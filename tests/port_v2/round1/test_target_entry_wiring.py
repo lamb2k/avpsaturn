@@ -7,7 +7,8 @@ MAIN = (ROOT / "main.c").read_text()
 
 REQUIRED = (
     '#include "src/port_v2/gameplay/round1/round1.h"',
-    "#define AVSP_TILE_REGION_BYTES 0x89000",
+    "#define AVSP_TILE_REGION_BYTES 0x8D000",
+    "#define AVSP_TILE_FRAME_UNIQUE_LIMIT 8192",
     "#define AVSP_ROUND1_RUNTIME_REGION_BYTES 0x19000",
     "#define AVSP_ROUND1_RUNTIME_MEASURED_BYTES 0x1487c",
     "(actor->type == 24u && actor->actor_class == 0x43)",
@@ -33,8 +34,8 @@ REQUIRED = (
     "avsp_round1_step_player(&round1_runtime, round1_player_mask, 0)",
     "avsp_round1_step_scheduler(&round1_runtime)",
     "avsp_diag_round1_entry_valid = avsp_round1_entry_valid(&round1_runtime);",
-    "AVSP_ROUND1_SPEC02_SHA256[0] == '3'",
-    "AVSP_ROUND1_SPEC02_SHA256[63] == 'd'",
+    "strcmp(AVSP_ROUND1_SPEC02_SHA256,",
+    '"79c5fd6a775a3b68d2b0145fed60acd16e2f0668356c48f7ff20fad2a6844625") ==',
     "avsp_diag_round1_route_state = round1_runtime.route_state;",
     "avsp_diag_round1_rng_seed = round1_runtime.rng_seed;",
     "avsp_diag_round1_canaries_ok = avsp_round1_canaries_ok(&round1_runtime);",

@@ -23,6 +23,7 @@ from pathlib import Path
 ROOT = Path(__file__).resolve().parents[1]
 GENERATOR = ROOT / "tools" / "gen_avsp_gfx_tiles.py"
 ARCHIVE = ROOT / "build" / "avsp_cd" / "SPR4" / "TILES.BIN"
+COMBAT_OVERLAY = ROOT / "build" / "avsp_cd" / "SPR4" / "COMBAT.BIN"
 MANIFEST = ROOT / "data" / "avsp_gfx_tiles.json"
 CAPTURE_ROOT = ROOT / ".deps" / "mame" / "enemy_actions"
 
@@ -65,13 +66,14 @@ def button3_cleanup_union_is_complete(presentations, fixture):
 def button1_presentation_union_is_complete(presentations, fixture):
     weapon = fixture["authority_data"]["player"][
         "weapon_projectile_resource"]["implementation_contract"]
+    weapon_timelines = weapon["sufficient_action"][
+        "presentation_selector_contract"]["selector_timelines"].values()
     expected = {
         (kind, int(record["assembly"], 16), facing)
         for kind, timeline in (
-            ("player-button1",
-             weapon["sufficient_action"]["presentation_timeline"]),
-            ("player-button1-empty",
-             weapon["empty_fallback"]["presentation_timeline"]))
+            [("player-button1", timeline) for timeline in weapon_timelines] +
+            [("player-button1-empty",
+              weapon["empty_fallback"]["presentation_timeline"])])
         for record in timeline
         for facing in (0, 1)
     }
@@ -235,6 +237,18 @@ def main() -> int:
         print("test_avsp_gfx_tiles_budget: SKIP (private captures absent)")
         return 0
 
+    carve_match = re.search(
+        r"#define\s+AVSP_TILE_REGION_BYTES\s+(0x[0-9A-Fa-f]+|\d+)",
+        (ROOT / "main.c").read_text(encoding="utf-8", errors="ignore"))
+    if not carve_match:
+        print("FAIL: AVSP_TILE_REGION_BYTES is unavailable")
+        return 1
+    carve_bytes = int(carve_match.group(1), 0)
+    if COMBAT_OVERLAY.is_file() and \
+            ARCHIVE.stat().st_size + COMBAT_OVERLAY.stat().st_size > carve_bytes:
+        print("FAIL: street archive plus combat overlay exceeds the runtime carve")
+        return 1
+
     sys.path.insert(0, str(ROOT / "tools"))
     from gen_avsp_emit_windows import load_spec02_round1_presentations
     presentations, _fixture_sha = load_spec02_round1_presentations()
@@ -326,9 +340,9 @@ def main() -> int:
     residency = before_manifest["presentation_residency"]
     native_presentations = before_manifest["routes"].get(
         "spec02_round1_native_presentations", {})
-    if (native_presentations.get("decoded_variants") != 359 or
-        native_presentations.get("unique_assemblies") != 199 or
-        native_presentations.get("tiles_added") != 1837):
+    if (native_presentations.get("decoded_variants") != 377 or
+        native_presentations.get("unique_assemblies") != 208 or
+        native_presentations.get("tiles_added") != 1936):
         print("FAIL: SPEC-02 native presentation union drifted")
         return 1
     if (residency["source_peak_unique_tiles"] != 374 or

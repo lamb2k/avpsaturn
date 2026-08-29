@@ -172,11 +172,12 @@ def load_spec02_round1_presentations():
         "directional_airborne_interruption"]["directional_actions"][
             "implementation_contract"]
     jump_actor = jump["presentation_actor_fields"]
-    add_records("player-button1",
-                weapon["sufficient_action"]["presentation_timeline"],
-                (0, 1), (jump_actor["coordinate_mode_u8"],),
-                int(jump_actor["object_or_u16"], 16),
-                (jump_actor["palette_u8"],))
+    for timeline in weapon["sufficient_action"][
+            "presentation_selector_contract"]["selector_timelines"].values():
+        add_records("player-button1", timeline,
+                    (0, 1), (jump_actor["coordinate_mode_u8"],),
+                    int(jump_actor["object_or_u16"], 16),
+                    (jump_actor["palette_u8"],))
     add_records("player-button1-empty",
                 weapon["empty_fallback"]["presentation_timeline"],
                 (0, 1), (jump_actor["coordinate_mode_u8"],),

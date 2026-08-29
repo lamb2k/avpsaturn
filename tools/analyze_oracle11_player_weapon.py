@@ -276,6 +276,48 @@ require([row["animation_record"] for row in player_presentation] == [
 ] + ["0x0015e580"] * 11 + ["0x0015f1f4"],
         "Predator player presentation timeline drift")
 
+# The Button1 entry routine uses the nearest eligible record-12 target twice:
+# once to derive the projectile angle and once to select one of four player
+# presentation tracks.  The isolated corrective capture has no eligible target
+# and therefore witnesses selector 4.  The accepted ORACLE-07/10 Coffee Shop
+# route witnesses selector 5.  Bind every reachable selector directly from the
+# accepted source table so native code cannot reuse selector 4 for all targets.
+player_presentation_sequences = {
+    str(selector): animation_sequence(program, 0x0015E540 +
+                                      (selector - 4) * 0x54)
+    for selector in range(4, 8)
+}
+require(all(len(sequence) == 5 for sequence in
+            player_presentation_sequences.values()),
+        "Predator Button1 presentation selector sequence drift")
+require([[row["timer_u16"] for row in
+          player_presentation_sequences[str(selector)]]
+         for selector in range(4, 8)] ==
+        [[2, 1, 2, 1, 4095]] * 4,
+        "Predator Button1 selector timer drift")
+player_presentation_variants = {}
+for selector in range(4, 8):
+    sequence = player_presentation_sequences[str(selector)]
+    tick_records = ([None] + [sequence[0]] * 3 + [sequence[1]] +
+                    [sequence[2]] * 2 + [sequence[3]] +
+                    [sequence[4]] * 11 + [None])
+    timeline = []
+    for source_row, record in zip(player_presentation, tick_records):
+        row = dict(source_row)
+        if record is not None:
+            row.update(record)
+        timeline.append(row)
+    player_presentation_variants[str(selector)] = timeline
+require(player_presentation_variants["4"] == player_presentation,
+        "selector-4 player presentation no longer matches cold capture")
+require(player_presentation_variants["5"][1]["animation_record"] ==
+        "0x0015e594" and
+        player_presentation_variants["5"][4]["animation_record"] ==
+        "0x0015e5a4" and
+        player_presentation_variants["5"][7]["animation_record"] ==
+        "0x0015e5c4",
+        "Coffee Shop selector-5 player presentation drift")
+
 source_object_identity = normalized_object_identity(
     baseline["objects.tsv"], entry, cleanup - entry)
 rejected_object_identity = normalized_object_identity(
@@ -734,6 +776,21 @@ implementation_contract = {
         "resource_debit_tick": 1,
         "parent_allocation_tick": 2,
         "presentation_timeline": player_presentation,
+        "presentation_selector_contract": {
+            "entry": "0x0241f0 then 0x0240e0..0x0240fa",
+            "selection_tick": 0,
+            "selector_range_u8": [4, 7],
+            "selector_source": "nearest eligible record-12 distance bucket through table 0x024100",
+            "animation_table_u32": "0x0015e32c",
+            "selector_timelines": player_presentation_variants,
+            "projectile_angle_and_player_presentation_share_scan": True,
+            "coffee_shop_source_witness": {
+                "frame": 2343,
+                "selector_u8": 5,
+                "animation_record": "0x0015e594",
+            },
+            "mutation_control": "selector 5 must not reuse selector-4 animation or assembly identity",
+        },
     },
     "record4_parent_class0": {
         "spec_executable": True, "record_type_u8": 4, "class_u8": 0,

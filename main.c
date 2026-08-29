@@ -99,12 +99,13 @@
    needs more PCM moved to phase-boundary loads first (S3 enabler,
    tracked in the handoff), not a bigger carve alone. */
 /* Widened from 0x40000 for the RP4 street archive and to the smallest aligned
- * carve that co-resides the complete SPEC-02 Coffee Shop presentation union
- * (540,376 bytes) followed by the accepted combat overlay (16,712 bytes):
- * 557,088 bytes total, 4,064 bytes of headroom. Scene loading boundaries are
- * the residency lever: the carve holds one scene-scope archive at a time and
- * is reloaded during transitions, when data-track reads are legal. */
-#define AVSP_TILE_REGION_BYTES 0x89000
+ * carve retaining at least 4 KiB after the current complete SPEC-02 Coffee
+ * Shop presentation union (553,444 bytes) and accepted combat overlay
+ * (16,712 bytes): 570,156 bytes total, 7,380 bytes of headroom. Scene loading
+ * boundaries are the residency lever: the carve holds one scene-scope archive
+ * at a time and is reloaded during transitions, when data-track reads are
+ * legal. */
+#define AVSP_TILE_REGION_BYTES 0x8D000
 
 /* RP4 street test: the interval strip bundle is staged after the tile
  * carve, outside the allocator, only in that build profile. */
@@ -3077,7 +3078,7 @@ static unsigned long tile_pool_stamp[AVSP_TILE_SPRITE_POOL];
  * not. */
 static unsigned char tile_pool_frame_pinned[AVSP_TILE_SPRITE_POOL];
 #ifdef AVSP_LIVE_ENCOUNTER
-#define AVSP_TILE_FRAME_UNIQUE_LIMIT 4096
+#define AVSP_TILE_FRAME_UNIQUE_LIMIT 8192
 static unsigned char tile_frame_unique_main[
     AVSP_TILE_FRAME_UNIQUE_LIMIT / 8];
 static unsigned char tile_frame_unique_overlay[
@@ -8208,9 +8209,9 @@ static void live_encounter_publish(void)
     avsp_diag_slice_canaries_ok = playable_slice_frame.canaries_ok;
     avsp_diag_live_frame = (int)live_encounter_frame.frame;
     avsp_diag_round1_spec_bound =
-        sizeof(AVSP_ROUND1_SPEC02_SHA256) == 65u &&
-        AVSP_ROUND1_SPEC02_SHA256[0] == '3' &&
-        AVSP_ROUND1_SPEC02_SHA256[63] == 'd';
+        strcmp(AVSP_ROUND1_SPEC02_SHA256,
+               "79c5fd6a775a3b68d2b0145fed60acd16e2f0668356c48f7ff20fad2a6844625") ==
+        0;
     avsp_diag_round1_entry_valid = avsp_round1_entry_valid(&round1_runtime);
     avsp_diag_round1_route_state = round1_runtime.route_state;
     avsp_diag_round1_rng_seed = round1_runtime.rng_seed;

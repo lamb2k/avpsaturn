@@ -6,7 +6,7 @@
 #include "../../combat/hit_ko/hit_ko.h"
 
 #define AVSP_ROUND1_SPEC02_SHA256 \
-    "3c6188ea0fbab14de5fee7a274e42ae16bbd1b0cf16d08b3f0fd178edfd8f5ad"
+    "79c5fd6a775a3b68d2b0145fed60acd16e2f0668356c48f7ff20fad2a6844625"
 #define AVSP_ROUND1_CANARY_HEAD 0x52314548UL
 #define AVSP_ROUND1_CANARY_TAIL 0x52314554UL
 #define AVSP_ROUND1_ROUTE_ENTRY_STATE 2
@@ -28,6 +28,7 @@
 #define AVSP_ROUND1_PLAYER_JUMP_SEQUENCE_COUNT 9u
 #define AVSP_ROUND1_PLAYER_JUMP_SEQUENCE_MAX_RECORDS 8u
 #define AVSP_ROUND1_PLAYER_WEAPON_PRESENTATION_COUNT 20u
+#define AVSP_ROUND1_PLAYER_WEAPON_SELECTOR_COUNT 4u
 #define AVSP_ROUND1_PLAYER_EMPTY_PRESENTATION_COUNT 18u
 #define AVSP_ROUND1_PLAYER_SPECIAL_PRESENTATION_COUNT 17u
 #define AVSP_ROUND1_CLASS4B_PRESENTATION_COUNT 32u
@@ -1496,8 +1497,8 @@ typedef struct
     unsigned char player_weapon_active;
     unsigned char player_weapon_empty;
     unsigned char player_weapon_tick;
-    unsigned char player_weapon_cadence;
-    signed char player_weapon_attempts;
+    unsigned char player_weapon_presentation_selector;
+    unsigned char player_weapon_target_angle;
     unsigned char player_weapon_empty_timer;
     unsigned char player_weapon_input_pipeline;
     unsigned char player_weapon_previous_pressed;

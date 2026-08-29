@@ -514,6 +514,47 @@ transition, animation guard, and scheduler ordering. Do not fit the frame or
 rebaseline input, and preserve the exact class-`0x1f` KO lifecycle through
 frame 2508.
 
+The frame-2343 Button1 divergence is now source-bound. Routine `0x0241f0`
+scans eligible type-12 targets at action entry, table `0x024100` maps the
+measured distance bucket to presentation selector `4..7`, and native code
+latches the matching projectile angle from the same scan. There is no
+fixed-frame selection, authored delay, projectile suppression, or later target
+rescan. SPEC-02 contract
+`79c5fd6a775a3b68d2b0145fed60acd16e2f0668356c48f7ff20fad2a6844625`
+and fixture
+`2a94f940406212a2d0c22267c686faa1a8f440d465800abf82606d07d5cb1cce`
+bind the implementation.
+
+Fast, Oracle, 105 SPEC mutations, 173 native mutations, 123 Target
+suppressions, LiveEncounterBench Target, and two byte-identical 575-sample
+Coffee Shop Emulator ledgers pass. The normalized ISO is
+`4baa310d670328f496154d6e5682074d4b45cfb37973909d71744582ef6577b7`;
+the canonical sample ledger remains
+`f41ac7b2f0287a096a4cd527291ee3c59620338d4d151e1ca887462fc114a148`.
+The measured `0x8d000` presentation carve leaves 7,380 bytes after the
+553,444-byte base archive and 16,712-byte combat overlay; live overflow and
+pin exhaustion are zero. Fresh window-only WGC covers frames 2280..2310;
+cadence sheet
+`82fb9fed7b16671ddcb77ae10734bc864998770d6ad0c503470e49005e65b8e6`
+and clip
+`792664b5e3a20dbb88a28d9c8de2f2188db70a053d23c6796147cace4bdbd2f4`
+pass direct inspection with stable Predator/staff identity, P1-only HUD,
+coherent backgrounds, frame-2306 damage, and frame-2307 impact.
+
+The scene gate changes from `484 / 1,356 / 10 / 94 / 3 / 281` to
+`392 / 1,360 / 30 / 94 / 3 / 281`. Missing source lifetimes improve by 92.
+Spawn/despawn rises by four and unsupported states by twenty because the
+source-correct selector and angle expose unmatched downstream class-`0x03`
+state `0x0604` and class-`0x49` state `0x0002` lifecycle identities. Those are
+explicit open gaps, not acceptance. Unowned Saturn actors, unidentified source
+pairs, and retained gameplay authorities remain zero.
+
+The next earliest causal scene divergence is class `0x09`, type `20`, slot
+`0x00ffb500` at visible frame 2367: source animation record `0x0006dbfe`
+differs from native `0x0006dc46`. Bind its accepted transition predicate,
+timer/animation guard, RNG ordering, and scheduler position. Do not fit the
+frame or rebaseline input, and preserve all current first-segment locks.
+
 ## Next eligible cards
 
 - `QA-13-ROUND1-END-TO-END-DIFFERENTIAL` after the complete stable Round 2

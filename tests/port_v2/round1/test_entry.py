@@ -9,7 +9,7 @@ from pathlib import Path
 
 ROOT = Path(__file__).resolve().parents[3]
 SPEC = ROOT / "data/spec02_round1_executable_contract.json"
-EXPECTED = "3c6188ea0fbab14de5fee7a274e42ae16bbd1b0cf16d08b3f0fd178edfd8f5ad"
+EXPECTED = "79c5fd6a775a3b68d2b0145fed60acd16e2f0668356c48f7ff20fad2a6844625"
 assert hashlib.sha256(SPEC.read_bytes()).hexdigest() == EXPECTED
 assert json.loads(SPEC.read_text())["status"] == "ACCEPTED"
 source = (ROOT / "src/port_v2/gameplay/round1/round1.c").read_text()
@@ -112,8 +112,10 @@ for before, after in (
     ("runtime->player_melee_selector_mask |= 1UL << (selector - 1u);", "runtime->player_melee_selector_mask = 0UL;"),
     ("++runtime->player_melee_completions;", "runtime->player_melee_completions += 2u;"),
     ("runtime->player_melee_presentation_mask |= 1UL << index;", "runtime->player_melee_presentation_mask = 0UL;"),
-    ("projectile->angle = avsp_round1_player_weapon_target_angle(runtime);",
-     "projectile->angle = 35u;"),
+    ("projectile->angle = runtime->player_weapon_target_angle;",
+     "projectile->angle = 0u;"),
+    ("*presentation_selector =\n        avsp_round1_weapon_target_presentation_selectors[distance_selector];",
+     "*presentation_selector = 4u;"),
     ("projectile->actor_class = avsp_round1_player_weapon.parent_class;",
      "projectile->actor_class = avsp_round1_player_weapon.child_class;"),
     ("runtime->player_action.state = prior_state;", "runtime->player_action.state = AVSP_PW_STATE_ATTACK;"),
@@ -338,7 +340,7 @@ for before, after in (
     ("{ 0x1600f8UL, 0x162a04UL, 8u, 1u },", "{ 0x1600f8UL, 0x162a82UL, 8u, 1u },"),
     ("{ 0x1601c0UL, 0x1614a4UL, 8u, 3u },", "{ 0x1601c0UL, 0x1614a4UL, 8u, 2u },"),
     ("    40u,\n    12u,\n    2u,", "    39u,\n    12u,\n    2u,"),
-    ("{ 3074u, 2u, 0x0015e540UL, 0x00161772UL, 1u, 0u },",
+    ("{ 3074u, 2u, 0x0015e594UL, 0x0016179aUL, 1u, 0u },",
      "{ 3074u, 2u, 0x00165410UL, 0x00166c22UL, 1u, 0u },"),
     ("{ 6658u, 2u, 0x0015fcfcUL, 0x00161772UL, 1u, 0u },",
      "{ 6658u, 2u, 0x001645d4UL, 0x00166bf8UL, 1u, 0u },"),

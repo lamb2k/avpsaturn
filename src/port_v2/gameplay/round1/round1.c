@@ -21,8 +21,9 @@ static unsigned char avsp_round1_source_rng(AvspRound1Runtime *runtime);
 static short avsp_round1_fixed_high_word(long value);
 static unsigned char avsp_round1_next_collision_identity(
     AvspRound1Runtime *runtime);
-static unsigned char avsp_round1_player_weapon_target_angle(
-    const AvspRound1Runtime *runtime);
+static void avsp_round1_player_weapon_target(
+    const AvspRound1Runtime *runtime, unsigned char *presentation_selector,
+    unsigned char *angle);
 static int avsp_round1_bind_class1f_action_selector(
     AvspRound1ActorCore *actor, unsigned char selector);
 static int avsp_round1_step_class1f_action_animation(
@@ -3482,6 +3483,10 @@ static int avsp_round1_player_weapon_contract_valid(void)
             0x0002fbb8UL ||
         avsp_round1_weapon_parent_presentations[7].branch != -32768 ||
         avsp_round1_weapon_target_distance_thresholds[15] != 352u ||
+        avsp_round1_player_weapon_frames[1][1].animation_record !=
+            0x0015e594UL ||
+        avsp_round1_player_weapon_frames[1][1].assembly !=
+            0x0016179aUL ||
         avsp_round1_weapon_parent_base_motion[28].x != -489 ||
         avsp_round1_weapon_parent_base_motion[28].y != -169 ||
         avsp_round1_weapon_projectile.initial_state != 0u ||
@@ -3546,13 +3551,20 @@ static int avsp_round1_player_weapon_contract_valid(void)
     for (index = 0u;
          index < AVSP_ROUND1_PLAYER_WEAPON_PRESENTATION_COUNT; ++index)
     {
-        const AvspRound1PlayerWeaponFrameSpec *frame =
-            &avsp_round1_player_weapon_frames[index];
-        if ((index == 0u && frame->action != 0x0c00u) ||
-            (index > 0u && index < 4u && frame->action != 0x0c02u) ||
-            (index >= 4u && index < 19u && frame->action != 0x0c04u) ||
-            (index == 19u && frame->action != 0u))
-            return 0;
+        unsigned int selector_index;
+        for (selector_index = 0u;
+             selector_index < AVSP_ROUND1_PLAYER_WEAPON_SELECTOR_COUNT;
+             ++selector_index)
+        {
+            const AvspRound1PlayerWeaponFrameSpec *frame =
+                &avsp_round1_player_weapon_frames[selector_index][index];
+            if ((index == 0u && frame->action != 0x0c00u) ||
+                (index > 0u && index < 4u && frame->action != 0x0c02u) ||
+                (index >= 4u && index < 19u &&
+                 frame->action != 0x0c04u) ||
+                (index == 19u && frame->action != 0u))
+                return 0;
+        }
     }
     for (index = 0u;
          index < AVSP_ROUND1_PLAYER_EMPTY_PRESENTATION_COUNT; ++index)
@@ -3619,7 +3631,7 @@ static int avsp_round1_allocate_player_weapon_projectile(
         avsp_round1_player_weapon.parent_attack_table;
     projectile->state = 0u;
     projectile->damage_class_index = 0u;
-    projectile->angle = avsp_round1_player_weapon_target_angle(runtime);
+    projectile->angle = runtime->player_weapon_target_angle;
     projectile->parent_presentation_selector = 0u;
     projectile->child_count = avsp_round1_weapon_projectile.child_count;
     projectile->child_cadence =
@@ -3631,15 +3643,16 @@ static int avsp_round1_allocate_player_weapon_projectile(
     return 1;
 }
 
-static unsigned char avsp_round1_player_weapon_target_angle(
-    const AvspRound1Runtime *runtime)
+static void avsp_round1_player_weapon_target(
+    const AvspRound1Runtime *runtime, unsigned char *presentation_selector,
+    unsigned char *angle)
 {
     const AvspRound1Pool *pool = &runtime->pools[0];
     unsigned int index;
     unsigned int threshold_index;
     unsigned short nearest = 0x00ffu;
     unsigned char found = 0u;
-    unsigned char selector = 15u;
+    unsigned char distance_selector = 15u;
     for (index = 0u; index < pool->capacity; ++index)
     {
         const AvspRound1ActorCore *actor = &pool->records[index];
@@ -3676,14 +3689,15 @@ static unsigned char avsp_round1_player_weapon_target_angle(
             if (nearest >= avsp_round1_weapon_target_distance_thresholds[
                     threshold_index - 1u])
             {
-                selector = (unsigned char)(threshold_index - 1u);
+                distance_selector = (unsigned char)(threshold_index - 1u);
                 break;
             }
     }
-    selector = (unsigned char)(32u - selector);
+    *presentation_selector =
+        avsp_round1_weapon_target_presentation_selectors[distance_selector];
+    *angle = (unsigned char)(32u - distance_selector);
     if (runtime->player.facing == 0u)
-        selector = (unsigned char)((0u - selector) & 0x3fu);
-    return selector;
+        *angle = (unsigned char)((0u - *angle) & 0x3fu);
 }
 
 static unsigned short avsp_round1_air_weapon_target_low(
@@ -7390,11 +7404,12 @@ static void avsp_round1_begin_player_weapon(AvspRound1Runtime *runtime)
         (unsigned char)(runtime->player_resource <
             avsp_round1_player_weapon.resource_debit);
     runtime->player_weapon_tick = 0u;
-    runtime->player_weapon_cadence = 0u;
-    runtime->player_weapon_attempts = 0;
     runtime->player_weapon_empty_timer =
         avsp_round1_player_weapon.empty_timer_initial;
     runtime->player_weapon_cleanup_pending = 0u;
+    avsp_round1_player_weapon_target(runtime,
+        &runtime->player_weapon_presentation_selector,
+        &runtime->player_weapon_target_angle);
     runtime->player_stop_ticks = 0u;
     runtime->player_was_directional = 0u;
     runtime->player_cleanup_pending = 0u;
@@ -7508,7 +7523,14 @@ static int avsp_round1_step_player_weapon(AvspRound1Runtime *runtime,
             ++runtime->player_weapon_attempts_total;
             avsp_round1_allocate_player_weapon_projectile(runtime);
         }
+        if (runtime->player_weapon_presentation_selector < 4u ||
+            runtime->player_weapon_presentation_selector > 7u)
+        {
+            ++runtime->failure_count;
+            return 0;
+        }
         frame = &avsp_round1_player_weapon_frames[
+            runtime->player_weapon_presentation_selector - 4u][
             runtime->player_weapon_tick];
         avsp_round1_bind_player_weapon_frame(runtime, frame);
         if (runtime->player_weapon_tick == 19u)
@@ -8697,7 +8719,11 @@ static int avsp_round1_player_weapon_runtime_valid(
             if (runtime->player_weapon_tick >
                 AVSP_ROUND1_PLAYER_WEAPON_PRESENTATION_COUNT)
                 return 0;
+            if (runtime->player_weapon_presentation_selector < 4u ||
+                runtime->player_weapon_presentation_selector > 7u)
+                return 0;
             frame = &avsp_round1_player_weapon_frames[
+                runtime->player_weapon_presentation_selector - 4u][
                 runtime->player_weapon_tick - 1u];
         }
         if (runtime->player.source_action != frame->action ||

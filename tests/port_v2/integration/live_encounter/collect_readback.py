@@ -283,7 +283,7 @@ count = signed(mcp,syms["avsp_diag_live_sample_count"])
 if count < 1 or count > 600:
     raise RuntimeError(f"invalid live sample count: {count}")
 sample_base = mcp.u32(syms["avsp_diag_live_samples"])
-expected_sample_base = 0x22600000 + 0x89000 + 0x48000 + 0x19000
+expected_sample_base = 0x22600000 + 0x8D000 + 0x48000 + 0x19000
 if sample_base != expected_sample_base:
     raise RuntimeError(
         f"live diagnostic cart pointer drift: {sample_base:#x} != "
@@ -869,8 +869,11 @@ spec_fixture = json.loads(
     (ROOT / "data/spec02_round1_generated_fixtures.json").read_text())
 weapon_contract = spec_fixture["authority_data"]["player"][
     "weapon_projectile_resource"]["implementation_contract"]
-for timeline in (weapon_contract["sufficient_action"]["presentation_timeline"],
-                 weapon_contract["empty_fallback"]["presentation_timeline"]):
+weapon_timelines = list(weapon_contract["sufficient_action"][
+    "presentation_selector_contract"]["selector_timelines"].values())
+weapon_timelines.append(
+    weapon_contract["empty_fallback"]["presentation_timeline"])
+for timeline in weapon_timelines:
     for frame in timeline:
         record = int(str(frame["animation_record"]), 0)
         assembly = int(str(frame["assembly"]), 0)

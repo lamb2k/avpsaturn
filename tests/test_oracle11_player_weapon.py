@@ -78,6 +78,24 @@ def validate(data):
     assert timeline[-2]["animation_record"] == "0x0015e580"
     assert timeline[-1]["animation_record"] == "0x0015f1f4"
     assert timeline[5]["assembly"] == "0x00161a0a"
+    selector_contract = action["presentation_selector_contract"]
+    assert selector_contract["selector_range_u8"] == [4, 7]
+    assert selector_contract["selection_tick"] == 0
+    assert selector_contract[
+        "projectile_angle_and_player_presentation_share_scan"] is True
+    assert selector_contract["coffee_shop_source_witness"] == {
+        "frame": 2343,
+        "selector_u8": 5,
+        "animation_record": "0x0015e594",
+    }
+    selector_timelines = selector_contract["selector_timelines"]
+    assert sorted(map(int, selector_timelines)) == [4, 5, 6, 7]
+    assert all(len(rows) == 20 for rows in selector_timelines.values())
+    assert selector_timelines["4"] == timeline
+    assert selector_timelines["5"][1]["animation_record"] == "0x0015e594"
+    assert selector_timelines["5"][1]["assembly"] == "0x0016179a"
+    assert selector_timelines["6"][1]["animation_record"] == "0x0015e5e8"
+    assert selector_timelines["7"][1]["animation_record"] == "0x0015e63c"
 
     parent = contract["record4_parent_class0"]
     assert parent["spec_executable"] is True
@@ -279,6 +297,7 @@ for path, value, label in [
     (("implementation_contract", "sufficient_action", "cleanup_tick"), 49, "Major action duration"),
     (("implementation_contract", "sufficient_action", "resource_debit_u8"), 3, "Major resource rule"),
     (("implementation_contract", "sufficient_action", "presentation_timeline", 5, "animation_record"), "0x00165410", "Major presentation"),
+    (("implementation_contract", "sufficient_action", "presentation_selector_contract", "selector_timelines", "5", 1, "animation_record"), "0x0015e540", "Coffee Shop target selector collapsed"),
     (("implementation_contract", "record4_parent_class0", "class_u8"), 5, "Major projectile class"),
     (("implementation_contract", "record4_parent_class0", "dispatch"), "0x030d34", "Major dispatcher"),
     (("implementation_contract", "record4_parent_class0", "state_sequence_u8"), [0, 2, 4, 6, 8], "invented parent state"),
@@ -320,4 +339,4 @@ for path, value, label in [
         cursor = cursor[key]
     cursor[path[-1]] = value
     reject(mutant, label)
-print("ORACLE-11 corrected Predator Button1 tests: PASS (42 mutations rejected)")
+print("ORACLE-11 corrected Predator Button1 tests: PASS (43 mutations rejected)")

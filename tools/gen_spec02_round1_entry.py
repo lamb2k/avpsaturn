@@ -278,6 +278,11 @@ def build() -> str:
         "registration_and_pair_eligibility"]
     weapon_empty_effect = weapon["empty_effect_variant1_contract"]
     weapon_frames = weapon_action["presentation_timeline"]
+    weapon_selector_contract = weapon_action["presentation_selector_contract"]
+    weapon_selector_timelines = weapon_selector_contract["selector_timelines"]
+    weapon_selectors = list(range(
+        weapon_selector_contract["selector_range_u8"][0],
+        weapon_selector_contract["selector_range_u8"][1] + 1))
     empty_frames = weapon_empty["presentation_timeline"]
     weapon_return_frame = dict(weapon_frames[0])
     weapon_return_frame.update({"action_u16": 2, "substate_u8": 2})
@@ -907,6 +912,17 @@ def build() -> str:
         weapon_empty["return_tick"] != 18 or
         weapon_empty["damaging_record4_count"] != 0):
         raise ValueError("SPEC-02 corrected Predator Button1 action/resource drift")
+    if (weapon_selector_contract["selection_tick"] != 0 or
+        weapon_selector_contract[
+            "projectile_angle_and_player_presentation_share_scan"] is not True or
+        weapon_selectors != [4, 5, 6, 7] or
+        sorted(map(int, weapon_selector_timelines)) != weapon_selectors or
+        any(len(weapon_selector_timelines[str(selector)]) != 20
+            for selector in weapon_selectors) or
+        weapon_selector_timelines["4"] != weapon_frames or
+        weapon_selector_timelines["5"][1]["animation_record"] !=
+            "0x0015e594"):
+        raise ValueError("SPEC-02 Predator Button1 target presentation drift")
     if (weapon_parent["spec_executable"] is not True or
         weapon_child["spec_executable"] is not True or
         weapon_empty_effect["spec_executable"] is not True or
@@ -2332,15 +2348,18 @@ def build() -> str:
         f"    {weapon_parent['collision_table']['table']}UL,",
         f"    {weapon_child['collision_table']['table']}UL",
         "};", "",
-        "static const AvspRound1PlayerWeaponFrameSpec avsp_round1_player_weapon_frames[AVSP_ROUND1_PLAYER_WEAPON_PRESENTATION_COUNT] =",
+        "static const AvspRound1PlayerWeaponFrameSpec avsp_round1_player_weapon_frames[AVSP_ROUND1_PLAYER_WEAPON_SELECTOR_COUNT][AVSP_ROUND1_PLAYER_WEAPON_PRESENTATION_COUNT] =",
         "{",
     ])
-    for row in weapon_frames:
-        lines.append(
-            "    { %du, %du, %sUL, %sUL, %du, %du }," % (
-                row["action_u16"], row["substate_u8"], row["animation_record"],
-                row["assembly"], row["hurt_selector_u8"],
-                row["attack_selector_u8"]))
+    for selector in weapon_selectors:
+        lines.append("    {")
+        for row in weapon_selector_timelines[str(selector)]:
+            lines.append(
+                "        { %du, %du, %sUL, %sUL, %du, %du }," % (
+                    row["action_u16"], row["substate_u8"],
+                    row["animation_record"], row["assembly"],
+                    row["hurt_selector_u8"], row["attack_selector_u8"]))
+        lines.append("    },")
     lines.extend([
         "};", "",
         "static const AvspRound1PlayerWeaponFrameSpec avsp_round1_player_empty_frames[AVSP_ROUND1_PLAYER_EMPTY_PRESENTATION_COUNT] =",
