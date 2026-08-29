@@ -443,6 +443,40 @@ slot `0x00ff9c40` at visible frame 2330: source hurt/attack selectors are `1/1`
 while native remains `0/0`. Bind the accepted dynamic-spawn initializer and its
 ordering; do not fit the observed frame or copy selectors from another actor.
 Frame 2328 remains evidence, not gameplay authority.
+
+That dynamic initializer boundary and the following complete source-owned
+class-`0x43`/type-24 population are now native. Two four-actor groups preserve
+their exact spawn order, seven RNG calls per actor, state, presentation,
+lifetime, scheduler and release rules. Checkpoints
+`9fd1e12d08905532c1f7ca6e209b8577b415dd86`,
+`b3a20e3e1e9dd0bee0939aa1ea6a662f1dfaf876`,
+`2f890be98dc6f8a8f236870a810cae2bd3fe6e88`, and
+`019d291855a799d918abe3460eef9726219f2e1d` are pushed and remote-equal. The
+bounded presentation carve is `0x89000`: the prior `0x87000` carve was proven
+4,128 bytes short after the source population became render-reachable.
+
+Fast, Oracle, 165 native mutations, 122 Target suppressions, both
+LiveEncounter Target profiles, and two byte-identical 575-sample Coffee Shop
+Emulator runs pass at normalized ISO
+`70087b97966b4d3e5ad18052ebadb78e2adc8e2e592db8abd51684b56592c2ce`.
+The Coffee Shop chronology rejects four real mutations. Fresh window-only WGC
+covers frames 2280..2310; direct inspection preserves Predator/staff identity,
+frame-2306 damage, frame-2307 impact, P1-only HUD, both planes, palette and
+priority. Sheet `82fb9fed7b16671ddcb77ae10734bc864998770d6ad0c503470e49005e65b8e6`
+and clip `792664b5e3a20dbb88a28d9c8de2f2188db70a053d23c6796147cace4bdbd2f4`
+remain exact.
+
+Scene gaps change from 404 / 1,377 / 30 / 94 / 3 / 281 to
+405 / 1,358 / 30 / 94 / 3 / 281. Spawn/despawn improves by 19. Missing
+lifetime rises by one because the corrected source RNG sequence exposes a
+distinct downstream source lifetime rather than the prior false identity
+match; this remains open work. Unowned Saturn actors, unidentified source pairs
+and retained gameplay authorities remain zero.
+
+The next earliest causal divergence is class-`0x1f` slot `0x00ffa3c0` at
+visible frame 2363: source remains in state `0x0400`, while native advances to
+`0x0402`. Bind the accepted transition predicate, timer/animation guard, RNG
+ordering and scheduler position. Do not fit the frame or add authored delay.
 Evidence: `data/reimplement13_round1_stable_entry.json` and
 `data/reimplement13_startup_authority.json`.
 
