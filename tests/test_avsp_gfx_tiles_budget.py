@@ -188,6 +188,25 @@ def class1f_source_hit_window_union_is_complete(presentations, fixture):
     return actual == expected
 
 
+def class4e_retained_window_union_is_complete(presentations, fixture):
+    retained = fixture["authority_data"]["auxiliary"][
+        "first_segment_dependencies"][
+            "class_0x4e_type24_variant4_effect"][
+                "variant1_collision_effect"]["allocation"][
+                    "fixed_slot_reuse_presentation"]
+    expected = {
+        (int(retained["animation_record"], 16),
+         int(retained["assembly"], 16), facing)
+        for facing in (0, 1)
+    }
+    actual = {
+        (item["animation_record"], item["assembly"], item["facing"])
+        for item in presentations
+        if item["kind"] == "class4e-variant1-retained-window"
+    }
+    return actual == expected
+
+
 def run(args):
     return subprocess.run([sys.executable, str(GENERATOR)] + args,
                           cwd=str(ROOT), capture_output=True, text=True)
@@ -228,6 +247,10 @@ def main() -> int:
             presentations, fixture):
         print("FAIL: class-0x1f source HIT decoder window is incomplete")
         return 1
+    if not class4e_retained_window_union_is_complete(
+            presentations, fixture):
+        print("FAIL: class-0x4e retained decoder window is incomplete")
+        return 1
     button3_indexes = [index for index, item in enumerate(presentations)
                        if item["kind"] == "player-button3"]
     if not button3_indexes or any(
@@ -254,7 +277,9 @@ def main() -> int:
             ("class10-empty-effect", empty_effect_union_is_complete),
             ("class1f-current", class1f_current_union_is_complete),
             ("class1f-source-hit-window",
-             class1f_source_hit_window_union_is_complete)):
+             class1f_source_hit_window_union_is_complete),
+            ("class4e-variant1-retained-window",
+             class4e_retained_window_union_is_complete)):
         indexes = [index for index, item in enumerate(presentations)
                    if item["kind"] == kind]
         if not indexes or any(complete(
