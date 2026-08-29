@@ -8138,7 +8138,10 @@ static void live_encounter_publish(void)
                 ((child_count & 0xffu) << 16) |
                 ((forbidden_count != 0u ? 1u : 0u) << 24) |
                 ((avsp_diag_round1_native_weapon_forbidden_identity != 0 ?
-                    1u : 0u) << 25);
+                    1u : 0u) << 25) |
+                (((unsigned int)
+                    round1_runtime.class4e_variant1_allocations & 0x0fu)
+                    << 26);
         }
         avsp_diag_live_sample_count = (int)live_encounter_frame.frame + 1;
     }

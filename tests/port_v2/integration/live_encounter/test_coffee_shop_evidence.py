@@ -31,16 +31,19 @@ def validate(report):
     assert report["vdp1_texture_integrity"]["mismatches"] == 0
     samples = report["samples"]
     assert len(samples) == 575
-    by_source = {sample["round1_source_frame"]: sample for sample in samples}
-    assert all(frame in by_source for frame in range(2280, 2311))
-    assert by_source[2287]["round1_native_projectile_damage_writes"] == 0
-    assert by_source[2288]["round1_native_projectile_damage_writes"] == 0
-    assert by_source[2305]["round1_native_projectile_collision_writes"] == 0
-    assert by_source[2305]["round1_native_projectile_damage_writes"] == 0
-    assert by_source[2306]["round1_native_projectile_collision_writes"] == 1
-    assert by_source[2306]["round1_native_projectile_damage_writes"] == 1
-    before = (by_source[2306]["round1_auxiliary_state"] >> 12) & 0x0f
-    after = (by_source[2307]["round1_auxiliary_state"] >> 12) & 0x0f
+    by_visible = {sample["round1_source_frame"]: sample
+                  for sample in samples}
+    by_scheduler = {sample["round1_scheduler_source_frame"]: sample
+                    for sample in samples}
+    assert all(frame in by_visible for frame in range(2280, 2311))
+    assert by_scheduler[2287]["round1_native_projectile_damage_writes"] == 0
+    assert by_scheduler[2288]["round1_native_projectile_damage_writes"] == 0
+    assert by_scheduler[2305]["round1_native_projectile_collision_writes"] == 0
+    assert by_scheduler[2305]["round1_native_projectile_damage_writes"] == 0
+    assert by_scheduler[2306]["round1_native_projectile_collision_writes"] == 1
+    assert by_scheduler[2306]["round1_native_projectile_damage_writes"] == 1
+    before = by_visible[2306]["round1_class4e_variant1_allocations"]
+    after = by_visible[2307]["round1_class4e_variant1_allocations"]
     assert after == before + 1
 
 
@@ -67,12 +70,13 @@ item["samples"][247]["round1_native_projectile_damage_writes"] = 1
 mutations.append(item)
 item = copy.deepcopy(reports[0])
 next(sample for sample in item["samples"]
-     if sample["round1_source_frame"] == 2306)[
+     if sample["round1_scheduler_source_frame"] == 2306)[
          "round1_native_projectile_damage_writes"] = 0
 mutations.append(item)
 item = copy.deepcopy(reports[0])
 next(sample for sample in item["samples"]
-     if sample["round1_source_frame"] == 2307)["round1_auxiliary_state"] -= 0x1000
+     if sample["round1_source_frame"] == 2307)[
+         "round1_class4e_variant1_allocations"] -= 1
 mutations.append(item)
 item = copy.deepcopy(reports[0])
 item["state"]["round1_fallback_count"] = 1

@@ -95,7 +95,12 @@ def read_samples(mcp, base, count):
         decoded["round1_camera_unlocks"] = (camera_state >> 27) & 0x0f
         scheduler_state = decoded["round1_scheduler_frames"] & 0xffffffff
         decoded["round1_source_frame"] = (scheduler_state >> 16) & 0xffff
+        decoded["round1_scheduler_source_frame"] = \
+            (decoded["round1_source_frame"] - 1) & 0xffff
         decoded["round1_scheduler_frames"] = scheduler_state & 0xffff
+        identity_state = decoded["round1_player_identity_state"] & 0xffffffff
+        decoded["round1_class4e_variant1_allocations"] = \
+            (identity_state >> 26) & 0x0f
         result.append(decoded)
     return result
 
@@ -611,44 +616,62 @@ if args.coffee_shop_scene:
             raise RuntimeError(
                 "Coffee Shop source input drift at source frame %d: %04x != %04x"
                 % (input_source_frame, sample["input_mask"], expected_input))
-    by_source_frame = {sample["round1_source_frame"]: sample
-                       for sample in samples}
-    required_source_frames = (2287, 2288, 2305, 2306, 2307)
-    if any(frame not in by_source_frame for frame in required_source_frames):
+    by_visible_source_frame = {sample["round1_source_frame"]: sample
+                               for sample in samples}
+    by_scheduler_source_frame = {
+        sample["round1_scheduler_source_frame"]: sample
+        for sample in samples}
+    required_visible_source_frames = (2287, 2288, 2305, 2306, 2307)
+    required_scheduler_source_frames = (2287, 2288, 2305, 2306)
+    if any(frame not in by_visible_source_frame
+           for frame in required_visible_source_frames):
         raise RuntimeError(
-            "Coffee Shop source-frame window absent: %s"
-            % [frame for frame in required_source_frames
-               if frame not in by_source_frame])
-    def damage_at(frame):
-        return by_source_frame[frame]["round1_native_projectile_damage_writes"]
-    def collision_at(frame):
-        return by_source_frame[frame][
+            "Coffee Shop visible source-frame window absent: %s"
+            % [frame for frame in required_visible_source_frames
+               if frame not in by_visible_source_frame])
+    if any(frame not in by_scheduler_source_frame
+           for frame in required_scheduler_source_frames):
+        raise RuntimeError(
+            "Coffee Shop scheduler source-frame window absent: %s"
+            % [frame for frame in required_scheduler_source_frames
+               if frame not in by_scheduler_source_frame])
+    def scheduler_damage_at(frame):
+        return by_scheduler_source_frame[frame][
+            "round1_native_projectile_damage_writes"]
+    def scheduler_collision_at(frame):
+        return by_scheduler_source_frame[frame][
             "round1_native_projectile_collision_writes"]
-    def class4e_at(frame):
-        return ((by_source_frame[frame]["round1_auxiliary_state"] &
-                 0xffffffff) >> 12) & 0x0f
-    if (damage_at(2288) != damage_at(2287) or
-            collision_at(2288) != collision_at(2287)):
+    def visible_class4e_at(frame):
+        return by_visible_source_frame[frame][
+            "round1_class4e_variant1_allocations"]
+    if (scheduler_damage_at(2288) != scheduler_damage_at(2287) or
+            scheduler_collision_at(2288) !=
+            scheduler_collision_at(2287)):
         raise RuntimeError("premature source-frame-2288 projectile contact")
-    if not (damage_at(2305) == 0 and damage_at(2306) == 1 and
-            collision_at(2305) == 0 and collision_at(2306) == 1):
-        ordered_source_frames = sorted(by_source_frame)
+    if not (scheduler_damage_at(2305) == 0 and
+            scheduler_damage_at(2306) == 1 and
+            scheduler_collision_at(2305) == 0 and
+            scheduler_collision_at(2306) == 1):
+        ordered_source_frames = sorted(by_scheduler_source_frame)
         first_damage_rise = next((frame for prior, frame in zip(
             ordered_source_frames, ordered_source_frames[1:])
-            if damage_at(frame) > damage_at(prior)), None)
+            if scheduler_damage_at(frame) > scheduler_damage_at(prior)), None)
         first_collision_rise = next((frame for prior, frame in zip(
             ordered_source_frames, ordered_source_frames[1:])
-            if collision_at(frame) > collision_at(prior)), None)
+            if scheduler_collision_at(frame) >
+            scheduler_collision_at(prior)), None)
         raise RuntimeError(
-            "source-frame-2306 collision/damage chronology drift: "
+            "scheduler-source-frame-2306 collision/damage chronology drift: "
             "collision=%s damage=%s first_collision=%s first_damage=%s" %
-            ([collision_at(2305), collision_at(2306)],
-             [damage_at(2305), damage_at(2306)], first_collision_rise,
+            ([scheduler_collision_at(2305), scheduler_collision_at(2306)],
+             [scheduler_damage_at(2305), scheduler_damage_at(2306)],
+             first_collision_rise,
              first_damage_rise))
-    if class4e_at(2307) != class4e_at(2306) + 1:
+    if visible_class4e_at(2307) != visible_class4e_at(2306) + 1:
         raise RuntimeError(
-            "source-frame-2307 class-0x4e impact chronology drift: "
-            f"{[class4e_at(2306), class4e_at(2307)]}")
+            "visible-source-frame-2307 class-0x4e impact allocation "
+            "chronology drift: "
+            f"{[visible_class4e_at(2306), visible_class4e_at(2307)]}")
     if not (state["runtime_ready"] == state["canaries_ok"] == 1 and
             state["round1_spec_bound"] == state["round1_entry_valid"] ==
             state["round1_canaries_ok"] == 1 and
@@ -919,11 +942,16 @@ report={"schema":1,"task_id":inventory["task_id"],"card_profile":inventory["card
 if args.coffee_shop_scene:
     report["evidence_mode"] = "COFFEE_SHOP_SOURCE_LEDGER"
     report["source_chronology"] = {
-        "source_frame_2288_damage_writes": damage_at(2288),
-        "source_frame_2305_damage_writes": damage_at(2305),
-        "source_frame_2306_damage_writes": damage_at(2306),
-        "source_frame_2306_collision_writes": collision_at(2306),
-        "source_frame_2307_class4e_initializations": class4e_at(2307),
+        "scheduler_source_frame_2288_damage_writes":
+            scheduler_damage_at(2288),
+        "scheduler_source_frame_2305_damage_writes":
+            scheduler_damage_at(2305),
+        "scheduler_source_frame_2306_damage_writes":
+            scheduler_damage_at(2306),
+        "scheduler_source_frame_2306_collision_writes":
+            scheduler_collision_at(2306),
+        "visible_source_frame_2307_class4e_impact_allocations":
+            visible_class4e_at(2307),
     }
 output=run_root/("coffee-shop-readback.json" if args.coffee_shop_scene
                  else "readback.json")
