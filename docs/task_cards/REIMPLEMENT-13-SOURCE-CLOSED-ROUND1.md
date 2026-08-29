@@ -853,6 +853,38 @@ accepted same-frame state-0 presentation initialization without authoring a
 delay or disturbing the corrected phase, RNG, spawn-index, class-`0x09`,
 collision, player, camera, HUD, audio, or rendering locks.
 
+Incremental checkpoint `24670a6dab40770a2cbe1fb60d1400dc0ac95784`
+closes that same-frame presentation boundary. The recurring actor now matches
+source animation `0x0012ddb0`, assembly `0x00130346`, timer `0x0fff`, branch
+`-0x8000`, and hurt/attack selectors `1/1` on frame 2511. SPEC-02 is
+`f6711c3d69fe9dc5527bc905ef2a1e3c2ec32d7207ad4b1ca6b316a36527dfab`;
+fixture is
+`6124a16d3aed20e1bf5c284cf5e721a4586432ddb869fd6f1d947e1706f6d335`.
+Fast, Oracle, 116 SPEC mutations, 26 encounter mutations, 82 enemy mutations,
+181 native mutations, 18 scene mutations, 123 Target suppressions, both
+LiveEncounter Target profiles, and two byte-identical 575-sample Emulator
+ledgers pass. Normalized ISO is
+`ff89cf06ed4f72bc31ab690e71e92b68c2b610b79934c4bc415c86564f2c41da`;
+canonical sample payload is
+`624345e3a23442e212baa06bf670145876b2028b2888ae09b8aa767cb2164d27`.
+
+Window-only WGC frames 2509..2513 pass direct inspection. Cadence sheet
+`ca6110ec4506116f7fef1cbb7550f3865e2bf4aaa8a29fcc24bac8ae5d51060a`
+and clip
+`aac56eeb841854b3ad72a9b0aba0e56074fe9ed53745ddf37c5316566c58911a`
+preserve Predator/staff identity, coherent alien presentation, P1-only HUD,
+and both Coffee Shop planes, palette, and priority. Whole-scene gaps remain
+`295 / 1,259 / 3 / 94 / 3 / 281`; no category increases. Unowned Saturn
+actors, unidentified source pairs, and retained gameplay authorities remain
+zero.
+
+The next earliest causal divergence is visible frame 2330 at class-`0x1f`
+slot `0x00ff9c40`: source animation is zero while native binds `0x0012ddb0`.
+Recover the exact source dynamic-allocation presentation guard and scheduler
+position and distinguish this earlier allocation from the now-closed recurring
+spawn at frame 2511. Apply the source rule, not a slot/frame exception, while
+preserving the already-closed selectors `1/1` and all accepted locks.
+
 ## Next eligible cards
 
 - `QA-13-ROUND1-END-TO-END-DIFFERENTIAL` after the complete stable Round 2
