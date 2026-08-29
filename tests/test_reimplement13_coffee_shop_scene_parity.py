@@ -92,6 +92,11 @@ item["native_capture"]["recurring_spawn_phase_boundary"][
     "spawned_record12"]["same_frame_presentation"]["native"]\
     ["animation_timer_u16"] = 0
 mutations.append(("recurring same-frame presentation delay", item))
+item = copy.deepcopy(BASE)
+item["native_capture"]["recurring_spawn_phase_boundary"][
+    "source_owner_guard_negative_control"]["class01_next_record12_tick"]\
+    ["native"]["animation_record"] = "0x0012ddb0"
+mutations.append(("generic dynamic-spawn presentation", item))
 
 for label, mutant in mutations:
     try:

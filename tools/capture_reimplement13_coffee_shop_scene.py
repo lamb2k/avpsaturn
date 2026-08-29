@@ -720,6 +720,8 @@ def recurring_spawn_phase_boundary(
         })
     spawned_source = source(2511, 0x00ffa3c0)
     spawned_native = native(2511, 0x00ffa3c0)
+    class01_source = source(2330, 0x00ff9c40)
+    class01_native = native(2330, 0x00ff9c40)
     return {
         "source_phase_update_precedes_controller": True,
         "controller_precedes_new_record12_dispatch": True,
@@ -777,6 +779,34 @@ def recurring_spawn_phase_boundary(
                         spawned_native["attack_selector"]),
                 },
             },
+        },
+        "source_owner_guard_negative_control": {
+            "class01_controller_source_slot": "0x00ffb580",
+            "class01_spawn_variant_u8": 5,
+            "class01_next_record12_tick": {
+                "source_frame": 2330,
+                "source": {
+                    "state_u16": "0x" + class01_source["state"],
+                    "substate_u16": "0x" + class01_source["substate"],
+                    "animation_record": "0x" +
+                        class01_source["animation_record"],
+                    "animation_timer_u16": int(
+                        class01_source["animation_timer"], 16),
+                    "animation_branch_s16": int(
+                        class01_source["animation_branch"]),
+                },
+                "native": {
+                    "state_u16": "0x" + class01_native["state"],
+                    "substate_u16": "0x" + class01_native["substate"],
+                    "animation_record": "0x" +
+                        class01_native["animation_record"],
+                    "animation_timer_u16": int(
+                        class01_native["animation_timer"]),
+                    "animation_branch_s16": int(
+                        class01_native["animation_branch"]),
+                },
+            },
+            "guard": "recurring post-allocation presentation applies only to source recurring-controller variants 3 or 4; class-0x01 variant 5 retains zero presentation until action 0x0e advances on the following tick",
         },
     }
 
@@ -905,6 +935,17 @@ def validate_report(report: dict[str, object]) -> None:
                 ["source"] != recurring["spawned_record12"] \
                 ["same_frame_presentation"]["native"]:
         raise ValueError("Coffee Shop recurring spawn phase boundary drift")
+    owner_guard = recurring["source_owner_guard_negative_control"]
+    if owner_guard["class01_controller_source_slot"] != "0x00ffb580" or \
+            owner_guard["class01_spawn_variant_u8"] != 5 or \
+            owner_guard["class01_next_record12_tick"]["source"] != \
+                owner_guard["class01_next_record12_tick"]["native"] or \
+            owner_guard["class01_next_record12_tick"]["source"] != {
+                "state_u16": "0x0200", "substate_u16": "0x0e00",
+                "animation_record": "0x00000000",
+                "animation_timer_u16": 0, "animation_branch_s16": 0,
+            }:
+        raise ValueError("Coffee Shop spawn-owner presentation guard drift")
     trajectory = report["native_capture"]["record4_parent_fixed_trajectory"]
     if trajectory["allocator"] != "0x01773e" or \
             trajectory["target_selector"] != "0x0241f0" or \

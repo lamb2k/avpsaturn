@@ -2481,7 +2481,9 @@ static int avsp_round1_step_class1f_source_action(
         if (!avsp_round1_seed_class1f_action_fields(runtime, actor,
                 runtime->rng_seed, (unsigned char)actor->source_action, 1))
             return 0;
-        if (actor->source_dynamic_spawn != 0u)
+        if (actor->source_dynamic_spawn != 0u &&
+            (actor->variant == avsp_round1_recurring_variants[0] ||
+             actor->variant == avsp_round1_recurring_spawn.auxiliary_variant))
         {
             const AvspRound1AnimationStateSpec *presentation =
                 &avsp_round1_recurring_spawn.post_allocation_presentation;
