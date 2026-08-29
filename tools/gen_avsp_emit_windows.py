@@ -150,7 +150,9 @@ def load_spec02_round1_presentations():
             for facing in facings:
                 for mode in modes:
                     for palette in palettes:
-                        key = (kind, assembly, facing, mode, palette)
+                        identity = (animation_record if
+                                    kind.endswith("-window") else assembly)
+                        key = (kind, identity, facing, mode, palette)
                         if key in seen:
                             continue
                         seen.add(key)
@@ -261,6 +263,25 @@ def load_spec02_round1_presentations():
     add_records("class1f-current",
                 [class1f_records[address]
                  for address in sorted(current_addresses)],
+                (0, 1), (1,), 0x8000, (0x15,))
+    source_hit_program = class1f_current["damage_hit_ko_removal"][
+        "source_hit_entry_program"]["source_hit_program"]
+    source_hit_addresses = {
+        address_key(record["animation_record"])
+        for sequence in source_hit_program["animation_sequences"].values()
+        for record in sequence["records"]}
+    source_hit_addresses.add(address_key(source_hit_program["normal_return"][
+        "class1f_resume_animation_record"]))
+    missing_source_hit = sorted(source_hit_addresses - class1f_records.keys())
+    if missing_source_hit:
+        raise AssertionError(
+            "class-0x1f source HIT presentation records are absent: %s" %
+            ", ".join(missing_source_hit))
+    # These records extend the sparse ROM decoder window only. Their tile
+    # codes are already present in the measured street/combat archives.
+    add_records("class1f-source-hit-window",
+                [class1f_records[address]
+                 for address in sorted(source_hit_addresses)],
                 (0, 1), (1,), 0x8000, (0x15,))
     dependencies = authority["auxiliary"]["first_segment_dependencies"]
     class09 = dependencies["class_0x09_type20_rng_owner"]

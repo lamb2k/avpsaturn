@@ -723,6 +723,9 @@ def main() -> int:
         tiles, banks, per_route = collect_entries(rom, routes)
         spec_presentations, spec_fixture_sha256 = (
             load_spec02_round1_presentations())
+        spec_presentations = [
+            item for item in spec_presentations
+            if item["kind"] != "class1f-source-hit-window"]
         spec_results = decode_spec02_presentations(rom, spec_presentations)
         spec_tile_count_before = len(tiles)
         spec_palette_banks: set[int] = set()

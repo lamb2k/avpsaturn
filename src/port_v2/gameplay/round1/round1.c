@@ -23,6 +23,11 @@ static unsigned char avsp_round1_next_collision_identity(
     AvspRound1Runtime *runtime);
 static unsigned char avsp_round1_player_weapon_target_angle(
     const AvspRound1Runtime *runtime);
+static int avsp_round1_bind_class1f_action_selector(
+    AvspRound1ActorCore *actor, unsigned char selector);
+static int avsp_round1_step_class1f_action_animation(
+    AvspRound1Runtime *runtime, AvspRound1ActorCore *actor,
+    int apply_movement);
 
 unsigned short avsp_round1_coffee_shop_source_input(
     unsigned short source_frame)
@@ -527,7 +532,8 @@ static int avsp_round1_class1f_begin_reaction(
 }
 
 static void avsp_round1_class1f_queue_projectile_reaction(
-    AvspRound1Runtime *runtime, AvspRound1ActorCore *actor, const int ko)
+    AvspRound1Runtime *runtime, AvspRound1ActorCore *actor, const int ko,
+    const short prior_health)
 {
     AvspRound1FirstEncounterRuntime *encounter = &runtime->first_encounter;
     actor->state = ko ? 0x0402u : 0x0202u;
@@ -535,7 +541,13 @@ static void avsp_round1_class1f_queue_projectile_reaction(
     actor->source_action = 0u;
     actor->source_action_timer = (unsigned char)(ko ?
         avsp_round1_class1f_current.ko_ticks :
-        avsp_round1_class1f_current.hit_ticks);
+        avsp_round1_class1f_source_hit.recovery_timer);
+    actor->source_prior_health = prior_health;
+    actor->source_hit_recovery_active = 0u;
+    actor->source_hit_mode = 0u;
+    actor->source_hit_kind = ko ? 0u : avsp_round1_class1f_source_hit.hit_kind;
+    actor->source_reaction_selector = 0u;
+    actor->source_hit_action_timer = 0u;
     actor->source_projectile_reaction_pending =
         (unsigned char)(ko ? 2u : 1u);
     if (ko)
@@ -554,9 +566,42 @@ static void avsp_round1_class1f_queue_projectile_reaction(
 }
 
 static int avsp_round1_class1f_consume_projectile_reaction(
-    AvspRound1ActorCore *actor)
+    AvspRound1ActorCore *actor, const unsigned char pending)
 {
     AvspPortV2HitKoRuntime reaction;
+    if (pending == 1u)
+    {
+        if (actor->state != avsp_round1_class1f_source_hit.state ||
+            actor->substate != 0u ||
+            actor->source_action_timer !=
+                avsp_round1_class1f_source_hit.recovery_timer ||
+            actor->source_hit_kind != avsp_round1_class1f_source_hit.hit_kind ||
+            actor->source_prior_health < actor->health)
+            return 0;
+        actor->substate = avsp_round1_class1f_source_hit.entry_action_phase;
+        actor->source_action = actor->substate;
+        actor->source_hit_mode = avsp_round1_class1f_source_hit.hit_mode;
+        actor->source_reaction_selector =
+            avsp_round1_class1f_source_hit.reaction_selector;
+        actor->source_hit_action_timer =
+            avsp_round1_class1f_source_hit.action_timer;
+        actor->source_prior_health = actor->health;
+        actor->source_hit_recovery_active = 1u;
+        actor->animation_timer = 1u;
+        actor->animation_branch = 0;
+        if (!avsp_round1_class1f_bind_record(
+                actor, avsp_round1_class1f_source_hit.animation_record) ||
+            actor->assembly != avsp_round1_class1f_source_hit.assembly ||
+            actor->hurt_selector !=
+                avsp_round1_class1f_source_hit.hurt_selector ||
+            actor->attack_selector !=
+                avsp_round1_class1f_source_hit.attack_selector)
+            return 0;
+        return avsp_round1_class1f_state_context_supported(
+            actor->state, actor->substate);
+    }
+    if (pending != 2u)
+        return 0;
     if (actor->source_action_timer == 0u ||
         !avsp_round1_class1f_rebuild_reaction(actor, &reaction))
         return 0;
@@ -570,7 +615,8 @@ static int avsp_round1_class1f_reaction_active(
     const AvspRound1ActorCore *actor)
 {
     unsigned long record = actor->animation_record;
-    return actor->source_action_timer != 0u &&
+    return actor->source_hit_recovery_active ||
+        (actor->source_action_timer != 0u &&
         (record == AVSP_PORT_V2_HIT_ANIM_RECORD ||
          record == AVSP_PORT_V2_HIT_RECOVERY_ANIM_RECORD ||
          record == AVSP_PORT_V2_KO_ANIM_RECORD ||
@@ -578,16 +624,280 @@ static int avsp_round1_class1f_reaction_active(
          record == AVSP_PORT_V2_KO_ANIM_RECORD_2 ||
          record == AVSP_PORT_V2_KO_ANIM_RECORD_3 ||
          record == AVSP_PORT_V2_KO_ANIM_RECORD_4 ||
-         record == AVSP_PORT_V2_KO_ANIM_RECORD_5);
+         record == AVSP_PORT_V2_KO_ANIM_RECORD_5));
+}
+
+static void avsp_round1_class1f_hit_clamp_y(AvspRound1ActorCore *actor)
+{
+    actor->source_y_fp = (long)(
+        ((unsigned long)actor->source_y_fp & 0x0000ffffUL) |
+        ((unsigned long)(unsigned short)actor->z << 16));
+    actor->y = actor->z;
+}
+
+static void avsp_round1_class1f_hit_clear_motion(
+    AvspRound1ActorCore *actor)
+{
+    actor->source_x_velocity = 0L;
+    actor->source_x_acceleration = 0L;
+    actor->source_y_velocity = 0L;
+    actor->source_y_acceleration = 0L;
+}
+
+static void avsp_round1_class1f_bind_source_hit_record(
+    AvspRound1ActorCore *actor,
+    const AvspRound1AnimationStateSpec *record,
+    const unsigned char index)
+{
+    actor->animation_index = index;
+    avsp_round1_bind_animation_state(actor, record);
+}
+
+static int avsp_round1_class1f_step_source_hit_reaction_animation(
+    AvspRound1ActorCore *actor)
+{
+    unsigned char next;
+    if (actor->animation_index >=
+            avsp_round1_class1f_source_hit.reaction_record_count ||
+        actor->animation_timer == 0u)
+        return 0;
+    --actor->animation_timer;
+    if (actor->animation_timer != 0u)
+        return 1;
+    next = (unsigned char)(actor->animation_index + 1u);
+    if (next >= avsp_round1_class1f_source_hit.reaction_record_count)
+        next = 0u;
+    avsp_round1_class1f_bind_source_hit_record(
+        actor, &avsp_round1_class1f_source_hit.reaction_records[next], next);
+    return 1;
+}
+
+static int avsp_round1_class1f_step_source_hit_loop_record(
+    AvspRound1ActorCore *actor,
+    const AvspRound1AnimationStateSpec *record)
+{
+    if (actor->animation_timer == 0u)
+        return 0;
+    --actor->animation_timer;
+    if (actor->animation_timer == 0u)
+        avsp_round1_class1f_bind_source_hit_record(actor, record, 0u);
+    return 1;
+}
+
+static int avsp_round1_class1f_hit_step_motion(
+    AvspRound1ActorCore *actor)
+{
+    actor->source_x_fp += actor->source_x_velocity;
+    actor->source_x_velocity += actor->source_x_acceleration;
+    actor->source_y_fp += actor->source_y_velocity;
+    actor->source_y_velocity += actor->source_y_acceleration;
+    actor->x = avsp_round1_fixed_high_word(actor->source_x_fp);
+    actor->y = avsp_round1_fixed_high_word(actor->source_y_fp);
+    return (unsigned short)actor->z < (unsigned short)actor->y;
+}
+
+static void avsp_round1_class1f_bind_source_hit_terminal(
+    AvspRound1ActorCore *actor, const unsigned char index)
+{
+    actor->animation_index = index;
+    avsp_round1_bind_animation_state(
+        actor, &avsp_round1_class1f_source_hit.terminal_records[index]);
+}
+
+static int avsp_round1_class1f_source_hit_normal_return(
+    AvspRound1ActorCore *actor)
+{
+    actor->active = 1u;
+    actor->state = avsp_round1_class1f_source_hit.normal_return_state;
+    actor->substate = avsp_round1_class1f_source_hit.normal_return_substate;
+    actor->source_action = actor->substate;
+    actor->source_hit_recovery_active = 0u;
+    actor->source_hit_mode = 0u;
+    actor->source_hit_kind = 0u;
+    actor->source_reaction_selector = 0u;
+    actor->source_hit_action_timer = 0u;
+    actor->source_airborne = 0u;
+    actor->source_motion_flags = 0u;
+    actor->source_collision_guard6d = 0u;
+    actor->source_collision_suppress70 = 0u;
+    avsp_round1_class1f_hit_clear_motion(actor);
+    return avsp_round1_class1f_state_context_supported(
+        actor->state, actor->substate);
+}
+
+static int avsp_round1_class1f_step_source_hit_terminal(
+    AvspRound1ActorCore *actor)
+{
+    unsigned char next;
+    const AvspRound1AnimationStateSpec *record;
+    if (actor->animation_index >=
+            avsp_round1_class1f_source_hit.terminal_record_count ||
+        actor->animation_timer == 0u)
+        return 0;
+    --actor->animation_timer;
+    if (actor->animation_timer != 0u)
+        return 1;
+    next = (unsigned char)(actor->animation_index + 1u);
+    if (next >= avsp_round1_class1f_source_hit.terminal_record_count)
+        return 0;
+    avsp_round1_class1f_bind_source_hit_terminal(actor, next);
+    record = &avsp_round1_class1f_source_hit.terminal_records[next];
+    if (record->branch < 0)
+        return avsp_round1_class1f_source_hit_normal_return(actor);
+    return 1;
 }
 
 static int avsp_round1_class1f_step_reaction(
     AvspRound1Runtime *runtime, AvspRound1ActorCore *actor)
 {
     AvspPortV2HitKoRuntime reaction;
-    (void)runtime;
+    unsigned short random;
+    unsigned int timer_index;
     if (!avsp_round1_class1f_reaction_active(actor))
         return 1;
+    if (actor->source_hit_recovery_active)
+    {
+        if (actor->state != avsp_round1_class1f_source_hit.state ||
+            actor->source_hit_mode != avsp_round1_class1f_source_hit.hit_mode ||
+            actor->source_reaction_selector !=
+                avsp_round1_class1f_source_hit.reaction_selector)
+            return 0;
+        if (actor->substate ==
+                avsp_round1_class1f_source_hit.entry_action_phase)
+        {
+            if (actor->animation_record !=
+                    avsp_round1_class1f_source_hit.animation_record)
+                return 0;
+            if (actor->source_action_timer != 0u)
+            {
+                --actor->source_action_timer;
+                return 1;
+            }
+            actor->substate = avsp_round1_class1f_source_hit.next_action_phase;
+            actor->source_action = actor->substate;
+        }
+        if (actor->substate == avsp_round1_class1f_source_hit.phases[0])
+        {
+            actor->substate = avsp_round1_class1f_source_hit.phases[1];
+            actor->source_action = actor->substate;
+            actor->source_airborne = 0xffu;
+            actor->source_x_velocity =
+                avsp_round1_class1f_source_hit.
+                    launch_x_velocity_before_facing;
+            actor->source_x_acceleration =
+                avsp_round1_class1f_source_hit.
+                    launch_x_acceleration_before_facing;
+            if (actor->source_facing_selector == 0u)
+            {
+                actor->source_x_velocity = -actor->source_x_velocity;
+                actor->source_x_acceleration = -actor->source_x_acceleration;
+            }
+            actor->source_y_velocity =
+                avsp_round1_class1f_source_hit.launch_y_velocity;
+            actor->source_y_acceleration =
+                avsp_round1_class1f_source_hit.launch_y_acceleration;
+            avsp_round1_class1f_bind_source_hit_record(
+                actor, &avsp_round1_class1f_source_hit.reaction_records[0],
+                0u);
+        }
+        if (actor->substate == avsp_round1_class1f_source_hit.phases[1])
+        {
+            if (avsp_round1_class1f_hit_step_motion(actor))
+                return avsp_round1_class1f_step_source_hit_reaction_animation(
+                    actor);
+            avsp_round1_class1f_hit_clamp_y(actor);
+            actor->substate = avsp_round1_class1f_source_hit.phases[2];
+            actor->source_action = actor->substate;
+            actor->source_airborne = 0u;
+            actor->source_motion_flags = 1u;
+            avsp_round1_class1f_hit_clear_motion(actor);
+            actor->source_hit_action_timer =
+                avsp_round1_class1f_source_hit.landing_hold_timer;
+            if (actor->palette != 0u)
+                actor->coordinate_mode = 1u;
+            avsp_round1_class1f_bind_source_hit_record(
+                actor, &avsp_round1_class1f_source_hit.landing_hold_record,
+                0u);
+            return 1;
+        }
+        if (actor->substate == avsp_round1_class1f_source_hit.phases[2])
+        {
+            if (actor->source_hit_action_timer == 0u)
+                return 0;
+            --actor->source_hit_action_timer;
+            if (actor->source_hit_action_timer != 0u)
+                return avsp_round1_class1f_step_source_hit_loop_record(
+                    actor, &avsp_round1_class1f_source_hit.landing_hold_record);
+            actor->substate = avsp_round1_class1f_source_hit.phases[3];
+            actor->source_action = actor->substate;
+            actor->source_airborne = 0xffu;
+            actor->source_motion_flags = 0u;
+            actor->source_x_velocity =
+                avsp_round1_class1f_source_hit.
+                    bounce_x_velocity_before_facing;
+            actor->source_x_acceleration =
+                avsp_round1_class1f_source_hit.
+                    bounce_x_acceleration_before_facing;
+            if (actor->source_facing_selector == 0u)
+            {
+                actor->source_x_velocity = -actor->source_x_velocity;
+                actor->source_x_acceleration = -actor->source_x_acceleration;
+            }
+            actor->source_y_velocity =
+                avsp_round1_class1f_source_hit.bounce_y_velocity;
+            actor->source_y_acceleration =
+                avsp_round1_class1f_source_hit.bounce_y_acceleration;
+            avsp_round1_class1f_bind_source_hit_record(
+                actor, &avsp_round1_class1f_source_hit.bounce_record, 0u);
+        }
+        if (actor->substate == avsp_round1_class1f_source_hit.phases[3])
+        {
+            if (avsp_round1_class1f_hit_step_motion(actor))
+                return avsp_round1_class1f_step_source_hit_loop_record(
+                    actor, &avsp_round1_class1f_source_hit.bounce_record);
+            avsp_round1_class1f_hit_clamp_y(actor);
+            if (actor->health < 0)
+                return 0;
+            actor->substate = avsp_round1_class1f_source_hit.phases[4];
+            actor->source_action = actor->substate;
+            actor->source_airborne = 0u;
+            actor->source_motion_flags = 1u;
+            avsp_round1_class1f_hit_clear_motion(actor);
+            random = avsp_round1_source_rng(runtime);
+            timer_index = (unsigned int)(random & 0x000fu) +
+                ((unsigned int)actor->source_collision_guard6d << 4);
+            if (timer_index >=
+                    AVSP_ROUND1_CLASS1F_SOURCE_HIT_RNG_TIMER_COUNT)
+                return 0;
+            actor->source_hit_action_timer =
+                avsp_round1_class1f_source_hit.rng_timer_row[timer_index];
+            if (actor->source_hit_action_timer == 0u)
+                return 0;
+            avsp_round1_class1f_bind_source_hit_record(
+                actor, &avsp_round1_class1f_source_hit.rng_hold_record, 0u);
+            return 1;
+        }
+        if (actor->substate == avsp_round1_class1f_source_hit.phases[4])
+        {
+            if (runtime->source_global_hit_pause !=
+                    avsp_round1_class1f_source_hit.global_pause_guard_zero)
+                return 1;
+            if (actor->source_hit_action_timer == 0u)
+                return 0;
+            --actor->source_hit_action_timer;
+            if (actor->source_hit_action_timer != 0u)
+                return avsp_round1_class1f_step_source_hit_loop_record(
+                    actor, &avsp_round1_class1f_source_hit.rng_hold_record);
+            actor->substate = avsp_round1_class1f_source_hit.phases[5];
+            actor->source_action = actor->substate;
+            actor->source_collision_guard6d = 0u;
+            avsp_round1_class1f_bind_source_hit_terminal(actor, 0u);
+            return 1;
+        }
+        if (actor->substate == avsp_round1_class1f_source_hit.phases[5])
+            return avsp_round1_class1f_step_source_hit_terminal(actor);
+        return 0;
+    }
     if (!avsp_round1_class1f_rebuild_reaction(actor, &reaction))
         return 0;
     if (reaction.active)
@@ -6133,14 +6443,17 @@ static int avsp_round1_projectile_collision_pass(
         projectile->collision_result = -1;
         projectile->health = -1;
         ++runtime->player_weapon_projectile_collision_writes;
-        health = (short)(target->health - (short)damage);
+        health = target->health;
+        target->source_prior_health = health;
+        health = (short)(health - (short)damage);
         target->health = health < 0 ? -1 : health;
         ++runtime->player_weapon_projectile_damage_writes;
         ++runtime->first_encounter.player_contacts;
         ++runtime->first_encounter.alien_damage_events;
         target->source_facing_selector = projectile->facing;
         avsp_round1_class1f_queue_projectile_reaction(
-            runtime, target, target->health < 0);
+            runtime, target, target->health < 0,
+            target->source_prior_health);
         if (!avsp_round1_spawn_class4e_variant1_impact(
                 runtime, projectile, target, box, &hurt))
             return 0;
@@ -7022,9 +7335,11 @@ int avsp_round1_step_scheduler(AvspRound1Runtime *runtime)
                        actor->substate == 0x1408u)));
                 if (actor->source_projectile_reaction_pending != 0u)
                 {
+                    unsigned char pending =
+                        actor->source_projectile_reaction_pending;
                     actor->source_projectile_reaction_pending = 0u;
                     if (!avsp_round1_class1f_consume_projectile_reaction(
-                            actor))
+                            actor, pending))
                     {
                         runtime->scheduler_failure_code = 17u;
                         runtime->scheduler_failure_source_slot =

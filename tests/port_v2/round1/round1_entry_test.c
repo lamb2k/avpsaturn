@@ -1357,8 +1357,10 @@ int main(void)
         if (!avsp_round1_step_scheduler(&projectile_runtime) ||
             target->health != 32 || target->state != 0x0202u ||
             target->substate != 0x0000u ||
-            target->source_action_timer != 39u ||
+            target->source_action_timer != 8u ||
             target->source_projectile_reaction_pending != 1u ||
+            target->source_hit_kind != 0x15u ||
+            target->source_prior_health != 63 ||
             child->collision_result != -1 ||
             target->source_collision_latches[0] !=
                 child->collision_identity ||
@@ -1378,6 +1380,206 @@ int main(void)
                     projectile_runtime.class4e_variant1_allocations,
                     projectile_runtime.failure_count);
             return 55;
+        }
+        {
+            AvspRound1Runtime source_hit_runtime = projectile_runtime;
+            AvspRound1ActorCore *source_hit_target =
+                &source_hit_runtime.pools[0].records[12];
+            unsigned int pool_index;
+            unsigned int projectile_index;
+            for (pool_index = 0u; pool_index < AVSP_ROUND1_POOL_COUNT;
+                 ++pool_index)
+            {
+                unsigned int actor_index;
+                for (actor_index = 0u;
+                     actor_index < source_hit_runtime.pools[pool_index].capacity;
+                     ++actor_index)
+                    if (pool_index != 0u || actor_index != 12u)
+                        source_hit_runtime.pools[pool_index].records[
+                            actor_index].active = 0u;
+            }
+            for (projectile_index = 0u;
+                 projectile_index < AVSP_ROUND1_WEAPON_PROJECTILE_CAPACITY;
+                 ++projectile_index)
+                source_hit_runtime.player_weapon_projectiles[
+                    projectile_index].active = 0u;
+            source_hit_runtime.rng_seed = 0xedd9u;
+            source_hit_runtime.source_global_hit_pause = 0u;
+            source_hit_target->x = 684;
+            source_hit_target->y = 310;
+            source_hit_target->z = 310;
+            source_hit_target->source_x_fp = 0x02ac4c00L;
+            source_hit_target->source_y_fp = 0x0136d600L;
+            source_hit_target->source_z_fp = 0x01360000L;
+            source_hit_target->source_facing_selector = 0u;
+            source_hit_target->source_collision_guard6d = 0u;
+            /* Accepted source frame 2306 context preserved through 0x01efec. */
+            source_hit_target->source_style85 = 0u;
+            source_hit_target->source_a3 = 0u;
+            source_hit_target->source_a4 = 1u;
+            source_hit_target->source_a5 = 1u;
+            source_hit_target->source_a6 = 1u;
+            source_hit_target->source_b0 = 2u;
+            source_hit_target->facing = 1u;
+            if (!avsp_round1_step_scheduler(&source_hit_runtime) ||
+                source_hit_target->state != 0x0202u ||
+                source_hit_target->substate != 0x0002u ||
+                source_hit_target->source_action_timer != 8u ||
+                source_hit_target->source_hit_recovery_active != 1u ||
+                source_hit_target->source_hit_mode != 2u ||
+                source_hit_target->source_hit_kind != 0x15u ||
+                source_hit_target->source_reaction_selector != 0x36u ||
+                source_hit_target->source_hit_action_timer != 4u ||
+                source_hit_target->source_prior_health != 32 ||
+                source_hit_target->animation_record != 0x0012e04cUL ||
+                source_hit_target->assembly != 0x001308a6UL ||
+                source_hit_target->animation_timer != 1u ||
+                source_hit_target->animation_branch != 0 ||
+                source_hit_target->hurt_selector != 1u ||
+                source_hit_target->attack_selector != 1u)
+            {
+                fprintf(stderr,
+                    "source HIT entry code=%u state=%04x/%04x timer=%u active=%u mode=%u kind=%u selector=%u action-timer=%u prior=%d anim=%08lx assembly=%08lx anim-timer=%u branch=%d selectors=%u/%u\n",
+                    source_hit_runtime.scheduler_failure_code,
+                    source_hit_target->state, source_hit_target->substate,
+                    source_hit_target->source_action_timer,
+                    source_hit_target->source_hit_recovery_active,
+                    source_hit_target->source_hit_mode,
+                    source_hit_target->source_hit_kind,
+                    source_hit_target->source_reaction_selector,
+                    source_hit_target->source_hit_action_timer,
+                    source_hit_target->source_prior_health,
+                    source_hit_target->animation_record,
+                    source_hit_target->assembly,
+                    source_hit_target->animation_timer,
+                    source_hit_target->animation_branch,
+                    source_hit_target->hurt_selector,
+                    source_hit_target->attack_selector);
+                return 56;
+            }
+            for (entry_calls = 0u; entry_calls < 8u; ++entry_calls)
+                if (!avsp_round1_step_scheduler(&source_hit_runtime))
+                    return 56;
+            if (source_hit_target->source_action_timer != 0u ||
+                source_hit_target->substate != 0x0002u ||
+                !source_hit_target->source_hit_recovery_active ||
+                !avsp_round1_step_scheduler(&source_hit_runtime) ||
+                source_hit_target->substate != 0x0202u ||
+                source_hit_target->source_x_fp != 0x02aa8c00L ||
+                source_hit_target->source_y_fp != 0x01425600L ||
+                source_hit_target->source_x_velocity != -0x0001c000L ||
+                source_hit_target->source_y_velocity != 0x000b0000L ||
+                source_hit_target->animation_record != 0x0012e05cUL)
+            {
+                fprintf(stderr,
+                    "source HIT launch code=%u state=%04x/%04x timer=%u active=%u action=%04x fp=%08lx/%08lx velocity=%08lx/%08lx anim=%08lx\n",
+                    source_hit_runtime.scheduler_failure_code,
+                    source_hit_target->state, source_hit_target->substate,
+                    source_hit_target->source_action_timer,
+                    source_hit_target->source_hit_recovery_active,
+                    source_hit_target->source_action,
+                    source_hit_target->source_x_fp,
+                    source_hit_target->source_y_fp,
+                    source_hit_target->source_x_velocity,
+                    source_hit_target->source_y_velocity,
+                    source_hit_target->animation_record);
+                return 56;
+            }
+            for (entry_calls = 0u; entry_calls < 46u; ++entry_calls)
+                if (!avsp_round1_step_scheduler(&source_hit_runtime))
+                    return 56;
+            if (source_hit_target->substate != 0x0204u ||
+                source_hit_target->source_x_fp != 0x025a0c00L ||
+                source_hit_target->source_y_fp != 0x0136d600L ||
+                source_hit_target->source_hit_action_timer != 3u ||
+                source_hit_target->animation_record != 0x0012ddb0UL)
+            {
+                fprintf(stderr,
+                    "source HIT first landing code=%u state=%04x/%04x action-timer=%u fp=%08lx/%08lx anim=%08lx\n",
+                    source_hit_runtime.scheduler_failure_code,
+                    source_hit_target->state, source_hit_target->substate,
+                    source_hit_target->source_hit_action_timer,
+                    source_hit_target->source_x_fp,
+                    source_hit_target->source_y_fp,
+                    source_hit_target->animation_record);
+                return 56;
+            }
+            for (entry_calls = 0u; entry_calls < 3u; ++entry_calls)
+                if (!avsp_round1_step_scheduler(&source_hit_runtime))
+                    return 56;
+            if (source_hit_target->substate != 0x0206u ||
+                source_hit_target->source_x_fp != 0x02580c00L ||
+                source_hit_target->source_y_fp != 0x013ad600L ||
+                source_hit_target->source_x_velocity != -0x0001f000L ||
+                source_hit_target->source_y_velocity != 0x00034000L ||
+                source_hit_target->animation_record != 0x0012dd9cUL)
+                return 56;
+            for (entry_calls = 0u; entry_calls < 11u; ++entry_calls)
+                if (!avsp_round1_step_scheduler(&source_hit_runtime))
+                    return 56;
+            if (source_hit_target->substate != 0x0208u ||
+                source_hit_target->source_x_fp != 0x02462c00L ||
+                source_hit_target->source_y_fp != 0x01365600L ||
+                source_hit_target->source_hit_action_timer != 10u ||
+                source_hit_target->animation_record != 0x0012ddb0UL ||
+                source_hit_runtime.rng_seed != 0xc9a2u)
+            {
+                fprintf(stderr,
+                    "source HIT RNG landing code=%u state=%04x/%04x action-timer=%u fp=%08lx/%08lx anim=%08lx rng=%04x\n",
+                    source_hit_runtime.scheduler_failure_code,
+                    source_hit_target->state, source_hit_target->substate,
+                    source_hit_target->source_hit_action_timer,
+                    source_hit_target->source_x_fp,
+                    source_hit_target->source_y_fp,
+                    source_hit_target->animation_record,
+                    source_hit_runtime.rng_seed);
+                return 56;
+            }
+            for (entry_calls = 0u; entry_calls < 10u; ++entry_calls)
+                if (!avsp_round1_step_scheduler(&source_hit_runtime))
+                    return 56;
+            if (source_hit_target->substate != 0x020au ||
+                source_hit_target->animation_record != 0x0012de38UL ||
+                source_hit_target->animation_timer != 3u)
+                return 56;
+            for (entry_calls = 0u; entry_calls < 24u; ++entry_calls)
+                if (!avsp_round1_step_scheduler(&source_hit_runtime))
+                    return 56;
+            if (source_hit_target->state != 0x0200u ||
+                source_hit_target->substate != 0x0000u ||
+                source_hit_target->source_hit_recovery_active ||
+                source_hit_target->animation_record != 0x0012ded8UL)
+            {
+                fprintf(stderr,
+                    "source HIT terminal code=%u state=%04x/%04x active=%u anim=%08lx index=%u timer=%u\n",
+                    source_hit_runtime.scheduler_failure_code,
+                    source_hit_target->state, source_hit_target->substate,
+                    source_hit_target->source_hit_recovery_active,
+                    source_hit_target->animation_record,
+                    source_hit_target->animation_index,
+                    source_hit_target->animation_timer);
+                return 56;
+            }
+            if (!avsp_round1_step_scheduler(&source_hit_runtime) ||
+                source_hit_target->substate != 0x1600u ||
+                source_hit_target->animation_record != 0x0012eafcUL)
+            {
+                fprintf(stderr,
+                    "source HIT return code=%u state=%04x/%04x active=%u anim=%08lx a3=%u a4=%u a5=%u a6=%u style85=%u facing=%u actor_x=%d player_x=%d\n",
+                    source_hit_runtime.scheduler_failure_code,
+                    source_hit_target->state, source_hit_target->substate,
+                    source_hit_target->source_hit_recovery_active,
+                    source_hit_target->animation_record,
+                    source_hit_target->source_a3,
+                    source_hit_target->source_a4,
+                    source_hit_target->source_a5,
+                    source_hit_target->source_a6,
+                    source_hit_target->source_style85,
+                    source_hit_target->facing,
+                    source_hit_target->x,
+                    source_hit_runtime.player_action.x);
+                return 56;
+            }
         }
         {
             AvspRound1Runtime child_release_runtime = projectile_runtime;

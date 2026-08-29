@@ -10,6 +10,7 @@ from pathlib import Path
 
 ROOT = Path(__file__).resolve().parents[4]
 HERE = Path(__file__).resolve().parent
+SOURCE_VISIBLE_FRAME_AT_DIAGNOSTIC_ZERO = 2041
 spec = importlib.util.spec_from_file_location(
     "button1_capture", HERE / "capture_button1_cadence.py")
 capture = importlib.util.module_from_spec(spec)
@@ -40,7 +41,11 @@ def main():
     mcp.call("set_debug_option", cpu_core="interpreter")
 
     for frame in range(args.first, args.last + 1):
-        capture.wait_frame(mcp, symbols, frame, args.timeout)
+        diagnostic_frame = frame - SOURCE_VISIBLE_FRAME_AT_DIAGNOSTIC_ZERO
+        if diagnostic_frame < 0:
+            raise RuntimeError(
+                f"source frame {frame} predates the native Coffee Shop ledger")
+        capture.wait_frame(mcp, symbols, diagnostic_frame, args.timeout)
         print(f"WGC_READY {frame}", flush=True)
         response = input().strip()
         if response != f"CAPTURED {frame}":

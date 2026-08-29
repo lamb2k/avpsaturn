@@ -168,6 +168,26 @@ def class1f_current_union_is_complete(presentations, fixture):
     return actual == expected
 
 
+def class1f_source_hit_window_union_is_complete(presentations, fixture):
+    class1f = next(item for item in fixture["authority_data"]["enemies"]
+                   ["archetypes"] if item["class"] == "0x1f")
+    current = class1f["current_state_implementation_contract"]
+    source_hit_program = current["damage_hit_ko_removal"][
+        "source_hit_entry_program"]["source_hit_program"]
+    addresses = {
+        int(record["animation_record"], 16)
+        for sequence in source_hit_program["animation_sequences"].values()
+        for record in sequence["records"]}
+    addresses.add(int(source_hit_program["normal_return"][
+        "class1f_resume_animation_record"], 16))
+    expected = {(address, facing) for address in addresses
+                for facing in (0, 1)}
+    actual = {(item["animation_record"], item["facing"])
+              for item in presentations
+              if item["kind"] == "class1f-source-hit-window"}
+    return actual == expected
+
+
 def run(args):
     return subprocess.run([sys.executable, str(GENERATOR)] + args,
                           cwd=str(ROOT), capture_output=True, text=True)
@@ -204,6 +224,10 @@ def main() -> int:
     if not class1f_current_union_is_complete(presentations, fixture):
         print("FAIL: class-0x1f current presentation union is incomplete")
         return 1
+    if not class1f_source_hit_window_union_is_complete(
+            presentations, fixture):
+        print("FAIL: class-0x1f source HIT decoder window is incomplete")
+        return 1
     button3_indexes = [index for index, item in enumerate(presentations)
                        if item["kind"] == "player-button3"]
     if not button3_indexes or any(
@@ -228,7 +252,9 @@ def main() -> int:
             ("player-button1-button2-special",
              button1_button2_special_union_is_complete),
             ("class10-empty-effect", empty_effect_union_is_complete),
-            ("class1f-current", class1f_current_union_is_complete)):
+            ("class1f-current", class1f_current_union_is_complete),
+            ("class1f-source-hit-window",
+             class1f_source_hit_window_union_is_complete)):
         indexes = [index for index, item in enumerate(presentations)
                    if item["kind"] == kind]
         if not indexes or any(complete(

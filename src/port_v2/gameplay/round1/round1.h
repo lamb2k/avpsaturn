@@ -416,12 +416,6 @@ typedef struct
     unsigned char source_collision_latches[8];
     unsigned char source_collision_suppress70;
     unsigned char source_projectile_reaction_pending;
-    unsigned char source_hit_recovery_active;
-    unsigned char source_hit_mode;
-    unsigned char source_hit_kind;
-    unsigned char source_reaction_selector;
-    unsigned char source_hit_action_timer;
-    short source_prior_health;
     unsigned char source_a2;
     unsigned char source_movement_table;
     unsigned long source_next_animation_record;
@@ -436,6 +430,16 @@ typedef struct
     unsigned long handler_updates;
     unsigned long state_handler_updates;
 } AvspRound1ActorCore;
+
+/* These class-0x1f HIT fields are phase-exclusive with the inner-state
+ * motion scratch and action timer. Keep the aliases explicit so lifting the
+ * source fields does not add eight bytes to every record in every fixed pool. */
+#define source_hit_mode source_motion_fields[0]
+#define source_hit_kind source_motion_fields[1]
+#define source_reaction_selector source_motion_fields[2]
+#define source_prior_health source_motion_fields[3]
+#define source_hit_recovery_active source_motion_fields[4]
+#define source_hit_action_timer transition_timer
 
 typedef struct
 {
