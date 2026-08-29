@@ -100,11 +100,11 @@
    tracked in the handoff), not a bigger carve alone. */
 /* Widened from 0x40000 for the RP4 street archive and to the smallest aligned
  * carve that co-resides the complete SPEC-02 Coffee Shop presentation union
- * (535,756 bytes) followed by the accepted combat overlay (16,712 bytes):
- * 552,468 bytes total, 492 bytes of headroom. Scene loading boundaries are
+ * (540,376 bytes) followed by the accepted combat overlay (16,712 bytes):
+ * 557,088 bytes total, 4,064 bytes of headroom. Scene loading boundaries are
  * the residency lever: the carve holds one scene-scope archive at a time and
  * is reloaded during transitions, when data-track reads are legal. */
-#define AVSP_TILE_REGION_BYTES 0x87000
+#define AVSP_TILE_REGION_BYTES 0x89000
 
 /* RP4 street test: the interval strip bundle is staged after the tile
  * carve, outside the allocator, only in that build profile. */

@@ -283,7 +283,7 @@ count = signed(mcp,syms["avsp_diag_live_sample_count"])
 if count < 1 or count > 600:
     raise RuntimeError(f"invalid live sample count: {count}")
 sample_base = mcp.u32(syms["avsp_diag_live_samples"])
-expected_sample_base = 0x22600000 + 0x87000 + 0x48000 + 0x19000
+expected_sample_base = 0x22600000 + 0x89000 + 0x48000 + 0x19000
 if sample_base != expected_sample_base:
     raise RuntimeError(
         f"live diagnostic cart pointer drift: {sample_base:#x} != "

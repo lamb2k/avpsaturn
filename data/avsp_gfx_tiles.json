@@ -308,6 +308,6 @@
  "scope": "street",
  "tile_bytes": 128,
  "tile_count": 4090,
- "tile_region_budget_bytes": 552960,
- "tile_region_budget_used_pct": 97.72
+ "tile_region_budget_bytes": 561152,
+ "tile_region_budget_used_pct": 96.3
 }
