@@ -889,6 +889,19 @@ alien_assemblies = {
     0x12E224:0x13020C, 0x12E234:0x13020C, 0x12E244:0x13020C,
     0x12E254:0x130294, 0x12E268:0x130346,
 }
+class1f_contract = next(
+    archetype for archetype in spec_fixture["authority_data"]["enemies"]
+        ["archetypes"]
+    if archetype["class"] == "0x1f")
+for record_contract in class1f_contract["presentation_and_collision"]["records"]:
+    if record_contract["classification"] != "SOURCE_CLOSED":
+        raise RuntimeError("class-0x1f presentation contract is not source-closed")
+    record = int(record_contract["animation_record"], 0)
+    assembly = int(record_contract["assembly"], 0)
+    if record in alien_assemblies and alien_assemblies[record] != assembly:
+        raise RuntimeError(
+            f"class-0x1f presentation contract conflicts at {record:#x}")
+    alien_assemblies[record] = assembly
 player_identity_drift = [
     {"frame":s["frame"], "state":s["player_state"],
      "record":hex(s["player_animation_record"]),
