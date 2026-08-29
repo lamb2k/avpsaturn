@@ -359,6 +359,34 @@ program from accepted Oracle/SPEC evidence, using the smallest bounded Oracle
 follow-up only if its implementation rules are absent. Do not implement from
 the observational frame trajectory, and do not leave Coffee Shop until its
 zero-gap gate passes.
+
+The complete class-`0x1f` source HIT program is now implemented through normal
+return. Recovery, phases `0x0200`..`0x020a`, movement, landing, bounce, RNG,
+terminal presentation and the guarded action-`0x16` resume are fixture-bound;
+generic selector-`0x36` action presentation is forbidden in HIT context.
+Checkpoint `58bfeacb88360c48ec309a5bb057ca8e17724f92` is pushed and remote-equal.
+Fast, Oracle, Target, 100 SPEC mutations, 161 native mutations, 119 Target
+suppressions, eight scene mutations, and two commit-bound identical 575-sample
+Emulator ledgers pass at ISO
+`f2d0ec57fe4d9b02d6a7e578145039c3080ef450ce9a3801fdcba6b90b1df287`.
+The sparse ROM decoder was extended for every source HIT/return assembly while
+the measured tile archive and overlay remain within the existing carve.
+
+Correctly aligned window-only WGC covers source-visible frames 2280..2310;
+cadence sheet `82fb9fed7b16671ddcb77ae10734bc864998770d6ad0c503470e49005e65b8e6`
+passes direct inspection. The refreshed whole-scene gate is 404 missing source
+lifetimes, 1,379 unmapped spawn/despawn edges, 30 unsupported states, 94
+collision/damage, 3 route/camera, and 281 audio/load gaps; unowned Saturn
+actors, unidentified source pairs, and retained gameplay authorities remain
+zero. Missing lifetimes improve by nine and spawn/despawn by three; no gap
+category increases.
+
+The next earliest causal divergence is class-`0x4e` slot `0x00ffbd80` at visible
+frame 2307. Source presents variant 1 immediately with animation `0x0008df2c`;
+native allocation is visible in frame 2307 with animation zero and initializes
+one frame later as `0x00092914`. Bind the accepted class-`0x4e` variant-1
+allocation/presentation transaction without authored timing or a generic-effect
+substitution, then rerun the complete scene gate.
 Frame 2328 remains evidence, not gameplay authority.
 Evidence: `data/reimplement13_round1_stable_entry.json` and
 `data/reimplement13_startup_authority.json`.
