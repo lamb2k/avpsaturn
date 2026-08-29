@@ -1100,6 +1100,12 @@ def validate(contract: dict[str, object], fixtures: dict[str, object],
             class1f_hit["recovery"]["captured_values_before_decrement"] ==
                 [8, 7, 6, 5, 4, 3, 2, 1, 0] and
             class1f_hit["recovery"]["next_action_phase_u16"] == 0x0200 and
+            class1f_hit["recovery"]["transition_scheduler_boundary"]
+                ["recovery_transition_returns_before_action_dispatch"] is True and
+            class1f_hit["recovery"]["transition_scheduler_boundary"]
+                ["transition_visible_source_frame"] == 2317 and
+            class1f_hit["recovery"]["transition_scheduler_boundary"]
+                ["launch_visible_source_frame"] == 2318 and
             class1f_hit["entry_rng_calls"] == [] and
             class1f_hit["action_dispatch"]["required_action_phases_u16"] ==
                 [0x0200, 0x0202, 0x0204, 0x0206, 0x0208, 0x020A] and

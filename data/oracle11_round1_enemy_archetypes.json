@@ -27917,7 +27917,20 @@
               "next_action_phase_source_frame": 2317,
               "next_action_phase_u16": 512,
               "rule": "decrement once per scheduler update; nonnegative retains action phase 0x0002; negative increments actor+0x06:u8 by 2 and clears actor+0x07:u8 and actor+0x2c:u8",
-              "timer": "actor+0x2c:u8"
+              "timer": "actor+0x2c:u8",
+              "transition_scheduler_boundary": {
+                "launch_visible_animation_record": "0x0012e05c",
+                "launch_visible_source_frame": 2318,
+                "launch_visible_substate_u16": 514,
+                "launch_visible_x_fp_u32": 44731392,
+                "launch_visible_y_fp_u32": 21124608,
+                "recovery_transition_returns_before_action_dispatch": true,
+                "transition_visible_animation_record": "0x0012e04c",
+                "transition_visible_source_frame": 2317,
+                "transition_visible_substate_u16": 512,
+                "transition_visible_x_fp_u32": 44846080,
+                "transition_visible_y_fp_u32": 20370944
+              }
             },
             "rng": {
               "calls": 1,

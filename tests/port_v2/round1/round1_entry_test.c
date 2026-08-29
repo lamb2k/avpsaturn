@@ -1469,6 +1469,11 @@ int main(void)
                 source_hit_target->substate != 0x0002u ||
                 !source_hit_target->source_hit_recovery_active ||
                 !avsp_round1_step_scheduler(&source_hit_runtime) ||
+                source_hit_target->substate != 0x0200u ||
+                source_hit_target->source_x_fp != 0x02ac4c00L ||
+                source_hit_target->source_y_fp != 0x0136d600L ||
+                source_hit_target->animation_record != 0x0012e04cUL ||
+                !avsp_round1_step_scheduler(&source_hit_runtime) ||
                 source_hit_target->substate != 0x0202u ||
                 source_hit_target->source_x_fp != 0x02aa8c00L ||
                 source_hit_target->source_y_fp != 0x01425600L ||

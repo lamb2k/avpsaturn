@@ -812,6 +812,10 @@ static int avsp_round1_class1f_step_reaction(
             }
             actor->substate = avsp_round1_class1f_source_hit.next_action_phase;
             actor->source_action = actor->substate;
+            if (!avsp_round1_class1f_source_hit.
+                    recovery_transition_returns)
+                return 0;
+            return 1;
         }
         if (actor->substate == avsp_round1_class1f_source_hit.phases[0])
         {

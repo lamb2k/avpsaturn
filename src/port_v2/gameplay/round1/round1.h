@@ -6,7 +6,7 @@
 #include "../../combat/hit_ko/hit_ko.h"
 
 #define AVSP_ROUND1_SPEC02_SHA256 \
-    "3abfcff9da0e862327d1c5afbf1698259eb42c89552f147ec9edef9ca160688d"
+    "639c9580ecb3c63b76c1caf54bcf148ecab441d7b30388153d1b506782e587fc"
 #define AVSP_ROUND1_CANARY_HEAD 0x52314548UL
 #define AVSP_ROUND1_CANARY_TAIL 0x52314554UL
 #define AVSP_ROUND1_ROUTE_ENTRY_STATE 2
@@ -494,6 +494,7 @@ typedef struct
     unsigned char hit_kind;
     unsigned char recovery_timer;
     unsigned char action_timer;
+    unsigned char recovery_transition_returns;
     unsigned char hurt_selector;
     unsigned char attack_selector;
     unsigned short phases[AVSP_ROUND1_CLASS1F_SOURCE_HIT_PHASE_COUNT];

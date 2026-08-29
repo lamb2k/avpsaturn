@@ -1494,7 +1494,15 @@ def class1f_hit_entry_contract(program: bytes,
             visible["animation_record"] == "0012e04c" and
             [row["recovery_timer2c"] for row in recovery] ==
                 ["08", "07", "06", "05", "04", "03", "02", "01", "00"] and
-            next_phase["substate"] == "0200" and not class1f_rng,
+            next_phase["substate"] == "0200" and
+            actor_row(2317)["substate"] == "0200" and
+            actor_row(2317)["animation_record"] == "0012e04c" and
+            actor_row(2317)["x_fp"] == "02ac4c00" and
+            actor_row(2317)["y_fp"] == "0136d600" and
+            actor_row(2318)["substate"] == "0202" and
+            actor_row(2318)["animation_record"] == "0012e05c" and
+            actor_row(2318)["x_fp"] == "02aa8c00" and
+            actor_row(2318)["y_fp"] == "01425600" and not class1f_rng,
             "class-0x1f HIT entry source chronology drift")
 
     reaction = animation_record(program, 0x12E04C)
@@ -1661,6 +1669,19 @@ def class1f_hit_entry_contract(program: bytes,
             "captured_values_before_decrement": [8, 7, 6, 5, 4, 3, 2, 1, 0],
             "next_action_phase_u16": 0x0200,
             "next_action_phase_source_frame": 2317,
+            "transition_scheduler_boundary": {
+                "recovery_transition_returns_before_action_dispatch": True,
+                "transition_visible_source_frame": 2317,
+                "transition_visible_substate_u16": 0x0200,
+                "transition_visible_animation_record": "0x0012e04c",
+                "transition_visible_x_fp_u32": 0x02AC4C00,
+                "transition_visible_y_fp_u32": 0x0136D600,
+                "launch_visible_source_frame": 2318,
+                "launch_visible_substate_u16": 0x0202,
+                "launch_visible_animation_record": "0x0012e05c",
+                "launch_visible_x_fp_u32": 0x02AA8C00,
+                "launch_visible_y_fp_u32": 0x01425600,
+            },
         },
         "entry_rng_calls": [],
         "action_dispatch": {
@@ -2347,6 +2368,19 @@ def validate(report: dict[str, object]) -> None:
                     hit_entry["recovery"]["captured_values_before_decrement"] ==
                         [8, 7, 6, 5, 4, 3, 2, 1, 0] and
                     hit_entry["recovery"]["next_action_phase_u16"] == 0x0200 and
+                    hit_entry["recovery"]["transition_scheduler_boundary"] == {
+                        "recovery_transition_returns_before_action_dispatch": True,
+                        "transition_visible_source_frame": 2317,
+                        "transition_visible_substate_u16": 0x0200,
+                        "transition_visible_animation_record": "0x0012e04c",
+                        "transition_visible_x_fp_u32": 0x02AC4C00,
+                        "transition_visible_y_fp_u32": 0x0136D600,
+                        "launch_visible_source_frame": 2318,
+                        "launch_visible_substate_u16": 0x0202,
+                        "launch_visible_animation_record": "0x0012e05c",
+                        "launch_visible_x_fp_u32": 0x02AA8C00,
+                        "launch_visible_y_fp_u32": 0x01425600,
+                    } and
                     hit_entry["entry_rng_calls"] == [] and
                     hit_entry["action_dispatch"]
                         ["required_action_phases_u16"] ==

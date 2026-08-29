@@ -65,6 +65,7 @@ for label,mutate in [
     ('source-hit-selector',lambda x:x['damage_hit_ko_removal']['source_hit_entry_program']['reaction_table'].__setitem__('reaction_selector_actor_4d_u8',0)),
     ('source-hit-record',lambda x:x['damage_hit_ko_removal']['source_hit_entry_program']['visible_result'].__setitem__('animation_record','0x0012dc50')),
     ('source-hit-recovery',lambda x:x['damage_hit_ko_removal']['source_hit_entry_program']['recovery']['captured_values_before_decrement'].__setitem__(0,7)),
+    ('source-hit-recovery-boundary',lambda x:x['damage_hit_ko_removal']['source_hit_entry_program']['recovery']['transition_scheduler_boundary'].__setitem__('recovery_transition_returns_before_action_dispatch',False)),
     ('source-hit-launch-motion',lambda x:x['damage_hit_ko_removal']['source_hit_entry_program']['source_hit_program']['phase_0x0200_launch']['observed_written_motion'].__setitem__('x_velocity_s32_16_16',-0x1b000)),
     ('source-hit-first-landing',lambda x:x['damage_hit_ko_removal']['source_hit_entry_program']['source_hit_program']['phase_0x0202_first_flight'].__setitem__('landing_visible_frame',2363)),
     ('source-hit-landing-hold',lambda x:x['damage_hit_ko_removal']['source_hit_entry_program']['source_hit_program']['phase_0x0204_landing_hold']['captured_values_before_decrement'].__setitem__(0,2)),

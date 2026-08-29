@@ -8206,8 +8206,8 @@ static void live_encounter_publish(void)
     avsp_diag_live_frame = (int)live_encounter_frame.frame;
     avsp_diag_round1_spec_bound =
         sizeof(AVSP_ROUND1_SPEC02_SHA256) == 65u &&
-        AVSP_ROUND1_SPEC02_SHA256[0] == '3' &&
-        AVSP_ROUND1_SPEC02_SHA256[63] == 'd';
+        AVSP_ROUND1_SPEC02_SHA256[0] == '6' &&
+        AVSP_ROUND1_SPEC02_SHA256[63] == 'c';
     avsp_diag_round1_entry_valid = avsp_round1_entry_valid(&round1_runtime);
     avsp_diag_round1_route_state = round1_runtime.route_state;
     avsp_diag_round1_rng_seed = round1_runtime.rng_seed;

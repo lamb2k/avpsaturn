@@ -365,6 +365,19 @@ def build() -> str:
         class1f_source_hit["visible_result"]["state_u16"] != 0x0202 or
         class1f_source_hit["visible_result"]["action_phase_u16"] != 0x0002 or
         class1f_source_hit["recovery"]["next_action_phase_u16"] != 0x0200 or
+        class1f_source_hit["recovery"]["transition_scheduler_boundary"] != {
+            "recovery_transition_returns_before_action_dispatch": True,
+            "transition_visible_source_frame": 2317,
+            "transition_visible_substate_u16": 0x0200,
+            "transition_visible_animation_record": "0x0012e04c",
+            "transition_visible_x_fp_u32": 0x02AC4C00,
+            "transition_visible_y_fp_u32": 0x0136D600,
+            "launch_visible_source_frame": 2318,
+            "launch_visible_substate_u16": 0x0202,
+            "launch_visible_animation_record": "0x0012e05c",
+            "launch_visible_x_fp_u32": 0x02AA8C00,
+            "launch_visible_y_fp_u32": 0x01425600,
+        } or
         class1f_source_hit["entry_writes_in_order"][1] !=
             "actor+0x2a:u8 = 4" or
         class1f_source_hit["action_dispatch"]["required_action_phases_u16"] !=
@@ -1232,7 +1245,7 @@ def build() -> str:
             class1f_source_hit["recovery"]["next_action_phase_u16"],
             class1f_source_hit["reaction_record"]["animation_record"],
             class1f_source_hit["reaction_record"]["assembly"]),
-        "    0x%02Xu, %du, 0x%02Xu, %du, 4u, %du, %du," % (
+        "    0x%02Xu, %du, 0x%02Xu, %du, 4u, 1u, %du, %du," % (
             class1f_source_hit["reaction_table"]
                 ["reaction_selector_actor_4d_u8"],
             class1f_source_hit["reaction_table"]["hit_mode_actor_46_u8"],
