@@ -712,15 +712,58 @@ remain coherent. Scene gaps improve from
 actors, unidentified source pairs, and retained gameplay authorities remain
 zero. The complete scene gate remains open.
 
-The next earliest causal divergence is record-type `4`, class `0x00`, slot
-`0x00ff8680` at visible frame 2435. Source y is `406` while native is `405`;
-x first differs at frame 2441 (`925` versus `924`), and state/animation first
-differ at frame 2466. The simultaneous class-`0x4e` child at `0x00ffc300`
-shares the initial one-pixel trajectory drift. Bind the accepted parent/child
-fixed-point movement, projection/rounding, spawn origin, and scheduler order;
-do not fit a frame, add an authored offset, or rebaseline input. Preserve the
-exact frame-2287/2306/2307 chronology, the class-`0x1f` retry/recovery cadence,
-and all current player, visual, HUD, audio, collision, and population locks.
+Incremental checkpoint `c584e416ac25d4e579e8c66a4059304a7e947b6c`
+closes the record-type-`4`, class-`0x00`, slot-`0x00ff8680` parent trajectory.
+The fixed-slot allocator `0x01773e` replaces only the x/y high words, so native
+now preserves the source slot's `0x0a00/0xb800` fractional residue. Target
+selector `0x0241f0` starts its unsigned nearest distance from the sign-extended
+`MOVEQ #$ff` value `0xffffffff`, not `0x00ff`; the route target at distance 343
+therefore selects source angle 46. Terminal record `0x0002fbb8` loops to
+`0x0002fba8`, and camera-relative bounds enter the source emitter/release path
+instead of releasing immediately.
+
+All 67 source/native rows from visible frame 2434 through 2500 now match at
+fixed-point x/y, state, timer, animation, angle, and progress. Both row hashes
+are `789cb79e083e0aa356989e67dbd6a0188a4eb58f794765c28d8bac0bd1544888`.
+The narrow accepted static Oracle correction amends only the nearest-distance,
+fixed-slot allocation, terminal-loop, and camera-bound implementation fields.
+SPEC-02 is
+`56f273bae8740ab294be897ab14831a727d1354116211e05ac64c97dfb536238`;
+fixture is
+`5a508062eed207eddb25d6351b5d6b08a3e0544ac2c9726e3877caea6a2832bd`.
+Fast, Oracle, 113 SPEC mutations, 45 weapon mutations, 181 native mutations,
+15 scene mutations, 123 Target suppressions, and both LiveEncounter Target
+profiles pass. The combat overlay's tile set and archive hash remain unchanged;
+only its derived SPEC fixture identity advanced.
+
+Two commit-bound 575-sample Coffee Shop Emulator ledgers are byte-identical at
+normalized ISO
+`9e4544d34242e710148e9b4a13df034173097be3a1d171aad7ad2fd690ad5b1c`;
+canonical sample payload is
+`92bc7e467d17eb0149d3b8c1e67f922f32140ee2e88e3c02d98ac0d46f90c767`.
+Fresh window-only Windows Graphics Capture covers every visible frame
+2434..2500. Cadence sheet
+`06c40976bceb749c62d62a1a05b2dbc0d193c4d25fdf8271eaee5db95ac2d937`
+and clip
+`624c3dc4ece7c881f49422cea59e8dd84b98c541116168728f781c9cfea7e1ef`
+pass direct inspection: Predator/staff identity is stable, parent and emitted
+effects move coherently, the P1-only HUD/equipment row remains intact, and both
+Coffee Shop planes, palette, and priority are coherent.
+
+Whole-scene gaps improve from `305 / 1,285 / 3 / 94 / 3 / 281` to
+`305 / 1,272 / 3 / 94 / 3 / 281` for actor lifetime, spawn/despawn, active
+state, collision/damage, route/camera, and audio/load respectively. No category
+increases. Unowned Saturn actors, unidentified source pairs, and retained
+gameplay authorities remain zero; the complete Coffee Shop gate remains open.
+
+The next earliest causal divergence is record-type `12`, class `0x1f`, slot
+`0x00ff9d00` at visible frame 2447. Source substate `0x0800` and animation
+`0x0012e65c` differ from native substate `0x1600` and animation `0x0012ec04`;
+native then enters state `0x0600` at frame 2448 while source remains `0x0200`.
+Bind the accepted current-state class-`0x1f` branch, guard, presentation, and
+scheduler ordering. Do not fit the frame or disturb the exact record-type-`4`
+trajectory, frame-2287/2306/2307 chronology, class-`0x1f` retry/recovery
+cadence, or current player, visual, HUD, audio, collision, and population locks.
 
 ## Next eligible cards
 
