@@ -1461,6 +1461,191 @@ int main(void)
             return 55;
         }
         {
+            AvspRound1Runtime late_registration_runtime = projectile_runtime;
+            AvspRound1WeaponProjectileAllocation *late_parent =
+                &late_registration_runtime.player_weapon_projectiles[5];
+            AvspRound1WeaponProjectileAllocation *late_child =
+                &late_registration_runtime.player_weapon_projectiles[0];
+            AvspRound1ActorCore *late_target =
+                &late_registration_runtime.pools[0].records[12];
+            unsigned int pool_index;
+            unsigned int projectile_index;
+            for (pool_index = 0u; pool_index < AVSP_ROUND1_POOL_COUNT;
+                 ++pool_index)
+            {
+                unsigned int actor_index;
+                for (actor_index = 0u;
+                     actor_index <
+                        late_registration_runtime.pools[pool_index].capacity;
+                     ++actor_index)
+                    if (pool_index != 0u || actor_index != 12u)
+                        late_registration_runtime.pools[pool_index].records[
+                            actor_index].active = 0u;
+            }
+            for (projectile_index = 0u;
+                 projectile_index < AVSP_ROUND1_WEAPON_PROJECTILE_CAPACITY;
+                 ++projectile_index)
+                late_registration_runtime.player_weapon_projectiles[
+                    projectile_index].active = 0u;
+            late_registration_runtime.player_weapon_projectile_free_count = 1u;
+            late_registration_runtime.player_weapon_projectile_free_stack[0] =
+                0u;
+            late_parent->active = 1u;
+            late_parent->actor_class = 0;
+            late_parent->source_slot = 0x8900u;
+            late_parent->state = 4u;
+            late_parent->substate = 2u;
+            late_parent->child_count = 1u;
+            late_parent->child_cadence = 1u;
+            late_parent->collision_result = -1;
+            late_parent->facing = 0u;
+            late_parent->x = 936;
+            late_parent->y = 310;
+            late_parent->z = 320;
+            late_parent->active_collision = 0u;
+            late_parent->attack_selector = 0u;
+            late_target->active = 1u;
+            late_target->state = 0x0200u;
+            late_target->substate = 0u;
+            late_target->source_action = 0u;
+            late_target->source_action_timer = 0u;
+            late_target->source_hit_recovery_active = 0u;
+            late_target->source_projectile_reaction_pending = 0u;
+            late_target->source_a3 = 0u;
+            late_target->source_a4 = 1u;
+            late_target->source_a5 = 1u;
+            late_target->source_a6 = 1u;
+            late_target->source_style85 = 0u;
+            late_target->source_b0 = 2u;
+            late_target->facing = 1u;
+            late_target->health = 63;
+            late_target->x = 936;
+            late_target->y = 320;
+            late_target->z = 320;
+            late_registration_runtime.camera_x_position = 1000;
+            late_registration_runtime.camera_z_position = 320;
+            if (!avsp_round1_step_scheduler(&late_registration_runtime) ||
+                !late_child->active || late_child->state != 0u ||
+                late_child->collision_registration_pending != 1u ||
+                late_child->collision_registered != 0u)
+                return 81;
+            late_child->x = 936;
+            late_child->y = 310;
+            late_child->z = 320;
+            late_child->x_fp = 936L * 65536L;
+            late_child->y_fp = 310L * 65536L;
+            late_child->z_fp = 320L * 65536L;
+            late_target->x = 936;
+            late_target->y = 320;
+            late_target->z = 320;
+            late_target->health = 63;
+            if (!avsp_round1_step_scheduler(&late_registration_runtime) ||
+                late_child->state != 2u ||
+                late_child->collision_registration_pending != 0u ||
+                late_child->collision_registered != 0u ||
+                late_target->health != 63)
+                return 81;
+            late_child->x = 936;
+            late_child->y = 310;
+            late_child->z = 320;
+            late_child->x_fp = 936L * 65536L;
+            late_child->y_fp = 310L * 65536L;
+            late_child->z_fp = 320L * 65536L;
+            late_target->state = 0x0200u;
+            late_target->substate = 0u;
+            late_target->source_action = 0u;
+            late_target->source_action_timer = 0u;
+            late_target->source_hit_recovery_active = 0u;
+            late_target->source_projectile_reaction_pending = 0u;
+            late_target->health = 63;
+            late_target->x = 936;
+            late_target->y = 320;
+            late_target->z = 320;
+            if (!avsp_round1_step_scheduler(&late_registration_runtime) ||
+                late_child->collision_registered != 1u ||
+                late_child->collision_result != -1 ||
+                late_target->health != 32)
+                return 81;
+        }
+        {
+            AvspRound1Runtime action16_rng_runtime = projectile_runtime;
+            AvspRound1ActorCore *action16_actor =
+                &action16_rng_runtime.pools[0].records[18];
+            unsigned int pool_index;
+            unsigned int projectile_index;
+            for (pool_index = 0u; pool_index < AVSP_ROUND1_POOL_COUNT;
+                 ++pool_index)
+            {
+                unsigned int actor_index;
+                for (actor_index = 0u;
+                     actor_index < action16_rng_runtime.pools[pool_index].capacity;
+                     ++actor_index)
+                    if (pool_index != 0u || actor_index != 18u)
+                        action16_rng_runtime.pools[pool_index].records[
+                            actor_index].active = 0u;
+            }
+            for (projectile_index = 0u;
+                 projectile_index < AVSP_ROUND1_WEAPON_PROJECTILE_CAPACITY;
+                 ++projectile_index)
+                action16_rng_runtime.player_weapon_projectiles[
+                    projectile_index].active = 0u;
+            action16_rng_runtime.rng_seed = 0xc9a2u;
+            action16_rng_runtime.player_action.x = 944;
+            action16_rng_runtime.player_action.lane = 320;
+            action16_actor->active = 1u;
+            action16_actor->type = 12u;
+            action16_actor->actor_class = 0x1f;
+            action16_actor->state = 0x0200u;
+            action16_actor->substate = 0x1600u;
+            action16_actor->source_action = 0x1600u;
+            action16_actor->x = 1001;
+            action16_actor->y = 296;
+            action16_actor->z = 296;
+            action16_actor->source_x_fp = 0x03e90000L;
+            action16_actor->source_y_fp = 0x01280000L;
+            action16_actor->source_z_fp = 0x01280000L;
+            action16_actor->facing = 1u;
+            action16_actor->source_facing_selector = 1u;
+            action16_actor->source_a3 = 1u;
+            action16_actor->source_a4 = 1u;
+            action16_actor->source_a5 = 1u;
+            action16_actor->source_a6 = 1u;
+            action16_actor->source_style85 = 1u;
+            action16_actor->source_b0 = 1u;
+            action16_actor->source_direction = 8u;
+            action16_actor->source_motion_flags = 0u;
+            action16_actor->animation_record = 0x0012ec74UL;
+            action16_actor->assembly = 0x0012f8b8UL;
+            action16_actor->animation_timer = 2u;
+            action16_actor->animation_branch = -32760;
+            action16_actor->source_next_animation_record = 0x0012ec74UL;
+            action16_actor->source_movement_table = 8u;
+            if (!avsp_round1_step_scheduler(&action16_rng_runtime) ||
+                action16_rng_runtime.rng_seed != 0x5cfeu ||
+                action16_actor->state != 0x0200u ||
+                action16_actor->substate != 0u ||
+                action16_actor->source_a4 != 0u ||
+                action16_actor->source_a6 != 2u ||
+                action16_actor->attack_selector != 2u ||
+                action16_actor->animation_record != 0x0012ec74UL ||
+                !avsp_round1_step_scheduler(&action16_rng_runtime) ||
+                action16_actor->substate != 0x1600u ||
+                action16_actor->animation_record != 0x0012e78cUL ||
+                action16_actor->attack_selector != 2u)
+            {
+                fprintf(stderr,
+                    "action16 RNG reuse code=%u rng=%04x state=%04x/%04x a4=%u a6=%u attack=%u anim=%08lx failures=%lu\n",
+                    action16_rng_runtime.scheduler_failure_code,
+                    action16_rng_runtime.rng_seed,
+                    action16_actor->state, action16_actor->substate,
+                    action16_actor->source_a4, action16_actor->source_a6,
+                    action16_actor->attack_selector,
+                    action16_actor->animation_record,
+                    action16_rng_runtime.failure_count);
+                return 80;
+            }
+        }
+        {
             AvspRound1Runtime source_hit_runtime = projectile_runtime;
             AvspRound1ActorCore *source_hit_target =
                 &source_hit_runtime.pools[0].records[12];

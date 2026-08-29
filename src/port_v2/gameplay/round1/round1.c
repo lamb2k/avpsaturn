@@ -1919,9 +1919,9 @@ static int avsp_round1_class1f_inner8_player_near(
 }
 
 static int avsp_round1_class1f_enter_inner8(
-    AvspRound1Runtime *runtime, AvspRound1ActorCore *actor)
+    AvspRound1Runtime *runtime, AvspRound1ActorCore *actor,
+    unsigned short *random_out, unsigned char *rng_consumed)
 {
-    unsigned char random;
     unsigned char target_side;
     if (actor->animation_branch >= 0 || actor->animation_timer != 1u ||
         actor->source_b0 != 0u)
@@ -1930,8 +1930,10 @@ static int avsp_round1_class1f_enter_inner8(
     if (target_side == actor->facing || actor->source_motion_flags != 0u)
         return 0;
     actor->source_motion_flags = 1u;
-    random = avsp_round1_source_rng(runtime);
-    if ((random & 3u) != 0u)
+    (void)avsp_round1_source_rng(runtime);
+    *random_out = runtime->rng_seed;
+    *rng_consumed = 1u;
+    if ((*random_out & 3u) != 0u)
         return 0;
     actor->source_motion_fields[2] = 1;
     actor->transition_timer =
@@ -2595,6 +2597,7 @@ static int avsp_round1_step_class1f_source_action(
     {
         int inner8_result;
         unsigned short random;
+        unsigned char rng_consumed = 0u;
         unsigned char relation;
         if (!avsp_round1_class1f_source_bounds(runtime, actor))
         {
@@ -2611,14 +2614,18 @@ static int avsp_round1_step_class1f_source_action(
             --actor->source_b0;
         if (actor->source_b0 != 0u)
             return 1;
-        inner8_result = avsp_round1_class1f_enter_inner8(runtime, actor);
+        inner8_result = avsp_round1_class1f_enter_inner8(
+            runtime, actor, &random, &rng_consumed);
         if (inner8_result != 0)
             return inner8_result > 0 ? 1 : 0;
         relation = actor->x < runtime->player_action.x ? 1u : 0u;
         if (relation != actor->source_a5 && actor->source_a6 == 0u)
             return 1;
-        (void)avsp_round1_source_rng(runtime);
-        random = runtime->rng_seed;
+        if (rng_consumed == 0u)
+        {
+            (void)avsp_round1_source_rng(runtime);
+            random = runtime->rng_seed;
+        }
         if (relation != actor->source_a5)
         {
             unsigned char branch = (unsigned char)(random & 3u);
@@ -8109,7 +8116,9 @@ int avsp_round1_step_scheduler(AvspRound1Runtime *runtime)
         return 0;
     for (slot_index = 0u;
          slot_index < AVSP_ROUND1_WEAPON_PROJECTILE_CAPACITY; ++slot_index)
-        if (runtime->player_weapon_projectiles[slot_index].active)
+        if (runtime->player_weapon_projectiles[slot_index].active &&
+            runtime->player_weapon_projectiles[slot_index].state !=
+                avsp_round1_weapon_projectile.initial_state)
             runtime->player_weapon_projectiles[slot_index]
                 .collision_registration_pending = 0u;
     runtime->scheduler_order_hash = hash;

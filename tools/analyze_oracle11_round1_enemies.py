@@ -526,6 +526,7 @@ def class1f_inner8_action_contract(program: bytes,
                 "target_side_guard": "one-player target x is on the non-facing side",
                 "transition_latch_guard": "transition_latch_u8 == 0",
                 "rng_guard": "exactly one RNG call; (result_u16 & 3) == 0",
+                "failed_guard_rng_ownership": "the same action-0x16 RNG result continues into the fallback branch; no second RNG call",
                 "writes": {"inner_state_u8": 8, "action_u8": 6,
                            "action_phase_u8": 0, "inner_timer_u16": 600,
                            "special_latch_u8": 1,
@@ -1116,6 +1117,20 @@ def class1f_first_segment_action_contract(program: bytes,
                 "loop_guard": "animation_branch_s16 < 0 and animation_timer_u16 == 1",
                 "loop_counter": "b0_u8", "target_compare_helper": "0x060cd2",
                 "rng_mask_branch_u16": 3, "rng_mask_timer_u16": 15,
+                "rng_transaction": {
+                    "calls_u8": 1,
+                    "entry": "0x017c5e",
+                    "result_consumers_in_order": [
+                        "inner-state-0x08 entry guard uses result_u16 & 3",
+                        "failed inner-state entry reuses the same result_u16 & 3 for the fallback branch",
+                        "attack selection reuses the same result_u16 & 15 for the timer table",
+                    ],
+                    "second_call_forbidden": True,
+                    "accepted_failed_entry_frame": 2377,
+                    "accepted_seed_before_u16": 0xC9A2,
+                    "accepted_seed_after_u16": 0x5CFE,
+                    "accepted_fallback_branch_u8": 2,
+                },
                 "attack_action_u8": 0x18,
                 "attack_selectors_by_style_u8": [0, 1]},
             "action_0x18": {
@@ -2758,6 +2773,16 @@ def validate(report: dict[str, object]) -> None:
                         [96] * 5 + [128] * 8 and
                     actions["action_programs"]["action_0x16"]
                         ["loop_counter"] == "b0_u8" and
+                    actions["action_programs"]["action_0x16"]
+                        ["rng_transaction"]["calls_u8"] == 1 and
+                    actions["action_programs"]["action_0x16"]
+                        ["rng_transaction"]["second_call_forbidden"] is True and
+                    actions["action_programs"]["action_0x16"]
+                        ["rng_transaction"]["accepted_seed_before_u16"] ==
+                        0xC9A2 and
+                    actions["action_programs"]["action_0x16"]
+                        ["rng_transaction"]["accepted_seed_after_u16"] ==
+                        0x5CFE and
                     actions["suppression_control"]["writer_pc"] ==
                         "0x0607e8" and
                     actions["suppression_control"]["suppressed_writes"] == 179 and
@@ -2778,6 +2803,10 @@ def validate(report: dict[str, object]) -> None:
                     inner8["entry_transition"]["writer_pc"] == "0x0610c8" and
                     inner8["entry_transition"]["timer_u16"] == 600 and
                     inner8["entry_transition"]["initial_selector_u8"] == 35 and
+                    inner8["observed_path_program"]
+                        ["normal_action_0x16_entry"]
+                        ["failed_guard_rng_ownership"].endswith(
+                            "no second RNG call") and
                     inner8["dispatch"]["inner_0x08_entry"] == "0x0610f6" and
                     inner8["dispatch"]["class_specific_dispatch"] ==
                         "0x040bbe" and

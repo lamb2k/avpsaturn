@@ -89,7 +89,7 @@ int main(void)
                             &runtime.player_weapon_projectiles[index]);
         if (source_frame == 2072u || source_frame == 2073u ||
             (source_frame >= 2249u && source_frame <= 2294u) ||
-            (source_frame >= 2348u && source_frame <= 2376u) ||
+            (source_frame >= 2348u && source_frame <= 2380u) ||
             (source_frame >= 2329u && source_frame <= 2330u))
             fprintf(stderr,
                     "rng_checkpoint frame=%u seed=%04x scheduler=%lu\n",

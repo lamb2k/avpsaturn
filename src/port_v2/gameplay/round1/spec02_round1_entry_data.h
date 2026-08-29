@@ -1,8 +1,8 @@
 #ifndef AVSP_SPEC02_ROUND1_ENTRY_DATA_H
 #define AVSP_SPEC02_ROUND1_ENTRY_DATA_H
 
-/* contract_sha256=fd65f15e44695ccdc65c2e59516ddb11ccd7315fe327f63c20a34ab00a51169f */
-/* fixtures_sha256=401253d2279846118b96c04b8c9ad6d41272102f3e3b203bb0d55ed3f25e9ff2 */
+/* contract_sha256=051d3047cd763f80da0e98e83e5c6d85ddc0b887ecf66334e7d279d1fb5a00ce */
+/* fixtures_sha256=4cf23d3b5c32649a8804acdcd3d740436a1490759c4d9bbb3550b49c0205d84f */
 #define AVSP_ROUND1_ENTRY_PROGRAM_SHA256 "e5ef761fadc1b5a7df62e77c03025c0ebff0c2503cbc8be9c0077d4bd6cd24ba"
 
 static const unsigned char avsp_round1_entry_program[AVSP_ROUND1_ENTRY_PROGRAM_BYTES] =

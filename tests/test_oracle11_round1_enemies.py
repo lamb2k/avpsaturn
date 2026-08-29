@@ -95,6 +95,7 @@ for label,mutate in [
     ('first-segment-jump-vector',lambda x:x['action_programs']['action_0x0e']['z_velocity_table_s32_16_16'].__setitem__(0,-0x0000f000)),
     ('first-segment-attack-selector-group',lambda x:x['action_programs']['action_0x04']['selector_groups_u16'][2].__setitem__(0,44)),
     ('first-segment-loop-counter',lambda x:x['action_programs']['action_0x16'].__setitem__('loop_counter','timer')),
+    ('first-segment-action16-rng-reuse',lambda x:x['action_programs']['action_0x16']['rng_transaction'].__setitem__('second_call_forbidden',False)),
     ('first-segment-fixed-frame',lambda x:x['suppression_control'].__setitem__('fixed_frame_substitute',True)),
     ('first-segment-mutation-control',lambda x:x['mutation_controls'].pop()),
 ]:
@@ -108,6 +109,7 @@ for label,mutate in [
     ('inner8-suppression',lambda x:x['mutation_control'].__setitem__('mutant_type16_spawn_frames',[3253])),
     ('inner8-record-next',lambda x:x['animation_records'][0].__setitem__('next_animation_record','0x0012d424')),
     ('inner8-action0-rng',lambda x:x['observed_path_program']['action_0x00']['captured_rng_call_counts'].__setitem__('frame_3004_style_match',3)),
+    ('inner8-action16-rng-ownership',lambda x:x['observed_path_program']['normal_action_0x16_entry'].__setitem__('failed_guard_rng_ownership','consume another RNG call')),
     ('inner8-action4-terminal',lambda x:x['observed_path_program']['action_0x04']['captured_terminals'].__setitem__('frame_3134','fixed frame')),
     ('inner8-action10-writer',lambda x:x['observed_path_program']['action_0x10']['overlap_transition'].__setitem__('writer','0x041310')),
     ('inner8-motion-selector',lambda x:x['observed_path_program']['action_0x0e']['captured_selection'].__setitem__('motion_selector_96_u16',22)),
@@ -115,4 +117,4 @@ for label,mutate in [
     ('inner8-direction-table',lambda x:x['observed_path_program']['source_tables']['direction_octant_base_u8'].__setitem__(0,0)),
 ]:
     mutant=copy.deepcopy(report);target=next(item for item in mutant['archetypes'] if item['class']=='0x1f')['first_segment_action_execution_contract']['inner_state_0x08_program'];mutate(target);reject(mutant,label)
-print('ORACLE-11 Round 1 enemy tests: PASS (80 mutations rejected)')
+print('ORACLE-11 Round 1 enemy tests: PASS (82 mutations rejected)')

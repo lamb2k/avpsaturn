@@ -9,7 +9,7 @@ from pathlib import Path
 
 ROOT = Path(__file__).resolve().parents[3]
 SPEC = ROOT / "data/spec02_round1_executable_contract.json"
-EXPECTED = "fd65f15e44695ccdc65c2e59516ddb11ccd7315fe327f63c20a34ab00a51169f"
+EXPECTED = "051d3047cd763f80da0e98e83e5c6d85ddc0b887ecf66334e7d279d1fb5a00ce"
 assert hashlib.sha256(SPEC.read_bytes()).hexdigest() == EXPECTED
 assert json.loads(SPEC.read_text())["status"] == "ACCEPTED"
 source = (ROOT / "src/port_v2/gameplay/round1/round1.c").read_text()
@@ -72,7 +72,8 @@ if "--baseline-only" in sys.argv:
 inner8_mutations = {
     "(actor->state == 0x0200u &&\n                      (actor->substate == 0x1000u ||",
     "actor->state = 0x0208u;\n    actor->substate = 0x0600u;",
-    "if ((random & 3u) != 0u)",
+    "if ((*random_out & 3u) != 0u)",
+    "*rng_consumed = 1u;",
     "actor->source_motion_fields[0] = 8;\n        actor->source_action_timer =",
     "actor->source_x_fp += actor->source_x_velocity;",
 }
@@ -82,6 +83,9 @@ ko_mutations = {
     "actor->source_y_velocity =\n                avsp_round1_class1f_source_ko.launch_y_velocity;",
     "actor->source_hit_action_timer =\n                avsp_round1_class1f_source_ko.removal_hold_timer;",
     "runtime->first_encounter.source_progress = (unsigned short)(\n        runtime->first_encounter.source_progress +\n        avsp_round1_recurring_spawn.progress_increment);",
+}
+registration_mutations = {
+    "if (runtime->player_weapon_projectiles[slot_index].active &&\n            runtime->player_weapon_projectiles[slot_index].state !=\n                avsp_round1_weapon_projectile.initial_state)",
 }
 for before, after in (
     ("runtime->route_state = AVSP_ROUND1_ROUTE_ENTRY_STATE;", "runtime->route_state = 4;"),
@@ -282,8 +286,10 @@ for before, after in (
      "(actor->state == 0x0208u &&\n                      (actor->substate == 0x1000u ||"),
     ("actor->state = 0x0208u;\n    actor->substate = 0x0600u;",
      "actor->state = 0x0200u;\n    actor->substate = 0x0600u;"),
-    ("if ((random & 3u) != 0u)",
-     "if ((random & 3u) != 3u)"),
+    ("if ((*random_out & 3u) != 0u)",
+     "if ((*random_out & 3u) != 3u)"),
+    ("*rng_consumed = 1u;",
+     "*rng_consumed = 0u;"),
     ("actor->source_motion_fields[0] = 8;\n        actor->source_action_timer =",
      "actor->source_motion_fields[0] = 6;\n        actor->source_action_timer ="),
     ("actor->source_x_fp += actor->source_x_velocity;",
@@ -302,18 +308,25 @@ for before, after in (
      "runtime->first_encounter.source_progress = (unsigned short)(\n        runtime->first_encounter.source_progress + 0u);"),
     ("effect->attack_selector = 0u;\n    }\n    if (effect->state == 2u)",
      "effect->attack_selector = 0u;\n        return 1;\n    }\n    if (effect->state == 2u)"),
+    ("if (runtime->player_weapon_projectiles[slot_index].active &&\n            runtime->player_weapon_projectiles[slot_index].state !=\n                avsp_round1_weapon_projectile.initial_state)",
+     "if (runtime->player_weapon_projectiles[slot_index].active)"),
 ):
     if "--inner8-only" in sys.argv and before not in inner8_mutations:
         continue
     if "--ko-only" in sys.argv and before not in ko_mutations:
         continue
+    if "--registration-only" in sys.argv and before not in registration_mutations:
+        continue
     assert before in source, before
     run(source.replace(before, after), header, False, before)
 if "--inner8-only" in sys.argv:
-    print("REIMPLEMENT-13 class-0x1f inner-state mutation lane: PASS (5 real mutations)")
+    print("REIMPLEMENT-13 class-0x1f inner-state mutation lane: PASS (6 real mutations)")
     raise SystemExit(0)
 if "--ko-only" in sys.argv:
     print("REIMPLEMENT-13 class-0x1f projectile KO mutation lane: PASS (5 real mutations)")
+    raise SystemExit(0)
+if "--registration-only" in sys.argv:
+    print("REIMPLEMENT-13 deferred record-4 registration mutation lane: PASS (1 real mutation)")
     raise SystemExit(0)
 for before, after in (
     ("    0x0400u, 0x0402u, 0x0404u, 0x0600u,",
@@ -460,4 +473,4 @@ for before, after in (
                                  "--", "bash", "-lc", command],
                                 capture_output=True)
         assert result.returncode != 0, f"generated mutation escaped: {before}"
-print("REIMPLEMENT-13 entry/player/scheduler/class1f/Coffee-Shop-navigation/neutral-stop/melee/Button1/Button3/type16-projectile/first-encounter differential: PASS (179 real mutations)")
+print("REIMPLEMENT-13 entry/player/scheduler/class1f/Coffee-Shop-navigation/neutral-stop/melee/Button1/Button3/type16-projectile/first-encounter differential: PASS (181 real mutations)")

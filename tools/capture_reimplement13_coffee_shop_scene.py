@@ -6,6 +6,7 @@ import csv
 import hashlib
 import io
 import json
+import re
 import subprocess
 import tempfile
 from collections import defaultdict
@@ -424,6 +425,109 @@ def fixed_slot_reuse_presentation(
     }
 
 
+def class1f_action16_rng_reuse(
+        source_rows: list[dict[str, str]],
+        native_rows: list[dict[str, str]],
+        divergences: list[dict[str, object]],
+        runtime_summary: str) -> dict[str, object]:
+    """Bind the single frame-2377 RNG transaction and selector result."""
+    source_by_frame = {
+        int(row["frame"]): row for row in source_rows
+        if int(row["slot"], 16) == 0x00ffa300 and
+        int(row["frame"]) in {2378, 2379, 2380}}
+    native_by_frame = {
+        int(row["frame"]): row for row in native_rows
+        if int(row["source_slot"], 16) == 0x00ffa300 and
+        int(row["frame"]) in {2378, 2379, 2380}}
+    checkpoints = {}
+    for match in re.finditer(
+            r"rng_checkpoint frame=(\d+) seed=([0-9a-f]{4})", runtime_summary):
+        checkpoints[int(match.group(1))] = "0x" + match.group(2)
+
+    def project(row: dict[str, str], source: bool) -> dict[str, object]:
+        return {
+            "frame_u16": int(row["frame"]),
+            "state_u16": "0x" + row["state"],
+            "substate_u16": "0x" + row["substate"],
+            "animation_record": "0x" + row["animation_record"],
+            "attack_selector_u8": int(row["attack_selector"], 16)
+                if source else int(row["attack_selector"]),
+        }
+
+    slot_divergence = next(
+        (item for item in divergences
+         if item["source_slot"] == "0x00ffa300"), None)
+    return {
+        "source_rng_call_frame_u16": 2377,
+        "source_seed_before_u16": "0xc9a2",
+        "source_seed_after_u16": "0x5cfe",
+        "source_call_count_u8": 1,
+        "second_call_forbidden": True,
+        "native_seed_before_visible_frame": checkpoints.get(2377),
+        "native_seed_after_visible_frame": checkpoints.get(2378),
+        "source": [project(source_by_frame[frame], True)
+                   for frame in (2378, 2379, 2380)],
+        "native": [project(native_by_frame[frame], False)
+                   for frame in (2378, 2379, 2380)],
+        "next_slot_divergence_frame_u16": (
+            int(slot_divergence["frame"]) if slot_divergence else None),
+    }
+
+
+def deferred_record4_collision_registration(
+        source_rows: list[dict[str, str]],
+        native_rows: list[dict[str, str]]) -> dict[str, object]:
+    """Bind late-slot initialization before frame-2390 source collision."""
+    source_target = {
+        int(row["frame"]): row for row in source_rows
+        if int(row["slot"], 16) == 0x00ff9dc0 and
+        int(row["frame"]) in {2390, 2391, 2392}}
+    native_target = {
+        int(row["frame"]): row for row in native_rows
+        if int(row["source_slot"], 16) == 0x00ff9dc0 and
+        int(row["frame"]) in {2390, 2391, 2392}}
+    native_projectile = {
+        int(row["frame"]): row for row in native_rows
+        if int(row["source_slot"], 16) == 0x00ff8680 and
+        int(row["frame"]) in {2389, 2390, 2391}}
+
+    def target_projection(row: dict[str, str]) -> dict[str, object]:
+        return {
+            "frame_u16": int(row["frame"]),
+            "state_u16": "0x" + row["state"],
+            "substate_u16": "0x" + row["substate"],
+            "health_s16": int(row["health"]),
+            "animation_record": "0x" + row["animation_record"],
+        }
+
+    return {
+        "source_damage_write": {
+            "source_frame_u16": 2390,
+            "attacker_slot": "0xff8680",
+            "defender_slot": "0xff9dc0",
+            "attack_record": "0x030cd2",
+            "health_before_s16": 87,
+            "health_after_s16": 56,
+            "writer_pc": "0x01d590",
+        },
+        "native_projectile": [{
+            "frame_u16": frame,
+            "state_u16": "0x" + native_projectile[frame]["state"],
+            "collision_registered_u8": int(
+                native_projectile[frame]["collision_registered"]),
+            "collision_result_s16": int(
+                native_projectile[frame]["collision_result"]),
+            "current_attack_record": "0x" +
+                native_projectile[frame]["current_attack_record"],
+        } for frame in (2389, 2390, 2391)],
+        "source_target": [target_projection(source_target[frame])
+                          for frame in (2390, 2391, 2392)],
+        "native_target": [target_projection(native_target[frame])
+                          for frame in (2390, 2391, 2392)],
+        "same_scan_initialization_collision_forbidden": True,
+    }
+
+
 def validate_report(report: dict[str, object]) -> None:
     gate_names = {
         "source_actor_population_missing_on_saturn",
@@ -524,6 +628,69 @@ def validate_report(report: dict[str, object]) -> None:
             "no_source_native_divergence_through_frame_u16": 2372,
             "next_slot_divergence_frame_u16": 2482}:
         raise ValueError("Coffee Shop record-4 fixed-slot reuse drift")
+    action16 = report["native_capture"]["class1f_action16_rng_reuse"]
+    action16_projection = [
+        {"frame_u16": 2378, "state_u16": "0x0200",
+         "substate_u16": "0x0000", "animation_record": "0x0012ec74",
+         "attack_selector_u8": 2},
+        {"frame_u16": 2379, "state_u16": "0x0200",
+         "substate_u16": "0x1600", "animation_record": "0x0012e78c",
+         "attack_selector_u8": 2},
+        {"frame_u16": 2380, "state_u16": "0x0200",
+         "substate_u16": "0x1600", "animation_record": "0x0012e78c",
+         "attack_selector_u8": 2},
+    ]
+    if action16 != {
+            "source_rng_call_frame_u16": 2377,
+            "source_seed_before_u16": "0xc9a2",
+            "source_seed_after_u16": "0x5cfe",
+            "source_call_count_u8": 1,
+            "second_call_forbidden": True,
+            "native_seed_before_visible_frame": "0xedd9",
+            "native_seed_after_visible_frame": "0x5cfe",
+            "source": action16_projection,
+            "native": action16_projection,
+            "next_slot_divergence_frame_u16": 2410}:
+        raise ValueError("Coffee Shop class-0x1f action-0x16 RNG reuse drift")
+    deferred = report["native_capture"][
+        "deferred_record4_collision_registration"]
+    target_projection = [
+        {"frame_u16": 2390, "state_u16": "0x0200",
+         "substate_u16": "0x1800", "health_s16": 87,
+         "animation_record": "0x0012e8c8"},
+        {"frame_u16": 2391, "state_u16": "0x0202",
+         "substate_u16": "0x0000", "health_s16": 56,
+         "animation_record": "0x0012e8c8"},
+        {"frame_u16": 2392, "state_u16": "0x0202",
+         "substate_u16": "0x0002", "health_s16": 56,
+         "animation_record": "0x0012e04c"},
+    ]
+    if deferred != {
+            "source_damage_write": {
+                "source_frame_u16": 2390,
+                "attacker_slot": "0xff8680",
+                "defender_slot": "0xff9dc0",
+                "attack_record": "0x030cd2",
+                "health_before_s16": 87,
+                "health_after_s16": 56,
+                "writer_pc": "0x01d590"},
+            "native_projectile": [
+                {"frame_u16": 2389, "state_u16": "0x0000",
+                 "collision_registered_u8": 0,
+                 "collision_result_s16": 0,
+                 "current_attack_record": "0x00000000"},
+                {"frame_u16": 2390, "state_u16": "0x0200",
+                 "collision_registered_u8": 0,
+                 "collision_result_s16": 0,
+                 "current_attack_record": "0x00030cd2"},
+                {"frame_u16": 2391, "state_u16": "0x0200",
+                 "collision_registered_u8": 1,
+                 "collision_result_s16": -1,
+                 "current_attack_record": "0x00030cd2"}],
+            "source_target": target_projection,
+            "native_target": target_projection,
+            "same_scan_initialization_collision_forbidden": True}:
+        raise ValueError("Coffee Shop deferred record-4 registration drift")
     all_zero = all(value == 0 for value in report["gaps"].values())
     if report["acceptance"] != {"all_zero": all_zero, "ready": all_zero}:
         raise ValueError("Coffee Shop scene accepted before the zero-gap gate")
@@ -610,7 +777,14 @@ def main() -> None:
                                source, rows, divergences),
                            "fixed_slot_reuse_presentation":
                                fixed_slot_reuse_presentation(
-                                   source_rows, rows, divergences)},
+                                   source_rows, rows, divergences),
+                           "class1f_action16_rng_reuse":
+                               class1f_action16_rng_reuse(
+                                   source_rows, rows, divergences,
+                                   runtime_summary),
+                           "deferred_record4_collision_registration":
+                               deferred_record4_collision_registration(
+                                   source_rows, rows)},
         "source_capture": {
             "actor_rows": len(source_rows),
             "actor_sha256": source_actor_sha256,
