@@ -641,13 +641,56 @@ because this repaired per-frame presentation was already inside an exact actor
 lifetime. Unowned Saturn actors, unidentified source pairs, and retained
 gameplay authorities remain zero.
 
+The frame-2378 selector divergence and its downstream frame-2306 chronology are
+now source-bound. Class-`0x1f` action `0x16` performs one RNG transaction at
+`0x017c5e` and shares the result across the inner-`0x08` guard, fallback branch,
+and timer selection. The accepted frame-2377 transition `0xc9a2 -> 0x5cfe`
+produces selector `2` and record `0x0012ec74` at frame 2378; a second call is a
+real rejected mutation. Record-type-4 allocations that occur after their lower
+slot has passed remain collision-registration-pending through state-0
+initialization and register on the following scheduler invocation. Native
+therefore has no frame-2288 damage, writes `0xffa180` health `87 -> 56` from
+slot `0x00ff8880` and attack `0x030cd2` on source scheduler frame 2306, and
+allocates the class-`0x4e` impact naturally for visible frame 2307.
+
+Incremental implementation checkpoint
+`9b6835c05a301de27bdb8b9e6bca0ba62e377d65` and validator checkpoint
+`45f890d5458be5de57b31afd7e8adcdc78d8fb4c` bind SPEC-02 contract
+`051d3047cd763f80da0e98e83e5c6d85ddc0b887ecf66334e7d279d1fb5a00ce`
+and fixture
+`4cf23d3b5c32649a8804acdcd3d740436a1490759c4d9bbb3550b49c0205d84f`.
+Fast, Oracle, 112 SPEC mutations, 181 native mutations, eleven scene mutations,
+123 Target suppressions, both LiveEncounter Target profiles, and paired
+commit-bound 575-sample Coffee Shop Emulator ledgers pass. The validator now
+derives class-`0x1f` presentation ownership from the accepted SPEC table rather
+than an incomplete hardcoded subset. Normalized ISO is
+`d7470bb606b91f142d8ea30098291d467b1e851582bc9415ab1046c07ad857c7`;
+canonical sample payload is
+`71c59a86a9c518c73ee432d6477c37b2736fa74afc566ca3cda3c7656559812e`.
+
+Fresh window-only WGC covers every visible frame 2280..2310. Cadence sheet
+`8ea5eb2c8a440b81fad5886f75caf5b806a5415cef3713587570816781b2235f`
+and clip
+`b2695152db316962ac45c3ca5ab9f9742eb3b933eb23e5e536167e8613ac535c`
+pass direct inspection with no frame-2288 premature effect, the frame-2306
+contact, natural frame-2307 impact, stable Predator/staff identity, and coherent
+Coffee Shop planes, palette, and priority. Scene gaps improve from
+`335 / 1,293 / 3 / 94 / 3 / 281` to
+`316 / 1,293 / 3 / 94 / 3 / 281`; no category increases. Unowned Saturn
+actors, unidentified source pairs, and retained gameplay authorities remain
+zero. The complete scene gate remains open.
+
 The next earliest causal divergence is record-type `12`, class `0x1f`, slot
-`0x00ffa300` at visible frame 2378. Source attack selector `2` differs from
-native selector `1`; the animation diverges at frame 2379 and later motion,
-facing, state, and substate differences are downstream. Bind the accepted
-selector predicate, state/substate guard, animation/assembly write, facing,
-and scheduler ordering. Do not fit the frame or rebaseline input, and preserve
-the fixed-slot correction and exact frame-2287/2306/2307 chronology.
+`0x00ffa300` at visible frame 2410. Source is substate `0x1a00`, facing `0`,
+attack selector `2`, and animation `0x0012d5e4`; native remains substate
+`0x0000`, facing `1`, selector `3`, and animation `0x0012e8fc`. Native x first
+diverges at frame 2413 and state later diverges at frame 2436. Bind the accepted
+transition predicate, RNG consumption, state/substate guard, facing,
+animation/assembly write, and scheduler ordering. Do not fit the frame or
+rebaseline input. Preserve the exact frame-2377..2379 RNG correction, deferred
+record-type-4 collision registration, frame-2287/2306/2307 chronology, and all
+current player, class-`0x1f`, visual, HUD, audio, collision, and population
+locks.
 
 ## Next eligible cards
 
