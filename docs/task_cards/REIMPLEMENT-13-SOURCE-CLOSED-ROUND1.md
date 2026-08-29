@@ -885,6 +885,36 @@ position and distinguish this earlier allocation from the now-closed recurring
 spawn at frame 2511. Apply the source rule, not a slot/frame exception, while
 preserving the already-closed selectors `1/1` and all accepted locks.
 
+Incremental checkpoint `8b1600473c77f2459ea1ccc554d94dc01ffddcbe`
+closes that owner guard. Accepted Oracle/SPEC evidence identifies slot
+`0x00ffb580` as a type-20/class-`0x01` controller that allocates record-12
+variant 5 for next-tick dispatch; only recurring-controller variants 3 and 4
+receive the accepted same-frame presentation. Frame 2330 slot `0x00ff9c40`
+now matches source state `0x0200:0e00`, animation/timer/branch zero, with its
+already-closed selectors `1/1` intact. The scene validator rejects 19 real
+mutations, including generic dynamic-spawn presentation.
+
+Fast, Oracle, 116 SPEC mutations, 25 encounter mutations, 82 enemy mutations,
+181 native mutations, 123 Target suppressions, both LiveEncounter Target
+profiles, and two byte-identical 575-sample Coffee Shop Emulator ledgers pass.
+Normalized ISO is
+`a14217a3af6834f53c95524fd815251f843855802e7ab27fee361846b4a58fbf`.
+Window-only WGC frames 2328..2332 pass direct inspection: cadence sheet
+`9272526bd5352dec72ed8ddfe337079ef1bd2d774bb9516b78e4814dde599fb6`
+and clip
+`fa8f054e5dd0510f937ad85ea7307ab8740ca4bfbeebc07d48b0db9507aa57c3`
+preserve Predator/staff identity, P1-only HUD, coherent actor presentation,
+and both Coffee Shop planes, palette, and priority.
+
+Whole-scene gaps remain `295 / 1,259 / 3 / 94 / 3 / 281`; no category
+increases. Unowned Saturn actors, unidentified source pairs, and retained
+gameplay authorities remain zero. The next earliest causal divergence is
+visible frame 2514 for recurring slot `0x00ffa3c0`: source `y/z` are `327/327`
+while native is `326/326`; `x` first differs at frame 2517 (`687` versus
+`686`). Recover the exact accepted movement arithmetic, signedness, scheduler
+position, and subpixel carry, then apply the source rule without a frame/slot
+exception.
+
 ## Next eligible cards
 
 - `QA-13-ROUND1-END-TO-END-DIFFERENTIAL` after the complete stable Round 2
