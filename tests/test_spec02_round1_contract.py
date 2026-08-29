@@ -157,6 +157,19 @@ assert hit_entry["reaction_table"]["hit_mode_actor_46_u8"] == 2
 assert hit_entry["visible_result"]["animation_record"] == "0x0012e04c"
 assert hit_entry["visible_result"]["assembly"] == "0x001308a6"
 assert hit_entry["recovery"]["captured_values_before_decrement"] == [8, 7, 6, 5, 4, 3, 2, 1, 0]
+assert hit_entry["action_dispatch"]["required_action_phases_u16"] == [0x0200, 0x0202, 0x0204, 0x0206, 0x0208, 0x020a]
+assert hit_entry["source_hit_program"]["phase_0x0200_launch"]["observed_written_motion"]["x_velocity_s32_16_16"] == -0x1c000
+assert hit_entry["source_hit_program"]["phase_0x0202_first_flight"]["landing_visible_frame"] == 2364
+assert hit_entry["source_hit_program"]["phase_0x0204_landing_hold"]["captured_values_before_decrement"] == [3, 2, 1]
+assert hit_entry["source_hit_program"]["phase_0x0206_bounce"]["observed_motion_after_facing"]["y_acceleration_s32_16_16"] == -0xc000
+assert hit_entry["source_hit_program"]["phase_0x0208_rng_hold"]["timer_initial_u8"] == 10
+assert hit_entry["source_hit_program"]["phase_0x020a_terminal_animation"]["records"][-1]["animation_record"] == "0x0012ded8"
+assert hit_entry["source_hit_program"]["normal_return"]["class1f_resume_at_2414"] == "0x0200:1600"
+assert hit_entry["rng"]["seed_before_u16"] == 0xedd9
+assert hit_entry["rng"]["seed_after_u16"] == 0xc9a2
+assert hit_entry["rng"]["result_low_nibble_u8"] == 2
+assert hit_entry["rng"]["timer_table_row_u8"] == [10] * 4 + [40] * 4 + [60] * 3 + [90] * 3 + [120] * 2
+assert hit_entry["rng"]["selected_timer_u8"] == 10
 assert hit_entry["mutation_control"]["mutant_animation_record"] == "0x0012dc50"
 actions = class1f["first_segment_action_execution_contract"]
 assert actions["classification"] == "SOURCE_CLOSED_IMPLEMENTATION_FIELDS"
@@ -373,6 +386,11 @@ f = copy.deepcopy(fixtures); next(item for item in f["authority_data"]["enemies"
 f = copy.deepcopy(fixtures); next(item for item in f["authority_data"]["enemies"]["archetypes"] if item["class"] == "0x1f")["current_state_implementation_contract"]["damage_hit_ko_removal"]["source_hit_entry_program"]["reaction_table"]["reaction_selector_actor_4d_u8"] = 0; mutations.append((contract, f, "class1f source HIT selector mutation"))
 f = copy.deepcopy(fixtures); next(item for item in f["authority_data"]["enemies"]["archetypes"] if item["class"] == "0x1f")["current_state_implementation_contract"]["damage_hit_ko_removal"]["source_hit_entry_program"]["visible_result"]["animation_record"] = "0x0012dc50"; mutations.append((contract, f, "class1f source HIT record mutation"))
 f = copy.deepcopy(fixtures); next(item for item in f["authority_data"]["enemies"]["archetypes"] if item["class"] == "0x1f")["current_state_implementation_contract"]["damage_hit_ko_removal"]["source_hit_entry_program"]["recovery"]["captured_values_before_decrement"][0] = 7; mutations.append((contract, f, "class1f source HIT recovery mutation"))
+f = copy.deepcopy(fixtures); next(item for item in f["authority_data"]["enemies"]["archetypes"] if item["class"] == "0x1f")["current_state_implementation_contract"]["damage_hit_ko_removal"]["source_hit_entry_program"]["source_hit_program"]["phase_0x0200_launch"]["observed_written_motion"]["x_velocity_s32_16_16"] = -0x1b000; mutations.append((contract, f, "class1f source HIT launch mutation"))
+f = copy.deepcopy(fixtures); next(item for item in f["authority_data"]["enemies"]["archetypes"] if item["class"] == "0x1f")["current_state_implementation_contract"]["damage_hit_ko_removal"]["source_hit_entry_program"]["source_hit_program"]["phase_0x0202_first_flight"]["landing_visible_frame"] = 2363; mutations.append((contract, f, "class1f source HIT landing mutation"))
+f = copy.deepcopy(fixtures); next(item for item in f["authority_data"]["enemies"]["archetypes"] if item["class"] == "0x1f")["current_state_implementation_contract"]["damage_hit_ko_removal"]["source_hit_entry_program"]["source_hit_program"]["phase_0x0206_bounce"]["observed_motion_after_facing"]["y_acceleration_s32_16_16"] = -0xb000; mutations.append((contract, f, "class1f source HIT bounce mutation"))
+f = copy.deepcopy(fixtures); next(item for item in f["authority_data"]["enemies"]["archetypes"] if item["class"] == "0x1f")["current_state_implementation_contract"]["damage_hit_ko_removal"]["source_hit_entry_program"]["rng"]["selected_timer_u8"] = 9; mutations.append((contract, f, "class1f source HIT RNG timer mutation"))
+f = copy.deepcopy(fixtures); next(item for item in f["authority_data"]["enemies"]["archetypes"] if item["class"] == "0x1f")["current_state_implementation_contract"]["damage_hit_ko_removal"]["source_hit_entry_program"]["source_hit_program"]["normal_return"]["class1f_resume_at_2414"] = "0x0200:0000"; mutations.append((contract, f, "class1f source HIT return mutation"))
 f = copy.deepcopy(fixtures); next(item for item in f["authority_data"]["enemies"]["archetypes"] if item["class"] == "0x1f")["first_segment_action_execution_contract"]["initializer"]["variants"][6]["writes"]["action_u8"] = 18; mutations.append((contract, f, "class1f action variant mutation"))
 f = copy.deepcopy(fixtures); next(item for item in f["authority_data"]["enemies"]["archetypes"] if item["class"] == "0x1f")["first_segment_action_execution_contract"]["current_dispatch"]["action_targets"][11]["target"] = "0x060c30"; mutations.append((contract, f, "class1f action target mutation"))
 f = copy.deepcopy(fixtures); next(item for item in f["authority_data"]["enemies"]["archetypes"] if item["class"] == "0x1f")["first_segment_action_execution_contract"]["animation_selector_table"]["selectors"][2]["selector_u8"] = 33; mutations.append((contract, f, "class1f action selector mutation"))

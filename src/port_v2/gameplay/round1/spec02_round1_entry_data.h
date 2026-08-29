@@ -1,8 +1,8 @@
 #ifndef AVSP_SPEC02_ROUND1_ENTRY_DATA_H
 #define AVSP_SPEC02_ROUND1_ENTRY_DATA_H
 
-/* contract_sha256=81ceb5b0bdee99f65e5e40c5978230bdea4010d163564d6e83a505f6fd329e55 */
-/* fixtures_sha256=8da6d445b72a8669cf0052b7a767ab8b4ba5c31b5ff17679055e507a4baba271 */
+/* contract_sha256=19b8d2c3b19e45cbbe66d2ef6e9deaf5b367cf4ff923bb2ce14eded7441a0dea */
+/* fixtures_sha256=4974cb863d82c74d149f592ab4b7f5be9a6cf078ac7679cdff5b365ff27bc258 */
 #define AVSP_ROUND1_ENTRY_PROGRAM_SHA256 "e5ef761fadc1b5a7df62e77c03025c0ebff0c2503cbc8be9c0077d4bd6cd24ba"
 
 static const unsigned char avsp_round1_entry_program[AVSP_ROUND1_ENTRY_PROGRAM_BYTES] =
@@ -342,6 +342,27 @@ static const AvspRound1Class1fSourceHitSpec avsp_round1_class1f_source_hit =
 {
     0x0202u, 0x0002u, 0x0200u, 0x0012e04cUL, 0x001308a6UL,
     0x36u, 2u, 0x15u, 8u, 4u, 0u, 0u,
+    { 0x0200u, 0x0202u, 0x0204u, 0x0206u, 0x0208u, 0x020Au },
+    -114688L, 0L, 753664L, -32768L,
+    -131072L, 4096L, 262144L, -49152L,
+    3u, 0x37u, 0x38u, 0x39u, 0x17u,
+    0xEDD9u, 0xC9A2u, 2u, 0u,
+    { 10u, 10u, 10u, 10u, 40u, 40u, 40u, 40u, 60u, 60u, 60u, 90u, 90u, 90u, 120u, 120u },
+    10u, 11u,
+    {
+        { 3u, 0, 0x0012de38UL, 0x00130346UL, 0u, 0u },
+        { 3u, 0, 0x0012de48UL, 0x00130354UL, 0u, 0u },
+        { 3u, 0, 0x0012de58UL, 0x00130346UL, 0u, 0u },
+        { 3u, 0, 0x0012de68UL, 0x00130354UL, 0u, 0u },
+        { 2u, 0, 0x0012de78UL, 0x00130362UL, 0u, 0u },
+        { 2u, 0, 0x0012de88UL, 0x00130370UL, 0u, 0u },
+        { 2u, 0, 0x0012de98UL, 0x001303a8UL, 0u, 0u },
+        { 2u, 0, 0x0012dea8UL, 0x0012fae8UL, 0u, 0u },
+        { 2u, 0, 0x0012deb8UL, 0x0012fb10UL, 0u, 0u },
+        { 2u, 0, 0x0012dec8UL, 0x0012fb38UL, 0u, 0u },
+        { 8u, -32768, 0x0012ded8UL, 0x0012f5deUL, 0u, 0u },
+    },
+    0x0200u, 0x0000u, 0x1600u,
 };
 
 static const AvspRound1RecurringSpawnSpec avsp_round1_recurring_spawn =

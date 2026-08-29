@@ -6,7 +6,7 @@
 #include "../../combat/hit_ko/hit_ko.h"
 
 #define AVSP_ROUND1_SPEC02_SHA256 \
-    "81ceb5b0bdee99f65e5e40c5978230bdea4010d163564d6e83a505f6fd329e55"
+    "19b8d2c3b19e45cbbe66d2ef6e9deaf5b367cf4ff923bb2ce14eded7441a0dea"
 #define AVSP_ROUND1_CANARY_HEAD 0x52314548UL
 #define AVSP_ROUND1_CANARY_TAIL 0x52314554UL
 #define AVSP_ROUND1_ROUTE_ENTRY_STATE 2
@@ -77,6 +77,9 @@
 #define AVSP_ROUND1_CLASS1F_INNER8_RECORD_COUNT 54u
 #define AVSP_ROUND1_CLASS1F_INNER8_MOVEMENT_TABLE_COUNT 8u
 #define AVSP_ROUND1_CLASS1F_ATTACK_TIMER_COUNT 16u
+#define AVSP_ROUND1_CLASS1F_SOURCE_HIT_PHASE_COUNT 6u
+#define AVSP_ROUND1_CLASS1F_SOURCE_HIT_RNG_TIMER_COUNT 16u
+#define AVSP_ROUND1_CLASS1F_SOURCE_HIT_TERMINAL_RECORD_COUNT 11u
 #define AVSP_ROUND1_CLASS09_INITIAL_ACTOR_COUNT 2u
 #define AVSP_ROUND1_CLASS09_SEQUENCE_COUNT 5u
 #define AVSP_ROUND1_CLASS09_SEQUENCE_RECORDS 2u
@@ -412,6 +415,12 @@ typedef struct
     unsigned char source_collision_latches[8];
     unsigned char source_collision_suppress70;
     unsigned char source_projectile_reaction_pending;
+    unsigned char source_hit_recovery_active;
+    unsigned char source_hit_mode;
+    unsigned char source_hit_kind;
+    unsigned char source_reaction_selector;
+    unsigned char source_hit_action_timer;
+    short source_prior_health;
     unsigned char source_a2;
     unsigned char source_movement_table;
     unsigned long source_next_animation_record;
@@ -482,6 +491,32 @@ typedef struct
     unsigned char action_timer;
     unsigned char hurt_selector;
     unsigned char attack_selector;
+    unsigned short phases[AVSP_ROUND1_CLASS1F_SOURCE_HIT_PHASE_COUNT];
+    long launch_x_velocity;
+    long launch_x_acceleration;
+    long launch_y_velocity;
+    long launch_y_acceleration;
+    long bounce_x_velocity;
+    long bounce_x_acceleration;
+    long bounce_y_velocity;
+    long bounce_y_acceleration;
+    unsigned char landing_hold_timer;
+    unsigned char landing_selector;
+    unsigned char bounce_selector;
+    unsigned char rng_hold_selector;
+    unsigned char terminal_selector;
+    unsigned short rng_seed_before;
+    unsigned short rng_seed_after;
+    unsigned char rng_result_low_nibble;
+    unsigned char rng_hit_count;
+    unsigned char rng_timer_row[AVSP_ROUND1_CLASS1F_SOURCE_HIT_RNG_TIMER_COUNT];
+    unsigned char rng_selected_timer;
+    unsigned char terminal_record_count;
+    AvspRound1AnimationStateSpec terminal_records[
+        AVSP_ROUND1_CLASS1F_SOURCE_HIT_TERMINAL_RECORD_COUNT];
+    unsigned short normal_return_state;
+    unsigned short normal_return_substate;
+    unsigned short class1f_resume_substate;
 } AvspRound1Class1fSourceHitSpec;
 
 typedef struct

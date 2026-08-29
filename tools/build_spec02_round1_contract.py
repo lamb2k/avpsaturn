@@ -1100,7 +1100,34 @@ def validate(contract: dict[str, object], fixtures: dict[str, object],
             class1f_hit["recovery"]["captured_values_before_decrement"] ==
                 [8, 7, 6, 5, 4, 3, 2, 1, 0] and
             class1f_hit["recovery"]["next_action_phase_u16"] == 0x0200 and
-            class1f_hit["rng_calls"] == [] and
+            class1f_hit["entry_rng_calls"] == [] and
+            class1f_hit["action_dispatch"]["required_action_phases_u16"] ==
+                [0x0200, 0x0202, 0x0204, 0x0206, 0x0208, 0x020A] and
+            class1f_hit["source_hit_program"]["phase_0x0200_launch"]
+                ["observed_written_motion"]["x_velocity_s32_16_16"] ==
+                -0x1C000 and
+            class1f_hit["source_hit_program"]["phase_0x0202_first_flight"]
+                ["landing_visible_frame"] == 2364 and
+            class1f_hit["source_hit_program"]["phase_0x0204_landing_hold"]
+                ["captured_values_before_decrement"] == [3, 2, 1] and
+            class1f_hit["source_hit_program"]["phase_0x0206_bounce"]
+                ["observed_motion_after_facing"]
+                ["y_acceleration_s32_16_16"] == -0xC000 and
+            class1f_hit["source_hit_program"]["phase_0x0208_rng_hold"]
+                ["timer_initial_u8"] == 10 and
+            class1f_hit["source_hit_program"]
+                ["phase_0x020a_terminal_animation"]["records"][-1]
+                ["animation_record"] == "0x0012ded8" and
+            class1f_hit["source_hit_program"]["normal_return"]
+                ["class1f_resume_at_2414"] == "0x0200:1600" and
+            class1f_hit["rng"]["calls"] == 1 and
+            class1f_hit["rng"]["seed_before_u16"] == 0xEDD9 and
+            class1f_hit["rng"]["seed_after_u16"] == 0xC9A2 and
+            class1f_hit["rng"]["result_low_nibble_u8"] == 2 and
+            class1f_hit["rng"]["timer_table_row_u8"] ==
+                [10, 10, 10, 10, 40, 40, 40, 40,
+                 60, 60, 60, 90, 90, 90, 120, 120] and
+            class1f_hit["rng"]["selected_timer_u8"] == 10 and
             class1f_hit["mutation_control"]["mutations"] == 2 and
             class1f_hit["mutation_control"]["mutant_animation_record"] ==
                 "0x0012dc50" and

@@ -95,6 +95,20 @@ def build() -> str:
     class1f_current_reaction = class1f_current_damage[
         "accepted_port_v2_reaction_mapping"]
     class1f_source_hit = class1f_current_damage["source_hit_entry_program"]
+    class1f_source_hit_program = class1f_source_hit["source_hit_program"]
+    class1f_source_hit_launch = class1f_source_hit_program[
+        "phase_0x0200_launch"]
+    class1f_source_hit_first_flight = class1f_source_hit_program[
+        "phase_0x0202_first_flight"]
+    class1f_source_hit_landing_hold = class1f_source_hit_program[
+        "phase_0x0204_landing_hold"]
+    class1f_source_hit_bounce = class1f_source_hit_program[
+        "phase_0x0206_bounce"]
+    class1f_source_hit_rng_hold = class1f_source_hit_program[
+        "phase_0x0208_rng_hold"]
+    class1f_source_hit_terminal = class1f_source_hit_program[
+        "phase_0x020a_terminal_animation"]
+    class1f_source_hit_rng = class1f_source_hit["rng"]
     class1f_actions = class1f["first_segment_action_execution_contract"]
     class1f_inner8 = class1f_actions["inner_state_0x08_program"]
     class1f_inner8_records = class1f_inner8["animation_records"]
@@ -339,7 +353,34 @@ def build() -> str:
         class1f_source_hit["visible_result"]["action_phase_u16"] != 0x0002 or
         class1f_source_hit["recovery"]["next_action_phase_u16"] != 0x0200 or
         class1f_source_hit["entry_writes_in_order"][1] !=
-            "actor+0x2a:u8 = 4"):
+            "actor+0x2a:u8 = 4" or
+        class1f_source_hit["action_dispatch"]["required_action_phases_u16"] !=
+            [0x0200, 0x0202, 0x0204, 0x0206, 0x0208, 0x020A] or
+        class1f_source_hit_launch["observed_written_motion"] != {
+            "x_velocity_s32_16_16": -0x1C000,
+            "x_acceleration_s32_16_16": 0,
+            "y_velocity_s32_16_16": 0xB8000,
+            "y_acceleration_s32_16_16": -0x8000} or
+        class1f_source_hit_first_flight["landing_selector_u8"] != 0x37 or
+        class1f_source_hit_landing_hold["captured_values_before_decrement"] !=
+            [3, 2, 1] or
+        class1f_source_hit_bounce["observed_motion_after_facing"] != {
+            "x_velocity_s32_16_16": -0x20000,
+            "x_acceleration_s32_16_16": 0x1000,
+            "y_velocity_s32_16_16": 0x40000,
+            "y_acceleration_s32_16_16": -0xC000} or
+        class1f_source_hit_rng_hold["captured_values_before_decrement"] !=
+            [10, 9, 8, 7, 6, 5, 4, 3, 2, 1] or
+        len(class1f_source_hit_terminal["records"]) != 11 or
+        class1f_source_hit_terminal["records"][-1]["animation_record"] !=
+            "0x0012ded8" or
+        class1f_source_hit_rng["seed_before_u16"] != 0xEDD9 or
+        class1f_source_hit_rng["seed_after_u16"] != 0xC9A2 or
+        class1f_source_hit_rng["result_low_nibble_u8"] != 2 or
+        class1f_source_hit_rng["timer_table_row_u8"] !=
+            [10, 10, 10, 10, 40, 40, 40, 40,
+             60, 60, 60, 90, 90, 90, 120, 120] or
+        class1f_source_hit_rng["selected_timer_u8"] != 10):
         raise ValueError("SPEC-02 class-0x1f current-state drift")
     if (source_update_cadence["classification"] !=
             "SOURCE_CLOSED_IMPLEMENTATION_FIELDS" or
@@ -1159,6 +1200,50 @@ def build() -> str:
                 ["recovery_timer_actor_2c_u8"],
             class1f_source_hit["reaction_record"]["hurt_selector_u8"],
             class1f_source_hit["reaction_record"]["attack_selector_u8"]),
+        "    { " + ", ".join(
+            f"0x{value:04X}u" for value in
+            class1f_source_hit["action_dispatch"]
+                ["required_action_phases_u16"]) + " },",
+        "    %dL, %dL, %dL, %dL," % tuple(
+            class1f_source_hit_launch["observed_written_motion"][key]
+            for key in ("x_velocity_s32_16_16",
+                        "x_acceleration_s32_16_16",
+                        "y_velocity_s32_16_16",
+                        "y_acceleration_s32_16_16")),
+        "    %dL, %dL, %dL, %dL," % tuple(
+            class1f_source_hit_bounce["observed_motion_after_facing"][key]
+            for key in ("x_velocity_s32_16_16",
+                        "x_acceleration_s32_16_16",
+                        "y_velocity_s32_16_16",
+                        "y_acceleration_s32_16_16")),
+        "    %du, 0x%02Xu, 0x%02Xu, 0x%02Xu, 0x%02Xu," % (
+            class1f_source_hit_landing_hold
+                ["captured_values_before_decrement"][0],
+            class1f_source_hit_first_flight["landing_selector_u8"],
+            class1f_source_hit_bounce["selector_u8"],
+            class1f_source_hit_rng_hold["selector_u8"],
+            class1f_source_hit_terminal["selector_u8"]),
+        "    0x%04Xu, 0x%04Xu, %du, %du," % (
+            class1f_source_hit_rng["seed_before_u16"],
+            class1f_source_hit_rng["seed_after_u16"],
+            class1f_source_hit_rng["result_low_nibble_u8"],
+            class1f_source_hit_rng["hit_count_actor_6d_u8"]),
+        "    { " + ", ".join(f"{value}u" for value in
+            class1f_source_hit_rng["timer_table_row_u8"]) + " },",
+        "    %du, %du," % (
+            class1f_source_hit_rng["selected_timer_u8"],
+            len(class1f_source_hit_terminal["records"])),
+        "    {",
+    ])
+    for record in class1f_source_hit_terminal["records"]:
+        lines.append(
+            "        { %du, %d, %sUL, %sUL, %du, %du }," % (
+                record["timer_u16"], record["branch_s16"],
+                record["animation_record"], record["assembly"],
+                record["hurt_selector_u8"], record["attack_selector_u8"]))
+    lines.extend([
+        "    },",
+        "    0x0200u, 0x0000u, 0x1600u,",
         "};", "",
         "static const AvspRound1RecurringSpawnSpec avsp_round1_recurring_spawn =",
         "{",
