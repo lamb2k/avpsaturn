@@ -168,6 +168,8 @@ def build() -> str:
     recurring_initializer = recurring_controller["initializer"]
     recurring_gate = recurring_controller["intro_gate_transition"]
     recurring_primary = recurring["primary_writer"]
+    recurring_post_allocation = recurring_primary[
+        "post_allocation_dispatch"]["same_frame"]
     recurring_auxiliary = recurring["auxiliary_writer"]
     recurring_progress = recurring["progress_increment_boundary"]
     recurring_tables = recurring_primary["tables"]
@@ -629,6 +631,14 @@ def build() -> str:
             "source_frame_u16": 2510, "before_u16": 9,
             "after_u16": 8,
             "guard": "successful primary record-12 allocation"} or
+        recurring_post_allocation != {
+            "state_u16": 0x0200, "substate_u16": 0,
+            "facing_u8": 1, "health_s16": 87,
+            "animation_record": "0x0012ddb0",
+            "animation_timer_u16": 0x0fff,
+            "animation_branch_s16": -0x8000,
+            "assembly": "0x00130346",
+            "hurt_selector_u8": 1, "attack_selector_u8": 1} or
         recurring_tables["lane_offsets_s16"] != [24, 40, 56, 72, 88, 104] or
         recurring_tables["selector_cycle_u8"] != [0, 1, 1, 1, 0, 1, 0, 1, 1, 1] or
         len(recurring_tables["lane_bucket_u8"]) != 64 or
@@ -1560,11 +1570,18 @@ def build() -> str:
             int(recurring_gate["gate_owner"]["class_u8"], 16),
             recurring_gate["gate_owner"]["record_type_u8"],
             recurring_gate["gate_owner"]["state_u16"]),
-        "    0x%04Xu, 0x%04Xu, %d, %du" % (
+        "    0x%04Xu, 0x%04Xu, %d, %du," % (
             recurring_progress["transition_guard"]["state_u16"],
             recurring_progress["transition_guard"]["substate_u16"],
             recurring_progress["transition_guard"]["health_s16"],
             recurring_progress["increment_u16"]),
+        "    { %du, %d, %sUL, %sUL, %du, %du }" % (
+            recurring_post_allocation["animation_timer_u16"],
+            recurring_post_allocation["animation_branch_s16"],
+            recurring_post_allocation["animation_record"],
+            recurring_post_allocation["assembly"],
+            recurring_post_allocation["hurt_selector_u8"],
+            recurring_post_allocation["attack_selector_u8"]),
         "};", "",
         "static const short avsp_round1_recurring_lane_offsets[AVSP_ROUND1_RECURRING_LANE_OFFSET_COUNT] =",
         "{",

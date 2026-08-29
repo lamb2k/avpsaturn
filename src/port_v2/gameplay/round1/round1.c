@@ -2481,6 +2481,16 @@ static int avsp_round1_step_class1f_source_action(
         if (!avsp_round1_seed_class1f_action_fields(runtime, actor,
                 runtime->rng_seed, (unsigned char)actor->source_action, 1))
             return 0;
+        if (actor->source_dynamic_spawn != 0u)
+        {
+            const AvspRound1AnimationStateSpec *presentation =
+                &avsp_round1_recurring_spawn.post_allocation_presentation;
+            if (!avsp_round1_class1f_bind_record(
+                    actor, presentation->animation_record))
+                return 0;
+            actor->animation_timer = presentation->timer;
+            actor->animation_branch = presentation->branch;
+        }
         actor->hurt_selector = actor->source_a5;
         actor->attack_selector = actor->source_a6;
         return 3;

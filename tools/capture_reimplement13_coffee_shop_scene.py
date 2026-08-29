@@ -743,11 +743,39 @@ def recurring_spawn_phase_boundary(
                                       int(spawned_native["z"])],
             "source_health_s16": int(spawned_source["health"]),
             "native_health_s16": int(spawned_native["health"]),
-            "remaining_presentation_gap": {
-                "source_animation_record": "0x" +
-                    spawned_source["animation_record"],
-                "native_animation_record": "0x" +
-                    spawned_native["animation_record"],
+            "same_frame_presentation": {
+                "source": {
+                    "state_u16": "0x" + spawned_source["state"],
+                    "substate_u16": "0x" + spawned_source["substate"],
+                    "facing_u8": int(spawned_source["facing"]),
+                    "animation_record": "0x" +
+                        spawned_source["animation_record"],
+                    "assembly": "0x00130346",
+                    "animation_timer_u16": int(
+                        spawned_source["animation_timer"], 16),
+                    "animation_branch_s16": int(
+                        spawned_source["animation_branch"]),
+                    "hurt_selector_u8": int(
+                        spawned_source["hurt_selector"], 16),
+                    "attack_selector_u8": int(
+                        spawned_source["attack_selector"], 16),
+                },
+                "native": {
+                    "state_u16": "0x" + spawned_native["state"],
+                    "substate_u16": "0x" + spawned_native["substate"],
+                    "facing_u8": int(spawned_native["facing"]),
+                    "animation_record": "0x" +
+                        spawned_native["animation_record"],
+                    "assembly": "0x" + spawned_native["assembly"],
+                    "animation_timer_u16": int(
+                        spawned_native["animation_timer"]),
+                    "animation_branch_s16": int(
+                        spawned_native["animation_branch"]),
+                    "hurt_selector_u8": int(
+                        spawned_native["hurt_selector"]),
+                    "attack_selector_u8": int(
+                        spawned_native["attack_selector"]),
+                },
             },
         },
     }
@@ -872,7 +900,10 @@ def validate_report(report: dict[str, object]) -> None:
             recurring["spawned_record12"]["source_position_s16"] != \
                 recurring["spawned_record12"]["native_position_s16"] or \
             recurring["spawned_record12"]["source_health_s16"] != \
-                recurring["spawned_record12"]["native_health_s16"]:
+                recurring["spawned_record12"]["native_health_s16"] or \
+            recurring["spawned_record12"]["same_frame_presentation"] \
+                ["source"] != recurring["spawned_record12"] \
+                ["same_frame_presentation"]["native"]:
         raise ValueError("Coffee Shop recurring spawn phase boundary drift")
     trajectory = report["native_capture"]["record4_parent_fixed_trajectory"]
     if trajectory["allocator"] != "0x01773e" or \

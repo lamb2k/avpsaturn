@@ -1278,7 +1278,12 @@ def build_report() -> dict[str, object]:
             "post_allocation_dispatch": {
                 "same_frame": {"state_u16": 0x0200, "substate_u16": 0,
                                "facing_u8": 1, "health_s16": 87,
-                               "animation_record": "0x0012ddb0"},
+                               "animation_record": "0x0012ddb0",
+                               "animation_timer_u16": 0x0fff,
+                               "animation_branch_s16": -0x8000,
+                               "assembly": "0x00130346",
+                               "hurt_selector_u8": 1,
+                               "attack_selector_u8": 1},
                 "next_frame": {"state_u16": 0x0200,
                                "substate_u16": 0x1600,
                                "animation_record": "0x0012ec04"},
@@ -1557,7 +1562,16 @@ def validate(report: dict[str, object]) -> None:
             progression["primary_writer"]["observed_transactions"][1]
                 ["x_s16"] == 960 and
             progression["primary_writer"]["post_allocation_dispatch"]
-                ["same_frame"]["state_u16"] == 0x0200 and
+                ["same_frame"] == {
+                    "state_u16": 0x0200, "substate_u16": 0,
+                    "facing_u8": 1, "health_s16": 87,
+                    "animation_record": "0x0012ddb0",
+                    "animation_timer_u16": 0x0fff,
+                    "animation_branch_s16": -0x8000,
+                    "assembly": "0x00130346",
+                    "hurt_selector_u8": 1,
+                    "attack_selector_u8": 1,
+                } and
             progression["primary_writer"]["post_allocation_dispatch"]
                 ["next_frame"]["substate_u16"] == 0x1600 and
             progression["auxiliary_writer"]["writer_pc"] == "0x028b7e" and

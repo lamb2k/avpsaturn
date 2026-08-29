@@ -18,6 +18,7 @@ def reject(mutant,label):
     raise AssertionError('accepted encounter mutation: '+label)
 
 mutations=[]
+item=copy.deepcopy(report); item["first_segment_recurring_spawn"]["primary_writer"]["post_allocation_dispatch"]["same_frame"]["animation_timer_u16"]=4094; mutations.append(("recurring same-frame presentation",item))
 for label,change in (
     ('status',lambda x:x.__setitem__('status','PARTIAL')),
     ('determinism',lambda x:x['capture_identity'].__setitem__('byte_identical',False)),

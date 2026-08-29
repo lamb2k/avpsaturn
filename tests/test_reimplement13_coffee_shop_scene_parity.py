@@ -87,6 +87,11 @@ item = copy.deepcopy(BASE)
 item["native_capture"]["recurring_spawn_phase_boundary"][
     "controller_spawn_index"][1]["native_spawn_index_u16"] = 9
 mutations.append(("recurring spawn index retention", item))
+item = copy.deepcopy(BASE)
+item["native_capture"]["recurring_spawn_phase_boundary"][
+    "spawned_record12"]["same_frame_presentation"]["native"]\
+    ["animation_timer_u16"] = 0
+mutations.append(("recurring same-frame presentation delay", item))
 
 for label, mutant in mutations:
     try:

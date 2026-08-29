@@ -60787,9 +60787,14 @@
           "substate_u16": 5632
         },
         "same_frame": {
+          "animation_branch_s16": -32768,
           "animation_record": "0x0012ddb0",
+          "animation_timer_u16": 4095,
+          "assembly": "0x00130346",
+          "attack_selector_u8": 1,
           "facing_u8": 1,
           "health_s16": 87,
+          "hurt_selector_u8": 1,
           "state_u16": 512,
           "substate_u16": 0
         }
