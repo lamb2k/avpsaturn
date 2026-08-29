@@ -480,6 +480,40 @@ ordering and scheduler position. Do not fit the frame or add authored delay.
 Evidence: `data/reimplement13_round1_stable_entry.json` and
 `data/reimplement13_startup_authority.json`.
 
+That class-`0x1f` projectile-KO lifecycle is now native through release. Source
+scheduler frame 2362 writes health `87 -> -1` and outer state `0x0400`; visible
+frame 2363 preserves that state and performs the source-owned progress handoff;
+visible frame 2364 enters `0x0402` with selector `0x36`, hit-kind `0x15`,
+recovery `8`, and animation `0x0012e04c`. Recovery, launch, landing, bounce,
+hold, and fixed-pool release match through frame 2508 without target-owned RNG.
+
+Checkpoint `7b93a82f058d9fbfb236e35fa64682d9d4e12c25` is pushed and remote-equal.
+Fast, Oracle, 105 SPEC mutations, 173 native mutations, 122 Target suppressions,
+LiveEncounterBench Target, and paired 575-sample Coffee Shop Emulator evidence
+pass. The normalized ISO is
+`36c022aabc3b1ac7fae5598a6b74246e4d7a891c09ea8d07596daecbd12ac1d2` and
+the canonical sample ledger is
+`f41ac7b2f0287a096a4cd527291ee3c59620338d4d151e1ca887462fc114a148`.
+Fresh window-only WGC covers frames 2280..2310; cadence sheet
+`49cf96e5806daca5f04377e4b0ba563dd4e5d0890834a9e44f39d261661c680e`
+and clip `792664b5e3a20dbb88a28d9c8de2f2188db70a053d23c6796147cace4bdbd2f4`
+match the prior visual lock and pass direct inspection.
+
+The before/after scene gaps are `405 / 1,358 / 30 / 94 / 3 / 281` and
+`484 / 1,356 / 10 / 94 / 3 / 281`. Spawn/despawn improves by two and
+unsupported states by twenty. Missing lifetimes rise by 79 because the
+source-correct KO lifecycle changes downstream incomplete-native identity and
+exposes additional source lifetimes without exact native matches. The increase
+is open work, not acceptance. Unowned Saturn actors, unidentified source pairs,
+and retained gameplay authorities remain zero.
+
+The next earliest causal scene divergence is Predator Warrior slot
+`0x00ff8380` at visible frame 2343: native animation record `0x0015e540`
+differs from source `0x0015e594`. Bind the accepted player action/substate
+transition, animation guard, and scheduler ordering. Do not fit the frame or
+rebaseline input, and preserve the exact class-`0x1f` KO lifecycle through
+frame 2508.
+
 ## Next eligible cards
 
 - `QA-13-ROUND1-END-TO-END-DIFFERENTIAL` after the complete stable Round 2
