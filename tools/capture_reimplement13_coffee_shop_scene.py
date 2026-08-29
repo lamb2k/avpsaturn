@@ -666,6 +666,93 @@ def deferred_record4_collision_registration(
     }
 
 
+def recurring_spawn_phase_boundary(
+        source_rows: list[dict[str, str]],
+        native_rows: list[dict[str, str]],
+        runtime_summary: str) -> dict[str, object]:
+    """Bind the first phase-gated recurring spawn and shared-RNG order."""
+    checkpoints: dict[int, dict[str, object]] = {}
+    pattern = re.compile(
+        r"rng_checkpoint frame=(2510|2511) seed=([0-9a-f]{4}) "
+        r"scheduler=(\d+) phase=(\d+) living=(\d+) spawn_index=(\d+) "
+        r"timer=(\d+)")
+    for match in pattern.finditer(runtime_summary):
+        checkpoints[int(match.group(1))] = {
+            "rng_seed_u16": "0x" + match.group(2),
+            "scheduler_updates_u32": int(match.group(3)),
+            "phase_u8": int(match.group(4)),
+            "living_u16": int(match.group(5)),
+            "spawn_index_u16": int(match.group(6)),
+            "spawn_timer_u16": int(match.group(7)),
+        }
+
+    def source(frame: int, slot: int) -> dict[str, str]:
+        return next(row for row in source_rows
+                    if int(row["frame"]) == frame and
+                    int(row["slot"], 16) == slot)
+
+    def native(frame: int, slot: int) -> dict[str, str]:
+        return next(row for row in native_rows
+                    if int(row["frame"]) == frame and
+                    int(row["source_slot"], 16) == slot)
+
+    class09 = []
+    for frame in (2510, 2511):
+        for slot in (0x00ffb480, 0x00ffb500):
+            source_row = source(frame, slot)
+            native_row = native(frame, slot)
+            class09.append({
+                "frame_u16": frame,
+                "source_slot": f"0x{slot:08x}",
+                "source_animation_record": "0x" +
+                    source_row["animation_record"],
+                "native_animation_record": "0x" +
+                    native_row["animation_record"],
+            })
+    controller = []
+    for frame in (2510, 2511):
+        source_row = source(frame, 0x00ffd180)
+        native_row = native(frame, 0x00ffd180)
+        controller.append({
+            "frame_u16": frame,
+            "source_spawn_index_u16": int(source_row["x_fp"], 16) >> 16,
+            "native_spawn_index_u16": int(native_row["x"]),
+        })
+    spawned_source = source(2511, 0x00ffa3c0)
+    spawned_native = native(2511, 0x00ffa3c0)
+    return {
+        "source_phase_update_precedes_controller": True,
+        "controller_precedes_new_record12_dispatch": True,
+        "new_record12_precedes_type20_class09": True,
+        "native_checkpoints": [dict({"frame_u16": frame},
+                                    **checkpoints[frame])
+                               for frame in (2510, 2511)],
+        "class09_terminal_and_selection": class09,
+        "controller_spawn_index": controller,
+        "spawned_record12": {
+            "frame_u16": 2511,
+            "source_slot": "0x00ffa3c0",
+            "source_state_u16": "0x" + spawned_source["state"],
+            "native_state_u16": "0x" + spawned_native["state"],
+            "source_position_s16": [
+                int(spawned_source["x_fp"], 16) >> 16,
+                int(spawned_source["y_fp"], 16) >> 16,
+                int(spawned_source["z"])],
+            "native_position_s16": [int(spawned_native["x"]),
+                                      int(spawned_native["y"]),
+                                      int(spawned_native["z"])],
+            "source_health_s16": int(spawned_source["health"]),
+            "native_health_s16": int(spawned_native["health"]),
+            "remaining_presentation_gap": {
+                "source_animation_record": "0x" +
+                    spawned_source["animation_record"],
+                "native_animation_record": "0x" +
+                    spawned_native["animation_record"],
+            },
+        },
+    }
+
+
 def validate_report(report: dict[str, object]) -> None:
     gate_names = {
         "source_actor_population_missing_on_saturn",
@@ -764,8 +851,29 @@ def validate_report(report: dict[str, object]) -> None:
                  "animation_record": "0x00030944",
                  "assembly": "0x00030bd6", "animation_timer_u16": 2}],
             "no_source_native_divergence_through_frame_u16": 2372,
-            "next_slot_divergence_frame_u16": 2935}:
+            "next_slot_divergence_frame_u16": 2914}:
         raise ValueError("Coffee Shop record-4 fixed-slot reuse drift")
+    recurring = report["native_capture"]["recurring_spawn_phase_boundary"]
+    if recurring["native_checkpoints"] != [
+            {"frame_u16": 2510, "rng_seed_u16": "0xd21c",
+             "scheduler_updates_u32": 441, "phase_u8": 191,
+             "living_u16": 7, "spawn_index_u16": 9,
+             "spawn_timer_u16": 3707},
+            {"frame_u16": 2511, "rng_seed_u16": "0x81a1",
+             "scheduler_updates_u32": 442, "phase_u8": 192,
+             "living_u16": 8, "spawn_index_u16": 8,
+             "spawn_timer_u16": 3706}] or \
+            any(item["source_animation_record"] !=
+                item["native_animation_record"] for item in
+                recurring["class09_terminal_and_selection"]) or \
+            any(item["source_spawn_index_u16"] !=
+                item["native_spawn_index_u16"] for item in
+                recurring["controller_spawn_index"]) or \
+            recurring["spawned_record12"]["source_position_s16"] != \
+                recurring["spawned_record12"]["native_position_s16"] or \
+            recurring["spawned_record12"]["source_health_s16"] != \
+                recurring["spawned_record12"]["native_health_s16"]:
+        raise ValueError("Coffee Shop recurring spawn phase boundary drift")
     trajectory = report["native_capture"]["record4_parent_fixed_trajectory"]
     if trajectory["allocator"] != "0x01773e" or \
             trajectory["target_selector"] != "0x0241f0" or \
@@ -988,7 +1096,10 @@ def main() -> None:
                                    runtime_summary),
                            "deferred_record4_collision_registration":
                                deferred_record4_collision_registration(
-                                   source_rows, rows)},
+                                   source_rows, rows),
+                           "recurring_spawn_phase_boundary":
+                               recurring_spawn_phase_boundary(
+                                   source_rows, rows, runtime_summary)},
         "source_capture": {
             "actor_rows": len(source_rows),
             "actor_sha256": source_actor_sha256,

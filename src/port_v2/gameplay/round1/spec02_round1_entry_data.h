@@ -1,8 +1,8 @@
 #ifndef AVSP_SPEC02_ROUND1_ENTRY_DATA_H
 #define AVSP_SPEC02_ROUND1_ENTRY_DATA_H
 
-/* contract_sha256=41791464584f88d98b550c73c763fcdbd13c5e2a0d7750d2b975e11e9e49a287 */
-/* fixtures_sha256=fd643801590a2bab1094f84b5fd658cd7d11753d5527f77b758bc76efa433149 */
+/* contract_sha256=b1b967ea0f023aa4236437591bc55579d481be897300631dc5b23277013f451d */
+/* fixtures_sha256=308c65f081447dda52a6eb26e89aa260c339a71a18db65debaaa253243ba389a */
 #define AVSP_ROUND1_ENTRY_PROGRAM_SHA256 "e5ef761fadc1b5a7df62e77c03025c0ebff0c2503cbc8be9c0077d4bd6cd24ba"
 
 static const unsigned char avsp_round1_entry_program[AVSP_ROUND1_ENTRY_PROGRAM_BYTES] =
@@ -403,7 +403,7 @@ static const AvspRound1RecurringSpawnSpec avsp_round1_recurring_spawn =
     0x0200u, 0x0202u, 0x0204u,
     3900u, 60u, 1200u, 2100u, 640u, 208u, 720, 9u,
     { 0u, 35u, 55u, 70u },
-    0xA2u, 8u, 7u, 3u, 31u,
+    0x06u, 8u, 7u, 3u, 31u,
     -48, 1008, 976, 344, 344, 4u, 0u,
     1u, 0u, 0xC580u, 0x44, 24u, 0x0404u,
     0x0402u, 0x0000u, -1, 1u

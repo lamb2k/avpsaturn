@@ -79,6 +79,14 @@ item = copy.deepcopy(BASE)
 item["native_capture"]["deferred_record4_collision_registration"][
     "native_projectile"][1]["collision_registered_u8"] = 1
 mutations.append(("record4 same-scan collision registration", item))
+item = copy.deepcopy(BASE)
+item["native_capture"]["recurring_spawn_phase_boundary"][
+    "native_checkpoints"][1]["phase_u8"] = 191
+mutations.append(("recurring spawn phase replay", item))
+item = copy.deepcopy(BASE)
+item["native_capture"]["recurring_spawn_phase_boundary"][
+    "controller_spawn_index"][1]["native_spawn_index_u16"] = 9
+mutations.append(("recurring spawn index retention", item))
 
 for label, mutant in mutations:
     try:

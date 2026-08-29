@@ -623,6 +623,12 @@ def build() -> str:
             "x_camera_offset_s16": -48, "lane_base_s16": 208,
             "lane_band_mask_u16": 0x00f0} or
         recurring_primary["rng"]["calls"] != 1 or
+        recurring["phase_counter"]["native_entry_handoff_value_u8"] != 0x06 or
+        recurring["phase_counter"]["native_entry_handoff_frame_u16"] != 2072 or
+        recurring["controller_guard"]["first_spawn_index_transition"] != {
+            "source_frame_u16": 2510, "before_u16": 9,
+            "after_u16": 8,
+            "guard": "successful primary record-12 allocation"} or
         recurring_tables["lane_offsets_s16"] != [24, 40, 56, 72, 88, 104] or
         recurring_tables["selector_cycle_u8"] != [0, 1, 1, 1, 0, 1, 0, 1, 1, 1] or
         len(recurring_tables["lane_bucket_u8"]) != 64 or
@@ -1534,7 +1540,7 @@ def build() -> str:
         "    { " + ", ".join(f"{value}u" for value in
             recurring_initializer["limit_table_u16"]) + " },",
         "    0x%02Xu, %du, %du, %du, %du," % (
-            recurring["phase_counter"]["stable_entry_value_u8"],
+            recurring["phase_counter"]["native_entry_handoff_value_u8"],
             recurring_primary["guard_values"]["living_limit_u16"],
             recurring_primary["guard_values"]["phase_mask_u8"],
             recurring_auxiliary["guard_values"]["phase_add_u8"],

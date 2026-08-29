@@ -1512,16 +1512,17 @@ static void avsp_round1_spawn_recurring_primary(AvspRound1Runtime *runtime)
             AVSP_ROUND1_RECURRING_SELECTOR_COUNT - 1u;
     else
         --encounter->source_spawn_index;
+    runtime->entry_controller.x = (short)encounter->source_spawn_index;
 }
 
 static int avsp_round1_step_recurring_controller(AvspRound1Runtime *runtime)
 {
     AvspRound1FirstEncounterRuntime *encounter = &runtime->first_encounter;
+    encounter->source_phase_counter = (unsigned char)(
+        encounter->source_phase_counter + 1u);
     if (!encounter->source_controller_initialized ||
         !encounter->source_initial_spawn_complete)
         return 1;
-    encounter->source_phase_counter = (unsigned char)(
-        encounter->source_phase_counter + 1u);
     ++encounter->source_controller_updates;
     if (runtime->entry_controller.state ==
             avsp_round1_recurring_spawn.wait_state)
@@ -7720,14 +7721,14 @@ int avsp_round1_step_scheduler(AvspRound1Runtime *runtime)
         ++runtime->failure_count;
         return 0;
     }
-    runtime->class1f_phase_guard_counter =
-        runtime->first_encounter.source_phase_counter;
     if (!avsp_round1_step_recurring_controller(runtime))
     {
         runtime->scheduler_failure_code = 15u;
         ++runtime->failure_count;
         return 0;
     }
+    runtime->class1f_phase_guard_counter =
+        runtime->first_encounter.source_phase_counter;
     if (!avsp_round1_step_record4_pool(runtime, &hash))
         return 0;
     for (order_index = 0u; order_index < AVSP_ROUND1_SCHEDULER_POOL_COUNT;

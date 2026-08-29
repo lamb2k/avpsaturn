@@ -106,13 +106,18 @@ int main(void)
                     hit_return_actor->source_a2);
         }
         if (source_frame == 2072u || source_frame == 2073u ||
+            source_frame == 2510u || source_frame == 2511u ||
             (source_frame >= 2249u && source_frame <= 2294u) ||
             (source_frame >= 2348u && source_frame <= 2380u) ||
             (source_frame >= 2329u && source_frame <= 2330u))
             fprintf(stderr,
-                    "rng_checkpoint frame=%u seed=%04x scheduler=%lu\n",
+                    "rng_checkpoint frame=%u seed=%04x scheduler=%lu phase=%u living=%u spawn_index=%u timer=%u\n",
                     source_frame, runtime.rng_seed,
-                    runtime.scheduler_frames);
+                    runtime.scheduler_frames,
+                    runtime.first_encounter.source_phase_counter,
+                    runtime.first_encounter.source_living_count,
+                    runtime.first_encounter.source_spawn_index,
+                    runtime.first_encounter.source_spawn_timer);
         if (source_frame == 2377u || source_frame == 2378u ||
             source_frame == 2409u || source_frame == 2410u)
         {

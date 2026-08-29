@@ -60468,6 +60468,12 @@
         "progress_u16": 1,
         "timer_after_u16": 3706,
         "timer_before_u16": 3707
+      },
+      "first_spawn_index_transition": {
+        "after_u16": 8,
+        "before_u16": 9,
+        "guard": "successful primary record-12 allocation",
+        "source_frame_u16": 2510
       }
     },
     "controller_program": {
@@ -60673,6 +60679,8 @@
       "arithmetic": "u8 wrapping add 1",
       "field": "0xff8019:u8",
       "guard": "increment only when u8(0xff81a6) == 0",
+      "native_entry_handoff_frame_u16": 2072,
+      "native_entry_handoff_value_u8": 6,
       "observed_updates": [
         {
           "after_u8": 163,

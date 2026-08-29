@@ -865,6 +865,10 @@ def build_report() -> dict[str, object]:
             int(first_active_write["camera_z"]) == 256 and
             first_active_write["rng"] == "d21c",
             "first recurring spawn guard operands drift")
+    require(progression_controller[2072]["g8019"] == "06" and
+            progression_controller[2510]["index10"] == "9" and
+            progression_controller[2511]["index10"] == "8",
+            "native-entry phase or recurring spawn-index chronology drift")
     require(first_active_write["slot"] == "ffa3c0" and
             later_active_write["slot"] == "ffa000" and
             (int(first_write_by_pc["028a50"]["data"], 16) & 0xffff) == 672 and
@@ -1087,6 +1091,8 @@ def build_report() -> dict[str, object]:
         },
         "phase_counter": {
             "field": "0xff8019:u8", "stable_entry_value_u8": 0xa2,
+            "native_entry_handoff_value_u8": 0x06,
+            "native_entry_handoff_frame_u16": 2072,
             "writer_pc": "0x00809a", "writer_routine": "0x00808e..0x00809a",
             "guard": "increment only when u8(0xff81a6) == 0",
             "arithmetic": "u8 wrapping add 1",
@@ -1111,6 +1117,12 @@ def build_report() -> dict[str, object]:
                 "timer_after_u16": int(first_active_write["c_timer40"]),
                 "controller_state_u16": int(first_active_write["c_state"]),
                 "controller_substate_u16": int(first_active_write["c_substate"]),
+            },
+            "first_spawn_index_transition": {
+                "source_frame_u16": 2510,
+                "before_u16": int(progression_controller[2510]["index10"]),
+                "after_u16": int(progression_controller[2511]["index10"]),
+                "guard": "successful primary record-12 allocation",
             },
         },
         "progress_increment_boundary": {
