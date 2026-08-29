@@ -36,9 +36,9 @@ COFFEE_SHOP_BOUNDS_B = ROOT / ".deps" / "mame" / "oracle11_progression_lifecycle
 CLASS1F_INNER8_A = ROOT / ".deps" / "mame" / "oracle11_progression_lifecycle_cs31a"
 CLASS1F_INNER8_B = ROOT / ".deps" / "mame" / "oracle11_progression_lifecycle_cs31b"
 CLASS1F_INNER8_SUPPRESS = ROOT / ".deps" / "mame" / "oracle11_progression_lifecycle_cs30s"
-CLASS1F_HIT_A = ROOT / ".deps" / "mame" / "oracle11_progression_lifecycle_cs33e"
-CLASS1F_HIT_B = ROOT / ".deps" / "mame" / "oracle11_progression_lifecycle_cs33f"
-CLASS1F_HIT_MUTANT = ROOT / ".deps" / "mame" / "oracle11_progression_lifecycle_cs33m3"
+CLASS1F_HIT_A = ROOT / ".deps" / "mame" / "oracle11_progression_lifecycle_cs35a"
+CLASS1F_HIT_B = ROOT / ".deps" / "mame" / "oracle11_progression_lifecycle_cs35b"
+CLASS1F_HIT_MUTANT = ROOT / ".deps" / "mame" / "oracle11_progression_lifecycle_cs35m"
 OUT = ROOT / "data" / "oracle11_round1_enemy_archetypes.json"
 FILES = ("enemy_samples.tsv", "enemy_entries.tsv", "enemy_writes.tsv",
          "enemy_rng.tsv", "player_damage.tsv", "samples.tsv", "dispatches.tsv",
@@ -82,6 +82,7 @@ CLASS1F_INNER8_FILES = (
 CLASS1F_HIT_FILES = (
     "coffee_shop_class1f_hit.tsv",
     "coffee_shop_class1f_hit_writes.tsv",
+    "coffee_shop_class1f_hit_program.tsv",
     "coffee_shop_scene_actors.tsv",
     "coffee_shop_scene_frames.tsv",
     "coffee_shop_scene_health_writes.tsv",
@@ -1436,6 +1437,20 @@ def class1f_hit_entry_contract(program: bytes,
         CLASS1F_HIT_A / "coffee_shop_rng_calls.tsv")
         if 2306 <= int(row["frame"]) <= 2317 and
         row["a6"] == "ffa180"]
+    program_trace = rows(CLASS1F_HIT_A /
+                         "coffee_shop_class1f_hit_program.tsv")
+
+    def program_row(frame: int, pc: str) -> dict[str, str]:
+        return next(row for row in program_trace
+                    if row["frame"] == str(frame) and row["pc"] == pc)
+
+    def actor_row(frame: int) -> dict[str, str]:
+        return next(row for row in actors
+                    if row["frame"] == str(frame) and
+                    row["slot"] == "ffa180")
+
+    def signed32(value: bytes) -> int:
+        return int.from_bytes(value, "big", signed=True)
 
     require(before["state"] == "0202" and before["substate"] == "0000" and
             before["animation_record"] == "0012eb5c" and
@@ -1478,9 +1493,70 @@ def class1f_hit_entry_contract(program: bytes,
         require(baseline_identity[filename] == mutant_identity[filename],
                 f"class-0x1f HIT mutation changed unrelated {filename}")
 
+    motion_address = 0x1F912 + (0x21 & 0xF0)
+    launch_motion = {
+        "table": "0x01f912", "index_mask_u8": 0xF0,
+        "motion_index_actor_6c_u8": 0x21,
+        "masked_index_u8": 0x20,
+        "entry_address": f"0x{motion_address:06x}",
+        "x_velocity_s32_16_16_before_facing": signed32(
+            program[motion_address:motion_address + 4]),
+        "x_acceleration_s32_16_16_before_facing": signed32(
+            program[motion_address + 4:motion_address + 8]),
+        "y_velocity_s32_16_16": signed32(
+            program[motion_address + 8:motion_address + 12]),
+        "y_acceleration_s32_16_16": signed32(
+            program[motion_address + 12:motion_address + 16]),
+        "entry_sha256": hashlib.sha256(
+            program[motion_address:motion_address + 16]).hexdigest(),
+    }
+    timer_table = list(program[0x1ED1C:0x1ED6C])
+    landing_rng_before = program_row(2377, "01ecb4")
+    landing_rng_after = program_row(2377, "01ecba")
+    landing_timer_write = program_row(2377, "01ece8")
+    terminal_records = [animation_record(program, address) for address in
+                        range(0x12DE38, 0x12DEE8, 0x10)]
+    hit_selectors = {
+        f"0x{selector:02x}": class1f_selector_sequence(program, selector)
+        for selector in (0x36, 0x37, 0x38, 0x39, 0x17)
+    }
+
+    require(launch_motion["x_velocity_s32_16_16_before_facing"] == 0x1C000 and
+            launch_motion["x_acceleration_s32_16_16_before_facing"] == 0 and
+            launch_motion["y_velocity_s32_16_16"] == 0xB8000 and
+            launch_motion["y_acceleration_s32_16_16"] == -0x8000 and
+            program_row(2317, "01eb4c")["x_velocity30"] == "fffe4000" and
+            program_row(2317, "01eb4c")["y_velocity34"] == "000b8000" and
+            actor_row(2363)["substate"] == "0202" and
+            actor_row(2363)["x_fp"] == "025bcc00" and
+            actor_row(2364)["substate"] == "0204" and
+            actor_row(2364)["x_fp"] == "025a0c00" and
+            actor_row(2364)["y_fp"] == "0136d600" and
+            actor_row(2364)["animation_record"] == "0012ddb0" and
+            actor_row(2367)["substate"] == "0206" and
+            actor_row(2367)["animation_record"] == "0012dd9c" and
+            landing_rng_before["rng"] == "edd9" and
+            landing_rng_after["rng"] == "c9a2" and
+            (int(landing_rng_after["d0"], 16) & 0xF) == 2 and
+            landing_timer_write["substate"] == "0208" and
+            timer_table[2] == 10 and
+            actor_row(2378)["substate"] == "0208" and
+            actor_row(2378)["animation_record"] == "0012ddb0" and
+            actor_row(2388)["substate"] == "020a" and
+            actor_row(2388)["animation_record"] == "0012de38" and
+            [int(row["timer_u16"]) for row in terminal_records] ==
+                [3, 3, 3, 3, 2, 2, 2, 2, 2, 2, 8] and
+            terminal_records[-1]["branch_s16"] < 0 and
+            program_row(2412, "01efec")["substate"] == "020a" and
+            actor_row(2413)["state"] == "0200" and
+            actor_row(2413)["substate"] == "0000" and
+            actor_row(2414)["substate"] == "1600" and
+            actor_row(2414)["animation_record"] == "0012eafc",
+            "class-0x1f complete source HIT program drift")
+
     return {
         "classification": "SOURCE_CLOSED_IMPLEMENTATION_FIELDS",
-        "scope": "Coffee Shop class-0x1f projectile HIT entry and recovery guard",
+        "scope": "Coffee Shop class-0x1f projectile HIT entry through normal-control return",
         "capture_identity": {
             "completion_a": baseline_identity,
             "completion_b": repeat_identity,
@@ -1531,7 +1607,153 @@ def class1f_hit_entry_contract(program: bytes,
             "next_action_phase_u16": 0x0200,
             "next_action_phase_source_frame": 2317,
         },
-        "rng_calls": [],
+        "entry_rng_calls": [],
+        "action_dispatch": {
+            "entry": "0x01eae4",
+            "index": "actor+0x07:u8",
+            "required_action_phases_u16": [0x0200, 0x0202, 0x0204,
+                                            0x0206, 0x0208, 0x020A],
+            "targets": ["0x01eb00", "0x01eb4c", "0x01ec10",
+                        "0x01ec5c", "0x01edbc", "0x01ee16"],
+        },
+        "source_hit_program": {
+            "phase_0x0200_launch": {
+                "entry": "0x01eb00",
+                "guard": "actor+0x07:u8 == 0x00 after recovery increments actor+0x06:u8 to 0x02",
+                "writes_in_order": [
+                    "actor+0x07:u8 += 2", "actor+0x4a:u16 = 0",
+                    "actor+0x5c:u8 = 0xff",
+                    "read launch motion from table_0x01f912[(actor+0x6c:u8 & 0xf0)]",
+                    "if actor+0x4f:u8 == 0 negate x velocity and x acceleration",
+                    "write actor+0x30,+0x38,+0x34,+0x3c:s32 16.16",
+                    "bind selector actor+0x4d:u8",
+                    "fall through to phase 0x0202 motion in the same scheduler update",
+                ],
+                "motion": launch_motion,
+                "observed_facing_field_actor_4f_u8": 0,
+                "observed_written_motion": {
+                    "x_velocity_s32_16_16": -0x1C000,
+                    "x_acceleration_s32_16_16": 0,
+                    "y_velocity_s32_16_16": 0xB8000,
+                    "y_acceleration_s32_16_16": -0x8000,
+                },
+                "selector_u8": 0x36,
+            },
+            "phase_0x0202_first_flight": {
+                "entry": "0x01eb4c",
+                "arithmetic_order": [
+                    "actor+0x10:s32 += actor+0x30:s32",
+                    "actor+0x30:s32 += actor+0x38:s32",
+                    "actor+0x14:s32 += actor+0x34:s32",
+                    "actor+0x34:s32 += actor+0x3c:s32",
+                ],
+                "landing_guard": "continue while actor+0x18:u16 < high_word(actor+0x14):u16; otherwise land",
+                "landing_writes_in_order": [
+                    "high_word(actor+0x14) = actor+0x18:u16",
+                    "actor+0x07:u8 += 2", "actor+0x5c:u8 = 0",
+                    "actor+0x73:u8 = 1",
+                    "actor+0x30,+0x38,+0x34,+0x3c:s32 = 0",
+                    "actor+0x2a:u8 = 3", "call 0x09a660", "call 0x001c4a",
+                    "if actor+0x0e:u8 != 0 actor+0x0d:u8 = 1",
+                    "bind selector actor+0x4d:u8 + 1",
+                ],
+                "source_frames": [2317, 2363],
+                "landing_visible_frame": 2364,
+                "landing_position": {"x_fp_u32": 0x025A0C00,
+                                     "y_fp_u32": 0x0136D600, "z_s16": 310},
+                "landing_selector_u8": 0x37,
+                "landing_animation_record": "0x0012ddb0",
+            },
+            "phase_0x0204_landing_hold": {
+                "entry": "0x01ec10", "timer": "actor+0x2a:u8",
+                "rule": "predecrement once per scheduler update; nonzero steps animation at 0x01ebc0; zero initializes phase 0x0206 in the same update",
+                "captured_values_before_decrement": [3, 2, 1],
+                "source_frames": [2364, 2366],
+            },
+            "phase_0x0206_bounce": {
+                "entry": "0x01ec16 then 0x01ec5c",
+                "entry_writes_in_order": [
+                    "actor+0x07:u8 += 2", "actor+0x5c:u8 = 0xff",
+                    "actor+0x73:u8 = 0",
+                    "actor+0x34:s32 = 0x00040000",
+                    "actor+0x3c:s32 = -0x0000c000",
+                    "x velocity = 0x00020000 and x acceleration = -0x00001000",
+                    "if actor+0x4f:u8 == 0 negate both x values",
+                    "bind selector actor+0x4d:u8 + 2",
+                    "fall through to motion in the same scheduler update",
+                ],
+                "observed_motion_after_facing": {
+                    "x_velocity_s32_16_16": -0x20000,
+                    "x_acceleration_s32_16_16": 0x1000,
+                    "y_velocity_s32_16_16": 0x40000,
+                    "y_acceleration_s32_16_16": -0xC000,
+                },
+                "arithmetic_order": [
+                    "actor+0x10:s32 += actor+0x30:s32",
+                    "actor+0x30:s32 += actor+0x38:s32",
+                    "actor+0x14:s32 += actor+0x34:s32",
+                    "actor+0x34:s32 += actor+0x3c:s32",
+                ],
+                "landing_guard": "continue while actor+0x18:u16 < high_word(actor+0x14):u16; otherwise land",
+                "landing_health_guard": "after clamp and call 0x001c20, branch to KO phase only when actor+0x40:s16 < 0",
+                "normal_landing_writes_in_order": [
+                    "actor+0x07:u8 += 2", "actor+0x5c:u8 = 0",
+                    "actor+0x73:u8 = 1",
+                    "actor+0x30,+0x38,+0x34,+0x3c:s32 = 0",
+                    "consume exactly one RNG call at 0x017c5e",
+                    "actor+0x2a:u8 = class timer table[(rng_result & 0x0f) + (actor+0x6d:u8 << 4)]",
+                    "call 0x09a660", "bind selector actor+0x4d:u8 + 3",
+                ],
+                "selector_u8": 0x38, "animation_record": "0x0012dd9c",
+                "source_frames": [2366, 2377],
+            },
+            "phase_0x0208_rng_hold": {
+                "entry": "0x01edbc", "global_pause_guard": "a5+0x022a:u16 == 0",
+                "timer": "actor+0x2a:u8", "timer_initial_u8": 10,
+                "captured_values_before_decrement": [10, 9, 8, 7, 6,
+                                                       5, 4, 3, 2, 1],
+                "zero_writes_in_order": [
+                    "actor+0x07:u8 += 2", "actor+0x48:u8 = 0",
+                    "actor+0x47:u8 = 0", "actor+0x6d:u8 = 0",
+                    "selector = 0x17 for hit kind 0x0c,0x13,0x15,0x14; else 0x18",
+                ],
+                "selector_u8": 0x39, "animation_record": "0x0012ddb0",
+                "source_frames": [2378, 2387],
+            },
+            "phase_0x020a_terminal_animation": {
+                "entry": "0x01ee16",
+                "guard": "step animation at 0x016536 while actor+0x24:s16 is nonnegative; call 0x01efec when negative",
+                "hit_kind_actor_49_u8": 0x15,
+                "selector_u8": 0x17,
+                "records": terminal_records,
+                "source_frames": [2388, 2412],
+            },
+            "normal_return": {
+                "entry": "0x01efec",
+                "writes_in_order": [
+                    "actor+0x05:u8 = 0", "actor+0x06:u16 = 0",
+                    "actor+0x00:u8 = 1", "actor+0x2d:u8 = 0",
+                    "actor+0x5c:u8 = 0", "actor+0x73:u8 = 0",
+                    "actor+0x6d:u8 = 0", "actor+0x70:u8 = 0",
+                    "dispatch through class table indexed by actor+0x02:u8",
+                ],
+                "visible_state_at_2413": "0x0200:0000",
+                "class1f_resume_at_2414": "0x0200:1600",
+                "class1f_resume_animation_record": "0x0012eafc",
+            },
+            "animation_selectors": hit_selectors,
+        },
+        "rng": {
+            "calls": 1, "entry": "0x017c5e", "source_frame": 2377,
+            "seed_before_u16": 0xEDD9, "seed_after_u16": 0xC9A2,
+            "result_low_nibble_u8": 2, "hit_count_actor_6d_u8": 0,
+            "timer_table_for_class1f": "0x01ed1c",
+            "timer_table_row_u8": timer_table[:16],
+            "table_sha256": hashlib.sha256(
+                program[0x1ED1C:0x1ED6C]).hexdigest(),
+            "selected_timer_u8": 10,
+            "consumption_order": "after bounce landing clamp/health guard and motion clear, before helper 0x09a660 and selector+3 binding",
+        },
         "source_blocks": {
             "class_dispatch": {"first": "0x060532", "last_exclusive": "0x060546",
                                "sha256": hashlib.sha256(opcodes[0x060532:0x060546]).hexdigest()},
@@ -1541,6 +1763,10 @@ def class1f_hit_entry_contract(program: bytes,
                                  "sha256": hashlib.sha256(opcodes[0x06105A:0x061060]).hexdigest()},
             "common_hit_entry": {"first": "0x01e868", "last_exclusive": "0x01ea4c",
                                  "sha256": hashlib.sha256(opcodes[0x01E868:0x01EA4C]).hexdigest()},
+            "hit_action_program": {"first": "0x01eae4", "last_exclusive": "0x01ee24",
+                                   "sha256": hashlib.sha256(opcodes[0x01EAE4:0x01EE24]).hexdigest()},
+            "normal_return": {"first": "0x01efec", "last_exclusive": "0x01f01c",
+                              "sha256": hashlib.sha256(opcodes[0x01EFEC:0x01F01C]).hexdigest()},
             "reaction_selector": {"first": "0x01f6c6", "last_exclusive": "0x01f722",
                                   "sha256": hashlib.sha256(opcodes[0x01F6C6:0x01F722]).hexdigest()},
             "animation_bind": {"first": "0x016518", "last_exclusive": "0x0165c4",
@@ -2044,7 +2270,33 @@ def validate(report: dict[str, object]) -> None:
                     hit_entry["recovery"]["captured_values_before_decrement"] ==
                         [8, 7, 6, 5, 4, 3, 2, 1, 0] and
                     hit_entry["recovery"]["next_action_phase_u16"] == 0x0200 and
-                    hit_entry["rng_calls"] == [] and
+                    hit_entry["entry_rng_calls"] == [] and
+                    hit_entry["action_dispatch"]
+                        ["required_action_phases_u16"] ==
+                        [0x0200, 0x0202, 0x0204, 0x0206, 0x0208, 0x020A] and
+                    hit_entry["source_hit_program"]["phase_0x0200_launch"]
+                        ["observed_written_motion"]["x_velocity_s32_16_16"] ==
+                        -0x1C000 and
+                    hit_entry["source_hit_program"]
+                        ["phase_0x0202_first_flight"]
+                        ["landing_visible_frame"] == 2364 and
+                    hit_entry["source_hit_program"]["phase_0x0204_landing_hold"]
+                        ["captured_values_before_decrement"] == [3, 2, 1] and
+                    hit_entry["source_hit_program"]["phase_0x0206_bounce"]
+                        ["observed_motion_after_facing"]
+                        ["y_acceleration_s32_16_16"] == -0xC000 and
+                    hit_entry["source_hit_program"]["phase_0x0208_rng_hold"]
+                        ["timer_initial_u8"] == 10 and
+                    hit_entry["source_hit_program"]
+                        ["phase_0x020a_terminal_animation"]
+                        ["records"][-1]["animation_record"] == "0x0012ded8" and
+                    hit_entry["source_hit_program"]["normal_return"]
+                        ["class1f_resume_at_2414"] == "0x0200:1600" and
+                    hit_entry["rng"]["calls"] == 1 and
+                    hit_entry["rng"]["seed_before_u16"] == 0xEDD9 and
+                    hit_entry["rng"]["seed_after_u16"] == 0xC9A2 and
+                    hit_entry["rng"]["result_low_nibble_u8"] == 2 and
+                    hit_entry["rng"]["selected_timer_u8"] == 10 and
                     hit_entry["mutation_control"]["mutations"] == 2 and
                     hit_entry["mutation_control"]["mutant_animation_record"] ==
                         "0x0012dc50" and

@@ -65,6 +65,13 @@ for label,mutate in [
     ('source-hit-selector',lambda x:x['damage_hit_ko_removal']['source_hit_entry_program']['reaction_table'].__setitem__('reaction_selector_actor_4d_u8',0)),
     ('source-hit-record',lambda x:x['damage_hit_ko_removal']['source_hit_entry_program']['visible_result'].__setitem__('animation_record','0x0012dc50')),
     ('source-hit-recovery',lambda x:x['damage_hit_ko_removal']['source_hit_entry_program']['recovery']['captured_values_before_decrement'].__setitem__(0,7)),
+    ('source-hit-launch-motion',lambda x:x['damage_hit_ko_removal']['source_hit_entry_program']['source_hit_program']['phase_0x0200_launch']['observed_written_motion'].__setitem__('x_velocity_s32_16_16',-0x1b000)),
+    ('source-hit-first-landing',lambda x:x['damage_hit_ko_removal']['source_hit_entry_program']['source_hit_program']['phase_0x0202_first_flight'].__setitem__('landing_visible_frame',2363)),
+    ('source-hit-landing-hold',lambda x:x['damage_hit_ko_removal']['source_hit_entry_program']['source_hit_program']['phase_0x0204_landing_hold']['captured_values_before_decrement'].__setitem__(0,2)),
+    ('source-hit-bounce-gravity',lambda x:x['damage_hit_ko_removal']['source_hit_entry_program']['source_hit_program']['phase_0x0206_bounce']['observed_motion_after_facing'].__setitem__('y_acceleration_s32_16_16',-0xb000)),
+    ('source-hit-rng-timer',lambda x:x['damage_hit_ko_removal']['source_hit_entry_program']['rng'].__setitem__('selected_timer_u8',9)),
+    ('source-hit-terminal-record',lambda x:x['damage_hit_ko_removal']['source_hit_entry_program']['source_hit_program']['phase_0x020a_terminal_animation']['records'][-1].__setitem__('animation_record','0x0012dec8')),
+    ('source-hit-return',lambda x:x['damage_hit_ko_removal']['source_hit_entry_program']['source_hit_program']['normal_return'].__setitem__('class1f_resume_at_2414','0x0200:0000')),
     ('source-hit-mutation',lambda x:x['damage_hit_ko_removal']['source_hit_entry_program']['mutation_control'].__setitem__('mutations',0)),
     ('source-hit-score-audio-correction',lambda x:x['damage_hit_ko_removal']['source_hit_entry_program'].__setitem__('score_correction','audio')),
     ('current-retained-authority',lambda x:x['authority_boundary'].__setitem__('retained_gameplay_authority_forbidden',False)),
@@ -104,4 +111,4 @@ for label,mutate in [
     ('inner8-direction-table',lambda x:x['observed_path_program']['source_tables']['direction_octant_base_u8'].__setitem__(0,0)),
 ]:
     mutant=copy.deepcopy(report);target=next(item for item in mutant['archetypes'] if item['class']=='0x1f')['first_segment_action_execution_contract']['inner_state_0x08_program'];mutate(target);reject(mutant,label)
-print('ORACLE-11 Round 1 enemy tests: PASS (71 mutations rejected)')
+print('ORACLE-11 Round 1 enemy tests: PASS (78 mutations rejected)')
