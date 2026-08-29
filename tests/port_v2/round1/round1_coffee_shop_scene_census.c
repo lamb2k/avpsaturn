@@ -21,7 +21,7 @@ static void emit_actor(unsigned int frame, const char *pool,
         (actor->actor_class == 0x10 || actor->actor_class == 0x49) &&
         source_state != 0u && source_state <= 6u)
         source_state = (unsigned short)(source_state << 8);
-    printf("%u\t%s\t%08lx\t%u\t%02x\t%04x\t%04x\t%ld\t%ld\t%d\t%u\t%08lx\t%08lx\t%d\t%u\t%u\t%d\t%d\t%u\t%u\t%u\t%u\t%u\t%u\t%u\t%u\t0\t0\t0\t0\n",
+    printf("%u\t%s\t%08lx\t%u\t%02x\t%04x\t%04x\t%ld\t%ld\t%d\t%u\t%08lx\t%08lx\t%d\t%u\t%u\t%d\t%d\t%u\t%u\t%u\t%u\t%u\t%u\t%u\t%u\t0\t0\t0\t0\t0\t0\n",
            frame, pool, actor->source_slot, actor->type,
            (unsigned int)(unsigned char)actor->actor_class,
            source_state, actor->substate, x_fp, y_fp, actor->z,
@@ -41,7 +41,7 @@ static void emit_projectile(unsigned int frame,
         return;
     source_state = actor->state == 0u ? 0u : (unsigned short)(
         ((unsigned short)actor->state << 8) | actor->substate);
-    printf("%u\trecord4\t00ff%04x\t4\t%02x\t%04x\t%04x\t%ld\t%ld\t%d\t%u\t%08lx\t%08lx\t%d\t0\t%u\t%d\t%d\t0\t0\t0\t0\t0\t0\t0\t%u\t%08lx\t%08lx\t%d\t%u\t%u\n",
+    printf("%u\trecord4\t00ff%04x\t4\t%02x\t%04x\t%04x\t%ld\t%ld\t%d\t%u\t%08lx\t%08lx\t%d\t0\t%u\t%d\t%d\t0\t0\t0\t0\t0\t0\t0\t%u\t%08lx\t%08lx\t%d\t%u\t%u\t%u\t%u\n",
            frame, actor->source_slot,
            (unsigned int)(unsigned char)actor->actor_class,
            (unsigned int)source_state, 0u,
@@ -52,7 +52,8 @@ static void emit_projectile(unsigned int frame,
            actor->attack_table,
            avsp_round1_weapon_current_attack_record(actor),
            actor->collision_result,
-           actor->collision_identity, actor->collision_registered);
+           actor->collision_identity, actor->collision_registered,
+           actor->angle, actor->progress);
 }
 
 int main(void)
@@ -62,7 +63,7 @@ int main(void)
     unsigned int index;
     int player_authority_enabled_at_tick_start;
     avsp_round1_init(&runtime);
-    puts("frame\tpool\tsource_slot\ttype\tclass\tstate\tsubstate\tx_fp\ty_fp\tz\tfacing\tanimation_record\tassembly\thealth\thurt_selector\tattack_selector\tx\ty\tsource_a3\tsource_a4\tsource_a5\tsource_a6\tsource_style85\tsource_b0\tsource_direction\tanimation_timer\tattack_table\tcurrent_attack_record\tcollision_result\tcollision_identity\tcollision_registered");
+    puts("frame\tpool\tsource_slot\ttype\tclass\tstate\tsubstate\tx_fp\ty_fp\tz\tfacing\tanimation_record\tassembly\thealth\thurt_selector\tattack_selector\tx\ty\tsource_a3\tsource_a4\tsource_a5\tsource_a6\tsource_style85\tsource_b0\tsource_direction\tanimation_timer\tattack_table\tcurrent_attack_record\tcollision_result\tcollision_identity\tcollision_registered\tangle\tprogress");
     for (source_frame = 1972u; source_frame <= 5566u; ++source_frame)
     {
         unsigned short input = avsp_round1_coffee_shop_source_input(
@@ -87,6 +88,17 @@ int main(void)
              ++index)
             emit_projectile(source_frame,
                             &runtime.player_weapon_projectiles[index]);
+        if (source_frame >= 2467u && source_frame <= 2501u)
+        {
+            const AvspRound1WeaponProjectileAllocation *parent =
+                &runtime.player_weapon_projectiles[0];
+            fprintf(stderr,
+                    "record4_trajectory frame=%u active=%u state=%u x=%d y=%d z=%d camera=%d/%d navigation=%d/%d\n",
+                    source_frame, parent->active, parent->state,
+                    parent->x, parent->y, parent->z,
+                    runtime.camera_x_position, runtime.camera_z_position,
+                    runtime.navigation_bound_x, runtime.navigation_bound_z);
+        }
         if (source_frame == 2072u || source_frame == 2073u ||
             (source_frame >= 2249u && source_frame <= 2294u) ||
             (source_frame >= 2348u && source_frame <= 2380u) ||

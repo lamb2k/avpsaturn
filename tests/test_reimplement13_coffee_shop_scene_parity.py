@@ -56,6 +56,18 @@ item["native_capture"]["fixed_slot_reuse_presentation"]["native"][1][
     "animation_record"] = "0x00000000"
 mutations.append(("fixed-slot reused presentation clear", item))
 item = copy.deepcopy(BASE)
+item["native_capture"]["record4_parent_fixed_trajectory"]["native_anchors"][0][
+    "x_fp_s32"] = "0x03b50000"
+mutations.append(("record4 fixed-slot fractional residue clear", item))
+item = copy.deepcopy(BASE)
+item["native_capture"]["record4_parent_fixed_trajectory"]["native_anchors"][0][
+    "angle_u8"] = 47
+mutations.append(("record4 truncated target range", item))
+item = copy.deepcopy(BASE)
+item["native_capture"]["record4_parent_fixed_trajectory"]["native_anchors"][3][
+    "animation_record"] = "0x0002fbb8"
+mutations.append(("record4 terminal presentation early exit", item))
+item = copy.deepcopy(BASE)
 item["native_capture"]["class1f_action16_rng_reuse"][
     "native_seed_after_visible_frame"] = "0x1614"
 mutations.append(("class1f action-0x16 duplicate RNG call", item))

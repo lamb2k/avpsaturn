@@ -7561,7 +7561,7 @@
           }
         },
         "resource_and_projectile_authority": "data/oracle11_predator_weapon_projectile_resource.json",
-        "resource_artifact_sha256": "1d42913809fb8f18747e9194f827e837f3b38fdea1eb5dbbfe091c7102b01341",
+        "resource_artifact_sha256": "24b23729b4a31877bf60de14a93c00237108439cd31e79d7d60d9db8621bba39",
         "resource_status": "SOURCE_CLOSED",
         "spawn_branch": "0x023858",
         "writer": "0x023860"
@@ -18291,6 +18291,7 @@
             "0x001fb4c0",
             "0x001fb5c0"
           ],
+          "presentation_terminal_rule": "record 0x0002fbb8 branch -32768 returns to 0x0002fba8; it does not enter emitter state 4",
           "route_motion_vectors_s16": {
             "high": {
               "17": [
@@ -22039,7 +22040,7 @@
             ],
             "eligible_guard": "active != 0 AND u8(actor+0x04) < 4 AND u16(target_z-player_z+16) < 32 AND target is ahead for facing",
             "entry": "0x0241f0",
-            "nearest_rule": "scan ascending slots; retain distance <= current unsigned u8 maximum 255, so equal distance selects the later slot",
+            "nearest_rule": "scan ascending slots; MOVEQ #0xff sign-extends D4 to 0xffffffff, so the unsigned word comparison begins at 65535; retain distance <= current u16 nearest, and equal distance selects the later slot",
             "pool_base": "0xff9580",
             "pool_count_u8": 20,
             "pool_stride_u16": 192,
@@ -22086,7 +22087,7 @@
           "class_u8": 0,
           "facing_u8": "copy player +0x0f",
           "owner_pointer_u16": "player low word",
-          "position": "copy player x/y/z high words",
+          "position": "copy player x/y/z high words; allocator does not clear the record, so x/y fractional low words survive fixed-slot reuse",
           "variant_u8": 0
         },
         "allocator": "0x01773e",
@@ -23653,7 +23654,7 @@
           "next_state_u8": 2,
           "object_or_u16": "0x8000",
           "player_presentation_selector_u8": "player +0x24 low byte",
-          "position_rule": "decrement z high word, then add signed selector offsets from parent presentation table; negate x only when facing is nonzero",
+          "position_rule": "decrement z high word, then add signed selector offsets from parent presentation table; negate x only when facing is nonzero; write only x/y high words and preserve their reused fractional low words",
           "presentation_records": [
             {
               "animation_record": "0x0002fb48",

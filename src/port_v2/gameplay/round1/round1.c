@@ -3604,6 +3604,30 @@ static void avsp_round1_bind_player_weapon_frame(
     ++runtime->player_weapon_presentation_bindings;
 }
 
+static long avsp_round1_replace_fixed_high_word(long value, short high)
+{
+    return (long)high * 65536L +
+        (long)((unsigned long)value & 0x0000ffffUL);
+}
+
+static void avsp_round1_clear_weapon_projectile_slot(
+    AvspRound1WeaponProjectileAllocation *projectile)
+{
+    unsigned long animation_record = projectile->animation_record;
+    unsigned long assembly = projectile->assembly;
+    unsigned short animation_timer = projectile->animation_timer;
+    short animation_branch = projectile->animation_branch;
+    unsigned short x_fraction = (unsigned short)projectile->x_fp;
+    unsigned short y_fraction = (unsigned short)projectile->y_fp;
+    memset(projectile, 0, sizeof(*projectile));
+    projectile->animation_record = animation_record;
+    projectile->assembly = assembly;
+    projectile->animation_timer = animation_timer;
+    projectile->animation_branch = animation_branch;
+    projectile->x_fp = (long)x_fraction;
+    projectile->y_fp = (long)y_fraction;
+}
+
 static int avsp_round1_allocate_player_weapon_projectile(
     AvspRound1Runtime *runtime)
 {
@@ -3623,7 +3647,7 @@ static int avsp_round1_allocate_player_weapon_projectile(
         return 0;
     }
     projectile = &runtime->player_weapon_projectiles[index];
-    memset(projectile, 0, sizeof(*projectile));
+    avsp_round1_clear_weapon_projectile_slot(projectile);
     projectile->collision_identity =
         avsp_round1_next_collision_identity(runtime);
     projectile->collision_registration_pending = 1u;
@@ -3647,8 +3671,10 @@ static int avsp_round1_allocate_player_weapon_projectile(
     projectile->child_count = avsp_round1_weapon_projectile.child_count;
     projectile->child_cadence =
         avsp_round1_weapon_projectile.child_cadence_initial;
-    projectile->x_fp = (long)runtime->player.x * 65536L;
-    projectile->y_fp = (long)runtime->player.y * 65536L;
+    projectile->x_fp = avsp_round1_replace_fixed_high_word(
+        projectile->x_fp, runtime->player.x);
+    projectile->y_fp = avsp_round1_replace_fixed_high_word(
+        projectile->y_fp, runtime->player.y);
     projectile->z_fp = (long)runtime->player.z * 65536L;
     ++runtime->player_weapon_allocations;
     return 1;
@@ -3661,7 +3687,7 @@ static void avsp_round1_player_weapon_target(
     const AvspRound1Pool *pool = &runtime->pools[0];
     unsigned int index;
     unsigned int threshold_index;
-    unsigned short nearest = 0x00ffu;
+    unsigned short nearest = 0xffffu;
     unsigned char found = 0u;
     unsigned char distance_selector = 15u;
     for (index = 0u; index < pool->capacity; ++index)
@@ -3794,7 +3820,7 @@ static int avsp_round1_allocate_player_air_weapon_projectile(
     if (index >= AVSP_ROUND1_WEAPON_PROJECTILE_CAPACITY)
         return 0;
     projectile = &runtime->player_weapon_projectiles[index];
-    memset(projectile, 0, sizeof(*projectile));
+    avsp_round1_clear_weapon_projectile_slot(projectile);
     projectile->collision_identity =
         avsp_round1_next_collision_identity(runtime);
     projectile->collision_registration_pending = 1u;
@@ -3825,8 +3851,10 @@ static int avsp_round1_allocate_player_air_weapon_projectile(
     projectile->child_count = avsp_round1_air_weapon_projectile.child_count;
     projectile->child_cadence =
         avsp_round1_air_weapon_projectile.child_cadence_initial;
-    projectile->x_fp = (long)projectile->x * 65536L;
-    projectile->y_fp = (long)projectile->y * 65536L;
+    projectile->x_fp = avsp_round1_replace_fixed_high_word(
+        projectile->x_fp, projectile->x);
+    projectile->y_fp = avsp_round1_replace_fixed_high_word(
+        projectile->y_fp, projectile->y);
     projectile->z_fp = (long)projectile->z * 65536L;
     ++runtime->player_weapon_allocations;
     ++runtime->player_air_weapon_allocations;
@@ -6301,10 +6329,6 @@ static int avsp_round1_release_player_weapon_projectile(
     AvspRound1Runtime *runtime, unsigned int index)
 {
     AvspRound1WeaponProjectileAllocation *projectile;
-    unsigned long animation_record;
-    unsigned long assembly;
-    unsigned short animation_timer;
-    short animation_branch;
     if (index >= AVSP_ROUND1_WEAPON_PROJECTILE_CAPACITY ||
         runtime->player_weapon_projectile_free_count >=
             AVSP_ROUND1_WEAPON_PROJECTILE_CAPACITY)
@@ -6315,15 +6339,7 @@ static int avsp_round1_release_player_weapon_projectile(
     runtime->player_weapon_projectile_free_stack[
         runtime->player_weapon_projectile_free_count] = (unsigned char)index;
     ++runtime->player_weapon_projectile_free_count;
-    animation_record = projectile->animation_record;
-    assembly = projectile->assembly;
-    animation_timer = projectile->animation_timer;
-    animation_branch = projectile->animation_branch;
-    memset(projectile, 0, sizeof(*projectile));
-    projectile->animation_record = animation_record;
-    projectile->assembly = assembly;
-    projectile->animation_timer = animation_timer;
-    projectile->animation_branch = animation_branch;
+    avsp_round1_clear_weapon_projectile_slot(projectile);
     ++runtime->player_weapon_projectile_releases;
     return 1;
 }
@@ -6336,10 +6352,6 @@ static int avsp_round1_allocate_weapon_child(
     unsigned int index;
     AvspRound1WeaponProjectileAllocation *child;
     short x_offset;
-    unsigned long animation_record;
-    unsigned long assembly;
-    unsigned short animation_timer;
-    short animation_branch;
     if (runtime->player_weapon_projectile_free_count == 0u)
     {
         ++runtime->player_weapon_allocation_failures;
@@ -6351,15 +6363,7 @@ static int avsp_round1_allocate_weapon_child(
     if (index >= AVSP_ROUND1_WEAPON_PROJECTILE_CAPACITY)
         return 0;
     child = &runtime->player_weapon_projectiles[index];
-    animation_record = child->animation_record;
-    assembly = child->assembly;
-    animation_timer = child->animation_timer;
-    animation_branch = child->animation_branch;
-    memset(child, 0, sizeof(*child));
-    child->animation_record = animation_record;
-    child->assembly = assembly;
-    child->animation_timer = animation_timer;
-    child->animation_branch = animation_branch;
+    avsp_round1_clear_weapon_projectile_slot(child);
     child->collision_identity = avsp_round1_next_collision_identity(runtime);
     child->collision_registration_pending = 1u;
     x_offset = parent->facing == 0u ? (short)-row->x : row->x;
@@ -6374,8 +6378,8 @@ static int avsp_round1_allocate_weapon_child(
     child->x = (short)(parent->x + x_offset);
     child->y = (short)(parent->z + row->y);
     child->z = (short)(parent->z + row->z);
-    child->x_fp = (long)child->x * 65536L;
-    child->y_fp = (long)child->y * 65536L;
+    child->x_fp = avsp_round1_replace_fixed_high_word(child->x_fp, child->x);
+    child->y_fp = avsp_round1_replace_fixed_high_word(child->y_fp, child->y);
     child->z_fp = (long)child->z * 65536L;
     child->attack_table = avsp_round1_player_weapon.child_attack_table;
     child->state = avsp_round1_weapon_projectile.initial_state;
@@ -6515,8 +6519,10 @@ static int avsp_round1_step_air_weapon_projectile(
             (projectile->facing == 0u ? -offset->x : offset->x));
         projectile->y = (short)(projectile->y + offset->y);
         --projectile->z;
-        projectile->x_fp = (long)projectile->x * 65536L;
-        projectile->y_fp = (long)projectile->y * 65536L;
+        projectile->x_fp = avsp_round1_replace_fixed_high_word(
+            projectile->x_fp, projectile->x);
+        projectile->y_fp = avsp_round1_replace_fixed_high_word(
+            projectile->y_fp, projectile->y);
         projectile->z_fp = (long)projectile->z * 65536L;
         projectile->object_or = avsp_round1_air_weapon_projectile.object_or;
         projectile->active_collision = 1u;
@@ -6708,8 +6714,10 @@ static int avsp_round1_step_weapon_projectile(
             (projectile->facing != 0u ? -offset->x : offset->x));
         projectile->y = (short)(projectile->y + offset->y);
         projectile->z = (short)(projectile->z - 1);
-        projectile->x_fp = (long)projectile->x * 65536L;
-        projectile->y_fp = (long)projectile->y * 65536L;
+        projectile->x_fp = avsp_round1_replace_fixed_high_word(
+            projectile->x_fp, projectile->x);
+        projectile->y_fp = avsp_round1_replace_fixed_high_word(
+            projectile->y_fp, projectile->y);
         projectile->z_fp = (long)projectile->z * 65536L;
         projectile->collision_result = 0;
         projectile->active_collision = 1u;
@@ -6752,17 +6760,25 @@ static int avsp_round1_step_weapon_projectile(
             return 1;
         }
         x_distance = (unsigned short)(projectile->x -
-            runtime->navigation_bound_x +
+            runtime->camera_x_position +
             avsp_round1_weapon_projectile.x_bound_bias);
         if (x_distance > avsp_round1_weapon_projectile.x_bound_span)
-            return avsp_round1_release_player_weapon_projectile(runtime,
-                                                                 index);
+        {
+            projectile->state = avsp_round1_weapon_projectile.emitter_state;
+            projectile->child_cadence =
+                avsp_round1_weapon_projectile.child_cadence_initial;
+            return 1;
+        }
         y_distance = (unsigned short)(projectile->y -
-            runtime->navigation_bound_z +
+            runtime->camera_z_position +
             avsp_round1_weapon_projectile.y_bound_bias);
         if (y_distance > avsp_round1_weapon_projectile.y_bound_span)
-            return avsp_round1_release_player_weapon_projectile(runtime,
-                                                                 index);
+        {
+            projectile->state = avsp_round1_weapon_projectile.emitter_state;
+            projectile->child_cadence =
+                avsp_round1_weapon_projectile.child_cadence_initial;
+            return 1;
+        }
         if ((unsigned short)projectile->y < (unsigned short)projectile->z)
         {
             projectile->state = avsp_round1_weapon_projectile.emitter_state;
@@ -6796,9 +6812,12 @@ static int avsp_round1_step_weapon_projectile(
             if (projectile->presentation_index + 1u >=
                 projectile->presentation_count)
             {
-                projectile->state = avsp_round1_weapon_projectile.emitter_state;
-                projectile->child_cadence =
-                    avsp_round1_weapon_projectile.child_cadence_initial;
+                if (projectile->animation_branch >= 0 ||
+                    projectile->presentation_count < 2u)
+                    return 0;
+                projectile->presentation_index = (unsigned char)(
+                    projectile->presentation_count - 2u);
+                avsp_round1_bind_projectile_animation(projectile);
             }
             else
             {

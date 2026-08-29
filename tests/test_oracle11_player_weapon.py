@@ -111,6 +111,10 @@ def validate(data):
     assert init["presentation_records"][-1]["animation_record"] == "0x0002fbb8"
     assert init["presentation_records"][-1]["branch_s16"] < 0
     assert "negate x only when facing is nonzero" in init["position_rule"]
+    assert "preserve their reused fractional low words" in \
+        init["position_rule"]
+    assert "fractional low words survive fixed-slot reuse" in \
+        parent["allocation_writes"]["position"]
     active = parent["active_state"]
     assert active["angle_u8_route_values"] == {
         "cold_run_1": [17], "facing_reversed": [47],
@@ -126,6 +130,9 @@ def validate(data):
     assert len(active["route_motion_vectors_s16"]["high"]["47"]) == 13
     assert active["coffee_shop_route_angles_u8"] == [17, 21, 42, 45, 46]
     assert active["base_motion_vectors_s16"]["45"] == [-489, -169]
+    assert active["presentation_terminal_rule"] == (
+        "record 0x0002fbb8 branch -32768 returns to 0x0002fba8; it does "
+        "not enter emitter state 4")
     target = active["target_selection"]
     assert target["entry"] == "0x0241f0"
     assert target["distance_thresholds_u16"] == [
@@ -133,6 +140,8 @@ def validate(data):
         192, 251, 352]
     assert target["presentation_selectors_u8"] == \
         [7, 7, 7, 7, 6, 6, 6, 6, 5, 5, 5, 5, 4, 4, 4, 4]
+    assert "unsigned word comparison begins at 65535" in \
+        target["nearest_rule"]
     emitter = parent["child_emitter_state"]
     assert emitter["initial_child_count_u8"] == 5
     assert emitter["cadence_reload_u8"] == 6
@@ -312,6 +321,9 @@ for path, value, label in [
     (("implementation_contract", "record4_parent_class0", "state_sequence_u8"), [0, 2, 4, 6, 8], "invented parent state"),
     (("implementation_contract", "record4_parent_class0", "active_state", "angle_u8_route_values", "cold_run_1"), [16], "wrong target angle"),
     (("implementation_contract", "record4_parent_class0", "active_state", "target_selection", "distance_thresholds_u16", 13), 191, "wrong target threshold"),
+    (("implementation_contract", "record4_parent_class0", "active_state", "target_selection", "nearest_rule"), "scan from 255", "truncated nearest-target range"),
+    (("implementation_contract", "record4_parent_class0", "active_state", "presentation_terminal_rule"), "enter state 4", "terminal presentation loop removed"),
+    (("implementation_contract", "record4_parent_class0", "allocation_writes", "position"), "copy complete fixed point position", "fixed-slot fractional residue cleared"),
     (("implementation_contract", "record4_parent_class0", "active_state", "base_motion_vectors_s16", "45", 0), -488, "wrong shared base motion"),
     (("implementation_contract", "record4_parent_class0", "initialization", "presentation_records", 7, "animation_record"), "0x0002fba8", "missing terminal presentation"),
     (("implementation_contract", "source_input", "native_input_pipeline_updates_u8"), 0, "missing source input pipeline"),

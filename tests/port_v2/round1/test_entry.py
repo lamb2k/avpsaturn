@@ -9,7 +9,7 @@ from pathlib import Path
 
 ROOT = Path(__file__).resolve().parents[3]
 SPEC = ROOT / "data/spec02_round1_executable_contract.json"
-EXPECTED = "9a65b6d082e477898aa966ae06984b5d4807f2db7ddbdfb3d5552bc0c5ad2d56"
+EXPECTED = "56f273bae8740ab294be897ab14831a727d1354116211e05ac64c97dfb536238"
 assert hashlib.sha256(SPEC.read_bytes()).hexdigest() == EXPECTED
 assert json.loads(SPEC.read_text())["status"] == "ACCEPTED"
 source = (ROOT / "src/port_v2/gameplay/round1/round1.c").read_text()
@@ -262,8 +262,16 @@ for before, after in (
      "if (0)\n                continue;"),
     ("if (projectile->actor_class == avsp_round1_weapon_projectile.child_class)\n            return avsp_round1_release_player_weapon_projectile(runtime,\n                                                                 index);",
      "if (projectile->actor_class == avsp_round1_weapon_projectile.child_class)\n            projectile->state = avsp_round1_weapon_projectile.release_state;"),
-    ("child->animation_record = animation_record;\n    child->assembly = assembly;",
-     "child->animation_record = 0UL;\n    child->assembly = assembly;"),
+    ("projectile->animation_record = animation_record;\n    projectile->assembly = assembly;",
+     "projectile->animation_record = 0UL;\n    projectile->assembly = assembly;"),
+    ("projectile->x_fp = (long)x_fraction;",
+     "projectile->x_fp = 0L;"),
+    ("unsigned short nearest = 0xffffu;",
+     "unsigned short nearest = 0x00ffu;"),
+    ("runtime->camera_x_position +\n            avsp_round1_weapon_projectile.x_bound_bias",
+     "runtime->navigation_bound_x +\n            avsp_round1_weapon_projectile.x_bound_bias"),
+    ("projectile->state = avsp_round1_weapon_projectile.emitter_state;\n            projectile->child_cadence =\n                avsp_round1_weapon_projectile.child_cadence_initial;\n            return 1;",
+     "return avsp_round1_release_player_weapon_projectile(runtime, index);"),
     ("weapon_pressed = runtime->player_weapon_input_pipeline;",
      "weapon_pressed = (unsigned char)((input_mask & AVSP_ROUND1_INPUT_BUTTON1) != 0u);"),
     ("actor->state != 0x0208u || actor->substate != 0x0e02u",

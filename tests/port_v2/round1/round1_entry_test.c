@@ -1118,10 +1118,12 @@ int main(void)
         target->health = -1;
         target->hurt_selector = 0u;
         target->facing = 0u;
-        target->x = (short)(projectile_runtime.player.x +
-            (projectile_runtime.player.facing ? -5 : 5));
-        target->y = (short)(projectile_runtime.player.y + 78);
-        target->z = (short)(projectile_runtime.player.z - 1);
+        target->state = 0x0200u;
+        target->x = (short)(projectile_runtime.player.x - 343);
+        target->y = projectile_runtime.player.y;
+        target->z = (short)(projectile_runtime.player.z - 16);
+        projectile_runtime.player_weapon_projectiles[0].x_fp = 0x00000a00L;
+        projectile_runtime.player_weapon_projectiles[0].y_fp = 0x0000b800L;
         if (!enter_button1(&projectile_runtime, 0u) ||
             !avsp_round1_step_player(&projectile_runtime, 0u, 0) ||
             !avsp_round1_step_player(&projectile_runtime, 0u, 0))
@@ -1130,11 +1132,14 @@ int main(void)
         if (!avsp_round1_step_scheduler(&projectile_runtime) ||
             projectile->state != 2u || projectile->collision_result != 0 ||
             projectile->actor_class != 0 ||
+            projectile->angle != 46u ||
             projectile->collision_identity != 0x26u ||
             projectile->attack_selector != 1u || target->health != -1 ||
             projectile->x != (short)(projectile_runtime.player.x +
                 (projectile->facing ? -5 : 5)) ||
             projectile->y != (short)(projectile_runtime.player.y + 86) ||
+            (unsigned short)projectile->x_fp != 0x0a00u ||
+            (unsigned short)projectile->y_fp != 0xb800u ||
             projectile->z != (short)(projectile_runtime.player.z - 1) ||
             projectile->coordinate_mode != 0u ||
             projectile->palette != 0u ||
@@ -1169,6 +1174,34 @@ int main(void)
                 projectile_runtime.navigation_bound_x,
                 projectile_runtime.navigation_bound_z);
             return 52;
+        }
+        {
+            AvspRound1Runtime camera_bound_runtime = projectile_runtime;
+            AvspRound1WeaponProjectileAllocation *camera_bound_parent =
+                &camera_bound_runtime.player_weapon_projectiles[0];
+            AvspRound1ActorCore *camera_bound_target =
+                &camera_bound_runtime.pools[0].records[12];
+            camera_bound_runtime.camera_x_position = 0;
+            camera_bound_runtime.navigation_bound_x = 832;
+            camera_bound_runtime.camera_z_position = camera_bound_parent->y;
+            camera_bound_parent->x = 936;
+            camera_bound_parent->x_fp = (long)camera_bound_parent->x * 65536L +
+                (unsigned short)camera_bound_parent->x_fp;
+            camera_bound_target->health = -1;
+            camera_bound_target->hurt_selector = 0u;
+            if (!avsp_round1_step_scheduler(&camera_bound_runtime) ||
+                camera_bound_parent->state != 4u ||
+                camera_bound_parent->child_cadence != 1u)
+            {
+                fprintf(stderr,
+                    "camera-bound parent state=%u cadence=%u camera=%d navigation=%d x=%d\n",
+                    camera_bound_parent->state,
+                    camera_bound_parent->child_cadence,
+                    camera_bound_runtime.camera_x_position,
+                    camera_bound_runtime.navigation_bound_x,
+                    camera_bound_parent->x);
+                return 52;
+            }
         }
         target->hurt_selector = 1u;
         target->health = 63;

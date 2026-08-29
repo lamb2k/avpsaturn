@@ -425,6 +425,75 @@ def fixed_slot_reuse_presentation(
     }
 
 
+def record4_parent_fixed_trajectory(
+        source_rows: list[dict[str, str]],
+        native_rows: list[dict[str, str]]) -> dict[str, object]:
+    """Compare the complete third-volley parent trajectory as fixed-point state."""
+    first = 2434
+    last = 2500
+    source = {
+        int(row["frame"]): row for row in source_rows
+        if int(row["slot"], 16) == 0x00ff8680 and
+        int(row["type"]) == 4 and int(row["class"], 16) == 0 and
+        first <= int(row["frame"]) <= last}
+    native = {
+        int(row["frame"]): row for row in native_rows
+        if int(row["source_slot"], 16) == 0x00ff8680 and
+        int(row["type"]) == 4 and int(row["class"], 16) == 0 and
+        first <= int(row["frame"]) <= last}
+
+    def source_projection(frame: int) -> dict[str, object]:
+        row = source[frame]
+        return {
+            "frame_u16": frame,
+            "state_u16": "0x" + row["state"],
+            "x_fp_s32": "0x" + row["x_fp"],
+            "y_fp_s32": "0x" + row["y_fp"],
+            "animation_record": "0x" + row["animation_record"],
+            "animation_timer_u16": int(row["animation_timer"], 16),
+            "angle_u8": 46,
+            "progress_u8": (int(row["action_timer"], 16) >> 8)
+                if int(row["state"], 16) == 0x0200 else None,
+        }
+
+    def native_projection(frame: int) -> dict[str, object]:
+        row = native[frame]
+        return {
+            "frame_u16": frame,
+            "state_u16": "0x" + row["state"],
+            "x_fp_s32": f"0x{int(row['x_fp']) & 0xffffffff:08x}",
+            "y_fp_s32": f"0x{int(row['y_fp']) & 0xffffffff:08x}",
+            "animation_record": "0x" + row["animation_record"],
+            "animation_timer_u16": int(row["animation_timer"]),
+            "angle_u8": int(row["angle"]),
+            "progress_u8": int(row["progress"])
+                if int(row["state"], 16) == 0x0200 else None,
+        }
+
+    source_frames = sorted(source)
+    native_frames = sorted(native)
+    source_projection_rows = [source_projection(frame)
+                              for frame in source_frames]
+    native_projection_rows = [native_projection(frame)
+                              for frame in native_frames]
+    anchors = {2434, 2435, 2462, 2466, 2469, 2500}
+    return {
+        "allocator": "0x01773e",
+        "target_selector": "0x0241f0",
+        "source_frame_range_u16": [first, last],
+        "source_row_count_u16": len(source_projection_rows),
+        "native_row_count_u16": len(native_projection_rows),
+        "source_rows_sha256": hashlib.sha256(
+            canonical(source_projection_rows)).hexdigest(),
+        "native_rows_sha256": hashlib.sha256(
+            canonical(native_projection_rows)).hexdigest(),
+        "source_anchors": [item for item in source_projection_rows
+                           if item["frame_u16"] in anchors],
+        "native_anchors": [item for item in native_projection_rows
+                           if item["frame_u16"] in anchors],
+    }
+
+
 def class1f_action16_rng_reuse(
         source_rows: list[dict[str, str]],
         native_rows: list[dict[str, str]],
@@ -695,8 +764,25 @@ def validate_report(report: dict[str, object]) -> None:
                  "animation_record": "0x00030944",
                  "assembly": "0x00030bd6", "animation_timer_u16": 2}],
             "no_source_native_divergence_through_frame_u16": 2372,
-            "next_slot_divergence_frame_u16": 2482}:
+            "next_slot_divergence_frame_u16": 2935}:
         raise ValueError("Coffee Shop record-4 fixed-slot reuse drift")
+    trajectory = report["native_capture"]["record4_parent_fixed_trajectory"]
+    if trajectory["allocator"] != "0x01773e" or \
+            trajectory["target_selector"] != "0x0241f0" or \
+            trajectory["source_frame_range_u16"] != [2434, 2500] or \
+            trajectory["source_row_count_u16"] != 67 or \
+            trajectory["native_row_count_u16"] != 67 or \
+            trajectory["source_rows_sha256"] != \
+                trajectory["native_rows_sha256"] or \
+            trajectory["source_anchors"] != trajectory["native_anchors"]:
+        raise ValueError("Coffee Shop record-4 fixed trajectory drift")
+    anchors = trajectory["source_anchors"]
+    if anchors[0]["x_fp_s32"] != "0x03b50a00" or \
+            anchors[0]["y_fp_s32"] != "0x0196b800" or \
+            any(item["angle_u8"] != 46 for item in anchors) or \
+            anchors[2]["animation_record"] != "0x0002fbb8" or \
+            anchors[3]["animation_record"] != "0x0002fba8":
+        raise ValueError("Coffee Shop record-4 reuse/angle/loop proof drift")
     action16 = report["native_capture"]["class1f_action16_rng_reuse"]
     action16_projection = [
         {"frame_u16": 2378, "state_u16": "0x0200",
@@ -889,6 +975,9 @@ def main() -> None:
                            "fixed_slot_reuse_presentation":
                                fixed_slot_reuse_presentation(
                                    source_rows, rows, divergences),
+                           "record4_parent_fixed_trajectory":
+                               record4_parent_fixed_trajectory(
+                                   source_rows, rows),
                            "class1f_action16_rng_reuse":
                                class1f_action16_rng_reuse(
                                    source_rows, rows, divergences,
