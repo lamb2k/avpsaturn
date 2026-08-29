@@ -897,6 +897,30 @@ def build() -> str:
         weapon_collision_registration["mutation_control"][
             "suppressed_writes"] != 15):
         raise ValueError("SPEC-02 collision registration/eligibility drift")
+    reaction_handoff = weapon_collision_registration[
+        "collision_to_reaction_handoff"]
+    if (reaction_handoff["classification"] !=
+            "SOURCE_CLOSED_IMPLEMENTATION_FIELDS" or
+        reaction_handoff["spec_executable"] is not True or
+        reaction_handoff["coffee_shop_slot_0xffa180"] != {
+            "collision_scheduler_source_frame_u16": 2306,
+            "collision_visible_frame_u16": 2307,
+            "health_before_s16": 87,
+            "health_after_s16": 56,
+            "state_u16": "0x0202",
+            "substate_u16": "0x0000",
+            "animation_record": "0x0012eb5c",
+            "hurt_selector_u8": 1,
+            "attack_selector_u8": 1,
+            "next_record12_visible_frame_u16": 2308,
+            "next_state_u16": "0x0202",
+            "next_substate_u16": "0x0002",
+            "next_animation_record": "0x0012e04c",
+            "next_hurt_selector_u8": 1,
+            "next_attack_selector_u8": 1} or
+        reaction_handoff["mutation_control"][
+            "first_rejected_visible_frame_u16"] != 2307):
+        raise ValueError("SPEC-02 collision-to-reaction handoff drift")
     if ([row["tick"] for row in weapon_frames] != list(range(20)) or
         [row["tick"] for row in empty_frames] != list(range(18)) or
         weapon_frames[0]["action_u16"] != 0x0c00 or

@@ -680,6 +680,57 @@ def build_fixtures(source: dict[str, dict]) -> dict[str, object]:
             "fixed_frame_substitute": False,
         },
     }
+    registration["collision_to_reaction_handoff"] = {
+        "classification": "SOURCE_CLOSED_IMPLEMENTATION_FIELDS",
+        "spec_executable": True,
+        "rule": (
+            "the record4-v-record12 collision scheduler writes health and the "
+            "outer HIT state after the defender's record-type-12 update; it "
+            "must retain the defender's current substate and presentation "
+            "until that defender's next record-type-12 scheduler update"
+        ),
+        "coffee_shop_slot_0xffa180": {
+            "collision_scheduler_source_frame_u16": 2306,
+            "collision_visible_frame_u16": 2307,
+            "health_before_s16": 87,
+            "health_after_s16": 56,
+            "state_u16": "0x0202",
+            "substate_u16": "0x0000",
+            "animation_record": "0x0012eb5c",
+            "hurt_selector_u8": 1,
+            "attack_selector_u8": 1,
+            "next_record12_visible_frame_u16": 2308,
+            "next_state_u16": "0x0202",
+            "next_substate_u16": "0x0002",
+            "next_animation_record": "0x0012e04c",
+            "next_hurt_selector_u8": 1,
+            "next_attack_selector_u8": 1,
+        },
+        "scheduler_order": [
+            "record-type-4 actor updates",
+            "record-type-12 actor updates",
+            "record4-v-record12 collision scheduler",
+            "next source scheduler invocation record-type-12 reaction bind",
+        ],
+        "evidence": {
+            "coffee_shop_scene_actors_sha256": source["route"]
+                ["coffee_shop_scene_census"]["capture_identity"]
+                ["completion_a"]["coffee_shop_scene_actors.tsv"],
+            "coffee_shop_scene_health_writes_sha256": source["route"]
+                ["coffee_shop_scene_census"]["capture_identity"]
+                ["completion_a"]["coffee_shop_scene_health_writes.tsv"],
+            "hit_transition_source":
+                "data/oracle11_round1_enemy_archetypes.json#/archetypes/3/damage_hit_ko/hit_ko_transitions",
+        },
+        "mutation_control": {
+            "mutations_rejected": [
+                "bind HIT substate and presentation in the collision scheduler",
+                "delay the health or outer-state write until the next record-type-12 update",
+            ],
+            "first_rejected_visible_frame_u16": 2307,
+            "fixed_frame_substitute": False,
+        },
+    }
     route = {key: copy.deepcopy(source["route"][key]) for key in
              ("route_entry", "first_entry_body", "data_contract", "segment_bindings",
               "route_state_edges", "enemy_spawns",

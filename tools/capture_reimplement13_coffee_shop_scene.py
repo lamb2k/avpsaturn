@@ -341,6 +341,14 @@ def collision_chronology(source: dict[str, object],
                 target_after["health"]),
             "target_state_next_visible_frame": "0x" +
                 target_after["state"],
+            "target_substate_next_visible_frame": "0x" +
+                target_after["substate"],
+            "target_animation_next_visible_frame": "0x" +
+                target_after["animation_record"],
+            "target_hurt_selector_next_visible_frame_u8": int(
+                target_after["hurt_selector"]),
+            "target_attack_selector_next_visible_frame_u8": int(
+                target_after["attack_selector"]),
             "target_slot": "0x" + target_after["source_slot"],
             "prior_target_health_values_s16": sorted(prior_target_health),
         },
@@ -414,6 +422,10 @@ def validate_report(report: dict[str, object]) -> None:
                 "target_health_during_source_frame_s16": 87,
                 "target_health_next_visible_frame_s16": 56,
                 "target_state_next_visible_frame": "0x0202",
+                "target_substate_next_visible_frame": "0x0000",
+                "target_animation_next_visible_frame": "0x0012eb5c",
+                "target_hurt_selector_next_visible_frame_u8": 1,
+                "target_attack_selector_next_visible_frame_u8": 1,
                 "target_slot": "0x00ffa180",
                 "prior_target_health_values_s16": [87]},
             "native_impact_transaction": {

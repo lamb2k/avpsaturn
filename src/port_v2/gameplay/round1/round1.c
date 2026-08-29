@@ -526,6 +526,17 @@ static int avsp_round1_class1f_begin_reaction(
     return avsp_round1_class1f_sync_reaction(actor, &reaction);
 }
 
+static void avsp_round1_class1f_queue_projectile_reaction(
+    AvspRound1ActorCore *actor, const int ko)
+{
+    actor->state = ko ? 0x0402u : 0x0202u;
+    actor->substate = 0u;
+    actor->source_action = 0u;
+    actor->source_action_timer = 0u;
+    actor->source_projectile_reaction_pending =
+        (unsigned char)(ko ? 2u : 1u);
+}
+
 static int avsp_round1_class1f_reaction_active(
     const AvspRound1ActorCore *actor)
 {
@@ -6099,9 +6110,8 @@ static int avsp_round1_projectile_collision_pass(
         ++runtime->first_encounter.player_contacts;
         ++runtime->first_encounter.alien_damage_events;
         target->source_facing_selector = projectile->facing;
-        if (!avsp_round1_class1f_begin_reaction(runtime, target,
-                                                 target->health < 0))
-            return 0;
+        avsp_round1_class1f_queue_projectile_reaction(
+            target, target->health < 0);
         if (!avsp_round1_spawn_class4e_variant1_impact(
                 runtime, projectile, target, box, &hurt))
             return 0;
@@ -6981,7 +6991,26 @@ int avsp_round1_step_scheduler(AvspRound1Runtime *runtime)
                        actor->substate == 0x1404u ||
                        actor->substate == 0x1406u ||
                        actor->substate == 0x1408u)));
-                if (avsp_round1_class1f_reaction_active(actor))
+                if (actor->source_projectile_reaction_pending != 0u)
+                {
+                    int pending_ko =
+                        actor->source_projectile_reaction_pending == 2u;
+                    actor->source_projectile_reaction_pending = 0u;
+                    if (!avsp_round1_class1f_begin_reaction(
+                            runtime, actor, pending_ko))
+                    {
+                        runtime->scheduler_failure_code = 17u;
+                        runtime->scheduler_failure_source_slot =
+                            actor->source_slot;
+                        runtime->scheduler_failure_state = actor->state;
+                        runtime->scheduler_failure_substate = actor->substate;
+                        runtime->scheduler_failure_animation_record =
+                            actor->animation_record;
+                        ++runtime->failure_count;
+                        return 0;
+                    }
+                }
+                else if (avsp_round1_class1f_reaction_active(actor))
                 {
                     if (!avsp_round1_class1f_step_reaction(runtime, actor))
                     {
