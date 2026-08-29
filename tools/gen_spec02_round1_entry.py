@@ -521,6 +521,13 @@ def build() -> str:
         action_bounds["latched_field_u8"] != "actor+0xa2" or
         action_bounds["camera_operand_u16"] != "0xff8278" or
         action_bounds["phase_guard_field_u8"] != "0xff8019" or
+        action_bounds["phase_guard_mask_u8"] != 1 or
+        action_bounds["coffee_shop_hit_return_boundary"]["phase_odd"]
+            ["phase_counter_u8"] != 0x97 or
+        action_bounds["coffee_shop_hit_return_boundary"]["phase_even"]
+            ["relative_u16"] != "0xfff9" or
+        action_bounds["coffee_shop_hit_return_boundary"]["phase_even"]
+            ["next_visible_source_frame_u16"] != 2471 or
         action_bounds["x_max_u16"] != 0x05f0 or
         action_bounds["camera_relative_bias_u16"] != 0x0070 or
         action_bounds["camera_relative_span_u16"] != 0x0260 or
@@ -1442,7 +1449,8 @@ def build() -> str:
                 record["hurt_selector_u8"], record["attack_selector_u8"]))
     lines.extend([
         "    },",
-        "    0x0200u, 0x0000u, 0x1600u,",
+        "    0x0200u, 0x0000u, 0x1600u, %du," % (
+            class1f_source_hit_return["class_tail"]["style85_after_u8"]),
         "    %du, %du, %du, %du, %du, %du, %du," % (
             class1f_source_hit_resume["actor_85_style_u8"],
             class1f_source_hit_resume["actor_a3_u8"],
@@ -1730,11 +1738,12 @@ def build() -> str:
         "};", "",
         "static const AvspRound1Class1fActionProgramSpec avsp_round1_class1f_action_program =",
         "{",
-        "    0x%04Xu, 0x%04Xu, 0x%04Xu, 0x%04Xu," % (
+        "    0x%04Xu, 0x%04Xu, 0x%04Xu, 0x%04Xu, %du," % (
             action_bounds["x_max_u16"],
             action_bounds["camera_relative_bias_u16"],
             action_bounds["camera_relative_span_u16"],
-            action_bounds["failure_outer_state_u16"]),
+            action_bounds["failure_outer_state_u16"],
+            action_bounds["phase_guard_mask_u8"]),
         "    0x%04Xu, 0x%04Xu, { 0x%02Xu, 0x%02Xu }, { 0x%02Xu, 0x%02Xu }," % (
             action_direction["upper_lane_u16"],
             action_direction["lower_lane_u16"],

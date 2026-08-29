@@ -1934,6 +1934,7 @@ int main(void)
                 source_hit_target->state != 0x0200u ||
                 source_hit_target->substate != 0x0000u ||
                 source_hit_target->source_hit_recovery_active ||
+                source_hit_target->source_style85 != 0u ||
                 source_hit_target->animation_record != 0x0012ded8UL)
                 return 56;
             if (!avsp_round1_step_scheduler(&source_hit_runtime) ||

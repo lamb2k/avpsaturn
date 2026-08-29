@@ -205,7 +205,7 @@ local stage_opcode_window = hex_opcode_bytes(0x017ac6, 0xc0)
 local class1f_bounds_opcode_window = hex_opcode_bytes(0x060c2e, 0x3a)
 
 local function emit_class1f_bounds(pc)
-    if not capture_scene or frame < 2280 or frame > 2400 then return end
+    if not capture_scene or frame < 2280 or frame > 2472 then return end
     local a5 = maincpu.state["A5"].value & 0xffffff
     local a6 = maincpu.state["A6"].value & 0xffffff
     if a6 < pool or a6 >= pool + count * stride or

@@ -801,6 +801,8 @@ static int avsp_round1_class1f_source_hit_normal_return(
     actor->source_motion_flags = 0u;
     actor->source_collision_guard6d = 0u;
     actor->source_collision_suppress70 = 0u;
+    actor->source_style85 =
+        avsp_round1_class1f_source_hit.normal_return_style85;
     avsp_round1_class1f_hit_clear_motion(actor);
     return avsp_round1_class1f_state_context_supported(
         actor->state, actor->substate);
@@ -1565,8 +1567,54 @@ static int avsp_round1_step_recurring_controller(AvspRound1Runtime *runtime)
     return 1;
 }
 
+static int avsp_round1_class1f_player_near(
+    const AvspRound1Runtime *runtime, const AvspRound1ActorCore *actor)
+{
+    short dx = (short)(runtime->player_action.x - actor->x);
+    short dz = (short)(runtime->player_action.lane - actor->z);
+    return runtime->player.active != 0u &&
+        runtime->player_action.state != AVSP_PW_STATE_KO &&
+        (unsigned short)(dx + (short)
+            avsp_round1_class1f_action_program.near_x_bias) <=
+            avsp_round1_class1f_action_program.near_x_span &&
+        (unsigned short)(dz + (short)
+            avsp_round1_class1f_action_program.near_z_bias) <=
+            avsp_round1_class1f_action_program.near_z_span;
+}
+
+static int avsp_round1_class1f_enter_near_action4(
+    AvspRound1ActorCore *actor, short player_x)
+{
+    unsigned char desired = player_x < actor->x ? 0u : 1u;
+    int selector;
+    actor->source_a5 = desired;
+    if (desired != actor->facing)
+    {
+        actor->facing = desired;
+        actor->substate = 0x0406u;
+        actor->source_action = actor->substate;
+        selector = avsp_round1_class1f_action_program.turn_selectors[
+            actor->source_style85 ? 1u : 0u];
+    }
+    else if (actor->source_style85)
+    {
+        actor->substate = 0x0408u;
+        actor->source_action = actor->substate;
+        selector = avsp_round1_class1f_action_program.idle_selectors[0];
+    }
+    else
+    {
+        actor->substate = 0x0400u;
+        actor->source_action = actor->substate;
+        return 1;
+    }
+    return avsp_round1_bind_class1f_action_selector(
+        actor, (unsigned char)selector);
+}
+
+/* 0 releases, 1 continues, 2 entered action 0x04, -1 is a bind failure. */
 static int avsp_round1_class1f_source_bounds(
-    const AvspRound1Runtime *runtime, AvspRound1ActorCore *actor)
+    AvspRound1Runtime *runtime, AvspRound1ActorCore *actor)
 {
     unsigned short relative;
     if (actor->source_a2 == 0u)
@@ -1577,6 +1625,14 @@ static int avsp_round1_class1f_source_bounds(
         if (actor->source_field01 == 0u)
             return 1;
         actor->source_a2 = 1u;
+    }
+    if ((runtime->class1f_phase_guard_counter &
+            avsp_round1_class1f_action_program.phase_guard_mask) != 0u)
+    {
+        if (!avsp_round1_class1f_player_near(runtime, actor))
+            return 1;
+        return avsp_round1_class1f_enter_near_action4(
+            actor, runtime->player_action.x) ? 2 : -1;
     }
     relative = (unsigned short)((unsigned short)actor->x -
         (unsigned short)runtime->camera_x_position +
@@ -1609,46 +1665,12 @@ static void avsp_round1_class1f_derive_direction(AvspRound1ActorCore *actor)
 static int avsp_round1_step_class1f_action_zero(
     AvspRound1Runtime *runtime, AvspRound1ActorCore *actor)
 {
-    short dx;
-    short dz;
     int selector;
     if (runtime->route_state == 0)
         return 0;
-    dx = (short)(runtime->player_action.x - actor->x);
-    dz = (short)(runtime->player_action.lane - actor->z);
-    if ((unsigned short)(dx + (short)
-            avsp_round1_class1f_action_program.near_x_bias) <=
-            avsp_round1_class1f_action_program.near_x_span &&
-        (unsigned short)(dz + (short)
-            avsp_round1_class1f_action_program.near_z_bias) <=
-            avsp_round1_class1f_action_program.near_z_span &&
-        runtime->player_action.state != AVSP_PW_STATE_KO)
-    {
-        unsigned char desired = runtime->player_action.x < actor->x ? 0u : 1u;
-        actor->source_a5 = desired;
-        if (desired != actor->facing)
-        {
-            actor->facing = desired;
-            actor->substate = 0x0406u;
-            actor->source_action = actor->substate;
-            selector = avsp_round1_class1f_action_program.turn_selectors[
-                actor->source_style85 ? 1u : 0u];
-        }
-        else if (actor->source_style85)
-        {
-            actor->substate = 0x0408u;
-            actor->source_action = actor->substate;
-            selector = avsp_round1_class1f_action_program.idle_selectors[0];
-        }
-        else
-        {
-            actor->substate = 0x0400u;
-            actor->source_action = actor->substate;
-            return 1;
-        }
-        return avsp_round1_bind_class1f_action_selector(actor,
-                                                         (unsigned char)selector);
-    }
+    if (avsp_round1_class1f_player_near(runtime, actor))
+        return avsp_round1_class1f_enter_near_action4(
+            actor, runtime->player_action.x);
     if (actor->source_a5 != actor->facing)
     {
         actor->facing ^= 1u;
@@ -2474,12 +2496,17 @@ static int avsp_round1_step_class1f_source_action(
         return avsp_round1_step_class1f_action4(runtime, actor);
     if (action == 0x02u)
     {
-        if (!avsp_round1_class1f_source_bounds(runtime, actor))
+        int bounds_result = avsp_round1_class1f_source_bounds(runtime, actor);
+        if (bounds_result < 0)
+            return 0;
+        if (bounds_result == 0)
         {
             actor->state = avsp_round1_class1f_action_program.release_state;
             actor->substate = 0u;
             return 1;
         }
+        if (bounds_result == 2)
+            return 1;
         avsp_round1_class1f_derive_direction(actor);
         if (!avsp_round1_step_class1f_action_animation(runtime, actor, 1))
             return 0;
@@ -2595,14 +2622,20 @@ static int avsp_round1_step_class1f_source_action(
     if (action == 0x16u)
     {
         int inner8_result;
+        int bounds_result;
         unsigned short random;
         unsigned char rng_consumed = 0u;
-        if (!avsp_round1_class1f_source_bounds(runtime, actor))
+        bounds_result = avsp_round1_class1f_source_bounds(runtime, actor);
+        if (bounds_result < 0)
+            return 0;
+        if (bounds_result == 0)
         {
             actor->state = avsp_round1_class1f_action_program.release_state;
             actor->substate = 0u;
             return 1;
         }
+        if (bounds_result == 2)
+            return 1;
         avsp_round1_class1f_derive_direction(actor);
         if (!avsp_round1_step_class1f_action_animation(runtime, actor, 1))
             return 0;
@@ -2664,12 +2697,17 @@ static int avsp_round1_step_class1f_source_action(
     }
     if (action == 0x1cu)
     {
-        if (!avsp_round1_class1f_source_bounds(runtime, actor))
+        int bounds_result = avsp_round1_class1f_source_bounds(runtime, actor);
+        if (bounds_result < 0)
+            return 0;
+        if (bounds_result == 0)
         {
             actor->state = avsp_round1_class1f_action_program.release_state;
             actor->substate = 0u;
             return 1;
         }
+        if (bounds_result == 2)
+            return 1;
         if (!avsp_round1_step_class1f_action_animation(runtime, actor, 1))
             return 0;
         actor->z = actor->y;
@@ -7682,6 +7720,8 @@ int avsp_round1_step_scheduler(AvspRound1Runtime *runtime)
         ++runtime->failure_count;
         return 0;
     }
+    runtime->class1f_phase_guard_counter =
+        runtime->first_encounter.source_phase_counter;
     if (!avsp_round1_step_recurring_controller(runtime))
     {
         runtime->scheduler_failure_code = 15u;

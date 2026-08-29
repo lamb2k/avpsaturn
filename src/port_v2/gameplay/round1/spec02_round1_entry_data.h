@@ -1,8 +1,8 @@
 #ifndef AVSP_SPEC02_ROUND1_ENTRY_DATA_H
 #define AVSP_SPEC02_ROUND1_ENTRY_DATA_H
 
-/* contract_sha256=56f273bae8740ab294be897ab14831a727d1354116211e05ac64c97dfb536238 */
-/* fixtures_sha256=5a508062eed207eddb25d6351b5d6b08a3e0544ac2c9726e3877caea6a2832bd */
+/* contract_sha256=41791464584f88d98b550c73c763fcdbd13c5e2a0d7750d2b975e11e9e49a287 */
+/* fixtures_sha256=fd643801590a2bab1094f84b5fd658cd7d11753d5527f77b758bc76efa433149 */
 #define AVSP_ROUND1_ENTRY_PROGRAM_SHA256 "e5ef761fadc1b5a7df62e77c03025c0ebff0c2503cbc8be9c0077d4bd6cd24ba"
 
 static const unsigned char avsp_round1_entry_program[AVSP_ROUND1_ENTRY_PROGRAM_BYTES] =
@@ -374,7 +374,7 @@ static const AvspRound1Class1fSourceHitSpec avsp_round1_class1f_source_hit =
         { 2u, 0, 0x0012dec8UL, 0x0012fb38UL, 0u, 0u },
         { 8u, -32768, 0x0012ded8UL, 0x0012f5deUL, 0u, 0u },
     },
-    0x0200u, 0x0000u, 0x1600u,
+    0x0200u, 0x0000u, 0x1600u, 0u,
     0u, 0u, 1u, 1u, 1u, 2u, 1u,
     582, 310, 944, 320,
 };
@@ -743,7 +743,7 @@ static const unsigned char avsp_round1_class1f_attack_timers[AVSP_ROUND1_CLASS1F
 
 static const AvspRound1Class1fActionProgramSpec avsp_round1_class1f_action_program =
 {
-    0x05F0u, 0x0070u, 0x0260u, 0x0600u,
+    0x05F0u, 0x0070u, 0x0260u, 0x0600u, 1u,
     0x0140u, 0x00E8u, { 0x16u, 0x0Au }, { 0x1Au, 0x06u },
     0x0020u, 0x0040u, 0x000Cu, 0x0018u,
     { 34u, 35u }, { 36u, 52u }, { 0x44u, 0x48u },

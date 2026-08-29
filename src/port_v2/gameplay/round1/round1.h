@@ -6,7 +6,7 @@
 #include "../../combat/hit_ko/hit_ko.h"
 
 #define AVSP_ROUND1_SPEC02_SHA256 \
-    "56f273bae8740ab294be897ab14831a727d1354116211e05ac64c97dfb536238"
+    "41791464584f88d98b550c73c763fcdbd13c5e2a0d7750d2b975e11e9e49a287"
 #define AVSP_ROUND1_CANARY_HEAD 0x52314548UL
 #define AVSP_ROUND1_CANARY_TAIL 0x52314554UL
 #define AVSP_ROUND1_ROUTE_ENTRY_STATE 2
@@ -554,6 +554,7 @@ typedef struct
     unsigned short normal_return_state;
     unsigned short normal_return_substate;
     unsigned short class1f_resume_substate;
+    unsigned char normal_return_style85;
     unsigned char resume_style85;
     unsigned char resume_a3;
     unsigned char resume_a4;
@@ -689,6 +690,7 @@ typedef struct
     unsigned short camera_relative_bias;
     unsigned short camera_relative_span;
     unsigned short release_state;
+    unsigned char phase_guard_mask;
     unsigned short upper_lane;
     unsigned short lower_lane;
     unsigned char upper_directions[2];
@@ -1323,6 +1325,7 @@ typedef struct
     AvspRound1Class1fTransitionRuntime class1f_transition[
         AVSP_ROUND1_CLASS1F_AIRBORNE_ACTOR_COUNT];
     unsigned char class1f_effect_guard;
+    unsigned char class1f_phase_guard_counter;
     unsigned short class1f_audio_command;
     unsigned long class1f_initializations;
     unsigned long class1f_initial_rng_calls;

@@ -27795,7 +27795,7 @@
             },
             "capture_identity": {
               "byte_identical": true,
-              "capture_script_sha256": "3cbc1c9745258095379f06392fb5e985dd794f27576140b039329f1edd7b7b3e",
+              "capture_script_sha256": "4d9f35eaa1a2d685c171f9b7fab83c49d57e8e2abd493712ee649ae69a855585",
               "completion_a": {
                 "coffee_shop_class1f_hit.tsv": "cc411e49ae629a622166f40a69c363f4ebdffb7b0f655e45b3334b3034d91648",
                 "coffee_shop_class1f_hit_program.tsv": "5dec2f9eb35a4303d0e4711d2b51def0e1bf57d411e1294596cbb64b93dfae90",
@@ -27970,6 +27970,11 @@
                 "first": "0x016518",
                 "last_exclusive": "0x0165c4",
                 "sha256": "bb5e8d016c2584344d1afef9f098eac57cb6e21c94062bba451d35b6b7490c0d"
+              },
+              "class1f_normal_return_tail": {
+                "first": "0x061060",
+                "last_exclusive": "0x061064",
+                "sha256": "e736553ff1aa855cdd3f210b41bf58e3a24d79571acb07ccb6afc9a5cad4076b"
               },
               "class_dispatch": {
                 "first": "0x060532",
@@ -28232,6 +28237,12 @@
               "normal_return": {
                 "class1f_resume_animation_record": "0x0012eafc",
                 "class1f_resume_at_2414": "0x0200:1600",
+                "class_tail": {
+                  "entry": "0x061060",
+                  "source_window_sha256": "e736553ff1aa855cdd3f210b41bf58e3a24d79571acb07ccb6afc9a5cad4076b",
+                  "style85_after_u8": 0,
+                  "write": "actor+0x85:u8 = 0"
+                },
                 "entry": "0x01efec",
                 "preserved_resume_fields": {
                   "actor_85_style_u8": 0,
@@ -28259,7 +28270,8 @@
                   "actor+0x73:u8 = 0",
                   "actor+0x6d:u8 = 0",
                   "actor+0x70:u8 = 0",
-                  "dispatch through class table indexed by actor+0x02:u8"
+                  "dispatch through class table indexed by actor+0x02:u8",
+                  "class-0x1f tail 0x061060 clears actor+0x85:u8"
                 ]
               },
               "phase_0x0200_launch": {
@@ -28550,7 +28562,7 @@
           "source_projectile_ko_program": {
             "capture_identity": {
               "byte_identical": true,
-              "capture_script_sha256": "3cbc1c9745258095379f06392fb5e985dd794f27576140b039329f1edd7b7b3e",
+              "capture_script_sha256": "4d9f35eaa1a2d685c171f9b7fab83c49d57e8e2abd493712ee649ae69a855585",
               "completion_a": {
                 "coffee_shop_class1f_hit.tsv": "ba5702bcc089aefcb3746144f5d60b61e5e72c3a0823107701b6b3fd63445335",
                 "coffee_shop_class1f_hit_program.tsv": "cbfcbfb3557698fff37e10f15cbe154a8305ce8d55d143f253eafe3f137ac4c5",
@@ -36125,6 +36137,29 @@
             "camera_operand_u16": "0xff8278",
             "camera_relative_bias_u16": 112,
             "camera_relative_span_u16": 608,
+            "coffee_shop_hit_return_boundary": {
+              "activation_field_u8": 0,
+              "actor_x_u16": "0x0259",
+              "authored_delay_forbidden": true,
+              "camera_operand_u16": "0x02d0",
+              "latched_field_u8": 1,
+              "phase_even": {
+                "guard_path": "bit 0 clear -> unsigned camera-relative result 0xfff9 exceeds 0x0260 -> outer state 0x0600",
+                "next_visible_source_frame_u16": 2471,
+                "next_visible_state": "0x0600:0000",
+                "phase_counter_u8": 152,
+                "relative_u16": "0xfff9",
+                "source_frame_u16": 2470
+              },
+              "phase_odd": {
+                "guard_path": "bit 0 set -> player proximity helper 0x060e94 returns zero -> continue action 0x16",
+                "next_visible_animation_timer_u16": 1,
+                "next_visible_state": "0x0200:1600",
+                "phase_counter_u8": 151,
+                "source_frame_u16": 2469
+              },
+              "source_slot": "0x00ff9d00"
+            },
             "coffee_shop_observation": {
               "activation_field_u8": 0,
               "actor_x_u16": "0x0258",
@@ -37820,6 +37855,13 @@
             "progression_lifecycle_writes.tsv": "a2d67f9f98fa04e696a88bb123f9b7e904714ad95dc81b494242221ad5571e22",
             "progression_result.tsv": "533001de7932a568a1c69358c536866fa50d1a70e84c7062200c07c351c20efc"
           },
+          "hit_return_bounds_a": {
+            "coffee_shop_class1f_source_bounds.tsv": "27c040494176b31730cb08e471dfa775ee6463f3e355d8fed04e26ac20a84c4d"
+          },
+          "hit_return_bounds_b": {
+            "coffee_shop_class1f_source_bounds.tsv": "27c040494176b31730cb08e471dfa775ee6463f3e355d8fed04e26ac20a84c4d"
+          },
+          "hit_return_bounds_byte_identical": true,
           "source_bounds_a": {
             "coffee_shop_class1f_source_bounds.tsv": "13d5f81aa9961ee077d1c15e198e1c878394268293cda21489124e548d74830f"
           },

@@ -33,6 +33,8 @@ COFFEE_SHOP_SCENE_B = ROOT / ".deps" / "mame" / "oracle11_progression_lifecycle_
 COFFEE_SHOP_SCENE_TIMER_SUPPRESS = ROOT / ".deps" / "mame" / "oracle11_progression_lifecycle_cs3s"
 COFFEE_SHOP_BOUNDS_A = ROOT / ".deps" / "mame" / "oracle11_progression_lifecycle_cs14a"
 COFFEE_SHOP_BOUNDS_B = ROOT / ".deps" / "mame" / "oracle11_progression_lifecycle_cs14b"
+COFFEE_SHOP_HIT_RETURN_BOUNDS_A = ROOT / ".deps" / "mame" / "oracle11_progression_lifecycle_cs37a"
+COFFEE_SHOP_HIT_RETURN_BOUNDS_B = ROOT / ".deps" / "mame" / "oracle11_progression_lifecycle_cs37b"
 CLASS1F_INNER8_A = ROOT / ".deps" / "mame" / "oracle11_progression_lifecycle_cs31a"
 CLASS1F_INNER8_B = ROOT / ".deps" / "mame" / "oracle11_progression_lifecycle_cs31b"
 CLASS1F_INNER8_SUPPRESS = ROOT / ".deps" / "mame" / "oracle11_progression_lifecycle_cs30s"
@@ -735,6 +737,30 @@ def class1f_first_segment_action_contract(program: bytes,
             all(row["opcode_window_bytes"] ==
                 opcodes[0x060C2E:0x060C68].hex() for row in first_a000),
             "Coffee Shop class-0x1f source-bounds operand/guard drift")
+    hit_return_bounds_identity_a = digest(
+        COFFEE_SHOP_HIT_RETURN_BOUNDS_A / bounds_name)
+    hit_return_bounds_identity_b = digest(
+        COFFEE_SHOP_HIT_RETURN_BOUNDS_B / bounds_name)
+    require(hit_return_bounds_identity_a == hit_return_bounds_identity_b,
+            "Coffee Shop HIT-return bounds captures differ")
+    hit_return_rows = [row for row in rows(
+        COFFEE_SHOP_HIT_RETURN_BOUNDS_A / bounds_name)
+        if row["slot"] == "ff9d00" and row["frame"] in {"2469", "2470"}]
+    phase_odd = [row for row in hit_return_rows if row["frame"] == "2469"]
+    phase_even = [row for row in hit_return_rows if row["frame"] == "2470"]
+    require(
+        [row["pc"] for row in phase_odd] ==
+            ["060c2e", "060c34", "060c4a", "060c52", "060c68", "060c70"] and
+        [row["pc"] for row in phase_even] ==
+            ["060c2e", "060c34", "060c4a", "060c52", "060c56",
+             "060c5a", "060c5e", "060c62", "0608a2"] and
+        all(row["actor_x_u16"] == "0259" and
+            row["operand_u16"] == "02d0" and row["field01"] == "00" and
+            row["fielda2"] == "01" for row in hit_return_rows) and
+        all(row["field19"] == "97" for row in phase_odd) and
+        all(row["field19"] == "98" for row in phase_even) and
+        phase_even[-2]["d0_u16"] == "fff9",
+        "Coffee Shop HIT-return phase/bounds branch drift")
     baseline = rows(FIRST_SEGMENT_ACTION_A /
                     "progression_class1f_transitions.tsv")
     suppressed = rows(FIRST_SEGMENT_ACTION_SUPPRESS /
@@ -942,7 +968,12 @@ def class1f_first_segment_action_contract(program: bytes,
                                                   bounds_identity_a},
                              "source_bounds_b": {bounds_name:
                                                   bounds_identity_b},
-                             "source_bounds_byte_identical": True},
+                             "source_bounds_byte_identical": True,
+                             "hit_return_bounds_a": {bounds_name:
+                                 hit_return_bounds_identity_a},
+                             "hit_return_bounds_b": {bounds_name:
+                                 hit_return_bounds_identity_b},
+                             "hit_return_bounds_byte_identical": True},
         "record_layout": {"state_inner_u16": "actor+0x04",
                           "action_substate_u16": "actor+0x06",
                           "facing_u8": "actor+0x0f",
@@ -1029,7 +1060,27 @@ def class1f_first_segment_action_contract(program: bytes,
                     "camera_operand_u16": "0x02d0",
                     "activation_field_u8": 0,
                     "latched_field_u8": 0,
-                    "result": "pass after x_max; camera-relative test skipped"}},
+                    "result": "pass after x_max; camera-relative test skipped"},
+                "coffee_shop_hit_return_boundary": {
+                    "source_slot": "0x00ff9d00",
+                    "actor_x_u16": "0x0259",
+                    "camera_operand_u16": "0x02d0",
+                    "activation_field_u8": 0,
+                    "latched_field_u8": 1,
+                    "phase_odd": {
+                        "source_frame_u16": 2469,
+                        "phase_counter_u8": 0x97,
+                        "guard_path": "bit 0 set -> player proximity helper 0x060e94 returns zero -> continue action 0x16",
+                        "next_visible_state": "0x0200:1600",
+                        "next_visible_animation_timer_u16": 1},
+                    "phase_even": {
+                        "source_frame_u16": 2470,
+                        "phase_counter_u8": 0x98,
+                        "guard_path": "bit 0 clear -> unsigned camera-relative result 0xfff9 exceeds 0x0260 -> outer state 0x0600",
+                        "relative_u16": "0xfff9",
+                        "next_visible_source_frame_u16": 2471,
+                        "next_visible_state": "0x0600:0000"},
+                    "authored_delay_forbidden": True}},
             "animation_movement_helper_0x0165c4": {
                 "entry_pc": "0x0165c4",
                 "source_window": source_window(opcodes, 0x0165C4),
@@ -1632,6 +1683,7 @@ def class1f_hit_entry_contract(program: bytes,
                            "records": terminal_records},
     }
     generic_selector_0x36 = class1f_selector_sequence(program, 0x36)
+    class1f_normal_return_tail = opcodes[0x061060:0x061064]
     pre_hit_context = next(row for row in transition_trace
                            if row["frame"] == "2306" and
                            row["pc"] == "01d4aa" and
@@ -1687,7 +1739,8 @@ def class1f_hit_entry_contract(program: bytes,
                 ["0x0012e04c", "0x0012e05c", "0x0012e06c",
                  "0x0012e07c", "0x0012e08c", "0x0012e09c"] and
             generic_selector_0x36["start_animation_record"] ==
-                "0x0012e410",
+                "0x0012e410" and
+            class1f_normal_return_tail == bytes.fromhex("422e0085"),
             "class-0x1f complete source HIT program drift")
 
     return {
@@ -1885,7 +1938,15 @@ def class1f_hit_entry_contract(program: bytes,
                     "actor+0x5c:u8 = 0", "actor+0x73:u8 = 0",
                     "actor+0x6d:u8 = 0", "actor+0x70:u8 = 0",
                     "dispatch through class table indexed by actor+0x02:u8",
+                    "class-0x1f tail 0x061060 clears actor+0x85:u8",
                 ],
+                "class_tail": {
+                    "entry": "0x061060",
+                    "write": "actor+0x85:u8 = 0",
+                    "style85_after_u8": 0,
+                    "source_window_sha256": hashlib.sha256(
+                        class1f_normal_return_tail).hexdigest(),
+                },
                 "visible_state_at_2413": "0x0200:0000",
                 "preserved_resume_fields": {
                     "source_frame": 2413,
@@ -1938,6 +1999,10 @@ def class1f_hit_entry_contract(program: bytes,
                                    "sha256": hashlib.sha256(opcodes[0x01EAE4:0x01EE24]).hexdigest()},
             "normal_return": {"first": "0x01efec", "last_exclusive": "0x01f01c",
                               "sha256": hashlib.sha256(opcodes[0x01EFEC:0x01F01C]).hexdigest()},
+            "class1f_normal_return_tail": {
+                "first": "0x061060", "last_exclusive": "0x061064",
+                "sha256": hashlib.sha256(
+                    class1f_normal_return_tail).hexdigest()},
             "reaction_selector": {"first": "0x01f6c6", "last_exclusive": "0x01f722",
                                   "sha256": hashlib.sha256(opcodes[0x01F6C6:0x01F722]).hexdigest()},
             "animation_bind": {"first": "0x016518", "last_exclusive": "0x0165c4",
@@ -2700,6 +2765,14 @@ def validate(report: dict[str, object]) -> None:
                     hit_entry["source_hit_program"]["normal_return"]
                         ["class1f_resume_at_2414"] == "0x0200:1600" and
                     hit_entry["source_hit_program"]["normal_return"]
+                        ["class_tail"] == {
+                            "entry": "0x061060",
+                            "write": "actor+0x85:u8 = 0",
+                            "style85_after_u8": 0,
+                            "source_window_sha256":
+                                "e736553ff1aa855cdd3f210b41bf58e3a24d79571acb07ccb6afc9a5cad4076b",
+                        } and
+                    hit_entry["source_hit_program"]["normal_return"]
                         ["preserved_resume_fields"] == {
                             "source_frame": 2413,
                             "dispatch_pc": "0x0607e8",
@@ -2786,6 +2859,17 @@ def validate(report: dict[str, object]) -> None:
                         ["camera_operand_u16"] == "0xff8278" and
                     actions["action_programs"]["source_bounds"]
                         ["phase_guard_field_u8"] == "0xff8019" and
+                    actions["action_programs"]["source_bounds"]
+                        ["phase_guard_mask_u8"] == 1 and
+                    actions["action_programs"]["source_bounds"]
+                        ["coffee_shop_hit_return_boundary"]["phase_odd"]
+                        ["phase_counter_u8"] == 0x97 and
+                    actions["action_programs"]["source_bounds"]
+                        ["coffee_shop_hit_return_boundary"]["phase_even"]
+                        ["relative_u16"] == "0xfff9" and
+                    actions["action_programs"]["source_bounds"]
+                        ["coffee_shop_hit_return_boundary"]["phase_even"]
+                        ["next_visible_source_frame_u16"] == 2471 and
                     actions["action_programs"]["source_bounds"]
                         ["x_max_u16"] == 0x05f0 and
                     actions["action_programs"]["source_bounds"]

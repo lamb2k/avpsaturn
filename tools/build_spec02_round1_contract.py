@@ -1242,6 +1242,14 @@ def validate(contract: dict[str, object], fixtures: dict[str, object],
             class1f_hit["source_hit_program"]["normal_return"]
                 ["class1f_resume_at_2414"] == "0x0200:1600" and
             class1f_hit["source_hit_program"]["normal_return"]
+                ["class_tail"] == {
+                    "entry": "0x061060",
+                    "write": "actor+0x85:u8 = 0",
+                    "style85_after_u8": 0,
+                    "source_window_sha256":
+                        "e736553ff1aa855cdd3f210b41bf58e3a24d79571acb07ccb6afc9a5cad4076b",
+                } and
+            class1f_hit["source_hit_program"]["normal_return"]
                 ["preserved_resume_fields"] == {
                     "source_frame": 2413,
                     "dispatch_pc": "0x0607e8",
@@ -1355,6 +1363,17 @@ def validate(contract: dict[str, object], fixtures: dict[str, object],
                 ["camera_operand_u16"] == "0xff8278" and
             class1f_actions["action_programs"]["source_bounds"]
                 ["phase_guard_field_u8"] == "0xff8019" and
+            class1f_actions["action_programs"]["source_bounds"]
+                ["phase_guard_mask_u8"] == 1 and
+            class1f_actions["action_programs"]["source_bounds"]
+                ["coffee_shop_hit_return_boundary"]["phase_odd"]
+                ["phase_counter_u8"] == 0x97 and
+            class1f_actions["action_programs"]["source_bounds"]
+                ["coffee_shop_hit_return_boundary"]["phase_even"]
+                ["relative_u16"] == "0xfff9" and
+            class1f_actions["action_programs"]["source_bounds"]
+                ["coffee_shop_hit_return_boundary"]["phase_even"]
+                ["next_visible_source_frame_u16"] == 2471 and
             class1f_actions["action_programs"]["source_bounds"]
                 ["x_max_u16"] == 0x05f0 and
             class1f_actions["action_programs"]["source_bounds"]

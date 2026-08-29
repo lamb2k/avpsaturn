@@ -92,12 +92,18 @@ int main(void)
         {
             const AvspRound1WeaponProjectileAllocation *parent =
                 &runtime.player_weapon_projectiles[0];
+            const AvspRound1ActorCore *hit_return_actor =
+                &runtime.pools[0].records[10];
             fprintf(stderr,
-                    "record4_trajectory frame=%u active=%u state=%u x=%d y=%d z=%d camera=%d/%d navigation=%d/%d\n",
+                    "record4_trajectory frame=%u active=%u state=%u x=%d y=%d z=%d camera=%d/%d navigation=%d/%d phase=%u class1f=%04x/%04x field01=%u a2=%u\n",
                     source_frame, parent->active, parent->state,
                     parent->x, parent->y, parent->z,
                     runtime.camera_x_position, runtime.camera_z_position,
-                    runtime.navigation_bound_x, runtime.navigation_bound_z);
+                    runtime.navigation_bound_x, runtime.navigation_bound_z,
+                    runtime.first_encounter.source_phase_counter,
+                    hit_return_actor->state, hit_return_actor->substate,
+                    hit_return_actor->source_field01,
+                    hit_return_actor->source_a2);
         }
         if (source_frame == 2072u || source_frame == 2073u ||
             (source_frame >= 2249u && source_frame <= 2294u) ||
