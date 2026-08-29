@@ -9,7 +9,7 @@ from pathlib import Path
 
 ROOT = Path(__file__).resolve().parents[3]
 SPEC = ROOT / "data/spec02_round1_executable_contract.json"
-EXPECTED = "e274c965def3371d131d13ae7617d97586415ce0934fb3a4378495b39de87f29"
+EXPECTED = "3c6188ea0fbab14de5fee7a274e42ae16bbd1b0cf16d08b3f0fd178edfd8f5ad"
 assert hashlib.sha256(SPEC.read_bytes()).hexdigest() == EXPECTED
 assert json.loads(SPEC.read_text())["status"] == "ACCEPTED"
 source = (ROOT / "src/port_v2/gameplay/round1/round1.c").read_text()
@@ -75,6 +75,13 @@ inner8_mutations = {
     "if ((random & 3u) != 0u)",
     "actor->source_motion_fields[0] = 8;\n        actor->source_action_timer =",
     "actor->source_x_fp += actor->source_x_velocity;",
+}
+ko_mutations = {
+    "actor->state = ko ? avsp_round1_class1f_source_ko.collision_state :",
+    "actor->source_hit_recovery_active = 2u;",
+    "actor->source_y_velocity =\n                avsp_round1_class1f_source_ko.launch_y_velocity;",
+    "actor->source_hit_action_timer =\n                avsp_round1_class1f_source_ko.removal_hold_timer;",
+    "runtime->first_encounter.source_progress = (unsigned short)(\n        runtime->first_encounter.source_progress +\n        avsp_round1_recurring_spawn.progress_increment);",
 }
 for before, after in (
     ("runtime->route_state = AVSP_ROUND1_ROUTE_ENTRY_STATE;", "runtime->route_state = 4;"),
@@ -277,15 +284,36 @@ for before, after in (
      "actor->source_x_fp += 0;"),
     ("actor->animation_record = animation_record;",
      "actor->animation_record = 0UL;"),
+    ("actor->state = ko ? avsp_round1_class1f_source_ko.collision_state :",
+     "actor->state = ko ? avsp_round1_class1f_source_ko.dispatch_state :"),
+    ("actor->source_hit_recovery_active = 2u;",
+     "actor->source_hit_recovery_active = 1u;"),
+    ("actor->source_y_velocity =\n                avsp_round1_class1f_source_ko.launch_y_velocity;",
+     "actor->source_y_velocity = 0L;"),
+    ("actor->source_hit_action_timer =\n                avsp_round1_class1f_source_ko.removal_hold_timer;",
+     "actor->source_hit_action_timer =\n                avsp_round1_class1f_source_ko.landing_hold_timer;"),
+    ("runtime->first_encounter.source_progress = (unsigned short)(\n        runtime->first_encounter.source_progress +\n        avsp_round1_recurring_spawn.progress_increment);",
+     "runtime->first_encounter.source_progress = (unsigned short)(\n        runtime->first_encounter.source_progress + 0u);"),
 ):
     if "--inner8-only" in sys.argv and before not in inner8_mutations:
+        continue
+    if "--ko-only" in sys.argv and before not in ko_mutations:
         continue
     assert before in source, before
     run(source.replace(before, after), header, False, before)
 if "--inner8-only" in sys.argv:
     print("REIMPLEMENT-13 class-0x1f inner-state mutation lane: PASS (5 real mutations)")
     raise SystemExit(0)
+if "--ko-only" in sys.argv:
+    print("REIMPLEMENT-13 class-0x1f projectile KO mutation lane: PASS (5 real mutations)")
+    raise SystemExit(0)
 for before, after in (
+    ("    0x0400u, 0x0402u, 0x0404u, 0x0600u,",
+     "    0x0402u, 0x0402u, 0x0404u, 0x0600u,"),
+    ("    114688L, 0L, 622592L, -20480L,",
+     "    114688L, 0L, 618496L, -20480L,"),
+    ("    2u, 0x36u, 0u, 0x15u, 8u, 3u, 60u, 6u,",
+     "    2u, 0x36u, 0u, 0x15u, 8u, 3u, 59u, 6u,"),
     ("{ 0xffa3c0u, 12u, 656, 312, 312,", "{ 0xffa3c0u, 12u, 657, 312, 312,"),
     ("{ AVSP_ROUND1_ENTRY_DWELL, 0x00u, 0u, 60u,", "{ AVSP_ROUND1_ENTRY_DWELL, 0x00u, 0u, 59u,"),
     ("    12u, 16u, 20u, 24u, 28u, 36u",
@@ -418,4 +446,4 @@ for before, after in (
                                  "--", "bash", "-lc", command],
                                 capture_output=True)
         assert result.returncode != 0, f"generated mutation escaped: {before}"
-print("REIMPLEMENT-13 entry/player/scheduler/class1f/Coffee-Shop-navigation/neutral-stop/melee/Button1/Button3/type16-projectile/first-encounter differential: PASS (165 real mutations)")
+print("REIMPLEMENT-13 entry/player/scheduler/class1f/Coffee-Shop-navigation/neutral-stop/melee/Button1/Button3/type16-projectile/first-encounter differential: PASS (173 real mutations)")

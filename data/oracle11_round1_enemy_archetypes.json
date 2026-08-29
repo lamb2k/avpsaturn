@@ -27795,7 +27795,7 @@
             },
             "capture_identity": {
               "byte_identical": true,
-              "capture_script_sha256": "7e5ab367904172e6eda500e1605e2c5c9e1d71414d4dcb74cdd22296c42eb145",
+              "capture_script_sha256": "3cbc1c9745258095379f06392fb5e985dd794f27576140b039329f1edd7b7b3e",
               "completion_a": {
                 "coffee_shop_class1f_hit.tsv": "cc411e49ae629a622166f40a69c363f4ebdffb7b0f655e45b3334b3034d91648",
                 "coffee_shop_class1f_hit_program.tsv": "5dec2f9eb35a4303d0e4711d2b51def0e1bf57d411e1294596cbb64b93dfae90",
@@ -28545,6 +28545,301 @@
               "slot": "0x00ffa180",
               "source_frame": 2308,
               "state_u16": 514
+            }
+          },
+          "source_projectile_ko_program": {
+            "capture_identity": {
+              "byte_identical": true,
+              "capture_script_sha256": "3cbc1c9745258095379f06392fb5e985dd794f27576140b039329f1edd7b7b3e",
+              "completion_a": {
+                "coffee_shop_class1f_hit.tsv": "ba5702bcc089aefcb3746144f5d60b61e5e72c3a0823107701b6b3fd63445335",
+                "coffee_shop_class1f_hit_program.tsv": "cbfcbfb3557698fff37e10f15cbe154a8305ce8d55d143f253eafe3f137ac4c5",
+                "coffee_shop_class1f_hit_writes.tsv": "6e637edc5731a32298bf2bb5e52c2c35ade8de31d9c6e8aa38157df929459ace",
+                "coffee_shop_rng_calls.tsv": "81338529f76629c3d103885c16838bd562beecf783f0b5107a5b7ecd11e219b3",
+                "coffee_shop_scene_actors.tsv": "9c0ea88c7eae6b4755b0025d356d49ae136d91de0e443fab0ff767151e43343d",
+                "coffee_shop_scene_frames.tsv": "91e4aab3a03586a6c9a143dd58ee03a72ebc52b7fd611fdc6fe0975ebd522d1d",
+                "coffee_shop_scene_health_writes.tsv": "7defadcfff16b99b8e2d5b66fc7b42443106837d698e659c64d45a8770d6aa0b",
+                "dispatches.tsv": "a47890edd3e102e8d8db5e4caa21d9b15c5c6e0a3c4800ab1aff578421102903",
+                "progression_class1f_transitions.tsv": "a9867149040dccd58597422a23c9db042b2df9fd2ee6b0d008f84c09aa3a754d",
+                "progression_result.tsv": "89e5ff6a76246c2eac618cc64c29c4c2956b51e82c7344239867986d3bee1c8e",
+                "projectiles.tsv": "323f89b97c779375272bcaf0bdfc337f3bd3601435607d7ee5804d38bf8443fa",
+                "samples.tsv": "51964bb2a5d68f44996c9a5bddd4102d131ebf2e9649b904dff91066221a7611",
+                "score_writes.tsv": "da1652439ffcf28d23957d6e56675a8963c1bc519ec7f46de46a2ef934a6f327"
+              },
+              "completion_b": {
+                "coffee_shop_class1f_hit.tsv": "ba5702bcc089aefcb3746144f5d60b61e5e72c3a0823107701b6b3fd63445335",
+                "coffee_shop_class1f_hit_program.tsv": "cbfcbfb3557698fff37e10f15cbe154a8305ce8d55d143f253eafe3f137ac4c5",
+                "coffee_shop_class1f_hit_writes.tsv": "6e637edc5731a32298bf2bb5e52c2c35ade8de31d9c6e8aa38157df929459ace",
+                "coffee_shop_rng_calls.tsv": "81338529f76629c3d103885c16838bd562beecf783f0b5107a5b7ecd11e219b3",
+                "coffee_shop_scene_actors.tsv": "9c0ea88c7eae6b4755b0025d356d49ae136d91de0e443fab0ff767151e43343d",
+                "coffee_shop_scene_frames.tsv": "91e4aab3a03586a6c9a143dd58ee03a72ebc52b7fd611fdc6fe0975ebd522d1d",
+                "coffee_shop_scene_health_writes.tsv": "7defadcfff16b99b8e2d5b66fc7b42443106837d698e659c64d45a8770d6aa0b",
+                "dispatches.tsv": "a47890edd3e102e8d8db5e4caa21d9b15c5c6e0a3c4800ab1aff578421102903",
+                "progression_class1f_transitions.tsv": "a9867149040dccd58597422a23c9db042b2df9fd2ee6b0d008f84c09aa3a754d",
+                "progression_result.tsv": "89e5ff6a76246c2eac618cc64c29c4c2956b51e82c7344239867986d3bee1c8e",
+                "projectiles.tsv": "323f89b97c779375272bcaf0bdfc337f3bd3601435607d7ee5804d38bf8443fa",
+                "samples.tsv": "51964bb2a5d68f44996c9a5bddd4102d131ebf2e9649b904dff91066221a7611",
+                "score_writes.tsv": "da1652439ffcf28d23957d6e56675a8963c1bc519ec7f46de46a2ef934a6f327"
+              },
+              "reaction_selector_table_mutation": {
+                "coffee_shop_class1f_hit.tsv": "ad7b5fe0cbb33ea6e2e28b5bf35a2db213b9f169977c034c9e94ba16c9d05ef5",
+                "coffee_shop_class1f_hit_program.tsv": "8b24ab7980e4179d63557f4b284ce56780d6594db0adc3b6575542a97578b6b4",
+                "coffee_shop_class1f_hit_writes.tsv": "cd43f150103763f07ba1751936fe1bbdb79c28c1c0108d61faeb8939cf4f3408",
+                "coffee_shop_rng_calls.tsv": "81338529f76629c3d103885c16838bd562beecf783f0b5107a5b7ecd11e219b3",
+                "coffee_shop_scene_actors.tsv": "170609ba6b9166e48f7875e53c9c9c92c5c87fe602c503fa321629b0b3a20dc8",
+                "coffee_shop_scene_frames.tsv": "91e4aab3a03586a6c9a143dd58ee03a72ebc52b7fd611fdc6fe0975ebd522d1d",
+                "coffee_shop_scene_health_writes.tsv": "7defadcfff16b99b8e2d5b66fc7b42443106837d698e659c64d45a8770d6aa0b",
+                "dispatches.tsv": "a47890edd3e102e8d8db5e4caa21d9b15c5c6e0a3c4800ab1aff578421102903",
+                "progression_class1f_transitions.tsv": "42c3c91e0905708feabf7f33f29ab996ef38b834c1f1d7420682dbad57566f1a",
+                "progression_result.tsv": "390590b47c6cb8acb4a398bc61ab72685463a163f37b5605a779e807947590cf",
+                "projectiles.tsv": "323f89b97c779375272bcaf0bdfc337f3bd3601435607d7ee5804d38bf8443fa",
+                "samples.tsv": "51964bb2a5d68f44996c9a5bddd4102d131ebf2e9649b904dff91066221a7611",
+                "score_writes.tsv": "da1652439ffcf28d23957d6e56675a8963c1bc519ec7f46de46a2ef934a6f327"
+              }
+            },
+            "classification": "SOURCE_CLOSED_IMPLEMENTATION_FIELDS",
+            "collision_visible_result": {
+              "action_substate_u16": 0,
+              "active_u8": 1,
+              "health_s16": -1,
+              "outer_state_u16": 1024,
+              "preserved_animation_record": "0x0012d638",
+              "prior_health_s16": 87,
+              "source_frame": 2363,
+              "source_slot": "0x00ffa3c0"
+            },
+            "mutation_controls": [
+              "reject immediate collision-time 0x0402 transition",
+              "reject generic Port V2 KO presentation program",
+              "zero source selector table entry 0x01fd3c changes KO presentation and lifecycle",
+              "reject authored delay or fixed-frame state change",
+              "reject wrong recovery width, motion sign, arithmetic order, landing timer, hold timer or release writer",
+              "reject any KO-owned RNG consumption"
+            ],
+            "scheduler_handoff": {
+              "action_substate_u16": 0,
+              "active_u8": 2,
+              "animation_record": "0x0012e04c",
+              "assembly": "0x001308a6",
+              "hit_kind_actor_49_u8": 21,
+              "hit_mode_actor_46_u8": 0,
+              "outer_state_u16": 1026,
+              "reaction_selector_actor_4d_u8": 54,
+              "recovery_timer_actor_2c_u8": 8,
+              "recovery_values_before_decrement_u8": [
+                8,
+                7,
+                6,
+                5,
+                4,
+                3,
+                2,
+                1,
+                0
+              ],
+              "scheduler_order": "record-12 visit after collision-owned frame-2363 visible result",
+              "source_frame": 2364
+            },
+            "scope": "Coffee Shop slot 0x00ffa3c0 lethal projectile handoff through fixed-pool release",
+            "state_program": {
+              "action_phases_u16": [
+                0,
+                512,
+                1024,
+                1536
+              ],
+              "animation_sequences": {
+                "bounce_0x38": {
+                  "records": [
+                    {
+                      "animation_record": "0x0012dd9c",
+                      "assembly": "0x00130294",
+                      "attack_selector_u8": 0,
+                      "branch_s16": -32768,
+                      "hurt_selector_u8": 0,
+                      "next_animation_record": "0x0012dd9c",
+                      "record_sha256": "66ed9b2ed74be8a7c8314e23d3dd6aeab745daf8122a03f80f3d5f952e2ada6b",
+                      "timer_u16": 4095
+                    }
+                  ],
+                  "start_animation_record": "0x0012dd9c",
+                  "terminal": "source pointer loop"
+                },
+                "landing_0x37_and_hold_0x39": {
+                  "records": [
+                    {
+                      "animation_record": "0x0012ddb0",
+                      "assembly": "0x00130346",
+                      "attack_selector_u8": 0,
+                      "branch_s16": -32768,
+                      "hurt_selector_u8": 7,
+                      "next_animation_record": "0x0012ddb0",
+                      "record_sha256": "2125394d64526eb88fc9761d2740321fb0abd360e78e90348a26cc519ca5f4b5",
+                      "timer_u16": 4095
+                    }
+                  ],
+                  "start_animation_record": "0x0012ddb0",
+                  "terminal": "source pointer loop"
+                },
+                "reaction_0x36": {
+                  "records": [
+                    {
+                      "animation_record": "0x0012e04c",
+                      "assembly": "0x001308a6",
+                      "attack_selector_u8": 0,
+                      "branch_s16": 0,
+                      "hurt_selector_u8": 0,
+                      "next_animation_record": "0x0012e05c",
+                      "record_sha256": "778e82c50f8c0e5d4f6b559e4d17e8269ff18e5c5100121eea49a6bd51a87e06",
+                      "timer_u16": 1
+                    },
+                    {
+                      "animation_record": "0x0012e05c",
+                      "assembly": "0x0013088e",
+                      "attack_selector_u8": 0,
+                      "branch_s16": 0,
+                      "hurt_selector_u8": 0,
+                      "next_animation_record": "0x0012e06c",
+                      "record_sha256": "5df001a8307ff9e2d4c1a530df248acabf04951990148922f87d35300212439c",
+                      "timer_u16": 1
+                    },
+                    {
+                      "animation_record": "0x0012e06c",
+                      "assembly": "0x001308c4",
+                      "attack_selector_u8": 0,
+                      "branch_s16": 0,
+                      "hurt_selector_u8": 0,
+                      "next_animation_record": "0x0012e07c",
+                      "record_sha256": "7e5a0f686dce89917a2210cafc0779286dba976b1e0615d815a7b31fa76e1a76",
+                      "timer_u16": 1
+                    },
+                    {
+                      "animation_record": "0x0012e07c",
+                      "assembly": "0x0013088e",
+                      "attack_selector_u8": 0,
+                      "branch_s16": 0,
+                      "hurt_selector_u8": 0,
+                      "next_animation_record": "0x0012e08c",
+                      "record_sha256": "5df001a8307ff9e2d4c1a530df248acabf04951990148922f87d35300212439c",
+                      "timer_u16": 1
+                    },
+                    {
+                      "animation_record": "0x0012e08c",
+                      "assembly": "0x001308e2",
+                      "attack_selector_u8": 0,
+                      "branch_s16": 0,
+                      "hurt_selector_u8": 0,
+                      "next_animation_record": "0x0012e09c",
+                      "record_sha256": "6120137e47ee1bee1cbaf26adee4bae384d414dab8430a6babad9b9fce2d10f0",
+                      "timer_u16": 1
+                    },
+                    {
+                      "animation_record": "0x0012e09c",
+                      "assembly": "0x0013088e",
+                      "attack_selector_u8": 0,
+                      "branch_s16": -32768,
+                      "hurt_selector_u8": 0,
+                      "next_animation_record": "0x0012e04c",
+                      "record_sha256": "401fd7041925e9c3926acc892591244d8d99992617ee43110be75798e3cb6e7d",
+                      "timer_u16": 1
+                    }
+                  ],
+                  "start_animation_record": "0x0012e04c",
+                  "terminal": "source pointer loop"
+                }
+              },
+              "bounce": {
+                "action_phase_u16": 1536,
+                "animation_record": "0x0012dd9c",
+                "source_frame": 2437,
+                "x_acceleration_s32_16_16_before_facing": 0,
+                "x_velocity_s32_16_16_before_facing": 131072,
+                "y_acceleration_s32_16_16": -49152,
+                "y_velocity_s32_16_16": 262144
+              },
+              "first_landing": {
+                "action_phase_u16": 1024,
+                "animation_record": "0x0012ddb0",
+                "clamp_y_to_z": true,
+                "source_frame": 2434,
+                "timer_actor_2a_u8": 3
+              },
+              "launch": {
+                "facing_rule": "negate x velocity and acceleration when actor+0x4f == 0",
+                "source_frame": 2373,
+                "x_acceleration_s32_16_16_before_facing": 0,
+                "x_velocity_s32_16_16_before_facing": 114688,
+                "y_acceleration_s32_16_16": -20480,
+                "y_velocity_s32_16_16": 622592
+              },
+              "release": {
+                "fixed_pool_release_required": true,
+                "outer_state_u16": 1536,
+                "outer_state_visible_frame": 2508,
+                "release_frame": 2508,
+                "release_writer": "0x0176ba"
+              },
+              "removal_hold": {
+                "action_substate_u16": 0,
+                "animation_record": "0x0012ddb0",
+                "outer_state_u16": 1028,
+                "source_frame": 2448,
+                "timer_actor_2a_u8": 60
+              },
+              "rng_calls": [],
+              "source_routines": {
+                "action_dispatch": {
+                  "first": "0x01f35e",
+                  "last_exclusive": "0x01f376",
+                  "sha256": "898718e60ac706b4d47f515dad1985a757aa972a6a84d75988365007fff1c6d1"
+                },
+                "bounce_landing": {
+                  "first": "0x01f4e8",
+                  "last_exclusive": "0x01f500",
+                  "sha256": "603916e68cec9cf0aa930e59ca9e326f5cbe34e5d233ff15f2099ddf4eac6209"
+                },
+                "landing": {
+                  "first": "0x01f3e6",
+                  "last_exclusive": "0x01f3fe",
+                  "sha256": "bf38cc60146b7dcba91a9048e20c0e98ca5180706e315f383f421988150c6daf"
+                },
+                "landing_hold_and_bounce": {
+                  "first": "0x01f466",
+                  "last_exclusive": "0x01f47e",
+                  "sha256": "4dfe8bd712548de82508e24d7fe55cc9e76ffb460b73dde239c6181a692b1a65"
+                },
+                "launch_and_flight": {
+                  "first": "0x01f374",
+                  "last_exclusive": "0x01f38c",
+                  "sha256": "26a7d49ac9012989e5b60da1e970b82fc7b763da3047b05cef957bdd9b42c1df"
+                },
+                "outer_dispatch": {
+                  "first": "0x01f248",
+                  "last_exclusive": "0x01f260",
+                  "sha256": "ee6aed95e878b2651761f0597907ebd469b1dded8f47e30b24789deedc711123"
+                },
+                "recovery_timer": {
+                  "first": "0x01f30e",
+                  "last_exclusive": "0x01f326",
+                  "sha256": "4e409f85b9cf75623a777559d965b6490ba7357b9426602b86c2e34793e2ff8f"
+                },
+                "release": {
+                  "first": "0x0176b2",
+                  "last_exclusive": "0x0176ca",
+                  "sha256": "6c4df06079953a8d9525c94bf4744f166d018e316dacb355f99b417c99024275"
+                },
+                "removal_hold": {
+                  "first": "0x01f338",
+                  "last_exclusive": "0x01f350",
+                  "sha256": "9c289530b907d1d87722e4e697f0be455cd54a960984168ea607d2834a5cf952"
+                }
+              },
+              "states_u16": [
+                1024,
+                1026,
+                1028,
+                1536
+              ]
             }
           }
         },

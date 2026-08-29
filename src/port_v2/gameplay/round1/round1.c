@@ -80,6 +80,8 @@ static int avsp_round1_pool_active_free_valid(const AvspRound1Pool *pool)
         if (!actor->active)
             continue;
         if ((actor->active != 1u &&
+             !(pool->record_type == 12u && actor->actor_class == 0x1f &&
+               actor->active == 2u) &&
              !(pool->record_type == 36u && actor->active == 2u) &&
              !(pool->record_type == 20u && actor->actor_class == 0x01 &&
                actor->active == 2u) &&
@@ -577,16 +579,18 @@ static void avsp_round1_class1f_queue_projectile_reaction(
     const short prior_health)
 {
     AvspRound1FirstEncounterRuntime *encounter = &runtime->first_encounter;
-    actor->state = ko ? 0x0402u : 0x0202u;
+    actor->state = ko ? avsp_round1_class1f_source_ko.collision_state :
+        avsp_round1_class1f_source_hit.state;
     actor->substate = 0u;
     actor->source_action = 0u;
-    actor->source_action_timer = (unsigned char)(ko ?
-        avsp_round1_class1f_current.ko_ticks :
-        avsp_round1_class1f_source_hit.recovery_timer);
+    actor->source_action_timer = ko ?
+        avsp_round1_class1f_source_ko.recovery_timer :
+        avsp_round1_class1f_source_hit.recovery_timer;
     actor->source_prior_health = prior_health;
     actor->source_hit_recovery_active = 0u;
     actor->source_hit_mode = 0u;
-    actor->source_hit_kind = ko ? 0u : avsp_round1_class1f_source_hit.hit_kind;
+    actor->source_hit_kind = ko ? avsp_round1_class1f_source_ko.hit_kind :
+        avsp_round1_class1f_source_hit.hit_kind;
     actor->source_reaction_selector = 0u;
     actor->source_hit_action_timer = 0u;
     actor->source_projectile_reaction_pending =
@@ -595,9 +599,6 @@ static void avsp_round1_class1f_queue_projectile_reaction(
     {
         ++encounter->ko_events;
         encounter->semantic_ko = 1u;
-        encounter->source_progress = (unsigned short)(
-            encounter->source_progress +
-            avsp_round1_recurring_spawn.progress_increment);
     }
     else
     {
@@ -607,9 +608,9 @@ static void avsp_round1_class1f_queue_projectile_reaction(
 }
 
 static int avsp_round1_class1f_consume_projectile_reaction(
-    AvspRound1ActorCore *actor, const unsigned char pending)
+    AvspRound1Runtime *runtime, AvspRound1ActorCore *actor,
+    const unsigned char pending)
 {
-    AvspPortV2HitKoRuntime reaction;
     if (pending == 1u)
     {
         if (actor->state != avsp_round1_class1f_source_hit.state ||
@@ -643,20 +644,39 @@ static int avsp_round1_class1f_consume_projectile_reaction(
     }
     if (pending != 2u)
         return 0;
-    if (actor->source_action_timer == 0u ||
-        !avsp_round1_class1f_rebuild_reaction(actor, &reaction))
+    if (actor->state != avsp_round1_class1f_source_ko.collision_state ||
+        actor->substate != 0u || actor->health >= 0 ||
+        actor->source_action_timer !=
+            avsp_round1_class1f_source_ko.recovery_timer ||
+        actor->source_hit_kind != avsp_round1_class1f_source_ko.hit_kind ||
+        actor->source_prior_health < 0)
         return 0;
-    if (reaction.active && !avsp_port_v2_hit_ko_step(&reaction))
+    actor->active = avsp_round1_class1f_source_ko.dispatch_active;
+    actor->state = avsp_round1_class1f_source_ko.dispatch_state;
+    actor->source_hit_mode = avsp_round1_class1f_source_ko.hit_mode;
+    actor->source_reaction_selector =
+        avsp_round1_class1f_source_ko.reaction_selector;
+    actor->source_hit_recovery_active = 2u;
+    actor->animation_timer = 1u;
+    actor->animation_branch = 0;
+    if (!avsp_round1_class1f_bind_record(
+            actor,
+            avsp_round1_class1f_source_ko.reaction_records[0]
+                .animation_record))
         return 0;
-    --actor->source_action_timer;
-    return avsp_round1_class1f_sync_reaction(actor, &reaction);
+    actor->animation_index = 0u;
+    runtime->first_encounter.source_progress = (unsigned short)(
+        runtime->first_encounter.source_progress +
+        avsp_round1_recurring_spawn.progress_increment);
+    return avsp_round1_class1f_state_context_supported(
+        actor->state, actor->substate);
 }
 
 static int avsp_round1_class1f_reaction_active(
     const AvspRound1ActorCore *actor)
 {
     unsigned long record = actor->animation_record;
-    return actor->source_hit_recovery_active ||
+    return actor->source_hit_recovery_active != 0 ||
         (actor->source_action_timer != 0u &&
         (record == AVSP_PORT_V2_HIT_ANIM_RECORD ||
          record == AVSP_PORT_V2_HIT_RECOVERY_ANIM_RECORD ||
@@ -710,6 +730,25 @@ static int avsp_round1_class1f_step_source_hit_reaction_animation(
         next = 0u;
     avsp_round1_class1f_bind_source_hit_record(
         actor, &avsp_round1_class1f_source_hit.reaction_records[next], next);
+    return 1;
+}
+
+static int avsp_round1_class1f_step_source_ko_reaction_animation(
+    AvspRound1ActorCore *actor)
+{
+    unsigned char next;
+    if (actor->animation_index >=
+            avsp_round1_class1f_source_ko.reaction_record_count ||
+        actor->animation_timer == 0u)
+        return 0;
+    --actor->animation_timer;
+    if (actor->animation_timer != 0u)
+        return 1;
+    next = (unsigned char)(actor->animation_index + 1u);
+    if (next >= avsp_round1_class1f_source_ko.reaction_record_count)
+        next = 0u;
+    avsp_round1_class1f_bind_source_hit_record(
+        actor, &avsp_round1_class1f_source_ko.reaction_records[next], next);
     return 1;
 }
 
@@ -788,6 +827,137 @@ static int avsp_round1_class1f_step_source_hit_terminal(
     return 1;
 }
 
+static int avsp_round1_class1f_step_source_ko(
+    AvspRound1ActorCore *actor)
+{
+    if (actor->source_hit_recovery_active != 2u)
+        return 0;
+    if (actor->state == avsp_round1_class1f_source_ko.dispatch_state)
+    {
+        if (actor->source_hit_mode != avsp_round1_class1f_source_ko.hit_mode ||
+            actor->source_hit_kind != avsp_round1_class1f_source_ko.hit_kind ||
+            actor->source_reaction_selector !=
+                avsp_round1_class1f_source_ko.reaction_selector)
+            return 0;
+        if (actor->substate ==
+                avsp_round1_class1f_source_ko.action_phases[0])
+        {
+            if (actor->source_action_timer != 0u)
+            {
+                --actor->source_action_timer;
+                return 1;
+            }
+            actor->substate =
+                avsp_round1_class1f_source_ko.action_phases[1];
+            actor->source_action = actor->substate;
+            actor->source_airborne = 0xffu;
+            actor->source_x_velocity =
+                avsp_round1_class1f_source_ko.
+                    launch_x_velocity_before_facing;
+            actor->source_x_acceleration =
+                avsp_round1_class1f_source_ko.
+                    launch_x_acceleration_before_facing;
+            if (actor->source_facing_selector == 0u)
+            {
+                actor->source_x_velocity = -actor->source_x_velocity;
+                actor->source_x_acceleration = -actor->source_x_acceleration;
+            }
+            actor->source_y_velocity =
+                avsp_round1_class1f_source_ko.launch_y_velocity;
+            actor->source_y_acceleration =
+                avsp_round1_class1f_source_ko.launch_y_acceleration;
+            avsp_round1_class1f_bind_source_hit_record(
+                actor, &avsp_round1_class1f_source_ko.reaction_records[0],
+                0u);
+        }
+        if (actor->substate ==
+                avsp_round1_class1f_source_ko.action_phases[1])
+        {
+            if (avsp_round1_class1f_hit_step_motion(actor))
+                return avsp_round1_class1f_step_source_ko_reaction_animation(
+                    actor);
+            avsp_round1_class1f_hit_clamp_y(actor);
+            actor->substate =
+                avsp_round1_class1f_source_ko.action_phases[2];
+            actor->source_action = actor->substate;
+            actor->source_airborne = 0u;
+            actor->source_motion_flags = 1u;
+            actor->source_hit_action_timer =
+                avsp_round1_class1f_source_ko.landing_hold_timer;
+            if (actor->palette != 0u)
+                actor->coordinate_mode = 1u;
+            avsp_round1_class1f_bind_source_hit_record(
+                actor, &avsp_round1_class1f_source_ko.landing_hold_record,
+                0u);
+            return 1;
+        }
+        if (actor->substate ==
+                avsp_round1_class1f_source_ko.action_phases[2])
+        {
+            if (actor->source_hit_action_timer == 0u)
+                return 0;
+            --actor->source_hit_action_timer;
+            if (actor->source_hit_action_timer != 0u)
+                return avsp_round1_class1f_step_source_hit_loop_record(
+                    actor,
+                    &avsp_round1_class1f_source_ko.landing_hold_record);
+            actor->substate =
+                avsp_round1_class1f_source_ko.action_phases[3];
+            actor->source_action = actor->substate;
+            actor->source_airborne = 1u;
+            actor->source_motion_flags = 0u;
+            actor->source_x_velocity =
+                avsp_round1_class1f_source_ko.
+                    bounce_x_velocity_before_facing;
+            actor->source_x_acceleration =
+                avsp_round1_class1f_source_ko.
+                    bounce_x_acceleration_before_facing;
+            if (actor->source_facing_selector == 0u)
+            {
+                actor->source_x_velocity = -actor->source_x_velocity;
+                actor->source_x_acceleration = -actor->source_x_acceleration;
+            }
+            actor->source_y_velocity =
+                avsp_round1_class1f_source_ko.bounce_y_velocity;
+            actor->source_y_acceleration =
+                avsp_round1_class1f_source_ko.bounce_y_acceleration;
+            avsp_round1_class1f_bind_source_hit_record(
+                actor, &avsp_round1_class1f_source_ko.bounce_record, 0u);
+        }
+        if (actor->substate ==
+                avsp_round1_class1f_source_ko.action_phases[3])
+        {
+            if (avsp_round1_class1f_hit_step_motion(actor))
+                return avsp_round1_class1f_step_source_hit_loop_record(
+                    actor, &avsp_round1_class1f_source_ko.bounce_record);
+            avsp_round1_class1f_hit_clamp_y(actor);
+            actor->state = avsp_round1_class1f_source_ko.hold_state;
+            actor->substate = 0u;
+            actor->source_action = 0u;
+            actor->source_airborne = 0u;
+            actor->source_motion_flags = 1u;
+            actor->source_hit_action_timer =
+                avsp_round1_class1f_source_ko.removal_hold_timer;
+            avsp_round1_class1f_bind_source_hit_record(
+                actor, &avsp_round1_class1f_source_ko.landing_hold_record,
+                0u);
+            return 1;
+        }
+        return 0;
+    }
+    if (actor->state != avsp_round1_class1f_source_ko.hold_state ||
+        actor->substate != 0u || actor->source_hit_action_timer == 0u)
+        return 0;
+    --actor->source_hit_action_timer;
+    if (actor->source_hit_action_timer == 0u)
+    {
+        actor->state = avsp_round1_class1f_source_ko.release_state;
+        actor->source_action_timer = 0u;
+        actor->source_hit_recovery_active = 0u;
+    }
+    return 1;
+}
+
 static int avsp_round1_class1f_step_reaction(
     AvspRound1Runtime *runtime, AvspRound1ActorCore *actor)
 {
@@ -796,6 +966,8 @@ static int avsp_round1_class1f_step_reaction(
     unsigned int timer_index;
     if (!avsp_round1_class1f_reaction_active(actor))
         return 1;
+    if (actor->source_hit_recovery_active == 2u)
+        return avsp_round1_class1f_step_source_ko(actor);
     if (actor->source_hit_recovery_active)
     {
         if (actor->state != avsp_round1_class1f_source_hit.state ||
@@ -7690,7 +7862,7 @@ int avsp_round1_step_scheduler(AvspRound1Runtime *runtime)
                         actor->source_projectile_reaction_pending;
                     actor->source_projectile_reaction_pending = 0u;
                     if (!avsp_round1_class1f_consume_projectile_reaction(
-                            actor, pending))
+                            runtime, actor, pending))
                     {
                         runtime->scheduler_failure_code = 17u;
                         runtime->scheduler_failure_source_slot =

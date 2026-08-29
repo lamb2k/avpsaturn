@@ -1168,6 +1168,52 @@ def validate(contract: dict[str, object], fixtures: dict[str, object],
             class1f_hit["mutation_control"]
                 ["fixed_frame_or_generic_reaction_rejected"] is True,
             "class-0x1f source HIT entry fixture incomplete or drifted")
+    class1f_ko = class1f["current_state_implementation_contract"][
+        "damage_hit_ko_removal"]["source_projectile_ko_program"]
+    require(class1f_ko["classification"] ==
+                "SOURCE_CLOSED_IMPLEMENTATION_FIELDS" and
+            class1f_ko["capture_identity"]["byte_identical"] is True and
+            class1f_ko["collision_visible_result"] == {
+                "source_frame": 2363,
+                "source_slot": "0x00ffa3c0",
+                "active_u8": 1,
+                "outer_state_u16": 0x0400,
+                "action_substate_u16": 0,
+                "health_s16": -1,
+                "prior_health_s16": 87,
+                "preserved_animation_record": "0x0012d638",
+            } and
+            class1f_ko["scheduler_handoff"]["source_frame"] == 2364 and
+            class1f_ko["scheduler_handoff"]["active_u8"] == 2 and
+            class1f_ko["scheduler_handoff"]["outer_state_u16"] == 0x0402 and
+            class1f_ko["scheduler_handoff"]
+                ["recovery_values_before_decrement_u8"] ==
+                    [8, 7, 6, 5, 4, 3, 2, 1, 0] and
+            class1f_ko["scheduler_handoff"]
+                ["reaction_selector_actor_4d_u8"] == 0x36 and
+            class1f_ko["scheduler_handoff"]["hit_mode_actor_46_u8"] == 0 and
+            class1f_ko["scheduler_handoff"]["hit_kind_actor_49_u8"] == 0x15 and
+            class1f_ko["state_program"]["states_u16"] ==
+                [0x0400, 0x0402, 0x0404, 0x0600] and
+            class1f_ko["state_program"]["action_phases_u16"] ==
+                [0, 0x0200, 0x0400, 0x0600] and
+            class1f_ko["state_program"]["launch"]
+                ["y_velocity_s32_16_16"] == 0x98000 and
+            class1f_ko["state_program"]["launch"]
+                ["y_acceleration_s32_16_16"] == -0x5000 and
+            class1f_ko["state_program"]["first_landing"]
+                ["timer_actor_2a_u8"] == 3 and
+            class1f_ko["state_program"]["bounce"]
+                ["y_acceleration_s32_16_16"] == -0xC000 and
+            class1f_ko["state_program"]["removal_hold"]
+                ["timer_actor_2a_u8"] == 60 and
+            class1f_ko["state_program"]["release"]
+                ["release_writer"] == "0x0176ba" and
+            class1f_ko["state_program"]["rng_calls"] == [] and
+            class1f_ko["state_program"]["animation_sequences"]
+                ["reaction_0x36"]["records"][0]["animation_record"] ==
+                    "0x0012e04c",
+            "class-0x1f projectile KO fixture incomplete or drifted")
     class1f_actions = class1f["first_segment_action_execution_contract"]
     require(class1f_actions["classification"] ==
                 "SOURCE_CLOSED_IMPLEMENTATION_FIELDS" and

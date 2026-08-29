@@ -176,6 +176,18 @@ assert hit_entry["rng"]["result_low_nibble_u8"] == 2
 assert hit_entry["rng"]["timer_table_row_u8"] == [10] * 4 + [40] * 4 + [60] * 3 + [90] * 3 + [120] * 2
 assert hit_entry["rng"]["selected_timer_u8"] == 10
 assert hit_entry["mutation_control"]["mutant_animation_record"] == "0x0012dc50"
+ko_entry = current["damage_hit_ko_removal"]["source_projectile_ko_program"]
+assert ko_entry["capture_identity"]["byte_identical"] is True
+assert ko_entry["collision_visible_result"]["outer_state_u16"] == 0x0400
+assert ko_entry["scheduler_handoff"]["outer_state_u16"] == 0x0402
+assert ko_entry["scheduler_handoff"]["recovery_values_before_decrement_u8"] == [8, 7, 6, 5, 4, 3, 2, 1, 0]
+assert ko_entry["scheduler_handoff"]["reaction_selector_actor_4d_u8"] == 0x36
+assert ko_entry["state_program"]["launch"]["y_velocity_s32_16_16"] == 0x98000
+assert ko_entry["state_program"]["first_landing"]["timer_actor_2a_u8"] == 3
+assert ko_entry["state_program"]["bounce"]["y_acceleration_s32_16_16"] == -0xc000
+assert ko_entry["state_program"]["removal_hold"]["timer_actor_2a_u8"] == 60
+assert ko_entry["state_program"]["release"]["release_writer"] == "0x0176ba"
+assert ko_entry["state_program"]["rng_calls"] == []
 actions = class1f["first_segment_action_execution_contract"]
 assert actions["classification"] == "SOURCE_CLOSED_IMPLEMENTATION_FIELDS"
 assert actions["capture_identity"]["byte_identical"] is True
@@ -413,6 +425,9 @@ f = copy.deepcopy(fixtures); next(item for item in f["authority_data"]["enemies"
 f = copy.deepcopy(fixtures); next(item for item in f["authority_data"]["enemies"]["archetypes"] if item["class"] == "0x1f")["current_state_implementation_contract"]["damage_hit_ko_removal"]["source_hit_entry_program"]["source_hit_program"]["selector_context_rule"]["generic_action_selector_binding_forbidden"] = False; mutations.append((contract, f, "class1f source HIT generic-selector mutation"))
 f = copy.deepcopy(fixtures); next(item for item in f["authority_data"]["enemies"]["archetypes"] if item["class"] == "0x1f")["current_state_implementation_contract"]["damage_hit_ko_removal"]["source_hit_entry_program"]["source_hit_program"]["normal_return"]["class1f_resume_at_2414"] = "0x0200:0000"; mutations.append((contract, f, "class1f source HIT return mutation"))
 f = copy.deepcopy(fixtures); next(item for item in f["authority_data"]["enemies"]["archetypes"] if item["class"] == "0x1f")["current_state_implementation_contract"]["damage_hit_ko_removal"]["source_hit_entry_program"]["source_hit_program"]["normal_return"]["preserved_resume_fields"]["actor_85_style_u8"] = 1; mutations.append((contract, f, "class1f source HIT return predicate mutation"))
+f = copy.deepcopy(fixtures); next(item for item in f["authority_data"]["enemies"]["archetypes"] if item["class"] == "0x1f")["current_state_implementation_contract"]["damage_hit_ko_removal"]["source_projectile_ko_program"]["collision_visible_result"]["outer_state_u16"] = 0x0402; mutations.append((contract, f, "class1f projectile KO collision chronology mutation"))
+f = copy.deepcopy(fixtures); next(item for item in f["authority_data"]["enemies"]["archetypes"] if item["class"] == "0x1f")["current_state_implementation_contract"]["damage_hit_ko_removal"]["source_projectile_ko_program"]["state_program"]["launch"]["y_velocity_s32_16_16"] = 0x97000; mutations.append((contract, f, "class1f projectile KO launch mutation"))
+f = copy.deepcopy(fixtures); next(item for item in f["authority_data"]["enemies"]["archetypes"] if item["class"] == "0x1f")["current_state_implementation_contract"]["damage_hit_ko_removal"]["source_projectile_ko_program"]["state_program"]["removal_hold"]["timer_actor_2a_u8"] = 59; mutations.append((contract, f, "class1f projectile KO hold mutation"))
 f = copy.deepcopy(fixtures); next(item for item in f["authority_data"]["enemies"]["archetypes"] if item["class"] == "0x1f")["first_segment_action_execution_contract"]["initializer"]["variants"][6]["writes"]["action_u8"] = 18; mutations.append((contract, f, "class1f action variant mutation"))
 f = copy.deepcopy(fixtures); next(item for item in f["authority_data"]["enemies"]["archetypes"] if item["class"] == "0x1f")["first_segment_action_execution_contract"]["current_dispatch"]["action_targets"][11]["target"] = "0x060c30"; mutations.append((contract, f, "class1f action target mutation"))
 f = copy.deepcopy(fixtures); next(item for item in f["authority_data"]["enemies"]["archetypes"] if item["class"] == "0x1f")["first_segment_action_execution_contract"]["animation_selector_table"]["selectors"][2]["selector_u8"] = 33; mutations.append((contract, f, "class1f action selector mutation"))

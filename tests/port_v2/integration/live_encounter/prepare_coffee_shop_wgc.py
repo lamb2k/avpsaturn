@@ -1,6 +1,7 @@
 #!/usr/bin/env python3
 """Package the exact Coffee Shop frame-2280..2310 WGC cadence."""
 
+import argparse
 import hashlib
 import json
 import subprocess
@@ -10,8 +11,6 @@ from PIL import Image, ImageDraw, ImageFont
 
 
 ROOT = Path(__file__).resolve().parents[4]
-PACKAGE = (ROOT / "build/feedback/REIMPLEMENT-13-COFFEE-SHOP-SCENE-PARITY"
-           / "wgc-2280-2310")
 FRAMES = tuple(range(2280, 2311))
 VIEWPORT = (1, 149, 801, 658)
 FONT = ImageFont.load_default()
@@ -37,6 +36,15 @@ def labelled(image, frame):
     draw.text((5, 5), text, font=FONT, fill="white")
     return result
 
+
+parser = argparse.ArgumentParser()
+parser.add_argument(
+    "--package",
+    default=("build/feedback/REIMPLEMENT-13-COFFEE-SHOP-SCENE-PARITY/"
+             "wgc-2280-2310"),
+)
+args = parser.parse_args()
+PACKAGE = ROOT / args.package
 
 paths = [PACKAGE / f"source-frame-{frame}.png" for frame in FRAMES]
 missing = [path.name for path in paths if not path.is_file()]

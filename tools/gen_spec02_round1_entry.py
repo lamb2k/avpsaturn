@@ -122,6 +122,21 @@ def build() -> str:
     class1f_source_hit_rng_hold_record = class1f_source_hit_sequences[
         "rng_hold_0x39"]["records"][0]
     class1f_source_hit_rng = class1f_source_hit["rng"]
+    class1f_source_ko = class1f_current_damage["source_projectile_ko_program"]
+    class1f_source_ko_handoff = class1f_source_ko["scheduler_handoff"]
+    class1f_source_ko_program = class1f_source_ko["state_program"]
+    class1f_source_ko_launch = class1f_source_ko_program["launch"]
+    class1f_source_ko_landing = class1f_source_ko_program["first_landing"]
+    class1f_source_ko_bounce = class1f_source_ko_program["bounce"]
+    class1f_source_ko_hold = class1f_source_ko_program["removal_hold"]
+    class1f_source_ko_release = class1f_source_ko_program["release"]
+    class1f_source_ko_sequences = class1f_source_ko_program["animation_sequences"]
+    class1f_source_ko_reaction_records = class1f_source_ko_sequences[
+        "reaction_0x36"]["records"]
+    class1f_source_ko_landing_record = class1f_source_ko_sequences[
+        "landing_0x37_and_hold_0x39"]["records"][0]
+    class1f_source_ko_bounce_record = class1f_source_ko_sequences[
+        "bounce_0x38"]["records"][0]
     class1f_actions = class1f["first_segment_action_execution_contract"]
     class1f_inner8 = class1f_actions["inner_state_0x08_program"]
     class1f_inner8_records = class1f_inner8["animation_records"]
@@ -438,6 +453,40 @@ def build() -> str:
              60, 60, 60, 90, 90, 90, 120, 120] or
         class1f_source_hit_rng["selected_timer_u8"] != 10):
         raise ValueError("SPEC-02 class-0x1f current-state drift")
+    if (class1f_source_ko["classification"] !=
+            "SOURCE_CLOSED_IMPLEMENTATION_FIELDS" or
+        class1f_source_ko["collision_visible_result"]["outer_state_u16"] !=
+            0x0400 or
+        class1f_source_ko_handoff["outer_state_u16"] != 0x0402 or
+        class1f_source_ko_handoff["active_u8"] != 2 or
+        class1f_source_ko_handoff["recovery_timer_actor_2c_u8"] != 8 or
+        class1f_source_ko_handoff["reaction_selector_actor_4d_u8"] != 0x36 or
+        class1f_source_ko_handoff["hit_mode_actor_46_u8"] != 0 or
+        class1f_source_ko_handoff["hit_kind_actor_49_u8"] != 0x15 or
+        class1f_source_ko_program["states_u16"] !=
+            [0x0400, 0x0402, 0x0404, 0x0600] or
+        class1f_source_ko_program["action_phases_u16"] !=
+            [0, 0x0200, 0x0400, 0x0600] or
+        class1f_source_ko_launch["x_velocity_s32_16_16_before_facing"] !=
+            0x1C000 or
+        class1f_source_ko_launch["y_velocity_s32_16_16"] != 0x98000 or
+        class1f_source_ko_launch["y_acceleration_s32_16_16"] != -0x5000 or
+        class1f_source_ko_landing["timer_actor_2a_u8"] != 3 or
+        class1f_source_ko_bounce["x_velocity_s32_16_16_before_facing"] !=
+            0x20000 or
+        class1f_source_ko_bounce["y_velocity_s32_16_16"] != 0x40000 or
+        class1f_source_ko_bounce["y_acceleration_s32_16_16"] != -0xC000 or
+        class1f_source_ko_hold["outer_state_u16"] != 0x0404 or
+        class1f_source_ko_hold["timer_actor_2a_u8"] != 60 or
+        class1f_source_ko_release["outer_state_u16"] != 0x0600 or
+        class1f_source_ko_release["release_writer"] != "0x0176ba" or
+        class1f_source_ko_program["rng_calls"] != [] or
+        len(class1f_source_ko_reaction_records) != 6 or
+        class1f_source_ko_landing_record["animation_record"] !=
+            "0x0012ddb0" or
+        class1f_source_ko_bounce_record["animation_record"] !=
+            "0x0012dd9c"):
+        raise ValueError("SPEC-02 class-0x1f projectile KO drift")
     if (source_update_cadence["classification"] !=
             "SOURCE_CLOSED_IMPLEMENTATION_FIELDS" or
         source_update_cadence["default_updates_per_source_frame_u8"] != 1 or
@@ -1337,6 +1386,60 @@ def build() -> str:
             class1f_source_hit_resume["actor_z_s16"],
             class1f_source_hit_resume["player_x_s16"],
             class1f_source_hit_resume["player_z_s16"]),
+        "};", "",
+        "static const AvspRound1Class1fSourceKoSpec avsp_round1_class1f_source_ko =",
+        "{",
+        "    0x%04Xu, 0x%04Xu, 0x%04Xu, 0x%04Xu," % (
+            class1f_source_ko["collision_visible_result"]
+                ["outer_state_u16"],
+            class1f_source_ko_handoff["outer_state_u16"],
+            class1f_source_ko_hold["outer_state_u16"],
+            class1f_source_ko_release["outer_state_u16"]),
+        "    { " + ", ".join(
+            f"0x{value:04X}u" for value in
+            class1f_source_ko_program["action_phases_u16"]) + " },",
+        "    %du, 0x%02Xu, %du, 0x%02Xu, %du, %du, %du, %du," % (
+            class1f_source_ko_handoff["active_u8"],
+            class1f_source_ko_handoff["reaction_selector_actor_4d_u8"],
+            class1f_source_ko_handoff["hit_mode_actor_46_u8"],
+            class1f_source_ko_handoff["hit_kind_actor_49_u8"],
+            class1f_source_ko_handoff["recovery_timer_actor_2c_u8"],
+            class1f_source_ko_landing["timer_actor_2a_u8"],
+            class1f_source_ko_hold["timer_actor_2a_u8"],
+            len(class1f_source_ko_reaction_records)),
+        "    %dL, %dL, %dL, %dL," % (
+            class1f_source_ko_launch[
+                "x_velocity_s32_16_16_before_facing"],
+            class1f_source_ko_launch[
+                "x_acceleration_s32_16_16_before_facing"],
+            class1f_source_ko_launch["y_velocity_s32_16_16"],
+            class1f_source_ko_launch["y_acceleration_s32_16_16"]),
+        "    %dL, %dL, %dL, %dL," % (
+            class1f_source_ko_bounce[
+                "x_velocity_s32_16_16_before_facing"],
+            class1f_source_ko_bounce[
+                "x_acceleration_s32_16_16_before_facing"],
+            class1f_source_ko_bounce["y_velocity_s32_16_16"],
+            class1f_source_ko_bounce["y_acceleration_s32_16_16"]),
+        "    {",
+    ])
+    for record in class1f_source_ko_reaction_records:
+        lines.append(
+            "        { %du, %d, %sUL, %sUL, %du, %du }," % (
+                record["timer_u16"], record["branch_s16"],
+                record["animation_record"], record["assembly"],
+                record["hurt_selector_u8"], record["attack_selector_u8"]))
+    lines.extend([
+        "    },",
+    ])
+    for record in (class1f_source_ko_landing_record,
+                   class1f_source_ko_bounce_record):
+        lines.append(
+            "    { %du, %d, %sUL, %sUL, %du, %du }," % (
+                record["timer_u16"], record["branch_s16"],
+                record["animation_record"], record["assembly"],
+                record["hurt_selector_u8"], record["attack_selector_u8"]))
+    lines.extend([
         "};", "",
         "static const AvspRound1RecurringSpawnSpec avsp_round1_recurring_spawn =",
         "{",

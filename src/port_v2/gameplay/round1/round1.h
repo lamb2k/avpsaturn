@@ -6,7 +6,7 @@
 #include "../../combat/hit_ko/hit_ko.h"
 
 #define AVSP_ROUND1_SPEC02_SHA256 \
-    "e274c965def3371d131d13ae7617d97586415ce0934fb3a4378495b39de87f29"
+    "3c6188ea0fbab14de5fee7a274e42ae16bbd1b0cf16d08b3f0fd178edfd8f5ad"
 #define AVSP_ROUND1_CANARY_HEAD 0x52314548UL
 #define AVSP_ROUND1_CANARY_TAIL 0x52314554UL
 #define AVSP_ROUND1_ROUTE_ENTRY_STATE 2
@@ -564,6 +564,35 @@ typedef struct
     short resume_player_x;
     short resume_player_z;
 } AvspRound1Class1fSourceHitSpec;
+
+typedef struct
+{
+    unsigned short collision_state;
+    unsigned short dispatch_state;
+    unsigned short hold_state;
+    unsigned short release_state;
+    unsigned short action_phases[4];
+    unsigned char dispatch_active;
+    unsigned char reaction_selector;
+    unsigned char hit_mode;
+    unsigned char hit_kind;
+    unsigned char recovery_timer;
+    unsigned char landing_hold_timer;
+    unsigned char removal_hold_timer;
+    unsigned char reaction_record_count;
+    long launch_x_velocity_before_facing;
+    long launch_x_acceleration_before_facing;
+    long launch_y_velocity;
+    long launch_y_acceleration;
+    long bounce_x_velocity_before_facing;
+    long bounce_x_acceleration_before_facing;
+    long bounce_y_velocity;
+    long bounce_y_acceleration;
+    AvspRound1AnimationStateSpec reaction_records[
+        AVSP_ROUND1_CLASS1F_SOURCE_HIT_REACTION_RECORD_COUNT];
+    AvspRound1AnimationStateSpec landing_hold_record;
+    AvspRound1AnimationStateSpec bounce_record;
+} AvspRound1Class1fSourceKoSpec;
 
 typedef struct
 {

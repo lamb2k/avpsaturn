@@ -1169,8 +1169,8 @@ int main(void)
         target->z = projectile->z;
         if (!avsp_round1_step_scheduler(&projectile_runtime) ||
             projectile->collision_result != -1 || target->health != -1 ||
-            target->state != 0x0402u || target->substate != 0x0000u ||
-            target->source_action_timer != 141u ||
+            target->state != 0x0400u || target->substate != 0x0000u ||
+            target->source_action_timer != 8u ||
             target->source_projectile_reaction_pending != 2u ||
             projectile_runtime.player_weapon_projectile_collision_writes != 1u ||
             projectile_runtime.player_weapon_projectile_damage_writes != 1u ||
@@ -1191,11 +1191,24 @@ int main(void)
         if (!avsp_round1_step_scheduler(&projectile_runtime) ||
             projectile->state != 4u || target->state != 0x0402u ||
             target->substate != 0x0000u ||
-            target->source_action_timer != 140u ||
+            target->source_action_timer != 8u ||
+            target->source_hit_recovery_active != 2u ||
+            target->source_reaction_selector != 0x36u ||
+            target->source_hit_mode != 0u ||
+            target->source_hit_kind != 0x15u || target->active != 2u ||
             target->source_projectile_reaction_pending != 0u ||
             projectile_runtime.first_encounter.ko_events != 1u ||
             !avsp_round1_step_scheduler(&projectile_runtime))
             return 53;
+        target->active = 1u;
+        target->state = 0x0200u;
+        target->substate = 0u;
+        target->source_action = 0u;
+        target->source_action_timer = 0u;
+        target->source_hit_recovery_active = 0u;
+        target->source_hit_mode = 0u;
+        target->source_hit_kind = 0u;
+        target->source_reaction_selector = 0u;
         child = &projectile_runtime.player_weapon_projectiles[1];
         if (!child->active || child->actor_class != 4 || child->variant != 1u ||
             child->collision_identity != 0x27u ||
@@ -1590,6 +1603,120 @@ int main(void)
                     source_hit_runtime.player_action.x);
                 return 56;
             }
+        }
+        {
+            AvspRound1Runtime source_ko_runtime = projectile_runtime;
+            AvspRound1ActorCore *source_ko_target =
+                &source_ko_runtime.pools[0].records[12];
+            unsigned int pool_index;
+            unsigned int projectile_index;
+            unsigned short progress_before =
+                source_ko_runtime.first_encounter.source_progress;
+            unsigned char free_before;
+            for (pool_index = 0u; pool_index < AVSP_ROUND1_POOL_COUNT;
+                 ++pool_index)
+            {
+                unsigned int actor_index;
+                for (actor_index = 0u;
+                     actor_index < source_ko_runtime.pools[pool_index].capacity;
+                     ++actor_index)
+                    if (pool_index != 0u || actor_index != 12u)
+                        source_ko_runtime.pools[pool_index].records[
+                            actor_index].active = 0u;
+            }
+            for (projectile_index = 0u;
+                 projectile_index < AVSP_ROUND1_WEAPON_PROJECTILE_CAPACITY;
+                 ++projectile_index)
+                source_ko_runtime.player_weapon_projectiles[
+                    projectile_index].active = 0u;
+            source_ko_target->active = 1u;
+            source_ko_target->state = 0x0400u;
+            source_ko_target->substate = 0u;
+            source_ko_target->source_action = 0u;
+            source_ko_target->health = -1;
+            source_ko_target->source_prior_health = 87;
+            source_ko_target->source_action_timer = 8u;
+            source_ko_target->source_hit_mode = 0u;
+            source_ko_target->source_hit_kind = 0x15u;
+            source_ko_target->source_reaction_selector = 0u;
+            source_ko_target->source_hit_recovery_active = 0u;
+            source_ko_target->source_projectile_reaction_pending = 2u;
+            source_ko_target->source_facing_selector = 0u;
+            source_ko_target->x = 833;
+            source_ko_target->y = 312;
+            source_ko_target->z = 312;
+            source_ko_target->source_x_fp = 0x03410000L;
+            source_ko_target->source_y_fp = 0x01380000L;
+            source_ko_target->source_z_fp = 0x01380000L;
+            source_ko_target->animation_record = 0x0012d638UL;
+            source_ko_target->assembly = 0x0012f762UL;
+            if (!avsp_round1_step_scheduler(&source_ko_runtime) ||
+                source_ko_target->active != 2u ||
+                source_ko_target->state != 0x0402u ||
+                source_ko_target->substate != 0u ||
+                source_ko_target->source_action_timer != 8u ||
+                source_ko_target->source_hit_recovery_active != 2u ||
+                source_ko_target->source_reaction_selector != 0x36u ||
+                source_ko_target->animation_record != 0x0012e04cUL ||
+                source_ko_runtime.first_encounter.source_progress !=
+                    (unsigned short)(progress_before + 1u))
+                return 57;
+            for (entry_calls = 0u; entry_calls < 8u; ++entry_calls)
+                if (!avsp_round1_step_scheduler(&source_ko_runtime))
+                    return 57;
+            if (source_ko_target->source_action_timer != 0u ||
+                source_ko_target->substate != 0u)
+                return 57;
+            if (!avsp_round1_step_scheduler(&source_ko_runtime) ||
+                source_ko_target->substate != 0x0200u ||
+                source_ko_target->source_x_fp != 0x033f4000L ||
+                source_ko_target->source_y_fp != 0x01418000L ||
+                source_ko_target->source_x_velocity != -0x0001c000L ||
+                source_ko_target->source_y_velocity != 0x00093000L ||
+                source_ko_target->animation_record != 0x0012e05cUL)
+                return 57;
+            for (entry_calls = 0u; entry_calls < 61u; ++entry_calls)
+                if (!avsp_round1_step_scheduler(&source_ko_runtime))
+                    return 57;
+            if (source_ko_target->substate != 0x0400u ||
+                source_ko_target->source_x_fp != 0x02d48000L ||
+                source_ko_target->source_y_fp != 0x01381000L ||
+                source_ko_target->source_hit_action_timer != 3u ||
+                source_ko_target->animation_record != 0x0012ddb0UL)
+                return 57;
+            for (entry_calls = 0u; entry_calls < 3u; ++entry_calls)
+                if (!avsp_round1_step_scheduler(&source_ko_runtime))
+                    return 57;
+            if (source_ko_target->substate != 0x0600u ||
+                source_ko_target->source_x_fp != 0x02d28000L ||
+                source_ko_target->source_y_fp != 0x013c1000L ||
+                source_ko_target->animation_record != 0x0012dd9cUL)
+                return 57;
+            for (entry_calls = 0u; entry_calls < 11u; ++entry_calls)
+                if (!avsp_round1_step_scheduler(&source_ko_runtime))
+                    return 57;
+            if (source_ko_target->state != 0x0404u ||
+                source_ko_target->substate != 0u ||
+                source_ko_target->source_x_fp != 0x02bc8000L ||
+                source_ko_target->source_y_fp != 0x01389000L ||
+                source_ko_target->source_hit_action_timer != 60u ||
+                source_ko_target->animation_record != 0x0012ddb0UL)
+                return 57;
+            for (entry_calls = 0u; entry_calls < 60u; ++entry_calls)
+                if (!avsp_round1_step_scheduler(&source_ko_runtime))
+                    return 57;
+            if (source_ko_target->state != 0x0600u ||
+                source_ko_target->source_hit_action_timer != 0u ||
+                source_ko_target->source_hit_recovery_active != 0u ||
+                source_ko_runtime.rng_seed != projectile_runtime.rng_seed)
+                return 57;
+            free_before = source_ko_runtime.pools[0].free_count;
+            source_ko_runtime.first_encounter.source_living_count = 1u;
+            if (!avsp_round1_step_scheduler(&source_ko_runtime) ||
+                source_ko_target->active ||
+                source_ko_runtime.pools[0].free_count !=
+                    (unsigned char)(free_before + 1u))
+                return 57;
         }
         {
             AvspRound1Runtime child_release_runtime = projectile_runtime;

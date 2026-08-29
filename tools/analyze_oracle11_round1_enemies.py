@@ -39,6 +39,9 @@ CLASS1F_INNER8_SUPPRESS = ROOT / ".deps" / "mame" / "oracle11_progression_lifecy
 CLASS1F_HIT_A = ROOT / ".deps" / "mame" / "oracle11_progression_lifecycle_cs35a"
 CLASS1F_HIT_B = ROOT / ".deps" / "mame" / "oracle11_progression_lifecycle_cs35b"
 CLASS1F_HIT_MUTANT = ROOT / ".deps" / "mame" / "oracle11_progression_lifecycle_cs35m"
+CLASS1F_KO_A = ROOT / ".deps" / "mame" / "oracle11_progression_lifecycle_cs36a"
+CLASS1F_KO_B = ROOT / ".deps" / "mame" / "oracle11_progression_lifecycle_cs36b"
+CLASS1F_KO_MUTANT = ROOT / ".deps" / "mame" / "oracle11_progression_lifecycle_cs36m4"
 OUT = ROOT / "data" / "oracle11_round1_enemy_archetypes.json"
 FILES = ("enemy_samples.tsv", "enemy_entries.tsv", "enemy_writes.tsv",
          "enemy_rng.tsv", "player_damage.tsv", "samples.tsv", "dispatches.tsv",
@@ -1883,6 +1886,217 @@ def class1f_hit_entry_contract(program: bytes,
     }
 
 
+def class1f_projectile_ko_contract(program: bytes,
+                                   opcodes: bytes) -> dict[str, object]:
+    baseline_identity = {name: digest(CLASS1F_KO_A / name)
+                         for name in CLASS1F_HIT_FILES}
+    repeat_identity = {name: digest(CLASS1F_KO_B / name)
+                       for name in CLASS1F_HIT_FILES}
+    mutant_identity = {name: digest(CLASS1F_KO_MUTANT / name)
+                       for name in CLASS1F_HIT_FILES}
+    require(baseline_identity == repeat_identity,
+            "class-0x1f projectile KO captures differ")
+
+    actors = rows(CLASS1F_KO_A / "coffee_shop_scene_actors.tsv")
+    mutant_actors = rows(CLASS1F_KO_MUTANT / "coffee_shop_scene_actors.tsv")
+    program_trace = rows(CLASS1F_KO_A /
+                         "coffee_shop_class1f_hit_program.tsv")
+    rng = [row for row in rows(CLASS1F_KO_A /
+                               "coffee_shop_rng_calls.tsv")
+           if 2362 <= int(row["frame"]) <= 2508 and
+           row["a6"] == "ffa3c0"]
+    result = rows(CLASS1F_KO_A / "progression_result.tsv")[0]
+    mutant_result = rows(CLASS1F_KO_MUTANT / "progression_result.tsv")[0]
+
+    def actor_row(source: list[dict[str, str]], frame: int) -> dict[str, str]:
+        return next(row for row in source if row["frame"] == str(frame) and
+                    row["slot"] == "ffa3c0")
+
+    def program_row(frame: int, pc: str) -> dict[str, str]:
+        return next(row for row in program_trace
+                    if row["frame"] == str(frame) and row["pc"] == pc)
+
+    expected = {
+        2362: ("1", "0200", "0600", "03410000", "01380000",
+               "0012d638"),
+        2363: ("1", "0400", "0000", "03410000", "01380000",
+               "0012d638"),
+        2364: ("2", "0402", "0000", "03410000", "01380000",
+               "0012e04c"),
+        2373: ("2", "0402", "0200", "033f4000", "01418000",
+               "0012e05c"),
+        2434: ("2", "0402", "0400", "02d48000", "01381000",
+               "0012ddb0"),
+        2437: ("2", "0402", "0600", "02d28000", "013c1000",
+               "0012dd9c"),
+        2448: ("2", "0404", "0000", "02bc8000", "01389000",
+               "0012ddb0"),
+        2508: ("2", "0600", "0000", "02bc8000", "01389000",
+               "0012ddb0"),
+    }
+    for frame, values in expected.items():
+        row = actor_row(actors, frame)
+        require(tuple(row[name] for name in
+                      ("active", "state", "substate", "x_fp", "y_fp",
+                       "animation_record")) == values,
+                f"class-0x1f projectile KO frame {frame} drift")
+
+    dispatch = program_row(2363, "01f316")
+    bound = program_row(2364, "01f316")
+    recovery_end = program_row(2372, "01f37c")
+    launch = program_row(2372, "01f3c0")
+    landing = program_row(2433, "01f3ee")
+    landing_hold = program_row(2434, "01f46e")
+    bounce_entry = program_row(2436, "01f4b2")
+    bounce_landing = program_row(2447, "01f4f0")
+    removal_hold = program_row(2448, "01f340")
+    release_guard = program_row(2507, "01f340")
+    require(
+        dispatch["state"] == "0402" and dispatch["substate"] == "0000" and
+        dispatch["recovery_timer2c"] == "08" and
+        dispatch["health"] == "-1" and dispatch["hit_kind49"] == "15" and
+        bound["reaction_selector4d"] == "36" and
+        bound["hit_mode46"] == "00" and
+        bound["animation_record"] == "0012e04c" and
+        recovery_end["recovery_timer2c"] == "00" and
+        launch["substate"] == "0200" and launch["airborne5c"] == "ff" and
+        launch["x_velocity30"] == "fffe4000" and
+        launch["x_acceleration38"] == "00000000" and
+        launch["y_velocity34"] == "00098000" and
+        launch["y_acceleration3c"] == "ffffb000" and
+        landing["x_fp"] == "02d48000" and landing["y_fp"] == "01361000" and
+        landing_hold["substate"] == "0400" and
+        landing_hold["action_timer2a"] == "03" and
+        bounce_entry["substate"] == "0600" and
+        bounce_entry["x_velocity30"] == "fffe0000" and
+        bounce_entry["x_acceleration38"] == "00000000" and
+        bounce_entry["y_velocity34"] == "00040000" and
+        bounce_entry["y_acceleration3c"] == "ffff4000" and
+        bounce_landing["x_fp"] == "02bc8000" and
+        bounce_landing["y_fp"] == "01389000" and
+        removal_hold["state"] == "0404" and
+        removal_hold["action_timer2a"] == "3c" and
+        release_guard["action_timer2a"] == "01" and not rng,
+        "class-0x1f projectile KO source program drift")
+
+    mutant_visible = actor_row(mutant_actors, 2364)
+    require(program[0x1FD3C:0x1FD3E] == bytes((0x36, 0x00)) and
+            int(result["class1f_hit_selector_mutations"]) == 0 and
+            int(mutant_result["class1f_hit_selector_mutations"]) == 2 and
+            mutant_visible["animation_record"] == "0012dc50" and
+            mutant_visible["state"] == "0402" and
+            mutant_visible["substate"] == "0000",
+            "class-0x1f projectile KO selector mutation did not discriminate")
+    for filename in ("coffee_shop_scene_frames.tsv",
+                     "coffee_shop_scene_health_writes.tsv",
+                     "coffee_shop_rng_calls.tsv", "dispatches.tsv",
+                     "samples.tsv", "score_writes.tsv", "projectiles.tsv"):
+        require(baseline_identity[filename] == mutant_identity[filename],
+                f"class-0x1f projectile KO mutation changed unrelated {filename}")
+
+    reaction_records = animation_sequence_from_record(program, 0x12E04C)
+    landing_record = animation_sequence_from_record(program, 0x12DDB0)
+    bounce_record = animation_sequence_from_record(program, 0x12DD9C)
+    require([row["animation_record"] for row in reaction_records["records"]] ==
+            ["0x0012e04c", "0x0012e05c", "0x0012e06c",
+             "0x0012e07c", "0x0012e08c", "0x0012e09c"],
+            "class-0x1f projectile KO reaction sequence drift")
+
+    return {
+        "classification": "SOURCE_CLOSED_IMPLEMENTATION_FIELDS",
+        "scope": "Coffee Shop slot 0x00ffa3c0 lethal projectile handoff through fixed-pool release",
+        "capture_identity": {
+            "completion_a": baseline_identity,
+            "completion_b": repeat_identity,
+            "byte_identical": True,
+            "reaction_selector_table_mutation": mutant_identity,
+            "capture_script_sha256": digest(
+                ROOT / "tools/mame_capture_oracle11_first_segment_progression.lua"),
+        },
+        "collision_visible_result": {
+            "source_frame": 2363, "source_slot": "0x00ffa3c0",
+            "active_u8": 1, "outer_state_u16": 0x0400,
+            "action_substate_u16": 0, "health_s16": -1,
+            "prior_health_s16": 87,
+            "preserved_animation_record": "0x0012d638",
+        },
+        "scheduler_handoff": {
+            "source_frame": 2364, "active_u8": 2,
+            "outer_state_u16": 0x0402, "action_substate_u16": 0,
+            "recovery_timer_actor_2c_u8": 8,
+            "recovery_values_before_decrement_u8": [8, 7, 6, 5, 4, 3, 2, 1, 0],
+            "reaction_selector_actor_4d_u8": 0x36,
+            "hit_mode_actor_46_u8": 0,
+            "hit_kind_actor_49_u8": 0x15,
+            "animation_record": "0x0012e04c",
+            "assembly": animation_record(program, 0x12E04C)["assembly"],
+            "scheduler_order": "record-12 visit after collision-owned frame-2363 visible result",
+        },
+        "state_program": {
+            "states_u16": [0x0400, 0x0402, 0x0404, 0x0600],
+            "action_phases_u16": [0x0000, 0x0200, 0x0400, 0x0600],
+            "launch": {
+                "source_frame": 2373,
+                "x_velocity_s32_16_16_before_facing": 0x1C000,
+                "x_acceleration_s32_16_16_before_facing": 0,
+                "y_velocity_s32_16_16": 0x98000,
+                "y_acceleration_s32_16_16": -0x5000,
+                "facing_rule": "negate x velocity and acceleration when actor+0x4f == 0",
+            },
+            "first_landing": {
+                "source_frame": 2434, "action_phase_u16": 0x0400,
+                "timer_actor_2a_u8": 3, "clamp_y_to_z": True,
+                "animation_record": "0x0012ddb0",
+            },
+            "bounce": {
+                "source_frame": 2437, "action_phase_u16": 0x0600,
+                "x_velocity_s32_16_16_before_facing": 0x20000,
+                "x_acceleration_s32_16_16_before_facing": 0,
+                "y_velocity_s32_16_16": 0x40000,
+                "y_acceleration_s32_16_16": -0xC000,
+                "animation_record": "0x0012dd9c",
+            },
+            "removal_hold": {
+                "source_frame": 2448, "outer_state_u16": 0x0404,
+                "action_substate_u16": 0, "timer_actor_2a_u8": 60,
+                "animation_record": "0x0012ddb0",
+            },
+            "release": {
+                "outer_state_visible_frame": 2508,
+                "outer_state_u16": 0x0600,
+                "release_writer": "0x0176ba", "release_frame": 2508,
+                "fixed_pool_release_required": True,
+            },
+            "animation_sequences": {
+                "reaction_0x36": reaction_records,
+                "landing_0x37_and_hold_0x39": landing_record,
+                "bounce_0x38": bounce_record,
+            },
+            "rng_calls": [],
+            "source_routines": {
+                name: source_window(opcodes, pc) for name, pc in {
+                    "outer_dispatch": 0x01F250,
+                    "recovery_timer": 0x01F316,
+                    "action_dispatch": 0x01F366,
+                    "launch_and_flight": 0x01F37C,
+                    "landing": 0x01F3EE,
+                    "landing_hold_and_bounce": 0x01F46E,
+                    "bounce_landing": 0x01F4F0,
+                    "removal_hold": 0x01F340,
+                    "release": 0x0176BA,
+                }.items()
+            },
+        },
+        "mutation_controls": [
+            "reject immediate collision-time 0x0402 transition",
+            "reject generic Port V2 KO presentation program",
+            "zero source selector table entry 0x01fd3c changes KO presentation and lifecycle",
+            "reject authored delay or fixed-frame state change",
+            "reject wrong recovery width, motion sign, arithmetic order, landing timer, hold timer or release writer",
+            "reject any KO-owned RNG consumption",
+        ],
+    }
+
 def class1f_current_state_contract(oracle09: dict[str, object],
                                    program: bytes,
                                    opcodes: bytes) -> dict[str, object]:
@@ -2033,6 +2247,8 @@ def class1f_current_state_contract(oracle09: dict[str, object],
             "presentation_owned_removal_forbidden": True,
             "source_hit_entry_program":
                 class1f_hit_entry_contract(program, opcodes),
+            "source_projectile_ko_program":
+                class1f_projectile_ko_contract(program, opcodes),
         },
         "mutation_controls": ["wrong first dynamic slot", "fixed-frame spawn",
             "missing living-count guard", "wrong spawn reload", "shadow actor position",
@@ -2318,6 +2534,8 @@ def validate(report: dict[str, object]) -> None:
                     "0x1f: initial transition implementation contract drift")
             current = item["current_state_implementation_contract"]
             hit_entry = current["damage_hit_ko_removal"]["source_hit_entry_program"]
+            ko_entry = current["damage_hit_ko_removal"][
+                "source_projectile_ko_program"]
             require(current["classification"] ==
                         "SOURCE_CLOSED_IMPLEMENTATION_FIELDS" and
                     current["accepted_oracle09_sha256"] == digest(ORACLE09) and
@@ -2436,6 +2654,24 @@ def validate(report: dict[str, object]) -> None:
                     hit_entry["mutation_control"]["mutant_animation_record"] ==
                         "0x0012dc50" and
                     hit_entry["score_correction"].startswith("0x0abdd2 remains") and
+                    ko_entry["classification"] ==
+                        "SOURCE_CLOSED_IMPLEMENTATION_FIELDS" and
+                    ko_entry["capture_identity"]["byte_identical"] is True and
+                    ko_entry["collision_visible_result"]["outer_state_u16"] ==
+                        0x0400 and
+                    ko_entry["scheduler_handoff"]["outer_state_u16"] ==
+                        0x0402 and
+                    ko_entry["scheduler_handoff"]
+                        ["recovery_timer_actor_2c_u8"] == 8 and
+                    ko_entry["state_program"]["launch"]
+                        ["y_velocity_s32_16_16"] == 0x98000 and
+                    ko_entry["state_program"]["first_landing"]
+                        ["timer_actor_2a_u8"] == 3 and
+                    ko_entry["state_program"]["removal_hold"]
+                        ["timer_actor_2a_u8"] == 60 and
+                    ko_entry["state_program"]["release"]
+                        ["release_writer"] == "0x0176ba" and
+                    ko_entry["state_program"]["rng_calls"] == [] and
                     len(current["mutation_controls"]) == 21,
                     "0x1f: current-state implementation contract drift")
             actions = item["first_segment_action_execution_contract"]

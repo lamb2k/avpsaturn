@@ -40,6 +40,14 @@ local capture_class1f_hit =
     os.getenv("AVSP_ORACLE11_CLASS1F_HIT_CAPTURE") == "1"
 local mutate_class1f_hit_selector =
     os.getenv("AVSP_ORACLE11_MUTATE_CLASS1F_HIT_SELECTOR") == "1"
+local class1f_hit_slot = tonumber(
+    os.getenv("AVSP_ORACLE11_CLASS1F_HIT_SLOT") or "ffa180", 16)
+local class1f_hit_first_frame = tonumber(
+    os.getenv("AVSP_ORACLE11_CLASS1F_HIT_FIRST_FRAME") or "2304")
+local class1f_hit_last_frame = tonumber(
+    os.getenv("AVSP_ORACLE11_CLASS1F_HIT_LAST_FRAME") or "2450")
+local class1f_hit_selector_entry = tonumber(
+    os.getenv("AVSP_ORACLE11_CLASS1F_HIT_SELECTOR_ENTRY") or "1f890", 16)
 local frame = 0
 local controller = 0xffd180
 local global = 0xff8000
@@ -1306,9 +1314,10 @@ oracle11_collision_identity_assignment_exit = opcodes:install_read_tap(
     end)
 
 local function emit_class1f_hit(pc)
-    if not capture_class1f_hit or frame < 2304 or frame > 2450 then return end
+    if not capture_class1f_hit or frame < class1f_hit_first_frame or
+            frame > class1f_hit_last_frame then return end
     local slot = maincpu.state["A6"].value & 0xffffff
-    if slot ~= 0xffa180 or u8(slot) == 0 or u8(slot + 2) ~= 0x1f or
+    if slot ~= class1f_hit_slot or u8(slot) == 0 or u8(slot + 2) ~= 0x1f or
             u8(slot + 8) ~= 12 then return end
     class1f_hit:write(string.format(
         "%d\t%06x\t%06x\t%04x\t%04x\t%d\t%08x\t%04x\t%d\t%04x\t%02x\t%d\t%d\t%02x\t%02x\t%02x\t%02x\t%02x\t%02x\t%02x\t%02x\t%02x\t%02x\t%08x\t%08x\t%08x\t%08x\t%06x\t%06x\t%06x\t%06x\t%06x\t%06x\n",
@@ -1358,7 +1367,9 @@ for _, pc in ipairs({
         0x01ece8, 0x01edbc,
         0x01edc8, 0x01edfc, 0x01ee16, 0x01ee24, 0x01ee6a,
         0x01efec, 0x01f6c6, 0x01f70a, 0x01f71c, 0x016518,
-        0x016536}) do
+        0x016536, 0x01f23e, 0x01f250, 0x01f316, 0x01f340,
+        0x01f366, 0x01f37c, 0x01f3c0, 0x01f3ee, 0x01f41e,
+        0x01f46e, 0x01f474, 0x01f4b2, 0x01f4f0, 0x01f508}) do
     oracle11_class1f_hit_pc_taps[#oracle11_class1f_hit_pc_taps + 1] =
         opcodes:install_read_tap(pc, pc + 1,
         string.format("oracle11_class1f_hit_%06x", pc),
@@ -1366,10 +1377,12 @@ for _, pc in ipairs({
 end
 
 oracle11_class1f_hit_write_tap = program:install_write_tap(
-    0xffa180, 0xffa23f, "oracle11_class1f_hit_writes",
+    class1f_hit_slot, class1f_hit_slot + 0xbf,
+    "oracle11_class1f_hit_writes",
     function(offset, data, mask)
-        if not capture_class1f_hit or frame < 2304 or frame > 2450 then return end
-        local slot = 0xffa180
+        if not capture_class1f_hit or frame < class1f_hit_first_frame or
+                frame > class1f_hit_last_frame then return end
+        local slot = class1f_hit_slot
         if u8(slot) == 0 or u8(slot + 2) ~= 0x1f or u8(slot + 8) ~= 12 then
             return
         end
@@ -1387,11 +1400,13 @@ oracle11_class1f_hit_write_tap = program:install_write_tap(
     end)
 
 oracle11_class1f_hit_selector_table_tap = program:install_read_tap(
-    0x01f890, 0x01f891, "oracle11_class1f_hit_selector_table",
+    class1f_hit_selector_entry, class1f_hit_selector_entry + 1,
+    "oracle11_class1f_hit_selector_table",
     function(offset, data, mask)
         if not capture_class1f_hit or not mutate_class1f_hit_selector or
-                frame < 2304 or frame > 2450 or
-                (maincpu.state["A6"].value & 0xffffff) ~= 0xffa180 then
+                frame < class1f_hit_first_frame or
+                frame > class1f_hit_last_frame or
+                (maincpu.state["A6"].value & 0xffffff) ~= class1f_hit_slot then
             return data
         end
         class1f_hit_selector_mutations = class1f_hit_selector_mutations + 1
