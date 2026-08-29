@@ -1170,11 +1170,11 @@ int main(void)
         if (!avsp_round1_step_scheduler(&projectile_runtime) ||
             projectile->collision_result != -1 || target->health != -1 ||
             target->state != 0x0402u || target->substate != 0x0000u ||
-            target->source_action_timer != 0u ||
+            target->source_action_timer != 141u ||
             target->source_projectile_reaction_pending != 2u ||
             projectile_runtime.player_weapon_projectile_collision_writes != 1u ||
             projectile_runtime.player_weapon_projectile_damage_writes != 1u ||
-            projectile_runtime.first_encounter.ko_events != 0u)
+            projectile_runtime.first_encounter.ko_events != 1u)
         {
             fprintf(stderr, "parent delayed collision p=%d/%d/%d target=%d/%d/%d health=%d target-state=%04x/%04x timer=%u result=%d projectile-state=%u counts=%lu/%lu ko=%lu code=%u failures=%lu\n",
                 projectile->x, projectile->y, projectile->z,
@@ -1191,7 +1191,7 @@ int main(void)
         if (!avsp_round1_step_scheduler(&projectile_runtime) ||
             projectile->state != 4u || target->state != 0x0402u ||
             target->substate != 0x0000u ||
-            target->source_action_timer != 141u ||
+            target->source_action_timer != 140u ||
             target->source_projectile_reaction_pending != 0u ||
             projectile_runtime.first_encounter.ko_events != 1u ||
             !avsp_round1_step_scheduler(&projectile_runtime))
@@ -1357,13 +1357,13 @@ int main(void)
         if (!avsp_round1_step_scheduler(&projectile_runtime) ||
             target->health != 32 || target->state != 0x0202u ||
             target->substate != 0x0000u ||
-            target->source_action_timer != 0u ||
+            target->source_action_timer != 39u ||
             target->source_projectile_reaction_pending != 1u ||
             child->collision_result != -1 ||
             target->source_collision_latches[0] !=
                 child->collision_identity ||
             projectile_runtime.player_weapon_projectile_damage_writes != 2u ||
-            projectile_runtime.first_encounter.hit_events != 0u)
+            projectile_runtime.first_encounter.hit_events != 1u)
         {
             fprintf(stderr,
                     "child collision failed code=%u slot=%04x health=%d state=%04x/%04x timer=%u result=%d writes=%lu hits=%lu impact=%lu/%lu failures=%lu\n",

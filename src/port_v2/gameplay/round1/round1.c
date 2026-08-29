@@ -527,14 +527,43 @@ static int avsp_round1_class1f_begin_reaction(
 }
 
 static void avsp_round1_class1f_queue_projectile_reaction(
-    AvspRound1ActorCore *actor, const int ko)
+    AvspRound1Runtime *runtime, AvspRound1ActorCore *actor, const int ko)
 {
+    AvspRound1FirstEncounterRuntime *encounter = &runtime->first_encounter;
     actor->state = ko ? 0x0402u : 0x0202u;
     actor->substate = 0u;
     actor->source_action = 0u;
-    actor->source_action_timer = 0u;
+    actor->source_action_timer = (unsigned char)(ko ?
+        avsp_round1_class1f_current.ko_ticks :
+        avsp_round1_class1f_current.hit_ticks);
     actor->source_projectile_reaction_pending =
         (unsigned char)(ko ? 2u : 1u);
+    if (ko)
+    {
+        ++encounter->ko_events;
+        encounter->semantic_ko = 1u;
+        encounter->source_progress = (unsigned short)(
+            encounter->source_progress +
+            avsp_round1_recurring_spawn.progress_increment);
+    }
+    else
+    {
+        ++encounter->hit_events;
+        encounter->semantic_hit = 1u;
+    }
+}
+
+static int avsp_round1_class1f_consume_projectile_reaction(
+    AvspRound1ActorCore *actor)
+{
+    AvspPortV2HitKoRuntime reaction;
+    if (actor->source_action_timer == 0u ||
+        !avsp_round1_class1f_rebuild_reaction(actor, &reaction))
+        return 0;
+    if (reaction.active && !avsp_port_v2_hit_ko_step(&reaction))
+        return 0;
+    --actor->source_action_timer;
+    return avsp_round1_class1f_sync_reaction(actor, &reaction);
 }
 
 static int avsp_round1_class1f_reaction_active(
@@ -6111,7 +6140,7 @@ static int avsp_round1_projectile_collision_pass(
         ++runtime->first_encounter.alien_damage_events;
         target->source_facing_selector = projectile->facing;
         avsp_round1_class1f_queue_projectile_reaction(
-            target, target->health < 0);
+            runtime, target, target->health < 0);
         if (!avsp_round1_spawn_class4e_variant1_impact(
                 runtime, projectile, target, box, &hurt))
             return 0;
@@ -6993,11 +7022,9 @@ int avsp_round1_step_scheduler(AvspRound1Runtime *runtime)
                        actor->substate == 0x1408u)));
                 if (actor->source_projectile_reaction_pending != 0u)
                 {
-                    int pending_ko =
-                        actor->source_projectile_reaction_pending == 2u;
                     actor->source_projectile_reaction_pending = 0u;
-                    if (!avsp_round1_class1f_begin_reaction(
-                            runtime, actor, pending_ko))
+                    if (!avsp_round1_class1f_consume_projectile_reaction(
+                            actor))
                     {
                         runtime->scheduler_failure_code = 17u;
                         runtime->scheduler_failure_source_slot =
