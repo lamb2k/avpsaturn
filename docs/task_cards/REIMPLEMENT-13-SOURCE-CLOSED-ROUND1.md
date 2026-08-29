@@ -609,6 +609,46 @@ lifecycle transition, including its state guard, scheduler position, and pool
 ownership. Do not fit the frame, rebaseline input, or disturb the exact
 frame-2287/2306/2307 chronology.
 
+The fixed-slot presentation boundary is now source-bound. Accepted allocator
+and release evidence for `0x01773e`/`0x017754` proves that the record-type-4
+slot is not presentation-cleared at release or reallocation. Native preserves
+the prior animation record, assembly, timer, and signed branch until state-0
+initialization. At visible frame 2371 slot `0x00ff8800`, class `0x04`, variant
+`2` now retains source record `0x0003088c`, assembly `0x00030b28`, timer `1`,
+and branch `-32768`; source initialization replaces them naturally at frame
+2372. No fixed-frame substitute, suppression, or input change is used.
+
+Incremental implementation checkpoint
+`9a6c1010a72d57c7c6c5fabfb52a0e8ddd450d8b` binds SPEC-02 contract
+`fd65f15e44695ccdc65c2e59516ddb11ccd7315fe327f63c20a34ab00a51169f`
+and fixture
+`401253d2279846118b96c04b8c9ad6d41272102f3e3b203bb0d55ed3f25e9ff2`.
+Fast, Oracle, 110 SPEC mutations, 179 native mutations, nine scene mutations,
+123 Target suppressions, LiveEncounterBench Target, and two commit-bound
+byte-identical 575-sample Emulator ledgers pass. The normalized ISO is
+`4dda2cf243c5f0f715aa2610ea078784bd7a93f525ab44708c98c1534b80c7e6`;
+the sample payload is
+`0afd341dd78d367adf5b323cb3b5e6d99b762d65844f36b64cfe330f6adce16a`.
+
+Fresh window-only WGC covers visible frames 2368..2374. Cadence sheet
+`9d76768c838f6a7af2c8fa45b7c7b1347ac2b6ca43a094139dbce64f68526bd3`
+and clip
+`c7faf1b5f585173fca90639557ea08ab5bdba4320e66c28bf889071355d22502`
+pass direct inspection with stable Predator identity, retained frame-2371
+presentation, and coherent Coffee Shop planes, palette, and priority. The
+scene gaps remain `335 / 1,293 / 3 / 94 / 3 / 281`; no category increases
+because this repaired per-frame presentation was already inside an exact actor
+lifetime. Unowned Saturn actors, unidentified source pairs, and retained
+gameplay authorities remain zero.
+
+The next earliest causal divergence is record-type `12`, class `0x1f`, slot
+`0x00ffa300` at visible frame 2378. Source attack selector `2` differs from
+native selector `1`; the animation diverges at frame 2379 and later motion,
+facing, state, and substate differences are downstream. Bind the accepted
+selector predicate, state/substate guard, animation/assembly write, facing,
+and scheduler ordering. Do not fit the frame or rebaseline input, and preserve
+the fixed-slot correction and exact frame-2287/2306/2307 chronology.
+
 ## Next eligible cards
 
 - `QA-13-ROUND1-END-TO-END-DIFFERENTIAL` after the complete stable Round 2
