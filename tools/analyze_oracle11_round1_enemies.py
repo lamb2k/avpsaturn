@@ -87,6 +87,7 @@ CLASS1F_HIT_FILES = (
     "coffee_shop_scene_frames.tsv",
     "coffee_shop_scene_health_writes.tsv",
     "coffee_shop_rng_calls.tsv",
+    "progression_class1f_transitions.tsv",
     "dispatches.tsv", "samples.tsv", "score_writes.tsv", "projectiles.tsv",
     "progression_result.tsv",
 )
@@ -1461,6 +1462,8 @@ def class1f_hit_entry_contract(program: bytes,
         row["a6"] == "ffa180"]
     program_trace = rows(CLASS1F_HIT_A /
                          "coffee_shop_class1f_hit_program.tsv")
+    transition_trace = rows(CLASS1F_HIT_A /
+                            "progression_class1f_transitions.tsv")
 
     def program_row(frame: int, pc: str) -> dict[str, str]:
         return next(row for row in program_trace
@@ -1548,6 +1551,13 @@ def class1f_hit_entry_contract(program: bytes,
                            "records": terminal_records},
     }
     generic_selector_0x36 = class1f_selector_sequence(program, 0x36)
+    pre_hit_context = next(row for row in transition_trace
+                           if row["frame"] == "2306" and
+                           row["pc"] == "01d4aa" and
+                           row["state_before"] == "0200")
+    return_dispatch = next(row for row in transition_trace
+                           if row["frame"] == "2413" and
+                           row["pc"] == "0607e8")
 
     require(launch_motion["x_velocity_s32_16_16_before_facing"] == 0x1C000 and
             launch_motion["x_acceleration_s32_16_16_before_facing"] == 0 and
@@ -1580,6 +1590,17 @@ def class1f_hit_entry_contract(program: bytes,
             actor_row(2413)["substate"] == "0000" and
             actor_row(2414)["substate"] == "1600" and
             actor_row(2414)["animation_record"] == "0012eafc" and
+            [pre_hit_context[name] for name in
+             ("field85", "fielda3", "fielda4", "fielda5", "fielda6",
+              "fieldb0")] == ["00", "00", "01", "01", "01", "02"] and
+            [return_dispatch[name] for name in
+             ("field85", "fielda3", "fielda4", "fielda5", "fielda6",
+              "fieldb0")] == ["00", "00", "01", "01", "01", "02"] and
+            return_dispatch["facing"] == "1" and
+            return_dispatch["x"] == "582" and
+            return_dispatch["z"] == "310" and
+            return_dispatch["p_x"] == "944" and
+            return_dispatch["p_z"] == "320" and
             [row["animation_record"] for row in
              hit_animation_sequences["reaction_0x36"]["records"]] ==
                 ["0x0012e04c", "0x0012e05c", "0x0012e06c",
@@ -1772,6 +1793,22 @@ def class1f_hit_entry_contract(program: bytes,
                     "dispatch through class table indexed by actor+0x02:u8",
                 ],
                 "visible_state_at_2413": "0x0200:0000",
+                "preserved_resume_fields": {
+                    "source_frame": 2413,
+                    "dispatch_pc": "0x0607e8",
+                    "actor_85_style_u8": 0,
+                    "actor_a3_u8": 0,
+                    "actor_a4_u8": 1,
+                    "actor_a5_u8": 1,
+                    "actor_a6_u8": 1,
+                    "actor_b0_u8": 2,
+                    "facing_u8": 1,
+                    "actor_x_s16": 582,
+                    "actor_z_s16": 310,
+                    "player_x_s16": 944,
+                    "player_z_s16": 320,
+                },
+                "resume_guard": "far-player branch; actor+0xa5:u8 == actor+0x0f:u8; actor+0xa3:u8 == actor+0x85:u8; actor+0xa6:u8 != 0 selects action 0x16 and writes actor+0xb0:u8 = 2",
                 "class1f_resume_at_2414": "0x0200:1600",
                 "class1f_resume_animation_record": "0x0012eafc",
             },
@@ -2340,6 +2377,22 @@ def validate(report: dict[str, object]) -> None:
                         ["generic_action_selector_binding_forbidden"] is True and
                     hit_entry["source_hit_program"]["normal_return"]
                         ["class1f_resume_at_2414"] == "0x0200:1600" and
+                    hit_entry["source_hit_program"]["normal_return"]
+                        ["preserved_resume_fields"] == {
+                            "source_frame": 2413,
+                            "dispatch_pc": "0x0607e8",
+                            "actor_85_style_u8": 0,
+                            "actor_a3_u8": 0,
+                            "actor_a4_u8": 1,
+                            "actor_a5_u8": 1,
+                            "actor_a6_u8": 1,
+                            "actor_b0_u8": 2,
+                            "facing_u8": 1,
+                            "actor_x_s16": 582,
+                            "actor_z_s16": 310,
+                            "player_x_s16": 944,
+                            "player_z_s16": 320,
+                        } and
                     hit_entry["rng"]["calls"] == 1 and
                     hit_entry["rng"]["seed_before_u16"] == 0xEDD9 and
                     hit_entry["rng"]["seed_after_u16"] == 0xC9A2 and

@@ -74,6 +74,7 @@ for label,mutate in [
     ('source-hit-context-record',lambda x:x['damage_hit_ko_removal']['source_hit_entry_program']['source_hit_program']['animation_sequences']['reaction_0x36']['records'][0].__setitem__('animation_record','0x0012e410')),
     ('source-hit-selector-context',lambda x:x['damage_hit_ko_removal']['source_hit_entry_program']['source_hit_program']['selector_context_rule'].__setitem__('generic_action_selector_binding_forbidden',False)),
     ('source-hit-return',lambda x:x['damage_hit_ko_removal']['source_hit_entry_program']['source_hit_program']['normal_return'].__setitem__('class1f_resume_at_2414','0x0200:0000')),
+    ('source-hit-return-style',lambda x:x['damage_hit_ko_removal']['source_hit_entry_program']['source_hit_program']['normal_return']['preserved_resume_fields'].__setitem__('actor_85_style_u8',1)),
     ('source-hit-mutation',lambda x:x['damage_hit_ko_removal']['source_hit_entry_program']['mutation_control'].__setitem__('mutations',0)),
     ('source-hit-score-audio-correction',lambda x:x['damage_hit_ko_removal']['source_hit_entry_program'].__setitem__('score_correction','audio')),
     ('current-retained-authority',lambda x:x['authority_boundary'].__setitem__('retained_gameplay_authority_forbidden',False)),
