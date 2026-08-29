@@ -375,6 +375,55 @@ def collision_chronology(source: dict[str, object],
     }
 
 
+def fixed_slot_reuse_presentation(
+        source_rows: list[dict[str, str]],
+        native_rows: list[dict[str, str]],
+        divergences: list[dict[str, object]]) -> dict[str, object]:
+    """Bind the allocation-visible presentation retained by slot 0xff8800."""
+    source_by_frame = {
+        int(row["frame"]): row for row in source_rows
+        if int(row["slot"], 16) == 0x00ff8800 and
+        int(row["frame"]) in {2333, 2371, 2372}}
+    native_by_frame = {
+        int(row["frame"]): row for row in native_rows
+        if int(row["source_slot"], 16) == 0x00ff8800 and
+        int(row["frame"]) in {2333, 2371, 2372}}
+
+    def source_projection(frame: int) -> dict[str, object]:
+        row = source_by_frame[frame]
+        return {
+            "frame_u16": frame,
+            "state_u16": "0x" + row["state"],
+            "variant_u8": int(row["variant"], 16),
+            "animation_record": "0x" + row["animation_record"],
+            "animation_timer_u16": int(row["animation_timer"], 16),
+            "animation_branch_s16": int(row["animation_branch"]),
+        }
+
+    def native_projection(frame: int) -> dict[str, object]:
+        row = native_by_frame[frame]
+        return {
+            "frame_u16": frame,
+            "state_u16": "0x" + row["state"],
+            "animation_record": "0x" + row["animation_record"],
+            "assembly": "0x" + row["assembly"],
+            "animation_timer_u16": int(row["animation_timer"]),
+        }
+
+    slot_divergence = next(
+        (item for item in divergences
+         if item["source_slot"] == "0x00ff8800"), None)
+    return {
+        "allocator": "0x01773e",
+        "release": "0x017754",
+        "source": [source_projection(frame) for frame in (2333, 2371, 2372)],
+        "native": [native_projection(frame) for frame in (2333, 2371, 2372)],
+        "no_source_native_divergence_through_frame_u16": 2372,
+        "next_slot_divergence_frame_u16": (
+            int(slot_divergence["frame"]) if slot_divergence else None),
+    }
+
+
 def validate_report(report: dict[str, object]) -> None:
     gate_names = {
         "source_actor_population_missing_on_saturn",
@@ -447,6 +496,34 @@ def validate_report(report: dict[str, object]) -> None:
                 "animation_record": "0x00092914",
                 "assembly": "0x00092c04"}}:
         raise ValueError("Coffee Shop first Button1 collision chronology drift")
+    reuse = report["native_capture"]["fixed_slot_reuse_presentation"]
+    if reuse != {
+            "allocator": "0x01773e", "release": "0x017754",
+            "source": [
+                {"frame_u16": 2333, "state_u16": "0x0400",
+                 "variant_u8": 0, "animation_record": "0x0003088c",
+                 "animation_timer_u16": 1,
+                 "animation_branch_s16": -32768},
+                {"frame_u16": 2371, "state_u16": "0x0000",
+                 "variant_u8": 2, "animation_record": "0x0003088c",
+                 "animation_timer_u16": 1,
+                 "animation_branch_s16": -32768},
+                {"frame_u16": 2372, "state_u16": "0x0200",
+                 "variant_u8": 2, "animation_record": "0x00030944",
+                 "animation_timer_u16": 2, "animation_branch_s16": 0}],
+            "native": [
+                {"frame_u16": 2333, "state_u16": "0x0400",
+                 "animation_record": "0x0003088c",
+                 "assembly": "0x00030b28", "animation_timer_u16": 1},
+                {"frame_u16": 2371, "state_u16": "0x0000",
+                 "animation_record": "0x0003088c",
+                 "assembly": "0x00030b28", "animation_timer_u16": 1},
+                {"frame_u16": 2372, "state_u16": "0x0200",
+                 "animation_record": "0x00030944",
+                 "assembly": "0x00030bd6", "animation_timer_u16": 2}],
+            "no_source_native_divergence_through_frame_u16": 2372,
+            "next_slot_divergence_frame_u16": 2482}:
+        raise ValueError("Coffee Shop record-4 fixed-slot reuse drift")
     all_zero = all(value == 0 for value in report["gaps"].values())
     if report["acceptance"] != {"all_zero": all_zero, "ready": all_zero}:
         raise ValueError("Coffee Shop scene accepted before the zero-gap gate")
@@ -530,7 +607,10 @@ def main() -> None:
                                 "class1f_first_movement": compact_window(
                                     rows, 2208, 2280, {"00ffa240"})},
                            "first_button1_collision": collision_chronology(
-                               source, rows, divergences)},
+                               source, rows, divergences),
+                           "fixed_slot_reuse_presentation":
+                               fixed_slot_reuse_presentation(
+                                   source_rows, rows, divergences)},
         "source_capture": {
             "actor_rows": len(source_rows),
             "actor_sha256": source_actor_sha256,

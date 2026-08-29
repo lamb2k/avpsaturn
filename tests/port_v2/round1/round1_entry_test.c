@@ -3069,6 +3069,28 @@ int main(void)
             unsigned int source_updates =
                 avsp_round1_coffee_shop_source_updates(
                     (unsigned short)source_frame);
+            if (source_frame == 2371u)
+            {
+                const AvspRound1WeaponProjectileAllocation *child =
+                    &scene_runtime.player_weapon_projectiles[3];
+                if (!child->active || child->source_slot != 0x8800u ||
+                    child->actor_class != 0x04 || child->variant != 2u ||
+                    child->state != 0u || child->substate != 0u ||
+                    child->animation_record != 0x0003088cUL ||
+                    child->assembly != 0x00030b28UL ||
+                    child->animation_timer != 1u ||
+                    child->animation_branch != (short)-32768)
+                {
+                    fprintf(stderr,
+                        "Coffee Shop fixed-slot retention failed frame=%u active=%u slot=%04x class=%02x variant=%u state=%02x/%02x animation=%08lx assembly=%08lx timer=%u branch=%d\n",
+                        source_frame, child->active, child->source_slot,
+                        (unsigned int)(unsigned char)child->actor_class,
+                        child->variant, child->state, child->substate,
+                        child->animation_record, child->assembly,
+                        child->animation_timer, child->animation_branch);
+                    return 113;
+                }
+            }
             scene_runtime.frame = source_frame - 2040u;
             for (source_tick = 1u; source_tick < source_updates;
                  ++source_tick)

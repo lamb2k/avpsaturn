@@ -51,6 +51,10 @@ item = copy.deepcopy(BASE)
 item["native_capture"]["first_button1_collision"][
     "native_impact_transaction"]["allocation_visible_frame"] = 2308
 mutations.append(("first impact allocation delay", item))
+item = copy.deepcopy(BASE)
+item["native_capture"]["fixed_slot_reuse_presentation"]["native"][1][
+    "animation_record"] = "0x00000000"
+mutations.append(("fixed-slot reused presentation clear", item))
 
 for label, mutant in mutations:
     try:

@@ -6299,6 +6299,10 @@ static int avsp_round1_release_player_weapon_projectile(
     AvspRound1Runtime *runtime, unsigned int index)
 {
     AvspRound1WeaponProjectileAllocation *projectile;
+    unsigned long animation_record;
+    unsigned long assembly;
+    unsigned short animation_timer;
+    short animation_branch;
     if (index >= AVSP_ROUND1_WEAPON_PROJECTILE_CAPACITY ||
         runtime->player_weapon_projectile_free_count >=
             AVSP_ROUND1_WEAPON_PROJECTILE_CAPACITY)
@@ -6309,7 +6313,15 @@ static int avsp_round1_release_player_weapon_projectile(
     runtime->player_weapon_projectile_free_stack[
         runtime->player_weapon_projectile_free_count] = (unsigned char)index;
     ++runtime->player_weapon_projectile_free_count;
+    animation_record = projectile->animation_record;
+    assembly = projectile->assembly;
+    animation_timer = projectile->animation_timer;
+    animation_branch = projectile->animation_branch;
     memset(projectile, 0, sizeof(*projectile));
+    projectile->animation_record = animation_record;
+    projectile->assembly = assembly;
+    projectile->animation_timer = animation_timer;
+    projectile->animation_branch = animation_branch;
     ++runtime->player_weapon_projectile_releases;
     return 1;
 }
@@ -6322,6 +6334,10 @@ static int avsp_round1_allocate_weapon_child(
     unsigned int index;
     AvspRound1WeaponProjectileAllocation *child;
     short x_offset;
+    unsigned long animation_record;
+    unsigned long assembly;
+    unsigned short animation_timer;
+    short animation_branch;
     if (runtime->player_weapon_projectile_free_count == 0u)
     {
         ++runtime->player_weapon_allocation_failures;
@@ -6333,7 +6349,15 @@ static int avsp_round1_allocate_weapon_child(
     if (index >= AVSP_ROUND1_WEAPON_PROJECTILE_CAPACITY)
         return 0;
     child = &runtime->player_weapon_projectiles[index];
+    animation_record = child->animation_record;
+    assembly = child->assembly;
+    animation_timer = child->animation_timer;
+    animation_branch = child->animation_branch;
     memset(child, 0, sizeof(*child));
+    child->animation_record = animation_record;
+    child->assembly = assembly;
+    child->animation_timer = animation_timer;
+    child->animation_branch = animation_branch;
     child->collision_identity = avsp_round1_next_collision_identity(runtime);
     child->collision_registration_pending = 1u;
     x_offset = parent->facing == 0u ? (short)-row->x : row->x;
@@ -6705,7 +6729,7 @@ static int avsp_round1_step_weapon_projectile(
         {
             if (projectile->animation_branch < 0)
                 projectile->state = avsp_round1_weapon_projectile.emitter_state;
-            else if (projectile->animation_timer > 0u)
+            if (projectile->animation_timer > 0u)
                 --projectile->animation_timer;
             if (projectile->state == avsp_round1_weapon_projectile.active_state &&
                 projectile->animation_timer == 0u)

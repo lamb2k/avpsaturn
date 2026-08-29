@@ -11,7 +11,6 @@ from PIL import Image, ImageDraw, ImageFont
 
 
 ROOT = Path(__file__).resolve().parents[4]
-FRAMES = tuple(range(2280, 2311))
 VIEWPORT = (1, 149, 801, 658)
 FONT = ImageFont.load_default()
 
@@ -38,12 +37,20 @@ def labelled(image, frame):
 
 
 parser = argparse.ArgumentParser()
+parser.add_argument("--first", type=int, default=2280)
+parser.add_argument("--last", type=int, default=2310)
+parser.add_argument("--focus-frame", type=int)
 parser.add_argument(
     "--package",
     default=("build/feedback/REIMPLEMENT-13-COFFEE-SHOP-SCENE-PARITY/"
              "wgc-2280-2310"),
 )
 args = parser.parse_args()
+if args.first < 0 or args.last < args.first:
+    raise ValueError("invalid Coffee Shop WGC frame range")
+FRAMES = tuple(range(args.first, args.last + 1))
+if args.focus_frame is not None and args.focus_frame not in FRAMES:
+    raise ValueError("focus frame must be inside the WGC frame range")
 PACKAGE = ROOT / args.package
 
 paths = [PACKAGE / f"source-frame-{frame}.png" for frame in FRAMES]
@@ -52,14 +59,16 @@ if missing:
     raise RuntimeError(f"missing Coffee Shop WGC frames: {missing}")
 images = [aperture(path) for path in paths]
 
-clip = PACKAGE / "source-frames-2280-2310.webp"
+clip = PACKAGE / f"source-frames-{FRAMES[0]}-{FRAMES[-1]}.webp"
 images[0].save(clip, save_all=True, append_images=images[1:],
                duration=17, loop=0, lossless=True, method=6)
 
-sheet = Image.new("RGB", (8 * 352, 4 * 224), "black")
+columns = min(8, len(images))
+rows = (len(images) + columns - 1) // columns
+sheet = Image.new("RGB", (columns * 352, rows * 224), "black")
 for index, (frame, image) in enumerate(zip(FRAMES, images)):
     sheet.paste(labelled(image, frame),
-                ((index % 8) * 352, (index // 8) * 224))
+                ((index % columns) * 352, (index // columns) * 224))
 sheet_path = PACKAGE / "cadence-1-contact-sheet.png"
 sheet.save(sheet_path)
 
@@ -72,8 +81,7 @@ report = {
     "source_commit": source_commit,
     "capture_method": "Windows.Graphics.Capture via @oai/sky",
     "source_visible_frame_range": [FRAMES[0], FRAMES[-1]],
-    "scheduler_collision_frame": 2306,
-    "impact_visible_frame": 2307,
+    "focus_frame": args.focus_frame,
     "capture_count": len(paths),
     "captures": [
         {"source_visible_frame": frame,

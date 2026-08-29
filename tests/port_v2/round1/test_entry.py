@@ -9,7 +9,7 @@ from pathlib import Path
 
 ROOT = Path(__file__).resolve().parents[3]
 SPEC = ROOT / "data/spec02_round1_executable_contract.json"
-EXPECTED = "bd838608397cbb895bc093163d2bd8de7d413ab2799a30f9419cd547002abf82"
+EXPECTED = "fd65f15e44695ccdc65c2e59516ddb11ccd7315fe327f63c20a34ab00a51169f"
 assert hashlib.sha256(SPEC.read_bytes()).hexdigest() == EXPECTED
 assert json.loads(SPEC.read_text())["status"] == "ACCEPTED"
 source = (ROOT / "src/port_v2/gameplay/round1/round1.c").read_text()
@@ -258,6 +258,8 @@ for before, after in (
      "if (0)\n                continue;"),
     ("if (projectile->actor_class == avsp_round1_weapon_projectile.child_class)\n            return avsp_round1_release_player_weapon_projectile(runtime,\n                                                                 index);",
      "if (projectile->actor_class == avsp_round1_weapon_projectile.child_class)\n            projectile->state = avsp_round1_weapon_projectile.release_state;"),
+    ("child->animation_record = animation_record;\n    child->assembly = assembly;",
+     "child->animation_record = 0UL;\n    child->assembly = assembly;"),
     ("weapon_pressed = runtime->player_weapon_input_pipeline;",
      "weapon_pressed = (unsigned char)((input_mask & AVSP_ROUND1_INPUT_BUTTON1) != 0u);"),
     ("actor->state != 0x0208u || actor->substate != 0x0e02u",
@@ -458,4 +460,4 @@ for before, after in (
                                  "--", "bash", "-lc", command],
                                 capture_output=True)
         assert result.returncode != 0, f"generated mutation escaped: {before}"
-print("REIMPLEMENT-13 entry/player/scheduler/class1f/Coffee-Shop-navigation/neutral-stop/melee/Button1/Button3/type16-projectile/first-encounter differential: PASS (178 real mutations)")
+print("REIMPLEMENT-13 entry/player/scheduler/class1f/Coffee-Shop-navigation/neutral-stop/melee/Button1/Button3/type16-projectile/first-encounter differential: PASS (179 real mutations)")

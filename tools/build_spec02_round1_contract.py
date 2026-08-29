@@ -649,6 +649,64 @@ def build_fixtures(source: dict[str, dict]) -> dict[str, object]:
                 "fixed_frame_substitute": False,
             },
         }
+    weapon_projection["record4_child_class4"][
+        "fixed_slot_reuse_presentation"] = {
+            "classification": "SOURCE_CLOSED_IMPLEMENTATION_FIELDS",
+            "spec_executable": True,
+            "allocator": "0x01773e",
+            "release": "0x017754",
+            "allocation_writer": "0x02f9dc child-emitter body",
+            "rule": (
+                "record-type-4 release and reallocation do not clear the "
+                "prior animation presentation fields before the new actor's "
+                "state-0 dispatch; retain them for the allocation-visible "
+                "source frame, then replace them during state-0 initialization"
+            ),
+            "retained_fields": [
+                "animation_record_u32", "assembly_u32",
+                "animation_timer_u16", "animation_branch_s16",
+            ],
+            "coffee_shop_slot_0xff8800": {
+                "prior_terminal_visible_frame_u16": 2333,
+                "prior_state_u16": "0x0400",
+                "prior_variant_u8": 0,
+                "retained_animation_record": "0x0003088c",
+                "retained_assembly": "0x00030b28",
+                "retained_animation_timer_u16": 1,
+                "retained_animation_branch_s16": -32768,
+                "reuse_visible_frame_u16": 2371,
+                "reuse_state_u16": "0x0000",
+                "reuse_variant_u8": 2,
+                "initialization_visible_frame_u16": 2372,
+                "initialized_state_u16": "0x0200",
+                "initialized_animation_record": "0x00030944",
+                "initialized_assembly": "0x00030bd6",
+                "initialized_animation_timer_u16": 2,
+                "initialized_animation_branch_s16": 0,
+            },
+            "evidence": {
+                "coffee_shop_scene_actors_sha256": source["route"]
+                    ["coffee_shop_scene_census"]["capture_identity"]
+                    ["completion_a"]["coffee_shop_scene_actors.tsv"],
+                "allocator_write_set":
+                    "data/oracle11_predator_weapon_projectile_resource.json#/implementation_contract/record4_parent_class0/allocation_writes",
+                "child_source_contract":
+                    "data/oracle11_predator_weapon_projectile_resource.json#/implementation_contract/record4_child_class4",
+            },
+            "mutation_control": {
+                "mutation": (
+                    "clear the retained presentation fields at release or "
+                    "before the child allocation becomes visible"
+                ),
+                "rejected_visible_frame_u16": 2371,
+                "mutant_animation_record": "0x00000000",
+                "source_animation_record": "0x0003088c",
+                "trajectory_fields_unchanged": [
+                    "state", "substate", "x", "y", "z", "facing",
+                ],
+                "fixed_frame_substitute": False,
+            },
+        }
     registration = weapon_projection["current_state_collision_damage"][
         "registration_and_pair_eligibility"]
     registration["new_allocation_registration_boundary"] = {
@@ -1007,6 +1065,36 @@ def validate(contract: dict[str, object], fixtures: dict[str, object],
                 "scene_differential_pass": False,
                 "ready": False},
             "Coffee Shop scene manifest incomplete or falsely accepted")
+    child_reuse = fixtures["authority_data"]["player"][
+        "weapon_projectile_resource"]["implementation_contract"][
+            "record4_child_class4"]["fixed_slot_reuse_presentation"]
+    require(child_reuse["classification"] ==
+                "SOURCE_CLOSED_IMPLEMENTATION_FIELDS" and
+            child_reuse["spec_executable"] is True and
+            child_reuse["allocator"] == "0x01773e" and
+            child_reuse["release"] == "0x017754" and
+            child_reuse["retained_fields"] == [
+                "animation_record_u32", "assembly_u32",
+                "animation_timer_u16", "animation_branch_s16"] and
+            child_reuse["coffee_shop_slot_0xff8800"] == {
+                "prior_terminal_visible_frame_u16": 2333,
+                "prior_state_u16": "0x0400", "prior_variant_u8": 0,
+                "retained_animation_record": "0x0003088c",
+                "retained_assembly": "0x00030b28",
+                "retained_animation_timer_u16": 1,
+                "retained_animation_branch_s16": -32768,
+                "reuse_visible_frame_u16": 2371,
+                "reuse_state_u16": "0x0000", "reuse_variant_u8": 2,
+                "initialization_visible_frame_u16": 2372,
+                "initialized_state_u16": "0x0200",
+                "initialized_animation_record": "0x00030944",
+                "initialized_assembly": "0x00030bd6",
+                "initialized_animation_timer_u16": 2,
+                "initialized_animation_branch_s16": 0} and
+            child_reuse["mutation_control"][
+                "rejected_visible_frame_u16"] == 2371 and
+            child_reuse["mutation_control"]["fixed_frame_substitute"] is False,
+            "record-4 child fixed-slot presentation retention drift")
     button3 = fixtures["authority_data"]["player"][
         "directional_airborne_interruption"]["directional_actions"][
             "implementation_contract"]

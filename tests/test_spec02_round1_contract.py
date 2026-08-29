@@ -37,6 +37,20 @@ assert parent_state["first_child_visible_frame_u16"] == 2288
 assert parent_state["mutation_control"]["first_rejected_frame_u16"] == 2288
 assert [len(child["initialization"]["variant_presentation_sequences"][str(i)])
         for i in range(3)] == [17, 10, 16]
+child_reuse = child["fixed_slot_reuse_presentation"]
+assert child_reuse["classification"] == "SOURCE_CLOSED_IMPLEMENTATION_FIELDS"
+assert child_reuse["spec_executable"] is True
+assert child_reuse["retained_fields"] == [
+    "animation_record_u32", "assembly_u32", "animation_timer_u16",
+    "animation_branch_s16"]
+assert child_reuse["coffee_shop_slot_0xff8800"][
+    "retained_animation_record"] == "0x0003088c"
+assert child_reuse["coffee_shop_slot_0xff8800"][
+    "reuse_visible_frame_u16"] == 2371
+assert child_reuse["coffee_shop_slot_0xff8800"][
+    "initialized_animation_record"] == "0x00030944"
+assert child_reuse["mutation_control"]["mutant_animation_record"] == \
+    "0x00000000"
 damage = weapon["current_state_collision_damage"]
 assert damage["parent_contact"]["damage_u8"] == 127
 assert damage["child_contact"]["damage_u8"] == 31
@@ -404,6 +418,7 @@ f = copy.deepcopy(fixtures); f["authority_data"]["player"]["weapon_projectile_re
 f = copy.deepcopy(fixtures); f["authority_data"]["player"]["weapon_projectile_resource"]["implementation_contract"]["current_state_collision_damage"]["registration_and_pair_eligibility"]["mutation_control"]["target_first_contact_frame_after"] = 2306; mutations.append((contract, f, "projectile collision registration control mutation"))
 f = copy.deepcopy(fixtures); f["authority_data"]["player"]["weapon_projectile_resource"]["implementation_contract"]["record4_parent_class0"]["initialization"]["object_or_u16"] = "0x0000"; mutations.append((contract, f, "projectile presentation object priority mutation"))
 f = copy.deepcopy(fixtures); f["authority_data"]["player"]["weapon_projectile_resource"]["implementation_contract"]["record4_child_class4"]["class_u8"] = 5; mutations.append((contract, f, "projectile child class mutation"))
+f = copy.deepcopy(fixtures); f["authority_data"]["player"]["weapon_projectile_resource"]["implementation_contract"]["record4_child_class4"]["fixed_slot_reuse_presentation"]["retained_fields"].remove("animation_record_u32"); mutations.append((contract, f, "projectile child fixed-slot presentation mutation"))
 f = copy.deepcopy(fixtures); next(item for item in f["authority_data"]["enemies"]["archetypes"] if item["class"] == "0x1f")["initial_transition_contract"]["phase_0x1400"]["substates"][1]["writes"]["x_velocity_s32_16_16"] = 0x20000; mutations.append((contract, f, "class1f transition motion mutation"))
 f = copy.deepcopy(fixtures); next(item for item in f["authority_data"]["enemies"]["archetypes"] if item["class"] == "0x1f")["initial_transition_contract"]["actors"][0]["coordinate_mode_u8"] = 0; mutations.append((contract, f, "class1f presentation mode mutation"))
 f = copy.deepcopy(fixtures); next(item for item in f["authority_data"]["enemies"]["archetypes"] if item["class"] == "0x1f")["initial_transition_contract"]["actors"][0]["palette_u8"] = 15; mutations.append((contract, f, "class1f presentation palette mutation"))

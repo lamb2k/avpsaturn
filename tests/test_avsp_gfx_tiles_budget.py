@@ -340,9 +340,9 @@ def main() -> int:
     residency = before_manifest["presentation_residency"]
     native_presentations = before_manifest["routes"].get(
         "spec02_round1_native_presentations", {})
-    if (native_presentations.get("decoded_variants") != 377 or
-        native_presentations.get("unique_assemblies") != 208 or
-        native_presentations.get("tiles_added") != 1936):
+    if (native_presentations.get("decoded_variants") != 389 or
+        native_presentations.get("unique_assemblies") != 214 or
+        native_presentations.get("tiles_added") != 1980):
         print("FAIL: SPEC-02 native presentation union drifted")
         return 1
     if (residency["source_peak_unique_tiles"] != 374 or
