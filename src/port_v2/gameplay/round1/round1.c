@@ -810,11 +810,13 @@ static int avsp_round1_class1f_step_source_hit_terminal(
     AvspRound1ActorCore *actor)
 {
     unsigned char next;
-    const AvspRound1AnimationStateSpec *record;
     if (actor->animation_index >=
             avsp_round1_class1f_source_hit.terminal_record_count ||
         actor->animation_timer == 0u)
         return 0;
+    if (avsp_round1_class1f_source_hit.
+            terminal_records[actor->animation_index].branch < 0)
+        return avsp_round1_class1f_source_hit_normal_return(actor);
     --actor->animation_timer;
     if (actor->animation_timer != 0u)
         return 1;
@@ -822,9 +824,6 @@ static int avsp_round1_class1f_step_source_hit_terminal(
     if (next >= avsp_round1_class1f_source_hit.terminal_record_count)
         return 0;
     avsp_round1_class1f_bind_source_hit_terminal(actor, next);
-    record = &avsp_round1_class1f_source_hit.terminal_records[next];
-    if (record->branch < 0)
-        return avsp_round1_class1f_source_hit_normal_return(actor);
     return 1;
 }
 
@@ -2598,7 +2597,6 @@ static int avsp_round1_step_class1f_source_action(
         int inner8_result;
         unsigned short random;
         unsigned char rng_consumed = 0u;
-        unsigned char relation;
         if (!avsp_round1_class1f_source_bounds(runtime, actor))
         {
             actor->state = avsp_round1_class1f_action_program.release_state;
@@ -2618,15 +2616,7 @@ static int avsp_round1_step_class1f_source_action(
             runtime, actor, &random, &rng_consumed);
         if (inner8_result != 0)
             return inner8_result > 0 ? 1 : 0;
-        relation = actor->x < runtime->player_action.x ? 1u : 0u;
-        if (relation != actor->source_a5 && actor->source_a6 == 0u)
-            return 1;
-        if (rng_consumed == 0u)
-        {
-            (void)avsp_round1_source_rng(runtime);
-            random = runtime->rng_seed;
-        }
-        if (relation != actor->source_a5)
+        if (rng_consumed != 0u)
         {
             unsigned char branch = (unsigned char)(random & 3u);
             if (branch == 1u)
@@ -2643,8 +2633,16 @@ static int avsp_round1_step_class1f_source_action(
             }
             return avsp_round1_set_class1f_action(actor, 0u, -1);
         }
+        (void)avsp_round1_source_rng(runtime);
+        random = runtime->rng_seed;
         actor->source_action_timer = avsp_round1_class1f_attack_timers[
             random & 0x000fu];
+        if (actor->source_a6 == 2u)
+        {
+            actor->facing ^= 1u;
+            return avsp_round1_set_class1f_action(actor, 0x1au,
+                actor->source_style85 ? 35 : 34);
+        }
         return avsp_round1_set_class1f_action(actor, 0x18u,
             actor->source_style85 ? 1 : 0);
     }
@@ -2660,11 +2658,8 @@ static int avsp_round1_step_class1f_source_action(
     if (action == 0x1au)
     {
         if (actor->animation_branch < 0)
-        {
-            actor->source_action_timer = 1u;
             return avsp_round1_set_class1f_action(actor, 0x18u,
                 actor->source_style85 ? 1 : 0);
-        }
         return avsp_round1_step_class1f_action_animation(runtime, actor, 0);
     }
     if (action == 0x1cu)

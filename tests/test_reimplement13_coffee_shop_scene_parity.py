@@ -60,6 +60,10 @@ item["native_capture"]["class1f_action16_rng_reuse"][
     "native_seed_after_visible_frame"] = "0x1614"
 mutations.append(("class1f action-0x16 duplicate RNG call", item))
 item = copy.deepcopy(BASE)
+item["native_capture"]["class1f_action16_latched_retry"][
+    "native_checkpoints"][1]["transition_latch_u8"] = 0
+mutations.append(("class1f action-0x16 latched retry bypass", item))
+item = copy.deepcopy(BASE)
 item["native_capture"]["deferred_record4_collision_registration"][
     "native_projectile"][1]["collision_registered_u8"] = 1
 mutations.append(("record4 same-scan collision registration", item))

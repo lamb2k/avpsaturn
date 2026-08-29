@@ -540,6 +540,22 @@ def build() -> str:
             [-0x00010000, -0x00014000, -0x00018000, -0x00020000] or
         action_attack["selector_groups_u16"] !=
             [[55], [56], [43, 43, 43, 55], [43, 43, 56]] or
+        action_programs["action_0x16"]["latched_retry_transition"]
+            ["transition_latch_u8"] != 1 or
+        action_programs["action_0x16"]["latched_retry_transition"]
+            ["a6_u8"] != 2 or
+        action_programs["action_0x16"]["latched_retry_transition"]
+            ["seed_before_u16"] != 0x4bdf or
+        action_programs["action_0x16"]["latched_retry_transition"]
+            ["seed_after_u16"] != 0xe3c2 or
+        action_programs["action_0x16"]["latched_retry_transition"]
+            ["next_action_u8"] != 0x1a or
+        action_programs["action_0x16"]["latched_retry_transition"]
+            ["selector_u8"] != 35 or
+        action_programs["action_0x16"]["latched_retry_transition"]
+            ["animation_record_u32"] != "0x0012d5e4" or
+        action_programs["action_0x16"]["latched_retry_transition"]
+            ["fixed_frame_substitute_forbidden"] is not True or
         action_attack_timers != [30] * 4 + [60] * 4 + [120] * 4 + [160] * 4 or
         class1f_actions["suppression_control"]["writer_pc"] != "0x0607e8" or
         class1f_actions["suppression_control"]["suppressed_writes"] != 179 or

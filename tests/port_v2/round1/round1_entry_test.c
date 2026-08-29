@@ -1644,6 +1644,73 @@ int main(void)
                     action16_rng_runtime.failure_count);
                 return 80;
             }
+            {
+                AvspRound1Runtime latched_retry_runtime =
+                    action16_rng_runtime;
+                AvspRound1ActorCore *latched_retry_actor =
+                    &latched_retry_runtime.pools[0].records[18];
+                latched_retry_runtime.rng_seed = 0x4bdfu;
+                latched_retry_actor->state = 0x0200u;
+                latched_retry_actor->substate = 0x1600u;
+                latched_retry_actor->source_action = 0x1600u;
+                latched_retry_actor->x = 1121;
+                latched_retry_actor->source_x_fp = 0x04610000L;
+                latched_retry_actor->facing = 1u;
+                latched_retry_actor->source_a5 = 1u;
+                latched_retry_actor->source_a6 = 2u;
+                latched_retry_actor->source_style85 = 1u;
+                latched_retry_actor->source_b0 = 1u;
+                latched_retry_actor->source_motion_flags = 1u;
+                latched_retry_actor->animation_record = 0x0012e7fcUL;
+                latched_retry_actor->assembly = 0x0012f8b8UL;
+                latched_retry_actor->animation_timer = 2u;
+                latched_retry_actor->animation_branch = -32760;
+                latched_retry_actor->source_next_animation_record =
+                    0x0012e7fcUL;
+                latched_retry_actor->source_movement_table = 8u;
+                if (!avsp_round1_step_scheduler(&latched_retry_runtime) ||
+                    latched_retry_runtime.rng_seed != 0xe3c2u ||
+                    latched_retry_actor->state != 0x0200u ||
+                    latched_retry_actor->substate != 0x1a00u ||
+                    latched_retry_actor->source_action != 0x1a00u ||
+                    latched_retry_actor->source_action_timer != 30u ||
+                    latched_retry_actor->facing != 0u ||
+                    latched_retry_actor->source_a6 != 2u ||
+                    latched_retry_actor->source_motion_flags != 1u ||
+                    latched_retry_actor->animation_record != 0x0012d5e4UL ||
+                    latched_retry_actor->attack_selector != 2u)
+                {
+                    fprintf(stderr,
+                        "action16 latched retry code=%u rng=%04x state=%04x/%04x timer=%u facing=%u a6=%u latch=%u attack=%u anim=%08lx failures=%lu\n",
+                        latched_retry_runtime.scheduler_failure_code,
+                        latched_retry_runtime.rng_seed,
+                        latched_retry_actor->state,
+                        latched_retry_actor->substate,
+                        latched_retry_actor->source_action_timer,
+                        latched_retry_actor->facing,
+                        latched_retry_actor->source_a6,
+                        latched_retry_actor->source_motion_flags,
+                        latched_retry_actor->attack_selector,
+                        latched_retry_actor->animation_record,
+                        latched_retry_runtime.failure_count);
+                    return 80;
+                }
+                for (entry_calls = 0u; entry_calls < 13u; ++entry_calls)
+                    if (!avsp_round1_step_scheduler(
+                            &latched_retry_runtime))
+                        return 80;
+                if (latched_retry_actor->state != 0x0200u ||
+                    latched_retry_actor->substate != 0x1800u ||
+                    latched_retry_actor->source_action != 0x1800u ||
+                    latched_retry_actor->source_action_timer != 30u ||
+                    latched_retry_actor->facing != 0u ||
+                    latched_retry_actor->animation_record !=
+                        0x0012e8ecUL ||
+                    !avsp_round1_step_scheduler(&latched_retry_runtime) ||
+                    latched_retry_actor->substate != 0x1800u ||
+                    latched_retry_actor->source_action_timer != 29u)
+                    return 80;
+            }
         }
         {
             AvspRound1Runtime source_hit_runtime = projectile_runtime;
@@ -1814,10 +1881,11 @@ int main(void)
             for (entry_calls = 0u; entry_calls < 24u; ++entry_calls)
                 if (!avsp_round1_step_scheduler(&source_hit_runtime))
                     return 56;
-            if (source_hit_target->state != 0x0200u ||
-                source_hit_target->substate != 0x0000u ||
-                source_hit_target->source_hit_recovery_active ||
-                source_hit_target->animation_record != 0x0012ded8UL)
+            if (source_hit_target->state != 0x0202u ||
+                source_hit_target->substate != 0x020au ||
+                !source_hit_target->source_hit_recovery_active ||
+                source_hit_target->animation_record != 0x0012ded8UL ||
+                source_hit_target->animation_timer != 8u)
             {
                 fprintf(stderr,
                     "source HIT terminal code=%u state=%04x/%04x active=%u anim=%08lx index=%u timer=%u\n",
@@ -1829,6 +1897,12 @@ int main(void)
                     source_hit_target->animation_timer);
                 return 56;
             }
+            if (!avsp_round1_step_scheduler(&source_hit_runtime) ||
+                source_hit_target->state != 0x0200u ||
+                source_hit_target->substate != 0x0000u ||
+                source_hit_target->source_hit_recovery_active ||
+                source_hit_target->animation_record != 0x0012ded8UL)
+                return 56;
             if (!avsp_round1_step_scheduler(&source_hit_runtime) ||
                 source_hit_target->substate != 0x1600u ||
                 source_hit_target->animation_record != 0x0012eafcUL)

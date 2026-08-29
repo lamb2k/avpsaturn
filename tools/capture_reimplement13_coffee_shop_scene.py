@@ -474,6 +474,75 @@ def class1f_action16_rng_reuse(
     }
 
 
+def class1f_action16_latched_retry(
+        source_rows: list[dict[str, str]],
+        native_rows: list[dict[str, str]],
+        divergences: list[dict[str, object]],
+        runtime_summary: str) -> dict[str, object]:
+    """Bind the frame-2409 latched action-0x16 transition transaction."""
+    frames = (2409, 2410, 2411)
+    source_by_frame = {
+        int(row["frame"]): row for row in source_rows
+        if int(row["slot"], 16) == 0x00ffa300 and
+        int(row["frame"]) in frames}
+    native_by_frame = {
+        int(row["frame"]): row for row in native_rows
+        if int(row["source_slot"], 16) == 0x00ffa300 and
+        int(row["frame"]) in frames}
+    checkpoints: dict[int, dict[str, object]] = {}
+    pattern = re.compile(
+        r"class1f_retry_checkpoint frame=(\d+) state=([0-9a-f]{4}) "
+        r"substate=([0-9a-f]{4}) latch=(\d+) a6=(\d+) b0=(\d+) "
+        r"timer=(\d+) branch=(-?\d+) rng=([0-9a-f]{4})")
+    for match in pattern.finditer(runtime_summary):
+        checkpoints[int(match.group(1))] = {
+            "state_u16": "0x" + match.group(2),
+            "substate_u16": "0x" + match.group(3),
+            "transition_latch_u8": int(match.group(4)),
+            "source_a6_u8": int(match.group(5)),
+            "source_b0_u8": int(match.group(6)),
+            "animation_timer_u16": int(match.group(7)),
+            "animation_branch_s16": int(match.group(8)),
+            "rng_seed_u16": "0x" + match.group(9),
+        }
+
+    def project(row: dict[str, str], source: bool) -> dict[str, object]:
+        return {
+            "frame_u16": int(row["frame"]),
+            "state_u16": "0x" + row["state"],
+            "substate_u16": "0x" + row["substate"],
+            "facing_u8": int(row["facing"], 16)
+                if source else int(row["facing"]),
+            "animation_record": "0x" + row["animation_record"],
+            "animation_timer_u16": int(row["animation_timer"], 16)
+                if source else int(row["animation_timer"]),
+            "attack_selector_u8": int(row["attack_selector"], 16)
+                if source else int(row["attack_selector"]),
+        }
+
+    slot_divergence = next(
+        (item for item in divergences
+         if item["source_slot"] == "0x00ffa300"), None)
+    return {
+        "source_transition_frame_u16": 2409,
+        "source_transition_pc": "0x060d52",
+        "source_facing_write_pc": "0x060d58",
+        "source_opcode_window": "0x060c9a-0x060d6a",
+        "source_opcode_window_sha256":
+            "4d40ad9eebfbc933233afc4d51d967d554748bb99ea0536b4f9baf276c54ae8f",
+        "source_rng_seed_before_u16": "0x4bdf",
+        "source_rng_seed_after_u16": "0xe3c2",
+        "source_rng_call_count_u8": 1,
+        "source": [project(source_by_frame[frame], True) for frame in frames],
+        "native": [project(native_by_frame[frame], False) for frame in frames],
+        "native_checkpoints": [dict({"frame_u16": frame},
+                                     **checkpoints[frame])
+                               for frame in (2409, 2410)],
+        "next_slot_divergence_frame_u16": (
+            int(slot_divergence["frame"]) if slot_divergence else None),
+    }
+
+
 def deferred_record4_collision_registration(
         source_rows: list[dict[str, str]],
         native_rows: list[dict[str, str]]) -> dict[str, object]:
@@ -650,8 +719,50 @@ def validate_report(report: dict[str, object]) -> None:
             "native_seed_after_visible_frame": "0x5cfe",
             "source": action16_projection,
             "native": action16_projection,
-            "next_slot_divergence_frame_u16": 2410}:
+            "next_slot_divergence_frame_u16": None}:
         raise ValueError("Coffee Shop class-0x1f action-0x16 RNG reuse drift")
+    latched_retry = report["native_capture"][
+        "class1f_action16_latched_retry"]
+    latched_retry_projection = [
+        {"frame_u16": 2409, "state_u16": "0x0200",
+         "substate_u16": "0x1600", "facing_u8": 1,
+         "animation_record": "0x0012e7fc", "animation_timer_u16": 2,
+         "attack_selector_u8": 2},
+        {"frame_u16": 2410, "state_u16": "0x0200",
+         "substate_u16": "0x1a00", "facing_u8": 0,
+         "animation_record": "0x0012d5e4", "animation_timer_u16": 4,
+         "attack_selector_u8": 2},
+        {"frame_u16": 2411, "state_u16": "0x0200",
+         "substate_u16": "0x1a00", "facing_u8": 0,
+         "animation_record": "0x0012d5e4", "animation_timer_u16": 3,
+         "attack_selector_u8": 2},
+    ]
+    if latched_retry != {
+            "source_transition_frame_u16": 2409,
+            "source_transition_pc": "0x060d52",
+            "source_facing_write_pc": "0x060d58",
+            "source_opcode_window": "0x060c9a-0x060d6a",
+            "source_opcode_window_sha256":
+                "4d40ad9eebfbc933233afc4d51d967d554748bb99ea0536b4f9baf276c54ae8f",
+            "source_rng_seed_before_u16": "0x4bdf",
+            "source_rng_seed_after_u16": "0xe3c2",
+            "source_rng_call_count_u8": 1,
+            "source": latched_retry_projection,
+            "native": latched_retry_projection,
+            "native_checkpoints": [
+                {"frame_u16": 2409, "state_u16": "0x0200",
+                 "substate_u16": "0x1600", "transition_latch_u8": 1,
+                 "source_a6_u8": 2, "source_b0_u8": 1,
+                 "animation_timer_u16": 2,
+                 "animation_branch_s16": -32760,
+                 "rng_seed_u16": "0x4bdf"},
+                {"frame_u16": 2410, "state_u16": "0x0200",
+                 "substate_u16": "0x1a00", "transition_latch_u8": 1,
+                 "source_a6_u8": 2, "source_b0_u8": 0,
+                 "animation_timer_u16": 4, "animation_branch_s16": 0,
+                 "rng_seed_u16": "0xe3c2"}],
+            "next_slot_divergence_frame_u16": None}:
+        raise ValueError("Coffee Shop class-0x1f latched retry drift")
     deferred = report["native_capture"][
         "deferred_record4_collision_registration"]
     target_projection = [
@@ -780,6 +891,10 @@ def main() -> None:
                                    source_rows, rows, divergences),
                            "class1f_action16_rng_reuse":
                                class1f_action16_rng_reuse(
+                                   source_rows, rows, divergences,
+                                   runtime_summary),
+                           "class1f_action16_latched_retry":
+                               class1f_action16_latched_retry(
                                    source_rows, rows, divergences,
                                    runtime_summary),
                            "deferred_record4_collision_registration":

@@ -232,6 +232,34 @@ assert actions["action_programs"]["action_0x16"]["rng_transaction"] == {
     ],
     "second_call_forbidden": True,
 }
+assert actions["action_programs"]["action_0x16"]["latched_retry_transition"] == {
+    "a6_u8": 2,
+    "accepted_source_write_frame_u16": 2409,
+    "animation_record_u32": "0x0012d5e4",
+    "branch_order": [
+        "a latched inner-state attempt skips the 0x060cd2/RNG-branch entry path",
+        "consume one RNG result and index the attack timer table with result_u16 & 15",
+        "a6_u8 == 2 enters action 0x1a instead of action 0x18",
+        "toggle facing and bind the style85 selector",
+    ],
+    "facing_after_u8": 0,
+    "facing_before_u8": 1,
+    "fixed_frame_substitute_forbidden": True,
+    "next_action_u8": 0x1a,
+    "seed_after_u16": 0xe3c2,
+    "seed_before_u16": 0x4bdf,
+    "selector_u8": 35,
+    "source_window": {
+        "first": "0x060c9a",
+        "last_exclusive": "0x060d6a",
+        "sha256": "4d40ad9eebfbc933233afc4d51d967d554748bb99ea0536b4f9baf276c54ae8f",
+    },
+    "target_side_relation_u8": 0,
+    "timer_index_u8": 2,
+    "timer_u8": 30,
+    "transition_latch_u8": 1,
+    "visible_source_frame_u16": 2410,
+}
 assert actions["attack_timer_table_u8"] == [30] * 4 + [60] * 4 + [120] * 4 + [160] * 4
 assert actions["suppression_control"]["writer_pc"] == "0x0607e8"
 assert actions["suppression_control"]["suppressed_writes"] == 179
@@ -471,6 +499,7 @@ f = copy.deepcopy(fixtures); next(item for item in f["authority_data"]["enemies"
 f = copy.deepcopy(fixtures); next(item for item in f["authority_data"]["enemies"]["archetypes"] if item["class"] == "0x1f")["first_segment_action_execution_contract"]["action_programs"]["action_0x04"]["selector_groups_u16"][2][0] = 44; mutations.append((contract, f, "class1f action attack-selector mutation"))
 f = copy.deepcopy(fixtures); next(item for item in f["authority_data"]["enemies"]["archetypes"] if item["class"] == "0x1f")["first_segment_action_execution_contract"]["action_programs"]["action_0x04"]["timer_rows_u8"][1][1] = 7; mutations.append((contract, f, "class1f action4 timer-row mutation"))
 f = copy.deepcopy(fixtures); next(item for item in f["authority_data"]["enemies"]["archetypes"] if item["class"] == "0x1f")["first_segment_action_execution_contract"]["action_programs"]["action_0x16"]["rng_transaction"]["second_call_forbidden"] = False; mutations.append((contract, f, "class1f action16 RNG reuse mutation"))
+f = copy.deepcopy(fixtures); next(item for item in f["authority_data"]["enemies"]["archetypes"] if item["class"] == "0x1f")["first_segment_action_execution_contract"]["action_programs"]["action_0x16"]["latched_retry_transition"]["next_action_u8"] = 0x18; mutations.append((contract, f, "class1f action16 latched retry mutation"))
 f = copy.deepcopy(fixtures); next(item for item in f["authority_data"]["enemies"]["archetypes"] if item["class"] == "0x1f")["first_segment_action_execution_contract"]["attack_timer_table_u8"][4] = 59; mutations.append((contract, f, "class1f action timer mutation"))
 f = copy.deepcopy(fixtures); next(item for item in f["authority_data"]["enemies"]["archetypes"] if item["class"] == "0x1f")["first_segment_action_execution_contract"]["suppression_control"]["suppressed_writes"] = 178; mutations.append((contract, f, "class1f action suppression mutation"))
 f = copy.deepcopy(fixtures); next(item for item in f["authority_data"]["enemies"]["archetypes"] if item["class"] == "0x1f")["first_segment_action_execution_contract"]["inner_state_0x08_program"]["entry_transition"]["writer_pc"] = "0x0610ca"; mutations.append((contract, f, "class1f inner8 writer mutation"))

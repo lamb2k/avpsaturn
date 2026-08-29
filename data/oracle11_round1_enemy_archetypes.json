@@ -35985,6 +35985,34 @@
             ],
             "copy_y_high_word_to_z": true,
             "direction_helper": "0x061032",
+            "latched_retry_transition": {
+              "a6_u8": 2,
+              "accepted_source_write_frame_u16": 2409,
+              "animation_record_u32": "0x0012d5e4",
+              "branch_order": [
+                "a latched inner-state attempt skips the 0x060cd2/RNG-branch entry path",
+                "consume one RNG result and index the attack timer table with result_u16 & 15",
+                "a6_u8 == 2 enters action 0x1a instead of action 0x18",
+                "toggle facing and bind the style85 selector"
+              ],
+              "facing_after_u8": 0,
+              "facing_before_u8": 1,
+              "fixed_frame_substitute_forbidden": true,
+              "next_action_u8": 26,
+              "seed_after_u16": 58306,
+              "seed_before_u16": 19423,
+              "selector_u8": 35,
+              "source_window": {
+                "first": "0x060c9a",
+                "last_exclusive": "0x060d6a",
+                "sha256": "4d40ad9eebfbc933233afc4d51d967d554748bb99ea0536b4f9baf276c54ae8f"
+              },
+              "target_side_relation_u8": 0,
+              "timer_index_u8": 2,
+              "timer_u8": 30,
+              "transition_latch_u8": 1,
+              "visible_source_frame_u16": 2410
+            },
             "loop_counter": "b0_u8",
             "loop_guard": "animation_branch_s16 < 0 and animation_timer_u16 == 1",
             "rng_mask_branch_u16": 3,
@@ -41533,7 +41561,8 @@
           "wrong action-4 RNG index",
           "suppressed action-4 timer write",
           "wrong source-bounds activation guard",
-          "wrong animation movement cadence"
+          "wrong animation movement cadence",
+          "wrong action-0x16 latched retry branch"
         ],
         "observed_state_writer_counts": {
           "0176ba": 7,

@@ -95,6 +95,19 @@ int main(void)
                     "rng_checkpoint frame=%u seed=%04x scheduler=%lu\n",
                     source_frame, runtime.rng_seed,
                     runtime.scheduler_frames);
+        if (source_frame == 2377u || source_frame == 2378u ||
+            source_frame == 2409u || source_frame == 2410u)
+        {
+            const AvspRound1ActorCore *retry_actor =
+                &runtime.pools[0].records[18];
+            fprintf(stderr,
+                    "class1f_retry_checkpoint frame=%u state=%04x substate=%04x latch=%u a6=%u b0=%u timer=%u branch=%d rng=%04x\n",
+                    source_frame, retry_actor->state,
+                    retry_actor->substate, retry_actor->source_motion_flags,
+                    retry_actor->source_a6, retry_actor->source_b0,
+                    retry_actor->animation_timer,
+                    retry_actor->animation_branch, runtime.rng_seed);
+        }
         if ((input & (AVSP_ROUND1_INPUT_BUTTON1 | AVSP_PW_INPUT_ATTACK |
                       AVSP_ROUND1_INPUT_BUTTON3)) != 0u ||
             runtime.player_special_attack_active)

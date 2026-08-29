@@ -1396,6 +1396,28 @@ def validate(contract: dict[str, object], fixtures: dict[str, object],
                 ["timer_rows_u8"]) and
             class1f_actions["action_programs"]["action_0x04"]
                 ["coffee_shop_observation"]["timer_result_u8"] == 6 and
+            {key: class1f_actions["action_programs"]["action_0x16"]
+                ["latched_retry_transition"][key] for key in (
+                    "accepted_source_write_frame_u16",
+                    "visible_source_frame_u16", "transition_latch_u8",
+                    "a6_u8", "seed_before_u16", "seed_after_u16",
+                    "timer_index_u8", "timer_u8", "next_action_u8",
+                    "facing_after_u8", "selector_u8",
+                    "animation_record_u32",
+                    "fixed_frame_substitute_forbidden")} == {
+                        "accepted_source_write_frame_u16": 2409,
+                        "visible_source_frame_u16": 2410,
+                        "transition_latch_u8": 1,
+                        "a6_u8": 2,
+                        "seed_before_u16": 0x4bdf,
+                        "seed_after_u16": 0xe3c2,
+                        "timer_index_u8": 2,
+                        "timer_u8": 30,
+                        "next_action_u8": 0x1a,
+                        "facing_after_u8": 0,
+                        "selector_u8": 35,
+                        "animation_record_u32": "0x0012d5e4",
+                        "fixed_frame_substitute_forbidden": True} and
             class1f_actions["attack_timer_table_u8"] ==
                 [30] * 4 + [60] * 4 + [120] * 4 + [160] * 4 and
             {key: class1f_actions["suppression_control"][key] for key in (

@@ -901,6 +901,31 @@ def class1f_first_segment_action_contract(program: bytes,
             first_scene_difference[1]["action_timer"] == "0600" and
             first_scene_difference[2]["action_timer"] == "0000",
             "class-0x1f action-0x04 timer capture drift")
+    retry_rows = [row for row in rows(
+        CLASS1F_INNER8_A / "progression_class1f_transitions.tsv")
+        if row["frame"] == "2409" and row["slot"] == "ffa300" and
+        row["pc"] in {"060d52", "060d58"}]
+    retry_rng = [row for row in rows(
+        CLASS1F_INNER8_A / "coffee_shop_rng_calls.tsv")
+        if row["frame"] == "2409" and row["a6"] == "ffa300"]
+    retry_actors = [row for row in rows(
+        CLASS1F_INNER8_A / "coffee_shop_scene_actors.tsv")
+        if row["slot"] == "ffa300" and row["frame"] in {"2409", "2410"}]
+    require(
+        [(row["pc"], row["substate_before"], row["fieldae"],
+          row["fielda6"], row["data"], row["mask"])
+         for row in retry_rows] == [
+            ("060d52", "1600", "01", "02", "00001a1a", "0000ff00"),
+            ("060d58", "1a00", "01", "02", "00000000", "000000ff")
+        ] and
+        len(retry_rng) == 1 and retry_rng[0]["rng_before"] == "4bdf" and
+        [(row["frame"], row["substate"], row["facing"],
+          row["animation_record"], row["animation_timer"])
+         for row in retry_actors] == [
+            ("2409", "1600", "1", "0012e7fc", "0002"),
+            ("2410", "1a00", "0", "0012d5e4", "0004")
+        ],
+        "class-0x1f action-0x16 latched retry/0x1a transition drift")
     return {
         "classification": "SOURCE_CLOSED_IMPLEMENTATION_FIELDS",
         "scope": ("all route-reachable class-0x1f action dispatch required "
@@ -1131,6 +1156,35 @@ def class1f_first_segment_action_contract(program: bytes,
                     "accepted_seed_after_u16": 0x5CFE,
                     "accepted_fallback_branch_u8": 2,
                 },
+                "latched_retry_transition": {
+                    "accepted_source_write_frame_u16": 2409,
+                    "visible_source_frame_u16": 2410,
+                    "transition_latch_u8": 1,
+                    "a6_u8": 2,
+                    "target_side_relation_u8": 0,
+                    "facing_before_u8": 1,
+                    "seed_before_u16": 0x4BDF,
+                    "seed_after_u16": 0xE3C2,
+                    "timer_index_u8": 2,
+                    "timer_u8": 30,
+                    "next_action_u8": 0x1A,
+                    "facing_after_u8": 0,
+                    "selector_u8": 35,
+                    "animation_record_u32": "0x0012d5e4",
+                    "branch_order": [
+                        "a latched inner-state attempt skips the 0x060cd2/RNG-branch entry path",
+                        "consume one RNG result and index the attack timer table with result_u16 & 15",
+                        "a6_u8 == 2 enters action 0x1a instead of action 0x18",
+                        "toggle facing and bind the style85 selector",
+                    ],
+                    "source_window": {
+                        "first": "0x060c9a",
+                        "last_exclusive": "0x060d6a",
+                        "sha256": hashlib.sha256(
+                            opcodes[0x060C9A:0x060D6A]).hexdigest(),
+                    },
+                    "fixed_frame_substitute_forbidden": True,
+                },
                 "attack_action_u8": 0x18,
                 "attack_selectors_by_style_u8": [0, 1]},
             "action_0x18": {
@@ -1182,7 +1236,8 @@ def class1f_first_segment_action_contract(program: bytes,
                               "wrong action-4 RNG index",
                               "suppressed action-4 timer write",
                               "wrong source-bounds activation guard",
-                              "wrong animation movement cadence"],
+                              "wrong animation movement cadence",
+                              "wrong action-0x16 latched retry branch"],
     }
 
 
@@ -2783,6 +2838,36 @@ def validate(report: dict[str, object]) -> None:
                     actions["action_programs"]["action_0x16"]
                         ["rng_transaction"]["accepted_seed_after_u16"] ==
                         0x5CFE and
+                    actions["action_programs"]["action_0x16"]
+                        ["latched_retry_transition"] == {
+                            "accepted_source_write_frame_u16": 2409,
+                            "visible_source_frame_u16": 2410,
+                            "transition_latch_u8": 1,
+                            "a6_u8": 2,
+                            "target_side_relation_u8": 0,
+                            "facing_before_u8": 1,
+                            "seed_before_u16": 0x4BDF,
+                            "seed_after_u16": 0xE3C2,
+                            "timer_index_u8": 2,
+                            "timer_u8": 30,
+                            "next_action_u8": 0x1A,
+                            "facing_after_u8": 0,
+                            "selector_u8": 35,
+                            "animation_record_u32": "0x0012d5e4",
+                            "branch_order": [
+                                "a latched inner-state attempt skips the 0x060cd2/RNG-branch entry path",
+                                "consume one RNG result and index the attack timer table with result_u16 & 15",
+                                "a6_u8 == 2 enters action 0x1a instead of action 0x18",
+                                "toggle facing and bind the style85 selector",
+                            ],
+                            "source_window": {
+                                "first": "0x060c9a",
+                                "last_exclusive": "0x060d6a",
+                                "sha256": hashlib.sha256(
+                                    opcodes[0x060C9A:0x060D6A]).hexdigest(),
+                            },
+                            "fixed_frame_substitute_forbidden": True,
+                        } and
                     actions["suppression_control"]["writer_pc"] ==
                         "0x0607e8" and
                     actions["suppression_control"]["suppressed_writes"] == 179 and
@@ -2794,7 +2879,7 @@ def validate(report: dict[str, object]) -> None:
                         is False and
                     actions["suppression_control"]["action4_timer"]
                         ["suppressed_writes"] == 1 and
-                    len(actions["mutation_controls"]) == 17,
+                    len(actions["mutation_controls"]) == 18,
                     "0x1f: first-segment action execution contract drift")
             inner8 = actions["inner_state_0x08_program"]
             require(inner8["classification"] ==

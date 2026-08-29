@@ -96,6 +96,7 @@ for label,mutate in [
     ('first-segment-attack-selector-group',lambda x:x['action_programs']['action_0x04']['selector_groups_u16'][2].__setitem__(0,44)),
     ('first-segment-loop-counter',lambda x:x['action_programs']['action_0x16'].__setitem__('loop_counter','timer')),
     ('first-segment-action16-rng-reuse',lambda x:x['action_programs']['action_0x16']['rng_transaction'].__setitem__('second_call_forbidden',False)),
+    ('first-segment-action16-latched-retry',lambda x:x['action_programs']['action_0x16']['latched_retry_transition'].__setitem__('next_action_u8',0x18)),
     ('first-segment-fixed-frame',lambda x:x['suppression_control'].__setitem__('fixed_frame_substitute',True)),
     ('first-segment-mutation-control',lambda x:x['mutation_controls'].pop()),
 ]:
