@@ -669,6 +669,27 @@ def first_segment_dependencies(ss,ee,ww,rr,op,program):
      impact_rng['seed']=='19c4','class-0x4e variant-1 RNG context drift')
  scene_actors=rows(SCENE_COMPONENT_A/'coffee_shop_scene_actors.tsv')
  scene_health=rows(SCENE_COMPONENT_A/'coffee_shop_scene_health_writes.tsv')
+ prior_impact_owner=next((r for r in scene_actors if r['slot']=='ffbd80' and
+                          int(r['frame'])==2306),None)
+ allocated_impact=next((r for r in scene_actors if r['slot']=='ffbd80' and
+                        int(r['frame'])==2307),None)
+ initialized_impact=next((r for r in scene_actors if r['slot']=='ffbd80' and
+                          int(r['frame'])==2308),None)
+ req(prior_impact_owner is not None and allocated_impact is not None and
+     initialized_impact is not None and
+     prior_impact_owner['class']=='45' and
+     prior_impact_owner['animation_record']=='0008df2c' and
+     prior_impact_owner['animation_timer']=='0fcd' and
+     prior_impact_owner['animation_branch']=='-32768' and
+     allocated_impact['class']=='4e' and
+     allocated_impact['state']=='0000' and
+     allocated_impact['animation_record']=='0008df2c' and
+     allocated_impact['animation_timer']=='0fcd' and
+     allocated_impact['animation_branch']=='-32768' and
+     initialized_impact['state']=='0200' and
+     initialized_impact['animation_record']=='00092914' and
+     initialized_impact['animation_timer']=='0004',
+     'class-0x4e fixed-slot retained presentation chronology drift')
  impact_health=next((r for r in scene_health if int(r['frame'])==2306 and
                      r['attacker']=='ff8880' and r['defender']=='ffa180'),None)
  req(impact_health is not None and impact_health['pc']=='01d590' and
@@ -713,7 +734,19 @@ def first_segment_dependencies(ss,ee,ww,rr,op,program):
    'x_rule':'signed midpoint of attacker attack-box center and defender hurt-box center',
    'y_rule':'signed midpoint of depth-projected attacker attack-box center and defender hurt-box center',
    'z_rule':'defender z_s16 - 1','first_spawn_position_s16':[717,336,309],
-   'allocation_failure_rule':'damage remains applied; omit only the impact actor'},
+   'allocation_failure_rule':'damage remains applied; omit only the impact actor',
+   'visible_frame_u16':2307,
+   'fixed_slot_reuse_presentation':{
+    'prior_visible_frame_u16':2306,'prior_class_u8':'0x45',
+    'allocation_visible_frame_u16':2307,'allocated_class_u8':'0x4e',
+    'rule':'0x0177da pops the released fixed slot without clearing fields not written by 0x01d622; retain the prior presentation until class-0x4e state 0 runs on its next scheduler visit',
+    'retained_fields':['animation_record','animation_timer','animation_branch'],
+    'animation_record':'0x0008df2c','assembly':'0x0008df96',
+    'animation_timer_u16':4045,'animation_branch_s16':-32768,
+    'state0_scheduler_frame_u16':2307,
+    'state0_visible_frame_u16':2308,
+    'state0_animation_record':'0x00092914',
+    'state0_assembly':'0x00092c04'}},
   'state0':{'state_write_u16':'0x0200','coordinate_mode_u8':2,
    'object_or_u16':'0x8000','rng_entry':'0x017c5e','rng_calls_u8':1,
    'rng_mask_u16':'0x001c','first_seed_before':'0x19c4',
@@ -1116,6 +1149,17 @@ def validate(r):
      c4e1['allocation']['source_slot']=='0x00ffbd80' and
      c4e1['allocation']['variant_u8']==1 and
      c4e1['allocation']['first_spawn_position_s16']==[717,336,309] and
+     c4e1['allocation']['fixed_slot_reuse_presentation']=={
+      'prior_visible_frame_u16':2306,'prior_class_u8':'0x45',
+      'allocation_visible_frame_u16':2307,'allocated_class_u8':'0x4e',
+      'rule':'0x0177da pops the released fixed slot without clearing fields not written by 0x01d622; retain the prior presentation until class-0x4e state 0 runs on its next scheduler visit',
+      'retained_fields':['animation_record','animation_timer','animation_branch'],
+      'animation_record':'0x0008df2c','assembly':'0x0008df96',
+      'animation_timer_u16':4045,'animation_branch_s16':-32768,
+      'state0_scheduler_frame_u16':2307,
+      'state0_visible_frame_u16':2308,
+      'state0_animation_record':'0x00092914',
+      'state0_assembly':'0x00092c04'} and
      c4e1['state0']['first_seed_before']=='0x19c4' and
      c4e1['state0']['first_seed_after']=='0x4d11' and
      c4e1['state0']['first_jitter_s16']==[-4,0] and

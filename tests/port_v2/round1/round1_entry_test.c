@@ -1354,6 +1354,11 @@ int main(void)
         target->y = (short)(child->y + 10);
         target->z = child->z;
         projectile->active_collision = 0u;
+        projectile_runtime.pools[3].records[29].animation_record =
+            0x0008df2cUL;
+        projectile_runtime.pools[3].records[29].assembly = 0x0008df96UL;
+        projectile_runtime.pools[3].records[29].animation_timer = 4045u;
+        projectile_runtime.pools[3].records[29].animation_branch = -32768;
         if (!avsp_round1_step_scheduler(&projectile_runtime) ||
             target->health != 32 || target->state != 0x0202u ||
             target->substate != 0x0000u ||
@@ -1602,6 +1607,10 @@ int main(void)
         if (!avsp_round1_is_weapon_impact_actor(impact) ||
             impact->source_slot != 0x00ffc500UL ||
             impact->state != 0u || impact->variant != 1u ||
+            impact->animation_record != 0x0008df2cUL ||
+            impact->assembly != 0x0008df96UL ||
+            impact->animation_timer != 4045u ||
+            impact->animation_branch != -32768 ||
             impact->facing != child->facing ||
             impact->x != 939 || impact->y != 337 || impact->z != 318 ||
             projectile_runtime.class4e_variant1_allocation_requests != 1u ||

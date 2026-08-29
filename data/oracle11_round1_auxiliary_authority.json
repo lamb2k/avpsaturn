@@ -14918,6 +14918,26 @@
             336,
             309
           ],
+          "fixed_slot_reuse_presentation": {
+            "allocated_class_u8": "0x4e",
+            "allocation_visible_frame_u16": 2307,
+            "animation_branch_s16": -32768,
+            "animation_record": "0x0008df2c",
+            "animation_timer_u16": 4045,
+            "assembly": "0x0008df96",
+            "prior_class_u8": "0x45",
+            "prior_visible_frame_u16": 2306,
+            "retained_fields": [
+              "animation_record",
+              "animation_timer",
+              "animation_branch"
+            ],
+            "rule": "0x0177da pops the released fixed slot without clearing fields not written by 0x01d622; retain the prior presentation until class-0x4e state 0 runs on its next scheduler visit",
+            "state0_animation_record": "0x00092914",
+            "state0_assembly": "0x00092c04",
+            "state0_scheduler_frame_u16": 2307,
+            "state0_visible_frame_u16": 2308
+          },
           "global_suppression_guard": "u8(0xff8244) == 0",
           "impact_allocator": "0x01d622",
           "pool_allocator": "0x0177da",
@@ -14926,6 +14946,7 @@
           "source_slot": "0x00ffbd80",
           "variant_rule": "absolute signed attack-record knockback_mode_s8",
           "variant_u8": 1,
+          "visible_frame_u16": 2307,
           "x_rule": "signed midpoint of attacker attack-box center and defender hurt-box center",
           "y_rule": "signed midpoint of depth-projected attacker attack-box center and defender hurt-box center",
           "z_rule": "defender z_s16 - 1"

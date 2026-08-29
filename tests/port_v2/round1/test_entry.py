@@ -9,7 +9,7 @@ from pathlib import Path
 
 ROOT = Path(__file__).resolve().parents[3]
 SPEC = ROOT / "data/spec02_round1_executable_contract.json"
-EXPECTED = "16165c7835be54b6bfb2390cf572079e0844b12d23072ed3db8bc92a607ae98b"
+EXPECTED = "3abfcff9da0e862327d1c5afbf1698259eb42c89552f147ec9edef9ca160688d"
 assert hashlib.sha256(SPEC.read_bytes()).hexdigest() == EXPECTED
 assert json.loads(SPEC.read_text())["status"] == "ACCEPTED"
 source = (ROOT / "src/port_v2/gameplay/round1/round1.c").read_text()
@@ -269,6 +269,8 @@ for before, after in (
      "actor->source_motion_fields[0] = 6;\n        actor->source_action_timer ="),
     ("actor->source_x_fp += actor->source_x_velocity;",
      "actor->source_x_fp += 0;"),
+    ("actor->animation_record = animation_record;",
+     "actor->animation_record = 0UL;"),
 ):
     if "--inner8-only" in sys.argv and before not in inner8_mutations:
         continue
@@ -410,4 +412,4 @@ for before, after in (
                                  "--", "bash", "-lc", command],
                                 capture_output=True)
         assert result.returncode != 0, f"generated mutation escaped: {before}"
-print("REIMPLEMENT-13 entry/player/scheduler/class1f/Coffee-Shop-navigation/neutral-stop/melee/Button1/Button3/type16-projectile/first-encounter differential: PASS (161 real mutations)")
+print("REIMPLEMENT-13 entry/player/scheduler/class1f/Coffee-Shop-navigation/neutral-stop/melee/Button1/Button3/type16-projectile/first-encounter differential: PASS (162 real mutations)")

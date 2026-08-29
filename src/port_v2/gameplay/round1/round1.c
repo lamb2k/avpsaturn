@@ -165,6 +165,43 @@ static AvspRound1ActorCore *avsp_round1_allocate_pool_actor_preserve_y(
     return actor;
 }
 
+static AvspRound1ActorCore *
+avsp_round1_allocate_pool_actor_preserve_presentation(
+    AvspRound1Runtime *runtime, unsigned int pool_index)
+{
+    AvspRound1Pool *pool;
+    unsigned short source_slot;
+    unsigned int actor_index;
+    unsigned long animation_record;
+    unsigned long assembly;
+    unsigned short animation_timer;
+    short animation_branch;
+    AvspRound1ActorCore *actor;
+    if (runtime == 0 || pool_index >= AVSP_ROUND1_POOL_COUNT)
+        return 0;
+    pool = &runtime->pools[pool_index];
+    if (pool->free_count == 0u)
+        return 0;
+    source_slot = pool->free_stack[pool->free_count - 1u];
+    actor_index = (unsigned int)(source_slot - pool->source_base) /
+        pool->stride;
+    if (actor_index >= pool->capacity)
+        return 0;
+    animation_record = pool->records[actor_index].animation_record;
+    assembly = pool->records[actor_index].assembly;
+    animation_timer = pool->records[actor_index].animation_timer;
+    animation_branch = pool->records[actor_index].animation_branch;
+    actor = avsp_round1_allocate_pool_actor(runtime, pool_index);
+    if (actor != 0)
+    {
+        actor->animation_record = animation_record;
+        actor->assembly = assembly;
+        actor->animation_timer = animation_timer;
+        actor->animation_branch = animation_branch;
+    }
+    return actor;
+}
+
 static AvspRound1ActorCore *avsp_round1_allocate_pool_source_slot(
     AvspRound1Runtime *runtime, unsigned int pool_index,
     unsigned short source_slot)
@@ -6301,7 +6338,7 @@ static int avsp_round1_spawn_class4e_variant1_impact(
     ++runtime->class4e_variant1_allocation_requests;
     if (runtime->class4e_impact_suppressed)
         return 1;
-    impact = avsp_round1_allocate_pool_actor(runtime, 3u);
+    impact = avsp_round1_allocate_pool_actor_preserve_presentation(runtime, 3u);
     if (impact == 0)
     {
         ++runtime->class4e_variant1_allocation_failures;

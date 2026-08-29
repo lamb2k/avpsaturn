@@ -284,7 +284,7 @@
   },
   "spec02_round1_native_presentations": {
    "decoded_variants": 289,
-   "fixture_sha256": "fb1e552f901bbe26947cf09f51884be7ebfe9160079094b08ec7dd2df1973891",
+   "fixture_sha256": "7116fcfe0e56ba1b57a01a2611f6fd54c966bf0b25f73a2bfa80d0125c2cf255",
    "palette_banks": [
     "0x00",
     "0x05",

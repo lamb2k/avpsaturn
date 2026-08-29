@@ -286,6 +286,19 @@ assert class4e1["scene_lifetime_count_u16"] == 23
 assert class4e1["first_collision"]["attacker_attack_record"] == "0x00030cd2"
 assert class4e1["allocation"]["scheduler_guard"].startswith(
     "record-type-24 release/dispatch")
+assert class4e1["allocation"]["fixed_slot_reuse_presentation"] == {
+    "prior_visible_frame_u16": 2306,
+    "prior_class_u8": "0x45",
+    "allocation_visible_frame_u16": 2307,
+    "allocated_class_u8": "0x4e",
+    "rule": "0x0177da pops the released fixed slot without clearing fields not written by 0x01d622; retain the prior presentation until class-0x4e state 0 runs on its next scheduler visit",
+    "retained_fields": ["animation_record", "animation_timer", "animation_branch"],
+    "animation_record": "0x0008df2c", "assembly": "0x0008df96",
+    "animation_timer_u16": 4045, "animation_branch_s16": -32768,
+    "state0_scheduler_frame_u16": 2307,
+    "state0_visible_frame_u16": 2308,
+    "state0_animation_record": "0x00092914",
+    "state0_assembly": "0x00092c04"}
 assert class4e1["state0"]["first_seed_after"] == "0x4d11"
 type36 = fixtures["authority_data"]["auxiliary"][
     "coffee_shop_type36_presentation"]
@@ -434,6 +447,7 @@ f = copy.deepcopy(fixtures); f["authority_data"]["route"]["first_segment_recurri
 f = copy.deepcopy(fixtures); f["authority_data"]["auxiliary"]["first_segment_dependencies"]["class_0x09_type20_rng_owner"]["selector_table_u16"][0] = 1; mutations.append((contract, f, "class09 RNG selector mutation"))
 f = copy.deepcopy(fixtures); f["authority_data"]["auxiliary"]["first_segment_dependencies"]["class_0x4e_type24_variant4_effect"]["allocation_pop_order"].reverse(); mutations.append((contract, f, "class4e allocation-order mutation"))
 f = copy.deepcopy(fixtures); f["authority_data"]["auxiliary"]["first_segment_dependencies"]["class_0x4e_type24_variant4_effect"]["variant1_collision_effect"]["allocation"]["scheduler_guard"] = "projectile first"; mutations.append((contract, f, "class4e variant1 scheduler mutation"))
+f = copy.deepcopy(fixtures); f["authority_data"]["auxiliary"]["first_segment_dependencies"]["class_0x4e_type24_variant4_effect"]["variant1_collision_effect"]["allocation"]["fixed_slot_reuse_presentation"]["animation_record"] = "0x00092914"; mutations.append((contract, f, "class4e retained-presentation mutation"))
 f = copy.deepcopy(fixtures); f["authority_data"]["auxiliary"]["coffee_shop_type36_presentation"]["pool"]["capacity"] = 32; mutations.append((contract, f, "Coffee Shop type36 pool mutation"))
 f = copy.deepcopy(fixtures); f["authority_data"]["auxiliary"]["coffee_shop_scene_component_identities"]["unidentified_pairs"] = 1; mutations.append((contract, f, "Coffee Shop component identity mutation"))
 f = copy.deepcopy(fixtures); f["authority_data"]["navigation"]["terrain_resolver"]["records"][4]["decoded_six_fields"]["z_parameter_s8"] = -8; mutations.append((contract, f, "terrain record sign mutation"))

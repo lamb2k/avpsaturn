@@ -358,6 +358,12 @@ def collision_chronology(source: dict[str, object],
             "type_u8": int(impact_allocated["type"]),
             "class_u8": int(impact_allocated["class"], 16),
             "state_at_allocation": "0x" + impact_allocated["state"],
+            "retained_animation_record_at_allocation": "0x" +
+                impact_allocated["animation_record"],
+            "retained_assembly_at_allocation": "0x" +
+                impact_allocated["assembly"],
+            "retained_animation_timer_at_allocation_u16": int(
+                impact_allocated["animation_timer"]),
             "initialization_visible_frame": 2308,
             "state_after_initialization": "0x" +
                 impact_initialized["state"],
@@ -432,6 +438,9 @@ def validate_report(report: dict[str, object]) -> None:
                 "allocation_visible_frame": 2307,
                 "slot": "0x00ffbd80", "type_u8": 24,
                 "class_u8": 78, "state_at_allocation": "0x0000",
+                "retained_animation_record_at_allocation": "0x0008df2c",
+                "retained_assembly_at_allocation": "0x0008df96",
+                "retained_animation_timer_at_allocation_u16": 4045,
                 "initialization_visible_frame": 2308,
                 "state_after_initialization": "0x0200",
                 "animation_record": "0x00092914",
