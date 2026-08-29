@@ -805,6 +805,54 @@ cadence, and scheduler order and determine whether both discrepancies share one
 source writer. Do not fit the frame or disturb any accepted chronology or
 presentation lock.
 
+Incremental checkpoint `f3bd0c438e2c6de78f727c9cec04a353532423cc`
+closes that shared recurring-phase boundary. Accepted evidence proves source
+global phase `0xff8019` is `0x06` at native-entry handoff frame 2072 and
+increments before the recurring controller and actor-pool scheduler. Native
+frame 2510 now matches phase `0xbf`, RNG `0xd21c`, living count 7, spawn index
+9, and timer 3707. Frame 2511 matches phase `0xc0`, RNG `0x81a1`, living count
+8, spawn index 8, and timer 3706. Both class-`0x09` actors retain their
+frame-2510 terminals and select source record `0x0006dbda` at 2511. The first
+recurring class-`0x1f` actor allocates naturally at slot `0x00ffa3c0`, position
+`672/328/328`, state `0x0200:0000`, and health 87. No projectile variant,
+damage delay, or input rebaseline was introduced.
+
+SPEC-02 is
+`b1b967ea0f023aa4236437591bc55579d481be897300631dc5b23277013f451d`;
+fixture is
+`308c65f081447dda52a6eb26e89aa260c339a71a18db65debaaa253243ba389a`.
+Fast, Oracle, 115 SPEC mutations, 82 Oracle-enemy mutations, 181 native
+mutations, 17 scene mutations, 123 Target suppressions, and both LiveEncounter
+Target profiles pass. The combat tile overlay content is unchanged; only its
+derived fixture identity advanced.
+
+Two commit-bound 575-sample Emulator ledgers are byte-identical at normalized
+ISO `e9a6542deb30c82e175f9500f6d5c10904035f90a1d7ab6f7bc285bdc1ad3a30`;
+canonical sample payload is
+`c1b9f52236fc987635d7536264288267e2db6821e69a86c5a48323cb2b5e05c9`.
+Fresh window-only WGC covers every visible frame 2280..2310. Cadence sheet
+`dc162f011463e9f3f46847c939754265e42474fdb66800a1af35cb87f1e203b1`
+and clip
+`b2695152db316962ac45c3ca5ab9f9742eb3b933eb23e5e536167e8613ac535c`
+pass direct inspection with stable Predator/staff identity, coherent projectile
+and impact presentation, clean Coffee Shop planes, palette and priority. The
+lower `WARRIOR` strip is source-owned P1 `HUDTOP` content; the separate P2 panel
+is absent.
+
+Whole-scene gaps improve from `319 / 1,274 / 3 / 94 / 3 / 281` to
+`295 / 1,259 / 3 / 94 / 3 / 281` for actor lifetime, spawn/despawn, active
+state, collision/damage, route/camera, and audio/load respectively. No category
+increases. Unowned Saturn actors, unidentified source pairs, and retained
+gameplay authorities remain zero; the complete Coffee Shop gate remains open.
+
+The next earliest causal divergence is visible frame 2511 at newly allocated
+slot `0x00ffa3c0`: source already owns animation `0x0012ddb0` in state
+`0x0200:0000`, while native has the correct allocation, state, position and
+health but animation `0x00000000` until the next scheduler visit. Bind the
+accepted same-frame state-0 presentation initialization without authoring a
+delay or disturbing the corrected phase, RNG, spawn-index, class-`0x09`,
+collision, player, camera, HUD, audio, or rendering locks.
+
 ## Next eligible cards
 
 - `QA-13-ROUND1-END-TO-END-DIFFERENTIAL` after the complete stable Round 2
