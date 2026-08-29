@@ -305,6 +305,11 @@ def load_spec02_round1_presentations():
         class4e["variant1_collision_effect"]["active_state"][
             "animation_records"],
         (0, 1), (2,), 0x8000)
+    add_records(
+        "class4e-variant10-collision-impact",
+        class4e["variant10_collision_effect"]["active_state"][
+            "animation_records"],
+        (0, 1), (2,), 0x8000)
     retained_impact = class4e["variant1_collision_effect"]["allocation"][
         "fixed_slot_reuse_presentation"]
     # The fixed-pool allocator reuses the released class-0x45 slot before the
@@ -316,6 +321,13 @@ def load_spec02_round1_presentations():
         "class4e-variant1-retained-window",
         [{"animation_record": retained_impact["animation_record"],
           "assembly": retained_impact["assembly"]}],
+        (0, 1), (0,), 0)
+    retained_impact10 = class4e["variant10_collision_effect"]["allocation"][
+        "fixed_slot_reuse_presentation"]
+    add_records(
+        "class4e-variant10-retained-window",
+        [{"animation_record": retained_impact10["animation_record"],
+          "assembly": retained_impact10["assembly"]}],
         (0, 1), (0,), 0)
     class44 = dependencies["class_0x44_type24_command_guard_owner"]
     class44_actor = class44["state0_presentation_actor"]

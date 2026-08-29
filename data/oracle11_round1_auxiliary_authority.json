@@ -13609,6 +13609,7 @@
           "address": "0x0003589e",
           "damage_selector_u8": 10,
           "hit_value_u8": 20,
+          "impact_variant_u8": 20,
           "knockback_mode_s8": 0,
           "record_sha256": "9d6295c0a64cb8c4e5cbe3a004f10420536e69ac45c868af70a58820f65801bb",
           "x_center_s8": 0,
@@ -16217,6 +16218,251 @@
         1024
       ],
       "terminal_guard": "signed actor+0x24 becomes negative, then state advances to 0x0400 and the next scheduler visit releases the record",
+      "variant10_collision_effect": {
+        "active_state": {
+          "animation_records": [
+            {
+              "animation_record": "0x00092e50",
+              "assembly": "0x000931f8",
+              "attack_selector_u8": 0,
+              "branch_s16": 0,
+              "hurt_selector_u8": 0,
+              "record_sha256": "48c3d77f052f3c9f88e2dce2f17c68a757bf327f5400813d6b06598b5f2e1427",
+              "timer_u16": 1
+            },
+            {
+              "animation_record": "0x00092e60",
+              "assembly": "0x00093206",
+              "attack_selector_u8": 0,
+              "branch_s16": 0,
+              "hurt_selector_u8": 0,
+              "record_sha256": "c40741a3a9a532637b1faf0ae4ec499cc7598ef80fc5ef2beaf631c212436e7a",
+              "timer_u16": 1
+            },
+            {
+              "animation_record": "0x00092e70",
+              "assembly": "0x00093214",
+              "attack_selector_u8": 0,
+              "branch_s16": 0,
+              "hurt_selector_u8": 0,
+              "record_sha256": "6d391b5aab353a69801b7d9751ab479b5694ccff81c7f34cead48ce87bfb3073",
+              "timer_u16": 1
+            },
+            {
+              "animation_record": "0x00092e80",
+              "assembly": "0x00093222",
+              "attack_selector_u8": 0,
+              "branch_s16": 0,
+              "hurt_selector_u8": 0,
+              "record_sha256": "91e38fdd994728769c1f0601fc72655ff0dafe7e3c7576b9104b558279ec7c26",
+              "timer_u16": 1
+            },
+            {
+              "animation_record": "0x00092e90",
+              "assembly": "0x00093230",
+              "attack_selector_u8": 0,
+              "branch_s16": 0,
+              "hurt_selector_u8": 0,
+              "record_sha256": "ad501b538ac1e48bda07d35df13f1215d3a215d557f777ac60e07695d2059dc1",
+              "timer_u16": 1
+            },
+            {
+              "animation_record": "0x00092ea0",
+              "assembly": "0x0009323e",
+              "attack_selector_u8": 0,
+              "branch_s16": -32768,
+              "hurt_selector_u8": 0,
+              "record_sha256": "f3449fbc4eaff8b20edd89654c4c3da0c763060d226e61acd2fbb4c9b6a174f4",
+              "timer_u16": 4095
+            }
+          ],
+          "movement_result": "x/y/z unchanged after state-0 jitter",
+          "state_u16": "0x0200",
+          "terminal_guard": "signed animation branch actor+0x24 < 0 advances state to 0x0400"
+        },
+        "allocation": {
+          "allocation_failure_rule": "damage remains applied; omit only the impact actor",
+          "class_u8": "0x4e",
+          "collision_entry": "0x01d116",
+          "facing_rule": "copy defender reaction-facing actor+0x4f_u8",
+          "first_spawn_position_s16": [
+            833,
+            325,
+            311
+          ],
+          "fixed_slot_reuse_presentation": {
+            "animation_branch_s16": -32768,
+            "animation_record": "0x0008def0",
+            "animation_timer_u16": 4050,
+            "assembly": "0x0008df62",
+            "retained_fields": [
+              "animation_record",
+              "animation_timer",
+              "animation_branch"
+            ],
+            "rule": "0x0177da preserves fields not written by 0x01d622 until class-0x4e state 0 runs on its next scheduler visit",
+            "state0_animation_record": "0x00092e50",
+            "state0_assembly": "0x000931f8",
+            "state0_scheduler_frame_u16": 2363,
+            "state0_visible_frame_u16": 2364
+          },
+          "global_suppression_guard": "u8(0xff8244) == 0",
+          "impact_allocator": "0x01d622",
+          "pool_allocator": "0x0177da",
+          "record_type_u8": 24,
+          "scheduler_guard": "record-type-24 release/dispatch at 0x01ba62 precedes record-type-4 collision scheduler at 0x01cbcc",
+          "source_slot": "0x00ffc200",
+          "variant_field": {
+            "attack_record_offset_u8": 8,
+            "raw_u8": 10,
+            "rule": "copy absolute signed byte at attack-record +0x08",
+            "signed": false,
+            "type": "u8",
+            "variant_u8": 10
+          },
+          "visible_frame_u16": 2363,
+          "x_rule": "signed midpoint of attacker attack-box center and defender hurt-box center",
+          "y_rule": "signed midpoint of depth-projected attacker attack-box center and defender hurt-box center",
+          "z_rule": "defender z_s16 - 1"
+        },
+        "capture_identity": {
+          "byte_identical": true,
+          "completion_a_actors_sha256": "9c0ea88c7eae6b4755b0025d356d49ae136d91de0e443fab0ff767151e43343d",
+          "completion_a_health_sha256": "040338654ba2ee8c9b998929c967e32e6c8460918ea1603462d6b461963f2559",
+          "completion_b_actors_sha256": "9c0ea88c7eae6b4755b0025d356d49ae136d91de0e443fab0ff767151e43343d",
+          "completion_b_health_sha256": "040338654ba2ee8c9b998929c967e32e6c8460918ea1603462d6b461963f2559"
+        },
+        "classification": "SOURCE_CLOSED_IMPLEMENTATION_FIELDS",
+        "collision_damage_authority": "shared collision writer; this actor is presentation-only",
+        "first_collision": {
+          "attacker_attack_record": "0x0002fc58",
+          "attacker_attack_selector_u8": 25,
+          "attacker_class_u8": "0x00",
+          "attacker_record_type_u8": 4,
+          "attacker_source_slot": "0x00ff8880",
+          "damage_s16": 127,
+          "damage_writer": "0x01d590 then clamp 0x01d598",
+          "defender_class_u8": "0x1f",
+          "defender_record_type_u8": 12,
+          "defender_source_slot": "0x00ffa3c0",
+          "defender_state_substate": "0x0200:0x0600",
+          "health_after_clamp_s16": -1,
+          "health_after_damage_s16": -40,
+          "health_before_s16": 87,
+          "source_frame": 2362
+        },
+        "fixed_frame_substitute_forbidden": true,
+        "lifetimes": [
+          {
+            "first_frame": 2363,
+            "last_frame": 2370,
+            "source_slot": "0x00ffc200"
+          },
+          {
+            "first_frame": 2906,
+            "last_frame": 2913,
+            "source_slot": "0x00ffb680"
+          },
+          {
+            "first_frame": 3830,
+            "last_frame": 3837,
+            "source_slot": "0x00ffc380"
+          },
+          {
+            "first_frame": 4130,
+            "last_frame": 4137,
+            "source_slot": "0x00ffc400"
+          },
+          {
+            "first_frame": 5150,
+            "last_frame": 5157,
+            "source_slot": "0x00ffba80"
+          }
+        ],
+        "mutation_controls": [
+          "attack-record +0x08 variant field",
+          "variant-10 class-0x4e suppression",
+          "RNG call/order",
+          "animation sequence",
+          "fixed-pool release"
+        ],
+        "release_state": {
+          "first_absent_frame": 2371,
+          "first_last_visible_frame": 2370,
+          "release_routine": "0x0177f0",
+          "state_u16": "0x0400"
+        },
+        "retained_gameplay_authority": false,
+        "rng_authority": "shared source RNG consumed by class-0x4e state 0",
+        "scene_actor_rows_u16": 40,
+        "scene_lifetime_count_u16": 5,
+        "source_bodies": {
+          "class_dispatch": {
+            "first": "0x0927f6",
+            "last_exclusive": "0x0928aa",
+            "sha256": "97a42d5f4181c8d86aed5b46d4ce084194c0ab09c638bb821959eb81a89c4250"
+          },
+          "collision_impact": {
+            "first": "0x01d622",
+            "last_exclusive": "0x01d6b2",
+            "sha256": "c7a9ead095414c01cd0984c5c82d9ee8cdc17cad1cd366c7f4fdf2069979a020"
+          }
+        },
+        "state0": {
+          "coordinate_mode_u8": 2,
+          "first_jitter_s16": [
+            -4,
+            -4
+          ],
+          "first_seed_after": "0xa774",
+          "first_seed_before": "0x37cd",
+          "first_table_offset_u8": 20,
+          "first_visible_position_after_state0_s16": [
+            829,
+            321,
+            311
+          ],
+          "jitter_table_s16": [
+            [
+              0,
+              0
+            ],
+            [
+              4,
+              0
+            ],
+            [
+              4,
+              -4
+            ],
+            [
+              4,
+              4
+            ],
+            [
+              -4,
+              0
+            ],
+            [
+              -4,
+              -4
+            ],
+            [
+              -4,
+              4
+            ],
+            [
+              -8,
+              8
+            ]
+          ],
+          "object_or_u16": "0x8000",
+          "rng_calls_u8": 1,
+          "rng_entry": "0x017c5e",
+          "rng_mask_u16": "0x001c",
+          "state_write_u16": "0x0200"
+        }
+      },
       "variant1_collision_effect": {
         "active_state": {
           "animation_records": [

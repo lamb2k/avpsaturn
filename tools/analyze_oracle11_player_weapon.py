@@ -120,6 +120,7 @@ def box_record(program: bytes, address: int, stride: int):
     }
     if stride == 16:
         result.update({
+            "impact_variant_u8": raw[8],
             "knockback_mode_s8": signed(raw[10]), "hit_value_u8": raw[14],
             "damage_selector_u8": raw[9],
         })
@@ -377,6 +378,10 @@ def route_motion_vectors(pointers):
 
 parent_collision = collision_table(program, 0x02FC3C)
 child_collision = collision_table(program, 0x030CB6)
+require(parent_collision["attack_entries"][1]["impact_variant_u8"] == 10 and
+        [row["impact_variant_u8"] for row in
+         child_collision["attack_entries"]] == [0, 1, 1],
+        "Predator projectile impact-variant field drift")
 parent_records = animation_sequence(program, 0x02FB48)
 require(len(parent_records) == 8 and
         parent_records[-1]["animation_record"] == "0x0002fbb8" and

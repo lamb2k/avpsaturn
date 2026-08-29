@@ -181,6 +181,7 @@ def build() -> str:
     class09 = auxiliary_dependencies["class_0x09_type20_rng_owner"]
     class4e = auxiliary_dependencies["class_0x4e_type24_variant4_effect"]
     class4e_variant1 = class4e["variant1_collision_effect"]
+    class4e_variant10 = class4e["variant10_collision_effect"]
     class4e_rng = class4e["seed_transaction_by_scheduler_slot"]
     class44 = auxiliary_dependencies["class_0x44_type24_command_guard_owner"]
     class43 = auxiliary_dependencies[
@@ -653,6 +654,23 @@ def build() -> str:
         class4e_variant1["state0"]["first_seed_after"] != "0x4d11" or
         len(class4e_variant1["active_state"]["animation_records"]) != 3 or
         class4e_variant1["fixed_frame_substitute_forbidden"] is not True or
+        class4e_variant10["classification"] !=
+            "SOURCE_CLOSED_IMPLEMENTATION_FIELDS" or
+        class4e_variant10["scene_lifetime_count_u16"] != 5 or
+        class4e_variant10["first_collision"]["attacker_attack_record"] !=
+            "0x0002fc58" or
+        class4e_variant10["allocation"]["variant_field"] != {
+            "attack_record_offset_u8": 8, "type": "u8", "signed": False,
+            "rule": "copy absolute signed byte at attack-record +0x08",
+            "raw_u8": 10, "variant_u8": 10} or
+        class4e_variant10["allocation"]["first_spawn_position_s16"] !=
+            [833, 325, 311] or
+        class4e_variant10["state0"]["first_seed_before"] != "0x37cd" or
+        class4e_variant10["state0"]["first_seed_after"] != "0xa774" or
+        class4e_variant10["state0"]["first_table_offset_u8"] != 20 or
+        len(class4e_variant10["active_state"]["animation_records"]) != 6 or
+        class4e_variant10["release_state"]["first_absent_frame"] != 2371 or
+        class4e_variant10["fixed_frame_substitute_forbidden"] is not True or
         class44["dispatch"] != "0x08d9a4" or
         class44["source_slot"] != "0x00ffc580" or
         class44["state_sequence_u16"] != [0x0200, 0x0400, 0x0402, 0x0404] or
@@ -994,6 +1012,8 @@ def build() -> str:
         [len(child_sequences[str(index)]) for index in range(3)] !=
             [17, 10, 16] or
         len(parent_attack_boxes) != 3 or len(child_attack_boxes) != 3 or
+        parent_attack_boxes[1]["impact_variant_u8"] != 10 or
+        [row["impact_variant_u8"] for row in child_attack_boxes] != [0, 1, 1] or
         len(empty_effect_offsets) != 4 or
         len(empty_effect_records) != 10):
         raise ValueError("SPEC-02 corrected projectile/effect cardinality drift")
@@ -1923,6 +1943,16 @@ def build() -> str:
             row["attack_selector_u8"]))
     lines.extend([
         "};", "",
+        "static const AvspRound1AnimationStateSpec avsp_round1_class4e_variant10_records[AVSP_ROUND1_CLASS4E_VARIANT10_PRESENTATION_COUNT] =",
+        "{",
+    ])
+    for row in class4e_variant10["active_state"]["animation_records"]:
+        lines.append("    { %du, %d, %sUL, %sUL, %du, %du }," % (
+            row["timer_u16"], row["branch_s16"], row["animation_record"],
+            row["assembly"], row["hurt_selector_u8"],
+            row["attack_selector_u8"]))
+    lines.extend([
+        "};", "",
         "static const AvspRound1Class44GuardSpec avsp_round1_class44_guard =",
         "{",
         "    %sUL, %d, %d, %d, 0x%04Xu, 0x0000u, %sUL, %du, %du, %du, %su" % (
@@ -2578,6 +2608,10 @@ def build() -> str:
             box["damage_selector_u8"]))
     lines.extend([
         "};", "",
+        "static const unsigned char avsp_round1_weapon_parent_impact_variants[AVSP_ROUND1_WEAPON_PROJECTILE_ATTACK_BOX_COUNT] =",
+        "{",
+        "    " + ", ".join(f"{box['impact_variant_u8']}u" for box in parent_attack_boxes),
+        "};", "",
         "static const AvspRound1CollisionBoxSpec avsp_round1_weapon_child_attack_boxes[AVSP_ROUND1_WEAPON_PROJECTILE_ATTACK_BOX_COUNT] =",
         "{",
     ])
@@ -2588,6 +2622,10 @@ def build() -> str:
             box["knockback_mode_s8"], box["hit_value_u8"],
             box["damage_selector_u8"]))
     lines.extend([
+        "};", "",
+        "static const unsigned char avsp_round1_weapon_child_impact_variants[AVSP_ROUND1_WEAPON_PROJECTILE_ATTACK_BOX_COUNT] =",
+        "{",
+        "    " + ", ".join(f"{box['impact_variant_u8']}u" for box in child_attack_boxes),
         "};", "",
         "static const AvspRound1VecS16 avsp_round1_empty_effect_variant_offsets[AVSP_ROUND1_EMPTY_EFFECT_VARIANT_COUNT] =",
         "{",

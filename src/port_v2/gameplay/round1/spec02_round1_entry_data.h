@@ -1,8 +1,8 @@
 #ifndef AVSP_SPEC02_ROUND1_ENTRY_DATA_H
 #define AVSP_SPEC02_ROUND1_ENTRY_DATA_H
 
-/* contract_sha256=79c5fd6a775a3b68d2b0145fed60acd16e2f0668356c48f7ff20fad2a6844625 */
-/* fixtures_sha256=2a94f940406212a2d0c22267c686faa1a8f440d465800abf82606d07d5cb1cce */
+/* contract_sha256=8b1acb140fcc9dc88b4f04b350eeef0e97178ba763554426ac6d1d4a77ddc8c8 */
+/* fixtures_sha256=26401cf8b787df4545bb22b45222241acb906524458caabb3e5e0845392fa15c */
 #define AVSP_ROUND1_ENTRY_PROGRAM_SHA256 "e5ef761fadc1b5a7df62e77c03025c0ebff0c2503cbc8be9c0077d4bd6cd24ba"
 
 static const unsigned char avsp_round1_entry_program[AVSP_ROUND1_ENTRY_PROGRAM_BYTES] =
@@ -903,6 +903,16 @@ static const AvspRound1AnimationStateSpec avsp_round1_class4e_variant1_records[A
     { 4095u, -32768, 0x00092934UL, 0x00092c12UL, 0u, 0u },
 };
 
+static const AvspRound1AnimationStateSpec avsp_round1_class4e_variant10_records[AVSP_ROUND1_CLASS4E_VARIANT10_PRESENTATION_COUNT] =
+{
+    { 1u, 0, 0x00092e50UL, 0x000931f8UL, 0u, 0u },
+    { 1u, 0, 0x00092e60UL, 0x00093206UL, 0u, 0u },
+    { 1u, 0, 0x00092e70UL, 0x00093214UL, 0u, 0u },
+    { 1u, 0, 0x00092e80UL, 0x00093222UL, 0u, 0u },
+    { 1u, 0, 0x00092e90UL, 0x00093230UL, 0u, 0u },
+    { 4095u, -32768, 0x00092ea0UL, 0x0009323eUL, 0u, 0u },
+};
+
 static const AvspRound1Class44GuardSpec avsp_round1_class44_guard =
 {
     0x00ffc580UL, 792, 296, 296, 0x0200u, 0x0000u, 0x08d9a4UL, 0u, 0u, 0u, 0x8000u
@@ -1770,11 +1780,21 @@ static const AvspRound1CollisionBoxSpec avsp_round1_weapon_parent_attack_boxes[A
     { 70, 31, 52u, 229u, -86, 141u, -125, 57u, 130u },
 };
 
+static const unsigned char avsp_round1_weapon_parent_impact_variants[AVSP_ROUND1_WEAPON_PROJECTILE_ATTACK_BOX_COUNT] =
+{
+    0u, 10u, 138u
+};
+
 static const AvspRound1CollisionBoxSpec avsp_round1_weapon_child_attack_boxes[AVSP_ROUND1_WEAPON_PROJECTILE_ATTACK_BOX_COUNT] =
 {
     { 0, 0, 0u, 0u, 0, 0u, 0, 0u, 0u },
     { 0, 10, 16u, 10u, 0, 8u, 1, 8u, 14u },
     { 0, 24, 16u, 24u, 0, 8u, 1, 8u, 14u },
+};
+
+static const unsigned char avsp_round1_weapon_child_impact_variants[AVSP_ROUND1_WEAPON_PROJECTILE_ATTACK_BOX_COUNT] =
+{
+    0u, 1u, 1u
 };
 
 static const AvspRound1VecS16 avsp_round1_empty_effect_variant_offsets[AVSP_ROUND1_EMPTY_EFFECT_VARIANT_COUNT] =
