@@ -212,6 +212,28 @@ def class1f_selector_sequence(program: bytes, selector: int) -> dict[str, object
     raise ValueError(f"selector {selector}: animation chain did not close")
 
 
+def animation_sequence_from_record(program: bytes, start: int,
+                                   limit: int = 32) -> dict[str, object]:
+    address = start
+    seen: set[int] = set()
+    records = []
+    for _ in range(limit):
+        require(address not in seen,
+                f"animation record {start:08x}: premature loop")
+        seen.add(address)
+        record = animation_record(program, address)
+        next_address = (int.from_bytes(program[address + 16:address + 20],
+                                       "big") if record["branch_s16"] < 0
+                        else address + 16)
+        record["next_animation_record"] = f"0x{next_address:08x}"
+        records.append(record)
+        if next_address in seen:
+            return {"start_animation_record": f"0x{start:08x}",
+                    "terminal": "source pointer loop", "records": records}
+        address = next_address
+    raise ValueError(f"animation record {start:08x}: chain did not close")
+
+
 def class1f_inner8_action_contract(program: bytes,
                                     opcodes: bytes) -> dict[str, object]:
     """Close the bounded inner-state 0x08 path that owns type-16 fire."""
@@ -1516,10 +1538,16 @@ def class1f_hit_entry_contract(program: bytes,
     landing_timer_write = program_row(2377, "01ece8")
     terminal_records = [animation_record(program, address) for address in
                         range(0x12DE38, 0x12DEE8, 0x10)]
-    hit_selectors = {
-        f"0x{selector:02x}": class1f_selector_sequence(program, selector)
-        for selector in (0x36, 0x37, 0x38, 0x39, 0x17)
+    hit_animation_sequences = {
+        "reaction_0x36": animation_sequence_from_record(program, 0x12E04C),
+        "landing_0x37": animation_sequence_from_record(program, 0x12DDB0),
+        "bounce_0x38": animation_sequence_from_record(program, 0x12DD9C),
+        "rng_hold_0x39": animation_sequence_from_record(program, 0x12DDB0),
+        "terminal_0x17": {"start_animation_record": "0x0012de38",
+                           "terminal": "negative branch returns through 0x01efec",
+                           "records": terminal_records},
     }
+    generic_selector_0x36 = class1f_selector_sequence(program, 0x36)
 
     require(launch_motion["x_velocity_s32_16_16_before_facing"] == 0x1C000 and
             launch_motion["x_acceleration_s32_16_16_before_facing"] == 0 and
@@ -1551,7 +1579,13 @@ def class1f_hit_entry_contract(program: bytes,
             actor_row(2413)["state"] == "0200" and
             actor_row(2413)["substate"] == "0000" and
             actor_row(2414)["substate"] == "1600" and
-            actor_row(2414)["animation_record"] == "0012eafc",
+            actor_row(2414)["animation_record"] == "0012eafc" and
+            [row["animation_record"] for row in
+             hit_animation_sequences["reaction_0x36"]["records"]] ==
+                ["0x0012e04c", "0x0012e05c", "0x0012e06c",
+                 "0x0012e07c", "0x0012e08c", "0x0012e09c"] and
+            generic_selector_0x36["start_animation_record"] ==
+                "0x0012e410",
             "class-0x1f complete source HIT program drift")
 
     return {
@@ -1741,7 +1775,13 @@ def class1f_hit_entry_contract(program: bytes,
                 "class1f_resume_at_2414": "0x0200:1600",
                 "class1f_resume_animation_record": "0x0012eafc",
             },
-            "animation_selectors": hit_selectors,
+            "animation_sequences": hit_animation_sequences,
+            "selector_context_rule": {
+                "rule": "selectors 0x36..0x39 bind through 0x01f6c6 in state 0x0202 with hit mode 2; the normal class-0x1f action-selector table is a different context",
+                "generic_action_selector_0x36_record":
+                    generic_selector_0x36["start_animation_record"],
+                "generic_action_selector_binding_forbidden": True,
+            },
         },
         "rng": {
             "calls": 1, "entry": "0x017c5e", "source_frame": 2377,
@@ -2290,6 +2330,14 @@ def validate(report: dict[str, object]) -> None:
                     hit_entry["source_hit_program"]
                         ["phase_0x020a_terminal_animation"]
                         ["records"][-1]["animation_record"] == "0x0012ded8" and
+                    hit_entry["source_hit_program"]["animation_sequences"]
+                        ["reaction_0x36"]["records"][0]
+                        ["animation_record"] == "0x0012e04c" and
+                    hit_entry["source_hit_program"]["selector_context_rule"]
+                        ["generic_action_selector_0x36_record"] ==
+                        "0x0012e410" and
+                    hit_entry["source_hit_program"]["selector_context_rule"]
+                        ["generic_action_selector_binding_forbidden"] is True and
                     hit_entry["source_hit_program"]["normal_return"]
                         ["class1f_resume_at_2414"] == "0x0200:1600" and
                     hit_entry["rng"]["calls"] == 1 and

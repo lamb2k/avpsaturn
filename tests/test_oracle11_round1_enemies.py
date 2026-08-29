@@ -71,6 +71,8 @@ for label,mutate in [
     ('source-hit-bounce-gravity',lambda x:x['damage_hit_ko_removal']['source_hit_entry_program']['source_hit_program']['phase_0x0206_bounce']['observed_motion_after_facing'].__setitem__('y_acceleration_s32_16_16',-0xb000)),
     ('source-hit-rng-timer',lambda x:x['damage_hit_ko_removal']['source_hit_entry_program']['rng'].__setitem__('selected_timer_u8',9)),
     ('source-hit-terminal-record',lambda x:x['damage_hit_ko_removal']['source_hit_entry_program']['source_hit_program']['phase_0x020a_terminal_animation']['records'][-1].__setitem__('animation_record','0x0012dec8')),
+    ('source-hit-context-record',lambda x:x['damage_hit_ko_removal']['source_hit_entry_program']['source_hit_program']['animation_sequences']['reaction_0x36']['records'][0].__setitem__('animation_record','0x0012e410')),
+    ('source-hit-selector-context',lambda x:x['damage_hit_ko_removal']['source_hit_entry_program']['source_hit_program']['selector_context_rule'].__setitem__('generic_action_selector_binding_forbidden',False)),
     ('source-hit-return',lambda x:x['damage_hit_ko_removal']['source_hit_entry_program']['source_hit_program']['normal_return'].__setitem__('class1f_resume_at_2414','0x0200:0000')),
     ('source-hit-mutation',lambda x:x['damage_hit_ko_removal']['source_hit_entry_program']['mutation_control'].__setitem__('mutations',0)),
     ('source-hit-score-audio-correction',lambda x:x['damage_hit_ko_removal']['source_hit_entry_program'].__setitem__('score_correction','audio')),
@@ -111,4 +113,4 @@ for label,mutate in [
     ('inner8-direction-table',lambda x:x['observed_path_program']['source_tables']['direction_octant_base_u8'].__setitem__(0,0)),
 ]:
     mutant=copy.deepcopy(report);target=next(item for item in mutant['archetypes'] if item['class']=='0x1f')['first_segment_action_execution_contract']['inner_state_0x08_program'];mutate(target);reject(mutant,label)
-print('ORACLE-11 Round 1 enemy tests: PASS (78 mutations rejected)')
+print('ORACLE-11 Round 1 enemy tests: PASS (80 mutations rejected)')
