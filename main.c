@@ -3927,9 +3927,12 @@ static int draw_round1_initial_source_actors(void)
             int initial_source_actor =
                 (actor->type == 12u && actor->actor_class == 0x1f) ||
                 (actor->type == 20u && actor->actor_class == 0x09) ||
+                (actor->type == 24u && actor->actor_class == 0x43) ||
                 (actor->type == 24u && actor->actor_class == 0x4e) ||
                 (actor->type == 24u && actor->actor_class == 0x44);
             if (!actor->active || !initial_source_actor ||
+                (actor->type == 24u && actor->actor_class == 0x43 &&
+                 (unsigned short)actor->y <= (unsigned short)actor->z) ||
                 actor->assembly == 0UL)
                 continue;
             rendered += draw_round1_source_actor(

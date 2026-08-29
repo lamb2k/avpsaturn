@@ -9,13 +9,13 @@
   "sha256": "0c14f4094d25787401aa949657620ff495ae8606c1cfd8ae2d059b94c3d478e9"
  },
  "spec02_round1_presentations": {
-  "decoded_variants": 331,
+  "decoded_variants": 401,
   "fixture": "data/spec02_round1_generated_fixtures.json",
   "fixture_sha256": "baf1583903dbb5138b945f5cba993cd250756867c43faea86ab1548f9b0c7c62",
-  "unique_assemblies": 143,
+  "unique_assemblies": 211,
   "verified_identical": true
  },
- "total_bytes": 26618,
+ "total_bytes": 27570,
  "verified_identical": true,
  "windows": [
   {
@@ -37,6 +37,11 @@
    "base": "0x07a140",
    "sha256": "f9f614c9bb0962fdd7b5896ed6c56c5e071ed5c47ff29c1f664cc295b8218a94",
    "size": 684
+  },
+  {
+   "base": "0x08d5ea",
+   "sha256": "6df4cd24fefb3c8d871dc773375cc75567f91f08572346a7e135d34f03fc728e",
+   "size": 952
   },
   {
    "base": "0x08db2e",

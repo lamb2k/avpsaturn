@@ -151,7 +151,9 @@ def load_spec02_round1_presentations():
                 for mode in modes:
                     for palette in palettes:
                         identity = (animation_record if
-                                    kind.endswith("-window") else assembly)
+                                    (kind.endswith("-window") or
+                                     kind == "class43-population") else
+                                    assembly)
                         key = (kind, identity, facing, mode, palette)
                         if key in seen:
                             continue
@@ -284,6 +286,12 @@ def load_spec02_round1_presentations():
                  for address in sorted(source_hit_addresses)],
                 (0, 1), (1,), 0x8000, (0x15,))
     dependencies = authority["auxiliary"]["first_segment_dependencies"]
+    class43 = dependencies["class_0x43_type24_class01_scene_population"]
+    add_records(
+        "class43-population",
+        [record for sequence in class43["state0"]["animation_sequences"]
+         for record in sequence["records"]],
+        (0,), (0,), int(class43["state0"]["object_or_u16"], 16))
     class09 = dependencies["class_0x09_type20_rng_owner"]
     add_records("class09-initial",
                 [record for sequence in class09["animation_sequences"]

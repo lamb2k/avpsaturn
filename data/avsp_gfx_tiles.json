@@ -1,8 +1,8 @@
 {
  "archive": {
-  "bytes": 535756,
+  "bytes": 540376,
   "file": "build/avsp_cd/SPR4/TILES.BIN",
-  "sha256": "84f19fd23ebf4a588316cf826c5b3618dcd133fca9dd1ff8a90aa1fb977cc8e6"
+  "sha256": "c3b60f1a927cc7cb68e239091b93f12651b8bb070a2a99242c431b13a8cd7984"
  },
  "classification": "tile archive manifest - no ROM bytes",
  "facing_union": true,
@@ -283,7 +283,7 @@
    "frames_sampled": 201
   },
   "spec02_round1_native_presentations": {
-   "decoded_variants": 289,
+   "decoded_variants": 359,
    "fixture_sha256": "baf1583903dbb5138b945f5cba993cd250756867c43faea86ab1548f9b0c7c62",
    "palette_banks": [
     "0x00",
@@ -299,15 +299,15 @@
     "0x1D",
     "0x1E"
    ],
-   "tiles_added": 1802,
-   "unique_assemblies": 131
+   "tiles_added": 1837,
+   "unique_assemblies": 199
   }
  },
  "sample_stride": 1,
  "schema": 1,
  "scope": "street",
  "tile_bytes": 128,
- "tile_count": 4055,
+ "tile_count": 4090,
  "tile_region_budget_bytes": 552960,
- "tile_region_budget_used_pct": 96.89
+ "tile_region_budget_used_pct": 97.72
 }

@@ -207,6 +207,24 @@ def class4e_retained_window_union_is_complete(presentations, fixture):
     return actual == expected
 
 
+def class43_population_union_is_complete(presentations, fixture):
+    class43 = fixture["authority_data"]["auxiliary"][
+        "first_segment_dependencies"][
+            "class_0x43_type24_class01_scene_population"]
+    expected = {
+        (int(record["animation_record"], 16),
+         int(record["assembly"], 16))
+        for sequence in class43["state0"]["animation_sequences"]
+        for record in sequence["records"]
+    }
+    actual = {
+        (item["animation_record"], item["assembly"])
+        for item in presentations
+        if item["kind"] == "class43-population"
+    }
+    return actual == expected
+
+
 def run(args):
     return subprocess.run([sys.executable, str(GENERATOR)] + args,
                           cwd=str(ROOT), capture_output=True, text=True)
@@ -251,6 +269,9 @@ def main() -> int:
             presentations, fixture):
         print("FAIL: class-0x4e retained decoder window is incomplete")
         return 1
+    if not class43_population_union_is_complete(presentations, fixture):
+        print("FAIL: class-0x43 source presentation union is incomplete")
+        return 1
     button3_indexes = [index for index, item in enumerate(presentations)
                        if item["kind"] == "player-button3"]
     if not button3_indexes or any(
@@ -279,7 +300,8 @@ def main() -> int:
             ("class1f-source-hit-window",
              class1f_source_hit_window_union_is_complete),
             ("class4e-variant1-retained-window",
-             class4e_retained_window_union_is_complete)):
+             class4e_retained_window_union_is_complete),
+            ("class43-population", class43_population_union_is_complete)):
         indexes = [index for index, item in enumerate(presentations)
                    if item["kind"] == kind]
         if not indexes or any(complete(
@@ -304,9 +326,9 @@ def main() -> int:
     residency = before_manifest["presentation_residency"]
     native_presentations = before_manifest["routes"].get(
         "spec02_round1_native_presentations", {})
-    if (native_presentations.get("decoded_variants") != 289 or
-        native_presentations.get("unique_assemblies") != 131 or
-        native_presentations.get("tiles_added") != 1802):
+    if (native_presentations.get("decoded_variants") != 359 or
+        native_presentations.get("unique_assemblies") != 199 or
+        native_presentations.get("tiles_added") != 1837):
         print("FAIL: SPEC-02 native presentation union drifted")
         return 1
     if (residency["source_peak_unique_tiles"] != 374 or
