@@ -10898,6 +10898,26 @@
           "stage_spawn_guard": {
             "allocation": "type-20 fixed pool; new actor dispatches later in the same ascending scheduler pass only when its slot has not already passed",
             "camera_predicate": "record.camera_threshold_u16 <= camera_x_u16",
+            "camera_sample_order": {
+              "mutation_control": "using the post-player next-frame camera moves the threshold-736 actor one visible frame early",
+              "records": [
+                {
+                  "address": "0x0015c128",
+                  "camera_x_u16": 640,
+                  "first_actor_visible_frame_u16": 2073,
+                  "source_slot": "0x00ffb580",
+                  "writer_source_frame_u16": 2072
+                },
+                {
+                  "address": "0x0015c158",
+                  "camera_x_u16": 675,
+                  "first_actor_visible_frame_u16": 2243,
+                  "source_slot": "0x00ffb400",
+                  "writer_source_frame_u16": 2242
+                }
+              ],
+              "rule": "compare against the camera position projected for the current source frame, before the native player step computes the next frame camera"
+            },
             "guard_0a": "if negative abs(value)>global+0x1eb; otherwise value<=global+0x1eb",
             "guard_0b": "zero or equal to global route byte +0x20e",
             "order": "16-byte records in source order; allocate all eligible records"
@@ -11249,6 +11269,26 @@
           "stage_spawn_guard": {
             "allocation": "type-20 fixed pool under ascending scheduler 0x01bc38",
             "camera_predicate": "record.camera_threshold_u16 <= camera_x_u16",
+            "camera_sample_order": {
+              "mutation_control": "using the post-player next-frame camera moves the threshold-736 actor one visible frame early",
+              "records": [
+                {
+                  "address": "0x0015c108",
+                  "camera_x_u16": 640,
+                  "first_actor_visible_frame_u16": 2073,
+                  "source_slot": "0x00ffb600",
+                  "writer_source_frame_u16": 2072
+                },
+                {
+                  "address": "0x0015c178",
+                  "camera_x_u16": 736,
+                  "first_actor_visible_frame_u16": 2618,
+                  "source_slot": "0x00ffb300",
+                  "writer_source_frame_u16": 2617
+                }
+              ],
+              "rule": "compare against the camera position projected for the current source frame, before the native player step computes the next frame camera"
+            },
             "guard_0a": "if negative abs(value)>global+0x1eb; otherwise value<=global+0x1eb",
             "guard_0b": "zero or equal to global route byte +0x20e",
             "order": "16-byte records in source order; allocate all eligible records"
@@ -16284,6 +16324,32 @@
         1024
       ],
       "terminal_guard": "signed actor+0x24 becomes negative, then state advances to 0x0400 and the next scheduler visit releases the record",
+      "terminal_transition": {
+        "after": {
+          "animation_record": "0x000929f0",
+          "branch_s16": -32768,
+          "state_u16": "0x0400",
+          "timer_u16": 4094,
+          "visible_frame_u16": 2259
+        },
+        "before": {
+          "animation_record": "0x000929f0",
+          "branch_s16": -32768,
+          "state_u16": "0x0200",
+          "timer_u16": 4095,
+          "visible_frame_u16": 2258
+        },
+        "capture_sha256": "9c0ea88c7eae6b4755b0025d356d49ae136d91de0e443fab0ff767151e43343d",
+        "classification": "SOURCE_CLOSED_IMPLEMENTATION_FIELDS",
+        "mutation_control": "reject state advance before terminal timer decrement",
+        "scheduler_rule": "each active source slot consumes the same terminal update in ascending slot order",
+        "source_slots": [
+          "0x00ffc480",
+          "0x00ffc500"
+        ],
+        "state_guard": "state_u16 == 0x0200 and signed actor+0x24 < 0",
+        "timer_rule": "decrement actor+0x0a_u16 once before writing state 0x0400"
+      },
       "variant0_collision_effect": {
         "active_state": {
           "animation_records": [

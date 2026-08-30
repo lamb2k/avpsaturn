@@ -106,6 +106,10 @@ mutant["obstacle_response"]["lifecycle_contract"]["source_scene_record"]["camera
 reject(mutant, "Coffee Shop obstacle spawn threshold changed")
 
 mutant = copy.deepcopy(report)
+mutant["obstacle_response"]["lifecycle_contract"]["spawn"]["camera_sample_order"]["native_rule"] = "scheduler guard uses camera_x_position"
+reject(mutant, "Coffee Shop obstacle scheduler camera sample changed")
+
+mutant = copy.deepcopy(report)
 mutant["obstacle_response"]["lifecycle_contract"]["initializer"]["child_allocation"]["variant_order_u8"] = [0, 1, 2, 3]
 reject(mutant, "Coffee Shop obstacle child allocation order changed")
 
@@ -157,4 +161,9 @@ mutant = copy.deepcopy(report)
 mutant["camera"]["implementation_contract"]["world_to_plane_order"]["raw_pattern_name_offset_forbidden"] = False
 reject(mutant, "raw camera coordinate submitted as plane offset")
 
-print("ORACLE-11 Round 1 navigation tests: PASS (30 mutations rejected)")
+mutant = copy.deepcopy(report)
+mutant["camera"]["implementation_contract"]["initialization"][
+    "first_control_chronology"][1]["camera_x_s16"] = 640
+reject(mutant, "camera first-control handoff update")
+
+print("ORACLE-11 Round 1 navigation tests: PASS (32 mutations rejected)")

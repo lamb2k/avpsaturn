@@ -421,6 +421,31 @@
       ],
       "initialization": {
         "entry": "0x0b04bc",
+        "first_control_chronology": [
+          {
+            "camera_target_x_s16": 640,
+            "camera_x_s16": 640,
+            "player_x_s16": 944,
+            "route_state_s16": 2,
+            "source_frame_u16": 2237
+          },
+          {
+            "camera_target_x_s16": 648,
+            "camera_x_s16": 648,
+            "player_x_s16": 944,
+            "route_state_s16": 4,
+            "source_frame_u16": 2238
+          },
+          {
+            "camera_target_x_s16": 655,
+            "camera_x_s16": 655,
+            "player_x_s16": 944,
+            "route_state_s16": 4,
+            "source_frame_u16": 2239
+          }
+        ],
+        "handoff_rule": "the route-2 to route-4 handoff consumes the first source camera controller update before the first route-4 frame is presented",
+        "mutation_control": "skipping the handoff camera update leaves source frame 2238 at x=640 instead of x=648",
         "override_guard": "u8(A5+0x1b0) != 0",
         "override_reads": [
           "camera+0x10:s16",
@@ -10102,6 +10127,11 @@
         "y_s16": 323
       },
       "spawn": {
+        "camera_sample_order": {
+          "mutation_control": "using post-player camera_x_position allocates 0xffb380 one frame early (native 2245 instead of source 2246)",
+          "native_rule": "scheduler guard uses camera_x_previous; camera_x_position is the post-player sample for the next source frame",
+          "source_rule": "scene-record guard samples A5+0x278 before the same source frame's player/camera controller write"
+        },
         "first_visible_frame": 2246,
         "guard": "nonnegative record threshold 688 <= unsigned camera bound A5+0x278, route/lane record filters pass, and the record-20 pool allocation succeeds",
         "scheduler": "record type 20 at 0x01bc38",

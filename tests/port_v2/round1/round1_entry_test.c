@@ -221,13 +221,13 @@ int main(void)
         runtime.entry.source_global_8209 != 2u ||
         runtime.entry.script_cursor != 0x00128FC4UL ||
         runtime.navigation_bounds_active != 1u ||
-        runtime.navigation_bound_x != 640 || runtime.navigation_bound_z != 256 ||
-        runtime.camera_x_position != 640 ||
-        runtime.camera_x_target != 640 ||
+        runtime.navigation_bound_x != 648 || runtime.navigation_bound_z != 256 ||
+        runtime.camera_x_position != 648 ||
+        runtime.camera_x_target != 648 ||
         runtime.camera_x_lower != 640 || runtime.camera_x_upper != 832 ||
         runtime.camera_z_position != 256 ||
         runtime.camera_z_lower != 256 || runtime.camera_z_upper != 256 ||
-        runtime.camera_scroll2_x != 576 ||
+        runtime.camera_scroll2_x != 584 ||
         runtime.camera_guard_countdown != 1200u ||
         runtime.pools[0].free_count != 10u ||
         runtime.pools[2].free_count != 12u ||
@@ -479,7 +479,7 @@ int main(void)
     runtime.player_action.x = 2000;
     runtime.player_action.lane = 1000;
     if (!avsp_round1_step_player(&runtime, 0u, 0) ||
-        runtime.player.x != 1028 || runtime.player.z != 327)
+        runtime.player.x != 1034 || runtime.player.z != 327)
     {
         fprintf(stderr,
                 "high clamp x=%d z=%d action_x=%d lane=%d applications=%lu clamps=%lu\n",
@@ -491,7 +491,7 @@ int main(void)
     runtime.player_action.x = -1000;
     runtime.player_action.lane = -1000;
     if (!avsp_round1_step_player(&runtime, 0u, 0) ||
-        runtime.player.x != 719 || runtime.player.z != 272 ||
+        runtime.player.x != 725 || runtime.player.z != 272 ||
         runtime.navigation_applications != 7u ||
         runtime.navigation_clamps != 4u)
     {
@@ -904,7 +904,14 @@ int main(void)
         if (!avsp_round1_step_scheduler(&air_runtime) ||
             effect->state != 2u || effect->effect_timer != 6u ||
             air_runtime.player_air_weapon_effect_requests != 1u)
+        {
+            fprintf(stderr,
+                "air effect followup state=%u timer=%u requests=%lu branch=%d anim_timer=%d\n",
+                effect->state, effect->effect_timer,
+                air_runtime.player_air_weapon_effect_requests,
+                effect->animation_branch, effect->animation_timer);
             return 97;
+        }
     }
     {
         AvspRound1Runtime air_failure = runtime;
@@ -975,6 +982,12 @@ int main(void)
         AvspRound1Runtime empty_walk_runtime = runtime;
         short weapon_x;
         short weapon_z;
+        unsigned long weapon_animation;
+        unsigned long weapon_assembly;
+        unsigned short weapon_animation_timer;
+        short weapon_animation_branch;
+        unsigned char weapon_hurt_selector;
+        unsigned char weapon_attack_selector;
         if (!avsp_round1_step_player(&weapon_runtime,
                 AVSP_PW_INPUT_RIGHT, 0) ||
             !avsp_round1_step_player(&weapon_runtime,
@@ -992,14 +1005,24 @@ int main(void)
             return 117;
         weapon_x = weapon_runtime.player.x;
         weapon_z = weapon_runtime.player.z;
+        weapon_animation = weapon_runtime.player.animation_record;
+        weapon_assembly = weapon_runtime.player.assembly;
+        weapon_animation_timer = weapon_runtime.player.animation_timer;
+        weapon_animation_branch = weapon_runtime.player.animation_branch;
+        weapon_hurt_selector = weapon_runtime.player.hurt_selector;
+        weapon_attack_selector = weapon_runtime.player.attack_selector;
         if (!avsp_round1_step_player(&weapon_runtime,
                 AVSP_ROUND1_INPUT_BUTTON1 | AVSP_PW_INPUT_RIGHT, 0) ||
             weapon_runtime.player_weapon_active != 1u ||
             weapon_runtime.player_weapon_tick != 1u ||
             weapon_runtime.player.source_action != 0x0c00u ||
             weapon_runtime.player.substate != 0x0c00u ||
-            weapon_runtime.player.animation_record != 0x0015f1f4UL ||
-            weapon_runtime.player.assembly != 0x001626a4UL ||
+            weapon_runtime.player.animation_record != weapon_animation ||
+            weapon_runtime.player.assembly != weapon_assembly ||
+            weapon_runtime.player.animation_timer != weapon_animation_timer ||
+            weapon_runtime.player.animation_branch != weapon_animation_branch ||
+            weapon_runtime.player.hurt_selector != weapon_hurt_selector ||
+            weapon_runtime.player.attack_selector != weapon_attack_selector ||
             weapon_runtime.player_weapon_entries != 1u ||
             weapon_runtime.player_weapon_attempts_total != 0u ||
             weapon_runtime.player_weapon_allocations != 0u ||
@@ -1012,13 +1035,23 @@ int main(void)
             weapon_runtime.player.z != weapon_z)
         {
             fprintf(stderr,
-                "Button1 entry mismatch active=%u tick=%u action=%04x substate=%04x animation=%08lx assembly=%08lx entries=%lu attempts=%lu allocations=%lu debits=%lu resource=%u recharge=%u player_state=%u interruptions=%lu position=%d/%d expected=%d/%d\n",
+                "Button1 entry mismatch active=%u tick=%u action=%04x substate=%04x animation=%08lx/%08lx assembly=%08lx/%08lx timer=%u/%u branch=%d/%d selectors=%u/%u:%u/%u entries=%lu attempts=%lu allocations=%lu debits=%lu resource=%u recharge=%u player_state=%u interruptions=%lu position=%d/%d expected=%d/%d\n",
                 weapon_runtime.player_weapon_active,
                 weapon_runtime.player_weapon_tick,
                 weapon_runtime.player.source_action,
                 weapon_runtime.player.substate,
                 weapon_runtime.player.animation_record,
+                weapon_animation,
                 weapon_runtime.player.assembly,
+                weapon_assembly,
+                weapon_runtime.player.animation_timer,
+                weapon_animation_timer,
+                weapon_runtime.player.animation_branch,
+                weapon_animation_branch,
+                weapon_runtime.player.hurt_selector,
+                weapon_hurt_selector,
+                weapon_runtime.player.attack_selector,
+                weapon_attack_selector,
                 weapon_runtime.player_weapon_entries,
                 weapon_runtime.player_weapon_attempts_total,
                 weapon_runtime.player_weapon_allocations,
@@ -2392,6 +2425,26 @@ int main(void)
                 projectile_runtime.class4e_variant1_allocation_failures);
             return 55;
         }
+        {
+            AvspRound1Runtime terminal_runtime = projectile_runtime;
+            AvspRound1ActorCore *terminal_impact =
+                &terminal_runtime.pools[3].records[impact_index];
+            terminal_impact->state = 0x0200u;
+            terminal_impact->animation_timer = 4095u;
+            terminal_impact->animation_branch = (short)-32768;
+            if (!avsp_round1_step_scheduler(&terminal_runtime) ||
+                terminal_impact->state != 0x0400u ||
+                terminal_impact->animation_timer != 4094u)
+            {
+                fprintf(stderr,
+                    "variant1 terminal state=%04x timer=%u branch=%d code=%u\n",
+                    terminal_impact->state,
+                    terminal_impact->animation_timer,
+                    terminal_impact->animation_branch,
+                    terminal_runtime.scheduler_failure_code);
+                return 55;
+            }
+        }
         target->hurt_selector = 0u;
         target->state = 0x0600u;
         target->substate = 0u;
@@ -3124,7 +3177,27 @@ int main(void)
                 class02->source_a4, class02->animation_record);
             return 97;
         }
+        {
+            AvspRound1Runtime camera_sample_runtime = component_runtime;
+            camera_sample_runtime.coffee_shop_obstacle_released = 1u;
+            camera_sample_runtime.camera_x_position = 672;
+            camera_sample_runtime.camera_x_previous = 671;
+            if (!avsp_round1_step_scheduler(&camera_sample_runtime) ||
+                camera_sample_runtime.coffee_scene_record_cursor != 2u ||
+                camera_sample_runtime.pools[2].records[11].active != 0u)
+            {
+                fprintf(stderr,
+                    "stage camera sample current=%d previous=%d cursor=%u actor=%u\n",
+                    camera_sample_runtime.camera_x_position,
+                    camera_sample_runtime.camera_x_previous,
+                    camera_sample_runtime.coffee_scene_record_cursor,
+                    camera_sample_runtime.pools[2].records[11].active);
+                return 97;
+            }
+        }
+        component_runtime.coffee_shop_obstacle_released = 1u;
         component_runtime.camera_x_position = 672;
+        component_runtime.camera_x_previous = 672;
         if (!avsp_round1_step_scheduler(&component_runtime) ||
             component_runtime.coffee_scene_record_cursor != 3u ||
             component_runtime.pools[2].records[11].actor_class != 0x01 ||
@@ -3133,6 +3206,7 @@ int main(void)
                 0x00ffb400UL)
             return 97;
         component_runtime.camera_x_position = 736;
+        component_runtime.camera_x_previous = 736;
         if (!avsp_round1_step_scheduler(&component_runtime) ||
             component_runtime.coffee_scene_record_cursor != 4u ||
             component_runtime.pools[2].records[9].actor_class != 0x02 ||
@@ -3243,6 +3317,7 @@ int main(void)
             return 98;
         class02 = &component_runtime.pools[2].records[9];
         component_runtime.camera_x_position = 832;
+        component_runtime.camera_x_previous = 832;
         component_runtime.player_action.x = 1091;
         component_runtime.player_action.lane = 320;
         component_runtime.player_action.height = 0;
@@ -3940,6 +4015,27 @@ int main(void)
                  scene_runtime.pools[2].records[15].animation_timer !=
                      4094u))
                 return 119;
+            if (source_frame == 2238u &&
+                (scene_runtime.player.animation_record != 0x0015f1f4UL ||
+                 scene_runtime.player.animation_timer != 4094u ||
+                 scene_runtime.player.animation_branch != (short)-32768))
+            {
+                fprintf(stderr,
+                    "Coffee Shop player idle animation failed frame=%u record=%08lx timer=%u branch=%d updates=%u\n",
+                    source_frame, scene_runtime.player.animation_record,
+                    scene_runtime.player.animation_timer,
+                    scene_runtime.player.animation_branch, source_updates);
+                return 120;
+            }
+            if (source_frame == 2246u &&
+                (scene_runtime.pools[2].records[10].source_slot !=
+                     0x00ffb380UL ||
+                 scene_runtime.pools[2].records[10].actor_class != 0x0a ||
+                 scene_runtime.pools[2].records[10].animation_record !=
+                     0x0006e136UL ||
+                 scene_runtime.pools[2].records[10].animation_timer !=
+                     4094u))
+                return 121;
         }
         if (!scene_runtime.first_encounter.initialized)
         {

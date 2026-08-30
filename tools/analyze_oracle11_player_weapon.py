@@ -20,6 +20,12 @@ PROGRAM = ROOT / ".deps/mame/actorprobe/decrypted_program_2m.bin"
 AUTH = ROOT / "data/oracle11_predator_warrior_authority.json"
 OUT = ROOT / "data/oracle11_predator_weapon_projectile_resource.json"
 COFFEE = ROOT / ".deps/mame/oracle11_progression_lifecycle_cs21a"
+COFFEE_PLAYER_ANIMATION_A = (ROOT / ".deps/mame" /
+    "oracle11_progression_lifecycle_cs41a" /
+    "coffee_shop_player_animation_writes.tsv")
+COFFEE_PLAYER_ANIMATION_B = (ROOT / ".deps/mame" /
+    "oracle11_progression_lifecycle_cs41b" /
+    "coffee_shop_player_animation_writes.tsv")
 COLLISION_A = ROOT / ".deps/mame/oracle11_progression_lifecycle_cs32a"
 COLLISION_B = ROOT / ".deps/mame/oracle11_progression_lifecycle_cs32b"
 COLLISION_S = ROOT / ".deps/mame/oracle11_progression_lifecycle_cs32s"
@@ -559,10 +565,48 @@ coffee_input = {int(row["frame"]): int(row["input_word"])
                 for row in full_route_samples}
 coffee_player = {int(row["frame"]): int(row["player_substate"])
                  for row in coffee_frames}
+coffee_player_actors = {int(row["frame"]): row for row in coffee_actors
+                        if row["pool"] == "player" and
+                        row["slot"] == "ff8380"}
+require(digest(COFFEE_PLAYER_ANIMATION_A) ==
+        digest(COFFEE_PLAYER_ANIMATION_B) ==
+        "bc3c9cc7df2830bbf61cd8a4a8bbebd57e7860b0a2d3aacad9e6c75a07575438",
+        "Coffee Shop player animation write captures drift")
+coffee_player_animation_writes = rows(COFFEE_PLAYER_ANIMATION_A)
+coffee_animation_pcs = {
+    frame: [row["pc"] for row in coffee_player_animation_writes
+            if int(row["frame"]) == frame]
+    for frame in range(2252, 2260)
+}
+require(
+    coffee_animation_pcs[2252].count("01652a") == 2 and
+    "01652e" in coffee_animation_pcs[2252] and
+    "016534" in coffee_animation_pcs[2252] and
+    coffee_animation_pcs[2253].count("01652a") == 2 and
+    "01652e" in coffee_animation_pcs[2253] and
+    "016534" in coffee_animation_pcs[2253] and
+    coffee_animation_pcs[2254].count("016574") == 1 and
+    all(pc not in coffee_animation_pcs[2254]
+        for pc in ("016588", "01658c", "016592")) and
+    all(all(pc in coffee_animation_pcs[frame]
+            for pc in ("016574", "016588", "01658c", "016592"))
+        for frame in (2255, 2256, 2258, 2259)),
+    "Coffee Shop Button1 animation writer chronology drift")
 require(coffee_input[2249] == 0 and coffee_input[2250] == 8 and
         coffee_player[2251] == 2 and coffee_player[2252] == 0x0c00 and
         coffee_parent_projection[0]["first_visible_frame"] == 2254,
         "Coffee Shop Button1 input/action/allocation chronology drift")
+require(
+    coffee_player_actors[2251]["animation_record"] == "0015f1f4" and
+    coffee_player_actors[2251]["animation_timer"] == "0ff2" and
+    int(coffee_player_actors[2251]["animation_branch"]) == -32768 and
+    coffee_player_actors[2252]["animation_record"] == "0015f1f4" and
+    coffee_player_actors[2252]["animation_timer"] == "0ff2" and
+    int(coffee_player_actors[2252]["animation_branch"]) == -32768 and
+    coffee_player_actors[2253]["animation_record"] == "0015e540" and
+    coffee_player_actors[2253]["animation_timer"] == "0002" and
+    int(coffee_player_actors[2253]["animation_branch"]) == 0,
+    "Coffee Shop sufficient Button1 entry presentation preservation drift")
 auxiliary = json.loads(AUXILIARY.read_text(encoding="ascii"))
 class49 = next(row for row in auxiliary["archetypes"]
                if row["type"] == 24 and row["class"] == "0x49")
@@ -604,6 +648,43 @@ require(len(class49_variant0_rows) == 793 and
              "last_frame": 2271, "animation_record": "0x0002fb68",
              "first_position_s16": [914, 394, 319]}],
         "Coffee Shop parent class-0x49 population drift")
+class49_reuse_rows = [row for row in coffee_actors if
+                      row["slot"] in ("ffc480", "ffc500") and
+                      int(row["frame"]) in (2259, 2262, 2264)]
+require([(int(row["frame"]), row["slot"], row["class"],
+          row["animation_record"], int(row["animation_timer"], 16),
+          int(row["animation_branch"])) for row in class49_reuse_rows] == [
+            (2259, "ffc480", "4e", "000929f0", 4094, -32768),
+            (2259, "ffc500", "4e", "000929f0", 4094, -32768),
+            (2262, "ffc500", "49", "0002fb58", 4094, -32768),
+            (2264, "ffc480", "49", "0002fb68", 4094, -32768),
+            (2264, "ffc500", "49", "0002fb58", 4094, -32768)],
+        "Coffee Shop class-0x49 fixed-slot animation-control residue drift")
+class49_fixed_slot_reuse = {
+    "classification": "SOURCE_CLOSED_IMPLEMENTATION_FIELDS",
+    "allocator_rule":
+        "generic record-type-24 allocation preserves unwritten slot fields",
+    "written_presentation_fields": [
+        "animation_record:u32 copied from parent",
+        "assembly:u32 follows copied animation record"],
+    "unwritten_retained_fields": [
+        "animation_timer actor+0x0a:u16",
+        "animation_branch actor+0x24:s16"],
+    "prior_owner": {"class_u8": "0x4e", "visible_frame_u16": 2259,
+                    "animation_record": "0x000929f0",
+                    "animation_timer_u16": 4094,
+                    "animation_branch_s16": -32768},
+    "first_reuses": [
+        {"source_slot": "0x00ffc500", "visible_frame_u16": 2262,
+         "animation_record": "0x0002fb58", "animation_timer_u16": 4094,
+         "animation_branch_s16": -32768},
+        {"source_slot": "0x00ffc480", "visible_frame_u16": 2264,
+         "animation_record": "0x0002fb68", "animation_timer_u16": 4094,
+         "animation_branch_s16": -32768}],
+    "mutation_control":
+        "clearing animation timer or branch on allocation changes both first lifetimes",
+    "capture_sha256": digest(COFFEE / "coffee_shop_scene_actors.tsv"),
+}
 parent_class49_effect = {
     "classification": "SOURCE_CLOSED_IMPLEMENTATION_FIELDS",
     "guard": "global phase byte +0x19 bit0 is clear",
@@ -631,6 +712,7 @@ parent_class49_effect = {
                "variant0_movement": "x/y/z unchanged",
                "update_order": ["timer", "variant guard", "visibility"]},
     "state4": {"release": "0x0177f0"},
+    "fixed_slot_reuse_presentation": class49_fixed_slot_reuse,
     "presentation_records": class49["presentation_and_collision"]["records"],
     "scene_actor_rows_u16": len(class49_variant0_rows),
     "scene_lifetime_count_u16": len(class49_variant0_lifetimes),
@@ -1050,6 +1132,59 @@ implementation_contract = {
         "player_position_and_facing_latched": True, "rng_calls": [],
         "resource_debit_tick": 1,
         "parent_allocation_tick": 2,
+        "entry_projection": {
+            "entry_rule": "write action/substate 0x0c00 while preserving the current animation record, assembly, timer, branch, and collision selectors; bind the selected 0x0c02 record on the following player update",
+            "entry_preserves_current_presentation": True,
+            "coffee_shop_witness": {
+                "prior_frame_u16": 2251,
+                "entry_frame_u16": 2252,
+                "prior_animation_record": "0x0015f1f4",
+                "entry_animation_record": "0x0015f1f4",
+                "prior_timer_u16": 4082,
+                "entry_timer_u16": 4082,
+                "prior_branch_s16": -32768,
+                "entry_branch_s16": -32768,
+                "active_frame_u16": 2253,
+                "active_animation_record": "0x0015e540",
+                "active_timer_u16": 2,
+                "active_branch_s16": 0,
+            },
+            "mutation_controls": [
+                "reject rebinding the idle timer to 4095 on the 0x0c00 entry",
+                "reject delaying the selected 0x0c02 record beyond the following player update",
+            ],
+        },
+        "animation_execution": {
+            "classification": "SOURCE_CLOSED_IMPLEMENTATION_FIELDS",
+            "spec_executable": True,
+            "entry_rebind_updates_u8": [1, 2],
+            "entry_rebind_rule": "the first two 0x0c02 updates bind the selected first animation record and reload its timer/branch",
+            "active_rule": "from the following update, decrement the current u16 timer once; on zero bind the next 16-byte record timer, signed branch, assembly, and collision selectors in source order",
+            "terminal_rule": "a negative signed branch retains the terminal record while its u16 timer continues to decrement until action cleanup owns the return",
+            "writers": {
+                "record_bind": "0x01652a then 0x016588",
+                "timer_bind": "0x01652e then 0x01658c",
+                "branch_bind": "0x016534 then 0x016592",
+                "timer_decrement": "0x016574",
+            },
+            "coffee_shop_writer_frames": {
+                "first_bind_u16": 2252,
+                "second_bind_u16": 2253,
+                "first_decrement_u16": 2254,
+                "next_record_bind_frames_u16": [2255, 2256, 2258, 2259],
+            },
+            "capture_identity": {
+                "independent_captures": 2,
+                "byte_identical": True,
+                "sha256": digest(COFFEE_PLAYER_ANIMATION_A),
+            },
+            "mutation_controls": [
+                "reject reloading a raw record timer on every action update",
+                "reject decrementing before both source entry binds",
+                "reject advancing a record before the current timer reaches zero",
+                "reject stopping terminal-record timer decrements before action cleanup",
+            ],
+        },
         "presentation_timeline": player_presentation,
         "presentation_selector_contract": {
             "entry": "0x0241f0 then 0x0240e0..0x0240fa",

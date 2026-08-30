@@ -108,18 +108,23 @@ int main(void)
         }
         if (source_frame == 2072u || source_frame == 2073u ||
             source_frame == 2510u || source_frame == 2511u ||
+            (source_frame >= 2239u && source_frame <= 2244u) ||
             (source_frame >= 2749u && source_frame <= 2759u) ||
             (source_frame >= 2249u && source_frame <= 2294u) ||
+            (source_frame >= 2614u && source_frame <= 2619u) ||
             (source_frame >= 2348u && source_frame <= 2380u) ||
             (source_frame >= 2329u && source_frame <= 2330u))
             fprintf(stderr,
-                    "rng_checkpoint frame=%u seed=%04x scheduler=%lu phase=%u living=%u spawn_index=%u timer=%u\n",
+                    "rng_checkpoint frame=%u seed=%04x scheduler=%lu phase=%u living=%u spawn_index=%u timer=%u camera=%d previous=%d scene_cursor=%u\n",
                     source_frame, runtime.rng_seed,
                     runtime.scheduler_frames,
                     runtime.first_encounter.source_phase_counter,
                     runtime.first_encounter.source_living_count,
                     runtime.first_encounter.source_spawn_index,
-                    runtime.first_encounter.source_spawn_timer);
+                    runtime.first_encounter.source_spawn_timer,
+                    runtime.camera_x_position,
+                    runtime.camera_x_previous,
+                    runtime.coffee_scene_record_cursor);
         if (source_frame == 2377u || source_frame == 2378u ||
             source_frame == 2409u || source_frame == 2410u)
         {

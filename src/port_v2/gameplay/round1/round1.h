@@ -6,7 +6,7 @@
 #include "../../combat/hit_ko/hit_ko.h"
 
 #define AVSP_ROUND1_SPEC02_SHA256 \
-    "d0d7762ade3d0f1cbb986d6c1135172e24017515c73ce30ccc39ec24b4385710"
+    "6aa35860d5854c77fb54e5174659a1cf546defdfb703d734b2f617276a0872b1"
 #define AVSP_ROUND1_CANARY_HEAD 0x52314548UL
 #define AVSP_ROUND1_CANARY_TAIL 0x52314554UL
 #define AVSP_ROUND1_ROUTE_ENTRY_STATE 2
@@ -31,6 +31,7 @@
 #define AVSP_ROUND1_PLAYER_JUMP_SEQUENCE_MAX_RECORDS 8u
 #define AVSP_ROUND1_PLAYER_WEAPON_PRESENTATION_COUNT 20u
 #define AVSP_ROUND1_PLAYER_WEAPON_SELECTOR_COUNT 4u
+#define AVSP_ROUND1_PLAYER_WEAPON_SEQUENCE_COUNT 5u
 #define AVSP_ROUND1_PLAYER_EMPTY_PRESENTATION_COUNT 18u
 #define AVSP_ROUND1_PLAYER_SPECIAL_PRESENTATION_COUNT 17u
 #define AVSP_ROUND1_CLASS4B_PRESENTATION_COUNT 32u
@@ -1134,6 +1135,8 @@ typedef struct
     unsigned long assembly;
     unsigned char hurt_selector;
     unsigned char attack_selector;
+    unsigned short timer;
+    short branch;
 } AvspRound1PlayerWeaponFrameSpec;
 
 typedef struct
@@ -1151,6 +1154,7 @@ typedef struct
     unsigned char normal_recharge_reload;
     unsigned char depleted_recharge_reload;
     unsigned char empty_dispatch_uses_depleted_latch;
+    unsigned char sufficient_entry_preserves_current_presentation;
     unsigned char empty_entry_preserves_current_presentation;
     unsigned char empty_effect_variant;
     unsigned char empty_effect_allocation_tick;

@@ -290,6 +290,8 @@ def build() -> str:
         "weapon_projectile_resource"]["special_implementation_contract"]
     weapon_states = weapon["state_dispatch"]
     weapon_action = weapon["sufficient_action"]
+    weapon_action_entry = weapon_action["entry_projection"]
+    weapon_animation_execution = weapon_action["animation_execution"]
     weapon_resource = weapon["resource_tick"]
     weapon_empty = weapon["empty_fallback"]
     weapon_empty_entry = weapon_empty["entry_projection"]
@@ -305,6 +307,14 @@ def build() -> str:
     weapon_selectors = list(range(
         weapon_selector_contract["selector_range_u8"][0],
         weapon_selector_contract["selector_range_u8"][1] + 1))
+    weapon_selector_sequences = {}
+    for selector in weapon_selectors:
+        sequence = []
+        for row in weapon_selector_timelines[str(selector)][1:19]:
+            if not sequence or row["animation_record"] != \
+                    sequence[-1]["animation_record"]:
+                sequence.append(row)
+        weapon_selector_sequences[str(selector)] = sequence
     empty_frames = weapon_empty["presentation_timeline"]
     weapon_return_frame = dict(weapon_frames[0])
     weapon_return_frame.update({"action_u16": 2, "substate_u8": 2})
@@ -780,6 +790,20 @@ def build() -> str:
             [("0xcdb5", "0x691e", 28), ("0x691e", "0x3b59", 24)] or
         len(class4e["jitter_table_s16"]) != 8 or
         len(class4e["animation_records"]) != 5 or
+        class4e["terminal_transition"]["classification"] !=
+            "SOURCE_CLOSED_IMPLEMENTATION_FIELDS" or
+        class4e["terminal_transition"]["source_slots"] !=
+            ["0x00ffc480", "0x00ffc500"] or
+        class4e["terminal_transition"]["before"] != {
+            "visible_frame_u16": 2258, "state_u16": "0x0200",
+            "animation_record": "0x000929f0", "timer_u16": 4095,
+            "branch_s16": -32768} or
+        class4e["terminal_transition"]["after"] != {
+            "visible_frame_u16": 2259, "state_u16": "0x0400",
+            "animation_record": "0x000929f0", "timer_u16": 4094,
+            "branch_s16": -32768} or
+        class4e["terminal_transition"]["mutation_control"] !=
+            "reject state advance before terminal timer decrement" or
         class4e_variant0["classification"] !=
             "SOURCE_CLOSED_IMPLEMENTATION_FIELDS" or
         class4e_variant0["scene_lifetime_count_u16"] != 2 or
@@ -934,6 +958,8 @@ def build() -> str:
             "SOURCE_CLOSED_IMPLEMENTATION_FIELDS" or
         obstacle_lifecycle["source_scene_record"]["camera_threshold_u16"] != 688 or
         obstacle_lifecycle["spawn"]["slot"] != "0xffb380" or
+        not obstacle_lifecycle["spawn"]["camera_sample_order"]["native_rule"].startswith(
+            "scheduler guard uses camera_x_previous") or
         obstacle_lifecycle["initializer"]["child_allocation"]["variant_order_u8"] !=
             [3, 2, 1, 0] or
         obstacle_lifecycle["initializer"]["child_allocation"]["source_slots_in_allocation_order"] !=
@@ -967,6 +993,16 @@ def build() -> str:
                 "decrement once per controller update while phase is 2",
             "counter_u16": 0, "snapshot_u16": 0,
             "threshold_byte_u8": 1, "threshold_ticks": 16} or
+        camera["initialization"]["first_control_chronology"] != [
+            {"source_frame_u16": 2237, "route_state_s16": 2,
+             "player_x_s16": 944, "camera_x_s16": 640,
+             "camera_target_x_s16": 640},
+            {"source_frame_u16": 2238, "route_state_s16": 4,
+             "player_x_s16": 944, "camera_x_s16": 648,
+             "camera_target_x_s16": 648},
+            {"source_frame_u16": 2239, "route_state_s16": 4,
+             "player_x_s16": 944, "camera_x_s16": 655,
+             "camera_target_x_s16": 655}] or
         camera_guard["fixed_frame_authority"] is not False or
         camera["world_to_plane_order"]["raw_pattern_name_offset_forbidden"]
             is not True):
@@ -1162,7 +1198,19 @@ def build() -> str:
             for selector in weapon_selectors) or
         weapon_selector_timelines["4"] != weapon_frames or
         weapon_selector_timelines["5"][1]["animation_record"] !=
-            "0x0015e594"):
+            "0x0015e594" or
+        weapon_animation_execution["entry_rebind_updates_u8"] != [1, 2] or
+        weapon_animation_execution["writers"] != {
+            "record_bind": "0x01652a then 0x016588",
+            "timer_bind": "0x01652e then 0x01658c",
+            "branch_bind": "0x016534 then 0x016592",
+            "timer_decrement": "0x016574"} or
+        any(len(weapon_selector_sequences[str(selector)]) != 5
+            for selector in weapon_selectors) or
+        any([row["timer_u16"] for row in
+             weapon_selector_sequences[str(selector)]] !=
+            [2, 1, 2, 1, 4095]
+            for selector in weapon_selectors)):
         raise ValueError("SPEC-02 Predator Button1 target presentation drift")
     if (weapon_parent["spec_executable"] is not True or
         weapon_child["spec_executable"] is not True or
@@ -1246,6 +1294,23 @@ def build() -> str:
         parent_effect["variant_u8"] != 0 or
         parent_effect["timer_u8"] != 8 or
         parent_effect["state0"].get("falls_through_to_state2") is not True or
+        parent_effect["fixed_slot_reuse_presentation"]["classification"] !=
+            "SOURCE_CLOSED_IMPLEMENTATION_FIELDS" or
+        parent_effect["fixed_slot_reuse_presentation"][
+            "unwritten_retained_fields"] != [
+                "animation_timer actor+0x0a:u16",
+                "animation_branch actor+0x24:s16"] or
+        tuple(parent_effect["fixed_slot_reuse_presentation"][
+            "prior_owner"][field] for field in (
+                "class_u8", "visible_frame_u16", "animation_record",
+                "animation_timer_u16", "animation_branch_s16")) !=
+            ("0x4e", 2259, "0x000929f0", 4094, -32768) or
+        [(row["source_slot"], row["visible_frame_u16"],
+          row["animation_timer_u16"], row["animation_branch_s16"])
+         for row in parent_effect["fixed_slot_reuse_presentation"][
+             "first_reuses"]] != [
+                ("0x00ffc500", 2262, 4094, -32768),
+                ("0x00ffc480", 2264, 4094, -32768)] or
         parent_effect["native_phase_projection"] != {
             "counter": "scheduler_frames before the record-4 update",
             "mask_u8": 1, "expected_u8": 1,
@@ -1441,6 +1506,15 @@ def build() -> str:
             ["0x0006b66c", "0x0006b680"] or
         class01_contract["rng"] != {"calls": 0, "consumption_order": []} or
         class02_contract["rng"] != {"calls": 0, "consumption_order": []} or
+        sorted((row["address"], row["writer_source_frame_u16"],
+                row["camera_x_u16"], row["first_actor_visible_frame_u16"])
+               for contract in (class01_contract, class02_contract)
+               for row in contract["stage_spawn_guard"]
+                   ["camera_sample_order"]["records"]) != [
+            ("0x0015c108", 2072, 640, 2073),
+            ("0x0015c128", 2072, 640, 2073),
+            ("0x0015c158", 2242, 675, 2243),
+            ("0x0015c178", 2617, 736, 2618)] or
         class01_contract["route_interaction"]["clear_writer"] !=
             "0x0289fc (captured successor 0x028a02) in recurring controller writes 0" or
         class02_collision["attack_record"] != "0x0011af76" or
@@ -2749,6 +2823,7 @@ def build() -> str:
         f"    {weapon_resource['normal_tick']['reload_u8']}u,",
         f"    {weapon_resource['depleted_tick']['reload_u8']}u,",
         "    1u,",
+        f"    {1 if weapon_action_entry['entry_preserves_current_presentation'] else 0}u,",
         "    1u,",
         f"    {weapon_empty_effect['variant']}u,",
         f"    {weapon_empty_effect['allocation']['allocation_update_after_entry_u8']}u,",
@@ -2768,10 +2843,26 @@ def build() -> str:
         lines.append("    {")
         for row in weapon_selector_timelines[str(selector)]:
             lines.append(
-                "        { %du, %du, %sUL, %sUL, %du, %du }," % (
+                "        { %du, %du, %sUL, %sUL, %du, %du, %du, %d }," % (
                     row["action_u16"], row["substate_u8"],
                     row["animation_record"], row["assembly"],
-                    row["hurt_selector_u8"], row["attack_selector_u8"]))
+                    row["hurt_selector_u8"], row["attack_selector_u8"],
+                    row["timer_u16"], row["branch_s16"]))
+        lines.append("    },")
+    lines.extend([
+        "};", "",
+        "static const AvspRound1PlayerWeaponFrameSpec avsp_round1_player_weapon_sequences[AVSP_ROUND1_PLAYER_WEAPON_SELECTOR_COUNT][AVSP_ROUND1_PLAYER_WEAPON_SEQUENCE_COUNT] =",
+        "{",
+    ])
+    for selector in weapon_selectors:
+        lines.append("    {")
+        for row in weapon_selector_sequences[str(selector)]:
+            lines.append(
+                "        { %du, %du, %sUL, %sUL, %du, %du, %du, %d }," % (
+                    row["action_u16"], row["substate_u8"],
+                    row["animation_record"], row["assembly"],
+                    row["hurt_selector_u8"], row["attack_selector_u8"],
+                    row["timer_u16"], row["branch_s16"]))
         lines.append("    },")
     lines.extend([
         "};", "",
@@ -2780,20 +2871,23 @@ def build() -> str:
     ])
     for row in empty_frames:
         lines.append(
-            "    { %du, %du, %sUL, %sUL, %du, %du }," % (
+            "    { %du, %du, %sUL, %sUL, %du, %du, %du, %d }," % (
                 row["action_u16"], row["substate_u8"], row["animation_record"],
                 row["assembly"], row["hurt_selector_u8"],
-                row["attack_selector_u8"]))
+                row["attack_selector_u8"], row["timer_u16"],
+                row["branch_s16"]))
     lines.extend([
         "};", "",
         "static const AvspRound1PlayerWeaponFrameSpec avsp_round1_player_weapon_return_frame =",
         "{",
-        "    %du, %du, %sUL, %sUL, %du, %du" % (
+        "    %du, %du, %sUL, %sUL, %du, %du, %du, %d" % (
             weapon_return_frame["action_u16"], weapon_return_frame["substate_u8"],
             weapon_return_frame["animation_record"],
             weapon_return_frame["assembly"],
             weapon_return_frame["hurt_selector_u8"],
-            weapon_return_frame["attack_selector_u8"]),
+            weapon_return_frame["attack_selector_u8"],
+            weapon_return_frame["timer_u16"],
+            weapon_return_frame["branch_s16"]),
         "};", "",
         "static const AvspRound1VecS16 avsp_round1_weapon_parent_selector_offsets[AVSP_ROUND1_WEAPON_PARENT_SELECTOR_COUNT] =",
         "{",

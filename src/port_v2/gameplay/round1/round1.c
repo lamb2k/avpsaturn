@@ -3823,6 +3823,8 @@ static int avsp_round1_player_weapon_contract_valid(void)
         avsp_round1_player_weapon.
             empty_dispatch_uses_depleted_latch != 1u ||
         avsp_round1_player_weapon.
+            sufficient_entry_preserves_current_presentation != 1u ||
+        avsp_round1_player_weapon.
             empty_entry_preserves_current_presentation != 1u ||
         avsp_round1_player_weapon.parent_class != 0 ||
         avsp_round1_player_weapon.child_class != 4 ||
@@ -3961,8 +3963,50 @@ static void avsp_round1_bind_player_weapon_frame(
     runtime->player.assembly = frame->assembly;
     runtime->player.hurt_selector = frame->hurt_selector;
     runtime->player.attack_selector = frame->attack_selector;
+    runtime->player.animation_timer = frame->timer;
+    runtime->player.animation_branch = frame->branch;
     runtime->player_locomotion_action = frame->action;
-    ++runtime->player_weapon_presentation_bindings;
+}
+
+static int avsp_round1_step_player_weapon_animation(
+    AvspRound1Runtime *runtime,
+    const AvspRound1PlayerWeaponFrameSpec *frame)
+{
+    const AvspRound1PlayerWeaponFrameSpec *sequence;
+    unsigned int index;
+    if (runtime->player_weapon_presentation_selector < 4u ||
+        runtime->player_weapon_presentation_selector > 7u ||
+        runtime->player_weapon_tick < 1u ||
+        runtime->player_weapon_tick >= 19u)
+        return 0;
+    sequence = avsp_round1_player_weapon_sequences[
+        runtime->player_weapon_presentation_selector - 4u];
+    runtime->player.source_action = frame->action;
+    runtime->player.substate = frame->action;
+    runtime->player_locomotion_action = frame->action;
+    if (runtime->player_weapon_tick <= 2u)
+    {
+        avsp_round1_bind_player_weapon_frame(runtime, &sequence[0]);
+        return 1;
+    }
+    if (runtime->player.animation_timer == 0u)
+        return 0;
+    --runtime->player.animation_timer;
+    if (runtime->player.animation_timer != 0u ||
+        runtime->player.animation_branch < 0)
+        return 1;
+    for (index = 0u; index + 1u <
+            AVSP_ROUND1_PLAYER_WEAPON_SEQUENCE_COUNT; ++index)
+    {
+        if (runtime->player.animation_record ==
+                sequence[index].animation_record)
+        {
+            avsp_round1_bind_player_weapon_frame(
+                runtime, &sequence[index + 1u]);
+            return 1;
+        }
+    }
+    return 0;
 }
 
 static long avsp_round1_replace_fixed_high_word(long value, short high)
@@ -5281,14 +5325,14 @@ static int avsp_round1_step_class4e(AvspRound1Runtime *runtime,
     }
     if (actor->state == 0x0200u)
     {
+        if (actor->animation_timer == 0u)
+            return 0;
+        --actor->animation_timer;
         if (actor->animation_branch < 0)
         {
             actor->state = 0x0400u;
             return 1;
         }
-        if (actor->animation_timer == 0u)
-            return 0;
-        --actor->animation_timer;
         if (actor->animation_timer == 0u)
         {
             presentation_count = actor->variant == 0u ?
@@ -6277,7 +6321,7 @@ static unsigned short avsp_round1_coffee_scene_camera_x(
 {
     if (runtime->route_state == AVSP_ROUND1_ROUTE_ENTRY_STATE)
         return runtime->first_encounter.source_camera_bound;
-    return (unsigned short)runtime->camera_x_position;
+    return (unsigned short)runtime->camera_x_previous;
 }
 
 static int avsp_round1_spawn_coffee_scene_records(
@@ -6794,6 +6838,8 @@ static int avsp_round1_step_coffee_shop_obstacle(
     }
     if (actor->state == spec->active_state)
     {
+        if (!avsp_round1_step_coffee_shop_obstacle_parent_animation(actor))
+            return 0;
         if (runtime->player_special_attack_contact_ready &&
             avsp_round1_coffee_shop_obstacle_damage_overlap(runtime, actor))
         {
@@ -7052,6 +7098,22 @@ static int avsp_round1_allocate_weapon_effect(
     unsigned char variant)
 {
     AvspRound1ActorCore *effect;
+    AvspRound1Pool *effect_pool = &runtime->pools[3u];
+    unsigned short retained_animation_timer = 0u;
+    short retained_animation_branch = 0;
+    if (effect_pool->free_count != 0u)
+    {
+        unsigned short source_slot = effect_pool->free_stack[
+            effect_pool->free_count - 1u];
+        unsigned int effect_index = (unsigned int)(
+            source_slot - effect_pool->source_base) / effect_pool->stride;
+        if (effect_index >= effect_pool->capacity)
+            return 0;
+        retained_animation_timer =
+            effect_pool->records[effect_index].animation_timer;
+        retained_animation_branch =
+            effect_pool->records[effect_index].animation_branch;
+    }
     if (variant == avsp_round1_parent_weapon_effect.variant)
         ++runtime->player_weapon_parent_effect_requests;
     else
@@ -7074,6 +7136,8 @@ static int avsp_round1_allocate_weapon_effect(
     effect->facing = projectile->facing;
     effect->animation_record = projectile->animation_record;
     effect->assembly = projectile->assembly;
+    effect->animation_timer = retained_animation_timer;
+    effect->animation_branch = retained_animation_branch;
     effect->effect_timer = avsp_round1_parent_weapon_effect.timer;
     effect->dispatch_entry = avsp_round1_parent_weapon_effect.dispatch_entry;
     if (variant == avsp_round1_parent_weapon_effect.variant)
@@ -8277,6 +8341,7 @@ static int avsp_round1_step_player_weapon(AvspRound1Runtime *runtime,
         }
         else
             avsp_round1_bind_player_weapon_frame(runtime, frame);
+        ++runtime->player_weapon_presentation_bindings;
         if (runtime->player_weapon_tick > 0u &&
             runtime->player_weapon_tick < 17u &&
             runtime->player_weapon_empty_timer > 0u)
@@ -8328,7 +8393,19 @@ static int avsp_round1_step_player_weapon(AvspRound1Runtime *runtime,
         frame = &avsp_round1_player_weapon_frames[
             runtime->player_weapon_presentation_selector - 4u][
             runtime->player_weapon_tick];
-        avsp_round1_bind_player_weapon_frame(runtime, frame);
+        if (runtime->player_weapon_tick == 0u &&
+            avsp_round1_player_weapon.
+                sufficient_entry_preserves_current_presentation)
+        {
+            runtime->player.source_action = frame->action;
+            runtime->player.substate = frame->action;
+            runtime->player_locomotion_action = frame->action;
+        }
+        else if (runtime->player_weapon_tick == 19u)
+            avsp_round1_bind_player_weapon_frame(runtime, frame);
+        else if (!avsp_round1_step_player_weapon_animation(runtime, frame))
+            return 0;
+        ++runtime->player_weapon_presentation_bindings;
         if (runtime->player_weapon_tick == 19u)
         {
             runtime->player_weapon_active = 0u;
@@ -9083,6 +9160,11 @@ int avsp_round1_step_first_entry(AvspRound1Runtime *runtime)
             runtime->player.source_action =
                 avsp_round1_player_locomotion.cleanup_action;
             runtime->player_cleanup_pending = 1u;
+            if (!avsp_round1_step_coffee_shop_camera(runtime))
+            {
+                ++runtime->failure_count;
+                return 0;
+            }
         }
         return avsp_round1_entry_valid(runtime);
     }
@@ -9656,10 +9738,16 @@ int avsp_round1_step_player(AvspRound1Runtime *runtime,
         runtime->player.source_action = runtime->player_locomotion_action;
         if (!runtime->player_walk_animation_active)
         {
-            runtime->player.animation_record = view.animation_record;
-            runtime->player.assembly = view.assembly;
-            runtime->player.animation_timer = 4095u;
-            runtime->player.animation_branch = -32768;
+            if (runtime->player.animation_record != view.animation_record ||
+                runtime->player.assembly != view.assembly)
+            {
+                runtime->player.animation_record = view.animation_record;
+                runtime->player.assembly = view.assembly;
+                runtime->player.animation_timer = 4095u;
+                runtime->player.animation_branch = -32768;
+            }
+            else if (runtime->player.animation_timer != 0u)
+                --runtime->player.animation_timer;
         }
     }
     runtime->player_weapon_previous_pressed = weapon_pressed;
@@ -9785,9 +9873,21 @@ static int avsp_round1_player_weapon_runtime_valid(
             if (runtime->player_weapon_presentation_selector < 4u ||
                 runtime->player_weapon_presentation_selector > 7u)
                 return 0;
-            frame = &avsp_round1_player_weapon_frames[
-                runtime->player_weapon_presentation_selector - 4u][
-                runtime->player_weapon_tick - 1u];
+            if (runtime->player_weapon_tick == 1u &&
+                avsp_round1_player_weapon.
+                    sufficient_entry_preserves_current_presentation)
+            {
+                if (runtime->player.source_action !=
+                        avsp_round1_player_weapon.sufficient_entry_action ||
+                    runtime->player.substate !=
+                        avsp_round1_player_weapon.sufficient_entry_action)
+                    return 0;
+                frame = 0;
+            }
+            else
+                frame = &avsp_round1_player_weapon_frames[
+                    runtime->player_weapon_presentation_selector - 4u][
+                    runtime->player_weapon_tick - 1u];
         }
         if (frame != 0 &&
             (runtime->player.source_action != frame->action ||
@@ -9795,7 +9895,10 @@ static int avsp_round1_player_weapon_runtime_valid(
             runtime->player.animation_record != frame->animation_record ||
             runtime->player.assembly != frame->assembly ||
             runtime->player.hurt_selector != frame->hurt_selector ||
-            runtime->player.attack_selector != frame->attack_selector))
+            runtime->player.attack_selector != frame->attack_selector ||
+            runtime->player.animation_timer == 0u ||
+            runtime->player.animation_timer > frame->timer ||
+            runtime->player.animation_branch != frame->branch))
             return 0;
     }
     else if (runtime->player_weapon_cleanup_pending)

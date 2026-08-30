@@ -9,7 +9,7 @@ from pathlib import Path
 
 ROOT = Path(__file__).resolve().parents[3]
 SPEC = ROOT / "data/spec02_round1_executable_contract.json"
-EXPECTED = "d0d7762ade3d0f1cbb986d6c1135172e24017515c73ce30ccc39ec24b4385710"
+EXPECTED = "6aa35860d5854c77fb54e5174659a1cf546defdfb703d734b2f617276a0872b1"
 assert hashlib.sha256(SPEC.read_bytes()).hexdigest() == EXPECTED
 assert json.loads(SPEC.read_text())["status"] == "ACCEPTED"
 source = (ROOT / "src/port_v2/gameplay/round1/round1.c").read_text()
@@ -119,6 +119,34 @@ controller_edge_mutations = {
     "encounter->source_blocked_by_living_count = 1u;\n    }\n    else",
 }
 for before, after in (
+    ("    return (unsigned short)runtime->camera_x_previous;",
+     "    return (unsigned short)runtime->camera_x_position;"),
+    ("            if (!avsp_round1_step_coffee_shop_camera(runtime))\n"
+     "            {\n"
+     "                ++runtime->failure_count;\n"
+     "                return 0;\n"
+     "            }",
+     "            /* first route-4 camera update suppressed */"),
+    ("    effect->animation_timer = retained_animation_timer;\n"
+     "    effect->animation_branch = retained_animation_branch;",
+     "    effect->animation_timer = 0u;\n"
+     "    effect->animation_branch = 0;"),
+    ("        if (actor->animation_timer == 0u)\n"
+     "            return 0;\n"
+     "        --actor->animation_timer;\n"
+     "        if (actor->animation_branch < 0)\n"
+     "        {\n"
+     "            actor->state = 0x0400u;\n"
+     "            return 1;\n"
+     "        }",
+     "        if (actor->animation_branch < 0)\n"
+     "        {\n"
+     "            actor->state = 0x0400u;\n"
+     "            return 1;\n"
+     "        }\n"
+     "        if (actor->animation_timer == 0u)\n"
+     "            return 0;\n"
+     "        --actor->animation_timer;"),
     ("if (!avsp_round1_allocate_class4e_variant0_impact(\n"
      "                runtime, actor, &attack, &hurt))",
      "if (0)"),
@@ -383,6 +411,18 @@ for before, after in (
      "runtime->player.animation_timer = 0u;"),
     ("if (!avsp_round1_step_class02_animation(actor))\n            return 0;",
      "if (0)\n            return 0;"),
+    ("else if (runtime->player.animation_timer != 0u)\n                --runtime->player.animation_timer;",
+     "else if (runtime->player.animation_timer != 0u)\n                runtime->player.animation_timer = runtime->player.animation_timer;"),
+    ("if (!avsp_round1_step_coffee_shop_obstacle_parent_animation(actor))\n            return 0;",
+     "if (0)\n            return 0;"),
+    ("(unsigned short)runtime->camera_x_previous < spec->camera_threshold",
+     "(unsigned short)runtime->camera_x_position < spec->camera_threshold"),
+    ("runtime->player.animation_timer = frame->timer;\n    runtime->player.animation_branch = frame->branch;",
+     "runtime->player.animation_timer = 4095u;\n    runtime->player.animation_branch = -32768;"),
+    ("sufficient_entry_preserves_current_presentation)",
+     "sufficient_entry_preserves_current_presentation == 0u)"),
+    ("else if (!avsp_round1_step_player_weapon_animation(runtime, frame))\n            return 0;",
+     "else if (0)\n            return 0;"),
     ("if (runtime->player_weapon_projectiles[slot_index].active &&\n            runtime->player_weapon_projectiles[slot_index].state !=\n                avsp_round1_weapon_projectile.initial_state)",
      "if (runtime->player_weapon_projectiles[slot_index].active)"),
 ):
@@ -463,12 +503,12 @@ for before, after in (
     ("{ 0x1601c0UL, 0x1614a4UL, 8u, 3u },", "{ 0x1601c0UL, 0x1614a4UL, 8u, 2u },"),
     ("    40u,\n    12u,\n    3u,\n    6u,\n    1u,",
      "    39u,\n    12u,\n    3u,\n    6u,\n    1u,"),
-    ("    40u,\n    12u,\n    3u,\n    6u,\n    1u,\n    1u,\n    0u,\n    1u,\n    1u,\n    0,\n    4,",
-     "    40u,\n    12u,\n    3u,\n    6u,\n    1u,\n    0u,\n    0u,\n    1u,\n    1u,\n    0,\n    4,"),
-    ("{ 3074u, 2u, 0x0015e594UL, 0x0016179aUL, 1u, 0u },",
-     "{ 3074u, 2u, 0x00165410UL, 0x00166c22UL, 1u, 0u },"),
-    ("{ 6658u, 2u, 0x0015fcfcUL, 0x00161772UL, 1u, 0u },",
-     "{ 6658u, 2u, 0x001645d4UL, 0x00166bf8UL, 1u, 0u },"),
+    ("    40u,\n    12u,\n    3u,\n    6u,\n    1u,\n    1u,\n    1u,\n    0u,\n    1u,\n    1u,\n    0,\n    4,",
+     "    40u,\n    12u,\n    3u,\n    6u,\n    1u,\n    0u,\n    1u,\n    0u,\n    1u,\n    1u,\n    0,\n    4,"),
+    ("{ 3074u, 2u, 0x0015e594UL, 0x0016179aUL, 1u, 0u, 2u, 0 },",
+     "{ 3074u, 2u, 0x00165410UL, 0x00166c22UL, 1u, 0u, 2u, 0 },"),
+    ("{ 6658u, 2u, 0x0015fcfcUL, 0x00161772UL, 1u, 0u, 4095u, -32768 },",
+     "{ 6658u, 2u, 0x001645d4UL, 0x00166bf8UL, 1u, 0u, 4095u, -32768 },"),
     ("    17u, 18u, 19u, 20u, 21u, 22u, 23u, 24u, 25u, 26u, 27u, 28u, 29u, 30u, 31u, 32u, 33u, 34u, 35u, 36u, 37u, 38u, 39u, 40u, 41u, 42u, 43u, 44u, 45u, 46u, 47u",
      "    17u, 18u, 19u, 20u, 21u, 22u, 23u, 24u, 25u, 26u, 27u, 28u, 29u, 30u, 31u, 32u, 33u, 34u, 35u, 36u, 37u, 38u, 39u, 40u, 41u, 42u, 43u, 44u, 45u, 46u, 46u"),
     ("    { 5, 86 },", "    { 6, 86 },"),

@@ -7238,7 +7238,7 @@
           "effect_allocation": {
             "accepted_auxiliary_contract": {
               "artifact": "data/oracle11_round1_auxiliary_authority.json",
-              "artifact_sha256": "96e7b7297f3680751644662ca39c4ac88c7cfaff1318bf7906ef56b8f9d93fd9",
+              "artifact_sha256": "fda7c53a4d4306f4f50f688e9f76e185cb13d41de8373d0e608df11154e92252",
               "dispatch": "0x08f080",
               "presentation_records": [
                 {
@@ -7561,7 +7561,7 @@
           }
         },
         "resource_and_projectile_authority": "data/oracle11_predator_weapon_projectile_resource.json",
-        "resource_artifact_sha256": "d3510980f1017dc0fc3b48836bb1fd86c2fcb42192bb335381febf5546c5b06a",
+        "resource_artifact_sha256": "d9044001a144396573d7eac94ea12a345a20588c0537d9bd2de6438512c7ec3e",
         "resource_status": "SOURCE_CLOSED",
         "spawn_branch": "0x023858",
         "writer": "0x023860"
@@ -22888,6 +22888,43 @@
           "class_u8": 73,
           "classification": "SOURCE_CLOSED_IMPLEMENTATION_FIELDS",
           "fixed_frame_substitute_forbidden": true,
+          "fixed_slot_reuse_presentation": {
+            "allocator_rule": "generic record-type-24 allocation preserves unwritten slot fields",
+            "capture_sha256": "9c0ea88c7eae6b4755b0025d356d49ae136d91de0e443fab0ff767151e43343d",
+            "classification": "SOURCE_CLOSED_IMPLEMENTATION_FIELDS",
+            "first_reuses": [
+              {
+                "animation_branch_s16": -32768,
+                "animation_record": "0x0002fb58",
+                "animation_timer_u16": 4094,
+                "source_slot": "0x00ffc500",
+                "visible_frame_u16": 2262
+              },
+              {
+                "animation_branch_s16": -32768,
+                "animation_record": "0x0002fb68",
+                "animation_timer_u16": 4094,
+                "source_slot": "0x00ffc480",
+                "visible_frame_u16": 2264
+              }
+            ],
+            "mutation_control": "clearing animation timer or branch on allocation changes both first lifetimes",
+            "prior_owner": {
+              "animation_branch_s16": -32768,
+              "animation_record": "0x000929f0",
+              "animation_timer_u16": 4094,
+              "class_u8": "0x4e",
+              "visible_frame_u16": 2259
+            },
+            "unwritten_retained_fields": [
+              "animation_timer actor+0x0a:u16",
+              "animation_branch actor+0x24:s16"
+            ],
+            "written_presentation_fields": [
+              "animation_record:u32 copied from parent",
+              "assembly:u32 follows copied animation record"
+            ]
+          },
           "guard": "global phase byte +0x19 bit0 is clear",
           "helper": "0x08f0c6",
           "mutation_controls": [
@@ -24514,7 +24551,68 @@
         "sufficient_entry_action": "0x0c00"
       },
       "sufficient_action": {
+        "animation_execution": {
+          "active_rule": "from the following update, decrement the current u16 timer once; on zero bind the next 16-byte record timer, signed branch, assembly, and collision selectors in source order",
+          "capture_identity": {
+            "byte_identical": true,
+            "independent_captures": 2,
+            "sha256": "bc3c9cc7df2830bbf61cd8a4a8bbebd57e7860b0a2d3aacad9e6c75a07575438"
+          },
+          "classification": "SOURCE_CLOSED_IMPLEMENTATION_FIELDS",
+          "coffee_shop_writer_frames": {
+            "first_bind_u16": 2252,
+            "first_decrement_u16": 2254,
+            "next_record_bind_frames_u16": [
+              2255,
+              2256,
+              2258,
+              2259
+            ],
+            "second_bind_u16": 2253
+          },
+          "entry_rebind_rule": "the first two 0x0c02 updates bind the selected first animation record and reload its timer/branch",
+          "entry_rebind_updates_u8": [
+            1,
+            2
+          ],
+          "mutation_controls": [
+            "reject reloading a raw record timer on every action update",
+            "reject decrementing before both source entry binds",
+            "reject advancing a record before the current timer reaches zero",
+            "reject stopping terminal-record timer decrements before action cleanup"
+          ],
+          "spec_executable": true,
+          "terminal_rule": "a negative signed branch retains the terminal record while its u16 timer continues to decrement until action cleanup owns the return",
+          "writers": {
+            "branch_bind": "0x016534 then 0x016592",
+            "record_bind": "0x01652a then 0x016588",
+            "timer_bind": "0x01652e then 0x01658c",
+            "timer_decrement": "0x016574"
+          }
+        },
         "cleanup_tick": 19,
+        "entry_projection": {
+          "coffee_shop_witness": {
+            "active_animation_record": "0x0015e540",
+            "active_branch_s16": 0,
+            "active_frame_u16": 2253,
+            "active_timer_u16": 2,
+            "entry_animation_record": "0x0015f1f4",
+            "entry_branch_s16": -32768,
+            "entry_frame_u16": 2252,
+            "entry_timer_u16": 4082,
+            "prior_animation_record": "0x0015f1f4",
+            "prior_branch_s16": -32768,
+            "prior_frame_u16": 2251,
+            "prior_timer_u16": 4082
+          },
+          "entry_preserves_current_presentation": true,
+          "entry_rule": "write action/substate 0x0c00 while preserving the current animation record, assembly, timer, branch, and collision selectors; bind the selected 0x0c02 record on the following player update",
+          "mutation_controls": [
+            "reject rebinding the idle timer to 4095 on the 0x0c00 entry",
+            "reject delaying the selected 0x0c02 record beyond the following player update"
+          ]
+        },
         "entry_tick": 0,
         "parent_allocation_tick": 2,
         "player_position_and_facing_latched": true,
@@ -25773,7 +25871,7 @@
         "completion_b": "af67295b879521e0aba388ebe4b1bd9e8698c21c86e9d5b837da14efe086b4cb",
         "increment_writer_suppression": "c644944b8036028064ddb068bce96a937a5e3641e8fceb3f9d7abd1b69534d00"
       },
-      "collision_registration_capture_script_sha256": "dd4f0bbd361a7d1cc46e071130878998b77915242c51d04686404325cb540e50",
+      "collision_registration_capture_script_sha256": "f03268bc9676afcd6c319cb2096328b726e2df2bdd2449ccead7b07d14887266",
       "collision_registration_evidence": {
         "coffee_shop_collision_actor_flags.tsv": "49ed048a0a11cbee06823cef07a9ec29c1034f66849b5734a581819fb7184e79",
         "coffee_shop_collision_identity_assignments.tsv": "41dfc90ad89a4c523cc4ec6dcf87afc104695b35682764902dd031f2f205bb60",

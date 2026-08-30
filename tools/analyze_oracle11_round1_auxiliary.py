@@ -54,6 +54,7 @@ FILES=('aux_samples.tsv','aux_entries.tsv','aux_writes.tsv','aux_rng.tsv','aux_p
 DISPATCH={(16,'0x06'):0x03537e,(20,'0x07'):0x06d1aa,(20,'0x08'):0x06d53c,(20,'0x09'):0x06d926,(20,'0x0a'):0x06de92,(24,'0x10'):0x079ffc,(24,'0x3d'):0x0887c8,(24,'0x43'):0x08ce44,(24,'0x45'):0x08dc1c,(24,'0x49'):0x08f080,(24,'0x4b'):0x08f86e,(24,'0x4e'):0x0927f6}
 EXPECTED={(16,'0x06'):(505,514,4991,0,2),(20,'0x07'):(28446,26565,26619,0,0),(20,'0x08'):(275,276,811,1,0),(20,'0x09'):(6956,7194,21606,898,0),(20,'0x0a'):(603,602,1708,1,0),(24,'0x10'):(4694,4769,23665,0,0),(24,'0x3d'):(12811,11476,121404,0,0),(24,'0x43'):(828,844,16860,112,0),(24,'0x45'):(1364,1308,30536,196,0),(24,'0x49'):(4209,4808,19339,0,0),(24,'0x4b'):(810,661,4080,0,0),(24,'0x4e'):(909,848,3732,80,0)}
 CLASS4E_VARIANT0_CONTRACT=None
+CLASS4E_TERMINAL_TRANSITION=None
 
 def req(x,m):
  if not x:raise ValueError(m)
@@ -461,6 +462,34 @@ def coffee_shop_scene_component_identities(op,program):
   '0x0015c128':(2072,'0x00ffb580'),
   '0x0015c158':(2242,'0x00ffb400'),
   '0x0015c178':(2617,'0x00ffb300')}
+ scene_frame_by_id={int(r['frame']):r for r in
+                    baseline['coffee_shop_scene_frames.tsv']}
+ scene_actor_rows=baseline['coffee_shop_scene_actors.tsv']
+ stage_camera_order=[]
+ for address,(writer_frame,source_slot) in observed_spawns.items():
+  slot=source_slot[4:]
+  first_actor_frame=min(int(r['frame']) for r in scene_actor_rows
+                        if r['slot']==slot)
+  stage_camera_order.append({
+   'address':address,'writer_source_frame_u16':writer_frame,
+   'camera_x_u16':int(scene_frame_by_id[writer_frame]['camera_x']),
+   'first_actor_visible_frame_u16':first_actor_frame,
+   'source_slot':source_slot})
+ stage_camera_order.sort(key=lambda r:int(r['address'],16))
+ req(stage_camera_order==[
+      {'address':'0x0015c108','writer_source_frame_u16':2072,
+       'camera_x_u16':640,'first_actor_visible_frame_u16':2073,
+       'source_slot':'0x00ffb600'},
+      {'address':'0x0015c128','writer_source_frame_u16':2072,
+       'camera_x_u16':640,'first_actor_visible_frame_u16':2073,
+       'source_slot':'0x00ffb580'},
+      {'address':'0x0015c158','writer_source_frame_u16':2242,
+       'camera_x_u16':675,'first_actor_visible_frame_u16':2243,
+       'source_slot':'0x00ffb400'},
+      {'address':'0x0015c178','writer_source_frame_u16':2617,
+       'camera_x_u16':736,'first_actor_visible_frame_u16':2618,
+       'source_slot':'0x00ffb300'}],
+     'Coffee Shop stage camera-sample chronology drift')
  for records_ in stage_records.values():
   for record in records_:
    address=int(record['address'],16)
@@ -616,6 +645,13 @@ def coffee_shop_scene_component_identities(op,program):
     'bounds sign','collision writer','attack record','signed health clamp',
     'reaction-direction attack-mode guard','reaction-direction x comparison',
     'effect-count predecrement','audio command','fixed-frame substitute']}}
+ for contract in implementation_contracts.values():
+  addresses={row['address'] for row in contract['stage_records']}
+  contract['stage_spawn_guard']['camera_sample_order']={
+   'rule':'compare against the camera position projected for the current source frame, before the native player step computes the next frame camera',
+   'records':[row for row in stage_camera_order
+              if row['address'] in addresses],
+   'mutation_control':'using the post-player next-frame camera moves the threshold-736 actor one visible frame early'}
  components=[]
  for pair in sorted(SCENE_COMPONENT_DISPATCH):
   typ,cls=pair;mutant_path=SCENE_COMPONENT_SUPPRESS[pair]
@@ -676,6 +712,7 @@ def coffee_shop_scene_component_identities(op,program):
    'unidentified_pairs':0,'semantic_names_inferred':False}
 
 def first_segment_dependencies(ss,ee,ww,rr,op,program):
+ global CLASS4E_TERMINAL_TRANSITION
  player_authority=json.loads(PLAYER.read_text(encoding='ascii'))
  player_special=player_authority['special_implementation_contract']
  class09_slots=('ffb480','ffb500');initial=[]
@@ -692,6 +729,34 @@ def first_segment_dependencies(ss,ee,ww,rr,op,program):
  class4e_rng=[r for r in rr if r['class']=='4e' and int(r['frame'])==2249]
  req([(r['slot'],r['seed']) for r in class4e_rng]==[('ffc480','cdb5'),('ffc500','691e')],'class-0x4e scheduler/RNG order drift')
  class4e_records=[animation_record(program,0x929b0+16*i) for i in range(5)]
+ class4e_scene_rows=rows(SCENE_COMPONENT_A/'coffee_shop_scene_actors.tsv')
+ class4e_terminal_rows=[r for r in class4e_scene_rows if
+                        r['slot'] in ('ffc480','ffc500') and
+                        r['class']=='4e' and
+                        int(r['frame']) in (2258,2259)]
+ req([(int(r['frame']),r['slot'],r['state'],
+       r['animation_record'],r['animation_timer'],
+       int(r['animation_branch'])) for r in class4e_terminal_rows]==[
+      (2258,'ffc480','0200','000929f0','0fff',-32768),
+      (2258,'ffc500','0200','000929f0','0fff',-32768),
+      (2259,'ffc480','0400','000929f0','0ffe',-32768),
+      (2259,'ffc500','0400','000929f0','0ffe',-32768)],
+     'class-0x4e terminal timer/state ordering drift')
+ class4e_terminal_transition={
+  'classification':'SOURCE_CLOSED_IMPLEMENTATION_FIELDS',
+  'state_guard':'state_u16 == 0x0200 and signed actor+0x24 < 0',
+  'timer_rule':'decrement actor+0x0a_u16 once before writing state 0x0400',
+  'source_slots':['0x00ffc480','0x00ffc500'],
+  'before':{'visible_frame_u16':2258,'state_u16':'0x0200',
+            'animation_record':'0x000929f0','timer_u16':4095,
+            'branch_s16':-32768},
+  'after':{'visible_frame_u16':2259,'state_u16':'0x0400',
+           'animation_record':'0x000929f0','timer_u16':4094,
+           'branch_s16':-32768},
+  'scheduler_rule':'each active source slot consumes the same terminal update in ascending slot order',
+  'mutation_control':'reject state advance before terminal timer decrement',
+  'capture_sha256':sha(SCENE_COMPONENT_A/'coffee_shop_scene_actors.tsv')}
+ CLASS4E_TERMINAL_TRANSITION=class4e_terminal_transition
  impact_writes=[r for r in ww if r['class']=='4e' and
                 r['slot']=='ffbd80' and int(r['frame']) in (2306,2307)]
  req([(r['pc'],r['offset'],r['data']) for r in impact_writes[:6]]==[
@@ -1489,6 +1554,10 @@ def build():
      'class-0x4e variant-0 implementation contract missing')
  report['first_segment_dependencies']['class_0x4e_type24_variant4_effect'][
   'variant0_collision_effect']=CLASS4E_VARIANT0_CONTRACT
+ req(CLASS4E_TERMINAL_TRANSITION is not None,
+     'class-0x4e terminal transition implementation contract missing')
+ report['first_segment_dependencies']['class_0x4e_type24_variant4_effect'][
+  'terminal_transition']=CLASS4E_TERMINAL_TRANSITION
  report['first_segment_dependencies']['class_0x1f_type16_0x06_projectile']=\
   coffee_shop_class1f_type16_projectile(op,program,ww)
  report['coffee_shop_type36_presentation']=coffee_shop_type36_presentation(
@@ -1557,6 +1626,21 @@ def validate(r):
      'class-0x1f type-16/class-0x06 projectile contract drift')
  req(c09['dispatch']=='0x06d926' and c09['state']=='0x0200' and len(c09['source_slots'])==2 and c09['first_segment_calls_before_class4e']==44 and c09['seed_after_first_call']=='0x44fb' and c09['seed_after_last_call']=='0x99e8' and c09['selector_table_u16']==[0,7,8,9,10,8,9,10] and [x['selector_u8'] for x in c09['animation_sequences']]==[0,7,8,9,10] and all(len(x['records'])==2 for x in c09['animation_sequences']) and c09['fixed_frame_substitute_forbidden'] is True,'class-0x09 first-segment dependency drift')
  req(c4e['dispatch']=='0x0927f6' and c4e['variant_u8']==4 and c4e['allocation_pop_order']==['0x00ffc500','0x00ffc480'] and c4e['scheduler_order']==['0x00ffc480','0x00ffc500'] and c4e['state_sequence_u16']==[0,0x0200,0x0400] and [(x['seed_before'],x['seed_after'],x['table_index']) for x in c4e['seed_transaction_by_scheduler_slot']]==[('0xcdb5','0x691e',28),('0x691e','0x3b59',24)] and c4e['seed_field_correction'].startswith('accepted RNG rows are pre-call seeds') and len(c4e['jitter_table_s16'])==8 and len(c4e['animation_records'])==5 and c4e['collision_or_damage_writes']==0 and c4e['fixed_frame_release_forbidden'] is True,'class-0x4e first-segment dependency drift')
+ req(c4e['terminal_transition']['classification']==
+     'SOURCE_CLOSED_IMPLEMENTATION_FIELDS' and
+     c4e['terminal_transition']['source_slots']==
+     ['0x00ffc480','0x00ffc500'] and
+     c4e['terminal_transition']['before']==
+     {'visible_frame_u16':2258,'state_u16':'0x0200',
+      'animation_record':'0x000929f0','timer_u16':4095,
+      'branch_s16':-32768} and
+     c4e['terminal_transition']['after']==
+     {'visible_frame_u16':2259,'state_u16':'0x0400',
+      'animation_record':'0x000929f0','timer_u16':4094,
+      'branch_s16':-32768} and
+     c4e['terminal_transition']['mutation_control']==
+     'reject state advance before terminal timer decrement',
+     'class-0x4e terminal transition drift')
  req(c4e0['classification']=='SOURCE_CLOSED_IMPLEMENTATION_FIELDS' and
      c4e0['scene_lifetime_count_u16']==2 and
      c4e0['scene_actor_rows_u16']==22 and
@@ -1824,6 +1908,11 @@ def validate(r):
          x['semantic_role']!='UNKNOWN' and
          x['implementation_contract'] is not None and
          len(x['implementation_contract']['stage_records'])==2 and
+         len(x['implementation_contract']['stage_spawn_guard']
+              ['camera_sample_order']['records'])==2 and
+         x['implementation_contract']['stage_spawn_guard']
+          ['camera_sample_order']['rule'].startswith(
+           'compare against the camera position projected for the current source frame') and
          0<x['suppression_control']['removed_lifetimes']<=x['lifetime_count'] and
          x['implementation_contract']['rng']==
           {'calls':0,'consumption_order':[]} and

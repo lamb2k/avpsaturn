@@ -105,6 +105,10 @@ local component20_collision = assert(io.open(
     root .. "/coffee_shop_component20_collision.tsv", "w"))
 local component20_global = assert(io.open(
     root .. "/coffee_shop_component20_global.tsv", "w"))
+local player_dispatch = assert(io.open(
+    root .. "/coffee_shop_player_dispatch.tsv", "w"))
+local player_animation_writes = assert(io.open(
+    root .. "/coffee_shop_player_animation_writes.tsv", "w"))
 local obstacle_trace = assert(io.open(
     root .. "/coffee_shop_obstacle_trace.tsv", "w"))
 local obstacle_writes = assert(io.open(
@@ -164,6 +168,8 @@ component20_writes:write("frame\tpc\tslot\tinner\ta1\ta3\ta4\ta6\tactive\tclass\
 component20_dispatch:write("frame\tpc\treturn_pc\tslot\ta4\ta6\tactive\tclass\ttype\tstate\tsubstate\tvariant\tx_fp\ty_fp\tz\tanimation_record\tanimation_timer\tanimation_branch\taction_timer\tfield42\tfield4c\tfield66\tliving\tprogress\tglobal1c\troute\tcamera_x\trng\td0\td1\td4\td5\n")
 component20_collision:write("frame\tpc\ta0\ta1\ta2\ta3\ta4\ta5\ta6\td0\td1\td2\td3\td4\td5\td6\td7\tstate\tsubstate\tanimation_record\thurt_selector\tattack_selector\thealth\n")
 component20_global:write("frame\tpc\toffset\ta1\ta3\ta4\ta6\told\tdata\tmask\tliving\tprogress\tglobal1c\troute\tcamera_x\n")
+player_dispatch:write("frame\tpc\treturn_pc\ta6\tstate\tsubstate\tanimation_record\tanimation_timer\tanimation_branch\taction_timer\troute\n")
+player_animation_writes:write("frame\tpc\taddress\ta6\tstate\tsubstate\tanimation_record\tanimation_timer\tanimation_branch\taction_timer\tdata\tmask\n")
 obstacle_trace:write("frame\tpc\tstate\tsubstate\tactive\tclass\ttype\tfacing\tx_fp\ty_fp\tz\tanimation_record\tanimation_timer\tanimation_branch\tfield06\tfield0c\tfield18\tfield24\tfield2a\tfield2e\tfield30\tfield32\tfield34\tfield36\tfield38\tfield3a\tfield3c\tfield3e\tfield40\tfield42\tfield4f\tfield50\tfield58\tfield60\tfield64\tfield68\tfield6c\tchild0\tchild1\tchild2\tchild3\tguard_ffee8f\troute\trng\td0\td1\td2\td3\ta0\ta1\ta2\ta3\ta4\ta5\n")
 obstacle_writes:write("frame\tpc\tinner\tstate\tsubstate\tactive\tclass\ttype\tanimation_record\tanimation_timer\tanimation_branch\thealth_before\tguard_ffee8f\td0\td1\td2\td3\ta0\ta1\ta2\ta3\ta4\ta5\tdata\tmask\tsuppressed\n")
 obstacle_guard:write("frame\tpc\tvalue_before\tdata\tmask\troute\tstate\tsubstate\td0\td1\td2\td3\ta0\ta1\ta2\ta3\ta4\ta5\ta6\n")
@@ -403,6 +409,38 @@ for _, pc in ipairs(component20_pcs) do
         opcodes:install_read_tap(pc, pc + 1,
         string.format("oracle11_component20_%06x", pc),
         function() emit_component20_dispatch(pc) end)
+end
+
+local function emit_player_dispatch(pc)
+    if not capture_scene or frame < 2235 or frame > 2260 then return end
+    local a6 = maincpu.state["A6"].value & 0xffffff
+    local sp = maincpu.state["SP"].value & 0xffffff
+    player_dispatch:write(string.format(
+        "%d\t%06x\t%06x\t%06x\t%04x\t%04x\t%08x\t%04x\t%d\t%04x\t%04x\n",
+        frame, pc, u32(sp) & 0xffffff, a6, u16(a6 + 4), u16(a6 + 6),
+        u32(a6 + 0x1c), u16(a6 + 0x0a), s16(u16(a6 + 0x24)),
+        u16(a6 + 0x2a), u16(global + 8)))
+end
+
+oracle11_player_animation_write_tap = program:install_write_tap(
+    player + 0x0a, player + 0x27, "oracle11_player_animation_writes",
+    function(offset, data, mask)
+        if not capture_scene or frame < 2235 or frame > 2260 then return end
+        local a6 = maincpu.state["A6"].value & 0xffffff
+        player_animation_writes:write(string.format(
+            "%d\t%06x\t%06x\t%06x\t%04x\t%04x\t%08x\t%04x\t%d\t%04x\t%08x\t%08x\n",
+            frame, maincpu.state["PC"].value & 0xffffff, offset, a6,
+            u16(player + 4), u16(player + 6), u32(player + 0x1c),
+            u16(player + 0x0a), s16(u16(player + 0x24)),
+            u16(player + 0x2a), data & 0xffffffff, mask & 0xffffffff))
+    end)
+
+oracle11_player_dispatch_pc_taps = {}
+for _, pc in ipairs({0x0196ac, 0x0165c4}) do
+    oracle11_player_dispatch_pc_taps[#oracle11_player_dispatch_pc_taps + 1] =
+        opcodes:install_read_tap(pc, pc + 1,
+        string.format("oracle11_player_dispatch_%06x", pc),
+        function() emit_player_dispatch(pc) end)
 end
 
 local function emit_component20_collision(pc)
@@ -1561,6 +1599,8 @@ oracle11_progression_frame = emu.add_machine_frame_notifier(function()
         component20_writes:close(); component20_dispatch:close()
         component20_collision:close()
         component20_global:close()
+        player_dispatch:close()
+        player_animation_writes:close()
         obstacle_guard:close()
         type16_collision:close()
         class1f_inner8_entries:close()

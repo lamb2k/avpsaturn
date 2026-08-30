@@ -161,6 +161,15 @@ def validate(data):
     assert effect["state0"]["falls_through_to_state2"] is True
     assert effect["scene_actor_rows_u16"] == 793
     assert effect["scene_lifetime_count_u16"] == 113
+    reuse = effect["fixed_slot_reuse_presentation"]
+    assert reuse["classification"] == "SOURCE_CLOSED_IMPLEMENTATION_FIELDS"
+    assert reuse["unwritten_retained_fields"] == [
+        "animation_timer actor+0x0a:u16",
+        "animation_branch actor+0x24:s16"]
+    assert reuse["prior_owner"]["animation_timer_u16"] == 4094
+    assert reuse["prior_owner"]["animation_branch_s16"] == -32768
+    assert [row["source_slot"] for row in reuse["first_reuses"]] == [
+        "0x00ffc500", "0x00ffc480"]
     parent_box = parent["collision_table"]
     assert parent_box["table"] == "0x0002fc3c"
     assert parent_box["attack_entries"][1]["damage_selector_u8"] == 25
@@ -285,6 +294,35 @@ def validate(data):
     assert empty_effect["capture_projection"][
         "coffee_shop_first_visible_position_s16"] == [944, 404, 319]
     assert contract["implementation_blocker"] is None
+    sufficient_entry = contract["sufficient_action"]["entry_projection"]
+    assert sufficient_entry["entry_preserves_current_presentation"] is True
+    assert sufficient_entry["coffee_shop_witness"] == {
+        "prior_frame_u16": 2251, "entry_frame_u16": 2252,
+        "prior_animation_record": "0x0015f1f4",
+        "entry_animation_record": "0x0015f1f4",
+        "prior_timer_u16": 4082, "entry_timer_u16": 4082,
+        "prior_branch_s16": -32768, "entry_branch_s16": -32768,
+        "active_frame_u16": 2253,
+        "active_animation_record": "0x0015e540",
+        "active_timer_u16": 2, "active_branch_s16": 0,
+    }
+    animation_execution = contract["sufficient_action"]["animation_execution"]
+    assert animation_execution["entry_rebind_updates_u8"] == [1, 2]
+    assert animation_execution["writers"] == {
+        "record_bind": "0x01652a then 0x016588",
+        "timer_bind": "0x01652e then 0x01658c",
+        "branch_bind": "0x016534 then 0x016592",
+        "timer_decrement": "0x016574",
+    }
+    assert animation_execution["coffee_shop_writer_frames"] == {
+        "first_bind_u16": 2252, "second_bind_u16": 2253,
+        "first_decrement_u16": 2254,
+        "next_record_bind_frames_u16": [2255, 2256, 2258, 2259],
+    }
+    assert animation_execution["capture_identity"] == {
+        "independent_captures": 2, "byte_identical": True,
+        "sha256": "bc3c9cc7df2830bbf61cd8a4a8bbebd57e7860b0a2d3aacad9e6c75a07575438",
+    }
     special = data["special_implementation_contract"]
     assert special["classification"] == "SOURCE_CLOSED_IMPLEMENTATION_FIELDS"
     assert special["spec_executable"] is True
@@ -372,6 +410,7 @@ for path, value, label in [
     (("implementation_contract", "record4_parent_class0", "child_emitter_state", "position_rule"), "child y uses parent y", "wrong child coordinate base"),
     (("implementation_contract", "record4_parent_class0", "effect_allocation", "native_phase_projection", "expected_u8"), 0, "wrong parent effect phase"),
     (("implementation_contract", "record4_parent_class0", "effect_allocation", "state0", "falls_through_to_state2"), False, "parent effect state0 early return"),
+    (("implementation_contract", "record4_parent_class0", "effect_allocation", "fixed_slot_reuse_presentation", "prior_owner", "animation_timer_u16"), 4095, "parent effect animation residue cleared"),
     (("implementation_contract", "record4_parent_class0", "collision_table", "table"), "0x0003136a", "Major collision table"),
     (("implementation_contract", "record4_child_class4", "class_u8"), 5, "wrong child class"),
     (("implementation_contract", "record4_child_class4", "initialization", "variant_offsets_u16", 1), 285, "wrong child presentation offset"),
@@ -401,4 +440,4 @@ for path, value, label in [
         cursor = cursor[key]
     cursor[path[-1]] = value
     reject(mutant, label)
-print("ORACLE-11 corrected Predator Button1 tests: PASS (45 mutations rejected)")
+print("ORACLE-11 corrected Predator Button1 tests: PASS (46 mutations rejected)")

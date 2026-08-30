@@ -226,6 +226,11 @@ def coffee_shop_obstacle_lifecycle(opcodes: bytes,
                            "0x01bf40"],
             "source_frame": 2245, "first_visible_frame": 2246,
             "slot": "0xffb380", "scheduler": "record type 20 at 0x01bc38",
+            "camera_sample_order": {
+                "source_rule": "scene-record guard samples A5+0x278 before the same source frame's player/camera controller write",
+                "native_rule": "scheduler guard uses camera_x_previous; camera_x_position is the post-player sample for the next source frame",
+                "mutation_control": "using post-player camera_x_position allocates 0xffb380 one frame early (native 2245 instead of source 2246)",
+            },
         },
         "initializer": {
             "dispatch_entry": "0x06de92",
@@ -702,6 +707,29 @@ def obstacle_implementation_contract(program: bytes, opcodes: bytes,
 def camera_implementation_contract(sample_rows: list[dict[str, str]],
                                    bound_rows: list[dict[str, str]],
                                    opcodes: bytes) -> dict[str, object]:
+    coffee_frames = rows(OBSTACLE_A / "coffee_shop_scene_frames.tsv")
+    require(digest(OBSTACLE_A / "coffee_shop_scene_frames.tsv") ==
+            digest(OBSTACLE_B / "coffee_shop_scene_frames.tsv"),
+            "Coffee Shop first-control camera captures differ")
+    coffee_by_frame = {int(row["frame"]): row for row in coffee_frames}
+    first_control = [{
+        "source_frame_u16": frame,
+        "route_state_s16": int(coffee_by_frame[frame]["route_state"]),
+        "player_x_s16": int(coffee_by_frame[frame]["player_x_fp"], 16) >> 16,
+        "camera_x_s16": int(coffee_by_frame[frame]["camera_x"]),
+        "camera_target_x_s16": int(coffee_by_frame[frame]["camera_target_x"]),
+    } for frame in (2237, 2238, 2239)]
+    require(first_control == [
+        {"source_frame_u16": 2237, "route_state_s16": 2,
+         "player_x_s16": 944, "camera_x_s16": 640,
+         "camera_target_x_s16": 640},
+        {"source_frame_u16": 2238, "route_state_s16": 4,
+         "player_x_s16": 944, "camera_x_s16": 648,
+         "camera_target_x_s16": 648},
+        {"source_frame_u16": 2239, "route_state_s16": 4,
+         "player_x_s16": 944, "camera_x_s16": 655,
+         "camera_target_x_s16": 655}],
+        "Coffee Shop first-control camera chronology drift")
     by_frame = {int(row["frame"]): row for row in sample_rows}
     require(len(sample_rows) == 1801 and set(by_frame) == set(range(3400, 5201)),
             "corrective camera sample window drift")
@@ -752,6 +780,9 @@ def camera_implementation_contract(sample_rows: list[dict[str, str]],
             "override_reads": ["camera+0x10:s16", "camera+0x14:s16"],
             "writes": ["x position/target/history from D0", "z position/target/history from D1"],
             "route_table_bounds": "0x0b0526 indexes four signed bounds by u16(A5+0x1e8)<<2",
+            "first_control_chronology": first_control,
+            "handoff_rule": "the route-2 to route-4 handoff consumes the first source camera controller update before the first route-4 frame is presented",
+            "mutation_control": "skipping the handoff camera update leaves source frame 2238 at x=640 instead of x=648",
         },
         "player_follow_guard": {
             "enabled": "u8(A5+0x1af) != 0",
@@ -1193,6 +1224,8 @@ def validate(report: dict[str, object]) -> None:
             lifecycle["source_scene_record"]["camera_threshold_u16"] == 688 and
             lifecycle["spawn"]["guard"].startswith(
                 "nonnegative record threshold 688") and
+            lifecycle["spawn"]["camera_sample_order"]["native_rule"].startswith(
+                "scheduler guard uses camera_x_previous") and
             lifecycle["initializer"]["guard"] ==
             "unsigned record-36 free count at 0xffee8f >= 4" and
             lifecycle["initializer"]["child_allocation"]["variant_order_u8"] ==
@@ -1254,6 +1287,16 @@ def validate(report: dict[str, object]) -> None:
             camera_contract["coffee_shop_guard"]["phase2_unlock_guard"] ==
             "unsigned(u16(A5-0x65e6)-u16(controller+0x44)) >= (u8(A5+0x020e)<<4), OR controller+0x46 countdown reaches zero" and
             camera_contract["coffee_shop_guard"]["fixed_frame_authority"] is False and
+            camera_contract["initialization"]["first_control_chronology"] == [
+                {"source_frame_u16": 2237, "route_state_s16": 2,
+                 "player_x_s16": 944, "camera_x_s16": 640,
+                 "camera_target_x_s16": 640},
+                {"source_frame_u16": 2238, "route_state_s16": 4,
+                 "player_x_s16": 944, "camera_x_s16": 648,
+                 "camera_target_x_s16": 648},
+                {"source_frame_u16": 2239, "route_state_s16": 4,
+                 "player_x_s16": 944, "camera_x_s16": 655,
+                 "camera_target_x_s16": 655}] and
             camera_contract["world_to_plane_order"]["raw_pattern_name_offset_forbidden"] is True and
             {(item["frame"], item["x_lower"], item["x_upper"])
              for item in camera_contract["dynamic_checkpoints"]} >=
