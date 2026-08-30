@@ -1,8 +1,8 @@
 #ifndef AVSP_SPEC02_ROUND1_ENTRY_DATA_H
 #define AVSP_SPEC02_ROUND1_ENTRY_DATA_H
 
-/* contract_sha256=9b16789689fca8d9c1c6b1b8db05f952822fbea011872d5b0c458ca1ca1d5c99 */
-/* fixtures_sha256=ea742cce53ba88baa3ae2e5669bee1b49c6c553c5735416f048ce7f60fb7489e */
+/* contract_sha256=6426ee3442ed459e74bfb3136c83589f9900d40589ac32f7beaf44a442153c3e */
+/* fixtures_sha256=487ab920865c20ecafb054a31b17bc7af3ac2064956a63589d7bc90d3a5a5796 */
 #define AVSP_ROUND1_ENTRY_PROGRAM_SHA256 "e5ef761fadc1b5a7df62e77c03025c0ebff0c2503cbc8be9c0077d4bd6cd24ba"
 
 static const unsigned char avsp_round1_entry_program[AVSP_ROUND1_ENTRY_PROGRAM_BYTES] =
@@ -770,7 +770,8 @@ static const AvspRound1Class1fPlayerCollisionSpec avsp_round1_class1f_player_col
     0x130ac8UL, 0x130b5cUL, 0x11ae02UL, 0x11ae8eUL, 0x0015f278UL, 0x01d5eeUL,
     2750u, 1u, 17u, 10u, 10u,
     { -37, 53, 38u, 8u, 0, 8u, 0, 10u, 0u },
-    { 1, 45, 20u, 46u, 0, 6u, 0, 0u, 0u }
+    { 1, 45, 20u, 46u, 0, 6u, 0, 0u, 0u },
+    0x00ffc300UL, 2751u, 0xeea3u, 0xcb6eu, 1095, 369, 319, 24u, 0x4e, 0u
 };
 
 static const AvspRound1Class1fInitialSpec avsp_round1_class1f_initial_actors[AVSP_ROUND1_CLASS1F_INITIAL_ACTOR_COUNT] =
@@ -903,6 +904,13 @@ static const AvspRound1AnimationStateSpec avsp_round1_class4e_records[AVSP_ROUND
     { 2u, 0, 0x000929d0UL, 0x00092c74UL, 0u, 0u },
     { 2u, 0, 0x000929e0UL, 0x00092c82UL, 0u, 0u },
     { 4095u, -32768, 0x000929f0UL, 0x00092c90UL, 0u, 0u },
+};
+
+static const AvspRound1AnimationStateSpec avsp_round1_class4e_variant0_records[AVSP_ROUND1_CLASS4E_VARIANT0_PRESENTATION_COUNT] =
+{
+    { 4u, 0, 0x000928e0UL, 0x00092be8UL, 0u, 0u },
+    { 4u, 0, 0x000928f0UL, 0x00092bf6UL, 0u, 0u },
+    { 4095u, -32768, 0x00092900UL, 0x00092bf6UL, 0u, 0u },
 };
 
 static const AvspRound1AnimationStateSpec avsp_round1_class4e_variant1_records[AVSP_ROUND1_CLASS4E_VARIANT1_PRESENTATION_COUNT] =

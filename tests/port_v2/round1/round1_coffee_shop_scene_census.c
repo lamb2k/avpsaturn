@@ -108,6 +108,7 @@ int main(void)
         }
         if (source_frame == 2072u || source_frame == 2073u ||
             source_frame == 2510u || source_frame == 2511u ||
+            (source_frame >= 2749u && source_frame <= 2759u) ||
             (source_frame >= 2249u && source_frame <= 2294u) ||
             (source_frame >= 2348u && source_frame <= 2380u) ||
             (source_frame >= 2329u && source_frame <= 2330u))

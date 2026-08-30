@@ -51,6 +51,7 @@ TYPE36_LIFETIMES={'0x03':50,'0x04':15,'0x05':4,'0x0e':16}
 FILES=('aux_samples.tsv','aux_entries.tsv','aux_writes.tsv','aux_rng.tsv','aux_player_effects.tsv','samples.tsv','dispatches.tsv','projectiles.tsv','score_writes.tsv','result.tsv')
 DISPATCH={(16,'0x06'):0x03537e,(20,'0x07'):0x06d1aa,(20,'0x08'):0x06d53c,(20,'0x09'):0x06d926,(20,'0x0a'):0x06de92,(24,'0x10'):0x079ffc,(24,'0x3d'):0x0887c8,(24,'0x43'):0x08ce44,(24,'0x45'):0x08dc1c,(24,'0x49'):0x08f080,(24,'0x4b'):0x08f86e,(24,'0x4e'):0x0927f6}
 EXPECTED={(16,'0x06'):(505,514,4991,0,2),(20,'0x07'):(28446,26565,26619,0,0),(20,'0x08'):(275,276,811,1,0),(20,'0x09'):(6956,7194,21606,898,0),(20,'0x0a'):(603,602,1708,1,0),(24,'0x10'):(4694,4769,23665,0,0),(24,'0x3d'):(12811,11476,121404,0,0),(24,'0x43'):(828,844,16860,112,0),(24,'0x45'):(1364,1308,30536,196,0),(24,'0x49'):(4209,4808,19339,0,0),(24,'0x4b'):(810,661,4080,0,0),(24,'0x4e'):(909,848,3732,80,0)}
+CLASS4E_VARIANT0_CONTRACT=None
 
 def req(x,m):
  if not x:raise ValueError(m)
@@ -769,6 +770,123 @@ def first_segment_dependencies(ss,ee,ww,rr,op,program):
   'rng_authority':'shared source RNG consumed by class-0x4e state 0',
  'fixed_frame_substitute_forbidden':True,
  'retained_gameplay_authority':False}
+ variant0_rows=[r for r in scene_actors if r['pool']=='record24' and
+                r['class']=='4e' and r['variant']=='00']
+ variant0_lifetimes=[];active_variant0={}
+ for row in variant0_rows:
+  frame=int(row['frame']);slot=row['slot'];prior=active_variant0.get(slot)
+  if prior is None or frame!=prior['last_frame']+1:
+   prior={'source_slot':f"0x00ff{slot[2:]}",'first_frame':frame,
+          'last_frame':frame}
+   variant0_lifetimes.append(prior);active_variant0[slot]=prior
+  else:prior['last_frame']=frame
+ req(len(variant0_lifetimes)==2 and len(variant0_rows)==22 and
+     variant0_lifetimes[0]=={'source_slot':'0x00ffc300',
+      'first_frame':2751,'last_frame':2761},
+     'class-0x4e variant-0 Coffee Shop lifetimes drift')
+ variant0_writes=[r for r in ww if r['class']=='4e' and
+                   r['slot']=='ffc300' and int(r['frame'])==2750]
+ req([(r['pc'],r['offset'],r['data']) for r in variant0_writes[:6]]==[
+      ('01d64e','02','00000000'),('01d654','0e','00000101'),
+      ('01d6c4','10','00000447'),('01d6d6','14','00000171'),
+      ('01d6dc','18','00000140'),('01d6e2','18','0000013f')],
+     'class-0x4e variant-0 collision allocation writes drift')
+ variant0_entry=next((r for r in ee if r['class']=='4e' and
+                       r['slot']=='ffc300' and int(r['frame'])==2751),None)
+ variant0_rng=next((r for r in rr if r['class']=='4e' and
+                     r['slot']=='ffc300' and int(r['frame'])==2751),None)
+ variant0_health=next((r for r in scene_health if int(r['frame'])==2750 and
+                        r['attacker']=='ffa240' and
+                        r['defender']=='ff8380'),None)
+ req(variant0_entry is not None and variant0_entry['state']=='0' and
+     variant0_entry['x']=='1095' and variant0_entry['z']=='319' and
+     variant0_entry['facing']=='1' and
+     variant0_entry['anim']=='0007a12c' and
+     variant0_rng is not None and variant0_rng['pc']=='092830' and
+     variant0_rng['seed']=='eea3' and
+     variant0_health is not None and variant0_health['pc']=='01d5ee' and
+     variant0_health['attack_record']=='130b5c' and
+     variant0_health['health_before']=='0065' and
+     variant0_health['health_after']=='005b' and
+     variant0_health['damage_writer']=='1',
+     'class-0x4e variant-0 causal collision/RNG context drift')
+ variant0_initialized=next((r for r in scene_actors if r['slot']=='ffc300' and
+                             int(r['frame'])==2752),None)
+ req(variant0_initialized is not None and
+     variant0_initialized['state']=='0200' and
+     variant0_initialized['x_fp']=='044b0000' and
+     variant0_initialized['y_fp']=='01750000' and
+     variant0_initialized['z']=='319' and
+     variant0_initialized['animation_record']=='000928e0' and
+     variant0_initialized['animation_timer']=='0004',
+     'class-0x4e variant-0 state-0 result drift')
+ variant0_records=[animation_record(program,address) for address in
+                    (0x928e0,0x928f0,0x92900)]
+ req([r['timer_u16'] for r in variant0_records]==[4,4,4095] and
+     [r['branch_s16'] for r in variant0_records]==[0,0,-32768],
+     'class-0x4e variant-0 presentation sequence drift')
+ class4e_variant0={
+  'classification':'SOURCE_CLOSED_IMPLEMENTATION_FIELDS',
+  'scene_lifetime_count_u16':len(variant0_lifetimes),
+  'scene_actor_rows_u16':len(variant0_rows),'lifetimes':variant0_lifetimes,
+  'first_collision':{'source_frame':2750,
+   'attacker_source_slot':'0x00ffa240','attacker_record_type_u8':12,
+   'attacker_class_u8':'0x1f','attacker_attack_record':'0x00130b5c',
+   'attacker_attack_selector_u8':1,
+   'defender_source_slot':'0x00ff8380','defender_record_type_u8':0,
+   'defender_class_u8':'0x00','defender_state_substate':'0x0200:0x0202',
+   'defender_hurt_record':'0x0011ae8e','defender_hurt_selector_u8':17,
+   'damage_writer':'0x01d5ee','health_before_s16':101,
+   'health_after_s16':91,'damage_s16':10,'hitstop_u8':10},
+  'allocation':{'collision_entry':'0x01d116',
+   'impact_allocator':'0x01d622','pool_allocator':'0x0177da',
+   'global_suppression_guard':'u8(0xff8244) == 0',
+   'scheduler_guard':'record-type-24 release/dispatch precedes record-type-12 collision scheduler',
+   'source_slot':'0x00ffc300','record_type_u8':24,'class_u8':'0x4e',
+   'variant_field':{'attack_record_offset_u8':8,'type':'u8',
+    'signed':False,'rule':'copy absolute signed byte at attack-record +0x08',
+    'raw_u8':0,'variant_u8':0},
+   'facing_rule':'copy defender reaction-facing actor+0x4f_u8',
+   'x_rule':'signed midpoint of attacker attack-box center and defender hurt-box center',
+   'y_rule':'signed midpoint of depth-projected attacker attack-box center and defender hurt-box center',
+   'z_rule':'defender z_s16 - 1','first_spawn_position_s16':[1095,369,319],
+   'allocation_failure_rule':'damage remains applied; omit only the impact actor',
+   'visible_frame_u16':2751,
+   'fixed_slot_reuse_presentation':{
+    'rule':'0x0177da pops the released fixed slot without clearing fields not written by 0x01d622; retain prior presentation until class-0x4e state 0 runs on its next scheduler visit',
+    'retained_fields':['animation_record','animation_timer','animation_branch'],
+    'animation_record':'0x0007a12c','assembly':'0x0007a3a0',
+    'animation_timer_u16':4094,'animation_branch_s16':-32767,
+    'state0_scheduler_frame_u16':2751,'state0_visible_frame_u16':2752,
+    'state0_animation_record':'0x000928e0',
+    'state0_assembly':'0x00092be8'}},
+  'state0':{'state_write_u16':'0x0200','coordinate_mode_u8':2,
+   'object_or_u16':'0x8000','rng_entry':'0x017c5e','rng_calls_u8':1,
+   'rng_mask_u16':'0x001c','first_seed_before':'0xeea3',
+   'first_seed_after':'0xcb6e','first_table_offset_u8':12,
+   'first_jitter_s16':[4,4],
+   'jitter_table_s16':[[0,0],[4,0],[4,-4],[4,4],[-4,0],[-4,-4],[-4,4],[-8,8]],
+   'first_visible_position_after_state0_s16':[1099,373,319]},
+  'active_state':{'state_u16':'0x0200',
+   'animation_records':variant0_records,
+   'terminal_guard':'signed animation branch actor+0x24 < 0 advances state to 0x0400',
+   'movement_result':'x/y/z unchanged after state-0 jitter'},
+  'release_state':{'state_u16':'0x0400','release_routine':'0x0177f0',
+   'first_last_visible_frame':2761,'first_absent_frame':2762},
+  'source_bodies':{'collision_impact':{'first':'0x01d622',
+    'last_exclusive':'0x01d6b2',
+    'sha256':hashlib.sha256(op[0x1d622:0x1d6b2]).hexdigest()},
+   'class_dispatch':{'first':'0x0927f6','last_exclusive':'0x0928aa',
+    'sha256':hashlib.sha256(op[0x927f6:0x928aa]).hexdigest()}},
+  'capture_identity':{
+   'scene_actors_sha256':sha(SCENE_COMPONENT_A/'coffee_shop_scene_actors.tsv'),
+   'scene_health_sha256':sha(SCENE_COMPONENT_A/'coffee_shop_scene_health_writes.tsv')},
+  'collision_damage_authority':'shared collision writer; this actor is presentation-only',
+  'rng_authority':'shared source RNG consumed by class-0x4e state 0',
+  'fixed_frame_substitute_forbidden':True,
+  'retained_gameplay_authority':False}
+ global CLASS4E_VARIANT0_CONTRACT
+ CLASS4E_VARIANT0_CONTRACT=class4e_variant0
  parent_attack=player_authority['implementation_contract'][
   'record4_parent_class0'][
    'collision_table']['attack_entries'][1]
@@ -1326,6 +1444,10 @@ def build():
  for actor_id,reason in [('actor-class-00-type-0','contains the player record plus a half-stride census alias; no source pool dispatch'),('actor-class-80-type-0','all six addresses are half-stride aliases between type-24 source records'),('actor-class-00-type-240','address 0xffb2c0 is a half-stride alias between type-20 source records'),('actor-class-80-type-240','same half-stride alias after source lifecycle writes')]:phantom.append({'id':actor_id,'classification':'NOT_REQUIRED_FOR_ROUND1','reason':reason,'scheduler_dispatch':None})
  report={'schema':'oracle11-round1-auxiliary-authority-v1','task':'ORACLE-11-ROUND1-REACHABLE-LOGIC-CLOSURE','status':'SOURCE_CLOSED','scope':'Round 1 pickups, equipment, weapons, projectiles, hazards and destructibles','capture_identity':{'completion_a':ia,'completion_b':ib,'byte_identical':True,'sample_rows':len(ss),'entry_rows':len(ee),'write_rows':len(ww),'rng_rows':len(rr),'player_effect_rows':len(ff)},'archetypes':archetypes,'phantom_census_aliases':phantom,'player_side_contract':{'classification':'SOURCE_CLOSED','evidence':'data/oracle11_predator_weapon_projectile_resource.json'},'navigation_body_geometry_contract':{'classification':'SOURCE_CLOSED','evidence':'data/oracle11_round1_navigation.json'},'owned_authoritative_writer_pcs':sorted(owned),'coverage':{'required_dispatched_pairs':12,'closed_dispatched_pairs':12,'not_required_alias_pairs':4,'orphan_dispatched_pairs':0,'orphan_state_phase_contexts':0,'orphan_write_rows':0,'orphan_rng_calls':0,'orphan_animation_records':0,'orphan_player_effects':0,'invalid_zero_removal_controls_accepted':0},'correction_record':{'finding':'initial suppression notifier handle was local and garbage-collected','invalid_capture_suffix':'no suffix','invalid_controls_removed_zero_actors':True,'accepted_capture_suffix':'v2','accepted_controls_all_remove_actors':True},'negative_controls':{'zero_removal_suppression_rejected':True,'semantic_names_inferred':False,'appearance_only_classification_forbidden':True,'fixed_frame_effect_forbidden':True,'generic_effect_framework_forbidden':True},'protected_boundaries':{'production_runtime_writes':0,'yaba_runs':0,'frontend_active':False,'user09_status':'CHANGES_REQUESTED','physical_saturn':'UNRUN','spec02_active':False,'oracle11_active':True}}
  report['first_segment_dependencies']=first_segment_dependencies(ss,ee,ww,rr,op,program)
+ req(CLASS4E_VARIANT0_CONTRACT is not None,
+     'class-0x4e variant-0 implementation contract missing')
+ report['first_segment_dependencies']['class_0x4e_type24_variant4_effect'][
+  'variant0_collision_effect']=CLASS4E_VARIANT0_CONTRACT
  report['first_segment_dependencies']['class_0x1f_type16_0x06_projectile']=\
   coffee_shop_class1f_type16_projectile(op,program,ww)
  report['coffee_shop_type36_presentation']=coffee_shop_type36_presentation(
@@ -1346,7 +1468,7 @@ def validate(r):
  op=OPCODES.read_bytes();req(len(r['archetypes'])==12 and {(x['type'],x['class']) for x in r['archetypes']}==set(DISPATCH),'aux inventory drift')
  for x in r['archetypes']:
   key=(x['type'],x['class']);entry=DISPATCH[key];exp=EXPECTED[key];req(x['classification']=='SOURCE_CLOSED' and x['dispatch_entry']==f'0x{entry:06x}' and x['dispatch_entry_sha256']==hashlib.sha256(op[entry:entry+64]).hexdigest() and tuple(x['counts'][k] for k in ('samples','entries','writes','rng','player_effects'))==exp and x['writer_provenance'] and x['orphan_write_rows']==0 and x['rng']['orphan_calls']==0 and x['presentation_and_collision']['record_count']>0 and x['presentation_and_collision']['orphan_records']==0 and x['counterfactual']['suppression_count']>0 and x['counterfactual']['first_frame']>0 and x['counterfactual']['classification']=='PASS' and x['semantic_name_inferred'] is False,f'{key}:aux authority drift')
- deps=r['first_segment_dependencies'];c09=deps['class_0x09_type20_rng_owner'];c4e=deps['class_0x4e_type24_variant4_effect'];c4e1=c4e['variant1_collision_effect'];c4e10=c4e['variant10_collision_effect'];c44=deps['class_0x44_type24_command_guard_owner'];c43=deps['class_0x43_type24_class01_scene_population'];c45=deps['class_0x45_type24_scene_population'];c47=deps['class_0x47_type24_class02_child_presentation'];special=deps['predator_special_type24_effects'];c4b=special['class_0x4b'];c3d=special['class_0x3d'];c16=deps['class_0x1f_type16_0x06_projectile']
+ deps=r['first_segment_dependencies'];c09=deps['class_0x09_type20_rng_owner'];c4e=deps['class_0x4e_type24_variant4_effect'];c4e0=c4e['variant0_collision_effect'];c4e1=c4e['variant1_collision_effect'];c4e10=c4e['variant10_collision_effect'];c44=deps['class_0x44_type24_command_guard_owner'];c43=deps['class_0x43_type24_class01_scene_population'];c45=deps['class_0x45_type24_scene_population'];c47=deps['class_0x47_type24_class02_child_presentation'];special=deps['predator_special_type24_effects'];c4b=special['class_0x4b'];c3d=special['class_0x3d'];c16=deps['class_0x1f_type16_0x06_projectile']
  req(deps['classification']=='SOURCE_CLOSED_IMPLEMENTATION_FIELDS','first-segment dependency classification drift')
  req(c16['classification']=='SOURCE_CLOSED_IMPLEMENTATION_FIELDS' and
      c16['spec_executable'] is True and c16['record_type_u8']==16 and
@@ -1394,6 +1516,27 @@ def validate(r):
      'class-0x1f type-16/class-0x06 projectile contract drift')
  req(c09['dispatch']=='0x06d926' and c09['state']=='0x0200' and len(c09['source_slots'])==2 and c09['first_segment_calls_before_class4e']==44 and c09['seed_after_first_call']=='0x44fb' and c09['seed_after_last_call']=='0x99e8' and c09['selector_table_u16']==[0,7,8,9,10,8,9,10] and [x['selector_u8'] for x in c09['animation_sequences']]==[0,7,8,9,10] and all(len(x['records'])==2 for x in c09['animation_sequences']) and c09['fixed_frame_substitute_forbidden'] is True,'class-0x09 first-segment dependency drift')
  req(c4e['dispatch']=='0x0927f6' and c4e['variant_u8']==4 and c4e['allocation_pop_order']==['0x00ffc500','0x00ffc480'] and c4e['scheduler_order']==['0x00ffc480','0x00ffc500'] and c4e['state_sequence_u16']==[0,0x0200,0x0400] and [(x['seed_before'],x['seed_after'],x['table_index']) for x in c4e['seed_transaction_by_scheduler_slot']]==[('0xcdb5','0x691e',28),('0x691e','0x3b59',24)] and c4e['seed_field_correction'].startswith('accepted RNG rows are pre-call seeds') and len(c4e['jitter_table_s16'])==8 and len(c4e['animation_records'])==5 and c4e['collision_or_damage_writes']==0 and c4e['fixed_frame_release_forbidden'] is True,'class-0x4e first-segment dependency drift')
+ req(c4e0['classification']=='SOURCE_CLOSED_IMPLEMENTATION_FIELDS' and
+     c4e0['scene_lifetime_count_u16']==2 and
+     c4e0['scene_actor_rows_u16']==22 and
+     c4e0['first_collision']['source_frame']==2750 and
+     c4e0['first_collision']['attacker_attack_record']=='0x00130b5c' and
+     c4e0['first_collision']['defender_source_slot']=='0x00ff8380' and
+     c4e0['first_collision']['health_before_s16']==101 and
+     c4e0['first_collision']['health_after_s16']==91 and
+     c4e0['allocation']['source_slot']=='0x00ffc300' and
+     c4e0['allocation']['variant_field']['variant_u8']==0 and
+     c4e0['allocation']['first_spawn_position_s16']==[1095,369,319] and
+     c4e0['state0']['first_seed_before']=='0xeea3' and
+     c4e0['state0']['first_seed_after']=='0xcb6e' and
+     c4e0['state0']['first_table_offset_u8']==12 and
+     c4e0['state0']['first_jitter_s16']==[4,4] and
+     c4e0['state0']['first_visible_position_after_state0_s16']==[1099,373,319] and
+     len(c4e0['active_state']['animation_records'])==3 and
+     c4e0['release_state']['first_absent_frame']==2762 and
+     c4e0['fixed_frame_substitute_forbidden'] is True and
+     c4e0['retained_gameplay_authority'] is False,
+     'class-0x4e variant-0 collision effect drift')
  req(c4e1['classification']=='SOURCE_CLOSED_IMPLEMENTATION_FIELDS' and
      c4e1['scene_lifetime_count_u16']==23 and
      c4e1['scene_actor_rows_u16']==253 and

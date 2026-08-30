@@ -9,7 +9,7 @@ from pathlib import Path
 
 ROOT = Path(__file__).resolve().parents[3]
 SPEC = ROOT / "data/spec02_round1_executable_contract.json"
-EXPECTED = "9b16789689fca8d9c1c6b1b8db05f952822fbea011872d5b0c458ca1ca1d5c99"
+EXPECTED = "6426ee3442ed459e74bfb3136c83589f9900d40589ac32f7beaf44a442153c3e"
 assert hashlib.sha256(SPEC.read_bytes()).hexdigest() == EXPECTED
 assert json.loads(SPEC.read_text())["status"] == "ACCEPTED"
 source = (ROOT / "src/port_v2/gameplay/round1/round1.c").read_text()
@@ -119,6 +119,12 @@ controller_edge_mutations = {
     "encounter->source_blocked_by_living_count = 1u;\n    }\n    else",
 }
 for before, after in (
+    ("if (!avsp_round1_allocate_class4e_variant0_impact(\n"
+     "                runtime, actor, &attack, &hurt))",
+     "if (0)"),
+    ("runtime->player.source_facing_selector =\n"
+     "            (unsigned char)(actor->x < runtime->player.x);",
+     "runtime->player.source_facing_selector = 0u;"),
     ("runtime->route_state = AVSP_ROUND1_ROUTE_ENTRY_STATE;", "runtime->route_state = 4;"),
     ("{20u, 20u, 16u, 32u, 16u, 64u}",
      "{20u, 20u, 16u, 32u, 16u, 63u}"),
@@ -548,6 +554,14 @@ for before, after in (
      "    { 1u, 0, 0x0015f278UL, 0x00160af2UL, 1u, 0u },"),
     ("    { 2, -2, 2, -2, 2, -2, 2, -2, 2, -2, 2, -2, 2, -2, 2, -2 }",
      "    { 3, -2, 2, -2, 2, -2, 2, -2, 2, -2, 2, -2, 2, -2, 2, -2 }"),
+    ("    0x00ffc300UL, 2751u, 0xeea3u, 0xcb6eu, 1095, 369, 319, 24u, 0x4e, 0u",
+     "    0x00ffc380UL, 2751u, 0xeea3u, 0xcb6eu, 1095, 369, 319, 24u, 0x4e, 0u"),
+    ("    0x00ffc300UL, 2751u, 0xeea3u, 0xcb6eu, 1095, 369, 319, 24u, 0x4e, 0u",
+     "    0x00ffc300UL, 2751u, 0xeea3u, 0xcb6eu, 1096, 369, 319, 24u, 0x4e, 0u"),
+    ("    { 4u, 0, 0x000928e0UL, 0x00092be8UL, 0u, 0u },",
+     "    { 4u, 0, 0x000928f0UL, 0x00092be8UL, 0u, 0u },"),
+    ("    { 4095u, -32768, 0x00092900UL, 0x00092bf6UL, 0u, 0u },",
+     "    { 4095u, -32768, 0x00092910UL, 0x00092bf6UL, 0u, 0u },"),
 ):
     if "--generated-walk-only" in sys.argv and before not in generated_walk_mutations:
         continue
@@ -592,4 +606,4 @@ for before, after in (
 if "--generated-walk-only" in sys.argv:
     print("REIMPLEMENT-13 generated walk fixture mutation lane: PASS (5 real mutations)")
     raise SystemExit(0)
-print("REIMPLEMENT-13 entry/player/scheduler/class1f/Coffee-Shop-navigation/neutral-stop/melee/Button1/Button3/type16-projectile/player-HIT/first-encounter differential: PASS (201 real mutations)")
+print("REIMPLEMENT-13 entry/player/scheduler/class1f/Coffee-Shop-navigation/neutral-stop/melee/Button1/Button3/type16-projectile/player-HIT/first-encounter differential: PASS (207 real mutations)")

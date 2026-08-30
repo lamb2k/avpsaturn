@@ -414,6 +414,17 @@ assert class4e1["allocation"]["fixed_slot_reuse_presentation"] == {
     "state0_animation_record": "0x00092914",
     "state0_assembly": "0x00092c04"}
 assert class4e1["state0"]["first_seed_after"] == "0x4d11"
+class4e0 = dependencies["class_0x4e_type24_variant4_effect"][
+    "variant0_collision_effect"]
+assert class4e0["classification"] == "SOURCE_CLOSED_IMPLEMENTATION_FIELDS"
+assert class4e0["first_collision"]["attacker_attack_record"] == "0x00130b5c"
+assert class4e0["allocation"]["source_slot"] == "0x00ffc300"
+assert class4e0["allocation"]["first_spawn_position_s16"] == [1095, 369, 319]
+assert class4e0["state0"]["first_seed_before"] == "0xeea3"
+assert class4e0["state0"]["first_seed_after"] == "0xcb6e"
+assert class4e0["active_state"]["animation_records"][0][
+    "animation_record"] == "0x000928e0"
+assert class4e0["release_state"]["first_absent_frame"] == 2762
 type36 = fixtures["authority_data"]["auxiliary"][
     "coffee_shop_type36_presentation"]
 scene_components = fixtures["authority_data"]["auxiliary"][
@@ -584,6 +595,10 @@ f = copy.deepcopy(fixtures); f["authority_data"]["auxiliary"]["first_segment_dep
 f = copy.deepcopy(fixtures); f["authority_data"]["auxiliary"]["first_segment_dependencies"]["class_0x4e_type24_variant4_effect"]["allocation_pop_order"].reverse(); mutations.append((contract, f, "class4e allocation-order mutation"))
 f = copy.deepcopy(fixtures); f["authority_data"]["auxiliary"]["first_segment_dependencies"]["class_0x4e_type24_variant4_effect"]["variant1_collision_effect"]["allocation"]["scheduler_guard"] = "projectile first"; mutations.append((contract, f, "class4e variant1 scheduler mutation"))
 f = copy.deepcopy(fixtures); f["authority_data"]["auxiliary"]["first_segment_dependencies"]["class_0x4e_type24_variant4_effect"]["variant1_collision_effect"]["allocation"]["fixed_slot_reuse_presentation"]["animation_record"] = "0x00092914"; mutations.append((contract, f, "class4e retained-presentation mutation"))
+f = copy.deepcopy(fixtures); f["authority_data"]["auxiliary"]["first_segment_dependencies"]["class_0x4e_type24_variant4_effect"]["variant0_collision_effect"]["allocation"]["source_slot"] = "0x00ffc380"; mutations.append((contract, f, "class4e variant0 source-slot mutation"))
+f = copy.deepcopy(fixtures); f["authority_data"]["auxiliary"]["first_segment_dependencies"]["class_0x4e_type24_variant4_effect"]["variant0_collision_effect"]["state0"]["first_seed_before"] = "0xeea2"; mutations.append((contract, f, "class4e variant0 RNG mutation"))
+f = copy.deepcopy(fixtures); f["authority_data"]["auxiliary"]["first_segment_dependencies"]["class_0x4e_type24_variant4_effect"]["variant0_collision_effect"]["active_state"]["animation_records"][0]["animation_record"] = "0x000928f0"; mutations.append((contract, f, "class4e variant0 presentation mutation"))
+f = copy.deepcopy(fixtures); f["authority_data"]["auxiliary"]["first_segment_dependencies"]["class_0x4e_type24_variant4_effect"]["variant0_collision_effect"]["release_state"]["first_absent_frame"] = 2763; mutations.append((contract, f, "class4e variant0 release mutation"))
 f = copy.deepcopy(fixtures); f["authority_data"]["player"]["weapon_projectile_resource"]["implementation_contract"]["record4_parent_class0"]["collision_table"]["attack_entries"][1]["impact_variant_u8"] = 1; mutations.append((contract, f, "class4e variant10 attack-field mutation"))
 f = copy.deepcopy(fixtures); f["authority_data"]["player"]["weapon_projectile_resource"]["implementation_contract"]["record4_parent_class0"]["effect_allocation"]["native_phase_projection"]["expected_u8"] = 0; mutations.append((contract, f, "class49 parent-effect phase mutation"))
 f = copy.deepcopy(fixtures); f["authority_data"]["player"]["weapon_projectile_resource"]["implementation_contract"]["record4_parent_class0"]["effect_allocation"]["state0"]["falls_through_to_state2"] = False; mutations.append((contract, f, "class49 state0 fallthrough mutation"))

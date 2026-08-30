@@ -20,6 +20,40 @@ static int enter_button1(AvspRound1Runtime *runtime,
         avsp_round1_step_player(runtime, mask, 0);
 }
 
+static int class4e_variant0_source_frame_valid(
+    const AvspRound1Runtime *runtime, unsigned int source_frame)
+{
+    const AvspRound1ActorCore *impact = &runtime->pools[3].records[25];
+    if (source_frame < 2751u || source_frame > 2762u)
+        return 1;
+    if (source_frame == 2751u)
+        return impact->active == 1u && impact->source_slot == 0x00ffc300UL &&
+            impact->type == 24u && impact->actor_class == 0x4e &&
+            impact->variant == 0u && impact->state == 0u &&
+            impact->x == 1095 && impact->y == 369 && impact->z == 319 &&
+            impact->facing == 1u &&
+            impact->animation_record == 0x0007a12cUL &&
+            impact->assembly == 0x0007a3a0UL;
+    if (source_frame == 2752u)
+        return impact->active == 1u && impact->state == 0x0200u &&
+            impact->x == 1099 && impact->y == 373 && impact->z == 319 &&
+            impact->animation_record == 0x000928e0UL &&
+            impact->assembly == 0x00092be8UL &&
+            impact->animation_timer == 4u &&
+            runtime->rng_seed == 0xcb6eu;
+    if (source_frame == 2759u)
+        return runtime->pools[2].records[12].animation_record ==
+                0x0006dbdaUL &&
+            runtime->pools[2].records[13].animation_record ==
+                0x0006dc6aUL;
+    if (source_frame == 2761u)
+        return impact->active == 1u && impact->state == 0x0400u &&
+            impact->animation_record == 0x00092900UL;
+    if (source_frame == 2762u)
+        return impact->active == 0u;
+    return impact->active == 1u;
+}
+
 static int player_hit_source_frame_valid(const AvspRound1Runtime *runtime,
                                          unsigned int source_frame)
 {
@@ -28,6 +62,8 @@ static int player_hit_source_frame_valid(const AvspRound1Runtime *runtime,
          0x6000u, 0xa000u, 0xc000u};
     long expected_x_fp;
     unsigned short expected_timer;
+    if (!class4e_variant0_source_frame_valid(runtime, source_frame))
+        return 0;
     if (source_frame < 2751u || source_frame > 2778u)
         return 1;
     if (runtime->player.health != 91 ||

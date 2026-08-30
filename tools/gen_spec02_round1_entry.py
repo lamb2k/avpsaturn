@@ -187,6 +187,7 @@ def build() -> str:
         "first_segment_dependencies"]
     class09 = auxiliary_dependencies["class_0x09_type20_rng_owner"]
     class4e = auxiliary_dependencies["class_0x4e_type24_variant4_effect"]
+    class4e_variant0 = class4e["variant0_collision_effect"]
     class4e_variant1 = class4e["variant1_collision_effect"]
     class4e_variant10 = class4e["variant10_collision_effect"]
     class4e_rng = class4e["seed_transaction_by_scheduler_slot"]
@@ -779,6 +780,23 @@ def build() -> str:
             [("0xcdb5", "0x691e", 28), ("0x691e", "0x3b59", 24)] or
         len(class4e["jitter_table_s16"]) != 8 or
         len(class4e["animation_records"]) != 5 or
+        class4e_variant0["classification"] !=
+            "SOURCE_CLOSED_IMPLEMENTATION_FIELDS" or
+        class4e_variant0["scene_lifetime_count_u16"] != 2 or
+        class4e_variant0["first_collision"]["attacker_attack_record"] !=
+            "0x00130b5c" or
+        class4e_variant0["first_collision"]["defender_hurt_record"] !=
+            "0x0011ae8e" or
+        class4e_variant0["allocation"]["source_slot"] != "0x00ffc300" or
+        class4e_variant0["allocation"]["variant_field"]["variant_u8"] != 0 or
+        class4e_variant0["allocation"]["first_spawn_position_s16"] !=
+            [1095, 369, 319] or
+        class4e_variant0["state0"]["first_seed_before"] != "0xeea3" or
+        class4e_variant0["state0"]["first_seed_after"] != "0xcb6e" or
+        class4e_variant0["state0"]["first_table_offset_u8"] != 12 or
+        len(class4e_variant0["active_state"]["animation_records"]) != 3 or
+        class4e_variant0["release_state"]["first_absent_frame"] != 2762 or
+        class4e_variant0["fixed_frame_substitute_forbidden"] is not True or
         class4e_variant1["classification"] !=
             "SOURCE_CLOSED_IMPLEMENTATION_FIELDS" or
         class4e_variant1["scene_lifetime_count_u16"] != 23 or
@@ -2009,13 +2027,22 @@ def build() -> str:
             action_player_collision["attacker"]["box"]["z_half"],
             action_player_collision["attacker"]["knockback_mode_s8"],
             action_player_collision["attacker"]["hit_value_u8"]),
-        "    { %d, %d, %du, %du, %d, %du, 0, 0u, 0u }" % (
+        "    { %d, %d, %du, %du, %d, %du, 0, 0u, 0u }," % (
             action_player_collision["defender"]["box"]["x_center"],
             action_player_collision["defender"]["box"]["y_center"],
             action_player_collision["defender"]["box"]["x_half"],
             action_player_collision["defender"]["box"]["y_half"],
             action_player_collision["defender"]["box"]["z_center"],
             action_player_collision["defender"]["box"]["z_half"]),
+        "    %sUL, %du, %su, %su, %d, %d, %d, %du, %s, %du" % (
+            class4e_variant0["allocation"]["source_slot"],
+            class4e_variant0["allocation"]["visible_frame_u16"],
+            class4e_variant0["state0"]["first_seed_before"],
+            class4e_variant0["state0"]["first_seed_after"],
+            *class4e_variant0["allocation"]["first_spawn_position_s16"],
+            class4e_variant0["allocation"]["record_type_u8"],
+            class4e_variant0["allocation"]["class_u8"],
+            class4e_variant0["allocation"]["variant_field"]["variant_u8"]),
         "};", "",
         "static const AvspRound1Class1fInitialSpec avsp_round1_class1f_initial_actors[AVSP_ROUND1_CLASS1F_INITIAL_ACTOR_COUNT] =",
         "{",
@@ -2198,6 +2225,16 @@ def build() -> str:
         "{",
     ])
     for row in class4e["animation_records"]:
+        lines.append("    { %du, %d, %sUL, %sUL, %du, %du }," % (
+            row["timer_u16"], row["branch_s16"], row["animation_record"],
+            row["assembly"], row["hurt_selector_u8"],
+            row["attack_selector_u8"]))
+    lines.extend([
+        "};", "",
+        "static const AvspRound1AnimationStateSpec avsp_round1_class4e_variant0_records[AVSP_ROUND1_CLASS4E_VARIANT0_PRESENTATION_COUNT] =",
+        "{",
+    ])
+    for row in class4e_variant0["active_state"]["animation_records"]:
         lines.append("    { %du, %d, %sUL, %sUL, %du, %du }," % (
             row["timer_u16"], row["branch_s16"], row["animation_record"],
             row["assembly"], row["hurt_selector_u8"],

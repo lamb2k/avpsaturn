@@ -6,7 +6,7 @@
 #include "../../combat/hit_ko/hit_ko.h"
 
 #define AVSP_ROUND1_SPEC02_SHA256 \
-    "9b16789689fca8d9c1c6b1b8db05f952822fbea011872d5b0c458ca1ca1d5c99"
+    "6426ee3442ed459e74bfb3136c83589f9900d40589ac32f7beaf44a442153c3e"
 #define AVSP_ROUND1_CANARY_HEAD 0x52314548UL
 #define AVSP_ROUND1_CANARY_TAIL 0x52314554UL
 #define AVSP_ROUND1_ROUTE_ENTRY_STATE 2
@@ -89,6 +89,7 @@
 #define AVSP_ROUND1_CLASS09_SEQUENCE_RECORDS 2u
 #define AVSP_ROUND1_CLASS4E_JITTER_COUNT 8u
 #define AVSP_ROUND1_CLASS4E_PRESENTATION_COUNT 5u
+#define AVSP_ROUND1_CLASS4E_VARIANT0_PRESENTATION_COUNT 3u
 #define AVSP_ROUND1_CLASS4E_VARIANT1_PRESENTATION_COUNT 3u
 #define AVSP_ROUND1_CLASS4E_VARIANT10_PRESENTATION_COUNT 6u
 #define AVSP_ROUND1_CLASS44_PRESENTATION_COUNT 2u
@@ -746,6 +747,16 @@ typedef struct
     unsigned char hitstop;
     AvspRound1CollisionBoxSpec attack_box;
     AvspRound1CollisionBoxSpec hurt_box;
+    unsigned long impact_source_slot;
+    unsigned short impact_visible_frame;
+    unsigned short impact_rng_seed_before;
+    unsigned short impact_rng_seed_after;
+    short impact_spawn_x;
+    short impact_spawn_y;
+    short impact_spawn_z;
+    unsigned char impact_record_type;
+    signed char impact_class;
+    unsigned char impact_variant;
 } AvspRound1Class1fPlayerCollisionSpec;
 
 typedef struct

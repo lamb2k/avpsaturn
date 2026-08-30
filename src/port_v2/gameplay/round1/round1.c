@@ -19,6 +19,7 @@ static void avsp_round1_bind_animation_state(
     AvspRound1ActorCore *actor, const AvspRound1AnimationStateSpec *record);
 static unsigned char avsp_round1_source_rng(AvspRound1Runtime *runtime);
 static short avsp_round1_fixed_high_word(long value);
+static short avsp_round1_source_midpoint(short left, short right);
 static unsigned char avsp_round1_next_collision_identity(
     AvspRound1Runtime *runtime);
 static void avsp_round1_player_weapon_target(
@@ -3706,7 +3707,14 @@ static int avsp_round1_class1f_player_collision_contract_valid(void)
         hurt->x_half == 20u && hurt->y_half == 46u &&
         hurt->z_center == 0 && hurt->z_half == 6u &&
         hurt->knockback_mode == 0 && hurt->hit_value == 0u &&
-        hurt->damage_selector == 0u;
+        hurt->damage_selector == 0u &&
+        spec->impact_source_slot == 0x00ffc300UL &&
+        spec->impact_visible_frame == 2751u &&
+        spec->impact_rng_seed_before == 0xeea3u &&
+        spec->impact_rng_seed_after == 0xcb6eu &&
+        spec->impact_spawn_x == 1095 && spec->impact_spawn_y == 369 &&
+        spec->impact_spawn_z == 319 && spec->impact_record_type == 24u &&
+        spec->impact_class == 0x4e && spec->impact_variant == 0u;
 }
 
 static void avsp_round1_observe_player_melee(AvspRound1Runtime *runtime,
@@ -4368,6 +4376,47 @@ static int avsp_round1_begin_player_hit(AvspRound1Runtime *runtime,
     return 1;
 }
 
+static int avsp_round1_allocate_class4e_variant0_impact(
+    AvspRound1Runtime *runtime, const AvspRound1ActorCore *attacker,
+    const AvspAttackBox *attack_box, const AvspBox *hurt_box)
+{
+    AvspRound1ActorCore *impact;
+    short depth_delta;
+    short attack_x;
+    short target_x;
+    short attack_y;
+    short target_y;
+    if (runtime->class4e_impact_suppressed)
+        return 1;
+    impact = avsp_round1_allocate_pool_actor_preserve_presentation(runtime, 3u);
+    if (impact == 0)
+    {
+        return 1;
+    }
+    depth_delta = (short)(
+        (short)(runtime->player.z + (short)hurt_box->z_center) -
+        (short)(attacker->z + (short)attack_box->box.z_center));
+    attack_x = (short)(attacker->x +
+        (attacker->facing ? -(short)attack_box->box.x_center :
+                            (short)attack_box->box.x_center));
+    target_x = (short)(runtime->player.x +
+        (runtime->player.facing ? -(short)hurt_box->x_center :
+                                  (short)hurt_box->x_center));
+    attack_y = (short)(attacker->y + (short)attack_box->box.y_center +
+                       depth_delta);
+    target_y = (short)(runtime->player.y + (short)hurt_box->y_center);
+    impact->actor_class = avsp_round1_class1f_player_collision.impact_class;
+    impact->variant = avsp_round1_class1f_player_collision.impact_variant;
+    impact->state = 0u;
+    impact->substate = 0u;
+    impact->facing = runtime->player.source_facing_selector;
+    impact->x = avsp_round1_source_midpoint(attack_x, target_x);
+    impact->y = avsp_round1_source_midpoint(attack_y, target_y);
+    impact->z = (short)(runtime->player.z - 1);
+    impact->dispatch_entry = 0x000927f6UL;
+    return 1;
+}
+
 static int avsp_round1_step_class1f_player_collision(
     AvspRound1Runtime *runtime)
 {
@@ -4450,9 +4499,14 @@ static int avsp_round1_step_class1f_player_collision(
         runtime->first_encounter.pending_player_damage = hit_value;
         runtime->first_encounter.pending_player_damage_health_applied = 1u;
         runtime->first_encounter.alien_contact = 1u;
+        runtime->player.source_facing_selector =
+            (unsigned char)(actor->x < runtime->player.x);
         ++runtime->first_encounter.alien_contacts;
         ++runtime->class1f_player_collision_writes;
         ++runtime->class1f_player_damage_writes;
+        if (!avsp_round1_allocate_class4e_variant0_impact(
+                runtime, actor, &attack, &hurt))
+            return 0;
         if (runtime->player_action.health >= 0 &&
             !avsp_round1_begin_player_hit(runtime, actor))
             return 0;
@@ -5118,7 +5172,7 @@ static int avsp_round1_step_class4e(AvspRound1Runtime *runtime,
 {
     unsigned int presentation_count;
     const AvspRound1AnimationStateSpec *presentation_records;
-    if (actor->variant != 1u && actor->variant != 4u &&
+    if (actor->variant != 0u && actor->variant != 1u && actor->variant != 4u &&
         actor->variant != 10u)
         return 0;
     if (actor->state == 0u)
@@ -5162,7 +5216,9 @@ static int avsp_round1_step_class4e(AvspRound1Runtime *runtime,
         actor->coordinate_mode = 2u;
         actor->object_or = 0x8000u;
         actor->animation_index = 0u;
-        presentation_records = actor->variant == 1u ?
+        presentation_records = actor->variant == 0u ?
+            avsp_round1_class4e_variant0_records :
+            actor->variant == 1u ?
             avsp_round1_class4e_variant1_records :
             actor->variant == 10u ?
                 avsp_round1_class4e_variant10_records :
@@ -5188,12 +5244,16 @@ static int avsp_round1_step_class4e(AvspRound1Runtime *runtime,
         --actor->animation_timer;
         if (actor->animation_timer == 0u)
         {
-            presentation_count = actor->variant == 1u ?
+            presentation_count = actor->variant == 0u ?
+                AVSP_ROUND1_CLASS4E_VARIANT0_PRESENTATION_COUNT :
+                actor->variant == 1u ?
                 AVSP_ROUND1_CLASS4E_VARIANT1_PRESENTATION_COUNT :
                 actor->variant == 10u ?
                     AVSP_ROUND1_CLASS4E_VARIANT10_PRESENTATION_COUNT :
                     AVSP_ROUND1_CLASS4E_PRESENTATION_COUNT;
-            presentation_records = actor->variant == 1u ?
+            presentation_records = actor->variant == 0u ?
+                avsp_round1_class4e_variant0_records :
+                actor->variant == 1u ?
                 avsp_round1_class4e_variant1_records :
                 actor->variant == 10u ?
                     avsp_round1_class4e_variant10_records :
