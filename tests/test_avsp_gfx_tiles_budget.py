@@ -85,6 +85,34 @@ def button1_presentation_union_is_complete(presentations, fixture):
     return actual == expected
 
 
+def button1_empty_entry_carried_union_is_complete(presentations, fixture):
+    authority = fixture["authority_data"]
+    weapon = authority["player"]["weapon_projectile_resource"][
+        "implementation_contract"]
+    witnesses = weapon["empty_fallback"]["entry_projection"][
+        "coffee_shop_witnesses"]
+    locomotion = authority["player"]["locomotion_neutral_facing"]
+    records = (locomotion["first_segment_execution_contract"][
+                   "presentation"]["records"] +
+               locomotion["release_transition"]["presentation"])
+    assembly_by_record = {
+        int(record["animation_record"], 16): int(record["assembly"], 16)
+        for record in records
+    }
+    expected = {
+        (assembly_by_record[int(witness["entry_animation_record"], 16)],
+         facing)
+        for witness in witnesses
+        for facing in (0, 1)
+    }
+    actual = {
+        (item["assembly"], item["facing"])
+        for item in presentations
+        if item["kind"] == "player-button1-empty-entry-carried"
+    }
+    return actual == expected
+
+
 def button1_projectile_union_is_complete(presentations, fixture):
     weapon = fixture["authority_data"]["player"][
         "weapon_projectile_resource"]["implementation_contract"]
@@ -275,6 +303,11 @@ def main() -> int:
     if not button1_presentation_union_is_complete(presentations, fixture):
         print("FAIL: Button1 source presentation union is incomplete")
         return 1
+    if not button1_empty_entry_carried_union_is_complete(
+            presentations, fixture):
+        print("FAIL: Button1 empty-entry carried presentation union is "
+              "incomplete")
+        return 1
     if not button1_projectile_union_is_complete(presentations, fixture):
         print("FAIL: Button1 projectile presentation union is incomplete")
         return 1
@@ -317,6 +350,8 @@ def main() -> int:
     for kind, complete in (
             ("player-button1", button1_presentation_union_is_complete),
             ("player-button1-empty", button1_presentation_union_is_complete),
+            ("player-button1-empty-entry-carried",
+             button1_empty_entry_carried_union_is_complete),
             ("projectile-parent", button1_projectile_union_is_complete),
             ("projectile-child", button1_projectile_union_is_complete),
             ("player-button1-button2-special",
@@ -352,8 +387,8 @@ def main() -> int:
     residency = before_manifest["presentation_residency"]
     native_presentations = before_manifest["routes"].get(
         "spec02_round1_native_presentations", {})
-    if (native_presentations.get("decoded_variants") != 425 or
-        native_presentations.get("unique_assemblies") != 232 or
+    if (native_presentations.get("decoded_variants") != 429 or
+        native_presentations.get("unique_assemblies") != 233 or
         native_presentations.get("tiles_added") != 2233):
         print("FAIL: SPEC-02 native presentation union drifted")
         return 1
@@ -366,11 +401,11 @@ def main() -> int:
         residency["max_tiles_per_impact"] != 0 or
         residency["per_tile_scanout_requirement"] != 653 or
         residency["composite_tile_threshold"] != 14 or
-        residency["spec02_composite_unique_entries"] != 145 or
-        residency["spec02_composite_texture_bytes"] != 460928 or
+        residency["spec02_composite_unique_entries"] != 147 or
+        residency["spec02_composite_texture_bytes"] != 467072 or
         residency["spec02_composite_max_texture_bytes"] != 11648 or
-        residency["first_segment_composite_unique_entries"] != 192 or
-        residency["first_segment_composite_texture_bytes"] != 581632 or
+        residency["first_segment_composite_unique_entries"] != 194 or
+        residency["first_segment_composite_texture_bytes"] != 587776 or
         residency["first_segment_composite_max_texture_bytes"] != 11648 or
         residency["first_segment_composite_frame_peak_entries"] != 11 or
         residency["first_segment_composite_frame_peak_bytes"] != 37248 or
@@ -399,6 +434,10 @@ def main() -> int:
         print("FAIL: first-segment presentation residency drifted")
         return 1
     makefile = (ROOT / "makefile").read_text(encoding="utf-8")
+    if ("main.o: src/port_v2/gameplay/round1/round1.h "
+            "generated/avsp_emit_windows.h" not in makefile):
+        print("FAIL: generated presentation windows cannot invalidate main.o")
+        return 1
     jo_max_match = re.search(r"^JO_MAX_SPRITE\s*=\s*(\d+)$", makefile,
                              re.MULTILINE)
     if (jo_max_match is None or int(jo_max_match.group(1)) != 255 or

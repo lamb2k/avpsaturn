@@ -237,8 +237,8 @@
    2048,
    1920
   ],
-  "first_segment_composite_texture_bytes": 581632,
-  "first_segment_composite_unique_entries": 192,
+  "first_segment_composite_texture_bytes": 587776,
+  "first_segment_composite_unique_entries": 194,
   "first_segment_peak_noncomposite_frame": 2745,
   "first_segment_peak_noncomposite_tiles": 158,
   "max_tiles_per_impact": 0,
@@ -264,8 +264,8 @@
   "source_peak_object_entries": 37,
   "source_peak_unique_tiles": 374,
   "spec02_composite_max_texture_bytes": 11648,
-  "spec02_composite_texture_bytes": 460928,
-  "spec02_composite_unique_entries": 145,
+  "spec02_composite_texture_bytes": 467072,
+  "spec02_composite_unique_entries": 147,
   "startup_peak_noncomposite_frame": 2208,
   "startup_peak_noncomposite_tiles": 69,
   "startup_source_frame_range": [
@@ -283,7 +283,7 @@
    "frames_sampled": 201
   },
   "spec02_round1_native_presentations": {
-   "decoded_variants": 425,
+   "decoded_variants": 429,
    "fixture_sha256": "1ae6a0031c1adba276f62e6fdb1e3ffb7fc52c0ff836e50c93f41ab34baaa587",
    "palette_banks": [
     "0x00",
@@ -300,7 +300,7 @@
     "0x1E"
    ],
    "tiles_added": 2233,
-   "unique_assemblies": 232
+   "unique_assemblies": 233
   }
  },
  "sample_stride": 1,

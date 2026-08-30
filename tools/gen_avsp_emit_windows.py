@@ -118,6 +118,9 @@ def load_spec02_round1_presentations():
     child = weapon["record4_child_class4"]
     result = []
     seen = set()
+    def address_key(value):
+        return "0x%08x" % int(str(value), 16)
+
     for kind, records, object_or in (
             ("projectile-parent",
              parent["initialization"]["presentation_records"],
@@ -183,6 +186,27 @@ def load_spec02_round1_presentations():
                 (0, 1), (jump_actor["coordinate_mode_u8"],),
                 int(jump_actor["object_or_u16"], 16),
                 (jump_actor["palette_u8"],))
+    empty_entry = weapon["empty_fallback"]["entry_projection"]
+    locomotion = authority["player"]["locomotion_neutral_facing"]
+    locomotion_records = {
+        address_key(record["animation_record"]): record
+        for record in (
+            locomotion["first_segment_execution_contract"]["presentation"]
+                      ["records"] +
+            locomotion["release_transition"]["presentation"])
+    }
+    carried_records = []
+    for witness in empty_entry["coffee_shop_witnesses"]:
+        animation_record = address_key(witness["entry_animation_record"])
+        if animation_record not in locomotion_records:
+            raise AssertionError(
+                "SPEC-02 empty-entry witness 0x%06x has no source-bound "
+                "locomotion presentation" % int(animation_record, 16))
+        carried_records.append(locomotion_records[animation_record])
+    add_records("player-button1-empty-entry-carried", carried_records,
+                (0, 1), (jump_actor["coordinate_mode_u8"],),
+                int(jump_actor["object_or_u16"], 16),
+                (jump_actor["palette_u8"],))
     special = authority["player"]["weapon_projectile_resource"][
         "special_implementation_contract"]
     add_records("player-button1-button2-special",
@@ -209,7 +233,6 @@ def load_spec02_round1_presentations():
         (jump_actor["coordinate_mode_u8"],),
         int(jump_actor["object_or_u16"], 16),
         (jump_actor["palette_u8"],))
-    locomotion = authority["player"]["locomotion_neutral_facing"]
     add_records(
         "player-button3-cleanup",
         [{"animation_record": record["animation_record"],
@@ -231,9 +254,6 @@ def load_spec02_round1_presentations():
     class1f_authority = authority["enemies"]["archetypes"][3]
     class1f_current = class1f_authority[
         "current_state_implementation_contract"]
-    def address_key(value):
-        return "0x%08x" % int(str(value), 16)
-
     class1f_records = {
         address_key(record["animation_record"]): record
         for record in class1f_authority["presentation_and_collision"][

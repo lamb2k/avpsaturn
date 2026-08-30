@@ -183,7 +183,7 @@ include $(COMPILER_DIR)/COMMON/jo_engine_makefile
 # Jo Engine's bundled make rules do not emit C header dependencies. Keep the
 # executable contract identity and generated Round 1 fixture from remaining
 # stale when SPEC-02 is deterministically regenerated.
-main.o: src/port_v2/gameplay/round1/round1.h
+main.o: src/port_v2/gameplay/round1/round1.h generated/avsp_emit_windows.h
 src/port_v2/gameplay/round1/round1.o: \
 	src/port_v2/gameplay/round1/round1.h \
 	src/port_v2/gameplay/round1/spec02_round1_entry_data.h
