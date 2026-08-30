@@ -6,7 +6,7 @@
 #include "../../combat/hit_ko/hit_ko.h"
 
 #define AVSP_ROUND1_SPEC02_SHA256 \
-    "75689cc3c7bc11a6178c621c004f58cca041ffc174f7df8354aeb4b83b4a9293"
+    "b1b81b9a3525a4b0220332f75187e33384bab8903fc092580efc2260c61a648d"
 #define AVSP_ROUND1_CANARY_HEAD 0x52314548UL
 #define AVSP_ROUND1_CANARY_TAIL 0x52314554UL
 #define AVSP_ROUND1_ROUTE_ENTRY_STATE 2
@@ -413,6 +413,8 @@ typedef struct
     unsigned short source_bound_b2;
     unsigned char source_direction;
     unsigned char source_action_timer;
+    unsigned char source_hitstop;
+    unsigned char source_player_collision_latched;
     unsigned char source_a3;
     unsigned char source_a4;
     unsigned char source_a5;
@@ -726,6 +728,23 @@ typedef struct
         AVSP_ROUND1_CLASS1F_ACTION4_TIMER_ROW_COUNT]
         [AVSP_ROUND1_CLASS1F_ACTION4_STAGE_COUNT];
 } AvspRound1Class1fActionProgramSpec;
+
+typedef struct
+{
+    unsigned long attacker_table_set;
+    unsigned long attack_record;
+    unsigned long defender_table_set;
+    unsigned long hurt_record;
+    unsigned long defender_animation_record;
+    unsigned long health_writer;
+    unsigned short source_frame;
+    unsigned char attack_selector;
+    unsigned char hurt_selector;
+    unsigned char damage;
+    unsigned char hitstop;
+    AvspRound1CollisionBoxSpec attack_box;
+    AvspRound1CollisionBoxSpec hurt_box;
+} AvspRound1Class1fPlayerCollisionSpec;
 
 typedef struct
 {
@@ -1270,6 +1289,7 @@ typedef struct
     unsigned char continued_after_unlock;
     unsigned char attack_latched;
     unsigned char pending_player_damage;
+    unsigned char pending_player_damage_health_applied;
     unsigned char player_contact;
     unsigned char alien_contact;
     unsigned char player_damage;
@@ -1348,6 +1368,9 @@ typedef struct
     unsigned long class1f_action_animation_steps;
     unsigned long class1f_action_movement_steps;
     unsigned long class1f_action_releases;
+    unsigned long class1f_player_collision_writes;
+    unsigned long class1f_player_damage_writes;
+    unsigned long class1f_hitstop_updates;
     unsigned short source_stage_parameter;
     unsigned short source_global_hit_pause;
     unsigned short player_variant;

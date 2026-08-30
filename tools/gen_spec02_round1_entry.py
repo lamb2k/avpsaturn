@@ -151,6 +151,8 @@ def build() -> str:
                       for record in sequence["records"]]
     action_movement_tables = class1f_actions["movement_tables"]
     action_attack_timers = class1f_actions["attack_timer_table_u8"]
+    action_player_collision = class1f_actions[
+        "current_state_player_collision"]
     action_programs = class1f_actions["action_programs"]
     action_bounds = action_programs["source_bounds"]
     action_animation_movement = action_programs[
@@ -570,7 +572,23 @@ def build() -> str:
         action_attack_timers != [30] * 4 + [60] * 4 + [120] * 4 + [160] * 4 or
         class1f_actions["suppression_control"]["writer_pc"] != "0x0607e8" or
         class1f_actions["suppression_control"]["suppressed_writes"] != 179 or
-        class1f_actions["suppression_control"]["fixed_frame_substitute"] is not False):
+        class1f_actions["suppression_control"]["fixed_frame_substitute"] is not False or
+        action_player_collision["classification"] !=
+            "SOURCE_CLOSED_IMPLEMENTATION_FIELDS" or
+        action_player_collision["capture_identity"]["byte_identical"] is not True or
+        action_player_collision["attacker"]["table_set"] != "0x130ac8" or
+        action_player_collision["attacker"]["attack_record"] != "0x130b5c" or
+        action_player_collision["attacker"]["attack_selector_u8"] != 1 or
+        action_player_collision["attacker"]["hit_value_u8"] != 10 or
+        action_player_collision["defender"]["table_set"] != "0x11ae02" or
+        action_player_collision["defender"]["hurt_record"] != "0x11ae8e" or
+        action_player_collision["defender"]["hurt_selector_u8"] != 17 or
+        action_player_collision["observed_transaction"]["writer_pc"] !=
+            "0x01d5ee" or
+        action_player_collision["observed_transaction"]["damage_s16"] != 10 or
+        action_player_collision["observed_transaction"]["hitstop_u8"] != 10 or
+        action_player_collision["observed_transaction"]
+            ["attack_advance_frame_u16"] != 2762):
         raise ValueError("SPEC-02 class-0x1f first-segment action drift")
     if (class1f_inner8["classification"] !=
             "SOURCE_CLOSED_IMPLEMENTATION_FIELDS" or
@@ -1857,6 +1875,39 @@ def build() -> str:
         lines.append("        { " + ", ".join(f"{value}u" for value in row) + " },")
     lines.extend([
         "    }",
+        "};", "",
+        "static const AvspRound1Class1fPlayerCollisionSpec avsp_round1_class1f_player_collision =",
+        "{",
+        "    %sUL, %sUL, %sUL, %sUL, %sUL, %sUL," % (
+            action_player_collision["attacker"]["table_set"],
+            action_player_collision["attacker"]["attack_record"],
+            action_player_collision["defender"]["table_set"],
+            action_player_collision["defender"]["hurt_record"],
+            action_player_collision["defender"]["animation_record"],
+            action_player_collision["observed_transaction"]["writer_pc"]),
+        "    %du, %du, %du, %du, %du," % (
+            action_player_collision["observed_transaction"]
+                ["source_frame_u16"],
+            action_player_collision["attacker"]["attack_selector_u8"],
+            action_player_collision["defender"]["hurt_selector_u8"],
+            action_player_collision["observed_transaction"]["damage_s16"],
+            action_player_collision["observed_transaction"]["hitstop_u8"]),
+        "    { %d, %d, %du, %du, %d, %du, %d, %du, 0u }," % (
+            action_player_collision["attacker"]["box"]["x_center"],
+            action_player_collision["attacker"]["box"]["y_center"],
+            action_player_collision["attacker"]["box"]["x_half"],
+            action_player_collision["attacker"]["box"]["y_half"],
+            action_player_collision["attacker"]["box"]["z_center"],
+            action_player_collision["attacker"]["box"]["z_half"],
+            action_player_collision["attacker"]["knockback_mode_s8"],
+            action_player_collision["attacker"]["hit_value_u8"]),
+        "    { %d, %d, %du, %du, %d, %du, 0, 0u, 0u }" % (
+            action_player_collision["defender"]["box"]["x_center"],
+            action_player_collision["defender"]["box"]["y_center"],
+            action_player_collision["defender"]["box"]["x_half"],
+            action_player_collision["defender"]["box"]["y_half"],
+            action_player_collision["defender"]["box"]["z_center"],
+            action_player_collision["defender"]["box"]["z_half"]),
         "};", "",
         "static const AvspRound1Class1fInitialSpec avsp_round1_class1f_initial_actors[AVSP_ROUND1_CLASS1F_INITIAL_ACTOR_COUNT] =",
         "{",

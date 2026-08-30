@@ -372,10 +372,16 @@ def build_coffee_shop_scene_manifest(source: dict[str, dict]) -> dict[str, objec
                    for actor in class1f_lifetimes)
 
     for item in census["health_writes"]:
+        player_collision_write = (
+            item["frame"] == 2750 and item["attacker"] == "0xffa240" and
+            item["defender"] == "0xff8380" and
+            item["attack_record"] == "0x130b5c" and
+            item["writer_pc"] == "0x01d5ee")
         item["classification"] = (
-            "NATIVE_IMPLEMENTED" if class1f_health_write(item) and
-            item["writer_pc"] in {"0x0605aa", "0x0172ba", "0x01d590",
-                                  "0x01d598"}
+            "NATIVE_IMPLEMENTED" if player_collision_write or (
+                class1f_health_write(item) and
+                item["writer_pc"] in {"0x0605aa", "0x0172ba", "0x01d590",
+                                      "0x01d598"})
             else "BLOCKED_MISSING_SPEC")
 
     route_edges = []
@@ -455,7 +461,9 @@ def build_coffee_shop_scene_manifest(source: dict[str, dict]) -> dict[str, objec
          "classification": "BLOCKED_MISSING_SPEC",
          "source_contract": "coffee_shop.health_writes",
          "implemented_subset": "class-0x1f initialization, player melee/"
-             "projectile damage, signed KO clamp, HIT/KO, and fixed-pool release",
+             "projectile damage, signed KO clamp, HIT/KO, fixed-pool release, "
+             "and the frame-2750 class-0x1f-to-player current-state damage/"
+             "hitstop transaction",
          "exact_blocker": "player health and non-class-0x1f health writers "
              "remain without a complete native Coffee Shop scene differential"},
         {"id": "coffee-shop-audio",
@@ -1393,6 +1401,8 @@ def validate(contract: dict[str, object], fixtures: dict[str, object],
                     "0x0012e04c",
             "class-0x1f projectile KO fixture incomplete or drifted")
     class1f_actions = class1f["first_segment_action_execution_contract"]
+    class1f_player_collision = class1f_actions[
+        "current_state_player_collision"]
     require(class1f_actions["classification"] ==
                 "SOURCE_CLOSED_IMPLEMENTATION_FIELDS" and
             class1f_actions["capture_identity"]["byte_identical"] is True and
@@ -1534,7 +1544,45 @@ def validate(contract: dict[str, object], fixtures: dict[str, object],
                 "first_difference_frame": 2798,
                 "first_difference_slot": "0x00ffa240",
                 "score_unchanged": True, "audio_dispatch_unchanged": True,
-                "route_exit_unchanged": True},
+                    "route_exit_unchanged": True} and
+            class1f_player_collision["classification"] ==
+                "SOURCE_CLOSED_IMPLEMENTATION_FIELDS" and
+            class1f_player_collision["capture_identity"]
+                ["byte_identical"] is True and
+            class1f_player_collision["attacker"] == {
+                "table_set": "0x130ac8",
+                "attack_table": "0x130b4c",
+                "selector_source": "current animation record byte +9",
+                "animation_record": "0x0012d8a0",
+                "attack_selector_u8": 1,
+                "attack_record": "0x130b5c",
+                "box": {"x_center": -37, "x_half": 38,
+                        "y_center": 53, "y_half": 8,
+                        "z_center": 0, "z_half": 8},
+                "hit_value_u8": 10,
+                "knockback_mode_s8": 0} and
+            class1f_player_collision["defender"] == {
+                "table_set": "0x11ae02",
+                "hurt_table": "0x11ae06",
+                "selector_source": "current animation record byte +8",
+                "animation_record": "0x0015f278",
+                "hurt_selector_u8": 17,
+                "hurt_record": "0x11ae8e",
+                "box": {"x_center": 1, "x_half": 20,
+                        "y_center": 45, "y_half": 46,
+                        "z_center": 0, "z_half": 6}} and
+            class1f_player_collision["observed_transaction"]
+                ["writer_pc"] == "0x01d5ee" and
+            class1f_player_collision["observed_transaction"]
+                ["damage_s16"] == 10 and
+            class1f_player_collision["observed_transaction"]
+                ["hitstop_u8"] == 10 and
+            class1f_player_collision["observed_transaction"]
+                ["attack_hold_first_frame_u16"] == 2751 and
+            class1f_player_collision["observed_transaction"]
+                ["attack_hold_last_frame_u16"] == 2761 and
+            class1f_player_collision["observed_transaction"]
+                ["attack_advance_frame_u16"] == 2762,
             "class-0x1f first-segment action fixture incomplete or drifted")
     inner8 = class1f_actions["inner_state_0x08_program"]
     require(inner8["classification"] ==

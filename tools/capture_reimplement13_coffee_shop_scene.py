@@ -427,6 +427,70 @@ def fixed_slot_reuse_presentation(
     }
 
 
+def class1f_player_collision_chronology(
+        source: dict[str, object],
+        source_rows: list[dict[str, str]],
+        native_rows: list[dict[str, str]],
+        divergences: list[dict[str, object]]) -> dict[str, object]:
+    """Bind the frame-2750 class-0x1f attack and ten-tick hitstop."""
+    frames = (2750, 2751, 2761, 2762)
+    source_actor = {
+        (int(row["frame"]), "0x" + row["slot"]): row
+        for row in source_rows if int(row["frame"]) in frames and
+        row["slot"] in {"ff8380", "ffa240"}}
+    native_actor = {
+        (int(row["frame"]), "0x" + row["source_slot"]): row
+        for row in native_rows if int(row["frame"]) in frames and
+        row["source_slot"] in {"00ff8380", "00ffa240"}}
+    source_write = next(
+        row for row in source["health_writes"]
+        if row["frame"] == 2750 and row["attacker"] == "0xffa240" and
+        row["defender"] == "0xff8380")
+
+    def project(row: dict[str, str], source_side: bool) -> dict[str, object]:
+        return {
+            "frame_u16": int(row["frame"]),
+            "state_u16": "0x" + row["state"],
+            "substate_u16": "0x" + row["substate"],
+            "animation_record": "0x" + row["animation_record"],
+            "animation_timer_u16": int(row["animation_timer"], 16)
+                if source_side else int(row["animation_timer"]),
+            "health_s16": int(row["health"]),
+        }
+
+    slot_divergence = next(
+        (item for item in divergences
+         if item["source_slot"] == "0x00ffa240"), None)
+    return {
+        "source_damage_write": {
+            "source_frame_u16": source_write["frame"],
+            "writer_pc": source_write["writer_pc"],
+            "attack_record": source_write["attack_record"],
+            "health_before_s16": source_write["health_before_s16"],
+            "health_after_s16": source_write["health_after_s16"],
+        },
+        "scheduler_order": [
+            "player update", "record12 actor update",
+            "current-state enemy-v-player collision",
+            "next player update consumes HIT transition"],
+        "source_attacker": [project(
+            source_actor[(frame, "0xffa240")], True) for frame in frames],
+        "native_attacker": [project(
+            native_actor[(frame, "0x00ffa240")], False) for frame in frames],
+        "source_player": [project(
+            source_actor[(frame, "0xff8380")], True) for frame in frames],
+        "native_player": [project(
+            native_actor[(frame, "0x00ff8380")], False) for frame in frames],
+        "native_health_visible_frame_u16": 2751,
+        "native_hitstop_first_frame_u16": 2751,
+        "native_hitstop_last_frame_u16": 2761,
+        "native_animation_advance_frame_u16": 2762,
+        "authored_delay_forbidden": True,
+        "next_attacker_divergence_frame_u16": (
+            int(slot_divergence["frame"]) if slot_divergence else None),
+    }
+
+
 def record4_parent_fixed_trajectory(
         source_rows: list[dict[str, str]],
         native_rows: list[dict[str, str]]) -> dict[str, object]:
@@ -939,7 +1003,7 @@ def validate_report(report: dict[str, object]) -> None:
                  "animation_record": "0x00030944",
                  "assembly": "0x00030bd6", "animation_timer_u16": 2}],
             "no_source_native_divergence_through_frame_u16": 2372,
-            "next_slot_divergence_frame_u16": 2914}:
+            "next_slot_divergence_frame_u16": 2917}:
         raise ValueError("Coffee Shop record-4 fixed-slot reuse drift")
     recurring = report["native_capture"]["recurring_spawn_phase_boundary"]
     if recurring["native_checkpoints"] != [
@@ -1110,6 +1174,94 @@ def validate_report(report: dict[str, object]) -> None:
             "native_target": target_projection,
             "same_scan_initialization_collision_forbidden": True}:
         raise ValueError("Coffee Shop deferred record-4 registration drift")
+    player_collision = report["native_capture"][
+        "class1f_player_collision"]
+    if player_collision != {
+            "source_damage_write": {
+                "source_frame_u16": 2750,
+                "writer_pc": "0x01d5ee",
+                "attack_record": "0x130b5c",
+                "health_before_s16": 101,
+                "health_after_s16": 91},
+            "scheduler_order": [
+                "player update", "record12 actor update",
+                "current-state enemy-v-player collision",
+                "next player update consumes HIT transition"],
+            "source_attacker": [
+                {"frame_u16": 2750, "state_u16": "0x0200",
+                 "substate_u16": "0x0402",
+                 "animation_record": "0x0012d890",
+                 "animation_timer_u16": 1, "health_s16": 87},
+                {"frame_u16": 2751, "state_u16": "0x0200",
+                 "substate_u16": "0x0402",
+                 "animation_record": "0x0012d8a0",
+                 "animation_timer_u16": 1, "health_s16": 87},
+                {"frame_u16": 2761, "state_u16": "0x0200",
+                 "substate_u16": "0x0402",
+                 "animation_record": "0x0012d8a0",
+                 "animation_timer_u16": 1, "health_s16": 87},
+                {"frame_u16": 2762, "state_u16": "0x0200",
+                 "substate_u16": "0x0402",
+                 "animation_record": "0x0012d8b0",
+                 "animation_timer_u16": 9, "health_s16": 87}],
+            "native_attacker": [
+                {"frame_u16": 2750, "state_u16": "0x0200",
+                 "substate_u16": "0x0402",
+                 "animation_record": "0x0012d890",
+                 "animation_timer_u16": 1, "health_s16": 87},
+                {"frame_u16": 2751, "state_u16": "0x0200",
+                 "substate_u16": "0x0402",
+                 "animation_record": "0x0012d8a0",
+                 "animation_timer_u16": 1, "health_s16": 87},
+                {"frame_u16": 2761, "state_u16": "0x0200",
+                 "substate_u16": "0x0402",
+                 "animation_record": "0x0012d8a0",
+                 "animation_timer_u16": 1, "health_s16": 87},
+                {"frame_u16": 2762, "state_u16": "0x0200",
+                 "substate_u16": "0x0402",
+                 "animation_record": "0x0012d8b0",
+                 "animation_timer_u16": 9, "health_s16": 87}],
+            "source_player": [
+                {"frame_u16": 2750, "state_u16": "0x0200",
+                 "substate_u16": "0x0202",
+                 "animation_record": "0x0015f278",
+                 "animation_timer_u16": 2, "health_s16": 101},
+                {"frame_u16": 2751, "state_u16": "0x0202",
+                 "substate_u16": "0x0000",
+                 "animation_record": "0x0015f278",
+                 "animation_timer_u16": 1, "health_s16": 91},
+                {"frame_u16": 2761, "state_u16": "0x0202",
+                 "substate_u16": "0x0200",
+                 "animation_record": "0x0015eee8",
+                 "animation_timer_u16": 8, "health_s16": 91},
+                {"frame_u16": 2762, "state_u16": "0x0202",
+                 "substate_u16": "0x0202",
+                 "animation_record": "0x0015eee8",
+                 "animation_timer_u16": 7, "health_s16": 91}],
+            "native_player": [
+                {"frame_u16": 2750, "state_u16": "0x0200",
+                 "substate_u16": "0x0002",
+                 "animation_record": "0x0015f1f4",
+                 "animation_timer_u16": 4095, "health_s16": 101},
+                {"frame_u16": 2751, "state_u16": "0x0200",
+                 "substate_u16": "0x0002",
+                 "animation_record": "0x0015f1f4",
+                 "animation_timer_u16": 4095, "health_s16": 91},
+                {"frame_u16": 2761, "state_u16": "0x0200",
+                 "substate_u16": "0x0002",
+                 "animation_record": "0x0015f1f4",
+                 "animation_timer_u16": 4095, "health_s16": 91},
+                {"frame_u16": 2762, "state_u16": "0x0200",
+                 "substate_u16": "0x0002",
+                 "animation_record": "0x0015f1f4",
+                 "animation_timer_u16": 4095, "health_s16": 91}],
+            "native_health_visible_frame_u16": 2751,
+            "native_hitstop_first_frame_u16": 2751,
+            "native_hitstop_last_frame_u16": 2761,
+            "native_animation_advance_frame_u16": 2762,
+            "authored_delay_forbidden": True,
+            "next_attacker_divergence_frame_u16": 2798}:
+        raise ValueError("Coffee Shop class-0x1f player collision drift")
     all_zero = all(value == 0 for value in report["gaps"].values())
     if report["acceptance"] != {"all_zero": all_zero, "ready": all_zero}:
         raise ValueError("Coffee Shop scene accepted before the zero-gap gate")
@@ -1211,6 +1363,9 @@ def main() -> None:
                            "deferred_record4_collision_registration":
                                deferred_record4_collision_registration(
                                    source_rows, rows),
+                           "class1f_player_collision":
+                               class1f_player_collision_chronology(
+                                   source, source_rows, rows, divergences),
                            "recurring_spawn_phase_boundary":
                                recurring_spawn_phase_boundary(
                                    source_rows, rows, runtime_summary)},

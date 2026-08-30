@@ -1,8 +1,8 @@
 #ifndef AVSP_SPEC02_ROUND1_ENTRY_DATA_H
 #define AVSP_SPEC02_ROUND1_ENTRY_DATA_H
 
-/* contract_sha256=75689cc3c7bc11a6178c621c004f58cca041ffc174f7df8354aeb4b83b4a9293 */
-/* fixtures_sha256=8554c61db6b1b4e8e64ab6b726c66f2e87539f29084d43c529e119fddc37dcd8 */
+/* contract_sha256=b1b81b9a3525a4b0220332f75187e33384bab8903fc092580efc2260c61a648d */
+/* fixtures_sha256=eb8fb469f8f978696b746b12b07d84c163c28750db803f8ab9b75993d6728886 */
 #define AVSP_ROUND1_ENTRY_PROGRAM_SHA256 "e5ef761fadc1b5a7df62e77c03025c0ebff0c2503cbc8be9c0077d4bd6cd24ba"
 
 static const unsigned char avsp_round1_entry_program[AVSP_ROUND1_ENTRY_PROGRAM_BYTES] =
@@ -763,6 +763,14 @@ static const AvspRound1Class1fActionProgramSpec avsp_round1_class1f_action_progr
         { 1u, 1u, 1u, 1u, 1u, 1u, 1u, 1u, 1u, 1u, 1u, 1u, 1u, 1u, 1u, 1u, 2u, 2u, 2u, 2u, 2u, 2u, 2u, 2u, 2u, 2u, 4u, 4u, 4u, 6u, 8u, 12u },
         { 1u, 1u, 1u, 1u, 1u, 1u, 1u, 1u, 1u, 1u, 1u, 1u, 1u, 1u, 1u, 1u, 1u, 1u, 1u, 1u, 1u, 1u, 1u, 1u, 1u, 1u, 2u, 2u, 2u, 3u, 5u, 8u },
     }
+};
+
+static const AvspRound1Class1fPlayerCollisionSpec avsp_round1_class1f_player_collision =
+{
+    0x130ac8UL, 0x130b5cUL, 0x11ae02UL, 0x11ae8eUL, 0x0015f278UL, 0x01d5eeUL,
+    2750u, 1u, 17u, 10u, 10u,
+    { -37, 53, 38u, 8u, 0, 8u, 0, 10u, 0u },
+    { 1, 45, 20u, 46u, 0, 6u, 0, 0u, 0u }
 };
 
 static const AvspRound1Class1fInitialSpec avsp_round1_class1f_initial_actors[AVSP_ROUND1_CLASS1F_INITIAL_ACTOR_COUNT] =

@@ -100,6 +100,10 @@ for label,mutate in [
     ('first-segment-loop-counter',lambda x:x['action_programs']['action_0x16'].__setitem__('loop_counter','timer')),
     ('first-segment-action16-rng-reuse',lambda x:x['action_programs']['action_0x16']['rng_transaction'].__setitem__('second_call_forbidden',False)),
     ('first-segment-action16-latched-retry',lambda x:x['action_programs']['action_0x16']['latched_retry_transition'].__setitem__('next_action_u8',0x18)),
+    ('first-segment-player-collision-record',lambda x:x['current_state_player_collision']['attacker'].__setitem__('attack_record','0x130b6c')),
+    ('first-segment-player-collision-hurt',lambda x:x['current_state_player_collision']['defender'].__setitem__('hurt_selector_u8',16)),
+    ('first-segment-player-collision-damage',lambda x:x['current_state_player_collision']['observed_transaction'].__setitem__('damage_s16',9)),
+    ('first-segment-player-collision-hitstop',lambda x:x['current_state_player_collision']['observed_transaction'].__setitem__('hitstop_u8',9)),
     ('first-segment-fixed-frame',lambda x:x['suppression_control'].__setitem__('fixed_frame_substitute',True)),
     ('first-segment-mutation-control',lambda x:x['mutation_controls'].pop()),
 ]:
@@ -121,4 +125,4 @@ for label,mutate in [
     ('inner8-direction-table',lambda x:x['observed_path_program']['source_tables']['direction_octant_base_u8'].__setitem__(0,0)),
 ]:
     mutant=copy.deepcopy(report);target=next(item for item in mutant['archetypes'] if item['class']=='0x1f')['first_segment_action_execution_contract']['inner_state_0x08_program'];mutate(target);reject(mutant,label)
-print('ORACLE-11 Round 1 enemy tests: PASS (83 mutations rejected)')
+print('ORACLE-11 Round 1 enemy tests: PASS (87 mutations rejected)')

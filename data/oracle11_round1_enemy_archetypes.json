@@ -38085,6 +38085,155 @@
             }
           }
         },
+        "current_state_player_collision": {
+          "accepted_collision_sha256": "49ce678bee49d331a3b9e6cee97708b7644c5b0727de477ffc89671bf64bd78c",
+          "accepted_encounter_authority_sha256": "cb753f5038ac92c6c2621674c0d4db4024fbcf04d854fd05d1b600908adc60ab",
+          "attacker": {
+            "animation_record": "0x0012d8a0",
+            "attack_record": "0x130b5c",
+            "attack_selector_u8": 1,
+            "attack_table": "0x130b4c",
+            "box": {
+              "x_center": -37,
+              "x_half": 38,
+              "y_center": 53,
+              "y_half": 8,
+              "z_center": 0,
+              "z_half": 8
+            },
+            "hit_value_u8": 10,
+            "knockback_mode_s8": 0,
+            "selector_source": "current animation record byte +9",
+            "table_set": "0x130ac8"
+          },
+          "capture_identity": {
+            "byte_identical": true,
+            "coffee_shop_scene_a": {
+              "coffee_shop_scene_actors.tsv": "26baba55abefb656d9bf680cb15fa589cf36fd01e30e08b6bff8314ad53e4b25",
+              "coffee_shop_scene_frames.tsv": "91e4aab3a03586a6c9a143dd58ee03a72ebc52b7fd611fdc6fe0975ebd522d1d",
+              "dispatches.tsv": "a47890edd3e102e8d8db5e4caa21d9b15c5c6e0a3c4800ab1aff578421102903",
+              "progression_class1f_action4_timers.tsv": "749bd0e8680ff18369a0e7d00d4c9a948b1ac9137fa61b17f6a9b6896b8b3c8e",
+              "progression_result.tsv": "56f80bd3b938058b18c42a6193e86624b2de0d48b44d8cd966435ba9b3a647da",
+              "samples.tsv": "51964bb2a5d68f44996c9a5bddd4102d131ebf2e9649b904dff91066221a7611",
+              "score_writes.tsv": "da1652439ffcf28d23957d6e56675a8963c1bc519ec7f46de46a2ef934a6f327"
+            },
+            "coffee_shop_scene_b": {
+              "coffee_shop_scene_actors.tsv": "26baba55abefb656d9bf680cb15fa589cf36fd01e30e08b6bff8314ad53e4b25",
+              "coffee_shop_scene_frames.tsv": "91e4aab3a03586a6c9a143dd58ee03a72ebc52b7fd611fdc6fe0975ebd522d1d",
+              "dispatches.tsv": "a47890edd3e102e8d8db5e4caa21d9b15c5c6e0a3c4800ab1aff578421102903",
+              "progression_class1f_action4_timers.tsv": "749bd0e8680ff18369a0e7d00d4c9a948b1ac9137fa61b17f6a9b6896b8b3c8e",
+              "progression_result.tsv": "56f80bd3b938058b18c42a6193e86624b2de0d48b44d8cd966435ba9b3a647da",
+              "samples.tsv": "51964bb2a5d68f44996c9a5bddd4102d131ebf2e9649b904dff91066221a7611",
+              "score_writes.tsv": "da1652439ffcf28d23957d6e56675a8963c1bc519ec7f46de46a2ef934a6f327"
+            },
+            "coffee_shop_scene_byte_identical": true,
+            "completion_a": {
+              "progression_class1f_transitions.tsv": "2ea14b063b91f9460190f973ff8c3460b93a427e6870ae02ad3b9a8d5a68a256",
+              "progression_lifecycle_writes.tsv": "a2d67f9f98fa04e696a88bb123f9b7e904714ad95dc81b494242221ad5571e22",
+              "progression_result.tsv": "533001de7932a568a1c69358c536866fa50d1a70e84c7062200c07c351c20efc"
+            },
+            "completion_b": {
+              "progression_class1f_transitions.tsv": "2ea14b063b91f9460190f973ff8c3460b93a427e6870ae02ad3b9a8d5a68a256",
+              "progression_lifecycle_writes.tsv": "a2d67f9f98fa04e696a88bb123f9b7e904714ad95dc81b494242221ad5571e22",
+              "progression_result.tsv": "533001de7932a568a1c69358c536866fa50d1a70e84c7062200c07c351c20efc"
+            }
+          },
+          "classification": "SOURCE_CLOSED_IMPLEMENTATION_FIELDS",
+          "collision_latch": {
+            "fixed_frame_or_authored_rearm_forbidden": true,
+            "native_bounded_rule": "one class-0x1f attack record may write player damage once; an attack-selector-zero record clears the latch",
+            "source_rule": "defender per-attacker latch rejects the same active attack identity until that attack registration clears"
+          },
+          "defender": {
+            "animation_record": "0x0015f278",
+            "box": {
+              "x_center": 1,
+              "x_half": 20,
+              "y_center": 45,
+              "y_half": 46,
+              "z_center": 0,
+              "z_half": 6
+            },
+            "hurt_record": "0x11ae8e",
+            "hurt_selector_u8": 17,
+            "hurt_table": "0x11ae06",
+            "selector_source": "current animation record byte +8",
+            "table_set": "0x11ae02"
+          },
+          "guard_order": [
+            "active class-0x1f current-state actor",
+            "current animation record attack selector_u8 is nonzero",
+            "current Predator Warrior animation record hurt selector_u8 is nonzero",
+            "attacker actor+0x2c:u8 is zero",
+            "the current attacker identity is absent from the defender per-attacker latch",
+            "player health_s16 is positive and no player damage is already pending",
+            "source 0x01d25e..0x01d312 overlap succeeds in z, x, y order"
+          ],
+          "mutation_controls": [
+            "wrong attack selector or attack record",
+            "wrong current player hurt selector or hurt record",
+            "wrong overlap axis, centre sign, half extent or facing mirror",
+            "wrong damage or hitstop value",
+            "damage in the actor update instead of the post-record12 collision traversal",
+            "immediate player damage consumption instead of next player update",
+            "authored animation delay instead of actor+0x2c hitstop"
+          ],
+          "observed_transaction": {
+            "attack_advance_frame_u16": 2762,
+            "attack_hold_first_frame_u16": 2751,
+            "attack_hold_last_frame_u16": 2761,
+            "attack_visible_before_frame_u16": 2750,
+            "attacker_source_slot": "0x00ffa240",
+            "damage_s16": 10,
+            "defender_source_slot": "0x00ff8380",
+            "health_after_s16": 91,
+            "health_before_s16": 101,
+            "held_animation_record": "0x0012d8a0",
+            "hitstop_u8": 10,
+            "next_animation_record": "0x0012d8b0",
+            "source_frame_u16": 2750,
+            "state_u16": 512,
+            "substate_u16": 1026,
+            "writer_pc": "0x01d5ee"
+          },
+          "scheduler_order": {
+            "collision_write": "after current record-12 action/presentation",
+            "player_damage_consumption": "next player update",
+            "player_update": "before fixed-pool scheduler",
+            "record12_update": "before current-state collision traversal",
+            "source_common_dispatch": "0x040baa consumes actor+0x2c:u8 before action dispatch"
+          },
+          "scope": "Coffee Shop class-0x1f current attack record against the current Predator Warrior hurt record",
+          "source_routines": {
+            "class1f_hitstop_dispatch": {
+              "first": "0x040ba2",
+              "last_exclusive": "0x040bba",
+              "sha256": "2c67acc51d9842aa0bda324278406d93452fc00c27e73e48ab2c2dcd1fec3d95"
+            },
+            "collision_apply": {
+              "first": "0x01cfc2",
+              "last_exclusive": "0x01cfda",
+              "sha256": "007735dacb7727526cb98a4ab46383d386282bf6a8dd719e0f8110cdab064543"
+            },
+            "health_writer": {
+              "first": "0x01d5e6",
+              "last_exclusive": "0x01d5fe",
+              "sha256": "7557f4bffa1e075bda225bdede8a8ca55977f08e51da188ea25c1e7ecc612aae"
+            },
+            "overlap": {
+              "first": "0x01d256",
+              "last_exclusive": "0x01d26e",
+              "sha256": "dc9a23614e00815a31a5663d586a55f27fb146f0f01abde0ebcb1ae796539c44"
+            }
+          },
+          "writes_in_order": [
+            "defender actor+0x2c:u8 = attack record +0x0e hit_value_u8",
+            "if attacker actor+0x2c:u8 == 0, attacker actor+0x2c:u8 = hit_value_u8",
+            "write hit source/facing metadata",
+            "player health_s16 -= hit_value_u8 at writer 0x01d5ee",
+            "next player update consumes the already-applied current-state damage event and enters HIT without applying health twice"
+          ]
+        },
         "initializer": {
           "entry": "0x060546",
           "rng_calls_per_actor": 1,
@@ -41614,7 +41763,8 @@
           "suppressed action-4 timer write",
           "wrong source-bounds activation guard",
           "wrong animation movement cadence",
-          "wrong action-0x16 latched retry branch"
+          "wrong action-0x16 latched retry branch",
+          "wrong current-state player collision"
         ],
         "observed_state_writer_counts": {
           "0176ba": 7,

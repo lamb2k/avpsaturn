@@ -22,6 +22,7 @@ SCHEDULER = ROOT / "data" / "oracle11_actor_scheduler_lifecycle.json"
 ORACLE09 = ROOT / "data" / "oracle09_street_alien_state_facing_presentation.json"
 ENCOUNTERS = ROOT / "data" / "oracle11_round1_encounter_route_authority.json"
 AUDIO = ROOT / "data" / "oracle11_global_audio_trigger_owners.json"
+COLLISION = ROOT / "data" / "avsp_collision.json"
 HIT_KO_CONTRACT = ROOT / "tests" / "port_v2" / "combat" / "hit_ko" / "approved_contract.json"
 OPCODES = ROOT / ".deps" / "mame" / "actorprobe" / "decrypted_opcodes_2m.bin"
 PROGRAM = ROOT / ".deps" / "mame" / "actorprobe" / "decrypted_program_2m.bin"
@@ -952,6 +953,160 @@ def class1f_first_segment_action_contract(program: bytes,
             ("2410", "1a00", "0", "0012d5e4", "0004")
         ],
         "class-0x1f action-0x16 latched retry/0x1a transition drift")
+    collision = json.loads(COLLISION.read_text(encoding="ascii"))
+    encounters = json.loads(ENCOUNTERS.read_text(encoding="ascii"))
+    enemy_family = next(row for row in collision["families"]
+                        if row["table_set"] == "0x130ac8")
+    player_family = next(row for row in collision["families"]
+                         if row["table_set"] == "0x11ae02")
+    enemy_attack = next(row for row in enemy_family["attack_entries"]
+                        if row["address"] == "0x130b5c")
+    player_hurt = next(row for row in player_family["hurt_entries"]
+                       if row["address"] == "0x11ae8e")
+    damage_write = next(row for row in
+                        encounters["coffee_shop_scene_census"]
+                                  ["health_writes"]
+                        if row["frame"] == 2750 and
+                        row["attacker"] == "0xffa240" and
+                        row["defender"] == "0xff8380")
+    collision_actor_rows = [row for row in baseline_scene_rows
+                            if row["frame"] in {"2750", "2751", "2761",
+                                                "2762"} and
+                            row["slot"] in {"ff8380", "ffa240"}]
+    collision_actor = {(row["frame"], row["slot"]): row
+                       for row in collision_actor_rows}
+    enemy_attack_record = animation_record(program, 0x12D8A0)
+    player_hurt_record = animation_record(program, 0x15F278)
+    require(
+        enemy_family["attack_table"] == "0x130b4c" and
+        enemy_attack["index"] == 1 and
+        enemy_attack["box"] == {
+            "x_center": -37, "x_half": 38,
+            "y_center": 53, "y_half": 8,
+            "z_center": 0, "z_half": 8} and
+        enemy_attack["hit_value"] == 10 and
+        enemy_attack["knockback_mode"] == 0 and
+        player_family["hurt_table"] == "0x11ae06" and
+        player_hurt["index"] == 17 and
+        player_hurt["box"] == {
+            "x_center": 1, "x_half": 20,
+            "y_center": 45, "y_half": 46,
+            "z_center": 0, "z_half": 6} and
+        enemy_attack_record["attack_selector_u8"] == 1 and
+        player_hurt_record["hurt_selector_u8"] == 17 and
+        program[0x130B5C:0x130B6C].hex() ==
+            "db35260800080100000a003002000a00" and
+        damage_write["attack_record"] == "0x130b5c" and
+        damage_write["writer_pc"] == "0x01d5ee" and
+        damage_write["health_before_s16"] == 101 and
+        damage_write["health_after_s16"] == 91 and
+        collision_actor[("2750", "ffa240")]["animation_record"] ==
+            "0012d890" and
+        collision_actor[("2751", "ffa240")]["animation_record"] ==
+            "0012d8a0" and
+        collision_actor[("2761", "ffa240")]["animation_record"] ==
+            "0012d8a0" and
+        collision_actor[("2762", "ffa240")]["animation_record"] ==
+            "0012d8b0" and
+        collision_actor[("2750", "ff8380")]["health"] == "101" and
+        collision_actor[("2751", "ff8380")]["health"] == "91",
+        "class-0x1f current-state player collision chronology drift")
+    current_state_player_collision = {
+        "classification": "SOURCE_CLOSED_IMPLEMENTATION_FIELDS",
+        "scope": ("Coffee Shop class-0x1f current attack record against "
+                  "the current Predator Warrior hurt record"),
+        "accepted_collision_sha256": digest(COLLISION),
+        "accepted_encounter_authority_sha256": digest(ENCOUNTERS),
+        "capture_identity": {
+            "completion_a": identity_a,
+            "completion_b": identity_b,
+            "byte_identical": True,
+            "coffee_shop_scene_a": scene_identity_a,
+            "coffee_shop_scene_b": scene_identity_b,
+            "coffee_shop_scene_byte_identical": True,
+        },
+        "scheduler_order": {
+            "player_update": "before fixed-pool scheduler",
+            "record12_update": "before current-state collision traversal",
+            "collision_write": "after current record-12 action/presentation",
+            "player_damage_consumption": "next player update",
+            "source_common_dispatch": "0x040baa consumes actor+0x2c:u8 before action dispatch",
+        },
+        "guard_order": [
+            "active class-0x1f current-state actor",
+            "current animation record attack selector_u8 is nonzero",
+            "current Predator Warrior animation record hurt selector_u8 is nonzero",
+            "attacker actor+0x2c:u8 is zero",
+            "the current attacker identity is absent from the defender per-attacker latch",
+            "player health_s16 is positive and no player damage is already pending",
+            "source 0x01d25e..0x01d312 overlap succeeds in z, x, y order",
+        ],
+        "attacker": {
+            "table_set": "0x130ac8",
+            "attack_table": enemy_family["attack_table"],
+            "selector_source": "current animation record byte +9",
+            "animation_record": "0x0012d8a0",
+            "attack_selector_u8": enemy_attack_record["attack_selector_u8"],
+            "attack_record": enemy_attack["address"],
+            "box": enemy_attack["box"],
+            "hit_value_u8": enemy_attack["hit_value"],
+            "knockback_mode_s8": enemy_attack["knockback_mode"],
+        },
+        "defender": {
+            "table_set": "0x11ae02",
+            "hurt_table": player_family["hurt_table"],
+            "selector_source": "current animation record byte +8",
+            "animation_record": "0x0015f278",
+            "hurt_selector_u8": player_hurt_record["hurt_selector_u8"],
+            "hurt_record": player_hurt["address"],
+            "box": player_hurt["box"],
+        },
+        "writes_in_order": [
+            "defender actor+0x2c:u8 = attack record +0x0e hit_value_u8",
+            "if attacker actor+0x2c:u8 == 0, attacker actor+0x2c:u8 = hit_value_u8",
+            "write hit source/facing metadata",
+            "player health_s16 -= hit_value_u8 at writer 0x01d5ee",
+            "next player update consumes the already-applied current-state damage event and enters HIT without applying health twice",
+        ],
+        "collision_latch": {
+            "source_rule": "defender per-attacker latch rejects the same active attack identity until that attack registration clears",
+            "native_bounded_rule": "one class-0x1f attack record may write player damage once; an attack-selector-zero record clears the latch",
+            "fixed_frame_or_authored_rearm_forbidden": True,
+        },
+        "observed_transaction": {
+            "source_frame_u16": 2750,
+            "attacker_source_slot": "0x00ffa240",
+            "defender_source_slot": "0x00ff8380",
+            "state_u16": 0x0200,
+            "substate_u16": 0x0402,
+            "writer_pc": damage_write["writer_pc"],
+            "health_before_s16": damage_write["health_before_s16"],
+            "health_after_s16": damage_write["health_after_s16"],
+            "damage_s16": 10,
+            "hitstop_u8": 10,
+            "attack_visible_before_frame_u16": 2750,
+            "attack_hold_first_frame_u16": 2751,
+            "attack_hold_last_frame_u16": 2761,
+            "attack_advance_frame_u16": 2762,
+            "held_animation_record": "0x0012d8a0",
+            "next_animation_record": "0x0012d8b0",
+        },
+        "source_routines": {
+            "collision_apply": source_window(opcodes, 0x01CFCA),
+            "overlap": source_window(opcodes, 0x01D25E),
+            "health_writer": source_window(opcodes, 0x01D5EE),
+            "class1f_hitstop_dispatch": source_window(opcodes, 0x040BAA),
+        },
+        "mutation_controls": [
+            "wrong attack selector or attack record",
+            "wrong current player hurt selector or hurt record",
+            "wrong overlap axis, centre sign, half extent or facing mirror",
+            "wrong damage or hitstop value",
+            "damage in the actor update instead of the post-record12 collision traversal",
+            "immediate player damage consumption instead of next player update",
+            "authored animation delay instead of actor+0x2c hitstop",
+        ],
+    }
     return {
         "classification": "SOURCE_CLOSED_IMPLEMENTATION_FIELDS",
         "scope": ("all route-reachable class-0x1f action dispatch required "
@@ -1033,6 +1188,7 @@ def class1f_first_segment_action_contract(program: bytes,
                                      "selectors": sequences},
         "movement_tables": movement_tables,
         "attack_timer_table_u8": list(opcodes[0x060D3C:0x060D4C]),
+        "current_state_player_collision": current_state_player_collision,
         "action_programs": {
             "source_bounds": {
                 "entry_pc": "0x060c2e",
@@ -1300,7 +1456,8 @@ def class1f_first_segment_action_contract(program: bytes,
                               "suppressed action-4 timer write",
                               "wrong source-bounds activation guard",
                               "wrong animation movement cadence",
-                              "wrong action-0x16 latched retry branch"],
+                              "wrong action-0x16 latched retry branch",
+                              "wrong current-state player collision"],
     }
 
 
@@ -2991,7 +3148,30 @@ def validate(report: dict[str, object]) -> None:
                         is False and
                     actions["suppression_control"]["action4_timer"]
                         ["suppressed_writes"] == 1 and
-                    len(actions["mutation_controls"]) == 18,
+                    actions["current_state_player_collision"]
+                        ["classification"] ==
+                            "SOURCE_CLOSED_IMPLEMENTATION_FIELDS" and
+                    actions["current_state_player_collision"]
+                        ["capture_identity"]["byte_identical"] is True and
+                    actions["current_state_player_collision"]
+                        ["attacker"]["attack_record"] == "0x130b5c" and
+                    actions["current_state_player_collision"]
+                        ["attacker"]["hit_value_u8"] == 10 and
+                    actions["current_state_player_collision"]
+                        ["defender"]["hurt_record"] == "0x11ae8e" and
+                    actions["current_state_player_collision"]
+                        ["defender"]["hurt_selector_u8"] == 17 and
+                    actions["current_state_player_collision"]
+                        ["observed_transaction"]["writer_pc"] ==
+                            "0x01d5ee" and
+                    actions["current_state_player_collision"]
+                        ["observed_transaction"]["damage_s16"] == 10 and
+                    actions["current_state_player_collision"]
+                        ["observed_transaction"]["hitstop_u8"] == 10 and
+                    actions["current_state_player_collision"]
+                        ["observed_transaction"]
+                        ["attack_advance_frame_u16"] == 2762 and
+                    len(actions["mutation_controls"]) == 19,
                     "0x1f: first-segment action execution contract drift")
             inner8 = actions["inner_state_0x08_program"]
             require(inner8["classification"] ==

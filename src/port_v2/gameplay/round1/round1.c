@@ -3547,6 +3547,33 @@ static int avsp_round1_player_melee_contract_valid(void)
     return 1;
 }
 
+static int avsp_round1_class1f_player_collision_contract_valid(void)
+{
+    const AvspRound1Class1fPlayerCollisionSpec *spec =
+        &avsp_round1_class1f_player_collision;
+    const AvspRound1CollisionBoxSpec *attack = &spec->attack_box;
+    const AvspRound1CollisionBoxSpec *hurt = &spec->hurt_box;
+    return spec->attacker_table_set == 0x130ac8UL &&
+        spec->attack_record == 0x130b5cUL &&
+        spec->defender_table_set == 0x11ae02UL &&
+        spec->hurt_record == 0x11ae8eUL &&
+        spec->defender_animation_record == 0x0015f278UL &&
+        spec->health_writer == 0x01d5eeUL &&
+        spec->source_frame == 2750u && spec->attack_selector == 1u &&
+        spec->hurt_selector == 17u && spec->damage == 10u &&
+        spec->hitstop == 10u &&
+        attack->x_center == -37 && attack->y_center == 53 &&
+        attack->x_half == 38u && attack->y_half == 8u &&
+        attack->z_center == 0 && attack->z_half == 8u &&
+        attack->knockback_mode == 0 && attack->hit_value == 10u &&
+        attack->damage_selector == 0u &&
+        hurt->x_center == 1 && hurt->y_center == 45 &&
+        hurt->x_half == 20u && hurt->y_half == 46u &&
+        hurt->z_center == 0 && hurt->z_half == 6u &&
+        hurt->knockback_mode == 0 && hurt->hit_value == 0u &&
+        hurt->damage_selector == 0u;
+}
+
 static void avsp_round1_observe_player_melee(AvspRound1Runtime *runtime,
                                               unsigned short prior_state,
                                               unsigned short prior_selector,
@@ -4062,6 +4089,95 @@ static void avsp_round1_refresh_collision_registration(
             actor->active == 1u &&
             avsp_round1_collision_visibility(runtime, actor->x, actor->y));
     }
+}
+
+static int avsp_round1_step_class1f_player_collision(
+    AvspRound1Runtime *runtime)
+{
+    unsigned int index;
+    AvspRound1Pool *attackers = &runtime->pools[0];
+    if (runtime->first_encounter.pending_player_damage != 0u ||
+        runtime->player.health <= 0 ||
+        runtime->player_action.state == AVSP_PW_STATE_KO)
+        return 1;
+    for (index = 0u; index < attackers->capacity; ++index)
+    {
+        AvspRound1ActorCore *actor = &attackers->records[index];
+        const AvspRound1Class1fActionRecordSpec *record;
+        AvspAttackBox attack;
+        AvspBox hurt;
+        AvspActor attacker;
+        AvspActor defender;
+        unsigned char hurt_selector;
+        unsigned char hit_value = 0u;
+        if (actor->active != 1u || actor->actor_class != 0x1f ||
+            actor->state != 0x0200u || actor->source_field01 != 1u ||
+            actor->source_hitstop != 0u || actor->health < 0 ||
+            avsp_round1_class1f_reaction_active(actor))
+            continue;
+        record = avsp_round1_find_class1f_action_record(
+            actor->animation_record);
+        if (record == 0)
+            continue;
+        if (record->attack_selector == 0u)
+        {
+            actor->source_player_collision_latched = 0u;
+            continue;
+        }
+        if (actor->source_player_collision_latched != 0u)
+            continue;
+        hurt_selector = runtime->player_locomotion_action ==
+                avsp_round1_player_locomotion.walking_action ||
+                runtime->player_locomotion_action ==
+                avsp_round1_player_locomotion.stop_action ||
+                runtime->player.animation_record ==
+                avsp_round1_class1f_player_collision.
+                    defender_animation_record ?
+            avsp_round1_class1f_player_collision.hurt_selector :
+            runtime->player.hurt_selector;
+        if (hurt_selector == 0u)
+            continue;
+        if (!avsp_collision_attack_box(
+                avsp_round1_class1f_player_collision.attacker_table_set,
+                record->attack_selector, &attack) ||
+            !avsp_collision_hurt_box(
+                avsp_round1_class1f_player_collision.defender_table_set,
+                hurt_selector, &hurt))
+            return 0;
+        memset(&attacker, 0, sizeof(attacker));
+        memset(&defender, 0, sizeof(defender));
+        attacker.world_x = (unsigned short)actor->x;
+        attacker.world_y = (unsigned short)actor->y;
+        attacker.world_z = (unsigned short)actor->z;
+        attacker.facing = actor->facing;
+        defender.world_x = (unsigned short)runtime->player.x;
+        defender.world_y = (unsigned short)runtime->player.y;
+        defender.world_z = (unsigned short)runtime->player.z;
+        defender.facing = runtime->player.facing;
+        if (!avsp_collision_overlap_boxes(&attacker, &attack, &defender,
+                                          &hurt, &hit_value))
+            continue;
+        if (record->attack_selector ==
+                avsp_round1_class1f_player_collision.attack_selector &&
+            hurt_selector ==
+                avsp_round1_class1f_player_collision.hurt_selector &&
+            (hit_value != avsp_round1_class1f_player_collision.damage ||
+             hit_value != avsp_round1_class1f_player_collision.hitstop))
+            return 0;
+        actor->source_hitstop = hit_value;
+        actor->source_player_collision_latched = 1u;
+        runtime->player_action.health = (short)(
+            runtime->player_action.health - (short)hit_value);
+        runtime->player.health = runtime->player_action.health;
+        runtime->first_encounter.pending_player_damage = hit_value;
+        runtime->first_encounter.pending_player_damage_health_applied = 1u;
+        runtime->first_encounter.alien_contact = 1u;
+        ++runtime->first_encounter.alien_contacts;
+        ++runtime->class1f_player_collision_writes;
+        ++runtime->class1f_player_damage_writes;
+        return 1;
+    }
+    return 1;
 }
 
 static unsigned char avsp_round1_source_rng(AvspRound1Runtime *runtime)
@@ -8194,6 +8310,11 @@ int avsp_round1_step_scheduler(AvspRound1Runtime *runtime)
                         return 0;
                     }
                 }
+                else if (actor->source_hitstop != 0u)
+                {
+                    --actor->source_hitstop;
+                    ++runtime->class1f_hitstop_updates;
+                }
                 else
                 {
                     class1f_result = avsp_round1_step_class1f_source_action(
@@ -8291,6 +8412,12 @@ int avsp_round1_step_scheduler(AvspRound1Runtime *runtime)
         }
     }
     avsp_round1_refresh_collision_registration(runtime);
+    if (!avsp_round1_step_class1f_player_collision(runtime))
+    {
+        runtime->scheduler_failure_code = 29u;
+        ++runtime->failure_count;
+        return 0;
+    }
     if (!avsp_round1_step_record4_collision(runtime))
         return 0;
     for (slot_index = 0u;
@@ -8685,6 +8812,12 @@ int avsp_round1_step_player(AvspRound1Runtime *runtime,
         }
         received_damage =
             (short)runtime->first_encounter.pending_player_damage;
+        if (runtime->first_encounter.pending_player_damage_health_applied)
+        {
+            runtime->player_action.health = (short)(
+                runtime->player_action.health + received_damage);
+            runtime->first_encounter.pending_player_damage_health_applied = 0u;
+        }
         runtime->first_encounter.player_damage =
             runtime->first_encounter.pending_player_damage;
         runtime->first_encounter.pending_player_damage = 0u;
@@ -9112,6 +9245,7 @@ int avsp_round1_entry_valid(const AvspRound1Runtime *runtime)
         runtime->player.health > AVSP_ROUND1_PLAYER_HEALTH ||
         runtime->fallback_count != 0u || runtime->failure_count != 0u ||
         !avsp_round1_player_melee_contract_valid() ||
+        !avsp_round1_class1f_player_collision_contract_valid() ||
         !avsp_round1_player_jump_contract_valid() ||
         !avsp_round1_player_jump_runtime_valid(runtime) ||
         !avsp_round1_player_weapon_contract_valid() ||

@@ -9,7 +9,7 @@ from pathlib import Path
 
 ROOT = Path(__file__).resolve().parents[3]
 SPEC = ROOT / "data/spec02_round1_executable_contract.json"
-EXPECTED = "75689cc3c7bc11a6178c621c004f58cca041ffc174f7df8354aeb4b83b4a9293"
+EXPECTED = "b1b81b9a3525a4b0220332f75187e33384bab8903fc092580efc2260c61a648d"
 assert hashlib.sha256(SPEC.read_bytes()).hexdigest() == EXPECTED
 assert json.loads(SPEC.read_text())["status"] == "ACCEPTED"
 source = (ROOT / "src/port_v2/gameplay/round1/round1.c").read_text()
@@ -442,7 +442,17 @@ for before, after in (
      "    -59, 64, 0x0058u, 0x0232u, 17, 16u, 0x06, 2u, 20u,"),
     ("    { 0, 0, 8u, 8u, 0, 8u, 0, 20u, 10u },",
      "    { 100, 0, 8u, 8u, 0, 8u, 0, 20u, 10u },"),
-    ("    { 1, 45, 20u, 46u, 0, 6u, 0, 0u, 0u }",
+    ("    2750u, 1u, 17u, 10u, 10u,\n"
+     "    { -37, 53, 38u, 8u, 0, 8u, 0, 10u, 0u },\n"
+     "    { 1, 45, 20u, 46u, 0, 6u, 0, 0u, 0u }",
+     "    2750u, 1u, 17u, 10u, 10u,\n"
+     "    { -37, 53, 38u, 8u, 0, 8u, 0, 10u, 0u },\n"
+     "    { 101, 45, 20u, 46u, 0, 6u, 0, 0u, 0u }"),
+    ("    -59, 64, 0x0058u, 0x0232u, 17, 16u, 0x06, 1u, 20u,\n"
+     "    { 0, 0, 8u, 8u, 0, 8u, 0, 20u, 10u },\n"
+     "    { 1, 45, 20u, 46u, 0, 6u, 0, 0u, 0u }",
+     "    -59, 64, 0x0058u, 0x0232u, 17, 16u, 0x06, 1u, 20u,\n"
+     "    { 0, 0, 8u, 8u, 0, 8u, 0, 20u, 10u },\n"
      "    { 101, 45, 20u, 46u, 0, 6u, 0, 0u, 0u }"),
     ("    { 524288L, -8192L, 262144L, -16384L, 0L },",
      "    { 524287L, -8192L, 262144L, -16384L, 0L },"),
@@ -493,4 +503,4 @@ for before, after in (
                                  "--", "bash", "-lc", command],
                                 capture_output=True)
         assert result.returncode != 0, f"generated mutation escaped: {before}"
-print("REIMPLEMENT-13 entry/player/scheduler/class1f/Coffee-Shop-navigation/neutral-stop/melee/Button1/Button3/type16-projectile/first-encounter differential: PASS (183 real mutations)")
+print("REIMPLEMENT-13 entry/player/scheduler/class1f/Coffee-Shop-navigation/neutral-stop/melee/Button1/Button3/type16-projectile/first-encounter differential: PASS (184 real mutations)")
