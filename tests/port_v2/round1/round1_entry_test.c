@@ -3369,6 +3369,71 @@ int main(void)
         }
     }
     {
+        AvspRound1Runtime reuse_runtime;
+        unsigned int source_frame;
+        avsp_round1_init(&reuse_runtime);
+        for (source_frame = 1972u; source_frame <= 2573u; ++source_frame)
+        {
+            unsigned short input = avsp_round1_coffee_shop_source_input(
+                (unsigned short)source_frame);
+            unsigned int tick;
+            if (source_frame == 2072u &&
+                !avsp_round1_begin_first_entry(&reuse_runtime))
+                return 114;
+            if (source_frame == 2572u || source_frame == 2573u)
+            {
+                const AvspRound1ActorCore *reused =
+                    &reuse_runtime.pools[0].records[17];
+                unsigned long expected_record = source_frame == 2572u ?
+                    0x0012e778UL : 0x0012e38cUL;
+                unsigned long expected_assembly = source_frame == 2572u ?
+                    0x0012f794UL : 0x0013065eUL;
+                unsigned short expected_substate = source_frame == 2572u ?
+                    0x0c00u : 0x0c02u;
+                unsigned short expected_timer = source_frame == 2572u ?
+                    1u : 8u;
+                short expected_branch = source_frame == 2572u ?
+                    (short)-32760 : 0;
+                if (!reused->active || reused->actor_class != 0x1f ||
+                    reused->state != 0x0200u ||
+                    reused->substate != expected_substate ||
+                    reused->animation_record != expected_record ||
+                    reused->assembly != expected_assembly ||
+                    reused->animation_timer != expected_timer ||
+                    reused->animation_branch != expected_branch)
+                {
+                    fprintf(stderr,
+                        "Coffee Shop recurring presentation reuse failed frame=%u active=%u class=%02x state=%04x/%04x animation=%08lx assembly=%08lx timer=%u branch=%d\n",
+                        source_frame, reused->active,
+                        (unsigned int)(unsigned char)reused->actor_class,
+                        reused->state, reused->substate,
+                        reused->animation_record, reused->assembly,
+                        reused->animation_timer, reused->animation_branch);
+                    return 114;
+                }
+            }
+            reuse_runtime.frame = source_frame >= 2040u ?
+                source_frame - 2040u : 0u;
+            for (tick = 0u;
+                 tick < avsp_round1_coffee_shop_source_updates(
+                    (unsigned short)source_frame); ++tick)
+            {
+                int player_authority_enabled_at_tick_start =
+                    reuse_runtime.route_state == 4;
+                if (reuse_runtime.entry.started &&
+                    reuse_runtime.route_state != 4 &&
+                    !avsp_round1_step_first_entry(&reuse_runtime))
+                    return 115;
+                if (player_authority_enabled_at_tick_start &&
+                    !avsp_round1_step_player(&reuse_runtime, input, 0))
+                    return 115;
+                if (reuse_runtime.entry.dependencies_seeded &&
+                    !avsp_round1_step_scheduler(&reuse_runtime))
+                    return 115;
+            }
+        }
+    }
+    {
         AvspRound1Runtime scene_runtime;
         unsigned int source_frame;
         unsigned int actor_index;

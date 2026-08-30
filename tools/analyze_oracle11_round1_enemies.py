@@ -1165,9 +1165,21 @@ def class1f_first_segment_action_contract(program: bytes,
                 "style85_result_by_action": {"0x06": 0, "0x08": 1,
                                                "0x0a": "unchanged"}},
             "action_0x0c": {
-                "substates_u8": [0, 2, 4], "initial_selector_u8": 35,
-                "middle_selector_u8": 36, "y_delta_s32_16_16": -0x2000,
-                "terminal_next_action_u8": 0},
+                "substates_u8": [0, 2, 4],
+                "initial_selector_u8": 0x35,
+                "middle_selector_u8": 0x36,
+                "y_delta_s32_16_16": -0x2000,
+                "terminal_next_action_u8": 0,
+                "selector_encoding":
+                    "68000 moveq immediates are hexadecimal 0x35/0x36; decimal 35/36 is rejected",
+                "coffee_shop_auxiliary_spawn": {
+                    "source_slot": "0x00ffa240",
+                    "entry_visible_frame_u16": 2572,
+                    "entry_animation_record": "0x0012e778",
+                    "initial_dispatch_write_frame_u16": 2572,
+                    "initial_visible_frame_u16": 2573,
+                    "initial_animation_record": "0x0012e38c",
+                    "initial_animation_timer_u16": 8}},
             "action_0x0e": {
                 "substates_u8": [0, 2, 4], "initial_selector_u8": 77,
                 "landing_selector_u8": 62,
@@ -2881,6 +2893,22 @@ def validate(report: dict[str, object]) -> None:
                     actions["action_programs"]["source_bounds"]
                         ["coffee_shop_observation"]["result"] ==
                             "pass after x_max; camera-relative test skipped" and
+                    actions["action_programs"]["action_0x0c"] == {
+                        "substates_u8": [0, 2, 4],
+                        "initial_selector_u8": 0x35,
+                        "middle_selector_u8": 0x36,
+                        "y_delta_s32_16_16": -0x2000,
+                        "terminal_next_action_u8": 0,
+                        "selector_encoding":
+                            "68000 moveq immediates are hexadecimal 0x35/0x36; decimal 35/36 is rejected",
+                        "coffee_shop_auxiliary_spawn": {
+                            "source_slot": "0x00ffa240",
+                            "entry_visible_frame_u16": 2572,
+                            "entry_animation_record": "0x0012e778",
+                            "initial_dispatch_write_frame_u16": 2572,
+                            "initial_visible_frame_u16": 2573,
+                            "initial_animation_record": "0x0012e38c",
+                            "initial_animation_timer_u16": 8}} and
                     actions["action_programs"]
                         ["animation_movement_helper_0x0165c4"]
                         ["source_body_sha256"] ==

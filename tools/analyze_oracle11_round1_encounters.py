@@ -1292,6 +1292,26 @@ def build_report() -> dict[str, object]:
                  "selector83_u8": 1},
             ],
             "post_allocation_dispatch": {
+                "presentation_ownership": "reused_record_residue",
+                "presentation_writer_pcs": [],
+                "writer_rule": ("0x028a12..0x028ab2 writes no animation record, "
+                                "timer, branch or assembly; allocation and class "
+                                "initialization preserve the released record's "
+                                "presentation until the next action dispatch"),
+                "source_samples": {
+                    "pre_release_frame_2508": {
+                        "slot": "0xffa3c0",
+                        "animation_record": "0x0012ddb0",
+                        "animation_timer_u16": 0x0fff,
+                        "animation_branch_s16": -0x8000},
+                    "post_allocation_frame_2511": {
+                        "slot": "0xffa3c0",
+                        "animation_record": "0x0012ddb0",
+                        "animation_timer_u16": 0x0fff,
+                        "animation_branch_s16": -0x8000}},
+                "mutation_control": {
+                    "mutation": "clear or replace reused presentation at allocation",
+                    "fixed_post_allocation_pose_forbidden": True},
                 "same_frame": {"state_u16": 0x0200, "substate_u16": 0,
                                "facing_u8": 1, "health_s16": 87,
                                "animation_record": "0x0012ddb0",
@@ -1365,6 +1385,36 @@ def build_report() -> dict[str, object]:
                 "x_s16 = 976", "y_s16 = 344", "z_s16 = 344",
                 "selector83_u8 = 0",
             ],
+            "post_allocation_dispatch": {
+                "presentation_ownership": "reused_record_residue",
+                "presentation_writer_pcs": [],
+                "writer_rule": ("0x028b5a..0x028ba4 and the same-frame class "
+                                "initializer write no animation record, timer, "
+                                "branch or assembly"),
+                "source_samples": {
+                    "pre_release_frame_2567": {
+                        "slot": "0xffa240",
+                        "animation_record": "0x0012e778",
+                        "animation_timer_u16": 1,
+                        "animation_branch_s16": -32760,
+                        "assembly": "0x0012f794"},
+                    "post_allocation_frame_2572": {
+                        "slot": "0xffa240",
+                        "animation_record": "0x0012e778",
+                        "animation_timer_u16": 1,
+                        "animation_branch_s16": -32760,
+                        "assembly": "0x0012f794"},
+                    "first_action_frame_2573": {
+                        "slot": "0xffa240",
+                        "logical_selector_u8": 0x35,
+                        "animation_record": "0x0012e38c",
+                        "animation_timer_u16": 8,
+                        "animation_branch_s16": 0,
+                        "assembly": "0x0013065e"}},
+                "mutation_control": {
+                    "clear_reused_presentation_rejected": True,
+                    "fixed_primary_pose_rejected": True,
+                    "decimal_35_selector_rejected": True}},
         },
         "suppression_control": {
             "mutation": "retain old active byte only at writer 0x028a3e",
@@ -1624,6 +1674,14 @@ def validate(report: dict[str, object]) -> None:
                     "attack_selector_u8": 1,
                 } and
             progression["primary_writer"]["post_allocation_dispatch"]
+                ["presentation_ownership"] == "reused_record_residue" and
+            progression["primary_writer"]["post_allocation_dispatch"]
+                ["presentation_writer_pcs"] == [] and
+            progression["primary_writer"]["post_allocation_dispatch"]
+                ["mutation_control"] == {
+                    "mutation": "clear or replace reused presentation at allocation",
+                    "fixed_post_allocation_pose_forbidden": True} and
+            progression["primary_writer"]["post_allocation_dispatch"]
                 ["next_frame"]["substate_u16"] == 0x1600 and
             progression["primary_writer"]["fixed_point_record_reuse"] == {
                 "classification": "SOURCE_CLOSED_IMPLEMENTATION_FIELDS",
@@ -1659,6 +1717,24 @@ def validate(report: dict[str, object]) -> None:
                 "x_s16": 976, "y_s16": 344, "z_s16": 344,
                 "selector83_u8": 0} and
             progression["auxiliary_writer"]["rng_calls"] == 0 and
+            progression["auxiliary_writer"]["post_allocation_dispatch"]
+                ["presentation_ownership"] == "reused_record_residue" and
+            progression["auxiliary_writer"]["post_allocation_dispatch"]
+                ["presentation_writer_pcs"] == [] and
+            progression["auxiliary_writer"]["post_allocation_dispatch"]
+                ["source_samples"]["post_allocation_frame_2572"] == {
+                    "slot": "0xffa240",
+                    "animation_record": "0x0012e778",
+                    "animation_timer_u16": 1,
+                    "animation_branch_s16": -32760,
+                    "assembly": "0x0012f794"} and
+            progression["auxiliary_writer"]["post_allocation_dispatch"]
+                ["source_samples"]["first_action_frame_2573"] == {
+                    "slot": "0xffa240", "logical_selector_u8": 0x35,
+                    "animation_record": "0x0012e38c",
+                    "animation_timer_u16": 8,
+                    "animation_branch_s16": 0,
+                    "assembly": "0x0013065e"} and
             progression["progress_increment_boundary"]["writer_pc"] ==
                 "0x061070" and
             progression["progress_increment_boundary"]["transition_guard"] == {

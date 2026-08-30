@@ -1,8 +1,8 @@
 {
  "archive": {
-  "bytes": 559252,
+  "bytes": 592648,
   "file": "build/avsp_cd/SPR4/TILES.BIN",
-  "sha256": "c6c3f8b5ac39ac98127cb1e14fb15610f3ddfabb6ffa067bac1fcc40e04e26a8"
+  "sha256": "cc964b51f4d9fcb1830ba4af19fcbcde2e8323c50944d9b54342cdc7f108aae4"
  },
  "classification": "tile archive manifest - no ROM bytes",
  "facing_union": true,
@@ -237,8 +237,8 @@
    2048,
    1920
   ],
-  "first_segment_composite_texture_bytes": 579072,
-  "first_segment_composite_unique_entries": 191,
+  "first_segment_composite_texture_bytes": 581632,
+  "first_segment_composite_unique_entries": 192,
   "first_segment_peak_noncomposite_frame": 2745,
   "first_segment_peak_noncomposite_tiles": 158,
   "max_tiles_per_impact": 0,
@@ -264,8 +264,8 @@
   "source_peak_object_entries": 37,
   "source_peak_unique_tiles": 374,
   "spec02_composite_max_texture_bytes": 11648,
-  "spec02_composite_texture_bytes": 455808,
-  "spec02_composite_unique_entries": 143,
+  "spec02_composite_texture_bytes": 460928,
+  "spec02_composite_unique_entries": 145,
   "startup_peak_noncomposite_frame": 2208,
   "startup_peak_noncomposite_tiles": 69,
   "startup_source_frame_range": [
@@ -283,8 +283,8 @@
    "frames_sampled": 201
   },
   "spec02_round1_native_presentations": {
-   "decoded_variants": 389,
-   "fixture_sha256": "2f05a0ef5a107403a4a74f06208ffec9fadb3f856ce13510efb185be4971fe5c",
+   "decoded_variants": 425,
+   "fixture_sha256": "8554c61db6b1b4e8e64ab6b726c66f2e87539f29084d43c529e119fddc37dcd8",
    "palette_banks": [
     "0x00",
     "0x05",
@@ -299,15 +299,15 @@
     "0x1D",
     "0x1E"
    ],
-   "tiles_added": 1980,
-   "unique_assemblies": 214
+   "tiles_added": 2233,
+   "unique_assemblies": 232
   }
  },
  "sample_stride": 1,
  "schema": 1,
  "scope": "street",
  "tile_bytes": 128,
- "tile_count": 4233,
- "tile_region_budget_bytes": 577536,
- "tile_region_budget_used_pct": 96.83
+ "tile_count": 4486,
+ "tile_region_budget_bytes": 614400,
+ "tile_region_budget_used_pct": 96.46
 }

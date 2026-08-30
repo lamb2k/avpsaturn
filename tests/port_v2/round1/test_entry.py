@@ -9,7 +9,7 @@ from pathlib import Path
 
 ROOT = Path(__file__).resolve().parents[3]
 SPEC = ROOT / "data/spec02_round1_executable_contract.json"
-EXPECTED = "4c52813c7f36e7094cae51bbd9d07c9d51001afcce3300455b67fcc645f5f723"
+EXPECTED = "75689cc3c7bc11a6178c621c004f58cca041ffc174f7df8354aeb4b83b4a9293"
 assert hashlib.sha256(SPEC.read_bytes()).hexdigest() == EXPECTED
 assert json.loads(SPEC.read_text())["status"] == "ACCEPTED"
 source = (ROOT / "src/port_v2/gameplay/round1/round1.c").read_text()
@@ -247,6 +247,10 @@ for before, after in (
      "actor->substate ==\n                    avsp_round1_recurring_spawn.intro_gate_owner_state"),
     ("encounter->source_living_count >=\n            avsp_round1_recurring_spawn.maximum_living",
      "encounter->source_living_count >\n            avsp_round1_recurring_spawn.maximum_living"),
+    ("if (avsp_round1_recurring_spawn.preserve_reused_presentation != 0u)",
+     "if (0)"),
+    ("avsp_round1_class1f_action_program.fall_initial_selector",
+     "35u"),
     ("actor->source_slot = 0x00ff0000UL | (unsigned long)slot;",
      "actor->source_slot = slot;"),
     ("actor->source_slot ==\n                        runtime->first_encounter.actor_source_slot)",
@@ -489,4 +493,4 @@ for before, after in (
                                  "--", "bash", "-lc", command],
                                 capture_output=True)
         assert result.returncode != 0, f"generated mutation escaped: {before}"
-print("REIMPLEMENT-13 entry/player/scheduler/class1f/Coffee-Shop-navigation/neutral-stop/melee/Button1/Button3/type16-projectile/first-encounter differential: PASS (181 real mutations)")
+print("REIMPLEMENT-13 entry/player/scheduler/class1f/Coffee-Shop-navigation/neutral-stop/melee/Button1/Button3/type16-projectile/first-encounter differential: PASS (183 real mutations)")

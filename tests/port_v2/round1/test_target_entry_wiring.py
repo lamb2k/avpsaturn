@@ -11,7 +11,7 @@ SPEC_SHA256 = hashlib.sha256(
 
 REQUIRED = (
     '#include "src/port_v2/gameplay/round1/round1.h"',
-    "#define AVSP_TILE_REGION_BYTES 0x8D000",
+    "#define AVSP_TILE_REGION_BYTES 0x96000",
     "#define AVSP_TILE_FRAME_UNIQUE_LIMIT 8192",
     "#define AVSP_ROUND1_RUNTIME_REGION_BYTES 0x19000",
     "#define AVSP_ROUND1_RUNTIME_MEASURED_BYTES 0x148a0",

@@ -1,8 +1,8 @@
 #ifndef AVSP_SPEC02_ROUND1_ENTRY_DATA_H
 #define AVSP_SPEC02_ROUND1_ENTRY_DATA_H
 
-/* contract_sha256=4c52813c7f36e7094cae51bbd9d07c9d51001afcce3300455b67fcc645f5f723 */
-/* fixtures_sha256=2f05a0ef5a107403a4a74f06208ffec9fadb3f856ce13510efb185be4971fe5c */
+/* contract_sha256=75689cc3c7bc11a6178c621c004f58cca041ffc174f7df8354aeb4b83b4a9293 */
+/* fixtures_sha256=8554c61db6b1b4e8e64ab6b726c66f2e87539f29084d43c529e119fddc37dcd8 */
 #define AVSP_ROUND1_ENTRY_PROGRAM_SHA256 "e5ef761fadc1b5a7df62e77c03025c0ebff0c2503cbc8be9c0077d4bd6cd24ba"
 
 static const unsigned char avsp_round1_entry_program[AVSP_ROUND1_ENTRY_PROGRAM_BYTES] =
@@ -407,8 +407,7 @@ static const AvspRound1RecurringSpawnSpec avsp_round1_recurring_spawn =
     -48, 1008, 976, 344, 344, 4u, 0u,
     1u, 0u, 0xC580u, 0x44, 24u, 0x0404u,
     0x0402u, 0x0000u, -1, 1u,
-    1u,
-    { 4095u, -32768, 0x0012ddb0UL, 0x00130346UL, 1u, 1u }
+    1u, 1u
 };
 
 static const short avsp_round1_recurring_lane_offsets[AVSP_ROUND1_RECURRING_LANE_OFFSET_COUNT] =
@@ -751,7 +750,7 @@ static const AvspRound1Class1fActionProgramSpec avsp_round1_class1f_action_progr
     { 34u, 35u }, { 36u, 52u }, { 0x44u, 0x48u },
     { -65536L, -81920L, -98304L, -131072L },
     229376L, -32768L, 32, -8192L,
-    77u, 62u, 1u,
+    53u, 54u, 77u, 62u, 1u,
     { 0u, 0u, 0u, 0u, 0u, 0u, 2u, 2u, 2u, 2u, 2u, 2u, 4u, 4u, 4u, 4u, 4u, 4u, 4u, 4u, 4u, 4u, 4u, 4u, 6u, 6u, 6u, 6u, 6u, 6u, 6u, 6u },
     { 0u, 1u, 2u, 6u },
     { 1u, 1u, 4u, 3u },

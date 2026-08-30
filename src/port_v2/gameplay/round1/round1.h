@@ -6,7 +6,7 @@
 #include "../../combat/hit_ko/hit_ko.h"
 
 #define AVSP_ROUND1_SPEC02_SHA256 \
-    "4c52813c7f36e7094cae51bbd9d07c9d51001afcce3300455b67fcc645f5f723"
+    "75689cc3c7bc11a6178c621c004f58cca041ffc174f7df8354aeb4b83b4a9293"
 #define AVSP_ROUND1_CANARY_HEAD 0x52314548UL
 #define AVSP_ROUND1_CANARY_TAIL 0x52314554UL
 #define AVSP_ROUND1_ROUTE_ENTRY_STATE 2
@@ -707,6 +707,8 @@ typedef struct
     long jump_y_acceleration;
     short jump_initial_y_add;
     long fall_y_delta;
+    unsigned char fall_initial_selector;
+    unsigned char fall_middle_selector;
     unsigned char jump_initial_selector;
     unsigned char jump_landing_selector;
     unsigned char jump_terminal_style;
@@ -762,7 +764,7 @@ typedef struct
     short progress_ko_health;
     unsigned short progress_increment;
     unsigned char preserve_reused_position_fraction;
-    AvspRound1AnimationStateSpec post_allocation_presentation;
+    unsigned char preserve_reused_presentation;
 } AvspRound1RecurringSpawnSpec;
 
 typedef struct

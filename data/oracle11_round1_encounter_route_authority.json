@@ -60382,6 +60382,40 @@
         "phase_add_u8": 3,
         "phase_mask_u8": 31
       },
+      "post_allocation_dispatch": {
+        "mutation_control": {
+          "clear_reused_presentation_rejected": true,
+          "decimal_35_selector_rejected": true,
+          "fixed_primary_pose_rejected": true
+        },
+        "presentation_ownership": "reused_record_residue",
+        "presentation_writer_pcs": [],
+        "source_samples": {
+          "first_action_frame_2573": {
+            "animation_branch_s16": 0,
+            "animation_record": "0x0012e38c",
+            "animation_timer_u16": 8,
+            "assembly": "0x0013065e",
+            "logical_selector_u8": 53,
+            "slot": "0xffa240"
+          },
+          "post_allocation_frame_2572": {
+            "animation_branch_s16": -32760,
+            "animation_record": "0x0012e778",
+            "animation_timer_u16": 1,
+            "assembly": "0x0012f794",
+            "slot": "0xffa240"
+          },
+          "pre_release_frame_2567": {
+            "animation_branch_s16": -32760,
+            "animation_record": "0x0012e778",
+            "animation_timer_u16": 1,
+            "assembly": "0x0012f794",
+            "slot": "0xffa240"
+          }
+        },
+        "writer_rule": "0x028b5a..0x028ba4 and the same-frame class initializer write no animation record, timer, branch or assembly"
+      },
       "rng_calls": 0,
       "routine": "0x028b5a..0x028ba4",
       "source_window": {
@@ -60823,11 +60857,17 @@
         "x_camera_offset_s16": -48
       },
       "post_allocation_dispatch": {
+        "mutation_control": {
+          "fixed_post_allocation_pose_forbidden": true,
+          "mutation": "clear or replace reused presentation at allocation"
+        },
         "next_frame": {
           "animation_record": "0x0012ec04",
           "state_u16": 512,
           "substate_u16": 5632
         },
+        "presentation_ownership": "reused_record_residue",
+        "presentation_writer_pcs": [],
         "same_frame": {
           "animation_branch_s16": -32768,
           "animation_record": "0x0012ddb0",
@@ -60839,7 +60879,22 @@
           "hurt_selector_u8": 1,
           "state_u16": 512,
           "substate_u16": 0
-        }
+        },
+        "source_samples": {
+          "post_allocation_frame_2511": {
+            "animation_branch_s16": -32768,
+            "animation_record": "0x0012ddb0",
+            "animation_timer_u16": 4095,
+            "slot": "0xffa3c0"
+          },
+          "pre_release_frame_2508": {
+            "animation_branch_s16": -32768,
+            "animation_record": "0x0012ddb0",
+            "animation_timer_u16": 4095,
+            "slot": "0xffa3c0"
+          }
+        },
+        "writer_rule": "0x028a12..0x028ab2 writes no animation record, timer, branch or assembly; allocation and class initialization preserve the released record's presentation until the next action dispatch"
       },
       "rng": {
         "calls": 1,

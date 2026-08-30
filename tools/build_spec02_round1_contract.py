@@ -1044,6 +1044,12 @@ def validate(contract: dict[str, object], fixtures: dict[str, object],
     reuse = fixtures["authority_data"]["route"][
         "first_segment_recurring_spawn"]["primary_writer"][
             "fixed_point_record_reuse"]
+    recurring = fixtures["authority_data"]["route"][
+        "first_segment_recurring_spawn"]
+    primary_presentation = recurring["primary_writer"][
+        "post_allocation_dispatch"]
+    auxiliary_presentation = recurring["auxiliary_writer"][
+        "post_allocation_dispatch"]
     require(
         reuse["classification"] == "SOURCE_CLOSED_IMPLEMENTATION_FIELDS" and
         reuse["field_types"] == {
@@ -1064,6 +1070,30 @@ def validate(contract: dict[str, object], fixtures: dict[str, object],
             "x_fp_s32": "0x02aec400", "y_fp_s32": "0x0144f200"} and
         reuse["spec_executable"] is True,
         "Coffee Shop recurring fixed-point reuse fixture drift")
+    require(
+        primary_presentation["presentation_ownership"] ==
+            "reused_record_residue" and
+        primary_presentation["presentation_writer_pcs"] == [] and
+        primary_presentation["mutation_control"]
+            ["fixed_post_allocation_pose_forbidden"] is True and
+        auxiliary_presentation["presentation_ownership"] ==
+            "reused_record_residue" and
+        auxiliary_presentation["presentation_writer_pcs"] == [] and
+        auxiliary_presentation["source_samples"]
+            ["post_allocation_frame_2572"]["animation_record"] ==
+                "0x0012e778" and
+        auxiliary_presentation["source_samples"]
+            ["first_action_frame_2573"] == {
+                "slot": "0xffa240", "logical_selector_u8": 0x35,
+                "animation_record": "0x0012e38c",
+                "animation_timer_u16": 8,
+                "animation_branch_s16": 0,
+                "assembly": "0x0013065e"} and
+        auxiliary_presentation["mutation_control"] == {
+            "clear_reused_presentation_rejected": True,
+            "fixed_primary_pose_rejected": True,
+            "decimal_35_selector_rejected": True},
+        "Coffee Shop recurring presentation reuse fixture drift")
     scene_items = (scene["actor_lifetimes"] + scene["audio_events"] +
                    scene["health_writes"] + scene["route_edges"] +
                    scene["load_boundaries"] + scene["navigation"]["camera_runs"] +
@@ -1434,6 +1464,13 @@ def validate(contract: dict[str, object], fixtures: dict[str, object],
                 ["upper_directions_by_a5_u8"] == [0x16, 0x0a] and
             class1f_actions["action_programs"]["direction_helper_0x061032"]
                 ["lower_directions_by_a5_u8"] == [0x1a, 0x06] and
+            class1f_actions["action_programs"]["action_0x0c"]
+                ["initial_selector_u8"] == 0x35 and
+            class1f_actions["action_programs"]["action_0x0c"]
+                ["middle_selector_u8"] == 0x36 and
+            class1f_actions["action_programs"]["action_0x0c"]
+                ["coffee_shop_auxiliary_spawn"]["initial_animation_record"] ==
+                    "0x0012e38c" and
             class1f_actions["action_programs"]["action_0x0e"]
                 ["z_velocity_table_s32_16_16"] ==
                 [-0x00010000, -0x00014000, -0x00018000, -0x00020000] and

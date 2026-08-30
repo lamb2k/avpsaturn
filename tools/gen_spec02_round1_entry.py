@@ -641,6 +641,21 @@ def build() -> str:
             "animation_branch_s16": -0x8000,
             "assembly": "0x00130346",
             "hurt_selector_u8": 1, "attack_selector_u8": 1} or
+        recurring_primary["post_allocation_dispatch"]
+            ["presentation_ownership"] != "reused_record_residue" or
+        recurring_primary["post_allocation_dispatch"]
+            ["presentation_writer_pcs"] != [] or
+        recurring_auxiliary["post_allocation_dispatch"]
+            ["presentation_ownership"] != "reused_record_residue" or
+        recurring_auxiliary["post_allocation_dispatch"]
+            ["presentation_writer_pcs"] != [] or
+        recurring_auxiliary["post_allocation_dispatch"]["source_samples"]
+            ["post_allocation_frame_2572"]["animation_record"] !=
+                "0x0012e778" or
+        recurring_auxiliary["post_allocation_dispatch"]["source_samples"]
+            ["first_action_frame_2573"]["logical_selector_u8"] != 0x35 or
+        action_fall["initial_selector_u8"] != 0x35 or
+        action_fall["middle_selector_u8"] != 0x36 or
         recurring_fixed_point_reuse["field_types"] != {
             "x_fp": "s32 16.16", "y_fp": "s32 16.16",
             "x_writer": "s16 high word", "y_writer": "s16 high word"} or
@@ -1610,14 +1625,7 @@ def build() -> str:
             recurring_progress["transition_guard"]["substate_u16"],
             recurring_progress["transition_guard"]["health_s16"],
             recurring_progress["increment_u16"]),
-        "    1u,",
-        "    { %du, %d, %sUL, %sUL, %du, %du }" % (
-            recurring_post_allocation["animation_timer_u16"],
-            recurring_post_allocation["animation_branch_s16"],
-            recurring_post_allocation["animation_record"],
-            recurring_post_allocation["assembly"],
-            recurring_post_allocation["hurt_selector_u8"],
-            recurring_post_allocation["attack_selector_u8"]),
+        "    1u, 1u",
         "};", "",
         "static const short avsp_round1_recurring_lane_offsets[AVSP_ROUND1_RECURRING_LANE_OFFSET_COUNT] =",
         "{",
@@ -1829,7 +1837,9 @@ def build() -> str:
             action_jump["y_acceleration_s32_16_16"],
             action_jump["initial_y_add_s16"],
             action_fall["y_delta_s32_16_16"]),
-        "    %du, %du, %du," % (
+        "    %du, %du, %du, %du, %du," % (
+            action_fall["initial_selector_u8"],
+            action_fall["middle_selector_u8"],
             action_jump["initial_selector_u8"],
             action_jump["landing_selector_u8"],
             action_jump["terminal_style85_u8"]),

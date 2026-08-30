@@ -4,6 +4,7 @@ import hashlib
 import importlib.util
 import json
 import os
+import re
 import time
 from pathlib import Path
 
@@ -283,7 +284,14 @@ count = signed(mcp,syms["avsp_diag_live_sample_count"])
 if count < 1 or count > 600:
     raise RuntimeError(f"invalid live sample count: {count}")
 sample_base = mcp.u32(syms["avsp_diag_live_samples"])
-expected_sample_base = 0x22600000 + 0x8D000 + 0x48000 + 0x19000
+main_text = (ROOT / "main.c").read_text(encoding="utf-8")
+tile_region_match = re.search(
+    r"#define\s+AVSP_TILE_REGION_BYTES\s+(0x[0-9A-Fa-f]+|\d+)",
+    main_text)
+if tile_region_match is None:
+    raise RuntimeError("AVSP_TILE_REGION_BYTES is unavailable")
+expected_sample_base = (0x22600000 + int(tile_region_match.group(1), 0) +
+                        0x48000 + 0x19000)
 if sample_base != expected_sample_base:
     raise RuntimeError(
         f"live diagnostic cart pointer drift: {sample_base:#x} != "

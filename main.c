@@ -99,13 +99,14 @@
    needs more PCM moved to phase-boundary loads first (S3 enabler,
    tracked in the handoff), not a bigger carve alone. */
 /* Widened from 0x40000 for the RP4 street archive and to the smallest aligned
- * carve retaining at least 4 KiB after the current complete SPEC-02 Coffee
- * Shop presentation union (553,444 bytes) and accepted combat overlay
- * (16,712 bytes): 570,156 bytes total, 7,380 bytes of headroom. Scene loading
- * boundaries are the residency lever: the carve holds one scene-scope archive
- * at a time and is reloaded during transitions, when data-track reads are
- * legal. */
-#define AVSP_TILE_REGION_BYTES 0x8D000
+ * carve retaining at least 4 KiB after the complete source-bound Coffee Shop
+ * presentation union (592,648 bytes) and accepted combat overlay (16,712
+ * bytes): 609,360 bytes total, 5,040 bytes of headroom.  The added residency
+ * is the SPEC-02 class-0x1f action-0x0c selector-53/54 union; gameplay timing
+ * and actor ownership are unchanged. Scene loading boundaries remain the
+ * residency lever: the carve holds one scene-scope archive at a time and is
+ * reloaded during transitions, when data-track reads are legal. */
+#define AVSP_TILE_REGION_BYTES 0x96000
 
 /* RP4 street test: the interval strip bundle is staged after the tile
  * carve, outside the allocator, only in that build profile. */
@@ -8210,7 +8211,7 @@ static void live_encounter_publish(void)
     avsp_diag_live_frame = (int)live_encounter_frame.frame;
     avsp_diag_round1_spec_bound =
         strcmp(AVSP_ROUND1_SPEC02_SHA256,
-               "4c52813c7f36e7094cae51bbd9d07c9d51001afcce3300455b67fcc645f5f723") ==
+               "75689cc3c7bc11a6178c621c004f58cca041ffc174f7df8354aeb4b83b4a9293") ==
         0;
     avsp_diag_round1_entry_valid = avsp_round1_entry_valid(&round1_runtime);
     avsp_diag_round1_route_state = round1_runtime.route_state;

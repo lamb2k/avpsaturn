@@ -251,6 +251,19 @@ def load_spec02_round1_presentations():
         current_addresses.update(
             address_key(record["animation_record"])
             for record in class1f_current["actions"][action]["records"])
+    action_execution = class1f_authority[
+        "first_segment_action_execution_contract"]
+    action_0c = action_execution["action_programs"]["action_0x0c"]
+    action_0c_selectors = {
+        action_0c["initial_selector_u8"],
+        action_0c["middle_selector_u8"],
+    }
+    current_addresses.update(
+        address_key(record["animation_record"])
+        for selector in action_execution["animation_selector_table"][
+            "selectors"]
+        if selector["selector_u8"] in action_0c_selectors
+        for record in selector["records"])
     current_addresses.update(
         address_key(address) for address in
         class1f_authority["presentation_and_collision"][

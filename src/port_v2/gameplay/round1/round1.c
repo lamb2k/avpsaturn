@@ -154,6 +154,10 @@ avsp_round1_allocate_pool_actor_preserve_position_fraction(
     unsigned int actor_index;
     unsigned short x_fraction;
     unsigned short y_fraction;
+    unsigned long animation_record;
+    unsigned long assembly;
+    unsigned short animation_timer;
+    short animation_branch;
     AvspRound1ActorCore *actor;
     if (runtime == 0 || pool_index >= AVSP_ROUND1_POOL_COUNT)
         return 0;
@@ -167,11 +171,22 @@ avsp_round1_allocate_pool_actor_preserve_position_fraction(
         return 0;
     x_fraction = (unsigned short)pool->records[actor_index].source_x_fp;
     y_fraction = (unsigned short)pool->records[actor_index].source_y_fp;
+    animation_record = pool->records[actor_index].animation_record;
+    assembly = pool->records[actor_index].assembly;
+    animation_timer = pool->records[actor_index].animation_timer;
+    animation_branch = pool->records[actor_index].animation_branch;
     actor = avsp_round1_allocate_pool_actor(runtime, pool_index);
     if (actor != 0)
     {
         actor->source_x_fp = (long)x_fraction;
         actor->source_y_fp = (long)y_fraction;
+        if (avsp_round1_recurring_spawn.preserve_reused_presentation != 0u)
+        {
+            actor->animation_record = animation_record;
+            actor->assembly = assembly;
+            actor->animation_timer = animation_timer;
+            actor->animation_branch = animation_branch;
+        }
     }
     return actor;
 }
@@ -2564,18 +2579,6 @@ static int avsp_round1_step_class1f_source_action(
         if (!avsp_round1_seed_class1f_action_fields(runtime, actor,
                 runtime->rng_seed, (unsigned char)actor->source_action, 1))
             return 0;
-        if (actor->source_dynamic_spawn != 0u &&
-            (actor->variant == avsp_round1_recurring_variants[0] ||
-             actor->variant == avsp_round1_recurring_spawn.auxiliary_variant))
-        {
-            const AvspRound1AnimationStateSpec *presentation =
-                &avsp_round1_recurring_spawn.post_allocation_presentation;
-            if (!avsp_round1_class1f_bind_record(
-                    actor, presentation->animation_record))
-                return 0;
-            actor->animation_timer = presentation->timer;
-            actor->animation_branch = presentation->branch;
-        }
         actor->hurt_selector = actor->source_a5;
         actor->attack_selector = actor->source_a6;
         return 3;
@@ -2629,7 +2632,8 @@ static int avsp_round1_step_class1f_source_action(
             actor->substate = 0x0c02u;
             actor->source_action = actor->substate;
             actor->source_style85 = 0u;
-            return avsp_round1_bind_class1f_action_selector(actor, 35u);
+            return avsp_round1_bind_class1f_action_selector(actor,
+                avsp_round1_class1f_action_program.fall_initial_selector);
         }
         actor->source_y_fp +=
             avsp_round1_class1f_action_program.fall_y_delta;
@@ -2641,7 +2645,8 @@ static int avsp_round1_step_class1f_source_action(
             {
                 actor->substate = 0x0c04u;
                 actor->source_action = actor->substate;
-                return avsp_round1_bind_class1f_action_selector(actor, 36u);
+                return avsp_round1_bind_class1f_action_selector(actor,
+                    avsp_round1_class1f_action_program.fall_middle_selector);
             }
             return avsp_round1_step_class1f_action_animation(runtime,
                                                               actor, 0);

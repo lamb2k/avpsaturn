@@ -159,6 +159,18 @@ def class1f_current_union_is_complete(presentations, fixture):
     for action in ("approach_0x1600", "attack_0x1800"):
         addresses.update(address_key(record["animation_record"])
                          for record in current["actions"][action]["records"])
+    action_execution = class1f["first_segment_action_execution_contract"]
+    action_0c = action_execution["action_programs"]["action_0x0c"]
+    action_0c_selectors = {
+        action_0c["initial_selector_u8"],
+        action_0c["middle_selector_u8"],
+    }
+    addresses.update(
+        address_key(record["animation_record"])
+        for selector in action_execution["animation_selector_table"][
+            "selectors"]
+        if selector["selector_u8"] in action_0c_selectors
+        for record in selector["records"])
     addresses.update(address_key(address) for address in
                      class1f["presentation_and_collision"]
                      ["accepted_hit_ko_records"]["record_addresses"])
@@ -340,9 +352,9 @@ def main() -> int:
     residency = before_manifest["presentation_residency"]
     native_presentations = before_manifest["routes"].get(
         "spec02_round1_native_presentations", {})
-    if (native_presentations.get("decoded_variants") != 389 or
-        native_presentations.get("unique_assemblies") != 214 or
-        native_presentations.get("tiles_added") != 1980):
+    if (native_presentations.get("decoded_variants") != 425 or
+        native_presentations.get("unique_assemblies") != 232 or
+        native_presentations.get("tiles_added") != 2233):
         print("FAIL: SPEC-02 native presentation union drifted")
         return 1
     if (residency["source_peak_unique_tiles"] != 374 or
@@ -354,11 +366,11 @@ def main() -> int:
         residency["max_tiles_per_impact"] != 0 or
         residency["per_tile_scanout_requirement"] != 653 or
         residency["composite_tile_threshold"] != 14 or
-        residency["spec02_composite_unique_entries"] != 143 or
-        residency["spec02_composite_texture_bytes"] != 455808 or
+        residency["spec02_composite_unique_entries"] != 145 or
+        residency["spec02_composite_texture_bytes"] != 460928 or
         residency["spec02_composite_max_texture_bytes"] != 11648 or
-        residency["first_segment_composite_unique_entries"] != 191 or
-        residency["first_segment_composite_texture_bytes"] != 579072 or
+        residency["first_segment_composite_unique_entries"] != 192 or
+        residency["first_segment_composite_texture_bytes"] != 581632 or
         residency["first_segment_composite_max_texture_bytes"] != 11648 or
         residency["first_segment_composite_frame_peak_entries"] != 11 or
         residency["first_segment_composite_frame_peak_bytes"] != 37248 or

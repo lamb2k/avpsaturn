@@ -94,6 +94,7 @@ for label,mutate in [
     ('first-segment-source-bound-phase',lambda x:x['action_programs']['source_bounds']['coffee_shop_hit_return_boundary']['phase_odd'].__setitem__('phase_counter_u8',0x98)),
     ('first-segment-movement-cadence',lambda x:x['action_programs']['animation_movement_helper_0x0165c4'].__setitem__('movement_cadence','every scheduler frame')),
     ('first-segment-direction',lambda x:x['action_programs']['direction_helper_0x061032']['upper_directions_by_a5_u8'].__setitem__(0,0x15)),
+    ('first-segment-fall-selector-encoding',lambda x:x['action_programs']['action_0x0c'].__setitem__('initial_selector_u8',35)),
     ('first-segment-jump-vector',lambda x:x['action_programs']['action_0x0e']['z_velocity_table_s32_16_16'].__setitem__(0,-0x0000f000)),
     ('first-segment-attack-selector-group',lambda x:x['action_programs']['action_0x04']['selector_groups_u16'][2].__setitem__(0,44)),
     ('first-segment-loop-counter',lambda x:x['action_programs']['action_0x16'].__setitem__('loop_counter','timer')),
@@ -120,4 +121,4 @@ for label,mutate in [
     ('inner8-direction-table',lambda x:x['observed_path_program']['source_tables']['direction_octant_base_u8'].__setitem__(0,0)),
 ]:
     mutant=copy.deepcopy(report);target=next(item for item in mutant['archetypes'] if item['class']=='0x1f')['first_segment_action_execution_contract']['inner_state_0x08_program'];mutate(target);reject(mutant,label)
-print('ORACLE-11 Round 1 enemy tests: PASS (82 mutations rejected)')
+print('ORACLE-11 Round 1 enemy tests: PASS (83 mutations rejected)')

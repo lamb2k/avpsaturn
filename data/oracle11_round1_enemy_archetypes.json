@@ -27575,7 +27575,7 @@
         "writes": 153166
       },
       "current_state_implementation_contract": {
-        "accepted_encounter_authority_sha256": "3a58c63b1322bf39dfe01d0cfc26bac9f5a4c7e79452ce359ec944f1765630e5",
+        "accepted_encounter_authority_sha256": "cb753f5038ac92c6c2621674c0d4db4024fbcf04d854fd05d1b600908adc60ab",
         "accepted_oracle09_sha256": "a3027c3ffcd19af2656c515e0dfc0e9c56086b1bf3dd029e854d74be372c847f",
         "actions": {
           "above_lane_0x0600": {
@@ -27795,7 +27795,7 @@
             },
             "capture_identity": {
               "byte_identical": true,
-              "capture_script_sha256": "4d9f35eaa1a2d685c171f9b7fab83c49d57e8e2abd493712ee649ae69a855585",
+              "capture_script_sha256": "dd4f0bbd361a7d1cc46e071130878998b77915242c51d04686404325cb540e50",
               "completion_a": {
                 "coffee_shop_class1f_hit.tsv": "cc411e49ae629a622166f40a69c363f4ebdffb7b0f655e45b3334b3034d91648",
                 "coffee_shop_class1f_hit_program.tsv": "5dec2f9eb35a4303d0e4711d2b51def0e1bf57d411e1294596cbb64b93dfae90",
@@ -28562,7 +28562,7 @@
           "source_projectile_ko_program": {
             "capture_identity": {
               "byte_identical": true,
-              "capture_script_sha256": "4d9f35eaa1a2d685c171f9b7fab83c49d57e8e2abd493712ee649ae69a855585",
+              "capture_script_sha256": "dd4f0bbd361a7d1cc46e071130878998b77915242c51d04686404325cb540e50",
               "completion_a": {
                 "coffee_shop_class1f_hit.tsv": "ba5702bcc089aefcb3746144f5d60b61e5e72c3a0823107701b6b3fd63445335",
                 "coffee_shop_class1f_hit_program.tsv": "cbfcbfb3557698fff37e10f15cbe154a8305ce8d55d143f253eafe3f137ac4c5",
@@ -35947,8 +35947,18 @@
             "timer_table_address": "0x0bc55a"
           },
           "action_0x0c": {
-            "initial_selector_u8": 35,
-            "middle_selector_u8": 36,
+            "coffee_shop_auxiliary_spawn": {
+              "entry_animation_record": "0x0012e778",
+              "entry_visible_frame_u16": 2572,
+              "initial_animation_record": "0x0012e38c",
+              "initial_animation_timer_u16": 8,
+              "initial_dispatch_write_frame_u16": 2572,
+              "initial_visible_frame_u16": 2573,
+              "source_slot": "0x00ffa240"
+            },
+            "initial_selector_u8": 53,
+            "middle_selector_u8": 54,
+            "selector_encoding": "68000 moveq immediates are hexadecimal 0x35/0x36; decimal 35/36 is rejected",
             "substates_u8": [
               0,
               2,
