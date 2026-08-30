@@ -950,6 +950,50 @@ the first animation divergence at frame 2523. Recover the exact accepted
 transition predicate, input/interruption guard, writes, presentation selection,
 and scheduler position, then apply the source rule without a frame exception.
 
+Incremental checkpoint `ec41b2bc70e4b5212cb8f9b586305b34ab3fba05`
+closes that depleted-resource dispatch. Source dispatch `0x01a6f4` tests the
+persistent player `+0x8b` depleted latch and enters action `0x1a00` at visible
+frame 2522. Normal recharge (`0x0adf06`, reload 3) and depleted recharge
+(`0x0adfc0`, reload 6) retain their distinct decrement, reload, increment, and
+later latch-clear ordering. Two source captures are byte-identical at
+`af67295b879521e0aba388ebe4b1bd9e8698c21c86e9d5b837da14efe086b4cb`;
+the increment-suppression control proves the action remains latch-owned.
+
+SPEC-02 is
+`e709b7bd616ecdb118e61459dbbc7677c9d0e13dd932f5bd4cf856a25f6d61ac`;
+fixture is
+`f726c7ae09f3edad2fb93fc853cf3851eb618449e72a64ad89a7b9974e2098e8`.
+Fast, Oracle, 119 SPEC mutations, 45 weapon controls, 82 enemy mutations, 181
+native mutations, the scene validator, 123 Target suppressions, both
+LiveEncounter Target profiles, and two byte-identical 575-sample Emulator
+ledgers pass. Normalized ISO is
+`be01ec7dfe1a002ec5bda0807e945e6d59544ea59e772a9f8f82f75edbc6cbaa`;
+canonical samples hash to
+`aab911fae523eb13b79969cf5a0d99ce002400577e3dd6016f416a6c6f60e099`.
+
+Window-only WGC frames 2520..2540 pass direct inspection. Cadence sheet
+`8788ae5739323986ef83f3734154acf0c71c27bd18680b07afe36327410ed83e`
+and clip
+`65651d2fb214185f4a548607cb89ad4ffc39d5cac9faf18157ec4fc4e4bcb242`
+preserve Predator/staff identity, source-timed empty-resource presentation,
+P1-only HUD and weapon meter, and clean Coffee Shop planes, palette, and
+priority.
+
+Whole-scene gaps change from `295 / 1,259 / 3 / 94 / 3 / 281` to
+`322 / 1,262 / 2 / 94 / 3 / 281`. The lifetime and spawn-edge counts rise by
+27 and 3 because the corrected depleted branch changes downstream type-24
+fixed-pool reuse and invalidates earlier false lifetime/edge matches; active
+state improves by one. The source capture is unchanged, the other categories
+do not increase, and unowned Saturn actors, unidentified source pairs, and
+retained gameplay authorities remain zero.
+
+The next earliest causal divergence is visible frame 2523 at source slot
+`0x00ffc300`: source owns type-24/class-`0x4e` on animation `0x0007a09c`,
+`y=404`, `z=319`, while native has reused the slot and presents `0x0007a0ac`,
+`y=402`, `z=0`. Bind the exact type-24 lifetime, release/reuse order, scheduler
+position, class/variant ownership, state initialization, coordinate writes,
+and presentation cadence. Apply the source rule, not a frame or slot exception.
+
 ## Next eligible cards
 
 - `QA-13-ROUND1-END-TO-END-DIFFERENTIAL` after the complete stable Round 2
