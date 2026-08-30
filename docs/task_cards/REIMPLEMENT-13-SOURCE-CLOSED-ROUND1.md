@@ -1266,6 +1266,61 @@ while slot `0x00ffb500` carries native `0x0006dbda` versus source `0x0006dc6a`.
 Bind the accepted spawn/update/presentation selection order without a frame or
 slot exception, weakened identity comparison, or input-route change.
 
+Incremental implementation checkpoint
+`db03e92d74aa5310ab9c4931bcad71bbd2612245` closes the frame-2750
+class-`0x1f` player-contact impact transaction. Accepted Oracle evidence binds
+the natural type-24/class-`0x4e` variant-0 allocation at slot `0x00ffc300`:
+visible frame 2751 position `1095,369,319`, facing 1, RNG
+`0xeea3 -> 0xcb6e`, jitter `+4,+4`, retained presentation
+`0x0007a12c/0x0007a3a0`, subsequent records
+`0x000928e0/0x000928f0/0x00092900`, terminal state at 2761, and release at
+2762. The source and native lifetime is exact. No fixed-frame allocation,
+authored delay, projectile suppression, input change, or retained gameplay
+authority was added.
+
+SPEC-02 is
+`6426ee3442ed459e74bfb3136c83589f9900d40589ac32f7beaf44a442153c3e`;
+fixture is
+`487ab920865c20ecafb054a31b17bc7af3ac2064956a63589d7bc90d3a5a5796`.
+Fast, Oracle, 80 bounded-Oracle mutations, 132 SPEC mutations, 207 native
+mutations, 20 scene mutations, 123 Target suppressions, and both LiveEncounter
+Target profiles pass. Exact runtime size remains `0x148e8` inside the
+unchanged `0x19000` carve, leaving `0x4718` bytes. Two 575-sample Emulator
+runs are byte-identical at normalized ISO
+`b3fc97654498a8f82636b3b0840476065f0cdcf24f32e757744ea69dccc0613a`,
+canonical payload
+`d6ce01333843b273432e965efde266f8a95c53c195a910e41602cc103d9a71d9`,
+and VDP1 cache
+`15235569ad91027a6f9cf6d00c5b88b9c13539895a9259036a1ecdde48ad6504`.
+
+Fresh window-only WGC frames 2280..2310 retain cadence sheet
+`651383577cc72d80e9c9cae7a67790aee6a4a68046ec2611de1117f128273a3a`
+and clip
+`f0bdf52684d9d3fab1446f2a932fe26e8b67c094206b357b3b64fa7f0603f8a2`.
+Direct inspection preserves the damage-free frame 2288, natural frame-2306/
+2307 damage-impact chronology, Predator/staff identity, P1-only HUD, and both
+Coffee Shop planes, palette, and priority. A capture-only extended diagnostic
+window records frames 2750..2762 at sheet
+`1a13eb065987273f55175952b0ba4e22f85f47a1a48c215830407e9aa45cef1b`
+and clip
+`dd1b32a5934c84a63f87fa1e81d954fd7ffe042388d270d51227c02dcff1c498`;
+the normal 575-sample limit was restored afterward.
+
+Whole-scene gaps change from `323 / 1,243 / 2 / 93 / 3 / 281` to
+`331 / 1,241 / 2 / 93 / 3 / 281`. The actor-lifetime increase of eight is
+explained by the restored RNG consumption invalidating later false matches;
+the corrected class-`0x4e` lifetime itself is exact, and spawn/despawn improves
+by two. Unowned Saturn actors, unidentified source pairs, and retained gameplay
+authorities remain zero.
+
+The next earliest causal divergence is player slot `0x00ff8380` at visible
+frame 2793: source hurt selector 1 versus native 0 in state `0x0200`, substate
+`0x0802`. Bind the accepted current-state selector writer, guard, reads/writes,
+and scheduler order without a frame exception, weakened comparison, or input
+change. Preserve the exact impact/RNG, player HIT, HUD/audio, and rendering
+locks. The next dependent divergence is class-`0x1f` slot `0x00ffa240` at
+frame 2798, source substate `0x0404` versus native `0x0000`.
+
 ## Next eligible cards
 
 - `QA-13-ROUND1-END-TO-END-DIFFERENTIAL` after the complete stable Round 2
