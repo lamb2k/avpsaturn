@@ -3486,6 +3486,10 @@ static void avsp_round1_bind_player_walk_record(
     runtime->player_walk_animation_active = 1u;
     runtime->player_walk_animation_timer = record->timer;
     avsp_round1_bind_animation_state(&runtime->player, record);
+    runtime->player.hurt_selector =
+        avsp_round1_player_locomotion.current_hurt_selector;
+    runtime->player.attack_selector =
+        avsp_round1_player_locomotion.current_attack_selector;
 }
 
 static void avsp_round1_advance_player_walk_animation(
@@ -3717,6 +3721,8 @@ static int avsp_round1_player_weapon_contract_valid(void)
         avsp_round1_player_weapon.depleted_recharge_reload != 6u ||
         avsp_round1_player_weapon.
             empty_dispatch_uses_depleted_latch != 1u ||
+        avsp_round1_player_weapon.
+            empty_entry_preserves_current_presentation != 1u ||
         avsp_round1_player_weapon.parent_class != 0 ||
         avsp_round1_player_weapon.child_class != 4 ||
         avsp_round1_player_weapon.projectile_source_base != 0x8680u ||
@@ -8088,7 +8094,19 @@ static int avsp_round1_step_player_weapon(AvspRound1Runtime *runtime,
         }
         frame = &avsp_round1_player_empty_frames[
             runtime->player_weapon_tick];
-        avsp_round1_bind_player_weapon_frame(runtime, frame);
+        if (runtime->player_weapon_tick == 0u &&
+            avsp_round1_player_weapon.
+                empty_entry_preserves_current_presentation)
+        {
+            runtime->player.source_action =
+                avsp_round1_player_weapon.empty_entry_action;
+            runtime->player.substate =
+                avsp_round1_player_weapon.empty_entry_action;
+            runtime->player_locomotion_action =
+                avsp_round1_player_weapon.empty_entry_action;
+        }
+        else
+            avsp_round1_bind_player_weapon_frame(runtime, frame);
         if (runtime->player_weapon_tick > 0u &&
             runtime->player_weapon_tick < 17u &&
             runtime->player_weapon_empty_timer > 0u)
@@ -9586,8 +9604,22 @@ static int avsp_round1_player_weapon_runtime_valid(
             if (runtime->player_weapon_tick >
                 AVSP_ROUND1_PLAYER_EMPTY_PRESENTATION_COUNT)
                 return 0;
-            frame = &avsp_round1_player_empty_frames[
-                runtime->player_weapon_tick - 1u];
+            if (runtime->player_weapon_tick == 1u &&
+                avsp_round1_player_weapon.
+                    empty_entry_preserves_current_presentation)
+            {
+                if (runtime->player.source_action !=
+                        avsp_round1_player_weapon.empty_entry_action ||
+                    runtime->player.substate !=
+                        avsp_round1_player_weapon.empty_entry_action ||
+                    runtime->player.hurt_selector != 0u ||
+                    runtime->player.attack_selector != 0u)
+                    return 0;
+                frame = 0;
+            }
+            else
+                frame = &avsp_round1_player_empty_frames[
+                    runtime->player_weapon_tick - 1u];
         }
         else
         {
@@ -9601,12 +9633,13 @@ static int avsp_round1_player_weapon_runtime_valid(
                 runtime->player_weapon_presentation_selector - 4u][
                 runtime->player_weapon_tick - 1u];
         }
-        if (runtime->player.source_action != frame->action ||
+        if (frame != 0 &&
+            (runtime->player.source_action != frame->action ||
             runtime->player.substate != frame->action ||
             runtime->player.animation_record != frame->animation_record ||
             runtime->player.assembly != frame->assembly ||
             runtime->player.hurt_selector != 0u ||
-            runtime->player.attack_selector != 0u)
+            runtime->player.attack_selector != 0u))
             return 0;
     }
     else if (runtime->player_weapon_cleanup_pending)

@@ -6,7 +6,7 @@
 #include "../../combat/hit_ko/hit_ko.h"
 
 #define AVSP_ROUND1_SPEC02_SHA256 \
-    "bb48c1976641d0afa01ed621c1dbbf9d71eac2337dd00ebf4da1e4f4fabc632f"
+    "635f3c848a5cdea35634b89ada4f8b19efdc25939bb93db7d9ab1ac46dd78e6b"
 #define AVSP_ROUND1_CANARY_HEAD 0x52314548UL
 #define AVSP_ROUND1_CANARY_TAIL 0x52314554UL
 #define AVSP_ROUND1_ROUTE_ENTRY_STATE 2
@@ -1047,6 +1047,8 @@ typedef struct
     unsigned short stop_action;
     unsigned short cleanup_action;
     unsigned short stop_ticks;
+    unsigned char current_hurt_selector;
+    unsigned char current_attack_selector;
     unsigned char direction_resolver[16];
 } AvspRound1PlayerLocomotionSpec;
 
@@ -1135,6 +1137,7 @@ typedef struct
     unsigned char normal_recharge_reload;
     unsigned char depleted_recharge_reload;
     unsigned char empty_dispatch_uses_depleted_latch;
+    unsigned char empty_entry_preserves_current_presentation;
     unsigned char empty_effect_variant;
     unsigned char empty_effect_allocation_tick;
     unsigned char empty_effect_preserve_position_residue;

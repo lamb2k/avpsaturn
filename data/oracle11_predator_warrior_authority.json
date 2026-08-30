@@ -9511,6 +9511,8 @@
           "animation_record": "0x0015f208",
           "animation_timer_u16": 4,
           "assembly": "0x00160a02",
+          "current_attack_selector_u8": 0,
+          "current_hurt_selector_u8": 0,
           "facing_u8": 1,
           "frame": 2602,
           "state_u16": "0x0200",
@@ -9528,6 +9530,17 @@
           "shift the two-sample direction pipeline",
           "consume the oldest staged direction",
           "dispatch the player control state"
+        ]
+      },
+      "current_collision_selector_projection": {
+        "actor_attack_selector_u8": 0,
+        "actor_hurt_selector_u8": 0,
+        "collision_lookup_hurt_selector_u8": 17,
+        "guard": "the player locomotion entry/active/stop body is current while its source animation record supplies collision lookup metadata",
+        "rule": "the player actor's captured current selector fields remain zero; collision resolves the current walk record byte +8 separately",
+        "source_frames": [
+          2602,
+          2678
         ]
       },
       "directional_entry": {
@@ -17766,6 +17779,58 @@
       "empty_fallback": {
         "cleanup_tick": 17,
         "damaging_record4_count": 0,
+        "entry_projection": {
+          "active_replacement": {
+            "action_u16": "0x1a02",
+            "animation_branch_s16": -32768,
+            "animation_record": "0x0015fcfc",
+            "animation_timer_u16": 4095,
+            "assembly": "0x00161772",
+            "current_attack_selector_u8": 0,
+            "current_hurt_selector_u8": 0,
+            "state_u16": "0x0200",
+            "substate_u16": "0x1a02",
+            "visible_update_offset_u8": 1
+          },
+          "classification": "SOURCE_CLOSED_IMPLEMENTATION_FIELDS",
+          "coffee_shop_witnesses": [
+            {
+              "active_frame_u16": 2523,
+              "entry_animation_record": "0x0015f1f4",
+              "entry_frame_u16": 2522,
+              "prior_animation_record": "0x0015f1f4",
+              "prior_frame_u16": 2521
+            },
+            {
+              "active_frame_u16": 2613,
+              "entry_animation_record": "0x0015f228",
+              "entry_frame_u16": 2612,
+              "prior_animation_record": "0x0015f228",
+              "prior_frame_u16": 2611
+            }
+          ],
+          "entry_preserves": [
+            "animation_record:u32",
+            "assembly:u32",
+            "animation_timer:u16",
+            "animation_branch:s16",
+            "current_hurt_selector:u8",
+            "current_attack_selector:u8"
+          ],
+          "entry_rule": "write state 0x0200 and action/substate 0x1a00 while preserving the current animation record, assembly, timer, branch, and current collision selectors; bind the 0x1a02 active record on the following player update",
+          "entry_writes": {
+            "action_u16": "0x1a00",
+            "state_u16": "0x0200",
+            "substate_u16": "0x1a00"
+          },
+          "mutation_controls": [
+            "reject fixed idle presentation on a walking entry",
+            "reject binding the active presentation on the entry update",
+            "reject delaying the active presentation past the next update"
+          ],
+          "rng_calls": [],
+          "spec_executable": true
+        },
         "presentation_timeline": [
           {
             "action_u16": 6656,

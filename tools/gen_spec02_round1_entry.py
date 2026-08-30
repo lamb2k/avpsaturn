@@ -290,6 +290,7 @@ def build() -> str:
     weapon_action = weapon["sufficient_action"]
     weapon_resource = weapon["resource_tick"]
     weapon_empty = weapon["empty_fallback"]
+    weapon_empty_entry = weapon_empty["entry_projection"]
     weapon_parent = weapon["record4_parent_class0"]
     weapon_child = weapon["record4_child_class4"]
     weapon_damage = weapon["current_state_collision_damage"]
@@ -958,10 +959,19 @@ def build() -> str:
             "substate_u16": "0x0200", "facing_u8": 1,
             "x_fp_s16_16": "0x03b24000",
             "animation_record": "0x0015f208",
-            "assembly": "0x00160a02", "animation_timer_u16": 4} or
+            "assembly": "0x00160a02", "animation_timer_u16": 4,
+            "current_hurt_selector_u8": 0,
+            "current_attack_selector_u8": 0} or
         locomotion_execution["movement"]["right_delta_s16_16"] !=
             "0x00024000" or
         locomotion_presentation["ticks_per_record"] != 4 or
+        locomotion_execution["current_collision_selector_projection"] != {
+            "guard": "the player locomotion entry/active/stop body is current while its source animation record supplies collision lookup metadata",
+            "actor_hurt_selector_u8": 0,
+            "actor_attack_selector_u8": 0,
+            "collision_lookup_hurt_selector_u8": 17,
+            "rule": "the player actor's captured current selector fields remain zero; collision resolves the current walk record byte +8 separately",
+            "source_frames": [2602, 2678]} or
         len(locomotion_records) != 12 or
         [row["animation_record"] for row in locomotion_records] !=
             [f"0x{address:06x}" for address in
@@ -1085,7 +1095,29 @@ def build() -> str:
         weapon_empty["timer_initial"] != 16 or
         weapon_empty["cleanup_tick"] != 17 or
         weapon_empty["return_tick"] != 18 or
-        weapon_empty["damaging_record4_count"] != 0):
+        weapon_empty["damaging_record4_count"] != 0 or
+        weapon_empty_entry["classification"] !=
+            "SOURCE_CLOSED_IMPLEMENTATION_FIELDS" or
+        weapon_empty_entry["spec_executable"] is not True or
+        weapon_empty_entry["entry_writes"] != {
+            "state_u16": "0x0200", "action_u16": "0x1a00",
+            "substate_u16": "0x1a00"} or
+        weapon_empty_entry["entry_preserves"] != [
+            "animation_record:u32", "assembly:u32",
+            "animation_timer:u16", "animation_branch:s16",
+            "current_hurt_selector:u8", "current_attack_selector:u8"] or
+        weapon_empty_entry["active_replacement"] != {
+            "visible_update_offset_u8": 1,
+            "state_u16": "0x0200", "action_u16": "0x1a02",
+            "substate_u16": "0x1a02",
+            "animation_record": "0x0015fcfc",
+            "assembly": "0x00161772", "animation_timer_u16": 4095,
+            "animation_branch_s16": -32768,
+            "current_hurt_selector_u8": 0,
+            "current_attack_selector_u8": 0} or
+        weapon_empty_entry["coffee_shop_witnesses"][1]
+            ["entry_animation_record"] != "0x0015f228" or
+        weapon_empty_entry["rng_calls"] != []):
         raise ValueError("SPEC-02 corrected Predator Button1 action/resource drift")
     if (weapon_selector_contract["selection_tick"] != 0 or
         weapon_selector_contract[
@@ -2456,6 +2488,8 @@ def build() -> str:
         f"    {int(release['stop_action'], 16)}u,",
         "    512u,",
         f"    {release['stop_timer']['ticks']}u,",
+        "    0u,",
+        "    0u,",
         "    {" + ", ".join(f"{value}u" for value in direction_resolver) + "}",
         "};", "",
         "static const AvspRound1AnimationStateSpec avsp_round1_player_walk_records[AVSP_ROUND1_PLAYER_WALK_PRESENTATION_COUNT] =",
@@ -2644,6 +2678,7 @@ def build() -> str:
         f"    {weapon_action['recharge_countdown_after_entry_u8']}u,",
         f"    {weapon_resource['normal_tick']['reload_u8']}u,",
         f"    {weapon_resource['depleted_tick']['reload_u8']}u,",
+        "    1u,",
         "    1u,",
         f"    {weapon_empty_effect['variant']}u,",
         f"    {weapon_empty_effect['allocation']['allocation_update_after_entry_u8']}u,",

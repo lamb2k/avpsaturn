@@ -9,7 +9,7 @@ from pathlib import Path
 
 ROOT = Path(__file__).resolve().parents[3]
 SPEC = ROOT / "data/spec02_round1_executable_contract.json"
-EXPECTED = "bb48c1976641d0afa01ed621c1dbbf9d71eac2337dd00ebf4da1e4f4fabc632f"
+EXPECTED = "635f3c848a5cdea35634b89ada4f8b19efdc25939bb93db7d9ab1ac46dd78e6b"
 assert hashlib.sha256(SPEC.read_bytes()).hexdigest() == EXPECTED
 assert json.loads(SPEC.read_text())["status"] == "ACCEPTED"
 source = (ROOT / "src/port_v2/gameplay/round1/round1.c").read_text()
@@ -392,6 +392,7 @@ if "--locomotion-only" in sys.argv:
 generated_walk_mutations = {
     "    { 4u, 0, 0x0015F208UL, 0x00160A02UL, 17u, 0u },",
     "    { 4u, -32768, 0x0015F2B8UL, 0x00160B9EUL, 17u, 0u },",
+    "    514u,\n    516u,\n    512u,\n    10u,\n    0u,\n    0u,\n    {255u, 2u, 6u, 255u,",
 }
 for before, after in (
     ("    { 4u, 0, 0x0015F208UL, 0x00160A02UL, 17u, 0u },",
@@ -424,13 +425,20 @@ for before, after in (
      "{ 0x02u, 0x02u, 0x80u, 0x80u, 0x10u, 0x10u, 0x00u, 0x80u },"),
     ("    1u, 1200u,", "    1u, 1199u,"),
     ("7u, 7u, 8u, 8u, 9u, 9u", "7u, 7u, 7u, 8u, 9u, 9u"),
-    ("    10u,\n    {255u, 2u, 6u, 255u,", "    9u,\n    {255u, 2u, 6u, 255u,"),
+    ("    514u,\n    516u,\n    512u,\n    10u,\n    0u,\n    0u,\n    {255u, 2u, 6u, 255u,",
+     "    514u,\n    516u,\n    512u,\n    9u,\n    0u,\n    0u,\n    {255u, 2u, 6u, 255u,"),
+    ("    514u,\n    516u,\n    512u,\n    10u,\n    0u,\n    0u,\n    {255u, 2u, 6u, 255u,",
+     "    514u,\n    516u,\n    512u,\n    10u,\n    1u,\n    0u,\n    {255u, 2u, 6u, 255u,"),
+    ("    514u,\n    516u,\n    512u,\n    10u,\n    0u,\n    0u,\n    {255u, 2u, 6u, 255u,",
+     "    514u,\n    516u,\n    512u,\n    10u,\n    0u,\n    1u,\n    {255u, 2u, 6u, 255u,"),
     ("    1536u,\n    5120u,\n    30u,", "    1538u,\n    5120u,\n    30u,"),
     ("    1536u,\n    5120u,\n    30u,", "    1536u,\n    5120u,\n    29u,"),
     ("{ 0x1600f8UL, 0x162a04UL, 8u, 1u },", "{ 0x1600f8UL, 0x162a82UL, 8u, 1u },"),
     ("{ 0x1601c0UL, 0x1614a4UL, 8u, 3u },", "{ 0x1601c0UL, 0x1614a4UL, 8u, 2u },"),
     ("    40u,\n    12u,\n    3u,\n    6u,\n    1u,",
      "    39u,\n    12u,\n    3u,\n    6u,\n    1u,"),
+    ("    40u,\n    12u,\n    3u,\n    6u,\n    1u,\n    1u,\n    0u,\n    1u,\n    1u,\n    0,\n    4,",
+     "    40u,\n    12u,\n    3u,\n    6u,\n    1u,\n    0u,\n    0u,\n    1u,\n    1u,\n    0,\n    4,"),
     ("{ 3074u, 2u, 0x0015e594UL, 0x0016179aUL, 1u, 0u },",
      "{ 3074u, 2u, 0x00165410UL, 0x00166c22UL, 1u, 0u },"),
     ("{ 6658u, 2u, 0x0015fcfcUL, 0x00161772UL, 1u, 0u },",
@@ -568,6 +576,6 @@ for before, after in (
                                 capture_output=True)
         assert result.returncode != 0, f"generated mutation escaped: {before}"
 if "--generated-walk-only" in sys.argv:
-    print("REIMPLEMENT-13 generated walk fixture mutation lane: PASS (3 real mutations)")
+    print("REIMPLEMENT-13 generated walk fixture mutation lane: PASS (5 real mutations)")
     raise SystemExit(0)
-print("REIMPLEMENT-13 entry/player/scheduler/class1f/Coffee-Shop-navigation/neutral-stop/melee/Button1/Button3/type16-projectile/player-HIT/first-encounter differential: PASS (198 real mutations)")
+print("REIMPLEMENT-13 entry/player/scheduler/class1f/Coffee-Shop-navigation/neutral-stop/melee/Button1/Button3/type16-projectile/player-HIT/first-encounter differential: PASS (199 real mutations)")

@@ -276,7 +276,9 @@ def build_report() -> dict[str, object]:
             coffee_rows[2602]["substate"] == "0200" and
             coffee_rows[2602]["facing"] == "1" and
             coffee_rows[2602]["animation_record"] == "0015f208" and
-            coffee_rows[2602]["animation_timer"] == "0004",
+            coffee_rows[2602]["animation_timer"] == "0004" and
+            coffee_rows[2602]["hurt_selector"] == "00" and
+            coffee_rows[2602]["attack_selector"] == "00",
             "Coffee Shop first directional result drift")
     for frame in range(2603, 2612):
         require(int(coffee_rows[frame]["x_fp"], 16) -
@@ -453,6 +455,8 @@ def build_report() -> dict[str, object]:
                         "animation_record": "0x0015f208",
                         "assembly": "0x00160a02",
                         "animation_timer_u16": 4,
+                        "current_hurt_selector_u8": 0,
+                        "current_attack_selector_u8": 0,
                     },
                 },
                 "directional_entry": {
@@ -472,6 +476,14 @@ def build_report() -> dict[str, object]:
                     "ticks_per_record": 4,
                     "advance_rule": "decrement the current record timer once per player update; advance after timer 1",
                     "loop_rule": "the terminal record 0x15f2b8 branches to 0x15f208",
+                },
+                "current_collision_selector_projection": {
+                    "guard": "the player locomotion entry/active/stop body is current while its source animation record supplies collision lookup metadata",
+                    "actor_hurt_selector_u8": 0,
+                    "actor_attack_selector_u8": 0,
+                    "collision_lookup_hurt_selector_u8": 17,
+                    "rule": "the player actor's captured current selector fields remain zero; collision resolves the current walk record byte +8 separately",
+                    "source_frames": [2602, 2678],
                 },
                 "rng_consumption": "none",
                 "scheduler_position": "player slot before all non-player fixed pools",
@@ -549,6 +561,63 @@ def build_report() -> dict[str, object]:
     if WEAPON.exists():
         report["weapon_projectile_resource"] = json.loads(
             WEAPON.read_text(encoding="ascii"))
+        empty_fallback = report["weapon_projectile_resource"][
+            "implementation_contract"]["empty_fallback"]
+        preserved_fields = (
+            "animation_record", "animation_timer", "animation_branch",
+            "hurt_selector", "attack_selector")
+        for before_frame, entry_frame, active_frame in (
+                (2521, 2522, 2523), (2611, 2612, 2613)):
+            before = coffee_rows[before_frame]
+            entry = coffee_rows[entry_frame]
+            active = coffee_rows[active_frame]
+            require(
+                entry["state"] == "0200" and entry["substate"] == "1a00" and
+                all(entry[field] == before[field]
+                    for field in preserved_fields) and
+                active["state"] == "0200" and active["substate"] == "1a02" and
+                active["animation_record"] == "0015fcfc" and
+                active["animation_timer"] == "0fff" and
+                active["animation_branch"] == "-32768",
+                f"Coffee Shop empty-resource entry projection drift at {entry_frame}")
+        empty_fallback["entry_projection"] = {
+            "classification": "SOURCE_CLOSED_IMPLEMENTATION_FIELDS",
+            "spec_executable": True,
+            "entry_rule": (
+                "write state 0x0200 and action/substate 0x1a00 while preserving "
+                "the current animation record, assembly, timer, branch, and "
+                "current collision selectors; bind the 0x1a02 active record on "
+                "the following player update"),
+            "entry_writes": {
+                "state_u16": "0x0200", "action_u16": "0x1a00",
+                "substate_u16": "0x1a00"},
+            "entry_preserves": [
+                "animation_record:u32", "assembly:u32",
+                "animation_timer:u16", "animation_branch:s16",
+                "current_hurt_selector:u8", "current_attack_selector:u8"],
+            "active_replacement": {
+                "visible_update_offset_u8": 1,
+                "state_u16": "0x0200", "action_u16": "0x1a02",
+                "substate_u16": "0x1a02",
+                "animation_record": "0x0015fcfc",
+                "assembly": "0x00161772", "animation_timer_u16": 4095,
+                "animation_branch_s16": -32768,
+                "current_hurt_selector_u8": 0,
+                "current_attack_selector_u8": 0},
+            "coffee_shop_witnesses": [
+                {"prior_frame_u16": 2521, "entry_frame_u16": 2522,
+                 "active_frame_u16": 2523,
+                 "prior_animation_record": "0x0015f1f4",
+                 "entry_animation_record": "0x0015f1f4"},
+                {"prior_frame_u16": 2611, "entry_frame_u16": 2612,
+                 "active_frame_u16": 2613,
+                 "prior_animation_record": "0x0015f228",
+                 "entry_animation_record": "0x0015f228"}],
+            "rng_calls": [],
+            "mutation_controls": [
+                "reject fixed idle presentation on a walking entry",
+                "reject binding the active presentation on the entry update",
+                "reject delaying the active presentation past the next update"]}
         report["remaining_player_backlog"] = [
             item for item in report["remaining_player_backlog"]
             if not any(token in item.lower() for token in
@@ -651,7 +720,9 @@ def validate(report: dict[str, object]) -> None:
                 "substate_u16": "0x0200", "facing_u8": 1,
                 "x_fp_s16_16": "0x03b24000",
                 "animation_record": "0x0015f208",
-                "assembly": "0x00160a02", "animation_timer_u16": 4},
+                "assembly": "0x00160a02", "animation_timer_u16": 4,
+                "current_hurt_selector_u8": 0,
+                "current_attack_selector_u8": 0},
             "first-segment controller/player chronology drift")
     require(len(presentation["records"]) == 12 and
             presentation["ticks_per_record"] == 4 and
@@ -660,11 +731,41 @@ def validate(report: dict[str, object]) -> None:
             presentation["records"][-1]["animation_record"] == "0x15f2b8" and
             presentation["records"][-1]["assembly"] == "0x160b9e" and
             execution["movement"]["right_delta_s16_16"] == "0x00024000" and
+            execution["current_collision_selector_projection"]
+                ["actor_hurt_selector_u8"] == 0 and
+            execution["current_collision_selector_projection"]
+                ["collision_lookup_hurt_selector_u8"] == 17 and
             execution["rng_consumption"] == "none",
             "first-segment locomotion execution contract drift")
     require(all(row["status"] == "PASS"
                 for row in closed["counterfactuals"].values()),
             "locomotion counterfactual failed")
+    if "weapon_projectile_resource" in report:
+        empty_entry = report["weapon_projectile_resource"][
+            "implementation_contract"]["empty_fallback"]["entry_projection"]
+        require(
+            empty_entry["classification"] ==
+                "SOURCE_CLOSED_IMPLEMENTATION_FIELDS" and
+            empty_entry["spec_executable"] is True and
+            empty_entry["entry_writes"] == {
+                "state_u16": "0x0200", "action_u16": "0x1a00",
+                "substate_u16": "0x1a00"} and
+            empty_entry["active_replacement"] == {
+                "visible_update_offset_u8": 1,
+                "state_u16": "0x0200", "action_u16": "0x1a02",
+                "substate_u16": "0x1a02",
+                "animation_record": "0x0015fcfc",
+                "assembly": "0x00161772", "animation_timer_u16": 4095,
+                "animation_branch_s16": -32768,
+                "current_hurt_selector_u8": 0,
+                "current_attack_selector_u8": 0} and
+            empty_entry["coffee_shop_witnesses"][1] == {
+                "prior_frame_u16": 2611, "entry_frame_u16": 2612,
+                "active_frame_u16": 2613,
+                "prior_animation_record": "0x0015f228",
+                "entry_animation_record": "0x0015f228"} and
+            empty_entry["rng_calls"] == [],
+            "Coffee Shop empty-resource entry contract drift")
     require(report["accepted_prior_player_bodies"]["attack_selector_order"] ==
             [1, 2, 3, 4] and
             report["accepted_prior_player_bodies"]["random_attack_selection"] is False,

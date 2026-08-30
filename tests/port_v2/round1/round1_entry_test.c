@@ -284,7 +284,9 @@ int main(void)
         if (walk_runtime.player.animation_record != 0x0015f2b8UL ||
             walk_runtime.player.assembly != 0x00160b9eUL ||
             walk_runtime.player.animation_timer != 4u ||
-            walk_runtime.player.animation_branch != (short)-32768)
+            walk_runtime.player.animation_branch != (short)-32768 ||
+            walk_runtime.player.hurt_selector != 0u ||
+            walk_runtime.player.attack_selector != 0u)
             return 186;
         for (calls = 0u; calls < 4u; ++calls)
             if (!avsp_round1_step_player(&walk_runtime,
@@ -292,7 +294,9 @@ int main(void)
                 return 186;
         if (walk_runtime.player.animation_record != 0x0015f208UL ||
             walk_runtime.player.assembly != 0x00160a02UL ||
-            walk_runtime.player.animation_timer != 4u)
+            walk_runtime.player.animation_timer != 4u ||
+            walk_runtime.player.hurt_selector != 0u ||
+            walk_runtime.player.attack_selector != 0u)
             return 186;
     }
     if (!avsp_round1_step_player(&runtime, AVSP_PW_INPUT_RIGHT, 0) ||
@@ -303,12 +307,16 @@ int main(void)
         runtime.player.animation_record != 0x0015f208UL ||
         runtime.player.assembly != 0x00160a02UL ||
         runtime.player.animation_timer != 4u ||
+        runtime.player.hurt_selector != 0u ||
+        runtime.player.attack_selector != 0u ||
         !avsp_round1_step_player(&runtime, AVSP_PW_INPUT_RIGHT, 0) ||
         runtime.player.source_x_fp != 0x03b48000L ||
         runtime.player.substate != 0x0202u ||
         runtime.player.animation_record != 0x0015f208UL ||
         runtime.player.assembly != 0x00160a02UL ||
         runtime.player.animation_timer != 3u ||
+        runtime.player.hurt_selector != 0u ||
+        runtime.player.attack_selector != 0u ||
         !avsp_round1_step_player(&runtime, 0u, 0) ||
         !avsp_round1_step_player(&runtime, 0u, 0) ||
         runtime.player.x <= 944 || runtime.player.z != 320 ||
@@ -928,6 +936,7 @@ int main(void)
     {
         AvspRound1Runtime weapon_runtime = runtime;
         AvspRound1Runtime empty_latch_runtime = runtime;
+        AvspRound1Runtime empty_walk_runtime = runtime;
         short weapon_x;
         short weapon_z;
         if (!avsp_round1_step_player(&weapon_runtime,
@@ -1054,6 +1063,56 @@ int main(void)
         if (!avsp_round1_step_player(&empty_latch_runtime, 0u, 0) ||
             empty_latch_runtime.player_resource_depleted != 0u)
             return 187;
+        if (!avsp_round1_step_player(&empty_walk_runtime,
+                AVSP_PW_INPUT_RIGHT, 0) ||
+            !avsp_round1_step_player(&empty_walk_runtime,
+                AVSP_PW_INPUT_RIGHT, 0) ||
+            !avsp_round1_step_player(&empty_walk_runtime,
+                AVSP_PW_INPUT_RIGHT, 0))
+            return 222;
+        empty_walk_runtime.player_resource = 43u;
+        empty_walk_runtime.player_resource_recharge = 5u;
+        empty_walk_runtime.player_resource_depleted = 1u;
+        if (!avsp_round1_step_player(&empty_walk_runtime,
+                AVSP_ROUND1_INPUT_BUTTON1 | AVSP_PW_INPUT_RIGHT, 0))
+            return 223;
+        {
+            unsigned long entry_record =
+                empty_walk_runtime.player.animation_record;
+            unsigned long entry_assembly = empty_walk_runtime.player.assembly;
+            unsigned short entry_timer =
+                empty_walk_runtime.player.animation_timer;
+            short entry_branch = empty_walk_runtime.player.animation_branch;
+            if (entry_record == 0x0015f1f4UL ||
+                !avsp_round1_step_player(&empty_walk_runtime,
+                    AVSP_ROUND1_INPUT_BUTTON1 | AVSP_PW_INPUT_RIGHT, 0) ||
+                empty_walk_runtime.player.source_action != 0x1a00u ||
+                empty_walk_runtime.player.substate != 0x1a00u ||
+                empty_walk_runtime.player.animation_record != entry_record ||
+                empty_walk_runtime.player.assembly != entry_assembly ||
+                empty_walk_runtime.player.animation_timer != entry_timer ||
+                empty_walk_runtime.player.animation_branch != entry_branch ||
+                empty_walk_runtime.player.hurt_selector != 0u ||
+                empty_walk_runtime.player.attack_selector != 0u)
+            {
+                fprintf(stderr,
+                    "empty walk entry record=%08lx/%08lx assembly=%08lx/%08lx timer=%u/%u branch=%d/%d action=%04x substate=%04x selectors=%u/%u\n",
+                    entry_record, empty_walk_runtime.player.animation_record,
+                    entry_assembly, empty_walk_runtime.player.assembly,
+                    entry_timer, empty_walk_runtime.player.animation_timer,
+                    entry_branch, empty_walk_runtime.player.animation_branch,
+                    empty_walk_runtime.player.source_action,
+                    empty_walk_runtime.player.substate,
+                    empty_walk_runtime.player.hurt_selector,
+                    empty_walk_runtime.player.attack_selector);
+                return 224;
+            }
+        }
+        if (!avsp_round1_step_player(&empty_walk_runtime, 0u, 0) ||
+            empty_walk_runtime.player.source_action != 0x1a02u ||
+            empty_walk_runtime.player.animation_record != 0x0015fcfcUL ||
+            empty_walk_runtime.player.assembly != 0x00161772UL)
+            return 225;
         if (weapon_runtime.player_weapon_projectile_free_count != 23u ||
             weapon_runtime.player_weapon_projectiles[0].actor_class != 0 ||
             weapon_runtime.player_weapon_projectiles[0].source_slot !=
