@@ -42,6 +42,10 @@ local mutate_class1f_hit_selector =
     os.getenv("AVSP_ORACLE11_MUTATE_CLASS1F_HIT_SELECTOR") == "1"
 local suppress_resource_pc = tonumber(
     os.getenv("AVSP_ORACLE11_SUPPRESS_RESOURCE_PC") or "", 16)
+local capture_controller_substate =
+    os.getenv("AVSP_ORACLE11_CONTROLLER_SUBSTATE_CAPTURE") == "1"
+local suppress_controller_substate_pc = tonumber(
+    os.getenv("AVSP_ORACLE11_SUPPRESS_CONTROLLER_SUBSTATE_PC") or "", 16)
 local class1f_hit_slot = tonumber(
     os.getenv("AVSP_ORACLE11_CLASS1F_HIT_SLOT") or "ffa180", 16)
 local class1f_hit_first_frame = tonumber(
@@ -135,6 +139,8 @@ local class1f_hit_program = assert(io.open(
     root .. "/coffee_shop_class1f_hit_program.tsv", "w"))
 local player_resource = assert(io.open(
     root .. "/coffee_shop_player_resource.tsv", "w"))
+local controller_substate_writes = assert(io.open(
+    root .. "/coffee_shop_controller_substate_writes.tsv", "w"))
 local result = assert(io.open(root .. "/progression_result.tsv", "w"))
 transactions:write("frame\tpc\ta4\ta6\tg8019\tliving\tprogress\tc_state\tc_substate\tc_timer40\tc_timer42\tc_limit4a\tc_index10\tc_phase2e\tc_local2c\tcamera_x\tcamera_z\trng\td0\td1\td2\tactor_active\tactor_class\tactor_type\tactor_state\tactor_substate\tactor_x\tactor_y\tactor_z\tactor_variant\tactor_timer\tactor_selector83\n")
 snapshots:write("frame\tslot\tactive\tclass\ttype\tstate\tsubstate\tfacing\tx\ty\tz\tvariant\ttimer\tselector83\thealth\tanim\n")
@@ -175,6 +181,7 @@ class1f_hit:write("frame\tpc\tslot\tstate\tsubstate\tfacing\tanimation_record\ta
 class1f_hit_writes:write("frame\tpc\tslot\tinner\tstate\tsubstate\tanimation_record\taction_timer\trecovery_timer2c\thealth\tprior_health\thit_mode46\thit_kind49\treaction_selector4d\treaction_facing4f\tairborne5c\tmotion_index6c\thit_count6d\tinterrupt73\told32\tdata\tmask\tsuppressed\n")
 class1f_hit_program:write("frame\tpc\tstate\tsubstate\tfacing\tx_fp\ty_fp\tz\tanimation_record\tanimation_timer\tanimation_branch\taction_timer2a\trecovery_timer2c\thealth\tprior_health\thit_mode46\thit_kind49\treaction_selector4d\treaction_facing4f\tairborne5c\tmotion_index6c\thit_count6d\tinterrupt73\tx_velocity30\ty_velocity34\tx_acceleration38\ty_acceleration3c\trng\td0\td1\td2\td3\n")
 player_resource:write("frame\tevent\tpc\tresource\trecharge\tdepleted\taward_timer\tstate\tsubstate\tdata\tmask\tsuppressed\n")
+controller_substate_writes:write("frame\tpc\toffset\tstate\tsubstate\tfield44\ta6\td0\td1\td2\td3\ta0\ta1\ta2\ta3\ta4\ta5\told32\tdata\tmask\tsuppressed\n")
 result:write("spawn_suppression\tguard_suppression\tmain_spawn_transactions\taux_spawn_transactions\tsuppressed_writes\tlifecycle_suppressed_writes\taction4_timer_events\taction4_timer_suppressed_writes\ttype4_class03_suppressed_writes\tcoffee_stage_rng_suppressed_writes\ttype36_suppressed_writes\tscene_pair_suppressed_actors\tobstacle_transition_suppressed_writes\tclass1f_hit_selector_mutations\tfinal_route\n")
 
 local function u8(a) return program:read_u8(a) end
@@ -882,6 +889,39 @@ for pc in pairs(target_pcs) do
         function() emit_transaction(pc) end)
 end
 
+oracle11_controller_substate_write = program:install_write_tap(
+    controller + 4, controller + 0x47,
+    "oracle11_controller_substate_write",
+    function(offset, data, mask)
+        if not capture_controller_substate or frame < 2670 or frame > 2690 then
+            return
+        end
+        local inner = offset - controller
+        if not ((inner >= 4 and inner <= 7) or
+                (inner >= 0x44 and inner <= 0x47)) then return end
+        local pc = maincpu.state["PC"].value & 0xffffff
+        local suppressed = suppress_controller_substate_pc ~= nil and
+            pc == suppress_controller_substate_pc and inner >= 4 and inner <= 7
+        controller_substate_writes:write(string.format(
+            "%d\t%06x\t%06x\t%04x\t%04x\t%04x\t%06x\t%08x\t%08x\t%08x\t%08x\t%06x\t%06x\t%06x\t%06x\t%06x\t%06x\t%08x\t%08x\t%08x\t%d\n",
+            frame, pc, offset, u16(controller + 4), u16(controller + 6),
+            u16(controller + 0x44),
+            maincpu.state["A6"].value & 0xffffff,
+            maincpu.state["D0"].value & 0xffffffff,
+            maincpu.state["D1"].value & 0xffffffff,
+            maincpu.state["D2"].value & 0xffffffff,
+            maincpu.state["D3"].value & 0xffffffff,
+            maincpu.state["A0"].value & 0xffffff,
+            maincpu.state["A1"].value & 0xffffff,
+            maincpu.state["A2"].value & 0xffffff,
+            maincpu.state["A3"].value & 0xffffff,
+            maincpu.state["A4"].value & 0xffffff,
+            maincpu.state["A5"].value & 0xffffff,
+            u32(offset & 0xfffffc), data & 0xffffffff,
+            mask & 0xffffffff, suppressed and 1 or 0))
+        if suppressed then return u32(offset & 0xfffffc) end
+    end)
+
 oracle11_progression_spawn_suppress = program:install_write_tap(
     pool, pool + count * stride - 1, "oracle11_progression_spawn_suppress",
     function(offset, data, mask)
@@ -1530,6 +1570,7 @@ oracle11_progression_frame = emu.add_machine_frame_notifier(function()
         class1f_hit_writes:close()
         class1f_hit_program:close()
         player_resource:close()
+        controller_substate_writes:close()
         result:close()
     end
 end)

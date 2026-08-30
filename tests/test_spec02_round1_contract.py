@@ -360,6 +360,16 @@ assert progression["controller_program"]["intro_gate_transition"]["write_values"
     "source_camera_target_u16": 208}
 assert progression["controller_program"]["initial_spawn_transition"]["observed_after"] == {
     "frame": 2074, "living_enemy_count_u16": 10, "state_u16": 0x0202}
+camera_edge = progression["controller_program"]["camera_edge_transition"]
+assert camera_edge["observed_transition"] == {
+    "camera_x_s16": 832, "field44_after_u16": 1,
+    "field46_after_u16": 837, "field46_before_u16": 838,
+    "field48_u16": 2100, "progress_snapshot_writer_pc": "0x02895e",
+    "progress_u16": 1, "substate_after_u16": 0x0200,
+    "substate_before_u16": 0, "visible_frame_u16": 2680,
+    "writer_frame_u16": 2679, "writer_pc": "0x02894e"}
+assert camera_edge["mutation_control"]["suppressed_visible_substate_u16"] == 0
+assert camera_edge["mutation_control"]["fixed_frame_substitute"] is False
 assert progression["progress_increment_boundary"]["writer_pc"] == "0x061070"
 assert progression["progress_increment_boundary"]["transition_guard"] == {
     "class_u8": "0x1f", "health_s16": -1, "record_type_u8": 12,
@@ -560,6 +570,7 @@ f = copy.deepcopy(fixtures); next(row for row in next(item for item in f["author
 f = copy.deepcopy(fixtures); next(row for row in next(item for item in f["authority_data"]["enemies"]["archetypes"] if item["class"] == "0x1f")["presentation_and_collision"]["records"] if row["animation_record"] == "0x0012ec74")["hurt_selector"] = 1; mutations.append((contract, f, "class1f first Button1 target selector mutation"))
 f = copy.deepcopy(fixtures); f["authority_data"]["route"]["first_segment_recurring_spawn"]["controller_program"]["initializer"]["limit_table_u16"][1] = 34; mutations.append((contract, f, "encounter controller limit-table mutation"))
 f = copy.deepcopy(fixtures); f["authority_data"]["route"]["first_segment_recurring_spawn"]["controller_program"]["intro_gate_transition"]["gate_owner"]["writer_successor_pc"] = "0x08da22"; mutations.append((contract, f, "encounter intro-gate writer mutation"))
+f = copy.deepcopy(fixtures); f["authority_data"]["route"]["first_segment_recurring_spawn"]["controller_program"]["camera_edge_transition"]["observed_transition"]["writer_pc"] = "0x028950"; mutations.append((contract, f, "encounter controller camera-edge mutation"))
 f = copy.deepcopy(fixtures); f["authority_data"]["route"]["first_segment_recurring_spawn"]["intro_gate_suppression_control"]["mutant_at_frame_4100"]["main_spawn_transactions"] = 1; mutations.append((contract, f, "encounter intro-gate suppression mutation"))
 f = copy.deepcopy(fixtures); f["authority_data"]["route"]["first_segment_recurring_spawn"]["primary_writer"]["rng"]["calls"] = 0; mutations.append((contract, f, "encounter recurring RNG mutation"))
 f = copy.deepcopy(fixtures); f["authority_data"]["route"]["first_segment_recurring_spawn"]["primary_writer"]["post_allocation_dispatch"]["same_frame"]["animation_timer_u16"] = 4094; mutations.append((contract, f, "encounter recurring same-frame presentation mutation"))

@@ -120,11 +120,11 @@
  * transient diagnostic storage. Reserve one aligned block immediately after
  * the existing tile/strip carve so debug and release use the same 4 MB-cart
  * ownership without consuming Saturn work RAM. The SH-2 runtime measures
- * 0x148e4 bytes with all six source pools; the 0x19000 carve preserves 0x471c
+ * 0x148e8 bytes with all six source pools; the 0x19000 carve preserves 0x4718
  * bytes (17.8 percent) of headroom inside the fixed arena. */
 #ifdef AVSP_LIVE_ENCOUNTER
 #define AVSP_ROUND1_RUNTIME_REGION_BYTES 0x19000
-#define AVSP_ROUND1_RUNTIME_MEASURED_BYTES 0x148e4
+#define AVSP_ROUND1_RUNTIME_MEASURED_BYTES 0x148e8
 #define AVSP_LIVE_DIAG_REGION_BYTES 0x1A000
 #define AVSP_LIVE_DIAG_RECORD_BYTES 156
 #define AVSP_ROUND1_RUNTIME_BASE ((AvspRound1Runtime *)(AVSP_CART_DRAM1_BASE + AVSP_TILE_REGION_BYTES + AVSP_STRIPS_REGION_BYTES))
@@ -572,9 +572,9 @@ static AvspLiveEncounterRuntime live_encounter_runtime;
 static AvspLiveEncounterFrame live_encounter_frame;
 #define round1_runtime (*AVSP_ROUND1_RUNTIME_BASE)
 typedef char AvspRound1RuntimeFitsReservedCartRegion[
-    sizeof(AvspRound1Runtime) <= AVSP_ROUND1_RUNTIME_REGION_BYTES ? 1 : -1];
-typedef char AvspRound1RuntimeSizeMatchesMeasuredTarget[
     sizeof(AvspRound1Runtime) == AVSP_ROUND1_RUNTIME_MEASURED_BYTES ? 1 : -1];
+typedef char AvspRound1RuntimeSizeMatchesMeasuredTarget[
+    sizeof(AvspRound1Runtime) <= AVSP_ROUND1_RUNTIME_REGION_BYTES ? 1 : -1];
 typedef char AvspLiveDiagnosticSamplesFitReservedCartRegion[
     sizeof(LiveEncounterDiagSample) * AVSP_LIVE_DIAG_SAMPLES <=
             AVSP_LIVE_DIAG_REGION_BYTES
@@ -8215,7 +8215,7 @@ static void live_encounter_publish(void)
     avsp_diag_live_frame = (int)live_encounter_frame.frame;
     avsp_diag_round1_spec_bound =
         strcmp(AVSP_ROUND1_SPEC02_SHA256,
-               "635f3c848a5cdea35634b89ada4f8b19efdc25939bb93db7d9ab1ac46dd78e6b") ==
+               "9b16789689fca8d9c1c6b1b8db05f952822fbea011872d5b0c458ca1ca1d5c99") ==
         0;
     avsp_diag_round1_entry_valid = avsp_round1_entry_valid(&round1_runtime);
     avsp_diag_round1_route_state = round1_runtime.route_state;

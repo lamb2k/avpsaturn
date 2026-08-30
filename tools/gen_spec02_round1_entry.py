@@ -169,6 +169,7 @@ def build() -> str:
     recurring_controller = recurring["controller_program"]
     recurring_initializer = recurring_controller["initializer"]
     recurring_gate = recurring_controller["intro_gate_transition"]
+    recurring_camera_edge = recurring_controller["camera_edge_transition"]
     recurring_primary = recurring["primary_writer"]
     recurring_post_allocation = recurring_primary[
         "post_allocation_dispatch"]["same_frame"]
@@ -670,6 +671,21 @@ def build() -> str:
             "camera_x_call_threshold_s16": 720,
             "conditional_phase_0x2e_u8": 1,
             "conditional_local_0x2c_u8": 0} or
+        recurring_camera_edge["observed_transition"] != {
+            "camera_x_s16": 832, "field44_after_u16": 1,
+            "field46_after_u16": 837, "field46_before_u16": 838,
+            "field48_u16": 2100,
+            "progress_snapshot_writer_pc": "0x02895e",
+            "progress_u16": 1, "substate_after_u16": 0x0200,
+            "substate_before_u16": 0, "visible_frame_u16": 2680,
+            "writer_frame_u16": 2679, "writer_pc": "0x02894e"} or
+        recurring_camera_edge["transition_values"] != {
+            "camera_edge_x_s16": 832,
+            "conditional_local_0x2c_u8": 0,
+            "conditional_phase_0x2e_u8": 1,
+            "field46_phase_threshold_u16": 600} or
+        recurring_camera_edge["mutation_control"]
+            ["fixed_frame_substitute"] is not False or
         recurring["intro_gate_suppression_control"]["mutant_at_frame_4100"] != {
             "state_u16": 0x0202, "timer42_u16": 60,
             "intro_gate_u8": 0xff, "main_spawn_transactions": 0,
@@ -1692,7 +1708,12 @@ def build() -> str:
         "};", "",
         "static const AvspRound1RecurringSpawnSpec avsp_round1_recurring_spawn =",
         "{",
-        "    0x0200u, 0x0202u, 0x0204u,",
+        "    0x0200u, 0x0202u, 0x0204u, 0x%04Xu, %du, %du," % (
+            recurring_camera_edge["observed_transition"]
+                ["substate_after_u16"],
+            recurring_camera_edge["transition_values"]
+                ["field46_phase_threshold_u16"],
+            recurring_camera_edge["transition_values"]["camera_edge_x_s16"]),
         "    %du, %du, %du, %du, %du, %du, %d, %du," % (
             recurring_initializer["observed_after"]["timer40_u16"],
             recurring_initializer["observed_after"]["timer42_u16"],

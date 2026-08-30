@@ -60511,6 +60511,107 @@
       }
     },
     "controller_program": {
+      "camera_edge_transition": {
+        "branch_order": [
+          "if controller+0x48:u16 != 0 and controller+0x46:u16 != 0, predecrement controller+0x46:u16",
+          "if the decremented controller+0x46:u16 equals 600, call 0x028a06 to set phase_0x2e=1 and local_0x2c=0",
+          "write camera_x_s16 to camera_target_x_s16 at 0xff829c",
+          "return while unsigned camera_x_u16 is below 0x0340",
+          "add 2 to controller+0x06:u8 so substate_u16 becomes 0x0200",
+          "write 0x0340 to camera_target_x_s16 at 0xff829c",
+          "write 0x0340 to camera_right_edge_s16 at 0xff829e",
+          "write progress_u16 from 0xff1a1a to controller+0x44:u16"
+        ],
+        "capture_identity": {
+          "byte_identical": true,
+          "completion_a": {
+            "files": {
+              "coffee_shop_controller_substate_writes.tsv": "eda238adfd9976c95330f1ad7720d4cc8646458587fa8b10deaf3c051e83c51c",
+              "coffee_shop_scene_actors.tsv": "9c0ea88c7eae6b4755b0025d356d49ae136d91de0e443fab0ff767151e43343d",
+              "coffee_shop_scene_frames.tsv": "91e4aab3a03586a6c9a143dd58ee03a72ebc52b7fd611fdc6fe0975ebd522d1d"
+            }
+          },
+          "completion_b": {
+            "files": {
+              "coffee_shop_controller_substate_writes.tsv": "eda238adfd9976c95330f1ad7720d4cc8646458587fa8b10deaf3c051e83c51c",
+              "coffee_shop_scene_actors.tsv": "9c0ea88c7eae6b4755b0025d356d49ae136d91de0e443fab0ff767151e43343d",
+              "coffee_shop_scene_frames.tsv": "91e4aab3a03586a6c9a143dd58ee03a72ebc52b7fd611fdc6fe0975ebd522d1d"
+            }
+          },
+          "suppression": {
+            "files": {
+              "coffee_shop_controller_substate_writes.tsv": "f02b5b7809cec67b52a479b611a802c001b008c7025679f9d1ffa003e94bef38",
+              "coffee_shop_scene_actors.tsv": "5ef1d82320934566b6834f43b2e540f2287e5ece9e5d457c1a09d2f9a2020aec",
+              "coffee_shop_scene_frames.tsv": "45ed718eaf3c45dcbc0d6f14e59b031c3a7501059298c0208c9c2c85839eaf7e"
+            }
+          }
+        },
+        "classification": "SOURCE_CLOSED_IMPLEMENTATION_FIELDS",
+        "dispatch_guard": {
+          "jump_table_index": "u8(controller+0x06)",
+          "state_u16": 516,
+          "substate_u16": 0
+        },
+        "field_types": {
+          "camera_right_edge_s16": "s16",
+          "camera_target_x_s16": "s16",
+          "camera_x_s16": "s16",
+          "field46_u16": "u16",
+          "field48_u16": "u16",
+          "progress_u16": "u16",
+          "state_u16": "u16",
+          "substate_u16": "u16"
+        },
+        "mutation_control": {
+          "baseline_visible_substate_u16": 512,
+          "downstream_actor_population_differs": true,
+          "fixed_frame_substitute": false,
+          "suppressed_visible_substate_u16": 0,
+          "writer_pc": "0x02894e"
+        },
+        "native_adapter_binding": {
+          "reason": "the combined native frame calls player/camera before the fixed-pool scheduler, so camera_x_previous preserves the source controller-before-camera read",
+          "runtime_field": "camera_x_previous",
+          "source_read": "camera_x_s16 at controller dispatch"
+        },
+        "observed_transition": {
+          "camera_x_s16": 832,
+          "field44_after_u16": 1,
+          "field46_after_u16": 837,
+          "field46_before_u16": 838,
+          "field48_u16": 2100,
+          "progress_snapshot_writer_pc": "0x02895e",
+          "progress_u16": 1,
+          "substate_after_u16": 512,
+          "substate_before_u16": 0,
+          "visible_frame_u16": 2680,
+          "writer_frame_u16": 2679,
+          "writer_pc": "0x02894e"
+        },
+        "rng_calls": 0,
+        "routine": "0x028910..0x02895e",
+        "scheduler_order": "entry controller before player and fixed actor pools",
+        "source_window": {
+          "first": "0x028910",
+          "last_exclusive": "0x028960",
+          "sha256": "793c5ea8d700a0836b8c46821653c9d0407cb5b4880d6e2f6f481bab37e7a7c6"
+        },
+        "spec_executable": true,
+        "transition_values": {
+          "camera_edge_x_s16": 832,
+          "conditional_local_0x2c_u8": 0,
+          "conditional_phase_0x2e_u8": 1,
+          "field46_phase_threshold_u16": 600
+        },
+        "writes": [
+          "controller+0x46:u16 -= 1",
+          "camera_target_x_s16 = camera_x_s16",
+          "controller+0x06:u8 += 2",
+          "camera_target_x_s16 = 0x0340",
+          "camera_right_edge_s16 = 0x0340",
+          "controller+0x44:u16 = progress_u16"
+        ]
+      },
       "field_types": {
         "entry_gate_timer": "u16",
         "field_0x46": "u16",

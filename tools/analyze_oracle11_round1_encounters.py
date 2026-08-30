@@ -25,6 +25,9 @@ PROGRESSION_LIFECYCLE_B = ROOT / ".deps/mame/oracle11_progression_lifecycle_b"
 PROGRESSION_LIFECYCLE_SUPPRESS = ROOT / ".deps/mame/oracle11_progression_lifecycle_s2"
 COFFEE_SHOP_SCENE_A = ROOT / ".deps/mame/oracle11_progression_lifecycle_cs7a"
 COFFEE_SHOP_SCENE_B = ROOT / ".deps/mame/oracle11_progression_lifecycle_cs7b"
+CONTROLLER_EDGE_A = ROOT / ".deps/mame/oracle11_progression_lifecycle_cs38a"
+CONTROLLER_EDGE_B = ROOT / ".deps/mame/oracle11_progression_lifecycle_cs38b"
+CONTROLLER_EDGE_SUPPRESS = ROOT / ".deps/mame/oracle11_progression_lifecycle_cs38s"
 ROUTE = ROOT / "data/oracle10_round1_route.json"
 ENEMIES = ROOT / "data/oracle11_round1_enemy_archetypes.json"
 AUXILIARY = ROOT / "data/oracle11_round1_auxiliary_authority.json"
@@ -128,6 +131,12 @@ def progression_identity(path: Path) -> dict[str, object]:
 def progression_lifecycle_identity(path: Path) -> dict[str, object]:
     return {"files": {name: digest(path / name)
                       for name in PROGRESSION_LIFECYCLE_FILES}}
+
+
+def controller_edge_identity(path: Path) -> dict[str, object]:
+    names = ("coffee_shop_controller_substate_writes.tsv",
+             "coffee_shop_scene_frames.tsv", "coffee_shop_scene_actors.tsv")
+    return {"files": {name: digest(path / name) for name in names}}
 
 
 def window(image: bytes, pc: int, before: int = 16, after: int = 32) -> dict[str, object]:
@@ -431,6 +440,11 @@ def build_report() -> dict[str, object]:
     require(progression_lifecycle_a["files"] ==
             progression_lifecycle_b["files"],
             "first-segment lifecycle captures differ")
+    controller_edge_a = controller_edge_identity(CONTROLLER_EDGE_A)
+    controller_edge_b = controller_edge_identity(CONTROLLER_EDGE_B)
+    controller_edge_suppress = controller_edge_identity(CONTROLLER_EDGE_SUPPRESS)
+    require(controller_edge_a["files"] == controller_edge_b["files"],
+            "controller camera-edge correction captures differ")
     final = next(rows(RAW_A / "result.tsv"))
     require(int(final["final_route"]) == 4, "route capture did not reach Round 2")
     route = json.loads(ROUTE.read_text(encoding="utf-8"))
@@ -971,6 +985,27 @@ def build_report() -> dict[str, object]:
                 f"source phase update drift at {phase_frame}")
         phase_points.append({"frame": phase_frame, "before_u8": before,
                              "after_u8": after})
+    controller_edge_rows = list(rows(
+        CONTROLLER_EDGE_A / "coffee_shop_controller_substate_writes.tsv"))
+    edge_substate = [row for row in controller_edge_rows
+                     if row["pc"] == "02894e"]
+    edge_progress = [row for row in controller_edge_rows
+                     if row["pc"] == "02895e"]
+    require(len(edge_substate) == 1 and len(edge_progress) == 1 and
+            edge_substate[0]["frame"] == "2679" and
+            edge_substate[0]["state"] == "0204" and
+            edge_substate[0]["substate"] == "0000" and
+            edge_substate[0]["d0"] == "00000340" and
+            edge_progress[0]["field44"] == "0000",
+            "controller camera-edge writer chronology drift")
+    edge_frames = {int(row["frame"]): row for row in rows(
+        CONTROLLER_EDGE_A / "coffee_shop_scene_frames.tsv")}
+    edge_suppress_frames = {int(row["frame"]): row for row in rows(
+        CONTROLLER_EDGE_SUPPRESS / "coffee_shop_scene_frames.tsv")}
+    require(int(edge_frames[2679]["entry_controller_substate"]) == 0 and
+            int(edge_frames[2680]["entry_controller_substate"]) == 0x0200 and
+            int(edge_suppress_frames[2680]["entry_controller_substate"]) == 0,
+            "controller camera-edge suppression did not discriminate")
     first_segment_recurring_spawn = {
         "classification": "SOURCE_CLOSED_IMPLEMENTATION_FIELDS",
         "scope": ("first-segment recurring type-12/class-0x1f source writers "
@@ -1103,6 +1138,84 @@ def build_report() -> dict[str, object]:
                                              "timer42_u16": 0xffff},
                 },
                 "rng_calls": 0,
+            },
+            "camera_edge_transition": {
+                "classification": "SOURCE_CLOSED_IMPLEMENTATION_FIELDS",
+                "routine": "0x028910..0x02895e",
+                "source_window": {
+                    "first": "0x028910", "last_exclusive": "0x028960",
+                    "sha256": hashlib.sha256(
+                        image[0x28910:0x28960]).hexdigest(),
+                },
+                "dispatch_guard": {
+                    "state_u16": 0x0204, "substate_u16": 0,
+                    "jump_table_index": "u8(controller+0x06)",
+                },
+                "field_types": {
+                    "state_u16": "u16", "substate_u16": "u16",
+                    "field46_u16": "u16", "field48_u16": "u16",
+                    "camera_x_s16": "s16", "camera_target_x_s16": "s16",
+                    "camera_right_edge_s16": "s16", "progress_u16": "u16",
+                },
+                "branch_order": [
+                    "if controller+0x48:u16 != 0 and controller+0x46:u16 != 0, predecrement controller+0x46:u16",
+                    "if the decremented controller+0x46:u16 equals 600, call 0x028a06 to set phase_0x2e=1 and local_0x2c=0",
+                    "write camera_x_s16 to camera_target_x_s16 at 0xff829c",
+                    "return while unsigned camera_x_u16 is below 0x0340",
+                    "add 2 to controller+0x06:u8 so substate_u16 becomes 0x0200",
+                    "write 0x0340 to camera_target_x_s16 at 0xff829c",
+                    "write 0x0340 to camera_right_edge_s16 at 0xff829e",
+                    "write progress_u16 from 0xff1a1a to controller+0x44:u16",
+                ],
+                "transition_values": {
+                    "field46_phase_threshold_u16": 600,
+                    "camera_edge_x_s16": 832,
+                    "conditional_phase_0x2e_u8": 1,
+                    "conditional_local_0x2c_u8": 0,
+                },
+                "observed_transition": {
+                    "writer_frame_u16": 2679,
+                    "visible_frame_u16": 2680,
+                    "writer_pc": "0x02894e",
+                    "progress_snapshot_writer_pc": "0x02895e",
+                    "camera_x_s16": 832,
+                    "substate_before_u16": 0,
+                    "substate_after_u16": 0x0200,
+                    "progress_u16": 1,
+                    "field44_after_u16": 1,
+                    "field46_before_u16": 838,
+                    "field46_after_u16": 837,
+                    "field48_u16": 2100,
+                },
+                "writes": [
+                    "controller+0x46:u16 -= 1",
+                    "camera_target_x_s16 = camera_x_s16",
+                    "controller+0x06:u8 += 2",
+                    "camera_target_x_s16 = 0x0340",
+                    "camera_right_edge_s16 = 0x0340",
+                    "controller+0x44:u16 = progress_u16",
+                ],
+                "rng_calls": 0,
+                "scheduler_order": "entry controller before player and fixed actor pools",
+                "native_adapter_binding": {
+                    "source_read": "camera_x_s16 at controller dispatch",
+                    "runtime_field": "camera_x_previous",
+                    "reason": "the combined native frame calls player/camera before the fixed-pool scheduler, so camera_x_previous preserves the source controller-before-camera read",
+                },
+                "capture_identity": {
+                    "completion_a": controller_edge_a,
+                    "completion_b": controller_edge_b,
+                    "byte_identical": True,
+                    "suppression": controller_edge_suppress,
+                },
+                "mutation_control": {
+                    "writer_pc": "0x02894e",
+                    "baseline_visible_substate_u16": 0x0200,
+                    "suppressed_visible_substate_u16": 0,
+                    "downstream_actor_population_differs": True,
+                    "fixed_frame_substitute": False,
+                },
+                "spec_executable": True,
             },
         },
         "phase_counter": {
@@ -1628,6 +1741,14 @@ def validate(report: dict[str, object]) -> None:
                     "conditional_local_0x2c_u8": 0} and
             progression["controller_program"]["intro_gate_transition"]
                 ["observed"]["first_current_sample"]["state_u16"] == 0x0204 and
+            progression["controller_program"]["camera_edge_transition"]
+                ["observed_transition"]["writer_pc"] == "0x02894e" and
+            progression["controller_program"]["camera_edge_transition"]
+                ["observed_transition"]["substate_after_u16"] == 0x0200 and
+            progression["controller_program"]["camera_edge_transition"]
+                ["mutation_control"]["suppressed_visible_substate_u16"] == 0 and
+            progression["controller_program"]["camera_edge_transition"]
+                ["mutation_control"]["fixed_frame_substitute"] is False and
             progression["controller_guard"]["first_operands"] == {
                 "progress_u16": 1, "limit_u16": 35,
                 "timer_before_u16": 3707, "timer_after_u16": 3706,

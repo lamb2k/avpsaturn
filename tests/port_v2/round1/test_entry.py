@@ -9,7 +9,7 @@ from pathlib import Path
 
 ROOT = Path(__file__).resolve().parents[3]
 SPEC = ROOT / "data/spec02_round1_executable_contract.json"
-EXPECTED = "635f3c848a5cdea35634b89ada4f8b19efdc25939bb93db7d9ab1ac46dd78e6b"
+EXPECTED = "9b16789689fca8d9c1c6b1b8db05f952822fbea011872d5b0c458ca1ca1d5c99"
 assert hashlib.sha256(SPEC.read_bytes()).hexdigest() == EXPECTED
 assert json.loads(SPEC.read_text())["status"] == "ACCEPTED"
 source = (ROOT / "src/port_v2/gameplay/round1/round1.c").read_text()
@@ -81,7 +81,8 @@ queue_after = """    delayed_direction = runtime->direction_history[AVSP_PW_DIRE
     runtime->direction_history[0] = direction_mask;"""
 assert queue_before in player_source
 subset_flags = {"--inner8-only", "--ko-only", "--registration-only",
-                "--locomotion-only", "--generated-walk-only"}
+                "--locomotion-only", "--generated-walk-only",
+                "--controller-edge-only"}
 if "--queue-only" in sys.argv or not subset_flags.intersection(sys.argv):
     run(source, header, False, "consume-before-direction-queue-shift",
         player_source.replace(queue_before, queue_after, 1))
@@ -112,6 +113,10 @@ locomotion_mutations = {
     "runtime->player_weapon_cleanup_pending = 0u;\n        weapon_return_owned = 1u;",
     "weapon_motion_hold = (unsigned char)(runtime->player_weapon_active ||\n        jump_owned || special_owned);",
     "if (weapon_motion_hold)\n        input.mask = (unsigned short)(input.mask &\n            (unsigned short)~AVSP_PW_INPUT_ATTACK);",
+}
+controller_edge_mutations = {
+    "encounter->source_camera_target =\n        (unsigned short)runtime->camera_x_previous;\n    if ((unsigned short)runtime->camera_x_previous <",
+    "encounter->source_blocked_by_living_count = 1u;\n    }\n    else",
 }
 for before, after in (
     ("runtime->route_state = AVSP_ROUND1_ROUTE_ENTRY_STATE;", "runtime->route_state = 4;"),
@@ -282,6 +287,10 @@ for before, after in (
      "actor->substate ==\n                    avsp_round1_recurring_spawn.intro_gate_owner_state"),
     ("encounter->source_living_count >=\n            avsp_round1_recurring_spawn.maximum_living",
      "encounter->source_living_count >\n            avsp_round1_recurring_spawn.maximum_living"),
+    ("encounter->source_camera_target =\n        (unsigned short)runtime->camera_x_previous;\n    if ((unsigned short)runtime->camera_x_previous <",
+     "encounter->source_camera_target =\n        (unsigned short)runtime->camera_x_position;\n    if ((unsigned short)runtime->camera_x_position <"),
+    ("encounter->source_blocked_by_living_count = 1u;\n    }\n    else",
+     "encounter->source_blocked_by_living_count = 1u;\n        return 1;\n    }\n    else"),
     ("if (avsp_round1_recurring_spawn.preserve_reused_presentation != 0u)",
      "if (0)"),
     ("avsp_round1_class1f_action_program.fall_initial_selector",
@@ -373,6 +382,8 @@ for before, after in (
         continue
     if "--locomotion-only" in sys.argv and before not in locomotion_mutations:
         continue
+    if "--controller-edge-only" in sys.argv and before not in controller_edge_mutations:
+        continue
     if "--generated-walk-only" in sys.argv:
         continue
     assert before in source, before
@@ -388,6 +399,9 @@ if "--registration-only" in sys.argv:
     raise SystemExit(0)
 if "--locomotion-only" in sys.argv:
     print("REIMPLEMENT-13 locomotion/weapon-return mutation lane: PASS (5 real mutations)")
+    raise SystemExit(0)
+if "--controller-edge-only" in sys.argv:
+    print("REIMPLEMENT-13 controller camera-edge mutation lane: PASS (2 real mutations)")
     raise SystemExit(0)
 generated_walk_mutations = {
     "    { 4u, 0, 0x0015F208UL, 0x00160A02UL, 17u, 0u },",
@@ -578,4 +592,4 @@ for before, after in (
 if "--generated-walk-only" in sys.argv:
     print("REIMPLEMENT-13 generated walk fixture mutation lane: PASS (5 real mutations)")
     raise SystemExit(0)
-print("REIMPLEMENT-13 entry/player/scheduler/class1f/Coffee-Shop-navigation/neutral-stop/melee/Button1/Button3/type16-projectile/player-HIT/first-encounter differential: PASS (199 real mutations)")
+print("REIMPLEMENT-13 entry/player/scheduler/class1f/Coffee-Shop-navigation/neutral-stop/melee/Button1/Button3/type16-projectile/player-HIT/first-encounter differential: PASS (201 real mutations)")

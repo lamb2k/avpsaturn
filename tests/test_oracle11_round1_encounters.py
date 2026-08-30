@@ -43,6 +43,7 @@ for label,change in (
     ('progression-suppression',lambda x:x['first_segment_recurring_spawn']['suppression_control'].__setitem__('suppressed_writer_count',0)),
     ('controller-init',lambda x:x['first_segment_recurring_spawn']['controller_program']['initializer']['limit_table_u16'].__setitem__(1,34)),
     ('intro-gate-owner',lambda x:x['first_segment_recurring_spawn']['controller_program']['intro_gate_transition']['gate_owner'].__setitem__('class_u8','0x1f')),
+    ('controller-camera-edge',lambda x:x['first_segment_recurring_spawn']['controller_program']['camera_edge_transition']['observed_transition'].__setitem__('writer_pc','0x028950')),
     ('intro-gate-suppression',lambda x:x['first_segment_recurring_spawn']['intro_gate_suppression_control'].__setitem__('suppressed_writer_count',0)),
     ('lifecycle-release-writer',lambda x:x['first_segment_recurring_spawn']['lifecycle_release_boundary'].__setitem__('writer_pc','0x061150')),
     ('ko-progress-increment',lambda x:x['first_segment_recurring_spawn']['progress_increment_boundary'].__setitem__('increment_u16',2)),
@@ -51,4 +52,4 @@ for label,change in (
     ('scene-silent-unknown',lambda x:x['coffee_shop_scene_census']['negative_controls'].__setitem__('unknown_pair_silently_omitted',True)),
 ):
     mutant=copy.deepcopy(report);change(mutant);reject(mutant,label)
-print('ORACLE-11 encounter/route authority tests: PASS (28 mutations rejected)')
+print('ORACLE-11 encounter/route authority tests: PASS (29 mutations rejected)')

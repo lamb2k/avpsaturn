@@ -1620,6 +1620,51 @@ static void avsp_round1_spawn_recurring_primary(AvspRound1Runtime *runtime)
     runtime->entry_controller.x = (short)encounter->source_spawn_index;
 }
 
+static void avsp_round1_set_recurring_phase(AvspRound1Runtime *runtime)
+{
+    runtime->first_encounter.source_phase =
+        avsp_round1_recurring_spawn.conditional_phase;
+    runtime->first_encounter.source_local =
+        avsp_round1_recurring_spawn.conditional_local;
+}
+
+static void avsp_round1_step_recurring_camera_edge(
+    AvspRound1Runtime *runtime)
+{
+    AvspRound1FirstEncounterRuntime *encounter = &runtime->first_encounter;
+    if (runtime->entry_controller.substate != 0u)
+        return;
+    if (encounter->source_field48 != 0u)
+    {
+        if (encounter->source_field46 != 0u)
+        {
+            --encounter->source_field46;
+            if (encounter->source_field46 ==
+                    avsp_round1_recurring_spawn.camera_edge_field46_threshold)
+                avsp_round1_set_recurring_phase(runtime);
+        }
+        else
+        {
+            --encounter->source_field48;
+            if (encounter->source_field48 ==
+                    avsp_round1_recurring_spawn.camera_edge_field46_threshold)
+                avsp_round1_set_recurring_phase(runtime);
+        }
+    }
+    encounter->source_camera_target =
+        (unsigned short)runtime->camera_x_previous;
+    if ((unsigned short)runtime->camera_x_previous <
+            avsp_round1_recurring_spawn.camera_edge_x)
+        return;
+    runtime->entry_controller.substate =
+        avsp_round1_recurring_spawn.camera_edge_substate;
+    encounter->source_camera_target =
+        avsp_round1_recurring_spawn.camera_edge_x;
+    encounter->source_camera_bound =
+        avsp_round1_recurring_spawn.camera_edge_x;
+    encounter->source_progress_snapshot = encounter->source_progress;
+}
+
 static int avsp_round1_step_recurring_controller(AvspRound1Runtime *runtime)
 {
     AvspRound1FirstEncounterRuntime *encounter = &runtime->first_encounter;
@@ -1665,11 +1710,14 @@ static int avsp_round1_step_recurring_controller(AvspRound1Runtime *runtime)
             avsp_round1_recurring_spawn.maximum_living)
     {
         encounter->source_blocked_by_living_count = 1u;
-        return 1;
     }
-    encounter->source_blocked_by_living_count = 0u;
-    avsp_round1_spawn_recurring_auxiliary(runtime);
-    avsp_round1_spawn_recurring_primary(runtime);
+    else
+    {
+        encounter->source_blocked_by_living_count = 0u;
+        avsp_round1_spawn_recurring_auxiliary(runtime);
+        avsp_round1_spawn_recurring_primary(runtime);
+    }
+    avsp_round1_step_recurring_camera_edge(runtime);
     return 1;
 }
 

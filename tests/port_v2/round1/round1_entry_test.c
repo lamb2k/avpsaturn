@@ -3706,6 +3706,23 @@ int main(void)
             unsigned int source_updates =
                 avsp_round1_coffee_shop_source_updates(
                     (unsigned short)source_frame);
+            if ((source_frame == 2679u &&
+                 scene_runtime.entry_controller.substate != 0u) ||
+                (source_frame == 2680u &&
+                 (scene_runtime.entry_controller.substate != 0x0200u ||
+                  scene_runtime.first_encounter.source_progress_snapshot != 1u ||
+                  scene_runtime.first_encounter.source_camera_bound != 832u)))
+            {
+                fprintf(stderr,
+                    "Coffee Shop controller camera edge failed frame=%u substate=%04x snapshot=%u bound=%u camera=%d previous=%d living=%u\n",
+                    source_frame, scene_runtime.entry_controller.substate,
+                    scene_runtime.first_encounter.source_progress_snapshot,
+                    scene_runtime.first_encounter.source_camera_bound,
+                    scene_runtime.camera_x_position,
+                    scene_runtime.camera_x_previous,
+                    scene_runtime.first_encounter.source_living_count);
+                return 117;
+            }
             if (source_frame == 2371u)
             {
                 const AvspRound1WeaponProjectileAllocation *child =
