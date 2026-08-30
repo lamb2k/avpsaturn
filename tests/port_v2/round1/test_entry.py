@@ -9,12 +9,13 @@ from pathlib import Path
 
 ROOT = Path(__file__).resolve().parents[3]
 SPEC = ROOT / "data/spec02_round1_executable_contract.json"
-EXPECTED = "45496c15cf6bef7176146e9530ffc6bc04bdb152c9892f3b7b1f10aeef97b5b7"
+EXPECTED = "bb48c1976641d0afa01ed621c1dbbf9d71eac2337dd00ebf4da1e4f4fabc632f"
 assert hashlib.sha256(SPEC.read_bytes()).hexdigest() == EXPECTED
 assert json.loads(SPEC.read_text())["status"] == "ACCEPTED"
 source = (ROOT / "src/port_v2/gameplay/round1/round1.c").read_text()
 header = (ROOT / "src/port_v2/gameplay/round1/round1.h").read_text()
 generated = (ROOT / "src/port_v2/gameplay/round1/spec02_round1_entry_data.h").read_text()
+player_source = (ROOT / "src/port_v2/gameplay/player_action/player_action.c").read_text()
 assert EXPECTED in header
 subprocess.run(["python", str(ROOT / "tools/gen_spec02_round1_entry.py"), "--check"], check=True)
 
@@ -24,7 +25,7 @@ def wsl(path):
                            str(path).replace("\\", "/")],
                           check=True, capture_output=True, text=True).stdout.strip()
 
-def run(body, header_body, passes, label="baseline"):
+def run(body, header_body, passes, label="baseline", player_body=player_source):
     with tempfile.TemporaryDirectory(prefix="round1-entry-") as name:
         temp = Path(name)
         linux_output = f"/tmp/{temp.name}-test"
@@ -43,13 +44,14 @@ def run(body, header_body, passes, label="baseline"):
             '#include "../../combat/hit_ko/hit_ko.h"', '#include "hit_ko.h"')
         (temp / "round1.h").write_text(temp_header)
         (temp / "spec02_round1_entry_data.h").write_text(generated)
+        (temp / "player_action.c").write_text(player_body)
         command = (f"cd '{wsl(ROOT)}' && gcc -std=c90 -pedantic -Wall -Wextra -Werror "
                    f"-I '{wsl(temp)}' -I . -I src/port_v2/gameplay/player_action "
                    f"-I src/port_v2/gameplay/street_alien_ai -I src/port_v2/combat/hit_ko "
                    f"-I src/port_v2/integration/combat "
                    f"'{wsl(temp / 'round1.c')}' "
                    f"avsp_actor.c avsp_collision.c "
-                   f"src/port_v2/gameplay/player_action/player_action.c "
+                   f"'{wsl(temp / 'player_action.c')}' "
                    f"src/port_v2/gameplay/street_alien_ai/street_alien_ai.c "
                    f"src/port_v2/combat/hit_ko/hit_ko.c "
                    f"src/port_v2/player/player.c src/port_v2/enemy/enemy.c "
@@ -69,6 +71,23 @@ run(source, header, True)
 if "--baseline-only" in sys.argv:
     print("REIMPLEMENT-13 focused baseline: PASS")
     raise SystemExit(0)
+queue_before = """    for (index = AVSP_PW_DIRECTION_LATENCY - 1; index > 0; --index)
+        runtime->direction_history[index] = runtime->direction_history[index - 1];
+    runtime->direction_history[0] = direction_mask;
+    delayed_direction = runtime->direction_history[AVSP_PW_DIRECTION_LATENCY - 1];"""
+queue_after = """    delayed_direction = runtime->direction_history[AVSP_PW_DIRECTION_LATENCY - 1];
+    for (index = AVSP_PW_DIRECTION_LATENCY - 1; index > 0; --index)
+        runtime->direction_history[index] = runtime->direction_history[index - 1];
+    runtime->direction_history[0] = direction_mask;"""
+assert queue_before in player_source
+subset_flags = {"--inner8-only", "--ko-only", "--registration-only",
+                "--locomotion-only", "--generated-walk-only"}
+if "--queue-only" in sys.argv or not subset_flags.intersection(sys.argv):
+    run(source, header, False, "consume-before-direction-queue-shift",
+        player_source.replace(queue_before, queue_after, 1))
+if "--queue-only" in sys.argv:
+    print("REIMPLEMENT-13 direction-queue-order mutation lane: PASS (1 real mutation)")
+    raise SystemExit(0)
 inner8_mutations = {
     "(actor->state == 0x0200u &&\n                      (actor->substate == 0x1000u ||",
     "actor->state = 0x0208u;\n    actor->substate = 0x0600u;",
@@ -86,6 +105,13 @@ ko_mutations = {
 }
 registration_mutations = {
     "if (runtime->player_weapon_projectiles[slot_index].active &&\n            runtime->player_weapon_projectiles[slot_index].state !=\n                avsp_round1_weapon_projectile.initial_state)",
+}
+locomotion_mutations = {
+    "if (next >= AVSP_ROUND1_PLAYER_WALK_PRESENTATION_COUNT)",
+    "const long denominator = 20L;",
+    "runtime->player_weapon_cleanup_pending = 0u;\n        weapon_return_owned = 1u;",
+    "weapon_motion_hold = (unsigned char)(runtime->player_weapon_active ||\n        jump_owned || special_owned);",
+    "if (weapon_motion_hold)\n        input.mask = (unsigned short)(input.mask &\n            (unsigned short)~AVSP_PW_INPUT_ATTACK);",
 }
 for before, after in (
     ("runtime->route_state = AVSP_ROUND1_ROUTE_ENTRY_STATE;", "runtime->route_state = 4;"),
@@ -111,6 +137,15 @@ for before, after in (
     ("actor->dispatch_entry = AVSP_ROUND1_CLASS1F_DISPATCH_ENTRY;", "actor->dispatch_entry = 0UL;"),
     ("avsp_round1_apply_player_global_bounds(runtime);", "/* bounds suppressed */"),
     ("avsp_round1_update_player_locomotion(runtime, applied_direction,\n                                            was_stopping, &view);", "/* locomotion transition suppressed */"),
+    ("if (next >= AVSP_ROUND1_PLAYER_WALK_PRESENTATION_COUNT)",
+     "if (next > AVSP_ROUND1_PLAYER_WALK_PRESENTATION_COUNT)"),
+    ("const long denominator = 20L;", "const long denominator = 19L;"),
+    ("runtime->player_weapon_cleanup_pending = 0u;\n        weapon_return_owned = 1u;",
+     "runtime->player_weapon_cleanup_pending = 0u;\n        runtime->player_weapon_return_pending = 1u;\n        weapon_return_owned = 1u;"),
+    ("weapon_motion_hold = (unsigned char)(runtime->player_weapon_active ||\n        jump_owned || special_owned);",
+     "weapon_motion_hold = (unsigned char)(runtime->player_weapon_active ||\n        weapon_return_owned || jump_owned || special_owned);"),
+    ("if (weapon_motion_hold)\n        input.mask = (unsigned short)(input.mask &\n            (unsigned short)~AVSP_PW_INPUT_ATTACK);",
+     "if (weapon_motion_hold)\n        input.mask = (unsigned short)(input.mask & (unsigned short)~(\n            AVSP_PW_INPUT_LEFT | AVSP_PW_INPUT_RIGHT |\n            AVSP_PW_INPUT_UP | AVSP_PW_INPUT_DOWN |\n            AVSP_PW_INPUT_ATTACK));"),
     ("avsp_round1_observe_player_melee(runtime, prior_state, prior_selector,\n                                    prior_attack_edges);", "/* melee observation suppressed */"),
     ("++runtime->player_melee_entries;", "runtime->player_melee_entries += 2u;"),
     ("runtime->player_melee_selector_mask |= 1UL << (selector - 1u);", "runtime->player_melee_selector_mask = 0UL;"),
@@ -336,6 +371,10 @@ for before, after in (
         continue
     if "--registration-only" in sys.argv and before not in registration_mutations:
         continue
+    if "--locomotion-only" in sys.argv and before not in locomotion_mutations:
+        continue
+    if "--generated-walk-only" in sys.argv:
+        continue
     assert before in source, before
     run(source.replace(before, after), header, False, before)
 if "--inner8-only" in sys.argv:
@@ -347,7 +386,20 @@ if "--ko-only" in sys.argv:
 if "--registration-only" in sys.argv:
     print("REIMPLEMENT-13 deferred record-4 registration mutation lane: PASS (1 real mutation)")
     raise SystemExit(0)
+if "--locomotion-only" in sys.argv:
+    print("REIMPLEMENT-13 locomotion/weapon-return mutation lane: PASS (5 real mutations)")
+    raise SystemExit(0)
+generated_walk_mutations = {
+    "    { 4u, 0, 0x0015F208UL, 0x00160A02UL, 17u, 0u },",
+    "    { 4u, -32768, 0x0015F2B8UL, 0x00160B9EUL, 17u, 0u },",
+}
 for before, after in (
+    ("    { 4u, 0, 0x0015F208UL, 0x00160A02UL, 17u, 0u },",
+     "    { 3u, 0, 0x0015F208UL, 0x00160A02UL, 17u, 0u },"),
+    ("    { 4u, 0, 0x0015F208UL, 0x00160A02UL, 17u, 0u },",
+     "    { 4u, 0, 0x0015F208UL, 0x00160A2AUL, 17u, 0u },"),
+    ("    { 4u, -32768, 0x0015F2B8UL, 0x00160B9EUL, 17u, 0u },",
+     "    { 4u, 0, 0x0015F2B8UL, 0x00160B9EUL, 17u, 0u },"),
     ("    0x0400u, 0x0402u, 0x0404u, 0x0600u,",
      "    0x0402u, 0x0402u, 0x0404u, 0x0600u,"),
     ("    114688L, 0L, 622592L, -20480L,",
@@ -475,6 +527,8 @@ for before, after in (
     ("    { 2, -2, 2, -2, 2, -2, 2, -2, 2, -2, 2, -2, 2, -2, 2, -2 }",
      "    { 3, -2, 2, -2, 2, -2, 2, -2, 2, -2, 2, -2, 2, -2, 2, -2 }"),
 ):
+    if "--generated-walk-only" in sys.argv and before not in generated_walk_mutations:
+        continue
     assert before in generated
     changed = generated.replace(before, after, 1)
     with tempfile.TemporaryDirectory(prefix="round1-generated-mutation-") as name:
@@ -513,4 +567,7 @@ for before, after in (
                                  "--", "bash", "-lc", command],
                                 capture_output=True)
         assert result.returncode != 0, f"generated mutation escaped: {before}"
-print("REIMPLEMENT-13 entry/player/scheduler/class1f/Coffee-Shop-navigation/neutral-stop/melee/Button1/Button3/type16-projectile/player-HIT/first-encounter differential: PASS (189 real mutations)")
+if "--generated-walk-only" in sys.argv:
+    print("REIMPLEMENT-13 generated walk fixture mutation lane: PASS (3 real mutations)")
+    raise SystemExit(0)
+print("REIMPLEMENT-13 entry/player/scheduler/class1f/Coffee-Shop-navigation/neutral-stop/melee/Button1/Button3/type16-projectile/player-HIT/first-encounter differential: PASS (198 real mutations)")

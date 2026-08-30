@@ -1,8 +1,8 @@
 #ifndef AVSP_SPEC02_ROUND1_ENTRY_DATA_H
 #define AVSP_SPEC02_ROUND1_ENTRY_DATA_H
 
-/* contract_sha256=45496c15cf6bef7176146e9530ffc6bc04bdb152c9892f3b7b1f10aeef97b5b7 */
-/* fixtures_sha256=15584fcaf6749b8f4be7240a91936c57154d898ec987854e6651e27916d8fa9d */
+/* contract_sha256=bb48c1976641d0afa01ed621c1dbbf9d71eac2337dd00ebf4da1e4f4fabc632f */
+/* fixtures_sha256=03f2c96366fded74bb94e3bbf57883a8c967e18908d0eedb963ce85ef65afa5b */
 #define AVSP_ROUND1_ENTRY_PROGRAM_SHA256 "e5ef761fadc1b5a7df62e77c03025c0ebff0c2503cbc8be9c0077d4bd6cd24ba"
 
 static const unsigned char avsp_round1_entry_program[AVSP_ROUND1_ENTRY_PROGRAM_BYTES] =
@@ -1192,6 +1192,22 @@ static const AvspRound1PlayerLocomotionSpec avsp_round1_player_locomotion =
     512u,
     10u,
     {255u, 2u, 6u, 255u, 4u, 3u, 5u, 255u, 0u, 1u, 7u, 255u, 255u, 255u, 255u, 255u}
+};
+
+static const AvspRound1AnimationStateSpec avsp_round1_player_walk_records[AVSP_ROUND1_PLAYER_WALK_PRESENTATION_COUNT] =
+{
+    { 4u, 0, 0x0015F208UL, 0x00160A02UL, 17u, 0u },
+    { 4u, 0, 0x0015F218UL, 0x00160A2AUL, 17u, 0u },
+    { 4u, 0, 0x0015F228UL, 0x00160A52UL, 17u, 0u },
+    { 4u, 0, 0x0015F238UL, 0x00160A70UL, 17u, 0u },
+    { 4u, 0, 0x0015F248UL, 0x00160A8EUL, 17u, 0u },
+    { 4u, 0, 0x0015F258UL, 0x00160AACUL, 17u, 0u },
+    { 4u, 0, 0x0015F268UL, 0x00160ACAUL, 17u, 0u },
+    { 4u, 0, 0x0015F278UL, 0x00160AF2UL, 17u, 0u },
+    { 4u, 0, 0x0015F288UL, 0x00160B20UL, 17u, 0u },
+    { 4u, 0, 0x0015F298UL, 0x00160B48UL, 17u, 0u },
+    { 4u, 0, 0x0015F2A8UL, 0x00160B76UL, 17u, 0u },
+    { 4u, -32768, 0x0015F2B8UL, 0x00160B9EUL, 17u, 0u },
 };
 
 static const AvspRound1PlayerHitSpec avsp_round1_player_hit =

@@ -275,16 +275,57 @@ int main(void)
             runtime.pools[0].records[10].object_or);
         return 54;
     }
+    {
+        AvspRound1Runtime walk_runtime = runtime;
+        for (calls = 0u; calls < 46u; ++calls)
+            if (!avsp_round1_step_player(&walk_runtime,
+                    AVSP_PW_INPUT_RIGHT, 0))
+                return 186;
+        if (walk_runtime.player.animation_record != 0x0015f2b8UL ||
+            walk_runtime.player.assembly != 0x00160b9eUL ||
+            walk_runtime.player.animation_timer != 4u ||
+            walk_runtime.player.animation_branch != (short)-32768)
+            return 186;
+        for (calls = 0u; calls < 4u; ++calls)
+            if (!avsp_round1_step_player(&walk_runtime,
+                    AVSP_PW_INPUT_RIGHT, 0))
+                return 186;
+        if (walk_runtime.player.animation_record != 0x0015f208UL ||
+            walk_runtime.player.assembly != 0x00160a02UL ||
+            walk_runtime.player.animation_timer != 4u)
+            return 186;
+    }
     if (!avsp_round1_step_player(&runtime, AVSP_PW_INPUT_RIGHT, 0) ||
+        runtime.player.source_x_fp != 0x03b00000L ||
         !avsp_round1_step_player(&runtime, AVSP_PW_INPUT_RIGHT, 0) ||
+        runtime.player.source_x_fp != 0x03b24000L ||
+        runtime.player.substate != 0x0200u ||
+        runtime.player.animation_record != 0x0015f208UL ||
+        runtime.player.assembly != 0x00160a02UL ||
+        runtime.player.animation_timer != 4u ||
         !avsp_round1_step_player(&runtime, AVSP_PW_INPUT_RIGHT, 0) ||
+        runtime.player.source_x_fp != 0x03b48000L ||
+        runtime.player.substate != 0x0202u ||
+        runtime.player.animation_record != 0x0015f208UL ||
+        runtime.player.assembly != 0x00160a02UL ||
+        runtime.player.animation_timer != 3u ||
         !avsp_round1_step_player(&runtime, 0u, 0) ||
         !avsp_round1_step_player(&runtime, 0u, 0) ||
         runtime.player.x <= 944 || runtime.player.z != 320 ||
         runtime.player.facing != 1u || runtime.player_controller_updates != 5u ||
-        runtime.player.substate != 2u ||
+        runtime.player.substate != 0x0204u ||
+        runtime.player_locomotion_action != 0x0204u ||
+        runtime.player_stop_ticks != 10u ||
         !avsp_round1_entry_valid(&runtime))
+    {
+        fprintf(stderr,
+            "locomotion x=%d z=%d facing=%u updates=%lu substate=%04x action=%04x stop=%u failures=%lu\n",
+            runtime.player.x, runtime.player.z, runtime.player.facing,
+            runtime.player_controller_updates, runtime.player.substate,
+            runtime.player_locomotion_action, runtime.player_stop_ticks,
+            runtime.failure_count);
         return 6;
+    }
     if (!avsp_round1_step_scheduler(&runtime) ||
         runtime.scheduler_trace_count != 16u ||
         runtime.scheduler_frames != 171u ||
@@ -417,7 +458,7 @@ int main(void)
                 runtime.navigation_applications, runtime.navigation_clamps);
         return 12;
     }
-    for (calls = 0u; calls < 9u; ++calls)
+    for (calls = 0u; calls < 8u; ++calls)
         if (!avsp_round1_step_player(&runtime, 0u, 0))
             return 13;
     if (runtime.player_stop_ticks != 0u ||
@@ -430,7 +471,7 @@ int main(void)
         runtime.player.source_action != 514u ||
         runtime.player_cleanup_pending != 0u ||
         runtime.player.facing != 1u ||
-        runtime.navigation_applications != 17u ||
+        runtime.navigation_applications != 16u ||
         runtime.navigation_clamps != 4u ||
         runtime.player_stop_motion_suppressions != 0u)
     {
@@ -958,18 +999,23 @@ int main(void)
             weapon_runtime.player_weapon_allocations != 1u)
             return 27;
         while (weapon_runtime.player_weapon_active)
-            if (!avsp_round1_step_player(&weapon_runtime, 0u, 0))
+            if (!avsp_round1_step_player(&weapon_runtime,
+                    AVSP_PW_INPUT_RIGHT, 0))
                 return 28;
+        weapon_x = weapon_runtime.player.x;
         if (weapon_runtime.player_weapon_tick != 20u ||
             weapon_runtime.player_weapon_cleanup_pending != 1u ||
             weapon_runtime.player.source_action != 0u ||
             weapon_runtime.player_weapon_completions != 1u ||
             weapon_runtime.player_weapon_allocations != 1u ||
             weapon_runtime.player_resource != 27u ||
-            !avsp_round1_step_player(&weapon_runtime, 0u, 0) ||
-            weapon_runtime.player.source_action != 2u ||
-            weapon_runtime.player.animation_record != 0x0015f1f4UL ||
-            weapon_runtime.player.assembly != 0x001626a4UL)
+            !avsp_round1_step_player(&weapon_runtime,
+                AVSP_PW_INPUT_RIGHT, 0) ||
+            weapon_runtime.player.source_action != 0x0200u ||
+            weapon_runtime.player.substate != 0x0200u ||
+            weapon_runtime.player.animation_record != 0x0015f208UL ||
+            weapon_runtime.player.assembly != 0x00160a02UL ||
+            weapon_runtime.player.x <= weapon_x)
         {
             fprintf(stderr,
                 "weapon completion tick=%u cleanup=%u action=%04x completions=%lu allocations=%lu resource=%u next_action=%04x\n",
@@ -1044,7 +1090,7 @@ int main(void)
         if (weapon_runtime.player_weapon_completions != 2u ||
             weapon_runtime.player.source_action != 0u ||
             !avsp_round1_step_player(&weapon_runtime, 0u, 0) ||
-            weapon_runtime.player.source_action != 2u)
+            weapon_runtime.player.source_action != 0x0202u)
             return 36;
         weapon_runtime.player_resource = 64u;
         weapon_runtime.player_resource_recharge = 12u;

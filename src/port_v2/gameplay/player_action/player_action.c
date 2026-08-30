@@ -359,10 +359,10 @@ static void avsp_pw_step_internal(AvspPwRuntime *runtime,
     direction_mask = (unsigned short)(runtime->current_mask &
         (AVSP_PW_INPUT_LEFT | AVSP_PW_INPUT_RIGHT |
          AVSP_PW_INPUT_UP | AVSP_PW_INPUT_DOWN));
-    delayed_direction = runtime->direction_history[AVSP_PW_DIRECTION_LATENCY - 1];
     for (index = AVSP_PW_DIRECTION_LATENCY - 1; index > 0; --index)
         runtime->direction_history[index] = runtime->direction_history[index - 1];
     runtime->direction_history[0] = direction_mask;
+    delayed_direction = runtime->direction_history[AVSP_PW_DIRECTION_LATENCY - 1];
 
     if (input->received_damage > 0 && runtime->state != AVSP_PW_STATE_KO)
     {

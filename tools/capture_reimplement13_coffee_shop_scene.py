@@ -1039,7 +1039,7 @@ def validate_report(report: dict[str, object]) -> None:
                  "animation_record": "0x00030944",
                  "assembly": "0x00030bd6", "animation_timer_u16": 2}],
             "no_source_native_divergence_through_frame_u16": 2372,
-            "next_slot_divergence_frame_u16": 2917}:
+            "next_slot_divergence_frame_u16": 2916}:
         raise ValueError("Coffee Shop record-4 fixed-slot reuse drift")
     recurring = report["native_capture"]["recurring_spawn_phase_boundary"]
     if recurring["native_checkpoints"] != [
@@ -1276,9 +1276,9 @@ def validate_report(report: dict[str, object]) -> None:
                  "animation_timer_u16": 7, "health_s16": 91}],
             "native_player": [
                 {"frame_u16": 2750, "state_u16": "0x0200",
-                 "substate_u16": "0x0002",
-                 "animation_record": "0x0015f1f4",
-                 "animation_timer_u16": 4095, "health_s16": 101},
+                 "substate_u16": "0x0202",
+                 "animation_record": "0x0015f278",
+                 "animation_timer_u16": 2, "health_s16": 101},
                 {"frame_u16": 2751, "state_u16": "0x0202",
                  "substate_u16": "0x0000",
                  "animation_record": "0x0015f278",

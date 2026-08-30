@@ -6,7 +6,7 @@
 #include "../../combat/hit_ko/hit_ko.h"
 
 #define AVSP_ROUND1_SPEC02_SHA256 \
-    "45496c15cf6bef7176146e9530ffc6bc04bdb152c9892f3b7b1f10aeef97b5b7"
+    "bb48c1976641d0afa01ed621c1dbbf9d71eac2337dd00ebf4da1e4f4fabc632f"
 #define AVSP_ROUND1_CANARY_HEAD 0x52314548UL
 #define AVSP_ROUND1_CANARY_TAIL 0x52314554UL
 #define AVSP_ROUND1_ROUTE_ENTRY_STATE 2
@@ -24,6 +24,7 @@
 #define AVSP_ROUND1_PLAYER_CONTROL_STATE 512u
 #define AVSP_ROUND1_PLAYER_MELEE_COUNT 4u
 #define AVSP_ROUND1_PLAYER_HIT_SHAKE_COUNT 16u
+#define AVSP_ROUND1_PLAYER_WALK_PRESENTATION_COUNT 12u
 #define AVSP_ROUND1_PLAYER_JUMP_VECTOR_COUNT 6u
 #define AVSP_ROUND1_PLAYER_JUMP_DOWN_VECTOR_COUNT 2u
 #define AVSP_ROUND1_PLAYER_JUMP_SEQUENCE_COUNT 9u
@@ -1560,6 +1561,9 @@ typedef struct
     unsigned short player_stop_ticks;
     unsigned char player_was_directional;
     unsigned char player_cleanup_pending;
+    unsigned char player_walk_animation_index;
+    unsigned char player_walk_animation_active;
+    unsigned short player_walk_animation_timer;
     unsigned long player_stop_entries;
     unsigned long player_stop_completions;
     unsigned long player_stop_motion_suppressions;

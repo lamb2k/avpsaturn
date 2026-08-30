@@ -7,8 +7,8 @@
   "live_diagnostic_measured_bytes": 89700,
   "note": "strips carve exists only in the street-test profile; the Round 1 runtime carve exists only in the live-encounter profile; the jo zone figure above applies when both are active, while other profiles omit the inactive carves",
   "round1_runtime_carve_bytes": 102400,
-  "round1_runtime_headroom_bytes": 18208,
-  "round1_runtime_measured_bytes": 84192,
+  "round1_runtime_headroom_bytes": 18204,
+  "round1_runtime_measured_bytes": 84196,
   "status": "MEASURED",
   "strips_carve_bytes": 294912,
   "strips_carve_headroom": 25258,
@@ -115,8 +115,8 @@
    "status": "MEASURED"
   },
   "debug-live-encounter": {
-   "bend": "0x060b9200",
-   "headroom_bytes": 28160,
+   "bend": "0x060b9340",
+   "headroom_bytes": 27840,
    "limit": "0x060c0000",
    "profile": "debug-live-encounter",
    "status": "MEASURED"

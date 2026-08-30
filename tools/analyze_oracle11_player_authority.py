@@ -15,6 +15,10 @@ OPCODES = ROOT / ".deps" / "mame" / "actorprobe" / "decrypted_opcodes_2m.bin"
 PROGRAM = ROOT / ".deps" / "mame" / "actorprobe" / "decrypted_program_2m.bin"
 ORACLE07 = ROOT / "data" / "oracle07_predator_warrior_action_graph_equipment.json"
 ORACLE10 = ROOT / "data" / "oracle10_round1_route.json"
+ROUTE_CENSUS = ROOT / "data" / "round1_route_census.json"
+COFFEE_SCENE = (ROOT / ".deps" / "mame" /
+                "oracle11_progression_lifecycle_cs21a" /
+                "coffee_shop_scene_actors.tsv")
 OUT = ROOT / "data" / "oracle11_predator_warrior_authority.json"
 WEAPON = ROOT / "data" / "oracle11_predator_weapon_projectile_resource.json"
 AIR = ROOT / "data" / "oracle11_predator_air_authority.json"
@@ -244,6 +248,50 @@ def build_report() -> dict[str, object]:
 
     oracle07 = json.loads(ORACLE07.read_text(encoding="utf-8"))
     oracle10 = json.loads(ORACLE10.read_text(encoding="utf-8"))
+    route_census = json.loads(ROUTE_CENSUS.read_text(encoding="ascii"))
+    coffee_rows = {
+        int(row["frame"]): row for row in read_rows(COFFEE_SCENE)
+        if row["slot"] == "ff8380"
+    }
+
+    def route_input_word(frame: int) -> int:
+        for group in route_census["groups"]:
+            cursor = group["first_frame"]
+            for word, frames in group["input_word_runs"]:
+                if cursor <= frame < cursor + frames:
+                    return word
+                cursor += frames
+        raise ValueError(f"missing route input frame {frame}")
+
+    walk_records = list(range(0x15F208, 0x15F2B9, 0x10))
+    walk_presentation = [record_identity(program, address)
+                         for address in walk_records]
+    require(route_input_word(2599) == 0x00 and
+            route_input_word(2600) == 0x04 and
+            route_input_word(2609) == 0x04,
+            "Coffee Shop right-input onset drift")
+    require(coffee_rows[2601]["x_fp"] == "03b00000" and
+            coffee_rows[2602]["x_fp"] == "03b24000" and
+            coffee_rows[2602]["state"] == "0200" and
+            coffee_rows[2602]["substate"] == "0200" and
+            coffee_rows[2602]["facing"] == "1" and
+            coffee_rows[2602]["animation_record"] == "0015f208" and
+            coffee_rows[2602]["animation_timer"] == "0004",
+            "Coffee Shop first directional result drift")
+    for frame in range(2603, 2612):
+        require(int(coffee_rows[frame]["x_fp"], 16) -
+                int(coffee_rows[frame - 1]["x_fp"], 16) == 0x24000,
+                f"Coffee Shop fixed-point movement drift at {frame}")
+    for frame in range(2630, 2678):
+        index = (frame - 2630) // 4
+        timer = 4 - ((frame - 2630) % 4)
+        require(coffee_rows[frame]["animation_record"] ==
+                f"{walk_records[index]:08x}" and
+                int(coffee_rows[frame]["animation_timer"], 16) == timer,
+                f"Coffee Shop walk presentation cadence drift at {frame}")
+    require(coffee_rows[2678]["animation_record"] == "0015f208" and
+            coffee_rows[2678]["animation_timer"] == "0004",
+            "Coffee Shop walk presentation loop drift")
     route_melee = next(row for row in oracle10["player_action_families"]
                        if row["id"] == "button2-contextual-close-combo")
     require(route_melee["classification"] == "SOURCE_CLOSED",
@@ -378,6 +426,67 @@ def build_report() -> dict[str, object]:
                 "rule": "character table selects eight signed 16.16 vector pairs; direction index multiplies by eight; first long adds to world X, second to world Y, and world Z mirrors or receives the same lane delta according to +0x74",
                 "fields_read": ["+0x0c s8 direction", "+0xd2 s8 character", "+0x74 u16 mode"],
                 "fields_written": ["+0x10 s16.16 X", "+0x14 s16.16 Y", "+0x18 s16.16 Z"],
+            },
+            "first_segment_execution_contract": {
+                "classification": "SOURCE_CLOSED_IMPLEMENTATION_FIELDS",
+                "spec_executable": True,
+                "controller_pipeline": {
+                    "direction_latency_samples": 2,
+                    "scheduler_order": [
+                        "decode current controller word",
+                        "shift the two-sample direction pipeline",
+                        "consume the oldest staged direction",
+                        "dispatch the player control state",
+                    ],
+                    "input_ledger": {
+                        "right_first_frame": 2600,
+                        "right_last_frame": 2609,
+                        "source_word": "0x0004",
+                        "native_mask": "0x0008",
+                    },
+                    "first_visible_result": {
+                        "frame": 2602,
+                        "state_u16": "0x0200",
+                        "substate_u16": "0x0200",
+                        "facing_u8": 1,
+                        "x_fp_s16_16": "0x03b24000",
+                        "animation_record": "0x0015f208",
+                        "assembly": "0x00160a02",
+                        "animation_timer_u16": 4,
+                    },
+                },
+                "directional_entry": {
+                    "guard": "oldest staged direction resolves to a valid direction while the prior locomotion update was nondirectional",
+                    "entry_action_u16": "0x0200",
+                    "active_action_u16": "0x0202",
+                    "next_update_rule": "write active action 0x0202 when a valid staged direction remains",
+                    "facing_rule": "right writes 1 at 0x01a37e; left writes 0 at 0x01a38a",
+                },
+                "movement": {
+                    "right_delta_s16_16": "0x00024000",
+                    "application": "add the selected signed 16.16 vector before projecting the visible integer position",
+                    "source_routine": "0x01a39c",
+                },
+                "presentation": {
+                    "records": walk_presentation,
+                    "ticks_per_record": 4,
+                    "advance_rule": "decrement the current record timer once per player update; advance after timer 1",
+                    "loop_rule": "the terminal record 0x15f2b8 branches to 0x15f208",
+                },
+                "rng_consumption": "none",
+                "scheduler_position": "player slot before all non-player fixed pools",
+                "mutation_control": {
+                    "consume_before_shift_forbidden": True,
+                    "fixed_frame_movement_forbidden": True,
+                    "input_rebaseline_forbidden": True,
+                    "idle_presentation_while_directional_forbidden": True,
+                },
+                "evidence": {
+                    "coffee_shop_scene_actors_sha256": digest(COFFEE_SCENE),
+                    "round1_route_census_sha256": digest(ROUTE_CENSUS),
+                    "decrypted_program_sha256": digest(PROGRAM),
+                    "source_frames": [2600, 2678],
+                },
             },
             "release_transition": {
                 "walking_action": "0x0202",
@@ -527,6 +636,32 @@ def validate(report: dict[str, object]) -> None:
     require([row["animation_record"] for row in release["presentation"]] ==
             ["0x15f258", "0x15f268", "0x15f278", "0x15f1f4"],
             "neutral presentation order drift")
+    execution = closed["first_segment_execution_contract"]
+    pipeline = execution["controller_pipeline"]
+    presentation = execution["presentation"]
+    require(execution["classification"] ==
+            "SOURCE_CLOSED_IMPLEMENTATION_FIELDS" and
+            execution["spec_executable"] is True and
+            pipeline["direction_latency_samples"] == 2 and
+            pipeline["scheduler_order"][1:3] == [
+                "shift the two-sample direction pipeline",
+                "consume the oldest staged direction"] and
+            pipeline["first_visible_result"] == {
+                "frame": 2602, "state_u16": "0x0200",
+                "substate_u16": "0x0200", "facing_u8": 1,
+                "x_fp_s16_16": "0x03b24000",
+                "animation_record": "0x0015f208",
+                "assembly": "0x00160a02", "animation_timer_u16": 4},
+            "first-segment controller/player chronology drift")
+    require(len(presentation["records"]) == 12 and
+            presentation["ticks_per_record"] == 4 and
+            presentation["records"][0]["animation_record"] == "0x15f208" and
+            presentation["records"][0]["assembly"] == "0x160a02" and
+            presentation["records"][-1]["animation_record"] == "0x15f2b8" and
+            presentation["records"][-1]["assembly"] == "0x160b9e" and
+            execution["movement"]["right_delta_s16_16"] == "0x00024000" and
+            execution["rng_consumption"] == "none",
+            "first-segment locomotion execution contract drift")
     require(all(row["status"] == "PASS"
                 for row in closed["counterfactuals"].values()),
             "locomotion counterfactual failed")

@@ -261,6 +261,10 @@ def build() -> str:
     player_hit_return = player_hit["phase_0x0204"]
     input_decode = locomotion["input_decode"]
     release = locomotion["release_transition"]
+    locomotion_execution = locomotion["first_segment_execution_contract"]
+    locomotion_pipeline = locomotion_execution["controller_pipeline"]
+    locomotion_presentation = locomotion_execution["presentation"]
+    locomotion_records = locomotion_presentation["records"]
     direction_resolver = input_decode["resolver_table"]
     melee = fixtures["authority_data"]["player"]["route_reachable_melee_actions"]
     close_combo = melee["close_combo"]
@@ -944,7 +948,26 @@ def build() -> str:
         release["idle_phase_writer"] !=
             "0x0198de writes action low byte 0x02 on the next update" or
         release["facing_rule"] !=
-            "neutral performs no +0x0f write and preserves the last directional facing"):
+            "neutral performs no +0x0f write and preserves the last directional facing" or
+        locomotion_execution["classification"] !=
+            "SOURCE_CLOSED_IMPLEMENTATION_FIELDS" or
+        locomotion_execution["spec_executable"] is not True or
+        locomotion_pipeline["direction_latency_samples"] != 2 or
+        locomotion_pipeline["first_visible_result"] != {
+            "frame": 2602, "state_u16": "0x0200",
+            "substate_u16": "0x0200", "facing_u8": 1,
+            "x_fp_s16_16": "0x03b24000",
+            "animation_record": "0x0015f208",
+            "assembly": "0x00160a02", "animation_timer_u16": 4} or
+        locomotion_execution["movement"]["right_delta_s16_16"] !=
+            "0x00024000" or
+        locomotion_presentation["ticks_per_record"] != 4 or
+        len(locomotion_records) != 12 or
+        [row["animation_record"] for row in locomotion_records] !=
+            [f"0x{address:06x}" for address in
+             range(0x15F208, 0x15F2B9, 0x10)] or
+        locomotion_records[0]["assembly"] != "0x160a02" or
+        locomotion_records[-1]["assembly"] != "0x160b9e"):
         raise ValueError("SPEC-02 locomotion-to-neutral transition drift")
     if (melee["classification"] != "SOURCE_CLOSED" or
         melee["input_guard"] !=
@@ -2434,6 +2457,16 @@ def build() -> str:
         "    512u,",
         f"    {release['stop_timer']['ticks']}u,",
         "    {" + ", ".join(f"{value}u" for value in direction_resolver) + "}",
+        "};", "",
+        "static const AvspRound1AnimationStateSpec avsp_round1_player_walk_records[AVSP_ROUND1_PLAYER_WALK_PRESENTATION_COUNT] =",
+        "{",
+    ])
+    for index, row in enumerate(locomotion_records):
+        lines.append("    { 4u, %d, 0x%08XUL, 0x%08XUL, %du, %du }," % (
+            -32768 if index + 1 == len(locomotion_records) else 0,
+            int(row["animation_record"], 16), int(row["assembly"], 16),
+            row["hurt_selector"], row["attack_selector"]))
+    lines.extend([
         "};", "",
         "static const AvspRound1PlayerHitSpec avsp_round1_player_hit =",
         "{",
