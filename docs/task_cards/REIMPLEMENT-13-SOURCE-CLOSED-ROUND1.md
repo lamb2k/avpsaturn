@@ -1220,6 +1220,52 @@ reads/writes, and scheduler order. Do not add a frame/slot exception and do not
 weaken the comparison. Preserve the corrected locomotion and HIT locks; the
 next animation divergence remains visible frame 2612.
 
+Incremental implementation checkpoint
+`9d0181a730394a83f374ec5a1f43459c6dc80e92` closes the source controller
+camera-edge transition at visible frame 2680. Accepted source routine
+`0x028910..0x02895e` runs after the recurring-spawn body returns to the
+controller dispatcher, predecrements field `0x46` when fields `0x48` and
+`0x46` are nonzero, compares the pre-player-update camera x unsigned with 832,
+then writes substate `0x0200`, bound/target 832, and progress snapshot 1. Native
+uses the accepted previous-camera sample because its combined frame calls
+player/camera before the fixed-pool controller. Source-write suppression
+retries and changes downstream population. There is no fixed-frame substitute,
+spawn suppression, authored delay, or input change.
+
+SPEC-02 is
+`9b16789689fca8d9c1c6b1b8db05f952822fbea011872d5b0c458ca1ca1d5c99`;
+fixture is
+`ea742cce53ba88baa3ae2e5669bee1b49c6c553c5735416f048ce7f60fb7489e`.
+Fast, Oracle, 128 SPEC mutations, 201 native mutations, 20 scene mutations,
+123 Target suppressions, and both LiveEncounter Target profiles pass. Exact
+runtime size is `0x148e8` inside the `0x19000` carve, leaving `0x4718` bytes.
+Two commit-bound 575-sample Emulator runs have byte-identical canonical payload
+`d6ce01333843b273432e965efde266f8a95c53c195a910e41602cc103d9a71d9`,
+VDP1 cache
+`15235569ad91027a6f9cf6d00c5b88b9c13539895a9259036a1ecdde48ad6504`,
+and normalized ISO
+`0b3ef70519e125923ff4c5d2679d5dd3a498e698fff59ee58b19de2399c30b7f`.
+
+Real window-only WGC covers every visible frame 2280..2310. Contact sheet
+`651383577cc72d80e9c9cae7a67790aee6a4a68046ec2611de1117f128273a3a`
+and clip
+`f0bdf52684d9d3fab1446f2a932fe26e8b67c094206b357b3b64fa7f0603f8a2`
+pass direct inspection: no premature hit is visible at frame 2288; frame-2306
+damage and the natural frame-2307 class-`0x4e` impact evolve coherently; P1
+remains the Predator; both Coffee Shop planes, palette, and priority remain
+coherent.
+
+Whole-scene gaps remain `323 / 1,243 / 2 / 93 / 3 / 281` before and after
+this correction for actor lifetimes, spawn/despawn, active states,
+collision/damage, route/camera, and audio/load. No category increases. Unowned
+Saturn actors, unidentified source pairs, and retained gameplay authorities
+remain zero. The controller mismatch at frame 2680 is closed. The next earliest
+causal divergence is visible frame 2759: type-20/class-`0x09` slot
+`0x00ffb480` carries native record `0x0006dc6a` versus source `0x0006dbda`,
+while slot `0x00ffb500` carries native `0x0006dbda` versus source `0x0006dc6a`.
+Bind the accepted spawn/update/presentation selection order without a frame or
+slot exception, weakened identity comparison, or input-route change.
+
 ## Next eligible cards
 
 - `QA-13-ROUND1-END-TO-END-DIFFERENTIAL` after the complete stable Round 2
