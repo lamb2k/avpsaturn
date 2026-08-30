@@ -1372,6 +1372,55 @@ dispatch plus its scheduler phase, using the smallest bounded Oracle follow-up
 only if accepted evidence lacks invocation ownership, then rerun the entire
 Coffee Shop scene and return to the class-`0x02` phase blocker.
 
+Incremental implementation checkpoint
+`06500692bba48c724ca00436751e1f2b7597f8d3` closes that dependency-safe
+player-animation body together with the source camera/stage activation sample,
+Coffee Shop obstacle parent animation, class-`0x49` retained fixed-slot
+presentation state, class-`0x4e` terminal timer order, and the exact Predator
+Button1 presentation sequence. Source record activation now samples the
+scheduler-visible prior camera position; the route-2 to route-4 handoff consumes
+its first camera update exactly once. Real mutations reject the prior post-player
+camera sample and the prior class-`0x4e` branch order.
+
+SPEC-02 is
+`6aa35860d5854c77fb54e5174659a1cf546defdfb703d734b2f617276a0872b1`;
+fixture is
+`94a9a551fa08a5f28174906436e8c38f45fc877779aa50c84aa294a77b59c313`.
+Fast, Oracle, 80 bounded-Oracle mutations, 133 SPEC mutations, 209 native
+mutations, 20 scene mutations, 123 Target suppressions, and both LiveEncounter
+Target profiles pass. Two 575-sample Coffee Shop Emulator runs are
+byte-identical at normalized ISO
+`4c3a2014cfb3b1d542a3c871b6920f37dd770e4e4906c1a5c7e23341a0552313`
+and VDP1 cache
+`15235569ad91027a6f9cf6d00c5b88b9c13539895a9259036a1ecdde48ad6504`;
+five chronology/cache mutations are rejected.
+
+Fresh real window-only WGC covers source-visible frames 2280..2310. Contact
+sheet
+`651383577cc72d80e9c9cae7a67790aee6a4a68046ec2611de1117f128273a3a`
+and clip
+`f0bdf52684d9d3fab1446f2a932fe26e8b67c094206b357b3b64fa7f0603f8a2`
+pass direct inspection. Frame 2288 remains damage-free, frame 2306 carries the
+accepted slot-`0x00ff8880` attack-`0x030cd2` damage write, frame 2307 carries
+the natural class-`0x4e` impact, Predator and Major remain distinct source-scene
+actors, and the two Coffee Shop planes, palette, and priority remain intact.
+The second `WARRIOR` HUD line is the Predator weapon/resource meter, not an
+active P2 slot.
+
+Whole-scene gaps improve from `331 / 1,241 / 2 / 93 / 3 / 281` to
+`327 / 1,234 / 2 / 93 / 3 / 281` for actor lifetimes, spawn/despawn, active
+states, collision/damage, route/camera, and audio/load. No category increases.
+Unowned Saturn actors, unidentified source pairs, and retained gameplay
+authorities remain zero.
+
+The earliest remaining causal divergence is class-`0x02` slot `0x00ffb600`
+at visible frame 2076: native animation timer 4090 versus source 4091. The next
+is class-`0x02` slot `0x00ffb300` at frame 2619: native 4094 versus source
+4095. Bind the accepted source per-phase scheduler invocation order, using only
+the smallest bounded Oracle follow-up needed to identify the owning phase or
+caller. Do not add a frame/slot exception, use recurring-controller cadence as
+a full-scheduler proxy, weaken identity comparison, or change the input route.
+
 ## Next eligible cards
 
 - `QA-13-ROUND1-END-TO-END-DIFFERENTIAL` after the complete stable Round 2
