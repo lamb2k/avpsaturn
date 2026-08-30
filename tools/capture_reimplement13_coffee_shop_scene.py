@@ -245,7 +245,7 @@ def source_native_divergences(
         (int(row["frame"]), f"{int(row['source_slot'], 16):08x}",
          int(row["type"]), f"{int(row['class'], 16):02x}"): row
         for row in native_rows}
-    first: dict[str, dict[str, object]] = {}
+    first: dict[tuple[str, int, str], dict[str, object]] = {}
     for source_row in source_rows:
         if source_row["active"] != "1":
             continue
@@ -255,15 +255,17 @@ def source_native_divergences(
              f"{int(source_row['class'], 16):02x}"))
         if native_row is None:
             continue
-        if slot not in first:
-            first[slot] = {
+        identity = (slot, int(source_row["type"]),
+                    f"{int(source_row['class'], 16):02x}")
+        if identity not in first:
+            first[identity] = {
                 "source_slot": "0x" + slot,
                 "frame": int(source_row["frame"]),
                 "type": int(source_row["type"]),
                 "class": f"0x{int(source_row['class'], 16):02x}",
                 "differences": {},
             }
-        differences = first[slot]["differences"]
+        differences = first[identity]["differences"]
         for field in fields:
             source_item = source_value(source_row, field)
             if source_item is None:

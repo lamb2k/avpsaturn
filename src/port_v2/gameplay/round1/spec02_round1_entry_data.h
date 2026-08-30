@@ -1,8 +1,8 @@
 #ifndef AVSP_SPEC02_ROUND1_ENTRY_DATA_H
 #define AVSP_SPEC02_ROUND1_ENTRY_DATA_H
 
-/* contract_sha256=e709b7bd616ecdb118e61459dbbc7677c9d0e13dd932f5bd4cf856a25f6d61ac */
-/* fixtures_sha256=f726c7ae09f3edad2fb93fc853cf3851eb618449e72a64ad89a7b9974e2098e8 */
+/* contract_sha256=4c52813c7f36e7094cae51bbd9d07c9d51001afcce3300455b67fcc645f5f723 */
+/* fixtures_sha256=2f05a0ef5a107403a4a74f06208ffec9fadb3f856ce13510efb185be4971fe5c */
 #define AVSP_ROUND1_ENTRY_PROGRAM_SHA256 "e5ef761fadc1b5a7df62e77c03025c0ebff0c2503cbc8be9c0077d4bd6cd24ba"
 
 static const unsigned char avsp_round1_entry_program[AVSP_ROUND1_ENTRY_PROGRAM_BYTES] =
@@ -1355,6 +1355,9 @@ static const AvspRound1PlayerWeaponSpec avsp_round1_player_weapon =
     12u,
     3u,
     6u,
+    1u,
+    0u,
+    1u,
     1u,
     0,
     4,

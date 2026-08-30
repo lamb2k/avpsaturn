@@ -252,7 +252,7 @@ int main(void)
     runtime.pools[3].records[0].active = 1u;
     runtime.pools[3].records[0].actor_class = 0x10;
     runtime.pools[3].records[0].type = 24u;
-    runtime.pools[3].records[0].variant = 1u;
+    runtime.pools[3].records[0].variant = 0u;
     runtime.pools[3].records[0].source_facing_selector = 1u;
     runtime.pools[3].records[0].source_slot = 0x00ffb680UL;
     runtime.pools[3].free_count = 2u;
@@ -946,13 +946,15 @@ int main(void)
         if (!enter_button1(&weapon_runtime, 0u) ||
             weapon_runtime.player.source_action != 0x1a00u ||
             weapon_runtime.player_weapon_empty != 1u ||
-            weapon_runtime.player_weapon_empty_auxiliary_requests != 1u ||
+            weapon_runtime.player_weapon_empty_auxiliary_requests != 0u ||
             weapon_runtime.player_weapon_allocations != 1u)
             return 33;
         if (!avsp_round1_step_player(&weapon_runtime, 0u, 0) ||
             weapon_runtime.player.source_action != 0x1a02u ||
             weapon_runtime.player.animation_record != 0x0015fcfcUL ||
-            weapon_runtime.player.assembly != 0x00161772UL)
+            weapon_runtime.player.assembly != 0x00161772UL ||
+            weapon_runtime.player_weapon_empty_auxiliary_requests != 1u ||
+            weapon_runtime.player_weapon_empty_auxiliary_allocations != 1u)
             return 34;
         while (weapon_runtime.player_weapon_active)
             if (!avsp_round1_step_player(&weapon_runtime, 0u, 0))
@@ -1008,9 +1010,15 @@ int main(void)
         if (effect_runtime.route_state != 4)
             return 43;
         stage_class1f_release(&effect_runtime, -1);
+        effect = &effect_runtime.pools[3].records[29];
+        effect->z = 319;
         effect_runtime.player_resource = 0u;
         effect_runtime.player_resource_depleted = 1u;
         if (!enter_button1(&effect_runtime, 0u) ||
+            effect_runtime.player_weapon_empty_auxiliary_requests != 0u ||
+            effect_runtime.player_weapon_empty_auxiliary_allocations != 0u ||
+            effect_runtime.pools[3].free_count != 30u ||
+            !avsp_round1_step_player(&effect_runtime, 0u, 0) ||
             effect_runtime.player_weapon_empty_auxiliary_requests != 1u ||
             effect_runtime.player_weapon_empty_auxiliary_allocations != 1u ||
             effect_runtime.pools[3].free_count != 29u)
@@ -1025,11 +1033,11 @@ int main(void)
                     effect_runtime.pools[0].free_count);
             return 43;
         }
-        effect = &effect_runtime.pools[3].records[29];
         if (!avsp_round1_step_scheduler(&effect_runtime) ||
-            effect->state != 2u || effect->variant != 1u ||
+            effect->state != 2u || effect->variant != 0u ||
             effect->x != effect_runtime.player.x ||
-            effect->y != effect_runtime.player.y + 78 ||
+            effect->y != effect_runtime.player.y + 84 ||
+            effect->z != 319 ||
             effect->animation_record != 0x0007a09cUL ||
             effect->animation_timer != 1u || effect->animation_branch != 0)
             return 44;
@@ -1066,7 +1074,7 @@ int main(void)
                         failed_actor ? failed_actor->transition_timer : 0u);
                 return 45;
             }
-        if (effect->y != effect_runtime.player.y + 110 ||
+        if (effect->y != effect_runtime.player.y + 116 ||
             effect->animation_index != 8u ||
             effect->animation_record != 0x0007a11cUL ||
             effect->animation_timer != 8u || effect->animation_branch != 1)

@@ -202,6 +202,40 @@ static AvspRound1ActorCore *avsp_round1_allocate_pool_actor_preserve_y(
 }
 
 static AvspRound1ActorCore *
+avsp_round1_allocate_pool_actor_preserve_position_residue(
+    AvspRound1Runtime *runtime, unsigned int pool_index)
+{
+    AvspRound1Pool *pool;
+    unsigned short source_slot;
+    unsigned int actor_index;
+    unsigned short x_fraction;
+    unsigned short y_fraction;
+    short retained_z;
+    AvspRound1ActorCore *actor;
+    if (runtime == 0 || pool_index >= AVSP_ROUND1_POOL_COUNT)
+        return 0;
+    pool = &runtime->pools[pool_index];
+    if (pool->free_count == 0u)
+        return 0;
+    source_slot = pool->free_stack[pool->free_count - 1u];
+    actor_index = (unsigned int)(source_slot - pool->source_base) /
+        pool->stride;
+    if (actor_index >= pool->capacity)
+        return 0;
+    x_fraction = (unsigned short)pool->records[actor_index].source_x_fp;
+    y_fraction = (unsigned short)pool->records[actor_index].source_y_fp;
+    retained_z = pool->records[actor_index].z;
+    actor = avsp_round1_allocate_pool_actor(runtime, pool_index);
+    if (actor != 0)
+    {
+        actor->source_x_fp = (long)x_fraction;
+        actor->source_y_fp = (long)y_fraction;
+        actor->z = retained_z;
+    }
+    return actor;
+}
+
+static AvspRound1ActorCore *
 avsp_round1_allocate_pool_actor_preserve_presentation(
     AvspRound1Runtime *runtime, unsigned int pool_index)
 {
@@ -3638,8 +3672,11 @@ static int avsp_round1_player_weapon_contract_valid(void)
         avsp_round1_weapon_child_sequences[0].record_count != 17u ||
         avsp_round1_weapon_child_sequences[1].record_count != 10u ||
         avsp_round1_weapon_child_sequences[2].record_count != 16u ||
-        avsp_round1_empty_effect_variant_offsets[1].x != 0 ||
-        avsp_round1_empty_effect_variant_offsets[1].y != 78 ||
+        avsp_round1_player_weapon.empty_effect_variant != 0u ||
+        avsp_round1_player_weapon.empty_effect_allocation_tick != 1u ||
+        avsp_round1_player_weapon.empty_effect_preserve_position_residue != 1u ||
+        avsp_round1_empty_effect_variant_offsets[0].x != 0 ||
+        avsp_round1_empty_effect_variant_offsets[0].y != 84 ||
         avsp_round1_empty_effect_variant1_records[0].timer != 1u ||
         avsp_round1_empty_effect_variant1_records[9].timer != 4095u ||
         avsp_round1_empty_effect_variant1_records[9].branch != -32767 ||
@@ -7257,18 +7294,23 @@ static int avsp_round1_step_record4_collision(AvspRound1Runtime *runtime)
 
 static int avsp_round1_begin_empty_effect(AvspRound1Runtime *runtime)
 {
-    AvspRound1ActorCore *actor = avsp_round1_allocate_pool_actor(runtime, 3u);
+    AvspRound1ActorCore *actor =
+        avsp_round1_allocate_pool_actor_preserve_position_residue(runtime, 3u);
     if (actor == 0)
     {
         ++runtime->player_weapon_empty_auxiliary_allocation_failures;
         return 0;
     }
     actor->actor_class = 0x10;
-    actor->variant = 1u;
+    actor->variant = avsp_round1_player_weapon.empty_effect_variant;
     actor->state = 0u;
     actor->substate = 0u;
     actor->x = runtime->player.x;
     actor->y = runtime->player.y;
+    actor->source_x_fp = (long)actor->x * 65536L +
+        (unsigned short)actor->source_x_fp;
+    actor->source_y_fp = (long)actor->y * 65536L +
+        (unsigned short)actor->source_y_fp;
     actor->source_facing_selector = runtime->player.facing;
     ++runtime->player_weapon_empty_auxiliary_allocations;
     return 1;
@@ -7290,7 +7332,7 @@ static int avsp_round1_step_empty_effect(AvspRound1Runtime *runtime,
                                          AvspRound1ActorCore *actor)
 {
     const AvspRound1AnimationStateSpec *record;
-    if (actor->variant != 1u)
+    if (actor->variant != avsp_round1_player_weapon.empty_effect_variant)
         return 0;
     if (actor->state == 0u)
     {
@@ -7301,6 +7343,10 @@ static int avsp_round1_step_empty_effect(AvspRound1Runtime *runtime,
         actor->x = (short)(actor->x +
             (actor->source_facing_selector == 0u ? -offset->x : offset->x));
         actor->y = (short)(actor->y + offset->y);
+        actor->source_x_fp = (long)actor->x * 65536L +
+            (unsigned short)actor->source_x_fp;
+        actor->source_y_fp = (long)actor->y * 65536L +
+            (unsigned short)actor->source_y_fp;
         actor->animation_index = 0u;
         avsp_round1_bind_animation_state(actor,
             &avsp_round1_empty_effect_variant1_records[0]);
@@ -7312,7 +7358,10 @@ static int avsp_round1_step_empty_effect(AvspRound1Runtime *runtime,
         if (actor->animation_branch < 0)
             actor->state = 4u;
         if ((actor->animation_branch & 0x00ff) == 0)
+        {
             actor->y = (short)(actor->y + 4);
+            actor->source_y_fp += 4L * 65536L;
+        }
         if (actor->animation_timer == 0u)
             return 0;
         --actor->animation_timer;
@@ -7623,8 +7672,6 @@ static void avsp_round1_begin_player_weapon(AvspRound1Runtime *runtime)
     if (runtime->player_weapon_empty)
     {
         runtime->player_resource_depleted = 1u;
-        ++runtime->player_weapon_empty_auxiliary_requests;
-        avsp_round1_begin_empty_effect(runtime);
     }
 }
 
@@ -7662,6 +7709,13 @@ static int avsp_round1_step_player_weapon(AvspRound1Runtime *runtime,
     const AvspRound1PlayerWeaponFrameSpec *frame;
     if (!runtime->player_weapon_active)
         return 0;
+    if (runtime->player_weapon_empty &&
+        runtime->player_weapon_tick ==
+            avsp_round1_player_weapon.empty_effect_allocation_tick)
+    {
+        ++runtime->player_weapon_empty_auxiliary_requests;
+        avsp_round1_begin_empty_effect(runtime);
+    }
     if (runtime->player_action.state != AVSP_PW_STATE_CONTROL)
     {
         runtime->player_weapon_active = 0u;

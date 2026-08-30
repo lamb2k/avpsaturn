@@ -6,7 +6,7 @@
 #include "../../combat/hit_ko/hit_ko.h"
 
 #define AVSP_ROUND1_SPEC02_SHA256 \
-    "e709b7bd616ecdb118e61459dbbc7677c9d0e13dd932f5bd4cf856a25f6d61ac"
+    "4c52813c7f36e7094cae51bbd9d07c9d51001afcce3300455b67fcc645f5f723"
 #define AVSP_ROUND1_CANARY_HEAD 0x52314548UL
 #define AVSP_ROUND1_CANARY_TAIL 0x52314554UL
 #define AVSP_ROUND1_ROUTE_ENTRY_STATE 2
@@ -1085,6 +1085,9 @@ typedef struct
     unsigned char normal_recharge_reload;
     unsigned char depleted_recharge_reload;
     unsigned char empty_dispatch_uses_depleted_latch;
+    unsigned char empty_effect_variant;
+    unsigned char empty_effect_allocation_tick;
+    unsigned char empty_effect_preserve_position_residue;
     signed char parent_class;
     signed char child_class;
     unsigned short projectile_source_base;

@@ -21,6 +21,29 @@ assert len(BASE_BYTES) < 1_600_000, "Coffee Shop manifest is not compact"
 assert BASE_BYTES.count(b"\n") == 1, "Coffee Shop manifest lost compact encoding"
 BASE = json.loads(BASE_BYTES)
 
+
+def divergence_row(frame, actor_class, source=True, x=10):
+    row = {
+        "frame": str(frame), "type": "24", "class": actor_class,
+        "state": "0200", "substate": "0000", "z": "0", "facing": "0",
+        "animation_record": "00000001", "health": "1",
+        "hurt_selector": "00", "attack_selector": "00"}
+    if source:
+        row.update({"active": "1", "slot": "00ffc300",
+                    "x_fp": f"{x << 16:08x}", "y_fp": "00140000"})
+    else:
+        row.update({"source_slot": "00ffc300", "x": str(x), "y": "20"})
+    return row
+
+
+# Reused fixed-pool slots must retain the identity of the lifetime that owns a
+# difference.  A prior class-0x4e lifetime cannot label a later class-0x10 gap.
+identity_probe = MODULE.source_native_divergences(
+    [divergence_row(1, "4e"), divergence_row(2, "10")],
+    [divergence_row(1, "4e", False),
+     divergence_row(2, "10", False, x=11)])
+assert len(identity_probe) == 1 and identity_probe[0]["class"] == "0x10"
+
 MODULE.validate_report(BASE)
 mutations = []
 item = copy.deepcopy(BASE)

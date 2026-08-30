@@ -9,7 +9,7 @@ from pathlib import Path
 
 ROOT = Path(__file__).resolve().parents[3]
 SPEC = ROOT / "data/spec02_round1_executable_contract.json"
-EXPECTED = "e709b7bd616ecdb118e61459dbbc7677c9d0e13dd932f5bd4cf856a25f6d61ac"
+EXPECTED = "4c52813c7f36e7094cae51bbd9d07c9d51001afcce3300455b67fcc645f5f723"
 assert hashlib.sha256(SPEC.read_bytes()).hexdigest() == EXPECTED
 assert json.loads(SPEC.read_text())["status"] == "ACCEPTED"
 source = (ROOT / "src/port_v2/gameplay/round1/round1.c").read_text()
@@ -128,7 +128,12 @@ for before, after in (
     ("++runtime->player_weapon_allocation_failures;", "runtime->player_weapon_allocation_failures += 2u;"),
     ("avsp_round1_tick_player_resource(runtime);", "/* resource tick suppressed */"),
     ("avsp_round1_begin_empty_effect(runtime);", "/* empty effect suppressed */"),
-    ("actor->variant = 1u;", "actor->variant = 0u;"),
+    ("actor->variant = avsp_round1_player_weapon.empty_effect_variant;",
+     "actor->variant = (unsigned char)(avsp_round1_player_weapon.empty_effect_variant + 1u);"),
+    ("runtime->player_weapon_tick ==\n            avsp_round1_player_weapon.empty_effect_allocation_tick",
+     "runtime->player_weapon_tick == 0u"),
+    ("avsp_round1_allocate_pool_actor_preserve_position_residue(runtime, 3u);",
+     "avsp_round1_allocate_pool_actor(runtime, 3u);"),
     ("actor->y = (short)(actor->y + 4);", "actor->y = (short)(actor->y + 3);"),
     ("if (actor->animation_branch < 0)", "if (actor->animation_branch < -32767)"),
     ("++runtime->player_weapon_empty_auxiliary_releases;", "runtime->player_weapon_empty_auxiliary_releases += 2u;"),
@@ -377,7 +382,7 @@ for before, after in (
     ("    17u, 18u, 19u, 20u, 21u, 22u, 23u, 24u, 25u, 26u, 27u, 28u, 29u, 30u, 31u, 32u, 33u, 34u, 35u, 36u, 37u, 38u, 39u, 40u, 41u, 42u, 43u, 44u, 45u, 46u, 47u",
      "    17u, 18u, 19u, 20u, 21u, 22u, 23u, 24u, 25u, 26u, 27u, 28u, 29u, 30u, 31u, 32u, 33u, 34u, 35u, 36u, 37u, 38u, 39u, 40u, 41u, 42u, 43u, 44u, 45u, 46u, 46u"),
     ("    { 5, 86 },", "    { 6, 86 },"),
-    ("    { 0, 78 },", "    { 0, 77 },"),
+    ("    { 0, 84 },", "    { 0, 83 },"),
     ("{ 4095u, -32767, 0x0007a12cUL, 0x0007a3a0UL, 0u, 0u },", "{ 4095u, -32768, 0x0007a12cUL, 0x0007a3a0UL, 0u, 0u },"),
     ("{ 0, -8, 4u, 12u, 0, 8u, 0, 8u, 25u },",
      "{ 0, -8, 4u, 12u, 0, 8u, 0, 8u, 24u },"),

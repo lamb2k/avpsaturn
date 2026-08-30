@@ -1013,6 +1013,11 @@ def build() -> str:
     if (weapon_parent["spec_executable"] is not True or
         weapon_child["spec_executable"] is not True or
         weapon_empty_effect["spec_executable"] is not True or
+        weapon_empty_effect["variant"] != 0 or
+        weapon_empty_effect["allocation"]["allocation_update_after_entry_u8"] != 1 or
+        weapon_empty_effect["allocation"]["unwritten_fields_retained"] !=
+            ["x_fraction:u16", "y_fraction:u16", "z:s16"] or
+        weapon_empty_effect["initialization"]["selected_offset_s16"] != [0, 84] or
         weapon_parent["record_type_u8"] != 4 or
         weapon_parent["class_u8"] != 0 or
         weapon_parent["allocator"] != "0x01773e" or
@@ -2467,6 +2472,9 @@ def build() -> str:
         f"    {weapon_action['recharge_countdown_after_entry_u8']}u,",
         f"    {weapon_resource['normal_tick']['reload_u8']}u,",
         f"    {weapon_resource['depleted_tick']['reload_u8']}u,",
+        "    1u,",
+        f"    {weapon_empty_effect['variant']}u,",
+        f"    {weapon_empty_effect['allocation']['allocation_update_after_entry_u8']}u,",
         "    1u,",
         f"    {weapon_parent['class_u8']},",
         f"    {weapon_child['class_u8']},",

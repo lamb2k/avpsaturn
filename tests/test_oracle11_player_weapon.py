@@ -274,7 +274,16 @@ def validate(data):
     assert empty["damaging_record4_count"] == 0
     assert {row["animation_record"] for row in empty["presentation_timeline"][1:17]} == {
         "0x0015fcfc"}
-    assert contract["empty_effect_variant1_contract"]["class"] == "0x10"
+    empty_effect = contract["empty_effect_variant1_contract"]
+    assert empty_effect["class"] == "0x10"
+    assert empty_effect["variant"] == 0
+    assert empty_effect["allocation"]["allocation_update_after_entry_u8"] == 1
+    assert empty_effect["allocation"]["variant_writer"] == \
+        "0x019f6c copies player+0xd2:u8"
+    assert empty_effect["allocation"]["unwritten_fields_retained"] == [
+        "x_fraction:u16", "y_fraction:u16", "z:s16"]
+    assert empty_effect["capture_projection"][
+        "coffee_shop_first_visible_position_s16"] == [944, 404, 319]
     assert contract["implementation_blocker"] is None
     special = data["special_implementation_contract"]
     assert special["classification"] == "SOURCE_CLOSED_IMPLEMENTATION_FIELDS"

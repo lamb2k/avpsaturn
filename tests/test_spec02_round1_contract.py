@@ -109,6 +109,12 @@ assert registration["coffee_shop_projection"]["first_registered_frame"] == 2296
 assert registration["coffee_shop_projection"]["first_contact_frame"] == 2306
 assert registration["mutation_control"]["target_first_contact_frame_after"] == 2311
 assert weapon["empty_effect_variant1_contract"]["spec_executable"] is True
+assert weapon["empty_effect_variant1_contract"]["variant"] == 0
+assert weapon["empty_effect_variant1_contract"]["allocation"][
+    "allocation_update_after_entry_u8"] == 1
+assert weapon["empty_effect_variant1_contract"]["allocation"][
+    "unwritten_fields_retained"] == [
+        "x_fraction:u16", "y_fraction:u16", "z:s16"]
 weapon_actor = weapon["player_actor_projection"]
 assert weapon_actor["classification"] == "SOURCE_CLOSED_IMPLEMENTATION_FIELDS"
 assert weapon_actor["spec_executable"] is True
@@ -458,7 +464,9 @@ m = copy.deepcopy(contract); m["field_contracts"][4]["mutation_control"]["json_p
 m = copy.deepcopy(contract); m["coverage_gate"]["orphan_authoritative_writers"] = 1; mutations.append((m, fixtures, "weakened gate"))
 f = copy.deepcopy(fixtures); f["authority_data"]["rng"]["algorithm"]["recurrence"] = "guess"; mutations.append((contract, f, "fixture mutation"))
 f = copy.deepcopy(fixtures); f["authority_data"]["player"]["weapon_projectile_resource"]["implementation_contract"]["record4_parent_class0"]["child_emitter_state"]["cadence_reload_u8"] = 5; mutations.append((contract, f, "weapon cadence mutation"))
-f = copy.deepcopy(fixtures); f["authority_data"]["player"]["weapon_projectile_resource"]["implementation_contract"]["empty_effect_variant1_contract"]["variant"] = 0; mutations.append((contract, f, "empty effect variant mutation"))
+f = copy.deepcopy(fixtures); f["authority_data"]["player"]["weapon_projectile_resource"]["implementation_contract"]["empty_effect_variant1_contract"]["variant"] = 1; mutations.append((contract, f, "empty effect variant mutation"))
+f = copy.deepcopy(fixtures); f["authority_data"]["player"]["weapon_projectile_resource"]["implementation_contract"]["empty_effect_variant1_contract"]["allocation"]["allocation_update_after_entry_u8"] = 0; mutations.append((contract, f, "empty effect allocation timing mutation"))
+f = copy.deepcopy(fixtures); f["authority_data"]["player"]["weapon_projectile_resource"]["implementation_contract"]["empty_effect_variant1_contract"]["allocation"]["unwritten_fields_retained"] = ["x_fraction:u16", "y_fraction:u16"]; mutations.append((contract, f, "empty effect retained z mutation"))
 f = copy.deepcopy(fixtures); f["authority_data"]["player"]["weapon_projectile_resource"]["implementation_contract"]["resource_tick"]["normal_tick"]["reload_u8"] = 2; mutations.append((contract, f, "resource normal cadence mutation"))
 f = copy.deepcopy(fixtures); f["authority_data"]["player"]["weapon_projectile_resource"]["implementation_contract"]["resource_tick"]["dispatch_guard"]["rule"] = "resource below debit owns empty dispatch"; mutations.append((contract, f, "resource depleted-latch mutation"))
 f = copy.deepcopy(fixtures); f["authority_data"]["player"]["weapon_projectile_resource"]["implementation_contract"]["empty_effect_variant1_contract"]["initialization"]["presentation_actor_fields"]["object_or_u16"] = "0x0000"; mutations.append((contract, f, "empty effect priority mutation"))

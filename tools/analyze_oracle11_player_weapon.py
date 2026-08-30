@@ -764,6 +764,44 @@ for row in empty_samples:
         })
 require({row["animation_record"] for row in empty_player_timeline[1:17]} ==
         {"0x0015fcfc"}, "Predator empty-resource presentation drift")
+empty_effect_rows = sorted(
+    [row for row in runs["resource_empty"]["actors.tsv"]
+     if row["kind"] == "record24" and row["class"] == "10"],
+    key=lambda row: int(row["frame"]))
+require(empty_effect_rows and
+        {row["slot"] for row in empty_effect_rows} == {"ffc100"} and
+        {int(row["actor_variant"]) for row in empty_effect_rows} == {0},
+        "Predator empty-effect class/variant projection drift")
+empty_effect_first = empty_effect_rows[0]
+empty_effect_last = empty_effect_rows[-1]
+empty_effect_allocation_writes = [
+    row for row in runs["resource_empty"]["writes.tsv"]
+    if row["kind"] == "record24" and int(row["frame"]) == empty_entry and
+    0x019f68 <= int(row["pc"], 16) <= 0x019f84 and
+    int(row["address"], 16) >= int(empty_effect_first["slot"], 16) and
+    int(row["address"], 16) < int(empty_effect_first["slot"], 16) + 0x80]
+require([int(row["pc"], 16) for row in empty_effect_allocation_writes] ==
+        [0x019f68, 0x019f6c, 0x019f72, 0x019f78, 0x019f7e,
+         0x019f84], "Predator empty-effect allocation writers drift")
+require((int(empty_effect_first["frame"]), int(empty_effect_first["x"]),
+         int(empty_effect_first["y"]), int(empty_effect_first["z"]),
+         empty_effect_first["anim"], int(empty_effect_last["frame"]),
+         int(empty_effect_last["state"])) ==
+        (empty_entry + 1, 1184, 404, 319, "0007a09c", 4440, 4),
+        "Predator empty-effect lifetime projection drift")
+coffee_empty_effect_rows = sorted(
+    [row for row in coffee_actors if row["type"] == "24" and
+     row["class"] == "10" and int(row["frame"]) >= 2520],
+    key=lambda row: int(row["frame"]))
+require(coffee_empty_effect_rows and
+        (int(coffee_empty_effect_rows[0]["frame"]),
+         int(coffee_empty_effect_rows[0]["variant"], 16),
+         int(coffee_empty_effect_rows[0]["x_fp"], 16),
+         int(coffee_empty_effect_rows[0]["y_fp"], 16),
+         int(coffee_empty_effect_rows[0]["z"]),
+         coffee_empty_effect_rows[0]["animation_record"]) ==
+        (2523, 0, 0x03b00000, 0x01940000, 319, "0007a09c"),
+        "Coffee Shop empty-effect first-visible projection drift")
 
 # The old summary named 0x024f04 for the special.  That body belongs to a
 # different character.  Character 0 writes the action at 0x01a89a and then
@@ -947,6 +985,42 @@ preserved_empty_effect = old_weapon.get("implementation_contract", {}).get(
     "empty_effect_variant1_contract", {})
 require(preserved_empty_effect.get("class") == "0x10",
         "accepted class-0x10 empty-effect contract missing")
+empty_effect_contract = json.loads(json.dumps(preserved_empty_effect))
+empty_effect_contract["variant"] = 0
+empty_effect_contract["allocation"]["writes"]["variant"] = 0
+empty_effect_contract["allocation"].update({
+    "entry_action_u16": "0x1a00",
+    "allocation_update_after_entry_u8": 1,
+    "writer_block": "0x019f40..0x019f8a",
+    "writer_pcs": ["0x019f68", "0x019f6c", "0x019f72",
+                   "0x019f78", "0x019f7e", "0x019f84"],
+    "variant_writer": "0x019f6c copies player+0xd2:u8",
+    "unwritten_fields_retained": ["x_fraction:u16", "y_fraction:u16",
+                                   "z:s16"],
+    "fixed_frame_substitute": False,
+})
+empty_effect_contract["initialization"]["selected_variant_u8"] = 0
+empty_effect_contract["initialization"]["selected_offset_s16"] = [0, 84]
+empty_effect_contract["capture_projection"] = {
+    "action_entry_frame": empty_entry,
+    "allocation_writer_frame": empty_entry,
+    "first_visible_frame": int(empty_effect_first["frame"]),
+    "first_visible_position_s16": [int(empty_effect_first["x"]),
+                                   int(empty_effect_first["y"]),
+                                   int(empty_effect_first["z"])],
+    "state4_frame": int(empty_effect_last["frame"]),
+    "coffee_shop_first_visible_frame": 2523,
+    "coffee_shop_first_visible_position_s16": [944, 404, 319],
+}
+empty_effect_contract["source_blocks"] = {
+    "player_empty_handler": window(opcodes, 0x019f40, 0x019f8a),
+    "effect_dispatch_and_init": window(opcodes, 0x079ffc, 0x07a068),
+}
+empty_effect_contract["mutation_controls"] = [
+    "variant 1 selects the rejected Major-era +78 y offset instead of Predator variant 0 +84",
+    "allocation on entry instead of the next player-state update advances the actor lifetime one frame",
+    "clearing the reused record loses the source-retained z=319 witness",
+]
 
 implementation_contract = {
     "classification": "SOURCE_CLOSED_IMPLEMENTATION_FIELDS",
@@ -1218,7 +1292,7 @@ implementation_contract = {
         "return_tick": empty_return - empty_entry, "damaging_record4_count": 0,
         "presentation_timeline": empty_player_timeline,
     },
-    "empty_effect_variant1_contract": preserved_empty_effect,
+    "empty_effect_variant1_contract": empty_effect_contract,
     "implementation_blocker": None,
 }
 

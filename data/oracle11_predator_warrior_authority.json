@@ -7561,7 +7561,7 @@
           }
         },
         "resource_and_projectile_authority": "data/oracle11_predator_weapon_projectile_resource.json",
-        "resource_artifact_sha256": "7ab99ce75f987f9eaadae05a1d86b854f37ba432843cf184553e8682b70bd924",
+        "resource_artifact_sha256": "d3510980f1017dc0fc3b48836bb1fd86c2fcb42192bb335381febf5546c5b06a",
         "resource_status": "SOURCE_CLOSED",
         "spawn_branch": "0x023858",
         "writer": "0x023860"
@@ -17101,38 +17101,50 @@
           ]
         },
         "allocation": {
+          "allocation_update_after_entry_u8": 1,
+          "entry_action_u16": "0x1a00",
+          "fixed_frame_substitute": false,
           "guard": "Button1 empty-resource entry and record-type-24 allocator succeeds",
+          "unwritten_fields_retained": [
+            "x_fraction:u16",
+            "y_fraction:u16",
+            "z:s16"
+          ],
+          "variant_writer": "0x019f6c copies player+0xd2:u8",
+          "writer_block": "0x019f40..0x019f8a",
+          "writer_pcs": [
+            "0x019f68",
+            "0x019f6c",
+            "0x019f72",
+            "0x019f78",
+            "0x019f7e",
+            "0x019f84"
+          ],
           "writes": {
             "active": 1,
             "class": "0x10",
             "spawn_facing_selector": "copy player facing",
-            "variant": 1,
+            "variant": 0,
             "x": "copy player x high word",
             "y": "copy player y high word"
           }
         },
         "capture_projection": {
-          "first_active_frame": 4493,
-          "last_position": [
-            1197,
-            427
+          "action_entry_frame": 4422,
+          "allocation_writer_frame": 4422,
+          "coffee_shop_first_visible_frame": 2523,
+          "coffee_shop_first_visible_position_s16": [
+            944,
+            404,
+            319
           ],
-          "movement_frames": [
-            4494,
-            4495,
-            4496,
-            4497,
-            4498,
-            4499,
-            4500,
-            4501
+          "first_visible_frame": 4423,
+          "first_visible_position_s16": [
+            1184,
+            404,
+            319
           ],
-          "spawn_frame": 4492,
-          "spawn_position": [
-            1197,
-            395
-          ],
-          "state4_frame": 4510
+          "state4_frame": 4440
         },
         "class": "0x10",
         "dispatch": "0x079ffc",
@@ -17151,6 +17163,11 @@
               "palette": "zero-initialized actor +0x0e u8"
             }
           },
+          "selected_offset_s16": [
+            0,
+            84
+          ],
+          "selected_variant_u8": 0,
           "variant_offsets_s16": [
             [
               0,
@@ -17182,6 +17199,11 @@
             "target_pointer": "0x8000"
           }
         },
+        "mutation_controls": [
+          "variant 1 selects the rejected Major-era +78 y offset instead of Predator variant 0 +84",
+          "allocation on entry instead of the next player-state update advances the actor lifetime one frame",
+          "clearing the reused record loses the source-retained z=319 witness"
+        ],
         "record_type": 24,
         "release_state": {
           "guard": "state 4 or 6",
@@ -17190,6 +17212,20 @@
         },
         "rng_calls": 0,
         "scheduler_position": "record type 24 after record types 4/8/12/16/20",
+        "source_blocks": {
+          "effect_dispatch_and_init": {
+            "bytes": 108,
+            "end_exclusive": "0x07a068",
+            "sha256": "c46c23b572beb4b7bb22ce944958837df99fbba8c5531a3e065f28937d417626",
+            "start": "0x079ffc"
+          },
+          "player_empty_handler": {
+            "bytes": 74,
+            "end_exclusive": "0x019f8a",
+            "sha256": "ab69e610ae94b129b45b19f64d14c742f4affd87d0baf69b5309f5e8787df835",
+            "start": "0x019f40"
+          }
+        },
         "spec_executable": true,
         "state_sequence": [
           0,
@@ -17197,7 +17233,7 @@
           4
         ],
         "state_type": "u8",
-        "variant": 1
+        "variant": 0
       },
       "empty_fallback": {
         "cleanup_tick": 17,
