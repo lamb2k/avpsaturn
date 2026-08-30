@@ -204,6 +204,36 @@ def compact_window(rows: list[dict[str, str]], first: int, last: int,
     }
 
 
+def bind_source_collision_selectors(
+        rows: list[dict[str, str]],
+        contract: dict[str, object]) -> list[dict[str, str]]:
+    """Replace rejected actor-field projections with SPEC-owned selectors."""
+    records = {
+        int(item["animation_record"], 16): item
+        for item in contract["records"]
+    }
+    result: list[dict[str, str]] = []
+    for original in rows:
+        row = dict(original)
+        if row["hurt_selector"] != "na":
+            animation = int(row["animation_record"], 16)
+            if animation == 0:
+                hurt = 0
+                attack = 0
+            else:
+                item = records.get(animation)
+                if item is None:
+                    raise ValueError(
+                        "Coffee Shop selector contract missing animation "
+                        f"0x{animation:08x}")
+                hurt = int(item["hurt_selector_u8"])
+                attack = int(item["attack_selector_u8"])
+            row["hurt_selector"] = f"{hurt:02x}"
+            row["attack_selector"] = f"{attack:02x}"
+        result.append(row)
+    return result
+
+
 def source_lifetime_summary(item: dict[str, object]) -> dict[str, object]:
     fields = (
         "id", "source_slot", "pool", "type", "class", "first_frame",
@@ -224,8 +254,12 @@ def source_native_divergences(
         if row[raw_field] == "na":
             return None
         if field in {"state", "substate", "animation_record",
+                     "animation_timer",
                      "hurt_selector", "attack_selector"}:
             return int(row[field], 16)
+        if field in {"x_fp", "y_fp"}:
+            value = int(row[field], 16)
+            return value - 0x100000000 if value >= 0x80000000 else value
         if field in {"x", "y"}:
             value = int(row[raw_field], 16)
             signed = value - 0x100000000 if value >= 0x80000000 else value
@@ -239,7 +273,8 @@ def source_native_divergences(
         return int(row[field])
 
     fields = ("state", "substate", "x", "y", "z", "facing",
-              "animation_record", "health", "hurt_selector",
+              "x_fp", "y_fp", "animation_record", "animation_timer",
+              "animation_branch", "health", "hurt_selector",
               "attack_selector")
     native_by_key = {
         (int(row["frame"]), f"{int(row['source_slot'], 16):08x}",
@@ -998,7 +1033,7 @@ def validate_report(report: dict[str, object]) -> None:
                 "target_substate_next_visible_frame": "0x0000",
                 "target_animation_next_visible_frame": "0x0012eb5c",
                 "target_hurt_selector_next_visible_frame_u8": 1,
-                "target_attack_selector_next_visible_frame_u8": 1,
+                "target_attack_selector_next_visible_frame_u8": 0,
                 "target_slot": "0x00ffa180",
                 "prior_target_health_values_s16": [87]},
             "native_impact_transaction": {
@@ -1109,13 +1144,13 @@ def validate_report(report: dict[str, object]) -> None:
     action16_projection = [
         {"frame_u16": 2378, "state_u16": "0x0200",
          "substate_u16": "0x0000", "animation_record": "0x0012ec74",
-         "attack_selector_u8": 2},
+         "attack_selector_u8": 0},
         {"frame_u16": 2379, "state_u16": "0x0200",
          "substate_u16": "0x1600", "animation_record": "0x0012e78c",
-         "attack_selector_u8": 2},
+         "attack_selector_u8": 0},
         {"frame_u16": 2380, "state_u16": "0x0200",
          "substate_u16": "0x1600", "animation_record": "0x0012e78c",
-         "attack_selector_u8": 2},
+         "attack_selector_u8": 0},
     ]
     if action16 != {
             "source_rng_call_frame_u16": 2377,
@@ -1135,15 +1170,15 @@ def validate_report(report: dict[str, object]) -> None:
         {"frame_u16": 2409, "state_u16": "0x0200",
          "substate_u16": "0x1600", "facing_u8": 1,
          "animation_record": "0x0012e7fc", "animation_timer_u16": 2,
-         "attack_selector_u8": 2},
+         "attack_selector_u8": 0},
         {"frame_u16": 2410, "state_u16": "0x0200",
          "substate_u16": "0x1a00", "facing_u8": 0,
          "animation_record": "0x0012d5e4", "animation_timer_u16": 4,
-         "attack_selector_u8": 2},
+         "attack_selector_u8": 0},
         {"frame_u16": 2411, "state_u16": "0x0200",
          "substate_u16": "0x1a00", "facing_u8": 0,
          "animation_record": "0x0012d5e4", "animation_timer_u16": 3,
-         "attack_selector_u8": 2},
+         "attack_selector_u8": 0},
     ]
     if latched_retry != {
             "source_transition_frame_u16": 2409,
@@ -1297,7 +1332,7 @@ def validate_report(report: dict[str, object]) -> None:
             "native_animation_advance_frame_u16": 2762,
             "source_native_hit_sequence_equal": True,
             "source_native_hit_sequence_frames": 28,
-            "next_player_divergence_frame_u16": 2793,
+            "next_player_divergence_frame_u16": 2805,
             "authored_delay_forbidden": True,
             "next_attacker_divergence_frame_u16": 2798}:
         raise ValueError("Coffee Shop class-0x1f player collision drift")
@@ -1317,6 +1352,8 @@ def main() -> None:
         raise ValueError("Coffee Shop source actor capture identity mismatch")
     with SOURCE_ACTORS.open(newline="", encoding="ascii") as handle:
         source_rows = list(csv.DictReader(handle, delimiter="\t"))
+    source_rows = bind_source_collision_selectors(
+        source_rows, source["animation_collision_selectors"])
     native = lifetimes(rows)
     source_by_key = {key(item): item for item in source["actor_lifetimes"]}
     native_by_key = {key(item): item for item in native}

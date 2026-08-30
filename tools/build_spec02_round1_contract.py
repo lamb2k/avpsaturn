@@ -62,6 +62,42 @@ def digest(path: Path) -> str:
     return hashlib.sha256(path.read_bytes()).hexdigest()
 
 
+def bind_animation_collision_selectors(
+        value: object, records: dict[int, dict[str, object]]) -> None:
+    if isinstance(value, list):
+        for item in value:
+            bind_animation_collision_selectors(item, records)
+        return
+    if not isinstance(value, dict):
+        return
+    animation = value.get("animation_record")
+    if isinstance(animation, str):
+        try:
+            address = int(animation, 16)
+        except ValueError:
+            address = -1
+        record = records.get(address)
+        if record is not None:
+            hurt = int(record["hurt_selector_u8"])
+            attack = int(record["attack_selector_u8"])
+            has_plain = "hurt_selector" in value or "attack_selector" in value
+            has_current = ("current_hurt_selector_u8" in value or
+                           "current_attack_selector_u8" in value)
+            has_suffixed = ("hurt_selector_u8" in value or
+                            "attack_selector_u8" in value)
+            if has_plain:
+                value["hurt_selector"] = hurt
+                value["attack_selector"] = attack
+            if has_current:
+                value["current_hurt_selector_u8"] = hurt
+                value["current_attack_selector_u8"] = attack
+            if has_suffixed or (not has_plain and not has_current):
+                value["hurt_selector_u8"] = hurt
+                value["attack_selector_u8"] = attack
+    for item in value.values():
+        bind_animation_collision_selectors(item, records)
+
+
 def load(path: Path) -> dict:
     return json.loads(path.read_text(encoding="utf-8"))
 
@@ -490,6 +526,8 @@ def build_coffee_shop_scene_manifest(source: dict[str, dict]) -> dict[str, objec
         "capture_identity": census["capture_identity"],
         "pool_scan": census["pool_scan"],
         "pool_layout_source": census["pool_layout_source"],
+        "animation_collision_selectors":
+            census["animation_collision_selectors"],
         "actor_lifetimes": census["actor_lifetimes"],
         "class_type_inventory": census["class_type_inventory"],
         "audio_events": census["audio_events"],
@@ -530,6 +568,25 @@ def build_fixtures(source: dict[str, dict]) -> dict[str, object]:
         "hit_ko_failure_continue_respawn",
         "route_pickup_resource_audio_load_ownership",
         "player_origin_gameplay_audio")}
+    selector_records = {
+        int(item["animation_record"], 16): item
+        for item in source["route"]["coffee_shop_scene_census"]
+            ["animation_collision_selectors"]["records"]
+    }
+    bind_animation_collision_selectors(player_authority, selector_records)
+    locomotion_execution = player_authority["locomotion_neutral_facing"][
+        "first_segment_execution_contract"]
+    locomotion_execution["current_collision_selector_projection"] = {
+        "guard": "the current locomotion animation record owns collision lookup metadata",
+        "actor_hurt_selector_u8": 17,
+        "actor_attack_selector_u8": 0,
+        "collision_lookup_hurt_selector_u8": 17,
+        "rule": (
+            "native current selectors derive from animation-record bytes "
+            "+0x08/+0x09; captured actor event/link bytes are rejected"
+        ),
+        "source_frames": [2602, 2678],
+    }
     player_authority["locomotion_neutral_facing"][
         "actor_state_projection"] = {
             "classification": "SOURCE_CLOSED_IMPLEMENTATION_FIELDS",
@@ -578,38 +635,38 @@ def build_fixtures(source: dict[str, dict]) -> dict[str, object]:
             "then receives 0x0000 cleanup and 0x0002 return locomotion"
         ),
         "selector_ownership": (
-            "player actor +0xa5/+0xa6 remain zero in the Coffee Shop scene; "
-            "animation-record hurt/attack selector bytes remain presentation "
-            "and collision metadata and are not copied into those actor fields"
+            "captured player actor +0x25/+0x26 event/link bytes are not "
+            "collision selectors; the native current collision selectors "
+            "derive from animation-record bytes +0x08/+0x09"
         ),
         "visible_runs": [
             {"first_frame_u16": 2252, "last_frame_u16": 2252,
              "state_u16": "0x0200", "substate_u16": "0x0c00",
-             "hurt_selector_u8": 0, "attack_selector_u8": 0},
+             "hurt_selector_u8": 1, "attack_selector_u8": 0},
             {"first_frame_u16": 2253, "last_frame_u16": 2255,
              "state_u16": "0x0200", "substate_u16": "0x0c02",
-             "hurt_selector_u8": 0, "attack_selector_u8": 0},
+             "hurt_selector_u8": 1, "attack_selector_u8": 0},
             {"first_frame_u16": 2256, "last_frame_u16": 2272,
              "state_u16": "0x0200", "substate_u16": "0x0c04",
-             "hurt_selector_u8": 0, "attack_selector_u8": 0},
+             "hurt_selector_u8": 1, "attack_selector_u8": 0},
             {"first_frame_u16": 2273, "last_frame_u16": 2273,
              "state_u16": "0x0200", "substate_u16": "0x0000",
-             "hurt_selector_u8": 0, "attack_selector_u8": 0},
+             "hurt_selector_u8": 1, "attack_selector_u8": 0},
             {"first_frame_u16": 2274, "last_frame_u16": 2274,
              "state_u16": "0x0200", "substate_u16": "0x0002",
-             "hurt_selector_u8": 0, "attack_selector_u8": 0},
+             "hurt_selector_u8": 1, "attack_selector_u8": 0},
             {"first_frame_u16": 2522, "last_frame_u16": 2522,
              "state_u16": "0x0200", "substate_u16": "0x1a00",
-             "hurt_selector_u8": 0, "attack_selector_u8": 0},
+             "hurt_selector_u8": 1, "attack_selector_u8": 0},
             {"first_frame_u16": 2523, "last_frame_u16": 2538,
              "state_u16": "0x0200", "substate_u16": "0x1a02",
-             "hurt_selector_u8": 0, "attack_selector_u8": 0},
+             "hurt_selector_u8": 1, "attack_selector_u8": 0},
             {"first_frame_u16": 2539, "last_frame_u16": 2539,
              "state_u16": "0x0200", "substate_u16": "0x0000",
-             "hurt_selector_u8": 0, "attack_selector_u8": 0},
+             "hurt_selector_u8": 1, "attack_selector_u8": 0},
             {"first_frame_u16": 2540, "last_frame_u16": 2540,
              "state_u16": "0x0200", "substate_u16": "0x0002",
-             "hurt_selector_u8": 0, "attack_selector_u8": 0},
+             "hurt_selector_u8": 1, "attack_selector_u8": 0},
         ],
         "evidence": {
             "coffee_shop_scene_actors_sha256": source["route"]
@@ -1036,11 +1093,16 @@ def validate(contract: dict[str, object], fixtures: dict[str, object],
             player_hit["entry_writes"]["carried_record"] == {
                 "animation_record": "0x0015f278",
                 "assembly": "0x00160af2", "visible_timer_u16": 1,
-                "hurt_selector_u8": 0, "attack_selector_u8": 0} and
+                "hurt_selector_u8": 17, "attack_selector_u8": 0} and
             player_hit["phase_0x0200"]["presentation"] == {
                 "animation_record": "0x0015eee8",
                 "assembly": "0x00160ede", "timer_u16": 8,
                 "branch_s16": -0x8000, "hurt_selector_u8": 0,
+                "attack_selector_u8": 0} and
+            player_hit["phase_0x0204"]["presentation"] == {
+                "animation_record": "0x0015f1f4",
+                "assembly": "0x001626a4", "timer_u16": 4095,
+                "branch_s16": -0x8000, "hurt_selector_u8": 1,
                 "attack_selector_u8": 0} and
             player_hit["shake"]["table_s16"] == [2, -2] * 8 and
             player_hit["phase_0x0204"]["return_visible_frame_u16"] ==

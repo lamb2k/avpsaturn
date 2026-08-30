@@ -27575,7 +27575,7 @@
         "writes": 153166
       },
       "current_state_implementation_contract": {
-        "accepted_encounter_authority_sha256": "51ebe252b92b92ada09cdc96d96f18d8627db4755f51dcd51aafd2709cb71c07",
+        "accepted_encounter_authority_sha256": "7fea457cb397676622e7629c573f79c5a3b46425e9185abaac0be9c415aa2174",
         "accepted_oracle09_sha256": "a3027c3ffcd19af2656c515e0dfc0e9c56086b1bf3dd029e854d74be372c847f",
         "actions": {
           "above_lane_0x0600": {
@@ -27795,7 +27795,7 @@
             },
             "capture_identity": {
               "byte_identical": true,
-              "capture_script_sha256": "e2b7129f1618a416b9ffed286bd1eae9d98fc05ddcf26655f023878c21334bc8",
+              "capture_script_sha256": "303892450486724d519381baa697904b4a282ce6574d28db4ffe000d817693ac",
               "completion_a": {
                 "coffee_shop_class1f_hit.tsv": "cc411e49ae629a622166f40a69c363f4ebdffb7b0f655e45b3334b3034d91648",
                 "coffee_shop_class1f_hit_program.tsv": "5dec2f9eb35a4303d0e4711d2b51def0e1bf57d411e1294596cbb64b93dfae90",
@@ -28562,7 +28562,7 @@
           "source_projectile_ko_program": {
             "capture_identity": {
               "byte_identical": true,
-              "capture_script_sha256": "e2b7129f1618a416b9ffed286bd1eae9d98fc05ddcf26655f023878c21334bc8",
+              "capture_script_sha256": "303892450486724d519381baa697904b4a282ce6574d28db4ffe000d817693ac",
               "completion_a": {
                 "coffee_shop_class1f_hit.tsv": "ba5702bcc089aefcb3746144f5d60b61e5e72c3a0823107701b6b3fd63445335",
                 "coffee_shop_class1f_hit_program.tsv": "cbfcbfb3557698fff37e10f15cbe154a8305ce8d55d143f253eafe3f137ac4c5",
@@ -38087,7 +38087,7 @@
         },
         "current_state_player_collision": {
           "accepted_collision_sha256": "49ce678bee49d331a3b9e6cee97708b7644c5b0727de477ffc89671bf64bd78c",
-          "accepted_encounter_authority_sha256": "51ebe252b92b92ada09cdc96d96f18d8627db4755f51dcd51aafd2709cb71c07",
+          "accepted_encounter_authority_sha256": "7fea457cb397676622e7629c573f79c5a3b46425e9185abaac0be9c415aa2174",
           "attacker": {
             "animation_record": "0x0012d8a0",
             "attack_record": "0x130b5c",

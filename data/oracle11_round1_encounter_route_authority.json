@@ -121,11 +121,9 @@
         ],
         "attack_selectors": [
           0,
-          185,
-          192,
-          193,
-          194,
-          195
+          10,
+          11,
+          21
         ],
         "class": "0x00",
         "despawn_edge": {
@@ -145,7 +143,13 @@
         "hurt_selectors": [
           0,
           1,
-          2
+          2,
+          11,
+          13,
+          14,
+          15,
+          16,
+          17
         ],
         "id": "coffee-shop-actor-000",
         "last_frame": 5566,
@@ -731,7 +735,7 @@
           "0x0012ec74"
         ],
         "attack_selectors": [
-          1
+          0
         ],
         "class": "0x1f",
         "despawn_edge": {
@@ -748,7 +752,11 @@
           87
         ],
         "hurt_selectors": [
-          1
+          0,
+          1,
+          2,
+          4,
+          7
         ],
         "id": "coffee-shop-actor-008",
         "last_frame": 2471,
@@ -880,7 +888,7 @@
           "0x0012eb6c"
         ],
         "attack_selectors": [
-          1
+          0
         ],
         "class": "0x1f",
         "despawn_edge": {
@@ -897,7 +905,12 @@
           87
         ],
         "hurt_selectors": [
-          1
+          0,
+          1,
+          2,
+          4,
+          7,
+          14
         ],
         "id": "coffee-shop-actor-009",
         "last_frame": 2941,
@@ -1045,8 +1058,7 @@
           "0x0012eb6c"
         ],
         "attack_selectors": [
-          1,
-          2
+          0
         ],
         "class": "0x1f",
         "despawn_edge": {
@@ -1064,7 +1076,9 @@
           87
         ],
         "hurt_selectors": [
-          1
+          1,
+          2,
+          4
         ],
         "id": "coffee-shop-actor-010",
         "last_frame": 2913,
@@ -1149,8 +1163,7 @@
           "0x0012eb6c"
         ],
         "attack_selectors": [
-          0,
-          1
+          0
         ],
         "class": "0x1f",
         "despawn_edge": {
@@ -1167,7 +1180,8 @@
           87
         ],
         "hurt_selectors": [
-          1
+          1,
+          2
         ],
         "id": "coffee-shop-actor-011",
         "last_frame": 2595,
@@ -1316,6 +1330,7 @@
           "0x0012ec74"
         ],
         "attack_selectors": [
+          0,
           1
         ],
         "class": "0x1f",
@@ -1334,7 +1349,12 @@
           87
         ],
         "hurt_selectors": [
-          1
+          0,
+          1,
+          2,
+          3,
+          4,
+          7
         ],
         "id": "coffee-shop-actor-012",
         "last_frame": 3975,
@@ -1503,8 +1523,7 @@
           "0x0012eb6c"
         ],
         "attack_selectors": [
-          0,
-          1
+          0
         ],
         "class": "0x1f",
         "despawn_edge": {
@@ -1521,7 +1540,8 @@
           87
         ],
         "hurt_selectors": [
-          1
+          1,
+          2
         ],
         "id": "coffee-shop-actor-013",
         "last_frame": 2695,
@@ -1608,7 +1628,7 @@
           "0x0012eb5c"
         ],
         "attack_selectors": [
-          1
+          0
         ],
         "class": "0x1f",
         "despawn_edge": {
@@ -1625,7 +1645,9 @@
           87
         ],
         "hurt_selectors": [
-          1
+          0,
+          1,
+          7
         ],
         "id": "coffee-shop-actor-014",
         "last_frame": 2415,
@@ -1755,8 +1777,7 @@
           "0x0012eb6c"
         ],
         "attack_selectors": [
-          1,
-          2
+          0
         ],
         "class": "0x1f",
         "despawn_edge": {
@@ -1774,7 +1795,12 @@
           87
         ],
         "hurt_selectors": [
-          1
+          0,
+          1,
+          2,
+          4,
+          10,
+          11
         ],
         "id": "coffee-shop-actor-015",
         "last_frame": 2567,
@@ -1893,8 +1919,7 @@
           "0x0012ec74"
         ],
         "attack_selectors": [
-          1,
-          2
+          0
         ],
         "class": "0x1f",
         "despawn_edge": {
@@ -1912,7 +1937,13 @@
           87
         ],
         "hurt_selectors": [
-          1
+          0,
+          1,
+          2,
+          3,
+          4,
+          10,
+          11
         ],
         "id": "coffee-shop-actor-016",
         "last_frame": 2493,
@@ -2017,7 +2048,7 @@
           "0x0012ea64"
         ],
         "attack_selectors": [
-          1
+          0
         ],
         "class": "0x1f",
         "despawn_edge": {
@@ -2034,7 +2065,13 @@
           87
         ],
         "hurt_selectors": [
-          1
+          0,
+          1,
+          2,
+          4,
+          7,
+          10,
+          11
         ],
         "id": "coffee-shop-actor-017",
         "last_frame": 2508,
@@ -5258,9 +5295,7 @@
           "0x0012ec74"
         ],
         "attack_selectors": [
-          0,
-          1,
-          2
+          0
         ],
         "class": "0x1f",
         "despawn_edge": {
@@ -5279,7 +5314,9 @@
         ],
         "hurt_selectors": [
           0,
-          1
+          2,
+          3,
+          11
         ],
         "id": "coffee-shop-actor-071",
         "last_frame": 2851,
@@ -8909,7 +8946,7 @@
           "0x0012ec74"
         ],
         "attack_selectors": [
-          1
+          0
         ],
         "class": "0x1f",
         "despawn_edge": {
@@ -8927,7 +8964,15 @@
           87
         ],
         "hurt_selectors": [
-          1
+          0,
+          1,
+          2,
+          3,
+          4,
+          5,
+          7,
+          8,
+          10
         ],
         "id": "coffee-shop-actor-133",
         "last_frame": 4275,
@@ -9156,6 +9201,7 @@
           "0x0012eb6c"
         ],
         "attack_selectors": [
+          0,
           1
         ],
         "class": "0x1f",
@@ -9173,7 +9219,9 @@
           87
         ],
         "hurt_selectors": [
-          1
+          0,
+          1,
+          14
         ],
         "id": "coffee-shop-actor-135",
         "last_frame": 2916,
@@ -9286,8 +9334,7 @@
           "0x0012ec74"
         ],
         "attack_selectors": [
-          1,
-          2
+          0
         ],
         "class": "0x1f",
         "despawn_edge": {
@@ -9304,7 +9351,7 @@
           87
         ],
         "hurt_selectors": [
-          1
+          2
         ],
         "id": "coffee-shop-actor-136",
         "last_frame": 3129,
@@ -9734,7 +9781,7 @@
           "0x0012e79c"
         ],
         "attack_selectors": [
-          1
+          0
         ],
         "class": "0x1f",
         "despawn_edge": {
@@ -9751,7 +9798,10 @@
           87
         ],
         "hurt_selectors": [
-          1
+          0,
+          1,
+          2,
+          14
         ],
         "id": "coffee-shop-actor-143",
         "last_frame": 2943,
@@ -12775,8 +12825,7 @@
           "0x0012ec74"
         ],
         "attack_selectors": [
-          0,
-          1
+          0
         ],
         "class": "0x1f",
         "despawn_edge": {
@@ -12793,7 +12842,7 @@
           87
         ],
         "hurt_selectors": [
-          1
+          2
         ],
         "id": "coffee-shop-actor-193",
         "last_frame": 3395,
@@ -14080,8 +14129,7 @@
           "0x0012ec74"
         ],
         "attack_selectors": [
-          1,
-          2
+          0
         ],
         "class": "0x1f",
         "despawn_edge": {
@@ -14098,7 +14146,8 @@
           87
         ],
         "hurt_selectors": [
-          1
+          0,
+          2
         ],
         "id": "coffee-shop-actor-216",
         "last_frame": 3359,
@@ -14312,7 +14361,8 @@
           "0x0012ec74"
         ],
         "attack_selectors": [
-          1
+          0,
+          6
         ],
         "class": "0x1f",
         "despawn_edge": {
@@ -14330,7 +14380,12 @@
           87
         ],
         "hurt_selectors": [
-          1
+          0,
+          1,
+          2,
+          3,
+          4,
+          14
         ],
         "id": "coffee-shop-actor-218",
         "last_frame": 4002,
@@ -15106,7 +15161,8 @@
           "0x0012eef8"
         ],
         "attack_selectors": [
-          1
+          0,
+          4
         ],
         "class": "0x1f",
         "despawn_edge": {
@@ -15124,7 +15180,15 @@
           87
         ],
         "hurt_selectors": [
-          1
+          0,
+          1,
+          2,
+          4,
+          5,
+          7,
+          8,
+          10,
+          14
         ],
         "id": "coffee-shop-actor-229",
         "last_frame": 4327,
@@ -15502,8 +15566,7 @@
           "0x0012ec74"
         ],
         "attack_selectors": [
-          0,
-          1
+          0
         ],
         "class": "0x1f",
         "despawn_edge": {
@@ -15520,7 +15583,8 @@
           87
         ],
         "hurt_selectors": [
-          1
+          0,
+          2
         ],
         "id": "coffee-shop-actor-234",
         "last_frame": 3441,
@@ -16116,8 +16180,7 @@
           "0x0012eb6c"
         ],
         "attack_selectors": [
-          1,
-          2
+          0
         ],
         "class": "0x1f",
         "despawn_edge": {
@@ -16134,7 +16197,9 @@
           87
         ],
         "hurt_selectors": [
-          1
+          1,
+          2,
+          4
         ],
         "id": "coffee-shop-actor-243",
         "last_frame": 3873,
@@ -17301,8 +17366,7 @@
           "0x0012ec74"
         ],
         "attack_selectors": [
-          0,
-          1
+          0
         ],
         "class": "0x1f",
         "despawn_edge": {
@@ -17319,7 +17383,7 @@
           87
         ],
         "hurt_selectors": [
-          1
+          2
         ],
         "id": "coffee-shop-actor-264",
         "last_frame": 4055,
@@ -18173,8 +18237,7 @@
           "0x0012eb6c"
         ],
         "attack_selectors": [
-          0,
-          1
+          0
         ],
         "class": "0x1f",
         "despawn_edge": {
@@ -18191,7 +18254,9 @@
           87
         ],
         "hurt_selectors": [
-          1
+          1,
+          2,
+          4
         ],
         "id": "coffee-shop-actor-279",
         "last_frame": 4137,
@@ -18662,8 +18727,7 @@
           "0x0012ec74"
         ],
         "attack_selectors": [
-          1,
-          2
+          0
         ],
         "class": "0x1f",
         "despawn_edge": {
@@ -18680,7 +18744,7 @@
           87
         ],
         "hurt_selectors": [
-          1
+          2
         ],
         "id": "coffee-shop-actor-286",
         "last_frame": 4005,
@@ -18874,8 +18938,7 @@
           "0x0012ec74"
         ],
         "attack_selectors": [
-          1,
-          2
+          0
         ],
         "class": "0x1f",
         "despawn_edge": {
@@ -18893,7 +18956,9 @@
           87
         ],
         "hurt_selectors": [
-          1
+          0,
+          2,
+          11
         ],
         "id": "coffee-shop-actor-289",
         "last_frame": 3829,
@@ -20661,8 +20726,7 @@
           "0x0012ec74"
         ],
         "attack_selectors": [
-          1,
-          2
+          0
         ],
         "class": "0x1f",
         "despawn_edge": {
@@ -20679,7 +20743,8 @@
           87
         ],
         "hurt_selectors": [
-          1
+          1,
+          2
         ],
         "id": "coffee-shop-actor-316",
         "last_frame": 4279,
@@ -23924,7 +23989,7 @@
           "0x0012ec74"
         ],
         "attack_selectors": [
-          1
+          0
         ],
         "class": "0x1f",
         "despawn_edge": {
@@ -23941,7 +24006,10 @@
           87
         ],
         "hurt_selectors": [
-          1
+          0,
+          2,
+          7,
+          14
         ],
         "id": "coffee-shop-actor-371",
         "last_frame": 4350,
@@ -24371,7 +24439,7 @@
           "0x0012ec74"
         ],
         "attack_selectors": [
-          1
+          0
         ],
         "class": "0x1f",
         "despawn_edge": {
@@ -24389,7 +24457,12 @@
           87
         ],
         "hurt_selectors": [
-          1
+          0,
+          1,
+          2,
+          3,
+          4,
+          14
         ],
         "id": "coffee-shop-actor-377",
         "last_frame": 4687,
@@ -24631,7 +24704,7 @@
           "0x0012eb6c"
         ],
         "attack_selectors": [
-          1
+          0
         ],
         "class": "0x1f",
         "despawn_edge": {
@@ -24648,7 +24721,11 @@
           87
         ],
         "hurt_selectors": [
-          1
+          0,
+          1,
+          2,
+          4,
+          14
         ],
         "id": "coffee-shop-actor-380",
         "last_frame": 4507,
@@ -25244,7 +25321,7 @@
           "0x0012ec74"
         ],
         "attack_selectors": [
-          1
+          0
         ],
         "class": "0x1f",
         "despawn_edge": {
@@ -25261,7 +25338,9 @@
           87
         ],
         "hurt_selectors": [
-          1
+          0,
+          2,
+          14
         ],
         "id": "coffee-shop-actor-390",
         "last_frame": 4520,
@@ -26564,7 +26643,7 @@
           "0x0012ec74"
         ],
         "attack_selectors": [
-          1
+          0
         ],
         "class": "0x1f",
         "despawn_edge": {
@@ -26581,7 +26660,9 @@
           87
         ],
         "hurt_selectors": [
-          1
+          0,
+          2,
+          14
         ],
         "id": "coffee-shop-actor-411",
         "last_frame": 4506,
@@ -29628,7 +29709,7 @@
           "0x0012ec74"
         ],
         "attack_selectors": [
-          1
+          0
         ],
         "class": "0x1f",
         "despawn_edge": {
@@ -29646,7 +29727,13 @@
           87
         ],
         "hurt_selectors": [
-          1
+          0,
+          1,
+          2,
+          4,
+          7,
+          11,
+          14
         ],
         "id": "coffee-shop-actor-460",
         "last_frame": 5550,
@@ -29763,8 +29850,7 @@
           "0x0012ec74"
         ],
         "attack_selectors": [
-          1,
-          2
+          0
         ],
         "class": "0x1f",
         "despawn_edge": {
@@ -29781,7 +29867,7 @@
           87
         ],
         "hurt_selectors": [
-          1
+          2
         ],
         "id": "coffee-shop-actor-461",
         "last_frame": 4627,
@@ -30035,7 +30121,7 @@
           "0x0012ec74"
         ],
         "attack_selectors": [
-          1
+          0
         ],
         "class": "0x1f",
         "despawn_edge": {
@@ -30052,7 +30138,9 @@
           87
         ],
         "hurt_selectors": [
-          1
+          0,
+          2,
+          14
         ],
         "id": "coffee-shop-actor-465",
         "last_frame": 4686,
@@ -30207,8 +30295,7 @@
           "0x0012ec74"
         ],
         "attack_selectors": [
-          0,
-          1
+          0
         ],
         "class": "0x1f",
         "despawn_edge": {
@@ -30225,7 +30312,8 @@
           87
         ],
         "hurt_selectors": [
-          1
+          0,
+          2
         ],
         "id": "coffee-shop-actor-467",
         "last_frame": 4789,
@@ -33266,7 +33354,7 @@
           "0x0012ec74"
         ],
         "attack_selectors": [
-          1
+          0
         ],
         "class": "0x1f",
         "despawn_edge": {
@@ -33283,7 +33371,9 @@
           87
         ],
         "hurt_selectors": [
-          1
+          0,
+          2,
+          14
         ],
         "id": "coffee-shop-actor-517",
         "last_frame": 4867,
@@ -33501,7 +33591,7 @@
           "0x0012ec74"
         ],
         "attack_selectors": [
-          1
+          0
         ],
         "class": "0x1f",
         "despawn_edge": {
@@ -33518,7 +33608,9 @@
           87
         ],
         "hurt_selectors": [
-          1
+          0,
+          2,
+          14
         ],
         "id": "coffee-shop-actor-520",
         "last_frame": 4866,
@@ -33618,8 +33710,7 @@
           "0x0012eb6c"
         ],
         "attack_selectors": [
-          1,
-          2
+          0
         ],
         "class": "0x1f",
         "despawn_edge": {
@@ -33636,7 +33727,10 @@
           87
         ],
         "hurt_selectors": [
-          1
+          0,
+          1,
+          2,
+          4
         ],
         "id": "coffee-shop-actor-521",
         "last_frame": 5001,
@@ -36319,7 +36413,7 @@
           "0x0012eb6c"
         ],
         "attack_selectors": [
-          1
+          0
         ],
         "class": "0x1f",
         "despawn_edge": {
@@ -36337,7 +36431,9 @@
           87
         ],
         "hurt_selectors": [
-          1
+          1,
+          2,
+          4
         ],
         "id": "coffee-shop-actor-565",
         "last_frame": 5550,
@@ -37382,7 +37478,7 @@
           "0x0012eb6c"
         ],
         "attack_selectors": [
-          1
+          0
         ],
         "class": "0x1f",
         "despawn_edge": {
@@ -37399,7 +37495,11 @@
           87
         ],
         "hurt_selectors": [
-          1
+          0,
+          1,
+          2,
+          4,
+          14
         ],
         "id": "coffee-shop-actor-583",
         "last_frame": 5047,
@@ -37788,7 +37888,7 @@
           "0x0012ec74"
         ],
         "attack_selectors": [
-          1
+          0
         ],
         "class": "0x1f",
         "despawn_edge": {
@@ -37805,7 +37905,9 @@
           87
         ],
         "hurt_selectors": [
-          1
+          0,
+          2,
+          14
         ],
         "id": "coffee-shop-actor-589",
         "last_frame": 5046,
@@ -40668,7 +40770,7 @@
           "0x0012eb6c"
         ],
         "attack_selectors": [
-          1
+          0
         ],
         "class": "0x1f",
         "despawn_edge": {
@@ -40685,7 +40787,9 @@
           87
         ],
         "hurt_selectors": [
-          1
+          1,
+          2,
+          4
         ],
         "id": "coffee-shop-actor-637",
         "last_frame": 5550,
@@ -41304,7 +41408,7 @@
           "0x0012ec74"
         ],
         "attack_selectors": [
-          1
+          0
         ],
         "class": "0x1f",
         "despawn_edge": {
@@ -41321,7 +41425,8 @@
           87
         ],
         "hurt_selectors": [
-          1
+          0,
+          2
         ],
         "id": "coffee-shop-actor-647",
         "last_frame": 5550,
@@ -41457,7 +41562,7 @@
           "0x0012ec74"
         ],
         "attack_selectors": [
-          1
+          0
         ],
         "class": "0x1f",
         "despawn_edge": {
@@ -41475,7 +41580,11 @@
           87
         ],
         "hurt_selectors": [
-          1
+          0,
+          1,
+          2,
+          4,
+          7
         ],
         "id": "coffee-shop-actor-649",
         "last_frame": 5295,
@@ -44238,7 +44347,7 @@
           "0x0012ec74"
         ],
         "attack_selectors": [
-          1
+          0
         ],
         "class": "0x1f",
         "despawn_edge": {
@@ -44255,7 +44364,8 @@
           87
         ],
         "hurt_selectors": [
-          1
+          1,
+          2
         ],
         "id": "coffee-shop-actor-694",
         "last_frame": 5550,
@@ -44450,7 +44560,7 @@
           "0x0012eb6c"
         ],
         "attack_selectors": [
-          1
+          0
         ],
         "class": "0x1f",
         "despawn_edge": {
@@ -44467,7 +44577,10 @@
           87
         ],
         "hurt_selectors": [
-          1
+          0,
+          1,
+          2,
+          4
         ],
         "id": "coffee-shop-actor-697",
         "last_frame": 5550,
@@ -44594,7 +44707,7 @@
           "0x0012ec74"
         ],
         "attack_selectors": [
-          1
+          0
         ],
         "class": "0x1f",
         "despawn_edge": {
@@ -44611,7 +44724,8 @@
           87
         ],
         "hurt_selectors": [
-          1
+          0,
+          2
         ],
         "id": "coffee-shop-actor-699",
         "last_frame": 5550,
@@ -47048,7 +47162,7 @@
           248
         ],
         "hurt_selectors": [
-          0
+          24
         ],
         "id": "coffee-shop-actor-739",
         "last_frame": 5566,
@@ -47418,6 +47532,3783 @@
         ]
       }
     ],
+    "animation_collision_selectors": {
+      "classification": "SOURCE_CLOSED_IMPLEMENTATION_FIELDS",
+      "layout": {
+        "animation_record_u32": "actor+0x1c",
+        "attack_selector_u8": "animation_record+0x09",
+        "capture_columns_rejected_as_authority": [
+          "actor+0x25 animation branch/event low byte",
+          "actor+0x26 linked-actor word high byte"
+        ],
+        "hurt_selector_u8": "animation_record+0x08"
+      },
+      "mutation_control": {
+        "animation_record": "0x0015fd10",
+        "first_discriminating_frame_u16": 2793,
+        "rejected_actor_event_byte_u8": 1,
+        "source_hurt_selector_u8": 0,
+        "wrong_player_field_projection_rejected": true
+      },
+      "records": [
+        {
+          "animation_record": "0x0002fb48",
+          "attack_selector_u8": 1,
+          "hurt_selector_u8": 0,
+          "record_sha256": "2fd0c3b9f5cb7e854f9c0694bfc323b9cc7e751507c79f78e5a77b7f42e7d595"
+        },
+        {
+          "animation_record": "0x0002fb58",
+          "attack_selector_u8": 1,
+          "hurt_selector_u8": 0,
+          "record_sha256": "b34ed3d121ef5fa4db9cccb97ebe79f6ff31645c87341a8fc23bc4ff561c2acd"
+        },
+        {
+          "animation_record": "0x0002fb68",
+          "attack_selector_u8": 1,
+          "hurt_selector_u8": 0,
+          "record_sha256": "dfe3bb1d7736e0e0fc12066b5d2289d2707c762f2b06236c8fb5670b4db902c5"
+        },
+        {
+          "animation_record": "0x0002fb78",
+          "attack_selector_u8": 1,
+          "hurt_selector_u8": 0,
+          "record_sha256": "cf6d88288ab3c0b9b85022ca7df9089e7e1b589be452687f06fc2c6782686d0a"
+        },
+        {
+          "animation_record": "0x0002fb88",
+          "attack_selector_u8": 1,
+          "hurt_selector_u8": 0,
+          "record_sha256": "57b8d3400d8aa18ce78783ec1bfd71119a4dd7065d83fb1c3a3630c4e18d3fc5"
+        },
+        {
+          "animation_record": "0x0002fb98",
+          "attack_selector_u8": 1,
+          "hurt_selector_u8": 0,
+          "record_sha256": "af1c58579336d990327a4243fee29ea09563c2ac0520287494b1c47d2e57f438"
+        },
+        {
+          "animation_record": "0x0002fba8",
+          "attack_selector_u8": 1,
+          "hurt_selector_u8": 0,
+          "record_sha256": "8c4fae16d1775afbf5b41e8e2f2d77c3b18357112d60cd46d9d6b1d9e04eb75a"
+        },
+        {
+          "animation_record": "0x0002fbb8",
+          "attack_selector_u8": 1,
+          "hurt_selector_u8": 0,
+          "record_sha256": "c3ee90cb08a344db7a3f2a7473f3013b5785246eff5b0b3f8512d8b80b108c23"
+        },
+        {
+          "animation_record": "0x0003078c",
+          "attack_selector_u8": 1,
+          "hurt_selector_u8": 0,
+          "record_sha256": "8d250715946d55c334d21eb91307fe171a662215fdcf0f436b9bb88aa078543f"
+        },
+        {
+          "animation_record": "0x0003079c",
+          "attack_selector_u8": 1,
+          "hurt_selector_u8": 0,
+          "record_sha256": "fd9b8e96f6630d0225024abfc1ab9adc55e9a207d557735f1ccb9f67748289b6"
+        },
+        {
+          "animation_record": "0x000307ac",
+          "attack_selector_u8": 1,
+          "hurt_selector_u8": 0,
+          "record_sha256": "a4a01dd065d2079ee6c946d01ddeee43d1ab2950439e83c9af7fe21e4d225148"
+        },
+        {
+          "animation_record": "0x000307bc",
+          "attack_selector_u8": 2,
+          "hurt_selector_u8": 0,
+          "record_sha256": "89f49aa93120897c6d084f267a892d1e5f87af988067131c1b4d2273bc2c35fd"
+        },
+        {
+          "animation_record": "0x000307cc",
+          "attack_selector_u8": 2,
+          "hurt_selector_u8": 0,
+          "record_sha256": "5bb95adf3c9280d3687f395cfae0a02b13affe5a3cfca47e3987af0878decfb4"
+        },
+        {
+          "animation_record": "0x000307dc",
+          "attack_selector_u8": 2,
+          "hurt_selector_u8": 0,
+          "record_sha256": "45de17d84cd88f9b64cb8ad3d96929cfbea7ca9d2d8c45372044df86ca447d02"
+        },
+        {
+          "animation_record": "0x000307ec",
+          "attack_selector_u8": 2,
+          "hurt_selector_u8": 0,
+          "record_sha256": "e4b6e30a5db7c0eb3f03dc6f2bf0bc020ac0c26c37f6f0c52345590c18a52726"
+        },
+        {
+          "animation_record": "0x000307fc",
+          "attack_selector_u8": 2,
+          "hurt_selector_u8": 0,
+          "record_sha256": "417c8a81ef27fe8db6d79c01ae4b065dcc12e2a280fbb794cf0c464fff94c0cb"
+        },
+        {
+          "animation_record": "0x0003080c",
+          "attack_selector_u8": 0,
+          "hurt_selector_u8": 0,
+          "record_sha256": "2a63c997b14680adbc921df7c141d7ca6c41739e2f5e33ac91489eb114ff1b77"
+        },
+        {
+          "animation_record": "0x0003081c",
+          "attack_selector_u8": 0,
+          "hurt_selector_u8": 0,
+          "record_sha256": "3f87982f55c746b5aa1dee382eb204a89a6f8134101f1b135180ad5910100f29"
+        },
+        {
+          "animation_record": "0x0003082c",
+          "attack_selector_u8": 0,
+          "hurt_selector_u8": 0,
+          "record_sha256": "6bd2fde9a76b1b85bafce5be8131222e72434b7b0a67903e8ee5f81fdb1682a9"
+        },
+        {
+          "animation_record": "0x0003083c",
+          "attack_selector_u8": 0,
+          "hurt_selector_u8": 0,
+          "record_sha256": "6b101c71f3f7628fcf99a85937af7b4956481dc4876305892da68a3ee033d688"
+        },
+        {
+          "animation_record": "0x0003084c",
+          "attack_selector_u8": 0,
+          "hurt_selector_u8": 0,
+          "record_sha256": "a675a79c6c4f1618de5b4c86ec7e10c4cdfa616c22422a27bd0b51ce07007f85"
+        },
+        {
+          "animation_record": "0x0003085c",
+          "attack_selector_u8": 0,
+          "hurt_selector_u8": 0,
+          "record_sha256": "763273625c4c76a2746a70b509a3a27dadd5ba0913732f6b46344dbd88d42dc4"
+        },
+        {
+          "animation_record": "0x0003086c",
+          "attack_selector_u8": 0,
+          "hurt_selector_u8": 0,
+          "record_sha256": "a1315b4cf20120ce232033f5bad02a8190b080f6f08f8f4bf57cccd037d43818"
+        },
+        {
+          "animation_record": "0x0003087c",
+          "attack_selector_u8": 0,
+          "hurt_selector_u8": 0,
+          "record_sha256": "e0fc8b8a8f9dc8986163dc2bc9b87bce17436ce961b0f431783be04cd0ca5d64"
+        },
+        {
+          "animation_record": "0x0003088c",
+          "attack_selector_u8": 0,
+          "hurt_selector_u8": 0,
+          "record_sha256": "7ebb2fef3240b3adda7281a601d0362de3df18513be364050c11917c5b5006ff"
+        },
+        {
+          "animation_record": "0x000308a0",
+          "attack_selector_u8": 1,
+          "hurt_selector_u8": 0,
+          "record_sha256": "1c331425192814478ebeeba875afb9e3652c5b7cc3e5317f951f71d105055b54"
+        },
+        {
+          "animation_record": "0x000308b0",
+          "attack_selector_u8": 3,
+          "hurt_selector_u8": 0,
+          "record_sha256": "badfce32ba0995c1be619f1a83876d435c422989558d4dfde4b169182d226d35"
+        },
+        {
+          "animation_record": "0x000308c0",
+          "attack_selector_u8": 3,
+          "hurt_selector_u8": 0,
+          "record_sha256": "8223028172a1c9235def010162148fbde1d2be9dc7af8d03487d903fb6718d02"
+        },
+        {
+          "animation_record": "0x000308d0",
+          "attack_selector_u8": 4,
+          "hurt_selector_u8": 0,
+          "record_sha256": "77dd1cb09305e77504389c5fcb823f7d6769f2a2ef382f85a2f6ba13abe63b30"
+        },
+        {
+          "animation_record": "0x000308e0",
+          "attack_selector_u8": 0,
+          "hurt_selector_u8": 0,
+          "record_sha256": "4f4a9bcf32ed03bce753bf21c3956cad8ed736880f831eba703701fcac3f08c1"
+        },
+        {
+          "animation_record": "0x000308f0",
+          "attack_selector_u8": 0,
+          "hurt_selector_u8": 0,
+          "record_sha256": "c0491ebb0db584fec4fac54fe97056d8738fb5f3e88504f59986c0af71af6439"
+        },
+        {
+          "animation_record": "0x00030900",
+          "attack_selector_u8": 0,
+          "hurt_selector_u8": 0,
+          "record_sha256": "5fd88e04197df7b1dc55317aadef338d03ea4c5e0118e0038ff403fb777e78f5"
+        },
+        {
+          "animation_record": "0x00030910",
+          "attack_selector_u8": 0,
+          "hurt_selector_u8": 0,
+          "record_sha256": "f3cb7bfb829c353fdb9b06b09d8bfaa6fde5640657bb453a266c9a4feefa5cc8"
+        },
+        {
+          "animation_record": "0x00030920",
+          "attack_selector_u8": 0,
+          "hurt_selector_u8": 0,
+          "record_sha256": "78d2b8d12463c76308fb1fc9f230069a2018785b1e980668aabc41cc9c8c66ff"
+        },
+        {
+          "animation_record": "0x00030930",
+          "attack_selector_u8": 0,
+          "hurt_selector_u8": 0,
+          "record_sha256": "1dd87ca8ed890a091a53de1ef29ff1877176b85ce6cf010e41f9c79ae31d0bf8"
+        },
+        {
+          "animation_record": "0x00030944",
+          "attack_selector_u8": 1,
+          "hurt_selector_u8": 0,
+          "record_sha256": "0767a1058483cd27179b31e190d99426c00b82a9df0b1a4b6275fd61ebfb45c3"
+        },
+        {
+          "animation_record": "0x00030954",
+          "attack_selector_u8": 5,
+          "hurt_selector_u8": 0,
+          "record_sha256": "fd5773436d11755a1b7cc4be576fc299ba065bd39c27a9eda3aafa7156d6d196"
+        },
+        {
+          "animation_record": "0x00030964",
+          "attack_selector_u8": 5,
+          "hurt_selector_u8": 0,
+          "record_sha256": "b1ae536783e9a4107814a6850c53eaf97cc12986e21be3989a0b0db8ac129d7b"
+        },
+        {
+          "animation_record": "0x00030974",
+          "attack_selector_u8": 5,
+          "hurt_selector_u8": 0,
+          "record_sha256": "9c407767368e1e68e5f5d1b334f3f1a34f2ab01e242616c498803ee2d5f8ca13"
+        },
+        {
+          "animation_record": "0x00030984",
+          "attack_selector_u8": 6,
+          "hurt_selector_u8": 0,
+          "record_sha256": "394792f34f36a1566a3c24ad21293b546633ebd8c334f06d7fb1a272de14ab52"
+        },
+        {
+          "animation_record": "0x00030994",
+          "attack_selector_u8": 6,
+          "hurt_selector_u8": 0,
+          "record_sha256": "3b6a8ab95742fa9dea83372da24ff5530d749bf3da33ac151f1d1cf10994da09"
+        },
+        {
+          "animation_record": "0x000309a4",
+          "attack_selector_u8": 6,
+          "hurt_selector_u8": 0,
+          "record_sha256": "a1109156db5b1e74e3e9352befef5c1a14f990b3a15a12b155ae2594b4225ada"
+        },
+        {
+          "animation_record": "0x000309b4",
+          "attack_selector_u8": 6,
+          "hurt_selector_u8": 0,
+          "record_sha256": "3c05394ca12814ee792d0c3a70b8643b8874df2a49dea906fbcc78d818fd18b3"
+        },
+        {
+          "animation_record": "0x000309c4",
+          "attack_selector_u8": 0,
+          "hurt_selector_u8": 0,
+          "record_sha256": "f3f318abe6001427ac3abac598e68573b917a8856da1a209ba9bd834a37d7507"
+        },
+        {
+          "animation_record": "0x000309d4",
+          "attack_selector_u8": 0,
+          "hurt_selector_u8": 0,
+          "record_sha256": "e26d9592ae65d14590057d23515f63ebf003bf86526b37753f2c6418790a6d6b"
+        },
+        {
+          "animation_record": "0x000309e4",
+          "attack_selector_u8": 0,
+          "hurt_selector_u8": 0,
+          "record_sha256": "72935006cd3e17debfe21405b28d4e06dd71e6bad6fedda1260d927e447ea945"
+        },
+        {
+          "animation_record": "0x000309f4",
+          "attack_selector_u8": 0,
+          "hurt_selector_u8": 0,
+          "record_sha256": "e2f3d369c5fc539ce25152a2b529bbe3f61eaad97e5211b6fef5293f5b230ebb"
+        },
+        {
+          "animation_record": "0x00030a04",
+          "attack_selector_u8": 0,
+          "hurt_selector_u8": 0,
+          "record_sha256": "a6ad24384bacd74e713e1da500f09485e8486bddd625aedffffec7ebb9428c0a"
+        },
+        {
+          "animation_record": "0x00030a14",
+          "attack_selector_u8": 0,
+          "hurt_selector_u8": 0,
+          "record_sha256": "99435aa55320ceeacfceb3b728f9057a96085c13dac81b846247f7adada96efb"
+        },
+        {
+          "animation_record": "0x00030a24",
+          "attack_selector_u8": 0,
+          "hurt_selector_u8": 0,
+          "record_sha256": "8390ac1e7789ec6fe1cce99c5c7c0b21de81a71236c70dd59c63425f2061ded2"
+        },
+        {
+          "animation_record": "0x00030a34",
+          "attack_selector_u8": 0,
+          "hurt_selector_u8": 0,
+          "record_sha256": "44c987064cbbae6572e8763925be38fe084041d8b2bb28812e2f7c89565f369c"
+        },
+        {
+          "animation_record": "0x000355dc",
+          "attack_selector_u8": 1,
+          "hurt_selector_u8": 0,
+          "record_sha256": "5538e51ab834edca4b01ce452c6c43132ef6b1d1ce9ac01f713262974e2d11a6"
+        },
+        {
+          "animation_record": "0x000355ec",
+          "attack_selector_u8": 1,
+          "hurt_selector_u8": 0,
+          "record_sha256": "4fc6b6fd3deed9b00f0487dbf6a223300c2b2d7d1a8faf269dbb05bc93741610"
+        },
+        {
+          "animation_record": "0x000355fc",
+          "attack_selector_u8": 1,
+          "hurt_selector_u8": 0,
+          "record_sha256": "1b601f9fc0e9e843a1e4053aa832bfbdf7f7b67bae69c12b0dfd5ec7bae6dec6"
+        },
+        {
+          "animation_record": "0x0003560c",
+          "attack_selector_u8": 1,
+          "hurt_selector_u8": 0,
+          "record_sha256": "71e9c6e892c40cc62ec0121248d2ab3b78309c1fd87499488d515dea78401575"
+        },
+        {
+          "animation_record": "0x00035620",
+          "attack_selector_u8": 2,
+          "hurt_selector_u8": 0,
+          "record_sha256": "fbe65325b8ab4ee30f0b84a6dc9da0ed88d1261a8b6fa9d676d51da222e0d77d"
+        },
+        {
+          "animation_record": "0x00035630",
+          "attack_selector_u8": 2,
+          "hurt_selector_u8": 0,
+          "record_sha256": "8851d809df48223a7c4d788d0b58901f86395f90bb4627e6c531fad64c7fea55"
+        },
+        {
+          "animation_record": "0x00035640",
+          "attack_selector_u8": 2,
+          "hurt_selector_u8": 0,
+          "record_sha256": "c13d0694f9702fdf09f8a39b478d223dc8ec915e3aa4e3006b1c8ad71e1c5a56"
+        },
+        {
+          "animation_record": "0x00035650",
+          "attack_selector_u8": 2,
+          "hurt_selector_u8": 0,
+          "record_sha256": "edd3f096ef562b4a7c2c35d346a7496580d3204daa0a0e4e4b6e0eba909c5ba1"
+        },
+        {
+          "animation_record": "0x00035660",
+          "attack_selector_u8": 2,
+          "hurt_selector_u8": 0,
+          "record_sha256": "fb754aa597abb0ea56a63d24fffe284bc67b99a28d4a305ada397b82ad50fc00"
+        },
+        {
+          "animation_record": "0x00035670",
+          "attack_selector_u8": 0,
+          "hurt_selector_u8": 0,
+          "record_sha256": "a74f441fb4522dba0d69a828537f8069ef30e28864479bef648ce645d3641563"
+        },
+        {
+          "animation_record": "0x00035680",
+          "attack_selector_u8": 0,
+          "hurt_selector_u8": 0,
+          "record_sha256": "297eaf6a0f56af4725b76abb1c6ca0409f1d35a1e567878b7fe9763a7d6a7979"
+        },
+        {
+          "animation_record": "0x0006b45a",
+          "attack_selector_u8": 0,
+          "hurt_selector_u8": 0,
+          "record_sha256": "de6e0d705249bebd4298dc7897aed39c5871664d9be8addedfbdfedaec683dbb"
+        },
+        {
+          "animation_record": "0x0006b46a",
+          "attack_selector_u8": 0,
+          "hurt_selector_u8": 0,
+          "record_sha256": "f24d507d98fea805924ff6815bfe7764e3f82d8e3d006e7efcbb054fa4d81b5b"
+        },
+        {
+          "animation_record": "0x0006b47a",
+          "attack_selector_u8": 0,
+          "hurt_selector_u8": 0,
+          "record_sha256": "27e195fb2830eae086b992e320e716c5de8beb60775d44255f5fa68fa61fb215"
+        },
+        {
+          "animation_record": "0x0006b66c",
+          "attack_selector_u8": 0,
+          "hurt_selector_u8": 1,
+          "record_sha256": "ea1906a51302bfff1cb37d009665817dad51bbe1c73ac6b05d54d343598a3d97"
+        },
+        {
+          "animation_record": "0x0006b680",
+          "attack_selector_u8": 0,
+          "hurt_selector_u8": 1,
+          "record_sha256": "871f8dd04016ea751fe080d43bcb1afb944ccae7a01c08b4b7b037ae88fe30ea"
+        },
+        {
+          "animation_record": "0x0006cc62",
+          "attack_selector_u8": 1,
+          "hurt_selector_u8": 1,
+          "record_sha256": "0bc41bae6f8a315cc988c2a6b5b2dc395b00c2a1cda4584ab600681ec2d7b883"
+        },
+        {
+          "animation_record": "0x0006cc8a",
+          "attack_selector_u8": 0,
+          "hurt_selector_u8": 0,
+          "record_sha256": "142c5fa631b0e21aff0b17f0f37076dae739a0e7a10b299e5b4ad7f96bd34585"
+        },
+        {
+          "animation_record": "0x0006cc9a",
+          "attack_selector_u8": 0,
+          "hurt_selector_u8": 0,
+          "record_sha256": "8d376e2925dc7c6dc8222bfc2a80ba2deecae947ce856b223acf80e7470b8994"
+        },
+        {
+          "animation_record": "0x0006ccae",
+          "attack_selector_u8": 0,
+          "hurt_selector_u8": 0,
+          "record_sha256": "6cbaa65f517ea7f2fc2b274886f9a2451b271ed6706f0eb6f7db3c4d869dcb6e"
+        },
+        {
+          "animation_record": "0x0006ccc2",
+          "attack_selector_u8": 0,
+          "hurt_selector_u8": 0,
+          "record_sha256": "dcafb2a948d468f4c5043dbf381cd5982b57b5f06b9bccb4ba1628673978db5d"
+        },
+        {
+          "animation_record": "0x0006d418",
+          "attack_selector_u8": 1,
+          "hurt_selector_u8": 1,
+          "record_sha256": "c41de3669731a6487e101869f08fd74dcfc4bfaa0b0acc261eaf772f72193310"
+        },
+        {
+          "animation_record": "0x0006d7b8",
+          "attack_selector_u8": 1,
+          "hurt_selector_u8": 1,
+          "record_sha256": "05cb19fc89bdf9efa6ade53fb88d5969fe6a8ee2e89a62f77ec8e428094b725c"
+        },
+        {
+          "animation_record": "0x0006d7f0",
+          "attack_selector_u8": 0,
+          "hurt_selector_u8": 0,
+          "record_sha256": "725b2d4cd3249d3b1d70e6a3384edb6b0b6a6b8fd7a20319605e5b6881778905"
+        },
+        {
+          "animation_record": "0x0006d800",
+          "attack_selector_u8": 0,
+          "hurt_selector_u8": 0,
+          "record_sha256": "a18c9e7f42db7bf0609da2a884836c2dd7b5dd7a539ce52ead93e1a4d6f780c9"
+        },
+        {
+          "animation_record": "0x0006d83c",
+          "attack_selector_u8": 0,
+          "hurt_selector_u8": 0,
+          "record_sha256": "8dc073c578982c25aa9e1874f67f54213aa150ebb8f4878dc6b8699a9842299a"
+        },
+        {
+          "animation_record": "0x0006d850",
+          "attack_selector_u8": 0,
+          "hurt_selector_u8": 0,
+          "record_sha256": "b4077db9ef0d9ea9b0ea07d682da6963aade8f84b1d9b1bd2913f3672ddac925"
+        },
+        {
+          "animation_record": "0x0006dbda",
+          "attack_selector_u8": 1,
+          "hurt_selector_u8": 1,
+          "record_sha256": "837ff7efe8a2376a9b8e3079003f78cc8b101ee46ca6afad7180d87b18b382d0"
+        },
+        {
+          "animation_record": "0x0006dbea",
+          "attack_selector_u8": 1,
+          "hurt_selector_u8": 1,
+          "record_sha256": "25483d07c54a0b5015479dcf5a6f35eecdc57b9f7fdfe300a11600d2a1ea7890"
+        },
+        {
+          "animation_record": "0x0006dbfe",
+          "attack_selector_u8": 1,
+          "hurt_selector_u8": 1,
+          "record_sha256": "5a65f54df1cdfe61cc8c940a60449ad205706bd8a8418d94aebe3269599b0789"
+        },
+        {
+          "animation_record": "0x0006dc0e",
+          "attack_selector_u8": 1,
+          "hurt_selector_u8": 1,
+          "record_sha256": "76611f37a3afec750f60a39663f176bf3346ab2c1ab47e57463dead8c0bfac45"
+        },
+        {
+          "animation_record": "0x0006dc22",
+          "attack_selector_u8": 1,
+          "hurt_selector_u8": 1,
+          "record_sha256": "02ee1be84f864973f511e633f0fc6218854e5ba5289796dd9b591fb7922f82a2"
+        },
+        {
+          "animation_record": "0x0006dc32",
+          "attack_selector_u8": 1,
+          "hurt_selector_u8": 1,
+          "record_sha256": "b7f5b62a1be6b631cfff69bf721140688b445c6bd460520c2b42c9699c1cafe6"
+        },
+        {
+          "animation_record": "0x0006dc46",
+          "attack_selector_u8": 1,
+          "hurt_selector_u8": 1,
+          "record_sha256": "499423a9fb16df1db70fe94867fe0b05e5eb3b359e70051ed9f0f6a69d3d46d0"
+        },
+        {
+          "animation_record": "0x0006dc56",
+          "attack_selector_u8": 1,
+          "hurt_selector_u8": 1,
+          "record_sha256": "93c820e656b83a5a270a86a540a96221c6668e8cff34a0c6411e440b1b6ee3fb"
+        },
+        {
+          "animation_record": "0x0006dc6a",
+          "attack_selector_u8": 1,
+          "hurt_selector_u8": 1,
+          "record_sha256": "d5c7a9f290540c6edbd66bef319a9dd76d7b9021fa44283f8a63581289120fbd"
+        },
+        {
+          "animation_record": "0x0006dc7a",
+          "attack_selector_u8": 1,
+          "hurt_selector_u8": 1,
+          "record_sha256": "36d15c17b9f10308bb871b22fbb7e21c98a2c1d63ceaf2566d59615a94bd0801"
+        },
+        {
+          "animation_record": "0x0006e136",
+          "attack_selector_u8": 1,
+          "hurt_selector_u8": 1,
+          "record_sha256": "78c23df59f3018da499e259f08cd94b3c714509f4274ccf26f1fcc282d22f794"
+        },
+        {
+          "animation_record": "0x0006e14a",
+          "attack_selector_u8": 0,
+          "hurt_selector_u8": 0,
+          "record_sha256": "877fc2c8f853ee236f872efd9c140112d11a719002fdc5141102d696ea856d52"
+        },
+        {
+          "animation_record": "0x0006e15a",
+          "attack_selector_u8": 0,
+          "hurt_selector_u8": 0,
+          "record_sha256": "1ff6f589690fcd095a26d743301fa05c2d5f04c3469cd7bbd10caa0e34eef87e"
+        },
+        {
+          "animation_record": "0x0006e16e",
+          "attack_selector_u8": 0,
+          "hurt_selector_u8": 0,
+          "record_sha256": "d35af71601d644275fd6c0f5333a65c4d0068fe183926924ba83b551a268b42f"
+        },
+        {
+          "animation_record": "0x0006e182",
+          "attack_selector_u8": 0,
+          "hurt_selector_u8": 0,
+          "record_sha256": "3cd842bb5b6555582744e2e7de9e4a262dc58d987aa16073893bafbac649bd17"
+        },
+        {
+          "animation_record": "0x0006ee4a",
+          "attack_selector_u8": 1,
+          "hurt_selector_u8": 1,
+          "record_sha256": "9fa3eb70f3d76f97f670c87efbe909c07eec16052e4725708f2b85f3994f6bc0"
+        },
+        {
+          "animation_record": "0x000764cc",
+          "attack_selector_u8": 0,
+          "hurt_selector_u8": 0,
+          "record_sha256": "b3c1a89e9c098a97d4ec13465c2425cd10dc2b3088a7a78e0f5ff5257fca7c4e"
+        },
+        {
+          "animation_record": "0x00077e54",
+          "attack_selector_u8": 16,
+          "hurt_selector_u8": 0,
+          "record_sha256": "e40359222c4ef5507f455bbd3028de921eb4ec8e164bd400719ec9c89361847a"
+        },
+        {
+          "animation_record": "0x000782a4",
+          "attack_selector_u8": 4,
+          "hurt_selector_u8": 0,
+          "record_sha256": "71a8cd969bc3ca5faa0e8729ac0ee0036b7cd7417e952fbaf961157d1b95af54"
+        },
+        {
+          "animation_record": "0x000782ac",
+          "attack_selector_u8": 7,
+          "hurt_selector_u8": 0,
+          "record_sha256": "dd290004ea8e2b7b10b67177c6c3070bd4ad5db1b4817f2d0a4aae1f6673b383"
+        },
+        {
+          "animation_record": "0x0007a09c",
+          "attack_selector_u8": 0,
+          "hurt_selector_u8": 0,
+          "record_sha256": "36110308b1a1f7c99613b44c635accc5ea8f4867571261b5fab4b4176b8a786d"
+        },
+        {
+          "animation_record": "0x0007a0ac",
+          "attack_selector_u8": 0,
+          "hurt_selector_u8": 0,
+          "record_sha256": "bb25f8fb5907c2adbe70aa56edb45da4903c36df0a6e16b35b3f77a3e9e6a4d6"
+        },
+        {
+          "animation_record": "0x0007a0bc",
+          "attack_selector_u8": 0,
+          "hurt_selector_u8": 0,
+          "record_sha256": "9bfd89e16b79a10ec036f41363ab184ddab2c280e0d2c332b170c27a8b9ce5c8"
+        },
+        {
+          "animation_record": "0x0007a0cc",
+          "attack_selector_u8": 0,
+          "hurt_selector_u8": 0,
+          "record_sha256": "5f7c456d0d9a21e9e8781c77e551e3dfa28bb2bbd7bdddf0805f1994c186b687"
+        },
+        {
+          "animation_record": "0x0007a0dc",
+          "attack_selector_u8": 0,
+          "hurt_selector_u8": 0,
+          "record_sha256": "cf075f76fd5a9272c2e4012c6289e9f8c295ad53c0f81e16a03538c5833b98b5"
+        },
+        {
+          "animation_record": "0x0007a0ec",
+          "attack_selector_u8": 0,
+          "hurt_selector_u8": 0,
+          "record_sha256": "f05aeba627e55efd17ad43660069f73e795d4a0ec1fbbabcad250d0a47ecbc8b"
+        },
+        {
+          "animation_record": "0x0007a0fc",
+          "attack_selector_u8": 0,
+          "hurt_selector_u8": 0,
+          "record_sha256": "cb6926acddd53847ce8801ecd4e213c4909f1e806497738f55e9621df85de5a9"
+        },
+        {
+          "animation_record": "0x0007a10c",
+          "attack_selector_u8": 0,
+          "hurt_selector_u8": 0,
+          "record_sha256": "0016879909161e64db6025b564c50fc9127f0711be9c72a5b569af6aa1ac6c4f"
+        },
+        {
+          "animation_record": "0x0007a11c",
+          "attack_selector_u8": 0,
+          "hurt_selector_u8": 0,
+          "record_sha256": "1ad1b9d0d87f40dec42e1bb8c5d3e2269a06ac2432a516ec7b270647c306547f"
+        },
+        {
+          "animation_record": "0x0007a12c",
+          "attack_selector_u8": 0,
+          "hurt_selector_u8": 0,
+          "record_sha256": "49d421ad0ff495b56305c42455165316f0597c7fd7e6e36020ba9e1609042bc4"
+        },
+        {
+          "animation_record": "0x0007a6ac",
+          "attack_selector_u8": 0,
+          "hurt_selector_u8": 0,
+          "record_sha256": "deaccfd01aa73177315c2fffa7b3106d77278b06e4af9cb69aeb2b0d9a111d67"
+        },
+        {
+          "animation_record": "0x0007a6bc",
+          "attack_selector_u8": 0,
+          "hurt_selector_u8": 0,
+          "record_sha256": "de21e7bcdce3ffa551c80e79ca351d500303314b6e3dd51a17bcd72a3c3cb142"
+        },
+        {
+          "animation_record": "0x0007a6cc",
+          "attack_selector_u8": 0,
+          "hurt_selector_u8": 0,
+          "record_sha256": "cd0ab1cdd29eb5727879611f7931ef4de68e90c38b617547482ae7a57cf47122"
+        },
+        {
+          "animation_record": "0x0007a6dc",
+          "attack_selector_u8": 0,
+          "hurt_selector_u8": 0,
+          "record_sha256": "1aeadcaa4f565a0017819e70c4f2796283ded0982249cf92e79edb942c5d521b"
+        },
+        {
+          "animation_record": "0x0007a6ec",
+          "attack_selector_u8": 0,
+          "hurt_selector_u8": 0,
+          "record_sha256": "6eef3043b0e8bdf003ca43e03c30128a614bb282d410e8b7ed5a89cd97e70cdf"
+        },
+        {
+          "animation_record": "0x0007a6fc",
+          "attack_selector_u8": 0,
+          "hurt_selector_u8": 0,
+          "record_sha256": "095f3b9d0f8f5eeca16c6fa938c8f75c5b80de54657fe2146bdb25b0c29d79cb"
+        },
+        {
+          "animation_record": "0x0007a70c",
+          "attack_selector_u8": 0,
+          "hurt_selector_u8": 0,
+          "record_sha256": "5bc2d4d1f45fe612ef81d2a0cf50c73e972ddc6d365b17376962a3a264e4753a"
+        },
+        {
+          "animation_record": "0x0007a71c",
+          "attack_selector_u8": 0,
+          "hurt_selector_u8": 0,
+          "record_sha256": "1e76dc34bc34f76137a106e05d6067356604e11badef42210073fe2bc84b50a3"
+        },
+        {
+          "animation_record": "0x0007a72c",
+          "attack_selector_u8": 0,
+          "hurt_selector_u8": 0,
+          "record_sha256": "c906ecc8c528d8d4457f870ae8fc36b782f546ce863f46845101bb620be2ce8a"
+        },
+        {
+          "animation_record": "0x0007a73c",
+          "attack_selector_u8": 0,
+          "hurt_selector_u8": 0,
+          "record_sha256": "4e2ad77c61e17be7ed3f725f959281e42f52737f2b98e32ee04b444454223ed6"
+        },
+        {
+          "animation_record": "0x0007fdac",
+          "attack_selector_u8": 0,
+          "hurt_selector_u8": 0,
+          "record_sha256": "203f00007b79e0dc0fa4b45f7d19f7066a345a9ac75a3f180372cf7370170ec8"
+        },
+        {
+          "animation_record": "0x0007fdbc",
+          "attack_selector_u8": 0,
+          "hurt_selector_u8": 0,
+          "record_sha256": "a42a2924f7dd67c94baf4d79b19d1a5dd19bd03a83e5a802ba0731061fc4f98d"
+        },
+        {
+          "animation_record": "0x0007fdcc",
+          "attack_selector_u8": 0,
+          "hurt_selector_u8": 0,
+          "record_sha256": "8c5a66a583525e8fff8b688b515f417a46264a0150fd01663bb3122249f9fa7f"
+        },
+        {
+          "animation_record": "0x0007fddc",
+          "attack_selector_u8": 0,
+          "hurt_selector_u8": 0,
+          "record_sha256": "e91a02647a131cf49d13a34b9eb0b65f28178d876590481325327ceb9bc0996b"
+        },
+        {
+          "animation_record": "0x0007fdec",
+          "attack_selector_u8": 0,
+          "hurt_selector_u8": 0,
+          "record_sha256": "ce71c3a43a497cb2b24c4f59832a7df4f9fbdcebfe5d6407a1b29fc08124ca49"
+        },
+        {
+          "animation_record": "0x0008d14a",
+          "attack_selector_u8": 0,
+          "hurt_selector_u8": 0,
+          "record_sha256": "381fc642c2a7fea3494d6d678daf6c6b96b6718e8578c76fc1ba5e77e4d2fc28"
+        },
+        {
+          "animation_record": "0x0008d15a",
+          "attack_selector_u8": 0,
+          "hurt_selector_u8": 0,
+          "record_sha256": "ffa750933f240a1b5fad2c8f0a0330da4c0e29e610180ace91fe59f93df8dbfc"
+        },
+        {
+          "animation_record": "0x0008d16a",
+          "attack_selector_u8": 0,
+          "hurt_selector_u8": 0,
+          "record_sha256": "e268772b516ca9b90241ab670e6d4c8804637ed768bcf6f4414de6e88c01832a"
+        },
+        {
+          "animation_record": "0x0008d17a",
+          "attack_selector_u8": 0,
+          "hurt_selector_u8": 0,
+          "record_sha256": "084ae7e015d461eef2919dc1fbdd68f953edf50002b7871f193be3424c0e7ad7"
+        },
+        {
+          "animation_record": "0x0008d18a",
+          "attack_selector_u8": 0,
+          "hurt_selector_u8": 0,
+          "record_sha256": "03d2cf0a1b22d2348abdda5af7dd19c1da8d452f9a077b28b79e4b9ae0d7ee03"
+        },
+        {
+          "animation_record": "0x0008d19a",
+          "attack_selector_u8": 0,
+          "hurt_selector_u8": 0,
+          "record_sha256": "adfc499f2c9b95b65ca16f2292f6987d33d292730a167675f415898b4f34731a"
+        },
+        {
+          "animation_record": "0x0008d1ae",
+          "attack_selector_u8": 0,
+          "hurt_selector_u8": 0,
+          "record_sha256": "21d857ad893f7c95870e8b63b5cf483059590464c7b5a367121fb56b6b344b13"
+        },
+        {
+          "animation_record": "0x0008d1be",
+          "attack_selector_u8": 0,
+          "hurt_selector_u8": 0,
+          "record_sha256": "a9ed18ed6a1f42bbfce4da6500bbfe5beab2451660cd9df0774f835d4292a26f"
+        },
+        {
+          "animation_record": "0x0008d1ce",
+          "attack_selector_u8": 0,
+          "hurt_selector_u8": 0,
+          "record_sha256": "7878086f1c92e53b66010599221ba30cd349516c0226a6e7b27d5d398ca2faae"
+        },
+        {
+          "animation_record": "0x0008d1de",
+          "attack_selector_u8": 0,
+          "hurt_selector_u8": 0,
+          "record_sha256": "f81684aab2e8feb10df4fd8dc32b5400212913bd3a2f6861c52d96abe7c515a1"
+        },
+        {
+          "animation_record": "0x0008d1ee",
+          "attack_selector_u8": 0,
+          "hurt_selector_u8": 0,
+          "record_sha256": "55eb978efbbce363ac83aae0351ba9cb673a4f05251dfa419a84ac0436b925e8"
+        },
+        {
+          "animation_record": "0x0008d1fe",
+          "attack_selector_u8": 0,
+          "hurt_selector_u8": 0,
+          "record_sha256": "3808f5ebb51076d0467cb80aa485bf730a9eb19336e42bf86c9c90efd15fe207"
+        },
+        {
+          "animation_record": "0x0008d212",
+          "attack_selector_u8": 0,
+          "hurt_selector_u8": 0,
+          "record_sha256": "6fda980d601166165a79087f7d26b056f835159b3a73f4ae0b82a7819a98922f"
+        },
+        {
+          "animation_record": "0x0008d222",
+          "attack_selector_u8": 0,
+          "hurt_selector_u8": 0,
+          "record_sha256": "93270ff200d1af4ed44c31cb8a493930b99741dba92ef8bbba3f289be44bd243"
+        },
+        {
+          "animation_record": "0x0008d232",
+          "attack_selector_u8": 0,
+          "hurt_selector_u8": 0,
+          "record_sha256": "2a3c6836e0c995a1b1c00fbe21d5aa456e86c001e1b7122afdc84c2f5356aa84"
+        },
+        {
+          "animation_record": "0x0008d242",
+          "attack_selector_u8": 0,
+          "hurt_selector_u8": 0,
+          "record_sha256": "5deae0a07c4134fec931fbc8683401c05f441562f62b164d3dd4d0d25fe1657e"
+        },
+        {
+          "animation_record": "0x0008d252",
+          "attack_selector_u8": 0,
+          "hurt_selector_u8": 0,
+          "record_sha256": "5ab8614d62472ead17c3cd1c35bb3e66af2eec999fe9122a4ad8bc7eaa0d1df0"
+        },
+        {
+          "animation_record": "0x0008d262",
+          "attack_selector_u8": 0,
+          "hurt_selector_u8": 0,
+          "record_sha256": "2859ce8cb37c7b77a2be6fe2fdb64365140c327b6105cecf474b4ee94d939519"
+        },
+        {
+          "animation_record": "0x0008d276",
+          "attack_selector_u8": 0,
+          "hurt_selector_u8": 0,
+          "record_sha256": "f71fe6c7b725952d9d38101691d1552b565c9389f5111f7a49c04d99ea2311f3"
+        },
+        {
+          "animation_record": "0x0008d286",
+          "attack_selector_u8": 0,
+          "hurt_selector_u8": 0,
+          "record_sha256": "5d8583b08bf0d64696d1e75cf09ce14792e1954844e4d6fbedbc24497783f326"
+        },
+        {
+          "animation_record": "0x0008d296",
+          "attack_selector_u8": 0,
+          "hurt_selector_u8": 0,
+          "record_sha256": "dbe67d747e9a00ec6afaf23d1e4e2e418ccccd1ac34c296a0a61409e3bcf60e4"
+        },
+        {
+          "animation_record": "0x0008d2a6",
+          "attack_selector_u8": 0,
+          "hurt_selector_u8": 0,
+          "record_sha256": "e12bc91950da92c035717eb556c26f19a79beacfc59f63c5e3e6008c8e724d31"
+        },
+        {
+          "animation_record": "0x0008d2b6",
+          "attack_selector_u8": 0,
+          "hurt_selector_u8": 0,
+          "record_sha256": "5b3714e9f7ac47e711416ad0ec8d7eaf07f06fe708d6cbad9e1157a39807ca7e"
+        },
+        {
+          "animation_record": "0x0008d2c6",
+          "attack_selector_u8": 0,
+          "hurt_selector_u8": 0,
+          "record_sha256": "7380917eaf211206b60527645bfe676a0a44e147acb291ddc46800d6cd37fa87"
+        },
+        {
+          "animation_record": "0x0008d2da",
+          "attack_selector_u8": 0,
+          "hurt_selector_u8": 0,
+          "record_sha256": "3c172367df34968d9c113331e18fa1e95b8737002a778077f74e5e1d21d9efec"
+        },
+        {
+          "animation_record": "0x0008d2ea",
+          "attack_selector_u8": 0,
+          "hurt_selector_u8": 0,
+          "record_sha256": "49040989a8d41c5cda068bdeb9537cf8d2c50c13aef1932b226772ae9a38c655"
+        },
+        {
+          "animation_record": "0x0008d2fa",
+          "attack_selector_u8": 0,
+          "hurt_selector_u8": 0,
+          "record_sha256": "16bfd382b85177300f60d9d1276b475358d15b900f0ee8e5c1df760ef9bb7045"
+        },
+        {
+          "animation_record": "0x0008d30a",
+          "attack_selector_u8": 0,
+          "hurt_selector_u8": 0,
+          "record_sha256": "0f6cfd2df8465ca20520d3beb72fc86a2dd7c9a870eaa1d4db6e7921f151bb70"
+        },
+        {
+          "animation_record": "0x0008d31a",
+          "attack_selector_u8": 0,
+          "hurt_selector_u8": 0,
+          "record_sha256": "14b45425efcc9bd3297f735a0b181ec02206bcf80b4e1f5a435ec99397cc5172"
+        },
+        {
+          "animation_record": "0x0008d32a",
+          "attack_selector_u8": 0,
+          "hurt_selector_u8": 0,
+          "record_sha256": "11e2a8985196c8a699ca14f6eb3623357395f3a7c278e27a827b992071f440a6"
+        },
+        {
+          "animation_record": "0x0008d33e",
+          "attack_selector_u8": 0,
+          "hurt_selector_u8": 0,
+          "record_sha256": "6766dae2cbb248f4d6408fe0bd1d90706a5bcb1811c262d7416143e83df6754e"
+        },
+        {
+          "animation_record": "0x0008d34e",
+          "attack_selector_u8": 0,
+          "hurt_selector_u8": 0,
+          "record_sha256": "6850e58dd851befebad06a743573b1e4743af6ad9cfb25c7bc7522806e3400f3"
+        },
+        {
+          "animation_record": "0x0008d35e",
+          "attack_selector_u8": 0,
+          "hurt_selector_u8": 0,
+          "record_sha256": "caac28568473d393bbe9a9c56d24f3040af331b7dc29a37b1a513e3550cc83b9"
+        },
+        {
+          "animation_record": "0x0008d36e",
+          "attack_selector_u8": 0,
+          "hurt_selector_u8": 0,
+          "record_sha256": "2f7f039a418299918333c99f65896d477ea0eed86112a9d11b8df9c162d35e2b"
+        },
+        {
+          "animation_record": "0x0008d37e",
+          "attack_selector_u8": 0,
+          "hurt_selector_u8": 0,
+          "record_sha256": "9925e0b7999b3c6dc9c2825571f4b000d2dd1416dcfec51f33ac7f5ef4a84ecf"
+        },
+        {
+          "animation_record": "0x0008d38e",
+          "attack_selector_u8": 0,
+          "hurt_selector_u8": 0,
+          "record_sha256": "848e2f13cda86e8e0309f9004dc02d167c4c09e35a6f63fd9e424a7a517ac369"
+        },
+        {
+          "animation_record": "0x0008d3a2",
+          "attack_selector_u8": 0,
+          "hurt_selector_u8": 0,
+          "record_sha256": "67e8dbdf812de7bbde9135ba572dbd15209f35e416a6ec76cd01f8983c74d4ff"
+        },
+        {
+          "animation_record": "0x0008d3b2",
+          "attack_selector_u8": 0,
+          "hurt_selector_u8": 0,
+          "record_sha256": "53f4606871243debfd28774142fb67c8767bec9b51f30b53597a3aaab36e106b"
+        },
+        {
+          "animation_record": "0x0008d3c2",
+          "attack_selector_u8": 0,
+          "hurt_selector_u8": 0,
+          "record_sha256": "16a225c39af9fd0986ae9a0512c2373b5fd0877b796813001c0c757d19dd1b82"
+        },
+        {
+          "animation_record": "0x0008d3d2",
+          "attack_selector_u8": 0,
+          "hurt_selector_u8": 0,
+          "record_sha256": "ce96eb8899ee7433bca011e25af7c3dd92823ae82f8192b48b9986cc4d323f9a"
+        },
+        {
+          "animation_record": "0x0008d3e6",
+          "attack_selector_u8": 0,
+          "hurt_selector_u8": 0,
+          "record_sha256": "3ad98f1f2e58e85decfaa4dcae124ba07deae90cd7a72b619954dbd2faff4842"
+        },
+        {
+          "animation_record": "0x0008d3f6",
+          "attack_selector_u8": 0,
+          "hurt_selector_u8": 0,
+          "record_sha256": "a4ae78378444a1cc715121b492adbd2b388609e19e165dc63bb146c4424e91c1"
+        },
+        {
+          "animation_record": "0x0008d406",
+          "attack_selector_u8": 0,
+          "hurt_selector_u8": 0,
+          "record_sha256": "1714b13c0f525292396b318a6981367160c4adb6aeade0c8f863331872518feb"
+        },
+        {
+          "animation_record": "0x0008d416",
+          "attack_selector_u8": 0,
+          "hurt_selector_u8": 0,
+          "record_sha256": "ea2c800086503439785b75015dc5d89e4285797754e5d46c003354521fb311a6"
+        },
+        {
+          "animation_record": "0x0008d42a",
+          "attack_selector_u8": 0,
+          "hurt_selector_u8": 0,
+          "record_sha256": "4044fc641b52fd1143106a17ecb7fd7c0f1fd7b48e9c70f5801c1b718fc2410e"
+        },
+        {
+          "animation_record": "0x0008d43a",
+          "attack_selector_u8": 0,
+          "hurt_selector_u8": 0,
+          "record_sha256": "4b28734232114991f33974d4ece9e04cb0bebb600482f96248943a4ca230c3c9"
+        },
+        {
+          "animation_record": "0x0008d44a",
+          "attack_selector_u8": 0,
+          "hurt_selector_u8": 0,
+          "record_sha256": "f1879f9d83ec1ac28f43127a0308b07f9854ce1e38dff03240efd9b158075bfd"
+        },
+        {
+          "animation_record": "0x0008d45a",
+          "attack_selector_u8": 0,
+          "hurt_selector_u8": 0,
+          "record_sha256": "72a9c70a705432eba4567b42b96518b4597765c7d0023285b8f0963283d54464"
+        },
+        {
+          "animation_record": "0x0008d46e",
+          "attack_selector_u8": 0,
+          "hurt_selector_u8": 0,
+          "record_sha256": "daa951fa0fec14c146b3753e3b80c0b553a4d3eae7d4c603ac1b7a8056137578"
+        },
+        {
+          "animation_record": "0x0008d47e",
+          "attack_selector_u8": 0,
+          "hurt_selector_u8": 0,
+          "record_sha256": "d5e176d83a12c02f66f7e2639fe17dd32569f7c06f407065b66e86dd19858171"
+        },
+        {
+          "animation_record": "0x0008d48e",
+          "attack_selector_u8": 0,
+          "hurt_selector_u8": 0,
+          "record_sha256": "b5549f392389c782b8b4c0f141c834d66e7f40bffd262028724ad5201b66c40a"
+        },
+        {
+          "animation_record": "0x0008d49e",
+          "attack_selector_u8": 0,
+          "hurt_selector_u8": 0,
+          "record_sha256": "a46658304a83e6d054cd23297d8e2878f343ec8fcd015828adba223b8cdc1dd9"
+        },
+        {
+          "animation_record": "0x0008d4ae",
+          "attack_selector_u8": 0,
+          "hurt_selector_u8": 0,
+          "record_sha256": "4504dff128da5aea5aa5766c13d851a2fa74d6bcbabf8761532f9e87d1807232"
+        },
+        {
+          "animation_record": "0x0008d4be",
+          "attack_selector_u8": 0,
+          "hurt_selector_u8": 0,
+          "record_sha256": "30c1f4fde3c426a3f761cbe39753a8d2fdd0e108cbb9c3a4d96bdeb1622adf9e"
+        },
+        {
+          "animation_record": "0x0008d4ce",
+          "attack_selector_u8": 0,
+          "hurt_selector_u8": 0,
+          "record_sha256": "b5549f392389c782b8b4c0f141c834d66e7f40bffd262028724ad5201b66c40a"
+        },
+        {
+          "animation_record": "0x0008d4de",
+          "attack_selector_u8": 0,
+          "hurt_selector_u8": 0,
+          "record_sha256": "6841e3b4f03d0228a00635dede81ef5af18f123d570929855739ba627b74efd9"
+        },
+        {
+          "animation_record": "0x0008d4f2",
+          "attack_selector_u8": 0,
+          "hurt_selector_u8": 0,
+          "record_sha256": "68e8e8f91f212ce72121db241fc940ac5c676c600f9373704449cb91fe5a35af"
+        },
+        {
+          "animation_record": "0x0008d502",
+          "attack_selector_u8": 0,
+          "hurt_selector_u8": 0,
+          "record_sha256": "101e0800e7c2cf275efbbac09825229822ae1fd7ad633fc943acf988d01265b4"
+        },
+        {
+          "animation_record": "0x0008d512",
+          "attack_selector_u8": 0,
+          "hurt_selector_u8": 0,
+          "record_sha256": "edb8f0247257cb8a2878833310c6c3f3677535ce56afd8da15bd4a1fa1aba0cc"
+        },
+        {
+          "animation_record": "0x0008d522",
+          "attack_selector_u8": 0,
+          "hurt_selector_u8": 0,
+          "record_sha256": "1f8b0b1ef1bcd9254fc939441eb08541d59b5ae883e9a257e82d9b60ac3fcb03"
+        },
+        {
+          "animation_record": "0x0008d532",
+          "attack_selector_u8": 0,
+          "hurt_selector_u8": 0,
+          "record_sha256": "50203d180426a24682c205713ce0be48660a97ad1a9d2bc2ca5a41e151f277b3"
+        },
+        {
+          "animation_record": "0x0008d542",
+          "attack_selector_u8": 0,
+          "hurt_selector_u8": 0,
+          "record_sha256": "f66945a36c918c1beb715f643913adc1c83d52ac9417bd04d01f5b310ef9fba9"
+        },
+        {
+          "animation_record": "0x0008d552",
+          "attack_selector_u8": 0,
+          "hurt_selector_u8": 0,
+          "record_sha256": "edb8f0247257cb8a2878833310c6c3f3677535ce56afd8da15bd4a1fa1aba0cc"
+        },
+        {
+          "animation_record": "0x0008d562",
+          "attack_selector_u8": 0,
+          "hurt_selector_u8": 0,
+          "record_sha256": "31966d81c248913c6eda11951b68f80835d723a4d29ed79fad97701f8f790600"
+        },
+        {
+          "animation_record": "0x0008d59a",
+          "attack_selector_u8": 0,
+          "hurt_selector_u8": 0,
+          "record_sha256": "4e94f091fb39c4c1adfe389d130f5092e7ed789da8d41aff30070318a0919027"
+        },
+        {
+          "animation_record": "0x0008d5ae",
+          "attack_selector_u8": 0,
+          "hurt_selector_u8": 0,
+          "record_sha256": "d94857384d7d7d5102f9ac580e8426283ab81096c76b462bd8af45d91292a722"
+        },
+        {
+          "animation_record": "0x0008d5c2",
+          "attack_selector_u8": 0,
+          "hurt_selector_u8": 0,
+          "record_sha256": "5890c25c62a5a57c4b41617a36346912ee20a1bdda101ffe12d99eee466b7590"
+        },
+        {
+          "animation_record": "0x0008d5d6",
+          "attack_selector_u8": 0,
+          "hurt_selector_u8": 0,
+          "record_sha256": "516f7a6516b1b3edbdd3145d4e61a2700990208e2abba53786c3ee3031cd1956"
+        },
+        {
+          "animation_record": "0x0008daf2",
+          "attack_selector_u8": 0,
+          "hurt_selector_u8": 0,
+          "record_sha256": "32667001324946ef1d7749bcb1742c4258ed25dd0b81b2597beb2e7a448216d1"
+        },
+        {
+          "animation_record": "0x0008db1a",
+          "attack_selector_u8": 0,
+          "hurt_selector_u8": 0,
+          "record_sha256": "931ead28c2c2ea4e10713f3b2d19c642af4775d5a405f2136da92c47a0c8e4bc"
+        },
+        {
+          "animation_record": "0x0008dedc",
+          "attack_selector_u8": 0,
+          "hurt_selector_u8": 0,
+          "record_sha256": "b52be5a00291b670d726a60c349fc44c861b2ed6e25a5a5102e2251bfafc29a9"
+        },
+        {
+          "animation_record": "0x0008def0",
+          "attack_selector_u8": 0,
+          "hurt_selector_u8": 0,
+          "record_sha256": "a243a6f9abd1d6976cab63d9f8990a96282ab3bb3ed172f5bf52d832863451d2"
+        },
+        {
+          "animation_record": "0x0008df18",
+          "attack_selector_u8": 0,
+          "hurt_selector_u8": 0,
+          "record_sha256": "f3441c5df2b287705686d88901b7be86e59fd477763a1ea5760452482d35d217"
+        },
+        {
+          "animation_record": "0x0008df2c",
+          "attack_selector_u8": 0,
+          "hurt_selector_u8": 0,
+          "record_sha256": "e02e579ff318094381205bea0a2e3767b347247d249582761b7a7945c7f15a60"
+        },
+        {
+          "animation_record": "0x0008df40",
+          "attack_selector_u8": 0,
+          "hurt_selector_u8": 0,
+          "record_sha256": "8e8ee26de59d142374b2daefa6f08a85db8a3af1c1fe594f7214cc3f9ef4f438"
+        },
+        {
+          "animation_record": "0x0008ee38",
+          "attack_selector_u8": 0,
+          "hurt_selector_u8": 0,
+          "record_sha256": "ec9bf59b7404e550fbda9184a2250c4297e8326b61b8ac6e62c6bb52577cf794"
+        },
+        {
+          "animation_record": "0x0008ee74",
+          "attack_selector_u8": 0,
+          "hurt_selector_u8": 0,
+          "record_sha256": "160e34a70ce6b35f6b92fa83a854c349857e26d1c455d8b1d0452b181a8c4a8d"
+        },
+        {
+          "animation_record": "0x0008ee88",
+          "attack_selector_u8": 0,
+          "hurt_selector_u8": 0,
+          "record_sha256": "5bf632ed6ed6c33ed624746dc73ca49eae49b8df419e348ad648f8db8fd2ad60"
+        },
+        {
+          "animation_record": "0x0008ee9c",
+          "attack_selector_u8": 0,
+          "hurt_selector_u8": 0,
+          "record_sha256": "545313e8f32736c04cb64fa5e46730513aa2ce54842009afaeff71bcec47fde4"
+        },
+        {
+          "animation_record": "0x0008eeb0",
+          "attack_selector_u8": 0,
+          "hurt_selector_u8": 0,
+          "record_sha256": "003cc27fe3070521088d740fae240f92fbcc88d1800d8f3481a49f22914d8421"
+        },
+        {
+          "animation_record": "0x0008f8e0",
+          "attack_selector_u8": 0,
+          "hurt_selector_u8": 0,
+          "record_sha256": "de41083fef302328560fe376050400523a0c3fb69b156835d6eb3383c9f12460"
+        },
+        {
+          "animation_record": "0x0008f8f0",
+          "attack_selector_u8": 0,
+          "hurt_selector_u8": 0,
+          "record_sha256": "6bbb5afe9f0367cad5a5d275a27b15911554f08b31f5c3e10ddeb5dace2bb4f8"
+        },
+        {
+          "animation_record": "0x0008f900",
+          "attack_selector_u8": 0,
+          "hurt_selector_u8": 0,
+          "record_sha256": "28b8452b49d837ed865e615d4ae76ba0a840631756d2d5f6ce2457facbc356c0"
+        },
+        {
+          "animation_record": "0x0008f910",
+          "attack_selector_u8": 0,
+          "hurt_selector_u8": 0,
+          "record_sha256": "c7f9bd983bdd303d8ee1f40e9ba7f3df925c1dc6408453900ea705a7b145c2f5"
+        },
+        {
+          "animation_record": "0x0008f920",
+          "attack_selector_u8": 0,
+          "hurt_selector_u8": 0,
+          "record_sha256": "547a86fb3404cd246dae368b8a10f37cf60d8d65581fc050fa49be1f9595df32"
+        },
+        {
+          "animation_record": "0x0008f930",
+          "attack_selector_u8": 0,
+          "hurt_selector_u8": 0,
+          "record_sha256": "4b75cf2b13d69488d194475bb64a0522300e1c25d1027c114fc751858d118acd"
+        },
+        {
+          "animation_record": "0x0008f940",
+          "attack_selector_u8": 0,
+          "hurt_selector_u8": 0,
+          "record_sha256": "711b9e5ff9522cb65263ac2283d8a57b684c054de2cdf1de3c21a083b6880536"
+        },
+        {
+          "animation_record": "0x0008f950",
+          "attack_selector_u8": 0,
+          "hurt_selector_u8": 0,
+          "record_sha256": "d7d084e1816597a3e3ef9fa5740ce6cfb25c4dfbb05a4aa10285f690db103a5e"
+        },
+        {
+          "animation_record": "0x0008f960",
+          "attack_selector_u8": 0,
+          "hurt_selector_u8": 0,
+          "record_sha256": "1be4140a834d71ab5301a72dca4ff6bf67a2892817d3d00da816f3ad230e707f"
+        },
+        {
+          "animation_record": "0x0008f970",
+          "attack_selector_u8": 0,
+          "hurt_selector_u8": 0,
+          "record_sha256": "768223b951a4628079d1381db8abc574c18969b3dcf938aacc3f98eb55d414f8"
+        },
+        {
+          "animation_record": "0x0008f980",
+          "attack_selector_u8": 0,
+          "hurt_selector_u8": 0,
+          "record_sha256": "a22a08c0827ed629913687ed8e8a34ff47d2c177f79b3452617bd58f205bd079"
+        },
+        {
+          "animation_record": "0x0008f990",
+          "attack_selector_u8": 0,
+          "hurt_selector_u8": 0,
+          "record_sha256": "84924ceca314362eba64718e64d7c262357c1dcb9d06f78833f00acb2123893e"
+        },
+        {
+          "animation_record": "0x0008f9a0",
+          "attack_selector_u8": 0,
+          "hurt_selector_u8": 0,
+          "record_sha256": "393f15c23aed786d6f0bf21f9de4257c142d043d0a80486baa1f8e0ce7cc1cda"
+        },
+        {
+          "animation_record": "0x0008f9b0",
+          "attack_selector_u8": 0,
+          "hurt_selector_u8": 0,
+          "record_sha256": "e126b943db628f19f36b29d37e20629ed30120b5db0a6c1da53f1d23a2c12225"
+        },
+        {
+          "animation_record": "0x0008f9c0",
+          "attack_selector_u8": 0,
+          "hurt_selector_u8": 0,
+          "record_sha256": "235a397401fd5f41464a1d41a6223825c242dceb86e8e94892e00276c1ac8210"
+        },
+        {
+          "animation_record": "0x0008f9d0",
+          "attack_selector_u8": 0,
+          "hurt_selector_u8": 0,
+          "record_sha256": "8d485f9c09466ec36e6c3c1c507283e9e6b2ac2c09e03b001d427af334b81f42"
+        },
+        {
+          "animation_record": "0x0008f9e0",
+          "attack_selector_u8": 0,
+          "hurt_selector_u8": 0,
+          "record_sha256": "de41083fef302328560fe376050400523a0c3fb69b156835d6eb3383c9f12460"
+        },
+        {
+          "animation_record": "0x0008f9f0",
+          "attack_selector_u8": 0,
+          "hurt_selector_u8": 0,
+          "record_sha256": "6bbb5afe9f0367cad5a5d275a27b15911554f08b31f5c3e10ddeb5dace2bb4f8"
+        },
+        {
+          "animation_record": "0x0008fa00",
+          "attack_selector_u8": 0,
+          "hurt_selector_u8": 0,
+          "record_sha256": "28b8452b49d837ed865e615d4ae76ba0a840631756d2d5f6ce2457facbc356c0"
+        },
+        {
+          "animation_record": "0x0008fa10",
+          "attack_selector_u8": 0,
+          "hurt_selector_u8": 0,
+          "record_sha256": "c7f9bd983bdd303d8ee1f40e9ba7f3df925c1dc6408453900ea705a7b145c2f5"
+        },
+        {
+          "animation_record": "0x0008fa20",
+          "attack_selector_u8": 0,
+          "hurt_selector_u8": 0,
+          "record_sha256": "547a86fb3404cd246dae368b8a10f37cf60d8d65581fc050fa49be1f9595df32"
+        },
+        {
+          "animation_record": "0x0008fa30",
+          "attack_selector_u8": 0,
+          "hurt_selector_u8": 0,
+          "record_sha256": "4b75cf2b13d69488d194475bb64a0522300e1c25d1027c114fc751858d118acd"
+        },
+        {
+          "animation_record": "0x0008fa40",
+          "attack_selector_u8": 0,
+          "hurt_selector_u8": 0,
+          "record_sha256": "711b9e5ff9522cb65263ac2283d8a57b684c054de2cdf1de3c21a083b6880536"
+        },
+        {
+          "animation_record": "0x0008fa50",
+          "attack_selector_u8": 0,
+          "hurt_selector_u8": 0,
+          "record_sha256": "d7d084e1816597a3e3ef9fa5740ce6cfb25c4dfbb05a4aa10285f690db103a5e"
+        },
+        {
+          "animation_record": "0x0008fa60",
+          "attack_selector_u8": 0,
+          "hurt_selector_u8": 0,
+          "record_sha256": "1be4140a834d71ab5301a72dca4ff6bf67a2892817d3d00da816f3ad230e707f"
+        },
+        {
+          "animation_record": "0x0008fa70",
+          "attack_selector_u8": 0,
+          "hurt_selector_u8": 0,
+          "record_sha256": "768223b951a4628079d1381db8abc574c18969b3dcf938aacc3f98eb55d414f8"
+        },
+        {
+          "animation_record": "0x0008fa80",
+          "attack_selector_u8": 0,
+          "hurt_selector_u8": 0,
+          "record_sha256": "a22a08c0827ed629913687ed8e8a34ff47d2c177f79b3452617bd58f205bd079"
+        },
+        {
+          "animation_record": "0x0008fa90",
+          "attack_selector_u8": 0,
+          "hurt_selector_u8": 0,
+          "record_sha256": "84924ceca314362eba64718e64d7c262357c1dcb9d06f78833f00acb2123893e"
+        },
+        {
+          "animation_record": "0x0008faa0",
+          "attack_selector_u8": 0,
+          "hurt_selector_u8": 0,
+          "record_sha256": "393f15c23aed786d6f0bf21f9de4257c142d043d0a80486baa1f8e0ce7cc1cda"
+        },
+        {
+          "animation_record": "0x0008fab0",
+          "attack_selector_u8": 0,
+          "hurt_selector_u8": 0,
+          "record_sha256": "e126b943db628f19f36b29d37e20629ed30120b5db0a6c1da53f1d23a2c12225"
+        },
+        {
+          "animation_record": "0x0008fac0",
+          "attack_selector_u8": 0,
+          "hurt_selector_u8": 0,
+          "record_sha256": "235a397401fd5f41464a1d41a6223825c242dceb86e8e94892e00276c1ac8210"
+        },
+        {
+          "animation_record": "0x0008fad0",
+          "attack_selector_u8": 0,
+          "hurt_selector_u8": 0,
+          "record_sha256": "4ca5c54eb8a57f1661183a25efea222b1f52c1219203872a61d049f61a96b6f2"
+        },
+        {
+          "animation_record": "0x000927c4",
+          "attack_selector_u8": 196,
+          "hurt_selector_u8": 39,
+          "record_sha256": "85c08a3fce984b034b8149684407e1647b749d33fa94e4ce6269380a5c41311a"
+        },
+        {
+          "animation_record": "0x000928e0",
+          "attack_selector_u8": 0,
+          "hurt_selector_u8": 0,
+          "record_sha256": "1d1761bbf7595d0d99c0eef053ea34e0474791d26cb4f68a89aff66ad135bd47"
+        },
+        {
+          "animation_record": "0x000928f0",
+          "attack_selector_u8": 0,
+          "hurt_selector_u8": 0,
+          "record_sha256": "6ed275b387b22ef1f5dbe3cfb472ac8c5dddd43033b17a3ab55b1f8c4f5d36bb"
+        },
+        {
+          "animation_record": "0x00092900",
+          "attack_selector_u8": 0,
+          "hurt_selector_u8": 0,
+          "record_sha256": "7a6623132bbaee57c41885f99cf055087342a87390dc7c95686c24e96d77c161"
+        },
+        {
+          "animation_record": "0x00092914",
+          "attack_selector_u8": 0,
+          "hurt_selector_u8": 0,
+          "record_sha256": "b189b1acd0570214089a0063a0358dc5f4b8ee3aeb23fdb32343c415a8ff9c83"
+        },
+        {
+          "animation_record": "0x00092924",
+          "attack_selector_u8": 0,
+          "hurt_selector_u8": 0,
+          "record_sha256": "67e2e07932e2342935a5f0a727308df77569e24919b1b86b4362e64c07fd9618"
+        },
+        {
+          "animation_record": "0x00092934",
+          "attack_selector_u8": 0,
+          "hurt_selector_u8": 0,
+          "record_sha256": "01c8eb8a60da6b452c51a5baf156016943521a2aedeb3d95c007d52e34e941ef"
+        },
+        {
+          "animation_record": "0x000929b0",
+          "attack_selector_u8": 0,
+          "hurt_selector_u8": 0,
+          "record_sha256": "b8008ed87cb839e9d647cd0b7291a227baaa4a5cd620a7c6f515aaae7c36f4c6"
+        },
+        {
+          "animation_record": "0x000929c0",
+          "attack_selector_u8": 0,
+          "hurt_selector_u8": 0,
+          "record_sha256": "123ae1f7c5c12e04ab4bcbff8523f8b173b185394f8e75eb7471fe1444f24c8b"
+        },
+        {
+          "animation_record": "0x000929d0",
+          "attack_selector_u8": 0,
+          "hurt_selector_u8": 0,
+          "record_sha256": "58cb533163b1e83396660cc244c90f1be61b549703b40deadd2e29f22df2f58c"
+        },
+        {
+          "animation_record": "0x000929e0",
+          "attack_selector_u8": 0,
+          "hurt_selector_u8": 0,
+          "record_sha256": "215b3ade40c9f197e7e1b482f5a98d2051f75402f283fbf414d76ebbfa0a1185"
+        },
+        {
+          "animation_record": "0x000929f0",
+          "attack_selector_u8": 0,
+          "hurt_selector_u8": 0,
+          "record_sha256": "806a46a2184db27ec08dda67d55dbda7f43a1db24d3f7f038e48d74b6b029072"
+        },
+        {
+          "animation_record": "0x00092a04",
+          "attack_selector_u8": 0,
+          "hurt_selector_u8": 0,
+          "record_sha256": "9ed13e997dbaf81f1ebb66e7a6b1e96ee5cb34207350ed96db775b981eef0399"
+        },
+        {
+          "animation_record": "0x00092a14",
+          "attack_selector_u8": 0,
+          "hurt_selector_u8": 0,
+          "record_sha256": "06e1186f686f7afe975735970e85c4054177a55ec4763700228e08a9e19d31d4"
+        },
+        {
+          "animation_record": "0x00092a24",
+          "attack_selector_u8": 0,
+          "hurt_selector_u8": 0,
+          "record_sha256": "9c864a1d3fd90ad1dcdc46a59cb3fee3f3d6a30af237fe782821230d2e8e7402"
+        },
+        {
+          "animation_record": "0x00092a34",
+          "attack_selector_u8": 0,
+          "hurt_selector_u8": 0,
+          "record_sha256": "77ae3ad2eca99124a36ba5646d6ddc6b466a01b45d9e4fabd52726d70fa85d48"
+        },
+        {
+          "animation_record": "0x00092a44",
+          "attack_selector_u8": 0,
+          "hurt_selector_u8": 0,
+          "record_sha256": "746cdb75fa76c27d1d11a76df058c20ede018ee97bf890363880f930e80f7a62"
+        },
+        {
+          "animation_record": "0x00092e50",
+          "attack_selector_u8": 0,
+          "hurt_selector_u8": 0,
+          "record_sha256": "48c3d77f052f3c9f88e2dce2f17c68a757bf327f5400813d6b06598b5f2e1427"
+        },
+        {
+          "animation_record": "0x00092e60",
+          "attack_selector_u8": 0,
+          "hurt_selector_u8": 0,
+          "record_sha256": "c40741a3a9a532637b1faf0ae4ec499cc7598ef80fc5ef2beaf631c212436e7a"
+        },
+        {
+          "animation_record": "0x00092e70",
+          "attack_selector_u8": 0,
+          "hurt_selector_u8": 0,
+          "record_sha256": "6d391b5aab353a69801b7d9751ab479b5694ccff81c7f34cead48ce87bfb3073"
+        },
+        {
+          "animation_record": "0x00092e80",
+          "attack_selector_u8": 0,
+          "hurt_selector_u8": 0,
+          "record_sha256": "91e38fdd994728769c1f0601fc72655ff0dafe7e3c7576b9104b558279ec7c26"
+        },
+        {
+          "animation_record": "0x00092e90",
+          "attack_selector_u8": 0,
+          "hurt_selector_u8": 0,
+          "record_sha256": "ad501b538ac1e48bda07d35df13f1215d3a215d557f777ac60e07695d2059dc1"
+        },
+        {
+          "animation_record": "0x00092ea0",
+          "attack_selector_u8": 0,
+          "hurt_selector_u8": 0,
+          "record_sha256": "f3449fbc4eaff8b20edd89654c4c3da0c763060d226e61acd2fbb4c9b6a174f4"
+        },
+        {
+          "animation_record": "0x000935b0",
+          "attack_selector_u8": 0,
+          "hurt_selector_u8": 0,
+          "record_sha256": "8f1886d3741e18476e9da27f6352c7d2aecb5ea57c1899cacb3c9c5bfca8abe6"
+        },
+        {
+          "animation_record": "0x000935c0",
+          "attack_selector_u8": 0,
+          "hurt_selector_u8": 0,
+          "record_sha256": "421cb8acc54d7a9bf68b6112dc4661cbe61bf04e93bf13b0e4c07af362ea8144"
+        },
+        {
+          "animation_record": "0x000935d0",
+          "attack_selector_u8": 0,
+          "hurt_selector_u8": 0,
+          "record_sha256": "8f1886d3741e18476e9da27f6352c7d2aecb5ea57c1899cacb3c9c5bfca8abe6"
+        },
+        {
+          "animation_record": "0x000935e0",
+          "attack_selector_u8": 0,
+          "hurt_selector_u8": 0,
+          "record_sha256": "421cb8acc54d7a9bf68b6112dc4661cbe61bf04e93bf13b0e4c07af362ea8144"
+        },
+        {
+          "animation_record": "0x000935f0",
+          "attack_selector_u8": 0,
+          "hurt_selector_u8": 0,
+          "record_sha256": "8f1886d3741e18476e9da27f6352c7d2aecb5ea57c1899cacb3c9c5bfca8abe6"
+        },
+        {
+          "animation_record": "0x00093600",
+          "attack_selector_u8": 0,
+          "hurt_selector_u8": 0,
+          "record_sha256": "421cb8acc54d7a9bf68b6112dc4661cbe61bf04e93bf13b0e4c07af362ea8144"
+        },
+        {
+          "animation_record": "0x00093610",
+          "attack_selector_u8": 0,
+          "hurt_selector_u8": 0,
+          "record_sha256": "8f1886d3741e18476e9da27f6352c7d2aecb5ea57c1899cacb3c9c5bfca8abe6"
+        },
+        {
+          "animation_record": "0x00093620",
+          "attack_selector_u8": 0,
+          "hurt_selector_u8": 0,
+          "record_sha256": "483272b95185cbfd760757af4440dd01013c910ef962d46b77b796886f8231c3"
+        },
+        {
+          "animation_record": "0x0009a884",
+          "attack_selector_u8": 0,
+          "hurt_selector_u8": 0,
+          "record_sha256": "b2edc0f7dbf0cc2d0905bca5371a8e3e6ce9ace445e345d50cc7e2d5314b6473"
+        },
+        {
+          "animation_record": "0x0009a894",
+          "attack_selector_u8": 0,
+          "hurt_selector_u8": 0,
+          "record_sha256": "b624474eb7b9de86d8be1319db05e6dc7dac283497816399033bde272ff1de81"
+        },
+        {
+          "animation_record": "0x0009a8a4",
+          "attack_selector_u8": 0,
+          "hurt_selector_u8": 0,
+          "record_sha256": "b20ca2a64957bd47b0ed42da09440ddf77a141a26d96bfd3f95eb9c6c4cf828f"
+        },
+        {
+          "animation_record": "0x0009a8b4",
+          "attack_selector_u8": 0,
+          "hurt_selector_u8": 0,
+          "record_sha256": "d024eeb273eed9e027aeec04bc150ac820e365a8bea434c6cf9be46e3f70be0b"
+        },
+        {
+          "animation_record": "0x0009a8c4",
+          "attack_selector_u8": 0,
+          "hurt_selector_u8": 0,
+          "record_sha256": "e943abcbcd34a3cd612f6d265a403d2ac802bb0502be3f49a1cc1b343cd24b58"
+        },
+        {
+          "animation_record": "0x0009a8d4",
+          "attack_selector_u8": 0,
+          "hurt_selector_u8": 0,
+          "record_sha256": "289bc81e60c74ebba1e21a79450e2931d50f7c34bbba13245e673de5f593705b"
+        },
+        {
+          "animation_record": "0x0009a8e4",
+          "attack_selector_u8": 0,
+          "hurt_selector_u8": 0,
+          "record_sha256": "137f7038f0aca422abc77725339865d6c8af0de4c3cb641121ca58c393825a5f"
+        },
+        {
+          "animation_record": "0x0009a8f4",
+          "attack_selector_u8": 0,
+          "hurt_selector_u8": 0,
+          "record_sha256": "b67bd919c69583d179979fbc5a94a5bc9a29c28ed28fbd19fe1673f3d37d5e4a"
+        },
+        {
+          "animation_record": "0x0009a904",
+          "attack_selector_u8": 0,
+          "hurt_selector_u8": 0,
+          "record_sha256": "ef768d0255d94b2a2dd35ba9ff8593e1a0b9cecae94611115313dc5c15c56272"
+        },
+        {
+          "animation_record": "0x0009a918",
+          "attack_selector_u8": 0,
+          "hurt_selector_u8": 0,
+          "record_sha256": "ba3223ef4bface4992071921547c1295d2c49b040f2434bd66ccc688a3fdcab4"
+        },
+        {
+          "animation_record": "0x0009a928",
+          "attack_selector_u8": 0,
+          "hurt_selector_u8": 0,
+          "record_sha256": "e1bf9eb84ee3cd211cd60d300851f5296a78c5c6d62c7505d230f60cc74c3df7"
+        },
+        {
+          "animation_record": "0x0009a938",
+          "attack_selector_u8": 0,
+          "hurt_selector_u8": 0,
+          "record_sha256": "ef59fc317b698749bb23fdeb7ebce8237a2b7b6b6d86dec7dc931ef89c348700"
+        },
+        {
+          "animation_record": "0x0009a948",
+          "attack_selector_u8": 0,
+          "hurt_selector_u8": 0,
+          "record_sha256": "ad5511746bff30c0148bf025685b140602de500b1bfb3ac6330a4919fd6fd5a1"
+        },
+        {
+          "animation_record": "0x0009a958",
+          "attack_selector_u8": 0,
+          "hurt_selector_u8": 0,
+          "record_sha256": "0ec5fc4e40710d36dc471aa09380b450d7b363f5282fdf4596659df258986dfc"
+        },
+        {
+          "animation_record": "0x0009a968",
+          "attack_selector_u8": 0,
+          "hurt_selector_u8": 0,
+          "record_sha256": "e44eba23faa0a9c3dae877bfc812bd897b1a4547c220f472b4c6402b8438925d"
+        },
+        {
+          "animation_record": "0x0009a978",
+          "attack_selector_u8": 0,
+          "hurt_selector_u8": 0,
+          "record_sha256": "ccddfe73c6461c895b0acd6cb3c0669d089aac28734736a8e23ca691a27891b6"
+        },
+        {
+          "animation_record": "0x0009a988",
+          "attack_selector_u8": 0,
+          "hurt_selector_u8": 0,
+          "record_sha256": "e428565238c90758233cbbd95da619f5e4738b0a06d0094c2b5b561a472e7771"
+        },
+        {
+          "animation_record": "0x0009a998",
+          "attack_selector_u8": 0,
+          "hurt_selector_u8": 0,
+          "record_sha256": "ca67b2f3d5c93c601acf5190cb6be2f5f4bb09c96e688425b67e8c2d6c0463f1"
+        },
+        {
+          "animation_record": "0x0009ac82",
+          "attack_selector_u8": 0,
+          "hurt_selector_u8": 0,
+          "record_sha256": "920c27d925f3b466e462c135be422e6e185e8ee28ff59af06dc14da62edc5099"
+        },
+        {
+          "animation_record": "0x0009ac92",
+          "attack_selector_u8": 0,
+          "hurt_selector_u8": 0,
+          "record_sha256": "ad03b549b26e13f2566943d93d24a2340416d7888f991662c35144e33c7e639a"
+        },
+        {
+          "animation_record": "0x0009aca2",
+          "attack_selector_u8": 0,
+          "hurt_selector_u8": 0,
+          "record_sha256": "f2fd7887e982c76ae44183801aefa112d1bec15c4cde08ec941dbc3c6a2713b8"
+        },
+        {
+          "animation_record": "0x0009acb2",
+          "attack_selector_u8": 0,
+          "hurt_selector_u8": 0,
+          "record_sha256": "dca60121d7c49908a95f4646f07110a1d418a6e380c22112103bc4a8c4467ae5"
+        },
+        {
+          "animation_record": "0x0009acc2",
+          "attack_selector_u8": 0,
+          "hurt_selector_u8": 0,
+          "record_sha256": "089253c4f672d3e2f9b296ce03abecca55e8f5cda4ea8eeed4dd5b73bc9d7c33"
+        },
+        {
+          "animation_record": "0x0009acd2",
+          "attack_selector_u8": 0,
+          "hurt_selector_u8": 0,
+          "record_sha256": "500dce5e435114fa1d85ec429f2d24acefacb9f85563427ec7013758296ca30d"
+        },
+        {
+          "animation_record": "0x0009ace2",
+          "attack_selector_u8": 0,
+          "hurt_selector_u8": 0,
+          "record_sha256": "6b47b27b8b6456c745c7951aef8f143cd8fd21311b840d04b77d718f5598f610"
+        },
+        {
+          "animation_record": "0x0009acf2",
+          "attack_selector_u8": 0,
+          "hurt_selector_u8": 0,
+          "record_sha256": "54a653fce374b5028e7d593d1dfd81b5a528a1e48131e139347cfd28be92e068"
+        },
+        {
+          "animation_record": "0x0009ad02",
+          "attack_selector_u8": 0,
+          "hurt_selector_u8": 0,
+          "record_sha256": "b4917ed4a0c58f2aa3c2e76715e969cc7164ae87a25f689fffba9cdb23ff08d8"
+        },
+        {
+          "animation_record": "0x0009ad12",
+          "attack_selector_u8": 0,
+          "hurt_selector_u8": 0,
+          "record_sha256": "5c2a2a56e9f51c3cccdf2cc80fc33633f0a799eb9bae3832bc5df0d14f678074"
+        },
+        {
+          "animation_record": "0x0009bbf0",
+          "attack_selector_u8": 0,
+          "hurt_selector_u8": 0,
+          "record_sha256": "abda988bd2488b966a253285ee80d8c2dea238a17972dee2c335be6b505e1da4"
+        },
+        {
+          "animation_record": "0x0009bc00",
+          "attack_selector_u8": 0,
+          "hurt_selector_u8": 0,
+          "record_sha256": "09425fd568e295f4b47d9d66933b46a84ae63d4694dc3a4252821870be5498e9"
+        },
+        {
+          "animation_record": "0x0009bc10",
+          "attack_selector_u8": 0,
+          "hurt_selector_u8": 0,
+          "record_sha256": "247227a98a9ab962222b042bdd7fde0d97f89d58bce36c6597fde174c8aeda1c"
+        },
+        {
+          "animation_record": "0x0009bc20",
+          "attack_selector_u8": 0,
+          "hurt_selector_u8": 0,
+          "record_sha256": "1cc8ad37ff3de700d0240b294d96253445a679d9221edc5765d4c9a3bd926768"
+        },
+        {
+          "animation_record": "0x0009bc30",
+          "attack_selector_u8": 0,
+          "hurt_selector_u8": 0,
+          "record_sha256": "3f13fe5ecd6bfa2a8fa8815df95afd95046ce144e7a840332d3c7d564a2e2d8c"
+        },
+        {
+          "animation_record": "0x0009bc44",
+          "attack_selector_u8": 0,
+          "hurt_selector_u8": 0,
+          "record_sha256": "67fd6c747acc3626e01efea6f22562783d722ad5b7d2ab066dede5a393acc0d8"
+        },
+        {
+          "animation_record": "0x0009bc54",
+          "attack_selector_u8": 0,
+          "hurt_selector_u8": 0,
+          "record_sha256": "2fff1db2c0f0d0832ccf933c884a4f6a553c6331d17ecf536d406ded7fb343b6"
+        },
+        {
+          "animation_record": "0x0009bc64",
+          "attack_selector_u8": 0,
+          "hurt_selector_u8": 0,
+          "record_sha256": "78c97eb91b3569ce44002f1f5abefbd427f44a5e1c2248bd5782de8d04c1a613"
+        },
+        {
+          "animation_record": "0x0009bc74",
+          "attack_selector_u8": 0,
+          "hurt_selector_u8": 0,
+          "record_sha256": "756f15aa09cf669b9df48ed79776c64fcf6c571c30ca8dd78d2ccf4f1229b75a"
+        },
+        {
+          "animation_record": "0x0009bc84",
+          "attack_selector_u8": 0,
+          "hurt_selector_u8": 0,
+          "record_sha256": "13f3ea508dbf9376b89a93f9735a8f6a7c097403a17eba3a7b243acdedf2248b"
+        },
+        {
+          "animation_record": "0x0009bc94",
+          "attack_selector_u8": 0,
+          "hurt_selector_u8": 0,
+          "record_sha256": "756f15aa09cf669b9df48ed79776c64fcf6c571c30ca8dd78d2ccf4f1229b75a"
+        },
+        {
+          "animation_record": "0x0009bca4",
+          "attack_selector_u8": 0,
+          "hurt_selector_u8": 0,
+          "record_sha256": "78c97eb91b3569ce44002f1f5abefbd427f44a5e1c2248bd5782de8d04c1a613"
+        },
+        {
+          "animation_record": "0x0009bcb4",
+          "attack_selector_u8": 0,
+          "hurt_selector_u8": 0,
+          "record_sha256": "a3f5da02421978dd23867fde2c21bba7a4b948fe8afc66290c9b73f6754f2b3c"
+        },
+        {
+          "animation_record": "0x0009bcc8",
+          "attack_selector_u8": 0,
+          "hurt_selector_u8": 0,
+          "record_sha256": "fe280b86ffd7c4c9e02f10083fab8e1695f1c14f423312c80cdd437f4442de2f"
+        },
+        {
+          "animation_record": "0x0009bcd8",
+          "attack_selector_u8": 0,
+          "hurt_selector_u8": 0,
+          "record_sha256": "a15a6b573cf7e51ac652a801ee8c966e937ece3c5bec6b289dd8c6665ec9d1d2"
+        },
+        {
+          "animation_record": "0x0009bce8",
+          "attack_selector_u8": 0,
+          "hurt_selector_u8": 0,
+          "record_sha256": "b9c8097436eeb4a525eebcafda6aac6891fe3b6c212f678824d267a9a49e754e"
+        },
+        {
+          "animation_record": "0x0009bcf8",
+          "attack_selector_u8": 0,
+          "hurt_selector_u8": 0,
+          "record_sha256": "3c509e2b31b8e835d562f347d0a764c7774f86f3222230fe9e7d9a17ade982ab"
+        },
+        {
+          "animation_record": "0x0009bd08",
+          "attack_selector_u8": 0,
+          "hurt_selector_u8": 0,
+          "record_sha256": "b9c8097436eeb4a525eebcafda6aac6891fe3b6c212f678824d267a9a49e754e"
+        },
+        {
+          "animation_record": "0x0009bd18",
+          "attack_selector_u8": 0,
+          "hurt_selector_u8": 0,
+          "record_sha256": "33936013c4ecf3a52b1ccf7de64982c74c63b3763487cb54533f5bad9a5f8343"
+        },
+        {
+          "animation_record": "0x0009bd2c",
+          "attack_selector_u8": 0,
+          "hurt_selector_u8": 0,
+          "record_sha256": "35062351f1fd7cdb44a526ccc96324517334c3a5b745998639420a88b070e7d7"
+        },
+        {
+          "animation_record": "0x0009bd3c",
+          "attack_selector_u8": 0,
+          "hurt_selector_u8": 0,
+          "record_sha256": "5543bd3d60c6cab6191c264fc688f5e60010fe45d9fb870c05ae10dc63178c85"
+        },
+        {
+          "animation_record": "0x0009bd4c",
+          "attack_selector_u8": 0,
+          "hurt_selector_u8": 0,
+          "record_sha256": "38f5f96705ca4eaaa5a9b10a63e06ecc1406c65cb4b20ce383c143c40ab788a4"
+        },
+        {
+          "animation_record": "0x0009bd5c",
+          "attack_selector_u8": 0,
+          "hurt_selector_u8": 0,
+          "record_sha256": "0524c0141e334d2705ed787a90e8ab4abaf11c31667c3f38221b30fe0f130701"
+        },
+        {
+          "animation_record": "0x0009bd6c",
+          "attack_selector_u8": 0,
+          "hurt_selector_u8": 0,
+          "record_sha256": "38f5f96705ca4eaaa5a9b10a63e06ecc1406c65cb4b20ce383c143c40ab788a4"
+        },
+        {
+          "animation_record": "0x0009bd7c",
+          "attack_selector_u8": 0,
+          "hurt_selector_u8": 0,
+          "record_sha256": "eb96bad69d4951844e15d14981a0e8a96197c51625f1d0ccac3a27cf8868fc91"
+        },
+        {
+          "animation_record": "0x0009bd90",
+          "attack_selector_u8": 0,
+          "hurt_selector_u8": 0,
+          "record_sha256": "db60ae29963614187ffc4227b05ee9099bcbc8d8732e418270925b7856f5df97"
+        },
+        {
+          "animation_record": "0x0009d676",
+          "attack_selector_u8": 0,
+          "hurt_selector_u8": 0,
+          "record_sha256": "6a04a05c0ed45566db58dbf4e9a83e6ba9a1a75274da0afa8b1e608380498ee0"
+        },
+        {
+          "animation_record": "0x0009d68a",
+          "attack_selector_u8": 0,
+          "hurt_selector_u8": 0,
+          "record_sha256": "86d6b27eddbe3b43680564497911db35dfeff749b3e10a41dcf760277bc3743e"
+        },
+        {
+          "animation_record": "0x0009d69e",
+          "attack_selector_u8": 0,
+          "hurt_selector_u8": 0,
+          "record_sha256": "0e59e5be17b40829faea50a4cf9f9da09050ef4e95446d2618d837ebf56606cd"
+        },
+        {
+          "animation_record": "0x0009d6b2",
+          "attack_selector_u8": 0,
+          "hurt_selector_u8": 0,
+          "record_sha256": "261152a94212f1605cec2a71f826d634950af435bf61f382a92ac7987f9bb041"
+        },
+        {
+          "animation_record": "0x0009d6c6",
+          "attack_selector_u8": 0,
+          "hurt_selector_u8": 0,
+          "record_sha256": "aa85e7a417b4aea20eb167fbf80079476657361f12d87460078e34873ba5f320"
+        },
+        {
+          "animation_record": "0x0009d6da",
+          "attack_selector_u8": 0,
+          "hurt_selector_u8": 0,
+          "record_sha256": "06e45ab07ee18bab3cf56dfa644e6d77eeefd938eab09210796b9f8a629ee982"
+        },
+        {
+          "animation_record": "0x0009d6ee",
+          "attack_selector_u8": 0,
+          "hurt_selector_u8": 0,
+          "record_sha256": "bce3b6761c7f5682ec18e51bb5b58d338ff9cee8c5c534b9450d0cf47c9e0fa0"
+        },
+        {
+          "animation_record": "0x0009d702",
+          "attack_selector_u8": 0,
+          "hurt_selector_u8": 0,
+          "record_sha256": "a3d1e80923e0ef42a3ae866cdc8408f625369f6cfb464b92820da3793cbaec8d"
+        },
+        {
+          "animation_record": "0x0009d716",
+          "attack_selector_u8": 0,
+          "hurt_selector_u8": 0,
+          "record_sha256": "b08d9dc193f25babfafb083df1c61590d3e6bce24bafb138c8bc361c6b7feecd"
+        },
+        {
+          "animation_record": "0x0009d72a",
+          "attack_selector_u8": 0,
+          "hurt_selector_u8": 0,
+          "record_sha256": "455ce80f41f2932f6f41a3731a50a5e4b989abad3b9383f6b69f2e5e958988e3"
+        },
+        {
+          "animation_record": "0x0009d73e",
+          "attack_selector_u8": 0,
+          "hurt_selector_u8": 0,
+          "record_sha256": "1ccd60a06f4fb437e89a341326263b93ed77e937a6b13f516f675cc87f70e7dc"
+        },
+        {
+          "animation_record": "0x0009d752",
+          "attack_selector_u8": 0,
+          "hurt_selector_u8": 0,
+          "record_sha256": "1196378f9bda0449faa21200f297d257d3c6db892728b0d567b55863ff3ecb37"
+        },
+        {
+          "animation_record": "0x0009dca8",
+          "attack_selector_u8": 0,
+          "hurt_selector_u8": 0,
+          "record_sha256": "7c026b1be85eba7e38ae5fecc2b1e6ef52fefd47ec9285eb37a580197243f663"
+        },
+        {
+          "animation_record": "0x0009dcd0",
+          "attack_selector_u8": 0,
+          "hurt_selector_u8": 0,
+          "record_sha256": "5574a6c45621e8b4bdb487afd7b62c7a024af4c23497eee23d875cfc3342772e"
+        },
+        {
+          "animation_record": "0x0009dd20",
+          "attack_selector_u8": 0,
+          "hurt_selector_u8": 0,
+          "record_sha256": "ba85515b36dc0b5b276e6222413dc9330b91d3647c98ed8f4290935b57c93c31"
+        },
+        {
+          "animation_record": "0x0009e606",
+          "attack_selector_u8": 0,
+          "hurt_selector_u8": 0,
+          "record_sha256": "30d5f20951afe72f7daad4fb8ec9883b8d24556bccb781c4d4b8f1e795d69e99"
+        },
+        {
+          "animation_record": "0x0009e62e",
+          "attack_selector_u8": 0,
+          "hurt_selector_u8": 0,
+          "record_sha256": "b68ea9f8e2a3c9719ad1e0291081df3f35463365c9afdc31e75fc15b1f319aad"
+        },
+        {
+          "animation_record": "0x0009e656",
+          "attack_selector_u8": 0,
+          "hurt_selector_u8": 0,
+          "record_sha256": "198d266a48981beb8e000dde155e62100349b4716fa11705686eb6518570fd71"
+        },
+        {
+          "animation_record": "0x0009e66a",
+          "attack_selector_u8": 0,
+          "hurt_selector_u8": 0,
+          "record_sha256": "abcf34e13f067ef8ff167e01d48518c8e1396fcdd253b6583e3fb4420467eba1"
+        },
+        {
+          "animation_record": "0x0009e692",
+          "attack_selector_u8": 0,
+          "hurt_selector_u8": 0,
+          "record_sha256": "15cf4dd691a1ed49f21581406be2862a7497979ff49f5d28e1a206c3fbf4b859"
+        },
+        {
+          "animation_record": "0x0009e6e2",
+          "attack_selector_u8": 0,
+          "hurt_selector_u8": 0,
+          "record_sha256": "6a71f10e50b711e01fe69c1a265d4b3e4da552a5840c1fdf41e5d807711702a6"
+        },
+        {
+          "animation_record": "0x0009e6f6",
+          "attack_selector_u8": 0,
+          "hurt_selector_u8": 0,
+          "record_sha256": "42c10d62d8681e25e318f838b79a3fbc59c999738b15ab64c5e157360bf3f47a"
+        },
+        {
+          "animation_record": "0x0009e70a",
+          "attack_selector_u8": 0,
+          "hurt_selector_u8": 0,
+          "record_sha256": "21ee9574aa559bf49f6c63d33bbcaf058172c96cd8fab7851b77f58a91bdca8d"
+        },
+        {
+          "animation_record": "0x0009e71e",
+          "attack_selector_u8": 0,
+          "hurt_selector_u8": 0,
+          "record_sha256": "36b4524e95bd7da141085e9ab8da1025b089fd036054adc0e064f73342a6b69b"
+        },
+        {
+          "animation_record": "0x0009e732",
+          "attack_selector_u8": 0,
+          "hurt_selector_u8": 0,
+          "record_sha256": "c7f70b0ccf4e54e11e9bd310cd5fe957cb29071da0abdcb43c031f39f86fbbda"
+        },
+        {
+          "animation_record": "0x000a3d1c",
+          "attack_selector_u8": 0,
+          "hurt_selector_u8": 2,
+          "record_sha256": "ea5e5aeacaaffcc7324505fdcf78a27fc815ad4c735cc16140a411f213ee5d2a"
+        },
+        {
+          "animation_record": "0x000a505e",
+          "attack_selector_u8": 0,
+          "hurt_selector_u8": 1,
+          "record_sha256": "d03245b5ac132e7360f850c364738ba6341285f08409ea6194488fc0fd517b03"
+        },
+        {
+          "animation_record": "0x000a51fa",
+          "attack_selector_u8": 0,
+          "hurt_selector_u8": 0,
+          "record_sha256": "d2d020c449bb4d760de1b65317b61fc89f00ae4eef81976ec9e0a53b3f500b5e"
+        },
+        {
+          "animation_record": "0x000a7408",
+          "attack_selector_u8": 0,
+          "hurt_selector_u8": 1,
+          "record_sha256": "b6e477c285e3949a2008d486c94a380b368456c7f9fd13a816251b6d0688550a"
+        },
+        {
+          "animation_record": "0x000a7418",
+          "attack_selector_u8": 0,
+          "hurt_selector_u8": 1,
+          "record_sha256": "24da4e70ce33ace0e9ccedc3cb320bb19f1ffad4bdd4153091b766924e04824a"
+        },
+        {
+          "animation_record": "0x000a7428",
+          "attack_selector_u8": 0,
+          "hurt_selector_u8": 1,
+          "record_sha256": "19ef4bd3874df4489077fd188ac630f95939feb7041957bc2188985754ee0bab"
+        },
+        {
+          "animation_record": "0x000a7438",
+          "attack_selector_u8": 0,
+          "hurt_selector_u8": 1,
+          "record_sha256": "d428bffbe61b64b5b6acd4c53ef592b2726c3ab0aee4859df4f1217df79f113b"
+        },
+        {
+          "animation_record": "0x000a7448",
+          "attack_selector_u8": 0,
+          "hurt_selector_u8": 1,
+          "record_sha256": "2c438a24a6a7d079366e9691384472e2c9a7e7f1563d588ea204bbbbf68fb6d7"
+        },
+        {
+          "animation_record": "0x000a7458",
+          "attack_selector_u8": 0,
+          "hurt_selector_u8": 1,
+          "record_sha256": "67f488878fc62c9a4915f3a7878e0af252ea4301fa8d0f35cfd469ed46af8bea"
+        },
+        {
+          "animation_record": "0x000a7468",
+          "attack_selector_u8": 0,
+          "hurt_selector_u8": 1,
+          "record_sha256": "9424fbefef8d96c0c439db5aac4de2909a0b6b810eec1f3841e6fd9c3df66578"
+        },
+        {
+          "animation_record": "0x000a7478",
+          "attack_selector_u8": 0,
+          "hurt_selector_u8": 1,
+          "record_sha256": "7546bf06ef49369a53eea7f34525812f0ec2b7c0909a132e1f144d4ae4b92af3"
+        },
+        {
+          "animation_record": "0x000a7488",
+          "attack_selector_u8": 0,
+          "hurt_selector_u8": 1,
+          "record_sha256": "da0ac7cfd5074d9b1c5bc57dbdce52041d17315e7049742179d8972d7cdb1ec1"
+        },
+        {
+          "animation_record": "0x000a7498",
+          "attack_selector_u8": 0,
+          "hurt_selector_u8": 1,
+          "record_sha256": "9b2a266aba748a313920786a0de6b109f699a1c21b22e79ecbd93abefbba0cf1"
+        },
+        {
+          "animation_record": "0x000a74a8",
+          "attack_selector_u8": 0,
+          "hurt_selector_u8": 1,
+          "record_sha256": "e8f353fcf0c89afe1e5c7b1c9d943af22311093b07455713c4532fbec4bca288"
+        },
+        {
+          "animation_record": "0x0012d380",
+          "attack_selector_u8": 0,
+          "hurt_selector_u8": 1,
+          "record_sha256": "5f88ed0f126f459311a72ff12653692c4e021c2acb7a84563c074d56be757493"
+        },
+        {
+          "animation_record": "0x0012d390",
+          "attack_selector_u8": 0,
+          "hurt_selector_u8": 1,
+          "record_sha256": "d6b57436737b64be569d7e92c6e817fdd43a5e81cfb6affab0267e4cf07c186b"
+        },
+        {
+          "animation_record": "0x0012d3a0",
+          "attack_selector_u8": 0,
+          "hurt_selector_u8": 1,
+          "record_sha256": "3205c92b6ad37fc504d3d4396cc1e76b7a74f285646bcc3538b20748513b2aa7"
+        },
+        {
+          "animation_record": "0x0012d3b0",
+          "attack_selector_u8": 0,
+          "hurt_selector_u8": 1,
+          "record_sha256": "4ee07a0b3c21115fd412554098488e7c5f7b985af06778242d94f4fedafea348"
+        },
+        {
+          "animation_record": "0x0012d3c0",
+          "attack_selector_u8": 0,
+          "hurt_selector_u8": 1,
+          "record_sha256": "a30c1bb09a499547365d386bd05bb3ed09570d089f6abd082dd905e059f433f3"
+        },
+        {
+          "animation_record": "0x0012d3d0",
+          "attack_selector_u8": 0,
+          "hurt_selector_u8": 1,
+          "record_sha256": "f02f5694062164fb7ebcf9b75f8e89285785848c94fa18b8f512ccb357f9292d"
+        },
+        {
+          "animation_record": "0x0012d3e0",
+          "attack_selector_u8": 0,
+          "hurt_selector_u8": 1,
+          "record_sha256": "d4a95bd70c864f28d97bbe66745f10b4358419315e56ce36bb6562edf5ec0513"
+        },
+        {
+          "animation_record": "0x0012d3f0",
+          "attack_selector_u8": 0,
+          "hurt_selector_u8": 1,
+          "record_sha256": "f4e65a0f512f6693e97762a4e4d8be62534abac996da83a7a4969abb637e5bd1"
+        },
+        {
+          "animation_record": "0x0012d404",
+          "attack_selector_u8": 0,
+          "hurt_selector_u8": 1,
+          "record_sha256": "2261b213952198733862067047a3eae938bb6de41ae684444d7f2d4a1d08f688"
+        },
+        {
+          "animation_record": "0x0012d414",
+          "attack_selector_u8": 0,
+          "hurt_selector_u8": 1,
+          "record_sha256": "26f5f3c3a720474eecfb1fa49cba20928751f97b60decabf4879928daa887c13"
+        },
+        {
+          "animation_record": "0x0012d424",
+          "attack_selector_u8": 0,
+          "hurt_selector_u8": 1,
+          "record_sha256": "1ab9037adea3d245e77e62ec522e7158e72f261f0b06f1267be112fc3a6f8a0e"
+        },
+        {
+          "animation_record": "0x0012d434",
+          "attack_selector_u8": 0,
+          "hurt_selector_u8": 1,
+          "record_sha256": "b9151feea7e7a1aa8a9911b37718b4539530f75854b5bfb031d879b05d3fb114"
+        },
+        {
+          "animation_record": "0x0012d444",
+          "attack_selector_u8": 0,
+          "hurt_selector_u8": 1,
+          "record_sha256": "9d20b8e8b25df42e91a892e0960694a8a65665b1a5f74c693734ab3f023f9861"
+        },
+        {
+          "animation_record": "0x0012d454",
+          "attack_selector_u8": 0,
+          "hurt_selector_u8": 1,
+          "record_sha256": "fea52bfe67be4fff4b593098f43a44bfbe749e7011447e4be96a59927ea06b3f"
+        },
+        {
+          "animation_record": "0x0012d464",
+          "attack_selector_u8": 0,
+          "hurt_selector_u8": 1,
+          "record_sha256": "9bd22554bcf8d4b4a5fffbab418249912f52997faf6fa82f23cc2f98cf7b8049"
+        },
+        {
+          "animation_record": "0x0012d474",
+          "attack_selector_u8": 0,
+          "hurt_selector_u8": 1,
+          "record_sha256": "8e0b1e3970023b2a28031dbcdd368dce8a0dd994b7dbcec8e73ff70c4cddd76c"
+        },
+        {
+          "animation_record": "0x0012d488",
+          "attack_selector_u8": 0,
+          "hurt_selector_u8": 2,
+          "record_sha256": "a5627473209ba0d17b78e0d5e427dc213f5376a6bbc742b9b423f73ac9a22e5c"
+        },
+        {
+          "animation_record": "0x0012d498",
+          "attack_selector_u8": 0,
+          "hurt_selector_u8": 2,
+          "record_sha256": "cc41047434a20352bb733c9b8a7198c02ebd10e880eba7ecdf61c4a5192baf66"
+        },
+        {
+          "animation_record": "0x0012d4a8",
+          "attack_selector_u8": 0,
+          "hurt_selector_u8": 2,
+          "record_sha256": "601300c9948e7d20f28999c8715afad16f9fa7dd539bfed25a74cf650acf637d"
+        },
+        {
+          "animation_record": "0x0012d4b8",
+          "attack_selector_u8": 0,
+          "hurt_selector_u8": 2,
+          "record_sha256": "0b91b6e10f79411a09e85c871b92ef1f28437de45f0ae60e8beea9209ae59067"
+        },
+        {
+          "animation_record": "0x0012d4c8",
+          "attack_selector_u8": 0,
+          "hurt_selector_u8": 2,
+          "record_sha256": "b56cb19cd02f906620d3f3d4dc8f9346aab3aee18a52b6f962df02225ac01e52"
+        },
+        {
+          "animation_record": "0x0012d4d8",
+          "attack_selector_u8": 0,
+          "hurt_selector_u8": 2,
+          "record_sha256": "7559b78f3f70330daf0975c7deeae62b440ff79e24b7cb6224930cf23efe5a74"
+        },
+        {
+          "animation_record": "0x0012d4e8",
+          "attack_selector_u8": 0,
+          "hurt_selector_u8": 2,
+          "record_sha256": "c79053e67d24e91c54fd8b52f8b29684b792f1ad4c80bee2466e9b2e1c1f06b6"
+        },
+        {
+          "animation_record": "0x0012d4f8",
+          "attack_selector_u8": 0,
+          "hurt_selector_u8": 2,
+          "record_sha256": "32da52eedb3b2bc4f9fcc3260b6100932661e8f364ba9fa0f2fd9a18d6e3a3a5"
+        },
+        {
+          "animation_record": "0x0012d50c",
+          "attack_selector_u8": 0,
+          "hurt_selector_u8": 2,
+          "record_sha256": "149db7d55f2bf223ceadc18c81a5d6a9c013e47d4814624277480ed51d562c70"
+        },
+        {
+          "animation_record": "0x0012d51c",
+          "attack_selector_u8": 0,
+          "hurt_selector_u8": 2,
+          "record_sha256": "5034db6dd160318151edf43e642b048ebe017073cd43fa83605422a70e468fc1"
+        },
+        {
+          "animation_record": "0x0012d52c",
+          "attack_selector_u8": 0,
+          "hurt_selector_u8": 2,
+          "record_sha256": "42d9e0a35ea1fde39d8ccf807cf0f421a8c86a0195cce3e5dc7b77a29abd25bc"
+        },
+        {
+          "animation_record": "0x0012d53c",
+          "attack_selector_u8": 0,
+          "hurt_selector_u8": 2,
+          "record_sha256": "7ac48d7195f636871dde144152b0e947568afdcfeb145f86caa7ad4592f27ed0"
+        },
+        {
+          "animation_record": "0x0012d54c",
+          "attack_selector_u8": 0,
+          "hurt_selector_u8": 2,
+          "record_sha256": "3606a488f75d708630464e5695efc50eefb264803aa663631e331b4a178414fe"
+        },
+        {
+          "animation_record": "0x0012d55c",
+          "attack_selector_u8": 0,
+          "hurt_selector_u8": 2,
+          "record_sha256": "b050f99ba741d692522aaa20d0293c4fa1a411a138d44ccd2fff63cd792c62be"
+        },
+        {
+          "animation_record": "0x0012d56c",
+          "attack_selector_u8": 0,
+          "hurt_selector_u8": 2,
+          "record_sha256": "ecbecc25a3653c9c69c037d44fb019e8a97c1ed2a54fc7533573345589a9c903"
+        },
+        {
+          "animation_record": "0x0012d57c",
+          "attack_selector_u8": 0,
+          "hurt_selector_u8": 2,
+          "record_sha256": "a3a905739ff08ee6ca910133fdcb7832232b23494ab330db6cf835698734a4f7"
+        },
+        {
+          "animation_record": "0x0012d590",
+          "attack_selector_u8": 0,
+          "hurt_selector_u8": 1,
+          "record_sha256": "f96d922d21f7662533b3040301d66837bdcba8fa15aaf9b0daf4f79d97a067f1"
+        },
+        {
+          "animation_record": "0x0012d5a0",
+          "attack_selector_u8": 0,
+          "hurt_selector_u8": 1,
+          "record_sha256": "192008347dbf7ac6672f08b942c10d7c04e63dcf4eda4b58aa2bab681b339f8f"
+        },
+        {
+          "animation_record": "0x0012d5b0",
+          "attack_selector_u8": 0,
+          "hurt_selector_u8": 1,
+          "record_sha256": "7e96035e495fa39101316e589430d2390b28a6e2c8a37b28a89b20d839fbf8a2"
+        },
+        {
+          "animation_record": "0x0012d5c0",
+          "attack_selector_u8": 0,
+          "hurt_selector_u8": 1,
+          "record_sha256": "abd796c0643594159b8af88525bfd7946359ad71c4efda482e55aba82ca0e291"
+        },
+        {
+          "animation_record": "0x0012d5d0",
+          "attack_selector_u8": 0,
+          "hurt_selector_u8": 1,
+          "record_sha256": "e3437da5183f897afb442819d327715a34e6a552c2499f68b4ab0e33f8089865"
+        },
+        {
+          "animation_record": "0x0012d5e4",
+          "attack_selector_u8": 0,
+          "hurt_selector_u8": 3,
+          "record_sha256": "c0743d426fc810a628e1eff4e18f1ee8e19d5e75d9bf602864f3230a20503a7c"
+        },
+        {
+          "animation_record": "0x0012d5f4",
+          "attack_selector_u8": 0,
+          "hurt_selector_u8": 3,
+          "record_sha256": "95228d3d9abe3d262f68e9c0d1d6c8ff4ade0d55fe4e47c65cd57138158f07c9"
+        },
+        {
+          "animation_record": "0x0012d604",
+          "attack_selector_u8": 0,
+          "hurt_selector_u8": 2,
+          "record_sha256": "1ee88df209d1157711c265cb9b298ea4b26347546be33dd9b5205cc59075074b"
+        },
+        {
+          "animation_record": "0x0012d614",
+          "attack_selector_u8": 0,
+          "hurt_selector_u8": 2,
+          "record_sha256": "09ab43b9eae524c2d45aa99c926e2b06e68e595701856252e501135b42f2b123"
+        },
+        {
+          "animation_record": "0x0012d628",
+          "attack_selector_u8": 0,
+          "hurt_selector_u8": 2,
+          "record_sha256": "afaeaf74f4c0fc24701135b1375bef6ede18fe1dcd4559916ee818199162ea66"
+        },
+        {
+          "animation_record": "0x0012d638",
+          "attack_selector_u8": 0,
+          "hurt_selector_u8": 4,
+          "record_sha256": "820cbedaba911bbb968811125a26c39de9e9c9b8e6cf62d942c480912e09e5fc"
+        },
+        {
+          "animation_record": "0x0012d648",
+          "attack_selector_u8": 0,
+          "hurt_selector_u8": 1,
+          "record_sha256": "d1f6995e0e6bd109c69429d2e02c836f9d47ff1c52361a28db0f02bab1477c10"
+        },
+        {
+          "animation_record": "0x0012d658",
+          "attack_selector_u8": 0,
+          "hurt_selector_u8": 1,
+          "record_sha256": "ad703f976335a66d77a1e3a637e9d791782d7686b9608b09f884a4188e662179"
+        },
+        {
+          "animation_record": "0x0012d668",
+          "attack_selector_u8": 0,
+          "hurt_selector_u8": 1,
+          "record_sha256": "b36f6afd71e0d3b40377c21f55d104a10348204624be386cc037919a25eef5b1"
+        },
+        {
+          "animation_record": "0x0012d678",
+          "attack_selector_u8": 0,
+          "hurt_selector_u8": 1,
+          "record_sha256": "e3437da5183f897afb442819d327715a34e6a552c2499f68b4ab0e33f8089865"
+        },
+        {
+          "animation_record": "0x0012d890",
+          "attack_selector_u8": 0,
+          "hurt_selector_u8": 1,
+          "record_sha256": "c76ab46cdaa6d8256da122840df9b4f9e40bd9653742927165e366123b54a42b"
+        },
+        {
+          "animation_record": "0x0012d8a0",
+          "attack_selector_u8": 1,
+          "hurt_selector_u8": 1,
+          "record_sha256": "5cf921125b5aec03c32bf78d2aab71e38543fb3a77c344a639b80e734eace9a8"
+        },
+        {
+          "animation_record": "0x0012d8b0",
+          "attack_selector_u8": 0,
+          "hurt_selector_u8": 1,
+          "record_sha256": "7926c990baade9b98b433af94e2f843300f801b6bccb2b9ac1f4c952c2224450"
+        },
+        {
+          "animation_record": "0x0012d8c0",
+          "attack_selector_u8": 0,
+          "hurt_selector_u8": 1,
+          "record_sha256": "7358e361524979b73efc5f8cf92d26c4cf370ec8ba6d7719af63e830d77e2c93"
+        },
+        {
+          "animation_record": "0x0012d8d0",
+          "attack_selector_u8": 0,
+          "hurt_selector_u8": 1,
+          "record_sha256": "37adbe873d96096c515e8b60c9dce63307bf19ba1d86e169008b8ecf9d47b219"
+        },
+        {
+          "animation_record": "0x0012d8e0",
+          "attack_selector_u8": 0,
+          "hurt_selector_u8": 1,
+          "record_sha256": "c9e40e469bd821c8be18858c83b68d8df8a5f7657d879da482e672bd6c3a1fe1"
+        },
+        {
+          "animation_record": "0x0012d9dc",
+          "attack_selector_u8": 0,
+          "hurt_selector_u8": 1,
+          "record_sha256": "270973a6634f6f78a6b7f40f3b800dff652b3ea05856c2bd1f02d143fe42d00c"
+        },
+        {
+          "animation_record": "0x0012d9ec",
+          "attack_selector_u8": 0,
+          "hurt_selector_u8": 1,
+          "record_sha256": "26d67b7367b6b43dc5fe010d5e9734394813d6260c827aba0f1665326976deb8"
+        },
+        {
+          "animation_record": "0x0012d9fc",
+          "attack_selector_u8": 0,
+          "hurt_selector_u8": 1,
+          "record_sha256": "596a00269a28af725290e4fecb5f5607da8e5d8a86d74ed36911cef0c1f78bde"
+        },
+        {
+          "animation_record": "0x0012da0c",
+          "attack_selector_u8": 4,
+          "hurt_selector_u8": 1,
+          "record_sha256": "a4f0f22feb4b760927321306dabff4426251ae7209c2e6fbfda4431cc843c75c"
+        },
+        {
+          "animation_record": "0x0012da1c",
+          "attack_selector_u8": 0,
+          "hurt_selector_u8": 1,
+          "record_sha256": "8e690d8c148a013a066697cb11504b542bceb5cd9993840643db2bd5c01ec092"
+        },
+        {
+          "animation_record": "0x0012da2c",
+          "attack_selector_u8": 0,
+          "hurt_selector_u8": 1,
+          "record_sha256": "3b0562d4fe5d1bf5ffa5f70d63fba1d5f7b69bb982ff1ede34270b8efed20b11"
+        },
+        {
+          "animation_record": "0x0012dad4",
+          "attack_selector_u8": 0,
+          "hurt_selector_u8": 1,
+          "record_sha256": "540851a5069b5ba9e8fadc52bc3052bd870ec179311a1e4c6467666f0058f9e2"
+        },
+        {
+          "animation_record": "0x0012dae4",
+          "attack_selector_u8": 6,
+          "hurt_selector_u8": 1,
+          "record_sha256": "6398c5ad031bf4b1aea975367e3939e2b081d813bf84e5999c6ce8355c93f352"
+        },
+        {
+          "animation_record": "0x0012daf4",
+          "attack_selector_u8": 0,
+          "hurt_selector_u8": 1,
+          "record_sha256": "e3eecf9e58f1d601e95e3d42096179bab2a818cf3d93a75ea7b2d75642238076"
+        },
+        {
+          "animation_record": "0x0012db04",
+          "attack_selector_u8": 0,
+          "hurt_selector_u8": 1,
+          "record_sha256": "b1719b0307afe63a9beb87790837a7f0d274f66117994a1f9fb70b9688b5bbcf"
+        },
+        {
+          "animation_record": "0x0012db14",
+          "attack_selector_u8": 0,
+          "hurt_selector_u8": 1,
+          "record_sha256": "2992abbac3d6e90cb775cd59932e3f6509fddf7e2321ffab4c28898e76241657"
+        },
+        {
+          "animation_record": "0x0012db24",
+          "attack_selector_u8": 0,
+          "hurt_selector_u8": 1,
+          "record_sha256": "c9e40e469bd821c8be18858c83b68d8df8a5f7657d879da482e672bd6c3a1fe1"
+        },
+        {
+          "animation_record": "0x0012dd78",
+          "attack_selector_u8": 0,
+          "hurt_selector_u8": 14,
+          "record_sha256": "d8fd6e8da38297b3874ea3cdafee2cc48af44f62433b4280409eeea714d0a64b"
+        },
+        {
+          "animation_record": "0x0012dd88",
+          "attack_selector_u8": 0,
+          "hurt_selector_u8": 2,
+          "record_sha256": "502c7d3f5baa0d2260733c0292a2e423c1e4e7c6c2e2650086b01be08461e2b6"
+        },
+        {
+          "animation_record": "0x0012dd9c",
+          "attack_selector_u8": 0,
+          "hurt_selector_u8": 0,
+          "record_sha256": "66ed9b2ed74be8a7c8314e23d3dd6aeab745daf8122a03f80f3d5f952e2ada6b"
+        },
+        {
+          "animation_record": "0x0012ddb0",
+          "attack_selector_u8": 0,
+          "hurt_selector_u8": 7,
+          "record_sha256": "2125394d64526eb88fc9761d2740321fb0abd360e78e90348a26cc519ca5f4b5"
+        },
+        {
+          "animation_record": "0x0012de38",
+          "attack_selector_u8": 0,
+          "hurt_selector_u8": 0,
+          "record_sha256": "a1c42d3eb1976ca140583c6f4ad6165973b4a47812d06a680db7199c343cc8a8"
+        },
+        {
+          "animation_record": "0x0012de48",
+          "attack_selector_u8": 0,
+          "hurt_selector_u8": 0,
+          "record_sha256": "3cd2e75b9a9ceb21ba20cc2abe47784958e36b10d22360bcc98109a1df689c2f"
+        },
+        {
+          "animation_record": "0x0012de58",
+          "attack_selector_u8": 0,
+          "hurt_selector_u8": 0,
+          "record_sha256": "a1c42d3eb1976ca140583c6f4ad6165973b4a47812d06a680db7199c343cc8a8"
+        },
+        {
+          "animation_record": "0x0012de68",
+          "attack_selector_u8": 0,
+          "hurt_selector_u8": 0,
+          "record_sha256": "3cd2e75b9a9ceb21ba20cc2abe47784958e36b10d22360bcc98109a1df689c2f"
+        },
+        {
+          "animation_record": "0x0012de78",
+          "attack_selector_u8": 0,
+          "hurt_selector_u8": 0,
+          "record_sha256": "276d5aaa3e9c2e30fcca8c98f788b534bead2f263921d6fe89e70fa343f18a47"
+        },
+        {
+          "animation_record": "0x0012de88",
+          "attack_selector_u8": 0,
+          "hurt_selector_u8": 0,
+          "record_sha256": "a5153db79180d4297a4465dc8bc1396a387f64b22cef29f1b7283baeafc21ee0"
+        },
+        {
+          "animation_record": "0x0012de98",
+          "attack_selector_u8": 0,
+          "hurt_selector_u8": 0,
+          "record_sha256": "3fe3261e0e3bdb059b7543f4739dcbbf66687ba392f9eaf0ecdbdd9c5706715f"
+        },
+        {
+          "animation_record": "0x0012dea8",
+          "attack_selector_u8": 0,
+          "hurt_selector_u8": 0,
+          "record_sha256": "27f716fc2e2b258b6e5d63d3c0f0b2170d308f78661219d72c0e42a41de2228a"
+        },
+        {
+          "animation_record": "0x0012deb8",
+          "attack_selector_u8": 0,
+          "hurt_selector_u8": 0,
+          "record_sha256": "60ffa111c3453e35e877f4b49f34f6358ba57765780d7fca7bffe7964fc0400e"
+        },
+        {
+          "animation_record": "0x0012dec8",
+          "attack_selector_u8": 0,
+          "hurt_selector_u8": 0,
+          "record_sha256": "4386a429c3d145e9fde49054343d3de88403ce235d3ee5f0912b688d6fd76e59"
+        },
+        {
+          "animation_record": "0x0012ded8",
+          "attack_selector_u8": 0,
+          "hurt_selector_u8": 0,
+          "record_sha256": "f966dc8cdd949fdd356a1b4365f7660954e3f0207fc05387fce172ca50fefce3"
+        },
+        {
+          "animation_record": "0x0012e04c",
+          "attack_selector_u8": 0,
+          "hurt_selector_u8": 0,
+          "record_sha256": "778e82c50f8c0e5d4f6b559e4d17e8269ff18e5c5100121eea49a6bd51a87e06"
+        },
+        {
+          "animation_record": "0x0012e05c",
+          "attack_selector_u8": 0,
+          "hurt_selector_u8": 0,
+          "record_sha256": "5df001a8307ff9e2d4c1a530df248acabf04951990148922f87d35300212439c"
+        },
+        {
+          "animation_record": "0x0012e06c",
+          "attack_selector_u8": 0,
+          "hurt_selector_u8": 0,
+          "record_sha256": "7e5a0f686dce89917a2210cafc0779286dba976b1e0615d815a7b31fa76e1a76"
+        },
+        {
+          "animation_record": "0x0012e07c",
+          "attack_selector_u8": 0,
+          "hurt_selector_u8": 0,
+          "record_sha256": "5df001a8307ff9e2d4c1a530df248acabf04951990148922f87d35300212439c"
+        },
+        {
+          "animation_record": "0x0012e08c",
+          "attack_selector_u8": 0,
+          "hurt_selector_u8": 0,
+          "record_sha256": "6120137e47ee1bee1cbaf26adee4bae384d414dab8430a6babad9b9fce2d10f0"
+        },
+        {
+          "animation_record": "0x0012e09c",
+          "attack_selector_u8": 0,
+          "hurt_selector_u8": 0,
+          "record_sha256": "401fd7041925e9c3926acc892591244d8d99992617ee43110be75798e3cb6e7d"
+        },
+        {
+          "animation_record": "0x0012e214",
+          "attack_selector_u8": 0,
+          "hurt_selector_u8": 14,
+          "record_sha256": "d1cdedb7de79870915d020102f9650493b67b0731aec85e2e7f0e7185051d3f5"
+        },
+        {
+          "animation_record": "0x0012e224",
+          "attack_selector_u8": 0,
+          "hurt_selector_u8": 14,
+          "record_sha256": "aef70b77224be5eb4abd06b7d0a1b91d4f2c34d96e0dd8a2b723b35383fc469b"
+        },
+        {
+          "animation_record": "0x0012e234",
+          "attack_selector_u8": 0,
+          "hurt_selector_u8": 14,
+          "record_sha256": "5c94b81fd2cfa9e559c241344ab728d479349a1fcc12bd672524363ee92e02ae"
+        },
+        {
+          "animation_record": "0x0012e244",
+          "attack_selector_u8": 0,
+          "hurt_selector_u8": 14,
+          "record_sha256": "8ca894e11d1945771533a36597f97bf7bf55804f1a10324222935a4b423e2f1a"
+        },
+        {
+          "animation_record": "0x0012e254",
+          "attack_selector_u8": 0,
+          "hurt_selector_u8": 0,
+          "record_sha256": "e1f2730bb91c93bac3107c34b221731110d96e5424f6e0927684ff01328c27bb"
+        },
+        {
+          "animation_record": "0x0012e268",
+          "attack_selector_u8": 0,
+          "hurt_selector_u8": 0,
+          "record_sha256": "952cb3154b06855078b2267725dd686f0bfba9a1f22f439a53454603b5c9f679"
+        },
+        {
+          "animation_record": "0x0012e38c",
+          "attack_selector_u8": 0,
+          "hurt_selector_u8": 0,
+          "record_sha256": "588ace00fe2d24f9f3c0158ad2f83eb165d41ebc752d7a4eabc45a76382930a7"
+        },
+        {
+          "animation_record": "0x0012e39c",
+          "attack_selector_u8": 0,
+          "hurt_selector_u8": 0,
+          "record_sha256": "2783bca076ca9a4ad856ce88c7c8c13a19af3a3791858797bd37fdb6cb8d2499"
+        },
+        {
+          "animation_record": "0x0012e3ac",
+          "attack_selector_u8": 0,
+          "hurt_selector_u8": 0,
+          "record_sha256": "0e43e556da8df4f323027bfae4bdd3726217e6fc489dd0b1d957fefece9b5881"
+        },
+        {
+          "animation_record": "0x0012e3bc",
+          "attack_selector_u8": 0,
+          "hurt_selector_u8": 0,
+          "record_sha256": "72f6c258a9cf4fdfe39d8f52fda0fed23e807f2a4576bfd807a4f2cc7fde25d6"
+        },
+        {
+          "animation_record": "0x0012e3cc",
+          "attack_selector_u8": 0,
+          "hurt_selector_u8": 0,
+          "record_sha256": "f935e2c6872edb60d61a98ffb1ab6c0493042af2ff01000e6cebba827a8860c7"
+        },
+        {
+          "animation_record": "0x0012e3dc",
+          "attack_selector_u8": 0,
+          "hurt_selector_u8": 0,
+          "record_sha256": "56fc537a3e37ad0aa6a4312ca13f2decc29f451396f9fb7b90d85adc433a5675"
+        },
+        {
+          "animation_record": "0x0012e3ec",
+          "attack_selector_u8": 0,
+          "hurt_selector_u8": 0,
+          "record_sha256": "1a5c6d70258f43224f86068fe9dd003094c3a64982c23a01d59b4b8d26546e76"
+        },
+        {
+          "animation_record": "0x0012e3fc",
+          "attack_selector_u8": 0,
+          "hurt_selector_u8": 0,
+          "record_sha256": "e088b490eb0035f2f31589fc5a7084d291ab2c79cb94b8a2bbfd1fabb143e895"
+        },
+        {
+          "animation_record": "0x0012e410",
+          "attack_selector_u8": 0,
+          "hurt_selector_u8": 0,
+          "record_sha256": "861e9d0cf6619104ff138dfbdae5c9f03bdfac67d7353eae4c1afda80a3a9f13"
+        },
+        {
+          "animation_record": "0x0012e420",
+          "attack_selector_u8": 0,
+          "hurt_selector_u8": 0,
+          "record_sha256": "bee195672507e356f69b7426a0f7a1d0e22a684bfe3f917e63939bb8ce509a20"
+        },
+        {
+          "animation_record": "0x0012e430",
+          "attack_selector_u8": 0,
+          "hurt_selector_u8": 0,
+          "record_sha256": "ad271bf722669543f5bba20988fd904aab53c103e57a5e6bce7ca89c30f62da4"
+        },
+        {
+          "animation_record": "0x0012e440",
+          "attack_selector_u8": 0,
+          "hurt_selector_u8": 0,
+          "record_sha256": "10cc81e03a1372273dba256c97f36cd2fcf7303fdff95affeb362683b1a77778"
+        },
+        {
+          "animation_record": "0x0012e450",
+          "attack_selector_u8": 0,
+          "hurt_selector_u8": 0,
+          "record_sha256": "12884f5bb3bb44e3dcda341bbe0adbfc157c96bcf5f74932dbd5095e1893d325"
+        },
+        {
+          "animation_record": "0x0012e460",
+          "attack_selector_u8": 0,
+          "hurt_selector_u8": 0,
+          "record_sha256": "fc38181688ebd2f470b0e3ebf1e09a8840d39e1205ed7c5c16d969fcfe0e3856"
+        },
+        {
+          "animation_record": "0x0012e470",
+          "attack_selector_u8": 0,
+          "hurt_selector_u8": 0,
+          "record_sha256": "4ff078c9adc265e7b9e44cdfc3ce0ffc9216fc5eedcbb78e20ccb5cae1d00c6c"
+        },
+        {
+          "animation_record": "0x0012e480",
+          "attack_selector_u8": 0,
+          "hurt_selector_u8": 0,
+          "record_sha256": "3dc6716cc9ab95eff5a4051d402637e8d9b1224460c012cb04592b75ef5f2653"
+        },
+        {
+          "animation_record": "0x0012e490",
+          "attack_selector_u8": 0,
+          "hurt_selector_u8": 0,
+          "record_sha256": "b2a3196082355672d75e30672f6f567299cf1b8f18458bca58922447acbcb955"
+        },
+        {
+          "animation_record": "0x0012e4a0",
+          "attack_selector_u8": 0,
+          "hurt_selector_u8": 0,
+          "record_sha256": "6dff3c03b3947387f043fae0ae983aa825736acda259a50130c41705e2dda0c6"
+        },
+        {
+          "animation_record": "0x0012e550",
+          "attack_selector_u8": 0,
+          "hurt_selector_u8": 4,
+          "record_sha256": "28791c4a39b5f1e482bd94103a75af89dc589b419da3a3f858958d2944ae0092"
+        },
+        {
+          "animation_record": "0x0012e560",
+          "attack_selector_u8": 0,
+          "hurt_selector_u8": 5,
+          "record_sha256": "08743c6942725b94107c36d6a5ffb1ab6a72de0c9e05d14fd6e5fd577668971c"
+        },
+        {
+          "animation_record": "0x0012e570",
+          "attack_selector_u8": 0,
+          "hurt_selector_u8": 1,
+          "record_sha256": "753a59c73b9e586c410b6582ad9c9ccaf6ae3f88419a427f27896c7a379bf8e6"
+        },
+        {
+          "animation_record": "0x0012e580",
+          "attack_selector_u8": 0,
+          "hurt_selector_u8": 8,
+          "record_sha256": "b27f51256b5ab5197d90f86d304a016536b7158352828a414d6a52c6fc9cb521"
+        },
+        {
+          "animation_record": "0x0012e590",
+          "attack_selector_u8": 0,
+          "hurt_selector_u8": 8,
+          "record_sha256": "accd96e9b1be6a98b15c489a539d88bffd7099df186c1bbbbe9cb2472400baff"
+        },
+        {
+          "animation_record": "0x0012e5a0",
+          "attack_selector_u8": 0,
+          "hurt_selector_u8": 8,
+          "record_sha256": "e22363ce2eb182f85a789d2e9d024a3267f96c120bc5ced7ae60cc1a94c85d3e"
+        },
+        {
+          "animation_record": "0x0012e5b0",
+          "attack_selector_u8": 0,
+          "hurt_selector_u8": 8,
+          "record_sha256": "accd96e9b1be6a98b15c489a539d88bffd7099df186c1bbbbe9cb2472400baff"
+        },
+        {
+          "animation_record": "0x0012e5c0",
+          "attack_selector_u8": 0,
+          "hurt_selector_u8": 8,
+          "record_sha256": "42c59b4f9f01d1438814e6a67b9ff200cb93c02ee94702cd109f98983684d6a0"
+        },
+        {
+          "animation_record": "0x0012e5d0",
+          "attack_selector_u8": 0,
+          "hurt_selector_u8": 8,
+          "record_sha256": "accd96e9b1be6a98b15c489a539d88bffd7099df186c1bbbbe9cb2472400baff"
+        },
+        {
+          "animation_record": "0x0012e5e0",
+          "attack_selector_u8": 0,
+          "hurt_selector_u8": 1,
+          "record_sha256": "0056801c4bd45464cd78fd7877ee5b7bf53159768a03eb15a5ad43375e8465f3"
+        },
+        {
+          "animation_record": "0x0012e5f0",
+          "attack_selector_u8": 0,
+          "hurt_selector_u8": 1,
+          "record_sha256": "63f4bcbfac25ab7197562bed7ed0d779e52d0f5aee24474fb7d8d7b4f019c937"
+        },
+        {
+          "animation_record": "0x0012e604",
+          "attack_selector_u8": 0,
+          "hurt_selector_u8": 4,
+          "record_sha256": "28791c4a39b5f1e482bd94103a75af89dc589b419da3a3f858958d2944ae0092"
+        },
+        {
+          "animation_record": "0x0012e614",
+          "attack_selector_u8": 0,
+          "hurt_selector_u8": 10,
+          "record_sha256": "e0e510efc0a5db5b75320e43455e03dc9655b88c781f1785cb17565e763c0e67"
+        },
+        {
+          "animation_record": "0x0012e624",
+          "attack_selector_u8": 0,
+          "hurt_selector_u8": 10,
+          "record_sha256": "0ab8a95debcc4ab010b903ad2f32a1b6d30821eddecb378c4929a04b573f91f0"
+        },
+        {
+          "animation_record": "0x0012e638",
+          "attack_selector_u8": 0,
+          "hurt_selector_u8": 10,
+          "record_sha256": "e5fe30903885f13e8374b6431c0f441c57cf275d7285764c9d49a1c125ddb8db"
+        },
+        {
+          "animation_record": "0x0012e648",
+          "attack_selector_u8": 0,
+          "hurt_selector_u8": 10,
+          "record_sha256": "7cba67cb51aa2aa36b098ee0c227de304a37520b65857904ce43965fd7963115"
+        },
+        {
+          "animation_record": "0x0012e65c",
+          "attack_selector_u8": 0,
+          "hurt_selector_u8": 1,
+          "record_sha256": "5c8061ac95964b5d62ab61fc927cd82ad7661da2295b64ae0b55c336a129db19"
+        },
+        {
+          "animation_record": "0x0012e66c",
+          "attack_selector_u8": 0,
+          "hurt_selector_u8": 4,
+          "record_sha256": "371422b81d607fab28e311f0a0ed197dec7dd8264e8e10df8334274f38a84816"
+        },
+        {
+          "animation_record": "0x0012e67c",
+          "attack_selector_u8": 0,
+          "hurt_selector_u8": 2,
+          "record_sha256": "a0de20e9075e39f4be2af9a0f0f7d6dfd8fec51494aedc94ba9cb7a59552e775"
+        },
+        {
+          "animation_record": "0x0012e68c",
+          "attack_selector_u8": 0,
+          "hurt_selector_u8": 2,
+          "record_sha256": "b0b826483693bfa990426869cd1920515ed0bf4f387b1f7d6b5db6aca71d36ef"
+        },
+        {
+          "animation_record": "0x0012e708",
+          "attack_selector_u8": 0,
+          "hurt_selector_u8": 1,
+          "record_sha256": "930fc8e74119cd107eb3d855b14b397b7e88ac0ffb288ad8902279744a2353f7"
+        },
+        {
+          "animation_record": "0x0012e718",
+          "attack_selector_u8": 0,
+          "hurt_selector_u8": 1,
+          "record_sha256": "8e81e51888886d0e1f7358b0950f8ae744f542d5aac4c4950bdba2a9945e623b"
+        },
+        {
+          "animation_record": "0x0012e728",
+          "attack_selector_u8": 0,
+          "hurt_selector_u8": 1,
+          "record_sha256": "45fd77e5f290e151ad372dca0dcd20332814b59bfb6a8f021e4783190ce78251"
+        },
+        {
+          "animation_record": "0x0012e738",
+          "attack_selector_u8": 0,
+          "hurt_selector_u8": 1,
+          "record_sha256": "11fb1a58ee3bba0a3fec037828bdb7de35c4755519facd811db987d7afa84f00"
+        },
+        {
+          "animation_record": "0x0012e748",
+          "attack_selector_u8": 0,
+          "hurt_selector_u8": 1,
+          "record_sha256": "c15c563aca7def3eb10009ed28a1cf9ed8a591ad22aaad6bfb965da6e82020f9"
+        },
+        {
+          "animation_record": "0x0012e758",
+          "attack_selector_u8": 0,
+          "hurt_selector_u8": 1,
+          "record_sha256": "a84c8f4661444bbd2c35f5a2efa56dd5026c4f66b92dc4fddc1330f1d4955dbf"
+        },
+        {
+          "animation_record": "0x0012e768",
+          "attack_selector_u8": 0,
+          "hurt_selector_u8": 1,
+          "record_sha256": "bdb18ab87a3e5d294a65ab3994446729df0d7c8ca3309ae97ba35a0756f0a4d2"
+        },
+        {
+          "animation_record": "0x0012e778",
+          "attack_selector_u8": 0,
+          "hurt_selector_u8": 1,
+          "record_sha256": "eead1782cea16e8a86693488397573435ad9ae589204da670f02c0d35842709a"
+        },
+        {
+          "animation_record": "0x0012e78c",
+          "attack_selector_u8": 0,
+          "hurt_selector_u8": 2,
+          "record_sha256": "cedb68f1b2b0948658eb71c576dc111f07ab8462b0b46d5b9c5cee10fbb800ef"
+        },
+        {
+          "animation_record": "0x0012e79c",
+          "attack_selector_u8": 0,
+          "hurt_selector_u8": 2,
+          "record_sha256": "81334ef16a9dc8be71d93db4c211d40f3529fcdaac4341766d23a74fcd1be074"
+        },
+        {
+          "animation_record": "0x0012e7ac",
+          "attack_selector_u8": 0,
+          "hurt_selector_u8": 2,
+          "record_sha256": "26042c8c7b83e0abac6f68fefccacc0599e28d9b062264fef37a3d0a4bbdcd20"
+        },
+        {
+          "animation_record": "0x0012e7bc",
+          "attack_selector_u8": 0,
+          "hurt_selector_u8": 2,
+          "record_sha256": "995b55779c7d71f11a8c014402018247196d3afd3166588ea77873978dbf6857"
+        },
+        {
+          "animation_record": "0x0012e7cc",
+          "attack_selector_u8": 0,
+          "hurt_selector_u8": 2,
+          "record_sha256": "665e5c8d1ced48cb342750ea1c002c9d0a5929c9ff4476c9136083f2ab38a196"
+        },
+        {
+          "animation_record": "0x0012e7dc",
+          "attack_selector_u8": 0,
+          "hurt_selector_u8": 2,
+          "record_sha256": "c61661cb607b429c0ce90e8a7118a7393f15a86761307b4f33f4232f5bc46094"
+        },
+        {
+          "animation_record": "0x0012e7ec",
+          "attack_selector_u8": 0,
+          "hurt_selector_u8": 2,
+          "record_sha256": "2a1c00e6ea21e7484a12923cc1fc252e55acde6ec80fae2ec669956ded6590e8"
+        },
+        {
+          "animation_record": "0x0012e7fc",
+          "attack_selector_u8": 0,
+          "hurt_selector_u8": 2,
+          "record_sha256": "50676c678203b609b70da5b8ef16b26acc48ea777ea920400edb4b461eb1090a"
+        },
+        {
+          "animation_record": "0x0012e8a8",
+          "attack_selector_u8": 0,
+          "hurt_selector_u8": 1,
+          "record_sha256": "4878fc426df34aafa95222bd157261988a4e022d0e0d5c1952520a0e687e099d"
+        },
+        {
+          "animation_record": "0x0012e8b8",
+          "attack_selector_u8": 0,
+          "hurt_selector_u8": 1,
+          "record_sha256": "c4670630d0c8684d0dfaa520e4bd0e0b2b4784f0a1cd844b5ad1584ef8aa15da"
+        },
+        {
+          "animation_record": "0x0012e8c8",
+          "attack_selector_u8": 0,
+          "hurt_selector_u8": 1,
+          "record_sha256": "46771582ed2f16f4869a6df8ac12f938610bebcd6bd917d067283d19870c01b0"
+        },
+        {
+          "animation_record": "0x0012e8d8",
+          "attack_selector_u8": 0,
+          "hurt_selector_u8": 1,
+          "record_sha256": "77c5a6e93018a6790459157a3f16e4c0a420658b1a591b50ed6a1558643ead72"
+        },
+        {
+          "animation_record": "0x0012e8ec",
+          "attack_selector_u8": 0,
+          "hurt_selector_u8": 2,
+          "record_sha256": "fcfb86f0585f33c718f086cfa68cdb307e7a8af5a8b1011525ac78353c76d883"
+        },
+        {
+          "animation_record": "0x0012e8fc",
+          "attack_selector_u8": 0,
+          "hurt_selector_u8": 2,
+          "record_sha256": "497e26122b4a6a717f407f4a16b5bd1ab657d6ceccb483128614a8aa56905b50"
+        },
+        {
+          "animation_record": "0x0012e90c",
+          "attack_selector_u8": 0,
+          "hurt_selector_u8": 2,
+          "record_sha256": "b3fda47757d3a55b27840323f4715e4f355ab32a57808515aec430dafb459762"
+        },
+        {
+          "animation_record": "0x0012e91c",
+          "attack_selector_u8": 0,
+          "hurt_selector_u8": 2,
+          "record_sha256": "33142ec3f7787a40fca903f90d7337454e5d211b8a06d66519ad575f9755fcb4"
+        },
+        {
+          "animation_record": "0x0012e944",
+          "attack_selector_u8": 0,
+          "hurt_selector_u8": 2,
+          "record_sha256": "587dfc9fd0f287f7cb6cb1a44d4923e3f8ecb4acd48c6e6cbfa3972721ffa3c2"
+        },
+        {
+          "animation_record": "0x0012e954",
+          "attack_selector_u8": 0,
+          "hurt_selector_u8": 10,
+          "record_sha256": "e0e510efc0a5db5b75320e43455e03dc9655b88c781f1785cb17565e763c0e67"
+        },
+        {
+          "animation_record": "0x0012e964",
+          "attack_selector_u8": 0,
+          "hurt_selector_u8": 10,
+          "record_sha256": "0ab8a95debcc4ab010b903ad2f32a1b6d30821eddecb378c4929a04b573f91f0"
+        },
+        {
+          "animation_record": "0x0012e9cc",
+          "attack_selector_u8": 0,
+          "hurt_selector_u8": 11,
+          "record_sha256": "2a114e0613150943166f6ef81ec96ec2fd0937d1fd5f397fc903f6de654af114"
+        },
+        {
+          "animation_record": "0x0012e9dc",
+          "attack_selector_u8": 0,
+          "hurt_selector_u8": 2,
+          "record_sha256": "de7ed2177c484c38f50a6e21c715c8db380d9d80ee2614a147f79e87f84edca9"
+        },
+        {
+          "animation_record": "0x0012e9f0",
+          "attack_selector_u8": 0,
+          "hurt_selector_u8": 0,
+          "record_sha256": "486c39e920f284ecbfeddbd5e24ef6022e78f0756c6797ee21fbf8adea5ee076"
+        },
+        {
+          "animation_record": "0x0012ea00",
+          "attack_selector_u8": 0,
+          "hurt_selector_u8": 0,
+          "record_sha256": "557317c0c300c0a9ba6226ccb7f5a4e4e1d4383138940f849f86cbc069eec965"
+        },
+        {
+          "animation_record": "0x0012ea10",
+          "attack_selector_u8": 0,
+          "hurt_selector_u8": 0,
+          "record_sha256": "a4453643561721387ad2a06d8f879960797bb4cd2fbee04d273d08bc224848fb"
+        },
+        {
+          "animation_record": "0x0012ea24",
+          "attack_selector_u8": 0,
+          "hurt_selector_u8": 0,
+          "record_sha256": "52b53fbc96c8ccdf707b44b258f5579e6cdb955ebdf0922457cfda762953e623"
+        },
+        {
+          "animation_record": "0x0012ea34",
+          "attack_selector_u8": 0,
+          "hurt_selector_u8": 0,
+          "record_sha256": "7893bab76263d8eab8988b4dc1508276b02ea6d5a6f7aab0c594dc54767680ec"
+        },
+        {
+          "animation_record": "0x0012ea44",
+          "attack_selector_u8": 0,
+          "hurt_selector_u8": 0,
+          "record_sha256": "8eb3873972a7db8fa64047a68af27ebecc25de503fc9ddbdead09142a1c86e0a"
+        },
+        {
+          "animation_record": "0x0012ea54",
+          "attack_selector_u8": 0,
+          "hurt_selector_u8": 0,
+          "record_sha256": "d854743ff0a24d72a255d813ce492c795b26ad0e594e1f2f0c4bfdf0182738b8"
+        },
+        {
+          "animation_record": "0x0012ea64",
+          "attack_selector_u8": 0,
+          "hurt_selector_u8": 0,
+          "record_sha256": "74aec07993d71dc956837dae73f27ac0778b9b71131341f55385e76eda13dc6d"
+        },
+        {
+          "animation_record": "0x0012eafc",
+          "attack_selector_u8": 0,
+          "hurt_selector_u8": 1,
+          "record_sha256": "c721cef8d2e4aa5c3c47b957a1ad617292805398fde4930ddc981a9bf03bef05"
+        },
+        {
+          "animation_record": "0x0012eb0c",
+          "attack_selector_u8": 0,
+          "hurt_selector_u8": 1,
+          "record_sha256": "4a2fa07b499374e24167b2de478f0be99eb9f71c904e5852a6868ace9d2ad0fc"
+        },
+        {
+          "animation_record": "0x0012eb1c",
+          "attack_selector_u8": 0,
+          "hurt_selector_u8": 1,
+          "record_sha256": "3fb86e8358daacedd90a58bae3957613195c557ab73ca811995f7eea696338e8"
+        },
+        {
+          "animation_record": "0x0012eb2c",
+          "attack_selector_u8": 0,
+          "hurt_selector_u8": 1,
+          "record_sha256": "0cfa4faeebde507af1fa940b9af5d61e67d3f3fcf18974dacde3d043bafbca0d"
+        },
+        {
+          "animation_record": "0x0012eb3c",
+          "attack_selector_u8": 0,
+          "hurt_selector_u8": 1,
+          "record_sha256": "83334c372695cabc1ab8a58d766808f251b5b3ac17e8eedf0b4fd02ee3e9ad19"
+        },
+        {
+          "animation_record": "0x0012eb4c",
+          "attack_selector_u8": 0,
+          "hurt_selector_u8": 1,
+          "record_sha256": "39aaabfadfe793ecc1860f53015c5cc9851bdbc73d8bd14719bf304e87a6666c"
+        },
+        {
+          "animation_record": "0x0012eb5c",
+          "attack_selector_u8": 0,
+          "hurt_selector_u8": 1,
+          "record_sha256": "1d0db850e9176517ae31add0c4121ee5b980fbbc146b054cf17eafb657bea6b2"
+        },
+        {
+          "animation_record": "0x0012eb6c",
+          "attack_selector_u8": 0,
+          "hurt_selector_u8": 1,
+          "record_sha256": "2b54a1b7cf1833492cf096ee91a9044d96dc901de8d73dd2c2492b815426c5a8"
+        },
+        {
+          "animation_record": "0x0012ec04",
+          "attack_selector_u8": 0,
+          "hurt_selector_u8": 2,
+          "record_sha256": "cedb68f1b2b0948658eb71c576dc111f07ab8462b0b46d5b9c5cee10fbb800ef"
+        },
+        {
+          "animation_record": "0x0012ec14",
+          "attack_selector_u8": 0,
+          "hurt_selector_u8": 2,
+          "record_sha256": "b09da558f00555b52b7e6751133331898e814264d3888bc9bfac74b3196610a0"
+        },
+        {
+          "animation_record": "0x0012ec24",
+          "attack_selector_u8": 0,
+          "hurt_selector_u8": 2,
+          "record_sha256": "26042c8c7b83e0abac6f68fefccacc0599e28d9b062264fef37a3d0a4bbdcd20"
+        },
+        {
+          "animation_record": "0x0012ec34",
+          "attack_selector_u8": 0,
+          "hurt_selector_u8": 2,
+          "record_sha256": "6a87c25376d3cfdf0745b3e575385841335a0eda058a0d254d4e399b64424a09"
+        },
+        {
+          "animation_record": "0x0012ec44",
+          "attack_selector_u8": 0,
+          "hurt_selector_u8": 2,
+          "record_sha256": "665e5c8d1ced48cb342750ea1c002c9d0a5929c9ff4476c9136083f2ab38a196"
+        },
+        {
+          "animation_record": "0x0012ec54",
+          "attack_selector_u8": 0,
+          "hurt_selector_u8": 2,
+          "record_sha256": "c9d06e96fcaa5883f2893046eaa0e50feec165671f1b84f12b11eeada41e0b8a"
+        },
+        {
+          "animation_record": "0x0012ec64",
+          "attack_selector_u8": 0,
+          "hurt_selector_u8": 2,
+          "record_sha256": "2a1c00e6ea21e7484a12923cc1fc252e55acde6ec80fae2ec669956ded6590e8"
+        },
+        {
+          "animation_record": "0x0012ec74",
+          "attack_selector_u8": 0,
+          "hurt_selector_u8": 2,
+          "record_sha256": "6ec04cfd0f156ff86d535c115bfad714e3a11ad872f4728b85062895d43febac"
+        },
+        {
+          "animation_record": "0x0012ee98",
+          "attack_selector_u8": 0,
+          "hurt_selector_u8": 2,
+          "record_sha256": "030aa305663abbf1150a49027a3f16601ca73967bcaa7f55ed395444ae2105c3"
+        },
+        {
+          "animation_record": "0x0012eea8",
+          "attack_selector_u8": 0,
+          "hurt_selector_u8": 2,
+          "record_sha256": "e50f12f7452c2b84fc3aed9822975766a1f80e76d410f3068e26aea162754eab"
+        },
+        {
+          "animation_record": "0x0012eeb8",
+          "attack_selector_u8": 0,
+          "hurt_selector_u8": 2,
+          "record_sha256": "6094b15306fa13d214ec577b9abebd8bd94445a5dd05e36c766a7a460d4d1624"
+        },
+        {
+          "animation_record": "0x0012eec8",
+          "attack_selector_u8": 0,
+          "hurt_selector_u8": 2,
+          "record_sha256": "68664a940b906558d6c8ad3d1612f1ac2ac9a0cfce46a7f0004d861f9fa2f2d9"
+        },
+        {
+          "animation_record": "0x0012eed8",
+          "attack_selector_u8": 0,
+          "hurt_selector_u8": 2,
+          "record_sha256": "3437f8e76fdfe33d9fac635876359035de99e9dd27e244fcae36a6ae51edb58d"
+        },
+        {
+          "animation_record": "0x0012eee8",
+          "attack_selector_u8": 0,
+          "hurt_selector_u8": 2,
+          "record_sha256": "9afcdb15bc43e183f2aca2ee5559b1a92eca81820880283d4d0bf0b2643a62ae"
+        },
+        {
+          "animation_record": "0x0012eef8",
+          "attack_selector_u8": 0,
+          "hurt_selector_u8": 2,
+          "record_sha256": "20c98ff8d609aed20655f25e1d39e8e62d18d0651800f8f9b25a7e23502cad19"
+        },
+        {
+          "animation_record": "0x0013cff8",
+          "attack_selector_u8": 0,
+          "hurt_selector_u8": 24,
+          "record_sha256": "be503e6480111b8f62073bac71bef7824e5b7d85141b4b5743b549e620e31eca"
+        },
+        {
+          "animation_record": "0x0015e540",
+          "attack_selector_u8": 0,
+          "hurt_selector_u8": 1,
+          "record_sha256": "fe49dfa0f7b76a492d58eabcf5d94b46776ee5d1f5945b62f8ee2085677893f6"
+        },
+        {
+          "animation_record": "0x0015e550",
+          "attack_selector_u8": 0,
+          "hurt_selector_u8": 1,
+          "record_sha256": "224423353d1a019faee365575cf42e755ed976c12411628e9ec37ce57653ff87"
+        },
+        {
+          "animation_record": "0x0015e560",
+          "attack_selector_u8": 0,
+          "hurt_selector_u8": 1,
+          "record_sha256": "8b8711550ee0628c7fe52b33409c5fa53c7f0a592f4ee24327f1611f6f56f944"
+        },
+        {
+          "animation_record": "0x0015e570",
+          "attack_selector_u8": 0,
+          "hurt_selector_u8": 1,
+          "record_sha256": "224423353d1a019faee365575cf42e755ed976c12411628e9ec37ce57653ff87"
+        },
+        {
+          "animation_record": "0x0015e580",
+          "attack_selector_u8": 0,
+          "hurt_selector_u8": 1,
+          "record_sha256": "e41f62c23957b6765872a77de68e23a844f69b9d29a887e5a91502db5fdefa42"
+        },
+        {
+          "animation_record": "0x0015e594",
+          "attack_selector_u8": 0,
+          "hurt_selector_u8": 1,
+          "record_sha256": "b8f398a3f058b8a1de8457e178dbc0816c0c5f4ea04fd52f65d49bbaea7661d5"
+        },
+        {
+          "animation_record": "0x0015e5a4",
+          "attack_selector_u8": 0,
+          "hurt_selector_u8": 1,
+          "record_sha256": "57ebeb7d74b60cfb89dad9afcf5a582e9aa0a76a904a0793d1f785754bd9b41f"
+        },
+        {
+          "animation_record": "0x0015e5b4",
+          "attack_selector_u8": 0,
+          "hurt_selector_u8": 1,
+          "record_sha256": "d417ef25b89cd4ed4ec4d5de25246c500a73504e878db92e1d7005d4e2cea9df"
+        },
+        {
+          "animation_record": "0x0015e5c4",
+          "attack_selector_u8": 0,
+          "hurt_selector_u8": 1,
+          "record_sha256": "57ebeb7d74b60cfb89dad9afcf5a582e9aa0a76a904a0793d1f785754bd9b41f"
+        },
+        {
+          "animation_record": "0x0015e5d4",
+          "attack_selector_u8": 0,
+          "hurt_selector_u8": 1,
+          "record_sha256": "e38ff901320f3ad4005f1b5f3c880ba3a565bc580fb45e9369469545f4b062f9"
+        },
+        {
+          "animation_record": "0x0015e9d8",
+          "attack_selector_u8": 0,
+          "hurt_selector_u8": 1,
+          "record_sha256": "c28715e3a3594cafbbfffef0399d8358e96eb24fc33585907a72290e2fa5f548"
+        },
+        {
+          "animation_record": "0x0015e9e8",
+          "attack_selector_u8": 0,
+          "hurt_selector_u8": 1,
+          "record_sha256": "d369ff6519e4342aff31262ebc3becd17065dc1d32550bf0eadd459012b2fef5"
+        },
+        {
+          "animation_record": "0x0015e9f8",
+          "attack_selector_u8": 0,
+          "hurt_selector_u8": 1,
+          "record_sha256": "486eed3a10994a92edb0157fdc4e73ae24b423a07fe404b91df0f22997fc5567"
+        },
+        {
+          "animation_record": "0x0015ea08",
+          "attack_selector_u8": 0,
+          "hurt_selector_u8": 1,
+          "record_sha256": "d369ff6519e4342aff31262ebc3becd17065dc1d32550bf0eadd459012b2fef5"
+        },
+        {
+          "animation_record": "0x0015ea18",
+          "attack_selector_u8": 0,
+          "hurt_selector_u8": 1,
+          "record_sha256": "7f5de383305bf8695b5566f0679906b8944c22040012d1f54ac6ee3e7fb3a031"
+        },
+        {
+          "animation_record": "0x0015eee8",
+          "attack_selector_u8": 0,
+          "hurt_selector_u8": 0,
+          "record_sha256": "b8b49a731d28a351a74a9db0e7cb44d5cfb338d65ff977fda79e3eb39b2a7367"
+        },
+        {
+          "animation_record": "0x0015ef24",
+          "attack_selector_u8": 0,
+          "hurt_selector_u8": 0,
+          "record_sha256": "1de8aa22850db10088e5d6f99219f02236d786f11be73107d091d21892a4752b"
+        },
+        {
+          "animation_record": "0x0015ef38",
+          "attack_selector_u8": 0,
+          "hurt_selector_u8": 0,
+          "record_sha256": "7d6c5aa89551165e36194ace0123e6a454b2bc2f0d91110d19271404869ff394"
+        },
+        {
+          "animation_record": "0x0015f1f4",
+          "attack_selector_u8": 0,
+          "hurt_selector_u8": 1,
+          "record_sha256": "28ff074b1e6e554544e4c197cae211a68240ea9d9e0a9e50a64e39448c09581e"
+        },
+        {
+          "animation_record": "0x0015f208",
+          "attack_selector_u8": 0,
+          "hurt_selector_u8": 17,
+          "record_sha256": "e2f1ec25d9b000079eed63dcff5af792a2b36e98aabfb7aac072a96b33a7ce25"
+        },
+        {
+          "animation_record": "0x0015f218",
+          "attack_selector_u8": 0,
+          "hurt_selector_u8": 17,
+          "record_sha256": "a22791b17245af1bcadccfc5dfee4c53f5a878efb967a9bbd4a9c0789bc9f148"
+        },
+        {
+          "animation_record": "0x0015f228",
+          "attack_selector_u8": 0,
+          "hurt_selector_u8": 17,
+          "record_sha256": "a83e5b349eb054661ed9b6f313a9dadade4ac83c7765d3117a7908fa63131746"
+        },
+        {
+          "animation_record": "0x0015f238",
+          "attack_selector_u8": 0,
+          "hurt_selector_u8": 17,
+          "record_sha256": "e2097ec1549d3cec30592b042cc22e64387441f07cf9d70aa0ea618cf2186c96"
+        },
+        {
+          "animation_record": "0x0015f248",
+          "attack_selector_u8": 0,
+          "hurt_selector_u8": 17,
+          "record_sha256": "32c95db069d96ddeabf38b6a9f5c5cd1d2effb3dbb1b3e20e68f5425e86f50e4"
+        },
+        {
+          "animation_record": "0x0015f258",
+          "attack_selector_u8": 0,
+          "hurt_selector_u8": 17,
+          "record_sha256": "ea82a26e65efac3239d50ed523c988cfd1f22cc64113b5e8fe3fb8e5f7f54c73"
+        },
+        {
+          "animation_record": "0x0015f268",
+          "attack_selector_u8": 0,
+          "hurt_selector_u8": 17,
+          "record_sha256": "7aa9aa37fe7c952e551d657f8ff5ed0a3062e672a6bac711f572c708bb7efd26"
+        },
+        {
+          "animation_record": "0x0015f278",
+          "attack_selector_u8": 0,
+          "hurt_selector_u8": 17,
+          "record_sha256": "0e6b953f36b6d4d8973a9a91fab5476ed56e9e461c7eb3ae11e318bb2f14159a"
+        },
+        {
+          "animation_record": "0x0015f288",
+          "attack_selector_u8": 0,
+          "hurt_selector_u8": 17,
+          "record_sha256": "e21925df4e5619e1b00da7f0e0f9876cfec9eb575c00edfd14bc72bbeec83015"
+        },
+        {
+          "animation_record": "0x0015f298",
+          "attack_selector_u8": 0,
+          "hurt_selector_u8": 17,
+          "record_sha256": "2ff074e2301e652e8f8736d93660667c7ec776d891aef06104ec5f61f9d17841"
+        },
+        {
+          "animation_record": "0x0015f2a8",
+          "attack_selector_u8": 0,
+          "hurt_selector_u8": 17,
+          "record_sha256": "4aa7c9e41e242593ab60b7ced95eb284f8d16ba50e76bc7ca6286967b9e9ea8c"
+        },
+        {
+          "animation_record": "0x0015f2b8",
+          "attack_selector_u8": 0,
+          "hurt_selector_u8": 17,
+          "record_sha256": "4a4ceee40107a984fde836c1b2a517f86326263a02a4508f593db8311d37e867"
+        },
+        {
+          "animation_record": "0x0015f2cc",
+          "attack_selector_u8": 0,
+          "hurt_selector_u8": 1,
+          "record_sha256": "878dbbd5dc2a58187a529228167cab02c00ebe4ba497cddbbd1431d0a1c00b64"
+        },
+        {
+          "animation_record": "0x0015f2dc",
+          "attack_selector_u8": 0,
+          "hurt_selector_u8": 1,
+          "record_sha256": "e520ad47f00be8121ca02d189548c52bc9e4c13f75ca1049d127b5a0adb995cc"
+        },
+        {
+          "animation_record": "0x0015f344",
+          "attack_selector_u8": 0,
+          "hurt_selector_u8": 2,
+          "record_sha256": "7f96984e9421ab3354f54b17fd096d491cc5b4f3d65c9a256859bd4756c2d794"
+        },
+        {
+          "animation_record": "0x0015f354",
+          "attack_selector_u8": 0,
+          "hurt_selector_u8": 2,
+          "record_sha256": "d75a0b223479a0689c2e135a5df5467131934ee38c83bbc940798a1c487985df"
+        },
+        {
+          "animation_record": "0x0015f364",
+          "attack_selector_u8": 0,
+          "hurt_selector_u8": 13,
+          "record_sha256": "5d681f8a1b42caff6fcd6b3c4795078e9806de0420629ed05db5c79d6318331a"
+        },
+        {
+          "animation_record": "0x0015f374",
+          "attack_selector_u8": 0,
+          "hurt_selector_u8": 14,
+          "record_sha256": "ceb036544bc8375951d9fe8ed0be91d02247bb7b43c8a3b6ca788b5f1d2eaef3"
+        },
+        {
+          "animation_record": "0x0015f384",
+          "attack_selector_u8": 0,
+          "hurt_selector_u8": 15,
+          "record_sha256": "46901d782b3e8a1e1511ae260af33f7c8fe23233490ca94307d5c1a5b2606213"
+        },
+        {
+          "animation_record": "0x0015f394",
+          "attack_selector_u8": 0,
+          "hurt_selector_u8": 16,
+          "record_sha256": "3563ca9e90da9f9461667ee615e354bc24cc51b4532bd2336d364141dca2644b"
+        },
+        {
+          "animation_record": "0x0015f3a4",
+          "attack_selector_u8": 0,
+          "hurt_selector_u8": 2,
+          "record_sha256": "d35ad1b52afae96e450904eb97233c1f44c32e6f120502cbd834033a58717672"
+        },
+        {
+          "animation_record": "0x0015f3b8",
+          "attack_selector_u8": 0,
+          "hurt_selector_u8": 2,
+          "record_sha256": "b3fcf3b6c96616f9988ea67b4fc130bb24251b8cbdb3c505ea424c32d04a57a7"
+        },
+        {
+          "animation_record": "0x0015f3c8",
+          "attack_selector_u8": 0,
+          "hurt_selector_u8": 16,
+          "record_sha256": "97169c80ef65ae70476e695e0901c0db2688bfc658878253cbb9046a5921f1e9"
+        },
+        {
+          "animation_record": "0x0015f3d8",
+          "attack_selector_u8": 0,
+          "hurt_selector_u8": 15,
+          "record_sha256": "895946719f73efe0e8d4c37e2807940847e5187cec6af8d9888059d732e66ee6"
+        },
+        {
+          "animation_record": "0x0015f3e8",
+          "attack_selector_u8": 0,
+          "hurt_selector_u8": 14,
+          "record_sha256": "a5706786bff4db10f80180da0b49f1fd2d89211a5996b7ecef6a4ffef9839946"
+        },
+        {
+          "animation_record": "0x0015f3f8",
+          "attack_selector_u8": 0,
+          "hurt_selector_u8": 13,
+          "record_sha256": "8e4affd5d72030b27b7f4045f7153fc28b934faddc702e6cfd7821f1c7c1a8c5"
+        },
+        {
+          "animation_record": "0x0015f408",
+          "attack_selector_u8": 0,
+          "hurt_selector_u8": 2,
+          "record_sha256": "fdab314f15c028011c7a11a87c31865db9e6b8e9b2634ba1c1e709f02e1eeecd"
+        },
+        {
+          "animation_record": "0x0015f418",
+          "attack_selector_u8": 0,
+          "hurt_selector_u8": 2,
+          "record_sha256": "bbf594f7997429ec665e76f3b2e7a824d4100284ce25fcf16e80e4dd05c84411"
+        },
+        {
+          "animation_record": "0x0015f428",
+          "attack_selector_u8": 0,
+          "hurt_selector_u8": 2,
+          "record_sha256": "7b776452259ce1d4276490783cbdf848f0dfb1e6afee23afb70098df0cffa3fe"
+        },
+        {
+          "animation_record": "0x0015f96c",
+          "attack_selector_u8": 0,
+          "hurt_selector_u8": 0,
+          "record_sha256": "9eba310749209b00a8eaf48390ca9f0d893b8b1b8baa9d68fd78cf84b2d0d590"
+        },
+        {
+          "animation_record": "0x0015f97c",
+          "attack_selector_u8": 10,
+          "hurt_selector_u8": 0,
+          "record_sha256": "3d0220cd432ab992aba4033fcd72271a1b11189fadf4990ea66674b399054a3b"
+        },
+        {
+          "animation_record": "0x0015f98c",
+          "attack_selector_u8": 10,
+          "hurt_selector_u8": 0,
+          "record_sha256": "bbe52796c6572fe703245a9ccb88dc9e6d9ec2b1d776709a2b528095eb30c551"
+        },
+        {
+          "animation_record": "0x0015fa04",
+          "attack_selector_u8": 0,
+          "hurt_selector_u8": 0,
+          "record_sha256": "4795518361192ba458d949480f95999d3135ae9d35dee97576035650a453e444"
+        },
+        {
+          "animation_record": "0x0015fa14",
+          "attack_selector_u8": 0,
+          "hurt_selector_u8": 0,
+          "record_sha256": "b1f8b4a3fcf5fcb6a43ba5ce2bc38f07e99ef41af39078ba725774e8d0cd4f13"
+        },
+        {
+          "animation_record": "0x0015fcfc",
+          "attack_selector_u8": 0,
+          "hurt_selector_u8": 1,
+          "record_sha256": "e41f62c23957b6765872a77de68e23a844f69b9d29a887e5a91502db5fdefa42"
+        },
+        {
+          "animation_record": "0x0015fd10",
+          "attack_selector_u8": 0,
+          "hurt_selector_u8": 0,
+          "record_sha256": "99a1dc2459f4b88a255bd891c0d2f55612fd0e14b54b6526a37521088092ac6b"
+        },
+        {
+          "animation_record": "0x0015fd20",
+          "attack_selector_u8": 0,
+          "hurt_selector_u8": 0,
+          "record_sha256": "c5a66c7ce4cda95c5ca2b566ed56bb8da4f00358ba96ebd9c9cfa47a9193daeb"
+        },
+        {
+          "animation_record": "0x0015fd30",
+          "attack_selector_u8": 0,
+          "hurt_selector_u8": 0,
+          "record_sha256": "ed80fc42bf88e4f5a5a9f8c07062665e69750add64aea37e213a1cc67421ddd6"
+        },
+        {
+          "animation_record": "0x0015fd40",
+          "attack_selector_u8": 0,
+          "hurt_selector_u8": 0,
+          "record_sha256": "536b993496586f6a6a056fc2d56c46538bda6dfacb017fd2946c24f773251c95"
+        },
+        {
+          "animation_record": "0x0015fd50",
+          "attack_selector_u8": 11,
+          "hurt_selector_u8": 0,
+          "record_sha256": "a214af8405d1df391efd704646f5757ea2135d0095404d5292dbfc557d94d2ce"
+        },
+        {
+          "animation_record": "0x0015fd60",
+          "attack_selector_u8": 11,
+          "hurt_selector_u8": 0,
+          "record_sha256": "08ca8f657c3af4034035d40aec217853a0525fc96e9b09ff1707e243d8331b78"
+        },
+        {
+          "animation_record": "0x0015fd70",
+          "attack_selector_u8": 11,
+          "hurt_selector_u8": 0,
+          "record_sha256": "8bcb8f2d136394e321f355c5b312ad88f50f65779d32ce3af9b4459672733c11"
+        },
+        {
+          "animation_record": "0x0015fd80",
+          "attack_selector_u8": 11,
+          "hurt_selector_u8": 0,
+          "record_sha256": "08ca8f657c3af4034035d40aec217853a0525fc96e9b09ff1707e243d8331b78"
+        },
+        {
+          "animation_record": "0x0015fd90",
+          "attack_selector_u8": 11,
+          "hurt_selector_u8": 0,
+          "record_sha256": "da1254eb3da9a3d9ea63ffca5739bc8a6e22409ca2e0aa2b06ef84f144f758f7"
+        },
+        {
+          "animation_record": "0x0015fda0",
+          "attack_selector_u8": 11,
+          "hurt_selector_u8": 0,
+          "record_sha256": "08ca8f657c3af4034035d40aec217853a0525fc96e9b09ff1707e243d8331b78"
+        },
+        {
+          "animation_record": "0x0015fdb0",
+          "attack_selector_u8": 11,
+          "hurt_selector_u8": 0,
+          "record_sha256": "8bcb8f2d136394e321f355c5b312ad88f50f65779d32ce3af9b4459672733c11"
+        },
+        {
+          "animation_record": "0x0015fdc0",
+          "attack_selector_u8": 11,
+          "hurt_selector_u8": 0,
+          "record_sha256": "08ca8f657c3af4034035d40aec217853a0525fc96e9b09ff1707e243d8331b78"
+        },
+        {
+          "animation_record": "0x0015fdd0",
+          "attack_selector_u8": 0,
+          "hurt_selector_u8": 0,
+          "record_sha256": "f2ed8756847a252b9bc13be653a06d08780ed40f3a32225d0a8c6a0269b03a8b"
+        },
+        {
+          "animation_record": "0x0015fde0",
+          "attack_selector_u8": 0,
+          "hurt_selector_u8": 0,
+          "record_sha256": "adb78958c1f125ffed14d74e22cb3277d4ba61bd2faa8a5332a429dcfa05dba3"
+        },
+        {
+          "animation_record": "0x0015fdf0",
+          "attack_selector_u8": 0,
+          "hurt_selector_u8": 0,
+          "record_sha256": "9a2d82e0a702ef9126bff2fc238c9fbbb94407085b70583ccaaf670e1acdde24"
+        },
+        {
+          "animation_record": "0x0015fe00",
+          "attack_selector_u8": 0,
+          "hurt_selector_u8": 0,
+          "record_sha256": "d4d52b1778661a873caddd8d31af447096e9ecc97d322d984eb7629b831337ce"
+        },
+        {
+          "animation_record": "0x0015fe10",
+          "attack_selector_u8": 0,
+          "hurt_selector_u8": 0,
+          "record_sha256": "878a9a5d7080366d644ff4ee844212021f5870f9b9b6af86bfa4c3b8bafd082c"
+        },
+        {
+          "animation_record": "0x00160288",
+          "attack_selector_u8": 0,
+          "hurt_selector_u8": 1,
+          "record_sha256": "b700dc2cc2084bac8e035cd167d1a18967caed9fe9cd5b243b8da4906fbaf049"
+        },
+        {
+          "animation_record": "0x00160298",
+          "attack_selector_u8": 21,
+          "hurt_selector_u8": 11,
+          "record_sha256": "1c0691d87f2245de702713064efd801b05d45dad19412998775dbf8d9e694786"
+        },
+        {
+          "animation_record": "0x001602a8",
+          "attack_selector_u8": 0,
+          "hurt_selector_u8": 11,
+          "record_sha256": "b0cdeca7338d46e1d7043ab0ac434373c98926dc8fbcea9e4c57e16fddd58c13"
+        },
+        {
+          "animation_record": "0x001602b8",
+          "attack_selector_u8": 0,
+          "hurt_selector_u8": 1,
+          "record_sha256": "7968e91240ecaebb949b768e7b0a690d23f30cf506c64de0ff3baad307f27d0a"
+        },
+        {
+          "animation_record": "0x001602c8",
+          "attack_selector_u8": 0,
+          "hurt_selector_u8": 1,
+          "record_sha256": "689eae9272ecac7c463c88e8f9082025e21c17a014b30ecac945f5b53274744a"
+        }
+      ]
+    },
     "audio_events": [
       {
         "arguments_u32": [

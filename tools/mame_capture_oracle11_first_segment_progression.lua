@@ -1132,18 +1132,21 @@ end
 local function emit_scene_actor(pool_spec, index)
     local slot = pool_spec.base + index * pool_spec.stride
     if u8(slot) == 0 then return end
+    local animation_record = u32(slot + 0x1c)
     local health = pool_spec.has_health and
         tostring(s16(u16(slot + 0x40))) or "na"
     local hurt_selector = pool_spec.has_collision_selectors and
-        string.format("%02x", u8(slot + 0xa5)) or "na"
+        string.format("%02x", animation_record ~= 0 and
+            u8(animation_record + 8) or 0) or "na"
     local attack_selector = pool_spec.has_collision_selectors and
-        string.format("%02x", u8(slot + 0xa6)) or "na"
+        string.format("%02x", animation_record ~= 0 and
+            u8(animation_record + 9) or 0) or "na"
     scene_actors:write(string.format(
         "%d\t%s\t%d\t%06x\t%d\t%d\t%02x\t%02x\t%04x\t%04x\t%d\t%08x\t%08x\t%d\t%08x\t%04x\t%d\t%04x\t%s\t%s\t%s\n",
         frame, pool_spec.name, index, slot, u8(slot), u8(slot + 8),
         u8(slot + 2), u8(slot + 3), u16(slot + 4), u16(slot + 6),
         u8(slot + 0x0f), u32(slot + 0x10), u32(slot + 0x14),
-        s16(u16(slot + 0x18)), u32(slot + 0x1c), u16(slot + 0x0a),
+        s16(u16(slot + 0x18)), animation_record, u16(slot + 0x0a),
         s16(u16(slot + 0x24)), u16(slot + 0x2a),
         health, hurt_selector, attack_selector))
 end
@@ -1518,13 +1521,16 @@ oracle11_progression_frame = emu.add_machine_frame_notifier(function()
             s16(u16(global + 0x278)), s16(u16(global + 0x27c)),
             s16(u16(global + 0x32)), u16(0xff81a8)))
         if u8(0xff8380) ~= 0 then
+            local player_animation = u32(0xff839c)
             scene_actors:write(string.format(
                 "%d\tplayer\t0\tff8380\t%d\t0\t%02x\t00\t%04x\t%04x\t%d\t%08x\t%08x\t%d\t%08x\t%04x\t%d\t%04x\t%d\t%02x\t%02x\n",
                 frame, u8(0xff8380), u8(0xff8382), u16(0xff8384),
                 u16(0xff8386), u8(0xff838f), u32(0xff8390),
-                u32(0xff8394), s16(u16(0xff8398)), u32(0xff839c),
+                u32(0xff8394), s16(u16(0xff8398)), player_animation,
                 u16(0xff838a), s16(u16(0xff83a4)), u16(0xff83aa),
-                s16(u16(0xff83c0)), u8(0xff83a5), u8(0xff83a6)))
+                s16(u16(0xff83c0)), player_animation ~= 0 and
+                    u8(player_animation + 8) or 0,
+                player_animation ~= 0 and u8(player_animation + 9) or 0))
         end
         for _, pool_spec in ipairs(scene_pools) do
             for index = 0, pool_spec.count - 1 do

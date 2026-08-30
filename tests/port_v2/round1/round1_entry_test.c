@@ -80,7 +80,7 @@ static int player_hit_source_frame_valid(const AvspRound1Runtime *runtime,
             runtime->player.animation_record == 0x0015f278UL &&
             runtime->player.assembly == 0x00160af2UL &&
             runtime->player.animation_timer == 1u &&
-            runtime->player.hurt_selector == 0u &&
+            runtime->player.hurt_selector == 17u &&
             runtime->player_hit_entries == 1u &&
             runtime->player_hit_audio_events == 0u;
     if (source_frame >= 2752u && source_frame <= 2761u)
@@ -321,7 +321,7 @@ int main(void)
             walk_runtime.player.assembly != 0x00160b9eUL ||
             walk_runtime.player.animation_timer != 4u ||
             walk_runtime.player.animation_branch != (short)-32768 ||
-            walk_runtime.player.hurt_selector != 0u ||
+            walk_runtime.player.hurt_selector != 17u ||
             walk_runtime.player.attack_selector != 0u)
             return 186;
         for (calls = 0u; calls < 4u; ++calls)
@@ -331,7 +331,7 @@ int main(void)
         if (walk_runtime.player.animation_record != 0x0015f208UL ||
             walk_runtime.player.assembly != 0x00160a02UL ||
             walk_runtime.player.animation_timer != 4u ||
-            walk_runtime.player.hurt_selector != 0u ||
+            walk_runtime.player.hurt_selector != 17u ||
             walk_runtime.player.attack_selector != 0u)
             return 186;
     }
@@ -343,7 +343,7 @@ int main(void)
         runtime.player.animation_record != 0x0015f208UL ||
         runtime.player.assembly != 0x00160a02UL ||
         runtime.player.animation_timer != 4u ||
-        runtime.player.hurt_selector != 0u ||
+        runtime.player.hurt_selector != 17u ||
         runtime.player.attack_selector != 0u ||
         !avsp_round1_step_player(&runtime, AVSP_PW_INPUT_RIGHT, 0) ||
         runtime.player.source_x_fp != 0x03b48000L ||
@@ -351,7 +351,7 @@ int main(void)
         runtime.player.animation_record != 0x0015f208UL ||
         runtime.player.assembly != 0x00160a02UL ||
         runtime.player.animation_timer != 3u ||
-        runtime.player.hurt_selector != 0u ||
+        runtime.player.hurt_selector != 17u ||
         runtime.player.attack_selector != 0u ||
         !avsp_round1_step_player(&runtime, 0u, 0) ||
         !avsp_round1_step_player(&runtime, 0u, 0) ||
@@ -378,8 +378,8 @@ int main(void)
         runtime.presentation_bindings != 1710u ||
         runtime.state_context_bindings != 1710u ||
         runtime.pools[0].records[10].assembly != 0x0012FA2AUL ||
-        runtime.pools[0].records[10].hurt_selector != 1u ||
-        runtime.pools[0].records[10].attack_selector != 1u ||
+        runtime.pools[0].records[10].hurt_selector != 2u ||
+        runtime.pools[0].records[10].attack_selector != 0u ||
         runtime.pools[0].records[16].assembly != 0x0012F9E4UL ||
         runtime.pools[0].records[16].hurt_selector != 1u ||
         runtime.pools[0].records[10].dispatch_entry != 0x00060532UL)
@@ -1128,7 +1128,7 @@ int main(void)
                 empty_walk_runtime.player.assembly != entry_assembly ||
                 empty_walk_runtime.player.animation_timer != entry_timer ||
                 empty_walk_runtime.player.animation_branch != entry_branch ||
-                empty_walk_runtime.player.hurt_selector != 0u ||
+                empty_walk_runtime.player.hurt_selector != 17u ||
                 empty_walk_runtime.player.attack_selector != 0u)
             {
                 fprintf(stderr,
@@ -1147,7 +1147,9 @@ int main(void)
         if (!avsp_round1_step_player(&empty_walk_runtime, 0u, 0) ||
             empty_walk_runtime.player.source_action != 0x1a02u ||
             empty_walk_runtime.player.animation_record != 0x0015fcfcUL ||
-            empty_walk_runtime.player.assembly != 0x00161772UL)
+            empty_walk_runtime.player.assembly != 0x00161772UL ||
+            empty_walk_runtime.player.hurt_selector != 1u ||
+            empty_walk_runtime.player.attack_selector != 0u)
             return 225;
         if (weapon_runtime.player_weapon_projectile_free_count != 23u ||
             weapon_runtime.player_weapon_projectiles[0].actor_class != 0 ||
@@ -1918,12 +1920,12 @@ int main(void)
                 action16_actor->substate != 0u ||
                 action16_actor->source_a4 != 0u ||
                 action16_actor->source_a6 != 2u ||
-                action16_actor->attack_selector != 2u ||
+                action16_actor->attack_selector != 0u ||
                 action16_actor->animation_record != 0x0012ec74UL ||
                 !avsp_round1_step_scheduler(&action16_rng_runtime) ||
                 action16_actor->substate != 0x1600u ||
                 action16_actor->animation_record != 0x0012e78cUL ||
-                action16_actor->attack_selector != 2u)
+                action16_actor->attack_selector != 0u)
             {
                 fprintf(stderr,
                     "action16 RNG reuse code=%u rng=%04x state=%04x/%04x a4=%u a6=%u attack=%u anim=%08lx failures=%lu\n",
@@ -1970,7 +1972,7 @@ int main(void)
                     latched_retry_actor->source_a6 != 2u ||
                     latched_retry_actor->source_motion_flags != 1u ||
                     latched_retry_actor->animation_record != 0x0012d5e4UL ||
-                    latched_retry_actor->attack_selector != 2u)
+                    latched_retry_actor->attack_selector != 0u)
                 {
                     fprintf(stderr,
                         "action16 latched retry code=%u rng=%04x state=%04x/%04x timer=%u facing=%u a6=%u latch=%u attack=%u anim=%08lx failures=%lu\n",
@@ -2058,8 +2060,8 @@ int main(void)
                 source_hit_target->assembly != 0x001308a6UL ||
                 source_hit_target->animation_timer != 1u ||
                 source_hit_target->animation_branch != 0 ||
-                source_hit_target->hurt_selector != 1u ||
-                source_hit_target->attack_selector != 1u)
+                source_hit_target->hurt_selector != 0u ||
+                source_hit_target->attack_selector != 0u)
             {
                 fprintf(stderr,
                     "source HIT entry code=%u state=%04x/%04x timer=%u active=%u mode=%u kind=%u selector=%u action-timer=%u prior=%d anim=%08lx assembly=%08lx anim-timer=%u branch=%d selectors=%u/%u\n",
@@ -2464,6 +2466,8 @@ int main(void)
                 return 61;
             ++entry_calls;
         }
+        /* This fixture isolates entry-transition authority, not contact. */
+        transition_runtime.player_hit_invulnerability = 1u;
         if (transition_runtime.class1f_initializations != 10u ||
             transition_runtime.class1f_initial_rng_calls != 10u ||
             transition_runtime.class09_rng_calls != 42u ||
@@ -3920,6 +3924,13 @@ int main(void)
                         inner8_seen = 1;
                 }
             }
+            if (source_frame == 2793u &&
+                (scene_runtime.player.animation_record != 0x0015fd10UL ||
+                 scene_runtime.player.animation_timer != 3u ||
+                 scene_runtime.player.animation_branch != 1 ||
+                 scene_runtime.player.hurt_selector != 0u ||
+                 scene_runtime.player.attack_selector != 0u))
+                return 118;
         }
         if (!scene_runtime.first_encounter.initialized)
         {

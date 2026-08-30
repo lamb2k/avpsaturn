@@ -1331,6 +1331,28 @@ static void avsp_round1_bind_class1f_action_record(
     actor->source_movement_table = record->movement_table;
 }
 
+static int avsp_round1_sync_class1f_presentation(
+    AvspRound1ActorCore *actor)
+{
+    const AvspRound1Class1fActionRecordSpec *action_record =
+        avsp_round1_find_class1f_action_record(actor->animation_record);
+    const AvspRound1PresentationSpec *presentation =
+        avsp_round1_find_class1f_presentation(actor->animation_record);
+    if (action_record != 0)
+    {
+        actor->assembly = action_record->assembly;
+        actor->hurt_selector = action_record->hurt_selector;
+        actor->attack_selector = action_record->attack_selector;
+        return 1;
+    }
+    if (presentation == 0)
+        return 0;
+    actor->assembly = presentation->assembly;
+    actor->hurt_selector = presentation->hurt_selector;
+    actor->attack_selector = presentation->attack_selector;
+    return 1;
+}
+
 static int avsp_round1_bind_class1f_inner8_record(
     AvspRound1ActorCore *actor, unsigned long address)
 {
@@ -2635,8 +2657,13 @@ static int avsp_round1_step_class1f_source_action(
         if (!avsp_round1_seed_class1f_action_fields(runtime, actor,
                 runtime->rng_seed, (unsigned char)actor->source_action, 1))
             return 0;
-        actor->hurt_selector = actor->source_a5;
-        actor->attack_selector = actor->source_a6;
+        if (actor->animation_record == 0UL)
+        {
+            actor->hurt_selector = 0u;
+            actor->attack_selector = 0u;
+        }
+        else if (!avsp_round1_sync_class1f_presentation(actor))
+            return 0;
         return 3;
     }
     if (actor->state == 0x0208u)
@@ -3535,10 +3562,6 @@ static void avsp_round1_bind_player_walk_record(
     runtime->player_walk_animation_active = 1u;
     runtime->player_walk_animation_timer = record->timer;
     avsp_round1_bind_animation_state(&runtime->player, record);
-    runtime->player.hurt_selector =
-        avsp_round1_player_locomotion.current_hurt_selector;
-    runtime->player.attack_selector =
-        avsp_round1_player_locomotion.current_attack_selector;
 }
 
 static void avsp_round1_advance_player_walk_animation(
@@ -3680,6 +3703,28 @@ static int avsp_round1_player_melee_contract_valid(void)
                 avsp_pw_assembly_for_record(strike->animation_record))
             return 0;
     }
+    return 1;
+}
+
+static int avsp_round1_player_locomotion_contract_valid(void)
+{
+    static const unsigned char expected_direction_resolver[16] =
+    {
+        255u, 2u, 6u, 255u, 4u, 3u, 5u, 255u,
+        0u, 1u, 7u, 255u, 255u, 255u, 255u, 255u
+    };
+    unsigned int index;
+    if (avsp_round1_player_locomotion.walking_action != 514u ||
+        avsp_round1_player_locomotion.stop_action != 516u ||
+        avsp_round1_player_locomotion.cleanup_action != 512u ||
+        avsp_round1_player_locomotion.stop_ticks != 10u ||
+        avsp_round1_player_locomotion.current_hurt_selector != 17u ||
+        avsp_round1_player_locomotion.current_attack_selector != 0u)
+        return 0;
+    for (index = 0u; index < 16u; ++index)
+        if (avsp_round1_player_locomotion.direction_resolver[index] !=
+                expected_direction_resolver[index])
+            return 0;
     return 1;
 }
 
@@ -3914,8 +3959,8 @@ static void avsp_round1_bind_player_weapon_frame(
     runtime->player.substate = frame->action;
     runtime->player.animation_record = frame->animation_record;
     runtime->player.assembly = frame->assembly;
-    runtime->player.hurt_selector = 0u;
-    runtime->player.attack_selector = 0u;
+    runtime->player.hurt_selector = frame->hurt_selector;
+    runtime->player.attack_selector = frame->attack_selector;
     runtime->player_locomotion_action = frame->action;
     ++runtime->player_weapon_presentation_bindings;
 }
@@ -4262,7 +4307,7 @@ static int avsp_round1_player_hit_contract_valid(void)
             0x0015F278UL ||
         avsp_round1_player_hit.carried_record.assembly != 0x00160AF2UL ||
         avsp_round1_player_hit.carried_record.timer != 1u ||
-        avsp_round1_player_hit.carried_record.hurt_selector != 0u ||
+        avsp_round1_player_hit.carried_record.hurt_selector != 17u ||
         avsp_round1_player_hit.hit_record.animation_record != 0x0015EEE8UL ||
         avsp_round1_player_hit.hit_record.assembly != 0x00160EDEUL ||
         avsp_round1_player_hit.hit_record.timer != 8u ||
@@ -4273,7 +4318,9 @@ static int avsp_round1_player_hit_contract_valid(void)
             0x0015F1F4UL ||
         avsp_round1_player_hit.return_record.assembly != 0x001626A4UL ||
         avsp_round1_player_hit.return_record.timer != 0x0FFFu ||
-        avsp_round1_player_hit.return_record.branch != (short)-32768)
+        avsp_round1_player_hit.return_record.branch != (short)-32768 ||
+        avsp_round1_player_hit.return_record.hurt_selector != 1u ||
+        avsp_round1_player_hit.return_record.attack_selector != 0u)
         return 0;
     for (index = 0u; index < AVSP_ROUND1_PLAYER_HIT_SHAKE_COUNT; ++index)
         if (avsp_round1_player_hit.shake_table[index] !=
@@ -7882,6 +7929,9 @@ static void avsp_round1_bind_player_special_record(
     runtime->player_special_animation_timer =
         avsp_round1_player_special_visible_durations[index];
     runtime->player_special_animation_branch = record->branch;
+    runtime->player.animation_timer =
+        runtime->player_special_animation_timer;
+    runtime->player.animation_branch = record->branch;
     runtime->player.source_action = runtime->player_special_phase;
     runtime->player.substate = runtime->player_special_phase;
     runtime->player.animation_record = record->animation_record;
@@ -8048,6 +8098,8 @@ static int avsp_round1_step_player_special(AvspRound1Runtime *runtime)
     if (runtime->player_special_animation_timer == 0u)
         return 0;
     --runtime->player_special_animation_timer;
+    runtime->player.animation_timer =
+        runtime->player_special_animation_timer;
     ++runtime->player_special_attack_elapsed;
     if (runtime->player_special_animation_timer != 0u)
         return 1;
@@ -8343,7 +8395,6 @@ int avsp_round1_step_scheduler(AvspRound1Runtime *runtime)
             AvspRound1ActorCore *actor =
                 &runtime->pools[pool_index].records[slot_index];
             AvspRound1SchedulerVisit *visit;
-            const AvspRound1PresentationSpec *presentation;
             unsigned short expected_slot;
             if (actor->active == 0u)
                 continue;
@@ -8691,31 +8742,17 @@ int avsp_round1_step_scheduler(AvspRound1Runtime *runtime)
                         continue;
                     }
                 }
+                if (!avsp_round1_sync_class1f_presentation(actor))
                 {
-                    const AvspRound1Class1fActionRecordSpec *action_record =
-                        avsp_round1_find_class1f_action_record(
-                            actor->animation_record);
-                    presentation = avsp_round1_find_class1f_presentation(
-                        actor->animation_record);
-                    actor->hurt_selector = actor->source_a5;
-                    actor->attack_selector = actor->source_a6;
-                    if (presentation != 0)
-                    {
-                        if (action_record == 0)
-                            actor->assembly = presentation->assembly;
-                    }
-                    if (action_record == 0 && presentation == 0)
-                    {
-                        runtime->scheduler_failure_code = 10u;
-                        runtime->scheduler_failure_source_slot =
-                            actor->source_slot;
-                        runtime->scheduler_failure_state = actor->state;
-                        runtime->scheduler_failure_substate = actor->substate;
-                        runtime->scheduler_failure_animation_record =
-                            actor->animation_record;
-                        ++runtime->failure_count;
-                        return 0;
-                    }
+                    runtime->scheduler_failure_code = 10u;
+                    runtime->scheduler_failure_source_slot =
+                        actor->source_slot;
+                    runtime->scheduler_failure_state = actor->state;
+                    runtime->scheduler_failure_substate = actor->substate;
+                    runtime->scheduler_failure_animation_record =
+                        actor->animation_record;
+                    ++runtime->failure_count;
+                    return 0;
                 }
                 if (actor->active &&
                     !avsp_round1_class1f_reaction_active(actor) &&
@@ -8945,6 +8982,9 @@ int avsp_round1_begin_first_entry(AvspRound1Runtime *runtime)
     runtime->player.animation_record = 0x0015F1F4UL;
     runtime->player.animation_timer = 0x0fffu;
     runtime->player.animation_branch = (short)0x8000u;
+    runtime->player.assembly = 0x001626A4UL;
+    runtime->player.hurt_selector = 1u;
+    runtime->player.attack_selector = 0u;
     runtime->player.health = AVSP_ROUND1_PLAYER_HEALTH;
     return avsp_round1_entry_valid(runtime);
 }
@@ -9719,9 +9759,7 @@ static int avsp_round1_player_weapon_runtime_valid(
                 if (runtime->player.source_action !=
                         avsp_round1_player_weapon.empty_entry_action ||
                     runtime->player.substate !=
-                        avsp_round1_player_weapon.empty_entry_action ||
-                    runtime->player.hurt_selector != 0u ||
-                    runtime->player.attack_selector != 0u)
+                        avsp_round1_player_weapon.empty_entry_action)
                     return 0;
                 frame = 0;
             }
@@ -9746,8 +9784,8 @@ static int avsp_round1_player_weapon_runtime_valid(
             runtime->player.substate != frame->action ||
             runtime->player.animation_record != frame->animation_record ||
             runtime->player.assembly != frame->assembly ||
-            runtime->player.hurt_selector != 0u ||
-            runtime->player.attack_selector != 0u))
+            runtime->player.hurt_selector != frame->hurt_selector ||
+            runtime->player.attack_selector != frame->attack_selector))
             return 0;
     }
     else if (runtime->player_weapon_cleanup_pending)
@@ -9765,8 +9803,8 @@ static int avsp_round1_player_weapon_runtime_valid(
             runtime->player.substate != frame->action ||
             runtime->player.animation_record != frame->animation_record ||
             runtime->player.assembly != frame->assembly ||
-            runtime->player.hurt_selector != 0u ||
-            runtime->player.attack_selector != 0u ||
+            runtime->player.hurt_selector != frame->hurt_selector ||
+            runtime->player.attack_selector != frame->attack_selector ||
             runtime->player_locomotion_action != frame->action)
             return 0;
     }
@@ -9853,6 +9891,7 @@ int avsp_round1_entry_valid(const AvspRound1Runtime *runtime)
         runtime->player.type != 0u ||
         runtime->player.health > AVSP_ROUND1_PLAYER_HEALTH ||
         runtime->fallback_count != 0u || runtime->failure_count != 0u ||
+        !avsp_round1_player_locomotion_contract_valid() ||
         !avsp_round1_player_melee_contract_valid() ||
         !avsp_round1_class1f_player_collision_contract_valid() ||
         !avsp_round1_player_hit_contract_valid() ||

@@ -9,7 +9,7 @@ from pathlib import Path
 
 ROOT = Path(__file__).resolve().parents[3]
 SPEC = ROOT / "data/spec02_round1_executable_contract.json"
-EXPECTED = "6426ee3442ed459e74bfb3136c83589f9900d40589ac32f7beaf44a442153c3e"
+EXPECTED = "6aedb1a103e129dd37ee9ad989863443a17453888fbef4324dfeccbf4dd44318"
 assert hashlib.sha256(SPEC.read_bytes()).hexdigest() == EXPECTED
 assert json.loads(SPEC.read_text())["status"] == "ACCEPTED"
 source = (ROOT / "src/port_v2/gameplay/round1/round1.c").read_text()
@@ -143,8 +143,8 @@ for before, after in (
     ("if (actor->active == 0u)\n                continue;", "if (actor->active != 0u)\n                continue;"),
     ("pool_index = order_index;", "pool_index = (order_index + 1u) % AVSP_ROUND1_POOL_COUNT;"),
     ("!avsp_round1_dispatch_supported(actor->type,\n                                                actor->actor_class)", "0"),
-    ("actor->source_next_animation_record = record->next_animation_record;\n    actor->assembly = record->assembly;",
-     "actor->source_next_animation_record = record->next_animation_record;\n    actor->assembly = 0UL;"),
+    ("actor->assembly = action_record->assembly;\n        actor->hurt_selector = action_record->hurt_selector;\n        actor->attack_selector = action_record->attack_selector;",
+     "actor->assembly = action_record->assembly;\n        actor->hurt_selector = action_record->hurt_selector;\n        actor->attack_selector = actor->source_a6;"),
     ("actor->dispatch_entry = AVSP_ROUND1_CLASS1F_DISPATCH_ENTRY;", "actor->dispatch_entry = 0UL;"),
     ("avsp_round1_apply_player_global_bounds(runtime);", "/* bounds suppressed */"),
     ("avsp_round1_update_player_locomotion(runtime, applied_direction,\n                                            was_stopping, &view);", "/* locomotion transition suppressed */"),
@@ -198,10 +198,10 @@ for before, after in (
     ("transition->y_acceleration = -0x00005000L;", "transition->y_acceleration = 0x00005000L;"),
     ("actor->effect_timer = 42u;", "actor->effect_timer = 41u;"),
     ("runtime->class1f_effect_guard = 0u;", "runtime->class1f_effect_guard = 1u;"),
-    ("actor->hurt_selector = actor->source_a5;",
-     "actor->hurt_selector = 0u;"),
-    ("actor->attack_selector = actor->source_a6;",
-     "actor->attack_selector = 0u;"),
+    ("actor->hurt_selector = action_record->hurt_selector;",
+     "actor->hurt_selector = actor->source_a5;"),
+    ("actor->assembly = presentation->assembly;\n    actor->hurt_selector = presentation->hurt_selector;\n    actor->attack_selector = presentation->attack_selector;",
+     "actor->assembly = presentation->assembly;\n    actor->hurt_selector = actor->source_a5;\n    actor->attack_selector = actor->source_a6;"),
     ("actor->source_style85 =\n        avsp_round1_class1f_source_hit.normal_return_style85;",
      "actor->source_style85 = 1u;"),
     ("slot == 0xc600u", "slot == 0xc580u"),
@@ -377,6 +377,10 @@ for before, after in (
      "runtime->first_encounter.source_progress = (unsigned short)(\n        runtime->first_encounter.source_progress + 0u);"),
     ("effect->attack_selector = 0u;\n    }\n    if (effect->state == 2u)",
      "effect->attack_selector = 0u;\n        return 1;\n    }\n    if (effect->state == 2u)"),
+    ("runtime->player.animation_branch = record->branch;",
+     "runtime->player.animation_branch = 0;"),
+    ("runtime->player.animation_timer =\n        runtime->player_special_animation_timer;",
+     "runtime->player.animation_timer = 0u;"),
     ("if (runtime->player_weapon_projectiles[slot_index].active &&\n            runtime->player_weapon_projectiles[slot_index].state !=\n                avsp_round1_weapon_projectile.initial_state)",
      "if (runtime->player_weapon_projectiles[slot_index].active)"),
 ):
@@ -412,7 +416,7 @@ if "--controller-edge-only" in sys.argv:
 generated_walk_mutations = {
     "    { 4u, 0, 0x0015F208UL, 0x00160A02UL, 17u, 0u },",
     "    { 4u, -32768, 0x0015F2B8UL, 0x00160B9EUL, 17u, 0u },",
-    "    514u,\n    516u,\n    512u,\n    10u,\n    0u,\n    0u,\n    {255u, 2u, 6u, 255u,",
+    "    514u,\n    516u,\n    512u,\n    10u,\n    17u,\n    0u,\n    {255u, 2u, 6u, 255u,",
 }
 for before, after in (
     ("    { 4u, 0, 0x0015F208UL, 0x00160A02UL, 17u, 0u },",
@@ -445,12 +449,12 @@ for before, after in (
      "{ 0x02u, 0x02u, 0x80u, 0x80u, 0x10u, 0x10u, 0x00u, 0x80u },"),
     ("    1u, 1200u,", "    1u, 1199u,"),
     ("7u, 7u, 8u, 8u, 9u, 9u", "7u, 7u, 7u, 8u, 9u, 9u"),
-    ("    514u,\n    516u,\n    512u,\n    10u,\n    0u,\n    0u,\n    {255u, 2u, 6u, 255u,",
-     "    514u,\n    516u,\n    512u,\n    9u,\n    0u,\n    0u,\n    {255u, 2u, 6u, 255u,"),
-    ("    514u,\n    516u,\n    512u,\n    10u,\n    0u,\n    0u,\n    {255u, 2u, 6u, 255u,",
-     "    514u,\n    516u,\n    512u,\n    10u,\n    1u,\n    0u,\n    {255u, 2u, 6u, 255u,"),
-    ("    514u,\n    516u,\n    512u,\n    10u,\n    0u,\n    0u,\n    {255u, 2u, 6u, 255u,",
-     "    514u,\n    516u,\n    512u,\n    10u,\n    0u,\n    1u,\n    {255u, 2u, 6u, 255u,"),
+    ("    514u,\n    516u,\n    512u,\n    10u,\n    17u,\n    0u,\n    {255u, 2u, 6u, 255u,",
+     "    514u,\n    516u,\n    512u,\n    9u,\n    17u,\n    0u,\n    {255u, 2u, 6u, 255u,"),
+    ("    514u,\n    516u,\n    512u,\n    10u,\n    17u,\n    0u,\n    {255u, 2u, 6u, 255u,",
+     "    514u,\n    516u,\n    512u,\n    10u,\n    16u,\n    0u,\n    {255u, 2u, 6u, 255u,"),
+    ("    514u,\n    516u,\n    512u,\n    10u,\n    17u,\n    0u,\n    {255u, 2u, 6u, 255u,",
+     "    514u,\n    516u,\n    512u,\n    10u,\n    17u,\n    1u,\n    {255u, 2u, 6u, 255u,"),
     ("    1536u,\n    5120u,\n    30u,", "    1538u,\n    5120u,\n    30u,"),
     ("    1536u,\n    5120u,\n    30u,", "    1536u,\n    5120u,\n    29u,"),
     ("{ 0x1600f8UL, 0x162a04UL, 8u, 1u },", "{ 0x1600f8UL, 0x162a82UL, 8u, 1u },"),
@@ -550,8 +554,8 @@ for before, after in (
      "    10u, 2u, 0u, 0u, 0x003Bu,"),
     ("    114688L, -8192L,",
      "    114687L, -8192L,"),
-    ("    { 1u, 0, 0x0015f278UL, 0x00160af2UL, 0u, 0u },",
-     "    { 1u, 0, 0x0015f278UL, 0x00160af2UL, 1u, 0u },"),
+    ("    { 1u, 0, 0x0015f278UL, 0x00160af2UL, 17u, 0u },",
+     "    { 1u, 0, 0x0015f278UL, 0x00160af2UL, 16u, 0u },"),
     ("    { 2, -2, 2, -2, 2, -2, 2, -2, 2, -2, 2, -2, 2, -2, 2, -2 }",
      "    { 3, -2, 2, -2, 2, -2, 2, -2, 2, -2, 2, -2, 2, -2, 2, -2 }"),
     ("    0x00ffc300UL, 2751u, 0xeea3u, 0xcb6eu, 1095, 369, 319, 24u, 0x4e, 0u",
@@ -606,4 +610,4 @@ for before, after in (
 if "--generated-walk-only" in sys.argv:
     print("REIMPLEMENT-13 generated walk fixture mutation lane: PASS (5 real mutations)")
     raise SystemExit(0)
-print("REIMPLEMENT-13 entry/player/scheduler/class1f/Coffee-Shop-navigation/neutral-stop/melee/Button1/Button3/type16-projectile/player-HIT/first-encounter differential: PASS (207 real mutations)")
+print("REIMPLEMENT-13 entry/player/scheduler/class1f/Coffee-Shop-navigation/neutral-stop/melee/Button1/Button3/type16-projectile/player-HIT/first-encounter differential: PASS (209 real mutations)")

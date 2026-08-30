@@ -26,13 +26,15 @@ def divergence_row(frame, actor_class, source=True, x=10):
     row = {
         "frame": str(frame), "type": "24", "class": actor_class,
         "state": "0200", "substate": "0000", "z": "0", "facing": "0",
-        "animation_record": "00000001", "health": "1",
+        "animation_record": "00000001", "animation_timer": "1",
+        "animation_branch": "0", "health": "1",
         "hurt_selector": "00", "attack_selector": "00"}
     if source:
         row.update({"active": "1", "slot": "00ffc300",
                     "x_fp": f"{x << 16:08x}", "y_fp": "00140000"})
     else:
-        row.update({"source_slot": "00ffc300", "x": str(x), "y": "20"})
+        row.update({"source_slot": "00ffc300", "x": str(x), "y": "20",
+                    "x_fp": str(x << 16), "y_fp": str(20 << 16)})
     return row
 
 
@@ -43,6 +45,15 @@ identity_probe = MODULE.source_native_divergences(
     [divergence_row(1, "4e", False),
      divergence_row(2, "10", False, x=11)])
 assert len(identity_probe) == 1 and identity_probe[0]["class"] == "0x10"
+
+selector_contract = json.loads(MODULE.FIXTURES.read_text(encoding="ascii"))[\
+    "scene_manifests"]["coffee_shop"]["animation_collision_selectors"]
+selector_probe = MODULE.bind_source_collision_selectors(
+    [{"animation_record": "0015fd10", "hurt_selector": "01",
+      "attack_selector": "00"}], selector_contract)
+assert selector_probe == [
+    {"animation_record": "0015fd10", "hurt_selector": "00",
+     "attack_selector": "00"}]
 
 MODULE.validate_report(BASE)
 mutations = []

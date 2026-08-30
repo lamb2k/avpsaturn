@@ -34,6 +34,7 @@ AUXILIARY = ROOT / "data/oracle11_round1_auxiliary_authority.json"
 RNG = ROOT / "data/oracle11_round1_rng.json"
 BOSS = ROOT / "data/oracle11_round1_boss_orchestration.json"
 OPCODES = ROOT / ".deps/mame/actorprobe/decrypted_opcodes_2m.bin"
+PROGRAM = ROOT / ".deps/mame/actorprobe/decrypted_program_2m.bin"
 OUT = ROOT / "data/oracle11_round1_encounter_route_authority.json"
 ORACLE10_EVENTS = (ROOT / ".deps/mame/oracle10_round1_system_census_e" /
                    "baseline/actor_events.tsv")
@@ -156,6 +157,8 @@ def coffee_shop_scene_census() -> dict[str, object]:
     auxiliary = json.loads(AUXILIARY.read_text(encoding="utf-8"))
     rng = json.loads(RNG.read_text(encoding="utf-8"))
     boss = json.loads(BOSS.read_text(encoding="utf-8"))
+    program = PROGRAM.read_bytes()
+    animation_collision_selectors: dict[int, tuple[int, int]] = {}
     transient_groups = rng["owner_partition"]["auxiliary_type16_20_24"][
         "transient_child_groups"]
     require(rng["status"] == "SOURCE_CLOSED" and
@@ -249,6 +252,12 @@ def coffee_shop_scene_census() -> dict[str, object]:
 
     for row in rows(COFFEE_SHOP_SCENE_A / "coffee_shop_scene_actors.tsv"):
         frame = int(row["frame"])
+        animation_record = int(row["animation_record"], 16)
+        if animation_record != 0:
+            require(animation_record + 9 < len(program),
+                    "Coffee Shop animation record outside source program")
+            animation_collision_selectors[animation_record] = (
+                program[animation_record + 8], program[animation_record + 9])
         key = (row["pool"], row["slot"])
         identity = (row["type"], row["class"])
         current = active.get(key)
@@ -278,11 +287,13 @@ def coffee_shop_scene_census() -> dict[str, object]:
         current["states"].add((int(row["state"], 16),
                                 int(row["substate"], 16)))
         current["facings"].add(int(row["facing"]))
-        current["animation_records"].add(f"0x{int(row['animation_record'], 16):08x}")
+        current["animation_records"].add(f"0x{animation_record:08x}")
         if row["attack_selector"] != "na":
-            current["attack_selectors"].add(int(row["attack_selector"], 16))
+            current["attack_selectors"].add(
+                animation_collision_selectors.get(animation_record, (0, 0))[1])
         if row["hurt_selector"] != "na":
-            current["hurt_selectors"].add(int(row["hurt_selector"], 16))
+            current["hurt_selectors"].add(
+                animation_collision_selectors.get(animation_record, (0, 0))[0])
         for field, value in (("x_fp_range_s32_16_16", int(row["x_fp"], 16)),
                              ("y_fp_range_s32_16_16", int(row["y_fp"], 16)),
                              ("z_range_s16", int(row["z"]))):
@@ -399,6 +410,32 @@ def coffee_shop_scene_census() -> dict[str, object]:
             "sha256": hashlib.sha256(
                 OPCODES.read_bytes()[0x01729e:0x0174a4]).hexdigest(),
             "inactive_in_capture": ["record8", "record24_aux"]},
+        "animation_collision_selectors": {
+            "classification": "SOURCE_CLOSED_IMPLEMENTATION_FIELDS",
+            "layout": {
+                "animation_record_u32": "actor+0x1c",
+                "hurt_selector_u8": "animation_record+0x08",
+                "attack_selector_u8": "animation_record+0x09",
+                "capture_columns_rejected_as_authority": [
+                    "actor+0x25 animation branch/event low byte",
+                    "actor+0x26 linked-actor word high byte"],
+            },
+            "records": [
+                {"animation_record": f"0x{address:08x}",
+                 "hurt_selector_u8": selectors[0],
+                 "attack_selector_u8": selectors[1],
+                 "record_sha256": hashlib.sha256(
+                     program[address:address + 16]).hexdigest()}
+                for address, selectors in sorted(
+                    animation_collision_selectors.items())],
+            "mutation_control": {
+                "wrong_player_field_projection_rejected": True,
+                "first_discriminating_frame_u16": 2793,
+                "animation_record": "0x0015fd10",
+                "source_hurt_selector_u8": 0,
+                "rejected_actor_event_byte_u8": 1,
+            },
+        },
         "actor_lifetimes": lifetimes,
         "class_type_inventory": pair_inventory,
         "blocked_class_type_pairs": blocked,
@@ -1651,6 +1688,7 @@ def validate(report: dict[str, object]) -> None:
             all(item["writer_pc"][2:] in SPAWN_GUARDS and item["transition_guard"]
                 for item in report["enemy_spawns"]), "unclosed encounter spawn")
     scene = report["coffee_shop_scene_census"]
+    selector_projection = scene["animation_collision_selectors"]
     require(scene["capture_identity"]["byte_identical"] is True and
             scene["source_frame_range"] == [1972, 5566] and
             scene["counts"] == {"actor_lifetimes": 747,
@@ -1675,7 +1713,23 @@ def validate(report: dict[str, object]) -> None:
             scene["negative_controls"] == {
                 "half_stride_aliases_admitted": False,
                 "inactive_slots_admitted": False,
-                "unknown_pair_silently_omitted": False},
+                "unknown_pair_silently_omitted": False} and
+            selector_projection["classification"] ==
+                "SOURCE_CLOSED_IMPLEMENTATION_FIELDS" and
+            len(selector_projection["records"]) == 626 and
+            next(item for item in selector_projection["records"]
+                 if item["animation_record"] == "0x0015fd10") == {
+                    "animation_record": "0x0015fd10",
+                    "hurt_selector_u8": 0,
+                    "attack_selector_u8": 0,
+                    "record_sha256":
+                        "99a1dc2459f4b88a255bd891c0d2f55612fd0e14b54b6526a37521088092ac6b"} and
+            selector_projection["mutation_control"] == {
+                "wrong_player_field_projection_rejected": True,
+                "first_discriminating_frame_u16": 2793,
+                "animation_record": "0x0015fd10",
+                "source_hurt_selector_u8": 0,
+                "rejected_actor_event_byte_u8": 1},
             "Coffee Shop scene census drift")
     first_entry = report["first_entry_body"]
     require(first_entry["classification"] == "SOURCE_CLOSED" and

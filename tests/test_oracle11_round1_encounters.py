@@ -48,8 +48,9 @@ for label,change in (
     ('lifecycle-release-writer',lambda x:x['first_segment_recurring_spawn']['lifecycle_release_boundary'].__setitem__('writer_pc','0x061150')),
     ('ko-progress-increment',lambda x:x['first_segment_recurring_spawn']['progress_increment_boundary'].__setitem__('increment_u16',2)),
     ('scene-lifetime-omission',lambda x:x['coffee_shop_scene_census']['actor_lifetimes'].pop()),
+    ('scene-selector-projection',lambda x:x['coffee_shop_scene_census']['animation_collision_selectors']['mutation_control'].__setitem__('wrong_player_field_projection_rejected',False)),
     ('scene-pool-omission',lambda x:x['coffee_shop_scene_census']['pool_scan'].pop()),
     ('scene-silent-unknown',lambda x:x['coffee_shop_scene_census']['negative_controls'].__setitem__('unknown_pair_silently_omitted',True)),
 ):
     mutant=copy.deepcopy(report);change(mutant);reject(mutant,label)
-print('ORACLE-11 encounter/route authority tests: PASS (29 mutations rejected)')
+print('ORACLE-11 encounter/route authority tests: PASS (30 mutations rejected)')

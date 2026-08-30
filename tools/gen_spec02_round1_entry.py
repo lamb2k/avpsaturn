@@ -994,17 +994,17 @@ def build() -> str:
             "x_fp_s16_16": "0x03b24000",
             "animation_record": "0x0015f208",
             "assembly": "0x00160a02", "animation_timer_u16": 4,
-            "current_hurt_selector_u8": 0,
+            "current_hurt_selector_u8": 17,
             "current_attack_selector_u8": 0} or
         locomotion_execution["movement"]["right_delta_s16_16"] !=
             "0x00024000" or
         locomotion_presentation["ticks_per_record"] != 4 or
         locomotion_execution["current_collision_selector_projection"] != {
-            "guard": "the player locomotion entry/active/stop body is current while its source animation record supplies collision lookup metadata",
-            "actor_hurt_selector_u8": 0,
+            "guard": "the current locomotion animation record owns collision lookup metadata",
+            "actor_hurt_selector_u8": 17,
             "actor_attack_selector_u8": 0,
             "collision_lookup_hurt_selector_u8": 17,
-            "rule": "the player actor's captured current selector fields remain zero; collision resolves the current walk record byte +8 separately",
+            "rule": "native current selectors derive from animation-record bytes +0x08/+0x09; captured actor event/link bytes are rejected",
             "source_frames": [2602, 2678]} or
         len(locomotion_records) != 12 or
         [row["animation_record"] for row in locomotion_records] !=
@@ -1147,7 +1147,7 @@ def build() -> str:
             "animation_record": "0x0015fcfc",
             "assembly": "0x00161772", "animation_timer_u16": 4095,
             "animation_branch_s16": -32768,
-            "current_hurt_selector_u8": 0,
+            "current_hurt_selector_u8": 1,
             "current_attack_selector_u8": 0} or
         weapon_empty_entry["coffee_shop_witnesses"][1]
             ["entry_animation_record"] != "0x0015f228" or
@@ -2546,8 +2546,8 @@ def build() -> str:
         f"    {int(release['stop_action'], 16)}u,",
         "    512u,",
         f"    {release['stop_timer']['ticks']}u,",
-        "    0u,",
-        "    0u,",
+        f"    {locomotion_execution['current_collision_selector_projection']['actor_hurt_selector_u8']}u,",
+        f"    {locomotion_execution['current_collision_selector_projection']['actor_attack_selector_u8']}u,",
         "    {" + ", ".join(f"{value}u" for value in direction_resolver) + "}",
         "};", "",
         "static const AvspRound1AnimationStateSpec avsp_round1_player_walk_records[AVSP_ROUND1_PLAYER_WALK_PRESENTATION_COUNT] =",
@@ -2598,11 +2598,13 @@ def build() -> str:
             player_hit_phase0["presentation"]["assembly"],
             player_hit_phase0["presentation"]["hurt_selector_u8"],
             player_hit_phase0["presentation"]["attack_selector_u8"]),
-        "    { %du, %d, %sUL, %sUL, 0u, 0u }," % (
+        "    { %du, %d, %sUL, %sUL, %du, %du }," % (
             player_hit_return["presentation"]["timer_u16"],
             player_hit_return["presentation"]["branch_s16"],
             player_hit_return["presentation"]["animation_record"],
-            player_hit_return["presentation"]["assembly"]),
+            player_hit_return["presentation"]["assembly"],
+            player_hit_return["presentation"]["hurt_selector_u8"],
+            player_hit_return["presentation"]["attack_selector_u8"]),
         "    { " + ", ".join(str(value) for value in
             player_hit["shake"]["table_s16"]) + " }",
         "};", "",

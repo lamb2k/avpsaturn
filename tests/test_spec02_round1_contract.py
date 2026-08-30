@@ -144,7 +144,7 @@ assert [(row["first_frame_u16"], row["last_frame_u16"],
             (2274, 2274, "0x0002"), (2522, 2522, "0x1a00"),
             (2523, 2538, "0x1a02"), (2539, 2539, "0x0000"),
             (2540, 2540, "0x0002")]
-assert all(row["hurt_selector_u8"] == 0 and
+assert all(row["hurt_selector_u8"] == 1 and
            row["attack_selector_u8"] == 0
            for row in weapon_actor["visible_runs"])
 assert weapon_actor["mutation_control"]["first_rejected_frame_u16"] == 2252
@@ -622,8 +622,9 @@ f = copy.deepcopy(fixtures); f["authority_data"]["player"]["directional_airborne
 f = copy.deepcopy(fixtures); f["authority_data"]["player"]["directional_airborne_interruption"]["airborne_actions"]["button1"]["record4_class03"]["effect_allocation"]["audio_command"] = "0x0008"; mutations.append((contract, f, "class-3 effect mislabeled as audio"))
 f = copy.deepcopy(fixtures); f["authority_data"]["player"]["directional_airborne_interruption"]["airborne_actions"]["button1"]["record4_class03"]["active_state"]["low_nibble_motion_tables_s16"]["1"] = f["authority_data"]["player"]["directional_airborne_interruption"]["airborne_actions"]["button1"]["record4_class03"]["active_state"]["low_nibble_motion_tables_s16"]["1"][:16]; mutations.append((contract, f, "class-3 direction table truncation"))
 f = copy.deepcopy(fixtures); f["authority_data"]["player"]["directional_airborne_interruption"]["airborne_actions"]["button1"]["record4_class03"]["effect_allocation"]["record_type_u8"] = 36; mutations.append((contract, f, "class-3 effect wrong fixed pool"))
-f = copy.deepcopy(fixtures); f["authority_data"]["player"]["hit_ko_failure_continue_respawn"]["nonlethal_hit"]["first_segment_execution_contract"]["entry_writes"]["carried_record"]["hurt_selector_u8"] = 17; mutations.append((contract, f, "player HIT stale hurt-selector mutation"))
+f = copy.deepcopy(fixtures); f["authority_data"]["player"]["hit_ko_failure_continue_respawn"]["nonlethal_hit"]["first_segment_execution_contract"]["entry_writes"]["carried_record"]["hurt_selector_u8"] = 0; mutations.append((contract, f, "player HIT missing hurt-selector mutation"))
 f = copy.deepcopy(fixtures); f["scene_manifests"]["coffee_shop"]["actor_lifetimes"].pop(); mutations.append((contract, f, "Coffee Shop actor omission"))
+f = copy.deepcopy(fixtures); f["scene_manifests"]["coffee_shop"]["animation_collision_selectors"]["records"][0]["hurt_selector_u8"] ^= 1; mutations.append((contract, f, "Coffee Shop selector projection mutation"))
 f = copy.deepcopy(fixtures); f["scene_manifests"]["coffee_shop"]["audio_events"].pop(); mutations.append((contract, f, "Coffee Shop audio omission"))
 f = copy.deepcopy(fixtures); f["scene_manifests"]["coffee_shop"]["health_writes"].pop(); mutations.append((contract, f, "Coffee Shop health-write omission"))
 f = copy.deepcopy(fixtures); f["scene_manifests"]["coffee_shop"]["actor_lifetimes"][0]["classification"] = "UNKNOWN"; mutations.append((contract, f, "Coffee Shop unknown classification"))
