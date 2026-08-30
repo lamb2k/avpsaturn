@@ -1128,13 +1128,55 @@ one. The source capture is unchanged; route/camera and audio/load do not
 increase. Unowned Saturn actors, unidentified source pairs, and retained
 gameplay authorities remain zero.
 
-The next earliest causal divergence is visible frame 2751 at player slot
-`0x00ff8380`: source enters HIT state `0x0202` after the frame-2750 health
-write while native remains state `0x0200` with idle animation `0x0015f1f4`.
-Bind the accepted player HIT entry, next-update state/substate/timer
-progression, animation/assembly, facing, interruption, collision suppression,
-and return-to-control rule. Preserve the accepted health write and do not
-subtract health twice.
+The next earliest causal divergence at that checkpoint was visible frame 2751
+at player slot `0x00ff8380`: source entered HIT state `0x0202` after the
+frame-2750 health write while native remained state `0x0200` with idle
+animation `0x0015f1f4`.
+
+Incremental checkpoint `b711281161305e5f193ef0b184bf0d9c9e5abc83`
+closes the complete nonlethal player HIT body. Accepted evidence binds entry,
+carried frame, eight-tick HIT presentation, sixteen-step shake, fixed-point
+motion, return-to-control, and one-frame post-return invulnerability through
+routines `0x1a96e`, `0x1a982`, `0x1aad0`, `0x1ab1a`, `0x1ab2c`, `0x1ab52`,
+and `0x1abb8`; shake table `0x1aa90`; motion row 2 at `0x1f892`; and audio
+command `0x003b`. Source and native player state, substate, position, facing,
+animation, assembly, timer, health, and invulnerability are exact for visible
+frames 2751..2778. Health remains owned solely by the accepted frame-2750
+collision write.
+
+SPEC-02 is
+`45496c15cf6bef7176146e9530ffc6bc04bdb152c9892f3b7b1f10aeef97b5b7`;
+fixture is
+`15584fcaf6749b8f4be7240a91936c57154d898ec987854e6651e27916d8fa9d`.
+Fast, Oracle, 15 Oracle-HIT mutations, 21 player-authority mutations, 127 SPEC
+mutations, 189 native mutations, 123 Target suppressions, and both
+LiveEncounter Target profiles pass. The exact SH-2 runtime is `0x148e0` bytes
+inside the unchanged `0x19000` carve, leaving `0x4720` bytes.
+
+Two commit-bound 575-sample Coffee Shop Emulator ledgers are byte-identical at
+normalized ISO
+`0e560acc57e0e16315114158f006c6d584599f772c771d1b9c37113347a54b6f`;
+canonical samples remain
+`2bb6c0321215d15d92b7a26a59e5a375b4bb9ea8ca003de93c6db8aba391e949`.
+Window-only WGC frames 2750..2780 pass direct inspection. Cadence sheet
+`4b16d25a9dfa674c97542859b1f567fc52fcb20e50fe6fc8bf06bd2b0d3ea929`
+and clip
+`82f492f003f7f6d17c79af293eb514f7dae33fc50674503d3d6f2bb1eac330bf`
+preserve dark-Predator P1 identity, the separate source-owned white Major
+actor, P1 weapon/resource presentation with the actual P2 slot hidden,
+coherent HIT/return presentation, staff continuity, both Coffee Shop planes,
+palette, and priority.
+
+Whole-scene gaps remain `339 / 1,248 / 2 / 93 / 3 / 281`; no category
+increases. Unowned Saturn actors, unidentified source pairs, and retained
+gameplay authorities remain zero. The regenerated complete scene exposes an
+earlier causal divergence at visible frame 2602: source player slot
+`0x00ff8380` samples rightward input before its update and enters
+`0x0200:0200`, facing 1, x `0x03b24000`, animation `0x0015f208`, assembly
+`0x00160a02`, timer 4. Native remains one update late at `0x0200:0002`,
+facing 0, x `0x03b00000`, idle `0x0015f1f4`. Bind the accepted controller and
+player scheduler order plus the directional transition rule without
+rebaselining input or adding a frame exception. Preserve the exact HIT body.
 
 ## Next eligible cards
 
