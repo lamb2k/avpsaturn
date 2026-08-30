@@ -1178,6 +1178,48 @@ facing 0, x `0x03b00000`, idle `0x0015f1f4`. Bind the accepted controller and
 player scheduler order plus the directional transition rule without
 rebaselining input or adding a frame exception. Preserve the exact HIT body.
 
+Incremental checkpoint `26f41cf0ff1b1abab0d19ef74be781ba0ff86ba4`
+closes that controller/player update-order divergence and the complete twelve-
+record Predator Warrior walk loop. Visible frame 2602 now matches source at
+`0x0200:0200`, facing 1, x `0x03b24000`, record `0x0015f208`, assembly
+`0x00160a02`, and timer 4; the fixed `0x24000` 16.16 movement delta and record
+cadence remain exact. The Button1 body returns naturally to the source walk
+entry at frame 2630 without an input rebaseline, frame exception, or authored
+return delay. The accepted player HIT body at frames 2751..2778 is unchanged.
+
+SPEC-02 is
+`bb48c1976641d0afa01ed621c1dbbf9d71eac2337dd00ebf4da1e4f4fabc632f`;
+fixture is
+`03f2c96366fded74bb94e3bbf57883a8c967e18908d0eedb963ce85ef65afa5b`.
+Fast, Oracle, 127 SPEC mutations, 198 native mutations, 20 scene mutations,
+123 Target suppressions, and both LiveEncounter Target profiles pass. Exact
+runtime size is `0x148e4` inside the `0x19000` carve, leaving `0x471c` bytes.
+Two commit-bound 575-sample Emulator runs have byte-identical sample payload
+`8d239f8a9187ad034c5793fa3eb932380f8784d6e761b51eec7d04b993747eb7`
+at normalized ISO
+`97be8a7019449f2e65066cc4416a6517f610c482a572d255be308e48cd57e9ee`.
+
+Real window-only WGC covers every visible frame 2598..2633. Cadence sheet
+`9525bf6e93004726d462f3e0b95d8e157e956fb7d685ff15651281222653a801`
+and clip
+`d15f9d2cb0a352c063092e70eee5f58048df0b7c985ddd2ea47d5d80288f5473`
+pass direct inspection: source-bound P1 Predator presentation, the independent
+intro actor, weapon-to-locomotion transition, P1-only HUD, both Coffee Shop
+planes, palette, and priority remain coherent.
+
+Whole-scene gaps improve from `339 / 1,248 / 2 / 93 / 3 / 281` to
+`323 / 1,243 / 2 / 93 / 3 / 281`. No category increases. Unowned Saturn
+actors, unidentified source pairs, and retained gameplay authorities remain
+zero. The corrected trajectory exposes the next fixed-slot mismatch one frame
+earlier (`2917 -> 2916`), but does not increase a gap category.
+
+The next earliest causal divergence is player slot `0x00ff8380` at visible
+frame 2602: source hurt selector is 0 while native still exposes selector 17.
+Bind its accepted current-state collision-selector writer, transition guard,
+reads/writes, and scheduler order. Do not add a frame/slot exception and do not
+weaken the comparison. Preserve the corrected locomotion and HIT locks; the
+next animation divergence remains visible frame 2612.
+
 ## Next eligible cards
 
 - `QA-13-ROUND1-END-TO-END-DIFFERENTIAL` after the complete stable Round 2
