@@ -590,6 +590,10 @@ typedef char AvspRound1ReservedCarvesFitCartDram1[
         : -1];
 static int round1_retained_initialized;
 static int round1_cdda_started;
+#ifdef AVSP_LIVE_ENCOUNTER_AUTOTEST
+#define AVSP_LIVE_AUTOTEST_EVIDENCE_LAST_FRAME 574
+static int round1_autotest_capture_frozen;
+#endif
 volatile LiveEncounterDiagSample *avsp_diag_live_samples =
     (volatile LiveEncounterDiagSample *)(
         AVSP_CART_DRAM1_BASE + AVSP_TILE_REGION_BYTES +
@@ -8410,6 +8414,17 @@ static void live_encounter_frame_callback(void)
             avsp_diag_live_frame_stage = -1;
         return;
     }
+#ifdef AVSP_LIVE_ENCOUNTER_AUTOTEST
+    /* Publish one stable, completed VDP1 frame for paired readback.  Without
+     * this boundary the MCP poll can observe any later stage-7 frame, so the
+     * cache identity depends on host polling latency even though gameplay
+     * samples are identical. */
+    if (round1_autotest_capture_frozen)
+    {
+        avsp_diag_live_frame_stage = 7;
+        return;
+    }
+#endif
     avsp_diag_live_frame_stage = 1;
     street_test_frame();
     source_frame = AVSP_ROUND1_DIAGNOSTIC_SOURCE_BASE_FRAME +
@@ -8555,7 +8570,6 @@ static void live_encounter_frame_callback(void)
         runtime_ready = 0;
         return;
     }
-    avsp_diag_live_frame_stage = 7;
     round1_record_startup_chronology(retained_stepped);
     if (!round1_runtime.first_encounter.initialized)
     {
@@ -8563,6 +8577,21 @@ static void live_encounter_frame_callback(void)
         live_encounter_frame.input_mask = round1_player_mask;
     }
     live_encounter_publish();
+#ifdef AVSP_LIVE_ENCOUNTER_AUTOTEST
+    if (live_encounter_frame.frame >=
+        AVSP_LIVE_AUTOTEST_EVIDENCE_LAST_FRAME)
+    {
+        round1_autotest_capture_frozen = 1;
+        /* Stage 8 is intentionally not accepted by the collector.  The next
+         * callback advances it to stable stage 7 without touching gameplay,
+         * sprite definitions, or VDP1 texture memory. */
+        avsp_diag_live_frame_stage = 8;
+    }
+    else
+        avsp_diag_live_frame_stage = 7;
+#else
+    avsp_diag_live_frame_stage = 7;
+#endif
     ++round1_runtime.frame;
     avsp_diag_runtime_ready = runtime_ready;
 }

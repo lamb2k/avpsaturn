@@ -61,6 +61,8 @@ assert reports[0]["iso_sha256"] == reports[1]["iso_sha256"] == \
     normalizations[0]["normalized_iso_sha256"]
 assert reports[0]["samples"] == reports[1]["samples"]
 assert reports[0]["source_chronology"] == reports[1]["source_chronology"]
+assert reports[0]["vdp1_texture_integrity"]["cache_sha256"] == \
+    reports[1]["vdp1_texture_integrity"]["cache_sha256"]
 for report in reports:
     validate(report)
 
@@ -87,6 +89,16 @@ for mutant in mutations:
     except AssertionError:
         continue
     raise AssertionError("Coffee Shop emulator mutation was accepted")
+
+cache_mutant = copy.deepcopy(reports[1])
+cache_mutant["vdp1_texture_integrity"]["cache_sha256"] = "0" * 64
+try:
+    assert reports[0]["vdp1_texture_integrity"]["cache_sha256"] == \
+        cache_mutant["vdp1_texture_integrity"]["cache_sha256"]
+except AssertionError:
+    mutations.append(cache_mutant)
+else:
+    raise AssertionError("Coffee Shop VDP1 cache mutation was accepted")
 
 print("REIMPLEMENT-13 paired Coffee Shop emulator chronology: PASS "
       f"({len(mutations)} mutations rejected)")
