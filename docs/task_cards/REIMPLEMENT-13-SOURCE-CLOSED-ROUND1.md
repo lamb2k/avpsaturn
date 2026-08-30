@@ -915,6 +915,41 @@ while native is `326/326`; `x` first differs at frame 2517 (`687` versus
 position, and subpixel carry, then apply the source rule without a frame/slot
 exception.
 
+Incremental checkpoint `368bb391ff82c4b542b0fdfe0465c8be3d04e7e0`
+closes the recurring fixed-point record-reuse boundary. Accepted Oracle evidence
+proves that the recurring record-12 writer replaces the signed high position
+words while preserving the allocated record's low `u16` fractions. Native now
+matches source at frames 2511, 2514, and 2517: `x/y`
+`0x02a08000/0x01489000`, `0x02a7e200/0x01470900`, and
+`0x02af4400/0x01458200`. The allocator and state-0 seed use that source rule;
+there is no frame or slot exception.
+
+SPEC-02 contract is
+`51150e37e05d7e0199cec08725580630ef1a1890d3a63fdff68bf7e7c11c8cf2`;
+fixture is
+`e5ece146171b40172901c3ad58f3fc71af6109cdb938b18c91f08d117c895d78`.
+Fast, Oracle, 117 SPEC mutations, 26 encounter mutations, 82 enemy mutations,
+181 native mutations, 20 scene mutations, 123 Target suppressions, both
+LiveEncounter Target profiles, and two byte-identical 575-sample Coffee Shop
+Emulator ledgers pass. Normalized ISO is
+`94608db70794fa58bcd8c2d7e49fe0d6b2a8376423ebabe82f57f675ef8f6614`.
+
+Window-only WGC frames 2510..2518 pass direct inspection. Cadence sheet
+`e8946734278145e5e234bd731732fcc9cadc000354eadd1b5c9a84182fe3a93a`
+and clip
+`e7bfdbab252e2578cc6813fb0524f675aea03098025636a0cbd3aa855af80fe9`
+preserve Predator/staff identity, coherent recurring movement, P1-only HUD,
+and clean Coffee Shop planes, palette, and priority. Whole-scene gaps remain
+`295 / 1,259 / 3 / 94 / 3 / 281`; no category increases. Unowned Saturn
+actors, unidentified source pairs, and retained gameplay authorities remain
+zero.
+
+The next earliest causal divergence is visible frame 2522 at player slot
+`0x00ff8380`: source substate is `0x1a00` while native remains `0x0c00`, with
+the first animation divergence at frame 2523. Recover the exact accepted
+transition predicate, input/interruption guard, writes, presentation selection,
+and scheduler position, then apply the source rule without a frame exception.
+
 ## Next eligible cards
 
 - `QA-13-ROUND1-END-TO-END-DIFFERENTIAL` after the complete stable Round 2
