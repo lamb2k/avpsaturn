@@ -994,6 +994,49 @@ The next earliest causal divergence is visible frame 2523 at source slot
 position, class/variant ownership, state initialization, coordinate writes,
 and presentation cadence. Apply the source rule, not a frame or slot exception.
 
+Incremental checkpoint `e352c265f45b114da040774e5fb9a53598e08117`
+corrects that report and closes the actual source type-24/class-`0x10`
+empty-resource effect. The scene reporter now keys lifetimes by slot, type, and
+class, preventing slot reuse from inheriting an earlier class-`0x4e` label.
+Accepted Oracle/SPEC evidence places allocation one player update after the
+depleted action entry, copies Predator variant zero, applies source offset
+`[0,84]`, writes the source position high words, and preserves the reused pool
+record's `x/y` low fractions and `z`. Actor `coffee-shop-actor-134` exactly
+matches source frames 2523..2540 and animations `0x0007a09c` through
+`0x0007a12c`. Real controls reject immediate allocation, Major variant one,
+cleared allocation residue, and wrong vertical offset.
+
+SPEC-02 is
+`4c52813c7f36e7094cae51bbd9d07c9d51001afcce3300455b67fcc645f5f723`;
+fixture is
+`2f05a0ef5a107403a4a74f06208ffec9fadb3f856ce13510efb185be4971fe5c`.
+Fast, Oracle, 121 SPEC mutations, 45 weapon controls, 82 enemy mutations, 181
+native mutations, 20 scene mutations, 123 Target suppressions, both
+LiveEncounter Target profiles, and two byte-identical 575-sample Emulator
+ledgers pass. Normalized ISO is
+`b15add08e7267ffe7f2d81d0aa3d423acd787bac3fdb1ebc9d7199670d37b152`;
+canonical samples hash to
+`0351745eb6c89a5378b245548609c220834fbb5e73c0a97bf5884ce98fc5799a`.
+
+Window-only WGC frames 2520..2540 pass direct inspection. Cadence sheet
+`8788ae5739323986ef83f3734154acf0c71c27bd18680b07afe36327410ed83e`
+and clip
+`65651d2fb214185f4a548607cb89ad4ffc39d5cac9faf18157ec4fc4e4bcb242`
+preserve Predator/staff identity, the source-timed empty-resource
+presentation, P1-only HUD and weapon meter, and clean Coffee Shop planes,
+palette, and priority.
+
+Whole-scene gaps improve from `322 / 1,262 / 2 / 94 / 3 / 281` to
+`322 / 1,256 / 2 / 94 / 3 / 281`. Six spawn/despawn gaps close; no category
+increases. Unowned Saturn actors, unidentified source pairs, and retained
+gameplay authorities remain zero.
+
+The next earliest causal divergence is visible frame 2572 at type-12/
+class-`0x1f` slot `0x00ffa240`: source animation is `0x0012e778` while native
+selects `0x0012ddb0`. Recover the accepted animation/state transition guard,
+timer, and scheduler order that owns this first mismatch. Apply the source
+rule without a slot/frame exception and preserve every closed lock.
+
 ## Next eligible cards
 
 - `QA-13-ROUND1-END-TO-END-DIFFERENTIAL` after the complete stable Round 2
