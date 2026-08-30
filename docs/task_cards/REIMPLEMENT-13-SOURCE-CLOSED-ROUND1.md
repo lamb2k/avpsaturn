@@ -1321,6 +1321,57 @@ change. Preserve the exact impact/RNG, player HIT, HUD/audio, and rendering
 locks. The next dependent divergence is class-`0x1f` slot `0x00ffa240` at
 frame 2798, source substate `0x0404` versus native `0x0000`.
 
+Incremental implementation checkpoint
+`5b40fd75c41e36c1c3c344e53882df1ed129466b` binds the source class-`0x02`
+current-animation step in state `0x0200`. At source frame 2074, native fixed
+slot `0x00ffb600` now carries record `0x0006b66c` with timer 4094. A real
+native mutation removes the step call and is rejected; no frame exception,
+input change, authored delay, or retained gameplay authority was introduced.
+
+The smallest bounded corrective Oracle consists of byte-identical `cs39a` and
+`cs39b` captures. Their scene-actor, component-20 dispatch, progression-
+transaction, and result identities match. Frames 2073..2077 call class-`0x02`
+entry `0x06b534` at counts `1,1,2,2,1`, while recurring-controller entry
+`0x0288e2` is called `0,1,3,1,1`. This proves recurring-controller cadence is
+not a full-scheduler cadence proxy. The residual frame-2076 class-`0x02`
+timer difference (native 4090, source 4091) is an exact diagnostic scheduler-
+phase blocker. Do not undo the source-correct native step or add a gameplay
+frame exception; unblock it only by binding per-phase scheduler invocation
+ownership.
+
+SPEC-02 is
+`d0d7762ade3d0f1cbb986d6c1135172e24017515c73ce30ccc39ec24b4385710`;
+fixture is
+`bf5a207ae4f83fca8683ebf9a64e8c93f8cef1674b1a3ae9691464d58f8136af`.
+Fast, Oracle, 80 bounded-Oracle mutations, 133 SPEC mutations, 209 native
+mutations, 20 scene mutations, 123 Target suppressions, and both LiveEncounter
+Target profiles pass. Exact runtime remains `0x148e8` bytes inside the
+`0x19000` carve, leaving `0x4718`. Two 575-sample Coffee Shop Emulator runs
+are byte-identical at normalized ISO
+`949fbc89c4a6e5703d2af6d14e38d610631217da099004222da1175924fbfbe0`,
+sample payload
+`d6ce01333843b273432e965efde266f8a95c53c195a910e41602cc103d9a71d9`,
+and VDP1 cache
+`15235569ad91027a6f9cf6d00c5b88b9c13539895a9259036a1ecdde48ad6504`.
+
+Real window-only WGC frames 2280..2310 pass direct inspection. Contact sheet
+`43e803cd593e1eb9f10aeaf52c1791b86ef3ab735077102af4e05389a90a2e09`
+and clip
+`f0bdf52684d9d3fab1446f2a932fe26e8b67c094206b357b3b64fa7f0603f8a2`
+preserve the damage-free frame 2288, natural frame-2306/2307 damage-impact
+progression, Predator/staff identity, both Coffee Shop planes, palette, and
+priority.
+
+Whole-scene gaps remain `331 / 1,241 / 2 / 93 / 3 / 281` for actor
+lifetimes, spawn/despawn, active states, collision/damage, route/camera, and
+audio/load. No category increases. Unowned Saturn actors, unidentified source
+pairs, and retained gameplay authorities remain zero. Continue the next
+dependency-safe divergence at player slot `0x00ff8380`, frame 2239, where the
+source animation timer is 4094 and native is 4095. Bind source player-animation
+dispatch plus its scheduler phase, using the smallest bounded Oracle follow-up
+only if accepted evidence lacks invocation ownership, then rerun the entire
+Coffee Shop scene and return to the class-`0x02` phase blocker.
+
 ## Next eligible cards
 
 - `QA-13-ROUND1-END-TO-END-DIFFERENTIAL` after the complete stable Round 2
