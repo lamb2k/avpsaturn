@@ -973,8 +973,26 @@ def build() -> str:
         weapon_action["parent_allocation_tick"] != 2 or
         weapon_action["recharge_countdown_after_entry_u8"] != 12 or
         weapon_action["rng_calls"] != [] or
-        weapon_resource["normal_recharge_reload_u8"] != 2 or
-        weapon_resource["depleted_recharge_reload_u8"] != 6 or
+        weapon_resource["dispatch_guard"]["routine"] != "0x01a6f4" or
+        weapon_resource["dispatch_guard"]["empty_action_u16"] !=
+            "0x1a00" or
+        weapon_resource["dispatch_guard"]["rule"] !=
+            "player+0x8b:u8 nonzero owns the empty-resource Button1 "
+            "dispatch; the instantaneous player+0x8c resource value does "
+            "not override that latch" or
+        weapon_resource["normal_tick"]["reload_u8"] != 3 or
+        weapon_resource["depleted_tick"]["reload_u8"] != 6 or
+        weapon_resource["depleted_tick"]["clear_latch_writer_pc"] !=
+            "0x0adfe6" or
+        weapon_resource["coffee_shop_projection"]
+            ["before_empty_dispatch"]["resource_u8"] != 13 or
+        weapon_resource["coffee_shop_projection"]
+            ["before_empty_dispatch"]["depleted_u8"] != 1 or
+        weapon_resource["mutation_control"]
+            ["high_resource_depleted_witness"]["resource_u8"] != 43 or
+        weapon_resource["mutation_control"]
+            ["high_resource_depleted_witness"]["substate_u16"] !=
+            "0x1a00" or
         weapon_empty["timer_type"] != "u8" or
         weapon_empty["timer_initial"] != 16 or
         weapon_empty["cleanup_tick"] != 17 or
@@ -2447,8 +2465,9 @@ def build() -> str:
         f"    {weapon_action['resource_capacity_u8']}u,",
         f"    {weapon_action['resource_debit_u8']}u,",
         f"    {weapon_action['recharge_countdown_after_entry_u8']}u,",
-        f"    {weapon_resource['normal_recharge_reload_u8']}u,",
-        f"    {weapon_resource['depleted_recharge_reload_u8']}u,",
+        f"    {weapon_resource['normal_tick']['reload_u8']}u,",
+        f"    {weapon_resource['depleted_tick']['reload_u8']}u,",
+        "    1u,",
         f"    {weapon_parent['class_u8']},",
         f"    {weapon_child['class_u8']},",
         "    0x8680u,",

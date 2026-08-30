@@ -146,6 +146,17 @@ int main(void)
                     runtime.player_action.health,
                     runtime.player_special_owner_contact,
                     runtime.player_special_attack_entries);
+        if (source_frame >= 2518u && source_frame <= 2541u)
+            fprintf(stderr,
+                    "player_resource_checkpoint frame=%u resource=%u recharge=%u depleted=%u weapon=%u empty=%u tick=%u substate=%04x animation=%08lx\n",
+                    source_frame, runtime.player_resource,
+                    runtime.player_resource_recharge,
+                    runtime.player_resource_depleted,
+                    runtime.player_weapon_active,
+                    runtime.player_weapon_empty,
+                    runtime.player_weapon_tick,
+                    runtime.player.substate,
+                    (unsigned long)runtime.player.animation_record);
         runtime.frame = source_frame >= 2040u ? source_frame - 2040u : 0u;
         for (tick = 0u;
              tick < avsp_round1_coffee_shop_source_updates(

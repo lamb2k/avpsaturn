@@ -40,6 +40,8 @@ local capture_class1f_hit =
     os.getenv("AVSP_ORACLE11_CLASS1F_HIT_CAPTURE") == "1"
 local mutate_class1f_hit_selector =
     os.getenv("AVSP_ORACLE11_MUTATE_CLASS1F_HIT_SELECTOR") == "1"
+local suppress_resource_pc = tonumber(
+    os.getenv("AVSP_ORACLE11_SUPPRESS_RESOURCE_PC") or "", 16)
 local class1f_hit_slot = tonumber(
     os.getenv("AVSP_ORACLE11_CLASS1F_HIT_SLOT") or "ffa180", 16)
 local class1f_hit_first_frame = tonumber(
@@ -51,6 +53,7 @@ local class1f_hit_selector_entry = tonumber(
 local frame = 0
 local controller = 0xffd180
 local global = 0xff8000
+local player = 0xff8380
 local pool, stride, count = 0xff9580, 0xc0, 57
 local pool24, stride24, count24 = 0xffb680, 0x80, 32
 local target_pcs = {
@@ -130,6 +133,8 @@ local class1f_hit_writes = assert(io.open(
     root .. "/coffee_shop_class1f_hit_writes.tsv", "w"))
 local class1f_hit_program = assert(io.open(
     root .. "/coffee_shop_class1f_hit_program.tsv", "w"))
+local player_resource = assert(io.open(
+    root .. "/coffee_shop_player_resource.tsv", "w"))
 local result = assert(io.open(root .. "/progression_result.tsv", "w"))
 transactions:write("frame\tpc\ta4\ta6\tg8019\tliving\tprogress\tc_state\tc_substate\tc_timer40\tc_timer42\tc_limit4a\tc_index10\tc_phase2e\tc_local2c\tcamera_x\tcamera_z\trng\td0\td1\td2\tactor_active\tactor_class\tactor_type\tactor_state\tactor_substate\tactor_x\tactor_y\tactor_z\tactor_variant\tactor_timer\tactor_selector83\n")
 snapshots:write("frame\tslot\tactive\tclass\ttype\tstate\tsubstate\tfacing\tx\ty\tz\tvariant\ttimer\tselector83\thealth\tanim\n")
@@ -169,6 +174,7 @@ collision_identity_assignments:write("frame\tevent\tpc\tslot\tactive\tclass\ttyp
 class1f_hit:write("frame\tpc\tslot\tstate\tsubstate\tfacing\tanimation_record\tanimation_timer\tanimation_branch\taction_timer\trecovery_timer2c\thealth\tprior_health\thit_mode46\thit_kind49\treaction_selector4d\tscore_arg4e\treaction_facing4f\tairborne5c\tlatch_index65\tmotion_index6c\thit_count6d\tinterrupt73\td0\td1\td2\td3\ta0\ta1\ta2\ta3\ta4\ta5\n")
 class1f_hit_writes:write("frame\tpc\tslot\tinner\tstate\tsubstate\tanimation_record\taction_timer\trecovery_timer2c\thealth\tprior_health\thit_mode46\thit_kind49\treaction_selector4d\treaction_facing4f\tairborne5c\tmotion_index6c\thit_count6d\tinterrupt73\told32\tdata\tmask\tsuppressed\n")
 class1f_hit_program:write("frame\tpc\tstate\tsubstate\tfacing\tx_fp\ty_fp\tz\tanimation_record\tanimation_timer\tanimation_branch\taction_timer2a\trecovery_timer2c\thealth\tprior_health\thit_mode46\thit_kind49\treaction_selector4d\treaction_facing4f\tairborne5c\tmotion_index6c\thit_count6d\tinterrupt73\tx_velocity30\ty_velocity34\tx_acceleration38\ty_acceleration3c\trng\td0\td1\td2\td3\n")
+player_resource:write("frame\tevent\tpc\tresource\trecharge\tdepleted\taward_timer\tstate\tsubstate\tdata\tmask\tsuppressed\n")
 result:write("spawn_suppression\tguard_suppression\tmain_spawn_transactions\taux_spawn_transactions\tsuppressed_writes\tlifecycle_suppressed_writes\taction4_timer_events\taction4_timer_suppressed_writes\ttype4_class03_suppressed_writes\tcoffee_stage_rng_suppressed_writes\ttype36_suppressed_writes\tscene_pair_suppressed_actors\tobstacle_transition_suppressed_writes\tclass1f_hit_selector_mutations\tfinal_route\n")
 
 local function u8(a) return program:read_u8(a) end
@@ -184,6 +190,25 @@ local type36_suppressed_writes = 0
 local scene_pair_suppressed_actors = 0
 local obstacle_transition_suppressed_writes = 0
 local class1f_hit_selector_mutations = 0
+
+oracle11_coffee_shop_resource_writes = program:install_write_tap(
+    player + 0x88, player + 0x8f,
+    "oracle11_coffee_shop_resource_writes",
+    function(offset, data, mask)
+        if not capture_scene or frame < 1972 or
+                frame > capture_last_frame then return end
+        local pc = maincpu.state["PC"].value & 0xffffff
+        local suppressed = suppress_resource_pc ~= nil and
+            pc == suppress_resource_pc
+        player_resource:write(string.format(
+            "%d\twrite\t%06x\t%d\t%d\t%d\t%d\t%04x\t%04x\t%08x\t%08x\t%d\n",
+            frame, pc, u8(player + 0x8c), u8(player + 0x8d),
+            u8(player + 0x8b), u8(player + 0x8a),
+            u16(player + 4), u16(player + 6),
+            data & 0xffffffff, mask & 0xffffffff,
+            suppressed and 1 or 0))
+        if suppressed then return u32(offset & 0xfffffc) end
+    end)
 
 local function hex_bytes(first, count)
     local parts = {}
@@ -1437,6 +1462,11 @@ oracle11_progression_frame = emu.add_machine_frame_notifier(function()
         for slot = 0xff9d00, 0xffa3c0, stride do emit_slot(slot) end
     end
     if capture_scene and frame >= 1972 and frame <= capture_last_frame then
+        player_resource:write(string.format(
+            "%d\tsample\t000000\t%d\t%d\t%d\t%d\t%04x\t%04x\t00000000\t00000000\t0\n",
+            frame, u8(player + 0x8c), u8(player + 0x8d),
+            u8(player + 0x8b), u8(player + 0x8a),
+            u16(player + 4), u16(player + 6)))
         scene_frames:write(string.format(
             "%d\t%d\t%d\t%d\t%d\t%d\t%d\t%d\t%d\t%d\t%d\t%d\t%08x\t%08x\t%d\t%d\t%d\t%d\t%d\t%04x\n",
             frame, u16(global + 8), u16(controller + 4),
@@ -1499,6 +1529,7 @@ oracle11_progression_frame = emu.add_machine_frame_notifier(function()
         class1f_hit:close()
         class1f_hit_writes:close()
         class1f_hit_program:close()
+        player_resource:close()
         result:close()
     end
 end)

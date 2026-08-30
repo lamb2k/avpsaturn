@@ -565,7 +565,7 @@ def validate(report: dict[str, object]) -> None:
     if "weapon_projectile_resource" in report:
         weapon = report["weapon_projectile_resource"]
         require(weapon["status"] == "SOURCE_CLOSED" and
-                weapon["mutation_controls"]["count"] == 14 and
+                weapon["mutation_controls"]["count"] == 15 and
                 weapon["character_identity"]["required_character_u8"] == 0 and
                 weapon["character_identity"]["rejected_character_u8"] == 1 and
                 weapon["character_identity"]

@@ -242,6 +242,33 @@ def validate(data):
         "target_first_contact_frame_before": 2306,
         "writer": "0x01686c",
     }
+    resource_tick = contract["resource_tick"]
+    assert resource_tick["classification"] == \
+        "SOURCE_CLOSED_IMPLEMENTATION_FIELDS"
+    assert resource_tick["dispatch_guard"]["routine"] == "0x01a6f4"
+    assert resource_tick["dispatch_guard"]["empty_action_u16"] == "0x1a00"
+    assert resource_tick["dispatch_guard"]["rule"] == \
+        "player+0x8b:u8 nonzero owns the empty-resource Button1 dispatch; " \
+        "the instantaneous player+0x8c resource value does not override " \
+        "that latch"
+    assert resource_tick["normal_tick"]["reload_u8"] == 3
+    assert resource_tick["normal_tick"]["increment_writer_pc"] == \
+        "0x0adf2e"
+    assert resource_tick["depleted_tick"]["reload_u8"] == 6
+    assert resource_tick["depleted_tick"]["clear_latch_writer_pc"] == \
+        "0x0adfe6"
+    assert resource_tick["coffee_shop_projection"]["before_empty_dispatch"] == {
+        "depleted_u8": 1, "frame_u16": 2521, "recharge_u8": 1,
+        "resource_u8": 13, "state_u16": "0x0200",
+        "substate_u16": "0x0002",
+    }
+    assert resource_tick["mutation_control"][
+        "high_resource_depleted_witness"] == {
+            "depleted_u8": 1, "frame_u16": 2522, "recharge_u8": 5,
+            "resource_u8": 43, "state_u16": "0x0200",
+            "substate_u16": "0x1a00",
+        }
+    assert resource_tick["mutation_control"]["suppressed_writes"] == 18
     empty = contract["empty_fallback"]
     assert empty["cleanup_tick"] == 17 and empty["return_tick"] == 18
     assert empty["damaging_record4_count"] == 0
@@ -289,8 +316,8 @@ def validate(data):
     assert data["special_causal_trace"]["actors"] == \
         ["type24 class0x4b", "type24 class0x3d"]
     assert data["mutation_controls"]["wrong_character_rejected"] is True
-    assert data["mutation_controls"]["count"] == 14
-    assert len(data["counterfactuals"]) == 14
+    assert data["mutation_controls"]["count"] == 15
+    assert len(data["counterfactuals"]) == 15
     assert data["physical_saturn"] == "UNRUN"
     assert data["saturn_emulator"] == "UNRUN"
 
@@ -328,6 +355,9 @@ for path, value, label in [
     (("implementation_contract", "record4_parent_class0", "initialization", "presentation_records", 7, "animation_record"), "0x0002fba8", "missing terminal presentation"),
     (("implementation_contract", "source_input", "native_input_pipeline_updates_u8"), 0, "missing source input pipeline"),
     (("implementation_contract", "sufficient_action", "parent_allocation_tick"), 0, "premature parent allocation"),
+    (("implementation_contract", "resource_tick", "dispatch_guard", "rule"), "resource below debit owns empty dispatch", "instantaneous resource guess"),
+    (("implementation_contract", "resource_tick", "normal_tick", "reload_u8"), 2, "wrong normal resource cadence"),
+    (("implementation_contract", "resource_tick", "depleted_tick", "clear_latch_writer_pc"), "0x0adfe0", "premature depleted clear"),
     (("implementation_contract", "record4_parent_class0", "child_emitter_state", "cadence_reload_u8"), 5, "wrong child cadence"),
     (("implementation_contract", "record4_parent_class0", "child_emitter_state", "normal_rows", 4, "variant_u8"), 0, "wrong terminal child variant"),
     (("implementation_contract", "record4_parent_class0", "child_emitter_state", "position_rule"), "child y uses parent y", "wrong child coordinate base"),

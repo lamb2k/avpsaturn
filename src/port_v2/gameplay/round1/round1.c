@@ -3564,8 +3564,10 @@ static int avsp_round1_player_weapon_contract_valid(void)
         avsp_round1_player_weapon.resource_capacity != 64u ||
         avsp_round1_player_weapon.resource_debit != 40u ||
         avsp_round1_player_weapon.recharge_after_success != 12u ||
-        avsp_round1_player_weapon.normal_recharge_reload != 2u ||
+        avsp_round1_player_weapon.normal_recharge_reload != 3u ||
         avsp_round1_player_weapon.depleted_recharge_reload != 6u ||
+        avsp_round1_player_weapon.
+            empty_dispatch_uses_depleted_latch != 1u ||
         avsp_round1_player_weapon.parent_class != 0 ||
         avsp_round1_player_weapon.child_class != 4 ||
         avsp_round1_player_weapon.projectile_source_base != 0x8680u ||
@@ -7579,7 +7581,10 @@ static void avsp_round1_tick_player_resource(AvspRound1Runtime *runtime)
 {
     if (runtime->player_resource >=
         avsp_round1_player_weapon.resource_capacity)
+    {
+        runtime->player_resource_depleted = 0u;
         return;
+    }
     if (runtime->player_resource_recharge > 0u)
         --runtime->player_resource_recharge;
     if (runtime->player_resource_recharge == 0u)
@@ -7591,11 +7596,8 @@ static void avsp_round1_tick_player_resource(AvspRound1Runtime *runtime)
             avsp_round1_player_weapon.normal_recharge_reload;
         if (runtime->player_resource >=
             avsp_round1_player_weapon.resource_capacity)
-        {
             runtime->player_resource =
                 avsp_round1_player_weapon.resource_capacity;
-            runtime->player_resource_depleted = 0u;
-        }
     }
 }
 
@@ -7603,8 +7605,10 @@ static void avsp_round1_begin_player_weapon(AvspRound1Runtime *runtime)
 {
     runtime->player_weapon_active = 1u;
     runtime->player_weapon_empty =
-        (unsigned char)(runtime->player_resource <
-            avsp_round1_player_weapon.resource_debit);
+        avsp_round1_player_weapon.empty_dispatch_uses_depleted_latch ?
+            runtime->player_resource_depleted :
+            (unsigned char)(runtime->player_resource <
+                avsp_round1_player_weapon.resource_debit);
     runtime->player_weapon_tick = 0u;
     runtime->player_weapon_empty_timer =
         avsp_round1_player_weapon.empty_timer_initial;

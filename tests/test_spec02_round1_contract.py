@@ -117,7 +117,9 @@ assert [(row["first_frame_u16"], row["last_frame_u16"],
         for row in weapon_actor["visible_runs"]] == [
             (2252, 2252, "0x0c00"), (2253, 2255, "0x0c02"),
             (2256, 2272, "0x0c04"), (2273, 2273, "0x0000"),
-            (2274, 2274, "0x0002")]
+            (2274, 2274, "0x0002"), (2522, 2522, "0x1a00"),
+            (2523, 2538, "0x1a02"), (2539, 2539, "0x0000"),
+            (2540, 2540, "0x0002")]
 assert all(row["hurt_selector_u8"] == 0 and
            row["attack_selector_u8"] == 0
            for row in weapon_actor["visible_runs"])
@@ -457,6 +459,8 @@ m = copy.deepcopy(contract); m["coverage_gate"]["orphan_authoritative_writers"] 
 f = copy.deepcopy(fixtures); f["authority_data"]["rng"]["algorithm"]["recurrence"] = "guess"; mutations.append((contract, f, "fixture mutation"))
 f = copy.deepcopy(fixtures); f["authority_data"]["player"]["weapon_projectile_resource"]["implementation_contract"]["record4_parent_class0"]["child_emitter_state"]["cadence_reload_u8"] = 5; mutations.append((contract, f, "weapon cadence mutation"))
 f = copy.deepcopy(fixtures); f["authority_data"]["player"]["weapon_projectile_resource"]["implementation_contract"]["empty_effect_variant1_contract"]["variant"] = 0; mutations.append((contract, f, "empty effect variant mutation"))
+f = copy.deepcopy(fixtures); f["authority_data"]["player"]["weapon_projectile_resource"]["implementation_contract"]["resource_tick"]["normal_tick"]["reload_u8"] = 2; mutations.append((contract, f, "resource normal cadence mutation"))
+f = copy.deepcopy(fixtures); f["authority_data"]["player"]["weapon_projectile_resource"]["implementation_contract"]["resource_tick"]["dispatch_guard"]["rule"] = "resource below debit owns empty dispatch"; mutations.append((contract, f, "resource depleted-latch mutation"))
 f = copy.deepcopy(fixtures); f["authority_data"]["player"]["weapon_projectile_resource"]["implementation_contract"]["empty_effect_variant1_contract"]["initialization"]["presentation_actor_fields"]["object_or_u16"] = "0x0000"; mutations.append((contract, f, "empty effect priority mutation"))
 f = copy.deepcopy(fixtures); f["authority_data"]["player"]["weapon_projectile_resource"]["implementation_contract"]["current_state_collision_damage"]["child_contact"]["damage_u8"] = 30; mutations.append((contract, f, "projectile damage lookup mutation"))
 f = copy.deepcopy(fixtures); f["authority_data"]["player"]["weapon_projectile_resource"]["implementation_contract"]["current_state_collision_damage"]["registration_and_pair_eligibility"]["visibility"]["x_guard"] = "u16(actor_x - camera_x + 0x0020) <= 0x0200"; mutations.append((contract, f, "projectile collision registration bias mutation"))

@@ -590,6 +590,18 @@ def build_fixtures(source: dict[str, dict]) -> dict[str, object]:
             {"first_frame_u16": 2274, "last_frame_u16": 2274,
              "state_u16": "0x0200", "substate_u16": "0x0002",
              "hurt_selector_u8": 0, "attack_selector_u8": 0},
+            {"first_frame_u16": 2522, "last_frame_u16": 2522,
+             "state_u16": "0x0200", "substate_u16": "0x1a00",
+             "hurt_selector_u8": 0, "attack_selector_u8": 0},
+            {"first_frame_u16": 2523, "last_frame_u16": 2538,
+             "state_u16": "0x0200", "substate_u16": "0x1a02",
+             "hurt_selector_u8": 0, "attack_selector_u8": 0},
+            {"first_frame_u16": 2539, "last_frame_u16": 2539,
+             "state_u16": "0x0200", "substate_u16": "0x0000",
+             "hurt_selector_u8": 0, "attack_selector_u8": 0},
+            {"first_frame_u16": 2540, "last_frame_u16": 2540,
+             "state_u16": "0x0200", "substate_u16": "0x0002",
+             "hurt_selector_u8": 0, "attack_selector_u8": 0},
         ],
         "evidence": {
             "coffee_shop_scene_actors_sha256": source["route"]
@@ -597,6 +609,8 @@ def build_fixtures(source: dict[str, dict]) -> dict[str, object]:
                 ["completion_a"]["coffee_shop_scene_actors.tsv"],
             "button1_source_contract":
                 "data/oracle11_predator_weapon_projectile_resource.json#/implementation_contract/sufficient_action",
+            "resource_timer_contract":
+                "data/oracle11_predator_weapon_projectile_resource.json#/implementation_contract/resource_tick + data/oracle07_predator_warrior_action_graph_equipment.json#/equipment_contract/gun/resource/recharge_cadence_frames",
         },
         "mutation_control": {
             "mutations_rejected": [

@@ -9,7 +9,7 @@ from pathlib import Path
 
 ROOT = Path(__file__).resolve().parents[3]
 SPEC = ROOT / "data/spec02_round1_executable_contract.json"
-EXPECTED = "51150e37e05d7e0199cec08725580630ef1a1890d3a63fdff68bf7e7c11c8cf2"
+EXPECTED = "e709b7bd616ecdb118e61459dbbc7677c9d0e13dd932f5bd4cf856a25f6d61ac"
 assert hashlib.sha256(SPEC.read_bytes()).hexdigest() == EXPECTED
 assert json.loads(SPEC.read_text())["status"] == "ACCEPTED"
 source = (ROOT / "src/port_v2/gameplay/round1/round1.c").read_text()
@@ -368,7 +368,8 @@ for before, after in (
     ("    1536u,\n    5120u,\n    30u,", "    1536u,\n    5120u,\n    29u,"),
     ("{ 0x1600f8UL, 0x162a04UL, 8u, 1u },", "{ 0x1600f8UL, 0x162a82UL, 8u, 1u },"),
     ("{ 0x1601c0UL, 0x1614a4UL, 8u, 3u },", "{ 0x1601c0UL, 0x1614a4UL, 8u, 2u },"),
-    ("    40u,\n    12u,\n    2u,", "    39u,\n    12u,\n    2u,"),
+    ("    40u,\n    12u,\n    3u,\n    6u,\n    1u,",
+     "    39u,\n    12u,\n    3u,\n    6u,\n    1u,"),
     ("{ 3074u, 2u, 0x0015e594UL, 0x0016179aUL, 1u, 0u },",
      "{ 3074u, 2u, 0x00165410UL, 0x00166c22UL, 1u, 0u },"),
     ("{ 6658u, 2u, 0x0015fcfcUL, 0x00161772UL, 1u, 0u },",

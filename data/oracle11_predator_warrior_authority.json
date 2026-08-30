@@ -7561,7 +7561,7 @@
           }
         },
         "resource_and_projectile_authority": "data/oracle11_predator_weapon_projectile_resource.json",
-        "resource_artifact_sha256": "24b23729b4a31877bf60de14a93c00237108439cd31e79d7d60d9db8621bba39",
+        "resource_artifact_sha256": "7ab99ce75f987f9eaadae05a1d86b854f37ba432843cf184553e8682b70bd924",
         "resource_status": "SOURCE_CLOSED",
         "spawn_branch": "0x023858",
         "writer": "0x023860"
@@ -16791,6 +16791,10 @@
       {
         "class": "resource_empty",
         "result": "0x1a00/0x1a02 and class-0x10 effect; no record-4 damaging family"
+      },
+      {
+        "class": "depleted_latch_with_high_resource",
+        "result": "resource 43 with depleted latch one still dispatches 0x1a00; instantaneous resource threshold is not the empty-action authority"
       }
     ],
     "determinism": {
@@ -23771,8 +23775,94 @@
         ]
       },
       "resource_tick": {
-        "depleted_recharge_reload_u8": 6,
-        "normal_recharge_reload_u8": 2,
+        "classification": "SOURCE_CLOSED_IMPLEMENTATION_FIELDS",
+        "coffee_shop_projection": {
+          "before_empty_dispatch": {
+            "depleted_u8": 1,
+            "frame_u16": 2521,
+            "recharge_u8": 1,
+            "resource_u8": 13,
+            "state_u16": "0x0200",
+            "substate_u16": "0x0002"
+          },
+          "depleted_latch_clear_visible": {
+            "depleted_u8": 0,
+            "frame_u16": 2823,
+            "recharge_u8": 6,
+            "resource_u8": 64,
+            "state_u16": "0x0200",
+            "substate_u16": "0x0804"
+          },
+          "empty_dispatch_visible": {
+            "depleted_u8": 1,
+            "frame_u16": 2522,
+            "recharge_u8": 6,
+            "resource_u8": 14,
+            "state_u16": "0x0200",
+            "substate_u16": "0x1a00"
+          }
+        },
+        "depleted_tick": {
+          "clear_latch_writer_pc": "0x0adfe6",
+          "decrement_writer_pc": "0x0adfce",
+          "increment_writer_pc": "0x0adfe0",
+          "reload_u8": 6,
+          "reload_writer_pc": "0x0adfda",
+          "routine": "0x0adfc0..0x0adfe8",
+          "rule": "while depleted and resource is below 64, decrement recharge; when it becomes zero in that same call, reload six and increment resource; clear depleted only on a later call that observes resource equal to 64",
+          "source_block": {
+            "bytes": 40,
+            "end_exclusive": "0x0adfe8",
+            "sha256": "5d8d1fd0c2bffc0150ad2c22a06629128ee2f93296e7a4d4a60d1941c6d392d7",
+            "start": "0x0adfc0"
+          }
+        },
+        "determinism": {
+          "byte_identical": true,
+          "independent_captures": 2,
+          "resource_trace_sha256": "af67295b879521e0aba388ebe4b1bd9e8698c21c86e9d5b837da14efe086b4cb"
+        },
+        "dispatch_guard": {
+          "empty_action_u16": "0x1a00",
+          "routine": "0x01a6f4",
+          "rule": "player+0x8b:u8 nonzero owns the empty-resource Button1 dispatch; the instantaneous player+0x8c resource value does not override that latch",
+          "source_block": {
+            "bytes": 64,
+            "end_exclusive": "0x01a734",
+            "sha256": "9c2b486cc24387c02d0be5f4e02807eb34581146ee4ec21bbd008a1385e5f5f9",
+            "start": "0x01a6f4"
+          },
+          "sufficient_action_u16": "0x0c00"
+        },
+        "mutation_control": {
+          "fixed_frame_substitute": false,
+          "high_resource_depleted_witness": {
+            "depleted_u8": 1,
+            "frame_u16": 2522,
+            "recharge_u8": 5,
+            "resource_u8": 43,
+            "state_u16": "0x0200",
+            "substate_u16": "0x1a00"
+          },
+          "kind": "suppress source normal resource increment writer 0x0adf2e",
+          "result": "resource is 43 while depleted remains one and the player still enters empty action 0x1a00",
+          "suppressed_writes": 18
+        },
+        "normal_tick": {
+          "decrement_writer_pc": "0x0adf1c",
+          "increment_writer_pc": "0x0adf2e",
+          "reload_u8": 3,
+          "reload_writer_pc": "0x0adf28",
+          "resource_capacity_u8": 64,
+          "routine": "0x0adf06..0x0adf30",
+          "rule": "when resource is below 64, decrement recharge; when it becomes zero in that same call, reload three and increment resource by one",
+          "source_block": {
+            "bytes": 42,
+            "end_exclusive": "0x0adf30",
+            "sha256": "52068a57e3e8b329f20ceb64ce39380f26ad260268b5ce4d4fc6252a3f24eb89",
+            "start": "0x0adf06"
+          }
+        },
         "order": "after player action entry/debit and before HUD projection"
       },
       "source_input": {
@@ -25040,7 +25130,7 @@
     },
     "mutation_controls": {
       "all_downstream_effects_asserted": true,
-      "count": 14,
+      "count": 15,
       "no_fixed_frame_result": true,
       "no_visible_weapon_inference_from_0xad": true,
       "wrong_character_rejected": true
@@ -25049,7 +25139,12 @@
     "provenance": {
       "capture_manifest_sha256": "61322d76027d491c50680357985d18b6814b464e33c05a9e7a17e5c9b1c0fc02",
       "capture_script_sha256": "9a473c4d3ac0c71e68dc581b0f613b19516915b6ada766170803ca4d3c77b3a0",
-      "collision_registration_capture_script_sha256": "3cbc1c9745258095379f06392fb5e985dd794f27576140b039329f1edd7b7b3e",
+      "coffee_shop_resource_evidence": {
+        "completion_a": "af67295b879521e0aba388ebe4b1bd9e8698c21c86e9d5b837da14efe086b4cb",
+        "completion_b": "af67295b879521e0aba388ebe4b1bd9e8698c21c86e9d5b837da14efe086b4cb",
+        "increment_writer_suppression": "c644944b8036028064ddb068bce96a937a5e3641e8fceb3f9d7abd1b69534d00"
+      },
+      "collision_registration_capture_script_sha256": "dd4f0bbd361a7d1cc46e071130878998b77915242c51d04686404325cb540e50",
       "collision_registration_evidence": {
         "coffee_shop_collision_actor_flags.tsv": "49ed048a0a11cbee06823cef07a9ec29c1034f66849b5734a581819fb7184e79",
         "coffee_shop_collision_identity_assignments.tsv": "41dfc90ad89a4c523cc4ec6dcf87afc104695b35682764902dd031f2f205bb60",

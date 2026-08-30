@@ -28,6 +28,9 @@ AIR_SPECIAL_B = ROOT / ".deps/mame/oracle11_player_air_b/air_special_combo"
 ORACLE07 = ROOT / "data/oracle07_predator_warrior_action_graph_equipment.json"
 AUXILIARY = ROOT / "data/oracle11_round1_auxiliary_authority.json"
 FULL_ROUTE = ROOT / ".deps/mame/full_route"
+COFFEE_RESOURCE_A = ROOT / ".deps/mame/reimplement13_coffee_resource_a"
+COFFEE_RESOURCE_B = ROOT / ".deps/mame/reimplement13_coffee_resource_b"
+COFFEE_RESOURCE_MUT = ROOT / ".deps/mame/reimplement13_coffee_resource_mut"
 VARIANTS = (
     "cold_run_1", "cold_run_2", "resource_empty", "b1_held",
     "repeat_startup", "repeat_active", "repeat_recovery", "target_inside",
@@ -199,6 +202,114 @@ program = PROGRAM.read_bytes()
 opcodes = OPCODES.read_bytes()
 samples = baseline["samples.tsv"]
 rejected_samples = rejected["samples.tsv"]
+coffee_resource_a = rows(COFFEE_RESOURCE_A / "coffee_shop_player_resource.tsv")
+coffee_resource_b = rows(COFFEE_RESOURCE_B / "coffee_shop_player_resource.tsv")
+coffee_resource_mut = rows(
+    COFFEE_RESOURCE_MUT / "coffee_shop_player_resource.tsv")
+require(digest(COFFEE_RESOURCE_A / "coffee_shop_player_resource.tsv") ==
+        digest(COFFEE_RESOURCE_B / "coffee_shop_player_resource.tsv"),
+        "Coffee Shop resource captures are not byte-identical")
+
+
+def resource_sample(raw_rows, frame):
+    row = next(item for item in raw_rows
+               if item["event"] == "sample" and
+               int(item["frame"]) == frame)
+    return {
+        "frame_u16": frame,
+        "resource_u8": int(row["resource"]),
+        "recharge_u8": int(row["recharge"]),
+        "depleted_u8": int(row["depleted"]),
+        "state_u16": f"0x{int(row['state'], 16):04x}",
+        "substate_u16": f"0x{int(row['substate'], 16):04x}",
+    }
+
+
+coffee_resource_contract = {
+    "classification": "SOURCE_CLOSED_IMPLEMENTATION_FIELDS",
+    "dispatch_guard": {
+        "routine": "0x01a6f4",
+        "rule": (
+            "player+0x8b:u8 nonzero owns the empty-resource Button1 "
+            "dispatch; the instantaneous player+0x8c resource value does "
+            "not override that latch"
+        ),
+        "sufficient_action_u16": "0x0c00",
+        "empty_action_u16": "0x1a00",
+        "source_block": window(opcodes, 0x01a6f4, 0x01a734),
+    },
+    "normal_tick": {
+        "routine": "0x0adf06..0x0adf30",
+        "resource_capacity_u8": 64,
+        "decrement_writer_pc": "0x0adf1c",
+        "reload_writer_pc": "0x0adf28",
+        "increment_writer_pc": "0x0adf2e",
+        "reload_u8": 3,
+        "rule": (
+            "when resource is below 64, decrement recharge; when it "
+            "becomes zero in that same call, reload three and increment "
+            "resource by one"
+        ),
+        "source_block": window(opcodes, 0x0adf06, 0x0adf30),
+    },
+    "depleted_tick": {
+        "routine": "0x0adfc0..0x0adfe8",
+        "decrement_writer_pc": "0x0adfce",
+        "reload_writer_pc": "0x0adfda",
+        "increment_writer_pc": "0x0adfe0",
+        "clear_latch_writer_pc": "0x0adfe6",
+        "reload_u8": 6,
+        "rule": (
+            "while depleted and resource is below 64, decrement recharge; "
+            "when it becomes zero in that same call, reload six and "
+            "increment resource; clear depleted only on a later call that "
+            "observes resource equal to 64"
+        ),
+        "source_block": window(opcodes, 0x0adfc0, 0x0adfe8),
+    },
+    "coffee_shop_projection": {
+        "before_empty_dispatch": resource_sample(coffee_resource_a, 2521),
+        "empty_dispatch_visible": resource_sample(coffee_resource_a, 2522),
+        "depleted_latch_clear_visible": resource_sample(
+            coffee_resource_a, 2823),
+    },
+    "mutation_control": {
+        "kind": "suppress source normal resource increment writer 0x0adf2e",
+        "suppressed_writes": sum(
+            int(row["suppressed"]) for row in coffee_resource_mut),
+        "high_resource_depleted_witness": resource_sample(
+            coffee_resource_mut, 2522),
+        "result": (
+            "resource is 43 while depleted remains one and the player "
+            "still enters empty action 0x1a00"
+        ),
+        "fixed_frame_substitute": False,
+    },
+    "determinism": {
+        "independent_captures": 2,
+        "byte_identical": True,
+        "resource_trace_sha256": digest(
+            COFFEE_RESOURCE_A / "coffee_shop_player_resource.tsv"),
+    },
+}
+require(coffee_resource_contract["coffee_shop_projection"]
+        ["before_empty_dispatch"] == {
+            "frame_u16": 2521, "resource_u8": 13, "recharge_u8": 1,
+            "depleted_u8": 1, "state_u16": "0x0200",
+            "substate_u16": "0x0002"},
+        "Coffee Shop pre-empty resource projection drift")
+require(coffee_resource_contract["coffee_shop_projection"]
+        ["empty_dispatch_visible"] == {
+            "frame_u16": 2522, "resource_u8": 14, "recharge_u8": 6,
+            "depleted_u8": 1, "state_u16": "0x0200",
+            "substate_u16": "0x1a00"},
+        "Coffee Shop empty resource projection drift")
+require(coffee_resource_contract["mutation_control"]
+        ["high_resource_depleted_witness"] == {
+            "frame_u16": 2522, "resource_u8": 43, "recharge_u8": 5,
+            "depleted_u8": 1, "state_u16": "0x0200",
+            "substate_u16": "0x1a00"},
+        "Coffee Shop depleted-latch mutation lost discrimination")
 
 require({int(row["character"]) for row in samples} == {0},
         "Predator capture changed character")
@@ -1098,10 +1209,9 @@ implementation_contract = {
         },
         "mutation": "attacker +0x5e changed to 2; exact downstream table address/value changes are retained in damage.tsv",
     },
-    "resource_tick": {
-        "order": "after player action entry/debit and before HUD projection",
-        "normal_recharge_reload_u8": 2, "depleted_recharge_reload_u8": 6,
-    },
+    "resource_tick": dict(
+        coffee_resource_contract,
+        order="after player action entry/debit and before HUD projection"),
     "empty_fallback": {
         "timer_type": "u8", "timer_initial": 16,
         "cleanup_tick": empty_cleanup - empty_entry,
@@ -1190,9 +1300,10 @@ report = {
         {"class": "damage_attacker_class", "result": "attacker +0x5e mutation changes the exact source damage lookup"},
         {"class": "collision_registration", "result": "redirecting only target 0xffa180 out of the source record12 defender list preserves the actor/route prefix and shifts its first projectile damage from frame 2306 to 2311"},
         {"class": "resource_empty", "result": "0x1a00/0x1a02 and class-0x10 effect; no record-4 damaging family"},
+        {"class": "depleted_latch_with_high_resource", "result": "resource 43 with depleted latch one still dispatches 0x1a00; instantaneous resource threshold is not the empty-action authority"},
     ],
     "mutation_controls": {
-        "count": 14, "all_downstream_effects_asserted": True,
+        "count": 15, "all_downstream_effects_asserted": True,
         "no_fixed_frame_result": True,
         "no_visible_weapon_inference_from_0xad": True,
         "wrong_character_rejected": True,
@@ -1206,6 +1317,14 @@ report = {
         "collision_registration_evidence": {
             filename: digest(COLLISION_A / filename)
             for filename in COLLISION_FILES
+        },
+        "coffee_shop_resource_evidence": {
+            "completion_a": digest(
+                COFFEE_RESOURCE_A / "coffee_shop_player_resource.tsv"),
+            "completion_b": digest(
+                COFFEE_RESOURCE_B / "coffee_shop_player_resource.tsv"),
+            "increment_writer_suppression": digest(
+                COFFEE_RESOURCE_MUT / "coffee_shop_player_resource.tsv"),
         },
         "mame": manifest["mame"],
         "nvram_baseline_sha256": manifest["nvram_baseline_sha256"],

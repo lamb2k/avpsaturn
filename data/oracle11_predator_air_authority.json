@@ -7539,7 +7539,7 @@
         }
       },
       "resource_and_projectile_authority": "data/oracle11_predator_weapon_projectile_resource.json",
-      "resource_artifact_sha256": "24b23729b4a31877bf60de14a93c00237108439cd31e79d7d60d9db8621bba39",
+      "resource_artifact_sha256": "7ab99ce75f987f9eaadae05a1d86b854f37ba432843cf184553e8682b70bd924",
       "resource_status": "SOURCE_CLOSED",
       "spawn_branch": "0x023858",
       "writer": "0x023860"
