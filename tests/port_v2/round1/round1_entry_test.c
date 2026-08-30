@@ -3931,6 +3931,15 @@ int main(void)
                  scene_runtime.player.hurt_selector != 0u ||
                  scene_runtime.player.attack_selector != 0u))
                 return 118;
+            if (source_frame == 2074u &&
+                (scene_runtime.pools[2].records[15].source_slot !=
+                     0x00ffb600UL ||
+                 scene_runtime.pools[2].records[15].actor_class != 0x02 ||
+                 scene_runtime.pools[2].records[15].animation_record !=
+                     0x0006b66cUL ||
+                 scene_runtime.pools[2].records[15].animation_timer !=
+                     4094u))
+                return 119;
         }
         if (!scene_runtime.first_encounter.initialized)
         {

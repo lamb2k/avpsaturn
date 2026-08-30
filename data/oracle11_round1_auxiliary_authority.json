@@ -11138,6 +11138,72 @@
             "calls": 0,
             "consumption_order": []
           },
+          "scheduler_phase_evidence": {
+            "byte_identical": true,
+            "capture_a": "oracle11_progression_lifecycle_cs39a",
+            "capture_b": "oracle11_progression_lifecycle_cs39b",
+            "class02_dispatch_counts": [
+              {
+                "dispatch_count_u8": 1,
+                "source_frame_u16": 2073
+              },
+              {
+                "dispatch_count_u8": 1,
+                "source_frame_u16": 2074
+              },
+              {
+                "dispatch_count_u8": 2,
+                "source_frame_u16": 2075
+              },
+              {
+                "dispatch_count_u8": 2,
+                "source_frame_u16": 2076
+              },
+              {
+                "dispatch_count_u8": 1,
+                "source_frame_u16": 2077
+              }
+            ],
+            "class02_dispatch_entry": "0x06b534",
+            "class02_source_slot": "0x00ffb600",
+            "classification": "SOURCE_CLOSED_IMPLEMENTATION_FIELDS",
+            "controller_dispatch_counts": [
+              {
+                "dispatch_count_u8": 0,
+                "source_frame_u16": 2073
+              },
+              {
+                "dispatch_count_u8": 1,
+                "source_frame_u16": 2074
+              },
+              {
+                "dispatch_count_u8": 3,
+                "source_frame_u16": 2075
+              },
+              {
+                "dispatch_count_u8": 1,
+                "source_frame_u16": 2076
+              },
+              {
+                "dispatch_count_u8": 1,
+                "source_frame_u16": 2077
+              }
+            ],
+            "controller_dispatch_entry": "0x0288e2",
+            "exact_native_blocker": "the existing diagnostic replay applies controller cadence to the full scheduler and lacks source-bound per-phase invocation ownership",
+            "files_sha256": {
+              "coffee_shop_component20_dispatch.tsv": "429d922e9ca1c519bb95ea7bfe187e253309fe4a03b32b1b90111ee55a3743c2",
+              "coffee_shop_scene_actors.tsv": "b7b1568df038af1cdd7eb5bc6eb30c830efca4952d1077644ab3b31ed2ad1c0f",
+              "progression_result.tsv": "89e5ff6a76246c2eac618cc64c29c4c2956b51e82c7344239867986d3bee1c8e",
+              "progression_transactions.tsv": "710cafe9ebe7ce295d1c4b07dc6b997fd55efa4670673f940cd59ad37a6f5625"
+            },
+            "finding": "captured controller invocations are not a full-scheduler cadence proxy; frame 2075 has three controller dispatches but two record-20/class-0x02 dispatches, while frame 2076 has one controller dispatch and two class-0x02 dispatches",
+            "fixed_frame_gameplay_authority_forbidden": true,
+            "source_frame_range_inclusive_u16": [
+              2073,
+              2077
+            ]
+          },
           "semantic_role": "SOURCE_DAMAGEABLE_SCENE_PROP_CONTROLLER",
           "source_body": {
             "first": "0x0006b534",

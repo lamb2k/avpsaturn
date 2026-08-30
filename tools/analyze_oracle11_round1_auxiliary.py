@@ -18,6 +18,8 @@ SCENE_COMPONENT_A=ROOT/'.deps/mame/oracle11_progression_lifecycle_cs17a'
 SCENE_COMPONENT_B=ROOT/'.deps/mame/oracle11_progression_lifecycle_cs17b'
 SCENE_COMPONENT_DETAIL_A=ROOT/'.deps/mame/oracle11_progression_lifecycle_cs27a'
 SCENE_COMPONENT_DETAIL_B=ROOT/'.deps/mame/oracle11_progression_lifecycle_cs27b'
+SCENE_CADENCE_A=ROOT/'.deps/mame/oracle11_progression_lifecycle_cs39a'
+SCENE_CADENCE_B=ROOT/'.deps/mame/oracle11_progression_lifecycle_cs39b'
 TYPE16_TRACE_A=ROOT/'.deps/mame/reimplement13_type16_trace_g'
 TYPE16_TRACE_B=ROOT/'.deps/mame/reimplement13_type16_trace_h'
 TYPE16_ATTACK_A=ROOT/'.deps/mame/reimplement13_type16_collision_a/attack_table.bin'
@@ -371,6 +373,32 @@ def coffee_shop_scene_component_identities(op,program):
                     for name in detail_files}
  req(detail_identity_a==detail_identity_b,
      'Coffee Shop type-20 implementation captures differ')
+ cadence_files=('coffee_shop_scene_actors.tsv',
+                'coffee_shop_component20_dispatch.tsv',
+                'progression_transactions.tsv','progression_result.tsv')
+ cadence_identity_a={name:sha(SCENE_CADENCE_A/name)
+                     for name in cadence_files}
+ cadence_identity_b={name:sha(SCENE_CADENCE_B/name)
+                     for name in cadence_files}
+ req(cadence_identity_a==cadence_identity_b,
+     'Coffee Shop scheduler-phase cadence captures differ')
+ cadence_dispatch=rows(SCENE_CADENCE_A/
+                       'coffee_shop_component20_dispatch.tsv')
+ cadence_controller=rows(SCENE_CADENCE_A/'progression_transactions.tsv')
+ class02_cadence=[]
+ controller_cadence=[]
+ for frame in range(2073,2078):
+  class02_cadence.append({
+   'source_frame_u16':frame,
+   'dispatch_count_u8':sum(r['slot']=='ffb600' and r['pc']=='06b534' and
+                           int(r['frame'])==frame for r in cadence_dispatch)})
+  controller_cadence.append({
+   'source_frame_u16':frame,
+   'dispatch_count_u8':sum(r['pc']=='0288e2' and int(r['frame'])==frame
+                           for r in cadence_controller)})
+ req([r['dispatch_count_u8'] for r in class02_cadence]==[1,1,2,2,1] and
+     [r['dispatch_count_u8'] for r in controller_cadence]==[0,1,3,1,1],
+     'Coffee Shop controller/type-20 scheduler-phase cadence drift')
  detail_writes=rows(SCENE_COMPONENT_DETAIL_A/
                     'coffee_shop_component20_writes.tsv')
  detail_health=rows(SCENE_COMPONENT_DETAIL_A/
@@ -529,6 +557,19 @@ def coffee_shop_scene_component_identities(op,program):
     '0x0200':'predecrement nonzero delay_timer and skip the subhandler until it reaches zero; substate 0 toggles in_camera_bounds on (u16)(x-camera_x+16)<=0x01a0 and binds/advances source animation; substate 0x0200 enters the state-0x0400 handler',
     '0x0400':'write state=0x0200; predecrement effect_count; if it reaches zero allocate one record28 child at x+8,y+64,z-8 with source class field 0x05 and field5c=1; always clear field40, bind selector effect_count, allocate four type-24/class-0x47 presentation actors, then emit command 0x0077',
     '0x0600':'release through type-20 fixed-pool release 0x017706'},
+   'scheduler_phase_evidence':{
+    'classification':'SOURCE_CLOSED_IMPLEMENTATION_FIELDS',
+    'capture_a':SCENE_CADENCE_A.name,'capture_b':SCENE_CADENCE_B.name,
+    'byte_identical':True,'files_sha256':cadence_identity_a,
+    'source_frame_range_inclusive_u16':[2073,2077],
+    'class02_dispatch_entry':'0x06b534',
+    'class02_source_slot':'0x00ffb600',
+    'class02_dispatch_counts':class02_cadence,
+    'controller_dispatch_entry':'0x0288e2',
+    'controller_dispatch_counts':controller_cadence,
+    'finding':'captured controller invocations are not a full-scheduler cadence proxy; frame 2075 has three controller dispatches but two record-20/class-0x02 dispatches, while frame 2076 has one controller dispatch and two class-0x02 dispatches',
+    'exact_native_blocker':'the existing diagnostic replay applies controller cadence to the full scheduler and lacks source-bound per-phase invocation ownership',
+    'fixed_frame_gameplay_authority_forbidden':True},
    'collision_damage':{
     'current_state_writer':'0x01d590 then signed clamp 0x01d598',
     'source_frame':2804,'attacker':'0x00ff8380','defender':'0x00ffb300',
@@ -1828,6 +1869,16 @@ def validate(r):
      scene_components['components'][1]['implementation_contract']
       ['collision_damage']['reaction_direction']['evidence']['byte_identical']
       is True and
+     scene_components['components'][1]['implementation_contract']
+      ['scheduler_phase_evidence']['byte_identical'] is True and
+     [x['dispatch_count_u8'] for x in
+      scene_components['components'][1]['implementation_contract']
+       ['scheduler_phase_evidence']['class02_dispatch_counts']]==
+      [1,1,2,2,1] and
+     [x['dispatch_count_u8'] for x in
+      scene_components['components'][1]['implementation_contract']
+       ['scheduler_phase_evidence']['controller_dispatch_counts']]==
+      [0,1,3,1,1] and
      scene_components['components'][1]['implementation_contract']
       ['audio_transactions'][0]['command_u16']=='0x0077',
      'Coffee Shop remaining component identity drift')

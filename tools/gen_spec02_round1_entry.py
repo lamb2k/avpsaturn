@@ -1451,7 +1451,17 @@ def build() -> str:
             {"source_frame": 2804, "attacker_x_u16": 1091,
              "defender_x_u16": 1152, "attack_mode_s8": 1} or
         class02_collision["reaction_direction"]["result_u8"] != 1 or
-        class02_collision["health_after_clamp_s16"] != -1):
+        class02_collision["health_after_clamp_s16"] != -1 or
+        class02_contract["scheduler_phase_evidence"]["byte_identical"] is
+            not True or
+        [row["dispatch_count_u8"] for row in class02_contract[
+            "scheduler_phase_evidence"]["class02_dispatch_counts"]] !=
+            [1, 1, 2, 2, 1] or
+        [row["dispatch_count_u8"] for row in class02_contract[
+            "scheduler_phase_evidence"]["controller_dispatch_counts"]] !=
+            [0, 1, 3, 1, 1] or
+        class02_contract["scheduler_phase_evidence"]
+            ["fixed_frame_gameplay_authority_forbidden"] is not True):
         raise ValueError("SPEC-02 Coffee Shop component implementation drift")
 
     cursor = int(player["initial_cursor"], 16)

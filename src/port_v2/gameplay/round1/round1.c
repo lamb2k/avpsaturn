@@ -6502,6 +6502,14 @@ static int avsp_round1_class02_in_camera(
         avsp_round1_class02.camera_bounds_span;
 }
 
+static int avsp_round1_step_class02_animation(AvspRound1ActorCore *actor)
+{
+    if (actor->animation_timer == 0u)
+        return 0;
+    --actor->animation_timer;
+    return 1;
+}
+
 static int avsp_round1_step_class02(AvspRound1Runtime *runtime,
                                     AvspRound1Pool *pool,
                                     AvspRound1ActorCore *actor)
@@ -6532,6 +6540,8 @@ static int avsp_round1_step_class02(AvspRound1Runtime *runtime,
             --actor->transition_timer;
             return 1;
         }
+        if (!avsp_round1_step_class02_animation(actor))
+            return 0;
         in_camera = (unsigned char)avsp_round1_class02_in_camera(
             runtime, actor);
         actor->source_flags = in_camera;

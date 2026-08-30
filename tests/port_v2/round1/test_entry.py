@@ -9,7 +9,7 @@ from pathlib import Path
 
 ROOT = Path(__file__).resolve().parents[3]
 SPEC = ROOT / "data/spec02_round1_executable_contract.json"
-EXPECTED = "6aedb1a103e129dd37ee9ad989863443a17453888fbef4324dfeccbf4dd44318"
+EXPECTED = "d0d7762ade3d0f1cbb986d6c1135172e24017515c73ce30ccc39ec24b4385710"
 assert hashlib.sha256(SPEC.read_bytes()).hexdigest() == EXPECTED
 assert json.loads(SPEC.read_text())["status"] == "ACCEPTED"
 source = (ROOT / "src/port_v2/gameplay/round1/round1.c").read_text()
@@ -381,6 +381,8 @@ for before, after in (
      "runtime->player.animation_branch = 0;"),
     ("runtime->player.animation_timer =\n        runtime->player_special_animation_timer;",
      "runtime->player.animation_timer = 0u;"),
+    ("if (!avsp_round1_step_class02_animation(actor))\n            return 0;",
+     "if (0)\n            return 0;"),
     ("if (runtime->player_weapon_projectiles[slot_index].active &&\n            runtime->player_weapon_projectiles[slot_index].state !=\n                avsp_round1_weapon_projectile.initial_state)",
      "if (runtime->player_weapon_projectiles[slot_index].active)"),
 ):
