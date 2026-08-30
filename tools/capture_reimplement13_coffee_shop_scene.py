@@ -722,6 +722,11 @@ def recurring_spawn_phase_boundary(
     spawned_native = native(2511, 0x00ffa3c0)
     class01_source = source(2330, 0x00ff9c40)
     class01_native = native(2330, 0x00ff9c40)
+    reuse_frames = (2508, 2511, 2514, 2517)
+    reuse_source = {frame: source(frame, 0x00ffa3c0)
+                    for frame in reuse_frames}
+    reuse_native = {frame: native(frame, 0x00ffa3c0)
+                    for frame in reuse_frames}
     return {
         "source_phase_update_precedes_controller": True,
         "controller_precedes_new_record12_dispatch": True,
@@ -807,6 +812,29 @@ def recurring_spawn_phase_boundary(
                 },
             },
             "guard": "recurring post-allocation presentation applies only to source recurring-controller variants 3 or 4; class-0x01 variant 5 retains zero presentation until action 0x0e advances on the following tick",
+        },
+        "fixed_point_record_reuse": {
+            "source_slot": "0x00ffa3c0",
+            "writer_rule": "recurring spawn writes signed high position words and preserves the reused record's low u16 fixed-point fractions",
+            "frames": {
+                str(frame): {
+                    "source": {
+                        "x_fp_s32": int(reuse_source[frame]["x_fp"], 16),
+                        "y_fp_s32": int(reuse_source[frame]["y_fp"], 16),
+                    },
+                    "native": {
+                        "x_fp_s32": int(reuse_native[frame]["x_fp"]),
+                        "y_fp_s32": int(reuse_native[frame]["y_fp"]),
+                    },
+                }
+                for frame in reuse_frames
+            },
+            "cleared_fraction_negative_control": {
+                "frame_2514_x_fp_s32": "0x02a76200",
+                "frame_2514_y_fp_s32": "0x01467900",
+                "frame_2517_x_fp_s32": "0x02aec400",
+                "frame_2517_y_fp_s32": "0x0144f200",
+            },
         },
     }
 
@@ -946,6 +974,18 @@ def validate_report(report: dict[str, object]) -> None:
                 "animation_timer_u16": 0, "animation_branch_s16": 0,
             }:
         raise ValueError("Coffee Shop spawn-owner presentation guard drift")
+    reuse = recurring["fixed_point_record_reuse"]
+    reuse_expected = {
+        "2508": {"x_fp_s32": 0x02bc8000, "y_fp_s32": 0x01389000},
+        "2511": {"x_fp_s32": 0x02a08000, "y_fp_s32": 0x01489000},
+        "2514": {"x_fp_s32": 0x02a7e200, "y_fp_s32": 0x01470900},
+        "2517": {"x_fp_s32": 0x02af4400, "y_fp_s32": 0x01458200},
+    }
+    if reuse["source_slot"] != "0x00ffa3c0" or any(
+            reuse["frames"][frame]["source"] != expected or
+            reuse["frames"][frame]["native"] != expected
+            for frame, expected in reuse_expected.items()):
+        raise ValueError("Coffee Shop recurring fixed-point reuse drift")
     trajectory = report["native_capture"]["record4_parent_fixed_trajectory"]
     if trajectory["allocator"] != "0x01773e" or \
             trajectory["target_selector"] != "0x0241f0" or \

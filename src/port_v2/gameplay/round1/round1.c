@@ -145,6 +145,37 @@ static AvspRound1ActorCore *avsp_round1_allocate_pool_actor(
     return actor;
 }
 
+static AvspRound1ActorCore *
+avsp_round1_allocate_pool_actor_preserve_position_fraction(
+    AvspRound1Runtime *runtime, unsigned int pool_index)
+{
+    AvspRound1Pool *pool;
+    unsigned short source_slot;
+    unsigned int actor_index;
+    unsigned short x_fraction;
+    unsigned short y_fraction;
+    AvspRound1ActorCore *actor;
+    if (runtime == 0 || pool_index >= AVSP_ROUND1_POOL_COUNT)
+        return 0;
+    pool = &runtime->pools[pool_index];
+    if (pool->free_count == 0u)
+        return 0;
+    source_slot = pool->free_stack[pool->free_count - 1u];
+    actor_index = (unsigned int)(source_slot - pool->source_base) /
+        pool->stride;
+    if (actor_index >= pool->capacity)
+        return 0;
+    x_fraction = (unsigned short)pool->records[actor_index].source_x_fp;
+    y_fraction = (unsigned short)pool->records[actor_index].source_y_fp;
+    actor = avsp_round1_allocate_pool_actor(runtime, pool_index);
+    if (actor != 0)
+    {
+        actor->source_x_fp = (long)x_fraction;
+        actor->source_y_fp = (long)y_fraction;
+    }
+    return actor;
+}
+
 static AvspRound1ActorCore *avsp_round1_allocate_pool_actor_preserve_y(
     AvspRound1Runtime *runtime, unsigned int pool_index)
 {
@@ -1362,8 +1393,19 @@ static int avsp_round1_seed_class1f_action_fields(
     unsigned char selector = spec != 0 ? spec->animation_selector : 0u;
     if (spec == 0)
         return 0;
-    actor->source_x_fp = (long)actor->x * 65536L;
-    actor->source_y_fp = (long)actor->y * 65536L;
+    if (actor->source_dynamic_spawn != 0u &&
+        avsp_round1_recurring_spawn.preserve_reused_position_fraction != 0u)
+    {
+        actor->source_x_fp = (long)(((unsigned long)(unsigned short)actor->x <<
+            16) | ((unsigned long)actor->source_x_fp & 0x0000ffffUL));
+        actor->source_y_fp = (long)(((unsigned long)(unsigned short)actor->y <<
+            16) | ((unsigned long)actor->source_y_fp & 0x0000ffffUL));
+    }
+    else
+    {
+        actor->source_x_fp = (long)actor->x * 65536L;
+        actor->source_y_fp = (long)actor->y * 65536L;
+    }
     actor->source_z_fp = (long)actor->z * 65536L;
     actor->source_a3 = (unsigned char)((random >> 2) & 1u);
     actor->source_a4 = spec->a4;
@@ -1437,6 +1479,11 @@ static void avsp_round1_initialize_recurring_actor(
     actor->x = x;
     actor->y = y;
     actor->z = z;
+    actor->source_x_fp = (long)(((unsigned long)(unsigned short)x << 16) |
+        ((unsigned long)actor->source_x_fp & 0x0000ffffUL));
+    actor->source_y_fp = (long)(((unsigned long)(unsigned short)y << 16) |
+        ((unsigned long)actor->source_y_fp & 0x0000ffffUL));
+    actor->source_z_fp = (long)z * 65536L;
     actor->transition_timer = 0u;
     actor->source_selector83 = selector;
     actor->source_dynamic_spawn = 1u;
@@ -1453,7 +1500,8 @@ static void avsp_round1_spawn_recurring_auxiliary(AvspRound1Runtime *runtime)
             avsp_round1_recurring_spawn.auxiliary_camera_x_limit ||
         (phase & avsp_round1_recurring_spawn.auxiliary_phase_mask) != 0u)
         return;
-    actor = avsp_round1_allocate_pool_actor(runtime, 0u);
+    actor = avsp_round1_allocate_pool_actor_preserve_position_fraction(
+        runtime, 0u);
     if (actor != 0)
         avsp_round1_initialize_recurring_actor(runtime, actor,
             avsp_round1_recurring_spawn.auxiliary_x,
@@ -1476,7 +1524,8 @@ static void avsp_round1_spawn_recurring_primary(AvspRound1Runtime *runtime)
     if ((encounter->source_phase_counter &
             avsp_round1_recurring_spawn.primary_phase_mask) != 0u)
         return;
-    actor = avsp_round1_allocate_pool_actor(runtime, 0u);
+    actor = avsp_round1_allocate_pool_actor_preserve_position_fraction(
+        runtime, 0u);
     if (actor == 0)
         return;
     (void)avsp_round1_source_rng(runtime);

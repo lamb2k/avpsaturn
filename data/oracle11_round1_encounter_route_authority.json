@@ -60732,6 +60732,48 @@
         "y": "s16",
         "z": "s16"
       },
+      "fixed_point_record_reuse": {
+        "classification": "SOURCE_CLOSED_IMPLEMENTATION_FIELDS",
+        "field_types": {
+          "x_fp": "s32 16.16",
+          "x_writer": "s16 high word",
+          "y_fp": "s32 16.16",
+          "y_writer": "s16 high word"
+        },
+        "mutation_control": {
+          "mutation": "clear both reused low words at allocation",
+          "rejected_frame_2514": {
+            "x_fp_s32": "0x02a76200",
+            "y_fp_s32": "0x01467900"
+          },
+          "rejected_frame_2517": {
+            "x_fp_s32": "0x02aec400",
+            "y_fp_s32": "0x0144f200"
+          }
+        },
+        "source_samples": {
+          "first_motion_frame_2514": {
+            "x_fp_s32": "0x02a7e200",
+            "y_fp_s32": "0x01470900"
+          },
+          "post_allocation_frame_2511": {
+            "x_fp_s32": "0x02a08000",
+            "y_fp_s32": "0x01489000"
+          },
+          "pre_release_frame_2508": {
+            "x_fp_s32": "0x02bc8000",
+            "x_fraction_u16": "0x8000",
+            "y_fp_s32": "0x01389000",
+            "y_fraction_u16": "0x9000"
+          },
+          "second_motion_frame_2517": {
+            "x_fp_s32": "0x02af4400",
+            "y_fp_s32": "0x01458200"
+          }
+        },
+        "spec_executable": true,
+        "writer_rule": "0x028a48/0x028a50 and 0x028a54/0x028a96 replace only the signed high word; preserve the reused record's prior low u16 fraction"
+      },
       "guard_branch_order": [
         "require living_enemy_count_u16 at 0xff1a18 < 8",
         "run auxiliary writer body before the primary phase guard",

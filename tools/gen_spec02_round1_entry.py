@@ -170,6 +170,8 @@ def build() -> str:
     recurring_primary = recurring["primary_writer"]
     recurring_post_allocation = recurring_primary[
         "post_allocation_dispatch"]["same_frame"]
+    recurring_fixed_point_reuse = recurring_primary[
+        "fixed_point_record_reuse"]
     recurring_auxiliary = recurring["auxiliary_writer"]
     recurring_progress = recurring["progress_increment_boundary"]
     recurring_tables = recurring_primary["tables"]
@@ -639,6 +641,16 @@ def build() -> str:
             "animation_branch_s16": -0x8000,
             "assembly": "0x00130346",
             "hurt_selector_u8": 1, "attack_selector_u8": 1} or
+        recurring_fixed_point_reuse["field_types"] != {
+            "x_fp": "s32 16.16", "y_fp": "s32 16.16",
+            "x_writer": "s16 high word", "y_writer": "s16 high word"} or
+        recurring_fixed_point_reuse["source_samples"]
+            ["post_allocation_frame_2511"] != {
+                "x_fp_s32": "0x02a08000", "y_fp_s32": "0x01489000"} or
+        recurring_fixed_point_reuse["mutation_control"]
+            ["rejected_frame_2514"] != {
+                "x_fp_s32": "0x02a76200", "y_fp_s32": "0x01467900"} or
+        recurring_fixed_point_reuse["spec_executable"] is not True or
         recurring_tables["lane_offsets_s16"] != [24, 40, 56, 72, 88, 104] or
         recurring_tables["selector_cycle_u8"] != [0, 1, 1, 1, 0, 1, 0, 1, 1, 1] or
         len(recurring_tables["lane_bucket_u8"]) != 64 or
@@ -1575,6 +1587,7 @@ def build() -> str:
             recurring_progress["transition_guard"]["substate_u16"],
             recurring_progress["transition_guard"]["health_s16"],
             recurring_progress["increment_u16"]),
+        "    1u,",
         "    { %du, %d, %sUL, %sUL, %du, %du }" % (
             recurring_post_allocation["animation_timer_u16"],
             recurring_post_allocation["animation_branch_s16"],

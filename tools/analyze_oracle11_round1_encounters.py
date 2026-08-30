@@ -835,6 +835,12 @@ def build_report() -> dict[str, object]:
         "first recurring spawn write order drift")
     first_post_init = snapshot(progression_snapshots, 2511, "ffa3c0")
     first_post_dispatch = snapshot(progression_snapshots, 2512, "ffa3c0")
+    scene_actor_rows = list(rows(
+        COFFEE_SHOP_SCENE_A / "coffee_shop_scene_actors.tsv"))
+    reused_before = snapshot(scene_actor_rows, 2508, "ffa3c0")
+    reused_spawn = snapshot(scene_actor_rows, 2511, "ffa3c0")
+    reused_move_1 = snapshot(scene_actor_rows, 2514, "ffa3c0")
+    reused_move_2 = snapshot(scene_actor_rows, 2517, "ffa3c0")
     later_post_init = snapshot(progression_snapshots, 3983, "ffa000")
     later_post_dispatch = snapshot(progression_snapshots, 3984, "ffa000")
     suppressed_first = snapshot(suppressed_snapshots, 2511, "ffa3c0")
@@ -897,6 +903,16 @@ def build_report() -> dict[str, object]:
             int(suppress_result["suppressed_writes"]) == 8 and
             int(base_result["suppressed_writes"]) == 0,
             "recurring spawn suppression did not discriminate scheduler state")
+    require(
+        (int(reused_before["x_fp"], 16) & 0xffff) == 0x8000 and
+        (int(reused_before["y_fp"], 16) & 0xffff) == 0x9000 and
+        int(reused_spawn["x_fp"], 16) == 0x02a08000 and
+        int(reused_spawn["y_fp"], 16) == 0x01489000 and
+        int(reused_move_1["x_fp"], 16) == 0x02a7e200 and
+        int(reused_move_1["y_fp"], 16) == 0x01470900 and
+        int(reused_move_2["x_fp"], 16) == 0x02af4400 and
+        int(reused_move_2["y_fp"], 16) == 0x01458200,
+        "recurring record reuse fixed-point fraction drift")
 
     guard_clear = [row for row in progression_global_writes
                    if row["pc"] == "08da38"]
@@ -1288,6 +1304,41 @@ def build_report() -> dict[str, object]:
                                "substate_u16": 0x1600,
                                "animation_record": "0x0012ec04"},
             },
+            "fixed_point_record_reuse": {
+                "classification": "SOURCE_CLOSED_IMPLEMENTATION_FIELDS",
+                "field_types": {
+                    "x_fp": "s32 16.16", "y_fp": "s32 16.16",
+                    "x_writer": "s16 high word", "y_writer": "s16 high word",
+                },
+                "writer_rule": ("0x028a48/0x028a50 and 0x028a54/0x028a96 "
+                                "replace only the signed high word; preserve the "
+                                "reused record's prior low u16 fraction"),
+                "source_samples": {
+                    "pre_release_frame_2508": {
+                        "x_fp_s32": "0x02bc8000", "y_fp_s32": "0x01389000",
+                        "x_fraction_u16": "0x8000", "y_fraction_u16": "0x9000",
+                    },
+                    "post_allocation_frame_2511": {
+                        "x_fp_s32": "0x02a08000", "y_fp_s32": "0x01489000",
+                    },
+                    "first_motion_frame_2514": {
+                        "x_fp_s32": "0x02a7e200", "y_fp_s32": "0x01470900",
+                    },
+                    "second_motion_frame_2517": {
+                        "x_fp_s32": "0x02af4400", "y_fp_s32": "0x01458200",
+                    },
+                },
+                "mutation_control": {
+                    "mutation": "clear both reused low words at allocation",
+                    "rejected_frame_2514": {
+                        "x_fp_s32": "0x02a76200", "y_fp_s32": "0x01467900",
+                    },
+                    "rejected_frame_2517": {
+                        "x_fp_s32": "0x02aec400", "y_fp_s32": "0x0144f200",
+                    },
+                },
+                "spec_executable": True,
+            },
         },
         "auxiliary_writer": {
             "routine": "0x028b5a..0x028ba4", "writer_pc": "0x028b7e",
@@ -1574,6 +1625,31 @@ def validate(report: dict[str, object]) -> None:
                 } and
             progression["primary_writer"]["post_allocation_dispatch"]
                 ["next_frame"]["substate_u16"] == 0x1600 and
+            progression["primary_writer"]["fixed_point_record_reuse"] == {
+                "classification": "SOURCE_CLOSED_IMPLEMENTATION_FIELDS",
+                "field_types": {
+                    "x_fp": "s32 16.16", "y_fp": "s32 16.16",
+                    "x_writer": "s16 high word", "y_writer": "s16 high word"},
+                "writer_rule": ("0x028a48/0x028a50 and 0x028a54/0x028a96 "
+                                "replace only the signed high word; preserve the "
+                                "reused record's prior low u16 fraction"),
+                "source_samples": {
+                    "pre_release_frame_2508": {
+                        "x_fp_s32": "0x02bc8000", "y_fp_s32": "0x01389000",
+                        "x_fraction_u16": "0x8000", "y_fraction_u16": "0x9000"},
+                    "post_allocation_frame_2511": {
+                        "x_fp_s32": "0x02a08000", "y_fp_s32": "0x01489000"},
+                    "first_motion_frame_2514": {
+                        "x_fp_s32": "0x02a7e200", "y_fp_s32": "0x01470900"},
+                    "second_motion_frame_2517": {
+                        "x_fp_s32": "0x02af4400", "y_fp_s32": "0x01458200"}},
+                "mutation_control": {
+                    "mutation": "clear both reused low words at allocation",
+                    "rejected_frame_2514": {
+                        "x_fp_s32": "0x02a76200", "y_fp_s32": "0x01467900"},
+                    "rejected_frame_2517": {
+                        "x_fp_s32": "0x02aec400", "y_fp_s32": "0x0144f200"}},
+                "spec_executable": True} and
             progression["auxiliary_writer"]["writer_pc"] == "0x028b7e" and
             progression["auxiliary_writer"]["guard_values"] == {
                 "camera_x_limit_s16": 1008, "phase_add_u8": 3,

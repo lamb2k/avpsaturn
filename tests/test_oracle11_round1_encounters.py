@@ -19,6 +19,7 @@ def reject(mutant,label):
 
 mutations=[]
 item=copy.deepcopy(report); item["first_segment_recurring_spawn"]["primary_writer"]["post_allocation_dispatch"]["same_frame"]["animation_timer_u16"]=4094; mutations.append(("recurring same-frame presentation",item))
+item=copy.deepcopy(report); item["first_segment_recurring_spawn"]["primary_writer"]["fixed_point_record_reuse"]["mutation_control"]["rejected_frame_2514"]["x_fp_s32"]="0x02a7e200"; mutations.append(("recurring reused fraction",item))
 for label,change in (
     ('status',lambda x:x.__setitem__('status','PARTIAL')),
     ('determinism',lambda x:x['capture_identity'].__setitem__('byte_identical',False)),
@@ -48,4 +49,4 @@ for label,change in (
     ('scene-silent-unknown',lambda x:x['coffee_shop_scene_census']['negative_controls'].__setitem__('unknown_pair_silently_omitted',True)),
 ):
     mutant=copy.deepcopy(report);change(mutant);reject(mutant,label)
-print('ORACLE-11 encounter/route authority tests: PASS (25 mutations rejected)')
+print('ORACLE-11 encounter/route authority tests: PASS (26 mutations rejected)')

@@ -1027,6 +1027,29 @@ def validate(contract: dict[str, object], fixtures: dict[str, object],
                 ["progression_transactions.tsv"] and
             cadence["spec_executable"] is True,
             "Coffee Shop source update cadence fixture drift")
+    reuse = fixtures["authority_data"]["route"][
+        "first_segment_recurring_spawn"]["primary_writer"][
+            "fixed_point_record_reuse"]
+    require(
+        reuse["classification"] == "SOURCE_CLOSED_IMPLEMENTATION_FIELDS" and
+        reuse["field_types"] == {
+            "x_fp": "s32 16.16", "y_fp": "s32 16.16",
+            "x_writer": "s16 high word", "y_writer": "s16 high word"} and
+        reuse["source_samples"]["pre_release_frame_2508"] == {
+            "x_fp_s32": "0x02bc8000", "y_fp_s32": "0x01389000",
+            "x_fraction_u16": "0x8000", "y_fraction_u16": "0x9000"} and
+        reuse["source_samples"]["post_allocation_frame_2511"] == {
+            "x_fp_s32": "0x02a08000", "y_fp_s32": "0x01489000"} and
+        reuse["source_samples"]["first_motion_frame_2514"] == {
+            "x_fp_s32": "0x02a7e200", "y_fp_s32": "0x01470900"} and
+        reuse["source_samples"]["second_motion_frame_2517"] == {
+            "x_fp_s32": "0x02af4400", "y_fp_s32": "0x01458200"} and
+        reuse["mutation_control"]["rejected_frame_2514"] == {
+            "x_fp_s32": "0x02a76200", "y_fp_s32": "0x01467900"} and
+        reuse["mutation_control"]["rejected_frame_2517"] == {
+            "x_fp_s32": "0x02aec400", "y_fp_s32": "0x0144f200"} and
+        reuse["spec_executable"] is True,
+        "Coffee Shop recurring fixed-point reuse fixture drift")
     scene_items = (scene["actor_lifetimes"] + scene["audio_events"] +
                    scene["health_writes"] + scene["route_edges"] +
                    scene["load_boundaries"] + scene["navigation"]["camera_runs"] +
