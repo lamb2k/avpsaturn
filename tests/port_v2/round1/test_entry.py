@@ -9,7 +9,7 @@ from pathlib import Path
 
 ROOT = Path(__file__).resolve().parents[3]
 SPEC = ROOT / "data/spec02_round1_executable_contract.json"
-EXPECTED = "b1b81b9a3525a4b0220332f75187e33384bab8903fc092580efc2260c61a648d"
+EXPECTED = "45496c15cf6bef7176146e9530ffc6bc04bdb152c9892f3b7b1f10aeef97b5b7"
 assert hashlib.sha256(SPEC.read_bytes()).hexdigest() == EXPECTED
 assert json.loads(SPEC.read_text())["status"] == "ACCEPTED"
 source = (ROOT / "src/port_v2/gameplay/round1/round1.c").read_text()
@@ -464,6 +464,16 @@ for before, after in (
      "    0x08F080UL, 24u, 0x49, 0u, 8u, 1u, 0u"),
     ("    0x08F080UL, 24u, 0x49, 0u, 8u, 1u, 1u",
      "    0x08F080UL, 24u, 0x49, 0u, 7u, 1u, 1u"),
+    ("    10u, 2u, 1u, 0u, 0x003Bu,",
+     "    10u, 2u, 1u, 0u, 0x003Au,"),
+    ("    10u, 2u, 1u, 0u, 0x003Bu,",
+     "    10u, 2u, 0u, 0u, 0x003Bu,"),
+    ("    114688L, -8192L,",
+     "    114687L, -8192L,"),
+    ("    { 1u, 0, 0x0015f278UL, 0x00160af2UL, 0u, 0u },",
+     "    { 1u, 0, 0x0015f278UL, 0x00160af2UL, 1u, 0u },"),
+    ("    { 2, -2, 2, -2, 2, -2, 2, -2, 2, -2, 2, -2, 2, -2, 2, -2 }",
+     "    { 3, -2, 2, -2, 2, -2, 2, -2, 2, -2, 2, -2, 2, -2, 2, -2 }"),
 ):
     assert before in generated
     changed = generated.replace(before, after, 1)
@@ -503,4 +513,4 @@ for before, after in (
                                  "--", "bash", "-lc", command],
                                 capture_output=True)
         assert result.returncode != 0, f"generated mutation escaped: {before}"
-print("REIMPLEMENT-13 entry/player/scheduler/class1f/Coffee-Shop-navigation/neutral-stop/melee/Button1/Button3/type16-projectile/first-encounter differential: PASS (184 real mutations)")
+print("REIMPLEMENT-13 entry/player/scheduler/class1f/Coffee-Shop-navigation/neutral-stop/melee/Button1/Button3/type16-projectile/player-HIT/first-encounter differential: PASS (189 real mutations)")

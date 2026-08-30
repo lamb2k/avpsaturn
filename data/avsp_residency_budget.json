@@ -1,21 +1,21 @@
 {
  "cartridge": {
   "dram1_bytes": 2097152,
-  "jo_zone_bytes": 1040384,
+  "jo_zone_bytes": 978944,
   "live_diagnostic_carve_bytes": 106496,
   "live_diagnostic_headroom_bytes": 16796,
   "live_diagnostic_measured_bytes": 89700,
   "note": "strips carve exists only in the street-test profile; the Round 1 runtime carve exists only in the live-encounter profile; the jo zone figure above applies when both are active, while other profiles omit the inactive carves",
   "round1_runtime_carve_bytes": 102400,
-  "round1_runtime_headroom_bytes": 18336,
-  "round1_runtime_measured_bytes": 84064,
+  "round1_runtime_headroom_bytes": 18208,
+  "round1_runtime_measured_bytes": 84192,
   "status": "MEASURED",
   "strips_carve_bytes": 294912,
   "strips_carve_headroom": 25258,
   "strips_file_bytes": 269654,
-  "tile_archive_bytes": 535756,
-  "tile_carve_bytes": 552960,
-  "tile_carve_headroom": 17204
+  "tile_archive_bytes": 592648,
+  "tile_carve_bytes": 614400,
+  "tile_carve_headroom": 21752
  },
  "classification": "pessimistic residency ledger; sizes, addresses and counts only",
  "cram": {
@@ -72,7 +72,7 @@
   "note": "TILES.BIN remains in cartridge DRAM and is copied through the bounded 218-tile LRU plus 21 composite slots; counting the archive container itself as VDP1 residency is invalid. Command sample is from one paused street frame; a route-wide command high-water is a GAP until a soak instrument runs",
   "resident_texture_budget_bytes": 458488,
   "status": "MEASURED",
-  "texture_archive_bytes": 535756,
+  "texture_archive_bytes": 592648,
   "texture_archive_residency": "CARTRIDGE_SOURCE_NOT_VDP1_RESIDENT"
  },
  "vdp2": {
@@ -115,8 +115,8 @@
    "status": "MEASURED"
   },
   "debug-live-encounter": {
-   "bend": "0x060b42a0",
-   "headroom_bytes": 48480,
+   "bend": "0x060b9200",
+   "headroom_bytes": 28160,
    "limit": "0x060c0000",
    "profile": "debug-live-encounter",
    "status": "MEASURED"

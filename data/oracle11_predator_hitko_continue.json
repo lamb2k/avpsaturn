@@ -114,6 +114,373 @@
     "classification": "SOURCE_CLOSED",
     "damage_guard": "current signed 16-bit health remains nonnegative after current-state collision damage",
     "entry": "0x01a96e",
+    "first_segment_execution_contract": {
+      "audio": {
+        "command_u16": 59,
+        "downstream_difference_source_frame_u16": 2752,
+        "player_side_return": "0x003b5a",
+        "provenance_sha256": "3722a39c3307bafba8bf955c86cc8816556608748cff5d1ab18d3494de41964e",
+        "semantic_name_inferred": false,
+        "shared_dispatch_entry": "0x001922",
+        "source_context": {
+          "action_u16": 512,
+          "outer_state_u16": 514,
+          "substate_u16": 0
+        }
+      },
+      "capture_identity": {
+        "coffee_shop_samples_sha256": "51964bb2a5d68f44996c9a5bddd4102d131ebf2e9649b904dff91066221a7611",
+        "coffee_shop_scene_actors_sha256": "9c0ea88c7eae6b4755b0025d356d49ae136d91de0e443fab0ff767151e43343d",
+        "oracle11_hitko_baseline_samples_sha256": "3385c452e5492960efa7d47619913b6bee7de87fd486d50d2df73744f64d7b17",
+        "player_audio_artifact_sha256": "1d29bb54c1a38b5328bd15a6eaaa8aaf0d57f0e5814f6e1b430bdce8ea8acae9",
+        "two_completion_captures_byte_identical": true
+      },
+      "classification": "SOURCE_CLOSED_IMPLEMENTATION_FIELDS",
+      "collision_and_control": {
+        "attack_selector_during_hit_u8": 0,
+        "hurt_selector_during_hit_u8": 0,
+        "player_attack_and_direction_dispatch_suppressed": true,
+        "resource_tick_continues": true,
+        "world_navigation_and_camera_continue": true
+      },
+      "entry_writes": {
+        "carried_record": {
+          "animation_record": "0x0015f278",
+          "assembly": "0x00160af2",
+          "attack_selector_u8": 0,
+          "hurt_selector_u8": 0,
+          "visible_timer_u16": 1
+        },
+        "clear_fields": [
+          "actor+0x92:u8",
+          "actor+0xaa:u8",
+          "actor+0x95:u8",
+          "actor+0x81:u8",
+          "actor+0x82:u8",
+          "actor+0x9d:u8"
+        ],
+        "motion_index_u8": 2,
+        "shake_countdown_u8": 10
+      },
+      "field_types": {
+        "animation_branch": "s16 actor+0x24",
+        "animation_record": "u32 actor+0x1c",
+        "animation_timer": "u16 actor+0x0a",
+        "facing": "u8 actor+0x0f",
+        "health": "s16 actor+0x40",
+        "hit_count": "u8 actor+0x6d",
+        "invulnerability": "u8 actor+0x70",
+        "motion_index": "u8 actor+0x6c low nibble",
+        "outer_state": "u16 actor+0x04",
+        "shake_countdown": "u8 actor+0x2c",
+        "substate": "u8 actor+0x07 projected as u16",
+        "x_acceleration": "s32 16.16 actor+0x38",
+        "x_fp": "s32 16.16 actor+0x10",
+        "x_velocity": "s32 16.16 actor+0x30"
+      },
+      "mutation_control": {
+        "first_rejected_visible_frame_u16": 2751,
+        "reject_double_health_subtraction": true,
+        "reject_fixed_frame_entry": true,
+        "reject_idle_presentation_during_hit": true,
+        "reject_input_owned_return": true,
+        "reject_missing_shake_or_wrong_sign": true,
+        "reject_rng_consumption": true,
+        "reject_wrong_motion_table_row": true
+      },
+      "observed_anchors": [
+        {
+          "animation_branch_s16": 0,
+          "animation_record": "0x0015f278",
+          "animation_timer_u16": 2,
+          "facing_u8": 1,
+          "frame_u16": 2750,
+          "health_s16": 101,
+          "hit_count_u8": 0,
+          "outer_state_u16": 512,
+          "resource_recharge_u8": 6,
+          "resource_u8": 52,
+          "substate_u16": 514,
+          "x_fp_s32_16_16": "0x04430000",
+          "z_s16": 320
+        },
+        {
+          "animation_branch_s16": 0,
+          "animation_record": "0x0015f278",
+          "animation_timer_u16": 1,
+          "facing_u8": 1,
+          "frame_u16": 2751,
+          "health_s16": 91,
+          "hit_count_u8": 3,
+          "outer_state_u16": 514,
+          "resource_recharge_u8": 5,
+          "resource_u8": 52,
+          "substate_u16": 0,
+          "x_fp_s32_16_16": "0x04430000",
+          "z_s16": 320
+        },
+        {
+          "animation_branch_s16": -32768,
+          "animation_record": "0x0015eee8",
+          "animation_timer_u16": 8,
+          "facing_u8": 1,
+          "frame_u16": 2752,
+          "health_s16": 91,
+          "hit_count_u8": 3,
+          "outer_state_u16": 514,
+          "resource_recharge_u8": 4,
+          "resource_u8": 52,
+          "substate_u16": 512,
+          "x_fp_s32_16_16": "0x04430000",
+          "z_s16": 320
+        },
+        {
+          "animation_branch_s16": -32768,
+          "animation_record": "0x0015eee8",
+          "animation_timer_u16": 8,
+          "facing_u8": 1,
+          "frame_u16": 2753,
+          "health_s16": 91,
+          "hit_count_u8": 3,
+          "outer_state_u16": 514,
+          "resource_recharge_u8": 3,
+          "resource_u8": 52,
+          "substate_u16": 512,
+          "x_fp_s32_16_16": "0x04410000",
+          "z_s16": 320
+        },
+        {
+          "animation_branch_s16": -32768,
+          "animation_record": "0x0015eee8",
+          "animation_timer_u16": 8,
+          "facing_u8": 1,
+          "frame_u16": 2761,
+          "health_s16": 91,
+          "hit_count_u8": 3,
+          "outer_state_u16": 514,
+          "resource_recharge_u8": 1,
+          "resource_u8": 53,
+          "substate_u16": 512,
+          "x_fp_s32_16_16": "0x04410000",
+          "z_s16": 320
+        },
+        {
+          "animation_branch_s16": -32768,
+          "animation_record": "0x0015eee8",
+          "animation_timer_u16": 7,
+          "facing_u8": 1,
+          "frame_u16": 2762,
+          "health_s16": 91,
+          "hit_count_u8": 3,
+          "outer_state_u16": 514,
+          "resource_recharge_u8": 6,
+          "resource_u8": 54,
+          "substate_u16": 514,
+          "x_fp_s32_16_16": "0x04430000",
+          "z_s16": 320
+        },
+        {
+          "animation_branch_s16": -32768,
+          "animation_record": "0x0015eee8",
+          "animation_timer_u16": 8,
+          "facing_u8": 1,
+          "frame_u16": 2769,
+          "health_s16": 91,
+          "hit_count_u8": 3,
+          "outer_state_u16": 514,
+          "resource_recharge_u8": 5,
+          "resource_u8": 55,
+          "substate_u16": 514,
+          "x_fp_s32_16_16": "0x04430000",
+          "z_s16": 320
+        },
+        {
+          "animation_branch_s16": -32768,
+          "animation_record": "0x0015eee8",
+          "animation_timer_u16": 7,
+          "facing_u8": 1,
+          "frame_u16": 2770,
+          "health_s16": 91,
+          "hit_count_u8": 3,
+          "outer_state_u16": 514,
+          "resource_recharge_u8": 4,
+          "resource_u8": 55,
+          "substate_u16": 514,
+          "x_fp_s32_16_16": "0x0443e000",
+          "z_s16": 320
+        },
+        {
+          "animation_branch_s16": -32768,
+          "animation_record": "0x0015eee8",
+          "animation_timer_u16": 1,
+          "facing_u8": 1,
+          "frame_u16": 2776,
+          "health_s16": 91,
+          "hit_count_u8": 3,
+          "outer_state_u16": 514,
+          "resource_recharge_u8": 4,
+          "resource_u8": 56,
+          "substate_u16": 514,
+          "x_fp_s32_16_16": "0x0443c000",
+          "z_s16": 320
+        },
+        {
+          "animation_branch_s16": -32768,
+          "animation_record": "0x0015f1f4",
+          "animation_timer_u16": 4095,
+          "facing_u8": 0,
+          "frame_u16": 2777,
+          "health_s16": 91,
+          "hit_count_u8": 3,
+          "outer_state_u16": 514,
+          "resource_recharge_u8": 3,
+          "resource_u8": 56,
+          "substate_u16": 516,
+          "x_fp_s32_16_16": "0x0443c000",
+          "z_s16": 320
+        },
+        {
+          "animation_branch_s16": -32768,
+          "animation_record": "0x0015f1f4",
+          "animation_timer_u16": 4095,
+          "facing_u8": 0,
+          "frame_u16": 2778,
+          "health_s16": 91,
+          "hit_count_u8": 3,
+          "outer_state_u16": 512,
+          "resource_recharge_u8": 2,
+          "resource_u8": 56,
+          "substate_u16": 0,
+          "x_fp_s32_16_16": "0x0443c000",
+          "z_s16": 320
+        }
+      ],
+      "phase_0x0200": {
+        "guard": "final shake countdown reaches zero and dispatches inner phase 0",
+        "motion_table": {
+          "address": "0x001f892",
+          "index_u8": 2,
+          "row_hex": "0001c000ffffe000"
+        },
+        "presentation": {
+          "animation_record": "0x0015eee8",
+          "assembly": "0x00160ede",
+          "attack_selector_u8": 0,
+          "branch_s16": -32768,
+          "hurt_selector_u8": 0,
+          "timer_u16": 8
+        },
+        "writes": {
+          "next_substate_u16": 514,
+          "x_acceleration_s32_16_16": -8192,
+          "x_velocity_s32_16_16": 114688
+        }
+      },
+      "phase_0x0202": {
+        "animation_loop": {
+          "branch_s16": -32768,
+          "timer_u16": 8
+        },
+        "interruption_order": [
+          "0x01a7e6",
+          "health/button guard",
+          "0x01abd0",
+          "0x01a6f4"
+        ],
+        "movement_order": [
+          "read signed velocity",
+          "apply facing sign",
+          "add to x s32 16.16",
+          "add acceleration to velocity",
+          "test velocity sign",
+          "world bound step",
+          "animation step"
+        ],
+        "negative_velocity_guard": "transition when post-acceleration velocity is negative"
+      },
+      "phase_0x0204": {
+        "presentation": {
+          "animation_record": "0x0015f1f4",
+          "assembly": "0x001626a4",
+          "branch_s16": -32768,
+          "timer_u16": 4095
+        },
+        "return_visible_frame_u16": 2778,
+        "writes": {
+          "facing_u8": 0,
+          "invulnerability_u8": 1,
+          "return_outer_state_u16": 512,
+          "return_substate_u16": 0
+        }
+      },
+      "rng": {
+        "calls": [],
+        "consumption_order": []
+      },
+      "scheduler_order": [
+        "player update",
+        "record12 actor update",
+        "current-state enemy-v-player collision",
+        "next player update dispatches HIT phase 0x0200"
+      ],
+      "shake": {
+        "facing_side_nonzero_negates": true,
+        "final_tick_dispatches_motion_substate": true,
+        "guard": "actor+0x2c predecrement body runs before phase dispatch",
+        "table_address": "0x01aa90",
+        "table_s16": [
+          2,
+          -2,
+          2,
+          -2,
+          2,
+          -2,
+          2,
+          -2,
+          2,
+          -2,
+          2,
+          -2,
+          2,
+          -2,
+          2,
+          -2
+        ],
+        "visible_frames_u16": [
+          2753,
+          2761
+        ]
+      },
+      "source_routines": {
+        "active_body": "0x01aad0",
+        "animation_step": "0x01656e",
+        "entry_body": "0x01a982",
+        "outer_dispatch_entry": "0x01a96e",
+        "phase_0x0200": "0x01ab2c",
+        "phase_0x0202": "0x01ab52",
+        "phase_0x0204": "0x01abb8",
+        "predator_dispatch": "0x01ab1a",
+        "world_bound_step": "0x01affc"
+      },
+      "spec_executable": true,
+      "states": {
+        "control_outer_u16": 512,
+        "entry_substate_u16": 0,
+        "hit_outer_u16": 514,
+        "motion_substate_u16": 514,
+        "return_substate_u16": 516,
+        "shake_substate_u16": 512
+      },
+      "transition_guard": {
+        "collision_writer": "0x01d5ee",
+        "damage_s16": 10,
+        "entry_visible_frame_u16": 2751,
+        "health_after_s16": 91,
+        "health_before_s16": 101,
+        "next_update_visible_frame_u16": 2752,
+        "rule": "current signed health remains nonnegative after current-state damage"
+      }
+    },
     "health": {
       "after": 85,
       "before": 101,

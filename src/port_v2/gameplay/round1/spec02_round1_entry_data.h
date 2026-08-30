@@ -1,8 +1,8 @@
 #ifndef AVSP_SPEC02_ROUND1_ENTRY_DATA_H
 #define AVSP_SPEC02_ROUND1_ENTRY_DATA_H
 
-/* contract_sha256=b1b81b9a3525a4b0220332f75187e33384bab8903fc092580efc2260c61a648d */
-/* fixtures_sha256=eb8fb469f8f978696b746b12b07d84c163c28750db803f8ab9b75993d6728886 */
+/* contract_sha256=45496c15cf6bef7176146e9530ffc6bc04bdb152c9892f3b7b1f10aeef97b5b7 */
+/* fixtures_sha256=15584fcaf6749b8f4be7240a91936c57154d898ec987854e6651e27916d8fa9d */
 #define AVSP_ROUND1_ENTRY_PROGRAM_SHA256 "e5ef761fadc1b5a7df62e77c03025c0ebff0c2503cbc8be9c0077d4bd6cd24ba"
 
 static const unsigned char avsp_round1_entry_program[AVSP_ROUND1_ENTRY_PROGRAM_BYTES] =
@@ -1192,6 +1192,18 @@ static const AvspRound1PlayerLocomotionSpec avsp_round1_player_locomotion =
     512u,
     10u,
     {255u, 2u, 6u, 255u, 4u, 3u, 5u, 255u, 0u, 1u, 7u, 255u, 255u, 255u, 255u, 255u}
+};
+
+static const AvspRound1PlayerHitSpec avsp_round1_player_hit =
+{
+    0x01a96eUL, 0x01a982UL, 0x01aad0UL, 0x01ab2cUL, 0x01ab52UL, 0x01abb8UL,
+    0x0200u, 0x0202u, 0x0000u, 0x0200u, 0x0202u, 0x0204u,
+    10u, 2u, 1u, 0u, 0x003Bu,
+    114688L, -8192L,
+    { 1u, 0, 0x0015f278UL, 0x00160af2UL, 0u, 0u },
+    { 8u, -32768, 0x0015eee8UL, 0x00160edeUL, 0u, 0u },
+    { 4095u, -32768, 0x0015f1f4UL, 0x001626a4UL, 0u, 0u },
+    { 2, -2, 2, -2, 2, -2, 2, -2, 2, -2, 2, -2, 2, -2, 2, -2 }
 };
 
 static const AvspRound1PlayerMeleeSpec avsp_round1_player_melee =

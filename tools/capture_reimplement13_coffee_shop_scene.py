@@ -458,6 +458,39 @@ def class1f_player_collision_chronology(
             "health_s16": int(row["health"]),
         }
 
+    def hit_project(row: dict[str, str], source_side: bool) -> tuple[int, ...]:
+        return (
+            int(row["state"], 16), int(row["substate"], 16),
+            int(row["x_fp"], 16) if source_side else int(row["x_fp"]),
+            int(row["y_fp"], 16) if source_side else int(row["y_fp"]),
+            int(row["z"]), int(row["facing"]),
+            int(row["animation_record"], 16),
+            int(row["animation_timer"], 16)
+                if source_side else int(row["animation_timer"]),
+            int(row["animation_branch"]), int(row["health"]),
+            int(row["hurt_selector"], 16)
+                if source_side else int(row["hurt_selector"]),
+            int(row["attack_selector"], 16)
+                if source_side else int(row["attack_selector"]),
+        )
+
+    source_player_rows = {
+        int(row["frame"]): row for row in source_rows
+        if row["slot"] == "ff8380"}
+    native_player_rows = {
+        int(row["frame"]): row for row in native_rows
+        if row["source_slot"] == "00ff8380"}
+    hit_frames = range(2751, 2779)
+    hit_equal = all(
+        hit_project(source_player_rows[frame], True) ==
+        hit_project(native_player_rows[frame], False)
+        for frame in hit_frames)
+    next_player_divergence = next(
+        (frame for frame in range(2779, 5567)
+         if frame not in source_player_rows or frame not in native_player_rows or
+         hit_project(source_player_rows[frame], True) !=
+         hit_project(native_player_rows[frame], False)), None)
+
     slot_divergence = next(
         (item for item in divergences
          if item["source_slot"] == "0x00ffa240"), None)
@@ -485,6 +518,9 @@ def class1f_player_collision_chronology(
         "native_hitstop_first_frame_u16": 2751,
         "native_hitstop_last_frame_u16": 2761,
         "native_animation_advance_frame_u16": 2762,
+        "source_native_hit_sequence_equal": hit_equal,
+        "source_native_hit_sequence_frames": 28,
+        "next_player_divergence_frame_u16": next_player_divergence,
         "authored_delay_forbidden": True,
         "next_attacker_divergence_frame_u16": (
             int(slot_divergence["frame"]) if slot_divergence else None),
@@ -1243,22 +1279,25 @@ def validate_report(report: dict[str, object]) -> None:
                  "substate_u16": "0x0002",
                  "animation_record": "0x0015f1f4",
                  "animation_timer_u16": 4095, "health_s16": 101},
-                {"frame_u16": 2751, "state_u16": "0x0200",
-                 "substate_u16": "0x0002",
-                 "animation_record": "0x0015f1f4",
-                 "animation_timer_u16": 4095, "health_s16": 91},
-                {"frame_u16": 2761, "state_u16": "0x0200",
-                 "substate_u16": "0x0002",
-                 "animation_record": "0x0015f1f4",
-                 "animation_timer_u16": 4095, "health_s16": 91},
-                {"frame_u16": 2762, "state_u16": "0x0200",
-                 "substate_u16": "0x0002",
-                 "animation_record": "0x0015f1f4",
-                 "animation_timer_u16": 4095, "health_s16": 91}],
+                {"frame_u16": 2751, "state_u16": "0x0202",
+                 "substate_u16": "0x0000",
+                 "animation_record": "0x0015f278",
+                 "animation_timer_u16": 1, "health_s16": 91},
+                {"frame_u16": 2761, "state_u16": "0x0202",
+                 "substate_u16": "0x0200",
+                 "animation_record": "0x0015eee8",
+                 "animation_timer_u16": 8, "health_s16": 91},
+                {"frame_u16": 2762, "state_u16": "0x0202",
+                 "substate_u16": "0x0202",
+                 "animation_record": "0x0015eee8",
+                 "animation_timer_u16": 7, "health_s16": 91}],
             "native_health_visible_frame_u16": 2751,
             "native_hitstop_first_frame_u16": 2751,
             "native_hitstop_last_frame_u16": 2761,
             "native_animation_advance_frame_u16": 2762,
+            "source_native_hit_sequence_equal": True,
+            "source_native_hit_sequence_frames": 28,
+            "next_player_divergence_frame_u16": 2779,
             "authored_delay_forbidden": True,
             "next_attacker_divergence_frame_u16": 2798}:
         raise ValueError("Coffee Shop class-0x1f player collision drift")

@@ -49,6 +49,23 @@ for path, value, label in (
     mutant[path[0]][path[1]] = value
     reject(mutant, label)
 
+for path, value, label in (
+    (("phase_0x0200", "writes", "x_velocity_s32_16_16"), 0x0001E000,
+     "guessed HIT velocity"),
+    (("shake", "table_s16"), [-2, 2] * 8, "reversed HIT shake"),
+    (("phase_0x0204", "return_visible_frame_u16"), 2777,
+     "fixed-frame early HIT return"),
+    (("audio", "command_u16"), 0x003A, "wrong HIT audio command"),
+    (("entry_writes", "carried_record", "hurt_selector_u8"), 17,
+     "stale pre-HIT hurt selector"),
+):
+    mutant = copy.deepcopy(report)
+    target = mutant["nonlethal_hit"]["first_segment_execution_contract"]
+    for key in path[:-1]:
+        target = target[key]
+    target[path[-1]] = value
+    reject(mutant, label)
+
 mutant = copy.deepcopy(report)
 mutant["counterfactuals"]["health_50_suppresses_lethal_ko"] = False
 reject(mutant, "health threshold control")
@@ -59,4 +76,4 @@ reject(mutant, "Yaba execution")
 
 rebuilt = oracle11.build_report()
 assert oracle11.canonical(rebuilt) == ARTIFACT.read_bytes(), "derived report drift"
-print("ORACLE-11 player HIT/KO tests: PASS (10 mutations rejected)")
+print("ORACLE-11 player HIT/KO tests: PASS (15 mutations rejected)")

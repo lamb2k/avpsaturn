@@ -6,7 +6,7 @@
 #include "../../combat/hit_ko/hit_ko.h"
 
 #define AVSP_ROUND1_SPEC02_SHA256 \
-    "b1b81b9a3525a4b0220332f75187e33384bab8903fc092580efc2260c61a648d"
+    "45496c15cf6bef7176146e9530ffc6bc04bdb152c9892f3b7b1f10aeef97b5b7"
 #define AVSP_ROUND1_CANARY_HEAD 0x52314548UL
 #define AVSP_ROUND1_CANARY_TAIL 0x52314554UL
 #define AVSP_ROUND1_ROUTE_ENTRY_STATE 2
@@ -23,6 +23,7 @@
 #define AVSP_ROUND1_PLAYER_ENTRY_STATE 2048u
 #define AVSP_ROUND1_PLAYER_CONTROL_STATE 512u
 #define AVSP_ROUND1_PLAYER_MELEE_COUNT 4u
+#define AVSP_ROUND1_PLAYER_HIT_SHAKE_COUNT 16u
 #define AVSP_ROUND1_PLAYER_JUMP_VECTOR_COUNT 6u
 #define AVSP_ROUND1_PLAYER_JUMP_DOWN_VECTOR_COUNT 2u
 #define AVSP_ROUND1_PLAYER_JUMP_SEQUENCE_COUNT 9u
@@ -1050,6 +1051,33 @@ typedef struct
 
 typedef struct
 {
+    unsigned long outer_dispatch_entry;
+    unsigned long entry_body;
+    unsigned long active_body;
+    unsigned long phase0_body;
+    unsigned long phase2_body;
+    unsigned long phase4_body;
+    unsigned short control_outer_state;
+    unsigned short hit_outer_state;
+    unsigned short entry_substate;
+    unsigned short shake_substate;
+    unsigned short motion_substate;
+    unsigned short return_substate;
+    unsigned char shake_count;
+    unsigned char motion_index;
+    unsigned char invulnerability;
+    unsigned char return_facing;
+    unsigned short audio_command;
+    long x_velocity;
+    long x_acceleration;
+    AvspRound1AnimationStateSpec carried_record;
+    AvspRound1AnimationStateSpec hit_record;
+    AvspRound1AnimationStateSpec return_record;
+    short shake_table[AVSP_ROUND1_PLAYER_HIT_SHAKE_COUNT];
+} AvspRound1PlayerHitSpec;
+
+typedef struct
+{
     unsigned short common_action;
     unsigned short target_context_action;
     unsigned short followup_ticks;
@@ -1509,6 +1537,25 @@ typedef struct
     unsigned long camera_updates;
     unsigned long camera_locks;
     unsigned long camera_unlocks;
+    unsigned char player_hit_active;
+    unsigned char player_hit_phase;
+    unsigned char player_hit_shake_remaining;
+    unsigned char player_hit_shake_index;
+    unsigned char player_hit_reaction_side;
+    unsigned char player_hit_invulnerability;
+    unsigned char player_hit_audio_latched;
+    unsigned short player_hit_animation_timer;
+    short player_hit_animation_branch;
+    long player_hit_x_fp;
+    long player_hit_x_velocity;
+    long player_hit_x_acceleration;
+    unsigned long player_hit_entries;
+    unsigned long player_hit_shake_updates;
+    unsigned long player_hit_motion_updates;
+    unsigned long player_hit_phase_transitions;
+    unsigned long player_hit_completions;
+    unsigned long player_hit_audio_events;
+    unsigned short player_hit_audio_command;
     unsigned short player_locomotion_action;
     unsigned short player_stop_ticks;
     unsigned char player_was_directional;

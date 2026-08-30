@@ -20,6 +20,88 @@ static int enter_button1(AvspRound1Runtime *runtime,
         avsp_round1_step_player(runtime, mask, 0);
 }
 
+static int player_hit_source_frame_valid(const AvspRound1Runtime *runtime,
+                                         unsigned int source_frame)
+{
+    static const unsigned short motion_fraction[7] =
+        {0xe000u, 0x0000u, 0xa000u, 0x0000u,
+         0x6000u, 0xa000u, 0xc000u};
+    long expected_x_fp;
+    unsigned short expected_timer;
+    if (source_frame < 2751u || source_frame > 2778u)
+        return 1;
+    if (runtime->player.health != 91 ||
+        runtime->player_action.health != 91 ||
+        runtime->player.y != 320 || runtime->player.z != 320 ||
+        runtime->player.source_y_fp != 0x01400000L ||
+        runtime->player.attack_selector != 0u)
+        return 0;
+    if (source_frame == 2751u)
+        return runtime->player.state == 0x0202u &&
+            runtime->player.substate == 0u &&
+            runtime->player.source_x_fp == 0x04430000L &&
+            runtime->player.facing == 1u &&
+            runtime->player.animation_record == 0x0015f278UL &&
+            runtime->player.assembly == 0x00160af2UL &&
+            runtime->player.animation_timer == 1u &&
+            runtime->player.hurt_selector == 0u &&
+            runtime->player_hit_entries == 1u &&
+            runtime->player_hit_audio_events == 0u;
+    if (source_frame >= 2752u && source_frame <= 2761u)
+        return runtime->player.state == 0x0202u &&
+            runtime->player.substate == 0x0200u &&
+            runtime->player.source_x_fp == (long)(
+                (source_frame & 1u) ? 0x04410000L : 0x04430000L) &&
+            runtime->player.facing == 1u &&
+            runtime->player.animation_record == 0x0015eee8UL &&
+            runtime->player.assembly == 0x00160edeUL &&
+            runtime->player.animation_timer == 8u &&
+            runtime->player.animation_branch == (short)-32768 &&
+            runtime->player.hurt_selector == 0u &&
+            runtime->player_hit_audio_events == 1u &&
+            runtime->player_hit_audio_command == 0x003bu;
+    if (source_frame >= 2762u && source_frame <= 2769u)
+    {
+        expected_timer = (unsigned short)(2769u - source_frame);
+        if (expected_timer == 0u)
+            expected_timer = 8u;
+        return runtime->player.state == 0x0202u &&
+            runtime->player.substate == 0x0202u &&
+            runtime->player.source_x_fp == 0x04430000L &&
+            runtime->player.facing == 1u &&
+            runtime->player.animation_record == 0x0015eee8UL &&
+            runtime->player.animation_timer == expected_timer;
+    }
+    if (source_frame >= 2770u && source_frame <= 2776u)
+    {
+        expected_x_fp = 0x04430000L +
+            motion_fraction[source_frame - 2770u];
+        expected_timer = (unsigned short)(2777u - source_frame);
+        return runtime->player.state == 0x0202u &&
+            runtime->player.substate == 0x0202u &&
+            runtime->player.source_x_fp == expected_x_fp &&
+            runtime->player.facing == 1u &&
+            runtime->player.animation_record == 0x0015eee8UL &&
+            runtime->player.animation_timer == expected_timer;
+    }
+    if (source_frame == 2777u)
+        return runtime->player.state == 0x0202u &&
+            runtime->player.substate == 0x0204u &&
+            runtime->player.source_x_fp == 0x0443c000L &&
+            runtime->player.facing == 0u &&
+            runtime->player.animation_record == 0x0015f1f4UL &&
+            runtime->player.assembly == 0x001626a4UL &&
+            runtime->player.animation_timer == 0x0fffu;
+    return runtime->player.state == 0x0200u &&
+        runtime->player.substate == 0u &&
+        runtime->player.source_x_fp == 0x0443c000L &&
+        runtime->player.facing == 0u &&
+        runtime->player.animation_record == 0x0015f1f4UL &&
+        runtime->player_hit_active == 0u &&
+        runtime->player_hit_invulnerability == 1u &&
+        runtime->player_hit_completions == 1u;
+}
+
 static void stage_class1f_release(AvspRound1Runtime *runtime,
                                   int keep_index)
 {
@@ -3430,6 +3512,62 @@ int main(void)
                 if (reuse_runtime.entry.dependencies_seeded &&
                     !avsp_round1_step_scheduler(&reuse_runtime))
                     return 115;
+            }
+        }
+    }
+    {
+        AvspRound1Runtime hit_runtime;
+        unsigned int source_frame;
+        avsp_round1_init(&hit_runtime);
+        for (source_frame = 1972u; source_frame <= 2778u; ++source_frame)
+        {
+            unsigned short input = avsp_round1_coffee_shop_source_input(
+                (unsigned short)source_frame);
+            unsigned int tick;
+            if (source_frame == 2072u &&
+                !avsp_round1_begin_first_entry(&hit_runtime))
+                return 116;
+            if (!player_hit_source_frame_valid(&hit_runtime, source_frame))
+            {
+                fprintf(stderr,
+                    "Coffee Shop player HIT chronology failed frame=%u state=%04x/%04x xfp=%08lx facing=%u animation=%08lx assembly=%08lx timer=%u branch=%d health=%d hurt=%u active=%u phase=%u invulnerability=%u entries=%lu completions=%lu audio=%lu/%04x\n",
+                    source_frame, hit_runtime.player.state,
+                    hit_runtime.player.substate,
+                    (unsigned long)hit_runtime.player.source_x_fp,
+                    hit_runtime.player.facing,
+                    hit_runtime.player.animation_record,
+                    hit_runtime.player.assembly,
+                    hit_runtime.player.animation_timer,
+                    hit_runtime.player.animation_branch,
+                    hit_runtime.player.health,
+                    hit_runtime.player.hurt_selector,
+                    hit_runtime.player_hit_active,
+                    hit_runtime.player_hit_phase,
+                    hit_runtime.player_hit_invulnerability,
+                    hit_runtime.player_hit_entries,
+                    hit_runtime.player_hit_completions,
+                    hit_runtime.player_hit_audio_events,
+                    hit_runtime.player_hit_audio_command);
+                return 116;
+            }
+            hit_runtime.frame = source_frame >= 2040u ?
+                source_frame - 2040u : 0u;
+            for (tick = 0u;
+                 tick < avsp_round1_coffee_shop_source_updates(
+                    (unsigned short)source_frame); ++tick)
+            {
+                int player_authority_enabled_at_tick_start =
+                    hit_runtime.route_state == 4;
+                if (hit_runtime.entry.started &&
+                    hit_runtime.route_state != 4 &&
+                    !avsp_round1_step_first_entry(&hit_runtime))
+                    return 116;
+                if (player_authority_enabled_at_tick_start &&
+                    !avsp_round1_step_player(&hit_runtime, input, 0))
+                    return 116;
+                if (hit_runtime.entry.dependencies_seeded &&
+                    !avsp_round1_step_scheduler(&hit_runtime))
+                    return 116;
             }
         }
     }

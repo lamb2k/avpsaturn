@@ -251,6 +251,14 @@ def build() -> str:
     camera_guard = camera["coffee_shop_guard"]
     camera_operands = camera_guard["captured_first_segment_operands"]
     locomotion = fixtures["authority_data"]["player"]["locomotion_neutral_facing"]
+    player_hit = fixtures["authority_data"]["player"][
+        "hit_ko_failure_continue_respawn"]["nonlethal_hit"][
+            "first_segment_execution_contract"]
+    player_hit_states = player_hit["states"]
+    player_hit_entry = player_hit["entry_writes"]["carried_record"]
+    player_hit_phase0 = player_hit["phase_0x0200"]
+    player_hit_motion = player_hit["phase_0x0202"]
+    player_hit_return = player_hit["phase_0x0204"]
     input_decode = locomotion["input_decode"]
     release = locomotion["release_transition"]
     direction_resolver = input_decode["resolver_table"]
@@ -297,6 +305,30 @@ def build() -> str:
         run for run in global_bounds["baseline_bound_runs"]
         if run["route"] == 4 and run["bound_x"] == 720 and
         run["bound_z"] == 256 and run["frames"] == 333)
+    if (player_hit["classification"] !=
+            "SOURCE_CLOSED_IMPLEMENTATION_FIELDS" or
+        player_hit["spec_executable"] is not True or
+        player_hit_states != {
+            "control_outer_u16": 0x0200, "hit_outer_u16": 0x0202,
+            "entry_substate_u16": 0, "shake_substate_u16": 0x0200,
+            "motion_substate_u16": 0x0202,
+            "return_substate_u16": 0x0204} or
+        player_hit["entry_writes"]["shake_countdown_u8"] != 10 or
+        player_hit["entry_writes"]["motion_index_u8"] != 2 or
+        player_hit_phase0["writes"] != {
+            "next_substate_u16": 0x0202,
+            "x_velocity_s32_16_16": 0x0001C000,
+            "x_acceleration_s32_16_16": -0x00002000} or
+        player_hit_phase0["motion_table"]["index_u8"] != 2 or
+        player_hit_phase0["motion_table"]["row_hex"] !=
+            "0001c000ffffe000" or
+        player_hit["shake"]["table_s16"] != [2, -2] * 8 or
+        player_hit_motion["animation_loop"] != {
+            "timer_u16": 8, "branch_s16": -0x8000} or
+        player_hit_return["return_visible_frame_u16"] != 2778 or
+        player_hit["audio"]["command_u16"] != 0x003b or
+        player_hit["rng"] != {"calls": [], "consumption_order": []}):
+        raise ValueError("SPEC-02 first-segment player HIT drift")
     if len(spawns) != 10 or len(commands) != len(KINDS):
         raise ValueError("SPEC-02 entry cardinality drift")
     if (coffee_stage_setup["classification"] !=
@@ -2402,6 +2434,52 @@ def build() -> str:
         "    512u,",
         f"    {release['stop_timer']['ticks']}u,",
         "    {" + ", ".join(f"{value}u" for value in direction_resolver) + "}",
+        "};", "",
+        "static const AvspRound1PlayerHitSpec avsp_round1_player_hit =",
+        "{",
+        "    %sUL, %sUL, %sUL, %sUL, %sUL, %sUL," % (
+            player_hit["source_routines"]["outer_dispatch_entry"],
+            player_hit["source_routines"]["entry_body"],
+            player_hit["source_routines"]["active_body"],
+            player_hit["source_routines"]["phase_0x0200"],
+            player_hit["source_routines"]["phase_0x0202"],
+            player_hit["source_routines"]["phase_0x0204"]),
+        "    0x%04Xu, 0x%04Xu, 0x%04Xu, 0x%04Xu, 0x%04Xu, 0x%04Xu," % (
+            player_hit_states["control_outer_u16"],
+            player_hit_states["hit_outer_u16"],
+            player_hit_states["entry_substate_u16"],
+            player_hit_states["shake_substate_u16"],
+            player_hit_states["motion_substate_u16"],
+            player_hit_states["return_substate_u16"]),
+        "    %du, %du, %du, %du, 0x%04Xu," % (
+            player_hit["entry_writes"]["shake_countdown_u8"],
+            player_hit["entry_writes"]["motion_index_u8"],
+            player_hit_return["writes"]["invulnerability_u8"],
+            player_hit_return["writes"]["facing_u8"],
+            player_hit["audio"]["command_u16"]),
+        "    %dL, %dL," % (
+            player_hit_phase0["writes"]["x_velocity_s32_16_16"],
+            player_hit_phase0["writes"]["x_acceleration_s32_16_16"]),
+        "    { %du, 0, %sUL, %sUL, %du, %du }," % (
+            player_hit_entry["visible_timer_u16"],
+            player_hit_entry["animation_record"],
+            player_hit_entry["assembly"],
+            player_hit_entry["hurt_selector_u8"],
+            player_hit_entry["attack_selector_u8"]),
+        "    { %du, %d, %sUL, %sUL, %du, %du }," % (
+            player_hit_phase0["presentation"]["timer_u16"],
+            player_hit_phase0["presentation"]["branch_s16"],
+            player_hit_phase0["presentation"]["animation_record"],
+            player_hit_phase0["presentation"]["assembly"],
+            player_hit_phase0["presentation"]["hurt_selector_u8"],
+            player_hit_phase0["presentation"]["attack_selector_u8"]),
+        "    { %du, %d, %sUL, %sUL, 0u, 0u }," % (
+            player_hit_return["presentation"]["timer_u16"],
+            player_hit_return["presentation"]["branch_s16"],
+            player_hit_return["presentation"]["animation_record"],
+            player_hit_return["presentation"]["assembly"]),
+        "    { " + ", ".join(str(value) for value in
+            player_hit["shake"]["table_s16"]) + " }",
         "};", "",
         "static const AvspRound1PlayerMeleeSpec avsp_round1_player_melee =",
         "{",

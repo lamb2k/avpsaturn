@@ -169,7 +169,20 @@ int main(void)
                 return 3;
             if (player_authority_enabled_at_tick_start &&
                 !avsp_round1_step_player(&runtime, input, 0))
+            {
+                fprintf(stderr,
+                        "player_failure frame=%u state=%04x substate=%04x action_state=%u hit_active=%u hit_phase=%u invulnerability=%u cleanup=%u locomotion=%04x failures=%lu\n",
+                        source_frame, runtime.player.state,
+                        runtime.player.substate,
+                        runtime.player_action.state,
+                        runtime.player_hit_active,
+                        runtime.player_hit_phase,
+                        runtime.player_hit_invulnerability,
+                        runtime.player_cleanup_pending,
+                        runtime.player_locomotion_action,
+                        runtime.failure_count);
                 return 4;
+            }
             if (runtime.entry.dependencies_seeded &&
                 !avsp_round1_step_scheduler(&runtime))
             {

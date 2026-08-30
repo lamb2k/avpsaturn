@@ -1017,6 +1017,37 @@ def validate(contract: dict[str, object], fixtures: dict[str, object],
             fixtures["optional_unknowns"]["required_for_round1"] is False,
             "fixture scope drift")
     scene = fixtures["scene_manifests"]["coffee_shop"]
+    player_hit = fixtures["authority_data"]["player"][
+        "hit_ko_failure_continue_respawn"]["nonlethal_hit"][
+            "first_segment_execution_contract"]
+    require(player_hit["classification"] ==
+                "SOURCE_CLOSED_IMPLEMENTATION_FIELDS" and
+            player_hit["spec_executable"] is True and
+            player_hit["states"] == {
+                "control_outer_u16": 0x0200, "hit_outer_u16": 0x0202,
+                "entry_substate_u16": 0x0000,
+                "shake_substate_u16": 0x0200,
+                "motion_substate_u16": 0x0202,
+                "return_substate_u16": 0x0204} and
+            player_hit["phase_0x0200"]["writes"] == {
+                "next_substate_u16": 0x0202,
+                "x_velocity_s32_16_16": 0x0001C000,
+                "x_acceleration_s32_16_16": -0x00002000} and
+            player_hit["entry_writes"]["carried_record"] == {
+                "animation_record": "0x0015f278",
+                "assembly": "0x00160af2", "visible_timer_u16": 1,
+                "hurt_selector_u8": 0, "attack_selector_u8": 0} and
+            player_hit["phase_0x0200"]["presentation"] == {
+                "animation_record": "0x0015eee8",
+                "assembly": "0x00160ede", "timer_u16": 8,
+                "branch_s16": -0x8000, "hurt_selector_u8": 0,
+                "attack_selector_u8": 0} and
+            player_hit["shake"]["table_s16"] == [2, -2] * 8 and
+            player_hit["phase_0x0204"]["return_visible_frame_u16"] ==
+                2778 and
+            player_hit["audio"]["command_u16"] == 0x003b and
+            player_hit["rng"] == {"calls": [], "consumption_order": []},
+            "first-segment player HIT fixture incomplete or drifted")
     activation = fixtures["authority_data"]["route"]["first_entry_body"][
         "route4_player_activation_order"]
     require(activation["classification"] ==

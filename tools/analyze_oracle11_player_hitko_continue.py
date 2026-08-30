@@ -12,6 +12,12 @@ ROOT = Path(__file__).resolve().parents[1]
 RAW_A = ROOT / ".deps" / "mame" / "oracle11_player_hitko_continue_a"
 RAW_B = ROOT / ".deps" / "mame" / "oracle11_player_hitko_continue_b"
 OPCODES = ROOT / ".deps" / "mame" / "actorprobe" / "decrypted_opcodes_2m.bin"
+PROGRAM = ROOT / ".deps" / "mame" / "actorprobe" / "decrypted_program_2m.bin"
+COFFEE_SHOP = (ROOT / ".deps" / "mame" /
+               "oracle11_progression_lifecycle_cs21a")
+COFFEE_ACTORS = COFFEE_SHOP / "coffee_shop_scene_actors.tsv"
+COFFEE_SAMPLES = COFFEE_SHOP / "samples.tsv"
+PLAYER_AUDIO = ROOT / "data" / "oracle11_predator_player_audio.json"
 OUT = ROOT / "data" / "oracle11_predator_hitko_continue.json"
 FILES = ("samples.tsv", "player_writes.tsv", "global_writes.tsv",
          "qsound_writes.tsv")
@@ -75,7 +81,9 @@ def manifest_identity(root: Path) -> dict[str, object]:
 
 def build_report() -> dict[str, object]:
     image = OPCODES.read_bytes()
+    program = PROGRAM.read_bytes()
     require(len(image) == 0x200000, "decoded source image size drift")
+    require(len(program) == 0x200000, "decoded source program size drift")
     identities = {root.name: manifest_identity(root)
                   for root in (RAW_A, RAW_B)}
     for filename in FILES:
@@ -86,6 +94,42 @@ def build_report() -> dict[str, object]:
     baseline = indexed(RAW_A, "baseline_hitko_1")
     player_writes = writes(RAW_A, "baseline_hitko_1", "player_writes.tsv")
     global_writes = writes(RAW_A, "baseline_hitko_1", "global_writes.tsv")
+
+    coffee_player = {
+        int(row["frame"]): row for row in rows(COFFEE_ACTORS)
+        if row["pool"] == "player" and row["slot"] == "ff8380" and
+        2749 <= int(row["frame"]) <= 2780
+    }
+    coffee_samples = {
+        int(row["frame"]): row for row in rows(COFFEE_SAMPLES)
+        if 2749 <= int(row["frame"]) <= 2780
+    }
+    require(sorted(coffee_player) == list(range(2749, 2781)) and
+            sorted(coffee_samples) == list(range(2749, 2781)),
+            "Coffee Shop player HIT source window drift")
+    player_audio = json.loads(PLAYER_AUDIO.read_text(encoding="ascii"))
+    hit_audio = next(edge for edge in player_audio["trigger_edges"]
+                     if edge["command_identity"] == "0x003b" and
+                     edge["caller_provenance"]["player_stack_owner_return"] ==
+                     "0x003b5a")
+
+    def player_anchor(frame: int) -> dict[str, object]:
+        row = coffee_player[frame]
+        return {
+            "frame_u16": frame,
+            "outer_state_u16": int(row["state"], 16),
+            "substate_u16": int(row["substate"], 16),
+            "facing_u8": int(row["facing"]),
+            "x_fp_s32_16_16": f"0x{int(row['x_fp'], 16):08x}",
+            "z_s16": int(row["z"]),
+            "animation_record": f"0x{int(row['animation_record'], 16):08x}",
+            "animation_timer_u16": int(row["animation_timer"], 16),
+            "animation_branch_s16": int(row["animation_branch"]),
+            "health_s16": int(row["health"]),
+            "hit_count_u8": int(coffee_samples[frame]["hit"]),
+            "resource_u8": int(coffee_samples[frame]["resource"]),
+            "resource_recharge_u8": int(coffee_samples[frame]["recharge"]),
+        }
 
     require((int(baseline[6080]["p_health"]),
              int(baseline[6081]["p_health"])) == (0, -1),
@@ -231,6 +275,164 @@ def build_report() -> dict[str, object]:
             "return_to_control_frame": 6857,
             "invulnerability": "actor +0x70 is set to 1 at recovery and consumed by the next scheduler tick",
             "rng_consumption": "none",
+            "first_segment_execution_contract": {
+                "classification": "SOURCE_CLOSED_IMPLEMENTATION_FIELDS",
+                "spec_executable": True,
+                "capture_identity": {
+                    "two_completion_captures_byte_identical": True,
+                    "oracle11_hitko_baseline_samples_sha256":
+                        digest(RAW_A / "baseline_hitko_1" / "samples.tsv"),
+                    "coffee_shop_scene_actors_sha256": digest(COFFEE_ACTORS),
+                    "coffee_shop_samples_sha256": digest(COFFEE_SAMPLES),
+                    "player_audio_artifact_sha256": digest(PLAYER_AUDIO),
+                },
+                "source_routines": {
+                    "outer_dispatch_entry": "0x01a96e",
+                    "entry_body": "0x01a982",
+                    "active_body": "0x01aad0",
+                    "predator_dispatch": "0x01ab1a",
+                    "phase_0x0200": "0x01ab2c",
+                    "phase_0x0202": "0x01ab52",
+                    "phase_0x0204": "0x01abb8",
+                    "animation_step": "0x01656e",
+                    "world_bound_step": "0x01affc",
+                },
+                "field_types": {
+                    "outer_state": "u16 actor+0x04",
+                    "substate": "u8 actor+0x07 projected as u16",
+                    "facing": "u8 actor+0x0f",
+                    "x_fp": "s32 16.16 actor+0x10",
+                    "health": "s16 actor+0x40",
+                    "motion_index": "u8 actor+0x6c low nibble",
+                    "hit_count": "u8 actor+0x6d",
+                    "invulnerability": "u8 actor+0x70",
+                    "animation_timer": "u16 actor+0x0a",
+                    "animation_record": "u32 actor+0x1c",
+                    "animation_branch": "s16 actor+0x24",
+                    "shake_countdown": "u8 actor+0x2c",
+                    "x_velocity": "s32 16.16 actor+0x30",
+                    "x_acceleration": "s32 16.16 actor+0x38",
+                },
+                "transition_guard": {
+                    "collision_writer": "0x01d5ee",
+                    "rule": "current signed health remains nonnegative after current-state damage",
+                    "health_before_s16": 101,
+                    "damage_s16": 10,
+                    "health_after_s16": 91,
+                    "entry_visible_frame_u16": 2751,
+                    "next_update_visible_frame_u16": 2752,
+                },
+                "scheduler_order": [
+                    "player update", "record12 actor update",
+                    "current-state enemy-v-player collision",
+                    "next player update dispatches HIT phase 0x0200"],
+                "states": {
+                    "control_outer_u16": 0x0200,
+                    "hit_outer_u16": 0x0202,
+                    "entry_substate_u16": 0x0000,
+                    "shake_substate_u16": 0x0200,
+                    "motion_substate_u16": 0x0202,
+                    "return_substate_u16": 0x0204,
+                },
+                "entry_writes": {
+                    "clear_fields": ["actor+0x92:u8", "actor+0xaa:u8",
+                                     "actor+0x95:u8", "actor+0x81:u8",
+                                     "actor+0x82:u8", "actor+0x9d:u8"],
+                    "carried_record": {
+                        "animation_record": "0x0015f278",
+                        "assembly": "0x00160af2",
+                        "visible_timer_u16": 1,
+                        "hurt_selector_u8": 0,
+                        "attack_selector_u8": 0,
+                    },
+                    "shake_countdown_u8": 10,
+                    "motion_index_u8": 2,
+                },
+                "phase_0x0200": {
+                    "guard": "final shake countdown reaches zero and dispatches inner phase 0",
+                    "writes": {
+                        "next_substate_u16": 0x0202,
+                        "x_velocity_s32_16_16": 0x0001C000,
+                        "x_acceleration_s32_16_16": -0x00002000,
+                    },
+                    "motion_table": {
+                        "address": "0x001f892",
+                        "index_u8": 2,
+                        "row_hex": program[0x1F892 + 2 * 8:
+                                           0x1F892 + 3 * 8].hex(),
+                    },
+                    "presentation": {
+                        "animation_record": "0x0015eee8",
+                        "assembly": "0x00160ede",
+                        "timer_u16": 8,
+                        "branch_s16": -0x8000,
+                        "hurt_selector_u8": 0,
+                        "attack_selector_u8": 0,
+                    },
+                },
+                "shake": {
+                    "guard": "actor+0x2c predecrement body runs before phase dispatch",
+                    "table_address": "0x01aa90",
+                    "table_s16": [2, -2] * 8,
+                    "facing_side_nonzero_negates": True,
+                    "visible_frames_u16": [2753, 2761],
+                    "final_tick_dispatches_motion_substate": True,
+                },
+                "phase_0x0202": {
+                    "interruption_order": ["0x01a7e6", "health/button guard",
+                                           "0x01abd0", "0x01a6f4"],
+                    "movement_order": ["read signed velocity", "apply facing sign",
+                                       "add to x s32 16.16", "add acceleration to velocity",
+                                       "test velocity sign", "world bound step",
+                                       "animation step"],
+                    "negative_velocity_guard": "transition when post-acceleration velocity is negative",
+                    "animation_loop": {"timer_u16": 8, "branch_s16": -0x8000},
+                },
+                "phase_0x0204": {
+                    "writes": {"invulnerability_u8": 1,
+                               "facing_u8": 0,
+                               "return_outer_state_u16": 0x0200,
+                               "return_substate_u16": 0x0000},
+                    "presentation": {"animation_record": "0x0015f1f4",
+                                     "assembly": "0x001626a4",
+                                     "timer_u16": 0x0fff,
+                                     "branch_s16": -0x8000},
+                    "return_visible_frame_u16": 2778,
+                },
+                "collision_and_control": {
+                    "attack_selector_during_hit_u8": 0,
+                    "hurt_selector_during_hit_u8": 0,
+                    "player_attack_and_direction_dispatch_suppressed": True,
+                    "resource_tick_continues": True,
+                    "world_navigation_and_camera_continue": True,
+                },
+                "audio": {
+                    "player_side_return": "0x003b5a",
+                    "command_u16": 0x003b,
+                    "shared_dispatch_entry": "0x001922",
+                    "source_context": {"outer_state_u16": 0x0202,
+                                       "action_u16": 0x0200,
+                                       "substate_u16": 0x0000},
+                    "downstream_difference_source_frame_u16": 2752,
+                    "semantic_name_inferred": False,
+                    "provenance_sha256": hit_audio["caller_provenance"]
+                        ["player_side_call"]["source_window"]["sha256"],
+                },
+                "rng": {"calls": [], "consumption_order": []},
+                "observed_anchors": [player_anchor(frame) for frame in
+                    (2750, 2751, 2752, 2753, 2761, 2762, 2769, 2770,
+                     2776, 2777, 2778)],
+                "mutation_control": {
+                    "reject_fixed_frame_entry": True,
+                    "reject_double_health_subtraction": True,
+                    "reject_idle_presentation_during_hit": True,
+                    "reject_missing_shake_or_wrong_sign": True,
+                    "reject_wrong_motion_table_row": True,
+                    "reject_input_owned_return": True,
+                    "reject_rng_consumption": True,
+                    "first_rejected_visible_frame_u16": 2751,
+                },
+            },
         },
         "lethal_ko": {
             "classification": "SOURCE_CLOSED",
@@ -331,6 +533,32 @@ def validate(report: dict[str, object]) -> None:
             report["failure_continue"]["rng_consumption"] == "none" and
             report["respawn_return"]["rng_consumption"] == "none",
             "HIT/KO/continue RNG or control drift")
+    execution = report["nonlethal_hit"]["first_segment_execution_contract"]
+    require(execution["classification"] ==
+            "SOURCE_CLOSED_IMPLEMENTATION_FIELDS" and
+            execution["spec_executable"] is True and
+            execution["transition_guard"] == {
+                "collision_writer": "0x01d5ee",
+                "rule": "current signed health remains nonnegative after current-state damage",
+                "health_before_s16": 101, "damage_s16": 10,
+                "health_after_s16": 91, "entry_visible_frame_u16": 2751,
+                "next_update_visible_frame_u16": 2752} and
+            execution["phase_0x0200"]["writes"] == {
+                "next_substate_u16": 0x0202,
+                "x_velocity_s32_16_16": 0x0001C000,
+                "x_acceleration_s32_16_16": -0x00002000} and
+            execution["entry_writes"]["carried_record"] == {
+                "animation_record": "0x0015f278",
+                "assembly": "0x00160af2", "visible_timer_u16": 1,
+                "hurt_selector_u8": 0, "attack_selector_u8": 0} and
+            execution["shake"]["table_s16"] == [2, -2] * 8 and
+            execution["phase_0x0204"]["return_visible_frame_u16"] == 2778 and
+            execution["audio"]["command_u16"] == 0x003b and
+            execution["rng"] == {"calls": [], "consumption_order": []} and
+            [row["frame_u16"] for row in execution["observed_anchors"]] ==
+            [2750, 2751, 2752, 2753, 2761, 2762, 2769, 2770,
+             2776, 2777, 2778],
+            "first-segment HIT execution contract drift")
     controls = report["counterfactuals"]
     require(all(value is True for key, value in controls.items()
                 if key != "activation_frames"), "counterfactual failure")

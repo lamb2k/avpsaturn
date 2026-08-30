@@ -13,6 +13,24 @@ spec02 = importlib.util.module_from_spec(SPEC); SPEC.loader.exec_module(spec02)
 contract = json.loads(spec02.OUT.read_text(encoding="ascii"))
 fixtures = json.loads(spec02.FIXTURES.read_text(encoding="ascii"))
 spec02.validate(contract, fixtures)
+player_hit = fixtures["authority_data"]["player"][
+    "hit_ko_failure_continue_respawn"]["nonlethal_hit"][
+        "first_segment_execution_contract"]
+assert player_hit["classification"] == "SOURCE_CLOSED_IMPLEMENTATION_FIELDS"
+assert player_hit["spec_executable"] is True
+assert player_hit["states"] == {
+    "control_outer_u16": 0x0200, "hit_outer_u16": 0x0202,
+    "entry_substate_u16": 0, "shake_substate_u16": 0x0200,
+    "motion_substate_u16": 0x0202, "return_substate_u16": 0x0204}
+assert player_hit["phase_0x0200"]["writes"] == {
+    "next_substate_u16": 0x0202,
+    "x_velocity_s32_16_16": 0x0001C000,
+    "x_acceleration_s32_16_16": -0x00002000}
+assert player_hit["shake"]["table_s16"] == [2, -2] * 8
+assert player_hit["audio"]["command_u16"] == 0x003b
+assert [row["frame_u16"] for row in player_hit["observed_anchors"]] == [
+    2750, 2751, 2752, 2753, 2761, 2762, 2769, 2770,
+    2776, 2777, 2778]
 weapon = fixtures["authority_data"]["player"][
     "weapon_projectile_resource"]["implementation_contract"]
 assert weapon["source_input"]["button1_mask"] == "0x0010"
@@ -578,6 +596,7 @@ f = copy.deepcopy(fixtures); f["authority_data"]["player"]["directional_airborne
 f = copy.deepcopy(fixtures); f["authority_data"]["player"]["directional_airborne_interruption"]["airborne_actions"]["button1"]["record4_class03"]["effect_allocation"]["audio_command"] = "0x0008"; mutations.append((contract, f, "class-3 effect mislabeled as audio"))
 f = copy.deepcopy(fixtures); f["authority_data"]["player"]["directional_airborne_interruption"]["airborne_actions"]["button1"]["record4_class03"]["active_state"]["low_nibble_motion_tables_s16"]["1"] = f["authority_data"]["player"]["directional_airborne_interruption"]["airborne_actions"]["button1"]["record4_class03"]["active_state"]["low_nibble_motion_tables_s16"]["1"][:16]; mutations.append((contract, f, "class-3 direction table truncation"))
 f = copy.deepcopy(fixtures); f["authority_data"]["player"]["directional_airborne_interruption"]["airborne_actions"]["button1"]["record4_class03"]["effect_allocation"]["record_type_u8"] = 36; mutations.append((contract, f, "class-3 effect wrong fixed pool"))
+f = copy.deepcopy(fixtures); f["authority_data"]["player"]["hit_ko_failure_continue_respawn"]["nonlethal_hit"]["first_segment_execution_contract"]["entry_writes"]["carried_record"]["hurt_selector_u8"] = 17; mutations.append((contract, f, "player HIT stale hurt-selector mutation"))
 f = copy.deepcopy(fixtures); f["scene_manifests"]["coffee_shop"]["actor_lifetimes"].pop(); mutations.append((contract, f, "Coffee Shop actor omission"))
 f = copy.deepcopy(fixtures); f["scene_manifests"]["coffee_shop"]["audio_events"].pop(); mutations.append((contract, f, "Coffee Shop audio omission"))
 f = copy.deepcopy(fixtures); f["scene_manifests"]["coffee_shop"]["health_writes"].pop(); mutations.append((contract, f, "Coffee Shop health-write omission"))
