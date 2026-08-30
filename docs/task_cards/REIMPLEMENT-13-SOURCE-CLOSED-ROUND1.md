@@ -1037,6 +1037,55 @@ selects `0x0012ddb0`. Recover the accepted animation/state transition guard,
 timer, and scheduler order that owns this first mismatch. Apply the source
 rule without a slot/frame exception and preserve every closed lock.
 
+Incremental checkpoint `ce829c774f21f2a25069e9b5ae3ffbf4e092345f`
+closes that recurring class-`0x1f` residue boundary. Source fixed-pool
+allocation preserves the reused record's animation, assembly, timer, branch,
+and position fractions. It no longer forces synthetic animation `0x0012ddb0`.
+The source action-`0x0c` selectors are numeric 53 and 54. Slot `0x00ffa240`
+now follows the measured frame-2567 release, frame-2572 residue-preserving
+allocation, and frame-2573 action-`0x0c` presentation without a frame or slot
+exception.
+
+SPEC-02 is
+`75689cc3c7bc11a6178c621c004f58cca041ffc174f7df8354aeb4b83b4a9293`;
+fixture is
+`8554c61db6b1b4e8e64ab6b726c66f2e87539f29084d43c529e119fddc37dcd8`.
+Fast, Oracle, 124 SPEC mutations, 45 weapon controls, 83 enemy mutations, 183
+native mutations, scene mutations, 123 Target suppressions, both
+LiveEncounter Target profiles, tile-residency controls, and two commit-bound
+575-sample Coffee Shop Emulator ledgers pass. The normalized ISO is
+`2a09a79404cbe23b757ada94eafe5413e443588cb7fd5430438af635accc50bb`;
+canonical samples hash to
+`2bb6c0321215d15d92b7a26a59e5a375b4bb9ea8ca003de93c6db8aba391e949`.
+The action-`0x0c` source-table union adds 18 assemblies and 253 tiles; the
+592,648-byte scene archive remains inside the bounded 614,400-byte residency
+carve.
+
+Window-only WGC frames 2567..2574 pass direct inspection. Cadence sheet
+`f66e267cad887423c8668034b02382352a2e680befff8277537ab525b668dd5a`
+and clip
+`5bd777c522b5c545773d4922a45639197b72afc20548919c86405efe70f85bba`
+show the corrected action-`0x0c` actor without a decoder failure, coherent
+source scene population, and clean Coffee Shop planes, palette, and priority.
+The source-scene Warrior status presentation remains source-owned; this
+checkpoint does not infer that it is a P2 gameplay actor.
+
+Whole-scene gaps improve from `322 / 1,256 / 2 / 94 / 3 / 281` to
+`308 / 1,253 / 3 / 94 / 3 / 281`. Actor lifetime improves by 14 and
+spawn/despawn by three. Active-state gaps increase by one because the corrected
+earlier trajectory exposes three later mismatches: class-`0x1f` slot
+`0x00ff9dc0` at `0x0200:0406`, and type-4/class-`0x03` slots `0x00ff8980` and
+`0x00ff8780` at `0x0604:0000`. Other categories do not increase. Unowned Saturn
+actors, unidentified source pairs, and retained gameplay authorities remain
+zero.
+
+The next earliest causal divergence is visible frame 2752 at type-12/
+class-`0x1f` slot `0x00ffa240`: source animation is `0x0012d8a0` while native
+selects `0x0012d8b0`. Bind the accepted transition writer, animation guard,
+timer, selector, fields, and scheduler order that own this first mismatch.
+Apply the source rule without a frame/slot exception and preserve every closed
+lock.
+
 ## Next eligible cards
 
 - `QA-13-ROUND1-END-TO-END-DIFFERENTIAL` after the complete stable Round 2
