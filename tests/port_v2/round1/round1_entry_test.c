@@ -20,6 +20,20 @@ static int enter_button1(AvspRound1Runtime *runtime,
         avsp_round1_step_player(runtime, mask, 0);
 }
 
+static unsigned long source_stage_progress_call_count(
+    unsigned int source_frame)
+{
+    static const unsigned short call_frames[15] = {
+        2252u, 2342u, 2432u, 2882u, 2927u,
+        3332u, 3377u, 3827u, 3962u, 4052u,
+        4127u, 4652u, 4696u, 5102u, 5147u
+    };
+    unsigned long count = 0u;
+    while (count < 15u && call_frames[count] <= source_frame)
+        ++count;
+    return count;
+}
+
 static int class4e_variant0_source_frame_valid(
     const AvspRound1Runtime *runtime, unsigned int source_frame)
 {
@@ -4089,6 +4103,30 @@ int main(void)
                         actor->state == 0x0208u)
                         inner8_seen = 1;
                 }
+            }
+            if (scene_runtime.player_stage_progress_calls !=
+                    source_stage_progress_call_count(source_frame))
+            {
+                fprintf(stderr,
+                    "Coffee Shop stage-progress chronology failed source=%u expected_calls=%lu native_calls=%lu input=%04x source_updates=%u class02_updates=%u weapon_active=%u weapon_empty=%u weapon_tick=%u weapon_entries=%lu weapon_completions=%lu cleanup=%u recovery=%u return=%u source_action=%04x pipeline=%u previous=%u progress=%u stage=%u\n",
+                    source_frame,
+                    source_stage_progress_call_count(source_frame),
+                    scene_runtime.player_stage_progress_calls,
+                    input, source_updates, class02_updates,
+                    scene_runtime.player_weapon_active,
+                    scene_runtime.player_weapon_empty,
+                    scene_runtime.player_weapon_tick,
+                    scene_runtime.player_weapon_entries,
+                    scene_runtime.player_weapon_completions,
+                    scene_runtime.player_weapon_cleanup_pending,
+                    scene_runtime.player_weapon_recovery_pending,
+                    scene_runtime.player_weapon_return_pending,
+                    scene_runtime.player.source_action,
+                    scene_runtime.player_weapon_input_pipeline,
+                    scene_runtime.player_weapon_previous_pressed,
+                    scene_runtime.source_stage_progress_accumulator,
+                    scene_runtime.source_stage_parameter);
+                return 123;
             }
             if (source_frame == 2793u &&
                 (scene_runtime.player.animation_record != 0x0015fd10UL ||

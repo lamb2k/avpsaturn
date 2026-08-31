@@ -1,66 +1,49 @@
-# REIMPLEMENT-13 paused agent handoff
+# Workflow pivot — REIMPLEMENT-13 paused agent handoff
+Resume the AvP salvage Goal on `codex/avp-playable-loop-pivot`. The active
+card remains `REIMPLEMENT-13-SOURCE-CLOSED-ROUND1`; accepted runtime candidate
+`d04a65a2253175c6e820140feefc35419e2cca07` remains unchanged. This branch-head
+checkpoint is unaccepted RED WIP. Read `project_state.yaml`, this handoff, the
+active task card, and current SPEC-02 contract/fixtures completely before acting.
+Do not create a workflow, roadmap, branch, task hierarchy, or coverage system.
 
-Resume the persistent AvP Goal on `codex/avp-playable-loop-pivot`. The active
-card remains `REIMPLEMENT-13-SOURCE-CLOSED-ROUND1`; the accepted runtime
-candidate remains `d04a65a2253175c6e820140feefc35419e2cca07`. This branch-head
-checkpoint is unaccepted WIP. Read `project_state.yaml`, this file, the active
-task card, and the current SPEC-02 contract/fixtures completely before acting.
-Do not create a new workflow, roadmap, branch, task hierarchy, or coverage
-system.
-
+Preserved evidence work includes `SALVAGE-00-OLD-BUILD-BASELINE` and `USER-01-PLAYER-BASELINE-REVIEW`; evidence candidate is `597f4ed517d4e715d814ff841bd00d3977803f85`.
 Preserve USER-09 `CHANGES_REQUESTED`, SALVAGE-08 inactive, physical Saturn
-`UNRUN`, all accepted gameplay/presentation locks, and the scheduler-visible
-camera X/Z binding. Never stage, reset, or overwrite the user-owned dirty files
-`data/avsp_anim_records.json` and `history.txt`; stage owned paths explicitly.
+`UNRUN`, all accepted locks, and the scheduler-visible camera X/Z binding. Do
+not stage, reset, or overwrite user-owned `data/avsp_anim_records.json` or
+`history.txt`; stage owned paths explicitly.
 
 ## Paused WIP
+The source Button1 stage helper is bound in Oracle/SPEC/generated/native code:
+caller `0x024094..0x024096`, helper `0x0179e2..0x017b74`, guard
+`a5+0x01b0:u8`, progress `a5+0x0226:u16`, stage `a5+0x01ea:s16`, bounds
+`a5+0x021a/+0x021c`, delta/threshold/mask 3/8/7, Coffee bounds 8..16, no RNG.
+Oracle passes 56 mutations; SPEC passes 47 fields/162 mutations; contract SHA
+is `37f8429a44a3d545b12d8242b0c8ab829e9ae2795cc1efa17f280fef7a9f6889` and
+fixture SHA is `a151d33a9174710d353a52a1933b63ab459856d3c602f047ca211d786f50ce31`.
 
-The complete source Button1 stage-progress helper is now bound in the existing
-Predator weapon Oracle artifact, SPEC-02, generated native data, and native
-runtime. Source provenance is caller `0x024094..0x024096`, helper
-`0x0179e2..0x017b74`, guard `a5+0x01b0:u8 == 0`, accumulator
-`a5+0x0226:u16`, stage `a5+0x01ea:s16`, route bounds at `a5+0x021a/+0x021c`,
-delta 3, threshold 8, mask 7, signed domain clamp/mask, Coffee Shop bounds
-8..16, no RNG, and player action-entry ordering before resource/projectile and
-actor scheduling. Accepted route A/B ledgers contain 15 byte-identical calls;
-the first three at source frames 2252/2342/2432 produce stage 8/8/9.
-
-Oracle player-weapon validation passes with 56 mutations. SPEC-02 passes with
-47 fields and 162 mutations. Contract SHA is
-`37f8429a44a3d545b12d8242b0c8ab829e9ae2795cc1efa17f280fef7a9f6889`;
-fixture SHA is
-`a151d33a9174710d353a52a1933b63ab459856d3c602f047ca211d786f50ce31`.
-The generator is current. The SPEC builder was made idempotent for the already
-accepted empty-resource entry projection, which had previously existed only in
-the checked-in generated fixture.
-
-The full host differential is still intentionally RED. At scheduler frame
-1757/code 15, slot `0x00ffa000`, state/substate `0x0208:0x0c04`, native stage
-is 11 with accumulator 0, 8 stage-helper calls, 3 carries, 22 total weapon
-entries, and RNG `0x1908`. The corresponding source route has only seven
-stage-helper calls before the frame-3525 class-`0x1f` comparison (the eighth is
-at source frame 3827). The native helper is therefore entered once too often;
-do not change its arithmetic, initialize stage 9/10/11 directly, add a
-frame/slot delay, weaken the comparison, or rebaseline the input route.
-Target, scene census, Emulator, and WGC were not run at this red WIP boundary.
+The committed chronology assertion is intentionally RED at source frame 2251:
+expected/native calls 0/1, input `0x0010`, source/class-`0x02` updates 1/1,
+weapon active/tick 1/1, action `0x0c00`, progress/stage 3/8. Physical Button1
+is captured at 2250, native pipeline exposes it at 2251, and source action plus
+helper first appear at 2252. Native begins and steps the weapon action in one
+scheduler visit, one source-visible update early. This causes the later eighth
+native helper call before frame 3525. Target/census/Emulator/WGC were not run.
 
 ## Exact resume prompt
 
-Continue `REIMPLEMENT-13-SOURCE-CLOSED-ROUND1` from the current branch head.
-Keep the bound Button1 stage-progress source program and all accepted evidence
-unchanged. Compare native sufficient-Button1 action-entry calls against the 15
-accepted source calls, beginning with source frames
-2252/2342/2432/2882/2927/3332/3377/3827. Add focused host assertions or a
-diagnostic ledger that identifies the first extra native helper invocation and
-its owning input/action/recovery transition. Repair that smallest call-edge or
-source-update-cadence boundary; do not alter helper arithmetic or source route
-data.
+Continue `REIMPLEMENT-13-SOURCE-CLOSED-ROUND1` from the branch head. Preserve
+the chronology assertion and helper arithmetic. From accepted evidence, add
+`action_dispatch_delay_updates_u8 = 1` to the existing Predator weapon
+Oracle/SPEC source-input contract, its mutation, validator, generator, generated
+native data, and runtime contract. On the pipelined Button1 edge, begin and hold
+motion but preserve locomotion presentation; defer sufficient/empty Button1
+step, projection, and helper until the next player update. Do not encode a frame
+exception, direct stage value, arithmetic change, weakened comparison, or route
+rebaseline.
 
-Then add real native wrong-delta, wrong-threshold, wrong-action-entry-timing,
-and omitted-call mutations; rerun Oracle, SPEC, generator, focused host, and the
-full host differential. Require the helper-call chronology and stage value to
-match source through frame 3525, then require slot `0x00ffa3c0` record
-`0x0012d488` with unchanged RNG. Continue the complete route-reachable
-class-`0x1f` program family. Run Target, the complete Coffee Shop census, paired
-Emulator, and WGC only at the coherent class-family/body boundary, then commit,
-push, verify private-origin SHA, and continue the existing first-segment plan.
+Run Oracle, SPEC, generator, focused/full host, and real wrong-delay/delta/
+threshold/omitted-call mutations. Require exact helper chronology/stage through
+frame 3525 and slot `0x00ffa3c0` record `0x0012d488` with unchanged RNG. Finish
+the route-reachable class-`0x1f` program family, then run Target, full Coffee
+Shop census, paired Emulator, and WGC at the coherent body gate; commit, push,
+verify private-origin, and continue the first-segment plan.

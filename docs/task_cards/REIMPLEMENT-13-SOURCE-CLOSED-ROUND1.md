@@ -1589,6 +1589,29 @@ the helper arithmetic, add a frame/slot exception, weaken the differential, or
 rebaseline the input. Native mutation execution, Target, scene census,
 Emulator, and WGC remain deferred at this red WIP boundary.
 
+### Paused Button1 action-dispatch chronology checkpoint (2026-08-31)
+
+A focused native chronology assertion now checks cumulative helper calls against
+all 15 accepted source call frames. It moves the first causal mismatch forward
+from the later frame-3525 class-`0x1f` comparison to source frame 2251:
+expected calls 0, native calls 1, input `0x0010`, source/class-`0x02` updates
+1/1, weapon active 1, weapon tick 1, source action `0x0c00`, progress 3, stage
+8. Accepted chronology captures physical Button1 at frame 2250, exposes the
+native one-update input pipeline at frame 2251, and first exposes source action
+`0x0c00` plus helper `0x0179e2` at frame 2252. The owning defect is therefore
+the native begin-and-step-in-one-visit boundary, not the helper arithmetic.
+
+This checkpoint is intentionally RED and unaccepted. The exact resume body is
+to add the implementation-required one-update action-dispatch delay to the
+existing Oracle/SPEC source-input contract from accepted evidence, regenerate
+the existing fixture/native table, and defer the first weapon action step and
+projection by one player update for both sufficient and empty Button1. Preserve
+the begin-update locomotion presentation and source-owned motion hold. Add a
+wrong-dispatch-delay mutation and keep the committed chronology assertion. Do
+not add a frame exception, change helper arithmetic, or promote the accepted
+runtime candidate. Target, census, Emulator, and WGC remain deferred until the
+complete class-family/body boundary.
+
 ## Next eligible cards
 
 - `QA-13-ROUND1-END-TO-END-DIFFERENTIAL` after the complete stable Round 2
