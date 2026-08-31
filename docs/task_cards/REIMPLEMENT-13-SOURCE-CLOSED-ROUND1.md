@@ -1689,6 +1689,33 @@ frame-2377 RNG ordering, natural 2416 release, and natural frame-2511 recurring
 allocation. Focused/full host remains intentionally RED, return 116. Target,
 scene census, Emulator, and WGC remain deferred.
 
+### Pause correction: parent allocation is the earliest phase defect (2026-08-31)
+
+The pause audit corrects the preceding same-update-collision diagnosis. The
+accepted fixture explicitly requires a newly initialized record-type-4 child
+to receive identity immediately but enter the attacker list on the next source
+scheduler invocation. Slot `0x00ff8880` receives identity at frame 2305 and is
+visible and collision-eligible at 2306, so `collision_registration_pending =
+1` is source-correct.
+
+The earliest mismatch is instead the parent lifetime. Source parent
+`0x00ff8680` receives identity at 2253, is first visible at 2254, reaches its
+last state-2 position at 2286, enters `0x0400` at 2287, and exposes its first
+child at 2288. Native is one visible frame late throughout that trajectory.
+The existing accepted fixture value `parent_allocation_tick = 2` conflicts
+with action entry at 2252 and the accepted writer/visibility chronology; the
+source-required value is tick 1.
+
+Resume by amending only that field through the existing Oracle/SPEC/generated
+native pipeline, emitting it in the native weapon table, and adding a real
+mutation that defers allocation back to tick 2. Preserve the one-update action
+dispatch and next-invocation child registration. Require the aligned parent
+and child trajectory, natural frame-2306 damage and frame-2307 impact/HIT,
+frame-2377 RNG ownership, frame-2416 release, and frame-2511 recurring spawn
+before body-boundary lanes. No new Oracle capture is required unless the
+accepted evidence proves insufficient. Focused/full host remains intentionally
+RED, return 116; Target, census, Emulator, and WGC remain deferred.
+
 ## Next eligible cards
 
 - `QA-13-ROUND1-END-TO-END-DIFFERENTIAL` after the complete stable Round 2
