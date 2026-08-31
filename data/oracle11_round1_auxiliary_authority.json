@@ -11056,6 +11056,18 @@
             },
             "hurt_selector_u8": 1,
             "overlap": "strict per-axis rectangle overlap using the sum of player attack and defender hurt half extents",
+            "reaction_delay": {
+              "coffee_shop_witness": {
+                "bound_frame_u16": 2806,
+                "first_animation_decrement_frame_u16": 2809,
+                "retained_animation_timer_u16": 4095,
+                "retained_through_frame_u16": 2808
+              },
+              "consumer": "class-0x02 state 0x0200 predecrements the nonzero delay and suppresses its animation subhandler until the third update reaches zero",
+              "field": "defender+0x2c:u16",
+              "value_source": "current attack record 0x0011af76 hit_value_u8",
+              "value_u16": 3
+            },
             "reaction_direction": {
               "attack_mode_guard": "attack_record+0x0a:s8 is +1; zero preserves the copied attacker facing and negative XORs it",
               "caller_chain": [
@@ -11148,6 +11160,7 @@
             "collision writer",
             "attack record",
             "signed health clamp",
+            "reaction delay/hit-value",
             "reaction-direction attack-mode guard",
             "reaction-direction x comparison",
             "effect-count predecrement",
@@ -11160,6 +11173,48 @@
           },
           "scheduler_phase_evidence": {
             "byte_identical": true,
+            "camera_entry_animation_rebind": {
+              "animation_bind_writers": [
+                "0x016e1e",
+                "0x016e22",
+                "0x016e28"
+              ],
+              "bound_animation_branch_s16": -32768,
+              "bound_animation_record": "0x0006b66c",
+              "bound_animation_timer_u16": 4095,
+              "entry_samples": [
+                {
+                  "animation_timer_u16": 4095,
+                  "camera_x_u16": 751,
+                  "in_camera_bounds_u8": 0,
+                  "source_frame_u16": 2638
+                },
+                {
+                  "animation_timer_u16": 4095,
+                  "camera_x_u16": 752,
+                  "in_camera_bounds_u8": 0,
+                  "source_frame_u16": 2639
+                },
+                {
+                  "animation_timer_u16": 4095,
+                  "camera_x_u16": 753,
+                  "in_camera_bounds_u8": 1,
+                  "source_frame_u16": 2640
+                },
+                {
+                  "animation_timer_u16": 4094,
+                  "camera_x_u16": 754,
+                  "in_camera_bounds_u8": 1,
+                  "source_frame_u16": 2641
+                }
+              ],
+              "first_decrement_writer_pc": "0x016e08",
+              "mutation_control": "immediate decrement on the zero-to-nonzero dispatch changes the frame-2640 entry timer from 4095 to 4094",
+              "predicate_transition_source_frame_u16": 2639,
+              "predicate_writer_pc": "0x06b5ba",
+              "rule": "when actor+0x4c changes from zero to nonzero, bind the current selector and return without advancing it; the next in-camera dispatch performs the first timer decrement",
+              "source_slot": "0x00ffb300"
+            },
             "capture_a": "oracle11_progression_lifecycle_cs39a",
             "capture_b": "oracle11_progression_lifecycle_cs39b",
             "class02_dispatch_counts": [
@@ -11186,6 +11241,473 @@
             ],
             "class02_dispatch_entry": "0x06b534",
             "class02_source_slot": "0x00ffb600",
+            "class02_source_update_cadence": {
+              "classification": "SOURCE_CLOSED_IMPLEMENTATION_FIELDS",
+              "default_updates_per_source_frame_u8": 1,
+              "exceptions": [
+                {
+                  "source_frame_u16": 2075,
+                  "updates_u8": 2
+                },
+                {
+                  "source_frame_u16": 2076,
+                  "updates_u8": 2
+                },
+                {
+                  "source_frame_u16": 2165,
+                  "updates_u8": 4
+                },
+                {
+                  "source_frame_u16": 2260,
+                  "updates_u8": 0
+                },
+                {
+                  "source_frame_u16": 2265,
+                  "updates_u8": 0
+                },
+                {
+                  "source_frame_u16": 5458,
+                  "updates_u8": 3
+                },
+                {
+                  "source_frame_u16": 5459,
+                  "updates_u8": 3
+                },
+                {
+                  "source_frame_u16": 5460,
+                  "updates_u8": 3
+                },
+                {
+                  "source_frame_u16": 5461,
+                  "updates_u8": 3
+                },
+                {
+                  "source_frame_u16": 5462,
+                  "updates_u8": 3
+                },
+                {
+                  "source_frame_u16": 5463,
+                  "updates_u8": 3
+                },
+                {
+                  "source_frame_u16": 5464,
+                  "updates_u8": 3
+                },
+                {
+                  "source_frame_u16": 5465,
+                  "updates_u8": 3
+                },
+                {
+                  "source_frame_u16": 5466,
+                  "updates_u8": 3
+                },
+                {
+                  "source_frame_u16": 5467,
+                  "updates_u8": 3
+                },
+                {
+                  "source_frame_u16": 5468,
+                  "updates_u8": 3
+                },
+                {
+                  "source_frame_u16": 5469,
+                  "updates_u8": 4
+                },
+                {
+                  "source_frame_u16": 5470,
+                  "updates_u8": 3
+                },
+                {
+                  "source_frame_u16": 5471,
+                  "updates_u8": 3
+                },
+                {
+                  "source_frame_u16": 5472,
+                  "updates_u8": 3
+                },
+                {
+                  "source_frame_u16": 5473,
+                  "updates_u8": 3
+                },
+                {
+                  "source_frame_u16": 5474,
+                  "updates_u8": 3
+                },
+                {
+                  "source_frame_u16": 5475,
+                  "updates_u8": 3
+                },
+                {
+                  "source_frame_u16": 5476,
+                  "updates_u8": 3
+                },
+                {
+                  "source_frame_u16": 5477,
+                  "updates_u8": 3
+                },
+                {
+                  "source_frame_u16": 5478,
+                  "updates_u8": 3
+                },
+                {
+                  "source_frame_u16": 5479,
+                  "updates_u8": 3
+                },
+                {
+                  "source_frame_u16": 5480,
+                  "updates_u8": 3
+                },
+                {
+                  "source_frame_u16": 5481,
+                  "updates_u8": 3
+                },
+                {
+                  "source_frame_u16": 5482,
+                  "updates_u8": 3
+                },
+                {
+                  "source_frame_u16": 5483,
+                  "updates_u8": 3
+                },
+                {
+                  "source_frame_u16": 5484,
+                  "updates_u8": 4
+                },
+                {
+                  "source_frame_u16": 5485,
+                  "updates_u8": 3
+                },
+                {
+                  "source_frame_u16": 5486,
+                  "updates_u8": 3
+                },
+                {
+                  "source_frame_u16": 5487,
+                  "updates_u8": 3
+                },
+                {
+                  "source_frame_u16": 5488,
+                  "updates_u8": 3
+                },
+                {
+                  "source_frame_u16": 5489,
+                  "updates_u8": 3
+                },
+                {
+                  "source_frame_u16": 5490,
+                  "updates_u8": 3
+                },
+                {
+                  "source_frame_u16": 5491,
+                  "updates_u8": 3
+                },
+                {
+                  "source_frame_u16": 5492,
+                  "updates_u8": 3
+                },
+                {
+                  "source_frame_u16": 5493,
+                  "updates_u8": 4
+                },
+                {
+                  "source_frame_u16": 5494,
+                  "updates_u8": 3
+                },
+                {
+                  "source_frame_u16": 5495,
+                  "updates_u8": 3
+                },
+                {
+                  "source_frame_u16": 5496,
+                  "updates_u8": 3
+                },
+                {
+                  "source_frame_u16": 5497,
+                  "updates_u8": 3
+                },
+                {
+                  "source_frame_u16": 5498,
+                  "updates_u8": 3
+                },
+                {
+                  "source_frame_u16": 5499,
+                  "updates_u8": 4
+                },
+                {
+                  "source_frame_u16": 5500,
+                  "updates_u8": 3
+                },
+                {
+                  "source_frame_u16": 5501,
+                  "updates_u8": 3
+                },
+                {
+                  "source_frame_u16": 5502,
+                  "updates_u8": 3
+                },
+                {
+                  "source_frame_u16": 5503,
+                  "updates_u8": 3
+                },
+                {
+                  "source_frame_u16": 5504,
+                  "updates_u8": 3
+                },
+                {
+                  "source_frame_u16": 5505,
+                  "updates_u8": 3
+                },
+                {
+                  "source_frame_u16": 5506,
+                  "updates_u8": 4
+                },
+                {
+                  "source_frame_u16": 5507,
+                  "updates_u8": 3
+                },
+                {
+                  "source_frame_u16": 5508,
+                  "updates_u8": 3
+                },
+                {
+                  "source_frame_u16": 5509,
+                  "updates_u8": 3
+                },
+                {
+                  "source_frame_u16": 5510,
+                  "updates_u8": 3
+                },
+                {
+                  "source_frame_u16": 5511,
+                  "updates_u8": 4
+                },
+                {
+                  "source_frame_u16": 5512,
+                  "updates_u8": 3
+                },
+                {
+                  "source_frame_u16": 5513,
+                  "updates_u8": 3
+                },
+                {
+                  "source_frame_u16": 5514,
+                  "updates_u8": 3
+                },
+                {
+                  "source_frame_u16": 5515,
+                  "updates_u8": 3
+                },
+                {
+                  "source_frame_u16": 5516,
+                  "updates_u8": 3
+                },
+                {
+                  "source_frame_u16": 5517,
+                  "updates_u8": 4
+                },
+                {
+                  "source_frame_u16": 5518,
+                  "updates_u8": 4
+                },
+                {
+                  "source_frame_u16": 5519,
+                  "updates_u8": 4
+                },
+                {
+                  "source_frame_u16": 5520,
+                  "updates_u8": 4
+                },
+                {
+                  "source_frame_u16": 5521,
+                  "updates_u8": 4
+                },
+                {
+                  "source_frame_u16": 5522,
+                  "updates_u8": 4
+                },
+                {
+                  "source_frame_u16": 5524,
+                  "updates_u8": 0
+                },
+                {
+                  "source_frame_u16": 5525,
+                  "updates_u8": 0
+                },
+                {
+                  "source_frame_u16": 5526,
+                  "updates_u8": 0
+                },
+                {
+                  "source_frame_u16": 5527,
+                  "updates_u8": 0
+                },
+                {
+                  "source_frame_u16": 5528,
+                  "updates_u8": 0
+                },
+                {
+                  "source_frame_u16": 5529,
+                  "updates_u8": 0
+                },
+                {
+                  "source_frame_u16": 5530,
+                  "updates_u8": 0
+                },
+                {
+                  "source_frame_u16": 5531,
+                  "updates_u8": 0
+                },
+                {
+                  "source_frame_u16": 5532,
+                  "updates_u8": 0
+                },
+                {
+                  "source_frame_u16": 5533,
+                  "updates_u8": 0
+                },
+                {
+                  "source_frame_u16": 5534,
+                  "updates_u8": 0
+                },
+                {
+                  "source_frame_u16": 5535,
+                  "updates_u8": 0
+                },
+                {
+                  "source_frame_u16": 5536,
+                  "updates_u8": 0
+                },
+                {
+                  "source_frame_u16": 5537,
+                  "updates_u8": 0
+                },
+                {
+                  "source_frame_u16": 5538,
+                  "updates_u8": 0
+                },
+                {
+                  "source_frame_u16": 5539,
+                  "updates_u8": 0
+                },
+                {
+                  "source_frame_u16": 5540,
+                  "updates_u8": 0
+                },
+                {
+                  "source_frame_u16": 5541,
+                  "updates_u8": 0
+                },
+                {
+                  "source_frame_u16": 5542,
+                  "updates_u8": 0
+                },
+                {
+                  "source_frame_u16": 5543,
+                  "updates_u8": 0
+                },
+                {
+                  "source_frame_u16": 5544,
+                  "updates_u8": 0
+                },
+                {
+                  "source_frame_u16": 5545,
+                  "updates_u8": 0
+                },
+                {
+                  "source_frame_u16": 5546,
+                  "updates_u8": 0
+                },
+                {
+                  "source_frame_u16": 5547,
+                  "updates_u8": 0
+                },
+                {
+                  "source_frame_u16": 5548,
+                  "updates_u8": 0
+                },
+                {
+                  "source_frame_u16": 5549,
+                  "updates_u8": 0
+                },
+                {
+                  "source_frame_u16": 5550,
+                  "updates_u8": 0
+                },
+                {
+                  "source_frame_u16": 5551,
+                  "updates_u8": 0
+                },
+                {
+                  "source_frame_u16": 5552,
+                  "updates_u8": 0
+                },
+                {
+                  "source_frame_u16": 5553,
+                  "updates_u8": 0
+                },
+                {
+                  "source_frame_u16": 5554,
+                  "updates_u8": 0
+                },
+                {
+                  "source_frame_u16": 5555,
+                  "updates_u8": 0
+                },
+                {
+                  "source_frame_u16": 5556,
+                  "updates_u8": 0
+                },
+                {
+                  "source_frame_u16": 5557,
+                  "updates_u8": 0
+                },
+                {
+                  "source_frame_u16": 5558,
+                  "updates_u8": 0
+                },
+                {
+                  "source_frame_u16": 5559,
+                  "updates_u8": 0
+                },
+                {
+                  "source_frame_u16": 5560,
+                  "updates_u8": 0
+                },
+                {
+                  "source_frame_u16": 5561,
+                  "updates_u8": 0
+                },
+                {
+                  "source_frame_u16": 5562,
+                  "updates_u8": 0
+                },
+                {
+                  "source_frame_u16": 5563,
+                  "updates_u8": 0
+                },
+                {
+                  "source_frame_u16": 5564,
+                  "updates_u8": 0
+                },
+                {
+                  "source_frame_u16": 5565,
+                  "updates_u8": 0
+                },
+                {
+                  "source_frame_u16": 5566,
+                  "updates_u8": 0
+                }
+              ],
+              "exceptions_sha256": "edef59d16bb596ec4b9a583eeb19052e125c371f2b72bc61ffb3b2f7410728da",
+              "fixed_frame_gameplay_authority_forbidden": true,
+              "mutation_control": "controller cadence 3/1 at frames 2075/2076 is rejected in favor of the captured class-0x02 cadence 2/2",
+              "rule": "diagnostic source-frame replay dispatches the native class-0x02 body once per captured source call from the record-20 scheduler; this does not own gameplay transitions",
+              "source_frame_range_inclusive_u16": [
+                2072,
+                5566
+              ],
+              "source_slot": "0x00ffb600"
+            },
             "classification": "SOURCE_CLOSED_IMPLEMENTATION_FIELDS",
             "controller_dispatch_counts": [
               {
@@ -11210,7 +11732,7 @@
               }
             ],
             "controller_dispatch_entry": "0x0288e2",
-            "exact_native_blocker": "the existing diagnostic replay applies controller cadence to the full scheduler and lacks source-bound per-phase invocation ownership",
+            "exact_native_blocker": "resolved implementation field: differential replay must separate class-0x02 dispatch cadence from recurring-controller cadence",
             "files_sha256": {
               "coffee_shop_component20_dispatch.tsv": "429d922e9ca1c519bb95ea7bfe187e253309fe4a03b32b1b90111ee55a3743c2",
               "coffee_shop_scene_actors.tsv": "b7b1568df038af1cdd7eb5bc6eb30c830efca4952d1077644ab3b31ed2ad1c0f",
@@ -11219,6 +11741,31 @@
             },
             "finding": "captured controller invocations are not a full-scheduler cadence proxy; frame 2075 has three controller dispatches but two record-20/class-0x02 dispatches, while frame 2076 has one controller dispatch and two class-0x02 dispatches",
             "fixed_frame_gameplay_authority_forbidden": true,
+            "out_of_camera_animation_retention": {
+              "animation_timer_u16": 4095,
+              "in_camera_bounds_u8": 0,
+              "mutation_control": "unconditional per-dispatch animation decrement changes frame 2619 from 4095 to 4094",
+              "rule": "actor+0x4c == 0 retains the bound animation timer; no animation advance occurs until the source bounds predicate becomes nonzero",
+              "source_frames_inclusive_u16": [
+                2618,
+                2621
+              ],
+              "source_slot": "0x00ffb300"
+            },
+            "phase_owner": {
+              "byte_identical": true,
+              "capture_a": "oracle11_progression_lifecycle_cs45a",
+              "capture_b": "oracle11_progression_lifecycle_cs45b",
+              "dispatch_target": "0x06b534",
+              "files_sha256": {
+                "coffee_shop_component20_callers.tsv": "daa23b1ca2442905c1805135a453afedad1c747379f74aac0b64cff868252e0c",
+                "coffee_shop_scheduler_phase.tsv": "ecfc03a567f616ce6a84b63bd9cac91db64a4f59643aaa957cd4aea5ef4af6b3"
+              },
+              "global_base_a5": "0xff8000",
+              "indirect_caller_pc": "0x01bc6e",
+              "source_pool": "record20",
+              "source_pool_scheduler": "0x01bc38..0x01bc78"
+            },
             "source_frame_range_inclusive_u16": [
               2073,
               2077
@@ -11294,7 +11841,7 @@
             "order": "16-byte records in source order; allocate all eligible records"
           },
           "state_program": {
-            "0x0200": "predecrement nonzero delay_timer and skip the subhandler until it reaches zero; substate 0 toggles in_camera_bounds on (u16)(x-camera_x+16)<=0x01a0 and binds/advances source animation; substate 0x0200 enters the state-0x0400 handler",
+            "0x0200": "predecrement nonzero delay_timer and skip the subhandler until it reaches zero; substate 0 recomputes in_camera_bounds from (u16)(x-camera_x+16)<=0x01a0, retains the bound animation timer while the result is zero, and advances source animation only while it is nonzero; substate 0x0200 enters the state-0x0400 handler",
             "0x0400": "write state=0x0200; predecrement effect_count; if it reaches zero allocate one record28 child at x+8,y+64,z-8 with source class field 0x05 and field5c=1; always clear field40, bind selector effect_count, allocate four type-24/class-0x47 presentation actors, then emit command 0x0077",
             "0x0600": "release through type-20 fixed-pool release 0x017706"
           }
@@ -13468,6 +14015,514 @@
     "required_dispatched_pairs": 12
   },
   "first_segment_dependencies": {
+    "class_0x08_type20_health_pickup": {
+      "capture_identity": {
+        "baseline_byte_identical": true,
+        "baseline_files": {
+          "record28_writes.tsv": "52a30ac02dce7bdaaf72845a06a94de82383388f3655dfd096aad4163c4c13a9",
+          "samples.tsv": "5d7009b55013a06d2fef7bc9afc056d131e8a0cf3a46530716e39b85521d7123",
+          "source_spawn_guard.tsv": "251eeacf807c38dc2067657885d64f67c7c2180f0ca7ddb4a4559190018f69de"
+        },
+        "manifest_sha256": "9f74bed31c8a01d46ead37483bbfca274447f92256f185b33e90dcf24de4e69b",
+        "suppression_files": {
+          "record28_writes.tsv": "03684d22823dc48a501efcc8d1f301ef77dc4acdac49bed18e2baf5d7b2fd70f",
+          "samples.tsv": "08e2323befba9d41a3f2dd77b5140c349af17843ad1ebbd5ce4039f9480e5e58",
+          "source_spawn_guard.tsv": "72ee51a74d4dd500dcbf500ab694d31071187c2d6cad1ec24991cbd51fb29cdc"
+        }
+      },
+      "classification": "SOURCE_CLOSED_IMPLEMENTATION_FIELDS",
+      "fixed_frame_substitute_forbidden": true,
+      "mutation_controls": [
+        "stage gate",
+        "stage record x/y",
+        "allocator selector",
+        "parent current attack record",
+        "parent hurt selector",
+        "signed damage clamp",
+        "drop RNG seed/order",
+        "drop subtype",
+        "record20-before-record28 scheduler order",
+        "visible actor high-word projection",
+        "pickup motion-substate guard",
+        "pickup animation timer loop",
+        "pickup initial velocity",
+        "pickup acceleration",
+        "first landing guard",
+        "landing fractional-low-word retention",
+        "second landing guard",
+        "prior sampled input ownership",
+        "player/pickup hurt boxes",
+        "health amount",
+        "health cap",
+        "audio command",
+        "animation-terminal completion",
+        "pickup release"
+      ],
+      "parent": {
+        "class_u8": "0x08",
+        "current_state_collision": {
+          "attack_record": {
+            "address": "0x0002fc58",
+            "damage_selector_u8": 25,
+            "hit_value_u8": 8,
+            "impact_variant_u8": 10,
+            "knockback_mode_s8": 0,
+            "record_sha256": "e95eb0889e2fab5f083a14f9618a561d95df248176622b9b1329c04f7aa0def1",
+            "x_center_s8": 0,
+            "x_half_u8": 4,
+            "y_center_s8": -8,
+            "y_half_u8": 12,
+            "z_center_s8": 0,
+            "z_half_u8": 8
+          },
+          "attacker_record_type_u8": 4,
+          "attacker_source_slot": "0x00ff8880",
+          "clamp_writer": "0x01d598",
+          "damage_s16": 25,
+          "damage_writer": "0x01d590",
+          "health_after_clamp_s16": -1,
+          "health_after_damage_s16": -25,
+          "health_before_s16": 0,
+          "hurt_record": {
+            "address": "0x0006d90c",
+            "record_sha256": "ee805a465a1e8442f7923029a46f0ae18822295fa5dbed4eb01a1f53b2680276",
+            "x_center_s8": 0,
+            "x_half_u8": 16,
+            "y_center_s8": 38,
+            "y_half_u8": 40,
+            "z_center_s8": 0,
+            "z_half_u8": 4
+          },
+          "hurt_selector_u8": 1,
+          "reaction_direction": {
+            "attack_mode_s8": 0,
+            "attacker_facing_u8": 1,
+            "consumer": "0x01d622 copies defender+0x4f:u8 to the allocated class-0x4e impact facing field",
+            "field": "defender+0x4f:u8; distinct from visible facing at defender+0x0f",
+            "result_u8": 1,
+            "rule": "zero attack mode preserves the initial 0x01d0c8 copy of attacker+0x0f:u8 into defender+0x4f:u8",
+            "source_body": {
+              "first": "0x0001d0c8",
+              "last_exclusive": "0x0001d0fa",
+              "sha256": "e717bbe969b011730a6a63f2c52bde7ec351b826206d2238bb058000d6172fb4"
+            },
+            "visible_witness": {
+              "impact_facing_u8": 1,
+              "impact_source_slot": "0x00ffb680",
+              "impact_visible_frame_u16": 2906
+            }
+          },
+          "reaction_writer": "0x01d4aa",
+          "source_update_frame_u16": 2905
+        },
+        "dispatch": "0x06d53c",
+        "drop": {
+          "allocation_routine": "0x017828",
+          "animation_record": {
+            "animation_record": "0x0006d7f0",
+            "assembly": "0x0006d8a2",
+            "attack_selector_u8": 0,
+            "branch_s16": 0,
+            "hurt_selector_u8": 0,
+            "record_sha256": "725b2d4cd3249d3b1d70e6a3384edb6b0b6a6b8fd7a20319605e5b6881778905",
+            "timer_u16": 1
+          },
+          "audio": {
+            "command_u16": "0x0077",
+            "player_side_caller": "0x06d5ba",
+            "shared_dispatch_entry": "0x001922",
+            "wrapper_return": "0x06d5c0"
+          },
+          "guard": "state 0x0400/substate 0 after current-state collision",
+          "reaction_timer_u8": 8,
+          "rng_calls_u8": 1,
+          "rng_entry": "0x017c5e",
+          "seed_after": "0xa388",
+          "seed_before": "0x8be5",
+          "selected_subtype_u8": "0x12",
+          "selector_mask_u8": "0x1f",
+          "selector_source": {
+            "actor_offset_u8": "0x0c",
+            "lookup_base": "0x000bceaa",
+            "row_address": "0x000bd20a",
+            "row_u8": [
+              18,
+              18,
+              18,
+              18,
+              18,
+              18,
+              18,
+              18,
+              18,
+              18,
+              18,
+              18,
+              18,
+              18,
+              18,
+              18,
+              18,
+              18,
+              18,
+              18,
+              18,
+              18,
+              18,
+              18,
+              18,
+              18,
+              18,
+              18,
+              18,
+              18,
+              18,
+              18
+            ],
+            "value_u8": "0x1b"
+          }
+        },
+        "initialization": {
+          "animation_record": {
+            "animation_record": "0x0006d7b8",
+            "assembly": "0x0006d864",
+            "attack_selector_u8": 1,
+            "branch_s16": -32768,
+            "hurt_selector_u8": 1,
+            "record_sha256": "05cb19fc89bdf9efa6ade53fb88d5969fe6a8ee2e89a62f77ec8e428094b725c",
+            "timer_u16": 4095
+          },
+          "field64_u8": 28,
+          "ground_copy": "y_s16 -> z_s16",
+          "object_or_u16": "0x8000",
+          "table_set": "0x0006d900"
+        },
+        "lifetime": {
+          "first_visible_frame_u16": 2673,
+          "last_visible_frame_u16": 2947
+        },
+        "post_drop_program": {
+          "collision_write_visibility_guard": "record-20 drop handler consumes state 0x0400 on the following source update; the collision-written 0x0400 state remains visible for one sample",
+          "debris": {
+            "alternate": {
+              "animation_record": {
+                "animation_record": "0x0006d850",
+                "assembly": "0x0006d8f2",
+                "attack_selector_u8": 0,
+                "branch_s16": -32768,
+                "hurt_selector_u8": 0,
+                "record_sha256": "b4077db9ef0d9ea9b0ea07d682da6963aade8f84b1d9b1bd2913f3672ddac925",
+                "timer_u16": 4095
+              },
+              "freeze_result": {
+                "x_fp_s32": 89653248,
+                "y_fp_s32": 20381696
+              },
+              "initial_x_fp_s32": 83886080,
+              "initial_y_fp_s32": 20774912,
+              "landing_guard": "unsigned y_high < ground_s16",
+              "landing_substate_u16": 512,
+              "x_velocity_s32": 262144,
+              "y_acceleration_s32": -32768,
+              "y_velocity_s32": 327680
+            },
+            "ground_s16": 317,
+            "integration_order": [
+              "x_fp += x_velocity",
+              "y_fp += y_velocity",
+              "y_velocity += y_acceleration"
+            ],
+            "internal_coordinate_format": "two signed 24.8 trajectories at actor+0x60/+0x68 and actor+0x64/+0x6c; signed 8.8 velocities are extended and shifted left 8 before each long add",
+            "presentation_selector": "visible source-frame parity: odd selects primary, even selects alternate",
+            "primary": {
+              "animation_record": {
+                "animation_record": "0x0006d83c",
+                "assembly": "0x0006d8e4",
+                "attack_selector_u8": 0,
+                "branch_s16": -32768,
+                "hurt_selector_u8": 0,
+                "record_sha256": "8dc073c578982c25aa9e1874f67f54213aa150ebb8f4878dc6b8699a9842299a",
+                "timer_u16": 4095
+              },
+              "initial_x_fp_s32": 83886080,
+              "initial_y_fp_s32": 23199744,
+              "landing_guard": "unsigned y_high < ground_s16",
+              "landing_state_u16": 1540,
+              "landing_substate_u16": 768,
+              "x_velocity_s32": 327680,
+              "y_acceleration_s32": -32768,
+              "y_velocity_s32": 393216
+            },
+            "projection_source_block": "0x06d610..0x06d7a6",
+            "release_guard": "state 0x0604/substate 0x0300 on the following record-20 update",
+            "state_u16": 1028,
+            "visible_position_projection": "0x06d72e copies only the selected internal x/y high words to actor+0x10/+0x14 and preserves the actor visible low u16 words"
+          },
+          "fixed_frame_substitute_forbidden": true,
+          "reaction_hold": {
+            "decrement_guard": "decrement timer once per source update while nonzero",
+            "state_u16": 1026,
+            "terminal_prelude": {
+              "animation_record": "0x0006d800",
+              "assembly": "0x0006d8b0",
+              "attack_selector_u8": 0,
+              "branch_s16": -32768,
+              "hurt_selector_u8": 0,
+              "record_sha256": "a18c9e7f42db7bf0609da2a884836c2dd7b5dd7a539ce52ead93e1a4d6f780c9",
+              "timer_u16": 4095
+            },
+            "timer_u8": 8
+          },
+          "source_block": "0x06d53c..0x06d7b8",
+          "source_block_sha256": "7b72396aa82ef452ba51b8b933c3258ee662c908190cab232ec6c2c05025cc5b",
+          "state_transitions": [
+            {
+              "count": 1,
+              "first_frame": 2906,
+              "from": [
+                512,
+                0
+              ],
+              "to": [
+                1024,
+                0
+              ]
+            },
+            {
+              "count": 1,
+              "first_frame": 2907,
+              "from": [
+                1024,
+                0
+              ],
+              "to": [
+                1026,
+                0
+              ]
+            },
+            {
+              "count": 1,
+              "first_frame": 2917,
+              "from": [
+                1026,
+                0
+              ],
+              "to": [
+                1028,
+                0
+              ]
+            },
+            {
+              "count": 1,
+              "first_frame": 2939,
+              "from": [
+                1028,
+                0
+              ],
+              "to": [
+                1028,
+                512
+              ]
+            },
+            {
+              "count": 1,
+              "first_frame": 2947,
+              "from": [
+                1028,
+                512
+              ],
+              "to": [
+                1540,
+                768
+              ]
+            }
+          ]
+        },
+        "record_type_u8": 20,
+        "source_slot": "0x00ffb200",
+        "state_sequence_u16": [
+          0,
+          512,
+          1024,
+          1026,
+          1028,
+          1540
+        ],
+        "variant_u8": 0
+      },
+      "pickup": {
+        "class_u8": "0x0a",
+        "collection": {
+          "collected_state_u16": 1536,
+          "first_absent_frame_u16": 3103,
+          "release_routine": "0x01783e..0x017866",
+          "state_writer": "0x0bc5fc then 0x0a3a30"
+        },
+        "dispatch": "0x0a38e4",
+        "initialization": {
+          "animation_record": {
+            "animation_record": "0x000a3d1c",
+            "assembly": "0x000a4094",
+            "attack_selector_u8": 0,
+            "branch_s16": -32768,
+            "hurt_selector_u8": 2,
+            "record_sha256": "ea5e5aeacaaffcc7324505fdcf78a27fc815ad4c735cc16140a411f213ee5d2a",
+            "timer_u16": 8
+          },
+          "field2e_u16": "0x8000",
+          "field5c_u8": 1,
+          "field64_u8": 41,
+          "motion_substate_guard": "the first post-allocation record-28 update writes substate 0x0002 and returns before movement",
+          "motion_substate_u16": 2,
+          "position_s16": [
+            1280,
+            317,
+            317
+          ],
+          "state_substate_u16": [
+            512,
+            0
+          ],
+          "table_set": "0x000a40a2",
+          "velocity_acceleration_16_16": {
+            "x": -229376,
+            "y": 327680,
+            "y_acceleration": -32768,
+            "z": 0
+          }
+        },
+        "lifetime": {
+          "first_visible_frame_u16": 2907,
+          "last_visible_frame_u16": 3102
+        },
+        "movement": {
+          "animation_timer_rule": "decrement once on every active source update, including the substate-0 to substate-2 update; when zero and branch is negative reload the same record timer 8",
+          "first_landing_guard": "unsigned y_high < ground_z",
+          "first_landing_result": {
+            "position_write": "replace only y_fp high word with ground_z and preserve the current fractional low word",
+            "substate_u16": 4,
+            "y_acceleration_16_16": -16384,
+            "y_s16": 317,
+            "y_velocity_16_16": 65536
+          },
+          "integration_order": [
+            "x += vx",
+            "z_fp += vz",
+            "y += vy",
+            "vy += ay"
+          ],
+          "second_landing_guard": "unsigned y_high < ground_z",
+          "second_landing_result": {
+            "field5c_u8": 0,
+            "position_write": "replace only y_fp high word with ground_z and preserve the current fractional low word",
+            "substate_u16": 512,
+            "y_s16": 317
+          }
+        },
+        "player_interaction": {
+          "action_u16": "0x0e00",
+          "audio_edge": {
+            "caller": "0x01a18a",
+            "command_u16": "0x0206",
+            "shared_dispatch_entry": "0x001922"
+          },
+          "completion_guard": "advance source animation; terminal negative branch returns to neutral, never a fixed-frame timer",
+          "health_after_s16": 95,
+          "health_before_s16": 85,
+          "health_cap_s16": 101,
+          "health_writer": "0x0bc5fc..0x0bc64a",
+          "input_sample_rule": "the eligible current-frame target/input guard latches pickup ownership and suppresses the normal attack path; the interaction writer consumes that latch on the following player update",
+          "interaction_writer": "0x019fec",
+          "pickup_hurt_record": {
+            "address": "0x000a40b6",
+            "record_sha256": "0a009b5c403accb17ef881800b801c99349d7262a166d46e515f44163f652f05",
+            "x_center_s8": 0,
+            "x_half_u8": 16,
+            "y_center_s8": 0,
+            "y_half_u8": 1,
+            "z_center_s8": 0,
+            "z_half_u8": 16
+          },
+          "pickup_hurt_selector_u8": 2,
+          "player_hurt_record": {
+            "address": "0x0011ae8e",
+            "record_sha256": "3030ace1c519657d628ef56976a03bf3fd0befe88eb870d8f0f25f35651c7cdc",
+            "x_center_s8": 1,
+            "x_half_u8": 20,
+            "y_center_s8": 45,
+            "y_half_u8": 46,
+            "z_center_s8": 0,
+            "z_half_u8": 6
+          },
+          "player_hurt_selector_u8": 17,
+          "player_table_set": "0x0011ae02",
+          "presentation_records": [
+            {
+              "animation_record": "0x0015fa04",
+              "assembly": "0x001610ca",
+              "attack_selector_u8": 0,
+              "branch_s16": 0,
+              "hurt_selector_u8": 0,
+              "record_sha256": "4795518361192ba458d949480f95999d3135ae9d35dee97576035650a453e444",
+              "timer_u16": 5
+            },
+            {
+              "animation_record": "0x0015fa14",
+              "assembly": "0x001626a4",
+              "attack_selector_u8": 0,
+              "branch_s16": -32768,
+              "hurt_selector_u8": 0,
+              "record_sha256": "b1f8b4a3fcf5fcb6a43ba5ce2bc38f07e99ef41af39078ba725774e8d0cd4f13",
+              "timer_u16": 4095
+            }
+          ],
+          "subtype_amount_s16": 10,
+          "target_scan": "0x01ce98..0x01cece",
+          "target_writer": "0x01cec2"
+        },
+        "record_type_u8": 28,
+        "scheduler_order": "record-type-20 parent drop allocation precedes record-type-28 dispatch in the same source update",
+        "source_slot": "0x00ffcd00",
+        "subtype_u8": "0x12"
+      },
+      "retained_gameplay_authority": false,
+      "spec_executable": true,
+      "stage_spawn": {
+        "accepted_witness": {
+          "global_gate_u16": 817,
+          "player_x_u16": 1063,
+          "source_update_frame_u16": 2672,
+          "visible_frame_u16": 2673
+        },
+        "caller_chain": [
+          "0x0084bc",
+          "0x0080a2"
+        ],
+        "fixed_frame_substitute_forbidden": true,
+        "guard": "record_gate_u16 <= global camera/right-edge gate_u16; lane and character guards are zero",
+        "owner": "route stage-record interpreter 0x01bece..0x01bf4e",
+        "record": {
+          "allocator_selector_u16": 4,
+          "character_guard_u8": 0,
+          "class_variant_word_u16": "0x0800",
+          "gate_u16": 816,
+          "lane_guard_s8": 0,
+          "x_s16": 1280,
+          "y_s16": 317
+        },
+        "source_slot": "0x00ffb200",
+        "stage_record_address": "0x0015c198",
+        "writes": [
+          "active_u8 += 1",
+          "class/variant word = 0x0800",
+          "x_s16 = 1280",
+          "y_s16 = 317",
+          "facing_u8 = 0",
+          "source flags = 0x1b",
+          "timer_u8 = 0"
+        ]
+      }
+    },
     "class_0x09_type20_rng_owner": {
       "animation_sequences": [
         {
@@ -16723,6 +17778,280 @@
         "rng_authority": "shared source RNG consumed by class-0x4e state 0",
         "scene_actor_rows_u16": 40,
         "scene_lifetime_count_u16": 5,
+        "shared_dispatch_reachable_variant_programs": {
+          "20": {
+            "allocation_routine": "0x0177da",
+            "allocation_writer": "0x01d64e",
+            "allocations": [
+              {
+                "allocation_frame_u16": 3263,
+                "facing_u8": 1,
+                "owner_source_slot": "0x00ffae00",
+                "position_after_rng_s16": [
+                  1168,
+                  385,
+                  319
+                ],
+                "position_before_rng_s16": [
+                  1172,
+                  389,
+                  319
+                ],
+                "seed_after": "0xc4f6",
+                "seed_before": "0xec32",
+                "source_slot": "0x00ffc080",
+                "table_offset_u8": 20,
+                "visible_frame_u16": 3264
+              },
+              {
+                "allocation_frame_u16": 3855,
+                "facing_u8": 1,
+                "owner_source_slot": "0x00ffad00",
+                "position_after_rng_s16": [
+                  1352,
+                  376,
+                  318
+                ],
+                "position_before_rng_s16": [
+                  1348,
+                  380,
+                  318
+                ],
+                "seed_after": "0xc9c9",
+                "seed_before": "0x4300",
+                "source_slot": "0x00ffc380",
+                "table_offset_u8": 8,
+                "visible_frame_u16": 3856
+              }
+            ],
+            "animation_records": [
+              {
+                "animation_record": "0x000935b0",
+                "assembly": "0x00093634",
+                "attack_selector_u8": 0,
+                "branch_s16": 0,
+                "hurt_selector_u8": 0,
+                "record_sha256": "8f1886d3741e18476e9da27f6352c7d2aecb5ea57c1899cacb3c9c5bfca8abe6",
+                "timer_u16": 1
+              },
+              {
+                "animation_record": "0x000935c0",
+                "assembly": "0x0009364c",
+                "attack_selector_u8": 0,
+                "branch_s16": 0,
+                "hurt_selector_u8": 0,
+                "record_sha256": "421cb8acc54d7a9bf68b6112dc4661cbe61bf04e93bf13b0e4c07af362ea8144",
+                "timer_u16": 1
+              },
+              {
+                "animation_record": "0x000935d0",
+                "assembly": "0x00093634",
+                "attack_selector_u8": 0,
+                "branch_s16": 0,
+                "hurt_selector_u8": 0,
+                "record_sha256": "8f1886d3741e18476e9da27f6352c7d2aecb5ea57c1899cacb3c9c5bfca8abe6",
+                "timer_u16": 1
+              },
+              {
+                "animation_record": "0x000935e0",
+                "assembly": "0x0009364c",
+                "attack_selector_u8": 0,
+                "branch_s16": 0,
+                "hurt_selector_u8": 0,
+                "record_sha256": "421cb8acc54d7a9bf68b6112dc4661cbe61bf04e93bf13b0e4c07af362ea8144",
+                "timer_u16": 1
+              },
+              {
+                "animation_record": "0x000935f0",
+                "assembly": "0x00093634",
+                "attack_selector_u8": 0,
+                "branch_s16": 0,
+                "hurt_selector_u8": 0,
+                "record_sha256": "8f1886d3741e18476e9da27f6352c7d2aecb5ea57c1899cacb3c9c5bfca8abe6",
+                "timer_u16": 1
+              },
+              {
+                "animation_record": "0x00093600",
+                "assembly": "0x0009364c",
+                "attack_selector_u8": 0,
+                "branch_s16": 0,
+                "hurt_selector_u8": 0,
+                "record_sha256": "421cb8acc54d7a9bf68b6112dc4661cbe61bf04e93bf13b0e4c07af362ea8144",
+                "timer_u16": 1
+              },
+              {
+                "animation_record": "0x00093610",
+                "assembly": "0x00093634",
+                "attack_selector_u8": 0,
+                "branch_s16": 0,
+                "hurt_selector_u8": 0,
+                "record_sha256": "8f1886d3741e18476e9da27f6352c7d2aecb5ea57c1899cacb3c9c5bfca8abe6",
+                "timer_u16": 1
+              },
+              {
+                "animation_record": "0x00093620",
+                "assembly": "0x0009364c",
+                "attack_selector_u8": 0,
+                "branch_s16": -32768,
+                "hurt_selector_u8": 0,
+                "record_sha256": "483272b95185cbfd760757af4440dd01013c910ef962d46b77b796886f8231c3",
+                "timer_u16": 1
+              }
+            ],
+            "classification": "SOURCE_CLOSED_IMPLEMENTATION_FIELDS",
+            "dispatch": "0x0927f6",
+            "fixed_frame_substitute_forbidden": true,
+            "lifetimes": [
+              {
+                "first_visible_frame_u16": 3264,
+                "last_visible_frame_u16": 3273,
+                "source_slot": "0x00ffc080"
+              },
+              {
+                "first_visible_frame_u16": 3856,
+                "last_visible_frame_u16": 3865,
+                "source_slot": "0x00ffc380"
+              }
+            ],
+            "mutation_controls": [
+              "variant",
+              "owner",
+              "allocation scheduler phase",
+              "RNG order",
+              "jitter",
+              "animation record",
+              "terminal order",
+              "release"
+            ],
+            "owner": "type16-class06-current-collision",
+            "release_routine": "0x0177f0",
+            "rng_call_pc": "0x09282a",
+            "rng_entry": "0x017c5e",
+            "rng_mask_u16": "0x001c",
+            "scheduler_rule": "collision allocation occurs after the type-24 pool; state-0 initialization and RNG occur on the next source frame",
+            "state0_writes": {
+              "coordinate_mode_u8": 2,
+              "object_or_u16": "0x8000"
+            },
+            "state_sequence_u16": [
+              0,
+              512,
+              1024
+            ],
+            "terminal_guard": "decrement the current animation timer, then signed negative branch writes state 0x0400; release on the next scheduler visit",
+            "variant_u8": 20
+          },
+          "5": {
+            "allocation_routine": "0x0177da",
+            "allocation_writer": "0x01d64e",
+            "allocations": [
+              {
+                "allocation_frame_u16": 4033,
+                "facing_u8": 0,
+                "owner_source_slot": "0x00ff8380",
+                "position_after_rng_s16": [
+                  1306,
+                  340,
+                  309
+                ],
+                "position_before_rng_s16": [
+                  1306,
+                  340,
+                  309
+                ],
+                "seed_after": "0xb001",
+                "seed_before": "0x9051",
+                "source_slot": "0x00ffb800",
+                "table_offset_u8": 0,
+                "visible_frame_u16": 4034
+              }
+            ],
+            "animation_records": [
+              {
+                "animation_record": "0x00092a04",
+                "assembly": "0x00092cac",
+                "attack_selector_u8": 0,
+                "branch_s16": 0,
+                "hurt_selector_u8": 0,
+                "record_sha256": "9ed13e997dbaf81f1ebb66e7a6b1e96ee5cb34207350ed96db775b981eef0399",
+                "timer_u16": 2
+              },
+              {
+                "animation_record": "0x00092a14",
+                "assembly": "0x00092cba",
+                "attack_selector_u8": 0,
+                "branch_s16": 0,
+                "hurt_selector_u8": 0,
+                "record_sha256": "06e1186f686f7afe975735970e85c4054177a55ec4763700228e08a9e19d31d4",
+                "timer_u16": 2
+              },
+              {
+                "animation_record": "0x00092a24",
+                "assembly": "0x00092cc8",
+                "attack_selector_u8": 0,
+                "branch_s16": 0,
+                "hurt_selector_u8": 0,
+                "record_sha256": "9c864a1d3fd90ad1dcdc46a59cb3fee3f3d6a30af237fe782821230d2e8e7402",
+                "timer_u16": 2
+              },
+              {
+                "animation_record": "0x00092a34",
+                "assembly": "0x00092cd6",
+                "attack_selector_u8": 0,
+                "branch_s16": 0,
+                "hurt_selector_u8": 0,
+                "record_sha256": "77ae3ad2eca99124a36ba5646d6ddc6b466a01b45d9e4fabd52726d70fa85d48",
+                "timer_u16": 2
+              },
+              {
+                "animation_record": "0x00092a44",
+                "assembly": "0x00092ce4",
+                "attack_selector_u8": 0,
+                "branch_s16": -32768,
+                "hurt_selector_u8": 0,
+                "record_sha256": "746cdb75fa76c27d1d11a76df058c20ede018ee97bf890363880f930e80f7a62",
+                "timer_u16": 4095
+              }
+            ],
+            "classification": "SOURCE_CLOSED_IMPLEMENTATION_FIELDS",
+            "dispatch": "0x0927f6",
+            "fixed_frame_substitute_forbidden": true,
+            "lifetimes": [
+              {
+                "first_visible_frame_u16": 4034,
+                "last_visible_frame_u16": 4044,
+                "source_slot": "0x00ffb800"
+              }
+            ],
+            "mutation_controls": [
+              "variant",
+              "owner",
+              "allocation scheduler phase",
+              "RNG order",
+              "jitter",
+              "animation record",
+              "terminal order",
+              "release"
+            ],
+            "owner": "player-melee-current-collision",
+            "release_routine": "0x0177f0",
+            "rng_call_pc": "0x09282a",
+            "rng_entry": "0x017c5e",
+            "rng_mask_u16": "0x001c",
+            "scheduler_rule": "collision allocation occurs after the type-24 pool; state-0 initialization and RNG occur on the next source frame",
+            "state0_writes": {
+              "coordinate_mode_u8": 2,
+              "object_or_u16": "0x8000"
+            },
+            "state_sequence_u16": [
+              0,
+              512,
+              1024
+            ],
+            "terminal_guard": "decrement the current animation timer, then signed negative branch writes state 0x0400; release on the next scheduler visit",
+            "variant_u8": 5
+          }
+        },
         "source_bodies": {
           "class_dispatch": {
             "first": "0x0927f6",
@@ -17008,6 +18337,206 @@
             "source_slot": "0x00ffc100"
           }
         ],
+        "player_special_collision": {
+          "attack_record": {
+            "address": "0x0011af76",
+            "hit_value_u8": 3,
+            "knockback_mode_s8": 1,
+            "record_sha256": "d9ba43b3f470fc2673b8124d6d3a46a5f3519a9158ba142cd9df6019f689dc0c",
+            "x_center_s8": 0,
+            "x_half_u8": 88,
+            "y_center_s8": 48,
+            "y_half_u8": 48,
+            "z_center_s8": 0,
+            "z_half_u8": 40
+          },
+          "attack_selector_u8": 11,
+          "capture_identity": {
+            "byte_identical": true,
+            "completion_a": "7defadcfff16b99b8e2d5b66fc7b42443106837d698e659c64d45a8770d6aa0b",
+            "completion_b": "7defadcfff16b99b8e2d5b66fc7b42443106837d698e659c64d45a8770d6aa0b"
+          },
+          "class1f_target": {
+            "animation_record": "0x0012d890",
+            "clamp_writer": "0x01d598",
+            "damage_s16": 127,
+            "damage_writer": "0x01d590",
+            "health_after_clamp_s16": -1,
+            "health_after_damage_s16": -40,
+            "health_before_s16": 87,
+            "hurt_record": {
+              "address": "0x00130ad4",
+              "record_sha256": "230bf93a72b398c47ab3890da3959c834cb5b7b75e3209fdef11655063e64caf",
+              "x_center_s8": -12,
+              "x_half_u8": 29,
+              "y_center_s8": 42,
+              "y_half_u8": 39,
+              "z_center_s8": 0,
+              "z_half_u8": 8
+            },
+            "hurt_selector_u8": 1,
+            "impact_facing_u8": 0,
+            "impact_source_slot": "0x00ffbf00",
+            "impact_spawn_position_s16": [
+              1083,
+              354,
+              308
+            ],
+            "impact_visible_frame_u16": 2805,
+            "reaction_state_substate": "0x0400:0x0000",
+            "reaction_writer": "0x01d4aa",
+            "source_ko": {
+              "action_phases_u16": [
+                0,
+                512,
+                1024,
+                1536
+              ],
+              "attack_selector_u8": 1,
+              "bounce_x_acceleration_16_16": 0,
+              "bounce_x_velocity_before_facing_16_16": 131072,
+              "bounce_y_acceleration_16_16": -49152,
+              "bounce_y_velocity_16_16": 262144,
+              "capture_range_u16": [
+                2805,
+                2916
+              ],
+              "collision_state_substate": "0x0400:0x0000",
+              "dispatch_active_u8": 2,
+              "dispatch_state_substate": "0x0402:0x0000",
+              "dispatch_visible_frame_u16": 2806,
+              "entry_hold_ticks_u8": 3,
+              "falling_record": {
+                "animation_record": "0x0012e254",
+                "assembly": "0x00130294",
+                "attack_selector_u8": 0,
+                "branch_s16": -32744,
+                "hurt_selector_u8": 0,
+                "record_sha256": "e1f2730bb91c93bac3107c34b221731110d96e5424f6e0927684ff01328c27bb",
+                "timer_u16": 4095
+              },
+              "hold_state_substate": "0x0404:0x0000",
+              "hurt_selector_u8": 1,
+              "landing_hold_ticks_u8": 3,
+              "landing_record": {
+                "animation_record": "0x0012e268",
+                "assembly": "0x00130346",
+                "attack_selector_u8": 0,
+                "branch_s16": -32743,
+                "hurt_selector_u8": 0,
+                "record_sha256": "952cb3154b06855078b2267725dd686f0bfba9a1f22f439a53454603b5c9f679",
+                "timer_u16": 4095
+              },
+              "launch_x_acceleration_16_16": 0,
+              "launch_x_velocity_before_facing_16_16": 237568,
+              "launch_y_acceleration_16_16": -49152,
+              "launch_y_velocity_16_16": 786432,
+              "motion_first_frame_u16": 2810,
+              "movement_rule": "apply x/y 16.16 velocity then acceleration each scheduler visit; negate x terms when reaction-facing selector is 0; clamp y high word to z while retaining the source fractional word",
+              "reaction_records": [
+                {
+                  "animation_record": "0x0012e214",
+                  "assembly": "0x0013020c",
+                  "attack_selector_u8": 0,
+                  "branch_s16": 0,
+                  "hurt_selector_u8": 14,
+                  "record_sha256": "d1cdedb7de79870915d020102f9650493b67b0731aec85e2e7f0e7185051d3f5",
+                  "timer_u16": 1
+                },
+                {
+                  "animation_record": "0x0012e224",
+                  "assembly": "0x0013020c",
+                  "attack_selector_u8": 0,
+                  "branch_s16": 34,
+                  "hurt_selector_u8": 14,
+                  "record_sha256": "aef70b77224be5eb4abd06b7d0a1b91d4f2c34d96e0dd8a2b723b35383fc469b",
+                  "timer_u16": 2
+                },
+                {
+                  "animation_record": "0x0012e234",
+                  "assembly": "0x0013020c",
+                  "attack_selector_u8": 0,
+                  "branch_s16": 35,
+                  "hurt_selector_u8": 14,
+                  "record_sha256": "5c94b81fd2cfa9e559c241344ab728d479349a1fcc12bd672524363ee92e02ae",
+                  "timer_u16": 5
+                },
+                {
+                  "animation_record": "0x0012e244",
+                  "assembly": "0x0013020c",
+                  "attack_selector_u8": 0,
+                  "branch_s16": 36,
+                  "hurt_selector_u8": 14,
+                  "record_sha256": "8ca894e11d1945771533a36597f97bf7bf55804f1a10324222935a4b423e2f1a",
+                  "timer_u16": 7
+                }
+              ],
+              "release_state_substate": "0x0600:0x0000",
+              "removal_hold_ticks_u8": 60,
+              "selector_rule": "retain pre-collision hurt=1 and attack=1 selectors"
+            },
+            "source_slot": "0x00ffa240",
+            "state_substate": "0x0200:0x0402",
+            "table_set": "0x00130ac8"
+          },
+          "classification": "SOURCE_CLOSED_IMPLEMENTATION_FIELDS",
+          "impact_allocation": {
+            "allocation_failure_rule": "damage remains applied; omit only the impact",
+            "allocator": "0x01d622",
+            "class_u8": "0x4e",
+            "entry": "0x01d116",
+            "facing_rule": "copy defender reaction-facing actor+0x4f_u8",
+            "pool_allocator": "0x0177da",
+            "position_rule": "signed midpoint of attack and hurt centres after depth projection; z is defender z_s16 - 1",
+            "record_type_u8": 24,
+            "variant_rule": "absolute signed attack-record knockback_mode_s8",
+            "variant_u8": 1
+          },
+          "multi_target_rule": "one active player attack registration may damage every overlapping target in source pool order; the first contact must not consume the registration",
+          "mutation_controls": [
+            "reject first-target consumption of the active player registration",
+            "reject record-type-20 before record-type-12 target traversal",
+            "reject damage before the attack-selector-11 registration",
+            "reject impact initialization during the already-completed record-type-24 pass",
+            "reject class-0x1f damage other than 127 or signed clamp other than -1",
+            "reject player hitstop other than attack-record hit_value 3 or rearming it per target",
+            "reject the projectile KO program in place of the source 0x0012e214 lethal reaction"
+          ],
+          "player_state_substate": "0x0200:0x0802",
+          "record20_targets": [
+            {
+              "class_u8": "0x02",
+              "damage_s16": 25,
+              "impact_facing_u8": 1,
+              "impact_source_slot": "0x00ffb900",
+              "impact_spawn_position_s16": [
+                1125,
+                390,
+                335
+              ],
+              "source_slot": "0x00ffb300"
+            },
+            {
+              "class_u8": "0x0a",
+              "damage_s16": 25,
+              "impact_facing_u8": 1,
+              "impact_source_slot": "0x00ffb680",
+              "impact_spawn_position_s16": [
+                1107,
+                379,
+                322
+              ],
+              "source_slot": "0x00ffb380"
+            }
+          ],
+          "registration_guard": "source player animation advances from 0x0015fd40 to attack-selector-11 record 0x0015fd50 before the current-state collision traversal",
+          "scheduler_order": [
+            "record-type-24 dispatch/release completes before collision allocation",
+            "the source player attack registration traverses record-type-12 targets",
+            "the same registration then traverses record-type-20 targets"
+          ],
+          "source_frame_u16": 2804
+        },
         "release_state": {
           "first_absent_frame": 2318,
           "first_last_visible_frame": 2317,
@@ -17640,7 +19169,14 @@
             "shared visibility 0x017176",
             "shared display 0x0167ac"
           ],
+          "coffee_shop_wrap_witness": {
+            "terminal_record_frame_u16": 2835,
+            "wrapped_animation_record": "0x0008f8e0",
+            "wrapped_record_frame_u16": 2836
+          },
+          "negative_animation_rule": "record 31 branch -32753 wraps the shared animation sequence to record 0 on the next update while the owner terminal guard remains false",
           "owner": "player low-word pointer at actor+0x26",
+          "owner_contact_lifetime": "player writer 0x01986a clears player+0x5c at the start of every player update; collision may set it after the type-24 scheduler, so a prior-frame contact cannot terminate the linked actor",
           "terminal_guard": "advance to 0x0400 when player+0x5c_u8 != 0 OR player+0x25_u8 != 0; zero animation event continues the active update"
         },
         "state_0x0400": "release on next scheduler visit",
@@ -17658,7 +19194,8 @@
       "mutation_controls": [
         "wrong player routine",
         "class4b allocation or owner guard",
-        "class4b event sequence",
+        "class4b owner-contact lifetime",
+        "class4b event sequence/wrap",
         "class3d class/variant",
         "class3d movement offset/sign",
         "animation terminal guard",

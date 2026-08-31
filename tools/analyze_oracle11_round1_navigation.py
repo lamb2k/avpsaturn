@@ -21,6 +21,7 @@ OBSTACLE_MUTANT = ROOT / ".deps" / "mame" / "oracle11_progression_lifecycle_cs21
 ORACLE08 = ROOT / "data" / "oracle08_round1_navigation_bounds.json"
 ORACLE10 = ROOT / "data" / "oracle10_round1_route.json"
 SCHEDULER = ROOT / "data" / "oracle11_actor_scheduler_lifecycle.json"
+GLOBAL_AUDIO = ROOT / "data" / "oracle11_global_audio_trigger_owners.json"
 OPCODES = ROOT / ".deps" / "mame" / "actorprobe" / "decrypted_opcodes_2m.bin"
 PROGRAM = ROOT / ".deps" / "mame" / "actorprobe" / "decrypted_program_2m.bin"
 OUT = ROOT / "data" / "oracle11_round1_navigation.json"
@@ -141,6 +142,7 @@ def coffee_shop_obstacle_lifecycle(opcodes: bytes,
     trace = rows(OBSTACLE_A / "coffee_shop_obstacle_trace.tsv")
     writes = rows(OBSTACLE_A / "coffee_shop_obstacle_writes.tsv")
     guard_writes = rows(OBSTACLE_A / "coffee_shop_obstacle_guard.tsv")
+    rng_calls = rows(OBSTACLE_A / "coffee_shop_rng_calls.tsv")
     actors = rows(OBSTACLE_A / "coffee_shop_scene_actors.tsv")
     baseline_result = rows(OBSTACLE_A / "progression_result.tsv")[0]
     mutant_result = rows(OBSTACLE_MUTANT / "progression_result.tsv")[0]
@@ -189,6 +191,26 @@ def coffee_shop_obstacle_lifecycle(opcodes: bytes,
             damage[2]["a1"] == "ffb380" and
             damage[2]["a3"] == "11af76",
             "Coffee Shop obstacle damage transition drift")
+    obstacle_break_rng = [row for row in rng_calls
+                          if row["frame"] == "2805" and
+                          row["a6"] == "ffb380"]
+    require(len(obstacle_break_rng) == 1 and
+            obstacle_break_rng[0]["entry_pc"] == "017c5e" and
+            obstacle_break_rng[0]["rng_before"] == "441b" and
+            obstacle_break_rng[0]["state"] == "0402" and
+            obstacle_break_rng[0]["substate"] == "0000",
+            "Coffee Shop obstacle break RNG transaction drift")
+    audio = json.loads(GLOBAL_AUDIO.read_text(encoding="ascii"))
+    obstacle_audio = [group for group in audio["trigger_groups"]
+                      if group["id"] ==
+                      "global-audio-ffb380-003a8e-0142"]
+    require(len(obstacle_audio) == 1 and
+            obstacle_audio[0]["command"] == "0x0142" and
+            obstacle_audio[0]["argument_variants"] ==
+            [["00000142", "00001b00", "00000000"]] and
+            obstacle_audio[0]["transition_guard"]["contexts"][0]
+                ["source_call"]["address"] == "0x06df42",
+            "Coffee Shop obstacle break audio ownership drift")
     require(int(baseline_result["obstacle_transition_suppressed_writes"]) == 0 and
             int(mutant_result["obstacle_transition_suppressed_writes"]) == 18 and
             int(baseline_result["final_route"]) == 2 and
@@ -199,6 +221,29 @@ def coffee_shop_obstacle_lifecycle(opcodes: bytes,
             identity_mutant["coffee_shop_scene_frames.tsv"] and
             identity_a["dispatches.tsv"] != identity_mutant["dispatches.tsv"],
             "Coffee Shop obstacle transition suppression did not discriminate")
+    physics_entry = [row for row in trace if row["frame"] == "2815" and
+                     row["pc"] == "06e09a"]
+    require(len(physics_entry) == 1 and
+            physics_entry[0]["state"] == "0404" and
+            physics_entry[0]["field4f"] == "01" and
+            physics_entry[0]["field60"] == "04630000" and
+            physics_entry[0]["field64"] == "04630000" and
+            physics_entry[0]["field68"] == "01730002" and
+            physics_entry[0]["field6c"] == "01430000" and
+            physics_entry[0]["field30"] == "0500" and
+            physics_entry[0]["field32"] == "0400" and
+            physics_entry[0]["field34"] == "0600" and
+            physics_entry[0]["field36"] == "0500",
+            "Coffee Shop obstacle physics initialization drift")
+    physics_visible = [row for row in obstacle
+                       if 2815 <= int(row["frame"]) <= 2818]
+    require([(int(row["frame"]), row["state"], row["x_fp"], row["y_fp"],
+              row["animation_record"]) for row in physics_visible] == [
+                (2815, "0402", "04630000", "01430000", "0006e15a"),
+                (2816, "0404", "04630000", "01730000", "0006e16e"),
+                (2817, "0404", "04670000", "01480000", "0006e182"),
+                (2818, "0404", "046d0000", "017e0000", "0006e16e"),
+              ], "Coffee Shop obstacle alternating projection drift")
     scene_record = program[0x15C168:0x15C178]
     require(scene_record.hex() == "02b00463014300040a000000000e0000",
             "Coffee Shop obstacle scene record drift")
@@ -276,13 +321,61 @@ def coffee_shop_obstacle_lifecycle(opcodes: bytes,
             },
             "state_0400": {
                 "entry": "increment low state byte to 0x0402, set timer high byte to 8, bind selector 1 record 0x06e14a, and submit",
+                "presentation_rng_transaction": {
+                    "caller": "0x06df3c", "callee": "0x0bc692",
+                    "rng_entry": "0x017c5e", "rng_call_pc": "0x0bc6b4",
+                    "calls_u8": 1, "seed_before_u16": "0x441b",
+                    "seed_after_u16": "0xcce7", "selector_mask_u16": "0x001f",
+                    "owner": "source-owned obstacle-break presentation transaction",
+                },
+                "audio_transaction": {
+                    "caller": "0x06df42", "callee": "0x002630",
+                    "shared_wrapper_return": "0x003a8e",
+                    "command_u16": "0x0142",
+                    "arguments_u32": ["0x00000142", "0x00001b00",
+                                      "0x00000000"],
+                    "semantic_sound_name": "UNKNOWN",
+                },
+                "side_effect_order": [
+                    "write state 0x0402",
+                    "0x0bc692 presentation transaction consumes one shared RNG value",
+                    "0x002630 dispatches command 0x0142",
+                    "write timer high byte 8",
+                    "bind selector 1 record 0x06e14a",
+                ],
                 "timer_high_byte_u8": 8,
                 "timer_guard": "decrement high byte of actor+0x2a while nonzero; after zero require negative animation branch",
                 "next_state": "0x0404",
             },
             "state_0404": {
                 "initialization": "selectors 2 and 3 seed two alternating animation/position records plus signed velocity and acceleration fields",
+                "transition_initialization_order": {
+                    "source_update_frame": 2815,
+                    "first_visible_frame": 2816,
+                    "rule": "after the state-0x0402 timer is zero and the animation branch is negative, increment substate to 0x0404, call 0x06e010 and 0x06e0b2 in the same actor update, then submit",
+                    "fixed_frame_delay_forbidden": True,
+                },
+                "channel_seeds": {
+                    "primary": {"animation_selector_u8": 2,
+                                "animation_record": "0x06e16e",
+                                "fp60_u32": "0x04630000",
+                                "fp68_u32": "0x01730002"},
+                    "alternate": {"animation_selector_u8": 3,
+                                  "animation_record": "0x06e182",
+                                  "fp64_u32": "0x04630000",
+                                  "fp6c_u32": "0x01430000"},
+                    "source_block": "0x06e010..0x06e0b0",
+                },
                 "position_select": "(u8(A5+0x19)+D7)&1 selects the first or second record",
+                "visible_projection": "0x06e0b2 copies only the selected channel x/y high words plus its animation, assembly, timer, branch and selector identity into the visible actor fields",
+                "selection_witness": [
+                    {"frame": 2816, "channel": "primary", "x_s16": 1123,
+                     "y_s16": 371, "animation_record": "0x06e16e"},
+                    {"frame": 2817, "channel": "alternate", "x_s16": 1127,
+                     "y_s16": 328, "animation_record": "0x06e182"},
+                    {"frame": 2818, "channel": "primary", "x_s16": 1133,
+                     "y_s16": 382, "animation_record": "0x06e16e"},
+                ],
                 "arithmetic": [
                     "when flag bit0 is clear: fp60 += s16(field30)<<8; fp68 += s16(field34)<<8; field34 += s16(field3c)",
                     "when flag bit1 is clear: fp64 += s16(field32)<<8; fp6c += s16(field36)<<8; field36 += s16(field3e)",
@@ -292,7 +385,11 @@ def coffee_shop_obstacle_lifecycle(opcodes: bytes,
                                        "field38": 0, "field3c": -128,
                                        "field32": 1024, "field36": 1280,
                                        "field3a": 0, "field3e": -128},
-                "facing_rule": "when facing is zero negate field30, field38, field32, and field3a",
+                "direction_control": {"field": "actor+0x4f:u8",
+                                      "source_value_at_entry_u8": 1,
+                                      "presentation_facing_field": "actor+0x0f:u8",
+                                      "presentation_facing_at_entry_u8": 0,
+                                      "rule": "only when actor+0x4f is zero negate field30, field38, field32, and field3a; actor+0x0f must not control trajectory sign"},
                 "completion_guard": "both flag bits set",
                 "next_state": "0x0604",
             },
@@ -470,6 +567,9 @@ def terrain_interpreter_contract(opcodes: bytes, program: bytes,
     selector_bytes = terrain_map[2::4]
     require(len(selector_bytes) == 0x1000,
             "Coffee Shop terrain selector projection size drift")
+    map_selectors = sorted({value & 0xfc for value in selector_bytes})
+    require(map_selectors == [0, 4, 20, 24, 56],
+            "Coffee Shop full terrain selector set drift")
     def cell_offset(x: int, z: int) -> int:
         inverted_z = (~z) & 0xffff
         return (((inverted_z & 0x0300) << 4) +
@@ -497,7 +597,7 @@ def terrain_interpreter_contract(opcodes: bytes, program: bytes,
     packed_grid = bytearray((len(grid_selectors) + 3) // 4)
     for index, selector in enumerate(grid_selectors):
         packed_grid[index >> 2] |= selector_codes[selector] << ((index & 3) * 2)
-    implementation_selectors = sorted(set(first_segment_selectors) |
+    implementation_selectors = sorted(set(map_selectors) |
                                       {0, 8, 56, 96, 100, 164})
     implementation_records = []
     for selector in implementation_selectors:
@@ -508,7 +608,8 @@ def terrain_interpreter_contract(opcodes: bytes, program: bytes,
             "record_bytes": program[address:address + 8].hex(),
         })
     require([row["record_bytes"] for row in implementation_records] == [
-        "0080808080808080", "0202808010100080",
+        "0080808080808080", "0200808010100080",
+        "0202808010100080", "020080801010ff80",
         "020280801010ff80", "0202808010080080",
         "0604020100008080", "0604020100088080",
         "0402020100088080"], "Coffee Shop implementation records drift")
@@ -532,11 +633,15 @@ def terrain_interpreter_contract(opcodes: bytes, program: bytes,
             "movement_rule": "no position write",
         },
         2: {
-            "entry": "0x0b1c16", "selected_entry": "0x0b1c54",
+            "entry": "0x0b1c16",
+            "selected_entries": {"0": "0x0b1c38", "2": "0x0b1c54"},
             "parameter_signedness": "fields 4 and 5 are u8",
             "movement_rule": (
-                "remainder=(~world_z)&15; penetration=u8(field5)-remainder; "
-                "if penetration>0 then world_z-=penetration, z_velocity=0, response=1"),
+                "branch 0 uses remainder=world_z&15 and adds positive "
+                "u8(field5)-remainder to world_z; branch 2 uses "
+                "remainder=(~world_z)&15 and subtracts positive "
+                "u8(field5)-remainder from world_z; either response clears "
+                "z_velocity and sets response=1"),
         },
         4: {
             "entry": "0x0b1cac", "selected_entry": "0x0b1d0e",
@@ -1161,8 +1266,8 @@ def validate(report: dict[str, object]) -> None:
              "u8_or_s8_by_kind"] and
             terrain_contract["selection"]["record_address"] ==
             "0x0b20c6 + 2 * (u8(cell+2) & 0xfc)" and
-            terrain_contract["handlers"]["2"]["selected_entry"] ==
-            "0x0b1c54" and
+            terrain_contract["handlers"]["2"]["selected_entries"] ==
+            {"0": "0x0b1c38", "2": "0x0b1c54"} and
             terrain_contract["handlers"]["4"]["selected_entry"] ==
             "0x0b1d0e" and
             terrain_contract["handlers"]["6"]["selected_entry"] ==
@@ -1245,8 +1350,36 @@ def validate(report: dict[str, object]) -> None:
                 "edge_to_damage_ticks_u8"] == 14 and
             lifecycle["state_program"]["state_0400"][
                 "timer_high_byte_u8"] == 8 and
+            lifecycle["state_program"]["state_0400"][
+                "presentation_rng_transaction"] == {
+                    "caller": "0x06df3c", "callee": "0x0bc692",
+                    "rng_entry": "0x017c5e", "rng_call_pc": "0x0bc6b4",
+                    "calls_u8": 1, "seed_before_u16": "0x441b",
+                    "seed_after_u16": "0xcce7",
+                    "selector_mask_u16": "0x001f",
+                    "owner": "source-owned obstacle-break presentation transaction"} and
+            lifecycle["state_program"]["state_0400"][
+                "audio_transaction"]["command_u16"] == "0x0142" and
+            lifecycle["state_program"]["state_0400"][
+                "audio_transaction"]["semantic_sound_name"] == "UNKNOWN" and
             lifecycle["state_program"]["state_0404"]["completion_guard"] ==
             "both flag bits set" and
+            lifecycle["state_program"]["state_0404"]
+                ["transition_initialization_order"]["source_update_frame"] == 2815 and
+            lifecycle["state_program"]["state_0404"]
+                ["transition_initialization_order"]["fixed_frame_delay_forbidden"] is True and
+            lifecycle["state_program"]["state_0404"]["channel_seeds"]
+                ["primary"]["fp68_u32"] == "0x01730002" and
+            lifecycle["state_program"]["state_0404"]["channel_seeds"]
+                ["alternate"]["animation_record"] == "0x06e182" and
+            lifecycle["state_program"]["state_0404"]["direction_control"] == {
+                "field": "actor+0x4f:u8", "source_value_at_entry_u8": 1,
+                "presentation_facing_field": "actor+0x0f:u8",
+                "presentation_facing_at_entry_u8": 0,
+                "rule": "only when actor+0x4f is zero negate field30, field38, field32, and field3a; actor+0x0f must not control trajectory sign"} and
+            lifecycle["state_program"]["state_0404"]["selection_witness"][1] == {
+                "frame": 2817, "channel": "alternate", "x_s16": 1127,
+                "y_s16": 328, "animation_record": "0x06e182"} and
             lifecycle["collision_damage"]["player_attack_record"][
                 "damage_s16"] == 25 and
             lifecycle["collision_damage"]["obstacle_hurt_record"][

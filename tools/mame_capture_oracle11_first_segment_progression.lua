@@ -44,6 +44,22 @@ local suppress_resource_pc = tonumber(
     os.getenv("AVSP_ORACLE11_SUPPRESS_RESOURCE_PC") or "", 16)
 local capture_controller_substate =
     os.getenv("AVSP_ORACLE11_CONTROLLER_SUBSTATE_CAPTURE") == "1"
+local capture_component20_phase =
+    os.getenv("AVSP_ORACLE11_COMPONENT20_PHASE_CAPTURE") == "1"
+local capture_class1f_action4_guard =
+    os.getenv("AVSP_ORACLE11_CLASS1F_ACTION4_GUARD_CAPTURE") == "1"
+local capture_class1f_inner8_group =
+    os.getenv("AVSP_ORACLE11_CLASS1F_INNER8_GROUP_CAPTURE") == "1"
+local mutate_class1f_inner8_group =
+    os.getenv("AVSP_ORACLE11_CLASS1F_INNER8_GROUP_MUTATE") == "1"
+local capture_class1f_action0c =
+    os.getenv("AVSP_ORACLE11_CLASS1F_ACTION0C_CAPTURE") == "1"
+local mutate_class1f_action0c =
+    os.getenv("AVSP_ORACLE11_CLASS1F_ACTION0C_MUTATE") == "1"
+local capture_player_hit =
+    os.getenv("AVSP_ORACLE11_PLAYER_HIT_CAPTURE") == "1"
+local mutate_player_hit_body =
+    os.getenv("AVSP_ORACLE11_PLAYER_HIT_MUTATE_BODY") == "1"
 local suppress_controller_substate_pc = tonumber(
     os.getenv("AVSP_ORACLE11_SUPPRESS_CONTROLLER_SUBSTATE_PC") or "", 16)
 local class1f_hit_slot = tonumber(
@@ -77,6 +93,8 @@ local class1f_transitions = assert(io.open(
     root .. "/progression_class1f_transitions.tsv", "w"))
 local action4_timers = assert(io.open(
     root .. "/progression_class1f_action4_timers.tsv", "w"))
+local action4_guard = assert(io.open(
+    root .. "/progression_class1f_action4_guard.tsv", "w"))
 local scene_actors = assert(io.open(
     root .. "/coffee_shop_scene_actors.tsv", "w"))
 local scene_frames = assert(io.open(
@@ -105,6 +123,12 @@ local component20_collision = assert(io.open(
     root .. "/coffee_shop_component20_collision.tsv", "w"))
 local component20_global = assert(io.open(
     root .. "/coffee_shop_component20_global.tsv", "w"))
+local component20_phase = assert(io.open(
+    root .. "/coffee_shop_component20_phase.tsv", "w"))
+local scheduler_phase = assert(io.open(
+    root .. "/coffee_shop_scheduler_phase.tsv", "w"))
+local component20_callers = assert(io.open(
+    root .. "/coffee_shop_component20_callers.tsv", "w"))
 local player_dispatch = assert(io.open(
     root .. "/coffee_shop_player_dispatch.tsv", "w"))
 local player_animation_writes = assert(io.open(
@@ -121,6 +145,10 @@ local class1f_inner8_entries = assert(io.open(
     root .. "/coffee_shop_class1f_inner8_entries.tsv", "w"))
 local class1f_inner8_writes = assert(io.open(
     root .. "/coffee_shop_class1f_inner8_writes.tsv", "w"))
+local class1f_inner8_group = assert(io.open(
+    root .. "/coffee_shop_class1f_inner8_group.tsv", "w"))
+local class1f_action0c = assert(io.open(
+    root .. "/coffee_shop_class1f_action0c.tsv", "w"))
 local collision_guard = assert(io.open(
     root .. "/coffee_shop_record4_collision_guard.tsv", "w"))
 local collision_guard_writes = assert(io.open(
@@ -145,6 +173,10 @@ local player_resource = assert(io.open(
     root .. "/coffee_shop_player_resource.tsv", "w"))
 local controller_substate_writes = assert(io.open(
     root .. "/coffee_shop_controller_substate_writes.tsv", "w"))
+local player_hit_program = assert(io.open(
+    root .. "/coffee_shop_player_hit_program.tsv", "w"))
+local player_hit_writes = assert(io.open(
+    root .. "/coffee_shop_player_hit_writes.tsv", "w"))
 local result = assert(io.open(root .. "/progression_result.tsv", "w"))
 transactions:write("frame\tpc\ta4\ta6\tg8019\tliving\tprogress\tc_state\tc_substate\tc_timer40\tc_timer42\tc_limit4a\tc_index10\tc_phase2e\tc_local2c\tcamera_x\tcamera_z\trng\td0\td1\td2\tactor_active\tactor_class\tactor_type\tactor_state\tactor_substate\tactor_x\tactor_y\tactor_z\tactor_variant\tactor_timer\tactor_selector83\n")
 snapshots:write("frame\tslot\tactive\tclass\ttype\tstate\tsubstate\tfacing\tx\ty\tz\tvariant\ttimer\tselector83\thealth\tanim\n")
@@ -154,6 +186,7 @@ controller_samples:write("frame\tactive\tclass\ttype\tstate\tsubstate\tindex10\t
 lifecycle_writes:write("frame\taddress\tpc\ta6\towner_active\towner_class\towner_type\towner_state\towner_substate\towner_x\towner_y\towner_z\towner_health\towner_anim\tliving_before\tprogress_before\tdata\tmask\tsuppressed\n")
 class1f_transitions:write("frame\tslot\tinner\tpc\ta6\tactive\tclass\ttype\tstate_before\tsubstate_before\tfacing\tx\ty\tz\thealth\tanim\ttimer2a\tfield01\tfield0a\tfield24\tfield2b\tfield5c\tfield6e\tfield85\tfield96\tfielda2\tfielda3\tfielda4\tfielda5\tfielda6\tfieldac\tfieldad\tfieldae\tfieldaa\tfieldb0\tfield0c\tg8209\tg9a10\tg9a1c\tliving\tprogress\tp_state\tp_substate\tp_facing\tp_x\tp_y\tp_z\tp_health\tp_anim\tp_hurt\tp_attack\td0\td1\td2\td3\ta0\ta1\ta2\ta3\ta4\ta5\tdata\tmask\tsuppressed\n")
 action4_timers:write("frame\tevent\tpc\tslot\tstate\tsubstate\tstage_parameter\trng\td0\ttimer2a\tdata\tmask\tsuppressed\n")
+action4_guard:write("frame\tevent\tpc\tslot\tstate\tsubstate\tfield6e\ttimer2a\tanimation_record\tanimation_timer\tanimation_branch\tdata\tmask\n")
 scene_actors:write("frame\tpool\tpool_index\tslot\tactive\ttype\tclass\tvariant\tstate\tsubstate\tfacing\tx_fp\ty_fp\tz\tanimation_record\tanimation_timer\tanimation_branch\taction_timer\thealth\thurt_selector\tattack_selector\n")
 scene_frames:write("frame\troute_state\tentry_controller_state\tentry_controller_substate\tentry_controller_timer40\tentry_controller_timer42\tliving_enemy_count\tencounter_progress\tplayer_active\tplayer_state\tplayer_substate\tplayer_facing\tplayer_x_fp\tplayer_y_fp\tplayer_z\tplayer_health\tcamera_x\tcamera_z\tcamera_target_x\trng\n")
 scene_health_writes:write("frame\ttarget_pool\ttarget_slot\tpc\tattacker\tdefender\tattack_record\tstate\tsubstate\thealth_before\thealth_after\tmask\tdamage_writer\n")
@@ -168,6 +201,9 @@ component20_writes:write("frame\tpc\tslot\tinner\ta1\ta3\ta4\ta6\tactive\tclass\
 component20_dispatch:write("frame\tpc\treturn_pc\tslot\ta4\ta6\tactive\tclass\ttype\tstate\tsubstate\tvariant\tx_fp\ty_fp\tz\tanimation_record\tanimation_timer\tanimation_branch\taction_timer\tfield42\tfield4c\tfield66\tliving\tprogress\tglobal1c\troute\tcamera_x\trng\td0\td1\td4\td5\n")
 component20_collision:write("frame\tpc\ta0\ta1\ta2\ta3\ta4\ta5\ta6\td0\td1\td2\td3\td4\td5\td6\td7\tstate\tsubstate\tanimation_record\thurt_selector\tattack_selector\thealth\n")
 component20_global:write("frame\tpc\toffset\ta1\ta3\ta4\ta6\told\tdata\tmask\tliving\tprogress\tglobal1c\troute\tcamera_x\n")
+component20_phase:write("frame\tordinal\tpc\tsp\ta7\ta7_return0\ta7_return1\ta7_return2\tslot\ta4\ta4_active\ta4_class\ta4_type\ta4_state\ta4_substate\tstate\tsubstate\tanimation_record\tanimation_timer\tanimation_branch\tfield42\tfield4c\tfield66\troute\tcamera_x\n")
+scheduler_phase:write("frame\tordinal\tpc\ta5\ta6\troute\tcamera_x\trng\n")
+component20_callers:write("frame\tordinal\tcaller_pc\ttarget\ta4\ta5\ta6\tstate\tsubstate\tanimation_timer\tfield4c\troute\tcamera_x\n")
 player_dispatch:write("frame\tpc\treturn_pc\ta6\tstate\tsubstate\tanimation_record\tanimation_timer\tanimation_branch\taction_timer\troute\n")
 player_animation_writes:write("frame\tpc\taddress\ta6\tstate\tsubstate\tanimation_record\tanimation_timer\tanimation_branch\taction_timer\tdata\tmask\n")
 obstacle_trace:write("frame\tpc\tstate\tsubstate\tactive\tclass\ttype\tfacing\tx_fp\ty_fp\tz\tanimation_record\tanimation_timer\tanimation_branch\tfield06\tfield0c\tfield18\tfield24\tfield2a\tfield2e\tfield30\tfield32\tfield34\tfield36\tfield38\tfield3a\tfield3c\tfield3e\tfield40\tfield42\tfield4f\tfield50\tfield58\tfield60\tfield64\tfield68\tfield6c\tchild0\tchild1\tchild2\tchild3\tguard_ffee8f\troute\trng\td0\td1\td2\td3\ta0\ta1\ta2\ta3\ta4\ta5\n")
@@ -176,6 +212,8 @@ obstacle_guard:write("frame\tpc\tvalue_before\tdata\tmask\troute\tstate\tsubstat
 type16_collision:write("frame\tpc\ta0\ta1\ta2\ta3\ta4\ta5\ta6\td0\td1\td2\td3\td4\td5\td6\td7\tattacker_state\tattacker_substate\tattacker_animation_record\tattacker_table\tdefender_state\tdefender_substate\tdefender_animation_record\tdefender_table\tattack_record\n")
 class1f_inner8_entries:write("frame\tpc\tslot\tstate\tsubstate\tfacing\tx_fp\ty_fp\tz\tanimation_record\tanimation_timer\tanimation_branch\taction_timer\tfield85\tfielda3\tfielda4\tfielda5\tfielda6\tfieldac\tfieldad\tfieldae\tfielda8\tfieldb0\trng\td0\td1\td2\td3\ta0\ta1\ta2\ta3\ta4\ta5\n")
 class1f_inner8_writes:write("frame\tpc\tslot\tinner\tstate\tsubstate\tfacing\tx_fp\ty_fp\tz\tanimation_record\tanimation_timer\tanimation_branch\taction_timer\tfield85\tfielda3\tfielda4\tfielda5\tfielda6\tfieldac\tfieldad\tfieldae\tfielda8\tfieldb0\trng\told32\tdata\tmask\n")
+class1f_inner8_group:write("frame\tevent\tpc\tslot\tstate\tsubstate\tband86\tgroup87_s8\tgroup87_u8\tcursor89\tmembership8a\tdirection0c\toffset60\toffset62\tstyle85\tfielda3\trng\toccupancy0\toccupancy1\toccupancy2\toccupancy3\tx_fp\ty_fp\tz\tcamera_x\tcamera_z\td0\td2\td3\tdata\tmask\tmutated\n")
+class1f_action0c:write("frame\tevent\tpc\tslot\tinner\tstate\tsubstate\tvariant\tfacing\tdirection\tx_fp\ty_fp\tz\tanimation_record\tanimation_timer\tanimation_branch\ttimer2a\tguard6e\tstyle85\tfield80\tfield82\tfield95\tfield96\tfield98\ttarget\trng\td0\td1\td2\td3\ta0\ta4\tdata\tmask\tmutated\n")
 collision_guard:write("frame\tevent\tpc\tattacker\tattacker_active\tattacker_class\tattacker_state\tattacker_substate\tattacker_x_fp\tattacker_y_fp\tattacker_z\tattacker_anim\tattacker_attack_selector\tattacker_latch_index65\tattacker_id67\tdefender\tdefender_active\tdefender_class\tdefender_state\tdefender_substate\tdefender_x_fp\tdefender_y_fp\tdefender_z\tdefender_anim\tdefender_hurt_selector\tdefender_guard6d\tdefender_latch_value\tdefender_suppress70\tdefender_health\tmutated\n")
 collision_guard_writes:write("frame\tpc\tslot\tinner\tstate\tsubstate\tguard6d_before\tdata\tmask\n")
 collision_lists:write("frame\tpc\tattacker_count\tattacker_slots\tdefender_count\tdefender_slots\n")
@@ -188,12 +226,15 @@ class1f_hit_writes:write("frame\tpc\tslot\tinner\tstate\tsubstate\tanimation_rec
 class1f_hit_program:write("frame\tpc\tstate\tsubstate\tfacing\tx_fp\ty_fp\tz\tanimation_record\tanimation_timer\tanimation_branch\taction_timer2a\trecovery_timer2c\thealth\tprior_health\thit_mode46\thit_kind49\treaction_selector4d\treaction_facing4f\tairborne5c\tmotion_index6c\thit_count6d\tinterrupt73\tx_velocity30\ty_velocity34\tx_acceleration38\ty_acceleration3c\trng\td0\td1\td2\td3\n")
 player_resource:write("frame\tevent\tpc\tresource\trecharge\tdepleted\taward_timer\tstate\tsubstate\tdata\tmask\tsuppressed\n")
 controller_substate_writes:write("frame\tpc\toffset\tstate\tsubstate\tfield44\ta6\td0\td1\td2\td3\ta0\ta1\ta2\ta3\ta4\ta5\told32\tdata\tmask\tsuppressed\n")
-result:write("spawn_suppression\tguard_suppression\tmain_spawn_transactions\taux_spawn_transactions\tsuppressed_writes\tlifecycle_suppressed_writes\taction4_timer_events\taction4_timer_suppressed_writes\ttype4_class03_suppressed_writes\tcoffee_stage_rng_suppressed_writes\ttype36_suppressed_writes\tscene_pair_suppressed_actors\tobstacle_transition_suppressed_writes\tclass1f_hit_selector_mutations\tfinal_route\n")
+player_hit_program:write("frame\tevent\tpc\tstate\tsubstate\tinner_phase\tfacing\tx_fp\ty_fp\tz\tground_z\tanimation_record\tanimation_timer\tanimation_branch\taction_timer\tshake_count\thealth\tlatched_health\tactive_body\thit_kind\tpresentation_selector\treaction_facing\tairborne\tmotion_index\tinterrupt\tx_velocity\ty_velocity\tx_acceleration\ty_acceleration\tcollision_flags\td0\td1\td2\td3\ta0\ta1\ta2\ta3\ta4\ta5\n")
+player_hit_writes:write("frame\tpc\toffset\tstate\tsubstate\tinner_phase\tanimation_record\taction_timer\tshake_count\thealth\tlatched_health\tactive_body\thit_kind\tpresentation_selector\treaction_facing\tairborne\tmotion_index\tinterrupt\told32\tdata\tmask\tmutated\n")
+result:write("spawn_suppression\tguard_suppression\tmain_spawn_transactions\taux_spawn_transactions\tsuppressed_writes\tlifecycle_suppressed_writes\taction4_timer_events\taction4_timer_suppressed_writes\ttype4_class03_suppressed_writes\tcoffee_stage_rng_suppressed_writes\ttype36_suppressed_writes\tscene_pair_suppressed_actors\tobstacle_transition_suppressed_writes\tclass1f_hit_selector_mutations\tplayer_hit_body_mutations\tfinal_route\n")
 
 local function u8(a) return program:read_u8(a) end
 local function u16(a) return program:read_u16(a) end
 local function u32(a) return program:read_u32(a) end
 local function s16(v) return v >= 0x8000 and v - 0x10000 or v end
+local function s8(v) return v >= 0x80 and v - 0x100 or v end
 local main_spawns, aux_spawns, suppressed_writes = 0, 0, 0
 local lifecycle_suppressed_writes = 0
 local action4_timer_events, action4_timer_suppressed_writes = 0, 0
@@ -203,6 +244,7 @@ local type36_suppressed_writes = 0
 local scene_pair_suppressed_actors = 0
 local obstacle_transition_suppressed_writes = 0
 local class1f_hit_selector_mutations = 0
+local player_hit_body_mutations = 0
 
 oracle11_coffee_shop_resource_writes = program:install_write_tap(
     player + 0x88, player + 0x8f,
@@ -373,6 +415,91 @@ local component20_slots = {
     [0xffb580] = true, [0xffb600] = true,
 }
 
+local component20_phase_ordinal = 0
+local scheduler_phase_ordinal = 0
+local component20_caller_ordinal = 0
+
+local function component20_phase_window()
+    return (frame >= 2072 and frame <= 2078) or
+        (frame >= 2617 and frame <= 2621)
+end
+
+local function emit_scheduler_phase(pc)
+    if not capture_component20_phase or frame < 1972 or
+        frame > capture_last_frame then
+        return
+    end
+    scheduler_phase_ordinal = scheduler_phase_ordinal + 1
+    scheduler_phase:write(string.format("%d\t%d\t%06x\t%06x\t%06x\t%d\t%d\t%04x\n",
+        frame, scheduler_phase_ordinal, pc,
+        maincpu.state["A5"].value & 0xffffff,
+        maincpu.state["A6"].value & 0xffffff, u16(global + 8),
+        s16(u16(global + 0x278)), u16(0xff81a8)))
+end
+
+oracle11_scheduler_phase_pc_taps = {}
+for _, pc in ipairs({0x00849e, 0x01bc38}) do
+    oracle11_scheduler_phase_pc_taps[#oracle11_scheduler_phase_pc_taps + 1] =
+        opcodes:install_read_tap(pc, pc + 1,
+        string.format("oracle11_scheduler_phase_%06x", pc),
+        function() emit_scheduler_phase(pc) end)
+end
+
+local component20_indirect_callers = {
+    0x003b58, 0x019c72, 0x019ccc, 0x019f1c, 0x01a106, 0x01a18a,
+    0x01a524, 0x01a748, 0x01a7bc, 0x01a9b4, 0x01ae70, 0x01b176,
+    0x01b86c, 0x01b8e2, 0x01b94c, 0x01b9aa, 0x01ba88, 0x01bc6e,
+    0x01bd00, 0x01bd6e, 0x01bde4, 0x01c834, 0x021738, 0x0244bc,
+    0x024d04, 0x02726c, 0x039d6c, 0x05d9dc, 0x05e084, 0x05e612,
+    0x0829f6, 0x09578a, 0x09587a, 0x0a8546, 0x0ac636, 0x0b98aa,
+    0x0cf1c6, 0x130676, 0x133bd4, 0x139e54,
+}
+
+local function emit_component20_caller(pc)
+    if not capture_component20_phase or frame < 1972 or
+        frame > capture_last_frame then
+        return
+    end
+    local target = maincpu.state["A0"].value & 0xffffff
+    if target ~= 0x06b534 then return end
+    local a6 = maincpu.state["A6"].value & 0xffffff
+    component20_caller_ordinal = component20_caller_ordinal + 1
+    component20_callers:write(string.format(
+        "%d\t%d\t%06x\t%06x\t%06x\t%06x\t%06x\t%04x\t%04x\t%04x\t%02x\t%d\t%d\n",
+        frame, component20_caller_ordinal, pc, target,
+        maincpu.state["A4"].value & 0xffffff,
+        maincpu.state["A5"].value & 0xffffff, a6, u16(a6 + 4),
+        u16(a6 + 6), u16(a6 + 0x0a), u8(a6 + 0x4c),
+        u16(global + 8), s16(u16(global + 0x278))))
+end
+
+oracle11_component20_caller_taps = {}
+for _, pc in ipairs(component20_indirect_callers) do
+    oracle11_component20_caller_taps[#oracle11_component20_caller_taps + 1] =
+        opcodes:install_read_tap(pc, pc + 1,
+        string.format("oracle11_component20_caller_%06x", pc),
+        function() emit_component20_caller(pc) end)
+end
+
+local function emit_component20_phase(pc, a6, sp)
+    if not capture_component20_phase or pc ~= 0x06b534 or
+        not component20_phase_window() then
+        return
+    end
+    component20_phase_ordinal = component20_phase_ordinal + 1
+    local a4 = maincpu.state["A4"].value & 0xffffff
+    local a7 = maincpu.state["A7"].value & 0xffffff
+    component20_phase:write(string.format(
+        "%d\t%d\t%06x\t%06x\t%06x\t%06x\t%06x\t%06x\t%06x\t%06x\t%d\t%02x\t%d\t%04x\t%04x\t%04x\t%04x\t%08x\t%04x\t%d\t%02x\t%02x\t%02x\t%d\t%d\n",
+        frame, component20_phase_ordinal, pc, sp, a7,
+        u32(a7) & 0xffffff, u32(a7 + 4) & 0xffffff,
+        u32(a7 + 8) & 0xffffff, a6, a4, u8(a4), u8(a4 + 2),
+        u8(a4 + 8), u16(a4 + 4), u16(a4 + 6), u16(a6 + 4),
+        u16(a6 + 6), u32(a6 + 0x1c), u16(a6 + 0x0a),
+        s16(u16(a6 + 0x24)), u8(a6 + 0x42), u8(a6 + 0x4c),
+        u8(a6 + 0x66), u16(global + 8), s16(u16(global + 0x278))))
+end
+
 local function emit_component20_dispatch(pc)
     if not capture_scene or frame < 1972 or frame > capture_last_frame then
         return
@@ -380,6 +507,7 @@ local function emit_component20_dispatch(pc)
     local a6 = maincpu.state["A6"].value & 0xffffff
     if not component20_slots[a6] then return end
     local sp = maincpu.state["SP"].value & 0xffffff
+    emit_component20_phase(pc, a6, sp)
     component20_dispatch:write(string.format(
         "%d\t%06x\t%06x\t%06x\t%06x\t%06x\t%d\t%02x\t%d\t%04x\t%04x\t%02x\t%08x\t%08x\t%d\t%08x\t%04x\t%d\t%04x\t%02x\t%02x\t%02x\t%d\t%d\t%d\t%d\t%d\t%04x\t%08x\t%08x\t%08x\t%08x\n",
         frame, pc, u32(sp) & 0xffffff, a6,
@@ -638,7 +766,33 @@ local function emit_action4_timer_event(event, pc)
         u16(0xff81ea), u16(0xff81a8),
         maincpu.state["D0"].value & 0xffffffff, u16(slot + 0x2a)))
     action4_timer_events = action4_timer_events + 1
+    if capture_class1f_action4_guard and pc == 0x060944 then
+        action4_guard:write(string.format(
+            "%d\tguard\t%06x\t%06x\t%04x\t%04x\t%02x\t%04x\t%08x\t%04x\t%d\t00000000\t00000000\n",
+            frame, pc, slot, u16(slot + 4), u16(slot + 6),
+            u8(slot + 0x6e), u16(slot + 0x2a), u32(slot + 0x1c),
+            u16(slot + 0x0a), s16(u16(slot + 0x24))))
+    end
 end
+
+oracle11_action4_guard_write = program:install_write_tap(
+    pool, pool + count * stride - 1, "oracle11_action4_guard_write",
+    function(offset, data, mask)
+        if not capture_class1f_action4_guard or frame < 1972 or
+                frame > capture_last_frame then return end
+        local relative = offset - pool
+        local slot = pool + math.floor(relative / stride) * stride
+        local inner = relative % stride
+        if inner ~= 0x6e or u8(slot + 2) ~= 0x1f or
+                u8(slot + 8) ~= 12 then return end
+        local pc = maincpu.state["PC"].value & 0xffffff
+        action4_guard:write(string.format(
+            "%d\twrite\t%06x\t%06x\t%04x\t%04x\t%02x\t%04x\t%08x\t%04x\t%d\t%08x\t%08x\n",
+            frame, pc, slot, u16(slot + 4), u16(slot + 6),
+            u8(slot + 0x6e), u16(slot + 0x2a), u32(slot + 0x1c),
+            u16(slot + 0x0a), s16(u16(slot + 0x24)),
+            data & 0xffffffff, mask & 0xffffffff))
+    end)
 
 local function emit_transaction(pc)
     if frame < 1972 or frame > capture_last_frame then return end
@@ -1044,6 +1198,153 @@ oracle11_progression_lifecycle_writes = program:install_write_tap(
             lifecycle_suppressed_writes = lifecycle_suppressed_writes + 1
             return u16(0xff1a18)
         end
+    end)
+
+local class1f_inner8_group_mutation_prepared = false
+local class1f_inner8_group_mutated = false
+
+local function emit_class1f_inner8_group(event, pc, slot, data, mask)
+    if not capture_class1f_inner8_group or frame < 1972 or
+            frame > capture_last_frame or slot < pool or
+            slot >= pool + count * stride or u8(slot) == 0 or
+            u8(slot + 2) ~= 0x1f or u8(slot + 8) ~= 12 then return end
+    local mutated = 0
+    if mutate_class1f_inner8_group and not class1f_inner8_group_mutated and
+            class1f_inner8_group_mutation_prepared and event == "entry" and
+            pc == 0x041c36 and frame == 3004 and slot == 0xffa3c0 then
+        class1f_inner8_group_mutated = true
+        mutated = 1
+    end
+    class1f_inner8_group:write(string.format(
+        "%d\t%s\t%06x\t%06x\t%04x\t%04x\t%d\t%d\t%d\t%d\t%d\t%d\t%d\t%d\t%d\t%d\t%04x\t%d\t%d\t%d\t%d\t%08x\t%08x\t%d\t%d\t%d\t%08x\t%08x\t%08x\t%08x\t%08x\t%d\n",
+        frame, event, pc, slot, u16(slot + 4), u16(slot + 6),
+        u8(slot + 0x86), s8(u8(slot + 0x87)), u8(slot + 0x87),
+        u8(slot + 0x89), u8(slot + 0x8a), u8(slot + 0x0c),
+        s16(u16(slot + 0x60)), s16(u16(slot + 0x62)),
+        u8(slot + 0x85), u8(slot + 0xa3), u16(0xff81a8),
+        u8(0xff1a3c), u8(0xff1a3d), u8(0xff1a3e), u8(0xff1a3f),
+        u32(slot + 0x10), u32(slot + 0x14), s16(u16(slot + 0x18)),
+        s16(u16(global + 0x278)), s16(u16(global + 0x27c)),
+        maincpu.state["D0"].value & 0xffffffff,
+        maincpu.state["D2"].value & 0xffffffff,
+        maincpu.state["D3"].value & 0xffffffff,
+        data or 0, mask or 0, mutated))
+end
+
+local function emit_class1f_inner8_group_entry(pc)
+    local slot = maincpu.state["A6"].value & 0xffffff
+    if mutate_class1f_inner8_group and
+            not class1f_inner8_group_mutation_prepared and pc == 0x041c36 and
+            frame == 3004 and slot == 0xffa3c0 then
+        emit_class1f_inner8_group("mutation_before", pc, slot, 0, 0)
+        program:write_u16(0xff81a8, 0x0101)
+        class1f_inner8_group_mutation_prepared = true
+    end
+    emit_class1f_inner8_group("entry", pc, slot, 0, 0)
+end
+
+oracle11_class1f_inner8_group_pc_taps = {}
+for _, pc in ipairs({0x041c36, 0x041c70, 0x041c7a, 0x041d04, 0x041d50,
+                     0x041d6c, 0x041d9c}) do
+    oracle11_class1f_inner8_group_pc_taps[
+        #oracle11_class1f_inner8_group_pc_taps + 1] =
+        opcodes:install_read_tap(pc, pc + 1,
+        string.format("oracle11_class1f_inner8_group_%06x", pc),
+        function() emit_class1f_inner8_group_entry(pc) end)
+end
+
+oracle11_class1f_inner8_group_actor_writes = program:install_write_tap(
+    pool, pool + count * stride - 1,
+    "oracle11_class1f_inner8_group_actor_writes",
+    function(offset, data, mask)
+        if not capture_class1f_inner8_group then return end
+        local relative = offset - pool
+        local slot = pool + math.floor(relative / stride) * stride
+        local inner = relative % stride
+        if inner ~= 0x86 and inner ~= 0x87 and inner ~= 0x89 and
+                inner ~= 0x8a then return end
+        emit_class1f_inner8_group("actor_write", maincpu.state["PC"].value &
+            0xffffff, slot, data & 0xffffffff, mask & 0xffffffff)
+    end)
+
+oracle11_class1f_inner8_group_global_writes = program:install_write_tap(
+    0xff1a3c, 0xff1a3f, "oracle11_class1f_inner8_group_global_writes",
+    function(offset, data, mask)
+        if not capture_class1f_inner8_group then return end
+        local slot = maincpu.state["A6"].value & 0xffffff
+        emit_class1f_inner8_group("occupancy_write",
+            maincpu.state["PC"].value & 0xffffff, slot,
+            data & 0xffffffff, mask & 0xffffffff)
+    end)
+
+local class1f_action0c_mutated = false
+
+local function emit_class1f_action0c(event, pc, slot, inner, data, mask, mutated)
+    if not capture_class1f_action0c or frame < 1972 or frame > 5566 then
+        return
+    end
+    if slot < pool or slot >= pool + count * stride or
+            ((slot - pool) % stride) ~= 0 or u8(slot) == 0 or
+            u8(slot + 2) ~= 0x1f or u8(slot + 8) ~= 12 or
+            u16(slot + 4) ~= 0x0208 then
+        return
+    end
+    if pc ~= 0x041dfe and u8(slot + 6) ~= 0x0c then return end
+    class1f_action0c:write(string.format(
+        "%d\t%s\t%06x\t%06x\t%02x\t%04x\t%04x\t%02x\t%d\t%02x\t%08x\t%08x\t%d\t%08x\t%04x\t%d\t%02x\t%02x\t%02x\t%04x\t%04x\t%02x\t%04x\t%04x\t%04x\t%04x\t%08x\t%08x\t%08x\t%08x\t%06x\t%06x\t%08x\t%08x\t%d\n",
+        frame, event, pc, slot, inner, u16(slot + 4), u16(slot + 6),
+        u8(slot + 3), u8(slot + 0x0f), u8(slot + 0x0c),
+        u32(slot + 0x10), u32(slot + 0x14), s16(u16(slot + 0x18)),
+        u32(slot + 0x1c), u16(slot + 0x0a), s16(u16(slot + 0x24)),
+        u8(slot + 0x2a), u8(slot + 0x6e), u8(slot + 0x85),
+        u16(slot + 0x80), u16(slot + 0x82), u8(slot + 0x95),
+        u16(slot + 0x96), u16(slot + 0x98), u16(slot + 0x28),
+        u16(0xff81a8), maincpu.state["D0"].value & 0xffffffff,
+        maincpu.state["D1"].value & 0xffffffff,
+        maincpu.state["D2"].value & 0xffffffff,
+        maincpu.state["D3"].value & 0xffffffff,
+        maincpu.state["A0"].value & 0xffffff,
+        maincpu.state["A4"].value & 0xffffff,
+        data & 0xffffffff, mask & 0xffffffff, mutated and 1 or 0))
+end
+
+oracle11_class1f_action0c_pc_taps = {}
+for _, pc in ipairs({
+        0x041dfe, 0x040dc0, 0x040dce, 0x040df8, 0x040dfe,
+        0x041054, 0x041080, 0x0410a6, 0x0410b6, 0x0410de,
+        0x040e06, 0x040e0e, 0x040e12, 0x040e1c,
+        0x040e24, 0x040e2a, 0x040e30, 0x040e34, 0x040e38,
+        0x040e40, 0x040e4e, 0x040e54, 0x040e5c,
+        0x040e62, 0x040e68, 0x040e72, 0x040e7e}) do
+    oracle11_class1f_action0c_pc_taps[
+        #oracle11_class1f_action0c_pc_taps + 1] =
+        opcodes:install_read_tap(pc, pc + 1,
+        string.format("oracle11_class1f_action0c_%06x", pc),
+        function()
+            local slot = maincpu.state["A6"].value & 0xffffff
+            emit_class1f_action0c("entry", pc, slot, 0xff, 0, 0, false)
+            if mutate_class1f_action0c and not class1f_action0c_mutated and
+                    pc == 0x040df8 and slot >= pool and
+                    slot < pool + count * stride and u8(slot + 6) == 0x0c then
+                emit_class1f_action0c("mutation_before", pc, slot, 0xff,
+                    0, 0, true)
+                local d0 = maincpu.state["D0"].value & 0xffffffff
+                maincpu.state["D0"].value = (d0 & 0xffff0000) |
+                    ((d0 + 2) & 0xffff)
+                class1f_action0c_mutated = true
+            end
+        end)
+end
+
+oracle11_class1f_action0c_write_tap = program:install_write_tap(
+    pool, pool + count * stride - 1, "oracle11_class1f_action0c_writes",
+    function(offset, data, mask)
+        if not capture_class1f_action0c then return end
+        local relative = offset - pool
+        local slot = pool + math.floor(relative / stride) * stride
+        emit_class1f_action0c("actor_write",
+            maincpu.state["PC"].value & 0xffffff, slot, relative % stride,
+            data & 0xffffffff, mask & 0xffffffff, false)
     end)
 
 local function emit_class1f_inner8_entry(pc)
@@ -1519,6 +1820,71 @@ oracle11_class1f_hit_selector_table_tap = program:install_read_tap(
         return data & 0x00ff
     end)
 
+local function emit_player_hit(event, pc)
+    if not capture_player_hit or frame < 2700 or frame > 4050 then return end
+    player_hit_program:write(string.format(
+        "%d\t%s\t%06x\t%04x\t%04x\t%02x\t%d\t%08x\t%08x\t%d\t%d\t%08x\t%04x\t%d\t%04x\t%02x\t%d\t%d\t%02x\t%02x\t%02x\t%02x\t%02x\t%02x\t%02x\t%08x\t%08x\t%08x\t%08x\t%04x\t%08x\t%08x\t%08x\t%08x\t%06x\t%06x\t%06x\t%06x\t%06x\t%06x\n",
+        frame, event, pc, u16(player + 4), u16(player + 6),
+        u8(player + 7), u8(player + 0x0f), u32(player + 0x10),
+        u32(player + 0x14), s16(u16(player + 0x14)),
+        s16(u16(player + 0x18)), u32(player + 0x1c),
+        u16(player + 0x0a), s16(u16(player + 0x24)),
+        u16(player + 0x2a), u8(player + 0x2c),
+        s16(u16(player + 0x40)), s16(u16(player + 0x42)),
+        u8(player + 0x46), u8(player + 0x49), u8(player + 0x4d),
+        u8(player + 0x4f), u8(player + 0x5c), u8(player + 0x6c),
+        u8(player + 0x73), u32(player + 0x30), u32(player + 0x34),
+        u32(player + 0x38), u32(player + 0x3c), u16(player + 0x74),
+        maincpu.state["D0"].value & 0xffffffff,
+        maincpu.state["D1"].value & 0xffffffff,
+        maincpu.state["D2"].value & 0xffffffff,
+        maincpu.state["D3"].value & 0xffffffff,
+        maincpu.state["A0"].value & 0xffffff,
+        maincpu.state["A1"].value & 0xffffff,
+        maincpu.state["A2"].value & 0xffffff,
+        maincpu.state["A3"].value & 0xffffff,
+        maincpu.state["A4"].value & 0xffffff,
+        maincpu.state["A5"].value & 0xffffff))
+end
+
+oracle11_player_hit_pc_taps = {}
+for _, pc in ipairs({
+        0x01d454, 0x01aa00, 0x01aa10, 0x01a96e, 0x01a982,
+        0x01aad0, 0x01ab1a, 0x01ab2c, 0x01ab52, 0x01abb8,
+        0x01ac48, 0x01ac62, 0x01acdc, 0x01ad14, 0x01ad74,
+        0x01adb0, 0x01ade8, 0x01ae24, 0x01ae78, 0x01ae9a}) do
+    oracle11_player_hit_pc_taps[#oracle11_player_hit_pc_taps + 1] =
+        opcodes:install_read_tap(pc, pc + 1,
+        string.format("oracle11_player_hit_%06x", pc),
+        function() emit_player_hit("dispatch", pc) end)
+end
+
+oracle11_player_hit_write_tap = program:install_write_tap(
+    player, player + 0xff, "oracle11_player_hit_writes",
+    function(offset, data, mask)
+        if not capture_player_hit or frame < 2700 or frame > 4050 then
+            return
+        end
+        local pc = maincpu.state["PC"].value & 0xffffff
+        local inner = offset - player
+        local mutated = mutate_player_hit_body and pc == 0x01d46c and
+            u8(player + 0x49) == 9
+        player_hit_writes:write(string.format(
+            "%d\t%06x\t%02x\t%04x\t%04x\t%02x\t%08x\t%04x\t%02x\t%d\t%d\t%02x\t%02x\t%02x\t%02x\t%02x\t%02x\t%02x\t%08x\t%08x\t%08x\t%d\n",
+            frame, pc, inner, u16(player + 4), u16(player + 6),
+            u8(player + 7), u32(player + 0x1c), u16(player + 0x2a),
+            u8(player + 0x2c), s16(u16(player + 0x40)),
+            s16(u16(player + 0x42)), u8(player + 0x46),
+            u8(player + 0x49), u8(player + 0x4d), u8(player + 0x4f),
+            u8(player + 0x5c), u8(player + 0x6c), u8(player + 0x73),
+            u32(offset & 0xfffffc), data & 0xffffffff,
+            mask & 0xffffffff, mutated and 1 or 0))
+        if mutated then
+            player_hit_body_mutations = player_hit_body_mutations + 1
+            return 0x00000202
+        end
+    end)
+
 oracle11_progression_frame = emu.add_machine_frame_notifier(function()
     frame = frame + 1
     suppress_selected_scene_pair()
@@ -1543,6 +1909,9 @@ oracle11_progression_frame = emu.add_machine_frame_notifier(function()
         for slot = 0xff9d00, 0xffa3c0, stride do emit_slot(slot) end
     end
     if capture_scene and frame >= 1972 and frame <= capture_last_frame then
+        if capture_player_hit and frame >= 2700 and frame <= 4050 then
+            emit_player_hit("sample", 0)
+        end
         player_resource:write(string.format(
             "%d\tsample\t000000\t%d\t%d\t%d\t%d\t%04x\t%04x\t00000000\t00000000\t0\n",
             frame, u8(player + 0x8c), u8(player + 0x8d),
@@ -1587,10 +1956,12 @@ oracle11_progression_frame = emu.add_machine_frame_notifier(function()
             scene_pair_suppressed_actors,
             obstacle_transition_suppressed_writes,
             class1f_hit_selector_mutations,
+            player_hit_body_mutations,
             u8(global + 9)}, "\t") .. "\n")
         transactions:close(); snapshots:close(); writes:close(); global_writes:close()
         controller_samples:close(); lifecycle_writes:close()
         class1f_transitions:close(); action4_timers:close()
+        action4_guard:close()
         scene_actors:close(); scene_frames:close()
         scene_health_writes:close(); type4_class03:close()
         scene_rng_calls:close(); stage_setup:close(); stage_setup_writes:close()
@@ -1599,12 +1970,17 @@ oracle11_progression_frame = emu.add_machine_frame_notifier(function()
         component20_writes:close(); component20_dispatch:close()
         component20_collision:close()
         component20_global:close()
+        component20_phase:close()
+        scheduler_phase:close()
+        component20_callers:close()
         player_dispatch:close()
         player_animation_writes:close()
         obstacle_guard:close()
         type16_collision:close()
         class1f_inner8_entries:close()
         class1f_inner8_writes:close()
+        class1f_inner8_group:close()
+        class1f_action0c:close()
         collision_guard:close()
         collision_guard_writes:close()
         collision_lists:close()
@@ -1617,6 +1993,8 @@ oracle11_progression_frame = emu.add_machine_frame_notifier(function()
         class1f_hit_program:close()
         player_resource:close()
         controller_substate_writes:close()
+        player_hit_program:close()
+        player_hit_writes:close()
         result:close()
     end
 end)

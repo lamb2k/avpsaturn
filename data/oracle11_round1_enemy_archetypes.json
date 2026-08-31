@@ -27795,7 +27795,7 @@
             },
             "capture_identity": {
               "byte_identical": true,
-              "capture_script_sha256": "303892450486724d519381baa697904b4a282ce6574d28db4ffe000d817693ac",
+              "capture_script_sha256": "231b9316eb718cbdbb2d3022d25682a6e5ab7e68eebd094d77f8c2ab52790396",
               "completion_a": {
                 "coffee_shop_class1f_hit.tsv": "cc411e49ae629a622166f40a69c363f4ebdffb7b0f655e45b3334b3034d91648",
                 "coffee_shop_class1f_hit_program.tsv": "5dec2f9eb35a4303d0e4711d2b51def0e1bf57d411e1294596cbb64b93dfae90",
@@ -28562,7 +28562,7 @@
           "source_projectile_ko_program": {
             "capture_identity": {
               "byte_identical": true,
-              "capture_script_sha256": "303892450486724d519381baa697904b4a282ce6574d28db4ffe000d817693ac",
+              "capture_script_sha256": "231b9316eb718cbdbb2d3022d25682a6e5ab7e68eebd094d77f8c2ab52790396",
               "completion_a": {
                 "coffee_shop_class1f_hit.tsv": "ba5702bcc089aefcb3746144f5d60b61e5e72c3a0823107701b6b3fd63445335",
                 "coffee_shop_class1f_hit_program.tsv": "cbfcbfb3557698fff37e10f15cbe154a8305ce8d55d143f253eafe3f137ac4c5",
@@ -35651,6 +35651,7 @@
           },
           "action_0x04": {
             "coffee_shop_observation": {
+              "guard_field_u8": 1,
               "rng_index_u8": 1,
               "rng_seed_after_u16": "0x5cc1",
               "rng_seed_before_u16": "0xc965",
@@ -35659,6 +35660,13 @@
               "stage_offset_u8": 32,
               "stage_parameter_u16": 9,
               "timer_result_u8": 6,
+              "visible_result": {
+                "animation_record_u32": "0x0012d8e0",
+                "animation_timer_u16": 7,
+                "source_frame_u16": 2798,
+                "state_u16": "0x0200",
+                "substate_u16": "0x0404"
+              },
               "writer_pc": "0x060944"
             },
             "group_offsets_u16": [
@@ -35667,6 +35675,29 @@
               20,
               30
             ],
+            "phase_0_guard_ownership": {
+              "capture_identity": {
+                "byte_identical": true,
+                "capture_a": "oracle11_progression_lifecycle_cs46a",
+                "capture_b": "oracle11_progression_lifecycle_cs46b",
+                "sha256": "c023e4aad76316dc8a15a2e005758feba08eca769fd442ec538507de161ebcb9"
+              },
+              "collision_set_captured_pc": "0x01cbba",
+              "collision_set_instruction_pc": "0x01cbb4",
+              "field": "actor+0x6e:u8",
+              "initial_group_rule": "phase 0 performs no direct actor+0x6e write; the source selector-registration helper owns the clear before later collision can set it",
+              "mutation_control": "clearing actor+0x6e during phase 0 changes the first Coffee Shop source/native action divergence to frame 2798",
+              "nonzero_result": "continue through animation helper 0x016536",
+              "phase_2_terminal_guard_pc": "0x060944",
+              "selector_rebind_clear_captured_pc": "0x01d76e",
+              "selector_rebind_clear_instruction_pc": "0x01d768",
+              "source_window": {
+                "first": "0x0608ce",
+                "last_exclusive": "0x06094e",
+                "sha256": "c0839676ea934a2f3495a13d6c646743295750aa59da192329c1c4255edf8dbf"
+              },
+              "zero_result": "clear actor+0x06 action/substate at 0x06096e"
+            },
             "rng_group_mask_u16": 62,
             "rng_group_table_u16": [
               0,
@@ -37826,6 +37857,13 @@
           160
         ],
         "capture_identity": {
+          "action4_guard_a": {
+            "progression_class1f_action4_guard.tsv": "c023e4aad76316dc8a15a2e005758feba08eca769fd442ec538507de161ebcb9"
+          },
+          "action4_guard_b": {
+            "progression_class1f_action4_guard.tsv": "c023e4aad76316dc8a15a2e005758feba08eca769fd442ec538507de161ebcb9"
+          },
+          "action4_guard_byte_identical": true,
           "action4_timer_suppression": {
             "coffee_shop_scene_actors.tsv": "ae6307766e05b72b771bf65d4f411c5d61eede9870575808b91728f7282de1a5",
             "coffee_shop_scene_frames.tsv": "5d1aab92f7cce67f90513b2be3df5798342cba04ffdc218258aeda2c002aae1d",
@@ -38236,6 +38274,7 @@
         },
         "initializer": {
           "entry": "0x060546",
+          "post_initialization_variant_u8": 0,
           "rng_calls_per_actor": 1,
           "rng_entry": "0x017c5e",
           "source_window": {
@@ -38243,7 +38282,10 @@
             "last_exclusive": "0x060556",
             "sha256": "76fca8e947ab4d3765628dd11cae861e53eed6ee68fca528815c2ad3c927866b"
           },
+          "variant_clear_order": "after variant dispatch returns and before facing/direction derivation",
+          "variant_clear_writer": "0x0605ec",
           "variant_dispatch_table": "0x060606",
+          "variant_field_u8": "actor+0x03",
           "variants": [
             {
               "variant_u8": 0,
@@ -38369,10 +38411,17 @@
               "x_fp += x_velocity; x_velocity += x_acceleration",
               "y_fp += y_velocity; y_velocity += y_acceleration",
               "continue while unsigned z_s16 < unsigned y_high_s16",
-              "on landing clear airborne, increment phase to 6, bind selector 0x53"
+              "on landing replace only y_fp high word with z_s16 and preserve the accumulated low 16-bit fraction",
+              "clear airborne, increment phase to 6, bind selector 0x53"
             ],
             "phase_6": "step animation; each positive actor+0x25 event calls 0x0413d2; terminal increments phase and writes action_timer_u8=8",
             "phase_8": "decrement action_timer_u8; zero branches to 0x040efe and clears action when actor+0x6e is zero",
+            "phase_8_terminal_writes": {
+              "action_u16": 0,
+              "field95_u8": 0,
+              "source_entry": "0x040e40",
+              "wander_cursor_u8": 0
+            },
             "phases_u16": [
               0,
               2,
@@ -38387,6 +38436,94 @@
             }
           },
           "animation_records": [
+            {
+              "animation_record": "0x0012d380",
+              "assembly": "0x0012f638",
+              "attack_selector_u8": 0,
+              "branch_s16": 27,
+              "hurt_selector_u8": 1,
+              "movement_table_index_u8": 27,
+              "next_animation_record": "0x0012d390",
+              "record_sha256": "5f88ed0f126f459311a72ff12653692c4e021c2acb7a84563c074d56be757493",
+              "timer_u16": 6
+            },
+            {
+              "animation_record": "0x0012d390",
+              "assembly": "0x0012f670",
+              "attack_selector_u8": 0,
+              "branch_s16": 271,
+              "hurt_selector_u8": 1,
+              "movement_table_index_u8": 15,
+              "next_animation_record": "0x0012d3a0",
+              "record_sha256": "d6b57436737b64be569d7e92c6e817fdd43a5e81cfb6affab0267e4cf07c186b",
+              "timer_u16": 6
+            },
+            {
+              "animation_record": "0x0012d3a0",
+              "assembly": "0x0012f6a8",
+              "attack_selector_u8": 0,
+              "branch_s16": 524,
+              "hurt_selector_u8": 1,
+              "movement_table_index_u8": 12,
+              "next_animation_record": "0x0012d3b0",
+              "record_sha256": "3205c92b6ad37fc504d3d4396cc1e76b7a74f285646bcc3538b20748513b2aa7",
+              "timer_u16": 6
+            },
+            {
+              "animation_record": "0x0012d3b0",
+              "assembly": "0x0012f6da",
+              "attack_selector_u8": 0,
+              "branch_s16": 779,
+              "hurt_selector_u8": 1,
+              "movement_table_index_u8": 11,
+              "next_animation_record": "0x0012d3c0",
+              "record_sha256": "4ee07a0b3c21115fd412554098488e7c5f7b985af06778242d94f4fedafea348",
+              "timer_u16": 6
+            },
+            {
+              "animation_record": "0x0012d3c0",
+              "assembly": "0x0012f712",
+              "attack_selector_u8": 0,
+              "branch_s16": 1036,
+              "hurt_selector_u8": 1,
+              "movement_table_index_u8": 12,
+              "next_animation_record": "0x0012d3d0",
+              "record_sha256": "a30c1bb09a499547365d386bd05bb3ed09570d089f6abd082dd905e059f433f3",
+              "timer_u16": 6
+            },
+            {
+              "animation_record": "0x0012d3d0",
+              "assembly": "0x0012f72a",
+              "attack_selector_u8": 0,
+              "branch_s16": 1292,
+              "hurt_selector_u8": 1,
+              "movement_table_index_u8": 12,
+              "next_animation_record": "0x0012d3e0",
+              "record_sha256": "f02f5694062164fb7ebcf9b75f8e89285785848c94fa18b8f512ccb357f9292d",
+              "timer_u16": 6
+            },
+            {
+              "animation_record": "0x0012d3e0",
+              "assembly": "0x0012f762",
+              "attack_selector_u8": 0,
+              "branch_s16": 1548,
+              "hurt_selector_u8": 1,
+              "movement_table_index_u8": 12,
+              "next_animation_record": "0x0012d3f0",
+              "record_sha256": "d4a95bd70c864f28d97bbe66745f10b4358419315e56ce36bb6562edf5ec0513",
+              "timer_u16": 6
+            },
+            {
+              "animation_record": "0x0012d3f0",
+              "assembly": "0x0012f794",
+              "attack_selector_u8": 0,
+              "branch_s16": -30962,
+              "hurt_selector_u8": 1,
+              "movement_table_index_u8": 14,
+              "next_animation_record": "0x0012d380",
+              "record_sha256": "f4e65a0f512f6693e97762a4e4d8be62534abac996da83a7a4969abb637e5bd1",
+              "timer_u16": 6
+            },
             {
               "animation_record": "0x0012d404",
               "assembly": "0x0012f794",
@@ -38762,6 +38899,644 @@
               "timer_u16": 4
             },
             {
+              "animation_record": "0x0012d890",
+              "assembly": "0x0012fe9e",
+              "attack_selector_u8": 0,
+              "branch_s16": 0,
+              "hurt_selector_u8": 1,
+              "movement_table_index_u8": 0,
+              "next_animation_record": "0x0012d8a0",
+              "record_sha256": "c76ab46cdaa6d8256da122840df9b4f9e40bd9653742927165e366123b54a42b",
+              "timer_u16": 8
+            },
+            {
+              "animation_record": "0x0012d8a0",
+              "assembly": "0x0012febc",
+              "attack_selector_u8": 1,
+              "branch_s16": 0,
+              "hurt_selector_u8": 1,
+              "movement_table_index_u8": 0,
+              "next_animation_record": "0x0012d8b0",
+              "record_sha256": "5cf921125b5aec03c32bf78d2aab71e38543fb3a77c344a639b80e734eace9a8",
+              "timer_u16": 1
+            },
+            {
+              "animation_record": "0x0012d8b0",
+              "assembly": "0x0012febc",
+              "attack_selector_u8": 0,
+              "branch_s16": 0,
+              "hurt_selector_u8": 1,
+              "movement_table_index_u8": 0,
+              "next_animation_record": "0x0012d8c0",
+              "record_sha256": "7926c990baade9b98b433af94e2f843300f801b6bccb2b9ac1f4c952c2224450",
+              "timer_u16": 9
+            },
+            {
+              "animation_record": "0x0012d8c0",
+              "assembly": "0x0012fef4",
+              "attack_selector_u8": 0,
+              "branch_s16": 0,
+              "hurt_selector_u8": 1,
+              "movement_table_index_u8": 0,
+              "next_animation_record": "0x0012d8d0",
+              "record_sha256": "7358e361524979b73efc5f8cf92d26c4cf370ec8ba6d7719af63e830d77e2c93",
+              "timer_u16": 10
+            },
+            {
+              "animation_record": "0x0012d8d0",
+              "assembly": "0x0012ff22",
+              "attack_selector_u8": 0,
+              "branch_s16": 0,
+              "hurt_selector_u8": 1,
+              "movement_table_index_u8": 0,
+              "next_animation_record": "0x0012d8e0",
+              "record_sha256": "37adbe873d96096c515e8b60c9dce63307bf19ba1d86e169008b8ecf9d47b219",
+              "timer_u16": 16
+            },
+            {
+              "animation_record": "0x0012d8e0",
+              "assembly": "0x0012f5ac",
+              "attack_selector_u8": 0,
+              "branch_s16": -32768,
+              "hurt_selector_u8": 1,
+              "movement_table_index_u8": 0,
+              "next_animation_record": "0x0012d8e0",
+              "record_sha256": "c9e40e469bd821c8be18858c83b68d8df8a5f7657d879da482e672bd6c3a1fe1",
+              "timer_u16": 8
+            },
+            {
+              "animation_record": "0x0012d8f4",
+              "assembly": "0x0012ff4a",
+              "attack_selector_u8": 0,
+              "branch_s16": 0,
+              "hurt_selector_u8": 1,
+              "movement_table_index_u8": 0,
+              "next_animation_record": "0x0012d904",
+              "record_sha256": "540851a5069b5ba9e8fadc52bc3052bd870ec179311a1e4c6467666f0058f9e2",
+              "timer_u16": 8
+            },
+            {
+              "animation_record": "0x0012d904",
+              "assembly": "0x0012ff9a",
+              "attack_selector_u8": 2,
+              "branch_s16": 0,
+              "hurt_selector_u8": 1,
+              "movement_table_index_u8": 0,
+              "next_animation_record": "0x0012d914",
+              "record_sha256": "2e9c438c4592b2f755a1e85d7cbd5f548cf75cde2a4cdeee1ac8eb9eba29de30",
+              "timer_u16": 1
+            },
+            {
+              "animation_record": "0x0012d914",
+              "assembly": "0x0012ff9a",
+              "attack_selector_u8": 0,
+              "branch_s16": 0,
+              "hurt_selector_u8": 1,
+              "movement_table_index_u8": 0,
+              "next_animation_record": "0x0012d924",
+              "record_sha256": "e3eecf9e58f1d601e95e3d42096179bab2a818cf3d93a75ea7b2d75642238076",
+              "timer_u16": 9
+            },
+            {
+              "animation_record": "0x0012d924",
+              "assembly": "0x0012ffd8",
+              "attack_selector_u8": 0,
+              "branch_s16": 0,
+              "hurt_selector_u8": 1,
+              "movement_table_index_u8": 0,
+              "next_animation_record": "0x0012d934",
+              "record_sha256": "b1719b0307afe63a9beb87790837a7f0d274f66117994a1f9fb70b9688b5bbcf",
+              "timer_u16": 10
+            },
+            {
+              "animation_record": "0x0012d934",
+              "assembly": "0x0013000a",
+              "attack_selector_u8": 0,
+              "branch_s16": 0,
+              "hurt_selector_u8": 1,
+              "movement_table_index_u8": 0,
+              "next_animation_record": "0x0012d944",
+              "record_sha256": "2992abbac3d6e90cb775cd59932e3f6509fddf7e2321ffab4c28898e76241657",
+              "timer_u16": 16
+            },
+            {
+              "animation_record": "0x0012d944",
+              "assembly": "0x0012f5ac",
+              "attack_selector_u8": 0,
+              "branch_s16": -32768,
+              "hurt_selector_u8": 1,
+              "movement_table_index_u8": 0,
+              "next_animation_record": "0x0012d944",
+              "record_sha256": "c9e40e469bd821c8be18858c83b68d8df8a5f7657d879da482e672bd6c3a1fe1",
+              "timer_u16": 8
+            },
+            {
+              "animation_record": "0x0012d958",
+              "assembly": "0x0012ff72",
+              "attack_selector_u8": 0,
+              "branch_s16": 0,
+              "hurt_selector_u8": 1,
+              "movement_table_index_u8": 0,
+              "next_animation_record": "0x0012d968",
+              "record_sha256": "3df14eb96f6647b0a031ce59579d3d3b6ff732eac049b9f813cb3d9734291aee",
+              "timer_u16": 8
+            },
+            {
+              "animation_record": "0x0012d968",
+              "assembly": "0x00130028",
+              "attack_selector_u8": 0,
+              "branch_s16": 0,
+              "hurt_selector_u8": 1,
+              "movement_table_index_u8": 0,
+              "next_animation_record": "0x0012d978",
+              "record_sha256": "9c4a5aa2b5a6e464cdadd34dce04f88d9f959ace72cfe0b40fccec72b9c59bf5",
+              "timer_u16": 5
+            },
+            {
+              "animation_record": "0x0012d978",
+              "assembly": "0x00130046",
+              "attack_selector_u8": 0,
+              "branch_s16": 0,
+              "hurt_selector_u8": 1,
+              "movement_table_index_u8": 0,
+              "next_animation_record": "0x0012d988",
+              "record_sha256": "f630a8a55472ba4a893cd22b22c515c71f0bc3078aa6f88fed775447fdc652e6",
+              "timer_u16": 5
+            },
+            {
+              "animation_record": "0x0012d988",
+              "assembly": "0x00130078",
+              "attack_selector_u8": 3,
+              "branch_s16": 0,
+              "hurt_selector_u8": 8,
+              "movement_table_index_u8": 0,
+              "next_animation_record": "0x0012d998",
+              "record_sha256": "4c8d2fd88f56367f2ce702cca9912f75e8273d9d3408302e864dae0f3c7205c3",
+              "timer_u16": 1
+            },
+            {
+              "animation_record": "0x0012d998",
+              "assembly": "0x00130078",
+              "attack_selector_u8": 0,
+              "branch_s16": 0,
+              "hurt_selector_u8": 8,
+              "movement_table_index_u8": 0,
+              "next_animation_record": "0x0012d9a8",
+              "record_sha256": "6a64b2b23e93c44651415a3f971609b0731625afd41585c2c13b6840b1e7e095",
+              "timer_u16": 9
+            },
+            {
+              "animation_record": "0x0012d9a8",
+              "assembly": "0x001300b0",
+              "attack_selector_u8": 0,
+              "branch_s16": 0,
+              "hurt_selector_u8": 1,
+              "movement_table_index_u8": 0,
+              "next_animation_record": "0x0012d9b8",
+              "record_sha256": "b707d151b9a85cb3d64218c3b5559b05227220c6de623530dac10ce9f04e84e1",
+              "timer_u16": 12
+            },
+            {
+              "animation_record": "0x0012d9b8",
+              "assembly": "0x001300ee",
+              "attack_selector_u8": 0,
+              "branch_s16": 0,
+              "hurt_selector_u8": 1,
+              "movement_table_index_u8": 0,
+              "next_animation_record": "0x0012d9c8",
+              "record_sha256": "bb6219518a66aeac7cb123088f82a144e7e8b727b7ff6ec67929940d621b4ded",
+              "timer_u16": 16
+            },
+            {
+              "animation_record": "0x0012d9c8",
+              "assembly": "0x0012f5ac",
+              "attack_selector_u8": 0,
+              "branch_s16": -32768,
+              "hurt_selector_u8": 1,
+              "movement_table_index_u8": 0,
+              "next_animation_record": "0x0012d9c8",
+              "record_sha256": "6131802bec1f89200bde656b621bc7f8c6351dac8acc8c2c1693b67109396593",
+              "timer_u16": 1
+            },
+            {
+              "animation_record": "0x0012d9dc",
+              "assembly": "0x00130120",
+              "attack_selector_u8": 0,
+              "branch_s16": 0,
+              "hurt_selector_u8": 1,
+              "movement_table_index_u8": 0,
+              "next_animation_record": "0x0012d9ec",
+              "record_sha256": "270973a6634f6f78a6b7f40f3b800dff652b3ea05856c2bd1f02d143fe42d00c",
+              "timer_u16": 7
+            },
+            {
+              "animation_record": "0x0012d9ec",
+              "assembly": "0x0013013e",
+              "attack_selector_u8": 0,
+              "branch_s16": 0,
+              "hurt_selector_u8": 1,
+              "movement_table_index_u8": 0,
+              "next_animation_record": "0x0012d9fc",
+              "record_sha256": "26d67b7367b6b43dc5fe010d5e9734394813d6260c827aba0f1665326976deb8",
+              "timer_u16": 7
+            },
+            {
+              "animation_record": "0x0012d9fc",
+              "assembly": "0x00130156",
+              "attack_selector_u8": 0,
+              "branch_s16": 0,
+              "hurt_selector_u8": 1,
+              "movement_table_index_u8": 0,
+              "next_animation_record": "0x0012da0c",
+              "record_sha256": "596a00269a28af725290e4fecb5f5607da8e5d8a86d74ed36911cef0c1f78bde",
+              "timer_u16": 5
+            },
+            {
+              "animation_record": "0x0012da0c",
+              "assembly": "0x0013016e",
+              "attack_selector_u8": 4,
+              "branch_s16": 0,
+              "hurt_selector_u8": 1,
+              "movement_table_index_u8": 0,
+              "next_animation_record": "0x0012da1c",
+              "record_sha256": "a4f0f22feb4b760927321306dabff4426251ae7209c2e6fbfda4431cc843c75c",
+              "timer_u16": 1
+            },
+            {
+              "animation_record": "0x0012da1c",
+              "assembly": "0x0013016e",
+              "attack_selector_u8": 0,
+              "branch_s16": 0,
+              "hurt_selector_u8": 1,
+              "movement_table_index_u8": 0,
+              "next_animation_record": "0x0012da2c",
+              "record_sha256": "8e690d8c148a013a066697cb11504b542bceb5cd9993840643db2bd5c01ec092",
+              "timer_u16": 9
+            },
+            {
+              "animation_record": "0x0012da2c",
+              "assembly": "0x0013018c",
+              "attack_selector_u8": 0,
+              "branch_s16": 0,
+              "hurt_selector_u8": 1,
+              "movement_table_index_u8": 0,
+              "next_animation_record": "0x0012da3c",
+              "record_sha256": "3b0562d4fe5d1bf5ffa5f70d63fba1d5f7b69bb982ff1ede34270b8efed20b11",
+              "timer_u16": 10
+            },
+            {
+              "animation_record": "0x0012da3c",
+              "assembly": "0x001301aa",
+              "attack_selector_u8": 0,
+              "branch_s16": 0,
+              "hurt_selector_u8": 1,
+              "movement_table_index_u8": 0,
+              "next_animation_record": "0x0012da4c",
+              "record_sha256": "e9285703447f047a56b58afb87432895bb0cd4b722ea094a11110f753c8dcb27",
+              "timer_u16": 7
+            },
+            {
+              "animation_record": "0x0012da4c",
+              "assembly": "0x001301c2",
+              "attack_selector_u8": 0,
+              "branch_s16": 0,
+              "hurt_selector_u8": 1,
+              "movement_table_index_u8": 0,
+              "next_animation_record": "0x0012da5c",
+              "record_sha256": "ab27a76de2aa1aadf9894711028ddfa889699c45baebf3b5baec848d693f3d71",
+              "timer_u16": 10
+            },
+            {
+              "animation_record": "0x0012da5c",
+              "assembly": "0x0012f5ac",
+              "attack_selector_u8": 0,
+              "branch_s16": -32768,
+              "hurt_selector_u8": 1,
+              "movement_table_index_u8": 0,
+              "next_animation_record": "0x0012da5c",
+              "record_sha256": "c9e40e469bd821c8be18858c83b68d8df8a5f7657d879da482e672bd6c3a1fe1",
+              "timer_u16": 8
+            },
+            {
+              "animation_record": "0x0012da70",
+              "assembly": "0x0012fe9e",
+              "attack_selector_u8": 0,
+              "branch_s16": 0,
+              "hurt_selector_u8": 1,
+              "movement_table_index_u8": 0,
+              "next_animation_record": "0x0012da80",
+              "record_sha256": "c76ab46cdaa6d8256da122840df9b4f9e40bd9653742927165e366123b54a42b",
+              "timer_u16": 8
+            },
+            {
+              "animation_record": "0x0012da80",
+              "assembly": "0x0012febc",
+              "attack_selector_u8": 5,
+              "branch_s16": 0,
+              "hurt_selector_u8": 1,
+              "movement_table_index_u8": 0,
+              "next_animation_record": "0x0012da90",
+              "record_sha256": "7acbe702698ce3703d013ddb51f04163348a8ff1143b298586241ceda04a9df0",
+              "timer_u16": 1
+            },
+            {
+              "animation_record": "0x0012da90",
+              "assembly": "0x0012febc",
+              "attack_selector_u8": 0,
+              "branch_s16": 0,
+              "hurt_selector_u8": 1,
+              "movement_table_index_u8": 0,
+              "next_animation_record": "0x0012daa0",
+              "record_sha256": "7926c990baade9b98b433af94e2f843300f801b6bccb2b9ac1f4c952c2224450",
+              "timer_u16": 9
+            },
+            {
+              "animation_record": "0x0012daa0",
+              "assembly": "0x0012fef4",
+              "attack_selector_u8": 0,
+              "branch_s16": 0,
+              "hurt_selector_u8": 1,
+              "movement_table_index_u8": 0,
+              "next_animation_record": "0x0012dab0",
+              "record_sha256": "7358e361524979b73efc5f8cf92d26c4cf370ec8ba6d7719af63e830d77e2c93",
+              "timer_u16": 10
+            },
+            {
+              "animation_record": "0x0012dab0",
+              "assembly": "0x0012ff22",
+              "attack_selector_u8": 0,
+              "branch_s16": 0,
+              "hurt_selector_u8": 1,
+              "movement_table_index_u8": 0,
+              "next_animation_record": "0x0012dac0",
+              "record_sha256": "37adbe873d96096c515e8b60c9dce63307bf19ba1d86e169008b8ecf9d47b219",
+              "timer_u16": 16
+            },
+            {
+              "animation_record": "0x0012dac0",
+              "assembly": "0x0012f5ac",
+              "attack_selector_u8": 0,
+              "branch_s16": -32768,
+              "hurt_selector_u8": 1,
+              "movement_table_index_u8": 0,
+              "next_animation_record": "0x0012dac0",
+              "record_sha256": "c9e40e469bd821c8be18858c83b68d8df8a5f7657d879da482e672bd6c3a1fe1",
+              "timer_u16": 8
+            },
+            {
+              "animation_record": "0x0012dad4",
+              "assembly": "0x0012ff4a",
+              "attack_selector_u8": 0,
+              "branch_s16": 0,
+              "hurt_selector_u8": 1,
+              "movement_table_index_u8": 0,
+              "next_animation_record": "0x0012dae4",
+              "record_sha256": "540851a5069b5ba9e8fadc52bc3052bd870ec179311a1e4c6467666f0058f9e2",
+              "timer_u16": 8
+            },
+            {
+              "animation_record": "0x0012dae4",
+              "assembly": "0x0012ff9a",
+              "attack_selector_u8": 6,
+              "branch_s16": 0,
+              "hurt_selector_u8": 1,
+              "movement_table_index_u8": 0,
+              "next_animation_record": "0x0012daf4",
+              "record_sha256": "6398c5ad031bf4b1aea975367e3939e2b081d813bf84e5999c6ce8355c93f352",
+              "timer_u16": 1
+            },
+            {
+              "animation_record": "0x0012daf4",
+              "assembly": "0x0012ff9a",
+              "attack_selector_u8": 0,
+              "branch_s16": 0,
+              "hurt_selector_u8": 1,
+              "movement_table_index_u8": 0,
+              "next_animation_record": "0x0012db04",
+              "record_sha256": "e3eecf9e58f1d601e95e3d42096179bab2a818cf3d93a75ea7b2d75642238076",
+              "timer_u16": 9
+            },
+            {
+              "animation_record": "0x0012db04",
+              "assembly": "0x0012ffd8",
+              "attack_selector_u8": 0,
+              "branch_s16": 0,
+              "hurt_selector_u8": 1,
+              "movement_table_index_u8": 0,
+              "next_animation_record": "0x0012db14",
+              "record_sha256": "b1719b0307afe63a9beb87790837a7f0d274f66117994a1f9fb70b9688b5bbcf",
+              "timer_u16": 10
+            },
+            {
+              "animation_record": "0x0012db14",
+              "assembly": "0x0013000a",
+              "attack_selector_u8": 0,
+              "branch_s16": 0,
+              "hurt_selector_u8": 1,
+              "movement_table_index_u8": 0,
+              "next_animation_record": "0x0012db24",
+              "record_sha256": "2992abbac3d6e90cb775cd59932e3f6509fddf7e2321ffab4c28898e76241657",
+              "timer_u16": 16
+            },
+            {
+              "animation_record": "0x0012db24",
+              "assembly": "0x0012f5ac",
+              "attack_selector_u8": 0,
+              "branch_s16": -32768,
+              "hurt_selector_u8": 1,
+              "movement_table_index_u8": 0,
+              "next_animation_record": "0x0012db24",
+              "record_sha256": "c9e40e469bd821c8be18858c83b68d8df8a5f7657d879da482e672bd6c3a1fe1",
+              "timer_u16": 8
+            },
+            {
+              "animation_record": "0x0012db38",
+              "assembly": "0x0012ff72",
+              "attack_selector_u8": 0,
+              "branch_s16": 0,
+              "hurt_selector_u8": 1,
+              "movement_table_index_u8": 0,
+              "next_animation_record": "0x0012db48",
+              "record_sha256": "3df14eb96f6647b0a031ce59579d3d3b6ff732eac049b9f813cb3d9734291aee",
+              "timer_u16": 8
+            },
+            {
+              "animation_record": "0x0012db48",
+              "assembly": "0x00130028",
+              "attack_selector_u8": 0,
+              "branch_s16": 0,
+              "hurt_selector_u8": 1,
+              "movement_table_index_u8": 0,
+              "next_animation_record": "0x0012db58",
+              "record_sha256": "9c4a5aa2b5a6e464cdadd34dce04f88d9f959ace72cfe0b40fccec72b9c59bf5",
+              "timer_u16": 5
+            },
+            {
+              "animation_record": "0x0012db58",
+              "assembly": "0x00130046",
+              "attack_selector_u8": 0,
+              "branch_s16": 0,
+              "hurt_selector_u8": 1,
+              "movement_table_index_u8": 0,
+              "next_animation_record": "0x0012db68",
+              "record_sha256": "f630a8a55472ba4a893cd22b22c515c71f0bc3078aa6f88fed775447fdc652e6",
+              "timer_u16": 5
+            },
+            {
+              "animation_record": "0x0012db68",
+              "assembly": "0x00130078",
+              "attack_selector_u8": 7,
+              "branch_s16": 0,
+              "hurt_selector_u8": 1,
+              "movement_table_index_u8": 0,
+              "next_animation_record": "0x0012db78",
+              "record_sha256": "82cb1bdc865a530f5b08455e6d80b1d278cdfbf761360435a42a53696bf2e5c8",
+              "timer_u16": 1
+            },
+            {
+              "animation_record": "0x0012db78",
+              "assembly": "0x00130078",
+              "attack_selector_u8": 0,
+              "branch_s16": 0,
+              "hurt_selector_u8": 1,
+              "movement_table_index_u8": 0,
+              "next_animation_record": "0x0012db88",
+              "record_sha256": "cc4ba9971c5da73b62b2c9249454ffd1cc606e6054e88570e68fc75618fd459f",
+              "timer_u16": 9
+            },
+            {
+              "animation_record": "0x0012db88",
+              "assembly": "0x001300b0",
+              "attack_selector_u8": 0,
+              "branch_s16": 0,
+              "hurt_selector_u8": 1,
+              "movement_table_index_u8": 0,
+              "next_animation_record": "0x0012db98",
+              "record_sha256": "b707d151b9a85cb3d64218c3b5559b05227220c6de623530dac10ce9f04e84e1",
+              "timer_u16": 12
+            },
+            {
+              "animation_record": "0x0012db98",
+              "assembly": "0x001300ee",
+              "attack_selector_u8": 0,
+              "branch_s16": 0,
+              "hurt_selector_u8": 1,
+              "movement_table_index_u8": 0,
+              "next_animation_record": "0x0012dba8",
+              "record_sha256": "bb6219518a66aeac7cb123088f82a144e7e8b727b7ff6ec67929940d621b4ded",
+              "timer_u16": 16
+            },
+            {
+              "animation_record": "0x0012dba8",
+              "assembly": "0x0012f5ac",
+              "attack_selector_u8": 0,
+              "branch_s16": -32768,
+              "hurt_selector_u8": 1,
+              "movement_table_index_u8": 0,
+              "next_animation_record": "0x0012dba8",
+              "record_sha256": "c9e40e469bd821c8be18858c83b68d8df8a5f7657d879da482e672bd6c3a1fe1",
+              "timer_u16": 8
+            },
+            {
+              "animation_record": "0x0012dbbc",
+              "assembly": "0x00130120",
+              "attack_selector_u8": 0,
+              "branch_s16": 0,
+              "hurt_selector_u8": 1,
+              "movement_table_index_u8": 0,
+              "next_animation_record": "0x0012dbcc",
+              "record_sha256": "270973a6634f6f78a6b7f40f3b800dff652b3ea05856c2bd1f02d143fe42d00c",
+              "timer_u16": 7
+            },
+            {
+              "animation_record": "0x0012dbcc",
+              "assembly": "0x0013013e",
+              "attack_selector_u8": 0,
+              "branch_s16": 0,
+              "hurt_selector_u8": 1,
+              "movement_table_index_u8": 0,
+              "next_animation_record": "0x0012dbdc",
+              "record_sha256": "26d67b7367b6b43dc5fe010d5e9734394813d6260c827aba0f1665326976deb8",
+              "timer_u16": 7
+            },
+            {
+              "animation_record": "0x0012dbdc",
+              "assembly": "0x00130156",
+              "attack_selector_u8": 0,
+              "branch_s16": 0,
+              "hurt_selector_u8": 1,
+              "movement_table_index_u8": 0,
+              "next_animation_record": "0x0012dbec",
+              "record_sha256": "596a00269a28af725290e4fecb5f5607da8e5d8a86d74ed36911cef0c1f78bde",
+              "timer_u16": 5
+            },
+            {
+              "animation_record": "0x0012dbec",
+              "assembly": "0x0013016e",
+              "attack_selector_u8": 8,
+              "branch_s16": 0,
+              "hurt_selector_u8": 1,
+              "movement_table_index_u8": 0,
+              "next_animation_record": "0x0012dbfc",
+              "record_sha256": "455c78b797454d3c551340f3a6147eb5b5ce573060912ec0c03bce45ceebe3ea",
+              "timer_u16": 1
+            },
+            {
+              "animation_record": "0x0012dbfc",
+              "assembly": "0x0013016e",
+              "attack_selector_u8": 0,
+              "branch_s16": 0,
+              "hurt_selector_u8": 1,
+              "movement_table_index_u8": 0,
+              "next_animation_record": "0x0012dc0c",
+              "record_sha256": "8e690d8c148a013a066697cb11504b542bceb5cd9993840643db2bd5c01ec092",
+              "timer_u16": 9
+            },
+            {
+              "animation_record": "0x0012dc0c",
+              "assembly": "0x0013018c",
+              "attack_selector_u8": 0,
+              "branch_s16": 0,
+              "hurt_selector_u8": 1,
+              "movement_table_index_u8": 0,
+              "next_animation_record": "0x0012dc1c",
+              "record_sha256": "3b0562d4fe5d1bf5ffa5f70d63fba1d5f7b69bb982ff1ede34270b8efed20b11",
+              "timer_u16": 10
+            },
+            {
+              "animation_record": "0x0012dc1c",
+              "assembly": "0x001301aa",
+              "attack_selector_u8": 0,
+              "branch_s16": 0,
+              "hurt_selector_u8": 1,
+              "movement_table_index_u8": 0,
+              "next_animation_record": "0x0012dc2c",
+              "record_sha256": "e9285703447f047a56b58afb87432895bb0cd4b722ea094a11110f753c8dcb27",
+              "timer_u16": 7
+            },
+            {
+              "animation_record": "0x0012dc2c",
+              "assembly": "0x001301c2",
+              "attack_selector_u8": 0,
+              "branch_s16": 0,
+              "hurt_selector_u8": 1,
+              "movement_table_index_u8": 0,
+              "next_animation_record": "0x0012dc3c",
+              "record_sha256": "ab27a76de2aa1aadf9894711028ddfa889699c45baebf3b5baec848d693f3d71",
+              "timer_u16": 10
+            },
+            {
+              "animation_record": "0x0012dc3c",
+              "assembly": "0x0012f5ac",
+              "attack_selector_u8": 0,
+              "branch_s16": -32768,
+              "hurt_selector_u8": 1,
+              "movement_table_index_u8": 0,
+              "next_animation_record": "0x0012dc3c",
+              "record_sha256": "c9e40e469bd821c8be18858c83b68d8df8a5f7657d879da482e672bd6c3a1fe1",
+              "timer_u16": 8
+            },
+            {
               "animation_record": "0x0012e550",
               "assembly": "0x0012f930",
               "attack_selector_u8": 0,
@@ -39065,7 +39840,8 @@
               "movement table is low six bits of new record byte 3",
               "index the signed x/y pair by low five direction bits",
               "add each signed s16 delta shifted left 8 to x/y 16.16",
-              "copy y high word to z after movement"
+              "copy y high word to z after movement",
+              "tail-call the shared terrain resolver 0x0b1baa"
             ],
             "helper": "0x016644",
             "source_window": {
@@ -39572,6 +40348,173 @@
                     "direction_u8": 31,
                     "x_delta_s16": -598,
                     "y_delta_s16": 1505
+                  }
+                ]
+              },
+              {
+                "fixed_point_scale": "signed s16 << 8",
+                "source_address": "0x1f8cc0",
+                "table_index_u8": 14,
+                "vectors": [
+                  {
+                    "direction_u8": 0,
+                    "x_delta_s16": 0,
+                    "y_delta_s16": 1792
+                  },
+                  {
+                    "direction_u8": 1,
+                    "x_delta_s16": 698,
+                    "y_delta_s16": 1756
+                  },
+                  {
+                    "direction_u8": 2,
+                    "x_delta_s16": 1368,
+                    "y_delta_s16": 1653
+                  },
+                  {
+                    "direction_u8": 3,
+                    "x_delta_s16": 1988,
+                    "y_delta_s16": 1488
+                  },
+                  {
+                    "direction_u8": 4,
+                    "x_delta_s16": 2533,
+                    "y_delta_s16": 1266
+                  },
+                  {
+                    "direction_u8": 5,
+                    "x_delta_s16": 2977,
+                    "y_delta_s16": 994
+                  },
+                  {
+                    "direction_u8": 6,
+                    "x_delta_s16": 3307,
+                    "y_delta_s16": 684
+                  },
+                  {
+                    "direction_u8": 7,
+                    "x_delta_s16": 3512,
+                    "y_delta_s16": 349
+                  },
+                  {
+                    "direction_u8": 8,
+                    "x_delta_s16": 3584,
+                    "y_delta_s16": 0
+                  },
+                  {
+                    "direction_u8": 9,
+                    "x_delta_s16": 3512,
+                    "y_delta_s16": -349
+                  },
+                  {
+                    "direction_u8": 10,
+                    "x_delta_s16": 3307,
+                    "y_delta_s16": -684
+                  },
+                  {
+                    "direction_u8": 11,
+                    "x_delta_s16": 2977,
+                    "y_delta_s16": -994
+                  },
+                  {
+                    "direction_u8": 12,
+                    "x_delta_s16": 2533,
+                    "y_delta_s16": -1266
+                  },
+                  {
+                    "direction_u8": 13,
+                    "x_delta_s16": 1988,
+                    "y_delta_s16": -1488
+                  },
+                  {
+                    "direction_u8": 14,
+                    "x_delta_s16": 1368,
+                    "y_delta_s16": -1653
+                  },
+                  {
+                    "direction_u8": 15,
+                    "x_delta_s16": 698,
+                    "y_delta_s16": -1756
+                  },
+                  {
+                    "direction_u8": 16,
+                    "x_delta_s16": 0,
+                    "y_delta_s16": -1792
+                  },
+                  {
+                    "direction_u8": 17,
+                    "x_delta_s16": -698,
+                    "y_delta_s16": -1756
+                  },
+                  {
+                    "direction_u8": 18,
+                    "x_delta_s16": -1368,
+                    "y_delta_s16": -1653
+                  },
+                  {
+                    "direction_u8": 19,
+                    "x_delta_s16": -1988,
+                    "y_delta_s16": -1488
+                  },
+                  {
+                    "direction_u8": 20,
+                    "x_delta_s16": -2533,
+                    "y_delta_s16": -1266
+                  },
+                  {
+                    "direction_u8": 21,
+                    "x_delta_s16": -2977,
+                    "y_delta_s16": -994
+                  },
+                  {
+                    "direction_u8": 22,
+                    "x_delta_s16": -3307,
+                    "y_delta_s16": -684
+                  },
+                  {
+                    "direction_u8": 23,
+                    "x_delta_s16": -3512,
+                    "y_delta_s16": -349
+                  },
+                  {
+                    "direction_u8": 24,
+                    "x_delta_s16": -3584,
+                    "y_delta_s16": 0
+                  },
+                  {
+                    "direction_u8": 25,
+                    "x_delta_s16": -3512,
+                    "y_delta_s16": 349
+                  },
+                  {
+                    "direction_u8": 26,
+                    "x_delta_s16": -3307,
+                    "y_delta_s16": 684
+                  },
+                  {
+                    "direction_u8": 27,
+                    "x_delta_s16": -2977,
+                    "y_delta_s16": 994
+                  },
+                  {
+                    "direction_u8": 28,
+                    "x_delta_s16": -2533,
+                    "y_delta_s16": 1266
+                  },
+                  {
+                    "direction_u8": 29,
+                    "x_delta_s16": -1988,
+                    "y_delta_s16": 1488
+                  },
+                  {
+                    "direction_u8": 30,
+                    "x_delta_s16": -1368,
+                    "y_delta_s16": 1653
+                  },
+                  {
+                    "direction_u8": 31,
+                    "x_delta_s16": -698,
+                    "y_delta_s16": 1756
                   }
                 ]
               },
@@ -40409,8 +41352,196 @@
                     "y_delta_s16": 3135
                   }
                 ]
+              },
+              {
+                "fixed_point_scale": "signed s16 << 8",
+                "source_address": "0x1f9340",
+                "table_index_u8": 27,
+                "vectors": [
+                  {
+                    "direction_u8": 0,
+                    "x_delta_s16": 0,
+                    "y_delta_s16": 3456
+                  },
+                  {
+                    "direction_u8": 1,
+                    "x_delta_s16": 1346,
+                    "y_delta_s16": 3386
+                  },
+                  {
+                    "direction_u8": 2,
+                    "x_delta_s16": 2639,
+                    "y_delta_s16": 3189
+                  },
+                  {
+                    "direction_u8": 3,
+                    "x_delta_s16": 3835,
+                    "y_delta_s16": 2871
+                  },
+                  {
+                    "direction_u8": 4,
+                    "x_delta_s16": 4885,
+                    "y_delta_s16": 2442
+                  },
+                  {
+                    "direction_u8": 5,
+                    "x_delta_s16": 5742,
+                    "y_delta_s16": 1917
+                  },
+                  {
+                    "direction_u8": 6,
+                    "x_delta_s16": 6378,
+                    "y_delta_s16": 1319
+                  },
+                  {
+                    "direction_u8": 7,
+                    "x_delta_s16": 6773,
+                    "y_delta_s16": 673
+                  },
+                  {
+                    "direction_u8": 8,
+                    "x_delta_s16": 6912,
+                    "y_delta_s16": 0
+                  },
+                  {
+                    "direction_u8": 9,
+                    "x_delta_s16": 6773,
+                    "y_delta_s16": -673
+                  },
+                  {
+                    "direction_u8": 10,
+                    "x_delta_s16": 6378,
+                    "y_delta_s16": -1319
+                  },
+                  {
+                    "direction_u8": 11,
+                    "x_delta_s16": 5742,
+                    "y_delta_s16": -1917
+                  },
+                  {
+                    "direction_u8": 12,
+                    "x_delta_s16": 4885,
+                    "y_delta_s16": -2442
+                  },
+                  {
+                    "direction_u8": 13,
+                    "x_delta_s16": 3835,
+                    "y_delta_s16": -2871
+                  },
+                  {
+                    "direction_u8": 14,
+                    "x_delta_s16": 2639,
+                    "y_delta_s16": -3189
+                  },
+                  {
+                    "direction_u8": 15,
+                    "x_delta_s16": 1346,
+                    "y_delta_s16": -3386
+                  },
+                  {
+                    "direction_u8": 16,
+                    "x_delta_s16": 0,
+                    "y_delta_s16": -3456
+                  },
+                  {
+                    "direction_u8": 17,
+                    "x_delta_s16": -1346,
+                    "y_delta_s16": -3386
+                  },
+                  {
+                    "direction_u8": 18,
+                    "x_delta_s16": -2639,
+                    "y_delta_s16": -3189
+                  },
+                  {
+                    "direction_u8": 19,
+                    "x_delta_s16": -3835,
+                    "y_delta_s16": -2871
+                  },
+                  {
+                    "direction_u8": 20,
+                    "x_delta_s16": -4885,
+                    "y_delta_s16": -2442
+                  },
+                  {
+                    "direction_u8": 21,
+                    "x_delta_s16": -5742,
+                    "y_delta_s16": -1917
+                  },
+                  {
+                    "direction_u8": 22,
+                    "x_delta_s16": -6378,
+                    "y_delta_s16": -1319
+                  },
+                  {
+                    "direction_u8": 23,
+                    "x_delta_s16": -6773,
+                    "y_delta_s16": -673
+                  },
+                  {
+                    "direction_u8": 24,
+                    "x_delta_s16": -6912,
+                    "y_delta_s16": 0
+                  },
+                  {
+                    "direction_u8": 25,
+                    "x_delta_s16": -6773,
+                    "y_delta_s16": 673
+                  },
+                  {
+                    "direction_u8": 26,
+                    "x_delta_s16": -6378,
+                    "y_delta_s16": 1319
+                  },
+                  {
+                    "direction_u8": 27,
+                    "x_delta_s16": -5742,
+                    "y_delta_s16": 1917
+                  },
+                  {
+                    "direction_u8": 28,
+                    "x_delta_s16": -4885,
+                    "y_delta_s16": 2442
+                  },
+                  {
+                    "direction_u8": 29,
+                    "x_delta_s16": -3835,
+                    "y_delta_s16": 2871
+                  },
+                  {
+                    "direction_u8": 30,
+                    "x_delta_s16": -2639,
+                    "y_delta_s16": 3189
+                  },
+                  {
+                    "direction_u8": 31,
+                    "x_delta_s16": -1346,
+                    "y_delta_s16": 3386
+                  }
+                ]
               }
-            ]
+            ],
+            "terrain_tail": {
+              "Coffee_Shop_reachable_class1f_sync_guard_zero": true,
+              "applies_to": "every Coffee Shop-reachable class-0x1f inner-state movement record with a nonzero movement table",
+              "callsite": "0x0166a4 tail jump after each nonzero movement-table step",
+              "contact_bits_field": "actor+0x5d:u8",
+              "mutation_control": {
+                "omitted_tail_rejected": true,
+                "proposed_world_z_without_tail_s16": 338,
+                "resolved_world_z_s16": 327,
+                "resolved_y_fp_s32_16_16": "0x01477000",
+                "source_frame": 3352,
+                "source_slot": "0x00ffa000"
+              },
+              "owner": "round1-navigation-terrain-resolver",
+              "selection_contract": "reuse navigation.terrain_resolver.implementation_contract and its source-derived first-segment packed grid",
+              "source_entry": "0x0b1baa",
+              "source_window_sha256": "078e408d3c197035430d40b4e182c66632b7aff1a14540ce80d96d9432134338",
+              "x_velocity_field": "actor+0x12:s16",
+              "y_high_word_sync_guard": "when actor+0x5c:u8, actor+0x5f:u8, and actor+0x74:u16 are all zero, copy resolved actor+0x18:s16 into the high word of actor+0x14:s32 while preserving its low word",
+              "z_velocity_field": "actor+0x1a:s16"
+            }
           },
           "mutation_control": {
             "baseline_inner8_present": true,
@@ -40587,10 +41718,133 @@
                 }
               }
             },
+            "action_0x02": {
+              "Coffee_Shop_observed_frames": 79,
+              "Coffee_Shop_observed_runs": [
+                {
+                  "action_timer_u8": 3,
+                  "first_source_frame": 3324,
+                  "last_source_frame": 3326,
+                  "source_slot": "0x00ffa000",
+                  "start_animation_record": "0x0012e8ec",
+                  "style85_u8": 1
+                },
+                {
+                  "action_timer_u8": 3,
+                  "first_source_frame": 3434,
+                  "last_source_frame": 3436,
+                  "source_slot": "0x00ffa3c0",
+                  "start_animation_record": "0x0012e8ec",
+                  "style85_u8": 1
+                },
+                {
+                  "action_timer_u8": 30,
+                  "first_source_frame": 3508,
+                  "last_source_frame": 3537,
+                  "source_slot": "0x00ff9e80",
+                  "start_animation_record": "0x0012e8a8",
+                  "style85_u8": 0
+                },
+                {
+                  "action_timer_u8": 3,
+                  "first_source_frame": 3603,
+                  "last_source_frame": 3605,
+                  "source_slot": "0x00ff9e80",
+                  "start_animation_record": "0x0012e8ec",
+                  "style85_u8": 1
+                },
+                {
+                  "action_timer_u8": 30,
+                  "first_source_frame": 3689,
+                  "last_source_frame": 3718,
+                  "source_slot": "0x00ffa000",
+                  "start_animation_record": "0x0012e8ec",
+                  "style85_u8": 1
+                },
+                {
+                  "action_timer_u8": 10,
+                  "first_source_frame": 3900,
+                  "last_source_frame": 3909,
+                  "source_slot": "0x00ff9dc0",
+                  "start_animation_record": "0x0012e8a8",
+                  "style85_u8": 0
+                }
+              ],
+              "entry": "0x040c5e",
+              "guard_order": [
+                "negative wander_band_s8 clears action immediately",
+                "otherwise 0x041db8 player proximity diverts to action 0x0c",
+                "otherwise predecrement action_timer_u8 and clear action on zero",
+                "step shared animation ownership through 0x016536 without movement"
+              ],
+              "mutation_control": {
+                "expected_source_slot": "0x00ff9e80",
+                "expected_style0_record": "0x0012e8a8",
+                "first_discriminating_source_frame": 3508,
+                "position_unchanged_on_bind": true,
+                "wrong_movement_chain_rejected": "0x0012d404"
+              },
+              "presentation_binding": {
+                "bind_after_nonnegative_timer": true,
+                "movement_on_bind": false,
+                "selector_by_style": [
+                  {
+                    "selector_u8": 0,
+                    "start_animation_record": "0x0012e8a8",
+                    "style85_u8": 0
+                  },
+                  {
+                    "selector_u8": 1,
+                    "start_animation_record": "0x0012e8ec",
+                    "style85_u8": 1
+                  }
+                ],
+                "selector_rule": "selector_u8=0 when actor+0x85 style85_u8 is zero; selector_u8=1 otherwise",
+                "source_entry": "0x041992",
+                "source_window_sha256": "dcaad6f3f01dbc01fc6cb8235bf873f660f73d0a593641753f7491aeb77948e2"
+              }
+            },
             "action_0x04": {
               "captured_terminals": {
                 "frame_3047": "action 0x06 after target-side result",
-                "frame_3134": "field88 zero, RNG bit set, source table zero, action 0x10"
+                "frame_3134": "field88 zero, RNG bit set, signed timer -1, action 0x10"
+              },
+              "complete_dispatch_contract": {
+                "clear_tail": {
+                  "Coffee_Shop_control": {
+                    "animation_record": "0x0012d4f8",
+                    "animation_timer_u16": 5,
+                    "source_frame_u16": 3524,
+                    "source_slot": "0x00ffa3c0",
+                    "state_u16": "0x0208",
+                    "substate_u16": "0x0000"
+                  },
+                  "rule": "after clearing action/substate, call 0x016644 once in the same scheduler visit"
+                },
+                "mutation_control": {
+                  "omitted_clear_tail_rejected": true,
+                  "omitted_proximity_first_rejected": true,
+                  "wrong_offset_sign_rejected": true
+                },
+                "per_update_proximity_first": {
+                  "helper": "0x041db8",
+                  "nonzero_result": "enter action 0x0c before animation-terminal dispatch",
+                  "x_bias_u16": 96,
+                  "x_span_u16": 192,
+                  "z_bias_u16": 12,
+                  "z_span_u16": 24
+                },
+                "source_window": {
+                  "first": "0x040c7c",
+                  "last_exclusive": "0x040cfe",
+                  "sha256": "5df372b2b6563e554e3bd76c7cbb98b3f71a35a9db2d51f6d0b676c8f8022df9"
+                },
+                "terminal_exact_action2_guard": {
+                  "both_true": "enter action 0x02 through 0x041966",
+                  "either_false": "clear actor+0x06 action/substate",
+                  "x_expression": "u16(actor_x - player_x - actor+0x60 + 16) <= 32",
+                  "z_expression": "u16(actor_z - player_z - actor+0x62 + 16) <= 32"
+                }
               },
               "movement_helper": "0x016644",
               "record_chains": {
@@ -40621,19 +41875,403 @@
                 "a nonzero side result enters action 0x06, flips facing, and binds the turn chain",
                 "otherwise predecrement field88_u8; nonzero rebinds the facing/style movement chain",
                 "on zero consume one RNG and test (result_u16 & 15) in bitset 0xf555",
-                "a set bit enters source action-0x02 allocator path 0x041966; a zero table result enters action 0x10",
+                "a set bit writes action 0x02, selects the actor-variant/stage-parameter timer bank, and consumes one RNG in 0x0bc3f8",
+                "a negative signed timer result enters action 0x10 and consumes its initializer RNG; a nonnegative result remains action 0x02 with that timer",
                 "otherwise exact player-relative x/z guards either enter action 0x02 or clear action"
-              ]
+              ],
+              "timer_selector_program": {
+                "Coffee_Shop_actor_variant_u8": 0,
+                "Coffee_Shop_stage_parameter_u16": 9,
+                "captured_frame_3134": {
+                  "action10_rng_after": "0x9042",
+                  "bank_u8": 1,
+                  "next_action_u8": 16,
+                  "rng_after": "0xdab2",
+                  "rng_before": "0x48d8",
+                  "table_index_u8": 2,
+                  "timer_s8": -1
+                },
+                "selection_order": [
+                  "index the variant-specific 32-byte bank selector by stage_parameter_u16",
+                  "consume exactly one RNG call and index the selected 16-byte signed timer bank by result_u16 & 15",
+                  "negative timer branches to action 0x10; nonnegative timer writes actor+0x2a:u8 and binds the facing/style record"
+                ],
+                "signed_timer_banks_s8": [
+                  [
+                    -1,
+                    -1,
+                    3,
+                    3,
+                    10,
+                    10,
+                    10,
+                    10,
+                    30,
+                    30,
+                    30,
+                    30,
+                    30,
+                    60,
+                    90,
+                    120
+                  ],
+                  [
+                    -1,
+                    -1,
+                    -1,
+                    3,
+                    3,
+                    3,
+                    3,
+                    10,
+                    10,
+                    10,
+                    30,
+                    30,
+                    30,
+                    30,
+                    60,
+                    90
+                  ],
+                  [
+                    -1,
+                    -1,
+                    -1,
+                    -1,
+                    -1,
+                    3,
+                    3,
+                    3,
+                    3,
+                    10,
+                    10,
+                    10,
+                    10,
+                    30,
+                    30,
+                    60
+                  ],
+                  [
+                    -1,
+                    -1,
+                    -1,
+                    -1,
+                    -1,
+                    -1,
+                    -1,
+                    -1,
+                    -1,
+                    3,
+                    3,
+                    3,
+                    10,
+                    10,
+                    10,
+                    60
+                  ],
+                  [
+                    -1,
+                    -1,
+                    -1,
+                    -1,
+                    -1,
+                    -1,
+                    -1,
+                    -1,
+                    -1,
+                    -1,
+                    3,
+                    3,
+                    3,
+                    10,
+                    10,
+                    60
+                  ],
+                  [
+                    -1,
+                    -1,
+                    -1,
+                    -1,
+                    -1,
+                    -1,
+                    -1,
+                    -1,
+                    -1,
+                    -1,
+                    -1,
+                    3,
+                    3,
+                    10,
+                    10,
+                    40
+                  ],
+                  [
+                    -1,
+                    -1,
+                    -1,
+                    -1,
+                    -1,
+                    -1,
+                    -1,
+                    -1,
+                    -1,
+                    -1,
+                    -1,
+                    -1,
+                    -1,
+                    3,
+                    3,
+                    30
+                  ],
+                  [
+                    -1,
+                    -1,
+                    -1,
+                    -1,
+                    -1,
+                    -1,
+                    -1,
+                    -1,
+                    -1,
+                    -1,
+                    -1,
+                    -1,
+                    -1,
+                    -1,
+                    -1,
+                    3
+                  ]
+                ],
+                "source_entries": [
+                  "0x041966",
+                  "0x0bc3f8"
+                ],
+                "stage_parameter_field": "0xff81ea:u16",
+                "variant0_bank_by_stage_parameter_u8": [
+                  0,
+                  0,
+                  0,
+                  0,
+                  0,
+                  0,
+                  1,
+                  1,
+                  1,
+                  1,
+                  2,
+                  2,
+                  2,
+                  2,
+                  3,
+                  3,
+                  3,
+                  3,
+                  4,
+                  4,
+                  4,
+                  4,
+                  5,
+                  5,
+                  5,
+                  5,
+                  6,
+                  6,
+                  6,
+                  6,
+                  7,
+                  7
+                ]
+              }
             },
             "action_0x06": {
-              "next_action_u8": 0,
-              "record_chain": [
-                "0x0012d5e4",
-                "0x0012d5f4",
-                "0x0012d604",
-                "0x0012d614"
+              "Coffee_Shop_observed_runs": [
+                {
+                  "facing_u8": 0,
+                  "first_source_frame": 3416,
+                  "last_source_frame": 3432,
+                  "record_chain": [
+                    "0x0012d590",
+                    "0x0012d5a0",
+                    "0x0012d5b0",
+                    "0x0012d5c0",
+                    "0x0012d5d0"
+                  ],
+                  "source_slot": "0x00ff9dc0",
+                  "style85_u8": 0
+                },
+                {
+                  "facing_u8": 1,
+                  "first_source_frame": 3477,
+                  "last_source_frame": 3493,
+                  "record_chain": [
+                    "0x0012d590",
+                    "0x0012d5a0",
+                    "0x0012d5b0",
+                    "0x0012d5c0",
+                    "0x0012d5d0"
+                  ],
+                  "source_slot": "0x00ff9dc0",
+                  "style85_u8": 0
+                },
+                {
+                  "facing_u8": 0,
+                  "first_source_frame": 3277,
+                  "last_source_frame": 3289,
+                  "record_chain": [
+                    "0x0012d5e4",
+                    "0x0012d5f4",
+                    "0x0012d604",
+                    "0x0012d614"
+                  ],
+                  "source_slot": "0x00ff9e80",
+                  "style85_u8": 1
+                },
+                {
+                  "facing_u8": 1,
+                  "first_source_frame": 3334,
+                  "last_source_frame": 3346,
+                  "record_chain": [
+                    "0x0012d5e4",
+                    "0x0012d5f4",
+                    "0x0012d604",
+                    "0x0012d614"
+                  ],
+                  "source_slot": "0x00ff9e80",
+                  "style85_u8": 1
+                },
+                {
+                  "facing_u8": 0,
+                  "first_source_frame": 5154,
+                  "last_source_frame": 5154,
+                  "record_chain": [
+                    "0x0012d590"
+                  ],
+                  "source_slot": "0x00ff9f40",
+                  "style85_u8": 0
+                },
+                {
+                  "facing_u8": 0,
+                  "first_source_frame": 3155,
+                  "last_source_frame": 3167,
+                  "record_chain": [
+                    "0x0012d5e4",
+                    "0x0012d5f4",
+                    "0x0012d604",
+                    "0x0012d614"
+                  ],
+                  "source_slot": "0x00ffa000",
+                  "style85_u8": 1
+                },
+                {
+                  "facing_u8": 1,
+                  "first_source_frame": 3242,
+                  "last_source_frame": 3258,
+                  "record_chain": [
+                    "0x0012d590",
+                    "0x0012d5a0",
+                    "0x0012d5b0",
+                    "0x0012d5c0",
+                    "0x0012d5d0"
+                  ],
+                  "source_slot": "0x00ffa000",
+                  "style85_u8": 0
+                },
+                {
+                  "facing_u8": 0,
+                  "first_source_frame": 4437,
+                  "last_source_frame": 4449,
+                  "record_chain": [
+                    "0x0012d5e4",
+                    "0x0012d5f4",
+                    "0x0012d604",
+                    "0x0012d614"
+                  ],
+                  "source_slot": "0x00ffa0c0",
+                  "style85_u8": 1
+                },
+                {
+                  "facing_u8": 1,
+                  "first_source_frame": 4494,
+                  "last_source_frame": 4506,
+                  "record_chain": [
+                    "0x0012d5e4",
+                    "0x0012d5f4",
+                    "0x0012d604",
+                    "0x0012d614"
+                  ],
+                  "source_slot": "0x00ffa0c0",
+                  "style85_u8": 1
+                },
+                {
+                  "facing_u8": 0,
+                  "first_source_frame": 2991,
+                  "last_source_frame": 3003,
+                  "record_chain": [
+                    "0x0012d5e4",
+                    "0x0012d5f4",
+                    "0x0012d604",
+                    "0x0012d614"
+                  ],
+                  "source_slot": "0x00ffa3c0",
+                  "style85_u8": 1
+                },
+                {
+                  "facing_u8": 1,
+                  "first_source_frame": 3048,
+                  "last_source_frame": 3060,
+                  "record_chain": [
+                    "0x0012d5e4",
+                    "0x0012d5f4",
+                    "0x0012d604",
+                    "0x0012d614"
+                  ],
+                  "source_slot": "0x00ffa3c0",
+                  "style85_u8": 1
+                }
               ],
+              "mutation_control": {
+                "expected_style0_record": "0x0012d590",
+                "first_discriminating_source_frame": 3242,
+                "source_slot": "0x00ffa000",
+                "wrong_style0_selector_rejected": "0x23"
+              },
+              "next_action_u8": 0,
+              "record_chains": {
+                "style85_one": [
+                  "0x0012d5e4",
+                  "0x0012d5f4",
+                  "0x0012d604",
+                  "0x0012d614"
+                ],
+                "style85_zero": [
+                  "0x0012d590",
+                  "0x0012d5a0",
+                  "0x0012d5b0",
+                  "0x0012d5c0",
+                  "0x0012d5d0"
+                ]
+              },
               "rng_calls": 0,
+              "selection_order": [
+                "write action_u8=6 and clear action_phase_u8",
+                "toggle facing_u8",
+                "select 0x22 when style85_u8 is zero or 0x23 when nonzero",
+                "bind the selected source animation chain"
+              ],
+              "selector_by_style": [
+                {
+                  "selector_u8": 34,
+                  "start_animation_record": "0x0012d590",
+                  "style85_u8": 0
+                },
+                {
+                  "selector_u8": 35,
+                  "start_animation_record": "0x0012d5e4",
+                  "style85_u8": 1
+                }
+              ],
+              "source_entry": "0x041b74",
+              "source_window_sha256": "7f17cf2a1da09a8cdd505fe9329b440a794d151184b07649f84c81c3f466b2ff",
               "terminal_guard": "animation_branch_s16 < 0"
             },
             "action_0x08": {
@@ -40651,6 +42289,1102 @@
                 "action_phase_u8": 0,
                 "action_u8": 4,
                 "style85_u8": 0
+              }
+            },
+            "action_0x0c": {
+              "Coffee_Shop_actor_slots": [
+                "0x00ff9dc0",
+                "0x00ff9e80",
+                "0x00ffa000"
+              ],
+              "Coffee_Shop_observed_actor_frames": 236,
+              "Coffee_Shop_observed_substates": {
+                "0x00": 4,
+                "0x02": 191,
+                "0x04": 11,
+                "0x06": 30
+              },
+              "audio_triggers": [
+                {
+                  "command": "0x0035",
+                  "source_slot": "0x00ffa000",
+                  "trigger_group": "global-audio-ffa000-003a8e-0035"
+                },
+                {
+                  "command": "0x0035",
+                  "source_slot": "0x00ff9e80",
+                  "trigger_group": "global-audio-ff9e80-003a8e-0035"
+                },
+                {
+                  "command": "0x0100",
+                  "source_slot": "0x00ff9dc0",
+                  "trigger_group": "global-audio-ff9dc0-003a8e-0100"
+                }
+              ],
+              "capture_identity": {
+                "byte_identical": true,
+                "completion_a": {
+                  "coffee_shop_class1f_action0c.tsv": "9201c74db0356574d1fcc85acf56117181b83b244a0503e714dfbc7a81451ca9",
+                  "coffee_shop_rng_calls.tsv": "81338529f76629c3d103885c16838bd562beecf783f0b5107a5b7ecd11e219b3",
+                  "coffee_shop_scene_actors.tsv": "b7b1568df038af1cdd7eb5bc6eb30c830efca4952d1077644ab3b31ed2ad1c0f",
+                  "progression_result.tsv": "89e5ff6a76246c2eac618cc64c29c4c2956b51e82c7344239867986d3bee1c8e"
+                },
+                "completion_b": {
+                  "coffee_shop_class1f_action0c.tsv": "9201c74db0356574d1fcc85acf56117181b83b244a0503e714dfbc7a81451ca9",
+                  "coffee_shop_rng_calls.tsv": "81338529f76629c3d103885c16838bd562beecf783f0b5107a5b7ecd11e219b3",
+                  "coffee_shop_scene_actors.tsv": "b7b1568df038af1cdd7eb5bc6eb30c830efca4952d1077644ab3b31ed2ad1c0f",
+                  "progression_result.tsv": "89e5ff6a76246c2eac618cc64c29c4c2956b51e82c7344239867986d3bee1c8e"
+                },
+                "plan_index_mutant": {
+                  "coffee_shop_class1f_action0c.tsv": "a1fffa5b5d8f314ffe776ca551d402513436395377a4e82bc6d5e1bf755a61f3",
+                  "coffee_shop_rng_calls.tsv": "cfc67d531794398ac6cce19654a52f9d46adc1b392c2528c27a04fc3549d441c",
+                  "coffee_shop_scene_actors.tsv": "3e884d403b2eaf25ab3fe529a27010bc2383424480d2de8d543d74d87d01c974",
+                  "progression_result.tsv": "aaf4a69c86df2006b497b6ce82eaa86f0c423cdee932c19e38a2005ccd24feb0"
+                }
+              },
+              "classification": "SOURCE_CLOSED_IMPLEMENTATION_FIELDS",
+              "collision_damage": {
+                "Coffee_Shop_player_damage": {
+                  "attack_record": "0x00130b8c",
+                  "attack_selector_u8": 4,
+                  "damage_s16": 15,
+                  "source_frame": 4006,
+                  "source_slot": "0x00ff9dc0",
+                  "writer_pc": "0x01d5ee"
+                },
+                "current_animation_record_required": true,
+                "guard_writer": "0x01cbb4 (captured PC 0x01cbba)"
+              },
+              "mutation_control": {
+                "baseline": {
+                  "frame_3579_animation_record": "0x0012d890",
+                  "plan_u16": 6,
+                  "selector_u16": 0
+                },
+                "fixed_frame_or_authored_delay_rejected": true,
+                "frame_3579_position_unchanged": true,
+                "mutant": {
+                  "frame_3579_animation_record": "0x0012d9dc",
+                  "plan_u16": 14,
+                  "selector_u16": 12
+                },
+                "trigger": "add two to the first phase-0 masked plan index at source 0x040df8"
+              },
+              "phase_0": {
+                "Coffee_Shop_captured_initializers": [
+                  {
+                    "plan_u16": 6,
+                    "rng_index_u16": 60,
+                    "selector_u16": 0,
+                    "selector_u8": 43,
+                    "source_frame": 3578,
+                    "source_slot": "0x00ffa000"
+                  },
+                  {
+                    "plan_u16": 4,
+                    "rng_index_u16": 44,
+                    "selector_u16": 0,
+                    "selector_u8": 43,
+                    "source_frame": 3763,
+                    "source_slot": "0x00ffa000"
+                  },
+                  {
+                    "plan_u16": 2,
+                    "rng_index_u16": 16,
+                    "selector_u16": 6,
+                    "selector_u8": 56,
+                    "source_frame": 3822,
+                    "source_slot": "0x00ff9e80"
+                  },
+                  {
+                    "plan_u16": 14,
+                    "rng_index_u16": 30,
+                    "selector_u16": 12,
+                    "selector_u8": 48,
+                    "source_frame": 3987,
+                    "source_slot": "0x00ff9dc0"
+                  }
+                ],
+                "rng_calls": 1,
+                "rng_index": "result_u16 & 0x003e, then divide by two",
+                "selector_bind_order": [
+                  "0x041054 clears collision_guard_u8 through 0x01d768",
+                  "read selector_s16 from the selected plan at plan_cursor_u16",
+                  "negative selector reports terminal to the phase-4 caller",
+                  "nonnegative selector clears selector_phase_u16 and writes selector_u16",
+                  "selector_phase zero increments to two and binds its exact animation record chain"
+                ],
+                "selector_rows": [
+                  {
+                    "field96_u16": 0,
+                    "records": [
+                      {
+                        "animation_record": "0x0012d890",
+                        "assembly": "0x0012fe9e",
+                        "attack_selector_u8": 0,
+                        "branch_s16": 0,
+                        "hurt_selector_u8": 1,
+                        "movement_table_index_u8": 0,
+                        "next_animation_record": "0x0012d8a0",
+                        "record_sha256": "c76ab46cdaa6d8256da122840df9b4f9e40bd9653742927165e366123b54a42b",
+                        "timer_u16": 8
+                      },
+                      {
+                        "animation_record": "0x0012d8a0",
+                        "assembly": "0x0012febc",
+                        "attack_selector_u8": 1,
+                        "branch_s16": 0,
+                        "hurt_selector_u8": 1,
+                        "movement_table_index_u8": 0,
+                        "next_animation_record": "0x0012d8b0",
+                        "record_sha256": "5cf921125b5aec03c32bf78d2aab71e38543fb3a77c344a639b80e734eace9a8",
+                        "timer_u16": 1
+                      },
+                      {
+                        "animation_record": "0x0012d8b0",
+                        "assembly": "0x0012febc",
+                        "attack_selector_u8": 0,
+                        "branch_s16": 0,
+                        "hurt_selector_u8": 1,
+                        "movement_table_index_u8": 0,
+                        "next_animation_record": "0x0012d8c0",
+                        "record_sha256": "7926c990baade9b98b433af94e2f843300f801b6bccb2b9ac1f4c952c2224450",
+                        "timer_u16": 9
+                      },
+                      {
+                        "animation_record": "0x0012d8c0",
+                        "assembly": "0x0012fef4",
+                        "attack_selector_u8": 0,
+                        "branch_s16": 0,
+                        "hurt_selector_u8": 1,
+                        "movement_table_index_u8": 0,
+                        "next_animation_record": "0x0012d8d0",
+                        "record_sha256": "7358e361524979b73efc5f8cf92d26c4cf370ec8ba6d7719af63e830d77e2c93",
+                        "timer_u16": 10
+                      },
+                      {
+                        "animation_record": "0x0012d8d0",
+                        "assembly": "0x0012ff22",
+                        "attack_selector_u8": 0,
+                        "branch_s16": 0,
+                        "hurt_selector_u8": 1,
+                        "movement_table_index_u8": 0,
+                        "next_animation_record": "0x0012d8e0",
+                        "record_sha256": "37adbe873d96096c515e8b60c9dce63307bf19ba1d86e169008b8ecf9d47b219",
+                        "timer_u16": 16
+                      },
+                      {
+                        "animation_record": "0x0012d8e0",
+                        "assembly": "0x0012f5ac",
+                        "attack_selector_u8": 0,
+                        "branch_s16": -32768,
+                        "hurt_selector_u8": 1,
+                        "movement_table_index_u8": 0,
+                        "next_animation_record": "0x0012d8e0",
+                        "record_sha256": "c9e40e469bd821c8be18858c83b68d8df8a5f7657d879da482e672bd6c3a1fe1",
+                        "timer_u16": 8
+                      }
+                    ],
+                    "selector_u8": 43,
+                    "start_animation_record": "0x0012d890"
+                  },
+                  {
+                    "field96_u16": 2,
+                    "records": [
+                      {
+                        "animation_record": "0x0012da70",
+                        "assembly": "0x0012fe9e",
+                        "attack_selector_u8": 0,
+                        "branch_s16": 0,
+                        "hurt_selector_u8": 1,
+                        "movement_table_index_u8": 0,
+                        "next_animation_record": "0x0012da80",
+                        "record_sha256": "c76ab46cdaa6d8256da122840df9b4f9e40bd9653742927165e366123b54a42b",
+                        "timer_u16": 8
+                      },
+                      {
+                        "animation_record": "0x0012da80",
+                        "assembly": "0x0012febc",
+                        "attack_selector_u8": 5,
+                        "branch_s16": 0,
+                        "hurt_selector_u8": 1,
+                        "movement_table_index_u8": 0,
+                        "next_animation_record": "0x0012da90",
+                        "record_sha256": "7acbe702698ce3703d013ddb51f04163348a8ff1143b298586241ceda04a9df0",
+                        "timer_u16": 1
+                      },
+                      {
+                        "animation_record": "0x0012da90",
+                        "assembly": "0x0012febc",
+                        "attack_selector_u8": 0,
+                        "branch_s16": 0,
+                        "hurt_selector_u8": 1,
+                        "movement_table_index_u8": 0,
+                        "next_animation_record": "0x0012daa0",
+                        "record_sha256": "7926c990baade9b98b433af94e2f843300f801b6bccb2b9ac1f4c952c2224450",
+                        "timer_u16": 9
+                      },
+                      {
+                        "animation_record": "0x0012daa0",
+                        "assembly": "0x0012fef4",
+                        "attack_selector_u8": 0,
+                        "branch_s16": 0,
+                        "hurt_selector_u8": 1,
+                        "movement_table_index_u8": 0,
+                        "next_animation_record": "0x0012dab0",
+                        "record_sha256": "7358e361524979b73efc5f8cf92d26c4cf370ec8ba6d7719af63e830d77e2c93",
+                        "timer_u16": 10
+                      },
+                      {
+                        "animation_record": "0x0012dab0",
+                        "assembly": "0x0012ff22",
+                        "attack_selector_u8": 0,
+                        "branch_s16": 0,
+                        "hurt_selector_u8": 1,
+                        "movement_table_index_u8": 0,
+                        "next_animation_record": "0x0012dac0",
+                        "record_sha256": "37adbe873d96096c515e8b60c9dce63307bf19ba1d86e169008b8ecf9d47b219",
+                        "timer_u16": 16
+                      },
+                      {
+                        "animation_record": "0x0012dac0",
+                        "assembly": "0x0012f5ac",
+                        "attack_selector_u8": 0,
+                        "branch_s16": -32768,
+                        "hurt_selector_u8": 1,
+                        "movement_table_index_u8": 0,
+                        "next_animation_record": "0x0012dac0",
+                        "record_sha256": "c9e40e469bd821c8be18858c83b68d8df8a5f7657d879da482e672bd6c3a1fe1",
+                        "timer_u16": 8
+                      }
+                    ],
+                    "selector_u8": 55,
+                    "start_animation_record": "0x0012da70"
+                  },
+                  {
+                    "field96_u16": 4,
+                    "records": [
+                      {
+                        "animation_record": "0x0012d8f4",
+                        "assembly": "0x0012ff4a",
+                        "attack_selector_u8": 0,
+                        "branch_s16": 0,
+                        "hurt_selector_u8": 1,
+                        "movement_table_index_u8": 0,
+                        "next_animation_record": "0x0012d904",
+                        "record_sha256": "540851a5069b5ba9e8fadc52bc3052bd870ec179311a1e4c6467666f0058f9e2",
+                        "timer_u16": 8
+                      },
+                      {
+                        "animation_record": "0x0012d904",
+                        "assembly": "0x0012ff9a",
+                        "attack_selector_u8": 2,
+                        "branch_s16": 0,
+                        "hurt_selector_u8": 1,
+                        "movement_table_index_u8": 0,
+                        "next_animation_record": "0x0012d914",
+                        "record_sha256": "2e9c438c4592b2f755a1e85d7cbd5f548cf75cde2a4cdeee1ac8eb9eba29de30",
+                        "timer_u16": 1
+                      },
+                      {
+                        "animation_record": "0x0012d914",
+                        "assembly": "0x0012ff9a",
+                        "attack_selector_u8": 0,
+                        "branch_s16": 0,
+                        "hurt_selector_u8": 1,
+                        "movement_table_index_u8": 0,
+                        "next_animation_record": "0x0012d924",
+                        "record_sha256": "e3eecf9e58f1d601e95e3d42096179bab2a818cf3d93a75ea7b2d75642238076",
+                        "timer_u16": 9
+                      },
+                      {
+                        "animation_record": "0x0012d924",
+                        "assembly": "0x0012ffd8",
+                        "attack_selector_u8": 0,
+                        "branch_s16": 0,
+                        "hurt_selector_u8": 1,
+                        "movement_table_index_u8": 0,
+                        "next_animation_record": "0x0012d934",
+                        "record_sha256": "b1719b0307afe63a9beb87790837a7f0d274f66117994a1f9fb70b9688b5bbcf",
+                        "timer_u16": 10
+                      },
+                      {
+                        "animation_record": "0x0012d934",
+                        "assembly": "0x0013000a",
+                        "attack_selector_u8": 0,
+                        "branch_s16": 0,
+                        "hurt_selector_u8": 1,
+                        "movement_table_index_u8": 0,
+                        "next_animation_record": "0x0012d944",
+                        "record_sha256": "2992abbac3d6e90cb775cd59932e3f6509fddf7e2321ffab4c28898e76241657",
+                        "timer_u16": 16
+                      },
+                      {
+                        "animation_record": "0x0012d944",
+                        "assembly": "0x0012f5ac",
+                        "attack_selector_u8": 0,
+                        "branch_s16": -32768,
+                        "hurt_selector_u8": 1,
+                        "movement_table_index_u8": 0,
+                        "next_animation_record": "0x0012d944",
+                        "record_sha256": "c9e40e469bd821c8be18858c83b68d8df8a5f7657d879da482e672bd6c3a1fe1",
+                        "timer_u16": 8
+                      }
+                    ],
+                    "selector_u8": 44,
+                    "start_animation_record": "0x0012d8f4"
+                  },
+                  {
+                    "field96_u16": 6,
+                    "records": [
+                      {
+                        "animation_record": "0x0012dad4",
+                        "assembly": "0x0012ff4a",
+                        "attack_selector_u8": 0,
+                        "branch_s16": 0,
+                        "hurt_selector_u8": 1,
+                        "movement_table_index_u8": 0,
+                        "next_animation_record": "0x0012dae4",
+                        "record_sha256": "540851a5069b5ba9e8fadc52bc3052bd870ec179311a1e4c6467666f0058f9e2",
+                        "timer_u16": 8
+                      },
+                      {
+                        "animation_record": "0x0012dae4",
+                        "assembly": "0x0012ff9a",
+                        "attack_selector_u8": 6,
+                        "branch_s16": 0,
+                        "hurt_selector_u8": 1,
+                        "movement_table_index_u8": 0,
+                        "next_animation_record": "0x0012daf4",
+                        "record_sha256": "6398c5ad031bf4b1aea975367e3939e2b081d813bf84e5999c6ce8355c93f352",
+                        "timer_u16": 1
+                      },
+                      {
+                        "animation_record": "0x0012daf4",
+                        "assembly": "0x0012ff9a",
+                        "attack_selector_u8": 0,
+                        "branch_s16": 0,
+                        "hurt_selector_u8": 1,
+                        "movement_table_index_u8": 0,
+                        "next_animation_record": "0x0012db04",
+                        "record_sha256": "e3eecf9e58f1d601e95e3d42096179bab2a818cf3d93a75ea7b2d75642238076",
+                        "timer_u16": 9
+                      },
+                      {
+                        "animation_record": "0x0012db04",
+                        "assembly": "0x0012ffd8",
+                        "attack_selector_u8": 0,
+                        "branch_s16": 0,
+                        "hurt_selector_u8": 1,
+                        "movement_table_index_u8": 0,
+                        "next_animation_record": "0x0012db14",
+                        "record_sha256": "b1719b0307afe63a9beb87790837a7f0d274f66117994a1f9fb70b9688b5bbcf",
+                        "timer_u16": 10
+                      },
+                      {
+                        "animation_record": "0x0012db14",
+                        "assembly": "0x0013000a",
+                        "attack_selector_u8": 0,
+                        "branch_s16": 0,
+                        "hurt_selector_u8": 1,
+                        "movement_table_index_u8": 0,
+                        "next_animation_record": "0x0012db24",
+                        "record_sha256": "2992abbac3d6e90cb775cd59932e3f6509fddf7e2321ffab4c28898e76241657",
+                        "timer_u16": 16
+                      },
+                      {
+                        "animation_record": "0x0012db24",
+                        "assembly": "0x0012f5ac",
+                        "attack_selector_u8": 0,
+                        "branch_s16": -32768,
+                        "hurt_selector_u8": 1,
+                        "movement_table_index_u8": 0,
+                        "next_animation_record": "0x0012db24",
+                        "record_sha256": "c9e40e469bd821c8be18858c83b68d8df8a5f7657d879da482e672bd6c3a1fe1",
+                        "timer_u16": 8
+                      }
+                    ],
+                    "selector_u8": 56,
+                    "start_animation_record": "0x0012dad4"
+                  },
+                  {
+                    "field96_u16": 8,
+                    "records": [
+                      {
+                        "animation_record": "0x0012d958",
+                        "assembly": "0x0012ff72",
+                        "attack_selector_u8": 0,
+                        "branch_s16": 0,
+                        "hurt_selector_u8": 1,
+                        "movement_table_index_u8": 0,
+                        "next_animation_record": "0x0012d968",
+                        "record_sha256": "3df14eb96f6647b0a031ce59579d3d3b6ff732eac049b9f813cb3d9734291aee",
+                        "timer_u16": 8
+                      },
+                      {
+                        "animation_record": "0x0012d968",
+                        "assembly": "0x00130028",
+                        "attack_selector_u8": 0,
+                        "branch_s16": 0,
+                        "hurt_selector_u8": 1,
+                        "movement_table_index_u8": 0,
+                        "next_animation_record": "0x0012d978",
+                        "record_sha256": "9c4a5aa2b5a6e464cdadd34dce04f88d9f959ace72cfe0b40fccec72b9c59bf5",
+                        "timer_u16": 5
+                      },
+                      {
+                        "animation_record": "0x0012d978",
+                        "assembly": "0x00130046",
+                        "attack_selector_u8": 0,
+                        "branch_s16": 0,
+                        "hurt_selector_u8": 1,
+                        "movement_table_index_u8": 0,
+                        "next_animation_record": "0x0012d988",
+                        "record_sha256": "f630a8a55472ba4a893cd22b22c515c71f0bc3078aa6f88fed775447fdc652e6",
+                        "timer_u16": 5
+                      },
+                      {
+                        "animation_record": "0x0012d988",
+                        "assembly": "0x00130078",
+                        "attack_selector_u8": 3,
+                        "branch_s16": 0,
+                        "hurt_selector_u8": 8,
+                        "movement_table_index_u8": 0,
+                        "next_animation_record": "0x0012d998",
+                        "record_sha256": "4c8d2fd88f56367f2ce702cca9912f75e8273d9d3408302e864dae0f3c7205c3",
+                        "timer_u16": 1
+                      },
+                      {
+                        "animation_record": "0x0012d998",
+                        "assembly": "0x00130078",
+                        "attack_selector_u8": 0,
+                        "branch_s16": 0,
+                        "hurt_selector_u8": 8,
+                        "movement_table_index_u8": 0,
+                        "next_animation_record": "0x0012d9a8",
+                        "record_sha256": "6a64b2b23e93c44651415a3f971609b0731625afd41585c2c13b6840b1e7e095",
+                        "timer_u16": 9
+                      },
+                      {
+                        "animation_record": "0x0012d9a8",
+                        "assembly": "0x001300b0",
+                        "attack_selector_u8": 0,
+                        "branch_s16": 0,
+                        "hurt_selector_u8": 1,
+                        "movement_table_index_u8": 0,
+                        "next_animation_record": "0x0012d9b8",
+                        "record_sha256": "b707d151b9a85cb3d64218c3b5559b05227220c6de623530dac10ce9f04e84e1",
+                        "timer_u16": 12
+                      },
+                      {
+                        "animation_record": "0x0012d9b8",
+                        "assembly": "0x001300ee",
+                        "attack_selector_u8": 0,
+                        "branch_s16": 0,
+                        "hurt_selector_u8": 1,
+                        "movement_table_index_u8": 0,
+                        "next_animation_record": "0x0012d9c8",
+                        "record_sha256": "bb6219518a66aeac7cb123088f82a144e7e8b727b7ff6ec67929940d621b4ded",
+                        "timer_u16": 16
+                      },
+                      {
+                        "animation_record": "0x0012d9c8",
+                        "assembly": "0x0012f5ac",
+                        "attack_selector_u8": 0,
+                        "branch_s16": -32768,
+                        "hurt_selector_u8": 1,
+                        "movement_table_index_u8": 0,
+                        "next_animation_record": "0x0012d9c8",
+                        "record_sha256": "6131802bec1f89200bde656b621bc7f8c6351dac8acc8c2c1693b67109396593",
+                        "timer_u16": 1
+                      }
+                    ],
+                    "selector_u8": 45,
+                    "start_animation_record": "0x0012d958"
+                  },
+                  {
+                    "field96_u16": 10,
+                    "records": [
+                      {
+                        "animation_record": "0x0012db38",
+                        "assembly": "0x0012ff72",
+                        "attack_selector_u8": 0,
+                        "branch_s16": 0,
+                        "hurt_selector_u8": 1,
+                        "movement_table_index_u8": 0,
+                        "next_animation_record": "0x0012db48",
+                        "record_sha256": "3df14eb96f6647b0a031ce59579d3d3b6ff732eac049b9f813cb3d9734291aee",
+                        "timer_u16": 8
+                      },
+                      {
+                        "animation_record": "0x0012db48",
+                        "assembly": "0x00130028",
+                        "attack_selector_u8": 0,
+                        "branch_s16": 0,
+                        "hurt_selector_u8": 1,
+                        "movement_table_index_u8": 0,
+                        "next_animation_record": "0x0012db58",
+                        "record_sha256": "9c4a5aa2b5a6e464cdadd34dce04f88d9f959ace72cfe0b40fccec72b9c59bf5",
+                        "timer_u16": 5
+                      },
+                      {
+                        "animation_record": "0x0012db58",
+                        "assembly": "0x00130046",
+                        "attack_selector_u8": 0,
+                        "branch_s16": 0,
+                        "hurt_selector_u8": 1,
+                        "movement_table_index_u8": 0,
+                        "next_animation_record": "0x0012db68",
+                        "record_sha256": "f630a8a55472ba4a893cd22b22c515c71f0bc3078aa6f88fed775447fdc652e6",
+                        "timer_u16": 5
+                      },
+                      {
+                        "animation_record": "0x0012db68",
+                        "assembly": "0x00130078",
+                        "attack_selector_u8": 7,
+                        "branch_s16": 0,
+                        "hurt_selector_u8": 1,
+                        "movement_table_index_u8": 0,
+                        "next_animation_record": "0x0012db78",
+                        "record_sha256": "82cb1bdc865a530f5b08455e6d80b1d278cdfbf761360435a42a53696bf2e5c8",
+                        "timer_u16": 1
+                      },
+                      {
+                        "animation_record": "0x0012db78",
+                        "assembly": "0x00130078",
+                        "attack_selector_u8": 0,
+                        "branch_s16": 0,
+                        "hurt_selector_u8": 1,
+                        "movement_table_index_u8": 0,
+                        "next_animation_record": "0x0012db88",
+                        "record_sha256": "cc4ba9971c5da73b62b2c9249454ffd1cc606e6054e88570e68fc75618fd459f",
+                        "timer_u16": 9
+                      },
+                      {
+                        "animation_record": "0x0012db88",
+                        "assembly": "0x001300b0",
+                        "attack_selector_u8": 0,
+                        "branch_s16": 0,
+                        "hurt_selector_u8": 1,
+                        "movement_table_index_u8": 0,
+                        "next_animation_record": "0x0012db98",
+                        "record_sha256": "b707d151b9a85cb3d64218c3b5559b05227220c6de623530dac10ce9f04e84e1",
+                        "timer_u16": 12
+                      },
+                      {
+                        "animation_record": "0x0012db98",
+                        "assembly": "0x001300ee",
+                        "attack_selector_u8": 0,
+                        "branch_s16": 0,
+                        "hurt_selector_u8": 1,
+                        "movement_table_index_u8": 0,
+                        "next_animation_record": "0x0012dba8",
+                        "record_sha256": "bb6219518a66aeac7cb123088f82a144e7e8b727b7ff6ec67929940d621b4ded",
+                        "timer_u16": 16
+                      },
+                      {
+                        "animation_record": "0x0012dba8",
+                        "assembly": "0x0012f5ac",
+                        "attack_selector_u8": 0,
+                        "branch_s16": -32768,
+                        "hurt_selector_u8": 1,
+                        "movement_table_index_u8": 0,
+                        "next_animation_record": "0x0012dba8",
+                        "record_sha256": "c9e40e469bd821c8be18858c83b68d8df8a5f7657d879da482e672bd6c3a1fe1",
+                        "timer_u16": 8
+                      }
+                    ],
+                    "selector_u8": 57,
+                    "start_animation_record": "0x0012db38"
+                  },
+                  {
+                    "field96_u16": 12,
+                    "records": [
+                      {
+                        "animation_record": "0x0012d9dc",
+                        "assembly": "0x00130120",
+                        "attack_selector_u8": 0,
+                        "branch_s16": 0,
+                        "hurt_selector_u8": 1,
+                        "movement_table_index_u8": 0,
+                        "next_animation_record": "0x0012d9ec",
+                        "record_sha256": "270973a6634f6f78a6b7f40f3b800dff652b3ea05856c2bd1f02d143fe42d00c",
+                        "timer_u16": 7
+                      },
+                      {
+                        "animation_record": "0x0012d9ec",
+                        "assembly": "0x0013013e",
+                        "attack_selector_u8": 0,
+                        "branch_s16": 0,
+                        "hurt_selector_u8": 1,
+                        "movement_table_index_u8": 0,
+                        "next_animation_record": "0x0012d9fc",
+                        "record_sha256": "26d67b7367b6b43dc5fe010d5e9734394813d6260c827aba0f1665326976deb8",
+                        "timer_u16": 7
+                      },
+                      {
+                        "animation_record": "0x0012d9fc",
+                        "assembly": "0x00130156",
+                        "attack_selector_u8": 0,
+                        "branch_s16": 0,
+                        "hurt_selector_u8": 1,
+                        "movement_table_index_u8": 0,
+                        "next_animation_record": "0x0012da0c",
+                        "record_sha256": "596a00269a28af725290e4fecb5f5607da8e5d8a86d74ed36911cef0c1f78bde",
+                        "timer_u16": 5
+                      },
+                      {
+                        "animation_record": "0x0012da0c",
+                        "assembly": "0x0013016e",
+                        "attack_selector_u8": 4,
+                        "branch_s16": 0,
+                        "hurt_selector_u8": 1,
+                        "movement_table_index_u8": 0,
+                        "next_animation_record": "0x0012da1c",
+                        "record_sha256": "a4f0f22feb4b760927321306dabff4426251ae7209c2e6fbfda4431cc843c75c",
+                        "timer_u16": 1
+                      },
+                      {
+                        "animation_record": "0x0012da1c",
+                        "assembly": "0x0013016e",
+                        "attack_selector_u8": 0,
+                        "branch_s16": 0,
+                        "hurt_selector_u8": 1,
+                        "movement_table_index_u8": 0,
+                        "next_animation_record": "0x0012da2c",
+                        "record_sha256": "8e690d8c148a013a066697cb11504b542bceb5cd9993840643db2bd5c01ec092",
+                        "timer_u16": 9
+                      },
+                      {
+                        "animation_record": "0x0012da2c",
+                        "assembly": "0x0013018c",
+                        "attack_selector_u8": 0,
+                        "branch_s16": 0,
+                        "hurt_selector_u8": 1,
+                        "movement_table_index_u8": 0,
+                        "next_animation_record": "0x0012da3c",
+                        "record_sha256": "3b0562d4fe5d1bf5ffa5f70d63fba1d5f7b69bb982ff1ede34270b8efed20b11",
+                        "timer_u16": 10
+                      },
+                      {
+                        "animation_record": "0x0012da3c",
+                        "assembly": "0x001301aa",
+                        "attack_selector_u8": 0,
+                        "branch_s16": 0,
+                        "hurt_selector_u8": 1,
+                        "movement_table_index_u8": 0,
+                        "next_animation_record": "0x0012da4c",
+                        "record_sha256": "e9285703447f047a56b58afb87432895bb0cd4b722ea094a11110f753c8dcb27",
+                        "timer_u16": 7
+                      },
+                      {
+                        "animation_record": "0x0012da4c",
+                        "assembly": "0x001301c2",
+                        "attack_selector_u8": 0,
+                        "branch_s16": 0,
+                        "hurt_selector_u8": 1,
+                        "movement_table_index_u8": 0,
+                        "next_animation_record": "0x0012da5c",
+                        "record_sha256": "ab27a76de2aa1aadf9894711028ddfa889699c45baebf3b5baec848d693f3d71",
+                        "timer_u16": 10
+                      },
+                      {
+                        "animation_record": "0x0012da5c",
+                        "assembly": "0x0012f5ac",
+                        "attack_selector_u8": 0,
+                        "branch_s16": -32768,
+                        "hurt_selector_u8": 1,
+                        "movement_table_index_u8": 0,
+                        "next_animation_record": "0x0012da5c",
+                        "record_sha256": "c9e40e469bd821c8be18858c83b68d8df8a5f7657d879da482e672bd6c3a1fe1",
+                        "timer_u16": 8
+                      }
+                    ],
+                    "selector_u8": 48,
+                    "start_animation_record": "0x0012d9dc"
+                  },
+                  {
+                    "field96_u16": 14,
+                    "records": [
+                      {
+                        "animation_record": "0x0012dbbc",
+                        "assembly": "0x00130120",
+                        "attack_selector_u8": 0,
+                        "branch_s16": 0,
+                        "hurt_selector_u8": 1,
+                        "movement_table_index_u8": 0,
+                        "next_animation_record": "0x0012dbcc",
+                        "record_sha256": "270973a6634f6f78a6b7f40f3b800dff652b3ea05856c2bd1f02d143fe42d00c",
+                        "timer_u16": 7
+                      },
+                      {
+                        "animation_record": "0x0012dbcc",
+                        "assembly": "0x0013013e",
+                        "attack_selector_u8": 0,
+                        "branch_s16": 0,
+                        "hurt_selector_u8": 1,
+                        "movement_table_index_u8": 0,
+                        "next_animation_record": "0x0012dbdc",
+                        "record_sha256": "26d67b7367b6b43dc5fe010d5e9734394813d6260c827aba0f1665326976deb8",
+                        "timer_u16": 7
+                      },
+                      {
+                        "animation_record": "0x0012dbdc",
+                        "assembly": "0x00130156",
+                        "attack_selector_u8": 0,
+                        "branch_s16": 0,
+                        "hurt_selector_u8": 1,
+                        "movement_table_index_u8": 0,
+                        "next_animation_record": "0x0012dbec",
+                        "record_sha256": "596a00269a28af725290e4fecb5f5607da8e5d8a86d74ed36911cef0c1f78bde",
+                        "timer_u16": 5
+                      },
+                      {
+                        "animation_record": "0x0012dbec",
+                        "assembly": "0x0013016e",
+                        "attack_selector_u8": 8,
+                        "branch_s16": 0,
+                        "hurt_selector_u8": 1,
+                        "movement_table_index_u8": 0,
+                        "next_animation_record": "0x0012dbfc",
+                        "record_sha256": "455c78b797454d3c551340f3a6147eb5b5ce573060912ec0c03bce45ceebe3ea",
+                        "timer_u16": 1
+                      },
+                      {
+                        "animation_record": "0x0012dbfc",
+                        "assembly": "0x0013016e",
+                        "attack_selector_u8": 0,
+                        "branch_s16": 0,
+                        "hurt_selector_u8": 1,
+                        "movement_table_index_u8": 0,
+                        "next_animation_record": "0x0012dc0c",
+                        "record_sha256": "8e690d8c148a013a066697cb11504b542bceb5cd9993840643db2bd5c01ec092",
+                        "timer_u16": 9
+                      },
+                      {
+                        "animation_record": "0x0012dc0c",
+                        "assembly": "0x0013018c",
+                        "attack_selector_u8": 0,
+                        "branch_s16": 0,
+                        "hurt_selector_u8": 1,
+                        "movement_table_index_u8": 0,
+                        "next_animation_record": "0x0012dc1c",
+                        "record_sha256": "3b0562d4fe5d1bf5ffa5f70d63fba1d5f7b69bb982ff1ede34270b8efed20b11",
+                        "timer_u16": 10
+                      },
+                      {
+                        "animation_record": "0x0012dc1c",
+                        "assembly": "0x001301aa",
+                        "attack_selector_u8": 0,
+                        "branch_s16": 0,
+                        "hurt_selector_u8": 1,
+                        "movement_table_index_u8": 0,
+                        "next_animation_record": "0x0012dc2c",
+                        "record_sha256": "e9285703447f047a56b58afb87432895bb0cd4b722ea094a11110f753c8dcb27",
+                        "timer_u16": 7
+                      },
+                      {
+                        "animation_record": "0x0012dc2c",
+                        "assembly": "0x001301c2",
+                        "attack_selector_u8": 0,
+                        "branch_s16": 0,
+                        "hurt_selector_u8": 1,
+                        "movement_table_index_u8": 0,
+                        "next_animation_record": "0x0012dc3c",
+                        "record_sha256": "ab27a76de2aa1aadf9894711028ddfa889699c45baebf3b5baec848d693f3d71",
+                        "timer_u16": 10
+                      },
+                      {
+                        "animation_record": "0x0012dc3c",
+                        "assembly": "0x0012f5ac",
+                        "attack_selector_u8": 0,
+                        "branch_s16": -32768,
+                        "hurt_selector_u8": 1,
+                        "movement_table_index_u8": 0,
+                        "next_animation_record": "0x0012dc3c",
+                        "record_sha256": "c9e40e469bd821c8be18858c83b68d8df8a5f7657d879da482e672bd6c3a1fe1",
+                        "timer_u16": 8
+                      }
+                    ],
+                    "selector_u8": 58,
+                    "start_animation_record": "0x0012dbbc"
+                  }
+                ],
+                "selector_sequences_by_plan": [
+                  {
+                    "field80_u16": 0,
+                    "values_s16": [
+                      2,
+                      -1
+                    ]
+                  },
+                  {
+                    "field80_u16": 2,
+                    "values_s16": [
+                      6,
+                      -1
+                    ]
+                  },
+                  {
+                    "field80_u16": 4,
+                    "values_s16": [
+                      0,
+                      0,
+                      6,
+                      -1
+                    ]
+                  },
+                  {
+                    "field80_u16": 6,
+                    "values_s16": [
+                      0,
+                      0,
+                      0,
+                      6,
+                      -1
+                    ]
+                  },
+                  {
+                    "field80_u16": 8,
+                    "values_s16": [
+                      0,
+                      10,
+                      -1
+                    ]
+                  },
+                  {
+                    "field80_u16": 10,
+                    "values_s16": [
+                      8,
+                      10,
+                      -1
+                    ]
+                  },
+                  {
+                    "field80_u16": 12,
+                    "values_s16": [
+                      14,
+                      -1
+                    ]
+                  },
+                  {
+                    "field80_u16": 14,
+                    "values_s16": [
+                      12,
+                      14,
+                      -1
+                    ]
+                  }
+                ],
+                "variant0_plan_by_rng_index_u16": [
+                  0,
+                  0,
+                  0,
+                  0,
+                  0,
+                  0,
+                  14,
+                  14,
+                  2,
+                  2,
+                  2,
+                  2,
+                  2,
+                  2,
+                  14,
+                  14,
+                  4,
+                  4,
+                  4,
+                  4,
+                  4,
+                  4,
+                  4,
+                  14,
+                  6,
+                  6,
+                  6,
+                  6,
+                  6,
+                  6,
+                  6,
+                  14
+                ],
+                "writes_before_selection": [
+                  "increment action_phase_u8 from 0 to 2",
+                  "emit the source-owned 0x040dc4 gameplay-audio edge",
+                  "clear plan_cursor_u16"
+                ]
+              },
+              "phase_2": {
+                "Coffee_Shop_stage_parameter_u16": 9,
+                "Coffee_Shop_terminal_results_u8": [
+                  11,
+                  14,
+                  6
+                ],
+                "nonterminal": "step shared animation through 0x016536",
+                "stage_offsets_u8": [
+                  0,
+                  0,
+                  0,
+                  0,
+                  0,
+                  32,
+                  32,
+                  32,
+                  32,
+                  32,
+                  32,
+                  32,
+                  32,
+                  64,
+                  64,
+                  64,
+                  64,
+                  64,
+                  64,
+                  96,
+                  96,
+                  96,
+                  96,
+                  96,
+                  128,
+                  128,
+                  128,
+                  128,
+                  128,
+                  128,
+                  128,
+                  128
+                ],
+                "terminal_order": [
+                  "increment action_phase_u8 from 2 to 4",
+                  "consume exactly one RNG call through 0x0bc416",
+                  "index the stage-parameter timer row by result_u16 & 31",
+                  "write action_timer_u8",
+                  "if collision_guard_u8 is zero clear action/substate, cursor and field95",
+                  "otherwise retain phase 4"
+                ],
+                "timer_row_u8": [
+                  6,
+                  6,
+                  6,
+                  6,
+                  6,
+                  6,
+                  6,
+                  6,
+                  7,
+                  7,
+                  7,
+                  7,
+                  8,
+                  8,
+                  8,
+                  8,
+                  9,
+                  9,
+                  9,
+                  9,
+                  10,
+                  10,
+                  10,
+                  10,
+                  11,
+                  11,
+                  11,
+                  11,
+                  12,
+                  14,
+                  16,
+                  18
+                ]
+              },
+              "phase_4": {
+                "Coffee_Shop_observed_updates": 12,
+                "order": [
+                  "predecrement action_timer_u8 and return while nonzero",
+                  "write action_phase_u8=2 and increment plan_cursor_u16 by two",
+                  "bind the next selector through 0x041054",
+                  "a negative selector clears phase and immediately re-enters phase 0 in the same scheduler visit"
+                ],
+                "terminal_branch": "NOT_REACHED_BEFORE_SOURCE_INTERRUPTION_IN_COFFEE_SHOP"
+              },
+              "phase_6": {
+                "Coffee_Shop_observed_updates": 30,
+                "entry_guard": "style85_u8 is nonzero in 0x041dfe",
+                "entry_selector_u8": 36,
+                "terminal_order": [
+                  "if animation_branch_s16 is negative clear action_phase_u8 and style85_u8",
+                  "always step shared animation once through 0x016536"
+                ]
+              },
+              "phase_8": {
+                "Coffee_Shop_observed_updates": 0,
+                "classification": "NOT_REQUIRED_FOR_COFFEE_SHOP",
+                "static_rule": [
+                  "if animation_branch_s16 is negative clear action_phase_u8",
+                  "when style85_u8 is nonzero write phase 6 and bind selector 36",
+                  "otherwise step shared animation through 0x016536"
+                ]
+              },
+              "phase_exclusive_hit_ko_dispatch_guard": {
+                "Coffee_Shop_negative_control": {
+                  "action_phase_u16": "0x0c02",
+                  "outer_state_u16": "0x0208",
+                  "plan_u16": 14,
+                  "reaction_dispatch": false,
+                  "source_frame_u16": 3635,
+                  "source_slot": "0x00ffa000"
+                },
+                "accepted_reaction_state_pairs": [
+                  {
+                    "outer_states_u16": [
+                      514
+                    ],
+                    "recovery_kind_u16": 1
+                  },
+                  {
+                    "outer_states_u16": [
+                      1026,
+                      1028
+                    ],
+                    "recovery_kind_u16": 2
+                  },
+                  {
+                    "outer_states_u16": [
+                      1026,
+                      1028
+                    ],
+                    "recovery_kind_u16": 3
+                  }
+                ],
+                "mutation_control": {
+                  "expected_effect": "misclassifying plan 14 as a recovery kind diverts action 0x0c into the HIT/KO dispatcher and fails the scheduler",
+                  "nonzero_plan_without_state_guard_rejected": true
+                },
+                "normal_owner": "action-0x0c plan_u16 while outer state is 0x0208",
+                "reaction_owner": "source HIT/KO recovery kind only while the exact HIT/KO outer state is active",
+                "shared_field": "actor+0x80:u16"
+              },
+              "record_fields": {
+                "collision_guard_u8": "actor+0x6e",
+                "field95_u8": "actor+0x95",
+                "plan_cursor_u16": "actor+0x82",
+                "plan_u16": "actor+0x80",
+                "selector_phase_u16": "actor+0x98",
+                "selector_u16": "actor+0x96",
+                "style85_u8": "actor+0x85"
+              },
+              "source_entry": "0x040daa",
+              "source_windows": {
+                "dispatcher_sha256": "65423144424e39818d8f79da478b1bb07318e4f7b923efdf47dda1f595e89f80",
+                "plan_table_sha256": "9e86703b57e7c1414afdb7e2ffc9a3302abec037588e14b06d30648cf858e2b1",
+                "selector_helper_sha256": "b104ed11a654098f5054429cb80d481dc104c3096ce9fc0ed735ca35619c7ca5",
+                "timer_row_sha256": "2979cc43df0ba58042b89cda10eabca959b993ae9c4db9807da11b700202295a",
+                "timer_stage_sha256": "1c5510847fa9101714f533a34fe412f49d5c446d835ccf42a860f7b4c744013d",
+                "variant0_plan_sha256": "51f7c821f7f38edbac53f3a36ae5dd60b9f3d059a3b4992e175e4b6f90ea0f97"
               }
             },
             "action_0x0e": {
@@ -40695,6 +43429,51 @@
               }
             },
             "action_0x10": {
+              "initializer": {
+                "Coffee_Shop_reachable_phases_u8": [
+                  0,
+                  6
+                ],
+                "Coffee_Shop_reachable_selector_values_u8": [
+                  0,
+                  2,
+                  4
+                ],
+                "action_timer_u8": 4,
+                "lifetime_timer_u8": 240,
+                "membership_release": "0x041d9c before target allocation",
+                "source_entry": "0x041a5c",
+                "target_allocator": "0x017020; Coffee Shop resolves player slot 0xff8380",
+                "unreached_phases": {
+                  "2": "NOT_REQUIRED_FOR_COFFEE_SHOP",
+                  "4": "NOT_REQUIRED_FOR_COFFEE_SHOP"
+                },
+                "x_offset_selector_by_rng_low_nibble_u8": [
+                  0,
+                  0,
+                  2,
+                  2,
+                  2,
+                  2,
+                  2,
+                  2,
+                  2,
+                  4,
+                  4,
+                  4,
+                  4,
+                  4,
+                  4,
+                  4
+                ],
+                "x_offset_sign_rule": "when camera band_s8 is nonnegative and bit 1 is clear, negate the selected signed offset",
+                "x_offsets_s16": [
+                  96,
+                  112,
+                  208
+                ],
+                "z_offset_s16": 0
+              },
               "overlap_transition": {
                 "action_phase_u8": 0,
                 "action_u8": 14,
@@ -40705,6 +43484,7 @@
                 "0x041db8 target proximity",
                 "predecrement field84_u8",
                 "predecrement action_timer_u8 and reload 4 on zero",
+                "on timer reload, 0x041bb2 turns direction by two steps toward player plus the stored offsets",
                 "0x041b26 target-side test",
                 "0x041bee exact target x +/-16 and z +/-12 overlap",
                 "0x016644 movement step"
@@ -41117,44 +43897,44 @@
               "action0_style_bits_u16": "0x6db6",
               "action4_choice_bits_u16": "0xf555",
               "direction_axis_equal_u8": [
-                59,
-                156,
-                89,
-                84
+                4,
+                12,
+                28,
+                20
               ],
               "direction_octant_base_u8": [
-                220,
-                204,
-                35,
-                120,
-                20,
-                172,
-                198,
-                232,
-                254,
+                0,
                 33,
-                11,
-                152,
-                5,
-                60,
-                249,
-                243,
-                238,
-                160,
-                76,
-                222,
-                81,
-                67,
-                217,
-                78,
-                183,
-                137,
-                77,
-                224,
-                235,
-                177,
-                252,
-                137
+                1,
+                32,
+                17,
+                16,
+                48,
+                49,
+                16,
+                46,
+                0,
+                12,
+                2,
+                64,
+                0,
+                255,
+                208,
+                64,
+                48,
+                48,
+                0,
+                0,
+                65,
+                240,
+                0,
+                0,
+                45,
+                72,
+                0,
+                28,
+                61,
+                80
               ],
               "field88_by_rng_low_nibble_u8": [
                 1,
@@ -41174,98 +43954,224 @@
                 1,
                 2
               ],
+              "movement_selector_by_style_relation": {
+                "relation": "((direction_u8 >> 4) & 1) XOR (facing_u8 & 1)",
+                "rows": [
+                  {
+                    "direction_facing_relation_u8": 1,
+                    "selector_u8": 2,
+                    "start_animation_record": "0x0012d380",
+                    "style85_u8": 0
+                  },
+                  {
+                    "direction_facing_relation_u8": 0,
+                    "selector_u8": 10,
+                    "start_animation_record": "0x0012d404",
+                    "style85_u8": 0
+                  },
+                  {
+                    "direction_facing_relation_u8": 1,
+                    "selector_u8": 18,
+                    "start_animation_record": "0x0012d488",
+                    "style85_u8": 1
+                  },
+                  {
+                    "direction_facing_relation_u8": 0,
+                    "selector_u8": 26,
+                    "start_animation_record": "0x0012d50c",
+                    "style85_u8": 1
+                  }
+                ],
+                "source_entry": "0x0419a4"
+              },
               "wander_direction_delta_other_style_u8": [
-                155,
-                48,
-                65,
-                19,
-                129,
-                248,
-                173,
-                103,
-                243,
-                129,
-                55,
-                182,
-                184,
-                216,
-                84,
-                43,
-                92,
-                126,
-                38,
-                121,
-                72,
-                53,
-                78,
-                38,
-                40,
-                82,
-                49,
-                192,
-                222,
-                171,
-                54,
-                205
+                255,
+                0,
+                1,
+                0,
+                255,
+                0,
+                1,
+                0,
+                255,
+                0,
+                1,
+                0,
+                255,
+                0,
+                1,
+                0,
+                255,
+                0,
+                1,
+                0,
+                255,
+                0,
+                1,
+                0,
+                255,
+                0,
+                1,
+                0,
+                255,
+                0,
+                1,
+                0
               ],
               "wander_direction_delta_same_style_u8": [
-                121,
-                224,
-                110,
-                53,
-                148,
-                150,
-                35,
-                231,
-                173,
                 247,
-                145,
-                60,
-                72,
-                15,
-                141,
-                63,
-                182,
-                60,
-                105,
-                227,
-                50,
-                135,
-                195,
-                244,
-                155,
-                135,
-                169,
-                98,
-                133,
-                180,
-                141,
-                1
+                248,
+                249,
+                250,
+                251,
+                252,
+                253,
+                254,
+                255,
+                0,
+                1,
+                0,
+                255,
+                0,
+                1,
+                0,
+                255,
+                0,
+                1,
+                0,
+                255,
+                0,
+                1,
+                0,
+                2,
+                3,
+                4,
+                5,
+                6,
+                7,
+                8,
+                9
               ],
               "wander_quadrant_delta_by_rng_low_nibble_u8": [
-                62,
-                77,
-                164,
-                31,
-                172,
-                106,
-                28,
-                179,
-                48,
-                0,
-                196,
-                250,
-                81,
-                248,
-                95,
-                193
+                1,
+                2,
+                3,
+                1,
+                2,
+                3,
+                1,
+                2,
+                3,
+                1,
+                2,
+                3,
+                1,
+                2,
+                3,
+                1
               ],
               "wander_target_offsets_s16": [
-                -29507,
-                23373,
-                1649,
-                -2818
-              ]
+                48,
+                144,
+                240,
+                336
+              ],
+              "wander_target_origin": {
+                "x_s16": "global+0x0278 camera_x",
+                "z_offset_s16": 48,
+                "z_s16": "global+0x027c camera_z"
+              }
+            },
+            "wander_group_occupancy_program": {
+              "Coffee_Shop_coverage": {
+                "actor_slots": [
+                  "0x00ff9dc0",
+                  "0x00ff9e80",
+                  "0x00ffa000",
+                  "0x00ffa0c0",
+                  "0x00ffa3c0"
+                ],
+                "band_calls": 2935,
+                "occupancy_writes": 56,
+                "release_calls": 2939,
+                "select_calls": 30
+              },
+              "camera_band_rule": [
+                "unsigned (actor_x_high_s16 - camera_x_s16) < 96 -> 0",
+                "otherwise < 192 -> 1",
+                "otherwise < 288 -> 2",
+                "otherwise < 384 -> 3",
+                "otherwise -1"
+              ],
+              "camera_band_thresholds_u16": [
+                96,
+                192,
+                288,
+                384
+              ],
+              "capture_identity": {
+                "byte_identical": true,
+                "completion_a": "89309bad8ff8dc4e0660466a452d8df426bd6d20e0475fcd3c4fe59cba286070",
+                "completion_b": "89309bad8ff8dc4e0660466a452d8df426bd6d20e0475fcd3c4fe59cba286070",
+                "rng_seed_mutant": "1263d8b61693b6a8bcb83db8b748f4a48c2a5184cdc205b0af589ea62804978b"
+              },
+              "classification": "SOURCE_CLOSED_IMPLEMENTATION_FIELDS",
+              "cursor_limit_u8": 15,
+              "group_count_u8": 4,
+              "least_populated_branch": {
+                "Coffee_Shop_reachable_calls": 0,
+                "classification": "NOT_REQUIRED_FOR_COFFEE_SHOP",
+                "guard": "cursor_u8 == 0 and wander_group_s8 < 0",
+                "static_rule": "scan occupancy groups 3 through 0 as unsigned u8; retain the lower count and allow later equal-count replacements"
+              },
+              "mutation_control": {
+                "baseline": {
+                  "direction_u8": 26,
+                  "frame_3005_x_fp": "0x04b8ae00",
+                  "frame_3005_y_fp": "0x00fb3d00",
+                  "frame_3005_z_s16": 251,
+                  "group_u8": 1,
+                  "x_offset_s16": 144
+                },
+                "mutant": {
+                  "direction_u8": 27,
+                  "frame_3005_x_fp": "0x04ba6d00",
+                  "frame_3005_y_fp": "0x00fce200",
+                  "frame_3005_z_s16": 252,
+                  "group_u8": 2,
+                  "x_offset_s16": 240
+                },
+                "prior_state_unchanged_through_source_frame": 3004,
+                "trigger": "replace source RNG seed 0xa476 with 0x0101 only at frame-3004 0x041c36 entry"
+              },
+              "selection_order": [
+                "if membership_u8 is nonzero, clear it and decrement shared occupancy at the prior wander_group_s8",
+                "if cursor_u8 is zero, consume one RNG call",
+                "Coffee Shop reachable actors have nonnegative wander_group_s8, so use (rng_result_u16 & 6) as the offset-table byte index",
+                "store signed x offset from 0x041d08 and signed z offset 48",
+                "increment cursor_u8 and clear it on reaching 15",
+                "store wander_group_u8 = offset_index_u8 >> 1",
+                "compute direction from camera plus offsets through 0x016484",
+                "consume one RNG call and select same-band or other-band delta by wander_group_u8 == wander_band_s8",
+                "subtract the delta modulo 32, set membership_u8, and increment shared occupancy for the new group"
+              ],
+              "shared_occupancy_u8": {
+                "base": "global-0x65c4 (0x00ff1a3c)",
+                "count": 4,
+                "index": "wander_group_s8 sign-extended"
+              },
+              "source_entries": {
+                "camera_band": "0x041d6c",
+                "least_populated_group": "0x041d50",
+                "release_membership": "0x041d9c",
+                "select_and_register": "0x041c36"
+              },
+              "source_windows": {
+                "camera_band_sha256": "beb4436302bb5f8f34a38833c424242d981690c67b9f7b668197b8041dd3eb8c",
+                "least_populated_sha256": "36d596e838e3cc4b6ea7abaf7ecea5432b830ddf9ddac47c2e14f0f463854711",
+                "release_membership_sha256": "f3a9e70a3012d435decf56962c0d9aa61afd4a394cb60154ccd269ab12b064b0",
+                "select_and_register_sha256": "76b56f5bf2a28464bb4990dc6cbf54ef71ac60a04028e425d5e6b16f20ddf10f"
+              }
             }
           },
           "record_layout": {
@@ -41285,6 +44191,12 @@
             "special_latch_u8": "actor+0xad",
             "target_low_word_u16": "actor+0x28",
             "transition_latch_u8": "actor+0xae",
+            "wander_band_s8": "actor+0x86",
+            "wander_cursor_u8": "actor+0x89",
+            "wander_group_s8": "actor+0x87",
+            "wander_membership_u8": "actor+0x8a",
+            "wander_x_offset_s16": "actor+0x60",
+            "wander_z_offset_s16": "actor+0x62",
             "x_acceleration_s32_16_16": "actor+0x38",
             "x_fp_s32_16_16": "actor+0x10",
             "x_velocity_s32_16_16": "actor+0x30",
@@ -41370,6 +44282,10 @@
               "entry": "0x040bea",
               "role": "target/style/RNG chooser"
             },
+            "0x02": {
+              "entry": "0x040c5e",
+              "role": "source-selected hold timer"
+            },
             "0x04": {
               "entry": "0x040c7c",
               "role": "source movement sequence and terminal chooser"
@@ -41385,6 +44301,10 @@
             "0x0a": {
               "entry": "0x040d72",
               "role": "style-one transition animation"
+            },
+            "0x0c": {
+              "entry": "0x040daa",
+              "role": "close-range attack program"
             },
             "0x0e": {
               "entry": "0x040e84",

@@ -8995,6 +8995,301 @@
     "nonlethal_hit": {
       "active_recovery": "0x01aad0",
       "classification": "SOURCE_CLOSED",
+      "coffee_shop_reachable_program": {
+        "capture_identity": {
+          "baseline_program_sha256": "d8affcc3b676c69c3eaf18038111d244e8cff07370336e9e9cb397f9c73249f8",
+          "baseline_writes_sha256": "183b0b106b08950504efac480a70be960c90d8e921c3faf18d7e68cdd52946cf",
+          "mutation_program_sha256": "2eebee566db369d72d041e5e66e2c0464ea75ff7bd5804bb3e66842d0328d1db",
+          "two_completion_captures_byte_identical": true
+        },
+        "carried_presentation_rule": "HIT entry preserves the current animation record/timer/branch for its visible entry frame while clearing current hurt and attack selectors; a fixed carried record is forbidden",
+        "classification": "SOURCE_CLOSED_IMPLEMENTATION_FIELDS",
+        "field_types": {
+          "active_body_selector": "u8 actor+0x46",
+          "hit_kind": "u8 actor+0x49",
+          "motion_index": "u8 actor+0x6c low nibble",
+          "presentation_selector": "u8 actor+0x4d",
+          "reaction_facing": "u8 actor+0x4f",
+          "shake_count": "u8 actor+0x2c from attack record+0x0e",
+          "x_acceleration": "s32 16.16 actor+0x38",
+          "x_position": "s32 16.16 actor+0x10",
+          "x_velocity": "s32 16.16 actor+0x30"
+        },
+        "instances": [
+          {
+            "active_body_selector_u8": 0,
+            "attack_record": "0x00130b5c",
+            "attacker_owner": "record12/class-0x1f",
+            "attacker_slot": "0x00ffa240",
+            "carried_animation_record": "0x0015f278",
+            "collision_writer_frame_u16": 2750,
+            "damage_s16": 10,
+            "entry_visible_frame_u16": 2751,
+            "health_after_s16": 91,
+            "health_before_s16": 101,
+            "hit_kind_u8": 6,
+            "motion": {
+              "row_hex": "0001c000ffffe000",
+              "table": "0x001f892",
+              "x_acceleration_s32_16_16": -8192,
+              "x_velocity_s32_16_16": 114688
+            },
+            "motion_index_u8": 2,
+            "motion_visible_frame_u16": 2762,
+            "next_body_visible_frame_u16": 2778,
+            "presentation": {
+              "animation_record": "0x0015eee8",
+              "assembly": "0x00160ede",
+              "attack_selector_u8": 0,
+              "branch_s16": -32768,
+              "hurt_selector_u8": 0,
+              "record_sha256": "b8b49a731d28a351a74a9db0e7cb44d5cfb338d65ff977fda79e3eb39b2a7367",
+              "timer_u16": 8
+            },
+            "presentation_selector_u8": 7,
+            "presentation_visible_frame_u16": 2752,
+            "shake_count_u8": 10,
+            "source_attack_selector_u8": 1,
+            "source_class_s8": 31,
+            "source_record_type_u8": 12,
+            "terminal_visible_frame_u16": 2777
+          },
+          {
+            "active_body_selector_u8": 0,
+            "attack_record": "0x0003589e",
+            "attacker_owner": "record16/class-0x06",
+            "attacker_slot": "0x00ffae00",
+            "carried_animation_record": "0x0015f248",
+            "collision_writer_frame_u16": 3263,
+            "damage_s16": 17,
+            "entry_visible_frame_u16": 3264,
+            "health_after_s16": 78,
+            "health_before_s16": 95,
+            "hit_kind_u8": 9,
+            "motion": {
+              "row_hex": "00034000ffffe000",
+              "table": "0x001f892",
+              "x_acceleration_s32_16_16": -8192,
+              "x_velocity_s32_16_16": 212992
+            },
+            "motion_index_u8": 8,
+            "motion_visible_frame_u16": 3285,
+            "next_body_visible_frame_u16": 3313,
+            "presentation": {
+              "animation_record": "0x0015ef24",
+              "assembly": "0x00160f3c",
+              "attack_selector_u8": 0,
+              "branch_s16": -32768,
+              "hurt_selector_u8": 0,
+              "record_sha256": "1de8aa22850db10088e5d6f99219f02236d786f11be73107d091d21892a4752b",
+              "timer_u16": 8
+            },
+            "presentation_selector_u8": 10,
+            "presentation_visible_frame_u16": 3265,
+            "shake_count_u8": 20,
+            "source_attack_selector_u8": 0,
+            "source_class_s8": 6,
+            "source_record_type_u8": 16,
+            "terminal_visible_frame_u16": 3312
+          },
+          {
+            "active_body_selector_u8": 0,
+            "attack_record": "0x00130b5c",
+            "attacker_owner": "record12/class-0x1f",
+            "attacker_slot": "0x00ffa000",
+            "carried_animation_record": "0x0015f208",
+            "collision_writer_frame_u16": 3771,
+            "damage_s16": 10,
+            "entry_visible_frame_u16": 3772,
+            "health_after_s16": 68,
+            "health_before_s16": 78,
+            "hit_kind_u8": 6,
+            "motion": {
+              "row_hex": "0001c000ffffe000",
+              "table": "0x001f892",
+              "x_acceleration_s32_16_16": -8192,
+              "x_velocity_s32_16_16": 114688
+            },
+            "motion_index_u8": 2,
+            "motion_visible_frame_u16": 3783,
+            "next_body_visible_frame_u16": 3799,
+            "presentation": {
+              "animation_record": "0x0015eee8",
+              "assembly": "0x00160ede",
+              "attack_selector_u8": 0,
+              "branch_s16": -32768,
+              "hurt_selector_u8": 0,
+              "record_sha256": "b8b49a731d28a351a74a9db0e7cb44d5cfb338d65ff977fda79e3eb39b2a7367",
+              "timer_u16": 8
+            },
+            "presentation_selector_u8": 7,
+            "presentation_visible_frame_u16": 3773,
+            "shake_count_u8": 10,
+            "source_attack_selector_u8": 1,
+            "source_class_s8": 31,
+            "source_record_type_u8": 12,
+            "terminal_visible_frame_u16": 3798
+          },
+          {
+            "active_body_selector_u8": 0,
+            "attack_record": "0x0003589e",
+            "attacker_owner": "record16/class-0x06",
+            "attacker_slot": "0x00ffad00",
+            "carried_animation_record": "0x0015f228",
+            "collision_writer_frame_u16": 3855,
+            "damage_s16": 17,
+            "entry_visible_frame_u16": 3856,
+            "health_after_s16": 51,
+            "health_before_s16": 68,
+            "hit_kind_u8": 9,
+            "motion": {
+              "row_hex": "00034000ffffe000",
+              "table": "0x001f892",
+              "x_acceleration_s32_16_16": -8192,
+              "x_velocity_s32_16_16": 212992
+            },
+            "motion_index_u8": 8,
+            "motion_visible_frame_u16": 3877,
+            "next_body_visible_frame_u16": 3878,
+            "presentation": {
+              "animation_record": "0x0015ef24",
+              "assembly": "0x00160f3c",
+              "attack_selector_u8": 0,
+              "branch_s16": -32768,
+              "hurt_selector_u8": 0,
+              "record_sha256": "1de8aa22850db10088e5d6f99219f02236d786f11be73107d091d21892a4752b",
+              "timer_u16": 8
+            },
+            "presentation_selector_u8": 10,
+            "presentation_visible_frame_u16": 3857,
+            "shake_count_u8": 20,
+            "source_attack_selector_u8": 0,
+            "source_class_s8": 6,
+            "source_record_type_u8": 16,
+            "terminal_visible_frame_u16": 3877
+          },
+          {
+            "active_body_selector_u8": 0,
+            "attack_record": "0x00130b8c",
+            "attacker_owner": "record12/class-0x1f",
+            "attacker_slot": "0x00ff9dc0",
+            "carried_animation_record": "0x0015f268",
+            "collision_writer_frame_u16": 4006,
+            "damage_s16": 15,
+            "entry_visible_frame_u16": 4007,
+            "health_after_s16": 30,
+            "health_before_s16": 45,
+            "hit_kind_u8": 10,
+            "motion": {
+              "row_hex": "00024000ffffe000",
+              "table": "0x001f892",
+              "x_acceleration_s32_16_16": -8192,
+              "x_velocity_s32_16_16": 147456
+            },
+            "motion_index_u8": 4,
+            "motion_visible_frame_u16": 4018,
+            "next_body_visible_frame_u16": 4032,
+            "presentation": {
+              "animation_record": "0x0015ef38",
+              "assembly": "0x00160f64",
+              "attack_selector_u8": 0,
+              "branch_s16": -32768,
+              "hurt_selector_u8": 0,
+              "record_sha256": "7d6c5aa89551165e36194ace0123e6a454b2bc2f0d91110d19271404869ff394",
+              "timer_u16": 8
+            },
+            "presentation_selector_u8": 11,
+            "presentation_visible_frame_u16": 4008,
+            "shake_count_u8": 10,
+            "source_attack_selector_u8": 4,
+            "source_class_s8": 31,
+            "source_record_type_u8": 12,
+            "terminal_visible_frame_u16": 4018
+          }
+        ],
+        "mutation_control": {
+          "baseline_x_fp": "0x04a0c000",
+          "first_field_difference_frame_u16": 3264,
+          "first_position_difference_frame_u16": 3286,
+          "health_unchanged_at_first_position_difference": true,
+          "kind": "replace both hit-kind-9 motion-index-8 writes with motion-index 2 at source writer 0x01d46c",
+          "mutant_x_fp": "0x04a04000",
+          "mutated_writes_u16": 2,
+          "reject_fixed_carried_record": true,
+          "reject_fixed_shake_count": true,
+          "reject_per-frame_authored_delays": true,
+          "reject_wrong_motion_row": true
+        },
+        "rng": {
+          "calls": [],
+          "consumption_order": []
+        },
+        "scheduler_order": [
+          "current player update",
+          "actor update",
+          "current-state collision writer 0x01d5ee",
+          "next player update enters 0x01a982",
+          "response table selects presentation and shared active body",
+          "shake countdown",
+          "motion row",
+          "return or source action interruption"
+        ],
+        "scope": "all five Coffee Shop-reachable nonlethal player HIT instances through the shared 0x01ab1a program",
+        "source_program": {
+          "active_body_dispatch": {
+            "bytes": 92,
+            "end_exclusive": "0x01ab2c",
+            "sha256": "8a1da0908f9f72abf63aaf0fec330fef5a8f6197fd6f3c85962edb9c1e2242e3",
+            "start": "0x01aad0"
+          },
+          "collision_field_writers": {
+            "bytes": 1188,
+            "end_exclusive": "0x01d476",
+            "sha256": "c79c9ebb36d7c7adf6234a604e3c399c83f6b5095977b8447fd12a2876b0f967",
+            "start": "0x01cfd2"
+          },
+          "motion_table": {
+            "bytes": 128,
+            "end_exclusive": "0x01f912",
+            "sha256": "6bad9c1ed421a8325779ed7d55b3b5268af068333c6532bfa6ebb63c558dc1fd",
+            "start": "0x01f892"
+          },
+          "outer_dispatch": {
+            "bytes": 290,
+            "end_exclusive": "0x01aa90",
+            "sha256": "e3323abdfd6128832fb877a06c75babb2b9df873074811fef7b3fc03a6e228be",
+            "start": "0x01a96e"
+          },
+          "response_table": {
+            "address": "0x01aa64",
+            "coffee_shop_entries": {
+              "10": [
+                11,
+                0
+              ],
+              "6": [
+                7,
+                0
+              ],
+              "9": [
+                10,
+                0
+              ]
+            },
+            "entry_layout": [
+              "presentation_selector:u8",
+              "active_body_selector:u8"
+            ]
+          },
+          "standard_hit_program": {
+            "bytes": 176,
+            "end_exclusive": "0x01abca",
+            "sha256": "8dcc6ccb972ae150bfe1d91cfcc27ea9343d36b4d6e6d02a4511be8dcbbbbbd1",
+            "start": "0x01ab1a"
+          }
+        },
+        "spec_executable": true
+      },
       "damage_guard": "current signed 16-bit health remains nonnegative after current-state collision damage",
       "entry": "0x01a96e",
       "first_segment_execution_contract": {
@@ -9312,6 +9607,22 @@
           "guard": "actor+0x2c predecrement body runs before phase dispatch",
           "table_address": "0x01aa90",
           "table_s16": [
+            2,
+            -2,
+            2,
+            -2,
+            2,
+            -2,
+            2,
+            -2,
+            2,
+            -2,
+            2,
+            -2,
+            2,
+            -2,
+            2,
+            -2,
             2,
             -2,
             2,

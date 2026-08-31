@@ -17,6 +17,12 @@ COFFEE_SHOP = (ROOT / ".deps" / "mame" /
                "oracle11_progression_lifecycle_cs21a")
 COFFEE_ACTORS = COFFEE_SHOP / "coffee_shop_scene_actors.tsv"
 COFFEE_SAMPLES = COFFEE_SHOP / "samples.tsv"
+COFFEE_HIT_A = (ROOT / ".deps" / "mame" /
+                "oracle11_progression_lifecycle_cs53a")
+COFFEE_HIT_B = (ROOT / ".deps" / "mame" /
+                "oracle11_progression_lifecycle_cs53b")
+COFFEE_HIT_MUTATION = (ROOT / ".deps" / "mame" /
+                       "oracle11_progression_lifecycle_cs53m")
 PLAYER_AUDIO = ROOT / "data" / "oracle11_predator_player_audio.json"
 OUT = ROOT / "data" / "oracle11_predator_hitko_continue.json"
 FILES = ("samples.tsv", "player_writes.tsv", "global_writes.tsv",
@@ -68,6 +74,20 @@ def source_window(image: bytes, start: int, end: int) -> dict[str, object]:
             "sha256": hashlib.sha256(image[start:end]).hexdigest()}
 
 
+def animation_record(program: bytes, address: int) -> dict[str, object]:
+    record = program[address:address + 16]
+    require(len(record) == 16, f"animation record 0x{address:06x} missing")
+    return {
+        "animation_record": f"0x{address:08x}",
+        "timer_u16": int.from_bytes(record[0:2], "big"),
+        "branch_s16": int.from_bytes(record[2:4], "big", signed=True),
+        "assembly": f"0x{int.from_bytes(record[4:8], 'big'):08x}",
+        "hurt_selector_u8": record[8],
+        "attack_selector_u8": record[9],
+        "record_sha256": hashlib.sha256(record).hexdigest(),
+    }
+
+
 def manifest_identity(root: Path) -> dict[str, object]:
     path = root / "input_manifest.json"
     manifest = json.loads(path.read_text(encoding="utf-8-sig"))
@@ -84,6 +104,192 @@ def build_report() -> dict[str, object]:
     program = PROGRAM.read_bytes()
     require(len(image) == 0x200000, "decoded source image size drift")
     require(len(program) == 0x200000, "decoded source program size drift")
+    coffee_hit_files = ("coffee_shop_player_hit_program.tsv",
+                        "coffee_shop_player_hit_writes.tsv",
+                        "coffee_shop_scene_actors.tsv",
+                        "coffee_shop_scene_health_writes.tsv")
+    for filename in coffee_hit_files:
+        require(digest(COFFEE_HIT_A / filename) ==
+                digest(COFFEE_HIT_B / filename),
+                f"independent Coffee Shop HIT captures differ: {filename}")
+    coffee_hit_samples = {
+        int(row["frame"]): row for row in
+        rows(COFFEE_HIT_A / "coffee_shop_player_hit_program.tsv")
+        if row["event"] == "sample"
+    }
+    coffee_hit_mutant = {
+        int(row["frame"]): row for row in
+        rows(COFFEE_HIT_MUTATION / "coffee_shop_player_hit_program.tsv")
+        if row["event"] == "sample"
+    }
+    coffee_hit_writes = rows(
+        COFFEE_HIT_A / "coffee_shop_player_hit_writes.tsv")
+    coffee_hit_health_writes = [
+        row for row in rows(
+            COFFEE_HIT_A / "coffee_shop_scene_health_writes.tsv")
+        if row["target_pool"] == "player" and row["damage_writer"] == "1" and
+        2700 <= int(row["frame"]) <= 4050
+    ]
+    mutation_result = rows(COFFEE_HIT_MUTATION / "progression_result.tsv")[0]
+    require(int(mutation_result["player_hit_body_mutations"]) == 2,
+            "Coffee Shop HIT motion-row mutation did not fire twice")
+
+    hit_instances = (
+        (2750, 2751, 2752, 2762, 2777, 2778, "0x00130b5c",
+         "0x00ffa240", "record12/class-0x1f", 12, 0x1f, 1, 6, 7, 0, 10, 2,
+         10, 101, 91, 0x15EEE8),
+        (3263, 3264, 3265, 3285, 3312, 3313, "0x0003589e",
+         "0x00ffae00", "record16/class-0x06", 16, 0x06, 0, 9, 10, 0, 20, 8,
+         17, 95, 78, 0x15EF24),
+        (3771, 3772, 3773, 3783, 3798, 3799, "0x00130b5c",
+         "0x00ffa000", "record12/class-0x1f", 12, 0x1f, 1, 6, 7, 0, 10, 2,
+         10, 78, 68, 0x15EEE8),
+        (3855, 3856, 3857, 3877, 3877, 3878, "0x0003589e",
+         "0x00ffad00", "record16/class-0x06", 16, 0x06, 0, 9, 10, 0, 20, 8,
+         17, 68, 51, 0x15EF24),
+        (4006, 4007, 4008, 4018, 4018, 4032, "0x00130b8c",
+         "0x00ff9dc0", "record12/class-0x1f", 12, 0x1f, 4, 10, 11, 0, 10, 4,
+         15, 45, 30, 0x15EF38),
+    )
+    health_by_frame = {int(row["frame"]): row
+                       for row in coffee_hit_health_writes}
+    execution_instances = []
+    for (writer_frame, entry_frame, presentation_frame, motion_frame,
+         terminal_frame, next_body_frame, attack_record, attacker_slot,
+         attacker_owner, source_record_type, source_class,
+         source_attack_selector, hit_kind,
+         presentation_selector, active_body,
+         shake_count, motion_index, damage, health_before, health_after,
+         presentation_record) in hit_instances:
+        writer = health_by_frame[writer_frame]
+        entry = coffee_hit_samples[entry_frame]
+        presentation = coffee_hit_samples[presentation_frame]
+        motion = coffee_hit_samples[motion_frame]
+        require(writer["attack_record"] == attack_record[4:] and
+                writer["attacker"] == attacker_slot[4:] and
+                int(writer["health_before"], 16) == health_before and
+                int(writer["health_after"], 16) == health_after,
+                f"Coffee Shop HIT collision writer drift at {writer_frame}")
+        require(int(entry["hit_kind"], 16) == hit_kind and
+                int(entry["motion_index"], 16) == motion_index and
+                int(entry["shake_count"], 16) == shake_count and
+                int(entry["health"]) == health_after,
+                f"Coffee Shop HIT entry field drift at {entry_frame}")
+        require(int(presentation["presentation_selector"], 16) ==
+                presentation_selector and
+                int(presentation["active_body"], 16) == active_body and
+                int(presentation["animation_record"], 16) ==
+                presentation_record,
+                f"Coffee Shop HIT presentation dispatch drift at {presentation_frame}")
+        expected_velocity = int.from_bytes(
+            program[0x1F892 + motion_index * 8:
+                    0x1F896 + motion_index * 8], "big", signed=True)
+        expected_acceleration = int.from_bytes(
+            program[0x1F896 + motion_index * 8:
+                    0x1F89A + motion_index * 8], "big", signed=True)
+        require(int(motion["x_velocity"], 16) ==
+                expected_velocity & 0xFFFFFFFF and
+                int(motion["x_acceleration"], 16) ==
+                expected_acceleration & 0xFFFFFFFF,
+                f"Coffee Shop HIT motion row drift at {motion_frame}")
+        execution_instances.append({
+            "collision_writer_frame_u16": writer_frame,
+            "entry_visible_frame_u16": entry_frame,
+            "presentation_visible_frame_u16": presentation_frame,
+            "motion_visible_frame_u16": motion_frame,
+            "terminal_visible_frame_u16": terminal_frame,
+            "next_body_visible_frame_u16": next_body_frame,
+            "attack_record": attack_record,
+            "attacker_slot": attacker_slot,
+            "attacker_owner": attacker_owner,
+            "source_record_type_u8": source_record_type,
+            "source_class_s8": source_class,
+            "source_attack_selector_u8": source_attack_selector,
+            "hit_kind_u8": hit_kind,
+            "presentation_selector_u8": presentation_selector,
+            "active_body_selector_u8": active_body,
+            "shake_count_u8": shake_count,
+            "motion_index_u8": motion_index,
+            "damage_s16": damage,
+            "health_before_s16": health_before,
+            "health_after_s16": health_after,
+            "carried_animation_record":
+                f"0x{int(entry['animation_record'], 16):08x}",
+            "presentation": animation_record(program, presentation_record),
+            "motion": {
+                "table": "0x001f892",
+                "row_hex": program[0x1F892 + motion_index * 8:
+                                   0x1F89A + motion_index * 8].hex(),
+                "x_velocity_s32_16_16": expected_velocity,
+                "x_acceleration_s32_16_16": expected_acceleration,
+            },
+        })
+
+    coffee_hit_program = {
+        "classification": "SOURCE_CLOSED_IMPLEMENTATION_FIELDS",
+        "spec_executable": True,
+        "scope": "all five Coffee Shop-reachable nonlethal player HIT instances through the shared 0x01ab1a program",
+        "source_program": {
+            "outer_dispatch": source_window(image, 0x01A96E, 0x01AA90),
+            "active_body_dispatch": source_window(image, 0x01AAD0, 0x01AB2C),
+            "standard_hit_program": source_window(image, 0x01AB1A, 0x01ABCA),
+            "collision_field_writers": source_window(image, 0x01CFD2, 0x01D476),
+            "response_table": {
+                "address": "0x01aa64",
+                "entry_layout": ["presentation_selector:u8",
+                                 "active_body_selector:u8"],
+                "coffee_shop_entries": {
+                    "6": [7, 0], "9": [10, 0], "10": [11, 0],
+                },
+            },
+            "motion_table": source_window(program, 0x01F892, 0x01F912),
+        },
+        "field_types": {
+            "shake_count": "u8 actor+0x2c from attack record+0x0e",
+            "active_body_selector": "u8 actor+0x46",
+            "hit_kind": "u8 actor+0x49",
+            "presentation_selector": "u8 actor+0x4d",
+            "reaction_facing": "u8 actor+0x4f",
+            "motion_index": "u8 actor+0x6c low nibble",
+            "x_position": "s32 16.16 actor+0x10",
+            "x_velocity": "s32 16.16 actor+0x30",
+            "x_acceleration": "s32 16.16 actor+0x38",
+        },
+        "carried_presentation_rule": "HIT entry preserves the current animation record/timer/branch for its visible entry frame while clearing current hurt and attack selectors; a fixed carried record is forbidden",
+        "instances": execution_instances,
+        "scheduler_order": [
+            "current player update", "actor update",
+            "current-state collision writer 0x01d5ee",
+            "next player update enters 0x01a982",
+            "response table selects presentation and shared active body",
+            "shake countdown", "motion row", "return or source action interruption",
+        ],
+        "rng": {"calls": [], "consumption_order": []},
+        "capture_identity": {
+            "two_completion_captures_byte_identical": True,
+            "baseline_program_sha256": digest(
+                COFFEE_HIT_A / "coffee_shop_player_hit_program.tsv"),
+            "baseline_writes_sha256": digest(
+                COFFEE_HIT_A / "coffee_shop_player_hit_writes.tsv"),
+            "mutation_program_sha256": digest(
+                COFFEE_HIT_MUTATION / "coffee_shop_player_hit_program.tsv"),
+        },
+        "mutation_control": {
+            "kind": "replace both hit-kind-9 motion-index-8 writes with motion-index 2 at source writer 0x01d46c",
+            "mutated_writes_u16": 2,
+            "first_field_difference_frame_u16": 3264,
+            "first_position_difference_frame_u16": 3286,
+            "baseline_x_fp": f"0x{int(coffee_hit_samples[3286]['x_fp'], 16):08x}",
+            "mutant_x_fp": f"0x{int(coffee_hit_mutant[3286]['x_fp'], 16):08x}",
+            "health_unchanged_at_first_position_difference":
+                coffee_hit_samples[3286]["health"] ==
+                coffee_hit_mutant[3286]["health"],
+            "reject_wrong_motion_row": True,
+            "reject_fixed_shake_count": True,
+            "reject_fixed_carried_record": True,
+            "reject_per-frame_authored_delays": True,
+        },
+    }
     identities = {root.name: manifest_identity(root)
                   for root in (RAW_A, RAW_B)}
     for filename in FILES:
@@ -373,7 +579,7 @@ def build_report() -> dict[str, object]:
                 "shake": {
                     "guard": "actor+0x2c predecrement body runs before phase dispatch",
                     "table_address": "0x01aa90",
-                    "table_s16": [2, -2] * 8,
+                    "table_s16": [2, -2] * 16,
                     "facing_side_nonzero_negates": True,
                     "visible_frames_u16": [2753, 2761],
                     "final_tick_dispatches_motion_substate": True,
@@ -433,6 +639,7 @@ def build_report() -> dict[str, object]:
                     "first_rejected_visible_frame_u16": 2751,
                 },
             },
+            "coffee_shop_reachable_program": coffee_hit_program,
         },
         "lethal_ko": {
             "classification": "SOURCE_CLOSED",
@@ -551,7 +758,7 @@ def validate(report: dict[str, object]) -> None:
                 "animation_record": "0x0015f278",
                 "assembly": "0x00160af2", "visible_timer_u16": 1,
                 "hurt_selector_u8": 0, "attack_selector_u8": 0} and
-            execution["shake"]["table_s16"] == [2, -2] * 8 and
+            execution["shake"]["table_s16"] == [2, -2] * 16 and
             execution["phase_0x0204"]["return_visible_frame_u16"] == 2778 and
             execution["audio"]["command_u16"] == 0x003b and
             execution["rng"] == {"calls": [], "consumption_order": []} and
@@ -559,6 +766,31 @@ def validate(report: dict[str, object]) -> None:
             [2750, 2751, 2752, 2753, 2761, 2762, 2769, 2770,
              2776, 2777, 2778],
             "first-segment HIT execution contract drift")
+    coffee_program = report["nonlethal_hit"]["coffee_shop_reachable_program"]
+    require(coffee_program["classification"] ==
+            "SOURCE_CLOSED_IMPLEMENTATION_FIELDS" and
+            coffee_program["spec_executable"] is True and
+            len(coffee_program["instances"]) == 5 and
+            [instance["collision_writer_frame_u16"] for instance in
+             coffee_program["instances"]] == [2750, 3263, 3771, 3855, 4006] and
+            [instance["hit_kind_u8"] for instance in
+             coffee_program["instances"]] == [6, 9, 6, 9, 10] and
+            [instance["shake_count_u8"] for instance in
+             coffee_program["instances"]] == [10, 20, 10, 20, 10] and
+            [instance["motion_index_u8"] for instance in
+             coffee_program["instances"]] == [2, 8, 2, 8, 4] and
+            [instance["active_body_selector_u8"] for instance in
+             coffee_program["instances"]] == [0, 0, 0, 0, 0] and
+            coffee_program["source_program"]["response_table"]
+                ["coffee_shop_entries"] == {
+                    "6": [7, 0], "9": [10, 0], "10": [11, 0]} and
+            coffee_program["mutation_control"]["mutated_writes_u16"] == 2 and
+            coffee_program["mutation_control"]
+                ["first_position_difference_frame_u16"] == 3286 and
+            coffee_program["mutation_control"]
+                ["health_unchanged_at_first_position_difference"] is True and
+            coffee_program["rng"] == {"calls": [], "consumption_order": []},
+            "Coffee Shop reachable HIT program drift")
     controls = report["counterfactuals"]
     require(all(value is True for key, value in controls.items()
                 if key != "activation_frames"), "counterfactual failure")

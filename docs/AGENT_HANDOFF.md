@@ -1,23 +1,83 @@
 # Active checkpoint
-`project_state.yaml` is machine-readable truth and `docs/PARITY_PLAN.md` is the only roadmap. Continue `REIMPLEMENT-13-SOURCE-CLOSED-ROUND1` on `codex/avp-playable-loop-pivot`; preserve private evidence and locks. The latest fully accepted candidate remains `d04a65a2253175c6e820140feefc35419e2cca07` until the complete Coffee Shop zero-gap gate passes.
+`project_state.yaml` is machine-readable truth and `docs/PARITY_PLAN.md` is the
+only roadmap. Continue `REIMPLEMENT-13-SOURCE-CLOSED-ROUND1` on
+`codex/avp-playable-loop-pivot`; preserve private evidence and all accepted
+locks. The latest fully accepted candidate remains
+`d04a65a2253175c6e820140feefc35419e2cca07` until the complete Coffee Shop
+zero-gap gate passes. The current branch head is a deliberate WIP evidence
+checkpoint and is not a candidate promotion.
 
-## Workflow pivot / Preserved evidence work
-Resume the AvP salvage Goal. Preserve `SALVAGE-00-OLD-BUILD-BASELINE`, `USER-01-PLAYER-BASELINE-REVIEW`, evidence candidate `597f4ed517d4e715d814ff841bd00d3977803f85`, and all accepted evidence.
+## Preserved authority and workflow
+- ORACLE-11/SPEC-02 remain accepted: 1,517 writers and zero gaps in the sole
+  94 x 10 matrix; `0x0abdd2` is packed-BCD score authority.
+- Native Round 1 remains the sole first-encounter gameplay authority. Retained
+  code is presentation-only.
+- Preserve the accepted player actions, class-`0x1f` identity/tracking,
+  projectile/damage/impact chronology, scheduler, navigation/camera, collision,
+  HUD/audio/loading, residency, background, palette, priority, and visual-QA
+  locks.
+- USER-09 remains `CHANGES_REQUESTED`; SALVAGE-08 remains inactive; physical
+  Saturn remains `UNRUN`.
+- Do not reset, clean, stash, rebase, broad-restore, force-push, use
+  `git add -A`, stage `data/avsp_anim_records.json`, or touch untracked
+  `history.txt`.
 
-## Preserved authority
-- ORACLE-11/SPEC-02 remain accepted: 1,517 writers, zero gaps in the sole 94 x 10 matrix; `0x0abdd2` is packed-BCD score.
-- Preserve the accepted player, scheduler, navigation/camera, first-encounter, presentation, collision, HUD, audio/loading, residency, background/palette/priority, and visual-QA locks. Native Round 1 is the sole first-encounter gameplay authority; retained code is presentation-only.
-- Preserve the exact frame-2287 projectile prefix, damage-free frame 2288, source frame-2306 slot-`0x00ff8880` attack-`0x030cd2` damage write against `0x00ffa180`, natural frame-2307 class-`0x4e` impact, exact record-type-4 frames 2434..2500, and class-`0x1f` HIT/KO/return behavior.
-- USER-09 is `CHANGES_REQUESTED`; SALVAGE-08 is inactive; physical Saturn is `UNRUN`; do not touch untracked `history.txt`.
+## Paused WIP program checkpoint
+This checkpoint fixes the phase-exclusive HIT/KO scratch alias and partially
+closes the complete class-`0x1f` inner-8 action-`0x04` dispatcher:
 
-## Current Coffee Shop checkpoint
-Incremental checkpoint `06500692bba48c724ca00436751e1f2b7597f8d3` closes the dependency-safe player, camera, stage-spawn, obstacle-animation, Button1-presentation, class-`0x49` residue, and class-`0x4e` terminal-timer bodies. It preserves the route-2 camera sample through the route-4 handoff, uses the scheduler-visible prior camera sample for Coffee Shop record activation, and retains the accepted source projectile/damage/impact chronology without a fixed-frame substitute.
+- `source_motion_fields[4]` is recognized as shared storage for HIT recovery
+  and the action-`0x0c` plan. HIT recovery is active only for the accepted exact
+  reaction kind/state pairs; a nonzero action plan alone no longer fabricates a
+  HIT reaction. Oracle/SPEC include the negative control.
+- The action-`0x04` program now performs the every-update player-proximity
+  check first, applies the exact final action-2 guard arithmetic, clears the
+  action, and steps the movement helper once in the same scheduler visit.
+- This makes source/native frame 3524 slot `0x00ffa3c0` agree on animation
+  record `0x0012d4f8` and timer 5. RNG state remains exact through frame 3525.
+- The Coffee Shop terrain fixture/runtime now contains the complete 4096-entry
+  selector map, selectors 4 and 20, exact branch-0/branch-2 arithmetic, and the
+  mandatory class-`0x1f` movement tail call.
 
-SPEC-02 is `6aa35860d5854c77fb54e5174659a1cf546defdfb703d734b2f617276a0872b1`; fixture is `94a9a551fa08a5f28174906436e8c38f45fc877779aa50c84aa294a77b59c313`. Fast, Oracle, 80 bounded-Oracle mutations, 133 SPEC mutations, 209 native mutations, 20 scene mutations, 123 Target suppressions, both LiveEncounter Target profiles, and the paired Coffee Shop Emulator chronology pass. The two 575-sample cold runs are byte-identical at normalized ISO `4c3a2014cfb3b1d542a3c871b6920f37dd770e4e4906c1a5c7e23341a0552313` and VDP1 cache `15235569ad91027a6f9cf6d00c5b88b9c13539895a9259036a1ecdde48ad6504`; five real paired-evidence mutations are rejected.
+The program and scene are **not accepted**. The earliest causal scene
+divergence is frame 3525, slot `0x00ffa3c0`: source binds record
+`0x0012d488`, while native binds `0x0012d50c` and moves on the wrong direction
+result. Source routine `0x041c36` computes the wander target from source global
+fields at `a5+0x278` and `a5+0x27c` plus actor offsets. At frame 3524 the source
+values are `camera_x=895`, `camera_z=256`, offsets `+144/+48`; the current native
+mapping uses a different origin. This is not an RNG or action-selection gap.
 
-Fresh window-only WGC covers every source-visible frame 2280..2310. Contact sheet `651383577cc72d80e9c9cae7a67790aee6a4a68046ec2611de1117f128273a3a` and clip `f0bdf52684d9d3fab1446f2a932fe26e8b67c094206b357b3b64fa7f0603f8a2` pass direct inspection: frame 2288 remains damage-free, frame 2306 performs the accepted damage write, frame 2307 carries the natural class-`0x4e` impact, Predator and Major remain distinct source-scene actors, and both Coffee Shop planes, palette, and priority remain intact. The second `WARRIOR` HUD line is the native Predator weapon/resource meter, not an active P2 panel.
+The focused evidence state at pause is:
 
-Whole-scene gaps improve from `331 / 1,241 / 2 / 93 / 3 / 281` to `327 / 1,234 / 2 / 93 / 3 / 281` for actor lifetimes, spawn/despawn, active states, collision/damage, route/camera, and audio/load. No category increased. Unowned Saturn actors, unidentified source pairs, and retained gameplay authorities remain zero. The earliest remaining divergence is still class-`0x02` slot `0x00ffb600` at frame 2076 (native timer 4090, source 4091); the next is class-`0x02` slot `0x00ffb300` at frame 2619 (native timer 4094, source 4095).
+- Oracle enemy analyzer: PASS.
+- Oracle enemy tests: PASS, including 104 mutations.
+- SPEC-02 build/generation/tests: PASS, including 156 mutations.
+- SPEC contract SHA-256:
+  `43e16c1e3d6a233f7a86703aa68e546e4a2b3be69b5ce7d6f264f9b5b587c288`.
+- Generated fixture SHA-256:
+  `dd9126f34d9e4ee141239eee907a1405d8561da2cb1d7ebadf66e53a08e8fecd`.
+- Full host entry lane: FAIL at frame 1757, code 15, slot
+  `0x00ffa000`, state/substate `0x0208:0x0c04`, record `0x0012d8e0`.
+- Full scene capture: FAIL at native frame 3653, code 29. Treat this as
+  downstream until the earlier frame-3525 divergence is corrected.
+- Target, Emulator, and WGC were not run because the focused host/scene gate is
+  red. The last completed census remains `327 / 1,234 / 2 / 93 / 3 / 281` for
+  actor lifetimes, spawn/despawn, active states, collision/damage,
+  route/camera, and audio/load; it is not a current WIP recapture.
 
-## Exact next experiment
-Keep REIMPLEMENT-13 active. Bind the source-owned per-phase scheduler invocation order that explains the class-`0x02` frame-2076 timer and the later frame-2619 class-`0x02` activation. Use the accepted `cs39a/cs39b` evidence first and run only the smallest bounded Oracle follow-up needed to identify the owning phase/caller. Do not add a frame or slot exception, treat recurring-controller cadence as the full scheduler, weaken the comparison, or change the input route. Regenerate only the existing fixture if an implementation-required field is genuinely absent, then rerun the complete Coffee Shop scene.
+## Exact next experiment / resume prompt
+Continue REIMPLEMENT-13 without changing the workflow. Resolve only the
+earliest frame-3525 class-`0x1f` divergence by binding the source `0x041c36`
+wander-target origin. Prove which source-owned scheduler-visible values map to
+`a5+0x278` and `a5+0x27c`, including why source frame 3524 uses
+`camera_x=895` and `camera_z=256` while native computes a different direction.
+Preserve the exact RNG prefix, the action-`0x04` dispatcher, the terrain tail,
+and the accepted render-camera behavior. Use accepted `cs50a/cs50b` evidence
+and SPEC-02 first; run only the smallest bounded Oracle follow-up if the mapping
+is genuinely absent. Add a mutation that rejects using the wrong current versus
+scheduler-visible origin, then run the focused host differential, relevant
+mutations, fixture validation, and Target. After the complete source program is
+green, run one pinned scene capture and focused visual inspection, then rerun
+the complete Coffee Shop census and reselect the earliest causal divergence.
+Do not add a frame/slot exception, change the input route, fit the renderer, or
+work on the downstream frame-3653 collision/action-`0x0c` failures first.

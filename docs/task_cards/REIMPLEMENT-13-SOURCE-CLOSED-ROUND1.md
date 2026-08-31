@@ -1421,6 +1421,46 @@ the smallest bounded Oracle follow-up needed to identify the owning phase or
 caller. Do not add a frame/slot exception, use recurring-controller cadence as
 a full-scheduler proxy, weaken identity comparison, or change the input route.
 
+## Paused WIP evidence checkpoint
+
+The current unaccepted WIP fixes the phase-exclusive HIT/KO scratch alias and
+partially closes the class-`0x1f` inner-8 action-`0x04` dispatcher. HIT recovery
+now requires the accepted exact reaction kind/state pairs, so the shared
+`source_motion_fields[4]` action-`0x0c` plan cannot fabricate a HIT reaction.
+The action-`0x04` program now performs its player-proximity test first, uses the
+exact final action-2 guard, clears the action, and steps the movement helper once
+in the same scheduler visit. The Coffee Shop terrain program includes the full
+4096-entry selector map and exact selector-4/20 branch arithmetic.
+
+This closes the frame-3524 slot-`0x00ffa3c0` animation mismatch: source and
+native now use record `0x0012d4f8`, timer 5, with identical RNG through frame
+3525. The next earliest causal divergence is frame 3525 at that same slot:
+source uses record `0x0012d488`, native uses `0x0012d50c`, because the native
+wander-direction helper has not yet bound the source scheduler-visible
+`a5+0x278`/`a5+0x27c` target origin used by routine `0x041c36`.
+
+Oracle enemy analysis and tests pass with 104 mutations. SPEC-02 build,
+generation, and tests pass with 156 mutations. The contract SHA is
+`43e16c1e3d6a233f7a86703aa68e546e4a2b3be69b5ce7d6f264f9b5b587c288`;
+the fixture SHA is
+`dd9126f34d9e4ee141239eee907a1405d8561da2cb1d7ebadf66e53a08e8fecd`.
+The program checkpoint is not accepted: the full host lane fails at frame 1757
+with code 15, slot `0x00ffa000`, state/substate `0x0208:0x0c04`, and the scene
+capture fails at native frame 3653 with code 29. Target, Emulator, and WGC were
+therefore not run. The prior completed scene census is retained but is not a
+current WIP recapture.
+
+Exact resume experiment: resolve only the earliest frame-3525 divergence by
+proving which source-owned scheduler-visible values map to `a5+0x278` and
+`a5+0x27c`, including why source frame 3524 uses `camera_x=895` and
+`camera_z=256`. Preserve the exact RNG prefix, action-`0x04` dispatcher,
+terrain tail, and render-camera behavior. Use accepted `cs50a/cs50b` and SPEC
+first; perform only the smallest bounded Oracle follow-up if the mapping is
+absent. Add a mutation rejecting the wrong current-versus-scheduler-visible
+origin, run focused host/fixtures/Target, then a pinned scene capture and the
+complete Coffee Shop census. Do not patch a frame/slot, change input, fit the
+renderer, or work on the downstream frame-3653 failure first.
+
 ## Next eligible cards
 
 - `QA-13-ROUND1-END-TO-END-DIFFERENTIAL` after the complete stable Round 2

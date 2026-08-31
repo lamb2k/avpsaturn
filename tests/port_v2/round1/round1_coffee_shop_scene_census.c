@@ -21,7 +21,7 @@ static void emit_actor(unsigned int frame, const char *pool,
         (actor->actor_class == 0x10 || actor->actor_class == 0x49) &&
         source_state != 0u && source_state <= 6u)
         source_state = (unsigned short)(source_state << 8);
-    printf("%u\t%s\t%08lx\t%u\t%02x\t%04x\t%04x\t%ld\t%ld\t%d\t%u\t%08lx\t%08lx\t%d\t%u\t%u\t%d\t%d\t%u\t%u\t%u\t%u\t%u\t%u\t%u\t%u\t0\t0\t0\t0\t0\t0\t0\t%d\n",
+    printf("%u\t%s\t%08lx\t%u\t%02x\t%04x\t%04x\t%ld\t%ld\t%d\t%u\t%08lx\t%08lx\t%d\t%u\t%u\t%d\t%d\t%u\t%u\t%u\t%u\t%u\t%u\t%u\t%u\t%u\t0\t0\t0\t0\t0\t0\t0\t%d\t%u\t%u\t%u\t%u\t%u\t%u\t%u\n",
            frame, pool, actor->source_slot, actor->type,
            (unsigned int)(unsigned char)actor->actor_class,
            source_state, actor->substate, x_fp, y_fp, actor->z,
@@ -30,8 +30,14 @@ static void emit_actor(unsigned int frame, const char *pool,
            actor->hurt_selector, actor->attack_selector, actor->x, actor->y,
            actor->source_a3, actor->source_a4, actor->source_a5,
            actor->source_a6, actor->source_style85, actor->source_b0,
-           actor->source_direction, actor->animation_timer,
-           actor->animation_branch);
+           actor->source_direction, actor->source_player_guard,
+           actor->animation_timer, actor->animation_branch,
+           actor->source_field01, actor->source_collision_guard6d,
+           actor->source_collision_suppress70,
+           actor->source_hit_recovery_active,
+           actor->source_transition_latch_ae,
+           actor->source_action_timer,
+           actor->variant);
 }
 
 static void emit_projectile(unsigned int frame,
@@ -42,7 +48,7 @@ static void emit_projectile(unsigned int frame,
         return;
     source_state = actor->state == 0u ? 0u : (unsigned short)(
         ((unsigned short)actor->state << 8) | actor->substate);
-    printf("%u\trecord4\t00ff%04x\t4\t%02x\t%04x\t%04x\t%ld\t%ld\t%d\t%u\t%08lx\t%08lx\t%d\t0\t%u\t%d\t%d\t0\t0\t0\t0\t0\t0\t0\t%u\t%08lx\t%08lx\t%d\t%u\t%u\t%u\t%u\t%d\n",
+    printf("%u\trecord4\t00ff%04x\t4\t%02x\t%04x\t%04x\t%ld\t%ld\t%d\t%u\t%08lx\t%08lx\t%d\t0\t%u\t%d\t%d\t0\t0\t0\t0\t0\t0\t0\t0\t%u\t%08lx\t%08lx\t%d\t%u\t%u\t%u\t%u\t%d\n",
            frame, actor->source_slot,
            (unsigned int)(unsigned char)actor->actor_class,
            (unsigned int)source_state, 0u,
@@ -64,12 +70,22 @@ int main(void)
     unsigned int index;
     int player_authority_enabled_at_tick_start;
     avsp_round1_init(&runtime);
-    puts("frame\tpool\tsource_slot\ttype\tclass\tstate\tsubstate\tx_fp\ty_fp\tz\tfacing\tanimation_record\tassembly\thealth\thurt_selector\tattack_selector\tx\ty\tsource_a3\tsource_a4\tsource_a5\tsource_a6\tsource_style85\tsource_b0\tsource_direction\tanimation_timer\tattack_table\tcurrent_attack_record\tcollision_result\tcollision_identity\tcollision_registered\tangle\tprogress\tanimation_branch");
+    fputs("frame\tpool\tsource_slot\ttype\tclass\tstate\tsubstate\tx_fp\ty_fp\tz\tfacing\tanimation_record\tassembly\thealth\thurt_selector\tattack_selector\tx\ty\tsource_a3\tsource_a4\tsource_a5\tsource_a6\tsource_style85\tsource_b0\tsource_direction\tsource_player_guard\tanimation_timer\tattack_table\tcurrent_attack_record\tcollision_result\tcollision_identity\tcollision_registered\tangle\tprogress\tanimation_branch\tsource_field01\tsource_collision_guard6d\tsource_collision_suppress70\tsource_hit_recovery_active",
+          stdout);
+    puts("\tsource_transition_latch_ae\tsource_action_timer\tsource_variant");
     for (source_frame = 1972u; source_frame <= 5566u; ++source_frame)
     {
         unsigned short input = avsp_round1_coffee_shop_source_input(
             (unsigned short)source_frame);
         unsigned int tick;
+        unsigned int default_updates =
+            avsp_round1_coffee_shop_source_updates(
+                (unsigned short)source_frame);
+        unsigned int class02_updates =
+            avsp_round1_coffee_shop_class02_source_updates(
+                (unsigned short)source_frame);
+        unsigned int phase_updates = default_updates > class02_updates ?
+            default_updates : class02_updates;
         if (source_frame == 2072u &&
             !avsp_round1_begin_first_entry(&runtime))
             return 2;
@@ -138,6 +154,76 @@ int main(void)
                     retry_actor->animation_timer,
                     retry_actor->animation_branch, runtime.rng_seed);
         }
+        if (source_frame >= 2918u && source_frame <= 2920u)
+        {
+            const AvspRound1ActorCore *recurring_actor =
+                &runtime.pools[0].records[17];
+            fprintf(stderr,
+                    "recurring_checkpoint frame=%u seed=%04x state=%04x/%04x a3=%u a4=%u a5=%u a6=%u style=%u selector83=%u direction=%u\n",
+                    source_frame, runtime.rng_seed,
+                    recurring_actor->state, recurring_actor->substate,
+                    recurring_actor->source_a3, recurring_actor->source_a4,
+                    recurring_actor->source_a5, recurring_actor->source_a6,
+                    recurring_actor->source_style85,
+                    recurring_actor->source_selector83,
+                    recurring_actor->source_direction);
+        }
+        if ((source_frame >= 2998u && source_frame <= 3010u) ||
+            (source_frame >= 3088u && source_frame <= 3093u) ||
+            (source_frame >= 3153u && source_frame <= 3156u))
+        {
+            const AvspRound1ActorCore *inner8_actor = source_frame >= 3153u ?
+                &runtime.pools[0].records[14] :
+                &runtime.pools[0].records[19];
+            fprintf(stderr,
+                    "inner8_checkpoint frame=%u camera=%d/%d seed=%04x state=%04x/%04x direction=%u facing=%u special_ad=%u transition_ae=%u b0=%u band=%d group=%d cursor=%u membership=%u offsets=%d/%d populations=%u/%u/%u/%u xfp=%ld yfp=%ld timer=%u branch=%d\n",
+                    source_frame, runtime.camera_x_position,
+                    runtime.camera_z_position, runtime.rng_seed,
+                    inner8_actor->state, inner8_actor->substate,
+                    inner8_actor->source_direction,
+                    inner8_actor->facing,
+                    inner8_actor->source_special_latch_ad,
+                    inner8_actor->source_transition_latch_ae,
+                    inner8_actor->source_b0,
+                    inner8_actor->source_inner8_band,
+                    inner8_actor->source_inner8_group,
+                    inner8_actor->source_inner8_cursor,
+                    inner8_actor->source_inner8_membership,
+                    inner8_actor->source_inner8_x_offset,
+                    inner8_actor->source_inner8_z_offset,
+                    runtime.class1f_inner8_group_population[0],
+                    runtime.class1f_inner8_group_population[1],
+                    runtime.class1f_inner8_group_population[2],
+                    runtime.class1f_inner8_group_population[3],
+                    inner8_actor->source_x_fp, inner8_actor->source_y_fp,
+                    inner8_actor->animation_timer,
+                    inner8_actor->animation_branch);
+        }
+        if ((source_frame >= 2780u && source_frame <= 2920u) ||
+            (source_frame >= 3268u && source_frame <= 3280u) ||
+            (source_frame >= 3505u && source_frame <= 3525u))
+        {
+            fprintf(stderr, "rng_frame frame=%u seed=%04x\n",
+                    source_frame, runtime.rng_seed);
+            if (source_frame >= 3268u)
+                fprintf(stderr,
+                        "rng_owner frame=%u class09=%lu class4e=%lu initial1f=%lu action4=%lu action4_timer=%lu action0c_timer=%lu action0e=%lu\n",
+                        source_frame, runtime.class09_rng_calls,
+                        runtime.class4e_rng_calls,
+                        runtime.class1f_initial_rng_calls,
+                        runtime.class1f_action4_rng_calls,
+                        runtime.class1f_action4_timer_rng_calls,
+                        runtime.class1f_action0c_timer_rng_calls,
+                        runtime.class1f_action0e_rng_calls);
+        }
+        if (source_frame >= 2805u && source_frame <= 2807u)
+            fprintf(stderr,
+                    "impact_rng_checkpoint frame=%u class47_init=%lu class47_rng=%lu class4e_init=%lu class4e_rng=%lu variant1_init=%lu\n",
+                    source_frame, runtime.class47_initializations,
+                    runtime.class47_rng_calls,
+                    runtime.class4e_initializations,
+                    runtime.class4e_rng_calls,
+                    runtime.class4e_variant1_initializations);
         if ((input & (AVSP_ROUND1_INPUT_BUTTON1 | AVSP_PW_INPUT_ATTACK |
                       AVSP_ROUND1_INPUT_BUTTON3)) != 0u ||
             runtime.player_special_attack_active)
@@ -163,17 +249,25 @@ int main(void)
                     runtime.player_weapon_tick,
                     runtime.player.substate,
                     (unsigned long)runtime.player.animation_record);
+        if (source_frame == 3282u)
+        {
+            const AvspRound1ActorCore *a = &runtime.pools[0].records[19];
+            fprintf(stderr,
+                    "inner8_pre_frame frame=%u slot=%04x state=%04x substate=%04x style=%u action_timer=%u rng=%04x\n",
+                    source_frame, (unsigned short)a->source_slot, a->state,
+                    a->substate, a->source_style85,
+                    a->source_action_timer, runtime.rng_seed);
+        }
         runtime.frame = source_frame >= 2040u ? source_frame - 2040u : 0u;
-        for (tick = 0u;
-             tick < avsp_round1_coffee_shop_source_updates(
-                 (unsigned short)source_frame);
-             ++tick)
+        for (tick = 0u; tick < phase_updates; ++tick)
         {
             player_authority_enabled_at_tick_start = runtime.route_state == 4;
-            if (runtime.entry.started && runtime.route_state != 4 &&
+            if (tick < default_updates && runtime.entry.started &&
+                runtime.route_state != 4 &&
                 !avsp_round1_step_first_entry(&runtime))
                 return 3;
-            if (player_authority_enabled_at_tick_start &&
+            if (tick < default_updates &&
+                player_authority_enabled_at_tick_start &&
                 !avsp_round1_step_player(&runtime, input, 0))
             {
                 fprintf(stderr,
@@ -190,7 +284,9 @@ int main(void)
                 return 4;
             }
             if (runtime.entry.dependencies_seeded &&
-                !avsp_round1_step_scheduler(&runtime))
+                !avsp_round1_step_scheduler_source_differential(
+                    &runtime, tick < default_updates,
+                    tick < class02_updates))
             {
                 fprintf(stderr,
                         "scheduler_failure frame=%u code=%u slot=%08lx state=%04x substate=%04x animation=%08lx failures=%lu\n",
@@ -203,6 +299,67 @@ int main(void)
                         runtime.failure_count);
                 return 5;
             }
+        }
+        if ((source_frame >= 3003u && source_frame <= 3005u) ||
+            (source_frame >= 3089u && source_frame <= 3092u) ||
+            (source_frame >= 3130u && source_frame <= 3190u) ||
+            (source_frame >= 3270u && source_frame <= 3284u) ||
+            (source_frame >= 3890u && source_frame <= 3927u))
+        {
+            unsigned int pool_index;
+            for (pool_index = 0u; pool_index < AVSP_ROUND1_POOL_COUNT;
+                 ++pool_index)
+            {
+                unsigned int record_index;
+                for (record_index = 0u;
+                     record_index < runtime.pools[pool_index].capacity;
+                     ++record_index)
+                {
+                    const AvspRound1ActorCore *a =
+                        &runtime.pools[pool_index].records[record_index];
+                    if ((unsigned short)a->source_slot != 0xa3c0u &&
+                        (unsigned short)a->source_slot != 0xa000u)
+                        continue;
+                    fprintf(stderr,
+                            "inner8_action10_probe frame=%u slot=%04x pool=%u record=%u active=%u state=%04x substate=%04x xfp=%08lx yfp=%08lx z=%d facing=%u style=%u direction=%u band=%d group=%d cursor=%u membership=%u prior_group=%u prior_membership=%u anim=%08lx timer=%u branch=%d action_timer=%u lifetime=%u target_x=%d target_z=%d rng=%04x\n",
+                            source_frame, (unsigned short)a->source_slot,
+                            pool_index, record_index, a->active,
+                            a->state, a->substate,
+                            (unsigned long)a->source_x_fp,
+                            (unsigned long)a->source_y_fp, a->z, a->facing,
+                            a->source_style85, a->source_direction,
+                            a->source_inner8_band,
+                            a->source_inner8_group, a->source_inner8_cursor,
+                            a->source_inner8_membership,
+                            a->source_inner8_prior_group,
+                            a->source_inner8_prior_membership,
+                            (unsigned long)a->animation_record,
+                            a->animation_timer, a->animation_branch,
+                            a->source_action_timer, a->effect_timer,
+                            runtime.player_action.x, runtime.player_action.lane,
+                            runtime.rng_seed);
+                }
+            }
+        }
+        if (source_frame == 2829u || source_frame == 2831u)
+        {
+            const AvspRound1ActorCore *a = source_frame == 2829u ?
+                &runtime.pools[0].records[11] :
+                &runtime.pools[0].records[15];
+            fprintf(stderr,
+                    "special_collision_probe frame=%u player_x=%d lane=%d height=%d attack=%u ready=%u hitstop=%u target=%08lx active=%u x=%d y=%d z=%d facing=%u hurt=%u health=%d guard01=%u guard6d=%u suppress70=%u reaction=%d tests=%lu contacts=%lu\n",
+                    source_frame, runtime.player_action.x,
+                    runtime.player_action.lane, runtime.player_action.height,
+                    runtime.player.attack_selector,
+                    runtime.player_special_attack_contact_ready,
+                    runtime.player.source_hitstop, a->source_slot, a->active,
+                    a->x, a->y, a->z, a->facing, a->hurt_selector,
+                    a->health, a->source_field01,
+                    a->source_collision_guard6d,
+                    a->source_collision_suppress70,
+                    a->source_hit_recovery_active != 0,
+                    runtime.player_special_class1f_collision_tests,
+                    runtime.player_special_attack_contacts);
         }
     }
     fprintf(stderr,

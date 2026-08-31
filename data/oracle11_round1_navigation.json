@@ -10173,8 +10173,38 @@
           "source_frame": 2804
         },
         "state_0400": {
+          "audio_transaction": {
+            "arguments_u32": [
+              "0x00000142",
+              "0x00001b00",
+              "0x00000000"
+            ],
+            "callee": "0x002630",
+            "caller": "0x06df42",
+            "command_u16": "0x0142",
+            "semantic_sound_name": "UNKNOWN",
+            "shared_wrapper_return": "0x003a8e"
+          },
           "entry": "increment low state byte to 0x0402, set timer high byte to 8, bind selector 1 record 0x06e14a, and submit",
           "next_state": "0x0404",
+          "presentation_rng_transaction": {
+            "callee": "0x0bc692",
+            "caller": "0x06df3c",
+            "calls_u8": 1,
+            "owner": "source-owned obstacle-break presentation transaction",
+            "rng_call_pc": "0x0bc6b4",
+            "rng_entry": "0x017c5e",
+            "seed_after_u16": "0xcce7",
+            "seed_before_u16": "0x441b",
+            "selector_mask_u16": "0x001f"
+          },
+          "side_effect_order": [
+            "write state 0x0402",
+            "0x0bc692 presentation transaction consumes one shared RNG value",
+            "0x002630 dispatches command 0x0142",
+            "write timer high byte 8",
+            "bind selector 1 record 0x06e14a"
+          ],
           "timer_guard": "decrement high byte of actor+0x2a while nonzero; after zero require negative animation branch",
           "timer_high_byte_u8": 8
         },
@@ -10184,8 +10214,29 @@
             "when flag bit1 is clear: fp64 += s16(field32)<<8; fp6c += s16(field36)<<8; field36 += s16(field3e)",
             "set flag bit0 when u16(fp68.high) < u16(parent reference field18); set bit1 by the same guard for fp6c"
           ],
+          "channel_seeds": {
+            "alternate": {
+              "animation_record": "0x06e182",
+              "animation_selector_u8": 3,
+              "fp64_u32": "0x04630000",
+              "fp6c_u32": "0x01430000"
+            },
+            "primary": {
+              "animation_record": "0x06e16e",
+              "animation_selector_u8": 2,
+              "fp60_u32": "0x04630000",
+              "fp68_u32": "0x01730002"
+            },
+            "source_block": "0x06e010..0x06e0b0"
+          },
           "completion_guard": "both flag bits set",
-          "facing_rule": "when facing is zero negate field30, field38, field32, and field3a",
+          "direction_control": {
+            "field": "actor+0x4f:u8",
+            "presentation_facing_at_entry_u8": 0,
+            "presentation_facing_field": "actor+0x0f:u8",
+            "rule": "only when actor+0x4f is zero negate field30, field38, field32, and field3a; actor+0x0f must not control trajectory sign",
+            "source_value_at_entry_u8": 1
+          },
           "initial_fields_s16": {
             "field30": 1280,
             "field32": 1024,
@@ -10198,7 +10249,37 @@
           },
           "initialization": "selectors 2 and 3 seed two alternating animation/position records plus signed velocity and acceleration fields",
           "next_state": "0x0604",
-          "position_select": "(u8(A5+0x19)+D7)&1 selects the first or second record"
+          "position_select": "(u8(A5+0x19)+D7)&1 selects the first or second record",
+          "selection_witness": [
+            {
+              "animation_record": "0x06e16e",
+              "channel": "primary",
+              "frame": 2816,
+              "x_s16": 1123,
+              "y_s16": 371
+            },
+            {
+              "animation_record": "0x06e182",
+              "channel": "alternate",
+              "frame": 2817,
+              "x_s16": 1127,
+              "y_s16": 328
+            },
+            {
+              "animation_record": "0x06e16e",
+              "channel": "primary",
+              "frame": 2818,
+              "x_s16": 1133,
+              "y_s16": 382
+            }
+          ],
+          "transition_initialization_order": {
+            "first_visible_frame": 2816,
+            "fixed_frame_delay_forbidden": true,
+            "rule": "after the state-0x0402 timer is zero and the animation branch is negative, increment substate to 0x0404, call 0x06e010 and 0x06e0b2 in the same actor update, then submit",
+            "source_update_frame": 2815
+          },
+          "visible_projection": "0x06e0b2 copies only the selected channel x/y high words plus its animation, assembly, timer, branch and selector identity into the visible actor fields"
         },
         "state_0604": {
           "release": "0x017706 fixed-pool release"
@@ -10279,9 +10360,12 @@
         },
         "2": {
           "entry": "0x0b1c16",
-          "movement_rule": "remainder=(~world_z)&15; penetration=u8(field5)-remainder; if penetration>0 then world_z-=penetration, z_velocity=0, response=1",
+          "movement_rule": "branch 0 uses remainder=world_z&15 and adds positive u8(field5)-remainder to world_z; branch 2 uses remainder=(~world_z)&15 and subtracts positive u8(field5)-remainder from world_z; either response clears z_velocity and sets response=1",
           "parameter_signedness": "fields 4 and 5 are u8",
-          "selected_entry": "0x0b1c54"
+          "selected_entries": {
+            "0": "0x0b1c38",
+            "2": "0x0b1c54"
+          }
         },
         "4": {
           "entry": "0x0b1cac",
@@ -10303,9 +10387,19 @@
           "selector_u8": 0
         },
         {
+          "address": "0x0b20ce",
+          "record_bytes": "0200808010100080",
+          "selector_u8": 4
+        },
+        {
           "address": "0x0b20d6",
           "record_bytes": "0202808010100080",
           "selector_u8": 8
+        },
+        {
+          "address": "0x0b20ee",
+          "record_bytes": "020080801010ff80",
+          "selector_u8": 20
         },
         {
           "address": "0x0b20f6",

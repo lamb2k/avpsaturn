@@ -26,7 +26,7 @@ assert player_hit["phase_0x0200"]["writes"] == {
     "next_substate_u16": 0x0202,
     "x_velocity_s32_16_16": 0x0001C000,
     "x_acceleration_s32_16_16": -0x00002000}
-assert player_hit["shake"]["table_s16"] == [2, -2] * 8
+assert player_hit["shake"]["table_s16"] == [2, -2] * 16
 assert player_hit["audio"]["command_u16"] == 0x003b
 assert [row["frame_u16"] for row in player_hit["observed_anchors"]] == [
     2750, 2751, 2752, 2753, 2761, 2762, 2769, 2770,
@@ -53,6 +53,11 @@ assert [row["source_state_u16"] for row in
             "0x0400", "0x0402", "0x0602"]
 assert parent_state["first_child_visible_frame_u16"] == 2288
 assert parent_state["mutation_control"]["first_rejected_frame_u16"] == 2288
+assert parent["child_emitter_state"]["child_initial_facing_u8"] == 0
+assert [(row["source_slot"], row["facing_u8"], row["parent_facing_u8"])
+        for row in parent["child_emitter_state"]
+        ["coffee_shop_collision_child_witnesses"]] == [
+            ("0x00ff8900", 0, 1), ("0x00ff8800", 0, 1)]
 assert [len(child["initialization"]["variant_presentation_sequences"][str(i)])
         for i in range(3)] == [17, 10, 16]
 child_reuse = child["fixed_slot_reuse_presentation"]
@@ -233,6 +238,9 @@ actions = class1f["first_segment_action_execution_contract"]
 assert actions["classification"] == "SOURCE_CLOSED_IMPLEMENTATION_FIELDS"
 assert actions["capture_identity"]["byte_identical"] is True
 assert len(actions["initializer"]["variants"]) == 10
+assert actions["initializer"]["variant_field_u8"] == "actor+0x03"
+assert actions["initializer"]["variant_clear_writer"] == "0x0605ec"
+assert actions["initializer"]["post_initialization_variant_u8"] == 0
 assert [row["action_u8"] for row in actions["current_dispatch"]["action_targets"]] == list(range(0, 32, 2))
 assert actions["current_dispatch"]["action_targets"][11] == {"action_u8": 22, "target": "0x060c2e"}
 assert [row["selector_u8"] for row in actions["animation_selector_table"]["selectors"]] == [0, 1, 34, 35, 36, 43, 52, 53, 54, 55, 56, 60, 62, 68, 69, 70, 71, 72, 73, 74, 76, 77]
@@ -303,10 +311,11 @@ assert inner8["capture_identity"]["byte_identical"] is True
 assert inner8["entry_transition"]["writer_pc"] == "0x0610c8"
 assert inner8["entry_transition"]["timer_u16"] == 600
 assert list(inner8["route_reachable_action_handlers"]) == [
-    "0x00", "0x04", "0x06", "0x08", "0x0a", "0x0e", "0x10"]
-assert len(inner8["animation_records"]) == 54
+    "0x00", "0x02", "0x04", "0x06", "0x08", "0x0a", "0x0c", "0x0e",
+    "0x10"]
+assert len(inner8["animation_records"]) == 120
 assert [row["table_index_u8"] for row in inner8["movement"]["tables"]] == [
-    4, 11, 12, 15, 18, 19, 23, 25]
+    4, 11, 12, 14, 15, 18, 19, 23, 25, 27]
 assert len(inner8["rng_calls"]) == 13
 assert inner8["action_0x0e_motion"]["phase_2_terminal"][
     "x_velocity_by_facing_s32_16_16"] == [65536, -65536]
@@ -320,10 +329,43 @@ assert inner8["observed_path_program"]["normal_action_0x16_entry"][
     "failed_guard_rng_ownership"].endswith("no second RNG call")
 assert inner8["observed_path_program"]["action_0x04"][
     "captured_terminals"]["frame_3134"].endswith("action 0x10")
+assert inner8["observed_path_program"]["action_0x04"][
+    "timer_selector_program"]["variant0_bank_by_stage_parameter_u8"][9] == 1
+assert inner8["observed_path_program"]["action_0x04"][
+    "timer_selector_program"]["signed_timer_banks_s8"][1][2] == -1
+assert inner8["observed_path_program"]["action_0x02"][
+    "Coffee_Shop_observed_frames"] == 79
+assert inner8["observed_path_program"]["action_0x02"][
+    "presentation_binding"]["selector_by_style"] == [
+        {"style85_u8": 0, "selector_u8": 0,
+         "start_animation_record": "0x0012e8a8"},
+        {"style85_u8": 1, "selector_u8": 1,
+         "start_animation_record": "0x0012e8ec"}]
+assert inner8["observed_path_program"]["action_0x02"][
+    "presentation_binding"]["movement_on_bind"] is False
+assert len(inner8["observed_path_program"]["action_0x02"][
+    "Coffee_Shop_observed_runs"]) == 6
+assert inner8["movement"]["terrain_tail"]["source_entry"] == "0x0b1baa"
+assert inner8["movement"]["terrain_tail"]["mutation_control"][
+    "proposed_world_z_without_tail_s16"] == 338
+assert inner8["movement"]["terrain_tail"]["mutation_control"][
+    "resolved_world_z_s16"] == 327
 assert inner8["observed_path_program"]["action_0x10"][
     "overlap_transition"]["writer"] == "0x04130e"
+assert inner8["observed_path_program"]["action_0x10"]["initializer"][
+    "x_offsets_s16"] == [96, 112, 208]
 assert inner8["observed_path_program"]["action_0x0e"][
     "captured_selection"]["motion_selector_96_u16"] == 24
+assert inner8["action_0x0e_motion"]["phase_8_terminal_writes"][
+    "wander_cursor_u8"] == 0
+assert inner8["action_0x0e_motion"]["phase_6"].startswith(
+    "step animation; each positive")
+assert inner8["action_0x0e_motion"]["phase_4_arithmetic"][3].endswith(
+    "preserve the accumulated low 16-bit fraction")
+assert [row["start_animation_record"] for row in inner8[
+    "observed_path_program"]["source_tables"][
+        "movement_selector_by_style_relation"]["rows"]] == [
+            "0x0012d380", "0x0012d404", "0x0012d488", "0x0012d50c"]
 progression = fixtures["authority_data"]["route"]["first_segment_recurring_spawn"]
 activation = fixtures["authority_data"]["route"]["first_entry_body"][
     "route4_player_activation_order"]
@@ -414,6 +456,13 @@ assert class4e1["allocation"]["fixed_slot_reuse_presentation"] == {
     "state0_animation_record": "0x00092914",
     "state0_assembly": "0x00092c04"}
 assert class4e1["state0"]["first_seed_after"] == "0x4d11"
+special_collision = class4e1["player_special_collision"]
+assert special_collision["source_frame_u16"] == 2804
+assert special_collision["class1f_target"]["damage_s16"] == 127
+assert special_collision["class1f_target"]["hurt_record"]["address"] == "0x00130ad4"
+assert [row["source_slot"] for row in special_collision["record20_targets"]] == [
+    "0x00ffb300", "0x00ffb380"]
+assert special_collision["impact_allocation"]["variant_u8"] == 1
 class4e0 = dependencies["class_0x4e_type24_variant4_effect"][
     "variant0_collision_effect"]
 assert class4e0["classification"] == "SOURCE_CLOSED_IMPLEMENTATION_FIELDS"
@@ -450,6 +499,10 @@ assert obstacle_lifecycle["classification"] == "SOURCE_CLOSED_IMPLEMENTATION_FIE
 assert obstacle_lifecycle["source_scene_record"]["camera_threshold_u16"] == 688
 assert obstacle_lifecycle["initializer"]["child_allocation"]["variant_order_u8"] == [3, 2, 1, 0]
 assert obstacle_lifecycle["state_program"]["state_0200"]["source_frame"] == 2804
+assert obstacle_lifecycle["state_program"]["state_0400"][
+    "presentation_rng_transaction"]["calls_u8"] == 1
+assert obstacle_lifecycle["state_program"]["state_0400"][
+    "audio_transaction"]["command_u16"] == "0x0142"
 assert obstacle_lifecycle["lifetimes"]["parent"]["first_frame"] == 2246
 assert obstacle_lifecycle["transition_suppression"]["suppressed_writes"] == 18
 assert navigation["camera"]["implementation_contract"]["coffee_shop_guard"][
@@ -547,6 +600,7 @@ f = copy.deepcopy(fixtures); next(item for item in f["authority_data"]["enemies"
 f = copy.deepcopy(fixtures); next(item for item in f["authority_data"]["enemies"]["archetypes"] if item["class"] == "0x1f")["current_state_implementation_contract"]["damage_hit_ko_removal"]["source_projectile_ko_program"]["state_program"]["launch"]["y_velocity_s32_16_16"] = 0x97000; mutations.append((contract, f, "class1f projectile KO launch mutation"))
 f = copy.deepcopy(fixtures); next(item for item in f["authority_data"]["enemies"]["archetypes"] if item["class"] == "0x1f")["current_state_implementation_contract"]["damage_hit_ko_removal"]["source_projectile_ko_program"]["state_program"]["removal_hold"]["timer_actor_2a_u8"] = 59; mutations.append((contract, f, "class1f projectile KO hold mutation"))
 f = copy.deepcopy(fixtures); next(item for item in f["authority_data"]["enemies"]["archetypes"] if item["class"] == "0x1f")["first_segment_action_execution_contract"]["initializer"]["variants"][6]["writes"]["action_u8"] = 18; mutations.append((contract, f, "class1f action variant mutation"))
+f = copy.deepcopy(fixtures); next(item for item in f["authority_data"]["enemies"]["archetypes"] if item["class"] == "0x1f")["first_segment_action_execution_contract"]["initializer"]["post_initialization_variant_u8"] = 3; mutations.append((contract, f, "class1f post-initializer variant-clear mutation"))
 f = copy.deepcopy(fixtures); next(item for item in f["authority_data"]["enemies"]["archetypes"] if item["class"] == "0x1f")["first_segment_action_execution_contract"]["current_dispatch"]["action_targets"][11]["target"] = "0x060c30"; mutations.append((contract, f, "class1f action target mutation"))
 f = copy.deepcopy(fixtures); next(item for item in f["authority_data"]["enemies"]["archetypes"] if item["class"] == "0x1f")["first_segment_action_execution_contract"]["animation_selector_table"]["selectors"][2]["selector_u8"] = 33; mutations.append((contract, f, "class1f action selector mutation"))
 f = copy.deepcopy(fixtures); next(item for item in f["authority_data"]["enemies"]["archetypes"] if item["class"] == "0x1f")["first_segment_action_execution_contract"]["movement_tables"][1]["vectors"][8]["x_delta_s16"] = 2047; mutations.append((contract, f, "class1f action movement mutation"))
@@ -575,7 +629,21 @@ f = copy.deepcopy(fixtures); next(item for item in f["authority_data"]["enemies"
 f = copy.deepcopy(fixtures); next(item for item in f["authority_data"]["enemies"]["archetypes"] if item["class"] == "0x1f")["first_segment_action_execution_contract"]["inner_state_0x08_program"]["observed_path_program"]["action_0x00"]["captured_rng_call_counts"]["frame_3004_style_match"] = 3; mutations.append((contract, f, "class1f inner8 chooser RNG mutation"))
 f = copy.deepcopy(fixtures); next(item for item in f["authority_data"]["enemies"]["archetypes"] if item["class"] == "0x1f")["first_segment_action_execution_contract"]["inner_state_0x08_program"]["observed_path_program"]["action_0x04"]["captured_terminals"]["frame_3134"] = "fixed frame"; mutations.append((contract, f, "class1f inner8 action4 transition mutation"))
 f = copy.deepcopy(fixtures); next(item for item in f["authority_data"]["enemies"]["archetypes"] if item["class"] == "0x1f")["first_segment_action_execution_contract"]["inner_state_0x08_program"]["observed_path_program"]["action_0x10"]["overlap_transition"]["writer"] = "0x041310"; mutations.append((contract, f, "class1f inner8 action10 writer mutation"))
+f = copy.deepcopy(fixtures); next(item for item in f["authority_data"]["enemies"]["archetypes"] if item["class"] == "0x1f")["first_segment_action_execution_contract"]["inner_state_0x08_program"]["observed_path_program"]["action_0x10"]["initializer"]["x_offsets_s16"][1] = 111; mutations.append((contract, f, "class1f inner8 action10 offset mutation"))
 f = copy.deepcopy(fixtures); next(item for item in f["authority_data"]["enemies"]["archetypes"] if item["class"] == "0x1f")["first_segment_action_execution_contract"]["inner_state_0x08_program"]["observed_path_program"]["action_0x0e"]["captured_selection"]["motion_selector_96_u16"] = 22; mutations.append((contract, f, "class1f inner8 motion-selector mutation"))
+f = copy.deepcopy(fixtures); next(item for item in f["authority_data"]["enemies"]["archetypes"] if item["class"] == "0x1f")["first_segment_action_execution_contract"]["inner_state_0x08_program"]["action_0x0e_motion"]["phase_8_terminal_writes"]["wander_cursor_u8"] = 1; mutations.append((contract, f, "class1f inner8 motion terminal cursor mutation"))
+f = copy.deepcopy(fixtures); next(item for item in f["authority_data"]["enemies"]["archetypes"] if item["class"] == "0x1f")["first_segment_action_execution_contract"]["inner_state_0x08_program"]["action_0x0e_motion"]["phase_6"] = "decrement terminal record timer before phase 8"; mutations.append((contract, f, "class1f inner8 phase6 terminal-order mutation"))
+f = copy.deepcopy(fixtures); next(item for item in f["authority_data"]["enemies"]["archetypes"] if item["class"] == "0x1f")["first_segment_action_execution_contract"]["inner_state_0x08_program"]["action_0x0e_motion"]["phase_4_arithmetic"][3] = "replace the whole fixed point value"; mutations.append((contract, f, "class1f inner8 landing fraction mutation"))
+f = copy.deepcopy(fixtures); next(item for item in f["authority_data"]["enemies"]["archetypes"] if item["class"] == "0x1f")["first_segment_action_execution_contract"]["inner_state_0x08_program"]["observed_path_program"]["source_tables"]["movement_selector_by_style_relation"]["rows"][0]["start_animation_record"] = "0x0012d404"; mutations.append((contract, f, "class1f inner8 movement-selector relation mutation"))
+f = copy.deepcopy(fixtures); next(item for item in f["authority_data"]["enemies"]["archetypes"] if item["class"] == "0x1f")["first_segment_action_execution_contract"]["inner_state_0x08_program"]["observed_path_program"]["wander_group_occupancy_program"]["mutation_control"]["mutant"]["direction_u8"] = 26; mutations.append((contract, f, "class1f inner8 group-direction mutation"))
+f = copy.deepcopy(fixtures); next(item for item in f["authority_data"]["enemies"]["archetypes"] if item["class"] == "0x1f")["first_segment_action_execution_contract"]["inner_state_0x08_program"]["observed_path_program"]["action_0x04"]["timer_selector_program"]["signed_timer_banks_s8"][1][2] = 3; mutations.append((contract, f, "class1f inner8 action4 timer-bank mutation"))
+f = copy.deepcopy(fixtures); next(item for item in f["authority_data"]["enemies"]["archetypes"] if item["class"] == "0x1f")["first_segment_action_execution_contract"]["inner_state_0x08_program"]["observed_path_program"]["action_0x02"]["presentation_binding"]["selector_by_style"][0]["selector_u8"] = 1; mutations.append((contract, f, "class1f inner8 action2 selector mutation"))
+f = copy.deepcopy(fixtures); next(item for item in f["authority_data"]["enemies"]["archetypes"] if item["class"] == "0x1f")["first_segment_action_execution_contract"]["inner_state_0x08_program"]["observed_path_program"]["action_0x02"]["presentation_binding"]["movement_on_bind"] = True; mutations.append((contract, f, "class1f inner8 action2 movement mutation"))
+f = copy.deepcopy(fixtures); next(item for item in f["authority_data"]["enemies"]["archetypes"] if item["class"] == "0x1f")["first_segment_action_execution_contract"]["inner_state_0x08_program"]["movement"]["terrain_tail"]["mutation_control"]["omitted_tail_rejected"] = False; mutations.append((contract, f, "class1f inner8 terrain-tail omission mutation"))
+f = copy.deepcopy(fixtures); next(item for item in f["authority_data"]["enemies"]["archetypes"] if item["class"] == "0x1f")["first_segment_action_execution_contract"]["inner_state_0x08_program"]["movement"]["terrain_tail"]["mutation_control"]["resolved_world_z_s16"] = 338; mutations.append((contract, f, "class1f inner8 terrain-tail result mutation"))
+f = copy.deepcopy(fixtures); next(item for item in f["authority_data"]["enemies"]["archetypes"] if item["class"] == "0x1f")["first_segment_action_execution_contract"]["inner_state_0x08_program"]["observed_path_program"]["action_0x02"]["Coffee_Shop_observed_frames"] = 78; mutations.append((contract, f, "class1f inner8 action2 coverage mutation"))
+f = copy.deepcopy(fixtures); next(item for item in f["authority_data"]["enemies"]["archetypes"] if item["class"] == "0x1f")["first_segment_action_execution_contract"]["inner_state_0x08_program"]["observed_path_program"]["action_0x0c"]["phase_exclusive_hit_ko_dispatch_guard"]["Coffee_Shop_negative_control"]["reaction_dispatch"] = True; mutations.append((contract, f, "class1f inner8 action0c reaction-dispatch guard mutation"))
+f = copy.deepcopy(fixtures); next(item for item in f["authority_data"]["enemies"]["archetypes"] if item["class"] == "0x1f")["first_segment_action_execution_contract"]["inner_state_0x08_program"]["observed_path_program"]["action_0x04"]["complete_dispatch_contract"]["clear_tail"]["Coffee_Shop_control"]["animation_timer_u16"] = 6; mutations.append((contract, f, "class1f inner8 action4 clear-tail mutation"))
 f = copy.deepcopy(fixtures); next(row for row in next(item for item in f["authority_data"]["enemies"]["archetypes"] if item["class"] == "0x1f")["presentation_and_collision"]["records"] if row["animation_record"] == "0x0012dd50")["assembly"] = "0x0013020c"; mutations.append((contract, f, "class1f HIT presentation mutation"))
 f = copy.deepcopy(fixtures); next(row for row in next(item for item in f["authority_data"]["enemies"]["archetypes"] if item["class"] == "0x1f")["presentation_and_collision"]["records"] if row["animation_record"] == "0x0012e214")["hurt_selector"] = 1; mutations.append((contract, f, "class1f KO selector mutation"))
 f = copy.deepcopy(fixtures); next(row for row in next(item for item in f["authority_data"]["enemies"]["archetypes"] if item["class"] == "0x1f")["presentation_and_collision"]["records"] if row["animation_record"] == "0x0012ec74")["hurt_selector"] = 1; mutations.append((contract, f, "class1f first Button1 target selector mutation"))
@@ -592,9 +660,15 @@ f = copy.deepcopy(fixtures); f["authority_data"]["route"]["first_segment_recurri
 f = copy.deepcopy(fixtures); f["authority_data"]["route"]["first_segment_recurring_spawn"]["progress_increment_boundary"]["increment_u16"] = 2; mutations.append((contract, f, "encounter KO progress mutation"))
 f = copy.deepcopy(fixtures); f["authority_data"]["route"]["first_segment_recurring_spawn"]["source_update_cadence"]["exceptions"][0]["updates_u8"] = 1; mutations.append((contract, f, "Coffee Shop scheduler cadence mutation"))
 f = copy.deepcopy(fixtures); f["authority_data"]["auxiliary"]["first_segment_dependencies"]["class_0x09_type20_rng_owner"]["selector_table_u16"][0] = 1; mutations.append((contract, f, "class09 RNG selector mutation"))
+f = copy.deepcopy(fixtures); f["authority_data"]["auxiliary"]["first_segment_dependencies"]["class_0x08_type20_health_pickup"]["stage_spawn"]["record"]["gate_u16"] = 817; mutations.append((contract, f, "class08 health-pickup stage-guard mutation"))
+f = copy.deepcopy(fixtures); f["authority_data"]["player"]["weapon_projectile_resource"]["implementation_contract"]["record4_parent_class0"]["child_emitter_state"]["child_initial_facing_u8"] = 1; mutations.append((contract, f, "projectile child facing mutation"))
+f = copy.deepcopy(fixtures); f["authority_data"]["auxiliary"]["first_segment_dependencies"]["class_0x08_type20_health_pickup"]["pickup"]["initialization"]["motion_substate_u16"] = 0; mutations.append((contract, f, "health-pickup motion-substate mutation"))
+f = copy.deepcopy(fixtures); f["authority_data"]["auxiliary"]["first_segment_dependencies"]["class_0x08_type20_health_pickup"]["pickup"]["movement"]["first_landing_result"]["position_write"] = "clear fractional low word"; mutations.append((contract, f, "health-pickup landing fraction mutation"))
+f = copy.deepcopy(fixtures); f["authority_data"]["auxiliary"]["first_segment_dependencies"]["class_0x08_type20_health_pickup"]["pickup"]["player_interaction"]["input_sample_rule"] = "raw current-frame input"; mutations.append((contract, f, "health-pickup input-sample mutation"))
 f = copy.deepcopy(fixtures); f["authority_data"]["auxiliary"]["first_segment_dependencies"]["class_0x4e_type24_variant4_effect"]["allocation_pop_order"].reverse(); mutations.append((contract, f, "class4e allocation-order mutation"))
 f = copy.deepcopy(fixtures); f["authority_data"]["auxiliary"]["first_segment_dependencies"]["class_0x4e_type24_variant4_effect"]["variant1_collision_effect"]["allocation"]["scheduler_guard"] = "projectile first"; mutations.append((contract, f, "class4e variant1 scheduler mutation"))
 f = copy.deepcopy(fixtures); f["authority_data"]["auxiliary"]["first_segment_dependencies"]["class_0x4e_type24_variant4_effect"]["variant1_collision_effect"]["allocation"]["fixed_slot_reuse_presentation"]["animation_record"] = "0x00092914"; mutations.append((contract, f, "class4e retained-presentation mutation"))
+f = copy.deepcopy(fixtures); f["authority_data"]["auxiliary"]["first_segment_dependencies"]["class_0x4e_type24_variant4_effect"]["variant1_collision_effect"]["player_special_collision"]["class1f_target"]["damage_s16"] = 126; mutations.append((contract, f, "player-special class1f damage mutation"))
 f = copy.deepcopy(fixtures); f["authority_data"]["auxiliary"]["first_segment_dependencies"]["class_0x4e_type24_variant4_effect"]["variant0_collision_effect"]["allocation"]["source_slot"] = "0x00ffc380"; mutations.append((contract, f, "class4e variant0 source-slot mutation"))
 f = copy.deepcopy(fixtures); f["authority_data"]["auxiliary"]["first_segment_dependencies"]["class_0x4e_type24_variant4_effect"]["variant0_collision_effect"]["state0"]["first_seed_before"] = "0xeea2"; mutations.append((contract, f, "class4e variant0 RNG mutation"))
 f = copy.deepcopy(fixtures); f["authority_data"]["auxiliary"]["first_segment_dependencies"]["class_0x4e_type24_variant4_effect"]["variant0_collision_effect"]["active_state"]["animation_records"][0]["animation_record"] = "0x000928f0"; mutations.append((contract, f, "class4e variant0 presentation mutation"))
@@ -610,6 +684,8 @@ f = copy.deepcopy(fixtures); f["authority_data"]["navigation"]["obstacle_respons
 f = copy.deepcopy(fixtures); f["authority_data"]["navigation"]["obstacle_response"]["lifecycle_contract"]["source_scene_record"]["camera_threshold_u16"] = 689; mutations.append((contract, f, "obstacle spawn threshold mutation"))
 f = copy.deepcopy(fixtures); f["authority_data"]["navigation"]["obstacle_response"]["lifecycle_contract"]["initializer"]["child_allocation"]["variant_order_u8"] = [0,1,2,3]; mutations.append((contract, f, "obstacle child order mutation"))
 f = copy.deepcopy(fixtures); f["authority_data"]["navigation"]["obstacle_response"]["lifecycle_contract"]["transition_suppression"]["suppressed_writes"] = 0; mutations.append((contract, f, "obstacle transition control mutation"))
+f = copy.deepcopy(fixtures); f["authority_data"]["navigation"]["obstacle_response"]["lifecycle_contract"]["state_program"]["state_0400"]["presentation_rng_transaction"]["calls_u8"] = 0; mutations.append((contract, f, "obstacle break RNG mutation"))
+f = copy.deepcopy(fixtures); f["authority_data"]["navigation"]["obstacle_response"]["lifecycle_contract"]["state_program"]["state_0400"]["audio_transaction"]["command_u16"] = "0x0077"; mutations.append((contract, f, "obstacle break audio mutation"))
 f = copy.deepcopy(fixtures); f["authority_data"]["navigation"]["camera"]["implementation_contract"]["coffee_shop_guard"]["phase2_unlock_guard"] = "frame >= 4992"; mutations.append((contract, f, "camera unlock guard mutation"))
 f = copy.deepcopy(fixtures); f["authority_data"]["player"]["directional_airborne_interruption"]["directional_actions"]["implementation_contract"]["vector_table"][2]["x_velocity_s32_16_16"]["raw_s32"] = -0x000e0000; mutations.append((contract, f, "Button3 vector mutation"))
 f = copy.deepcopy(fixtures); f["authority_data"]["player"]["directional_airborne_interruption"]["directional_actions"]["implementation_contract"]["input_facing_mapping"][3]["entry_index"] = 2; mutations.append((contract, f, "Button3 facing map mutation"))

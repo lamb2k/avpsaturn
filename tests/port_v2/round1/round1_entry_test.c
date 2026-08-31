@@ -80,7 +80,7 @@ static int player_hit_source_frame_valid(const AvspRound1Runtime *runtime,
             runtime->player.animation_record == 0x0015f278UL &&
             runtime->player.assembly == 0x00160af2UL &&
             runtime->player.animation_timer == 1u &&
-            runtime->player.hurt_selector == 17u &&
+            runtime->player.hurt_selector == 0u &&
             runtime->player_hit_entries == 1u &&
             runtime->player_hit_audio_events == 0u;
     if (source_frame >= 2752u && source_frame <= 2761u)
@@ -136,6 +136,51 @@ static int player_hit_source_frame_valid(const AvspRound1Runtime *runtime,
         runtime->player_hit_active == 0u &&
         runtime->player_hit_invulnerability == 1u &&
         runtime->player_hit_completions == 1u;
+}
+
+static int player_hit_type16_source_frame_valid(
+    const AvspRound1Runtime *runtime, unsigned int source_frame)
+{
+    if (source_frame < 3264u || source_frame > 3313u)
+        return 1;
+    if (runtime->player.health != 78 ||
+        runtime->player_action.health != 78 ||
+        runtime->player_hit_reaction_index != 1u ||
+        runtime->player_hit_kind != 9u ||
+        runtime->player_hit_presentation_selector != 10u ||
+        runtime->player_hit_active_body_selector != 0u)
+        return 0;
+    if (source_frame == 3264u)
+        return runtime->player.state == 0x0202u &&
+            runtime->player.substate == 0u &&
+            runtime->player.animation_record == 0x0015f248UL &&
+            runtime->player.animation_timer == 1u &&
+            runtime->player.hurt_selector == 0u &&
+            runtime->player_hit_phase == 1u;
+    if (source_frame == 3265u)
+        return runtime->player.substate == 0x0200u &&
+            runtime->player.animation_record == 0x0015ef24UL &&
+            runtime->player.assembly == 0x00160f3cUL &&
+            runtime->player_hit_shake_remaining == 20u;
+    if (source_frame == 3284u)
+        return runtime->player.substate == 0x0200u &&
+            runtime->player_hit_shake_remaining == 1u;
+    if (source_frame == 3285u)
+        return runtime->player.substate == 0x0202u &&
+            runtime->player_hit_phase == 3u &&
+            runtime->player_hit_x_velocity == 0x00034000L &&
+            runtime->player_hit_x_acceleration == -0x00002000L &&
+            runtime->player.animation_timer == 7u;
+    if (source_frame == 3312u)
+        return runtime->player.substate == 0x0204u &&
+            runtime->player.animation_record == 0x0015f1f4UL &&
+            runtime->player.facing == 0u;
+    if (source_frame == 3313u)
+        return runtime->player.state == 0x0200u &&
+            runtime->player.substate == 0u &&
+            runtime->player_hit_active == 0u &&
+            runtime->player_hit_invulnerability == 1u;
+    return 1;
 }
 
 static void stage_class1f_release(AvspRound1Runtime *runtime,
@@ -461,11 +506,11 @@ int main(void)
     first = &runtime.pools[0].records[19];
     last = &runtime.pools[0].records[10];
     if (first->source_slot != 0x00FFA3C0UL || first->x != 713 ||
-        first->z != 312 || first->variant != 8u ||
+        first->z != 312 || first->variant != 0u ||
         first->source_action != 0x1400u || first->state != 0x0200u ||
         first->substate != 0x1404u || first->health != 87 ||
         last->source_slot != 0x00FF9D00UL || last->x != 632 ||
-        last->z != 296 || last->variant != 6u ||
+        last->z != 296 || last->variant != 0u ||
         last->substate != 4096u || last->transition_timer != 45u)
     {
         fprintf(stderr,
@@ -3323,6 +3368,7 @@ int main(void)
         component_runtime.player_action.height = 0;
         component_runtime.player_special_attack_active = 1u;
         component_runtime.player_special_attack_contact_ready = 1u;
+        component_runtime.player.attack_selector = 11u;
         if (!avsp_round1_step_scheduler(&component_runtime) ||
             class02->health != -1 || class02->state != 0x0400u ||
             component_runtime.class02_damage_writes != 1u)
@@ -3591,6 +3637,7 @@ int main(void)
         parent->source_field01 = 0u;
         parent->source_b0 = 1u;
         parent->source_motion_flags = 0u;
+        parent->source_style85 = 1u;
         parent->facing = 1u;
         parent->x = 1226;
         parent->y = 247;
@@ -3607,8 +3654,8 @@ int main(void)
         if (!avsp_round1_step_scheduler(&inner_runtime) ||
             parent->state != 0x0208u || parent->substate != 0x0600u ||
             parent->facing != 0u || parent->transition_timer != 600u ||
-            parent->source_motion_flags != 1u ||
-            parent->source_motion_fields[2] != 1 ||
+            parent->source_motion_flags != 0u ||
+            parent->source_motion_fields[2] != 0 ||
             parent->source_target_low != 0x8380u ||
             inner_runtime.rng_seed != 0xceb8u)
         {
@@ -3648,7 +3695,7 @@ int main(void)
                 return 109;
             ++ticks;
         }
-        if (inner_runtime.rng_seed != 0x51ccu ||
+        if (inner_runtime.rng_seed != 0xd00bu ||
             inner_runtime.type16_spawn_requests != 3u ||
             inner_runtime.type16_allocations != 3u ||
             parent->source_motion_fields[0] != 8 ||
@@ -3739,7 +3786,7 @@ int main(void)
         AvspRound1Runtime hit_runtime;
         unsigned int source_frame;
         avsp_round1_init(&hit_runtime);
-        for (source_frame = 1972u; source_frame <= 2778u; ++source_frame)
+        for (source_frame = 1972u; source_frame <= 3313u; ++source_frame)
         {
             unsigned short input = avsp_round1_coffee_shop_source_input(
                 (unsigned short)source_frame);
@@ -3747,7 +3794,9 @@ int main(void)
             if (source_frame == 2072u &&
                 !avsp_round1_begin_first_entry(&hit_runtime))
                 return 116;
-            if (!player_hit_source_frame_valid(&hit_runtime, source_frame))
+            if (!player_hit_source_frame_valid(&hit_runtime, source_frame) ||
+                !player_hit_type16_source_frame_valid(
+                    &hit_runtime, source_frame))
             {
                 fprintf(stderr,
                     "Coffee Shop player HIT chronology failed frame=%u state=%04x/%04x xfp=%08lx facing=%u animation=%08lx assembly=%08lx timer=%u branch=%d health=%d hurt=%u active=%u phase=%u invulnerability=%u entries=%lu completions=%lu audio=%lu/%04x\n",
@@ -3821,6 +3870,11 @@ int main(void)
             unsigned int source_updates =
                 avsp_round1_coffee_shop_source_updates(
                     (unsigned short)source_frame);
+            unsigned int class02_updates =
+                avsp_round1_coffee_shop_class02_source_updates(
+                    (unsigned short)source_frame);
+            unsigned int phase_updates = source_updates > class02_updates ?
+                source_updates : class02_updates;
             if ((source_frame == 2679u &&
                  scene_runtime.entry_controller.substate != 0u) ||
                 (source_frame == 2680u &&
@@ -3861,20 +3915,24 @@ int main(void)
                 }
             }
             scene_runtime.frame = source_frame - 2040u;
-            for (source_tick = 1u; source_tick < source_updates;
+            for (source_tick = 1u; source_tick < phase_updates;
                  ++source_tick)
             {
                 player_authority_enabled_at_tick_start =
                     scene_runtime.route_state == 4;
-                if (scene_runtime.frame >= 32u &&
+                if (source_tick < source_updates &&
+                    scene_runtime.frame >= 32u &&
                     scene_runtime.route_state != 4 &&
                     !avsp_round1_step_first_entry(&scene_runtime))
                     return 110;
-                if (player_authority_enabled_at_tick_start &&
+                if (source_tick < source_updates &&
+                    player_authority_enabled_at_tick_start &&
                     !avsp_round1_step_player(&scene_runtime, input, 0))
                     return 111;
                 if (scene_runtime.entry.spawned &&
-                    !avsp_round1_step_scheduler(&scene_runtime))
+                    !avsp_round1_step_scheduler_source_differential(
+                        &scene_runtime, source_tick < source_updates,
+                        source_tick < class02_updates))
                     return 112;
             }
             player_authority_enabled_at_tick_start =
@@ -3974,9 +4032,11 @@ int main(void)
                     scene_runtime.tail_canary);
                 return 93;
             }
-            if (source_updates != 0u && scene_runtime.entry.spawned)
+            if (phase_updates != 0u && scene_runtime.entry.spawned)
             {
-                if (!avsp_round1_step_scheduler(&scene_runtime))
+                if (!avsp_round1_step_scheduler_source_differential(
+                        &scene_runtime, source_updates != 0u,
+                        class02_updates != 0u))
                 {
                     fprintf(stderr,
                         "Coffee Shop scheduler failure code=%u slot=%04x state=%04x substate=%04x record=%08lx frame=%lu\n",
@@ -4036,6 +4096,17 @@ int main(void)
                  scene_runtime.pools[2].records[10].animation_timer !=
                      4094u))
                 return 121;
+        }
+        if (scene_runtime.coffee_shop_obstacle_rng_calls != 1u ||
+            scene_runtime.coffee_shop_obstacle_audio_events != 1u ||
+            scene_runtime.coffee_shop_obstacle_audio_command != 0x0142u)
+        {
+            fprintf(stderr,
+                "Coffee Shop obstacle break side effects failed rng=%lu audio=%lu command=%04x\n",
+                scene_runtime.coffee_shop_obstacle_rng_calls,
+                scene_runtime.coffee_shop_obstacle_audio_events,
+                scene_runtime.coffee_shop_obstacle_audio_command);
+            return 122;
         }
         if (!scene_runtime.first_encounter.initialized)
         {

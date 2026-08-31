@@ -9,7 +9,7 @@ from pathlib import Path
 
 ROOT = Path(__file__).resolve().parents[3]
 SPEC = ROOT / "data/spec02_round1_executable_contract.json"
-EXPECTED = "6aa35860d5854c77fb54e5174659a1cf546defdfb703d734b2f617276a0872b1"
+EXPECTED = "43e16c1e3d6a233f7a86703aa68e546e4a2b3be69b5ce7d6f264f9b5b587c288"
 assert hashlib.sha256(SPEC.read_bytes()).hexdigest() == EXPECTED
 assert json.loads(SPEC.read_text())["status"] == "ACCEPTED"
 source = (ROOT / "src/port_v2/gameplay/round1/round1.c").read_text()
@@ -82,7 +82,7 @@ queue_after = """    delayed_direction = runtime->direction_history[AVSP_PW_DIRE
 assert queue_before in player_source
 subset_flags = {"--inner8-only", "--ko-only", "--registration-only",
                 "--locomotion-only", "--generated-walk-only",
-                "--controller-edge-only"}
+                "--controller-edge-only", "--player-hit-only"}
 if "--queue-only" in sys.argv or not subset_flags.intersection(sys.argv):
     run(source, header, False, "consume-before-direction-queue-shift",
         player_source.replace(queue_before, queue_after, 1))
@@ -100,7 +100,7 @@ inner8_mutations = {
 ko_mutations = {
     "actor->state = ko ? avsp_round1_class1f_source_ko.collision_state :",
     "actor->source_hit_recovery_active = 2u;",
-    "actor->source_y_velocity =\n                avsp_round1_class1f_source_ko.launch_y_velocity;",
+    "actor->source_y_velocity = spec->launch_y_velocity;",
     "actor->source_hit_action_timer =\n                avsp_round1_class1f_source_ko.removal_hold_timer;",
     "runtime->first_encounter.source_progress = (unsigned short)(\n        runtime->first_encounter.source_progress +\n        avsp_round1_recurring_spawn.progress_increment);",
 }
@@ -117,6 +117,12 @@ locomotion_mutations = {
 controller_edge_mutations = {
     "encounter->source_camera_target =\n        (unsigned short)runtime->camera_x_previous;\n    if ((unsigned short)runtime->camera_x_previous <",
     "encounter->source_blocked_by_living_count = 1u;\n    }\n    else",
+}
+player_hit_mutations = {
+    "runtime->player_hit_shake_remaining =\n            reaction->shake_count;",
+    "runtime, &reaction->presentation);",
+    "runtime->player_hit_x_velocity =\n                reaction->x_velocity;",
+    "runtime->player_hit_x_acceleration =\n                reaction->x_acceleration;",
 }
 for before, after in (
     ("    return (unsigned short)runtime->camera_x_previous;",
@@ -147,8 +153,9 @@ for before, after in (
      "        if (actor->animation_timer == 0u)\n"
      "            return 0;\n"
      "        --actor->animation_timer;"),
-    ("if (!avsp_round1_allocate_class4e_variant0_impact(\n"
-     "                runtime, actor, &attack, &hurt))",
+    ("if (!avsp_round1_allocate_class4e_impact_to_player(\n"
+     "                runtime, actor, &attack, &hurt,\n"
+     "                avsp_round1_class1f_player_collision.impact_variant))",
      "if (0)"),
     ("runtime->player.source_facing_selector =\n"
      "            (unsigned char)(actor->x < runtime->player.x);",
@@ -397,7 +404,7 @@ for before, after in (
      "actor->state = ko ? avsp_round1_class1f_source_ko.dispatch_state :"),
     ("actor->source_hit_recovery_active = 2u;",
      "actor->source_hit_recovery_active = 1u;"),
-    ("actor->source_y_velocity =\n                avsp_round1_class1f_source_ko.launch_y_velocity;",
+    ("actor->source_y_velocity = spec->launch_y_velocity;",
      "actor->source_y_velocity = 0L;"),
     ("actor->source_hit_action_timer =\n                avsp_round1_class1f_source_ko.removal_hold_timer;",
      "actor->source_hit_action_timer =\n                avsp_round1_class1f_source_ko.landing_hold_timer;"),
@@ -409,8 +416,10 @@ for before, after in (
      "runtime->player.animation_branch = 0;"),
     ("runtime->player.animation_timer =\n        runtime->player_special_animation_timer;",
      "runtime->player.animation_timer = 0u;"),
-    ("if (!avsp_round1_step_class02_animation(actor))\n            return 0;",
-     "if (0)\n            return 0;"),
+    ("if (!was_in_camera)\n                avsp_round1_bind_animation_state(",
+     "if (0)\n                avsp_round1_bind_animation_state("),
+    ("actor->source_hitstop = hit_value;\n        actor->source_player_guard = 1u;",
+     "actor->source_hitstop = hit_value;\n        actor->source_player_guard = 0u;"),
     ("else if (runtime->player.animation_timer != 0u)\n                --runtime->player.animation_timer;",
      "else if (runtime->player.animation_timer != 0u)\n                runtime->player.animation_timer = runtime->player.animation_timer;"),
     ("if (!avsp_round1_step_coffee_shop_obstacle_parent_animation(actor))\n            return 0;",
@@ -419,6 +428,20 @@ for before, after in (
      "(unsigned short)runtime->camera_x_position < spec->camera_threshold"),
     ("runtime->player.animation_timer = frame->timer;\n    runtime->player.animation_branch = frame->branch;",
      "runtime->player.animation_timer = 4095u;\n    runtime->player.animation_branch = -32768;"),
+    ("runtime->player_hit_shake_remaining =\n            reaction->shake_count;",
+     "runtime->player_hit_shake_remaining =\n            avsp_round1_player_hit.shake_count;"),
+    ("runtime, &reaction->presentation);",
+     "runtime, &avsp_round1_player_hit.hit_record);"),
+    ("runtime->player_hit_x_velocity =\n                reaction->x_velocity;",
+     "runtime->player_hit_x_velocity =\n                avsp_round1_player_hit.x_velocity;"),
+    ("runtime->player_hit_x_acceleration =\n                reaction->x_acceleration;",
+     "runtime->player_hit_x_acceleration = 0L;"),
+    ("12u, 0x1f, record->attack_selector);",
+     "12u, 0x1f, 1u);"),
+    ("special_buttons = runtime->player_special_input_pipeline;",
+     "special_buttons = (unsigned char)(input_mask & 0x70u);"),
+    ("if (avsp_round1_player_special_guard(\n                runtime, special_buttons,",
+     "if (0 && avsp_round1_player_special_guard(\n                runtime, special_buttons,"),
     ("sufficient_entry_preserves_current_presentation)",
      "sufficient_entry_preserves_current_presentation == 0u)"),
     ("else if (!avsp_round1_step_player_weapon_animation(runtime, frame))\n            return 0;",
@@ -435,6 +458,8 @@ for before, after in (
     if "--locomotion-only" in sys.argv and before not in locomotion_mutations:
         continue
     if "--controller-edge-only" in sys.argv and before not in controller_edge_mutations:
+        continue
+    if "--player-hit-only" in sys.argv and before not in player_hit_mutations:
         continue
     if "--generated-walk-only" in sys.argv:
         continue
@@ -454,6 +479,9 @@ if "--locomotion-only" in sys.argv:
     raise SystemExit(0)
 if "--controller-edge-only" in sys.argv:
     print("REIMPLEMENT-13 controller camera-edge mutation lane: PASS (2 real mutations)")
+    raise SystemExit(0)
+if "--player-hit-only" in sys.argv:
+    print("REIMPLEMENT-13 Coffee Shop player-HIT program mutation lane: PASS (4 real mutations)")
     raise SystemExit(0)
 generated_walk_mutations = {
     "    { 4u, 0, 0x0015F208UL, 0x00160A02UL, 17u, 0u },",

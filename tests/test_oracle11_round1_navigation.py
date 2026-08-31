@@ -118,6 +118,18 @@ mutant["obstacle_response"]["lifecycle_contract"]["state_program"]["state_0404"]
 reject(mutant, "Coffee Shop obstacle completion guard replaced")
 
 mutant = copy.deepcopy(report)
+mutant["obstacle_response"]["lifecycle_contract"]["state_program"]["state_0404"]["transition_initialization_order"]["source_update_frame"] = 2816
+reject(mutant, "Coffee Shop obstacle same-update initialization delayed")
+
+mutant = copy.deepcopy(report)
+mutant["obstacle_response"]["lifecycle_contract"]["state_program"]["state_0404"]["direction_control"]["field"] = "actor+0x0f:u8"
+reject(mutant, "Coffee Shop obstacle trajectory sign changed to presentation facing")
+
+mutant = copy.deepcopy(report)
+mutant["obstacle_response"]["lifecycle_contract"]["state_program"]["state_0404"]["selection_witness"][1]["animation_record"] = "0x06e16e"
+reject(mutant, "Coffee Shop obstacle alternating channel projection replaced")
+
+mutant = copy.deepcopy(report)
 mutant["obstacle_response"]["lifecycle_contract"]["transition_suppression"]["suppressed_writes"] = 0
 reject(mutant, "Coffee Shop obstacle suppression control removed")
 
@@ -132,6 +144,14 @@ reject(mutant, "Coffee Shop obstacle child parent-state guard replaced")
 mutant = copy.deepcopy(report)
 mutant["obstacle_response"]["lifecycle_contract"]["state_program"]["state_0200"]["player_trigger"]["edge_to_damage_ticks_u8"] = 13
 reject(mutant, "Coffee Shop obstacle special contact timing changed")
+
+mutant = copy.deepcopy(report)
+mutant["obstacle_response"]["lifecycle_contract"]["state_program"]["state_0400"]["presentation_rng_transaction"]["calls_u8"] = 0
+reject(mutant, "Coffee Shop obstacle break RNG transaction removed")
+
+mutant = copy.deepcopy(report)
+mutant["obstacle_response"]["lifecycle_contract"]["state_program"]["state_0400"]["audio_transaction"]["command_u16"] = "0x0077"
+reject(mutant, "Coffee Shop obstacle break audio command changed")
 
 mutant = copy.deepcopy(report)
 record = next(item for item in mutant["terrain_resolver"]["records"]
@@ -166,4 +186,4 @@ mutant["camera"]["implementation_contract"]["initialization"][
     "first_control_chronology"][1]["camera_x_s16"] = 640
 reject(mutant, "camera first-control handoff update")
 
-print("ORACLE-11 Round 1 navigation tests: PASS (32 mutations rejected)")
+print("ORACLE-11 Round 1 navigation tests: PASS (34 mutations rejected)")

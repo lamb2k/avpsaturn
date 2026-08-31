@@ -244,7 +244,7 @@ def build_fields() -> list[dict[str, object]]:
           ["enemy.variant:u8", "enemy.state:u16", "enemy.action:u16", "enemy.facing:u8", "enemy.position:s32", "enemy.animation_record:u32", "enemy.animation_timer:u16", "enemy.animation_branch:s16", "player.position:s32", "route.globals", "rng.seed:u16"], ["enemy.state:u16", "enemy.action:u16", "enemy.facing:u8", "enemy.position:s32", "enemy.animation_record:u32", "enemy.collision_selectors:u8", "enemy.health:s16", "pool.free_count:u8", "living_enemy_count:u16", "rng.seed:u16"],
           "/archetypes/3/first_segment_action_execution_contract/mutation_controls", "variant, action target, branch order, selector, record, movement, timer, release, RNG or single-synthetic-actor substitution changes the causal first-segment trace"),
         f("enemy.class1f_inner_state_0x08", "round1-enemy-archetypes", "guarded_actor_program", True,
-          "enemies", "/archetypes/3/first_segment_action_execution_contract/inner_state_0x08_program", "0x061096 transition, 0x0610f6/0x040bbe inner dispatch, 0x016644 movement, 0x0411c4 motion, and 0x0413d2 type-16 emission",
+          "enemies", "/archetypes/3/first_segment_action_execution_contract/inner_state_0x08_program", "0x061096 transition, 0x0610f6/0x040bbe inner dispatch, 0x041c36/0x041d6c group-band occupancy, 0x016644 movement, 0x0411c4 motion, and 0x0413d2 type-16 emission",
           "/authority_data/enemies/archetypes/3/first_segment_action_execution_contract/inner_state_0x08_program", "the action-0x16 terminal, target-side, latch, RNG and facing guards enter inner state 0x08; scheduler-owned action, animation and motion guards alone advance it and positive animation events alone emit type-16 actors",
           ["enemy.outer_state:u8", "enemy.inner_state:u8", "enemy.action:u8", "enemy.action_phase:u8", "enemy.inner_timer:u16", "enemy.animation_timer:u16", "enemy.animation_branch:s16", "enemy.animation_record:u32", "enemy.direction:u8", "enemy.facing:u8", "enemy.position:s32", "enemy.velocity:s32", "enemy.target:u16", "enemy.latches:u8", "player.position:s32", "route.gameplay_gate:s16", "route.interruption:u8", "rng.seed:u16", "type16.free_count:u8"], ["enemy.inner_state:u8", "enemy.action:u8", "enemy.action_phase:u8", "enemy.inner_timer:u16", "enemy.action_timer:u8", "enemy.position:s32", "enemy.velocity:s32", "enemy.facing:u8", "enemy.animation_record:u32", "enemy.animation_timer:u16", "enemy.animation_branch:s16", "enemy.collision_selectors:u8", "enemy.latches:u8", "rng.seed:u16", "type16.actor_record"],
           "/archetypes/3/first_segment_action_execution_contract/inner_state_0x08_program/mutation_control", "suppressing the exact inner-state writer removes every inner-0x08 context and its three animation-event-owned type-16 spawns; fixed-frame or authored emission is rejected"),
@@ -258,6 +258,11 @@ def build_fields() -> list[dict[str, object]]:
           "/authority_data/auxiliary/archetypes", "current class/state owns lifecycle, presentation, collision, player effect, and RNG consumption",
           ["actor.class:s8", "actor.state:u16", "player.position:s16"], ["actor.state:u16", "actor.active:u8", "player.health:s16", "player.resource:s16"],
           "/archetypes/0/counterfactual", "corrected class/type suppression removes actors and changes the causal state"),
+        f("auxiliary.coffee_shop_class08_health_pickup", "pickups-equipment-weapons-projectiles-hazards-destructibles", "guarded_actor_and_pickup_program", True,
+          "auxiliary", "/first_segment_dependencies/class_0x08_type20_health_pickup", "0x01bece stage-record interpreter, 0x06d53c class-0x08 parent, 0x0bc692 drop selector, 0x0a38e4 class-0x0a pickup, and 0x019fec player interaction",
+          "/authority_data/auxiliary/first_segment_dependencies/class_0x08_type20_health_pickup", "the source stage guard owns the parent; current record-4 collision owns the drop; scheduler-ordered RNG, record-28 motion, hurt-box overlap, health update, audio command, animation terminal, and fixed-pool release own the pickup lifecycle",
+          ["route.camera_right_edge:u16", "stage.record", "record20.health:s16", "record4.attack_record:u32", "rng.seed:u16", "record28.position:s32", "player.position:s32", "player.health:s16", "input.button2_edge:u8"], ["record20.actor", "record20.state:u16", "record28.actor", "record28.position:s32", "rng.seed:u16", "player.state:u16", "player.health:s16", "audio.command:u16", "record28.active:u8"],
+          "/first_segment_dependencies/class_0x08_type20_health_pickup/mutation_controls", "stage guard, fixed-frame spawn, collision record, damage, RNG, scheduler order, movement, landing, hurt box, health, audio, terminal or release mutation changes the captured Coffee Shop scene"),
         f("auxiliary.coffee_shop_class4e_variant10_impact", "pickups-equipment-weapons-projectiles-hazards-destructibles", "guarded_presentation_actor_program", True,
           "auxiliary", "/first_segment_dependencies/class_0x4e_type24_variant4_effect/variant10_collision_effect", "0x01d622 impact allocation and 0x0927f6 class-0x4e state dispatch",
           "/authority_data/auxiliary/first_segment_dependencies/class_0x4e_type24_variant4_effect/variant10_collision_effect", "source collision at frame 2362 allocates variant 10; scheduler-owned state 0 consumes one RNG call before animation and fixed-pool release",
@@ -723,11 +728,26 @@ def build_fixtures(source: dict[str, dict]) -> dict[str, object]:
                     "omit the inner-state-2 transition",
                     "delay child allocation while changing inner state",
                     "project inner state into source actor +0x06 substate",
+                    "copy parent facing into the allocator-cleared child",
                 ],
                 "first_rejected_frame_u16": 2288,
                 "fixed_frame_substitute": False,
             },
         }
+    weapon_projection["record4_parent_class0"]["child_emitter_state"].update({
+        "child_initial_facing_u8": 0,
+        "child_facing_rule": (
+            "the record-4 allocator clears child facing to zero; parent "
+            "facing is read only for the row-x sign and is not copied"),
+        "coffee_shop_collision_child_witnesses": [
+            {"source_slot": "0x00ff8900", "variant_u8": 1,
+             "first_visible_frame_u16": 2908, "facing_u8": 0,
+             "parent_source_slot": "0x00ff8880", "parent_facing_u8": 1},
+            {"source_slot": "0x00ff8800", "variant_u8": 2,
+             "first_visible_frame_u16": 2914, "facing_u8": 0,
+             "parent_source_slot": "0x00ff8880", "parent_facing_u8": 1},
+        ],
+    })
     weapon_projection["record4_child_class4"][
         "fixed_slot_reuse_presentation"] = {
             "classification": "SOURCE_CLOSED_IMPLEMENTATION_FIELDS",
@@ -1074,9 +1094,72 @@ def validate(contract: dict[str, object], fixtures: dict[str, object],
             fixtures["optional_unknowns"]["required_for_round1"] is False,
             "fixture scope drift")
     scene = fixtures["scene_manifests"]["coffee_shop"]
+    class08_pickup = fixtures["authority_data"]["auxiliary"][
+        "first_segment_dependencies"]["class_0x08_type20_health_pickup"]
+    require(
+        class08_pickup["classification"] ==
+            "SOURCE_CLOSED_IMPLEMENTATION_FIELDS" and
+        class08_pickup["spec_executable"] is True and
+        class08_pickup["fixed_frame_substitute_forbidden"] is True and
+        class08_pickup["stage_spawn"]["record"] == {
+            "allocator_selector_u16": 4,
+            "character_guard_u8": 0,
+            "class_variant_word_u16": "0x0800",
+            "gate_u16": 816,
+            "lane_guard_s8": 0,
+            "x_s16": 1280,
+            "y_s16": 317} and
+        class08_pickup["parent"]["current_state_collision"]
+            ["attack_record"]["address"] == "0x0002fc58" and
+        class08_pickup["parent"]["drop"]["seed_before"] == "0x8be5" and
+        class08_pickup["parent"]["drop"]["seed_after"] == "0xa388" and
+        class08_pickup["parent"]["post_drop_program"]["debris"]
+            ["internal_coordinate_format"].startswith(
+                "two signed 24.8 trajectories") and
+        class08_pickup["parent"]["post_drop_program"]["debris"]
+            ["visible_position_projection"].startswith(
+                "0x06d72e copies only") and
+        class08_pickup["pickup"]["scheduler_order"].startswith(
+            "record-type-20 parent drop allocation precedes") and
+        class08_pickup["pickup"]["initialization"]
+            ["motion_substate_u16"] == 0x0002 and
+        class08_pickup["pickup"]["movement"]["first_landing_result"]
+            ["position_write"] ==
+            "replace only y_fp high word with ground_z and preserve the current fractional low word" and
+        class08_pickup["pickup"]["movement"]["second_landing_result"]
+            ["position_write"] ==
+            "replace only y_fp high word with ground_z and preserve the current fractional low word" and
+        class08_pickup["pickup"]["player_interaction"]["action_u16"] ==
+            "0x0e00" and
+        class08_pickup["pickup"]["player_interaction"][
+            "input_sample_rule"].startswith(
+                "the eligible current-frame target/input guard latches pickup ownership") and
+        class08_pickup["pickup"]["player_interaction"]["health_before_s16"] ==
+            85 and
+        class08_pickup["pickup"]["player_interaction"]["health_after_s16"] ==
+            95 and
+        class08_pickup["pickup"]["player_interaction"]["audio_edge"]
+            ["command_u16"] == "0x0206" and
+        class08_pickup["pickup"]["collection"]["first_absent_frame_u16"] ==
+            3103,
+        "Coffee Shop class-0x08 health-pickup fixture incomplete or drifted")
+    class4b = fixtures["authority_data"]["auxiliary"][
+        "first_segment_dependencies"]["predator_special_type24_effects"][
+            "class_0x4b"]
+    require(
+        class4b["state_0x0200"]["owner_contact_lifetime"].startswith(
+            "player writer 0x01986a clears") and
+        class4b["state_0x0200"]["coffee_shop_wrap_witness"] == {
+            "terminal_record_frame_u16": 2835,
+            "wrapped_record_frame_u16": 2836,
+            "wrapped_animation_record": "0x0008f8e0"},
+        "Coffee Shop class-0x4b contact/wrap fixture incomplete or drifted")
     player_hit = fixtures["authority_data"]["player"][
         "hit_ko_failure_continue_respawn"]["nonlethal_hit"][
             "first_segment_execution_contract"]
+    coffee_hit_program = fixtures["authority_data"]["player"][
+        "hit_ko_failure_continue_respawn"]["nonlethal_hit"][
+            "coffee_shop_reachable_program"]
     require(player_hit["classification"] ==
                 "SOURCE_CLOSED_IMPLEMENTATION_FIELDS" and
             player_hit["spec_executable"] is True and
@@ -1104,12 +1187,25 @@ def validate(contract: dict[str, object], fixtures: dict[str, object],
                 "assembly": "0x001626a4", "timer_u16": 4095,
                 "branch_s16": -0x8000, "hurt_selector_u8": 1,
                 "attack_selector_u8": 0} and
-            player_hit["shake"]["table_s16"] == [2, -2] * 8 and
+            player_hit["shake"]["table_s16"] == [2, -2] * 16 and
             player_hit["phase_0x0204"]["return_visible_frame_u16"] ==
                 2778 and
             player_hit["audio"]["command_u16"] == 0x003b and
             player_hit["rng"] == {"calls": [], "consumption_order": []},
             "first-segment player HIT fixture incomplete or drifted")
+    require(
+        coffee_hit_program["classification"] ==
+            "SOURCE_CLOSED_IMPLEMENTATION_FIELDS" and
+        coffee_hit_program["spec_executable"] is True and
+        len(coffee_hit_program["instances"]) == 5 and
+        [row["hit_kind_u8"] for row in
+         coffee_hit_program["instances"]] == [6, 9, 6, 9, 10] and
+        [row["shake_count_u8"] for row in
+         coffee_hit_program["instances"]] == [10, 20, 10, 20, 10] and
+        [row["motion_index_u8"] for row in
+         coffee_hit_program["instances"]] == [2, 8, 2, 8, 4] and
+        coffee_hit_program["mutation_control"]["mutated_writes_u16"] == 2,
+        "Coffee Shop player HIT program fixture incomplete or drifted")
     activation = fixtures["authority_data"]["route"]["first_entry_body"][
         "route4_player_activation_order"]
     require(activation["classification"] ==
@@ -1233,8 +1329,20 @@ def validate(contract: dict[str, object], fixtures: dict[str, object],
                 "scene_differential_pass": False,
                 "ready": False},
             "Coffee Shop scene manifest incomplete or falsely accepted")
-    child_reuse = fixtures["authority_data"]["player"][
-        "weapon_projectile_resource"]["implementation_contract"][
+    weapon_contract = fixtures["authority_data"]["player"][
+        "weapon_projectile_resource"]["implementation_contract"]
+    child_emitter = weapon_contract["record4_parent_class0"][
+        "child_emitter_state"]
+    require(child_emitter["child_initial_facing_u8"] == 0 and
+            child_emitter["child_facing_rule"] ==
+                "the record-4 allocator clears child facing to zero; parent facing is read only for the row-x sign and is not copied" and
+            [(row["source_slot"], row["variant_u8"], row["facing_u8"],
+              row["parent_facing_u8"]) for row in
+             child_emitter["coffee_shop_collision_child_witnesses"]] == [
+                ("0x00ff8900", 1, 0, 1),
+                ("0x00ff8800", 2, 0, 1)],
+            "record-4 child allocator-cleared facing drift")
+    child_reuse = weapon_contract[
             "record4_child_class4"]["fixed_slot_reuse_presentation"]
     require(child_reuse["classification"] ==
                 "SOURCE_CLOSED_IMPLEMENTATION_FIELDS" and
@@ -1592,6 +1700,22 @@ def validate(contract: dict[str, object], fixtures: dict[str, object],
                 ["timer_rows_u8"]) and
             class1f_actions["action_programs"]["action_0x04"]
                 ["coffee_shop_observation"]["timer_result_u8"] == 6 and
+            class1f_actions["action_programs"]["action_0x04"]
+                ["coffee_shop_observation"]["guard_field_u8"] == 1 and
+            class1f_actions["action_programs"]["action_0x04"]
+                ["phase_0_guard_ownership"]["field"] == "actor+0x6e:u8" and
+            class1f_actions["action_programs"]["action_0x04"]
+                ["phase_0_guard_ownership"]["initial_group_rule"] ==
+                    "phase 0 performs no direct actor+0x6e write; the source selector-registration helper owns the clear before later collision can set it" and
+            class1f_actions["action_programs"]["action_0x04"]
+                ["phase_0_guard_ownership"]["collision_set_captured_pc"] ==
+                    "0x01cbba" and
+            class1f_actions["action_programs"]["action_0x04"]
+                ["phase_0_guard_ownership"]
+                ["selector_rebind_clear_captured_pc"] == "0x01d76e" and
+            class1f_actions["action_programs"]["action_0x04"]
+                ["phase_0_guard_ownership"]["capture_identity"]
+                ["byte_identical"] is True and
             {key: class1f_actions["action_programs"]["action_0x16"]
                 ["latched_retry_transition"][key] for key in (
                     "accepted_source_write_frame_u16",
@@ -1686,15 +1810,17 @@ def validate(contract: dict[str, object], fixtures: dict[str, object],
             inner8["dispatch"]["scheduler_position"] ==
                 "type-12 ascending fixed-pool source slot" and
             list(inner8["route_reachable_action_handlers"]) ==
-                ["0x00", "0x04", "0x06", "0x08", "0x0a", "0x0e", "0x10"] and
-            len(inner8["animation_records"]) == 54 and
+                ["0x00", "0x02", "0x04", "0x06", "0x08", "0x0a",
+                 "0x0c", "0x0e", "0x10"] and
+            len(inner8["animation_records"]) == 120 and
             all("next_animation_record" in row for row in
                 inner8["animation_records"]) and
-            inner8["animation_records"][0]
+            next(row for row in inner8["animation_records"]
+                 if row["animation_record"] == "0x0012d404")
                 ["next_animation_record"] == "0x0012d414" and
             [row["table_index_u8"] for row in
              inner8["movement"]["tables"]] ==
-                [4, 11, 12, 15, 18, 19, 23, 25] and
+                [4, 11, 12, 14, 15, 18, 19, 23, 25, 27] and
             len(inner8["rng_calls"]) == 13 and
             inner8["action_0x0e_motion"]["phase_2_terminal"]
                 ["x_velocity_by_facing_s32_16_16"] == [65536, -65536] and
@@ -1715,16 +1841,124 @@ def validate(contract: dict[str, object], fixtures: dict[str, object],
             len(inner8["observed_path_program"]["source_tables"]
                 ["direction_octant_base_u8"]) == 32 and
             inner8["observed_path_program"]["source_tables"]
-                ["direction_axis_equal_u8"] == [59, 156, 89, 84] and
+                ["direction_axis_equal_u8"] == [4, 12, 28, 20] and
             inner8["observed_path_program"]["source_tables"]
-                ["direction_octant_base_u8"][0] == 220 and
+                ["direction_octant_base_u8"][0] == 0 and
+            inner8["observed_path_program"]["source_tables"]
+                ["wander_target_origin"] == {
+                    "x_s16": "global+0x0278 camera_x",
+                    "z_s16": "global+0x027c camera_z",
+                    "z_offset_s16": 48} and
+            inner8["observed_path_program"]
+                ["wander_group_occupancy_program"]
+                ["Coffee_Shop_coverage"]["select_calls"] == 30 and
+            inner8["observed_path_program"]
+                ["wander_group_occupancy_program"]
+                ["Coffee_Shop_coverage"]["occupancy_writes"] == 56 and
+            inner8["observed_path_program"]
+                ["wander_group_occupancy_program"]
+                ["camera_band_thresholds_u16"] == [96, 192, 288, 384] and
+            inner8["observed_path_program"]
+                ["wander_group_occupancy_program"]
+                ["least_populated_branch"]["classification"] ==
+                    "NOT_REQUIRED_FOR_COFFEE_SHOP" and
+            inner8["observed_path_program"]
+                ["wander_group_occupancy_program"]
+                ["capture_identity"]["byte_identical"] is True and
+            inner8["observed_path_program"]
+                ["wander_group_occupancy_program"]
+                ["mutation_control"]["baseline"]["direction_u8"] == 26 and
+            inner8["observed_path_program"]
+                ["wander_group_occupancy_program"]
+                ["mutation_control"]["mutant"]["direction_u8"] == 27 and
             inner8["observed_path_program"]["action_0x04"]
                 ["captured_terminals"]["frame_3134"] ==
-                "field88 zero, RNG bit set, source table zero, action 0x10" and
+                "field88 zero, RNG bit set, signed timer -1, action 0x10" and
+            inner8["observed_path_program"]["action_0x06"]
+                ["selector_by_style"] == [
+                    {"style85_u8": 0, "selector_u8": 34,
+                     "start_animation_record": "0x0012d590"},
+                    {"style85_u8": 1, "selector_u8": 35,
+                     "start_animation_record": "0x0012d5e4"}] and
+            len(inner8["observed_path_program"]["action_0x06"]
+                ["Coffee_Shop_observed_runs"]) == 11 and
+            inner8["observed_path_program"]["action_0x06"]
+                ["mutation_control"]
+                ["first_discriminating_source_frame"] == 3242 and
+            inner8["observed_path_program"]["action_0x04"]
+                ["timer_selector_program"]
+                ["variant0_bank_by_stage_parameter_u8"][9] == 1 and
+            inner8["observed_path_program"]["action_0x04"]
+                ["timer_selector_program"]
+                ["signed_timer_banks_s8"][1][2] == -1 and
+            inner8["observed_path_program"]["action_0x02"]
+                ["Coffee_Shop_observed_frames"] == 79 and
+            inner8["observed_path_program"]["action_0x02"]
+                ["presentation_binding"]["selector_by_style"] == [
+                    {"style85_u8": 0, "selector_u8": 0,
+                     "start_animation_record": "0x0012e8a8"},
+                    {"style85_u8": 1, "selector_u8": 1,
+                     "start_animation_record": "0x0012e8ec"}] and
+            inner8["observed_path_program"]["action_0x02"]
+                ["presentation_binding"]["movement_on_bind"] is False and
+            len(inner8["observed_path_program"]["action_0x02"]
+                ["Coffee_Shop_observed_runs"]) == 6 and
+            inner8["observed_path_program"]["action_0x02"]
+                ["mutation_control"]["position_unchanged_on_bind"] is True and
+            inner8["movement"]["terrain_tail"]["source_entry"] ==
+                "0x0b1baa" and
+            inner8["movement"]["terrain_tail"]
+                ["Coffee_Shop_reachable_class1f_sync_guard_zero"] is True and
+            inner8["movement"]["terrain_tail"]["mutation_control"]
+                ["proposed_world_z_without_tail_s16"] == 338 and
+            inner8["movement"]["terrain_tail"]["mutation_control"]
+                ["resolved_world_z_s16"] == 327 and
+            inner8["movement"]["terrain_tail"]["mutation_control"]
+                ["omitted_tail_rejected"] is True and
+            inner8["observed_path_program"]["action_0x0c"]
+                ["classification"] ==
+                    "SOURCE_CLOSED_IMPLEMENTATION_FIELDS" and
+            inner8["observed_path_program"]["action_0x0c"]
+                ["Coffee_Shop_observed_actor_frames"] == 236 and
+            inner8["observed_path_program"]["action_0x0c"]
+                ["phase_0"]["variant0_plan_by_rng_index_u16"][15] == 14 and
+            inner8["observed_path_program"]["action_0x0c"]
+                ["phase_0"]["selector_rows"][6]["selector_u8"] == 48 and
+            inner8["observed_path_program"]["action_0x0c"]
+                ["phase_2"]["timer_row_u8"][29] == 14 and
+            inner8["observed_path_program"]["action_0x0c"]
+                ["collision_damage"]["Coffee_Shop_player_damage"]
+                ["damage_s16"] == 15 and
+            inner8["observed_path_program"]["action_0x0c"]
+                ["phase_exclusive_hit_ko_dispatch_guard"]
+                ["Coffee_Shop_negative_control"]["reaction_dispatch"] is False and
+            inner8["observed_path_program"]["action_0x0c"]
+                ["phase_exclusive_hit_ko_dispatch_guard"]
+                ["accepted_reaction_state_pairs"][0] == {
+                    "recovery_kind_u16": 1,
+                    "outer_states_u16": [0x0202]} and
+            inner8["observed_path_program"]["action_0x04"]
+                ["complete_dispatch_contract"]["per_update_proximity_first"]
+                ["helper"] == "0x041db8" and
+            inner8["observed_path_program"]["action_0x04"]
+                ["complete_dispatch_contract"]["clear_tail"]
+                ["Coffee_Shop_control"]["animation_timer_u16"] == 5 and
             inner8["observed_path_program"]["action_0x10"]
                 ["overlap_transition"]["writer"] == "0x04130e" and
+            inner8["observed_path_program"]["action_0x10"]
+                ["initializer"]["x_offset_selector_by_rng_low_nibble_u8"] ==
+                    [0, 0, 2, 2, 2, 2, 2, 2, 2, 4, 4, 4, 4, 4, 4, 4] and
+            inner8["observed_path_program"]["action_0x10"]
+                ["initializer"]["x_offsets_s16"] == [96, 112, 208] and
+            inner8["observed_path_program"]["action_0x10"]
+                ["initializer"]["Coffee_Shop_reachable_phases_u8"] == [0, 6] and
             inner8["observed_path_program"]["action_0x0e"]
                 ["captured_selection"]["motion_selector_96_u16"] == 24 and
+            inner8["action_0x0e_motion"]["phase_4_arithmetic"][3] ==
+                "on landing replace only y_fp high word with z_s16 and preserve the accumulated low 16-bit fraction" and
+            inner8["action_0x0e_motion"]["phase_8_terminal_writes"] == {
+                "source_entry": "0x040e40", "action_u16": 0,
+                "wander_cursor_u8": 0, "field95_u8": 0} and
             inner8["observed_path_program"]
                 ["fixed_frame_or_authored_transition_forbidden"] is True and
             inner8["mutation_control"] == {

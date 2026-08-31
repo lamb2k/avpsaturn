@@ -19,6 +19,8 @@ OUT = ROOT / "data" / "reimplement13_coffee_shop_scene_parity.json"
 SOURCE_ACTORS = (ROOT / ".deps" / "mame" /
                  "oracle11_progression_lifecycle_cs21a" /
                  "coffee_shop_scene_actors.tsv")
+FAILURE_STDOUT = ROOT / ".deps" / "reimplement13_coffee_native_failure.tsv"
+FAILURE_STDERR = ROOT / ".deps" / "reimplement13_coffee_native_failure.stderr"
 
 
 def canonical(value: object) -> bytes:
@@ -57,6 +59,8 @@ def capture() -> tuple[list[dict[str, str]], str]:
              "bash", "-lc", command], check=False, capture_output=True,
              text=True)
         if result.returncode != 0:
+            FAILURE_STDOUT.write_text(result.stdout, encoding="utf-8")
+            FAILURE_STDERR.write_text(result.stderr, encoding="utf-8")
             raise RuntimeError(
                 f"native Coffee Shop census failed ({result.returncode})\n"
                 f"{result.stderr[-8000:]}")
@@ -147,6 +151,7 @@ NATIVE_OWNERS = {
     (4, "0x04"): "player weapon record4 child",
     (12, "0x1f"): "native class-0x1f fixed-pool dispatcher",
     (16, "0x06"): "native class-0x1f type-16 projectile dispatcher",
+    (20, "0x08"): "native class-0x08 source-prop lifecycle",
     (20, "0x09"): "native class-0x09 presentation dispatcher",
     (20, "0x01"): "native class-0x01 scene spawn controller",
     (20, "0x02"): "native class-0x02 damageable scene prop controller",
@@ -160,6 +165,7 @@ NATIVE_OWNERS = {
     (24, "0x4b"): "native Predator special linked presentation dispatcher",
     (24, "0x3d"): "native Predator special event-effect dispatcher",
     (24, "0x4e"): "class-0x4e effect dispatcher",
+    (28, "0x0a"): "native class-0x0a source-pickup lifecycle",
     (32, "0x01"): "AvspRound1Runtime.entry_controller",
     (36, "0x05"): "Coffee Shop obstacle child dispatcher",
 }
@@ -1074,8 +1080,9 @@ def validate_report(report: dict[str, object]) -> None:
                  "animation_record": "0x00030944",
                  "assembly": "0x00030bd6", "animation_timer_u16": 2}],
             "no_source_native_divergence_through_frame_u16": 2372,
-            "next_slot_divergence_frame_u16": 2916}:
-        raise ValueError("Coffee Shop record-4 fixed-slot reuse drift")
+            "next_slot_divergence_frame_u16": 3838}:
+        raise ValueError("Coffee Shop record-4 fixed-slot reuse drift: " +
+                         json.dumps(reuse, sort_keys=True))
     recurring = report["native_capture"]["recurring_spawn_phase_boundary"]
     if recurring["native_checkpoints"] != [
             {"frame_u16": 2510, "rng_seed_u16": "0xd21c",
@@ -1332,10 +1339,11 @@ def validate_report(report: dict[str, object]) -> None:
             "native_animation_advance_frame_u16": 2762,
             "source_native_hit_sequence_equal": True,
             "source_native_hit_sequence_frames": 28,
-            "next_player_divergence_frame_u16": 2805,
+            "next_player_divergence_frame_u16": 3264,
             "authored_delay_forbidden": True,
-            "next_attacker_divergence_frame_u16": 2798}:
-        raise ValueError("Coffee Shop class-0x1f player collision drift")
+            "next_attacker_divergence_frame_u16": 3330}:
+        raise ValueError("Coffee Shop class-0x1f player collision drift: " +
+                         json.dumps(player_collision, sort_keys=True))
     all_zero = all(value == 0 for value in report["gaps"].values())
     if report["acceptance"] != {"all_zero": all_zero, "ready": all_zero}:
         raise ValueError("Coffee Shop scene accepted before the zero-gap gate")
