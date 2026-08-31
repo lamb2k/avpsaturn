@@ -518,6 +518,8 @@ repair11_live_background_presentation:
 source_closure:
   status: ACTIVE
   active_checkpoint: REIMPLEMENT-13-SOURCE-CLOSED-ROUND1
+  workflow_pause: USER_REQUESTED_2026_08_30
+  resume_pointer: docs/AGENT_HANDOFF.md exact next experiment; same branch and persistent Goal; no implementation or evidence work after pre-handoff branch head 529c1241cca00d8828281fb66bcd1984344646de
   prototype_harness_retained: true
   preserved_infrastructure: [rendering, HUD, camera, audio, collision, readback, emulator, visual-QA]
   active_card: REIMPLEMENT-13-SOURCE-CLOSED-ROUND1

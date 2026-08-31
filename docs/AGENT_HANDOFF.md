@@ -1,4 +1,10 @@
 # Active checkpoint
+User-requested pause recorded on 2026-08-30. No implementation, fixture,
+capture, or evidence work was performed after branch head
+`529c1241cca00d8828281fb66bcd1984344646de`; the commit containing this note is
+a documentation-only handoff checkpoint. Resume from that handoff commit on
+the same branch and begin with the exact experiment below.
+
 `project_state.yaml` is machine-readable truth and `docs/PARITY_PLAN.md` is the
 only roadmap. Continue `REIMPLEMENT-13-SOURCE-CLOSED-ROUND1` on
 `codex/avp-playable-loop-pivot`; preserve private evidence and all accepted
@@ -57,7 +63,12 @@ retained census `327 / 1,234 / 2 / 93 / 3 / 281` is not a current WIP
 recapture.
 
 ## Exact next experiment / resume prompt
-Continue REIMPLEMENT-13 under the 2026-08-30 execution plan amendment.
+Continue `REIMPLEMENT-13-SOURCE-CLOSED-ROUND1` on
+`codex/avp-playable-loop-pivot` from the current handoff commit. Read
+`project_state.yaml`, `docs/AGENT_HANDOFF.md`, the active task card, and the
+current SPEC-02 contract/fixtures completely before acting. Preserve the
+user-owned dirty files `data/avsp_anim_records.json` and `history.txt` and all
+accepted locks. Continue under the 2026-08-30 execution plan amendment.
 
 1. Wander origin (unchanged narrow fix). Prove which source-owned
    scheduler-visible values map to `a5+0x278` and `a5+0x27c` in routine
