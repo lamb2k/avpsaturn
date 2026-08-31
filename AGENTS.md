@@ -43,7 +43,7 @@ Only execute the bounded tranche in `docs/NEXT_AGENT_PROMPT.md`. The first tranc
 
 ### Separate implementor task launch policy
 
-When the harness launches a separate implementor task from an `IMPLEMENTOR_INVOCATION`, it must explicitly set model `gpt-5.6-terra` and reasoning effort `xhigh`. For the Codex task launcher, pass `model: "gpt-5.6-terra"`, `thinking: "xhigh"`, and the saved project's local environment; never request an app-created task worktree. The task must operate only in the exact existing implementation worktree named by the invocation. Never omit these fields or rely on the project, app, or account default. This policy applies only to the separate write-enabled implementor task. Supervisor and review tasks retain their own configured reasoning levels.
+When the harness launches a separate implementor task from an `IMPLEMENTOR_INVOCATION`, it must explicitly set model `gpt-5.6-sol` and reasoning effort `medium`. For the Codex task launcher, pass `model: "gpt-5.6-sol"`, `thinking: "medium"`, and the saved project's local environment; never request an app-created task worktree. The task must operate only in the exact existing implementation worktree named by the invocation. Never omit these fields or rely on the project, app, or account default. This policy applies only to the separate write-enabled implementor task. Supervisor and review tasks retain their own configured reasoning levels.
 
 ### Mandatory same-worktree task loop
 
@@ -58,7 +58,7 @@ the next dispatch before it returns:
 - After review, if the continuation contract requires more work, fork a new
   task with the same-directory environment. Send the complete selected
   `IMPLEMENTOR_INVOCATION` as that child task's first active prompt with model
-  `gpt-5.6-terra` and reasoning `xhigh`.
+  `gpt-5.6-sol` and reasoning `medium`.
 - Never rely on an inherited/default model. Never create an app-managed
   worktree for either relay. The invocation controls the Git branch/worktree
   contract inside the existing tranche directory.
@@ -180,7 +180,7 @@ After completing the disposition and next `IMPLEMENTOR_INVOCATION`, the
 supervisor must immediately launch that complete invocation in a separate
 Codex task by forking the current task with the same-directory environment.
 Send the invocation as the child task's first active prompt using model
-`gpt-5.6-terra` with reasoning `xhigh`, preserve the exact existing
+`gpt-5.6-sol` with reasoning `medium`, preserve the exact existing
 base/branch/worktree contract, and report the created task identifier or app
 directive. The launcher must not create a task worktree. Merely printing an
 invocation without dispatching it is an incomplete review handoff.
