@@ -21,7 +21,7 @@ only when the active task card explicitly permits it. The task card fixes the
 scope, owned paths, checks, exclusions, hard stops, and next eligible cards.
 
 Interactive implementation sessions for this line run on Codex `gpt-5.6-sol`
-at `medium` reasoning (owner decision, 2026-08-30). Do not escalate the model
+at `high` reasoning (owner decision, 2026-08-30). Do not change the model
 or reasoning tier without new owner authority.
 
 While a physical card is stopped at `READY_FOR_PHYSICAL`, Goal Mode may run

@@ -303,7 +303,7 @@ fixture; full ceremony (mutations, Target, pinned scene capture, complete
 census, paired Emulator/WGC) runs once per body; and checkpoint evidence is
 recorded once in the task card with pointers elsewhere. Evidence standards and
 the QA-13/USER-10 gates are unchanged. Interactive implementation runs on
-Codex `gpt-5.6-sol` at `medium` reasoning. The authoritative amendment text is
+Codex `gpt-5.6-sol` at `high` reasoning. The authoritative amendment text is
 owned by `docs/task_cards/REIMPLEMENT-13-SOURCE-CLOSED-ROUND1.md`.
 
 | Sequence | Card or card family | Result |
