@@ -2077,6 +2077,12 @@ def validate(contract: dict[str, object], fixtures: dict[str, object],
                 ["phase_0"]["selector_rows"][6]["selector_u8"] == 48 and
             inner8["observed_path_program"]["action_0x0c"]
                 ["phase_2"]["timer_row_u8"][29] == 14 and
+            len(inner8["observed_path_program"]["action_0x0c"]
+                ["phase_2"]["timer_rows_u8"]) == 5 and
+            inner8["observed_path_program"]["action_0x0c"]
+                ["phase_2"]["timer_rows_u8"][1][29] == 14 and
+            inner8["observed_path_program"]["action_0x0c"]
+                ["phase_2"]["fixed_observed_stage_guard_forbidden"] is True and
             inner8["observed_path_program"]["action_0x0c"]
                 ["collision_damage"]["Coffee_Shop_player_damage"]
                 ["damage_s16"] == 15 and

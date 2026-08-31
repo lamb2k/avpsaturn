@@ -451,8 +451,15 @@ def class1f_inner8_action_contract(program: bytes,
         action0c_record_addresses.update(
             int(row["animation_record"], 16) for row in sequence["records"])
     action0c_timer_stage_offsets = list(program[0x0BC53A:0x0BC55A])
-    action0c_timer_row = list(program[0x0BC57A:0x0BC59A])
+    action0c_timer_rows = [
+        list(program[address:address + 32])
+        for address in range(0x0BC55A, 0x0BC5FA, 32)
+    ]
+    action0c_timer_row = action0c_timer_rows[1]
     require(action0c_timer_stage_offsets[9] == 32 and
+            action0c_timer_stage_offsets[11] == 32 and
+            len(action0c_timer_rows) == 5 and
+            all(len(row) == 32 for row in action0c_timer_rows) and
             action0c_timer_row == [
                 6, 6, 6, 6, 6, 6, 6, 6,
                 7, 7, 7, 7, 8, 8, 8, 8,
@@ -1222,8 +1229,11 @@ def class1f_inner8_action_contract(program: bytes,
                     ],
                     "Coffee_Shop_stage_parameter_u16": 9,
                     "stage_offsets_u8": action0c_timer_stage_offsets,
+                    "timer_rows_u8": action0c_timer_rows,
                     "timer_row_u8": action0c_timer_row,
                     "Coffee_Shop_terminal_results_u8": [11, 14, 6],
+                    "implementation_rule": "index the complete five-row source table at 0x0bc55a by stage_offsets_u8[stage_parameter_u16] before applying result_u16 & 31",
+                    "fixed_observed_stage_guard_forbidden": True,
                 },
                 "phase_4": {
                     "order": [
@@ -4221,6 +4231,12 @@ def validate(report: dict[str, object]) -> None:
                             48 and
                     inner8["observed_path_program"]["action_0x0c"]
                         ["phase_2"]["timer_row_u8"][29] == 14 and
+                    len(inner8["observed_path_program"]["action_0x0c"]
+                        ["phase_2"]["timer_rows_u8"]) == 5 and
+                    inner8["observed_path_program"]["action_0x0c"]
+                        ["phase_2"]["timer_rows_u8"][1][29] == 14 and
+                    inner8["observed_path_program"]["action_0x0c"]
+                        ["phase_2"]["fixed_observed_stage_guard_forbidden"] is True and
                     inner8["observed_path_program"]["action_0x0c"]
                         ["collision_damage"]["Coffee_Shop_player_damage"]
                         ["damage_s16"] == 15 and

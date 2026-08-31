@@ -4280,7 +4280,7 @@ int main(void)
                         }
                     }
                     fprintf(stderr,
-                        "Coffee Shop scheduler failure source=%u code=%u slot=%04x state=%04x substate=%04x record=%08lx frame=%lu action_timer=%u animation_timer=%u branch=%d motion4=%d recovery=%d guard=%u style=%u stage=%u progress=%u stage_calls=%lu stage_carries=%lu weapon_entries=%lu rng=%04x\n",
+                        "Coffee Shop scheduler failure source=%u code=%u slot=%04x state=%04x substate=%04x record=%08lx frame=%lu action_timer=%u animation_timer=%u branch=%d plan=%d cursor=%d selector=%d selector_phase=%d field95=%u guard=%u style=%u audio=%04x/%lu action0c=%lu/%lu/%lu stage=%u progress=%u stage_calls=%lu stage_carries=%lu weapon_entries=%lu rng=%04x\n",
                         source_frame,
                         scene_runtime.scheduler_failure_code,
                         scene_runtime.scheduler_failure_source_slot,
@@ -4293,12 +4293,23 @@ int main(void)
                         failed_actor != 0 ? failed_actor->animation_timer : 0u,
                         failed_actor != 0 ? failed_actor->animation_branch : 0,
                         failed_actor != 0 ?
-                            failed_actor->source_motion_fields[4] : 0,
+                            failed_actor->source_action0c_plan : 0,
                         failed_actor != 0 ?
-                            failed_actor->source_hit_recovery_active : 0,
+                            failed_actor->source_action0c_cursor : 0,
+                        failed_actor != 0 ?
+                            failed_actor->source_action0c_selector : 0,
+                        failed_actor != 0 ?
+                            failed_actor->source_action0c_selector_phase : 0,
+                        failed_actor != 0 ?
+                            failed_actor->source_action0c_field95 : 0u,
                         failed_actor != 0 ?
                             failed_actor->source_player_guard : 0u,
                         failed_actor != 0 ? failed_actor->source_style85 : 0u,
+                        scene_runtime.class1f_audio_command,
+                        scene_runtime.class1f_audio_events,
+                        scene_runtime.class1f_action0c_entries,
+                        scene_runtime.class1f_action0c_plan_bindings,
+                        scene_runtime.class1f_action0c_timer_rng_calls,
                         scene_runtime.source_stage_parameter,
                         scene_runtime.source_stage_progress_accumulator,
                         scene_runtime.player_stage_progress_calls,

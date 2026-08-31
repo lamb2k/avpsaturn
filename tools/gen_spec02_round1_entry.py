@@ -791,6 +791,13 @@ def build() -> str:
         class1f_inner8_action0c_phase0["selector_rows"][6]
             ["selector_u8"] != 48 or
         class1f_inner8_action0c_phase2["timer_row_u8"][29] != 14 or
+        len(class1f_inner8_action0c_phase2["timer_rows_u8"]) != 5 or
+        any(len(row) != 32 for row in
+            class1f_inner8_action0c_phase2["timer_rows_u8"]) or
+        class1f_inner8_action0c_phase2["timer_rows_u8"][1][29] != 14 or
+        class1f_inner8_action0c_phase2["stage_offsets_u8"][11] != 32 or
+        class1f_inner8_action0c_phase2[
+            "fixed_observed_stage_guard_forbidden"] is not True or
         class1f_inner8_action0c["collision_damage"]
             ["Coffee_Shop_player_damage"]["damage_s16"] != 15 or
         class1f_inner8_action0c["phase_exclusive_hit_ko_dispatch_guard"]
@@ -2508,8 +2515,13 @@ def build() -> str:
             class1f_inner8_action0c_phase0["selector_rows"]) + " },",
         "    { " + ", ".join(f"{value}u" for value in
             class1f_inner8_action0c_phase2["stage_offsets_u8"]) + " },",
-        "    { " + ", ".join(f"{value}u" for value in
-            class1f_inner8_action0c_phase2["timer_row_u8"]) + " },",
+        "    {",
+    ])
+    for row in class1f_inner8_action0c_phase2["timer_rows_u8"]:
+        lines.append("        { " + ", ".join(
+            f"{value}u" for value in row) + " },")
+    lines.extend([
+        "    },",
         "    %du," % class1f_inner8_action0c_phase2[
             "Coffee_Shop_stage_parameter_u16"],
         "    { " + ", ".join(

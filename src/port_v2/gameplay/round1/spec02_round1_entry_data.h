@@ -1,8 +1,8 @@
 #ifndef AVSP_SPEC02_ROUND1_ENTRY_DATA_H
 #define AVSP_SPEC02_ROUND1_ENTRY_DATA_H
 
-/* contract_sha256=4f593a2628eb35042d995addb633d1bb88cfc74226c1cd894ebea2efa1b57f36 */
-/* fixtures_sha256=4e4b3706666430fe2caacaeaadfcba3f31c76463f46f5fa1d948c3a44d72e616 */
+/* contract_sha256=790da00bd00deacf085fef6426cea606587355b3f828fbdbf72cd753f059840a */
+/* fixtures_sha256=42ec4f39a49a565c958924866ebac8d03f365ae283f499ee06d660ab03f1045e */
 #define AVSP_ROUND1_ENTRY_PROGRAM_SHA256 "e5ef761fadc1b5a7df62e77c03025c0ebff0c2503cbc8be9c0077d4bd6cd24ba"
 
 static const unsigned char avsp_round1_entry_program[AVSP_ROUND1_ENTRY_PROGRAM_BYTES] =
@@ -858,7 +858,13 @@ static const AvspRound1Class1fInner8ProgramSpec avsp_round1_class1f_inner8_progr
     { 43u, 55u, 44u, 56u, 45u, 57u, 48u, 58u },
     { 0x0012d890UL, 0x0012da70UL, 0x0012d8f4UL, 0x0012dad4UL, 0x0012d958UL, 0x0012db38UL, 0x0012d9dcUL, 0x0012dbbcUL },
     { 0u, 0u, 0u, 0u, 0u, 32u, 32u, 32u, 32u, 32u, 32u, 32u, 32u, 64u, 64u, 64u, 64u, 64u, 64u, 96u, 96u, 96u, 96u, 96u, 128u, 128u, 128u, 128u, 128u, 128u, 128u, 128u },
-    { 6u, 6u, 6u, 6u, 6u, 6u, 6u, 6u, 7u, 7u, 7u, 7u, 8u, 8u, 8u, 8u, 9u, 9u, 9u, 9u, 10u, 10u, 10u, 10u, 11u, 11u, 11u, 11u, 12u, 14u, 16u, 18u },
+    {
+        { 8u, 8u, 8u, 8u, 10u, 10u, 10u, 10u, 12u, 12u, 12u, 12u, 16u, 16u, 16u, 16u, 17u, 18u, 19u, 20u, 21u, 22u, 23u, 24u, 25u, 26u, 27u, 28u, 29u, 30u, 31u, 32u },
+        { 6u, 6u, 6u, 6u, 6u, 6u, 6u, 6u, 7u, 7u, 7u, 7u, 8u, 8u, 8u, 8u, 9u, 9u, 9u, 9u, 10u, 10u, 10u, 10u, 11u, 11u, 11u, 11u, 12u, 14u, 16u, 18u },
+        { 1u, 1u, 1u, 1u, 1u, 1u, 1u, 1u, 1u, 2u, 2u, 2u, 2u, 2u, 2u, 2u, 3u, 3u, 3u, 3u, 3u, 3u, 3u, 3u, 4u, 4u, 4u, 4u, 6u, 8u, 10u, 16u },
+        { 1u, 1u, 1u, 1u, 1u, 1u, 1u, 1u, 1u, 1u, 1u, 1u, 1u, 1u, 1u, 1u, 2u, 2u, 2u, 2u, 2u, 2u, 2u, 2u, 2u, 2u, 4u, 4u, 4u, 6u, 8u, 12u },
+        { 1u, 1u, 1u, 1u, 1u, 1u, 1u, 1u, 1u, 1u, 1u, 1u, 1u, 1u, 1u, 1u, 1u, 1u, 1u, 1u, 1u, 1u, 1u, 1u, 1u, 1u, 2u, 2u, 2u, 3u, 5u, 8u },
+    },
     9u,
     { 0xA000u, 0x9E80u, 0x9DC0u },
     { 0x0035u, 0x0035u, 0x0100u }

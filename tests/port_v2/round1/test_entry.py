@@ -9,7 +9,7 @@ from pathlib import Path
 
 ROOT = Path(__file__).resolve().parents[3]
 SPEC = ROOT / "data/spec02_round1_executable_contract.json"
-EXPECTED = "4f593a2628eb35042d995addb633d1bb88cfc74226c1cd894ebea2efa1b57f36"
+EXPECTED = "790da00bd00deacf085fef6426cea606587355b3f828fbdbf72cd753f059840a"
 assert hashlib.sha256(SPEC.read_bytes()).hexdigest() == EXPECTED
 assert json.loads(SPEC.read_text())["status"] == "ACCEPTED"
 source = (ROOT / "src/port_v2/gameplay/round1/round1.c").read_text()
@@ -78,6 +78,7 @@ def run(body, header_body, passes, label="baseline", player_body=player_source,
 run(source, header, True,
     expected_returncode=(117 if "--weapon-timing-only" in sys.argv else
                          94 if "--controller-edge-only" in sys.argv else
+                         123 if "--action0c-only" in sys.argv else
                          None))
 if "--baseline-only" in sys.argv:
     print("REIMPLEMENT-13 focused baseline: PASS")
@@ -94,7 +95,7 @@ assert queue_before in player_source
 subset_flags = {"--inner8-only", "--ko-only", "--registration-only",
                 "--locomotion-only", "--generated-walk-only",
                 "--controller-edge-only", "--player-hit-only",
-                "--weapon-timing-only"}
+                "--weapon-timing-only", "--action0c-only"}
 if "--queue-only" in sys.argv or not subset_flags.intersection(sys.argv):
     run(source, header, False, "consume-before-direction-queue-shift",
         player_source.replace(queue_before, queue_after, 1))
@@ -143,7 +144,17 @@ weapon_timing_mutations = {
     "runtime->player_weapon_tick ==\n"
     "                avsp_round1_player_weapon.parent_allocation_tick",
 }
+action0c_mutations = {
+    "    if (stage >= AVSP_ROUND1_CLASS1F_ACTION4_STAGE_COUNT)\n"
+    "        return 0u;",
+}
 for before, after in (
+    ("    if (stage >= AVSP_ROUND1_CLASS1F_ACTION4_STAGE_COUNT)\n"
+     "        return 0u;",
+     "    if (stage >= AVSP_ROUND1_CLASS1F_ACTION4_STAGE_COUNT ||\n"
+     "        stage != avsp_round1_class1f_inner8_program.\n"
+     "            action0c_observed_stage_parameter)\n"
+     "        return 0u;"),
     ("            *value = runtime->camera_x_previous;",
      "            *value = runtime->camera_x_position;"),
     ("            --actor->source_action_timer;\n"
@@ -494,11 +505,14 @@ for before, after in (
         continue
     if "--weapon-timing-only" in sys.argv and before not in weapon_timing_mutations:
         continue
+    if "--action0c-only" in sys.argv and before not in action0c_mutations:
+        continue
     if "--generated-walk-only" in sys.argv:
         continue
     assert before in source, before
     run(source.replace(before, after), header, False, before,
         expected_returncode=(27 if "--weapon-timing-only" in sys.argv
+                             else 94 if "--action0c-only" in sys.argv
                              else None))
 if "--inner8-only" in sys.argv:
     print("REIMPLEMENT-13 class-0x1f inner-state mutation lane: PASS (8 real mutations)")
@@ -520,6 +534,9 @@ if "--player-hit-only" in sys.argv:
     raise SystemExit(0)
 if "--weapon-timing-only" in sys.argv:
     print("REIMPLEMENT-13 Button1 parent-allocation timing mutation lane: PASS (1 real mutation)")
+    raise SystemExit(0)
+if "--action0c-only" in sys.argv:
+    print("REIMPLEMENT-13 class-0x1f action-0x0c timer-row mutation lane: PASS (1 real mutation)")
     raise SystemExit(0)
 generated_walk_mutations = {
     "    { 4u, 0, 0x0015F208UL, 0x00160A02UL, 17u, 0u },",

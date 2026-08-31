@@ -6,7 +6,7 @@
 #include "../../combat/hit_ko/hit_ko.h"
 
 #define AVSP_ROUND1_SPEC02_SHA256 \
-"4f593a2628eb35042d995addb633d1bb88cfc74226c1cd894ebea2efa1b57f36"
+"790da00bd00deacf085fef6426cea606587355b3f828fbdbf72cd753f059840a"
 #define AVSP_ROUND1_CANARY_HEAD 0x52314548UL
 #define AVSP_ROUND1_CANARY_TAIL 0x52314554UL
 #define AVSP_ROUND1_ROUTE_ENTRY_STATE 2
@@ -745,8 +745,10 @@ typedef struct
     unsigned char action0c_selector_by_field96[8];
     unsigned long action0c_record_by_field96[8];
     unsigned char action0c_timer_stage_offsets[32];
-    unsigned char action0c_timer_row[32];
-    unsigned char action0c_stage_parameter;
+    unsigned char action0c_timer_rows[
+        AVSP_ROUND1_CLASS1F_ACTION4_TIMER_ROW_COUNT]
+        [AVSP_ROUND1_CLASS1F_ACTION4_STAGE_COUNT];
+    unsigned char action0c_observed_stage_parameter;
     unsigned short action0c_audio_slots[3];
     unsigned short action0c_audio_commands[3];
 } AvspRound1Class1fInner8ProgramSpec;

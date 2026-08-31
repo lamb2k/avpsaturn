@@ -2662,16 +2662,22 @@ static unsigned char avsp_round1_class1f_inner8_action0c_timer(
 {
     unsigned short stage = runtime->source_stage_parameter;
     unsigned char random;
-    if (stage >= 32u ||
-        stage != avsp_round1_class1f_inner8_program.
-            action0c_stage_parameter ||
-        avsp_round1_class1f_inner8_program.
-            action0c_timer_stage_offsets[stage] != 32u)
+    unsigned char offset;
+    unsigned char row;
+    if (stage >= AVSP_ROUND1_CLASS1F_ACTION4_STAGE_COUNT)
+        return 0u;
+    offset = avsp_round1_class1f_inner8_program.
+        action0c_timer_stage_offsets[stage];
+    if ((offset % AVSP_ROUND1_CLASS1F_ACTION4_STAGE_COUNT) != 0u)
+        return 0u;
+    row = (unsigned char)(offset /
+        AVSP_ROUND1_CLASS1F_ACTION4_STAGE_COUNT);
+    if (row >= AVSP_ROUND1_CLASS1F_ACTION4_TIMER_ROW_COUNT)
         return 0u;
     random = avsp_round1_source_rng(runtime);
     ++runtime->class1f_action0c_timer_rng_calls;
     return avsp_round1_class1f_inner8_program.
-        action0c_timer_row[random & 0x1fu];
+        action0c_timer_rows[row][random & 0x1fu];
 }
 
 static int avsp_round1_class1f_inner8_action0c_begin(

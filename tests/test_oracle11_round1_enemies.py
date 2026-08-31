@@ -135,6 +135,8 @@ for label,mutate in [
     ('inner8-action0c-plan',lambda x:x['observed_path_program']['action_0x0c']['phase_0']['variant0_plan_by_rng_index_u16'].__setitem__(15,6)),
     ('inner8-action0c-selector',lambda x:x['observed_path_program']['action_0x0c']['phase_0']['selector_rows'][6].__setitem__('selector_u8',47)),
     ('inner8-action0c-timer',lambda x:x['observed_path_program']['action_0x0c']['phase_2']['timer_row_u8'].__setitem__(29,13)),
+    ('inner8-action0c-complete-timer-rows',lambda x:x['observed_path_program']['action_0x0c']['phase_2']['timer_rows_u8'][1].__setitem__(29,13)),
+    ('inner8-action0c-fixed-stage-guard',lambda x:x['observed_path_program']['action_0x0c']['phase_2'].__setitem__('fixed_observed_stage_guard_forbidden',False)),
     ('inner8-action0c-damage',lambda x:x['observed_path_program']['action_0x0c']['collision_damage']['Coffee_Shop_player_damage'].__setitem__('damage_s16',14)),
     ('inner8-action0c-reaction-state-guard',lambda x:x['observed_path_program']['action_0x0c']['phase_exclusive_hit_ko_dispatch_guard']['Coffee_Shop_negative_control'].__setitem__('reaction_dispatch',True)),
     ('inner8-action0c-reaction-kind-state-pair',lambda x:x['observed_path_program']['action_0x0c']['phase_exclusive_hit_ko_dispatch_guard']['accepted_reaction_state_pairs'][0]['outer_states_u16'].__setitem__(0,0x0208)),

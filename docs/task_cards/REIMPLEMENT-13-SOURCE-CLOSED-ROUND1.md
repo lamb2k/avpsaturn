@@ -1780,5 +1780,36 @@ census, and WGC remain deferred at this intentional RED next-program boundary.
 
 ## Next eligible cards
 
+### Paused class-0x1F action-0x0C timer-table checkpoint (2026-08-31)
+
+The Coffee Shop-reachable class-`0x1f` inner-state-`0x08`, action-`0x0c`
+timer-selection boundary is now executable through the existing Oracle,
+SPEC-02, generated-header, native-table, and mutation pipeline. The prior
+native fixed-stage-9 guard is rejected. Accepted decrypted program bytes bind
+the complete five-row by 32-column timer table at `0x0bc55a..0x0bc5fa` and
+the stage-offset selector at `0x0bc53a..0x0bc55a`; stage 11 selects row 1,
+consumes one source RNG value, and indexes it by `rng & 31`.
+
+The focused action-`0x0c` lane passes one discriminating fixed-stage mutation,
+Oracle enemy validation passes 104 mutations, SPEC-02 passes 167 mutations,
+and the generated header is current. Contract SHA is
+`790da00bd00deacf085fef6426cea606587355b3f828fbdbf72cd753f059840a`;
+fixture SHA is
+`42ec4f39a49a565c958924866ebac8d03f365ae283f499ee06d660ab03f1045e`.
+Target `LiveEncounterBench` BUILD_ONLY passes; ISO SHA is
+`0bc362062eea3cc4c7b2e15ceee0a7c1b9c04b5123956a9cc3192b6c445862f1`.
+The combat overlay remains byte-identical at 126 tiles/16712 bytes with SHA
+`171f0dfa25d8a1fe94d2889f89c78e71bd3b1cfffa9fd5ff11964b1fc23815fe`.
+
+The full host differential advances past the old return-94/frame-3827 boundary
+to intentional return 123 at source frame 4052. Source player slot
+`0x00ff8380` enters HIT state `0x0202` at frame 4007, returns to outer state
+`0x0200`/substate `0x0e00` at frame 4032, and accepts Button1 into substate
+`0x0c00` at frame 4052. Native remains in source action/state `0x0202` and is
+one stage-progress call behind. The next owning body is the complete Predator
+Warrior HIT/return-to-control/action-entry program. Paired Emulator, complete
+scene census, and WGC remain deferred at this intentional next-program
+boundary.
+
 - `QA-13-ROUND1-END-TO-END-DIFFERENTIAL` after the complete stable Round 2
   handoff candidate is committed and frozen.
