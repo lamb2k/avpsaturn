@@ -20,6 +20,10 @@ not used for ordinary implementation. Claude is an optional bounded provider
 only when the active task card explicitly permits it. The task card fixes the
 scope, owned paths, checks, exclusions, hard stops, and next eligible cards.
 
+Interactive implementation sessions for this line run on Codex `gpt-5.6-sol`
+at `medium` reasoning (owner decision, 2026-08-30). Do not escalate the model
+or reasoning tier without new owner authority.
+
 While a physical card is stopped at `READY_FOR_PHYSICAL`, Goal Mode may run
 only a predeclared `independent_read_only_cards` Oracle body. Exactly one
 Oracle writer may operate at a time. It may write only card-scoped source

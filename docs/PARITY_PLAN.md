@@ -292,6 +292,20 @@ high-water is 242/255.
 Enemy movement, damage, dynamic spawn, and the preserved first-segment blockers
 remain pending; frame 2328 is not gameplay authority.
 
+An owner-approved execution plan amendment (2026-08-30) governs the remainder
+of REIMPLEMENT-13: bodies are whole routine programs, actor-class families, or
+segments rather than single observed branches; the remaining SPEC-02
+executable semantics are completed in batches per actor class from the
+decrypted opcode image validated against the existing byte-identical ledgers,
+with new bounded Oracle captures only where those ledgers cannot witness the
+behavior; a scheduler-visible `a5`-relative globals table becomes a SPEC-02
+fixture; full ceremony (mutations, Target, pinned scene capture, complete
+census, paired Emulator/WGC) runs once per body; and checkpoint evidence is
+recorded once in the task card with pointers elsewhere. Evidence standards and
+the QA-13/USER-10 gates are unchanged. Interactive implementation runs on
+Codex `gpt-5.6-sol` at `medium` reasoning. The authoritative amendment text is
+owned by `docs/task_cards/REIMPLEMENT-13-SOURCE-CLOSED-ROUND1.md`.
+
 | Sequence | Card or card family | Result |
 |---:|---|---|
 | 1 | `INTEGRATE-01-PLAYER-AND-ENEMY` | Accepted player/enemy co-residency and ordering |

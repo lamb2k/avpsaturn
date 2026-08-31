@@ -4,8 +4,9 @@ only roadmap. Continue `REIMPLEMENT-13-SOURCE-CLOSED-ROUND1` on
 `codex/avp-playable-loop-pivot`; preserve private evidence and all accepted
 locks. The latest fully accepted candidate remains
 `d04a65a2253175c6e820140feefc35419e2cca07` until the complete Coffee Shop
-zero-gap gate passes. The current branch head is a deliberate WIP evidence
-checkpoint and is not a candidate promotion.
+zero-gap gate passes. Commit `efcfebcec559c1827998698d47234d2b00552f91` is a
+deliberate WIP evidence checkpoint, not a candidate promotion; commits after
+it on this branch are documentation and plan-amendment only.
 
 ## Preserved authority and workflow
 - ORACLE-11/SPEC-02 remain accepted: 1,517 writers and zero gaps in the sole
@@ -22,62 +23,76 @@ checkpoint and is not a candidate promotion.
   `git add -A`, stage `data/avsp_anim_records.json`, or touch untracked
   `history.txt`.
 
-## Paused WIP program checkpoint
-This checkpoint fixes the phase-exclusive HIT/KO scratch alias and partially
-closes the complete class-`0x1f` inner-8 action-`0x04` dispatcher:
+## Execution plan amendment (2026-08-30)
+An owner-approved amendment governs the remainder of REIMPLEMENT-13: bodies
+are whole routine programs, actor-class families, or segments; remaining
+SPEC-02 executable semantics are completed in batches per actor class from the
+decrypted opcode image validated against the existing byte-identical ledgers;
+a scheduler-visible `a5`-relative globals table becomes a SPEC-02 fixture;
+full ceremony runs once per body; checkpoint evidence is recorded once in the
+task card. Evidence standards are unchanged. The authoritative amendment text
+is in `docs/task_cards/REIMPLEMENT-13-SOURCE-CLOSED-ROUND1.md` under
+"Execution plan amendment (2026-08-30)". Interactive implementation runs on
+Codex `gpt-5.6-sol` at `medium` reasoning (owner decision, 2026-08-30).
 
-- `source_motion_fields[4]` is recognized as shared storage for HIT recovery
-  and the action-`0x0c` plan. HIT recovery is active only for the accepted exact
-  reaction kind/state pairs; a nonzero action plan alone no longer fabricates a
-  HIT reaction. Oracle/SPEC include the negative control.
-- The action-`0x04` program now performs the every-update player-proximity
-  check first, applies the exact final action-2 guard arithmetic, clears the
-  action, and steps the movement helper once in the same scheduler visit.
-- This makes source/native frame 3524 slot `0x00ffa3c0` agree on animation
-  record `0x0012d4f8` and timer 5. RNG state remains exact through frame 3525.
-- The Coffee Shop terrain fixture/runtime now contains the complete 4096-entry
-  selector map, selectors 4 and 20, exact branch-0/branch-2 arithmetic, and the
-  mandatory class-`0x1f` movement tail call.
-
-The program and scene are **not accepted**. The earliest causal scene
-divergence is frame 3525, slot `0x00ffa3c0`: source binds record
-`0x0012d488`, while native binds `0x0012d50c` and moves on the wrong direction
-result. Source routine `0x041c36` computes the wander target from source global
-fields at `a5+0x278` and `a5+0x27c` plus actor offsets. At frame 3524 the source
-values are `camera_x=895`, `camera_z=256`, offsets `+144/+48`; the current native
-mapping uses a different origin. This is not an RNG or action-selection gap.
-
-The focused evidence state at pause is:
-
-- Oracle enemy analyzer: PASS.
-- Oracle enemy tests: PASS, including 104 mutations.
-- SPEC-02 build/generation/tests: PASS, including 156 mutations.
-- SPEC contract SHA-256:
-  `43e16c1e3d6a233f7a86703aa68e546e4a2b3be69b5ce7d6f264f9b5b587c288`.
-- Generated fixture SHA-256:
-  `dd9126f34d9e4ee141239eee907a1405d8561da2cb1d7ebadf66e53a08e8fecd`.
-- Full host entry lane: FAIL at frame 1757, code 15, slot
-  `0x00ffa000`, state/substate `0x0208:0x0c04`, record `0x0012d8e0`.
-- Full scene capture: FAIL at native frame 3653, code 29. Treat this as
-  downstream until the earlier frame-3525 divergence is corrected.
-- Target, Emulator, and WGC were not run because the focused host/scene gate is
-  red. The last completed census remains `327 / 1,234 / 2 / 93 / 3 / 281` for
-  actor lifetimes, spawn/despawn, active states, collision/damage,
-  route/camera, and audio/load; it is not a current WIP recapture.
+## Paused WIP program checkpoint (summary)
+Full evidence lives in the task card's "Paused WIP evidence checkpoint"
+section. Key facts: the WIP fixes the phase-exclusive HIT/KO scratch alias and
+partially closes the class-`0x1f` inner-8 action-`0x04` dispatcher; source and
+native agree at frame 3524 slot `0x00ffa3c0` (record `0x0012d4f8`, timer 5)
+with exact RNG through frame 3525. The earliest causal scene divergence is
+frame 3525 at that slot: source binds record `0x0012d488`, native binds
+`0x0012d50c`, because the native wander helper has not bound the source
+`0x041c36` scheduler-visible target origin `a5+0x278`/`a5+0x27c` (source frame
+3524 sees `camera_x=895`, `camera_z=256`). Oracle enemy analysis (104
+mutations) and SPEC-02 build/generation/tests (156 mutations) pass; SPEC
+contract SHA-256
+`43e16c1e3d6a233f7a86703aa68e546e4a2b3be69b5ce7d6f264f9b5b587c288`; fixture
+SHA-256
+`dd9126f34d9e4ee141239eee907a1405d8561da2cb1d7ebadf66e53a08e8fecd`. Red
+lanes: full host entry lane FAIL at frame 1757, code 15, slot `0x00ffa000`,
+state/substate `0x0208:0x0c04`; full scene capture FAIL at native frame 3653,
+code 29. Target, Emulator, and WGC were not run at this red boundary. The
+retained census `327 / 1,234 / 2 / 93 / 3 / 281` is not a current WIP
+recapture.
 
 ## Exact next experiment / resume prompt
-Continue REIMPLEMENT-13 without changing the workflow. Resolve only the
-earliest frame-3525 class-`0x1f` divergence by binding the source `0x041c36`
-wander-target origin. Prove which source-owned scheduler-visible values map to
-`a5+0x278` and `a5+0x27c`, including why source frame 3524 uses
-`camera_x=895` and `camera_z=256` while native computes a different direction.
-Preserve the exact RNG prefix, the action-`0x04` dispatcher, the terrain tail,
-and the accepted render-camera behavior. Use accepted `cs50a/cs50b` evidence
-and SPEC-02 first; run only the smallest bounded Oracle follow-up if the mapping
-is genuinely absent. Add a mutation that rejects using the wrong current versus
-scheduler-visible origin, then run the focused host differential, relevant
-mutations, fixture validation, and Target. After the complete source program is
-green, run one pinned scene capture and focused visual inspection, then rerun
-the complete Coffee Shop census and reselect the earliest causal divergence.
-Do not add a frame/slot exception, change the input route, fit the renderer, or
-work on the downstream frame-3653 collision/action-`0x0c` failures first.
+Continue REIMPLEMENT-13 under the 2026-08-30 execution plan amendment.
+
+1. Wander origin (unchanged narrow fix). Prove which source-owned
+   scheduler-visible values map to `a5+0x278` and `a5+0x27c` in routine
+   `0x041c36`, including why source frame 3524 uses `camera_x=895` and
+   `camera_z=256`, and bind the native wander helper to that origin. Use
+   accepted `cs50a/cs50b` evidence and SPEC-02 first; run the smallest bounded
+   Oracle follow-up only if the mapping is genuinely absent. Add a mutation
+   rejecting current-versus-scheduler-visible origin confusion and confirm
+   frame 3525 slot `0x00ffa3c0` binds record `0x0012d488`. Preserve the exact
+   RNG prefix, the action-`0x04` dispatcher, the terrain tail, and the
+   accepted render-camera behavior.
+2. Classify frame 1757 before advancing past it. Rerun the full host entry
+   lane. If frame 1757 (code 15, slot `0x00ffa000`, `0x0208:0x0c04`) clears,
+   record that it shared the wander-origin root cause. If it persists, it
+   precedes frame 3525 on its own lane: determine whether the WIP HIT-recovery
+   gating or action-`0x04` change regressed it, and fix it before any further
+   scene advancement. Do not defer it silently.
+3. Complete the class-`0x1f` program family as one body. Decode every
+   route-reachable action of the inner-8 dispatcher and its movement, wander,
+   and terrain helpers — exactly the set enumerated by the accepted ORACLE-11
+   enemy contract, nothing outside it — from the decrypted opcode image,
+   validated against the existing byte-identical ledgers; capture new Oracle
+   evidence only for behavior those ledgers cannot witness. Amend SPEC-02 and
+   regenerate fixtures once for the whole family, emit the scheduler-visible
+   `a5`-global table fixture, and implement all actions with per-branch
+   mutations.
+4. Consolidated body-boundary verification. Focused host differentials and
+   fixture validation per step. At the body boundary run Target, one pinned
+   scene capture, and the complete Coffee Shop census; run paired Emulator and
+   WGC when the census is green or strictly improved. Reselect the earliest
+   causal divergence from the fresh census and record one task-card checkpoint
+   entry containing counters, hashes, and the next resume line.
+
+Do not add a frame/slot exception, change the input route, fit the renderer,
+or work on the downstream frame-3653 failure before its upstream causes are
+closed. Stage explicit paths only; never stage `data/avsp_anim_records.json`
+or touch `history.txt`; push once at completion or a declared hard stop and
+verify the exact `private-origin` SHA.

@@ -1450,16 +1450,49 @@ capture fails at native frame 3653 with code 29. Target, Emulator, and WGC were
 therefore not run. The prior completed scene census is retained but is not a
 current WIP recapture.
 
-Exact resume experiment: resolve only the earliest frame-3525 divergence by
-proving which source-owned scheduler-visible values map to `a5+0x278` and
-`a5+0x27c`, including why source frame 3524 uses `camera_x=895` and
-`camera_z=256`. Preserve the exact RNG prefix, action-`0x04` dispatcher,
-terrain tail, and render-camera behavior. Use accepted `cs50a/cs50b` and SPEC
-first; perform only the smallest bounded Oracle follow-up if the mapping is
-absent. Add a mutation rejecting the wrong current-versus-scheduler-visible
-origin, run focused host/fixtures/Target, then a pinned scene capture and the
-complete Coffee Shop census. Do not patch a frame/slot, change input, fit the
-renderer, or work on the downstream frame-3653 failure first.
+The prior single-divergence resume experiment is superseded by the execution
+plan amendment below. The live chaptered resume prompt is maintained in
+`docs/AGENT_HANDOFF.md`; it applies this amendment starting at the frame-3525
+wander-origin fix and the frame-1757 host-lane classification.
+
+## Execution plan amendment (2026-08-30)
+
+Owner-approved amendment to this card's execution method. Evidence standards
+are unchanged: earliest-causal-divergence selection, exact RNG call order,
+two-run identity for any new capture, real per-branch mutations, no frame/slot
+exceptions, no fixed-frame/counter/presentation authority, and every accepted
+lock. Only granularity, spec-completion strategy, ceremony frequency, and
+recording change:
+
+- A body is a whole routine program, actor-class family, or segment, per this
+  card's own body definition under "Focused machine checks" — never a single
+  observed branch or timer tick. When a divergence lands inside a dispatcher,
+  the body is the complete route-reachable program family containing it.
+- Complete the remaining SPEC-02 executable semantics in batches per actor
+  class: decode the bounded route-reachable routine set from the decrypted
+  opcode image and validate the decoded semantics against the existing
+  byte-identical capture ledgers (`cs50a/cs50b` and predecessors). Run a new
+  bounded Oracle capture only when the existing ledgers cannot witness the
+  behavior. Amend SPEC-02 and regenerate fixtures once per family, not per
+  branch. The reachable action set is exactly the one enumerated by the
+  accepted ORACLE-11 contracts; nothing outside it.
+- Emit the scheduler-visible `a5`-relative globals table (address, width,
+  writers, readers, semantic owner) for Round-1-reachable routines as a
+  SPEC-02 fixture, derived from the accepted 1,517-PC writer reconciliation by
+  extending an existing analyzer. Native code reads source globals only
+  through that table.
+- Ceremony per granularity: focused host differential and fixture validation
+  per step; real mutations, Target, one pinned scene capture, and the complete
+  Coffee Shop census once per body; paired Emulator and WGC at the body
+  boundary when the census is green or strictly improved. The full census is
+  never rerun for an intermediate branch.
+- Recording: one checkpoint entry in this card per body (counters, hashes,
+  next resume line); `project_state.yaml` keeps pointers and counters;
+  `docs/AGENT_HANDOFF.md` keeps only the active-checkpoint summary and the
+  live resume prompt. Do not duplicate evidence prose across the three
+  documents.
+- Do not build a general lifter or translator, a new capture framework, new
+  dashboards, or parallel worktree orchestration under this amendment.
 
 ## Next eligible cards
 
