@@ -543,7 +543,7 @@ source_closure:
     recording: one task-card checkpoint entry per body; project_state pointers and counters; AGENT_HANDOFF active summary and live resume prompt only
     prohibited: general lifter or translator, new capture frameworks, new dashboards, parallel worktree orchestration
     implementor: codex gpt-5.6-sol high
-  exact_next_experiment: Resume from docs/AGENT_HANDOFF.md. Preserve the completed scheduler split and Button1 timing controls. Use the existing source/native Coffee Shop TSVs and capture-tool parsers to find the earliest Predator Warrior state-action-input divergence after frames2522-2523 and before native frame3653; source is 0204-0600 while native is 0200-0202 at frames3650-3654. Close the owning reusable player program from accepted Oracle-SPEC evidence, not the downstream code29 collision symptom, then rerun focused mutations, fixture validation, Target and the complete scene census.
+  exact_next_experiment: Resume from docs/AGENT_HANDOFF.md after verified runtime checkpoint 5d09b9b. Regenerate the Coffee Shop census and prove the corrected signed-16.16 HIT-to-control bridge moves the first player-position mismatch beyond frame3314. Then close the next earliest reusable contextual Button2 program at source frames3410-3416: guard-bound action 1400/1402, records 160288..1602c8 and selectors21/20, using only accepted Oracle-SPEC evidence; rerun focused mutations, fixture validation, Target and the complete scene census.
   frontend_activation_allowed: false
   physical_saturn: UNRUN
 current_checkpoint: reimplement-source-closed-round1

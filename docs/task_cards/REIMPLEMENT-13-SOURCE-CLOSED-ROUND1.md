@@ -1902,3 +1902,22 @@ unclaimed at this RED checkpoint; the accepted runtime candidate remains
 
 - `QA-13-ROUND1-END-TO-END-DIFFERENTIAL` after the complete stable Round 2
   handoff candidate is committed and frozen.
+
+### Paused player HIT-to-control fixed-point checkpoint (2026-08-31)
+
+Runtime checkpoint `5d09b9b` closes the Coffee Shop-reachable type-16 player
+HIT and return-to-control fractional-position boundary without changing the
+accepted runtime candidate. HIT entry now preserves the actor's signed 16.16 X;
+global-bound clamping preserves its low word, while obstacle/terrain ownership
+clears it. Normal control applies its measured delta to the inherited source
+position instead of rebuilding an absolute position from the twentieths input
+adapter. The focused player-HIT lane passes nine real mutations, the generated
+SPEC fixture check passes, and `LiveEncounterBench` Target BUILD_ONLY passes
+with GAME.BIN 411488 bytes and ISO member SHA-256
+`a41feb01186d6b7f630656e865f2235d4688c8a0b33d0d3463827d0dd59bf911`.
+
+The full census, Emulator, and WGC remain unaccepted/unrun after this change.
+Resume by regenerating the census, proving the first player-position mismatch
+moves beyond frame 3314, then closing the contextual Button2 `0x1400/0x1402`
+program at source frames 3410-3416 from accepted Oracle/SPEC evidence. The
+complete instructions remain in `docs/AGENT_HANDOFF.md`.
