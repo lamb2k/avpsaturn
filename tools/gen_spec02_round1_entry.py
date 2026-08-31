@@ -1403,6 +1403,7 @@ def build() -> str:
         weapon["implementation_blocker"] is not None or
         weapon["source_input"]["button1_mask"] != "0x0010" or
         weapon["source_input"]["native_input_pipeline_updates_u8"] != 1 or
+        weapon["source_input"]["action_dispatch_delay_updates_u8"] != 1 or
         weapon_states != {
             "sufficient_entry_action": "0x0c00",
             "sufficient_active_action": "0x0c02 then 0x0c04",
@@ -3568,6 +3569,7 @@ def build() -> str:
         f"    {int(weapon_states['cleanup_action'], 16)}u,",
         f"    {int(weapon_states['return_locomotion_action'], 16)}u,",
         f"    {weapon_empty['timer_initial']}u,",
+        f"    {weapon['source_input']['action_dispatch_delay_updates_u8']}u,",
         f"    {weapon_action['resource_capacity_u8']}u,",
         f"    {weapon_action['resource_debit_u8']}u,",
         f"    {weapon_action['recharge_countdown_after_entry_u8']}u,",

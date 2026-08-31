@@ -1612,6 +1612,31 @@ not add a frame exception, change helper arithmetic, or promote the accepted
 runtime candidate. Target, census, Emulator, and WGC remain deferred until the
 complete class-family/body boundary.
 
+### Paused Button1 chronology correction and class-0x1f lifetime checkpoint (2026-08-31)
+
+The accepted source-input chronology is now represented end to end as
+`action_dispatch_delay_updates_u8 = 1`. Oracle, SPEC-02, the generated fixture
+and header, and native runtime defer the sufficient/empty Button1 action step,
+projection, and stage helper from pipeline frame 2251 to source-visible frame
+2252. The begin update retains locomotion presentation and motion hold without
+advancing the direction-history queue. Oracle passes 57 mutations, SPEC-02
+passes 163 mutations, and the generator is current. Contract SHA is
+`59ff3a9922e0b65617bf3cfeb0cb460134491a6d5f97ca8f163d12e11f4e8279`;
+fixture SHA is
+`15aff4079e2690936ccd4346ee3f28d01698c9e2f5080bc0ca5eed6fabffb84e`.
+
+The focused/full Coffee Shop host differential remains intentionally RED and
+now fails earlier and more causally at source frame 2511. The accepted scene
+manifest requires record-type-12/class-`0x1f` slot `0x00ffa3c0` to be active
+from frame 2511 through 3975; native has no matching actor at its first frame.
+This missing lifetime is upstream of the absent inner-state
+`0x0208:0x0e02` type-16 effects at 3253/3258/3263, attack-record `0x03589e`
+damage at 3263, and player HIT at 3264. The next body is the complete source
+spawn/scheduler program owning this actor and all Coffee Shop-reachable
+instances/branches, not a frame, slot, or downstream damage patch. Target,
+scene census, Emulator, and WGC remain deferred at this red intermediate
+boundary. The exact continuation is in `docs/AGENT_HANDOFF.md`.
+
 ## Next eligible cards
 
 - `QA-13-ROUND1-END-TO-END-DIFFERENTIAL` after the complete stable Round 2

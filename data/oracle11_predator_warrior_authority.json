@@ -24791,6 +24791,7 @@
         "order": "after player action entry/debit and before HUD projection"
       },
       "source_input": {
+        "action_dispatch_delay_updates_u8": 1,
         "button1_mask": "0x0010",
         "coffee_shop_control": {
           "action_entry_visible_frame": 2252,

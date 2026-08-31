@@ -4734,6 +4734,7 @@ static int avsp_round1_player_weapon_contract_valid(void)
         avsp_round1_player_weapon.cleanup_action != 0u ||
         avsp_round1_player_weapon.return_action != 2u ||
         avsp_round1_player_weapon.empty_timer_initial != 16u ||
+        avsp_round1_player_weapon.action_dispatch_delay_updates != 1u ||
         avsp_round1_player_weapon.resource_capacity != 64u ||
         avsp_round1_player_weapon.resource_debit != 40u ||
         avsp_round1_player_weapon.recharge_after_success != 12u ||
@@ -5420,6 +5421,7 @@ static int avsp_round1_begin_player_hit(
     if (runtime->player_weapon_active)
     {
         runtime->player_weapon_active = 0u;
+        runtime->player_weapon_dispatch_delay = 0u;
         runtime->player_weapon_cleanup_pending = 0u;
         runtime->player_weapon_recovery_pending = 0u;
         ++runtime->player_weapon_interruptions;
@@ -9698,6 +9700,7 @@ static void avsp_round1_begin_player_special(AvspRound1Runtime *runtime)
     runtime->player_special_owner_contact = 0u;
     runtime->player.source_hitstop = 0u;
     runtime->player_weapon_active = 0u;
+    runtime->player_weapon_dispatch_delay = 0u;
     runtime->player_weapon_cleanup_pending = 0u;
     runtime->player_weapon_return_pending = 0u;
     runtime->player_weapon_recovery_pending = 0u;
@@ -9869,6 +9872,8 @@ static void avsp_round1_begin_player_weapon(AvspRound1Runtime *runtime)
             (unsigned char)(runtime->player_resource <
                 avsp_round1_player_weapon.resource_debit);
     runtime->player_weapon_tick = 0u;
+    runtime->player_weapon_dispatch_delay =
+        avsp_round1_player_weapon.action_dispatch_delay_updates;
     runtime->player_weapon_empty_timer =
         avsp_round1_player_weapon.empty_timer_initial;
     runtime->player_weapon_cleanup_pending = 0u;
@@ -9967,9 +9972,15 @@ static int avsp_round1_step_player_weapon(AvspRound1Runtime *runtime,
     if (runtime->player_action.state != AVSP_PW_STATE_CONTROL)
     {
         runtime->player_weapon_active = 0u;
+        runtime->player_weapon_dispatch_delay = 0u;
         runtime->player_weapon_cleanup_pending = 0u;
         runtime->player_weapon_recovery_pending = 0u;
         ++runtime->player_weapon_interruptions;
+        return 0;
+    }
+    if (runtime->player_weapon_dispatch_delay != 0u)
+    {
+        --runtime->player_weapon_dispatch_delay;
         return 0;
     }
     if (weapon_edge && runtime->player_weapon_tick != 0u)
@@ -10011,6 +10022,7 @@ static int avsp_round1_step_player_weapon(AvspRound1Runtime *runtime,
             if (runtime->player_weapon_empty_timer != 0u)
                 ++runtime->failure_count;
             runtime->player_weapon_active = 0u;
+            runtime->player_weapon_dispatch_delay = 0u;
             runtime->player_weapon_cleanup_pending = 1u;
             ++runtime->player_weapon_completions;
         }
@@ -10076,6 +10088,7 @@ static int avsp_round1_step_player_weapon(AvspRound1Runtime *runtime,
         if (runtime->player_weapon_tick == 19u)
         {
             runtime->player_weapon_active = 0u;
+            runtime->player_weapon_dispatch_delay = 0u;
             runtime->player_weapon_cleanup_pending = 1u;
             ++runtime->player_weapon_completions;
         }
@@ -11414,11 +11427,14 @@ int avsp_round1_step_player(AvspRound1Runtime *runtime,
     short prior_facing;
     unsigned short prior_state;
     unsigned short prior_selector;
+    unsigned short prior_direction_history_0;
+    unsigned short prior_direction_history_1;
     unsigned long prior_attack_edges;
     unsigned char weapon_pressed;
     unsigned char weapon_edge;
     unsigned char weapon_motion_hold;
     unsigned char weapon_owned;
+    unsigned char weapon_dispatch_pending;
     unsigned char recovery_start;
     unsigned char weapon_return_owned;
     unsigned char jump_pressed;
@@ -11586,6 +11602,7 @@ int avsp_round1_step_player(AvspRound1Runtime *runtime,
     }
     if (!special_owned && !jump_owned && !runtime->player_weapon_active &&
         runtime->player_action.state == AVSP_PW_STATE_CONTROL &&
+        received_damage <= 0 &&
         (recovery_start ||
          (weapon_edge && (input_mask & AVSP_PW_INPUT_ATTACK) == 0u)))
     {
@@ -11594,6 +11611,9 @@ int avsp_round1_step_player(AvspRound1Runtime *runtime,
         weapon_return_owned = 0u;
         avsp_round1_begin_player_weapon(runtime);
     }
+    weapon_dispatch_pending = (unsigned char)(
+        runtime->player_weapon_active &&
+        runtime->player_weapon_dispatch_delay != 0u);
     weapon_motion_hold = (unsigned char)(runtime->player_weapon_active ||
         jump_owned || special_owned);
     input.mask = (unsigned short)(input_mask &
@@ -11614,10 +11634,21 @@ int avsp_round1_step_player(AvspRound1Runtime *runtime,
     prior_facing = runtime->player_action.facing;
     prior_state = runtime->player_action.state;
     prior_selector = runtime->player_action.selector;
+    prior_direction_history_0 = runtime->player_action.direction_history[0];
+    prior_direction_history_1 = runtime->player_action.direction_history[1];
     prior_attack_edges = runtime->player_action.accepted_attack_edges;
     avsp_pw_step_round1(&runtime->player_action, &input);
-    applied_direction = runtime->player_action.direction_history[
-        AVSP_PW_DIRECTION_LATENCY - 1];
+    if (weapon_dispatch_pending)
+    {
+        runtime->player_action.direction_history[0] =
+            prior_direction_history_0;
+        runtime->player_action.direction_history[1] =
+            prior_direction_history_1;
+        applied_direction = prior_direction_history_1;
+    }
+    else
+        applied_direction = runtime->player_action.direction_history[
+            AVSP_PW_DIRECTION_LATENCY - 1];
     avsp_round1_observe_player_melee(runtime, prior_state, prior_selector,
                                     prior_attack_edges);
     if (was_stopping || weapon_motion_hold)
@@ -11764,6 +11795,8 @@ static int avsp_round1_player_weapon_runtime_valid(
             runtime->player_weapon_parent_effect_allocation_failures ||
         runtime->player_weapon_parent_effect_releases >
             runtime->player_weapon_parent_effect_allocations ||
+        runtime->player_weapon_dispatch_delay >
+            avsp_round1_player_weapon.action_dispatch_delay_updates ||
         runtime->player_weapon_completions > runtime->player_weapon_entries)
         return 0;
     for (index = 0u; index < AVSP_ROUND1_WEAPON_PROJECTILE_CAPACITY; ++index)
@@ -11811,8 +11844,15 @@ static int avsp_round1_player_weapon_runtime_valid(
     }
     if (runtime->player_weapon_active)
     {
-        if (runtime->player_action.state != AVSP_PW_STATE_CONTROL ||
-            runtime->player_weapon_tick == 0u)
+        if (runtime->player_action.state != AVSP_PW_STATE_CONTROL)
+            return 0;
+        if (runtime->player_weapon_tick == 0u)
+            return runtime->player_weapon_dispatch_delay == 0u &&
+                runtime->player.source_action !=
+                    avsp_round1_player_weapon.sufficient_entry_action &&
+                runtime->player.source_action !=
+                    avsp_round1_player_weapon.empty_entry_action;
+        if (runtime->player_weapon_dispatch_delay != 0u)
             return 0;
         if (runtime->player_weapon_empty)
         {
@@ -11870,6 +11910,8 @@ static int avsp_round1_player_weapon_runtime_valid(
             runtime->player.animation_branch != frame->branch))
             return 0;
     }
+    else if (runtime->player_weapon_dispatch_delay != 0u)
+        return 0;
     else if (runtime->player_weapon_cleanup_pending)
     {
         if (runtime->player.source_action !=

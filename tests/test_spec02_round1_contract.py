@@ -34,6 +34,7 @@ assert [row["frame_u16"] for row in player_hit["observed_anchors"]] == [
 weapon = fixtures["authority_data"]["player"][
     "weapon_projectile_resource"]["implementation_contract"]
 assert weapon["source_input"]["button1_mask"] == "0x0010"
+assert weapon["source_input"]["action_dispatch_delay_updates_u8"] == 1
 assert weapon["sufficient_action"]["cleanup_tick"] == 19
 assert weapon["sufficient_action"]["resource_debit_u8"] == 40
 stage_progress = weapon["sufficient_action"]["source_stage_progress"]
@@ -582,6 +583,7 @@ m = copy.deepcopy(contract); m["field_contracts"][4]["mutation_control"]["json_p
 m = copy.deepcopy(contract); m["coverage_gate"]["orphan_authoritative_writers"] = 1; mutations.append((m, fixtures, "weakened gate"))
 f = copy.deepcopy(fixtures); f["authority_data"]["rng"]["algorithm"]["recurrence"] = "guess"; mutations.append((contract, f, "fixture mutation"))
 f = copy.deepcopy(fixtures); f["authority_data"]["player"]["weapon_projectile_resource"]["implementation_contract"]["record4_parent_class0"]["child_emitter_state"]["cadence_reload_u8"] = 5; mutations.append((contract, f, "weapon cadence mutation"))
+f = copy.deepcopy(fixtures); f["authority_data"]["player"]["weapon_projectile_resource"]["implementation_contract"]["source_input"]["action_dispatch_delay_updates_u8"] = 0; mutations.append((contract, f, "weapon action dispatch delay mutation"))
 f = copy.deepcopy(fixtures); f["authority_data"]["player"]["weapon_projectile_resource"]["implementation_contract"]["empty_effect_variant1_contract"]["variant"] = 1; mutations.append((contract, f, "empty effect variant mutation"))
 f = copy.deepcopy(fixtures); f["authority_data"]["player"]["weapon_projectile_resource"]["implementation_contract"]["empty_effect_variant1_contract"]["allocation"]["allocation_update_after_entry_u8"] = 0; mutations.append((contract, f, "empty effect allocation timing mutation"))
 f = copy.deepcopy(fixtures); f["authority_data"]["player"]["weapon_projectile_resource"]["implementation_contract"]["empty_effect_variant1_contract"]["allocation"]["unwritten_fields_retained"] = ["x_fraction:u16", "y_fraction:u16"]; mutations.append((contract, f, "empty effect retained z mutation"))

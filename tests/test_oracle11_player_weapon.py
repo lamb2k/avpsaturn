@@ -55,6 +55,7 @@ def validate(data):
     assert contract["classification"] == "SOURCE_CLOSED_IMPLEMENTATION_FIELDS"
     assert contract["source_input"]["button1_mask"] == "0x0010"
     assert contract["source_input"]["native_input_pipeline_updates_u8"] == 1
+    assert contract["source_input"]["action_dispatch_delay_updates_u8"] == 1
     assert contract["source_input"]["coffee_shop_control"] == {
         "physical_edge_frame": 2250,
         "action_entry_visible_frame": 2252,
@@ -468,6 +469,7 @@ for path, value, label in [
     (("implementation_contract", "record4_parent_class0", "active_state", "base_motion_vectors_s16", "45", 0), -488, "wrong shared base motion"),
     (("implementation_contract", "record4_parent_class0", "initialization", "presentation_records", 7, "animation_record"), "0x0002fba8", "missing terminal presentation"),
     (("implementation_contract", "source_input", "native_input_pipeline_updates_u8"), 0, "missing source input pipeline"),
+    (("implementation_contract", "source_input", "action_dispatch_delay_updates_u8"), 0, "premature source action dispatch"),
     (("implementation_contract", "sufficient_action", "parent_allocation_tick"), 0, "premature parent allocation"),
     (("implementation_contract", "sufficient_action", "source_stage_progress", "caller", "delta_u16"), 2, "wrong stage-progress delta"),
     (("implementation_contract", "sufficient_action", "source_stage_progress", "helper", "progress_threshold_u16"), 7, "wrong stage-progress threshold"),
@@ -511,4 +513,4 @@ for path, value, label in [
         cursor = cursor[key]
     cursor[path[-1]] = value
     reject(mutant, label)
-print("ORACLE-11 corrected Predator Button1 tests: PASS (56 mutations rejected)")
+print("ORACLE-11 corrected Predator Button1 tests: PASS (57 mutations rejected)")

@@ -1265,6 +1265,7 @@ implementation_contract = {
         "guard": "new Button1 edge in normal controllable player state after the shared B1+B2 guard",
         "physical_to_action_visible_frames_u8": 2,
         "native_input_pipeline_updates_u8": 1,
+        "action_dispatch_delay_updates_u8": 1,
         "coffee_shop_control": {
             "physical_edge_frame": 2250,
             "action_entry_visible_frame": 2252,
