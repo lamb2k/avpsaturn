@@ -74,6 +74,18 @@ def build() -> str:
     commands = player["source_program"]["commands"]
     program = bytes.fromhex(player["source_program"]["hex"])
     scheduler = fixtures["authority_data"]["scheduler"]
+    scheduler_globals = fixtures["authority_data"]["navigation"][
+        "scheduler_visible_globals"]
+    scheduler_global_fields = scheduler_globals["fields"]
+    if (scheduler_globals["classification"] !=
+            "SOURCE_CLOSED_IMPLEMENTATION_FIELDS" or
+        scheduler_globals["consumer"]["routine"] != "0x041c36" or
+        [(row["a5_offset_u16"], row["absolute_address"], row["type"],
+          row["width_bytes"], row["native_scheduler_field"])
+         for row in scheduler_global_fields] != [
+            (0x0278, "0xff8278", "s16", 2, "camera_x_previous"),
+            (0x027c, "0xff827c", "s16", 2, "camera_z_previous")]):
+        raise ValueError("SPEC-02 scheduler-visible globals drift")
     scheduler_order = [row["record_type"] for row in
                        scheduler["frame_scheduler"]["full_order"]
                        if row["record_type"] in (12, 16, 20, 24, 28, 36)]
@@ -1902,6 +1914,20 @@ def build() -> str:
         "static const unsigned char avsp_round1_scheduler_pool_order[AVSP_ROUND1_SCHEDULER_POOL_COUNT] =",
         "{",
         "    " + ", ".join(f"{value}u" for value in scheduler_order),
+        "};", "",
+        "static const AvspRound1SchedulerGlobalSpec avsp_round1_scheduler_globals[AVSP_ROUND1_SCHEDULER_GLOBAL_COUNT] =",
+        "{",
+    ])
+    binding_names = {
+        "camera_x_previous": "AVSP_ROUND1_SCHEDULER_GLOBAL_CAMERA_X_PREVIOUS",
+        "camera_z_previous": "AVSP_ROUND1_SCHEDULER_GLOBAL_CAMERA_Z_PREVIOUS",
+    }
+    for row in scheduler_global_fields:
+        lines.append(
+            "    { 0x%04Xu, %sUL, %du, %s }," % (
+                row["a5_offset_u16"], row["absolute_address"],
+                row["width_bytes"], binding_names[row["native_scheduler_field"]]))
+    lines.extend([
         "};", "",
         "static const AvspRound1DispatchSpec avsp_round1_required_dispatches[AVSP_ROUND1_REQUIRED_DISPATCH_COUNT] =",
         "{",

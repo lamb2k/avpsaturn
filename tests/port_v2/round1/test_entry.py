@@ -9,7 +9,7 @@ from pathlib import Path
 
 ROOT = Path(__file__).resolve().parents[3]
 SPEC = ROOT / "data/spec02_round1_executable_contract.json"
-EXPECTED = "43e16c1e3d6a233f7a86703aa68e546e4a2b3be69b5ce7d6f264f9b5b587c288"
+EXPECTED = "6eb601e055bf9a59aaf7c1a10fea2cae1a351ca49324b22285c5faa82f30f60a"
 assert hashlib.sha256(SPEC.read_bytes()).hexdigest() == EXPECTED
 assert json.loads(SPEC.read_text())["status"] == "ACCEPTED"
 source = (ROOT / "src/port_v2/gameplay/round1/round1.c").read_text()
@@ -96,6 +96,9 @@ inner8_mutations = {
     "*rng_consumed = 1u;",
     "actor->source_motion_fields[0] = 8;\n        actor->source_action_timer =",
     "actor->source_x_fp += actor->source_x_velocity;",
+    "            *value = runtime->camera_x_previous;",
+    "            --actor->source_action_timer;\n"
+    "            if (actor->source_action_timer != 0u)",
 }
 ko_mutations = {
     "actor->state = ko ? avsp_round1_class1f_source_ko.collision_state :",
@@ -125,6 +128,14 @@ player_hit_mutations = {
     "runtime->player_hit_x_acceleration =\n                reaction->x_acceleration;",
 }
 for before, after in (
+    ("            *value = runtime->camera_x_previous;",
+     "            *value = runtime->camera_x_position;"),
+    ("            --actor->source_action_timer;\n"
+     "            if (actor->source_action_timer != 0u)",
+     "            if (actor->source_action_timer == 0u)\n"
+     "                return 0;\n"
+     "            --actor->source_action_timer;\n"
+     "            if (actor->source_action_timer != 0u)"),
     ("    return (unsigned short)runtime->camera_x_previous;",
      "    return (unsigned short)runtime->camera_x_position;"),
     ("            if (!avsp_round1_step_coffee_shop_camera(runtime))\n"
@@ -466,7 +477,7 @@ for before, after in (
     assert before in source, before
     run(source.replace(before, after), header, False, before)
 if "--inner8-only" in sys.argv:
-    print("REIMPLEMENT-13 class-0x1f inner-state mutation lane: PASS (6 real mutations)")
+    print("REIMPLEMENT-13 class-0x1f inner-state mutation lane: PASS (8 real mutations)")
     raise SystemExit(0)
 if "--ko-only" in sys.argv:
     print("REIMPLEMENT-13 class-0x1f projectile KO mutation lane: PASS (5 real mutations)")

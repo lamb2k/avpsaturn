@@ -716,6 +716,7 @@
     "orphan_bound_runs": 0,
     "orphan_camera_edges": 0,
     "orphan_navigation_bodies": 0,
+    "orphan_scheduler_visible_globals": 0,
     "orphan_terrain_records": 0,
     "required_unknown": 0
   },
@@ -10313,6 +10314,95 @@
     "spec02_active": false,
     "user09_status": "CHANGES_REQUESTED",
     "yaba_runs": 0
+  },
+  "scheduler_visible_globals": {
+    "a5_base": "0xff8000",
+    "classification": "SOURCE_CLOSED_IMPLEMENTATION_FIELDS",
+    "consumer": {
+      "operation_order": [
+        "read s16(A5+0x278) into D0",
+        "add s16(actor+0x60) to D0",
+        "read s16(A5+0x27c) into D1",
+        "add s16(actor+0x62) to D1",
+        "call direction selector 0x016484",
+        "write selected direction to actor+0x0c"
+      ],
+      "reader_block": "0x041cb0..0x041cca",
+      "reader_block_sha256": "c302422dad20c704186530c5a421c48f3b4a72278010313814866f8a62ada7ee",
+      "routine": "0x041c36"
+    },
+    "fields": [
+      {
+        "a5_offset_u16": 632,
+        "absolute_address": "0xff8278",
+        "name": "camera.position_x",
+        "native_scheduler_field": "camera_x_previous",
+        "readers": [
+          {
+            "instruction_bytes": "302d0278",
+            "pc": "0x041cb0",
+            "role": "class-0x1f wander target X origin",
+            "routine": "0x041c36"
+          }
+        ],
+        "semantic_owner": "camera position X at actor-scheduler phase",
+        "source_frame_3524_value_s16": 895,
+        "type": "s16",
+        "width_bytes": 2,
+        "writers": [
+          {
+            "instruction_bytes": "3d400010",
+            "pc": "0x0b04ca",
+            "role": "camera initializer"
+          },
+          {
+            "instruction_bytes": "3d400010",
+            "pc": "0x0b06fa",
+            "role": "camera X controller"
+          }
+        ]
+      },
+      {
+        "a5_offset_u16": 636,
+        "absolute_address": "0xff827c",
+        "name": "camera.position_z",
+        "native_scheduler_field": "camera_z_previous",
+        "readers": [
+          {
+            "instruction_bytes": "322d027c",
+            "pc": "0x041cb8",
+            "role": "class-0x1f wander target Z origin",
+            "routine": "0x041c36"
+          }
+        ],
+        "semantic_owner": "camera position Z at actor-scheduler phase",
+        "source_frame_3524_value_s16": 256,
+        "type": "s16",
+        "width_bytes": 2,
+        "writers": [
+          {
+            "instruction_bytes": "3d410014",
+            "pc": "0x0b04f4",
+            "role": "camera initializer"
+          },
+          {
+            "instruction_bytes": "3d400014",
+            "pc": "0x0b081c",
+            "role": "camera Z controller"
+          }
+        ]
+      }
+    ],
+    "mutation_control": {
+      "baseline_source_frame_3525_animation_record": "0x0012d488",
+      "baseline_source_frame_3525_slot": "0x00ffa3c0",
+      "known_wrong_native_animation_record": "0x0012d50c",
+      "mutation": "replace preserved pre-update camera sample with post-player current sample",
+      "renderer_camera_must_remain_unchanged": true,
+      "rng_prefix_must_remain_exact": true
+    },
+    "owning_phase": "source actor scheduler before same-frame player/camera controller",
+    "snapshot_rule": "the source class-0x1f scheduler reads camera position before the same source frame's player/camera write; the combined native frame therefore exposes the preserved pre-update sample"
   },
   "schema": "oracle11-round1-navigation-v1",
   "scope": "Round 1 player navigation, terrain, obstacles and camera bounds",

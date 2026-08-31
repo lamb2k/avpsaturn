@@ -81,6 +81,20 @@ mutant["camera"]["primary_writer"] = "fixed frame"
 reject(mutant, "fixed-frame camera substitute admitted")
 
 mutant = copy.deepcopy(report)
+mutant["scheduler_visible_globals"]["fields"].pop()
+reject(mutant, "scheduler-visible camera field omitted")
+
+mutant = copy.deepcopy(report)
+mutant["scheduler_visible_globals"]["fields"][0]["readers"][0]["pc"] = \
+    "0x041cb8"
+reject(mutant, "wander camera reader provenance changed")
+
+mutant = copy.deepcopy(report)
+mutant["scheduler_visible_globals"]["fields"][0][
+    "native_scheduler_field"] = "camera_x_position"
+reject(mutant, "post-player camera sample admitted")
+
+mutant = copy.deepcopy(report)
 mutant["camera"]["camera_lock_and_unlock_runs"].pop()
 reject(mutant, "camera edge orphaned")
 
@@ -186,4 +200,4 @@ mutant["camera"]["implementation_contract"]["initialization"][
     "first_control_chronology"][1]["camera_x_s16"] = 640
 reject(mutant, "camera first-control handoff update")
 
-print("ORACLE-11 Round 1 navigation tests: PASS (34 mutations rejected)")
+print("ORACLE-11 Round 1 navigation tests: PASS (37 mutations rejected)")

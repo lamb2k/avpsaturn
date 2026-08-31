@@ -1505,6 +1505,39 @@ recording change:
 - Do not build a general lifter or translator, a new capture framework, new
   dashboards, or parallel worktree orchestration under this amendment.
 
+## Paused scheduler-globals checkpoint (2026-08-31)
+
+The existing navigation/SPEC pipeline now emits and validates the two signed
+scheduler-visible camera globals consumed by class-`0x1f` routine `0x041c36`:
+X at `a5+0x0278` and Z at `a5+0x027c`, including their exact absolute
+addresses, source readers, four source writers, widths, ownership, and native
+pre-update bindings. Native wander reads both fields only through the generated
+table; camera stepping preserves pre-update X and Z without changing the render
+camera. The current-Sample X mutation and the action-`0x0c` zero-timer shortcut
+mutation are rejected.
+
+Focused Oracle navigation passes with 37 mutations. SPEC-02 passes with 46
+fields and 158 mutations. Contract SHA is
+`6eb601e055bf9a59aaf7c1a10fea2cae1a351ca49324b22285c5faa82f30f60a`;
+fixture SHA is
+`bf1b080ddd8c045884b194f3ac0d4975d9888f746d3fec2bb512214a21313fec`.
+
+This remains unaccepted WIP. The full host lane fails at frame 1757/code 15,
+slot `0x00ffa000`, state/substate `0x0208:0x0c04`, action timer 0 and source
+stage parameter 8. The accepted action-`0x0c` phase-2 timer table requires the
+Coffee Shop transition to stage parameter 9. Its exact source writer, guard,
+scheduler phase, reads, and writes are not yet bound. Do not substitute a
+constant-9 initialization or a frame/slot exception. Target, scene census,
+Emulator, and WGC remain deferred at this red intermediate boundary.
+
+Resume by binding that smallest source-owned stage-parameter transition from
+accepted Oracle/writer evidence, using a bounded corrective Oracle only if the
+required implementation fields are genuinely absent. Amend the existing
+SPEC-02 fixture, add a real wrong-transition mutation, and rerun focused lanes
+plus full host. Then require frame 3525 slot `0x00ffa3c0` record `0x0012d488`
+with unchanged RNG and finish the complete route-reachable class-`0x1f`
+program family before its body-boundary Target/scene/Emulator/WGC ceremony.
+
 ## Next eligible cards
 
 - `QA-13-ROUND1-END-TO-END-DIFFERENTIAL` after the complete stable Round 2

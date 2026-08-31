@@ -1,8 +1,8 @@
 #ifndef AVSP_SPEC02_ROUND1_ENTRY_DATA_H
 #define AVSP_SPEC02_ROUND1_ENTRY_DATA_H
 
-/* contract_sha256=43e16c1e3d6a233f7a86703aa68e546e4a2b3be69b5ce7d6f264f9b5b587c288 */
-/* fixtures_sha256=dd9126f34d9e4ee141239eee907a1405d8561da2cb1d7ebadf66e53a08e8fecd */
+/* contract_sha256=6eb601e055bf9a59aaf7c1a10fea2cae1a351ca49324b22285c5faa82f30f60a */
+/* fixtures_sha256=bf1b080ddd8c045884b194f3ac0d4975d9888f746d3fec2bb512214a21313fec */
 #define AVSP_ROUND1_ENTRY_PROGRAM_SHA256 "e5ef761fadc1b5a7df62e77c03025c0ebff0c2503cbc8be9c0077d4bd6cd24ba"
 
 static const unsigned char avsp_round1_entry_program[AVSP_ROUND1_ENTRY_PROGRAM_BYTES] =
@@ -46,6 +46,12 @@ static const AvspRound1EntryStepSpec avsp_round1_entry_steps[AVSP_ROUND1_ENTRY_S
 static const unsigned char avsp_round1_scheduler_pool_order[AVSP_ROUND1_SCHEDULER_POOL_COUNT] =
 {
     12u, 16u, 20u, 24u, 28u, 36u
+};
+
+static const AvspRound1SchedulerGlobalSpec avsp_round1_scheduler_globals[AVSP_ROUND1_SCHEDULER_GLOBAL_COUNT] =
+{
+    { 0x0278u, 0xff8278UL, 2u, AVSP_ROUND1_SCHEDULER_GLOBAL_CAMERA_X_PREVIOUS },
+    { 0x027Cu, 0xff827cUL, 2u, AVSP_ROUND1_SCHEDULER_GLOBAL_CAMERA_Z_PREVIOUS },
 };
 
 static const AvspRound1DispatchSpec avsp_round1_required_dispatches[AVSP_ROUND1_REQUIRED_DISPATCH_COUNT] =

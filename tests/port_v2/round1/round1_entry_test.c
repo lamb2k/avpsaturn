@@ -4038,14 +4038,41 @@ int main(void)
                         &scene_runtime, source_updates != 0u,
                         class02_updates != 0u))
                 {
+                    const AvspRound1ActorCore *failed_actor = 0;
+                    for (actor_index = 0u;
+                         actor_index < scene_runtime.pools[0].capacity;
+                         ++actor_index)
+                    {
+                        const AvspRound1ActorCore *candidate =
+                            &scene_runtime.pools[0].records[actor_index];
+                        if ((unsigned short)candidate->source_slot ==
+                                scene_runtime.scheduler_failure_source_slot)
+                        {
+                            failed_actor = candidate;
+                            break;
+                        }
+                    }
                     fprintf(stderr,
-                        "Coffee Shop scheduler failure code=%u slot=%04x state=%04x substate=%04x record=%08lx frame=%lu\n",
+                        "Coffee Shop scheduler failure code=%u slot=%04x state=%04x substate=%04x record=%08lx frame=%lu action_timer=%u animation_timer=%u branch=%d motion4=%d recovery=%d guard=%u style=%u stage=%u rng=%04x\n",
                         scene_runtime.scheduler_failure_code,
                         scene_runtime.scheduler_failure_source_slot,
                         scene_runtime.scheduler_failure_state,
                         scene_runtime.scheduler_failure_substate,
                         scene_runtime.scheduler_failure_animation_record,
-                        scene_runtime.scheduler_frames);
+                        scene_runtime.scheduler_frames,
+                        failed_actor != 0 ?
+                            failed_actor->source_action_timer : 0u,
+                        failed_actor != 0 ? failed_actor->animation_timer : 0u,
+                        failed_actor != 0 ? failed_actor->animation_branch : 0,
+                        failed_actor != 0 ?
+                            failed_actor->source_motion_fields[4] : 0,
+                        failed_actor != 0 ?
+                            failed_actor->source_hit_recovery_active : 0,
+                        failed_actor != 0 ?
+                            failed_actor->source_player_guard : 0u,
+                        failed_actor != 0 ? failed_actor->source_style85 : 0u,
+                        scene_runtime.source_stage_parameter,
+                        scene_runtime.rng_seed);
                     return 94;
                 }
                 for (actor_index = 0u;

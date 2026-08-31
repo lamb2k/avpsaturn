@@ -6,7 +6,7 @@
 #include "../../combat/hit_ko/hit_ko.h"
 
 #define AVSP_ROUND1_SPEC02_SHA256 \
-"43e16c1e3d6a233f7a86703aa68e546e4a2b3be69b5ce7d6f264f9b5b587c288"
+"6eb601e055bf9a59aaf7c1a10fea2cae1a351ca49324b22285c5faa82f30f60a"
 #define AVSP_ROUND1_CANARY_HEAD 0x52314548UL
 #define AVSP_ROUND1_CANARY_TAIL 0x52314554UL
 #define AVSP_ROUND1_ROUTE_ENTRY_STATE 2
@@ -18,6 +18,9 @@
 #define AVSP_ROUND1_ENTRY_PROGRAM_BYTES 26
 #define AVSP_ROUND1_ENTRY_STEP_COUNT 8
 #define AVSP_ROUND1_SCHEDULER_POOL_COUNT 6
+#define AVSP_ROUND1_SCHEDULER_GLOBAL_COUNT 2u
+#define AVSP_ROUND1_SCHEDULER_GLOBAL_CAMERA_X_PREVIOUS 1u
+#define AVSP_ROUND1_SCHEDULER_GLOBAL_CAMERA_Z_PREVIOUS 2u
 #define AVSP_ROUND1_REQUIRED_DISPATCH_COUNT 16
 #define AVSP_ROUND1_SCHEDULER_TRACE_CAPACITY 192
 #define AVSP_ROUND1_PLAYER_ENTRY_STATE 2048u
@@ -1112,6 +1115,14 @@ typedef struct
 
 typedef struct
 {
+    unsigned short a5_offset;
+    unsigned long absolute_address;
+    unsigned char width_bytes;
+    unsigned char native_binding;
+} AvspRound1SchedulerGlobalSpec;
+
+typedef struct
+{
     unsigned long animation_record;
     unsigned long assembly;
     unsigned char hurt_selector;
@@ -1775,6 +1786,7 @@ typedef struct
     unsigned char navigation_contact_bits;
     short camera_x_previous;
     short camera_x_position;
+    short camera_z_previous;
     short camera_z_position;
     short camera_x_target;
     short camera_z_target;

@@ -197,6 +197,11 @@ def build_fields() -> list[dict[str, object]]:
           "/authority_data/scheduler/frame_scheduler", "exhaust each active pool in ascending slot order before the next record type",
           ["actor.active:u8", "actor.class:s8"], ["actor.state", "actor.position", "actor.lifecycle"],
           "/targeted_counterfactuals", "class removal exposes scheduler-order differences"),
+        f("scheduler.source_visible_camera_globals", "actor-scheduler-allocation-lifecycle", "scheduler_global_table", True,
+          "navigation", "/scheduler_visible_globals", "0x041c36 reads A5+0x278/A5+0x27c after camera writers 0x0b04ca/0x0b06fa and 0x0b04f4/0x0b081c",
+          "/authority_data/navigation/scheduler_visible_globals", "the class-0x1f actor scheduler consumes preserved pre-update signed camera X/Z, never the post-player current sample",
+          ["camera.position_x:s16", "camera.position_z:s16", "scheduler.phase"], ["enemy.wander_target_x:s16", "enemy.wander_target_z:s16", "enemy.direction:u8"],
+          "/scheduler_visible_globals/mutation_control", "substituting post-player current camera state changes frame-3525 slot 0x00ffa3c0 from source record 0x0012d488 to 0x0012d50c"),
         f("navigation.terrain_bounds", "round1-navigation-terrain-camera", "signed_geometry_table", True,
           "navigation", "/global_bounds", "0x01b000 signed global bounds",
           "/authority_data/navigation/global_bounds", "current route bounds constrain source world x/z before obstacle and terrain response",
@@ -966,7 +971,8 @@ def build_fixtures(source: dict[str, dict]) -> dict[str, object]:
                           ("source_identity", "frame_scheduler", "pools")},
             "navigation": {key: copy.deepcopy(source["navigation"][key]) for key in
                            ("coordinate_contract", "global_bounds", "terrain_resolver",
-                            "navigation_bodies", "obstacle_response", "camera")},
+                            "navigation_bodies", "obstacle_response",
+                            "scheduler_visible_globals", "camera")},
             "enemies": {"scheduler": copy.deepcopy(source["enemies"]["scheduler"]),
                         "archetypes": copy.deepcopy(source["enemies"]["archetypes"])},
             "auxiliary": {"archetypes": copy.deepcopy(source["auxiliary"]["archetypes"]),
@@ -1094,6 +1100,33 @@ def validate(contract: dict[str, object], fixtures: dict[str, object],
             fixtures["optional_unknowns"]["required_for_round1"] is False,
             "fixture scope drift")
     scene = fixtures["scene_manifests"]["coffee_shop"]
+    scheduler_globals = fixtures["authority_data"]["navigation"][
+        "scheduler_visible_globals"]
+    require(
+        scheduler_globals["classification"] ==
+            "SOURCE_CLOSED_IMPLEMENTATION_FIELDS" and
+        scheduler_globals["consumer"]["routine"] == "0x041c36" and
+        [(row["a5_offset_u16"], row["absolute_address"], row["type"],
+          row["width_bytes"], row["native_scheduler_field"])
+         for row in scheduler_globals["fields"]] == [
+            (0x0278, "0xff8278", "s16", 2, "camera_x_previous"),
+            (0x027c, "0xff827c", "s16", 2, "camera_z_previous"),
+        ] and
+        [[writer["pc"] for writer in row["writers"]]
+         for row in scheduler_globals["fields"]] == [
+            ["0x0b04ca", "0x0b06fa"],
+            ["0x0b04f4", "0x0b081c"]] and
+        [[reader["pc"] for reader in row["readers"]]
+         for row in scheduler_globals["fields"]] == [
+            ["0x041cb0"], ["0x041cb8"]] and
+        scheduler_globals["mutation_control"][
+            "baseline_source_frame_3525_animation_record"] ==
+            "0x0012d488" and
+        scheduler_globals["mutation_control"][
+            "known_wrong_native_animation_record"] == "0x0012d50c" and
+        scheduler_globals["mutation_control"][
+            "rng_prefix_must_remain_exact"] is True,
+        "scheduler-visible camera globals fixture incomplete or drifted")
     class08_pickup = fixtures["authority_data"]["auxiliary"][
         "first_segment_dependencies"]["class_0x08_type20_health_pickup"]
     require(

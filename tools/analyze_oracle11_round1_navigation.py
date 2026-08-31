@@ -1009,6 +1009,96 @@ def camera_authority(route: dict[str, object], samples: list[dict[str, str]],
     }
 
 
+def scheduler_visible_globals_contract(
+        opcodes: bytes) -> dict[str, object]:
+    reader_bytes = opcodes[0x041CB0:0x041CCA]
+    require(reader_bytes.hex() ==
+            "302d0278d06e0060322d027cd26e00624eb9000164841d46000c",
+            "class-0x1f wander global-reader opcode drift")
+    writer_bytes = {
+        "0x0b04ca": opcodes[0x0B04CA:0x0B04CE].hex(),
+        "0x0b06fa": opcodes[0x0B06FA:0x0B06FE].hex(),
+        "0x0b04f4": opcodes[0x0B04F4:0x0B04F8].hex(),
+        "0x0b081c": opcodes[0x0B081C:0x0B0820].hex(),
+    }
+    require(writer_bytes == {
+        "0x0b04ca": "3d400010",
+        "0x0b06fa": "3d400010",
+        "0x0b04f4": "3d410014",
+        "0x0b081c": "3d400014",
+    }, "camera-position writer opcode drift")
+    return {
+        "classification": "SOURCE_CLOSED_IMPLEMENTATION_FIELDS",
+        "a5_base": "0xff8000",
+        "owning_phase": "source actor scheduler before same-frame player/camera controller",
+        "snapshot_rule": (
+            "the source class-0x1f scheduler reads camera position before the "
+            "same source frame's player/camera write; the combined native frame "
+            "therefore exposes the preserved pre-update sample"),
+        "consumer": {
+            "routine": "0x041c36",
+            "reader_block": "0x041cb0..0x041cca",
+            "reader_block_sha256": hashlib.sha256(reader_bytes).hexdigest(),
+            "operation_order": [
+                "read s16(A5+0x278) into D0",
+                "add s16(actor+0x60) to D0",
+                "read s16(A5+0x27c) into D1",
+                "add s16(actor+0x62) to D1",
+                "call direction selector 0x016484",
+                "write selected direction to actor+0x0c",
+            ],
+        },
+        "fields": [
+            {
+                "name": "camera.position_x", "a5_offset_u16": 0x0278,
+                "absolute_address": "0xff8278", "type": "s16",
+                "width_bytes": 2,
+                "semantic_owner": "camera position X at actor-scheduler phase",
+                "writers": [
+                    {"pc": "0x0b04ca", "role": "camera initializer",
+                     "instruction_bytes": writer_bytes["0x0b04ca"]},
+                    {"pc": "0x0b06fa", "role": "camera X controller",
+                     "instruction_bytes": writer_bytes["0x0b06fa"]},
+                ],
+                "readers": [
+                    {"pc": "0x041cb0", "routine": "0x041c36",
+                     "role": "class-0x1f wander target X origin",
+                     "instruction_bytes": "302d0278"},
+                ],
+                "native_scheduler_field": "camera_x_previous",
+                "source_frame_3524_value_s16": 895,
+            },
+            {
+                "name": "camera.position_z", "a5_offset_u16": 0x027c,
+                "absolute_address": "0xff827c", "type": "s16",
+                "width_bytes": 2,
+                "semantic_owner": "camera position Z at actor-scheduler phase",
+                "writers": [
+                    {"pc": "0x0b04f4", "role": "camera initializer",
+                     "instruction_bytes": writer_bytes["0x0b04f4"]},
+                    {"pc": "0x0b081c", "role": "camera Z controller",
+                     "instruction_bytes": writer_bytes["0x0b081c"]},
+                ],
+                "readers": [
+                    {"pc": "0x041cb8", "routine": "0x041c36",
+                     "role": "class-0x1f wander target Z origin",
+                     "instruction_bytes": "322d027c"},
+                ],
+                "native_scheduler_field": "camera_z_previous",
+                "source_frame_3524_value_s16": 256,
+            },
+        ],
+        "mutation_control": {
+            "mutation": "replace preserved pre-update camera sample with post-player current sample",
+            "baseline_source_frame_3525_slot": "0x00ffa3c0",
+            "baseline_source_frame_3525_animation_record": "0x0012d488",
+            "known_wrong_native_animation_record": "0x0012d50c",
+            "rng_prefix_must_remain_exact": True,
+            "renderer_camera_must_remain_unchanged": True,
+        },
+    }
+
+
 def build_report() -> dict[str, object]:
     identity_a = capture_identity(BASE_A)
     identity_b = capture_identity(BASE_B)
@@ -1079,6 +1169,7 @@ def build_report() -> dict[str, object]:
     obstacle_lifecycle = coffee_shop_obstacle_lifecycle(opcodes, program)
     camera_contract = camera_implementation_contract(
         corrective_samples, corrective_bounds, opcodes)
+    scheduler_globals = scheduler_visible_globals_contract(opcodes)
     counterfactual = next(item for item in route["counterfactual_authority_coverage"]
                           if item["authority_family"] ==
                           "round1-navigation-terrain-camera")
@@ -1164,6 +1255,7 @@ def build_report() -> dict[str, object]:
             "implementation_contract": obstacle_contract,
             "lifecycle_contract": obstacle_lifecycle,
         },
+        "scheduler_visible_globals": scheduler_globals,
         "camera": {**camera, "implementation_contract": camera_contract},
         "counterfactuals": {
             "oracle08_directional_and_obstacle_controls":
@@ -1179,7 +1271,8 @@ def build_report() -> dict[str, object]:
         "closure": {
             "required_unknown": 0, "orphan_bound_runs": 0,
             "orphan_terrain_records": 0, "orphan_navigation_bodies": 0,
-            "orphan_camera_edges": 0, "guessed_camera_guards": 0,
+            "orphan_camera_edges": 0, "orphan_scheduler_visible_globals": 0,
+            "guessed_camera_guards": 0,
             "authored_fallbacks": 0,
         },
         "protected_boundaries": {
@@ -1392,6 +1485,37 @@ def validate(report: dict[str, object]) -> None:
             lifecycle["transition_suppression"]["mutant_final_route"] == 4 and
             lifecycle["fixed_frame_substitute_forbidden"] is True,
             "obstacle lifecycle contract drift")
+    scheduler_globals = report["scheduler_visible_globals"]
+    require(scheduler_globals["classification"] ==
+            "SOURCE_CLOSED_IMPLEMENTATION_FIELDS" and
+            scheduler_globals["a5_base"] == "0xff8000" and
+            scheduler_globals["consumer"]["routine"] == "0x041c36" and
+            scheduler_globals["consumer"]["reader_block_sha256"] ==
+            hashlib.sha256(opcodes[0x041CB0:0x041CCA]).hexdigest() and
+            [(item["a5_offset_u16"], item["absolute_address"], item["type"],
+              item["width_bytes"], item["native_scheduler_field"],
+              item["source_frame_3524_value_s16"])
+             for item in scheduler_globals["fields"]] == [
+                (0x0278, "0xff8278", "s16", 2,
+                 "camera_x_previous", 895),
+                (0x027c, "0xff827c", "s16", 2,
+                 "camera_z_previous", 256),
+            ] and
+            [[writer["pc"] for writer in item["writers"]]
+             for item in scheduler_globals["fields"]] == [
+                ["0x0b04ca", "0x0b06fa"],
+                ["0x0b04f4", "0x0b081c"],
+            ] and
+            [[reader["pc"] for reader in item["readers"]]
+             for item in scheduler_globals["fields"]] == [
+                ["0x041cb0"], ["0x041cb8"],
+            ] and
+            scheduler_globals["mutation_control"][
+                "baseline_source_frame_3525_animation_record"] ==
+            "0x0012d488" and
+            scheduler_globals["mutation_control"][
+                "known_wrong_native_animation_record"] == "0x0012d50c",
+            "scheduler-visible globals contract drift")
     camera = report["camera"]
     require(camera["classification"] == "SOURCE_CLOSED" and
             camera["primary_writer"] == "0x0b0706" and

@@ -509,6 +509,14 @@ assert navigation["camera"]["implementation_contract"]["coffee_shop_guard"][
     "fixed_frame_authority"] is False
 assert navigation["camera"]["implementation_contract"]["x_target_arithmetic"][
     "speed_table_u16"][-4:] == [11, 11, 11, 11]
+scheduler_globals = navigation["scheduler_visible_globals"]
+assert scheduler_globals["consumer"]["routine"] == "0x041c36"
+assert [(row["a5_offset_u16"], row["native_scheduler_field"])
+        for row in scheduler_globals["fields"]] == [
+            (0x0278, "camera_x_previous"),
+            (0x027c, "camera_z_previous")]
+assert scheduler_globals["mutation_control"][
+    "baseline_source_frame_3525_animation_record"] == "0x0012d488"
 button3 = fixtures["authority_data"]["player"][
     "directional_airborne_interruption"]["directional_actions"][
         "implementation_contract"]
@@ -687,6 +695,8 @@ f = copy.deepcopy(fixtures); f["authority_data"]["navigation"]["obstacle_respons
 f = copy.deepcopy(fixtures); f["authority_data"]["navigation"]["obstacle_response"]["lifecycle_contract"]["state_program"]["state_0400"]["presentation_rng_transaction"]["calls_u8"] = 0; mutations.append((contract, f, "obstacle break RNG mutation"))
 f = copy.deepcopy(fixtures); f["authority_data"]["navigation"]["obstacle_response"]["lifecycle_contract"]["state_program"]["state_0400"]["audio_transaction"]["command_u16"] = "0x0077"; mutations.append((contract, f, "obstacle break audio mutation"))
 f = copy.deepcopy(fixtures); f["authority_data"]["navigation"]["camera"]["implementation_contract"]["coffee_shop_guard"]["phase2_unlock_guard"] = "frame >= 4992"; mutations.append((contract, f, "camera unlock guard mutation"))
+f = copy.deepcopy(fixtures); f["authority_data"]["navigation"]["scheduler_visible_globals"]["fields"][0]["native_scheduler_field"] = "camera_x_position"; mutations.append((contract, f, "scheduler current-X mutation"))
+f = copy.deepcopy(fixtures); f["authority_data"]["navigation"]["scheduler_visible_globals"]["fields"][1]["readers"][0]["pc"] = "0x041cb0"; mutations.append((contract, f, "scheduler Z-reader mutation"))
 f = copy.deepcopy(fixtures); f["authority_data"]["player"]["directional_airborne_interruption"]["directional_actions"]["implementation_contract"]["vector_table"][2]["x_velocity_s32_16_16"]["raw_s32"] = -0x000e0000; mutations.append((contract, f, "Button3 vector mutation"))
 f = copy.deepcopy(fixtures); f["authority_data"]["player"]["directional_airborne_interruption"]["directional_actions"]["implementation_contract"]["input_facing_mapping"][3]["entry_index"] = 2; mutations.append((contract, f, "Button3 facing map mutation"))
 f = copy.deepcopy(fixtures); f["authority_data"]["player"]["directional_airborne_interruption"]["directional_actions"]["implementation_contract"]["initialization"]["non_down"]["opposite_facing_horizontal"]["collision_level_u8"] = 2; mutations.append((contract, f, "Button3 collision selector mutation"))

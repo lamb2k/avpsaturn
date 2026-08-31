@@ -2323,6 +2323,37 @@ static unsigned char avsp_round1_class1f_inner8_direction(
     return (unsigned char)((base & 0x3fu) >> 1);
 }
 
+static int avsp_round1_scheduler_global_s16(
+    const AvspRound1Runtime *runtime, unsigned short a5_offset,
+    short *value)
+{
+    unsigned int index;
+    for (index = 0u; index < AVSP_ROUND1_SCHEDULER_GLOBAL_COUNT; ++index)
+    {
+        const AvspRound1SchedulerGlobalSpec *spec =
+            &avsp_round1_scheduler_globals[index];
+        if (spec->a5_offset != a5_offset)
+            continue;
+        if (spec->width_bytes != 2u ||
+            spec->absolute_address != 0x00ff8000UL + spec->a5_offset)
+            return 0;
+        if (spec->native_binding ==
+                AVSP_ROUND1_SCHEDULER_GLOBAL_CAMERA_X_PREVIOUS)
+        {
+            *value = runtime->camera_x_previous;
+            return 1;
+        }
+        if (spec->native_binding ==
+                AVSP_ROUND1_SCHEDULER_GLOBAL_CAMERA_Z_PREVIOUS)
+        {
+            *value = runtime->camera_z_previous;
+            return 1;
+        }
+        return 0;
+    }
+    return 0;
+}
+
 static void avsp_round1_class1f_inner8_update_band(
     const AvspRound1Runtime *runtime, AvspRound1ActorCore *actor)
 {
@@ -2367,6 +2398,8 @@ static int avsp_round1_class1f_inner8_wander(
     unsigned char offset_index;
     unsigned char direction_delta;
     unsigned char group;
+    short origin_x;
+    short origin_z;
     short target_x;
     short target_z;
     if (!avsp_round1_class1f_inner8_release_membership(runtime, actor))
@@ -2395,10 +2428,13 @@ static int avsp_round1_class1f_inner8_wander(
     group = (unsigned char)(offset_index >> 1);
     if (group >= avsp_round1_class1f_inner8_program.wander_group_count)
         return 0;
-    target_x = (short)(runtime->camera_x_position +
+    if (!avsp_round1_scheduler_global_s16(runtime, 0x0278u, &origin_x) ||
+        !avsp_round1_scheduler_global_s16(runtime, 0x027cu, &origin_z))
+        return 0;
+    target_x = (short)(origin_x +
         actor->source_inner8_x_offset);
     actor->source_inner8_group = (signed char)group;
-    target_z = (short)(runtime->camera_z_position +
+    target_z = (short)(origin_z +
         actor->source_inner8_z_offset);
     actor->source_direction = avsp_round1_class1f_inner8_direction(
         actor, target_x, target_z);
@@ -2945,8 +2981,6 @@ static int avsp_round1_step_class1f_inner8(
         if (phase == 4u)
         {
             int selection;
-            if (actor->source_action_timer == 0u)
-                return 0;
             --actor->source_action_timer;
             if (actor->source_action_timer != 0u)
                 return 1;
@@ -4284,6 +4318,7 @@ static int avsp_round1_step_coffee_shop_camera(AvspRound1Runtime *runtime)
     }
 
     runtime->camera_x_previous = runtime->camera_x_position;
+    runtime->camera_z_previous = runtime->camera_z_position;
     runtime->camera_x_target_previous = runtime->camera_x_target;
     delta = (short)(runtime->player_action.x - runtime->camera_x_target -
                     avsp_round1_coffee_shop_camera.x_right_offset);
@@ -10778,6 +10813,8 @@ int avsp_round1_step_first_entry(AvspRound1Runtime *runtime)
                 avsp_round1_coffee_shop_camera.initial_x;
             runtime->camera_x_position =
                 avsp_round1_coffee_shop_camera.initial_x;
+            runtime->camera_z_previous =
+                avsp_round1_coffee_shop_camera.initial_z;
             runtime->camera_z_position =
                 avsp_round1_coffee_shop_camera.initial_z;
             runtime->camera_x_target =
