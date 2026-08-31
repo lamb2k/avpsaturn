@@ -1,8 +1,8 @@
 #ifndef AVSP_SPEC02_ROUND1_ENTRY_DATA_H
 #define AVSP_SPEC02_ROUND1_ENTRY_DATA_H
 
-/* contract_sha256=6eb601e055bf9a59aaf7c1a10fea2cae1a351ca49324b22285c5faa82f30f60a */
-/* fixtures_sha256=bf1b080ddd8c045884b194f3ac0d4975d9888f746d3fec2bb512214a21313fec */
+/* contract_sha256=37f8429a44a3d545b12d8242b0c8ab829e9ae2795cc1efa17f280fef7a9f6889 */
+/* fixtures_sha256=a151d33a9174710d353a52a1933b63ab459856d3c602f047ca211d786f50ce31 */
 #define AVSP_ROUND1_ENTRY_PROGRAM_SHA256 "e5ef761fadc1b5a7df62e77c03025c0ebff0c2503cbc8be9c0077d4bd6cd24ba"
 
 static const unsigned char avsp_round1_entry_program[AVSP_ROUND1_ENTRY_PROGRAM_BYTES] =
@@ -1729,6 +1729,26 @@ static const AvspRound1VecS16 avsp_round1_class3d_offsets[AVSP_ROUND1_CLASS3D_OF
     { -48, 19 },
     { -61, 13 },
     { -72, 0 },
+};
+
+static const AvspRound1PlayerStageProgressSpec avsp_round1_player_stage_progress =
+{
+    0x0179e2UL,
+    0x024094UL,
+    0x024096UL,
+    0x01b0u,
+    0x01eau,
+    0x021au,
+    0x021cu,
+    0x0226u,
+    3u,
+    8u,
+    7u,
+    32u,
+    31u,
+    8,
+    16,
+    0u
 };
 
 static const AvspRound1PlayerWeaponSpec avsp_round1_player_weapon =

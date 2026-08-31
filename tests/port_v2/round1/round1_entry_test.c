@@ -4053,7 +4053,7 @@ int main(void)
                         }
                     }
                     fprintf(stderr,
-                        "Coffee Shop scheduler failure code=%u slot=%04x state=%04x substate=%04x record=%08lx frame=%lu action_timer=%u animation_timer=%u branch=%d motion4=%d recovery=%d guard=%u style=%u stage=%u rng=%04x\n",
+                        "Coffee Shop scheduler failure code=%u slot=%04x state=%04x substate=%04x record=%08lx frame=%lu action_timer=%u animation_timer=%u branch=%d motion4=%d recovery=%d guard=%u style=%u stage=%u progress=%u stage_calls=%lu stage_carries=%lu weapon_entries=%lu rng=%04x\n",
                         scene_runtime.scheduler_failure_code,
                         scene_runtime.scheduler_failure_source_slot,
                         scene_runtime.scheduler_failure_state,
@@ -4072,6 +4072,10 @@ int main(void)
                             failed_actor->source_player_guard : 0u,
                         failed_actor != 0 ? failed_actor->source_style85 : 0u,
                         scene_runtime.source_stage_parameter,
+                        scene_runtime.source_stage_progress_accumulator,
+                        scene_runtime.player_stage_progress_calls,
+                        scene_runtime.player_stage_progress_carries,
+                        scene_runtime.player_weapon_entries,
                         scene_runtime.rng_seed);
                     return 94;
                 }

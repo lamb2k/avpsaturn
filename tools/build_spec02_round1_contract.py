@@ -167,6 +167,11 @@ def build_fields() -> list[dict[str, object]]:
           "/authority_data/player/weapon_projectile_resource", "Button1/B1+B2 source guards own allocation, resource debit/recharge, collision, removal, and presentation continuity",
           ["input.new_edges:u16", "player.resource:s16", "target.pointer:u32"], ["player.state:u16", "player.resource:s16", "projectile.record", "player.animation:u32"],
           "/weapon_projectile_resource/counterfactuals", "projectile, target, or resource suppression changes the causal route"),
+        f("player.button1_stage_progress", "predator-warrior-player-authority", "guarded_global_program", True,
+          "player", "/weapon_projectile_resource/implementation_contract/sufficient_action/source_stage_progress", "0x024094/0x024096 caller and 0x0179e2..0x017b74 helper",
+          "/authority_data/player/weapon_projectile_resource/implementation_contract/sufficient_action/source_stage_progress", "a sufficient Button1 action entry calls the guarded source helper before resource debit, projectile allocation, and the actor scheduler",
+          ["global.a5+0x01b0:u8", "global.a5+0x0226:u16", "global.a5+0x01ea:s16", "global.a5+0x021a:s16", "global.a5+0x021c:s16"], ["global.a5+0x0226:u16", "global.a5+0x01ea:s16"],
+          "/weapon_projectile_resource/implementation_contract/sufficient_action/source_stage_progress/mutation_controls", "wrong delta, threshold, action-entry timing, or direct stage initialization changes the scheduler-visible class-0x1f action-0x0c branch"),
         f("player.weapon_projectile_impact_variant", "predator-warrior-player-authority", "attack_record_field", False,
           "player", "/weapon_projectile_resource/implementation_contract/record4_parent_class0/collision_table/attack_entries/1/impact_variant_u8", "0x01d622 reads attack-record +0x08; parent record 0x02fc58 contains 0x0a",
           "/authority_data/player/weapon_projectile_resource/implementation_contract/record4_parent_class0/collision_table/attack_entries/1/impact_variant_u8", "a current-state projectile collision copies the absolute signed attack-record +0x08 byte into the allocated class-0x4e variant",
@@ -636,6 +641,54 @@ def build_fixtures(source: dict[str, dict]) -> dict[str, object]:
         }
     weapon_projection = player_authority["weapon_projectile_resource"][
         "implementation_contract"]
+    weapon_projection["empty_fallback"]["entry_projection"] = {
+        "classification": "SOURCE_CLOSED_IMPLEMENTATION_FIELDS",
+        "spec_executable": True,
+        "entry_rule": (
+            "write state 0x0200 and action/substate 0x1a00 while preserving "
+            "the current animation record, assembly, timer, branch, and "
+            "current collision selectors; bind the 0x1a02 active record on "
+            "the following player update"
+        ),
+        "entry_writes": {
+            "state_u16": "0x0200",
+            "action_u16": "0x1a00",
+            "substate_u16": "0x1a00",
+        },
+        "entry_preserves": [
+            "animation_record:u32", "assembly:u32",
+            "animation_timer:u16", "animation_branch:s16",
+            "current_hurt_selector:u8", "current_attack_selector:u8",
+        ],
+        "active_replacement": {
+            "visible_update_offset_u8": 1,
+            "state_u16": "0x0200",
+            "action_u16": "0x1a02",
+            "substate_u16": "0x1a02",
+            "animation_record": "0x0015fcfc",
+            "assembly": "0x00161772",
+            "animation_timer_u16": 4095,
+            "animation_branch_s16": -32768,
+            "current_hurt_selector_u8": 1,
+            "current_attack_selector_u8": 0,
+        },
+        "coffee_shop_witnesses": [
+            {"prior_frame_u16": 2521, "entry_frame_u16": 2522,
+             "active_frame_u16": 2523,
+             "prior_animation_record": "0x0015f1f4",
+             "entry_animation_record": "0x0015f1f4"},
+            {"prior_frame_u16": 2611, "entry_frame_u16": 2612,
+             "active_frame_u16": 2613,
+             "prior_animation_record": "0x0015f228",
+             "entry_animation_record": "0x0015f228"},
+        ],
+        "rng_calls": [],
+        "mutation_controls": [
+            "reject fixed idle presentation on a walking entry",
+            "reject binding the active presentation on the entry update",
+            "reject delaying the active presentation past the next update",
+        ],
+    }
     weapon_projection["player_actor_projection"] = {
         "classification": "SOURCE_CLOSED_IMPLEMENTATION_FIELDS",
         "spec_executable": True,
@@ -1364,6 +1417,65 @@ def validate(contract: dict[str, object], fixtures: dict[str, object],
             "Coffee Shop scene manifest incomplete or falsely accepted")
     weapon_contract = fixtures["authority_data"]["player"][
         "weapon_projectile_resource"]["implementation_contract"]
+    stage_progress = weapon_contract["sufficient_action"][
+        "source_stage_progress"]
+    require(stage_progress["classification"] ==
+                "SOURCE_CLOSED_IMPLEMENTATION_FIELDS" and
+            stage_progress["spec_executable"] is True and
+            stage_progress["caller"]["player_state_program"] ==
+                "0x024060" and
+            stage_progress["caller"]["delta_load_pc"] == "0x024094" and
+            stage_progress["caller"]["helper_call_pc"] == "0x024096" and
+            stage_progress["caller"]["delta_u16"] == 3 and
+            stage_progress["caller"]["action_entry_tick_u8"] == 0 and
+            stage_progress["helper"]["entry"] == "0x0179e2" and
+            stage_progress["helper"]["return"] == "0x017b74" and
+            stage_progress["helper"]["guard"] == {
+                "field": "a5+0x01b0:u8",
+                "predicate": "u8(a5+0x01b0) == 0",
+                "checked_before_add_and_before_route_bounds": True} and
+            stage_progress["helper"]["fields"] == {
+                "progress": "a5+0x0226:u16",
+                "stage_parameter": "a5+0x01ea:s16",
+                "upper_bound": "a5+0x021a:s16",
+                "lower_bound": "a5+0x021c:s16"} and
+            stage_progress["helper"]["field_layout"] == {
+                "guard": {"a5_offset_u16": 0x01b0,
+                          "absolute": "0x00ff81b0", "width_u8": 1,
+                          "signed": False},
+                "stage_parameter": {"a5_offset_u16": 0x01ea,
+                                    "absolute": "0x00ff81ea",
+                                    "width_u8": 2, "signed": True},
+                "upper_bound": {"a5_offset_u16": 0x021a,
+                                "absolute": "0x00ff821a", "width_u8": 2,
+                                "signed": True},
+                "lower_bound": {"a5_offset_u16": 0x021c,
+                                "absolute": "0x00ff821c", "width_u8": 2,
+                                "signed": True},
+                "progress": {"a5_offset_u16": 0x0226,
+                             "absolute": "0x00ff8226", "width_u8": 2,
+                             "signed": False}} and
+            (stage_progress["helper"]["progress_threshold_u16"],
+             stage_progress["helper"]["progress_mask_u16"],
+             stage_progress["helper"]["stage_domain_limit_u16"],
+             stage_progress["helper"]["stage_domain_mask_u16"],
+             stage_progress["helper"]["coffee_shop_lower_bound_s16"],
+             stage_progress["helper"]["coffee_shop_upper_bound_s16"]) ==
+                (8, 7, 32, 31, 8, 16) and
+            stage_progress["helper"]["rng_calls"] == [] and
+            [(row["source_frame_u16"], row["progress_before_u16"],
+              row["progress_after_add_u16"],
+              row["progress_after_mask_u16"],
+              row["stage_before_s16"], row["stage_after_s16"])
+             for row in stage_progress["coffee_shop_calls"][:3]] == [
+                (2252, 0, 3, 3, 8, 8),
+                (2342, 3, 6, 6, 8, 8),
+                (2432, 6, 9, 1, 8, 9)] and
+            len(stage_progress["coffee_shop_calls"]) == 15 and
+            stage_progress["capture_identity"][
+                "byte_identical_selected_rows"] is True and
+            stage_progress["fixed_frame_substitute"] is False,
+            "Predator Button1 stage-progress fixture incomplete or drifted")
     child_emitter = weapon_contract["record4_parent_class0"][
         "child_emitter_state"]
     require(child_emitter["child_initial_facing_u8"] == 0 and

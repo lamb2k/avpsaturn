@@ -4711,7 +4711,23 @@ static void avsp_round1_observe_player_melee(AvspRound1Runtime *runtime,
 static int avsp_round1_player_weapon_contract_valid(void)
 {
     unsigned int index;
-    if (avsp_round1_player_weapon.sufficient_entry_action != 0x0c00u ||
+    if (avsp_round1_player_stage_progress.helper_entry != 0x0179e2UL ||
+        avsp_round1_player_stage_progress.caller_delta_pc != 0x024094UL ||
+        avsp_round1_player_stage_progress.caller_call_pc != 0x024096UL ||
+        avsp_round1_player_stage_progress.guard_a5_offset != 0x01b0u ||
+        avsp_round1_player_stage_progress.stage_a5_offset != 0x01eau ||
+        avsp_round1_player_stage_progress.upper_bound_a5_offset != 0x021au ||
+        avsp_round1_player_stage_progress.lower_bound_a5_offset != 0x021cu ||
+        avsp_round1_player_stage_progress.progress_a5_offset != 0x0226u ||
+        avsp_round1_player_stage_progress.delta != 3u ||
+        avsp_round1_player_stage_progress.threshold != 8u ||
+        avsp_round1_player_stage_progress.progress_mask != 7u ||
+        avsp_round1_player_stage_progress.stage_domain_limit != 32u ||
+        avsp_round1_player_stage_progress.stage_domain_mask != 31u ||
+        avsp_round1_player_stage_progress.lower_bound != 8 ||
+        avsp_round1_player_stage_progress.upper_bound != 16 ||
+        avsp_round1_player_stage_progress.action_entry_tick != 0u ||
+        avsp_round1_player_weapon.sufficient_entry_action != 0x0c00u ||
         avsp_round1_player_weapon.sufficient_active_action != 0x0c02u ||
         avsp_round1_player_weapon.empty_entry_action != 0x1a00u ||
         avsp_round1_player_weapon.empty_active_action != 0x1a02u ||
@@ -9896,6 +9912,44 @@ static int avsp_round1_begin_player_air_weapon(AvspRound1Runtime *runtime,
     return 1;
 }
 
+static int avsp_round1_apply_player_stage_progress(
+    AvspRound1Runtime *runtime)
+{
+    const AvspRound1PlayerStageProgressSpec *spec =
+        &avsp_round1_player_stage_progress;
+    unsigned short progress;
+    unsigned short carry;
+    short stage;
+    if (runtime == 0)
+        return 0;
+    ++runtime->player_stage_progress_calls;
+    if (runtime->source_stage_progress_guard != 0u)
+        return 1;
+    progress = (unsigned short)(
+        runtime->source_stage_progress_accumulator + spec->delta);
+    runtime->source_stage_progress_accumulator = progress;
+    carry = (unsigned short)(progress >= spec->threshold ? 1u : 0u);
+    runtime->source_stage_progress_accumulator = (unsigned short)(
+        runtime->source_stage_progress_accumulator & spec->progress_mask);
+    stage = (short)((short)runtime->source_stage_parameter + (short)carry);
+    if (stage < 0)
+        stage = 0;
+    else if ((unsigned short)stage >= spec->stage_domain_limit)
+        stage = (short)spec->stage_domain_mask;
+    stage = (short)((unsigned short)stage & spec->stage_domain_mask);
+    runtime->source_stage_parameter = (unsigned short)stage;
+    if (carry != 0u)
+        ++runtime->player_stage_progress_carries;
+    if (runtime->source_stage_progress_guard != 0u)
+        return 1;
+    if (stage > spec->upper_bound)
+        stage = spec->upper_bound;
+    else if (stage < spec->lower_bound)
+        stage = spec->lower_bound;
+    runtime->source_stage_parameter = (unsigned short)stage;
+    return 1;
+}
+
 static int avsp_round1_step_player_weapon(AvspRound1Runtime *runtime,
                                           unsigned char weapon_pressed,
                                           unsigned char weapon_edge)
@@ -9965,6 +10019,13 @@ static int avsp_round1_step_player_weapon(AvspRound1Runtime *runtime,
     {
         if (runtime->player_weapon_tick >=
             AVSP_ROUND1_PLAYER_WEAPON_PRESENTATION_COUNT)
+        {
+            ++runtime->failure_count;
+            return 0;
+        }
+        if (runtime->player_weapon_tick ==
+                avsp_round1_player_stage_progress.action_entry_tick &&
+            !avsp_round1_apply_player_stage_progress(runtime))
         {
             ++runtime->failure_count;
             return 0;

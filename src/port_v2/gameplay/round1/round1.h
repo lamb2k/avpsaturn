@@ -6,7 +6,7 @@
 #include "../../combat/hit_ko/hit_ko.h"
 
 #define AVSP_ROUND1_SPEC02_SHA256 \
-"6eb601e055bf9a59aaf7c1a10fea2cae1a351ca49324b22285c5faa82f30f60a"
+"37f8429a44a3d545b12d8242b0c8ab829e9ae2795cc1efa17f280fef7a9f6889"
 #define AVSP_ROUND1_CANARY_HEAD 0x52314548UL
 #define AVSP_ROUND1_CANARY_TAIL 0x52314554UL
 #define AVSP_ROUND1_ROUTE_ENTRY_STATE 2
@@ -1344,6 +1344,26 @@ typedef struct
 
 typedef struct
 {
+    unsigned long helper_entry;
+    unsigned long caller_delta_pc;
+    unsigned long caller_call_pc;
+    unsigned short guard_a5_offset;
+    unsigned short stage_a5_offset;
+    unsigned short upper_bound_a5_offset;
+    unsigned short lower_bound_a5_offset;
+    unsigned short progress_a5_offset;
+    unsigned short delta;
+    unsigned short threshold;
+    unsigned short progress_mask;
+    unsigned short stage_domain_limit;
+    unsigned short stage_domain_mask;
+    short lower_bound;
+    short upper_bound;
+    unsigned char action_entry_tick;
+} AvspRound1PlayerStageProgressSpec;
+
+typedef struct
+{
     unsigned short sufficient_entry_action;
     unsigned short sufficient_active_action;
     unsigned short empty_entry_action;
@@ -1629,6 +1649,10 @@ typedef struct
     unsigned long class1f_player_damage_writes;
     unsigned long class1f_hitstop_updates;
     unsigned short source_stage_parameter;
+    unsigned short source_stage_progress_accumulator;
+    unsigned char source_stage_progress_guard;
+    unsigned long player_stage_progress_calls;
+    unsigned long player_stage_progress_carries;
     unsigned short source_global_hit_pause;
     unsigned short player_variant;
     unsigned char source_stage_record_type;

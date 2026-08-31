@@ -69,6 +69,73 @@ def validate(data):
     assert action["resource_debit_tick"] == 1
     assert action["parent_allocation_tick"] == 2
     assert action["rng_calls"] == []
+    stage_progress = action["source_stage_progress"]
+    assert stage_progress["classification"] == \
+        "SOURCE_CLOSED_IMPLEMENTATION_FIELDS"
+    assert stage_progress["spec_executable"] is True
+    assert stage_progress["caller"] == {
+        "player_state_program": "0x024060",
+        "delta_load_pc": "0x024094",
+        "helper_call_pc": "0x024096",
+        "delta_u16": 3,
+        "action_entry_tick_u8": 0,
+        "scheduler_position": "sufficient Button1 action-entry player update before resource debit, projectile allocation, and actor scheduler",
+        "source_window": {
+            "start": "0x024060", "end_exclusive": "0x024100",
+            "bytes": 160,
+            "sha256": "629285f7329ff301a5f80b01ce3e1b9ac268a1df8bf56865bfd1b941ab1915d4",
+        },
+    }
+    helper = stage_progress["helper"]
+    assert helper["entry"] == "0x0179e2" and helper["return"] == "0x017b74"
+    assert helper["guard"] == {
+        "field": "a5+0x01b0:u8",
+        "predicate": "u8(a5+0x01b0) == 0",
+        "checked_before_add_and_before_route_bounds": True,
+    }
+    assert helper["fields"] == {
+        "progress": "a5+0x0226:u16",
+        "stage_parameter": "a5+0x01ea:s16",
+        "upper_bound": "a5+0x021a:s16",
+        "lower_bound": "a5+0x021c:s16",
+    }
+    assert helper["field_layout"] == {
+        "guard": {"a5_offset_u16": 0x01b0,
+                  "absolute": "0x00ff81b0", "width_u8": 1,
+                  "signed": False},
+        "stage_parameter": {"a5_offset_u16": 0x01ea,
+                            "absolute": "0x00ff81ea", "width_u8": 2,
+                            "signed": True},
+        "upper_bound": {"a5_offset_u16": 0x021a,
+                        "absolute": "0x00ff821a", "width_u8": 2,
+                        "signed": True},
+        "lower_bound": {"a5_offset_u16": 0x021c,
+                        "absolute": "0x00ff821c", "width_u8": 2,
+                        "signed": True},
+        "progress": {"a5_offset_u16": 0x0226,
+                     "absolute": "0x00ff8226", "width_u8": 2,
+                     "signed": False},
+    }
+    assert (helper["progress_threshold_u16"],
+            helper["progress_mask_u16"],
+            helper["stage_domain_limit_u16"],
+            helper["stage_domain_mask_u16"],
+            helper["coffee_shop_lower_bound_s16"],
+            helper["coffee_shop_upper_bound_s16"]) == (8, 7, 32, 31, 8, 16)
+    assert helper["rng_calls"] == []
+    assert [(row["source_frame_u16"], row["progress_before_u16"],
+             row["progress_after_add_u16"], row["progress_after_mask_u16"],
+             row["stage_before_s16"], row["stage_after_s16"])
+            for row in stage_progress["coffee_shop_calls"][:3]] == [
+                (2252, 0, 3, 3, 8, 8),
+                (2342, 3, 6, 6, 8, 8),
+                (2432, 6, 9, 1, 8, 9),
+            ]
+    assert len(stage_progress["coffee_shop_calls"]) == 15
+    assert stage_progress["capture_identity"]["independent_captures"] == 2
+    assert stage_progress["capture_identity"][
+        "byte_identical_selected_rows"] is True
+    assert stage_progress["fixed_frame_substitute"] is False
     timeline = action["presentation_timeline"]
     assert len(timeline) == 20
     assert [timeline[index]["animation_record"] for index in range(8)] == [
@@ -402,6 +469,10 @@ for path, value, label in [
     (("implementation_contract", "record4_parent_class0", "initialization", "presentation_records", 7, "animation_record"), "0x0002fba8", "missing terminal presentation"),
     (("implementation_contract", "source_input", "native_input_pipeline_updates_u8"), 0, "missing source input pipeline"),
     (("implementation_contract", "sufficient_action", "parent_allocation_tick"), 0, "premature parent allocation"),
+    (("implementation_contract", "sufficient_action", "source_stage_progress", "caller", "delta_u16"), 2, "wrong stage-progress delta"),
+    (("implementation_contract", "sufficient_action", "source_stage_progress", "helper", "progress_threshold_u16"), 7, "wrong stage-progress threshold"),
+    (("implementation_contract", "sufficient_action", "source_stage_progress", "coffee_shop_calls", 2, "source_frame_u16"), 2433, "late stage-progress invocation"),
+    (("implementation_contract", "sufficient_action", "source_stage_progress", "fixed_frame_substitute"), True, "fixed-frame stage transition"),
     (("implementation_contract", "resource_tick", "dispatch_guard", "rule"), "resource below debit owns empty dispatch", "instantaneous resource guess"),
     (("implementation_contract", "resource_tick", "normal_tick", "reload_u8"), 2, "wrong normal resource cadence"),
     (("implementation_contract", "resource_tick", "depleted_tick", "clear_latch_writer_pc"), "0x0adfe0", "premature depleted clear"),
@@ -440,4 +511,4 @@ for path, value, label in [
         cursor = cursor[key]
     cursor[path[-1]] = value
     reject(mutant, label)
-print("ORACLE-11 corrected Predator Button1 tests: PASS (46 mutations rejected)")
+print("ORACLE-11 corrected Predator Button1 tests: PASS (56 mutations rejected)")

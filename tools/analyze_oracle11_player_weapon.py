@@ -37,6 +37,8 @@ FULL_ROUTE = ROOT / ".deps/mame/full_route"
 COFFEE_RESOURCE_A = ROOT / ".deps/mame/reimplement13_coffee_resource_a"
 COFFEE_RESOURCE_B = ROOT / ".deps/mame/reimplement13_coffee_resource_b"
 COFFEE_RESOURCE_MUT = ROOT / ".deps/mame/reimplement13_coffee_resource_mut"
+ROUND1_ROUTE_A = ROOT / ".deps/mame/oracle11_round1_route_a/route_writes.tsv"
+ROUND1_ROUTE_B = ROOT / ".deps/mame/oracle11_round1_route_b/route_writes.tsv"
 VARIANTS = (
     "cold_run_1", "cold_run_2", "resource_empty", "b1_held",
     "repeat_startup", "repeat_active", "repeat_recovery", "target_inside",
@@ -73,6 +75,157 @@ def digest(path: Path) -> str:
 def rows(path: Path):
     with path.open(encoding="utf-8", newline="") as stream:
         return list(csv.DictReader(stream, delimiter="\t"))
+
+
+def selected_stage_progress_rows(path: Path):
+    selected = []
+    pcs = {"0179ee", "017a00", "017a1a"}
+    addresses = {"ff8226", "ff81ea"}
+    with path.open(encoding="utf-8", newline="") as stream:
+        for row in csv.DictReader(stream, delimiter="\t"):
+            if (int(row["frame"]) <= 5566 and
+                    row["pc"].lower() in pcs and
+                    row["address"].lower() in addresses):
+                selected.append(row)
+    return selected
+
+
+def stage_progress_contract(opcodes: bytes):
+    route_a = selected_stage_progress_rows(ROUND1_ROUTE_A)
+    route_b = selected_stage_progress_rows(ROUND1_ROUTE_B)
+    require(route_a == route_b, "Round 1 stage-progress captures differ")
+    require(len(route_a) == 45, "unexpected Coffee Shop stage-progress rows")
+    calls = []
+    for index in range(0, len(route_a), 3):
+        add_row, mask_row, stage_row = route_a[index:index + 3]
+        require((add_row["pc"].lower(), add_row["address"].lower()) ==
+                ("0179ee", "ff8226"), "stage-progress add writer drift")
+        require((mask_row["pc"].lower(), mask_row["address"].lower()) ==
+                ("017a00", "ff8226"), "stage-progress mask writer drift")
+        require((stage_row["pc"].lower(), stage_row["address"].lower()) ==
+                ("017a1a", "ff81ea"), "stage-progress stage writer drift")
+        require(add_row["frame"] == mask_row["frame"] == stage_row["frame"],
+                "stage-progress transaction split across frames")
+        require(add_row["a6"].lower() == "ff8380" and
+                mask_row["a6"].lower() == "ff8380" and
+                stage_row["a6"].lower() == "ff8380",
+                "stage-progress transaction is not player-owned")
+        before = int(add_row["old"], 16) & 0xffff
+        after_add = int(add_row["data"], 16) & 0xffff
+        after_mask = int(mask_row["data"], 16) & 0xffff
+        stage_before = int(stage_row["old"], 16) & 0xffff
+        stage_after = int(stage_row["data"], 16) & 0xffff
+        require(after_add == ((before + 3) & 0xffff),
+                "stage-progress caller delta drift")
+        require(after_mask == (after_add & 7),
+                "stage-progress accumulator mask drift")
+        require(stage_after == min(16, max(8,
+                stage_before + (1 if after_add >= 8 else 0))),
+                "stage-progress stage arithmetic drift")
+        calls.append({
+            "source_frame_u16": int(add_row["frame"]),
+            "progress_before_u16": before,
+            "progress_after_add_u16": after_add,
+            "progress_after_mask_u16": after_mask,
+            "stage_before_s16": stage_before,
+            "stage_after_s16": stage_after,
+        })
+    require([row["source_frame_u16"] for row in calls[:3]] ==
+            [2252, 2342, 2432], "Coffee Shop stage-progress timing drift")
+    require([(row["progress_before_u16"],
+              row["progress_after_add_u16"],
+              row["progress_after_mask_u16"],
+              row["stage_before_s16"], row["stage_after_s16"])
+             for row in calls[:3]] == [
+                (0, 3, 3, 8, 8),
+                (3, 6, 6, 8, 8),
+                (6, 9, 1, 8, 9)],
+            "Coffee Shop first stage transition drift")
+    canonical = json.dumps(calls, sort_keys=True,
+                           separators=(",", ":")).encode("ascii")
+    return {
+        "classification": "SOURCE_CLOSED_IMPLEMENTATION_FIELDS",
+        "spec_executable": True,
+        "caller": {
+            "player_state_program": "0x024060",
+            "delta_load_pc": "0x024094",
+            "helper_call_pc": "0x024096",
+            "delta_u16": 3,
+            "action_entry_tick_u8": 0,
+            "scheduler_position": (
+                "sufficient Button1 action-entry player update before "
+                "resource debit, projectile allocation, and actor scheduler"),
+            "source_window": window(opcodes, 0x024060, 0x024100),
+        },
+        "helper": {
+            "entry": "0x0179e2",
+            "return": "0x017b74",
+            "source_window": window(opcodes, 0x0179e2, 0x017b76),
+            "guard": {
+                "field": "a5+0x01b0:u8",
+                "predicate": "u8(a5+0x01b0) == 0",
+                "checked_before_add_and_before_route_bounds": True,
+            },
+            "fields": {
+                "progress": "a5+0x0226:u16",
+                "stage_parameter": "a5+0x01ea:s16",
+                "upper_bound": "a5+0x021a:s16",
+                "lower_bound": "a5+0x021c:s16",
+            },
+            "field_layout": {
+                "guard": {"a5_offset_u16": 0x01b0,
+                          "absolute": "0x00ff81b0", "width_u8": 1,
+                          "signed": False},
+                "stage_parameter": {"a5_offset_u16": 0x01ea,
+                                    "absolute": "0x00ff81ea",
+                                    "width_u8": 2, "signed": True},
+                "upper_bound": {"a5_offset_u16": 0x021a,
+                                "absolute": "0x00ff821a", "width_u8": 2,
+                                "signed": True},
+                "lower_bound": {"a5_offset_u16": 0x021c,
+                                "absolute": "0x00ff821c", "width_u8": 2,
+                                "signed": True},
+                "progress": {"a5_offset_u16": 0x0226,
+                             "absolute": "0x00ff8226", "width_u8": 2,
+                             "signed": False},
+            },
+            "arithmetic_order": [
+                "u16 progress = u16(progress + delta)",
+                "u16 carry = progress >= 8 ? 1 : 0",
+                "progress = u16(progress & 7)",
+                "s16 stage = s16(stage + carry)",
+                "stage = stage < 0 ? 0 : (stage >= 32 ? 31 : stage)",
+                "stage = s16(u16(stage) & 31)",
+                "stage = stage > upper_bound ? upper_bound : stage",
+                "stage = stage < lower_bound ? lower_bound : stage",
+            ],
+            "progress_threshold_u16": 8,
+            "progress_mask_u16": 7,
+            "stage_domain_limit_u16": 32,
+            "stage_domain_mask_u16": 31,
+            "coffee_shop_lower_bound_s16": 8,
+            "coffee_shop_upper_bound_s16": 16,
+            "rng_calls": [],
+            "writers": ["0x0179e8", "0x0179f8", "0x017a16",
+                        "0x017b60", "0x017b70"],
+        },
+        "coffee_shop_calls": calls,
+        "capture_identity": {
+            "independent_captures": 2,
+            "byte_identical_selected_rows": True,
+            "selected_rows": len(route_a),
+            "transaction_sha256": hashlib.sha256(canonical).hexdigest(),
+            "route_a_sha256": digest(ROUND1_ROUTE_A),
+            "route_b_sha256": digest(ROUND1_ROUTE_B),
+        },
+        "mutation_controls": [
+            "delta 2 delays the first stage carry past the third Coffee Shop call",
+            "threshold 7 advances a later carry at a different accumulator value",
+            "invocation after action entry changes the scheduler-visible stage parameter",
+            "direct stage-9 initialization destroys the frame-2072 stage-8 source setup",
+        ],
+        "fixed_frame_substitute": False,
+    }
 
 
 def run(root: Path, name: str):
@@ -1103,6 +1256,7 @@ empty_effect_contract["mutation_controls"] = [
     "allocation on entry instead of the next player-state update advances the actor lifetime one frame",
     "clearing the reused record loses the source-retained z=319 witness",
 ]
+source_stage_progress = stage_progress_contract(opcodes)
 
 implementation_contract = {
     "classification": "SOURCE_CLOSED_IMPLEMENTATION_FIELDS",
@@ -1132,6 +1286,7 @@ implementation_contract = {
         "player_position_and_facing_latched": True, "rng_calls": [],
         "resource_debit_tick": 1,
         "parent_allocation_tick": 2,
+        "source_stage_progress": source_stage_progress,
         "entry_projection": {
             "entry_rule": "write action/substate 0x0c00 while preserving the current animation record, assembly, timer, branch, and collision selectors; bind the selected 0x0c02 record on the following player update",
             "entry_preserves_current_presentation": True,

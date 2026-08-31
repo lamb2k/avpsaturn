@@ -36,6 +36,19 @@ weapon = fixtures["authority_data"]["player"][
 assert weapon["source_input"]["button1_mask"] == "0x0010"
 assert weapon["sufficient_action"]["cleanup_tick"] == 19
 assert weapon["sufficient_action"]["resource_debit_u8"] == 40
+stage_progress = weapon["sufficient_action"]["source_stage_progress"]
+assert stage_progress["classification"] == "SOURCE_CLOSED_IMPLEMENTATION_FIELDS"
+assert stage_progress["spec_executable"] is True
+assert stage_progress["caller"]["delta_u16"] == 3
+assert stage_progress["caller"]["helper_call_pc"] == "0x024096"
+assert stage_progress["helper"]["entry"] == "0x0179e2"
+assert stage_progress["helper"]["progress_threshold_u16"] == 8
+assert stage_progress["helper"]["progress_mask_u16"] == 7
+assert stage_progress["helper"]["stage_domain_limit_u16"] == 32
+assert stage_progress["helper"]["stage_domain_mask_u16"] == 31
+assert [(row["source_frame_u16"], row["stage_after_s16"])
+        for row in stage_progress["coffee_shop_calls"][:3]] == [
+            (2252, 8), (2342, 8), (2432, 9)]
 assert weapon["empty_fallback"]["cleanup_tick"] == 17
 parent = weapon["record4_parent_class0"]
 child = weapon["record4_child_class4"]
@@ -703,6 +716,10 @@ f = copy.deepcopy(fixtures); f["authority_data"]["player"]["directional_airborne
 f = copy.deepcopy(fixtures); f["authority_data"]["player"]["directional_airborne_interruption"]["directional_actions"]["implementation_contract"]["motion_and_landing"]["phase_0x040a"]["negative_velocity_transition"]["phase_timer_s16"] = 9; mutations.append((contract, f, "Button3 timer mutation"))
 f = copy.deepcopy(fixtures); f["authority_data"]["player"]["directional_airborne_interruption"]["directional_actions"]["implementation_contract"]["rng_calls"] = ["guess"]; mutations.append((contract, f, "Button3 RNG mutation"))
 f = copy.deepcopy(fixtures); f["authority_data"]["player"]["directional_airborne_interruption"]["directional_actions"]["implementation_contract"]["presentation_actor_fields"]["object_or_u16"] = "0x0000"; mutations.append((contract, f, "Button3 presentation actor mutation"))
+f = copy.deepcopy(fixtures); f["authority_data"]["player"]["weapon_projectile_resource"]["implementation_contract"]["sufficient_action"]["source_stage_progress"]["caller"]["delta_u16"] = 2; mutations.append((contract, f, "Button1 stage-progress delta mutation"))
+f = copy.deepcopy(fixtures); f["authority_data"]["player"]["weapon_projectile_resource"]["implementation_contract"]["sufficient_action"]["source_stage_progress"]["helper"]["progress_threshold_u16"] = 7; mutations.append((contract, f, "Button1 stage-progress threshold mutation"))
+f = copy.deepcopy(fixtures); f["authority_data"]["player"]["weapon_projectile_resource"]["implementation_contract"]["sufficient_action"]["source_stage_progress"]["coffee_shop_calls"][2]["source_frame_u16"] = 2433; mutations.append((contract, f, "Button1 stage-progress timing mutation"))
+f = copy.deepcopy(fixtures); f["authority_data"]["player"]["weapon_projectile_resource"]["implementation_contract"]["sufficient_action"]["source_stage_progress"]["fixed_frame_substitute"] = True; mutations.append((contract, f, "Button1 stage-progress fixed-frame mutation"))
 f = copy.deepcopy(fixtures); f["authority_data"]["player"]["directional_airborne_interruption"]["airborne_actions"]["button1"]["record4_class03"]["class_u8"] = 0; mutations.append((contract, f, "airborne Button1 class-3 identity mutation"))
 f = copy.deepcopy(fixtures); f["authority_data"]["player"]["directional_airborne_interruption"]["airborne_actions"]["button1"]["record4_class03"]["player_phase_0x0406"]["presentation_selector_u8"] = 17; mutations.append((contract, f, "airborne Button1 player presentation selector mutation"))
 f = copy.deepcopy(fixtures); f["authority_data"]["player"]["directional_airborne_interruption"]["airborne_actions"]["button1"]["record4_class03"]["effect_allocation"]["audio_command"] = "0x0008"; mutations.append((contract, f, "class-3 effect mislabeled as audio"))

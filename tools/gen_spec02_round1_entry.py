@@ -341,6 +341,9 @@ def build() -> str:
         "weapon_projectile_resource"]["special_implementation_contract"]
     weapon_states = weapon["state_dispatch"]
     weapon_action = weapon["sufficient_action"]
+    weapon_stage_progress = weapon_action["source_stage_progress"]
+    weapon_stage_progress_helper = weapon_stage_progress["helper"]
+    weapon_stage_progress_layout = weapon_stage_progress_helper["field_layout"]
     weapon_action_entry = weapon_action["entry_projection"]
     weapon_animation_execution = weapon_action["animation_execution"]
     weapon_resource = weapon["resource_tick"]
@@ -1417,6 +1420,55 @@ def build() -> str:
         weapon_action["parent_allocation_tick"] != 2 or
         weapon_action["recharge_countdown_after_entry_u8"] != 12 or
         weapon_action["rng_calls"] != [] or
+        weapon_stage_progress["classification"] !=
+            "SOURCE_CLOSED_IMPLEMENTATION_FIELDS" or
+        weapon_stage_progress["spec_executable"] is not True or
+        weapon_stage_progress["caller"]["player_state_program"] !=
+            "0x024060" or
+        weapon_stage_progress["caller"]["delta_load_pc"] != "0x024094" or
+        weapon_stage_progress["caller"]["helper_call_pc"] != "0x024096" or
+        weapon_stage_progress["caller"]["delta_u16"] != 3 or
+        weapon_stage_progress["caller"]["action_entry_tick_u8"] != 0 or
+        weapon_stage_progress_helper["entry"] != "0x0179e2" or
+        weapon_stage_progress_helper["return"] != "0x017b74" or
+        weapon_stage_progress_helper["guard"] != {
+            "field": "a5+0x01b0:u8",
+            "predicate": "u8(a5+0x01b0) == 0",
+            "checked_before_add_and_before_route_bounds": True} or
+        weapon_stage_progress_layout != {
+            "guard": {"a5_offset_u16": 0x01b0,
+                      "absolute": "0x00ff81b0", "width_u8": 1,
+                      "signed": False},
+            "stage_parameter": {"a5_offset_u16": 0x01ea,
+                                "absolute": "0x00ff81ea", "width_u8": 2,
+                                "signed": True},
+            "upper_bound": {"a5_offset_u16": 0x021a,
+                            "absolute": "0x00ff821a", "width_u8": 2,
+                            "signed": True},
+            "lower_bound": {"a5_offset_u16": 0x021c,
+                            "absolute": "0x00ff821c", "width_u8": 2,
+                            "signed": True},
+            "progress": {"a5_offset_u16": 0x0226,
+                         "absolute": "0x00ff8226", "width_u8": 2,
+                         "signed": False}} or
+        weapon_stage_progress_helper["progress_threshold_u16"] != 8 or
+        weapon_stage_progress_helper["progress_mask_u16"] != 7 or
+        weapon_stage_progress_helper["stage_domain_limit_u16"] != 32 or
+        weapon_stage_progress_helper["stage_domain_mask_u16"] != 31 or
+        weapon_stage_progress_helper["coffee_shop_lower_bound_s16"] != 8 or
+        weapon_stage_progress_helper["coffee_shop_upper_bound_s16"] != 16 or
+        weapon_stage_progress_helper["rng_calls"] != [] or
+        [(row["source_frame_u16"], row["progress_before_u16"],
+          row["progress_after_add_u16"], row["progress_after_mask_u16"],
+          row["stage_before_s16"], row["stage_after_s16"])
+         for row in weapon_stage_progress["coffee_shop_calls"][:3]] != [
+            (2252, 0, 3, 3, 8, 8),
+            (2342, 3, 6, 6, 8, 8),
+            (2432, 6, 9, 1, 8, 9)] or
+        len(weapon_stage_progress["coffee_shop_calls"]) != 15 or
+        weapon_stage_progress["capture_identity"][
+            "byte_identical_selected_rows"] is not True or
+        weapon_stage_progress["fixed_frame_substitute"] is not False or
         weapon_resource["dispatch_guard"]["routine"] != "0x01a6f4" or
         weapon_resource["dispatch_guard"]["empty_action_u16"] !=
             "0x1a00" or
@@ -3487,6 +3539,25 @@ def build() -> str:
     for x, z in class3d_offsets:
         lines.append(f"    {{ {x}, {z} }},")
     lines.extend([
+        "};", "",
+        "static const AvspRound1PlayerStageProgressSpec avsp_round1_player_stage_progress =",
+        "{",
+        f"    {weapon_stage_progress_helper['entry']}UL,",
+        f"    {weapon_stage_progress['caller']['delta_load_pc']}UL,",
+        f"    {weapon_stage_progress['caller']['helper_call_pc']}UL,",
+        f"    0x{weapon_stage_progress_layout['guard']['a5_offset_u16']:04x}u,",
+        f"    0x{weapon_stage_progress_layout['stage_parameter']['a5_offset_u16']:04x}u,",
+        f"    0x{weapon_stage_progress_layout['upper_bound']['a5_offset_u16']:04x}u,",
+        f"    0x{weapon_stage_progress_layout['lower_bound']['a5_offset_u16']:04x}u,",
+        f"    0x{weapon_stage_progress_layout['progress']['a5_offset_u16']:04x}u,",
+        f"    {weapon_stage_progress['caller']['delta_u16']}u,",
+        f"    {weapon_stage_progress_helper['progress_threshold_u16']}u,",
+        f"    {weapon_stage_progress_helper['progress_mask_u16']}u,",
+        f"    {weapon_stage_progress_helper['stage_domain_limit_u16']}u,",
+        f"    {weapon_stage_progress_helper['stage_domain_mask_u16']}u,",
+        f"    {weapon_stage_progress_helper['coffee_shop_lower_bound_s16']},",
+        f"    {weapon_stage_progress_helper['coffee_shop_upper_bound_s16']},",
+        f"    {weapon_stage_progress['caller']['action_entry_tick_u8']}u",
         "};", "",
         "static const AvspRound1PlayerWeaponSpec avsp_round1_player_weapon =",
         "{",

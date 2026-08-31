@@ -18090,58 +18090,6 @@
       "empty_fallback": {
         "cleanup_tick": 17,
         "damaging_record4_count": 0,
-        "entry_projection": {
-          "active_replacement": {
-            "action_u16": "0x1a02",
-            "animation_branch_s16": -32768,
-            "animation_record": "0x0015fcfc",
-            "animation_timer_u16": 4095,
-            "assembly": "0x00161772",
-            "current_attack_selector_u8": 0,
-            "current_hurt_selector_u8": 0,
-            "state_u16": "0x0200",
-            "substate_u16": "0x1a02",
-            "visible_update_offset_u8": 1
-          },
-          "classification": "SOURCE_CLOSED_IMPLEMENTATION_FIELDS",
-          "coffee_shop_witnesses": [
-            {
-              "active_frame_u16": 2523,
-              "entry_animation_record": "0x0015f1f4",
-              "entry_frame_u16": 2522,
-              "prior_animation_record": "0x0015f1f4",
-              "prior_frame_u16": 2521
-            },
-            {
-              "active_frame_u16": 2613,
-              "entry_animation_record": "0x0015f228",
-              "entry_frame_u16": 2612,
-              "prior_animation_record": "0x0015f228",
-              "prior_frame_u16": 2611
-            }
-          ],
-          "entry_preserves": [
-            "animation_record:u32",
-            "assembly:u32",
-            "animation_timer:u16",
-            "animation_branch:s16",
-            "current_hurt_selector:u8",
-            "current_attack_selector:u8"
-          ],
-          "entry_rule": "write state 0x0200 and action/substate 0x1a00 while preserving the current animation record, assembly, timer, branch, and current collision selectors; bind the 0x1a02 active record on the following player update",
-          "entry_writes": {
-            "action_u16": "0x1a00",
-            "state_u16": "0x0200",
-            "substate_u16": "0x1a00"
-          },
-          "mutation_controls": [
-            "reject fixed idle presentation on a walking entry",
-            "reject binding the active presentation on the entry update",
-            "reject delaying the active presentation past the next update"
-          ],
-          "rng_calls": [],
-          "spec_executable": true
-        },
         "presentation_timeline": [
           {
             "action_u16": 6656,
@@ -26163,7 +26111,239 @@
         "resource_debit_tick": 1,
         "resource_debit_u8": 40,
         "return_tick": 20,
-        "rng_calls": []
+        "rng_calls": [],
+        "source_stage_progress": {
+          "caller": {
+            "action_entry_tick_u8": 0,
+            "delta_load_pc": "0x024094",
+            "delta_u16": 3,
+            "helper_call_pc": "0x024096",
+            "player_state_program": "0x024060",
+            "scheduler_position": "sufficient Button1 action-entry player update before resource debit, projectile allocation, and actor scheduler",
+            "source_window": {
+              "bytes": 160,
+              "end_exclusive": "0x024100",
+              "sha256": "629285f7329ff301a5f80b01ce3e1b9ac268a1df8bf56865bfd1b941ab1915d4",
+              "start": "0x024060"
+            }
+          },
+          "capture_identity": {
+            "byte_identical_selected_rows": true,
+            "independent_captures": 2,
+            "route_a_sha256": "6f1e4d6da736d9b886a834bf72fc426e58011f68e512acf1d6e8b7348c4f858a",
+            "route_b_sha256": "6f1e4d6da736d9b886a834bf72fc426e58011f68e512acf1d6e8b7348c4f858a",
+            "selected_rows": 45,
+            "transaction_sha256": "1a323351c6aba95788d690a202cb75d6058dff85c1ed6859716bd5a5b93c02d7"
+          },
+          "classification": "SOURCE_CLOSED_IMPLEMENTATION_FIELDS",
+          "coffee_shop_calls": [
+            {
+              "progress_after_add_u16": 3,
+              "progress_after_mask_u16": 3,
+              "progress_before_u16": 0,
+              "source_frame_u16": 2252,
+              "stage_after_s16": 8,
+              "stage_before_s16": 8
+            },
+            {
+              "progress_after_add_u16": 6,
+              "progress_after_mask_u16": 6,
+              "progress_before_u16": 3,
+              "source_frame_u16": 2342,
+              "stage_after_s16": 8,
+              "stage_before_s16": 8
+            },
+            {
+              "progress_after_add_u16": 9,
+              "progress_after_mask_u16": 1,
+              "progress_before_u16": 6,
+              "source_frame_u16": 2432,
+              "stage_after_s16": 9,
+              "stage_before_s16": 8
+            },
+            {
+              "progress_after_add_u16": 4,
+              "progress_after_mask_u16": 4,
+              "progress_before_u16": 1,
+              "source_frame_u16": 2882,
+              "stage_after_s16": 9,
+              "stage_before_s16": 9
+            },
+            {
+              "progress_after_add_u16": 7,
+              "progress_after_mask_u16": 7,
+              "progress_before_u16": 4,
+              "source_frame_u16": 2927,
+              "stage_after_s16": 9,
+              "stage_before_s16": 9
+            },
+            {
+              "progress_after_add_u16": 10,
+              "progress_after_mask_u16": 2,
+              "progress_before_u16": 7,
+              "source_frame_u16": 3332,
+              "stage_after_s16": 11,
+              "stage_before_s16": 10
+            },
+            {
+              "progress_after_add_u16": 5,
+              "progress_after_mask_u16": 5,
+              "progress_before_u16": 2,
+              "source_frame_u16": 3377,
+              "stage_after_s16": 11,
+              "stage_before_s16": 11
+            },
+            {
+              "progress_after_add_u16": 8,
+              "progress_after_mask_u16": 0,
+              "progress_before_u16": 5,
+              "source_frame_u16": 3827,
+              "stage_after_s16": 12,
+              "stage_before_s16": 11
+            },
+            {
+              "progress_after_add_u16": 3,
+              "progress_after_mask_u16": 3,
+              "progress_before_u16": 0,
+              "source_frame_u16": 3962,
+              "stage_after_s16": 12,
+              "stage_before_s16": 12
+            },
+            {
+              "progress_after_add_u16": 6,
+              "progress_after_mask_u16": 6,
+              "progress_before_u16": 3,
+              "source_frame_u16": 4052,
+              "stage_after_s16": 13,
+              "stage_before_s16": 13
+            },
+            {
+              "progress_after_add_u16": 9,
+              "progress_after_mask_u16": 1,
+              "progress_before_u16": 6,
+              "source_frame_u16": 4127,
+              "stage_after_s16": 14,
+              "stage_before_s16": 13
+            },
+            {
+              "progress_after_add_u16": 4,
+              "progress_after_mask_u16": 4,
+              "progress_before_u16": 1,
+              "source_frame_u16": 4652,
+              "stage_after_s16": 14,
+              "stage_before_s16": 14
+            },
+            {
+              "progress_after_add_u16": 7,
+              "progress_after_mask_u16": 7,
+              "progress_before_u16": 4,
+              "source_frame_u16": 4696,
+              "stage_after_s16": 14,
+              "stage_before_s16": 14
+            },
+            {
+              "progress_after_add_u16": 10,
+              "progress_after_mask_u16": 2,
+              "progress_before_u16": 7,
+              "source_frame_u16": 5102,
+              "stage_after_s16": 16,
+              "stage_before_s16": 15
+            },
+            {
+              "progress_after_add_u16": 5,
+              "progress_after_mask_u16": 5,
+              "progress_before_u16": 2,
+              "source_frame_u16": 5147,
+              "stage_after_s16": 16,
+              "stage_before_s16": 16
+            }
+          ],
+          "fixed_frame_substitute": false,
+          "helper": {
+            "arithmetic_order": [
+              "u16 progress = u16(progress + delta)",
+              "u16 carry = progress >= 8 ? 1 : 0",
+              "progress = u16(progress & 7)",
+              "s16 stage = s16(stage + carry)",
+              "stage = stage < 0 ? 0 : (stage >= 32 ? 31 : stage)",
+              "stage = s16(u16(stage) & 31)",
+              "stage = stage > upper_bound ? upper_bound : stage",
+              "stage = stage < lower_bound ? lower_bound : stage"
+            ],
+            "coffee_shop_lower_bound_s16": 8,
+            "coffee_shop_upper_bound_s16": 16,
+            "entry": "0x0179e2",
+            "field_layout": {
+              "guard": {
+                "a5_offset_u16": 432,
+                "absolute": "0x00ff81b0",
+                "signed": false,
+                "width_u8": 1
+              },
+              "lower_bound": {
+                "a5_offset_u16": 540,
+                "absolute": "0x00ff821c",
+                "signed": true,
+                "width_u8": 2
+              },
+              "progress": {
+                "a5_offset_u16": 550,
+                "absolute": "0x00ff8226",
+                "signed": false,
+                "width_u8": 2
+              },
+              "stage_parameter": {
+                "a5_offset_u16": 490,
+                "absolute": "0x00ff81ea",
+                "signed": true,
+                "width_u8": 2
+              },
+              "upper_bound": {
+                "a5_offset_u16": 538,
+                "absolute": "0x00ff821a",
+                "signed": true,
+                "width_u8": 2
+              }
+            },
+            "fields": {
+              "lower_bound": "a5+0x021c:s16",
+              "progress": "a5+0x0226:u16",
+              "stage_parameter": "a5+0x01ea:s16",
+              "upper_bound": "a5+0x021a:s16"
+            },
+            "guard": {
+              "checked_before_add_and_before_route_bounds": true,
+              "field": "a5+0x01b0:u8",
+              "predicate": "u8(a5+0x01b0) == 0"
+            },
+            "progress_mask_u16": 7,
+            "progress_threshold_u16": 8,
+            "return": "0x017b74",
+            "rng_calls": [],
+            "source_window": {
+              "bytes": 404,
+              "end_exclusive": "0x017b76",
+              "sha256": "ec5558131f2c4076533af9f913c12145450e8b0c0d6c04589c0030bb0b0428be",
+              "start": "0x0179e2"
+            },
+            "stage_domain_limit_u16": 32,
+            "stage_domain_mask_u16": 31,
+            "writers": [
+              "0x0179e8",
+              "0x0179f8",
+              "0x017a16",
+              "0x017b60",
+              "0x017b70"
+            ]
+          },
+          "mutation_controls": [
+            "delta 2 delays the first stage carry past the third Coffee Shop call",
+            "threshold 7 advances a later carry at a different accumulator value",
+            "invocation after action entry changes the scheduler-visible stage parameter",
+            "direct stage-9 initialization destroys the frame-2072 stage-8 source setup"
+          ],
+          "spec_executable": true
+        }
       }
     },
     "mutation_controls": {
@@ -26182,7 +26362,7 @@
         "completion_b": "af67295b879521e0aba388ebe4b1bd9e8698c21c86e9d5b837da14efe086b4cb",
         "increment_writer_suppression": "c644944b8036028064ddb068bce96a937a5e3641e8fceb3f9d7abd1b69534d00"
       },
-      "collision_registration_capture_script_sha256": "f03268bc9676afcd6c319cb2096328b726e2df2bdd2449ccead7b07d14887266",
+      "collision_registration_capture_script_sha256": "231b9316eb718cbdbb2d3022d25682a6e5ab7e68eebd094d77f8c2ab52790396",
       "collision_registration_evidence": {
         "coffee_shop_collision_actor_flags.tsv": "49ed048a0a11cbee06823cef07a9ec29c1034f66849b5734a581819fb7184e79",
         "coffee_shop_collision_identity_assignments.tsv": "41dfc90ad89a4c523cc4ec6dcf87afc104695b35682764902dd031f2f205bb60",

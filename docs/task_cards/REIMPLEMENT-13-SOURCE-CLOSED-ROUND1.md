@@ -1559,6 +1559,36 @@ adding wrong-delta, wrong-threshold, and wrong-timing mutations. No direct
 stage-9 assignment, initialization change, frame/slot exception, or bounded
 Oracle recapture is justified by the currently accepted evidence.
 
+### Paused Button1 stage-progress implementation checkpoint (2026-08-31)
+
+The complete route-reachable helper is now represented in the existing
+Predator weapon Oracle artifact, SPEC-02, generated fixture/header, and native
+runtime. The bound source contract includes caller `0x024094..0x024096`, helper
+`0x0179e2..0x017b74`, the exact guard and five global fields, signedness,
+arithmetic and branch order, Coffee Shop bounds, 15 accepted route calls, no
+RNG, and action-entry scheduler ordering. The SPEC builder now regenerates the
+already accepted empty-resource entry projection instead of dropping it.
+
+Oracle player-weapon validation passes with 56 mutations. SPEC-02 passes with
+47 fields and 162 mutations; contract SHA is
+`37f8429a44a3d545b12d8242b0c8ab829e9ae2795cc1efa17f280fef7a9f6889`
+and fixture SHA is
+`a151d33a9174710d353a52a1933b63ab459856d3c602f047ca211d786f50ce31`.
+The generator check passes. Native baseline compilation reaches the existing
+Coffee Shop differential but remains RED at scheduler frame 1757/code 15,
+slot `0x00ffa000`: stage 11, accumulator 0, eight helper calls, three carries,
+22 total weapon entries, RNG `0x1908`.
+
+The accepted source route has seven helper calls before the frame-3525
+class-`0x1f` comparison and its eighth only at source frame 3827. The exact
+next body is therefore the sufficient-Button1 call edge or source-update
+cadence, not the proven helper arithmetic. Locate the first extra native call
+against source frames 2252/2342/2432/2882/2927/3332/3377/3827 and repair its
+owning input/action/recovery transition. Do not assign a stage constant, change
+the helper arithmetic, add a frame/slot exception, weaken the differential, or
+rebaseline the input. Native mutation execution, Target, scene census,
+Emulator, and WGC remain deferred at this red WIP boundary.
+
 ## Next eligible cards
 
 - `QA-13-ROUND1-END-TO-END-DIFFERENTIAL` after the complete stable Round 2
