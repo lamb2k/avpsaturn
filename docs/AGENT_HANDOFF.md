@@ -1,25 +1,92 @@
 # Workflow pivot — REIMPLEMENT-13 paused agent handoff
 
-Resume the persistent AvP Goal on `codex/avp-playable-loop-pivot`. The active card remains `REIMPLEMENT-13-SOURCE-CLOSED-ROUND1`. The accepted runtime candidate `d04a65a2253175c6e820140feefc35419e2cca07` intentionally remains unchanged because Coffee Shop has not passed its zero-gap scene gate.
+Resume the persistent AvP Goal on `codex/avp-playable-loop-pivot`. The active
+card remains `REIMPLEMENT-13-SOURCE-CLOSED-ROUND1`. The accepted runtime
+candidate `d04a65a2253175c6e820140feefc35419e2cca07` intentionally remains
+unchanged because Coffee Shop has not passed its zero-gap scene gate. The
+branch head is a committed RED implementation checkpoint, not a promoted
+candidate.
 
-Read `project_state.yaml`, this handoff, the active task card, and the current SPEC-02 contract/generated fixtures completely before acting. Do not create another Goal, workflow, roadmap, branch, task hierarchy, coverage system, or parallel writer. Preserve USER-09 `CHANGES_REQUESTED`, SALVAGE-08 inactive, physical Saturn `UNRUN`, and every accepted gameplay/presentation lock. Do not stage, reset, or overwrite user-owned `data/avsp_anim_records.json` or `history.txt`; stage owned paths explicitly.
+Read `project_state.yaml`, this handoff, the active task card, and the current
+SPEC-02 contract/generated fixtures completely before acting. Do not create
+another Goal, workflow, roadmap, branch, task hierarchy, coverage system, or
+parallel writer. Preserve USER-09 `CHANGES_REQUESTED`, SALVAGE-08 inactive,
+physical Saturn `UNRUN`, and every accepted gameplay/presentation lock. Do not
+stage, reset, or overwrite user-owned `data/avsp_anim_records.json` or
+`history.txt`; stage owned paths explicitly.
 
 ## Paused checkpoint
 
-The complete Coffee Shop-reachable class-`0x1f` inner-state-`0x08`, action-`0x0c` timer-selection boundary is now corrected through the existing Oracle, SPEC-02, generated-header, native-table, and mutation pipeline. The prior native implementation incorrectly treated the one observed Coffee Shop stage parameter, 9, as an execution guard. Accepted decrypted program bytes at `0x0bc55a..0x0bc5fa` establish five complete 32-byte timer rows selected through the 32-entry stage-offset table at `0x0bc53a..0x0bc55a`; stage 11 also selects offset 32 and must execute row 1. Native now validates the stage offset, derives the row, consumes exactly one source RNG value, and indexes the selected row by `rng & 31`. No frame, slot, or fixed-stage exception remains.
+The accepted class-`0x1f` action-`0x0c` five-row timer-table checkpoint remains
+unchanged. Investigation of its later frame-4052 symptom proved that native had
+completed only one of the source route's five player HITs; the missing later
+HITs were downstream of an earlier shared player Button1 projection mismatch,
+not a stuck HIT-return program.
 
-The focused action-`0x0c` lane passes one real mutation: restoring the rejected fixed-stage-9 guard fails at the old return-94/frame-3827 boundary while baseline advances to the next independent boundary. Oracle enemy validation passes 104 mutations. SPEC-02 passes 167 mutations. The generated header is current. Contract SHA is `790da00bd00deacf085fef6426cea606587355b3f828fbdbf72cd753f059840a`; fixture SHA is `42ec4f39a49a565c958924866ebac8d03f365ae283f499ee06d660ab03f1045e`; Oracle enemy artifact SHA is `634495784ea8c7e3557b93a5715ca45bf5de353e76015e87fcf5c45abdc99132`.
+Fresh source/native comparison identified the first player mismatch at source
+frame 2252. The accepted SPEC-02 player weapon fixture already requires the
+physical edge at 2250, one native input-pipeline update, visible entry action
+`0x0c00` at 2252, active `0x0c02` presentation at 2253, parent visibility at
+2254, stage-progress/resource/parent tick 1, and the corresponding empty path
+`0x1a00` at 2522 with active presentation plus its class-`0x10` effect at 2523.
+Native was projecting both sufficient and empty Button1 one visible frame late.
 
-Target `LiveEncounterBench` BUILD_ONLY passes after updating only the declared SPEC fixture identity in the retained combat-overlay contract. The combat overlay itself is unchanged at 126 tiles/16712 bytes with SHA `171f0dfa25d8a1fe94d2889f89c78e71bd3b1cfffa9fd5ff11964b1fc23815fe`. The tile archive remains 592648/614400 bytes. Build ISO SHA is `0bc362062eea3cc4c7b2e15ceee0a7c1b9c04b5123956a9cc3192b6c445862f1`.
+The paused native correction now starts the weapon program at tick 1, projects
+the sufficient or empty entry action immediately while preserving the current
+entry presentation, keeps the one-update dispatch hold authoritative, binds
+resource debit through the generated `resource_debit_tick`, offsets the
+stage-progress/resource/parent operations by the dispatch delay, and allocates
+the empty effect only after that hold. The generated entry header is current.
+Focused direct expectations were updated to the accepted entry/active/return
+sequence. Diagnostic player-HIT and class-`0x1f` probes remain in the host test
+to locate the downstream causal chain.
 
-The full host differential no longer returns 94 at source frame 3827. It intentionally advances to return 123 at source frame 4052. Source player slot `0x00ff8380` enters HIT outer state `0x0202` at frame 4007, moves through substates `0x0200` and `0x0202`, returns to outer state `0x0200`/substate `0x0e00` at frame 4032, then accepts the next Button1 action at frame 4052 and enters substate `0x0c00` (`0x0c02` at frame 4053). Native is still in source action/state `0x0202` at frame 4052 and has nine stage-progress calls where source has ten. The next owner is therefore the complete current-route player HIT/return-to-control/action-entry program, not class-`0x1f` action `0x0c`.
+The generator check passes. The baseline host differential is intentionally
+RED with return 117 at source frame 2679:
 
-Current program metrics at this boundary are one proven unresolved gameplay-authoritative source program, zero unresolved scene/encounter controllers, one implicated player authority family, zero newly orphaned audio owners, and zero newly orphaned load owners. Raw scene-gap counts remain the last completed 327 actor-lifetime, 1234 spawn/despawn, 2 active-state, 93 collision/damage, 3 route/camera, and 281 audio/load rows; they are not a current census and must not be presented as accepted closure. Paired Emulator, complete scene census, and WGC were not rerun at this intentional next-program boundary. Do not claim them.
+`substate=0x0200 snapshot=1 bound=832 camera=832 previous=830 living=8`
+
+This is the existing hard-coded Coffee Shop controller/camera-edge precheck.
+Do not change its expected frame merely to make the lane green. The Button1
+correction changed upstream chronology, so the next agent must compare the
+accepted source controller rows and the fresh native state at frames 2677-2682
+to determine whether the precheck is stale or whether a real controller
+scheduler/camera-sample defect remains. The earlier record-type-4 parent/child,
+frame-2306 damage, frame-2307 impact/HIT, frame-2377 RNG ownership, frame-2416
+release, and natural frame-2511 recurring allocation still execute before this
+boundary.
+
+No new Oracle capture was required. Oracle, SPEC mutation, Target, Emulator,
+complete scene census, and WGC were not rerun for this incomplete body. The
+existing `test_entry.py` weapon mutations still refer to the old parent timing
+expression and must be updated before the correction can be accepted. Do not
+claim this checkpoint as scene parity or candidate promotion.
 
 ## Exact resume prompt
 
-Continue `REIMPLEMENT-13-SOURCE-CLOSED-ROUND1` from the branch head. Preserve the complete class-`0x1f` action-`0x0c` five-row timer-table correction and every aligned upstream Button1, projectile, collision, HIT/KO, RNG, release, allocation, navigation, camera, HUD, audio, background, palette, priority, and residency lock.
+Continue `REIMPLEMENT-13-SOURCE-CLOSED-ROUND1` from the branch head. Preserve
+the accepted class-`0x1f` action-`0x0c` timer-table checkpoint and the paused
+SPEC-bound shared Button1 entry-projection correction. Do not reopen the later
+frame-4052 HIT-return symptom unless it remains after the earlier chronology is
+closed.
 
-Close the complete Coffee Shop-reachable Predator Warrior HIT/return-to-control/action-entry source program exposed by the full host differential at source frame 4052, return 123. Compare player slot `0x00ff8380` through source frames 4007-4053: HIT outer state `0x0202`, substate transitions `0x0200 -> 0x0202`, return to outer state `0x0200`/substate `0x0e00` at frame 4032, and Button1 acceptance into `0x0c00` at frame 4052. Determine the first native divergence in the owning HIT timer, animation terminal, control-enable, input-queue, return-state, or scheduler-order program and close every Coffee Shop-reachable branch owned by that program.
+First reconcile the Coffee Shop recurring-controller/camera-edge precheck at
+source frames 2677-2682. Compare the accepted source actor/controller rows,
+route state, living count, progress snapshot, current camera 832, previous
+camera 830, controller substate, and camera bound against a fresh native trace.
+Determine whether the host assertion is checking before or after the owning
+scheduler update, or whether native has a genuine controller-phase divergence.
+Repair only the complete owning source program or correct the stale diagnostic
+assertion when source evidence proves it stale; do not patch frame 2679, delay
+an event, rebaseline input, or change the accepted camera-current-sample rule.
 
-Do not patch frame 4052, force the tenth stage-progress call, shorten a timer by observation, or bypass current-state HIT/KO authority. Use accepted Oracle evidence and the existing SPEC-02 fixture. If an implementation-required field is genuinely absent, amend only the existing fixture from accepted evidence or run the smallest bounded Oracle follow-up. Add a real mutation for the identified wrong rule. Run focused host differential, relevant mutations, fixture validation, Oracle, and Target after the complete owning program is bound. Reserve paired cold Emulator, complete scene census, and WGC for a coherent program checkpoint or the scene gate. Continue from the next earliest causal divergence only after this program is closed.
+Then update the existing Button1 mutation controls for the generated
+`resource_debit_tick`, immediate entry projection, dispatch-hold ownership,
+post-hold empty-effect allocation, and dispatch-delay offsets on
+stage-progress/resource/parent operations. Require mutations that reject the
+old one-frame-late sufficient and empty paths. Rerun the generator check,
+focused host differential, relevant real mutations, fixture validation, and
+Target. Once the complete Button1 program is green, regenerate the Coffee Shop
+census and continue from its next earliest causal source/native divergence.
+Reserve paired cold Emulator and full WGC for the coherent program checkpoint
+or scene gate, as required by the task card.

@@ -1768,6 +1768,7 @@ static const AvspRound1PlayerWeaponSpec avsp_round1_player_weapon =
     16u,
     1u,
     1u,
+    1u,
     64u,
     40u,
     12u,

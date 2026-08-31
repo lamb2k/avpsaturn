@@ -1811,5 +1811,39 @@ Warrior HIT/return-to-control/action-entry program. Paired Emulator, complete
 scene census, and WGC remain deferred at this intentional next-program
 boundary.
 
+### Paused shared Button1 entry-projection correction (2026-08-31)
+
+Fresh source/native comparison corrects the preceding frame-4052 hypothesis.
+Native had completed only one of five source player HITs, so the later stuck-HIT
+appearance was downstream. The earliest player mismatch is source frame 2252:
+source exposes sufficient Button1 entry `0x0c00` there and active `0x0c02` at
+2253, while native was one visible frame late. The empty-resource path has the
+same defect at source frames 2522-2523. The accepted SPEC-02 fixture already
+binds physical edge 2250, one input-pipeline update, immediate entry-action
+projection, active presentation on the following update, tick-1
+stage/resource/parent operations, parent visibility 2254, and empty-effect
+visibility 2523.
+
+The paused implementation now begins the shared weapon program at tick 1,
+projects only the sufficient/empty entry action while preserving entry
+presentation, retains the one-update dispatch hold as action ownership, emits
+and validates `resource_debit_tick`, applies the dispatch offset to
+stage-progress/resource/parent operations, and moves empty-effect allocation
+after the hold. The generated header check passes. Direct focused expectations
+are aligned to the accepted entry, active, and directional-return sequence.
+
+The host differential is intentionally RED with return 117 at source frame
+2679, where the existing controller-edge check reports controller substate
+`0x0200`, progress snapshot 1, bound 832, current camera 832, previous camera
+830, and living count 8. This may be a stale pre-update assertion exposed by
+the corrected upstream chronology or a real controller scheduler-phase defect;
+it has not been classified. Do not change its frame without accepted source
+evidence. Next compare source/native controller rows at frames 2677-2682, close
+the complete owning rule, and then update the existing real Button1 mutations
+for entry projection, hold ownership, resource-debit timing, empty-effect
+timing, and dispatch offsets. Oracle, SPEC mutation, Target, Emulator, complete
+census, and WGC remain deferred at this RED checkpoint. The exact continuation
+is in `docs/AGENT_HANDOFF.md`.
+
 - `QA-13-ROUND1-END-TO-END-DIFFERENTIAL` after the complete stable Round 2
   handoff candidate is committed and frozen.

@@ -3595,6 +3595,7 @@ def build() -> str:
         f"    {weapon_empty['timer_initial']}u,",
         f"    {weapon['source_input']['action_dispatch_delay_updates_u8']}u,",
         f"    {weapon_action['parent_allocation_tick']}u,",
+        f"    {weapon_action['resource_debit_tick']}u,",
         f"    {weapon_action['resource_capacity_u8']}u,",
         f"    {weapon_action['resource_debit_u8']}u,",
         f"    {weapon_action['recharge_countdown_after_entry_u8']}u,",

@@ -4745,6 +4745,7 @@ static int avsp_round1_player_weapon_contract_valid(void)
         avsp_round1_player_weapon.empty_timer_initial != 16u ||
         avsp_round1_player_weapon.action_dispatch_delay_updates != 1u ||
         avsp_round1_player_weapon.parent_allocation_tick != 1u ||
+        avsp_round1_player_weapon.resource_debit_tick != 1u ||
         avsp_round1_player_weapon.resource_capacity != 64u ||
         avsp_round1_player_weapon.resource_debit != 40u ||
         avsp_round1_player_weapon.recharge_after_success != 12u ||
@@ -9875,13 +9876,14 @@ static void avsp_round1_tick_player_resource(AvspRound1Runtime *runtime)
 
 static void avsp_round1_begin_player_weapon(AvspRound1Runtime *runtime)
 {
+    unsigned short entry_action;
     runtime->player_weapon_active = 1u;
     runtime->player_weapon_empty =
         avsp_round1_player_weapon.empty_dispatch_uses_depleted_latch ?
             runtime->player_resource_depleted :
             (unsigned char)(runtime->player_resource <
                 avsp_round1_player_weapon.resource_debit);
-    runtime->player_weapon_tick = 0u;
+    runtime->player_weapon_tick = 1u;
     runtime->player_weapon_dispatch_delay =
         avsp_round1_player_weapon.action_dispatch_delay_updates;
     runtime->player_weapon_empty_timer =
@@ -9898,6 +9900,12 @@ static void avsp_round1_begin_player_weapon(AvspRound1Runtime *runtime)
     {
         runtime->player_resource_depleted = 1u;
     }
+    entry_action = runtime->player_weapon_empty ?
+        avsp_round1_player_weapon.empty_entry_action :
+        avsp_round1_player_weapon.sufficient_entry_action;
+    runtime->player.source_action = entry_action;
+    runtime->player.substate = entry_action;
+    runtime->player_locomotion_action = entry_action;
 }
 
 static int avsp_round1_begin_player_air_weapon(AvspRound1Runtime *runtime,
@@ -9972,13 +9980,6 @@ static int avsp_round1_step_player_weapon(AvspRound1Runtime *runtime,
     const AvspRound1PlayerWeaponFrameSpec *frame;
     if (!runtime->player_weapon_active)
         return 0;
-    if (runtime->player_weapon_empty &&
-        runtime->player_weapon_tick ==
-            avsp_round1_player_weapon.empty_effect_allocation_tick)
-    {
-        ++runtime->player_weapon_empty_auxiliary_requests;
-        avsp_round1_begin_empty_effect(runtime);
-    }
     if (runtime->player_action.state != AVSP_PW_STATE_CONTROL)
     {
         runtime->player_weapon_active = 0u;
@@ -9991,7 +9992,14 @@ static int avsp_round1_step_player_weapon(AvspRound1Runtime *runtime,
     if (runtime->player_weapon_dispatch_delay != 0u)
     {
         --runtime->player_weapon_dispatch_delay;
-        return 0;
+        return 1;
+    }
+    if (runtime->player_weapon_empty &&
+        runtime->player_weapon_tick ==
+            avsp_round1_player_weapon.empty_effect_allocation_tick)
+    {
+        ++runtime->player_weapon_empty_auxiliary_requests;
+        avsp_round1_begin_empty_effect(runtime);
     }
     if (weapon_edge && runtime->player_weapon_tick != 0u)
     {
@@ -10046,13 +10054,20 @@ static int avsp_round1_step_player_weapon(AvspRound1Runtime *runtime,
             return 0;
         }
         if (runtime->player_weapon_tick ==
-                avsp_round1_player_stage_progress.action_entry_tick &&
+                (unsigned char)(
+                    avsp_round1_player_stage_progress.action_entry_tick +
+                    avsp_round1_player_weapon.
+                        action_dispatch_delay_updates) &&
             !avsp_round1_apply_player_stage_progress(runtime))
         {
             ++runtime->failure_count;
             return 0;
         }
-        if (runtime->player_weapon_tick == 1u)
+        if (runtime->player_weapon_tick ==
+                (unsigned char)(
+                    avsp_round1_player_weapon.resource_debit_tick +
+                    avsp_round1_player_weapon.
+                        action_dispatch_delay_updates))
         {
             if (runtime->player_resource >
                     avsp_round1_player_weapon.resource_debit)
@@ -10069,7 +10084,10 @@ static int avsp_round1_step_player_weapon(AvspRound1Runtime *runtime,
             ++runtime->player_weapon_resource_debits;
         }
         if (runtime->player_weapon_tick ==
-                avsp_round1_player_weapon.parent_allocation_tick)
+                (unsigned char)(
+                    avsp_round1_player_weapon.parent_allocation_tick +
+                    avsp_round1_player_weapon.
+                        action_dispatch_delay_updates))
         {
             ++runtime->player_weapon_attempts_total;
             avsp_round1_allocate_player_weapon_projectile(runtime);

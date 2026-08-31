@@ -1376,6 +1376,7 @@ typedef struct
     unsigned char empty_timer_initial;
     unsigned char action_dispatch_delay_updates;
     unsigned char parent_allocation_tick;
+    unsigned char resource_debit_tick;
     unsigned char resource_capacity;
     unsigned char resource_debit;
     unsigned char recharge_after_success;

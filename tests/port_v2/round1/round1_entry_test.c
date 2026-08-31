@@ -26,7 +26,6 @@ static int enter_ground_button1(AvspRound1Runtime *runtime,
     unsigned short mask = (unsigned short)(
         AVSP_ROUND1_INPUT_BUTTON1 | additional_mask);
     return avsp_round1_step_player(runtime, mask, 0) &&
-        avsp_round1_step_player(runtime, mask, 0) &&
         avsp_round1_step_player(runtime, mask, 0);
 }
 
@@ -1062,12 +1061,6 @@ int main(void)
         AvspRound1Runtime empty_walk_runtime = runtime;
         short weapon_x;
         short weapon_z;
-        unsigned long weapon_animation;
-        unsigned long weapon_assembly;
-        unsigned short weapon_animation_timer;
-        short weapon_animation_branch;
-        unsigned char weapon_hurt_selector;
-        unsigned char weapon_attack_selector;
         if (!avsp_round1_step_player(&weapon_runtime,
                 AVSP_PW_INPUT_RIGHT, 0) ||
             !avsp_round1_step_player(&weapon_runtime,
@@ -1088,10 +1081,10 @@ int main(void)
         if (!avsp_round1_step_player(&weapon_runtime,
                 AVSP_ROUND1_INPUT_BUTTON1 | AVSP_PW_INPUT_RIGHT, 0) ||
             weapon_runtime.player_weapon_active != 1u ||
-            weapon_runtime.player_weapon_tick != 0u ||
+            weapon_runtime.player_weapon_tick != 1u ||
             weapon_runtime.player_weapon_dispatch_delay != 0u ||
-            weapon_runtime.player.source_action != 0x0200u ||
-            weapon_runtime.player.substate != 0x0200u ||
+            weapon_runtime.player.source_action != 0x0c00u ||
+            weapon_runtime.player.substate != 0x0c00u ||
             weapon_runtime.player_weapon_entries != 1u ||
             weapon_runtime.player_weapon_attempts_total != 0u ||
             weapon_runtime.player_weapon_allocations != 0u ||
@@ -1122,24 +1115,18 @@ int main(void)
                 weapon_x, weapon_z);
             return 118;
         }
-        weapon_animation = weapon_runtime.player.animation_record;
-        weapon_assembly = weapon_runtime.player.assembly;
-        weapon_animation_timer = weapon_runtime.player.animation_timer;
-        weapon_animation_branch = weapon_runtime.player.animation_branch;
-        weapon_hurt_selector = weapon_runtime.player.hurt_selector;
-        weapon_attack_selector = weapon_runtime.player.attack_selector;
         if (!avsp_round1_step_player(&weapon_runtime,
                 AVSP_ROUND1_INPUT_BUTTON1 | AVSP_PW_INPUT_RIGHT, 0) ||
             weapon_runtime.player_weapon_active != 1u ||
-            weapon_runtime.player_weapon_tick != 1u ||
-            weapon_runtime.player.source_action != 0x0c00u ||
-            weapon_runtime.player.substate != 0x0c00u ||
-            weapon_runtime.player.animation_record != weapon_animation ||
-            weapon_runtime.player.assembly != weapon_assembly ||
-            weapon_runtime.player.animation_timer != weapon_animation_timer ||
-            weapon_runtime.player.animation_branch != weapon_animation_branch ||
-            weapon_runtime.player.hurt_selector != weapon_hurt_selector ||
-            weapon_runtime.player.attack_selector != weapon_attack_selector ||
+            weapon_runtime.player_weapon_tick != 2u ||
+            weapon_runtime.player.source_action != 0x0c02u ||
+            weapon_runtime.player.substate != 0x0c02u ||
+            weapon_runtime.player.animation_record != 0x0015e594UL ||
+            weapon_runtime.player.assembly != 0x0016179aUL ||
+            weapon_runtime.player.animation_timer != 2u ||
+            weapon_runtime.player.animation_branch != 0 ||
+            weapon_runtime.player.hurt_selector != 1u ||
+            weapon_runtime.player.attack_selector != 0u ||
             weapon_runtime.player_weapon_entries != 1u ||
             weapon_runtime.player_weapon_attempts_total != 0u ||
             weapon_runtime.player_weapon_allocations != 0u ||
@@ -1158,17 +1145,17 @@ int main(void)
                 weapon_runtime.player.source_action,
                 weapon_runtime.player.substate,
                 weapon_runtime.player.animation_record,
-                weapon_animation,
+                0x0015e594UL,
                 weapon_runtime.player.assembly,
-                weapon_assembly,
+                0x0016179aUL,
                 weapon_runtime.player.animation_timer,
-                weapon_animation_timer,
+                2u,
                 weapon_runtime.player.animation_branch,
-                weapon_animation_branch,
+                0,
                 weapon_runtime.player.hurt_selector,
-                weapon_hurt_selector,
+                1u,
                 weapon_runtime.player.attack_selector,
-                weapon_attack_selector,
+                0u,
                 weapon_runtime.player_weapon_entries,
                 weapon_runtime.player_weapon_attempts_total,
                 weapon_runtime.player_weapon_allocations,
@@ -1205,10 +1192,10 @@ int main(void)
             weapon_runtime.player_resource != 27u ||
             !avsp_round1_step_player(&weapon_runtime,
                 AVSP_PW_INPUT_RIGHT, 0) ||
-            weapon_runtime.player.source_action != 0x0202u ||
-            weapon_runtime.player.substate != 0x0202u ||
-            weapon_runtime.player.animation_record != 0x0015f1f4UL ||
-            weapon_runtime.player.assembly != 0x001626a4UL ||
+            weapon_runtime.player.source_action != 0x0200u ||
+            weapon_runtime.player.substate != 0x0200u ||
+            weapon_runtime.player.animation_record != 0x0015f208UL ||
+            weapon_runtime.player.assembly != 0x00160a02UL ||
             weapon_runtime.player.x <= weapon_x)
         {
             fprintf(stderr,
@@ -1268,19 +1255,17 @@ int main(void)
             unsigned short entry_timer;
             short entry_branch;
             if (!avsp_round1_step_player(&empty_walk_runtime,
-                    AVSP_ROUND1_INPUT_BUTTON1 | AVSP_PW_INPUT_RIGHT, 0) ||
+                AVSP_ROUND1_INPUT_BUTTON1 | AVSP_PW_INPUT_RIGHT, 0) ||
                 empty_walk_runtime.player_weapon_active != 1u ||
-                empty_walk_runtime.player_weapon_tick != 0u ||
+                empty_walk_runtime.player_weapon_tick != 1u ||
                 empty_walk_runtime.player_weapon_dispatch_delay != 0u ||
-                empty_walk_runtime.player.source_action != 0x0200u)
+                empty_walk_runtime.player.source_action != 0x1a00u)
                 return 223;
             entry_record = empty_walk_runtime.player.animation_record;
             entry_assembly = empty_walk_runtime.player.assembly;
             entry_timer = empty_walk_runtime.player.animation_timer;
             entry_branch = empty_walk_runtime.player.animation_branch;
             if (entry_record == 0x0015f1f4UL ||
-                !avsp_round1_step_player(&empty_walk_runtime,
-                    AVSP_ROUND1_INPUT_BUTTON1 | AVSP_PW_INPUT_RIGHT, 0) ||
                 empty_walk_runtime.player.source_action != 0x1a00u ||
                 empty_walk_runtime.player.substate != 0x1a00u ||
                 empty_walk_runtime.player.animation_record != entry_record ||
@@ -4329,11 +4314,111 @@ int main(void)
                         inner8_seen = 1;
                 }
             }
+            if (source_frame == 2750u || source_frame == 3263u ||
+                source_frame == 3771u || source_frame == 3855u ||
+                source_frame == 4006u || source_frame == 4007u ||
+                source_frame == 4032u || source_frame == 4052u)
+            {
+                const AvspRound1ActorCore *attack_actor = 0;
+                unsigned long wanted_slot = source_frame >= 4006u ?
+                    0x00ff9dc0UL : source_frame >= 3855u ?
+                    0x00ffad00UL : source_frame >= 3771u ?
+                    0x00ffa000UL : source_frame >= 3263u ?
+                    0x00ffae00UL : 0x00ffa240UL;
+                unsigned int pool_i;
+                for (pool_i = 0u; pool_i < AVSP_ROUND1_POOL_COUNT;
+                     ++pool_i)
+                {
+                    unsigned int slot_i;
+                    for (slot_i = 0u;
+                         slot_i < scene_runtime.pools[pool_i].capacity;
+                         ++slot_i)
+                    {
+                        const AvspRound1ActorCore *candidate =
+                            &scene_runtime.pools[pool_i].records[slot_i];
+                        if (candidate->source_slot == wanted_slot)
+                            attack_actor = candidate;
+                    }
+                }
+                fprintf(stderr,
+                    "player_hit_scene_probe frame=%u player=%04x/%04x x=%d z=%d facing=%u anim=%08lx timer=%u health=%d hurt=%u input=%04x hit=%u/%u reaction=%u entries=%lu completions=%lu collision=%lu damage=%lu pending=%u actor=%08lx active=%u type=%u class=%02x state=%04x/%04x x=%d z=%d facing=%u anim=%08lx attack=%u field01=%u hitstop=%u guard=%u latch=%u\n",
+                    source_frame, scene_runtime.player.state,
+                    scene_runtime.player.substate,
+                    scene_runtime.player.x, scene_runtime.player.z,
+                    scene_runtime.player.facing,
+                    scene_runtime.player.animation_record,
+                    scene_runtime.player.animation_timer,
+                    scene_runtime.player_action.health,
+                    scene_runtime.player.hurt_selector, input,
+                    scene_runtime.player_hit_active,
+                    scene_runtime.player_hit_phase,
+                    scene_runtime.player_hit_reaction_index,
+                    scene_runtime.player_hit_entries,
+                    scene_runtime.player_hit_completions,
+                    scene_runtime.class1f_player_collision_writes +
+                        scene_runtime.type16_collision_writes,
+                    scene_runtime.class1f_player_damage_writes +
+                        scene_runtime.type16_damage_writes,
+                    scene_runtime.first_encounter.pending_player_damage,
+                    attack_actor != 0 ? attack_actor->source_slot : 0UL,
+                    attack_actor != 0 ? attack_actor->active : 0u,
+                    attack_actor != 0 ? attack_actor->type : 0u,
+                    attack_actor != 0 ?
+                        (unsigned int)(unsigned char)
+                            attack_actor->actor_class : 0u,
+                    attack_actor != 0 ? attack_actor->state : 0u,
+                    attack_actor != 0 ? attack_actor->substate : 0u,
+                    attack_actor != 0 ? attack_actor->x : 0,
+                    attack_actor != 0 ? attack_actor->z : 0,
+                    attack_actor != 0 ? attack_actor->facing : 0u,
+                    attack_actor != 0 ?
+                        attack_actor->animation_record : 0UL,
+                    attack_actor != 0 ? attack_actor->attack_selector : 0u,
+                    attack_actor != 0 ? attack_actor->source_field01 : 0u,
+                    attack_actor != 0 ? attack_actor->source_hitstop : 0u,
+                    attack_actor != 0 ?
+                        attack_actor->source_player_guard : 0u,
+                    attack_actor != 0 ?
+                        attack_actor->source_player_collision_latched : 0u);
+            }
+            if (source_frame == 3827u || source_frame == 3830u ||
+                source_frame == 3850u || source_frame == 3875u ||
+                source_frame == 3900u || source_frame == 3925u ||
+                source_frame == 3950u || source_frame == 3975u ||
+                source_frame == 3987u || source_frame == 4002u ||
+                source_frame == 4006u)
+            {
+                unsigned int slot_i;
+                for (slot_i = 0u;
+                     slot_i < scene_runtime.pools[0].capacity; ++slot_i)
+                {
+                    const AvspRound1ActorCore *actor =
+                        &scene_runtime.pools[0].records[slot_i];
+                    if (actor->source_slot != 0x00ffa000UL &&
+                        actor->source_slot != 0x00ff9dc0UL)
+                        continue;
+                    fprintf(stderr,
+                        "class1f_post_action0c_probe frame=%u slot=%04x state=%04x/%04x xfp=%08lx yfp=%08lx z=%d facing=%u anim=%08lx timer=%u branch=%d attack=%u plan=%d cursor=%d selector=%d phase=%d action_timer=%u rng=%04x\n",
+                        source_frame, (unsigned short)actor->source_slot,
+                        actor->state, actor->substate,
+                        (unsigned long)actor->source_x_fp,
+                        (unsigned long)actor->source_y_fp,
+                        actor->z, actor->facing,
+                        actor->animation_record, actor->animation_timer,
+                        actor->animation_branch, actor->attack_selector,
+                        actor->source_action0c_plan,
+                        actor->source_action0c_cursor,
+                        actor->source_action0c_selector,
+                        actor->source_action0c_selector_phase,
+                        actor->source_action_timer,
+                        scene_runtime.rng_seed);
+                }
+            }
             if (scene_runtime.player_stage_progress_calls !=
                     source_stage_progress_call_count(source_frame))
             {
                 fprintf(stderr,
-                    "Coffee Shop stage-progress chronology failed source=%u expected_calls=%lu native_calls=%lu input=%04x source_updates=%u class02_updates=%u weapon_active=%u weapon_empty=%u weapon_tick=%u weapon_entries=%lu weapon_completions=%lu cleanup=%u recovery=%u return=%u source_action=%04x pipeline=%u previous=%u progress=%u stage=%u\n",
+                    "Coffee Shop stage-progress chronology failed source=%u expected_calls=%lu native_calls=%lu input=%04x source_updates=%u class02_updates=%u weapon_active=%u weapon_empty=%u weapon_tick=%u weapon_entries=%lu weapon_completions=%lu cleanup=%u recovery=%u return=%u source_action=%04x pipeline=%u previous=%u progress=%u stage=%u hit=%u/%u reaction=%u kind=%u presentation=%u shake=%u xvel=%ld xacc=%ld entries=%lu completions=%lu player=%04x/%04x anim=%08lx timer=%u facing=%u health=%d invuln=%u\n",
                     source_frame,
                     source_stage_progress_call_count(source_frame),
                     scene_runtime.player_stage_progress_calls,
@@ -4350,7 +4435,24 @@ int main(void)
                     scene_runtime.player_weapon_input_pipeline,
                     scene_runtime.player_weapon_previous_pressed,
                     scene_runtime.source_stage_progress_accumulator,
-                    scene_runtime.source_stage_parameter);
+                    scene_runtime.source_stage_parameter,
+                    scene_runtime.player_hit_active,
+                    scene_runtime.player_hit_phase,
+                    scene_runtime.player_hit_reaction_index,
+                    scene_runtime.player_hit_kind,
+                    scene_runtime.player_hit_presentation_selector,
+                    scene_runtime.player_hit_shake_remaining,
+                    scene_runtime.player_hit_x_velocity,
+                    scene_runtime.player_hit_x_acceleration,
+                    scene_runtime.player_hit_entries,
+                    scene_runtime.player_hit_completions,
+                    scene_runtime.player.state,
+                    scene_runtime.player.substate,
+                    scene_runtime.player.animation_record,
+                    scene_runtime.player.animation_timer,
+                    scene_runtime.player.facing,
+                    scene_runtime.player_action.health,
+                    scene_runtime.player_hit_invulnerability);
                 return 123;
             }
             if (source_frame == 2793u &&
