@@ -8,6 +8,8 @@ static int initialize_jump(AvspRound1Runtime *runtime,
     unsigned short mask = (unsigned short)(
         AVSP_ROUND1_INPUT_BUTTON3 | direction_mask);
     return avsp_round1_step_player(runtime, mask, 0) &&
+        avsp_round1_step_player(runtime, mask, 0) &&
+        avsp_round1_step_player(runtime, mask, 0) &&
         avsp_round1_step_player(runtime, mask, 0);
 }
 
@@ -218,6 +220,21 @@ static int player_hit_type16_source_frame_valid(
     return 1;
 }
 
+static int player_weapon_fractional_latch_source_frame_valid(
+    const AvspRound1Runtime *runtime, unsigned int source_frame)
+{
+    if (source_frame < 3331u || source_frame > 3333u)
+        return 1;
+    if (runtime->player.source_x_fp != 0x04a0e000L ||
+        runtime->player.source_y_fp != 0x01400000L)
+        return 0;
+    if (source_frame == 3331u)
+        return runtime->player.substate == 0x0202u;
+    if (source_frame == 3332u)
+        return runtime->player.substate == 0x0c00u;
+    return runtime->player.substate == 0x0c02u;
+}
+
 static int class1f_slot_a3c0_lifetime_source_frame_valid(
     const AvspRound1Runtime *runtime, unsigned int source_frame)
 {
@@ -330,6 +347,7 @@ int main(void)
         runtime.class09_initializations != 2u ||
         runtime.class09_rng_calls != 42u ||
         runtime.rng_seed != 0x334fu ||
+        runtime.player.source_target_low != 0xce00u ||
         runtime.source_stage_parameter != 8u ||
         runtime.coffee_stage_setup_complete != 1u ||
         runtime.coffee_stage_setup_calls != 1u ||
@@ -779,6 +797,26 @@ int main(void)
         }
     }
     {
+        AvspRound1Runtime jump_runtime = runtime;
+        unsigned short mask = AVSP_ROUND1_INPUT_BUTTON3;
+        if (!avsp_round1_step_player(&jump_runtime, mask, 0) ||
+            jump_runtime.player_jump_active != 1u ||
+            jump_runtime.player_jump_dispatch_delay != 1u ||
+            jump_runtime.player_jump_entries != 0u ||
+            jump_runtime.player.source_action == 0x0400u ||
+            !avsp_round1_step_player(&jump_runtime, mask, 0) ||
+            jump_runtime.player_jump_dispatch_delay != 0u ||
+            jump_runtime.player_jump_entries != 1u ||
+            jump_runtime.player.source_action != 0x0400u ||
+            jump_runtime.player.animation_record != 0x0015f2ccUL ||
+            !avsp_round1_step_player(&jump_runtime, mask, 0) ||
+            jump_runtime.player.source_action != 0x0400u ||
+            jump_runtime.player.animation_record != 0x0015f2dcUL ||
+            !avsp_round1_step_player(&jump_runtime, mask, 0) ||
+            jump_runtime.player.source_action != 0x0402u)
+            return 82;
+    }
+    {
         static const unsigned short masks[10] = {
             0u, AVSP_PW_INPUT_UP, AVSP_PW_INPUT_LEFT,
             AVSP_PW_INPUT_LEFT, AVSP_PW_INPUT_RIGHT,
@@ -806,12 +844,12 @@ int main(void)
             -0x00008000L, -0x00003800L, -0x00008800L, -0x00008800L,
             -0x00008800L, -0x00008800L };
         static const unsigned char selectors[10] =
-            {4u, 4u, 5u, 15u, 15u, 6u, 5u, 6u, 6u, 6u};
+            {4u, 4u, 5u, 15u, 15u, 5u, 5u, 6u, 6u, 6u};
         static const unsigned char collisions[10] =
             {3u, 3u, 2u, 8u, 8u, 2u, 1u, 4u, 4u, 1u};
         static const unsigned long records[10] = {
             0x0015f2f0UL, 0x0015f2f0UL, 0x0015f344UL,
-            0x0015f43cUL, 0x0015f43cUL, 0x0015f3b8UL,
+            0x0015f43cUL, 0x0015f43cUL, 0x0015f344UL,
             0x0015f344UL, 0x0015f3b8UL, 0x0015f3b8UL,
             0x0015f3b8UL };
         unsigned int jump_index;
@@ -847,6 +885,8 @@ int main(void)
         AvspRound1Runtime jump_runtime = runtime;
         unsigned int jump_calls = 2u;
         short maximum_height = 0;
+        jump_runtime.player.source_y_fp =
+            (long)jump_runtime.player_action.lane * 65536L + 0x3800L;
         if (!initialize_jump(&jump_runtime, 0u) ||
             jump_runtime.player.animation_record != 0x0015f2f0UL ||
             jump_runtime.player_jump_animation_timer != 8u)
@@ -867,6 +907,9 @@ int main(void)
             jump_runtime.player_jump_cleanup_pending != 1u ||
             jump_runtime.player.source_action != 0u ||
             jump_runtime.player.animation_record != 0x0015f1f4UL ||
+            jump_runtime.player.animation_timer != 0x0fffu ||
+            jump_runtime.player.animation_branch != (short)0x8000 ||
+            (jump_runtime.player.source_y_fp & 0xffffL) != 0x3800L ||
             jump_runtime.player_action.height != 0 ||
             !avsp_round1_entry_valid(&jump_runtime) ||
             !avsp_round1_step_player(&jump_runtime, 0u, 0) ||
@@ -1021,6 +1064,92 @@ int main(void)
             !avsp_round1_entry_valid(&air_failure))
             return 98;
     }
+    {
+        AvspRound1Runtime contextual = runtime;
+        unsigned long seen = 0u;
+        unsigned int steps = 0u;
+        if (!avsp_round1_step_player(&contextual, AVSP_PW_INPUT_ATTACK, 0) ||
+            contextual.player_contextual_melee_active != 1u ||
+            contextual.player_contextual_melee_entries != 0u)
+            return 124;
+        if (!avsp_round1_step_player(&contextual, AVSP_PW_INPUT_ATTACK, 0) ||
+            contextual.player.source_action != 0x1400u ||
+            contextual.player.animation_record != 0x00160288UL ||
+            contextual.player_contextual_melee_entries != 1u ||
+            contextual.player_contextual_melee_audio_events != 1u ||
+            contextual.player_contextual_melee_audio_command != 0x0036u)
+        {
+            fprintf(stderr, "context entry active=%u action=%04x record=%08lx entries=%lu audio=%lu/%04x valid=%d\n",
+                contextual.player_contextual_melee_active,
+                contextual.player.source_action,
+                contextual.player.animation_record,
+                contextual.player_contextual_melee_entries,
+                contextual.player_contextual_melee_audio_events,
+                contextual.player_contextual_melee_audio_command,
+                avsp_round1_entry_valid(&contextual));
+            return 124;
+        }
+        while (contextual.player_contextual_melee_active && steps < 20u)
+        {
+            if (!avsp_round1_step_player(&contextual,
+                    steps == 0u ? AVSP_PW_INPUT_ATTACK : 0u, 0))
+            {
+                fprintf(stderr, "context step failed step=%u active=%u index=%u timer=%u branch=%d action=%04x valid=%d failures=%lu\n",
+                    steps, contextual.player_contextual_melee_active,
+                    contextual.player_contextual_melee_animation_index,
+                    contextual.player_contextual_melee_animation_timer,
+                    contextual.player_contextual_melee_animation_branch,
+                    contextual.player.source_action,
+                    avsp_round1_entry_valid(&contextual),
+                    contextual.failure_count);
+                return 124;
+            }
+            if (contextual.player.animation_record >= 0x00160288UL &&
+                contextual.player.animation_record <= 0x001602c8UL)
+                seen |= 1UL << ((contextual.player.animation_record -
+                                 0x00160288UL) >> 4);
+            ++steps;
+        }
+        if (contextual.player_contextual_melee_active || steps != 12u ||
+            seen != 0x1fUL ||
+            contextual.player_contextual_melee_completions != 1u ||
+            contextual.player_contextual_melee_toggle87 != 1u ||
+            contextual.player.source_action != 0u)
+        {
+            fprintf(stderr, "context complete active=%u steps=%u seen=%lx completions=%lu toggle=%u action=%04x record=%08lx timer=%u branch=%d\n",
+                contextual.player_contextual_melee_active, steps, seen,
+                contextual.player_contextual_melee_completions,
+                contextual.player_contextual_melee_toggle87,
+                contextual.player.source_action,
+                contextual.player.animation_record,
+                contextual.player.animation_timer,
+                contextual.player.animation_branch);
+            return 124;
+        }
+        if (!avsp_round1_step_player(&contextual, AVSP_PW_INPUT_ATTACK, 0) ||
+            !avsp_round1_step_player(&contextual, AVSP_PW_INPUT_ATTACK, 0) ||
+            contextual.player_contextual_melee_entries != 2u ||
+            contextual.player_contextual_melee_audio_command != 0x0101u)
+            return 125;
+        for (steps = 0u; steps < 8u; ++steps)
+            if (!avsp_round1_step_player(&contextual,
+                    steps == 0u ? AVSP_PW_INPUT_ATTACK : 0u, 0))
+                return 125;
+        contextual.player_resource = 0u;
+        contextual.player_resource_depleted = 1u;
+        if (!avsp_round1_step_player(&contextual,
+                AVSP_ROUND1_INPUT_BUTTON1, 0) ||
+            !avsp_round1_step_player(&contextual,
+                AVSP_ROUND1_INPUT_BUTTON1, 0) ||
+            contextual.player_contextual_melee_active != 0u ||
+            contextual.player_contextual_melee_interruptions != 1u ||
+            contextual.player.source_action != 0x1a00u ||
+            contextual.player.animation_record != 0x001602b8UL ||
+            contextual.player.animation_timer != 2u)
+            return 125;
+    }
+    /* The legacy four-strike unit lane exercises the no-target dispatch. */
+    runtime.player.source_target_low = 0u;
     for (selector = 1u; selector <= AVSP_ROUND1_PLAYER_MELEE_COUNT;
          ++selector)
     {
@@ -2907,6 +3036,8 @@ int main(void)
                 return 72;
             ++entry_calls;
         }
+        /* This synthetic selector-cycle lane remains the no-target control. */
+        integrated_runtime.player.source_target_low = 0u;
         for (tick = 0u; tick < 467u; ++tick)
         {
             unsigned short mask = 0u;
@@ -3972,6 +4103,8 @@ int main(void)
                     &hit_runtime, source_frame) ||
                 !player_hit_source_frame_valid(&hit_runtime, source_frame) ||
                 !player_hit_type16_source_frame_valid(
+                    &hit_runtime, source_frame) ||
+                !player_weapon_fractional_latch_source_frame_valid(
                     &hit_runtime, source_frame))
             {
                 fprintf(stderr,

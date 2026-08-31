@@ -325,6 +325,8 @@ def build() -> str:
     melee_sequences = close_combo["animation_sequences"]
     melee_selectors = close_combo["attack_selectors"]
     melee_steps = close_combo["step_values"]
+    contextual_melee = melee["contextual_melee"]["implementation_contract"]
+    contextual_sequences = contextual_melee["presentation_sequences"]
     melee_strikes = []
     jump = fixtures["authority_data"]["player"][
         "directional_airborne_interruption"]["directional_actions"][
@@ -332,6 +334,7 @@ def build() -> str:
     jump_vectors = jump["vector_table"]
     jump_down_vectors = jump["down_vector_table"]
     jump_sequences = jump["presentation_selector_sequences"]
+    jump_witness = jump["coffee_shop_right_facing1_witness"]
     air_class03 = fixtures["authority_data"]["player"][
         "directional_airborne_interruption"]["airborne_actions"]["button1"][
             "record4_class03"]
@@ -1359,6 +1362,23 @@ def build() -> str:
         melee["rng_consumption"] !=
             "none for selector or assembly choice; state selects the measured animation record"):
         raise ValueError("SPEC-02 route-reachable melee contract drift")
+    if (contextual_melee["classification"] !=
+            "SOURCE_CLOSED_IMPLEMENTATION_FIELDS" or
+        contextual_melee["spec_executable"] is not True or
+        contextual_melee["target_link"]["target_low_u16"] != 0xce00 or
+        contextual_melee["target_link"]["source_frame_u16"] != 2074 or
+        contextual_melee["target_link"]["player_to_target_writer"] !=
+            "0x0212ce" or
+        contextual_melee["target_link"]
+            ["target_actor_program_spec_executable"] is not False or
+        contextual_melee["dispatch"]["entry_action_u16"] != 0x1400 or
+        contextual_melee["dispatch"]["active_action_u16"] != 0x1402 or
+        [row["selector_u8"] for row in contextual_sequences] != [21, 20] or
+        [len(row["records"]) for row in contextual_sequences] != [5, 6] or
+        contextual_melee["movement"]["rng_calls"] != [] or
+        [row["command_u16"] for row in contextual_melee["audio_edges"]] !=
+            [0x0036, 0x0101]):
+        raise ValueError("SPEC-02 contextual Button2 contract drift")
     for selector in melee_selectors:
         sequence = melee_sequences[f"close_{selector}"]
         strikes = [row for row in sequence
@@ -1400,12 +1420,23 @@ def build() -> str:
          (3, 4, 5, 6, 10, 15, 41, 42, 60)] !=
             [2, 5, 7, 8, 2, 3, 2, 1, 1] or
         jump["initialization"]["non_down"][
+            "same_facing_horizontal"]["presentation_level_u8"] != 5 or
+        jump["initialization"]["non_down"][
             "opposite_facing_horizontal"]["collision_level_u8"] != 8 or
         jump["initialization"]["down"]["collision_selector_u8"] != 7 or
         jump["motion_and_landing"]["landing_0x023630"][
             "presentation_selector_u8"] != 10 or
         jump["motion_and_landing"]["phase_0x040a"][
             "negative_velocity_transition"]["phase_timer_s16"] != 10 or
+        jump_witness["physical_input_frame"] != 3440 or
+        jump_witness["pipeline_edge_frame"] != 3441 or
+        jump_witness["jump_dispatch_frame"] != 3442 or
+        jump_witness["landing_frame"] != 3482 or
+        jump_witness["neutral_return_frame"] != 3484 or
+        jump_witness["presentation_selector_u8"] != 5 or
+        len(jump_witness["chronology"]) != 46 or
+        jump_witness["chronology"][-1]["animation_timer_u16"] != 4095 or
+        jump_witness["chronology"][-1]["animation_branch_s16"] != -32768 or
         jump["presentation_actor_fields"] != {
             "coordinate_mode_u8": 0, "palette_u8": 0,
             "object_or_u16": "0x8000",
@@ -3468,6 +3499,48 @@ def build() -> str:
                 row["attack_selector"]))
     lines.extend([
         "};", "",
+        "static const AvspRound1PlayerContextualMeleeSpec avsp_round1_player_contextual_melee =",
+        "{",
+        "    %sUL, %sUL, %sUL, %sUL," % (
+            contextual_melee["target_link"]["clear_writer"],
+            contextual_melee["target_link"]["allocator_entry"],
+            contextual_melee["target_link"]["target_to_player_writer"],
+            contextual_melee["target_link"]["player_to_target_writer"]),
+        "    %sUL, %sUL, %sUL, %sUL," % (
+            contextual_melee["state_program"]["entry_body"],
+            contextual_melee["state_program"]["active_body"],
+            contextual_melee["state_program"]["common_reset"],
+            contextual_melee["target_link"]["target_slot"]),
+        "    %du, %du, %du, %du, %du, %du, %du," % (
+            contextual_melee["target_link"]["target_low_u16"],
+            contextual_melee["target_link"]["target_state_u16"],
+            contextual_melee["target_link"]["target_substate_u16"],
+            contextual_melee["dispatch"]["common_action_u16"],
+            contextual_melee["dispatch"]["entry_action_u16"],
+            contextual_melee["dispatch"]["active_action_u16"],
+            30),
+        "    { " + ", ".join("%du" % row["command_u16"] for row in
+                              contextual_melee["audio_edges"]) + " },",
+        "    %du, %d" % (
+            contextual_melee["target_link"]["target_record_type_u8"],
+            contextual_melee["target_link"]["target_class_s8"]),
+        "};", "",
+        "static const AvspRound1PlayerContextualMeleeSequenceSpec avsp_round1_player_contextual_melee_sequences[AVSP_ROUND1_PLAYER_CONTEXTUAL_MELEE_SEQUENCE_COUNT] =",
+        "{",
+    ])
+    for sequence in contextual_sequences:
+        rendered = ["{ %du, %d, %sUL, %sUL, %du, %du }" % (
+            row["timer_u16"], row["branch_s16"],
+            row["animation_record"], row["assembly"],
+            row["hurt_selector_u8"], row["attack_selector_u8"])
+            for row in sequence["records"]]
+        while len(rendered) < 6:
+            rendered.append("{ 0u, 0, 0UL, 0UL, 0u, 0u }")
+        lines.append("    { %du, %du, %du, { %s } }," % (
+            sequence["facing_u8"], sequence["selector_u8"],
+            len(sequence["records"]), ", ".join(rendered)))
+    lines.extend([
+        "};", "",
         "static const AvspRound1PlayerJumpVectorSpec avsp_round1_player_jump_vectors[AVSP_ROUND1_PLAYER_JUMP_VECTOR_COUNT] =",
         "{",
     ])
@@ -3509,6 +3582,21 @@ def build() -> str:
             jump["presentation_actor_fields"]["coordinate_mode_u8"],
             jump["presentation_actor_fields"]["palette_u8"],
             jump["presentation_actor_fields"]["object_or_u16"]),
+        "};", "",
+        "static const AvspRound1PlayerJumpTimingSpec avsp_round1_player_jump_timing =",
+        "{",
+        "    %du, %du, %du, %du, %du, 1u, %du, %d" % (
+            jump_witness["pipeline_edge_frame"] -
+                jump_witness["physical_input_frame"],
+            jump_witness["jump_dispatch_frame"] -
+                jump_witness["pipeline_edge_frame"],
+            jump_witness["jump_dispatch_frame"] -
+                jump_witness["physical_input_frame"],
+            jump_witness["presentation_selector_u8"],
+            jump["motion_and_landing"]["landing_0x023630"][
+                "presentation_selector_u8"],
+            jump_witness["chronology"][-1]["animation_timer_u16"],
+            jump_witness["chronology"][-1]["animation_branch_s16"]),
         "};", "",
         "static const AvspRound1PlayerSpecialSpec avsp_round1_player_special =",
         "{",

@@ -124,7 +124,7 @@
  * bytes of headroom inside the fixed arena. */
 #ifdef AVSP_LIVE_ENCOUNTER
 #define AVSP_ROUND1_RUNTIME_REGION_BYTES 0x19000
-#define AVSP_ROUND1_RUNTIME_MEASURED_BYTES 0x173b8
+#define AVSP_ROUND1_RUNTIME_MEASURED_BYTES 0x173dc
 #define AVSP_LIVE_DIAG_REGION_BYTES 0x1A000
 #define AVSP_LIVE_DIAG_RECORD_BYTES 156
 #define AVSP_ROUND1_RUNTIME_BASE ((AvspRound1Runtime *)(AVSP_CART_DRAM1_BASE + AVSP_TILE_REGION_BYTES + AVSP_STRIPS_REGION_BYTES))
@@ -8215,7 +8215,7 @@ static void live_encounter_publish(void)
     avsp_diag_live_frame = (int)live_encounter_frame.frame;
     avsp_diag_round1_spec_bound =
         strcmp(AVSP_ROUND1_SPEC02_SHA256,
-               "4f593a2628eb35042d995addb633d1bb88cfc74226c1cd894ebea2efa1b57f36") ==
+               "5f50fe36d7827b4ecada76b52dfe740a4d475f47e437f37f19ec0a5342958a46") ==
         0;
     avsp_diag_round1_entry_valid = avsp_round1_entry_valid(&round1_runtime);
     avsp_diag_round1_route_state = round1_runtime.route_state;

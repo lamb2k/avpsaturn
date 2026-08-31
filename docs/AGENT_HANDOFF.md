@@ -1,49 +1,54 @@
-# REIMPLEMENT-13 paused agent handoff
+# REIMPLEMENT-13 active agent handoff
 
 Resume the persistent AvP Goal on `codex/avp-playable-loop-pivot` from the branch
-head. The active card remains `REIMPLEMENT-13-SOURCE-CLOSED-ROUND1`; runtime checkpoint `5d09b9b` is a
-verified partial implementation, not Coffee Shop acceptance. The accepted candidate intentionally remains `d04a65a2253175c6e820140feefc35419e2cca07`.
+head. The active card remains `REIMPLEMENT-13-SOURCE-CLOSED-ROUND1`. The branch
+head is a verified partial implementation, not Coffee Shop acceptance. The
+accepted candidate intentionally remains
+`d04a65a2253175c6e820140feefc35419e2cca07`.
 Workflow pivot / Preserved evidence work: Resume the AvP salvage Goal; retain SALVAGE-00-OLD-BUILD-BASELINE, USER-01-PLAYER-BASELINE-REVIEW, and evidence candidate `597f4ed517d4e715d814ff841bd00d3977803f85`.
 
 Read `project_state.yaml`, this handoff, the active task card, and current SPEC-02 contract/generated fixtures completely. Do not create another Goal,
 roadmap, workflow, branch, task hierarchy, coverage system, or writer. Preserve USER-09 `CHANGES_REQUESTED`, SALVAGE-08 inactive, physical Saturn `UNRUN`, and all accepted locks. Never stage/reset/overwrite user-owned
 `data/avsp_anim_records.json` or `history.txt`; stage owned paths explicitly.
 
-## Verified pause boundary
+## Verified active boundary
 
-The shared Predator Warrior HIT program now enters from the actor's signed 16.16
-source X, distinguishes global-bound clamping from obstacle/terrain
-ownership, and preserves the low word when only the high word is bounded. Its
-return-to-control bridge preserves the source actor position and applies the
-controller adapter's measured delta, so inherited fractions survive normal
-locomotion. Obstacle/terrain writes still clear the fraction they own.
+The Coffee Shop contextual Button2 body is source-bound through its target
+context, `0x1400/0x1402` transition, records `0x160288..0x1602c8`, selectors
+21/20, movement, collision, exit, and real mutations. The shared Button1
+fractional-position latch remains preserved.
 
-`python tests/port_v2/round1/test_entry.py --player-hit-only` passes with nine real mutations. The lane binds type-16 HIT frames 3264-3313 and the frame-3314
-return to control at X `0x04a0a000`; mutations reject entry truncation, wrong
-bound ownership, unconditional truncation, source-position zeroing, and the
-old absolute-twentieths reconstruction. Generated SPEC fixture check passes.
+The normal right-facing Button3 Coffee Shop route now reproduces the accepted
+source chronology exactly: physical input frame 3440, pipeline edge 3441, jump
+dispatch 3442, active air 3444, landing 3482, and neutral 3484. Native uses the
+generated selector-5 contract, signed 16.16 movement, source projection,
+fraction-preserving landing, and neutral timer/branch values. The focused jump
+lane passes 11 real mutations; contextual Button2 passes eight; Button1 passes
+nine. Oracle/SPEC analyzers and generated-header validation pass.
 
-Target `LiveEncounterBench` BUILD_ONLY passes: GAME.BIN 411488 bytes, BSS end `0x060be620`, ISO `/GAME.BIN` SHA-256
-`a41feb01186d6b7f630656e865f2235d4688c8a0b33d0d3463827d0dd59bf911`.
-No Emulator/WGC acceptance was run. Oracle remains intentionally RED at the
-later return-123/frame-4052 stage-progress mismatch. The complete scene census
-has not been regenerated after this return-to-control correction.
+Target `LiveEncounterBench` BUILD_ONLY passes: GAME.BIN 402704 bytes, BSS end
+`0x060bc390`, ISO `/GAME.BIN` SHA-256
+`8cf0f975f6ca4f7ac62795e3dd193dd1ce5e0dfc92edacacf04a6cfe76ce4e3b`.
+The combat overlay remains byte-identical at SHA-256
+`171f0dfa25d8a1fe94d2889f89c78e71bd3b1cfffa9fd5ff11964b1fc23815fe`.
 
 Ignored diagnostics remain `.deps/reimplement13_coffee_native_failure.tsv`, its
 `.stderr`, and `.deps/mame/oracle11_progression_lifecycle_cs21a/coffee_shop_scene_actors.tsv`.
 
-## Exact resume prompt
+## Exact next experiment
 
-Continue `REIMPLEMENT-13-SOURCE-CLOSED-ROUND1` from the branch head after runtime checkpoint `5d09b9b`. First regenerate the Coffee Shop census and use
-`tools/capture_reimplement13_coffee_shop_scene.py` to prove the player X 16.16
-first mismatch moved beyond frame 3314. Do not reopen the accepted scheduler,
-Button1, HIT, or return-to-control programs unless that evidence contradicts them. Then close the next earliest reusable player program: source input
-`0x0028` at frames 3410-3416 enters contextual Button2 action `0x1400`, active
-`0x1402`, records `0x160288..0x1602c8`, selectors 21/20, while native previously
-selected the generic close-combo path. Bind the target-context guard, entry
-timing, records, selectors, movement/collision, exit, and every Coffee
-Shop-reachable branch only from accepted Oracle/SPEC evidence; if a required
-field is absent, record the exact SPEC blocker and perform only the smallest
-bounded evidence amendment. Add real mutations, then run focused differential,
-fixture validation, Target, and the complete scene census. Keep the scene RED
-until zero unexplained gameplay gaps and no retained gameplay authority remain.
+Continue from the first remaining source/native divergence at source frame
+3530. Player state, action, animation, and signed 16.16 position match through
+frame 3529. At 3530 the source advances from X `0x04a0d000` to `0x04a2d000`,
+while native remains globally clamped at X high word `0x04a0`. Compare native
+and source camera chronology at frames 3519, 3529, 3530, 3540, 3550, and 3561,
+then identify the owning reusable global-bounds/camera phase program. Close all
+Coffee Shop-reachable branches from accepted Oracle/SPEC evidence; do not add a
+frame exception, authored delay, or guessed unlock.
+
+After that program passes focused differential, mutations, fixture validation,
+Target, and one pinned scene run, regenerate the complete Coffee Shop census.
+Keep the scene RED until zero unexplained gameplay-authoritative differences,
+zero unowned actors/events, and no retained gameplay authority remain. Paired
+cold Emulator and full WGC remain reserved for the coherent program or scene
+gate.

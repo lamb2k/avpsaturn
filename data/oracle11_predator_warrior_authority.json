@@ -7698,6 +7698,586 @@
           "horizontal direction versus facing",
           "facing sign transform"
         ],
+        "coffee_shop_right_facing1_witness": {
+          "active_air_frame": 3444,
+          "capture": "oracle11_progression_lifecycle_cs7a",
+          "capture_sha256": "9c0ea88c7eae6b4755b0025d356d49ae136d91de0e443fab0ff767151e43343d",
+          "chronology": [
+            {
+              "animation_branch_s16": -32768,
+              "animation_record": "0x0015f1f4",
+              "animation_timer_u16": 4095,
+              "facing_u8": 1,
+              "frame": 3439,
+              "state_u16": "0x0200",
+              "substate_u16": "0x0000",
+              "world_y_s32_16_16": "0x01400000",
+              "world_z_s16": 320,
+              "x_s32_16_16": "0x04a0e000"
+            },
+            {
+              "animation_branch_s16": 0,
+              "animation_record": "0x0015f208",
+              "animation_timer_u16": 4,
+              "facing_u8": 1,
+              "frame": 3440,
+              "state_u16": "0x0200",
+              "substate_u16": "0x0200",
+              "world_y_s32_16_16": "0x01400000",
+              "world_z_s16": 320,
+              "x_s32_16_16": "0x04a02000"
+            },
+            {
+              "animation_branch_s16": 0,
+              "animation_record": "0x0015f208",
+              "animation_timer_u16": 3,
+              "facing_u8": 1,
+              "frame": 3441,
+              "state_u16": "0x0200",
+              "substate_u16": "0x0202",
+              "world_y_s32_16_16": "0x01400000",
+              "world_z_s16": 320,
+              "x_s32_16_16": "0x04a06000"
+            },
+            {
+              "animation_branch_s16": 0,
+              "animation_record": "0x0015f2cc",
+              "animation_timer_u16": 1,
+              "facing_u8": 1,
+              "frame": 3442,
+              "state_u16": "0x0200",
+              "substate_u16": "0x0400",
+              "world_y_s32_16_16": "0x01400000",
+              "world_z_s16": 320,
+              "x_s32_16_16": "0x04a06000"
+            },
+            {
+              "animation_branch_s16": -32768,
+              "animation_record": "0x0015f2dc",
+              "animation_timer_u16": 1,
+              "facing_u8": 1,
+              "frame": 3443,
+              "state_u16": "0x0200",
+              "substate_u16": "0x0400",
+              "world_y_s32_16_16": "0x01400000",
+              "world_z_s16": 320,
+              "x_s32_16_16": "0x04a06000"
+            },
+            {
+              "animation_branch_s16": 0,
+              "animation_record": "0x0015f344",
+              "animation_timer_u16": 10,
+              "facing_u8": 1,
+              "frame": 3444,
+              "state_u16": "0x0200",
+              "substate_u16": "0x0402",
+              "world_y_s32_16_16": "0x01400000",
+              "world_z_s16": 320,
+              "x_s32_16_16": "0x04a06000"
+            },
+            {
+              "animation_branch_s16": 0,
+              "animation_record": "0x0015f344",
+              "animation_timer_u16": 9,
+              "facing_u8": 1,
+              "frame": 3445,
+              "state_u16": "0x0200",
+              "substate_u16": "0x0402",
+              "world_y_s32_16_16": "0x01440000",
+              "world_z_s16": 320,
+              "x_s32_16_16": "0x04a06000"
+            },
+            {
+              "animation_branch_s16": 0,
+              "animation_record": "0x0015f344",
+              "animation_timer_u16": 8,
+              "facing_u8": 1,
+              "frame": 3446,
+              "state_u16": "0x0200",
+              "substate_u16": "0x0402",
+              "world_y_s32_16_16": "0x0147c800",
+              "world_z_s16": 320,
+              "x_s32_16_16": "0x04a0f800"
+            },
+            {
+              "animation_branch_s16": 0,
+              "animation_record": "0x0015f344",
+              "animation_timer_u16": 7,
+              "facing_u8": 1,
+              "frame": 3447,
+              "state_u16": "0x0200",
+              "substate_u16": "0x0402",
+              "world_y_s32_16_16": "0x014b5800",
+              "world_z_s16": 320,
+              "x_s32_16_16": "0x04a02800"
+            },
+            {
+              "animation_branch_s16": 0,
+              "animation_record": "0x0015f344",
+              "animation_timer_u16": 6,
+              "facing_u8": 1,
+              "frame": 3448,
+              "state_u16": "0x0200",
+              "substate_u16": "0x0402",
+              "world_y_s32_16_16": "0x014eb000",
+              "world_z_s16": 320,
+              "x_s32_16_16": "0x04a0f000"
+            },
+            {
+              "animation_branch_s16": 0,
+              "animation_record": "0x0015f344",
+              "animation_timer_u16": 5,
+              "facing_u8": 1,
+              "frame": 3449,
+              "state_u16": "0x0200",
+              "substate_u16": "0x0402",
+              "world_y_s32_16_16": "0x0151d000",
+              "world_z_s16": 320,
+              "x_s32_16_16": "0x04a05000"
+            },
+            {
+              "animation_branch_s16": 0,
+              "animation_record": "0x0015f344",
+              "animation_timer_u16": 4,
+              "facing_u8": 1,
+              "frame": 3450,
+              "state_u16": "0x0200",
+              "substate_u16": "0x0402",
+              "world_y_s32_16_16": "0x0154b800",
+              "world_z_s16": 320,
+              "x_s32_16_16": "0x04a04800"
+            },
+            {
+              "animation_branch_s16": 0,
+              "animation_record": "0x0015f344",
+              "animation_timer_u16": 3,
+              "facing_u8": 1,
+              "frame": 3451,
+              "state_u16": "0x0200",
+              "substate_u16": "0x0402",
+              "world_y_s32_16_16": "0x01576800",
+              "world_z_s16": 320,
+              "x_s32_16_16": "0x04a0d800"
+            },
+            {
+              "animation_branch_s16": 0,
+              "animation_record": "0x0015f344",
+              "animation_timer_u16": 2,
+              "facing_u8": 1,
+              "frame": 3452,
+              "state_u16": "0x0200",
+              "substate_u16": "0x0402",
+              "world_y_s32_16_16": "0x0159e000",
+              "world_z_s16": 320,
+              "x_s32_16_16": "0x04a00000"
+            },
+            {
+              "animation_branch_s16": 0,
+              "animation_record": "0x0015f344",
+              "animation_timer_u16": 1,
+              "facing_u8": 1,
+              "frame": 3453,
+              "state_u16": "0x0200",
+              "substate_u16": "0x0402",
+              "world_y_s32_16_16": "0x015c2000",
+              "world_z_s16": 320,
+              "x_s32_16_16": "0x04a0c000"
+            },
+            {
+              "animation_branch_s16": 0,
+              "animation_record": "0x0015f354",
+              "animation_timer_u16": 3,
+              "facing_u8": 1,
+              "frame": 3454,
+              "state_u16": "0x0200",
+              "substate_u16": "0x0402",
+              "world_y_s32_16_16": "0x015e2800",
+              "world_z_s16": 320,
+              "x_s32_16_16": "0x04a01800"
+            },
+            {
+              "animation_branch_s16": 0,
+              "animation_record": "0x0015f354",
+              "animation_timer_u16": 2,
+              "facing_u8": 1,
+              "frame": 3455,
+              "state_u16": "0x0200",
+              "substate_u16": "0x0402",
+              "world_y_s32_16_16": "0x015ff800",
+              "world_z_s16": 320,
+              "x_s32_16_16": "0x04a00800"
+            },
+            {
+              "animation_branch_s16": 0,
+              "animation_record": "0x0015f354",
+              "animation_timer_u16": 1,
+              "facing_u8": 1,
+              "frame": 3456,
+              "state_u16": "0x0200",
+              "substate_u16": "0x0402",
+              "world_y_s32_16_16": "0x01619000",
+              "world_z_s16": 320,
+              "x_s32_16_16": "0x04a09000"
+            },
+            {
+              "animation_branch_s16": 0,
+              "animation_record": "0x0015f364",
+              "animation_timer_u16": 3,
+              "facing_u8": 1,
+              "frame": 3457,
+              "state_u16": "0x0200",
+              "substate_u16": "0x0402",
+              "world_y_s32_16_16": "0x0162f000",
+              "world_z_s16": 320,
+              "x_s32_16_16": "0x04a0b000"
+            },
+            {
+              "animation_branch_s16": 0,
+              "animation_record": "0x0015f364",
+              "animation_timer_u16": 2,
+              "facing_u8": 1,
+              "frame": 3458,
+              "state_u16": "0x0200",
+              "substate_u16": "0x0402",
+              "world_y_s32_16_16": "0x01641800",
+              "world_z_s16": 320,
+              "x_s32_16_16": "0x04a06800"
+            },
+            {
+              "animation_branch_s16": 0,
+              "animation_record": "0x0015f364",
+              "animation_timer_u16": 1,
+              "facing_u8": 1,
+              "frame": 3459,
+              "state_u16": "0x0200",
+              "substate_u16": "0x0402",
+              "world_y_s32_16_16": "0x01650800",
+              "world_z_s16": 320,
+              "x_s32_16_16": "0x04a0b800"
+            },
+            {
+              "animation_branch_s16": 0,
+              "animation_record": "0x0015f374",
+              "animation_timer_u16": 6,
+              "facing_u8": 1,
+              "frame": 3460,
+              "state_u16": "0x0200",
+              "substate_u16": "0x0402",
+              "world_y_s32_16_16": "0x0165c000",
+              "world_z_s16": 320,
+              "x_s32_16_16": "0x04a0a000"
+            },
+            {
+              "animation_branch_s16": 0,
+              "animation_record": "0x0015f374",
+              "animation_timer_u16": 5,
+              "facing_u8": 1,
+              "frame": 3461,
+              "state_u16": "0x0200",
+              "substate_u16": "0x0402",
+              "world_y_s32_16_16": "0x01664000",
+              "world_z_s16": 320,
+              "x_s32_16_16": "0x04a02000"
+            },
+            {
+              "animation_branch_s16": 0,
+              "animation_record": "0x0015f374",
+              "animation_timer_u16": 4,
+              "facing_u8": 1,
+              "frame": 3462,
+              "state_u16": "0x0200",
+              "substate_u16": "0x0402",
+              "world_y_s32_16_16": "0x01668800",
+              "world_z_s16": 320,
+              "x_s32_16_16": "0x04a03800"
+            },
+            {
+              "animation_branch_s16": 0,
+              "animation_record": "0x0015f374",
+              "animation_timer_u16": 3,
+              "facing_u8": 1,
+              "frame": 3463,
+              "state_u16": "0x0200",
+              "substate_u16": "0x0402",
+              "world_y_s32_16_16": "0x01669800",
+              "world_z_s16": 320,
+              "x_s32_16_16": "0x04a0e800"
+            },
+            {
+              "animation_branch_s16": 0,
+              "animation_record": "0x0015f374",
+              "animation_timer_u16": 2,
+              "facing_u8": 1,
+              "frame": 3464,
+              "state_u16": "0x0200",
+              "substate_u16": "0x0402",
+              "world_y_s32_16_16": "0x01667000",
+              "world_z_s16": 320,
+              "x_s32_16_16": "0x04a03000"
+            },
+            {
+              "animation_branch_s16": 0,
+              "animation_record": "0x0015f374",
+              "animation_timer_u16": 1,
+              "facing_u8": 1,
+              "frame": 3465,
+              "state_u16": "0x0200",
+              "substate_u16": "0x0402",
+              "world_y_s32_16_16": "0x01661000",
+              "world_z_s16": 320,
+              "x_s32_16_16": "0x04a01000"
+            },
+            {
+              "animation_branch_s16": 0,
+              "animation_record": "0x0015f384",
+              "animation_timer_u16": 6,
+              "facing_u8": 1,
+              "frame": 3466,
+              "state_u16": "0x0200",
+              "substate_u16": "0x0402",
+              "world_y_s32_16_16": "0x01657800",
+              "world_z_s16": 320,
+              "x_s32_16_16": "0x04a08800"
+            },
+            {
+              "animation_branch_s16": 0,
+              "animation_record": "0x0015f384",
+              "animation_timer_u16": 5,
+              "facing_u8": 1,
+              "frame": 3467,
+              "state_u16": "0x0200",
+              "substate_u16": "0x0402",
+              "world_y_s32_16_16": "0x0164a800",
+              "world_z_s16": 320,
+              "x_s32_16_16": "0x04a09800"
+            },
+            {
+              "animation_branch_s16": 0,
+              "animation_record": "0x0015f384",
+              "animation_timer_u16": 4,
+              "facing_u8": 1,
+              "frame": 3468,
+              "state_u16": "0x0200",
+              "substate_u16": "0x0402",
+              "world_y_s32_16_16": "0x0163a000",
+              "world_z_s16": 320,
+              "x_s32_16_16": "0x04a04000"
+            },
+            {
+              "animation_branch_s16": 0,
+              "animation_record": "0x0015f384",
+              "animation_timer_u16": 3,
+              "facing_u8": 1,
+              "frame": 3469,
+              "state_u16": "0x0200",
+              "substate_u16": "0x0402",
+              "world_y_s32_16_16": "0x01626000",
+              "world_z_s16": 320,
+              "x_s32_16_16": "0x04a08000"
+            },
+            {
+              "animation_branch_s16": 0,
+              "animation_record": "0x0015f384",
+              "animation_timer_u16": 2,
+              "facing_u8": 1,
+              "frame": 3470,
+              "state_u16": "0x0200",
+              "substate_u16": "0x0402",
+              "world_y_s32_16_16": "0x0160e800",
+              "world_z_s16": 320,
+              "x_s32_16_16": "0x04a05800"
+            },
+            {
+              "animation_branch_s16": 0,
+              "animation_record": "0x0015f384",
+              "animation_timer_u16": 1,
+              "facing_u8": 1,
+              "frame": 3471,
+              "state_u16": "0x0200",
+              "substate_u16": "0x0402",
+              "world_y_s32_16_16": "0x015f3800",
+              "world_z_s16": 320,
+              "x_s32_16_16": "0x04a0c800"
+            },
+            {
+              "animation_branch_s16": 0,
+              "animation_record": "0x0015f394",
+              "animation_timer_u16": 8,
+              "facing_u8": 1,
+              "frame": 3472,
+              "state_u16": "0x0200",
+              "substate_u16": "0x0402",
+              "world_y_s32_16_16": "0x015d5000",
+              "world_z_s16": 320,
+              "x_s32_16_16": "0x04a0d000"
+            },
+            {
+              "animation_branch_s16": 0,
+              "animation_record": "0x0015f394",
+              "animation_timer_u16": 7,
+              "facing_u8": 1,
+              "frame": 3473,
+              "state_u16": "0x0200",
+              "substate_u16": "0x0402",
+              "world_y_s32_16_16": "0x015b3000",
+              "world_z_s16": 320,
+              "x_s32_16_16": "0x04a07000"
+            },
+            {
+              "animation_branch_s16": 0,
+              "animation_record": "0x0015f394",
+              "animation_timer_u16": 6,
+              "facing_u8": 1,
+              "frame": 3474,
+              "state_u16": "0x0200",
+              "substate_u16": "0x0402",
+              "world_y_s32_16_16": "0x0158d800",
+              "world_z_s16": 320,
+              "x_s32_16_16": "0x04a0a800"
+            },
+            {
+              "animation_branch_s16": 0,
+              "animation_record": "0x0015f394",
+              "animation_timer_u16": 5,
+              "facing_u8": 1,
+              "frame": 3475,
+              "state_u16": "0x0200",
+              "substate_u16": "0x0402",
+              "world_y_s32_16_16": "0x01564800",
+              "world_z_s16": 320,
+              "x_s32_16_16": "0x04a07800"
+            },
+            {
+              "animation_branch_s16": 0,
+              "animation_record": "0x0015f394",
+              "animation_timer_u16": 4,
+              "facing_u8": 1,
+              "frame": 3476,
+              "state_u16": "0x0200",
+              "substate_u16": "0x0402",
+              "world_y_s32_16_16": "0x01538000",
+              "world_z_s16": 320,
+              "x_s32_16_16": "0x04a0e000"
+            },
+            {
+              "animation_branch_s16": 0,
+              "animation_record": "0x0015f394",
+              "animation_timer_u16": 3,
+              "facing_u8": 1,
+              "frame": 3477,
+              "state_u16": "0x0200",
+              "substate_u16": "0x0402",
+              "world_y_s32_16_16": "0x01508000",
+              "world_z_s16": 320,
+              "x_s32_16_16": "0x04a0e000"
+            },
+            {
+              "animation_branch_s16": 0,
+              "animation_record": "0x0015f394",
+              "animation_timer_u16": 2,
+              "facing_u8": 1,
+              "frame": 3478,
+              "state_u16": "0x0200",
+              "substate_u16": "0x0402",
+              "world_y_s32_16_16": "0x014d4800",
+              "world_z_s16": 320,
+              "x_s32_16_16": "0x04a07800"
+            },
+            {
+              "animation_branch_s16": 0,
+              "animation_record": "0x0015f394",
+              "animation_timer_u16": 1,
+              "facing_u8": 1,
+              "frame": 3479,
+              "state_u16": "0x0200",
+              "substate_u16": "0x0402",
+              "world_y_s32_16_16": "0x0149d800",
+              "world_z_s16": 320,
+              "x_s32_16_16": "0x04a0a800"
+            },
+            {
+              "animation_branch_s16": -32768,
+              "animation_record": "0x0015f3a4",
+              "animation_timer_u16": 4095,
+              "facing_u8": 1,
+              "frame": 3480,
+              "state_u16": "0x0200",
+              "substate_u16": "0x0402",
+              "world_y_s32_16_16": "0x01463000",
+              "world_z_s16": 320,
+              "x_s32_16_16": "0x04a07000"
+            },
+            {
+              "animation_branch_s16": -32768,
+              "animation_record": "0x0015f3a4",
+              "animation_timer_u16": 4094,
+              "facing_u8": 1,
+              "frame": 3481,
+              "state_u16": "0x0200",
+              "substate_u16": "0x0402",
+              "world_y_s32_16_16": "0x01425000",
+              "world_z_s16": 320,
+              "x_s32_16_16": "0x04a0d000"
+            },
+            {
+              "animation_branch_s16": 0,
+              "animation_record": "0x0015f2cc",
+              "animation_timer_u16": 1,
+              "facing_u8": 1,
+              "frame": 3482,
+              "state_u16": "0x0200",
+              "substate_u16": "0x0404",
+              "world_y_s32_16_16": "0x01403800",
+              "world_z_s16": 320,
+              "x_s32_16_16": "0x04a0d000"
+            },
+            {
+              "animation_branch_s16": -32768,
+              "animation_record": "0x0015f2dc",
+              "animation_timer_u16": 1,
+              "facing_u8": 1,
+              "frame": 3483,
+              "state_u16": "0x0200",
+              "substate_u16": "0x0404",
+              "world_y_s32_16_16": "0x01403800",
+              "world_z_s16": 320,
+              "x_s32_16_16": "0x04a0d000"
+            },
+            {
+              "animation_branch_s16": -32768,
+              "animation_record": "0x0015f1f4",
+              "animation_timer_u16": 4095,
+              "facing_u8": 1,
+              "frame": 3484,
+              "state_u16": "0x0200",
+              "substate_u16": "0x0000",
+              "world_y_s32_16_16": "0x01403800",
+              "world_z_s16": 320,
+              "x_s32_16_16": "0x04a0d000"
+            }
+          ],
+          "classification": "SOURCE_DERIVED_ACCEPTED_CAPTURE",
+          "jump_dispatch_frame": 3442,
+          "landing_frame": 3482,
+          "neutral_return_frame": 3484,
+          "physical_input_frame": 3440,
+          "pipeline_edge_frame": 3441,
+          "presentation_selector_u8": 5,
+          "record_sequence": [
+            "0x15f2cc",
+            "0x15f2dc",
+            "0x15f344",
+            "0x15f354",
+            "0x15f364",
+            "0x15f374",
+            "0x15f384",
+            "0x15f394",
+            "0x15f3a4",
+            "0x15f2cc",
+            "0x15f2dc",
+            "0x15f1f4"
+          ]
+        },
         "down_vector_table": {
           "vertical_only": {
             "source_address": "0x024432",
@@ -7748,7 +8328,8 @@
             "same_facing_horizontal": {
               "collision_level_u8": 2,
               "collision_up_u8": 1,
-              "presentation": "facing + 5"
+              "presentation_level_u8": 5,
+              "presentation_up_u8": "facing + 5"
             }
           }
         },
@@ -7835,7 +8416,7 @@
             "airborne_latch_u8": 0,
             "next_phase_u16": "0x0404",
             "presentation_selector_u8": 10,
-            "terrain_mode_zero_write": "world_y high word = world_z high word"
+            "terrain_mode_zero_write": "world_y high word = world_z high word; preserve the existing world_y fractional low word"
           },
           "phase_0x0402": {
             "landing_guard": "carry clear after signed world_y versus world_z comparison",
@@ -7873,6 +8454,9 @@
           "reject presentation selector or record mutation",
           "reject landing comparison polarity or terrain-mode guard mutation",
           "reject phase or timer transition mutation",
+          "reject physical-edge to dispatcher chronology mutation",
+          "reject same-facing level selector 5 mutation",
+          "reject landing fractional-low-word preservation mutation",
           "reject interruption branch reordering",
           "reject added RNG consumption"
         ],
@@ -17372,6 +17956,301 @@
         20
       ],
       "entry": "0x022ed6",
+      "implementation_contract": {
+        "audio_edges": [
+          {
+            "command_u16": 54,
+            "downstream_qsound_difference": {
+              "baseline": {
+                "byte": "00",
+                "frame": "3413",
+                "pc": "0ad3",
+                "port": "d001",
+                "register": "",
+                "value": ""
+              },
+              "kind": "value",
+              "mutant": {
+                "byte": "3e",
+                "frame": "3413",
+                "pc": "0ad3",
+                "port": "d001",
+                "register": "",
+                "value": ""
+              },
+              "row_index": 123969
+            },
+            "player_side_caller": "0x019850",
+            "semantic_sound_name": "UNKNOWN",
+            "shared_dispatch_entry": "0x001922",
+            "source_frame_u16": 3412
+          },
+          {
+            "command_u16": 257,
+            "downstream_qsound_difference": {
+              "baseline": {
+                "byte": "00",
+                "frame": "3723",
+                "pc": "0ad3",
+                "port": "d001",
+                "register": "",
+                "value": ""
+              },
+              "kind": "value",
+              "mutant": {
+                "byte": "13",
+                "frame": "3723",
+                "pc": "0ad3",
+                "port": "d001",
+                "register": "",
+                "value": ""
+              },
+              "row_index": 154668
+            },
+            "player_side_caller": "0x019850",
+            "semantic_sound_name": "UNKNOWN",
+            "shared_dispatch_entry": "0x001922",
+            "source_frame_u16": 3722
+          }
+        ],
+        "classification": "SOURCE_CLOSED_IMPLEMENTATION_FIELDS",
+        "coffee_shop_witnesses": [
+          {
+            "active_frame_u16": 3413,
+            "edge_frame_u16": 3411,
+            "entry_frame_u16": 3412,
+            "facing_u8": 1,
+            "terminal_frame_u16": 3422,
+            "terminal_kind": "BUTTON1_INTERRUPT",
+            "x_fp_s32": 77651968,
+            "y_fp_s32": 20971520
+          },
+          {
+            "active_frame_u16": 3723,
+            "edge_frame_u16": 3721,
+            "entry_frame_u16": 3722,
+            "facing_u8": 1,
+            "terminal_frame_u16": 3734,
+            "terminal_kind": "NORMAL_RESET",
+            "x_fp_s32": 89165824,
+            "y_fp_s32": 20920320
+          }
+        ],
+        "collision": {
+          "coffee_shop_damage_events": 0,
+          "current_attack_selectors_u8": [
+            21,
+            20
+          ],
+          "rule": "publish the current selector from the bound animation record; do not infer an unobserved damage write"
+        },
+        "dispatch": {
+          "active_action_u16": 5122,
+          "button2_edge_writer": "0x01a6e4",
+          "common_action_u16": 1536,
+          "entry_action_u16": 5120,
+          "target_guard": "player +0x5a u16 != 0",
+          "target_override_writer": "0x01a6ea"
+        },
+        "evidence": {
+          "baseline_trace_sha256": "eea9b1aceff832808a6cf3ba016ccf8af243f811ca92ad1569e22286378e6620",
+          "baseline_writes_sha256": "c12ebf098a22ab5945d62e9dcda126e82af377b35469b7bdc2c1d30cbdec6197",
+          "cold_runs_byte_identical": true,
+          "mutation_discriminates_0x1400_from_0x0600": true,
+          "target_writer_suppression_trace_sha256": "204b08b0b4eb886d94f284e9abb61ed2f007e28e892cdfdafc025336794cf51b",
+          "target_writer_suppression_writes_sha256": "377ce3429e12c88a5b28b2874467110699aac0515849f6858bb34bbb68e726f3"
+        },
+        "movement": {
+          "facing_rule": "latch facing selected at entry",
+          "rng_calls": [],
+          "scheduler_position": "player slot before non-player pools",
+          "x_rule": "preserve exact signed 16.16 X",
+          "y_rule": "preserve exact signed 16.16 Y"
+        },
+        "presentation_sequences": [
+          {
+            "facing_u8": 1,
+            "records": [
+              {
+                "animation_record": "0x160288",
+                "assembly": "0x1629e6",
+                "assembly_window_sha256": "faaea5af66a415b31ee8d4b78fcca9ddc1838b572fe860deebe12e843db04525",
+                "attack_selector_u8": 0,
+                "branch_s16": 0,
+                "hurt_selector_u8": 1,
+                "record_sha256": "b700dc2cc2084bac8e035cd167d1a18967caed9fe9cd5b243b8da4906fbaf049",
+                "timer_u16": 1
+              },
+              {
+                "animation_record": "0x160298",
+                "assembly": "0x162a04",
+                "assembly_window_sha256": "348d78e7be9442018078253ed053bb9f73221c58470e16de21c00b21c9f8fce6",
+                "attack_selector_u8": 21,
+                "branch_s16": 0,
+                "hurt_selector_u8": 11,
+                "record_sha256": "1c0691d87f2245de702713064efd801b05d45dad19412998775dbf8d9e694786",
+                "timer_u16": 2
+              },
+              {
+                "animation_record": "0x1602a8",
+                "assembly": "0x162a04",
+                "assembly_window_sha256": "348d78e7be9442018078253ed053bb9f73221c58470e16de21c00b21c9f8fce6",
+                "attack_selector_u8": 0,
+                "branch_s16": 1,
+                "hurt_selector_u8": 11,
+                "record_sha256": "b0cdeca7338d46e1d7043ab0ac434373c98926dc8fbcea9e4c57e16fddd58c13",
+                "timer_u16": 2
+              },
+              {
+                "animation_record": "0x1602b8",
+                "assembly": "0x1629e6",
+                "assembly_window_sha256": "faaea5af66a415b31ee8d4b78fcca9ddc1838b572fe860deebe12e843db04525",
+                "attack_selector_u8": 0,
+                "branch_s16": 1,
+                "hurt_selector_u8": 1,
+                "record_sha256": "7968e91240ecaebb949b768e7b0a690d23f30cf506c64de0ff3baad307f27d0a",
+                "timer_u16": 5
+              },
+              {
+                "animation_record": "0x1602c8",
+                "assembly": "0x1629e6",
+                "assembly_window_sha256": "faaea5af66a415b31ee8d4b78fcca9ddc1838b572fe860deebe12e843db04525",
+                "attack_selector_u8": 0,
+                "branch_s16": -32767,
+                "hurt_selector_u8": 1,
+                "record_sha256": "689eae9272ecac7c463c88e8f9082025e21c17a014b30ecac945f5b53274744a",
+                "timer_u16": 4095
+              }
+            ],
+            "selector_u8": 21
+          },
+          {
+            "facing_u8": 0,
+            "records": [
+              {
+                "animation_record": "0x1602dc",
+                "assembly": "0x162a32",
+                "assembly_window_sha256": "c252caab1850d308c2204baab1b50a7329ceaefa9a6da40be7af5367c1753f3a",
+                "attack_selector_u8": 0,
+                "branch_s16": 0,
+                "hurt_selector_u8": 1,
+                "record_sha256": "de9a383fc777f2fac8357d5f29df26472dfa6c5ec08c4e3418e3418c3407399d",
+                "timer_u16": 2
+              },
+              {
+                "animation_record": "0x1602ec",
+                "assembly": "0x162a5a",
+                "assembly_window_sha256": "08bd8912d5b5f327581bcf043df4f0ebc4daf84e2d2ffb72384a68b5794c4925",
+                "attack_selector_u8": 0,
+                "branch_s16": 0,
+                "hurt_selector_u8": 1,
+                "record_sha256": "16ca64057cd28c857b4019863c7ae3beedff182dd30ed13fbfa5fc709e0df2ca",
+                "timer_u16": 1
+              },
+              {
+                "animation_record": "0x1602fc",
+                "assembly": "0x162a82",
+                "assembly_window_sha256": "c3c282dc7f4801f1824796e4e80bfc97b03d2ff358556b57dc03f262777cca42",
+                "attack_selector_u8": 20,
+                "branch_s16": 1,
+                "hurt_selector_u8": 11,
+                "record_sha256": "402cba0856772a7671442c0cb448be9ce3aa2c75885021a207f4fbf9866e9285",
+                "timer_u16": 4
+              },
+              {
+                "animation_record": "0x16030c",
+                "assembly": "0x162a5a",
+                "assembly_window_sha256": "08bd8912d5b5f327581bcf043df4f0ebc4daf84e2d2ffb72384a68b5794c4925",
+                "attack_selector_u8": 0,
+                "branch_s16": 1,
+                "hurt_selector_u8": 1,
+                "record_sha256": "8cf6dc55c68cd42efe42655ec7f65956adda5d05bfb239d32510ab54f2aa9a08",
+                "timer_u16": 5
+              },
+              {
+                "animation_record": "0x16031c",
+                "assembly": "0x162a32",
+                "assembly_window_sha256": "c252caab1850d308c2204baab1b50a7329ceaefa9a6da40be7af5367c1753f3a",
+                "attack_selector_u8": 0,
+                "branch_s16": 1,
+                "hurt_selector_u8": 1,
+                "record_sha256": "8cd2b51321c38751b70e8f6f5bb6823228cf996f9470c0e112797c176556e4ae",
+                "timer_u16": 4
+              },
+              {
+                "animation_record": "0x16032c",
+                "assembly": "0x162a32",
+                "assembly_window_sha256": "c252caab1850d308c2204baab1b50a7329ceaefa9a6da40be7af5367c1753f3a",
+                "attack_selector_u8": 0,
+                "branch_s16": -32767,
+                "hurt_selector_u8": 1,
+                "record_sha256": "80af3091e2b5e3f7c8869cb2f5c3fb9299d4c7491a94739f80d3005a66dd4605",
+                "timer_u16": 4095
+              }
+            ],
+            "selector_u8": 20
+          }
+        ],
+        "spec_executable": true,
+        "state_program": {
+          "active_body": "0x022f42",
+          "active_reads": [
+            "+0x81 u8 step",
+            "+0x6e u8 guard",
+            "+0x25 u8 event",
+            "+0x80 u8 completion",
+            "+0xee/+0xef input edge",
+            "+0x87 u8 toggle"
+          ],
+          "button1_interruption": "frame 3422 transfers to 0x1a00 while preserving record 0x1602b8 and its timer",
+          "common_reset": "0x01a3e2",
+          "completion_false": "toggle87 ^= 1; step81=0",
+          "completion_true": "step81=(step81+1)&3; field82 high=30",
+          "entry_body": "0x022ed6",
+          "entry_writes": {
+            "action_u16": 5120,
+            "event80_u8": 0,
+            "field92_u8": 12,
+            "flag9d_u8": 1,
+            "next_action_u16": 5122,
+            "state_u16": 512,
+            "step81_u8": 0
+          },
+          "fresh_button2_edge_exit": "clear phase byte +0x07",
+          "ordinary_exit": "0x01a3e2 common reset"
+        },
+        "target_link": {
+          "allocator_entry": "0x017828",
+          "clear_writer": "0x02129e",
+          "native_install_guard": "entry.animation_c1 == 8 source subhandler completion",
+          "player_field": "+0x5a u16",
+          "player_to_target_writer": "0x0212ce",
+          "scope": "player dispatch consumes the proven nonzero cross-link only; no type-28 actor behavior is inferred",
+          "source_frame_u16": 2074,
+          "source_windows": {
+            "allocator": {
+              "bytes": 72,
+              "end_exclusive": "0x017870",
+              "sha256": "b786d0e506ebdd6edd130867d378ae2427ad03b4b22d0008f381d35ac790355d",
+              "start": "0x017828"
+            },
+            "crosslink": {
+              "bytes": 72,
+              "end_exclusive": "0x0212e0",
+              "sha256": "a5d05d8f5b1f990bd6f536cc421736ea6f078fe76856ebe8df9d360fb29bbe9a",
+              "start": "0x021298"
+            }
+          },
+          "target_actor_program_spec_executable": false,
+          "target_class_s8": 0,
+          "target_low_u16": 52736,
+          "target_record_type_u8": 28,
+          "target_slot": "0xffce00",
+          "target_state_u16": 518,
+          "target_substate_u16": 512,
+          "target_to_player_writer": "0x0212c6"
+        }
+      },
       "step_field": "+0x81 u8",
       "step_rule": "advance modulo four on +0x80 completion, otherwise clear the step and toggle +0x87"
     },

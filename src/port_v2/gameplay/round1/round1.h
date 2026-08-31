@@ -6,7 +6,7 @@
 #include "../../combat/hit_ko/hit_ko.h"
 
 #define AVSP_ROUND1_SPEC02_SHA256 \
-"790da00bd00deacf085fef6426cea606587355b3f828fbdbf72cd753f059840a"
+"5f50fe36d7827b4ecada76b52dfe740a4d475f47e437f37f19ec0a5342958a46"
 #define AVSP_ROUND1_CANARY_HEAD 0x52314548UL
 #define AVSP_ROUND1_CANARY_TAIL 0x52314554UL
 #define AVSP_ROUND1_ROUTE_ENTRY_STATE 2
@@ -26,6 +26,9 @@
 #define AVSP_ROUND1_PLAYER_ENTRY_STATE 2048u
 #define AVSP_ROUND1_PLAYER_CONTROL_STATE 512u
 #define AVSP_ROUND1_PLAYER_MELEE_COUNT 4u
+#define AVSP_ROUND1_PLAYER_CONTEXTUAL_MELEE_SEQUENCE_COUNT 2u
+#define AVSP_ROUND1_PLAYER_CONTEXTUAL_MELEE_MAX_RECORDS 6u
+#define AVSP_ROUND1_PLAYER_CONTEXTUAL_MELEE_AUDIO_COUNT 2u
 #define AVSP_ROUND1_PLAYER_HIT_SHAKE_COUNT 32u
 #define AVSP_ROUND1_PLAYER_HIT_REACTION_COUNT 3u
 #define AVSP_ROUND1_PLAYER_WALK_PRESENTATION_COUNT 12u
@@ -1312,6 +1315,38 @@ typedef struct
 
 typedef struct
 {
+    unsigned char facing;
+    unsigned char selector;
+    unsigned char record_count;
+    AvspRound1AnimationStateSpec records[
+        AVSP_ROUND1_PLAYER_CONTEXTUAL_MELEE_MAX_RECORDS];
+} AvspRound1PlayerContextualMeleeSequenceSpec;
+
+typedef struct
+{
+    unsigned long target_link_clear_writer;
+    unsigned long target_link_allocator;
+    unsigned long target_to_player_writer;
+    unsigned long player_to_target_writer;
+    unsigned long entry_body;
+    unsigned long active_body;
+    unsigned long common_reset;
+    unsigned long target_source_slot;
+    unsigned short target_low;
+    unsigned short target_state;
+    unsigned short target_substate;
+    unsigned short common_action;
+    unsigned short entry_action;
+    unsigned short active_action;
+    unsigned short followup_ticks;
+    unsigned short audio_commands[
+        AVSP_ROUND1_PLAYER_CONTEXTUAL_MELEE_AUDIO_COUNT];
+    unsigned char target_record_type;
+    signed char target_class;
+} AvspRound1PlayerContextualMeleeSpec;
+
+typedef struct
+{
     long x_velocity;
     long x_acceleration;
     long y_velocity;
@@ -1332,6 +1367,18 @@ typedef struct
     unsigned char palette;
     unsigned short object_or;
 } AvspRound1PlayerPresentationActorSpec;
+
+typedef struct
+{
+    unsigned char physical_to_pipeline_updates;
+    unsigned char pipeline_to_dispatch_updates;
+    unsigned char dispatch_delay_counter;
+    unsigned char same_facing_level_selector;
+    unsigned char landing_selector;
+    unsigned char preserve_landing_fraction;
+    unsigned short neutral_timer;
+    short neutral_branch;
+} AvspRound1PlayerJumpTimingSpec;
 
 typedef struct
 {
@@ -1872,8 +1919,23 @@ typedef struct
     unsigned long player_melee_selector_mask;
     unsigned long player_melee_presentation_mask;
     unsigned long player_melee_interruptions;
+    unsigned char player_contextual_melee_active;
+    unsigned char player_contextual_melee_dispatch_delay;
+    unsigned char player_contextual_melee_sequence;
+    unsigned char player_contextual_melee_animation_index;
+    unsigned char player_contextual_melee_step81;
+    unsigned char player_contextual_melee_toggle87;
+    unsigned short player_contextual_melee_animation_timer;
+    short player_contextual_melee_animation_branch;
+    unsigned long player_contextual_melee_entries;
+    unsigned long player_contextual_melee_completions;
+    unsigned long player_contextual_melee_interruptions;
+    unsigned long player_contextual_melee_presentation_mask;
+    unsigned long player_contextual_melee_audio_events;
+    unsigned short player_contextual_melee_audio_command;
     unsigned char player_jump_active;
     unsigned char player_jump_cleanup_pending;
+    unsigned char player_jump_dispatch_delay;
     unsigned char player_jump_previous_pressed;
     unsigned char player_jump_direction_class;
     unsigned char player_jump_collision_selector;

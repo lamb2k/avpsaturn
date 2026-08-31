@@ -9,7 +9,7 @@ from pathlib import Path
 
 ROOT = Path(__file__).resolve().parents[3]
 SPEC = ROOT / "data/spec02_round1_executable_contract.json"
-EXPECTED = "790da00bd00deacf085fef6426cea606587355b3f828fbdbf72cd753f059840a"
+EXPECTED = "5f50fe36d7827b4ecada76b52dfe740a4d475f47e437f37f19ec0a5342958a46"
 assert hashlib.sha256(SPEC.read_bytes()).hexdigest() == EXPECTED
 assert json.loads(SPEC.read_text())["status"] == "ACCEPTED"
 source = (ROOT / "src/port_v2/gameplay/round1/round1.c").read_text()
@@ -81,12 +81,19 @@ def run(body, header_body, passes, label="baseline", player_body=player_source,
             result.stdout.decode(errors="replace") +
             result.stderr.decode(errors="replace"))
 
+jump_stop_marker = "    {\n        AvspRound1Runtime contextual = runtime;"
+assert jump_stop_marker in test_source
+jump_test_body = test_source.replace(
+    jump_stop_marker, "    return 0;\n" + jump_stop_marker, 1)
+
 run(source, header, True,
     expected_returncode=(123 if "--weapon-timing-only" in sys.argv else
+                         123 if "--contextual-melee-only" in sys.argv else
                          123 if "--controller-edge-only" in sys.argv else
                          123 if "--player-hit-only" in sys.argv else
                          123 if "--action0c-only" in sys.argv else
-                         None))
+                         None),
+    test_body=(jump_test_body if "--jump-only" in sys.argv else None))
 if "--baseline-only" in sys.argv:
     print("REIMPLEMENT-13 focused baseline: PASS")
     raise SystemExit(0)
@@ -102,7 +109,8 @@ assert queue_before in player_source
 subset_flags = {"--inner8-only", "--ko-only", "--registration-only",
                 "--locomotion-only", "--generated-walk-only",
                 "--controller-edge-only", "--player-hit-only",
-                "--weapon-timing-only", "--action0c-only"}
+                "--weapon-timing-only", "--contextual-melee-only",
+                "--action0c-only", "--jump-only"}
 if "--queue-only" in sys.argv or not subset_flags.intersection(sys.argv):
     run(source, header, False, "consume-before-direction-queue-shift",
         player_source.replace(queue_before, queue_after, 1))
@@ -134,7 +142,8 @@ locomotion_mutations = {
     "if (next >= AVSP_ROUND1_PLAYER_WALK_PRESENTATION_COUNT)",
     "const long denominator = 20L;",
     "runtime->player_weapon_cleanup_pending = 0u;\n        weapon_return_owned = 1u;",
-    "weapon_motion_hold = (unsigned char)(runtime->player_weapon_active ||\n        jump_owned || special_owned);",
+    "weapon_motion_hold = (unsigned char)(runtime->player_weapon_active ||\n"
+    "        (jump_owned && !jump_began) || special_owned || contextual_owned);",
     "if (weapon_motion_hold)\n        input.mask = (unsigned short)(input.mask &\n            (unsigned short)~AVSP_PW_INPUT_ATTACK);",
 }
 controller_edge_mutations = {
@@ -156,6 +165,8 @@ player_hit_mutations = {
     "runtime->player_hit_x_acceleration =\n                reaction->x_acceleration;",
 }
 weapon_timing_mutations = {
+    "else if (weapon_owned || contextual_owned)\n    {\n"
+    "        runtime->player.source_x_fp = view.x != bounded_player_x ?",
     "runtime->player_weapon_tick = 1u;",
     "runtime->player_weapon_dispatch_delay =\n"
     "        avsp_round1_player_weapon.action_dispatch_delay_updates;",
@@ -175,11 +186,52 @@ weapon_timing_mutations = {
     "        return 1;\n"
     "    }",
 }
+contextual_melee_mutations = {
+    "runtime->player.source_target_low =\n"
+    "            avsp_round1_player_contextual_melee.target_low;",
+    "unsigned char index = runtime->player_action.facing != 0 ? 0u : 1u;",
+    "runtime->player_contextual_melee_dispatch_delay = 2u;",
+    "avsp_round1_player_contextual_melee.active_action;",
+    "if (runtime->player_contextual_melee_animation_branch < 0)",
+    "avsp_round1_player_contextual_melee.audio_commands[\n"
+    "                    runtime->player_contextual_melee_entries];",
+    "(jump_owned && !jump_began) || special_owned || contextual_owned);",
+    "if (runtime->player_contextual_melee_active && weapon_edge &&",
+}
 action0c_mutations = {
     "    if (stage >= AVSP_ROUND1_CLASS1F_ACTION4_STAGE_COUNT)\n"
     "        return 0u;",
 }
+jump_mutations = {
+    "runtime->player_jump_dispatch_delay =\n"
+    "        avsp_round1_player_jump_timing.dispatch_delay_counter;",
+    "if (avsp_round1_player_jump_timing.preserve_landing_fraction)",
+    "runtime->player.animation_timer = avsp_round1_player_jump_timing.neutral_timer;",
+    "runtime->player.animation_branch = avsp_round1_player_jump_timing.neutral_branch;",
+    "runtime->player_jump_y_fp += runtime->player_jump_y_velocity;",
+    "if (facing != 0u)\n        {\n"
+    "            runtime->player_jump_x_velocity =\n"
+    "                -runtime->player_jump_x_velocity;",
+}
 for before, after in (
+    ("runtime->player.source_target_low =\n"
+     "            avsp_round1_player_contextual_melee.target_low;",
+     "runtime->player.source_target_low = 0u;"),
+    ("unsigned char index = runtime->player_action.facing != 0 ? 0u : 1u;",
+     "unsigned char index = runtime->player_action.facing != 0 ? 1u : 0u;"),
+    ("runtime->player_contextual_melee_dispatch_delay = 2u;",
+     "runtime->player_contextual_melee_dispatch_delay = 0u;"),
+    ("avsp_round1_player_contextual_melee.active_action;",
+     "avsp_round1_player_contextual_melee.common_action;"),
+    ("if (runtime->player_contextual_melee_animation_branch < 0)",
+     "if (runtime->player_contextual_melee_animation_branch == -32768)"),
+    ("avsp_round1_player_contextual_melee.audio_commands[\n"
+     "                    runtime->player_contextual_melee_entries];",
+     "avsp_round1_player_contextual_melee.audio_commands[0];"),
+    ("(jump_owned && !jump_began) || special_owned || contextual_owned);",
+     "(jump_owned && !jump_began) || special_owned);"),
+    ("if (runtime->player_contextual_melee_active && weapon_edge &&",
+     "if (0 && runtime->player_contextual_melee_active && weapon_edge &&"),
     ("    if (stage >= AVSP_ROUND1_CLASS1F_ACTION4_STAGE_COUNT)\n"
      "        return 0u;",
      "    if (stage >= AVSP_ROUND1_CLASS1F_ACTION4_STAGE_COUNT ||\n"
@@ -257,8 +309,11 @@ for before, after in (
     ("const long denominator = 20L;", "const long denominator = 19L;"),
     ("runtime->player_weapon_cleanup_pending = 0u;\n        weapon_return_owned = 1u;",
      "runtime->player_weapon_cleanup_pending = 0u;\n        runtime->player_weapon_return_pending = 1u;\n        weapon_return_owned = 1u;"),
-    ("weapon_motion_hold = (unsigned char)(runtime->player_weapon_active ||\n        jump_owned || special_owned);",
-     "weapon_motion_hold = (unsigned char)(runtime->player_weapon_active ||\n        weapon_return_owned || jump_owned || special_owned);"),
+    ("weapon_motion_hold = (unsigned char)(runtime->player_weapon_active ||\n"
+     "        (jump_owned && !jump_began) || special_owned || contextual_owned);",
+     "weapon_motion_hold = (unsigned char)(runtime->player_weapon_active ||\n"
+     "        weapon_return_owned || (jump_owned && !jump_began) ||\n"
+     "        special_owned || contextual_owned);"),
     ("if (weapon_motion_hold)\n        input.mask = (unsigned short)(input.mask &\n            (unsigned short)~AVSP_PW_INPUT_ATTACK);",
      "if (weapon_motion_hold)\n        input.mask = (unsigned short)(input.mask & (unsigned short)~(\n            AVSP_PW_INPUT_LEFT | AVSP_PW_INPUT_RIGHT |\n            AVSP_PW_INPUT_UP | AVSP_PW_INPUT_DOWN |\n            AVSP_PW_INPUT_ATTACK));"),
     ("avsp_round1_observe_player_melee(runtime, prior_state, prior_selector,\n                                    prior_attack_edges);", "/* melee observation suppressed */"),
@@ -354,6 +409,10 @@ for before, after in (
      "runtime->camera_guard_countdown = runtime->camera_guard_countdown;"),
     ("unsigned short index = (unsigned short)(byte_offset >> 1);",
      "unsigned short index = (unsigned short)(byte_offset >> 2);"),
+    ("runtime->player_jump_dispatch_delay =\n"
+     "        avsp_round1_player_jump_timing.dispatch_delay_counter;",
+     "runtime->player_jump_dispatch_delay = (unsigned char)(\n"
+     "        avsp_round1_player_jump_timing.dispatch_delay_counter + 1u);"),
     ("if (up)\n            index += 1u;",
      "if (up)\n            index += 2u;"),
     ("if ((unsigned char)(right ^ facing) != 0u)\n                index += 2u;",
@@ -370,6 +429,13 @@ for before, after in (
      "runtime->player_jump_y_fp -= runtime->player_jump_y_velocity;"),
     ("runtime->player_jump_y_velocity += runtime->player_jump_y_acceleration;",
      "runtime->player_jump_y_velocity -= runtime->player_jump_y_acceleration;"),
+    ("if (avsp_round1_player_jump_timing.preserve_landing_fraction)",
+     "if (0)"),
+    ("runtime->player.animation_timer = avsp_round1_player_jump_timing.neutral_timer;",
+     "runtime->player.animation_timer = (unsigned short)(\n"
+     "        avsp_round1_player_jump_timing.neutral_timer - 1u);"),
+    ("runtime->player.animation_branch = avsp_round1_player_jump_timing.neutral_branch;",
+     "runtime->player.animation_branch = 0;"),
     ("avsp_round1_fixed_high_word(runtime->player_jump_y_fp) <=\n            runtime->player_action.lane",
      "avsp_round1_fixed_high_word(runtime->player_jump_y_fp) <\n            runtime->player_action.lane"),
     ("runtime->player_jump_phase_timer = 10u;",
@@ -539,6 +605,10 @@ for before, after in (
      "sufficient_entry_preserves_current_presentation == 0u)"),
     ("runtime->player_weapon_tick = 1u;",
      "runtime->player_weapon_tick = 0u;"),
+    ("else if (weapon_owned || contextual_owned)\n    {\n"
+     "        runtime->player.source_x_fp = view.x != bounded_player_x ?",
+     "else if ((weapon_owned && 0) || contextual_owned)\n    {\n"
+     "        runtime->player.source_x_fp = view.x != bounded_player_x ?"),
     ("runtime->player_weapon_dispatch_delay =\n"
      "        avsp_round1_player_weapon.action_dispatch_delay_updates;",
      "runtime->player_weapon_dispatch_delay = 0u;"),
@@ -592,12 +662,17 @@ for before, after in (
         continue
     if "--weapon-timing-only" in sys.argv and before not in weapon_timing_mutations:
         continue
+    if "--contextual-melee-only" in sys.argv and before not in contextual_melee_mutations:
+        continue
     if "--action0c-only" in sys.argv and before not in action0c_mutations:
+        continue
+    if "--jump-only" in sys.argv and before not in jump_mutations:
         continue
     if "--generated-walk-only" in sys.argv:
         continue
     assert before in source, before
     run(source.replace(before, after), header, False, before,
+        test_body=(jump_test_body if "--jump-only" in sys.argv else None),
         expected_returncode=(94 if "--action0c-only" in sys.argv
                              else None))
 if "--inner8-only" in sys.argv:
@@ -608,6 +683,9 @@ if "--ko-only" in sys.argv:
     raise SystemExit(0)
 if "--registration-only" in sys.argv:
     print("REIMPLEMENT-13 deferred record-4 registration mutation lane: PASS (1 real mutation)")
+    raise SystemExit(0)
+if "--contextual-melee-only" in sys.argv:
+    print("REIMPLEMENT-13 contextual Button2 mutation lane: PASS (8 real mutations)")
     raise SystemExit(0)
 if "--locomotion-only" in sys.argv:
     print("REIMPLEMENT-13 locomotion/weapon-return mutation lane: PASS (5 real mutations)")
@@ -661,10 +739,27 @@ if ("--weapon-timing-only" in sys.argv or
         generated_body=generated.replace(
             generated_resource_before, generated_resource_after, 1))
     if "--weapon-timing-only" in sys.argv:
-        print("REIMPLEMENT-13 Button1 timing mutation lane: PASS (8 real mutations)")
+        print("REIMPLEMENT-13 Button1 timing mutation lane: PASS (9 real mutations)")
         raise SystemExit(0)
 if "--action0c-only" in sys.argv:
     print("REIMPLEMENT-13 class-0x1f action-0x0c timer-row mutation lane: PASS (1 real mutation)")
+    raise SystemExit(0)
+if "--jump-only" in sys.argv:
+    generated_jump_timing = (
+        "    1u, 1u, 2u, 5u, 10u, 1u, 4095u, -32768")
+    assert generated.count(generated_jump_timing) == 1
+    for label, changed_timing in (
+        ("dispatch-delay", "    1u, 1u, 1u, 5u, 10u, 1u, 4095u, -32768"),
+        ("same-facing-selector", "    1u, 1u, 2u, 6u, 10u, 1u, 4095u, -32768"),
+        ("landing-fraction", "    1u, 1u, 2u, 5u, 10u, 0u, 4095u, -32768"),
+        ("neutral-timer", "    1u, 1u, 2u, 5u, 10u, 1u, 4094u, -32768"),
+        ("neutral-branch", "    1u, 1u, 2u, 5u, 10u, 1u, 4095u, 0"),
+    ):
+        run(source, header, False, "generated-jump-" + label,
+            generated_body=generated.replace(
+                generated_jump_timing, changed_timing, 1),
+            test_body=jump_test_body)
+    print("REIMPLEMENT-13 Button3 source-timing mutation lane: PASS (11 real mutations)")
     raise SystemExit(0)
 generated_walk_mutations = {
     "    { 4u, 0, 0x0015F208UL, 0x00160A02UL, 17u, 0u },",
@@ -863,4 +958,4 @@ for before, after in (
 if "--generated-walk-only" in sys.argv:
     print("REIMPLEMENT-13 generated walk fixture mutation lane: PASS (5 real mutations)")
     raise SystemExit(0)
-print("REIMPLEMENT-13 entry/player/scheduler/class1f/Coffee-Shop-navigation/neutral-stop/melee/Button1/Button3/type16-projectile/player-HIT/first-encounter differential: PASS (223 real mutations)")
+print("REIMPLEMENT-13 entry/player/scheduler/class1f/Coffee-Shop-navigation/neutral-stop/melee/Button1/Button3/type16-projectile/player-HIT/first-encounter differential: PASS (224 real mutations)")

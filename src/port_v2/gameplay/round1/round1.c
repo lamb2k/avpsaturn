@@ -4561,6 +4561,176 @@ static int avsp_round1_player_melee_contract_valid(void)
     return 1;
 }
 
+static int avsp_round1_player_contextual_melee_contract_valid(void)
+{
+    const AvspRound1PlayerContextualMeleeSpec *spec =
+        &avsp_round1_player_contextual_melee;
+    const AvspRound1PlayerContextualMeleeSequenceSpec *right =
+        &avsp_round1_player_contextual_melee_sequences[0];
+    const AvspRound1PlayerContextualMeleeSequenceSpec *left =
+        &avsp_round1_player_contextual_melee_sequences[1];
+    return spec->target_link_clear_writer == 0x02129eUL &&
+        spec->target_link_allocator == 0x017828UL &&
+        spec->target_to_player_writer == 0x0212c6UL &&
+        spec->player_to_target_writer == 0x0212ceUL &&
+        spec->entry_body == 0x022ed6UL &&
+        spec->active_body == 0x022f42UL &&
+        spec->common_reset == 0x01a3e2UL &&
+        spec->target_source_slot == 0x00ffce00UL &&
+        spec->target_low == 0xce00u && spec->target_state == 0x0206u &&
+        spec->target_substate == 0x0200u &&
+        spec->common_action == 0x0600u && spec->entry_action == 0x1400u &&
+        spec->active_action == 0x1402u && spec->followup_ticks == 30u &&
+        spec->audio_commands[0] == 0x0036u &&
+        spec->audio_commands[1] == 0x0101u &&
+        spec->target_record_type == 28u && spec->target_class == 0 &&
+        right->facing == 1u && right->selector == 21u &&
+        right->record_count == 5u &&
+        right->records[1].attack_selector == 21u &&
+        left->facing == 0u && left->selector == 20u &&
+        left->record_count == 6u &&
+        left->records[2].attack_selector == 20u;
+}
+
+static int avsp_round1_player_contextual_melee_runtime_valid(
+    const AvspRound1Runtime *runtime)
+{
+    const AvspRound1PlayerContextualMeleeSequenceSpec *sequence;
+    if (runtime->player_contextual_melee_completions +
+            runtime->player_contextual_melee_interruptions >
+            runtime->player_contextual_melee_entries ||
+        runtime->player_contextual_melee_audio_events !=
+            (runtime->player_contextual_melee_entries <
+                AVSP_ROUND1_PLAYER_CONTEXTUAL_MELEE_AUDIO_COUNT ?
+             runtime->player_contextual_melee_entries :
+             AVSP_ROUND1_PLAYER_CONTEXTUAL_MELEE_AUDIO_COUNT))
+        return 0;
+    if (!runtime->player_contextual_melee_active)
+        return 1;
+    if (runtime->player_contextual_melee_sequence >=
+            AVSP_ROUND1_PLAYER_CONTEXTUAL_MELEE_SEQUENCE_COUNT)
+        return 0;
+    sequence = &avsp_round1_player_contextual_melee_sequences[
+        runtime->player_contextual_melee_sequence];
+    if (runtime->player_contextual_melee_dispatch_delay == 2u)
+        return 1;
+    return runtime->player_contextual_melee_animation_index <
+            sequence->record_count &&
+        runtime->player_contextual_melee_animation_timer ==
+            runtime->player.animation_timer &&
+        runtime->player_contextual_melee_animation_branch ==
+            runtime->player.animation_branch;
+}
+
+static void avsp_round1_reset_contextual_player_action(
+    AvspRound1Runtime *runtime)
+{
+    runtime->player_action.state = AVSP_PW_STATE_CONTROL;
+    runtime->player_action.phase = AVSP_PW_PHASE_NONE;
+    runtime->player_action.selector = 0u;
+    runtime->player_action.action_elapsed = 0u;
+    runtime->player_action.source_action = 0u;
+    runtime->player_action.source_substate = 0u;
+    runtime->player_action.attack_active = 0u;
+    runtime->player_action.height = 0;
+}
+
+static int avsp_round1_begin_player_contextual_melee(
+    AvspRound1Runtime *runtime)
+{
+    unsigned char index = runtime->player_action.facing != 0 ? 0u : 1u;
+    if (runtime->player.source_target_low !=
+            avsp_round1_player_contextual_melee.target_low)
+        return 0;
+    runtime->player_contextual_melee_active = 1u;
+    runtime->player_contextual_melee_dispatch_delay = 2u;
+    runtime->player_contextual_melee_sequence = index;
+    runtime->player_contextual_melee_animation_index = 0u;
+    runtime->player_contextual_melee_step81 = 0u;
+    runtime->player_contextual_melee_animation_timer = 0u;
+    runtime->player_contextual_melee_animation_branch = 0;
+    avsp_round1_reset_contextual_player_action(runtime);
+    return 1;
+}
+
+static int avsp_round1_step_player_contextual_melee(
+    AvspRound1Runtime *runtime)
+{
+    const AvspRound1PlayerContextualMeleeSequenceSpec *sequence =
+        &avsp_round1_player_contextual_melee_sequences[
+            runtime->player_contextual_melee_sequence];
+    const AvspRound1AnimationStateSpec *record;
+    if (!runtime->player_contextual_melee_active ||
+        runtime->player_contextual_melee_sequence >=
+            AVSP_ROUND1_PLAYER_CONTEXTUAL_MELEE_SEQUENCE_COUNT ||
+        runtime->player_contextual_melee_animation_index >=
+            sequence->record_count)
+        return 0;
+    if (runtime->player_contextual_melee_dispatch_delay == 2u)
+    {
+        --runtime->player_contextual_melee_dispatch_delay;
+        runtime->player_contextual_melee_animation_timer =
+            sequence->records[0].timer;
+        runtime->player_contextual_melee_animation_branch =
+            sequence->records[0].branch;
+        runtime->player.source_action =
+            avsp_round1_player_contextual_melee.entry_action;
+        runtime->player.substate = runtime->player.source_action;
+        avsp_round1_bind_animation_state(&runtime->player,
+                                         &sequence->records[0]);
+        if (runtime->player_contextual_melee_entries <
+                AVSP_ROUND1_PLAYER_CONTEXTUAL_MELEE_AUDIO_COUNT)
+        {
+            runtime->player_contextual_melee_audio_command =
+                avsp_round1_player_contextual_melee.audio_commands[
+                    runtime->player_contextual_melee_entries];
+            ++runtime->player_contextual_melee_audio_events;
+        }
+        ++runtime->player_contextual_melee_entries;
+        runtime->player_contextual_melee_presentation_mask |=
+            1UL << runtime->player_contextual_melee_sequence;
+        return 1;
+    }
+    runtime->player.source_action =
+        avsp_round1_player_contextual_melee.active_action;
+    runtime->player.substate = runtime->player.source_action;
+    if (runtime->player_contextual_melee_dispatch_delay != 0u)
+    {
+        --runtime->player_contextual_melee_dispatch_delay;
+        return 1;
+    }
+    if (runtime->player_contextual_melee_animation_branch < 0)
+    {
+        runtime->player_contextual_melee_active = 0u;
+        runtime->player_contextual_melee_step81 = 0u;
+        runtime->player_contextual_melee_toggle87 ^= 1u;
+        runtime->player.source_action = 0u;
+        runtime->player.substate = 0u;
+        runtime->player_locomotion_action = 0u;
+        runtime->player_was_directional = 0u;
+        ++runtime->player_contextual_melee_completions;
+        avsp_round1_bind_animation_state(
+            &runtime->player, &avsp_round1_player_hit.return_record);
+        return 0;
+    }
+    if (runtime->player_contextual_melee_animation_timer > 1u)
+    {
+        --runtime->player_contextual_melee_animation_timer;
+        --runtime->player.animation_timer;
+        return 1;
+    }
+    ++runtime->player_contextual_melee_animation_index;
+    if (runtime->player_contextual_melee_animation_index >=
+            sequence->record_count)
+        return 0;
+    record = &sequence->records[
+        runtime->player_contextual_melee_animation_index];
+    runtime->player_contextual_melee_animation_timer = record->timer;
+    runtime->player_contextual_melee_animation_branch = record->branch;
+    avsp_round1_bind_animation_state(&runtime->player, record);
+    return 1;
+}
+
 static int avsp_round1_player_locomotion_contract_valid(void)
 {
     static const unsigned char expected_direction_resolver[16] =
@@ -5629,6 +5799,8 @@ static int avsp_round1_bind_player_jump_sequence(AvspRound1Runtime *runtime,
     runtime->player_jump_animation_index = 0u;
     runtime->player_jump_animation_timer = record->timer;
     runtime->player_jump_animation_branch = record->branch;
+    runtime->player.animation_timer = record->timer;
+    runtime->player.animation_branch = record->branch;
     runtime->player.animation_record = record->animation_record;
     runtime->player.assembly = record->assembly;
     runtime->player.hurt_selector = record->hurt_selector;
@@ -5648,12 +5820,14 @@ static int avsp_round1_step_player_jump_animation(AvspRound1Runtime *runtime)
             sequence->record_count || runtime->player_jump_animation_timer == 0u)
         return 0;
     --runtime->player_jump_animation_timer;
+    runtime->player.animation_timer = runtime->player_jump_animation_timer;
     if (runtime->player_jump_animation_timer != 0u)
         return 1;
     if (runtime->player_jump_animation_branch < 0)
     {
         record = &sequence->records[runtime->player_jump_animation_index];
         runtime->player_jump_animation_timer = record->timer;
+        runtime->player.animation_timer = record->timer;
         return 1;
     }
     next = (unsigned char)(runtime->player_jump_animation_index + 1u);
@@ -5663,6 +5837,8 @@ static int avsp_round1_step_player_jump_animation(AvspRound1Runtime *runtime)
     record = &sequence->records[next];
     runtime->player_jump_animation_timer = record->timer;
     runtime->player_jump_animation_branch = record->branch;
+    runtime->player.animation_timer = record->timer;
+    runtime->player.animation_branch = record->branch;
     runtime->player.animation_record = record->animation_record;
     runtime->player.assembly = record->assembly;
     runtime->player.hurt_selector = record->hurt_selector;
@@ -5675,6 +5851,7 @@ static void avsp_round1_finish_player_jump(AvspRound1Runtime *runtime)
 {
     runtime->player_jump_active = 0u;
     runtime->player_jump_cleanup_pending = 1u;
+    runtime->player_jump_dispatch_delay = 0u;
     runtime->player_jump_phase = 0u;
     runtime->player_jump_airborne_latch = 0u;
     runtime->player_action.height = 0;
@@ -5682,6 +5859,8 @@ static void avsp_round1_finish_player_jump(AvspRound1Runtime *runtime)
     runtime->player.substate = 0u;
     runtime->player.animation_record = 0x0015f1f4UL;
     runtime->player.assembly = 0x001626a4UL;
+    runtime->player.animation_timer = avsp_round1_player_jump_timing.neutral_timer;
+    runtime->player.animation_branch = avsp_round1_player_jump_timing.neutral_branch;
     runtime->player.hurt_selector = 1u;
     runtime->player.attack_selector = 0u;
     runtime->player_action.x_numerator = 0L;
@@ -5692,6 +5871,7 @@ static void avsp_round1_interrupt_player_jump(AvspRound1Runtime *runtime)
 {
     runtime->player_jump_active = 0u;
     runtime->player_jump_cleanup_pending = 0u;
+    runtime->player_jump_dispatch_delay = 0u;
     runtime->player_jump_phase = 0u;
     runtime->player_jump_airborne_latch = 0u;
     runtime->player_action.height = 0;
@@ -5703,6 +5883,8 @@ static int avsp_round1_begin_player_jump(AvspRound1Runtime *runtime)
 {
     runtime->player_jump_active = 1u;
     runtime->player_jump_cleanup_pending = 0u;
+    runtime->player_jump_dispatch_delay =
+        avsp_round1_player_jump_timing.dispatch_delay_counter;
     runtime->player_jump_phase = 0x0400u;
     runtime->player_jump_phase_timer = 0u;
     runtime->player_jump_direction_class = 0u;
@@ -5714,17 +5896,11 @@ static int avsp_round1_begin_player_jump(AvspRound1Runtime *runtime)
     runtime->player_jump_y_velocity = 0L;
     runtime->player_jump_x_acceleration = 0L;
     runtime->player_jump_y_acceleration = 0L;
-    runtime->player_stop_ticks = 0u;
-    runtime->player_was_directional = 0u;
-    runtime->player_cleanup_pending = 0u;
-    runtime->player.source_action = 0x0400u;
-    runtime->player.substate = 0u;
     runtime->player.coordinate_mode =
         avsp_round1_player_jump_actor.coordinate_mode;
     runtime->player.palette = avsp_round1_player_jump_actor.palette;
     runtime->player.object_or = avsp_round1_player_jump_actor.object_or;
-    ++runtime->player_jump_entries;
-    return avsp_round1_bind_player_jump_sequence(runtime, 3u);
+    return 1;
 }
 
 static int avsp_round1_initialize_player_jump(AvspRound1Runtime *runtime,
@@ -5792,7 +5968,9 @@ static int avsp_round1_initialize_player_jump(AvspRound1Runtime *runtime,
             if ((unsigned char)(right ^ facing) == 0u)
             {
                 runtime->player_jump_collision_selector = up ? 1u : 2u;
-                selector = (unsigned char)(facing + 5u);
+                selector = up ? (unsigned char)(facing + 5u) :
+                    avsp_round1_player_jump_timing.
+                        same_facing_level_selector;
             }
             else
             {
@@ -5810,6 +5988,23 @@ static int avsp_round1_step_player_jump(AvspRound1Runtime *runtime,
 {
     if (!runtime->player_jump_active)
         return 1;
+    if (runtime->player_jump_dispatch_delay != 0u)
+    {
+        --runtime->player_jump_dispatch_delay;
+        if (runtime->player_jump_dispatch_delay == 0u)
+        {
+            runtime->player_jump_x_fp = runtime->player.source_x_fp;
+            runtime->player_jump_y_fp = runtime->player.source_y_fp;
+            runtime->player_stop_ticks = 0u;
+            runtime->player_was_directional = 0u;
+            runtime->player_cleanup_pending = 0u;
+            runtime->player.source_action = 0x0400u;
+            runtime->player.substate = 0x0400u;
+            ++runtime->player_jump_entries;
+            return avsp_round1_bind_player_jump_sequence(runtime, 3u);
+        }
+        return 1;
+    }
     if (runtime->player_jump_phase == 0x0400u)
     {
         if (runtime->player_jump_animation_branch >= 0)
@@ -5839,14 +6034,21 @@ static int avsp_round1_step_player_jump(AvspRound1Runtime *runtime,
         if (avsp_round1_fixed_high_word(runtime->player_jump_y_fp) <=
             runtime->player_action.lane)
         {
-            runtime->player_jump_y_fp =
-                (long)runtime->player_action.lane * 65536L;
+            if (avsp_round1_player_jump_timing.preserve_landing_fraction)
+                runtime->player_jump_y_fp =
+                    avsp_round1_replace_fixed_high_word(
+                        runtime->player_jump_y_fp,
+                        runtime->player_action.lane);
+            else
+                runtime->player_jump_y_fp =
+                    (long)runtime->player_action.lane * 65536L;
             runtime->player_action.height = 0;
             runtime->player_jump_phase = 0x0404u;
             runtime->player_jump_airborne_latch = 0u;
             runtime->player.source_action = 0x0404u;
             ++runtime->player_jump_landings;
-            return avsp_round1_bind_player_jump_sequence(runtime, 10u);
+            return avsp_round1_bind_player_jump_sequence(runtime,
+                avsp_round1_player_jump_timing.landing_selector);
         }
         return avsp_round1_step_player_jump_animation(runtime);
     }
@@ -10995,6 +11197,8 @@ int avsp_round1_step_first_entry(AvspRound1Runtime *runtime)
     {
         runtime->entry.animation_c1 = 0u;
         runtime->entry.animation_c2 = 0u;
+        runtime->player.source_target_low =
+            avsp_round1_player_contextual_melee.target_low;
         return avsp_round1_entry_valid(runtime);
     }
     if (runtime->entry.animation_c1 == 2u)
@@ -11508,11 +11712,14 @@ int avsp_round1_step_player(AvspRound1Runtime *runtime,
     unsigned char weapon_motion_hold;
     unsigned char weapon_owned;
     unsigned char weapon_dispatch_pending;
+    unsigned char contextual_owned;
+    unsigned char contextual_began;
     unsigned char recovery_start;
     unsigned char weapon_return_owned;
     unsigned char jump_pressed;
     unsigned char jump_edge;
     unsigned char jump_owned;
+    unsigned char jump_began;
     unsigned char special_buttons;
     unsigned char special_physical_candidate;
     unsigned char special_pressed;
@@ -11633,6 +11840,7 @@ int avsp_round1_step_player(AvspRound1Runtime *runtime,
         runtime->player_jump_cleanup_pending = 0u;
     if (runtime->player_jump_active && received_damage > 0)
         avsp_round1_interrupt_player_jump(runtime);
+    jump_began = 0u;
     if (!special_owned && !runtime->player_jump_active &&
         !runtime->player_weapon_active &&
         !runtime->player_weapon_cleanup_pending &&
@@ -11644,11 +11852,20 @@ int avsp_round1_step_player(AvspRound1Runtime *runtime,
             ++runtime->failure_count;
             return 0;
         }
+        jump_began = 1u;
     }
     jump_owned = runtime->player_jump_active;
     weapon_pressed = runtime->player_weapon_input_pipeline;
     weapon_edge = (unsigned char)(weapon_pressed &&
         !runtime->player_weapon_previous_pressed);
+    if (runtime->player_contextual_melee_active && weapon_edge &&
+        (input_mask & AVSP_PW_INPUT_ATTACK) == 0u)
+    {
+        runtime->player_contextual_melee_active = 0u;
+        runtime->player_contextual_melee_dispatch_delay = 0u;
+        ++runtime->player_contextual_melee_interruptions;
+        avsp_round1_reset_contextual_player_action(runtime);
+    }
     if (jump_owned && runtime->player_jump_phase == 0x0402u &&
         weapon_edge && (input_mask & AVSP_PW_INPUT_ATTACK) == 0u &&
         !avsp_round1_begin_player_air_weapon(runtime, input_mask))
@@ -11683,8 +11900,10 @@ int avsp_round1_step_player(AvspRound1Runtime *runtime,
     weapon_dispatch_pending = (unsigned char)(
         runtime->player_weapon_active &&
         runtime->player_weapon_dispatch_delay != 0u);
+    contextual_owned = runtime->player_contextual_melee_active;
+    contextual_began = 0u;
     weapon_motion_hold = (unsigned char)(runtime->player_weapon_active ||
-        jump_owned || special_owned);
+        (jump_owned && !jump_began) || special_owned || contextual_owned);
     input.mask = (unsigned short)(input_mask &
         (unsigned short)~(AVSP_ROUND1_INPUT_BUTTON1 |
                           AVSP_ROUND1_INPUT_BUTTON3));
@@ -11709,6 +11928,20 @@ int avsp_round1_step_player(AvspRound1Runtime *runtime,
     prior_direction_history_1 = runtime->player_action.direction_history[1];
     prior_attack_edges = runtime->player_action.accepted_attack_edges;
     avsp_pw_step_round1(&runtime->player_action, &input);
+    if (!contextual_owned &&
+        runtime->player_action.accepted_attack_edges ==
+            prior_attack_edges + 1u &&
+        runtime->player.source_target_low ==
+            avsp_round1_player_contextual_melee.target_low)
+    {
+        if (!avsp_round1_begin_player_contextual_melee(runtime))
+        {
+            ++runtime->failure_count;
+            return 0;
+        }
+        contextual_owned = 1u;
+        contextual_began = 1u;
+    }
     if (weapon_dispatch_pending)
     {
         runtime->player_action.direction_history[0] =
@@ -11720,8 +11953,9 @@ int avsp_round1_step_player(AvspRound1Runtime *runtime,
     else
         applied_direction = runtime->player_action.direction_history[
             AVSP_PW_DIRECTION_LATENCY - 1];
-    avsp_round1_observe_player_melee(runtime, prior_state, prior_selector,
-                                    prior_attack_edges);
+    if (!contextual_began && !contextual_owned)
+        avsp_round1_observe_player_melee(runtime, prior_state, prior_selector,
+                                        prior_attack_edges);
     if (was_stopping || weapon_motion_hold)
     {
         if (runtime->player_action.x != prior_x ||
@@ -11768,6 +12002,11 @@ int avsp_round1_step_player(AvspRound1Runtime *runtime,
     }
     weapon_owned = (unsigned char)avsp_round1_step_player_weapon(
         runtime, weapon_pressed, weapon_edge);
+    if (contextual_owned && !contextual_began)
+    {
+        if (!avsp_round1_step_player_contextual_melee(runtime))
+            contextual_owned = 2u;
+    }
     avsp_round1_tick_player_resource(runtime);
     avsp_round1_apply_player_global_bounds(runtime);
     bounded_player_x = runtime->player_action.x;
@@ -11783,11 +12022,12 @@ int avsp_round1_step_player(AvspRound1Runtime *runtime,
     {
         short jump_x = avsp_round1_fixed_high_word(runtime->player_jump_x_fp);
         if (jump_x != runtime->player_action.x)
-            runtime->player_jump_x_fp =
-                (long)runtime->player_action.x * 65536L;
+            runtime->player_jump_x_fp = avsp_round1_replace_fixed_high_word(
+                runtime->player_jump_x_fp, runtime->player_action.x);
     }
     avsp_pw_view(&runtime->player_action, &view);
-    if (!special_owned && !jump_owned && !weapon_owned)
+    if (!special_owned && (!jump_owned || jump_began) && !weapon_owned &&
+        !contextual_owned)
         avsp_round1_update_player_locomotion(runtime, applied_direction,
                                             was_stopping, &view);
     if (runtime->failure_count != 0u)
@@ -11797,7 +12037,7 @@ int avsp_round1_step_player(AvspRound1Runtime *runtime,
     runtime->player.x = view.x;
     runtime->player.y = (short)(view.lane + view.height);
     runtime->player.z = view.lane;
-    if (!special_owned && !jump_owned && !weapon_owned)
+    if (!special_owned && !jump_owned && !weapon_owned && !contextual_owned)
     {
         runtime->player.source_x_fp = view.x != bounded_player_x ?
             (long)view.x * 65536L :
@@ -11807,6 +12047,44 @@ int avsp_round1_step_player(AvspRound1Runtime *runtime,
             (long)view.lane * 65536L :
             avsp_round1_replace_fixed_high_word(
                 control_source_y_fp, view.lane);
+    }
+    else if (jump_owned && jump_began)
+    {
+        runtime->player.source_x_fp = view.x != bounded_player_x ?
+            (long)view.x * 65536L :
+            avsp_round1_replace_fixed_high_word(
+                control_source_x_fp, view.x);
+        runtime->player.source_y_fp = view.lane != bounded_player_lane ?
+            (long)view.lane * 65536L :
+            avsp_round1_replace_fixed_high_word(
+                control_source_y_fp, view.lane);
+    }
+    else if (jump_owned)
+    {
+        runtime->player.source_x_fp = runtime->player_jump_x_fp;
+        runtime->player.source_y_fp = runtime->player_jump_y_fp;
+    }
+    else if (contextual_owned && contextual_began)
+    {
+        runtime->player.source_x_fp = view.x != bounded_player_x ?
+            (long)view.x * 65536L :
+            avsp_round1_replace_fixed_high_word(
+                control_source_x_fp, view.x);
+        runtime->player.source_y_fp = view.lane != bounded_player_lane ?
+            (long)view.lane * 65536L :
+            avsp_round1_replace_fixed_high_word(
+                control_source_y_fp, view.lane);
+    }
+    else if (weapon_owned || contextual_owned)
+    {
+        runtime->player.source_x_fp = view.x != bounded_player_x ?
+            (long)view.x * 65536L :
+            avsp_round1_replace_fixed_high_word(
+                prior_source_x_fp, view.x);
+        runtime->player.source_y_fp = view.lane != bounded_player_lane ?
+            (long)view.lane * 65536L :
+            avsp_round1_replace_fixed_high_word(
+                prior_source_y_fp, view.lane);
     }
     else
     {
@@ -11823,10 +12101,27 @@ int avsp_round1_step_player(AvspRound1Runtime *runtime,
     }
     else if (jump_owned)
     {
-        runtime->player.source_action = runtime->player_jump_phase;
+        if (jump_began)
+        {
+            runtime->player.source_action =
+                runtime->player_locomotion_action;
+            runtime->player.substate = runtime->player_was_directional ||
+                    runtime->player_stop_ticks != 0u ?
+                runtime->player_locomotion_action :
+                (unsigned short)(runtime->player_locomotion_action & 0x00ffu);
+        }
+        else
+        {
+            runtime->player.source_action = runtime->player_jump_phase;
+            runtime->player.substate = runtime->player_jump_phase;
+        }
         if (!runtime->player_jump_active &&
             runtime->player_jump_cleanup_pending)
             runtime->player.source_action = 0u;
+    }
+    else if (contextual_owned)
+    {
+        runtime->player.substate = runtime->player.source_action;
     }
     else if (!weapon_owned)
     {
@@ -12060,6 +12355,9 @@ static int avsp_round1_player_jump_runtime_valid(
         runtime->player_jump_phase != 0x040au &&
         runtime->player_jump_phase != 0x040cu)
         return 0;
+    if (runtime->player_jump_dispatch_delay != 0u)
+        return runtime->player_jump_phase == 0x0400u &&
+            runtime->player_jump_dispatch_delay == 1u;
     if (runtime->player.source_action != runtime->player_jump_phase ||
         runtime->player_jump_animation_timer == 0u)
         return 0;
@@ -12116,6 +12414,8 @@ int avsp_round1_entry_valid(const AvspRound1Runtime *runtime)
         runtime->fallback_count != 0u || runtime->failure_count != 0u ||
         !avsp_round1_player_locomotion_contract_valid() ||
         !avsp_round1_player_melee_contract_valid() ||
+        !avsp_round1_player_contextual_melee_contract_valid() ||
+        !avsp_round1_player_contextual_melee_runtime_valid(runtime) ||
         !avsp_round1_class1f_player_collision_contract_valid() ||
         !avsp_round1_player_special_class1f_collision_contract_valid() ||
         !avsp_round1_player_hit_contract_valid() ||
@@ -12211,6 +12511,7 @@ int avsp_round1_entry_valid(const AvspRound1Runtime *runtime)
             runtime->player_pickup_active ||
             runtime->player_jump_active ||
             runtime->player_jump_cleanup_pending ||
+            runtime->player_contextual_melee_active ||
             runtime->player_weapon_active ||
             runtime->player_weapon_cleanup_pending ||
             runtime->player_weapon_return_pending)
@@ -12267,6 +12568,7 @@ int avsp_round1_entry_valid(const AvspRound1Runtime *runtime)
              runtime->player_pickup_active ||
              runtime->player_jump_active ||
              runtime->player_jump_cleanup_pending ||
+             runtime->player_contextual_melee_active ||
              runtime->player_weapon_active ||
              runtime->player_weapon_cleanup_pending ||
              runtime->player_weapon_return_pending ||

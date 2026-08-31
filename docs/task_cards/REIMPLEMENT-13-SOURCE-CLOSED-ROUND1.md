@@ -1921,3 +1921,35 @@ Resume by regenerating the census, proving the first player-position mismatch
 moves beyond frame 3314, then closing the contextual Button2 `0x1400/0x1402`
 program at source frames 3410-3416 from accepted Oracle/SPEC evidence. The
 complete instructions remain in `docs/AGENT_HANDOFF.md`.
+
+### Contextual Button2 and exact Coffee Shop Button3 checkpoint (2026-08-31)
+
+The contextual Button2 program is now bound through its source target-context
+guard, `0x1400/0x1402` transition, records `0x160288..0x1602c8`, selectors
+21/20, movement, collision, exit, and eight real mutations. The shared Button1
+fractional-position latch is preserved and its focused lane passes nine real
+mutations.
+
+The normal right-facing Coffee Shop Button3 route is executable from the
+accepted Oracle/SPEC trace: physical input frame 3440, pipeline edge 3441,
+dispatch 3442, active air 3444, landing 3482, and neutral 3484. Native consumes
+generated timing and selector values, performs the source signed 16.16 arc,
+preserves the landing low word, and returns with the source neutral timer and
+branch. The jump lane passes 11 real mutations. Oracle and SPEC analyzers plus
+the generated-header check pass.
+
+Target `LiveEncounterBench` BUILD_ONLY passes with GAME.BIN 402704 bytes, BSS
+end `0x060bc390`, and ISO `/GAME.BIN` SHA-256
+`8cf0f975f6ca4f7ac62795e3dd193dd1ce5e0dfc92edacacf04a6cfe76ce4e3b`.
+The combat overlay is byte-identical at SHA-256
+`171f0dfa25d8a1fe94d2889f89c78e71bd3b1cfffa9fd5ff11964b1fc23815fe`.
+
+The full Coffee Shop scene remains intentionally RED at the later scheduler
+code-29 boundary. The corrected player state, action, animation, and signed
+16.16 position match the source through frame 3529. The next earliest causal
+divergence is frame 3530: source advances to X `0x04a2d000`, while native stays
+globally clamped at X high word `0x04a0`. Resume by comparing source/native
+camera chronology and closing the owning reusable global-bounds/camera phase
+program across all Coffee Shop-reachable branches. Do not add a frame-specific
+exception, authored delay, or guessed unlock. Paired cold Emulator, complete
+scene acceptance, and full WGC remain unclaimed.

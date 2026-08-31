@@ -429,6 +429,53 @@ def build_report() -> dict[str, object]:
         "down": ["0x15f2cc", "0x15f2dc", "0x15fc60", "0x15fce8",
                  "0x15f1f4"],
     }, "Button3 presentation sequence drift")
+    coffee_player = {
+        int(row["frame"]): row for row in
+        rows(SCENE_A / "coffee_shop_scene_actors.tsv")
+        if row["pool"] == "player" and 3439 <= int(row["frame"]) <= 3484
+    }
+    require(list(coffee_player) == list(range(3439, 3485)),
+            "Coffee Shop Button3 witness frame coverage drift")
+    coffee_chronology = [
+        {"frame": frame,
+         "state_u16": f"0x{int(coffee_player[frame]['state'], 16):04x}",
+         "substate_u16": f"0x{int(coffee_player[frame]['substate'], 16):04x}",
+         "facing_u8": int(coffee_player[frame]["facing"]),
+         "x_s32_16_16": f"0x{int(coffee_player[frame]['x_fp'], 16):08x}",
+         "world_y_s32_16_16": f"0x{int(coffee_player[frame]['y_fp'], 16):08x}",
+         "world_z_s16": int(coffee_player[frame]["z"]),
+         "animation_record":
+             f"0x{int(coffee_player[frame]['animation_record'], 16):08x}",
+         "animation_timer_u16":
+             int(coffee_player[frame]["animation_timer"], 16),
+         "animation_branch_s16":
+             int(coffee_player[frame]["animation_branch"])}
+        for frame in range(3439, 3485)
+    ]
+    require(
+        [(frame, coffee_player[frame]["substate"],
+          coffee_player[frame]["animation_record"],
+          coffee_player[frame]["animation_timer"],
+          coffee_player[frame]["x_fp"], coffee_player[frame]["y_fp"])
+         for frame in (3440, 3441, 3442, 3443, 3444, 3482, 3484)] == [
+            (3440, "0200", "0015f208", "0004", "04a02000", "01400000"),
+            (3441, "0202", "0015f208", "0003", "04a06000", "01400000"),
+            (3442, "0400", "0015f2cc", "0001", "04a06000", "01400000"),
+            (3443, "0400", "0015f2dc", "0001", "04a06000", "01400000"),
+            (3444, "0402", "0015f344", "000a", "04a06000", "01400000"),
+            (3482, "0404", "0015f2cc", "0001", "04a0d000", "01403800"),
+            (3484, "0000", "0015f1f4", "0fff", "04a0d000", "01403800"),
+        ], "Coffee Shop right/facing-1 Button3 chronology drift")
+    coffee_sequence = []
+    for frame in range(3442, 3485):
+        record = f"0x{int(coffee_player[frame]['animation_record'], 16):06x}"
+        if not coffee_sequence or coffee_sequence[-1] != record:
+            coffee_sequence.append(record)
+    require(coffee_sequence == [
+        "0x15f2cc", "0x15f2dc", "0x15f344", "0x15f354",
+        "0x15f364", "0x15f374", "0x15f384", "0x15f394",
+        "0x15f3a4", "0x15f2cc", "0x15f2dc", "0x15f1f4"],
+        "Coffee Shop same-facing selector-5 sequence drift")
     presentation_actor_fields = set()
     for name in ("air_cold_1", "dash_right", "dash_left", "dash_up",
                  "dash_down"):
@@ -774,7 +821,8 @@ def build_report() -> dict[str, object]:
                                  "presentation_selector_neutral_u8": 4,
                                  "same_facing_horizontal": {
                                      "collision_up_u8": 1, "collision_level_u8": 2,
-                                     "presentation": "facing + 5"},
+                                     "presentation_up_u8": "facing + 5",
+                                     "presentation_level_u8": 5},
                                  "opposite_facing_horizontal": {
                                      "collision_up_u8": 4, "collision_level_u8": 8,
                                      "presentation_up_u8": 6,
@@ -795,7 +843,8 @@ def build_report() -> dict[str, object]:
                     },
                     "landing_0x023630": {
                         "next_phase_u16": "0x0404", "airborne_latch_u8": 0,
-                        "terrain_mode_zero_write": "world_y high word = world_z high word",
+                        "terrain_mode_zero_write": ("world_y high word = world_z high word; "
+                            "preserve the existing world_y fractional low word"),
                         "presentation_selector_u8": 10},
                     "phase_0x0404": {
                         "timer_negative": "0x01a3e2 common reset",
@@ -823,6 +872,21 @@ def build_report() -> dict[str, object]:
                     "capture_scope": ["neutral", "right", "left", "up", "down"],
                 },
                 "observed_record_sequences": observed_sequences,
+                "coffee_shop_right_facing1_witness": {
+                    "classification": "SOURCE_DERIVED_ACCEPTED_CAPTURE",
+                    "capture": "oracle11_progression_lifecycle_cs7a",
+                    "capture_sha256": digest(
+                        SCENE_A / "coffee_shop_scene_actors.tsv"),
+                    "physical_input_frame": 3440,
+                    "pipeline_edge_frame": 3441,
+                    "jump_dispatch_frame": 3442,
+                    "active_air_frame": 3444,
+                    "landing_frame": 3482,
+                    "neutral_return_frame": 3484,
+                    "presentation_selector_u8": 5,
+                    "record_sequence": coffee_sequence,
+                    "chronology": coffee_chronology,
+                },
                 "scheduler": "player actor slot is updated once in fixed actor-pool scheduler order before current-state collision and presentation submission",
                 "rng_calls": [],
                 "mutation_controls": [
@@ -833,6 +897,9 @@ def build_report() -> dict[str, object]:
                     "reject presentation selector or record mutation",
                     "reject landing comparison polarity or terrain-mode guard mutation",
                     "reject phase or timer transition mutation",
+                    "reject physical-edge to dispatcher chronology mutation",
+                    "reject same-facing level selector 5 mutation",
+                    "reject landing fractional-low-word preservation mutation",
                     "reject interruption branch reordering",
                     "reject added RNG consumption",
                 ],
@@ -1009,6 +1076,8 @@ def validate(report: dict[str, object]) -> None:
                  ("up_right", 0, 5, False), ("up_right", 1, 3, True)],
             "Button3 input/facing mapping drift")
     require(implementation["initialization"]["non_down"][
+                "same_facing_horizontal"]["presentation_level_u8"] == 5 and
+            implementation["initialization"]["non_down"][
                 "opposite_facing_horizontal"]["collision_level_u8"] == 8 and
             implementation["initialization"]["down"][
                 "presentation_horizontal_u8"] == 41 and
@@ -1033,8 +1102,18 @@ def validate(report: dict[str, object]) -> None:
                                   "facing": "actor +0x0f u8",
                                   "object_or": "actor +0x2e u16"},
                 "capture_scope": ["neutral", "right", "left", "up", "down"]} and
+            implementation["coffee_shop_right_facing1_witness"][
+                "presentation_selector_u8"] == 5 and
+            implementation["coffee_shop_right_facing1_witness"][
+                "jump_dispatch_frame"] == 3442 and
+            implementation["coffee_shop_right_facing1_witness"][
+                "landing_frame"] == 3482 and
+            implementation["coffee_shop_right_facing1_witness"][
+                "neutral_return_frame"] == 3484 and
+            len(implementation["coffee_shop_right_facing1_witness"][
+                "chronology"]) == 46 and
             implementation["rng_calls"] == [] and
-            len(implementation["mutation_controls"]) == 9,
+            len(implementation["mutation_controls"]) == 12,
             "Button3 presentation/RNG/mutation contract drift")
     require(set(report["not_required_for_round1"]["phases"]) ==
             {f"0x{x:04x}" for x in NOT_REQUIRED},

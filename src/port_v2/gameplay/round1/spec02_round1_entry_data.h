@@ -1,8 +1,8 @@
 #ifndef AVSP_SPEC02_ROUND1_ENTRY_DATA_H
 #define AVSP_SPEC02_ROUND1_ENTRY_DATA_H
 
-/* contract_sha256=790da00bd00deacf085fef6426cea606587355b3f828fbdbf72cd753f059840a */
-/* fixtures_sha256=42ec4f39a49a565c958924866ebac8d03f365ae283f499ee06d660ab03f1045e */
+/* contract_sha256=5f50fe36d7827b4ecada76b52dfe740a4d475f47e437f37f19ec0a5342958a46 */
+/* fixtures_sha256=0b8e38d95c8ac442dc9f03b525c7abaeb8a182f29cb694ab36e3b3df5dd09235 */
 #define AVSP_ROUND1_ENTRY_PROGRAM_SHA256 "e5ef761fadc1b5a7df62e77c03025c0ebff0c2503cbc8be9c0077d4bd6cd24ba"
 
 static const unsigned char avsp_round1_entry_program[AVSP_ROUND1_ENTRY_PROGRAM_BYTES] =
@@ -1601,6 +1601,21 @@ static const AvspRound1PresentationSpec avsp_round1_player_melee_strikes[AVSP_RO
     { 0x160234UL, 0x162b26UL, 19u, 4u },
 };
 
+static const AvspRound1PlayerContextualMeleeSpec avsp_round1_player_contextual_melee =
+{
+    0x02129eUL, 0x017828UL, 0x0212c6UL, 0x0212ceUL,
+    0x022ed6UL, 0x022f42UL, 0x01a3e2UL, 0xffce00UL,
+    52736u, 518u, 512u, 1536u, 5120u, 5122u, 30u,
+    { 54u, 257u },
+    28u, 0
+};
+
+static const AvspRound1PlayerContextualMeleeSequenceSpec avsp_round1_player_contextual_melee_sequences[AVSP_ROUND1_PLAYER_CONTEXTUAL_MELEE_SEQUENCE_COUNT] =
+{
+    { 1u, 21u, 5u, { { 1u, 0, 0x160288UL, 0x1629e6UL, 1u, 0u }, { 2u, 0, 0x160298UL, 0x162a04UL, 11u, 21u }, { 2u, 1, 0x1602a8UL, 0x162a04UL, 11u, 0u }, { 5u, 1, 0x1602b8UL, 0x1629e6UL, 1u, 0u }, { 4095u, -32767, 0x1602c8UL, 0x1629e6UL, 1u, 0u }, { 0u, 0, 0UL, 0UL, 0u, 0u } } },
+    { 0u, 20u, 6u, { { 2u, 0, 0x1602dcUL, 0x162a32UL, 1u, 0u }, { 1u, 0, 0x1602ecUL, 0x162a5aUL, 1u, 0u }, { 4u, 1, 0x1602fcUL, 0x162a82UL, 11u, 20u }, { 5u, 1, 0x16030cUL, 0x162a5aUL, 1u, 0u }, { 4u, 1, 0x16031cUL, 0x162a32UL, 1u, 0u }, { 4095u, -32767, 0x16032cUL, 0x162a32UL, 1u, 0u } } },
+};
+
 static const AvspRound1PlayerJumpVectorSpec avsp_round1_player_jump_vectors[AVSP_ROUND1_PLAYER_JUMP_VECTOR_COUNT] =
 {
     { 0L, 0L, 557056L, -32768L },
@@ -1633,6 +1648,11 @@ static const AvspRound1PlayerJumpSequenceSpec avsp_round1_player_jump_sequences[
 static const AvspRound1PlayerPresentationActorSpec avsp_round1_player_jump_actor =
 {
     0u, 0u, 0x8000u
+};
+
+static const AvspRound1PlayerJumpTimingSpec avsp_round1_player_jump_timing =
+{
+    1u, 1u, 2u, 5u, 10u, 1u, 4095u, -32768
 };
 
 static const AvspRound1PlayerSpecialSpec avsp_round1_player_special =

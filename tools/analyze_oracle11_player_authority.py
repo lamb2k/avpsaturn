@@ -11,6 +11,12 @@ from pathlib import Path
 ROOT = Path(__file__).resolve().parents[1]
 RAW = ROOT / ".deps" / "mame" / "oracle11_player_locomotion_a"
 RAW_JUMP = ROOT / ".deps" / "mame" / "oracle11_player_jump_a"
+RAW_CONTEXT = (ROOT / ".deps" / "mame" /
+               "oracle11_player_contextual_melee_v2_a")
+RAW_CONTEXT_REPEAT = (ROOT / ".deps" / "mame" /
+                      "oracle11_player_contextual_melee_v2_b")
+RAW_CONTEXT_MUTANT = (ROOT / ".deps" / "mame" /
+                      "oracle11_player_contextual_melee_v2_m")
 OPCODES = ROOT / ".deps" / "mame" / "actorprobe" / "decrypted_opcodes_2m.bin"
 PROGRAM = ROOT / ".deps" / "mame" / "actorprobe" / "decrypted_program_2m.bin"
 ORACLE07 = ROOT / "data" / "oracle07_predator_warrior_action_graph_equipment.json"
@@ -120,6 +126,18 @@ def record_identity(program: bytes, address: int) -> dict[str, object]:
         "assembly_window_sha256": hashlib.sha256(
             program[assembly:assembly + 32]).hexdigest(),
     }
+
+
+def animation_state_identity(program: bytes, address: int) -> dict[str, object]:
+    identity = record_identity(program, address)
+    identity.update({
+        "timer_u16": int.from_bytes(program[address:address + 2], "big"),
+        "branch_s16": int.from_bytes(
+            program[address + 2:address + 4], "big", signed=True),
+        "hurt_selector_u8": identity.pop("hurt_selector"),
+        "attack_selector_u8": identity.pop("attack_selector"),
+    })
+    return identity
 
 
 def build_report() -> dict[str, object]:
@@ -248,6 +266,55 @@ def build_report() -> dict[str, object]:
 
     oracle07 = json.loads(ORACLE07.read_text(encoding="utf-8"))
     oracle10 = json.loads(ORACLE10.read_text(encoding="utf-8"))
+    player_audio = json.loads(PLAYER_AUDIO.read_text(encoding="utf-8"))
+    for filename in ("player_contextual_melee.tsv",
+                     "player_contextual_melee_writes.tsv"):
+        require(digest(RAW_CONTEXT / filename) ==
+                digest(RAW_CONTEXT_REPEAT / filename),
+                f"contextual melee cold captures differ: {filename}")
+    contextual_rows = {int(row["frame"]): row for row in read_rows(
+        RAW_CONTEXT / "player_contextual_melee.tsv") if row["event"] == "sample"}
+    contextual_mutant = {int(row["frame"]): row for row in read_rows(
+        RAW_CONTEXT_MUTANT / "player_contextual_melee.tsv")
+        if row["event"] == "sample"}
+    contextual_writes = read_rows(
+        RAW_CONTEXT / "player_contextual_melee_writes.tsv")
+    require(write_exists(contextual_writes, frame=2074, offset="ff83da",
+                         pc="02129e", data="00000000",
+                         mask="0000ffff") and
+            write_exists(contextual_writes, frame=2074, offset="ff83da",
+                         pc="0212ce", data="0000ce00",
+                         mask="0000ffff"),
+            "contextual target-link writer identity drift")
+    require(contextual_rows[3412]["substate"] == "1400" and
+            contextual_rows[3413]["substate"] == "1402" and
+            contextual_mutant[3412]["substate"] == "0600" and
+            contextual_mutant[3413]["substate"] == "0602",
+            "contextual target mutation did not discriminate dispatch")
+    contextual_audio = []
+    for command, frame in (("0x0036", 3412), ("0x0101", 3722)):
+        edges = [edge for edge in player_audio["trigger_edges"]
+                 if edge["command_identity"] == command and
+                 any(context["player_action_u16"] == 0x1402 and
+                     context["first_frame"] == frame
+                     for context in edge["transition_guard"]["contexts"])]
+        require(len(edges) == 1 and
+                edges[0]["caller_provenance"]["player_side_call"]
+                ["address"] == "0x019850" and
+                edges[0]["caller_provenance"]["shared_dispatch_entry"] ==
+                "0x001922" and
+                edges[0]["mutation"]["gameplay_invariants"]
+                ["score_health_damage_resource_route"] is True,
+                f"contextual audio ownership drift: {command}")
+        contextual_audio.append({
+            "source_frame_u16": frame,
+            "command_u16": int(command, 16),
+            "player_side_caller": "0x019850",
+            "shared_dispatch_entry": "0x001922",
+            "downstream_qsound_difference":
+                edges[0]["mutation"]["downstream_qsound_difference"],
+            "semantic_sound_name": "UNKNOWN",
+        })
     route_census = json.loads(ROUTE_CENSUS.read_text(encoding="ascii"))
     coffee_rows = {
         int(row["frame"]): row for row in read_rows(COFFEE_SCENE)
@@ -350,6 +417,120 @@ def build_report() -> dict[str, object]:
                 "step_rule": "advance modulo four on +0x80 completion, otherwise clear the step and toggle +0x87",
                 "attack_selectors_observed": [21, 20],
                 "animation_sequence": oracle07["presentation_identity"]["sequences"]["contextual_button2"],
+                "implementation_contract": {
+                    "classification": "SOURCE_CLOSED_IMPLEMENTATION_FIELDS",
+                    "spec_executable": True,
+                    "dispatch": {
+                        "button2_edge_writer": "0x01a6e4",
+                        "common_action_u16": 0x0600,
+                        "target_guard": "player +0x5a u16 != 0",
+                        "target_override_writer": "0x01a6ea",
+                        "entry_action_u16": 0x1400,
+                        "active_action_u16": 0x1402,
+                    },
+                    "target_link": {
+                        "player_field": "+0x5a u16",
+                        "source_frame_u16": 2074,
+                        "clear_writer": "0x02129e",
+                        "allocator_entry": "0x017828",
+                        "target_to_player_writer": "0x0212c6",
+                        "player_to_target_writer": "0x0212ce",
+                        "target_low_u16": 0xce00,
+                        "target_slot": "0xffce00",
+                        "target_record_type_u8": 28,
+                        "target_class_s8": 0,
+                        "target_state_u16": 0x0206,
+                        "target_substate_u16": 0x0200,
+                        "native_install_guard":
+                            "entry.animation_c1 == 8 source subhandler completion",
+                        "target_actor_program_spec_executable": False,
+                        "scope": "player dispatch consumes the proven nonzero cross-link only; no type-28 actor behavior is inferred",
+                        "source_windows": {
+                            "crosslink": source_window(opcodes, 0x021298, 0x0212e0),
+                            "allocator": source_window(opcodes, 0x017828, 0x017870),
+                        },
+                    },
+                    "state_program": {
+                        "entry_body": "0x022ed6",
+                        "active_body": "0x022f42",
+                        "common_reset": "0x01a3e2",
+                        "entry_writes": {
+                            "state_u16": 0x0200,
+                            "action_u16": 0x1400,
+                            "next_action_u16": 0x1402,
+                            "event80_u8": 0,
+                            "step81_u8": 0,
+                            "flag9d_u8": 1,
+                            "field92_u8": 12,
+                        },
+                        "active_reads": ["+0x81 u8 step", "+0x6e u8 guard",
+                                         "+0x25 u8 event", "+0x80 u8 completion",
+                                         "+0xee/+0xef input edge", "+0x87 u8 toggle"],
+                        "completion_true":
+                            "step81=(step81+1)&3; field82 high=30",
+                        "completion_false":
+                            "toggle87 ^= 1; step81=0",
+                        "fresh_button2_edge_exit":
+                            "clear phase byte +0x07",
+                        "ordinary_exit": "0x01a3e2 common reset",
+                        "button1_interruption":
+                            "frame 3422 transfers to 0x1a00 while preserving record 0x1602b8 and its timer",
+                    },
+                    "movement": {
+                        "x_rule": "preserve exact signed 16.16 X",
+                        "y_rule": "preserve exact signed 16.16 Y",
+                        "facing_rule": "latch facing selected at entry",
+                        "rng_calls": [],
+                        "scheduler_position":
+                            "player slot before non-player pools",
+                    },
+                    "presentation_sequences": [
+                        {
+                            "facing_u8": 1,
+                            "selector_u8": 21,
+                            "records": [animation_state_identity(program, address)
+                                        for address in range(0x160288, 0x1602d8, 0x10)],
+                        },
+                        {
+                            "facing_u8": 0,
+                            "selector_u8": 20,
+                            "records": [animation_state_identity(program, address)
+                                        for address in range(0x1602dc, 0x16033c, 0x10)],
+                        },
+                    ],
+                    "collision": {
+                        "current_attack_selectors_u8": [21, 20],
+                        "coffee_shop_damage_events": 0,
+                        "rule": "publish the current selector from the bound animation record; do not infer an unobserved damage write",
+                    },
+                    "coffee_shop_witnesses": [
+                        {"edge_frame_u16": 3411, "entry_frame_u16": 3412,
+                         "active_frame_u16": 3413,
+                         "terminal_kind": "BUTTON1_INTERRUPT",
+                         "terminal_frame_u16": 3422,
+                         "x_fp_s32": 0x04a0e000, "y_fp_s32": 0x01400000,
+                         "facing_u8": 1},
+                        {"edge_frame_u16": 3721, "entry_frame_u16": 3722,
+                         "active_frame_u16": 3723,
+                         "terminal_kind": "NORMAL_RESET",
+                         "terminal_frame_u16": 3734,
+                         "x_fp_s32": 0x05509000, "y_fp_s32": 0x013f3800,
+                         "facing_u8": 1},
+                    ],
+                    "audio_edges": contextual_audio,
+                    "evidence": {
+                        "cold_runs_byte_identical": True,
+                        "baseline_trace_sha256": digest(
+                            RAW_CONTEXT / "player_contextual_melee.tsv"),
+                        "baseline_writes_sha256": digest(
+                            RAW_CONTEXT / "player_contextual_melee_writes.tsv"),
+                        "target_writer_suppression_trace_sha256": digest(
+                            RAW_CONTEXT_MUTANT / "player_contextual_melee.tsv"),
+                        "target_writer_suppression_writes_sha256": digest(
+                            RAW_CONTEXT_MUTANT / "player_contextual_melee_writes.tsv"),
+                        "mutation_discriminates_0x1400_from_0x0600": True,
+                    },
+                },
             },
             "collision_damage_identity": "accepted source combat contract bound through ORACLE-07; presentation cannot own contact or damage",
             "rng_consumption": "none for selector or assembly choice; state selects the measured animation record",
@@ -779,6 +960,29 @@ def validate(report: dict[str, object]) -> None:
             "melee selector/window/RNG contract drift")
     require(all(melee["counterfactuals"].values()),
             "melee counterfactual failed")
+    contextual = melee["contextual_melee"]["implementation_contract"]
+    require(contextual["classification"] ==
+                "SOURCE_CLOSED_IMPLEMENTATION_FIELDS" and
+            contextual["spec_executable"] is True and
+            contextual["target_link"]["target_low_u16"] == 0xce00 and
+            contextual["target_link"]["player_to_target_writer"] ==
+                "0x0212ce" and
+            contextual["target_link"]["target_actor_program_spec_executable"]
+                is False and
+            [row["selector_u8"] for row in
+             contextual["presentation_sequences"]] == [21, 20] and
+            [len(row["records"]) for row in
+             contextual["presentation_sequences"]] == [5, 6] and
+            contextual["presentation_sequences"][0]["records"][1]
+                ["attack_selector_u8"] == 21 and
+            contextual["presentation_sequences"][1]["records"][2]
+                ["attack_selector_u8"] == 20 and
+            contextual["movement"]["rng_calls"] == [] and
+            [row["command_u16"] for row in contextual["audio_edges"]] ==
+                [0x0036, 0x0101] and
+            contextual["evidence"]
+                ["mutation_discriminates_0x1400_from_0x0600"] is True,
+            "contextual melee executable contract drift")
     jump = report["normal_jump_air_landing"]
     require(jump["classification"] == "SOURCE_CLOSED" and
             jump["remaining_unknowns"] == [], "normal jump authority is not closed")
