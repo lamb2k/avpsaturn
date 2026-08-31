@@ -1455,6 +1455,17 @@ plan amendment below. The live chaptered resume prompt is maintained in
 `docs/AGENT_HANDOFF.md`; it applies this amendment starting at the frame-3525
 wander-origin fix and the frame-1757 host-lane classification.
 
+Pause addendum (read-only source mapping, 2026-08-30): decrypted-opcode
+inspection proves that routine `0x041c36` reads signed 16-bit camera position
+X at `0x041cb0` from `a5+0x278` and Z at `0x041cb8` from `a5+0x27c`, then adds
+the actor's `+0x60`/`+0x62` offsets before calling `0x016484`. Accepted camera
+evidence binds source writers `0x0b04ca`/`0x0b06fa` for X and
+`0x0b04f4`/`0x0b081c` for Z, and establishes that this scheduler sample
+precedes the same-frame player/camera update. The next implementation step is
+therefore the existing globals-table fixture plus native pre-update X/Z
+binding and a current-sample negative control. No runtime, fixture, capture,
+lane, or acceptance state changed during this mapping.
+
 ## Execution plan amendment (2026-08-30)
 
 Owner-approved amendment to this card's execution method. Evidence standards
