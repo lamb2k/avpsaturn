@@ -6,7 +6,7 @@
 #include "../../combat/hit_ko/hit_ko.h"
 
 #define AVSP_ROUND1_SPEC02_SHA256 \
-"bcba36794f1aa4e21012fda54d61745302a71ae33fa0d3480bc68d06a04156a3"
+"7a0db579d3751541d374444ebae60a009f9afedf75840457661b60de1fa93b3a"
 #define AVSP_ROUND1_CANARY_HEAD 0x52314548UL
 #define AVSP_ROUND1_CANARY_TAIL 0x52314554UL
 #define AVSP_ROUND1_ROUTE_ENTRY_STATE 2
@@ -2133,6 +2133,8 @@ typedef struct
 } AvspRound1Runtime;
 
 void avsp_round1_init(AvspRound1Runtime *runtime);
+int avsp_round1_bind_content_archive(const void *data,
+                                     unsigned long bytes);
 int avsp_round1_begin_first_entry(AvspRound1Runtime *runtime);
 int avsp_round1_step_first_entry(AvspRound1Runtime *runtime);
 int avsp_round1_step_player(AvspRound1Runtime *runtime,

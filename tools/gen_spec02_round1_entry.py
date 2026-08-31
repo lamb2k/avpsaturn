@@ -5,6 +5,7 @@ from __future__ import annotations
 import argparse
 import hashlib
 import json
+import re
 from pathlib import Path
 
 
@@ -13,6 +14,7 @@ FIXTURES = ROOT / "data/spec02_round1_generated_fixtures.json"
 CONTRACT = ROOT / "data/spec02_round1_executable_contract.json"
 ROUTE_CENSUS = ROOT / "data/round1_route_census.json"
 OUT = ROOT / "src/port_v2/gameplay/round1/spec02_round1_entry_data.h"
+OUT_CONTENT = ROOT / "src/port_v2/gameplay/round1/spec02_round1_content_image.c"
 
 KINDS = (
     "AVSP_ROUND1_ENTRY_SET_POSITION",
@@ -29,6 +31,89 @@ LENGTHS = (6, 2, 2, 4, 4, 2, 4, 2)
 
 def sha(path: Path) -> str:
     return hashlib.sha256(path.read_bytes()).hexdigest()
+
+
+def split_target_content(rendered: str) -> tuple[str, str]:
+    """Keep host fixtures inline but make every Target constant cart-backed."""
+    source_lines = rendered.splitlines()
+    output: list[str] = []
+    members: list[str] = []
+    initializers: list[str] = []
+    index = 0
+    declaration = re.compile(
+        r"(?s)^static const\s+(.+?)\s+(avsp_round1_[A-Za-z0-9_]+)"
+        r"((?:\[[^\n]+?\])*)\s*$")
+    while index < len(source_lines):
+        line = source_lines[index]
+        if not line.startswith("static const "):
+            output.append(line)
+            index += 1
+            continue
+        block = [line]
+        brace_depth = line.count("{") - line.count("}")
+        while not (brace_depth == 0 and block[-1].rstrip().endswith(";")):
+            index += 1
+            if index >= len(source_lines):
+                raise ValueError("unterminated generated static constant")
+            block.append(source_lines[index])
+            brace_depth += source_lines[index].count("{")
+            brace_depth -= source_lines[index].count("}")
+        text = "\n".join(block)
+        left, initializer = text.rsplit(";", 1)[0].split("=", 1)
+        match = declaration.match(left.strip())
+        if match is None:
+            raise ValueError(f"unsupported generated declaration: {left}")
+        value_type, name, dimensions = match.groups()
+        member = f"    {value_type} content_{name}{dimensions};"
+        members.append(member)
+        initializers.append(initializer.strip())
+        output.extend([
+            "#if defined(__sh__)",
+            f"#define {name} (avsp_round1_content->content_{name})",
+            "#else",
+            text,
+            "#endif",
+        ])
+        index += 1
+    if not members:
+        raise ValueError("no generated Round 1 constants found")
+    if output[-1] != "#endif":
+        raise ValueError("generated Round 1 header guard drift")
+    output[-1:-1] = [
+        "#if defined(__sh__)",
+        "typedef struct",
+        "{",
+        "    unsigned long magic;",
+        "    unsigned long version;",
+        "    unsigned long bytes;",
+        *members,
+        "} AvspRound1ContentArchive;",
+        "extern const AvspRound1ContentArchive *avsp_round1_content;",
+        "#define AVSP_ROUND1_CONTENT_ARCHIVE_MAGIC 0x52314341UL",
+        "#define AVSP_ROUND1_CONTENT_ARCHIVE_VERSION 1UL",
+        "#define AVSP_ROUND1_CONTENT_ARCHIVE_BYTES \\",
+        "    ((unsigned long)sizeof(AvspRound1ContentArchive))",
+        "#endif",
+        "",
+    ]
+    content = [
+        "/* Generated target-endian image; compile only for archive extraction. */",
+        "#include \"round1.h\"",
+        "#include \"spec02_round1_entry_data.h\"",
+        "",
+        "const AvspRound1ContentArchive avsp_round1_content_image",
+        "    __attribute__((section(\".round1content\"), used)) =",
+        "{",
+        "    AVSP_ROUND1_CONTENT_ARCHIVE_MAGIC,",
+        "    AVSP_ROUND1_CONTENT_ARCHIVE_VERSION,",
+        "    sizeof(AvspRound1ContentArchive),",
+    ]
+    for initializer in initializers:
+        rendered_initializer = initializer.splitlines()
+        content.extend(f"    {row}" for row in rendered_initializer)
+        content[-1] += ","
+    content.extend(["};", ""])
+    return "\n".join(output) + "\n", "\n".join(content)
 
 
 def build() -> str:
@@ -4393,21 +4478,26 @@ def build() -> str:
     for first, last, word in scene_input_runs:
         lines.append(f"    {{ {first}u, {last}u, 0x{word:04X}u }},")
     lines.extend(["};", "", "#endif", ""])
-    return "\n".join(lines)
+    return split_target_content("\n".join(lines))
 
 
 def main() -> None:
     parser = argparse.ArgumentParser()
     parser.add_argument("--check", action="store_true")
     args = parser.parse_args()
-    rendered = build()
+    rendered, content = build()
     if args.check:
-        if not OUT.exists() or OUT.read_text(encoding="ascii") != rendered:
+        if (not OUT.exists() or OUT.read_text(encoding="ascii") != rendered or
+                not OUT_CONTENT.exists() or
+                OUT_CONTENT.read_text(encoding="ascii") != content):
             raise SystemExit("generated SPEC-02 Round 1 entry header is stale")
-        print("SPEC-02 Round 1 entry data: PASS (generated header current)")
+        print("SPEC-02 Round 1 entry data: PASS "
+              "(generated header and cart image current)")
         return
     OUT.write_text(rendered, encoding="ascii", newline="\n")
+    OUT_CONTENT.write_text(content, encoding="ascii", newline="\n")
     print(f"wrote {OUT.relative_to(ROOT)}")
+    print(f"wrote {OUT_CONTENT.relative_to(ROOT)}")
 
 
 if __name__ == "__main__":

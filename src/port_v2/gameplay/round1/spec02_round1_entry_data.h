@@ -1,16 +1,23 @@
 #ifndef AVSP_SPEC02_ROUND1_ENTRY_DATA_H
 #define AVSP_SPEC02_ROUND1_ENTRY_DATA_H
 
-/* contract_sha256=bcba36794f1aa4e21012fda54d61745302a71ae33fa0d3480bc68d06a04156a3 */
-/* fixtures_sha256=be1aba966091941aba3de87e7d8574908b850f3529733b7e610e1b45fe38fc31 */
+/* contract_sha256=7a0db579d3751541d374444ebae60a009f9afedf75840457661b60de1fa93b3a */
+/* fixtures_sha256=ae84a21f139fc86d820b22a2e6277e838cd2b31e9f17519619e799418a5eb76b */
 #define AVSP_ROUND1_ENTRY_PROGRAM_SHA256 "e5ef761fadc1b5a7df62e77c03025c0ebff0c2503cbc8be9c0077d4bd6cd24ba"
 
+#if defined(__sh__)
+#define avsp_round1_entry_program (avsp_round1_content->content_avsp_round1_entry_program)
+#else
 static const unsigned char avsp_round1_entry_program[AVSP_ROUND1_ENTRY_PROGRAM_BYTES] =
 {
     0x0Au, 0x00u, 0x03u, 0xB0u, 0x01u, 0x40u, 0x06u, 0x00u, 0x18u, 0x00u, 0x00u, 0x00u, 0x00u,
     0x3Cu, 0x00u, 0x00u, 0x00u, 0x3Cu, 0x16u, 0x02u, 0x00u, 0x00u, 0x00u, 0x2Cu, 0xFFu, 0xFFu
 };
+#endif
 
+#if defined(__sh__)
+#define avsp_round1_entry_spawns (avsp_round1_content->content_avsp_round1_entry_spawns)
+#else
 static const AvspRound1EntrySpawnSpec avsp_round1_entry_spawns[AVSP_ROUND1_FIRST_SPAWN_COUNT] =
 {
     { 0xffa3c0u, 12u, 656, 312, 312, 0x1Fu, 8u, 16u, 512u, 5120u, 1u, 0x0012e8ecu, 87 },
@@ -24,13 +31,21 @@ static const AvspRound1EntrySpawnSpec avsp_round1_entry_spawns[AVSP_ROUND1_FIRST
     { 0xff9dc0u, 12u, 616, 304, 304, 0x1Fu, 6u, 0u, 512u, 4096u, 1u, 0x0012e8ecu, 87 },
     { 0xff9d00u, 12u, 632, 296, 296, 0x1Fu, 6u, 0u, 512u, 4096u, 1u, 0x0012e8ecu, 87 },
 };
+#endif
 
+#if defined(__sh__)
+#define avsp_round1_coffee_stage_setup (avsp_round1_content->content_avsp_round1_coffee_stage_setup)
+#else
 static const AvspRound1CoffeeStageSetupSpec avsp_round1_coffee_stage_setup =
 {
     2, 1u, 0x1Cu, 14, 25u, 14u, 22u, -4, -8, 0, 0x18u, 0, 0,
     8, 16, 0x8DEFu, 0xA998u, 8
 };
+#endif
 
+#if defined(__sh__)
+#define avsp_round1_entry_steps (avsp_round1_content->content_avsp_round1_entry_steps)
+#else
 static const AvspRound1EntryStepSpec avsp_round1_entry_steps[AVSP_ROUND1_ENTRY_STEP_COUNT] =
 {
     { AVSP_ROUND1_ENTRY_SET_POSITION, 0x0Au, 944u, 320u, 0u, 0x00128FAAUL, 0x00128FB0UL },
@@ -42,18 +57,30 @@ static const AvspRound1EntryStepSpec avsp_round1_entry_steps[AVSP_ROUND1_ENTRY_S
     { AVSP_ROUND1_ENTRY_DWELL, 0x00u, 0u, 44u, 0u, 0x00128FBEUL, 0x00128FC2UL },
     { AVSP_ROUND1_ENTRY_TERMINATE, 0xFFu, 0u, 0u, 0u, 0x00128FC2UL, 0x00128FC4UL },
 };
+#endif
 
+#if defined(__sh__)
+#define avsp_round1_scheduler_pool_order (avsp_round1_content->content_avsp_round1_scheduler_pool_order)
+#else
 static const unsigned char avsp_round1_scheduler_pool_order[AVSP_ROUND1_SCHEDULER_POOL_COUNT] =
 {
     12u, 16u, 20u, 24u, 28u, 36u
 };
+#endif
 
+#if defined(__sh__)
+#define avsp_round1_scheduler_globals (avsp_round1_content->content_avsp_round1_scheduler_globals)
+#else
 static const AvspRound1SchedulerGlobalSpec avsp_round1_scheduler_globals[AVSP_ROUND1_SCHEDULER_GLOBAL_COUNT] =
 {
     { 0x0278u, 0xff8278UL, 2u, AVSP_ROUND1_SCHEDULER_GLOBAL_CAMERA_X_PREVIOUS },
     { 0x027Cu, 0xff827cUL, 2u, AVSP_ROUND1_SCHEDULER_GLOBAL_CAMERA_Z_PREVIOUS },
 };
+#endif
 
+#if defined(__sh__)
+#define avsp_round1_required_dispatches (avsp_round1_content->content_avsp_round1_required_dispatches)
+#else
 static const AvspRound1DispatchSpec avsp_round1_required_dispatches[AVSP_ROUND1_REQUIRED_DISPATCH_COUNT] =
 {
     { 12u, 0x00 },
@@ -73,8 +100,12 @@ static const AvspRound1DispatchSpec avsp_round1_required_dispatches[AVSP_ROUND1_
     { 24u, 0x4B },
     { 24u, 0x4E },
 };
+#endif
 
 #define AVSP_ROUND1_CLASS1F_PRESENTATION_COUNT 192u
+#if defined(__sh__)
+#define avsp_round1_class1f_presentation (avsp_round1_content->content_avsp_round1_class1f_presentation)
+#else
 static const AvspRound1PresentationSpec avsp_round1_class1f_presentation[AVSP_ROUND1_CLASS1F_PRESENTATION_COUNT] =
 {
     { 0x0012d2f8UL, 0x0012f994UL, 1u, 0u },
@@ -270,9 +301,13 @@ static const AvspRound1PresentationSpec avsp_round1_class1f_presentation[AVSP_RO
     { 0x0012eee8UL, 0x0012f85eUL, 2u, 0u },
     { 0x0012eef8UL, 0x0012f890UL, 2u, 0u },
 };
+#endif
 
 #define AVSP_ROUND1_CLASS1F_DISPATCH_ENTRY 0x060532UL
 #define AVSP_ROUND1_CLASS1F_STATE_CONTEXT_COUNT 61u
+#if defined(__sh__)
+#define avsp_round1_class1f_state_contexts (avsp_round1_content->content_avsp_round1_class1f_state_contexts)
+#else
 static const AvspRound1StateContextSpec avsp_round1_class1f_state_contexts[AVSP_ROUND1_CLASS1F_STATE_CONTEXT_COUNT] =
 {
     { 0x0000u, 0x0000u },
@@ -337,16 +372,32 @@ static const AvspRound1StateContextSpec avsp_round1_class1f_state_contexts[AVSP_
     { 0x0404u, 0x0000u },
     { 0x0600u, 0x0000u },
 };
+#endif
 
+#if defined(__sh__)
+#define avsp_round1_class1f_current (avsp_round1_content->content_avsp_round1_class1f_current)
+#else
 static const AvspRound1Class1fCurrentSpec avsp_round1_class1f_current =
 {
     0x00ffb580UL, 0xffa000UL, 20u, 0x01, 960, 343, 343, 87, 111, -23, 38u, 120u, 48u, 119u, 8u, 39u, 141u,
     { 8u, 8u, 10u, 12u },
 };
+#endif
 
+#if defined(__sh__)
+#define avsp_round1_class1f_collision_reaction_facing_xor (avsp_round1_content->content_avsp_round1_class1f_collision_reaction_facing_xor)
+#else
 static const unsigned char avsp_round1_class1f_collision_reaction_facing_xor = 1u;
+#endif
+#if defined(__sh__)
+#define avsp_round1_class1f_collision_reaction_attack_record (avsp_round1_content->content_avsp_round1_class1f_collision_reaction_attack_record)
+#else
 static const unsigned long avsp_round1_class1f_collision_reaction_attack_record = 0x02fc58UL;
+#endif
 
+#if defined(__sh__)
+#define avsp_round1_class1f_source_hit (avsp_round1_content->content_avsp_round1_class1f_source_hit)
+#else
 static const AvspRound1Class1fSourceHitSpec avsp_round1_class1f_source_hit =
 {
     0x0202u, 0x0002u, 0x0200u, 0x0012e04cUL, 0x001308a6UL,
@@ -387,7 +438,11 @@ static const AvspRound1Class1fSourceHitSpec avsp_round1_class1f_source_hit =
     0u, 0u, 1u, 1u, 1u, 2u, 1u,
     582, 310, 944, 320,
 };
+#endif
 
+#if defined(__sh__)
+#define avsp_round1_class1f_source_ko (avsp_round1_content->content_avsp_round1_class1f_source_ko)
+#else
 static const AvspRound1Class1fSourceKoSpec avsp_round1_class1f_source_ko =
 {
     0x0400u, 0x0402u, 0x0404u, 0x0600u,
@@ -406,7 +461,11 @@ static const AvspRound1Class1fSourceKoSpec avsp_round1_class1f_source_ko =
     { 4095u, -32768, 0x0012ddb0UL, 0x00130346UL, 7u, 0u },
     { 4095u, -32768, 0x0012dd9cUL, 0x00130294UL, 0u, 0u },
 };
+#endif
 
+#if defined(__sh__)
+#define avsp_round1_class1f_player_special_ko (avsp_round1_content->content_avsp_round1_class1f_player_special_ko)
+#else
 static const AvspRound1Class1fSourceKoSpec avsp_round1_class1f_player_special_ko =
 {
     0x0400u, 0x0402u, 0x0404u, 0x0600u,
@@ -423,7 +482,11 @@ static const AvspRound1Class1fSourceKoSpec avsp_round1_class1f_player_special_ko
     { 4095u, -32743, 0x0012e268UL, 0x00130346UL, 0u, 0u },
     { 4095u, -32744, 0x0012e254UL, 0x00130294UL, 0u, 0u },
 };
+#endif
 
+#if defined(__sh__)
+#define avsp_round1_recurring_spawn (avsp_round1_content->content_avsp_round1_recurring_spawn)
+#else
 static const AvspRound1RecurringSpawnSpec avsp_round1_recurring_spawn =
 {
     0x0200u, 0x0202u, 0x0204u, 0x0200u, 600u, 832u, 1u,
@@ -435,17 +498,29 @@ static const AvspRound1RecurringSpawnSpec avsp_round1_recurring_spawn =
     0x0402u, 0x0000u, -1, 1u,
     1u, 1u
 };
+#endif
 
+#if defined(__sh__)
+#define avsp_round1_recurring_lane_offsets (avsp_round1_content->content_avsp_round1_recurring_lane_offsets)
+#else
 static const short avsp_round1_recurring_lane_offsets[AVSP_ROUND1_RECURRING_LANE_OFFSET_COUNT] =
 {
     24, 40, 56, 72, 88, 104
 };
+#endif
 
+#if defined(__sh__)
+#define avsp_round1_recurring_selector_cycle (avsp_round1_content->content_avsp_round1_recurring_selector_cycle)
+#else
 static const unsigned char avsp_round1_recurring_selector_cycle[AVSP_ROUND1_RECURRING_SELECTOR_COUNT] =
 {
     0u, 1u, 1u, 1u, 0u, 1u, 0u, 1u, 1u, 1u
 };
+#endif
 
+#if defined(__sh__)
+#define avsp_round1_recurring_lane_buckets (avsp_round1_content->content_avsp_round1_recurring_lane_buckets)
+#else
 static const unsigned char avsp_round1_recurring_lane_buckets[AVSP_ROUND1_RECURRING_LANE_BUCKET_COUNT] =
 {
     0u, 0u, 0u, 0u, 1u, 1u, 1u, 1u, 2u, 2u, 2u, 2u, 3u, 3u, 3u, 3u,
@@ -453,7 +528,11 @@ static const unsigned char avsp_round1_recurring_lane_buckets[AVSP_ROUND1_RECURR
     0u, 0u, 1u, 1u, 1u, 2u, 2u, 2u, 3u, 3u, 3u, 4u, 4u, 4u, 5u, 5u,
     3u, 3u, 3u, 3u, 3u, 3u, 3u, 3u, 3u, 3u, 3u, 3u, 3u, 3u, 3u, 3u
 };
+#endif
 
+#if defined(__sh__)
+#define avsp_round1_recurring_variants (avsp_round1_content->content_avsp_round1_recurring_variants)
+#else
 static const unsigned char avsp_round1_recurring_variants[AVSP_ROUND1_RECURRING_VARIANT_COUNT] =
 {
     3u, 3u, 3u, 3u, 3u, 3u, 3u, 3u, 3u, 3u, 3u, 3u, 3u, 3u, 3u, 3u,
@@ -463,17 +542,29 @@ static const unsigned char avsp_round1_recurring_variants[AVSP_ROUND1_RECURRING_
     3u, 3u, 3u, 3u, 3u, 3u, 3u, 3u, 3u, 3u, 3u, 3u, 3u, 3u, 3u, 3u,
     3u, 3u, 3u, 3u, 3u, 3u, 3u, 3u, 3u, 3u, 3u, 3u, 3u, 3u, 3u, 3u
 };
+#endif
 
+#if defined(__sh__)
+#define avsp_round1_class1f_approach_records (avsp_round1_content->content_avsp_round1_class1f_approach_records)
+#else
 static const unsigned long avsp_round1_class1f_approach_records[AVSP_ROUND1_CLASS1F_APPROACH_RECORD_COUNT] =
 {
     0x12ec04UL, 0x12ec14UL, 0x12ec24UL, 0x12ec34UL, 0x12ec44UL, 0x12ec54UL, 0x12ec64UL, 0x12ec74UL
 };
+#endif
 
+#if defined(__sh__)
+#define avsp_round1_class1f_attack_records (avsp_round1_content->content_avsp_round1_class1f_attack_records)
+#else
 static const unsigned long avsp_round1_class1f_attack_records[AVSP_ROUND1_CLASS1F_ATTACK_RECORD_COUNT] =
 {
     0x12e8ecUL, 0x12e8fcUL, 0x12e90cUL, 0x12e91cUL
 };
+#endif
 
+#if defined(__sh__)
+#define avsp_round1_class1f_action_targets (avsp_round1_content->content_avsp_round1_class1f_action_targets)
+#else
 static const AvspRound1Class1fActionTargetSpec avsp_round1_class1f_action_targets[AVSP_ROUND1_CLASS1F_ACTION_TARGET_COUNT] =
 {
     { 0u, 0x0607b8UL },
@@ -493,7 +584,11 @@ static const AvspRound1Class1fActionTargetSpec avsp_round1_class1f_action_target
     { 28u, 0x060d88UL },
     { 30u, 0x060de0UL },
 };
+#endif
 
+#if defined(__sh__)
+#define avsp_round1_class1f_action_variants (avsp_round1_content->content_avsp_round1_class1f_action_variants)
+#else
 static const AvspRound1Class1fActionVariantSpec avsp_round1_class1f_action_variants[AVSP_ROUND1_CLASS1F_ACTION_VARIANT_COUNT] =
 {
     { 0u, 2u, 0u, 0u, 0u, 0u, 0u, 0u, 0u, 0x00u, 0x0000u },
@@ -507,7 +602,11 @@ static const AvspRound1Class1fActionVariantSpec avsp_round1_class1f_action_varia
     { 8u, 1u, 1u, 1u, 20u, 0u, 1u, 1u, 0u, 0x2Du, 0x0000u },
     { 9u, 1u, 1u, 1u, 28u, 0u, 0u, 0u, 0u, 0xC5u, 0x0420u },
 };
+#endif
 
+#if defined(__sh__)
+#define avsp_round1_class1f_action_selectors (avsp_round1_content->content_avsp_round1_class1f_action_selectors)
+#else
 static const AvspRound1Class1fActionSelectorSpec avsp_round1_class1f_action_selectors[AVSP_ROUND1_CLASS1F_ACTION_SELECTOR_COUNT] =
 {
     { 0u, 0u, 4u },
@@ -533,7 +632,11 @@ static const AvspRound1Class1fActionSelectorSpec avsp_round1_class1f_action_sele
     { 76u, 124u, 5u },
     { 77u, 129u, 3u },
 };
+#endif
 
+#if defined(__sh__)
+#define avsp_round1_class1f_action_records (avsp_round1_content->content_avsp_round1_class1f_action_records)
+#else
 static const AvspRound1Class1fActionRecordSpec avsp_round1_class1f_action_records[AVSP_ROUND1_CLASS1F_ACTION_RECORD_COUNT] =
 {
     { 0x0012e8a8UL, 0x0012e8b8UL, 0x0012f994UL, 9u, 0, 1u, 0u, 0u },
@@ -669,13 +772,21 @@ static const AvspRound1Class1fActionRecordSpec avsp_round1_class1f_action_record
     { 0x0012ea00UL, 0x0012ea10UL, 0x0012fc24UL, 8u, 0, 0u, 0u, 0u },
     { 0x0012ea10UL, 0x0012ea10UL, 0x0012fb98UL, 4095u, -32768, 0u, 0u, 0u },
 };
+#endif
 
+#if defined(__sh__)
+#define avsp_round1_class1f_movement_tables (avsp_round1_content->content_avsp_round1_class1f_movement_tables)
+#else
 static const AvspRound1Class1fMovementTableSpec avsp_round1_class1f_movement_tables[AVSP_ROUND1_CLASS1F_MOVEMENT_TABLE_COUNT] =
 {
     { 1u, { { 0, 128 }, { 49, 125 }, { 97, 118 }, { 142, 106 }, { 180, 90 }, { 212, 71 }, { 236, 48 }, { 250, 24 }, { 256, 0 }, { 250, -24 }, { 236, -48 }, { 212, -71 }, { 180, -90 }, { 142, -106 }, { 97, -118 }, { 49, -125 }, { 0, -128 }, { -49, -125 }, { -97, -118 }, { -142, -106 }, { -180, -90 }, { -212, -71 }, { -236, -48 }, { -250, -24 }, { -256, 0 }, { -250, 24 }, { -236, 48 }, { -212, 71 }, { -180, 90 }, { -142, 106 }, { -97, 118 }, { -49, 125 } } },
     { 8u, { { 0, 1024 }, { 399, 1003 }, { 782, 945 }, { 1136, 850 }, { 1447, 723 }, { 1701, 568 }, { 1890, 391 }, { 2007, 199 }, { 2048, 0 }, { 2007, -199 }, { 1890, -391 }, { 1701, -568 }, { 1447, -723 }, { 1136, -850 }, { 782, -945 }, { 399, -1003 }, { 0, -1024 }, { -399, -1003 }, { -782, -945 }, { -1136, -850 }, { -1447, -723 }, { -1701, -568 }, { -1890, -391 }, { -2007, -199 }, { -2048, 0 }, { -2007, 199 }, { -1890, 391 }, { -1701, 568 }, { -1447, 723 }, { -1136, 850 }, { -782, 945 }, { -399, 1003 } } },
 };
+#endif
 
+#if defined(__sh__)
+#define avsp_round1_class1f_inner8_records (avsp_round1_content->content_avsp_round1_class1f_inner8_records)
+#else
 static const AvspRound1Class1fActionRecordSpec avsp_round1_class1f_inner8_records[AVSP_ROUND1_CLASS1F_INNER8_RECORD_COUNT] =
 {
     { 0x0012d380UL, 0x0012d390UL, 0x0012f638UL, 6u, 27, 1u, 0u, 27u },
@@ -831,7 +942,11 @@ static const AvspRound1Class1fActionRecordSpec avsp_round1_class1f_inner8_record
     { 0x0012ef7cUL, 0x0012ef8cUL, 0x0012f7e4UL, 4u, 267, 2u, 0u, 11u },
     { 0x0012ef8cUL, 0x0012ef1cUL, 0x0012f7ccUL, 4u, -32757, 2u, 0u, 11u },
 };
+#endif
 
+#if defined(__sh__)
+#define avsp_round1_class1f_inner8_movement_tables (avsp_round1_content->content_avsp_round1_class1f_inner8_movement_tables)
+#else
 static const AvspRound1Class1fMovementTableSpec avsp_round1_class1f_inner8_movement_tables[AVSP_ROUND1_CLASS1F_INNER8_MOVEMENT_TABLE_COUNT] =
 {
     { 4u, { { 0, 512 }, { 199, 501 }, { 391, 472 }, { 568, 425 }, { 723, 361 }, { 850, 284 }, { 945, 195 }, { 1003, 99 }, { 1024, 0 }, { 1003, -99 }, { 945, -195 }, { 850, -284 }, { 723, -361 }, { 568, -425 }, { 391, -472 }, { 199, -501 }, { 0, -512 }, { -199, -501 }, { -391, -472 }, { -568, -425 }, { -723, -361 }, { -850, -284 }, { -945, -195 }, { -1003, -99 }, { -1024, 0 }, { -1003, 99 }, { -945, 195 }, { -850, 284 }, { -723, 361 }, { -568, 425 }, { -391, 472 }, { -199, 501 } } },
@@ -845,7 +960,11 @@ static const AvspRound1Class1fMovementTableSpec avsp_round1_class1f_inner8_movem
     { 25u, { { 0, 3200 }, { 1246, 3135 }, { 2443, 2953 }, { 3551, 2658 }, { 4523, 2261 }, { 5317, 1775 }, { 5906, 1221 }, { 6271, 623 }, { 6400, 0 }, { 6271, -623 }, { 5906, -1221 }, { 5317, -1775 }, { 4523, -2261 }, { 3551, -2658 }, { 2443, -2953 }, { 1246, -3135 }, { 0, -3200 }, { -1246, -3135 }, { -2443, -2953 }, { -3551, -2658 }, { -4523, -2261 }, { -5317, -1775 }, { -5906, -1221 }, { -6271, -623 }, { -6400, 0 }, { -6271, 623 }, { -5906, 1221 }, { -5317, 1775 }, { -4523, 2261 }, { -3551, 2658 }, { -2443, 2953 }, { -1246, 3135 } } },
     { 27u, { { 0, 3456 }, { 1346, 3386 }, { 2639, 3189 }, { 3835, 2871 }, { 4885, 2442 }, { 5742, 1917 }, { 6378, 1319 }, { 6773, 673 }, { 6912, 0 }, { 6773, -673 }, { 6378, -1319 }, { 5742, -1917 }, { 4885, -2442 }, { 3835, -2871 }, { 2639, -3189 }, { 1346, -3386 }, { 0, -3456 }, { -1346, -3386 }, { -2639, -3189 }, { -3835, -2871 }, { -4885, -2442 }, { -5742, -1917 }, { -6378, -1319 }, { -6773, -673 }, { -6912, 0 }, { -6773, 673 }, { -6378, 1319 }, { -5742, 1917 }, { -4885, 2442 }, { -3835, 2871 }, { -2639, 3189 }, { -1346, 3386 } } },
 };
+#endif
 
+#if defined(__sh__)
+#define avsp_round1_class1f_inner8_program (avsp_round1_content->content_avsp_round1_class1f_inner8_program)
+#else
 static const AvspRound1Class1fInner8ProgramSpec avsp_round1_class1f_inner8_program =
 {
     0xA3C0u,
@@ -905,12 +1024,20 @@ static const AvspRound1Class1fInner8ProgramSpec avsp_round1_class1f_inner8_progr
     { 0xA000u, 0x9E80u, 0x9DC0u },
     { 0x0035u, 0x0035u, 0x0100u }
 };
+#endif
 
+#if defined(__sh__)
+#define avsp_round1_class1f_attack_timers (avsp_round1_content->content_avsp_round1_class1f_attack_timers)
+#else
 static const unsigned char avsp_round1_class1f_attack_timers[AVSP_ROUND1_CLASS1F_ATTACK_TIMER_COUNT] =
 {
     30u, 30u, 30u, 30u, 60u, 60u, 60u, 60u, 120u, 120u, 120u, 120u, 160u, 160u, 160u, 160u
 };
+#endif
 
+#if defined(__sh__)
+#define avsp_round1_class1f_action_program (avsp_round1_content->content_avsp_round1_class1f_action_program)
+#else
 static const AvspRound1Class1fActionProgramSpec avsp_round1_class1f_action_program =
 {
     0x05F0u, 0x0070u, 0x0260u, 0x0600u, 1u,
@@ -933,7 +1060,11 @@ static const AvspRound1Class1fActionProgramSpec avsp_round1_class1f_action_progr
         { 1u, 1u, 1u, 1u, 1u, 1u, 1u, 1u, 1u, 1u, 1u, 1u, 1u, 1u, 1u, 1u, 1u, 1u, 1u, 1u, 1u, 1u, 1u, 1u, 1u, 1u, 2u, 2u, 2u, 3u, 5u, 8u },
     }
 };
+#endif
 
+#if defined(__sh__)
+#define avsp_round1_class1f_player_collision (avsp_round1_content->content_avsp_round1_class1f_player_collision)
+#else
 static const AvspRound1Class1fPlayerCollisionSpec avsp_round1_class1f_player_collision =
 {
     0x130ac8UL, 0x130b5cUL, 0x11ae02UL, 0x11ae8eUL, 0x0015f278UL, 0x01d5eeUL,
@@ -942,7 +1073,11 @@ static const AvspRound1Class1fPlayerCollisionSpec avsp_round1_class1f_player_col
     { 1, 45, 20u, 46u, 0, 6u, 0, 0u, 0u },
     0x00ffc300UL, 2751u, 0xeea3u, 0xcb6eu, 1095, 369, 319, 24u, 0x4e, 0u
 };
+#endif
 
+#if defined(__sh__)
+#define avsp_round1_player_special_class1f_collision (avsp_round1_content->content_avsp_round1_player_special_class1f_collision)
+#else
 static const AvspRound1PlayerSpecialTargetCollisionSpec avsp_round1_player_special_class1f_collision =
 {
     0x0011AE02UL, 0x0011af76UL, 0x00130ac8UL, 0x00130ad4UL,
@@ -953,7 +1088,11 @@ static const AvspRound1PlayerSpecialTargetCollisionSpec avsp_round1_player_speci
     { -12, 42, 29u, 39u, 0, 8u, 0, 0u, 0u },
     0x00ffbf00UL, 2805u, 1083, 354, 308, 0u
 };
+#endif
 
+#if defined(__sh__)
+#define avsp_round1_class1f_initial_actors (avsp_round1_content->content_avsp_round1_class1f_initial_actors)
+#else
 static const AvspRound1Class1fInitialSpec avsp_round1_class1f_initial_actors[AVSP_ROUND1_CLASS1F_INITIAL_ACTOR_COUNT] =
 {
     { 0x00ff9d00UL, 0x0200u, 0x1000u, 632, 296, 296, 1u, 1u, 16u, 0x8000, 216u, 0x0Fu, 1u, 1u, 1u },
@@ -967,7 +1106,11 @@ static const AvspRound1Class1fInitialSpec avsp_round1_class1f_initial_actors[AVS
     { 0x00ffa300UL, 0x0200u, 0x1400u, 704, 296, 296, 1u, 1u, 19u, 0x8000, 3u, 0x0Fu, 1u, 1u, 1u },
     { 0x00ffa3c0UL, 0x0200u, 0x1400u, 656, 312, 312, 1u, 1u, 19u, 0x8000, 16u, 0x0Fu, 1u, 1u, 1u },
 };
+#endif
 
+#if defined(__sh__)
+#define avsp_round1_class1f_initial_sequences (avsp_round1_content->content_avsp_round1_class1f_initial_sequences)
+#else
 static const AvspRound1AnimationSequenceSpec avsp_round1_class1f_initial_sequences[AVSP_ROUND1_CLASS1F_INITIAL_SEQUENCE_COUNT] =
 {
     { 0u, 4u, AVSP_ROUND1_ANIMATION_TERMINAL_LOOP_FIRST, { { 9u, 0, 0x0012e8a8UL, 0x0012f994UL, 1u, 0u }, { 9u, 0, 0x0012e8b8UL, 0x0012f9bcUL, 1u, 0u }, { 9u, 0, 0x0012e8c8UL, 0x0012f9e4UL, 1u, 0u }, { 9u, -32768, 0x0012e8d8UL, 0x0012f9bcUL, 1u, 0u }, { 0u, 0, 0UL, 0UL, 0u, 0u } } },
@@ -977,12 +1120,20 @@ static const AvspRound1AnimationSequenceSpec avsp_round1_class1f_initial_sequenc
     { 62u, 2u, AVSP_ROUND1_ANIMATION_TERMINAL_STATE_GUARD, { { 4u, 0, 0x0012e9ccUL, 0x0012fc92UL, 11u, 0u }, { 4095u, -32768, 0x0012e9dcUL, 0x0012f5fcUL, 2u, 0u }, { 0u, 0, 0UL, 0UL, 0u, 0u }, { 0u, 0, 0UL, 0UL, 0u, 0u }, { 0u, 0, 0UL, 0UL, 0u, 0u } } },
     { 76u, 5u, AVSP_ROUND1_ANIMATION_TERMINAL_STATE_GUARD, { { 8u, 0, 0x0012ea24UL, 0x0012fb60UL, 0u, 0u }, { 8u, 0, 0x0012ea34UL, 0x0012fbfcUL, 0u, 0u }, { 8u, 0, 0x0012ea44UL, 0x0012fc74UL, 0u, 0u }, { 8u, 0, 0x0012ea54UL, 0x0012fc24UL, 0u, 0u }, { 4095u, -32768, 0x0012ea64UL, 0x0012fb98UL, 0u, 0u } } },
 };
+#endif
 
+#if defined(__sh__)
+#define avsp_round1_class1f_initial_audio_commands (avsp_round1_content->content_avsp_round1_class1f_initial_audio_commands)
+#else
 static const unsigned short avsp_round1_class1f_initial_audio_commands[AVSP_ROUND1_CLASS1F_AIRBORNE_ACTOR_COUNT] =
 {
     0x004Du, 0x0118u, 0x0000u
 };
+#endif
 
+#if defined(__sh__)
+#define avsp_round1_type16 (avsp_round1_content->content_avsp_round1_type16)
+#else
 static const AvspRound1Type16Spec avsp_round1_type16 =
 {
     0x03537eUL, 0x0413d2UL, 0x01778cUL, 0x0177a2UL, 0x00035882UL, 0x0003589eUL, 0x0011ae02UL, 0x0011ae8eUL,
@@ -990,14 +1141,22 @@ static const AvspRound1Type16Spec avsp_round1_type16 =
     { 0, 0, 8u, 8u, 0, 8u, 0, 20u, 10u },
     { 1, 45, 20u, 46u, 0, 6u, 0, 0u, 0u }
 };
+#endif
 
+#if defined(__sh__)
+#define avsp_round1_type16_motion (avsp_round1_content->content_avsp_round1_type16_motion)
+#else
 static const AvspRound1Type16MotionSpec avsp_round1_type16_motion[AVSP_ROUND1_TYPE16_MOTION_COUNT] =
 {
     { 524288L, -8192L, 262144L, -16384L, 0L },
     { 475136L, -9216L, 245760L, -20480L, 0L },
     { 425984L, -10240L, 229376L, -28672L, 0L },
 };
+#endif
 
+#if defined(__sh__)
+#define avsp_round1_type16_parent_records (avsp_round1_content->content_avsp_round1_type16_parent_records)
+#else
 static const AvspRound1AnimationStateSpec avsp_round1_type16_parent_records[AVSP_ROUND1_TYPE16_PARENT_PRESENTATION_COUNT] =
 {
     { 6u, 0, 0x0012e550UL, 0x0012f930UL, 4u, 0u },
@@ -1012,7 +1171,11 @@ static const AvspRound1AnimationStateSpec avsp_round1_type16_parent_records[AVSP
     { 6u, 0, 0x0012e5e0UL, 0x001300eeUL, 1u, 0u },
     { 7u, -32768, 0x0012e5f0UL, 0x0012f5acUL, 1u, 0u },
 };
+#endif
 
+#if defined(__sh__)
+#define avsp_round1_type16_records (avsp_round1_content->content_avsp_round1_type16_records)
+#else
 static const AvspRound1AnimationStateSpec avsp_round1_type16_records[AVSP_ROUND1_TYPE16_PRESENTATION_COUNT] =
 {
     { 10u, 0, 0x000355dcUL, 0x0003570cUL, 0u, 1u },
@@ -1027,7 +1190,11 @@ static const AvspRound1AnimationStateSpec avsp_round1_type16_records[AVSP_ROUND1
     { 4u, 0, 0x00035670UL, 0x00035808UL, 0u, 0u },
     { 4095u, -32768, 0x00035680UL, 0x00035824UL, 0u, 0u },
 };
+#endif
 
+#if defined(__sh__)
+#define avsp_round1_class08_health_pickup (avsp_round1_content->content_avsp_round1_class08_health_pickup)
+#else
 static const AvspRound1Class08HealthPickupSpec avsp_round1_class08_health_pickup =
 {
     0x0015c198UL, 0x00ffb200UL, 0x00ffcd00UL, 0x06d53cUL, 0x0a38e4UL,
@@ -1044,14 +1211,22 @@ static const AvspRound1Class08HealthPickupSpec avsp_round1_class08_health_pickup
     { 1, 45, 20u, 46u, 0, 6u, 0, 0u, 0u },
     { 0, 0, 16u, 1u, 0, 16u, 0, 0u, 0u }
 };
+#endif
 
+#if defined(__sh__)
+#define avsp_round1_class08_debris (avsp_round1_content->content_avsp_round1_class08_debris)
+#else
 static const AvspRound1Class08DebrisSpec avsp_round1_class08_debris =
 {
     0x0404u, 0x0200u, 0x0604u, 0x0300u, 317,
     83886080L, 23199744L, 327680L, 393216L, -32768L,
     83886080L, 20774912L, 262144L, 327680L, -32768L, 89653248L, 20381696L
 };
+#endif
 
+#if defined(__sh__)
+#define avsp_round1_class08_parent_records (avsp_round1_content->content_avsp_round1_class08_parent_records)
+#else
 static const AvspRound1AnimationStateSpec avsp_round1_class08_parent_records[AVSP_ROUND1_CLASS08_PARENT_PRESENTATION_COUNT] =
 {
     { 4095u, -32768, 0x0006d7b8UL, 0x0006d864UL, 1u, 1u },
@@ -1060,29 +1235,49 @@ static const AvspRound1AnimationStateSpec avsp_round1_class08_parent_records[AVS
     { 4095u, -32768, 0x0006d83cUL, 0x0006d8e4UL, 0u, 0u },
     { 4095u, -32768, 0x0006d850UL, 0x0006d8f2UL, 0u, 0u },
 };
+#endif
 
+#if defined(__sh__)
+#define avsp_round1_health_pickup_records (avsp_round1_content->content_avsp_round1_health_pickup_records)
+#else
 static const AvspRound1AnimationStateSpec avsp_round1_health_pickup_records[AVSP_ROUND1_HEALTH_PICKUP_PRESENTATION_COUNT] =
 {
     { 8u, -32768, 0x000a3d1cUL, 0x000a4094UL, 2u, 0u },
 };
+#endif
 
+#if defined(__sh__)
+#define avsp_round1_player_pickup_records (avsp_round1_content->content_avsp_round1_player_pickup_records)
+#else
 static const AvspRound1AnimationStateSpec avsp_round1_player_pickup_records[AVSP_ROUND1_PLAYER_PICKUP_PRESENTATION_COUNT] =
 {
     { 5u, 0, 0x0015fa04UL, 0x001610caUL, 0u, 0u },
     { 4095u, -32768, 0x0015fa14UL, 0x001626a4UL, 0u, 0u },
 };
+#endif
 
+#if defined(__sh__)
+#define avsp_round1_class09_initial_actors (avsp_round1_content->content_avsp_round1_class09_initial_actors)
+#else
 static const AvspRound1Class09InitialSpec avsp_round1_class09_initial_actors[AVSP_ROUND1_CLASS09_INITIAL_ACTOR_COUNT] =
 {
     { 0x00ffb480UL, 992, 240, 240, 0x0200u, 0x0000u, 0u, 0x0006dbdaUL },
     { 0x00ffb500UL, 940, 240, 240, 0x0200u, 0x0000u, 0u, 0x0006dbdaUL },
 };
+#endif
 
+#if defined(__sh__)
+#define avsp_round1_class09_selector_table (avsp_round1_content->content_avsp_round1_class09_selector_table)
+#else
 static const unsigned char avsp_round1_class09_selector_table[8] =
 {
     0u, 7u, 8u, 9u, 10u, 8u, 9u, 10u
 };
+#endif
 
+#if defined(__sh__)
+#define avsp_round1_class09_sequences (avsp_round1_content->content_avsp_round1_class09_sequences)
+#else
 static const AvspRound1AnimationStateSpec avsp_round1_class09_sequences[AVSP_ROUND1_CLASS09_SEQUENCE_COUNT][AVSP_ROUND1_CLASS09_SEQUENCE_RECORDS] =
 {
     { { 8u, 0, 0x0006dbdaUL, 0x0006dd26UL, 1u, 1u }, { 8u, -32768, 0x0006dbeaUL, 0x0006dd26UL, 1u, 1u } },
@@ -1091,24 +1286,40 @@ static const AvspRound1AnimationStateSpec avsp_round1_class09_sequences[AVSP_ROU
     { { 8u, 0, 0x0006dc46UL, 0x0006dd8cUL, 1u, 1u }, { 8u, -32768, 0x0006dc56UL, 0x0006dd8cUL, 1u, 1u } },
     { { 8u, 0, 0x0006dc6aUL, 0x0006ddb0UL, 1u, 1u }, { 8u, -32768, 0x0006dc7aUL, 0x0006ddb0UL, 1u, 1u } },
 };
+#endif
 
+#if defined(__sh__)
+#define avsp_round1_class09_sequence_selectors (avsp_round1_content->content_avsp_round1_class09_sequence_selectors)
+#else
 static const unsigned char avsp_round1_class09_sequence_selectors[AVSP_ROUND1_CLASS09_SEQUENCE_COUNT] =
 {
     0u, 7u, 8u, 9u, 10u
 };
+#endif
 
+#if defined(__sh__)
+#define avsp_round1_class4e_initial_spawns (avsp_round1_content->content_avsp_round1_class4e_initial_spawns)
+#else
 static const AvspRound1Class4eSpawnSpec avsp_round1_class4e_initial_spawns[AVSP_ROUND1_CLASS09_INITIAL_ACTOR_COUNT] =
 {
     { 0x00ffc500UL, 816, 384, 296 },
     { 0x00ffc480UL, 848, 424, 296 },
 };
+#endif
 
+#if defined(__sh__)
+#define avsp_round1_class4e_rng (avsp_round1_content->content_avsp_round1_class4e_rng)
+#else
 static const AvspRound1Class4eRngSpec avsp_round1_class4e_rng[AVSP_ROUND1_CLASS09_INITIAL_ACTOR_COUNT] =
 {
     { 0x00ffc480UL, 0xcdb5u, 0x691eu, 28u },
     { 0x00ffc500UL, 0x691eu, 0x3b59u, 24u },
 };
+#endif
 
+#if defined(__sh__)
+#define avsp_round1_class4e_jitter (avsp_round1_content->content_avsp_round1_class4e_jitter)
+#else
 static const AvspRound1VecS16 avsp_round1_class4e_jitter[AVSP_ROUND1_CLASS4E_JITTER_COUNT] =
 {
     { 0, 0 },
@@ -1120,7 +1331,11 @@ static const AvspRound1VecS16 avsp_round1_class4e_jitter[AVSP_ROUND1_CLASS4E_JIT
     { -4, 4 },
     { -8, 8 },
 };
+#endif
 
+#if defined(__sh__)
+#define avsp_round1_class4e_records (avsp_round1_content->content_avsp_round1_class4e_records)
+#else
 static const AvspRound1AnimationStateSpec avsp_round1_class4e_records[AVSP_ROUND1_CLASS4E_PRESENTATION_COUNT] =
 {
     { 2u, 0, 0x000929b0UL, 0x00092c58UL, 0u, 0u },
@@ -1129,21 +1344,33 @@ static const AvspRound1AnimationStateSpec avsp_round1_class4e_records[AVSP_ROUND
     { 2u, 0, 0x000929e0UL, 0x00092c82UL, 0u, 0u },
     { 4095u, -32768, 0x000929f0UL, 0x00092c90UL, 0u, 0u },
 };
+#endif
 
+#if defined(__sh__)
+#define avsp_round1_class4e_variant0_records (avsp_round1_content->content_avsp_round1_class4e_variant0_records)
+#else
 static const AvspRound1AnimationStateSpec avsp_round1_class4e_variant0_records[AVSP_ROUND1_CLASS4E_VARIANT0_PRESENTATION_COUNT] =
 {
     { 4u, 0, 0x000928e0UL, 0x00092be8UL, 0u, 0u },
     { 4u, 0, 0x000928f0UL, 0x00092bf6UL, 0u, 0u },
     { 4095u, -32768, 0x00092900UL, 0x00092bf6UL, 0u, 0u },
 };
+#endif
 
+#if defined(__sh__)
+#define avsp_round1_class4e_variant1_records (avsp_round1_content->content_avsp_round1_class4e_variant1_records)
+#else
 static const AvspRound1AnimationStateSpec avsp_round1_class4e_variant1_records[AVSP_ROUND1_CLASS4E_VARIANT1_PRESENTATION_COUNT] =
 {
     { 4u, 0, 0x00092914UL, 0x00092c04UL, 0u, 0u },
     { 4u, 0, 0x00092924UL, 0x00092c12UL, 0u, 0u },
     { 4095u, -32768, 0x00092934UL, 0x00092c12UL, 0u, 0u },
 };
+#endif
 
+#if defined(__sh__)
+#define avsp_round1_class4e_variant10_records (avsp_round1_content->content_avsp_round1_class4e_variant10_records)
+#else
 static const AvspRound1AnimationStateSpec avsp_round1_class4e_variant10_records[AVSP_ROUND1_CLASS4E_VARIANT10_PRESENTATION_COUNT] =
 {
     { 1u, 0, 0x00092e50UL, 0x000931f8UL, 0u, 0u },
@@ -1153,7 +1380,11 @@ static const AvspRound1AnimationStateSpec avsp_round1_class4e_variant10_records[
     { 1u, 0, 0x00092e90UL, 0x00093230UL, 0u, 0u },
     { 4095u, -32768, 0x00092ea0UL, 0x0009323eUL, 0u, 0u },
 };
+#endif
 
+#if defined(__sh__)
+#define avsp_round1_class4e_variant5_records (avsp_round1_content->content_avsp_round1_class4e_variant5_records)
+#else
 static const AvspRound1AnimationStateSpec avsp_round1_class4e_variant5_records[AVSP_ROUND1_CLASS4E_VARIANT5_PRESENTATION_COUNT] =
 {
     { 2u, 0, 0x00092a04UL, 0x00092cacUL, 0u, 0u },
@@ -1162,7 +1393,11 @@ static const AvspRound1AnimationStateSpec avsp_round1_class4e_variant5_records[A
     { 2u, 0, 0x00092a34UL, 0x00092cd6UL, 0u, 0u },
     { 4095u, -32768, 0x00092a44UL, 0x00092ce4UL, 0u, 0u },
 };
+#endif
 
+#if defined(__sh__)
+#define avsp_round1_class4e_variant20_records (avsp_round1_content->content_avsp_round1_class4e_variant20_records)
+#else
 static const AvspRound1AnimationStateSpec avsp_round1_class4e_variant20_records[AVSP_ROUND1_CLASS4E_VARIANT20_PRESENTATION_COUNT] =
 {
     { 1u, 0, 0x000935b0UL, 0x00093634UL, 0u, 0u },
@@ -1174,33 +1409,57 @@ static const AvspRound1AnimationStateSpec avsp_round1_class4e_variant20_records[
     { 1u, 0, 0x00093610UL, 0x00093634UL, 0u, 0u },
     { 1u, -32768, 0x00093620UL, 0x0009364cUL, 0u, 0u },
 };
+#endif
 
+#if defined(__sh__)
+#define avsp_round1_class44_guard (avsp_round1_content->content_avsp_round1_class44_guard)
+#else
 static const AvspRound1Class44GuardSpec avsp_round1_class44_guard =
 {
     0x00ffc580UL, 792, 296, 296, 0x0200u, 0x0000u, 0x08d9a4UL, 0u, 0u, 0u, 0x8000u
 };
+#endif
 
+#if defined(__sh__)
+#define avsp_round1_class44_records (avsp_round1_content->content_avsp_round1_class44_records)
+#else
 static const AvspRound1AnimationStateSpec avsp_round1_class44_records[AVSP_ROUND1_CLASS44_PRESENTATION_COUNT] =
 {
     { 4095u, -32768, 0x0008daf2UL, 0x0008db2eUL, 0u, 0u },
     { 4095u, -32768, 0x0008db1aUL, 0x0008db6aUL, 0u, 0u },
 };
+#endif
 
+#if defined(__sh__)
+#define avsp_round1_class43 (avsp_round1_content->content_avsp_round1_class43)
+#else
 static const AvspRound1Class43Spec avsp_round1_class43 =
 {
     0x43, 0u, 2u, 4u, 7u, 80, -1, 0x08ce44UL
 };
+#endif
 
+#if defined(__sh__)
+#define avsp_round1_class43_animation_selectors (avsp_round1_content->content_avsp_round1_class43_animation_selectors)
+#else
 static const unsigned char avsp_round1_class43_animation_selectors[AVSP_ROUND1_CLASS43_SELECTOR_COUNT] =
 {
     5u, 6u, 7u, 15u, 5u, 6u, 7u, 15u, 0u, 1u, 2u, 3u, 4u, 8u, 9u, 10u, 11u, 12u, 13u, 14u, 0u, 1u, 2u, 3u, 4u, 8u, 9u, 10u, 11u, 12u, 13u, 14u
 };
+#endif
 
+#if defined(__sh__)
+#define avsp_round1_class43_sequence_offsets (avsp_round1_content->content_avsp_round1_class43_sequence_offsets)
+#else
 static const unsigned char avsp_round1_class43_sequence_offsets[AVSP_ROUND1_CLASS43_SEQUENCE_COUNT] =
 {
     0u, 6u, 12u, 18u, 24u, 30u, 36u, 40u, 44u, 48u, 56u, 64u, 66u, 67u, 68u, 69u
 };
+#endif
 
+#if defined(__sh__)
+#define avsp_round1_class43_records (avsp_round1_content->content_avsp_round1_class43_records)
+#else
 static const AvspRound1AnimationStateSpec avsp_round1_class43_records[AVSP_ROUND1_CLASS43_PRESENTATION_COUNT] =
 {
     { 4u, 0, 0x0008d14aUL, 0x0008d5eaUL, 0u, 0u },
@@ -1274,7 +1533,11 @@ static const AvspRound1AnimationStateSpec avsp_round1_class43_records[AVSP_ROUND
     { 4095u, -32768, 0x0008d5c2UL, 0x0008d986UL, 0u, 0u },
     { 4095u, -32768, 0x0008d5d6UL, 0x0008d994UL, 0u, 0u },
 };
+#endif
 
+#if defined(__sh__)
+#define avsp_round1_class43_motion (avsp_round1_content->content_avsp_round1_class43_motion)
+#else
 static const AvspRound1Class45MotionSpec avsp_round1_class43_motion[AVSP_ROUND1_CLASS43_MOTION_COUNT] =
 {
     { 0, 2048, -96, 896, 1792, -96 },
@@ -1286,24 +1549,40 @@ static const AvspRound1Class45MotionSpec avsp_round1_class43_motion[AVSP_ROUND1_
     { 640, 1280, -96, 256, 2560, -96 },
     { 896, 1152, -96, 0, 2816, -96 },
 };
+#endif
 
+#if defined(__sh__)
+#define avsp_round1_class45_source_slots (avsp_round1_content->content_avsp_round1_class45_source_slots)
+#else
 static const unsigned long avsp_round1_class45_source_slots[AVSP_ROUND1_CLASS45_SCENE_ACTOR_COUNT] =
 {
     0x00ffb680UL, 0x00ffb700UL, 0x00ffb780UL, 0x00ffb800UL, 0x00ffb880UL, 0x00ffb900UL, 0x00ffb980UL, 0x00ffba00UL, 0x00ffba80UL, 0x00ffbb00UL, 0x00ffbb80UL, 0x00ffbc00UL, 0x00ffbc80UL, 0x00ffbd00UL, 0x00ffbd80UL, 0x00ffbe00UL, 0x00ffbe80UL, 0x00ffbf00UL, 0x00ffbf80UL, 0x00ffc000UL, 0x00ffc080UL, 0x00ffc100UL, 0x00ffc180UL, 0x00ffc200UL, 0x00ffc280UL, 0x00ffc300UL, 0x00ffc380UL, 0x00ffc400UL
 };
+#endif
 
+#if defined(__sh__)
+#define avsp_round1_class45_spawn_groups (avsp_round1_content->content_avsp_round1_class45_spawn_groups)
+#else
 static const AvspRound1Class45SpawnGroupSpec avsp_round1_class45_spawn_groups[AVSP_ROUND1_CLASS45_SPAWN_GROUP_COUNT] =
 {
     { 5u, 0, 128, -1 },
     { 5u, 0, 128, -1 },
     { 65535u, 48, 64, -1 },
 };
+#endif
 
+#if defined(__sh__)
+#define avsp_round1_class45_animation_selectors (avsp_round1_content->content_avsp_round1_class45_animation_selectors)
+#else
 static const unsigned char avsp_round1_class45_animation_selectors[AVSP_ROUND1_CLASS45_SELECTOR_COUNT] =
 {
     0u, 1u, 0u, 3u, 4u, 5u, 0u, 1u, 1u, 3u, 4u, 5u, 0u, 1u, 3u, 3u, 4u, 5u, 0u, 1u, 4u, 3u, 4u, 5u, 0u, 1u, 5u, 3u, 4u, 5u, 0u, 1u
 };
+#endif
 
+#if defined(__sh__)
+#define avsp_round1_class45_records (avsp_round1_content->content_avsp_round1_class45_records)
+#else
 static const AvspRound1AnimationStateSpec avsp_round1_class45_records[AVSP_ROUND1_CLASS45_PRESENTATION_COUNT] =
 {
     { 4095u, -32768, 0x0008dedcUL, 0x0008df54UL, 0u, 0u },
@@ -1312,7 +1591,11 @@ static const AvspRound1AnimationStateSpec avsp_round1_class45_records[AVSP_ROUND
     { 4095u, -32768, 0x0008df2cUL, 0x0008df96UL, 0u, 0u },
     { 4095u, -32768, 0x0008df40UL, 0x0008dfa4UL, 0u, 0u },
 };
+#endif
 
+#if defined(__sh__)
+#define avsp_round1_class45_motion (avsp_round1_content->content_avsp_round1_class45_motion)
+#else
 static const AvspRound1Class45MotionSpec avsp_round1_class45_motion[AVSP_ROUND1_CLASS45_MOTION_COUNT] =
 {
     { 0, 2048, -96, -896, 2048, -96 },
@@ -1324,22 +1607,38 @@ static const AvspRound1Class45MotionSpec avsp_round1_class45_motion[AVSP_ROUND1_
     { 768, 1280, -96, -128, 1280, -96 },
     { 896, 1152, -96, 0, 1152, -96 },
 };
+#endif
 
+#if defined(__sh__)
+#define avsp_round1_class47_source_slots (avsp_round1_content->content_avsp_round1_class47_source_slots)
+#else
 static const unsigned long avsp_round1_class47_source_slots[AVSP_ROUND1_CLASS47_SCENE_ACTOR_COUNT] =
 {
     0x00ffbd80UL, 0x00ffc180UL, 0x00ffc200UL, 0x00ffc380UL
 };
+#endif
 
+#if defined(__sh__)
+#define avsp_round1_class47 (avsp_round1_content->content_avsp_round1_class47)
+#else
 static const AvspRound1Class47Spec avsp_round1_class47 =
 {
     0x47, 0u, 4u, 7u, 80, -1, 0x08eb86UL
 };
+#endif
 
+#if defined(__sh__)
+#define avsp_round1_class47_animation_selectors (avsp_round1_content->content_avsp_round1_class47_animation_selectors)
+#else
 static const unsigned char avsp_round1_class47_animation_selectors[AVSP_ROUND1_CLASS47_SELECTOR_COUNT] =
 {
     0u, 1u, 2u, 3u, 4u, 5u, 6u, 0u, 1u, 2u, 3u, 4u, 5u, 6u, 0u, 1u, 2u, 3u, 4u, 5u, 6u, 7u, 8u, 7u, 8u, 7u, 8u, 0u, 1u, 2u, 3u, 4u
 };
+#endif
 
+#if defined(__sh__)
+#define avsp_round1_class47_records (avsp_round1_content->content_avsp_round1_class47_records)
+#else
 static const AvspRound1AnimationStateSpec avsp_round1_class47_records[AVSP_ROUND1_CLASS47_PRESENTATION_COUNT] =
 {
     { 4095u, -32768, 0x0008ee38UL, 0x0008eeecUL, 0u, 0u },
@@ -1352,7 +1651,11 @@ static const AvspRound1AnimationStateSpec avsp_round1_class47_records[AVSP_ROUND
     { 4095u, -32768, 0x0008eec4UL, 0x0008ef4eUL, 0u, 0u },
     { 4095u, -32768, 0x0008eed8UL, 0x0008ef5cUL, 0u, 0u },
 };
+#endif
 
+#if defined(__sh__)
+#define avsp_round1_class47_motion (avsp_round1_content->content_avsp_round1_class47_motion)
+#else
 static const AvspRound1Class45MotionSpec avsp_round1_class47_motion[AVSP_ROUND1_CLASS47_MOTION_COUNT] =
 {
     { 0, 2048, -96, 896, 1792, -96 },
@@ -1364,13 +1667,21 @@ static const AvspRound1Class45MotionSpec avsp_round1_class47_motion[AVSP_ROUND1_
     { 640, 1280, -96, 256, 2560, -96 },
     { 896, 1152, -96, 0, 2816, -96 },
 };
+#endif
 
+#if defined(__sh__)
+#define avsp_round1_first_segment_bounds (avsp_round1_content->content_avsp_round1_first_segment_bounds)
+#else
 static const AvspRound1NavigationBoundsSpec avsp_round1_first_segment_bounds =
 {
     720, 256, 752, 1072,
     272, 400
 };
+#endif
 
+#if defined(__sh__)
+#define avsp_round1_first_segment_terrain_records (avsp_round1_content->content_avsp_round1_first_segment_terrain_records)
+#else
 static const AvspRound1TerrainRecordSpec avsp_round1_first_segment_terrain_records[AVSP_ROUND1_TERRAIN_RECORD_COUNT] =
 {
     { 0x00u, 0x80u, 0x80u, 0x80u, 0x80u, 0x80u, 0x80u, 0x80u },
@@ -1383,7 +1694,11 @@ static const AvspRound1TerrainRecordSpec avsp_round1_first_segment_terrain_recor
     { 0x06u, 0x04u, 0x02u, 0x01u, 0x00u, 0x08u, 0x80u, 0x80u },
     { 0x04u, 0x02u, 0x02u, 0x01u, 0x00u, 0x08u, 0x80u, 0x80u },
 };
+#endif
 
+#if defined(__sh__)
+#define avsp_round1_first_segment_terrain_packed (avsp_round1_content->content_avsp_round1_first_segment_terrain_packed)
+#else
 static const unsigned char avsp_round1_first_segment_terrain_packed[AVSP_ROUND1_TERRAIN_PACKED_BYTES] =
 {
     0x00u, 0x00u, 0x00u, 0x00u, 0x00u, 0x00u, 0x00u, 0x00u, 0x00u, 0x00u, 0x00u, 0x00u, 0x00u, 0x00u, 0x00u, 0x00u, 0x00u, 0x00u, 0x00u, 0x00u, 0x00u, 0x00u, 0x00u, 0x00u, 0x00u, 0x00u, 0x00u, 0x00u, 0x00u, 0x00u, 0x00u, 0x00u,
@@ -1391,7 +1706,11 @@ static const unsigned char avsp_round1_first_segment_terrain_packed[AVSP_ROUND1_
     0x55u, 0x55u, 0x15u, 0x00u, 0x00u, 0x55u, 0x55u, 0x55u, 0x55u, 0x55u, 0x55u, 0x55u, 0x55u, 0x55u, 0x01u, 0x00u, 0x50u, 0x55u, 0x55u, 0x55u, 0x55u, 0x55u, 0x55u, 0x55u, 0x55u, 0x15u, 0x00u, 0x00u, 0x55u, 0x55u, 0x55u, 0x55u,
     0x55u, 0x55u, 0x55u, 0x55u, 0x55u, 0x01u, 0x00u, 0x00u
 };
+#endif
 
+#if defined(__sh__)
+#define avsp_round1_first_segment_terrain_selector_runs (avsp_round1_content->content_avsp_round1_first_segment_terrain_selector_runs)
+#else
 static const AvspRound1TerrainSelectorRunSpec avsp_round1_first_segment_terrain_selector_runs[AVSP_ROUND1_TERRAIN_SELECTOR_RUN_COUNT] =
 {
     { 255u, 0x00u },
@@ -1778,7 +2097,11 @@ static const AvspRound1TerrainSelectorRunSpec avsp_round1_first_segment_terrain_
     { 6u, 0x14u },
     { 5u, 0x00u },
 };
+#endif
 
+#if defined(__sh__)
+#define avsp_round1_coffee_shop_terrain_stream_writes (avsp_round1_content->content_avsp_round1_coffee_shop_terrain_stream_writes)
+#else
 static const AvspRound1TerrainStreamWriteSpec avsp_round1_coffee_shop_terrain_stream_writes[AVSP_ROUND1_TERRAIN_STREAM_WRITE_COUNT] =
 {
     { 1190u, 0x14u, 0x00u },
@@ -3258,7 +3581,11 @@ static const AvspRound1TerrainStreamWriteSpec avsp_round1_coffee_shop_terrain_st
     { 3560u, 0x14u, 0x00u },
     { 3561u, 0x14u, 0x00u },
 };
+#endif
 
+#if defined(__sh__)
+#define avsp_round1_coffee_shop_terrain_stream_transactions (avsp_round1_content->content_avsp_round1_coffee_shop_terrain_stream_transactions)
+#else
 static const AvspRound1TerrainStreamTransactionSpec avsp_round1_coffee_shop_terrain_stream_transactions[AVSP_ROUND1_TERRAIN_STREAM_TRANSACTION_COUNT] =
 {
     { 662, 256, 41u, 16u, 0u, 0x00u, 0u, 36u },
@@ -3303,7 +3630,11 @@ static const AvspRound1TerrainStreamTransactionSpec avsp_round1_coffee_shop_terr
     { 671, 256, 41u, 16u, 4u, 0x00u, 1404u, 36u },
     { 649, 256, 40u, 16u, 4u, 0x10u, 1440u, 36u },
 };
+#endif
 
+#if defined(__sh__)
+#define avsp_round1_coffee_shop_obstacle_records (avsp_round1_content->content_avsp_round1_coffee_shop_obstacle_records)
+#else
 static const AvspRound1AnimationStateSpec avsp_round1_coffee_shop_obstacle_records[AVSP_ROUND1_OBSTACLE_PARENT_RECORD_COUNT] =
 {
     { 4095u, -32768, 0x06e136UL, 0x06e196UL, 1u, 1u },
@@ -3312,7 +3643,11 @@ static const AvspRound1AnimationStateSpec avsp_round1_coffee_shop_obstacle_recor
     { 4095u, -32768, 0x06e16eUL, 0x06e1eaUL, 0u, 0u },
     { 4095u, -32768, 0x06e182UL, 0x06e202UL, 0u, 0u },
 };
+#endif
 
+#if defined(__sh__)
+#define avsp_round1_coffee_shop_obstacle_child_sequences (avsp_round1_content->content_avsp_round1_coffee_shop_obstacle_child_sequences)
+#else
 static const AvspRound1ObstacleChildSequenceSpec avsp_round1_coffee_shop_obstacle_child_sequences[AVSP_ROUND1_OBSTACLE_CHILD_VARIANTS] =
 {
     { 5u, { { 8u, 0, 0x09bbf0UL, 0x09bdb2UL, 0u, 0u }, { 8u, 0, 0x09bc00UL, 0x09bdc0UL, 0u, 0u }, { 8u, 0, 0x09bc10UL, 0x09bdceUL, 0u, 0u }, { 8u, 0, 0x09bc20UL, 0x09bddcUL, 0u, 0u }, { 8u, -32768, 0x09bc30UL, 0x09bdeaUL, 0u, 0u }, { 0u, 0, 0UL, 0UL, 0u, 0u }, { 0u, 0, 0UL, 0UL, 0u, 0u }, { 0u, 0, 0UL, 0UL, 0u, 0u } } },
@@ -3320,10 +3655,18 @@ static const AvspRound1ObstacleChildSequenceSpec avsp_round1_coffee_shop_obstacl
     { 6u, { { 6u, 0, 0x09bcc8UL, 0x09be4cUL, 0u, 0u }, { 6u, 0, 0x09bcd8UL, 0x09be5aUL, 0u, 0u }, { 6u, 0, 0x09bce8UL, 0x09be3eUL, 0u, 0u }, { 6u, 0, 0x09bcf8UL, 0x09be68UL, 0u, 0u }, { 6u, 0, 0x09bd08UL, 0x09be3eUL, 0u, 0u }, { 6u, -32768, 0x09bd18UL, 0x09be5aUL, 0u, 0u }, { 0u, 0, 0UL, 0UL, 0u, 0u }, { 0u, 0, 0UL, 0UL, 0u, 0u } } },
     { 6u, { { 7u, 0, 0x09bd2cUL, 0x09be76UL, 0u, 0u }, { 7u, 0, 0x09bd3cUL, 0x09bea0UL, 0u, 0u }, { 7u, 0, 0x09bd4cUL, 0x09be92UL, 0u, 0u }, { 7u, 0, 0x09bd5cUL, 0x09be84UL, 0u, 0u }, { 7u, 0, 0x09bd6cUL, 0x09be92UL, 0u, 0u }, { 7u, -32768, 0x09bd7cUL, 0x09bea0UL, 0u, 0u }, { 0u, 0, 0UL, 0UL, 0u, 0u }, { 0u, 0, 0UL, 0UL, 0u, 0u } } },
 };
+#endif
 
+#if defined(__sh__)
+#define avsp_round1_coffee_shop_obstacle_child_release (avsp_round1_content->content_avsp_round1_coffee_shop_obstacle_child_release)
+#else
 static const AvspRound1AnimationStateSpec avsp_round1_coffee_shop_obstacle_child_release =
 { 4095u, -32768, 0x09bd90UL, 0x09beaeUL, 0u, 0u };
+#endif
 
+#if defined(__sh__)
+#define avsp_round1_coffee_shop_obstacle_lifecycle (avsp_round1_content->content_avsp_round1_coffee_shop_obstacle_lifecycle)
+#else
 static const AvspRound1ObstacleLifecycleSpec avsp_round1_coffee_shop_obstacle_lifecycle =
 {
     0x15c168UL, 0xffb380UL, 0x06DE92UL, 0x11af76UL,
@@ -3337,14 +3680,22 @@ static const AvspRound1ObstacleLifecycleSpec avsp_round1_coffee_shop_obstacle_li
     { 0, 64, 16u, 64u, 0, 6u, 0, 0u, 0u },
     { 1280, 1536, 0, -128, 1024, 1280, 0, -128 }
 };
+#endif
 
+#if defined(__sh__)
+#define avsp_round1_coffee_shop_obstacle (avsp_round1_content->content_avsp_round1_coffee_shop_obstacle)
+#else
 static const AvspRound1ObstacleSpec avsp_round1_coffee_shop_obstacle =
 {
     0xffb380UL, 0x0A, 20u, 0x0200u, 0x0000u,
     1123, 323, 323, 0u, 0x06e136UL, 0x06e196UL, 1u, 1u,
     { 0, 0, 32u, 127u, 0, 6u, 0, 0u, 0u }
 };
+#endif
 
+#if defined(__sh__)
+#define avsp_round1_coffee_shop_camera (avsp_round1_content->content_avsp_round1_coffee_shop_camera)
+#else
 static const AvspRound1CameraSpec avsp_round1_coffee_shop_camera =
 {
     640, 256, 640, 832, 256, 256, 0x40u, 0x20u,
@@ -3352,7 +3703,11 @@ static const AvspRound1CameraSpec avsp_round1_coffee_shop_camera =
     1u, 1200u,
     {0u, 1u, 1u, 2u, 3u, 4u, 5u, 6u, 7u, 7u, 8u, 8u, 9u, 9u, 10u, 10u, 11u, 11u, 11u, 11u}
 };
+#endif
 
+#if defined(__sh__)
+#define avsp_round1_player_locomotion (avsp_round1_content->content_avsp_round1_player_locomotion)
+#else
 static const AvspRound1PlayerLocomotionSpec avsp_round1_player_locomotion =
 {
     514u,
@@ -3364,7 +3719,11 @@ static const AvspRound1PlayerLocomotionSpec avsp_round1_player_locomotion =
     0u,
     {255u, 2u, 6u, 255u, 4u, 3u, 5u, 255u, 0u, 1u, 7u, 255u, 255u, 255u, 255u, 255u}
 };
+#endif
 
+#if defined(__sh__)
+#define avsp_round1_player_walk_records (avsp_round1_content->content_avsp_round1_player_walk_records)
+#else
 static const AvspRound1AnimationStateSpec avsp_round1_player_walk_records[AVSP_ROUND1_PLAYER_WALK_PRESENTATION_COUNT] =
 {
     { 4u, 0, 0x0015F208UL, 0x00160A02UL, 17u, 0u },
@@ -3380,7 +3739,11 @@ static const AvspRound1AnimationStateSpec avsp_round1_player_walk_records[AVSP_R
     { 4u, 0, 0x0015F2A8UL, 0x00160B76UL, 17u, 0u },
     { 4u, -32768, 0x0015F2B8UL, 0x00160B9EUL, 17u, 0u },
 };
+#endif
 
+#if defined(__sh__)
+#define avsp_round1_player_hit (avsp_round1_content->content_avsp_round1_player_hit)
+#else
 static const AvspRound1PlayerHitSpec avsp_round1_player_hit =
 {
     0x01a96eUL, 0x01a982UL, 0x01aad0UL, 0x01ab2cUL, 0x01ab52UL, 0x01abb8UL,
@@ -3392,14 +3755,22 @@ static const AvspRound1PlayerHitSpec avsp_round1_player_hit =
     { 4095u, -32768, 0x0015f1f4UL, 0x001626a4UL, 1u, 0u },
     { 2, -2, 2, -2, 2, -2, 2, -2, 2, -2, 2, -2, 2, -2, 2, -2, 2, -2, 2, -2, 2, -2, 2, -2, 2, -2, 2, -2, 2, -2, 2, -2 }
 };
+#endif
 
+#if defined(__sh__)
+#define avsp_round1_player_hit_reactions (avsp_round1_content->content_avsp_round1_player_hit_reactions)
+#else
 static const AvspRound1PlayerHitReactionSpec avsp_round1_player_hit_reactions[AVSP_ROUND1_PLAYER_HIT_REACTION_COUNT] =
 {
     { 0x00130b5cUL, 114688L, -8192L, { 8u, -32768, 0x0015eee8UL, 0x00160edeUL, 0u, 0u }, 10, 12u, 0x1f, 1u, 6u, 7u, 0u, 10u, 2u },
     { 0x0003589eUL, 212992L, -8192L, { 8u, -32768, 0x0015ef24UL, 0x00160f3cUL, 0u, 0u }, 17, 16u, 0x06, 0u, 9u, 10u, 0u, 20u, 8u },
     { 0x00130b8cUL, 147456L, -8192L, { 8u, -32768, 0x0015ef38UL, 0x00160f64UL, 0u, 0u }, 15, 12u, 0x1f, 4u, 10u, 11u, 0u, 10u, 4u },
 };
+#endif
 
+#if defined(__sh__)
+#define avsp_round1_player_melee (avsp_round1_content->content_avsp_round1_player_melee)
+#else
 static const AvspRound1PlayerMeleeSpec avsp_round1_player_melee =
 {
     1536u,
@@ -3409,7 +3780,11 @@ static const AvspRound1PlayerMeleeSpec avsp_round1_player_melee =
     {1u, 2u, 3u, 4u},
     {0u, 1u, 2u, 3u}
 };
+#endif
 
+#if defined(__sh__)
+#define avsp_round1_player_melee_strikes (avsp_round1_content->content_avsp_round1_player_melee_strikes)
+#else
 static const AvspRound1PresentationSpec avsp_round1_player_melee_strikes[AVSP_ROUND1_PLAYER_MELEE_COUNT] =
 {
     { 0x1600f8UL, 0x162a04UL, 8u, 1u },
@@ -3417,7 +3792,11 @@ static const AvspRound1PresentationSpec avsp_round1_player_melee_strikes[AVSP_RO
     { 0x1601c0UL, 0x1614a4UL, 8u, 3u },
     { 0x160234UL, 0x162b26UL, 19u, 4u },
 };
+#endif
 
+#if defined(__sh__)
+#define avsp_round1_player_contextual_melee (avsp_round1_content->content_avsp_round1_player_contextual_melee)
+#else
 static const AvspRound1PlayerContextualMeleeSpec avsp_round1_player_contextual_melee =
 {
     0x02129eUL, 0x017828UL, 0x0212c6UL, 0x0212ceUL,
@@ -3426,13 +3805,21 @@ static const AvspRound1PlayerContextualMeleeSpec avsp_round1_player_contextual_m
     { 54u, 257u },
     28u, 0
 };
+#endif
 
+#if defined(__sh__)
+#define avsp_round1_player_contextual_melee_sequences (avsp_round1_content->content_avsp_round1_player_contextual_melee_sequences)
+#else
 static const AvspRound1PlayerContextualMeleeSequenceSpec avsp_round1_player_contextual_melee_sequences[AVSP_ROUND1_PLAYER_CONTEXTUAL_MELEE_SEQUENCE_COUNT] =
 {
     { 1u, 21u, 5u, { { 1u, 0, 0x160288UL, 0x1629e6UL, 1u, 0u }, { 2u, 0, 0x160298UL, 0x162a04UL, 11u, 21u }, { 2u, 1, 0x1602a8UL, 0x162a04UL, 11u, 0u }, { 5u, 1, 0x1602b8UL, 0x1629e6UL, 1u, 0u }, { 4095u, -32767, 0x1602c8UL, 0x1629e6UL, 1u, 0u }, { 0u, 0, 0UL, 0UL, 0u, 0u } } },
     { 0u, 20u, 6u, { { 2u, 0, 0x1602dcUL, 0x162a32UL, 1u, 0u }, { 1u, 0, 0x1602ecUL, 0x162a5aUL, 1u, 0u }, { 4u, 1, 0x1602fcUL, 0x162a82UL, 11u, 20u }, { 5u, 1, 0x16030cUL, 0x162a5aUL, 1u, 0u }, { 4u, 1, 0x16031cUL, 0x162a32UL, 1u, 0u }, { 4095u, -32767, 0x16032cUL, 0x162a32UL, 1u, 0u } } },
 };
+#endif
 
+#if defined(__sh__)
+#define avsp_round1_player_jump_vectors (avsp_round1_content->content_avsp_round1_player_jump_vectors)
+#else
 static const AvspRound1PlayerJumpVectorSpec avsp_round1_player_jump_vectors[AVSP_ROUND1_PLAYER_JUMP_VECTOR_COUNT] =
 {
     { 0L, 0L, 557056L, -32768L },
@@ -3442,13 +3829,21 @@ static const AvspRound1PlayerJumpVectorSpec avsp_round1_player_jump_vectors[AVSP
     { 589824L, -8192L, 262144L, -32768L },
     { 557056L, -9216L, 786432L, -34816L },
 };
+#endif
 
+#if defined(__sh__)
+#define avsp_round1_player_jump_down_vectors (avsp_round1_content->content_avsp_round1_player_jump_down_vectors)
+#else
 static const AvspRound1PlayerJumpVectorSpec avsp_round1_player_jump_down_vectors[AVSP_ROUND1_PLAYER_JUMP_DOWN_VECTOR_COUNT] =
 {
     { 393216L, -32768L, 0L, 0L },
     { 786432L, -40960L, 0L, 0L }
 };
+#endif
 
+#if defined(__sh__)
+#define avsp_round1_player_jump_sequences (avsp_round1_content->content_avsp_round1_player_jump_sequences)
+#else
 static const AvspRound1PlayerJumpSequenceSpec avsp_round1_player_jump_sequences[AVSP_ROUND1_PLAYER_JUMP_SEQUENCE_COUNT] =
 {
     { 3u, 2u, { { 1u, 0, 0x15f2ccUL, 0x160bc6UL, 1u, 0u }, { 1u, -32768, 0x15f2dcUL, 0x160bc6UL, 1u, 0u }, { 0u, 0, 0UL, 0UL, 0u, 0u }, { 0u, 0, 0UL, 0UL, 0u, 0u }, { 0u, 0, 0UL, 0UL, 0u, 0u }, { 0u, 0, 0UL, 0UL, 0u, 0u }, { 0u, 0, 0UL, 0UL, 0u, 0u }, { 0u, 0, 0UL, 0UL, 0u, 0u } } },
@@ -3461,24 +3856,40 @@ static const AvspRound1PlayerJumpSequenceSpec avsp_round1_player_jump_sequences[
     { 42u, 1u, { { 4095u, -32768, 0x15fce8UL, 0x16212cUL, 7u, 0u }, { 0u, 0, 0UL, 0UL, 0u, 0u }, { 0u, 0, 0UL, 0UL, 0u, 0u }, { 0u, 0, 0UL, 0UL, 0u, 0u }, { 0u, 0, 0UL, 0UL, 0u, 0u }, { 0u, 0, 0UL, 0UL, 0u, 0u }, { 0u, 0, 0UL, 0UL, 0u, 0u }, { 0u, 0, 0UL, 0UL, 0u, 0u } } },
     { 60u, 1u, { { 4095u, -32768, 0x15fc60UL, 0x162ee2UL, 9u, 35u }, { 0u, 0, 0UL, 0UL, 0u, 0u }, { 0u, 0, 0UL, 0UL, 0u, 0u }, { 0u, 0, 0UL, 0UL, 0u, 0u }, { 0u, 0, 0UL, 0UL, 0u, 0u }, { 0u, 0, 0UL, 0UL, 0u, 0u }, { 0u, 0, 0UL, 0UL, 0u, 0u }, { 0u, 0, 0UL, 0UL, 0u, 0u } } },
 };
+#endif
 
+#if defined(__sh__)
+#define avsp_round1_player_jump_actor (avsp_round1_content->content_avsp_round1_player_jump_actor)
+#else
 static const AvspRound1PlayerPresentationActorSpec avsp_round1_player_jump_actor =
 {
     0u, 0u, 0x8000u
 };
+#endif
 
+#if defined(__sh__)
+#define avsp_round1_player_jump_timing (avsp_round1_content->content_avsp_round1_player_jump_timing)
+#else
 static const AvspRound1PlayerJumpTimingSpec avsp_round1_player_jump_timing =
 {
     1u, 1u, 2u, 5u, 10u, 1u, 4095u, -32768
 };
+#endif
 
+#if defined(__sh__)
+#define avsp_round1_player_special (avsp_round1_content->content_avsp_round1_player_special)
+#else
 static const AvspRound1PlayerSpecialSpec avsp_round1_player_special =
 {
     0x0800u, 0x0802u, 0x0804u, 0x0804u, 0x0000u,
     47u, 11u, 6u, 24u, 0x4B, 24u, 0x3D,
     0x0091u, 0x0096u
 };
+#endif
 
+#if defined(__sh__)
+#define avsp_round1_player_special_records (avsp_round1_content->content_avsp_round1_player_special_records)
+#else
 static const AvspRound1AnimationStateSpec avsp_round1_player_special_records[AVSP_ROUND1_PLAYER_SPECIAL_PRESENTATION_COUNT] =
 {
     { 4u, 1, 0x0015fd10UL, 0x001626ccUL, 0u, 0u },
@@ -3499,12 +3910,20 @@ static const AvspRound1AnimationStateSpec avsp_round1_player_special_records[AVS
     { 16u, 0, 0x0015fe00UL, 0x001626ccUL, 0u, 0u },
     { 4095u, -32768, 0x0015fe10UL, 0x001626a4UL, 0u, 0u },
 };
+#endif
 
+#if defined(__sh__)
+#define avsp_round1_player_special_visible_durations (avsp_round1_content->content_avsp_round1_player_special_visible_durations)
+#else
 static const unsigned char avsp_round1_player_special_visible_durations[AVSP_ROUND1_PLAYER_SPECIAL_PRESENTATION_COUNT] =
 {
     4u, 4u, 3u, 1u, 5u, 4u, 4u, 4u, 4u, 4u, 6u, 4u, 4u, 4u, 4u, 16u, 1u
 };
+#endif
 
+#if defined(__sh__)
+#define avsp_round1_class4b_records (avsp_round1_content->content_avsp_round1_class4b_records)
+#else
 static const AvspRound1AnimationStateSpec avsp_round1_class4b_records[AVSP_ROUND1_CLASS4B_PRESENTATION_COUNT] =
 {
     { 1u, 0, 0x0008f8e0UL, 0x0008fae4UL, 0u, 0u },
@@ -3540,7 +3959,11 @@ static const AvspRound1AnimationStateSpec avsp_round1_class4b_records[AVSP_ROUND
     { 1u, 14, 0x0008fac0UL, 0x0008fb44UL, 0u, 0u },
     { 1u, -32753, 0x0008fad0UL, 0x0008fb44UL, 0u, 0u },
 };
+#endif
 
+#if defined(__sh__)
+#define avsp_round1_class3d_records (avsp_round1_content->content_avsp_round1_class3d_records)
+#else
 static const AvspRound1AnimationStateSpec avsp_round1_class3d_records[AVSP_ROUND1_CLASS3D_PRESENTATION_COUNT] =
 {
     { 2u, 0, 0x0009a918UL, 0x0009a9aeUL, 0u, 0u },
@@ -3553,7 +3976,11 @@ static const AvspRound1AnimationStateSpec avsp_round1_class3d_records[AVSP_ROUND
     { 2u, 0, 0x0009a988UL, 0x0009aa10UL, 0u, 0u },
     { 4095u, -32768, 0x0009a998UL, 0x0009a9acUL, 0u, 0u },
 };
+#endif
 
+#if defined(__sh__)
+#define avsp_round1_class3d_offsets (avsp_round1_content->content_avsp_round1_class3d_offsets)
+#else
 static const AvspRound1VecS16 avsp_round1_class3d_offsets[AVSP_ROUND1_CLASS3D_OFFSET_COUNT] =
 {
     { -61, -13 },
@@ -3573,7 +4000,11 @@ static const AvspRound1VecS16 avsp_round1_class3d_offsets[AVSP_ROUND1_CLASS3D_OF
     { -61, 13 },
     { -72, 0 },
 };
+#endif
 
+#if defined(__sh__)
+#define avsp_round1_player_stage_progress (avsp_round1_content->content_avsp_round1_player_stage_progress)
+#else
 static const AvspRound1PlayerStageProgressSpec avsp_round1_player_stage_progress =
 {
     0x0179e2UL,
@@ -3593,7 +4024,11 @@ static const AvspRound1PlayerStageProgressSpec avsp_round1_player_stage_progress
     16,
     0u
 };
+#endif
 
+#if defined(__sh__)
+#define avsp_round1_player_weapon (avsp_round1_content->content_avsp_round1_player_weapon)
+#else
 static const AvspRound1PlayerWeaponSpec avsp_round1_player_weapon =
 {
     3072u,
@@ -3625,7 +4060,11 @@ static const AvspRound1PlayerWeaponSpec avsp_round1_player_weapon =
     0x0002fc3cUL,
     0x00030cb6UL
 };
+#endif
 
+#if defined(__sh__)
+#define avsp_round1_player_weapon_frames (avsp_round1_content->content_avsp_round1_player_weapon_frames)
+#else
 static const AvspRound1PlayerWeaponFrameSpec avsp_round1_player_weapon_frames[AVSP_ROUND1_PLAYER_WEAPON_SELECTOR_COUNT][AVSP_ROUND1_PLAYER_WEAPON_PRESENTATION_COUNT] =
 {
     {
@@ -3717,7 +4156,11 @@ static const AvspRound1PlayerWeaponFrameSpec avsp_round1_player_weapon_frames[AV
         { 0u, 0u, 0x0015f1f4UL, 0x001626a4UL, 1u, 0u, 4095u, -32768 },
     },
 };
+#endif
 
+#if defined(__sh__)
+#define avsp_round1_player_weapon_sequences (avsp_round1_content->content_avsp_round1_player_weapon_sequences)
+#else
 static const AvspRound1PlayerWeaponFrameSpec avsp_round1_player_weapon_sequences[AVSP_ROUND1_PLAYER_WEAPON_SELECTOR_COUNT][AVSP_ROUND1_PLAYER_WEAPON_SEQUENCE_COUNT] =
 {
     {
@@ -3749,7 +4192,11 @@ static const AvspRound1PlayerWeaponFrameSpec avsp_round1_player_weapon_sequences
         { 3076u, 4u, 0x0015e67cUL, 0x001617eaUL, 1u, 0u, 4095u, -32768 },
     },
 };
+#endif
 
+#if defined(__sh__)
+#define avsp_round1_player_empty_frames (avsp_round1_content->content_avsp_round1_player_empty_frames)
+#else
 static const AvspRound1PlayerWeaponFrameSpec avsp_round1_player_empty_frames[AVSP_ROUND1_PLAYER_EMPTY_PRESENTATION_COUNT] =
 {
     { 6656u, 0u, 0x0015f1f4UL, 0x001626a4UL, 1u, 0u, 4095u, -32768 },
@@ -3771,12 +4218,20 @@ static const AvspRound1PlayerWeaponFrameSpec avsp_round1_player_empty_frames[AVS
     { 6658u, 2u, 0x0015fcfcUL, 0x00161772UL, 1u, 0u, 4095u, -32768 },
     { 0u, 0u, 0x0015f1f4UL, 0x001626a4UL, 1u, 0u, 4095u, -32768 },
 };
+#endif
 
+#if defined(__sh__)
+#define avsp_round1_player_weapon_return_frame (avsp_round1_content->content_avsp_round1_player_weapon_return_frame)
+#else
 static const AvspRound1PlayerWeaponFrameSpec avsp_round1_player_weapon_return_frame =
 {
     2u, 2u, 0x0015f1f4UL, 0x001626a4UL, 1u, 0u, 4095u, -32768
 };
+#endif
 
+#if defined(__sh__)
+#define avsp_round1_weapon_parent_selector_offsets (avsp_round1_content->content_avsp_round1_weapon_parent_selector_offsets)
+#else
 static const AvspRound1VecS16 avsp_round1_weapon_parent_selector_offsets[AVSP_ROUND1_WEAPON_PARENT_SELECTOR_COUNT] =
 {
     { 5, 86 },
@@ -3786,7 +4241,11 @@ static const AvspRound1VecS16 avsp_round1_weapon_parent_selector_offsets[AVSP_RO
     { 8, 49 },
     { 19, 54 },
 };
+#endif
 
+#if defined(__sh__)
+#define avsp_round1_weapon_parent_presentations (avsp_round1_content->content_avsp_round1_weapon_parent_presentations)
+#else
 static const AvspRound1AnimationStateSpec avsp_round1_weapon_parent_presentations[AVSP_ROUND1_WEAPON_PARENT_PRESENTATION_COUNT] =
 {
     { 4u, 0, 0x0002fb48UL, 0x0002fbccUL, 0u, 1u },
@@ -3798,22 +4257,38 @@ static const AvspRound1AnimationStateSpec avsp_round1_weapon_parent_presentation
     { 4u, 0, 0x0002fba8UL, 0x0002fc20UL, 0u, 1u },
     { 4u, -32768, 0x0002fbb8UL, 0x0002fc2eUL, 0u, 1u },
 };
+#endif
 
+#if defined(__sh__)
+#define avsp_round1_weapon_target_distance_thresholds (avsp_round1_content->content_avsp_round1_weapon_target_distance_thresholds)
+#else
 static const unsigned short avsp_round1_weapon_target_distance_thresholds[AVSP_ROUND1_WEAPON_TARGET_DISTANCE_COUNT] =
 {
     0u, 13u, 16u, 22u, 30u, 38u, 48u, 58u, 70u, 88u, 103u, 123u, 153u, 192u, 251u, 352u
 };
+#endif
 
+#if defined(__sh__)
+#define avsp_round1_weapon_target_presentation_selectors (avsp_round1_content->content_avsp_round1_weapon_target_presentation_selectors)
+#else
 static const unsigned char avsp_round1_weapon_target_presentation_selectors[AVSP_ROUND1_WEAPON_TARGET_DISTANCE_COUNT] =
 {
     7u, 7u, 7u, 7u, 6u, 6u, 6u, 6u, 5u, 5u, 5u, 5u, 4u, 4u, 4u, 4u
 };
+#endif
 
+#if defined(__sh__)
+#define avsp_round1_weapon_parent_route_angles (avsp_round1_content->content_avsp_round1_weapon_parent_route_angles)
+#else
 static const unsigned char avsp_round1_weapon_parent_route_angles[AVSP_ROUND1_WEAPON_PARENT_ROUTE_ANGLE_COUNT] =
 {
     17u, 18u, 19u, 20u, 21u, 22u, 23u, 24u, 25u, 26u, 27u, 28u, 29u, 30u, 31u, 32u, 33u, 34u, 35u, 36u, 37u, 38u, 39u, 40u, 41u, 42u, 43u, 44u, 45u, 46u, 47u
 };
+#endif
 
+#if defined(__sh__)
+#define avsp_round1_weapon_parent_motion_low (avsp_round1_content->content_avsp_round1_weapon_parent_motion_low)
+#else
 static const AvspRound1VecS16 avsp_round1_weapon_parent_motion_low[AVSP_ROUND1_WEAPON_PARENT_ROUTE_ANGLE_COUNT][AVSP_ROUND1_WEAPON_PARENT_LOW_MOTION_COUNT] =
 {
     { { 0, 0 }, { 15, -1 }, { 31, -3 }, { 47, -5 }, { 63, -7 }, { 79, -8 }, { 95, -10 }, { 111, -12 }, { 127, -14 }, { 143, -16 }, { 159, -17 }, { 175, -19 }, { 191, -21 }, { 206, -23 }, { 222, -25 }, { 238, -26 } },
@@ -3848,7 +4323,11 @@ static const AvspRound1VecS16 avsp_round1_weapon_parent_motion_low[AVSP_ROUND1_W
     { { 0, 0 }, { -15, -3 }, { -31, -7 }, { -47, -10 }, { -62, -14 }, { -78, -17 }, { -94, -21 }, { -109, -24 }, { -125, -28 }, { -141, -32 }, { -156, -35 }, { -172, -39 }, { -188, -42 }, { -203, -46 }, { -219, -49 }, { -235, -53 } },
     { { 0, 0 }, { -15, -1 }, { -31, -3 }, { -47, -5 }, { -63, -7 }, { -79, -8 }, { -95, -10 }, { -111, -12 }, { -127, -14 }, { -143, -16 }, { -159, -17 }, { -175, -19 }, { -191, -21 }, { -206, -23 }, { -222, -25 }, { -238, -26 } },
 };
+#endif
 
+#if defined(__sh__)
+#define avsp_round1_weapon_parent_motion_high (avsp_round1_content->content_avsp_round1_weapon_parent_motion_high)
+#else
 static const AvspRound1VecS16 avsp_round1_weapon_parent_motion_high[AVSP_ROUND1_WEAPON_PARENT_ROUTE_ANGLE_COUNT][AVSP_ROUND1_WEAPON_PARENT_HIGH_MOTION_COUNT] =
 {
     { { 0, 0 }, { 254, -28 }, { 509, -57 }, { 764, -85 }, { 1018, -114 }, { 1273, -143 }, { 1528, -171 }, { 1782, -200 }, { 2037, -229 }, { 2292, -257 }, { 2546, -286 }, { 2801, -315 }, { 3056, -343 } },
@@ -3883,7 +4362,11 @@ static const AvspRound1VecS16 avsp_round1_weapon_parent_motion_high[AVSP_ROUND1_
     { { 0, 0 }, { -250, -57 }, { -501, -114 }, { -752, -171 }, { -1003, -228 }, { -1254, -285 }, { -1505, -342 }, { -1756, -399 }, { -2007, -456 }, { -2257, -513 }, { -2508, -570 }, { -2759, -627 }, { -3010, -684 } },
     { { 0, 0 }, { -254, -28 }, { -509, -57 }, { -764, -85 }, { -1018, -114 }, { -1273, -143 }, { -1528, -171 }, { -1782, -200 }, { -2037, -229 }, { -2292, -257 }, { -2546, -286 }, { -2801, -315 }, { -3056, -343 } },
 };
+#endif
 
+#if defined(__sh__)
+#define avsp_round1_weapon_parent_base_motion (avsp_round1_content->content_avsp_round1_weapon_parent_base_motion)
+#else
 static const AvspRound1VecS16 avsp_round1_weapon_parent_base_motion[AVSP_ROUND1_WEAPON_PARENT_ROUTE_ANGLE_COUNT] =
 {
     { 509, -57 },
@@ -3918,7 +4401,11 @@ static const AvspRound1VecS16 avsp_round1_weapon_parent_base_motion[AVSP_ROUND1_
     { -501, -114 },
     { -509, -57 },
 };
+#endif
 
+#if defined(__sh__)
+#define avsp_round1_air_weapon_selector_offsets (avsp_round1_content->content_avsp_round1_air_weapon_selector_offsets)
+#else
 static const AvspRound1VecS16 avsp_round1_air_weapon_selector_offsets[AVSP_ROUND1_AIR_WEAPON_SELECTOR_COUNT] =
 {
     { 5, 86 },
@@ -3929,7 +4416,11 @@ static const AvspRound1VecS16 avsp_round1_air_weapon_selector_offsets[AVSP_ROUND
     { 20, 55 },
     { -14, 70 },
 };
+#endif
 
+#if defined(__sh__)
+#define avsp_round1_air_weapon_presentations (avsp_round1_content->content_avsp_round1_air_weapon_presentations)
+#else
 static const AvspRound1AnimationStateSpec avsp_round1_air_weapon_presentations[AVSP_ROUND1_AIR_WEAPON_PRESENTATION_COUNT] =
 {
     { 4u, 0, 0x0002fb48UL, 0x0002fbccUL, 0u, 1u },
@@ -3941,7 +4432,11 @@ static const AvspRound1AnimationStateSpec avsp_round1_air_weapon_presentations[A
     { 4u, 0, 0x0002fba8UL, 0x0002fc20UL, 0u, 1u },
     { 4u, -32768, 0x0002fbb8UL, 0x0002fc2eUL, 0u, 1u },
 };
+#endif
 
+#if defined(__sh__)
+#define avsp_round1_air_weapon_player_sequence (avsp_round1_content->content_avsp_round1_air_weapon_player_sequence)
+#else
 static const AvspRound1PlayerJumpSequenceSpec avsp_round1_air_weapon_player_sequence =
 {
     18u, AVSP_ROUND1_AIR_WEAPON_PLAYER_PRESENTATION_COUNT,
@@ -3956,7 +4451,11 @@ static const AvspRound1PlayerJumpSequenceSpec avsp_round1_air_weapon_player_sequ
         { 0u, 0, 0UL, 0UL, 0u, 0u },
     }
 };
+#endif
 
+#if defined(__sh__)
+#define avsp_round1_air_weapon_motion_low (avsp_round1_content->content_avsp_round1_air_weapon_motion_low)
+#else
 static const AvspRound1VecS16 avsp_round1_air_weapon_motion_low[AVSP_ROUND1_AIR_WEAPON_LOW_TABLE_COUNT][AVSP_ROUND1_AIR_WEAPON_DIRECTION_COUNT] =
 {
     { { 0, 0 }, { 0, 0 }, { 0, 0 }, { 0, 0 }, { 0, 0 }, { 0, 0 }, { 0, 0 }, { 0, 0 }, { 0, 0 }, { 0, 0 }, { 0, 0 }, { 0, 0 }, { 0, 0 }, { 0, 0 }, { 0, 0 }, { 0, 0 }, { 0, 0 }, { 0, 0 }, { 0, 0 }, { 0, 0 }, { 0, 0 }, { 0, 0 }, { 0, 0 }, { 0, 0 }, { 0, 0 }, { 0, 0 }, { 0, 0 }, { 0, 0 }, { 0, 0 }, { 0, 0 }, { 0, 0 }, { 0, 0 }, { 0, 0 }, { 0, 0 }, { 0, 0 }, { 0, 0 }, { 0, 0 }, { 0, 0 }, { 0, 0 }, { 0, 0 }, { 0, 0 }, { 0, 0 }, { 0, 0 }, { 0, 0 }, { 0, 0 }, { 0, 0 }, { 0, 0 }, { 0, 0 }, { 0, 0 }, { 0, 0 }, { 0, 0 }, { 0, 0 }, { 0, 0 }, { 0, 0 }, { 0, 0 }, { 0, 0 }, { 0, 0 }, { 0, 0 }, { 0, 0 }, { 0, 0 }, { 0, 0 }, { 0, 0 }, { 0, 0 }, { 0, 0 } },
@@ -3976,7 +4475,11 @@ static const AvspRound1VecS16 avsp_round1_air_weapon_motion_low[AVSP_ROUND1_AIR_
     { { 0, 256 }, { 21, 254 }, { 43, 250 }, { 64, 244 }, { 85, 236 }, { 105, 225 }, { 124, 212 }, { 141, 197 }, { 158, 180 }, { 173, 162 }, { 186, 142 }, { 197, 120 }, { 206, 97 }, { 214, 74 }, { 219, 49 }, { 222, 25 }, { 224, 0 }, { 222, -25 }, { 219, -49 }, { 214, -74 }, { 206, -97 }, { 197, -120 }, { 186, -142 }, { 173, -162 }, { 158, -180 }, { 141, -197 }, { 124, -212 }, { 105, -225 }, { 85, -236 }, { 64, -244 }, { 43, -250 }, { 21, -254 }, { 0, -256 }, { -21, -254 }, { -43, -250 }, { -64, -244 }, { -85, -236 }, { -105, -225 }, { -124, -212 }, { -141, -197 }, { -158, -180 }, { -173, -162 }, { -186, -142 }, { -197, -120 }, { -206, -97 }, { -214, -74 }, { -219, -49 }, { -222, -25 }, { -224, 0 }, { -222, 25 }, { -219, 49 }, { -214, 74 }, { -206, 97 }, { -197, 120 }, { -186, 142 }, { -173, 162 }, { -158, 180 }, { -141, 197 }, { -124, 212 }, { -105, 225 }, { -85, 236 }, { -64, 244 }, { -43, 250 }, { -21, 254 } },
     { { 0, 274 }, { 23, 272 }, { 46, 268 }, { 69, 262 }, { 91, 253 }, { 113, 241 }, { 133, 227 }, { 152, 212 }, { 169, 193 }, { 185, 173 }, { 199, 152 }, { 211, 129 }, { 221, 104 }, { 229, 79 }, { 235, 53 }, { 238, 26 }, { 240, 0 }, { 238, -26 }, { 235, -53 }, { 229, -79 }, { 221, -104 }, { 211, -129 }, { 199, -152 }, { 185, -173 }, { 169, -193 }, { 152, -212 }, { 133, -227 }, { 113, -241 }, { 91, -253 }, { 69, -262 }, { 46, -268 }, { 23, -272 }, { 0, -274 }, { -23, -272 }, { -46, -268 }, { -69, -262 }, { -91, -253 }, { -113, -241 }, { -133, -227 }, { -152, -212 }, { -169, -193 }, { -185, -173 }, { -199, -152 }, { -211, -129 }, { -221, -104 }, { -229, -79 }, { -235, -53 }, { -238, -26 }, { -240, 0 }, { -238, 26 }, { -235, 53 }, { -229, 79 }, { -221, 104 }, { -211, 129 }, { -199, 152 }, { -185, 173 }, { -169, 193 }, { -152, 212 }, { -133, 227 }, { -113, 241 }, { -91, 253 }, { -69, 262 }, { -46, 268 }, { -23, 272 } },
 };
+#endif
 
+#if defined(__sh__)
+#define avsp_round1_air_weapon_motion_high (avsp_round1_content->content_avsp_round1_air_weapon_motion_high)
+#else
 static const AvspRound1VecS16 avsp_round1_air_weapon_motion_high[AVSP_ROUND1_AIR_WEAPON_HIGH_TABLE_COUNT][AVSP_ROUND1_AIR_WEAPON_DIRECTION_COUNT] =
 {
     { { 0, 0 }, { 0, 0 }, { 0, 0 }, { 0, 0 }, { 0, 0 }, { 0, 0 }, { 0, 0 }, { 0, 0 }, { 0, 0 }, { 0, 0 }, { 0, 0 }, { 0, 0 }, { 0, 0 }, { 0, 0 }, { 0, 0 }, { 0, 0 }, { 0, 0 }, { 0, 0 }, { 0, 0 }, { 0, 0 }, { 0, 0 }, { 0, 0 }, { 0, 0 }, { 0, 0 }, { 0, 0 }, { 0, 0 }, { 0, 0 }, { 0, 0 }, { 0, 0 }, { 0, 0 }, { 0, 0 }, { 0, 0 }, { 0, 0 }, { 0, 0 }, { 0, 0 }, { 0, 0 }, { 0, 0 }, { 0, 0 }, { 0, 0 }, { 0, 0 }, { 0, 0 }, { 0, 0 }, { 0, 0 }, { 0, 0 }, { 0, 0 }, { 0, 0 }, { 0, 0 }, { 0, 0 }, { 0, 0 }, { 0, 0 }, { 0, 0 }, { 0, 0 }, { 0, 0 }, { 0, 0 }, { 0, 0 }, { 0, 0 }, { 0, 0 }, { 0, 0 }, { 0, 0 }, { 0, 0 }, { 0, 0 }, { 0, 0 }, { 0, 0 }, { 0, 0 } },
@@ -3993,7 +4496,11 @@ static const AvspRound1VecS16 avsp_round1_air_weapon_motion_high[AVSP_ROUND1_AIR
     { { 0, 3218 }, { 275, 3201 }, { 548, 3153 }, { 816, 3076 }, { 1075, 2970 }, { 1326, 2834 }, { 1562, 2673 }, { 1784, 2487 }, { 1990, 2274 }, { 2176, 2039 }, { 2339, 1785 }, { 2480, 1515 }, { 2598, 1228 }, { 2691, 932 }, { 2759, 627 }, { 2801, 315 }, { 2816, 0 }, { 2801, -315 }, { 2759, -627 }, { 2691, -932 }, { 2598, -1228 }, { 2480, -1515 }, { 2339, -1785 }, { 2176, -2039 }, { 1990, -2274 }, { 1784, -2487 }, { 1562, -2673 }, { 1326, -2834 }, { 1075, -2970 }, { 816, -3076 }, { 548, -3153 }, { 275, -3201 }, { 0, -3218 }, { -275, -3201 }, { -548, -3153 }, { -816, -3076 }, { -1075, -2970 }, { -1326, -2834 }, { -1562, -2673 }, { -1784, -2487 }, { -1990, -2274 }, { -2176, -2039 }, { -2339, -1785 }, { -2480, -1515 }, { -2598, -1228 }, { -2691, -932 }, { -2759, -627 }, { -2801, -315 }, { -2816, 0 }, { -2801, 315 }, { -2759, 627 }, { -2691, 932 }, { -2598, 1228 }, { -2480, 1515 }, { -2339, 1785 }, { -2176, 2039 }, { -1990, 2274 }, { -1784, 2487 }, { -1562, 2673 }, { -1326, 2834 }, { -1075, 2970 }, { -816, 3076 }, { -548, 3153 }, { -275, 3201 } },
     { { 0, 3510 }, { 300, 3492 }, { 598, 3440 }, { 890, 3355 }, { 1173, 3240 }, { 1446, 3092 }, { 1704, 2916 }, { 1947, 2713 }, { 2171, 2481 }, { 2374, 2225 }, { 2552, 1948 }, { 2706, 1653 }, { 2835, 1340 }, { 2936, 1017 }, { 3010, 684 }, { 3056, 343 }, { 3072, 0 }, { 3056, -343 }, { 3010, -684 }, { 2936, -1017 }, { 2835, -1340 }, { 2706, -1653 }, { 2552, -1948 }, { 2374, -2225 }, { 2171, -2481 }, { 1947, -2713 }, { 1704, -2916 }, { 1446, -3092 }, { 1173, -3240 }, { 890, -3355 }, { 598, -3440 }, { 300, -3492 }, { 0, -3510 }, { -300, -3492 }, { -598, -3440 }, { -890, -3355 }, { -1173, -3240 }, { -1446, -3092 }, { -1704, -2916 }, { -1947, -2713 }, { -2171, -2481 }, { -2374, -2225 }, { -2552, -1948 }, { -2706, -1653 }, { -2835, -1340 }, { -2936, -1017 }, { -3010, -684 }, { -3056, -343 }, { -3072, 0 }, { -3056, 343 }, { -3010, 684 }, { -2936, 1017 }, { -2835, 1340 }, { -2706, 1653 }, { -2552, 1948 }, { -2374, 2225 }, { -2171, 2481 }, { -1947, 2713 }, { -1704, 2916 }, { -1446, 3092 }, { -1173, 3240 }, { -890, 3355 }, { -598, 3440 }, { -300, 3492 } },
 };
+#endif
 
+#if defined(__sh__)
+#define avsp_round1_air_weapon_child_spawn_normal (avsp_round1_content->content_avsp_round1_air_weapon_child_spawn_normal)
+#else
 static const AvspRound1WeaponChildSpawnSpec avsp_round1_air_weapon_child_spawn_normal[AVSP_ROUND1_WEAPON_CHILD_SPAWN_COUNT] =
 {
     { 32, -16, -16, 0u },
@@ -4002,7 +4509,11 @@ static const AvspRound1WeaponChildSpawnSpec avsp_round1_air_weapon_child_spawn_n
     { 48, 8, 8, 0u },
     { 0, 0, 0, 1u },
 };
+#endif
 
+#if defined(__sh__)
+#define avsp_round1_air_weapon_child_spawn_collision (avsp_round1_content->content_avsp_round1_air_weapon_child_spawn_collision)
+#else
 static const AvspRound1WeaponChildSpawnSpec avsp_round1_air_weapon_child_spawn_collision[AVSP_ROUND1_WEAPON_CHILD_SPAWN_COUNT] =
 {
     { 64, -16, -16, 2u },
@@ -4011,7 +4522,11 @@ static const AvspRound1WeaponChildSpawnSpec avsp_round1_air_weapon_child_spawn_c
     { 16, 8, 8, 2u },
     { 0, 0, 0, 1u },
 };
+#endif
 
+#if defined(__sh__)
+#define avsp_round1_air_weapon_projectile (avsp_round1_content->content_avsp_round1_air_weapon_projectile)
+#else
 static const AvspRound1AirWeaponProjectileSpec avsp_round1_air_weapon_projectile =
 {
     3, 0u, 2u, 4u, 6u,
@@ -4027,9 +4542,17 @@ static const AvspRound1AirWeaponProjectileSpec avsp_round1_air_weapon_projectile
     73u,
     1u
 };
+#endif
 
+#if defined(__sh__)
+#define avsp_round1_weapon_child_initial_facing (avsp_round1_content->content_avsp_round1_weapon_child_initial_facing)
+#else
 static const unsigned char avsp_round1_weapon_child_initial_facing = 0u;
+#endif
 
+#if defined(__sh__)
+#define avsp_round1_weapon_child_spawn_normal (avsp_round1_content->content_avsp_round1_weapon_child_spawn_normal)
+#else
 static const AvspRound1WeaponChildSpawnSpec avsp_round1_weapon_child_spawn_normal[AVSP_ROUND1_WEAPON_CHILD_SPAWN_COUNT] =
 {
     { 32, -16, -16, 0u },
@@ -4038,7 +4561,11 @@ static const AvspRound1WeaponChildSpawnSpec avsp_round1_weapon_child_spawn_norma
     { 48, 16, 16, 0u },
     { 0, 0, 0, 1u },
 };
+#endif
 
+#if defined(__sh__)
+#define avsp_round1_weapon_child_spawn_collision (avsp_round1_content->content_avsp_round1_weapon_child_spawn_collision)
+#else
 static const AvspRound1WeaponChildSpawnSpec avsp_round1_weapon_child_spawn_collision[AVSP_ROUND1_WEAPON_CHILD_SPAWN_COUNT] =
 {
     { 64, -16, -16, 2u },
@@ -4047,19 +4574,31 @@ static const AvspRound1WeaponChildSpawnSpec avsp_round1_weapon_child_spawn_colli
     { 16, 8, 8, 2u },
     { 0, 0, 0, 1u },
 };
+#endif
 
+#if defined(__sh__)
+#define avsp_round1_weapon_child_sequences (avsp_round1_content->content_avsp_round1_weapon_child_sequences)
+#else
 static const AvspRound1WeaponChildSequenceSpec avsp_round1_weapon_child_sequences[AVSP_ROUND1_WEAPON_CHILD_VARIANT_COUNT] =
 {
     { 17u, { { 2u, 0, 0x0003078cUL, 0x00030a48UL, 0u, 1u }, { 2u, 0, 0x0003079cUL, 0x00030a56UL, 0u, 1u }, { 2u, 0, 0x000307acUL, 0x00030a64UL, 0u, 1u }, { 2u, 0, 0x000307bcUL, 0x00030a72UL, 0u, 2u }, { 2u, 0, 0x000307ccUL, 0x00030a80UL, 0u, 2u }, { 2u, 0, 0x000307dcUL, 0x00030a8eUL, 0u, 2u }, { 2u, 0, 0x000307ecUL, 0x00030a9cUL, 0u, 2u }, { 2u, 0, 0x000307fcUL, 0x00030aaaUL, 0u, 2u }, { 2u, 0, 0x0003080cUL, 0x00030ab8UL, 0u, 0u }, { 2u, 0, 0x0003081cUL, 0x00030ac6UL, 0u, 0u }, { 2u, 0, 0x0003082cUL, 0x00030ad4UL, 0u, 0u }, { 2u, 0, 0x0003083cUL, 0x00030ae2UL, 0u, 0u }, { 2u, 0, 0x0003084cUL, 0x00030af0UL, 0u, 0u }, { 2u, 0, 0x0003085cUL, 0x00030afeUL, 0u, 0u }, { 2u, 0, 0x0003086cUL, 0x00030b0cUL, 0u, 0u }, { 2u, 0, 0x0003087cUL, 0x00030b1aUL, 0u, 0u }, { 2u, -32768, 0x0003088cUL, 0x00030b28UL, 0u, 0u } } },
     { 10u, { { 4u, 0, 0x000308a0UL, 0x00030b36UL, 0u, 1u }, { 4u, 0, 0x000308b0UL, 0x00030b44UL, 0u, 3u }, { 4u, 0, 0x000308c0UL, 0x00030b52UL, 0u, 3u }, { 4u, 0, 0x000308d0UL, 0x00030b60UL, 0u, 4u }, { 4u, 0, 0x000308e0UL, 0x00030b78UL, 0u, 0u }, { 4u, 0, 0x000308f0UL, 0x00030b90UL, 0u, 0u }, { 4u, 0, 0x00030900UL, 0x00030b9eUL, 0u, 0u }, { 4u, 0, 0x00030910UL, 0x00030bacUL, 0u, 0u }, { 4u, 0, 0x00030920UL, 0x00030bbaUL, 0u, 0u }, { 4u, -32768, 0x00030930UL, 0x00030bc8UL, 0u, 0u }, { 0u, 0, 0UL, 0UL, 0u, 0u }, { 0u, 0, 0UL, 0UL, 0u, 0u }, { 0u, 0, 0UL, 0UL, 0u, 0u }, { 0u, 0, 0UL, 0UL, 0u, 0u }, { 0u, 0, 0UL, 0UL, 0u, 0u }, { 0u, 0, 0UL, 0UL, 0u, 0u }, { 0u, 0, 0UL, 0UL, 0u, 0u } } },
     { 16u, { { 2u, 0, 0x00030944UL, 0x00030bd6UL, 0u, 1u }, { 2u, 0, 0x00030954UL, 0x00030be4UL, 0u, 5u }, { 2u, 0, 0x00030964UL, 0x00030bf2UL, 0u, 5u }, { 2u, 0, 0x00030974UL, 0x00030c00UL, 0u, 5u }, { 2u, 0, 0x00030984UL, 0x00030c0eUL, 0u, 6u }, { 2u, 0, 0x00030994UL, 0x00030c1cUL, 0u, 6u }, { 2u, 0, 0x000309a4UL, 0x00030c2aUL, 0u, 6u }, { 2u, 0, 0x000309b4UL, 0x00030c38UL, 0u, 6u }, { 2u, 0, 0x000309c4UL, 0x00030c46UL, 0u, 0u }, { 2u, 0, 0x000309d4UL, 0x00030c54UL, 0u, 0u }, { 2u, 0, 0x000309e4UL, 0x00030c62UL, 0u, 0u }, { 2u, 0, 0x000309f4UL, 0x00030c70UL, 0u, 0u }, { 2u, 0, 0x00030a04UL, 0x00030c7eUL, 0u, 0u }, { 2u, 0, 0x00030a14UL, 0x00030c8cUL, 0u, 0u }, { 2u, 0, 0x00030a24UL, 0x00030c9aUL, 0u, 0u }, { 2u, -32768, 0x00030a34UL, 0x00030ca8UL, 0u, 0u }, { 0u, 0, 0UL, 0UL, 0u, 0u } } },
 };
+#endif
 
+#if defined(__sh__)
+#define avsp_round1_parent_weapon_effect (avsp_round1_content->content_avsp_round1_parent_weapon_effect)
+#else
 static const AvspRound1PlayerWeaponEffectSpec avsp_round1_parent_weapon_effect =
 {
     0x08F080UL, 24u, 0x49, 0u, 8u, 1u, 1u
 };
+#endif
 
+#if defined(__sh__)
+#define avsp_round1_weapon_projectile (avsp_round1_content->content_avsp_round1_weapon_projectile)
+#else
 static const AvspRound1WeaponProjectileSpec avsp_round1_weapon_projectile =
 {
     0u, 2u, 4u, 6u, 0x50, 0x0220u, 0x10, 0x0120u,
@@ -4075,31 +4614,51 @@ static const AvspRound1WeaponProjectileSpec avsp_round1_weapon_projectile =
     127u,
     31u
 };
+#endif
 
+#if defined(__sh__)
+#define avsp_round1_weapon_parent_attack_boxes (avsp_round1_content->content_avsp_round1_weapon_parent_attack_boxes)
+#else
 static const AvspRound1CollisionBoxSpec avsp_round1_weapon_parent_attack_boxes[AVSP_ROUND1_WEAPON_PROJECTILE_ATTACK_BOX_COUNT] =
 {
     { 0, 0, 0u, 0u, 0, 0u, 0, 0u, 0u },
     { 0, -8, 4u, 12u, 0, 8u, 0, 8u, 25u },
     { 70, 31, 52u, 229u, -86, 141u, -125, 57u, 130u },
 };
+#endif
 
+#if defined(__sh__)
+#define avsp_round1_weapon_parent_impact_variants (avsp_round1_content->content_avsp_round1_weapon_parent_impact_variants)
+#else
 static const unsigned char avsp_round1_weapon_parent_impact_variants[AVSP_ROUND1_WEAPON_PROJECTILE_ATTACK_BOX_COUNT] =
 {
     0u, 10u, 138u
 };
+#endif
 
+#if defined(__sh__)
+#define avsp_round1_weapon_child_attack_boxes (avsp_round1_content->content_avsp_round1_weapon_child_attack_boxes)
+#else
 static const AvspRound1CollisionBoxSpec avsp_round1_weapon_child_attack_boxes[AVSP_ROUND1_WEAPON_PROJECTILE_ATTACK_BOX_COUNT] =
 {
     { 0, 0, 0u, 0u, 0, 0u, 0, 0u, 0u },
     { 0, 10, 16u, 10u, 0, 8u, 1, 8u, 14u },
     { 0, 24, 16u, 24u, 0, 8u, 1, 8u, 14u },
 };
+#endif
 
+#if defined(__sh__)
+#define avsp_round1_weapon_child_impact_variants (avsp_round1_content->content_avsp_round1_weapon_child_impact_variants)
+#else
 static const unsigned char avsp_round1_weapon_child_impact_variants[AVSP_ROUND1_WEAPON_PROJECTILE_ATTACK_BOX_COUNT] =
 {
     0u, 1u, 1u
 };
+#endif
 
+#if defined(__sh__)
+#define avsp_round1_empty_effect_variant_offsets (avsp_round1_content->content_avsp_round1_empty_effect_variant_offsets)
+#else
 static const AvspRound1VecS16 avsp_round1_empty_effect_variant_offsets[AVSP_ROUND1_EMPTY_EFFECT_VARIANT_COUNT] =
 {
     { 0, 84 },
@@ -4107,7 +4666,11 @@ static const AvspRound1VecS16 avsp_round1_empty_effect_variant_offsets[AVSP_ROUN
     { 0, 84 },
     { 0, 68 },
 };
+#endif
 
+#if defined(__sh__)
+#define avsp_round1_empty_effect_variant1_records (avsp_round1_content->content_avsp_round1_empty_effect_variant1_records)
+#else
 static const AvspRound1AnimationStateSpec avsp_round1_empty_effect_variant1_records[AVSP_ROUND1_EMPTY_EFFECT_PRESENTATION_COUNT] =
 {
     { 1u, 0, 0x0007a09cUL, 0x0007a140UL, 0u, 0u },
@@ -4121,7 +4684,11 @@ static const AvspRound1AnimationStateSpec avsp_round1_empty_effect_variant1_reco
     { 8u, 1, 0x0007a11cUL, 0x0007a3a0UL, 0u, 0u },
     { 4095u, -32767, 0x0007a12cUL, 0x0007a3a0UL, 0u, 0u },
 };
+#endif
 
+#if defined(__sh__)
+#define avsp_round1_coffee_scene_records (avsp_round1_content->content_avsp_round1_coffee_scene_records)
+#else
 static const AvspRound1CoffeeSceneRecordSpec avsp_round1_coffee_scene_records[AVSP_ROUND1_COFFEE_SCENE_RECORD_COUNT] =
 {
     { 0x0015c108UL, 0x00ffb600UL, 2072u, 512u, 752, 336, 4u, 0x02, 0u, 0, 0u, 0u, 0u, 0u },
@@ -4131,20 +4698,32 @@ static const AvspRound1CoffeeSceneRecordSpec avsp_round1_coffee_scene_records[AV
     { 0x0015c188UL, 0x00ffb280UL, 2672u, 816u, 1264, 293, 4u, 0x05, 0u, 0, 0u, 0u, 48u, 0u },
     { 0x0015c1a8UL, 0x00ffb180UL, 2672u, 816u, 1284, 268, 4u, 0x05, 0u, 0, 0u, 0u, 34u, 0u },
 };
+#endif
 
+#if defined(__sh__)
+#define avsp_round1_class01_records (avsp_round1_content->content_avsp_round1_class01_records)
+#else
 static const AvspRound1AnimationStateSpec avsp_round1_class01_records[AVSP_ROUND1_CLASS01_PRESENTATION_COUNT] =
 {
     { 8u, 0, 0x0006b45aUL, 0x0006b48eUL, 0u, 0u },
     { 8u, 0, 0x0006b46aUL, 0x0006b4b4UL, 0u, 0u },
     { 8u, -32768, 0x0006b47aUL, 0x0006b4daUL, 0u, 0u },
 };
+#endif
 
+#if defined(__sh__)
+#define avsp_round1_class02_records (avsp_round1_content->content_avsp_round1_class02_records)
+#else
 static const AvspRound1AnimationStateSpec avsp_round1_class02_records[AVSP_ROUND1_CLASS02_PRESENTATION_COUNT] =
 {
     { 4095u, -32768, 0x0006b66cUL, 0x0006b6a8UL, 1u, 0u },
     { 4095u, -32768, 0x0006b680UL, 0x0006b6baUL, 1u, 0u },
 };
+#endif
 
+#if defined(__sh__)
+#define avsp_round1_class05_records (avsp_round1_content->content_avsp_round1_class05_records)
+#else
 static const AvspRound1AnimationStateSpec avsp_round1_class05_records[AVSP_ROUND1_CLASS05_PRESENTATION_COUNT] =
 {
     { 4095u, -32768, 0x0006cc62UL, 0x0006ccd6UL, 1u, 1u },
@@ -4153,7 +4732,11 @@ static const AvspRound1AnimationStateSpec avsp_round1_class05_records[AVSP_ROUND
     { 4095u, -32768, 0x0006ccaeUL, 0x0006cd28UL, 0u, 0u },
     { 4095u, -32768, 0x0006ccc2UL, 0x0006cd36UL, 0u, 0u },
 };
+#endif
 
+#if defined(__sh__)
+#define avsp_round1_class05 (avsp_round1_content->content_avsp_round1_class05)
+#else
 static const AvspRound1Class05Spec avsp_round1_class05 =
 {
     0x06c9eeUL, 0x0006CD44UL, 0x0011af76UL, 0x0006cd50UL,
@@ -4162,18 +4745,30 @@ static const AvspRound1Class05Spec avsp_round1_class05 =
     { 0, 48, 88u, 48u, 0, 40u, 3, 3u, 25u },
     { 0, 20, 24u, 32u, -5, 6u, 0, 0u, 0u }
 };
+#endif
 
+#if defined(__sh__)
+#define avsp_round1_class05_motion (avsp_round1_content->content_avsp_round1_class05_motion)
+#else
 static const AvspRound1Class05MotionSpec avsp_round1_class05_motion =
 {
     27, -327680L, 393216L, 0L, -32768L, -262144L, 327680L, 0L, -32768L
 };
+#endif
 
+#if defined(__sh__)
+#define avsp_round1_class01 (avsp_round1_content->content_avsp_round1_class01)
+#else
 static const AvspRound1Class01Spec avsp_round1_class01 =
 {
     0x06B2FAUL, 0x06B520UL, 240u, 60u, 360u, 192u, 40u,
     5u, 6u, 0x1F, 5u, 0x006du, 0x0139u
 };
+#endif
 
+#if defined(__sh__)
+#define avsp_round1_class02 (avsp_round1_content->content_avsp_round1_class02)
+#else
 static const AvspRound1Class02Spec avsp_round1_class02 =
 {
     0x06B534UL, 0x06B6EAUL, 0x0011af76UL, 0x0006b6f4UL,
@@ -4181,12 +4776,16 @@ static const AvspRound1Class02Spec avsp_round1_class02 =
     { 0, 48, 88u, 48u, 0, 40u, 1, 3u, 0u },
     { 8, 64, 8u, 32u, -4, 4u, 0, 0u, 0u }
 };
+#endif
 
 /* Source-display cadence derived from the accepted recurring-controller
  * transaction ledger. This is diagnostic replay timing, not a gameplay
  * transition trigger. */
 #define AVSP_ROUND1_COFFEE_SHOP_DEFAULT_SOURCE_UPDATES 1u
 #define AVSP_ROUND1_COFFEE_SHOP_UPDATE_CADENCE_COUNT 4
+#if defined(__sh__)
+#define avsp_round1_coffee_shop_update_cadence (avsp_round1_content->content_avsp_round1_coffee_shop_update_cadence)
+#else
 static const AvspRound1SceneUpdateCadence avsp_round1_coffee_shop_update_cadence[AVSP_ROUND1_COFFEE_SHOP_UPDATE_CADENCE_COUNT] =
 {
     { 2075u, 3u },
@@ -4194,12 +4793,16 @@ static const AvspRound1SceneUpdateCadence avsp_round1_coffee_shop_update_cadence
     { 2260u, 0u },
     { 2265u, 0u },
 };
+#endif
 
 /* Source-display class-0x02 dispatch cadence from the accepted
  * record-20 indirect caller ledger. This is used only to align the
  * scene differential with source scheduler phases. */
 #define AVSP_ROUND1_COFFEE_SHOP_CLASS02_DEFAULT_SOURCE_UPDATES 1u
 #define AVSP_ROUND1_COFFEE_SHOP_CLASS02_UPDATE_CADENCE_COUNT 113
+#if defined(__sh__)
+#define avsp_round1_coffee_shop_class02_update_cadence (avsp_round1_content->content_avsp_round1_coffee_shop_class02_update_cadence)
+#else
 static const AvspRound1SceneUpdateCadence avsp_round1_coffee_shop_class02_update_cadence[AVSP_ROUND1_COFFEE_SHOP_CLASS02_UPDATE_CADENCE_COUNT] =
 {
     { 2075u, 2u },
@@ -4316,11 +4919,15 @@ static const AvspRound1SceneUpdateCadence avsp_round1_coffee_shop_class02_update
     { 5565u, 0u },
     { 5566u, 0u },
 };
+#endif
 
 /* Diagnostic-only replay of the accepted ORACLE-10 Coffee Shop
  * controller ledger. Native gameplay remains controller-driven;
  * this table exists only for source/native scene differential runs. */
 #define AVSP_ROUND1_COFFEE_SHOP_INPUT_RUN_COUNT 177
+#if defined(__sh__)
+#define avsp_round1_coffee_shop_input_runs (avsp_round1_content->content_avsp_round1_coffee_shop_input_runs)
+#else
 static const AvspRound1SceneInputRun avsp_round1_coffee_shop_input_runs[AVSP_ROUND1_COFFEE_SHOP_INPUT_RUN_COUNT] =
 {
     { 2040u, 2069u, 0x0000u },
@@ -4501,5 +5108,172 @@ static const AvspRound1SceneInputRun avsp_round1_coffee_shop_input_runs[AVSP_ROU
     { 5550u, 5556u, 0x0018u },
     { 5557u, 5566u, 0x0008u },
 };
+#endif
+
+#if defined(__sh__)
+typedef struct
+{
+    unsigned long magic;
+    unsigned long version;
+    unsigned long bytes;
+    unsigned char content_avsp_round1_entry_program[AVSP_ROUND1_ENTRY_PROGRAM_BYTES];
+    AvspRound1EntrySpawnSpec content_avsp_round1_entry_spawns[AVSP_ROUND1_FIRST_SPAWN_COUNT];
+    AvspRound1CoffeeStageSetupSpec content_avsp_round1_coffee_stage_setup;
+    AvspRound1EntryStepSpec content_avsp_round1_entry_steps[AVSP_ROUND1_ENTRY_STEP_COUNT];
+    unsigned char content_avsp_round1_scheduler_pool_order[AVSP_ROUND1_SCHEDULER_POOL_COUNT];
+    AvspRound1SchedulerGlobalSpec content_avsp_round1_scheduler_globals[AVSP_ROUND1_SCHEDULER_GLOBAL_COUNT];
+    AvspRound1DispatchSpec content_avsp_round1_required_dispatches[AVSP_ROUND1_REQUIRED_DISPATCH_COUNT];
+    AvspRound1PresentationSpec content_avsp_round1_class1f_presentation[AVSP_ROUND1_CLASS1F_PRESENTATION_COUNT];
+    AvspRound1StateContextSpec content_avsp_round1_class1f_state_contexts[AVSP_ROUND1_CLASS1F_STATE_CONTEXT_COUNT];
+    AvspRound1Class1fCurrentSpec content_avsp_round1_class1f_current;
+    unsigned char content_avsp_round1_class1f_collision_reaction_facing_xor;
+    unsigned long content_avsp_round1_class1f_collision_reaction_attack_record;
+    AvspRound1Class1fSourceHitSpec content_avsp_round1_class1f_source_hit;
+    AvspRound1Class1fSourceKoSpec content_avsp_round1_class1f_source_ko;
+    AvspRound1Class1fSourceKoSpec content_avsp_round1_class1f_player_special_ko;
+    AvspRound1RecurringSpawnSpec content_avsp_round1_recurring_spawn;
+    short content_avsp_round1_recurring_lane_offsets[AVSP_ROUND1_RECURRING_LANE_OFFSET_COUNT];
+    unsigned char content_avsp_round1_recurring_selector_cycle[AVSP_ROUND1_RECURRING_SELECTOR_COUNT];
+    unsigned char content_avsp_round1_recurring_lane_buckets[AVSP_ROUND1_RECURRING_LANE_BUCKET_COUNT];
+    unsigned char content_avsp_round1_recurring_variants[AVSP_ROUND1_RECURRING_VARIANT_COUNT];
+    unsigned long content_avsp_round1_class1f_approach_records[AVSP_ROUND1_CLASS1F_APPROACH_RECORD_COUNT];
+    unsigned long content_avsp_round1_class1f_attack_records[AVSP_ROUND1_CLASS1F_ATTACK_RECORD_COUNT];
+    AvspRound1Class1fActionTargetSpec content_avsp_round1_class1f_action_targets[AVSP_ROUND1_CLASS1F_ACTION_TARGET_COUNT];
+    AvspRound1Class1fActionVariantSpec content_avsp_round1_class1f_action_variants[AVSP_ROUND1_CLASS1F_ACTION_VARIANT_COUNT];
+    AvspRound1Class1fActionSelectorSpec content_avsp_round1_class1f_action_selectors[AVSP_ROUND1_CLASS1F_ACTION_SELECTOR_COUNT];
+    AvspRound1Class1fActionRecordSpec content_avsp_round1_class1f_action_records[AVSP_ROUND1_CLASS1F_ACTION_RECORD_COUNT];
+    AvspRound1Class1fMovementTableSpec content_avsp_round1_class1f_movement_tables[AVSP_ROUND1_CLASS1F_MOVEMENT_TABLE_COUNT];
+    AvspRound1Class1fActionRecordSpec content_avsp_round1_class1f_inner8_records[AVSP_ROUND1_CLASS1F_INNER8_RECORD_COUNT];
+    AvspRound1Class1fMovementTableSpec content_avsp_round1_class1f_inner8_movement_tables[AVSP_ROUND1_CLASS1F_INNER8_MOVEMENT_TABLE_COUNT];
+    AvspRound1Class1fInner8ProgramSpec content_avsp_round1_class1f_inner8_program;
+    unsigned char content_avsp_round1_class1f_attack_timers[AVSP_ROUND1_CLASS1F_ATTACK_TIMER_COUNT];
+    AvspRound1Class1fActionProgramSpec content_avsp_round1_class1f_action_program;
+    AvspRound1Class1fPlayerCollisionSpec content_avsp_round1_class1f_player_collision;
+    AvspRound1PlayerSpecialTargetCollisionSpec content_avsp_round1_player_special_class1f_collision;
+    AvspRound1Class1fInitialSpec content_avsp_round1_class1f_initial_actors[AVSP_ROUND1_CLASS1F_INITIAL_ACTOR_COUNT];
+    AvspRound1AnimationSequenceSpec content_avsp_round1_class1f_initial_sequences[AVSP_ROUND1_CLASS1F_INITIAL_SEQUENCE_COUNT];
+    unsigned short content_avsp_round1_class1f_initial_audio_commands[AVSP_ROUND1_CLASS1F_AIRBORNE_ACTOR_COUNT];
+    AvspRound1Type16Spec content_avsp_round1_type16;
+    AvspRound1Type16MotionSpec content_avsp_round1_type16_motion[AVSP_ROUND1_TYPE16_MOTION_COUNT];
+    AvspRound1AnimationStateSpec content_avsp_round1_type16_parent_records[AVSP_ROUND1_TYPE16_PARENT_PRESENTATION_COUNT];
+    AvspRound1AnimationStateSpec content_avsp_round1_type16_records[AVSP_ROUND1_TYPE16_PRESENTATION_COUNT];
+    AvspRound1Class08HealthPickupSpec content_avsp_round1_class08_health_pickup;
+    AvspRound1Class08DebrisSpec content_avsp_round1_class08_debris;
+    AvspRound1AnimationStateSpec content_avsp_round1_class08_parent_records[AVSP_ROUND1_CLASS08_PARENT_PRESENTATION_COUNT];
+    AvspRound1AnimationStateSpec content_avsp_round1_health_pickup_records[AVSP_ROUND1_HEALTH_PICKUP_PRESENTATION_COUNT];
+    AvspRound1AnimationStateSpec content_avsp_round1_player_pickup_records[AVSP_ROUND1_PLAYER_PICKUP_PRESENTATION_COUNT];
+    AvspRound1Class09InitialSpec content_avsp_round1_class09_initial_actors[AVSP_ROUND1_CLASS09_INITIAL_ACTOR_COUNT];
+    unsigned char content_avsp_round1_class09_selector_table[8];
+    AvspRound1AnimationStateSpec content_avsp_round1_class09_sequences[AVSP_ROUND1_CLASS09_SEQUENCE_COUNT][AVSP_ROUND1_CLASS09_SEQUENCE_RECORDS];
+    unsigned char content_avsp_round1_class09_sequence_selectors[AVSP_ROUND1_CLASS09_SEQUENCE_COUNT];
+    AvspRound1Class4eSpawnSpec content_avsp_round1_class4e_initial_spawns[AVSP_ROUND1_CLASS09_INITIAL_ACTOR_COUNT];
+    AvspRound1Class4eRngSpec content_avsp_round1_class4e_rng[AVSP_ROUND1_CLASS09_INITIAL_ACTOR_COUNT];
+    AvspRound1VecS16 content_avsp_round1_class4e_jitter[AVSP_ROUND1_CLASS4E_JITTER_COUNT];
+    AvspRound1AnimationStateSpec content_avsp_round1_class4e_records[AVSP_ROUND1_CLASS4E_PRESENTATION_COUNT];
+    AvspRound1AnimationStateSpec content_avsp_round1_class4e_variant0_records[AVSP_ROUND1_CLASS4E_VARIANT0_PRESENTATION_COUNT];
+    AvspRound1AnimationStateSpec content_avsp_round1_class4e_variant1_records[AVSP_ROUND1_CLASS4E_VARIANT1_PRESENTATION_COUNT];
+    AvspRound1AnimationStateSpec content_avsp_round1_class4e_variant10_records[AVSP_ROUND1_CLASS4E_VARIANT10_PRESENTATION_COUNT];
+    AvspRound1AnimationStateSpec content_avsp_round1_class4e_variant5_records[AVSP_ROUND1_CLASS4E_VARIANT5_PRESENTATION_COUNT];
+    AvspRound1AnimationStateSpec content_avsp_round1_class4e_variant20_records[AVSP_ROUND1_CLASS4E_VARIANT20_PRESENTATION_COUNT];
+    AvspRound1Class44GuardSpec content_avsp_round1_class44_guard;
+    AvspRound1AnimationStateSpec content_avsp_round1_class44_records[AVSP_ROUND1_CLASS44_PRESENTATION_COUNT];
+    AvspRound1Class43Spec content_avsp_round1_class43;
+    unsigned char content_avsp_round1_class43_animation_selectors[AVSP_ROUND1_CLASS43_SELECTOR_COUNT];
+    unsigned char content_avsp_round1_class43_sequence_offsets[AVSP_ROUND1_CLASS43_SEQUENCE_COUNT];
+    AvspRound1AnimationStateSpec content_avsp_round1_class43_records[AVSP_ROUND1_CLASS43_PRESENTATION_COUNT];
+    AvspRound1Class45MotionSpec content_avsp_round1_class43_motion[AVSP_ROUND1_CLASS43_MOTION_COUNT];
+    unsigned long content_avsp_round1_class45_source_slots[AVSP_ROUND1_CLASS45_SCENE_ACTOR_COUNT];
+    AvspRound1Class45SpawnGroupSpec content_avsp_round1_class45_spawn_groups[AVSP_ROUND1_CLASS45_SPAWN_GROUP_COUNT];
+    unsigned char content_avsp_round1_class45_animation_selectors[AVSP_ROUND1_CLASS45_SELECTOR_COUNT];
+    AvspRound1AnimationStateSpec content_avsp_round1_class45_records[AVSP_ROUND1_CLASS45_PRESENTATION_COUNT];
+    AvspRound1Class45MotionSpec content_avsp_round1_class45_motion[AVSP_ROUND1_CLASS45_MOTION_COUNT];
+    unsigned long content_avsp_round1_class47_source_slots[AVSP_ROUND1_CLASS47_SCENE_ACTOR_COUNT];
+    AvspRound1Class47Spec content_avsp_round1_class47;
+    unsigned char content_avsp_round1_class47_animation_selectors[AVSP_ROUND1_CLASS47_SELECTOR_COUNT];
+    AvspRound1AnimationStateSpec content_avsp_round1_class47_records[AVSP_ROUND1_CLASS47_PRESENTATION_COUNT];
+    AvspRound1Class45MotionSpec content_avsp_round1_class47_motion[AVSP_ROUND1_CLASS47_MOTION_COUNT];
+    AvspRound1NavigationBoundsSpec content_avsp_round1_first_segment_bounds;
+    AvspRound1TerrainRecordSpec content_avsp_round1_first_segment_terrain_records[AVSP_ROUND1_TERRAIN_RECORD_COUNT];
+    unsigned char content_avsp_round1_first_segment_terrain_packed[AVSP_ROUND1_TERRAIN_PACKED_BYTES];
+    AvspRound1TerrainSelectorRunSpec content_avsp_round1_first_segment_terrain_selector_runs[AVSP_ROUND1_TERRAIN_SELECTOR_RUN_COUNT];
+    AvspRound1TerrainStreamWriteSpec content_avsp_round1_coffee_shop_terrain_stream_writes[AVSP_ROUND1_TERRAIN_STREAM_WRITE_COUNT];
+    AvspRound1TerrainStreamTransactionSpec content_avsp_round1_coffee_shop_terrain_stream_transactions[AVSP_ROUND1_TERRAIN_STREAM_TRANSACTION_COUNT];
+    AvspRound1AnimationStateSpec content_avsp_round1_coffee_shop_obstacle_records[AVSP_ROUND1_OBSTACLE_PARENT_RECORD_COUNT];
+    AvspRound1ObstacleChildSequenceSpec content_avsp_round1_coffee_shop_obstacle_child_sequences[AVSP_ROUND1_OBSTACLE_CHILD_VARIANTS];
+    AvspRound1AnimationStateSpec content_avsp_round1_coffee_shop_obstacle_child_release;
+    AvspRound1ObstacleLifecycleSpec content_avsp_round1_coffee_shop_obstacle_lifecycle;
+    AvspRound1ObstacleSpec content_avsp_round1_coffee_shop_obstacle;
+    AvspRound1CameraSpec content_avsp_round1_coffee_shop_camera;
+    AvspRound1PlayerLocomotionSpec content_avsp_round1_player_locomotion;
+    AvspRound1AnimationStateSpec content_avsp_round1_player_walk_records[AVSP_ROUND1_PLAYER_WALK_PRESENTATION_COUNT];
+    AvspRound1PlayerHitSpec content_avsp_round1_player_hit;
+    AvspRound1PlayerHitReactionSpec content_avsp_round1_player_hit_reactions[AVSP_ROUND1_PLAYER_HIT_REACTION_COUNT];
+    AvspRound1PlayerMeleeSpec content_avsp_round1_player_melee;
+    AvspRound1PresentationSpec content_avsp_round1_player_melee_strikes[AVSP_ROUND1_PLAYER_MELEE_COUNT];
+    AvspRound1PlayerContextualMeleeSpec content_avsp_round1_player_contextual_melee;
+    AvspRound1PlayerContextualMeleeSequenceSpec content_avsp_round1_player_contextual_melee_sequences[AVSP_ROUND1_PLAYER_CONTEXTUAL_MELEE_SEQUENCE_COUNT];
+    AvspRound1PlayerJumpVectorSpec content_avsp_round1_player_jump_vectors[AVSP_ROUND1_PLAYER_JUMP_VECTOR_COUNT];
+    AvspRound1PlayerJumpVectorSpec content_avsp_round1_player_jump_down_vectors[AVSP_ROUND1_PLAYER_JUMP_DOWN_VECTOR_COUNT];
+    AvspRound1PlayerJumpSequenceSpec content_avsp_round1_player_jump_sequences[AVSP_ROUND1_PLAYER_JUMP_SEQUENCE_COUNT];
+    AvspRound1PlayerPresentationActorSpec content_avsp_round1_player_jump_actor;
+    AvspRound1PlayerJumpTimingSpec content_avsp_round1_player_jump_timing;
+    AvspRound1PlayerSpecialSpec content_avsp_round1_player_special;
+    AvspRound1AnimationStateSpec content_avsp_round1_player_special_records[AVSP_ROUND1_PLAYER_SPECIAL_PRESENTATION_COUNT];
+    unsigned char content_avsp_round1_player_special_visible_durations[AVSP_ROUND1_PLAYER_SPECIAL_PRESENTATION_COUNT];
+    AvspRound1AnimationStateSpec content_avsp_round1_class4b_records[AVSP_ROUND1_CLASS4B_PRESENTATION_COUNT];
+    AvspRound1AnimationStateSpec content_avsp_round1_class3d_records[AVSP_ROUND1_CLASS3D_PRESENTATION_COUNT];
+    AvspRound1VecS16 content_avsp_round1_class3d_offsets[AVSP_ROUND1_CLASS3D_OFFSET_COUNT];
+    AvspRound1PlayerStageProgressSpec content_avsp_round1_player_stage_progress;
+    AvspRound1PlayerWeaponSpec content_avsp_round1_player_weapon;
+    AvspRound1PlayerWeaponFrameSpec content_avsp_round1_player_weapon_frames[AVSP_ROUND1_PLAYER_WEAPON_SELECTOR_COUNT][AVSP_ROUND1_PLAYER_WEAPON_PRESENTATION_COUNT];
+    AvspRound1PlayerWeaponFrameSpec content_avsp_round1_player_weapon_sequences[AVSP_ROUND1_PLAYER_WEAPON_SELECTOR_COUNT][AVSP_ROUND1_PLAYER_WEAPON_SEQUENCE_COUNT];
+    AvspRound1PlayerWeaponFrameSpec content_avsp_round1_player_empty_frames[AVSP_ROUND1_PLAYER_EMPTY_PRESENTATION_COUNT];
+    AvspRound1PlayerWeaponFrameSpec content_avsp_round1_player_weapon_return_frame;
+    AvspRound1VecS16 content_avsp_round1_weapon_parent_selector_offsets[AVSP_ROUND1_WEAPON_PARENT_SELECTOR_COUNT];
+    AvspRound1AnimationStateSpec content_avsp_round1_weapon_parent_presentations[AVSP_ROUND1_WEAPON_PARENT_PRESENTATION_COUNT];
+    unsigned short content_avsp_round1_weapon_target_distance_thresholds[AVSP_ROUND1_WEAPON_TARGET_DISTANCE_COUNT];
+    unsigned char content_avsp_round1_weapon_target_presentation_selectors[AVSP_ROUND1_WEAPON_TARGET_DISTANCE_COUNT];
+    unsigned char content_avsp_round1_weapon_parent_route_angles[AVSP_ROUND1_WEAPON_PARENT_ROUTE_ANGLE_COUNT];
+    AvspRound1VecS16 content_avsp_round1_weapon_parent_motion_low[AVSP_ROUND1_WEAPON_PARENT_ROUTE_ANGLE_COUNT][AVSP_ROUND1_WEAPON_PARENT_LOW_MOTION_COUNT];
+    AvspRound1VecS16 content_avsp_round1_weapon_parent_motion_high[AVSP_ROUND1_WEAPON_PARENT_ROUTE_ANGLE_COUNT][AVSP_ROUND1_WEAPON_PARENT_HIGH_MOTION_COUNT];
+    AvspRound1VecS16 content_avsp_round1_weapon_parent_base_motion[AVSP_ROUND1_WEAPON_PARENT_ROUTE_ANGLE_COUNT];
+    AvspRound1VecS16 content_avsp_round1_air_weapon_selector_offsets[AVSP_ROUND1_AIR_WEAPON_SELECTOR_COUNT];
+    AvspRound1AnimationStateSpec content_avsp_round1_air_weapon_presentations[AVSP_ROUND1_AIR_WEAPON_PRESENTATION_COUNT];
+    AvspRound1PlayerJumpSequenceSpec content_avsp_round1_air_weapon_player_sequence;
+    AvspRound1VecS16 content_avsp_round1_air_weapon_motion_low[AVSP_ROUND1_AIR_WEAPON_LOW_TABLE_COUNT][AVSP_ROUND1_AIR_WEAPON_DIRECTION_COUNT];
+    AvspRound1VecS16 content_avsp_round1_air_weapon_motion_high[AVSP_ROUND1_AIR_WEAPON_HIGH_TABLE_COUNT][AVSP_ROUND1_AIR_WEAPON_DIRECTION_COUNT];
+    AvspRound1WeaponChildSpawnSpec content_avsp_round1_air_weapon_child_spawn_normal[AVSP_ROUND1_WEAPON_CHILD_SPAWN_COUNT];
+    AvspRound1WeaponChildSpawnSpec content_avsp_round1_air_weapon_child_spawn_collision[AVSP_ROUND1_WEAPON_CHILD_SPAWN_COUNT];
+    AvspRound1AirWeaponProjectileSpec content_avsp_round1_air_weapon_projectile;
+    unsigned char content_avsp_round1_weapon_child_initial_facing;
+    AvspRound1WeaponChildSpawnSpec content_avsp_round1_weapon_child_spawn_normal[AVSP_ROUND1_WEAPON_CHILD_SPAWN_COUNT];
+    AvspRound1WeaponChildSpawnSpec content_avsp_round1_weapon_child_spawn_collision[AVSP_ROUND1_WEAPON_CHILD_SPAWN_COUNT];
+    AvspRound1WeaponChildSequenceSpec content_avsp_round1_weapon_child_sequences[AVSP_ROUND1_WEAPON_CHILD_VARIANT_COUNT];
+    AvspRound1PlayerWeaponEffectSpec content_avsp_round1_parent_weapon_effect;
+    AvspRound1WeaponProjectileSpec content_avsp_round1_weapon_projectile;
+    AvspRound1CollisionBoxSpec content_avsp_round1_weapon_parent_attack_boxes[AVSP_ROUND1_WEAPON_PROJECTILE_ATTACK_BOX_COUNT];
+    unsigned char content_avsp_round1_weapon_parent_impact_variants[AVSP_ROUND1_WEAPON_PROJECTILE_ATTACK_BOX_COUNT];
+    AvspRound1CollisionBoxSpec content_avsp_round1_weapon_child_attack_boxes[AVSP_ROUND1_WEAPON_PROJECTILE_ATTACK_BOX_COUNT];
+    unsigned char content_avsp_round1_weapon_child_impact_variants[AVSP_ROUND1_WEAPON_PROJECTILE_ATTACK_BOX_COUNT];
+    AvspRound1VecS16 content_avsp_round1_empty_effect_variant_offsets[AVSP_ROUND1_EMPTY_EFFECT_VARIANT_COUNT];
+    AvspRound1AnimationStateSpec content_avsp_round1_empty_effect_variant1_records[AVSP_ROUND1_EMPTY_EFFECT_PRESENTATION_COUNT];
+    AvspRound1CoffeeSceneRecordSpec content_avsp_round1_coffee_scene_records[AVSP_ROUND1_COFFEE_SCENE_RECORD_COUNT];
+    AvspRound1AnimationStateSpec content_avsp_round1_class01_records[AVSP_ROUND1_CLASS01_PRESENTATION_COUNT];
+    AvspRound1AnimationStateSpec content_avsp_round1_class02_records[AVSP_ROUND1_CLASS02_PRESENTATION_COUNT];
+    AvspRound1AnimationStateSpec content_avsp_round1_class05_records[AVSP_ROUND1_CLASS05_PRESENTATION_COUNT];
+    AvspRound1Class05Spec content_avsp_round1_class05;
+    AvspRound1Class05MotionSpec content_avsp_round1_class05_motion;
+    AvspRound1Class01Spec content_avsp_round1_class01;
+    AvspRound1Class02Spec content_avsp_round1_class02;
+    AvspRound1SceneUpdateCadence content_avsp_round1_coffee_shop_update_cadence[AVSP_ROUND1_COFFEE_SHOP_UPDATE_CADENCE_COUNT];
+    AvspRound1SceneUpdateCadence content_avsp_round1_coffee_shop_class02_update_cadence[AVSP_ROUND1_COFFEE_SHOP_CLASS02_UPDATE_CADENCE_COUNT];
+    AvspRound1SceneInputRun content_avsp_round1_coffee_shop_input_runs[AVSP_ROUND1_COFFEE_SHOP_INPUT_RUN_COUNT];
+} AvspRound1ContentArchive;
+extern const AvspRound1ContentArchive *avsp_round1_content;
+#define AVSP_ROUND1_CONTENT_ARCHIVE_MAGIC 0x52314341UL
+#define AVSP_ROUND1_CONTENT_ARCHIVE_VERSION 1UL
+#define AVSP_ROUND1_CONTENT_ARCHIVE_BYTES \
+    ((unsigned long)sizeof(AvspRound1ContentArchive))
+#endif
 
 #endif

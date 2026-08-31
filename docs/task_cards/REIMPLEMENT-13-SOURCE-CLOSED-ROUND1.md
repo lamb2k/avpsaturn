@@ -2042,3 +2042,57 @@ read-only content prefers cartridge. Later loads may occur only at the Round
 1-to-Round 2 boundary (`ADAPTED` for USER-10) or a census-proven camera-locked,
 CDDA-safe, never-mid-combat source seam. All later size pressure routes to this
 program rather than ad-hoc squeezing.
+
+### Complete-Round-1 memory-plan checkpoint (2026-08-31)
+
+The bounded memory program is complete without changing the workflow or
+creating another ledger. `data/reimplement13_round1_memory_plan.json` records
+the linked work-RAM limit and every contiguous cartridge carve with base, size,
+owner, required bytes, and load phase. Its capacity basis is the accepted
+ORACLE-11 census: 94 route segments and 1,517 authoritative writer PCs. The
+complete generated read-only SPEC set (terrain, timer/selector,
+animation-record, collision, route, and actor contract tables) is 152 tables
+inside one deterministic SH-2 big-endian archive. The archive is 46,564 bytes,
+has SHA-256
+`b2bae49f6182dcde3ced8d47342d5689c48b5095793ae4ec0ead61323c64d587`,
+and resides in a census-sized `0x40000` cartridge region beginning at
+`0x22711000`.
+
+Target loads the archive only through the existing boot seam, validates its
+magic/version/byte count, and binds the generated tables before native Round 1
+initialization. Per-region compile-time assertions cover the runtime,
+diagnostic, content, scratch, and complete DRAM1 layout. The Round 1-to-Round 2
+load is inactive and reserved as `ADAPTED_PRESENTATION_FOR_USER_10` if later
+needed. Intra-round loading remains inactive unless the census proves it is
+necessary at a camera-locked, CDDA-safe, never-mid-combat source seam. Future
+size pressure returns to this memory program; it does not authorize ad-hoc
+squeezes.
+
+The archive double-build is byte-identical. Focused memory, Target wiring,
+cart-to-VDP1 CPU upload, class-`0x05`, Oracle auxiliary, SPEC-02, and generator
+lanes pass 18/130/4/4/114/180 real mutations or suppressions. The mechanically
+regenerated player-air artifact changes only its embedded accepted-auxiliary
+SHA. The regenerated SPEC contract and fixture identities are
+`7a0db579d3751541d374444ebae60a009f9afedf75840457661b60de1fa93b3a` and
+`ae84a21f139fc86d820b22a2e6277e838cd2b31e9f17519619e799418a5eb76b`.
+Target passes with GAME.BIN 371,408 bytes, BSS end `0x060b1be0`, and
+GAME.BIN SHA-256
+`857ffe7c695add3f38f82f5cea68ee303635e6919fd82982435bb47dbe2095de`.
+Two cold pinned-emulator runs pass byte-identically at normalized ISO SHA-256
+`9a6ccf084933397826ae1a4d7128bbc1d3254a6b862e91d7291c8bc958a68e60`.
+Both report `round1_spec_bound=1`; that diagnostic now requires the archive's
+boot-load completion as well as the accepted contract identity, and a real
+mutation rejects removing the load predicate.
+Direct window-only WGC inspection confirms Predator identity, P1-only HUD,
+coherent actors, both VDP2 planes, palette, and priority. The emulator remains
+blind to the SCU-DMA A-bus restriction; physical Saturn is `UNRUN`.
+Fast and Oracle pass the focused memory, SPEC, and Oracle bodies before both
+reach the preserved full-host frame-3782 Coffee Shop chronology RED. That
+failure remains part of the active scene closure and is not reclassified as a
+memory-program pass.
+
+The complete Coffee Shop scene remains intentionally RED at native frame 4006,
+scheduler code 29. Resume by regenerating the complete source/native census,
+identifying the owning reusable player-collision program, and closing all
+Coffee Shop-reachable branches from accepted Oracle/SPEC evidence. Do not add a
+frame exception, authored delay, guessed rule, or further ad-hoc size squeeze.

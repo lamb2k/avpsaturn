@@ -1,5 +1,29 @@
 #include "round1.h"
 #include "spec02_round1_entry_data.h"
+
+#if defined(__sh__)
+const AvspRound1ContentArchive *avsp_round1_content;
+#endif
+
+int avsp_round1_bind_content_archive(const void *data,
+                                     unsigned long bytes)
+{
+#if defined(__sh__)
+    const AvspRound1ContentArchive *content =
+        (const AvspRound1ContentArchive *)data;
+    if (content == 0 || bytes != AVSP_ROUND1_CONTENT_ARCHIVE_BYTES ||
+        content->magic != AVSP_ROUND1_CONTENT_ARCHIVE_MAGIC ||
+        content->version != AVSP_ROUND1_CONTENT_ARCHIVE_VERSION ||
+        content->bytes != AVSP_ROUND1_CONTENT_ARCHIVE_BYTES)
+        return 0;
+    avsp_round1_content = content;
+    return 1;
+#else
+    (void)data;
+    (void)bytes;
+    return 1;
+#endif
+}
 #include "../../integration/combat/combat.h"
 #include "../../../../avsp_actor.h"
 #include "../../../../avsp_collision.h"

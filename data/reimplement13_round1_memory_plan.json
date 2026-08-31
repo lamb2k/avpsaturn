@@ -1,0 +1,142 @@
+{
+  "build_time_asserts": [
+    "runtime measured bytes equal source-pool layout",
+    "runtime fits runtime region",
+    "diagnostic window fits diagnostic region",
+    "content archive fits census-sized content region",
+    "census capacity floor fits content region",
+    "composite maximum fits scratch region",
+    "all DRAM1 carves fit the 2 MiB bank",
+    "GAME.BIN BSS ends before 0x060c0000"
+  ],
+  "cartridge_dram0": {
+    "base": "0x22400000",
+    "load_phase": "boot and approved phase overlays",
+    "owner": "Jo general allocator",
+    "size": 2097152
+  },
+  "cartridge_dram1": {
+    "base": "0x22600000",
+    "regions": [
+      {
+        "base": "0x22600000",
+        "id": "round1-tile-archive",
+        "load_phase": "boot",
+        "owner": "complete four-route source tile union",
+        "required_bytes": 612720,
+        "size": 614400
+      },
+      {
+        "base": "0x22696000",
+        "id": "round1-stage-strips",
+        "load_phase": "boot",
+        "owner": "Round 1 VDP2 strip package",
+        "required_bytes": 269654,
+        "size": 294912
+      },
+      {
+        "base": "0x226de000",
+        "id": "round1-runtime",
+        "load_phase": "runtime",
+        "owner": "complete fixed actor pools and mutable route state",
+        "required_bytes": 99344,
+        "size": 102400
+      },
+      {
+        "base": "0x226f7000",
+        "id": "live-diagnostic-window",
+        "load_phase": "runtime",
+        "owner": "rolling 575-sample emulator evidence window",
+        "required_bytes": 89700,
+        "size": 106496
+      },
+      {
+        "base": "0x22711000",
+        "census_capacity_floor_bytes": 239908,
+        "id": "round1-spec-content",
+        "load_phase": "boot",
+        "owner": "all generated read-only SPEC fixture tables",
+        "required_bytes": 46564,
+        "sha256": "b2bae49f6182dcde3ced8d47342d5689c48b5095793ae4ec0ead61323c64d587",
+        "size": 262144
+      },
+      {
+        "base": "0x22751000",
+        "id": "composite-scratch",
+        "load_phase": "per frame",
+        "owner": "mutable CPU-mediated VDP1 composite staging",
+        "required_bytes": 11648,
+        "size": 12288
+      },
+      {
+        "base": "0x22754000",
+        "id": "bank1-general-allocator",
+        "load_phase": "boot and approved overlays",
+        "owner": "Jo allocator remainder",
+        "size": 704512
+      }
+    ],
+    "size": 2097152
+  },
+  "classification": "REIMPLEMENT-13 bounded memory-plan program",
+  "content_archive": {
+    "bytes": 46564,
+    "categories": [
+      "terrain",
+      "timer-selector",
+      "animation-record",
+      "collision",
+      "route-and-actor-contract"
+    ],
+    "deterministic_double_build": true,
+    "file": "build/avsp_cd/R1/R1SPEC.BIN",
+    "generated_source_sha256": "568b4c95723dd389d1911c1c2f7f777c43b9cb01b6986da9f500a5ca77e05346",
+    "sha256": "b2bae49f6182dcde3ced8d47342d5689c48b5095793ae4ec0ead61323c64d587",
+    "table_count": 152,
+    "target_endian": "SH-2 big endian"
+  },
+  "legal_load_seams": [
+    {
+      "active": true,
+      "classification": "SOURCE_BOUND_PLATFORM_ADAPTER",
+      "seam": "existing boot load"
+    },
+    {
+      "active": false,
+      "classification": "ADAPTED_PRESENTATION_FOR_USER_10",
+      "seam": "Round 1 to Round 2 stage boundary"
+    },
+    {
+      "active": false,
+      "classification": "CONDITIONAL",
+      "guard": "only if census math proves all-resident cannot fit; CDDA data-read-safe; never mid-combat",
+      "seam": "intra-round camera-locked transition"
+    }
+  ],
+  "physical_saturn": "UNRUN",
+  "placement_rule": {
+    "mutable_per_frame": "work RAM or fixed cartridge runtime pool",
+    "read_only_content": "cartridge content archive",
+    "scu_dma": "no SCU DMA transfer with an A-bus endpoint; cart-sourced VDP1 uploads are CPU-mediated"
+  },
+  "schema": "reimplement13-round1-memory-plan-v1",
+  "source_inputs": {
+    "actor_lifetimes": 427,
+    "authoritative_writer_pcs": 1517,
+    "class_type_archetypes": 20,
+    "coverage_sha256": "7aa303ef5e75f031ee982dcf7f6f1ca619b9656ab35768685c995f2bfe73e379",
+    "route_events": 24,
+    "route_segments": 94,
+    "writer_reconciliation_sha256": "e9508e1c621e6448953549817b8d66e9399cbce97f06d7883c013776f34fc39c"
+  },
+  "work_ram": {
+    "bss_end": "0x060b1be0",
+    "bss_headroom_bytes": 58400,
+    "game_bin_bytes": 371408,
+    "jo_user_program_data_end_exclusive": "0x060c0000",
+    "linked_capacity_bytes": 770048,
+    "linked_image_base": "0x06004000",
+    "linked_rodata_bytes": 74992,
+    "loader_low_ram_file_staging_limit_bytes": 1048576
+  }
+}

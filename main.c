@@ -39,6 +39,7 @@
 #ifdef AVSP_LIVE_ENCOUNTER
 #include "src/port_v2/integration/live_encounter/live_encounter.h"
 #include "src/port_v2/gameplay/round1/round1.h"
+#include "src/port_v2/gameplay/round1/spec02_round1_content_identity.h"
 #endif
 #ifdef AVSP_PROBE3
 #include "tests/hardware/probe3/probe3.h"
@@ -126,16 +127,25 @@
 #define AVSP_ROUND1_RUNTIME_REGION_BYTES 0x19000
 #define AVSP_ROUND1_RUNTIME_MEASURED_BYTES 0x18410
 #define AVSP_LIVE_DIAG_REGION_BYTES 0x1A000
-#define AVSP_COMPOSITE_SCRATCH_REGION_BYTES AVSP_COMPOSITE_MAX_TEXTURE_BYTES
+#define AVSP_ROUND1_CONTENT_REGION_BYTES 0x40000
+#define AVSP_COMPOSITE_SCRATCH_REGION_BYTES 0x3000
 #define AVSP_LIVE_DIAG_RECORD_BYTES 156
-#define AVSP_ROUND1_RUNTIME_BASE ((AvspRound1Runtime *)(AVSP_CART_DRAM1_BASE + AVSP_TILE_REGION_BYTES + AVSP_STRIPS_REGION_BYTES))
-#define AVSP_COMPOSITE_SCRATCH_BASE \
+#define AVSP_ROUND1_RUNTIME_BASE \
+    ((AvspRound1Runtime *)(AVSP_CART_DRAM1_BASE + AVSP_TILE_REGION_BYTES + \
+                          AVSP_STRIPS_REGION_BYTES))
+#define AVSP_LIVE_DIAG_BASE \
     (AVSP_CART_DRAM1_BASE + AVSP_TILE_REGION_BYTES + \
-     AVSP_STRIPS_REGION_BYTES + AVSP_ROUND1_RUNTIME_REGION_BYTES + \
-     AVSP_LIVE_DIAG_REGION_BYTES)
+     AVSP_STRIPS_REGION_BYTES + AVSP_ROUND1_RUNTIME_REGION_BYTES)
+#define AVSP_ROUND1_CONTENT_BASE \
+    (AVSP_LIVE_DIAG_BASE + AVSP_LIVE_DIAG_REGION_BYTES)
+#define AVSP_COMPOSITE_SCRATCH_BASE \
+    (AVSP_ROUND1_CONTENT_BASE + AVSP_ROUND1_CONTENT_REGION_BYTES)
+#define AVSP_ROUND1_CART_ALLOCATOR_BASE \
+    (AVSP_COMPOSITE_SCRATCH_BASE + AVSP_COMPOSITE_SCRATCH_REGION_BYTES)
 #else
 #define AVSP_ROUND1_RUNTIME_REGION_BYTES 0
 #define AVSP_LIVE_DIAG_REGION_BYTES 0
+#define AVSP_ROUND1_CONTENT_REGION_BYTES 0
 #define AVSP_COMPOSITE_SCRATCH_REGION_BYTES 0
 #endif
 
@@ -588,9 +598,22 @@ typedef char AvspLiveDiagnosticSamplesFitReservedCartRegion[
         : -1];
 typedef char AvspLiveDiagnosticRecordSizeMatchesMeasuredTarget[
     sizeof(LiveEncounterDiagSample) == AVSP_LIVE_DIAG_RECORD_BYTES ? 1 : -1];
+typedef char AvspRound1ContentArchiveFitsCensusSizedCartRegion[
+    AVSP_ROUND1_CONTENT_ARCHIVE_EXPECTED_BYTES <=
+            AVSP_ROUND1_CONTENT_REGION_BYTES
+        ? 1
+        : -1];
+typedef char AvspRound1ContentCensusCapacityFitsCartRegion[
+    0x3A924UL <= AVSP_ROUND1_CONTENT_REGION_BYTES ? 1 : -1];
+typedef char AvspRound1CompositeScratchFitsReservedCartRegion[
+    AVSP_COMPOSITE_MAX_TEXTURE_BYTES <=
+            AVSP_COMPOSITE_SCRATCH_REGION_BYTES
+        ? 1
+        : -1];
 typedef char AvspRound1ReservedCarvesFitCartDram1[
     AVSP_TILE_REGION_BYTES + AVSP_STRIPS_REGION_BYTES +
             AVSP_ROUND1_RUNTIME_REGION_BYTES + AVSP_LIVE_DIAG_REGION_BYTES +
+            AVSP_ROUND1_CONTENT_REGION_BYTES +
             AVSP_COMPOSITE_SCRATCH_REGION_BYTES <=
         AVSP_CART_DRAM1_BYTES
         ? 1
@@ -602,9 +625,9 @@ static int round1_cdda_started;
 static int round1_autotest_capture_frozen;
 #endif
 volatile LiveEncounterDiagSample *avsp_diag_live_samples =
-    (volatile LiveEncounterDiagSample *)(
-        AVSP_CART_DRAM1_BASE + AVSP_TILE_REGION_BYTES +
-        AVSP_STRIPS_REGION_BYTES + AVSP_ROUND1_RUNTIME_REGION_BYTES);
+    (volatile LiveEncounterDiagSample *)AVSP_LIVE_DIAG_BASE;
+volatile unsigned long avsp_diag_round1_content_bytes;
+volatile int avsp_diag_round1_content_loaded;
 volatile int avsp_diag_live_sample_count;
 volatile int avsp_diag_live_interface_version;
 volatile int avsp_diag_live_contract_flags;
@@ -3223,6 +3246,26 @@ static int load_tile_archive(void)
     tile_archive_ready = 1;
     return 1;
 }
+
+#ifdef AVSP_LIVE_ENCOUNTER
+static int load_round1_content_archive(void)
+{
+    const int read_bytes = avsp_fs_read_into(
+        AVSP_ROUND1_CONTENT_ARCHIVE_FILE,
+        AVSP_ROUND1_CONTENT_ARCHIVE_DIRECTORY,
+        AVSP_ROUND1_CONTENT_BASE,
+        AVSP_ROUND1_CONTENT_REGION_BYTES);
+    avsp_diag_round1_content_bytes =
+        read_bytes > 0 ? (unsigned long)read_bytes : 0UL;
+    avsp_diag_round1_content_loaded =
+        read_bytes == (int)AVSP_ROUND1_CONTENT_ARCHIVE_EXPECTED_BYTES &&
+        avsp_round1_bind_content_archive(
+            AVSP_ROUND1_CONTENT_BASE, (unsigned long)read_bytes);
+    if (!avsp_diag_round1_content_loaded)
+        failed_asset = "R1SPEC.BIN";
+    return avsp_diag_round1_content_loaded;
+}
+#endif
 
 static int tile_sprite_for_archive_rank(const AvspTileArchive *archive,
                                         const long rank)
@@ -8250,8 +8293,9 @@ static void live_encounter_publish(void)
     avsp_diag_slice_canaries_ok = playable_slice_frame.canaries_ok;
     avsp_diag_live_frame = (int)live_encounter_frame.frame;
     avsp_diag_round1_spec_bound =
+        avsp_diag_round1_content_loaded &&
         strcmp(AVSP_ROUND1_SPEC02_SHA256,
-               "bcba36794f1aa4e21012fda54d61745302a71ae33fa0d3480bc68d06a04156a3") ==
+               "7a0db579d3751541d374444ebae60a009f9afedf75840457661b60de1fa93b3a") ==
         0;
     avsp_diag_round1_entry_valid = avsp_round1_entry_valid(&round1_runtime);
     avsp_diag_round1_route_state = round1_runtime.route_state;
@@ -9552,11 +9596,13 @@ void jo_main(void)
                                AVSP_STRIPS_REGION_BYTES +
                                AVSP_ROUND1_RUNTIME_REGION_BYTES +
                                AVSP_LIVE_DIAG_REGION_BYTES +
+                               AVSP_ROUND1_CONTENT_REGION_BYTES +
                                AVSP_COMPOSITE_SCRATCH_REGION_BYTES,
                            AVSP_CART_DRAM1_BYTES - AVSP_TILE_REGION_BYTES -
                                AVSP_STRIPS_REGION_BYTES -
                                AVSP_ROUND1_RUNTIME_REGION_BYTES -
                                AVSP_LIVE_DIAG_REGION_BYTES -
+                               AVSP_ROUND1_CONTENT_REGION_BYTES -
                                AVSP_COMPOSITE_SCRATCH_REGION_BYTES);
     }
 #ifndef AVSP_PROBE3
@@ -9598,7 +9644,12 @@ void jo_main(void)
     set_hud_palette();
     cap_world_init(&world);
     hud_pcm_bench_init();
-    runtime_ready = playable_slice_init();
+#ifdef AVSP_LIVE_ENCOUNTER
+    runtime_ready = load_round1_content_archive();
+#else
+    runtime_ready = 1;
+#endif
+    runtime_ready = runtime_ready && playable_slice_init();
 #ifdef AVSP_LIVE_ENCOUNTER
     avsp_frontend_init(&frontend_runtime, avsp_fs_read_file_in_dir,
                        background_bitmap, &frontend_palettes[0],

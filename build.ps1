@@ -152,6 +152,17 @@ try {
         if ($LASTEXITCODE -ne 0) {
             throw "Collision-table generation failed with exit code $LASTEXITCODE."
         }
+        & $PythonPath (Join-Path $projectRoot `
+            'tools\gen_spec02_round1_entry.py')
+        if ($LASTEXITCODE -ne 0) {
+            throw "Round 1 SPEC fixture generation failed with exit code $LASTEXITCODE."
+        }
+        & $PythonPath (Join-Path $projectRoot `
+            'tools\build_round1_content_archive.py') `
+            '--compiler' $compiler '--objcopy' $objcopy
+        if ($LASTEXITCODE -ne 0) {
+            throw "Round 1 content archive generation failed with exit code $LASTEXITCODE."
+        }
         if (-not $SkipHostTests) {
             & '.\test.ps1' -PythonPath $PythonPath
             if ($LASTEXITCODE -ne 0) {
@@ -636,6 +647,12 @@ try {
             "BSS end 0x{1:x8}, final entry 0x06004000") -f `
             $gamePayload.Length, $gameBssEnd
         Write-Host $gameSummary
+        & $PythonPath (Join-Path $projectRoot `
+            'tools\build_round1_content_archive.py') `
+            '--compiler' $compiler '--objcopy' $objcopy
+        if ($LASTEXITCODE -ne 0) {
+            throw "Round 1 memory-map refresh failed with exit code $LASTEXITCODE."
+        }
         [IO.File]::WriteAllText($profileStamp, $compileProfile)
 
         Copy-Item -LiteralPath $loaderBinary.FullName `
@@ -721,6 +738,14 @@ try {
                 'game.iso' '/SPR4/COMBAT.BIN' '--equals' $combatTileOverlay
             if ($LASTEXITCODE -ne 0) {
                 throw "Combat tile overlay ISO verification failed with exit code $LASTEXITCODE."
+            }
+        }
+        if ($LiveEncounterBench -or $LiveEncounter) {
+            & $PythonPath (Join-Path $projectRoot 'tools\verify_iso_file.py') `
+                'game.iso' '/R1/R1SPEC.BIN' '--equals' `
+                (Join-Path $contentRoot 'R1\R1SPEC.BIN')
+            if ($LASTEXITCODE -ne 0) {
+                throw "Round 1 SPEC archive ISO verification failed with exit code $LASTEXITCODE."
             }
         }
         if ($CombatIntegrationBench -or $usePlayableSlice) {
