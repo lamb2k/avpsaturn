@@ -32,6 +32,7 @@ static int avsp_round1_step_class1f_action_animation(
     AvspRound1Runtime *runtime, AvspRound1ActorCore *actor,
     int apply_movement);
 static int avsp_round1_apply_first_segment_terrain_position(
+    const AvspRound1Runtime *runtime,
     short *world_x, short *world_z,
     long *x_velocity, long *z_velocity,
     unsigned char *contact_bits,
@@ -979,15 +980,16 @@ static int avsp_round1_class1f_step_source_ko_reaction_animation(
     next = (unsigned char)(actor->animation_index + 1u);
     if (next >= spec->reaction_record_count)
     {
-        avsp_round1_class1f_bind_source_hit_record(
-            actor, &spec->bounce_record, 0u);
         if (preserve_collision_selectors)
         {
+            avsp_round1_class1f_bind_source_hit_record(
+                actor, &spec->bounce_record, 0u);
             actor->hurt_selector =
                 avsp_round1_player_special_class1f_collision.hurt_selector;
             actor->attack_selector = 1u;
+            return 1;
         }
-        return 1;
+        next = 0u;
     }
     avsp_round1_class1f_bind_source_hit_record(
         actor, &spec->reaction_records[next], next);
@@ -1608,6 +1610,7 @@ static int avsp_round1_apply_class1f_inner8_movement(
     actor->y = avsp_round1_fixed_high_word(actor->source_y_fp);
     actor->z = actor->y;
     if (!avsp_round1_apply_first_segment_terrain_position(
+            runtime,
             &actor->x, &actor->z,
             &actor->source_x_velocity, &actor->source_y_velocity,
             &actor->source_navigation_contact_bits,
@@ -1633,6 +1636,17 @@ static int avsp_round1_bind_class1f_inner8_movement_record(
     return avsp_round1_apply_class1f_inner8_movement(runtime, actor);
 }
 
+static void avsp_round1_apply_class1f_inner8_contact_direction(
+    AvspRound1ActorCore *actor)
+{
+    if (actor->source_navigation_contact_bits != 0u)
+        actor->source_direction = (unsigned char)(
+            (actor->source_direction +
+             avsp_round1_class1f_inner8_program.
+                action4_contact_direction_delta) &
+            avsp_round1_class1f_inner8_program.action4_direction_mask);
+}
+
 static int avsp_round1_step_class1f_inner8_animation(
     AvspRound1Runtime *runtime, AvspRound1ActorCore *actor,
     int apply_movement)
@@ -1655,6 +1669,15 @@ static int avsp_round1_step_class1f_inner8_animation(
     if (apply_movement &&
         !avsp_round1_apply_class1f_inner8_movement(runtime, actor))
         return 0;
+    return 1;
+}
+
+static int avsp_round1_step_class1f_inner8_action4_movement(
+    AvspRound1Runtime *runtime, AvspRound1ActorCore *actor)
+{
+    if (!avsp_round1_step_class1f_inner8_animation(runtime, actor, 1))
+        return 0;
+    avsp_round1_apply_class1f_inner8_contact_direction(actor);
     return 1;
 }
 
@@ -1985,6 +2008,8 @@ static int avsp_round1_step_recurring_controller(AvspRound1Runtime *runtime)
         runtime->entry_controller.state =
             avsp_round1_recurring_spawn.current_state;
         encounter->source_camera_target =
+            avsp_round1_recurring_spawn.source_camera_target_current;
+        runtime->camera_z_lower = (short)
             avsp_round1_recurring_spawn.source_camera_target_current;
         if (runtime->camera_x_position <=
                 avsp_round1_recurring_spawn.source_camera_call_threshold)
@@ -2455,14 +2480,12 @@ static int avsp_round1_class1f_inner8_wander(
     return 1;
 }
 
-static int avsp_round1_class1f_inner8_bind_movement(
+static int avsp_round1_class1f_inner8_bind_relation_movement(
     AvspRound1Runtime *runtime, AvspRound1ActorCore *actor)
 {
     unsigned char relation;
     unsigned char index;
     unsigned long record;
-    if (!avsp_round1_class1f_inner8_wander(runtime, actor))
-        return 0;
     relation = (unsigned char)(
         (((actor->source_direction >> 4) & 1u) ^ (actor->facing & 1u)) & 1u);
     index = (unsigned char)(actor->source_style85 != 0u ? 2u : 0u);
@@ -2471,19 +2494,47 @@ static int avsp_round1_class1f_inner8_bind_movement(
     record = avsp_round1_class1f_inner8_program.
         movement_records_by_style_relation[index];
     actor->source_primary_animation_record = record;
-    return avsp_round1_bind_class1f_inner8_movement_record(
-        runtime, actor, record);
+    if (!avsp_round1_bind_class1f_inner8_movement_record(
+            runtime, actor, record))
+        return 0;
+    avsp_round1_apply_class1f_inner8_contact_direction(actor);
+    return 1;
+}
+
+static int avsp_round1_class1f_inner8_bind_movement(
+    AvspRound1Runtime *runtime, AvspRound1ActorCore *actor)
+{
+    if (!avsp_round1_class1f_inner8_wander(runtime, actor))
+        return 0;
+    return avsp_round1_class1f_inner8_bind_relation_movement(
+        runtime, actor);
 }
 
 static int avsp_round1_class1f_inner8_bind_current_movement(
     AvspRound1Runtime *runtime, AvspRound1ActorCore *actor)
 {
-    unsigned long record = actor->source_style85 ?
-        avsp_round1_class1f_inner8_program.style_one_record :
-        avsp_round1_class1f_inner8_program.style_zero_record;
+    return avsp_round1_class1f_inner8_bind_relation_movement(
+        runtime, actor);
+}
+
+static int avsp_round1_class1f_inner8_bind_phase_terminal_movement(
+    AvspRound1Runtime *runtime, AvspRound1ActorCore *actor)
+{
+    unsigned char relation;
+    unsigned char index;
+    unsigned long record;
+    relation = (unsigned char)(((actor->source_direction >> 4) & 1u) ^
+        (actor->facing & 1u));
+    index = (unsigned char)((actor->source_style85 != 0u ? 2u : 0u) +
+        (relation == 0u ? 1u : 0u));
+    record = avsp_round1_class1f_inner8_program.
+        action10_phase_records_by_style_relation[index];
     actor->source_primary_animation_record = record;
-    return avsp_round1_bind_class1f_inner8_movement_record(
-        runtime, actor, record);
+    if (!avsp_round1_bind_class1f_inner8_movement_record(
+            runtime, actor, record))
+        return 0;
+    avsp_round1_apply_class1f_inner8_contact_direction(actor);
+    return 1;
 }
 
 static int avsp_round1_class1f_inner8_enter_action10(
@@ -2707,12 +2758,13 @@ static int avsp_round1_class1f_inner8_select_action2(
     unsigned char random;
     signed char timer;
     if (actor->variant != 0u ||
-        avsp_round1_class1f_inner8_program.action4_stage_parameter >= 32u)
+        runtime->source_stage_parameter >=
+            AVSP_ROUND1_CLASS1F_ACTION4_STAGE_COUNT)
         return 0;
     actor->substate = 0x0200u;
     actor->source_action = actor->substate;
     bank = avsp_round1_class1f_inner8_program.action4_timer_bank_by_stage[
-        avsp_round1_class1f_inner8_program.action4_stage_parameter];
+        runtime->source_stage_parameter];
     if (bank >= 8u)
         return 0;
     random = avsp_round1_source_rng(runtime);
@@ -2766,8 +2818,19 @@ static int avsp_round1_step_class1f_inner8(
     unsigned char random;
     unsigned char selected_style;
     unsigned char target_side;
-    if (actor->transition_timer != 0u)
-        --actor->transition_timer;
+    actor->transition_timer = (unsigned short)(actor->transition_timer - 1u);
+    if ((short)actor->transition_timer < 0 && action == 0u)
+    {
+        actor->source_special_latch_ad =
+            avsp_round1_class1f_inner8_program.timeout_special_latch;
+        actor->transition_timer = 0u;
+        actor->state =
+            avsp_round1_class1f_inner8_program.timeout_outer_state;
+        actor->substate =
+            avsp_round1_class1f_inner8_program.timeout_action_substate;
+        actor->source_action = actor->substate;
+        return 1;
+    }
     if (action == 0u)
     {
         if (runtime->route_state == 0)
@@ -2808,6 +2871,20 @@ static int avsp_round1_step_class1f_inner8(
     }
     if (action == 0x08u)
     {
+        unsigned char phase = (unsigned char)(actor->substate & 0xffu);
+        if (phase == 2u)
+        {
+            if (actor->animation_branch < 0)
+            {
+                actor->source_style85 = 0u;
+                actor->substate = 0x0e00u;
+                actor->source_action = actor->substate;
+            }
+            return avsp_round1_step_class1f_inner8_animation(
+                runtime, actor, 0);
+        }
+        if (phase != 0u)
+            return 0;
         if (actor->animation_branch < 0)
         {
             actor->source_style85 = 0u;
@@ -2878,8 +2955,14 @@ static int avsp_round1_step_class1f_inner8(
             if (actor->source_motion_fields[3] != 0)
                 --actor->source_motion_fields[3];
             if (actor->source_motion_fields[3] != 0)
-                return avsp_round1_bind_class1f_inner8_movement_record(
-                    runtime, actor, actor->source_primary_animation_record);
+            {
+                if (!avsp_round1_bind_class1f_inner8_movement_record(
+                        runtime, actor,
+                        actor->source_primary_animation_record))
+                    return 0;
+                avsp_round1_apply_class1f_inner8_contact_direction(actor);
+                return 1;
+            }
             random = avsp_round1_source_rng(runtime);
             if (((avsp_round1_class1f_inner8_program.action4_choice_bits >>
                     (random & 15u)) & 1u) != 0u)
@@ -2898,10 +2981,11 @@ static int avsp_round1_step_class1f_inner8(
             }
             actor->substate = 0u;
             actor->source_action = 0u;
-            return avsp_round1_step_class1f_inner8_animation(
-                runtime, actor, 1);
+            return avsp_round1_step_class1f_inner8_action4_movement(
+                runtime, actor);
         }
-        return avsp_round1_step_class1f_inner8_animation(runtime, actor, 1);
+        return avsp_round1_step_class1f_inner8_action4_movement(
+            runtime, actor);
     }
     if (action == 0x10u)
     {
@@ -2914,7 +2998,7 @@ static int avsp_round1_step_class1f_inner8(
                 actor->source_action = actor->substate;
                 if (phase == 6u)
                     actor->source_style85 = 1u;
-                return avsp_round1_class1f_inner8_bind_current_movement(
+                return avsp_round1_class1f_inner8_bind_phase_terminal_movement(
                     runtime, actor);
             }
             return avsp_round1_step_class1f_inner8_animation(
@@ -2958,6 +3042,13 @@ static int avsp_round1_step_class1f_inner8(
             actor->substate = 0x0e00u;
             actor->source_action = actor->substate;
             actor->source_motion_fields[0] = 0;
+            if (actor->source_style85 != 0u)
+            {
+                actor->substate = 0x0802u;
+                actor->source_action = actor->substate;
+                return avsp_round1_bind_class1f_action_selector(actor,
+                    0x24u);
+            }
             return 1;
         }
         return avsp_round1_step_class1f_inner8_animation(runtime, actor, 1);
@@ -3084,10 +3175,6 @@ static int avsp_round1_step_class1f_inner8(
             if ((unsigned short)actor->z < (unsigned short)actor->y)
                 return avsp_round1_step_class1f_inner8_animation(runtime,
                                                                   actor, 0);
-            actor->y = actor->z;
-            actor->source_y_fp = (long)(
-                ((unsigned long)(unsigned short)actor->z << 16) |
-                ((unsigned long)actor->source_y_fp & 0x0000ffffUL));
             actor->source_airborne = 0u;
             actor->source_motion_fields[0] = 6;
             actor->source_projectile_enable = 1u;
@@ -3389,6 +3476,8 @@ static int avsp_round1_type16_collision_pass(AvspRound1Runtime *runtime)
             projectile->source_collision_current_health < 0 ||
             projectile->source_collision_current_attack_selector !=
                 avsp_round1_type16.attack_selector ||
+            runtime->player.hurt_selector !=
+                avsp_round1_type16.player_hurt_selector ||
             runtime->first_encounter.pending_player_damage != 0u ||
             runtime->player.health <= 0)
             continue;
@@ -4124,7 +4213,8 @@ static const AvspRound1TerrainRecordSpec *avsp_round1_terrain_record(
     }
 }
 
-static int avsp_round1_terrain_selector(const short world_x,
+static int avsp_round1_terrain_selector(const AvspRound1Runtime *runtime,
+                                        const short world_x,
                                         const short world_z,
                                         unsigned char *selector)
 {
@@ -4134,14 +4224,16 @@ static int avsp_round1_terrain_selector(const short world_x,
         ((inverted_z & 0x00f0u) >> 2) +
         (((unsigned short)world_x << 2) & 0x0fc0u));
     unsigned short index = (unsigned short)(byte_offset >> 2);
-    if (index >= AVSP_ROUND1_TERRAIN_SELECTOR_MAP_COUNT)
+    if (runtime == 0 || !runtime->terrain_stream_initialized ||
+        index >= AVSP_ROUND1_TERRAIN_SELECTOR_MAP_COUNT)
         return 0;
     *selector = (unsigned char)(
-        avsp_round1_first_segment_terrain_selector_map[index] & 0xfcu);
+        runtime->terrain_selector_map[index] & 0xfcu);
     return 1;
 }
 
 static int avsp_round1_apply_first_segment_terrain_position(
+    const AvspRound1Runtime *runtime,
     short *world_x, short *world_z,
     long *x_velocity, long *z_velocity,
     unsigned char *contact_bits,
@@ -4159,7 +4251,7 @@ static int avsp_round1_apply_first_segment_terrain_position(
         unsigned short remainder;
         unsigned short penetration;
         retry = 0u;
-        if (!avsp_round1_terrain_selector(*world_x, *world_z,
+        if (!avsp_round1_terrain_selector(runtime, *world_x, *world_z,
                                           &selector))
             return 0;
         record = avsp_round1_terrain_record(selector);
@@ -4266,6 +4358,7 @@ static int avsp_round1_apply_first_segment_terrain(
     AvspRound1Runtime *runtime)
 {
     return avsp_round1_apply_first_segment_terrain_position(
+        runtime,
         &runtime->player_action.x, &runtime->player_action.lane,
         &runtime->player_action.x_numerator,
         &runtime->player_action.lane_numerator,
@@ -4288,6 +4381,76 @@ static int avsp_round1_camera_x_speed(const short delta,
     return 1;
 }
 
+static const AvspRound1TerrainStreamTransactionSpec *
+avsp_round1_find_terrain_stream_transaction(
+    const AvspRound1Runtime *runtime, unsigned char direction)
+{
+    unsigned int index;
+    unsigned char x_tile = (unsigned char)(
+        (unsigned short)runtime->camera_x_position >> 4);
+    unsigned char z_tile = (unsigned char)(
+        (unsigned short)runtime->camera_z_position >> 4);
+    for (index = 0u; index < AVSP_ROUND1_TERRAIN_STREAM_TRANSACTION_COUNT;
+         ++index)
+    {
+        const AvspRound1TerrainStreamTransactionSpec *transaction =
+            &avsp_round1_coffee_shop_terrain_stream_transactions[index];
+        if (transaction->camera_x_tile == x_tile &&
+            transaction->camera_z_tile == z_tile &&
+            transaction->direction == direction)
+            return transaction;
+    }
+    return 0;
+}
+
+static int avsp_round1_stream_coffee_shop_terrain(
+    AvspRound1Runtime *runtime)
+{
+    const AvspRound1TerrainStreamTransactionSpec *transaction;
+    unsigned char current_phase;
+    unsigned char direction;
+    unsigned int write_index;
+    if (!runtime->terrain_stream_initialized)
+        return 0;
+    current_phase = (unsigned char)(
+        (unsigned short)runtime->camera_x_position & 0x10u);
+    if (current_phase != runtime->terrain_stream_phase_x)
+        return 1;
+    direction = runtime->camera_x_position < runtime->camera_x_previous ?
+        4u : 0u;
+    runtime->terrain_stream_phase_x ^= 0x10u;
+    transaction = avsp_round1_find_terrain_stream_transaction(
+        runtime, direction);
+    if (transaction == 0 ||
+        transaction->phase_after != runtime->terrain_stream_phase_x ||
+        transaction->first_write + transaction->write_count >
+            AVSP_ROUND1_TERRAIN_STREAM_WRITE_COUNT)
+    {
+        ++runtime->terrain_stream_failures;
+        return 0;
+    }
+    for (write_index = transaction->first_write;
+         write_index < transaction->first_write + transaction->write_count;
+         ++write_index)
+    {
+        const AvspRound1TerrainStreamWriteSpec *write =
+            &avsp_round1_coffee_shop_terrain_stream_writes[write_index];
+        if (write->selector_index >=
+                AVSP_ROUND1_TERRAIN_SELECTOR_MAP_COUNT)
+        {
+            ++runtime->terrain_stream_failures;
+            return 0;
+        }
+        runtime->terrain_selector_map[write->selector_index] =
+            write->selector;
+        ++runtime->terrain_stream_writes;
+    }
+    runtime->terrain_stream_last_transaction = (unsigned short)(
+        transaction - avsp_round1_coffee_shop_terrain_stream_transactions);
+    ++runtime->terrain_stream_transactions;
+    return 1;
+}
+
 static int avsp_round1_step_coffee_shop_camera(AvspRound1Runtime *runtime)
 {
     short delta;
@@ -4298,6 +4461,8 @@ static int avsp_round1_step_coffee_shop_camera(AvspRound1Runtime *runtime)
         runtime->camera_x_lower = 0x0340;
         runtime->camera_x_upper = 0x0340;
         runtime->camera_guard_snapshot = runtime->camera_guard_counter;
+        runtime->camera_guard_countdown =
+            runtime->first_encounter.source_field46;
         runtime->camera_coffee_phase = 2u;
         ++runtime->camera_locks;
     }
@@ -4307,10 +4472,11 @@ static int avsp_round1_step_coffee_shop_camera(AvspRound1Runtime *runtime)
             runtime->camera_guard_counter - runtime->camera_guard_snapshot);
         int unlock = elapsed >= (unsigned short)(
             avsp_round1_coffee_shop_camera.guard_threshold_byte << 4);
-        if (!unlock && runtime->camera_guard_countdown != 0u)
+        if (!unlock && runtime->camera_guard_countdown == 0u)
+            unlock = 1;
+        else if (!unlock)
         {
             --runtime->camera_guard_countdown;
-            unlock = runtime->camera_guard_countdown == 0u;
         }
         if (unlock)
         {
@@ -4352,6 +4518,8 @@ static int avsp_round1_step_coffee_shop_camera(AvspRound1Runtime *runtime)
     if (runtime->camera_x_target < runtime->camera_x_lower)
         runtime->camera_x_target = runtime->camera_x_lower;
     runtime->camera_x_position = runtime->camera_x_target;
+    if (!avsp_round1_stream_coffee_shop_terrain(runtime))
+        return 0;
 
     runtime->camera_z_target_previous = runtime->camera_z_target;
     delta = (short)(runtime->player_action.lane - runtime->camera_z_target -
@@ -4743,6 +4911,7 @@ static int avsp_round1_player_locomotion_contract_valid(void)
         avsp_round1_player_locomotion.stop_action != 516u ||
         avsp_round1_player_locomotion.cleanup_action != 512u ||
         avsp_round1_player_locomotion.stop_ticks != 10u ||
+        avsp_round1_player_locomotion.right_delta_s16_16 != 0x00024000L ||
         avsp_round1_player_locomotion.current_hurt_selector != 17u ||
         avsp_round1_player_locomotion.current_attack_selector != 0u)
         return 0;
@@ -5562,6 +5731,7 @@ static int avsp_round1_begin_player_hit(
         reaction->presentation_selector;
     runtime->player_hit_active_body_selector =
         reaction->active_body_selector;
+    runtime->player_hit_special_pending = 0u;
     runtime->player_hit_reaction_side = (unsigned char)(
         attacker->x < runtime->player_action.x);
     runtime->player_hit_invulnerability = 0u;
@@ -9562,6 +9732,10 @@ static int avsp_round1_projectile_collision_pass(
         ++runtime->first_encounter.player_contacts;
         ++runtime->first_encounter.alien_damage_events;
         target->source_facing_selector = projectile->facing;
+        if (current_attack_record ==
+                avsp_round1_class1f_collision_reaction_attack_record)
+            target->facing = (unsigned char)(target->source_facing_selector ^
+                avsp_round1_class1f_collision_reaction_facing_xor);
         avsp_round1_class1f_queue_projectile_reaction(
             runtime, target, target->health < 0,
             target->source_prior_health);
@@ -11006,11 +11180,35 @@ void avsp_round1_init(AvspRound1Runtime *runtime)
 {
     unsigned int pool_index;
     unsigned int slot_index;
+    unsigned int terrain_run_index;
+    unsigned int terrain_selector_offset;
     AvspRound1Pool *pool;
 
     if (runtime == 0)
         return;
     memset(runtime, 0, sizeof(*runtime));
+    terrain_selector_offset = 0u;
+    for (terrain_run_index = 0u;
+         terrain_run_index < AVSP_ROUND1_TERRAIN_SELECTOR_RUN_COUNT;
+         ++terrain_run_index)
+    {
+        const AvspRound1TerrainSelectorRunSpec *run =
+            &avsp_round1_first_segment_terrain_selector_runs[
+                terrain_run_index];
+        const unsigned int run_length =
+            (unsigned int)run->run_length_minus_one + 1u;
+        if (terrain_selector_offset + run_length >
+                AVSP_ROUND1_TERRAIN_SELECTOR_MAP_COUNT)
+            return;
+        memset(&runtime->terrain_selector_map[terrain_selector_offset],
+               run->selector, run_length);
+        terrain_selector_offset += run_length;
+    }
+    if (terrain_selector_offset != AVSP_ROUND1_TERRAIN_SELECTOR_MAP_COUNT)
+        return;
+    runtime->terrain_stream_phase_x = 0x10u;
+    runtime->terrain_stream_initialized = 1u;
+    runtime->terrain_stream_last_transaction = 0xffffu;
     runtime->head_canary = AVSP_ROUND1_CANARY_HEAD;
     runtime->tail_canary = AVSP_ROUND1_CANARY_TAIL;
     runtime->route_state = AVSP_ROUND1_ROUTE_ENTRY_STATE;
@@ -11349,6 +11547,11 @@ static int avsp_round1_step_player_hit(AvspRound1Runtime *runtime,
     current_special_buttons = (unsigned char)(input_mask &
         (AVSP_ROUND1_INPUT_BUTTON1 | AVSP_PW_INPUT_ATTACK |
          AVSP_ROUND1_INPUT_BUTTON3));
+    if (avsp_round1_player_hit.queue_special_input_during_hit &&
+        avsp_round1_player_special_guard(
+            runtime, special_buttons,
+            runtime->player_special_previous_buttons))
+        runtime->player_hit_special_pending = 1u;
 
     if (runtime->player_hit_phase == AVSP_ROUND1_PLAYER_HIT_ENTRY)
     {
@@ -11404,10 +11607,9 @@ static int avsp_round1_step_player_hit(AvspRound1Runtime *runtime,
     else if (runtime->player_hit_phase == AVSP_ROUND1_PLAYER_HIT_MOTION)
     {
         long velocity = runtime->player_hit_x_velocity;
-        if (avsp_round1_player_special_guard(
-                runtime, special_buttons,
-                runtime->player_special_previous_buttons))
+        if (runtime->player_hit_special_pending)
         {
+            runtime->player_hit_special_pending = 0u;
             runtime->player_hit_active = 0u;
             runtime->player_hit_phase = 0u;
             runtime->player_hit_invulnerability = 0u;
@@ -11478,6 +11680,7 @@ static int avsp_round1_step_player_hit(AvspRound1Runtime *runtime,
     }
     else if (runtime->player_hit_phase == AVSP_ROUND1_PLAYER_HIT_RETURN)
     {
+        runtime->player_hit_special_pending = 0u;
         runtime->player_hit_active = 0u;
         runtime->player_hit_phase = 0u;
         runtime->player_hit_invulnerability =
@@ -11795,6 +11998,11 @@ int avsp_round1_step_player(AvspRound1Runtime *runtime,
              AVSP_ROUND1_INPUT_BUTTON3));
         runtime->player_special_input_pipeline =
             runtime->player_special_previous_buttons;
+        if (!avsp_round1_step_coffee_shop_camera(runtime))
+        {
+            ++runtime->failure_count;
+            return 0;
+        }
         ++runtime->player_controller_updates;
         return avsp_round1_entry_valid(runtime);
     }
@@ -11990,6 +12198,14 @@ int avsp_round1_step_player(AvspRound1Runtime *runtime,
             runtime->player_action.lane_numerator) -
         avsp_round1_player_fractional_position(
             prior_lane, prior_lane_numerator);
+    if (!was_stopping && !weapon_motion_hold &&
+        avsp_round1_source_direction(applied_direction) == 2u)
+    {
+        control_source_x_fp = prior_source_x_fp +
+            avsp_round1_player_locomotion.right_delta_s16_16;
+        runtime->player_action.x =
+            avsp_round1_fixed_high_word(control_source_x_fp);
+    }
     if (special_owned)
         special_owned = (unsigned char)avsp_round1_step_player_special(runtime);
     if (special_owned && runtime->player.attack_selector ==

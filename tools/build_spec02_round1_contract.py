@@ -1229,6 +1229,19 @@ def validate(contract: dict[str, object], fixtures: dict[str, object],
         class08_pickup["pickup"]["collection"]["first_absent_frame_u16"] ==
             3103,
         "Coffee Shop class-0x08 health-pickup fixture incomplete or drifted")
+    class16 = fixtures["authority_data"]["auxiliary"][
+        "first_segment_dependencies"]["class_0x1f_type16_0x06_projectile"]
+    require(
+        class16["classification"] == "SOURCE_CLOSED_IMPLEMENTATION_FIELDS" and
+        class16["spec_executable"] is True and
+        class16["current_state_collision"]["attack_selector_u8"] == 1 and
+        class16["current_state_collision"]["player_hurt_selector_u8"] == 17 and
+        class16["current_state_collision"]["attack_record"]["address"] ==
+            "0x0003589e" and
+        class16["current_state_collision"]["player_hurt_record"]["address"] ==
+            "0x0011ae8e" and
+        "wrong current player hurt selector" in class16["mutation_controls"],
+        "Coffee Shop type-16 current-state collision fixture incomplete or drifted")
     class4b = fixtures["authority_data"]["auxiliary"][
         "first_segment_dependencies"]["predator_special_type24_effects"][
             "class_0x4b"]
@@ -1290,6 +1303,30 @@ def validate(contract: dict[str, object], fixtures: dict[str, object],
          coffee_hit_program["instances"]] == [10, 20, 10, 20, 10] and
         [row["motion_index_u8"] for row in
          coffee_hit_program["instances"]] == [2, 8, 2, 8, 4] and
+        coffee_hit_program["source_action_interruption"] == {
+            "classification": "SOURCE_CLOSED_IMPLEMENTATION_FIELDS",
+            "spec_executable": True,
+            "guard_routine": "0x01a7e6",
+            "action_writer": "0x01a892..0x01a8a0",
+            "hit_phase_dispatch_pc": "0x01ab52",
+            "dispatch_substate_u16": 0x0202,
+            "queue_rule": "a qualifying source special edge observed while the shared HIT body is active remains pending until phase 0x0202 evaluates 0x01a7e6; advancing the edge out of the pending queue during shake is forbidden",
+            "input_runs": [
+                {"first_frame_u16": 3870, "last_frame_u16": 3874,
+                 "input_mask_u8": "0x58"},
+                {"first_frame_u16": 3875, "last_frame_u16": 3876,
+                 "input_mask_u8": "0x48"},
+                {"first_frame_u16": 3877, "last_frame_u16": 3877,
+                 "input_mask_u8": "0x08"}],
+            "terminal_hit_visible_frame_u16": 3877,
+            "special_entry_visible_frame_u16": 3878,
+            "special_startup_visible_frame_u16": 3879,
+            "special_entry_state_u16": 0x0200,
+            "special_entry_substate_u16": 0x0800,
+            "mutation_control": {
+                "reject_edge_loss_during_shake": True,
+                "reject_dispatch_before_phase_0x0202": True,
+                "reject_fixed_frame_special_entry": True}} and
         coffee_hit_program["mutation_control"]["mutated_writes_u16"] == 2,
         "Coffee Shop player HIT program fixture incomplete or drifted")
     activation = fixtures["authority_data"]["route"]["first_entry_body"][
@@ -1610,8 +1647,35 @@ def validate(contract: dict[str, object], fixtures: dict[str, object],
                  class1f_records[address]["attack_selector"]) == fields
                 for address, fields in expected_first_button1_targets.items()),
             "class-0x1f first Button1 target selectors incomplete or drifted")
-    class1f_hit = class1f["current_state_implementation_contract"][
-        "damage_hit_ko_removal"]["source_hit_entry_program"]
+    class1f_damage = class1f["current_state_implementation_contract"][
+        "damage_hit_ko_removal"]
+    class1f_collision_facing = class1f_damage[
+        "common_collision_reaction_facing"]
+    require(class1f_collision_facing["classification"] ==
+                "SOURCE_CLOSED_IMPLEMENTATION_FIELDS" and
+            class1f_collision_facing["source_entry"] == "0x01d416" and
+            class1f_collision_facing["reaction_facing_writer"] ==
+                "0x01d448" and
+            class1f_collision_facing["facing_xor_writer"] == "0x01d44e" and
+            class1f_collision_facing["source_window_sha256"] ==
+                "aab16f054a654c0cbb500ed9df53f80b56ee323a7bee89b03351f1f69f3564e6" and
+            class1f_collision_facing["guard"] == {
+                "excluded_target_type_u8": 0x14,
+                "excluded_target_classes_u8": [0x11, 0x20, 0x10, 0x26],
+                "coffee_shop_class1f_type12_reaches_writer": True,
+                "coffee_shop_attack_record": "0x02fc58",
+            } and
+            class1f_collision_facing["facing_xor_u8"] == 1 and
+            class1f_collision_facing["coffee_shop_control"] == {
+                "source_frame_u16": 3830,
+                "target_slot": "0x00ffa000",
+                "reaction_facing_u8": 1,
+                "facing_u8": 0,
+                "health_s16": -1,
+                "outer_state_u16": 0x0400,
+            },
+            "class-0x1f common collision reaction-facing fixture incomplete or drifted")
+    class1f_hit = class1f_damage["source_hit_entry_program"]
     require(class1f_hit["classification"] ==
                 "SOURCE_CLOSED_IMPLEMENTATION_FIELDS" and
             class1f_hit["capture_identity"]["byte_identical"] is True and
@@ -1706,8 +1770,7 @@ def validate(contract: dict[str, object], fixtures: dict[str, object],
             class1f_hit["mutation_control"]
                 ["fixed_frame_or_generic_reaction_rejected"] is True,
             "class-0x1f source HIT entry fixture incomplete or drifted")
-    class1f_ko = class1f["current_state_implementation_contract"][
-        "damage_hit_ko_removal"]["source_projectile_ko_program"]
+    class1f_ko = class1f_damage["source_projectile_ko_program"]
     require(class1f_ko["classification"] ==
                 "SOURCE_CLOSED_IMPLEMENTATION_FIELDS" and
             class1f_ko["capture_identity"]["byte_identical"] is True and
@@ -1963,7 +2026,7 @@ def validate(contract: dict[str, object], fixtures: dict[str, object],
             list(inner8["route_reachable_action_handlers"]) ==
                 ["0x00", "0x02", "0x04", "0x06", "0x08", "0x0a",
                  "0x0c", "0x0e", "0x10"] and
-            len(inner8["animation_records"]) == 120 and
+            len(inner8["animation_records"]) == 152 and
             all("next_animation_record" in row for row in
                 inner8["animation_records"]) and
             next(row for row in inner8["animation_records"]
@@ -2036,6 +2099,15 @@ def validate(contract: dict[str, object], fixtures: dict[str, object],
             inner8["observed_path_program"]["action_0x06"]
                 ["mutation_control"]
                 ["first_discriminating_source_frame"] == 3242 and
+            inner8["observed_path_program"]["action_0x08"]["phase_2"]
+                ["Coffee_Shop_control"]["substate_u16"] == "0x0e00" and
+            inner8["observed_path_program"]["action_0x10"]
+                ["phase_terminal_movement_binding"]
+                ["Coffee_Shop_control"]["selector_u8"] == 66 and
+            inner8["observed_path_program"]["action_0x10"]
+                ["phase_terminal_movement_binding"]
+                ["Coffee_Shop_control"]["animation_record"] ==
+                    "0x0012ee98" and
             inner8["observed_path_program"]["action_0x04"]
                 ["timer_selector_program"]
                 ["variant0_bank_by_stage_parameter_u8"][9] == 1 and
@@ -2101,7 +2173,11 @@ def validate(contract: dict[str, object], fixtures: dict[str, object],
                 ["complete_dispatch_contract"]["clear_tail"]
                 ["Coffee_Shop_control"]["animation_timer_u16"] == 5 and
             inner8["observed_path_program"]["action_0x10"]
-                ["overlap_transition"]["writer"] == "0x04130e" and
+                ["overlap_transition"]["base_writes"]["writer"] ==
+                    "0x04130e" and
+            inner8["observed_path_program"]["action_0x10"]
+                ["overlap_transition"]["style85_nonzero_override"]
+                ["selector_u8"] == 36 and
             inner8["observed_path_program"]["action_0x10"]
                 ["initializer"]["x_offset_selector_by_rng_low_nibble_u8"] ==
                     [0, 0, 2, 2, 2, 2, 2, 2, 2, 4, 4, 4, 4, 4, 4, 4] and
@@ -2112,10 +2188,27 @@ def validate(contract: dict[str, object], fixtures: dict[str, object],
             inner8["observed_path_program"]["action_0x0e"]
                 ["captured_selection"]["motion_selector_96_u16"] == 24 and
             inner8["action_0x0e_motion"]["phase_4_arithmetic"][3] ==
-                "on landing replace only y_fp high word with z_s16 and preserve the accumulated low 16-bit fraction" and
+                "on landing retain the accumulated y_fp unchanged; do not snap its high word to z_s16" and
+            inner8["action_0x0e_motion"]["phase_4_Coffee_Shop_control"]
+                ["result_y_fp_s32_16_16"] == "0x013aba00" and
             inner8["action_0x0e_motion"]["phase_8_terminal_writes"] == {
                 "source_entry": "0x040e40", "action_u16": 0,
                 "wander_cursor_u8": 0, "field95_u8": 0} and
+            inner8["route_interaction"]["timeout_return"]["source_entry"] ==
+                "0x0610f6" and
+            inner8["route_interaction"]["timeout_return"]
+                ["source_exit_helper"] == "0x0610d4" and
+            inner8["route_interaction"]["timeout_return"]
+                ["source_window_sha256"] ==
+                "e1e231c72ee8540740c632f54bcb2f960262dfd88f1b657fbce4be1d82b497cf" and
+            inner8["route_interaction"]["timeout_return"]["writes"] == {
+                "special_latch_ad_u8": 0,
+                "inner_timer_u16": 0,
+                "outer_state_u16": 0x0200,
+                "action_substate_u16": 0,
+            } and
+            inner8["route_interaction"]["timeout_return"]
+                ["coffee_shop_control"]["return_frame_u16"] == 3881 and
             inner8["observed_path_program"]
                 ["fixed_frame_or_authored_transition_forbidden"] is True and
             inner8["mutation_control"] == {

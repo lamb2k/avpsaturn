@@ -448,6 +448,11 @@ def coffee_shop_class1f_type16_projectile(op,program,aux_writes):
    'defender_state_u16':int(row['defender_state'],16),
    'defender_substate_u16':int(row['defender_substate'],16),
    'attack_record':'0x0003589e','hurt_record':'0x0011ae8e'})
+ defender_records=[animation_record(program,
+                   int(item['defender_animation_record'],16))
+                   for item in contacts]
+ req({item['hurt_selector_u8'] for item in defender_records}=={17},
+     'type-16 collision current player hurt-selector drift')
  attack_dump=TYPE16_ATTACK_A.read_bytes();hurt_dump=TYPE16_HURT_A.read_bytes()
  attack=attack_box(attack_dump[0x1c:0x2c],0x03589e)
  hurt=hurt_box(hurt_dump[0x0e:0x16],0x11ae8e)
@@ -491,7 +496,7 @@ def coffee_shop_class1f_type16_projectile(op,program,aux_writes):
    'animation_records':records[:4]},
   'terminal_state':{'state_u16':'0x0400','guard':'signed animation branch negative decrements timer_u16; zero advances to 0x0600','animation_records':records[4:]},
   'release_state':{'state_u16':'0x0600','release_routine':'0x0177a2'},
-  'current_state_collision':{'scheduler':'record-type-16 attackers against player after actor movement/presentation selection','writer':'0x01d5ee','attack_table':'0x00035882','attack_selector_u8':1,'attack_record':attack,'player_table':'0x0011ae02','player_hurt_record':hurt,'contact_guard':'current animation attack selector 1 resolves table record 0x03589e; that record and current player hurt record overlap in x/y/z under shared 0x01d4aa collision arithmetic','damage_selector_u8':10,'route_character_damage_s16':17,'hit_value_u8':20,'contacts':contacts,'health_writes':[{'source_frame':int(row['frame']),'health_before_s16':int(row['health_before'],16),'health_after_s16':int(row['health_after'],16)} for row in damage]},
+  'current_state_collision':{'scheduler':'record-type-16 attackers against player after actor movement/presentation selection','writer':'0x01d5ee','attack_table':'0x00035882','attack_selector_u8':1,'attack_record':attack,'player_table':'0x0011ae02','player_hurt_selector_u8':17,'player_hurt_record':hurt,'contact_guard':'current animation attack selector 1 resolves table record 0x03589e; current player animation hurt selector 17 resolves table record 0x11ae8e; those current records overlap in x/y/z under shared 0x01d4aa collision arithmetic','damage_selector_u8':10,'route_character_damage_s16':17,'hit_value_u8':20,'contacts':contacts,'health_writes':[{'source_frame':int(row['frame']),'health_before_s16':int(row['health_before'],16),'health_after_s16':int(row['health_after'],16)} for row in damage]},
   'scene_lifetimes':lifetimes,'rng_calls':0,
   'capture_identity':{'collision_completion_a':identity_a,
    'collision_completion_b':identity_b,'byte_identical':True,
@@ -500,7 +505,8 @@ def coffee_shop_class1f_type16_projectile(op,program,aux_writes):
   'mutation_controls':['wrong parent state','wrong animation event branch',
    'fixed-frame spawn','wrong variant','wrong motion row','wrong facing sign',
    'wrong movement order','wrong state guard','wrong animation record',
-   'wrong attack selector','wrong attack box','wrong player hurt box',
+   'wrong attack selector','wrong attack box','wrong current player hurt selector',
+   'wrong player hurt box',
    'damage without overlap','wrong damage selector','wrong scheduler position',
    'fixed-frame release'],
   'suppression_control':suppression(16,'0x06'),
@@ -2337,6 +2343,7 @@ def validate(r):
      c16['current_state_collision']['attack_record']['x_half_u8']==8 and
      c16['current_state_collision']['attack_record']['damage_selector_u8']==10 and
      c16['current_state_collision']['attack_record']['hit_value_u8']==20 and
+     c16['current_state_collision']['player_hurt_selector_u8']==17 and
      c16['current_state_collision']['player_hurt_record']['address']=='0x0011ae8e' and
      c16['current_state_collision']['player_hurt_record']['x_half_u8']==20 and
      c16['current_state_collision']['route_character_damage_s16']==17 and

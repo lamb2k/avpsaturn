@@ -197,7 +197,58 @@ int main(void)
                     runtime.class1f_inner8_group_population[3],
                     inner8_actor->source_x_fp, inner8_actor->source_y_fp,
                     inner8_actor->animation_timer,
-                    inner8_actor->animation_branch);
+                        inner8_actor->animation_branch);
+        }
+        if ((source_frame >= 3574u && source_frame <= 3582u) ||
+            (source_frame >= 3644u && source_frame <= 3647u))
+        {
+            const AvspRound1ActorCore *actor =
+                &runtime.pools[0].records[14];
+            fprintf(stderr,
+                    "inner8_late_checkpoint frame=%u camera=%d/%d previous=%d/%d rng=%04x slot=%04x state=%04x/%04x xfp=%08lx yfp=%08lx z=%d band=%d group=%d cursor=%u member=%u prior=%u/%u offsets=%d/%d direction=%u style=%u populations=%u/%u/%u/%u\n",
+                    source_frame, runtime.camera_x_position,
+                    runtime.camera_z_position, runtime.camera_x_previous,
+                    runtime.camera_z_previous, runtime.rng_seed,
+                    (unsigned short)actor->source_slot, actor->state,
+                    actor->substate, (unsigned long)actor->source_x_fp,
+                    (unsigned long)actor->source_y_fp, actor->z,
+                    actor->source_inner8_band,
+                    actor->source_inner8_group,
+                    actor->source_inner8_cursor,
+                    actor->source_inner8_membership,
+                    actor->source_inner8_prior_membership,
+                    actor->source_inner8_prior_group,
+                    actor->source_inner8_x_offset,
+                    actor->source_inner8_z_offset,
+                    actor->source_direction, actor->source_style85,
+                    runtime.class1f_inner8_group_population[0],
+                    runtime.class1f_inner8_group_population[1],
+                    runtime.class1f_inner8_group_population[2],
+                    runtime.class1f_inner8_group_population[3]);
+        }
+        if (source_frame >= 3653u && source_frame <= 3655u)
+        {
+            const AvspRound1ActorCore *actor =
+                &runtime.pools[0].records[19];
+            fprintf(stderr,
+                    "inner8_action10_transition frame=%u rng=%04x state=%04x/%04x xfp=%08lx yfp=%08lx z=%d band=%d group=%d cursor=%u member=%u prior=%u/%u offsets=%d/%d direction=%u style=%u a3=%u a4=%u a5=%u a6=%u b0=%u populations=%u/%u/%u/%u\n",
+                    source_frame, runtime.rng_seed, actor->state,
+                    actor->substate, (unsigned long)actor->source_x_fp,
+                    (unsigned long)actor->source_y_fp, actor->z,
+                    actor->source_inner8_band, actor->source_inner8_group,
+                    actor->source_inner8_cursor,
+                    actor->source_inner8_membership,
+                    actor->source_inner8_prior_membership,
+                    actor->source_inner8_prior_group,
+                    actor->source_inner8_x_offset,
+                    actor->source_inner8_z_offset,
+                    actor->source_direction, actor->source_style85,
+                    actor->source_a3, actor->source_a4, actor->source_a5,
+                    actor->source_a6, actor->source_b0,
+                    runtime.class1f_inner8_group_population[0],
+                    runtime.class1f_inner8_group_population[1],
+                    runtime.class1f_inner8_group_population[2],
+                    runtime.class1f_inner8_group_population[3]);
         }
         if ((source_frame >= 2780u && source_frame <= 2920u) ||
             (source_frame >= 3268u && source_frame <= 3280u) ||

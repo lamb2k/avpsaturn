@@ -142,7 +142,7 @@ for label,mutate in [
     ('inner8-action0c-reaction-kind-state-pair',lambda x:x['observed_path_program']['action_0x0c']['phase_exclusive_hit_ko_dispatch_guard']['accepted_reaction_state_pairs'][0]['outer_states_u16'].__setitem__(0,0x0208)),
     ('inner8-action4-proximity-order',lambda x:x['observed_path_program']['action_0x04']['complete_dispatch_contract']['per_update_proximity_first'].__setitem__('helper','after terminal')),
     ('inner8-action4-clear-tail',lambda x:x['observed_path_program']['action_0x04']['complete_dispatch_contract']['clear_tail']['Coffee_Shop_control'].__setitem__('animation_timer_u16',6)),
-    ('inner8-action10-writer',lambda x:x['observed_path_program']['action_0x10']['overlap_transition'].__setitem__('writer','0x041310')),
+    ('inner8-action10-writer',lambda x:x['observed_path_program']['action_0x10']['overlap_transition']['base_writes'].__setitem__('writer','0x041310')),
     ('inner8-action10-offset',lambda x:x['observed_path_program']['action_0x10']['initializer']['x_offsets_s16'].__setitem__(1,111)),
     ('inner8-motion-selector',lambda x:x['observed_path_program']['action_0x0e']['captured_selection'].__setitem__('motion_selector_96_u16',22)),
     ('inner8-motion-terminal-cursor',lambda x:x['action_0x0e_motion']['phase_8_terminal_writes'].__setitem__('wander_cursor_u8',1)),

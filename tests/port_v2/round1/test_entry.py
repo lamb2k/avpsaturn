@@ -9,7 +9,7 @@ from pathlib import Path
 
 ROOT = Path(__file__).resolve().parents[3]
 SPEC = ROOT / "data/spec02_round1_executable_contract.json"
-EXPECTED = "5f50fe36d7827b4ecada76b52dfe740a4d475f47e437f37f19ec0a5342958a46"
+EXPECTED = "ad4f85b8cc6fceb80bd2f4900f3ccfa26192f1ee54b79f03c99e2b8baa686900"
 assert hashlib.sha256(SPEC.read_bytes()).hexdigest() == EXPECTED
 assert json.loads(SPEC.read_text())["status"] == "ACCEPTED"
 source = (ROOT / "src/port_v2/gameplay/round1/round1.c").read_text()
@@ -89,9 +89,12 @@ jump_test_body = test_source.replace(
 run(source, header, True,
     expected_returncode=(123 if "--weapon-timing-only" in sys.argv else
                          123 if "--contextual-melee-only" in sys.argv else
+                         123 if "--locomotion-only" in sys.argv else
+                         123 if "--generated-walk-only" in sys.argv else
                          123 if "--controller-edge-only" in sys.argv else
                          123 if "--player-hit-only" in sys.argv else
                          123 if "--action0c-only" in sys.argv else
+                         123 if "--inner8-only" in sys.argv else
                          None),
     test_body=(jump_test_body if "--jump-only" in sys.argv else None))
 if "--baseline-only" in sys.argv:
@@ -127,6 +130,23 @@ inner8_mutations = {
     "            *value = runtime->camera_x_previous;",
     "            --actor->source_action_timer;\n"
     "            if (actor->source_action_timer != 0u)",
+    "record = avsp_round1_class1f_inner8_program.\n"
+    "        action10_phase_records_by_style_relation[index];",
+    "            if (actor->source_style85 != 0u)\n"
+    "            {\n"
+    "                actor->substate = 0x0802u;",
+    "        if (phase == 2u)\n"
+    "        {\n"
+    "            if (actor->animation_branch < 0)\n"
+    "            {\n"
+    "                actor->source_style85 = 0u;\n"
+    "                actor->substate = 0x0e00u;",
+    "            actor->source_airborne = 0u;\n"
+    "            actor->source_motion_fields[0] = 6;\n"
+    "            actor->source_projectile_enable = 1u;",
+    "target->facing = (unsigned char)(target->source_facing_selector ^\n"
+    "                avsp_round1_class1f_collision_reaction_facing_xor);",
+    "actor->transition_timer = (unsigned short)(actor->transition_timer - 1u);",
 }
 ko_mutations = {
     "actor->state = ko ? avsp_round1_class1f_source_ko.collision_state :",
@@ -145,6 +165,8 @@ locomotion_mutations = {
     "weapon_motion_hold = (unsigned char)(runtime->player_weapon_active ||\n"
     "        (jump_owned && !jump_began) || special_owned || contextual_owned);",
     "if (weapon_motion_hold)\n        input.mask = (unsigned short)(input.mask &\n            (unsigned short)~AVSP_PW_INPUT_ATTACK);",
+    "if (!was_stopping && !weapon_motion_hold &&\n"
+    "        avsp_round1_source_direction(applied_direction) == 2u)",
 }
 controller_edge_mutations = {
     "camera_x = avsp_round1_recurring_spawn.camera_edge_uses_current_position ?\n        (unsigned short)runtime->camera_x_position :\n        (unsigned short)runtime->camera_x_previous;",
@@ -163,6 +185,9 @@ player_hit_mutations = {
     "runtime, &reaction->presentation);",
     "runtime->player_hit_x_velocity =\n                reaction->x_velocity;",
     "runtime->player_hit_x_acceleration =\n                reaction->x_acceleration;",
+    "runtime->player_hit_special_pending = 1u;",
+    "runtime->player.hurt_selector !=\n"
+    "                avsp_round1_type16.player_hurt_selector ||",
 }
 weapon_timing_mutations = {
     "else if (weapon_owned || contextual_owned)\n    {\n"
@@ -238,6 +263,22 @@ for before, after in (
      "        stage != avsp_round1_class1f_inner8_program.\n"
      "            action0c_observed_stage_parameter)\n"
      "        return 0u;"),
+    ("    bank = avsp_round1_class1f_inner8_program.action4_timer_bank_by_stage[\n"
+     "        runtime->source_stage_parameter];",
+     "    bank = avsp_round1_class1f_inner8_program.action4_timer_bank_by_stage[\n"
+     "        avsp_round1_class1f_inner8_program.action4_stage_parameter];"),
+    ("    if (actor->source_navigation_contact_bits != 0u)\n"
+     "        actor->source_direction = (unsigned char)(\n"
+     "            (actor->source_direction +\n"
+     "             avsp_round1_class1f_inner8_program.\n"
+     "                action4_contact_direction_delta) &\n"
+     "            avsp_round1_class1f_inner8_program.action4_direction_mask);",
+     "    if (actor->source_navigation_contact_bits == 0u)\n"
+     "        actor->source_direction = (unsigned char)(\n"
+     "            (actor->source_direction +\n"
+     "             avsp_round1_class1f_inner8_program.\n"
+     "                action4_contact_direction_delta) &\n"
+     "            avsp_round1_class1f_inner8_program.action4_direction_mask);"),
     ("            *value = runtime->camera_x_previous;",
      "            *value = runtime->camera_x_position;"),
     ("            --actor->source_action_timer;\n"
@@ -459,6 +500,14 @@ for before, after in (
     ("return entry->updates;", "return 1u;"),
     ("if (encounter->source_intro_gate != 0u)",
      "if (encounter->source_intro_gate == 0u)"),
+    ("runtime->camera_z_lower = (short)\n"
+     "            avsp_round1_recurring_spawn.source_camera_target_current;",
+     "runtime->camera_z_lower = (short)\n"
+     "            avsp_round1_recurring_spawn.source_camera_bound_initial;"),
+    ("if (preserve_collision_selectors)\n        {\n"
+     "            avsp_round1_class1f_bind_source_hit_record(",
+     "if (!preserve_collision_selectors)\n        {\n"
+     "            avsp_round1_class1f_bind_source_hit_record("),
     ("encounter->source_intro_timer - 1u",
      "encounter->source_intro_timer - 2u"),
     ("(unsigned short)actor->source_slot ==\n                    avsp_round1_recurring_spawn.intro_gate_owner_slot",
@@ -517,6 +566,8 @@ for before, after in (
      "projectile->source_x_velocity = motion->y_velocity;"),
     ("projectile->attack_selector ==\n                avsp_round1_type16.attack_selector",
      "projectile->attack_selector !=\n                avsp_round1_type16.attack_selector"),
+    ("runtime->player.hurt_selector !=\n                avsp_round1_type16.player_hurt_selector ||",
+     "runtime->player.hurt_selector ==\n                avsp_round1_type16.player_hurt_selector ||"),
     ("(unsigned char)avsp_round1_type16.damage;",
      "(unsigned char)(avsp_round1_type16.damage - 1);"),
     ("++runtime->type16_releases;",
@@ -537,6 +588,44 @@ for before, after in (
      "actor->source_motion_fields[0] = 6;\n        actor->source_action_timer ="),
     ("actor->source_x_fp += actor->source_x_velocity;",
      "actor->source_x_fp += 0;"),
+    ("record = avsp_round1_class1f_inner8_program.\n"
+     "        action10_phase_records_by_style_relation[index];",
+     "record = avsp_round1_class1f_inner8_program.\n"
+     "        movement_records_by_style_relation[index];"),
+    ("            if (actor->source_style85 != 0u)\n"
+     "            {\n"
+     "                actor->substate = 0x0802u;",
+     "            if (actor->source_style85 == 0u)\n"
+     "            {\n"
+     "                actor->substate = 0x0802u;"),
+    ("        if (phase == 2u)\n"
+     "        {\n"
+     "            if (actor->animation_branch < 0)\n"
+     "            {\n"
+     "                actor->source_style85 = 0u;\n"
+     "                actor->substate = 0x0e00u;",
+     "        if (phase == 2u)\n"
+     "        {\n"
+     "            if (actor->animation_branch < 0)\n"
+     "            {\n"
+     "                actor->source_style85 = 0u;\n"
+     "                actor->substate = 0x0400u;"),
+    ("            actor->source_airborne = 0u;\n"
+     "            actor->source_motion_fields[0] = 6;\n"
+     "            actor->source_projectile_enable = 1u;",
+     "            actor->source_y_fp = (long)(\n"
+     "                ((unsigned long)(unsigned short)actor->z << 16) |\n"
+     "                ((unsigned long)actor->source_y_fp & 0x0000ffffUL));\n"
+     "            actor->y = actor->z;\n"
+     "            actor->source_airborne = 0u;\n"
+     "            actor->source_motion_fields[0] = 6;\n"
+     "            actor->source_projectile_enable = 1u;"),
+    ("target->facing = (unsigned char)(target->source_facing_selector ^\n"
+     "                avsp_round1_class1f_collision_reaction_facing_xor);",
+     "target->facing = (unsigned char)target->source_facing_selector;"),
+    ("actor->transition_timer = (unsigned short)(actor->transition_timer - 1u);",
+     "if (actor->transition_timer != 0u)\n"
+     "        --actor->transition_timer;"),
     ("actor->animation_record = animation_record;",
      "actor->animation_record = 0UL;"),
     ("actor->state = ko ? avsp_round1_class1f_source_ko.collision_state :",
@@ -575,6 +664,8 @@ for before, after in (
      "runtime->player_hit_x_velocity =\n                avsp_round1_player_hit.x_velocity;"),
     ("runtime->player_hit_x_acceleration =\n                reaction->x_acceleration;",
      "runtime->player_hit_x_acceleration = 0L;"),
+    ("runtime->player_hit_special_pending = 1u;",
+     "runtime->player_hit_special_pending = 0u;"),
     ("runtime->player_hit_x_fp = runtime->player.source_x_fp;",
      "runtime->player_hit_x_fp =\n"
      "        (long)runtime->player_action.x * 65536L;"),
@@ -595,6 +686,10 @@ for before, after in (
      "                control_source_x_fp, view.x);",
      "avsp_round1_player_fractional_position(\n"
      "                view.x, runtime->player_action.x_numerator);"),
+    ("if (!was_stopping && !weapon_motion_hold &&\n"
+     "        avsp_round1_source_direction(applied_direction) == 2u)",
+     "if (0 && !was_stopping && !weapon_motion_hold &&\n"
+     "        avsp_round1_source_direction(applied_direction) == 2u)"),
     ("12u, 0x1f, record->attack_selector);",
      "12u, 0x1f, 1u);"),
     ("special_buttons = runtime->player_special_input_pipeline;",
@@ -676,7 +771,7 @@ for before, after in (
         expected_returncode=(94 if "--action0c-only" in sys.argv
                              else None))
 if "--inner8-only" in sys.argv:
-    print("REIMPLEMENT-13 class-0x1f inner-state mutation lane: PASS (8 real mutations)")
+    print("REIMPLEMENT-13 class-0x1f inner-state mutation lane: PASS (14 real mutations)")
     raise SystemExit(0)
 if "--ko-only" in sys.argv:
     print("REIMPLEMENT-13 class-0x1f projectile KO mutation lane: PASS (5 real mutations)")
@@ -688,7 +783,7 @@ if "--contextual-melee-only" in sys.argv:
     print("REIMPLEMENT-13 contextual Button2 mutation lane: PASS (8 real mutations)")
     raise SystemExit(0)
 if "--locomotion-only" in sys.argv:
-    print("REIMPLEMENT-13 locomotion/weapon-return mutation lane: PASS (5 real mutations)")
+    print("REIMPLEMENT-13 locomotion/weapon-return mutation lane: PASS (6 real mutations)")
     raise SystemExit(0)
 if ("--controller-edge-only" in sys.argv or
         not subset_flags.intersection(sys.argv)):
@@ -764,7 +859,8 @@ if "--jump-only" in sys.argv:
 generated_walk_mutations = {
     "    { 4u, 0, 0x0015F208UL, 0x00160A02UL, 17u, 0u },",
     "    { 4u, -32768, 0x0015F2B8UL, 0x00160B9EUL, 17u, 0u },",
-    "    514u,\n    516u,\n    512u,\n    10u,\n    17u,\n    0u,\n    {255u, 2u, 6u, 255u,",
+    "    514u,\n    516u,\n    512u,\n    10u,\n    147456L,\n    17u,\n    0u,\n    {255u, 2u, 6u, 255u,",
+    "    147456L,",
 }
 for before, after in (
     ("    { 4u, 0, 0x0015F208UL, 0x00160A02UL, 17u, 0u },",
@@ -797,12 +893,13 @@ for before, after in (
      "{ 0x02u, 0x02u, 0x80u, 0x80u, 0x10u, 0x10u, 0x00u, 0x80u },"),
     ("    1u, 1200u,", "    1u, 1199u,"),
     ("7u, 7u, 8u, 8u, 9u, 9u", "7u, 7u, 7u, 8u, 9u, 9u"),
-    ("    514u,\n    516u,\n    512u,\n    10u,\n    17u,\n    0u,\n    {255u, 2u, 6u, 255u,",
-     "    514u,\n    516u,\n    512u,\n    9u,\n    17u,\n    0u,\n    {255u, 2u, 6u, 255u,"),
-    ("    514u,\n    516u,\n    512u,\n    10u,\n    17u,\n    0u,\n    {255u, 2u, 6u, 255u,",
-     "    514u,\n    516u,\n    512u,\n    10u,\n    16u,\n    0u,\n    {255u, 2u, 6u, 255u,"),
-    ("    514u,\n    516u,\n    512u,\n    10u,\n    17u,\n    0u,\n    {255u, 2u, 6u, 255u,",
-     "    514u,\n    516u,\n    512u,\n    10u,\n    17u,\n    1u,\n    {255u, 2u, 6u, 255u,"),
+    ("    147456L,", "    147455L,"),
+    ("    514u,\n    516u,\n    512u,\n    10u,\n    147456L,\n    17u,\n    0u,\n    {255u, 2u, 6u, 255u,",
+     "    514u,\n    516u,\n    512u,\n    9u,\n    147456L,\n    17u,\n    0u,\n    {255u, 2u, 6u, 255u,"),
+    ("    514u,\n    516u,\n    512u,\n    10u,\n    147456L,\n    17u,\n    0u,\n    {255u, 2u, 6u, 255u,",
+     "    514u,\n    516u,\n    512u,\n    10u,\n    147456L,\n    16u,\n    0u,\n    {255u, 2u, 6u, 255u,"),
+    ("    514u,\n    516u,\n    512u,\n    10u,\n    147456L,\n    17u,\n    0u,\n    {255u, 2u, 6u, 255u,",
+     "    514u,\n    516u,\n    512u,\n    10u,\n    147456L,\n    17u,\n    1u,\n    {255u, 2u, 6u, 255u,"),
     ("    1536u,\n    5120u,\n    30u,", "    1538u,\n    5120u,\n    30u,"),
     ("    1536u,\n    5120u,\n    30u,", "    1536u,\n    5120u,\n    29u,"),
     ("{ 0x1600f8UL, 0x162a04UL, 8u, 1u },", "{ 0x1600f8UL, 0x162a82UL, 8u, 1u },"),
@@ -956,6 +1053,6 @@ for before, after in (
                                 capture_output=True)
         assert result.returncode != 0, f"generated mutation escaped: {before}"
 if "--generated-walk-only" in sys.argv:
-    print("REIMPLEMENT-13 generated walk fixture mutation lane: PASS (5 real mutations)")
+    print("REIMPLEMENT-13 generated walk fixture mutation lane: PASS (6 real mutations)")
     raise SystemExit(0)
 print("REIMPLEMENT-13 entry/player/scheduler/class1f/Coffee-Shop-navigation/neutral-stop/melee/Button1/Button3/type16-projectile/player-HIT/first-encounter differential: PASS (224 real mutations)")

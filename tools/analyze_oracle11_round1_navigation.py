@@ -18,6 +18,13 @@ CORRECTIVE_B = ROOT / ".deps" / "mame" / "reimplement13_navigation_fields_h"
 OBSTACLE_A = ROOT / ".deps" / "mame" / "oracle11_progression_lifecycle_cs21a"
 OBSTACLE_B = ROOT / ".deps" / "mame" / "oracle11_progression_lifecycle_cs21b"
 OBSTACLE_MUTANT = ROOT / ".deps" / "mame" / "oracle11_progression_lifecycle_cs21s"
+TERRAIN_STREAM_A = ROOT / ".deps" / "mame" / "oracle11_progression_lifecycle_cs58a"
+TERRAIN_STREAM_B = ROOT / ".deps" / "mame" / "oracle11_progression_lifecycle_cs58b"
+TERRAIN_STREAM_MUTANT = ROOT / ".deps" / "mame" / "oracle11_progression_lifecycle_cs58m"
+TERRAIN_STREAM_BACKTRACK_A = ROOT / ".deps" / "mame" / "oracle11_progression_lifecycle_cs59a"
+TERRAIN_STREAM_BACKTRACK_B = ROOT / ".deps" / "mame" / "oracle11_progression_lifecycle_cs59b"
+TERRAIN_STREAM_FORCED_A = ROOT / ".deps" / "mame" / "oracle11_progression_lifecycle_cs60a"
+TERRAIN_STREAM_FORCED_B = ROOT / ".deps" / "mame" / "oracle11_progression_lifecycle_cs60b"
 ORACLE08 = ROOT / "data" / "oracle08_round1_navigation_bounds.json"
 ORACLE10 = ROOT / "data" / "oracle10_round1_route.json"
 SCHEDULER = ROOT / "data" / "oracle11_actor_scheduler_lifecycle.json"
@@ -54,6 +61,11 @@ OBSTACLE_CAPTURE_FILES = (
     "coffee_shop_scene_actors.tsv", "coffee_shop_scene_frames.tsv",
     "coffee_shop_scene_health_writes.tsv", "coffee_shop_rng_calls.tsv",
     "dispatches.tsv", "progression_result.tsv",
+)
+TERRAIN_STREAM_CAPTURE_FILES = (
+    "coffee_shop_terrain_stream.tsv", "coffee_shop_terrain_patch.tsv",
+    "coffee_shop_scene_actors.tsv", "coffee_shop_scene_frames.tsv",
+    "progression_result.tsv",
 )
 
 
@@ -735,6 +747,217 @@ def terrain_interpreter_contract(opcodes: bytes, program: bytes,
     }
 
 
+def terrain_streaming_contract(opcodes: bytes) -> dict[str, object]:
+    def identity(path: Path) -> dict[str, str]:
+        return {name: digest(path / name) for name in TERRAIN_STREAM_CAPTURE_FILES}
+
+    identity_a = identity(TERRAIN_STREAM_A)
+    identity_b = identity(TERRAIN_STREAM_B)
+    identity_mutant = identity(TERRAIN_STREAM_MUTANT)
+    identity_backtrack_a = identity(TERRAIN_STREAM_BACKTRACK_A)
+    identity_backtrack_b = identity(TERRAIN_STREAM_BACKTRACK_B)
+    identity_forced_a = identity(TERRAIN_STREAM_FORCED_A)
+    identity_forced_b = identity(TERRAIN_STREAM_FORCED_B)
+    require(identity_a == identity_b,
+            "Coffee Shop terrain-stream baselines differ")
+    require(identity_backtrack_a == identity_backtrack_b,
+            "Coffee Shop terrain-stream backtrack captures differ")
+    require(identity_forced_a == identity_forced_b,
+            "Coffee Shop terrain-stream forced-backtrack captures differ")
+    baseline = rows(TERRAIN_STREAM_A / "coffee_shop_terrain_stream.tsv")
+    backtrack = rows(
+        TERRAIN_STREAM_BACKTRACK_A / "coffee_shop_terrain_stream.tsv")
+    mutant = rows(TERRAIN_STREAM_MUTANT / "coffee_shop_terrain_stream.tsv")
+    require(len(baseline) == 1224 and len(mutant) == 828 and
+            all(row["pc"] == "0b2832" and row["a6"] == "ff8268" and
+                row["camera_mode"] == "00" and
+                int(row["address"], 16) & 3 == 2
+                for row in baseline),
+            "Coffee Shop terrain-stream write universe drift")
+
+    grouped: list[list[dict[str, str]]] = []
+    current_key: tuple[str, ...] | None = None
+    for row in baseline:
+        key = (row["frame"], row["camera_x"], row["camera_z"],
+               row["camera_phase_x"], row["camera_direction"])
+        if key != current_key:
+            grouped.append([])
+            current_key = key
+        grouped[-1].append(row)
+    require(len(grouped) == 34 and all(len(group) == 36 for group in grouped),
+            "Coffee Shop terrain-stream transaction grouping drift")
+
+    backtrack_groups: list[list[dict[str, str]]] = []
+    current_key = None
+    for row in backtrack:
+        key = (row["frame"], row["camera_x"], row["camera_z"],
+               row["camera_phase_x"], row["camera_direction"])
+        if key != current_key:
+            backtrack_groups.append([])
+            current_key = key
+        backtrack_groups[-1].append(row)
+    backtrack_groups = [group for group in backtrack_groups
+                        if group[0]["camera_direction"] == "04"]
+    require(len(backtrack_groups) == 5 and
+            all(len(group) == 36 and
+                all(row["selector_before"] == row["selector_data"]
+                    for row in group)
+                for group in backtrack_groups),
+            "Coffee Shop terrain-stream backtrack universe drift")
+    grouped.extend(backtrack_groups)
+    forced = rows(TERRAIN_STREAM_FORCED_A / "coffee_shop_terrain_stream.tsv")
+    forced_groups: list[list[dict[str, str]]] = []
+    current_key = None
+    for row in forced:
+        key = (row["frame"], row["camera_x"], row["camera_z"],
+               row["camera_phase_x"], row["camera_direction"])
+        if key != current_key:
+            forced_groups.append([])
+            current_key = key
+        forced_groups[-1].append(row)
+    forced_groups = [group for group in forced_groups
+                     if group[0]["camera_direction"] == "04" and
+                     2300 <= int(group[0]["frame"]) <= 2303]
+    require(len(forced_groups) == 3 and
+            [int(group[0]["camera_x"]) for group in forced_groups] ==
+            [682, 671, 649] and
+            all(len(group) == 36 and
+                all(row["selector_before"] == row["selector_data"]
+                    for row in group)
+                for group in forced_groups),
+            "Coffee Shop terrain-stream forced-backtrack universe drift")
+    grouped.extend(forced_groups)
+
+    unique_groups: list[list[dict[str, str]]] = []
+    unique_by_lookup: dict[tuple[int, int, int], list[dict[str, str]]] = {}
+    for group in grouped:
+        first = group[0]
+        lookup_key = (int(first["camera_x"]) >> 4,
+                      int(first["camera_z"]) >> 4,
+                      int(first["camera_direction"], 16))
+        if lookup_key in unique_by_lookup:
+            existing = unique_by_lookup[lookup_key]
+            require([(row["address"], row["selector_data"],
+                      row["attribute_data"]) for row in existing] ==
+                    [(row["address"], row["selector_data"],
+                      row["attribute_data"]) for row in group],
+                    "Coffee Shop terrain-stream duplicate lookup differs")
+            continue
+        unique_by_lookup[lookup_key] = group
+        unique_groups.append(group)
+    grouped = unique_groups
+
+    transactions = []
+    lookup_keys: set[tuple[int, int, int]] = set()
+    for ordinal, group in enumerate(grouped):
+        first = group[0]
+        camera_x = int(first["camera_x"])
+        camera_z = int(first["camera_z"])
+        direction = int(first["camera_direction"], 16)
+        lookup_key = (camera_x >> 4, camera_z >> 4, direction)
+        require(lookup_key not in lookup_keys,
+                "Coffee Shop terrain-stream lookup key is ambiguous")
+        lookup_keys.add(lookup_key)
+        packed = bytearray()
+        writes = []
+        for row in group:
+            index = (int(row["address"], 16) - 0x904002) >> 2
+            selector = int(row["selector_data"], 16)
+            attribute = int(row["attribute_data"], 16)
+            require(0 <= index < 0x1000,
+                    "Coffee Shop terrain-stream selector index drift")
+            packed.extend(index.to_bytes(2, "big"))
+            packed.extend((selector, attribute))
+            writes.append([index, selector, attribute])
+        transactions.append({
+            "ordinal_u16": ordinal,
+            "source_frame_u16": int(first["frame"]),
+            "camera_x_observed_s16": camera_x,
+            "camera_z_observed_s16": camera_z,
+            "camera_x_tile_u8": camera_x >> 4,
+            "camera_z_tile_u8": camera_z >> 4,
+            "direction_u8": direction,
+            "phase_after_u8": int(first["camera_phase_x"], 16),
+            "write_count_u8": len(writes),
+            "writes": writes,
+            "writes_sha256": hashlib.sha256(packed).hexdigest(),
+        })
+
+    target_writes = [row for row in baseline if row["address"] in
+                     {"90636e", "9063ae", "9063ee", "90642e"}]
+    require([(int(row["frame"]), row["address"], row["selector_data"])
+             for row in target_writes] == [
+                 (2251, "90636e", "38"),
+                 (2268, "9063ae", "38"),
+                 (2616, "9063ee", "38"),
+                 (2638, "90642e", "a4"),
+             ], "Coffee Shop route-reachable terrain cells drift")
+    baseline_player = [row for row in rows(
+        TERRAIN_STREAM_A / "coffee_shop_scene_actors.tsv")
+        if row["frame"] == "3578" and row["pool"] == "player"]
+    mutant_player = [row for row in rows(
+        TERRAIN_STREAM_MUTANT / "coffee_shop_scene_actors.tsv")
+        if row["frame"] == "3578" and row["pool"] == "player"]
+    require(len(baseline_player) == len(mutant_player) == 1 and
+            baseline_player[0]["z"] == "319" and
+            mutant_player[0]["z"] == "320" and
+            all(row["mutated"] == "1" for row in mutant) and
+            identity_mutant["coffee_shop_scene_actors.tsv"] !=
+            identity_a["coffee_shop_scene_actors.tsv"] and
+            identity_mutant["coffee_shop_scene_frames.tsv"] !=
+            identity_a["coffee_shop_scene_frames.tsv"],
+            "Coffee Shop terrain-stream mutation did not discriminate")
+    return {
+        "classification": "SOURCE_CLOSED_IMPLEMENTATION_FIELDS",
+        "capture_identity": {
+            "completion_a": identity_a,
+            "completion_b": identity_b,
+            "byte_identical": True,
+            "writer_suppression": identity_mutant,
+            "backtrack_a": identity_backtrack_a,
+            "backtrack_b": identity_backtrack_b,
+            "backtrack_byte_identical": True,
+            "forced_backtrack_a": identity_forced_a,
+            "forced_backtrack_b": identity_forced_b,
+            "forced_backtrack_byte_identical": True,
+        },
+        "source_program": {
+            "camera_guard": "0x0b06b6..0x0b06f6",
+            "camera_guard_sha256": hashlib.sha256(
+                opcodes[0x0B06B6:0x0B06F6]).hexdigest(),
+            "address_and_source_resolver": "0x0b266a..0x0b27ee",
+            "address_and_source_resolver_sha256": hashlib.sha256(
+                opcodes[0x0B266A:0x0B27EE]).hexdigest(),
+            "horizontal_stream": "0x0b27ee..0x0b2836",
+            "horizontal_stream_sha256": hashlib.sha256(
+                opcodes[0x0B27EE:0x0B2836]).hexdigest(),
+            "selector_writer": "0x0b2832",
+        },
+        "initial_phase_x_u8": 0x10,
+        "guard": (
+            "after camera target/position update, compare "
+            "u8(camera+0x20)&0x10 with camera+0x44; when equal, toggle "
+            "camera+0x44 by 0x10 and stream the crossed column"),
+        "lookup_key": ["camera_x_s16>>4", "camera_z_s16>>4",
+                       "direction_u8"],
+        "direction_values": {"forward": 0, "backward": 4},
+        "scheduler_order": (
+            "terrain resolution reads the existing map; camera position then "
+            "updates; the camera phase guard streams the new column for the "
+            "next scheduler update"),
+        "transaction_count_u16": len(transactions),
+        "write_count_u16": sum(len(group) for group in grouped),
+        "transactions": transactions,
+        "mutation_control": {
+            "suppressed_writer": "0x0b2832",
+            "mutated_writes_u16": len(mutant),
+            "baseline_frame_3578_player_z_s16": 319,
+            "mutant_frame_3578_player_z_s16": 320,
+            "fixed_frame_or_static_snapshot_substitute_rejected": True,
+        },
+    }
+
+
 def obstacle_implementation_contract(program: bytes, opcodes: bytes,
                                      resolve_rows: list[dict[str, str]]) -> dict[str, object]:
     animation = 0x06E136
@@ -1145,6 +1368,8 @@ def build_report() -> dict[str, object]:
     terrain_map = (CORRECTIVE_A / "terrain_map.bin").read_bytes()
     terrain_contract = terrain_interpreter_contract(opcodes, program,
                                                     terrain_map)
+    terrain_contract["selection"]["camera_streaming_program"] = (
+        terrain_streaming_contract(opcodes))
     handler_entry = {0: "0x0b1c14", 2: "0x0b1c54",
                      4: "0x0b1d0e", 6: "0x0b1e9c"}
     for item in terrain:
@@ -1328,6 +1553,7 @@ def validate(report: dict[str, object]) -> None:
                 for item in terrain["records"]), "terrain closure drift")
     terrain_contract = terrain["implementation_contract"]
     packed_grid = terrain_contract["selection"]["bounded_packed_grid"]
+    terrain_stream = terrain_contract["selection"]["camera_streaming_program"]
     packed_grid_bytes = bytes.fromhex(packed_grid["packed_bytes_hex"])
     expected_decoded = {
         "0x0b20c6": {"kind_u8": 0, "branch_selector_u8": 128,
@@ -1365,6 +1591,23 @@ def validate(report: dict[str, object]) -> None:
             "0x0b1d0e" and
             terrain_contract["handlers"]["6"]["selected_entry"] ==
             "0x0b1e9c" and
+            terrain_stream["classification"] ==
+            "SOURCE_CLOSED_IMPLEMENTATION_FIELDS" and
+            terrain_stream["capture_identity"]["byte_identical"] is True and
+            terrain_stream["initial_phase_x_u8"] == 0x10 and
+            terrain_stream["transaction_count_u16"] == 41 and
+            terrain_stream["write_count_u16"] == 1476 and
+            len(terrain_stream["transactions"]) == 41 and
+            all(item["write_count_u8"] == 36 and
+                len(item["writes"]) == 36
+                for item in terrain_stream["transactions"]) and
+            terrain_stream["mutation_control"] == {
+                "suppressed_writer": "0x0b2832",
+                "mutated_writes_u16": 828,
+                "baseline_frame_3578_player_z_s16": 319,
+                "mutant_frame_3578_player_z_s16": 320,
+                "fixed_frame_or_static_snapshot_substitute_rejected": True,
+            } and
             packed_grid["classification"] == "SOURCE_DERIVED_CONTENT_DATA" and
             packed_grid["world_x_inclusive"] == [640, 1360] and
             packed_grid["world_z_inclusive"] == [272, 400] and

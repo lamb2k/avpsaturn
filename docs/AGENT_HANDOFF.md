@@ -12,43 +12,38 @@ roadmap, workflow, branch, task hierarchy, coverage system, or writer. Preserve 
 `data/avsp_anim_records.json` or `history.txt`; stage owned paths explicitly.
 
 ## Verified active boundary
+The accumulated Coffee Shop program work is preserved. The latest bounded
+correction makes type-16 collision depend on the source current player hurt
+selector 17. The fabricated native frame-3878 hit is gone; the legitimate
+frame-3877 HIT, frame-3878 special entry, frame-3891 selector-11 contact, and
+class-`0x1f` special-KO trajectory through release frame 4002 remain exact.
+The focused player-HIT lane passes nine real mutations and Oracle/SPEC/header
+validation passes.
 
-The Coffee Shop contextual Button2 body is source-bound through its target
-context, `0x1400/0x1402` transition, records `0x160288..0x1602c8`, selectors
-21/20, movement, collision, exit, and real mutations. The shared Button1
-fractional-position latch remains preserved.
-
-The normal right-facing Button3 Coffee Shop route now reproduces the accepted
-source chronology exactly: physical input frame 3440, pipeline edge 3441, jump
-dispatch 3442, active air 3444, landing 3482, and neutral 3484. Native uses the
-generated selector-5 contract, signed 16.16 movement, source projection,
-fraction-preserving landing, and neutral timer/branch values. The focused jump
-lane passes 11 real mutations; contextual Button2 passes eight; Button1 passes
-nine. Oracle/SPEC analyzers and generated-header validation pass.
-
-Target `LiveEncounterBench` BUILD_ONLY passes: GAME.BIN 402704 bytes, BSS end
-`0x060bc390`, ISO `/GAME.BIN` SHA-256
-`8cf0f975f6ca4f7ac62795e3dd193dd1ce5e0dfc92edacacf04a6cfe76ce4e3b`.
-The combat overlay remains byte-identical at SHA-256
+Target `LiveEncounterBench` BUILD_ONLY passes with GAME.BIN 417840 bytes and
+BSS end `0x060bfef0`. The exact 4096-byte terrain selector map is reconstructed
+from a deterministic 383-run encoding, preserving all source selectors while
+remaining inside the existing memory carve. The combat overlay remains
+byte-identical at SHA-256
 `171f0dfa25d8a1fe94d2889f89c78e71bd3b1cfffa9fd5ff11964b1fc23815fe`.
-
-Ignored diagnostics remain `.deps/reimplement13_coffee_native_failure.tsv`, its
-`.stderr`, and `.deps/mame/oracle11_progression_lifecycle_cs21a/coffee_shop_scene_actors.tsv`.
+Fast and Oracle reach the intentional full-host RED boundary at source frame
+3782 (stage-progress call count 8 versus 7); no candidate promotion is made.
 
 ## Exact next experiment
 
-Continue from the first remaining source/native divergence at source frame
-3530. Player state, action, animation, and signed 16.16 position match through
-frame 3529. At 3530 the source advances from X `0x04a0d000` to `0x04a2d000`,
-while native remains globally clamped at X high word `0x04a0`. Compare native
-and source camera chronology at frames 3519, 3529, 3530, 3540, 3550, and 3561,
-then identify the owning reusable global-bounds/camera phase program. Close all
-Coffee Shop-reachable branches from accepted Oracle/SPEC evidence; do not add a
-frame exception, authored delay, or guessed unlock.
+Close the complete Coffee Shop-reachable record-type-20/class-`0x05` source
+program exposed by the scene differential. Source slots `0x00ffb180` and
+`0x00ffb280` enter at frame 2673. The latter receives the source special contact
+at frame 3891, transitions `0x0200 -> 0x0400 -> 0x0402 -> 0x0404 -> 0x0604`,
+consumes its source RNG, allocates the second class-`0x4e` variant-1 impact in
+slot `0x00ffc200`, and releases at frame 3931. Native currently omits this
+program, leaving RNG two calls behind and causing the later class-`0x1f`
+action/collision divergence.
 
-After that program passes focused differential, mutations, fixture validation,
-Target, and one pinned scene run, regenerate the complete Coffee Shop census.
-Keep the scene RED until zero unexplained gameplay-authoritative differences,
-zero unowned actors/events, and no retained gameplay authority remain. Paired
-cold Emulator and full WGC remain reserved for the coherent program or scene
-gate.
+Use the existing full-scene capture, decrypted program, and accepted evidence
+first. If exact dispatch, guards, writers, or release fields remain absent,
+perform only the smallest bounded MAME Oracle follow-up and amend the existing
+auxiliary SPEC fixture. Implement the whole reusable class program, not a
+frame/slot exception. Then run focused differential, mutations, fixture checks,
+Target, one pinned scene run, and regenerate the complete census. Paired cold
+Emulator and full WGC remain reserved for a coherent program or scene gate.

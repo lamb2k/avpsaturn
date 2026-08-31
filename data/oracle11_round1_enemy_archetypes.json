@@ -27757,6 +27757,44 @@
             "rule": "the accepted adapter owns intermediate HIT/KO writes; native fixed-pool release may consume outer 0x0600 only after the KO timer and adapter sequence complete",
             "terminal_release_outer_state_u16": 1536
           },
+          "common_collision_reaction_facing": {
+            "classification": "SOURCE_CLOSED_IMPLEMENTATION_FIELDS",
+            "coffee_shop_control": {
+              "facing_u8": 0,
+              "health_s16": -1,
+              "outer_state_u16": 1024,
+              "reaction_facing_u8": 1,
+              "source_frame_u16": 3830,
+              "target_slot": "0x00ffa000"
+            },
+            "facing_xor_u8": 1,
+            "facing_xor_writer": "0x01d44e",
+            "guard": {
+              "coffee_shop_attack_record": "0x02fc58",
+              "coffee_shop_class1f_type12_reaches_writer": true,
+              "excluded_target_classes_u8": [
+                17,
+                32,
+                16,
+                38
+              ],
+              "excluded_target_type_u8": 20
+            },
+            "mutation_control": {
+              "expected_discriminating_effect": "Coffee Shop slot 0x00ffa000 faces 1 instead of source-facing 0 at frame 3830 while the KO state, health and animation remain unchanged",
+              "mutation": "omit the XOR and retain the prior target facing"
+            },
+            "reaction_facing_writer": "0x01d448",
+            "reads": {
+              "reaction_facing_u8": "target actor+0x4f"
+            },
+            "rule": "target.facing_u8 = target.reaction_facing_u8 XOR 1",
+            "source_entry": "0x01d416",
+            "source_window_sha256": "aab16f054a654c0cbb500ed9df53f80b56ee323a7bee89b03351f1f69f3564e6",
+            "writes": {
+              "facing_u8": "target actor+0x0f"
+            }
+          },
           "damage_by_player_selector_s16": [
             8,
             8,
@@ -27795,7 +27833,7 @@
             },
             "capture_identity": {
               "byte_identical": true,
-              "capture_script_sha256": "231b9316eb718cbdbb2d3022d25682a6e5ab7e68eebd094d77f8c2ab52790396",
+              "capture_script_sha256": "8493ee77b036cd9318d608363d4c9356e2e41f93d560e324f686f94765d286a2",
               "completion_a": {
                 "coffee_shop_class1f_hit.tsv": "cc411e49ae629a622166f40a69c363f4ebdffb7b0f655e45b3334b3034d91648",
                 "coffee_shop_class1f_hit_program.tsv": "5dec2f9eb35a4303d0e4711d2b51def0e1bf57d411e1294596cbb64b93dfae90",
@@ -28562,7 +28600,7 @@
           "source_projectile_ko_program": {
             "capture_identity": {
               "byte_identical": true,
-              "capture_script_sha256": "231b9316eb718cbdbb2d3022d25682a6e5ab7e68eebd094d77f8c2ab52790396",
+              "capture_script_sha256": "8493ee77b036cd9318d608363d4c9356e2e41f93d560e324f686f94765d286a2",
               "completion_a": {
                 "coffee_shop_class1f_hit.tsv": "ba5702bcc089aefcb3746144f5d60b61e5e72c3a0823107701b6b3fd63445335",
                 "coffee_shop_class1f_hit_program.tsv": "cbfcbfb3557698fff37e10f15cbe154a8305ce8d55d143f253eafe3f137ac4c5",
@@ -28894,6 +28932,7 @@
           "wrong HIT duration",
           "wrong KO duration",
           "wrong reaction field mapping",
+          "wrong collision reaction-facing XOR",
           "immediate KO release",
           "presentation-owned removal",
           "retained encounter gameplay step"
@@ -38407,13 +38446,28 @@
               "y_acceleration_s32_16_16": -38400,
               "y_velocity_s32_16_16": 786432
             },
+            "phase_4_Coffee_Shop_control": {
+              "animation_record": "0x0012e550",
+              "next_phase_u16": 6,
+              "prior_y_fp_s32_16_16": "0x0146c000",
+              "result_y_fp_s32_16_16": "0x013aba00",
+              "result_y_high_s16": 314,
+              "source_frame_u16": 3807,
+              "source_slot": "0x00ff9dc0",
+              "y_velocity_s32_16_16": -787968,
+              "z_s16": 315
+            },
             "phase_4_arithmetic": [
               "x_fp += x_velocity; x_velocity += x_acceleration",
               "y_fp += y_velocity; y_velocity += y_acceleration",
               "continue while unsigned z_s16 < unsigned y_high_s16",
-              "on landing replace only y_fp high word with z_s16 and preserve the accumulated low 16-bit fraction",
+              "on landing retain the accumulated y_fp unchanged; do not snap its high word to z_s16",
               "clear airborne, increment phase to 6, bind selector 0x53"
             ],
+            "phase_4_mutation_control": {
+              "fixed_frame_landing_forbidden": true,
+              "snap_y_high_to_z": "must produce 0x013bba00 instead of source 0x013aba00 at Coffee Shop source frame 3807"
+            },
             "phase_6": "step animation; each positive actor+0x25 event calls 0x0413d2; terminal increments phase and writes action_timer_u8=8",
             "phase_8": "decrement action_timer_u8; zero branches to 0x040efe and clears action when actor+0x6e is zero",
             "phase_8_terminal_writes": {
@@ -39755,6 +39809,358 @@
               "next_animation_record": "0x0012e68c",
               "record_sha256": "b0b826483693bfa990426869cd1920515ed0bf4f387b1f7d6b5db6aca71d36ef",
               "timer_u16": 6
+            },
+            {
+              "animation_record": "0x0012ed90",
+              "assembly": "0x0012f638",
+              "attack_selector_u8": 0,
+              "branch_s16": 27,
+              "hurt_selector_u8": 1,
+              "movement_table_index_u8": 27,
+              "next_animation_record": "0x0012eda0",
+              "record_sha256": "7c44cb0c4b23c9f0ae1084cbaf617013f7524b1d5c13f9d35c92b4ec0948a665",
+              "timer_u16": 4
+            },
+            {
+              "animation_record": "0x0012eda0",
+              "assembly": "0x0012f670",
+              "attack_selector_u8": 0,
+              "branch_s16": 271,
+              "hurt_selector_u8": 1,
+              "movement_table_index_u8": 15,
+              "next_animation_record": "0x0012edb0",
+              "record_sha256": "9275bbe8e8af175d4fdcff5793dcebad14ab14cc7039848eec89c38ec91d53a3",
+              "timer_u16": 3
+            },
+            {
+              "animation_record": "0x0012edb0",
+              "assembly": "0x0012f6a8",
+              "attack_selector_u8": 0,
+              "branch_s16": 524,
+              "hurt_selector_u8": 1,
+              "movement_table_index_u8": 12,
+              "next_animation_record": "0x0012edc0",
+              "record_sha256": "c8cdf178a69029f1cfce64cf3fefdb83ca172378bed8effe174b44d5685d9139",
+              "timer_u16": 4
+            },
+            {
+              "animation_record": "0x0012edc0",
+              "assembly": "0x0012f6da",
+              "attack_selector_u8": 0,
+              "branch_s16": 779,
+              "hurt_selector_u8": 1,
+              "movement_table_index_u8": 11,
+              "next_animation_record": "0x0012edd0",
+              "record_sha256": "ae7dfe52fd2f4c832cab0a8e2dbc40b21f128d10e481bbd0a7ae49b32e5ca2b9",
+              "timer_u16": 3
+            },
+            {
+              "animation_record": "0x0012edd0",
+              "assembly": "0x0012f712",
+              "attack_selector_u8": 0,
+              "branch_s16": 1036,
+              "hurt_selector_u8": 1,
+              "movement_table_index_u8": 12,
+              "next_animation_record": "0x0012ede0",
+              "record_sha256": "ec4b24bc69ff4a5edcd21779d9fc38b2e1ebe8045df8e5b1492b9b4b05e9fcfd",
+              "timer_u16": 4
+            },
+            {
+              "animation_record": "0x0012ede0",
+              "assembly": "0x0012f72a",
+              "attack_selector_u8": 0,
+              "branch_s16": 1292,
+              "hurt_selector_u8": 1,
+              "movement_table_index_u8": 12,
+              "next_animation_record": "0x0012edf0",
+              "record_sha256": "c8ca8e65f28e0ddce107b1017663295f48d502def3fcb0e0fac2ffa4dc97df35",
+              "timer_u16": 3
+            },
+            {
+              "animation_record": "0x0012edf0",
+              "assembly": "0x0012f762",
+              "attack_selector_u8": 0,
+              "branch_s16": 1548,
+              "hurt_selector_u8": 1,
+              "movement_table_index_u8": 12,
+              "next_animation_record": "0x0012ee00",
+              "record_sha256": "dad8c052992f3b8ecf7f0109abbddc96213c3b042eff7966590c8cc70b90ed2d",
+              "timer_u16": 4
+            },
+            {
+              "animation_record": "0x0012ee00",
+              "assembly": "0x0012f794",
+              "attack_selector_u8": 0,
+              "branch_s16": -30962,
+              "hurt_selector_u8": 1,
+              "movement_table_index_u8": 14,
+              "next_animation_record": "0x0012ed90",
+              "record_sha256": "88974f35b7d83018f3db8936b4d19e9e40cab5e7e3b9b06aefd78f9181c7bda9",
+              "timer_u16": 3
+            },
+            {
+              "animation_record": "0x0012ee14",
+              "assembly": "0x0012f794",
+              "attack_selector_u8": 0,
+              "branch_s16": 1804,
+              "hurt_selector_u8": 1,
+              "movement_table_index_u8": 12,
+              "next_animation_record": "0x0012ee24",
+              "record_sha256": "38336866254472e1b926fc7449932b3be82bf519be66217144bea9caee650acc",
+              "timer_u16": 4
+            },
+            {
+              "animation_record": "0x0012ee24",
+              "assembly": "0x0012f762",
+              "attack_selector_u8": 0,
+              "branch_s16": 1551,
+              "hurt_selector_u8": 1,
+              "movement_table_index_u8": 15,
+              "next_animation_record": "0x0012ee34",
+              "record_sha256": "4b9c0bf2e9ae1d19252c5c7864c6848d50afcfcab0a03fa4e6471d3a51285c1e",
+              "timer_u16": 3
+            },
+            {
+              "animation_record": "0x0012ee34",
+              "assembly": "0x0012f72a",
+              "attack_selector_u8": 0,
+              "branch_s16": 1292,
+              "hurt_selector_u8": 1,
+              "movement_table_index_u8": 12,
+              "next_animation_record": "0x0012ee44",
+              "record_sha256": "69231a3045996af384983ebb88b4e3b676db95d2d8a0734c6871b9d5fd5861fb",
+              "timer_u16": 4
+            },
+            {
+              "animation_record": "0x0012ee44",
+              "assembly": "0x0012f712",
+              "attack_selector_u8": 0,
+              "branch_s16": 1039,
+              "hurt_selector_u8": 1,
+              "movement_table_index_u8": 15,
+              "next_animation_record": "0x0012ee54",
+              "record_sha256": "bca6a2ac6263496896401f5a459e4f489825e72574e4d57327488f3f96b170fb",
+              "timer_u16": 3
+            },
+            {
+              "animation_record": "0x0012ee54",
+              "assembly": "0x0012f6da",
+              "attack_selector_u8": 0,
+              "branch_s16": 780,
+              "hurt_selector_u8": 1,
+              "movement_table_index_u8": 12,
+              "next_animation_record": "0x0012ee64",
+              "record_sha256": "e8ab1319dd1b5841ba02152aedeb0ea5c9f688ca1e192e2882697841e250caed",
+              "timer_u16": 4
+            },
+            {
+              "animation_record": "0x0012ee64",
+              "assembly": "0x0012f6a8",
+              "attack_selector_u8": 0,
+              "branch_s16": 524,
+              "hurt_selector_u8": 1,
+              "movement_table_index_u8": 12,
+              "next_animation_record": "0x0012ee74",
+              "record_sha256": "68a8a56d420f9416365583b7d2732bc5e503124adca664c0e0c478f366e5d6ff",
+              "timer_u16": 3
+            },
+            {
+              "animation_record": "0x0012ee74",
+              "assembly": "0x0012f670",
+              "attack_selector_u8": 0,
+              "branch_s16": 268,
+              "hurt_selector_u8": 1,
+              "movement_table_index_u8": 12,
+              "next_animation_record": "0x0012ee84",
+              "record_sha256": "6d0ea56a0617dd910b5e22fb9a3f2c89e87b79599ccd6a2df35cdb151c91b3da",
+              "timer_u16": 4
+            },
+            {
+              "animation_record": "0x0012ee84",
+              "assembly": "0x0012f638",
+              "attack_selector_u8": 0,
+              "branch_s16": -32750,
+              "hurt_selector_u8": 1,
+              "movement_table_index_u8": 18,
+              "next_animation_record": "0x0012ee14",
+              "record_sha256": "245d09e7b1c84197124db9b99d9e8ddf591b28cacc1f6335855ef7f6a764fc4b",
+              "timer_u16": 3
+            },
+            {
+              "animation_record": "0x0012ee98",
+              "assembly": "0x0012f7cc",
+              "attack_selector_u8": 0,
+              "branch_s16": 19,
+              "hurt_selector_u8": 2,
+              "movement_table_index_u8": 19,
+              "next_animation_record": "0x0012eea8",
+              "record_sha256": "030aa305663abbf1150a49027a3f16601ca73967bcaa7f55ed395444ae2105c3",
+              "timer_u16": 4
+            },
+            {
+              "animation_record": "0x0012eea8",
+              "assembly": "0x0012f7e4",
+              "attack_selector_u8": 0,
+              "branch_s16": 267,
+              "hurt_selector_u8": 2,
+              "movement_table_index_u8": 11,
+              "next_animation_record": "0x0012eeb8",
+              "record_sha256": "e50f12f7452c2b84fc3aed9822975766a1f80e76d410f3068e26aea162754eab",
+              "timer_u16": 4
+            },
+            {
+              "animation_record": "0x0012eeb8",
+              "assembly": "0x0012f7fc",
+              "attack_selector_u8": 0,
+              "branch_s16": 527,
+              "hurt_selector_u8": 2,
+              "movement_table_index_u8": 15,
+              "next_animation_record": "0x0012eec8",
+              "record_sha256": "6094b15306fa13d214ec577b9abebd8bd94445a5dd05e36c766a7a460d4d1624",
+              "timer_u16": 4
+            },
+            {
+              "animation_record": "0x0012eec8",
+              "assembly": "0x0012f814",
+              "attack_selector_u8": 0,
+              "branch_s16": 793,
+              "hurt_selector_u8": 2,
+              "movement_table_index_u8": 25,
+              "next_animation_record": "0x0012eed8",
+              "record_sha256": "68664a940b906558d6c8ad3d1612f1ac2ac9a0cfce46a7f0004d861f9fa2f2d9",
+              "timer_u16": 4
+            },
+            {
+              "animation_record": "0x0012eed8",
+              "assembly": "0x0012f82c",
+              "attack_selector_u8": 0,
+              "branch_s16": 1047,
+              "hurt_selector_u8": 2,
+              "movement_table_index_u8": 23,
+              "next_animation_record": "0x0012eee8",
+              "record_sha256": "3437f8e76fdfe33d9fac635876359035de99e9dd27e244fcae36a6ae51edb58d",
+              "timer_u16": 4
+            },
+            {
+              "animation_record": "0x0012eee8",
+              "assembly": "0x0012f85e",
+              "attack_selector_u8": 0,
+              "branch_s16": 1292,
+              "hurt_selector_u8": 2,
+              "movement_table_index_u8": 12,
+              "next_animation_record": "0x0012eef8",
+              "record_sha256": "9afcdb15bc43e183f2aca2ee5559b1a92eca81820880283d4d0bf0b2643a62ae",
+              "timer_u16": 4
+            },
+            {
+              "animation_record": "0x0012eef8",
+              "assembly": "0x0012f890",
+              "attack_selector_u8": 0,
+              "branch_s16": 1540,
+              "hurt_selector_u8": 2,
+              "movement_table_index_u8": 4,
+              "next_animation_record": "0x0012ef08",
+              "record_sha256": "20c98ff8d609aed20655f25e1d39e8e62d18d0651800f8f9b25a7e23502cad19",
+              "timer_u16": 4
+            },
+            {
+              "animation_record": "0x0012ef08",
+              "assembly": "0x0012f8b8",
+              "attack_selector_u8": 0,
+              "branch_s16": -30958,
+              "hurt_selector_u8": 2,
+              "movement_table_index_u8": 18,
+              "next_animation_record": "0x0012d404",
+              "record_sha256": "5857eee0440009a0ce91bd03bfcf41a212ab3bcd0b480997fca7145ecdf88cf9",
+              "timer_u16": 4
+            },
+            {
+              "animation_record": "0x0012ef1c",
+              "assembly": "0x0012f8b8",
+              "attack_selector_u8": 0,
+              "branch_s16": 1803,
+              "hurt_selector_u8": 2,
+              "movement_table_index_u8": 11,
+              "next_animation_record": "0x0012ef2c",
+              "record_sha256": "e079026e836d3eb2dcc996ff1276d9886fa872cbc6bd34344b7f601ce1a095f7",
+              "timer_u16": 4
+            },
+            {
+              "animation_record": "0x0012ef2c",
+              "assembly": "0x0012f890",
+              "attack_selector_u8": 0,
+              "branch_s16": 1547,
+              "hurt_selector_u8": 2,
+              "movement_table_index_u8": 11,
+              "next_animation_record": "0x0012ef3c",
+              "record_sha256": "c3dcf793febe56a0eedb629d9ce2b00c94295955fff89b7259b366a96d6c4304",
+              "timer_u16": 4
+            },
+            {
+              "animation_record": "0x0012ef3c",
+              "assembly": "0x0012f85e",
+              "attack_selector_u8": 0,
+              "branch_s16": 1291,
+              "hurt_selector_u8": 2,
+              "movement_table_index_u8": 11,
+              "next_animation_record": "0x0012ef4c",
+              "record_sha256": "9de5e083cffe8cd214074d24f49405ba6eaaf56e56e88a2ae5efc34b0f784c10",
+              "timer_u16": 4
+            },
+            {
+              "animation_record": "0x0012ef4c",
+              "assembly": "0x0012f82c",
+              "attack_selector_u8": 0,
+              "branch_s16": 1035,
+              "hurt_selector_u8": 2,
+              "movement_table_index_u8": 11,
+              "next_animation_record": "0x0012ef5c",
+              "record_sha256": "9984c1c3c0650e15f262fd0ce5e713f63ac16c4a78405c0bbd4e421a590be2d7",
+              "timer_u16": 4
+            },
+            {
+              "animation_record": "0x0012ef5c",
+              "assembly": "0x0012f814",
+              "attack_selector_u8": 0,
+              "branch_s16": 779,
+              "hurt_selector_u8": 2,
+              "movement_table_index_u8": 11,
+              "next_animation_record": "0x0012ef6c",
+              "record_sha256": "60b989f1e557650e132a8713a0954131b6edfb5a5b79504815e59cad4fcbf13a",
+              "timer_u16": 4
+            },
+            {
+              "animation_record": "0x0012ef6c",
+              "assembly": "0x0012f7fc",
+              "attack_selector_u8": 0,
+              "branch_s16": 523,
+              "hurt_selector_u8": 2,
+              "movement_table_index_u8": 11,
+              "next_animation_record": "0x0012ef7c",
+              "record_sha256": "1627e696b7079d2e95bebc9d9f402976f1eadf5b1359fcfe0043a49716a17db0",
+              "timer_u16": 4
+            },
+            {
+              "animation_record": "0x0012ef7c",
+              "assembly": "0x0012f7e4",
+              "attack_selector_u8": 0,
+              "branch_s16": 267,
+              "hurt_selector_u8": 2,
+              "movement_table_index_u8": 11,
+              "next_animation_record": "0x0012ef8c",
+              "record_sha256": "e50f12f7452c2b84fc3aed9822975766a1f80e76d410f3068e26aea162754eab",
+              "timer_u16": 4
+            },
+            {
+              "animation_record": "0x0012ef8c",
+              "assembly": "0x0012f7cc",
+              "attack_selector_u8": 0,
+              "branch_s16": -32757,
+              "hurt_selector_u8": 2,
+              "movement_table_index_u8": 11,
+              "next_animation_record": "0x0012ef1c",
+              "record_sha256": "9a7916d11a7d90a720ea707ad50aa5655e4fe80c311635245a56647524ff4b7f",
+              "timer_u16": 4
             }
           ],
           "capture_identity": {
@@ -41823,8 +42229,10 @@
                 },
                 "mutation_control": {
                   "omitted_clear_tail_rejected": true,
+                  "omitted_post_terrain_direction_rejected": true,
                   "omitted_proximity_first_rejected": true,
-                  "wrong_offset_sign_rejected": true
+                  "wrong_offset_sign_rejected": true,
+                  "zero_contact_direction_change_rejected": true
                 },
                 "per_update_proximity_first": {
                   "helper": "0x041db8",
@@ -41833,6 +42241,43 @@
                   "x_span_u16": 192,
                   "z_bias_u16": 12,
                   "z_span_u16": 24
+                },
+                "post_movement_terrain_direction": {
+                  "Coffee_Shop_control": {
+                    "animation_record": "0x0012d4f8",
+                    "direction_after_u8": 30,
+                    "direction_before_u8": 14,
+                    "source_frame_u16": 3654,
+                    "source_slot": "0x00ffa3c0",
+                    "world_z_s16": 224
+                  },
+                  "direction_delta_u8": 16,
+                  "direction_mask_u8": 31,
+                  "guard": "actor+0x5d:u8 != 0 after 0x016644 returns",
+                  "order": [
+                    "call shared movement and terrain tail 0x016644",
+                    "test actor+0x5d:u8 after the terrain resolver",
+                    "when nonzero add 0x10 to actor+0x0c:u8",
+                    "mask the result to the low five direction bits"
+                  ],
+                  "source_windows": [
+                    {
+                      "first": "0x040ce4",
+                      "last_exclusive": "0x040cfe",
+                      "owner": "action-0x04 common movement tail",
+                      "sha256": "7c9ed6627db5d215e99116f8e2ff9cb306d4d136f6b407fa9d44a1fb1b2d7dd1"
+                    },
+                    {
+                      "first": "0x0419e0",
+                      "last_exclusive": "0x041a00",
+                      "owner": "facing/style movement rebind",
+                      "sha256": "b7b10c278a28ecb61f2784a1f1ca0002ac685ec610eb96e331dca433bf0aff82"
+                    }
+                  ],
+                  "writer_pcs": [
+                    "0x040cf0",
+                    "0x0419f2"
+                  ]
                 },
                 "source_window": {
                   "first": "0x040c7c",
@@ -42275,7 +42720,42 @@
               "terminal_guard": "animation_branch_s16 < 0"
             },
             "action_0x08": {
-              "post_terminal": "consume one field88 RNG plus two 0x041c36 helper RNG calls and bind style85-zero movement chain",
+              "phase_0": {
+                "post_terminal": "consume one field88 RNG plus two 0x041c36 helper RNG calls and bind style85-zero movement chain",
+                "terminal_guard": "animation_branch_s16 < 0",
+                "writes": {
+                  "action_phase_u8": 0,
+                  "action_u8": 4,
+                  "style85_u8": 0
+                }
+              },
+              "phase_2": {
+                "Coffee_Shop_control": {
+                  "animation_branch_s16": -32768,
+                  "animation_record": "0x0012d678",
+                  "animation_timer_u16": 3,
+                  "prior_substate_u16": "0x0802",
+                  "source_frame_u16": 3752,
+                  "source_slot": "0x00ff9dc0",
+                  "style85_u8": 0,
+                  "substate_u16": "0x0e00"
+                },
+                "mutation_control": {
+                  "omit_shared_animation_tail": "must leave timer 4 instead of source timer 3",
+                  "reuse_phase_0_terminal": "must produce action 0x04 instead of source action 0x0e at Coffee Shop source frame 3752"
+                },
+                "per_update_tail": "always step shared animation through 0x016536, including after terminal writes",
+                "source_window": {
+                  "first": "0x040d56",
+                  "last_exclusive": "0x040d72"
+                },
+                "terminal_guard": "animation_branch_s16 < 0",
+                "terminal_writes": {
+                  "action_phase_u8": 0,
+                  "action_u8": 14,
+                  "style85_u8": 0
+                }
+              },
               "record_chain": [
                 "0x0012d628",
                 "0x0012d638",
@@ -42283,13 +42763,7 @@
                 "0x0012d658",
                 "0x0012d668",
                 "0x0012d678"
-              ],
-              "terminal_guard": "animation_branch_s16 < 0",
-              "writes": {
-                "action_phase_u8": 0,
-                "action_u8": 4,
-                "style85_u8": 0
-              }
+              ]
             },
             "action_0x0c": {
               "Coffee_Shop_actor_slots": [
@@ -43616,6 +44090,21 @@
                 "action_timer_u8": 4,
                 "lifetime_timer_u8": 240,
                 "membership_release": "0x041d9c before target allocation",
+                "movement_binding": {
+                  "Coffee_Shop_control": {
+                    "animation_record": "0x0012d50c",
+                    "direction_u8": 30,
+                    "facing_u8": 1,
+                    "relation_u8": 0,
+                    "selector_u8": 26,
+                    "source_frame_u16": 3655,
+                    "source_slot": "0x00ffa3c0",
+                    "style85_u8": 1
+                  },
+                  "fixed_style_record_forbidden": true,
+                  "selector_rule": "reuse source_tables.movement_selector_by_style_relation after preserving the current direction and facing",
+                  "source_entry": "0x0419a4"
+                },
                 "source_entry": "0x041a5c",
                 "target_allocator": "0x017020; Coffee Shop resolves player slot 0xff8380",
                 "unreached_phases": {
@@ -43649,10 +44138,36 @@
                 "z_offset_s16": 0
               },
               "overlap_transition": {
-                "action_phase_u8": 0,
-                "action_u8": 14,
+                "Coffee_Shop_control": {
+                  "animation_record": "0x0012d628",
+                  "prior_substate_u16": "0x1000",
+                  "result_substate_u16": "0x0802",
+                  "source_frame_u16": 3722,
+                  "source_slot": "0x00ff9dc0",
+                  "style85_u8": 1
+                },
+                "base_writes": {
+                  "action_phase_u8": 0,
+                  "action_u8": 14,
+                  "writer": "0x04130e"
+                },
                 "guard": "0x041bee returns nonzero",
-                "writer": "0x04130e"
+                "mutation_control": {
+                  "fixed_frame_transition_forbidden": true,
+                  "omit_style_override": "must produce action 0x0e instead of source action 0x08 at Coffee Shop source frame 3722"
+                },
+                "style85_nonzero_override": {
+                  "action_phase_u8": 2,
+                  "action_u8": 8,
+                  "guard": "actor+0x85 style85_u8 is nonzero",
+                  "selector_u8": 36,
+                  "start_animation_record": "0x0012d628",
+                  "writers": [
+                    "0x041318",
+                    "0x04131e",
+                    "0x041324"
+                  ]
+                }
               },
               "per_update_order": [
                 "0x041db8 target proximity",
@@ -43663,6 +44178,44 @@
                 "0x041bee exact target x +/-16 and z +/-12 overlap",
                 "0x016644 movement step"
               ],
+              "phase_terminal_movement_binding": {
+                "Coffee_Shop_control": {
+                  "animation_branch_s16": 19,
+                  "animation_record": "0x0012ee98",
+                  "animation_timer_u16": 4,
+                  "direction_u8": 6,
+                  "facing_u8": 1,
+                  "prior_substate_u16": "0x1006",
+                  "relation_u8": 1,
+                  "selector_u8": 66,
+                  "source_frame_u16": 3697,
+                  "source_slot": "0x00ff9dc0",
+                  "style85_u8": 1,
+                  "substate_u16": "0x1000",
+                  "x_fp_s32_16_16": "0x0429bf00",
+                  "y_fp_s32_16_16": "0x01223f00",
+                  "z_s16": 290
+                },
+                "fixed_style_or_regular_movement_record_forbidden": true,
+                "movement_order": [
+                  "bind the selected animation record",
+                  "apply one shared movement step through 0x016624",
+                  "when actor+0x5d is nonzero add 0x10 to direction and mask to low five bits"
+                ],
+                "mutation_control": {
+                  "fixed_frame_transition_forbidden": true,
+                  "replace_selector_66_with_regular_style_one_selector_18": "must diverge at Coffee Shop source frame 3697"
+                },
+                "phase_6_write": "style85_u8 = 1 before selector relation",
+                "selector_rule": "use source_tables.action10_phase_terminal_selector_by_style_relation after preserving current direction and facing",
+                "source_entry": "0x041a00",
+                "source_phases_u8": [
+                  2,
+                  4,
+                  6
+                ],
+                "terminal_guard": "animation_branch_s16 < 0"
+              },
               "record_chain": [
                 "0x0012d404",
                 "0x0012d414",
@@ -44069,6 +44622,484 @@
             "source_slot": "0x00ffa3c0",
             "source_tables": {
               "action0_style_bits_u16": "0x6db6",
+              "action10_phase_terminal_selector_by_style_relation": {
+                "relation": "((direction_u8 >> 4) & 1) XOR (facing_u8 & 1)",
+                "rows": [
+                  {
+                    "direction_facing_relation_u8": 1,
+                    "records": [
+                      {
+                        "animation_record": "0x0012ed90",
+                        "assembly": "0x0012f638",
+                        "attack_selector_u8": 0,
+                        "branch_s16": 27,
+                        "hurt_selector_u8": 1,
+                        "movement_table_index_u8": 27,
+                        "next_animation_record": "0x0012eda0",
+                        "record_sha256": "7c44cb0c4b23c9f0ae1084cbaf617013f7524b1d5c13f9d35c92b4ec0948a665",
+                        "timer_u16": 4
+                      },
+                      {
+                        "animation_record": "0x0012eda0",
+                        "assembly": "0x0012f670",
+                        "attack_selector_u8": 0,
+                        "branch_s16": 271,
+                        "hurt_selector_u8": 1,
+                        "movement_table_index_u8": 15,
+                        "next_animation_record": "0x0012edb0",
+                        "record_sha256": "9275bbe8e8af175d4fdcff5793dcebad14ab14cc7039848eec89c38ec91d53a3",
+                        "timer_u16": 3
+                      },
+                      {
+                        "animation_record": "0x0012edb0",
+                        "assembly": "0x0012f6a8",
+                        "attack_selector_u8": 0,
+                        "branch_s16": 524,
+                        "hurt_selector_u8": 1,
+                        "movement_table_index_u8": 12,
+                        "next_animation_record": "0x0012edc0",
+                        "record_sha256": "c8cdf178a69029f1cfce64cf3fefdb83ca172378bed8effe174b44d5685d9139",
+                        "timer_u16": 4
+                      },
+                      {
+                        "animation_record": "0x0012edc0",
+                        "assembly": "0x0012f6da",
+                        "attack_selector_u8": 0,
+                        "branch_s16": 779,
+                        "hurt_selector_u8": 1,
+                        "movement_table_index_u8": 11,
+                        "next_animation_record": "0x0012edd0",
+                        "record_sha256": "ae7dfe52fd2f4c832cab0a8e2dbc40b21f128d10e481bbd0a7ae49b32e5ca2b9",
+                        "timer_u16": 3
+                      },
+                      {
+                        "animation_record": "0x0012edd0",
+                        "assembly": "0x0012f712",
+                        "attack_selector_u8": 0,
+                        "branch_s16": 1036,
+                        "hurt_selector_u8": 1,
+                        "movement_table_index_u8": 12,
+                        "next_animation_record": "0x0012ede0",
+                        "record_sha256": "ec4b24bc69ff4a5edcd21779d9fc38b2e1ebe8045df8e5b1492b9b4b05e9fcfd",
+                        "timer_u16": 4
+                      },
+                      {
+                        "animation_record": "0x0012ede0",
+                        "assembly": "0x0012f72a",
+                        "attack_selector_u8": 0,
+                        "branch_s16": 1292,
+                        "hurt_selector_u8": 1,
+                        "movement_table_index_u8": 12,
+                        "next_animation_record": "0x0012edf0",
+                        "record_sha256": "c8ca8e65f28e0ddce107b1017663295f48d502def3fcb0e0fac2ffa4dc97df35",
+                        "timer_u16": 3
+                      },
+                      {
+                        "animation_record": "0x0012edf0",
+                        "assembly": "0x0012f762",
+                        "attack_selector_u8": 0,
+                        "branch_s16": 1548,
+                        "hurt_selector_u8": 1,
+                        "movement_table_index_u8": 12,
+                        "next_animation_record": "0x0012ee00",
+                        "record_sha256": "dad8c052992f3b8ecf7f0109abbddc96213c3b042eff7966590c8cc70b90ed2d",
+                        "timer_u16": 4
+                      },
+                      {
+                        "animation_record": "0x0012ee00",
+                        "assembly": "0x0012f794",
+                        "attack_selector_u8": 0,
+                        "branch_s16": -30962,
+                        "hurt_selector_u8": 1,
+                        "movement_table_index_u8": 14,
+                        "next_animation_record": "0x0012ed90",
+                        "record_sha256": "88974f35b7d83018f3db8936b4d19e9e40cab5e7e3b9b06aefd78f9181c7bda9",
+                        "timer_u16": 3
+                      }
+                    ],
+                    "selector_u8": 64,
+                    "start_animation_record": "0x0012ed90",
+                    "style85_u8": 0
+                  },
+                  {
+                    "direction_facing_relation_u8": 0,
+                    "records": [
+                      {
+                        "animation_record": "0x0012ee14",
+                        "assembly": "0x0012f794",
+                        "attack_selector_u8": 0,
+                        "branch_s16": 1804,
+                        "hurt_selector_u8": 1,
+                        "movement_table_index_u8": 12,
+                        "next_animation_record": "0x0012ee24",
+                        "record_sha256": "38336866254472e1b926fc7449932b3be82bf519be66217144bea9caee650acc",
+                        "timer_u16": 4
+                      },
+                      {
+                        "animation_record": "0x0012ee24",
+                        "assembly": "0x0012f762",
+                        "attack_selector_u8": 0,
+                        "branch_s16": 1551,
+                        "hurt_selector_u8": 1,
+                        "movement_table_index_u8": 15,
+                        "next_animation_record": "0x0012ee34",
+                        "record_sha256": "4b9c0bf2e9ae1d19252c5c7864c6848d50afcfcab0a03fa4e6471d3a51285c1e",
+                        "timer_u16": 3
+                      },
+                      {
+                        "animation_record": "0x0012ee34",
+                        "assembly": "0x0012f72a",
+                        "attack_selector_u8": 0,
+                        "branch_s16": 1292,
+                        "hurt_selector_u8": 1,
+                        "movement_table_index_u8": 12,
+                        "next_animation_record": "0x0012ee44",
+                        "record_sha256": "69231a3045996af384983ebb88b4e3b676db95d2d8a0734c6871b9d5fd5861fb",
+                        "timer_u16": 4
+                      },
+                      {
+                        "animation_record": "0x0012ee44",
+                        "assembly": "0x0012f712",
+                        "attack_selector_u8": 0,
+                        "branch_s16": 1039,
+                        "hurt_selector_u8": 1,
+                        "movement_table_index_u8": 15,
+                        "next_animation_record": "0x0012ee54",
+                        "record_sha256": "bca6a2ac6263496896401f5a459e4f489825e72574e4d57327488f3f96b170fb",
+                        "timer_u16": 3
+                      },
+                      {
+                        "animation_record": "0x0012ee54",
+                        "assembly": "0x0012f6da",
+                        "attack_selector_u8": 0,
+                        "branch_s16": 780,
+                        "hurt_selector_u8": 1,
+                        "movement_table_index_u8": 12,
+                        "next_animation_record": "0x0012ee64",
+                        "record_sha256": "e8ab1319dd1b5841ba02152aedeb0ea5c9f688ca1e192e2882697841e250caed",
+                        "timer_u16": 4
+                      },
+                      {
+                        "animation_record": "0x0012ee64",
+                        "assembly": "0x0012f6a8",
+                        "attack_selector_u8": 0,
+                        "branch_s16": 524,
+                        "hurt_selector_u8": 1,
+                        "movement_table_index_u8": 12,
+                        "next_animation_record": "0x0012ee74",
+                        "record_sha256": "68a8a56d420f9416365583b7d2732bc5e503124adca664c0e0c478f366e5d6ff",
+                        "timer_u16": 3
+                      },
+                      {
+                        "animation_record": "0x0012ee74",
+                        "assembly": "0x0012f670",
+                        "attack_selector_u8": 0,
+                        "branch_s16": 268,
+                        "hurt_selector_u8": 1,
+                        "movement_table_index_u8": 12,
+                        "next_animation_record": "0x0012ee84",
+                        "record_sha256": "6d0ea56a0617dd910b5e22fb9a3f2c89e87b79599ccd6a2df35cdb151c91b3da",
+                        "timer_u16": 4
+                      },
+                      {
+                        "animation_record": "0x0012ee84",
+                        "assembly": "0x0012f638",
+                        "attack_selector_u8": 0,
+                        "branch_s16": -32750,
+                        "hurt_selector_u8": 1,
+                        "movement_table_index_u8": 18,
+                        "next_animation_record": "0x0012ee14",
+                        "record_sha256": "245d09e7b1c84197124db9b99d9e8ddf591b28cacc1f6335855ef7f6a764fc4b",
+                        "timer_u16": 3
+                      }
+                    ],
+                    "selector_u8": 65,
+                    "start_animation_record": "0x0012ee14",
+                    "style85_u8": 0
+                  },
+                  {
+                    "direction_facing_relation_u8": 1,
+                    "records": [
+                      {
+                        "animation_record": "0x0012ee98",
+                        "assembly": "0x0012f7cc",
+                        "attack_selector_u8": 0,
+                        "branch_s16": 19,
+                        "hurt_selector_u8": 2,
+                        "movement_table_index_u8": 19,
+                        "next_animation_record": "0x0012eea8",
+                        "record_sha256": "030aa305663abbf1150a49027a3f16601ca73967bcaa7f55ed395444ae2105c3",
+                        "timer_u16": 4
+                      },
+                      {
+                        "animation_record": "0x0012eea8",
+                        "assembly": "0x0012f7e4",
+                        "attack_selector_u8": 0,
+                        "branch_s16": 267,
+                        "hurt_selector_u8": 2,
+                        "movement_table_index_u8": 11,
+                        "next_animation_record": "0x0012eeb8",
+                        "record_sha256": "e50f12f7452c2b84fc3aed9822975766a1f80e76d410f3068e26aea162754eab",
+                        "timer_u16": 4
+                      },
+                      {
+                        "animation_record": "0x0012eeb8",
+                        "assembly": "0x0012f7fc",
+                        "attack_selector_u8": 0,
+                        "branch_s16": 527,
+                        "hurt_selector_u8": 2,
+                        "movement_table_index_u8": 15,
+                        "next_animation_record": "0x0012eec8",
+                        "record_sha256": "6094b15306fa13d214ec577b9abebd8bd94445a5dd05e36c766a7a460d4d1624",
+                        "timer_u16": 4
+                      },
+                      {
+                        "animation_record": "0x0012eec8",
+                        "assembly": "0x0012f814",
+                        "attack_selector_u8": 0,
+                        "branch_s16": 793,
+                        "hurt_selector_u8": 2,
+                        "movement_table_index_u8": 25,
+                        "next_animation_record": "0x0012eed8",
+                        "record_sha256": "68664a940b906558d6c8ad3d1612f1ac2ac9a0cfce46a7f0004d861f9fa2f2d9",
+                        "timer_u16": 4
+                      },
+                      {
+                        "animation_record": "0x0012eed8",
+                        "assembly": "0x0012f82c",
+                        "attack_selector_u8": 0,
+                        "branch_s16": 1047,
+                        "hurt_selector_u8": 2,
+                        "movement_table_index_u8": 23,
+                        "next_animation_record": "0x0012eee8",
+                        "record_sha256": "3437f8e76fdfe33d9fac635876359035de99e9dd27e244fcae36a6ae51edb58d",
+                        "timer_u16": 4
+                      },
+                      {
+                        "animation_record": "0x0012eee8",
+                        "assembly": "0x0012f85e",
+                        "attack_selector_u8": 0,
+                        "branch_s16": 1292,
+                        "hurt_selector_u8": 2,
+                        "movement_table_index_u8": 12,
+                        "next_animation_record": "0x0012eef8",
+                        "record_sha256": "9afcdb15bc43e183f2aca2ee5559b1a92eca81820880283d4d0bf0b2643a62ae",
+                        "timer_u16": 4
+                      },
+                      {
+                        "animation_record": "0x0012eef8",
+                        "assembly": "0x0012f890",
+                        "attack_selector_u8": 0,
+                        "branch_s16": 1540,
+                        "hurt_selector_u8": 2,
+                        "movement_table_index_u8": 4,
+                        "next_animation_record": "0x0012ef08",
+                        "record_sha256": "20c98ff8d609aed20655f25e1d39e8e62d18d0651800f8f9b25a7e23502cad19",
+                        "timer_u16": 4
+                      },
+                      {
+                        "animation_record": "0x0012ef08",
+                        "assembly": "0x0012f8b8",
+                        "attack_selector_u8": 0,
+                        "branch_s16": -30958,
+                        "hurt_selector_u8": 2,
+                        "movement_table_index_u8": 18,
+                        "next_animation_record": "0x0012d404",
+                        "record_sha256": "5857eee0440009a0ce91bd03bfcf41a212ab3bcd0b480997fca7145ecdf88cf9",
+                        "timer_u16": 4
+                      },
+                      {
+                        "animation_record": "0x0012d404",
+                        "assembly": "0x0012f794",
+                        "attack_selector_u8": 0,
+                        "branch_s16": 12,
+                        "hurt_selector_u8": 1,
+                        "movement_table_index_u8": 12,
+                        "next_animation_record": "0x0012d414",
+                        "record_sha256": "2261b213952198733862067047a3eae938bb6de41ae684444d7f2d4a1d08f688",
+                        "timer_u16": 6
+                      },
+                      {
+                        "animation_record": "0x0012d414",
+                        "assembly": "0x0012f762",
+                        "attack_selector_u8": 0,
+                        "branch_s16": 15,
+                        "hurt_selector_u8": 1,
+                        "movement_table_index_u8": 15,
+                        "next_animation_record": "0x0012d424",
+                        "record_sha256": "26f5f3c3a720474eecfb1fa49cba20928751f97b60decabf4879928daa887c13",
+                        "timer_u16": 6
+                      },
+                      {
+                        "animation_record": "0x0012d424",
+                        "assembly": "0x0012f72a",
+                        "attack_selector_u8": 0,
+                        "branch_s16": 12,
+                        "hurt_selector_u8": 1,
+                        "movement_table_index_u8": 12,
+                        "next_animation_record": "0x0012d434",
+                        "record_sha256": "1ab9037adea3d245e77e62ec522e7158e72f261f0b06f1267be112fc3a6f8a0e",
+                        "timer_u16": 6
+                      },
+                      {
+                        "animation_record": "0x0012d434",
+                        "assembly": "0x0012f712",
+                        "attack_selector_u8": 0,
+                        "branch_s16": 15,
+                        "hurt_selector_u8": 1,
+                        "movement_table_index_u8": 15,
+                        "next_animation_record": "0x0012d444",
+                        "record_sha256": "b9151feea7e7a1aa8a9911b37718b4539530f75854b5bfb031d879b05d3fb114",
+                        "timer_u16": 6
+                      },
+                      {
+                        "animation_record": "0x0012d444",
+                        "assembly": "0x0012f6da",
+                        "attack_selector_u8": 0,
+                        "branch_s16": 12,
+                        "hurt_selector_u8": 1,
+                        "movement_table_index_u8": 12,
+                        "next_animation_record": "0x0012d454",
+                        "record_sha256": "9d20b8e8b25df42e91a892e0960694a8a65665b1a5f74c693734ab3f023f9861",
+                        "timer_u16": 6
+                      },
+                      {
+                        "animation_record": "0x0012d454",
+                        "assembly": "0x0012f6a8",
+                        "attack_selector_u8": 0,
+                        "branch_s16": 12,
+                        "hurt_selector_u8": 1,
+                        "movement_table_index_u8": 12,
+                        "next_animation_record": "0x0012d464",
+                        "record_sha256": "fea52bfe67be4fff4b593098f43a44bfbe749e7011447e4be96a59927ea06b3f",
+                        "timer_u16": 6
+                      },
+                      {
+                        "animation_record": "0x0012d464",
+                        "assembly": "0x0012f670",
+                        "attack_selector_u8": 0,
+                        "branch_s16": 12,
+                        "hurt_selector_u8": 1,
+                        "movement_table_index_u8": 12,
+                        "next_animation_record": "0x0012d474",
+                        "record_sha256": "9bd22554bcf8d4b4a5fffbab418249912f52997faf6fa82f23cc2f98cf7b8049",
+                        "timer_u16": 6
+                      },
+                      {
+                        "animation_record": "0x0012d474",
+                        "assembly": "0x0012f638",
+                        "attack_selector_u8": 0,
+                        "branch_s16": -32750,
+                        "hurt_selector_u8": 1,
+                        "movement_table_index_u8": 18,
+                        "next_animation_record": "0x0012d404",
+                        "record_sha256": "8e0b1e3970023b2a28031dbcdd368dce8a0dd994b7dbcec8e73ff70c4cddd76c",
+                        "timer_u16": 6
+                      }
+                    ],
+                    "selector_u8": 66,
+                    "start_animation_record": "0x0012ee98",
+                    "style85_u8": 1
+                  },
+                  {
+                    "direction_facing_relation_u8": 0,
+                    "records": [
+                      {
+                        "animation_record": "0x0012ef1c",
+                        "assembly": "0x0012f8b8",
+                        "attack_selector_u8": 0,
+                        "branch_s16": 1803,
+                        "hurt_selector_u8": 2,
+                        "movement_table_index_u8": 11,
+                        "next_animation_record": "0x0012ef2c",
+                        "record_sha256": "e079026e836d3eb2dcc996ff1276d9886fa872cbc6bd34344b7f601ce1a095f7",
+                        "timer_u16": 4
+                      },
+                      {
+                        "animation_record": "0x0012ef2c",
+                        "assembly": "0x0012f890",
+                        "attack_selector_u8": 0,
+                        "branch_s16": 1547,
+                        "hurt_selector_u8": 2,
+                        "movement_table_index_u8": 11,
+                        "next_animation_record": "0x0012ef3c",
+                        "record_sha256": "c3dcf793febe56a0eedb629d9ce2b00c94295955fff89b7259b366a96d6c4304",
+                        "timer_u16": 4
+                      },
+                      {
+                        "animation_record": "0x0012ef3c",
+                        "assembly": "0x0012f85e",
+                        "attack_selector_u8": 0,
+                        "branch_s16": 1291,
+                        "hurt_selector_u8": 2,
+                        "movement_table_index_u8": 11,
+                        "next_animation_record": "0x0012ef4c",
+                        "record_sha256": "9de5e083cffe8cd214074d24f49405ba6eaaf56e56e88a2ae5efc34b0f784c10",
+                        "timer_u16": 4
+                      },
+                      {
+                        "animation_record": "0x0012ef4c",
+                        "assembly": "0x0012f82c",
+                        "attack_selector_u8": 0,
+                        "branch_s16": 1035,
+                        "hurt_selector_u8": 2,
+                        "movement_table_index_u8": 11,
+                        "next_animation_record": "0x0012ef5c",
+                        "record_sha256": "9984c1c3c0650e15f262fd0ce5e713f63ac16c4a78405c0bbd4e421a590be2d7",
+                        "timer_u16": 4
+                      },
+                      {
+                        "animation_record": "0x0012ef5c",
+                        "assembly": "0x0012f814",
+                        "attack_selector_u8": 0,
+                        "branch_s16": 779,
+                        "hurt_selector_u8": 2,
+                        "movement_table_index_u8": 11,
+                        "next_animation_record": "0x0012ef6c",
+                        "record_sha256": "60b989f1e557650e132a8713a0954131b6edfb5a5b79504815e59cad4fcbf13a",
+                        "timer_u16": 4
+                      },
+                      {
+                        "animation_record": "0x0012ef6c",
+                        "assembly": "0x0012f7fc",
+                        "attack_selector_u8": 0,
+                        "branch_s16": 523,
+                        "hurt_selector_u8": 2,
+                        "movement_table_index_u8": 11,
+                        "next_animation_record": "0x0012ef7c",
+                        "record_sha256": "1627e696b7079d2e95bebc9d9f402976f1eadf5b1359fcfe0043a49716a17db0",
+                        "timer_u16": 4
+                      },
+                      {
+                        "animation_record": "0x0012ef7c",
+                        "assembly": "0x0012f7e4",
+                        "attack_selector_u8": 0,
+                        "branch_s16": 267,
+                        "hurt_selector_u8": 2,
+                        "movement_table_index_u8": 11,
+                        "next_animation_record": "0x0012ef8c",
+                        "record_sha256": "e50f12f7452c2b84fc3aed9822975766a1f80e76d410f3068e26aea162754eab",
+                        "timer_u16": 4
+                      },
+                      {
+                        "animation_record": "0x0012ef8c",
+                        "assembly": "0x0012f7cc",
+                        "attack_selector_u8": 0,
+                        "branch_s16": -32757,
+                        "hurt_selector_u8": 2,
+                        "movement_table_index_u8": 11,
+                        "next_animation_record": "0x0012ef1c",
+                        "record_sha256": "9a7916d11a7d90a720ea707ad50aa5655e4fe80c311635245a56647524ff4b7f",
+                        "timer_u16": 4
+                      }
+                    ],
+                    "selector_u8": 67,
+                    "start_animation_record": "0x0012ef1c",
+                    "style85_u8": 1
+                  }
+                ],
+                "source_entry": "0x041a00"
+              },
               "action4_choice_bits_u16": "0xf555",
               "direction_axis_equal_u8": [
                 4,
@@ -44449,7 +45480,38 @@
           "route_interaction": {
             "gameplay_gate": "s16(a5-0x65e4) must remain nonzero",
             "interruption_guard": "actor scheduler interruption byte a5+0x1f3 diverts before class-specific dispatch",
-            "timeout": "inner_timer_u16 is decremented in scheduler order and returns to normal only after signed underflow under the source guard"
+            "timeout": "inner_timer_u16 is decremented in scheduler order and returns to normal only after signed underflow under the source guard",
+            "timeout_return": {
+              "action_guard": "actor+0x06 high action byte == 0",
+              "classification": "SOURCE_CLOSED_IMPLEMENTATION_FIELDS",
+              "coffee_shop_control": {
+                "preserved_animation_record": "0x0012e5f0",
+                "preserved_facing_u8": 1,
+                "preserved_x_fp_s32_16_16": "0x04530300",
+                "preserved_y_fp_s32_16_16": "0x0134bb00",
+                "preserved_z_s16": 309,
+                "return_frame_u16": 3881,
+                "source_slot": "0x00ffa3c0",
+                "terminal_action_clear_frame_u16": 3880
+              },
+              "mutation_control": {
+                "expected_discriminating_effect": "slot 0x00ffa3c0 re-enters inner action 0x0400 instead of returning to outer 0x0200 at frame 3881",
+                "mutation": "do not decrement zero to signed 0xffff"
+              },
+              "route_guard": "s16(a5-0x65e4) != 0",
+              "signed_underflow_guard": "s16(actor+0xa8) < 0",
+              "source_entry": "0x0610f6",
+              "source_exit_helper": "0x0610d4",
+              "source_window_sha256": "e1e231c72ee8540740c632f54bcb2f960262dfd88f1b657fbce4be1d82b497cf",
+              "timer_field": "actor+0xa8:u16",
+              "timer_update": "predecrement one on every inner-state scheduler invocation, including zero to 0xffff",
+              "writes": {
+                "action_substate_u16": 0,
+                "inner_timer_u16": 0,
+                "outer_state_u16": 512,
+                "special_latch_ad_u8": 0
+              }
+            }
           },
           "route_reachable_action_handlers": {
             "0x00": {

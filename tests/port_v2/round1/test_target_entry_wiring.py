@@ -14,7 +14,7 @@ REQUIRED = (
     "#define AVSP_TILE_REGION_BYTES 0x96000",
     "#define AVSP_TILE_FRAME_UNIQUE_LIMIT 8192",
     "#define AVSP_ROUND1_RUNTIME_REGION_BYTES 0x19000",
-    "#define AVSP_ROUND1_RUNTIME_MEASURED_BYTES 0x173dc",
+    "#define AVSP_ROUND1_RUNTIME_MEASURED_BYTES 0x183ec",
     "(actor->type == 24u && actor->actor_class == 0x43)",
     "(unsigned short)actor->y <= (unsigned short)actor->z",
     "#define AVSP_LIVE_DIAG_REGION_BYTES 0x1A000",

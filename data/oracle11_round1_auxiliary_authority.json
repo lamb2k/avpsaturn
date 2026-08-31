@@ -14782,7 +14782,7 @@
         },
         "attack_selector_u8": 1,
         "attack_table": "0x00035882",
-        "contact_guard": "current animation attack selector 1 resolves table record 0x03589e; that record and current player hurt record overlap in x/y/z under shared 0x01d4aa collision arithmetic",
+        "contact_guard": "current animation attack selector 1 resolves table record 0x03589e; current player animation hurt selector 17 resolves table record 0x11ae8e; those current records overlap in x/y/z under shared 0x01d4aa collision arithmetic",
         "contacts": [
           {
             "attack_record": "0x0003589e",
@@ -14833,6 +14833,7 @@
           "z_center_s8": 0,
           "z_half_u8": 6
         },
+        "player_hurt_selector_u8": 17,
         "player_table": "0x0011ae02",
         "route_character_damage_s16": 17,
         "scheduler": "record-type-16 attackers against player after actor movement/presentation selection",
@@ -14886,6 +14887,7 @@
         "wrong animation record",
         "wrong attack selector",
         "wrong attack box",
+        "wrong current player hurt selector",
         "wrong player hurt box",
         "damage without overlap",
         "wrong damage selector",

@@ -112,9 +112,11 @@ def build_report() -> dict[str, object]:
         require(digest(COFFEE_HIT_A / filename) ==
                 digest(COFFEE_HIT_B / filename),
                 f"independent Coffee Shop HIT captures differ: {filename}")
+    coffee_hit_rows = rows(
+        COFFEE_HIT_A / "coffee_shop_player_hit_program.tsv")
     coffee_hit_samples = {
         int(row["frame"]): row for row in
-        rows(COFFEE_HIT_A / "coffee_shop_player_hit_program.tsv")
+        coffee_hit_rows
         if row["event"] == "sample"
     }
     coffee_hit_mutant = {
@@ -133,6 +135,30 @@ def build_report() -> dict[str, object]:
     mutation_result = rows(COFFEE_HIT_MUTATION / "progression_result.tsv")[0]
     require(int(mutation_result["player_hit_body_mutations"]) == 2,
             "Coffee Shop HIT motion-row mutation did not fire twice")
+    coffee_route_samples = {
+        int(row["frame"]): row for row in rows(COFFEE_SAMPLES)
+        if 3868 <= int(row["frame"]) <= 3879
+    }
+    coffee_route_player = {
+        int(row["frame"]): row for row in rows(COFFEE_ACTORS)
+        if row["pool"] == "player" and row["slot"] == "ff8380" and
+        3870 <= int(row["frame"]) <= 3879
+    }
+    require([int(coffee_route_samples[frame]["input"])
+             for frame in range(3870, 3878)] ==
+            [0x58, 0x58, 0x58, 0x58, 0x58, 0x48, 0x48, 0x08],
+            "Coffee Shop HIT-to-special input chronology drift")
+    require((coffee_route_player[3877]["state"],
+             coffee_route_player[3877]["substate"],
+             coffee_route_player[3878]["state"],
+             coffee_route_player[3878]["substate"],
+             coffee_route_player[3879]["substate"]) ==
+            ("0202", "0202", "0200", "0800", "0802"),
+            "Coffee Shop HIT-to-special dispatch chronology drift")
+    require(any(int(row["frame"]) == 3877 and
+                row["event"] == "dispatch" and row["pc"] == "01ab52"
+                for row in coffee_hit_rows),
+            "Coffee Shop HIT phase-0x0202 interruption dispatch missing")
 
     hit_instances = (
         (2750, 2751, 2752, 2762, 2777, 2778, "0x00130b5c",
@@ -264,6 +290,33 @@ def build_report() -> dict[str, object]:
             "response table selects presentation and shared active body",
             "shake countdown", "motion row", "return or source action interruption",
         ],
+        "source_action_interruption": {
+            "classification": "SOURCE_CLOSED_IMPLEMENTATION_FIELDS",
+            "spec_executable": True,
+            "guard_routine": "0x01a7e6",
+            "action_writer": "0x01a892..0x01a8a0",
+            "hit_phase_dispatch_pc": "0x01ab52",
+            "dispatch_substate_u16": 0x0202,
+            "queue_rule": "a qualifying source special edge observed while the shared HIT body is active remains pending until phase 0x0202 evaluates 0x01a7e6; advancing the edge out of the pending queue during shake is forbidden",
+            "input_runs": [
+                {"first_frame_u16": 3870, "last_frame_u16": 3874,
+                 "input_mask_u8": "0x58"},
+                {"first_frame_u16": 3875, "last_frame_u16": 3876,
+                 "input_mask_u8": "0x48"},
+                {"first_frame_u16": 3877, "last_frame_u16": 3877,
+                 "input_mask_u8": "0x08"},
+            ],
+            "terminal_hit_visible_frame_u16": 3877,
+            "special_entry_visible_frame_u16": 3878,
+            "special_startup_visible_frame_u16": 3879,
+            "special_entry_state_u16": 0x0200,
+            "special_entry_substate_u16": 0x0800,
+            "mutation_control": {
+                "reject_edge_loss_during_shake": True,
+                "reject_dispatch_before_phase_0x0202": True,
+                "reject_fixed_frame_special_entry": True,
+            },
+        },
         "rng": {"calls": [], "consumption_order": []},
         "capture_identity": {
             "two_completion_captures_byte_identical": True,

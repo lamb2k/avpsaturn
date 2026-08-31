@@ -46,6 +46,14 @@ local capture_controller_substate =
     os.getenv("AVSP_ORACLE11_CONTROLLER_SUBSTATE_CAPTURE") == "1"
 local capture_component20_phase =
     os.getenv("AVSP_ORACLE11_COMPONENT20_PHASE_CAPTURE") == "1"
+local capture_terrain_patch =
+    os.getenv("AVSP_ORACLE11_TERRAIN_PATCH_CAPTURE") == "1"
+local capture_terrain_stream =
+    os.getenv("AVSP_ORACLE11_TERRAIN_STREAM_CAPTURE") == "1"
+local mutate_terrain_patch =
+    os.getenv("AVSP_ORACLE11_TERRAIN_PATCH_MUTATE") == "1"
+local terrain_patch_mutation_pc = tonumber(
+    os.getenv("AVSP_ORACLE11_TERRAIN_PATCH_MUTATION_PC") or "", 16)
 local capture_class1f_action4_guard =
     os.getenv("AVSP_ORACLE11_CLASS1F_ACTION4_GUARD_CAPTURE") == "1"
 local capture_class1f_inner8_group =
@@ -129,6 +137,10 @@ local scheduler_phase = assert(io.open(
     root .. "/coffee_shop_scheduler_phase.tsv", "w"))
 local component20_callers = assert(io.open(
     root .. "/coffee_shop_component20_callers.tsv", "w"))
+local terrain_patch = assert(io.open(
+    root .. "/coffee_shop_terrain_patch.tsv", "w"))
+local terrain_stream = assert(io.open(
+    root .. "/coffee_shop_terrain_stream.tsv", "w"))
 local player_dispatch = assert(io.open(
     root .. "/coffee_shop_player_dispatch.tsv", "w"))
 local player_animation_writes = assert(io.open(
@@ -178,6 +190,9 @@ local player_hit_program = assert(io.open(
 local player_hit_writes = assert(io.open(
     root .. "/coffee_shop_player_hit_writes.tsv", "w"))
 local result = assert(io.open(root .. "/progression_result.tsv", "w"))
+
+terrain_patch:write("frame\tevent\taddress\tpc\ta0\ta1\ta2\ta3\ta4\ta5\ta6\tplayer_x\tplayer_z\tcamera_x\tcamera_z\tcamera_phase_x\tcamera_phase_z\tcamera_mode\tcamera_map_index\tcell_236c\tcell_23ac\tcell_23ec\tcell_242c\tdata\tmask\tmutated\n")
+terrain_stream:write("frame\taddress\tpc\tcamera_x\tcamera_z\tcamera_phase_x\tcamera_phase_z\tcamera_direction\tcamera_mode\tcamera_map_index\ta0\ta1\ta6\tselector_before\tselector_data\tattribute_data\tmask\tmutated\n")
 transactions:write("frame\tpc\ta4\ta6\tg8019\tliving\tprogress\tc_state\tc_substate\tc_timer40\tc_timer42\tc_limit4a\tc_index10\tc_phase2e\tc_local2c\tcamera_x\tcamera_z\trng\td0\td1\td2\tactor_active\tactor_class\tactor_type\tactor_state\tactor_substate\tactor_x\tactor_y\tactor_z\tactor_variant\tactor_timer\tactor_selector83\n")
 snapshots:write("frame\tslot\tactive\tclass\ttype\tstate\tsubstate\tfacing\tx\ty\tz\tvariant\ttimer\tselector83\thealth\tanim\n")
 writes:write("frame\tslot\tinner\tpc\ta6\told32\tdata\tmask\tg8019\tliving\tprogress\tc_state\tc_substate\tc_timer40\tc_limit4a\tc_index10\tcamera_x\tcamera_z\trng\tsuppressed\n")
@@ -245,6 +260,73 @@ local scene_pair_suppressed_actors = 0
 local obstacle_transition_suppressed_writes = 0
 local class1f_hit_selector_mutations = 0
 local player_hit_body_mutations = 0
+
+local terrain_patch_cells = {
+    0x90636c, 0x9063ac, 0x9063ec, 0x90642c,
+}
+
+local function emit_terrain_patch(event, address, data, mask, mutated)
+    if not capture_terrain_patch then return end
+    terrain_patch:write(string.format(
+        "%d\t%s\t%06x\t%06x\t%06x\t%06x\t%06x\t%06x\t%06x\t%06x\t%06x\t%d\t%d\t%d\t%d\t%02x\t%02x\t%02x\t%04x\t%02x\t%02x\t%02x\t%02x\t%08x\t%08x\t%d\n",
+        frame, event, address,
+        maincpu.state["PC"].value & 0xffffff,
+        maincpu.state["A0"].value & 0xffffff,
+        maincpu.state["A1"].value & 0xffffff,
+        maincpu.state["A2"].value & 0xffffff,
+        maincpu.state["A3"].value & 0xffffff,
+        maincpu.state["A4"].value & 0xffffff,
+        maincpu.state["A5"].value & 0xffffff,
+        maincpu.state["A6"].value & 0xffffff,
+        s16(u16(player + 0x10)), s16(u16(player + 0x18)),
+        s16(u16(0xff8268 + 0x20)), s16(u16(0xff8268 + 0x24)),
+        u8(0xff8268 + 0x44), u8(0xff8268 + 0x45),
+        u8(0xff8268 + 0x5e), u16(0xff8268 + 0x42),
+        u8(0x90636e), u8(0x9063ae), u8(0x9063ee), u8(0x90642e),
+        data & 0xffffffff, mask & 0xffffffff, mutated and 1 or 0))
+end
+
+oracle11_terrain_patch_writes = {}
+for _, address in ipairs(terrain_patch_cells) do
+    oracle11_terrain_patch_writes[#oracle11_terrain_patch_writes + 1] =
+        program:install_write_tap(address, address + 3,
+        string.format("oracle11_terrain_patch_%06x", address),
+        function(offset, data, mask)
+            local pc = maincpu.state["PC"].value & 0xffffff
+            local mutated = capture_terrain_patch and mutate_terrain_patch and
+                frame >= 2073 and
+                terrain_patch_mutation_pc ~= nil and
+                pc == terrain_patch_mutation_pc
+            if capture_terrain_patch and frame <= capture_last_frame then
+                emit_terrain_patch("write", offset, data, mask, mutated)
+            end
+            if mutated then return u32(offset & 0xfffffc) end
+        end)
+end
+
+oracle11_terrain_stream_writes = program:install_write_tap(
+    0x904000, 0x907fff, "oracle11_terrain_stream_writes",
+    function(offset, data, mask)
+        local pc = maincpu.state["PC"].value & 0xffffff
+        if not capture_terrain_stream or frame < 2073 or
+                frame > 5541 or pc ~= 0x0b2832 then return end
+        local mutated = mutate_terrain_patch and
+            terrain_patch_mutation_pc == pc
+        terrain_stream:write(string.format(
+            "%d\t%06x\t%06x\t%d\t%d\t%02x\t%02x\t%02x\t%02x\t%04x\t%06x\t%06x\t%06x\t%02x\t%02x\t%02x\t%08x\t%d\n",
+            frame, offset, pc, s16(u16(0xff8268 + 0x20)),
+            s16(u16(0xff8268 + 0x24)),
+            u8(0xff8268 + 0x44), u8(0xff8268 + 0x45),
+            u8(0xff8268 + 0x47),
+            u8(0xff8268 + 0x5e),
+            u16(0xff8268 + 0x42),
+            maincpu.state["A0"].value & 0xffffff,
+            maincpu.state["A1"].value & 0xffffff,
+            maincpu.state["A6"].value & 0xffffff,
+            u8(offset), (data >> 8) & 0xff, data & 0xff,
+            mask & 0xffffffff, mutated and 1 or 0))
+        if mutated then return u32(offset & 0xfffffc) end
+    end)
 
 oracle11_coffee_shop_resource_writes = program:install_write_tap(
     player + 0x88, player + 0x8f,
@@ -1888,6 +1970,10 @@ oracle11_player_hit_write_tap = program:install_write_tap(
 oracle11_progression_frame = emu.add_machine_frame_notifier(function()
     frame = frame + 1
     suppress_selected_scene_pair()
+    if capture_terrain_patch and frame >= 1972 and
+            frame <= capture_last_frame then
+        emit_terrain_patch("sample", 0, 0, 0, false)
+    end
     if frame >= 1972 and frame <= capture_last_frame then
         controller_samples:write(string.format(
             "%d\t%d\t%02x\t%d\t%d\t%d\t%d\t%d\t%d\t%d\t%d\t%d\t%d\t%02x\t%02x\t%02x\t%02x\t%d\t%d\t%d\t%d\n",
@@ -1973,6 +2059,8 @@ oracle11_progression_frame = emu.add_machine_frame_notifier(function()
         component20_phase:close()
         scheduler_phase:close()
         component20_callers:close()
+        terrain_patch:close()
+        terrain_stream:close()
         player_dispatch:close()
         player_animation_writes:close()
         obstacle_guard:close()

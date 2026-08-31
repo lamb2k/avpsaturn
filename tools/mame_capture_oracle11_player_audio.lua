@@ -17,6 +17,10 @@ local suppress_return0 = tonumber(os.getenv("AVSP_ORACLE11_PLAYER_AUDIO_SUPPRESS
 local suppress_limit = tonumber(os.getenv("AVSP_ORACLE11_PLAYER_AUDIO_SUPPRESS_LIMIT") or "") or 1
 local compact_qsound = os.getenv("AVSP_ORACLE11_PLAYER_AUDIO_COMPACT_QSOUND") == "1"
 local navigation_perturb = os.getenv("AVSP_ORACLE11_NAVIGATION_PERTURB") == "1"
+local terrain_stream_backtrack =
+    os.getenv("AVSP_ORACLE11_TERRAIN_STREAM_BACKTRACK") == "1"
+local terrain_stream_force_backtrack =
+    os.getenv("AVSP_ORACLE11_TERRAIN_STREAM_FORCE_BACKTRACK") == "1"
 
 local in0 = machine.ioport.ports[":IN0"].fields
 local in2 = machine.ioport.ports[":IN2"].fields
@@ -59,7 +63,7 @@ end
 
 local function schedule(f)
     local word = 0
-    local coin_on, start_on, right_on = false, false, false
+    local coin_on, start_on, left_on, right_on = false, false, false, false
     local gun_on, attack_on, jump_on, up_on, down_on = false, false, false, false, false
     if f <= 4200 then
         coin_on = f >= 1200 and f <= 2400 and (f - 1200) % 180 < 3
@@ -67,7 +71,12 @@ local function schedule(f)
             (f - 1200) % 180 >= 30 and (f - 1200) % 180 < 33
         gun_on = (f >= 1500 and f < 4200 and f % 90 < 5) or
             (f >= 2600 and f < 4200 and f % 75 < 6)
-        right_on = f >= 2600 and f < 4200
+        if terrain_stream_backtrack then
+            left_on = f >= 2238 and f < 2450
+            right_on = f >= 2450 and f < 4200
+        else
+            right_on = f >= 2600 and f < 4200
+        end
         attack_on = f >= 2600 and f < 4200 and f % 310 < 7
         jump_on = f >= 2600 and f < 4200 and f % 430 < 7
     else
@@ -85,7 +94,7 @@ local function schedule(f)
     end
     word = drive(coin, coin_on, 1, word)
     word = drive(start, start_on, 2, word)
-    word = drive(left, false, 4, word)
+    word = drive(left, left_on, 4, word)
     word = drive(right, right_on, 8, word)
     word = drive(gun, gun_on, 16, word)
     word = drive(attack, attack_on, 32, word)
@@ -198,6 +207,12 @@ oracle11_player_audio_qsound = audio_program:install_write_tap(
 
 oracle11_player_audio_subscription = emu.add_machine_frame_notifier(function()
     frame = frame + 1
+    if terrain_stream_force_backtrack and frame >= 2300 and frame < 2400 and
+            u8(0xff8009) == 4 and u8(player) ~= 0 then
+        local camera_x = s16(u16(0xff8278))
+        local forced_x = (camera_x + 0x20) & 0xffff
+        program:write_u32(player + 0x10, forced_x << 16)
+    end
     local input_word = schedule(frame)
     if frame >= first_frame and frame <= last_frame then
         samples:write(table.concat({frame, variant, input_word, u8(0xff8009), u8(player),

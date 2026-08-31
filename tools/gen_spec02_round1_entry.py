@@ -104,6 +104,8 @@ def build() -> str:
     class1f_current_spawn = class1f_current["spawn"]
     class1f_current_actions = class1f_current["actions"]
     class1f_current_damage = class1f_current["damage_hit_ko_removal"]
+    class1f_collision_reaction_facing = class1f_current_damage[
+        "common_collision_reaction_facing"]
     class1f_current_reaction = class1f_current_damage[
         "accepted_port_v2_reaction_mapping"]
     class1f_source_hit = class1f_current_damage["source_hit_entry_program"]
@@ -157,20 +159,31 @@ def build() -> str:
     class1f_inner8_path = class1f_inner8["observed_path_program"]
     class1f_inner8_action10 = class1f_inner8_path["action_0x10"]
     class1f_inner8_action10_init = class1f_inner8_action10["initializer"]
+    class1f_inner8_action10_movement = class1f_inner8_action10_init[
+        "movement_binding"]
+    class1f_inner8_action10_phase_movement = class1f_inner8_action10[
+        "phase_terminal_movement_binding"]
     class1f_inner8_action4 = class1f_inner8_path["action_0x04"]
+    class1f_inner8_action4_contact = class1f_inner8_action4[
+        "complete_dispatch_contract"]["post_movement_terrain_direction"]
     class1f_inner8_action4_timer = class1f_inner8_action4[
         "timer_selector_program"]
     class1f_inner8_action2 = class1f_inner8_path["action_0x02"]
     class1f_inner8_action6 = class1f_inner8_path["action_0x06"]
+    class1f_inner8_action8 = class1f_inner8_path["action_0x08"]
     class1f_inner8_action0c = class1f_inner8_path["action_0x0c"]
     class1f_inner8_action0c_phase0 = class1f_inner8_action0c["phase_0"]
     class1f_inner8_action0c_phase2 = class1f_inner8_action0c["phase_2"]
     class1f_inner8_tables = class1f_inner8_path["source_tables"]
     class1f_inner8_movement_selectors = class1f_inner8_tables[
         "movement_selector_by_style_relation"]["rows"]
+    class1f_inner8_action10_phase_selectors = class1f_inner8_tables[
+        "action10_phase_terminal_selector_by_style_relation"]["rows"]
     class1f_inner8_groups = class1f_inner8_path[
         "wander_group_occupancy_program"]
     class1f_inner8_motion = class1f_inner8["action_0x0e_motion"]
+    class1f_inner8_timeout = class1f_inner8["route_interaction"][
+        "timeout_return"]
     action_variants = class1f_actions["initializer"]["variants"]
     action_targets = class1f_actions["current_dispatch"]["action_targets"]
     action_selectors = class1f_actions["animation_selector_table"]["selectors"]
@@ -274,8 +287,25 @@ def build() -> str:
     terrain_records = terrain["implementation_records"]
     terrain_map = terrain["selection"]["captured_first_segment_map"]
     terrain_selectors = bytes.fromhex(terrain_map["selector_bytes_hex"])
+    terrain_selector_runs = []
+    for selector in terrain_selectors:
+        if (terrain_selector_runs and
+                terrain_selector_runs[-1][1] == selector and
+                terrain_selector_runs[-1][0] < 256):
+            terrain_selector_runs[-1] = (
+                terrain_selector_runs[-1][0] + 1, selector)
+        else:
+            terrain_selector_runs.append((1, selector))
     terrain_grid = terrain["selection"]["bounded_packed_grid"]
     terrain_packed = bytes.fromhex(terrain_grid["packed_bytes_hex"])
+    terrain_stream = terrain["selection"]["camera_streaming_program"]
+    terrain_stream_transactions = terrain_stream["transactions"]
+    terrain_stream_writes = []
+    terrain_stream_ranges = []
+    for transaction in terrain_stream_transactions:
+        terrain_stream_ranges.append(
+            (len(terrain_stream_writes), len(transaction["writes"])))
+        terrain_stream_writes.extend(transaction["writes"])
     obstacle = navigation["obstacle_response"]["implementation_contract"]
     obstacle_lifecycle = navigation["obstacle_response"]["lifecycle_contract"]
     obstacle_parent_records = obstacle_lifecycle["presentation"]["records"]
@@ -305,6 +335,8 @@ def build() -> str:
     player_hit_program = fixtures["authority_data"]["player"][
         "hit_ko_failure_continue_respawn"]["nonlethal_hit"][
             "coffee_shop_reachable_program"]
+    player_hit_interruption = player_hit_program[
+        "source_action_interruption"]
     player_hit_reactions = []
     player_hit_seen = set()
     for instance in player_hit_program["instances"]:
@@ -421,6 +453,23 @@ def build() -> str:
             [10, 20, 10] or
         [row["motion_index_u8"] for row in player_hit_reactions] !=
             [2, 8, 4] or
+        player_hit_interruption["classification"] !=
+            "SOURCE_CLOSED_IMPLEMENTATION_FIELDS" or
+        player_hit_interruption["spec_executable"] is not True or
+        player_hit_interruption["guard_routine"] != "0x01a7e6" or
+        player_hit_interruption["action_writer"] !=
+            "0x01a892..0x01a8a0" or
+        player_hit_interruption["hit_phase_dispatch_pc"] != "0x01ab52" or
+        player_hit_interruption["dispatch_substate_u16"] != 0x0202 or
+        player_hit_interruption["terminal_hit_visible_frame_u16"] != 3877 or
+        player_hit_interruption["special_entry_visible_frame_u16"] != 3878 or
+        player_hit_interruption["special_startup_visible_frame_u16"] != 3879 or
+        player_hit_interruption["special_entry_state_u16"] != 0x0200 or
+        player_hit_interruption["special_entry_substate_u16"] != 0x0800 or
+        player_hit_interruption["mutation_control"] != {
+            "reject_edge_loss_during_shake": True,
+            "reject_dispatch_before_phase_0x0202": True,
+            "reject_fixed_frame_special_entry": True} or
         player_hit_program["mutation_control"]["mutated_writes_u16"] != 2):
         raise ValueError("SPEC-02 Coffee Shop player HIT program drift")
     if len(spawns) != 10 or len(commands) != len(KINDS):
@@ -507,6 +556,30 @@ def build() -> str:
         class1f_current_reaction["ko_entry_outer_state_u16"] != 0x0402 or
         class1f_current_reaction["ko_entry_action_substate_u16"] != 0x0000 or
         class1f_current_reaction["terminal_release_outer_state_u16"] != 0x0600 or
+        class1f_collision_reaction_facing["classification"] !=
+            "SOURCE_CLOSED_IMPLEMENTATION_FIELDS" or
+        class1f_collision_reaction_facing["source_entry"] != "0x01d416" or
+        class1f_collision_reaction_facing["reaction_facing_writer"] !=
+            "0x01d448" or
+        class1f_collision_reaction_facing["facing_xor_writer"] !=
+            "0x01d44e" or
+        class1f_collision_reaction_facing["source_window_sha256"] !=
+            "aab16f054a654c0cbb500ed9df53f80b56ee323a7bee89b03351f1f69f3564e6" or
+        class1f_collision_reaction_facing["guard"] != {
+            "excluded_target_type_u8": 0x14,
+            "excluded_target_classes_u8": [0x11, 0x20, 0x10, 0x26],
+            "coffee_shop_class1f_type12_reaches_writer": True,
+            "coffee_shop_attack_record": "0x02fc58",
+        } or
+        class1f_collision_reaction_facing["facing_xor_u8"] != 1 or
+        class1f_collision_reaction_facing["coffee_shop_control"] != {
+            "source_frame_u16": 3830,
+            "target_slot": "0x00ffa000",
+            "reaction_facing_u8": 1,
+            "facing_u8": 0,
+            "health_s16": -1,
+            "outer_state_u16": 0x0400,
+        } or
         class1f_source_hit["entry_guard"]["hit_kind_actor_49_u8"] != 0x15 or
         class1f_source_hit["entry_guard"]["recovery_timer_actor_2c_u8"] != 8 or
         class1f_source_hit["reaction_table"]
@@ -733,7 +806,7 @@ def build() -> str:
         raise ValueError("SPEC-02 class-0x1f initializer variant-clear drift")
     if (class1f_inner8["classification"] !=
             "SOURCE_CLOSED_IMPLEMENTATION_FIELDS" or
-        len(class1f_inner8_records) != 120 or
+        len(class1f_inner8_records) != 152 or
         len(class1f_inner8_movement_tables) != 10 or
         [row["table_index_u8"] for row in class1f_inner8_movement_tables] !=
             [4, 11, 12, 14, 15, 18, 19, 23, 25, 27] or
@@ -750,14 +823,65 @@ def build() -> str:
         len(class1f_inner8_action6["Coffee_Shop_observed_runs"]) != 11 or
         class1f_inner8_action6["mutation_control"]
             ["first_discriminating_source_frame"] != 3242 or
+        class1f_inner8_action8["phase_2"]["Coffee_Shop_control"] != {
+            "source_frame_u16": 3752,
+            "source_slot": "0x00ff9dc0",
+            "prior_substate_u16": "0x0802",
+            "substate_u16": "0x0e00",
+            "style85_u8": 0,
+            "animation_record": "0x0012d678",
+            "animation_timer_u16": 3,
+            "animation_branch_s16": -32768} or
         class1f_inner8_action10["overlap_transition"]
-            ["writer"] != "0x04130e" or
+            ["base_writes"]["writer"] != "0x04130e" or
+        class1f_inner8_action10["overlap_transition"]
+            ["style85_nonzero_override"] != {
+                "guard": "actor+0x85 style85_u8 is nonzero",
+                "action_u8": 8,
+                "action_phase_u8": 2,
+                "selector_u8": 36,
+                "start_animation_record": "0x0012d628",
+                "writers": ["0x041318", "0x04131e", "0x041324"]} or
+        class1f_inner8_action10["overlap_transition"]
+            ["Coffee_Shop_control"]["result_substate_u16"] != "0x0802" or
         class1f_inner8_action10_init["action_timer_u8"] != 4 or
         class1f_inner8_action10_init["lifetime_timer_u8"] != 240 or
         class1f_inner8_action10_init[
             "x_offset_selector_by_rng_low_nibble_u8"] !=
             [0, 0, 2, 2, 2, 2, 2, 2, 2, 4, 4, 4, 4, 4, 4, 4] or
         class1f_inner8_action10_init["x_offsets_s16"] != [96, 112, 208] or
+        class1f_inner8_action10_movement["source_entry"] != "0x0419a4" or
+        class1f_inner8_action10_movement[
+            "fixed_style_record_forbidden"] is not True or
+        class1f_inner8_action10_movement["Coffee_Shop_control"] != {
+            "source_frame_u16": 3655,
+            "source_slot": "0x00ffa3c0",
+            "direction_u8": 30,
+            "facing_u8": 1,
+            "style85_u8": 1,
+            "relation_u8": 0,
+            "selector_u8": 26,
+            "animation_record": "0x0012d50c"} or
+        class1f_inner8_action10_phase_movement["source_entry"] !=
+            "0x041a00" or
+        class1f_inner8_action10_phase_movement[
+            "fixed_style_or_regular_movement_record_forbidden"] is not True or
+        class1f_inner8_action10_phase_movement["Coffee_Shop_control"] != {
+            "source_frame_u16": 3697,
+            "source_slot": "0x00ff9dc0",
+            "prior_substate_u16": "0x1006",
+            "substate_u16": "0x1000",
+            "direction_u8": 6,
+            "facing_u8": 1,
+            "style85_u8": 1,
+            "relation_u8": 1,
+            "selector_u8": 66,
+            "animation_record": "0x0012ee98",
+            "animation_timer_u16": 4,
+            "animation_branch_s16": 19,
+            "x_fp_s32_16_16": "0x0429bf00",
+            "y_fp_s32_16_16": "0x01223f00",
+            "z_s16": 290} or
         class1f_inner8_action4_timer["Coffee_Shop_stage_parameter_u16"] != 9 or
         class1f_inner8_action4_timer[
             "variant0_bank_by_stage_parameter_u8"][9] != 1 or
@@ -818,14 +942,48 @@ def build() -> str:
             ["Coffee_Shop_control"]["animation_timer_u16"] != 5 or
         class1f_inner8_action4["complete_dispatch_contract"]
             ["mutation_control"]["omitted_clear_tail_rejected"] is not True or
+        class1f_inner8_action4_contact["writer_pcs"] !=
+            ["0x040cf0", "0x0419f2"] or
+        class1f_inner8_action4_contact["direction_delta_u8"] != 16 or
+        class1f_inner8_action4_contact["direction_mask_u8"] != 31 or
+        class1f_inner8_action4_contact["Coffee_Shop_control"] != {
+            "source_frame_u16": 3654,
+            "source_slot": "0x00ffa3c0",
+            "direction_before_u8": 14,
+            "direction_after_u8": 30,
+            "animation_record": "0x0012d4f8",
+            "world_z_s16": 224} or
+        class1f_inner8_action4["complete_dispatch_contract"]
+            ["mutation_control"]
+            ["omitted_post_terrain_direction_rejected"] is not True or
+        class1f_inner8_action4["complete_dispatch_contract"]
+            ["mutation_control"]
+            ["zero_contact_direction_change_rejected"] is not True or
         class1f_inner8_motion["motion_selector_u16"] != 24 or
         class1f_inner8_motion["phase_4_arithmetic"][3] !=
-            "on landing replace only y_fp high word with z_s16 and preserve the accumulated low 16-bit fraction" or
+            "on landing retain the accumulated y_fp unchanged; do not snap its high word to z_s16" or
+        class1f_inner8_motion["phase_4_Coffee_Shop_control"]
+            ["result_y_fp_s32_16_16"] != "0x013aba00" or
         class1f_inner8_motion["phase_6"] !=
             "step animation; each positive actor+0x25 event calls 0x0413d2; terminal increments phase and writes action_timer_u8=8" or
         class1f_inner8_motion["phase_8_terminal_writes"] != {
             "source_entry": "0x040e40", "action_u16": 0,
             "wander_cursor_u8": 0, "field95_u8": 0} or
+        class1f_inner8_timeout["classification"] !=
+            "SOURCE_CLOSED_IMPLEMENTATION_FIELDS" or
+        class1f_inner8_timeout["source_entry"] != "0x0610f6" or
+        class1f_inner8_timeout["source_exit_helper"] != "0x0610d4" or
+        class1f_inner8_timeout["source_window_sha256"] !=
+            "e1e231c72ee8540740c632f54bcb2f960262dfd88f1b657fbce4be1d82b497cf" or
+        class1f_inner8_timeout["timer_field"] != "actor+0xa8:u16" or
+        class1f_inner8_timeout["writes"] != {
+            "special_latch_ad_u8": 0,
+            "inner_timer_u16": 0,
+            "outer_state_u16": 0x0200,
+            "action_substate_u16": 0,
+        } or
+        class1f_inner8_timeout["coffee_shop_control"]
+            ["return_frame_u16"] != 3881 or
         class1f_inner8_tables["field88_by_rng_low_nibble_u8"] !=
             [1, 2, 1, 2, 1, 1, 2, 1, 2, 1, 1, 1, 1, 2, 1, 2] or
         len(class1f_inner8_tables["wander_direction_delta_same_style_u8"]) != 32 or
@@ -833,6 +991,10 @@ def build() -> str:
         [row["start_animation_record"] for row in
          class1f_inner8_movement_selectors] !=
             ["0x0012d380", "0x0012d404", "0x0012d488", "0x0012d50c"] or
+        [row["start_animation_record"] for row in
+         class1f_inner8_action10_phase_selectors] !=
+            ["0x0012ed90", "0x0012ee14",
+             "0x0012ee98", "0x0012ef1c"] or
         class1f_inner8_path["fixed_frame_or_authored_transition_forbidden"]
             is not True):
         raise ValueError("SPEC-02 class-0x1f inner-state 0x08 drift")
@@ -1177,6 +1339,7 @@ def build() -> str:
         len(class16["terminal_state"]["animation_records"]) != 7 or
         class16["current_state_collision"]["attack_record"]["address"] !=
             "0x0003589e" or
+        class16["current_state_collision"]["player_hurt_selector_u8"] != 17 or
         class16["current_state_collision"]["player_hurt_record"]["address"] !=
             "0x0011ae8e" or
         class16["current_state_collision"]["route_character_damage_s16"] != 17 or
@@ -1205,6 +1368,9 @@ def build() -> str:
         terrain_grid["bits_per_cell"] != 2 or
         terrain_grid["selector_code_u8"] != [0, 24, 56] or
         terrain_grid["packed_bytes"] != 104 or len(terrain_packed) != 104 or
+        len(terrain_selector_runs) != 383 or
+        bytes(selector for length, selector in terrain_selector_runs
+              for _ in range(length)) != terrain_selectors or
         hashlib.sha256(terrain_packed).hexdigest() !=
             terrain_grid["packed_sha256"] or
         [row["selector_u8"] for row in terrain_records] !=
@@ -1214,7 +1380,24 @@ def build() -> str:
             "0202808010100080", "020080801010ff80",
             "020280801010ff80", "0202808010080080",
             "0604020100008080",
-            "0604020100088080", "0402020100088080"]):
+            "0604020100088080", "0402020100088080"] or
+        terrain_stream["classification"] !=
+            "SOURCE_CLOSED_IMPLEMENTATION_FIELDS" or
+        terrain_stream["initial_phase_x_u8"] != 0x10 or
+        terrain_stream["transaction_count_u16"] != 41 or
+        terrain_stream["write_count_u16"] != 1476 or
+        len(terrain_stream_transactions) != 41 or
+        len(terrain_stream_writes) != 1476 or
+        any(transaction["write_count_u8"] != 36 or
+            len(transaction["writes"]) != 36
+            for transaction in terrain_stream_transactions) or
+        terrain_stream["mutation_control"] != {
+            "suppressed_writer": "0x0b2832",
+            "mutated_writes_u16": 828,
+            "baseline_frame_3578_player_z_s16": 319,
+            "mutant_frame_3578_player_z_s16": 320,
+            "fixed_frame_or_static_snapshot_substitute_rejected": True,
+        }):
         raise ValueError("SPEC-02 Coffee Shop terrain implementation drift")
     if (obstacle_actor != {
             "animation_record": "0x06e136", "assembly": "0x06e196",
@@ -2077,6 +2260,12 @@ def build() -> str:
         "    { " + ", ".join(f"{value}u" for value in
             class1f_current_damage["damage_by_player_selector_s16"]) + " },",
         "};", "",
+        "static const unsigned char avsp_round1_class1f_collision_reaction_facing_xor = %du;" % (
+            class1f_collision_reaction_facing["facing_xor_u8"]),
+        "static const unsigned long avsp_round1_class1f_collision_reaction_attack_record = %sUL;" % (
+            class1f_collision_reaction_facing["guard"]
+                ["coffee_shop_attack_record"]),
+        "",
         "static const AvspRound1Class1fSourceHitSpec avsp_round1_class1f_source_hit =",
         "{",
         "    0x%04Xu, 0x%04Xu, 0x%04Xu, %sUL, %sUL," % (
@@ -2466,10 +2655,16 @@ def build() -> str:
         "static const AvspRound1Class1fInner8ProgramSpec avsp_round1_class1f_inner8_program =",
         "{",
         "    0x%04Xu," % (int(class1f_inner8_path["source_slot"], 16) & 0xffff),
-        "    %du, %su, %su," % (
+        "    %du, 0x%04Xu, 0x%04Xu, %du," % (
             class1f_inner8["entry_transition"]["timer_u16"],
+            class1f_inner8_timeout["writes"]["outer_state_u16"],
+            class1f_inner8_timeout["writes"]["action_substate_u16"],
+            class1f_inner8_timeout["writes"]["special_latch_ad_u8"]),
+        "    %su, %su, %du, %du," % (
             class1f_inner8_tables["action0_style_bits_u16"],
-            class1f_inner8_tables["action4_choice_bits_u16"]),
+            class1f_inner8_tables["action4_choice_bits_u16"],
+            class1f_inner8_action4_contact["direction_delta_u8"],
+            class1f_inner8_action4_contact["direction_mask_u8"]),
         "    %du," % class1f_inner8_action4_timer[
             "Coffee_Shop_stage_parameter_u16"],
         "    { " + ", ".join(f"{value}u" for value in
@@ -2515,7 +2710,9 @@ def build() -> str:
             f"{row['start_animation_record']}UL" for row in
             class1f_inner8_action6["selector_by_style"]) + " }, { " + ", ".join(
             f"{row['start_animation_record']}UL" for row in
-            class1f_inner8_movement_selectors) + " },",
+            class1f_inner8_movement_selectors) + " }, { " + ", ".join(
+            f"{row['start_animation_record']}UL" for row in
+            class1f_inner8_action10_phase_selectors) + " },",
         "    0x0012D488UL, 0x0012D404UL, 0x0012D628UL,",
         "    0x0012E65CUL, 0x0012D50CUL, 0x0012E604UL, 0x0012E638UL, 0x0012E550UL,",
         "    96u, 12u, 16u, 12u, %du, %du," % (
@@ -2790,12 +2987,13 @@ def build() -> str:
             class16["initialization"]["collision_table"],
             type16_attack["address"], type16_collision["player_table"],
             type16_hurt["address"]),
-        "    %d, %d, 0x0058u, 0x0232u, %d, %du, 0x%02X, %du, %du," % (
+        "    %d, %d, 0x0058u, 0x0232u, %d, %du, 0x%02X, %du, %du, %du," % (
             class16["spawn_owner"]["position_offset_s16"][0],
             class16["spawn_owner"]["position_offset_s16"][1],
             type16_collision["route_character_damage_s16"],
             class16["record_type_u8"], int(class16["class_u8"], 16),
             class16["current_state_collision"]["attack_selector_u8"],
+            class16["current_state_collision"]["player_hurt_selector_u8"],
             type16_attack["hit_value_u8"]),
         "    { %d, %d, %du, %du, %d, %du, %d, %du, %du }," % (
             type16_attack["x_center_s8"], type16_attack["y_center_s8"],
@@ -3278,13 +3476,35 @@ def build() -> str:
                      ("," if offset + 32 < len(terrain_packed) else ""))
     lines.extend([
         "};", "",
-        "static const unsigned char avsp_round1_first_segment_terrain_selector_map[AVSP_ROUND1_TERRAIN_SELECTOR_MAP_COUNT] =",
+        "static const AvspRound1TerrainSelectorRunSpec avsp_round1_first_segment_terrain_selector_runs[AVSP_ROUND1_TERRAIN_SELECTOR_RUN_COUNT] =",
         "{",
     ])
-    for offset in range(0, len(terrain_selectors), 32):
-        chunk = terrain_selectors[offset:offset + 32]
-        lines.append("    " + ", ".join(f"0x{value:02X}u" for value in chunk) +
-                     ("," if offset + 32 < len(terrain_selectors) else ""))
+    for length, selector in terrain_selector_runs:
+        lines.append(
+            f"    {{ {length - 1}u, 0x{selector:02X}u }},")
+    lines.extend([
+        "};", "",
+        "static const AvspRound1TerrainStreamWriteSpec avsp_round1_coffee_shop_terrain_stream_writes[AVSP_ROUND1_TERRAIN_STREAM_WRITE_COUNT] =",
+        "{",
+    ])
+    for index, selector, attribute in terrain_stream_writes:
+        lines.append(f"    {{ {index}u, 0x{selector:02X}u, 0x{attribute:02X}u }},")
+    lines.extend([
+        "};", "",
+        "static const AvspRound1TerrainStreamTransactionSpec avsp_round1_coffee_shop_terrain_stream_transactions[AVSP_ROUND1_TERRAIN_STREAM_TRANSACTION_COUNT] =",
+        "{",
+    ])
+    for transaction, (first_write, write_count) in zip(
+            terrain_stream_transactions, terrain_stream_ranges):
+        lines.append(
+            "    { %d, %d, %du, %du, %du, 0x%02Xu, %du, %du }," % (
+                transaction["camera_x_observed_s16"],
+                transaction["camera_z_observed_s16"],
+                transaction["camera_x_tile_u8"],
+                transaction["camera_z_tile_u8"],
+                transaction["direction_u8"],
+                transaction["phase_after_u8"],
+                first_write, write_count))
     lines.extend([
         "};", "",
         "static const AvspRound1AnimationStateSpec avsp_round1_coffee_shop_obstacle_records[AVSP_ROUND1_OBSTACLE_PARENT_RECORD_COUNT] =",
@@ -3396,6 +3616,7 @@ def build() -> str:
         f"    {int(release['stop_action'], 16)}u,",
         "    512u,",
         f"    {release['stop_timer']['ticks']}u,",
+        f"    {int(locomotion_execution['movement']['right_delta_s16_16'], 16)}L,",
         f"    {locomotion_execution['current_collision_selector_projection']['actor_hurt_selector_u8']}u,",
         f"    {locomotion_execution['current_collision_selector_projection']['actor_attack_selector_u8']}u,",
         "    {" + ", ".join(f"{value}u" for value in direction_resolver) + "}",
@@ -3426,12 +3647,14 @@ def build() -> str:
             player_hit_states["shake_substate_u16"],
             player_hit_states["motion_substate_u16"],
             player_hit_states["return_substate_u16"]),
-        "    %du, %du, %du, %du, 0x%04Xu," % (
+        "    %du, %du, %du, %du, 0x%04Xu, %du," % (
             player_hit["entry_writes"]["shake_countdown_u8"],
             player_hit["entry_writes"]["motion_index_u8"],
             player_hit_return["writes"]["invulnerability_u8"],
             player_hit_return["writes"]["facing_u8"],
-            player_hit["audio"]["command_u16"]),
+            player_hit["audio"]["command_u16"],
+            1 if player_hit_interruption["mutation_control"]
+                ["reject_edge_loss_during_shake"] else 0),
         "    %dL, %dL," % (
             player_hit_phase0["writes"]["x_velocity_s32_16_16"],
             player_hit_phase0["writes"]["x_acceleration_s32_16_16"]),

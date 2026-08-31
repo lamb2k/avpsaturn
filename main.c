@@ -120,11 +120,11 @@
  * transient diagnostic storage. Reserve one aligned block immediately after
  * the existing tile/strip carve so debug and release use the same 4 MB-cart
  * ownership without consuming Saturn work RAM. The SH-2 runtime measures
- * 0x173b8 bytes with all six source pools; the 0x19000 carve preserves 0x1c48
- * bytes of headroom inside the fixed arena. */
+ * 0x183ec bytes with all six source pools and the Coffee Shop terrain stream;
+ * the 0x19000 carve preserves 0x0c14 bytes of headroom inside the fixed arena. */
 #ifdef AVSP_LIVE_ENCOUNTER
 #define AVSP_ROUND1_RUNTIME_REGION_BYTES 0x19000
-#define AVSP_ROUND1_RUNTIME_MEASURED_BYTES 0x173dc
+#define AVSP_ROUND1_RUNTIME_MEASURED_BYTES 0x183ec
 #define AVSP_LIVE_DIAG_REGION_BYTES 0x1A000
 #define AVSP_LIVE_DIAG_RECORD_BYTES 156
 #define AVSP_ROUND1_RUNTIME_BASE ((AvspRound1Runtime *)(AVSP_CART_DRAM1_BASE + AVSP_TILE_REGION_BYTES + AVSP_STRIPS_REGION_BYTES))

@@ -444,6 +444,22 @@ int main(void)
             walk_runtime.player.attack_selector != 0u)
             return 186;
     }
+    {
+        AvspRound1Runtime fractional_walk_runtime = runtime;
+        fractional_walk_runtime.player.source_x_fp = 0x03b09000L;
+        fractional_walk_runtime.player.x = 944;
+        fractional_walk_runtime.player_action.x = 944;
+        fractional_walk_runtime.player_action.x_numerator = 15L;
+        fractional_walk_runtime.player_action.direction_history[0] =
+            AVSP_PW_INPUT_RIGHT;
+        fractional_walk_runtime.player_action.direction_history[1] =
+            AVSP_PW_INPUT_RIGHT;
+        if (!avsp_round1_step_player(&fractional_walk_runtime,
+                AVSP_PW_INPUT_RIGHT, 0) ||
+            fractional_walk_runtime.player.source_x_fp != 0x03b2d000L ||
+            fractional_walk_runtime.player.x != 946)
+            return 186;
+    }
     if (!avsp_round1_step_player(&runtime, AVSP_PW_INPUT_RIGHT, 0) ||
         runtime.player.source_x_fp != 0x03b00000L ||
         !avsp_round1_step_player(&runtime, AVSP_PW_INPUT_RIGHT, 0) ||
@@ -605,15 +621,29 @@ int main(void)
         runtime.navigation_clamps != 4u)
     {
         fprintf(stderr,
-                "low clamp x=%d z=%d action_x=%d lane=%d applications=%lu clamps=%lu\n",
+                "low clamp x=%d z=%d action_x=%d lane=%d applications=%lu clamps=%lu camera=%d,%d phase=%u stream=%lu failures=%lu\n",
                 runtime.player.x, runtime.player.z,
                 runtime.player_action.x, runtime.player_action.lane,
-                runtime.navigation_applications, runtime.navigation_clamps);
+                runtime.navigation_applications, runtime.navigation_clamps,
+                runtime.camera_x_position, runtime.camera_z_position,
+                runtime.terrain_stream_phase_x,
+                runtime.terrain_stream_transactions,
+                runtime.terrain_stream_failures);
         return 12;
     }
     for (calls = 0u; calls < 8u; ++calls)
         if (!avsp_round1_step_player(&runtime, 0u, 0))
+        {
+            fprintf(stderr,
+                    "stop step=%u camera=%d,%d phase=%u stream=%lu last=%u failures=%lu\n",
+                    calls, runtime.camera_x_position,
+                    runtime.camera_z_position,
+                    runtime.terrain_stream_phase_x,
+                    runtime.terrain_stream_transactions,
+                    runtime.terrain_stream_last_transaction,
+                    runtime.terrain_stream_failures);
             return 13;
+        }
     if (runtime.player_stop_ticks != 0u ||
         runtime.player.source_action != 512u ||
         runtime.player_cleanup_pending != 1u ||
@@ -742,6 +772,7 @@ int main(void)
         camera_runtime.camera_guard_counter = 0u;
         camera_runtime.camera_guard_snapshot = 0u;
         camera_runtime.camera_guard_countdown = 1200u;
+        camera_runtime.first_encounter.source_field46 = 1200u;
         camera_runtime.navigation_bound_x = 640;
         camera_runtime.navigation_bound_z = 256;
         if (!avsp_round1_step_player(&camera_runtime, 0u, 0) ||
@@ -781,7 +812,7 @@ int main(void)
                 return 80;
             ++locked_steps;
         }
-        if (locked_steps != 1200u ||
+        if (locked_steps != 1201u ||
             camera_runtime.camera_coffee_phase != 4u ||
             camera_runtime.camera_x_upper != 1008 ||
             camera_runtime.camera_unlocks != runtime.camera_unlocks + 1u)
@@ -2585,7 +2616,14 @@ int main(void)
                 source_ko_target->source_y_velocity != 0x00093000L ||
                 source_ko_target->animation_record != 0x0012e05cUL)
                 return 57;
-            for (entry_calls = 0u; entry_calls < 61u; ++entry_calls)
+            for (entry_calls = 0u; entry_calls < 5u; ++entry_calls)
+                if (!avsp_round1_step_scheduler(&source_ko_runtime))
+                    return 57;
+            if (source_ko_target->substate != 0x0200u ||
+                source_ko_target->animation_record != 0x0012e04cUL ||
+                source_ko_target->animation_timer != 1u)
+                return 57;
+            for (entry_calls = 0u; entry_calls < 56u; ++entry_calls)
                 if (!avsp_round1_step_scheduler(&source_ko_runtime))
                     return 57;
             if (source_ko_target->substate != 0x0400u ||
@@ -2668,7 +2706,7 @@ int main(void)
             impact->animation_timer != expected_impact_timer ||
             impact->animation_branch != expected_impact_branch ||
             impact->facing != child->facing ||
-            impact->x != 939 || impact->y != 337 || impact->z != 318 ||
+            impact->x != 926 || impact->y != 337 || impact->z != 318 ||
             projectile_runtime.class4e_variant1_allocation_requests != 1u ||
             projectile_runtime.class4e_variant1_allocations != 1u ||
             projectile_runtime.class4e_variant1_allocation_failures != 0u)
@@ -2678,7 +2716,7 @@ int main(void)
                 impact->active, impact->actor_class, impact->variant,
                 impact->state, impact->source_slot, impact->facing,
                 child->facing, impact->x, impact->y, impact->z,
-                939, 337, 318,
+                926, 337, 318,
                 impact->animation_record, impact->assembly,
                 impact->animation_timer, impact->animation_branch,
                 avsp_round1_is_weapon_impact_actor(impact),
@@ -2884,7 +2922,7 @@ int main(void)
                  transition_runtime.first_encounter.source_intro_timer !=
                     0xffffu ||
                  transition_runtime.first_encounter.source_camera_target !=
-                    208u ||
+                    208u || transition_runtime.camera_z_lower != 208 ||
                  transition_runtime.first_encounter.source_living_count !=
                     10u))
                 return 67;
@@ -3744,6 +3782,7 @@ int main(void)
         type16_runtime.player.x = 800;
         type16_runtime.player.y = 355;
         type16_runtime.player.z = 320;
+        type16_runtime.player.hurt_selector = 17u;
         type16_runtime.player.health = 95;
         type16_runtime.player_action.x = 800;
         type16_runtime.player_action.lane = 320;
@@ -3888,6 +3927,279 @@ int main(void)
                 inner_runtime.rng_seed, parent->source_field01,
                 inner_runtime.failure_count);
             return 109;
+        }
+        {
+            AvspRound1Runtime terrain_turn_runtime = inner_runtime;
+            AvspRound1ActorCore *terrain_actor =
+                &terrain_turn_runtime.pools[0].records[19];
+            unsigned int pool_index;
+            for (pool_index = 0u; pool_index < AVSP_ROUND1_POOL_COUNT;
+                 ++pool_index)
+            {
+                unsigned int actor_index;
+                for (actor_index = 0u;
+                     actor_index <
+                        terrain_turn_runtime.pools[pool_index].capacity;
+                     ++actor_index)
+                    if (pool_index != 0u || actor_index != 19u)
+                        terrain_turn_runtime.pools[pool_index].records[
+                            actor_index].active = 0u;
+            }
+            terrain_turn_runtime.route_state = 4;
+            terrain_turn_runtime.player_action.x = 0;
+            terrain_turn_runtime.player_action.lane = 0;
+            terrain_actor->active = 1u;
+            terrain_actor->type = 12u;
+            terrain_actor->actor_class = 0x1f;
+            terrain_actor->state = 0x0208u;
+            terrain_actor->substate = 0x0400u;
+            terrain_actor->source_action = 0x0400u;
+            terrain_actor->source_style85 = 1u;
+            terrain_actor->source_direction = 14u;
+            terrain_actor->source_primary_animation_record = 0x0012d488UL;
+            terrain_actor->source_x_fp = 0x045cf200L;
+            terrain_actor->source_y_fp = 0x00e0ef00L;
+            terrain_actor->x = 1116;
+            terrain_actor->y = 224;
+            terrain_actor->z = 224;
+            terrain_actor->animation_record = 0x0012d4e8UL;
+            terrain_actor->assembly = 0x0012f890UL;
+            terrain_actor->animation_timer = 1u;
+            terrain_actor->animation_branch = 1540;
+            terrain_actor->source_next_animation_record = 0x0012d4f8UL;
+            terrain_actor->source_movement_table = 4u;
+            terrain_actor->hurt_selector = 2u;
+            terrain_actor->attack_selector = 0u;
+            if (!avsp_round1_step_scheduler(&terrain_turn_runtime) ||
+                terrain_actor->animation_record != 0x0012d4f8UL ||
+                terrain_actor->source_x_fp != 0x0463d100L ||
+                terrain_actor->source_y_fp != 0x00e0a100L ||
+                terrain_actor->z != 224 ||
+                terrain_actor->source_navigation_contact_bits == 0u ||
+                terrain_actor->source_direction != 30u)
+            {
+                fprintf(stderr,
+                    "inner8 terrain direction code=%u state=%04x/%04x anim=%08lx xfp=%08lx yfp=%08lx z=%d contact=%u direction=%u failures=%lu\n",
+                    terrain_turn_runtime.scheduler_failure_code,
+                    terrain_actor->state, terrain_actor->substate,
+                    terrain_actor->animation_record,
+                    terrain_actor->source_x_fp,
+                    terrain_actor->source_y_fp,
+                    terrain_actor->z,
+                    terrain_actor->source_navigation_contact_bits,
+                    terrain_actor->source_direction,
+                    terrain_turn_runtime.failure_count);
+                return 110;
+            }
+            terrain_actor->state = 0x0208u;
+            terrain_actor->substate = 0x0400u;
+            terrain_actor->source_action = 0x0400u;
+            terrain_actor->source_style85 = 1u;
+            terrain_actor->source_direction = 14u;
+            terrain_actor->source_motion_fields[3] = 2;
+            terrain_actor->source_primary_animation_record = 0x0012d488UL;
+            terrain_actor->source_x_fp = 0x04335500L;
+            terrain_actor->source_y_fp = 0x00e53700L;
+            terrain_actor->x = 1075;
+            terrain_actor->y = 229;
+            terrain_actor->z = 229;
+            terrain_actor->animation_record = 0x0012d4f8UL;
+            terrain_actor->assembly = 0x0012f8b8UL;
+            terrain_actor->animation_timer = 1u;
+            terrain_actor->animation_branch = -30958;
+            terrain_actor->source_next_animation_record = 0x0012d488UL;
+            terrain_actor->source_movement_table = 18u;
+            if (!avsp_round1_step_scheduler(&terrain_turn_runtime) ||
+                terrain_actor->animation_record != 0x0012d488UL ||
+                terrain_actor->source_x_fp != 0x043a9600L ||
+                terrain_actor->source_y_fp != 0x00e07300L ||
+                terrain_actor->z != 224 ||
+                terrain_actor->source_navigation_contact_bits == 0u ||
+                terrain_actor->source_direction != 30u)
+            {
+                fprintf(stderr,
+                    "inner8 terrain rebind direction code=%u state=%04x/%04x anim=%08lx xfp=%08lx yfp=%08lx z=%d contact=%u direction=%u failures=%lu\n",
+                    terrain_turn_runtime.scheduler_failure_code,
+                    terrain_actor->state, terrain_actor->substate,
+                    terrain_actor->animation_record,
+                    terrain_actor->source_x_fp,
+                    terrain_actor->source_y_fp,
+                    terrain_actor->z,
+                    terrain_actor->source_navigation_contact_bits,
+                    terrain_actor->source_direction,
+                    terrain_turn_runtime.failure_count);
+                return 110;
+            }
+            terrain_actor->state = 0x0208u;
+            terrain_actor->substate = 0x1006u;
+            terrain_actor->source_action = 0x1006u;
+            terrain_actor->source_style85 = 0u;
+            terrain_actor->source_direction = 6u;
+            terrain_actor->facing = 1u;
+            terrain_actor->source_navigation_contact_bits = 0u;
+            terrain_actor->source_x_fp = 0x04183700L;
+            terrain_actor->source_y_fp = 0x011e9f00L;
+            terrain_actor->x = 1048;
+            terrain_actor->y = 286;
+            terrain_actor->z = 286;
+            terrain_actor->animation_record = 0x0012e68cUL;
+            terrain_actor->assembly = 0x0012f5deUL;
+            terrain_actor->animation_timer = 6u;
+            terrain_actor->animation_branch = -32768;
+            terrain_actor->source_next_animation_record = 0x0012e68cUL;
+            terrain_actor->source_movement_table = 0u;
+            if (!avsp_round1_step_scheduler(&terrain_turn_runtime) ||
+                terrain_actor->state != 0x0208u ||
+                terrain_actor->substate != 0x1000u ||
+                terrain_actor->source_style85 != 1u ||
+                terrain_actor->source_direction != 6u ||
+                terrain_actor->animation_record != 0x0012ee98UL ||
+                terrain_actor->animation_timer != 4u ||
+                terrain_actor->animation_branch != 19 ||
+                terrain_actor->source_x_fp != 0x0429bf00L ||
+                terrain_actor->source_y_fp != 0x01223f00L ||
+                terrain_actor->z != 290)
+            {
+                fprintf(stderr,
+                    "inner8 action10 terminal binding code=%u state=%04x/%04x style=%u direction=%u anim=%08lx timer=%u branch=%d xfp=%08lx yfp=%08lx z=%d failures=%lu\n",
+                    terrain_turn_runtime.scheduler_failure_code,
+                    terrain_actor->state, terrain_actor->substate,
+                    terrain_actor->source_style85,
+                    terrain_actor->source_direction,
+                    terrain_actor->animation_record,
+                    terrain_actor->animation_timer,
+                    terrain_actor->animation_branch,
+                    terrain_actor->source_x_fp,
+                    terrain_actor->source_y_fp,
+                    terrain_actor->z,
+                    terrain_turn_runtime.failure_count);
+                return 110;
+            }
+            terrain_turn_runtime.player_action.x = 1360;
+            terrain_turn_runtime.player_action.lane = 319;
+            terrain_actor->state = 0x0208u;
+            terrain_actor->substate = 0x1000u;
+            terrain_actor->source_action = 0x1000u;
+            terrain_actor->source_style85 = 1u;
+            terrain_actor->source_direction = 6u;
+            terrain_actor->facing = 1u;
+            terrain_actor->source_inner8_x_offset = -208;
+            terrain_actor->source_inner8_z_offset = 0;
+            terrain_actor->effect_timer = 149u;
+            terrain_actor->source_action_timer = 4u;
+            terrain_actor->source_navigation_contact_bits = 0u;
+            terrain_actor->source_x_fp = 0x04726c00L;
+            terrain_actor->source_y_fp = 0x013b3800L;
+            terrain_actor->x = 1138;
+            terrain_actor->y = 315;
+            terrain_actor->z = 315;
+            terrain_actor->animation_record = 0x0012eef8UL;
+            terrain_actor->assembly = 0x0012f890UL;
+            terrain_actor->animation_timer = 4u;
+            terrain_actor->animation_branch = 1540;
+            terrain_actor->source_next_animation_record = 0x0012ef08UL;
+            terrain_actor->source_movement_table = 4u;
+            if (!avsp_round1_step_scheduler(&terrain_turn_runtime) ||
+                terrain_actor->state != 0x0208u ||
+                terrain_actor->substate != 0x0802u ||
+                terrain_actor->source_style85 != 1u ||
+                terrain_actor->animation_record != 0x0012d628UL ||
+                terrain_actor->animation_timer != 6u ||
+                terrain_actor->animation_branch != 0 ||
+                terrain_actor->source_x_fp != 0x04726c00L ||
+                terrain_actor->source_y_fp != 0x013b3800L ||
+                terrain_actor->z != 315)
+            {
+                fprintf(stderr,
+                    "inner8 action10 overlap override code=%u state=%04x/%04x style=%u anim=%08lx timer=%u branch=%d xfp=%08lx yfp=%08lx z=%d failures=%lu\n",
+                    terrain_turn_runtime.scheduler_failure_code,
+                    terrain_actor->state, terrain_actor->substate,
+                    terrain_actor->source_style85,
+                    terrain_actor->animation_record,
+                    terrain_actor->animation_timer,
+                    terrain_actor->animation_branch,
+                    terrain_actor->source_x_fp,
+                    terrain_actor->source_y_fp,
+                    terrain_actor->z,
+                    terrain_turn_runtime.failure_count);
+                return 110;
+            }
+            terrain_actor->animation_record = 0x0012d678UL;
+            terrain_actor->assembly = 0x0012f5acUL;
+            terrain_actor->animation_timer = 4u;
+            terrain_actor->animation_branch = -32768;
+            terrain_actor->source_next_animation_record = 0x0012d678UL;
+            if (!avsp_round1_step_scheduler(&terrain_turn_runtime) ||
+                terrain_actor->state != 0x0208u ||
+                terrain_actor->substate != 0x0e00u ||
+                terrain_actor->source_style85 != 0u ||
+                terrain_actor->animation_record != 0x0012d678UL ||
+                terrain_actor->animation_timer != 3u ||
+                terrain_actor->animation_branch != -32768 ||
+                terrain_actor->source_x_fp != 0x04726c00L ||
+                terrain_actor->source_y_fp != 0x013b3800L ||
+                terrain_actor->z != 315)
+            {
+                fprintf(stderr,
+                    "inner8 action8 phase2 terminal code=%u state=%04x/%04x style=%u anim=%08lx timer=%u branch=%d xfp=%08lx yfp=%08lx z=%d failures=%lu\n",
+                    terrain_turn_runtime.scheduler_failure_code,
+                    terrain_actor->state, terrain_actor->substate,
+                    terrain_actor->source_style85,
+                    terrain_actor->animation_record,
+                    terrain_actor->animation_timer,
+                    terrain_actor->animation_branch,
+                    terrain_actor->source_x_fp,
+                    terrain_actor->source_y_fp,
+                    terrain_actor->z,
+                    terrain_turn_runtime.failure_count);
+                return 110;
+            }
+            terrain_actor->state = 0x0208u;
+            terrain_actor->substate = 0x0e02u;
+            terrain_actor->source_action = 0x0e02u;
+            terrain_actor->source_motion_fields[0] = 4;
+            terrain_actor->source_style85 = 0u;
+            terrain_actor->source_airborne = 1u;
+            terrain_actor->facing = 1u;
+            terrain_actor->source_x_fp = 0x04496c00L;
+            terrain_actor->source_y_fp = 0x0146c000L;
+            terrain_actor->source_x_velocity = -0x00010000L;
+            terrain_actor->source_x_acceleration = 0L;
+            terrain_actor->source_y_velocity = -0x000c0600L;
+            terrain_actor->source_y_acceleration = -0x00009600L;
+            terrain_actor->x = 1097;
+            terrain_actor->y = 326;
+            terrain_actor->z = 315;
+            terrain_actor->animation_record = 0x0012e638UL;
+            terrain_actor->assembly = 0x0012f97cUL;
+            terrain_actor->animation_timer = 3u;
+            terrain_actor->animation_branch = 0;
+            terrain_actor->source_next_animation_record = 0x0012e648UL;
+            if (!avsp_round1_step_scheduler(&terrain_turn_runtime) ||
+                terrain_actor->state != 0x0208u ||
+                terrain_actor->substate != 0x0e02u ||
+                terrain_actor->source_motion_fields[0] != 6 ||
+                terrain_actor->source_airborne != 0u ||
+                terrain_actor->source_x_fp != 0x04486c00L ||
+                terrain_actor->source_y_fp != 0x013aba00L ||
+                terrain_actor->y != 314 || terrain_actor->z != 315 ||
+                terrain_actor->animation_record != 0x0012e550UL ||
+                terrain_actor->animation_timer != 6u)
+            {
+                fprintf(stderr,
+                    "inner8 action0e landing code=%u state=%04x/%04x phase=%d airborne=%u anim=%08lx timer=%u xfp=%08lx yfp=%08lx y=%d z=%d failures=%lu\n",
+                    terrain_turn_runtime.scheduler_failure_code,
+                    terrain_actor->state, terrain_actor->substate,
+                    terrain_actor->source_motion_fields[0],
+                    terrain_actor->source_airborne,
+                    terrain_actor->animation_record,
+                    terrain_actor->animation_timer,
+                    terrain_actor->source_x_fp,
+                    terrain_actor->source_y_fp,
+                    terrain_actor->y, terrain_actor->z,
+                    terrain_turn_runtime.failure_count);
+                return 110;
+            }
         }
         parent->state = 0x0208u;
         parent->substate = 0x0e00u;
@@ -4474,6 +4786,85 @@ int main(void)
                     if (actor->active && actor->actor_class == 0x1f &&
                         actor->state == 0x0208u)
                         inner8_seen = 1;
+                }
+                if (source_frame == 3830u)
+                {
+                    const AvspRound1ActorCore *reaction_target = 0;
+                    for (actor_index = 0u;
+                         actor_index < scene_runtime.pools[0].capacity;
+                         ++actor_index)
+                    {
+                        const AvspRound1ActorCore *candidate =
+                            &scene_runtime.pools[0].records[actor_index];
+                        if (candidate->source_slot == 0x00ffa000UL)
+                        {
+                            reaction_target = candidate;
+                            break;
+                        }
+                    }
+                    if (reaction_target == 0 || !reaction_target->active ||
+                        reaction_target->state != 0x0400u ||
+                        reaction_target->health != -1 ||
+                        reaction_target->source_facing_selector != 1u ||
+                        reaction_target->facing != 0u)
+                    {
+                        fprintf(stderr,
+                            "Coffee Shop collision reaction-facing failed source=%u active=%u state=%04x health=%d reaction=%u facing=%u\n",
+                            source_frame,
+                            reaction_target != 0 ? reaction_target->active : 0u,
+                            reaction_target != 0 ? reaction_target->state : 0u,
+                            reaction_target != 0 ? reaction_target->health : 0,
+                            reaction_target != 0 ?
+                                reaction_target->source_facing_selector : 0u,
+                            reaction_target != 0 ? reaction_target->facing : 0u);
+                        return 124;
+                    }
+                }
+                if (source_frame == 3881u)
+                {
+                    const AvspRound1ActorCore *timeout_actor = 0;
+                    for (actor_index = 0u;
+                         actor_index < scene_runtime.pools[0].capacity;
+                         ++actor_index)
+                    {
+                        const AvspRound1ActorCore *candidate =
+                            &scene_runtime.pools[0].records[actor_index];
+                        if (candidate->source_slot == 0x00ffa3c0UL)
+                        {
+                            timeout_actor = candidate;
+                            break;
+                        }
+                    }
+                    if (timeout_actor == 0 || !timeout_actor->active ||
+                        timeout_actor->state != 0x0200u ||
+                        timeout_actor->substate != 0u ||
+                        timeout_actor->transition_timer != 0u ||
+                        timeout_actor->source_special_latch_ad != 0u ||
+                        timeout_actor->source_x_fp != 0x04530300L ||
+                        timeout_actor->source_y_fp != 0x0134bb00L ||
+                        timeout_actor->z != 309 || timeout_actor->facing != 1u ||
+                        timeout_actor->animation_record != 0x0012e5f0UL)
+                    {
+                        fprintf(stderr,
+                            "Coffee Shop inner timeout return failed source=%u active=%u state=%04x/%04x timer=%u latch=%u fp=%08lx/%08lx z=%d facing=%u anim=%08lx\n",
+                            source_frame,
+                            timeout_actor != 0 ? timeout_actor->active : 0u,
+                            timeout_actor != 0 ? timeout_actor->state : 0u,
+                            timeout_actor != 0 ? timeout_actor->substate : 0u,
+                            timeout_actor != 0 ?
+                                timeout_actor->transition_timer : 0u,
+                            timeout_actor != 0 ?
+                                timeout_actor->source_special_latch_ad : 0u,
+                            timeout_actor != 0 ?
+                                timeout_actor->source_x_fp : 0L,
+                            timeout_actor != 0 ?
+                                timeout_actor->source_y_fp : 0L,
+                            timeout_actor != 0 ? timeout_actor->z : 0,
+                            timeout_actor != 0 ? timeout_actor->facing : 0u,
+                            timeout_actor != 0 ?
+                                timeout_actor->animation_record : 0UL);
+                        return 125;
+                    }
                 }
             }
             if (source_frame == 2750u || source_frame == 3263u ||

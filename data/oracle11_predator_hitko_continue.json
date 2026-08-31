@@ -352,6 +352,42 @@
         "return or source action interruption"
       ],
       "scope": "all five Coffee Shop-reachable nonlethal player HIT instances through the shared 0x01ab1a program",
+      "source_action_interruption": {
+        "action_writer": "0x01a892..0x01a8a0",
+        "classification": "SOURCE_CLOSED_IMPLEMENTATION_FIELDS",
+        "dispatch_substate_u16": 514,
+        "guard_routine": "0x01a7e6",
+        "hit_phase_dispatch_pc": "0x01ab52",
+        "input_runs": [
+          {
+            "first_frame_u16": 3870,
+            "input_mask_u8": "0x58",
+            "last_frame_u16": 3874
+          },
+          {
+            "first_frame_u16": 3875,
+            "input_mask_u8": "0x48",
+            "last_frame_u16": 3876
+          },
+          {
+            "first_frame_u16": 3877,
+            "input_mask_u8": "0x08",
+            "last_frame_u16": 3877
+          }
+        ],
+        "mutation_control": {
+          "reject_dispatch_before_phase_0x0202": true,
+          "reject_edge_loss_during_shake": true,
+          "reject_fixed_frame_special_entry": true
+        },
+        "queue_rule": "a qualifying source special edge observed while the shared HIT body is active remains pending until phase 0x0202 evaluates 0x01a7e6; advancing the edge out of the pending queue during shake is forbidden",
+        "spec_executable": true,
+        "special_entry_state_u16": 512,
+        "special_entry_substate_u16": 2048,
+        "special_entry_visible_frame_u16": 3878,
+        "special_startup_visible_frame_u16": 3879,
+        "terminal_hit_visible_frame_u16": 3877
+      },
       "source_program": {
         "active_body_dispatch": {
           "bytes": 92,

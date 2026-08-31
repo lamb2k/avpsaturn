@@ -1953,3 +1953,35 @@ camera chronology and closing the owning reusable global-bounds/camera phase
 program across all Coffee Shop-reachable branches. Do not add a frame-specific
 exception, authored delay, or guessed unlock. Paired cold Emulator, complete
 scene acceptance, and full WGC remain unclaimed.
+
+### Type-16 current-hurt-selector checkpoint (2026-08-31)
+
+The complete scene exposed a fabricated native type-16 player hit at visible
+frame 3878. Accepted source contacts at frames 3263 and 3855 both require the
+current player hurt selector 17; the frame-3878 player record has selector 0.
+The auxiliary Oracle/SPEC/generated/native path now binds and enforces selector
+17, with a negative mutation for the prior fixed-box behavior. The false hit is
+gone while the legitimate frame-3877 HIT, frame-3878 special entry, frame-3891
+selector-11 contact, and class-`0x1f` special-KO release through frame 4002 are
+unchanged. The focused lane passes nine real mutations.
+
+The SPEC fingerprint sentinel was refreshed without changing the 126-tile,
+16712-byte combat overlay (`171f0dfa25d8a1fe94d2889f89c78e71bd3b1cfffa9fd5ff11964b1fc23815fe`).
+The 4096-byte source terrain selector map is now represented in Target data by
+383 deterministic runs and reconstructed exactly at initialization. Target
+`LiveEncounterBench` BUILD_ONLY passes with GAME.BIN 417840 bytes and BSS end
+`0x060bfef0`, preserving JO_MAX_SPRITE 255 and the existing memory carve.
+
+The scene remains intentionally RED. The earliest newly exposed causal gap is
+the complete Coffee Shop-reachable record-type-20/class-`0x05` program: source
+slots `0x00ffb180` and `0x00ffb280` enter at frame 2673; `0x00ffb280` receives
+the frame-3891 special contact, consumes source RNG, transitions through
+`0x0200/0x0400/0x0402/0x0404/0x0604`, allocates the second class-`0x4e`
+variant-1 impact at `0x00ffc200`, and releases at frame 3931. Native omission
+leaves RNG two calls behind and causes the later class-`0x1f` action/collision
+divergence. Close this whole reusable program from existing evidence, using only
+the smallest bounded MAME Oracle follow-up if exact implementation fields are
+absent. Fast and Oracle pass every preceding check and stop at the intentional
+full-host frame-3782 stage-progress mismatch (eight native calls versus seven
+source calls). Paired Emulator, complete census acceptance, and WGC remain
+unclaimed.

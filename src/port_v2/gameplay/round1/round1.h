@@ -6,7 +6,7 @@
 #include "../../combat/hit_ko/hit_ko.h"
 
 #define AVSP_ROUND1_SPEC02_SHA256 \
-"5f50fe36d7827b4ecada76b52dfe740a4d475f47e437f37f19ec0a5342958a46"
+"ad4f85b8cc6fceb80bd2f4900f3ccfa26192f1ee54b79f03c99e2b8baa686900"
 #define AVSP_ROUND1_CANARY_HEAD 0x52314548UL
 #define AVSP_ROUND1_CANARY_TAIL 0x52314554UL
 #define AVSP_ROUND1_ROUTE_ENTRY_STATE 2
@@ -85,7 +85,7 @@
 #define AVSP_ROUND1_CLASS1F_ACTION4_TIMER_ROW_COUNT 5u
 #define AVSP_ROUND1_CLASS1F_MOVEMENT_TABLE_COUNT 2u
 #define AVSP_ROUND1_CLASS1F_MOVEMENT_DIRECTION_COUNT 32u
-#define AVSP_ROUND1_CLASS1F_INNER8_RECORD_COUNT 120u
+#define AVSP_ROUND1_CLASS1F_INNER8_RECORD_COUNT 152u
 #define AVSP_ROUND1_CLASS1F_INNER8_MOVEMENT_TABLE_COUNT 10u
 #define AVSP_ROUND1_CLASS1F_ATTACK_TIMER_COUNT 16u
 #define AVSP_ROUND1_CLASS1F_SOURCE_HIT_PHASE_COUNT 6u
@@ -136,6 +136,9 @@
 #define AVSP_ROUND1_TERRAIN_GRID_CELL_COUNT 414u
 #define AVSP_ROUND1_TERRAIN_PACKED_BYTES 104u
 #define AVSP_ROUND1_TERRAIN_SELECTOR_MAP_COUNT 4096u
+#define AVSP_ROUND1_TERRAIN_SELECTOR_RUN_COUNT 383u
+#define AVSP_ROUND1_TERRAIN_STREAM_TRANSACTION_COUNT 41u
+#define AVSP_ROUND1_TERRAIN_STREAM_WRITE_COUNT 1476u
 #define AVSP_ROUND1_CAMERA_SPEED_COUNT 20u
 #define AVSP_ROUND1_INPUT_BUTTON1 0x0010u
 #define AVSP_ROUND1_INPUT_BUTTON3 0x0040u
@@ -702,8 +705,13 @@ typedef struct
 {
     unsigned short captured_source_slot_low;
     unsigned short inner_timer;
+    unsigned short timeout_outer_state;
+    unsigned short timeout_action_substate;
+    unsigned char timeout_special_latch;
     unsigned short action0_style_bits;
     unsigned short action4_choice_bits;
+    unsigned char action4_contact_direction_delta;
+    unsigned char action4_direction_mask;
     unsigned char action4_stage_parameter;
     unsigned char action4_timer_bank_by_stage[32];
     signed char action4_timer_banks[8][16];
@@ -725,6 +733,7 @@ typedef struct
     unsigned char action10_lifetime;
     unsigned long turn_records_by_style[2];
     unsigned long movement_records_by_style_relation[4];
+    unsigned long action10_phase_records_by_style_relation[4];
     unsigned long style_one_record;
     unsigned long style_zero_record;
     unsigned long idle_record;
@@ -1086,6 +1095,7 @@ typedef struct
     unsigned char record_type;
     signed char actor_class;
     unsigned char attack_selector;
+    unsigned char player_hurt_selector;
     unsigned char hit_value;
     AvspRound1CollisionBoxSpec attack_box;
     AvspRound1CollisionBoxSpec player_hurt_box;
@@ -1162,6 +1172,31 @@ typedef struct
     unsigned char retry_selector;
     unsigned char reserved;
 } AvspRound1TerrainRecordSpec;
+
+typedef struct
+{
+    unsigned short selector_index;
+    unsigned char selector;
+    unsigned char attribute;
+} AvspRound1TerrainStreamWriteSpec;
+
+typedef struct
+{
+    unsigned char run_length_minus_one;
+    unsigned char selector;
+} AvspRound1TerrainSelectorRunSpec;
+
+typedef struct
+{
+    short camera_x_observed;
+    short camera_z_observed;
+    unsigned char camera_x_tile;
+    unsigned char camera_z_tile;
+    unsigned char direction;
+    unsigned char phase_after;
+    unsigned short first_write;
+    unsigned short write_count;
+} AvspRound1TerrainStreamTransactionSpec;
 
 typedef struct
 {
@@ -1254,6 +1289,7 @@ typedef struct
     unsigned short stop_action;
     unsigned short cleanup_action;
     unsigned short stop_ticks;
+    long right_delta_s16_16;
     unsigned char current_hurt_selector;
     unsigned char current_attack_selector;
     unsigned char direction_resolver[16];
@@ -1278,6 +1314,7 @@ typedef struct
     unsigned char invulnerability;
     unsigned char return_facing;
     unsigned short audio_command;
+    unsigned char queue_special_input_during_hit;
     long x_velocity;
     long x_acceleration;
     AvspRound1AnimationStateSpec carried_record;
@@ -1860,6 +1897,14 @@ typedef struct
     unsigned long class1f_terrain_tests;
     unsigned long class1f_terrain_responses;
     unsigned long class1f_terrain_retries;
+    unsigned char terrain_selector_map[
+        AVSP_ROUND1_TERRAIN_SELECTOR_MAP_COUNT];
+    unsigned char terrain_stream_phase_x;
+    unsigned char terrain_stream_initialized;
+    unsigned short terrain_stream_last_transaction;
+    unsigned long terrain_stream_transactions;
+    unsigned long terrain_stream_writes;
+    unsigned long terrain_stream_failures;
     unsigned char navigation_contact_bits;
     short camera_x_previous;
     short camera_x_position;
@@ -1892,6 +1937,7 @@ typedef struct
     unsigned char player_hit_kind;
     unsigned char player_hit_presentation_selector;
     unsigned char player_hit_active_body_selector;
+    unsigned char player_hit_special_pending;
     unsigned short player_hit_animation_timer;
     short player_hit_animation_branch;
     long player_hit_x_fp;
