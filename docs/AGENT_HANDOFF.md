@@ -9,6 +9,47 @@ Read `project_state.yaml`, this file, the active card, and current SPEC-02 contr
 workflow, branch, task hierarchy, coverage system, or writer. Preserve USER-09 `CHANGES_REQUESTED`, SALVAGE-08 inactive, physical Saturn `UNRUN`, and all locks.
 Never stage/reset/overwrite user-owned `data/avsp_anim_records.json` or `history.txt`; stage owned paths explicitly.
 
+## Owner direction (2026-08-31): headless emulator visual-capture lane
+
+Queue this as the next bounded body after the in-flight memory-plan program
+checkpoints; do not interleave it mid-body. Goal: replace window-bound WGC for
+all machine visual QA with frame-exact headless screenshots served by the
+pinned emulator's own MCP endpoint; window-only WGC remains solely for
+user-facing review packages.
+
+Body: extend the existing diagnostic Yaba Sanshiro fork (the locally modified
+source checkout `71c973f...` that already provides the `:9640/mcp` endpoint)
+with one new MCP tool, `framebuffer_screenshot`: while paused via the existing
+`pause`/`breakpoint_add`/`wait_for_stop` machinery, capture the emulator's own
+rendered frame (renderer FBO readback, or the software video core buffer) and
+return PNG bytes plus frame-identity metadata (emulated frame counter and
+enough register/state identity to bind the image to a ledger row). Also
+support a bounded frame-range capture-to-directory mode so whole-scene
+cadence-1 sweeps do not need one HTTP round trip per frame. No gameplay,
+timing, or emulation-semantics change is permitted.
+
+Discipline:
+- Carry the change as a tracked patch against the pinned upstream revision,
+  committed in the engine-patches pattern; never commit emulator binaries or
+  the source checkout itself.
+- Rebuild, then re-pin: update `setup_emulator.ps1` and the source-ledger
+  package/archive/EXE SHA-256 entries, and record the pin change as evidence.
+- Negative control 1 (emulation unchanged): rerun one accepted paired
+  cold-run scenario on the new build and require its semantic ledgers to
+  remain byte-identical to the recorded hashes.
+- Negative control 2 (capture determinism): the same frame across two cold
+  runs must produce byte-identical image hashes; a different frame must not.
+- Evidence tier: the screenshots are ONE_EMULATOR rendered output, the same
+  tier as WGC; they upgrade no claim, and the SCU-DMA/A-bus rule remains
+  physical-tier-only regardless of any screenshot.
+- Integration: give the existing visual-QA scripts an MCP mode that produces
+  the same cadence-1 contact sheets; from then on machine visual QA uses the
+  MCP lane by default and window-only WGC is reserved for USER checkpoints.
+
+After this body checkpoints, return to the standing plan (the earliest
+Coffee Shop divergence and its scene regressions) with the MCP lane as the
+default visual evidence path.
+
 ## Verified active boundary
 
 The complete Coffee Shop record-type-20/class-`0x05` program and CPU-mediated cart-to-VDP1 upload boundary are committed at `2f516cd`. The full scene remains
