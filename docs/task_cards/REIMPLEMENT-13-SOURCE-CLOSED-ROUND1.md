@@ -1660,6 +1660,35 @@ release/spawn, actor-limit change, slot substitution, or downstream damage
 patch is permitted. Target, census, Emulator, and WGC remain deferred at this
 RED intermediate boundary.
 
+### Paused record-type-4 same-update collision diagnosis (2026-08-31)
+
+Targeted source/native transition and RNG diagnostics correct the preceding
+terminal-lifecycle hypothesis. Source record-type-4/class-`0x04` slot
+`0x00ff8880`, attack record `0x030cd2`, damages class-`0x1f` slot
+`0x00ffa180` during scheduler frame 2306. Source therefore exposes the outer
+HIT state at frame 2307 and reaches normal return at 2413, release state
+`0x0600:0x0000` at 2415, and despawn at 2416. Native allocates the child during
+processing frame 2306 but leaves collision registration pending until the next
+scheduler update, making every visible HIT substate one frame late.
+
+The phase error changes source-owned RNG consumption. Source frame 2377 gives
+`0x00ffa180` call `0xedd9 -> 0xc9a2`, low nibble 2, hold timer 10, then gives
+`0x00ffa300` call `0xc9a2 -> 0x5cfe`. Native lets `0x00ffa300` consume the first
+call and makes `0x00ffa180` consume the second one update late, selecting hold
+timer 120. The stale frame-2511 lifetime and blocked `0x00ffa3c0` allocation are
+downstream; the RNG algorithm, terminal predicate, recurring controller, and
+actor limit are not the first defect.
+
+A diagnostic experiment moving all record-type-4 collisions before all
+record-type-12 updates broke the delayed-parent collision control and was
+restored. The complete owning body is the Coffee Shop-reachable same-update
+child allocation, registration, current-state collision, and reaction-dispatch
+scheduler rule. Resume from `docs/AGENT_HANDOFF.md`; add a mutation rejecting a
+one-update child deferral and require the exact 2288/2306/2307 chronology,
+frame-2377 RNG ordering, natural 2416 release, and natural frame-2511 recurring
+allocation. Focused/full host remains intentionally RED, return 116. Target,
+scene census, Emulator, and WGC remain deferred.
+
 ## Next eligible cards
 
 - `QA-13-ROUND1-END-TO-END-DIFFERENTIAL` after the complete stable Round 2

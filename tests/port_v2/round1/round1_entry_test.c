@@ -1638,7 +1638,7 @@ int main(void)
             projectile_runtime.player_weapon_projectile_damage_writes != 1u ||
             projectile_runtime.first_encounter.ko_events != 1u)
         {
-            fprintf(stderr, "parent delayed collision p=%d/%d/%d target=%d/%d/%d health=%d target-state=%04x/%04x timer=%u result=%d projectile-state=%u counts=%lu/%lu ko=%lu code=%u failures=%lu\n",
+            fprintf(stderr, "parent delayed collision p=%d/%d/%d target=%d/%d/%d health=%d target-state=%04x/%04x timer=%u result=%d projectile-state=%u counts=%lu/%lu ko=%lu code=%u failures=%lu registered=%u pending=%u target-visible=%u target-hurt=%u target-record=%08lx current=%u/%04x/%d/%d/%d/%d\n",
                 projectile->x, projectile->y, projectile->z,
                 target->x, target->y, target->z, target->health,
                 target->state, target->substate, target->source_action_timer,
@@ -1647,7 +1647,17 @@ int main(void)
                 projectile_runtime.player_weapon_projectile_damage_writes,
                 projectile_runtime.first_encounter.ko_events,
                 projectile_runtime.scheduler_failure_code,
-                projectile_runtime.failure_count);
+                projectile_runtime.failure_count,
+                projectile->collision_registered,
+                projectile->collision_registration_pending,
+                target->source_field01, target->hurt_selector,
+                target->animation_record,
+                target->source_collision_current_active,
+                target->source_collision_current_state,
+                target->source_collision_current_x,
+                target->source_collision_current_y,
+                target->source_collision_current_z,
+                target->source_collision_current_health);
             return 52;
         }
         impact = 0;
@@ -3869,6 +3879,11 @@ int main(void)
         unsigned int source_frame;
         unsigned int actor_index;
         unsigned char tracked_active = 0xffu;
+        unsigned short tracked_state = 0xffffu;
+        unsigned short tracked_substate = 0xffffu;
+        unsigned long tracked_record = 0xffffffffUL;
+        unsigned char tracked_animation_index = 0xffu;
+        unsigned char tracked_recovery = 0xffu;
         avsp_round1_init(&hit_runtime);
         for (source_frame = 1972u; source_frame <= 3313u; ++source_frame)
         {
@@ -3883,6 +3898,26 @@ int main(void)
             unsigned int phase_updates = source_updates > class02_updates ?
                 source_updates : class02_updates;
             unsigned int source_tick;
+            if (source_frame >= 2304u && source_frame <= 2308u)
+            {
+                const AvspRound1WeaponProjectileAllocation *projectile =
+                    &hit_runtime.player_weapon_projectiles[4];
+                const AvspRound1ActorCore *tracked =
+                    &hit_runtime.pools[0].records[16];
+                fprintf(stderr,
+                    "record4/A180 frame=%u p=%u/%u/%u %d/%d/%d record=%08lx timer=%u collision=%d registered=%u t=%u %04x/%04x %d/%d/%d record=%08lx health=%d pending=%u\n",
+                    source_frame, projectile->active,
+                    projectile->actor_class, projectile->state,
+                    projectile->x, projectile->y, projectile->z,
+                    projectile->animation_record,
+                    projectile->animation_timer,
+                    projectile->collision_result,
+                    projectile->collision_registered,
+                    tracked->active, tracked->state, tracked->substate,
+                    tracked->x, tracked->y, tracked->z,
+                    tracked->animation_record, tracked->health,
+                    tracked->source_projectile_reaction_pending);
+            }
             if (hit_runtime.pools[0].records[16].active != tracked_active)
             {
                 const AvspRound1ActorCore *tracked =
@@ -3895,6 +3930,44 @@ int main(void)
                     hit_runtime.first_encounter.source_living_count,
                     hit_runtime.first_encounter.source_progress);
                 tracked_active = tracked->active;
+            }
+            if (source_frame >= 2300u && source_frame <= 2420u)
+            {
+                const AvspRound1ActorCore *tracked =
+                    &hit_runtime.pools[0].records[16];
+                if (source_frame >= 2373u && source_frame <= 2380u)
+                    fprintf(stderr,
+                        "A180 RNG window frame=%u state=%04x/%04x hit_timer=%u guard6d=%u rng=%04x\n",
+                        source_frame, tracked->state, tracked->substate,
+                        tracked->source_hit_action_timer,
+                        tracked->source_collision_guard6d,
+                        hit_runtime.rng_seed);
+                if (tracked->state != tracked_state ||
+                    tracked->substate != tracked_substate ||
+                    tracked->animation_record != tracked_record ||
+                    tracked->animation_index != tracked_animation_index ||
+                    tracked->source_hit_recovery_active != tracked_recovery)
+                {
+                    fprintf(stderr,
+                        "A180 transition frame=%u active=%u state=%04x/%04x action=%04x recovery=%u record=%08lx index=%u animation=%u/%d action_timer=%u hit_timer=%u health=%d rng=%04x updates=%lu\n",
+                        source_frame, tracked->active, tracked->state,
+                        tracked->substate, tracked->source_action,
+                        tracked->source_hit_recovery_active,
+                        tracked->animation_record,
+                        tracked->animation_index,
+                        tracked->animation_timer,
+                        tracked->animation_branch,
+                        tracked->source_action_timer,
+                        tracked->source_hit_action_timer,
+                        tracked->health, hit_runtime.rng_seed,
+                        tracked->handler_updates);
+                    tracked_state = tracked->state;
+                    tracked_substate = tracked->substate;
+                    tracked_record = tracked->animation_record;
+                    tracked_animation_index = tracked->animation_index;
+                    tracked_recovery =
+                        tracked->source_hit_recovery_active;
+                }
             }
             if (source_frame == 2072u &&
                 !avsp_round1_begin_first_entry(&hit_runtime))
