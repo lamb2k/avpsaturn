@@ -55,7 +55,7 @@ NEXT_ASSIGNMENT_REQUIREMENTS:
 - require the next implementor to return through this same canonical template.
 
 NEW_TASK_DISPATCH_REQUIRED: true
-NEW_TASK_DISPATCH: after completing the disposition and next IMPLEMENTOR_INVOCATION, immediately fork a separate same-directory Codex task, send the complete invocation as its first active prompt using model gpt-5.6-sol with reasoning medium, do not create an app-managed task worktree, and report the created task identifier/directive
+NEW_TASK_DISPATCH: after completing the disposition and next IMPLEMENTOR_INVOCATION, immediately fork a separate same-directory Codex task, send the complete invocation as its first active prompt using model gpt-5.6-sol with reasoning high, do not create an app-managed task worktree, and report the created task identifier/directive
 
 ASSIGNMENT_KIND_REQUIRED: true
 IMPLEMENTATION_REMOTE_SYNC_REQUIRED: true
