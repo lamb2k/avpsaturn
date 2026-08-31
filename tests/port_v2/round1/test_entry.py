@@ -84,6 +84,7 @@ def run(body, header_body, passes, label="baseline", player_body=player_source,
 run(source, header, True,
     expected_returncode=(123 if "--weapon-timing-only" in sys.argv else
                          123 if "--controller-edge-only" in sys.argv else
+                         123 if "--player-hit-only" in sys.argv else
                          123 if "--action0c-only" in sys.argv else
                          None))
 if "--baseline-only" in sys.argv:
@@ -141,6 +142,14 @@ controller_edge_mutations = {
     "encounter->source_blocked_by_living_count = 1u;\n    }\n    else",
 }
 player_hit_mutations = {
+    "runtime->player_hit_x_fp = runtime->player.source_x_fp;",
+    "if (resolved_x != bounded_x)",
+    "runtime->player_hit_x_fp = avsp_round1_replace_fixed_high_word(\n"
+    "            runtime->player_hit_x_fp, resolved_x);",
+    "if (!runtime->player_hit_active && runtime->player_hit_invulnerability)\n"
+    "        runtime->player_hit_invulnerability = 0u;",
+    "avsp_round1_replace_fixed_high_word(\n"
+    "                control_source_x_fp, view.x);",
     "runtime->player_hit_shake_remaining =\n            reaction->shake_count;",
     "runtime, &reaction->presentation);",
     "runtime->player_hit_x_velocity =\n                reaction->x_velocity;",
@@ -500,6 +509,26 @@ for before, after in (
      "runtime->player_hit_x_velocity =\n                avsp_round1_player_hit.x_velocity;"),
     ("runtime->player_hit_x_acceleration =\n                reaction->x_acceleration;",
      "runtime->player_hit_x_acceleration = 0L;"),
+    ("runtime->player_hit_x_fp = runtime->player.source_x_fp;",
+     "runtime->player_hit_x_fp =\n"
+     "        (long)runtime->player_action.x * 65536L;"),
+    ("if (resolved_x != bounded_x)",
+     "if (resolved_x != proposed_x)"),
+    ("runtime->player_hit_x_fp = avsp_round1_replace_fixed_high_word(\n"
+     "            runtime->player_hit_x_fp, resolved_x);",
+     "runtime->player_hit_x_fp = (long)resolved_x * 65536L;"),
+    ("if (!runtime->player_hit_active && runtime->player_hit_invulnerability)\n"
+     "        runtime->player_hit_invulnerability = 0u;",
+     "if (!runtime->player_hit_active && runtime->player_hit_invulnerability)\n"
+     "    {\n"
+     "        runtime->player_hit_invulnerability = 0u;\n"
+     "        runtime->player.source_x_fp = 0L;\n"
+     "        runtime->player.source_y_fp = 0L;\n"
+     "    }"),
+    ("avsp_round1_replace_fixed_high_word(\n"
+     "                control_source_x_fp, view.x);",
+     "avsp_round1_player_fractional_position(\n"
+     "                view.x, runtime->player_action.x_numerator);"),
     ("12u, 0x1f, record->attack_selector);",
      "12u, 0x1f, 1u);"),
     ("special_buttons = runtime->player_special_input_pipeline;",
@@ -611,7 +640,7 @@ if ("--controller-edge-only" in sys.argv or
         print("REIMPLEMENT-13 controller camera-edge mutation lane: PASS (3 real mutations)")
         raise SystemExit(0)
 if "--player-hit-only" in sys.argv:
-    print("REIMPLEMENT-13 Coffee Shop player-HIT program mutation lane: PASS (4 real mutations)")
+    print("REIMPLEMENT-13 Coffee Shop player-HIT program mutation lane: PASS (9 real mutations)")
     raise SystemExit(0)
 if ("--weapon-timing-only" in sys.argv or
         not subset_flags.intersection(sys.argv)):
@@ -834,4 +863,4 @@ for before, after in (
 if "--generated-walk-only" in sys.argv:
     print("REIMPLEMENT-13 generated walk fixture mutation lane: PASS (5 real mutations)")
     raise SystemExit(0)
-print("REIMPLEMENT-13 entry/player/scheduler/class1f/Coffee-Shop-navigation/neutral-stop/melee/Button1/Button3/type16-projectile/player-HIT/first-encounter differential: PASS (218 real mutations)")
+print("REIMPLEMENT-13 entry/player/scheduler/class1f/Coffee-Shop-navigation/neutral-stop/melee/Button1/Button3/type16-projectile/player-HIT/first-encounter differential: PASS (223 real mutations)")

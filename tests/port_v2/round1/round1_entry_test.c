@@ -164,7 +164,7 @@ static int player_hit_source_frame_valid(const AvspRound1Runtime *runtime,
 static int player_hit_type16_source_frame_valid(
     const AvspRound1Runtime *runtime, unsigned int source_frame)
 {
-    if (source_frame < 3264u || source_frame > 3313u)
+    if (source_frame < 3264u || source_frame > 3314u)
         return 1;
     if (runtime->player.health != 78 ||
         runtime->player_action.health != 78 ||
@@ -176,33 +176,45 @@ static int player_hit_type16_source_frame_valid(
     if (source_frame == 3264u)
         return runtime->player.state == 0x0202u &&
             runtime->player.substate == 0u &&
+            runtime->player.source_x_fp == 0x04a08000L &&
             runtime->player.animation_record == 0x0015f248UL &&
             runtime->player.animation_timer == 1u &&
             runtime->player.hurt_selector == 0u &&
             runtime->player_hit_phase == 1u;
     if (source_frame == 3265u)
         return runtime->player.substate == 0x0200u &&
+            runtime->player.source_x_fp == 0x04a08000L &&
             runtime->player.animation_record == 0x0015ef24UL &&
             runtime->player.assembly == 0x00160f3cUL &&
             runtime->player_hit_shake_remaining == 20u;
     if (source_frame == 3284u)
         return runtime->player.substate == 0x0200u &&
+            runtime->player.source_x_fp == 0x049e8000L &&
             runtime->player_hit_shake_remaining == 1u;
     if (source_frame == 3285u)
         return runtime->player.substate == 0x0202u &&
+            runtime->player.source_x_fp == 0x04a08000L &&
             runtime->player_hit_phase == 3u &&
             runtime->player_hit_x_velocity == 0x00034000L &&
             runtime->player_hit_x_acceleration == -0x00002000L &&
             runtime->player.animation_timer == 7u;
     if (source_frame == 3312u)
         return runtime->player.substate == 0x0204u &&
+            runtime->player.source_x_fp == 0x04a06000L &&
             runtime->player.animation_record == 0x0015f1f4UL &&
             runtime->player.facing == 0u;
     if (source_frame == 3313u)
         return runtime->player.state == 0x0200u &&
             runtime->player.substate == 0u &&
+            runtime->player.source_x_fp == 0x04a06000L &&
             runtime->player_hit_active == 0u &&
             runtime->player_hit_invulnerability == 1u;
+    if (source_frame == 3314u)
+        return runtime->player.state == 0x0200u &&
+            runtime->player.substate == 0x0200u &&
+            runtime->player.source_x_fp == 0x04a0a000L &&
+            runtime->player.animation_record == 0x0015f208UL &&
+            runtime->player_hit_invulnerability == 0u;
     return 1;
 }
 

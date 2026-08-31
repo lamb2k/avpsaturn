@@ -5396,7 +5396,7 @@ static int avsp_round1_begin_player_hit(
         attacker->x < runtime->player_action.x);
     runtime->player_hit_invulnerability = 0u;
     runtime->player_hit_audio_latched = 0u;
-    runtime->player_hit_x_fp = (long)runtime->player_action.x * 65536L;
+    runtime->player_hit_x_fp = runtime->player.source_x_fp;
     runtime->player_hit_x_velocity = 0L;
     runtime->player_hit_x_acceleration = 0L;
     runtime->player.source_x_fp = runtime->player_hit_x_fp;
@@ -11122,6 +11122,7 @@ static int avsp_round1_step_player_hit(AvspRound1Runtime *runtime,
 {
     const AvspRound1PlayerHitReactionSpec *reaction;
     short proposed_x;
+    short bounded_x;
     short resolved_x;
     unsigned char weapon_pressed;
     unsigned char jump_pressed;
@@ -11301,6 +11302,7 @@ static int avsp_round1_step_player_hit(AvspRound1Runtime *runtime,
     runtime->player_action.x = proposed_x;
     avsp_round1_tick_player_resource(runtime);
     avsp_round1_apply_player_global_bounds(runtime);
+    bounded_x = runtime->player_action.x;
     avsp_round1_apply_coffee_shop_obstacle(runtime);
     if (!avsp_round1_apply_first_segment_terrain(runtime) ||
         !avsp_round1_step_coffee_shop_camera(runtime))
@@ -11309,11 +11311,11 @@ static int avsp_round1_step_player_hit(AvspRound1Runtime *runtime,
         return 0;
     }
     resolved_x = runtime->player_action.x;
-    if (resolved_x != proposed_x)
+    if (resolved_x != bounded_x)
         runtime->player_hit_x_fp = (long)resolved_x * 65536L;
     else
-        runtime->player_hit_x_fp = (long)resolved_x * 65536L +
-            (unsigned short)runtime->player_hit_x_fp;
+        runtime->player_hit_x_fp = avsp_round1_replace_fixed_high_word(
+            runtime->player_hit_x_fp, resolved_x);
     runtime->player.x = resolved_x;
     runtime->player.y = runtime->player_action.lane;
     runtime->player.z = runtime->player_action.lane;
@@ -11487,8 +11489,14 @@ int avsp_round1_step_player(AvspRound1Runtime *runtime,
     unsigned char was_stopping;
     long prior_x_numerator;
     long prior_lane_numerator;
+    long prior_source_x_fp;
+    long prior_source_y_fp;
+    long control_source_x_fp;
+    long control_source_y_fp;
     short prior_x;
     short prior_lane;
+    short bounded_player_x;
+    short bounded_player_lane;
     short prior_facing;
     unsigned short prior_state;
     unsigned short prior_selector;
@@ -11522,11 +11530,7 @@ int avsp_round1_step_player(AvspRound1Runtime *runtime,
     if (runtime->player_special_cleanup_pending)
         runtime->player_special_cleanup_pending = 0u;
     if (!runtime->player_hit_active && runtime->player_hit_invulnerability)
-    {
         runtime->player_hit_invulnerability = 0u;
-        runtime->player.source_x_fp = 0L;
-        runtime->player.source_y_fp = 0L;
-    }
     if (runtime->first_encounter.pending_player_damage != 0u)
     {
         if (received_damage != 0)
@@ -11694,6 +11698,8 @@ int avsp_round1_step_player(AvspRound1Runtime *runtime,
     was_stopping = (unsigned char)(runtime->player_stop_ticks != 0u);
     prior_x_numerator = runtime->player_action.x_numerator;
     prior_lane_numerator = runtime->player_action.lane_numerator;
+    prior_source_x_fp = runtime->player.source_x_fp;
+    prior_source_y_fp = runtime->player.source_y_fp;
     prior_x = runtime->player_action.x;
     prior_lane = runtime->player_action.lane;
     prior_facing = runtime->player_action.facing;
@@ -11738,6 +11744,18 @@ int avsp_round1_step_player(AvspRound1Runtime *runtime,
             received_damage <= 0)
             runtime->player_action.state = prior_state;
     }
+    control_source_x_fp = prior_source_x_fp +
+        avsp_round1_player_fractional_position(
+            runtime->player_action.x,
+            runtime->player_action.x_numerator) -
+        avsp_round1_player_fractional_position(
+            prior_x, prior_x_numerator);
+    control_source_y_fp = prior_source_y_fp +
+        avsp_round1_player_fractional_position(
+            runtime->player_action.lane,
+            runtime->player_action.lane_numerator) -
+        avsp_round1_player_fractional_position(
+            prior_lane, prior_lane_numerator);
     if (special_owned)
         special_owned = (unsigned char)avsp_round1_step_player_special(runtime);
     if (special_owned && runtime->player.attack_selector ==
@@ -11752,6 +11770,8 @@ int avsp_round1_step_player(AvspRound1Runtime *runtime,
         runtime, weapon_pressed, weapon_edge);
     avsp_round1_tick_player_resource(runtime);
     avsp_round1_apply_player_global_bounds(runtime);
+    bounded_player_x = runtime->player_action.x;
+    bounded_player_lane = runtime->player_action.lane;
     avsp_round1_apply_coffee_shop_obstacle(runtime);
     if (!avsp_round1_apply_first_segment_terrain(runtime) ||
         !avsp_round1_step_coffee_shop_camera(runtime))
@@ -11777,10 +11797,24 @@ int avsp_round1_step_player(AvspRound1Runtime *runtime,
     runtime->player.x = view.x;
     runtime->player.y = (short)(view.lane + view.height);
     runtime->player.z = view.lane;
-    runtime->player.source_x_fp = avsp_round1_player_fractional_position(
-        view.x, runtime->player_action.x_numerator);
-    runtime->player.source_y_fp = avsp_round1_player_fractional_position(
-        view.lane, runtime->player_action.lane_numerator);
+    if (!special_owned && !jump_owned && !weapon_owned)
+    {
+        runtime->player.source_x_fp = view.x != bounded_player_x ?
+            (long)view.x * 65536L :
+            avsp_round1_replace_fixed_high_word(
+                control_source_x_fp, view.x);
+        runtime->player.source_y_fp = view.lane != bounded_player_lane ?
+            (long)view.lane * 65536L :
+            avsp_round1_replace_fixed_high_word(
+                control_source_y_fp, view.lane);
+    }
+    else
+    {
+        runtime->player.source_x_fp = avsp_round1_player_fractional_position(
+            view.x, runtime->player_action.x_numerator);
+        runtime->player.source_y_fp = avsp_round1_player_fractional_position(
+            view.lane, runtime->player_action.lane_numerator);
+    }
     runtime->player.health = view.health;
     if (special_owned)
     {
