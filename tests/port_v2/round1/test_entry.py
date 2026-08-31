@@ -95,6 +95,8 @@ run(source, header, True,
                          123 if "--player-hit-only" in sys.argv else
                          123 if "--action0c-only" in sys.argv else
                          123 if "--inner8-only" in sys.argv else
+                         123 if "--type16-terminal-only" in sys.argv else
+                         123 if "--special-input-only" in sys.argv else
                          None),
     test_body=(jump_test_body if "--jump-only" in sys.argv else None))
 if "--baseline-only" in sys.argv:
@@ -113,7 +115,8 @@ subset_flags = {"--inner8-only", "--ko-only", "--registration-only",
                 "--locomotion-only", "--generated-walk-only",
                 "--controller-edge-only", "--player-hit-only",
                 "--weapon-timing-only", "--contextual-melee-only",
-                "--action0c-only", "--jump-only"}
+                "--action0c-only", "--jump-only",
+                "--type16-terminal-only", "--special-input-only"}
 if "--queue-only" in sys.argv or not subset_flags.intersection(sys.argv):
     run(source, header, False, "consume-before-direction-queue-shift",
         player_source.replace(queue_before, queue_after, 1))
@@ -121,6 +124,9 @@ if "--queue-only" in sys.argv:
     print("REIMPLEMENT-13 direction-queue-order mutation lane: PASS (1 real mutation)")
     raise SystemExit(0)
 inner8_mutations = {
+    "    if (record == 0)\n"
+    "        record = avsp_round1_find_class1f_inner8_record(address);\n"
+    "    return record;",
     "(actor->state == 0x0200u &&\n                      (actor->substate == 0x1000u ||",
     "actor->state = 0x0208u;\n    actor->substate = 0x0600u;",
     "if ((*random_out & 3u) != 0u)",
@@ -147,6 +153,15 @@ inner8_mutations = {
     "target->facing = (unsigned char)(target->source_facing_selector ^\n"
     "                avsp_round1_class1f_collision_reaction_facing_xor);",
     "actor->transition_timer = (unsigned short)(actor->transition_timer - 1u);",
+}
+type16_terminal_mutations = {
+    "        if (projectile->animation_branch < 0)\n"
+    "        {\n"
+    "            if (projectile->transition_timer != 0u)"
+}
+special_input_mutations = {
+    "        !special_physical_candidate && jump_edge &&\n"
+    "        runtime->player_action.state == AVSP_PW_STATE_CONTROL)"
 }
 ko_mutations = {
     "actor->state = ko ? avsp_round1_class1f_source_ko.collision_state :",
@@ -186,6 +201,8 @@ player_hit_mutations = {
     "runtime->player_hit_x_velocity =\n                reaction->x_velocity;",
     "runtime->player_hit_x_acceleration =\n                reaction->x_acceleration;",
     "runtime->player_hit_special_pending = 1u;",
+    "runtime->player_action.health - reaction->damage",
+    "(unsigned char)reaction->damage;",
     "runtime->player.hurt_selector !=\n"
     "                avsp_round1_type16.player_hurt_selector ||",
 }
@@ -576,6 +593,20 @@ for before, after in (
      "actor->type == 16u && actor->actor_class == 0x05"),
     ("if (projectile->health < 0)\n        {\n            projectile->state = 0x0600u;",
      "if (projectile->health < 0)\n        {\n            projectile->state = 0x0400u;"),
+    ("runtime->player_action.health - reaction->damage",
+     "runtime->player_action.health - (short)hit_value"),
+    ("(unsigned char)reaction->damage;",
+     "hit_value;"),
+    ("        if (projectile->animation_branch < 0)\n"
+     "        {\n"
+     "            if (projectile->transition_timer != 0u)",
+     "        if (projectile->animation_timer == 0u)\n"
+     "        {\n"
+     "            if (projectile->transition_timer != 0u)"),
+    ("        !special_physical_candidate && jump_edge &&\n"
+     "        runtime->player_action.state == AVSP_PW_STATE_CONTROL)",
+     "        jump_edge &&\n"
+     "        runtime->player_action.state == AVSP_PW_STATE_CONTROL)"),
     ("(actor->state == 0x0200u &&\n                      (actor->substate == 0x1000u ||",
      "(actor->state == 0x0208u &&\n                      (actor->substate == 0x1000u ||"),
     ("actor->state = 0x0208u;\n    actor->substate = 0x0600u;",
@@ -763,6 +794,12 @@ for before, after in (
         continue
     if "--jump-only" in sys.argv and before not in jump_mutations:
         continue
+    if ("--type16-terminal-only" in sys.argv and
+            before not in type16_terminal_mutations):
+        continue
+    if ("--special-input-only" in sys.argv and
+            before not in special_input_mutations):
+        continue
     if "--generated-walk-only" in sys.argv:
         continue
     assert before in source, before
@@ -771,7 +808,7 @@ for before, after in (
         expected_returncode=(94 if "--action0c-only" in sys.argv
                              else None))
 if "--inner8-only" in sys.argv:
-    print("REIMPLEMENT-13 class-0x1f inner-state mutation lane: PASS (14 real mutations)")
+    print("REIMPLEMENT-13 class-0x1f inner-state mutation lane: PASS (15 real mutations)")
     raise SystemExit(0)
 if "--ko-only" in sys.argv:
     print("REIMPLEMENT-13 class-0x1f projectile KO mutation lane: PASS (5 real mutations)")
@@ -813,7 +850,7 @@ if ("--controller-edge-only" in sys.argv or
         print("REIMPLEMENT-13 controller camera-edge mutation lane: PASS (3 real mutations)")
         raise SystemExit(0)
 if "--player-hit-only" in sys.argv:
-    print("REIMPLEMENT-13 Coffee Shop player-HIT program mutation lane: PASS (9 real mutations)")
+    print("REIMPLEMENT-13 Coffee Shop player-HIT program mutation lane: PASS (11 real mutations)")
     raise SystemExit(0)
 if ("--weapon-timing-only" in sys.argv or
         not subset_flags.intersection(sys.argv)):
@@ -855,6 +892,14 @@ if "--jump-only" in sys.argv:
                 generated_jump_timing, changed_timing, 1),
             test_body=jump_test_body)
     print("REIMPLEMENT-13 Button3 source-timing mutation lane: PASS (11 real mutations)")
+    raise SystemExit(0)
+if "--type16-terminal-only" in sys.argv:
+    print("REIMPLEMENT-13 type16 terminal action-timer lane: PASS "
+          "(1 real mutation)")
+    raise SystemExit(0)
+if "--special-input-only" in sys.argv:
+    print("REIMPLEMENT-13 simultaneous special-input arbitration lane: PASS "
+          "(1 real mutation)")
     raise SystemExit(0)
 generated_walk_mutations = {
     "    { 4u, 0, 0x0015F208UL, 0x00160A02UL, 17u, 0u },",

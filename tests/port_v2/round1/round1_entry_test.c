@@ -3760,6 +3760,40 @@ int main(void)
         stage_class1f_release(&type16_runtime, -1);
         if (!avsp_round1_step_scheduler(&type16_runtime))
             return 107;
+        {
+            AvspRound1Runtime terminal_runtime = type16_runtime;
+            AvspRound1ActorCore *terminal_projectile =
+                &terminal_runtime.pools[1].records[19];
+            terminal_projectile->state = 0x0400u;
+            terminal_projectile->animation_index = 6u;
+            terminal_projectile->animation_record = 0x00035680UL;
+            terminal_projectile->assembly = 0x00035824UL;
+            terminal_projectile->animation_timer = 4095u;
+            terminal_projectile->animation_branch = -32768;
+            terminal_projectile->transition_timer = 2u;
+            if (!avsp_round1_step_scheduler(&terminal_runtime) ||
+                terminal_projectile->state != 0x0400u ||
+                terminal_projectile->transition_timer != 1u ||
+                terminal_projectile->animation_timer != 4094u ||
+                !avsp_round1_step_scheduler(&terminal_runtime) ||
+                terminal_projectile->state != 0x0600u ||
+                terminal_projectile->transition_timer != 0u ||
+                terminal_projectile->animation_timer != 4094u ||
+                !avsp_round1_step_scheduler(&terminal_runtime) ||
+                terminal_projectile->active != 0u ||
+                terminal_runtime.type16_releases != 1u)
+            {
+                fprintf(stderr,
+                    "type16 terminal action-timer state=%04x timer=%u animation_timer=%u active=%u releases=%lu code=%u\n",
+                    terminal_projectile->state,
+                    terminal_projectile->transition_timer,
+                    terminal_projectile->animation_timer,
+                    terminal_projectile->active,
+                    terminal_runtime.type16_releases,
+                    terminal_runtime.scheduler_failure_code);
+                return 108;
+            }
+        }
         projectile->state = 0x0200u;
         projectile->health = 0;
         projectile->x = 800;

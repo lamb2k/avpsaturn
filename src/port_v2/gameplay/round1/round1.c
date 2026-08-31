@@ -1543,6 +1543,16 @@ avsp_round1_find_class1f_inner8_record(unsigned long address)
     return 0;
 }
 
+static const AvspRound1Class1fActionRecordSpec *
+avsp_round1_find_class1f_current_record(unsigned long address)
+{
+    const AvspRound1Class1fActionRecordSpec *record =
+        avsp_round1_find_class1f_action_record(address);
+    if (record == 0)
+        record = avsp_round1_find_class1f_inner8_record(address);
+    return record;
+}
+
 static const AvspRound1Class1fMovementTableSpec *
 avsp_round1_find_class1f_inner8_movement_table(unsigned char table_index)
 {
@@ -1571,7 +1581,7 @@ static int avsp_round1_sync_class1f_presentation(
     AvspRound1ActorCore *actor)
 {
     const AvspRound1Class1fActionRecordSpec *action_record =
-        avsp_round1_find_class1f_action_record(actor->animation_record);
+        avsp_round1_find_class1f_current_record(actor->animation_record);
     const AvspRound1PresentationSpec *presentation =
         avsp_round1_find_class1f_presentation(actor->animation_record);
     if (actor->source_hit_recovery_active == 3u)
@@ -3448,11 +3458,6 @@ static int avsp_round1_step_type16_projectile(
     }
     if (projectile->state == 0x0400u)
     {
-        if (projectile->animation_timer == 0u)
-            return 0;
-        --projectile->animation_timer;
-        if (projectile->animation_timer != 0u)
-            return 1;
         if (projectile->animation_branch < 0)
         {
             if (projectile->transition_timer != 0u)
@@ -3460,11 +3465,18 @@ static int avsp_round1_step_type16_projectile(
             if (projectile->transition_timer == 0u)
                 projectile->state = 0x0600u;
             else
-                projectile->animation_timer =
-                    avsp_round1_type16_records[
-                        projectile->animation_index].timer;
+            {
+                if (projectile->animation_timer == 0u)
+                    return 0;
+                --projectile->animation_timer;
+            }
             return 1;
         }
+        if (projectile->animation_timer == 0u)
+            return 0;
+        --projectile->animation_timer;
+        if (projectile->animation_timer != 0u)
+            return 1;
         next = (unsigned char)(projectile->animation_index + 1u);
         if (next >= AVSP_ROUND1_TYPE16_PRESENTATION_COUNT)
             return 0;
@@ -5930,15 +5942,14 @@ static int avsp_round1_step_class1f_player_collision(
             (hit_value != avsp_round1_class1f_player_collision.damage ||
              hit_value != avsp_round1_class1f_player_collision.hitstop))
             return 0;
-        if (reaction->damage != (short)hit_value)
-            return 0;
         actor->source_hitstop = hit_value;
         actor->source_player_guard = 1u;
         actor->source_player_collision_latched = 1u;
         runtime->player_action.health = (short)(
-            runtime->player_action.health - (short)hit_value);
+            runtime->player_action.health - reaction->damage);
         runtime->player.health = runtime->player_action.health;
-        runtime->first_encounter.pending_player_damage = hit_value;
+        runtime->first_encounter.pending_player_damage =
+            (unsigned char)reaction->damage;
         runtime->first_encounter.pending_player_damage_health_applied = 1u;
         runtime->first_encounter.alien_contact = 1u;
         runtime->player.source_facing_selector =
@@ -9675,7 +9686,7 @@ static int avsp_round1_player_special_class1f_collision_pass(
             continue;
         presentation = avsp_round1_find_class1f_presentation(
             target->animation_record);
-        action_record = avsp_round1_find_class1f_action_record(
+        action_record = avsp_round1_find_class1f_current_record(
             target->animation_record);
         if (presentation == 0 && action_record == 0)
             return 0;
@@ -9918,7 +9929,7 @@ static int avsp_round1_projectile_collision_pass(
             continue;
         target_presentation = avsp_round1_find_class1f_presentation(
             target->animation_record);
-        target_action_record = avsp_round1_find_class1f_action_record(
+        target_action_record = avsp_round1_find_class1f_current_record(
             target->animation_record);
         if (target->animation_record == 0u)
             continue;
@@ -12307,7 +12318,8 @@ int avsp_round1_step_player(AvspRound1Runtime *runtime,
         !runtime->player_weapon_active &&
         !runtime->player_weapon_cleanup_pending &&
         !runtime->player_weapon_return_pending && received_damage <= 0 &&
-        jump_edge && runtime->player_action.state == AVSP_PW_STATE_CONTROL)
+        !special_physical_candidate && jump_edge &&
+        runtime->player_action.state == AVSP_PW_STATE_CONTROL)
     {
         if (!avsp_round1_begin_player_jump(runtime))
         {

@@ -2096,3 +2096,42 @@ scheduler code 29. Resume by regenerating the complete source/native census,
 identifying the owning reusable player-collision program, and closing all
 Coffee Shop-reachable branches from accepted Oracle/SPEC evidence. Do not add a
 frame exception, authored delay, guessed rule, or further ad-hoc size squeeze.
+
+### Coffee Shop reusable-runtime closure checkpoint (2026-08-31)
+
+Four source programs exposed by the complete scene are now closed without
+reopening class-`0x05` or changing the accepted runtime candidate. Type-16
+terminal animation uses its separate two-tick action timer before release;
+class-`0x1f` selector-4 contact preserves source hitstop 10 and damage 15 as
+separate values; presentation and current collision accept all 54 accepted
+inner-state records through one shared lookup; and simultaneous right +
+Button1 + Button2 + Button3 input remains in the source special-input pipeline
+instead of beginning Button3 immediately. Focused lanes pass 1/11/15/1 real
+mutations.
+
+The complete host census now advances through the prior frame-4006 boundary to
+source frame 5566. Its code-11 slot `0x00ff9e80`, state/substate
+`0x0208:0x1004`, appears only after the source has already replaced the Coffee
+Shop population and traversed route edges 4->6->0->2. It is therefore tracked
+as downstream of the still-unimplemented exit/teardown program; adding that
+state as an isolated context is forbidden.
+
+Release `LiveEncounterBench` Target passes with GAME.BIN 371,440 bytes, BSS end
+`0x060b1c00`, and GAME.BIN SHA-256
+`6c5d58cfc019f4530976c388167e769f0dfc534b60af74521b99a4104ea75b0d`.
+Two cold pinned-emulator Coffee Shop runs pass the existing paired five-mutation
+evidence check at normalized ISO SHA-256
+`3293a604ed84a0062ec50e1fe16ead762646789e4a407f6f659f41a9e5c99bdc`.
+Focused window-only WGC at valid source-aligned frames 2280, 2287, 2306, 2307,
+and 2310 preserves the prior gameplay aperture, Predator identity, impact
+cadence, both VDP2 planes, palette, and priority. Later host source frames are
+outside the current emulator ledger, which stops at diagnostic frame 574 /
+source-visible frame 2615; no later WGC claim is made.
+
+Fast and Oracle pass every focused authority and all 180 SPEC mutations, then
+stop at the preserved full-host frame-3782 stage-progress chronology RED. The
+scene remains unaccepted. The next implementation body is the complete Coffee
+Shop exit controller: encounter clear, actor teardown/replacement, route edges
+at 5453/5524/5562, and load boundaries at 5565/5566. Use accepted Oracle/SPEC
+evidence or the smallest required fixture amendment; do not add an authored
+delay, fixed-frame teardown, isolated state context, or ad-hoc size squeeze.

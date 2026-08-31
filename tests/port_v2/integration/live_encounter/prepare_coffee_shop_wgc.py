@@ -39,6 +39,7 @@ def labelled(image, frame):
 parser = argparse.ArgumentParser()
 parser.add_argument("--first", type=int, default=2280)
 parser.add_argument("--last", type=int, default=2310)
+parser.add_argument("--frames", type=int, nargs="+")
 parser.add_argument("--focus-frame", type=int)
 parser.add_argument(
     "--package",
@@ -46,9 +47,17 @@ parser.add_argument(
              "wgc-2280-2310"),
 )
 args = parser.parse_args()
-if args.first < 0 or args.last < args.first:
-    raise ValueError("invalid Coffee Shop WGC frame range")
-FRAMES = tuple(range(args.first, args.last + 1))
+if args.frames:
+    if args.first != 2280 or args.last != 2310:
+        raise ValueError("choose an explicit frame list or a frame range")
+    FRAMES = tuple(args.frames)
+    if (not FRAMES or any(frame < 0 for frame in FRAMES) or
+            any(right <= left for left, right in zip(FRAMES, FRAMES[1:]))):
+        raise ValueError("Coffee Shop WGC frames must be increasing")
+else:
+    if args.first < 0 or args.last < args.first:
+        raise ValueError("invalid Coffee Shop WGC frame range")
+    FRAMES = tuple(range(args.first, args.last + 1))
 if args.focus_frame is not None and args.focus_frame not in FRAMES:
     raise ValueError("focus frame must be inside the WGC frame range")
 PACKAGE = ROOT / args.package

@@ -11,10 +11,31 @@ from pathlib import Path
 ROOT = Path(__file__).resolve().parents[4]
 HERE = Path(__file__).resolve().parent
 SOURCE_VISIBLE_FRAME_AT_DIAGNOSTIC_ZERO = 2041
+INTERPRETER_APPROACH_FRAMES = 60
 spec = importlib.util.spec_from_file_location(
     "button1_capture", HERE / "capture_button1_cadence.py")
 capture = importlib.util.module_from_spec(spec)
 spec.loader.exec_module(capture)
+
+
+def wait_frame(mcp, symbols, target, timeout):
+    """Reach an exact frame without running the entire route in interpreter."""
+    deadline = time.time() + timeout
+    address = symbols["avsp_diag_live_frame"]
+    mcp.call("pause")
+    current = capture.tools.signed32(mcp.u32(address))
+    if target - current > INTERPRETER_APPROACH_FRAMES:
+        mcp.call("set_debug_option", cpu_core="dynarec")
+        mcp.call("resume")
+        while time.time() < deadline:
+            current = capture.tools.signed32(mcp.u32(address))
+            if current >= target - INTERPRETER_APPROACH_FRAMES:
+                break
+            time.sleep(0.002)
+        mcp.call("pause")
+    mcp.call("set_debug_option", cpu_core="interpreter")
+    remaining = max(1.0, deadline - time.time())
+    capture.wait_frame(mcp, symbols, target, remaining)
 
 
 def main():
@@ -50,14 +71,13 @@ def main():
             if time.time() >= deadline:
                 raise
             time.sleep(0.1)
-    mcp.call("set_debug_option", cpu_core="interpreter")
 
     for frame in frames:
         diagnostic_frame = frame - SOURCE_VISIBLE_FRAME_AT_DIAGNOSTIC_ZERO
         if diagnostic_frame < 0:
             raise RuntimeError(
                 f"source frame {frame} predates the native Coffee Shop ledger")
-        capture.wait_frame(mcp, symbols, diagnostic_frame, args.timeout)
+        wait_frame(mcp, symbols, diagnostic_frame, args.timeout)
         print(f"WGC_READY {frame}", flush=True)
         response = input().strip()
         if response != f"CAPTURED {frame}":
