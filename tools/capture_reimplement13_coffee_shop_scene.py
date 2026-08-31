@@ -155,6 +155,7 @@ NATIVE_OWNERS = {
     (20, "0x09"): "native class-0x09 presentation dispatcher",
     (20, "0x01"): "native class-0x01 scene spawn controller",
     (20, "0x02"): "native class-0x02 damageable scene prop controller",
+    (20, "0x05"): "native class-0x05 reactive scene-prop program",
     (20, "0x0a"): "Coffee Shop obstacle lifecycle",
     (24, "0x10"): "player empty-resource effect dispatcher",
     (24, "0x44"): "Coffee Shop command-guard presentation dispatcher",

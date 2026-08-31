@@ -227,6 +227,8 @@ def build() -> str:
         "first_segment_dependencies"]
     class08_pickup = auxiliary_dependencies[
         "class_0x08_type20_health_pickup"]
+    class05_prop = auxiliary_dependencies[
+        "class_0x05_type20_reactive_prop"]
     class09 = auxiliary_dependencies["class_0x09_type20_rng_owner"]
     class4e = auxiliary_dependencies["class_0x4e_type24_variant4_effect"]
     class4e_variant0 = class4e["variant0_collision_effect"]
@@ -263,13 +265,18 @@ def build() -> str:
     class02_contract = class02["implementation_contract"]
     coffee_scene_records = sorted(
         class01_contract["stage_records"] +
-        class02_contract["stage_records"],
+        class02_contract["stage_records"] +
+        class05_prop["stage_records"],
         key=lambda row: int(row["address"], 16))
     class01_records = class01_contract["initialization"][
         "animation_records"]
     class02_records = class02_contract["initialization"][
         "animation_records"]
     class02_collision = class02_contract["collision_damage"]
+    class05_records = class05_prop["presentation_records"]
+    class05_collision = class05_prop["current_state_collision"]
+    class05_reaction = class05_prop["reaction_program"]
+    class05_motion = class05_reaction["state_0x0404"]
     class02_source_cadence = class02_contract["scheduler_phase_evidence"][
         "class02_source_update_cadence"]
     class02_source_exceptions = class02_source_cadence["exceptions"]
@@ -2072,11 +2079,24 @@ def build() -> str:
             ("0x0015c108", "0x00ffb600", 512, 2, 0),
             ("0x0015c128", "0x00ffb580", 512, 1, 0),
             ("0x0015c158", "0x00ffb400", 672, 1, 1),
-            ("0x0015c178", "0x00ffb300", 736, 2, 0)] or
+            ("0x0015c178", "0x00ffb300", 736, 2, 0),
+            ("0x0015c188", "0x00ffb280", 816, 5, 0),
+            ("0x0015c1a8", "0x00ffb180", 816, 5, 0)] or
         [row["animation_record"] for row in class01_records] !=
             ["0x0006b45a", "0x0006b46a", "0x0006b47a"] or
         [row["animation_record"] for row in class02_records] !=
             ["0x0006b66c", "0x0006b680"] or
+        class05_prop["classification"] !=
+            "SOURCE_CLOSED_IMPLEMENTATION_FIELDS" or
+        class05_prop["spec_executable"] is not True or
+        [row["animation_record"] for row in class05_records] !=
+            ["0x0006cc62", "0x0006cc8a", "0x0006cc9a",
+             "0x0006ccae", "0x0006ccc2"] or
+        class05_collision["attack_record"]["address"] != "0x0011af76" or
+        class05_collision["hurt_record"]["address"] != "0x0006cd50" or
+        class05_reaction["state_0x0400"]["seed_after"] != "0x61a7" or
+        class05_motion["primary"]["x_velocity_s32"] != -0x00050000 or
+        class05_prop["fixed_frame_substitute_forbidden"] is not True or
         class01_contract["rng"] != {"calls": 0, "consumption_order": []} or
         class02_contract["rng"] != {"calls": 0, "consumption_order": []} or
         sorted((row["address"], row["writer_source_frame_u16"],
@@ -4252,10 +4272,62 @@ def build() -> str:
             row["timer_u16"], row["branch_s16"], row["animation_record"],
             row["assembly"], row["hurt_selector_u8"],
             row["attack_selector_u8"]))
+    lines.extend([
+        "};", "",
+        "static const AvspRound1AnimationStateSpec avsp_round1_class05_records[AVSP_ROUND1_CLASS05_PRESENTATION_COUNT] =",
+        "{",
+    ])
+    for row in class05_records:
+        lines.append("    { %du, %d, %sUL, %sUL, %du, %du }," % (
+            row["timer_u16"], row["branch_s16"], row["animation_record"],
+            row["assembly"], row["hurt_selector_u8"],
+            row["attack_selector_u8"]))
     class01_audio = class01_contract["audio_transactions"]
     attack_box = class02_collision["attack_box"]
     hurt_box = class02_collision["hurt_record"]
+    class05_attack = class05_collision["attack_record"]
+    class05_hurt = class05_collision["hurt_record"]
     lines.extend([
+        "};", "",
+        "static const AvspRound1Class05Spec avsp_round1_class05 =",
+        "{",
+        "    %sUL, 0x0006CD44UL, %sUL, %sUL," % (
+            class05_prop["dispatch"], class05_attack["address"],
+            class05_hurt["address"]),
+        "    0x0200u, 0x0400u, 0x0402u, 0x0404u, 0x0200u, 0x0604u, 0x0300u,",
+        "    %du, %su, %d, %d, 0x05, %du, %du, %du," % (
+            class05_reaction["state_0x0400"]["timer_u16"],
+            class05_reaction["state_0x0400"]["audio_command_u16"],
+            class05_collision["damage_s16"],
+            class05_collision["health_after_clamp_s16"],
+            class05_prop["initialization"]["animation_record"]
+                ["hurt_selector_u8"],
+            class05_collision["impact_allocation"]["variant_u8"],
+            class05_prop["initialization"]["field64_u8"]),
+        "    { %d, %d, %du, %du, %d, %du, %d, %du, %du }," % (
+            class05_attack["x_center_s8"], class05_attack["y_center_s8"],
+            class05_attack["x_half_u8"], class05_attack["y_half_u8"],
+            class05_attack["z_center_s8"], class05_attack["z_half_u8"],
+            class05_attack["knockback_mode_s8"],
+            class05_attack["hit_value_u8"],
+            class05_attack["damage_selector_u8"]),
+        "    { %d, %d, %du, %du, %d, %du, 0, 0u, 0u }" % (
+            class05_hurt["x_center_s8"], class05_hurt["y_center_s8"],
+            class05_hurt["x_half_u8"], class05_hurt["y_half_u8"],
+            class05_hurt["z_center_s8"], class05_hurt["z_half_u8"]),
+        "};", "",
+        "static const AvspRound1Class05MotionSpec avsp_round1_class05_motion =",
+        "{",
+        "    %d, %dL, %dL, %dL, %dL, %dL, %dL, %dL, %dL" % (
+            class05_motion["primary"]["initial_y_offset_s16"],
+            class05_motion["primary"]["x_velocity_s32"],
+            class05_motion["primary"]["y_velocity_s32"],
+            class05_motion["primary"]["x_acceleration_s32"],
+            class05_motion["primary"]["y_acceleration_s32"],
+            class05_motion["alternate"]["x_velocity_s32"],
+            class05_motion["alternate"]["y_velocity_s32"],
+            class05_motion["alternate"]["x_acceleration_s32"],
+            class05_motion["alternate"]["y_acceleration_s32"]),
         "};", "",
         "static const AvspRound1Class01Spec avsp_round1_class01 =",
         "{",

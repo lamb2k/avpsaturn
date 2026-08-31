@@ -19,12 +19,24 @@ spec.loader.exec_module(capture)
 
 def main():
     parser = argparse.ArgumentParser()
-    parser.add_argument("--first", type=int, required=True)
-    parser.add_argument("--last", type=int, required=True)
+    parser.add_argument("--first", type=int)
+    parser.add_argument("--last", type=int)
+    parser.add_argument("--frames", type=int, nargs="+")
     parser.add_argument("--timeout", type=float, default=300.0)
     args = parser.parse_args()
-    if args.first < 0 or args.last < args.first:
-        raise ValueError("invalid Coffee Shop WGC frame range")
+    if args.frames:
+        frames = tuple(args.frames)
+        if args.first is not None or args.last is not None:
+            raise ValueError("choose an explicit frame list or a frame range")
+    else:
+        if args.first is None or args.last is None:
+            raise ValueError("Coffee Shop WGC frame range is required")
+        if args.first < 0 or args.last < args.first:
+            raise ValueError("invalid Coffee Shop WGC frame range")
+        frames = range(args.first, args.last + 1)
+    if not frames or any(frame < 0 for frame in frames) or any(
+            right <= left for left, right in zip(frames, frames[1:])):
+        raise ValueError("Coffee Shop WGC frames must be increasing")
 
     inventory = json.loads((HERE / "inventory.json").read_text())
     symbols = capture.tools.symbols(inventory["required_readback_symbols"])
@@ -40,7 +52,7 @@ def main():
             time.sleep(0.1)
     mcp.call("set_debug_option", cpu_core="interpreter")
 
-    for frame in range(args.first, args.last + 1):
+    for frame in frames:
         diagnostic_frame = frame - SOURCE_VISIBLE_FRAME_AT_DIAGNOSTIC_ZERO
         if diagnostic_frame < 0:
             raise RuntimeError(

@@ -14015,6 +14015,289 @@
     "required_dispatched_pairs": 12
   },
   "first_segment_dependencies": {
+    "class_0x05_type20_reactive_prop": {
+      "bounded_source_body": {
+        "first": "0x0006c9ee",
+        "last_exclusive": "0x0006cc56",
+        "sha256": "ef42536f1c199471beb96ac3a80833ce73260c092d8dcd27660803b3b2f136b6"
+      },
+      "capture_identity": {
+        "byte_identical": true,
+        "completion_a_sha256": "9c0ea88c7eae6b4755b0025d356d49ae136d91de0e443fab0ff767151e43343d",
+        "completion_b_sha256": "9c0ea88c7eae6b4755b0025d356d49ae136d91de0e443fab0ff767151e43343d"
+      },
+      "class_u8": "0x05",
+      "classification": "SOURCE_CLOSED_IMPLEMENTATION_FIELDS",
+      "current_state_collision": {
+        "attack_record": {
+          "address": "0x0011af76",
+          "damage_selector_u8": 25,
+          "hit_value_u8": 3,
+          "impact_variant_u8": 1,
+          "knockback_mode_s8": 3,
+          "record_sha256": "d9ba43b3f470fc2673b8124d6d3a46a5f3519a9158ba142cd9df6019f689dc0c",
+          "x_center_s8": 0,
+          "x_half_u8": 88,
+          "y_center_s8": 48,
+          "y_half_u8": 48,
+          "z_center_s8": 0,
+          "z_half_u8": 40
+        },
+        "attacker_source_slot": "0x00ff8380",
+        "damage_s16": 25,
+        "guard": "player selector 11 is contact-ready; target state is 0x0200; target player guard is zero; current attack and hurt boxes overlap",
+        "health_after_clamp_s16": -1,
+        "health_before_s16": 0,
+        "hurt_record": {
+          "address": "0x0006cd50",
+          "record_sha256": "4f624157e6748a794746004fdb494bd73cfdf2e2b7940f99c036077cc612936f",
+          "x_center_s8": 0,
+          "x_half_u8": 24,
+          "y_center_s8": 20,
+          "y_half_u8": 32,
+          "z_center_s8": -5,
+          "z_half_u8": 6
+        },
+        "hurt_selector_u8": 1,
+        "impact_allocation": {
+          "class_u8": "0x4e",
+          "record_type_u8": 24,
+          "source_slot": "0x00ffc200",
+          "variant_u8": 1,
+          "visible_frame_u16": 3891,
+          "x_s16": 1312,
+          "y_s16": 324,
+          "z_s16": 292
+        },
+        "reaction_direction_rule": "write player_x < target_x to target+0x4f; state-4 entry XORs that value with 1 for visible facing",
+        "reaction_state_u16": "0x0400",
+        "reaction_substate_u16": "0x0000",
+        "source_update_frame_u16": 3890
+      },
+      "dispatch": "0x06c9ee",
+      "fixed_frame_substitute_forbidden": true,
+      "initialization": {
+        "animation_record": {
+          "animation_record": "0x0006cc62",
+          "assembly": "0x0006ccd6",
+          "attack_selector_u8": 1,
+          "branch_s16": -32768,
+          "hurt_selector_u8": 1,
+          "record_sha256": "0bc41bae6f8a315cc988c2a6b5b2dc395b00c2a1cda4584ab600681ec2d7b883",
+          "timer_u16": 4095
+        },
+        "facing_u8": 0,
+        "field64_u8": 25,
+        "ground_copy": "y_s16 -> z_s16",
+        "object_or_u16": "0x8000",
+        "state_u16": "0x0200",
+        "substate_u16": "0x0000",
+        "table_set": "0x0006cd44"
+      },
+      "mutation_controls": [
+        "reject fixed-frame spawn",
+        "reject reversed stage-record order",
+        "reject wrong current attack record",
+        "reject wrong hurt selector",
+        "reject missing damage clamp",
+        "reject wrong reaction facing XOR",
+        "reject missing class-0x05 RNG call",
+        "reject guessed audio identity",
+        "reject early timer transition",
+        "reject authored debris delay",
+        "reject wrong trajectory sign",
+        "reject wrong phase projection",
+        "reject early release",
+        "reject missing class-0x4e variant-1 impact"
+      ],
+      "presentation_records": [
+        {
+          "animation_record": "0x0006cc62",
+          "assembly": "0x0006ccd6",
+          "attack_selector_u8": 1,
+          "branch_s16": -32768,
+          "hurt_selector_u8": 1,
+          "record_sha256": "0bc41bae6f8a315cc988c2a6b5b2dc395b00c2a1cda4584ab600681ec2d7b883",
+          "timer_u16": 4095
+        },
+        {
+          "animation_record": "0x0006cc8a",
+          "assembly": "0x0006cd0c",
+          "attack_selector_u8": 0,
+          "branch_s16": 0,
+          "hurt_selector_u8": 0,
+          "record_sha256": "142c5fa631b0e21aff0b17f0f37076dae739a0e7a10b299e5b4ad7f96bd34585",
+          "timer_u16": 1
+        },
+        {
+          "animation_record": "0x0006cc9a",
+          "assembly": "0x0006cd1a",
+          "attack_selector_u8": 0,
+          "branch_s16": -32768,
+          "hurt_selector_u8": 0,
+          "record_sha256": "8d376e2925dc7c6dc8222bfc2a80ba2deecae947ce856b223acf80e7470b8994",
+          "timer_u16": 4095
+        },
+        {
+          "animation_record": "0x0006ccae",
+          "assembly": "0x0006cd28",
+          "attack_selector_u8": 0,
+          "branch_s16": -32768,
+          "hurt_selector_u8": 0,
+          "record_sha256": "6cbaa65f517ea7f2fc2b274886f9a2451b271ed6706f0eb6f7db3c4d869dcb6e",
+          "timer_u16": 4095
+        },
+        {
+          "animation_record": "0x0006ccc2",
+          "assembly": "0x0006cd36",
+          "attack_selector_u8": 0,
+          "branch_s16": -32768,
+          "hurt_selector_u8": 0,
+          "record_sha256": "dcafb2a948d468f4c5043dbf381cd5982b57b5f06b9bccb4ba1628673978db5d",
+          "timer_u16": 4095
+        }
+      ],
+      "reaction_program": {
+        "state_0x0400": {
+          "animation_record": {
+            "animation_record": "0x0006cc8a",
+            "assembly": "0x0006cd0c",
+            "attack_selector_u8": 0,
+            "branch_s16": 0,
+            "hurt_selector_u8": 0,
+            "record_sha256": "142c5fa631b0e21aff0b17f0f37076dae739a0e7a10b299e5b4ad7f96bd34585",
+            "timer_u16": 1
+          },
+          "audio_command_u16": "0x0074",
+          "facing_rule": "source_facing_selector_u8 XOR 1",
+          "next_state_u16": "0x0402",
+          "rng_calls_u8": 1,
+          "seed_after": "0x61a7",
+          "seed_before": "0xcb46",
+          "timer_u16": 8
+        },
+        "state_0x0402": {
+          "terminal_animation_record": {
+            "animation_record": "0x0006cc9a",
+            "assembly": "0x0006cd1a",
+            "attack_selector_u8": 0,
+            "branch_s16": -32768,
+            "hurt_selector_u8": 0,
+            "record_sha256": "8d376e2925dc7c6dc8222bfc2a80ba2deecae947ce856b223acf80e7470b8994",
+            "timer_u16": 4095
+          },
+          "timer_rule": "decrement timer through zero; only the signed animation terminal advances to state 0x0404"
+        },
+        "state_0x0404": {
+          "alternate": {
+            "animation_record": {
+              "animation_record": "0x0006ccc2",
+              "assembly": "0x0006cd36",
+              "attack_selector_u8": 0,
+              "branch_s16": -32768,
+              "hurt_selector_u8": 0,
+              "record_sha256": "dcafb2a948d468f4c5043dbf381cd5982b57b5f06b9bccb4ba1628673978db5d",
+              "timer_u16": 4095
+            },
+            "initial_y_offset_s16": 0,
+            "landing_substate_u16": "0x0200",
+            "x_acceleration_s32": 0,
+            "x_velocity_s32": -262144,
+            "y_acceleration_s32": -32768,
+            "y_velocity_s32": 327680
+          },
+          "landing_rule": "unsigned trajectory high word below ground z sets its landing bit; both bits advance to state 0x0604/substate 0x0300",
+          "primary": {
+            "animation_record": {
+              "animation_record": "0x0006ccae",
+              "assembly": "0x0006cd28",
+              "attack_selector_u8": 0,
+              "branch_s16": -32768,
+              "hurt_selector_u8": 0,
+              "record_sha256": "6cbaa65f517ea7f2fc2b274886f9a2451b271ed6706f0eb6f7db3c4d869dcb6e",
+              "timer_u16": 4095
+            },
+            "initial_y_offset_s16": 27,
+            "x_acceleration_s32": 0,
+            "x_velocity_s32": -327680,
+            "y_acceleration_s32": -32768,
+            "y_velocity_s32": 393216
+          },
+          "projection_rule": "(source global phase byte + scheduler d7) & 1 selects primary on zero and alternate on one; the accepted Coffee Shop adapter maps odd native runtime frames to the zero/primary source phase",
+          "release_guard": "state 0x0604/substate 0x0300 releases the fixed-pool record on its next scheduler update"
+        },
+        "state_sequence_u16": [
+          [
+            512,
+            0
+          ],
+          [
+            1024,
+            0
+          ],
+          [
+            1026,
+            0
+          ],
+          [
+            1028,
+            0
+          ],
+          [
+            1028,
+            512
+          ],
+          [
+            1540,
+            768
+          ]
+        ]
+      },
+      "record_type_u8": 20,
+      "retained_gameplay_authority": false,
+      "scheduler_order": "record-type-20 ascending source-slot order; class-0x05 reaction and RNG precede record-type-24 impact initialization",
+      "source_slots": [
+        "0x00ffb180",
+        "0x00ffb280"
+      ],
+      "spec_executable": true,
+      "stage_records": [
+        {
+          "address": "0x0015c188",
+          "allocator_u16": 4,
+          "camera_threshold_u16": 816,
+          "class_u8": 5,
+          "facing_u8": 0,
+          "field_0d_u8": 48,
+          "guard_0a_s8": 0,
+          "guard_0b_u8": 0,
+          "observed_source_frame": 2672,
+          "observed_source_slot": "0x00ffb280",
+          "record_sha256": "8e3d5ad2866e73c5c9febcc6afb84767aed96515808c9d60dbf9ef7e552cca33",
+          "timer_u16": 0,
+          "variant_u8": 0,
+          "x_s16": 1264,
+          "y_s16": 293
+        },
+        {
+          "address": "0x0015c1a8",
+          "allocator_u16": 4,
+          "camera_threshold_u16": 816,
+          "class_u8": 5,
+          "facing_u8": 0,
+          "field_0d_u8": 34,
+          "guard_0a_s8": 0,
+          "guard_0b_u8": 0,
+          "observed_source_frame": 2672,
+          "observed_source_slot": "0x00ffb180",
+          "record_sha256": "0c9f50d9fc7998b5579633cace2e5e8dbea6ed6591702ddb590b4659b0568544",
+          "timer_u16": 0,
+          "variant_u8": 0,
+          "x_s16": 1284,
+          "y_s16": 268
+        }
+      ]
+    },
     "class_0x08_type20_health_pickup": {
       "capture_identity": {
         "baseline_byte_identical": true,

@@ -120,17 +120,23 @@
  * transient diagnostic storage. Reserve one aligned block immediately after
  * the existing tile/strip carve so debug and release use the same 4 MB-cart
  * ownership without consuming Saturn work RAM. The SH-2 runtime measures
- * 0x183ec bytes with all six source pools and the Coffee Shop terrain stream;
- * the 0x19000 carve preserves 0x0c14 bytes of headroom inside the fixed arena. */
+ * 0x18410 bytes with all six source pools and the Coffee Shop terrain stream;
+ * the 0x19000 carve preserves 0x0bf0 bytes of headroom inside the fixed arena. */
 #ifdef AVSP_LIVE_ENCOUNTER
 #define AVSP_ROUND1_RUNTIME_REGION_BYTES 0x19000
-#define AVSP_ROUND1_RUNTIME_MEASURED_BYTES 0x183ec
+#define AVSP_ROUND1_RUNTIME_MEASURED_BYTES 0x18410
 #define AVSP_LIVE_DIAG_REGION_BYTES 0x1A000
+#define AVSP_COMPOSITE_SCRATCH_REGION_BYTES AVSP_COMPOSITE_MAX_TEXTURE_BYTES
 #define AVSP_LIVE_DIAG_RECORD_BYTES 156
 #define AVSP_ROUND1_RUNTIME_BASE ((AvspRound1Runtime *)(AVSP_CART_DRAM1_BASE + AVSP_TILE_REGION_BYTES + AVSP_STRIPS_REGION_BYTES))
+#define AVSP_COMPOSITE_SCRATCH_BASE \
+    (AVSP_CART_DRAM1_BASE + AVSP_TILE_REGION_BYTES + \
+     AVSP_STRIPS_REGION_BYTES + AVSP_ROUND1_RUNTIME_REGION_BYTES + \
+     AVSP_LIVE_DIAG_REGION_BYTES)
 #else
 #define AVSP_ROUND1_RUNTIME_REGION_BYTES 0
 #define AVSP_LIVE_DIAG_REGION_BYTES 0
+#define AVSP_COMPOSITE_SCRATCH_REGION_BYTES 0
 #endif
 
 #ifdef AVSP_STREET_TEST
@@ -584,7 +590,8 @@ typedef char AvspLiveDiagnosticRecordSizeMatchesMeasuredTarget[
     sizeof(LiveEncounterDiagSample) == AVSP_LIVE_DIAG_RECORD_BYTES ? 1 : -1];
 typedef char AvspRound1ReservedCarvesFitCartDram1[
     AVSP_TILE_REGION_BYTES + AVSP_STRIPS_REGION_BYTES +
-            AVSP_ROUND1_RUNTIME_REGION_BYTES + AVSP_LIVE_DIAG_REGION_BYTES <=
+            AVSP_ROUND1_RUNTIME_REGION_BYTES + AVSP_LIVE_DIAG_REGION_BYTES +
+            AVSP_COMPOSITE_SCRATCH_REGION_BYTES <=
         AVSP_CART_DRAM1_BYTES
         ? 1
         : -1];
@@ -3543,8 +3550,7 @@ typedef struct
 
 static AvspRound1CompositeSprite
     round1_composite_sprites[AVSP_COMPOSITE_SPRITE_POOL];
-static unsigned char
-    round1_composite_scratch[AVSP_COMPOSITE_MAX_TEXTURE_BYTES];
+#define round1_composite_scratch AVSP_COMPOSITE_SCRATCH_BASE
 static const unsigned short round1_composite_slot_dimensions[
     AVSP_COMPOSITE_SPRITE_POOL][2] = {
     {112, 208}, {96, 224},
@@ -3556,6 +3562,33 @@ static const unsigned short round1_composite_slot_dimensions[
 };
 static unsigned long round1_composite_clock;
 static volatile int avsp_diag_round1_native_composite_exhaustions;
+volatile unsigned long avsp_diag_round1_cart_vdp1_cpu_uploads;
+
+/* The composite workspace is in expansion-RAM A-bus space. SCU DMA cannot
+ * transfer between an A-bus endpoint and VDP1 VRAM on the B-bus, even though
+ * current emulators accept it. Keep both endpoints CPU-mediated here. The
+ * destination is longword-aligned and every source-derived 4bpp composite is
+ * a whole number of longwords. */
+static int round1_replace_4bits_image_from_cart_cpu(
+    const jo_img_4bits *const image, const int sprite_id)
+{
+    const unsigned long byte_count =
+        ((unsigned long)image->width * (unsigned long)image->height) / 2UL;
+    const unsigned long *source = (const unsigned long *)image->data;
+    volatile unsigned long *destination = (volatile unsigned long *)(
+        JO_VDP1_VRAM + JO_MULT_BY_8(__jo_sprite_def[sprite_id].adr));
+    unsigned long word_count = byte_count / sizeof(unsigned long);
+    while (word_count-- > 0UL)
+        *destination++ = *source++;
+    __jo_sprite_pic[sprite_id].data = (void *)(
+        JO_VDP1_VRAM + JO_MULT_BY_8(__jo_sprite_def[sprite_id].adr));
+#ifdef JO_COMPILE_WITH_3D_SUPPORT
+    if (__jo_sprite_quad[sprite_id] != JO_NULL)
+        jo_3d_free_sprite_quad(sprite_id);
+#endif
+    ++avsp_diag_round1_cart_vdp1_cpu_uploads;
+    return sprite_id;
+}
 
 static void round1_composite_begin_frame(void)
 {
@@ -3569,11 +3602,11 @@ static int round1_initialize_fixed_vdp1_pools(void)
     jo_img_4bits image;
     unsigned char tile[AVSP_TILE_BYTES];
     unsigned int index;
-    memset(round1_composite_scratch, 0, sizeof(round1_composite_scratch));
     memset(tile, 0, sizeof(tile));
     round1_composite_sprite_count = 0;
     round1_composite_texture_bytes = 0UL;
     round1_composite_clock = 0UL;
+    avsp_diag_round1_cart_vdp1_cpu_uploads = 0UL;
     for (index = 0u; index < AVSP_COMPOSITE_SPRITE_POOL; ++index)
     {
         AvspRound1CompositeSprite *slot = &round1_composite_sprites[index];
@@ -3583,7 +3616,9 @@ static int round1_initialize_fixed_vdp1_pools(void)
             (unsigned long)width * (unsigned long)height / 2UL;
         image.width = width;
         image.height = height;
-        image.data = round1_composite_scratch;
+        /* Reserve VDP1 space without presenting an A-bus source to Jo's
+         * SCU-DMA-backed upload. The first cache fill writes it via CPU. */
+        image.data = JO_NULL;
         memset(slot, 0, sizeof(*slot));
         slot->sprite_id = jo_sprite_add_4bits_image(&image);
         if (slot->sprite_id < 0 ||
@@ -3591,6 +3626,7 @@ static int round1_initialize_fixed_vdp1_pools(void)
                 AVSP_COMPOSITE_TEXTURE_BUDGET)
             return 0;
         slot->capacity_bytes = bytes;
+        slot->texture_attr = 0xffffu;
         round1_composite_texture_bytes += bytes;
         ++round1_composite_sprite_count;
     }
@@ -3680,7 +3716,7 @@ static int round1_composite_sprite_for_entry(const AvspObjectEntry *entry,
         (unsigned short)height;
     __jo_sprite_def[round1_composite_sprites[victim].sprite_id].size =
         (unsigned short)(((width & 0x1f8) << 5) | height);
-    if (jo_sprite_replace_4bits_image(
+    if (round1_replace_4bits_image_from_cart_cpu(
             &image, round1_composite_sprites[victim].sprite_id) < 0)
         return -2;
     round1_composite_sprites[victim].y_code_bits = y_code_bits;
@@ -8215,7 +8251,7 @@ static void live_encounter_publish(void)
     avsp_diag_live_frame = (int)live_encounter_frame.frame;
     avsp_diag_round1_spec_bound =
         strcmp(AVSP_ROUND1_SPEC02_SHA256,
-               "5f50fe36d7827b4ecada76b52dfe740a4d475f47e437f37f19ec0a5342958a46") ==
+               "bcba36794f1aa4e21012fda54d61745302a71ae33fa0d3480bc68d06a04156a3") ==
         0;
     avsp_diag_round1_entry_valid = avsp_round1_entry_valid(&round1_runtime);
     avsp_diag_round1_route_state = round1_runtime.route_state;
@@ -9515,11 +9551,13 @@ void jo_main(void)
         jo_add_memory_zone(AVSP_CART_DRAM1_BASE + AVSP_TILE_REGION_BYTES +
                                AVSP_STRIPS_REGION_BYTES +
                                AVSP_ROUND1_RUNTIME_REGION_BYTES +
-                               AVSP_LIVE_DIAG_REGION_BYTES,
+                               AVSP_LIVE_DIAG_REGION_BYTES +
+                               AVSP_COMPOSITE_SCRATCH_REGION_BYTES,
                            AVSP_CART_DRAM1_BYTES - AVSP_TILE_REGION_BYTES -
                                AVSP_STRIPS_REGION_BYTES -
                                AVSP_ROUND1_RUNTIME_REGION_BYTES -
-                               AVSP_LIVE_DIAG_REGION_BYTES);
+                               AVSP_LIVE_DIAG_REGION_BYTES -
+                               AVSP_COMPOSITE_SCRATCH_REGION_BYTES);
     }
 #ifndef AVSP_PROBE3
     set_actor_palette();

@@ -1985,3 +1985,60 @@ absent. Fast and Oracle pass every preceding check and stop at the intentional
 full-host frame-3782 stage-progress mismatch (eight native calls versus seven
 source calls). Paired Emulator, complete census acceptance, and WGC remain
 unclaimed.
+
+### Coffee Shop record-type-20/class-0x05 program checkpoint (2026-08-31)
+
+The complete Coffee Shop-reachable record-type-20/class-`0x05` program is
+implemented as one reusable source program rather than frame or slot patches.
+Source slots `0x00ffb180` and `0x00ffb280` execute states
+`0x0200/0x0400/0x0402/0x0404/0x0604`, current selector-11 contact, RNG
+`0xcb46 -> 0x61a7`, audio command `0x0074`, both trajectories, the natural
+class-`0x4e` variant-1 impact allocation in `0x00ffc200`, and release at source
+frame 3931. The focused differential passes four real mutations. Oracle
+auxiliary validation passes 114 mutations; SPEC-02 passes 180 mutations; the
+generated header is current. Contract and fixture SHA-256 values are
+`bcba36794f1aa4e21012fda54d61745302a71ae33fa0d3480bc68d06a04156a3`
+and `be1aba966091941aba3de87e7d8574908b850f3529733b7e610e1b45fe38fc31`.
+
+Target `LiveEncounterBench` BUILD_ONLY passes with GAME.BIN 408704 bytes, BSS
+end `0x060bad80`, and `/GAME.BIN` SHA-256
+`84fc1c479ecebef8b1f608fae3d2e7472adacba28fe4e1883711288797ff8bb8`.
+The runtime measures `0x18410` bytes in its `0x19000` cartridge carve.
+
+The in-flight size correction exposed a Saturn platform defect: Jo's sprite
+upload path uses `jo_dma_copy`, which is unconditionally `slDMACopy`. Because
+the composite scratch is in cartridge A-bus space and VDP1 VRAM is on B-bus,
+that SCU DMA transfer is unsupported even though current emulators allow it.
+Boot pool creation now reserves VDP1 storage with no A-bus source upload, and
+each runtime composite replacement uses an explicit SH-2 CPU longword copy.
+Four real platform mutations reject boot or runtime SCU-DMA/A-bus endpoints
+and loss of the cart scratch binding. Platform rule: no SCU DMA transfer may
+have an A-bus endpoint; cart-sourced VDP1 uploads are CPU-mediated. This remains
+physical-tier-only and physical Saturn is `UNRUN`.
+
+The required paired cold pinned-emulator lane passes deterministically with
+normalized ISO SHA-256
+`47775bf876d2f6e3328f9452ea076ba73728ea6b5efcf28ef0badeb6916fe409`.
+The required window-only WGC covers cadence-1 source frames 2280..2310. Direct
+inspection confirms Predator identity, P1-only HUD, coherent impact/explosion
+cadence, class-`0x1f` presentation, both VDP2 planes, palette, and priority.
+The full-speed WebP and contact-sheet SHA-256 values are
+`7c1e6e3bafd379ef1a611d76a21d2f33bf6a61418ba6a1e10297585a63b967a8`
+and `45560cc804fb1ad226d55aa1ade170bde1a6c13c57f9976dd09d05b409c4a4dc`.
+
+The complete scene remains intentionally RED at native frame 4006, scheduler
+code 29, after the class-`0x05` program and release are exact. Raw unexplained
+scene counters remain 327 actor-lifetime, 1234 spawn/despawn, 2 active-state,
+93 collision/damage, 3 route/camera, and 281 audio/load rows until the next
+full census. No accepted-candidate promotion is made.
+
+Before further scene expansion, execute one bounded complete-Round-1 memory
+program: document the linked work-RAM limit and all cartridge carves; size them
+from the accepted ORACLE-11 complete-route census; add per-region build-time
+assertions; and place generated read-only SPEC terrain, timer/selector,
+animation-record, and collision tables into a deterministic hashed cart archive
+loaded at the existing boot seam. Mutable per-frame state prefers work RAM and
+read-only content prefers cartridge. Later loads may occur only at the Round
+1-to-Round 2 boundary (`ADAPTED` for USER-10) or a census-proven camera-locked,
+CDDA-safe, never-mid-combat source seam. All later size pressure routes to this
+program rather than ad-hoc squeezing.

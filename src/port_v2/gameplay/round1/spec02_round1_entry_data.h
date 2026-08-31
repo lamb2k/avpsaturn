@@ -1,8 +1,8 @@
 #ifndef AVSP_SPEC02_ROUND1_ENTRY_DATA_H
 #define AVSP_SPEC02_ROUND1_ENTRY_DATA_H
 
-/* contract_sha256=ad4f85b8cc6fceb80bd2f4900f3ccfa26192f1ee54b79f03c99e2b8baa686900 */
-/* fixtures_sha256=e9151e9d17001c9feff1ab68705dd4d80e07d7c7f44111207d61f3adb1089a60 */
+/* contract_sha256=bcba36794f1aa4e21012fda54d61745302a71ae33fa0d3480bc68d06a04156a3 */
+/* fixtures_sha256=be1aba966091941aba3de87e7d8574908b850f3529733b7e610e1b45fe38fc31 */
 #define AVSP_ROUND1_ENTRY_PROGRAM_SHA256 "e5ef761fadc1b5a7df62e77c03025c0ebff0c2503cbc8be9c0077d4bd6cd24ba"
 
 static const unsigned char avsp_round1_entry_program[AVSP_ROUND1_ENTRY_PROGRAM_BYTES] =
@@ -4128,6 +4128,8 @@ static const AvspRound1CoffeeSceneRecordSpec avsp_round1_coffee_scene_records[AV
     { 0x0015c128UL, 0x00ffb580UL, 2072u, 512u, 816, 336, 4u, 0x01, 0u, 0, 0u, 0u, 0u, 0u },
     { 0x0015c158UL, 0x00ffb400UL, 2242u, 672u, 1104, 336, 4u, 0x01, 1u, 0, 0u, 0u, 0u, 0u },
     { 0x0015c178UL, 0x00ffb300UL, 2617u, 736u, 1152, 336, 4u, 0x02, 0u, 0, 0u, 0u, 0u, 0u },
+    { 0x0015c188UL, 0x00ffb280UL, 2672u, 816u, 1264, 293, 4u, 0x05, 0u, 0, 0u, 0u, 48u, 0u },
+    { 0x0015c1a8UL, 0x00ffb180UL, 2672u, 816u, 1284, 268, 4u, 0x05, 0u, 0, 0u, 0u, 34u, 0u },
 };
 
 static const AvspRound1AnimationStateSpec avsp_round1_class01_records[AVSP_ROUND1_CLASS01_PRESENTATION_COUNT] =
@@ -4141,6 +4143,29 @@ static const AvspRound1AnimationStateSpec avsp_round1_class02_records[AVSP_ROUND
 {
     { 4095u, -32768, 0x0006b66cUL, 0x0006b6a8UL, 1u, 0u },
     { 4095u, -32768, 0x0006b680UL, 0x0006b6baUL, 1u, 0u },
+};
+
+static const AvspRound1AnimationStateSpec avsp_round1_class05_records[AVSP_ROUND1_CLASS05_PRESENTATION_COUNT] =
+{
+    { 4095u, -32768, 0x0006cc62UL, 0x0006ccd6UL, 1u, 1u },
+    { 1u, 0, 0x0006cc8aUL, 0x0006cd0cUL, 0u, 0u },
+    { 4095u, -32768, 0x0006cc9aUL, 0x0006cd1aUL, 0u, 0u },
+    { 4095u, -32768, 0x0006ccaeUL, 0x0006cd28UL, 0u, 0u },
+    { 4095u, -32768, 0x0006ccc2UL, 0x0006cd36UL, 0u, 0u },
+};
+
+static const AvspRound1Class05Spec avsp_round1_class05 =
+{
+    0x06c9eeUL, 0x0006CD44UL, 0x0011af76UL, 0x0006cd50UL,
+    0x0200u, 0x0400u, 0x0402u, 0x0404u, 0x0200u, 0x0604u, 0x0300u,
+    8u, 0x0074u, 25, -1, 0x05, 1u, 1u, 25u,
+    { 0, 48, 88u, 48u, 0, 40u, 3, 3u, 25u },
+    { 0, 20, 24u, 32u, -5, 6u, 0, 0u, 0u }
+};
+
+static const AvspRound1Class05MotionSpec avsp_round1_class05_motion =
+{
+    27, -327680L, 393216L, 0L, -32768L, -262144L, 327680L, 0L, -32768L
 };
 
 static const AvspRound1Class01Spec avsp_round1_class01 =

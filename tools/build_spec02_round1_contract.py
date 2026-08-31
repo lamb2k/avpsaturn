@@ -273,6 +273,11 @@ def build_fields() -> list[dict[str, object]]:
           "/authority_data/auxiliary/first_segment_dependencies/class_0x08_type20_health_pickup", "the source stage guard owns the parent; current record-4 collision owns the drop; scheduler-ordered RNG, record-28 motion, hurt-box overlap, health update, audio command, animation terminal, and fixed-pool release own the pickup lifecycle",
           ["route.camera_right_edge:u16", "stage.record", "record20.health:s16", "record4.attack_record:u32", "rng.seed:u16", "record28.position:s32", "player.position:s32", "player.health:s16", "input.button2_edge:u8"], ["record20.actor", "record20.state:u16", "record28.actor", "record28.position:s32", "rng.seed:u16", "player.state:u16", "player.health:s16", "audio.command:u16", "record28.active:u8"],
           "/first_segment_dependencies/class_0x08_type20_health_pickup/mutation_controls", "stage guard, fixed-frame spawn, collision record, damage, RNG, scheduler order, movement, landing, hurt box, health, audio, terminal or release mutation changes the captured Coffee Shop scene"),
+        f("auxiliary.coffee_shop_class05_reactive_prop", "pickups-equipment-weapons-projectiles-hazards-destructibles", "guarded_actor_program", True,
+          "auxiliary", "/first_segment_dependencies/class_0x05_type20_reactive_prop", "0x01bece stage-record interpreter, 0x06c9ee..0x06cc56 class-0x05 dispatcher, current-state collision writers 0x01d0c8..0x01d6f8, and fixed-pool release 0x017706",
+          "/authority_data/auxiliary/first_segment_dependencies/class_0x05_type20_reactive_prop", "the source stage guard owns two actors; selector-11 current-state collision owns the single reaction, command, RNG, class-0x4e impact, dual trajectory, landing and release program",
+          ["route.camera_right_edge:u16", "stage.record", "player.attack_record:u32", "record20.state:u16", "record20.position:s32", "record20.hurt_selector:u8", "rng.seed:u16", "frame.phase:u8", "type24.free_count:u8"], ["record20.actor", "record20.state:u16", "record20.position:s32", "record20.facing:u8", "record20.animation:u32", "record20.health:s16", "rng.seed:u16", "audio.command:u16", "type24.class4e.actor", "pool.free_count:u8"],
+          "/first_segment_dependencies/class_0x05_type20_reactive_prop/mutation_controls", "stage order, collision record, selector, damage, facing, RNG, audio, timer, trajectory, projection, landing, impact or release mutation changes the captured Coffee Shop scene"),
         f("auxiliary.coffee_shop_class4e_variant10_impact", "pickups-equipment-weapons-projectiles-hazards-destructibles", "guarded_presentation_actor_program", True,
           "auxiliary", "/first_segment_dependencies/class_0x4e_type24_variant4_effect/variant10_collision_effect", "0x01d622 impact allocation and 0x0927f6 class-0x4e state dispatch",
           "/authority_data/auxiliary/first_segment_dependencies/class_0x4e_type24_variant4_effect/variant10_collision_effect", "source collision at frame 2362 allocates variant 10; scheduler-owned state 0 consumes one RNG call before animation and fixed-pool release",
@@ -1229,6 +1234,31 @@ def validate(contract: dict[str, object], fixtures: dict[str, object],
         class08_pickup["pickup"]["collection"]["first_absent_frame_u16"] ==
             3103,
         "Coffee Shop class-0x08 health-pickup fixture incomplete or drifted")
+    class05_prop = fixtures["authority_data"]["auxiliary"][
+        "first_segment_dependencies"]["class_0x05_type20_reactive_prop"]
+    require(
+        class05_prop["classification"] ==
+            "SOURCE_CLOSED_IMPLEMENTATION_FIELDS" and
+        class05_prop["spec_executable"] is True and
+        class05_prop["dispatch"] == "0x06c9ee" and
+        [(row["address"], row["x_s16"], row["y_s16"])
+         for row in class05_prop["stage_records"]] == [
+            ("0x0015c188", 1264, 293),
+            ("0x0015c1a8", 1284, 268)] and
+        class05_prop["current_state_collision"]["attack_record"][
+            "address"] == "0x0011af76" and
+        class05_prop["current_state_collision"]["hurt_record"][
+            "address"] == "0x0006cd50" and
+        class05_prop["reaction_program"]["state_0x0400"][
+            "seed_after"] == "0x61a7" and
+        class05_prop["reaction_program"]["state_0x0404"]["primary"][
+            "x_velocity_s32"] == -0x00050000 and
+        class05_prop["current_state_collision"]["impact_allocation"][
+            "source_slot"] == "0x00ffc200" and
+        class05_prop["capture_identity"]["byte_identical"] is True and
+        class05_prop["fixed_frame_substitute_forbidden"] is True and
+        class05_prop["retained_gameplay_authority"] is False,
+        "Coffee Shop class-0x05 reactive-prop fixture incomplete or drifted")
     class16 = fixtures["authority_data"]["auxiliary"][
         "first_segment_dependencies"]["class_0x1f_type16_0x06_projectile"]
     require(

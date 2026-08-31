@@ -513,7 +513,7 @@ static int avsp_round1_dispatch_supported(unsigned char record_type,
     if (record_type == 28u && actor_class == 0x0a)
         return 1;
     if (record_type == 20u &&
-        (actor_class == 0x01 || actor_class == 0x02))
+        (actor_class == 0x01 || actor_class == 0x02 || actor_class == 0x05))
         return 1;
     for (index = 0u; index < AVSP_ROUND1_REQUIRED_DISPATCH_COUNT; ++index)
     {
@@ -7722,8 +7722,14 @@ static int avsp_round1_spawn_coffee_scene_records(
         actor->state = 0u;
         actor->substate = 0u;
         actor->transition_timer = spec->timer;
-        actor->dispatch_entry = spec->actor_class == 0x01 ?
-            avsp_round1_class01.dispatch : avsp_round1_class02.dispatch;
+        if (spec->actor_class == 0x01)
+            actor->dispatch_entry = avsp_round1_class01.dispatch;
+        else if (spec->actor_class == 0x02)
+            actor->dispatch_entry = avsp_round1_class02.dispatch;
+        else if (spec->actor_class == avsp_round1_class05.actor_class)
+            actor->dispatch_entry = avsp_round1_class05.dispatch;
+        else
+            return 0;
         ++runtime->coffee_scene_record_cursor;
         ++runtime->coffee_scene_spawns;
     }
@@ -7812,6 +7818,159 @@ static void avsp_round1_class08_select_debris_presentation(
     }
     actor->x = avsp_round1_fixed_high_word(actor->source_x_fp);
     actor->y = avsp_round1_fixed_high_word(actor->source_y_fp);
+}
+
+static void avsp_round1_class05_select_debris_presentation(
+    AvspRound1Runtime *runtime, AvspRound1ActorCore *actor)
+{
+    if ((runtime->frame & 1u) != 0u)
+    {
+        actor->source_x_fp = avsp_round1_replace_fixed_high_word(
+            actor->source_x_fp,
+            avsp_round1_fixed_high_word(actor->source_primary_x_fp));
+        actor->source_y_fp = avsp_round1_replace_fixed_high_word(
+            actor->source_y_fp,
+            avsp_round1_fixed_high_word(actor->source_primary_y_fp));
+        actor->animation_index = 3u;
+        avsp_round1_bind_animation_state(
+            actor, &avsp_round1_class05_records[3]);
+    }
+    else
+    {
+        actor->source_x_fp = avsp_round1_replace_fixed_high_word(
+            actor->source_x_fp,
+            avsp_round1_fixed_high_word(actor->source_alternate_x_fp));
+        actor->source_y_fp = avsp_round1_replace_fixed_high_word(
+            actor->source_y_fp,
+            avsp_round1_fixed_high_word(actor->source_alternate_y_fp));
+        actor->animation_index = 4u;
+        avsp_round1_bind_animation_state(
+            actor, &avsp_round1_class05_records[4]);
+    }
+    actor->x = avsp_round1_fixed_high_word(actor->source_x_fp);
+    actor->y = avsp_round1_fixed_high_word(actor->source_y_fp);
+}
+
+static int avsp_round1_step_class05(AvspRound1Runtime *runtime,
+                                    AvspRound1Pool *pool,
+                                    AvspRound1ActorCore *actor)
+{
+    const AvspRound1Class05Spec *spec = &avsp_round1_class05;
+    const AvspRound1Class05MotionSpec *motion = &avsp_round1_class05_motion;
+    if (actor->dispatch_entry != spec->dispatch ||
+        actor->actor_class != spec->actor_class)
+        return 0;
+    if (actor->state == 0u)
+    {
+        actor->state = spec->active_state;
+        actor->substate = 0u;
+        actor->object_or = 0x8000u;
+        actor->source_a6 = spec->field64;
+        actor->z = actor->y;
+        actor->facing = 0u;
+        actor->source_x_fp = (long)actor->x * 65536L;
+        actor->source_y_fp = (long)actor->y * 65536L;
+        actor->animation_index = 0u;
+        avsp_round1_bind_animation_state(actor,
+                                         &avsp_round1_class05_records[0]);
+        ++runtime->class05_initializations;
+        return 1;
+    }
+    if (actor->state == spec->active_state)
+        return 1;
+    if (actor->state == spec->reaction_state)
+    {
+        actor->state = spec->reaction_wait_state;
+        actor->substate = 0u;
+        (void)avsp_round1_source_rng(runtime);
+        ++runtime->class05_rng_calls;
+        runtime->class05_audio_command = spec->audio_command;
+        ++runtime->class05_audio_events;
+        actor->transition_timer = spec->reaction_timer;
+        actor->facing = (unsigned char)(actor->source_facing_selector ^ 1u);
+        actor->animation_index = 1u;
+        avsp_round1_bind_animation_state(actor,
+                                         &avsp_round1_class05_records[1]);
+        ++runtime->class05_state_transitions;
+        return 1;
+    }
+    if (actor->state == spec->reaction_wait_state)
+    {
+        if (actor->transition_timer != 0u)
+        {
+            --actor->transition_timer;
+            return 1;
+        }
+        if (actor->animation_index == 1u)
+        {
+            actor->animation_index = 2u;
+            avsp_round1_bind_animation_state(
+                actor, &avsp_round1_class05_records[2]);
+            return 1;
+        }
+        if (actor->animation_index != 2u || actor->animation_branch >= 0)
+            return 0;
+        actor->state = spec->debris_state;
+        actor->substate = 0u;
+        actor->source_primary_x_fp = (long)actor->x * 65536L;
+        actor->source_primary_y_fp =
+            (long)(actor->y + motion->primary_y_offset) * 65536L;
+        actor->source_alternate_x_fp = (long)actor->x * 65536L;
+        actor->source_alternate_y_fp = (long)actor->y * 65536L;
+        actor->source_x_velocity = motion->primary_x_velocity;
+        actor->source_y_velocity = motion->primary_y_velocity;
+        actor->source_z_velocity = motion->alternate_x_velocity;
+        actor->source_aux_fp = motion->alternate_y_velocity;
+        if (actor->source_facing_selector != 0u)
+        {
+            actor->source_x_velocity = -actor->source_x_velocity;
+            actor->source_z_velocity = -actor->source_z_velocity;
+        }
+        avsp_round1_class05_select_debris_presentation(runtime, actor);
+        ++runtime->class05_state_transitions;
+        return 1;
+    }
+    if (actor->state == spec->debris_state)
+    {
+        actor->source_primary_x_fp += actor->source_x_velocity;
+        actor->source_primary_y_fp += actor->source_y_velocity;
+        actor->source_x_velocity += actor->source_facing_selector != 0u ?
+            -motion->primary_x_acceleration : motion->primary_x_acceleration;
+        actor->source_y_velocity += motion->primary_y_acceleration;
+        if (actor->substate == 0u)
+        {
+            actor->source_alternate_x_fp += actor->source_z_velocity;
+            actor->source_alternate_y_fp += actor->source_aux_fp;
+            actor->source_z_velocity += actor->source_facing_selector != 0u ?
+                -motion->alternate_x_acceleration :
+                motion->alternate_x_acceleration;
+            actor->source_aux_fp += motion->alternate_y_acceleration;
+            if ((unsigned short)avsp_round1_fixed_high_word(
+                    actor->source_alternate_y_fp) < (unsigned short)actor->z)
+            {
+                actor->substate = spec->alternate_landing_substate;
+                ++runtime->class05_state_transitions;
+            }
+        }
+        if ((unsigned short)avsp_round1_fixed_high_word(
+                actor->source_primary_y_fp) < (unsigned short)actor->z)
+        {
+            actor->state = spec->release_state;
+            actor->substate = spec->release_substate;
+            ++runtime->class05_state_transitions;
+        }
+        avsp_round1_class05_select_debris_presentation(runtime, actor);
+        return 1;
+    }
+    if (actor->state == spec->release_state &&
+        actor->substate == spec->release_substate)
+    {
+        if (!avsp_round1_release_pool_actor(pool, actor))
+            return 0;
+        ++runtime->class05_releases;
+        return 1;
+    }
+    return 0;
 }
 
 static int avsp_round1_step_class08_parent(
@@ -8204,6 +8363,27 @@ static int avsp_round1_class02_damage_overlap(
 {
     const AvspRound1CollisionBoxSpec *attack = &avsp_round1_class02.attack_box;
     const AvspRound1CollisionBoxSpec *hurt = &avsp_round1_class02.hurt_box;
+    long dx = (long)runtime->player_action.x + attack->x_center -
+        actor->x - hurt->x_center;
+    long dy = (long)runtime->player_action.lane +
+        runtime->player_action.height + attack->y_center -
+        actor->y - hurt->y_center;
+    long dz = (long)runtime->player_action.lane + attack->z_center -
+        actor->z - hurt->z_center;
+    return avsp_round1_abs_long(dx) <
+            (long)attack->x_half + hurt->x_half &&
+        avsp_round1_abs_long(dy) <
+            (long)attack->y_half + hurt->y_half &&
+        avsp_round1_abs_long(dz) <
+            (long)attack->z_half + hurt->z_half;
+}
+
+static int avsp_round1_class05_damage_overlap(
+    const AvspRound1Runtime *runtime, const AvspRound1ActorCore *actor)
+{
+    const AvspRound1CollisionBoxSpec *attack =
+        &avsp_round1_class05.player_attack_box;
+    const AvspRound1CollisionBoxSpec *hurt = &avsp_round1_class05.hurt_box;
     long dx = (long)runtime->player_action.x + attack->x_center -
         actor->x - hurt->x_center;
     long dy = (long)runtime->player_action.lane +
@@ -9534,6 +9714,41 @@ static int avsp_round1_player_special_record20_collision(
         AvspRound1ActorCore *actor = &targets->records[index];
         if (actor->active == 0u)
             continue;
+        if (actor->actor_class == avsp_round1_class05.actor_class &&
+            actor->state == avsp_round1_class05.active_state &&
+            actor->source_player_guard == 0u)
+        {
+            ++runtime->class05_collision_tests;
+            if (avsp_round1_class05_damage_overlap(runtime, actor))
+            {
+                short health = (short)(actor->health -
+                                       avsp_round1_class05.damage);
+                actor->health = health < 0 ?
+                    avsp_round1_class05.health_clamp : health;
+                actor->source_facing_selector =
+                    (unsigned short)runtime->player_action.x <
+                        (unsigned short)actor->x ? 1u : 0u;
+                actor->state = avsp_round1_class05.reaction_state;
+                actor->substate = 0u;
+                actor->source_player_guard = 1u;
+                ++runtime->class05_collision_writes;
+                ++runtime->class05_damage_writes;
+                ++runtime->class05_state_transitions;
+                ++runtime->player_special_record20_damage_writes;
+                ++runtime->player_special_attack_contacts;
+                runtime->player_special_owner_contact = 1u;
+                if (runtime->player.source_hitstop == 0u)
+                    runtime->player.source_hitstop =
+                        avsp_round1_class05.player_attack_box.hit_value;
+                avsp_round1_box_from_spec(
+                    &avsp_round1_class05.hurt_box, &hurt);
+                if (!avsp_round1_spawn_player_special_class4e_impact(
+                        runtime, actor,
+                        &avsp_round1_class05.player_attack_box, &hurt))
+                    return 0;
+            }
+            continue;
+        }
         if (actor->actor_class == 0x02 && actor->state == 0x0200u &&
             actor->source_player_guard == 0u &&
             avsp_round1_class02_in_camera(runtime, actor))
@@ -10718,6 +10933,21 @@ static int avsp_round1_step_scheduler_post_player_mask(
                         runtime, &runtime->pools[pool_index], actor))
                 {
                     runtime->scheduler_failure_code = 25u;
+                    runtime->scheduler_failure_source_slot = actor->source_slot;
+                    runtime->scheduler_failure_state = actor->state;
+                    ++runtime->failure_count;
+                    return 0;
+                }
+                continue;
+            }
+            if (actor->type == 20u && actor->actor_class == 0x05)
+            {
+                ++actor->scheduler_updates;
+                ++runtime->scheduler_dispatches;
+                if (!avsp_round1_step_class05(
+                        runtime, &runtime->pools[pool_index], actor))
+                {
+                    runtime->scheduler_failure_code = 42u;
                     runtime->scheduler_failure_source_slot = actor->source_slot;
                     runtime->scheduler_failure_state = actor->state;
                     ++runtime->failure_count;

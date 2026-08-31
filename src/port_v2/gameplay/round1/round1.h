@@ -6,7 +6,7 @@
 #include "../../combat/hit_ko/hit_ko.h"
 
 #define AVSP_ROUND1_SPEC02_SHA256 \
-"ad4f85b8cc6fceb80bd2f4900f3ccfa26192f1ee54b79f03c99e2b8baa686900"
+"bcba36794f1aa4e21012fda54d61745302a71ae33fa0d3480bc68d06a04156a3"
 #define AVSP_ROUND1_CANARY_HEAD 0x52314548UL
 #define AVSP_ROUND1_CANARY_TAIL 0x52314554UL
 #define AVSP_ROUND1_ROUTE_ENTRY_STATE 2
@@ -119,9 +119,10 @@
 #define AVSP_ROUND1_TYPE16_MOTION_COUNT 3u
 #define AVSP_ROUND1_TYPE16_PARENT_PRESENTATION_COUNT 11u
 #define AVSP_ROUND1_TYPE16_PRESENTATION_COUNT 11u
-#define AVSP_ROUND1_COFFEE_SCENE_RECORD_COUNT 4u
+#define AVSP_ROUND1_COFFEE_SCENE_RECORD_COUNT 6u
 #define AVSP_ROUND1_CLASS01_PRESENTATION_COUNT 3u
 #define AVSP_ROUND1_CLASS02_PRESENTATION_COUNT 2u
+#define AVSP_ROUND1_CLASS05_PRESENTATION_COUNT 5u
 #define AVSP_ROUND1_CLASS08_PARENT_PRESENTATION_COUNT 5u
 #define AVSP_ROUND1_HEALTH_PICKUP_PRESENTATION_COUNT 1u
 #define AVSP_ROUND1_PLAYER_PICKUP_PRESENTATION_COUNT 2u
@@ -1034,6 +1035,44 @@ typedef struct
     long alternate_freeze_x_fp;
     long alternate_freeze_y_fp;
 } AvspRound1Class08DebrisSpec;
+
+typedef struct
+{
+    unsigned long dispatch;
+    unsigned long table_set;
+    unsigned long player_attack_record;
+    unsigned long hurt_record;
+    unsigned short active_state;
+    unsigned short reaction_state;
+    unsigned short reaction_wait_state;
+    unsigned short debris_state;
+    unsigned short alternate_landing_substate;
+    unsigned short release_state;
+    unsigned short release_substate;
+    unsigned short reaction_timer;
+    unsigned short audio_command;
+    short damage;
+    short health_clamp;
+    signed char actor_class;
+    unsigned char hurt_selector;
+    unsigned char impact_variant;
+    unsigned char field64;
+    AvspRound1CollisionBoxSpec player_attack_box;
+    AvspRound1CollisionBoxSpec hurt_box;
+} AvspRound1Class05Spec;
+
+typedef struct
+{
+    short primary_y_offset;
+    long primary_x_velocity;
+    long primary_y_velocity;
+    long primary_x_acceleration;
+    long primary_y_acceleration;
+    long alternate_x_velocity;
+    long alternate_y_velocity;
+    long alternate_x_acceleration;
+    long alternate_y_acceleration;
+} AvspRound1Class05MotionSpec;
 
 typedef struct
 {
@@ -2074,6 +2113,15 @@ typedef struct
     unsigned short player_weapon_impact_audio_command;
     unsigned char player_weapon_impact_audio_selector;
     unsigned long player_resource_recharges;
+    unsigned long class05_initializations;
+    unsigned long class05_collision_tests;
+    unsigned long class05_collision_writes;
+    unsigned long class05_damage_writes;
+    unsigned long class05_rng_calls;
+    unsigned long class05_audio_events;
+    unsigned short class05_audio_command;
+    unsigned long class05_state_transitions;
+    unsigned long class05_releases;
     unsigned short scheduler_failure_code;
     unsigned short scheduler_failure_source_slot;
     unsigned short scheduler_failure_state;
