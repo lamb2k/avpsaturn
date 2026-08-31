@@ -1236,8 +1236,8 @@ def build_report() -> dict[str, object]:
                 "scheduler_order": "entry controller before player and fixed actor pools",
                 "native_adapter_binding": {
                     "source_read": "camera_x_s16 at controller dispatch",
-                    "runtime_field": "camera_x_previous",
-                    "reason": "the combined native frame calls player/camera before the fixed-pool scheduler, so camera_x_previous preserves the source controller-before-camera read",
+                    "runtime_field": "camera_x_position",
+                    "reason": "the corrected native player/camera chronology has camera_x_position=832 and camera_x_previous=830 at source writer frame 2679; the source controller reads the current 0xff8278 camera value 832 before writing the edge transition",
                 },
                 "capture_identity": {
                     "completion_a": controller_edge_a,
@@ -1249,6 +1249,9 @@ def build_report() -> dict[str, object]:
                     "writer_pc": "0x02894e",
                     "baseline_visible_substate_u16": 0x0200,
                     "suppressed_visible_substate_u16": 0,
+                    "accepted_current_camera_x_s16": 832,
+                    "rejected_previous_camera_x_s16": 830,
+                    "previous_runtime_sample_rejected": True,
                     "downstream_actor_population_differs": True,
                     "fixed_frame_substitute": False,
                 },
@@ -1800,7 +1803,16 @@ def validate(report: dict[str, object]) -> None:
             progression["controller_program"]["camera_edge_transition"]
                 ["observed_transition"]["substate_after_u16"] == 0x0200 and
             progression["controller_program"]["camera_edge_transition"]
+                ["native_adapter_binding"]["runtime_field"] ==
+                    "camera_x_position" and
+            progression["controller_program"]["camera_edge_transition"]
                 ["mutation_control"]["suppressed_visible_substate_u16"] == 0 and
+            progression["controller_program"]["camera_edge_transition"]
+                ["mutation_control"]["accepted_current_camera_x_s16"] == 832 and
+            progression["controller_program"]["camera_edge_transition"]
+                ["mutation_control"]["rejected_previous_camera_x_s16"] == 830 and
+            progression["controller_program"]["camera_edge_transition"]
+                ["mutation_control"]["previous_runtime_sample_rejected"] is True and
             progression["controller_program"]["camera_edge_transition"]
                 ["mutation_control"]["fixed_frame_substitute"] is False and
             progression["controller_guard"]["first_operands"] == {

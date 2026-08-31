@@ -9,7 +9,7 @@ from pathlib import Path
 
 ROOT = Path(__file__).resolve().parents[3]
 SPEC = ROOT / "data/spec02_round1_executable_contract.json"
-EXPECTED = "8460d848dbe75564bbea988a585e44e7261f9799e9464f98f86b19ba1fad56de"
+EXPECTED = "4f593a2628eb35042d995addb633d1bb88cfc74226c1cd894ebea2efa1b57f36"
 assert hashlib.sha256(SPEC.read_bytes()).hexdigest() == EXPECTED
 assert json.loads(SPEC.read_text())["status"] == "ACCEPTED"
 source = (ROOT / "src/port_v2/gameplay/round1/round1.c").read_text()
@@ -76,7 +76,9 @@ def run(body, header_body, passes, label="baseline", player_body=player_source,
             result.stderr.decode(errors="replace"))
 
 run(source, header, True,
-    expected_returncode=117 if "--weapon-timing-only" in sys.argv else None)
+    expected_returncode=(117 if "--weapon-timing-only" in sys.argv else
+                         94 if "--controller-edge-only" in sys.argv else
+                         None))
 if "--baseline-only" in sys.argv:
     print("REIMPLEMENT-13 focused baseline: PASS")
     raise SystemExit(0)
@@ -128,7 +130,7 @@ locomotion_mutations = {
     "if (weapon_motion_hold)\n        input.mask = (unsigned short)(input.mask &\n            (unsigned short)~AVSP_PW_INPUT_ATTACK);",
 }
 controller_edge_mutations = {
-    "encounter->source_camera_target =\n        (unsigned short)runtime->camera_x_previous;\n    if ((unsigned short)runtime->camera_x_previous <",
+    "camera_x = avsp_round1_recurring_spawn.camera_edge_uses_current_position ?\n        (unsigned short)runtime->camera_x_position :\n        (unsigned short)runtime->camera_x_previous;",
     "encounter->source_blocked_by_living_count = 1u;\n    }\n    else",
 }
 player_hit_mutations = {
@@ -357,8 +359,8 @@ for before, after in (
      "actor->substate ==\n                    avsp_round1_recurring_spawn.intro_gate_owner_state"),
     ("encounter->source_living_count >=\n            avsp_round1_recurring_spawn.maximum_living",
      "encounter->source_living_count >\n            avsp_round1_recurring_spawn.maximum_living"),
-    ("encounter->source_camera_target =\n        (unsigned short)runtime->camera_x_previous;\n    if ((unsigned short)runtime->camera_x_previous <",
-     "encounter->source_camera_target =\n        (unsigned short)runtime->camera_x_position;\n    if ((unsigned short)runtime->camera_x_position <"),
+    ("camera_x = avsp_round1_recurring_spawn.camera_edge_uses_current_position ?\n        (unsigned short)runtime->camera_x_position :\n        (unsigned short)runtime->camera_x_previous;",
+     "camera_x = avsp_round1_recurring_spawn.camera_edge_uses_current_position ?\n        (unsigned short)runtime->camera_x_previous :\n        (unsigned short)runtime->camera_x_position;"),
     ("encounter->source_blocked_by_living_count = 1u;\n    }\n    else",
      "encounter->source_blocked_by_living_count = 1u;\n        return 1;\n    }\n    else"),
     ("if (avsp_round1_recurring_spawn.preserve_reused_presentation != 0u)",

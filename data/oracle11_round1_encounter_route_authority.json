@@ -64454,15 +64454,18 @@
           "substate_u16": "u16"
         },
         "mutation_control": {
+          "accepted_current_camera_x_s16": 832,
           "baseline_visible_substate_u16": 512,
           "downstream_actor_population_differs": true,
           "fixed_frame_substitute": false,
+          "previous_runtime_sample_rejected": true,
+          "rejected_previous_camera_x_s16": 830,
           "suppressed_visible_substate_u16": 0,
           "writer_pc": "0x02894e"
         },
         "native_adapter_binding": {
-          "reason": "the combined native frame calls player/camera before the fixed-pool scheduler, so camera_x_previous preserves the source controller-before-camera read",
-          "runtime_field": "camera_x_previous",
+          "reason": "the corrected native player/camera chronology has camera_x_position=832 and camera_x_previous=830 at source writer frame 2679; the source controller reads the current 0xff8278 camera value 832 before writing the edge transition",
+          "runtime_field": "camera_x_position",
           "source_read": "camera_x_s16 at controller dispatch"
         },
         "observed_transition": {

@@ -1928,6 +1928,7 @@ static void avsp_round1_step_recurring_camera_edge(
     AvspRound1Runtime *runtime)
 {
     AvspRound1FirstEncounterRuntime *encounter = &runtime->first_encounter;
+    unsigned short camera_x;
     if (runtime->entry_controller.substate != 0u)
         return;
     if (encounter->source_field48 != 0u)
@@ -1947,9 +1948,11 @@ static void avsp_round1_step_recurring_camera_edge(
                 avsp_round1_set_recurring_phase(runtime);
         }
     }
-    encounter->source_camera_target =
+    camera_x = avsp_round1_recurring_spawn.camera_edge_uses_current_position ?
+        (unsigned short)runtime->camera_x_position :
         (unsigned short)runtime->camera_x_previous;
-    if ((unsigned short)runtime->camera_x_previous <
+    encounter->source_camera_target = camera_x;
+    if (camera_x <
             avsp_round1_recurring_spawn.camera_edge_x)
         return;
     runtime->entry_controller.substate =

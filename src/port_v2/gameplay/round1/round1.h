@@ -6,7 +6,7 @@
 #include "../../combat/hit_ko/hit_ko.h"
 
 #define AVSP_ROUND1_SPEC02_SHA256 \
-"8460d848dbe75564bbea988a585e44e7261f9799e9464f98f86b19ba1fad56de"
+"4f593a2628eb35042d995addb633d1bb88cfc74226c1cd894ebea2efa1b57f36"
 #define AVSP_ROUND1_CANARY_HEAD 0x52314548UL
 #define AVSP_ROUND1_CANARY_TAIL 0x52314554UL
 #define AVSP_ROUND1_ROUTE_ENTRY_STATE 2
@@ -859,6 +859,7 @@ typedef struct
     unsigned short camera_edge_substate;
     unsigned short camera_edge_field46_threshold;
     unsigned short camera_edge_x;
+    unsigned char camera_edge_uses_current_position;
     unsigned short spawn_timer_initial;
     unsigned short intro_timer_initial;
     unsigned short field46_initial;

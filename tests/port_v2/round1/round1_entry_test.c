@@ -4280,7 +4280,8 @@ int main(void)
                         }
                     }
                     fprintf(stderr,
-                        "Coffee Shop scheduler failure code=%u slot=%04x state=%04x substate=%04x record=%08lx frame=%lu action_timer=%u animation_timer=%u branch=%d motion4=%d recovery=%d guard=%u style=%u stage=%u progress=%u stage_calls=%lu stage_carries=%lu weapon_entries=%lu rng=%04x\n",
+                        "Coffee Shop scheduler failure source=%u code=%u slot=%04x state=%04x substate=%04x record=%08lx frame=%lu action_timer=%u animation_timer=%u branch=%d motion4=%d recovery=%d guard=%u style=%u stage=%u progress=%u stage_calls=%lu stage_carries=%lu weapon_entries=%lu rng=%04x\n",
+                        source_frame,
                         scene_runtime.scheduler_failure_code,
                         scene_runtime.scheduler_failure_source_slot,
                         scene_runtime.scheduler_failure_state,

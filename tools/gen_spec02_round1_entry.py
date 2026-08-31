@@ -856,6 +856,10 @@ def build() -> str:
             "progress_u16": 1, "substate_after_u16": 0x0200,
             "substate_before_u16": 0, "visible_frame_u16": 2680,
             "writer_frame_u16": 2679, "writer_pc": "0x02894e"} or
+        recurring_camera_edge["native_adapter_binding"] != {
+            "source_read": "camera_x_s16 at controller dispatch",
+            "runtime_field": "camera_x_position",
+            "reason": "the corrected native player/camera chronology has camera_x_position=832 and camera_x_previous=830 at source writer frame 2679; the source controller reads the current 0xff8278 camera value 832 before writing the edge transition"} or
         recurring_camera_edge["transition_values"] != {
             "camera_edge_x_s16": 832,
             "conditional_local_0x2c_u8": 0,
@@ -863,6 +867,12 @@ def build() -> str:
             "field46_phase_threshold_u16": 600} or
         recurring_camera_edge["mutation_control"]
             ["fixed_frame_substitute"] is not False or
+        recurring_camera_edge["mutation_control"]
+            ["accepted_current_camera_x_s16"] != 832 or
+        recurring_camera_edge["mutation_control"]
+            ["rejected_previous_camera_x_s16"] != 830 or
+        recurring_camera_edge["mutation_control"]
+            ["previous_runtime_sample_rejected"] is not True or
         recurring["intro_gate_suppression_control"]["mutant_at_frame_4100"] != {
             "state_u16": 0x0202, "timer42_u16": 60,
             "intro_gate_u8": 0xff, "main_spawn_transactions": 0,
@@ -2229,12 +2239,14 @@ def build() -> str:
         "};", "",
         "static const AvspRound1RecurringSpawnSpec avsp_round1_recurring_spawn =",
         "{",
-        "    0x0200u, 0x0202u, 0x0204u, 0x%04Xu, %du, %du," % (
+        "    0x0200u, 0x0202u, 0x0204u, 0x%04Xu, %du, %du, %du," % (
             recurring_camera_edge["observed_transition"]
                 ["substate_after_u16"],
             recurring_camera_edge["transition_values"]
                 ["field46_phase_threshold_u16"],
-            recurring_camera_edge["transition_values"]["camera_edge_x_s16"]),
+            recurring_camera_edge["transition_values"]["camera_edge_x_s16"],
+            1 if recurring_camera_edge["native_adapter_binding"]
+                ["runtime_field"] == "camera_x_position" else 0),
         "    %du, %du, %du, %du, %du, %du, %d, %du," % (
             recurring_initializer["observed_after"]["timer40_u16"],
             recurring_initializer["observed_after"]["timer42_u16"],

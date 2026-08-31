@@ -1738,6 +1738,46 @@ complete source controller program and its scheduler-visible camera sample,
 not a frame exception. Target was attempted but stopped at the VDP1
 actor-working-set budget guard; Emulator, census, and WGC remain unclaimed.
 
+### Paused recurring-controller current-camera checkpoint (2026-08-31)
+
+The Coffee Shop recurring-controller program at source routine
+`0x028910..0x02895e` is now bound through the existing Oracle, SPEC-02,
+generated-header, native-table, and mutation path. Source writer frame 2679
+reads current camera position 832; previous camera position 830 is an explicit
+rejected sample. Native uses the generated ownership field for both the target
+and camera-edge guard. The separate class-`0x1f` previous-camera presentation
+binding remains unchanged.
+
+Oracle encounter validation passes with 94 segments, 14 edges, 609
+route-writer transactions, 56 spawns, and zero orphan authority. SPEC-02 passes
+165 mutations. Contract SHA is
+`4f593a2628eb35042d995addb633d1bb88cfc74226c1cd894ebea2efa1b57f36`;
+fixture SHA is
+`4e4b3706666430fe2caacaeaadfcba3f31c76463f46f5fa1d948c3a44d72e616`.
+The generated header is current and the focused controller-edge lane passes
+two real mutations, including the wrong previous-camera sample.
+
+Target `LiveEncounterBench` BUILD_ONLY passes. The measured
+`AvspRound1Runtime` size is `0x173b8` inside the unchanged `0x19000` arena,
+leaving `0x1c48` bytes headroom. ISO SHA is
+`4566957f85ac53b770f3c34e809503b3cc33baa188a9dab4eab0bf75be9e14f6`.
+
+The full host differential no longer returns 117 at source frame 2680. It
+advances to intentional return 94 at source frame 3827 for class-`0x1f` slot
+`0x00ffa000`, state `0x0208`, action/substate `0x0c04`. The next body is the
+complete Coffee Shop-reachable inner-state-`0x08` action-`0x0c` program,
+including phase-4 cursor/selector handling, immediate phase-0 re-entry, audio
+entry ownership, and phase-exclusive scratch semantics for slots
+`0x00ffa000`, `0x00ff9e80`, and `0x00ff9dc0`. It is a high-fan-out,
+gameplay-authoritative class-`0x1f` program reused later in Round 1.
+
+At this boundary the proven unresolved metrics are one source program, zero
+scene/encounter controllers, one actor class, zero audio owners, and zero load
+owners. The raw scene-gap counters remain the last completed 327 actor-lifetime,
+1234 spawn/despawn, 2 active-state, 93 collision/damage, 3 route/camera, and
+281 audio/load rows; no current census claim is made. Paired Emulator, full
+census, and WGC remain deferred at this intentional RED next-program boundary.
+
 ## Next eligible cards
 
 - `QA-13-ROUND1-END-TO-END-DIFFERENTIAL` after the complete stable Round 2

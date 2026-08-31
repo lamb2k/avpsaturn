@@ -120,11 +120,11 @@
  * transient diagnostic storage. Reserve one aligned block immediately after
  * the existing tile/strip carve so debug and release use the same 4 MB-cart
  * ownership without consuming Saturn work RAM. The SH-2 runtime measures
- * 0x148e8 bytes with all six source pools; the 0x19000 carve preserves 0x4718
- * bytes (17.8 percent) of headroom inside the fixed arena. */
+ * 0x173b8 bytes with all six source pools; the 0x19000 carve preserves 0x1c48
+ * bytes of headroom inside the fixed arena. */
 #ifdef AVSP_LIVE_ENCOUNTER
 #define AVSP_ROUND1_RUNTIME_REGION_BYTES 0x19000
-#define AVSP_ROUND1_RUNTIME_MEASURED_BYTES 0x148e8
+#define AVSP_ROUND1_RUNTIME_MEASURED_BYTES 0x173b8
 #define AVSP_LIVE_DIAG_REGION_BYTES 0x1A000
 #define AVSP_LIVE_DIAG_RECORD_BYTES 156
 #define AVSP_ROUND1_RUNTIME_BASE ((AvspRound1Runtime *)(AVSP_CART_DRAM1_BASE + AVSP_TILE_REGION_BYTES + AVSP_STRIPS_REGION_BYTES))
@@ -8215,7 +8215,7 @@ static void live_encounter_publish(void)
     avsp_diag_live_frame = (int)live_encounter_frame.frame;
     avsp_diag_round1_spec_bound =
         strcmp(AVSP_ROUND1_SPEC02_SHA256,
-               "6aa35860d5854c77fb54e5174659a1cf546defdfb703d734b2f617276a0872b1") ==
+               "4f593a2628eb35042d995addb633d1bb88cfc74226c1cd894ebea2efa1b57f36") ==
         0;
     avsp_diag_round1_entry_valid = avsp_round1_entry_valid(&round1_runtime);
     avsp_diag_round1_route_state = round1_runtime.route_state;
