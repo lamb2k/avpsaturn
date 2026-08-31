@@ -46,15 +46,38 @@ RED with return 117 at source frame 2679:
 
 `substate=0x0200 snapshot=1 bound=832 camera=832 previous=830 living=8`
 
-This is the existing hard-coded Coffee Shop controller/camera-edge precheck.
-Do not change its expected frame merely to make the lane green. The Button1
-correction changed upstream chronology, so the next agent must compare the
-accepted source controller rows and the fresh native state at frames 2677-2682
-to determine whether the precheck is stale or whether a real controller
-scheduler/camera-sample defect remains. The earlier record-type-4 parent/child,
-frame-2306 damage, frame-2307 impact/HIT, frame-2377 RNG ownership, frame-2416
-release, and natural frame-2511 recurring allocation still execute before this
-boundary.
+The source/native phase comparison is complete. Source and native player and
+camera values agree exactly before the controller edge: frame 2677 camera 828
+and player X `0x04328000`, frame 2678 camera 830 and player X `0x0434c000`, and
+frame 2679 camera 832 and player X `0x04370000`. Source keeps controller
+substate 0 through frame 2679 and exposes substate `0x0200`, progress snapshot
+1, and bound 832 at frame 2680. Native already exposes those controller writes
+at frame 2679. The precheck is therefore valid and the defect is a real
+one-visible-frame controller-phase lead.
+
+The accepted recurring-controller fixture explicitly orders the entry
+controller before the player and fixed actor pools. Native production and the
+full-scene host harness currently execute player, then the combined scheduler;
+the combined scheduler owns both recurring-controller and post-player fixed
+pool/collision work. The smallest complete owning correction is to split that
+existing scheduler boundary into a pre-player recurring-controller phase and a
+post-player fixed-pool/collision phase, while retaining a combined wrapper for
+isolated focused callers if useful. Keep collision-state snapshotting with the
+post-player actor/collision phase unless accepted evidence proves otherwise.
+Do not revert the accepted current-camera sample, change the asserted frame,
+or add an authored delay. The temporary diagnostic probe was removed before
+this checkpoint. The earlier record-type-4 parent/child, frame-2306 damage,
+frame-2307 impact/HIT, frame-2377 RNG ownership, frame-2416 release, and natural
+frame-2511 recurring allocation still execute before this boundary.
+
+Primary comparison input is
+`.deps/mame/oracle11_progression_lifecycle_cs21a/coffee_shop_scene_frames.tsv`;
+the accepted rule is in the generated fixture under
+`authority_data.route.first_segment_recurring_spawn.source_update_cadence` and
+its camera-edge body. The combined native boundary is
+`avsp_round1_step_scheduler_mask` in `round1.c`; production `main.c`,
+`round1_entry_test.c`, and `round1_coffee_shop_scene_census.c` currently expose
+the player-before-combined-scheduler order that must be corrected.
 
 No new Oracle capture was required. Oracle, SPEC mutation, Target, Emulator,
 complete scene census, and WGC were not rerun for this incomplete body. The
@@ -70,15 +93,16 @@ SPEC-bound shared Button1 entry-projection correction. Do not reopen the later
 frame-4052 HIT-return symptom unless it remains after the earlier chronology is
 closed.
 
-First reconcile the Coffee Shop recurring-controller/camera-edge precheck at
-source frames 2677-2682. Compare the accepted source actor/controller rows,
-route state, living count, progress snapshot, current camera 832, previous
-camera 830, controller substate, and camera bound against a fresh native trace.
-Determine whether the host assertion is checking before or after the owning
-scheduler update, or whether native has a genuine controller-phase divergence.
-Repair only the complete owning source program or correct the stale diagnostic
-assertion when source evidence proves it stale; do not patch frame 2679, delay
-an event, rebaseline input, or change the accepted camera-current-sample rule.
+First correct the proven Coffee Shop scheduler-phase defect. Split the existing
+combined native scheduler so the recurring entry controller executes before
+the player and the fixed actor pools plus current-state collision execute after
+the player, exactly as bound by the accepted fixture. Update production and the
+full-scene entry/census harnesses to use the phased interface; preserve a
+combined wrapper only for focused callers whose contract needs one. Add a real
+mutation that rejects moving the controller back after the player. Require the
+existing frame-2679/2680 assertion to pass naturally. Do not patch frame 2679,
+delay the controller, rebaseline input, move post-player collision snapshotting
+without evidence, or change the accepted current-camera-sample rule.
 
 Then update the existing Button1 mutation controls for the generated
 `resource_debit_tick`, immediate entry projection, dispatch-hold ownership,

@@ -1835,15 +1835,35 @@ are aligned to the accepted entry, active, and directional-return sequence.
 The host differential is intentionally RED with return 117 at source frame
 2679, where the existing controller-edge check reports controller substate
 `0x0200`, progress snapshot 1, bound 832, current camera 832, previous camera
-830, and living count 8. This may be a stale pre-update assertion exposed by
-the corrected upstream chronology or a real controller scheduler-phase defect;
-it has not been classified. Do not change its frame without accepted source
-evidence. Next compare source/native controller rows at frames 2677-2682, close
-the complete owning rule, and then update the existing real Button1 mutations
-for entry projection, hold ownership, resource-debit timing, empty-effect
-timing, and dispatch offsets. Oracle, SPEC mutation, Target, Emulator, complete
-census, and WGC remain deferred at this RED checkpoint. The exact continuation
-is in `docs/AGENT_HANDOFF.md`.
+830, and living count 8. The bounded comparison recorded below subsequently
+classified this as a real scheduler-phase defect, not a stale assertion. Do not
+change its frame without accepted source evidence. Oracle, SPEC mutation,
+Target, Emulator, complete census, and WGC remain deferred at this RED
+checkpoint. The exact continuation is in `docs/AGENT_HANDOFF.md`.
+
+### Paused recurring-controller scheduler-phase diagnosis (2026-08-31)
+
+The frame-2679 precheck is not stale. A bounded source/native trace proves
+identical player and camera chronology through the edge: frames 2677, 2678,
+and 2679 use camera 828, 830, and 832 with player X `0x04328000`,
+`0x0434c000`, and `0x04370000`. Source controller substate remains 0 at frame
+2679 and becomes `0x0200` with progress snapshot 1 and bound 832 at frame 2680;
+native exposes the same writes one visible frame early at 2679.
+
+The owning defect is the native orchestration boundary. The accepted fixture
+orders the recurring entry controller before player update and before fixed
+actor pools. Production and both full-scene host paths currently update the
+player before a combined scheduler that contains the controller, fixed pools,
+and collision. Resume by splitting the existing scheduler into a pre-player
+recurring-controller phase and a post-player fixed-pool/current-state-collision
+phase, then update production and scene harness call order. Preserve combined
+focused-call compatibility where useful. Add a mutation rejecting post-player
+controller execution. Do not change the accepted current-camera sample, move
+the expected edge, or add a frame delay. After the frame-2679/2680 invariant
+passes naturally, complete the pending Button1 timing mutations and required
+generator, focused differential, fixture, Oracle, and Target lanes before
+regenerating the scene census. No acceptance or candidate promotion is claimed
+at this paused RED checkpoint.
 
 - `QA-13-ROUND1-END-TO-END-DIFFERENTIAL` after the complete stable Round 2
   handoff candidate is committed and frozen.
