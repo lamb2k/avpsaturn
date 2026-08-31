@@ -1637,6 +1637,29 @@ instances/branches, not a frame, slot, or downstream damage patch. Target,
 scene census, Emulator, and WGC remain deferred at this red intermediate
 boundary. The exact continuation is in `docs/AGENT_HANDOFF.md`.
 
+### Paused class-0x1f terminal-lifecycle diagnosis (2026-08-31)
+
+The frame-2511 absence of recurring slot `0x00ffa3c0` is not a missing spawn
+program. The accepted recurring controller `0x0288e2`, writers `0x028a3e` and
+`0x028b7e`, guard, and pool allocation are already implemented. Mirroring the
+accepted source/class-`0x02` phase cadence in the focused host leaves the same
+failure: native has living count 8 because slot `0x00ffa180` remains active at
+frame 2511 in `0x0202:0x020a`, record `0x0012de78`, health 56. Source owns this
+actor through frame 2415 with its despawn edge at 2416; state `0x0600:0x0000`
+must decrement the encounter living count and release it. Its missing terminal
+transition/release is therefore the first known causal gap and blocks the
+otherwise-natural `0x00ffa3c0` allocation.
+
+The focused/full host remains intentionally RED, return 116. Added diagnostics
+report source cadence, encounter spawn/living counters, active class-`0x1f`
+actors, and the `0x00ffa180` active edge. The next experiment is to trace that
+actor's state/substate/record changes over frames 2306-2416, bind the first
+departure against the accepted HIT/KO/normal-return/release contract, and
+correct the complete owning program or missing harness phase. No fixed-frame
+release/spawn, actor-limit change, slot substitution, or downstream damage
+patch is permitted. Target, census, Emulator, and WGC remain deferred at this
+RED intermediate boundary.
+
 ## Next eligible cards
 
 - `QA-13-ROUND1-END-TO-END-DIFFERENTIAL` after the complete stable Round 2

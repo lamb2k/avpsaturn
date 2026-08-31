@@ -3868,12 +3868,34 @@ int main(void)
         AvspRound1Runtime hit_runtime;
         unsigned int source_frame;
         unsigned int actor_index;
+        unsigned char tracked_active = 0xffu;
         avsp_round1_init(&hit_runtime);
         for (source_frame = 1972u; source_frame <= 3313u; ++source_frame)
         {
             unsigned short input = avsp_round1_coffee_shop_source_input(
                 (unsigned short)source_frame);
-            unsigned int tick;
+            unsigned int source_updates =
+                avsp_round1_coffee_shop_source_updates(
+                    (unsigned short)source_frame);
+            unsigned int class02_updates =
+                avsp_round1_coffee_shop_class02_source_updates(
+                    (unsigned short)source_frame);
+            unsigned int phase_updates = source_updates > class02_updates ?
+                source_updates : class02_updates;
+            unsigned int source_tick;
+            if (hit_runtime.pools[0].records[16].active != tracked_active)
+            {
+                const AvspRound1ActorCore *tracked =
+                    &hit_runtime.pools[0].records[16];
+                fprintf(stderr,
+                    "A180 active edge frame=%u active=%u state=%04x/%04x action=%04x record=%08lx health=%d living=%u progress=%u\n",
+                    source_frame, tracked->active, tracked->state,
+                    tracked->substate, tracked->source_action,
+                    tracked->animation_record, tracked->health,
+                    hit_runtime.first_encounter.source_living_count,
+                    hit_runtime.first_encounter.source_progress);
+                tracked_active = tracked->active;
+            }
             if (source_frame == 2072u &&
                 !avsp_round1_begin_first_entry(&hit_runtime))
                 return 116;
@@ -3884,7 +3906,7 @@ int main(void)
                     &hit_runtime, source_frame))
             {
                 fprintf(stderr,
-                    "Coffee Shop player HIT chronology failed frame=%u state=%04x/%04x xfp=%08lx facing=%u animation=%08lx assembly=%08lx timer=%u branch=%d health=%d hurt=%u active=%u phase=%u invulnerability=%u entries=%lu completions=%lu audio=%lu/%04x type16=%lu/%lu/%lu/%lu/%lu\n",
+                    "Coffee Shop player HIT chronology failed frame=%u state=%04x/%04x xfp=%08lx facing=%u animation=%08lx assembly=%08lx timer=%u branch=%d health=%d hurt=%u active=%u phase=%u invulnerability=%u entries=%lu completions=%lu audio=%lu/%04x type16=%lu/%lu/%lu/%lu/%lu living=%u progress=%u spawn=%u/%u phase19=%u blocked=%u pool12_free=%u\n",
                     source_frame, hit_runtime.player.state,
                     hit_runtime.player.substate,
                     (unsigned long)hit_runtime.player.source_x_fp,
@@ -3906,7 +3928,14 @@ int main(void)
                     hit_runtime.type16_allocations,
                     hit_runtime.type16_movement_steps,
                     hit_runtime.type16_collision_writes,
-                    hit_runtime.type16_damage_writes);
+                    hit_runtime.type16_damage_writes,
+                    hit_runtime.first_encounter.source_living_count,
+                    hit_runtime.first_encounter.source_progress,
+                    hit_runtime.first_encounter.source_spawn_timer,
+                    hit_runtime.first_encounter.source_spawn_limit,
+                    hit_runtime.first_encounter.source_phase_counter,
+                    hit_runtime.first_encounter.source_blocked_by_living_count,
+                    hit_runtime.pools[0].free_count);
                 for (actor_index = 0u;
                      actor_index < hit_runtime.pools[0].capacity;
                      ++actor_index)
@@ -3915,8 +3944,8 @@ int main(void)
                         &hit_runtime.pools[0].records[actor_index];
                     if (actor->active && actor->actor_class == 0x1f)
                         fprintf(stderr,
-                            " class1f slot=%08lx state=%04x/%04x action=%04x inner=%u timer=%u record=%08lx x=%d z=%d health=%d\n",
-                            actor->source_slot, actor->state,
+                            " class1f index=%u slot=%08lx state=%04x/%04x action=%04x inner=%u timer=%u record=%08lx x=%d z=%d health=%d\n",
+                            actor_index, actor->source_slot, actor->state,
                             actor->substate, actor->source_action,
                             actor->source_motion_fields[0],
                             actor->source_action_timer,
@@ -3927,21 +3956,41 @@ int main(void)
             }
             hit_runtime.frame = source_frame >= 2040u ?
                 source_frame - 2040u : 0u;
-            for (tick = 0u;
-                 tick < avsp_round1_coffee_shop_source_updates(
-                    (unsigned short)source_frame); ++tick)
+            for (source_tick = 1u; source_tick < phase_updates; ++source_tick)
             {
                 int player_authority_enabled_at_tick_start =
                     hit_runtime.route_state == 4;
-                if (hit_runtime.entry.started &&
+                if (source_tick < source_updates &&
+                    hit_runtime.entry.started &&
                     hit_runtime.route_state != 4 &&
                     !avsp_round1_step_first_entry(&hit_runtime))
                     return 116;
-                if (player_authority_enabled_at_tick_start &&
+                if (source_tick < source_updates &&
+                    player_authority_enabled_at_tick_start &&
                     !avsp_round1_step_player(&hit_runtime, input, 0))
                     return 116;
                 if (hit_runtime.entry.dependencies_seeded &&
-                    !avsp_round1_step_scheduler(&hit_runtime))
+                    !avsp_round1_step_scheduler_source_differential(
+                        &hit_runtime, source_tick < source_updates,
+                        source_tick < class02_updates))
+                    return 116;
+            }
+            {
+                int player_authority_enabled_at_tick_start =
+                    hit_runtime.route_state == 4;
+                if (source_updates != 0u && hit_runtime.entry.started &&
+                    hit_runtime.route_state != 4 &&
+                    !avsp_round1_step_first_entry(&hit_runtime))
+                    return 116;
+                if (source_updates != 0u &&
+                    player_authority_enabled_at_tick_start &&
+                    !avsp_round1_step_player(&hit_runtime, input, 0))
+                    return 116;
+                if (phase_updates != 0u &&
+                    hit_runtime.entry.dependencies_seeded &&
+                    !avsp_round1_step_scheduler_source_differential(
+                        &hit_runtime, source_updates != 0u,
+                        class02_updates != 0u))
                     return 116;
             }
         }

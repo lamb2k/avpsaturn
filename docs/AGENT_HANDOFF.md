@@ -41,27 +41,55 @@ The chronology fix exposes the next earlier class-`0x1f` program-family gap.
 The source scene manifest requires slot `0x00ffa3c0`, record type 12,
 class `0x1f`, to be active from source frame 2511 through 3975. The new lifetime
 assertion fails immediately at frame 2511: native has eight active class-`0x1f`
-actors but no `0x00ffa3c0`. This is upstream of the later missing type-16
-spawns at 3253/3258/3263, player damage write at 3263, and visible HIT at 3264.
-Do not repair the downstream HIT with authored damage, a fixed-frame spawn,
-slot substitution, or a weakened comparison.
+actors but no `0x00ffa3c0`.
+
+The recurring spawn program is already implemented and source-bound. Its
+accepted controller `0x0288e2`, primary writer `0x028a3e`, auxiliary writer
+`0x028b7e`, living-count guard, and fixed-pool allocation are not the missing
+authority. The focused host was changed to use the accepted source/class-`0x02`
+phase cadence and still fails. At frame 2511 its recurring controller is
+naturally blocked with living count 8 because slot `0x00ffa180` remains active
+in state `0x0202:0x020a`, animation record `0x0012de78`, health 56. Source owns
+that actor only through frame 2415 and emits its despawn edge at 2416. The
+accepted class-`0x1f` release boundary is state `0x0600:0x0000`, which decrements
+the living count and releases the fixed-pool record. Therefore the missing
+`0x00ffa3c0` allocation is downstream of the earlier `0x00ffa180` terminal
+HIT/return/release failure, not evidence for a new spawn implementation.
+
+This is upstream of the later missing type-16 spawns at 3253/3258/3263, player
+damage write at 3263, and visible HIT at 3264. Do not repair any downstream
+symptom with authored damage, a fixed-frame spawn/release, slot substitution,
+an actor-limit change, or a weakened comparison. The extra host diagnostics
+committed at this pause print source cadence, encounter counters, the active
+class-`0x1f` population, and the `0x00ffa180` active edge; they are diagnostic
+WIP and may be narrowed or removed after the owning rule is corrected.
 
 ## Exact resume prompt
 
 Continue `REIMPLEMENT-13-SOURCE-CLOSED-ROUND1` from the branch head. Preserve
-the completed one-update Button1 dispatch contract and the new source-lifetime
-assertion. Start at the first failing source frame 2511 and identify the owning
-source program for the missing record-type-12/class-`0x1f` slot
-`0x00ffa3c0`. Use the existing Coffee Shop actor-lifetime/spawn evidence and
-accepted Oracle/SPEC fixtures to bind its spawn guard, scheduler phase, initial
-state/substate, record, position/facing, and fixed-pool allocation. Then close
-every Coffee Shop-reachable branch and actor instance owned by that same
-program, not a single frame or slot exception.
+the completed one-update Button1 dispatch contract, the source-lifetime
+assertion, and the corrected finding that recurring allocation is already
+source-bound. Start with slot `0x00ffa180`, whose accepted source lifetime ends
+at frame 2415/despawn edge 2416 but which remains natively active at frame 2511
+in `0x0202:0x020a`, record `0x0012de78`, thereby holding living count 8 and
+blocking the otherwise-correct `0x00ffa3c0` recurring allocation.
+
+Inspect the complete accepted class-`0x1f` HIT/KO/normal-return/release program,
+especially the `phase_0x020a_terminal_animation` predicate and transition to
+state `0x0600:0x0000`. Add targeted state/substate/record transition diagnostics
+for `0x00ffa180` over frames 2306 through 2416 and identify the first native
+departure from accepted Oracle/SPEC evidence. Compare the focused harness with
+the parent checkpoint only as needed to determine whether the defect is a
+runtime rule or a missing harness phase. Correct the entire Coffee Shop-
+reachable owning program, not a frame, slot, or forced-release exception. The
+expected causal result is natural release of `0x00ffa180`, living-count
+decrement, and natural recurring allocation of `0x00ffa3c0` at frame 2511.
 
 If an implementation-required field is absent, record the exact field, amend
 the existing SPEC-02 fixture from accepted Oracle evidence, and run only the
 smallest bounded Oracle follow-up if that evidence genuinely lacks it. Do not
-guess. Require the actor to remain source-valid through frame 3975 and naturally
+guess. Require `0x00ffa180` to follow its source lifetime and the resulting
+`0x00ffa3c0` actor to remain source-valid through frame 3975 and naturally
 produce the accepted `0x0208:0x0e02` type-16 effects at 3253/3258/3263, the
 attack-record `0x03589e` damage write at 3263, and player HIT at 3264. Add real
 mutations for the dispatch delay and the completed source program; rerun
