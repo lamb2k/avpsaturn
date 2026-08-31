@@ -10126,14 +10126,8 @@ static int avsp_round1_step_player_weapon(AvspRound1Runtime *runtime,
     return 1;
 }
 
-static int avsp_round1_step_scheduler_mask(AvspRound1Runtime *runtime,
-                                           int include_default,
-                                           int include_class02)
+static int avsp_round1_scheduler_runtime_valid(AvspRound1Runtime *runtime)
 {
-    unsigned int order_index;
-    unsigned int pool_index;
-    unsigned int slot_index;
-    unsigned long hash = 2166136261UL;
     if (runtime == 0 ||
         (runtime->route_state != 4 &&
          !(runtime->route_state == AVSP_ROUND1_ROUTE_ENTRY_STATE &&
@@ -10146,11 +10140,49 @@ static int avsp_round1_step_scheduler_mask(AvspRound1Runtime *runtime,
             runtime->scheduler_failure_code = 14u;
         return 0;
     }
+    return 1;
+}
+
+static void avsp_round1_reset_scheduler_failure(AvspRound1Runtime *runtime)
+{
     runtime->scheduler_failure_code = 0u;
     runtime->scheduler_failure_source_slot = 0u;
     runtime->scheduler_failure_state = 0u;
     runtime->scheduler_failure_substate = 0u;
     runtime->scheduler_failure_animation_record = 0u;
+}
+
+int avsp_round1_step_scheduler_pre_player_source_differential(
+    AvspRound1Runtime *runtime, int include_default)
+{
+    if (!include_default)
+        return 1;
+    if (!avsp_round1_scheduler_runtime_valid(runtime))
+        return 0;
+    avsp_round1_reset_scheduler_failure(runtime);
+    if (!avsp_round1_step_recurring_controller(runtime))
+    {
+        runtime->scheduler_failure_code = 15u;
+        ++runtime->failure_count;
+        return 0;
+    }
+    runtime->class1f_phase_guard_counter =
+        runtime->first_encounter.source_phase_counter;
+    return 1;
+}
+
+static int avsp_round1_step_scheduler_post_player_mask(
+    AvspRound1Runtime *runtime, int include_default, int include_class02)
+{
+    unsigned int order_index;
+    unsigned int pool_index;
+    unsigned int slot_index;
+    unsigned long hash = 2166136261UL;
+    if (!include_default && !include_class02)
+        return 1;
+    if (!avsp_round1_scheduler_runtime_valid(runtime))
+        return 0;
+    avsp_round1_reset_scheduler_failure(runtime);
     if (include_default)
         runtime->scheduler_trace_count = 0u;
     if (include_default)
@@ -10174,15 +10206,6 @@ static int avsp_round1_step_scheduler_mask(AvspRound1Runtime *runtime,
         ++runtime->failure_count;
         return 0;
     }
-    if (include_default && !avsp_round1_step_recurring_controller(runtime))
-    {
-        runtime->scheduler_failure_code = 15u;
-        ++runtime->failure_count;
-        return 0;
-    }
-    if (include_default)
-        runtime->class1f_phase_guard_counter =
-            runtime->first_encounter.source_phase_counter;
     if (include_default && !avsp_round1_step_record4_pool(runtime, &hash))
         return 0;
     for (order_index = 0u; order_index < AVSP_ROUND1_SCHEDULER_POOL_COUNT;
@@ -10682,7 +10705,17 @@ static int avsp_round1_step_scheduler_mask(AvspRound1Runtime *runtime,
 
 int avsp_round1_step_scheduler(AvspRound1Runtime *runtime)
 {
-    return avsp_round1_step_scheduler_mask(runtime, 1, 1);
+    return
+        avsp_round1_step_scheduler_pre_player_source_differential(runtime, 1) &&
+        avsp_round1_step_scheduler_post_player_source_differential(
+            runtime, 1, 1);
+}
+
+int avsp_round1_step_scheduler_post_player_source_differential(
+    AvspRound1Runtime *runtime, int include_default, int include_class02)
+{
+    return avsp_round1_step_scheduler_post_player_mask(
+        runtime, include_default, include_class02);
 }
 
 int avsp_round1_step_scheduler_source_differential(
@@ -10690,8 +10723,11 @@ int avsp_round1_step_scheduler_source_differential(
 {
     if (!include_default && !include_class02)
         return 1;
-    return avsp_round1_step_scheduler_mask(runtime, include_default,
-                                           include_class02);
+    return
+        avsp_round1_step_scheduler_pre_player_source_differential(
+            runtime, include_default) &&
+        avsp_round1_step_scheduler_post_player_source_differential(
+            runtime, include_default, include_class02);
 }
 
 void avsp_round1_first_encounter_view(

@@ -4022,12 +4022,16 @@ int main(void)
                     hit_runtime.route_state != 4 &&
                     !avsp_round1_step_first_entry(&hit_runtime))
                     return 116;
+                if (hit_runtime.entry.dependencies_seeded &&
+                    !avsp_round1_step_scheduler_pre_player_source_differential(
+                        &hit_runtime, source_tick < source_updates))
+                    return 116;
                 if (source_tick < source_updates &&
                     player_authority_enabled_at_tick_start &&
                     !avsp_round1_step_player(&hit_runtime, input, 0))
                     return 116;
                 if (hit_runtime.entry.dependencies_seeded &&
-                    !avsp_round1_step_scheduler_source_differential(
+                    !avsp_round1_step_scheduler_post_player_source_differential(
                         &hit_runtime, source_tick < source_updates,
                         source_tick < class02_updates))
                     return 116;
@@ -4039,13 +4043,18 @@ int main(void)
                     hit_runtime.route_state != 4 &&
                     !avsp_round1_step_first_entry(&hit_runtime))
                     return 116;
+                if (phase_updates != 0u &&
+                    hit_runtime.entry.dependencies_seeded &&
+                    !avsp_round1_step_scheduler_pre_player_source_differential(
+                        &hit_runtime, source_updates != 0u))
+                    return 116;
                 if (source_updates != 0u &&
                     player_authority_enabled_at_tick_start &&
                     !avsp_round1_step_player(&hit_runtime, input, 0))
                     return 116;
                 if (phase_updates != 0u &&
                     hit_runtime.entry.dependencies_seeded &&
-                    !avsp_round1_step_scheduler_source_differential(
+                    !avsp_round1_step_scheduler_post_player_source_differential(
                         &hit_runtime, source_updates != 0u,
                         class02_updates != 0u))
                     return 116;
@@ -4137,12 +4146,16 @@ int main(void)
                     scene_runtime.route_state != 4 &&
                     !avsp_round1_step_first_entry(&scene_runtime))
                     return 110;
+                if (scene_runtime.entry.spawned &&
+                    !avsp_round1_step_scheduler_pre_player_source_differential(
+                        &scene_runtime, source_tick < source_updates))
+                    return 112;
                 if (source_tick < source_updates &&
                     player_authority_enabled_at_tick_start &&
                     !avsp_round1_step_player(&scene_runtime, input, 0))
                     return 111;
                 if (scene_runtime.entry.spawned &&
-                    !avsp_round1_step_scheduler_source_differential(
+                    !avsp_round1_step_scheduler_post_player_source_differential(
                         &scene_runtime, source_tick < source_updates,
                         source_tick < class02_updates))
                     return 112;
@@ -4161,6 +4174,10 @@ int main(void)
                     scene_runtime.failure_count, scene_runtime.fallback_count);
                 return 92;
             }
+            if (phase_updates != 0u && scene_runtime.entry.spawned &&
+                !avsp_round1_step_scheduler_pre_player_source_differential(
+                    &scene_runtime, source_updates != 0u))
+                return 112;
             if (source_updates != 0u &&
                 player_authority_enabled_at_tick_start &&
                 !avsp_round1_step_player(&scene_runtime, input, 0))
@@ -4246,7 +4263,7 @@ int main(void)
             }
             if (phase_updates != 0u && scene_runtime.entry.spawned)
             {
-                if (!avsp_round1_step_scheduler_source_differential(
+                if (!avsp_round1_step_scheduler_post_player_source_differential(
                         &scene_runtime, source_updates != 0u,
                         class02_updates != 0u))
                 {

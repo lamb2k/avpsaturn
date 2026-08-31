@@ -1983,6 +1983,10 @@ int avsp_round1_step_player(AvspRound1Runtime *runtime,
                             unsigned short input_mask,
                             short received_damage);
 int avsp_round1_step_scheduler(AvspRound1Runtime *runtime);
+int avsp_round1_step_scheduler_pre_player_source_differential(
+    AvspRound1Runtime *runtime, int include_default);
+int avsp_round1_step_scheduler_post_player_source_differential(
+    AvspRound1Runtime *runtime, int include_default, int include_class02);
 int avsp_round1_step_scheduler_source_differential(
     AvspRound1Runtime *runtime, int include_default, int include_class02);
 void avsp_round1_first_encounter_view(

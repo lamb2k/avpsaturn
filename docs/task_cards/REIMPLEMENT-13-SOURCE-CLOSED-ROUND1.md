@@ -1865,5 +1865,40 @@ generator, focused differential, fixture, Oracle, and Target lanes before
 regenerating the scene census. No acceptance or candidate promotion is claimed
 at this paused RED checkpoint.
 
+### Paused scheduler-phase implementation and player-action diagnosis (2026-08-31)
+
+The recurring-controller scheduler-phase defect is corrected through one
+reusable orchestration boundary. Production and both full-scene host paths now
+execute entry, pre-player recurring controller, player, then post-player fixed
+pools and current-state collision. Combined APIs remain for focused callers,
+and collision snapshotting remains post-player. A real mutation moves the
+controller after the player and recreates return 117. The focused controller
+lane passes three real mutations.
+
+The shared sufficient/empty Button1 program is also locked with eight real
+timing mutations covering tick-1 entry, one-update dispatch hold, immediate
+entry-action projection, stage/resource/parent dispatch offsets, post-hold
+empty-effect allocation, and generated `resource_debit_tick`. The generator
+check passes and SPEC-02 passes 167 mutations. Target `LiveEncounterBench`
+BUILD_ONLY passes with GAME.BIN 411136 bytes, BSS end `0x060be4c0`, and ISO
+member SHA-256
+`1f02795e3fed11bc6dab75ccf394400edf2260d313bed7355b7c33438b28f018`.
+
+Oracle now advances beyond frame 2679 but remains RED at the later return-123
+frame-4052 stage-progress mismatch; it is not accepted. A fresh full Coffee
+Shop census exposes an earlier causal failure at native frame 3653, scheduler
+code 29. Source is executing Predator Warrior state `0x0204`,
+substate/action `0x0600` at frames 3650-3654 while native remains walking in
+`0x0200/0x0202`. The code-29 class-`0x1f` player-collision failure is therefore
+downstream until the earlier player action/input chronology is reconciled.
+
+Resume by comparing the existing source/native scene TSVs from the accepted
+empty-Button1 anchor at frames 2522-2523 through frame 3653, using the existing
+capture-tool parsers. Identify and close the earliest reusable Predator Warrior
+action/input program divergence, not the isolated collision row. Do not suppress
+collision, add a delay, or rebaseline input. Paired Emulator and WGC remain
+unclaimed at this RED checkpoint; the accepted runtime candidate remains
+`d04a65a2253175c6e820140feefc35419e2cca07`.
+
 - `QA-13-ROUND1-END-TO-END-DIFFERENTIAL` after the complete stable Round 2
   handoff candidate is committed and frozen.

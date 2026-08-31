@@ -16,6 +16,7 @@ source = (ROOT / "src/port_v2/gameplay/round1/round1.c").read_text()
 header = (ROOT / "src/port_v2/gameplay/round1/round1.h").read_text()
 generated = (ROOT / "src/port_v2/gameplay/round1/spec02_round1_entry_data.h").read_text()
 player_source = (ROOT / "src/port_v2/gameplay/player_action/player_action.c").read_text()
+test_source = (ROOT / "tests/port_v2/round1/round1_entry_test.c").read_text()
 assert EXPECTED in header
 subprocess.run(["python", str(ROOT / "tools/gen_spec02_round1_entry.py"), "--check"], check=True)
 
@@ -26,10 +27,14 @@ def wsl(path):
                           check=True, capture_output=True, text=True).stdout.strip()
 
 def run(body, header_body, passes, label="baseline", player_body=player_source,
-        expected_returncode=None):
+        expected_returncode=None, generated_body=None, test_body=None):
     with tempfile.TemporaryDirectory(prefix="round1-entry-") as name:
         temp = Path(name)
         linux_output = f"/tmp/{temp.name}-test"
+        if generated_body is None:
+            generated_body = generated
+        if test_body is None:
+            test_body = test_source
         temp_body = body.replace(
             '#include "../../integration/combat/combat.h"', '#include "combat.h"')
         temp_body = temp_body.replace(
@@ -44,8 +49,9 @@ def run(body, header_body, passes, label="baseline", player_body=player_source,
         temp_header = temp_header.replace(
             '#include "../../combat/hit_ko/hit_ko.h"', '#include "hit_ko.h"')
         (temp / "round1.h").write_text(temp_header)
-        (temp / "spec02_round1_entry_data.h").write_text(generated)
+        (temp / "spec02_round1_entry_data.h").write_text(generated_body)
         (temp / "player_action.c").write_text(player_body)
+        (temp / "round1_entry_test.c").write_text(test_body)
         command = (f"cd '{wsl(ROOT)}' && gcc -std=c90 -pedantic -Wall -Wextra -Werror "
                    f"-I '{wsl(temp)}' -I . -I src/port_v2/gameplay/player_action "
                    f"-I src/port_v2/gameplay/street_alien_ai -I src/port_v2/combat/hit_ko "
@@ -58,7 +64,7 @@ def run(body, header_body, passes, label="baseline", player_body=player_source,
                    f"src/port_v2/player/player.c src/port_v2/enemy/enemy.c "
                    f"src/port_v2/integration/player_enemy/player_enemy.c "
                    f"src/port_v2/integration/combat/combat.c "
-                   f"tests/port_v2/round1/round1_entry_test.c -o '{linux_output}' && "
+                   f"'{wsl(temp / 'round1_entry_test.c')}' -o '{linux_output}' && "
                    f"ulimit -s unlimited && '{linux_output}'")
         result = subprocess.run(["wsl.exe", "-d", "Ubuntu-24.04", "-u", "root",
                                  "--", "bash", "-lc", command],
@@ -76,8 +82,8 @@ def run(body, header_body, passes, label="baseline", player_body=player_source,
             result.stderr.decode(errors="replace"))
 
 run(source, header, True,
-    expected_returncode=(117 if "--weapon-timing-only" in sys.argv else
-                         94 if "--controller-edge-only" in sys.argv else
+    expected_returncode=(123 if "--weapon-timing-only" in sys.argv else
+                         123 if "--controller-edge-only" in sys.argv else
                          123 if "--action0c-only" in sys.argv else
                          None))
 if "--baseline-only" in sys.argv:
@@ -141,8 +147,24 @@ player_hit_mutations = {
     "runtime->player_hit_x_acceleration =\n                reaction->x_acceleration;",
 }
 weapon_timing_mutations = {
-    "runtime->player_weapon_tick ==\n"
-    "                avsp_round1_player_weapon.parent_allocation_tick",
+    "runtime->player_weapon_tick = 1u;",
+    "runtime->player_weapon_dispatch_delay =\n"
+    "        avsp_round1_player_weapon.action_dispatch_delay_updates;",
+    "runtime->player.source_action = entry_action;",
+    "avsp_round1_player_stage_progress.action_entry_tick +\n"
+    "                    avsp_round1_player_weapon.\n"
+    "                        action_dispatch_delay_updates",
+    "avsp_round1_player_weapon.resource_debit_tick +\n"
+    "                    avsp_round1_player_weapon.\n"
+    "                        action_dispatch_delay_updates",
+    "avsp_round1_player_weapon.parent_allocation_tick +\n"
+    "                    avsp_round1_player_weapon.\n"
+    "                        action_dispatch_delay_updates",
+    "if (runtime->player_weapon_dispatch_delay != 0u)\n"
+    "    {\n"
+    "        --runtime->player_weapon_dispatch_delay;\n"
+    "        return 1;\n"
+    "    }",
 }
 action0c_mutations = {
     "    if (stage >= AVSP_ROUND1_CLASS1F_ACTION4_STAGE_COUNT)\n"
@@ -486,6 +508,42 @@ for before, after in (
      "if (0 && avsp_round1_player_special_guard(\n                runtime, special_buttons,"),
     ("sufficient_entry_preserves_current_presentation)",
      "sufficient_entry_preserves_current_presentation == 0u)"),
+    ("runtime->player_weapon_tick = 1u;",
+     "runtime->player_weapon_tick = 0u;"),
+    ("runtime->player_weapon_dispatch_delay =\n"
+     "        avsp_round1_player_weapon.action_dispatch_delay_updates;",
+     "runtime->player_weapon_dispatch_delay = 0u;"),
+    ("runtime->player.source_action = entry_action;",
+     "runtime->player.source_action = 0u;"),
+    ("avsp_round1_player_stage_progress.action_entry_tick +\n"
+     "                    avsp_round1_player_weapon.\n"
+     "                        action_dispatch_delay_updates",
+     "avsp_round1_player_stage_progress.action_entry_tick"),
+    ("avsp_round1_player_weapon.resource_debit_tick +\n"
+     "                    avsp_round1_player_weapon.\n"
+     "                        action_dispatch_delay_updates",
+     "avsp_round1_player_weapon.resource_debit_tick"),
+    ("avsp_round1_player_weapon.parent_allocation_tick +\n"
+     "                    avsp_round1_player_weapon.\n"
+     "                        action_dispatch_delay_updates",
+     "avsp_round1_player_weapon.parent_allocation_tick"),
+    ("if (runtime->player_weapon_dispatch_delay != 0u)\n"
+     "    {\n"
+     "        --runtime->player_weapon_dispatch_delay;\n"
+     "        return 1;\n"
+     "    }",
+     "if (runtime->player_weapon_dispatch_delay != 0u)\n"
+     "    {\n"
+     "        if (runtime->player_weapon_empty &&\n"
+     "            runtime->player_weapon_tick ==\n"
+     "                avsp_round1_player_weapon.empty_effect_allocation_tick)\n"
+     "        {\n"
+     "            ++runtime->player_weapon_empty_auxiliary_requests;\n"
+     "            avsp_round1_begin_empty_effect(runtime);\n"
+     "        }\n"
+     "        --runtime->player_weapon_dispatch_delay;\n"
+     "        return 1;\n"
+     "    }"),
     ("else if (!avsp_round1_step_player_weapon_animation(runtime, frame))\n            return 0;",
      "else if (0)\n            return 0;"),
     ("if (runtime->player_weapon_projectiles[slot_index].active &&\n            runtime->player_weapon_projectiles[slot_index].state !=\n                avsp_round1_weapon_projectile.initial_state)",
@@ -511,8 +569,7 @@ for before, after in (
         continue
     assert before in source, before
     run(source.replace(before, after), header, False, before,
-        expected_returncode=(27 if "--weapon-timing-only" in sys.argv
-                             else 94 if "--action0c-only" in sys.argv
+        expected_returncode=(94 if "--action0c-only" in sys.argv
                              else None))
 if "--inner8-only" in sys.argv:
     print("REIMPLEMENT-13 class-0x1f inner-state mutation lane: PASS (8 real mutations)")
@@ -526,15 +583,57 @@ if "--registration-only" in sys.argv:
 if "--locomotion-only" in sys.argv:
     print("REIMPLEMENT-13 locomotion/weapon-return mutation lane: PASS (5 real mutations)")
     raise SystemExit(0)
-if "--controller-edge-only" in sys.argv:
-    print("REIMPLEMENT-13 controller camera-edge mutation lane: PASS (2 real mutations)")
-    raise SystemExit(0)
+if ("--controller-edge-only" in sys.argv or
+        not subset_flags.intersection(sys.argv)):
+    pre_before = """            if (phase_updates != 0u && scene_runtime.entry.spawned &&
+                !avsp_round1_step_scheduler_pre_player_source_differential(
+                    &scene_runtime, source_updates != 0u))
+                return 112;
+"""
+    post_before = """            if (phase_updates != 0u && scene_runtime.entry.spawned)
+            {
+                if (!avsp_round1_step_scheduler_post_player_source_differential(
+"""
+    assert pre_before in test_source
+    assert post_before in test_source
+    post_after = """            if (phase_updates != 0u && scene_runtime.entry.spawned)
+            {
+                if (!avsp_round1_step_scheduler_pre_player_source_differential(
+                        &scene_runtime, source_updates != 0u))
+                    return 112;
+                if (!avsp_round1_step_scheduler_post_player_source_differential(
+"""
+    post_player_controller = test_source.replace(pre_before, "", 1).replace(
+        post_before, post_after, 1)
+    run(source, header, False, "post-player-recurring-controller",
+        expected_returncode=117, test_body=post_player_controller)
+    if "--controller-edge-only" in sys.argv:
+        print("REIMPLEMENT-13 controller camera-edge mutation lane: PASS (3 real mutations)")
+        raise SystemExit(0)
 if "--player-hit-only" in sys.argv:
     print("REIMPLEMENT-13 Coffee Shop player-HIT program mutation lane: PASS (4 real mutations)")
     raise SystemExit(0)
-if "--weapon-timing-only" in sys.argv:
-    print("REIMPLEMENT-13 Button1 parent-allocation timing mutation lane: PASS (1 real mutation)")
-    raise SystemExit(0)
+if ("--weapon-timing-only" in sys.argv or
+        not subset_flags.intersection(sys.argv)):
+    generated_resource_before = """    16u,
+    1u,
+    1u,
+    1u,
+    64u,
+"""
+    generated_resource_after = """    16u,
+    1u,
+    1u,
+    0u,
+    64u,
+"""
+    assert generated.count(generated_resource_before) == 1
+    run(source, header, False, "generated-resource-debit-tick",
+        generated_body=generated.replace(
+            generated_resource_before, generated_resource_after, 1))
+    if "--weapon-timing-only" in sys.argv:
+        print("REIMPLEMENT-13 Button1 timing mutation lane: PASS (8 real mutations)")
+        raise SystemExit(0)
 if "--action0c-only" in sys.argv:
     print("REIMPLEMENT-13 class-0x1f action-0x0c timer-row mutation lane: PASS (1 real mutation)")
     raise SystemExit(0)
@@ -735,4 +834,4 @@ for before, after in (
 if "--generated-walk-only" in sys.argv:
     print("REIMPLEMENT-13 generated walk fixture mutation lane: PASS (5 real mutations)")
     raise SystemExit(0)
-print("REIMPLEMENT-13 entry/player/scheduler/class1f/Coffee-Shop-navigation/neutral-stop/melee/Button1/Button3/type16-projectile/player-HIT/first-encounter differential: PASS (209 real mutations)")
+print("REIMPLEMENT-13 entry/player/scheduler/class1f/Coffee-Shop-navigation/neutral-stop/melee/Button1/Button3/type16-projectile/player-HIT/first-encounter differential: PASS (218 real mutations)")

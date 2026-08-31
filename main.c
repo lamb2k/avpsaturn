@@ -8460,6 +8460,26 @@ static void live_encounter_frame_callback(void)
             runtime_ready = 0;
             return;
         }
+        if (round1_runtime.entry.dependencies_seeded &&
+            !avsp_round1_step_scheduler_pre_player_source_differential(
+                &round1_runtime, 1))
+        {
+            avsp_diag_round1_scheduler_failure_code =
+                round1_runtime.scheduler_failure_code;
+            avsp_diag_round1_scheduler_failure_source_slot =
+                round1_runtime.scheduler_failure_source_slot;
+            avsp_diag_round1_scheduler_failure_state =
+                round1_runtime.scheduler_failure_state;
+            avsp_diag_round1_scheduler_failure_substate =
+                round1_runtime.scheduler_failure_substate;
+            avsp_diag_round1_scheduler_failure_animation_record =
+                round1_runtime.scheduler_failure_animation_record;
+            avsp_diag_round1_failure_count =
+                (int)round1_runtime.failure_count;
+            avsp_diag_live_frame_stage = -10;
+            runtime_ready = 0;
+            return;
+        }
         if (round1_player_authority_enabled_at_tick_start &&
             !avsp_round1_step_player(&round1_runtime, round1_player_mask, 0))
         {
@@ -8468,7 +8488,8 @@ static void live_encounter_frame_callback(void)
             return;
         }
         if (round1_runtime.entry.dependencies_seeded &&
-            !avsp_round1_step_scheduler(&round1_runtime))
+            !avsp_round1_step_scheduler_post_player_source_differential(
+                &round1_runtime, 1, 1))
         {
             avsp_diag_round1_scheduler_failure_code =
                 round1_runtime.scheduler_failure_code;

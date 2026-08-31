@@ -266,6 +266,10 @@ int main(void)
                 runtime.route_state != 4 &&
                 !avsp_round1_step_first_entry(&runtime))
                 return 3;
+            if (runtime.entry.dependencies_seeded &&
+                !avsp_round1_step_scheduler_pre_player_source_differential(
+                    &runtime, tick < default_updates))
+                return 5;
             if (tick < default_updates &&
                 player_authority_enabled_at_tick_start &&
                 !avsp_round1_step_player(&runtime, input, 0))
@@ -284,7 +288,7 @@ int main(void)
                 return 4;
             }
             if (runtime.entry.dependencies_seeded &&
-                !avsp_round1_step_scheduler_source_differential(
+                !avsp_round1_step_scheduler_post_player_source_differential(
                     &runtime, tick < default_updates,
                     tick < class02_updates))
             {
