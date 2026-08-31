@@ -1538,6 +1538,27 @@ plus full host. Then require frame 3525 slot `0x00ffa3c0` record `0x0012d488`
 with unchanged RNG and finish the complete route-reachable class-`0x1f`
 program family before its body-boundary Target/scene/Emulator/WGC ceremony.
 
+### Pause handoff addendum: source stage-progress program mapped
+
+Read-only accepted-evidence inspection closes the previously missing source
+provenance without a new capture. Predator Button1 routine `0x024060` loads
+D0=3 at `0x024094` and calls `0x0179e2` at `0x024096`. When
+`a5+0x01b0:u8 == 0`, the helper adds D0 to `a5+0x0226:u16`, derives a
+single carry from threshold 8, masks the accumulator with 7, adds the carry to
+`a5+0x01ea:s16`, applies the signed zero/31 domain clamp and 5-bit mask, then
+the Coffee Shop 8..16 route bounds. The accepted byte-identical route A/B
+ledgers show Coffee Shop calls at frames 2252, 2342, and 2432 progressing
+`0->3`, `3->6`, and `6->9->1`; the third call changes stage 8 to 9. The
+source stage setup at frame 2072 remains 8.
+
+This is mapping only: Oracle/SPEC/native artifacts and lane status are
+unchanged. Resume by amending the existing Predator weapon contract and
+SPEC-02 fixture for the complete route-reachable helper program, generating
+its native table/state, binding its source action-entry scheduler phase, and
+adding wrong-delta, wrong-threshold, and wrong-timing mutations. No direct
+stage-9 assignment, initialization change, frame/slot exception, or bounded
+Oracle recapture is justified by the currently accepted evidence.
+
 ## Next eligible cards
 
 - `QA-13-ROUND1-END-TO-END-DIFFERENTIAL` after the complete stable Round 2
