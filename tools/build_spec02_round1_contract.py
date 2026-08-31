@@ -1418,11 +1418,13 @@ def validate(contract: dict[str, object], fixtures: dict[str, object],
     weapon_contract = fixtures["authority_data"]["player"][
         "weapon_projectile_resource"]["implementation_contract"]
     weapon_source_input = weapon_contract["source_input"]
+    weapon_action = weapon_contract["sufficient_action"]
     stage_progress = weapon_contract["sufficient_action"][
         "source_stage_progress"]
     require(weapon_source_input["physical_to_action_visible_frames_u8"] == 2 and
             weapon_source_input["native_input_pipeline_updates_u8"] == 1 and
             weapon_source_input["action_dispatch_delay_updates_u8"] == 1 and
+            weapon_action["parent_allocation_tick"] == 1 and
             stage_progress["classification"] ==
                 "SOURCE_CLOSED_IMPLEMENTATION_FIELDS" and
             stage_progress["spec_executable"] is True and

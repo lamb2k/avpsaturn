@@ -1716,6 +1716,28 @@ before body-boundary lanes. No new Oracle capture is required unless the
 accepted evidence proves insufficient. Focused/full host remains intentionally
 RED, return 116; Target, census, Emulator, and WGC remain deferred.
 
+### Paused parent-allocation timing correction (2026-08-31)
+
+The accepted parent chronology is now executable through the existing Oracle,
+SPEC-02, generated-header, native-table, and mutation pipeline. Parent
+allocation is tick 1; Button1 dispatch remains delayed one update and child
+collision registration remains next-invocation. Oracle passes 57 mutations,
+SPEC-02 passes 164 mutations, the generated header is current, and the focused
+host lane rejects a real tick-2 deferral. Contract SHA is
+`8460d848dbe75564bbea988a585e44e7261f9799e9464f98f86b19ba1fad56de`;
+fixture SHA is
+`7d85d8c85f8b48ba1713acd49e578382c0226f13cd42abd34adea5fc40c7ffe5`.
+
+The full host differential now passes the parent/child, frame-2306 collision,
+frame-2307 impact/HIT, frame-2377 RNG ownership, frame-2416 release, and natural
+frame-2511 recurring-allocation chain. It advances to return 117 at source
+frame 2680: source enters recurring-controller substate `0x0200`, snapshots
+progress 1, and sets camera bound 832 while native still sees the prior camera
+sample 830 and remains in substate `0x0000` with bound 640. The next body is the
+complete source controller program and its scheduler-visible camera sample,
+not a frame exception. Target was attempted but stopped at the VDP1
+actor-working-set budget guard; Emulator, census, and WGC remain unclaimed.
+
 ## Next eligible cards
 
 - `QA-13-ROUND1-END-TO-END-DIFFERENTIAL` after the complete stable Round 2

@@ -1286,7 +1286,7 @@ implementation_contract = {
         "recharge_countdown_after_entry_u8": 12,
         "player_position_and_facing_latched": True, "rng_calls": [],
         "resource_debit_tick": 1,
-        "parent_allocation_tick": 2,
+        "parent_allocation_tick": 1,
         "source_stage_progress": source_stage_progress,
         "entry_projection": {
             "entry_rule": "write action/substate 0x0c00 while preserving the current animation record, assembly, timer, branch, and collision selectors; bind the selected 0x0c02 record on the following player update",

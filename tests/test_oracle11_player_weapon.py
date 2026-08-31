@@ -68,7 +68,7 @@ def validate(data):
     assert action["recharge_countdown_after_entry_u8"] == 12
     assert action["player_position_and_facing_latched"] is True
     assert action["resource_debit_tick"] == 1
-    assert action["parent_allocation_tick"] == 2
+    assert action["parent_allocation_tick"] == 1
     assert action["rng_calls"] == []
     stage_progress = action["source_stage_progress"]
     assert stage_progress["classification"] == \
@@ -470,7 +470,7 @@ for path, value, label in [
     (("implementation_contract", "record4_parent_class0", "initialization", "presentation_records", 7, "animation_record"), "0x0002fba8", "missing terminal presentation"),
     (("implementation_contract", "source_input", "native_input_pipeline_updates_u8"), 0, "missing source input pipeline"),
     (("implementation_contract", "source_input", "action_dispatch_delay_updates_u8"), 0, "premature source action dispatch"),
-    (("implementation_contract", "sufficient_action", "parent_allocation_tick"), 0, "premature parent allocation"),
+    (("implementation_contract", "sufficient_action", "parent_allocation_tick"), 2, "deferred parent allocation"),
     (("implementation_contract", "sufficient_action", "source_stage_progress", "caller", "delta_u16"), 2, "wrong stage-progress delta"),
     (("implementation_contract", "sufficient_action", "source_stage_progress", "helper", "progress_threshold_u16"), 7, "wrong stage-progress threshold"),
     (("implementation_contract", "sufficient_action", "source_stage_progress", "coffee_shop_calls", 2, "source_frame_u16"), 2433, "late stage-progress invocation"),

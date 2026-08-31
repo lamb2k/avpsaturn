@@ -1188,10 +1188,9 @@ int main(void)
             weapon_runtime.player_weapon_presentation_selector != 5u ||
             weapon_runtime.player_weapon_resource_debits != 1u ||
             weapon_runtime.player_resource != 24u ||
-            weapon_runtime.player_weapon_allocations != 0u ||
-            !avsp_round1_step_player(&weapon_runtime, 0u, 0) ||
             weapon_runtime.player_weapon_attempts_total != 1u ||
-            weapon_runtime.player_weapon_allocations != 1u)
+            weapon_runtime.player_weapon_allocations != 1u ||
+            !avsp_round1_step_player(&weapon_runtime, 0u, 0))
             return 27;
         while (weapon_runtime.player_weapon_active)
             if (!avsp_round1_step_player(&weapon_runtime,

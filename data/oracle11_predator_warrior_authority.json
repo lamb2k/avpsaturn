@@ -7238,7 +7238,7 @@
           "effect_allocation": {
             "accepted_auxiliary_contract": {
               "artifact": "data/oracle11_round1_auxiliary_authority.json",
-              "artifact_sha256": "fda7c53a4d4306f4f50f688e9f76e185cb13d41de8373d0e608df11154e92252",
+              "artifact_sha256": "fc0367db214b1dc09539fb1a671f6e5ddd3780f8ae526cd854c0240f1714a014",
               "dispatch": "0x08f080",
               "presentation_records": [
                 {
@@ -7561,7 +7561,7 @@
           }
         },
         "resource_and_projectile_authority": "data/oracle11_predator_weapon_projectile_resource.json",
-        "resource_artifact_sha256": "d9044001a144396573d7eac94ea12a345a20588c0537d9bd2de6438512c7ec3e",
+        "resource_artifact_sha256": "e9daf799c432a055cbae6ebe0c2e7cca4ec07aff3b197bf4b406f6767ed28f77",
         "resource_status": "SOURCE_CLOSED",
         "spawn_branch": "0x023858",
         "writer": "0x023860"
@@ -18090,6 +18090,58 @@
       "empty_fallback": {
         "cleanup_tick": 17,
         "damaging_record4_count": 0,
+        "entry_projection": {
+          "active_replacement": {
+            "action_u16": "0x1a02",
+            "animation_branch_s16": -32768,
+            "animation_record": "0x0015fcfc",
+            "animation_timer_u16": 4095,
+            "assembly": "0x00161772",
+            "current_attack_selector_u8": 0,
+            "current_hurt_selector_u8": 0,
+            "state_u16": "0x0200",
+            "substate_u16": "0x1a02",
+            "visible_update_offset_u8": 1
+          },
+          "classification": "SOURCE_CLOSED_IMPLEMENTATION_FIELDS",
+          "coffee_shop_witnesses": [
+            {
+              "active_frame_u16": 2523,
+              "entry_animation_record": "0x0015f1f4",
+              "entry_frame_u16": 2522,
+              "prior_animation_record": "0x0015f1f4",
+              "prior_frame_u16": 2521
+            },
+            {
+              "active_frame_u16": 2613,
+              "entry_animation_record": "0x0015f228",
+              "entry_frame_u16": 2612,
+              "prior_animation_record": "0x0015f228",
+              "prior_frame_u16": 2611
+            }
+          ],
+          "entry_preserves": [
+            "animation_record:u32",
+            "assembly:u32",
+            "animation_timer:u16",
+            "animation_branch:s16",
+            "current_hurt_selector:u8",
+            "current_attack_selector:u8"
+          ],
+          "entry_rule": "write state 0x0200 and action/substate 0x1a00 while preserving the current animation record, assembly, timer, branch, and current collision selectors; bind the 0x1a02 active record on the following player update",
+          "entry_writes": {
+            "action_u16": "0x1a00",
+            "state_u16": "0x0200",
+            "substate_u16": "0x1a00"
+          },
+          "mutation_controls": [
+            "reject fixed idle presentation on a walking entry",
+            "reject binding the active presentation on the entry update",
+            "reject delaying the active presentation past the next update"
+          ],
+          "rng_calls": [],
+          "spec_executable": true
+        },
         "presentation_timeline": [
           {
             "action_u16": 6656,
@@ -24874,7 +24926,7 @@
           ]
         },
         "entry_tick": 0,
-        "parent_allocation_tick": 2,
+        "parent_allocation_tick": 1,
         "player_position_and_facing_latched": true,
         "presentation_selector_contract": {
           "animation_table_u32": "0x0015e32c",

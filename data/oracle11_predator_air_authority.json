@@ -7216,7 +7216,7 @@
         "effect_allocation": {
           "accepted_auxiliary_contract": {
             "artifact": "data/oracle11_round1_auxiliary_authority.json",
-            "artifact_sha256": "fda7c53a4d4306f4f50f688e9f76e185cb13d41de8373d0e608df11154e92252",
+            "artifact_sha256": "fc0367db214b1dc09539fb1a671f6e5ddd3780f8ae526cd854c0240f1714a014",
             "dispatch": "0x08f080",
             "presentation_records": [
               {
@@ -7539,7 +7539,7 @@
         }
       },
       "resource_and_projectile_authority": "data/oracle11_predator_weapon_projectile_resource.json",
-      "resource_artifact_sha256": "d9044001a144396573d7eac94ea12a345a20588c0537d9bd2de6438512c7ec3e",
+      "resource_artifact_sha256": "e9daf799c432a055cbae6ebe0c2e7cca4ec07aff3b197bf4b406f6767ed28f77",
       "resource_status": "SOURCE_CLOSED",
       "spawn_branch": "0x023858",
       "writer": "0x023860"

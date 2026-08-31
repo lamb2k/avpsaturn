@@ -4735,6 +4735,7 @@ static int avsp_round1_player_weapon_contract_valid(void)
         avsp_round1_player_weapon.return_action != 2u ||
         avsp_round1_player_weapon.empty_timer_initial != 16u ||
         avsp_round1_player_weapon.action_dispatch_delay_updates != 1u ||
+        avsp_round1_player_weapon.parent_allocation_tick != 1u ||
         avsp_round1_player_weapon.resource_capacity != 64u ||
         avsp_round1_player_weapon.resource_debit != 40u ||
         avsp_round1_player_weapon.recharge_after_success != 12u ||
@@ -10058,7 +10059,8 @@ static int avsp_round1_step_player_weapon(AvspRound1Runtime *runtime,
                 avsp_round1_player_weapon.recharge_after_success;
             ++runtime->player_weapon_resource_debits;
         }
-        if (runtime->player_weapon_tick == 2u)
+        if (runtime->player_weapon_tick ==
+                avsp_round1_player_weapon.parent_allocation_tick)
         {
             ++runtime->player_weapon_attempts_total;
             avsp_round1_allocate_player_weapon_projectile(runtime);

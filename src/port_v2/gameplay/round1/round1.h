@@ -6,7 +6,7 @@
 #include "../../combat/hit_ko/hit_ko.h"
 
 #define AVSP_ROUND1_SPEC02_SHA256 \
-"59ff3a9922e0b65617bf3cfeb0cb460134491a6d5f97ca8f163d12e11f4e8279"
+"8460d848dbe75564bbea988a585e44e7261f9799e9464f98f86b19ba1fad56de"
 #define AVSP_ROUND1_CANARY_HEAD 0x52314548UL
 #define AVSP_ROUND1_CANARY_TAIL 0x52314554UL
 #define AVSP_ROUND1_ROUTE_ENTRY_STATE 2
@@ -1372,6 +1372,7 @@ typedef struct
     unsigned short return_action;
     unsigned char empty_timer_initial;
     unsigned char action_dispatch_delay_updates;
+    unsigned char parent_allocation_tick;
     unsigned char resource_capacity;
     unsigned char resource_debit;
     unsigned char recharge_after_success;

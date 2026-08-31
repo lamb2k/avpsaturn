@@ -9,7 +9,7 @@ from pathlib import Path
 
 ROOT = Path(__file__).resolve().parents[3]
 SPEC = ROOT / "data/spec02_round1_executable_contract.json"
-EXPECTED = "59ff3a9922e0b65617bf3cfeb0cb460134491a6d5f97ca8f163d12e11f4e8279"
+EXPECTED = "8460d848dbe75564bbea988a585e44e7261f9799e9464f98f86b19ba1fad56de"
 assert hashlib.sha256(SPEC.read_bytes()).hexdigest() == EXPECTED
 assert json.loads(SPEC.read_text())["status"] == "ACCEPTED"
 source = (ROOT / "src/port_v2/gameplay/round1/round1.c").read_text()
@@ -25,7 +25,8 @@ def wsl(path):
                            str(path).replace("\\", "/")],
                           check=True, capture_output=True, text=True).stdout.strip()
 
-def run(body, header_body, passes, label="baseline", player_body=player_source):
+def run(body, header_body, passes, label="baseline", player_body=player_source,
+        expected_returncode=None):
     with tempfile.TemporaryDirectory(prefix="round1-entry-") as name:
         temp = Path(name)
         linux_output = f"/tmp/{temp.name}-test"
@@ -62,12 +63,20 @@ def run(body, header_body, passes, label="baseline", player_body=player_source):
         result = subprocess.run(["wsl.exe", "-d", "Ubuntu-24.04", "-u", "root",
                                  "--", "bash", "-lc", command],
                                 capture_output=True)
+        if expected_returncode is not None:
+            assert result.returncode == expected_returncode, (
+                f"label={label}\nexpected_returncode={expected_returncode}\n"
+                f"returncode={result.returncode}\n" +
+                result.stdout.decode(errors="replace") +
+                result.stderr.decode(errors="replace"))
+            return
         assert (result.returncode == 0) == passes, (
             f"label={label}\nreturncode={result.returncode}\n" +
             result.stdout.decode(errors="replace") +
             result.stderr.decode(errors="replace"))
 
-run(source, header, True)
+run(source, header, True,
+    expected_returncode=117 if "--weapon-timing-only" in sys.argv else None)
 if "--baseline-only" in sys.argv:
     print("REIMPLEMENT-13 focused baseline: PASS")
     raise SystemExit(0)
@@ -82,7 +91,8 @@ queue_after = """    delayed_direction = runtime->direction_history[AVSP_PW_DIRE
 assert queue_before in player_source
 subset_flags = {"--inner8-only", "--ko-only", "--registration-only",
                 "--locomotion-only", "--generated-walk-only",
-                "--controller-edge-only", "--player-hit-only"}
+                "--controller-edge-only", "--player-hit-only",
+                "--weapon-timing-only"}
 if "--queue-only" in sys.argv or not subset_flags.intersection(sys.argv):
     run(source, header, False, "consume-before-direction-queue-shift",
         player_source.replace(queue_before, queue_after, 1))
@@ -126,6 +136,10 @@ player_hit_mutations = {
     "runtime, &reaction->presentation);",
     "runtime->player_hit_x_velocity =\n                reaction->x_velocity;",
     "runtime->player_hit_x_acceleration =\n                reaction->x_acceleration;",
+}
+weapon_timing_mutations = {
+    "runtime->player_weapon_tick ==\n"
+    "                avsp_round1_player_weapon.parent_allocation_tick",
 }
 for before, after in (
     ("            *value = runtime->camera_x_previous;",
@@ -224,6 +238,10 @@ for before, after in (
      "actor->variant = (unsigned char)(avsp_round1_player_weapon.empty_effect_variant + 1u);"),
     ("runtime->player_weapon_tick ==\n            avsp_round1_player_weapon.empty_effect_allocation_tick",
      "runtime->player_weapon_tick == 0u"),
+    ("runtime->player_weapon_tick ==\n"
+     "                avsp_round1_player_weapon.parent_allocation_tick",
+     "runtime->player_weapon_tick == (unsigned char)(\n"
+     "                avsp_round1_player_weapon.parent_allocation_tick + 1u)"),
     ("avsp_round1_allocate_pool_actor_preserve_position_residue(runtime, 3u);",
      "avsp_round1_allocate_pool_actor(runtime, 3u);"),
     ("actor->y = (short)(actor->y + 4);", "actor->y = (short)(actor->y + 3);"),
@@ -472,10 +490,14 @@ for before, after in (
         continue
     if "--player-hit-only" in sys.argv and before not in player_hit_mutations:
         continue
+    if "--weapon-timing-only" in sys.argv and before not in weapon_timing_mutations:
+        continue
     if "--generated-walk-only" in sys.argv:
         continue
     assert before in source, before
-    run(source.replace(before, after), header, False, before)
+    run(source.replace(before, after), header, False, before,
+        expected_returncode=(27 if "--weapon-timing-only" in sys.argv
+                             else None))
 if "--inner8-only" in sys.argv:
     print("REIMPLEMENT-13 class-0x1f inner-state mutation lane: PASS (8 real mutations)")
     raise SystemExit(0)
@@ -493,6 +515,9 @@ if "--controller-edge-only" in sys.argv:
     raise SystemExit(0)
 if "--player-hit-only" in sys.argv:
     print("REIMPLEMENT-13 Coffee Shop player-HIT program mutation lane: PASS (4 real mutations)")
+    raise SystemExit(0)
+if "--weapon-timing-only" in sys.argv:
+    print("REIMPLEMENT-13 Button1 parent-allocation timing mutation lane: PASS (1 real mutation)")
     raise SystemExit(0)
 generated_walk_mutations = {
     "    { 4u, 0, 0x0015F208UL, 0x00160A02UL, 17u, 0u },",
