@@ -2329,3 +2329,20 @@ remain discriminating. No actor, lifecycle, route/camera, audio, load, release,
 or identity event is orphaned. Evidence artifact SHA-256 is
 `b6bb711eeca20571b06c0cde107960bff46dc475e902708f0f58a0adab563eee`.
 Continue P2 at frame 9005 through the next source boundary in scene order.
+
+### Overnight census segment 9005..9039 checkpoint (2026-08-31)
+
+The second warehouse interwave cluster is census-closed as one 35-frame
+source-owned presentation boundary. The paired semantic SHA-256 is
+`8d59f0a7c1c334c3f9171203d001e3a8d4c1ce53cdca51386b1e4cb54b1dedc5`.
+All frames retain Predator identity. Five continuing lifetimes cover player,
+two class-`0x00/12` enemies, class `0x06/12`, and navigation `0x07/20`; no
+actor spawns, despawns, or HIT/KO transition occurs. The only audio transaction
+is source command `0x024e` and remains causally owned.
+
+All 11 visual signatures are source-closed presentation dependencies with no
+progression ownership. Enemy, navigation, and route-wide controls remain
+discriminating, with zero orphan actor, lifecycle, route/camera, audio, load,
+release, or identity events. Evidence artifact SHA-256 is
+`bf2edfd1377b8f4309d6f329e1765a3dda3540096658d2e8c7c1bbc26e6f0b43`.
+Continue P2 at source frame 9040 through `round1-warehouse-gameplay-2`.

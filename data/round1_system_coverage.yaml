@@ -20405,26 +20405,29 @@
       "data/oracle10_round1_census_extension_6201_6692.json",
       "data/oracle10_round1_census_extension_6693_7438.json",
       "data/oracle10_round1_census_extension_7439_7503.json",
-      "data/oracle10_round1_census_extension_7504_9004.json"
+      "data/oracle10_round1_census_extension_7504_9004.json",
+      "data/oracle10_round1_census_extension_9005_9039.json"
     ],
     "accepted_evidence_sha256": [
       "1eeb385455a62edb0d21bf48790aa7ac34c6a29408b40792197ee0798370d9c0",
       "0cb1e3a8267a4557960705f43a1543283361172415a3d457199901e92455d400",
       "8fdb7c05d4da1b35aa761f78abbbc182d66b1074edd4dc5a1bfe80464b9f3cc9",
       "adb7f0caf3cf538826f8210f1e322b88de5b501000ae995356cd83c0a94f405a",
-      "b6bb711eeca20571b06c0cde107960bff46dc475e902708f0f58a0adab563eee"
+      "b6bb711eeca20571b06c0cde107960bff46dc475e902708f0f58a0adab563eee",
+      "bf2edfd1377b8f4309d6f329e1765a3dda3540096658d2e8c7c1bbc26e6f0b43"
     ],
     "class_type_pairs": 9,
-    "next_source_frame": 9005,
+    "next_source_frame": 9040,
     "orphan_authority_events": 0,
     "paired_semantic_sha256": [
       "4a4a0ab9d4485ca37e15e9bb6e1644748cec11455fb8298f1338d96f2629ee30",
       "d93a3dcd53bf4951d0631bcf0927a6560b399da1bb913414e3de94f212252c2e",
       "00fdcda6ef8e9c8e02190fc6e5892951898570bffc07ae718ddd98ced61595e4",
       "f6c5cfa838a709a8538a0b763d953bdf71bc2c4d1ed8760c125163d399fad691",
-      "976ae53a62b2edc0ab7cb61572e4c01f2c8853b8177ab614bd840c849ced0221"
+      "976ae53a62b2edc0ab7cb61572e4c01f2c8853b8177ab614bd840c849ced0221",
+      "8d59f0a7c1c334c3f9171203d001e3a8d4c1ce53cdca51386b1e4cb54b1dedc5"
     ],
-    "source_frame_range": [5567, 9004],
+    "source_frame_range": [5567, 9039],
     "status": "CENSUS_SEGMENT_COMPLETE"
   },
   "route_wide_perturbation": {
