@@ -2346,3 +2346,20 @@ discriminating, with zero orphan actor, lifecycle, route/camera, audio, load,
 release, or identity events. Evidence artifact SHA-256 is
 `bf2edfd1377b8f4309d6f329e1765a3dda3540096658d2e8c7c1bbc26e6f0b43`.
 Continue P2 at source frame 9040 through `round1-warehouse-gameplay-2`.
+
+### Overnight census segment 9040..9940 checkpoint (2026-08-31)
+
+The next warehouse gameplay body is census-closed across 901 paired frames at
+semantic SHA-256
+`c6a06d1bf0278d29374081b9e90c09fc343198d5873aa563c344b83d8919b4a3`.
+Predator identity remains exact throughout. Thirteen lifetimes cover player,
+two class-`0x00/12` enemies, class `0x06/12`, navigation `0x07/20`, and eight
+source-owned `0x3d/24` effects.
+
+The body binds eight spawn edges, ten despawn edges, 29 HIT/KO transitions,
+and 73 audio transactions across 23 commands. It contains no route or load
+boundary and overlaps three accepted source camera runs. Enemy, auxiliary,
+navigation, route-wide, and presentation controls remain discriminating, with
+zero orphan authority event. Evidence artifact SHA-256 is
+`4572f355ccefe66cc0bc6ba2ead29ec5c65911a2dca28ef0f7b27fcdb99b1566`.
+Continue P2 at source frame 9941 through the next source boundary.

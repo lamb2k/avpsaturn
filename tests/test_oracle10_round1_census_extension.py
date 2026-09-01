@@ -20,6 +20,9 @@ WAREHOUSE2 = json.loads((ROOT / "data/oracle10_round1_census_extension_7504_9004
                         .read_text(encoding="ascii"))
 INTERWAVE2 = json.loads((ROOT / "data/oracle10_round1_census_extension_9005_9039.json")
                         .read_text(encoding="ascii"))
+WAREHOUSE_GAMEPLAY2 = json.loads(
+    (ROOT / "data/oracle10_round1_census_extension_9040_9940.json")
+    .read_text(encoding="ascii"))
 GENERATOR = (ROOT / "tools/analyze_oracle10_round1_census_extension.py") \
     .read_text(encoding="utf-8")
 
@@ -442,5 +445,75 @@ for label, path, value in (
         continue
     raise AssertionError(f"Interwave 2 census mutation accepted: {label}")
 
-print("ORACLE-10 Round 1 census extension 5567..9039: PASS "
-      "(38 mutations rejected)")
+
+def validate_warehouse_gameplay2(report: dict[str, object]) -> None:
+    ceremony = report["paired_capture_ceremony"]
+    semantics = ceremony["segment_semantics"]
+    census = report["scene_census_delta"]
+    controls = report["targeted_counterfactuals"]
+    assert report["status"] == "CENSUS_SEGMENT_COMPLETE"
+    assert report["segment"]["source_frame_range"] == [9040, 9940]
+    assert report["segment"]["scene_ids"] == ["round1-warehouse-gameplay-2"]
+    assert ceremony["raw_capture_files_byte_identical"] is True
+    assert ceremony["paired_route_ledgers_byte_identical"] is True
+    assert semantics["frame_count"] == 901
+    assert semantics["canonical_semantic_sha256"] == \
+        "c6a06d1bf0278d29374081b9e90c09fc343198d5873aa563c344b83d8919b4a3"
+    assert semantics["player_active_frames"] == 901
+    assert semantics["character_mismatch_frames"] == []
+    assert semantics["identity_mismatch_frames"] == []
+    assert semantics["per_frame_character_identity_gate"] is True
+    assert [(row["class"], row["type"], row["instance_count"])
+            for row in census["class_type_inventory"]] == [
+                ("0x00", 0, 1), ("0x00", 12, 2),
+                ("0x06", 12, 1), ("0x07", 20, 1),
+                ("0x3d", 24, 8)]
+    assert len(census["actor_lifetimes"]) == 13
+    assert len(census["spawn_edges"]) == 8
+    assert len(census["despawn_edges"]) == 10
+    assert len(census["hit_ko_transitions"]) == 29
+    assert census["audio"]["handler_transaction_count"] == 73
+    assert len(census["audio"]["command_counts"]) == 23
+    assert len(census["audio"]["source_owned_trigger_groups_first_seen"]) == 2
+    assert len(census["audio"]["player_origin_edges"]) == 3
+    assert census["audio"]["orphan_handler_transactions"] == 0
+    assert census["audio"]["orphan_trigger_groups"] == 0
+    assert census["load_release_boundaries"] == []
+    assert report["route_authority_extension"]["route_state_edges"] == []
+    assert len(report["route_authority_extension"]["camera_lock_runs"]) == 3
+    assert len(controls["presentation_boundaries"]) == 1
+    assert controls["presentation_boundaries"][0]["owns_progression"] is False
+    assert len(controls["enemy_class_controls"]) == 2
+    assert len(controls["auxiliary_class_controls"]) == 2
+    assert all(value == 0 for value in report["coverage"].values())
+    assert report["physical_saturn"] == "UNRUN"
+
+
+validate_warehouse_gameplay2(WAREHOUSE_GAMEPLAY2)
+for label, path, value in (
+        ("warehouse gameplay2 semantic identity",
+         ("paired_capture_ceremony", "segment_semantics",
+          "canonical_semantic_sha256"), "0" * 64),
+        ("warehouse gameplay2 identity",
+         ("paired_capture_ceremony", "segment_semantics",
+          "character_mismatch_frames"), [9500]),
+        ("warehouse gameplay2 missing lifecycle",
+         ("scene_census_delta", "spawn_edges"), []),
+        ("warehouse gameplay2 missing controls",
+         ("targeted_counterfactuals", "enemy_class_controls"), []),
+        ("warehouse gameplay2 orphan camera",
+         ("coverage", "unowned_route_camera_events"), 1),
+        ("warehouse gameplay2 physical claim", ("physical_saturn",), "PASS")):
+    mutant = copy.deepcopy(WAREHOUSE_GAMEPLAY2)
+    target = mutant
+    for key in path[:-1]:
+        target = target[key]
+    target[path[-1]] = value
+    try:
+        validate_warehouse_gameplay2(mutant)
+    except AssertionError:
+        continue
+    raise AssertionError(f"Warehouse gameplay 2 census mutation accepted: {label}")
+
+print("ORACLE-10 Round 1 census extension 5567..9940: PASS "
+      "(44 mutations rejected)")

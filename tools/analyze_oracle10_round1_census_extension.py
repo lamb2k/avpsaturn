@@ -47,6 +47,11 @@ PROFILES = {
         "id": "round1-warehouse-second-interwave-presentation-cluster",
         "output": "oracle10_round1_census_extension_9005_9039.json",
     },
+    "warehouse_gameplay_2": {
+        "first": 9040, "last": 9940,
+        "id": "round1-warehouse-second-gameplay-body",
+        "output": "oracle10_round1_census_extension_9040_9940.json",
+    },
 }
 WORKRAM_BASE = 0xFF0000
 PLAYER = 0xFF8380
