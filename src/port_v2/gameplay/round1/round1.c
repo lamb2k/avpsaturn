@@ -2424,6 +2424,7 @@ static int avsp_round1_step_recurring_controller(AvspRound1Runtime *runtime)
             encounter->source_intro_timer =
                 avsp_round1_coffee_exit.withdrawal_timer;
             encounter->source_progress = 0u;
+            runtime->coffee_scene_active_flag = 0u;
             return 1;
         }
     }
@@ -2578,13 +2579,8 @@ static void avsp_round1_class1f_derive_direction(AvspRound1ActorCore *actor)
 static int avsp_round1_step_class1f_action_zero(
     AvspRound1Runtime *runtime, AvspRound1ActorCore *actor)
 {
-    AvspRound1ActorCore *scene_gate_actor;
     int selector;
-    scene_gate_actor = avsp_round1_find_pool_source_actor(
-        runtime, 0u, 0x9a00u);
-    if (runtime->entry.exit_started &&
-        (scene_gate_actor == 0 ||
-         (scene_gate_actor->animation_record & 0xffff0000UL) == 0UL))
+    if (runtime->coffee_scene_active_flag == 0u)
     {
         if (actor->source_player_collision_latched != 0u)
             return 1;

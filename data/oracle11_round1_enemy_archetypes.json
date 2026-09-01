@@ -37965,7 +37965,7 @@
         "classification": "SOURCE_CLOSED_IMPLEMENTATION_FIELDS",
         "current_dispatch": {
           "action_0_branch_order": [
-            "if s16(0xff9a1c)==0 enter source special state 0x0a",
+            "if s16(0xff1a1c)==0 enter source special state 0x0a",
             "if an active P1 is within x [-32,+32] and z [-12,+12] and P1+0x96==0 enter action 0x04",
             "if a5_u8 != facing_u8 enter action 0x0a and toggle facing",
             "if a3_u8 == style85_u8 enter action 0x02; a6_u8!=0 promotes it to action 0x16 and b0_u8=2",
@@ -38079,6 +38079,26 @@
             "0x0200:1c00",
             "0x0200:1e00"
           ],
+          "scene_active_flag": {
+            "accepted_evidence": [
+              "data/oracle11_round1_auxiliary_authority.json",
+              ".deps/mame/oracle11_coffee_player_selector_a/coffee_shop_component20_global.tsv"
+            ],
+            "address_and_type": "0xff1a1c:u16",
+            "owner": "record32 class-0x01 recurring controller",
+            "write_chronology": [
+              {
+                "source_frame": 2072,
+                "value": 1,
+                "writer": "0x028814"
+              },
+              {
+                "source_frame": 5151,
+                "value": 0,
+                "writer": "0x028a02"
+              }
+            ]
+          },
           "source_windows": {
             "0x0607b8": {
               "first": "0x0607b0",

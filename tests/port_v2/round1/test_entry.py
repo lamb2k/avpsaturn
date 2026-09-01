@@ -9,7 +9,7 @@ from pathlib import Path
 
 ROOT = Path(__file__).resolve().parents[3]
 SPEC = ROOT / "data/spec02_round1_executable_contract.json"
-EXPECTED = "7cdb093dfeca862d0e5f2cc7e4c956ecd8664eff568b88c43e84e129481a3e4b"
+EXPECTED = "d5de94cd368126c1315639e443ac6c929c4c7037140f84c1ae7d9083bf7f3bb3"
 assert hashlib.sha256(SPEC.read_bytes()).hexdigest() == EXPECTED
 assert json.loads(SPEC.read_text())["status"] == "ACCEPTED"
 source = (ROOT / "src/port_v2/gameplay/round1/round1.c").read_text()
@@ -107,6 +107,12 @@ scene_checkpoint_body = test_source.replace(
     "            if (source_frame == 5523u)\n"
     "                return 0;\n",
     1)
+class1f_state0_checkpoint_body = test_source.replace(
+    scene_checkpoint_marker,
+    scene_checkpoint_marker +
+    "            if (source_frame == 5551u)\n"
+    "                return 0;\n",
+    1)
 scene_checkpoint_flags = {
     "--controller-edge-only", "--weapon-timing-only",
     "--special-input-only", "--hit-interaction-only", "--queue-only",
@@ -115,6 +121,8 @@ scene_checkpoint_flags = {
 
 run(source, header, True,
     test_body=(jump_test_body if "--jump-only" in sys.argv else
+               class1f_state0_checkpoint_body
+               if "--class1f-state0-only" in sys.argv else
                scene_checkpoint_body
                if scene_checkpoint_flags.intersection(sys.argv) else None))
 if "--baseline-only" in sys.argv:
@@ -303,9 +311,9 @@ hit_interaction_mutations = {
     "        runtime->player_weapon_dispatch_delay = 0u;",
 }
 class1f_state0_mutations = {
-    "    if (runtime->entry.exit_started &&\n"
-    "        (scene_gate_actor == 0 ||\n"
-    "         (scene_gate_actor->animation_record & 0xffff0000UL) == 0UL))",
+    "    if (runtime->coffee_scene_active_flag == 0u)",
+    "            runtime->coffee_scene_active_flag = 0u;\n"
+    "            return 1;",
 }
 class1f_action16_mutations = {
     "actor = avsp_round1_allocate_pool_actor_preserve_position_fraction(\n"
@@ -314,14 +322,12 @@ class1f_action16_mutations = {
     "        actor->source_transition_latch_ae != 0u)",
 }
 for before, after in (
-    ("    if (runtime->entry.exit_started &&\n"
-     "        (scene_gate_actor == 0 ||\n"
-     "         (scene_gate_actor->animation_record & 0xffff0000UL) == 0UL))",
-     "    if (runtime->route_state == 0)\n"
-     "        return 0;\n"
-     "    if (runtime->entry.exit_started &&\n"
-     "        (scene_gate_actor == 0 ||\n"
-     "         (scene_gate_actor->animation_record & 0xffff0000UL) == 0UL))"),
+    ("    if (runtime->coffee_scene_active_flag == 0u)",
+     "    if (runtime->coffee_scene_active_flag != 0u)"),
+    ("            runtime->coffee_scene_active_flag = 0u;\n"
+     "            return 1;",
+     "            /* source scene-active clear suppressed */\n"
+     "            return 1;"),
     ("runtime->player_hit_interaction_pending = 1u;",
      "runtime->player_hit_interaction_pending = 0u;"),
     ("effect->actor_class =\n"
@@ -935,14 +941,16 @@ for before, after in (
         continue
     assert before in source, before
     run(source.replace(before, after), header, False, before,
-        test_body=(jump_test_body if "--jump-only" in sys.argv else None),
+        test_body=(jump_test_body if "--jump-only" in sys.argv else
+                   class1f_state0_checkpoint_body
+                   if "--class1f-state0-only" in sys.argv else None),
         expected_returncode=(94 if "--action0c-only" in sys.argv
                              else None))
 if "--inner8-only" in sys.argv:
     print("REIMPLEMENT-13 class-0x1f inner-state mutation lane: PASS (15 real mutations)")
     raise SystemExit(0)
 if "--class1f-state0-only" in sys.argv:
-    print("REIMPLEMENT-13 class-0x1f state-0 mutation lane: PASS (1 real mutation)")
+    print("REIMPLEMENT-13 class-0x1f state-0 mutation lane: PASS (2 real mutations)")
     raise SystemExit(0)
 if "--class1f-action16-only" in sys.argv:
     print("REIMPLEMENT-13 class-0x1f action-0x16/fixed-slot lifecycle "

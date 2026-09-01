@@ -1,6 +1,6 @@
 # REIMPLEMENT-13 active agent handoff
 
-Resume the persistent AvP Goal on `codex/avp-playable-loop-pivot`;
+Workflow pivot / Preserved evidence work: Resume the AvP salvage Goal from `SALVAGE-00-OLD-BUILD-BASELINE` and `USER-01-PLAYER-BASELINE-REVIEW` on `codex/avp-playable-loop-pivot`; evidence candidate `597f4ed517d4e715d814ff841bd00d3977803f85`.
 `REIMPLEMENT-13-SOURCE-CLOSED-ROUND1` remains active. Candidate
 `d04a65a2253175c6e820140feefc35419e2cca07` stays frozen until Coffee Shop is
 zero-gap. Preserve USER-09 `CHANGES_REQUESTED`, SALVAGE-08 inactive, physical
@@ -13,38 +13,37 @@ Do not create another Goal, roadmap, workflow, branch, task hierarchy,
 coverage system, or writer.
 
 ## Closed checkpoints
-
 P2 is closed through the stable Round 2 seam at frame 15193 and P3 is complete.
 Preserve their evidence, the memory plan, CPU-mediated cart-to-VDP1 rule and all
 accepted presentation/gameplay locks.
 
-The frame-5523 class-0x1f state-0 body is closed through fixed-slot gate
-`0xff9a1c`; all reachable action-0/action-2 branches and the 4051/4052 field
-witnesses remain locked. The 47,316-byte archive SHA is `2b1946c6...09df`.
+The player fixed-point and airborne Button1 presentation programs remain
+closed. Class-`0x1f` action-`0x16`, fixed-slot lifecycle, all five player-HIT
+reactions, contextual Button2, both normalized witnesses and the frame-5523
+state-0 witness remain locked.
 
-Owner delivery 2 package `da2ffb34...8746`, semantic/animated-burst controls
-and two fresh interpreter savestate legs pass. The transition visual remains
-BLOCKED after the bounded three attempts: helper timeout repaired, then targets
-3470/300 seconds and 3400/600 seconds were not reached. Do not retry without an
-owner ruling on the capture boundary. Video 4 / Sound 1 / core 3 are restored;
-no emulator process remains.
+The stale state-0 fixture operand is corrected: decoded `0x0607b8` reads global
+`0xff1a1c:u16`, not `0xff9a1c`. The record-32 class-`0x01` recurring controller
+owns set writer `0x028814` at frame 2072 and clear writer `0x028a02` at 5151.
+Native owns the same clear and all Coffee-Shop-reachable class-`0x1f` action-0
+instances consume it. Frame 5208 slot `0x00ffa240` and the action tail through
+the final source class-`0x1f` lifetime at 5550 now match; two mutations pass.
+
+Oracle enemy tests reject 104 mutations, SPEC-02 rejects 190, generated data is
+current at contract SHA `d5de94cd...3bb3`. Target is 377,248 bytes at
+`75bbd4cd...a56d`, BSS `0x060b32b0`; protected files are untouched. Scene gaps
+improve from 188/1/0/675/2/93/0/279/0 to 188/1/0/671/1/93/0/279/0; retained
+gameplay authority remains zero. Next attacker RED advances 5208 -> 5459.
+
+Owner delivery 2 semantic/framebuffer/savestate controls pass. The transition
+visual remains BLOCKED after its bounded three attempts. Do not retry without
+an owner ruling. Video 4 / Sound 1 / SH2 core 3 are restored; physical UNRUN.
 
 ## Exact next experiment
-
-Class-`0x1f` action-`0x16` and fixed-slot lifecycle are closed. Frame 3606 slot
-`0x00ffa300` preserves source residue and actor+`0xae` owns retry; three
-mutations pass and this slot has no later divergence.
-
-Player HIT chronology is closed across all five reactions; the first 28-frame
-sequence and 14 mutations pass. Contextual Button2 at 3411/3412/3413 remains
-closed with carried entry presentation, command `0x0036` and motion hold.
-Player fixed-point closure remains locked. Airborne Button1 presentation is
-now exact across source frames 4697-4722: 26 scheduler rows match, entry retains
-timer 2, records advance at 4699/4701/4703/4705 and landing enters `0x0404` at
-4722. The timing lane rejects 13 mutations. Target is 377,312 bytes at
-`af589cde...e6fd3`, BSS `0x060b32f0`; raw gaps remain unchanged.
-
-Next RED is frame 5208 class-`0x1f` slot `0x00ffa240`: source enters
-`0x020a:0x0000`, record `0x0012d32c`; native remains `0x0200:0x1600`.
-Close every Coffee-Shop-reachable branch of its owning state-`0x020a` program.
-Keep candidate frozen; never commit captured artifacts or protected files.
+The earliest whole-scene RED is source frame 5452: close the complete Coffee
+Shop clear-to-exit player and scene lifecycle through the owning exit-controller
+and route teardown, including the source frame-5551 scene population release.
+Use accepted SPEC-02 only, then focused mutations, Target and whole-scene
+differential. Do not implement the native-only stale actor state seen after the
+source population has already been released. Keep candidate frozen and continue
+scene-order automatically.

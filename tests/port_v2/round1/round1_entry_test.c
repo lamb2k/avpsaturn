@@ -5024,6 +5024,64 @@ int main(void)
                         scene_runtime.rng_seed);
                     return 94;
                 }
+                /* The post-update state for frame 5207 is the source row at 5208. */
+                if (source_frame == 5207u)
+                {
+                    const AvspRound1ActorCore *scene_exit_actor = 0;
+                    for (actor_index = 0u;
+                         actor_index < scene_runtime.pools[0].capacity;
+                         ++actor_index)
+                    {
+                        const AvspRound1ActorCore *candidate =
+                            &scene_runtime.pools[0].records[actor_index];
+                        if (candidate->source_slot == 0x00ffa240UL)
+                        {
+                            scene_exit_actor = candidate;
+                            break;
+                        }
+                    }
+                    if (scene_runtime.coffee_scene_active_flag != 0u ||
+                        scene_exit_actor == 0 ||
+                        scene_exit_actor->active == 0u ||
+                        scene_exit_actor->state != 0x020au ||
+                        scene_exit_actor->substate != 0u ||
+                        scene_exit_actor->animation_record != 0x0012e8ecUL ||
+                        scene_exit_actor->animation_timer != 9u ||
+                        scene_exit_actor->animation_branch != 0 ||
+                        scene_exit_actor->facing != 1u ||
+                        scene_exit_actor->health != 87 ||
+                        scene_exit_actor->source_x_fp != 0x042f9200UL ||
+                        scene_exit_actor->source_y_fp != 0x0130b300UL ||
+                        scene_exit_actor->z != 304)
+                    {
+                        fprintf(stderr,
+                            "Coffee Shop class1f scene-active transition failed source=%u flag=%u active=%u state=%04x/%04x anim=%08lx timer=%u branch=%d facing=%u health=%d fp=%08lx/%08lx z=%d\n",
+                            source_frame,
+                            scene_runtime.coffee_scene_active_flag,
+                            scene_exit_actor != 0 ?
+                                scene_exit_actor->active : 0u,
+                            scene_exit_actor != 0 ?
+                                scene_exit_actor->state : 0u,
+                            scene_exit_actor != 0 ?
+                                scene_exit_actor->substate : 0u,
+                            scene_exit_actor != 0 ?
+                                scene_exit_actor->animation_record : 0UL,
+                            scene_exit_actor != 0 ?
+                                scene_exit_actor->animation_timer : 0u,
+                            scene_exit_actor != 0 ?
+                                scene_exit_actor->animation_branch : 0,
+                            scene_exit_actor != 0 ?
+                                scene_exit_actor->facing : 0u,
+                            scene_exit_actor != 0 ?
+                                scene_exit_actor->health : 0,
+                            scene_exit_actor != 0 ?
+                                (unsigned long)scene_exit_actor->source_x_fp : 0UL,
+                            scene_exit_actor != 0 ?
+                                (unsigned long)scene_exit_actor->source_y_fp : 0UL,
+                            scene_exit_actor != 0 ? scene_exit_actor->z : 0);
+                        return 134;
+                    }
+                }
                 if (source_frame == 5523u)
                 {
                     const AvspRound1ActorCore *interrupted_actor = 0;

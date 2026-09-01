@@ -1422,7 +1422,7 @@ def validate_report(report: dict[str, object]) -> None:
             "source_native_hit_sequence_frames": 28,
             "next_player_divergence_frame_u16": 5452,
             "authored_delay_forbidden": True,
-            "next_attacker_divergence_frame_u16": 5208}:
+            "next_attacker_divergence_frame_u16": 5459}:
         raise ValueError("Coffee Shop class-0x1f player collision drift: " +
                          json.dumps(player_collision, sort_keys=True))
     airborne_button1 = report["native_capture"][

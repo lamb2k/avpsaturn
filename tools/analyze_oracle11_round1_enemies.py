@@ -2197,11 +2197,20 @@ def class1f_first_segment_action_contract(program: bytes,
                                 "target": f"0x{target:06x}"}
                                for index, target in enumerate(action_targets)],
             "action_0_branch_order": [
-                "if s16(0xff9a1c)==0 enter source special state 0x0a",
+                "if s16(0xff1a1c)==0 enter source special state 0x0a",
                 "if an active P1 is within x [-32,+32] and z [-12,+12] and P1+0x96==0 enter action 0x04",
                 "if a5_u8 != facing_u8 enter action 0x0a and toggle facing",
                 "if a3_u8 == style85_u8 enter action 0x02; a6_u8!=0 promotes it to action 0x16 and b0_u8=2",
                 "otherwise a3_u8!=0 enters action 0x08; zero enters action 0x06"],
+            "scene_active_flag": {
+                "address_and_type": "0xff1a1c:u16",
+                "owner": "record32 class-0x01 recurring controller",
+                "write_chronology": [
+                    {"source_frame": 2072, "writer": "0x028814", "value": 1},
+                    {"source_frame": 5151, "writer": "0x028a02", "value": 0}],
+                "accepted_evidence": [
+                    "data/oracle11_round1_auxiliary_authority.json",
+                    ".deps/mame/oracle11_coffee_player_selector_a/coffee_shop_component20_global.tsv"]},
             "movement_action_0x16_order": [
                 "enforce x/camera visibility guard and release through outer state 0x0600 when outside",
                 "apply source actor-separation helper 0x060f36",

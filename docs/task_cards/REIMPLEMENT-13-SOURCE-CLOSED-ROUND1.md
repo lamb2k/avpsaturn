@@ -3784,3 +3784,31 @@ class-`0x1f` slot `0x00ffa240`: source enters state/substate `0x020a:0x0000`
 with record `0x0012d32c`, while native remains `0x0200:0x1600`. The next player
 divergence advances to the already source-owned exit boundary at frame 5452.
 Candidate and visual-blocker status remain unchanged.
+
+### P4 class-0x1F scene-active state-0 checkpoint (2026-09-01)
+
+Direct decode corrected the stale fixture operand for action 0: `tst.w`
+addresses global `0xff1a1c`, not actor-slot-like `0xff9a1c`. Accepted auxiliary
+evidence already owns this `u16` scene-active flag: the record-32 class-`0x01`
+recurring controller sets it through writer `0x028814` at frame 2072 and clears
+it through writer `0x028a02` at frame 5151. Native now clears the same field at
+that controller transition and every Coffee-Shop-reachable class-`0x1f`
+action-0 instance consumes it without a route/frame shortcut.
+
+The frame-5208 slot `0x00ffa240` row now matches source state `0x020a:0000`,
+record `0x0012e8ec`, timer 9, facing 1, health 87 and fixed-point position.
+The action-0/action-2 tail remains stable through the final source class-`0x1f`
+lifetime at frame 5550. Two real controls reject an inverted guard and a
+suppressed controller clear. Oracle enemy tests reject 104 mutations, SPEC-02
+rejects 190, and generated entry data is current at contract SHA-256
+`d5de94cd368126c1315639e443ac6c929c4c7037140f84c1ae7d9083bf7f3bb3`.
+
+Release/live-encounter Target passes with GAME.BIN 377,248 bytes, SHA-256
+`75bbd4cd9259f9ec3e58098bc0bb6c79a3d714082ba6bd0863ff95a50167a56d`,
+BSS end `0x060b32b0`; the protected animation manifest is byte-unchanged. The
+whole-scene census improves raw gaps from 188/1/0/675/2/93/0/279/0 to
+188/1/0/671/1/93/0/279/0 and advances the next attacker divergence from 5208
+to 5459. The earlier next RED is the frame-5452 player/exit lifecycle; close
+its complete Coffee Shop exit-controller and scene-teardown program through
+the frame-5551 population release. Candidate and exhausted visual blocker
+remain frozen.
