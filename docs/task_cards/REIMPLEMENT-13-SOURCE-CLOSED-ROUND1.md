@@ -2457,3 +2457,20 @@ enemy, auxiliary, route-wide, presentation, and player-audio controls remain
 discriminating, and no authority event is orphaned. Evidence artifact SHA-256
 is `2c9b32f78f7a0dfdd7315c6d01d8f183b7f12f62651846bbc3a05700448697a5`.
 Continue P2 at frame 12800 through `continue-countdown-2`.
+
+### Overnight census segment 12800..13292 checkpoint (2026-09-01)
+
+The second credited-continue countdown is census-closed across 493 paired
+source frames at semantic SHA-256
+`ff82b9cdf5081ff8def9d4168ce80809e9013009cff9fa47d2c65441d36947fa`.
+No player actor is active during the countdown. Three continuing lifetimes are
+owned by class `0x01/12`, class `0x06/12`, and navigation class `0x07/20`;
+there are no spawn, despawn, or HIT/KO edges. Two owned audio transactions use
+commands `0x000f` and `0x0202`.
+
+The credited-return dispatcher writes route state `4` at source write frame
+13291, visible at frame 13292, through writer `0x0090f2`. Presentation owns no
+progression, all counterfactual controls remain discriminating, and no
+authority event is orphaned. Evidence artifact SHA-256 is
+`1d85dc4bedaa5808acada030130556da15849cfb420bcd0e5b87c0f8564fc763`.
+Continue P2 at frame 13293 through `round1-chrysalis-battle-2`.

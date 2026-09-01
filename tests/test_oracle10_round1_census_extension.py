@@ -41,6 +41,9 @@ WAREHOUSE3_ENTRY = json.loads(
 WAREHOUSE3 = json.loads(
     (ROOT / "data/oracle10_round1_census_extension_12478_12799.json")
     .read_text(encoding="ascii"))
+CONTINUE2 = json.loads(
+    (ROOT / "data/oracle10_round1_census_extension_12800_13292.json")
+    .read_text(encoding="ascii"))
 GENERATOR = (ROOT / "tools/analyze_oracle10_round1_census_extension.py") \
     .read_text(encoding="utf-8")
 
@@ -895,5 +898,62 @@ for label, path, value in (
         continue
     raise AssertionError(f"Warehouse gameplay 3 mutation accepted: {label}")
 
-print("ORACLE-10 Round 1 census extension 5567..12799: PASS "
-      "(75 mutations rejected)")
+def validate_continue2(report: dict[str, object]) -> None:
+    semantics = report["paired_capture_ceremony"]["segment_semantics"]
+    census = report["scene_census_delta"]
+    assert report["status"] == "CENSUS_SEGMENT_COMPLETE"
+    assert report["segment"]["source_frame_range"] == [12800, 13292]
+    assert report["segment"]["scene_ids"] == ["continue-countdown-2"]
+    assert semantics["frame_count"] == 493
+    assert semantics["canonical_semantic_sha256"] == \
+        "ff82b9cdf5081ff8def9d4168ce80809e9013009cff9fa47d2c65441d36947fa"
+    assert semantics["player_active_frames"] == 0
+    assert semantics["identity_mismatch_frames"] == []
+    assert [(row["class"], row["type"]) for row in
+            census["class_type_inventory"]] == [
+                ("0x01", 12), ("0x06", 12), ("0x07", 20)]
+    assert len(census["actor_lifetimes"]) == 3
+    assert census["spawn_edges"] == [] and census["despawn_edges"] == []
+    assert census["hit_ko_transitions"] == []
+    assert census["audio"]["command_counts"] == {"0x000f": 1, "0x0202": 1}
+    assert census["audio"]["handler_transaction_count"] == 2
+    assert census["load_release_boundaries"] == []
+    edges = report["route_authority_extension"]["route_state_edges"]
+    assert [(row["sample_transition_frame"], row["write_frame"],
+             row["writer_pc"], row["value"]) for row in edges] == [
+                 (13292, 13291, "0x0090f2", 4)]
+    assert report["targeted_counterfactuals"]["presentation_boundaries"] == [{
+        "classification": "SOURCE_CLOSED_PRESENTATION_DEPENDENCY",
+        "owns_progression": False,
+        "signature": "S0236cab182f2-1",
+    }]
+    assert all(value == 0 for value in report["coverage"].values())
+    assert report["physical_saturn"] == "UNRUN"
+
+
+validate_continue2(CONTINUE2)
+for label, path, value in (
+        ("continue2 semantic", ("paired_capture_ceremony", "segment_semantics",
+                                "canonical_semantic_sha256"), "0" * 64),
+        ("continue2 active player", ("paired_capture_ceremony", "segment_semantics",
+                                     "player_active_frames"), 1),
+        ("continue2 route", ("route_authority_extension", "route_state_edges"), []),
+        ("continue2 audio", ("scene_census_delta", "audio",
+                             "handler_transaction_count"), 1),
+        ("continue2 presentation progression", ("targeted_counterfactuals",
+                                                 "presentation_boundaries"), []),
+        ("continue2 orphan", ("coverage", "unowned_route_camera_events"), 1),
+        ("continue2 physical", ("physical_saturn",), "PASS")):
+    mutant = copy.deepcopy(CONTINUE2)
+    target = mutant
+    for key in path[:-1]:
+        target = target[key]
+    target[path[-1]] = value
+    try:
+        validate_continue2(mutant)
+    except AssertionError:
+        continue
+    raise AssertionError(f"Round 1 continue-2 mutation accepted: {label}")
+
+print("ORACLE-10 Round 1 census extension 5567..13292: PASS "
+      "(82 mutations rejected)")

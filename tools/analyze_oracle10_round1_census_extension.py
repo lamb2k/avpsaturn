@@ -82,6 +82,11 @@ PROFILES = {
         "id": "round1-warehouse-gameplay-three-to-failure-boundary",
         "output": "oracle10_round1_census_extension_12478_12799.json",
     },
+    "continue_countdown_2": {
+        "first": 12800, "last": 13292,
+        "id": "round1-continue-countdown-two-to-credited-return",
+        "output": "oracle10_round1_census_extension_12800_13292.json",
+    },
 }
 WORKRAM_BASE = 0xFF0000
 PLAYER = 0xFF8380
