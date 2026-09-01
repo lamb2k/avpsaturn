@@ -20,6 +20,7 @@ SOURCES = {
     "class00_program": "data/spec02_class00_type12_program.json",
     "class01_program": "data/spec02_class01_type12_program.json",
     "class06_program": "data/spec02_class06_type12_program.json",
+    "class07_program": "data/spec02_class07_type20_program.json",
     "auxiliary": "data/oracle11_round1_auxiliary_authority.json",
     "route": "data/oracle11_round1_encounter_route_authority.json",
     "boss": "data/oracle11_round1_boss_orchestration.json",
@@ -256,6 +257,11 @@ def build_fields() -> list[dict[str, object]]:
           "/authority_data/enemies/archetypes/2/whole_routine_implementation_contract", "outer state, action, phase, hit/interruption state and source selectors dispatch only through the bounded source program; exact-width guards, arithmetic, RNG order and accepted shared helpers own every transition",
           ["enemy.outer_state:u16", "enemy.action_substate:u16", "enemy.position:s16/s32", "enemy.velocity:s32", "enemy.facing:u8", "enemy.timer:u8/u16", "enemy.health:s16", "enemy.animation_record:u32", "enemy.action_locals", "player.position:s16", "camera.position:s16", "route.globals", "rng.seed:u16"], ["enemy.state:u16", "enemy.action_substate:u16", "enemy.position:s16/s32", "enemy.velocity:s32", "enemy.facing:u8", "enemy.timer:u8/u16", "enemy.animation_record:u32", "enemy.collision_selectors:u8", "enemy.health:s16", "player.health:s16", "effect.record", "pool.free_count:u8", "rng.seed:u16"],
           "/mutation_controls", "dispatch, sentinel, operand width, read/write field, signed branch, transition, RNG order, presentation, collision, damage, effect or release mutation changes the paired class-0x06 semantic witness"),
+        f("auxiliary.class07_type20_whole_program", "round1-projectile-pickup-hazard", "guarded_actor_program", True,
+          "class07_program", "/", "0x06d1aa class entry, top-state and active-state dispatch tables, and every Round 1-reachable branch",
+          "/authority_data/auxiliary/archetypes/1/whole_routine_implementation_contract", "outer and active state dispatch only through the bounded source program; exact-width movement, double-buffered navigation, contact, presentation and accepted shared helpers own every transition",
+          ["actor.outer_state:u8/u16", "actor.active_phase:u8", "actor.contact_state:u8/u16", "actor.position:s16", "actor.movement:s16", "actor.facing:u8", "actor.timer:u8", "actor.animation_record:u32", "route.globals"], ["actor.state:u8/u16", "actor.position:s16", "actor.movement:s16", "actor.animation_record:u32", "actor.collision_selectors:u8", "actor.navigation_buffers", "pool.free_count:u8", "audio.command:u16"],
+          "/mutation_controls", "dispatch, operand width, field offset, signed branch, transition, presentation, collision, navigation buffering, command or release mutation changes the paired class-0x07 semantic witness"),
         f("enemy.initial_transition_execution", "round1-enemy-archetypes", "guarded_state_program", True,
           "enemies", "/archetypes/3/initial_transition_contract", "0x0606aa/0x0606d4/0x0606fc initializers and 0x060b1a..0x060c1c transition bodies",
           "/authority_data/enemies/archetypes/3/initial_transition_contract", "route-global, timer, animation-branch, landing and source-pool guards own the three initial class-0x1f bodies",
@@ -1108,6 +1114,11 @@ def build_fixtures(source: dict[str, dict]) -> dict[str, object]:
                    if item["class"] == "0x06" and item["type"] == 12)
     class06["whole_routine_implementation_contract"] = copy.deepcopy(
         source["class06_program"])
+    class07 = next(item for item in
+                   fixtures["authority_data"]["auxiliary"]["archetypes"]
+                   if item["class"] == "0x07" and item["type"] == 20)
+    class07["whole_routine_implementation_contract"] = copy.deepcopy(
+        source["class07_program"])
     fixtures["scene_manifests"] = {
         "coffee_shop": build_coffee_shop_scene_manifest(source)}
     return fixtures
@@ -1758,6 +1769,33 @@ def validate(contract: dict[str, object], fixtures: dict[str, object],
             class06_program["implementation_rules"]
                 ["unknown_state_or_transition_logic_allowed"] is False,
             "class-0x06/type-12 whole-routine fixture incomplete or drifted")
+    class07 = next(item for item in
+                   fixtures["authority_data"]["auxiliary"]["archetypes"]
+                   if item["class"] == "0x07" and item["type"] == 20)
+    class07_program = class07["whole_routine_implementation_contract"]
+    require(class07_program == source["class07_program"] and
+            class07_program["status"] == "SPEC_EXECUTABLE" and
+            class07_program["classification"] ==
+                "SOURCE_CLOSED_IMPLEMENTATION_FIELDS" and
+            len(class07_program["reachable_state_substate_contexts"]) == 2 and
+            len(class07_program["dispatch"]) == 2 and
+            sum(row["entry_count"] for row in
+                class07_program["dispatch"].values()) == 7 and
+            class07_program["normalized_source_program"]
+                ["instruction_count"] == 135 and
+            len(class07_program["normalized_source_program"]
+                ["field_access_profiles"]) == 33 and
+            len(class07_program["normalized_source_program"]
+                ["external_transfers"]) == 10 and
+            class07_program["dynamic_witness"]["counts"] == {
+                "entries": 26565, "samples": 28446, "writes": 26619,
+                "rng_calls": 0, "player_effects": 0} and
+            all(class07_program["mutation_controls"].values()) and
+            class07_program["implementation_rules"]
+                ["runtime_68000_interpretation_forbidden"] is True and
+            class07_program["implementation_rules"]
+                ["unknown_state_or_transition_logic_allowed"] is False,
+            "class-0x07/type-20 whole-routine fixture incomplete or drifted")
     class1f = next(item for item in
                    fixtures["authority_data"]["enemies"]["archetypes"]
                    if item["class"] == "0x1f")

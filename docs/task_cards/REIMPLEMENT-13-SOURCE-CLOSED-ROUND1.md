@@ -2700,3 +2700,38 @@ SHA-256 `9a7f69e8ee761b8d98a18ec8c4ac98ba9c5f8c1c9f4aaa4a1979734e258da178`
 and is unstaged with `history.txt`.
 
 Continue P3 with class `0x07/20` as the next whole-routine family.
+
+### P3 class 0x07/type 20 whole-routine checkpoint (2026-09-01)
+
+Class `0x07/20` is SPEC-executable as one bounded source program spanning
+`0x06d1aa..0x06d53c`. The fixture closes 135 decoded operations, both computed
+dispatch tables with seven total entries, both paired-witness contexts, 33
+exact field read/write profiles, and ten source-owned external transfer paths.
+It preserves exact operand widths and signed branches, scheduler order,
+top/active-state transitions, movement arithmetic, double-buffered navigation,
+facing, presentation, contact, gameplay-command and fixed-pool release
+ownership. Runtime 68000 interpretation remains forbidden.
+
+The paired retained ledgers bind 26,565 entries, 28,446 samples, 26,619 writes,
+zero RNG calls, and zero player-effect writes. Artifact SHA-256 is
+`3aa984b5e2b6634c8749e037fbf0914e12412fe4d39099b494404fc2e7ac0a51`;
+instruction-semantics SHA-256 is
+`daf8f4c5f7e0a5e27a1a7e2d28aa3aefa6151c66efb073b4d7b42dbf9440ffdb`.
+Nine class mutations and all 180 SPEC-02 mutations reject. Fast and Target
+pass. GAME.BIN remains unchanged at
+`aa99904645fa584952ccba84e4fb28d970dabc4ae6e6e593b401f9e3323910a1`,
+and the cart content archive remains
+`ccf8795a147daf337c1f72364c81f05fc2cfd255d8d21b40a56c74c97f8d15bd`.
+
+One debug-rig pinned scene run passes all 575 samples with zero failure,
+fallback or unsupported dispatch at normalized ISO
+`3bb36edbd29c0a07867826f7d1ac99e96d84849232a05b3bdea43d5d84a611de`.
+Capture settings were restored to VideoCore 4 / SoundCore 1. The complete
+Coffee Shop census remains expected RED at source frame 5566 (`code=11`, slot
+`0x00009e80`, state `0x0208`, substate `0x1004`); this SPEC-only body neither
+changes runtime identity nor claims scene improvement, so paired cold Emulator
+and WGC were not triggered. Protected `data/avsp_anim_records.json` remains at
+SHA-256 `9a7f69e8ee761b8d98a18ec8c4ac98ba9c5f8c1c9f4aaa4a1979734e258da178`
+and is unstaged with `history.txt`.
+
+Continue P3 with class `0x10/24` as the next whole-routine family.

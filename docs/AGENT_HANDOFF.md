@@ -37,13 +37,13 @@ inspection. Settings were restored to VideoCore 4 / SoundCore 1. Evidence is
 
 P2 is closed through stable Round 2 seam frame 15193; closure SHA is
 `b5c72089...f94b3`, all authority/table/capacity gates pass, and Round 2 gameplay
-was not censused. P3 classes `0x00/12`, `0x01/12`, and `0x06/12` are now
-whole-routine SPEC-executable at artifacts `f06dab53...b9f3`,
-`dc578bed...9d52`, and `eb251681...023c`. Class `0x06/12` closes 1,788 decoded
-operations, 40 contexts, 29 dispatch tables/137 entries, 92 field profiles,
-29 owned transfer paths, and its paired 216-RNG/13-damage witness.
+was not censused. P3 classes `0x00/12`, `0x01/12`, `0x06/12`, and `0x07/20`
+are whole-routine SPEC-executable at artifacts `f06dab53...b9f3`,
+`dc578bed...9d52`, `eb251681...023c`, and `3aa984b5...0a51`. Class `0x07/20`
+closes 135 decoded operations, two contexts, two dispatch tables/seven entries,
+33 field profiles, ten owned transfer paths, and its paired 26,565-entry witness.
 Focused/SPEC/Fast/Target and one debug-rig 575-sample scene run pass; GAME.BIN
 remains `aa999046...0a1`, ISO remains `3bb36edb...611de`, scene remains RED at
 source 5566 code 11, and the runtime candidate is unpromoted. Continue P3 with
-class `0x07/20` as one whole-routine family, then follow the closure-report
+class `0x10/24` as one whole-routine family, then follow the closure-report
 order; never commit captures, PNGs, ROMs, ISOs, or dumps.
