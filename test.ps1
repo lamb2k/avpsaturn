@@ -708,6 +708,16 @@ if (Test-Path -LiteralPath (Join-Path $PSScriptRoot 'data\spec02_route_audio_own
         throw "SPEC-02 route-audio owner mutation test failed with exit code $LASTEXITCODE."
     }
 }
+if (Test-Path -LiteralPath (Join-Path $PSScriptRoot 'data\spec02_encounter_audio_owner_program.json')) {
+    & $PythonPath (Join-Path $PSScriptRoot 'tools\build_spec02_encounter_audio_owner_program.py') '--check'
+    if ($LASTEXITCODE -ne 0) {
+        throw "SPEC-02 encounter-audio owner generation check failed with exit code $LASTEXITCODE."
+    }
+    & $PythonPath (Join-Path $PSScriptRoot 'tests\test_spec02_encounter_audio_owner.py')
+    if ($LASTEXITCODE -ne 0) {
+        throw "SPEC-02 encounter-audio owner mutation test failed with exit code $LASTEXITCODE."
+    }
+}
 if (Test-Path -LiteralPath (Join-Path $PSScriptRoot 'data\spec02_round1_executable_contract.json')) {
     & $PythonPath (Join-Path $PSScriptRoot 'tests\test_spec02_round1_contract.py')
     if ($LASTEXITCODE -ne 0) {

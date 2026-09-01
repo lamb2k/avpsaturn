@@ -3491,3 +3491,40 @@ Settings were restored to VideoCore 4 / SoundCore 1.
 
 Continue P3 with the first-demand encounter-audio owner family at source frame
 15192.
+
+### P3 encounter-audio owner-family checkpoint (2026-09-01)
+
+The complete Round 1 encounter-owned audio family is SPEC-executable from the
+accepted paired trigger, shared-command and handler ledgers plus exact offline
+opcode windows. Four source-closed trigger groups bind commands `0x0006`,
+`0x0007`, `0x001f` and `0xff00` across six exact encounter contexts and nine
+dispatch occurrences from source origins `0xff8480` and `0xffea80`. The
+projection is the encounter pseudo-owner record type/class `0x00/0x00`.
+
+Four exact caller programs at `0x003c00`, `0x00809e`, `0x0083b4` and
+`0x008556` bind their opcode slices, field widths, signed guards, arguments
+and ordered helper/wrapper paths into grouped handler/QSound transactions.
+Individual register writes are not logical events and semantic sound names
+remain `UNKNOWN`. The family owns no encounter progression projection, logical
+load/release or RNG.
+
+Artifact SHA-256 is
+`465c4bf03f863ca1bb6dc7b00688dd074d392a38e5cf93593c9d9bd95ac5c677`.
+Nineteen focused and all 180 aggregate SPEC mutations reject. Aggregate
+fixture SHA-256 is
+`509b58de00ab53bad6f85941d0e0dc6629357002a85b0c42d1d8e6f8cd5d53bb`;
+contract SHA-256 is
+`d83c6422e5e96df5e040d8158754f935f16639c1761554dd9895b6e76d15f879`.
+
+Fast and Oracle pass every Oracle/SPEC prerequisite and stop only at the
+accepted P4 frame-3782 RED. Debug and release/live-encounter Target pass;
+release GAME.BIN is 373,840 bytes at SHA-256
+`a1c8428d20ffb62bbd8449505be8451359c9a7265839bd60a4a6692914028e35`,
+and the cart archive remains
+`ccf8795a147daf337c1f72364c81f05fc2cfd255d8d21b40a56c74c97f8d15bd`.
+This SPEC-only body changes no runtime semantics, does not promote the
+candidate and does not trigger WGC. Commit-bound paired cold Emulator evidence
+is required before the P3 phase checkpoint is complete.
+
+After the paired evidence is recorded, begin P4 with the preserved source
+frame-3782 stage-progress discrepancy and close its complete owning program.

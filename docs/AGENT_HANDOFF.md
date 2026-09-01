@@ -32,16 +32,16 @@ contract `12c61b10...7ea5`. Focused 19 and aggregate 180 mutations reject.
 Fast/Oracle reach only frame-3782 RED. Target passes; GAME.BIN is
 `0e6fc6cb...cc4b`, archive unchanged. Paired semantics are `1a6a8c39...2f59`
 and normalized ISO is `615cd156...a848`; settings are restored 4/1.
-Route audio is SPEC-executable: seven groups and commands, nine exact contexts,
-11 occurrences, one origin, pseudo-owner type/class 00/00 and seven caller
-programs. Artifact is `00c53afd...25f5`; fixture `7ffe49b6...6261`; contract
-`b7048808...ad5c`; focused 19 and aggregate 180 mutations reject. Fast/Oracle
-reach only frame-3782 RED. Target passes; GAME.BIN is `0ed25541...f9b2`,
-archive unchanged. Paired semantics are `1a6a8c39...2f59`; normalized ISO is
-`c22c5358...a86c`; settings are restored 4/1.
+Route audio is committed and paired-emulator green. Encounter audio is
+SPEC-executable: four groups/commands, six contexts, nine occurrences, two
+origins, pseudo-owner type/class 00/00 and four caller programs. Artifact is
+`465c4bf0...c677`; fixture `509b58de...53bb`; contract `d83c6422...f879`;
+focused 19 and aggregate 180 mutations reject. Fast/Oracle reach only
+frame-3782 RED. Target passes; GAME.BIN is `a1c8428d...8e35`, archive unchanged.
+Commit-bound paired Emulator evidence is pending.
 ## Exact next sequence
-Close encounter-audio at source frame 15192 as the final reusable owner family.
-Bind every reachable caller/guard, command/arguments, grouped handler
-transaction and audio/load/RNG ownership, regenerate once, then run the full
-family ceremony. Continue according to the overnight plan without promotion.
+Commit encounter audio and run its two cold debug-rig captures plus mutations.
+After recording and checkpointing them, begin P4 at the preserved source-frame
+3782 stage-progress discrepancy and close its complete owning program. Keep the
+candidate frozen and Coffee Shop RED until its zero-gap gate passes.
 Never commit captures, PNGs, ROMs, ISOs, dumps, or protected user files.
