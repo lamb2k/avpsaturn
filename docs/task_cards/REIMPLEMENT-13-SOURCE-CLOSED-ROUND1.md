@@ -3349,9 +3349,17 @@ Release GAME.BIN is 373,840 bytes at SHA-256
 `ba5a4cd46840c74129593017e27f1e987bcec3d16a0ac8c657b28afc337277cb`;
 the cart archive remains
 `ccf8795a147daf337c1f72364c81f05fc2cfd255d8d21b40a56c74c97f8d15bd`.
+Two commit-bound cold debug-rig Coffee Shop runs pass byte-identical 575-sample
+semantic ledgers with five real mutations rejected and zero fallback/failure at
+semantic SHA-256
+`4bfad24e448457a4452513759f065d157161a6c22747b1c0bdb735cd6c40e689`
+and normalized ISO SHA-256
+`e70d99bb4933b7ef51e59a9ad91fb6a55f5af9f2dc226f4aea584f85c9a351d1`.
+The first launch attempt used the restored normal VideoCore 4 setting, which
+the GL-only debug rig cannot execute; both corrected runs used its required
+VideoCore 1 / SoundCore 0 capture settings. Settings were restored to 4/1.
 This SPEC-only body changes no gameplay semantics, does not promote the
-candidate and does not trigger WGC. Commit-bound pinned-emulator evidence is
-the remaining checkpoint action.
+candidate and does not trigger WGC.
 
-After commit-bound emulator evidence, continue P3 with the first-demand
-boss-audio owner family at source frame 5867 as one reusable owner-family body.
+Continue P3 with the first-demand boss-audio owner family at source frame 5867
+as one reusable owner-family body.
