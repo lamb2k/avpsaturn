@@ -85,20 +85,37 @@ jump_stop_marker = "    {\n        AvspRound1Runtime contextual = runtime;"
 assert jump_stop_marker in test_source
 jump_test_body = test_source.replace(
     jump_stop_marker, "    return 0;\n" + jump_stop_marker, 1)
+scene_checkpoint_marker = (
+    "        for (source_frame = 2040u; source_frame <= 5566u; "
+    "++source_frame)\n"
+    "        {\n"
+    "            unsigned short input =\n"
+    "                avsp_round1_coffee_shop_source_input(\n"
+    "                    (unsigned short)source_frame);\n"
+    "            unsigned int source_updates =\n"
+    "                avsp_round1_coffee_shop_source_updates(\n"
+    "                    (unsigned short)source_frame);\n"
+    "            unsigned int class02_updates =\n"
+    "                avsp_round1_coffee_shop_class02_source_updates(\n"
+    "                    (unsigned short)source_frame);\n"
+    "            unsigned int phase_updates = source_updates > class02_updates ?\n"
+    "                source_updates : class02_updates;\n")
+assert scene_checkpoint_marker in test_source
+scene_checkpoint_body = test_source.replace(
+    scene_checkpoint_marker,
+    scene_checkpoint_marker +
+    "            if (source_frame == 5458u)\n"
+    "                return 0;\n",
+    1)
+scene_checkpoint_flags = {
+    "--controller-edge-only", "--weapon-timing-only",
+    "--special-input-only",
+}
 
 run(source, header, True,
-    expected_returncode=(123 if "--weapon-timing-only" in sys.argv else
-                         123 if "--contextual-melee-only" in sys.argv else
-                         123 if "--locomotion-only" in sys.argv else
-                         123 if "--generated-walk-only" in sys.argv else
-                         123 if "--controller-edge-only" in sys.argv else
-                         123 if "--player-hit-only" in sys.argv else
-                         123 if "--action0c-only" in sys.argv else
-                         123 if "--inner8-only" in sys.argv else
-                         123 if "--type16-terminal-only" in sys.argv else
-                         123 if "--special-input-only" in sys.argv else
-                         None),
-    test_body=(jump_test_body if "--jump-only" in sys.argv else None))
+    test_body=(jump_test_body if "--jump-only" in sys.argv else
+               scene_checkpoint_body
+               if scene_checkpoint_flags.intersection(sys.argv) else None))
 if "--baseline-only" in sys.argv:
     print("REIMPLEMENT-13 focused baseline: PASS")
     raise SystemExit(0)
@@ -824,18 +841,21 @@ if "--locomotion-only" in sys.argv:
     raise SystemExit(0)
 if ("--controller-edge-only" in sys.argv or
         not subset_flags.intersection(sys.argv)):
-    pre_before = """            if (phase_updates != 0u && scene_runtime.entry.spawned &&
+    pre_before = """            if (phase_updates != 0u &&
+                scene_runtime.entry.dependencies_seeded &&
                 !avsp_round1_step_scheduler_pre_player_source_differential(
                     &scene_runtime, source_updates != 0u))
                 return 112;
 """
-    post_before = """            if (phase_updates != 0u && scene_runtime.entry.spawned)
+    post_before = """            if (phase_updates != 0u &&
+                scene_runtime.entry.dependencies_seeded)
             {
                 if (!avsp_round1_step_scheduler_post_player_source_differential(
 """
     assert pre_before in test_source
     assert post_before in test_source
-    post_after = """            if (phase_updates != 0u && scene_runtime.entry.spawned)
+    post_after = """            if (phase_updates != 0u &&
+                scene_runtime.entry.dependencies_seeded)
             {
                 if (!avsp_round1_step_scheduler_pre_player_source_differential(
                         &scene_runtime, source_updates != 0u))
@@ -846,14 +866,50 @@ if ("--controller-edge-only" in sys.argv or
         post_before, post_after, 1)
     run(source, header, False, "post-player-recurring-controller",
         expected_returncode=117, test_body=post_player_controller)
+    delayed_scene_scheduler = test_source.replace(
+        "scene_runtime.entry.dependencies_seeded",
+        "scene_runtime.entry.spawned")
+    run(source, header, False, "delayed-scene-scheduler-handoff",
+        expected_returncode=124, test_body=delayed_scene_scheduler)
     if "--controller-edge-only" in sys.argv:
-        print("REIMPLEMENT-13 controller camera-edge mutation lane: PASS (3 real mutations)")
+        print("REIMPLEMENT-13 controller camera-edge mutation lane: PASS (4 real mutations)")
         raise SystemExit(0)
 if "--player-hit-only" in sys.argv:
     print("REIMPLEMENT-13 Coffee Shop player-HIT program mutation lane: PASS (11 real mutations)")
     raise SystemExit(0)
 if ("--weapon-timing-only" in sys.argv or
         not subset_flags.intersection(sys.argv)):
+    airborne_progress_before = """    if (!avsp_round1_apply_player_stage_progress(runtime))
+        return 0;
+    runtime->player_jump_phase = 0x0406u;"""
+    airborne_progress_after = """    runtime->player_jump_phase = 0x0406u;"""
+    assert airborne_progress_before in source
+    run(source.replace(airborne_progress_before, airborne_progress_after, 1),
+        header, False, "airborne-Button1-stage-progress")
+    airborne_guard_before = """    if (runtime->player_resource_depleted)
+        return 1;"""
+    airborne_guard_after = """    if (runtime->player_resource <
+            avsp_round1_player_weapon.resource_debit)
+        return 1;"""
+    assert airborne_guard_before in source
+    run(source.replace(airborne_guard_before, airborne_guard_after, 1),
+        header, False, "airborne-Button1-depleted-latch-guard",
+        test_body=scene_checkpoint_body)
+    airborne_clamp_before = """        else
+        {
+            runtime->player_resource = 0u;
+            runtime->player_resource_depleted = 1u;
+        }
+        runtime->player_resource_recharge ="""
+    airborne_clamp_after = """        else
+            runtime->player_resource = (unsigned char)(
+                runtime->player_resource -
+                avsp_round1_player_weapon.resource_debit);
+        runtime->player_resource_recharge ="""
+    assert airborne_clamp_before in source
+    run(source.replace(airborne_clamp_before, airborne_clamp_after, 1),
+        header, False, "airborne-Button1-saturating-debit",
+        test_body=scene_checkpoint_body)
     generated_resource_before = """    16u,
     1u,
     1u,
@@ -871,7 +927,7 @@ if ("--weapon-timing-only" in sys.argv or
         generated_body=generated.replace(
             generated_resource_before, generated_resource_after, 1))
     if "--weapon-timing-only" in sys.argv:
-        print("REIMPLEMENT-13 Button1 timing mutation lane: PASS (9 real mutations)")
+        print("REIMPLEMENT-13 Button1 timing mutation lane: PASS (12 real mutations)")
         raise SystemExit(0)
 if "--action0c-only" in sys.argv:
     print("REIMPLEMENT-13 class-0x1f action-0x0c timer-row mutation lane: PASS (1 real mutation)")
@@ -898,8 +954,18 @@ if "--type16-terminal-only" in sys.argv:
           "(1 real mutation)")
     raise SystemExit(0)
 if "--special-input-only" in sys.argv:
+    zero_health_combo_before = """    special_physical_candidate = (unsigned char)(
+        special_pipeline_candidate ||
+        avsp_round1_player_special_physical_guard("""
+    zero_health_combo_after = """    special_physical_candidate = (unsigned char)(
+        0 && special_pipeline_candidate ||
+        avsp_round1_player_special_physical_guard("""
+    assert zero_health_combo_before in source
+    run(source.replace(zero_health_combo_before, zero_health_combo_after, 1),
+        header, False, "zero-health-Button1-combo-priority",
+        test_body=scene_checkpoint_body)
     print("REIMPLEMENT-13 simultaneous special-input arbitration lane: PASS "
-          "(1 real mutation)")
+          "(2 real mutations)")
     raise SystemExit(0)
 generated_walk_mutations = {
     "    { 4u, 0, 0x0015F208UL, 0x00160A02UL, 17u, 0u },",

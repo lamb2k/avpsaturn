@@ -1133,7 +1133,7 @@ int main(void)
                     contextual.player.source_action,
                     avsp_round1_entry_valid(&contextual),
                     contextual.failure_count);
-                return 124;
+                return 128;
             }
             if (contextual.player.animation_record >= 0x00160288UL &&
                 contextual.player.animation_record <= 0x001602c8UL)
@@ -4560,8 +4560,6 @@ int main(void)
         int player_authority_enabled_at_tick_start;
         int inner8_seen = 0;
         avsp_round1_init(&scene_runtime);
-        if (!avsp_round1_begin_first_entry(&scene_runtime))
-            return 90;
         if (avsp_round1_coffee_shop_source_input(2600u) !=
                 AVSP_PW_INPUT_RIGHT ||
             avsp_round1_coffee_shop_source_input(2790u) !=
@@ -4587,6 +4585,15 @@ int main(void)
                     (unsigned short)source_frame);
             unsigned int phase_updates = source_updates > class02_updates ?
                 source_updates : class02_updates;
+            if (source_frame == 2072u &&
+                !avsp_round1_begin_first_entry(&scene_runtime))
+                return 90;
+            if (source_frame == 2073u &&
+                (!scene_runtime.entry.dependencies_seeded ||
+                 scene_runtime.scheduler_frames != 1u ||
+                 scene_runtime.first_encounter.source_phase_counter != 7u ||
+                 scene_runtime.class1f_phase_guard_counter != 7u))
+                return 124;
             if ((source_frame == 2679u &&
                  scene_runtime.entry_controller.substate != 0u) ||
                 (source_frame == 2680u &&
@@ -4637,7 +4644,7 @@ int main(void)
                     scene_runtime.route_state != 4 &&
                     !avsp_round1_step_first_entry(&scene_runtime))
                     return 110;
-                if (scene_runtime.entry.spawned &&
+                if (scene_runtime.entry.dependencies_seeded &&
                     !avsp_round1_step_scheduler_pre_player_source_differential(
                         &scene_runtime, source_tick < source_updates))
                     return 112;
@@ -4645,7 +4652,7 @@ int main(void)
                     player_authority_enabled_at_tick_start &&
                     !avsp_round1_step_player(&scene_runtime, input, 0))
                     return 111;
-                if (scene_runtime.entry.spawned &&
+                if (scene_runtime.entry.dependencies_seeded &&
                     !avsp_round1_step_scheduler_post_player_source_differential(
                         &scene_runtime, source_tick < source_updates,
                         source_tick < class02_updates))
@@ -4665,7 +4672,8 @@ int main(void)
                     scene_runtime.failure_count, scene_runtime.fallback_count);
                 return 92;
             }
-            if (phase_updates != 0u && scene_runtime.entry.spawned &&
+            if (phase_updates != 0u &&
+                scene_runtime.entry.dependencies_seeded &&
                 !avsp_round1_step_scheduler_pre_player_source_differential(
                     &scene_runtime, source_updates != 0u))
                 return 112;
@@ -4752,7 +4760,8 @@ int main(void)
                     scene_runtime.tail_canary);
                 return 93;
             }
-            if (phase_updates != 0u && scene_runtime.entry.spawned)
+            if (phase_updates != 0u &&
+                scene_runtime.entry.dependencies_seeded)
             {
                 if (!avsp_round1_step_scheduler_post_player_source_differential(
                         &scene_runtime, source_updates != 0u,
@@ -4837,7 +4846,7 @@ int main(void)
                         }
                     }
                     if (reaction_target == 0 || !reaction_target->active ||
-                        reaction_target->state != 0x0400u ||
+                        reaction_target->state != 0x0402u ||
                         reaction_target->health != -1 ||
                         reaction_target->source_facing_selector != 1u ||
                         reaction_target->facing != 0u)
@@ -4871,13 +4880,13 @@ int main(void)
                     }
                     if (timeout_actor == 0 || !timeout_actor->active ||
                         timeout_actor->state != 0x0200u ||
-                        timeout_actor->substate != 0u ||
+                        timeout_actor->substate != 0x0800u ||
                         timeout_actor->transition_timer != 0u ||
                         timeout_actor->source_special_latch_ad != 0u ||
                         timeout_actor->source_x_fp != 0x04530300L ||
                         timeout_actor->source_y_fp != 0x0134bb00L ||
                         timeout_actor->z != 309 || timeout_actor->facing != 1u ||
-                        timeout_actor->animation_record != 0x0012e5f0UL)
+                        timeout_actor->animation_record != 0x0012e65cUL)
                     {
                         fprintf(stderr,
                             "Coffee Shop inner timeout return failed source=%u active=%u state=%04x/%04x timer=%u latch=%u fp=%08lx/%08lx z=%d facing=%u anim=%08lx\n",
@@ -5053,10 +5062,10 @@ int main(void)
                 (scene_runtime.pools[2].records[15].source_slot !=
                      0x00ffb600UL ||
                  scene_runtime.pools[2].records[15].actor_class != 0x02 ||
-                 scene_runtime.pools[2].records[15].animation_record !=
-                     0x0006b66cUL ||
-                 scene_runtime.pools[2].records[15].animation_timer !=
-                     4094u))
+                  scene_runtime.pools[2].records[15].animation_record !=
+                      0x0006b66cUL ||
+                  scene_runtime.pools[2].records[15].animation_timer !=
+                      4093u))
                 return 119;
             if (source_frame == 2238u &&
                 (scene_runtime.player.animation_record != 0x0015f1f4UL ||

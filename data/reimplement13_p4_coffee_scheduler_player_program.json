@@ -1,0 +1,78 @@
+{
+  "schema": 1,
+  "task": "REIMPLEMENT-13-SOURCE-CLOSED-ROUND1",
+  "checkpoint": "P4-COFFEE-SCHEDULER-PLAYER-PROGRAM",
+  "result": "PASS_PROGRAM_CLOSED_SCENE_RED",
+  "source_span": [2072, 5457],
+  "closed_divergences": [3782, 4696, 5102],
+  "owning_programs": {
+    "scheduler_phase_handoff": {
+      "entry_frame": 2072,
+      "guard": "entry.dependencies_seeded",
+      "first_source_hit_recovered": 3771,
+      "effect": "the source HIT naturally suppresses the false frame-3782 Button1 dispatch"
+    },
+    "airborne_button1": {
+      "source_frame": 4696,
+      "guard": "resource-depleted latch, not resource threshold",
+      "resource_rule": "subtract 40 and saturate a partial balance to zero",
+      "stage_progress_owned": true
+    },
+    "special_button1_arbitration": {
+      "source_frame": 5102,
+      "special_rejected_when_health_zero": true,
+      "button1_priority_preserved": true
+    }
+  },
+  "source_hit_health_sequence": [91, 78, 68, 51, 30],
+  "focused_controls": {
+    "controller_edge_mutations_rejected": 4,
+    "button1_mutations_rejected": 12,
+    "special_input_mutations_rejected": 2,
+    "total_real_mutations_rejected": 18
+  },
+  "target": {
+    "entry_wiring_suppressions_rejected": 130,
+    "game_bin_bytes": 373968,
+    "game_bin_sha256": "068bc8dfd8fa059bfd811e79746310688810877a1334108c8743ce8cf121339d",
+    "bss_end": "0x060b25e0",
+    "content_archive_sha256": "ccf8795a147daf337c1f72364c81f05fc2cfd255d8d21b40a56c74c97f8d15bd"
+  },
+  "scene_differential": {
+    "result": "RED_NEXT_PROGRAM",
+    "first_divergence_source_frame": 5458,
+    "failure_code": 11,
+    "source_slot": "0x00ff9e80",
+    "state": "0x0208",
+    "substate": "0x1004",
+    "animation_record": "0x0012d628",
+    "native_failure_ledger_sha256": "1069882da7909273f9f72332286ff6f8a662bcc39c8e1ac4683ee197ae4212db"
+  },
+  "visual_gate": {
+    "mode": "MCP_FRAMEBUFFER_BURST",
+    "evidence_tier": "ONE_EMULATOR",
+    "manifest_sha256": "74884ce0e02f6df0a86e849d898dd67579a1140cb2402222bf2fb1f06f409ded",
+    "frame_hash_sequence_sha256": "8a8db749b24ec811232816532d53c212b20ee87b9479e0772f7cf5f80716f123",
+    "captured_frames": 31,
+    "stable_inspected_frames": [9426, 9448],
+    "unique_frame_hashes": 6,
+    "breakpoint_resume_preroll_excluded": [9418, 9425],
+    "direct_inspection": "PASS",
+    "observed": [
+      "stable Predator Warrior identity",
+      "P1-only HUD",
+      "source-owned alien population and animation",
+      "coherent VDP2 planes",
+      "stable palette and priority"
+    ]
+  },
+  "capture_profile": {
+    "temporary_autotest_freeze_extension_committed": false,
+    "normal_autotest_last_frame_restored": 574,
+    "video_core_restored": 4,
+    "sound_core_restored": 1,
+    "stray_emulator_processes": 0
+  },
+  "candidate_promoted": false,
+  "physical_saturn": "UNRUN"
+}

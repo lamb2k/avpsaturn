@@ -78,6 +78,8 @@ avsp_round1_find_player_hit_reaction(unsigned char source_record_type,
 static int avsp_round1_player_special_guard(
     const AvspRound1Runtime *runtime, unsigned char current,
     unsigned char previous);
+static int avsp_round1_player_special_physical_guard(
+    unsigned char current, unsigned char previous);
 static unsigned char avsp_round1_class1f_inner8_direction(
     const AvspRound1ActorCore *actor, short target_x, short target_z);
 static int avsp_round1_step_coffee_exit_player(AvspRound1Runtime *runtime);
@@ -88,6 +90,8 @@ static int avsp_round1_step_player_jump_animation(
 static void avsp_round1_bind_player_walk_record(
     AvspRound1Runtime *runtime, unsigned char index);
 static void avsp_round1_advance_player_walk_animation(
+    AvspRound1Runtime *runtime);
+static int avsp_round1_apply_player_stage_progress(
     AvspRound1Runtime *runtime);
 static void avsp_round1_begin_player_special(AvspRound1Runtime *runtime);
 static int avsp_round1_step_player_special(AvspRound1Runtime *runtime);
@@ -10727,9 +10731,8 @@ static int avsp_round1_allocate_player_special_class4b(
     return avsp_round1_allocate_player_special_class3d(runtime, effect, 0u);
 }
 
-static int avsp_round1_player_special_guard(
-    const AvspRound1Runtime *runtime, unsigned char current,
-    unsigned char previous)
+static int avsp_round1_player_special_physical_guard(
+    unsigned char current, unsigned char previous)
 {
     unsigned char new_buttons = (unsigned char)(current &
         (unsigned char)~previous & 0x70u);
@@ -10740,10 +10743,6 @@ static int avsp_round1_player_special_guard(
         count = (unsigned char)(count + (bits & 1u));
         bits >>= 1;
     }
-    if (runtime->player_special_attack_active ||
-        runtime->player.health == 0 ||
-        runtime->player_special_owner_contact != 0u)
-        return 0;
     if (count >= 2u)
         return 1;
     if ((current & AVSP_ROUND1_INPUT_BUTTON1) != 0u &&
@@ -10754,6 +10753,17 @@ static int avsp_round1_player_special_guard(
     return (current & AVSP_ROUND1_INPUT_BUTTON3) != 0u &&
         (previous & AVSP_ROUND1_INPUT_BUTTON3) != 0u &&
         (new_buttons & AVSP_ROUND1_INPUT_BUTTON1) != 0u;
+}
+
+static int avsp_round1_player_special_guard(
+    const AvspRound1Runtime *runtime, unsigned char current,
+    unsigned char previous)
+{
+    if (runtime->player_special_attack_active ||
+        runtime->player.health == 0 ||
+        runtime->player_special_owner_contact != 0u)
+        return 0;
+    return avsp_round1_player_special_physical_guard(current, previous);
 }
 
 static void avsp_round1_begin_player_special(AvspRound1Runtime *runtime)
@@ -10970,8 +10980,10 @@ static int avsp_round1_begin_player_air_weapon(AvspRound1Runtime *runtime,
                                                 unsigned short input_mask)
 {
     int allocated;
-    if (runtime->player_resource < avsp_round1_player_weapon.resource_debit)
+    if (runtime->player_resource_depleted)
         return 1;
+    if (!avsp_round1_apply_player_stage_progress(runtime))
+        return 0;
     runtime->player_jump_phase = 0x0406u;
     runtime->player.source_action = 0x0406u;
     runtime->player_jump_collision_selector =
@@ -10982,9 +10994,16 @@ static int avsp_round1_begin_player_air_weapon(AvspRound1Runtime *runtime,
         runtime, input_mask);
     if (allocated)
     {
-        runtime->player_resource = (unsigned char)(
-            runtime->player_resource -
-            avsp_round1_player_weapon.resource_debit);
+        if (runtime->player_resource >
+                avsp_round1_player_weapon.resource_debit)
+            runtime->player_resource = (unsigned char)(
+                runtime->player_resource -
+                avsp_round1_player_weapon.resource_debit);
+        else
+        {
+            runtime->player_resource = 0u;
+            runtime->player_resource_depleted = 1u;
+        }
         runtime->player_resource_recharge =
             avsp_round1_player_weapon.recharge_after_success;
         ++runtime->player_weapon_resource_debits;
@@ -12652,6 +12671,7 @@ int avsp_round1_step_player(AvspRound1Runtime *runtime,
     unsigned char jump_began;
     unsigned char special_buttons;
     unsigned char special_physical_candidate;
+    unsigned char special_pipeline_candidate;
     unsigned char special_pressed;
     unsigned char special_edge;
     unsigned char special_owned;
@@ -12748,12 +12768,16 @@ int avsp_round1_step_player(AvspRound1Runtime *runtime,
     jump_edge = (unsigned char)(jump_pressed &&
         !runtime->player_jump_previous_pressed);
     special_buttons = runtime->player_special_input_pipeline;
-    special_physical_candidate = (unsigned char)
-        avsp_round1_player_special_guard(runtime,
+    special_pipeline_candidate = (unsigned char)
+        avsp_round1_player_special_physical_guard(
+            special_buttons, runtime->player_special_previous_buttons);
+    special_physical_candidate = (unsigned char)(
+        special_pipeline_candidate ||
+        avsp_round1_player_special_physical_guard(
             (unsigned char)(input_mask &
                 (AVSP_ROUND1_INPUT_BUTTON1 | AVSP_PW_INPUT_ATTACK |
                  AVSP_ROUND1_INPUT_BUTTON3)),
-            special_buttons);
+            special_buttons));
     special_pressed = (unsigned char)(
         (special_buttons & (AVSP_ROUND1_INPUT_BUTTON1 |
                             AVSP_PW_INPUT_ATTACK)) ==
@@ -12795,7 +12819,8 @@ int avsp_round1_step_player(AvspRound1Runtime *runtime,
     weapon_edge = (unsigned char)(weapon_pressed &&
         !runtime->player_weapon_previous_pressed);
     if (runtime->player_contextual_melee_active && weapon_edge &&
-        (input_mask & AVSP_PW_INPUT_ATTACK) == 0u)
+        ((input_mask & AVSP_PW_INPUT_ATTACK) == 0u ||
+         special_physical_candidate))
     {
         runtime->player_contextual_melee_active = 0u;
         runtime->player_contextual_melee_dispatch_delay = 0u;
@@ -12803,7 +12828,9 @@ int avsp_round1_step_player(AvspRound1Runtime *runtime,
         avsp_round1_reset_contextual_player_action(runtime);
     }
     if (jump_owned && runtime->player_jump_phase == 0x0402u &&
-        weapon_edge && (input_mask & AVSP_PW_INPUT_ATTACK) == 0u &&
+        weapon_edge &&
+        ((input_mask & AVSP_PW_INPUT_ATTACK) == 0u ||
+         special_physical_candidate) &&
         !avsp_round1_begin_player_air_weapon(runtime, input_mask))
     {
         ++runtime->failure_count;
@@ -12826,7 +12853,9 @@ int avsp_round1_step_player(AvspRound1Runtime *runtime,
         runtime->player_action.state == AVSP_PW_STATE_CONTROL &&
         received_damage <= 0 &&
         (recovery_start ||
-         (weapon_edge && (input_mask & AVSP_PW_INPUT_ATTACK) == 0u)))
+         (weapon_edge &&
+          ((input_mask & AVSP_PW_INPUT_ATTACK) == 0u ||
+           special_physical_candidate))))
     {
         runtime->player_weapon_recovery_pending = 0u;
         runtime->player_weapon_return_pending = 0u;

@@ -11,38 +11,38 @@ Read `project_state.yaml`, the active card, current SPEC-02 contract/fixtures,
 Do not create another Goal, roadmap, workflow, branch, task hierarchy,
 coverage system, or writer.
 
-Workflow pivot / Preserved evidence work: Resume the AvP salvage Goal; retain
-SALVAGE-00-OLD-BUILD-BASELINE, USER-01-PLAYER-BASELINE-REVIEW, and
-`597f4ed517d4e715d814ff841bd00d3977803f85`.
+Workflow pivot / Preserved evidence work: Resume the AvP salvage Goal; retain SALVAGE-00-OLD-BUILD-BASELINE, USER-01-PLAYER-BASELINE-REVIEW, and `597f4ed517d4e715d814ff841bd00d3977803f85`.
 
 ## Closed checkpoints
-Coffee Shop native authority is closed through source frame 5566 except the
-preserved frame-3782 stage-progress mismatch. P2 is cumulatively closed
+Coffee Shop native authority is now source-aligned through frame 5457. The
+P4 owning-program checkpoint corrected the source scheduler handoff at frame
+2072, which restores the frame-3771 HIT and naturally removes the false
+frame-3782 Button1 dispatch. It also closes the complete airborne Button1
+resource/stage-progress rule at frame 4696 and zero-health special/Button1
+arbitration at frame 5102. Focused lanes reject 18 real mutations; Target
+wiring rejects 130 suppressions. The normal Target is 373,968 bytes,
+GAME.BIN `068bc8df...339d`, BSS end `0x060b25e0`, archive unchanged.
+
+The ONE_EMULATOR burst manifest is `74884ce0...9ded`; direct inspection of
+the stable transition frames passes Predator identity, P1-only HUD, alien
+population/animation, both VDP2 planes, palette and priority. The temporary
+visual-only freeze extension was not committed; the normal frame-574 freeze,
+VideoCore 4, SoundCore 1 and zero emulator processes are restored.
+
+P2 is cumulatively closed
 through the stable Round 2 seam at frame 15193; all authority, table and
 capacity gates pass, and Round 2 gameplay was not censused. The memory plan
 and cart archive `ccf8795a...15bd` remain unchanged. The MCP capture lane and
 physical-only cart-to-VDP1 CPU-copy rule remain locked.
 
-All nine P3 actor and seven route programs are SPEC-executable. Presentation,
-projectile, boss and enemy audio are committed and paired-emulator green.
-Enemy audio is SPEC-executable: 83 groups, 14 commands, 182 exact contexts,
-228 occurrences, ten origins, four type/class pairs and 18 exact caller
-programs. Artifact SHA is `5d4fff53...37ae`; fixture `8aadcc83...3bca`;
-contract `12c61b10...7ea5`. Focused 19 and aggregate 180 mutations reject.
-Fast/Oracle reach only frame-3782 RED. Target passes; GAME.BIN is
-`0e6fc6cb...cc4b`, archive unchanged. Paired semantics are `1a6a8c39...2f59`
-and normalized ISO is `615cd156...a848`; settings are restored 4/1.
-Route audio is committed and paired-emulator green. Encounter audio is
-SPEC-executable: four groups/commands, six contexts, nine occurrences, two
-origins, pseudo-owner type/class 00/00 and four caller programs. Artifact is
-`465c4bf0...c677`; fixture `509b58de...53bb`; contract `d83c6422...f879`;
-focused 19 and aggregate 180 mutations reject. Fast/Oracle reach only
-frame-3782 RED. Target passes; GAME.BIN is `a1c8428d...8e35`, archive unchanged.
-Paired semantics are `1a6a8c39...2f59`; normalized ISO is `728a2a09...0c9d`;
-settings are restored 4/1. All P2-discovered P3 families are now complete.
+All P2-discovered P3 families are complete: nine actor programs, seven route
+programs and six audio-owner families are SPEC-executable, mutation-locked,
+Target-green and commit-bound emulator-green. Preserve their card evidence.
 ## Exact next sequence
-Begin P4 at the preserved source-frame 3782 stage-progress discrepancy. Use it
-only to identify the complete owning source program, implement every reachable
-branch from SPEC-02, and run focused differential plus MCP burst visual gate.
+Continue P4 at the new earliest source/native divergence, frame 5458: class
+`0x1f`, slot `0x00ff9e80`, state/substate `0x0208:0x1004`, animation record
+`0x0012d628`, scheduler failure code 11. Close every Coffee-Shop-reachable
+branch of its complete owning action-`0x10` program from SPEC-02, then rerun
+focused mutations, Target, the whole-scene differential and MCP burst gate.
 Keep the candidate frozen and Coffee Shop RED until its zero-gap gate passes.
 Never commit captures, PNGs, ROMs, ISOs, dumps, or protected user files.

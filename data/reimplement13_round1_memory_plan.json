@@ -130,9 +130,9 @@
     "writer_reconciliation_sha256": "e9508e1c621e6448953549817b8d66e9399cbce97f06d7883c013776f34fc39c"
   },
   "work_ram": {
-    "bss_end": "0x060b2560",
-    "bss_headroom_bytes": 55968,
-    "game_bin_bytes": 373840,
+    "bss_end": "0x060b25e0",
+    "bss_headroom_bytes": 55840,
+    "game_bin_bytes": 373968,
     "jo_user_program_data_end_exclusive": "0x060c0000",
     "linked_capacity_bytes": 770048,
     "linked_image_base": "0x06004000",

@@ -3534,3 +3534,41 @@ P2-discovered reusable actor, route and audio-owner family.
 
 Begin P4 with the preserved source frame-3782 stage-progress discrepancy and
 close its complete owning program.
+
+### P4 Coffee Shop scheduler/player owning-program checkpoint (2026-09-01)
+
+The frame-3782 discrepancy belonged to the reusable Coffee Shop scheduler
+handoff, not a frame-specific stage-progress rule. Native started its first
+source scheduler phase from `entry.spawned`; source starts it when entry
+dependencies are seeded at frame 2072. Moving that boundary restores the five
+accepted player HIT writes (health 91, 78, 68, 51, 30), including the missing
+frame-3771 HIT that naturally suppresses the false frame-3782 Button1 action.
+
+The same body closes every currently reached player branch through frame 5457:
+airborne Button1 at frame 4696 uses the depleted latch rather than a 40-point
+threshold, advances source stage progress, and saturates a partial resource
+debit to zero; at frame 5102, zero health rejects the special combo without
+stealing the independent Button1 action. No fixed-frame delay or authored
+suppression was added.
+
+Controller, Button1 and special-input lanes reject 4, 12 and 2 real mutations
+respectively. Target wiring rejects 130 suppressions; SPEC entry data is
+current. The complete scene advances to the next real RED at source frame
+5458: slot `0x00ff9e80`, class `0x1f`, state/substate `0x0208:0x1004`, record
+`0x0012d628`, scheduler failure code 11. Normal release GAME.BIN is 373,968
+bytes at SHA-256 `068bc8dfd8fa059bfd811e79746310688810877a1334108c8743ce8cf121339d`,
+BSS end is `0x060b25e0`, and the cart archive remains `ccf8795a...15bd`.
+
+A temporary uncommitted extension of the existing diagnostic freeze enabled
+the required ONE_EMULATOR burst at the transition; the normal frame-574 freeze
+was restored and rebuilt afterward. Manifest SHA-256 is
+`74884ce0e02f6df0a86e849d898dd67579a1140cb2402222bf2fb1f06f409ded`.
+After excluding breakpoint-resume pre-roll, direct inspection passes stable
+Predator identity, P1-only HUD, source-owned alien population/animation, both
+VDP2 planes, palette and priority. Captures remain ignored; Video/Sound are
+restored to 4/1, no emulator process remains, candidate promotion is false and
+physical Saturn remains UNRUN. Evidence is
+`data/reimplement13_p4_coffee_scheduler_player_program.json`.
+
+Continue P4 at frame 5458 and close every Coffee-Shop-reachable branch of the
+complete owning class-`0x1f` action-`0x10` program.
