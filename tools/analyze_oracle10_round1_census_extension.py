@@ -27,6 +27,11 @@ PROFILES = {
         "id": "round1-continue-countdown-to-credited-return",
         "output": "oracle10_round1_census_extension_6201_6692.json",
     },
+    "warehouse_stalker_1": {
+        "first": 6693, "last": 7438,
+        "id": "round1-warehouse-stalker-first-gameplay-run",
+        "output": "oracle10_round1_census_extension_6693_7438.json",
+    },
 }
 WORKRAM_BASE = 0xFF0000
 PLAYER = 0xFF8380
@@ -164,6 +169,18 @@ OWNER = {
     ("0x07", 20): ("round1-navigation-terrain-camera",
                      "data/oracle11_round1_navigation.json"),
     ("0x49", 24): (
+        "pickups-equipment-weapons-projectiles-hazards-destructibles",
+        "data/oracle11_round1_auxiliary_authority.json"),
+    ("0x10", 24): (
+        "pickups-equipment-weapons-projectiles-hazards-destructibles",
+        "data/oracle11_round1_auxiliary_authority.json"),
+    ("0x3d", 24): (
+        "pickups-equipment-weapons-projectiles-hazards-destructibles",
+        "data/oracle11_round1_auxiliary_authority.json"),
+    ("0x4b", 24): (
+        "pickups-equipment-weapons-projectiles-hazards-destructibles",
+        "data/oracle11_round1_auxiliary_authority.json"),
+    ("0x4e", 24): (
         "pickups-equipment-weapons-projectiles-hazards-destructibles",
         "data/oracle11_round1_auxiliary_authority.json"),
 }
@@ -311,13 +328,27 @@ def main() -> None:
             ["counterfactuals"]["suppress_warehouse_offense"],
             "suppress_load_6200": boundaries[0]["failure_control"],
         }
-    else:
+    elif args.segment == "continue":
         continue_authority = load("oracle11_predator_hitko_continue.json")
         targeted_counterfactuals = {
             "failure_continue": continue_authority["failure_continue"],
             "input_counterfactuals": continue_authority["counterfactuals"],
             "route_wide_perturbation_difference": route
             ["route_wide_perturbation"]["first_semantic_difference"],
+        }
+    else:
+        continue_authority = load("oracle11_predator_hitko_continue.json")
+        auxiliary = load("oracle11_round1_auxiliary_authority.json")
+        observed_pairs = {(row["class"], row["type"]) for row in inventory}
+        targeted_counterfactuals = {
+            "respawn_return": continue_authority["respawn_return"],
+            "continue_input_controls": continue_authority["counterfactuals"],
+            "auxiliary_class_controls": [
+                {"class": row["class"], "type": row["type"],
+                 "counterfactual": row["counterfactual"]}
+                for row in auxiliary["archetypes"]
+                if (row["class"], row["type"]) in observed_pairs],
+            "auxiliary_zero_gap_coverage": auxiliary["coverage"],
         }
 
     report = {

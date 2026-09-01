@@ -83471,15 +83471,17 @@
   "overnight_census_extension": {
     "accepted_evidence": [
       "data/oracle10_round1_census_extension_5567_6200.json",
-      "data/oracle10_round1_census_extension_6201_6692.json"
+      "data/oracle10_round1_census_extension_6201_6692.json",
+      "data/oracle10_round1_census_extension_6693_7438.json"
     ],
     "accepted_evidence_sha256": [
       "1eeb385455a62edb0d21bf48790aa7ac34c6a29408b40792197ee0798370d9c0",
-      "0cb1e3a8267a4557960705f43a1543283361172415a3d457199901e92455d400"
+      "0cb1e3a8267a4557960705f43a1543283361172415a3d457199901e92455d400",
+      "8fdb7c05d4da1b35aa761f78abbbc182d66b1074edd4dc5a1bfe80464b9f3cc9"
     ],
-    "class_type_pairs": 5,
+    "class_type_pairs": 9,
     "orphan_authority_events": 0,
-    "source_frame_range": [5567, 6692]
+    "source_frame_range": [5567, 7438]
   },
   "status": "SOURCE_CLOSED",
   "task": "ORACLE-11-ROUND1-REACHABLE-LOGIC-CLOSURE"

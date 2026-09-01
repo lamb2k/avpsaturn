@@ -2265,3 +2265,29 @@ Shop exit controller: encounter clear, actor teardown/replacement, route edges
 at 5453/5524/5562, and load boundaries at 5565/5566. Use accepted Oracle/SPEC
 evidence or the smallest required fixture amendment; do not add an authored
 delay, fixed-frame teardown, isolated state context, or ad-hoc size squeeze.
+
+### Overnight census segment 6693..7438 checkpoint (2026-08-31)
+
+The first warehouse-stalker gameplay run is census-closed from the credited
+route-state return through source frame 7438. Two independently launched raw
+captures and both route-ledger sets remain byte-identical. Their 746-frame
+fixed-pool semantic projection has SHA-256
+`00fdcda6ef8e9c8e02190fc6e5892951898570bffc07ae718ddd98ced61595e4`.
+The source respawns Predator Warrior at frame 6723 and returns control at 6786;
+all 716 active-player frames retain character `0`, class/type `0/0`, and an
+accepted Predator animation record.
+
+The census binds 48 actor lifetimes across nine class/type pairs, including
+the player, enemy classes `0x00/0x06`, navigation `0x07`, and source-owned
+type-24 auxiliary classes `0x10/0x3d/0x49/0x4b/0x4e`. It records 44 spawn and
+44 despawn edges, 55 enemy HIT/KO transitions, 64 logical audio-handler
+transactions, no load boundary, and every overlapping camera run. Accepted
+respawn/input and per-auxiliary-class counterfactuals discriminate these
+owners. There are zero unidentified class/type pairs, unowned lifetimes,
+unmapped lifecycle edges, or orphan route/camera/audio/load/identity events.
+
+The evidence artifact SHA-256 is
+`8fdb7c05d4da1b35aa761f78abbbc182d66b1074edd4dc5a1bfe80464b9f3cc9`.
+P3 remains deferred until P2 reaches Round 1 clear. Continue P2 at source frame
+7439 through the next source scene in scene order with the same paired capture,
+identity, route, audio, load, RNG, and counterfactual ceremony.
