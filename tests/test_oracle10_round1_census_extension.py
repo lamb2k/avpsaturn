@@ -35,6 +35,9 @@ STALKER3_INTERWAVE = json.loads(
 STALKER3 = json.loads(
     (ROOT / "data/oracle10_round1_census_extension_11542_12442.json")
     .read_text(encoding="ascii"))
+WAREHOUSE3_ENTRY = json.loads(
+    (ROOT / "data/oracle10_round1_census_extension_12443_12477.json")
+    .read_text(encoding="ascii"))
 GENERATOR = (ROOT / "tools/analyze_oracle10_round1_census_extension.py") \
     .read_text(encoding="utf-8")
 
@@ -785,5 +788,65 @@ for label, path, value in (
         continue
     raise AssertionError(f"Stalker 3 census mutation accepted: {label}")
 
-print("ORACLE-10 Round 1 census extension 5567..12442: PASS "
-      "(65 mutations rejected)")
+
+def validate_warehouse3_entry(report: dict[str, object]) -> None:
+    semantics = report["paired_capture_ceremony"]["segment_semantics"]
+    census = report["scene_census_delta"]
+    controls = report["targeted_counterfactuals"]
+    assert report["status"] == "CENSUS_SEGMENT_COMPLETE"
+    assert report["segment"]["source_frame_range"] == [12443, 12477]
+    assert len(report["segment"]["scene_ids"]) == 11
+    assert report["paired_capture_ceremony"]["raw_capture_files_byte_identical"] is True
+    assert report["paired_capture_ceremony"]["paired_route_ledgers_byte_identical"] is True
+    assert semantics["frame_count"] == 35
+    assert semantics["canonical_semantic_sha256"] == \
+        "fec4caf85e842696db67bce8daf82fed479d39c4ac18a9aae53edb14cc1f9ce6"
+    assert semantics["player_active_frames"] == 35
+    assert semantics["character_mismatch_frames"] == []
+    assert semantics["identity_mismatch_frames"] == []
+    assert [(row["class"], row["type"], row["instance_count"])
+            for row in census["class_type_inventory"]] == [
+                ("0x00", 0, 1), ("0x01", 12, 1), ("0x06", 12, 1),
+                ("0x07", 20, 1), ("0x10", 24, 2)]
+    assert len(census["actor_lifetimes"]) == 6
+    assert len(census["spawn_edges"]) == 1
+    assert len(census["despawn_edges"]) == 1
+    assert census["hit_ko_transitions"] == []
+    assert census["audio"]["handler_transaction_count"] == 0
+    assert census["load_release_boundaries"] == []
+    assert report["route_authority_extension"]["route_state_edges"] == []
+    assert len(report["route_authority_extension"]["camera_lock_runs"]) == 1
+    assert len(controls["presentation_boundaries"]) == 11
+    assert all(row["owns_progression"] is False
+               for row in controls["presentation_boundaries"])
+    assert len(controls["enemy_class_controls"]) == 2
+    assert len(controls["auxiliary_class_controls"]) == 2
+    assert all(value == 0 for value in report["coverage"].values())
+    assert report["physical_saturn"] == "UNRUN"
+
+
+validate_warehouse3_entry(WAREHOUSE3_ENTRY)
+for label, path, value in (
+        ("warehouse3 entry semantic",
+         ("paired_capture_ceremony", "segment_semantics",
+          "canonical_semantic_sha256"), "0" * 64),
+        ("warehouse3 entry identity",
+         ("paired_capture_ceremony", "segment_semantics",
+          "identity_mismatch_frames"), [12460]),
+        ("warehouse3 entry presentation",
+         ("targeted_counterfactuals", "presentation_boundaries"), []),
+        ("warehouse3 entry orphan", ("coverage", "unowned_actor_lifetimes"), 1),
+        ("warehouse3 entry physical", ("physical_saturn",), "PASS")):
+    mutant = copy.deepcopy(WAREHOUSE3_ENTRY)
+    target = mutant
+    for key in path[:-1]:
+        target = target[key]
+    target[path[-1]] = value
+    try:
+        validate_warehouse3_entry(mutant)
+    except AssertionError:
+        continue
+    raise AssertionError(f"Warehouse gameplay 3 entry mutation accepted: {label}")
+
+print("ORACLE-10 Round 1 census extension 5567..12477: PASS "
+      "(70 mutations rejected)")

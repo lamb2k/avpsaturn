@@ -72,6 +72,11 @@ PROFILES = {
         "id": "round1-warehouse-stalker-three-gameplay",
         "output": "oracle10_round1_census_extension_11542_12442.json",
     },
+    "warehouse_gameplay3_entry": {
+        "first": 12443, "last": 12477,
+        "id": "round1-warehouse-gameplay-three-entry-cluster",
+        "output": "oracle10_round1_census_extension_12443_12477.json",
+    },
 }
 WORKRAM_BASE = 0xFF0000
 PLAYER = 0xFF8380

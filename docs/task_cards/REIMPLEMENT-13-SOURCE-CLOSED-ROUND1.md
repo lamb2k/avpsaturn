@@ -2429,3 +2429,15 @@ remains in the accepted camera run. All controls remain discriminating and no
 authority event is orphaned. Evidence artifact SHA-256 is
 `96897579957165df8fa72dacd4853ad8de3fb2d93b86cd6e89538900d0641231`.
 Continue P2 at source frame 12443 through the next source boundary.
+
+### Overnight census segment 12443..12477 checkpoint (2026-09-01)
+
+The warehouse-gameplay-three entry cluster is census-closed as one 35-frame
+source-owned presentation boundary. Paired semantic SHA-256 is
+`fec4caf85e842696db67bce8daf82fed479d39c4ac18a9aae53edb14cc1f9ce6`;
+Predator identity remains exact. Six lifetimes across five owned pairs produce
+one spawn and one despawn, with no HIT/KO or audio transaction. All 11 visual
+signatures own no progression and zero authority event is orphaned. Evidence
+SHA-256 is
+`0e4a78338a3f5054a9389c92e64f6e62cadbf9f35485e75bc5f96dc2b15c0f7a`.
+Continue P2 at frame 12478 through `round1-warehouse-gameplay-3`.
