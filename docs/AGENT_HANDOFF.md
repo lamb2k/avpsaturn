@@ -32,18 +32,17 @@ inspection. Settings were restored to VideoCore 4 / SoundCore 1. Evidence is
 P2 is closed through stable Round 2 seam frame 15193; closure SHA is
 `b5c72089...f94b3`, all authority/table/capacity gates pass, and Round 2 gameplay
 was not censused. All nine P3 actor programs and all seven route programs are
-SPEC-executable. The first-demand presentation-audio family is also executable:
-eight source-closed commands, 20 owner contexts, 53 occurrences and eight exact
-offline-decoded caller programs. Guards, arguments, shared wrappers, grouped
-handler/QSound transactions and causal controls are bound; semantic names remain
-UNKNOWN. Artifact SHA is `32fb5e95...3753`; focused 16 and SPEC 180 mutations
-pass. Aggregate fixture is `8f824c0e...b321`, contract `5b50fdf5...f807`.
-Fast/Oracle reach only accepted P4 frame-3782 RED. Debug and release-live Target
-pass; GAME.BIN is `236d9bd6...e5b5`, archive `ccf8795a...15bd`. Two commit-bound
-cold debug-rig runs pass identical 575-sample ledgers at ISO `71fc5794...5f11`; settings are 4/1.
-No gameplay-semantic change, promotion or WGC.
-Exact next experiment: close the first-demand projectile-audio owner family at
-source frame 5762 as one reusable owner-family body. Bind every reachable
-projectile caller/guard, exact command/arguments, shared-dispatch/handler
-transaction, state effects and audio/load/RNG ownership from retained evidence;
-regenerate once and run the full family ceremony. Never commit captures, PNGs, ROMs, ISOs, dumps, or protected user files.
+SPEC-executable. Presentation-audio is accepted and commit-bound emulator-green.
+Projectile-audio is SPEC-executable: 46 source-closed groups, six commands, 69
+type4/class04 contexts, 365 occurrences and all eight fixed-pool origins. Exact
+selector caller `01b862..01b86e` has SHA `9d1edb02...8df2`; grouped handler/QSound
+transactions are bound and semantic names remain UNKNOWN. Artifact SHA is
+`0cfb54fd...1803`; focused 18 and SPEC 180 mutations pass. Aggregate fixture is
+`64e29603...10e7`, contract `d46d699a...091`. Fast/Oracle reach only accepted P4
+frame-3782 RED. Debug and release-live Target pass; GAME.BIN is
+`ba5a4cd4...77cb`, archive `ccf8795a...15bd`. No gameplay-semantic change,
+promotion or WGC.
+Exact next experiment: commit this projectile SPEC body, run commit-bound pinned
+debug-rig Coffee Shop evidence with real mutations and restore settings 4/1,
+then close the boss-audio owner family at first demand source frame 5867. Never
+commit captures, PNGs, ROMs, ISOs, dumps, or protected user files.

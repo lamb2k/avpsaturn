@@ -3315,3 +3315,43 @@ Continue P3 with the first-demand projectile-audio owner family at source frame
 5762. Close all Round 1-reachable projectile callers and trigger guards, exact
 command/arguments, shared-dispatch and handler transactions, state effects and
 audio/load/RNG ownership as one reusable owner-family body.
+
+### P3 projectile-audio owner-family checkpoint (2026-09-01)
+
+The complete Round 1 projectile-owned audio family is SPEC-executable from the
+accepted paired trigger, shared-command and handler ledgers plus the exact
+offline opcode image. Forty-six source-closed trigger groups bind commands
+`0x004d`, `0x004e`, `0x004f`, `0x0118`, `0x0119` and `0x011a` across 69
+distinct source contexts and 365 dispatch occurrences. All contexts are
+record type 4 / class `0x04`, and all eight fixed-pool origins from `0xff8680`
+through `0xff8a00` are accounted for.
+
+The exact reusable selector caller is `0x01b862..0x01b86e`, with callsite
+`0x01b86c`, opcode bytes `d040d040207b001070004e90` and SHA-256
+`9d1edb02752dc07b730ab282720c2919839367a5a3bf643934f7c6b884c98df2`.
+It doubles the signed selector twice, loads the handler from the indexed table,
+zeros `d0`, and calls the selected owner transaction. Grouped handler/QSound
+transactions remain logical events; individual QSound register writes do not.
+Semantic sound names remain `UNKNOWN`.
+
+The family owns no gameplay projection, logical load/release or RNG. Its
+artifact SHA-256 is
+`0cfb54fd7367d8c321f910e614400fad808d4d98a56bd9808bc470ffebe31803`.
+Eighteen focused and all 180 aggregate SPEC mutations reject. Aggregate fixture
+SHA-256 is
+`64e296032447915a5d499a279daefe200b99cb1e29de379ced602847e14ce0e7`;
+contract SHA-256 is
+`d46d699aa6703e718462e454bb5141101ea20231d48897ddead49014f3404091`.
+
+Fast and Oracle pass every Oracle/SPEC prerequisite and stop only at the
+accepted P4 frame-3782 RED. Debug and release/live-encounter Target pass.
+Release GAME.BIN is 373,840 bytes at SHA-256
+`ba5a4cd46840c74129593017e27f1e987bcec3d16a0ac8c657b28afc337277cb`;
+the cart archive remains
+`ccf8795a147daf337c1f72364c81f05fc2cfd255d8d21b40a56c74c97f8d15bd`.
+This SPEC-only body changes no gameplay semantics, does not promote the
+candidate and does not trigger WGC. Commit-bound pinned-emulator evidence is
+the remaining checkpoint action.
+
+After commit-bound emulator evidence, continue P3 with the first-demand
+boss-audio owner family at source frame 5867 as one reusable owner-family body.
