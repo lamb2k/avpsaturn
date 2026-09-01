@@ -32,6 +32,11 @@ PROFILES = {
         "id": "round1-warehouse-stalker-first-gameplay-run",
         "output": "oracle10_round1_census_extension_6693_7438.json",
     },
+    "warehouse_interwave": {
+        "first": 7439, "last": 7503,
+        "id": "round1-warehouse-stalker-interwave-presentation-cluster",
+        "output": "oracle10_round1_census_extension_7439_7503.json",
+    },
 }
 WORKRAM_BASE = 0xFF0000
 PLAYER = 0xFF8380
@@ -336,7 +341,7 @@ def main() -> None:
             "route_wide_perturbation_difference": route
             ["route_wide_perturbation"]["first_semantic_difference"],
         }
-    else:
+    elif args.segment == "warehouse_stalker_1":
         continue_authority = load("oracle11_predator_hitko_continue.json")
         auxiliary = load("oracle11_round1_auxiliary_authority.json")
         observed_pairs = {(row["class"], row["type"]) for row in inventory}
@@ -349,6 +354,27 @@ def main() -> None:
                 for row in auxiliary["archetypes"]
                 if (row["class"], row["type"]) in observed_pairs],
             "auxiliary_zero_gap_coverage": auxiliary["coverage"],
+        }
+    else:
+        auxiliary = load("oracle11_round1_auxiliary_authority.json")
+        observed_pairs = {(row["class"], row["type"]) for row in inventory}
+        targeted_counterfactuals = {
+            "presentation_boundaries": [
+                row["presentation_boundary"] for row in segment_bindings],
+            "enemy_class_controls": [
+                {"class": row["class"], "type": row["type"],
+                 "counterfactuals": row["counterfactuals"]}
+                for row in enemy["archetypes"]
+                if (row["class"], row["type"]) in observed_pairs],
+            "auxiliary_class_controls": [
+                {"class": row["class"], "type": row["type"],
+                 "counterfactual": row["counterfactual"]}
+                for row in auxiliary["archetypes"]
+                if (row["class"], row["type"]) in observed_pairs],
+            "navigation_route_wide": navigation["counterfactuals"]
+            ["oracle10_route_wide"],
+            "route_wide_perturbation_difference": route
+            ["route_wide_perturbation"]["first_semantic_difference"],
         }
 
     report = {

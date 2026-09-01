@@ -14,6 +14,8 @@ CONTINUE = json.loads((ROOT / "data/oracle10_round1_census_extension_6201_6692.j
                       .read_text(encoding="ascii"))
 WAREHOUSE = json.loads((ROOT / "data/oracle10_round1_census_extension_6693_7438.json")
                        .read_text(encoding="ascii"))
+INTERWAVE = json.loads((ROOT / "data/oracle10_round1_census_extension_7439_7503.json")
+                       .read_text(encoding="ascii"))
 GENERATOR = (ROOT / "tools/analyze_oracle10_round1_census_extension.py") \
     .read_text(encoding="utf-8")
 
@@ -234,5 +236,75 @@ for label, path, value in (
         continue
     raise AssertionError(f"Warehouse census mutation accepted: {label}")
 
-print("ORACLE-10 Round 1 census extension 5567..7438: PASS "
-      "(21 mutations rejected)")
+
+def validate_interwave(report: dict[str, object]) -> None:
+    ceremony = report["paired_capture_ceremony"]
+    semantics = ceremony["segment_semantics"]
+    census = report["scene_census_delta"]
+    controls = report["targeted_counterfactuals"]
+    assert report["status"] == "CENSUS_SEGMENT_COMPLETE"
+    assert report["segment"]["source_frame_range"] == [7439, 7503]
+    assert len(report["segment"]["scene_ids"]) == 19
+    assert ceremony["raw_capture_files_byte_identical"] is True
+    assert ceremony["paired_route_ledgers_byte_identical"] is True
+    assert semantics["frame_count"] == 65
+    assert semantics["canonical_semantic_sha256"] == \
+        "f6c5cfa838a709a8538a0b763d953bdf71bc2c4d1ed8760c125163d399fad691"
+    assert semantics["player_active_frames"] == 65
+    assert semantics["character_mismatch_frames"] == []
+    assert semantics["identity_mismatch_frames"] == []
+    assert semantics["per_frame_character_identity_gate"] is True
+    assert [(row["class"], row["type"], row["instance_count"])
+            for row in census["class_type_inventory"]] == [
+                ("0x00", 0, 1), ("0x06", 12, 1),
+                ("0x07", 20, 1), ("0x10", 24, 1)]
+    assert len(census["actor_lifetimes"]) == 4
+    assert len(census["spawn_edges"]) == 1
+    assert len(census["despawn_edges"]) == 1
+    assert len(census["hit_ko_transitions"]) == 1
+    assert census["audio"]["handler_transaction_count"] == 3
+    assert census["audio"]["command_counts"] == {
+        "0x003e": 1, "0x010a": 1, "0x0200": 1}
+    assert census["audio"]["orphan_handler_transactions"] == 0
+    assert census["audio"]["orphan_trigger_groups"] == 0
+    assert census["load_release_boundaries"] == []
+    assert report["route_authority_extension"]["route_state_edges"] == []
+    assert len(report["route_authority_extension"]["camera_lock_runs"]) == 1
+    assert len(controls["presentation_boundaries"]) == 19
+    assert all(row["classification"] ==
+               "SOURCE_CLOSED_PRESENTATION_DEPENDENCY" and
+               row["owns_progression"] is False
+               for row in controls["presentation_boundaries"])
+    assert len(controls["enemy_class_controls"]) == 1
+    assert len(controls["auxiliary_class_controls"]) == 2
+    assert controls["navigation_route_wide"]["status"] == "PASS"
+    assert all(value == 0 for value in report["coverage"].values())
+    assert report["physical_saturn"] == "UNRUN"
+
+
+validate_interwave(INTERWAVE)
+for label, path, value in (
+        ("interwave semantic identity",
+         ("paired_capture_ceremony", "segment_semantics",
+          "canonical_semantic_sha256"), "0" * 64),
+        ("interwave missing presentation boundaries",
+         ("targeted_counterfactuals", "presentation_boundaries"), []),
+        ("interwave presentation owns progression",
+         ("targeted_counterfactuals", "presentation_boundaries", "0",
+          "owns_progression"), True),
+        ("interwave missing actor", ("scene_census_delta", "actor_lifetimes"), []),
+        ("interwave orphan audio", ("coverage", "unowned_audio_events"), 1),
+        ("interwave physical claim", ("physical_saturn",), "PASS")):
+    mutant = copy.deepcopy(INTERWAVE)
+    target = mutant
+    try:
+        for key in path[:-1]:
+            target = target[int(key)] if isinstance(target, list) else target[key]
+        target[path[-1]] = value
+        validate_interwave(mutant)
+    except AssertionError:
+        continue
+    raise AssertionError(f"Interwave census mutation accepted: {label}")
+
+print("ORACLE-10 Round 1 census extension 5567..7503: PASS "
+      "(27 mutations rejected)")

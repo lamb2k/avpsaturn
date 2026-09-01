@@ -2291,3 +2291,22 @@ The evidence artifact SHA-256 is
 P3 remains deferred until P2 reaches Round 1 clear. Continue P2 at source frame
 7439 through the next source scene in scene order with the same paired capture,
 identity, route, audio, load, RNG, and counterfactual ceremony.
+
+### Overnight census segment 7439..7503 checkpoint (2026-08-31)
+
+The 65-frame interwave presentation cluster between the first and second
+warehouse gameplay runs is census-closed as one coherent source-owned boundary,
+not 19 frame-level implementation bodies. The paired semantic projection has
+SHA-256 `f6c5cfa838a709a8538a0b763d953bdf71bc2c4d1ed8760c125163d399fad691`.
+Predator identity is stable on every frame. Four continuing lifetimes cover the
+player, class `0x06/12`, navigation `0x07/20`, and one bounded `0x10/24`
+effect; the effect supplies the only spawn and despawn edge. One accepted enemy
+HIT/KO transition and three player-origin audio transactions are bound.
+
+All 19 source presentation signatures are explicitly classified
+`SOURCE_CLOSED_PRESENTATION_DEPENDENCY` with `owns_progression=false`.
+Enemy, auxiliary, navigation, and route-wide controls remain discriminating;
+there are zero unowned actors, lifecycle edges, route/camera, audio, load,
+release, or identity events. Evidence SHA-256 is
+`adb7f0caf3cf538826f8210f1e322b88de5b501000ae995356cd83c0a94f405a`.
+Continue P2 at source frame 7504 through `round1-warehouse-stalker-2`.
