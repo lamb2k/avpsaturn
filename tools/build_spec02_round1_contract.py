@@ -24,6 +24,7 @@ SOURCES = {
     "class10_program": "data/spec02_class10_type24_program.json",
     "class3d_program": "data/spec02_class3d_type24_program.json",
     "class49_program": "data/spec02_class49_type24_program.json",
+    "class4b_program": "data/spec02_class4b_type24_program.json",
     "auxiliary": "data/oracle11_round1_auxiliary_authority.json",
     "route": "data/oracle11_round1_encounter_route_authority.json",
     "boss": "data/oracle11_round1_boss_orchestration.json",
@@ -280,6 +281,11 @@ def build_fields() -> list[dict[str, object]]:
           "/authority_data/auxiliary/archetypes/9/whole_routine_implementation_contract", "outer state dispatches only through the bounded source program; source phase guards select the two allocation helpers, retained slot animation fields preserve fixed-pool identity, the timer and variant-1 global delta own lifetime and motion, and fixed-pool release owns removal",
           ["actor.outer_state:u8", "actor.variant:u8", "actor.position:s16", "actor.animation_record:u32", "actor.animation_timer:u16", "actor.animation_branch:s16", "global.phase:u8", "global.variant1_x_delta:s16", "type24.free_count:u8"], ["actor.active:u8", "actor.class:u8", "actor.state:u8", "actor.variant:u8", "actor.position:s16", "actor.animation_record:u32", "actor.lifetime_timer:u8", "actor.presentation_fields", "type24.free_count:u8"],
           "/mutation_controls", "dispatch, helper variant, phase guard, timer, retained animation field, position copy, global delta, presentation or release mutation changes the paired class-0x49 semantic witness"),
+        f("auxiliary.class4b_type24_whole_program", "round1-projectile-pickup-hazard", "guarded_actor_program", True,
+          "class4b_program", "/", "0x08f86e class entry, four-way top-state dispatch, 32-record animation program, owner-contact guard, and every Round 1-reachable branch",
+          "/authority_data/auxiliary/archetypes/10/whole_routine_implementation_contract", "outer state dispatches only through the bounded source program; player-owned contact and animation-event guards, exact facing-relative position setup, shared animation wrap semantics, visibility submission and fixed-pool release own every transition",
+          ["actor.outer_state:u8", "actor.position:s16", "actor.facing:u8", "actor.animation_record:u32", "actor.animation_timer:u16", "actor.animation_branch:s16", "actor.owner_pointer:u16", "owner.contact:u8", "owner.animation_event:u8"], ["actor.state:u8", "actor.position:s16", "actor.animation_record:u32", "actor.presentation_fields", "type24.free_count:u8"],
+          "/mutation_controls", "dispatch, owner guard, facing offset, vertical placement, animation sequence/wrap, visibility or release mutation changes the paired class-0x4b semantic witness"),
         f("enemy.initial_transition_execution", "round1-enemy-archetypes", "guarded_state_program", True,
           "enemies", "/archetypes/3/initial_transition_contract", "0x0606aa/0x0606d4/0x0606fc initializers and 0x060b1a..0x060c1c transition bodies",
           "/authority_data/enemies/archetypes/3/initial_transition_contract", "route-global, timer, animation-branch, landing and source-pool guards own the three initial class-0x1f bodies",
@@ -1152,6 +1158,11 @@ def build_fixtures(source: dict[str, dict]) -> dict[str, object]:
                    if item["class"] == "0x49" and item["type"] == 24)
     class49["whole_routine_implementation_contract"] = copy.deepcopy(
         source["class49_program"])
+    class4b = next(item for item in
+                   fixtures["authority_data"]["auxiliary"]["archetypes"]
+                   if item["class"] == "0x4b" and item["type"] == 24)
+    class4b["whole_routine_implementation_contract"] = copy.deepcopy(
+        source["class4b_program"])
     fixtures["scene_manifests"] = {
         "coffee_shop": build_coffee_shop_scene_manifest(source)}
     return fixtures
@@ -1914,6 +1925,35 @@ def validate(contract: dict[str, object], fixtures: dict[str, object],
             class49_program["implementation_rules"]
                 ["unknown_state_or_transition_logic_allowed"] is False,
             "class-0x49/type-24 whole-routine fixture incomplete or drifted")
+    class4b = next(item for item in
+                   fixtures["authority_data"]["auxiliary"]["archetypes"]
+                   if item["class"] == "0x4b" and item["type"] == 24)
+    class4b_program = class4b["whole_routine_implementation_contract"]
+    require(class4b_program == source["class4b_program"] and
+            class4b_program["status"] == "SPEC_EXECUTABLE" and
+            class4b_program["classification"] ==
+                "SOURCE_CLOSED_IMPLEMENTATION_FIELDS" and
+            len(class4b_program["reachable_state_substate_contexts"]) == 3 and
+            len(class4b_program["dispatch"]) == 1 and
+            sum(row["entry_count"] for row in
+                class4b_program["dispatch"].values()) == 4 and
+            class4b_program["normalized_source_program"]
+                ["instruction_count"] == 26 and
+            len(class4b_program["normalized_source_program"]
+                ["field_access_profiles"]) == 8 and
+            len(class4b_program["normalized_source_program"]
+                ["external_transfers"]) == 5 and
+            class4b_program["dynamic_witness"]["counts"] == {
+                "entries": 661, "samples": 810, "writes": 4080,
+                "rng_calls": 0, "player_effects": 0} and
+            len(class4b_program["state_contract"]["state0"]
+                ["animation_records"]) == 32 and
+            all(class4b_program["mutation_controls"].values()) and
+            class4b_program["implementation_rules"]
+                ["runtime_68000_interpretation_forbidden"] is True and
+            class4b_program["implementation_rules"]
+                ["unknown_state_or_transition_logic_allowed"] is False,
+            "class-0x4b/type-24 whole-routine fixture incomplete or drifted")
     class1f = next(item for item in
                    fixtures["authority_data"]["enemies"]["archetypes"]
                    if item["class"] == "0x1f")
