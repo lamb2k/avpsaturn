@@ -158,3 +158,39 @@ the transition window. Evidence tier stays ONE_EMULATOR; capture hygiene
 SH2Interpreter=3 after interpreter legs, kill stray processes, commit no
 captures or states) is unchanged. Savestate .yss files are capture
 artifacts: never commit them.
+
+## Owner delivery 2 integration checkpoint (2026-09-01)
+
+Tasks 1-3 pass. The owner EXE is repackaged without fork-source edits as
+`yabasanshiro-1.20.37-2986eb-debug-rig-mcp-da2ffb34`; archive SHA-256 is
+`0d6b44afae0f99a76f5ba3090a3ce307137c9fc305ffa67d0c0a04bf040dd34b`
+and EXE SHA-256 is
+`da2ffb341532f10808d8f9659c875a96cbc29ebc10a454426415059c7cef8746`.
+The Aug-10 and d7767591 packages remain explicit controls.
+
+Two cold new-rig runs and both explicit control runs reproduce all 575
+semantic samples. The new-rig sample SHA-256 is
+`1a6a8c39e83ae29ed1ab2c00e2ce735a281445e4b31bb89b7402fec2767f2f59`
+and its canonical semantic SHA-256 is
+`179120458393d519a5c3896de6c43ac9a99024f63d579c107c60ad64d5c68798`.
+Two cold framebuffer legs align at emulator frame 2050; frames 2051..2081
+match row-for-row at canonical sequence SHA-256
+`6d64c5aea1e3666d5dae9515bef9a08ec49169702474697d4ca55d12661e75e0`
+and contain nine distinct hashes.
+
+The savestate control saves dynarec slot 8 at diagnostic frame 200 / emulator
+frame 1950. The 10,381,254-byte state SHA-256 is
+`24fee31d69f4606ce8a364199b8599019411680f68ce0378c94a64e487f1eb93`.
+Two fresh interpreter processes load it once and produce identical
+load-relative frames 1..12, including row 1, at manifest SHA-256
+`ec0aebb185f673ee4be3fb4505ac207472e715266fb4f5440ab0f38cbc3e5979`.
+
+Task 4 remains BLOCKED after its bounded three-attempt pass. The first attempt
+exposed and corrected the helper's hidden 30-second HTTP ceiling. The unchanged
+native image then failed to reach diagnostic target 3470 within 300 seconds
+and target 3400 within 600 seconds, so no transition savestate or visual
+acceptance was produced. Do not retry this body without an owner-ruling change
+to the capture boundary. Normal settings are restored to VideoCore 4,
+SoundCore 1 and SH2Interpreter 3; no emulator process remains. Captures and
+states remain ignored, evidence stays ONE_EMULATOR, and physical Saturn stays
+UNRUN.

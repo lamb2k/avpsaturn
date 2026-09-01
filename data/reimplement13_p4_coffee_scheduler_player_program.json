@@ -2,9 +2,9 @@
   "schema": 1,
   "task": "REIMPLEMENT-13-SOURCE-CLOSED-ROUND1",
   "checkpoint": "P4-COFFEE-SCHEDULER-PLAYER-PROGRAM",
-  "result": "PASS_PROGRAM_CLOSED_SCENE_RED_VISUAL_FOLLOWUP_BLOCKED",
-  "source_span": [2072, 5522],
-  "closed_divergences": [3782, 4696, 5102, 5458],
+  "result": "PASS_STATE0_PROGRAM_CLOSED_SCENE_RED_VISUAL_BLOCKED",
+  "source_span": [2072, 5523],
+  "closed_divergences": [3782, 4696, 5102, 5458, 5523],
   "owning_programs": {
     "scheduler_phase_handoff": {
       "entry_frame": 2072,
@@ -38,6 +38,18 @@
       "visible_transition_frames": [5451, 5452, 5453],
       "same_call_route_write_rejected": true,
       "global_consumer_suppression_rejected": true
+    },
+    "class1f_state0_interruption": {
+      "source_frame": 5523,
+      "source_slot": "0x00ff9dc0",
+      "source_gate_slot": "0x00ff9a00",
+      "source_gate_field": "animation_record high word",
+      "rejected_native_shortcut": "route_state != 0",
+      "entry_state_substate": "0x0200:0x0000",
+      "exit_state_substate": "0x020a:0x0000_or_0x0200",
+      "animation_record": "0x0012e90c",
+      "reachable_action0_action2_tail_native": true,
+      "fixed_slot_gate_mutation_rejected": true
     }
   },
   "source_hit_health_sequence": [91, 78, 68, 51, 30],
@@ -47,13 +59,17 @@
     "special_input_mutations_rejected": 2,
     "hit_interaction_mutations_rejected": 7,
     "direction_queue_mutations_rejected": 1,
-    "total_real_mutations_rejected": 26
+    "state0_gate_mutations_rejected": 1,
+    "weapon_stage_progress_field_witness": "frame4051 pending=1 applied=0 calls=9 progress=3 weapon_active=1 tick=1 dispatch_delay=0",
+    "reaction_launch_velocity_field_witness": "frame4052 slot9dc0 state0202 substate0202 recovery4 projectile_pending0 x_velocity=-0x30000 y_velocity=0x32000 animation0x12dd78",
+    "normalized_witnesses_resolved": 2,
+    "total_real_mutations_rejected": 27
   },
   "target": {
     "entry_wiring_suppressions_rejected": 130,
-    "game_bin_bytes": 376880,
-    "game_bin_sha256": "cb9e18801b287c16cd2e44f8f66d5c2548e94625ba638c8d8dec9d65caa99c66",
-    "bss_end": "0x060b3140",
+    "game_bin_bytes": 377216,
+    "game_bin_sha256": "9ce8a1de807ef6a8501b7b25627d7741b09e138f328d549382395184e3b8847b",
+    "bss_end": "0x060b3290",
     "content_archive_bytes": 47316,
     "content_archive_sha256": "2b1946c6c7da2ed3c2e027142c293ea94e7dbddfeea67b354b21072ca32c09df",
     "runtime_bytes": 99432,
@@ -62,13 +78,26 @@
   },
   "scene_differential": {
     "result": "RED_NEXT_PROGRAM",
-    "first_divergence_source_frame": 5523,
-    "failure_code": 15,
-    "source_slot": "0x00ff9dc0",
+    "first_divergence_source_frame": 3606,
+    "source_slot": "0x00ffa300",
+    "record_type": 12,
+    "class": "0x1f",
     "state": "0x0200",
-    "substate": "0x0000",
-    "animation_record": "0x0012e90c",
-    "owning_boundary": "complete class-0x1f state-0 action program"
+    "substate": "0x1600",
+    "source_animation_record": "0x0012e78c",
+    "first_missing_fields": ["health", "animation_record", "animation_timer", "animation_branch", "hurt_selector"],
+    "owning_boundary": "complete class-0x1f action-0x16 program and slot lifecycle",
+    "raw_scene_gap_counts": {
+      "source_actor_population_missing_on_saturn": 249,
+      "unmapped_source_spawn_despawn_edges": 1005,
+      "unsupported_active_states": 2,
+      "unowned_collision_damage_events": 93,
+      "unowned_route_camera_events": 3,
+      "unowned_audio_load_events": 281,
+      "retained_gameplay_authorities": 0,
+      "unowned_saturn_actors": 0,
+      "unidentified_source_class_type_pairs": 0
+    }
   },
   "paired_emulator": {
     "result": "PASS",
@@ -76,8 +105,10 @@
     "samples_per_run": 575,
     "samples_byte_identical": true,
     "mutations_rejected": 5,
-    "normalized_iso_sha256": "1ab030f86e328b373423d3313fd3e1b8e993c015d25b8ccf4a5c1b3fa088c863",
-    "emulator_exe_sha256": "d77675912421a7435d02d844625a6ef68ba0e55ef17c9845f08651eb98f54b45",
+    "normalized_iso_sha256": "103c4042329c849dd8fb16ac02ff9b966daf6de870e5e78fee80f4c7b7c5b141",
+    "emulator_exe_sha256": "da2ffb341532f10808d8f9659c875a96cbc29ebc10a454426415059c7cef8746",
+    "canonical_samples_sha256": "1a6a8c39e83ae29ed1ab2c00e2ce735a281445e4b31bb89b7402fec2767f2f59",
+    "canonical_semantic_sha256": "179120458393d519a5c3896de6c43ac9a99024f63d579c107c60ad64d5c68798",
     "invalid_video4_launch_excluded": true
   },
   "visual_gate": {
@@ -120,7 +151,30 @@
         "timeout_seconds": 180
       }
     ],
-    "exact_unblock_condition": "run a future coherent program visual checkpoint with the accepted dynarec-to-interpreter pre-roll helper and capture before the normal frame-574 diagnostic freeze; do not retry this body"
+    "owner_delivery_2_controls": {
+      "package_exe_sha256": "da2ffb341532f10808d8f9659c875a96cbc29ebc10a454426415059c7cef8746",
+      "semantic_negative_control": "PASS two new plus two Aug10 cold runs",
+      "framebuffer_negative_control": "PASS paired frames2051-2081 canonical sequence6d64c5aea1e3666d5dae9515bef9a08ec49169702474697d4ca55d12661e75e0 unique9",
+      "savestate_negative_control": "PASS two fresh interpreter legs rows1-12 manifest ec0aebb185f673ee4be3fb4505ac207472e715266fb4f5440ab0f38cbc3e5979"
+    },
+    "owner_delivery_2_visual_attempts": [
+      {
+        "result": "HELPER_HTTP_TIMEOUT_REPAIRED",
+        "target_diagnostic_frame": 3470,
+        "hidden_http_timeout_seconds": 30
+      },
+      {
+        "result": "TARGET_NOT_REACHED",
+        "target_diagnostic_frame": 3470,
+        "timeout_seconds": 300
+      },
+      {
+        "result": "TARGET_NOT_REACHED",
+        "target_diagnostic_frame": 3400,
+        "timeout_seconds": 600
+      }
+    ],
+    "exact_unblock_condition": "owner ruling on a different pre-roll boundary or capture target; do not retry this visual body under the current contract"
   },
   "capture_profile": {
     "temporary_autotest_freeze_extension_committed": false,

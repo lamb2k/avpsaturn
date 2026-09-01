@@ -4839,6 +4839,31 @@ int main(void)
                     scene_runtime.tail_canary);
                 return 93;
             }
+            if (source_frame == 4051u &&
+                (scene_runtime.player_weapon_stage_progress_pending != 1u ||
+                 scene_runtime.player_weapon_stage_progress_applied != 0u ||
+                 scene_runtime.player_stage_progress_calls != 9u ||
+                 scene_runtime.source_stage_progress_accumulator != 3u ||
+                 scene_runtime.player_weapon_active != 1u ||
+                 scene_runtime.player_weapon_tick != 1u ||
+                 scene_runtime.player_weapon_dispatch_delay != 0u ||
+                 scene_runtime.player_hit_interaction_active != 0u ||
+                 scene_runtime.player_hit_interaction_input_pending != 0u))
+            {
+                fprintf(stderr,
+                    "Coffee Shop HIT-interruption pending witness failed source=%u pending=%u applied=%u calls=%lu progress=%u weapon=%u tick=%u delay=%u interaction=%u input_pending=%u\n",
+                    source_frame,
+                    scene_runtime.player_weapon_stage_progress_pending,
+                    scene_runtime.player_weapon_stage_progress_applied,
+                    scene_runtime.player_stage_progress_calls,
+                    scene_runtime.source_stage_progress_accumulator,
+                    scene_runtime.player_weapon_active,
+                    scene_runtime.player_weapon_tick,
+                    scene_runtime.player_weapon_dispatch_delay,
+                    scene_runtime.player_hit_interaction_active,
+                    scene_runtime.player_hit_interaction_input_pending);
+                return 127;
+            }
             if (phase_updates != 0u &&
                 scene_runtime.entry.dependencies_seeded)
             {
@@ -4943,6 +4968,16 @@ int main(void)
                     if (actor->active && actor->actor_class == 0x1f &&
                         actor->state == 0x0208u)
                         inner8_seen = 1;
+                }
+                if (source_frame == 4034u &&
+                    scene_runtime.class1f_audio_command != 0x003du)
+                {
+                    fprintf(stderr,
+                        "Coffee Shop HIT-interaction audio witness failed source=%u command=%04x events=%lu\n",
+                        source_frame,
+                        scene_runtime.class1f_audio_command,
+                        scene_runtime.class1f_audio_events);
+                    return 129;
                 }
                 if (source_frame == 3830u)
                 {
@@ -5051,7 +5086,7 @@ int main(void)
                     }
                 }
                 fprintf(stderr,
-                    "player_hit_scene_probe frame=%u player=%04x/%04x x=%d z=%d facing=%u anim=%08lx timer=%u health=%d hurt=%u input=%04x hit=%u/%u reaction=%u entries=%lu completions=%lu collision=%lu damage=%lu pending=%u actor=%08lx active=%u type=%u class=%02x state=%04x/%04x x=%d z=%d facing=%u anim=%08lx attack=%u field01=%u hitstop=%u guard=%u latch=%u\n",
+                    "player_hit_scene_probe frame=%u player=%04x/%04x x=%d z=%d facing=%u anim=%08lx timer=%u health=%d hurt=%u input=%04x hit=%u/%u reaction=%u entries=%lu completions=%lu collision=%lu damage=%lu pending=%u actor=%08lx active=%u type=%u class=%02x state=%04x/%04x x=%d z=%d facing=%u anim=%08lx attack=%u field01=%u hitstop=%u guard=%u latch=%u xvel=%ld yvel=%ld recovery=%u projectile_pending=%u\n",
                     source_frame, scene_runtime.player.state,
                     scene_runtime.player.substate,
                     scene_runtime.player.x, scene_runtime.player.z,
@@ -5089,7 +5124,45 @@ int main(void)
                     attack_actor != 0 ?
                         attack_actor->source_player_guard : 0u,
                     attack_actor != 0 ?
-                        attack_actor->source_player_collision_latched : 0u);
+                        attack_actor->source_player_collision_latched : 0u,
+                    attack_actor != 0 ?
+                        attack_actor->source_x_velocity : 0L,
+                    attack_actor != 0 ?
+                        attack_actor->source_y_velocity : 0L,
+                    attack_actor != 0 ?
+                        (unsigned int)attack_actor->source_hit_recovery_active :
+                        0u,
+                    attack_actor != 0 ?
+                        attack_actor->source_projectile_reaction_pending : 0u);
+                if (source_frame == 4052u &&
+                    (attack_actor == 0 || !attack_actor->active ||
+                     attack_actor->state != 0x0202u ||
+                     attack_actor->substate != 0x0202u ||
+                     attack_actor->source_hit_recovery_active != 4u ||
+                     attack_actor->source_projectile_reaction_pending != 0u ||
+                     attack_actor->source_x_velocity != -0x00030000L ||
+                     attack_actor->source_y_velocity != 0x00032000L ||
+                     attack_actor->animation_record != 0x0012dd78UL))
+                {
+                    fprintf(stderr,
+                        "Coffee Shop HIT-interaction launch witness failed source=%u state=%04x/%04x recovery=%u pending=%u velocity=%ld/%ld animation=%08lx\n",
+                        source_frame,
+                        attack_actor != 0 ? attack_actor->state : 0u,
+                        attack_actor != 0 ? attack_actor->substate : 0u,
+                        attack_actor != 0 ?
+                            (unsigned int)
+                                attack_actor->source_hit_recovery_active : 0u,
+                        attack_actor != 0 ?
+                            attack_actor->source_projectile_reaction_pending :
+                            0u,
+                        attack_actor != 0 ?
+                            attack_actor->source_x_velocity : 0L,
+                        attack_actor != 0 ?
+                            attack_actor->source_y_velocity : 0L,
+                        attack_actor != 0 ?
+                            attack_actor->animation_record : 0UL);
+                    return 128;
+                }
             }
             if (source_frame == 3827u || source_frame == 3830u ||
                 source_frame == 3850u || source_frame == 3875u ||

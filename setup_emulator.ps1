@@ -1,17 +1,24 @@
 [CmdletBinding()]
 param(
-    [ValidateSet('DebugRigMcp', 'Aug10')]
+    [ValidateSet('DebugRigMcp', 'DebugRigMcpD776', 'Aug10')]
     [string]$Package = 'DebugRigMcp'
 )
 
 $ErrorActionPreference = 'Stop'
 $packages = @{
     DebugRigMcp = @{
+        Name = 'yabasanshiro-1.20.37-2986eb-debug-rig-mcp-da2ffb34'
+        DownloadUrl = $null
+        ArchiveSha256 = '0D6B44AFAE0F99A76F5BA3090A3CE307137C9FC305FFA67D0C0A04BF040DD34B'
+        ExeSha256 = 'DA2FFB341532F10808D8F9659C875A96CBC29EBC10A454426415059C7CEF8746'
+        Identity = 'owner-built debug rig with framebuffer_screenshot/framebuffer_burst/save_state'
+    }
+    DebugRigMcpD776 = @{
         Name = 'yabasanshiro-1.20.37-2986eb-debug-rig-mcp-d7767591'
         DownloadUrl = $null
         ArchiveSha256 = '6F157F15DA4D01CCA9EF044D32352B8E6D3CF6B71A44AD3303AAEB9939015864'
         ExeSha256 = 'D77675912421A7435D02D844625A6EF68BA0E55EF17C9845F08651EB98F54B45'
-        Identity = 'owner-built debug rig with framebuffer_screenshot/framebuffer_burst'
+        Identity = 'owner-built framebuffer-only debug-rig control'
     }
     Aug10 = @{
         Name = 'yabasanshiro-1.20.37-2986eb'

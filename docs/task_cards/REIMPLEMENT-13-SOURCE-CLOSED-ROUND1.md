@@ -3627,3 +3627,35 @@ complete-scene harness (`player_weapon_stage_progress_pending` and reaction
 launch velocity). Preserve the gameplay body; repair those causal witnesses,
 then run the pinned-emulator burst and whole-scene census. Candidate promotion
 remains false.
+
+### P4 class-0x1f state-0 checkpoint (2026-09-01)
+
+The two normalized witnesses are now field-level causal checks inside the
+complete-scene harness. Frame 4051 proves the player weapon stage-progress
+pending/applied/call/progress fields before the post-scheduler phase; frame
+4052 proves the exact class-0x1f reaction state, recovery, projectile latch,
+signed launch velocities and animation record. The focused HIT-interaction and
+state-0 mutations reject without reopening accepted gameplay authority.
+
+The source fixed-slot gate at `0xff9a1c` remains the owning condition for the
+frame-5523 slot-`0xff9dc0` interruption. The incorrect route-state shortcut is
+absent, outer state `0x020a` is reached, and the complete Coffee-Shop-reachable
+action-0/action-2 tail remains native. Target passes at GAME.BIN SHA-256
+`9ce8a1de807ef6a8501b7b25627d7741b09e138f328d549382395184e3b8847b`
+(377,216 bytes), BSS `0x060b3290`; the 47,316-byte content archive is
+`2b1946c6c7da2ed3c2e027142c293ea94e7dbddfeea67b354b21072ca32c09df`.
+
+Owner delivery 2 integration tasks 1-3 pass: EXE `da2ffb34...8746`, two cold
+semantic controls, paired animated framebuffer controls and the two-fresh-leg
+savestate identity control all pass. The transition visual remains BLOCKED
+after the new bounded three-attempt pass: the helper's hidden 30-second HTTP
+ceiling was corrected, then unchanged targets 3470/300 seconds and 3400/600
+seconds were not reached. No visual acceptance is inferred; settings are
+restored and no process remains.
+
+The stricter whole-scene census now reports the earliest independent RED at
+source frame 3606: source slot `0x00ffa300`, record type 12 / class `0x1f`,
+action `0x16`. Native omits the source actor's health, animation record/timer/
+branch and hurt selector. Continue P4 by closing the complete reusable
+class-0x1f action-0x16 program and slot lifecycle, then rerun focused mutation,
+Target and the whole-scene differential. Candidate promotion remains false.

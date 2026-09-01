@@ -1101,7 +1101,7 @@ def validate_report(report: dict[str, object]) -> None:
                  "animation_record": "0x00030944",
                  "assembly": "0x00030bd6", "animation_timer_u16": 2}],
             "no_source_native_divergence_through_frame_u16": 2372,
-            "next_slot_divergence_frame_u16": 3838}:
+            "next_slot_divergence_frame_u16": None}:
         raise ValueError("Coffee Shop record-4 fixed-slot reuse drift: " +
                          json.dumps(reuse, sort_keys=True))
     recurring = report["native_capture"]["recurring_spawn_phase_boundary"]
@@ -1191,7 +1191,14 @@ def validate_report(report: dict[str, object]) -> None:
             "source": action16_projection,
             "native": action16_projection,
             "next_slot_divergence_frame_u16": None}:
-        raise ValueError("Coffee Shop class-0x1f action-0x16 RNG reuse drift")
+        raise ValueError("Coffee Shop class-0x1f action-0x16 RNG reuse drift: " +
+                         json.dumps({
+                             "projection": action16,
+                             "owning_divergence": next((item for item in
+                                 report[
+                                     "source_native_first_divergence_by_slot"]
+                                 if item["source_slot"] == "0x00ffa300"),
+                                 None)}, sort_keys=True))
     latched_retry = report["native_capture"][
         "class1f_action16_latched_retry"]
     latched_retry_projection = [

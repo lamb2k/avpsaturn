@@ -14,36 +14,29 @@ coverage system, or writer.
 
 ## Closed checkpoints
 
-P2 is closed through the stable Round 2 seam at frame 15193 and P3 is complete
-for all discovered actor, route, and audio-owner families. Preserve their
-evidence, the memory plan, CPU-mediated cart-to-VDP1 upload rule, and all
+P2 is closed through the stable Round 2 seam at frame 15193 and P3 is complete.
+Preserve their evidence, the memory plan, CPU-mediated cart-to-VDP1 rule and all
 accepted presentation/gameplay locks.
 
-P4 is source-aligned through frame 5522. The latest coherent body closes the
-class-0x1F action-`0x10`/HIT-interaction work and the exact frame-5451..5453
-withdrawal-to-route-6 handoff: controller countdown sets `g81f3`, then the
-earlier global route phase consumes it at writer `0x008418`. Same-call route
-write and suppressed-consumer mutations reject. The complete scene now reaches
-the next independent RED at source frame 5523.
+The frame-5523 class-0x1f state-0 body is closed. Fixed-slot gate `0xff9a1c`
+replaces the rejected route-state shortcut; slot `0xff9dc0` enters `0x020a`,
+and every reachable action-0/action-2 interruption branch is native. Field
+witnesses at 4051/4052 bind weapon stage progress and reaction launch velocity.
+Target GAME.BIN is 377,216 bytes, SHA `9ce8a1de...847b`, BSS `0x060b3290`;
+archive is 47,316 bytes, SHA `2b1946c6...09df`, with 2,968 runtime bytes free.
 
-Focused lanes reject 26 real mutations; Target wiring rejects 130 suppressions;
-Oracle/SPEC reject 30/18/114/190 mutations. Release GAME.BIN is 376,880 bytes,
-SHA `cb9e1880...9c66`, BSS `0x060b3140`; the 47,316-byte cart archive is
-`2b1946c6...09df`; runtime headroom is 2,968 bytes. Two cold debug-rig runs
-pass 575-sample identity and five mutations at normalized ISO `1ab030f8...c863`.
-
-The continuation visual gate remains BLOCKED after three bounded attempts:
-black framebuffer, post-freeze static VDP2-only burst, then exact-frame timeout
-at diagnostic frame 2278 while targeting 3400. Do not retry this body. A future
-coherent program checkpoint may satisfy the gate only with the accepted
-dynarec-to-interpreter pre-roll helper before the normal frame-574 freeze.
-Settings are restored to VideoCore 4 / SoundCore 1; no emulator process remains.
+Owner delivery 2 package `da2ffb34...8746`, semantic/animated-burst controls
+and two fresh interpreter savestate legs pass. The transition visual remains
+BLOCKED after the bounded three attempts: helper timeout repaired, then targets
+3470/300 seconds and 3400/600 seconds were not reached. Do not retry without an
+owner ruling on the capture boundary. Video 4 / Sound 1 / core 3 are restored;
+no emulator process remains.
 
 ## Exact next experiment
 
-At source frame 5523, close every Coffee-Shop-reachable branch of the complete
-class-`0x1f` state-0 action program for slot `0x00ff9dc0`, state/substate
-`0x0200:0x0000`, animation `0x0012e90c`, scheduler code 15. Use SPEC-02 only,
-then rerun focused mutations, Target and whole-scene differential. Keep Coffee
-Shop RED and the candidate frozen until zero-gap and visual gates pass. Never
+The strict whole-scene census is RED at source frame 3606: slot `0x00ffa300`,
+record type 12 / class `0x1f`, action `0x16`; native lacks source health,
+animation record/timer/branch and hurt selector. Close the complete reusable
+action-0x16 program and slot lifecycle from SPEC-02, then run focused mutations,
+Target and the whole-scene differential. Keep the candidate frozen. Never
 commit captures, PNGs, ROMs, ISOs, dumps, or protected user files.
