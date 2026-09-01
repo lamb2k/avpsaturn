@@ -3069,3 +3069,49 @@ Continue P3 with the credited-continue route-state-2 program entered at
 `407c340e5ed1daf8c1a19d3642f4b538e3daa5da4b31cf08f7e4ee12eedccad4`),
 bind visible transition frames 6692 and 13292, and close every Round 1-reachable
 credited-continue restore branch as one whole program.
+
+### P3 route writer 0x0090f2 credited-continue whole-program checkpoint (2026-09-01)
+
+The credited-continue dispatcher is SPEC-executable across all six reachable
+source slices in `0x008d62..0x009144`. The accepted writer-centered evidence
+window remains `0x0090e2..0x009112` at SHA-256
+`407c340e5ed1daf8c1a19d3642f4b538e3daa5da4b31cf08f7e4ee12eedccad4`.
+The contract closes 101 decoded instructions, 25 exact field-access profiles,
+13 owned external transfers, the embedded state-0/state-2 dispatch, every
+outer guard, the route-mode-8 tail, and the complete credited state restore.
+
+The credited branch writes route state 4, clears its state/substate/timer/aux,
+restores player and five destination-base records, clears the continue latch,
+enables route control, and performs the source-ordered helper calls and tail.
+Its player-side caller owns command `0x000f` with zeroed secondary arguments
+through shared helper `0x0088ea`; semantic sound identity remains UNKNOWN and
+the downstream suppression control is discriminating. The destination writes
+restore already resident state and are not logical load/release events. No RNG
+is consumed and fixed-frame authority is forbidden.
+
+Both retained route ledgers bind 24 identical writes, eight aligned samples,
+source write frames 6691/13291 and visible frames 6692/13292. Artifact SHA-256
+is `df77ae3b469d9051e9f336a40cd103c42a35aa22ce1410d7db579996638fd56d`;
+instruction-semantics SHA-256 is
+`4e6b36dca895af1e7222a9ddc37da9bc2cc89a68c89605e0e7aeee3ea2be44fa`.
+Eighteen focused and all 180 aggregate SPEC mutations reject. Aggregate fixture
+SHA-256 is
+`11a6267fedd067d18e5fc8ba8248a9d966155c62c4664e6cc0fdc39cc38c5000`.
+
+Fast and release/live-encounter Target pass. GAME.BIN remains byte-identical at
+373,840 bytes and SHA-256
+`aa99904645fa584952ccba84e4fb28d970dabc4ae6e6e593b401f9e3323910a1`;
+the cart archive remains
+`ccf8795a147daf337c1f72364c81f05fc2cfd255d8d21b40a56c74c97f8d15bd`.
+Two cold debug-rig Coffee Shop runs pass the identical 575-sample semantic
+ledger and five real mutations at normalized ISO
+`3bb36edbd29c0a07867826f7d1ac99e96d84849232a05b3bdea43d5d84a611de`.
+Settings were restored to VideoCore 4 / SoundCore 1. This SPEC-only body changes
+no runtime identity or WGC requirement; the Coffee Shop census remains expected
+RED at source frame 5566 code 11 and the candidate remains unpromoted.
+
+Continue P3 with next-demand round-clear writer `0x008418` as one whole source
+program. Preserve accepted window `0x008408..0x008438` SHA-256
+`24c11db9b6955fb7d3e0f629d3db35000fdb955a36d664f1683ac5abd4b55ac6`,
+bind visible transition frame 15019 and every Round 1-reachable branch plus its
+route/audio/load/RNG ownership, then regenerate the existing fixture once.

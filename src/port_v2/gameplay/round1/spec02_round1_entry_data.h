@@ -1,8 +1,8 @@
 #ifndef AVSP_SPEC02_ROUND1_ENTRY_DATA_H
 #define AVSP_SPEC02_ROUND1_ENTRY_DATA_H
 
-/* contract_sha256=d8d12cee8d63b940c09c3ecbc1da0d9fea87cafb1633d9f680703a1d62e9adf1 */
-/* fixtures_sha256=05eaf44ab776b80a9d77d4fbf7036307df3f5315f979a530303fc3c60c459209 */
+/* contract_sha256=7f61ae63182526ef3c26e8f0be2695795d9ec78493cf710c90605c8b5c248bb5 */
+/* fixtures_sha256=11a6267fedd067d18e5fc8ba8248a9d966155c62c4664e6cc0fdc39cc38c5000 */
 #define AVSP_ROUND1_ENTRY_PROGRAM_SHA256 "e5ef761fadc1b5a7df62e77c03025c0ebff0c2503cbc8be9c0077d4bd6cd24ba"
 
 #if defined(__sh__)

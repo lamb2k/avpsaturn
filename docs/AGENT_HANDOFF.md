@@ -35,19 +35,20 @@ inspection. Settings were restored to VideoCore 4 / SoundCore 1. Evidence is
 P2 is closed through stable Round 2 seam frame 15193; closure SHA is
 `b5c72089...f94b3`, all authority/table/capacity gates pass, and Round 2 gameplay
 was not censused. All nine P3 actor programs and route writers `0x00c200`,
-`0x008546`, and `0x008bb2` are SPEC-executable. Artifact `e0b67d33...8005`
-closes the aligned `0x008b9c..0x008d62` dispatcher/state-0 program: 95
-instructions, 39 field profiles, 11 owned transfers, exact route `0->2` setup,
-three-record player selection, both character branches, command `0x0001`, two
-exact `gfxram1` load transactions, and the post-load guard. Retained witnesses
-bind 30 writes, eight samples, visible frames 6200/12799, and zero RNG. Focused
-18 and SPEC 180 mutations pass. Fast and Target pass; two cold debug-rig Coffee
-Shop ledgers pass all 575 samples at ISO `3bb36edb...611de`. Normal settings are
-restored. Source frame 5566 code 11 remains the expected P4 census RED.
+`0x008546`, `0x008bb2`, and `0x0090f2` are SPEC-executable. Artifact
+`df77ae3b...56d` closes the credited-continue dispatcher over six reachable
+source slices in `0x008d62..0x009144`: 101 instructions, 25 field profiles, 13
+owned transfers, exact state-0/2 dispatch and outer guards, route-mode-8 tail,
+credited state restore, five destination-base restores, and source-owned audio
+command `0x000f`. Retained witnesses bind 24 writes, eight samples, visible
+frames 6692/13292, and zero RNG. Focused 18 and SPEC 180 mutations pass. Fast,
+Target, and paired cold debug-rig Coffee Shop evidence pass all 575 samples at
+ISO `3bb36edb...611de`; normal settings are restored. Source frame 5566 code 11
+remains the expected P4 census RED, with no runtime promotion or WGC trigger.
 
-Exact next experiment: close the credited-continue route-state-2 whole program
-entered at `0x008d62` and owning writer `0x0090f2`. Preserve accepted writer
-window `0x0090e2..0x009112` SHA `407c340e...cad4`, bind visible frames
-6692/13292, every reachable restore branch and its audio/load ownership, then
-regenerate the existing fixture once and run the full family ceremony. Never
-commit captures, PNGs, ROMs, ISOs, dumps, or protected user files.
+Exact next experiment: close next-demand round-clear route writer `0x008418`
+as one whole source program. Preserve accepted window `0x008408..0x008438` SHA
+`24c11db9...ac6` and visible frame 15019; bind every Round 1-reachable branch
+and its route/audio/load/RNG ownership, regenerate the existing fixture once,
+and run the full family ceremony. Never commit captures, PNGs, ROMs, ISOs,
+dumps, or protected user files.
