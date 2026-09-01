@@ -37,10 +37,11 @@ Route audio is SPEC-executable: seven groups and commands, nine exact contexts,
 programs. Artifact is `00c53afd...25f5`; fixture `7ffe49b6...6261`; contract
 `b7048808...ad5c`; focused 19 and aggregate 180 mutations reject. Fast/Oracle
 reach only frame-3782 RED. Target passes; GAME.BIN is `0ed25541...f9b2`,
-archive unchanged. Commit-bound paired Emulator evidence is pending.
+archive unchanged. Paired semantics are `1a6a8c39...2f59`; normalized ISO is
+`c22c5358...a86c`; settings are restored 4/1.
 ## Exact next sequence
-Commit route audio, run its two cold debug-rig captures plus mutations, record
-and checkpoint them, then close encounter-audio at source frame 15192 as the
-final reusable owner family. Bind every reachable caller/guard,
-command/arguments, grouped handler transaction and audio/load/RNG ownership.
+Close encounter-audio at source frame 15192 as the final reusable owner family.
+Bind every reachable caller/guard, command/arguments, grouped handler
+transaction and audio/load/RNG ownership, regenerate once, then run the full
+family ceremony. Continue according to the overnight plan without promotion.
 Never commit captures, PNGs, ROMs, ISOs, dumps, or protected user files.
