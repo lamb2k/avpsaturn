@@ -61,7 +61,7 @@
  "inputs": {
   "animation_spans": {
    "path": "data/avsp_anim_records.json",
-   "sha256": "b404f61a03f2d8422d04d0b50317ac7d06d1312ddbf58b9fd48f2caa1c0a8397"
+   "sha256": "9a7f69e8ee761b8d98a18ec8c4ac98ba9c5f8c1c9f4aaa4a1979734e258da178"
   },
   "capture_route": ".deps/mame/enemy_actions",
   "program_image": {

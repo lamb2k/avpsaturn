@@ -51,10 +51,12 @@ if ((Test-Path -LiteralPath $animRom) -and
     (Test-Path -LiteralPath $animCaptureB) -and
     (Test-Path -LiteralPath (Join-Path $animAnchorRoot 'workram_05191.bin')) -and
     (Test-Path -LiteralPath (Join-Path $animAnchorRoot 'workram_05469.bin'))) {
+    # Match the accepted complete-cadence REPAIR-09 range used by the Target
+    # build. The former split rewrote the protected manifest to a narrower,
+    # non-runtime identity whenever Fast ran.
     & $PythonPath (Join-Path $PSScriptRoot 'tools\gen_avsp_anim_records.py') `
         '--rom' $animRom '--capture' $animCaptureA '--capture' $animCaptureB `
-        '--capture-dir-range' "$animAnchorRoot`:5191`:5226" `
-        '--capture-dir-range' "$animAnchorRoot`:5330`:5469" `
+        '--capture-dir-range' "$animAnchorRoot`:5191`:5469" `
         '--verify-deterministic'
     if ($LASTEXITCODE -ne 0) {
         throw "Animation-record extraction failed with exit code $LASTEXITCODE."
@@ -504,6 +506,16 @@ if (Test-Path -LiteralPath (Join-Path $PSScriptRoot 'data\spec02_class00_type12_
     & $PythonPath (Join-Path $PSScriptRoot 'tests\test_spec02_class00_type12.py')
     if ($LASTEXITCODE -ne 0) {
         throw "SPEC-02 class-0x00/type-12 mutation test failed with exit code $LASTEXITCODE."
+    }
+}
+if (Test-Path -LiteralPath (Join-Path $PSScriptRoot 'data\spec02_class01_type12_program.json')) {
+    & $PythonPath (Join-Path $PSScriptRoot 'tools\build_spec02_class01_type12.py') '--check'
+    if ($LASTEXITCODE -ne 0) {
+        throw "SPEC-02 class-0x01/type-12 generation check failed with exit code $LASTEXITCODE."
+    }
+    & $PythonPath (Join-Path $PSScriptRoot 'tests\test_spec02_class01_type12.py')
+    if ($LASTEXITCODE -ne 0) {
+        throw "SPEC-02 class-0x01/type-12 mutation test failed with exit code $LASTEXITCODE."
     }
 }
 if (Test-Path -LiteralPath (Join-Path $PSScriptRoot 'data\spec02_round1_executable_contract.json')) {

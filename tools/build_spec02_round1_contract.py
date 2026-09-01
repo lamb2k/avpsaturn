@@ -18,6 +18,7 @@ SOURCES = {
     "navigation": "data/oracle11_round1_navigation.json",
     "enemies": "data/oracle11_round1_enemy_archetypes.json",
     "class00_program": "data/spec02_class00_type12_program.json",
+    "class01_program": "data/spec02_class01_type12_program.json",
     "auxiliary": "data/oracle11_round1_auxiliary_authority.json",
     "route": "data/oracle11_round1_encounter_route_authority.json",
     "boss": "data/oracle11_round1_boss_orchestration.json",
@@ -244,6 +245,11 @@ def build_fields() -> list[dict[str, object]]:
           "/authority_data/enemies/archetypes/0/whole_routine_implementation_contract", "outer state, active inner state, action and substate dispatch select only the source-decoded class program; source guards, exact-width arithmetic and accepted shared helpers own every transition",
           ["enemy.outer_state:u16", "enemy.action_substate:u16", "enemy.position:s16/s32", "enemy.facing:u8", "enemy.timer:u8/u16", "enemy.health:s16", "enemy.animation_record:u32", "player.position:s16", "camera.position:s16", "route.globals", "rng.seed:u16"], ["enemy.state:u16", "enemy.action_substate:u16", "enemy.position:s16/s32", "enemy.facing:u8", "enemy.timer:u8/u16", "enemy.animation_record:u32", "enemy.collision_selectors:u8", "enemy.health:s16", "player.health:s16", "pool.free_count:u8", "rng.seed:u16"],
           "/mutation_controls", "dispatch, operand width, signed branch, field offset, transition, RNG order, presentation selector, collision, damage or release mutation changes the paired class-0x00 semantic witness"),
+        f("enemy.class01_type12_whole_program", "round1-enemy-archetypes", "guarded_actor_program", True,
+          "class01_program", "/", "0x0407b0 class entry, 25 explicit computed-dispatch tables, and every Round 1-reachable branch",
+          "/authority_data/enemies/archetypes/1/whole_routine_implementation_contract", "outer state, active inner state, action, phase, spawn variant and action-16 variant dispatch select only the source-decoded class program; exact-width reads/writes, branch order and accepted shared helpers own every transition",
+          ["enemy.outer_state:u16", "enemy.action_substate:u16", "enemy.position:s16/s32", "enemy.facing:u8", "enemy.timer:u8/u16", "enemy.health:s16", "enemy.animation_record:u32", "enemy.action_locals", "player.position:s16", "camera.position:s16", "route.globals", "rng.seed:u16"], ["enemy.state:u16", "enemy.action_substate:u16", "enemy.position:s16/s32", "enemy.facing:u8", "enemy.timer:u8/u16", "enemy.animation_record:u32", "enemy.collision_selectors:u8", "enemy.health:s16", "player.health:s16", "enemy.action_locals", "pool.free_count:u8", "rng.seed:u16"],
+          "/mutation_controls", "dispatch, operand width, read/write field, signed branch, transition, RNG order, presentation selector, collision, damage or release mutation changes the paired class-0x01 semantic witness"),
         f("enemy.initial_transition_execution", "round1-enemy-archetypes", "guarded_state_program", True,
           "enemies", "/archetypes/3/initial_transition_contract", "0x0606aa/0x0606d4/0x0606fc initializers and 0x060b1a..0x060c1c transition bodies",
           "/authority_data/enemies/archetypes/3/initial_transition_contract", "route-global, timer, animation-branch, landing and source-pool guards own the three initial class-0x1f bodies",
@@ -1086,6 +1092,11 @@ def build_fixtures(source: dict[str, dict]) -> dict[str, object]:
                    if item["class"] == "0x00" and item["type"] == 12)
     class00["whole_routine_implementation_contract"] = copy.deepcopy(
         source["class00_program"])
+    class01 = next(item for item in
+                   fixtures["authority_data"]["enemies"]["archetypes"]
+                   if item["class"] == "0x01" and item["type"] == 12)
+    class01["whole_routine_implementation_contract"] = copy.deepcopy(
+        source["class01_program"])
     fixtures["scene_manifests"] = {
         "coffee_shop": build_coffee_shop_scene_manifest(source)}
     return fixtures
@@ -1684,6 +1695,31 @@ def validate(contract: dict[str, object], fixtures: dict[str, object],
             class00_program["implementation_rules"]
                 ["unknown_state_or_transition_logic_allowed"] is False,
             "class-0x00/type-12 whole-routine fixture incomplete or drifted")
+    class01 = next(item for item in
+                   fixtures["authority_data"]["enemies"]["archetypes"]
+                   if item["class"] == "0x01" and item["type"] == 12)
+    class01_program = class01["whole_routine_implementation_contract"]
+    require(class01_program == source["class01_program"] and
+            class01_program["status"] == "SPEC_EXECUTABLE" and
+            class01_program["classification"] ==
+                "SOURCE_CLOSED_IMPLEMENTATION_FIELDS" and
+            len(class01_program["reachable_state_substate_contexts"]) == 32 and
+            len(class01_program["dispatch"]) == 25 and
+            sum(row["entry_count"] for row in
+                class01_program["dispatch"].values()) == 119 and
+            class01_program["normalized_source_program"]
+                ["instruction_count"] == 1620 and
+            len(class01_program["normalized_source_program"]
+                ["field_access_profiles"]) == 69 and
+            class01_program["dynamic_witness"]["counts"] == {
+                "entries": 3304, "samples": 3796, "writes": 30904,
+                "rng_calls": 131, "player_damage_writes": 1} and
+            all(class01_program["mutation_controls"].values()) and
+            class01_program["implementation_rules"]
+                ["runtime_68000_interpretation_forbidden"] is True and
+            class01_program["implementation_rules"]
+                ["unknown_state_or_transition_logic_allowed"] is False,
+            "class-0x01/type-12 whole-routine fixture incomplete or drifted")
     class1f = next(item for item in
                    fixtures["authority_data"]["enemies"]["archetypes"]
                    if item["class"] == "0x1f")

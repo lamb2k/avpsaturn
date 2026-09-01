@@ -2624,3 +2624,40 @@ the census neither became green nor strictly improved, paired cold Emulator
 and WGC were not triggered by the body ceremony.
 
 Continue P3 with first-demand class `0x01/12` as the next whole-routine family.
+
+### P3 class 0x01/type 12 whole-routine checkpoint (2026-09-01)
+
+Class `0x01/12` is SPEC-executable as one bounded source program spanning
+`0x0407b0..0x042220`. The fixture closes 1,620 decoded operations, 25 explicit
+computed-dispatch tables with 119 entries, all 32 paired-witness contexts,
+69 exact field read/write profiles, and 23 source-owned external transfers.
+It preserves operation width, signed branch predicates, scheduler order,
+spawn/action/phase/variant dispatch, movement, presentation, collision,
+damage, HIT/KO, RNG, interruption and fixed-pool release. Runtime 68000
+interpretation remains forbidden.
+
+The paired retained ledgers bind 3,304 entries, 3,796 samples, 30,904 writes,
+131 RNG calls, and one player-damage event. Artifact SHA-256 is
+`dc578bed80c57cbcc38b89888bc719adb5be44234a870d27e04b864204d49d52`;
+instruction-semantics SHA-256 is
+`6f17ccdcacfb88887cf196c2633de8a677a5d1002dd8af8ae28810fd025c9e34`.
+Nine class mutations and all 180 SPEC-02 mutations reject. Fast and Target
+pass, with GAME.BIN unchanged at
+`aa99904645fa584952ccba84e4fb28d970dabc4ae6e6e593b401f9e3323910a1`.
+
+Fast initially exposed that its old split animation range rewrote the protected
+manifest to a narrower non-runtime identity. The runner now uses the same
+accepted complete `5191..5469` range as Target; the pre-run protected hash
+`9a7f69e8ee761b8d98a18ec8c4ac98ba9c5f8c1c9f4aaa4a1979734e258da178`
+is unchanged and remains unstaged. The dependent anchor evidence now binds
+that existing identity.
+
+The complete Coffee Shop census remains RED at the existing source-frame-5566
+unsupported scheduler boundary (`code=11`, slot `0x00009e80`, state `0x0208`,
+substate `0x1004`); this SPEC-only body does not claim improvement. One debug-rig
+pinned scene run passes all 575 samples with zero failure or fallback at ISO
+`3bb36edbd29c0a07867826f7d1ac99e96d84849232a05b3bdea43d5d84a611de`.
+Because runtime identity is unchanged and the census is neither green nor
+strictly improved, paired cold Emulator and WGC were not triggered.
+
+Continue P3 with class `0x06/12` as the next whole-routine family.
