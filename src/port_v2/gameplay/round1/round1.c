@@ -11374,6 +11374,11 @@ static int avsp_round1_begin_player_air_weapon(AvspRound1Runtime *runtime,
         avsp_round1_air_weapon_projectile.player_collision_selector;
     if (!avsp_round1_bind_player_jump_sequence(runtime, 18u))
         return 0;
+    /* The source binds this sequence before the current player update's
+       animation tick. Prime that tick so the first scheduler-visible row
+       retains the record's complete two-tick duration. */
+    ++runtime->player_jump_animation_timer;
+    ++runtime->player.animation_timer;
     allocated = avsp_round1_allocate_player_air_weapon_projectile(
         runtime, input_mask);
     if (allocated)

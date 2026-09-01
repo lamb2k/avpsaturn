@@ -3758,3 +3758,29 @@ Continue with the distinct frame-4697 airborne Button1 presentation-timing
 program: source holds record `0x0015e9d8` for timer 2/1 before advancing,
 where native enters at timer 1 and advances one update early. Candidate and
 visual-blocker status remain unchanged.
+
+### P4 airborne Button1 presentation checkpoint (2026-09-01)
+
+The complete Coffee Shop-reachable player phase-`0x0406` presentation runtime
+now follows the accepted source chronology. The source binds selector 18 before
+the current player animation tick; native accounts for that ordering without a
+frame-number guard. Record `0x0015e9d8` is visible at timer 2 on frame 4697 and
+timer 1 on 4698, then records advance at 4699, 4701, 4703 and 4705. The existing
+source landing guard enters phase `0x0404` and record `0x0015f2cc` at frame 4722.
+
+All 26 scheduler-visible rows from 4697 through 4722 match for state/substate,
+signed fixed-point position, facing, animation record/timer/branch, health and
+collision selectors. Source/native projections share SHA-256
+`71b474ffca0db13abde44359ff2542a6fa3a064daa202bebef71fa945ce6fd51`.
+The Button1 timing lane rejects 13 real mutations, including removal of the
+entry-tick ordering rule. The complete scene census passes its locks with raw
+gaps unchanged at 188/1/0/675/2/93/0/279/0 and zero retained authority.
+
+Target builds at 377,312 bytes, SHA-256
+`af589cde437da5c1c887e7a3f87c8f57123b9aa8c071a457e9aa1abd119e6fd3`,
+with BSS end `0x060b32f0`; the protected animation manifest is byte-unchanged.
+The next attacker divergence remains the earlier dependency-ready frame 5208,
+class-`0x1f` slot `0x00ffa240`: source enters state/substate `0x020a:0x0000`
+with record `0x0012d32c`, while native remains `0x0200:0x1600`. The next player
+divergence advances to the already source-owned exit boundary at frame 5452.
+Candidate and visual-blocker status remain unchanged.

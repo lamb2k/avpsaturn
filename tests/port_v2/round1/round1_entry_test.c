@@ -1020,6 +1020,8 @@ int main(void)
             air_runtime.player_jump_presentation_selector != 18u ||
             air_runtime.player.animation_record != 0x0015e9d8UL ||
             air_runtime.player.assembly != 0x00161dfcUL ||
+            air_runtime.player_jump_animation_timer != 2u ||
+            air_runtime.player.animation_timer != 2u ||
             air_runtime.player_resource != 24u ||
             air_runtime.player_resource_recharge != 11u ||
             air_runtime.player_air_weapon_entries != 1u ||

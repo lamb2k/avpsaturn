@@ -592,6 +592,10 @@ for before, after in (
      "input |= 0x04u;"),
     ("projectile->actor_class = avsp_round1_air_weapon_projectile.actor_class;",
      "projectile->actor_class = avsp_round1_player_weapon.child_class;"),
+    ("++runtime->player_jump_animation_timer;\n"
+     "    ++runtime->player.animation_timer;",
+     "runtime->player_jump_animation_timer += 0u;\n"
+     "    runtime->player.animation_timer += 0u;"),
     ("effect->effect_timer = avsp_round1_parent_weapon_effect.timer;",
      "effect->effect_timer = 7u;"),
     ("(runtime->scheduler_frames & 1u) == 0u",
@@ -1047,7 +1051,7 @@ if ("--weapon-timing-only" in sys.argv or
         generated_body=generated.replace(
             generated_resource_before, generated_resource_after, 1))
     if "--weapon-timing-only" in sys.argv:
-        print("REIMPLEMENT-13 Button1 timing mutation lane: PASS (12 real mutations)")
+        print("REIMPLEMENT-13 Button1 timing mutation lane: PASS (13 real mutations)")
         raise SystemExit(0)
 if "--action0c-only" in sys.argv:
     print("REIMPLEMENT-13 class-0x1f action-0x0c timer-row mutation lane: PASS (1 real mutation)")

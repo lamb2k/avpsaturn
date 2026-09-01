@@ -589,6 +589,59 @@ def class1f_player_collision_chronology(
     }
 
 
+def airborne_button1_presentation_chronology(
+        source_rows: list[dict[str, str]],
+        native_rows: list[dict[str, str]]) -> dict[str, object]:
+    """Bind the complete scheduler-visible 0x0406 presentation program."""
+    frames = range(4697, 4723)
+    source_player = {
+        int(row["frame"]): row for row in source_rows
+        if row["slot"] == "ff8380" and int(row["frame"]) in frames}
+    native_player = {
+        int(row["frame"]): row for row in native_rows
+        if row["source_slot"] == "00ff8380" and int(row["frame"]) in frames}
+
+    def project(row: dict[str, str], source_side: bool) -> tuple[int, ...]:
+        return (
+            int(row["state"], 16), int(row["substate"], 16),
+            int(row["x_fp"], 16) if source_side else int(row["x_fp"]),
+            int(row["y_fp"], 16) if source_side else int(row["y_fp"]),
+            int(row["z"]), int(row["facing"]),
+            int(row["animation_record"], 16),
+            int(row["animation_timer"], 16)
+                if source_side else int(row["animation_timer"]),
+            int(row["animation_branch"]), int(row["health"]),
+            int(row["hurt_selector"], 16)
+                if source_side else int(row["hurt_selector"]),
+            int(row["attack_selector"], 16)
+                if source_side else int(row["attack_selector"]),
+        )
+
+    source_projection = [project(source_player[frame], True) for frame in frames]
+    native_projection = [project(native_player[frame], False) for frame in frames]
+    advance_frames = [
+        frame for frame in frames
+        if frame == 4697 or
+        source_player[frame]["animation_record"] !=
+        source_player[frame - 1]["animation_record"]]
+    return {
+        "source_frame_range_u16": [4697, 4722],
+        "source_native_semantic_equal": source_projection == native_projection,
+        "equal_frame_count_u16": len(source_projection),
+        "source_projection_sha256": hashlib.sha256(
+            canonical(source_projection)).hexdigest(),
+        "native_projection_sha256": hashlib.sha256(
+            canonical(native_projection)).hexdigest(),
+        "phase_entry_u16": "0x0406",
+        "entry_timer_u16": int(source_player[4697]["animation_timer"], 16),
+        "record_advance_frames_u16": advance_frames,
+        "record_sequence": ["0x" + source_player[frame]["animation_record"]
+                            for frame in advance_frames],
+        "landing_frame_u16": 4722,
+        "landing_phase_u16": "0x" + source_player[4722]["substate"],
+    }
+
+
 def record4_parent_fixed_trajectory(
         source_rows: list[dict[str, str]],
         native_rows: list[dict[str, str]]) -> dict[str, object]:
@@ -1367,11 +1420,28 @@ def validate_report(report: dict[str, object]) -> None:
             "native_animation_advance_frame_u16": 2762,
             "source_native_hit_sequence_equal": True,
             "source_native_hit_sequence_frames": 28,
-            "next_player_divergence_frame_u16": 4697,
+            "next_player_divergence_frame_u16": 5452,
             "authored_delay_forbidden": True,
             "next_attacker_divergence_frame_u16": 5208}:
         raise ValueError("Coffee Shop class-0x1f player collision drift: " +
                          json.dumps(player_collision, sort_keys=True))
+    airborne_button1 = report["native_capture"][
+        "airborne_button1_presentation"]
+    if (not airborne_button1["source_native_semantic_equal"] or
+            airborne_button1["equal_frame_count_u16"] != 26 or
+            airborne_button1["source_projection_sha256"] !=
+            airborne_button1["native_projection_sha256"] or
+            airborne_button1["phase_entry_u16"] != "0x0406" or
+            airborne_button1["entry_timer_u16"] != 2 or
+            airborne_button1["record_advance_frames_u16"] !=
+            [4697, 4699, 4701, 4703, 4705, 4722] or
+            airborne_button1["record_sequence"] != [
+                "0x0015e9d8", "0x0015e9e8", "0x0015e9f8",
+                "0x0015ea08", "0x0015ea18", "0x0015f2cc"] or
+            airborne_button1["landing_frame_u16"] != 4722 or
+            airborne_button1["landing_phase_u16"] != "0x0404"):
+        raise ValueError("Coffee Shop airborne Button1 presentation drift: " +
+                         json.dumps(airborne_button1, sort_keys=True))
     all_zero = all(value == 0 for value in report["gaps"].values())
     if report["acceptance"] != {"all_zero": all_zero, "ready": all_zero}:
         raise ValueError("Coffee Shop scene accepted before the zero-gap gate")
@@ -1493,6 +1563,9 @@ def main() -> None:
                            "class1f_player_collision":
                                class1f_player_collision_chronology(
                                    source, source_rows, rows, divergences),
+                           "airborne_button1_presentation":
+                               airborne_button1_presentation_chronology(
+                                   source_rows, rows),
                            "recurring_spawn_phase_boundary":
                                recurring_spawn_phase_boundary(
                                    source_rows, rows, runtime_summary)},
