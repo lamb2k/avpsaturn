@@ -5576,7 +5576,7 @@ static int avsp_round1_player_contextual_melee_runtime_valid(
         return 0;
     sequence = &avsp_round1_player_contextual_melee_sequences[
         runtime->player_contextual_melee_sequence];
-    if (runtime->player_contextual_melee_dispatch_delay == 2u)
+    if (runtime->player_contextual_melee_dispatch_delay != 0u)
         return 1;
     return runtime->player_contextual_melee_animation_index <
             sequence->record_count &&
@@ -5633,15 +5633,9 @@ static int avsp_round1_step_player_contextual_melee(
     if (runtime->player_contextual_melee_dispatch_delay == 2u)
     {
         --runtime->player_contextual_melee_dispatch_delay;
-        runtime->player_contextual_melee_animation_timer =
-            sequence->records[0].timer;
-        runtime->player_contextual_melee_animation_branch =
-            sequence->records[0].branch;
         runtime->player.source_action =
             avsp_round1_player_contextual_melee.entry_action;
         runtime->player.substate = runtime->player.source_action;
-        avsp_round1_bind_animation_state(&runtime->player,
-                                         &sequence->records[0]);
         if (runtime->player_contextual_melee_entries <
                 AVSP_ROUND1_PLAYER_CONTEXTUAL_MELEE_AUDIO_COUNT)
         {
@@ -5661,6 +5655,12 @@ static int avsp_round1_step_player_contextual_melee(
     if (runtime->player_contextual_melee_dispatch_delay != 0u)
     {
         --runtime->player_contextual_melee_dispatch_delay;
+        runtime->player_contextual_melee_animation_timer =
+            sequence->records[0].timer;
+        runtime->player_contextual_melee_animation_branch =
+            sequence->records[0].branch;
+        avsp_round1_bind_animation_state(&runtime->player,
+                                         &sequence->records[0]);
         return 1;
     }
     if (runtime->player_contextual_melee_animation_branch < 0)
@@ -13476,6 +13476,8 @@ int avsp_round1_step_player(AvspRound1Runtime *runtime,
         contextual_owned = 1u;
         contextual_began = 1u;
     }
+    if (contextual_began && runtime->player.animation_timer != 0u)
+        --runtime->player.animation_timer;
     if (weapon_dispatch_pending)
     {
         runtime->player_action.direction_history[0] =

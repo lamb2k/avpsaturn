@@ -3715,3 +3715,23 @@ scheduler program. Source advances X and decrements the carried animation
 timer before state `0x1400` is visible; native holds one frame and binds the
 Button2 presentation one frame early. Candidate and visual-blocker status are
 unchanged.
+
+### P4 contextual Button2 entry chronology checkpoint (2026-09-01)
+
+The source edge/entry/active sequence is now exact at frames 3411, 3412 and
+3413. The edge advances locomotion and decrements the carried animation timer;
+entry state `0x1400` retains that presentation and owns audio command `0x0036`;
+active state `0x1402` binds record `0x00160288`. Directional input is frozen
+after entry, with a dedicated motion-hold witness.
+
+Eight contextual mutations pass. The complete scene advances its next player
+divergence from 3411 to 3578 while leaving the next attacker divergence at
+5208 and the raw gap counts unchanged. Target GAME.BIN is 377,280 bytes at
+SHA-256 `4197fbb943b217d35f4044a29f1dcd65be5e7488a9713fe6aa0657ce99639470`,
+BSS `0x060b32d0`; the protected animation manifest is byte-unchanged.
+
+At 3578 source changes the player Y high word from `0x0140` to `0x013f` while
+preserving low fraction `0x3800`; native changes the high word but zeros the
+fraction. X, state, animation and timer already agree. Continue through the
+complete reusable locomotion lane fixed-point program. Candidate and visual
+blocker remain unchanged.

@@ -1112,6 +1112,19 @@ int main(void)
             return 98;
     }
     {
+        AvspRound1Runtime contextual_motion = runtime;
+        short entry_x;
+        unsigned short mask = (unsigned short)(
+            AVSP_PW_INPUT_ATTACK | AVSP_PW_INPUT_RIGHT);
+        if (!avsp_round1_step_player(&contextual_motion, mask, 0))
+            return 131;
+        entry_x = contextual_motion.player_action.x;
+        if (!avsp_round1_step_player(&contextual_motion, mask, 0) ||
+            !avsp_round1_step_player(&contextual_motion, mask, 0) ||
+            contextual_motion.player_action.x != entry_x)
+            return 131;
+    }
+    {
         AvspRound1Runtime contextual = runtime;
         unsigned long seen = 0u;
         unsigned int steps = 0u;
@@ -1121,7 +1134,8 @@ int main(void)
             return 124;
         if (!avsp_round1_step_player(&contextual, AVSP_PW_INPUT_ATTACK, 0) ||
             contextual.player.source_action != 0x1400u ||
-            contextual.player.animation_record != 0x00160288UL ||
+            contextual.player.animation_record != 0x0015f1f4UL ||
+            contextual.player.animation_timer != 4094u ||
             contextual.player_contextual_melee_entries != 1u ||
             contextual.player_contextual_melee_audio_events != 1u ||
             contextual.player_contextual_melee_audio_command != 0x0036u)
@@ -1136,6 +1150,14 @@ int main(void)
                 avsp_round1_entry_valid(&contextual));
             return 124;
         }
+        if (!avsp_round1_step_player(&contextual, AVSP_PW_INPUT_ATTACK, 0) ||
+            contextual.player.source_action != 0x1402u ||
+            contextual.player.animation_record != 0x00160288UL ||
+            contextual.player.animation_timer != 1u ||
+            contextual.player.hurt_selector != 1u)
+            return 124;
+        seen = 1u;
+        steps = 1u;
         while (contextual.player_contextual_melee_active && steps < 20u)
         {
             if (!avsp_round1_step_player(&contextual,
