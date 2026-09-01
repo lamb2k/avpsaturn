@@ -2413,3 +2413,19 @@ progression ownership. Enemy, auxiliary, navigation, and route-wide controls
 remain discriminating. There are zero orphan authority events. Evidence SHA is
 `9fd0986fc835bba44299df599342e1ef6e19cc1fc14b59e0a613960c1c64cae3`.
 Continue P2 at frame 11542 through `round1-warehouse-stalker-3`.
+
+### Overnight census segment 11542..12442 checkpoint (2026-08-31)
+
+The third warehouse-stalker gameplay scene is census-closed across 901 paired
+frames at semantic SHA-256
+`c56ec8e416d2c39050e24c6040e3d7532e5e0b4d5b54a13c34f63f8eb21e4152`.
+Predator identity remains exact. Twenty-eight lifetimes cover six owned pairs:
+player, two `0x01/12` enemies, class `0x06/12`, navigation, eleven `0x10/24`
+effects, and twelve `0x49/24` effects.
+
+The scene binds 22 spawn edges, 23 despawn edges, 27 HIT/KO transitions, and
+71 audio transactions across 23 commands. It has no route or load edge and
+remains in the accepted camera run. All controls remain discriminating and no
+authority event is orphaned. Evidence artifact SHA-256 is
+`96897579957165df8fa72dacd4853ad8de3fb2d93b86cd6e89538900d0641231`.
+Continue P2 at source frame 12443 through the next source boundary.

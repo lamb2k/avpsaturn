@@ -32,6 +32,9 @@ CHRYSALIS = json.loads(
 STALKER3_INTERWAVE = json.loads(
     (ROOT / "data/oracle10_round1_census_extension_11477_11541.json")
     .read_text(encoding="ascii"))
+STALKER3 = json.loads(
+    (ROOT / "data/oracle10_round1_census_extension_11542_12442.json")
+    .read_text(encoding="ascii"))
 GENERATOR = (ROOT / "tools/analyze_oracle10_round1_census_extension.py") \
     .read_text(encoding="utf-8")
 
@@ -719,5 +722,68 @@ for label, path, value in (
         continue
     raise AssertionError(f"Stalker 3 interwave mutation accepted: {label}")
 
-print("ORACLE-10 Round 1 census extension 5567..11541: PASS "
-      "(60 mutations rejected)")
+
+def validate_stalker3(report: dict[str, object]) -> None:
+    ceremony = report["paired_capture_ceremony"]
+    semantics = ceremony["segment_semantics"]
+    census = report["scene_census_delta"]
+    controls = report["targeted_counterfactuals"]
+    assert report["status"] == "CENSUS_SEGMENT_COMPLETE"
+    assert report["segment"]["source_frame_range"] == [11542, 12442]
+    assert report["segment"]["scene_ids"] == ["round1-warehouse-stalker-3"]
+    assert ceremony["raw_capture_files_byte_identical"] is True
+    assert ceremony["paired_route_ledgers_byte_identical"] is True
+    assert semantics["frame_count"] == 901
+    assert semantics["canonical_semantic_sha256"] == \
+        "c56ec8e416d2c39050e24c6040e3d7532e5e0b4d5b54a13c34f63f8eb21e4152"
+    assert semantics["player_active_frames"] == 901
+    assert semantics["character_mismatch_frames"] == []
+    assert semantics["identity_mismatch_frames"] == []
+    assert semantics["per_frame_character_identity_gate"] is True
+    assert [(row["class"], row["type"], row["instance_count"])
+            for row in census["class_type_inventory"]] == [
+                ("0x00", 0, 1), ("0x01", 12, 2), ("0x06", 12, 1),
+                ("0x07", 20, 1), ("0x10", 24, 11), ("0x49", 24, 12)]
+    assert len(census["actor_lifetimes"]) == 28
+    assert len(census["spawn_edges"]) == 22
+    assert len(census["despawn_edges"]) == 23
+    assert len(census["hit_ko_transitions"]) == 27
+    assert census["audio"]["handler_transaction_count"] == 71
+    assert len(census["audio"]["command_counts"]) == 23
+    assert len(census["audio"]["source_owned_trigger_groups_first_seen"]) == 2
+    assert len(census["audio"]["player_origin_edges"]) == 5
+    assert census["audio"]["orphan_handler_transactions"] == 0
+    assert census["audio"]["orphan_trigger_groups"] == 0
+    assert census["load_release_boundaries"] == []
+    assert report["route_authority_extension"]["route_state_edges"] == []
+    assert len(report["route_authority_extension"]["camera_lock_runs"]) == 1
+    assert len(controls["presentation_boundaries"]) == 1
+    assert controls["presentation_boundaries"][0]["owns_progression"] is False
+    assert len(controls["enemy_class_controls"]) == 2
+    assert len(controls["auxiliary_class_controls"]) == 3
+    assert all(value == 0 for value in report["coverage"].values())
+    assert report["physical_saturn"] == "UNRUN"
+
+
+validate_stalker3(STALKER3)
+for label, path, value in (
+        ("stalker3 semantic", ("paired_capture_ceremony", "segment_semantics",
+                               "canonical_semantic_sha256"), "0" * 64),
+        ("stalker3 identity", ("paired_capture_ceremony", "segment_semantics",
+                               "identity_mismatch_frames"), [12000]),
+        ("stalker3 lifecycle", ("scene_census_delta", "spawn_edges"), []),
+        ("stalker3 orphan", ("coverage", "unmapped_spawn_despawn_edges"), 1),
+        ("stalker3 physical", ("physical_saturn",), "PASS")):
+    mutant = copy.deepcopy(STALKER3)
+    target = mutant
+    for key in path[:-1]:
+        target = target[key]
+    target[path[-1]] = value
+    try:
+        validate_stalker3(mutant)
+    except AssertionError:
+        continue
+    raise AssertionError(f"Stalker 3 census mutation accepted: {label}")
+
+print("ORACLE-10 Round 1 census extension 5567..12442: PASS "
+      "(65 mutations rejected)")
