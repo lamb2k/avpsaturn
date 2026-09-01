@@ -2590,3 +2590,37 @@ The cumulative closure report SHA-256 is
 `b5c720892f439fa9e6f2e152a6997b87a1d67b0655a8d400cf759ab0207f94b3`.
 Proceed directly to P3, beginning with the first-demand class `0x00/12`
 whole-routine SPEC-02 body.
+
+### P3 class 0x00/type 12 whole-routine checkpoint (2026-09-01)
+
+The first-demand class `0x00/12` family is SPEC-executable as one bounded
+source program. `data/spec02_class00_type12_program.json` binds the complete
+class entry window `0x03f09c..0x0403be`, initializer plus 38 post-initial
+contexts, 17 action dispatches, eight second-level substate tables, the
+post-dispatch X clamp, scheduler position, typed actor/global fields, shared
+helper ownership, collision/damage/presentation/RNG dependencies, and 904
+decoded operations. Runtime 68000 interpretation remains forbidden.
+
+The retained paired ledgers bind 5,821 entries, 6,397 samples, 40,876 writes,
+194 RNG calls, and two player-damage events. Artifact SHA-256 is
+`f06dab53d7c53e53edf5b1d64846d92c15f05906c1dc1341668cc9a419c6b9f3`;
+instruction-semantics SHA-256 is
+`d5b4705d75a75feaa7e7e9184ea17994ca711444b687bfdaa57f035328093348`.
+Nine family mutations and all 180 existing SPEC-02 mutations reject. The full
+Fast lane and release Target pass; GAME.BIN remains byte-identical at
+`aa99904645fa584952ccba84e4fb28d970dabc4ae6e6e593b401f9e3323910a1`,
+so this checkpoint changes no production runtime.
+
+One debug-rig pinned Coffee Shop run passes all 575 semantic samples with zero
+failure or fallback, normalized ISO SHA-256
+`3bb36edbd29c0a07867826f7d1ac99e96d84849232a05b3bdea43d5d84a611de`,
+and EXE SHA-256
+`d77675912421a7435d02d844625a6ef68ba0e55ef17c9845f08651eb98f54b45`.
+The first launch was rejected because the debug rig was left on unsupported
+VideoCore 4; the accepted launch used VideoCore 1 / SoundCore 0 and restored
+4 / 1 afterward. The complete host scene remains RED at the preserved
+downstream native boundary. Because the runtime artifact did not change and
+the census neither became green nor strictly improved, paired cold Emulator
+and WGC were not triggered by the body ceremony.
+
+Continue P3 with first-demand class `0x01/12` as the next whole-routine family.

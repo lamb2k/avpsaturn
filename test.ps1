@@ -496,6 +496,22 @@ if (Test-Path -LiteralPath (Join-Path $PSScriptRoot 'data\spec01_first_live_enco
         throw "SPEC-01 executable encounter contract test failed with exit code $LASTEXITCODE."
     }
 }
+if (Test-Path -LiteralPath (Join-Path $PSScriptRoot 'data\spec02_class00_type12_program.json')) {
+    & $PythonPath (Join-Path $PSScriptRoot 'tools\build_spec02_class00_type12.py') '--check'
+    if ($LASTEXITCODE -ne 0) {
+        throw "SPEC-02 class-0x00/type-12 generation check failed with exit code $LASTEXITCODE."
+    }
+    & $PythonPath (Join-Path $PSScriptRoot 'tests\test_spec02_class00_type12.py')
+    if ($LASTEXITCODE -ne 0) {
+        throw "SPEC-02 class-0x00/type-12 mutation test failed with exit code $LASTEXITCODE."
+    }
+}
+if (Test-Path -LiteralPath (Join-Path $PSScriptRoot 'data\spec02_round1_executable_contract.json')) {
+    & $PythonPath (Join-Path $PSScriptRoot 'tests\test_spec02_round1_contract.py')
+    if ($LASTEXITCODE -ne 0) {
+        throw "SPEC-02 Round 1 executable contract test failed with exit code $LASTEXITCODE."
+    }
+}
 if (Test-Path -LiteralPath (Join-Path $PSScriptRoot 'tests\port_v2\integration\source_closed_live_encounter\test_contract.py')) {
     & $PythonPath (Join-Path $PSScriptRoot 'tests\port_v2\integration\source_closed_live_encounter\test_contract.py')
     if ($LASTEXITCODE -ne 0) {

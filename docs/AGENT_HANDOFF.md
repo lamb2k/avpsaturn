@@ -40,9 +40,10 @@ inspection. Settings were restored to VideoCore 4 / SoundCore 1. Evidence is
 
 ## Exact next sequence
 
-P2 is closed through stable Round 2 seam frame 15193; Round 2 gameplay was not
-censused. Closure SHA is `b5c72089...f94b3`. All authorities/tables are bound;
-archive identity remains 157 tables / 47056 bytes / `ccf8795...15bd`, with
-3020 runtime bytes free. Continue P3 at first-demand class `0x00/12`, then the
-remaining nine-family order in the closure report. Use retained opcode evidence
-and ledgers; never commit captures, PNGs, ROMs, ISOs, or dumps.
+P2 is closed through stable Round 2 seam frame 15193; closure SHA is
+`b5c72089...f94b3`, all authority/table/capacity gates pass, and Round 2 gameplay
+was not censused. P3 class `0x00/12` is whole-routine SPEC-executable: 39
+contexts, 17 actions, eight substate tables, 904 operations, artifact
+`f06dab53...b9f3`. Focused/SPEC/Fast/Target and one pinned scene run pass;
+GAME.BIN remains `aa999046...0a1`, scene RED, candidate unpromoted. Continue P3
+with class `0x01/12` as one complete family, then follow the closure-report order; never commit captures, PNGs, ROMs, ISOs, or dumps.

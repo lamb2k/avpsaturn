@@ -11,7 +11,7 @@
  "spec02_round1_presentations": {
   "decoded_variants": 473,
   "fixture": "data/spec02_round1_generated_fixtures.json",
-  "fixture_sha256": "3fc140c51e42e1e4c21b996a746b7828c2e58ae8854c1c4a200e68028360f9ae",
+  "fixture_sha256": "9f6475a6e9c7b38541001c336639c4ecb9e558b5422c925149c27e49e2f76a54",
   "unique_assemblies": 246,
   "verified_identical": true
  },

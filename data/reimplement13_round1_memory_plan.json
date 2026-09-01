@@ -124,7 +124,7 @@
     "actor_lifetimes": 427,
     "authoritative_writer_pcs": 1517,
     "class_type_archetypes": 20,
-    "coverage_sha256": "7aa303ef5e75f031ee982dcf7f6f1ca619b9656ab35768685c995f2bfe73e379",
+    "coverage_sha256": "a4428fec9d8a2c1f0f3efd472c287c9f0702018236af138fe9b23f78c2790935",
     "route_events": 24,
     "route_segments": 94,
     "writer_reconciliation_sha256": "e9508e1c621e6448953549817b8d66e9399cbce97f06d7883c013776f34fc39c"

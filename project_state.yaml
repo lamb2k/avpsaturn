@@ -519,7 +519,7 @@ source_closure:
   status: ACTIVE
   active_checkpoint: REIMPLEMENT-13-SOURCE-CLOSED-ROUND1
   workflow_pause: NONE_ACTIVE_REIMPLEMENT13_CONTINUING
-  resume_pointer: docs/AGENT_HANDOFF.md exact next experiment; same branch and persistent Goal; P2 is cumulatively closed through stable Round 2 seam frame15193; continue P3 at class0x00-type12 whole-routine SPEC-02 body
+  resume_pointer: docs/AGENT_HANDOFF.md exact next experiment; same branch and persistent Goal; P2 is cumulatively closed through stable Round 2 seam frame15193; P3 class0x00-type12 is whole-routine SPEC-executable; continue P3 at class0x01-type12
   prototype_harness_retained: true
   preserved_infrastructure: [rendering, HUD, camera, audio, collision, readback, emulator, visual-QA]
   active_card: REIMPLEMENT-13-SOURCE-CLOSED-ROUND1
@@ -537,6 +537,7 @@ source_closure:
   round1_memory_plan_checkpoint: PASS / complete map data/reimplement13_round1_memory_plan.json / census 94 route segments and 1517 writer PCs / 157 generated read-only SPEC tables in deterministic 47056-byte cart archive at 0x22711000 / archive SHA ccf8795a147daf337c1f72364c81f05fc2cfd255d8d21b40a56c74c97f8d15bd / census floor 240400 fits 0x40000 carve / runtime exact 0x18434 fits 0x19000 carve with 3020-byte headroom / per-region Target asserts / current GAME.BIN373840 BSS0x060b2560 SHAaa99904645fa584952ccba84e4fb28d970dabc4ae6e6e593b401f9e3323910a1 / paired cold Emulator exact ISO3bb36edbd29c0a07867826f7d1ac99e96d84849232a05b3bdea43d5d84a611de with round1_spec_bound1 / only existing boot load active / physical Saturn UNRUN
   emulator_mcp_capture_checkpoint: PASS / owner debug-rig package archive6f157f15da4d01cca9ef044d32352b8e6d3cf6b71a44ad3303aaeb9939015864 EXEd77675912421a7435d02d844625a6ef68ba0e55ef17c9845f08651eb98f54b45 / Aug10-vs-debug two cold runs each and 575 samples canonical semantic SHA7fae4a7cffe2c35a0df8a3c181a5ffa8f141f5b113500d67de1fd60f071a56fc / same-frame burst frames2095-2125 manifest13afd26ef889b6f792ade52989749eeec1dc23203b5eb1def55ac85ccca31c1f and 7 unique animated hashes / MCP cadence-1 visual QA direct inspection PASS / ONE_EMULATOR / physical Saturn UNRUN
   overnight_census_frontier_checkpoint: P2_CLOSED_THROUGH_STABLE_ROUND2_SEAM_15193 / 20 continuous non-overlapping segments5567-15193 plus accepted baseline1972-5566 / cumulative closure data/oracle10_round1_p2_closure.json SHAb5c720892f439fa9e6f2e152a6997b87a1d67b0655a8d400cf759ab0207f94b3 / 3 new class-type pairs all source-owned / 9 P3 actor programs 7 route programs 6 audio owners 2 load boundaries / zero ownership table or capacity blockers / archive157 tables 47056 bytes SHA ccf8795a147daf337c1f72364c81f05fc2cfd255d8d21b40a56c74c97f8d15bd / runtime headroom consumed0 remaining3020 / memory plan holds / Round2 gameplay not censused
+  p3_class00_type12_checkpoint: SPEC_EXECUTABLE / complete source program0x03f09c-0x0403be / 39 contexts including initializer / 17 actions / 8 second-level substate tables / 904 bounded decoded operations / paired retained ledger5821 entries 6397 samples 40876 writes 194 RNG 2 player-damage / artifact data/spec02_class00_type12_program.json SHAf06dab53d7c53e53edf5b1d64846d92c15f05906c1dc1341668cc9a419c6b9f3 / instruction semantics SHAd5b4705d75a75feaa7e7e9184ea17994ca711444b687bfdaa57f035328093348 / focused9 and SPEC180 mutations rejected / Fast PASS / Target PASS unchanged GAME.BIN aa99904645fa584952ccba84e4fb28d970dabc4ae6e6e593b401f9e3323910a1 / debug-rig pinned scene PASS 575 samples ISO3bb36edbd29c0a07867826f7d1ac99e96d84849232a05b3bdea43d5d84a611de EXEd77675912421a7435d02d844625a6ef68ba0e55ef17c9845f08651eb98f54b45 / no runtime change / Coffee Shop census remains accepted RED / paired-WGC not triggered
   execution_plan_amendment_2026_08_30:
     scope: REIMPLEMENT-13 execution method only; evidence standards, QA-13, and USER-10 gates unchanged
     authoritative_text: docs/task_cards/REIMPLEMENT-13-SOURCE-CLOSED-ROUND1.md
@@ -547,7 +548,7 @@ source_closure:
     recording: one task-card checkpoint entry per body; project_state pointers and counters; AGENT_HANDOFF active summary and live resume prompt only
     prohibited: general lifter or translator, new capture frameworks, new dashboards, parallel worktree orchestration
     implementor: codex gpt-5.6-sol high
-  exact_next_experiment: Execute docs/ROUND1_OVERNIGHT_PLAN.md P3 first-demand class0x00-type12 whole-routine SPEC-02 body from accepted decrypted-opcode evidence and retained ledgers; regenerate the existing fixture once and run the full family ceremony.
+  exact_next_experiment: Execute docs/ROUND1_OVERNIGHT_PLAN.md P3 first-demand class0x01-type12 whole-routine SPEC-02 body from accepted decrypted-opcode evidence and retained ledgers; include every Round1-reachable branch, regenerate the existing fixture once, and run the full family ceremony.
   frontend_activation_allowed: false
   physical_saturn: UNRUN
 current_checkpoint: reimplement-source-closed-round1
