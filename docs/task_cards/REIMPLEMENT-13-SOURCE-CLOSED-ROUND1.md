@@ -3016,3 +3016,56 @@ promote the runtime candidate or trigger WGC.
 Continue P3 with failure/continue writer `0x008bb2` as one whole program over
 accepted source window `0x008ba2..0x008bd2`, including both occurrences visible
 at source frames 6200 and 12799 and every Round 1-reachable branch.
+
+### P3 route writer 0x008bb2 failure-state whole-program checkpoint (2026-09-01)
+
+The failure/continue dispatcher and complete route-state-0 program are
+SPEC-executable over aligned source window `0x008b9c..0x008d62`. The accepted
+writer-centred evidence window remains `0x008ba2..0x008bd2`; it begins in an
+extension word and is not treated as an instruction boundary. Embedded table
+bytes `000401ba` dispatch raw route state 0 to `0x008bac` and route state 2 to
+the separate credited-continue body at `0x008d62`. The state-0 body closes 95
+decoded instructions, 39 exact field access profiles and 11 owned external
+transfers. Its instruction-semantics SHA-256 is
+`ecd88f48fe728e0288a808109c1ce79523341181b0999bfbb61e9fc593d2c0ea`.
+
+The program owns the ordered route `0->2` initialization, three-record player
+selection loop, both exact character-presentation branches, command `0x0001`
+through player-side wrapper `0x003bdc`, the two accepted logical `gfxram1`
+load transactions, and the post-load `u8(g81be)` guard. Each load transaction
+contains 8,960 source writes to `0x910000..0x91fffe`, with transaction SHA-256
+`47d5ee64e221e7d1139027630492c2334ed612250557dc2cdea6dbbc8351dd61`
+and package SHA-256
+`02fd861bf661a94320e84030c5f42901373cae22e739d9579158430d5336a836`.
+The individual destination writes are not reclassified as logical load events.
+No semantic sound name is inferred, no RNG is consumed, and fixed-frame or
+authored fallback authority is forbidden.
+
+Both retained ledgers bind 30 route writes, eight aligned samples, the source
+write frames 6199 and 12798, and visible frames 6200 and 12799. Artifact
+SHA-256 is
+`e0b67d339fe989f8a8b37b46b3b7eb0ba316d4ed6960d18c7c4d598adca98005`.
+Eighteen focused mutations and all 180 aggregate SPEC mutations reject. The
+aggregate fixture SHA-256 is
+`05eaf44ab776b80a9d77d4fbf7036307df3f5315f979a530303fc3c60c459209`.
+
+Fast and release/live-encounter Target pass. GAME.BIN remains byte-identical at
+373,840 bytes and SHA-256
+`aa99904645fa584952ccba84e4fb28d970dabc4ae6e6e593b401f9e3323910a1`;
+the cart archive remains
+`ccf8795a147daf337c1f72364c81f05fc2cfd255d8d21b40a56c74c97f8d15bd`.
+The first emulator attempt used the resting renderer/audio configuration and
+did not yield an admissible startup read. Under the mandated capture settings,
+two independent cold debug-rig runs pass identical 575-sample semantic ledgers
+and five real mutations at normalized ISO
+`3bb36edbd29c0a07867826f7d1ac99e96d84849232a05b3bdea43d5d84a611de`.
+Settings were restored to VideoCore 4 / SoundCore 1. This SPEC-only body changes
+no runtime identity; the Coffee Shop census remains expected RED at source
+frame 5566 code 11 and WGC is not triggered.
+
+Continue P3 with the credited-continue route-state-2 program entered at
+`0x008d62` and owning writer `0x0090f2`. Preserve accepted writer window
+`0x0090e2..0x009112` (SHA-256
+`407c340e5ed1daf8c1a19d3642f4b538e3daa5da4b31cf08f7e4ee12eedccad4`),
+bind visible transition frames 6692 and 13292, and close every Round 1-reachable
+credited-continue restore branch as one whole program.

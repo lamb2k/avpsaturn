@@ -34,16 +34,20 @@ inspection. Settings were restored to VideoCore 4 / SoundCore 1. Evidence is
 ## Exact next sequence
 P2 is closed through stable Round 2 seam frame 15193; closure SHA is
 `b5c72089...f94b3`, all authority/table/capacity gates pass, and Round 2 gameplay
-was not censused. All nine P3 actor programs and route writers `0x00c200` and
-`0x008546` are SPEC-executable. Artifact `43004b5d...792b` closes the aligned
-`0x008520..0x00855e` route-zero program: 16 operations, 11 global profiles,
-exact `g81af/g81d4` and three-player-presence guard, six ordered writes, two
-source occurrences, zero RNG, and the causal `0xff00` command transaction.
-Focused 12 and SPEC 180 mutations pass. A stale provenance hash in the three
-type-12 fixtures was reconciled to accepted enemy Oracle `ce140c9c...5d52`;
-their programs and witnesses are unchanged. Fast and Target pass; paired cold
-Coffee Shop ledgers are identical at `3bb36edb...611de`. Source frame 5566 code
-11 remains the expected P4 census RED. Continue P3 with failure/continue writer
-`0x008bb2` whole program (`0x008ba2..0x008bd2`, visible frames 6200/12799),
-then remaining route/audio/load families in demand order. Never commit
-captures, PNGs, ROMs, ISOs, or dumps.
+was not censused. All nine P3 actor programs and route writers `0x00c200`,
+`0x008546`, and `0x008bb2` are SPEC-executable. Artifact `e0b67d33...8005`
+closes the aligned `0x008b9c..0x008d62` dispatcher/state-0 program: 95
+instructions, 39 field profiles, 11 owned transfers, exact route `0->2` setup,
+three-record player selection, both character branches, command `0x0001`, two
+exact `gfxram1` load transactions, and the post-load guard. Retained witnesses
+bind 30 writes, eight samples, visible frames 6200/12799, and zero RNG. Focused
+18 and SPEC 180 mutations pass. Fast and Target pass; two cold debug-rig Coffee
+Shop ledgers pass all 575 samples at ISO `3bb36edb...611de`. Normal settings are
+restored. Source frame 5566 code 11 remains the expected P4 census RED.
+
+Exact next experiment: close the credited-continue route-state-2 whole program
+entered at `0x008d62` and owning writer `0x0090f2`. Preserve accepted writer
+window `0x0090e2..0x009112` SHA `407c340e...cad4`, bind visible frames
+6692/13292, every reachable restore branch and its audio/load ownership, then
+regenerate the existing fixture once and run the full family ceremony. Never
+commit captures, PNGs, ROMs, ISOs, dumps, or protected user files.
