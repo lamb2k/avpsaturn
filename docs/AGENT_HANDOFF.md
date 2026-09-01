@@ -39,10 +39,11 @@ execute `docs/EMULATOR_MCP_CAPTURE.md` (package + re-pin + paired-ledger and
 image-hash controls + visual-QA MCP mode). Do not modify the fork source
 beyond re-packaging. Standing rule: keep this handoff under 50 lines.
 
-## Exact next experiment
+## Exact next sequence (owner)
 
-Finish Fast/Oracle and the current checkpoint commit/push first. Then close the
-complete Coffee Shop exit controller: encounter clear, source-owned actor
-teardown and replacement, route edges at 5453/5524/5562, and load boundaries at
-5565/5566, using accepted Oracle/SPEC evidence or the smallest required fixture
-amendment.
+1. Finish the in-flight Coffee Shop exit-controller closure (route edges
+   5453/5524/5562, load boundaries 5565/5566); checkpoint.
+2. Execute `docs/EMULATOR_MCP_CAPTURE.md` (package, re-pin, controls, MCP mode).
+3. Execute `docs/ROUND1_OVERNIGHT_PLAN.md`: ORACLE-10/11 census extension from
+   frame 5566 to Round 1 clear, batched SPEC-02 per new class, then scene-order
+   closure behind burst visual gates.
