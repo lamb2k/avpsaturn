@@ -114875,11 +114875,16 @@
         "accepted_evidence": "data/oracle10_round1_census_extension_15059_15080.json",
         "accepted_evidence_sha256": "d6e0ff9b4db945efcc78bccd65d86e5eb4a14278cbc615d320268747ed32d6e1",
         "source_frame_range": [15059, 15080]
+      },
+      {
+        "accepted_evidence": "data/oracle10_round1_census_extension_15081_15091.json",
+        "accepted_evidence_sha256": "7db0c73970973b916103f137dfb57c187dfddca8b832cedfbb6dd96795b08358",
+        "source_frame_range": [15081, 15091]
       }
     ],
     "classification": "CENSUS_SEGMENT_COMPLETE",
-    "next_source_frame": 15081,
-    "source_frame_range": [5567, 15080]
+    "next_source_frame": 15092,
+    "source_frame_range": [5567, 15091]
   },
   "task": "ORACLE-10-ROUND1-END-TO-END-SYSTEM-CENSUS"
 }

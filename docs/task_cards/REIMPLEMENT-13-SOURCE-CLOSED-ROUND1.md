@@ -2521,3 +2521,17 @@ all controls remain discriminating, and no authority event is orphaned.
 Evidence artifact SHA-256 is
 `d6e0ff9b4db945efcc78bccd65d86e5eb4a14278cbc615d320268747ed32d6e1`.
 Continue P2 at frame 15081 through source scene `Sa96e1f71b9dd`.
+
+### Overnight census segment 15081..15091 checkpoint (2026-09-01)
+
+The final Round 1 clear-results signature is census-closed across 11 paired,
+active-Predator frames at semantic SHA-256
+`15e99f1c3e21c431c6ca341bd7831d8a8de12da2beb3024bfa6446a72789d9c1`.
+The sole source-owned lifetime is the player; no lifecycle or HIT/KO edge
+occurs. One owned audio transaction uses command `0xff00`.
+
+Writer `0x0083d4` writes route state `2` at source write frame 15088, visible at
+frame 15089. Signature `Sa96e1f71b9dd` owns no progression, all controls remain
+discriminating, and no authority event is orphaned. Evidence artifact SHA-256
+is `7db0c73970973b916103f137dfb57c187dfddca8b832cedfbb6dd96795b08358`.
+Continue P2 at frame 15092 through `round2-title`.

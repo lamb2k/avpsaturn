@@ -102,6 +102,11 @@ PROFILES = {
         "id": "round1-clear-results-b",
         "output": "oracle10_round1_census_extension_15059_15080.json",
     },
+    "round1_clear_results_c": {
+        "first": 15081, "last": 15091,
+        "id": "round1-clear-results-c",
+        "output": "oracle10_round1_census_extension_15081_15091.json",
+    },
 }
 WORKRAM_BASE = 0xFF0000
 PLAYER = 0xFF8380
