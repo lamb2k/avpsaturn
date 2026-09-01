@@ -57,6 +57,11 @@ PROFILES = {
         "id": "round1-chrysalis-entry-presentation-cluster",
         "output": "oracle10_round1_census_extension_9941_9975.json",
     },
+    "chrysalis_battle": {
+        "first": 9976, "last": 11476,
+        "id": "round1-chrysalis-battle",
+        "output": "oracle10_round1_census_extension_9976_11476.json",
+    },
 }
 WORKRAM_BASE = 0xFF0000
 PLAYER = 0xFF8380
@@ -188,6 +193,8 @@ OWNER = {
     ("0x00", 0): ("predator-warrior-player-authority",
                     "data/oracle11_predator_warrior_authority.json"),
     ("0x00", 12): ("round1-enemy-archetypes",
+                     "data/oracle11_round1_enemy_archetypes.json"),
+    ("0x01", 12): ("round1-enemy-archetypes",
                      "data/oracle11_round1_enemy_archetypes.json"),
     ("0x06", 12): ("round1-enemy-archetypes",
                      "data/oracle11_round1_enemy_archetypes.json"),

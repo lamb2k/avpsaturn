@@ -26,6 +26,9 @@ WAREHOUSE_GAMEPLAY2 = json.loads(
 CHRYSALIS_INTERWAVE = json.loads(
     (ROOT / "data/oracle10_round1_census_extension_9941_9975.json")
     .read_text(encoding="ascii"))
+CHRYSALIS = json.loads(
+    (ROOT / "data/oracle10_round1_census_extension_9976_11476.json")
+    .read_text(encoding="ascii"))
 GENERATOR = (ROOT / "tools/analyze_oracle10_round1_census_extension.py") \
     .read_text(encoding="utf-8")
 
@@ -580,5 +583,74 @@ for label, path, value in (
         continue
     raise AssertionError(f"Chrysalis interwave mutation accepted: {label}")
 
-print("ORACLE-10 Round 1 census extension 5567..9975: PASS "
-      "(49 mutations rejected)")
+
+def validate_chrysalis(report: dict[str, object]) -> None:
+    ceremony = report["paired_capture_ceremony"]
+    semantics = ceremony["segment_semantics"]
+    census = report["scene_census_delta"]
+    controls = report["targeted_counterfactuals"]
+    assert report["status"] == "CENSUS_SEGMENT_COMPLETE"
+    assert report["segment"]["source_frame_range"] == [9976, 11476]
+    assert report["segment"]["scene_ids"] == ["round1-chrysalis-battle"]
+    assert ceremony["raw_capture_files_byte_identical"] is True
+    assert ceremony["paired_route_ledgers_byte_identical"] is True
+    assert semantics["frame_count"] == 1501
+    assert semantics["canonical_semantic_sha256"] == \
+        "4bb1aea23c6f0a54ba47b8fd1c0f8ba61e4cbaa81293dc1c0b579e5cd851d51e"
+    assert semantics["player_active_frames"] == 1501
+    assert semantics["character_mismatch_frames"] == []
+    assert semantics["identity_mismatch_frames"] == []
+    assert semantics["per_frame_character_identity_gate"] is True
+    assert [(row["class"], row["type"], row["instance_count"])
+            for row in census["class_type_inventory"]] == [
+                ("0x00", 0, 1), ("0x01", 12, 2), ("0x06", 12, 1),
+                ("0x07", 20, 1), ("0x10", 24, 5),
+                ("0x3d", 24, 22), ("0x49", 24, 29),
+                ("0x4e", 24, 1)]
+    assert len(census["actor_lifetimes"]) == 62
+    assert len(census["spawn_edges"]) == 59
+    assert len(census["despawn_edges"]) == 57
+    assert len(census["hit_ko_transitions"]) == 34
+    assert census["audio"]["handler_transaction_count"] == 130
+    assert len(census["audio"]["command_counts"]) == 23
+    assert len(census["audio"]["source_owned_trigger_groups_first_seen"]) == 2
+    assert len(census["audio"]["player_origin_edges"]) == 3
+    assert census["audio"]["orphan_handler_transactions"] == 0
+    assert census["audio"]["orphan_trigger_groups"] == 0
+    assert census["load_release_boundaries"] == []
+    assert report["route_authority_extension"]["route_state_edges"] == []
+    assert len(report["route_authority_extension"]["camera_lock_runs"]) == 1
+    assert len(controls["presentation_boundaries"]) == 1
+    assert controls["presentation_boundaries"][0]["owns_progression"] is False
+    assert len(controls["enemy_class_controls"]) == 2
+    assert len(controls["auxiliary_class_controls"]) == 5
+    assert all(value == 0 for value in report["coverage"].values())
+    assert report["physical_saturn"] == "UNRUN"
+
+
+validate_chrysalis(CHRYSALIS)
+for label, path, value in (
+        ("chrysalis semantic identity",
+         ("paired_capture_ceremony", "segment_semantics",
+          "canonical_semantic_sha256"), "0" * 64),
+        ("chrysalis player identity",
+         ("paired_capture_ceremony", "segment_semantics",
+          "identity_mismatch_frames"), [11000]),
+        ("chrysalis missing lifecycle", ("scene_census_delta", "spawn_edges"), []),
+        ("chrysalis missing class controls",
+         ("targeted_counterfactuals", "enemy_class_controls"), []),
+        ("chrysalis orphan actor", ("coverage", "unowned_actor_lifetimes"), 1),
+        ("chrysalis physical claim", ("physical_saturn",), "PASS")):
+    mutant = copy.deepcopy(CHRYSALIS)
+    target = mutant
+    for key in path[:-1]:
+        target = target[key]
+    target[path[-1]] = value
+    try:
+        validate_chrysalis(mutant)
+    except AssertionError:
+        continue
+    raise AssertionError(f"Chrysalis census mutation accepted: {label}")
+
+print("ORACLE-10 Round 1 census extension 5567..11476: PASS "
+      "(55 mutations rejected)")

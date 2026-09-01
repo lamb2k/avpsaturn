@@ -2379,3 +2379,21 @@ remain discriminating. There are zero orphan actors, lifecycle, route/camera,
 audio, load, release, or identity events. Evidence artifact SHA-256 is
 `ec72ef4e391eb58b21896fb50f67fda1993b17442de6331a817e88737f917881`.
 Continue P2 at source frame 9976 through `round1-chrysalis-battle`.
+
+### Overnight census segment 9976..11476 checkpoint (2026-08-31)
+
+The complete Chrysalis battle is census-closed across 1,501 paired frames at
+semantic SHA-256
+`4bb1aea23c6f0a54ba47b8fd1c0f8ba61e4cbaa81293dc1c0b579e5cd851d51e`.
+All frames retain Predator identity. Sixty-two lifetimes cover eight owned
+class/type pairs, including the newly reached SOURCE_CLOSED enemy class
+`0x01/12`, class `0x06/12`, navigation, player, and four auxiliary effect
+families.
+
+The battle binds 59 spawn edges, 57 despawn edges, 34 HIT/KO transitions, and
+130 audio transactions across 23 commands. It contains no route or load edge
+and stays within the accepted source camera run. Enemy, auxiliary, navigation,
+route-wide, and presentation controls remain discriminating. No authority event
+is orphaned. Evidence artifact SHA-256 is
+`8d7aba5b517d9281c3511eb3c48423a68513f6d282872f17b6003801d7dd2dc2`.
+Continue P2 at source frame 11477 through the next source boundary.

@@ -1,0 +1,5508 @@
+{
+  "coverage": {
+    "per_frame_character_identity_failures": 0,
+    "unidentified_source_class_type_pairs": 0,
+    "unmapped_spawn_despawn_edges": 0,
+    "unowned_actor_lifetimes": 0,
+    "unowned_audio_events": 0,
+    "unowned_load_release_events": 0,
+    "unowned_route_camera_events": 0
+  },
+  "paired_capture_ceremony": {
+    "independent_raw_captures": [
+      "full_route",
+      "full_route_rerun"
+    ],
+    "paired_route_ledger_sha256": {
+      "dispatches.tsv": "c58ce0b2fd9811112002e717b33ee8364a7808aa6c42ffdceb97380b8f8b9985",
+      "lifecycle_writes.tsv": "21bbd8c035146051401132e86f20f77282348a3227290b5e80bbf58675224656",
+      "result.tsv": "e75dded8c4f6dd02bedcf3e2b32782bd2e53d65256e042e11436435317b734ed",
+      "route_rng.tsv": "8f59258961ea4694e545993331a9478b006a1a3df9913390df01822ad397dd19",
+      "route_samples.tsv": "ad723acfbd3d51c0c833da0eed3490833494bab5af9862244f8ca35e2876a54c",
+      "route_writes.tsv": "6f1e4d6da736d9b886a834bf72fc426e58011f68e512acf1d6e8b7348c4f858a"
+    },
+    "paired_route_ledgers_byte_identical": true,
+    "raw_capture_files_byte_identical": true,
+    "segment_semantics": {
+      "canonical_semantic_sha256": "4bb1aea23c6f0a54ba47b8fd1c0f8ba61e4cbaa81293dc1c0b579e5cd851d51e",
+      "character_mismatch_frames": [],
+      "frame_count": 1501,
+      "identity_mismatch_frames": [],
+      "per_frame_character_identity_gate": true,
+      "player_active_frames": 1501,
+      "required_character_u8": 0
+    }
+  },
+  "physical_saturn": "UNRUN",
+  "route_authority_extension": {
+    "camera_lock_runs": [
+      {
+        "camera_target_at_entry": 0,
+        "camera_target_at_exit": 1010,
+        "classification": "SOURCE_CLOSED",
+        "first_frame": 9732,
+        "frames": 3563,
+        "last_frame": 13294,
+        "owning_writer_pcs": [
+          "0x008c34",
+          "0x0b0706"
+        ],
+        "player_x_at_entry": 1334,
+        "player_x_at_exit": 1120,
+        "prior_scroll2_x": 953,
+        "route": 4,
+        "scroll2_x": 65472
+      }
+    ],
+    "route_state_edges": [],
+    "route_wide_perturbation": {
+      "first_input_difference": {
+        "control": {
+          "input_word": "9"
+        },
+        "fields": [
+          "input_word"
+        ],
+        "frame": 4230,
+        "variant": {
+          "input_word": "8"
+        }
+      },
+      "first_semantic_difference": {
+        "control": {
+          "g8009": "4",
+          "p_x": "192",
+          "p_z": "0"
+        },
+        "fields": [
+          "g8009",
+          "p_x",
+          "p_z"
+        ],
+        "frame": 6692,
+        "variant": {
+          "g8009": "2",
+          "p_x": "1233",
+          "p_z": "311"
+        }
+      },
+      "rendered_witness": "private frames/16800.png directly inspected",
+      "stable_round2_handoff_frame": 16425,
+      "status": "PASS",
+      "variant": "route_perturbed"
+    },
+    "segment_bindings": [
+      {
+        "classification": "SOURCE_CLOSED",
+        "enemy_spawn_count": 2,
+        "enemy_spawn_frames": [
+          11044,
+          11065
+        ],
+        "gameplay_route_edges": [],
+        "observational_labels": [
+          "boss_stalker_wave_2"
+        ],
+        "presentation_boundary": {
+          "classification": "SOURCE_CLOSED_PRESENTATION_DEPENDENCY",
+          "owns_progression": false,
+          "signature": "S30d9c3b2392d"
+        },
+        "route_mode_values": [
+          4
+        ],
+        "route_segment": "round1-chrysalis-battle",
+        "route_writer_refs": [
+          "0x000e86@0xff8018",
+          "0x000e8a@0xff81a2",
+          "0x000e92@0xff81bc",
+          "0x001186@0xff8070",
+          "0x001222@0xff8072",
+          "0x00126c@0xff8054",
+          "0x00126c@0xff8056",
+          "0x001278@0xff8054",
+          "0x001288@0xff8064",
+          "0x001288@0xff8066",
+          "0x00128c@0xff8068",
+          "0x00128c@0xff806a",
+          "0x001298@0xff8064",
+          "0x0012a4@0xff8066",
+          "0x0012b0@0xff8068",
+          "0x0012bc@0xff806a",
+          "0x0012c6@0xff8060",
+          "0x0012c6@0xff8062",
+          "0x0012d2@0xff8060",
+          "0x001432@0xff81a6",
+          "0x001448@0xff81c6",
+          "0x00159c@0xff818a",
+          "0x0015a0@0xff8192",
+          "0x0015a4@0xff819a",
+          "0x0015a8@0xff819e",
+          "0x001914@0xff801e",
+          "0x001954@0xff8020",
+          "0x008090@0xff81bc",
+          "0x00809a@0xff8018",
+          "0x008444@0xff820e",
+          "0x00846a@0xff81f0",
+          "0x008470@0xff81f0",
+          "0x008476@0xff8214",
+          "0x008476@0xff8216",
+          "0x0084ec@0xff820c",
+          "0x0084fa@0xff827c",
+          "0x0084fe@0xff82fc",
+          "0x008502@0xff8034",
+          "0x008506@0xff8038",
+          "0x008522@0xff8248",
+          "0x0085aa@0xff8220",
+          "0x0085b2@0xff8220",
+          "0x0085fa@0xff8224",
+          "0x0086ec@0xff8240",
+          "0x016df2@0xff802c",
+          "0x017976@0xff81ec",
+          "0x01798c@0xff81ec",
+          "0x017992@0xff81ea",
+          "0x0179ee@0xff8226",
+          "0x017a00@0xff8226",
+          "0x017a1a@0xff81ea",
+          "0x017c70@0xff81a8",
+          "0x017c72@0xff81a8",
+          "0x01d772@0xff820a",
+          "0x020648@0xff829c",
+          "0x02064c@0xff829e",
+          "0x0207c0@0xff8238",
+          "0x02083e@0xff8238",
+          "0x020842@0xff8024",
+          "0x04a494@0xff820c",
+          "0x0a9a42@0xff81a4",
+          "0x0a9a46@0xff81a2",
+          "0x0af86c@0xff82c0",
+          "0x0af878@0xff82c2",
+          "0x0af87e@0xff8290",
+          "0x0af884@0xff8294",
+          "0x0b06c0@0xff82ae",
+          "0x0b06fe@0xff8278",
+          "0x0b0706@0xff8032",
+          "0x0b0720@0xff8288",
+          "0x0b072c@0xff8288",
+          "0x0b07d8@0xff828c",
+          "0x0b07e2@0xff82ae",
+          "0x0b0820@0xff827c",
+          "0x0b0828@0xff8034",
+          "0x0b085a@0xff828c",
+          "0x0b17ec@0xff82f8",
+          "0x0b17f4@0xff8036",
+          "0x0b1836@0xff82fc",
+          "0x0b183e@0xff8038"
+        ],
+        "source_frame_range": [
+          9976,
+          11476
+        ]
+      }
+    ]
+  },
+  "scene_census_delta": {
+    "actor_lifetimes": [
+      {
+        "accepted_evidence": "data/oracle11_predator_warrior_authority.json",
+        "animation_record_count": 91,
+        "class": "0x00",
+        "classification": "SOURCE_CLOSED",
+        "despawn_in_segment": false,
+        "facings": [
+          0,
+          1
+        ],
+        "id": "player-0-life-6723",
+        "observed_lifetime": [
+          6723,
+          12797
+        ],
+        "segment_lifetime": [
+          9976,
+          11476
+        ],
+        "slot": "0xff8380",
+        "source_owner": "predator-warrior-player-authority",
+        "spawn_in_segment": false,
+        "state_context_count": 40,
+        "type": 0
+      },
+      {
+        "accepted_evidence": "data/oracle11_round1_enemy_archetypes.json",
+        "animation_record_count": 177,
+        "class": "0x06",
+        "classification": "SOURCE_CLOSED",
+        "despawn_in_segment": false,
+        "facings": [
+          0,
+          1
+        ],
+        "id": "actor-19-life-5566",
+        "observed_lifetime": [
+          5566,
+          15047
+        ],
+        "segment_lifetime": [
+          9976,
+          11476
+        ],
+        "slot": "0xffa3c0",
+        "source_owner": "round1-enemy-archetypes",
+        "spawn_in_segment": false,
+        "state_context_count": 39,
+        "type": 12
+      },
+      {
+        "accepted_evidence": "data/oracle11_round1_navigation.json",
+        "animation_record_count": 1,
+        "class": "0x07",
+        "classification": "SOURCE_CLOSED",
+        "despawn_in_segment": false,
+        "facings": [
+          0
+        ],
+        "id": "actor-42-life-5566",
+        "observed_lifetime": [
+          5566,
+          15047
+        ],
+        "segment_lifetime": [
+          9976,
+          11476
+        ],
+        "slot": "0xffb500",
+        "source_owner": "round1-navigation-terrain-camera",
+        "spawn_in_segment": false,
+        "state_context_count": 1,
+        "type": 20
+      },
+      {
+        "accepted_evidence": "data/oracle11_round1_auxiliary_authority.json",
+        "animation_record_count": 9,
+        "class": "0x3d",
+        "classification": "SOURCE_CLOSED",
+        "despawn_in_segment": true,
+        "facings": [
+          0
+        ],
+        "id": "actor-54-life-9981",
+        "observed_lifetime": [
+          9981,
+          9998
+        ],
+        "segment_lifetime": [
+          9981,
+          9998
+        ],
+        "slot": "0xffbe00",
+        "source_owner": "pickups-equipment-weapons-projectiles-hazards-destructibles",
+        "spawn_in_segment": true,
+        "state_context_count": 2,
+        "type": 24
+      },
+      {
+        "accepted_evidence": "data/oracle11_round1_auxiliary_authority.json",
+        "animation_record_count": 9,
+        "class": "0x3d",
+        "classification": "SOURCE_CLOSED",
+        "despawn_in_segment": true,
+        "facings": [
+          0
+        ],
+        "id": "actor-48-life-9986",
+        "observed_lifetime": [
+          9986,
+          10003
+        ],
+        "segment_lifetime": [
+          9986,
+          10003
+        ],
+        "slot": "0xffb980",
+        "source_owner": "pickups-equipment-weapons-projectiles-hazards-destructibles",
+        "spawn_in_segment": true,
+        "state_context_count": 2,
+        "type": 24
+      },
+      {
+        "accepted_evidence": "data/oracle11_round1_auxiliary_authority.json",
+        "animation_record_count": 9,
+        "class": "0x3d",
+        "classification": "SOURCE_CLOSED",
+        "despawn_in_segment": true,
+        "facings": [
+          0
+        ],
+        "id": "actor-52-life-9989",
+        "observed_lifetime": [
+          9989,
+          10006
+        ],
+        "segment_lifetime": [
+          9989,
+          10006
+        ],
+        "slot": "0xffbc80",
+        "source_owner": "pickups-equipment-weapons-projectiles-hazards-destructibles",
+        "spawn_in_segment": true,
+        "state_context_count": 2,
+        "type": 24
+      },
+      {
+        "accepted_evidence": "data/oracle11_round1_auxiliary_authority.json",
+        "animation_record_count": 9,
+        "class": "0x3d",
+        "classification": "SOURCE_CLOSED",
+        "despawn_in_segment": true,
+        "facings": [
+          0
+        ],
+        "id": "actor-56-life-9994",
+        "observed_lifetime": [
+          9994,
+          10011
+        ],
+        "segment_lifetime": [
+          9994,
+          10011
+        ],
+        "slot": "0xffbf80",
+        "source_owner": "pickups-equipment-weapons-projectiles-hazards-destructibles",
+        "spawn_in_segment": true,
+        "state_context_count": 2,
+        "type": 24
+      },
+      {
+        "accepted_evidence": "data/oracle11_round1_auxiliary_authority.json",
+        "animation_record_count": 9,
+        "class": "0x3d",
+        "classification": "SOURCE_CLOSED",
+        "despawn_in_segment": true,
+        "facings": [
+          0
+        ],
+        "id": "actor-50-life-9998",
+        "observed_lifetime": [
+          9998,
+          10015
+        ],
+        "segment_lifetime": [
+          9998,
+          10015
+        ],
+        "slot": "0xffbb00",
+        "source_owner": "pickups-equipment-weapons-projectiles-hazards-destructibles",
+        "spawn_in_segment": true,
+        "state_context_count": 2,
+        "type": 24
+      },
+      {
+        "accepted_evidence": "data/oracle11_round1_auxiliary_authority.json",
+        "animation_record_count": 9,
+        "class": "0x3d",
+        "classification": "SOURCE_CLOSED",
+        "despawn_in_segment": true,
+        "facings": [
+          0
+        ],
+        "id": "actor-54-life-10000",
+        "observed_lifetime": [
+          10000,
+          10017
+        ],
+        "segment_lifetime": [
+          10000,
+          10017
+        ],
+        "slot": "0xffbe00",
+        "source_owner": "pickups-equipment-weapons-projectiles-hazards-destructibles",
+        "spawn_in_segment": true,
+        "state_context_count": 2,
+        "type": 24
+      },
+      {
+        "accepted_evidence": "data/oracle11_round1_auxiliary_authority.json",
+        "animation_record_count": 9,
+        "class": "0x3d",
+        "classification": "SOURCE_CLOSED",
+        "despawn_in_segment": true,
+        "facings": [
+          0
+        ],
+        "id": "actor-48-life-10005",
+        "observed_lifetime": [
+          10005,
+          10022
+        ],
+        "segment_lifetime": [
+          10005,
+          10022
+        ],
+        "slot": "0xffb980",
+        "source_owner": "pickups-equipment-weapons-projectiles-hazards-destructibles",
+        "spawn_in_segment": true,
+        "state_context_count": 2,
+        "type": 24
+      },
+      {
+        "accepted_evidence": "data/oracle11_round1_auxiliary_authority.json",
+        "animation_record_count": 9,
+        "class": "0x3d",
+        "classification": "SOURCE_CLOSED",
+        "despawn_in_segment": true,
+        "facings": [
+          0
+        ],
+        "id": "actor-52-life-10008",
+        "observed_lifetime": [
+          10008,
+          10025
+        ],
+        "segment_lifetime": [
+          10008,
+          10025
+        ],
+        "slot": "0xffbc80",
+        "source_owner": "pickups-equipment-weapons-projectiles-hazards-destructibles",
+        "spawn_in_segment": true,
+        "state_context_count": 2,
+        "type": 24
+      },
+      {
+        "accepted_evidence": "data/oracle11_round1_auxiliary_authority.json",
+        "animation_record_count": 9,
+        "class": "0x3d",
+        "classification": "SOURCE_CLOSED",
+        "despawn_in_segment": true,
+        "facings": [
+          0
+        ],
+        "id": "actor-56-life-10013",
+        "observed_lifetime": [
+          10013,
+          10030
+        ],
+        "segment_lifetime": [
+          10013,
+          10030
+        ],
+        "slot": "0xffbf80",
+        "source_owner": "pickups-equipment-weapons-projectiles-hazards-destructibles",
+        "spawn_in_segment": true,
+        "state_context_count": 2,
+        "type": 24
+      },
+      {
+        "accepted_evidence": "data/oracle11_round1_auxiliary_authority.json",
+        "animation_record_count": 1,
+        "class": "0x49",
+        "classification": "SOURCE_CLOSED",
+        "despawn_in_segment": true,
+        "facings": [
+          1
+        ],
+        "id": "actor-56-life-10104",
+        "observed_lifetime": [
+          10104,
+          10110
+        ],
+        "segment_lifetime": [
+          10104,
+          10110
+        ],
+        "slot": "0xffbf80",
+        "source_owner": "pickups-equipment-weapons-projectiles-hazards-destructibles",
+        "spawn_in_segment": true,
+        "state_context_count": 1,
+        "type": 24
+      },
+      {
+        "accepted_evidence": "data/oracle11_round1_auxiliary_authority.json",
+        "animation_record_count": 1,
+        "class": "0x49",
+        "classification": "SOURCE_CLOSED",
+        "despawn_in_segment": true,
+        "facings": [
+          1
+        ],
+        "id": "actor-56-life-10112",
+        "observed_lifetime": [
+          10112,
+          10118
+        ],
+        "segment_lifetime": [
+          10112,
+          10118
+        ],
+        "slot": "0xffbf80",
+        "source_owner": "pickups-equipment-weapons-projectiles-hazards-destructibles",
+        "spawn_in_segment": true,
+        "state_context_count": 1,
+        "type": 24
+      },
+      {
+        "accepted_evidence": "data/oracle11_round1_auxiliary_authority.json",
+        "animation_record_count": 9,
+        "class": "0x3d",
+        "classification": "SOURCE_CLOSED",
+        "despawn_in_segment": true,
+        "facings": [
+          0
+        ],
+        "id": "actor-56-life-10159",
+        "observed_lifetime": [
+          10159,
+          10176
+        ],
+        "segment_lifetime": [
+          10159,
+          10176
+        ],
+        "slot": "0xffbf80",
+        "source_owner": "pickups-equipment-weapons-projectiles-hazards-destructibles",
+        "spawn_in_segment": true,
+        "state_context_count": 2,
+        "type": 24
+      },
+      {
+        "accepted_evidence": "data/oracle11_round1_auxiliary_authority.json",
+        "animation_record_count": 9,
+        "class": "0x3d",
+        "classification": "SOURCE_CLOSED",
+        "despawn_in_segment": true,
+        "facings": [
+          0
+        ],
+        "id": "actor-52-life-10162",
+        "observed_lifetime": [
+          10162,
+          10179
+        ],
+        "segment_lifetime": [
+          10162,
+          10179
+        ],
+        "slot": "0xffbc80",
+        "source_owner": "pickups-equipment-weapons-projectiles-hazards-destructibles",
+        "spawn_in_segment": true,
+        "state_context_count": 2,
+        "type": 24
+      },
+      {
+        "accepted_evidence": "data/oracle11_round1_auxiliary_authority.json",
+        "animation_record_count": 11,
+        "class": "0x10",
+        "classification": "SOURCE_CLOSED",
+        "despawn_in_segment": true,
+        "facings": [
+          0
+        ],
+        "id": "actor-48-life-10164",
+        "observed_lifetime": [
+          10164,
+          10182
+        ],
+        "segment_lifetime": [
+          10164,
+          10182
+        ],
+        "slot": "0xffb980",
+        "source_owner": "pickups-equipment-weapons-projectiles-hazards-destructibles",
+        "spawn_in_segment": true,
+        "state_context_count": 3,
+        "type": 24
+      },
+      {
+        "accepted_evidence": "data/oracle11_round1_auxiliary_authority.json",
+        "animation_record_count": 9,
+        "class": "0x3d",
+        "classification": "SOURCE_CLOSED",
+        "despawn_in_segment": true,
+        "facings": [
+          0
+        ],
+        "id": "actor-54-life-10169",
+        "observed_lifetime": [
+          10169,
+          10186
+        ],
+        "segment_lifetime": [
+          10169,
+          10186
+        ],
+        "slot": "0xffbe00",
+        "source_owner": "pickups-equipment-weapons-projectiles-hazards-destructibles",
+        "spawn_in_segment": true,
+        "state_context_count": 2,
+        "type": 24
+      },
+      {
+        "accepted_evidence": "data/oracle11_round1_auxiliary_authority.json",
+        "animation_record_count": 9,
+        "class": "0x3d",
+        "classification": "SOURCE_CLOSED",
+        "despawn_in_segment": true,
+        "facings": [
+          0
+        ],
+        "id": "actor-50-life-10170",
+        "observed_lifetime": [
+          10170,
+          10187
+        ],
+        "segment_lifetime": [
+          10170,
+          10187
+        ],
+        "slot": "0xffbb00",
+        "source_owner": "pickups-equipment-weapons-projectiles-hazards-destructibles",
+        "spawn_in_segment": true,
+        "state_context_count": 2,
+        "type": 24
+      },
+      {
+        "accepted_evidence": "data/oracle11_round1_auxiliary_authority.json",
+        "animation_record_count": 9,
+        "class": "0x3d",
+        "classification": "SOURCE_CLOSED",
+        "despawn_in_segment": true,
+        "facings": [
+          0
+        ],
+        "id": "actor-56-life-10178",
+        "observed_lifetime": [
+          10178,
+          10195
+        ],
+        "segment_lifetime": [
+          10178,
+          10195
+        ],
+        "slot": "0xffbf80",
+        "source_owner": "pickups-equipment-weapons-projectiles-hazards-destructibles",
+        "spawn_in_segment": true,
+        "state_context_count": 2,
+        "type": 24
+      },
+      {
+        "accepted_evidence": "data/oracle11_round1_auxiliary_authority.json",
+        "animation_record_count": 9,
+        "class": "0x3d",
+        "classification": "SOURCE_CLOSED",
+        "despawn_in_segment": true,
+        "facings": [
+          0
+        ],
+        "id": "actor-52-life-10181",
+        "observed_lifetime": [
+          10181,
+          10198
+        ],
+        "segment_lifetime": [
+          10181,
+          10198
+        ],
+        "slot": "0xffbc80",
+        "source_owner": "pickups-equipment-weapons-projectiles-hazards-destructibles",
+        "spawn_in_segment": true,
+        "state_context_count": 2,
+        "type": 24
+      },
+      {
+        "accepted_evidence": "data/oracle11_round1_auxiliary_authority.json",
+        "animation_record_count": 9,
+        "class": "0x3d",
+        "classification": "SOURCE_CLOSED",
+        "despawn_in_segment": true,
+        "facings": [
+          0
+        ],
+        "id": "actor-52-life-10340",
+        "observed_lifetime": [
+          10340,
+          10357
+        ],
+        "segment_lifetime": [
+          10340,
+          10357
+        ],
+        "slot": "0xffbc80",
+        "source_owner": "pickups-equipment-weapons-projectiles-hazards-destructibles",
+        "spawn_in_segment": true,
+        "state_context_count": 2,
+        "type": 24
+      },
+      {
+        "accepted_evidence": "data/oracle11_round1_auxiliary_authority.json",
+        "animation_record_count": 9,
+        "class": "0x3d",
+        "classification": "SOURCE_CLOSED",
+        "despawn_in_segment": true,
+        "facings": [
+          0
+        ],
+        "id": "actor-56-life-10343",
+        "observed_lifetime": [
+          10343,
+          10360
+        ],
+        "segment_lifetime": [
+          10343,
+          10360
+        ],
+        "slot": "0xffbf80",
+        "source_owner": "pickups-equipment-weapons-projectiles-hazards-destructibles",
+        "spawn_in_segment": true,
+        "state_context_count": 2,
+        "type": 24
+      },
+      {
+        "accepted_evidence": "data/oracle11_round1_auxiliary_authority.json",
+        "animation_record_count": 9,
+        "class": "0x3d",
+        "classification": "SOURCE_CLOSED",
+        "despawn_in_segment": true,
+        "facings": [
+          0
+        ],
+        "id": "actor-50-life-10351",
+        "observed_lifetime": [
+          10351,
+          10368
+        ],
+        "segment_lifetime": [
+          10351,
+          10368
+        ],
+        "slot": "0xffbb00",
+        "source_owner": "pickups-equipment-weapons-projectiles-hazards-destructibles",
+        "spawn_in_segment": true,
+        "state_context_count": 2,
+        "type": 24
+      },
+      {
+        "accepted_evidence": "data/oracle11_round1_auxiliary_authority.json",
+        "animation_record_count": 9,
+        "class": "0x3d",
+        "classification": "SOURCE_CLOSED",
+        "despawn_in_segment": true,
+        "facings": [
+          0
+        ],
+        "id": "actor-54-life-10353",
+        "observed_lifetime": [
+          10353,
+          10370
+        ],
+        "segment_lifetime": [
+          10353,
+          10370
+        ],
+        "slot": "0xffbe00",
+        "source_owner": "pickups-equipment-weapons-projectiles-hazards-destructibles",
+        "spawn_in_segment": true,
+        "state_context_count": 2,
+        "type": 24
+      },
+      {
+        "accepted_evidence": "data/oracle11_round1_auxiliary_authority.json",
+        "animation_record_count": 9,
+        "class": "0x3d",
+        "classification": "SOURCE_CLOSED",
+        "despawn_in_segment": true,
+        "facings": [
+          0
+        ],
+        "id": "actor-52-life-10359",
+        "observed_lifetime": [
+          10359,
+          10376
+        ],
+        "segment_lifetime": [
+          10359,
+          10376
+        ],
+        "slot": "0xffbc80",
+        "source_owner": "pickups-equipment-weapons-projectiles-hazards-destructibles",
+        "spawn_in_segment": true,
+        "state_context_count": 2,
+        "type": 24
+      },
+      {
+        "accepted_evidence": "data/oracle11_round1_auxiliary_authority.json",
+        "animation_record_count": 9,
+        "class": "0x3d",
+        "classification": "SOURCE_CLOSED",
+        "despawn_in_segment": true,
+        "facings": [
+          0
+        ],
+        "id": "actor-48-life-10361",
+        "observed_lifetime": [
+          10361,
+          10378
+        ],
+        "segment_lifetime": [
+          10361,
+          10378
+        ],
+        "slot": "0xffb980",
+        "source_owner": "pickups-equipment-weapons-projectiles-hazards-destructibles",
+        "spawn_in_segment": true,
+        "state_context_count": 2,
+        "type": 24
+      },
+      {
+        "accepted_evidence": "data/oracle11_round1_auxiliary_authority.json",
+        "animation_record_count": 9,
+        "class": "0x3d",
+        "classification": "SOURCE_CLOSED",
+        "despawn_in_segment": true,
+        "facings": [
+          0
+        ],
+        "id": "actor-56-life-10362",
+        "observed_lifetime": [
+          10362,
+          10379
+        ],
+        "segment_lifetime": [
+          10362,
+          10379
+        ],
+        "slot": "0xffbf80",
+        "source_owner": "pickups-equipment-weapons-projectiles-hazards-destructibles",
+        "spawn_in_segment": true,
+        "state_context_count": 2,
+        "type": 24
+      },
+      {
+        "accepted_evidence": "data/oracle11_round1_auxiliary_authority.json",
+        "animation_record_count": 11,
+        "class": "0x10",
+        "classification": "SOURCE_CLOSED",
+        "despawn_in_segment": true,
+        "facings": [
+          0
+        ],
+        "id": "actor-56-life-10703",
+        "observed_lifetime": [
+          10703,
+          10721
+        ],
+        "segment_lifetime": [
+          10703,
+          10721
+        ],
+        "slot": "0xffbf80",
+        "source_owner": "pickups-equipment-weapons-projectiles-hazards-destructibles",
+        "spawn_in_segment": true,
+        "state_context_count": 3,
+        "type": 24
+      },
+      {
+        "accepted_evidence": "data/oracle11_round1_auxiliary_authority.json",
+        "animation_record_count": 1,
+        "class": "0x49",
+        "classification": "SOURCE_CLOSED",
+        "despawn_in_segment": true,
+        "facings": [
+          1
+        ],
+        "id": "actor-48-life-10706",
+        "observed_lifetime": [
+          10706,
+          10712
+        ],
+        "segment_lifetime": [
+          10706,
+          10712
+        ],
+        "slot": "0xffb980",
+        "source_owner": "pickups-equipment-weapons-projectiles-hazards-destructibles",
+        "spawn_in_segment": true,
+        "state_context_count": 1,
+        "type": 24
+      },
+      {
+        "accepted_evidence": "data/oracle11_round1_auxiliary_authority.json",
+        "animation_record_count": 1,
+        "class": "0x49",
+        "classification": "SOURCE_CLOSED",
+        "despawn_in_segment": true,
+        "facings": [
+          1
+        ],
+        "id": "actor-48-life-10714",
+        "observed_lifetime": [
+          10714,
+          10720
+        ],
+        "segment_lifetime": [
+          10714,
+          10720
+        ],
+        "slot": "0xffb980",
+        "source_owner": "pickups-equipment-weapons-projectiles-hazards-destructibles",
+        "spawn_in_segment": true,
+        "state_context_count": 1,
+        "type": 24
+      },
+      {
+        "accepted_evidence": "data/oracle11_round1_auxiliary_authority.json",
+        "animation_record_count": 1,
+        "class": "0x49",
+        "classification": "SOURCE_CLOSED",
+        "despawn_in_segment": true,
+        "facings": [
+          1
+        ],
+        "id": "actor-56-life-10780",
+        "observed_lifetime": [
+          10780,
+          10786
+        ],
+        "segment_lifetime": [
+          10780,
+          10786
+        ],
+        "slot": "0xffbf80",
+        "source_owner": "pickups-equipment-weapons-projectiles-hazards-destructibles",
+        "spawn_in_segment": true,
+        "state_context_count": 1,
+        "type": 24
+      },
+      {
+        "accepted_evidence": "data/oracle11_round1_auxiliary_authority.json",
+        "animation_record_count": 1,
+        "class": "0x49",
+        "classification": "SOURCE_CLOSED",
+        "despawn_in_segment": true,
+        "facings": [
+          1
+        ],
+        "id": "actor-48-life-10782",
+        "observed_lifetime": [
+          10782,
+          10788
+        ],
+        "segment_lifetime": [
+          10782,
+          10788
+        ],
+        "slot": "0xffb980",
+        "source_owner": "pickups-equipment-weapons-projectiles-hazards-destructibles",
+        "spawn_in_segment": true,
+        "state_context_count": 1,
+        "type": 24
+      },
+      {
+        "accepted_evidence": "data/oracle11_round1_auxiliary_authority.json",
+        "animation_record_count": 1,
+        "class": "0x49",
+        "classification": "SOURCE_CLOSED",
+        "despawn_in_segment": true,
+        "facings": [
+          1
+        ],
+        "id": "actor-56-life-10788",
+        "observed_lifetime": [
+          10788,
+          10794
+        ],
+        "segment_lifetime": [
+          10788,
+          10794
+        ],
+        "slot": "0xffbf80",
+        "source_owner": "pickups-equipment-weapons-projectiles-hazards-destructibles",
+        "spawn_in_segment": true,
+        "state_context_count": 1,
+        "type": 24
+      },
+      {
+        "accepted_evidence": "data/oracle11_round1_auxiliary_authority.json",
+        "animation_record_count": 1,
+        "class": "0x49",
+        "classification": "SOURCE_CLOSED",
+        "despawn_in_segment": true,
+        "facings": [
+          1
+        ],
+        "id": "actor-48-life-10790",
+        "observed_lifetime": [
+          10790,
+          10796
+        ],
+        "segment_lifetime": [
+          10790,
+          10796
+        ],
+        "slot": "0xffb980",
+        "source_owner": "pickups-equipment-weapons-projectiles-hazards-destructibles",
+        "spawn_in_segment": true,
+        "state_context_count": 1,
+        "type": 24
+      },
+      {
+        "accepted_evidence": "data/oracle11_round1_auxiliary_authority.json",
+        "animation_record_count": 1,
+        "class": "0x49",
+        "classification": "SOURCE_CLOSED",
+        "despawn_in_segment": true,
+        "facings": [
+          1
+        ],
+        "id": "actor-48-life-10820",
+        "observed_lifetime": [
+          10820,
+          10826
+        ],
+        "segment_lifetime": [
+          10820,
+          10826
+        ],
+        "slot": "0xffb980",
+        "source_owner": "pickups-equipment-weapons-projectiles-hazards-destructibles",
+        "spawn_in_segment": true,
+        "state_context_count": 1,
+        "type": 24
+      },
+      {
+        "accepted_evidence": "data/oracle11_round1_auxiliary_authority.json",
+        "animation_record_count": 1,
+        "class": "0x49",
+        "classification": "SOURCE_CLOSED",
+        "despawn_in_segment": true,
+        "facings": [
+          1
+        ],
+        "id": "actor-56-life-10824",
+        "observed_lifetime": [
+          10824,
+          10830
+        ],
+        "segment_lifetime": [
+          10824,
+          10830
+        ],
+        "slot": "0xffbf80",
+        "source_owner": "pickups-equipment-weapons-projectiles-hazards-destructibles",
+        "spawn_in_segment": true,
+        "state_context_count": 1,
+        "type": 24
+      },
+      {
+        "accepted_evidence": "data/oracle11_round1_auxiliary_authority.json",
+        "animation_record_count": 1,
+        "class": "0x49",
+        "classification": "SOURCE_CLOSED",
+        "despawn_in_segment": true,
+        "facings": [
+          1
+        ],
+        "id": "actor-48-life-10828",
+        "observed_lifetime": [
+          10828,
+          10834
+        ],
+        "segment_lifetime": [
+          10828,
+          10834
+        ],
+        "slot": "0xffb980",
+        "source_owner": "pickups-equipment-weapons-projectiles-hazards-destructibles",
+        "spawn_in_segment": true,
+        "state_context_count": 1,
+        "type": 24
+      },
+      {
+        "accepted_evidence": "data/oracle11_round1_auxiliary_authority.json",
+        "animation_record_count": 1,
+        "class": "0x49",
+        "classification": "SOURCE_CLOSED",
+        "despawn_in_segment": true,
+        "facings": [
+          1
+        ],
+        "id": "actor-56-life-10832",
+        "observed_lifetime": [
+          10832,
+          10838
+        ],
+        "segment_lifetime": [
+          10832,
+          10838
+        ],
+        "slot": "0xffbf80",
+        "source_owner": "pickups-equipment-weapons-projectiles-hazards-destructibles",
+        "spawn_in_segment": true,
+        "state_context_count": 1,
+        "type": 24
+      },
+      {
+        "accepted_evidence": "data/oracle11_round1_auxiliary_authority.json",
+        "animation_record_count": 1,
+        "class": "0x49",
+        "classification": "SOURCE_CLOSED",
+        "despawn_in_segment": true,
+        "facings": [
+          1
+        ],
+        "id": "actor-48-life-10836",
+        "observed_lifetime": [
+          10836,
+          10842
+        ],
+        "segment_lifetime": [
+          10836,
+          10842
+        ],
+        "slot": "0xffb980",
+        "source_owner": "pickups-equipment-weapons-projectiles-hazards-destructibles",
+        "spawn_in_segment": true,
+        "state_context_count": 1,
+        "type": 24
+      },
+      {
+        "accepted_evidence": "data/oracle11_round1_auxiliary_authority.json",
+        "animation_record_count": 1,
+        "class": "0x49",
+        "classification": "SOURCE_CLOSED",
+        "despawn_in_segment": true,
+        "facings": [
+          1
+        ],
+        "id": "actor-48-life-10882",
+        "observed_lifetime": [
+          10882,
+          10888
+        ],
+        "segment_lifetime": [
+          10882,
+          10888
+        ],
+        "slot": "0xffb980",
+        "source_owner": "pickups-equipment-weapons-projectiles-hazards-destructibles",
+        "spawn_in_segment": true,
+        "state_context_count": 1,
+        "type": 24
+      },
+      {
+        "accepted_evidence": "data/oracle11_round1_auxiliary_authority.json",
+        "animation_record_count": 1,
+        "class": "0x49",
+        "classification": "SOURCE_CLOSED",
+        "despawn_in_segment": true,
+        "facings": [
+          1
+        ],
+        "id": "actor-56-life-10886",
+        "observed_lifetime": [
+          10886,
+          10892
+        ],
+        "segment_lifetime": [
+          10886,
+          10892
+        ],
+        "slot": "0xffbf80",
+        "source_owner": "pickups-equipment-weapons-projectiles-hazards-destructibles",
+        "spawn_in_segment": true,
+        "state_context_count": 1,
+        "type": 24
+      },
+      {
+        "accepted_evidence": "data/oracle11_round1_auxiliary_authority.json",
+        "animation_record_count": 1,
+        "class": "0x49",
+        "classification": "SOURCE_CLOSED",
+        "despawn_in_segment": true,
+        "facings": [
+          1
+        ],
+        "id": "actor-48-life-10890",
+        "observed_lifetime": [
+          10890,
+          10896
+        ],
+        "segment_lifetime": [
+          10890,
+          10896
+        ],
+        "slot": "0xffb980",
+        "source_owner": "pickups-equipment-weapons-projectiles-hazards-destructibles",
+        "spawn_in_segment": true,
+        "state_context_count": 1,
+        "type": 24
+      },
+      {
+        "accepted_evidence": "data/oracle11_round1_auxiliary_authority.json",
+        "animation_record_count": 1,
+        "class": "0x49",
+        "classification": "SOURCE_CLOSED",
+        "despawn_in_segment": true,
+        "facings": [
+          1
+        ],
+        "id": "actor-56-life-10894",
+        "observed_lifetime": [
+          10894,
+          10900
+        ],
+        "segment_lifetime": [
+          10894,
+          10900
+        ],
+        "slot": "0xffbf80",
+        "source_owner": "pickups-equipment-weapons-projectiles-hazards-destructibles",
+        "spawn_in_segment": true,
+        "state_context_count": 1,
+        "type": 24
+      },
+      {
+        "accepted_evidence": "data/oracle11_round1_enemy_archetypes.json",
+        "animation_record_count": 86,
+        "class": "0x01",
+        "classification": "SOURCE_CLOSED",
+        "despawn_in_segment": false,
+        "facings": [
+          0,
+          1
+        ],
+        "id": "actor-18-life-11045",
+        "observed_lifetime": [
+          11045,
+          13639
+        ],
+        "segment_lifetime": [
+          11045,
+          11476
+        ],
+        "slot": "0xffa300",
+        "source_owner": "round1-enemy-archetypes",
+        "spawn_in_segment": true,
+        "state_context_count": 29,
+        "type": 12
+      },
+      {
+        "accepted_evidence": "data/oracle11_round1_auxiliary_authority.json",
+        "animation_record_count": 1,
+        "class": "0x49",
+        "classification": "SOURCE_CLOSED",
+        "despawn_in_segment": true,
+        "facings": [
+          1
+        ],
+        "id": "actor-56-life-11064",
+        "observed_lifetime": [
+          11064,
+          11070
+        ],
+        "segment_lifetime": [
+          11064,
+          11070
+        ],
+        "slot": "0xffbf80",
+        "source_owner": "pickups-equipment-weapons-projectiles-hazards-destructibles",
+        "spawn_in_segment": true,
+        "state_context_count": 1,
+        "type": 24
+      },
+      {
+        "accepted_evidence": "data/oracle11_round1_enemy_archetypes.json",
+        "animation_record_count": 92,
+        "class": "0x01",
+        "classification": "SOURCE_CLOSED",
+        "despawn_in_segment": false,
+        "facings": [
+          0,
+          1
+        ],
+        "id": "actor-17-life-11066",
+        "observed_lifetime": [
+          11066,
+          12266
+        ],
+        "segment_lifetime": [
+          11066,
+          11476
+        ],
+        "slot": "0xffa240",
+        "source_owner": "round1-enemy-archetypes",
+        "spawn_in_segment": true,
+        "state_context_count": 28,
+        "type": 12
+      },
+      {
+        "accepted_evidence": "data/oracle11_round1_auxiliary_authority.json",
+        "animation_record_count": 1,
+        "class": "0x49",
+        "classification": "SOURCE_CLOSED",
+        "despawn_in_segment": true,
+        "facings": [
+          1
+        ],
+        "id": "actor-56-life-11072",
+        "observed_lifetime": [
+          11072,
+          11078
+        ],
+        "segment_lifetime": [
+          11072,
+          11078
+        ],
+        "slot": "0xffbf80",
+        "source_owner": "pickups-equipment-weapons-projectiles-hazards-destructibles",
+        "spawn_in_segment": true,
+        "state_context_count": 1,
+        "type": 24
+      },
+      {
+        "accepted_evidence": "data/oracle11_round1_auxiliary_authority.json",
+        "animation_record_count": 1,
+        "class": "0x49",
+        "classification": "SOURCE_CLOSED",
+        "despawn_in_segment": true,
+        "facings": [
+          1
+        ],
+        "id": "actor-56-life-11246",
+        "observed_lifetime": [
+          11246,
+          11252
+        ],
+        "segment_lifetime": [
+          11246,
+          11252
+        ],
+        "slot": "0xffbf80",
+        "source_owner": "pickups-equipment-weapons-projectiles-hazards-destructibles",
+        "spawn_in_segment": true,
+        "state_context_count": 1,
+        "type": 24
+      },
+      {
+        "accepted_evidence": "data/oracle11_round1_auxiliary_authority.json",
+        "animation_record_count": 1,
+        "class": "0x49",
+        "classification": "SOURCE_CLOSED",
+        "despawn_in_segment": true,
+        "facings": [
+          1
+        ],
+        "id": "actor-56-life-11254",
+        "observed_lifetime": [
+          11254,
+          11260
+        ],
+        "segment_lifetime": [
+          11254,
+          11260
+        ],
+        "slot": "0xffbf80",
+        "source_owner": "pickups-equipment-weapons-projectiles-hazards-destructibles",
+        "spawn_in_segment": true,
+        "state_context_count": 1,
+        "type": 24
+      },
+      {
+        "accepted_evidence": "data/oracle11_round1_auxiliary_authority.json",
+        "animation_record_count": 4,
+        "class": "0x4e",
+        "classification": "SOURCE_CLOSED",
+        "despawn_in_segment": true,
+        "facings": [
+          0
+        ],
+        "id": "actor-56-life-11262",
+        "observed_lifetime": [
+          11262,
+          11272
+        ],
+        "segment_lifetime": [
+          11262,
+          11272
+        ],
+        "slot": "0xffbf80",
+        "source_owner": "pickups-equipment-weapons-projectiles-hazards-destructibles",
+        "spawn_in_segment": true,
+        "state_context_count": 3,
+        "type": 24
+      },
+      {
+        "accepted_evidence": "data/oracle11_round1_auxiliary_authority.json",
+        "animation_record_count": 11,
+        "class": "0x10",
+        "classification": "SOURCE_CLOSED",
+        "despawn_in_segment": true,
+        "facings": [
+          0
+        ],
+        "id": "actor-56-life-11291",
+        "observed_lifetime": [
+          11291,
+          11309
+        ],
+        "segment_lifetime": [
+          11291,
+          11309
+        ],
+        "slot": "0xffbf80",
+        "source_owner": "pickups-equipment-weapons-projectiles-hazards-destructibles",
+        "spawn_in_segment": true,
+        "state_context_count": 3,
+        "type": 24
+      },
+      {
+        "accepted_evidence": "data/oracle11_round1_auxiliary_authority.json",
+        "animation_record_count": 1,
+        "class": "0x49",
+        "classification": "SOURCE_CLOSED",
+        "despawn_in_segment": true,
+        "facings": [
+          1
+        ],
+        "id": "actor-56-life-11316",
+        "observed_lifetime": [
+          11316,
+          11322
+        ],
+        "segment_lifetime": [
+          11316,
+          11322
+        ],
+        "slot": "0xffbf80",
+        "source_owner": "pickups-equipment-weapons-projectiles-hazards-destructibles",
+        "spawn_in_segment": true,
+        "state_context_count": 1,
+        "type": 24
+      },
+      {
+        "accepted_evidence": "data/oracle11_round1_auxiliary_authority.json",
+        "animation_record_count": 1,
+        "class": "0x49",
+        "classification": "SOURCE_CLOSED",
+        "despawn_in_segment": true,
+        "facings": [
+          1
+        ],
+        "id": "actor-56-life-11324",
+        "observed_lifetime": [
+          11324,
+          11330
+        ],
+        "segment_lifetime": [
+          11324,
+          11330
+        ],
+        "slot": "0xffbf80",
+        "source_owner": "pickups-equipment-weapons-projectiles-hazards-destructibles",
+        "spawn_in_segment": true,
+        "state_context_count": 1,
+        "type": 24
+      },
+      {
+        "accepted_evidence": "data/oracle11_round1_auxiliary_authority.json",
+        "animation_record_count": 1,
+        "class": "0x49",
+        "classification": "SOURCE_CLOSED",
+        "despawn_in_segment": true,
+        "facings": [
+          1
+        ],
+        "id": "actor-56-life-11332",
+        "observed_lifetime": [
+          11332,
+          11338
+        ],
+        "segment_lifetime": [
+          11332,
+          11338
+        ],
+        "slot": "0xffbf80",
+        "source_owner": "pickups-equipment-weapons-projectiles-hazards-destructibles",
+        "spawn_in_segment": true,
+        "state_context_count": 1,
+        "type": 24
+      },
+      {
+        "accepted_evidence": "data/oracle11_round1_auxiliary_authority.json",
+        "animation_record_count": 11,
+        "class": "0x10",
+        "classification": "SOURCE_CLOSED",
+        "despawn_in_segment": true,
+        "facings": [
+          0
+        ],
+        "id": "actor-56-life-11340",
+        "observed_lifetime": [
+          11340,
+          11358
+        ],
+        "segment_lifetime": [
+          11340,
+          11358
+        ],
+        "slot": "0xffbf80",
+        "source_owner": "pickups-equipment-weapons-projectiles-hazards-destructibles",
+        "spawn_in_segment": true,
+        "state_context_count": 3,
+        "type": 24
+      },
+      {
+        "accepted_evidence": "data/oracle11_round1_auxiliary_authority.json",
+        "animation_record_count": 1,
+        "class": "0x49",
+        "classification": "SOURCE_CLOSED",
+        "despawn_in_segment": true,
+        "facings": [
+          1
+        ],
+        "id": "actor-56-life-11360",
+        "observed_lifetime": [
+          11360,
+          11366
+        ],
+        "segment_lifetime": [
+          11360,
+          11366
+        ],
+        "slot": "0xffbf80",
+        "source_owner": "pickups-equipment-weapons-projectiles-hazards-destructibles",
+        "spawn_in_segment": true,
+        "state_context_count": 1,
+        "type": 24
+      },
+      {
+        "accepted_evidence": "data/oracle11_round1_auxiliary_authority.json",
+        "animation_record_count": 1,
+        "class": "0x49",
+        "classification": "SOURCE_CLOSED",
+        "despawn_in_segment": true,
+        "facings": [
+          1
+        ],
+        "id": "actor-56-life-11368",
+        "observed_lifetime": [
+          11368,
+          11374
+        ],
+        "segment_lifetime": [
+          11368,
+          11374
+        ],
+        "slot": "0xffbf80",
+        "source_owner": "pickups-equipment-weapons-projectiles-hazards-destructibles",
+        "spawn_in_segment": true,
+        "state_context_count": 1,
+        "type": 24
+      },
+      {
+        "accepted_evidence": "data/oracle11_round1_auxiliary_authority.json",
+        "animation_record_count": 1,
+        "class": "0x49",
+        "classification": "SOURCE_CLOSED",
+        "despawn_in_segment": true,
+        "facings": [
+          1
+        ],
+        "id": "actor-56-life-11376",
+        "observed_lifetime": [
+          11376,
+          11382
+        ],
+        "segment_lifetime": [
+          11376,
+          11382
+        ],
+        "slot": "0xffbf80",
+        "source_owner": "pickups-equipment-weapons-projectiles-hazards-destructibles",
+        "spawn_in_segment": true,
+        "state_context_count": 1,
+        "type": 24
+      },
+      {
+        "accepted_evidence": "data/oracle11_round1_auxiliary_authority.json",
+        "animation_record_count": 1,
+        "class": "0x49",
+        "classification": "SOURCE_CLOSED",
+        "despawn_in_segment": true,
+        "facings": [
+          1
+        ],
+        "id": "actor-56-life-11422",
+        "observed_lifetime": [
+          11422,
+          11428
+        ],
+        "segment_lifetime": [
+          11422,
+          11428
+        ],
+        "slot": "0xffbf80",
+        "source_owner": "pickups-equipment-weapons-projectiles-hazards-destructibles",
+        "spawn_in_segment": true,
+        "state_context_count": 1,
+        "type": 24
+      },
+      {
+        "accepted_evidence": "data/oracle11_round1_auxiliary_authority.json",
+        "animation_record_count": 1,
+        "class": "0x49",
+        "classification": "SOURCE_CLOSED",
+        "despawn_in_segment": true,
+        "facings": [
+          1
+        ],
+        "id": "actor-56-life-11430",
+        "observed_lifetime": [
+          11430,
+          11436
+        ],
+        "segment_lifetime": [
+          11430,
+          11436
+        ],
+        "slot": "0xffbf80",
+        "source_owner": "pickups-equipment-weapons-projectiles-hazards-destructibles",
+        "spawn_in_segment": true,
+        "state_context_count": 1,
+        "type": 24
+      },
+      {
+        "accepted_evidence": "data/oracle11_round1_auxiliary_authority.json",
+        "animation_record_count": 11,
+        "class": "0x10",
+        "classification": "SOURCE_CLOSED",
+        "despawn_in_segment": true,
+        "facings": [
+          0
+        ],
+        "id": "actor-56-life-11438",
+        "observed_lifetime": [
+          11438,
+          11456
+        ],
+        "segment_lifetime": [
+          11438,
+          11456
+        ],
+        "slot": "0xffbf80",
+        "source_owner": "pickups-equipment-weapons-projectiles-hazards-destructibles",
+        "spawn_in_segment": true,
+        "state_context_count": 3,
+        "type": 24
+      }
+    ],
+    "audio": {
+      "command_counts": {
+        "0x003d": 3,
+        "0x003e": 8,
+        "0x003f": 3,
+        "0x004d": 24,
+        "0x004e": 6,
+        "0x0051": 7,
+        "0x005d": 3,
+        "0x0060": 1,
+        "0x0072": 1,
+        "0x0091": 3,
+        "0x0096": 3,
+        "0x0107": 1,
+        "0x0108": 3,
+        "0x0109": 8,
+        "0x010a": 4,
+        "0x0118": 24,
+        "0x0119": 6,
+        "0x012d": 4,
+        "0x0130": 2,
+        "0x013d": 1,
+        "0x0201": 1,
+        "0x0203": 1,
+        "0x024e": 13
+      },
+      "handler_transaction_count": 130,
+      "orphan_handler_transactions": 0,
+      "orphan_trigger_groups": 0,
+      "player_origin_edges": [
+        {
+          "classification": "SOURCE_CLOSED",
+          "command": "0x0107",
+          "frames": [
+            10461
+          ],
+          "id": "player-audio-003b5a-0107"
+        },
+        {
+          "classification": "SOURCE_CLOSED",
+          "command": "0x003f",
+          "frames": [
+            10495
+          ],
+          "id": "player-audio-01ad14-003f"
+        },
+        {
+          "classification": "SOURCE_CLOSED",
+          "command": "0x0201",
+          "frames": [
+            10518
+          ],
+          "id": "player-audio-01ae72-0201"
+        }
+      ],
+      "source_owned_trigger_groups_first_seen": [
+        {
+          "classification": "SOURCE_CLOSED",
+          "command": "0x004e",
+          "first_frame": 10840,
+          "id": "global-audio-ff8680-003a8e-004e",
+          "owner_families": [
+            "projectile"
+          ]
+        },
+        {
+          "classification": "SOURCE_CLOSED",
+          "command": "0x0108",
+          "first_frame": 11262,
+          "id": "global-audio-ffa300-003a8e-0108",
+          "owner_families": [
+            "enemy"
+          ]
+        }
+      ]
+    },
+    "class_type_inventory": [
+      {
+        "accepted_evidence": "data/oracle11_predator_warrior_authority.json",
+        "class": "0x00",
+        "classification": "SOURCE_CLOSED",
+        "instance_count": 1,
+        "source_owner": "predator-warrior-player-authority",
+        "type": 0
+      },
+      {
+        "accepted_evidence": "data/oracle11_round1_enemy_archetypes.json",
+        "class": "0x01",
+        "classification": "SOURCE_CLOSED",
+        "instance_count": 2,
+        "source_owner": "round1-enemy-archetypes",
+        "type": 12
+      },
+      {
+        "accepted_evidence": "data/oracle11_round1_enemy_archetypes.json",
+        "class": "0x06",
+        "classification": "SOURCE_CLOSED",
+        "instance_count": 1,
+        "source_owner": "round1-enemy-archetypes",
+        "type": 12
+      },
+      {
+        "accepted_evidence": "data/oracle11_round1_navigation.json",
+        "class": "0x07",
+        "classification": "SOURCE_CLOSED",
+        "instance_count": 1,
+        "source_owner": "round1-navigation-terrain-camera",
+        "type": 20
+      },
+      {
+        "accepted_evidence": "data/oracle11_round1_auxiliary_authority.json",
+        "class": "0x10",
+        "classification": "SOURCE_CLOSED",
+        "instance_count": 5,
+        "source_owner": "pickups-equipment-weapons-projectiles-hazards-destructibles",
+        "type": 24
+      },
+      {
+        "accepted_evidence": "data/oracle11_round1_auxiliary_authority.json",
+        "class": "0x3d",
+        "classification": "SOURCE_CLOSED",
+        "instance_count": 22,
+        "source_owner": "pickups-equipment-weapons-projectiles-hazards-destructibles",
+        "type": 24
+      },
+      {
+        "accepted_evidence": "data/oracle11_round1_auxiliary_authority.json",
+        "class": "0x49",
+        "classification": "SOURCE_CLOSED",
+        "instance_count": 29,
+        "source_owner": "pickups-equipment-weapons-projectiles-hazards-destructibles",
+        "type": 24
+      },
+      {
+        "accepted_evidence": "data/oracle11_round1_auxiliary_authority.json",
+        "class": "0x4e",
+        "classification": "SOURCE_CLOSED",
+        "instance_count": 1,
+        "source_owner": "pickups-equipment-weapons-projectiles-hazards-destructibles",
+        "type": 24
+      }
+    ],
+    "despawn_edges": [
+      {
+        "accepted_evidence": "data/oracle11_round1_auxiliary_authority.json",
+        "animation_record_count": 9,
+        "class": "0x3d",
+        "classification": "SOURCE_CLOSED",
+        "despawn_in_segment": true,
+        "facings": [
+          0
+        ],
+        "id": "actor-54-life-9981",
+        "observed_lifetime": [
+          9981,
+          9998
+        ],
+        "segment_lifetime": [
+          9981,
+          9998
+        ],
+        "slot": "0xffbe00",
+        "source_owner": "pickups-equipment-weapons-projectiles-hazards-destructibles",
+        "spawn_in_segment": true,
+        "state_context_count": 2,
+        "type": 24
+      },
+      {
+        "accepted_evidence": "data/oracle11_round1_auxiliary_authority.json",
+        "animation_record_count": 9,
+        "class": "0x3d",
+        "classification": "SOURCE_CLOSED",
+        "despawn_in_segment": true,
+        "facings": [
+          0
+        ],
+        "id": "actor-48-life-9986",
+        "observed_lifetime": [
+          9986,
+          10003
+        ],
+        "segment_lifetime": [
+          9986,
+          10003
+        ],
+        "slot": "0xffb980",
+        "source_owner": "pickups-equipment-weapons-projectiles-hazards-destructibles",
+        "spawn_in_segment": true,
+        "state_context_count": 2,
+        "type": 24
+      },
+      {
+        "accepted_evidence": "data/oracle11_round1_auxiliary_authority.json",
+        "animation_record_count": 9,
+        "class": "0x3d",
+        "classification": "SOURCE_CLOSED",
+        "despawn_in_segment": true,
+        "facings": [
+          0
+        ],
+        "id": "actor-52-life-9989",
+        "observed_lifetime": [
+          9989,
+          10006
+        ],
+        "segment_lifetime": [
+          9989,
+          10006
+        ],
+        "slot": "0xffbc80",
+        "source_owner": "pickups-equipment-weapons-projectiles-hazards-destructibles",
+        "spawn_in_segment": true,
+        "state_context_count": 2,
+        "type": 24
+      },
+      {
+        "accepted_evidence": "data/oracle11_round1_auxiliary_authority.json",
+        "animation_record_count": 9,
+        "class": "0x3d",
+        "classification": "SOURCE_CLOSED",
+        "despawn_in_segment": true,
+        "facings": [
+          0
+        ],
+        "id": "actor-56-life-9994",
+        "observed_lifetime": [
+          9994,
+          10011
+        ],
+        "segment_lifetime": [
+          9994,
+          10011
+        ],
+        "slot": "0xffbf80",
+        "source_owner": "pickups-equipment-weapons-projectiles-hazards-destructibles",
+        "spawn_in_segment": true,
+        "state_context_count": 2,
+        "type": 24
+      },
+      {
+        "accepted_evidence": "data/oracle11_round1_auxiliary_authority.json",
+        "animation_record_count": 9,
+        "class": "0x3d",
+        "classification": "SOURCE_CLOSED",
+        "despawn_in_segment": true,
+        "facings": [
+          0
+        ],
+        "id": "actor-50-life-9998",
+        "observed_lifetime": [
+          9998,
+          10015
+        ],
+        "segment_lifetime": [
+          9998,
+          10015
+        ],
+        "slot": "0xffbb00",
+        "source_owner": "pickups-equipment-weapons-projectiles-hazards-destructibles",
+        "spawn_in_segment": true,
+        "state_context_count": 2,
+        "type": 24
+      },
+      {
+        "accepted_evidence": "data/oracle11_round1_auxiliary_authority.json",
+        "animation_record_count": 9,
+        "class": "0x3d",
+        "classification": "SOURCE_CLOSED",
+        "despawn_in_segment": true,
+        "facings": [
+          0
+        ],
+        "id": "actor-54-life-10000",
+        "observed_lifetime": [
+          10000,
+          10017
+        ],
+        "segment_lifetime": [
+          10000,
+          10017
+        ],
+        "slot": "0xffbe00",
+        "source_owner": "pickups-equipment-weapons-projectiles-hazards-destructibles",
+        "spawn_in_segment": true,
+        "state_context_count": 2,
+        "type": 24
+      },
+      {
+        "accepted_evidence": "data/oracle11_round1_auxiliary_authority.json",
+        "animation_record_count": 9,
+        "class": "0x3d",
+        "classification": "SOURCE_CLOSED",
+        "despawn_in_segment": true,
+        "facings": [
+          0
+        ],
+        "id": "actor-48-life-10005",
+        "observed_lifetime": [
+          10005,
+          10022
+        ],
+        "segment_lifetime": [
+          10005,
+          10022
+        ],
+        "slot": "0xffb980",
+        "source_owner": "pickups-equipment-weapons-projectiles-hazards-destructibles",
+        "spawn_in_segment": true,
+        "state_context_count": 2,
+        "type": 24
+      },
+      {
+        "accepted_evidence": "data/oracle11_round1_auxiliary_authority.json",
+        "animation_record_count": 9,
+        "class": "0x3d",
+        "classification": "SOURCE_CLOSED",
+        "despawn_in_segment": true,
+        "facings": [
+          0
+        ],
+        "id": "actor-52-life-10008",
+        "observed_lifetime": [
+          10008,
+          10025
+        ],
+        "segment_lifetime": [
+          10008,
+          10025
+        ],
+        "slot": "0xffbc80",
+        "source_owner": "pickups-equipment-weapons-projectiles-hazards-destructibles",
+        "spawn_in_segment": true,
+        "state_context_count": 2,
+        "type": 24
+      },
+      {
+        "accepted_evidence": "data/oracle11_round1_auxiliary_authority.json",
+        "animation_record_count": 9,
+        "class": "0x3d",
+        "classification": "SOURCE_CLOSED",
+        "despawn_in_segment": true,
+        "facings": [
+          0
+        ],
+        "id": "actor-56-life-10013",
+        "observed_lifetime": [
+          10013,
+          10030
+        ],
+        "segment_lifetime": [
+          10013,
+          10030
+        ],
+        "slot": "0xffbf80",
+        "source_owner": "pickups-equipment-weapons-projectiles-hazards-destructibles",
+        "spawn_in_segment": true,
+        "state_context_count": 2,
+        "type": 24
+      },
+      {
+        "accepted_evidence": "data/oracle11_round1_auxiliary_authority.json",
+        "animation_record_count": 1,
+        "class": "0x49",
+        "classification": "SOURCE_CLOSED",
+        "despawn_in_segment": true,
+        "facings": [
+          1
+        ],
+        "id": "actor-56-life-10104",
+        "observed_lifetime": [
+          10104,
+          10110
+        ],
+        "segment_lifetime": [
+          10104,
+          10110
+        ],
+        "slot": "0xffbf80",
+        "source_owner": "pickups-equipment-weapons-projectiles-hazards-destructibles",
+        "spawn_in_segment": true,
+        "state_context_count": 1,
+        "type": 24
+      },
+      {
+        "accepted_evidence": "data/oracle11_round1_auxiliary_authority.json",
+        "animation_record_count": 1,
+        "class": "0x49",
+        "classification": "SOURCE_CLOSED",
+        "despawn_in_segment": true,
+        "facings": [
+          1
+        ],
+        "id": "actor-56-life-10112",
+        "observed_lifetime": [
+          10112,
+          10118
+        ],
+        "segment_lifetime": [
+          10112,
+          10118
+        ],
+        "slot": "0xffbf80",
+        "source_owner": "pickups-equipment-weapons-projectiles-hazards-destructibles",
+        "spawn_in_segment": true,
+        "state_context_count": 1,
+        "type": 24
+      },
+      {
+        "accepted_evidence": "data/oracle11_round1_auxiliary_authority.json",
+        "animation_record_count": 9,
+        "class": "0x3d",
+        "classification": "SOURCE_CLOSED",
+        "despawn_in_segment": true,
+        "facings": [
+          0
+        ],
+        "id": "actor-56-life-10159",
+        "observed_lifetime": [
+          10159,
+          10176
+        ],
+        "segment_lifetime": [
+          10159,
+          10176
+        ],
+        "slot": "0xffbf80",
+        "source_owner": "pickups-equipment-weapons-projectiles-hazards-destructibles",
+        "spawn_in_segment": true,
+        "state_context_count": 2,
+        "type": 24
+      },
+      {
+        "accepted_evidence": "data/oracle11_round1_auxiliary_authority.json",
+        "animation_record_count": 9,
+        "class": "0x3d",
+        "classification": "SOURCE_CLOSED",
+        "despawn_in_segment": true,
+        "facings": [
+          0
+        ],
+        "id": "actor-52-life-10162",
+        "observed_lifetime": [
+          10162,
+          10179
+        ],
+        "segment_lifetime": [
+          10162,
+          10179
+        ],
+        "slot": "0xffbc80",
+        "source_owner": "pickups-equipment-weapons-projectiles-hazards-destructibles",
+        "spawn_in_segment": true,
+        "state_context_count": 2,
+        "type": 24
+      },
+      {
+        "accepted_evidence": "data/oracle11_round1_auxiliary_authority.json",
+        "animation_record_count": 11,
+        "class": "0x10",
+        "classification": "SOURCE_CLOSED",
+        "despawn_in_segment": true,
+        "facings": [
+          0
+        ],
+        "id": "actor-48-life-10164",
+        "observed_lifetime": [
+          10164,
+          10182
+        ],
+        "segment_lifetime": [
+          10164,
+          10182
+        ],
+        "slot": "0xffb980",
+        "source_owner": "pickups-equipment-weapons-projectiles-hazards-destructibles",
+        "spawn_in_segment": true,
+        "state_context_count": 3,
+        "type": 24
+      },
+      {
+        "accepted_evidence": "data/oracle11_round1_auxiliary_authority.json",
+        "animation_record_count": 9,
+        "class": "0x3d",
+        "classification": "SOURCE_CLOSED",
+        "despawn_in_segment": true,
+        "facings": [
+          0
+        ],
+        "id": "actor-54-life-10169",
+        "observed_lifetime": [
+          10169,
+          10186
+        ],
+        "segment_lifetime": [
+          10169,
+          10186
+        ],
+        "slot": "0xffbe00",
+        "source_owner": "pickups-equipment-weapons-projectiles-hazards-destructibles",
+        "spawn_in_segment": true,
+        "state_context_count": 2,
+        "type": 24
+      },
+      {
+        "accepted_evidence": "data/oracle11_round1_auxiliary_authority.json",
+        "animation_record_count": 9,
+        "class": "0x3d",
+        "classification": "SOURCE_CLOSED",
+        "despawn_in_segment": true,
+        "facings": [
+          0
+        ],
+        "id": "actor-50-life-10170",
+        "observed_lifetime": [
+          10170,
+          10187
+        ],
+        "segment_lifetime": [
+          10170,
+          10187
+        ],
+        "slot": "0xffbb00",
+        "source_owner": "pickups-equipment-weapons-projectiles-hazards-destructibles",
+        "spawn_in_segment": true,
+        "state_context_count": 2,
+        "type": 24
+      },
+      {
+        "accepted_evidence": "data/oracle11_round1_auxiliary_authority.json",
+        "animation_record_count": 9,
+        "class": "0x3d",
+        "classification": "SOURCE_CLOSED",
+        "despawn_in_segment": true,
+        "facings": [
+          0
+        ],
+        "id": "actor-56-life-10178",
+        "observed_lifetime": [
+          10178,
+          10195
+        ],
+        "segment_lifetime": [
+          10178,
+          10195
+        ],
+        "slot": "0xffbf80",
+        "source_owner": "pickups-equipment-weapons-projectiles-hazards-destructibles",
+        "spawn_in_segment": true,
+        "state_context_count": 2,
+        "type": 24
+      },
+      {
+        "accepted_evidence": "data/oracle11_round1_auxiliary_authority.json",
+        "animation_record_count": 9,
+        "class": "0x3d",
+        "classification": "SOURCE_CLOSED",
+        "despawn_in_segment": true,
+        "facings": [
+          0
+        ],
+        "id": "actor-52-life-10181",
+        "observed_lifetime": [
+          10181,
+          10198
+        ],
+        "segment_lifetime": [
+          10181,
+          10198
+        ],
+        "slot": "0xffbc80",
+        "source_owner": "pickups-equipment-weapons-projectiles-hazards-destructibles",
+        "spawn_in_segment": true,
+        "state_context_count": 2,
+        "type": 24
+      },
+      {
+        "accepted_evidence": "data/oracle11_round1_auxiliary_authority.json",
+        "animation_record_count": 9,
+        "class": "0x3d",
+        "classification": "SOURCE_CLOSED",
+        "despawn_in_segment": true,
+        "facings": [
+          0
+        ],
+        "id": "actor-52-life-10340",
+        "observed_lifetime": [
+          10340,
+          10357
+        ],
+        "segment_lifetime": [
+          10340,
+          10357
+        ],
+        "slot": "0xffbc80",
+        "source_owner": "pickups-equipment-weapons-projectiles-hazards-destructibles",
+        "spawn_in_segment": true,
+        "state_context_count": 2,
+        "type": 24
+      },
+      {
+        "accepted_evidence": "data/oracle11_round1_auxiliary_authority.json",
+        "animation_record_count": 9,
+        "class": "0x3d",
+        "classification": "SOURCE_CLOSED",
+        "despawn_in_segment": true,
+        "facings": [
+          0
+        ],
+        "id": "actor-56-life-10343",
+        "observed_lifetime": [
+          10343,
+          10360
+        ],
+        "segment_lifetime": [
+          10343,
+          10360
+        ],
+        "slot": "0xffbf80",
+        "source_owner": "pickups-equipment-weapons-projectiles-hazards-destructibles",
+        "spawn_in_segment": true,
+        "state_context_count": 2,
+        "type": 24
+      },
+      {
+        "accepted_evidence": "data/oracle11_round1_auxiliary_authority.json",
+        "animation_record_count": 9,
+        "class": "0x3d",
+        "classification": "SOURCE_CLOSED",
+        "despawn_in_segment": true,
+        "facings": [
+          0
+        ],
+        "id": "actor-50-life-10351",
+        "observed_lifetime": [
+          10351,
+          10368
+        ],
+        "segment_lifetime": [
+          10351,
+          10368
+        ],
+        "slot": "0xffbb00",
+        "source_owner": "pickups-equipment-weapons-projectiles-hazards-destructibles",
+        "spawn_in_segment": true,
+        "state_context_count": 2,
+        "type": 24
+      },
+      {
+        "accepted_evidence": "data/oracle11_round1_auxiliary_authority.json",
+        "animation_record_count": 9,
+        "class": "0x3d",
+        "classification": "SOURCE_CLOSED",
+        "despawn_in_segment": true,
+        "facings": [
+          0
+        ],
+        "id": "actor-54-life-10353",
+        "observed_lifetime": [
+          10353,
+          10370
+        ],
+        "segment_lifetime": [
+          10353,
+          10370
+        ],
+        "slot": "0xffbe00",
+        "source_owner": "pickups-equipment-weapons-projectiles-hazards-destructibles",
+        "spawn_in_segment": true,
+        "state_context_count": 2,
+        "type": 24
+      },
+      {
+        "accepted_evidence": "data/oracle11_round1_auxiliary_authority.json",
+        "animation_record_count": 9,
+        "class": "0x3d",
+        "classification": "SOURCE_CLOSED",
+        "despawn_in_segment": true,
+        "facings": [
+          0
+        ],
+        "id": "actor-52-life-10359",
+        "observed_lifetime": [
+          10359,
+          10376
+        ],
+        "segment_lifetime": [
+          10359,
+          10376
+        ],
+        "slot": "0xffbc80",
+        "source_owner": "pickups-equipment-weapons-projectiles-hazards-destructibles",
+        "spawn_in_segment": true,
+        "state_context_count": 2,
+        "type": 24
+      },
+      {
+        "accepted_evidence": "data/oracle11_round1_auxiliary_authority.json",
+        "animation_record_count": 9,
+        "class": "0x3d",
+        "classification": "SOURCE_CLOSED",
+        "despawn_in_segment": true,
+        "facings": [
+          0
+        ],
+        "id": "actor-48-life-10361",
+        "observed_lifetime": [
+          10361,
+          10378
+        ],
+        "segment_lifetime": [
+          10361,
+          10378
+        ],
+        "slot": "0xffb980",
+        "source_owner": "pickups-equipment-weapons-projectiles-hazards-destructibles",
+        "spawn_in_segment": true,
+        "state_context_count": 2,
+        "type": 24
+      },
+      {
+        "accepted_evidence": "data/oracle11_round1_auxiliary_authority.json",
+        "animation_record_count": 9,
+        "class": "0x3d",
+        "classification": "SOURCE_CLOSED",
+        "despawn_in_segment": true,
+        "facings": [
+          0
+        ],
+        "id": "actor-56-life-10362",
+        "observed_lifetime": [
+          10362,
+          10379
+        ],
+        "segment_lifetime": [
+          10362,
+          10379
+        ],
+        "slot": "0xffbf80",
+        "source_owner": "pickups-equipment-weapons-projectiles-hazards-destructibles",
+        "spawn_in_segment": true,
+        "state_context_count": 2,
+        "type": 24
+      },
+      {
+        "accepted_evidence": "data/oracle11_round1_auxiliary_authority.json",
+        "animation_record_count": 11,
+        "class": "0x10",
+        "classification": "SOURCE_CLOSED",
+        "despawn_in_segment": true,
+        "facings": [
+          0
+        ],
+        "id": "actor-56-life-10703",
+        "observed_lifetime": [
+          10703,
+          10721
+        ],
+        "segment_lifetime": [
+          10703,
+          10721
+        ],
+        "slot": "0xffbf80",
+        "source_owner": "pickups-equipment-weapons-projectiles-hazards-destructibles",
+        "spawn_in_segment": true,
+        "state_context_count": 3,
+        "type": 24
+      },
+      {
+        "accepted_evidence": "data/oracle11_round1_auxiliary_authority.json",
+        "animation_record_count": 1,
+        "class": "0x49",
+        "classification": "SOURCE_CLOSED",
+        "despawn_in_segment": true,
+        "facings": [
+          1
+        ],
+        "id": "actor-48-life-10706",
+        "observed_lifetime": [
+          10706,
+          10712
+        ],
+        "segment_lifetime": [
+          10706,
+          10712
+        ],
+        "slot": "0xffb980",
+        "source_owner": "pickups-equipment-weapons-projectiles-hazards-destructibles",
+        "spawn_in_segment": true,
+        "state_context_count": 1,
+        "type": 24
+      },
+      {
+        "accepted_evidence": "data/oracle11_round1_auxiliary_authority.json",
+        "animation_record_count": 1,
+        "class": "0x49",
+        "classification": "SOURCE_CLOSED",
+        "despawn_in_segment": true,
+        "facings": [
+          1
+        ],
+        "id": "actor-48-life-10714",
+        "observed_lifetime": [
+          10714,
+          10720
+        ],
+        "segment_lifetime": [
+          10714,
+          10720
+        ],
+        "slot": "0xffb980",
+        "source_owner": "pickups-equipment-weapons-projectiles-hazards-destructibles",
+        "spawn_in_segment": true,
+        "state_context_count": 1,
+        "type": 24
+      },
+      {
+        "accepted_evidence": "data/oracle11_round1_auxiliary_authority.json",
+        "animation_record_count": 1,
+        "class": "0x49",
+        "classification": "SOURCE_CLOSED",
+        "despawn_in_segment": true,
+        "facings": [
+          1
+        ],
+        "id": "actor-56-life-10780",
+        "observed_lifetime": [
+          10780,
+          10786
+        ],
+        "segment_lifetime": [
+          10780,
+          10786
+        ],
+        "slot": "0xffbf80",
+        "source_owner": "pickups-equipment-weapons-projectiles-hazards-destructibles",
+        "spawn_in_segment": true,
+        "state_context_count": 1,
+        "type": 24
+      },
+      {
+        "accepted_evidence": "data/oracle11_round1_auxiliary_authority.json",
+        "animation_record_count": 1,
+        "class": "0x49",
+        "classification": "SOURCE_CLOSED",
+        "despawn_in_segment": true,
+        "facings": [
+          1
+        ],
+        "id": "actor-48-life-10782",
+        "observed_lifetime": [
+          10782,
+          10788
+        ],
+        "segment_lifetime": [
+          10782,
+          10788
+        ],
+        "slot": "0xffb980",
+        "source_owner": "pickups-equipment-weapons-projectiles-hazards-destructibles",
+        "spawn_in_segment": true,
+        "state_context_count": 1,
+        "type": 24
+      },
+      {
+        "accepted_evidence": "data/oracle11_round1_auxiliary_authority.json",
+        "animation_record_count": 1,
+        "class": "0x49",
+        "classification": "SOURCE_CLOSED",
+        "despawn_in_segment": true,
+        "facings": [
+          1
+        ],
+        "id": "actor-56-life-10788",
+        "observed_lifetime": [
+          10788,
+          10794
+        ],
+        "segment_lifetime": [
+          10788,
+          10794
+        ],
+        "slot": "0xffbf80",
+        "source_owner": "pickups-equipment-weapons-projectiles-hazards-destructibles",
+        "spawn_in_segment": true,
+        "state_context_count": 1,
+        "type": 24
+      },
+      {
+        "accepted_evidence": "data/oracle11_round1_auxiliary_authority.json",
+        "animation_record_count": 1,
+        "class": "0x49",
+        "classification": "SOURCE_CLOSED",
+        "despawn_in_segment": true,
+        "facings": [
+          1
+        ],
+        "id": "actor-48-life-10790",
+        "observed_lifetime": [
+          10790,
+          10796
+        ],
+        "segment_lifetime": [
+          10790,
+          10796
+        ],
+        "slot": "0xffb980",
+        "source_owner": "pickups-equipment-weapons-projectiles-hazards-destructibles",
+        "spawn_in_segment": true,
+        "state_context_count": 1,
+        "type": 24
+      },
+      {
+        "accepted_evidence": "data/oracle11_round1_auxiliary_authority.json",
+        "animation_record_count": 1,
+        "class": "0x49",
+        "classification": "SOURCE_CLOSED",
+        "despawn_in_segment": true,
+        "facings": [
+          1
+        ],
+        "id": "actor-48-life-10820",
+        "observed_lifetime": [
+          10820,
+          10826
+        ],
+        "segment_lifetime": [
+          10820,
+          10826
+        ],
+        "slot": "0xffb980",
+        "source_owner": "pickups-equipment-weapons-projectiles-hazards-destructibles",
+        "spawn_in_segment": true,
+        "state_context_count": 1,
+        "type": 24
+      },
+      {
+        "accepted_evidence": "data/oracle11_round1_auxiliary_authority.json",
+        "animation_record_count": 1,
+        "class": "0x49",
+        "classification": "SOURCE_CLOSED",
+        "despawn_in_segment": true,
+        "facings": [
+          1
+        ],
+        "id": "actor-56-life-10824",
+        "observed_lifetime": [
+          10824,
+          10830
+        ],
+        "segment_lifetime": [
+          10824,
+          10830
+        ],
+        "slot": "0xffbf80",
+        "source_owner": "pickups-equipment-weapons-projectiles-hazards-destructibles",
+        "spawn_in_segment": true,
+        "state_context_count": 1,
+        "type": 24
+      },
+      {
+        "accepted_evidence": "data/oracle11_round1_auxiliary_authority.json",
+        "animation_record_count": 1,
+        "class": "0x49",
+        "classification": "SOURCE_CLOSED",
+        "despawn_in_segment": true,
+        "facings": [
+          1
+        ],
+        "id": "actor-48-life-10828",
+        "observed_lifetime": [
+          10828,
+          10834
+        ],
+        "segment_lifetime": [
+          10828,
+          10834
+        ],
+        "slot": "0xffb980",
+        "source_owner": "pickups-equipment-weapons-projectiles-hazards-destructibles",
+        "spawn_in_segment": true,
+        "state_context_count": 1,
+        "type": 24
+      },
+      {
+        "accepted_evidence": "data/oracle11_round1_auxiliary_authority.json",
+        "animation_record_count": 1,
+        "class": "0x49",
+        "classification": "SOURCE_CLOSED",
+        "despawn_in_segment": true,
+        "facings": [
+          1
+        ],
+        "id": "actor-56-life-10832",
+        "observed_lifetime": [
+          10832,
+          10838
+        ],
+        "segment_lifetime": [
+          10832,
+          10838
+        ],
+        "slot": "0xffbf80",
+        "source_owner": "pickups-equipment-weapons-projectiles-hazards-destructibles",
+        "spawn_in_segment": true,
+        "state_context_count": 1,
+        "type": 24
+      },
+      {
+        "accepted_evidence": "data/oracle11_round1_auxiliary_authority.json",
+        "animation_record_count": 1,
+        "class": "0x49",
+        "classification": "SOURCE_CLOSED",
+        "despawn_in_segment": true,
+        "facings": [
+          1
+        ],
+        "id": "actor-48-life-10836",
+        "observed_lifetime": [
+          10836,
+          10842
+        ],
+        "segment_lifetime": [
+          10836,
+          10842
+        ],
+        "slot": "0xffb980",
+        "source_owner": "pickups-equipment-weapons-projectiles-hazards-destructibles",
+        "spawn_in_segment": true,
+        "state_context_count": 1,
+        "type": 24
+      },
+      {
+        "accepted_evidence": "data/oracle11_round1_auxiliary_authority.json",
+        "animation_record_count": 1,
+        "class": "0x49",
+        "classification": "SOURCE_CLOSED",
+        "despawn_in_segment": true,
+        "facings": [
+          1
+        ],
+        "id": "actor-48-life-10882",
+        "observed_lifetime": [
+          10882,
+          10888
+        ],
+        "segment_lifetime": [
+          10882,
+          10888
+        ],
+        "slot": "0xffb980",
+        "source_owner": "pickups-equipment-weapons-projectiles-hazards-destructibles",
+        "spawn_in_segment": true,
+        "state_context_count": 1,
+        "type": 24
+      },
+      {
+        "accepted_evidence": "data/oracle11_round1_auxiliary_authority.json",
+        "animation_record_count": 1,
+        "class": "0x49",
+        "classification": "SOURCE_CLOSED",
+        "despawn_in_segment": true,
+        "facings": [
+          1
+        ],
+        "id": "actor-56-life-10886",
+        "observed_lifetime": [
+          10886,
+          10892
+        ],
+        "segment_lifetime": [
+          10886,
+          10892
+        ],
+        "slot": "0xffbf80",
+        "source_owner": "pickups-equipment-weapons-projectiles-hazards-destructibles",
+        "spawn_in_segment": true,
+        "state_context_count": 1,
+        "type": 24
+      },
+      {
+        "accepted_evidence": "data/oracle11_round1_auxiliary_authority.json",
+        "animation_record_count": 1,
+        "class": "0x49",
+        "classification": "SOURCE_CLOSED",
+        "despawn_in_segment": true,
+        "facings": [
+          1
+        ],
+        "id": "actor-48-life-10890",
+        "observed_lifetime": [
+          10890,
+          10896
+        ],
+        "segment_lifetime": [
+          10890,
+          10896
+        ],
+        "slot": "0xffb980",
+        "source_owner": "pickups-equipment-weapons-projectiles-hazards-destructibles",
+        "spawn_in_segment": true,
+        "state_context_count": 1,
+        "type": 24
+      },
+      {
+        "accepted_evidence": "data/oracle11_round1_auxiliary_authority.json",
+        "animation_record_count": 1,
+        "class": "0x49",
+        "classification": "SOURCE_CLOSED",
+        "despawn_in_segment": true,
+        "facings": [
+          1
+        ],
+        "id": "actor-56-life-10894",
+        "observed_lifetime": [
+          10894,
+          10900
+        ],
+        "segment_lifetime": [
+          10894,
+          10900
+        ],
+        "slot": "0xffbf80",
+        "source_owner": "pickups-equipment-weapons-projectiles-hazards-destructibles",
+        "spawn_in_segment": true,
+        "state_context_count": 1,
+        "type": 24
+      },
+      {
+        "accepted_evidence": "data/oracle11_round1_auxiliary_authority.json",
+        "animation_record_count": 1,
+        "class": "0x49",
+        "classification": "SOURCE_CLOSED",
+        "despawn_in_segment": true,
+        "facings": [
+          1
+        ],
+        "id": "actor-56-life-11064",
+        "observed_lifetime": [
+          11064,
+          11070
+        ],
+        "segment_lifetime": [
+          11064,
+          11070
+        ],
+        "slot": "0xffbf80",
+        "source_owner": "pickups-equipment-weapons-projectiles-hazards-destructibles",
+        "spawn_in_segment": true,
+        "state_context_count": 1,
+        "type": 24
+      },
+      {
+        "accepted_evidence": "data/oracle11_round1_auxiliary_authority.json",
+        "animation_record_count": 1,
+        "class": "0x49",
+        "classification": "SOURCE_CLOSED",
+        "despawn_in_segment": true,
+        "facings": [
+          1
+        ],
+        "id": "actor-56-life-11072",
+        "observed_lifetime": [
+          11072,
+          11078
+        ],
+        "segment_lifetime": [
+          11072,
+          11078
+        ],
+        "slot": "0xffbf80",
+        "source_owner": "pickups-equipment-weapons-projectiles-hazards-destructibles",
+        "spawn_in_segment": true,
+        "state_context_count": 1,
+        "type": 24
+      },
+      {
+        "accepted_evidence": "data/oracle11_round1_auxiliary_authority.json",
+        "animation_record_count": 1,
+        "class": "0x49",
+        "classification": "SOURCE_CLOSED",
+        "despawn_in_segment": true,
+        "facings": [
+          1
+        ],
+        "id": "actor-56-life-11246",
+        "observed_lifetime": [
+          11246,
+          11252
+        ],
+        "segment_lifetime": [
+          11246,
+          11252
+        ],
+        "slot": "0xffbf80",
+        "source_owner": "pickups-equipment-weapons-projectiles-hazards-destructibles",
+        "spawn_in_segment": true,
+        "state_context_count": 1,
+        "type": 24
+      },
+      {
+        "accepted_evidence": "data/oracle11_round1_auxiliary_authority.json",
+        "animation_record_count": 1,
+        "class": "0x49",
+        "classification": "SOURCE_CLOSED",
+        "despawn_in_segment": true,
+        "facings": [
+          1
+        ],
+        "id": "actor-56-life-11254",
+        "observed_lifetime": [
+          11254,
+          11260
+        ],
+        "segment_lifetime": [
+          11254,
+          11260
+        ],
+        "slot": "0xffbf80",
+        "source_owner": "pickups-equipment-weapons-projectiles-hazards-destructibles",
+        "spawn_in_segment": true,
+        "state_context_count": 1,
+        "type": 24
+      },
+      {
+        "accepted_evidence": "data/oracle11_round1_auxiliary_authority.json",
+        "animation_record_count": 4,
+        "class": "0x4e",
+        "classification": "SOURCE_CLOSED",
+        "despawn_in_segment": true,
+        "facings": [
+          0
+        ],
+        "id": "actor-56-life-11262",
+        "observed_lifetime": [
+          11262,
+          11272
+        ],
+        "segment_lifetime": [
+          11262,
+          11272
+        ],
+        "slot": "0xffbf80",
+        "source_owner": "pickups-equipment-weapons-projectiles-hazards-destructibles",
+        "spawn_in_segment": true,
+        "state_context_count": 3,
+        "type": 24
+      },
+      {
+        "accepted_evidence": "data/oracle11_round1_auxiliary_authority.json",
+        "animation_record_count": 11,
+        "class": "0x10",
+        "classification": "SOURCE_CLOSED",
+        "despawn_in_segment": true,
+        "facings": [
+          0
+        ],
+        "id": "actor-56-life-11291",
+        "observed_lifetime": [
+          11291,
+          11309
+        ],
+        "segment_lifetime": [
+          11291,
+          11309
+        ],
+        "slot": "0xffbf80",
+        "source_owner": "pickups-equipment-weapons-projectiles-hazards-destructibles",
+        "spawn_in_segment": true,
+        "state_context_count": 3,
+        "type": 24
+      },
+      {
+        "accepted_evidence": "data/oracle11_round1_auxiliary_authority.json",
+        "animation_record_count": 1,
+        "class": "0x49",
+        "classification": "SOURCE_CLOSED",
+        "despawn_in_segment": true,
+        "facings": [
+          1
+        ],
+        "id": "actor-56-life-11316",
+        "observed_lifetime": [
+          11316,
+          11322
+        ],
+        "segment_lifetime": [
+          11316,
+          11322
+        ],
+        "slot": "0xffbf80",
+        "source_owner": "pickups-equipment-weapons-projectiles-hazards-destructibles",
+        "spawn_in_segment": true,
+        "state_context_count": 1,
+        "type": 24
+      },
+      {
+        "accepted_evidence": "data/oracle11_round1_auxiliary_authority.json",
+        "animation_record_count": 1,
+        "class": "0x49",
+        "classification": "SOURCE_CLOSED",
+        "despawn_in_segment": true,
+        "facings": [
+          1
+        ],
+        "id": "actor-56-life-11324",
+        "observed_lifetime": [
+          11324,
+          11330
+        ],
+        "segment_lifetime": [
+          11324,
+          11330
+        ],
+        "slot": "0xffbf80",
+        "source_owner": "pickups-equipment-weapons-projectiles-hazards-destructibles",
+        "spawn_in_segment": true,
+        "state_context_count": 1,
+        "type": 24
+      },
+      {
+        "accepted_evidence": "data/oracle11_round1_auxiliary_authority.json",
+        "animation_record_count": 1,
+        "class": "0x49",
+        "classification": "SOURCE_CLOSED",
+        "despawn_in_segment": true,
+        "facings": [
+          1
+        ],
+        "id": "actor-56-life-11332",
+        "observed_lifetime": [
+          11332,
+          11338
+        ],
+        "segment_lifetime": [
+          11332,
+          11338
+        ],
+        "slot": "0xffbf80",
+        "source_owner": "pickups-equipment-weapons-projectiles-hazards-destructibles",
+        "spawn_in_segment": true,
+        "state_context_count": 1,
+        "type": 24
+      },
+      {
+        "accepted_evidence": "data/oracle11_round1_auxiliary_authority.json",
+        "animation_record_count": 11,
+        "class": "0x10",
+        "classification": "SOURCE_CLOSED",
+        "despawn_in_segment": true,
+        "facings": [
+          0
+        ],
+        "id": "actor-56-life-11340",
+        "observed_lifetime": [
+          11340,
+          11358
+        ],
+        "segment_lifetime": [
+          11340,
+          11358
+        ],
+        "slot": "0xffbf80",
+        "source_owner": "pickups-equipment-weapons-projectiles-hazards-destructibles",
+        "spawn_in_segment": true,
+        "state_context_count": 3,
+        "type": 24
+      },
+      {
+        "accepted_evidence": "data/oracle11_round1_auxiliary_authority.json",
+        "animation_record_count": 1,
+        "class": "0x49",
+        "classification": "SOURCE_CLOSED",
+        "despawn_in_segment": true,
+        "facings": [
+          1
+        ],
+        "id": "actor-56-life-11360",
+        "observed_lifetime": [
+          11360,
+          11366
+        ],
+        "segment_lifetime": [
+          11360,
+          11366
+        ],
+        "slot": "0xffbf80",
+        "source_owner": "pickups-equipment-weapons-projectiles-hazards-destructibles",
+        "spawn_in_segment": true,
+        "state_context_count": 1,
+        "type": 24
+      },
+      {
+        "accepted_evidence": "data/oracle11_round1_auxiliary_authority.json",
+        "animation_record_count": 1,
+        "class": "0x49",
+        "classification": "SOURCE_CLOSED",
+        "despawn_in_segment": true,
+        "facings": [
+          1
+        ],
+        "id": "actor-56-life-11368",
+        "observed_lifetime": [
+          11368,
+          11374
+        ],
+        "segment_lifetime": [
+          11368,
+          11374
+        ],
+        "slot": "0xffbf80",
+        "source_owner": "pickups-equipment-weapons-projectiles-hazards-destructibles",
+        "spawn_in_segment": true,
+        "state_context_count": 1,
+        "type": 24
+      },
+      {
+        "accepted_evidence": "data/oracle11_round1_auxiliary_authority.json",
+        "animation_record_count": 1,
+        "class": "0x49",
+        "classification": "SOURCE_CLOSED",
+        "despawn_in_segment": true,
+        "facings": [
+          1
+        ],
+        "id": "actor-56-life-11376",
+        "observed_lifetime": [
+          11376,
+          11382
+        ],
+        "segment_lifetime": [
+          11376,
+          11382
+        ],
+        "slot": "0xffbf80",
+        "source_owner": "pickups-equipment-weapons-projectiles-hazards-destructibles",
+        "spawn_in_segment": true,
+        "state_context_count": 1,
+        "type": 24
+      },
+      {
+        "accepted_evidence": "data/oracle11_round1_auxiliary_authority.json",
+        "animation_record_count": 1,
+        "class": "0x49",
+        "classification": "SOURCE_CLOSED",
+        "despawn_in_segment": true,
+        "facings": [
+          1
+        ],
+        "id": "actor-56-life-11422",
+        "observed_lifetime": [
+          11422,
+          11428
+        ],
+        "segment_lifetime": [
+          11422,
+          11428
+        ],
+        "slot": "0xffbf80",
+        "source_owner": "pickups-equipment-weapons-projectiles-hazards-destructibles",
+        "spawn_in_segment": true,
+        "state_context_count": 1,
+        "type": 24
+      },
+      {
+        "accepted_evidence": "data/oracle11_round1_auxiliary_authority.json",
+        "animation_record_count": 1,
+        "class": "0x49",
+        "classification": "SOURCE_CLOSED",
+        "despawn_in_segment": true,
+        "facings": [
+          1
+        ],
+        "id": "actor-56-life-11430",
+        "observed_lifetime": [
+          11430,
+          11436
+        ],
+        "segment_lifetime": [
+          11430,
+          11436
+        ],
+        "slot": "0xffbf80",
+        "source_owner": "pickups-equipment-weapons-projectiles-hazards-destructibles",
+        "spawn_in_segment": true,
+        "state_context_count": 1,
+        "type": 24
+      },
+      {
+        "accepted_evidence": "data/oracle11_round1_auxiliary_authority.json",
+        "animation_record_count": 11,
+        "class": "0x10",
+        "classification": "SOURCE_CLOSED",
+        "despawn_in_segment": true,
+        "facings": [
+          0
+        ],
+        "id": "actor-56-life-11438",
+        "observed_lifetime": [
+          11438,
+          11456
+        ],
+        "segment_lifetime": [
+          11438,
+          11456
+        ],
+        "slot": "0xffbf80",
+        "source_owner": "pickups-equipment-weapons-projectiles-hazards-destructibles",
+        "spawn_in_segment": true,
+        "state_context_count": 3,
+        "type": 24
+      }
+    ],
+    "hit_ko_transitions": [
+      {
+        "class": "0x01",
+        "classification": "SOURCE_CLOSED",
+        "count": 1,
+        "first_frame": 11097,
+        "from": [
+          512,
+          5632
+        ],
+        "to": [
+          512,
+          5634
+        ],
+        "type": 12
+      },
+      {
+        "class": "0x01",
+        "classification": "SOURCE_CLOSED",
+        "count": 1,
+        "first_frame": 11098,
+        "from": [
+          512,
+          5634
+        ],
+        "to": [
+          512,
+          512
+        ],
+        "type": 12
+      },
+      {
+        "class": "0x01",
+        "classification": "SOURCE_CLOSED",
+        "count": 1,
+        "first_frame": 11118,
+        "from": [
+          512,
+          5632
+        ],
+        "to": [
+          512,
+          5634
+        ],
+        "type": 12
+      },
+      {
+        "class": "0x01",
+        "classification": "SOURCE_CLOSED",
+        "count": 1,
+        "first_frame": 11119,
+        "from": [
+          512,
+          5634
+        ],
+        "to": [
+          512,
+          512
+        ],
+        "type": 12
+      },
+      {
+        "class": "0x01",
+        "classification": "SOURCE_CLOSED",
+        "count": 7,
+        "first_frame": 11158,
+        "from": [
+          512,
+          512
+        ],
+        "to": [
+          512,
+          0
+        ],
+        "type": 12
+      },
+      {
+        "class": "0x01",
+        "classification": "SOURCE_CLOSED",
+        "count": 4,
+        "first_frame": 11159,
+        "from": [
+          512,
+          0
+        ],
+        "to": [
+          512,
+          2048
+        ],
+        "type": 12
+      },
+      {
+        "class": "0x01",
+        "classification": "SOURCE_CLOSED",
+        "count": 4,
+        "first_frame": 11179,
+        "from": [
+          512,
+          512
+        ],
+        "to": [
+          512,
+          0
+        ],
+        "type": 12
+      },
+      {
+        "class": "0x01",
+        "classification": "SOURCE_CLOSED",
+        "count": 3,
+        "first_frame": 11180,
+        "from": [
+          512,
+          0
+        ],
+        "to": [
+          512,
+          2048
+        ],
+        "type": 12
+      },
+      {
+        "class": "0x06",
+        "classification": "SOURCE_CLOSED",
+        "count": 1,
+        "first_frame": 11183,
+        "from": [
+          512,
+          2560
+        ],
+        "to": [
+          512,
+          3584
+        ],
+        "type": 12
+      },
+      {
+        "class": "0x01",
+        "classification": "SOURCE_CLOSED",
+        "count": 4,
+        "first_frame": 11189,
+        "from": [
+          512,
+          2048
+        ],
+        "to": [
+          512,
+          1024
+        ],
+        "type": 12
+      },
+      {
+        "class": "0x01",
+        "classification": "SOURCE_CLOSED",
+        "count": 3,
+        "first_frame": 11210,
+        "from": [
+          512,
+          2048
+        ],
+        "to": [
+          512,
+          1024
+        ],
+        "type": 12
+      },
+      {
+        "class": "0x01",
+        "classification": "SOURCE_CLOSED",
+        "count": 3,
+        "first_frame": 11232,
+        "from": [
+          512,
+          1024
+        ],
+        "to": [
+          512,
+          4096
+        ],
+        "type": 12
+      },
+      {
+        "class": "0x01",
+        "classification": "SOURCE_CLOSED",
+        "count": 4,
+        "first_frame": 11253,
+        "from": [
+          512,
+          1024
+        ],
+        "to": [
+          512,
+          4102
+        ],
+        "type": 12
+      },
+      {
+        "class": "0x01",
+        "classification": "SOURCE_CLOSED",
+        "count": 2,
+        "first_frame": 11255,
+        "from": [
+          512,
+          4102
+        ],
+        "to": [
+          514,
+          0
+        ],
+        "type": 12
+      },
+      {
+        "class": "0x01",
+        "classification": "SOURCE_CLOSED",
+        "count": 2,
+        "first_frame": 11256,
+        "from": [
+          514,
+          0
+        ],
+        "to": [
+          514,
+          2
+        ],
+        "type": 12
+      },
+      {
+        "class": "0x01",
+        "classification": "SOURCE_CLOSED",
+        "count": 2,
+        "first_frame": 11260,
+        "from": [
+          514,
+          2
+        ],
+        "to": [
+          514,
+          512
+        ],
+        "type": 12
+      },
+      {
+        "class": "0x01",
+        "classification": "SOURCE_CLOSED",
+        "count": 2,
+        "first_frame": 11261,
+        "from": [
+          514,
+          512
+        ],
+        "to": [
+          514,
+          514
+        ],
+        "type": 12
+      },
+      {
+        "class": "0x01",
+        "classification": "SOURCE_CLOSED",
+        "count": 1,
+        "first_frame": 11262,
+        "from": [
+          512,
+          4096
+        ],
+        "to": [
+          514,
+          0
+        ],
+        "type": 12
+      },
+      {
+        "class": "0x01",
+        "classification": "SOURCE_CLOSED",
+        "count": 2,
+        "first_frame": 11263,
+        "from": [
+          514,
+          0
+        ],
+        "to": [
+          514,
+          2
+        ],
+        "type": 12
+      },
+      {
+        "class": "0x01",
+        "classification": "SOURCE_CLOSED",
+        "count": 2,
+        "first_frame": 11267,
+        "from": [
+          514,
+          2
+        ],
+        "to": [
+          514,
+          512
+        ],
+        "type": 12
+      },
+      {
+        "class": "0x01",
+        "classification": "SOURCE_CLOSED",
+        "count": 2,
+        "first_frame": 11268,
+        "from": [
+          514,
+          512
+        ],
+        "to": [
+          514,
+          514
+        ],
+        "type": 12
+      },
+      {
+        "class": "0x01",
+        "classification": "SOURCE_CLOSED",
+        "count": 2,
+        "first_frame": 11293,
+        "from": [
+          514,
+          514
+        ],
+        "to": [
+          514,
+          516
+        ],
+        "type": 12
+      },
+      {
+        "class": "0x01",
+        "classification": "SOURCE_CLOSED",
+        "count": 2,
+        "first_frame": 11296,
+        "from": [
+          514,
+          516
+        ],
+        "to": [
+          514,
+          518
+        ],
+        "type": 12
+      },
+      {
+        "class": "0x01",
+        "classification": "SOURCE_CLOSED",
+        "count": 3,
+        "first_frame": 11300,
+        "from": [
+          514,
+          514
+        ],
+        "to": [
+          514,
+          516
+        ],
+        "type": 12
+      },
+      {
+        "class": "0x01",
+        "classification": "SOURCE_CLOSED",
+        "count": 3,
+        "first_frame": 11303,
+        "from": [
+          514,
+          516
+        ],
+        "to": [
+          514,
+          518
+        ],
+        "type": 12
+      },
+      {
+        "class": "0x01",
+        "classification": "SOURCE_CLOSED",
+        "count": 2,
+        "first_frame": 11307,
+        "from": [
+          514,
+          518
+        ],
+        "to": [
+          514,
+          520
+        ],
+        "type": 12
+      },
+      {
+        "class": "0x01",
+        "classification": "SOURCE_CLOSED",
+        "count": 3,
+        "first_frame": 11314,
+        "from": [
+          514,
+          518
+        ],
+        "to": [
+          514,
+          520
+        ],
+        "type": 12
+      },
+      {
+        "class": "0x01",
+        "classification": "SOURCE_CLOSED",
+        "count": 2,
+        "first_frame": 11317,
+        "from": [
+          514,
+          520
+        ],
+        "to": [
+          514,
+          522
+        ],
+        "type": 12
+      },
+      {
+        "class": "0x01",
+        "classification": "SOURCE_CLOSED",
+        "count": 2,
+        "first_frame": 11342,
+        "from": [
+          514,
+          522
+        ],
+        "to": [
+          512,
+          0
+        ],
+        "type": 12
+      },
+      {
+        "class": "0x01",
+        "classification": "SOURCE_CLOSED",
+        "count": 2,
+        "first_frame": 11343,
+        "from": [
+          512,
+          0
+        ],
+        "to": [
+          512,
+          1024
+        ],
+        "type": 12
+      },
+      {
+        "class": "0x01",
+        "classification": "SOURCE_CLOSED",
+        "count": 2,
+        "first_frame": 11354,
+        "from": [
+          514,
+          520
+        ],
+        "to": [
+          514,
+          522
+        ],
+        "type": 12
+      },
+      {
+        "class": "0x01",
+        "classification": "SOURCE_CLOSED",
+        "count": 2,
+        "first_frame": 11379,
+        "from": [
+          514,
+          522
+        ],
+        "to": [
+          512,
+          0
+        ],
+        "type": 12
+      },
+      {
+        "class": "0x01",
+        "classification": "SOURCE_CLOSED",
+        "count": 5,
+        "first_frame": 11380,
+        "from": [
+          512,
+          0
+        ],
+        "to": [
+          512,
+          2560
+        ],
+        "type": 12
+      },
+      {
+        "class": "0x01",
+        "classification": "SOURCE_CLOSED",
+        "count": 5,
+        "first_frame": 11401,
+        "from": [
+          512,
+          2560
+        ],
+        "to": [
+          512,
+          1024
+        ],
+        "type": 12
+      }
+    ],
+    "load_release_boundaries": [],
+    "spawn_edges": [
+      {
+        "accepted_evidence": "data/oracle11_round1_auxiliary_authority.json",
+        "animation_record_count": 9,
+        "class": "0x3d",
+        "classification": "SOURCE_CLOSED",
+        "despawn_in_segment": true,
+        "facings": [
+          0
+        ],
+        "id": "actor-54-life-9981",
+        "observed_lifetime": [
+          9981,
+          9998
+        ],
+        "segment_lifetime": [
+          9981,
+          9998
+        ],
+        "slot": "0xffbe00",
+        "source_owner": "pickups-equipment-weapons-projectiles-hazards-destructibles",
+        "spawn_in_segment": true,
+        "state_context_count": 2,
+        "type": 24
+      },
+      {
+        "accepted_evidence": "data/oracle11_round1_auxiliary_authority.json",
+        "animation_record_count": 9,
+        "class": "0x3d",
+        "classification": "SOURCE_CLOSED",
+        "despawn_in_segment": true,
+        "facings": [
+          0
+        ],
+        "id": "actor-48-life-9986",
+        "observed_lifetime": [
+          9986,
+          10003
+        ],
+        "segment_lifetime": [
+          9986,
+          10003
+        ],
+        "slot": "0xffb980",
+        "source_owner": "pickups-equipment-weapons-projectiles-hazards-destructibles",
+        "spawn_in_segment": true,
+        "state_context_count": 2,
+        "type": 24
+      },
+      {
+        "accepted_evidence": "data/oracle11_round1_auxiliary_authority.json",
+        "animation_record_count": 9,
+        "class": "0x3d",
+        "classification": "SOURCE_CLOSED",
+        "despawn_in_segment": true,
+        "facings": [
+          0
+        ],
+        "id": "actor-52-life-9989",
+        "observed_lifetime": [
+          9989,
+          10006
+        ],
+        "segment_lifetime": [
+          9989,
+          10006
+        ],
+        "slot": "0xffbc80",
+        "source_owner": "pickups-equipment-weapons-projectiles-hazards-destructibles",
+        "spawn_in_segment": true,
+        "state_context_count": 2,
+        "type": 24
+      },
+      {
+        "accepted_evidence": "data/oracle11_round1_auxiliary_authority.json",
+        "animation_record_count": 9,
+        "class": "0x3d",
+        "classification": "SOURCE_CLOSED",
+        "despawn_in_segment": true,
+        "facings": [
+          0
+        ],
+        "id": "actor-56-life-9994",
+        "observed_lifetime": [
+          9994,
+          10011
+        ],
+        "segment_lifetime": [
+          9994,
+          10011
+        ],
+        "slot": "0xffbf80",
+        "source_owner": "pickups-equipment-weapons-projectiles-hazards-destructibles",
+        "spawn_in_segment": true,
+        "state_context_count": 2,
+        "type": 24
+      },
+      {
+        "accepted_evidence": "data/oracle11_round1_auxiliary_authority.json",
+        "animation_record_count": 9,
+        "class": "0x3d",
+        "classification": "SOURCE_CLOSED",
+        "despawn_in_segment": true,
+        "facings": [
+          0
+        ],
+        "id": "actor-50-life-9998",
+        "observed_lifetime": [
+          9998,
+          10015
+        ],
+        "segment_lifetime": [
+          9998,
+          10015
+        ],
+        "slot": "0xffbb00",
+        "source_owner": "pickups-equipment-weapons-projectiles-hazards-destructibles",
+        "spawn_in_segment": true,
+        "state_context_count": 2,
+        "type": 24
+      },
+      {
+        "accepted_evidence": "data/oracle11_round1_auxiliary_authority.json",
+        "animation_record_count": 9,
+        "class": "0x3d",
+        "classification": "SOURCE_CLOSED",
+        "despawn_in_segment": true,
+        "facings": [
+          0
+        ],
+        "id": "actor-54-life-10000",
+        "observed_lifetime": [
+          10000,
+          10017
+        ],
+        "segment_lifetime": [
+          10000,
+          10017
+        ],
+        "slot": "0xffbe00",
+        "source_owner": "pickups-equipment-weapons-projectiles-hazards-destructibles",
+        "spawn_in_segment": true,
+        "state_context_count": 2,
+        "type": 24
+      },
+      {
+        "accepted_evidence": "data/oracle11_round1_auxiliary_authority.json",
+        "animation_record_count": 9,
+        "class": "0x3d",
+        "classification": "SOURCE_CLOSED",
+        "despawn_in_segment": true,
+        "facings": [
+          0
+        ],
+        "id": "actor-48-life-10005",
+        "observed_lifetime": [
+          10005,
+          10022
+        ],
+        "segment_lifetime": [
+          10005,
+          10022
+        ],
+        "slot": "0xffb980",
+        "source_owner": "pickups-equipment-weapons-projectiles-hazards-destructibles",
+        "spawn_in_segment": true,
+        "state_context_count": 2,
+        "type": 24
+      },
+      {
+        "accepted_evidence": "data/oracle11_round1_auxiliary_authority.json",
+        "animation_record_count": 9,
+        "class": "0x3d",
+        "classification": "SOURCE_CLOSED",
+        "despawn_in_segment": true,
+        "facings": [
+          0
+        ],
+        "id": "actor-52-life-10008",
+        "observed_lifetime": [
+          10008,
+          10025
+        ],
+        "segment_lifetime": [
+          10008,
+          10025
+        ],
+        "slot": "0xffbc80",
+        "source_owner": "pickups-equipment-weapons-projectiles-hazards-destructibles",
+        "spawn_in_segment": true,
+        "state_context_count": 2,
+        "type": 24
+      },
+      {
+        "accepted_evidence": "data/oracle11_round1_auxiliary_authority.json",
+        "animation_record_count": 9,
+        "class": "0x3d",
+        "classification": "SOURCE_CLOSED",
+        "despawn_in_segment": true,
+        "facings": [
+          0
+        ],
+        "id": "actor-56-life-10013",
+        "observed_lifetime": [
+          10013,
+          10030
+        ],
+        "segment_lifetime": [
+          10013,
+          10030
+        ],
+        "slot": "0xffbf80",
+        "source_owner": "pickups-equipment-weapons-projectiles-hazards-destructibles",
+        "spawn_in_segment": true,
+        "state_context_count": 2,
+        "type": 24
+      },
+      {
+        "accepted_evidence": "data/oracle11_round1_auxiliary_authority.json",
+        "animation_record_count": 1,
+        "class": "0x49",
+        "classification": "SOURCE_CLOSED",
+        "despawn_in_segment": true,
+        "facings": [
+          1
+        ],
+        "id": "actor-56-life-10104",
+        "observed_lifetime": [
+          10104,
+          10110
+        ],
+        "segment_lifetime": [
+          10104,
+          10110
+        ],
+        "slot": "0xffbf80",
+        "source_owner": "pickups-equipment-weapons-projectiles-hazards-destructibles",
+        "spawn_in_segment": true,
+        "state_context_count": 1,
+        "type": 24
+      },
+      {
+        "accepted_evidence": "data/oracle11_round1_auxiliary_authority.json",
+        "animation_record_count": 1,
+        "class": "0x49",
+        "classification": "SOURCE_CLOSED",
+        "despawn_in_segment": true,
+        "facings": [
+          1
+        ],
+        "id": "actor-56-life-10112",
+        "observed_lifetime": [
+          10112,
+          10118
+        ],
+        "segment_lifetime": [
+          10112,
+          10118
+        ],
+        "slot": "0xffbf80",
+        "source_owner": "pickups-equipment-weapons-projectiles-hazards-destructibles",
+        "spawn_in_segment": true,
+        "state_context_count": 1,
+        "type": 24
+      },
+      {
+        "accepted_evidence": "data/oracle11_round1_auxiliary_authority.json",
+        "animation_record_count": 9,
+        "class": "0x3d",
+        "classification": "SOURCE_CLOSED",
+        "despawn_in_segment": true,
+        "facings": [
+          0
+        ],
+        "id": "actor-56-life-10159",
+        "observed_lifetime": [
+          10159,
+          10176
+        ],
+        "segment_lifetime": [
+          10159,
+          10176
+        ],
+        "slot": "0xffbf80",
+        "source_owner": "pickups-equipment-weapons-projectiles-hazards-destructibles",
+        "spawn_in_segment": true,
+        "state_context_count": 2,
+        "type": 24
+      },
+      {
+        "accepted_evidence": "data/oracle11_round1_auxiliary_authority.json",
+        "animation_record_count": 9,
+        "class": "0x3d",
+        "classification": "SOURCE_CLOSED",
+        "despawn_in_segment": true,
+        "facings": [
+          0
+        ],
+        "id": "actor-52-life-10162",
+        "observed_lifetime": [
+          10162,
+          10179
+        ],
+        "segment_lifetime": [
+          10162,
+          10179
+        ],
+        "slot": "0xffbc80",
+        "source_owner": "pickups-equipment-weapons-projectiles-hazards-destructibles",
+        "spawn_in_segment": true,
+        "state_context_count": 2,
+        "type": 24
+      },
+      {
+        "accepted_evidence": "data/oracle11_round1_auxiliary_authority.json",
+        "animation_record_count": 11,
+        "class": "0x10",
+        "classification": "SOURCE_CLOSED",
+        "despawn_in_segment": true,
+        "facings": [
+          0
+        ],
+        "id": "actor-48-life-10164",
+        "observed_lifetime": [
+          10164,
+          10182
+        ],
+        "segment_lifetime": [
+          10164,
+          10182
+        ],
+        "slot": "0xffb980",
+        "source_owner": "pickups-equipment-weapons-projectiles-hazards-destructibles",
+        "spawn_in_segment": true,
+        "state_context_count": 3,
+        "type": 24
+      },
+      {
+        "accepted_evidence": "data/oracle11_round1_auxiliary_authority.json",
+        "animation_record_count": 9,
+        "class": "0x3d",
+        "classification": "SOURCE_CLOSED",
+        "despawn_in_segment": true,
+        "facings": [
+          0
+        ],
+        "id": "actor-54-life-10169",
+        "observed_lifetime": [
+          10169,
+          10186
+        ],
+        "segment_lifetime": [
+          10169,
+          10186
+        ],
+        "slot": "0xffbe00",
+        "source_owner": "pickups-equipment-weapons-projectiles-hazards-destructibles",
+        "spawn_in_segment": true,
+        "state_context_count": 2,
+        "type": 24
+      },
+      {
+        "accepted_evidence": "data/oracle11_round1_auxiliary_authority.json",
+        "animation_record_count": 9,
+        "class": "0x3d",
+        "classification": "SOURCE_CLOSED",
+        "despawn_in_segment": true,
+        "facings": [
+          0
+        ],
+        "id": "actor-50-life-10170",
+        "observed_lifetime": [
+          10170,
+          10187
+        ],
+        "segment_lifetime": [
+          10170,
+          10187
+        ],
+        "slot": "0xffbb00",
+        "source_owner": "pickups-equipment-weapons-projectiles-hazards-destructibles",
+        "spawn_in_segment": true,
+        "state_context_count": 2,
+        "type": 24
+      },
+      {
+        "accepted_evidence": "data/oracle11_round1_auxiliary_authority.json",
+        "animation_record_count": 9,
+        "class": "0x3d",
+        "classification": "SOURCE_CLOSED",
+        "despawn_in_segment": true,
+        "facings": [
+          0
+        ],
+        "id": "actor-56-life-10178",
+        "observed_lifetime": [
+          10178,
+          10195
+        ],
+        "segment_lifetime": [
+          10178,
+          10195
+        ],
+        "slot": "0xffbf80",
+        "source_owner": "pickups-equipment-weapons-projectiles-hazards-destructibles",
+        "spawn_in_segment": true,
+        "state_context_count": 2,
+        "type": 24
+      },
+      {
+        "accepted_evidence": "data/oracle11_round1_auxiliary_authority.json",
+        "animation_record_count": 9,
+        "class": "0x3d",
+        "classification": "SOURCE_CLOSED",
+        "despawn_in_segment": true,
+        "facings": [
+          0
+        ],
+        "id": "actor-52-life-10181",
+        "observed_lifetime": [
+          10181,
+          10198
+        ],
+        "segment_lifetime": [
+          10181,
+          10198
+        ],
+        "slot": "0xffbc80",
+        "source_owner": "pickups-equipment-weapons-projectiles-hazards-destructibles",
+        "spawn_in_segment": true,
+        "state_context_count": 2,
+        "type": 24
+      },
+      {
+        "accepted_evidence": "data/oracle11_round1_auxiliary_authority.json",
+        "animation_record_count": 9,
+        "class": "0x3d",
+        "classification": "SOURCE_CLOSED",
+        "despawn_in_segment": true,
+        "facings": [
+          0
+        ],
+        "id": "actor-52-life-10340",
+        "observed_lifetime": [
+          10340,
+          10357
+        ],
+        "segment_lifetime": [
+          10340,
+          10357
+        ],
+        "slot": "0xffbc80",
+        "source_owner": "pickups-equipment-weapons-projectiles-hazards-destructibles",
+        "spawn_in_segment": true,
+        "state_context_count": 2,
+        "type": 24
+      },
+      {
+        "accepted_evidence": "data/oracle11_round1_auxiliary_authority.json",
+        "animation_record_count": 9,
+        "class": "0x3d",
+        "classification": "SOURCE_CLOSED",
+        "despawn_in_segment": true,
+        "facings": [
+          0
+        ],
+        "id": "actor-56-life-10343",
+        "observed_lifetime": [
+          10343,
+          10360
+        ],
+        "segment_lifetime": [
+          10343,
+          10360
+        ],
+        "slot": "0xffbf80",
+        "source_owner": "pickups-equipment-weapons-projectiles-hazards-destructibles",
+        "spawn_in_segment": true,
+        "state_context_count": 2,
+        "type": 24
+      },
+      {
+        "accepted_evidence": "data/oracle11_round1_auxiliary_authority.json",
+        "animation_record_count": 9,
+        "class": "0x3d",
+        "classification": "SOURCE_CLOSED",
+        "despawn_in_segment": true,
+        "facings": [
+          0
+        ],
+        "id": "actor-50-life-10351",
+        "observed_lifetime": [
+          10351,
+          10368
+        ],
+        "segment_lifetime": [
+          10351,
+          10368
+        ],
+        "slot": "0xffbb00",
+        "source_owner": "pickups-equipment-weapons-projectiles-hazards-destructibles",
+        "spawn_in_segment": true,
+        "state_context_count": 2,
+        "type": 24
+      },
+      {
+        "accepted_evidence": "data/oracle11_round1_auxiliary_authority.json",
+        "animation_record_count": 9,
+        "class": "0x3d",
+        "classification": "SOURCE_CLOSED",
+        "despawn_in_segment": true,
+        "facings": [
+          0
+        ],
+        "id": "actor-54-life-10353",
+        "observed_lifetime": [
+          10353,
+          10370
+        ],
+        "segment_lifetime": [
+          10353,
+          10370
+        ],
+        "slot": "0xffbe00",
+        "source_owner": "pickups-equipment-weapons-projectiles-hazards-destructibles",
+        "spawn_in_segment": true,
+        "state_context_count": 2,
+        "type": 24
+      },
+      {
+        "accepted_evidence": "data/oracle11_round1_auxiliary_authority.json",
+        "animation_record_count": 9,
+        "class": "0x3d",
+        "classification": "SOURCE_CLOSED",
+        "despawn_in_segment": true,
+        "facings": [
+          0
+        ],
+        "id": "actor-52-life-10359",
+        "observed_lifetime": [
+          10359,
+          10376
+        ],
+        "segment_lifetime": [
+          10359,
+          10376
+        ],
+        "slot": "0xffbc80",
+        "source_owner": "pickups-equipment-weapons-projectiles-hazards-destructibles",
+        "spawn_in_segment": true,
+        "state_context_count": 2,
+        "type": 24
+      },
+      {
+        "accepted_evidence": "data/oracle11_round1_auxiliary_authority.json",
+        "animation_record_count": 9,
+        "class": "0x3d",
+        "classification": "SOURCE_CLOSED",
+        "despawn_in_segment": true,
+        "facings": [
+          0
+        ],
+        "id": "actor-48-life-10361",
+        "observed_lifetime": [
+          10361,
+          10378
+        ],
+        "segment_lifetime": [
+          10361,
+          10378
+        ],
+        "slot": "0xffb980",
+        "source_owner": "pickups-equipment-weapons-projectiles-hazards-destructibles",
+        "spawn_in_segment": true,
+        "state_context_count": 2,
+        "type": 24
+      },
+      {
+        "accepted_evidence": "data/oracle11_round1_auxiliary_authority.json",
+        "animation_record_count": 9,
+        "class": "0x3d",
+        "classification": "SOURCE_CLOSED",
+        "despawn_in_segment": true,
+        "facings": [
+          0
+        ],
+        "id": "actor-56-life-10362",
+        "observed_lifetime": [
+          10362,
+          10379
+        ],
+        "segment_lifetime": [
+          10362,
+          10379
+        ],
+        "slot": "0xffbf80",
+        "source_owner": "pickups-equipment-weapons-projectiles-hazards-destructibles",
+        "spawn_in_segment": true,
+        "state_context_count": 2,
+        "type": 24
+      },
+      {
+        "accepted_evidence": "data/oracle11_round1_auxiliary_authority.json",
+        "animation_record_count": 11,
+        "class": "0x10",
+        "classification": "SOURCE_CLOSED",
+        "despawn_in_segment": true,
+        "facings": [
+          0
+        ],
+        "id": "actor-56-life-10703",
+        "observed_lifetime": [
+          10703,
+          10721
+        ],
+        "segment_lifetime": [
+          10703,
+          10721
+        ],
+        "slot": "0xffbf80",
+        "source_owner": "pickups-equipment-weapons-projectiles-hazards-destructibles",
+        "spawn_in_segment": true,
+        "state_context_count": 3,
+        "type": 24
+      },
+      {
+        "accepted_evidence": "data/oracle11_round1_auxiliary_authority.json",
+        "animation_record_count": 1,
+        "class": "0x49",
+        "classification": "SOURCE_CLOSED",
+        "despawn_in_segment": true,
+        "facings": [
+          1
+        ],
+        "id": "actor-48-life-10706",
+        "observed_lifetime": [
+          10706,
+          10712
+        ],
+        "segment_lifetime": [
+          10706,
+          10712
+        ],
+        "slot": "0xffb980",
+        "source_owner": "pickups-equipment-weapons-projectiles-hazards-destructibles",
+        "spawn_in_segment": true,
+        "state_context_count": 1,
+        "type": 24
+      },
+      {
+        "accepted_evidence": "data/oracle11_round1_auxiliary_authority.json",
+        "animation_record_count": 1,
+        "class": "0x49",
+        "classification": "SOURCE_CLOSED",
+        "despawn_in_segment": true,
+        "facings": [
+          1
+        ],
+        "id": "actor-48-life-10714",
+        "observed_lifetime": [
+          10714,
+          10720
+        ],
+        "segment_lifetime": [
+          10714,
+          10720
+        ],
+        "slot": "0xffb980",
+        "source_owner": "pickups-equipment-weapons-projectiles-hazards-destructibles",
+        "spawn_in_segment": true,
+        "state_context_count": 1,
+        "type": 24
+      },
+      {
+        "accepted_evidence": "data/oracle11_round1_auxiliary_authority.json",
+        "animation_record_count": 1,
+        "class": "0x49",
+        "classification": "SOURCE_CLOSED",
+        "despawn_in_segment": true,
+        "facings": [
+          1
+        ],
+        "id": "actor-56-life-10780",
+        "observed_lifetime": [
+          10780,
+          10786
+        ],
+        "segment_lifetime": [
+          10780,
+          10786
+        ],
+        "slot": "0xffbf80",
+        "source_owner": "pickups-equipment-weapons-projectiles-hazards-destructibles",
+        "spawn_in_segment": true,
+        "state_context_count": 1,
+        "type": 24
+      },
+      {
+        "accepted_evidence": "data/oracle11_round1_auxiliary_authority.json",
+        "animation_record_count": 1,
+        "class": "0x49",
+        "classification": "SOURCE_CLOSED",
+        "despawn_in_segment": true,
+        "facings": [
+          1
+        ],
+        "id": "actor-48-life-10782",
+        "observed_lifetime": [
+          10782,
+          10788
+        ],
+        "segment_lifetime": [
+          10782,
+          10788
+        ],
+        "slot": "0xffb980",
+        "source_owner": "pickups-equipment-weapons-projectiles-hazards-destructibles",
+        "spawn_in_segment": true,
+        "state_context_count": 1,
+        "type": 24
+      },
+      {
+        "accepted_evidence": "data/oracle11_round1_auxiliary_authority.json",
+        "animation_record_count": 1,
+        "class": "0x49",
+        "classification": "SOURCE_CLOSED",
+        "despawn_in_segment": true,
+        "facings": [
+          1
+        ],
+        "id": "actor-56-life-10788",
+        "observed_lifetime": [
+          10788,
+          10794
+        ],
+        "segment_lifetime": [
+          10788,
+          10794
+        ],
+        "slot": "0xffbf80",
+        "source_owner": "pickups-equipment-weapons-projectiles-hazards-destructibles",
+        "spawn_in_segment": true,
+        "state_context_count": 1,
+        "type": 24
+      },
+      {
+        "accepted_evidence": "data/oracle11_round1_auxiliary_authority.json",
+        "animation_record_count": 1,
+        "class": "0x49",
+        "classification": "SOURCE_CLOSED",
+        "despawn_in_segment": true,
+        "facings": [
+          1
+        ],
+        "id": "actor-48-life-10790",
+        "observed_lifetime": [
+          10790,
+          10796
+        ],
+        "segment_lifetime": [
+          10790,
+          10796
+        ],
+        "slot": "0xffb980",
+        "source_owner": "pickups-equipment-weapons-projectiles-hazards-destructibles",
+        "spawn_in_segment": true,
+        "state_context_count": 1,
+        "type": 24
+      },
+      {
+        "accepted_evidence": "data/oracle11_round1_auxiliary_authority.json",
+        "animation_record_count": 1,
+        "class": "0x49",
+        "classification": "SOURCE_CLOSED",
+        "despawn_in_segment": true,
+        "facings": [
+          1
+        ],
+        "id": "actor-48-life-10820",
+        "observed_lifetime": [
+          10820,
+          10826
+        ],
+        "segment_lifetime": [
+          10820,
+          10826
+        ],
+        "slot": "0xffb980",
+        "source_owner": "pickups-equipment-weapons-projectiles-hazards-destructibles",
+        "spawn_in_segment": true,
+        "state_context_count": 1,
+        "type": 24
+      },
+      {
+        "accepted_evidence": "data/oracle11_round1_auxiliary_authority.json",
+        "animation_record_count": 1,
+        "class": "0x49",
+        "classification": "SOURCE_CLOSED",
+        "despawn_in_segment": true,
+        "facings": [
+          1
+        ],
+        "id": "actor-56-life-10824",
+        "observed_lifetime": [
+          10824,
+          10830
+        ],
+        "segment_lifetime": [
+          10824,
+          10830
+        ],
+        "slot": "0xffbf80",
+        "source_owner": "pickups-equipment-weapons-projectiles-hazards-destructibles",
+        "spawn_in_segment": true,
+        "state_context_count": 1,
+        "type": 24
+      },
+      {
+        "accepted_evidence": "data/oracle11_round1_auxiliary_authority.json",
+        "animation_record_count": 1,
+        "class": "0x49",
+        "classification": "SOURCE_CLOSED",
+        "despawn_in_segment": true,
+        "facings": [
+          1
+        ],
+        "id": "actor-48-life-10828",
+        "observed_lifetime": [
+          10828,
+          10834
+        ],
+        "segment_lifetime": [
+          10828,
+          10834
+        ],
+        "slot": "0xffb980",
+        "source_owner": "pickups-equipment-weapons-projectiles-hazards-destructibles",
+        "spawn_in_segment": true,
+        "state_context_count": 1,
+        "type": 24
+      },
+      {
+        "accepted_evidence": "data/oracle11_round1_auxiliary_authority.json",
+        "animation_record_count": 1,
+        "class": "0x49",
+        "classification": "SOURCE_CLOSED",
+        "despawn_in_segment": true,
+        "facings": [
+          1
+        ],
+        "id": "actor-56-life-10832",
+        "observed_lifetime": [
+          10832,
+          10838
+        ],
+        "segment_lifetime": [
+          10832,
+          10838
+        ],
+        "slot": "0xffbf80",
+        "source_owner": "pickups-equipment-weapons-projectiles-hazards-destructibles",
+        "spawn_in_segment": true,
+        "state_context_count": 1,
+        "type": 24
+      },
+      {
+        "accepted_evidence": "data/oracle11_round1_auxiliary_authority.json",
+        "animation_record_count": 1,
+        "class": "0x49",
+        "classification": "SOURCE_CLOSED",
+        "despawn_in_segment": true,
+        "facings": [
+          1
+        ],
+        "id": "actor-48-life-10836",
+        "observed_lifetime": [
+          10836,
+          10842
+        ],
+        "segment_lifetime": [
+          10836,
+          10842
+        ],
+        "slot": "0xffb980",
+        "source_owner": "pickups-equipment-weapons-projectiles-hazards-destructibles",
+        "spawn_in_segment": true,
+        "state_context_count": 1,
+        "type": 24
+      },
+      {
+        "accepted_evidence": "data/oracle11_round1_auxiliary_authority.json",
+        "animation_record_count": 1,
+        "class": "0x49",
+        "classification": "SOURCE_CLOSED",
+        "despawn_in_segment": true,
+        "facings": [
+          1
+        ],
+        "id": "actor-48-life-10882",
+        "observed_lifetime": [
+          10882,
+          10888
+        ],
+        "segment_lifetime": [
+          10882,
+          10888
+        ],
+        "slot": "0xffb980",
+        "source_owner": "pickups-equipment-weapons-projectiles-hazards-destructibles",
+        "spawn_in_segment": true,
+        "state_context_count": 1,
+        "type": 24
+      },
+      {
+        "accepted_evidence": "data/oracle11_round1_auxiliary_authority.json",
+        "animation_record_count": 1,
+        "class": "0x49",
+        "classification": "SOURCE_CLOSED",
+        "despawn_in_segment": true,
+        "facings": [
+          1
+        ],
+        "id": "actor-56-life-10886",
+        "observed_lifetime": [
+          10886,
+          10892
+        ],
+        "segment_lifetime": [
+          10886,
+          10892
+        ],
+        "slot": "0xffbf80",
+        "source_owner": "pickups-equipment-weapons-projectiles-hazards-destructibles",
+        "spawn_in_segment": true,
+        "state_context_count": 1,
+        "type": 24
+      },
+      {
+        "accepted_evidence": "data/oracle11_round1_auxiliary_authority.json",
+        "animation_record_count": 1,
+        "class": "0x49",
+        "classification": "SOURCE_CLOSED",
+        "despawn_in_segment": true,
+        "facings": [
+          1
+        ],
+        "id": "actor-48-life-10890",
+        "observed_lifetime": [
+          10890,
+          10896
+        ],
+        "segment_lifetime": [
+          10890,
+          10896
+        ],
+        "slot": "0xffb980",
+        "source_owner": "pickups-equipment-weapons-projectiles-hazards-destructibles",
+        "spawn_in_segment": true,
+        "state_context_count": 1,
+        "type": 24
+      },
+      {
+        "accepted_evidence": "data/oracle11_round1_auxiliary_authority.json",
+        "animation_record_count": 1,
+        "class": "0x49",
+        "classification": "SOURCE_CLOSED",
+        "despawn_in_segment": true,
+        "facings": [
+          1
+        ],
+        "id": "actor-56-life-10894",
+        "observed_lifetime": [
+          10894,
+          10900
+        ],
+        "segment_lifetime": [
+          10894,
+          10900
+        ],
+        "slot": "0xffbf80",
+        "source_owner": "pickups-equipment-weapons-projectiles-hazards-destructibles",
+        "spawn_in_segment": true,
+        "state_context_count": 1,
+        "type": 24
+      },
+      {
+        "accepted_evidence": "data/oracle11_round1_enemy_archetypes.json",
+        "animation_record_count": 86,
+        "class": "0x01",
+        "classification": "SOURCE_CLOSED",
+        "despawn_in_segment": false,
+        "facings": [
+          0,
+          1
+        ],
+        "id": "actor-18-life-11045",
+        "observed_lifetime": [
+          11045,
+          13639
+        ],
+        "segment_lifetime": [
+          11045,
+          11476
+        ],
+        "slot": "0xffa300",
+        "source_owner": "round1-enemy-archetypes",
+        "spawn_in_segment": true,
+        "state_context_count": 29,
+        "type": 12
+      },
+      {
+        "accepted_evidence": "data/oracle11_round1_auxiliary_authority.json",
+        "animation_record_count": 1,
+        "class": "0x49",
+        "classification": "SOURCE_CLOSED",
+        "despawn_in_segment": true,
+        "facings": [
+          1
+        ],
+        "id": "actor-56-life-11064",
+        "observed_lifetime": [
+          11064,
+          11070
+        ],
+        "segment_lifetime": [
+          11064,
+          11070
+        ],
+        "slot": "0xffbf80",
+        "source_owner": "pickups-equipment-weapons-projectiles-hazards-destructibles",
+        "spawn_in_segment": true,
+        "state_context_count": 1,
+        "type": 24
+      },
+      {
+        "accepted_evidence": "data/oracle11_round1_enemy_archetypes.json",
+        "animation_record_count": 92,
+        "class": "0x01",
+        "classification": "SOURCE_CLOSED",
+        "despawn_in_segment": false,
+        "facings": [
+          0,
+          1
+        ],
+        "id": "actor-17-life-11066",
+        "observed_lifetime": [
+          11066,
+          12266
+        ],
+        "segment_lifetime": [
+          11066,
+          11476
+        ],
+        "slot": "0xffa240",
+        "source_owner": "round1-enemy-archetypes",
+        "spawn_in_segment": true,
+        "state_context_count": 28,
+        "type": 12
+      },
+      {
+        "accepted_evidence": "data/oracle11_round1_auxiliary_authority.json",
+        "animation_record_count": 1,
+        "class": "0x49",
+        "classification": "SOURCE_CLOSED",
+        "despawn_in_segment": true,
+        "facings": [
+          1
+        ],
+        "id": "actor-56-life-11072",
+        "observed_lifetime": [
+          11072,
+          11078
+        ],
+        "segment_lifetime": [
+          11072,
+          11078
+        ],
+        "slot": "0xffbf80",
+        "source_owner": "pickups-equipment-weapons-projectiles-hazards-destructibles",
+        "spawn_in_segment": true,
+        "state_context_count": 1,
+        "type": 24
+      },
+      {
+        "accepted_evidence": "data/oracle11_round1_auxiliary_authority.json",
+        "animation_record_count": 1,
+        "class": "0x49",
+        "classification": "SOURCE_CLOSED",
+        "despawn_in_segment": true,
+        "facings": [
+          1
+        ],
+        "id": "actor-56-life-11246",
+        "observed_lifetime": [
+          11246,
+          11252
+        ],
+        "segment_lifetime": [
+          11246,
+          11252
+        ],
+        "slot": "0xffbf80",
+        "source_owner": "pickups-equipment-weapons-projectiles-hazards-destructibles",
+        "spawn_in_segment": true,
+        "state_context_count": 1,
+        "type": 24
+      },
+      {
+        "accepted_evidence": "data/oracle11_round1_auxiliary_authority.json",
+        "animation_record_count": 1,
+        "class": "0x49",
+        "classification": "SOURCE_CLOSED",
+        "despawn_in_segment": true,
+        "facings": [
+          1
+        ],
+        "id": "actor-56-life-11254",
+        "observed_lifetime": [
+          11254,
+          11260
+        ],
+        "segment_lifetime": [
+          11254,
+          11260
+        ],
+        "slot": "0xffbf80",
+        "source_owner": "pickups-equipment-weapons-projectiles-hazards-destructibles",
+        "spawn_in_segment": true,
+        "state_context_count": 1,
+        "type": 24
+      },
+      {
+        "accepted_evidence": "data/oracle11_round1_auxiliary_authority.json",
+        "animation_record_count": 4,
+        "class": "0x4e",
+        "classification": "SOURCE_CLOSED",
+        "despawn_in_segment": true,
+        "facings": [
+          0
+        ],
+        "id": "actor-56-life-11262",
+        "observed_lifetime": [
+          11262,
+          11272
+        ],
+        "segment_lifetime": [
+          11262,
+          11272
+        ],
+        "slot": "0xffbf80",
+        "source_owner": "pickups-equipment-weapons-projectiles-hazards-destructibles",
+        "spawn_in_segment": true,
+        "state_context_count": 3,
+        "type": 24
+      },
+      {
+        "accepted_evidence": "data/oracle11_round1_auxiliary_authority.json",
+        "animation_record_count": 11,
+        "class": "0x10",
+        "classification": "SOURCE_CLOSED",
+        "despawn_in_segment": true,
+        "facings": [
+          0
+        ],
+        "id": "actor-56-life-11291",
+        "observed_lifetime": [
+          11291,
+          11309
+        ],
+        "segment_lifetime": [
+          11291,
+          11309
+        ],
+        "slot": "0xffbf80",
+        "source_owner": "pickups-equipment-weapons-projectiles-hazards-destructibles",
+        "spawn_in_segment": true,
+        "state_context_count": 3,
+        "type": 24
+      },
+      {
+        "accepted_evidence": "data/oracle11_round1_auxiliary_authority.json",
+        "animation_record_count": 1,
+        "class": "0x49",
+        "classification": "SOURCE_CLOSED",
+        "despawn_in_segment": true,
+        "facings": [
+          1
+        ],
+        "id": "actor-56-life-11316",
+        "observed_lifetime": [
+          11316,
+          11322
+        ],
+        "segment_lifetime": [
+          11316,
+          11322
+        ],
+        "slot": "0xffbf80",
+        "source_owner": "pickups-equipment-weapons-projectiles-hazards-destructibles",
+        "spawn_in_segment": true,
+        "state_context_count": 1,
+        "type": 24
+      },
+      {
+        "accepted_evidence": "data/oracle11_round1_auxiliary_authority.json",
+        "animation_record_count": 1,
+        "class": "0x49",
+        "classification": "SOURCE_CLOSED",
+        "despawn_in_segment": true,
+        "facings": [
+          1
+        ],
+        "id": "actor-56-life-11324",
+        "observed_lifetime": [
+          11324,
+          11330
+        ],
+        "segment_lifetime": [
+          11324,
+          11330
+        ],
+        "slot": "0xffbf80",
+        "source_owner": "pickups-equipment-weapons-projectiles-hazards-destructibles",
+        "spawn_in_segment": true,
+        "state_context_count": 1,
+        "type": 24
+      },
+      {
+        "accepted_evidence": "data/oracle11_round1_auxiliary_authority.json",
+        "animation_record_count": 1,
+        "class": "0x49",
+        "classification": "SOURCE_CLOSED",
+        "despawn_in_segment": true,
+        "facings": [
+          1
+        ],
+        "id": "actor-56-life-11332",
+        "observed_lifetime": [
+          11332,
+          11338
+        ],
+        "segment_lifetime": [
+          11332,
+          11338
+        ],
+        "slot": "0xffbf80",
+        "source_owner": "pickups-equipment-weapons-projectiles-hazards-destructibles",
+        "spawn_in_segment": true,
+        "state_context_count": 1,
+        "type": 24
+      },
+      {
+        "accepted_evidence": "data/oracle11_round1_auxiliary_authority.json",
+        "animation_record_count": 11,
+        "class": "0x10",
+        "classification": "SOURCE_CLOSED",
+        "despawn_in_segment": true,
+        "facings": [
+          0
+        ],
+        "id": "actor-56-life-11340",
+        "observed_lifetime": [
+          11340,
+          11358
+        ],
+        "segment_lifetime": [
+          11340,
+          11358
+        ],
+        "slot": "0xffbf80",
+        "source_owner": "pickups-equipment-weapons-projectiles-hazards-destructibles",
+        "spawn_in_segment": true,
+        "state_context_count": 3,
+        "type": 24
+      },
+      {
+        "accepted_evidence": "data/oracle11_round1_auxiliary_authority.json",
+        "animation_record_count": 1,
+        "class": "0x49",
+        "classification": "SOURCE_CLOSED",
+        "despawn_in_segment": true,
+        "facings": [
+          1
+        ],
+        "id": "actor-56-life-11360",
+        "observed_lifetime": [
+          11360,
+          11366
+        ],
+        "segment_lifetime": [
+          11360,
+          11366
+        ],
+        "slot": "0xffbf80",
+        "source_owner": "pickups-equipment-weapons-projectiles-hazards-destructibles",
+        "spawn_in_segment": true,
+        "state_context_count": 1,
+        "type": 24
+      },
+      {
+        "accepted_evidence": "data/oracle11_round1_auxiliary_authority.json",
+        "animation_record_count": 1,
+        "class": "0x49",
+        "classification": "SOURCE_CLOSED",
+        "despawn_in_segment": true,
+        "facings": [
+          1
+        ],
+        "id": "actor-56-life-11368",
+        "observed_lifetime": [
+          11368,
+          11374
+        ],
+        "segment_lifetime": [
+          11368,
+          11374
+        ],
+        "slot": "0xffbf80",
+        "source_owner": "pickups-equipment-weapons-projectiles-hazards-destructibles",
+        "spawn_in_segment": true,
+        "state_context_count": 1,
+        "type": 24
+      },
+      {
+        "accepted_evidence": "data/oracle11_round1_auxiliary_authority.json",
+        "animation_record_count": 1,
+        "class": "0x49",
+        "classification": "SOURCE_CLOSED",
+        "despawn_in_segment": true,
+        "facings": [
+          1
+        ],
+        "id": "actor-56-life-11376",
+        "observed_lifetime": [
+          11376,
+          11382
+        ],
+        "segment_lifetime": [
+          11376,
+          11382
+        ],
+        "slot": "0xffbf80",
+        "source_owner": "pickups-equipment-weapons-projectiles-hazards-destructibles",
+        "spawn_in_segment": true,
+        "state_context_count": 1,
+        "type": 24
+      },
+      {
+        "accepted_evidence": "data/oracle11_round1_auxiliary_authority.json",
+        "animation_record_count": 1,
+        "class": "0x49",
+        "classification": "SOURCE_CLOSED",
+        "despawn_in_segment": true,
+        "facings": [
+          1
+        ],
+        "id": "actor-56-life-11422",
+        "observed_lifetime": [
+          11422,
+          11428
+        ],
+        "segment_lifetime": [
+          11422,
+          11428
+        ],
+        "slot": "0xffbf80",
+        "source_owner": "pickups-equipment-weapons-projectiles-hazards-destructibles",
+        "spawn_in_segment": true,
+        "state_context_count": 1,
+        "type": 24
+      },
+      {
+        "accepted_evidence": "data/oracle11_round1_auxiliary_authority.json",
+        "animation_record_count": 1,
+        "class": "0x49",
+        "classification": "SOURCE_CLOSED",
+        "despawn_in_segment": true,
+        "facings": [
+          1
+        ],
+        "id": "actor-56-life-11430",
+        "observed_lifetime": [
+          11430,
+          11436
+        ],
+        "segment_lifetime": [
+          11430,
+          11436
+        ],
+        "slot": "0xffbf80",
+        "source_owner": "pickups-equipment-weapons-projectiles-hazards-destructibles",
+        "spawn_in_segment": true,
+        "state_context_count": 1,
+        "type": 24
+      },
+      {
+        "accepted_evidence": "data/oracle11_round1_auxiliary_authority.json",
+        "animation_record_count": 11,
+        "class": "0x10",
+        "classification": "SOURCE_CLOSED",
+        "despawn_in_segment": true,
+        "facings": [
+          0
+        ],
+        "id": "actor-56-life-11438",
+        "observed_lifetime": [
+          11438,
+          11456
+        ],
+        "segment_lifetime": [
+          11438,
+          11456
+        ],
+        "slot": "0xffbf80",
+        "source_owner": "pickups-equipment-weapons-projectiles-hazards-destructibles",
+        "spawn_in_segment": true,
+        "state_context_count": 3,
+        "type": 24
+      }
+    ]
+  },
+  "schema": "oracle10-round1-census-extension-v1",
+  "segment": {
+    "id": "round1-chrysalis-battle",
+    "scene_ids": [
+      "round1-chrysalis-battle"
+    ],
+    "source_frame_range": [
+      9976,
+      11476
+    ]
+  },
+  "status": "CENSUS_SEGMENT_COMPLETE",
+  "table_demand_delta": {
+    "accepted_cart_archive_sha256": "ccf8795a147daf337c1f72364c81f05fc2cfd255d8d21b40a56c74c97f8d15bd",
+    "accepted_cart_archive_table_count": 157,
+    "p3_program_families": [
+      {
+        "class": "0x01",
+        "source_owner": "round1-enemy-archetypes",
+        "type": 12
+      },
+      {
+        "class": "0x06",
+        "source_owner": "round1-enemy-archetypes",
+        "type": 12
+      },
+      {
+        "class": "0x07",
+        "source_owner": "round1-navigation-terrain-camera",
+        "type": 20
+      },
+      {
+        "class": "0x10",
+        "source_owner": "pickups-equipment-weapons-projectiles-hazards-destructibles",
+        "type": 24
+      },
+      {
+        "class": "0x3d",
+        "source_owner": "pickups-equipment-weapons-projectiles-hazards-destructibles",
+        "type": 24
+      },
+      {
+        "class": "0x49",
+        "source_owner": "pickups-equipment-weapons-projectiles-hazards-destructibles",
+        "type": 24
+      },
+      {
+        "class": "0x4e",
+        "source_owner": "pickups-equipment-weapons-projectiles-hazards-destructibles",
+        "type": 24
+      }
+    ],
+    "spec_executable_review_deferred_to_p3": true,
+    "unbound_table_identities": []
+  },
+  "targeted_counterfactuals": {
+    "auxiliary_class_controls": [
+      {
+        "class": "0x07",
+        "counterfactual": {
+          "capture": "oracle11_aux_suppress_20_07_v2",
+          "classification": "PASS",
+          "final_health": 95,
+          "final_player_active": 1,
+          "final_player_state": 2048,
+          "final_resource": 59,
+          "final_route": 4,
+          "final_score": "00143702",
+          "first_frame": 5566,
+          "identity": {
+            "files": {
+              "dispatches.tsv": "251c3ae7e24f8d5d9e84d204dcf50f07ad46541444e8998cdd247c69f7d161a6",
+              "projectiles.tsv": "08352fadefa09cfbed392c0278365187fbbc7131796a078a6c710c27ad06d45f",
+              "result.tsv": "344ea236d3d589d0a0a4b7e1dae042d121ed13d53afdbca2eac8e667a821994c",
+              "samples.tsv": "540cf87d8a646947553c4e496e5be24560ed71d93b8498eb46ce721ecfbaa8fc",
+              "score_writes.tsv": "a471452a475160610d02291870d89e97c2a792a75b071c0dd471f10cbc07a7d6",
+              "suppression.tsv": "b2f02af49925d46f9c1401b5632a3bb34269bb0516006a8b7765eb199457b05a"
+            },
+            "mame_sha256": "af6966108d9b52c22465c6d50f4e5d50cc371b50f2d27dc443935f287aad37a3",
+            "manifest_sha256": "07cd77bf5ab57b3d4486f6ec502d3b425d457dd551b76e9b601f4d8c6b955c72",
+            "nvram_baseline_sha256": "35720ff0054bb7ba233da6d00ccbe92473c8a87e2c53c134c83ac2721f7d0ebf"
+          },
+          "suppression_count": 4
+        },
+        "type": 20
+      },
+      {
+        "class": "0x10",
+        "counterfactual": {
+          "capture": "oracle11_aux_suppress_24_10_v2",
+          "classification": "PASS",
+          "final_health": 15,
+          "final_player_active": 1,
+          "final_player_state": 512,
+          "final_resource": 56,
+          "final_route": 4,
+          "final_score": "00152802",
+          "first_frame": 2523,
+          "identity": {
+            "files": {
+              "dispatches.tsv": "f796c95896daedebd638cf63b5804945057aad2a8cc4fab87dd72eac75d50c07",
+              "projectiles.tsv": "010db02fc91be97c2b0f33d71595aada2e6a2cae97187083df6e0b21f1f4d445",
+              "result.tsv": "a5d6dfd1f52dc2440e2621bb58d149d78eeb933bad02b82f0e10f999579aff65",
+              "samples.tsv": "fac1f6552f03a40247d28b1fcbf778873d3a7b16751198472f60aad2076d9adc",
+              "score_writes.tsv": "608608fa39ff7bfcf48484b81ce26988656537e64d5d1b3d134205c30856ead1",
+              "suppression.tsv": "a1407f9136f37eda5bdbf9747a40c445855e9b9991919c4917cefb0e69220a76"
+            },
+            "mame_sha256": "af6966108d9b52c22465c6d50f4e5d50cc371b50f2d27dc443935f287aad37a3",
+            "manifest_sha256": "41ce544f388b6caed8fcd3f92d4af70a61a180da1e74321c640662eb9c0b2684",
+            "nvram_baseline_sha256": "35720ff0054bb7ba233da6d00ccbe92473c8a87e2c53c134c83ac2721f7d0ebf"
+          },
+          "suppression_count": 74
+        },
+        "type": 24
+      },
+      {
+        "class": "0x3d",
+        "counterfactual": {
+          "capture": "oracle11_aux_suppress_24_3d_v2",
+          "classification": "PASS",
+          "final_health": 11,
+          "final_player_active": 1,
+          "final_player_state": 512,
+          "final_resource": 56,
+          "final_route": 4,
+          "final_score": "00153802",
+          "first_frame": 2805,
+          "identity": {
+            "files": {
+              "dispatches.tsv": "f1cb7be4db4c993d3b24b6313c61cfada4d60993ce0f6686fe344815af10ee59",
+              "projectiles.tsv": "323f89b97c779375272bcaf0bdfc337f3bd3601435607d7ee5804d38bf8443fa",
+              "result.tsv": "5ff8476bc4e366eb0e3181a178accb7e32aa66c6813017094b3908d889004207",
+              "samples.tsv": "b0fe6d641496cb5440e64989f10a2b7aa5110b2d970d69efea796c6f256cbdab",
+              "score_writes.tsv": "80ec533195fb0c95857ad09228d27fd2c4cddbd090f4d903db40ecf466cbbe3e",
+              "suppression.tsv": "dd7399bcb310a308423e65bda5f0d882dcb232f0ea76f1dbc257159805b60660"
+            },
+            "mame_sha256": "af6966108d9b52c22465c6d50f4e5d50cc371b50f2d27dc443935f287aad37a3",
+            "manifest_sha256": "f2caa378a7823af5f58fbee912c1ebc6575125dd581820fcdeb385e9038d1cc5",
+            "nvram_baseline_sha256": "35720ff0054bb7ba233da6d00ccbe92473c8a87e2c53c134c83ac2721f7d0ebf"
+          },
+          "suppression_count": 80
+        },
+        "type": 24
+      },
+      {
+        "class": "0x49",
+        "counterfactual": {
+          "capture": "oracle11_aux_suppress_24_49_v2",
+          "classification": "PASS",
+          "final_health": 17,
+          "final_player_active": 1,
+          "final_player_state": 512,
+          "final_resource": 3,
+          "final_route": 4,
+          "final_score": "00141002",
+          "first_frame": 2262,
+          "identity": {
+            "files": {
+              "dispatches.tsv": "5b9447febe5286b8e6211dc3461e8768a26c73c6b73f2af641ef91728992debc",
+              "projectiles.tsv": "323f89b97c779375272bcaf0bdfc337f3bd3601435607d7ee5804d38bf8443fa",
+              "result.tsv": "4b1609ea50f414ee71b15d439ef207a7460212e58e08b316309468174339eda6",
+              "samples.tsv": "34cc7300f237c8945ab623f78aa5e620895991aae33a9699a72e38a22e673c49",
+              "score_writes.tsv": "9f22990e840e7feb3d639a37bfbfc0bbe72ba86576e4c18d5e31871b6b04d9e8",
+              "suppression.tsv": "e9410f67468091f383a9e56591948253d61e97ace1fd7439a45b814eafb29297"
+            },
+            "mame_sha256": "af6966108d9b52c22465c6d50f4e5d50cc371b50f2d27dc443935f287aad37a3",
+            "manifest_sha256": "68c83198d4f7cbb263ffd6203c06a4b84895e5725809da1ee7e567a125c21cd5",
+            "nvram_baseline_sha256": "35720ff0054bb7ba233da6d00ccbe92473c8a87e2c53c134c83ac2721f7d0ebf"
+          },
+          "suppression_count": 84
+        },
+        "type": 24
+      },
+      {
+        "class": "0x4e",
+        "counterfactual": {
+          "capture": "oracle11_aux_suppress_24_4e_v2",
+          "classification": "PASS",
+          "final_health": 89,
+          "final_player_active": 1,
+          "final_player_state": 512,
+          "final_resource": 30,
+          "final_route": 4,
+          "final_score": "00183002",
+          "first_frame": 1346,
+          "identity": {
+            "files": {
+              "dispatches.tsv": "61c02945cb040f85cef7270cbf2fc9388b29b9bf7487e965e53d2eef4524ee95",
+              "projectiles.tsv": "fdaed5770b370022b3c1217df2904317d92ca91b68a39d1c9a52977470203d42",
+              "result.tsv": "b591b885147e9ede4240e8d6a4fb5cbe5b2a712250c8c9c6e3cb0899f0cf3625",
+              "samples.tsv": "be4228459351aef9dee907451f192b3840c5673dbe422917f4ce03e310f4d7ed",
+              "score_writes.tsv": "07a599a43dfda3b763d23e8ca9eb2e086a464c6f80c4cd89bef04e11d2db5750",
+              "suppression.tsv": "4758646582889de34844238982c0ecab4c445303a4e0ed4c9d1377755357f885"
+            },
+            "mame_sha256": "af6966108d9b52c22465c6d50f4e5d50cc371b50f2d27dc443935f287aad37a3",
+            "manifest_sha256": "7658e95825d425d87e4dd8f62be2a9542b05599df59e4d4be9b36c75f4eba36d",
+            "nvram_baseline_sha256": "35720ff0054bb7ba233da6d00ccbe92473c8a87e2c53c134c83ac2721f7d0ebf"
+          },
+          "suppression_count": 109
+        },
+        "type": 24
+      }
+    ],
+    "enemy_class_controls": [
+      {
+        "class": "0x01",
+        "counterfactuals": {
+          "remove_class_01": {
+            "completed_round1": true,
+            "semantic_difference": {
+              "control": {
+                "actor_population": "01-0c:1,06-0c:1,07-14:1"
+              },
+              "fields": [
+                "actor_population"
+              ],
+              "frame": 11045,
+              "variant": {
+                "actor_population": "06-0c:1,07-14:1"
+              }
+            },
+            "stable_round2_handoff_frame": 14181,
+            "status": "PASS"
+          },
+          "suppress_warehouse_offense": {
+            "completed_round1": false,
+            "semantic_difference": {
+              "control": {
+                "p_phase": "3072",
+                "p_x": "964"
+              },
+              "fields": [
+                "p_phase",
+                "p_x"
+              ],
+              "frame": 5732,
+              "variant": {
+                "p_phase": "514",
+                "p_x": "966"
+              }
+            },
+            "stable_round2_handoff_frame": null,
+            "status": "PASS"
+          }
+        },
+        "type": 12
+      },
+      {
+        "class": "0x06",
+        "counterfactuals": {
+          "remove_class_06": {
+            "completed_round1": false,
+            "semantic_difference": {
+              "control": {
+                "actor_population": "06-0c:1,07-14:1"
+              },
+              "fields": [
+                "actor_population"
+              ],
+              "frame": 5566,
+              "variant": {
+                "actor_population": "07-14:1"
+              }
+            },
+            "stable_round2_handoff_frame": null,
+            "status": "PASS"
+          },
+          "suppress_boss_offense": {
+            "completed_round1": true,
+            "semantic_difference": {
+              "control": {
+                "p_phase": "6656"
+              },
+              "fields": [
+                "p_phase"
+              ],
+              "frame": 10052,
+              "variant": {
+                "p_phase": "514"
+              }
+            },
+            "stable_round2_handoff_frame": 16765,
+            "status": "PASS"
+          }
+        },
+        "type": 12
+      }
+    ],
+    "navigation_route_wide": {
+      "authority_family": "round1-navigation-terrain-camera",
+      "outcomes": {
+        "hold_navigation": {
+          "completed_round1": true,
+          "first_semantic_difference": {
+            "control": {
+              "p_facing": "1",
+              "p_phase": "512",
+              "p_x": "946"
+            },
+            "fields": [
+              "p_phase",
+              "p_facing",
+              "p_x"
+            ],
+            "frame": 2602,
+            "variant": {
+              "p_facing": "0",
+              "p_phase": "2",
+              "p_x": "944"
+            }
+          },
+          "stable_round2_handoff_frame": 15227
+        },
+        "remove_navigation_bodies": {
+          "completed_round1": true,
+          "first_semantic_difference": {
+            "control": {
+              "actor_population": "09-14:1"
+            },
+            "fields": [
+              "actor_population"
+            ],
+            "frame": 2073,
+            "variant": {
+              "actor_population": ""
+            }
+          },
+          "stable_round2_handoff_frame": 14455
+        }
+      },
+      "status": "PASS",
+      "variants": [
+        "hold_navigation",
+        "remove_navigation_bodies"
+      ]
+    },
+    "presentation_boundaries": [
+      {
+        "classification": "SOURCE_CLOSED_PRESENTATION_DEPENDENCY",
+        "owns_progression": false,
+        "signature": "S30d9c3b2392d"
+      }
+    ],
+    "route_wide_perturbation_difference": {
+      "control": {
+        "g8009": "4",
+        "p_x": "192",
+        "p_z": "0"
+      },
+      "fields": [
+        "g8009",
+        "p_x",
+        "p_z"
+      ],
+      "frame": 6692,
+      "variant": {
+        "g8009": "2",
+        "p_x": "1233",
+        "p_z": "311"
+      }
+    }
+  },
+  "task": "ORACLE-10-ROUND1-END-TO-END-SYSTEM-CENSUS"
+}

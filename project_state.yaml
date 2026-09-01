@@ -519,7 +519,7 @@ source_closure:
   status: ACTIVE
   active_checkpoint: REIMPLEMENT-13-SOURCE-CLOSED-ROUND1
   workflow_pause: NONE_ACTIVE_REIMPLEMENT13_CONTINUING
-  resume_pointer: docs/AGENT_HANDOFF.md exact next experiment; same branch and persistent Goal; paired post-Coffee-Shop census is complete through source frame 9975; continue at frame 9976
+  resume_pointer: docs/AGENT_HANDOFF.md exact next experiment; same branch and persistent Goal; paired post-Coffee-Shop census is complete through source frame 11476; continue at frame 11477
   prototype_harness_retained: true
   preserved_infrastructure: [rendering, HUD, camera, audio, collision, readback, emulator, visual-QA]
   active_card: REIMPLEMENT-13-SOURCE-CLOSED-ROUND1
@@ -536,7 +536,7 @@ source_closure:
   cart_vdp1_upload_checkpoint: PASS_IMPLEMENTATION_AND_MUTATION_PHYSICAL_UNRUN / composite scratch remains in cartridge A-bus / boot reserves VDP1 texture space without A-bus source DMA / every cart-sourced composite replace uses an explicit SH-2 CPU longword copy to VDP1 B-bus / SCU-DMA endpoint mutation PASS 4 / platform rule is no SCU DMA transfer with an A-bus endpoint / emulator is blind to this rule / physical Saturn remains UNRUN
   round1_memory_plan_checkpoint: PASS / complete map data/reimplement13_round1_memory_plan.json / census 94 route segments and 1517 writer PCs / 157 generated read-only SPEC tables in deterministic 47056-byte cart archive at 0x22711000 / archive SHA ccf8795a147daf337c1f72364c81f05fc2cfd255d8d21b40a56c74c97f8d15bd / census floor 240400 fits 0x40000 carve / runtime exact 0x18434 fits 0x19000 carve with 3020-byte headroom / per-region Target asserts / current GAME.BIN373840 BSS0x060b2560 SHAaa99904645fa584952ccba84e4fb28d970dabc4ae6e6e593b401f9e3323910a1 / paired cold Emulator exact ISO3bb36edbd29c0a07867826f7d1ac99e96d84849232a05b3bdea43d5d84a611de with round1_spec_bound1 / only existing boot load active / physical Saturn UNRUN
   emulator_mcp_capture_checkpoint: PASS / owner debug-rig package archive6f157f15da4d01cca9ef044d32352b8e6d3cf6b71a44ad3303aaeb9939015864 EXEd77675912421a7435d02d844625a6ef68ba0e55ef17c9845f08651eb98f54b45 / Aug10-vs-debug two cold runs each and 575 samples canonical semantic SHA7fae4a7cffe2c35a0df8a3c181a5ffa8f141f5b113500d67de1fd60f071a56fc / same-frame burst frames2095-2125 manifest13afd26ef889b6f792ade52989749eeec1dc23203b5eb1def55ac85ccca31c1f and 7 unique animated hashes / MCP cadence-1 visual QA direct inspection PASS / ONE_EMULATOR / physical Saturn UNRUN
-  overnight_census_frontier_checkpoint: COMPLETE_THROUGH_SOURCE_9975 / interwave segment9941-9975 evidence SHAec72ef4e391eb58b21896fb50f67fda1993b17442de6331a817e88737f917881 semantice7c513451b2a1eea9733a78cbfe9ac41bdc4c8e11068d33d39e207e1a1b56ccf / 35 active Predator frames zero identity mismatch / 3 continuing lifetimes 3 class-type pairs zero lifecycle or HIT-KO events 3 audio transactions / 11 source-owned presentation signatures own no progression / zero orphan actor route camera audio load release or identity events / next source frame9976
+  overnight_census_frontier_checkpoint: COMPLETE_THROUGH_SOURCE_11476 / segment9976-11476 evidence SHA8d7aba5b517d9281c3511eb3c48423a68513f6d282872f17b6003801d7dd2dc2 semantic4bb1aea23c6f0a54ba47b8fd1c0f8ba61e4cbaa81293dc1c0b579e5cd851d51e / 1501 active Predator frames zero identity mismatch / new SOURCE_CLOSED class0x01-type12 / 62 lifetimes 8 class-type pairs 59 spawn 57 despawn 34 HIT-KO 130 audio transactions / zero orphan actor route camera audio load release or identity events / next source frame11477
   execution_plan_amendment_2026_08_30:
     scope: REIMPLEMENT-13 execution method only; evidence standards, QA-13, and USER-10 gates unchanged
     authoritative_text: docs/task_cards/REIMPLEMENT-13-SOURCE-CLOSED-ROUND1.md
@@ -547,7 +547,7 @@ source_closure:
     recording: one task-card checkpoint entry per body; project_state pointers and counters; AGENT_HANDOFF active summary and live resume prompt only
     prohibited: general lifter or translator, new capture frameworks, new dashboards, parallel worktree orchestration
     implementor: codex gpt-5.6-sol high
-  exact_next_experiment: Continue docs/ROUND1_OVERNIGHT_PLAN.md P2 at source frame 9976 through round1-chrysalis-battle with all lifetimes/classes, route/camera/audio/load/RNG events, paired identity, and accepted counterfactual ceremony.
+  exact_next_experiment: Continue docs/ROUND1_OVERNIGHT_PLAN.md P2 at source frame 11477 through the next source boundary in scene order with all lifetimes/classes, route/camera/audio/load/RNG events, paired identity, and accepted counterfactual ceremony.
   frontend_activation_allowed: false
   physical_saturn: UNRUN
 current_checkpoint: reimplement-source-closed-round1
