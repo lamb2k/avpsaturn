@@ -3683,3 +3683,35 @@ collision-write-visible frame while native clears it immediately; frame 2752
 then binds selector 0 with the HIT presentation record on both. Continue with
 the complete player HIT collision-write-to-next-update chronology. The prior
 visual three-attempt blocker and frozen candidate remain unchanged.
+
+### P4 player HIT collision-write chronology checkpoint (2026-09-01)
+
+The player HIT entry now preserves the current animation and collision
+selectors on the scheduler-visible collision/damage frame. The following
+player update binds the source reaction presentation and its selector zero.
+This rule is proven at all five Coffee Shop reaction entries (2751, 3264,
+3771, 3855 and 4006), rather than authored for one frame. The first 28-frame
+HIT sequence is source/native equal, including health, state/substate,
+fixed-point position, facing, presentation, selector and audio chronology.
+
+The focused player-HIT lane rejects 12 real mutations, including premature
+selector clearing and a zero pending-damage witness. The whole-scene census
+passes its collision sequence lock and advances the next player divergence
+from 2751 to 3411; the next attacker divergence remains 5208. Target is
+377,280 bytes at SHA-256
+`7317730a8718e80b1b3e0cebc91a2153794b29541376948a89d883860778ed2a`,
+BSS `0x060b32d0`, with the protected animation manifest byte-unchanged.
+
+Raw gaps are now source-missing 188, unowned-native 1, unidentified-pairs 0,
+spawn/despawn 675, unsupported-states 2, collision/damage 93, route/camera 0,
+audio/load 279 and retained-authority 0. The unowned-native count rises from
+zero because the longer exact capture now exposes the already source-owned
+class-`0x20` HIT-interaction effect at native slot `0x00ffbd80`; earlier
+fixed-pool lifetime drift prevents its source-instance mapping, so it remains
+RED rather than being relabeled.
+
+Continue at frame 3411 through the complete player locomotion-to-Button2 entry
+scheduler program. Source advances X and decrements the carried animation
+timer before state `0x1400` is visible; native holds one frame and binds the
+Button2 presentation one frame early. Candidate and visual-blocker status are
+unchanged.

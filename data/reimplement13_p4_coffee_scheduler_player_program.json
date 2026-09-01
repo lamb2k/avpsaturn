@@ -72,6 +72,16 @@
       "source_transition_latch_value": 1,
       "fixed_slot_reuse_mutations_rejected": 3,
       "next_slot_divergence_frame_u16": null
+    },
+    "player_hit_collision_write_chronology": {
+      "source_frames": [2751, 3264, 3771, 3855, 4006],
+      "collision_visible_rule": "retain current presentation and hurt selector on the damage-write frame",
+      "next_update_rule": "bind the reaction presentation record and its collision selectors",
+      "first_sequence_frames": [2751, 2778],
+      "first_sequence_source_native_equal": true,
+      "first_sequence_equal_frames": 28,
+      "premature_clear_mutation_rejected": true,
+      "pending_damage_zero_mutation_rejected": true
     }
   },
   "source_hit_health_sequence": [91, 78, 68, 51, 30],
@@ -86,12 +96,13 @@
     "reaction_launch_velocity_field_witness": "frame4052 slot9dc0 state0202 substate0202 recovery4 projectile_pending0 x_velocity=-0x30000 y_velocity=0x32000 animation0x12dd78",
     "normalized_witnesses_resolved": 2,
     "action16_lifecycle_mutations_rejected": 3,
-    "total_real_mutations_rejected": 30
+    "player_hit_mutations_rejected": 12,
+    "total_real_mutations_rejected": 42
   },
   "target": {
     "entry_wiring_suppressions_rejected": 130,
     "game_bin_bytes": 377280,
-    "game_bin_sha256": "08fdcb6fc2c6bdf0c7da5e94b72d9a2194050b74bb5ce306bdcc219cb86402ba",
+    "game_bin_sha256": "7317730a8718e80b1b3e0cebc91a2153794b29541376948a89d883860778ed2a",
     "bss_end": "0x060b32d0",
     "content_archive_bytes": 47316,
     "content_archive_sha256": "2b1946c6c7da2ed3c2e027142c293ea94e7dbddfeea67b354b21072ca32c09df",
@@ -101,30 +112,32 @@
   },
   "scene_differential": {
     "result": "RED_NEXT_PROGRAM",
-    "first_divergence_source_frame": 2751,
+    "first_divergence_source_frame": 3411,
     "source_slot": "player",
     "record_type": 2,
     "class": "0x00",
-    "state": "0x0202",
-    "substate": "0x0000",
-    "source_animation_record": "0x0015f278",
-    "first_missing_fields": ["one-frame retained hurt selector"],
-    "owning_boundary": "player HIT collision-write to next-update presentation chronology",
+    "state": "0x0200",
+    "substate": "0x0202",
+    "source_animation_record": "0x0015f238",
+    "first_missing_fields": ["movement fixed-point advance", "animation timer chronology", "Button2 entry presentation ordering"],
+    "owning_boundary": "player locomotion-to-Button2 entry scheduler chronology",
     "closed_action16_slot_divergence_frame_u16": 3606,
     "next_action16_slot_divergence_frame_u16": null,
     "next_attacker_divergence_frame_u16": 5208,
-    "next_player_divergence_frame_u16": 3264,
+    "closed_player_hit_divergence_frame_u16": 2751,
+    "next_player_divergence_frame_u16": 3411,
     "raw_scene_gap_counts": {
-      "source_actor_population_missing_on_saturn": 249,
-      "unmapped_source_spawn_despawn_edges": 1005,
+      "source_actor_population_missing_on_saturn": 188,
+      "unmapped_source_spawn_despawn_edges": 675,
       "unsupported_active_states": 2,
       "unowned_collision_damage_events": 93,
-      "unowned_route_camera_events": 3,
-      "unowned_audio_load_events": 281,
+      "unowned_route_camera_events": 0,
+      "unowned_audio_load_events": 279,
       "retained_gameplay_authorities": 0,
-      "unowned_saturn_actors": 0,
+      "unowned_saturn_actors": 1,
       "unidentified_source_class_type_pairs": 0
-    }
+    },
+    "gap_increase_explanation": "the now-complete capture exposes the already source-owned class-0x20 HIT-interaction effect at native slot 0x00ffbd80; it remains unowned only because earlier fixed-pool lifetime drift maps the source instance to another slot, so the count stays RED until that lifecycle boundary closes"
   },
   "paired_emulator": {
     "result": "PASS",

@@ -18,12 +18,9 @@ P2 is closed through the stable Round 2 seam at frame 15193 and P3 is complete.
 Preserve their evidence, the memory plan, CPU-mediated cart-to-VDP1 rule and all
 accepted presentation/gameplay locks.
 
-The frame-5523 class-0x1f state-0 body is closed. Fixed-slot gate `0xff9a1c`
-replaces the rejected route-state shortcut; slot `0xff9dc0` enters `0x020a`,
-and every reachable action-0/action-2 interruption branch is native. Field
-witnesses at 4051/4052 bind weapon stage progress and reaction launch velocity.
-Target GAME.BIN is 377,216 bytes, SHA `9ce8a1de...847b`, BSS `0x060b3290`;
-archive is 47,316 bytes, SHA `2b1946c6...09df`, with 2,968 runtime bytes free.
+The frame-5523 class-0x1f state-0 body is closed through fixed-slot gate
+`0xff9a1c`; all reachable action-0/action-2 branches and the 4051/4052 field
+witnesses remain locked. The 47,316-byte archive SHA is `2b1946c6...09df`.
 
 Owner delivery 2 package `da2ffb34...8746`, semantic/animated-burst controls
 and two fresh interpreter savestate legs pass. The transition visual remains
@@ -34,15 +31,19 @@ no emulator process remains.
 
 ## Exact next experiment
 
-The complete class-`0x1f` action-`0x16` and fixed-slot lifecycle is closed.
-Frame 3606 slot `0x00ffa300` now preserves source fixed-point residue,
-presentation, health and collision selectors; the actor+`0xae` latch owns the
-retry transition. Three mutations and Target pass; the slot has no later
-divergence. GAME.BIN is 377,280 bytes at `08fdcb6f...02ba`, BSS `0x060b32d0`.
+Class-`0x1f` action-`0x16` and fixed-slot lifecycle are closed. Frame 3606 slot
+`0x00ffa300` preserves source residue and actor+`0xae` owns retry; three
+mutations pass and this slot has no later divergence.
 
-The strict scene now stops at the independent frame-2751 player HIT boundary:
-source retains hurt selector 17 on the collision-write-visible frame, native
-clears it immediately; frame 2752 naturally binds selector 0. Close that
-one-update chronology through the complete HIT program, focused mutations,
-Target and whole-scene differential. Keep the candidate frozen. Never commit
-captures, PNGs, ROMs, ISOs, dumps, or protected user files.
+The complete player HIT collision-write chronology is closed across all five
+Coffee Shop reactions. Source and native retain the current hurt selector on
+the damage-visible frame and bind the reaction selector on the next update;
+the first 28-frame sequence is exact and 12 mutations pass. Target GAME.BIN is
+377,280 bytes at `7317730a...ed2a`, BSS `0x060b32d0`.
+
+The next independent RED is player frame 3411. Source advances X and decrements
+the carried animation timer before Button2 state `0x1400` becomes visible;
+native holds one frame and binds Button2 presentation early. Close the complete
+locomotion-to-Button2 scheduler program, focused mutations, Target and scene
+differential. Keep the candidate frozen. Never commit captures, PNGs, ROMs,
+ISOs, dumps, or protected user files.

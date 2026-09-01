@@ -6554,7 +6554,6 @@ static int avsp_round1_begin_player_hit(
     runtime->player.state = avsp_round1_player_hit.hit_outer_state;
     runtime->player.substate = avsp_round1_player_hit.entry_substate;
     runtime->player.source_action = 0u;
-    runtime->player.hurt_selector = 0u;
     runtime->player.attack_selector = 0u;
     runtime->player_hit_animation_timer = runtime->player.animation_timer;
     runtime->player_hit_animation_branch = runtime->player.animation_branch;

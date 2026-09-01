@@ -105,7 +105,8 @@ static int player_hit_source_frame_valid(const AvspRound1Runtime *runtime,
             runtime->player.animation_record == 0x0015f278UL &&
             runtime->player.assembly == 0x00160af2UL &&
             runtime->player.animation_timer == 1u &&
-            runtime->player.hurt_selector == 0u &&
+            runtime->player.hurt_selector == 17u &&
+            runtime->first_encounter.pending_player_damage == 10u &&
             runtime->player_hit_entries == 1u &&
             runtime->player_hit_audio_events == 0u;
     if (source_frame >= 2752u && source_frame <= 2761u)
@@ -181,7 +182,8 @@ static int player_hit_type16_source_frame_valid(
             runtime->player.source_x_fp == 0x04a08000L &&
             runtime->player.animation_record == 0x0015f248UL &&
             runtime->player.animation_timer == 1u &&
-            runtime->player.hurt_selector == 0u &&
+            runtime->player.hurt_selector == 17u &&
+            runtime->first_encounter.pending_player_damage == 17u &&
             runtime->player_hit_phase == 1u;
     if (source_frame == 3265u)
         return runtime->player.substate == 0x0200u &&

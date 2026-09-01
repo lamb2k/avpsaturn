@@ -210,6 +210,9 @@ controller_edge_mutations = {
     "if (!avsp_round1_step_coffee_clear_route(runtime))",
 }
 player_hit_mutations = {
+    "runtime->player.substate = avsp_round1_player_hit.entry_substate;\n"
+    "    runtime->player.source_action = 0u;\n"
+    "    runtime->player.attack_selector = 0u;",
     "runtime->player_hit_x_fp = runtime->player.source_x_fp;",
     "if (resolved_x != bounded_x)",
     "runtime->player_hit_x_fp = avsp_round1_replace_fixed_high_word(\n"
@@ -668,7 +671,7 @@ for before, after in (
     ("runtime->player_action.health - reaction->damage",
      "runtime->player_action.health - (short)hit_value"),
     ("(unsigned char)reaction->damage;",
-     "hit_value;"),
+     "0u;"),
     ("        if (projectile->animation_branch < 0)\n"
      "        {\n"
      "            if (projectile->transition_timer != 0u)",
@@ -772,6 +775,13 @@ for before, after in (
     ("runtime->player_hit_x_fp = runtime->player.source_x_fp;",
      "runtime->player_hit_x_fp =\n"
      "        (long)runtime->player_action.x * 65536L;"),
+    ("runtime->player.substate = avsp_round1_player_hit.entry_substate;\n"
+     "    runtime->player.source_action = 0u;\n"
+     "    runtime->player.attack_selector = 0u;",
+     "runtime->player.substate = avsp_round1_player_hit.entry_substate;\n"
+     "    runtime->player.source_action = 0u;\n"
+     "    runtime->player.hurt_selector = 0u;\n"
+     "    runtime->player.attack_selector = 0u;"),
     ("if (resolved_x != bounded_x)",
      "if (resolved_x != proposed_x)"),
     ("runtime->player_hit_x_fp = avsp_round1_replace_fixed_high_word(\n"
@@ -946,7 +956,7 @@ if ("--controller-edge-only" in sys.argv or
         print("REIMPLEMENT-13 controller camera-edge mutation lane: PASS (4 real mutations)")
         raise SystemExit(0)
 if "--player-hit-only" in sys.argv:
-    print("REIMPLEMENT-13 Coffee Shop player-HIT program mutation lane: PASS (11 real mutations)")
+    print("REIMPLEMENT-13 Coffee Shop player-HIT program mutation lane: PASS (12 real mutations)")
     raise SystemExit(0)
 if "--hit-interaction-only" in sys.argv:
     print("REIMPLEMENT-13 HIT-interaction/Button1 handoff mutation lane: PASS (7 real mutations)")
