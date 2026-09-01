@@ -87,6 +87,11 @@ PROFILES = {
         "id": "round1-continue-countdown-two-to-credited-return",
         "output": "oracle10_round1_census_extension_12800_13292.json",
     },
+    "chrysalis_battle_2": {
+        "first": 13293, "last": 15039,
+        "id": "round1-chrysalis-battle-two",
+        "output": "oracle10_round1_census_extension_13293_15039.json",
+    },
 }
 WORKRAM_BASE = 0xFF0000
 PLAYER = 0xFF8380

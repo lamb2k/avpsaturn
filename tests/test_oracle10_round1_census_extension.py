@@ -44,6 +44,9 @@ WAREHOUSE3 = json.loads(
 CONTINUE2 = json.loads(
     (ROOT / "data/oracle10_round1_census_extension_12800_13292.json")
     .read_text(encoding="ascii"))
+CHRYSALIS2 = json.loads(
+    (ROOT / "data/oracle10_round1_census_extension_13293_15039.json")
+    .read_text(encoding="ascii"))
 GENERATOR = (ROOT / "tools/analyze_oracle10_round1_census_extension.py") \
     .read_text(encoding="utf-8")
 
@@ -955,5 +958,64 @@ for label, path, value in (
         continue
     raise AssertionError(f"Round 1 continue-2 mutation accepted: {label}")
 
-print("ORACLE-10 Round 1 census extension 5567..13292: PASS "
-      "(82 mutations rejected)")
+def validate_chrysalis2(report: dict[str, object]) -> None:
+    semantics = report["paired_capture_ceremony"]["segment_semantics"]
+    census = report["scene_census_delta"]
+    assert report["status"] == "CENSUS_SEGMENT_COMPLETE"
+    assert report["segment"]["source_frame_range"] == [13293, 15039]
+    assert report["segment"]["scene_ids"] == ["round1-chrysalis-battle-2"]
+    assert semantics["frame_count"] == 1747
+    assert semantics["canonical_semantic_sha256"] == \
+        "2ea02ee902a115824dccdd918b71076b15cb548213635b5c497da875750990f7"
+    assert semantics["player_active_frames"] == 1747
+    assert semantics["identity_mismatch_frames"] == []
+    assert [(row["class"], row["type"], row["instance_count"]) for row in
+            census["class_type_inventory"]] == [
+                ("0x00", 0, 1), ("0x01", 12, 1), ("0x06", 12, 1),
+                ("0x07", 20, 1), ("0x10", 24, 4), ("0x3d", 24, 39),
+                ("0x49", 24, 14), ("0x4b", 24, 1), ("0x4e", 24, 1)]
+    assert len(census["actor_lifetimes"]) == 63
+    assert len(census["spawn_edges"]) == 60
+    assert len(census["despawn_edges"]) == 60
+    assert len(census["hit_ko_transitions"]) == 18
+    assert census["audio"]["handler_transaction_count"] == 96
+    assert len(census["audio"]["command_counts"]) == 30
+    assert census["audio"]["orphan_handler_transactions"] == 0
+    assert census["audio"]["orphan_trigger_groups"] == 0
+    assert census["load_release_boundaries"] == []
+    edges = report["route_authority_extension"]["route_state_edges"]
+    assert [(row["sample_transition_frame"], row["write_frame"],
+             row["writer_pc"], row["value"]) for row in edges] == [
+                 (15019, 15018, "0x008418", 6),
+                 (15021, 15020, "0x00c886", 0)]
+    assert all(value == 0 for value in report["coverage"].values())
+    assert report["table_demand_delta"]["unbound_table_identities"] == []
+    assert report["physical_saturn"] == "UNRUN"
+
+
+validate_chrysalis2(CHRYSALIS2)
+for label, path, value in (
+        ("chrysalis2 semantic", ("paired_capture_ceremony", "segment_semantics",
+                                 "canonical_semantic_sha256"), "0" * 64),
+        ("chrysalis2 identity", ("paired_capture_ceremony", "segment_semantics",
+                                 "identity_mismatch_frames"), [14000]),
+        ("chrysalis2 lifecycle", ("scene_census_delta", "spawn_edges"), []),
+        ("chrysalis2 route", ("route_authority_extension", "route_state_edges"), []),
+        ("chrysalis2 audio", ("scene_census_delta", "audio",
+                              "orphan_trigger_groups"), 1),
+        ("chrysalis2 table", ("table_demand_delta", "unbound_table_identities"),
+                              ["0xdeadbe"]),
+        ("chrysalis2 physical", ("physical_saturn",), "PASS")):
+    mutant = copy.deepcopy(CHRYSALIS2)
+    target = mutant
+    for key in path[:-1]:
+        target = target[key]
+    target[path[-1]] = value
+    try:
+        validate_chrysalis2(mutant)
+    except AssertionError:
+        continue
+    raise AssertionError(f"Round 1 Chrysalis-2 mutation accepted: {label}")
+
+print("ORACLE-10 Round 1 census extension 5567..15039: PASS "
+      "(89 mutations rejected)")

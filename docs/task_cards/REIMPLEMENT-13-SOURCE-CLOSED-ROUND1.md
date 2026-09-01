@@ -2474,3 +2474,20 @@ progression, all counterfactual controls remain discriminating, and no
 authority event is orphaned. Evidence artifact SHA-256 is
 `1d85dc4bedaa5808acada030130556da15849cfb420bcd0e5b87c0f8564fc763`.
 Continue P2 at frame 13293 through `round1-chrysalis-battle-2`.
+
+### Overnight census segment 13293..15039 checkpoint (2026-09-01)
+
+The second complete Chrysalis battle is census-closed across 1,747 paired,
+active-Predator source frames at semantic SHA-256
+`2ea02ee902a115824dccdd918b71076b15cb548213635b5c497da875750990f7`.
+Sixty-three lifetimes cover nine owned class/type pairs and bind 60 spawns,
+60 despawns, and 18 HIT/KO transitions. Ninety-six owned audio transactions
+cover 30 commands.
+
+The route controller writes state `6` at sample frame 15019 and state `0` at
+15021 through the accepted clear/controller writers. No load boundary occurs.
+All identity, lifecycle, route, audio, table-demand, and counterfactual gates
+remain clean, with zero orphan authority event or unbound table. Evidence
+artifact SHA-256 is
+`68259fa0bfd0da3d4a8a1d1ddf4a4f08e5a70493216d3e3c366eb0e55b62452e`.
+Continue P2 at source frame 15040 through scene `Sc196f8dbfff3-1`.
