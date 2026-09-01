@@ -30,6 +30,7 @@ SOURCES = {
     "route_8546_program": "data/spec02_route_8546_program.json",
     "route_8bb2_program": "data/spec02_route_8bb2_program.json",
     "route_90f2_program": "data/spec02_route_90f2_program.json",
+    "route_8418_program": "data/spec02_route_8418_program.json",
     "auxiliary": "data/oracle11_round1_auxiliary_authority.json",
     "route": "data/oracle11_round1_encounter_route_authority.json",
     "boss": "data/oracle11_round1_boss_orchestration.json",
@@ -396,6 +397,11 @@ def build_fields() -> list[dict[str, object]]:
           "/authority_data/route/p3_whole_routine_programs/0x0090f2", "raw route state 2 selects the exact body; ordered guards own substate presentation, mode-8 cleanup or credited route restore without fixed-frame authority or an invented load",
           ["g8008:s16", "g800c:u16", "g81bf:u8", "g81d4:u8", "g81af:u8", "selected_actor+0xde:s8", "saved route coordinates", "seven source table/data groups"], ["g8004:u16", "g8008:s16", "g800c:u16", "g8010:u16", "g8014:u16", "route coordinates", "destination bases", "route latches", "audio.command"],
           "/mutation_controls", "outer/substate dispatch, ordered guard, source-view table data, signed selector, copy arithmetic, route restore, load ownership, audio command, RNG or fixed-frame mutation changes the paired witness"),
+        f("route.writer_0x008418_whole_program", "encounters-waves-scripted-triggers", "round_clear_route_program", True,
+          "route_8418_program", "/", "aligned 0x00840a..0x008438 clear branch, exact clear guard, five direct writes, shared route setup and source-owned player presentation-stage binding",
+          "/authority_data/route/p3_whole_routine_programs/0x008418", "the exact clear byte owns both Round 1-reachable 4-to-6 transitions; source-ordered route setup and stage presentation binding follow without fixed-frame, audio, load or RNG authority",
+          ["g81f3:u8", "g8008:s16", "g800c:u16", "g8240:u8", "g8237:u8", "g81e8:u16", "g822c:u16", "active player identity fields", "stage presentation tables"], ["g8008:s16", "g800c:u16", "g8240:u8", "shared route fields", "g8237:u8", "g822c:u16", "player presentation pointer/cursor"],
+          "/mutation_controls", "alignment, clear guard, route arithmetic, write width/order, helper order, stage selector/index/table, special-branch substitution, invented audio/load/RNG or fixed-frame mutation changes the paired witness"),
         f("boss.phases_spawns", "round1-boss", "boss_phase_table", True,
           "boss", "/controller_contract", "class-0x02 type-32 controller, 11 phases, eight boss-room spawns",
           "/authority_data/boss", "controller state/phase and source countdown guards own boss spawns and phase transitions",
@@ -1210,6 +1216,9 @@ def build_fixtures(source: dict[str, dict]) -> dict[str, object]:
     fixtures["authority_data"]["route"][
         "p3_whole_routine_programs"]["0x0090f2"] = copy.deepcopy(
             source["route_90f2_program"])
+    fixtures["authority_data"]["route"][
+        "p3_whole_routine_programs"]["0x008418"] = copy.deepcopy(
+            source["route_8418_program"])
     fixtures["scene_manifests"] = {
         "coffee_shop": build_coffee_shop_scene_manifest(source)}
     return fixtures
@@ -2148,6 +2157,34 @@ def validate(contract: dict[str, object], fixtures: dict[str, object],
             route_90f2["implementation_rules"]
                 ["unknown_state_or_transition_logic_allowed"] is False,
             "route-0x0090f2 whole-program fixture incomplete or drifted")
+    route_8418 = fixtures["authority_data"]["route"][
+        "p3_whole_routine_programs"]["0x008418"]
+    require(route_8418 == source["route_8418_program"] and
+            route_8418["status"] == "SPEC_EXECUTABLE" and
+            route_8418["classification"] ==
+                "SOURCE_CLOSED_IMPLEMENTATION_FIELDS" and
+            route_8418["source_identity"]["program_window"] ==
+                ["0x00840a", "0x008438"] and
+            route_8418["normalized_source_program"]["instruction_count"] == 9 and
+            len(route_8418["normalized_source_program"]
+                ["field_access_profiles"]) == 7 and
+            len(route_8418["normalized_source_program"]
+                ["external_transfers"]) == 3 and
+            route_8418["transition_contract"]["guard"] ==
+                "u8(g81f3) != 0" and
+            route_8418["transition_contract"]["ordered_helper_calls"] ==
+                ["0x00c754", "0x021ef8"] and
+            route_8418["player_presentation_stage_binding"]
+                ["round1_reachable_stage_indices_u16"] == [2, 4] and
+            route_8418["dynamic_witness"]["counts"] == {
+                "direct_writes": 10, "helper_writes": 18,
+                "samples": 8, "rng_calls": 0} and
+            all(route_8418["mutation_controls"].values()) and
+            route_8418["implementation_rules"]["logical_audio_or_load_event"]
+                is False and
+            route_8418["implementation_rules"]
+                ["unknown_state_or_transition_logic_allowed"] is False,
+            "route-0x008418 whole-program fixture incomplete or drifted")
     class1f = next(item for item in
                    fixtures["authority_data"]["enemies"]["archetypes"]
                    if item["class"] == "0x1f")

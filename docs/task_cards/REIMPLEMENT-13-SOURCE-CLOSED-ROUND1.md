@@ -3103,6 +3103,9 @@ Fast and release/live-encounter Target pass. GAME.BIN remains byte-identical at
 `aa99904645fa584952ccba84e4fb28d970dabc4ae6e6e593b401f9e3323910a1`;
 the cart archive remains
 `ccf8795a147daf337c1f72364c81f05fc2cfd255d8d21b40a56c74c97f8d15bd`.
+The first Target attempt exposed only a stale SPEC fixture hash in the declared
+combat tile-overlay contract. Updating that binding restored the lane while
+preserving the exact 126-tile, 16,712-byte overlay and archive identities.
 Two cold debug-rig Coffee Shop runs pass the identical 575-sample semantic
 ledger and five real mutations at normalized ISO
 `3bb36edbd29c0a07867826f7d1ac99e96d84849232a05b3bdea43d5d84a611de`.
@@ -3114,4 +3117,50 @@ Continue P3 with next-demand round-clear writer `0x008418` as one whole source
 program. Preserve accepted window `0x008408..0x008438` SHA-256
 `24c11db9b6955fb7d3e0f629d3db35000fdb955a36d664f1683ac5abd4b55ac6`,
 bind visible transition frame 15019 and every Round 1-reachable branch plus its
+route/audio/load/RNG ownership, then regenerate the existing fixture once.
+
+### P3 route writer 0x008418 round-clear whole-program checkpoint (2026-09-01)
+
+The reusable Round 1 clear route body is SPEC-executable as the aligned source
+program `0x00840a..0x008438`; accepted writer-centered evidence remains
+`0x008408..0x008438` at SHA-256
+`24c11db9b6955fb7d3e0f629d3db35000fdb955a36d664f1683ac5abd4b55ac6`.
+It closes all nine decoded operations, seven exact field profiles and three
+owned external transfers for both Round 1-reachable invocations.
+
+The exact guard is `u8(g81f3) != 0`. Its false branch reaches the shared
+continuation without an owned write or helper call. Its true branch increments
+signed route state by two (`4->6`), clears the route substate, enables route
+control, executes the complete shared route-setup transaction, selects stage
+presentation 8, copies the current stage index, and applies the source-owned
+player presentation binding. Stage indices 2 and 4 use their exact source
+records; special branches 14/36 are not Round 1-reachable here. Presentation
+owns no gameplay result. No audio, logical load/release or RNG event occurs.
+
+Both retained ledgers bind 10 direct writes, 18 shared-helper writes, eight
+aligned samples, source frames 5452/15018 and visible frames 5453/15019.
+Artifact SHA-256 is
+`e63b0f0eee5a95f3ce9f4abaf679a74bcc1d27fd133ec1012cca908aefb986ff`;
+instruction-semantics SHA-256 is
+`0fbe328a0840269e3516ee2e7bf329cd5279d440744e810ed516ced0d7a6699a`.
+Sixteen focused and all 180 aggregate SPEC mutations reject. Aggregate fixture
+SHA-256 is
+`1f2db6adeeb96717c13192148c734bdf8f58e4a52dfc59aca6f48c0887607a61`.
+
+Fast and release/live-encounter Target pass. GAME.BIN remains byte-identical at
+373,840 bytes and SHA-256
+`aa99904645fa584952ccba84e4fb28d970dabc4ae6e6e593b401f9e3323910a1`;
+the cart archive remains
+`ccf8795a147daf337c1f72364c81f05fc2cfd255d8d21b40a56c74c97f8d15bd`.
+Two cold debug-rig Coffee Shop runs pass the identical 575-sample semantic
+ledger and five real mutations at normalized ISO
+`3bb36edbd29c0a07867826f7d1ac99e96d84849232a05b3bdea43d5d84a611de`.
+Settings were restored to VideoCore 4 / SoundCore 1. This SPEC-only body changes
+no runtime identity or WGC requirement; the Coffee Shop census remains expected
+RED at source frame 5566 code 11 and the candidate remains unpromoted.
+
+Continue P3 with next-demand round-reset writer `0x00c886` as one whole source
+program. Preserve accepted window `0x00c876..0x00c8a6` SHA-256
+`0b513c6416543d878f188af34d17d574390a894d6d699dddf81990a7b3b2d320`,
+bind visible transition frame 15021 and every Round 1-reachable branch plus its
 route/audio/load/RNG ownership, then regenerate the existing fixture once.

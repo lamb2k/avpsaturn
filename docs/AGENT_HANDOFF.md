@@ -1,14 +1,13 @@
 # REIMPLEMENT-13 active agent handoff
-Resume the persistent AvP Goal on `codex/avp-playable-loop-pivot` from branch
-HEAD. `REIMPLEMENT-13-SOURCE-CLOSED-ROUND1` remains active. The accepted runtime
-candidate stays `d04a65a2253175c6e820140feefc35419e2cca07` until the complete
-Coffee Shop zero-gap gate passes. Preserve USER-09 `CHANGES_REQUESTED`,
-SALVAGE-08 inactive, physical Saturn `UNRUN`, and all accepted locks. Never
-stage/reset/overwrite `data/avsp_anim_records.json` or `history.txt`.
+Resume the persistent AvP Goal on `codex/avp-playable-loop-pivot` from branch HEAD.
+`REIMPLEMENT-13-SOURCE-CLOSED-ROUND1` remains active. Candidate
+`d04a65a2253175c6e820140feefc35419e2cca07` stays frozen until Coffee Shop is
+zero-gap. Preserve USER-09 `CHANGES_REQUESTED`, SALVAGE-08 inactive, physical
+Saturn `UNRUN`, and all locks. Never stage/reset/overwrite
+`data/avsp_anim_records.json` or `history.txt`.
 Read `project_state.yaml`, the active card, current SPEC-02 contract/fixtures,
-`docs/EMULATOR_MCP_CAPTURE.md`, and `docs/ROUND1_OVERNIGHT_PLAN.md` completely.
-Do not create another Goal, roadmap, workflow, branch, task hierarchy, coverage
-system, or writer.
+and both `docs/EMULATOR_MCP_CAPTURE.md` and `docs/ROUND1_OVERNIGHT_PLAN.md` completely.
+Do not create another Goal, roadmap, workflow, branch, task hierarchy, coverage system, or writer.
 Workflow pivot / Preserved evidence work: Resume the AvP salvage Goal; retain SALVAGE-00-OLD-BUILD-BASELINE, USER-01-PLAYER-BASELINE-REVIEW, and `597f4ed517d4e715d814ff841bd00d3977803f85`.
 ## Closed checkpoints
 Coffee Shop exit authority is source-closed and native through frame 5566:
@@ -24,8 +23,7 @@ The owner debug-rig MCP lane passes. Package archive SHA-256 is
 `6f157f15da4d01cca9ef044d32352b8e6d3cf6b71a44ad3303aaeb9939015864`;
 EXE SHA-256 is
 `d77675912421a7435d02d844625a6ef68ba0e55ef17c9845f08651eb98f54b45`.
-Aug-10 and debug-rig cold ledgers match at semantic SHA-256
-`7fae4a7cffe2c35a0df8a3c181a5ffa8f141f5b113500d67de1fd60f071a56fc`.
+Aug-10/debug-rig cold ledgers match semantic SHA `7fae4a7c...a56fc`.
 Two identical bursts cover frames 2095..2125 at manifest SHA-256
 `13afd26ef889b6f792ade52989749eeec1dc23203b5eb1def55ac85ccca31c1f`;
 seven unique hashes prove animation. MCP cadence-1 visual QA passes direct
@@ -34,21 +32,18 @@ inspection. Settings were restored to VideoCore 4 / SoundCore 1. Evidence is
 ## Exact next sequence
 P2 is closed through stable Round 2 seam frame 15193; closure SHA is
 `b5c72089...f94b3`, all authority/table/capacity gates pass, and Round 2 gameplay
-was not censused. All nine P3 actor programs and route writers `0x00c200`,
-`0x008546`, `0x008bb2`, and `0x0090f2` are SPEC-executable. Artifact
-`df77ae3b...56d` closes the credited-continue dispatcher over six reachable
-source slices in `0x008d62..0x009144`: 101 instructions, 25 field profiles, 13
-owned transfers, exact state-0/2 dispatch and outer guards, route-mode-8 tail,
-credited state restore, five destination-base restores, and source-owned audio
-command `0x000f`. Retained witnesses bind 24 writes, eight samples, visible
-frames 6692/13292, and zero RNG. Focused 18 and SPEC 180 mutations pass. Fast,
-Target, and paired cold debug-rig Coffee Shop evidence pass all 575 samples at
-ISO `3bb36edb...611de`; normal settings are restored. Source frame 5566 code 11
+was not censused. All nine P3 actor programs and route writers through `0x008418`
+are SPEC-executable. Artifact `e63b0f0e...86ff` closes the aligned clear program
+`0x00840a..0x008438`: nine instructions, seven field profiles, three transfers,
+exact clear guard, five direct writes, shared route setup, and source-owned
+player presentation-stage binding for Round 1 indices 2/4. Retained witnesses
+bind 10 direct plus 18 helper writes, eight samples, visible frames 5453/15019,
+and zero RNG. Focused 16 and SPEC 180 mutations pass. Fast, Target, and paired
+cold debug-rig Coffee Shop evidence pass all 575 samples at ISO
+`3bb36edb...611de`; normal settings are restored. Source frame 5566 code 11
 remains the expected P4 census RED, with no runtime promotion or WGC trigger.
-
-Exact next experiment: close next-demand round-clear route writer `0x008418`
-as one whole source program. Preserve accepted window `0x008408..0x008438` SHA
-`24c11db9...ac6` and visible frame 15019; bind every Round 1-reachable branch
-and its route/audio/load/RNG ownership, regenerate the existing fixture once,
-and run the full family ceremony. Never commit captures, PNGs, ROMs, ISOs,
-dumps, or protected user files.
+Exact next experiment: close next-demand round-reset route writer `0x00c886` as
+one whole source program. Preserve window `0x00c876..0x00c8a6` SHA
+`0b513c64...320` and visible frame 15021; bind every reachable branch and its
+route/audio/load/RNG ownership, regenerate once, and run the full ceremony.
+Never commit captures, PNGs, ROMs, ISOs, dumps, or protected user files.
