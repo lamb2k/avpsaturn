@@ -3299,8 +3299,11 @@ release GAME.BIN is 373,840 bytes at SHA-256
 `236d9bd6c8c432feff09d3a3cbd14215f3a1da5d40babad136c291389450e5b5`,
 and the cart archive remains
 `ccf8795a147daf337c1f72364c81f05fc2cfd255d8d21b40a56c74c97f8d15bd`.
-One debug-rig Coffee Shop run passes all 575 semantic samples with zero
-failure/fallback at normalized ISO SHA-256
+Two commit-bound cold debug-rig Coffee Shop runs pass byte-identical 575-sample
+semantic ledgers with five real mutations rejected and zero failure/fallback at
+semantic SHA-256
+`1a6a8c39e83ae29ed1ab2c00e2ce735a281445e4b31bb89b7402fec2767f2f59`
+and normalized ISO SHA-256
 `71fc5794aa80d1632866a447f488f54f3c13bf7d3e0093a0ac2736a728fc5f11`.
 Settings were restored to VideoCore 4 / SoundCore 1. The attempted plain
 Release profile correctly tripped its unrelated full-working-set VDP1 guard;

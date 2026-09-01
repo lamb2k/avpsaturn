@@ -39,8 +39,8 @@ handler/QSound transactions and causal controls are bound; semantic names remain
 UNKNOWN. Artifact SHA is `32fb5e95...3753`; focused 16 and SPEC 180 mutations
 pass. Aggregate fixture is `8f824c0e...b321`, contract `5b50fdf5...f807`.
 Fast/Oracle reach only accepted P4 frame-3782 RED. Debug and release-live Target
-pass; GAME.BIN is `236d9bd6...e5b5`, archive `ccf8795a...15bd`. One debug-rig
-Coffee Shop run passes 575 samples at ISO `71fc5794...5f11`; settings are 4/1.
+pass; GAME.BIN is `236d9bd6...e5b5`, archive `ccf8795a...15bd`. Two commit-bound
+cold debug-rig runs pass identical 575-sample ledgers at ISO `71fc5794...5f11`; settings are 4/1.
 No gameplay-semantic change, promotion or WGC.
 Exact next experiment: close the first-demand projectile-audio owner family at
 source frame 5762 as one reusable owner-family body. Bind every reachable
