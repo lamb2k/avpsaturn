@@ -3363,3 +3363,42 @@ candidate and does not trigger WGC.
 
 Continue P3 with the first-demand boss-audio owner family at source frame 5867
 as one reusable owner-family body.
+
+### P3 boss-audio owner-family checkpoint (2026-09-01)
+
+The complete Round 1 boss-owned audio family is SPEC-executable from the
+accepted paired trigger, shared-command and handler ledgers plus exact offline
+opcode windows. Twenty-five source-closed trigger groups bind 15 commands
+across 42 exact boss contexts and 110 dispatch occurrences from seven fixed
+source origins. The projection covers record types 12, 16 and 24 with class
+`0x06` and all shared-command occurrences remain explicit.
+
+Fourteen exact caller programs at `0x003b58`, `0x01eba4`, `0x01ec8a`,
+`0x01f402`, `0x01f4ea`, `0x03542a`, `0x035562`, `0x049582`, `0x0496f0`,
+`0x049832`, `0x049c14`, `0x04a482`, `0x07733e` and `0x07736a` bind their
+opcode slices, field profiles, guards, arguments and grouped handler/QSound
+transactions. Individual register writes are not logical events and semantic
+sound names remain `UNKNOWN`.
+
+The family owns no boss gameplay projection, logical load/release or RNG. Its
+artifact SHA-256 is
+`77068e123ee51271406a7b235554c19ca1d99dee7de8a8c50dde1dc6ec5a6d42`.
+Nineteen focused and all 180 aggregate SPEC mutations reject. Aggregate
+fixture SHA-256 is
+`dda52c9ec3a79b97b5dfcf4909c064c66450611f5392b54f144ce1e8e57a60dd`;
+contract SHA-256 is
+`d39dfe1a9b69168c8dff2db1d53ab760da3942ad50918ac2ea11d5982c6c9e05`.
+
+Fast and Oracle pass every Oracle/SPEC prerequisite and stop only at the
+accepted P4 frame-3782 RED. Debug and release/live-encounter Target pass;
+release GAME.BIN is 373,840 bytes at SHA-256
+`f74fa03f6cbeb47db1108f10140f482de7953e9993bc4777f739e929e411a76d`,
+and the cart archive remains
+`ccf8795a147daf337c1f72364c81f05fc2cfd255d8d21b40a56c74c97f8d15bd`.
+This SPEC-only body changes no runtime semantics, does not promote the
+candidate and does not trigger WGC. Commit-bound paired cold-emulator evidence
+is the remaining checkpoint step.
+
+After the paired evidence is recorded, continue P3 with the first-demand
+enemy-audio owner family at source frame 5881 as one reusable owner-family
+body.
