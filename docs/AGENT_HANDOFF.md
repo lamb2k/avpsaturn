@@ -6,14 +6,11 @@ candidate stays `d04a65a2253175c6e820140feefc35419e2cca07` until the complete
 Coffee Shop zero-gap gate passes. Preserve USER-09 `CHANGES_REQUESTED`,
 SALVAGE-08 inactive, physical Saturn `UNRUN`, and all accepted locks. Never
 stage/reset/overwrite `data/avsp_anim_records.json` or `history.txt`.
-
 Read `project_state.yaml`, the active card, current SPEC-02 contract/fixtures,
 `docs/EMULATOR_MCP_CAPTURE.md`, and `docs/ROUND1_OVERNIGHT_PLAN.md` completely.
 Do not create another Goal, roadmap, workflow, branch, task hierarchy, coverage
 system, or writer.
-
 Workflow pivot / Preserved evidence work: Resume the AvP salvage Goal; retain SALVAGE-00-OLD-BUILD-BASELINE, USER-01-PLAYER-BASELINE-REVIEW, and `597f4ed517d4e715d814ff841bd00d3977803f85`.
-
 ## Closed checkpoints
 
 Coffee Shop exit authority is source-closed and native through frame 5566:
@@ -25,7 +22,6 @@ paired cold ISO SHA-256 is
 `3bb36edbd29c0a07867826f7d1ac99e96d84849232a05b3bdea43d5d84a611de`.
 The complete Coffee Shop host scene remains RED only at the preserved
 source-frame-3782 stage-progress mismatch; do not promote the candidate.
-
 The owner debug-rig MCP lane passes. Package archive SHA-256 is
 `6f157f15da4d01cca9ef044d32352b8e6d3cf6b71a44ad3303aaeb9939015864`;
 EXE SHA-256 is
@@ -37,13 +33,17 @@ Two identical bursts cover frames 2095..2125 at manifest SHA-256
 seven unique hashes prove animation. MCP cadence-1 visual QA passes direct
 inspection. Settings were restored to VideoCore 4 / SoundCore 1. Evidence is
 `ONE_EMULATOR`; the DMA point is physical-only.
-
 ## Exact next sequence
 
 P2 is closed through stable Round 2 seam frame 15193; closure SHA is
 `b5c72089...f94b3`, all authority/table/capacity gates pass, and Round 2 gameplay
-was not censused. P3 classes `0x00/12` and `0x01/12` are whole-routine
-SPEC-executable at artifacts `f06dab53...b9f3` and `dc578bed...9d52`.
-Focused/SPEC/Fast/Target and pinned scene runs pass; GAME.BIN remains
-`aa999046...0a1`, scene RED, candidate unpromoted. Continue P3 with class
-`0x06/12` as one complete family, then follow the closure-report order; never commit captures, PNGs, ROMs, ISOs, or dumps.
+was not censused. P3 classes `0x00/12`, `0x01/12`, and `0x06/12` are now
+whole-routine SPEC-executable at artifacts `f06dab53...b9f3`,
+`dc578bed...9d52`, and `eb251681...023c`. Class `0x06/12` closes 1,788 decoded
+operations, 40 contexts, 29 dispatch tables/137 entries, 92 field profiles,
+29 owned transfer paths, and its paired 216-RNG/13-damage witness.
+Focused/SPEC/Fast/Target and one debug-rig 575-sample scene run pass; GAME.BIN
+remains `aa999046...0a1`, ISO remains `3bb36edb...611de`, scene remains RED at
+source 5566 code 11, and the runtime candidate is unpromoted. Continue P3 with
+class `0x07/20` as one whole-routine family, then follow the closure-report
+order; never commit captures, PNGs, ROMs, ISOs, or dumps.

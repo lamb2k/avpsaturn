@@ -2661,3 +2661,42 @@ Because runtime identity is unchanged and the census is neither green nor
 strictly improved, paired cold Emulator and WGC were not triggered.
 
 Continue P3 with class `0x06/12` as the next whole-routine family.
+
+### P3 class 0x06/type 12 whole-routine checkpoint (2026-09-01)
+
+Class `0x06/12` is SPEC-executable as one bounded source program spanning
+`0x04956c..0x04be76`. The fixture closes 1,788 decoded operations, all 40
+paired-witness contexts, 29 computed-dispatch tables with 137 entries, 92
+exact field read/write profiles, and 29 source-owned external transfer paths.
+The action-0x18 table's `0xffff` index-zero sentinel is explicitly unreachable;
+it is not decoded as code. Exact operand width, signed branch predicates,
+scheduler reflection arithmetic, action/hit/interruption dispatch, movement,
+presentation, collision, damage, HIT/KO, effects, RNG, navigation and release
+are bound. Runtime 68000 interpretation remains forbidden.
+
+The paired retained ledgers bind 8,855 entries, 9,482 samples, 101,686 writes,
+216 ordered RNG calls, and 13 player-damage writes. Artifact SHA-256 is
+`eb251681f2fd67005d0d2597721084ed4ed3787c94ee2d7d0c5bb31c3b32023c`;
+instruction-semantics SHA-256 is
+`0eb139c6c5453e4b3bf5d78b15f9573a0b9b4170d5f585e071a77d8235e1c8dd`.
+Nine class mutations and all 180 SPEC-02 mutations reject. Fast and Target
+pass. Target's first attempt correctly stopped on the dependent combat-overlay
+fixture identity; rebinding that existing generated contract allowed the same
+source tile/archive identities to pass without gameplay changes. GAME.BIN is
+unchanged at
+`aa99904645fa584952ccba84e4fb28d970dabc4ae6e6e593b401f9e3323910a1`,
+and the 47,056-byte cart content archive remains
+`ccf8795a147daf337c1f72364c81f05fc2cfd255d8d21b40a56c74c97f8d15bd`.
+
+One debug-rig pinned scene run passes all 575 samples with zero failure,
+fallback or unsupported dispatch at normalized ISO
+`3bb36edbd29c0a07867826f7d1ac99e96d84849232a05b3bdea43d5d84a611de`.
+Capture settings were restored to VideoCore 4 / SoundCore 1. The complete
+Coffee Shop census remains expected RED at source frame 5566 (`code=11`, slot
+`0x00009e80`, state `0x0208`, substate `0x1004`); this SPEC-only body neither
+changes runtime identity nor claims scene improvement, so paired cold Emulator
+and WGC were not triggered. Protected `data/avsp_anim_records.json` remains at
+SHA-256 `9a7f69e8ee761b8d98a18ec8c4ac98ba9c5f8c1c9f4aaa4a1979734e258da178`
+and is unstaged with `history.txt`.
+
+Continue P3 with class `0x07/20` as the next whole-routine family.
