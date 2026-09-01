@@ -24,15 +24,7 @@ and cart archive `ccf8795a...15bd` remain unchanged. The MCP capture lane and
 physical-only cart-to-VDP1 CPU-copy rule remain locked.
 
 All nine P3 actor and seven route programs are SPEC-executable. Presentation,
-projectile and boss audio are committed and paired-emulator green. Boss is
-SPEC-executable: 25 groups, 15 commands, 42 exact contexts, 110 occurrences,
-seven origins, three type/class pairs and 14 exact caller programs. Artifact
-SHA is `77068e12...6d42`; aggregate fixture `dda52c9e...60dd`; contract
-`d39dfe1...9e05`. Focused 19 and aggregate 180 mutations reject. Fast/Oracle
-reach only accepted P4 frame-3782 RED. Debug/release-live Target pass;
-GAME.BIN is `f74fa03f...a76d`, archive unchanged. This SPEC-only body changes
-no runtime semantics and does not promote the candidate or trigger WGC. Its
-paired semantic SHA is `1a6a8c39...2f59` and ISO is `d7878b86...f584`.
+projectile, boss and enemy audio are committed and paired-emulator green.
 Enemy audio is SPEC-executable: 83 groups, 14 commands, 182 exact contexts,
 228 occurrences, ten origins, four type/class pairs and 18 exact caller
 programs. Artifact SHA is `5d4fff53...37ae`; fixture `8aadcc83...3bca`;
@@ -40,9 +32,15 @@ contract `12c61b10...7ea5`. Focused 19 and aggregate 180 mutations reject.
 Fast/Oracle reach only frame-3782 RED. Target passes; GAME.BIN is
 `0e6fc6cb...cc4b`, archive unchanged. Paired semantics are `1a6a8c39...2f59`
 and normalized ISO is `615cd156...a848`; settings are restored 4/1.
+Route audio is SPEC-executable: seven groups and commands, nine exact contexts,
+11 occurrences, one origin, pseudo-owner type/class 00/00 and seven caller
+programs. Artifact is `00c53afd...25f5`; fixture `7ffe49b6...6261`; contract
+`b7048808...ad5c`; focused 19 and aggregate 180 mutations reject. Fast/Oracle
+reach only frame-3782 RED. Target passes; GAME.BIN is `0ed25541...f9b2`,
+archive unchanged. Commit-bound paired Emulator evidence is pending.
 ## Exact next sequence
-Close route-audio at first demand source frame 6199 as one reusable owner
-family. Bind every reachable caller/guard, command/arguments,
-shared-dispatch/handler transaction, state effects and audio/load/RNG
-ownership from retained evidence, regenerate once, and run the full ceremony.
+Commit route audio, run its two cold debug-rig captures plus mutations, record
+and checkpoint them, then close encounter-audio at source frame 15192 as the
+final reusable owner family. Bind every reachable caller/guard,
+command/arguments, grouped handler transaction and audio/load/RNG ownership.
 Never commit captures, PNGs, ROMs, ISOs, dumps, or protected user files.

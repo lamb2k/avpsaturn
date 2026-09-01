@@ -37,6 +37,7 @@ SOURCES = {
     "projectile_audio_program": "data/spec02_projectile_audio_owner_program.json",
     "boss_audio_program": "data/spec02_boss_audio_owner_program.json",
     "enemy_audio_program": "data/spec02_enemy_audio_owner_program.json",
+    "route_audio_program": "data/spec02_route_audio_owner_program.json",
     "auxiliary": "data/oracle11_round1_auxiliary_authority.json",
     "route": "data/oracle11_round1_encounter_route_authority.json",
     "boss": "data/oracle11_round1_boss_orchestration.json",
@@ -468,6 +469,11 @@ def build_fields() -> list[dict[str, object]]:
           "/authority_data/audio/p3_owner_programs/enemy", "exact type-12 class-0x00/01/1f/29 state/substate and local caller guard submit the bound command/arguments to the accepted shared dispatcher without owning enemy gameplay",
           ["enemy.type:u8", "enemy.class:u8", "enemy.state:u16", "enemy.substate:u16", "enemy local fields", "audio command arguments"], ["enemy-local fields", "audio.command_queue[16]", "grouped QSound transaction"],
           "/mutation_controls", "group, origin, class/type, context, callsite instruction, signed guard, command, arguments, dispatcher, handler, QSound grouping, gameplay coupling, load, RNG or fixed-frame mutation is rejected"),
+        f("audio.route_owner_program", "gameplay-audio-load-release", "route_audio_trigger_family", False,
+          "route_audio_program", "/", "all seven Round 1 route-origin trigger groups, nine exact route contexts and seven source callsite programs",
+          "/authority_data/audio/p3_owner_programs/route", "exact route pseudo-owner state/substate and local caller guard submit the bound command/arguments to the accepted shared dispatcher without owning route progression",
+          ["route.owner.type:u8", "route.owner.class:u8", "route.owner.state:u16", "route.owner.substate:u16", "route globals", "audio command arguments"], ["route-local globals", "audio.command_queue[16]", "grouped QSound transaction"],
+          "/mutation_controls", "group, origin, context, callsite instruction, signed guard, command, arguments, dispatcher, handler, QSound grouping, route coupling, load, RNG or fixed-frame mutation is rejected"),
         f("audio.player_trigger", "gameplay-audio-load-release", "audio_trigger_table", False,
           "player", "/player_origin_gameplay_audio/trigger_edges", "38 player-side caller/command edges to wrapper 0x003a88 and queue 0x001922",
           "/authority_data/player/player_origin_gameplay_audio", "player action/state/substate guard and exact caller enqueue the bound command/arguments",
@@ -1186,6 +1192,7 @@ def build_fixtures(source: dict[str, dict]) -> dict[str, object]:
                     "projectile": copy.deepcopy(source["projectile_audio_program"]),
                     "boss": copy.deepcopy(source["boss_audio_program"]),
                     "enemy": copy.deepcopy(source["enemy_audio_program"]),
+                    "route": copy.deepcopy(source["route_audio_program"]),
                 },
             },
             "loading": {"boundaries": copy.deepcopy(source["loads"]["boundaries"])},
@@ -2390,6 +2397,34 @@ def validate(contract: dict[str, object], fixtures: dict[str, object],
             enemy_audio["implementation_rules"]
                 ["unknown_state_or_transition_logic_allowed"] is False,
             "enemy-audio owner family fixture incomplete or drifted")
+    route_audio = fixtures["authority_data"]["audio"][
+        "p3_owner_programs"]["route"]
+    require(route_audio == source["route_audio_program"] and
+            route_audio["status"] == "SPEC_EXECUTABLE" and
+            route_audio["classification"] ==
+                "SOURCE_CLOSED_IMPLEMENTATION_FIELDS" and
+            route_audio["coverage"] == {
+                "trigger_groups": 7, "distinct_commands": 7,
+                "route_source_contexts": 9,
+                "route_dispatch_occurrences": 11,
+                "source_origin_records": 1,
+                "distinct_callsite_programs": 7,
+                "record_type_class_pairs": 1,
+                "orphan_groups": 0, "orphan_contexts": 0,
+                "orphan_handler_transactions": 0,
+                "unowned_audio_events": 0,
+                "logical_load_release_events": 0, "rng_calls": 0} and
+            len(route_audio["normalized_source_programs"]) == 7 and
+            route_audio["source_origin_records"] == ["0xff00d8"] and
+            route_audio["handler_boundary"]
+                ["individual_qsound_writes_are_logical_events"] is False and
+            route_audio["transition_contract"]
+                ["route_audio_owns_route_progression"] is False and
+            route_audio["transition_contract"]["rng_calls"] == 0 and
+            all(route_audio["mutation_controls"].values()) and
+            route_audio["implementation_rules"]
+                ["unknown_state_or_transition_logic_allowed"] is False,
+            "route-audio owner family fixture incomplete or drifted")
     class1f = next(item for item in
                    fixtures["authority_data"]["enemies"]["archetypes"]
                    if item["class"] == "0x1f")

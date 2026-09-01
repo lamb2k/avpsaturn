@@ -3450,5 +3450,39 @@ and normalized ISO SHA-256
 `615cd156b2bbe013213be4da7a9dbca426ffffb57edc916b6d8ce3b312efa848`.
 Settings were restored to VideoCore 4 / SoundCore 1.
 
+### P3 route-audio owner-family checkpoint (2026-09-01)
+
+The complete Round 1 route-owned audio family is SPEC-executable from the
+accepted paired trigger, shared-command and handler ledgers plus exact offline
+opcode windows. Seven source-closed trigger groups bind commands `0x0001`,
+`0x000f`, `0x0016`, `0x0254`, `0x0257`, `0x0258` and `0xff07` across nine
+exact route contexts and 11 dispatch occurrences from source origin `0xff00d8`.
+The projection is the route pseudo-owner record type/class `0x00/0x00`.
+
+Seven exact caller programs at `0x003c00`, `0x0094c4`, `0x00bfd8`,
+`0x00c0de`, `0x00c0f0`, `0x00c284` and `0x00c86e` bind their opcode slices,
+field widths and signed guards, arguments and helper/wrapper paths into grouped
+handler/QSound transactions. Individual register writes are not logical
+events and semantic sound names remain `UNKNOWN`. The family owns no route
+progression projection, logical load/release or RNG.
+
+Artifact SHA-256 is
+`00c53afd251e81452e44c1f1c73d58b1ab680520d31a600793e60df67afa25f5`.
+Nineteen focused and all 180 aggregate SPEC mutations reject. Aggregate
+fixture SHA-256 is
+`7ffe49b61334a33ae512b9ffc85c74092454ec6d69b9ef29c7b749f38adb6261`;
+contract SHA-256 is
+`b70488087c0d4f512fa9a08fa0336a6bec35e8d0a733f2886d014a42b10bad5c`.
+
+Fast and Oracle pass every Oracle/SPEC prerequisite and stop only at the
+accepted P4 frame-3782 RED. Debug and release/live-encounter Target pass;
+release GAME.BIN is 373,840 bytes at SHA-256
+`0ed25541cbd8059908b2f8ac0d0149edded6c3c8e3f4a4f181a34a817962f9b2`,
+and the cart archive remains
+`ccf8795a147daf337c1f72364c81f05fc2cfd255d8d21b40a56c74c97f8d15bd`.
+This SPEC-only body changes no runtime semantics, does not promote the
+candidate and does not trigger WGC. Commit-bound paired cold Emulator evidence
+is required before this checkpoint is complete.
+
 After the paired evidence is recorded, continue P3 with the first-demand
-route-audio owner family at source frame 6199.
+encounter-audio owner family at source frame 15192.
