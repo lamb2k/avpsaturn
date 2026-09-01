@@ -106,3 +106,55 @@ Captured PNGs, manifests, ROMs, and ISOs remain ignored.
 Capture settings were restored to VideoCore 4 and SoundCore 1. Evidence tier
 remains `ONE_EMULATOR`; the SCU-DMA A-bus rule remains physical-tier-only and
 physical Saturn remains `UNRUN`.
+
+## Owner delivery 2 (2026-09-01): save_state and the validated pre-roll flow
+
+The debug-rig fork adds one MCP tool, `save_state {slot}`: writes
+`<itemnum>_<slot>.yss` to the configured SaveStates directory (pauses around
+the save, resumes only if it was running) and returns the file path, size,
+SHA-256, and emulated frame count. Rebuilt EXE:
+`C:\ybexact\build-qt-route2\src\qt\yabasanshiro.exe`, SHA-256
+`da2ffb341532f10808d8f9659c875a96cbc29ebc10a454426415059c7cef8746`.
+Source delta refreshed at `C:\ybexact\fork-delta-vs-aug10-snapshot.patch`
+(16 files; the only new delta is DebugMcpServer.cpp - emulation core
+untouched).
+
+This is the pre-roll primitive for the recorded frame-574 visual-lane
+blocker. Owner-validated flow on a private copy of the current native
+`game.iso` + `stage1_audio.wav`:
+
+1. Pre-roll leg, dynarec `Advanced\SH2Interpreter=3`: set `autostart=true`
+   (one-shot - it must be re-set before every launch), free-run to the
+   window edge, `pause`, `save_state {slot}`. Kill the process.
+2. Capture legs, interpreter `Advanced\SH2Interpreter=0` (core id 0 in this
+   build; id 1 is the debug interpreter and id 2 does not exist - it fails
+   init): one fresh process per leg, `pause`, `load_state {slot}`,
+   `framebuffer_burst`.
+
+Owner validation evidence: state saved at dynarec frame 2005; two
+independent interpreter processes loading that slot produced byte-identical
+12-row burst manifests including row 1, with seven unique hashes in an
+animating window. Within-process repeat loads under dynarec are NOT
+deterministic (warm translation-cache residue) - always capture from a
+fresh interpreter process, never re-load inside a session that has run.
+
+Semantics to respect:
+- The emulated frame counter is a session counter, not part of the saved
+  state: after `load_state` it restarts near 1, so burst manifests are
+  load-relative. Paired legs get identical numbering; align row-for-row.
+- The first presented frames after a load can differ from the pre-save
+  presented imagery (the VDP1 framebuffer is not in a savestate). Cross-leg
+  identity held from row 1 in validation; against pre-save imagery, exclude
+  the first 4 rows (mirrors breakpoint_resume_preroll_excluded).
+
+Integration tasks, in order: (1) repackage this EXE in the pinned layout and
+pin it as the new debug-rig identity, keeping Aug-10 and d7767591 as
+explicit controls; (2) rerun negative controls A/B on the new EXE; (3) add a
+savestate negative control repeating the two-leg identity check above;
+(4) rebuild the blocked native visual gate on this flow: dynarec pre-roll
+past the frame-574 point, save, then paired fresh-interpreter legs bursting
+the transition window. Evidence tier stays ONE_EMULATOR; capture hygiene
+(VideoCore=1/SoundCore=0 for capture, restore 4/1, re-set the pinned
+SH2Interpreter=3 after interpreter legs, kill stray processes, commit no
+captures or states) is unchanged. Savestate .yss files are capture
+artifacts: never commit them.
