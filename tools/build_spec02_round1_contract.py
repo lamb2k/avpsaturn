@@ -21,6 +21,7 @@ SOURCES = {
     "class01_program": "data/spec02_class01_type12_program.json",
     "class06_program": "data/spec02_class06_type12_program.json",
     "class07_program": "data/spec02_class07_type20_program.json",
+    "class10_program": "data/spec02_class10_type24_program.json",
     "auxiliary": "data/oracle11_round1_auxiliary_authority.json",
     "route": "data/oracle11_round1_encounter_route_authority.json",
     "boss": "data/oracle11_round1_boss_orchestration.json",
@@ -262,6 +263,11 @@ def build_fields() -> list[dict[str, object]]:
           "/authority_data/auxiliary/archetypes/1/whole_routine_implementation_contract", "outer and active state dispatch only through the bounded source program; exact-width movement, double-buffered navigation, contact, presentation and accepted shared helpers own every transition",
           ["actor.outer_state:u8/u16", "actor.active_phase:u8", "actor.contact_state:u8/u16", "actor.position:s16", "actor.movement:s16", "actor.facing:u8", "actor.timer:u8", "actor.animation_record:u32", "route.globals"], ["actor.state:u8/u16", "actor.position:s16", "actor.movement:s16", "actor.animation_record:u32", "actor.collision_selectors:u8", "actor.navigation_buffers", "pool.free_count:u8", "audio.command:u16"],
           "/mutation_controls", "dispatch, operand width, field offset, signed branch, transition, presentation, collision, navigation buffering, command or release mutation changes the paired class-0x07 semantic witness"),
+        f("auxiliary.class10_type24_whole_program", "round1-projectile-pickup-hazard", "guarded_actor_program", True,
+          "class10_program", "/", "0x079ffc class entry, four-way top-state dispatch, six source variant selectors, and every Round 1-reachable branch",
+          "/authority_data/auxiliary/archetypes/5/whole_routine_implementation_contract", "outer state dispatches only through the bounded source program; variant-indexed signed offsets and animation records, exact current-state guards, presentation updates and fixed-pool release own every transition",
+          ["actor.outer_state:u16", "actor.variant:u8", "actor.direction:u8", "actor.position:s16", "actor.animation_branch:s16", "actor.animation_event:u8", "variant.tables"], ["actor.state:u16", "actor.position:s16", "actor.animation_record:u32", "actor.presentation_fields", "pool.free_count:u8"],
+          "/mutation_controls", "dispatch, operand width, field offset, signed branch, variant selector, movement table, animation table, presentation or release mutation changes the paired class-0x10 semantic witness"),
         f("enemy.initial_transition_execution", "round1-enemy-archetypes", "guarded_state_program", True,
           "enemies", "/archetypes/3/initial_transition_contract", "0x0606aa/0x0606d4/0x0606fc initializers and 0x060b1a..0x060c1c transition bodies",
           "/authority_data/enemies/archetypes/3/initial_transition_contract", "route-global, timer, animation-branch, landing and source-pool guards own the three initial class-0x1f bodies",
@@ -1119,6 +1125,11 @@ def build_fixtures(source: dict[str, dict]) -> dict[str, object]:
                    if item["class"] == "0x07" and item["type"] == 20)
     class07["whole_routine_implementation_contract"] = copy.deepcopy(
         source["class07_program"])
+    class10 = next(item for item in
+                   fixtures["authority_data"]["auxiliary"]["archetypes"]
+                   if item["class"] == "0x10" and item["type"] == 24)
+    class10["whole_routine_implementation_contract"] = copy.deepcopy(
+        source["class10_program"])
     fixtures["scene_manifests"] = {
         "coffee_shop": build_coffee_shop_scene_manifest(source)}
     return fixtures
@@ -1796,6 +1807,34 @@ def validate(contract: dict[str, object], fixtures: dict[str, object],
             class07_program["implementation_rules"]
                 ["unknown_state_or_transition_logic_allowed"] is False,
             "class-0x07/type-20 whole-routine fixture incomplete or drifted")
+    class10 = next(item for item in
+                   fixtures["authority_data"]["auxiliary"]["archetypes"]
+                   if item["class"] == "0x10" and item["type"] == 24)
+    class10_program = class10["whole_routine_implementation_contract"]
+    require(class10_program == source["class10_program"] and
+            class10_program["status"] == "SPEC_EXECUTABLE" and
+            class10_program["classification"] ==
+                "SOURCE_CLOSED_IMPLEMENTATION_FIELDS" and
+            len(class10_program["reachable_state_substate_contexts"]) == 3 and
+            len(class10_program["dispatch"]) == 1 and
+            sum(row["entry_count"] for row in
+                class10_program["dispatch"].values()) == 4 and
+            class10_program["variant_tables"]["entry_count"] == 6 and
+            class10_program["normalized_source_program"]
+                ["instruction_count"] == 28 and
+            len(class10_program["normalized_source_program"]
+                ["field_access_profiles"]) == 10 and
+            len(class10_program["normalized_source_program"]
+                ["external_transfers"]) == 4 and
+            class10_program["dynamic_witness"]["counts"] == {
+                "entries": 4769, "samples": 4694, "writes": 23665,
+                "rng_calls": 0, "player_effects": 0} and
+            all(class10_program["mutation_controls"].values()) and
+            class10_program["implementation_rules"]
+                ["runtime_68000_interpretation_forbidden"] is True and
+            class10_program["implementation_rules"]
+                ["unknown_state_or_transition_logic_allowed"] is False,
+            "class-0x10/type-24 whole-routine fixture incomplete or drifted")
     class1f = next(item for item in
                    fixtures["authority_data"]["enemies"]["archetypes"]
                    if item["class"] == "0x1f")
