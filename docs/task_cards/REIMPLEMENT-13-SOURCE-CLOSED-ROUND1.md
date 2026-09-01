@@ -2506,3 +2506,18 @@ No route or load edge occurs, and the source-owned presentation signature
 no authority event is orphaned. Evidence artifact SHA-256 is
 `6edba055d101afd418c8549f45684721e67c4f187988d9f0451479ea4a16ae5f`.
 Continue P2 at frame 15059 through source scene `S5fdeea4b937b`.
+
+### Overnight census segment 15059..15080 checkpoint (2026-09-01)
+
+The second round-clear/results presentation boundary is census-closed across
+22 paired, active-Predator frames at semantic SHA-256
+`9c78762e92938734546be021be18d35aa23a42e10d82c60c40e17cc2928b299f`.
+The sole source-owned lifetime is the Predator Warrior player. There are no
+spawn, despawn, HIT/KO, route, or load edges. One owned audio transaction uses
+command `0xff07`.
+
+The source-owned presentation signature `S5fdeea4b937b` owns no progression,
+all controls remain discriminating, and no authority event is orphaned.
+Evidence artifact SHA-256 is
+`d6e0ff9b4db945efcc78bccd65d86e5eb4a14278cbc615d320268747ed32d6e1`.
+Continue P2 at frame 15081 through source scene `Sa96e1f71b9dd`.
