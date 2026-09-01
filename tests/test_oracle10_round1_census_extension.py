@@ -56,6 +56,9 @@ CLEAR_RESULTS_B = json.loads(
 CLEAR_RESULTS_C = json.loads(
     (ROOT / "data/oracle10_round1_census_extension_15081_15091.json")
     .read_text(encoding="ascii"))
+ROUND2_TITLE = json.loads(
+    (ROOT / "data/oracle10_round1_census_extension_15092_15192.json")
+    .read_text(encoding="ascii"))
 GENERATOR = (ROOT / "tools/analyze_oracle10_round1_census_extension.py") \
     .read_text(encoding="utf-8")
 
@@ -1184,5 +1187,59 @@ for label, path, value in (
         continue
     raise AssertionError(f"Round 1 clear-results-C mutation accepted: {label}")
 
-print("ORACLE-10 Round 1 census extension 5567..15091: PASS "
-      "(107 mutations rejected)")
+def validate_round2_title(report: dict[str, object]) -> None:
+    semantics = report["paired_capture_ceremony"]["segment_semantics"]
+    census = report["scene_census_delta"]
+    route = report["route_authority_extension"]
+    assert report["status"] == "CENSUS_SEGMENT_COMPLETE"
+    assert report["segment"]["source_frame_range"] == [15092, 15192]
+    assert report["segment"]["scene_ids"] == ["round2-title"]
+    assert semantics["frame_count"] == 101
+    assert semantics["canonical_semantic_sha256"] == \
+        "8c693da9d26a6424e096ea668dc436506e0fcad2115b82e4284a6654fc3bc447"
+    assert semantics["player_active_frames"] == 101
+    assert semantics["identity_mismatch_frames"] == []
+    assert [(row["class"], row["type"], row["instance_count"]) for row in
+            census["class_type_inventory"]] == [("0x00", 0, 1)]
+    assert len(census["actor_lifetimes"]) == 1
+    assert census["spawn_edges"] == [] and census["despawn_edges"] == []
+    assert census["hit_ko_transitions"] == []
+    assert census["audio"]["command_counts"] == {
+        "0x0006": 1, "0x0254": 1, "0x0258": 1}
+    assert census["audio"]["handler_transaction_count"] == 3
+    assert census["audio"]["orphan_trigger_groups"] == 0
+    assert route["route_state_edges"] == []
+    assert len(route["camera_lock_runs"]) == 1
+    assert census["load_release_boundaries"] == []
+    assert len(report["targeted_counterfactuals"]["presentation_boundaries"]) == 1
+    assert report["targeted_counterfactuals"]["presentation_boundaries"][0] \
+        ["owns_progression"] is False
+    assert all(value == 0 for value in report["coverage"].values())
+    assert report["physical_saturn"] == "UNRUN"
+
+
+validate_round2_title(ROUND2_TITLE)
+for label, path, value in (
+        ("round2-title semantic", ("paired_capture_ceremony", "segment_semantics",
+                                   "canonical_semantic_sha256"), "0" * 64),
+        ("round2-title identity", ("paired_capture_ceremony", "segment_semantics",
+                                   "identity_mismatch_frames"), [15142]),
+        ("round2-title audio", ("scene_census_delta", "audio",
+                                "orphan_trigger_groups"), 1),
+        ("round2-title camera", ("route_authority_extension", "camera_lock_runs"), []),
+        ("round2-title presentation", ("targeted_counterfactuals",
+                                       "presentation_boundaries"), []),
+        ("round2-title physical", ("physical_saturn",), "PASS")):
+    mutant = copy.deepcopy(ROUND2_TITLE)
+    target = mutant
+    for key in path[:-1]:
+        target = target[key]
+    target[path[-1]] = value
+    try:
+        validate_round2_title(mutant)
+    except AssertionError:
+        continue
+    raise AssertionError(f"Round 2 title mutation accepted: {label}")
+
+print("ORACLE-10 Round 1 census extension 5567..15192: PASS "
+      "(113 mutations rejected)")

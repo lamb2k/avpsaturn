@@ -2535,3 +2535,18 @@ frame 15089. Signature `Sa96e1f71b9dd` owns no progression, all controls remain
 discriminating, and no authority event is orphaned. Evidence artifact SHA-256
 is `7db0c73970973b916103f137dfb57c187dfddca8b832cedfbb6dd96795b08358`.
 Continue P2 at frame 15092 through `round2-title`.
+
+### Overnight census segment 15092..15192 checkpoint (2026-09-01)
+
+The Round 2 title handoff is census-closed across 101 paired, active-Predator
+frames at semantic SHA-256
+`8c693da9d26a6424e096ea668dc436506e0fcad2115b82e4284a6654fc3bc447`.
+The sole source-owned lifetime is the player, with no lifecycle, HIT/KO, route,
+or load edge. Three owned audio transactions use commands `0x0006`, `0x0254`,
+and `0x0258`; one accepted camera run overlaps the title.
+
+The title presentation owns no progression, all controls remain discriminating,
+and no authority event is orphaned. Evidence artifact SHA-256 is
+`82a7113f2b74aef8ecefcc9202449cfd8f51a1a6b5271c0a9973c22779349f11`.
+Close only the stable Round 2 seam at frame 15193; do not extend into Round 2
+gameplay.
