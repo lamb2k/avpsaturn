@@ -1367,7 +1367,7 @@ def validate_report(report: dict[str, object]) -> None:
             "native_animation_advance_frame_u16": 2762,
             "source_native_hit_sequence_equal": True,
             "source_native_hit_sequence_frames": 28,
-            "next_player_divergence_frame_u16": 3578,
+            "next_player_divergence_frame_u16": 4697,
             "authored_delay_forbidden": True,
             "next_attacker_divergence_frame_u16": 5208}:
         raise ValueError("Coffee Shop class-0x1f player collision drift: " +

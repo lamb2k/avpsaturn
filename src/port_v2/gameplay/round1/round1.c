@@ -6536,8 +6536,8 @@ static int avsp_round1_begin_player_hit(
     runtime->player_hit_x_velocity = 0L;
     runtime->player_hit_x_acceleration = 0L;
     runtime->player.source_x_fp = runtime->player_hit_x_fp;
-    runtime->player.source_y_fp =
-        (long)runtime->player_action.lane * 65536L;
+    runtime->player.source_y_fp = avsp_round1_replace_fixed_high_word(
+        runtime->player.source_y_fp, runtime->player_action.lane);
     runtime->player_action.state = AVSP_PW_STATE_HIT;
     runtime->player_action.phase = AVSP_PW_PHASE_RECOVERY;
     runtime->player_action.source_action = 0u;
@@ -13033,8 +13033,8 @@ static int avsp_round1_step_player_hit(AvspRound1Runtime *runtime,
     runtime->player.y = runtime->player_action.lane;
     runtime->player.z = runtime->player_action.lane;
     runtime->player.source_x_fp = runtime->player_hit_x_fp;
-    runtime->player.source_y_fp =
-        (long)runtime->player_action.lane * 65536L;
+    runtime->player.source_y_fp = avsp_round1_replace_fixed_high_word(
+        runtime->player.source_y_fp, runtime->player_action.lane);
     runtime->player.health = runtime->player_action.health;
     runtime->player.facing = (unsigned char)runtime->player_action.facing;
     runtime->player_weapon_previous_pressed = weapon_pressed;
@@ -13209,7 +13209,6 @@ int avsp_round1_step_player(AvspRound1Runtime *runtime,
     short prior_x;
     short prior_lane;
     short bounded_player_x;
-    short bounded_player_lane;
     short prior_facing;
     unsigned short prior_state;
     unsigned short prior_selector;
@@ -13554,7 +13553,6 @@ int avsp_round1_step_player(AvspRound1Runtime *runtime,
     avsp_round1_tick_player_resource(runtime);
     avsp_round1_apply_player_global_bounds(runtime);
     bounded_player_x = runtime->player_action.x;
-    bounded_player_lane = runtime->player_action.lane;
     avsp_round1_apply_coffee_shop_obstacle(runtime);
     if (!avsp_round1_apply_first_segment_terrain(runtime) ||
         !avsp_round1_step_coffee_shop_camera(runtime))
@@ -13587,10 +13585,8 @@ int avsp_round1_step_player(AvspRound1Runtime *runtime,
             (long)view.x * 65536L :
             avsp_round1_replace_fixed_high_word(
                 control_source_x_fp, view.x);
-        runtime->player.source_y_fp = view.lane != bounded_player_lane ?
-            (long)view.lane * 65536L :
-            avsp_round1_replace_fixed_high_word(
-                control_source_y_fp, view.lane);
+        runtime->player.source_y_fp = avsp_round1_replace_fixed_high_word(
+            control_source_y_fp, view.lane);
     }
     else if (jump_owned && jump_began)
     {
@@ -13598,10 +13594,8 @@ int avsp_round1_step_player(AvspRound1Runtime *runtime,
             (long)view.x * 65536L :
             avsp_round1_replace_fixed_high_word(
                 control_source_x_fp, view.x);
-        runtime->player.source_y_fp = view.lane != bounded_player_lane ?
-            (long)view.lane * 65536L :
-            avsp_round1_replace_fixed_high_word(
-                control_source_y_fp, view.lane);
+        runtime->player.source_y_fp = avsp_round1_replace_fixed_high_word(
+            control_source_y_fp, view.lane);
     }
     else if (jump_owned)
     {
@@ -13614,10 +13608,8 @@ int avsp_round1_step_player(AvspRound1Runtime *runtime,
             (long)view.x * 65536L :
             avsp_round1_replace_fixed_high_word(
                 control_source_x_fp, view.x);
-        runtime->player.source_y_fp = view.lane != bounded_player_lane ?
-            (long)view.lane * 65536L :
-            avsp_round1_replace_fixed_high_word(
-                control_source_y_fp, view.lane);
+        runtime->player.source_y_fp = avsp_round1_replace_fixed_high_word(
+            control_source_y_fp, view.lane);
     }
     else if (weapon_owned || contextual_owned)
     {
@@ -13625,10 +13617,15 @@ int avsp_round1_step_player(AvspRound1Runtime *runtime,
             (long)view.x * 65536L :
             avsp_round1_replace_fixed_high_word(
                 prior_source_x_fp, view.x);
-        runtime->player.source_y_fp = view.lane != bounded_player_lane ?
-            (long)view.lane * 65536L :
-            avsp_round1_replace_fixed_high_word(
-                prior_source_y_fp, view.lane);
+        runtime->player.source_y_fp = avsp_round1_replace_fixed_high_word(
+            prior_source_y_fp, view.lane);
+    }
+    else if (special_owned)
+    {
+        runtime->player.source_x_fp = avsp_round1_replace_fixed_high_word(
+            prior_source_x_fp, view.x);
+        runtime->player.source_y_fp = avsp_round1_replace_fixed_high_word(
+            prior_source_y_fp, view.lane);
     }
     else
     {

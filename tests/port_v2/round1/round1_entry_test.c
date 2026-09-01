@@ -4891,6 +4891,34 @@ int main(void)
                     scene_runtime.player_hit_interaction_input_pending);
                 return 127;
             }
+            if (source_frame == 3578u &&
+                scene_runtime.player.source_y_fp != 0x013f3800L)
+            {
+                fprintf(stderr,
+                    "Coffee Shop player terrain fixed-point sync failed source=%u yfp=%08lx z=%d\n",
+                    source_frame, scene_runtime.player.source_y_fp,
+                    scene_runtime.player.z);
+                return 131;
+            }
+            if (source_frame == 3772u &&
+                scene_runtime.player.source_y_fp != 0x013f3800L)
+            {
+                fprintf(stderr,
+                    "Coffee Shop player HIT fixed-point carry failed source=%u yfp=%08lx z=%d\n",
+                    source_frame, scene_runtime.player.source_y_fp,
+                    scene_runtime.player.z);
+                return 132;
+            }
+            if (source_frame == 3879u &&
+                (scene_runtime.player.source_x_fp != 0x0550f000L ||
+                 scene_runtime.player.source_y_fp != 0x013f3800L))
+            {
+                fprintf(stderr,
+                    "Coffee Shop player special-entry fixed-point carry failed source=%u xfp=%08lx yfp=%08lx\n",
+                    source_frame, scene_runtime.player.source_x_fp,
+                    scene_runtime.player.source_y_fp);
+                return 133;
+            }
             if (source_frame == 3606u)
             {
                 const AvspRound1ActorCore *reused_actor =

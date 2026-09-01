@@ -3735,3 +3735,26 @@ preserving low fraction `0x3800`; native changes the high word but zeros the
 fraction. X, state, animation and timer already agree. Continue through the
 complete reusable locomotion lane fixed-point program. Candidate and visual
 blocker remain unchanged.
+
+### P4 player fixed-point position program checkpoint (2026-09-01)
+
+The source high-word sync at `0x0b1c08` is now preserved across every exposed
+Coffee Shop player context rather than only the first terrain row. Terrain
+correction at frame 3578 retains Y `0x013f3800`; HIT entry and the HIT step at
+frame 3772 retain the same low word; special-entry interruption at frame 3879
+retains X/Y `0x0550f000/0x013f3800`. No frame-specific authored delay or
+snapshot was added.
+
+Focused locomotion, player-HIT and special-input lanes reject 7, 14 and 3 real
+mutations respectively. The complete scene advances the next player
+divergence from 3578 through 3772 and 3879 to frame 4697. Its raw gap counts
+remain 188/1/0/675/2/93/0/279/0, the first 28-frame HIT sequence remains exact,
+and the next attacker divergence remains frame 5208.
+
+Target builds at 377,312 bytes, SHA-256
+`7f57a1a2a3f2c170e387bb87a2b8bae9bd2e37b61641c98fc53ddcda10485b1a`,
+with BSS end `0x060b32f0`; the protected animation manifest is byte-unchanged.
+Continue with the distinct frame-4697 airborne Button1 presentation-timing
+program: source holds record `0x0015e9d8` for timer 2/1 before advancing,
+where native enters at timer 1 and advances one update early. Candidate and
+visual-blocker status remain unchanged.

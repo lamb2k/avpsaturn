@@ -35,16 +35,16 @@ Class-`0x1f` action-`0x16` and fixed-slot lifecycle are closed. Frame 3606 slot
 `0x00ffa300` preserves source residue and actor+`0xae` owns retry; three
 mutations pass and this slot has no later divergence.
 
-Player HIT chronology is closed across all five Coffee Shop reactions: retain
-the current selector on damage, bind reaction selector next update. The first
-28-frame sequence and 12 mutations pass; BSS is `0x060b32d0`.
+Player HIT chronology is closed across all five reactions; the first 28-frame
+sequence and 14 mutations pass. Contextual Button2 at 3411/3412/3413 remains
+closed with carried entry presentation, command `0x0036` and motion hold.
+The reusable player fixed-point program is closed at terrain frame 3578, HIT
+frame 3772 and special-entry frame 3879. Source high-word updates retain the
+low fraction; locomotion/HIT/special lanes reject 7/14/3 mutations. Target is
+377,312 bytes at `7f57a1a2...5b1a`, BSS `0x060b32f0`.
 
-The contextual Button2 edge/entry/active chronology at 3411/3412/3413 is
-closed, including carried entry presentation, command `0x0036`, motion hold and
-eight mutations. Target is 377,280 bytes at `4197fbb9...9470`.
-
-Next RED is player frame 3578. Source changes Y high word `0x0140` to `0x013f`
-while preserving fractional word `0x3800`; native zeros the fraction. X, state
-and presentation match. Close the reusable locomotion lane fixed-point program,
-then focused mutations, Target and scene differential. Keep candidate frozen;
-never commit captures, PNGs, ROMs, ISOs, dumps, or protected user files.
+Next RED is airborne Button1 presentation timing at frame 4697: source holds
+record `0x0015e9d8` for timer 2/1 and advances at 4699; native advances at
+4698. Close its complete runtime, focused mutations, Target and scene
+differential. Keep candidate frozen; never commit captured artifacts or the
+protected user files.

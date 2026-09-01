@@ -181,7 +181,11 @@ type16_terminal_mutations = {
 }
 special_input_mutations = {
     "        !special_physical_candidate && jump_edge &&\n"
-    "        runtime->player_action.state == AVSP_PW_STATE_CONTROL)"
+    "        runtime->player_action.state == AVSP_PW_STATE_CONTROL)",
+    "else if (special_owned)\n"
+    "    {\n"
+    "        runtime->player.source_x_fp = avsp_round1_replace_fixed_high_word(\n"
+    "            prior_source_x_fp, view.x);",
 }
 ko_mutations = {
     "actor->state = ko ? avsp_round1_class1f_source_ko.collision_state :",
@@ -195,13 +199,15 @@ registration_mutations = {
 }
 locomotion_mutations = {
     "if (next >= AVSP_ROUND1_PLAYER_WALK_PRESENTATION_COUNT)",
-    "const long denominator = 20L;",
+    "const long remainder = numerator % denominator;",
     "runtime->player_weapon_cleanup_pending = 0u;\n        weapon_return_owned = 1u;",
     "weapon_motion_hold = (unsigned char)(runtime->player_weapon_active ||\n"
     "        (jump_owned && !jump_began) || special_owned || contextual_owned);",
     "if (weapon_motion_hold)\n        input.mask = (unsigned short)(input.mask &\n            (unsigned short)~AVSP_PW_INPUT_ATTACK);",
     "if (!was_stopping && !weapon_motion_hold &&\n"
     "        avsp_round1_source_direction(applied_direction) == 2u)",
+    "runtime->player.source_y_fp = avsp_round1_replace_fixed_high_word(\n"
+    "            control_source_y_fp, view.lane);",
 }
 controller_edge_mutations = {
     "camera_x = avsp_round1_recurring_spawn.camera_edge_uses_current_position ?\n        (unsigned short)runtime->camera_x_position :\n        (unsigned short)runtime->camera_x_previous;",
@@ -228,6 +234,12 @@ player_hit_mutations = {
     "runtime->player_hit_special_pending = 1u;",
     "runtime->player_action.health - reaction->damage",
     "(unsigned char)reaction->damage;",
+    "runtime->player.source_y_fp = avsp_round1_replace_fixed_high_word(\n"
+    "        runtime->player.source_y_fp, runtime->player_action.lane);\n"
+    "    runtime->player_action.state = AVSP_PW_STATE_HIT;",
+    "runtime->player.source_y_fp = avsp_round1_replace_fixed_high_word(\n"
+    "        runtime->player.source_y_fp, runtime->player_action.lane);\n"
+    "    runtime->player.health = runtime->player_action.health;",
     "runtime->player.hurt_selector !=\n"
     "                avsp_round1_type16.player_hurt_selector ||",
 }
@@ -435,7 +447,8 @@ for before, after in (
     ("avsp_round1_update_player_locomotion(runtime, applied_direction,\n                                            was_stopping, &view);", "/* locomotion transition suppressed */"),
     ("if (next >= AVSP_ROUND1_PLAYER_WALK_PRESENTATION_COUNT)",
      "if (next > AVSP_ROUND1_PLAYER_WALK_PRESENTATION_COUNT)"),
-    ("const long denominator = 20L;", "const long denominator = 19L;"),
+    ("const long remainder = numerator % denominator;",
+     "const long remainder = 0L;"),
     ("runtime->player_weapon_cleanup_pending = 0u;\n        weapon_return_owned = 1u;",
      "runtime->player_weapon_cleanup_pending = 0u;\n        runtime->player_weapon_return_pending = 1u;\n        weapon_return_owned = 1u;"),
     ("weapon_motion_hold = (unsigned char)(runtime->player_weapon_active ||\n"
@@ -672,6 +685,18 @@ for before, after in (
      "runtime->player_action.health - (short)hit_value"),
     ("(unsigned char)reaction->damage;",
      "0u;"),
+    ("runtime->player.source_y_fp = avsp_round1_replace_fixed_high_word(\n"
+     "        runtime->player.source_y_fp, runtime->player_action.lane);\n"
+     "    runtime->player_action.state = AVSP_PW_STATE_HIT;",
+     "runtime->player.source_y_fp =\n"
+     "        (long)runtime->player_action.lane * 65536L;\n"
+     "    runtime->player_action.state = AVSP_PW_STATE_HIT;"),
+    ("runtime->player.source_y_fp = avsp_round1_replace_fixed_high_word(\n"
+     "        runtime->player.source_y_fp, runtime->player_action.lane);\n"
+     "    runtime->player.health = runtime->player_action.health;",
+     "runtime->player.source_y_fp =\n"
+     "        (long)runtime->player_action.lane * 65536L;\n"
+     "    runtime->player.health = runtime->player_action.health;"),
     ("        if (projectile->animation_branch < 0)\n"
      "        {\n"
      "            if (projectile->transition_timer != 0u)",
@@ -682,6 +707,14 @@ for before, after in (
      "        runtime->player_action.state == AVSP_PW_STATE_CONTROL)",
      "        jump_edge &&\n"
      "        runtime->player_action.state == AVSP_PW_STATE_CONTROL)"),
+    ("else if (special_owned)\n"
+     "    {\n"
+     "        runtime->player.source_x_fp = avsp_round1_replace_fixed_high_word(\n"
+     "            prior_source_x_fp, view.x);",
+     "else if (special_owned)\n"
+     "    {\n"
+     "        runtime->player.source_x_fp = avsp_round1_player_fractional_position(\n"
+     "            view.x, runtime->player_action.x_numerator);"),
     ("(actor->state == 0x0200u &&\n                      (actor->substate == 0x1000u ||",
      "(actor->state == 0x0208u &&\n                      (actor->substate == 0x1000u ||"),
     ("actor->state = 0x0208u;\n    actor->substate = 0x0600u;",
@@ -803,6 +836,9 @@ for before, after in (
      "        avsp_round1_source_direction(applied_direction) == 2u)",
      "if (0 && !was_stopping && !weapon_motion_hold &&\n"
      "        avsp_round1_source_direction(applied_direction) == 2u)"),
+    ("runtime->player.source_y_fp = avsp_round1_replace_fixed_high_word(\n"
+     "            control_source_y_fp, view.lane);",
+     "runtime->player.source_y_fp = (long)view.lane * 65536L;"),
     ("12u, 0x1f, record->attack_selector);",
      "12u, 0x1f, 1u);"),
     ("special_buttons = runtime->player_special_input_pipeline;",
@@ -918,7 +954,7 @@ if "--contextual-melee-only" in sys.argv:
     print("REIMPLEMENT-13 contextual Button2 mutation lane: PASS (8 real mutations)")
     raise SystemExit(0)
 if "--locomotion-only" in sys.argv:
-    print("REIMPLEMENT-13 locomotion/weapon-return mutation lane: PASS (6 real mutations)")
+    print("REIMPLEMENT-13 locomotion/weapon-return mutation lane: PASS (7 real mutations)")
     raise SystemExit(0)
 if ("--controller-edge-only" in sys.argv or
         not subset_flags.intersection(sys.argv)):
@@ -956,7 +992,7 @@ if ("--controller-edge-only" in sys.argv or
         print("REIMPLEMENT-13 controller camera-edge mutation lane: PASS (4 real mutations)")
         raise SystemExit(0)
 if "--player-hit-only" in sys.argv:
-    print("REIMPLEMENT-13 Coffee Shop player-HIT program mutation lane: PASS (12 real mutations)")
+    print("REIMPLEMENT-13 Coffee Shop player-HIT program mutation lane: PASS (14 real mutations)")
     raise SystemExit(0)
 if "--hit-interaction-only" in sys.argv:
     print("REIMPLEMENT-13 HIT-interaction/Button1 handoff mutation lane: PASS (7 real mutations)")
@@ -1049,7 +1085,7 @@ if "--special-input-only" in sys.argv:
         header, False, "zero-health-Button1-combo-priority",
         test_body=scene_checkpoint_body)
     print("REIMPLEMENT-13 simultaneous special-input arbitration lane: PASS "
-          "(2 real mutations)")
+          "(3 real mutations)")
     raise SystemExit(0)
 generated_walk_mutations = {
     "    { 4u, 0, 0x0015F208UL, 0x00160A02UL, 17u, 0u },",
