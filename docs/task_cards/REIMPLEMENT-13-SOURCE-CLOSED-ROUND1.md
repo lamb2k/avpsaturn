@@ -3164,3 +3164,59 @@ program. Preserve accepted window `0x00c876..0x00c8a6` SHA-256
 `0b513c6416543d878f188af34d17d574390a894d6d699dddf81990a7b3b2d320`,
 bind visible transition frame 15021 and every Round 1-reachable branch plus its
 route/audio/load/RNG ownership, then regenerate the existing fixture once.
+
+### P3 route writer 0x00c886 round-reset whole-program checkpoint (2026-09-01)
+
+The reusable route dispatcher and both Round 1-reachable target programs are
+SPEC-executable. Dispatcher `0x00c7ea..0x00c816` has SHA-256
+`bf8624afff942389e26dbe04232e7aa93b5cc96fb186b8a5c99916cf80e0e9c8`;
+its exact 19-entry signed table at `0x00c816..0x00c83c` has SHA-256
+`380bd5ffdf1b0a1fb0bc4b7032c4c600c42cfd49f8f7dcba418ce71ea38c46f3`.
+Only indices 2 and 4 are Round 1-reachable, dispatching respectively to
+`0x00c83c` and `0x00c880`; every other target is explicit
+`NOT_REQUIRED_FOR_ROUND1` rather than silently omitted.
+
+The two executable slices `0x00c83c..0x00c87a` and
+`0x00c880..0x00c8a8` close 23 decoded instructions, seven exact field-access
+profiles and ten owned external transfers. The accepted writer window
+`0x00c876..0x00c8a6` remains SHA-256
+`0b513c6416543d878f188af34d17d574390a894d6d699dddf81990a7b3b2d320`.
+The first program owns the ordered round-reset transaction and exact command
+`0xff07` at caller `0x00c86e`, with arguments `d1=0x0fffff07,d2=0,d3=0` and
+return at `0x00c874`. Its semantic sound name remains UNKNOWN. The second
+program owns the route state write at `0x00c886` plus the bounded
+player-presentation reset. Presentation owns no gameplay result. No logical
+load/release or RNG event occurs.
+
+Both retained ledgers bind 30 route writes plus four active-player
+presentation writes, eight aligned samples, source frames 5523/15020 and
+visible frames 5524/15021. Artifact SHA-256 is
+`9f4724cba20f29764108418613de13a880d09019311bc59940da62cfdb54741a`;
+instruction-semantics SHA-256 is
+`5d817cf62826034f1bb9ec7ba0035eeaca4081742f37ba6b718b2a8ee7354225`.
+Eighteen focused and all 180 aggregate SPEC mutations reject. Aggregate fixture
+SHA-256 is
+`5d633cf04a9646bfc903e42b42cef21f67ef3a4c8994ab35a575cc2084e9c861`;
+contract SHA-256 is
+`cd7763f153bc8fdb0030be658616019543adc4913d0eff7f08f5a241d065569c`.
+
+The first admissible cold Target run exposed an integration-only stale
+contract-hash sentinel in `main.c`. Correcting that sentinel made the declared
+target-entry wiring pass while 130 suppression mutations reject. The
+release/live-encounter GAME.BIN is 373,840 bytes at SHA-256
+`dfe446da498b73d45a9ab1d8b5ce31d8d0e61e12abc42d80fbfa042e8624a8ae`;
+the cart archive remains
+`ccf8795a147daf337c1f72364c81f05fc2cfd255d8d21b40a56c74c97f8d15bd`.
+Two cold debug-rig runs pass identical 575-sample ledgers and five real
+mutations at normalized ISO
+`c97593577ed5863b55c127c8a4583146a2d78980f5623cae8e439fa53c3fcf5d`.
+Settings were restored to VideoCore 4 / SoundCore 1. Fast passes every
+Oracle/SPEC prerequisite and then reaches the accepted P4 frame-3782 RED.
+This SPEC body changes no gameplay runtime, does not promote the candidate and
+does not trigger WGC.
+
+Continue P3 with next-demand writer `0x0083d4` as one whole source program.
+Preserve accepted window `0x0083c4..0x0083f4` SHA-256
+`3813fbb167fad415d00f787901e0b0e4cbafab1cbfd789d83fd9b3d9cf7d7384`,
+bind visible transition frames 5562 and 15089, and close every Round
+1-reachable branch plus its route/audio/load/RNG ownership.

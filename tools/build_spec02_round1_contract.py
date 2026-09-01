@@ -31,6 +31,7 @@ SOURCES = {
     "route_8bb2_program": "data/spec02_route_8bb2_program.json",
     "route_90f2_program": "data/spec02_route_90f2_program.json",
     "route_8418_program": "data/spec02_route_8418_program.json",
+    "route_c886_program": "data/spec02_route_c886_program.json",
     "auxiliary": "data/oracle11_round1_auxiliary_authority.json",
     "route": "data/oracle11_round1_encounter_route_authority.json",
     "boss": "data/oracle11_round1_boss_orchestration.json",
@@ -402,6 +403,11 @@ def build_fields() -> list[dict[str, object]]:
           "/authority_data/route/p3_whole_routine_programs/0x008418", "the exact clear byte owns both Round 1-reachable 4-to-6 transitions; source-ordered route setup and stage presentation binding follow without fixed-frame, audio, load or RNG authority",
           ["g81f3:u8", "g8008:s16", "g800c:u16", "g8240:u8", "g8237:u8", "g81e8:u16", "g822c:u16", "active player identity fields", "stage presentation tables"], ["g8008:s16", "g800c:u16", "g8240:u8", "shared route fields", "g8237:u8", "g822c:u16", "player presentation pointer/cursor"],
           "/mutation_controls", "alignment, clear guard, route arithmetic, write width/order, helper order, stage selector/index/table, special-branch substitution, invented audio/load/RNG or fixed-frame mutation changes the paired witness"),
+        f("route.writer_0x00c886_whole_program", "encounters-waves-scripted-triggers", "round_index_route_reset_program", True,
+          "route_c886_program", "/", "0x00c7ea signed round-index dispatcher, exact 19-entry target table, both Round 1-reachable transition bodies, shared route/player/map helpers and the source-owned ff07 transaction",
+          "/authority_data/route/p3_whole_routine_programs/0x00c886", "round indices 2 and 4 select the only Round 1-reachable bodies; ordered route clears, active-player presentation writes, next-index map and the first-body ff07 transaction own the reset without fixed-frame authority",
+          ["g81af:u8", "g823d:u8", "g8208:u8", "g81e8:u16", "g8236:u8", "g8008:s16", "g800c:u16", "g8010:u16", "g8014:u16", "active player records", "round-index table"], ["g823e:u8", "g8008:s16", "g800c:u16", "g8010:u16", "g8014:u16", "g81e8:u16", "g8222:u16", "active player presentation fields", "audio.command"],
+          "/mutation_controls", "dispatcher guard/index/table, reachable target, body gate, write width/order, helper scan, round-index map, ff07 command, tail, RNG or fixed-frame mutation changes the paired route/audio witness"),
         f("boss.phases_spawns", "round1-boss", "boss_phase_table", True,
           "boss", "/controller_contract", "class-0x02 type-32 controller, 11 phases, eight boss-room spawns",
           "/authority_data/boss", "controller state/phase and source countdown guards own boss spawns and phase transitions",
@@ -1219,6 +1225,9 @@ def build_fixtures(source: dict[str, dict]) -> dict[str, object]:
     fixtures["authority_data"]["route"][
         "p3_whole_routine_programs"]["0x008418"] = copy.deepcopy(
             source["route_8418_program"])
+    fixtures["authority_data"]["route"][
+        "p3_whole_routine_programs"]["0x00c886"] = copy.deepcopy(
+            source["route_c886_program"])
     fixtures["scene_manifests"] = {
         "coffee_shop": build_coffee_shop_scene_manifest(source)}
     return fixtures
@@ -2185,6 +2194,32 @@ def validate(contract: dict[str, object], fixtures: dict[str, object],
             route_8418["implementation_rules"]
                 ["unknown_state_or_transition_logic_allowed"] is False,
             "route-0x008418 whole-program fixture incomplete or drifted")
+    route_c886 = fixtures["authority_data"]["route"][
+        "p3_whole_routine_programs"]["0x00c886"]
+    require(route_c886 == source["route_c886_program"] and
+            route_c886["status"] == "SPEC_EXECUTABLE" and
+            route_c886["classification"] ==
+                "SOURCE_CLOSED_IMPLEMENTATION_FIELDS" and
+            route_c886["source_identity"]["dispatcher_window"]["first"] ==
+                "0x00c7ea" and
+            route_c886["dispatcher_contract"]["round1_reachable"] ==
+                {"2": "0x00c83c", "4": "0x00c880"} and
+            route_c886["dispatcher_contract"]["other_targets"] ==
+                "NOT_REQUIRED_FOR_ROUND1" and
+            route_c886["normalized_source_program"]["instruction_count"] == 23 and
+            len(route_c886["normalized_source_program"]
+                ["field_access_profiles"]) == 7 and
+            len(route_c886["normalized_source_program"]
+                ["external_transfers"]) == 10 and
+            route_c886["transition_contract"]["rng_calls"] == 0 and
+            route_c886["audio_command_contract"]["command"] == "0xff07" and
+            route_c886["dynamic_witness"]["counts"] == {
+                "route_writes": 30, "player_presentation_writes": 4,
+                "total_owned_writes": 34, "samples": 8, "rng_calls": 0} and
+            all(route_c886["mutation_controls"].values()) and
+            route_c886["implementation_rules"]
+                ["unknown_state_or_transition_logic_allowed"] is False,
+            "route-0x00c886 whole-program fixture incomplete or drifted")
     class1f = next(item for item in
                    fixtures["authority_data"]["enemies"]["archetypes"]
                    if item["class"] == "0x1f")

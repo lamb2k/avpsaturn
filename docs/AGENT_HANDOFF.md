@@ -32,18 +32,19 @@ inspection. Settings were restored to VideoCore 4 / SoundCore 1. Evidence is
 ## Exact next sequence
 P2 is closed through stable Round 2 seam frame 15193; closure SHA is
 `b5c72089...f94b3`, all authority/table/capacity gates pass, and Round 2 gameplay
-was not censused. All nine P3 actor programs and route writers through `0x008418`
-are SPEC-executable. Artifact `e63b0f0e...86ff` closes the aligned clear program
-`0x00840a..0x008438`: nine instructions, seven field profiles, three transfers,
-exact clear guard, five direct writes, shared route setup, and source-owned
-player presentation-stage binding for Round 1 indices 2/4. Retained witnesses
-bind 10 direct plus 18 helper writes, eight samples, visible frames 5453/15019,
-and zero RNG. Focused 16 and SPEC 180 mutations pass. Fast, Target, and paired
-cold debug-rig Coffee Shop evidence pass all 575 samples at ISO
-`3bb36edb...611de`; normal settings are restored. Source frame 5566 code 11
-remains the expected P4 census RED, with no runtime promotion or WGC trigger.
-Exact next experiment: close next-demand round-reset route writer `0x00c886` as
-one whole source program. Preserve window `0x00c876..0x00c8a6` SHA
-`0b513c64...320` and visible frame 15021; bind every reachable branch and its
+was not censused. All nine P3 actor programs and route writers through `0x00c886`
+are SPEC-executable. Artifact `9f4724cb...741a` closes the reusable `0x00c7ea`
+dispatcher, exact 19-entry signed table, and both Round 1-reachable programs:
+23 instructions, seven field profiles and ten owned transfers. The exact
+`0xff07` transaction has UNKNOWN semantic name; there is no logical load or RNG.
+Retained witnesses bind 34 writes, eight samples and visible frames 5524/15021.
+Focused 18 and SPEC 180 mutations pass. The first cold Target exposed and fixed
+one stale contract-hash sentinel; 130 wiring suppressions now reject. Target
+GAME.BIN is `dfe446da...a8ae`; paired cold debug-rig evidence passes 575 samples
+and five mutations at ISO `c9759357...fcf5d`. Normal settings are restored.
+Fast reaches only the accepted P4 frame-3782 RED; no runtime promotion or WGC.
+Exact next experiment: close next-demand route writer `0x0083d4` as one whole
+source program. Preserve window `0x0083c4..0x0083f4` SHA `3813fbb1...7384`
+and visible frames 5562/15089; bind every reachable branch and its
 route/audio/load/RNG ownership, regenerate once, and run the full ceremony.
 Never commit captures, PNGs, ROMs, ISOs, dumps, or protected user files.

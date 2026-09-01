@@ -638,6 +638,16 @@ if (Test-Path -LiteralPath (Join-Path $PSScriptRoot 'data\spec02_route_8418_prog
         throw "SPEC-02 route-0x008418 mutation test failed with exit code $LASTEXITCODE."
     }
 }
+if (Test-Path -LiteralPath (Join-Path $PSScriptRoot 'data\spec02_route_c886_program.json')) {
+    & $PythonPath (Join-Path $PSScriptRoot 'tools\build_spec02_route_c886_program.py') '--check'
+    if ($LASTEXITCODE -ne 0) {
+        throw "SPEC-02 route-0x00c886 generation check failed with exit code $LASTEXITCODE."
+    }
+    & $PythonPath (Join-Path $PSScriptRoot 'tests\test_spec02_route_c886.py')
+    if ($LASTEXITCODE -ne 0) {
+        throw "SPEC-02 route-0x00c886 mutation test failed with exit code $LASTEXITCODE."
+    }
+}
 if (Test-Path -LiteralPath (Join-Path $PSScriptRoot 'data\spec02_round1_executable_contract.json')) {
     & $PythonPath (Join-Path $PSScriptRoot 'tests\test_spec02_round1_contract.py')
     if ($LASTEXITCODE -ne 0) {
