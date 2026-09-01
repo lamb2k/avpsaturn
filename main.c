@@ -121,11 +121,12 @@
  * transient diagnostic storage. Reserve one aligned block immediately after
  * the existing tile/strip carve so debug and release use the same 4 MB-cart
  * ownership without consuming Saturn work RAM. The SH-2 runtime measures
- * 0x18410 bytes with all six source pools and the Coffee Shop terrain stream;
+ * 0x18434 bytes with all six source pools, the Coffee Shop terrain stream,
+ * and the source-owned Coffee Shop exit-controller state;
  * the 0x19000 carve preserves 0x0bf0 bytes of headroom inside the fixed arena. */
 #ifdef AVSP_LIVE_ENCOUNTER
 #define AVSP_ROUND1_RUNTIME_REGION_BYTES 0x19000
-#define AVSP_ROUND1_RUNTIME_MEASURED_BYTES 0x18410
+#define AVSP_ROUND1_RUNTIME_MEASURED_BYTES 0x18434
 #define AVSP_LIVE_DIAG_REGION_BYTES 0x1A000
 #define AVSP_ROUND1_CONTENT_REGION_BYTES 0x40000
 #define AVSP_COMPOSITE_SCRATCH_REGION_BYTES 0x3000
@@ -8295,7 +8296,7 @@ static void live_encounter_publish(void)
     avsp_diag_round1_spec_bound =
         avsp_diag_round1_content_loaded &&
         strcmp(AVSP_ROUND1_SPEC02_SHA256,
-               "7a0db579d3751541d374444ebae60a009f9afedf75840457661b60de1fa93b3a") ==
+               "c36120c5b548d3c505e8628e381ce6d48d06b4411eec99722a97fbe14b4e25a2") ==
         0;
     avsp_diag_round1_entry_valid = avsp_round1_entry_valid(&round1_runtime);
     avsp_diag_round1_route_state = round1_runtime.route_state;
@@ -8561,6 +8562,7 @@ static void live_encounter_frame_callback(void)
             return;
         }
         if (round1_player_authority_enabled_at_tick_start &&
+            round1_runtime.route_state == 4 &&
             !avsp_round1_step_player(&round1_runtime, round1_player_mask, 0))
         {
             avsp_diag_live_frame_stage = -9;
@@ -8587,6 +8589,12 @@ static void live_encounter_frame_callback(void)
             runtime_ready = 0;
             return;
         }
+    }
+    if (!avsp_round1_step_coffee_exit_display(&round1_runtime))
+    {
+        avsp_diag_live_frame_stage = -8;
+        runtime_ready = 0;
+        return;
     }
     if (round1_route_before != 4 && round1_runtime.route_state == 4)
     {

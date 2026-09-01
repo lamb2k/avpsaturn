@@ -39,7 +39,7 @@
         "id": "round1-runtime",
         "load_phase": "runtime",
         "owner": "complete fixed actor pools and mutable route state",
-        "required_bytes": 99344,
+        "required_bytes": 99380,
         "size": 102400
       },
       {
@@ -52,12 +52,12 @@
       },
       {
         "base": "0x22711000",
-        "census_capacity_floor_bytes": 239908,
+        "census_capacity_floor_bytes": 240400,
         "id": "round1-spec-content",
         "load_phase": "boot",
         "owner": "all generated read-only SPEC fixture tables",
-        "required_bytes": 46564,
-        "sha256": "b2bae49f6182dcde3ced8d47342d5689c48b5095793ae4ec0ead61323c64d587",
+        "required_bytes": 47056,
+        "sha256": "ccf8795a147daf337c1f72364c81f05fc2cfd255d8d21b40a56c74c97f8d15bd",
         "size": 262144
       },
       {
@@ -80,7 +80,7 @@
   },
   "classification": "REIMPLEMENT-13 bounded memory-plan program",
   "content_archive": {
-    "bytes": 46564,
+    "bytes": 47056,
     "categories": [
       "terrain",
       "timer-selector",
@@ -90,9 +90,9 @@
     ],
     "deterministic_double_build": true,
     "file": "build/avsp_cd/R1/R1SPEC.BIN",
-    "generated_source_sha256": "568b4c95723dd389d1911c1c2f7f777c43b9cb01b6986da9f500a5ca77e05346",
-    "sha256": "b2bae49f6182dcde3ced8d47342d5689c48b5095793ae4ec0ead61323c64d587",
-    "table_count": 152,
+    "generated_source_sha256": "d33adcd2a38b5642df36671035e37ea147497965f6a62641ec6f89f92e2fb4d1",
+    "sha256": "ccf8795a147daf337c1f72364c81f05fc2cfd255d8d21b40a56c74c97f8d15bd",
+    "table_count": 157,
     "target_endian": "SH-2 big endian"
   },
   "legal_load_seams": [
@@ -130,9 +130,9 @@
     "writer_reconciliation_sha256": "e9508e1c621e6448953549817b8d66e9399cbce97f06d7883c013776f34fc39c"
   },
   "work_ram": {
-    "bss_end": "0x060b1c00",
-    "bss_headroom_bytes": 58368,
-    "game_bin_bytes": 371440,
+    "bss_end": "0x060b2560",
+    "bss_headroom_bytes": 55968,
+    "game_bin_bytes": 373840,
     "jo_user_program_data_end_exclusive": "0x060c0000",
     "linked_capacity_bytes": 770048,
     "linked_image_base": "0x06004000",

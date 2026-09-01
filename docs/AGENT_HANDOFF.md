@@ -1,49 +1,48 @@
 # REIMPLEMENT-13 active agent handoff
 
-Resume the persistent AvP Goal on `codex/avp-playable-loop-pivot` from branch HEAD. `REIMPLEMENT-13-SOURCE-CLOSED-ROUND1` remains active. The accepted runtime
-candidate stays `d04a65a2253175c6e820140feefc35419e2cca07` until the Coffee Shop
-zero-gap gate passes. Preserve USER-09 `CHANGES_REQUESTED`, SALVAGE-08 inactive,
-physical Saturn `UNRUN`, and all accepted locks. Never stage/reset/overwrite
-user-owned `data/avsp_anim_records.json` or `history.txt`.
-Workflow pivot / Preserved evidence work: Resume the AvP salvage Goal; retain SALVAGE-00-OLD-BUILD-BASELINE, USER-01-PLAYER-BASELINE-REVIEW, and evidence candidate `597f4ed517d4e715d814ff841bd00d3977803f85`.
+Resume the persistent AvP Goal on `codex/avp-playable-loop-pivot` from branch
+HEAD. `REIMPLEMENT-13-SOURCE-CLOSED-ROUND1` remains active. The accepted runtime
+candidate stays `d04a65a2253175c6e820140feefc35419e2cca07` until the complete
+Coffee Shop zero-gap gate passes. Preserve USER-09 `CHANGES_REQUESTED`,
+SALVAGE-08 inactive, physical Saturn `UNRUN`, and all accepted locks. Never
+stage/reset/overwrite `data/avsp_anim_records.json` or `history.txt`.
 
-Read `project_state.yaml`, the active card, and current SPEC-02 contract and fixtures completely. Do not create another Goal, roadmap, workflow, branch, task hierarchy, coverage system, or writer.
+Read `project_state.yaml`, the active card, current SPEC-02 contract/fixtures,
+`docs/EMULATOR_MCP_CAPTURE.md`, and `docs/ROUND1_OVERNIGHT_PLAN.md` completely.
+Do not create another Goal, roadmap, workflow, branch, task hierarchy, coverage
+system, or writer.
 
-## Verified active boundary
+Workflow pivot / Preserved evidence work: Resume the AvP salvage Goal; retain
+SALVAGE-00-OLD-BUILD-BASELINE, USER-01-PLAYER-BASELINE-REVIEW, and evidence
+candidate `597f4ed517d4e715d814ff841bd00d3977803f85`.
 
-Class-`0x05`, CPU-mediated cart-to-VDP1 upload, and the complete Round 1 memory plan are accepted and must not be reopened. The memory plan binds 94 segments,
-1,517 writers, and 152 generated tables in the deterministic 46,564-byte cart
-archive at `0x22711000` (SHA-256 `b2bae49f6182dcde3ced8d47342d5689c48b5095793ae4ec0ead61323c64d587`).
-No further ad-hoc size squeeze is permitted.
+## Closed checkpoint
 
-The in-flight reusable-runtime checkpoint closes the type-16 terminal two-tick timer, class-`0x1f` selector-4 hitstop-10/damage-15 split, all 54 inner-state
-presentation/current-record lookups, and simultaneous special-input arbitration.
-Focused lanes pass 15/1/11/1 real mutations. The complete host scene advances
-to source frame 5566, where native class-`0x1f` code 11 remains after the source
-has already executed Coffee Shop population teardown and route edges 4->6->0->2;
-do not invent state `0x0208:0x1004` before closing that owning exit program.
+The Coffee Shop exit controller is SOURCE_CLOSED and NATIVE_IMPLEMENTED through
+source frame 5566: route `4->6->0->2`, player withdrawal script and ballistic
+motion, source callback cadence, fixed-pool teardown, gate `8236`, and resident
+load no-op boundaries. Focused exit passes three real mutations. Target passes
+with GAME.BIN 373,840 bytes, BSS `0x060b2560`, SHA-256
+`aa99904645fa584952ccba84e4fb28d970dabc4ae6e6e593b401f9e3323910a1`.
 
-Release Target GAME.BIN is 371,440 bytes, BSS end `0x060b1c00`, SHA-256 `6c5d58cfc019f4530976c388167e769f0dfc534b60af74521b99a4104ea75b0d`.
-Two cold pinned-emulator Coffee Shop runs pass the existing five-mutation paired
-evidence check at normalized ISO SHA-256
-`3293a604ed84a0062ec50e1fe16ead762646789e4a407f6f659f41a9e5c99bdc`.
-Window-only WGC frames 2280/2287/2306/2307/2310 preserve the prior rendered
-gameplay aperture; the scene remains intentionally RED, not accepted. The SCU
-DMA A-bus restriction remains physical-tier-only.
+The 157-table content archive is 47,056 bytes, SHA-256
+`ccf8795a147daf337c1f72364c81f05fc2cfd255d8d21b40a56c74c97f8d15bd`.
+Runtime is exactly `0x18434` in the unchanged `0x19000` carve. Paired cold
+emulator chronology passes at normalized ISO SHA-256
+`3bb36edbd29c0a07867826f7d1ac99e96d84849232a05b3bdea43d5d84a611de`.
+Window-only WGC frames 2280/2287/2306/2307/2310 preserve Predator identity,
+P1-only HUD, impact cadence, both VDP2 planes, palette, and priority.
 
-## Headless MCP capture: owner build ready for integration
+Fast and Oracle pass every focused check and stop only at the preserved
+source-frame-3782 stage-progress mismatch (seven source calls, eight native).
+The complete Coffee Shop scene stays RED; no candidate promotion or accepted
+lock reopening is permitted. The SCU-DMA A-bus rule remains physical-only.
 
-The owner's rebuilt debug-rig EXE with `framebuffer_screenshot` and
-`framebuffer_burst` is smoke-tested and ready. After the current checkpoint,
-execute `docs/EMULATOR_MCP_CAPTURE.md` (package + re-pin + paired-ledger and
-image-hash controls + visual-QA MCP mode). Do not modify the fork source
-beyond re-packaging. Standing rule: keep this handoff under 50 lines.
+## Exact next sequence
 
-## Exact next sequence (owner)
-
-1. Finish the in-flight Coffee Shop exit-controller closure (route edges
-   5453/5524/5562, load boundaries 5565/5566); checkpoint.
-2. Execute `docs/EMULATOR_MCP_CAPTURE.md` (package, re-pin, controls, MCP mode).
-3. Execute `docs/ROUND1_OVERNIGHT_PLAN.md`: ORACLE-10/11 census extension from
-   frame 5566 to Round 1 clear, batched SPEC-02 per new class, then scene-order
-   closure behind burst visual gates.
+1. Execute `docs/EMULATOR_MCP_CAPTURE.md` in full: package and re-pin the owner
+   EXE without fork-source edits, run semantic and image negative controls, and
+   add MCP burst mode to visual-QA. Do not commit captures, ROMs, or ISOs.
+2. Execute `docs/ROUND1_OVERNIGHT_PLAN.md` P2: extend paired ORACLE-10/11 census
+   from frame 5566 to Round 1 clear, committing each completed census segment.
+3. Follow P3/P4 in scene order with the three-attempt cap and burst visual gates.

@@ -14,7 +14,7 @@ REQUIRED = (
     "#define AVSP_TILE_REGION_BYTES 0x96000",
     "#define AVSP_TILE_FRAME_UNIQUE_LIMIT 8192",
     "#define AVSP_ROUND1_RUNTIME_REGION_BYTES 0x19000",
-    "#define AVSP_ROUND1_RUNTIME_MEASURED_BYTES 0x18410",
+    "#define AVSP_ROUND1_RUNTIME_MEASURED_BYTES 0x18434",
     "#define AVSP_ROUND1_CONTENT_REGION_BYTES 0x40000",
     "#define AVSP_COMPOSITE_SCRATCH_REGION_BYTES 0x3000",
     "(actor->type == 24u && actor->actor_class == 0x43)",
@@ -81,6 +81,7 @@ REQUIRED = (
     "(unsigned short)source_frame);",
     "for (source_tick = 0u; source_tick < source_updates; ++source_tick)",
     "if (round1_player_authority_enabled_at_tick_start &&\n"
+    "            round1_runtime.route_state == 4 &&\n"
     "            !avsp_round1_step_player",
     "avsp_diag_round1_player_weapon_entries =",
     "avsp_diag_round1_player_weapon_completions =",

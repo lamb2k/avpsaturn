@@ -2097,6 +2097,51 @@ identifying the owning reusable player-collision program, and closing all
 Coffee Shop-reachable branches from accepted Oracle/SPEC evidence. Do not add a
 frame exception, authored delay, guessed rule, or further ad-hoc size squeeze.
 
+### Coffee Shop exit-controller checkpoint (2026-08-31)
+
+The complete source-owned exit program is now closed from the accepted paired
+captures through source frame 5566. Route state `4` enters the player withdrawal
+body at frame 5452, route `6` executes the packed source display script and
+selector-6 ballistic withdrawal, route `6->0` occurs at 5523, route `0->2` at
+5561, and the 5565/5566 loader boundaries are resident no-ops under the existing
+all-resident memory plan. Centralized fixed-pool teardown and gate `8236` are
+owned by the route transition; no isolated `0x0208:0x1004` context, authored
+delay, or fixed-frame gameplay result was added. The focused host lane passes
+three real callback-cadence, ballistic-acceleration, and loader-stall mutations.
+
+The accepted Oracle route artifact includes the new paired player/route capture
+identity. SPEC-02 and generated fixtures bind the script, movement, transition,
+teardown, and load ownership. Their SHA-256 values are
+`c36120c5b548d3c505e8628e381ce6d48d06b4411eec99722a97fbe14b4e25a2`
+and `3fc140c51e42e1e4c21b996a746b7828c2e58ae8854c1c4a200e68028360f9ae`.
+The deterministic 157-table cart archive is 47,056 bytes at SHA-256
+`ccf8795a147daf337c1f72364c81f05fc2cfd255d8d21b40a56c74c97f8d15bd`.
+Runtime size is exactly `0x18434` inside the unchanged `0x19000` cartridge
+carve, leaving 3,020 bytes of headroom.
+
+Release Target passes with GAME.BIN 373,840 bytes, BSS end `0x060b2560`, and
+GAME.BIN SHA-256
+`aa99904645fa584952ccba84e4fb28d970dabc4ae6e6e593b401f9e3323910a1`.
+Two cold pinned-emulator runs pass the five-mutation Coffee Shop evidence lane
+at normalized ISO SHA-256
+`3bb36edbd29c0a07867826f7d1ac99e96d84849232a05b3bdea43d5d84a611de`.
+Window-only WGC frames 2280/2287/2306/2307/2310 directly preserve Predator
+identity, P1-only HUD, coherent impact cadence, both VDP2 planes, palette, and
+priority. The WebP and cadence-sheet SHA-256 values are
+`d9c23c2f61fe48f5ea890d7fbd315a965a6c9ec5d032d28715b3846926b07835`
+and `9af82b62fa64dd284d98ae38e4cd759a7443766da10b84e8412923edaaade924`.
+
+Fast and Oracle pass all focused authority, fixture, mutation, memory, and DMA
+checks, then stop at the preserved full-host source-frame-3782 stage-progress
+chronology mismatch (seven source calls versus eight native calls). The
+complete Coffee Shop scene therefore remains RED and no runtime-candidate
+promotion is made. The SCU-DMA A-bus rule remains physical-tier-only and
+physical Saturn remains `UNRUN`.
+
+The next dependency-ready body is the owner-defined P1 capture-lane integration
+in `docs/EMULATOR_MCP_CAPTURE.md`, followed by the census-first sequence in
+`docs/ROUND1_OVERNIGHT_PLAN.md`.
+
 ### Coffee Shop reusable-runtime closure checkpoint (2026-08-31)
 
 Four source programs exposed by the complete scene are now closed without

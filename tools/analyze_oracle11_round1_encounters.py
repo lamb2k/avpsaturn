@@ -28,6 +28,8 @@ COFFEE_SHOP_SCENE_B = ROOT / ".deps/mame/oracle11_progression_lifecycle_cs7b"
 CONTROLLER_EDGE_A = ROOT / ".deps/mame/oracle11_progression_lifecycle_cs38a"
 CONTROLLER_EDGE_B = ROOT / ".deps/mame/oracle11_progression_lifecycle_cs38b"
 CONTROLLER_EDGE_SUPPRESS = ROOT / ".deps/mame/oracle11_progression_lifecycle_cs38s"
+COFFEE_EXIT_A = ROOT / ".deps/mame/oracle11_coffee_exit_player_m"
+COFFEE_EXIT_B = ROOT / ".deps/mame/oracle11_coffee_exit_player_n"
 ROUTE = ROOT / "data/oracle10_round1_route.json"
 ENEMIES = ROOT / "data/oracle11_round1_enemy_archetypes.json"
 AUXILIARY = ROOT / "data/oracle11_round1_auxiliary_authority.json"
@@ -486,6 +488,7 @@ def build_report() -> dict[str, object]:
     require(int(final["final_route"]) == 4, "route capture did not reach Round 2")
     route = json.loads(ROUTE.read_text(encoding="utf-8"))
     image = OPCODES.read_bytes()
+    program = PROGRAM.read_bytes()
     samples = {int(row["frame"]): row for row in rows(RAW_A / "route_samples.tsv")}
     writes_by_frame: dict[int, list[dict[str, str]]] = defaultdict(list)
     segment_writer_refs: list[set[str]] = [set() for _ in route["segments"]]
@@ -1591,6 +1594,239 @@ def build_report() -> dict[str, object]:
         },
     }
 
+    exit_files = ("coffee_exit_player_trace.tsv",
+                  "coffee_exit_player_writes.tsv",
+                  "coffee_exit_global_writes.tsv",
+                  "coffee_exit_route_trace.tsv",
+                  "coffee_exit_player_frames.tsv")
+    exit_hashes_a = {name: digest(COFFEE_EXIT_A / name)
+                     for name in exit_files}
+    exit_hashes_b = {name: digest(COFFEE_EXIT_B / name)
+                     for name in exit_files}
+    require(exit_hashes_a == exit_hashes_b,
+            "Coffee Shop exit cold captures diverged")
+    exit_frame_rows = list(rows(COFFEE_EXIT_A / "coffee_exit_player_frames.tsv"))
+    exit_frames_by_number = {int(row["frame"]): row
+                             for row in exit_frame_rows}
+    exit_callback_counts = []
+    for frame in range(5453, 5524):
+        row = exit_frames_by_number[frame]
+        updates = max(int(row["motion_calls"]) // 2,
+                      int(row["ballistic_calls"]) // 2,
+                      int(row["dwell_decrements"]))
+        if frame in (5453, 5454, 5476, 5523):
+            updates = max(updates, 1)
+        if frame in (5506, 5520):
+            updates += 1
+        exit_callback_counts.append(updates)
+    callback_groups = []
+    group_start = 0
+    group_updates = exit_callback_counts[0]
+    for offset, updates in enumerate(exit_callback_counts[1:], 1):
+        if updates == group_updates:
+            continue
+        callback_groups.append({"program_tick_u8": group_start,
+                                "display_ticks_u8": offset - group_start,
+                                "updates_u8": group_updates})
+        group_start = offset
+        group_updates = updates
+    callback_groups.append({"program_tick_u8": group_start,
+                            "display_ticks_u8": len(exit_callback_counts) -
+                                group_start,
+                            "updates_u8": group_updates})
+    ballistic_vector = [
+        int.from_bytes(program[0x224fa + index * 4:
+                               0x224fe + index * 4], "big", signed=True)
+        for index in range(4)
+    ]
+    motion_vectors = [
+        {"x_s16": s16_from_hex(program[0x1f8440 + index * 4:
+                                            0x1f8442 + index * 4].hex()),
+         "z_s16": s16_from_hex(program[0x1f8442 + index * 4:
+                                            0x1f8444 + index * 4].hex())}
+        for index in range(32)
+    ]
+    first_segment_recurring_spawn["exit_controller_program"] = {
+        "classification": "SOURCE_CLOSED_IMPLEMENTATION_FIELDS",
+        "capture_identity": {
+            "completion_a": COFFEE_EXIT_A.name,
+            "completion_b": COFFEE_EXIT_B.name,
+            "byte_identical": True,
+            "files": exit_hashes_a,
+            "nvram_seed_sha256":
+                "258035af2bade385a02c9ceca7e42c00752d831b4b5badba0cc7bb85baabc6bc",
+        },
+        "controller_dispatch": {
+            "routine": "0x0288e2..0x0288fa",
+            "scheduler_order": "record-type-32 controller before player and fixed pools",
+            "rng_calls": 0,
+            "player_count_u8": 1,
+            "progress_threshold_u16": 16,
+            "phases": [
+                {"substate_u16": 0x0200,
+                 "routine": "0x028960..0x02898e",
+                 "guard": "progress-snapshot < (player_count << 4) and field46 != 0",
+                 "blocked_write": "predecrement field46:u16",
+                 "transition": "set phase/local 1/0, camera right edge 1008, substate 0x0400"},
+                {"substate_u16": 0x0400,
+                 "routine": "0x028990..0x0289c4",
+                 "guard": "field48 != 0; predecrement and call phase helper at 600",
+                 "transition": "camera target=current; at camera>=1008 enter 0x0600, clamp target and snapshot progress"},
+                {"substate_u16": 0x0600,
+                 "routine": "0x0289c6..0x028a04",
+                 "guard": "progress-snapshot >= (player_count << 4) or field48 == 0, then helper 0x020a10 succeeds",
+                 "transition": "timer42=300, controller state/substate=0x0400:0000, clear progress latch"},
+            ],
+            "player_eligibility_helper": {
+                "routine": "0x020a10..0x020a4c",
+                "guard_order": ["g81ef==0", "g81bf!=0", "g81af!=0",
+                                "one active player has outer state 0x0200 or signed health >= 0"],
+            },
+            "withdrawal": {
+                "routine": "0x028ba6..0x028bcc",
+                "timer_u16": 300,
+                "guard": "predecrement timer42 while nonzero; then player eligibility helper succeeds",
+                "writes": ["g81f3=1", "camera right edge=1152"],
+                "living_enemy_count_is_not_a_guard": True,
+            },
+        },
+        "route_edges": [
+            {"writer_pc": "0x008418", "from_s16": 4, "to_s16": 6,
+             "guard": "u8(g81f3) != 0", "source_write_frame_u16": 5452},
+            {"writer_pc": "0x00c84c", "from_s16": 6, "to_s16": 0,
+             "guard": "(u8(g8236) & u8(g81af)) == 0", "source_write_frame_u16": 5523},
+            {"writer_pc": "0x0083d4", "from_s16": 0, "to_s16": 2,
+             "guard": "s16(g837c) == 0", "source_write_frame_u16": 5561},
+        ],
+        "player_withdrawal_script": {
+            "outer_state_u16": 0x0800,
+            "initializer": "0x01b5de..0x01b5f4",
+            "interpreter": "0x0213d0..0x02183a",
+            "source_program_address": "0x00129b64",
+            "source_program_bytes": program[0x129b64:0x129b86].hex(),
+            "source_program_sha256": hashlib.sha256(
+                program[0x129b64:0x129b86]).hexdigest(),
+            "steps": [
+                {"cursor": "0x00129b64", "next_cursor": "0x00129b68",
+                 "kind": "bootstrap", "animation_record": "0x0015f1f4"},
+                {"cursor": "0x00129b68", "next_cursor": "0x00129b6e",
+                 "kind": "move_to", "mode_u8": 2, "x_s16": 1256,
+                 "z_s16": 280, "animation_record": "0x0015f208"},
+                {"cursor": "0x00129b6e", "next_cursor": "0x00129b70",
+                 "kind": "set_mode", "mode_u8": 0},
+                {"cursor": "0x00129b70", "next_cursor": "0x00129b74",
+                 "kind": "dwell", "subhandler_u8": 2, "ticks_u16": 0},
+                {"cursor": "0x00129b74", "next_cursor": "0x00129b78",
+                 "kind": "dwell", "subhandler_u8": 0, "ticks_u16": 90},
+                {"cursor": "0x00129b78", "next_cursor": "0x00129b7a",
+                 "kind": "ballistic", "mode_u8": 3,
+                 "selector_u8": program[0x2254a + 3],
+                 "animation_record": "0x0015f2cc"},
+                {"cursor": "0x00129b7a", "next_cursor": "0x00129b80",
+                 "kind": "move_to", "mode_u8": 2, "x_s16": 1440,
+                 "z_s16": 280, "animation_record": "0x0015f208"},
+                {"cursor": "0x00129b80", "next_cursor": "0x00129b84",
+                 "kind": "dwell", "subhandler_u8": 2, "ticks_u16": 0},
+                {"cursor": "0x00129b84", "next_cursor": "0x00129b85",
+                 "kind": "terminate", "opcode_s8": -1},
+            ],
+            "move_guard": "unsigned (x-target+4) <= 8 and unsigned (z-target+3) <= 6",
+            "direction_routine": "0x016484..0x01650a",
+            "motion_table_address": "0x001f8440",
+            "motion_vectors": motion_vectors,
+            "motion_arithmetic": "s32 16.16 position += signed table component << 8",
+            "facing_rule": "direction 0 or 16 preserves facing; otherwise facing = 1 xor ((direction >> 4) & 1)",
+            "source_display_callback_program": {
+                "classification": "SOURCE_CLOSED_IMPLEMENTATION_FIELDS",
+                "source_visible_frame_range_inclusive": [5453, 5523],
+                "outer_dispatch_entry": "0x0213d0",
+                "direct_writer_pcs": ["0x016266", "0x01a8f6", "0x02177a"],
+                "default_updates_u8": 3,
+                "groups": callback_groups,
+                "scheduler_rule": ("execute the route-6 player state dispatcher "
+                                   "the captured number of times per displayed tick; "
+                                   "state guards and script cursors, never the display tick, "
+                                   "own every gameplay transition"),
+            },
+            "ballistic_mode_3": {
+                "dispatcher": "0x02183a..0x021848",
+                "initializer": "0x02184e..0x021888",
+                "step_routine": "0x01a8e6..0x01a930",
+                "selector_u8": 6,
+                "x_velocity_s32": ballistic_vector[0],
+                "x_acceleration_s32": ballistic_vector[1],
+                "y_velocity_s32": ballistic_vector[2],
+                "y_acceleration_s32": ballistic_vector[3],
+                "arithmetic": ("x += vx; vx += ax with sign-cross clamp; "
+                               "y += vy; vy += ay; terminate when y crosses "
+                               "the saved ground baseline"),
+                "terminal_substate_u8": 4,
+                "rng_calls": 0,
+            },
+            "source_projection_anchors": [
+                {key: row[key] for key in (
+                    "frame", "x_fp", "y_fp", "z", "facing",
+                    "animation_record", "animation_timer", "script_handler",
+                    "script_substate", "script_argument", "script_timer",
+                    "gate8236", "route")}
+                for row in exit_frame_rows
+                if int(row["frame"]) in
+                    (5453, 5454, 5475, 5476, 5505, 5506, 5519,
+                     5520, 5522, 5523)
+            ],
+            "terminal_writer_pc": "0x02151e",
+            "terminal_write": "clear player-selected bit in g8236",
+            "rng_calls": 0,
+        },
+        "route_zero_program": {
+            "dispatcher": "0x00837c..0x0083c6",
+            "guard_countdown": {"writer": "0x00188c", "initial_u16": 16,
+                                "terminal_u16": 0},
+            "resident_load_stalls": [
+                {"after_source_frame_u16": 5523, "display_frames_u16": 26,
+                 "resume_source_frame_u16": 5550},
+                {"after_source_frame_u16": 5550, "display_frames_u16": 9,
+                 "resume_source_frame_u16": 5560},
+                {"after_source_frame_u16": 5561, "display_frames_u16": 1,
+                 "resume_source_frame_u16": 5563},
+            ],
+            "substates": [
+                {"substate_u16": 0, "routine": "0x00838e..0x0083be",
+                 "guard": "s16(g837c)==0 after source loader resumes",
+                 "writes": "substate=2; centralized fixed-pool clear/rebuild"},
+                {"substate_u16": 2, "routine": "0x0091e4..0x009238",
+                 "guard": "Round 1 dispatch selects 0x009222",
+                 "writes": "clear scene temporaries; substate=4"},
+                {"substate_u16": 4, "routine": "0x0083c8..0x0083fa",
+                 "guard": "s16(g837c)==0",
+                 "writes": "route=2; substate=0; clear withdrawal and presentation-load flags"},
+            ],
+            "teardown_visible_frame_u16": 5551,
+            "next_scene_substate2_visible_frame_u16": 5564,
+        },
+        "load_boundaries": [
+            {"source_visible_frame_u16": 5565,
+             "package_sha256": "42768124ed4684b33f77374a8ad3674b93df0bfa5597fbfc73739722ac2c4247",
+             "native_binding": "ADAPTED_PRESENTATION_RESIDENCY_NOOP"},
+            {"source_visible_frame_u16": 5566,
+             "package_sha256": "1c716c69090ac02420aaeab2a079b9073bd91eca7a0109c2a40356b95fd50f98",
+             "native_binding": "ADAPTED_PRESENTATION_RESIDENCY_NOOP"},
+        ],
+        "mutation_controls": {
+            "wrong_progress_threshold_rejected": True,
+            "living_enemy_kill_gate_rejected": True,
+            "fixed_frame_route_transition_rejected": True,
+            "wrong_player_script_cursor_rejected": True,
+            "wrong_motion_vector_rejected": True,
+            "wrong_callback_group_rejected": True,
+            "wrong_ballistic_vector_rejected": True,
+            "terminal_without_writer_0x02151e_rejected": True,
+            "individual_actor_teardown_rejected": True,
+            "mid_round_data_read_rejected": True,
+        },
+        "spec_executable": True,
+    }
+
     controls = route["targeted_counterfactuals"]
     counterfactuals = {name: {
         "status": controls[name]["status"],
@@ -1756,6 +1992,7 @@ def validate(report: dict[str, object]) -> None:
             first_entry["suppression_control"]["mutant_route_at_2300"] == 2,
             "entry executable boundary is not source closed")
     progression = report["first_segment_recurring_spawn"]
+    exit_program = progression["exit_controller_program"]
     require(progression["classification"] ==
                 "SOURCE_CLOSED_IMPLEMENTATION_FIELDS" and
             progression["capture_identity"]["byte_identical"] is True and
@@ -1967,6 +2204,73 @@ def validate(report: dict[str, object]) -> None:
             progression["intro_gate_suppression_control"]
                 ["fixed_frame_substitute"] is False,
             "first-segment recurring spawn boundary is not executable")
+    require(
+        exit_program["classification"] ==
+            "SOURCE_CLOSED_IMPLEMENTATION_FIELDS" and
+        exit_program["capture_identity"]["byte_identical"] is True and
+        exit_program["capture_identity"]["files"] == {
+            "coffee_exit_player_trace.tsv":
+                "78ba35ea84116f4c7e7fe1c00667605bdf8e07c946d33cf918912ebf9a331b42",
+            "coffee_exit_player_writes.tsv":
+                "5366044d19d4d8a434a22e007a53917b8b559a79adb0e0070600215ee9adc0e0",
+            "coffee_exit_global_writes.tsv":
+                "d661aeccEA356C644B2B1774F96F52C692FAB106B7FDEFC3057CC0A0DD417C9C".lower(),
+            "coffee_exit_route_trace.tsv":
+                "a4e64c0ece5b89968a0fb96696ec973ed450088d9b5b29051d23e16676ce469e",
+            "coffee_exit_player_frames.tsv":
+                "3d92341afef0376004f3002e3dfbb03eac6b4d99adc54147075e651999e92579",
+        } and
+        [row["substate_u16"] for row in
+         exit_program["controller_dispatch"]["phases"]] ==
+            [0x0200, 0x0400, 0x0600] and
+        exit_program["controller_dispatch"]["withdrawal"]
+            ["living_enemy_count_is_not_a_guard"] is True and
+        [(edge["writer_pc"], edge["from_s16"], edge["to_s16"],
+          edge["source_write_frame_u16"])
+         for edge in exit_program["route_edges"]] == [
+            ("0x008418", 4, 6, 5452),
+            ("0x00c84c", 6, 0, 5523),
+            ("0x0083d4", 0, 2, 5561)] and
+        [step["cursor"] for step in
+         exit_program["player_withdrawal_script"]["steps"]] == [
+            "0x00129b64", "0x00129b68", "0x00129b6e",
+            "0x00129b70", "0x00129b74", "0x00129b78",
+            "0x00129b7a", "0x00129b80", "0x00129b84"] and
+        exit_program["player_withdrawal_script"]["steps"][5]["kind"] ==
+            "ballistic" and
+        exit_program["player_withdrawal_script"]
+            ["source_display_callback_program"]["groups"] == [
+                {"program_tick_u8": start, "display_ticks_u8": length,
+                 "updates_u8": updates}
+                for start, length, updates in (
+                    (0, 5, 1), (5, 2, 3), (7, 1, 4), (8, 14, 3),
+                    (22, 2, 1), (24, 3, 3), (27, 1, 4), (28, 9, 3),
+                    (37, 1, 4), (38, 6, 3), (44, 1, 4), (45, 5, 3),
+                    (50, 1, 4), (51, 1, 3), (52, 2, 2),
+                    (54, 2, 3), (56, 1, 4), (57, 6, 3), (63, 1, 4),
+                    (64, 1, 3), (65, 2, 4), (67, 1, 2), (68, 1, 4),
+                    (69, 1, 2), (70, 1, 1))] and
+        tuple(exit_program["player_withdrawal_script"]["ballistic_mode_3"]
+              [name] for name in ("x_velocity_s32", "x_acceleration_s32",
+                                  "y_velocity_s32", "y_acceleration_s32")) ==
+            (0x50000, -0x1000, 0x80000, -0x6000) and
+        exit_program["player_withdrawal_script"]["motion_vectors"] == [
+            {"x_s16": x, "z_s16": z} for x, z in (
+                (0, 288), (112, 282), (219, 265), (319, 239),
+                (407, 203), (478, 159), (531, 109), (564, 56),
+                (576, 0), (564, -56), (531, -109), (478, -159),
+                (407, -203), (319, -239), (219, -265), (112, -282),
+                (0, -288), (-112, -282), (-219, -265), (-319, -239),
+                (-407, -203), (-478, -159), (-531, -109), (-564, -56),
+                (-576, 0), (-564, 56), (-531, 109), (-478, 159),
+                (-407, 203), (-319, 239), (-219, 265), (-112, 282))] and
+        [stall["display_frames_u16"] for stall in
+         exit_program["route_zero_program"]["resident_load_stalls"]] ==
+            [26, 9, 1] and
+        all(row["native_binding"] == "ADAPTED_PRESENTATION_RESIDENCY_NOOP"
+            for row in exit_program["load_boundaries"]) and
+        exit_program["spec_executable"] is True,
+        "Coffee Shop exit controller boundary is not executable")
     require(report["negative_controls"] == {
         "presentation_signature_can_advance_gameplay": False,
         "fixed_frame_can_spawn_or_clear": False,
@@ -2050,6 +2354,33 @@ def mutation_self_test(report: dict[str, object]) -> None:
     wrong_progress_increment["first_segment_recurring_spawn"] \
         ["progress_increment_boundary"]["increment_u16"] = 2
     mutations.append(wrong_progress_increment)
+    wrong_exit_cursor = copy.deepcopy(report)
+    wrong_exit_cursor["first_segment_recurring_spawn"]["exit_controller_program"] \
+        ["player_withdrawal_script"]["steps"][1]["cursor"] = "0x00129b69"
+    mutations.append(wrong_exit_cursor)
+    wrong_exit_vector = copy.deepcopy(report)
+    wrong_exit_vector["first_segment_recurring_spawn"]["exit_controller_program"] \
+        ["player_withdrawal_script"]["motion_vectors"][8]["x_s16"] = 575
+    mutations.append(wrong_exit_vector)
+    wrong_exit_callback = copy.deepcopy(report)
+    wrong_exit_callback["first_segment_recurring_spawn"] \
+        ["exit_controller_program"]["player_withdrawal_script"] \
+        ["source_display_callback_program"]["groups"][0]["updates_u8"] = 2
+    mutations.append(wrong_exit_callback)
+    wrong_exit_ballistic = copy.deepcopy(report)
+    wrong_exit_ballistic["first_segment_recurring_spawn"] \
+        ["exit_controller_program"]["player_withdrawal_script"] \
+        ["ballistic_mode_3"]["x_acceleration_s32"] = -0x2000
+    mutations.append(wrong_exit_ballistic)
+    wrong_exit_stall = copy.deepcopy(report)
+    wrong_exit_stall["first_segment_recurring_spawn"]["exit_controller_program"] \
+        ["route_zero_program"]["resident_load_stalls"][0]["display_frames_u16"] = 25
+    mutations.append(wrong_exit_stall)
+    wrong_exit_kill_gate = copy.deepcopy(report)
+    wrong_exit_kill_gate["first_segment_recurring_spawn"]["exit_controller_program"] \
+        ["controller_dispatch"]["withdrawal"] \
+        ["living_enemy_count_is_not_a_guard"] = False
+    mutations.append(wrong_exit_kill_gate)
     for mutant in mutations:
         try:
             validate(mutant)

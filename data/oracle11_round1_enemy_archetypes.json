@@ -27575,7 +27575,7 @@
         "writes": 153166
       },
       "current_state_implementation_contract": {
-        "accepted_encounter_authority_sha256": "2d59b4a249e42297d8542b9551e219b6fefd6b4856fe9f03dcf1ea3c55d85f4a",
+        "accepted_encounter_authority_sha256": "cf21dccbed88bbd2f26a9cd7f33bc7e3799e45c18ed0a7406fd393ca01c031f0",
         "accepted_oracle09_sha256": "a3027c3ffcd19af2656c515e0dfc0e9c56086b1bf3dd029e854d74be372c847f",
         "actions": {
           "above_lane_0x0600": {
@@ -38164,7 +38164,7 @@
         },
         "current_state_player_collision": {
           "accepted_collision_sha256": "49ce678bee49d331a3b9e6cee97708b7644c5b0727de477ffc89671bf64bd78c",
-          "accepted_encounter_authority_sha256": "2d59b4a249e42297d8542b9551e219b6fefd6b4856fe9f03dcf1ea3c55d85f4a",
+          "accepted_encounter_authority_sha256": "cf21dccbed88bbd2f26a9cd7f33bc7e3799e45c18ed0a7406fd393ca01c031f0",
           "attacker": {
             "animation_record": "0x0012d8a0",
             "attack_record": "0x130b5c",

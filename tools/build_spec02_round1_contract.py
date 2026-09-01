@@ -313,6 +313,11 @@ def build_fields() -> list[dict[str, object]]:
           "/authority_data/route/first_segment_recurring_spawn", "source controller initialization, class-0x44 intro-gate release, class-0x1f KO progress, countdown/progress guards, phase counters and successful record-12 allocation own recurring class-0x1f spawns",
           ["route.state:s16", "controller.state_substate:u16", "controller.timer40:u16", "controller.timer42:u16", "controller.limit:u16", "intro_gate.u8", "phase.u8", "class1f.state_substate:u16", "class1f.health:s16", "progress:u16", "camera.position:s16", "rng.seed:u16", "pool.free_count:u8"], ["controller.state_substate:u16", "controller.timers:u16", "progress:u16", "enemy.record", "living_enemy_count:u16", "controller.index:u16", "rng.seed:u16", "pool.free_count:u8"],
           "/first_segment_recurring_spawn/intro_gate_suppression_control", "suppressing only the class-0x44 writer leaves the controller at 0x0202 with timer 60 and prevents primary or auxiliary recurring spawns; fixed-frame advancement is rejected"),
+        f("route.coffee_shop_exit_controller", "encounters-waves-scripted-triggers", "guarded_exit_route_program", True,
+          "route", "/first_segment_recurring_spawn/exit_controller_program", "0x0288e2 phase dispatcher, 0x028ba6 withdrawal timer, player program 0x00129b64, route writers 0x008418/0x00c84c/0x0083d4 and route-zero dispatcher 0x00837c",
+          "/authority_data/route/first_segment_recurring_spawn/exit_controller_program", "controller progress, source timers, player-script terminal writer and route-zero loader resumes own Coffee Shop withdrawal, centralized teardown and next-scene handoff; living enemy count and fixed frames do not",
+          ["route.state:s16", "controller.state_substate:u16", "controller.timer42:u16", "progress:u16", "progress_snapshot:u16", "player.script_cursor:u32", "player.position:s32", "g8236:u8", "g81af:u8", "g837c:s16", "loader.resume:u8"], ["controller.state_substate:u16", "controller.timer42:u16", "route.state:s16", "player.state:u16", "player.position:s32", "player.facing:u8", "pool.free_count:u8", "load.event"],
+          "/first_segment_recurring_spawn/exit_controller_program/mutation_controls", "wrong progress threshold, kill gate, fixed-frame transition, script cursor, motion vector, terminal writer, teardown mode or mid-round read is rejected"),
         f("boss.phases_spawns", "round1-boss", "boss_phase_table", True,
           "boss", "/controller_contract", "class-0x02 type-32 controller, 11 phases, eight boss-room spawns",
           "/authority_data/boss", "controller state/phase and source countdown guards own boss spawns and phase transitions",
@@ -446,7 +451,8 @@ def build_coffee_shop_scene_manifest(source: dict[str, dict]) -> dict[str, objec
             continue
         edge = copy.deepcopy(item)
         edge["classification"] = (
-            "NATIVE_IMPLEMENTED" if edge["write_frame"] == 2237 else
+            "NATIVE_IMPLEMENTED" if edge["write_frame"] in
+                {2237, 5452, 5523, 5561} else
             "BLOCKED_MISSING_SPEC")
         route_edges.append(edge)
 
@@ -455,7 +461,8 @@ def build_coffee_shop_scene_manifest(source: dict[str, dict]) -> dict[str, objec
         if int(item["visible_boundary_frame"]) > 5566:
             continue
         boundary = copy.deepcopy(item)
-        boundary["classification"] = "BLOCKED_MISSING_SPEC"
+        boundary["classification"] = "NATIVE_IMPLEMENTED"
+        boundary["native_binding"] = "ADAPTED_PRESENTATION_RESIDENCY_NOOP"
         loads.append(boundary)
 
     camera_runs = []
@@ -489,7 +496,7 @@ def build_coffee_shop_scene_manifest(source: dict[str, dict]) -> dict[str, objec
          "classification": "BLOCKED_MISSING_SPEC",
          "source_contract": "authority_data.player",
          "exact_blocker": "complete scene state/animation and current "
-             "collision/damage/HIT/KO/exit binding is not yet present in the "
+             "collision/damage/HIT/KO binding is not yet present in the "
              "implementation fixture"},
         {"id": "coffee-shop-obstacle",
          "classification": "NATIVE_IMPLEMENTED",
@@ -526,10 +533,10 @@ def build_coffee_shop_scene_manifest(source: dict[str, dict]) -> dict[str, objec
          "classification": "BLOCKED_MISSING_SPEC",
          "source_contract": "coffee_shop.audio_events"},
         {"id": "coffee-shop-exit-loads",
-         "classification": "BLOCKED_MISSING_SPEC",
+         "classification": "NATIVE_IMPLEMENTED",
          "source_contract": "authority_data.loading.boundaries"},
         {"id": "coffee-shop-encounter-clear-and-exit",
-         "classification": "BLOCKED_MISSING_SPEC",
+         "classification": "NATIVE_IMPLEMENTED",
          "source_contract": "authority_data.route.route_state_edges"},
     ]
     all_items = (census["actor_lifetimes"] + census["audio_events"] +

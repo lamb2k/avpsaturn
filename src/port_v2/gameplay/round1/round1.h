@@ -6,7 +6,7 @@
 #include "../../combat/hit_ko/hit_ko.h"
 
 #define AVSP_ROUND1_SPEC02_SHA256 \
-"7a0db579d3751541d374444ebae60a009f9afedf75840457661b60de1fa93b3a"
+"c36120c5b548d3c505e8628e381ce6d48d06b4411eec99722a97fbe14b4e25a2"
 #define AVSP_ROUND1_CANARY_HEAD 0x52314548UL
 #define AVSP_ROUND1_CANARY_TAIL 0x52314554UL
 #define AVSP_ROUND1_ROUTE_ENTRY_STATE 2
@@ -74,6 +74,16 @@
 #define AVSP_ROUND1_RECURRING_SELECTOR_COUNT 10u
 #define AVSP_ROUND1_RECURRING_LANE_BUCKET_COUNT 64u
 #define AVSP_ROUND1_RECURRING_VARIANT_COUNT 96u
+#define AVSP_ROUND1_COFFEE_EXIT_STEP_COUNT 9u
+#define AVSP_ROUND1_COFFEE_EXIT_MOTION_COUNT 32u
+#define AVSP_ROUND1_COFFEE_EXIT_CALLBACK_GROUP_COUNT 25u
+#define AVSP_ROUND1_COFFEE_EXIT_LOAD_COUNT 2u
+#define AVSP_ROUND1_EXIT_STEP_BOOTSTRAP 0u
+#define AVSP_ROUND1_EXIT_STEP_MOVE_TO 1u
+#define AVSP_ROUND1_EXIT_STEP_SET_MODE 2u
+#define AVSP_ROUND1_EXIT_STEP_DWELL 3u
+#define AVSP_ROUND1_EXIT_STEP_TERMINATE 4u
+#define AVSP_ROUND1_EXIT_STEP_BALLISTIC 5u
 #define AVSP_ROUND1_CLASS1F_ACTION_TARGET_COUNT 16u
 #define AVSP_ROUND1_CLASS1F_ACTION_VARIANT_COUNT 10u
 #define AVSP_ROUND1_CLASS1F_ACTION_SELECTOR_COUNT 22u
@@ -912,6 +922,67 @@ typedef struct
 
 typedef struct
 {
+    unsigned short phase_wait;
+    unsigned short phase_camera;
+    unsigned short phase_complete;
+    unsigned short withdrawal_state;
+    unsigned short progress_threshold;
+    unsigned short field46_phase_threshold;
+    unsigned short camera_phase_edge;
+    unsigned short withdrawal_timer;
+    unsigned short withdrawal_camera_edge;
+    short route_withdrawal;
+    short route_teardown;
+    short route_next_entry;
+    unsigned short teardown_countdown;
+    unsigned short first_stall_frames;
+    unsigned short second_stall_frames;
+    unsigned short third_stall_frames;
+    unsigned short teardown_visible_frame;
+    unsigned short next_scene_substate2_visible_frame;
+    unsigned short player_outer_state;
+    unsigned long player_program_address;
+    unsigned long terminal_cursor;
+} AvspRound1CoffeeExitSpec;
+
+typedef struct
+{
+    unsigned long cursor;
+    unsigned long next_cursor;
+    unsigned long animation_record;
+    short x;
+    short z;
+    unsigned short ticks;
+    unsigned char kind;
+    unsigned char mode;
+    unsigned char subhandler;
+} AvspRound1CoffeeExitStepSpec;
+
+typedef struct
+{
+    short x;
+    short z;
+} AvspRound1CoffeeExitMotionSpec;
+
+typedef struct
+{
+    unsigned char program_tick;
+    unsigned char display_ticks;
+    unsigned char updates;
+} AvspRound1CoffeeExitCallbackGroupSpec;
+
+typedef struct
+{
+    long x_velocity;
+    long x_acceleration;
+    long y_velocity;
+    long y_acceleration;
+    unsigned char selector;
+    unsigned char terminal_substate;
+} AvspRound1CoffeeExitBallisticSpec;
+
+typedef struct
+{
     unsigned short first_source_frame;
     unsigned short last_source_frame;
     unsigned short input_mask;
@@ -1642,6 +1713,23 @@ typedef struct
     unsigned short spawn_count;
     unsigned short source18_argument;
     unsigned long script_cursor;
+    unsigned long exit_script_cursor;
+    unsigned short exit_script_ticks;
+    unsigned short exit_route_countdown;
+    unsigned short exit_stall_remaining;
+    unsigned char exit_started;
+    unsigned char exit_script_step;
+    unsigned char exit_script_mode;
+    unsigned char exit_script_subhandler;
+    unsigned char exit_route_phase;
+    unsigned char exit_route_substate;
+    unsigned char exit_load_index;
+    unsigned char exit_complete;
+    unsigned char exit_display_tick;
+    unsigned long exit_script_updates;
+    unsigned long exit_route_updates;
+    unsigned long exit_pool_teardowns;
+    unsigned long exit_load_events;
 } AvspRound1EntryRuntime;
 
 typedef struct
@@ -2137,6 +2225,7 @@ int avsp_round1_bind_content_archive(const void *data,
                                      unsigned long bytes);
 int avsp_round1_begin_first_entry(AvspRound1Runtime *runtime);
 int avsp_round1_step_first_entry(AvspRound1Runtime *runtime);
+int avsp_round1_step_coffee_exit_display(AvspRound1Runtime *runtime);
 int avsp_round1_step_player(AvspRound1Runtime *runtime,
                             unsigned short input_mask,
                             short received_damage);

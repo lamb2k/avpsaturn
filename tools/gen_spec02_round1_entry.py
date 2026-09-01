@@ -303,6 +303,12 @@ def build() -> str:
     recurring_auxiliary = recurring["auxiliary_writer"]
     recurring_progress = recurring["progress_increment_boundary"]
     recurring_tables = recurring_primary["tables"]
+    coffee_exit = recurring["exit_controller_program"]
+    coffee_exit_controller = coffee_exit["controller_dispatch"]
+    coffee_exit_script = coffee_exit["player_withdrawal_script"]
+    coffee_exit_route_zero = coffee_exit["route_zero_program"]
+    coffee_exit_callbacks = coffee_exit_script["source_display_callback_program"]
+    coffee_exit_ballistic = coffee_exit_script["ballistic_mode_3"]
     class1f_initial_actors = class1f_initial["actors"]
     class1f_initialization = class1f_initial["initialization"]
     class1f_sequences = class1f_initial["animation_sequences"]
@@ -1212,7 +1218,38 @@ def build() -> str:
             "frame": 5150, "slot": "0xff9c40",
             "progress_before_u16": 19, "progress_after_u16": 20} or
         recurring_progress["mutation_control"]["fixed_frame_substitute"] is not
-            False):
+            False or
+        coffee_exit["classification"] !=
+            "SOURCE_CLOSED_IMPLEMENTATION_FIELDS" or
+        coffee_exit["spec_executable"] is not True or
+        [row["substate_u16"] for row in coffee_exit_controller["phases"]] !=
+            [0x0200, 0x0400, 0x0600] or
+        coffee_exit_controller["withdrawal"]["timer_u16"] != 300 or
+        coffee_exit_controller["withdrawal"]
+            ["living_enemy_count_is_not_a_guard"] is not True or
+        [(row["from_s16"], row["to_s16"], row["source_write_frame_u16"])
+         for row in coffee_exit["route_edges"]] !=
+            [(4, 6, 5452), (6, 0, 5523), (0, 2, 5561)] or
+        [row["cursor"] for row in coffee_exit_script["steps"]] != [
+            "0x00129b64", "0x00129b68", "0x00129b6e",
+            "0x00129b70", "0x00129b74", "0x00129b78",
+            "0x00129b7a", "0x00129b80", "0x00129b84"] or
+        len(coffee_exit_script["motion_vectors"]) != 32 or
+        coffee_exit_script["motion_vectors"][8] !=
+            {"x_s16": 576, "z_s16": 0} or
+        coffee_exit_script["steps"][5]["kind"] != "ballistic" or
+        len(coffee_exit_callbacks["groups"]) != 25 or
+        sum(row["display_ticks_u8"] for row in
+            coffee_exit_callbacks["groups"]) != 71 or
+        coffee_exit_ballistic["selector_u8"] != 6 or
+        tuple(coffee_exit_ballistic[name] for name in
+              ("x_velocity_s32", "x_acceleration_s32",
+               "y_velocity_s32", "y_acceleration_s32")) !=
+            (0x50000, -0x1000, 0x80000, -0x6000) or
+        [row["display_frames_u16"] for row in
+         coffee_exit_route_zero["resident_load_stalls"]] != [26, 9, 1] or
+        any(row["native_binding"] != "ADAPTED_PRESENTATION_RESIDENCY_NOOP"
+            for row in coffee_exit["load_boundaries"])):
         raise ValueError("SPEC-02 first-segment recurring spawn drift")
     if (class08_pickup["classification"] !=
             "SOURCE_CLOSED_IMPLEMENTATION_FIELDS" or
@@ -2617,6 +2654,78 @@ def build() -> str:
             recurring_progress["transition_guard"]["health_s16"],
             recurring_progress["increment_u16"]),
         "    1u, 1u",
+        "};", "",
+        "static const AvspRound1CoffeeExitSpec avsp_round1_coffee_exit =",
+        "{",
+        "    0x%04Xu, 0x%04Xu, 0x%04Xu, 0x0400u," % tuple(
+            row["substate_u16"] for row in coffee_exit_controller["phases"]),
+        "    16u, 600u, 1008u, %du, 1152u," %
+            coffee_exit_controller["withdrawal"]["timer_u16"],
+        "    %d, %d, %d, %du," % (
+            coffee_exit["route_edges"][0]["to_s16"],
+            coffee_exit["route_edges"][1]["to_s16"],
+            coffee_exit["route_edges"][2]["to_s16"],
+            coffee_exit_route_zero["guard_countdown"]["initial_u16"]),
+        "    %du, %du, %du, %du, %du," % (
+            coffee_exit_route_zero["resident_load_stalls"][0]
+                ["display_frames_u16"],
+            coffee_exit_route_zero["resident_load_stalls"][1]
+                ["display_frames_u16"],
+            coffee_exit_route_zero["resident_load_stalls"][2]
+                ["display_frames_u16"],
+            coffee_exit_route_zero["teardown_visible_frame_u16"],
+            coffee_exit_route_zero["next_scene_substate2_visible_frame_u16"]),
+        "    0x%04Xu, %sUL, %sUL" % (
+            coffee_exit_script["outer_state_u16"],
+            coffee_exit_script["source_program_address"],
+            coffee_exit_script["steps"][-1]["cursor"]),
+        "};", "",
+        "static const AvspRound1CoffeeExitStepSpec avsp_round1_coffee_exit_steps[AVSP_ROUND1_COFFEE_EXIT_STEP_COUNT] =",
+        "{",
+    ])
+    exit_kind = {
+        "bootstrap": "AVSP_ROUND1_EXIT_STEP_BOOTSTRAP",
+        "move_to": "AVSP_ROUND1_EXIT_STEP_MOVE_TO",
+        "set_mode": "AVSP_ROUND1_EXIT_STEP_SET_MODE",
+        "dwell": "AVSP_ROUND1_EXIT_STEP_DWELL",
+        "terminate": "AVSP_ROUND1_EXIT_STEP_TERMINATE",
+        "ballistic": "AVSP_ROUND1_EXIT_STEP_BALLISTIC",
+    }
+    for step in coffee_exit_script["steps"]:
+        lines.append(
+            "    { %sUL, %sUL, %sUL, %d, %d, %du, %s, %du, %du }," % (
+                step["cursor"], step["next_cursor"],
+                step.get("animation_record", "0x00000000"),
+                step.get("x_s16", 0), step.get("z_s16", 0),
+                step.get("ticks_u16", 0), exit_kind[step["kind"]],
+                step.get("mode_u8", 0), step.get("subhandler_u8", 0)))
+    lines.extend([
+        "};", "",
+        "static const AvspRound1CoffeeExitMotionSpec avsp_round1_coffee_exit_motion[AVSP_ROUND1_COFFEE_EXIT_MOTION_COUNT] =",
+        "{",
+    ])
+    for row in coffee_exit_script["motion_vectors"]:
+        lines.append("    { %d, %d }," % (row["x_s16"], row["z_s16"]))
+    lines.extend([
+        "};", "",
+        "static const AvspRound1CoffeeExitCallbackGroupSpec avsp_round1_coffee_exit_callbacks[AVSP_ROUND1_COFFEE_EXIT_CALLBACK_GROUP_COUNT] =",
+        "{",
+    ])
+    for row in coffee_exit_callbacks["groups"]:
+        lines.append("    { %du, %du, %du }," % (
+            row["program_tick_u8"], row["display_ticks_u8"],
+            row["updates_u8"]))
+    lines.extend([
+        "};", "",
+        "static const AvspRound1CoffeeExitBallisticSpec avsp_round1_coffee_exit_ballistic =",
+        "{",
+        "    %dL, %dL, %dL, %dL, %du, %du" % (
+            coffee_exit_ballistic["x_velocity_s32"],
+            coffee_exit_ballistic["x_acceleration_s32"],
+            coffee_exit_ballistic["y_velocity_s32"],
+            coffee_exit_ballistic["y_acceleration_s32"],
+            coffee_exit_ballistic["selector_u8"],
+            coffee_exit_ballistic["terminal_substate_u8"]),
         "};", "",
         "static const short avsp_round1_recurring_lane_offsets[AVSP_ROUND1_RECURRING_LANE_OFFSET_COUNT] =",
         "{",

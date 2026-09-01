@@ -323,6 +323,7 @@ int main(void)
                 return 5;
             if (tick < default_updates &&
                 player_authority_enabled_at_tick_start &&
+                runtime.route_state == 4 &&
                 !avsp_round1_step_player(&runtime, input, 0))
             {
                 fprintf(stderr,
@@ -355,6 +356,8 @@ int main(void)
                 return 5;
             }
         }
+        if (!avsp_round1_step_coffee_exit_display(&runtime))
+            return 6;
         if ((source_frame >= 3003u && source_frame <= 3005u) ||
             (source_frame >= 3089u && source_frame <= 3092u) ||
             (source_frame >= 3130u && source_frame <= 3190u) ||

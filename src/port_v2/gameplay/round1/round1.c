@@ -78,6 +78,17 @@ avsp_round1_find_player_hit_reaction(unsigned char source_record_type,
 static int avsp_round1_player_special_guard(
     const AvspRound1Runtime *runtime, unsigned char current,
     unsigned char previous);
+static unsigned char avsp_round1_class1f_inner8_direction(
+    const AvspRound1ActorCore *actor, short target_x, short target_z);
+static int avsp_round1_step_coffee_exit_player(AvspRound1Runtime *runtime);
+static int avsp_round1_bind_player_jump_sequence(
+    AvspRound1Runtime *runtime, unsigned char selector);
+static int avsp_round1_step_player_jump_animation(
+    AvspRound1Runtime *runtime);
+static void avsp_round1_bind_player_walk_record(
+    AvspRound1Runtime *runtime, unsigned char index);
+static void avsp_round1_advance_player_walk_animation(
+    AvspRound1Runtime *runtime);
 static void avsp_round1_begin_player_special(AvspRound1Runtime *runtime);
 static int avsp_round1_step_player_special(AvspRound1Runtime *runtime);
 
@@ -2055,9 +2066,112 @@ static int avsp_round1_step_recurring_controller(AvspRound1Runtime *runtime)
         }
         return 1;
     }
+    if (runtime->entry_controller.state ==
+            avsp_round1_coffee_exit.withdrawal_state)
+    {
+        if (encounter->source_intro_timer != 0u)
+        {
+            --encounter->source_intro_timer;
+            if (encounter->source_intro_timer != 0u)
+                return 1;
+        }
+        runtime->route_state = avsp_round1_coffee_exit.route_withdrawal;
+        runtime->camera_x_upper =
+            (short)avsp_round1_coffee_exit.withdrawal_camera_edge;
+        runtime->entry.exit_started = 1u;
+        runtime->entry.exit_script_step = 0u;
+        runtime->entry.exit_script_cursor =
+            avsp_round1_coffee_exit.player_program_address;
+        runtime->entry.exit_route_phase = 0u;
+        runtime->entry.exit_display_tick = 0u;
+        runtime->entry.gate8236 |= 1u;
+        runtime->player.state = avsp_round1_coffee_exit.player_outer_state;
+        runtime->player.substate = 0u;
+        runtime->player.source_x_fp = (long)runtime->player.x << 16;
+        runtime->player.source_y_fp = (long)runtime->player.z << 16;
+        runtime->player_action.x = runtime->player.x;
+        runtime->player_action.lane = runtime->player.z;
+        return 1;
+    }
     if (runtime->entry_controller.state !=
             avsp_round1_recurring_spawn.current_state)
         return 1;
+    if (runtime->entry_controller.substate ==
+            avsp_round1_coffee_exit.phase_wait)
+    {
+        if ((unsigned short)(encounter->source_progress -
+                encounter->source_progress_snapshot) <
+                avsp_round1_coffee_exit.progress_threshold &&
+            encounter->source_field46 != 0u)
+        {
+            --encounter->source_field46;
+        }
+        else
+        {
+            encounter->source_phase = 1u;
+            encounter->source_local = 0u;
+            encounter->source_camera_bound =
+                avsp_round1_coffee_exit.camera_phase_edge;
+            runtime->camera_x_upper =
+                (short)avsp_round1_coffee_exit.camera_phase_edge;
+            runtime->entry_controller.substate =
+                avsp_round1_coffee_exit.phase_camera;
+        }
+    }
+    if (runtime->entry_controller.substate ==
+            avsp_round1_coffee_exit.phase_camera)
+    {
+        if (encounter->source_field48 != 0u)
+        {
+            --encounter->source_field48;
+            if (encounter->source_field48 ==
+                    avsp_round1_coffee_exit.field46_phase_threshold)
+                avsp_round1_set_recurring_phase(runtime);
+        }
+        encounter->source_camera_target =
+            (unsigned short)runtime->camera_x_position;
+        if ((unsigned short)runtime->camera_x_position >=
+                avsp_round1_coffee_exit.camera_phase_edge)
+        {
+            runtime->entry_controller.substate =
+                avsp_round1_coffee_exit.phase_complete;
+            encounter->source_camera_target =
+                avsp_round1_coffee_exit.camera_phase_edge;
+            encounter->source_camera_bound =
+                avsp_round1_coffee_exit.camera_phase_edge;
+            encounter->source_progress_snapshot = encounter->source_progress;
+        }
+    }
+    if (runtime->entry_controller.substate ==
+            avsp_round1_coffee_exit.phase_complete)
+    {
+        if ((unsigned short)(encounter->source_progress -
+                encounter->source_progress_snapshot) <
+                avsp_round1_coffee_exit.progress_threshold &&
+            encounter->source_field48 != 0u)
+        {
+            /* The phase program still reaches the common recurring writer. */
+        }
+        else if (runtime->player.active != 0u &&
+                 runtime->entry.gate81af != 0u)
+        {
+            runtime->entry_controller.state =
+                avsp_round1_coffee_exit.withdrawal_state;
+            runtime->entry_controller.substate = 0u;
+            encounter->source_intro_timer =
+                avsp_round1_coffee_exit.withdrawal_timer;
+            encounter->source_progress = 0u;
+            return 1;
+        }
+    }
+    if (runtime->entry_controller.substate != 0u &&
+        runtime->entry_controller.substate !=
+            avsp_round1_coffee_exit.phase_wait &&
+        runtime->entry_controller.substate !=
+            avsp_round1_coffee_exit.phase_camera &&
+        runtime->entry_controller.substate !=
+            avsp_round1_coffee_exit.phase_complete)
+        return 0;
     if (encounter->source_progress >= encounter->source_spawn_limit)
         return 1;
     encounter->source_spawn_timer = (unsigned short)(
@@ -2383,6 +2497,324 @@ static unsigned char avsp_round1_class1f_inner8_direction(
         base = (unsigned char)(base - ratio);
     }
     return (unsigned char)((base & 0x3fu) >> 1);
+}
+
+static void avsp_round1_clear_coffee_scene_pools(AvspRound1Runtime *runtime)
+{
+    unsigned int pool_index;
+    unsigned int record_index;
+    for (pool_index = 0u; pool_index < AVSP_ROUND1_POOL_COUNT; ++pool_index)
+    {
+        AvspRound1Pool *pool = &runtime->pools[pool_index];
+        for (record_index = 0u; record_index < pool->capacity; ++record_index)
+        {
+            memset(&pool->records[record_index], 0,
+                   sizeof(pool->records[record_index]));
+            pool->free_stack[record_index] = (unsigned short)(
+                pool->source_base + record_index * pool->stride);
+        }
+        pool->free_count = pool->capacity;
+    }
+    runtime->entry_controller.active = 0u;
+    runtime->first_encounter.source_living_count = 0u;
+    runtime->coffee_scene_active_flag = 0u;
+    ++runtime->entry.exit_pool_teardowns;
+}
+
+static unsigned int avsp_round1_coffee_exit_callback_updates(
+    unsigned char program_tick)
+{
+    unsigned int index;
+    for (index = 0u; index < AVSP_ROUND1_COFFEE_EXIT_CALLBACK_GROUP_COUNT;
+         ++index)
+    {
+        const AvspRound1CoffeeExitCallbackGroupSpec *group =
+            &avsp_round1_coffee_exit_callbacks[index];
+        if (program_tick >= group->program_tick &&
+            program_tick < (unsigned int)group->program_tick +
+                group->display_ticks)
+            return group->updates;
+    }
+    return 0u;
+}
+
+static int avsp_round1_step_coffee_exit_player(AvspRound1Runtime *runtime)
+{
+    unsigned int immediate_steps;
+    for (immediate_steps = 0u;
+         immediate_steps < AVSP_ROUND1_COFFEE_EXIT_STEP_COUNT;
+         ++immediate_steps)
+    {
+        const AvspRound1CoffeeExitStepSpec *step;
+        unsigned char direction;
+        const AvspRound1CoffeeExitMotionSpec *motion;
+        if (runtime->entry.exit_script_step >=
+                AVSP_ROUND1_COFFEE_EXIT_STEP_COUNT)
+            return 0;
+        step = &avsp_round1_coffee_exit_steps[
+            runtime->entry.exit_script_step];
+        if (runtime->entry.exit_script_cursor != step->cursor)
+            return 0;
+        ++runtime->entry.exit_script_updates;
+        if (step->kind == AVSP_ROUND1_EXIT_STEP_BOOTSTRAP)
+        {
+            avsp_round1_bind_animation_state(
+                &runtime->player, &avsp_round1_player_hit.return_record);
+            runtime->entry.exit_script_mode = 2u;
+            runtime->entry.exit_script_subhandler = 0u;
+            runtime->entry.exit_script_cursor = step->next_cursor;
+            ++runtime->entry.exit_script_step;
+            return 1;
+        }
+        if (step->kind == AVSP_ROUND1_EXIT_STEP_SET_MODE)
+        {
+            runtime->entry.exit_script_mode = step->mode;
+            runtime->entry.exit_script_cursor = step->next_cursor;
+            ++runtime->entry.exit_script_step;
+            continue;
+        }
+        if (step->kind == AVSP_ROUND1_EXIT_STEP_DWELL)
+        {
+            runtime->entry.exit_script_subhandler = step->subhandler;
+            if (step->ticks == 0u)
+            {
+                runtime->entry.exit_script_cursor = step->next_cursor;
+                ++runtime->entry.exit_script_step;
+                continue;
+            }
+            if (runtime->entry.exit_script_ticks == 0u)
+            {
+                runtime->entry.exit_script_ticks = step->ticks;
+                runtime->entry.exit_script_mode = 2u;
+                return 1;
+            }
+            --runtime->entry.exit_script_ticks;
+            if (runtime->entry.exit_script_ticks == 0u)
+            {
+                runtime->entry.exit_script_cursor = step->next_cursor;
+                ++runtime->entry.exit_script_step;
+                continue;
+            }
+            return 1;
+        }
+        if (step->kind == AVSP_ROUND1_EXIT_STEP_BALLISTIC)
+        {
+            if (runtime->entry.exit_script_mode != 6u)
+            {
+                runtime->entry.exit_script_mode = 6u;
+                runtime->entry.exit_script_subhandler = 0u;
+                if (!avsp_round1_bind_player_jump_sequence(runtime, 3u) ||
+                    runtime->player.animation_record != step->animation_record)
+                    return 0;
+                return 1;
+            }
+            if (runtime->entry.exit_script_subhandler == 0u)
+            {
+                runtime->player.source_x_velocity =
+                    avsp_round1_coffee_exit_ballistic.x_velocity;
+                runtime->player.source_x_acceleration =
+                    avsp_round1_coffee_exit_ballistic.x_acceleration;
+                runtime->player.source_y_velocity =
+                    avsp_round1_coffee_exit_ballistic.y_velocity;
+                runtime->player.source_y_acceleration =
+                    avsp_round1_coffee_exit_ballistic.y_acceleration;
+                runtime->entry.exit_script_subhandler = 2u;
+                if (!avsp_round1_bind_player_jump_sequence(
+                        runtime, avsp_round1_coffee_exit_ballistic.selector))
+                    return 0;
+                return 1;
+            }
+            if (runtime->entry.exit_script_subhandler == 2u)
+            {
+                long prior_velocity = runtime->player.source_x_velocity;
+                runtime->player.source_x_fp += prior_velocity;
+                runtime->player.source_x_velocity +=
+                    runtime->player.source_x_acceleration;
+                if ((prior_velocity < 0L) !=
+                    (runtime->player.source_x_velocity < 0L))
+                    runtime->player.source_x_velocity = 0L;
+                runtime->player.source_y_fp +=
+                    runtime->player.source_y_velocity;
+                runtime->player.source_y_velocity +=
+                    runtime->player.source_y_acceleration;
+                runtime->player.x = avsp_round1_fixed_high_word(
+                    runtime->player.source_x_fp);
+                runtime->player.y = avsp_round1_fixed_high_word(
+                    runtime->player.source_y_fp);
+                runtime->player_action.x = runtime->player.x;
+                if ((short)runtime->player.y <= (short)runtime->player.z &&
+                    runtime->player.source_y_velocity < 0L)
+                {
+                    runtime->player.source_y_fp =
+                        avsp_round1_replace_fixed_high_word(
+                            runtime->player.source_y_fp, runtime->player.z);
+                    runtime->player.y = runtime->player.z;
+                    runtime->entry.exit_script_subhandler =
+                        avsp_round1_coffee_exit_ballistic.terminal_substate;
+                    return avsp_round1_bind_player_jump_sequence(runtime, 3u);
+                }
+                return avsp_round1_step_player_jump_animation(runtime);
+            }
+            if (runtime->entry.exit_script_subhandler ==
+                    avsp_round1_coffee_exit_ballistic.terminal_substate)
+            {
+                runtime->entry.exit_script_mode = 0u;
+                runtime->entry.exit_script_subhandler = 0u;
+                runtime->entry.exit_script_cursor = step->next_cursor;
+                ++runtime->entry.exit_script_step;
+                continue;
+            }
+            return 0;
+        }
+        if (step->kind == AVSP_ROUND1_EXIT_STEP_MOVE_TO)
+        {
+            if (runtime->entry.exit_script_mode != 4u)
+            {
+                runtime->entry.exit_script_mode = 4u;
+                runtime->entry.exit_script_subhandler = 0u;
+                avsp_round1_bind_player_walk_record(runtime, 0u);
+                return runtime->failure_count == 0u;
+            }
+            if ((unsigned short)(runtime->player.x - step->x + 4) <= 8u &&
+                (unsigned short)(runtime->player.z - step->z + 3) <= 6u)
+            {
+                runtime->entry.exit_script_mode = 0u;
+                runtime->player_walk_animation_active = 0u;
+                avsp_round1_bind_animation_state(
+                    &runtime->player, &avsp_round1_player_hit.return_record);
+                runtime->entry.exit_script_cursor = step->next_cursor;
+                ++runtime->entry.exit_script_step;
+                return 1;
+            }
+            direction = avsp_round1_class1f_inner8_direction(
+                &runtime->player, step->x, step->z);
+            if (direction != 0u && direction != 16u)
+                runtime->player.facing = (unsigned char)(
+                    1u ^ ((direction >> 4) & 1u));
+            motion = &avsp_round1_coffee_exit_motion[direction & 31u];
+            runtime->player.source_x_fp += (long)motion->x * 256L;
+            runtime->player.source_y_fp += (long)motion->z * 256L;
+            runtime->player.x = avsp_round1_fixed_high_word(
+                runtime->player.source_x_fp);
+            runtime->player.y = avsp_round1_fixed_high_word(
+                runtime->player.source_y_fp);
+            runtime->player.z = runtime->player.y;
+            runtime->player_action.x = runtime->player.x;
+            runtime->player_action.lane = runtime->player.z;
+            if (!runtime->player_walk_animation_active)
+                avsp_round1_bind_player_walk_record(runtime, 0u);
+            else
+                avsp_round1_advance_player_walk_animation(runtime);
+            if ((unsigned short)(runtime->player.x - step->x + 4) <= 8u &&
+                (unsigned short)(runtime->player.z - step->z + 3) <= 6u)
+            {
+                runtime->entry.exit_script_mode = 0u;
+                runtime->player_walk_animation_active = 0u;
+                avsp_round1_bind_animation_state(
+                    &runtime->player, &avsp_round1_player_hit.return_record);
+                runtime->entry.exit_script_cursor = step->next_cursor;
+                ++runtime->entry.exit_script_step;
+            }
+            return runtime->failure_count == 0u;
+        }
+        if (step->kind == AVSP_ROUND1_EXIT_STEP_TERMINATE)
+        {
+            runtime->entry.gate8236 &= (unsigned char)~1u;
+            runtime->entry.exit_script_cursor = step->next_cursor;
+            ++runtime->entry.exit_script_step;
+            runtime->route_state = avsp_round1_coffee_exit.route_teardown;
+            runtime->entry.exit_route_phase = 1u;
+            runtime->entry.exit_route_substate = 0u;
+            runtime->entry.exit_route_countdown =
+                avsp_round1_coffee_exit.teardown_countdown;
+            runtime->entry.exit_stall_remaining =
+                avsp_round1_coffee_exit.first_stall_frames;
+            runtime->entry.exit_route_updates = 0u;
+            return 1;
+        }
+        return 0;
+    }
+    return 0;
+}
+
+int avsp_round1_step_coffee_exit_display(AvspRound1Runtime *runtime)
+{
+    if (runtime == 0 || !runtime->entry.exit_started ||
+        runtime->entry.exit_complete)
+        return runtime != 0;
+    if (runtime->route_state == avsp_round1_coffee_exit.route_withdrawal)
+        return 1;
+    ++runtime->entry.exit_route_updates;
+    if (runtime->entry.exit_route_phase == 1u)
+    {
+        if (runtime->entry.exit_route_updates == 1u)
+            return 1;
+        if (runtime->entry.exit_route_countdown != 0u)
+            --runtime->entry.exit_route_countdown;
+        if (runtime->entry.exit_stall_remaining != 0u)
+        {
+            --runtime->entry.exit_stall_remaining;
+            return 1;
+        }
+        if (runtime->entry.exit_route_countdown != 0u)
+            return 1;
+        avsp_round1_clear_coffee_scene_pools(runtime);
+        runtime->entry.exit_route_substate = 2u;
+        runtime->entry.exit_route_phase = 2u;
+        runtime->entry.exit_stall_remaining =
+            avsp_round1_coffee_exit.second_stall_frames;
+        return 1;
+    }
+    if (runtime->entry.exit_route_phase == 2u)
+    {
+        if (runtime->entry.exit_stall_remaining != 0u)
+        {
+            --runtime->entry.exit_stall_remaining;
+            return 1;
+        }
+        runtime->entry.exit_route_substate = 4u;
+        runtime->entry.exit_route_phase = 3u;
+        return 1;
+    }
+    if (runtime->entry.exit_route_phase == 3u)
+    {
+        runtime->route_state = avsp_round1_coffee_exit.route_next_entry;
+        runtime->entry.exit_route_substate = 0u;
+        runtime->entry.exit_route_phase = 4u;
+        runtime->entry.exit_stall_remaining =
+            avsp_round1_coffee_exit.third_stall_frames;
+        return 1;
+    }
+    if (runtime->entry.exit_route_phase == 4u)
+    {
+        if (runtime->entry.exit_stall_remaining != 0u)
+        {
+            --runtime->entry.exit_stall_remaining;
+            return 1;
+        }
+        runtime->entry.exit_route_substate = 2u;
+        runtime->entry.exit_route_phase = 5u;
+        runtime->entry.exit_stall_remaining = 1u;
+        return 1;
+    }
+    if (runtime->entry.exit_route_phase == 5u)
+    {
+        if (runtime->entry.exit_stall_remaining != 0u)
+        {
+            --runtime->entry.exit_stall_remaining;
+            return 1;
+        }
+        if (runtime->entry.exit_load_index < AVSP_ROUND1_COFFEE_EXIT_LOAD_COUNT)
+        {
+            ++runtime->entry.exit_load_index;
+            ++runtime->entry.exit_load_events;
+            if (runtime->entry.exit_load_index ==
+                    AVSP_ROUND1_COFFEE_EXIT_LOAD_COUNT)
+                runtime->entry.exit_complete = 1u;
+            return 1;
+        }
+    }
+    return 0;
 }
 
 static int avsp_round1_scheduler_global_s16(
@@ -10756,6 +11188,12 @@ static int avsp_round1_scheduler_runtime_valid(AvspRound1Runtime *runtime)
 {
     if (runtime == 0 ||
         (runtime->route_state != 4 &&
+         !(runtime->entry.exit_started &&
+           (runtime->route_state ==
+                avsp_round1_coffee_exit.route_withdrawal ||
+            runtime->route_state == avsp_round1_coffee_exit.route_teardown ||
+            runtime->route_state ==
+                avsp_round1_coffee_exit.route_next_entry)) &&
          !(runtime->route_state == AVSP_ROUND1_ROUTE_ENTRY_STATE &&
            runtime->entry.started &&
            runtime->entry.dependencies_seeded)) ||
@@ -11571,6 +12009,30 @@ int avsp_round1_step_first_entry(AvspRound1Runtime *runtime)
         return 0;
     if (runtime->route_state == 4)
         return avsp_round1_entry_valid(runtime);
+    if (runtime->entry.exit_started)
+    {
+        if (runtime->route_state ==
+                avsp_round1_coffee_exit.route_withdrawal)
+        {
+            unsigned int exit_update;
+            unsigned int exit_updates =
+                avsp_round1_coffee_exit_callback_updates(
+                    runtime->entry.exit_display_tick);
+            if (exit_updates == 0u)
+            {
+                ++runtime->failure_count;
+                return 0;
+            }
+            for (exit_update = 0u; exit_update < exit_updates; ++exit_update)
+                if (!avsp_round1_step_coffee_exit_player(runtime))
+                {
+                    ++runtime->failure_count;
+                    return 0;
+                }
+            ++runtime->entry.exit_display_tick;
+        }
+        return avsp_round1_entry_valid(runtime);
+    }
     if (runtime->route_state != AVSP_ROUND1_ROUTE_ENTRY_STATE)
         return 0;
     if (!runtime->entry.dependencies_seeded)
@@ -12887,7 +13349,9 @@ int avsp_round1_entry_valid(const AvspRound1Runtime *runtime)
         avsp_round1_entry_program[AVSP_ROUND1_ENTRY_PROGRAM_BYTES - 2u] != 0xFFu ||
         avsp_round1_entry_program[AVSP_ROUND1_ENTRY_PROGRAM_BYTES - 1u] != 0xFFu ||
         (runtime->route_state != AVSP_ROUND1_ROUTE_ENTRY_STATE &&
-         runtime->route_state != 4) ||
+         runtime->route_state != 4 &&
+         runtime->route_state != avsp_round1_coffee_exit.route_withdrawal &&
+         runtime->route_state != avsp_round1_coffee_exit.route_teardown) ||
         (!runtime->entry.started &&
          runtime->rng_seed != AVSP_ROUND1_INITIAL_RNG) ||
         runtime->player.active != 1u || runtime->player.actor_class != 0 ||
@@ -12917,6 +13381,36 @@ int avsp_round1_entry_valid(const AvspRound1Runtime *runtime)
     }
     if (!avsp_round1_pool_active_free_valid(&runtime->pools[0]))
         return 0;
+    if (runtime->entry.exit_started)
+    {
+        if (runtime->player.state != avsp_round1_coffee_exit.player_outer_state ||
+            runtime->entry.exit_script_step >
+                AVSP_ROUND1_COFFEE_EXIT_STEP_COUNT ||
+            runtime->entry.exit_load_index >
+                AVSP_ROUND1_COFFEE_EXIT_LOAD_COUNT ||
+            runtime->entry.exit_pool_teardowns > 1u ||
+            runtime->entry.exit_load_events !=
+                runtime->entry.exit_load_index)
+            return 0;
+        if (runtime->route_state ==
+                avsp_round1_coffee_exit.route_withdrawal)
+            return runtime->entry_controller.active == 1u &&
+                runtime->entry.gate8236 == 1u &&
+                runtime->entry.exit_script_step <
+                    AVSP_ROUND1_COFFEE_EXIT_STEP_COUNT;
+        if (runtime->route_state == avsp_round1_coffee_exit.route_teardown)
+            return runtime->entry.gate8236 == 0u &&
+                runtime->entry.exit_route_phase >= 1u &&
+                runtime->entry.exit_route_phase <= 3u;
+        if (runtime->route_state ==
+                avsp_round1_coffee_exit.route_next_entry)
+            return runtime->entry.gate8236 == 0u &&
+                runtime->entry.exit_route_phase >= 4u &&
+                runtime->entry.exit_route_phase <= 5u &&
+                runtime->entry.exit_pool_teardowns == 1u &&
+                runtime->pools[0].free_count == runtime->pools[0].capacity;
+        return 0;
+    }
     if (!runtime->entry.started)
         return runtime->route_state == AVSP_ROUND1_ROUTE_ENTRY_STATE &&
             runtime->player.state == 0u && runtime->player.substate == 0u &&

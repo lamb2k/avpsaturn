@@ -64620,6 +64620,684 @@
         }
       }
     },
+    "exit_controller_program": {
+      "capture_identity": {
+        "byte_identical": true,
+        "completion_a": "oracle11_coffee_exit_player_m",
+        "completion_b": "oracle11_coffee_exit_player_n",
+        "files": {
+          "coffee_exit_global_writes.tsv": "d661aeccea356c644b2b1774f96f52c692fab106b7fdefc3057cc0a0dd417c9c",
+          "coffee_exit_player_frames.tsv": "3d92341afef0376004f3002e3dfbb03eac6b4d99adc54147075e651999e92579",
+          "coffee_exit_player_trace.tsv": "78ba35ea84116f4c7e7fe1c00667605bdf8e07c946d33cf918912ebf9a331b42",
+          "coffee_exit_player_writes.tsv": "5366044d19d4d8a434a22e007a53917b8b559a79adb0e0070600215ee9adc0e0",
+          "coffee_exit_route_trace.tsv": "a4e64c0ece5b89968a0fb96696ec973ed450088d9b5b29051d23e16676ce469e"
+        },
+        "nvram_seed_sha256": "258035af2bade385a02c9ceca7e42c00752d831b4b5badba0cc7bb85baabc6bc"
+      },
+      "classification": "SOURCE_CLOSED_IMPLEMENTATION_FIELDS",
+      "controller_dispatch": {
+        "phases": [
+          {
+            "blocked_write": "predecrement field46:u16",
+            "guard": "progress-snapshot < (player_count << 4) and field46 != 0",
+            "routine": "0x028960..0x02898e",
+            "substate_u16": 512,
+            "transition": "set phase/local 1/0, camera right edge 1008, substate 0x0400"
+          },
+          {
+            "guard": "field48 != 0; predecrement and call phase helper at 600",
+            "routine": "0x028990..0x0289c4",
+            "substate_u16": 1024,
+            "transition": "camera target=current; at camera>=1008 enter 0x0600, clamp target and snapshot progress"
+          },
+          {
+            "guard": "progress-snapshot >= (player_count << 4) or field48 == 0, then helper 0x020a10 succeeds",
+            "routine": "0x0289c6..0x028a04",
+            "substate_u16": 1536,
+            "transition": "timer42=300, controller state/substate=0x0400:0000, clear progress latch"
+          }
+        ],
+        "player_count_u8": 1,
+        "player_eligibility_helper": {
+          "guard_order": [
+            "g81ef==0",
+            "g81bf!=0",
+            "g81af!=0",
+            "one active player has outer state 0x0200 or signed health >= 0"
+          ],
+          "routine": "0x020a10..0x020a4c"
+        },
+        "progress_threshold_u16": 16,
+        "rng_calls": 0,
+        "routine": "0x0288e2..0x0288fa",
+        "scheduler_order": "record-type-32 controller before player and fixed pools",
+        "withdrawal": {
+          "guard": "predecrement timer42 while nonzero; then player eligibility helper succeeds",
+          "living_enemy_count_is_not_a_guard": true,
+          "routine": "0x028ba6..0x028bcc",
+          "timer_u16": 300,
+          "writes": [
+            "g81f3=1",
+            "camera right edge=1152"
+          ]
+        }
+      },
+      "load_boundaries": [
+        {
+          "native_binding": "ADAPTED_PRESENTATION_RESIDENCY_NOOP",
+          "package_sha256": "42768124ed4684b33f77374a8ad3674b93df0bfa5597fbfc73739722ac2c4247",
+          "source_visible_frame_u16": 5565
+        },
+        {
+          "native_binding": "ADAPTED_PRESENTATION_RESIDENCY_NOOP",
+          "package_sha256": "1c716c69090ac02420aaeab2a079b9073bd91eca7a0109c2a40356b95fd50f98",
+          "source_visible_frame_u16": 5566
+        }
+      ],
+      "mutation_controls": {
+        "fixed_frame_route_transition_rejected": true,
+        "individual_actor_teardown_rejected": true,
+        "living_enemy_kill_gate_rejected": true,
+        "mid_round_data_read_rejected": true,
+        "terminal_without_writer_0x02151e_rejected": true,
+        "wrong_ballistic_vector_rejected": true,
+        "wrong_callback_group_rejected": true,
+        "wrong_motion_vector_rejected": true,
+        "wrong_player_script_cursor_rejected": true,
+        "wrong_progress_threshold_rejected": true
+      },
+      "player_withdrawal_script": {
+        "ballistic_mode_3": {
+          "arithmetic": "x += vx; vx += ax with sign-cross clamp; y += vy; vy += ay; terminate when y crosses the saved ground baseline",
+          "dispatcher": "0x02183a..0x021848",
+          "initializer": "0x02184e..0x021888",
+          "rng_calls": 0,
+          "selector_u8": 6,
+          "step_routine": "0x01a8e6..0x01a930",
+          "terminal_substate_u8": 4,
+          "x_acceleration_s32": -4096,
+          "x_velocity_s32": 327680,
+          "y_acceleration_s32": -24576,
+          "y_velocity_s32": 524288
+        },
+        "direction_routine": "0x016484..0x01650a",
+        "facing_rule": "direction 0 or 16 preserves facing; otherwise facing = 1 xor ((direction >> 4) & 1)",
+        "initializer": "0x01b5de..0x01b5f4",
+        "interpreter": "0x0213d0..0x02183a",
+        "motion_arithmetic": "s32 16.16 position += signed table component << 8",
+        "motion_table_address": "0x001f8440",
+        "motion_vectors": [
+          {
+            "x_s16": 0,
+            "z_s16": 288
+          },
+          {
+            "x_s16": 112,
+            "z_s16": 282
+          },
+          {
+            "x_s16": 219,
+            "z_s16": 265
+          },
+          {
+            "x_s16": 319,
+            "z_s16": 239
+          },
+          {
+            "x_s16": 407,
+            "z_s16": 203
+          },
+          {
+            "x_s16": 478,
+            "z_s16": 159
+          },
+          {
+            "x_s16": 531,
+            "z_s16": 109
+          },
+          {
+            "x_s16": 564,
+            "z_s16": 56
+          },
+          {
+            "x_s16": 576,
+            "z_s16": 0
+          },
+          {
+            "x_s16": 564,
+            "z_s16": -56
+          },
+          {
+            "x_s16": 531,
+            "z_s16": -109
+          },
+          {
+            "x_s16": 478,
+            "z_s16": -159
+          },
+          {
+            "x_s16": 407,
+            "z_s16": -203
+          },
+          {
+            "x_s16": 319,
+            "z_s16": -239
+          },
+          {
+            "x_s16": 219,
+            "z_s16": -265
+          },
+          {
+            "x_s16": 112,
+            "z_s16": -282
+          },
+          {
+            "x_s16": 0,
+            "z_s16": -288
+          },
+          {
+            "x_s16": -112,
+            "z_s16": -282
+          },
+          {
+            "x_s16": -219,
+            "z_s16": -265
+          },
+          {
+            "x_s16": -319,
+            "z_s16": -239
+          },
+          {
+            "x_s16": -407,
+            "z_s16": -203
+          },
+          {
+            "x_s16": -478,
+            "z_s16": -159
+          },
+          {
+            "x_s16": -531,
+            "z_s16": -109
+          },
+          {
+            "x_s16": -564,
+            "z_s16": -56
+          },
+          {
+            "x_s16": -576,
+            "z_s16": 0
+          },
+          {
+            "x_s16": -564,
+            "z_s16": 56
+          },
+          {
+            "x_s16": -531,
+            "z_s16": 109
+          },
+          {
+            "x_s16": -478,
+            "z_s16": 159
+          },
+          {
+            "x_s16": -407,
+            "z_s16": 203
+          },
+          {
+            "x_s16": -319,
+            "z_s16": 239
+          },
+          {
+            "x_s16": -219,
+            "z_s16": 265
+          },
+          {
+            "x_s16": -112,
+            "z_s16": 282
+          }
+        ],
+        "move_guard": "unsigned (x-target+4) <= 8 and unsigned (z-target+3) <= 6",
+        "outer_state_u16": 2048,
+        "rng_calls": 0,
+        "source_display_callback_program": {
+          "classification": "SOURCE_CLOSED_IMPLEMENTATION_FIELDS",
+          "default_updates_u8": 3,
+          "direct_writer_pcs": [
+            "0x016266",
+            "0x01a8f6",
+            "0x02177a"
+          ],
+          "groups": [
+            {
+              "display_ticks_u8": 5,
+              "program_tick_u8": 0,
+              "updates_u8": 1
+            },
+            {
+              "display_ticks_u8": 2,
+              "program_tick_u8": 5,
+              "updates_u8": 3
+            },
+            {
+              "display_ticks_u8": 1,
+              "program_tick_u8": 7,
+              "updates_u8": 4
+            },
+            {
+              "display_ticks_u8": 14,
+              "program_tick_u8": 8,
+              "updates_u8": 3
+            },
+            {
+              "display_ticks_u8": 2,
+              "program_tick_u8": 22,
+              "updates_u8": 1
+            },
+            {
+              "display_ticks_u8": 3,
+              "program_tick_u8": 24,
+              "updates_u8": 3
+            },
+            {
+              "display_ticks_u8": 1,
+              "program_tick_u8": 27,
+              "updates_u8": 4
+            },
+            {
+              "display_ticks_u8": 9,
+              "program_tick_u8": 28,
+              "updates_u8": 3
+            },
+            {
+              "display_ticks_u8": 1,
+              "program_tick_u8": 37,
+              "updates_u8": 4
+            },
+            {
+              "display_ticks_u8": 6,
+              "program_tick_u8": 38,
+              "updates_u8": 3
+            },
+            {
+              "display_ticks_u8": 1,
+              "program_tick_u8": 44,
+              "updates_u8": 4
+            },
+            {
+              "display_ticks_u8": 5,
+              "program_tick_u8": 45,
+              "updates_u8": 3
+            },
+            {
+              "display_ticks_u8": 1,
+              "program_tick_u8": 50,
+              "updates_u8": 4
+            },
+            {
+              "display_ticks_u8": 1,
+              "program_tick_u8": 51,
+              "updates_u8": 3
+            },
+            {
+              "display_ticks_u8": 2,
+              "program_tick_u8": 52,
+              "updates_u8": 2
+            },
+            {
+              "display_ticks_u8": 2,
+              "program_tick_u8": 54,
+              "updates_u8": 3
+            },
+            {
+              "display_ticks_u8": 1,
+              "program_tick_u8": 56,
+              "updates_u8": 4
+            },
+            {
+              "display_ticks_u8": 6,
+              "program_tick_u8": 57,
+              "updates_u8": 3
+            },
+            {
+              "display_ticks_u8": 1,
+              "program_tick_u8": 63,
+              "updates_u8": 4
+            },
+            {
+              "display_ticks_u8": 1,
+              "program_tick_u8": 64,
+              "updates_u8": 3
+            },
+            {
+              "display_ticks_u8": 2,
+              "program_tick_u8": 65,
+              "updates_u8": 4
+            },
+            {
+              "display_ticks_u8": 1,
+              "program_tick_u8": 67,
+              "updates_u8": 2
+            },
+            {
+              "display_ticks_u8": 1,
+              "program_tick_u8": 68,
+              "updates_u8": 4
+            },
+            {
+              "display_ticks_u8": 1,
+              "program_tick_u8": 69,
+              "updates_u8": 2
+            },
+            {
+              "display_ticks_u8": 1,
+              "program_tick_u8": 70,
+              "updates_u8": 1
+            }
+          ],
+          "outer_dispatch_entry": "0x0213d0",
+          "scheduler_rule": "execute the route-6 player state dispatcher the captured number of times per displayed tick; state guards and script cursors, never the display tick, own every gameplay transition",
+          "source_visible_frame_range_inclusive": [
+            5453,
+            5523
+          ]
+        },
+        "source_program_address": "0x00129b64",
+        "source_program_bytes": "12010002020204e801180600000200000000005a0403020205a0011800020000ffff",
+        "source_program_sha256": "1493f6c29b41d5dac709e72ded084bc3fe86384173b8b372aa7aa85b122201e4",
+        "source_projection_anchors": [
+          {
+            "animation_record": "0015f1f4",
+            "animation_timer": "0fff",
+            "facing": "01",
+            "frame": "5453",
+            "gate8236": "01",
+            "route": "6",
+            "script_argument": "00",
+            "script_handler": "02",
+            "script_substate": "00",
+            "script_timer": "0000",
+            "x_fp": "05509000",
+            "y_fp": "013fa800",
+            "z": "319"
+          },
+          {
+            "animation_record": "0015f208",
+            "animation_timer": "0004",
+            "facing": "01",
+            "frame": "5454",
+            "gate8236": "01",
+            "route": "6",
+            "script_argument": "02",
+            "script_handler": "04",
+            "script_substate": "00",
+            "script_timer": "0000",
+            "x_fp": "05509000",
+            "y_fp": "013fa800",
+            "z": "319"
+          },
+          {
+            "animation_record": "0015f1f4",
+            "animation_timer": "0fff",
+            "facing": "00",
+            "frame": "5475",
+            "gate8236": "01",
+            "route": "6",
+            "script_argument": "00",
+            "script_handler": "00",
+            "script_substate": "00",
+            "script_timer": "0000",
+            "x_fp": "04ecfe00",
+            "y_fp": "0119c800",
+            "z": "281"
+          },
+          {
+            "animation_record": "0015f1f4",
+            "animation_timer": "0fff",
+            "facing": "00",
+            "frame": "5476",
+            "gate8236": "01",
+            "route": "6",
+            "script_argument": "00",
+            "script_handler": "02",
+            "script_substate": "00",
+            "script_timer": "005a",
+            "x_fp": "04ecfe00",
+            "y_fp": "0119c800",
+            "z": "281"
+          },
+          {
+            "animation_record": "0015f2cc",
+            "animation_timer": "0001",
+            "facing": "00",
+            "frame": "5505",
+            "gate8236": "01",
+            "route": "6",
+            "script_argument": "03",
+            "script_handler": "06",
+            "script_substate": "00",
+            "script_timer": "0000",
+            "x_fp": "04ecfe00",
+            "y_fp": "0119c800",
+            "z": "281"
+          },
+          {
+            "animation_record": "0015f3b8",
+            "animation_timer": "0001",
+            "facing": "00",
+            "frame": "5506",
+            "gate8236": "01",
+            "route": "6",
+            "script_argument": "03",
+            "script_handler": "06",
+            "script_substate": "02",
+            "script_timer": "0000",
+            "x_fp": "04f1fe00",
+            "y_fp": "0121c800",
+            "z": "281"
+          },
+          {
+            "animation_record": "0015f2cc",
+            "animation_timer": "0001",
+            "facing": "00",
+            "frame": "5519",
+            "gate8236": "01",
+            "route": "6",
+            "script_argument": "03",
+            "script_handler": "06",
+            "script_substate": "04",
+            "script_timer": "0000",
+            "x_fp": "058dde00",
+            "y_fp": "01190800",
+            "z": "281"
+          },
+          {
+            "animation_record": "0015f208",
+            "animation_timer": "0003",
+            "facing": "01",
+            "frame": "5520",
+            "gate8236": "01",
+            "route": "6",
+            "script_argument": "02",
+            "script_handler": "04",
+            "script_substate": "00",
+            "script_timer": "0000",
+            "x_fp": "05901e00",
+            "y_fp": "01190800",
+            "z": "281"
+          },
+          {
+            "animation_record": "0015f1f4",
+            "animation_timer": "0fff",
+            "facing": "01",
+            "frame": "5522",
+            "gate8236": "01",
+            "route": "6",
+            "script_argument": "00",
+            "script_handler": "00",
+            "script_substate": "00",
+            "script_timer": "0000",
+            "x_fp": "059d9200",
+            "y_fp": "0118d000",
+            "z": "280"
+          },
+          {
+            "animation_record": "0015f1f4",
+            "animation_timer": "0fff",
+            "facing": "01",
+            "frame": "5523",
+            "gate8236": "00",
+            "route": "0",
+            "script_argument": "00",
+            "script_handler": "00",
+            "script_substate": "00",
+            "script_timer": "0000",
+            "x_fp": "059d9200",
+            "y_fp": "0118d000",
+            "z": "280"
+          }
+        ],
+        "steps": [
+          {
+            "animation_record": "0x0015f1f4",
+            "cursor": "0x00129b64",
+            "kind": "bootstrap",
+            "next_cursor": "0x00129b68"
+          },
+          {
+            "animation_record": "0x0015f208",
+            "cursor": "0x00129b68",
+            "kind": "move_to",
+            "mode_u8": 2,
+            "next_cursor": "0x00129b6e",
+            "x_s16": 1256,
+            "z_s16": 280
+          },
+          {
+            "cursor": "0x00129b6e",
+            "kind": "set_mode",
+            "mode_u8": 0,
+            "next_cursor": "0x00129b70"
+          },
+          {
+            "cursor": "0x00129b70",
+            "kind": "dwell",
+            "next_cursor": "0x00129b74",
+            "subhandler_u8": 2,
+            "ticks_u16": 0
+          },
+          {
+            "cursor": "0x00129b74",
+            "kind": "dwell",
+            "next_cursor": "0x00129b78",
+            "subhandler_u8": 0,
+            "ticks_u16": 90
+          },
+          {
+            "animation_record": "0x0015f2cc",
+            "cursor": "0x00129b78",
+            "kind": "ballistic",
+            "mode_u8": 3,
+            "next_cursor": "0x00129b7a",
+            "selector_u8": 6
+          },
+          {
+            "animation_record": "0x0015f208",
+            "cursor": "0x00129b7a",
+            "kind": "move_to",
+            "mode_u8": 2,
+            "next_cursor": "0x00129b80",
+            "x_s16": 1440,
+            "z_s16": 280
+          },
+          {
+            "cursor": "0x00129b80",
+            "kind": "dwell",
+            "next_cursor": "0x00129b84",
+            "subhandler_u8": 2,
+            "ticks_u16": 0
+          },
+          {
+            "cursor": "0x00129b84",
+            "kind": "terminate",
+            "next_cursor": "0x00129b85",
+            "opcode_s8": -1
+          }
+        ],
+        "terminal_write": "clear player-selected bit in g8236",
+        "terminal_writer_pc": "0x02151e"
+      },
+      "route_edges": [
+        {
+          "from_s16": 4,
+          "guard": "u8(g81f3) != 0",
+          "source_write_frame_u16": 5452,
+          "to_s16": 6,
+          "writer_pc": "0x008418"
+        },
+        {
+          "from_s16": 6,
+          "guard": "(u8(g8236) & u8(g81af)) == 0",
+          "source_write_frame_u16": 5523,
+          "to_s16": 0,
+          "writer_pc": "0x00c84c"
+        },
+        {
+          "from_s16": 0,
+          "guard": "s16(g837c) == 0",
+          "source_write_frame_u16": 5561,
+          "to_s16": 2,
+          "writer_pc": "0x0083d4"
+        }
+      ],
+      "route_zero_program": {
+        "dispatcher": "0x00837c..0x0083c6",
+        "guard_countdown": {
+          "initial_u16": 16,
+          "terminal_u16": 0,
+          "writer": "0x00188c"
+        },
+        "next_scene_substate2_visible_frame_u16": 5564,
+        "resident_load_stalls": [
+          {
+            "after_source_frame_u16": 5523,
+            "display_frames_u16": 26,
+            "resume_source_frame_u16": 5550
+          },
+          {
+            "after_source_frame_u16": 5550,
+            "display_frames_u16": 9,
+            "resume_source_frame_u16": 5560
+          },
+          {
+            "after_source_frame_u16": 5561,
+            "display_frames_u16": 1,
+            "resume_source_frame_u16": 5563
+          }
+        ],
+        "substates": [
+          {
+            "guard": "s16(g837c)==0 after source loader resumes",
+            "routine": "0x00838e..0x0083be",
+            "substate_u16": 0,
+            "writes": "substate=2; centralized fixed-pool clear/rebuild"
+          },
+          {
+            "guard": "Round 1 dispatch selects 0x009222",
+            "routine": "0x0091e4..0x009238",
+            "substate_u16": 2,
+            "writes": "clear scene temporaries; substate=4"
+          },
+          {
+            "guard": "s16(g837c)==0",
+            "routine": "0x0083c8..0x0083fa",
+            "substate_u16": 4,
+            "writes": "route=2; substate=0; clear withdrawal and presentation-load flags"
+          }
+        ],
+        "teardown_visible_frame_u16": 5551
+      },
+      "spec_executable": true
+    },
     "intro_gate_suppression_control": {
       "fixed_frame_substitute": false,
       "mutant_at_frame_4100": {

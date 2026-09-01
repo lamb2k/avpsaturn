@@ -1,8 +1,8 @@
 #ifndef AVSP_SPEC02_ROUND1_ENTRY_DATA_H
 #define AVSP_SPEC02_ROUND1_ENTRY_DATA_H
 
-/* contract_sha256=7a0db579d3751541d374444ebae60a009f9afedf75840457661b60de1fa93b3a */
-/* fixtures_sha256=ae84a21f139fc86d820b22a2e6277e838cd2b31e9f17519619e799418a5eb76b */
+/* contract_sha256=c36120c5b548d3c505e8628e381ce6d48d06b4411eec99722a97fbe14b4e25a2 */
+/* fixtures_sha256=3fc140c51e42e1e4c21b996a746b7828c2e58ae8854c1c4a200e68028360f9ae */
 #define AVSP_ROUND1_ENTRY_PROGRAM_SHA256 "e5ef761fadc1b5a7df62e77c03025c0ebff0c2503cbc8be9c0077d4bd6cd24ba"
 
 #if defined(__sh__)
@@ -497,6 +497,118 @@ static const AvspRound1RecurringSpawnSpec avsp_round1_recurring_spawn =
     1u, 0u, 0xC580u, 0x44, 24u, 0x0404u,
     0x0402u, 0x0000u, -1, 1u,
     1u, 1u
+};
+#endif
+
+#if defined(__sh__)
+#define avsp_round1_coffee_exit (avsp_round1_content->content_avsp_round1_coffee_exit)
+#else
+static const AvspRound1CoffeeExitSpec avsp_round1_coffee_exit =
+{
+    0x0200u, 0x0400u, 0x0600u, 0x0400u,
+    16u, 600u, 1008u, 300u, 1152u,
+    6, 0, 2, 16u,
+    26u, 9u, 1u, 5551u, 5564u,
+    0x0800u, 0x00129b64UL, 0x00129b84UL
+};
+#endif
+
+#if defined(__sh__)
+#define avsp_round1_coffee_exit_steps (avsp_round1_content->content_avsp_round1_coffee_exit_steps)
+#else
+static const AvspRound1CoffeeExitStepSpec avsp_round1_coffee_exit_steps[AVSP_ROUND1_COFFEE_EXIT_STEP_COUNT] =
+{
+    { 0x00129b64UL, 0x00129b68UL, 0x0015f1f4UL, 0, 0, 0u, AVSP_ROUND1_EXIT_STEP_BOOTSTRAP, 0u, 0u },
+    { 0x00129b68UL, 0x00129b6eUL, 0x0015f208UL, 1256, 280, 0u, AVSP_ROUND1_EXIT_STEP_MOVE_TO, 2u, 0u },
+    { 0x00129b6eUL, 0x00129b70UL, 0x00000000UL, 0, 0, 0u, AVSP_ROUND1_EXIT_STEP_SET_MODE, 0u, 0u },
+    { 0x00129b70UL, 0x00129b74UL, 0x00000000UL, 0, 0, 0u, AVSP_ROUND1_EXIT_STEP_DWELL, 0u, 2u },
+    { 0x00129b74UL, 0x00129b78UL, 0x00000000UL, 0, 0, 90u, AVSP_ROUND1_EXIT_STEP_DWELL, 0u, 0u },
+    { 0x00129b78UL, 0x00129b7aUL, 0x0015f2ccUL, 0, 0, 0u, AVSP_ROUND1_EXIT_STEP_BALLISTIC, 3u, 0u },
+    { 0x00129b7aUL, 0x00129b80UL, 0x0015f208UL, 1440, 280, 0u, AVSP_ROUND1_EXIT_STEP_MOVE_TO, 2u, 0u },
+    { 0x00129b80UL, 0x00129b84UL, 0x00000000UL, 0, 0, 0u, AVSP_ROUND1_EXIT_STEP_DWELL, 0u, 2u },
+    { 0x00129b84UL, 0x00129b85UL, 0x00000000UL, 0, 0, 0u, AVSP_ROUND1_EXIT_STEP_TERMINATE, 0u, 0u },
+};
+#endif
+
+#if defined(__sh__)
+#define avsp_round1_coffee_exit_motion (avsp_round1_content->content_avsp_round1_coffee_exit_motion)
+#else
+static const AvspRound1CoffeeExitMotionSpec avsp_round1_coffee_exit_motion[AVSP_ROUND1_COFFEE_EXIT_MOTION_COUNT] =
+{
+    { 0, 288 },
+    { 112, 282 },
+    { 219, 265 },
+    { 319, 239 },
+    { 407, 203 },
+    { 478, 159 },
+    { 531, 109 },
+    { 564, 56 },
+    { 576, 0 },
+    { 564, -56 },
+    { 531, -109 },
+    { 478, -159 },
+    { 407, -203 },
+    { 319, -239 },
+    { 219, -265 },
+    { 112, -282 },
+    { 0, -288 },
+    { -112, -282 },
+    { -219, -265 },
+    { -319, -239 },
+    { -407, -203 },
+    { -478, -159 },
+    { -531, -109 },
+    { -564, -56 },
+    { -576, 0 },
+    { -564, 56 },
+    { -531, 109 },
+    { -478, 159 },
+    { -407, 203 },
+    { -319, 239 },
+    { -219, 265 },
+    { -112, 282 },
+};
+#endif
+
+#if defined(__sh__)
+#define avsp_round1_coffee_exit_callbacks (avsp_round1_content->content_avsp_round1_coffee_exit_callbacks)
+#else
+static const AvspRound1CoffeeExitCallbackGroupSpec avsp_round1_coffee_exit_callbacks[AVSP_ROUND1_COFFEE_EXIT_CALLBACK_GROUP_COUNT] =
+{
+    { 0u, 5u, 1u },
+    { 5u, 2u, 3u },
+    { 7u, 1u, 4u },
+    { 8u, 14u, 3u },
+    { 22u, 2u, 1u },
+    { 24u, 3u, 3u },
+    { 27u, 1u, 4u },
+    { 28u, 9u, 3u },
+    { 37u, 1u, 4u },
+    { 38u, 6u, 3u },
+    { 44u, 1u, 4u },
+    { 45u, 5u, 3u },
+    { 50u, 1u, 4u },
+    { 51u, 1u, 3u },
+    { 52u, 2u, 2u },
+    { 54u, 2u, 3u },
+    { 56u, 1u, 4u },
+    { 57u, 6u, 3u },
+    { 63u, 1u, 4u },
+    { 64u, 1u, 3u },
+    { 65u, 2u, 4u },
+    { 67u, 1u, 2u },
+    { 68u, 1u, 4u },
+    { 69u, 1u, 2u },
+    { 70u, 1u, 1u },
+};
+#endif
+
+#if defined(__sh__)
+#define avsp_round1_coffee_exit_ballistic (avsp_round1_content->content_avsp_round1_coffee_exit_ballistic)
+#else
+static const AvspRound1CoffeeExitBallisticSpec avsp_round1_coffee_exit_ballistic =
+{
+    327680L, -4096L, 524288L, -24576L, 6u, 4u
 };
 #endif
 
@@ -5132,6 +5244,11 @@ typedef struct
     AvspRound1Class1fSourceKoSpec content_avsp_round1_class1f_source_ko;
     AvspRound1Class1fSourceKoSpec content_avsp_round1_class1f_player_special_ko;
     AvspRound1RecurringSpawnSpec content_avsp_round1_recurring_spawn;
+    AvspRound1CoffeeExitSpec content_avsp_round1_coffee_exit;
+    AvspRound1CoffeeExitStepSpec content_avsp_round1_coffee_exit_steps[AVSP_ROUND1_COFFEE_EXIT_STEP_COUNT];
+    AvspRound1CoffeeExitMotionSpec content_avsp_round1_coffee_exit_motion[AVSP_ROUND1_COFFEE_EXIT_MOTION_COUNT];
+    AvspRound1CoffeeExitCallbackGroupSpec content_avsp_round1_coffee_exit_callbacks[AVSP_ROUND1_COFFEE_EXIT_CALLBACK_GROUP_COUNT];
+    AvspRound1CoffeeExitBallisticSpec content_avsp_round1_coffee_exit_ballistic;
     short content_avsp_round1_recurring_lane_offsets[AVSP_ROUND1_RECURRING_LANE_OFFSET_COUNT];
     unsigned char content_avsp_round1_recurring_selector_cycle[AVSP_ROUND1_RECURRING_SELECTOR_COUNT];
     unsigned char content_avsp_round1_recurring_lane_buckets[AVSP_ROUND1_RECURRING_LANE_BUCKET_COUNT];
