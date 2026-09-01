@@ -92,6 +92,11 @@ PROFILES = {
         "id": "round1-chrysalis-battle-two",
         "output": "oracle10_round1_census_extension_13293_15039.json",
     },
+    "round1_clear_results_a": {
+        "first": 15040, "last": 15058,
+        "id": "round1-clear-results-a",
+        "output": "oracle10_round1_census_extension_15040_15058.json",
+    },
 }
 WORKRAM_BASE = 0xFF0000
 PLAYER = 0xFF8380

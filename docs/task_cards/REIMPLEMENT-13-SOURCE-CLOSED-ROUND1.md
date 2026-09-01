@@ -2491,3 +2491,18 @@ remain clean, with zero orphan authority event or unbound table. Evidence
 artifact SHA-256 is
 `68259fa0bfd0da3d4a8a1d1ddf4a4f08e5a70493216d3e3c366eb0e55b62452e`.
 Continue P2 at source frame 15040 through scene `Sc196f8dbfff3-1`.
+
+### Overnight census segment 15040..15058 checkpoint (2026-09-01)
+
+The first round-clear/results presentation boundary is census-closed across 19
+paired, active-Predator frames at semantic SHA-256
+`2280ba63d09a8ce1b9e353968d05deb77567ac283e10b7beecfd144b8b1f5619`.
+Three owned lifetimes cover player, class `0x06/12`, and navigation class
+`0x07/20`; two despawns occur with no spawn or HIT/KO edge. Two owned audio
+transactions include route command `0x0016` at frame 15057.
+
+No route or load edge occurs, and the source-owned presentation signature
+`Sc196f8dbfff3-1` owns no progression. All controls remain discriminating and
+no authority event is orphaned. Evidence artifact SHA-256 is
+`6edba055d101afd418c8549f45684721e67c4f187988d9f0451479ea4a16ae5f`.
+Continue P2 at frame 15059 through source scene `S5fdeea4b937b`.
