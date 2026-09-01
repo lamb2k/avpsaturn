@@ -40,10 +40,10 @@ inspection. Settings were restored to VideoCore 4 / SoundCore 1. Evidence is
 
 ## Exact next sequence
 
-P2 is complete through frame 12477. The newest segment evidence SHA is
-`0e4a78338a3f5054a9389c92e64f6e62cadbf9f35485e75bc5f96dc2b15c0f7a`;
-paired semantic SHA is `fec4caf85e842696db67bce8daf82fed479d39c4ac18a9aae53edb14cc1f9ce6`.
-Continue at frame 12478 through `round1-warehouse-gameplay-3`, preserving
+P2 is complete through frame 12799. The newest segment evidence SHA is
+`2c9b32f78f7a0dfdd7315c6d01d8f183b7f12f62651846bbc3a05700448697a5`;
+paired semantic SHA is `655519331dc74eff591584b216bd586acb32799d7a1240304b2a05bb86c416bf`.
+Continue at frame 12800 through `continue-countdown-2`, preserving
 paired identity/route/audio/load/RNG and accepted counterfactual controls.
 Commit each segment; after three failed attempts record the blocker and move
 scene-order. Never commit captures, PNGs, ROMs, ISOs, or dumps. P3 follows P2.

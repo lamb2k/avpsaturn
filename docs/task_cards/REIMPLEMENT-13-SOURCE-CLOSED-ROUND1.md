@@ -2441,3 +2441,19 @@ signatures own no progression and zero authority event is orphaned. Evidence
 SHA-256 is
 `0e4a78338a3f5054a9389c92e64f6e62cadbf9f35485e75bc5f96dc2b15c0f7a`.
 Continue P2 at frame 12478 through `round1-warehouse-gameplay-3`.
+
+### Overnight census segment 12478..12799 checkpoint (2026-09-01)
+
+Warehouse gameplay three is census-closed across 322 paired source frames at
+semantic SHA-256
+`655519331dc74eff591584b216bd586acb32799d7a1240304b2a05bb86c416bf`.
+Predator identity remains exact across 320 active-player frames. Ten lifetimes
+cover five owned class/type pairs and bind five spawns, seven despawns, and
+three HIT/KO transitions. Fourteen owned audio transactions cover 11 commands.
+
+The route controller writes state `0` at frame 12798 and state `2` at frame
+12799; the frame-12799 route load/release boundary is source-owned. Camera,
+enemy, auxiliary, route-wide, presentation, and player-audio controls remain
+discriminating, and no authority event is orphaned. Evidence artifact SHA-256
+is `2c9b32f78f7a0dfdd7315c6d01d8f183b7f12f62651846bbc3a05700448697a5`.
+Continue P2 at frame 12800 through `continue-countdown-2`.

@@ -77,6 +77,11 @@ PROFILES = {
         "id": "round1-warehouse-gameplay-three-entry-cluster",
         "output": "oracle10_round1_census_extension_12443_12477.json",
     },
+    "warehouse_gameplay_3": {
+        "first": 12478, "last": 12799,
+        "id": "round1-warehouse-gameplay-three-to-failure-boundary",
+        "output": "oracle10_round1_census_extension_12478_12799.json",
+    },
 }
 WORKRAM_BASE = 0xFF0000
 PLAYER = 0xFF8380

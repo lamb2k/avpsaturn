@@ -38,6 +38,9 @@ STALKER3 = json.loads(
 WAREHOUSE3_ENTRY = json.loads(
     (ROOT / "data/oracle10_round1_census_extension_12443_12477.json")
     .read_text(encoding="ascii"))
+WAREHOUSE3 = json.loads(
+    (ROOT / "data/oracle10_round1_census_extension_12478_12799.json")
+    .read_text(encoding="ascii"))
 GENERATOR = (ROOT / "tools/analyze_oracle10_round1_census_extension.py") \
     .read_text(encoding="utf-8")
 
@@ -848,5 +851,49 @@ for label, path, value in (
         continue
     raise AssertionError(f"Warehouse gameplay 3 entry mutation accepted: {label}")
 
-print("ORACLE-10 Round 1 census extension 5567..12477: PASS "
-      "(70 mutations rejected)")
+
+def validate_warehouse3(report: dict[str, object]) -> None:
+    semantics = report["paired_capture_ceremony"]["segment_semantics"]
+    census = report["scene_census_delta"]
+    assert report["status"] == "CENSUS_SEGMENT_COMPLETE"
+    assert report["segment"]["source_frame_range"] == [12478, 12799]
+    assert semantics["frame_count"] == 322
+    assert semantics["canonical_semantic_sha256"] == \
+        "655519331dc74eff591584b216bd586acb32799d7a1240304b2a05bb86c416bf"
+    assert semantics["player_active_frames"] == 320
+    assert semantics["identity_mismatch_frames"] == []
+    assert len(census["actor_lifetimes"]) == 10
+    assert len(census["spawn_edges"]) == 5
+    assert len(census["despawn_edges"]) == 7
+    assert len(census["hit_ko_transitions"]) == 3
+    assert census["audio"]["handler_transaction_count"] == 14
+    assert [(row["sample_transition_frame"], row["value"], row["writer_pc"])
+            for row in report["route_authority_extension"]["route_state_edges"]] == [
+                (12798, 0, "0x008546"), (12799, 2, "0x008bb2")]
+    assert [row["id"] for row in census["load_release_boundaries"]] == [
+        "route-load-release-12799"]
+    assert all(value == 0 for value in report["coverage"].values())
+    assert report["physical_saturn"] == "UNRUN"
+
+
+validate_warehouse3(WAREHOUSE3)
+for label, path, value in (
+        ("warehouse3 semantic", ("paired_capture_ceremony", "segment_semantics",
+                                 "canonical_semantic_sha256"), "0" * 64),
+        ("warehouse3 route", ("route_authority_extension", "route_state_edges"), []),
+        ("warehouse3 load", ("scene_census_delta", "load_release_boundaries"), []),
+        ("warehouse3 orphan", ("coverage", "unowned_load_release_events"), 1),
+        ("warehouse3 physical", ("physical_saturn",), "PASS")):
+    mutant = copy.deepcopy(WAREHOUSE3)
+    target = mutant
+    for key in path[:-1]:
+        target = target[key]
+    target[path[-1]] = value
+    try:
+        validate_warehouse3(mutant)
+    except AssertionError:
+        continue
+    raise AssertionError(f"Warehouse gameplay 3 mutation accepted: {label}")
+
+print("ORACLE-10 Round 1 census extension 5567..12799: PASS "
+      "(75 mutations rejected)")
