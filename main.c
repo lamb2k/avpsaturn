@@ -8296,7 +8296,7 @@ static void live_encounter_publish(void)
     avsp_diag_round1_spec_bound =
         avsp_diag_round1_content_loaded &&
         strcmp(AVSP_ROUND1_SPEC02_SHA256,
-               "cd7763f153bc8fdb0030be658616019543adc4913d0eff7f08f5a241d065569c") ==
+               "5d839081411876ec8650cb9a7195de2672d29d9f2bd7d99a161d18087fc75ada") ==
         0;
     avsp_diag_round1_entry_valid = avsp_round1_entry_valid(&round1_runtime);
     avsp_diag_round1_route_state = round1_runtime.route_state;

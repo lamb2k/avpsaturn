@@ -3220,3 +3220,52 @@ Preserve accepted window `0x0083c4..0x0083f4` SHA-256
 `3813fbb167fad415d00f787901e0b0e4cbafab1cbfd789d83fd9b3d9cf7d7384`,
 bind visible transition frames 5562 and 15089, and close every Round
 1-reachable branch plus its route/audio/load/RNG ownership.
+
+### P3 route writer 0x0083d4 route-zero whole-program checkpoint (2026-09-01)
+
+The final P2-listed route transition program is SPEC-executable as aligned
+program `0x0083c8..0x0083fc` (SHA-256
+`0af69945481bbf585d5a9fc8a171ff5d3bdd79a5015aee9482d761a4ec1bd2d3`).
+The accepted writer window `0x0083c4..0x0083f4` remains SHA-256
+`3813fbb167fad415d00f787901e0b0e4cbafab1cbfd789d83fd9b3d9cf7d7384`.
+The body closes 11 decoded instructions, six exact field profiles and five
+owned external transfers.
+
+The exact guard is `s16(g837c) == 0`. The false branch continues at
+`0x0083c6` with no owned write, call, audio, load or RNG. The true branch
+increments signed route state `0->2`, clears `g800c`, `g81f3` and `g820a`,
+calls `0x01728a`, `0x0ac15e` and `0x017ca8` in order, writes `g90e8=1`, then
+tails through `0x001972`. That tail owns exact shared command `0xff00` with
+arguments `d1=0x0000ff00,d2=0,d3=0`; its semantic sound name remains UNKNOWN.
+There is no logical load/release and zero owned RNG consumption.
+
+The paired retained evidence binds eight direct writes, 220 fixed-pool reset
+writes, eight aligned samples and two `0xff00` dispatches at source frames
+5561/15088, visible frames 5562/15089 and audio-dispatch frames 5563/15090.
+Artifact SHA-256 is
+`e367d2893e8e64a9922e6495b22c49b1af4ea14d8c4f1e4ecb1b7758c2d39295`;
+instruction-semantics SHA-256 is
+`fdeb1ff1eafc2d186424e772b0dc63d497ce8c510a207a88ed546e5be3fbab3f`.
+Fifteen focused and all 180 aggregate SPEC mutations reject. Aggregate fixture
+SHA-256 is
+`f1132fe6f928e62d8a7c55ed407e9ed68cd5d9d4fcd6598b69675e779a054926`;
+contract SHA-256 is
+`5d839081411876ec8650cb9a7195de2672d29d9f2bd7d99a161d18087fc75ada`.
+
+Fast passes all Oracle/SPEC prerequisites and stops only at the accepted P4
+frame-3782 RED. Debug and release/live-encounter Target pass. Release GAME.BIN
+is 373,840 bytes at SHA-256
+`7ee71766649f94c20fafa128c6a1711990c96ac79356160d1f88c44876e7f7e0`;
+the content archive remains
+`ccf8795a147daf337c1f72364c81f05fc2cfd255d8d21b40a56c74c97f8d15bd`.
+Two cold debug-rig Coffee Shop runs pass identical 575-sample ledgers and five
+real mutations at normalized ISO
+`f50cae0afa97dab28f75e5b8bce7757c65a5bfc6fbe1544a22936e28ca58f35f`.
+Settings were restored to VideoCore 4 / SoundCore 1. This SPEC-only body changes
+no runtime identity, does not promote the candidate and does not trigger WGC.
+
+Continue P3 with the first-demand presentation-audio owner family at source
+frame 5719. Close the complete reusable source owner/caller program and every
+Round 1-reachable trigger branch, exact command/arguments, shared-dispatch
+edge, state effects and audio/load/RNG ownership from retained evidence before
+regenerating the existing fixture once.

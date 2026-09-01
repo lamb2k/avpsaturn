@@ -5,8 +5,7 @@ Resume the persistent AvP Goal on `codex/avp-playable-loop-pivot` from branch HE
 zero-gap. Preserve USER-09 `CHANGES_REQUESTED`, SALVAGE-08 inactive, physical
 Saturn `UNRUN`, and all locks. Never stage/reset/overwrite
 `data/avsp_anim_records.json` or `history.txt`.
-Read `project_state.yaml`, the active card, current SPEC-02 contract/fixtures,
-and both `docs/EMULATOR_MCP_CAPTURE.md` and `docs/ROUND1_OVERNIGHT_PLAN.md` completely.
+Read `project_state.yaml`, the active card, current SPEC-02 contract/fixtures, and both `docs/EMULATOR_MCP_CAPTURE.md` and `docs/ROUND1_OVERNIGHT_PLAN.md` completely.
 Do not create another Goal, roadmap, workflow, branch, task hierarchy, coverage system, or writer.
 Workflow pivot / Preserved evidence work: Resume the AvP salvage Goal; retain SALVAGE-00-OLD-BUILD-BASELINE, USER-01-PLAYER-BASELINE-REVIEW, and `597f4ed517d4e715d814ff841bd00d3977803f85`.
 ## Closed checkpoints
@@ -32,19 +31,19 @@ inspection. Settings were restored to VideoCore 4 / SoundCore 1. Evidence is
 ## Exact next sequence
 P2 is closed through stable Round 2 seam frame 15193; closure SHA is
 `b5c72089...f94b3`, all authority/table/capacity gates pass, and Round 2 gameplay
-was not censused. All nine P3 actor programs and route writers through `0x00c886`
-are SPEC-executable. Artifact `9f4724cb...741a` closes the reusable `0x00c7ea`
-dispatcher, exact 19-entry signed table, and both Round 1-reachable programs:
-23 instructions, seven field profiles and ten owned transfers. The exact
-`0xff07` transaction has UNKNOWN semantic name; there is no logical load or RNG.
-Retained witnesses bind 34 writes, eight samples and visible frames 5524/15021.
-Focused 18 and SPEC 180 mutations pass. The first cold Target exposed and fixed
-one stale contract-hash sentinel; 130 wiring suppressions now reject. Target
-GAME.BIN is `dfe446da...a8ae`; paired cold debug-rig evidence passes 575 samples
-and five mutations at ISO `c9759357...fcf5d`. Normal settings are restored.
-Fast reaches only the accepted P4 frame-3782 RED; no runtime promotion or WGC.
-Exact next experiment: close next-demand route writer `0x0083d4` as one whole
-source program. Preserve window `0x0083c4..0x0083f4` SHA `3813fbb1...7384`
-and visible frames 5562/15089; bind every reachable branch and its
-route/audio/load/RNG ownership, regenerate once, and run the full ceremony.
-Never commit captures, PNGs, ROMs, ISOs, dumps, or protected user files.
+was not censused. All nine P3 actor programs and all seven route programs are
+SPEC-executable. Artifact `e367d289...39295` closes writer `0x0083d4` as the
+complete `0x0083c8..0x0083fc` program: 11 instructions, six field profiles and
+five owned transfers. Its exact signed `g837c==0` guard owns route `0->2`, three
+ordered helpers, pool reset, `g90e8=1`, and command `0xff00` with exact zero
+arguments; semantic sound name remains UNKNOWN. Retained witnesses bind eight
+direct plus 220 pool-reset writes, eight samples, two audio dispatches, visible
+frames 5562/15089 and zero RNG. Focused 15 and SPEC 180 mutations pass. Debug
+and release Target pass; release GAME.BIN is `7ee71766...f7e0`, archive remains
+`ccf8795a...15bd`. Paired cold Coffee Shop evidence is byte-identical across
+575 samples with five mutations at ISO `f50cae0a...f35f`. Normal settings are
+restored. Fast reaches only accepted P4 frame-3782 RED; no promotion or WGC.
+Exact next experiment: close the first-demand presentation-audio owner family
+at source frame 5719 as one reusable source program. Bind every Round 1 caller,
+guard, command/arguments, shared-dispatch edge, state effect and audio/load/RNG
+owner from retained evidence; regenerate once and run the full family ceremony. Never commit captures, PNGs, ROMs, ISOs, dumps, or protected user files.
