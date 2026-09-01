@@ -3408,3 +3408,41 @@ trigger WGC.
 After the paired evidence is recorded, continue P3 with the first-demand
 enemy-audio owner family at source frame 5881 as one reusable owner-family
 body.
+
+### P3 enemy-audio owner-family checkpoint (2026-09-01)
+
+The complete Round 1 enemy-owned audio family is SPEC-executable from the
+accepted paired trigger, shared-command and handler ledgers plus exact offline
+opcode windows. Eighty-three source-closed trigger groups bind 14 commands
+across 182 exact enemy contexts and 228 dispatch occurrences from ten fixed
+source origins. The projection covers record type 12 with classes `0x00`,
+`0x01`, `0x1f` and `0x29`; shared non-enemy occurrences remain explicit.
+
+Eighteen reusable caller programs bind exact opcode slices, instruction
+semantics, field widths and signedness, state/substate guards, argument
+variants and grouped handler/QSound transactions. Individual register writes
+are not logical events and semantic sound names remain `UNKNOWN`. The family
+owns no enemy gameplay projection, logical load/release or RNG.
+
+Artifact SHA-256 is
+`5d4fff53dfd1fd3a611a66b485dba4b9d9d80f1d12641747db71828d115837ae`.
+Nineteen focused and all 180 aggregate SPEC mutations reject. Aggregate
+fixture SHA-256 is
+`8aadcc83642fbb58dc2570efd34c2292800e85280bf6d8bf47f23f1ab1863bca`;
+contract SHA-256 is
+`12c61b100077e5494170def25b8522fe4084b33ebf44b2edd7e53ea9ec887ea5`.
+
+Fast and Oracle pass every Oracle/SPEC prerequisite and stop only at the
+accepted P4 frame-3782 RED. Debug and release/live-encounter Target pass;
+release GAME.BIN is 373,840 bytes at SHA-256
+`0e6fc6cb97411454aae72de1cc8a17bccc461909daebd9b1476f5f472905cc4b`,
+and the cart archive remains
+`ccf8795a147daf337c1f72364c81f05fc2cfd255d8d21b40a56c74c97f8d15bd`.
+The attempted full-route tile-union measurement correctly refused its known
+over-budget archive; the current scene-owned street scope was regenerated and
+no carve, asset or memory-plan change was made. This SPEC-only body changes no
+runtime semantics, does not promote the candidate and does not trigger WGC.
+Commit-bound paired cold-emulator evidence remains before closure.
+
+After the paired evidence is recorded, continue P3 with the first-demand
+route-audio owner family at source frame 6199.

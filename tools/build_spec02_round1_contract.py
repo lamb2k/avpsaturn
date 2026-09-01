@@ -36,6 +36,7 @@ SOURCES = {
     "presentation_audio_program": "data/spec02_presentation_audio_owner_program.json",
     "projectile_audio_program": "data/spec02_projectile_audio_owner_program.json",
     "boss_audio_program": "data/spec02_boss_audio_owner_program.json",
+    "enemy_audio_program": "data/spec02_enemy_audio_owner_program.json",
     "auxiliary": "data/oracle11_round1_auxiliary_authority.json",
     "route": "data/oracle11_round1_encounter_route_authority.json",
     "boss": "data/oracle11_round1_boss_orchestration.json",
@@ -461,6 +462,11 @@ def build_fields() -> list[dict[str, object]]:
           "boss_audio_program", "/", "all 25 Round 1 boss-origin trigger groups, 42 exact boss contexts and 14 source callsite programs",
           "/authority_data/audio/p3_owner_programs/boss", "exact type-12/16/24 class-0x06 state/substate and local caller guard submit the bound command/arguments to the accepted shared dispatcher without owning boss gameplay",
           ["boss.type:u8", "boss.class:u8", "boss.state:u16", "boss.substate:u16", "boss local fields", "audio command arguments"], ["boss-local fields", "audio.command_queue[16]", "grouped QSound transaction"],
+          "/mutation_controls", "group, origin, class/type, context, callsite instruction, signed guard, command, arguments, dispatcher, handler, QSound grouping, gameplay coupling, load, RNG or fixed-frame mutation is rejected"),
+        f("audio.enemy_owner_program", "gameplay-audio-load-release", "enemy_audio_trigger_family", False,
+          "enemy_audio_program", "/", "all 83 Round 1 enemy-origin trigger groups, 182 exact enemy contexts and 18 source callsite programs",
+          "/authority_data/audio/p3_owner_programs/enemy", "exact type-12 class-0x00/01/1f/29 state/substate and local caller guard submit the bound command/arguments to the accepted shared dispatcher without owning enemy gameplay",
+          ["enemy.type:u8", "enemy.class:u8", "enemy.state:u16", "enemy.substate:u16", "enemy local fields", "audio command arguments"], ["enemy-local fields", "audio.command_queue[16]", "grouped QSound transaction"],
           "/mutation_controls", "group, origin, class/type, context, callsite instruction, signed guard, command, arguments, dispatcher, handler, QSound grouping, gameplay coupling, load, RNG or fixed-frame mutation is rejected"),
         f("audio.player_trigger", "gameplay-audio-load-release", "audio_trigger_table", False,
           "player", "/player_origin_gameplay_audio/trigger_edges", "38 player-side caller/command edges to wrapper 0x003a88 and queue 0x001922",
@@ -1179,6 +1185,7 @@ def build_fixtures(source: dict[str, dict]) -> dict[str, object]:
                     "presentation": copy.deepcopy(source["presentation_audio_program"]),
                     "projectile": copy.deepcopy(source["projectile_audio_program"]),
                     "boss": copy.deepcopy(source["boss_audio_program"]),
+                    "enemy": copy.deepcopy(source["enemy_audio_program"]),
                 },
             },
             "loading": {"boundaries": copy.deepcopy(source["loads"]["boundaries"])},
@@ -2355,6 +2362,34 @@ def validate(contract: dict[str, object], fixtures: dict[str, object],
             boss_audio["implementation_rules"]
                 ["unknown_state_or_transition_logic_allowed"] is False,
             "boss-audio owner family fixture incomplete or drifted")
+    enemy_audio = fixtures["authority_data"]["audio"][
+        "p3_owner_programs"]["enemy"]
+    require(enemy_audio == source["enemy_audio_program"] and
+            enemy_audio["status"] == "SPEC_EXECUTABLE" and
+            enemy_audio["classification"] ==
+                "SOURCE_CLOSED_IMPLEMENTATION_FIELDS" and
+            enemy_audio["coverage"] == {
+                "trigger_groups": 83, "distinct_commands": 14,
+                "enemy_source_contexts": 182,
+                "enemy_dispatch_occurrences": 228,
+                "source_origin_records": 10,
+                "distinct_callsite_programs": 18,
+                "record_type_class_pairs": 4,
+                "orphan_groups": 0, "orphan_contexts": 0,
+                "orphan_handler_transactions": 0,
+                "unowned_audio_events": 0,
+                "logical_load_release_events": 0, "rng_calls": 0} and
+            len(enemy_audio["normalized_source_programs"]) == 18 and
+            len(enemy_audio["source_origin_records"]) == 10 and
+            enemy_audio["handler_boundary"]
+                ["individual_qsound_writes_are_logical_events"] is False and
+            enemy_audio["transition_contract"]
+                ["enemy_audio_owns_enemy_gameplay"] is False and
+            enemy_audio["transition_contract"]["rng_calls"] == 0 and
+            all(enemy_audio["mutation_controls"].values()) and
+            enemy_audio["implementation_rules"]
+                ["unknown_state_or_transition_logic_allowed"] is False,
+            "enemy-audio owner family fixture incomplete or drifted")
     class1f = next(item for item in
                    fixtures["authority_data"]["enemies"]["archetypes"]
                    if item["class"] == "0x1f")

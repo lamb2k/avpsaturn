@@ -33,10 +33,17 @@ reach only accepted P4 frame-3782 RED. Debug/release-live Target pass;
 GAME.BIN is `f74fa03f...a76d`, archive unchanged. This SPEC-only body changes
 no runtime semantics and does not promote the candidate or trigger WGC. Its
 paired semantic SHA is `1a6a8c39...2f59` and ISO is `d7878b86...f584`.
-
+Enemy audio is SPEC-executable: 83 groups, 14 commands, 182 exact contexts,
+228 occurrences, ten origins, four type/class pairs and 18 exact caller
+programs. Artifact SHA is `5d4fff53...37ae`; fixture `8aadcc83...3bca`;
+contract `12c61b10...7ea5`. Focused 19 and aggregate 180 mutations reject.
+Fast/Oracle reach only frame-3782 RED. Target passes; GAME.BIN is
+`0e6fc6cb...cc4b`, archive unchanged. Paired commit-bound emulator is pending.
 ## Exact next sequence
-Continue P3 with enemy-audio at first demand source frame 5881 as one complete
-reusable owner family. Bind every reachable caller/guard, command/arguments,
+Commit/push enemy audio with explicit paths, verify remote, run its two cold
+debug-rig captures at Video1/Sound0, restore 4/1, and record/push the result.
+Then close route-audio at first demand source frame 6199 as one reusable owner
+family. Bind every reachable caller/guard, command/arguments,
 shared-dispatch/handler transaction, state effects and audio/load/RNG
 ownership from retained evidence, regenerate once, and run the full ceremony.
 Never commit captures, PNGs, ROMs, ISOs, dumps, or protected user files.
