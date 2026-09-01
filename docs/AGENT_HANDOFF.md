@@ -23,22 +23,18 @@ capacity gates pass, and Round 2 gameplay was not censused. The memory plan
 and cart archive `ccf8795a...15bd` remain unchanged. The MCP capture lane and
 physical-only cart-to-VDP1 CPU-copy rule remain locked.
 
-All nine P3 actor and seven route programs are SPEC-executable. Presentation
-and projectile audio are committed and paired-emulator green. Boss audio is
+All nine P3 actor and seven route programs are SPEC-executable. Presentation,
+projectile and boss audio are committed and paired-emulator green. Boss is
 SPEC-executable: 25 groups, 15 commands, 42 exact contexts, 110 occurrences,
 seven origins, three type/class pairs and 14 exact caller programs. Artifact
 SHA is `77068e12...6d42`; aggregate fixture `dda52c9e...60dd`; contract
 `d39dfe1...9e05`. Focused 19 and aggregate 180 mutations reject. Fast/Oracle
 reach only accepted P4 frame-3782 RED. Debug/release-live Target pass;
 GAME.BIN is `f74fa03f...a76d`, archive unchanged. This SPEC-only body changes
-no runtime semantics and does not promote the candidate or trigger WGC.
+no runtime semantics and does not promote the candidate or trigger WGC. Its
+paired semantic SHA is `1a6a8c39...2f59` and ISO is `d7878b86...f584`.
 
 ## Exact next sequence
-Commit and push the boss-audio family with explicit paths; verify remote SHA.
-Run two commit-bound cold debug-rig Coffee Shop captures at VideoCore 1 /
-SoundCore 0, validate identical 575-sample semantics and real mutations, then
-restore normal settings 4/1. Record and push the paired result.
-
 Continue P3 with enemy-audio at first demand source frame 5881 as one complete
 reusable owner family. Bind every reachable caller/guard, command/arguments,
 shared-dispatch/handler transaction, state effects and audio/load/RNG

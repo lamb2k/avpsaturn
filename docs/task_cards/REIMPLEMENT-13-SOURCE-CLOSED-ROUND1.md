@@ -3395,9 +3395,15 @@ release GAME.BIN is 373,840 bytes at SHA-256
 `f74fa03f6cbeb47db1108f10140f482de7953e9993bc4777f739e929e411a76d`,
 and the cart archive remains
 `ccf8795a147daf337c1f72364c81f05fc2cfd255d8d21b40a56c74c97f8d15bd`.
-This SPEC-only body changes no runtime semantics, does not promote the
-candidate and does not trigger WGC. Commit-bound paired cold-emulator evidence
-is the remaining checkpoint step.
+Two commit-bound cold debug-rig Coffee Shop runs pass byte-identical 575-sample
+semantic ledgers with five real mutations rejected and zero fallback/failure
+at semantic SHA-256
+`1a6a8c39e83ae29ed1ab2c00e2ce735a281445e4b31bb89b7402fec2767f2f59`
+and normalized ISO SHA-256
+`d7878b868558664d49141ea6d5c967af623084558181adef444eb4d95179f584`.
+Settings were restored to VideoCore 4 / SoundCore 1. This SPEC-only body
+changes no runtime semantics, does not promote the candidate and does not
+trigger WGC.
 
 After the paired evidence is recorded, continue P3 with the first-demand
 enemy-audio owner family at source frame 5881 as one reusable owner-family
