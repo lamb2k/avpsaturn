@@ -2363,3 +2363,19 @@ navigation, route-wide, and presentation controls remain discriminating, with
 zero orphan authority event. Evidence artifact SHA-256 is
 `4572f355ccefe66cc0bc6ba2ead29ec5c65911a2dca28ef0f7b27fcdb99b1566`.
 Continue P2 at source frame 9941 through the next source boundary.
+
+### Overnight census segment 9941..9975 checkpoint (2026-08-31)
+
+The Chrysalis entry presentation cluster is census-closed as one 35-frame
+source-owned boundary. The paired semantic SHA-256 is
+`e7c513451b2a1eea9733a78cbfe9ac41bdc4c8e11068d33d39e207e1a1b56ccf`.
+Predator identity remains exact. Three continuing lifetimes cover player,
+class `0x06/12`, and navigation `0x07/20`; no lifecycle or HIT/KO edge occurs.
+Three owned audio transactions use commands `0x003e`, `0x0113`, and `0x0203`.
+
+All 11 visual signatures are source-closed presentation dependencies with no
+progression authority. Enemy, navigation, route-wide, and player-audio controls
+remain discriminating. There are zero orphan actors, lifecycle, route/camera,
+audio, load, release, or identity events. Evidence artifact SHA-256 is
+`ec72ef4e391eb58b21896fb50f67fda1993b17442de6331a817e88737f917881`.
+Continue P2 at source frame 9976 through `round1-chrysalis-battle`.

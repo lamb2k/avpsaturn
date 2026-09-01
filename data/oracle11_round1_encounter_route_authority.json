@@ -83476,7 +83476,8 @@
       "data/oracle10_round1_census_extension_7439_7503.json",
       "data/oracle10_round1_census_extension_7504_9004.json",
       "data/oracle10_round1_census_extension_9005_9039.json",
-      "data/oracle10_round1_census_extension_9040_9940.json"
+      "data/oracle10_round1_census_extension_9040_9940.json",
+      "data/oracle10_round1_census_extension_9941_9975.json"
     ],
     "accepted_evidence_sha256": [
       "1eeb385455a62edb0d21bf48790aa7ac34c6a29408b40792197ee0798370d9c0",
@@ -83485,11 +83486,12 @@
       "adb7f0caf3cf538826f8210f1e322b88de5b501000ae995356cd83c0a94f405a",
       "b6bb711eeca20571b06c0cde107960bff46dc475e902708f0f58a0adab563eee",
       "bf2edfd1377b8f4309d6f329e1765a3dda3540096658d2e8c7c1bbc26e6f0b43",
-      "4572f355ccefe66cc0bc6ba2ead29ec5c65911a2dca28ef0f7b27fcdb99b1566"
+      "4572f355ccefe66cc0bc6ba2ead29ec5c65911a2dca28ef0f7b27fcdb99b1566",
+      "ec72ef4e391eb58b21896fb50f67fda1993b17442de6331a817e88737f917881"
     ],
     "class_type_pairs": 9,
     "orphan_authority_events": 0,
-    "source_frame_range": [5567, 9940]
+    "source_frame_range": [5567, 9975]
   },
   "status": "SOURCE_CLOSED",
   "task": "ORACLE-11-ROUND1-REACHABLE-LOGIC-CLOSURE"

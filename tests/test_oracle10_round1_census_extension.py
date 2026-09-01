@@ -23,6 +23,9 @@ INTERWAVE2 = json.loads((ROOT / "data/oracle10_round1_census_extension_9005_9039
 WAREHOUSE_GAMEPLAY2 = json.loads(
     (ROOT / "data/oracle10_round1_census_extension_9040_9940.json")
     .read_text(encoding="ascii"))
+CHRYSALIS_INTERWAVE = json.loads(
+    (ROOT / "data/oracle10_round1_census_extension_9941_9975.json")
+    .read_text(encoding="ascii"))
 GENERATOR = (ROOT / "tools/analyze_oracle10_round1_census_extension.py") \
     .read_text(encoding="utf-8")
 
@@ -515,5 +518,67 @@ for label, path, value in (
         continue
     raise AssertionError(f"Warehouse gameplay 2 census mutation accepted: {label}")
 
-print("ORACLE-10 Round 1 census extension 5567..9940: PASS "
-      "(44 mutations rejected)")
+
+def validate_chrysalis_interwave(report: dict[str, object]) -> None:
+    ceremony = report["paired_capture_ceremony"]
+    semantics = ceremony["segment_semantics"]
+    census = report["scene_census_delta"]
+    controls = report["targeted_counterfactuals"]
+    assert report["status"] == "CENSUS_SEGMENT_COMPLETE"
+    assert report["segment"]["source_frame_range"] == [9941, 9975]
+    assert len(report["segment"]["scene_ids"]) == 11
+    assert ceremony["raw_capture_files_byte_identical"] is True
+    assert ceremony["paired_route_ledgers_byte_identical"] is True
+    assert semantics["frame_count"] == 35
+    assert semantics["canonical_semantic_sha256"] == \
+        "e7c513451b2a1eea9733a78cbfe9ac41bdc4c8e11068d33d39e207e1a1b56ccf"
+    assert semantics["player_active_frames"] == 35
+    assert semantics["character_mismatch_frames"] == []
+    assert semantics["identity_mismatch_frames"] == []
+    assert semantics["per_frame_character_identity_gate"] is True
+    assert [(row["class"], row["type"], row["instance_count"])
+            for row in census["class_type_inventory"]] == [
+                ("0x00", 0, 1), ("0x06", 12, 1), ("0x07", 20, 1)]
+    assert len(census["actor_lifetimes"]) == 3
+    assert census["spawn_edges"] == [] and census["despawn_edges"] == []
+    assert census["hit_ko_transitions"] == []
+    assert census["audio"]["handler_transaction_count"] == 3
+    assert census["audio"]["command_counts"] == {
+        "0x003e": 1, "0x0113": 1, "0x0203": 1}
+    assert census["audio"]["orphan_handler_transactions"] == 0
+    assert census["audio"]["orphan_trigger_groups"] == 0
+    assert census["load_release_boundaries"] == []
+    assert report["route_authority_extension"]["route_state_edges"] == []
+    assert len(report["route_authority_extension"]["camera_lock_runs"]) == 1
+    assert len(controls["presentation_boundaries"]) == 11
+    assert all(row["owns_progression"] is False
+               for row in controls["presentation_boundaries"])
+    assert len(controls["enemy_class_controls"]) == 1
+    assert len(controls["auxiliary_class_controls"]) == 1
+    assert all(value == 0 for value in report["coverage"].values())
+    assert report["physical_saturn"] == "UNRUN"
+
+
+validate_chrysalis_interwave(CHRYSALIS_INTERWAVE)
+for label, path, value in (
+        ("chrysalis interwave semantic",
+         ("paired_capture_ceremony", "segment_semantics",
+          "canonical_semantic_sha256"), "0" * 64),
+        ("chrysalis interwave presentation",
+         ("targeted_counterfactuals", "presentation_boundaries"), []),
+        ("chrysalis interwave actors", ("scene_census_delta", "actor_lifetimes"), []),
+        ("chrysalis interwave orphan audio", ("coverage", "unowned_audio_events"), 1),
+        ("chrysalis interwave physical", ("physical_saturn",), "PASS")):
+    mutant = copy.deepcopy(CHRYSALIS_INTERWAVE)
+    target = mutant
+    for key in path[:-1]:
+        target = target[key]
+    target[path[-1]] = value
+    try:
+        validate_chrysalis_interwave(mutant)
+    except AssertionError:
+        continue
+    raise AssertionError(f"Chrysalis interwave mutation accepted: {label}")
+
+print("ORACLE-10 Round 1 census extension 5567..9975: PASS "
+      "(49 mutations rejected)")
