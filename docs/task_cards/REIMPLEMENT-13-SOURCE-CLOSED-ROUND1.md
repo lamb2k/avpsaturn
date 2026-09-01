@@ -2934,3 +2934,39 @@ All nine P2 actor programs are now SPEC-executable. Continue P3 with the
 first-demand route-transition writer `0x00c200` as one whole program over
 `0x00c1f0..0x00c220`, including its frame-5720 guard and every Round 1-reachable
 branch, then follow route/audio/load families in closure-report demand order.
+
+### P3 route writer 0x00c200 whole-routine checkpoint (2026-09-01)
+
+The first-demand route-transition family is SPEC-executable as one bounded
+source program over `0x00c1f0..0x00c220`. It closes all 12 decoded operations,
+eight exact a5-global field profiles and three source-owned transfers. The
+exact guard is `(u8(g8236) & u8(g81af)) == 0`; its false branch performs no
+owned mutation and tail-jumps to `0x008438`. Its true branch increments signed
+route state by two, clears `g800c/g8010/g8014`, writes signed bounds `0x0300`
+and `0x0400`, calls shared route-latch `0x00c7ae` before shared state-clear
+`0x00c784`, then uses the same tail. No RNG is consumed and no fixed-frame
+transition is allowed.
+
+Both retained route ledgers bind the same six source writes at frame 5719 and
+the same four-frame semantic window through visible frame 5720. Artifact
+SHA-256 is
+`e785f87e6e508e984f5e52c5b6924e67e7a92d8e4e3237fceddf7b49f53f58c5`;
+instruction-semantics SHA-256 is
+`d3038f2bcf75e5e0ce0394558f61b51e605c7863792c7403d616a6522ad3588f`.
+Eleven route mutations and all 180 SPEC-02 mutations reject.
+
+Fast passes every P3/focused/Oracle/SPEC gate and then reaches the preserved P4
+source-frame-3782 stage-progress RED. Release/live-encounter Target is
+byte-identical: GAME.BIN remains 373,840 bytes at
+`aa99904645fa584952ccba84e4fb28d970dabc4ae6e6e593b401f9e3323910a1`,
+BSS ends at `0x060b2560`, and the cart archive remains
+`ccf8795a147daf337c1f72364c81f05fc2cfd255d8d21b40a56c74c97f8d15bd`.
+One debug-rig pinned scene run passes 575 samples with zero fallback at ISO
+`3bb36edbd29c0a07867826f7d1ac99e96d84849232a05b3bdea43d5d84a611de`.
+Settings were restored to VideoCore 4 / SoundCore 1. The complete Coffee Shop
+census remains expected RED at source 5566 code 11; this SPEC-only body changes
+no runtime identity and triggers neither paired cold Emulator nor WGC.
+
+Continue P3 with next-demand route writer `0x008546` as one whole program over
+`0x008536..0x008566`, including its frame-6199 guard and every Round 1-reachable
+branch.

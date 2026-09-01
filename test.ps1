@@ -588,6 +588,16 @@ if (Test-Path -LiteralPath (Join-Path $PSScriptRoot 'data\spec02_class4e_type24_
         throw "SPEC-02 class-0x4e/type-24 mutation test failed with exit code $LASTEXITCODE."
     }
 }
+if (Test-Path -LiteralPath (Join-Path $PSScriptRoot 'data\spec02_route_c200_program.json')) {
+    & $PythonPath (Join-Path $PSScriptRoot 'tools\build_spec02_route_c200_program.py') '--check'
+    if ($LASTEXITCODE -ne 0) {
+        throw "SPEC-02 route-0x00c200 generation check failed with exit code $LASTEXITCODE."
+    }
+    & $PythonPath (Join-Path $PSScriptRoot 'tests\test_spec02_route_c200.py')
+    if ($LASTEXITCODE -ne 0) {
+        throw "SPEC-02 route-0x00c200 mutation test failed with exit code $LASTEXITCODE."
+    }
+}
 if (Test-Path -LiteralPath (Join-Path $PSScriptRoot 'data\spec02_round1_executable_contract.json')) {
     & $PythonPath (Join-Path $PSScriptRoot 'tests\test_spec02_round1_contract.py')
     if ($LASTEXITCODE -ne 0) {

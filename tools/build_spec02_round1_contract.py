@@ -26,6 +26,7 @@ SOURCES = {
     "class49_program": "data/spec02_class49_type24_program.json",
     "class4b_program": "data/spec02_class4b_type24_program.json",
     "class4e_program": "data/spec02_class4e_type24_program.json",
+    "route_c200_program": "data/spec02_route_c200_program.json",
     "auxiliary": "data/oracle11_round1_auxiliary_authority.json",
     "route": "data/oracle11_round1_encounter_route_authority.json",
     "boss": "data/oracle11_round1_boss_orchestration.json",
@@ -372,6 +373,11 @@ def build_fields() -> list[dict[str, object]]:
           "/authority_data/route/first_segment_recurring_spawn/exit_controller_program", "controller progress, source timers, player-script terminal writer and route-zero loader resumes own Coffee Shop withdrawal, centralized teardown and next-scene handoff; living enemy count and fixed frames do not",
           ["route.state:s16", "controller.state_substate:u16", "controller.timer42:u16", "progress:u16", "progress_snapshot:u16", "player.script_cursor:u32", "player.position:s32", "g8236:u8", "g81af:u8", "g837c:s16", "loader.resume:u8"], ["controller.state_substate:u16", "controller.timer42:u16", "route.state:s16", "player.state:u16", "player.position:s32", "player.facing:u8", "pool.free_count:u8", "load.event"],
           "/first_segment_recurring_spawn/exit_controller_program/mutation_controls", "wrong progress threshold, kill gate, fixed-frame transition, script cursor, motion vector, terminal writer, teardown mode or mid-round read is rejected"),
+        f("route.writer_0x00c200_whole_program", "encounters-waves-scripted-triggers", "guarded_route_transition_program", True,
+          "route_c200_program", "/", "0x00c1f0 route entry, exact g8236/g81af guard, six ordered global writes, two shared helper calls and tail continuation",
+          "/authority_data/route/p3_whole_routine_programs/0x00c200", "the bitwise gate owns whether the transition executes; exact-width writes, helper order and the 0x008438 tail target own the 2-to-4 route edge without fixed-frame authority",
+          ["g8236:u8", "g81af:u8", "g8008:s16", "g800c:u16", "g8010:u16", "g8014:u16", "g829c:s16", "g829e:s16", "g823e:u16", "g8248:u16"], ["g8008:s16", "g800c:u16", "g8010:u16", "g8014:u16", "g829c:s16", "g829e:s16", "g823e:u16", "g8248:u16"],
+          "/mutation_controls", "guard, route increment, width, field, write order, bound constant, helper order, tail target, RNG or fixed-frame mutation changes the paired route witness"),
         f("boss.phases_spawns", "round1-boss", "boss_phase_table", True,
           "boss", "/controller_contract", "class-0x02 type-32 controller, 11 phases, eight boss-room spawns",
           "/authority_data/boss", "controller state/phase and source countdown guards own boss spawns and phase transitions",
@@ -1174,6 +1180,9 @@ def build_fixtures(source: dict[str, dict]) -> dict[str, object]:
                    if item["class"] == "0x4e" and item["type"] == 24)
     class4e["whole_routine_implementation_contract"] = copy.deepcopy(
         source["class4e_program"])
+    fixtures["authority_data"]["route"].setdefault(
+        "p3_whole_routine_programs", {})["0x00c200"] = copy.deepcopy(
+            source["route_c200_program"])
     fixtures["scene_manifests"] = {
         "coffee_shop": build_coffee_shop_scene_manifest(source)}
     return fixtures
@@ -1996,6 +2005,34 @@ def validate(contract: dict[str, object], fixtures: dict[str, object],
             class4e_program["implementation_rules"]
                 ["unknown_state_or_transition_logic_allowed"] is False,
             "class-0x4e/type-24 whole-routine fixture incomplete or drifted")
+    route_c200 = fixtures["authority_data"]["route"][
+        "p3_whole_routine_programs"]["0x00c200"]
+    require(route_c200 == source["route_c200_program"] and
+            route_c200["status"] == "SPEC_EXECUTABLE" and
+            route_c200["classification"] ==
+                "SOURCE_CLOSED_IMPLEMENTATION_FIELDS" and
+            route_c200["source_identity"]["program_window"] ==
+                ["0x00c1f0", "0x00c220"] and
+            route_c200["normalized_source_program"]["instruction_count"] == 12 and
+            len(route_c200["normalized_source_program"]
+                ["field_access_profiles"]) == 8 and
+            len(route_c200["normalized_source_program"]
+                ["external_transfers"]) == 3 and
+            route_c200["transition_contract"]["guard"] ==
+                "(u8(g8236) & u8(g81af)) == 0" and
+            len(route_c200["transition_contract"]
+                ["guard_true_ordered_writes"]) == 6 and
+            route_c200["transition_contract"]["ordered_helper_calls"] ==
+                ["0x00c7ae", "0x00c784"] and
+            route_c200["transition_contract"]["tail_target"] == "0x008438" and
+            route_c200["dynamic_witness"]["counts"] ==
+                {"writes": 6, "samples": 4, "rng_calls": 0} and
+            all(route_c200["mutation_controls"].values()) and
+            route_c200["implementation_rules"]
+                ["runtime_68000_interpretation_forbidden"] is True and
+            route_c200["implementation_rules"]
+                ["unknown_state_or_transition_logic_allowed"] is False,
+            "route-0x00c200 whole-routine fixture incomplete or drifted")
     class1f = next(item for item in
                    fixtures["authority_data"]["enemies"]["archetypes"]
                    if item["class"] == "0x1f")
