@@ -33,6 +33,7 @@ SOURCES = {
     "route_8418_program": "data/spec02_route_8418_program.json",
     "route_c886_program": "data/spec02_route_c886_program.json",
     "route_83d4_program": "data/spec02_route_83d4_program.json",
+    "presentation_audio_program": "data/spec02_presentation_audio_owner_program.json",
     "auxiliary": "data/oracle11_round1_auxiliary_authority.json",
     "route": "data/oracle11_round1_encounter_route_authority.json",
     "boss": "data/oracle11_round1_boss_orchestration.json",
@@ -444,6 +445,11 @@ def build_fields() -> list[dict[str, object]]:
           "/authority_data/audio/nonplayer_trigger_groups", "owner class/type/state/substate and hashed local caller guard reach the shared wrapper",
           ["owner.state", "owner.substate", "route.state"], ["audio.command_queue[16]"],
           "/trigger_groups/0/handler_transaction/causal_control", "trigger suppression changes downstream QSound with gameplay projection unchanged"),
+        f("audio.presentation_owner_program", "gameplay-audio-load-release", "presentation_audio_trigger_family", False,
+          "presentation_audio_program", "/", "all eight Round 1 presentation-origin trigger groups and eight exact source callsite programs",
+          "/authority_data/audio/p3_owner_programs/presentation", "exact owner class/type/state/substate and source callsite guard submit the bound command/arguments to the accepted shared dispatcher without owning gameplay",
+          ["presentation.owner.state:u16", "presentation.owner.substate:u16", "presentation.control fields", "audio command arguments"], ["presentation-local fields", "audio.command_queue[16]", "grouped QSound transaction"],
+          "/mutation_controls", "group, owner, context, callsite, command, arguments, dispatcher, handler, QSound grouping, gameplay coupling, load, RNG or fixed-frame mutation is rejected"),
         f("audio.player_trigger", "gameplay-audio-load-release", "audio_trigger_table", False,
           "player", "/player_origin_gameplay_audio/trigger_edges", "38 player-side caller/command edges to wrapper 0x003a88 and queue 0x001922",
           "/authority_data/player/player_origin_gameplay_audio", "player action/state/substate guard and exact caller enqueue the bound command/arguments",
@@ -1157,6 +1163,9 @@ def build_fixtures(source: dict[str, dict]) -> dict[str, object]:
                 "handler_paths": copy.deepcopy(source["audio_handlers"]["handler_paths"]),
                 "command_transactions": copy.deepcopy(source["audio_handlers"]["command_transactions"]),
                 "nonplayer_trigger_groups": copy.deepcopy(source["audio_triggers"]["trigger_groups"]),
+                "p3_owner_programs": {
+                    "presentation": copy.deepcopy(source["presentation_audio_program"]),
+                },
             },
             "loading": {"boundaries": copy.deepcopy(source["loads"]["boundaries"])},
         },
@@ -2254,6 +2263,29 @@ def validate(contract: dict[str, object], fixtures: dict[str, object],
             route_83d4["implementation_rules"]
                 ["unknown_state_or_transition_logic_allowed"] is False,
             "route-0x0083d4 whole-program fixture incomplete or drifted")
+    presentation_audio = fixtures["authority_data"]["audio"][
+        "p3_owner_programs"]["presentation"]
+    require(presentation_audio == source["presentation_audio_program"] and
+            presentation_audio["status"] == "SPEC_EXECUTABLE" and
+            presentation_audio["classification"] ==
+                "SOURCE_CLOSED_IMPLEMENTATION_FIELDS" and
+            presentation_audio["coverage"] == {
+                "trigger_groups": 8, "distinct_commands": 8,
+                "source_contexts": 20, "dispatch_occurrences": 53,
+                "distinct_callsite_programs": 8, "orphan_groups": 0,
+                "orphan_contexts": 0, "orphan_handler_transactions": 0,
+                "unowned_audio_events": 0,
+                "logical_load_release_events": 0, "rng_calls": 0} and
+            len(presentation_audio["normalized_source_programs"]) == 8 and
+            presentation_audio["handler_boundary"]
+                ["individual_qsound_writes_are_logical_events"] is False and
+            presentation_audio["transition_contract"]
+                ["presentation_owns_gameplay_result"] is False and
+            presentation_audio["transition_contract"]["rng_calls"] == 0 and
+            all(presentation_audio["mutation_controls"].values()) and
+            presentation_audio["implementation_rules"]
+                ["unknown_state_or_transition_logic_allowed"] is False,
+            "presentation-audio owner family fixture incomplete or drifted")
     class1f = next(item for item in
                    fixtures["authority_data"]["enemies"]["archetypes"]
                    if item["class"] == "0x1f")

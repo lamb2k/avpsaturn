@@ -9,7 +9,7 @@ from pathlib import Path
 
 ROOT = Path(__file__).resolve().parents[3]
 SPEC = ROOT / "data/spec02_round1_executable_contract.json"
-EXPECTED = "5d839081411876ec8650cb9a7195de2672d29d9f2bd7d99a161d18087fc75ada"
+EXPECTED = "5b50fdf578ed4f2262f10bb496b903e83db24e73b8b77a0bea2af683f7b7f807"
 assert hashlib.sha256(SPEC.read_bytes()).hexdigest() == EXPECTED
 assert json.loads(SPEC.read_text())["status"] == "ACCEPTED"
 source = (ROOT / "src/port_v2/gameplay/round1/round1.c").read_text()

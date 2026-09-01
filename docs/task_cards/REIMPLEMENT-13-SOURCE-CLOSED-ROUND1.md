@@ -3269,3 +3269,46 @@ frame 5719. Close the complete reusable source owner/caller program and every
 Round 1-reachable trigger branch, exact command/arguments, shared-dispatch
 edge, state effects and audio/load/RNG ownership from retained evidence before
 regenerating the existing fixture once.
+
+### P3 presentation-audio owner-family checkpoint (2026-09-01)
+
+The complete Round 1 presentation-owned audio family is SPEC-executable from
+the accepted paired trigger, shared-command and handler ledgers plus exact
+offline opcode windows. Eight source-closed trigger groups bind commands
+`0x0004`, `0x000f`, `0x0030`, `0x0034`, `0x007d`, `0x0266`, `0xff05` and
+`0xff07` across 20 distinct source contexts and 53 dispatch occurrences. Eight
+exact caller programs at `0x00173e`, `0x003c00`, `0x020bb0`, `0x028dde`,
+`0x028e22`, `0x0ac636`, `0x0ac760` and `0x0ad1cc` bind the source guard tails,
+argument variants, shared wrapper, handler table transaction and discriminating
+downstream QSound difference. Individual register writes are not promoted to
+logical events, and all semantic sound names remain `UNKNOWN`.
+
+The family owns no gameplay projection, logical load/release or RNG. It cannot
+create gameplay state, and the shared dispatcher/transport remains owned by the
+accepted global gameplay-audio family. Artifact SHA-256 is
+`32fb5e9506b729414389a26f447aab00a926585494f5a87ba3dd0ea35f8a3753`.
+Sixteen focused and all 180 aggregate SPEC mutations reject. Aggregate fixture
+SHA-256 is
+`8f824c0e83ec13b5940254b7e8dde70c4f66552809ac5d6cca321901be75b321`;
+contract SHA-256 is
+`5b50fdf578ed4f2262f10bb496b903e83db24e73b8b77a0bea2af683f7b7f807`.
+
+Fast and Oracle pass every Oracle/SPEC prerequisite and stop only at the
+accepted P4 frame-3782 RED. Debug and release/live-encounter Target pass;
+release GAME.BIN is 373,840 bytes at SHA-256
+`236d9bd6c8c432feff09d3a3cbd14215f3a1da5d40babad136c291389450e5b5`,
+and the cart archive remains
+`ccf8795a147daf337c1f72364c81f05fc2cfd255d8d21b40a56c74c97f8d15bd`.
+One debug-rig Coffee Shop run passes all 575 semantic samples with zero
+failure/fallback at normalized ISO SHA-256
+`71fc5794aa80d1632866a447f488f54f3c13bf7d3e0093a0ac2736a728fc5f11`.
+Settings were restored to VideoCore 4 / SoundCore 1. The attempted plain
+Release profile correctly tripped its unrelated full-working-set VDP1 guard;
+the card-owned release/live-encounter profile passed. This SPEC-only body
+changes no gameplay semantics, does not promote the candidate and does not
+trigger WGC.
+
+Continue P3 with the first-demand projectile-audio owner family at source frame
+5762. Close all Round 1-reachable projectile callers and trigger guards, exact
+command/arguments, shared-dispatch and handler transactions, state effects and
+audio/load/RNG ownership as one reusable owner-family body.

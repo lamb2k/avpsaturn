@@ -32,18 +32,18 @@ inspection. Settings were restored to VideoCore 4 / SoundCore 1. Evidence is
 P2 is closed through stable Round 2 seam frame 15193; closure SHA is
 `b5c72089...f94b3`, all authority/table/capacity gates pass, and Round 2 gameplay
 was not censused. All nine P3 actor programs and all seven route programs are
-SPEC-executable. Artifact `e367d289...39295` closes writer `0x0083d4` as the
-complete `0x0083c8..0x0083fc` program: 11 instructions, six field profiles and
-five owned transfers. Its exact signed `g837c==0` guard owns route `0->2`, three
-ordered helpers, pool reset, `g90e8=1`, and command `0xff00` with exact zero
-arguments; semantic sound name remains UNKNOWN. Retained witnesses bind eight
-direct plus 220 pool-reset writes, eight samples, two audio dispatches, visible
-frames 5562/15089 and zero RNG. Focused 15 and SPEC 180 mutations pass. Debug
-and release Target pass; release GAME.BIN is `7ee71766...f7e0`, archive remains
-`ccf8795a...15bd`. Paired cold Coffee Shop evidence is byte-identical across
-575 samples with five mutations at ISO `f50cae0a...f35f`. Normal settings are
-restored. Fast reaches only accepted P4 frame-3782 RED; no promotion or WGC.
-Exact next experiment: close the first-demand presentation-audio owner family
-at source frame 5719 as one reusable source program. Bind every Round 1 caller,
-guard, command/arguments, shared-dispatch edge, state effect and audio/load/RNG
-owner from retained evidence; regenerate once and run the full family ceremony. Never commit captures, PNGs, ROMs, ISOs, dumps, or protected user files.
+SPEC-executable. The first-demand presentation-audio family is also executable:
+eight source-closed commands, 20 owner contexts, 53 occurrences and eight exact
+offline-decoded caller programs. Guards, arguments, shared wrappers, grouped
+handler/QSound transactions and causal controls are bound; semantic names remain
+UNKNOWN. Artifact SHA is `32fb5e95...3753`; focused 16 and SPEC 180 mutations
+pass. Aggregate fixture is `8f824c0e...b321`, contract `5b50fdf5...f807`.
+Fast/Oracle reach only accepted P4 frame-3782 RED. Debug and release-live Target
+pass; GAME.BIN is `236d9bd6...e5b5`, archive `ccf8795a...15bd`. One debug-rig
+Coffee Shop run passes 575 samples at ISO `71fc5794...5f11`; settings are 4/1.
+No gameplay-semantic change, promotion or WGC.
+Exact next experiment: close the first-demand projectile-audio owner family at
+source frame 5762 as one reusable owner-family body. Bind every reachable
+projectile caller/guard, exact command/arguments, shared-dispatch/handler
+transaction, state effects and audio/load/RNG ownership from retained evidence;
+regenerate once and run the full family ceremony. Never commit captures, PNGs, ROMs, ISOs, dumps, or protected user files.
