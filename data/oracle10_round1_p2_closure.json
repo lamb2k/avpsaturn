@@ -1,0 +1,607 @@
+{
+  "cumulative_segment_rows": {
+    "actor_lifetime_rows": 307,
+    "audio_transactions": 643,
+    "despawn_edges": 241,
+    "frames": 9627,
+    "hit_ko_transitions": 286,
+    "load_release_boundaries": 2,
+    "route_state_edges": 10,
+    "spawn_edges": 240
+  },
+  "memory_plan_holds_without_revision": true,
+  "mutable_carve": {
+    "capacity_bytes": 102400,
+    "p2_headroom_consumed_bytes": 0,
+    "region": "round1-runtime",
+    "remaining_headroom_bytes": 3020,
+    "required_bytes_after_p2": 99380,
+    "required_bytes_before_p2": 99380
+  },
+  "next_phase": "P3_SPEC02_BATCHED_WHOLE_ROUTINE_BODIES",
+  "ownership_closure": {
+    "all_p2_class_type_pairs": [
+      {
+        "class": "0x00",
+        "classification": "SOURCE_CLOSED",
+        "source_owner": "predator-warrior-player-authority",
+        "type": 0
+      },
+      {
+        "class": "0x00",
+        "classification": "SOURCE_CLOSED",
+        "source_owner": "round1-enemy-archetypes",
+        "type": 12
+      },
+      {
+        "class": "0x01",
+        "classification": "SOURCE_CLOSED",
+        "source_owner": "round1-enemy-archetypes",
+        "type": 12
+      },
+      {
+        "class": "0x06",
+        "classification": "SOURCE_CLOSED",
+        "source_owner": "round1-enemy-archetypes",
+        "type": 12
+      },
+      {
+        "class": "0x07",
+        "classification": "SOURCE_CLOSED",
+        "source_owner": "round1-navigation-terrain-camera",
+        "type": 20
+      },
+      {
+        "class": "0x10",
+        "classification": "SOURCE_CLOSED",
+        "source_owner": "pickups-equipment-weapons-projectiles-hazards-destructibles",
+        "type": 24
+      },
+      {
+        "class": "0x3d",
+        "classification": "SOURCE_CLOSED",
+        "source_owner": "pickups-equipment-weapons-projectiles-hazards-destructibles",
+        "type": 24
+      },
+      {
+        "class": "0x49",
+        "classification": "SOURCE_CLOSED",
+        "source_owner": "pickups-equipment-weapons-projectiles-hazards-destructibles",
+        "type": 24
+      },
+      {
+        "class": "0x4b",
+        "classification": "SOURCE_CLOSED",
+        "source_owner": "pickups-equipment-weapons-projectiles-hazards-destructibles",
+        "type": 24
+      },
+      {
+        "class": "0x4e",
+        "classification": "SOURCE_CLOSED",
+        "source_owner": "pickups-equipment-weapons-projectiles-hazards-destructibles",
+        "type": 24
+      }
+    ],
+    "contradictory_segment_ownership": [],
+    "coverage_gaps": {
+      "per_frame_character_identity_failures": 0,
+      "unidentified_source_class_type_pairs": 0,
+      "unmapped_spawn_despawn_edges": 0,
+      "unowned_actor_lifetimes": 0,
+      "unowned_audio_events": 0,
+      "unowned_load_release_events": 0,
+      "unowned_route_camera_events": 0
+    },
+    "new_class_type_pairs_vs_frame_5566": [
+      {
+        "class": "0x00",
+        "classification": "SOURCE_CLOSED",
+        "first_p2_source_frame": 5567,
+        "source_owner": "round1-enemy-archetypes",
+        "type": 12
+      },
+      {
+        "class": "0x01",
+        "classification": "SOURCE_CLOSED",
+        "first_p2_source_frame": 9976,
+        "source_owner": "round1-enemy-archetypes",
+        "type": 12
+      },
+      {
+        "class": "0x4b",
+        "classification": "SOURCE_CLOSED",
+        "first_p2_source_frame": 6693,
+        "source_owner": "pickups-equipment-weapons-projectiles-hazards-destructibles",
+        "type": 24
+      }
+    ],
+    "zero_unidentified_or_unowned_gameplay_authority": true
+  },
+  "p3_reusable_program_controller_families": {
+    "actor_programs": [
+      {
+        "class": "0x00",
+        "source_owner": "round1-enemy-archetypes",
+        "type": 12
+      },
+      {
+        "class": "0x01",
+        "source_owner": "round1-enemy-archetypes",
+        "type": 12
+      },
+      {
+        "class": "0x06",
+        "source_owner": "round1-enemy-archetypes",
+        "type": 12
+      },
+      {
+        "class": "0x07",
+        "source_owner": "round1-navigation-terrain-camera",
+        "type": 20
+      },
+      {
+        "class": "0x10",
+        "source_owner": "pickups-equipment-weapons-projectiles-hazards-destructibles",
+        "type": 24
+      },
+      {
+        "class": "0x3d",
+        "source_owner": "pickups-equipment-weapons-projectiles-hazards-destructibles",
+        "type": 24
+      },
+      {
+        "class": "0x49",
+        "source_owner": "pickups-equipment-weapons-projectiles-hazards-destructibles",
+        "type": 24
+      },
+      {
+        "class": "0x4b",
+        "source_owner": "pickups-equipment-weapons-projectiles-hazards-destructibles",
+        "type": 24
+      },
+      {
+        "class": "0x4e",
+        "source_owner": "pickups-equipment-weapons-projectiles-hazards-destructibles",
+        "type": 24
+      }
+    ],
+    "audio_owner_families": [
+      {
+        "first_p2_source_frame": 5867,
+        "owner": "boss"
+      },
+      {
+        "first_p2_source_frame": 15192,
+        "owner": "encounter"
+      },
+      {
+        "first_p2_source_frame": 5881,
+        "owner": "enemy"
+      },
+      {
+        "first_p2_source_frame": 5719,
+        "owner": "presentation"
+      },
+      {
+        "first_p2_source_frame": 5762,
+        "owner": "projectile"
+      },
+      {
+        "first_p2_source_frame": 6199,
+        "owner": "route"
+      }
+    ],
+    "load_release_boundaries": [
+      {
+        "classification": "SOURCE_CLOSED",
+        "id": "route-load-release-6200",
+        "visible_boundary_frame": 6200
+      },
+      {
+        "classification": "SOURCE_CLOSED",
+        "id": "route-load-release-12799",
+        "visible_boundary_frame": 12799
+      }
+    ],
+    "route_transition_programs": [
+      {
+        "classification": "SOURCE_CLOSED",
+        "guards": [
+          "s16(g837c) == 0"
+        ],
+        "sample_transition_frames": [
+          15089
+        ],
+        "source_window": {
+          "first": "0x0083c4",
+          "last_exclusive": "0x0083f4",
+          "sha256": "3813fbb167fad415d00f787901e0b0e4cbafab1cbfd789d83fd9b3d9cf7d7384"
+        },
+        "writer_pc": "0x0083d4"
+      },
+      {
+        "classification": "SOURCE_CLOSED",
+        "guards": [
+          "u8(g81f3) != 0"
+        ],
+        "sample_transition_frames": [
+          15019
+        ],
+        "source_window": {
+          "first": "0x008408",
+          "last_exclusive": "0x008438",
+          "sha256": "24c11db9b6955fb7d3e0f629d3db35000fdb955a36d664f1683ac5abd4b55ac6"
+        },
+        "writer_pc": "0x008418"
+      },
+      {
+        "classification": "SOURCE_CLOSED",
+        "guards": [
+          "u8(g81af)==0 && u8(g81d4)==0 && no active player records"
+        ],
+        "sample_transition_frames": [
+          6199,
+          12798
+        ],
+        "source_window": {
+          "first": "0x008536",
+          "last_exclusive": "0x008566",
+          "sha256": "08fe394a5d57592cffc9f64dd7db16cd3268f0ade64969fdf59bf042905e4c6d"
+        },
+        "writer_pc": "0x008546"
+      },
+      {
+        "classification": "SOURCE_CLOSED",
+        "guards": [
+          "failure/continue dispatcher entered state 0"
+        ],
+        "sample_transition_frames": [
+          6200,
+          12799
+        ],
+        "source_window": {
+          "first": "0x008ba2",
+          "last_exclusive": "0x008bd2",
+          "sha256": "9cd8ee473c743e3b0e3597b8cd5367ffa2b6a382702ad98130e1c48f05db753f"
+        },
+        "writer_pc": "0x008bb2"
+      },
+      {
+        "classification": "SOURCE_CLOSED",
+        "guards": [
+          "credited continue restore dispatcher entered state 2"
+        ],
+        "sample_transition_frames": [
+          6692,
+          13292
+        ],
+        "source_window": {
+          "first": "0x0090e2",
+          "last_exclusive": "0x009112",
+          "sha256": "407c340e5ed1daf8c1a19d3642f4b538e3daa5da4b31cf08f7e4ee12eedccad4"
+        },
+        "writer_pc": "0x0090f2"
+      },
+      {
+        "classification": "SOURCE_CLOSED",
+        "guards": [
+          "(u8(g8236) & u8(g81af)) == 0"
+        ],
+        "sample_transition_frames": [
+          5720
+        ],
+        "source_window": {
+          "first": "0x00c1f0",
+          "last_exclusive": "0x00c220",
+          "sha256": "92b117a8ae2c802521389a06a488de0ae9e95c275346b92f98f0ea68d4543c6e"
+        },
+        "writer_pc": "0x00c200"
+      },
+      {
+        "classification": "SOURCE_CLOSED",
+        "guards": [
+          "round-index dispatch selected the second transition body"
+        ],
+        "sample_transition_frames": [
+          15021
+        ],
+        "source_window": {
+          "first": "0x00c876",
+          "last_exclusive": "0x00c8a6",
+          "sha256": "0b513c6416543d878f188af34d17d574390a894d6d699dddf81990a7b3b2d320"
+        },
+        "writer_pc": "0x00c886"
+      }
+    ]
+  },
+  "paired_full_route_identity": {
+    "all_segment_semantics_byte_identical": true,
+    "independently_launched": true,
+    "raw_capture_files_byte_identical": true,
+    "screenshot_hash_stream_sha256": "bab7563357758052b1fef6b3a7e98da8c0ca36d9589d6c8d4133a0d0d4d18013",
+    "segment_semantic_stream_sha256": "0da340aab00fdb0f2654c2a2ee92033398ced92be8207131fc99a426ad46b038"
+  },
+  "phase": "P2",
+  "physical_saturn": "UNRUN",
+  "remaining_blockers": {
+    "capacity": [],
+    "source": [],
+    "table": []
+  },
+  "route_controls": {
+    "accepted_counterfactual_gate": {
+      "bounded_failure_continue": "PASS",
+      "production_runtime_writes": 0,
+      "route_wide_completing_perturbation": "PASS",
+      "targeted_counterfactuals_all_discovered_authorities": "PASS",
+      "two_independent_identical_completions": "PASS"
+    },
+    "accepted_failure_continue": {
+      "completion_after_continue": true,
+      "continue_scene_ranges": [
+        [
+          6201,
+          6692
+        ],
+        [
+          12800,
+          13292
+        ]
+      ],
+      "stable_round2_handoff_frame": 15193,
+      "status": "OBSERVED"
+    },
+    "accepted_route_perturbation": {
+      "first_input_difference": {
+        "control": {
+          "input_word": "9"
+        },
+        "fields": [
+          "input_word"
+        ],
+        "frame": 4230,
+        "variant": {
+          "input_word": "8"
+        }
+      },
+      "first_semantic_difference": {
+        "control": {
+          "g8009": "4",
+          "p_x": "192",
+          "p_z": "0"
+        },
+        "fields": [
+          "g8009",
+          "p_x",
+          "p_z"
+        ],
+        "frame": 6692,
+        "variant": {
+          "g8009": "2",
+          "p_x": "1233",
+          "p_z": "311"
+        }
+      },
+      "rendered_witness": "private frames/16800.png directly inspected",
+      "stable_round2_handoff_frame": 16425,
+      "status": "PASS",
+      "variant": "route_perturbed"
+    },
+    "paired_route_state_edges": 10
+  },
+  "schema": "oracle10-round1-p2-closure-v1",
+  "segment_evidence": [
+    {
+      "path": "data/oracle10_round1_census_extension_5567_6200.json",
+      "semantic_sha256": "4a4a0ab9d4485ca37e15e9bb6e1644748cec11455fb8298f1338d96f2629ee30",
+      "sha256": "1eeb385455a62edb0d21bf48790aa7ac34c6a29408b40792197ee0798370d9c0",
+      "source_frame_range": [
+        5567,
+        6200
+      ]
+    },
+    {
+      "path": "data/oracle10_round1_census_extension_6201_6692.json",
+      "semantic_sha256": "d93a3dcd53bf4951d0631bcf0927a6560b399da1bb913414e3de94f212252c2e",
+      "sha256": "0cb1e3a8267a4557960705f43a1543283361172415a3d457199901e92455d400",
+      "source_frame_range": [
+        6201,
+        6692
+      ]
+    },
+    {
+      "path": "data/oracle10_round1_census_extension_6693_7438.json",
+      "semantic_sha256": "00fdcda6ef8e9c8e02190fc6e5892951898570bffc07ae718ddd98ced61595e4",
+      "sha256": "8fdb7c05d4da1b35aa761f78abbbc182d66b1074edd4dc5a1bfe80464b9f3cc9",
+      "source_frame_range": [
+        6693,
+        7438
+      ]
+    },
+    {
+      "path": "data/oracle10_round1_census_extension_7439_7503.json",
+      "semantic_sha256": "f6c5cfa838a709a8538a0b763d953bdf71bc2c4d1ed8760c125163d399fad691",
+      "sha256": "adb7f0caf3cf538826f8210f1e322b88de5b501000ae995356cd83c0a94f405a",
+      "source_frame_range": [
+        7439,
+        7503
+      ]
+    },
+    {
+      "path": "data/oracle10_round1_census_extension_7504_9004.json",
+      "semantic_sha256": "976ae53a62b2edc0ab7cb61572e4c01f2c8853b8177ab614bd840c849ced0221",
+      "sha256": "b6bb711eeca20571b06c0cde107960bff46dc475e902708f0f58a0adab563eee",
+      "source_frame_range": [
+        7504,
+        9004
+      ]
+    },
+    {
+      "path": "data/oracle10_round1_census_extension_9005_9039.json",
+      "semantic_sha256": "8d59f0a7c1c334c3f9171203d001e3a8d4c1ce53cdca51386b1e4cb54b1dedc5",
+      "sha256": "bf2edfd1377b8f4309d6f329e1765a3dda3540096658d2e8c7c1bbc26e6f0b43",
+      "source_frame_range": [
+        9005,
+        9039
+      ]
+    },
+    {
+      "path": "data/oracle10_round1_census_extension_9040_9940.json",
+      "semantic_sha256": "c6a06d1bf0278d29374081b9e90c09fc343198d5873aa563c344b83d8919b4a3",
+      "sha256": "4572f355ccefe66cc0bc6ba2ead29ec5c65911a2dca28ef0f7b27fcdb99b1566",
+      "source_frame_range": [
+        9040,
+        9940
+      ]
+    },
+    {
+      "path": "data/oracle10_round1_census_extension_9941_9975.json",
+      "semantic_sha256": "e7c513451b2a1eea9733a78cbfe9ac41bdc4c8e11068d33d39e207e1a1b56ccf",
+      "sha256": "ec72ef4e391eb58b21896fb50f67fda1993b17442de6331a817e88737f917881",
+      "source_frame_range": [
+        9941,
+        9975
+      ]
+    },
+    {
+      "path": "data/oracle10_round1_census_extension_9976_11476.json",
+      "semantic_sha256": "4bb1aea23c6f0a54ba47b8fd1c0f8ba61e4cbaa81293dc1c0b579e5cd851d51e",
+      "sha256": "8d7aba5b517d9281c3511eb3c48423a68513f6d282872f17b6003801d7dd2dc2",
+      "source_frame_range": [
+        9976,
+        11476
+      ]
+    },
+    {
+      "path": "data/oracle10_round1_census_extension_11477_11541.json",
+      "semantic_sha256": "423e70ebb77bdd6f1f95aa67aae69b51b6bbfb7001a8fc8f945c37f2e9ecd921",
+      "sha256": "9fd0986fc835bba44299df599342e1ef6e19cc1fc14b59e0a613960c1c64cae3",
+      "source_frame_range": [
+        11477,
+        11541
+      ]
+    },
+    {
+      "path": "data/oracle10_round1_census_extension_11542_12442.json",
+      "semantic_sha256": "c56ec8e416d2c39050e24c6040e3d7532e5e0b4d5b54a13c34f63f8eb21e4152",
+      "sha256": "96897579957165df8fa72dacd4853ad8de3fb2d93b86cd6e89538900d0641231",
+      "source_frame_range": [
+        11542,
+        12442
+      ]
+    },
+    {
+      "path": "data/oracle10_round1_census_extension_12443_12477.json",
+      "semantic_sha256": "fec4caf85e842696db67bce8daf82fed479d39c4ac18a9aae53edb14cc1f9ce6",
+      "sha256": "0e4a78338a3f5054a9389c92e64f6e62cadbf9f35485e75bc5f96dc2b15c0f7a",
+      "source_frame_range": [
+        12443,
+        12477
+      ]
+    },
+    {
+      "path": "data/oracle10_round1_census_extension_12478_12799.json",
+      "semantic_sha256": "655519331dc74eff591584b216bd586acb32799d7a1240304b2a05bb86c416bf",
+      "sha256": "2c9b32f78f7a0dfdd7315c6d01d8f183b7f12f62651846bbc3a05700448697a5",
+      "source_frame_range": [
+        12478,
+        12799
+      ]
+    },
+    {
+      "path": "data/oracle10_round1_census_extension_12800_13292.json",
+      "semantic_sha256": "ff82b9cdf5081ff8def9d4168ce80809e9013009cff9fa47d2c65441d36947fa",
+      "sha256": "1d85dc4bedaa5808acada030130556da15849cfb420bcd0e5b87c0f8564fc763",
+      "source_frame_range": [
+        12800,
+        13292
+      ]
+    },
+    {
+      "path": "data/oracle10_round1_census_extension_13293_15039.json",
+      "semantic_sha256": "2ea02ee902a115824dccdd918b71076b15cb548213635b5c497da875750990f7",
+      "sha256": "68259fa0bfd0da3d4a8a1d1ddf4a4f08e5a70493216d3e3c366eb0e55b62452e",
+      "source_frame_range": [
+        13293,
+        15039
+      ]
+    },
+    {
+      "path": "data/oracle10_round1_census_extension_15040_15058.json",
+      "semantic_sha256": "2280ba63d09a8ce1b9e353968d05deb77567ac283e10b7beecfd144b8b1f5619",
+      "sha256": "6edba055d101afd418c8549f45684721e67c4f187988d9f0451479ea4a16ae5f",
+      "source_frame_range": [
+        15040,
+        15058
+      ]
+    },
+    {
+      "path": "data/oracle10_round1_census_extension_15059_15080.json",
+      "semantic_sha256": "9c78762e92938734546be021be18d35aa23a42e10d82c60c40e17cc2928b299f",
+      "sha256": "d6e0ff9b4db945efcc78bccd65d86e5eb4a14278cbc615d320268747ed32d6e1",
+      "source_frame_range": [
+        15059,
+        15080
+      ]
+    },
+    {
+      "path": "data/oracle10_round1_census_extension_15081_15091.json",
+      "semantic_sha256": "15e99f1c3e21c431c6ca341bd7831d8a8de12da2beb3024bfa6446a72789d9c1",
+      "sha256": "7db0c73970973b916103f137dfb57c187dfddca8b832cedfbb6dd96795b08358",
+      "source_frame_range": [
+        15081,
+        15091
+      ]
+    },
+    {
+      "path": "data/oracle10_round1_census_extension_15092_15192.json",
+      "semantic_sha256": "8c693da9d26a6424e096ea668dc436506e0fcad2115b82e4284a6654fc3bc447",
+      "sha256": "82a7113f2b74aef8ecefcc9202449cfd8f51a1a6b5271c0a9973c22779349f11",
+      "source_frame_range": [
+        15092,
+        15192
+      ]
+    },
+    {
+      "path": "data/oracle10_round1_census_extension_15193_15193.json",
+      "semantic_sha256": "39ca42eed85d8841024009ec6278aefad09344d7247bcb24e0b8abf0a4822e21",
+      "sha256": "87f52ba5366b1f9fad577d58425044091a5502075c82c1e99c389e20bb2456e6",
+      "source_frame_range": [
+        15193,
+        15193
+      ]
+    }
+  ],
+  "source_coverage": {
+    "accepted_pre_p2_range": [
+      1972,
+      5566
+    ],
+    "complete_round1_route_frames": 13222,
+    "complete_round1_route_span": [
+      1972,
+      15193
+    ],
+    "continuous": true,
+    "non_overlapping": true,
+    "p2_extension_range": [
+      5567,
+      15193
+    ],
+    "p2_frames": 9627,
+    "round1_to_round2_seam_classification": "ADAPTED_PRESENTATION_FOR_USER_10",
+    "round2_gameplay_census_extended": false,
+    "segment_count": 20,
+    "stable_round2_handoff_frame": 15193
+  },
+  "status": "P2_CLOSED",
+  "table_demand_delta": {
+    "accepted_archive_bytes": 47056,
+    "accepted_archive_sha256": "ccf8795a147daf337c1f72364c81f05fc2cfd255d8d21b40a56c74c97f8d15bd",
+    "accepted_archive_table_count": 157,
+    "new_table_bytes": 0,
+    "new_table_count": 0,
+    "unbound_table_identities": []
+  },
+  "task": "ORACLE-10-ROUND1-END-TO-END-SYSTEM-CENSUS"
+}

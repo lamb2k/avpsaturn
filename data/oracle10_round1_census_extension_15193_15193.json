@@ -1,0 +1,303 @@
+{
+  "coverage": {
+    "per_frame_character_identity_failures": 0,
+    "unidentified_source_class_type_pairs": 0,
+    "unmapped_spawn_despawn_edges": 0,
+    "unowned_actor_lifetimes": 0,
+    "unowned_audio_events": 0,
+    "unowned_load_release_events": 0,
+    "unowned_route_camera_events": 0
+  },
+  "paired_capture_ceremony": {
+    "independent_raw_captures": [
+      "full_route",
+      "full_route_rerun"
+    ],
+    "paired_route_ledger_sha256": {
+      "dispatches.tsv": "c58ce0b2fd9811112002e717b33ee8364a7808aa6c42ffdceb97380b8f8b9985",
+      "lifecycle_writes.tsv": "21bbd8c035146051401132e86f20f77282348a3227290b5e80bbf58675224656",
+      "result.tsv": "e75dded8c4f6dd02bedcf3e2b32782bd2e53d65256e042e11436435317b734ed",
+      "route_rng.tsv": "8f59258961ea4694e545993331a9478b006a1a3df9913390df01822ad397dd19",
+      "route_samples.tsv": "ad723acfbd3d51c0c833da0eed3490833494bab5af9862244f8ca35e2876a54c",
+      "route_writes.tsv": "6f1e4d6da736d9b886a834bf72fc426e58011f68e512acf1d6e8b7348c4f858a"
+    },
+    "paired_route_ledgers_byte_identical": true,
+    "raw_capture_files_byte_identical": true,
+    "segment_semantics": {
+      "canonical_semantic_sha256": "39ca42eed85d8841024009ec6278aefad09344d7247bcb24e0b8abf0a4822e21",
+      "character_mismatch_frames": [],
+      "frame_count": 1,
+      "identity_mismatch_frames": [],
+      "per_frame_character_identity_gate": true,
+      "player_active_frames": 1,
+      "required_character_u8": 0
+    }
+  },
+  "physical_saturn": "UNRUN",
+  "route_authority_extension": {
+    "camera_lock_runs": [],
+    "route_state_edges": [],
+    "route_wide_perturbation": {
+      "first_input_difference": {
+        "control": {
+          "input_word": "9"
+        },
+        "fields": [
+          "input_word"
+        ],
+        "frame": 4230,
+        "variant": {
+          "input_word": "8"
+        }
+      },
+      "first_semantic_difference": {
+        "control": {
+          "g8009": "4",
+          "p_x": "192",
+          "p_z": "0"
+        },
+        "fields": [
+          "g8009",
+          "p_x",
+          "p_z"
+        ],
+        "frame": 6692,
+        "variant": {
+          "g8009": "2",
+          "p_x": "1233",
+          "p_z": "311"
+        }
+      },
+      "rendered_witness": "private frames/16800.png directly inspected",
+      "stable_round2_handoff_frame": 16425,
+      "status": "PASS",
+      "variant": "route_perturbed"
+    },
+    "segment_bindings": [
+      {
+        "classification": "SOURCE_CLOSED",
+        "enemy_spawn_count": 0,
+        "enemy_spawn_frames": [],
+        "gameplay_route_edges": [],
+        "observational_labels": [],
+        "presentation_boundary": {
+          "classification": "NOT_REQUIRED_FOR_ROUND1",
+          "owns_progression": false,
+          "signature": "S082af5ef984a"
+        },
+        "route_mode_values": [
+          2
+        ],
+        "route_segment": "round2-underpass",
+        "route_writer_refs": [
+          "0x000e86@0xff8018",
+          "0x000e8a@0xff81a2",
+          "0x000e92@0xff81bc",
+          "0x001186@0xff8070",
+          "0x001222@0xff8072",
+          "0x00126c@0xff8054",
+          "0x00126c@0xff8056",
+          "0x001278@0xff8054",
+          "0x001288@0xff8064",
+          "0x001288@0xff8066",
+          "0x00128c@0xff8068",
+          "0x00128c@0xff806a",
+          "0x001298@0xff8064",
+          "0x0012a4@0xff8066",
+          "0x0012b0@0xff8068",
+          "0x0012bc@0xff806a",
+          "0x0012c6@0xff8060",
+          "0x0012c6@0xff8062",
+          "0x0012d2@0xff8060",
+          "0x001432@0xff81a6",
+          "0x001448@0xff81c6",
+          "0x00159c@0xff818a",
+          "0x0015a0@0xff8192",
+          "0x0015a4@0xff819a",
+          "0x0015a8@0xff819e",
+          "0x001914@0xff801e",
+          "0x008090@0xff81bc",
+          "0x00809a@0xff8018",
+          "0x008444@0xff820e",
+          "0x00846a@0xff81f0",
+          "0x008522@0xff8248",
+          "0x00c2e0@0xff800e",
+          "0x0170f8@0xff81b8",
+          "0x0170fc@0xff823a",
+          "0x017112@0xff823a",
+          "0x0290d0@0xff829c",
+          "0x0290d6@0xff829e",
+          "0x0a9a42@0xff81a4",
+          "0x0a9a46@0xff81a2",
+          "0x0af86c@0xff82c0",
+          "0x0af878@0xff82c2",
+          "0x0af87e@0xff8290",
+          "0x0af884@0xff8294",
+          "0x0b06c0@0xff82ae",
+          "0x0b06fe@0xff8278",
+          "0x0b0706@0xff8032",
+          "0x0b0738@0xff8288",
+          "0x0b07e2@0xff82ae",
+          "0x0b0820@0xff827c",
+          "0x0b0828@0xff8034",
+          "0x0b17ec@0xff82f8",
+          "0x0b17f4@0xff8036",
+          "0x0b1836@0xff82fc",
+          "0x0b183e@0xff8038"
+        ],
+        "source_frame_range": [
+          15193,
+          18000
+        ]
+      }
+    ]
+  },
+  "scene_census_delta": {
+    "actor_lifetimes": [
+      {
+        "accepted_evidence": "data/oracle11_predator_warrior_authority.json",
+        "animation_record_count": 42,
+        "class": "0x00",
+        "classification": "SOURCE_CLOSED",
+        "despawn_in_segment": false,
+        "facings": [
+          0,
+          1
+        ],
+        "id": "player-0-life-13293",
+        "observed_lifetime": [
+          13293,
+          15193
+        ],
+        "segment_lifetime": [
+          15193,
+          15193
+        ],
+        "slot": "0xff8380",
+        "source_owner": "predator-warrior-player-authority",
+        "spawn_in_segment": false,
+        "state_context_count": 21,
+        "type": 0
+      }
+    ],
+    "audio": {
+      "command_counts": {},
+      "handler_transaction_count": 0,
+      "orphan_handler_transactions": 0,
+      "orphan_trigger_groups": 0,
+      "player_origin_edges": [],
+      "source_owned_trigger_groups_first_seen": []
+    },
+    "class_type_inventory": [
+      {
+        "accepted_evidence": "data/oracle11_predator_warrior_authority.json",
+        "class": "0x00",
+        "classification": "SOURCE_CLOSED",
+        "instance_count": 1,
+        "source_owner": "predator-warrior-player-authority",
+        "type": 0
+      }
+    ],
+    "despawn_edges": [],
+    "hit_ko_transitions": [],
+    "load_release_boundaries": [],
+    "spawn_edges": []
+  },
+  "schema": "oracle10-round1-census-extension-v1",
+  "segment": {
+    "id": "round1-to-round2-stable-seam",
+    "scene_ids": [
+      "round2-underpass"
+    ],
+    "source_frame_range": [
+      15193,
+      15193
+    ]
+  },
+  "status": "CENSUS_SEGMENT_COMPLETE",
+  "table_demand_delta": {
+    "accepted_cart_archive_sha256": "ccf8795a147daf337c1f72364c81f05fc2cfd255d8d21b40a56c74c97f8d15bd",
+    "accepted_cart_archive_table_count": 157,
+    "p3_program_families": [],
+    "spec_executable_review_deferred_to_p3": true,
+    "unbound_table_identities": []
+  },
+  "targeted_counterfactuals": {
+    "auxiliary_class_controls": [],
+    "enemy_class_controls": [],
+    "navigation_route_wide": {
+      "authority_family": "round1-navigation-terrain-camera",
+      "outcomes": {
+        "hold_navigation": {
+          "completed_round1": true,
+          "first_semantic_difference": {
+            "control": {
+              "p_facing": "1",
+              "p_phase": "512",
+              "p_x": "946"
+            },
+            "fields": [
+              "p_phase",
+              "p_facing",
+              "p_x"
+            ],
+            "frame": 2602,
+            "variant": {
+              "p_facing": "0",
+              "p_phase": "2",
+              "p_x": "944"
+            }
+          },
+          "stable_round2_handoff_frame": 15227
+        },
+        "remove_navigation_bodies": {
+          "completed_round1": true,
+          "first_semantic_difference": {
+            "control": {
+              "actor_population": "09-14:1"
+            },
+            "fields": [
+              "actor_population"
+            ],
+            "frame": 2073,
+            "variant": {
+              "actor_population": ""
+            }
+          },
+          "stable_round2_handoff_frame": 14455
+        }
+      },
+      "status": "PASS",
+      "variants": [
+        "hold_navigation",
+        "remove_navigation_bodies"
+      ]
+    },
+    "presentation_boundaries": [
+      {
+        "classification": "NOT_REQUIRED_FOR_ROUND1",
+        "owns_progression": false,
+        "signature": "S082af5ef984a"
+      }
+    ],
+    "route_wide_perturbation_difference": {
+      "control": {
+        "g8009": "4",
+        "p_x": "192",
+        "p_z": "0"
+      },
+      "fields": [
+        "g8009",
+        "p_x",
+        "p_z"
+      ],
+      "frame": 6692,
+      "variant": {
+        "g8009": "2",
+        "p_x": "1233",
+        "p_z": "311"
+      }
+    }
+  },
+  "task": "ORACLE-10-ROUND1-END-TO-END-SYSTEM-CENSUS"
+}

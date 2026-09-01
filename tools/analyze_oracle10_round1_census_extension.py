@@ -112,6 +112,11 @@ PROFILES = {
         "id": "round1-to-round2-title-handoff",
         "output": "oracle10_round1_census_extension_15092_15192.json",
     },
+    "round2_stable_seam": {
+        "first": 15193, "last": 15193,
+        "id": "round1-to-round2-stable-seam",
+        "output": "oracle10_round1_census_extension_15193_15193.json",
+    },
 }
 WORKRAM_BASE = 0xFF0000
 PLAYER = 0xFF8380

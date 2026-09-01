@@ -114885,11 +114885,18 @@
         "accepted_evidence": "data/oracle10_round1_census_extension_15092_15192.json",
         "accepted_evidence_sha256": "82a7113f2b74aef8ecefcc9202449cfd8f51a1a6b5271c0a9973c22779349f11",
         "source_frame_range": [15092, 15192]
+      },
+      {
+        "accepted_evidence": "data/oracle10_round1_census_extension_15193_15193.json",
+        "accepted_evidence_sha256": "87f52ba5366b1f9fad577d58425044091a5502075c82c1e99c389e20bb2456e6",
+        "source_frame_range": [15193, 15193]
       }
     ],
-    "classification": "CENSUS_SEGMENT_COMPLETE",
-    "next_source_frame": 15193,
-    "source_frame_range": [5567, 15192]
+    "classification": "P2_CLOSED",
+    "next_source_frame": null,
+    "p2_closure_report": "data/oracle10_round1_p2_closure.json",
+    "p2_closure_report_sha256": "b5c720892f439fa9e6f2e152a6997b87a1d67b0655a8d400cf759ab0207f94b3",
+    "source_frame_range": [5567, 15193]
   },
   "task": "ORACLE-10-ROUND1-END-TO-END-SYSTEM-CENSUS"
 }

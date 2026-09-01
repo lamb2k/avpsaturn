@@ -2550,3 +2550,43 @@ and no authority event is orphaned. Evidence artifact SHA-256 is
 `82a7113f2b74aef8ecefcc9202449cfd8f51a1a6b5271c0a9973c22779349f11`.
 Close only the stable Round 2 seam at frame 15193; do not extend into Round 2
 gameplay.
+
+### Overnight census segment 15193 stable-seam checkpoint (2026-09-01)
+
+The single stable Round 2 handoff frame is census-closed at semantic SHA-256
+`39ca42eed85d8841024009ec6278aefad09344d7247bcb24e0b8abf0a4822e21`.
+It contains one source-owned Predator lifetime and no lifecycle, HIT/KO, audio,
+route, camera, or load edge. The `round2-underpass` presentation signature is
+explicitly `NOT_REQUIRED_FOR_ROUND1`; no later Round 2 gameplay frame was
+censused. Evidence artifact SHA-256 is
+`87f52ba5366b1f9fad577d58425044091a5502075c82c1e99c389e20bb2456e6`.
+
+### P2 cumulative closure gate (2026-09-01)
+
+P2 is closed across 20 continuous, non-overlapping segments from frame 5567
+through the stable Round 2 seam at frame 15193. Together with accepted frames
+1972..5566, the complete Round 1 source route spans 13,222 frames. The two
+independent full-route captures and every segment semantic ledger remain
+byte-identical; the route perturbation, two continue paths, and targeted
+counterfactual gate remain accepted.
+
+The P2 census adds exactly three class/type pairs versus the frame-5566
+frontier: enemy `0x00/12` owned by `round1-enemy-archetypes` from frame 5567,
+effect `0x4b/24` owned by the pickup/projectile/hazard authority from frame
+6693, and enemy `0x01/12` owned by `round1-enemy-archetypes` from frame 9976.
+P3 demand resolves to nine actor programs, seven source route-writer programs,
+six audio-owner families, and two load/release boundaries, all enumerated in
+`data/oracle10_round1_p2_closure.json`. No segment has contradictory ownership;
+all unidentified/unowned counters are zero.
+
+The accepted content archive remains 157 tables and 47,056 bytes at SHA-256
+`ccf8795a147daf337c1f72364c81f05fc2cfd255d8d21b40a56c74c97f8d15bd`:
+P2 adds zero unbound tables and zero archive bytes. Evidence-only census work
+consumed zero mutable runtime bytes; the `round1-runtime` carve remains 99,380
+of 102,400 bytes with 3,020 bytes headroom. There is no source, table, or
+capacity blocker, so the existing memory plan holds without revision.
+
+The cumulative closure report SHA-256 is
+`b5c720892f439fa9e6f2e152a6997b87a1d67b0655a8d400cf759ab0207f94b3`.
+Proceed directly to P3, beginning with the first-demand class `0x00/12`
+whole-routine SPEC-02 body.
