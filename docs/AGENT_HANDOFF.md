@@ -1,5 +1,4 @@
 # REIMPLEMENT-13 active agent handoff
-
 Resume the persistent AvP Goal on `codex/avp-playable-loop-pivot` from branch
 HEAD. `REIMPLEMENT-13-SOURCE-CLOSED-ROUND1` remains active. The accepted runtime
 candidate stays `d04a65a2253175c6e820140feefc35419e2cca07` until the complete
@@ -12,7 +11,6 @@ Do not create another Goal, roadmap, workflow, branch, task hierarchy, coverage
 system, or writer.
 Workflow pivot / Preserved evidence work: Resume the AvP salvage Goal; retain SALVAGE-00-OLD-BUILD-BASELINE, USER-01-PLAYER-BASELINE-REVIEW, and `597f4ed517d4e715d814ff841bd00d3977803f85`.
 ## Closed checkpoints
-
 Coffee Shop exit authority is source-closed and native through frame 5566:
 route `4->6->0->2`, withdrawal script and ballistics, source callback cadence,
 fixed-pool teardown, gate 8236, and resident load no-op boundaries. Target
@@ -34,17 +32,18 @@ seven unique hashes prove animation. MCP cadence-1 visual QA passes direct
 inspection. Settings were restored to VideoCore 4 / SoundCore 1. Evidence is
 `ONE_EMULATOR`; the DMA point is physical-only.
 ## Exact next sequence
-
 P2 is closed through stable Round 2 seam frame 15193; closure SHA is
 `b5c72089...f94b3`, all authority/table/capacity gates pass, and Round 2 gameplay
-was not censused. P3 classes `0x00/12`, `0x01/12`, `0x06/12`, `0x07/20`,
-`0x10/24`, `0x3d/24`, `0x49/24`, and `0x4b/24` are whole-routine
-SPEC-executable. Class `0x4b/24` artifact `0264ba7e...fbed` closes 26 decoded
-operations, three reachable contexts plus the unreachable release alias, one
-four-entry dispatch, eight field profiles, five transfers, all 32 animation
-records, contact/event guards, animation wrap, and its paired 661-entry witness.
-Focused/SPEC/Fast/Target and one debug-rig 575-sample scene run pass; GAME.BIN
-remains `aa999046...0a1`, ISO remains `3bb36edb...611de`, scene remains RED at
-source 5566 code 11, and the runtime candidate is unpromoted. Continue P3 with
-class `0x4e/24` as one whole-routine family, then follow the closure-report
-order; never commit captures, PNGs, ROMs, ISOs, or dumps.
+was not censused. All nine P3 actor programs are now whole-routine
+SPEC-executable. Class `0x4e/24` artifact `a304dccb...22cb` closes 31 decoded
+operations, three reachable contexts plus the unreachable release alias, the
+four-entry dispatch, 26-entry animation selector, eight-pair RNG jitter table,
+special variant-24/25 facing branch, exact RNG consumption, 53 presentation
+records, and the paired 848-entry/80-RNG witness. Focused 11 and SPEC 180
+mutations pass; Fast reaches the accepted P4 frame-3782 RED without a new
+failure. Release/live-encounter Target remains `aa999046...0a1`, the pinned
+575-sample debug-rig scene remains `3bb36edb...611de`, and source 5566 code 11
+remains the expected census RED. Continue P3 with the first-demand route writer
+`0x00c200` whole program (`0x00c1f0..0x00c220`, frame-5720 guard), then the
+remaining closure-report route/audio/load families in demand order. Never
+commit captures, PNGs, ROMs, ISOs, or dumps.

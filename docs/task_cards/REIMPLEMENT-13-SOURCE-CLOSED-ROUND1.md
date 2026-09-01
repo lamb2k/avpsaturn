@@ -2880,3 +2880,57 @@ SHA-256 `9a7f69e8ee761b8d98a18ec8c4ac98ba9c5f8c1c9f4aaa4a1979734e258da178`
 and is unstaged with `history.txt`.
 
 Continue P3 with class `0x4e/24` as the next whole-routine family.
+
+### P3 class 0x4e/type 24 whole-routine checkpoint (2026-09-01)
+
+Class `0x4e/24` is SPEC-executable as one bounded source program spanning
+`0x0927f6..0x0928aa`. The fixture closes 31 decoded operations, all three
+Round 1-reachable states, the four-entry top-state table with its explicit
+unreachable state-6 release alias, eight exact field read/write profiles, five
+source-owned external transfers, and 53 source-owned presentation/collision
+records. The complete 26-entry animation selector and exact eight-pair signed
+RNG jitter table are bound. Reachable variants are 0, 1, 4, 5, 10, 20, 24 and
+25; variants 24/25 use the source facing-relative X branch, while the other
+reachable variants consume exactly one source RNG call with mask `0x001c`.
+Animation terminal ordering and fixed-pool release own every lifetime. Runtime
+68000 interpretation remains forbidden.
+
+The paired retained ledgers bind 848 entries, 909 samples, 3,732 writes, 80
+ordered RNG calls and zero player-effect writes. Artifact SHA-256 is
+`a304dccb4697c367f8602fc2c3f7f3f1a74a6604a7a0a103695397cd8caa22cb`;
+instruction-semantics SHA-256 is
+`6ed7f89057dbe457f049d87df2ad1d9855f5aea0ac5ea34c71d5fd61b05e3d8d`.
+Eleven family mutations and all 180 SPEC-02 mutations reject. The class-0x1f
+derived evidence had two stale encounter-authority hash links; deterministic
+regeneration changed only those provenance fields to the already accepted
+authority SHA and its 104-mutation validator passes. No enemy semantics were
+reopened or altered.
+
+Fast passes every P3/focused/Oracle/SPEC gate and then reaches the preserved P4
+source-frame-3782 stage-progress RED; the mismatch is not reclassified or
+hidden. The comparable release/live-encounter Target is byte-identical:
+GAME.BIN remains 373,840 bytes at
+`aa99904645fa584952ccba84e4fb28d970dabc4ae6e6e593b401f9e3323910a1`,
+BSS ends at `0x060b2560`, and the 47,056-byte cart archive remains
+`ccf8795a147daf337c1f72364c81f05fc2cfd255d8d21b40a56c74c97f8d15bd`.
+The broad non-live Release profile was a negative control and correctly hit
+its existing VDP1 working-set guard; its incomparable debug-size output was
+not accepted into the memory plan.
+
+One debug-rig pinned scene run passes all 575 samples with zero fallback at
+normalized ISO
+`3bb36edbd29c0a07867826f7d1ac99e96d84849232a05b3bdea43d5d84a611de`
+and EXE
+`d77675912421a7435d02d844625a6ef68ba0e55ef17c9845f08651eb98f54b45`.
+Capture settings were restored to VideoCore 4 / SoundCore 1. The complete
+Coffee Shop census remains expected RED at source frame 5566 (`code=11`, slot
+`0x00009e80`, state `0x0208`, substate `0x1004`); this SPEC-only body changes
+no runtime identity and triggers neither paired cold Emulator nor WGC. Protected
+`data/avsp_anim_records.json` remains at SHA-256
+`9a7f69e8ee761b8d98a18ec8c4ac98ba9c5f8c1c9f4aaa4a1979734e258da178`
+and is unstaged with `history.txt`.
+
+All nine P2 actor programs are now SPEC-executable. Continue P3 with the
+first-demand route-transition writer `0x00c200` as one whole program over
+`0x00c1f0..0x00c220`, including its frame-5720 guard and every Round 1-reachable
+branch, then follow route/audio/load families in closure-report demand order.
