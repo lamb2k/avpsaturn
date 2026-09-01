@@ -6,7 +6,7 @@
 #include "../../combat/hit_ko/hit_ko.h"
 
 #define AVSP_ROUND1_SPEC02_SHA256 \
-"d83c6422e5e96df5e040d8158754f935f16639c1761554dd9895b6e76d15f879"
+"bb9edbf2cfd4b664497cb2246f121f2dde5bd5767e77cc9bf6f2f6b8d5cb1465"
 #define AVSP_ROUND1_CANARY_HEAD 0x52314548UL
 #define AVSP_ROUND1_CANARY_TAIL 0x52314554UL
 #define AVSP_ROUND1_ROUTE_ENTRY_STATE 2
@@ -29,6 +29,8 @@
 #define AVSP_ROUND1_PLAYER_CONTEXTUAL_MELEE_SEQUENCE_COUNT 2u
 #define AVSP_ROUND1_PLAYER_CONTEXTUAL_MELEE_MAX_RECORDS 6u
 #define AVSP_ROUND1_PLAYER_CONTEXTUAL_MELEE_AUDIO_COUNT 2u
+#define AVSP_ROUND1_PLAYER_HIT_INTERACTION_RECORD_COUNT 5u
+#define AVSP_ROUND1_CLASS20_INTERACTION_RECORD_COUNT 5u
 #define AVSP_ROUND1_PLAYER_HIT_SHAKE_COUNT 32u
 #define AVSP_ROUND1_PLAYER_HIT_REACTION_COUNT 3u
 #define AVSP_ROUND1_PLAYER_WALK_PRESENTATION_COUNT 12u
@@ -719,6 +721,9 @@ typedef struct
     unsigned short timeout_outer_state;
     unsigned short timeout_action_substate;
     unsigned char timeout_special_latch;
+    unsigned char timeout_direction_xor;
+    unsigned char timeout_direction_shift;
+    unsigned char timeout_direction_bias;
     unsigned short action0_style_bits;
     unsigned short action4_choice_bits;
     unsigned char action4_contact_direction_delta;
@@ -1494,6 +1499,43 @@ typedef struct
 
 typedef struct
 {
+    unsigned short coffee_shop_route_state;
+    unsigned short outer_state;
+    unsigned short entry_action;
+    unsigned short button1_action;
+    unsigned long entry_body;
+    unsigned long active_body;
+    unsigned long completion_writer;
+    unsigned long effect_dispatch;
+    unsigned char input_pipeline_updates;
+    unsigned char effect_record_type;
+    signed char effect_class;
+    unsigned char effect_variant;
+    unsigned char selector_argument;
+} AvspRound1PlayerHitInteractionSpec;
+
+typedef struct
+{
+    unsigned short collision_state;
+    unsigned short collision_substate;
+    unsigned short entry_substate;
+    unsigned short launch_substate;
+    unsigned long entry_animation_record;
+    unsigned long terminal_animation_record;
+    unsigned short audio_command;
+    unsigned char collision_freeze_ticks;
+    unsigned char landing_hold_ticks;
+    unsigned char preserved_hurt_selector;
+    unsigned char preserved_attack_selector;
+    unsigned char landing_same_dispatch_decrement;
+    long launch_x_velocity;
+    long launch_x_acceleration;
+    long launch_y_velocity;
+    long launch_y_acceleration;
+} AvspRound1PlayerHitInteractionTargetReactionSpec;
+
+typedef struct
+{
     long x_velocity;
     long x_acceleration;
     long y_velocity;
@@ -1704,6 +1746,7 @@ typedef struct
     unsigned char step_index;
     unsigned char gate8236;
     unsigned char gate81af;
+    unsigned char gate81f3;
     unsigned char source_global_8209;
     unsigned char animation_c0;
     unsigned char animation_c1;
@@ -2065,6 +2108,7 @@ typedef struct
     unsigned char player_hit_presentation_selector;
     unsigned char player_hit_active_body_selector;
     unsigned char player_hit_special_pending;
+    unsigned char player_hit_interaction_pending;
     unsigned short player_hit_animation_timer;
     short player_hit_animation_branch;
     long player_hit_x_fp;
@@ -2077,6 +2121,19 @@ typedef struct
     unsigned long player_hit_completions;
     unsigned long player_hit_audio_events;
     unsigned short player_hit_audio_command;
+    unsigned char player_hit_interaction_active;
+    unsigned char player_hit_interaction_attack_latched;
+    unsigned char player_hit_interaction_input_pending;
+    unsigned char player_hit_interaction_animation_index;
+    unsigned short player_hit_interaction_animation_timer;
+    short player_hit_interaction_animation_branch;
+    unsigned long player_hit_interaction_entries;
+    unsigned long player_hit_interaction_completions;
+    unsigned long player_hit_interaction_interruptions;
+    unsigned long class20_interaction_allocations;
+    unsigned long class20_interaction_allocation_failures;
+    unsigned long class20_interaction_state_transitions;
+    unsigned long class20_interaction_releases;
     unsigned short player_locomotion_action;
     unsigned short player_stop_ticks;
     unsigned char player_was_directional;
@@ -2143,6 +2200,8 @@ typedef struct
     unsigned char player_weapon_cleanup_pending;
     unsigned char player_weapon_return_pending;
     unsigned char player_weapon_recovery_pending;
+    unsigned char player_weapon_stage_progress_applied;
+    unsigned char player_weapon_stage_progress_pending;
     unsigned char player_resource;
     unsigned char player_resource_recharge;
     unsigned char player_resource_depleted;

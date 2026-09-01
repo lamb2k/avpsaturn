@@ -1666,6 +1666,8 @@ def class1f_inner8_action_contract(program: bytes,
                 "classification": "SOURCE_CLOSED_IMPLEMENTATION_FIELDS",
                 "source_entry": "0x0610f6",
                 "source_exit_helper": "0x0610d4",
+                "source_exit_window_sha256": hashlib.sha256(
+                    opcodes[0x0610D4:0x0610F6]).hexdigest(),
                 "source_window_sha256": hashlib.sha256(
                     opcodes[0x0610F6:0x061134]).hexdigest(),
                 "timer_field": "actor+0xa8:u16",
@@ -1678,6 +1680,7 @@ def class1f_inner8_action_contract(program: bytes,
                     "inner_timer_u16": 0,
                     "outer_state_u16": 0x0200,
                     "action_substate_u16": 0,
+                    "direction_u8": "((a5_u8 ^ 1) << 4) + 8",
                 },
                 "coffee_shop_control": {
                     "source_slot": "0x00ffa3c0",
@@ -1688,10 +1691,19 @@ def class1f_inner8_action_contract(program: bytes,
                     "preserved_z_s16": 309,
                     "preserved_facing_u8": 1,
                     "preserved_animation_record": "0x0012e5f0",
+                    "direction_before_u8": 2,
+                    "direction_after_u8": 8,
+                    "direction_writer_pc": "0x0610f0",
                 },
                 "mutation_control": {
-                    "mutation": "do not decrement zero to signed 0xffff",
-                    "expected_discriminating_effect": "slot 0x00ffa3c0 re-enters inner action 0x0400 instead of returning to outer 0x0200 at frame 3881",
+                    "mutations": [
+                        "do not decrement zero to signed 0xffff",
+                        "omit the 0x0610f0 direction reset",
+                    ],
+                    "expected_discriminating_effects": [
+                        "slot 0x00ffa3c0 re-enters inner action 0x0400 instead of returning to outer 0x0200 at frame 3881",
+                        "the later action-0x16 uses movement-table-8 direction 2 instead of source direction 8, diverging x/y at frame 3906",
+                    ],
                 },
             },
         },
@@ -4375,6 +4387,8 @@ def validate(report: dict[str, object]) -> None:
                         "classification": "SOURCE_CLOSED_IMPLEMENTATION_FIELDS",
                         "source_entry": "0x0610f6",
                         "source_exit_helper": "0x0610d4",
+                        "source_exit_window_sha256":
+                            "6b09506d487a9af8c04d737045639bd17c60f20cfc96530015bfd1e31703c70a",
                         "source_window_sha256":
                             "e1e231c72ee8540740c632f54bcb2f960262dfd88f1b657fbce4be1d82b497cf",
                         "timer_field": "actor+0xa8:u16",
@@ -4387,6 +4401,7 @@ def validate(report: dict[str, object]) -> None:
                             "inner_timer_u16": 0,
                             "outer_state_u16": 0x0200,
                             "action_substate_u16": 0,
+                            "direction_u8": "((a5_u8 ^ 1) << 4) + 8",
                         },
                         "coffee_shop_control": {
                             "source_slot": "0x00ffa3c0",
@@ -4397,10 +4412,19 @@ def validate(report: dict[str, object]) -> None:
                             "preserved_z_s16": 309,
                             "preserved_facing_u8": 1,
                             "preserved_animation_record": "0x0012e5f0",
+                            "direction_before_u8": 2,
+                            "direction_after_u8": 8,
+                            "direction_writer_pc": "0x0610f0",
                         },
                         "mutation_control": {
-                            "mutation": "do not decrement zero to signed 0xffff",
-                            "expected_discriminating_effect": "slot 0x00ffa3c0 re-enters inner action 0x0400 instead of returning to outer 0x0200 at frame 3881",
+                            "mutations": [
+                                "do not decrement zero to signed 0xffff",
+                                "omit the 0x0610f0 direction reset",
+                            ],
+                            "expected_discriminating_effects": [
+                                "slot 0x00ffa3c0 re-enters inner action 0x0400 instead of returning to outer 0x0200 at frame 3881",
+                                "the later action-0x16 uses movement-table-8 direction 2 instead of source direction 8, diverging x/y at frame 3906",
+                            ],
                         },
                     } and
                     inner8["type16_emission"]["observed_source_spawn_frames"] ==

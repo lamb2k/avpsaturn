@@ -3572,3 +3572,43 @@ physical Saturn remains UNRUN. Evidence is
 
 Continue P4 at frame 5458 and close every Coffee-Shop-reachable branch of the
 complete owning class-`0x1f` action-`0x10` program.
+
+### P4 Coffee Shop action-0x10 / clear-route checkpoint (2026-09-01)
+
+The complete currently reachable class-`0x1f` action-`0x10` and
+HIT-interaction/Button1 handoff is native, and the Coffee Shop withdrawal
+chronology is now exact through source frame 5522. At 5451 the source timer is
+one; processing 5451 decrements it, calls the accepted completion helper, sets
+`g81f3`, and raises the camera upper edge. The earlier global route phase then
+consumes that gate at writer `0x008418` during source frame 5452, producing the
+visible route-6/player-`0x0800` state at 5453. Same-call route mutation and
+suppressed global-consumer mutation both reject.
+
+The complete scene now advances to the next independent RED at source frame
+5523: slot `0x00ff9dc0`, class `0x1f`, state/substate `0x0200:0x0000`,
+animation `0x0012e90c`, scheduler code 15. Focused lanes reject 26 real
+mutations; Target wiring rejects 130 suppressions; encounter, route-owner,
+auxiliary and aggregate SPEC lanes reject 30, 18, 114 and 190 mutations.
+Release GAME.BIN is 376,880 bytes at SHA-256
+`cb9e18801b287c16cd2e44f8f66d5c2548e94625ba638c8d8dec9d65caa99c66`,
+BSS ends at `0x060b3140`, and the 47,316-byte cart archive is
+`2b1946c6c7da2ed3c2e027142c293ea94e7dbddfeea67b354b21072ca32c09df`.
+The 99,432-byte runtime retains 2,968 bytes of headroom; no carve changed.
+
+Two cold GL debug-rig runs pass byte-identical 575-sample semantics and five
+mutations at normalized ISO SHA-256
+`1ab030f86e328b373423d3313fd3e1b8e993c015d25b8ccf4a5c1b3fa088c863`.
+An invalid VideoCore-4 launch was excluded before those two correct runs;
+settings are restored to VideoCore 4 / SoundCore 1 and no process remains.
+
+The continuation MCP visual gate is BLOCKED after the three allowed attempts:
+black framebuffer, post-freeze static VDP2-only burst, then a 180-second exact
+frame approach that reached diagnostic frame 2278 while targeting 3400. No
+visual acceptance is inferred and the candidate remains frozen. Do not retry
+this body. A future coherent program checkpoint may unblock the visual lane
+only with the accepted dynarec-to-interpreter pre-roll helper before the normal
+frame-574 freeze. Evidence is
+`data/reimplement13_p4_coffee_scheduler_player_program.json`.
+
+Continue P4 at frame 5523 and close every Coffee-Shop-reachable branch of the
+complete owning class-`0x1f` state-0 action program.

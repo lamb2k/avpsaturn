@@ -133,6 +133,20 @@ def source_window(data: bytes, start: int, end: int) -> dict[str, object]:
             "sha256": hashlib.sha256(data[start:end]).hexdigest()}
 
 
+def animation_record(program: bytes, address: int) -> dict[str, object]:
+    raw = program[address:address + 16]
+    require(len(raw) == 16, f"animation record {address:08x} truncated")
+    return {
+        "animation_record": f"0x{address:08x}",
+        "timer_u16": int.from_bytes(raw[0:2], "big"),
+        "branch_s16": int.from_bytes(raw[2:4], "big", signed=True),
+        "assembly": f"0x{int.from_bytes(raw[4:8], 'big'):08x}",
+        "hurt_selector_u8": raw[8],
+        "attack_selector_u8": raw[9],
+        "record_sha256": hashlib.sha256(raw).hexdigest(),
+    }
+
+
 def build_report() -> dict[str, object]:
     opcodes, program = OPCODES.read_bytes(), PROGRAM.read_bytes()
     require(len(opcodes) == len(program) == 0x200000,
@@ -166,6 +180,10 @@ def build_report() -> dict[str, object]:
     no_effect = samples(RAW / "effect_pool_unavailable" / "samples.tsv")
     uninterrupted = samples(RAW_UNINTERRUPTED / "interaction_uninterrupted" /
                             "samples.tsv")
+    uninterrupted_writes = rows(
+        RAW_UNINTERRUPTED / "interaction_uninterrupted" / "writes.tsv")
+    uninterrupted_actors = rows(
+        RAW_UNINTERRUPTED / "interaction_uninterrupted" / "actors.tsv")
     resource = samples(RAW_RESOURCE / "resource_pickup_near" / "samples.tsv")
     baseline_writes = rows(RAW / "route_interaction_1" / "writes.tsv")
     max_writes = rows(RAW / "health_max" / "writes.tsv")
@@ -195,6 +213,42 @@ def build_report() -> dict[str, object]:
             baseline[4051]["action"] == 0x0E00 and
             baseline[4052]["action"] == 0x0C00,
             "interaction completion/interruption boundary drift")
+    require(write_exists(uninterrupted_writes, 4031, "01ac04", "06", "0e00") and
+            write_exists(uninterrupted_writes, 4059, "01a3fa", "06", "0000"),
+            "HIT Button2 interaction writer boundary drift")
+    class20 = [row for row in uninterrupted_actors
+               if row["class"] == "20" and 4032 <= int(row["frame"]) <= 4063]
+    require(class20 and int(class20[0]["frame"]) == 4032 and
+            int(class20[-1]["frame"]) == 4063 and
+            {int(row["state"]) for row in class20} == {0x0200, 0x0400} and
+            {row["anim"] for row in class20} ==
+            {"0007fdac", "0007fdbc", "0007fdcc", "0007fddc", "0007fdec"},
+            "class-0x20 interaction-effect lifetime drift")
+
+    interaction_player_records = [animation_record(program, address) for address in
+                                  (0x15F96C, 0x15F97C, 0x15F98C,
+                                   0x15F99C, 0x15F9AC)]
+    interaction_effect_records = [animation_record(program, address) for address in
+                                  (0x07FDAC, 0x07FDBC, 0x07FDCC,
+                                   0x07FDDC, 0x07FDEC)]
+    require([row["timer_u16"] for row in interaction_player_records] ==
+            [2, 4, 4, 4, 8] and
+            [row["attack_selector_u8"] for row in interaction_player_records] ==
+            [0, 10, 10, 0, 0] and
+            interaction_player_records[-1]["branch_s16"] == -32768,
+            "interaction player animation program drift")
+    require([row["timer_u16"] for row in interaction_effect_records] ==
+            [2, 4, 12, 12, 8] and
+            all(row["hurt_selector_u8"] == 0 and
+                row["attack_selector_u8"] == 0
+                for row in interaction_effect_records) and
+            interaction_effect_records[-1]["branch_s16"] == -32768,
+            "class-0x20 animation program drift")
+    attack_raw = program[0x11AF66:0x11AF76]
+    hurt_raw = program[0x130AD4:0x130ADC]
+    require(attack_raw.hex() == "3013301300080300050c01f16e080e0c" and
+            hurt_raw.hex() == "f42a1d2700080000",
+            "interaction current-state collision record drift")
 
     require(all(resource[f]["award"] == 0 for f in range(3997, 4002)) and
             all(resource[f]["award"] == 600 for f in range(4002, 4006)) and
@@ -308,6 +362,228 @@ def build_report() -> dict[str, object]:
                                     "next_frame": 4052},
             "effect_actor": ("record24 class0x20 is presentation/coordination; "
                              "pool unavailability does not change gameplay result"),
+            "implementation_contract": {
+                "classification": "SOURCE_CLOSED_IMPLEMENTATION_FIELDS",
+                "source_guard": {
+                    "routine": "0x01abd0..0x01abfc",
+                    "route_guard": "A5+0x01e8:u16 != 0x000a",
+                    "facing_guard": "player+0x4f:u8 == player+0x0f:u8",
+                    "input_guard": "bit 5 already set in player+0x4f or a real new Button2 edge ((~player+0xef & player+0xee) & 0x20) != 0",
+                    "coffee_shop_witness": {
+                        "edge_frame_u16": 4030,
+                        "writer_frame_u16": 4031,
+                        "visible_frame_u16": 4032,
+                    },
+                },
+                "entry": {
+                    "routine": "0x01abfc..0x01ac48",
+                    "writes": {"outer_state_u16": 0x0200,
+                               "action_u16": 0x0e00,
+                               "field81_u8": 0, "field9d_u8": 0},
+                    "allocation": {
+                        "pool": "record24", "record_type_u8": 24,
+                        "class_u8": "0x20", "variant_u8": 4,
+                        "active_increment_u8": 1,
+                        "position": "copy player x/y/z then subtract one from child z",
+                        "facing": "copy player+0x0f:u8",
+                        "failure_rule": "pool exhaustion does not change player gameplay state",
+                    },
+                    "selector_argument_u8": 0x10,
+                    "player_presentation": interaction_player_records,
+                },
+                "active": {
+                    "dispatch": "0x01ac48 inner-state 0x00",
+                    "animation_rule": "source animation runtime decrements timer, advances to the next 16-byte record at zero, and takes the terminal branch only from branch -32768",
+                    "natural_completion": {
+                        "guard": "terminal player record 0x0015f9ac",
+                        "writer": "0x01a3fa",
+                        "writes": {"outer_state_u16": 0x0200,
+                                   "action_u16": 0},
+                        "writer_frame_u16": 4059,
+                        "visible_frame_u16": 4060,
+                    },
+                    "button1_interruption": {
+                        "guard": "one-frame source input pipeline exposes a real new Button1 edge while action 0x0e00 is active",
+                        "next_action_u16": 0x0c00,
+                        "weapon_dispatch_delay_updates_u8": 0,
+                        "edge_frame_u16": 4050,
+                        "writer_frame_u16": 4051,
+                        "visible_frame_u16": 4052,
+                        "source_stage_progress": {
+                            "caller": "0x024094 delta load then 0x024096 helper call",
+                            "helper": "0x0179e2..0x017b74",
+                            "source_frame_u16": 4052,
+                            "calls_u8": 1,
+                            "progress_before_u16": 3,
+                            "progress_after_u16": 6,
+                            "stage_before_s16": 11,
+                            "stage_after_s16": 11,
+                            "duplicate_call_forbidden": True,
+                        },
+                    },
+                },
+                "class20_effect": {
+                    "classification": "SOURCE_OWNED_PRESENTATION_COORDINATION",
+                    "dispatch": "0x07f9a8",
+                    "source_scheduler": "0x01ba62 record24 after player update",
+                    "variant_u8": 4,
+                    "states": [0x0200, 0x0400],
+                    "presentation": interaction_effect_records,
+                    "terminal_guard": "negative actor+0x24 animation event advances state 0x0200 to 0x0400",
+                    "release": "next state-0x0400 dispatch calls 0x0177f0 fixed-pool release",
+                    "first_visible_frame_u16": 4032,
+                    "last_visible_frame_u16": 4063,
+                    "rng": {"calls": [], "consumption_order": []},
+                },
+                "current_state_collision": {
+                    "source_frame_u16": 4033,
+                    "attacker": "player 0x00ff8380 action 0x0e00 attack selector 10",
+                    "defender": "record12 0x00ff9dc0 class0x1f current state 0x0208:0x0c02",
+                    "target_eligibility": {
+                        "pool": "record12",
+                        "scan_order": "ascending source-slot order",
+                        "guards": [
+                            "active current collision registration",
+                            "class_u8 == 0x1f",
+                            "health_s16 >= 0",
+                            "current hurt selector resolves to 0x00130ad4",
+                            "attack/hurt boxes overlap",
+                        ],
+                        "reaction_state_exclusion": False,
+                        "coffee_shop_first_eligible_target": {
+                            "source_slot": "0x00ff9dc0",
+                            "state_u16": 0x0208,
+                            "substate_u16": 0x0c02,
+                        },
+                    },
+                    "collision_identity_latch": {
+                        "set_on_source_frame_u16": 4033,
+                        "hold_guard": "player action 0x0e00 current attack selector remains 10",
+                        "reset_guard": "interaction ends or current attack selector leaves 10",
+                        "damage_writes_while_held_u8": 1,
+                        "independent_from_melee_attack_active": True,
+                    },
+                    "attack_record": {
+                        "address": "0x0011af66", "x_center_s8": 48,
+                        "y_center_s8": 19, "x_half_u8": 48,
+                        "y_half_u8": 19, "z_center_s8": 0,
+                        "z_half_u8": 8, "knockback_mode_s8": 3,
+                        "impact_variant_u8": 5, "damage_selector_u8": 12,
+                        "hit_value_u8": 14,
+                        "record_sha256": hashlib.sha256(attack_raw).hexdigest(),
+                    },
+                    "hurt_record": {
+                        "address": "0x00130ad4", "x_center_s8": -12,
+                        "y_center_s8": 42, "x_half_u8": 29,
+                        "y_half_u8": 39, "z_center_s8": 0,
+                        "z_half_u8": 8,
+                        "record_sha256": hashlib.sha256(hurt_raw).hexdigest(),
+                    },
+                    "damage_s16": 31,
+                    "health_before_s16": 87,
+                    "health_after_s16": 56,
+                    "damage_writer": "0x01d590",
+                    "impact": {"record_type_u8": 24, "class_u8": "0x4e",
+                               "variant_u8": 5,
+                               "first_visible_frame_u16": 4034},
+                    "target_reaction": {
+                        "classification":
+                            "SOURCE_CLOSED_IMPLEMENTATION_FIELDS",
+                        "collision_handoff": {
+                            "visible_frame_u16": 4034,
+                            "state_u16": 0x0202,
+                            "substate_u16": 0,
+                            "preserved_animation_record": "0x0012da2c",
+                            "preserved_animation_timer_u16": 3,
+                        },
+                        "reaction_entry": {
+                            "visible_frame_u16": 4035,
+                            "state_u16": 0x0202,
+                            "substate_u16": 0x0002,
+                            "record": animation_record(program, 0x12dd78),
+                            "collision_freeze_ticks_u8": 14,
+                            "landing_hold_ticks_u8": 4,
+                            "preserved_collision_selectors": {
+                                "hurt_selector_u8": 1,
+                                "attack_selector_u8": 1,
+                            },
+                        },
+                        "first_flight": {
+                            "visible_frame_u16": 4051,
+                            "state_u16": 0x0202,
+                            "substate_u16": 0x0202,
+                            "x_velocity_s32_16_16": -0x30000,
+                            "x_acceleration_s32_16_16": 0,
+                            "facing_rule": "the captured vector is the final signed motion; do not apply the shared HIT facing inversion a second time",
+                            "y_velocity_s32_16_16": 0x50000,
+                            "y_acceleration_s32_16_16": -0x0a000,
+                            "terminal_record":
+                                animation_record(program, 0x12dd88),
+                        },
+                        "shared_tail": (
+                            "phases 0x0204/0x0206/0x0208/0x020a, bounce, "
+                            "RNG hold, terminal animation and normal return "
+                            "reuse the accepted class-0x1f source HIT program"),
+                        "shared_tail_overrides": {
+                            "landing": {
+                                "visible_frame_u16": 4067,
+                                "substate_u16": 0x0204,
+                                "record": animation_record(program, 0x12ddb0),
+                                "same_dispatch_hold_decrement": True,
+                            },
+                            "bounce": {
+                                "visible_frame_u16": 4070,
+                                "substate_u16": 0x0206,
+                                "record": animation_record(program, 0x12dd9c),
+                            },
+                            "rng_hold": {
+                                "visible_frame_u16": 4081,
+                                "substate_u16": 0x0208,
+                                "record": animation_record(program, 0x12ddb0),
+                            },
+                            "terminal": {
+                                "visible_frame_u16": 4171,
+                                "substate_u16": 0x020a,
+                                "records": [animation_record(program, address)
+                                            for address in range(
+                                                0x12de38, 0x12dee8, 0x10)],
+                            },
+                            "normal_return": {
+                                "visible_frame_u16": 4196,
+                                "state_u16": 0x0200,
+                                "substate_u16": 0,
+                            },
+                            "selector_rule": "preserve hurt selector 1 and attack selector 1 through every shared-tail presentation bind",
+                        },
+                        "audio": {
+                            "main_frame_u16": 4034,
+                            "command_u16": 0x003d,
+                            "owner_slot": "0x00ff9dc0",
+                        },
+                        "rng": {
+                            "entry_calls": [],
+                            "impact_call_seed_before_u16": 0x9051,
+                            "impact_call_seed_after_u16": 0xb001,
+                        },
+                    },
+                    "scheduler_order": "player action registration then current record12 collision after record24 dispatch",
+                },
+                "scheduler_order": ["player HIT phase dispatch",
+                                    "record24 class-0x20 dispatch",
+                                    "current-state collision/damage passes"],
+                "fixed_frame_substitute_forbidden": True,
+                "mutation_controls": {
+                    "wrong_guard_rejected": True,
+                    "same_frame_edge_dispatch_rejected": True,
+                    "fixed_frame_completion_rejected": True,
+                    "class20_pool_failure_changes_gameplay_rejected": True,
+                    "wrong_record_or_selector_rejected": True,
+                    "wrong_target_reaction_record_or_motion_rejected": True,
+                    "wrong_target_audio_owner_rejected": True,
+                    "missing_early_or_duplicate_stage_progress_rejected": True,
+                    "wrong_scheduler_or_release_order_rejected": True,
+                },
+            },
             "remaining_unknowns": [],
         },
         "resource_meter": {
@@ -429,6 +705,82 @@ def validate(report: dict[str, object]) -> None:
     require(report["interaction_action_and_interruption"]["natural_completion"] ==
             {"entry": 4032, "last": 4059, "return_to_neutral": 4060},
             "interaction completion drift")
+    interaction = report["interaction_action_and_interruption"][
+        "implementation_contract"]
+    require(interaction["classification"] ==
+            "SOURCE_CLOSED_IMPLEMENTATION_FIELDS" and
+            interaction["entry"]["allocation"]["variant_u8"] == 4 and
+            [row["animation_record"] for row in
+             interaction["entry"]["player_presentation"]] ==
+            ["0x0015f96c", "0x0015f97c", "0x0015f98c",
+             "0x0015f99c", "0x0015f9ac"] and
+            interaction["active"]["natural_completion"]["writer"] ==
+            "0x01a3fa" and
+            interaction["class20_effect"]["states"] == [0x0200, 0x0400] and
+            interaction["class20_effect"]["rng"]["calls"] == [] and
+            interaction["current_state_collision"]["damage_s16"] == 31 and
+            interaction["current_state_collision"]["attack_record"]
+                ["address"] == "0x0011af66" and
+            interaction["current_state_collision"]["target_eligibility"] == {
+                "pool": "record12",
+                "scan_order": "ascending source-slot order",
+                "guards": [
+                    "active current collision registration",
+                    "class_u8 == 0x1f",
+                    "health_s16 >= 0",
+                    "current hurt selector resolves to 0x00130ad4",
+                    "attack/hurt boxes overlap",
+                ],
+                "reaction_state_exclusion": False,
+                "coffee_shop_first_eligible_target": {
+                    "source_slot": "0x00ff9dc0",
+                    "state_u16": 0x0208,
+                    "substate_u16": 0x0c02,
+                },
+            } and
+            interaction["current_state_collision"][
+                "collision_identity_latch"] == {
+                    "set_on_source_frame_u16": 4033,
+                    "hold_guard": "player action 0x0e00 current attack selector remains 10",
+                    "reset_guard": "interaction ends or current attack selector leaves 10",
+                    "damage_writes_while_held_u8": 1,
+                    "independent_from_melee_attack_active": True,
+                } and
+            interaction["current_state_collision"]["target_reaction"]
+                ["reaction_entry"]["record"]["animation_record"] ==
+                "0x0012dd78" and
+            interaction["current_state_collision"]["target_reaction"]
+                ["first_flight"]["x_velocity_s32_16_16"] == -0x30000 and
+            interaction["current_state_collision"]["target_reaction"]
+                ["first_flight"]["facing_rule"].startswith(
+                    "the captured vector is the final signed motion") and
+            interaction["current_state_collision"]["target_reaction"]
+                ["audio"]["command_u16"] == 0x003d and
+            interaction["current_state_collision"]["target_reaction"]
+                ["reaction_entry"]["preserved_collision_selectors"] == {
+                    "hurt_selector_u8": 1, "attack_selector_u8": 1} and
+            interaction["current_state_collision"]["target_reaction"]
+                ["shared_tail_overrides"]["landing"]
+                ["same_dispatch_hold_decrement"] is True and
+            interaction["current_state_collision"]["target_reaction"]
+                ["shared_tail_overrides"]["normal_return"]
+                ["visible_frame_u16"] == 4196 and
+            interaction["active"]["button1_interruption"]
+                ["source_stage_progress"] == {
+                    "caller": "0x024094 delta load then 0x024096 helper call",
+                    "helper": "0x0179e2..0x017b74",
+                    "source_frame_u16": 4052,
+                    "calls_u8": 1,
+                    "progress_before_u16": 3,
+                    "progress_after_u16": 6,
+                    "stage_before_s16": 11,
+                    "stage_after_s16": 11,
+                    "duplicate_call_forbidden": True,
+                } and
+            interaction["active"]["button1_interruption"]
+                ["weapon_dispatch_delay_updates_u8"] == 0 and
+            interaction["fixed_frame_substitute_forbidden"] is True,
+            "interaction implementation contract drift")
     audio_closed = report["status"] == "SOURCE_CLOSED"
     require(report["audio_ownership"]["route_audio_owner"] ==
             "gameplay-audio-load-release" and

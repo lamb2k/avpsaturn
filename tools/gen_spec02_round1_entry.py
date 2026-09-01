@@ -305,6 +305,7 @@ def build() -> str:
     recurring_tables = recurring_primary["tables"]
     coffee_exit = recurring["exit_controller_program"]
     coffee_exit_controller = coffee_exit["controller_dispatch"]
+    coffee_exit_handoff = coffee_exit_controller["withdrawal_route_handoff"]
     coffee_exit_script = coffee_exit["player_withdrawal_script"]
     coffee_exit_route_zero = coffee_exit["route_zero_program"]
     coffee_exit_callbacks = coffee_exit_script["source_display_callback_program"]
@@ -457,6 +458,32 @@ def build() -> str:
     melee_steps = close_combo["step_values"]
     contextual_melee = melee["contextual_melee"]["implementation_contract"]
     contextual_sequences = contextual_melee["presentation_sequences"]
+    hit_interaction = fixtures["authority_data"]["player"][
+        "route_pickup_resource_audio_load_ownership"][
+            "interaction_action_and_interruption"]["implementation_contract"]
+    hit_interaction_player_records = hit_interaction["entry"][
+        "player_presentation"]
+    hit_interaction_effect = hit_interaction["class20_effect"]
+    hit_interaction_collision = hit_interaction["current_state_collision"]
+    hit_interaction_eligibility = hit_interaction_collision[
+        "target_eligibility"]
+    hit_interaction_latch = hit_interaction_collision[
+        "collision_identity_latch"]
+    hit_interaction_target_reaction = hit_interaction_collision[
+        "target_reaction"]
+    if (hit_interaction_eligibility["pool"] != "record12" or
+        hit_interaction_eligibility["scan_order"] !=
+            "ascending source-slot order" or
+        hit_interaction_eligibility["reaction_state_exclusion"] is not False or
+        hit_interaction_eligibility["coffee_shop_first_eligible_target"] != {
+            "source_slot": "0x00ff9dc0", "state_u16": 0x0208,
+            "substate_u16": 0x0c02}):
+        raise ValueError("SPEC-02 player interaction target eligibility drift")
+    if (hit_interaction_latch["damage_writes_while_held_u8"] != 1 or
+        hit_interaction_latch["independent_from_melee_attack_active"] is not True or
+        hit_interaction_latch["reset_guard"] !=
+            "interaction ends or current attack selector leaves 10"):
+        raise ValueError("SPEC-02 player interaction collision latch drift")
     melee_strikes = []
     jump = fixtures["authority_data"]["player"][
         "directional_airborne_interruption"]["directional_actions"][
@@ -1079,9 +1106,16 @@ def build() -> str:
             "inner_timer_u16": 0,
             "outer_state_u16": 0x0200,
             "action_substate_u16": 0,
+            "direction_u8": "((a5_u8 ^ 1) << 4) + 8",
         } or
+        class1f_inner8_timeout["source_exit_window_sha256"] !=
+            "6b09506d487a9af8c04d737045639bd17c60f20cfc96530015bfd1e31703c70a" or
         class1f_inner8_timeout["coffee_shop_control"]
             ["return_frame_u16"] != 3881 or
+        class1f_inner8_timeout["coffee_shop_control"]
+            ["direction_writer_pc"] != "0x0610f0" or
+        class1f_inner8_timeout["coffee_shop_control"]
+            ["direction_after_u8"] != 8 or
         class1f_inner8_tables["field88_by_rng_low_nibble_u8"] !=
             [1, 2, 1, 2, 1, 1, 2, 1, 2, 1, 1, 1, 1, 2, 1, 2] or
         len(class1f_inner8_tables["wander_direction_delta_same_style_u8"]) != 32 or
@@ -1224,6 +1258,48 @@ def build() -> str:
         coffee_exit["spec_executable"] is not True or
         [row["substate_u16"] for row in coffee_exit_controller["phases"]] !=
             [0x0200, 0x0400, 0x0600] or
+        coffee_exit_controller["withdrawal_visibility"] != {
+            "scheduler_write_source_frame_u16": 5151,
+            "source_visible_frame_u16": 5152,
+            "source_visible_timer_u16": 300,
+            "first_decrement_visible_frame_u16": 5153,
+            "first_decrement_timer_u16": 299,
+            "route_state_during_transition_s16": 4,
+            "player_update_after_controller_same_source_frame": True,
+            "source_observations": [
+                {"frame_u16": 5150, "state_u16": 0x0204,
+                 "substate_u16": 0x0600, "timer42_u16": 0xffff,
+                 "progress_u16": 19},
+                {"frame_u16": 5151, "state_u16": 0x0204,
+                 "substate_u16": 0x0600, "timer42_u16": 0xffff,
+                 "progress_u16": 20},
+                {"frame_u16": 5152, "state_u16": 0x0400,
+                 "substate_u16": 0, "timer42_u16": 300,
+                 "progress_u16": 20},
+                {"frame_u16": 5153, "state_u16": 0x0400,
+                 "substate_u16": 0, "timer42_u16": 299,
+                 "progress_u16": 20},
+            ],
+        } or
+        coffee_exit_handoff["controller_gate_writer"] != "0x028bba" or
+        coffee_exit_handoff["gate_write_source_frame_u16"] != 5451 or
+        coffee_exit_handoff["gate_visible_frame_u16"] != 5452 or
+        coffee_exit_handoff["route_dispatcher"] !=
+            "0x00840a..0x008438" or
+        coffee_exit_handoff["route_writer"] != "0x008418" or
+        coffee_exit_handoff["route_write_source_frame_u16"] != 5452 or
+        coffee_exit_handoff["route_visible_frame_u16"] != 5453 or
+        coffee_exit_handoff["same_invocation_gate_consumption"] is not
+            False or
+        coffee_exit_handoff[
+            "player_gameplay_update_after_gate_write_same_source_frame"] is
+            not True or
+        [(row["frame_u16"], row["route_state_s16"],
+          row["player_state_u16"], row["timer42_u16"])
+         for row in coffee_exit_handoff["source_observations"]] != [
+            (5451, 4, 0x0200, 1),
+            (5452, 4, 0x0200, 0),
+            (5453, 6, 0x0800, 0)] or
         coffee_exit_controller["withdrawal"]["timer_u16"] != 300 or
         coffee_exit_controller["withdrawal"]
             ["living_enemy_count_is_not_a_guard"] is not True or
@@ -1387,6 +1463,15 @@ def build() -> str:
         player_special_target_collision["class1f_target"]["damage_s16"] != 127 or
         player_special_target_collision["class1f_target"]
             ["health_after_clamp_s16"] != -1 or
+        player_special_target_collision["class1f_traversal_cadence"] != {
+            "max_damage_targets_per_frame_u8": 1,
+            "registration_retained_after_contact": True,
+            "next_frame_resumes_after_ineligible_prior_targets": True,
+            "coffee_shop_witnesses": [
+                {"source_frame_u16": 4394,
+                 "source_slot": "0x00ff9c40"},
+                {"source_frame_u16": 4395,
+                 "source_slot": "0x00ff9e80"}]} or
         player_special_target_collision["impact_allocation"]["variant_u8"] != 1 or
         len(player_special_target_collision["record20_targets"]) != 2 or
         class4e_variant1["fixed_frame_substitute_forbidden"] is not True or
@@ -2874,6 +2959,7 @@ def build() -> str:
             class1f_inner8_timeout["writes"]["outer_state_u16"],
             class1f_inner8_timeout["writes"]["action_substate_u16"],
             class1f_inner8_timeout["writes"]["special_latch_ad_u8"]),
+        "    1u, 4u, 8u,",
         "    %su, %su, %du, %du," % (
             class1f_inner8_tables["action0_style_bits_u16"],
             class1f_inner8_tables["action4_choice_bits_u16"],
@@ -3977,6 +4063,102 @@ def build() -> str:
             sequence["facing_u8"], sequence["selector_u8"],
             len(sequence["records"]), ", ".join(rendered)))
     lines.extend([
+        "};", "",
+        "static const AvspRound1PlayerHitInteractionSpec avsp_round1_player_hit_interaction =",
+        "{",
+        "    4u, %du, %du, %du," % (
+            hit_interaction["entry"]["writes"]["outer_state_u16"],
+            hit_interaction["entry"]["writes"]["action_u16"],
+            hit_interaction["active"]["button1_interruption"]
+                ["next_action_u16"]),
+        "    0x0001abfcUL, 0x0001ac48UL, 0x0001a3faUL, %sUL," %
+            hit_interaction_effect["dispatch"],
+        "    1u, %du, %d, %du, %du" % (
+            hit_interaction["entry"]["allocation"]["record_type_u8"],
+            int(hit_interaction["entry"]["allocation"]["class_u8"], 16),
+            hit_interaction["entry"]["allocation"]["variant_u8"],
+            hit_interaction["entry"]["selector_argument_u8"]),
+        "};", "",
+        "static const AvspRound1AnimationStateSpec avsp_round1_player_hit_interaction_records[AVSP_ROUND1_PLAYER_HIT_INTERACTION_RECORD_COUNT] =",
+        "{",
+    ])
+    for row in hit_interaction_player_records:
+        lines.append("    { %du, %d, %sUL, %sUL, %du, %du }," % (
+            row["timer_u16"], row["branch_s16"], row["animation_record"],
+            row["assembly"], row["hurt_selector_u8"],
+            row["attack_selector_u8"]))
+    lines.extend([
+        "};", "",
+        "static const AvspRound1AnimationStateSpec avsp_round1_class20_interaction_records[AVSP_ROUND1_CLASS20_INTERACTION_RECORD_COUNT] =",
+        "{",
+    ])
+    for row in hit_interaction_effect["presentation"]:
+        lines.append("    { %du, %d, %sUL, %sUL, %du, %du }," % (
+            row["timer_u16"], row["branch_s16"], row["animation_record"],
+            row["assembly"], row["hurt_selector_u8"],
+            row["attack_selector_u8"]))
+    lines.extend([
+        "};", "",
+        "static const AvspRound1CollisionBoxSpec avsp_round1_player_hit_interaction_attack_box =",
+        "{ %d, %d, %du, %du, %d, %du, %d, %du, %du };" % (
+            hit_interaction_collision["attack_record"]["x_center_s8"],
+            hit_interaction_collision["attack_record"]["y_center_s8"],
+            hit_interaction_collision["attack_record"]["x_half_u8"],
+            hit_interaction_collision["attack_record"]["y_half_u8"],
+            hit_interaction_collision["attack_record"]["z_center_s8"],
+            hit_interaction_collision["attack_record"]["z_half_u8"],
+            hit_interaction_collision["attack_record"]["knockback_mode_s8"],
+            hit_interaction_collision["attack_record"]["hit_value_u8"],
+            hit_interaction_collision["attack_record"]["damage_selector_u8"]),
+        "static const AvspRound1CollisionBoxSpec avsp_round1_player_hit_interaction_hurt_box =",
+        "{ %d, %d, %du, %du, %d, %du, 0, 0u, 0u };" % (
+            hit_interaction_collision["hurt_record"]["x_center_s8"],
+            hit_interaction_collision["hurt_record"]["y_center_s8"],
+            hit_interaction_collision["hurt_record"]["x_half_u8"],
+            hit_interaction_collision["hurt_record"]["y_half_u8"],
+            hit_interaction_collision["hurt_record"]["z_center_s8"],
+            hit_interaction_collision["hurt_record"]["z_half_u8"]),
+        "static const short avsp_round1_player_hit_interaction_damage = %d;" %
+            hit_interaction_collision["damage_s16"],
+        "static const unsigned char avsp_round1_player_hit_interaction_impact_variant = %du;" %
+            hit_interaction_collision["impact"]["variant_u8"],
+        "",
+        "static const AvspRound1PlayerHitInteractionTargetReactionSpec avsp_round1_player_hit_interaction_target_reaction =",
+        "{",
+        "    0x%04Xu, 0x%04Xu, 0x%04Xu, 0x%04Xu," % (
+            hit_interaction_target_reaction["collision_handoff"]
+                ["state_u16"],
+            hit_interaction_target_reaction["collision_handoff"]
+                ["substate_u16"],
+            hit_interaction_target_reaction["reaction_entry"]
+                ["substate_u16"],
+            hit_interaction_target_reaction["first_flight"]
+                ["substate_u16"]),
+        "    %sUL, %sUL, 0x%04Xu, %du, %du, %du, %du, %du," % (
+            hit_interaction_target_reaction["reaction_entry"]["record"]
+                ["animation_record"],
+            hit_interaction_target_reaction["first_flight"]
+                ["terminal_record"]["animation_record"],
+            hit_interaction_target_reaction["audio"]["command_u16"],
+            hit_interaction_target_reaction["reaction_entry"]
+                ["collision_freeze_ticks_u8"],
+            hit_interaction_target_reaction["reaction_entry"]
+                ["landing_hold_ticks_u8"],
+            hit_interaction_target_reaction["reaction_entry"]
+                ["preserved_collision_selectors"]["hurt_selector_u8"],
+            hit_interaction_target_reaction["reaction_entry"]
+                ["preserved_collision_selectors"]["attack_selector_u8"],
+            1 if hit_interaction_target_reaction["shared_tail_overrides"]
+                ["landing"]["same_dispatch_hold_decrement"] else 0),
+        "    %dL, %dL, %dL, %dL" % (
+            hit_interaction_target_reaction["first_flight"]
+                ["x_velocity_s32_16_16"],
+            hit_interaction_target_reaction["first_flight"]
+                ["x_acceleration_s32_16_16"],
+            hit_interaction_target_reaction["first_flight"]
+                ["y_velocity_s32_16_16"],
+            hit_interaction_target_reaction["first_flight"]
+                ["y_acceleration_s32_16_16"]),
         "};", "",
         "static const AvspRound1PlayerJumpVectorSpec avsp_round1_player_jump_vectors[AVSP_ROUND1_PLAYER_JUMP_VECTOR_COUNT] =",
         "{",

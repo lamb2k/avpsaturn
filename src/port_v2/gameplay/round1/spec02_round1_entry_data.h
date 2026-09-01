@@ -1,8 +1,8 @@
 #ifndef AVSP_SPEC02_ROUND1_ENTRY_DATA_H
 #define AVSP_SPEC02_ROUND1_ENTRY_DATA_H
 
-/* contract_sha256=d83c6422e5e96df5e040d8158754f935f16639c1761554dd9895b6e76d15f879 */
-/* fixtures_sha256=509b58de00ab53bad6f85941d0e0dc6629357002a85b0c42d1d8e6f8cd5d53bb */
+/* contract_sha256=bb9edbf2cfd4b664497cb2246f121f2dde5bd5767e77cc9bf6f2f6b8d5cb1465 */
+/* fixtures_sha256=cc6dfa0a79b8a3d27671a2eb64c0c348216e2336d2e019dad2754cd2620d3697 */
 #define AVSP_ROUND1_ENTRY_PROGRAM_SHA256 "e5ef761fadc1b5a7df62e77c03025c0ebff0c2503cbc8be9c0077d4bd6cd24ba"
 
 #if defined(__sh__)
@@ -1081,6 +1081,7 @@ static const AvspRound1Class1fInner8ProgramSpec avsp_round1_class1f_inner8_progr
 {
     0xA3C0u,
     600u, 0x0200u, 0x0000u, 0u,
+    1u, 4u, 8u,
     0x6db6u, 0xf555u, 16u, 31u,
     9u,
     { 0u, 0u, 0u, 0u, 0u, 0u, 1u, 1u, 1u, 1u, 2u, 2u, 2u, 2u, 3u, 3u, 3u, 3u, 4u, 4u, 4u, 4u, 5u, 5u, 5u, 5u, 6u, 6u, 6u, 6u, 7u, 7u },
@@ -3930,6 +3931,77 @@ static const AvspRound1PlayerContextualMeleeSequenceSpec avsp_round1_player_cont
 #endif
 
 #if defined(__sh__)
+#define avsp_round1_player_hit_interaction (avsp_round1_content->content_avsp_round1_player_hit_interaction)
+#else
+static const AvspRound1PlayerHitInteractionSpec avsp_round1_player_hit_interaction =
+{
+    4u, 512u, 3584u, 3072u,
+    0x0001abfcUL, 0x0001ac48UL, 0x0001a3faUL, 0x07f9a8UL,
+    1u, 24u, 32, 4u, 16u
+};
+#endif
+
+#if defined(__sh__)
+#define avsp_round1_player_hit_interaction_records (avsp_round1_content->content_avsp_round1_player_hit_interaction_records)
+#else
+static const AvspRound1AnimationStateSpec avsp_round1_player_hit_interaction_records[AVSP_ROUND1_PLAYER_HIT_INTERACTION_RECORD_COUNT] =
+{
+    { 2u, 0, 0x0015f96cUL, 0x00161376UL, 0u, 0u },
+    { 4u, 0, 0x0015f97cUL, 0x00161348UL, 0u, 10u },
+    { 4u, 0, 0x0015f98cUL, 0x00161320UL, 0u, 10u },
+    { 4u, 0, 0x0015f99cUL, 0x001612f8UL, 0u, 0u },
+    { 8u, -32768, 0x0015f9acUL, 0x001626a4UL, 0u, 0u },
+};
+#endif
+
+#if defined(__sh__)
+#define avsp_round1_class20_interaction_records (avsp_round1_content->content_avsp_round1_class20_interaction_records)
+#else
+static const AvspRound1AnimationStateSpec avsp_round1_class20_interaction_records[AVSP_ROUND1_CLASS20_INTERACTION_RECORD_COUNT] =
+{
+    { 2u, 0, 0x0007fdacUL, 0x00080052UL, 0u, 0u },
+    { 4u, 0, 0x0007fdbcUL, 0x00080060UL, 0u, 0u },
+    { 12u, 0, 0x0007fdccUL, 0x00080078UL, 0u, 0u },
+    { 12u, 0, 0x0007fddcUL, 0x00080090UL, 0u, 0u },
+    { 8u, -32768, 0x0007fdecUL, 0x00080050UL, 0u, 0u },
+};
+#endif
+
+#if defined(__sh__)
+#define avsp_round1_player_hit_interaction_attack_box (avsp_round1_content->content_avsp_round1_player_hit_interaction_attack_box)
+#else
+static const AvspRound1CollisionBoxSpec avsp_round1_player_hit_interaction_attack_box =
+{ 48, 19, 48u, 19u, 0, 8u, 3, 14u, 12u };
+#endif
+#if defined(__sh__)
+#define avsp_round1_player_hit_interaction_hurt_box (avsp_round1_content->content_avsp_round1_player_hit_interaction_hurt_box)
+#else
+static const AvspRound1CollisionBoxSpec avsp_round1_player_hit_interaction_hurt_box =
+{ -12, 42, 29u, 39u, 0, 8u, 0, 0u, 0u };
+#endif
+#if defined(__sh__)
+#define avsp_round1_player_hit_interaction_damage (avsp_round1_content->content_avsp_round1_player_hit_interaction_damage)
+#else
+static const short avsp_round1_player_hit_interaction_damage = 31;
+#endif
+#if defined(__sh__)
+#define avsp_round1_player_hit_interaction_impact_variant (avsp_round1_content->content_avsp_round1_player_hit_interaction_impact_variant)
+#else
+static const unsigned char avsp_round1_player_hit_interaction_impact_variant = 5u;
+#endif
+
+#if defined(__sh__)
+#define avsp_round1_player_hit_interaction_target_reaction (avsp_round1_content->content_avsp_round1_player_hit_interaction_target_reaction)
+#else
+static const AvspRound1PlayerHitInteractionTargetReactionSpec avsp_round1_player_hit_interaction_target_reaction =
+{
+    0x0202u, 0x0000u, 0x0002u, 0x0202u,
+    0x0012dd78UL, 0x0012dd88UL, 0x003Du, 14u, 4u, 1u, 1u, 1u,
+    -196608L, 0L, 327680L, -40960L
+};
+#endif
+
+#if defined(__sh__)
 #define avsp_round1_player_jump_vectors (avsp_round1_content->content_avsp_round1_player_jump_vectors)
 #else
 static const AvspRound1PlayerJumpVectorSpec avsp_round1_player_jump_vectors[AVSP_ROUND1_PLAYER_JUMP_VECTOR_COUNT] =
@@ -5329,6 +5401,14 @@ typedef struct
     AvspRound1PresentationSpec content_avsp_round1_player_melee_strikes[AVSP_ROUND1_PLAYER_MELEE_COUNT];
     AvspRound1PlayerContextualMeleeSpec content_avsp_round1_player_contextual_melee;
     AvspRound1PlayerContextualMeleeSequenceSpec content_avsp_round1_player_contextual_melee_sequences[AVSP_ROUND1_PLAYER_CONTEXTUAL_MELEE_SEQUENCE_COUNT];
+    AvspRound1PlayerHitInteractionSpec content_avsp_round1_player_hit_interaction;
+    AvspRound1AnimationStateSpec content_avsp_round1_player_hit_interaction_records[AVSP_ROUND1_PLAYER_HIT_INTERACTION_RECORD_COUNT];
+    AvspRound1AnimationStateSpec content_avsp_round1_class20_interaction_records[AVSP_ROUND1_CLASS20_INTERACTION_RECORD_COUNT];
+    AvspRound1CollisionBoxSpec content_avsp_round1_player_hit_interaction_attack_box;
+    AvspRound1CollisionBoxSpec content_avsp_round1_player_hit_interaction_hurt_box;
+    short content_avsp_round1_player_hit_interaction_damage;
+    unsigned char content_avsp_round1_player_hit_interaction_impact_variant;
+    AvspRound1PlayerHitInteractionTargetReactionSpec content_avsp_round1_player_hit_interaction_target_reaction;
     AvspRound1PlayerJumpVectorSpec content_avsp_round1_player_jump_vectors[AVSP_ROUND1_PLAYER_JUMP_VECTOR_COUNT];
     AvspRound1PlayerJumpVectorSpec content_avsp_round1_player_jump_down_vectors[AVSP_ROUND1_PLAYER_JUMP_DOWN_VECTOR_COUNT];
     AvspRound1PlayerJumpSequenceSpec content_avsp_round1_player_jump_sequences[AVSP_ROUND1_PLAYER_JUMP_SEQUENCE_COUNT];

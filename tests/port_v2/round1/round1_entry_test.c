@@ -460,6 +460,20 @@ int main(void)
             fractional_walk_runtime.player.x != 946)
             return 186;
     }
+    {
+        AvspPwRuntime direction_queue_runtime;
+        AvspPwInput direction_queue_input;
+        short queue_start_x;
+        avsp_pw_init(&direction_queue_runtime);
+        direction_queue_runtime.direction_history[0] = AVSP_PW_INPUT_RIGHT;
+        direction_queue_runtime.direction_history[1] = AVSP_PW_INPUT_LEFT;
+        direction_queue_input.mask = AVSP_PW_INPUT_RIGHT;
+        direction_queue_input.received_damage = 0;
+        queue_start_x = direction_queue_runtime.x;
+        avsp_pw_step_round1(&direction_queue_runtime, &direction_queue_input);
+        if (direction_queue_runtime.x <= queue_start_x)
+            return 186;
+    }
     if (!avsp_round1_step_player(&runtime, AVSP_PW_INPUT_RIGHT, 0) ||
         runtime.player.source_x_fp != 0x03b00000L ||
         !avsp_round1_step_player(&runtime, AVSP_PW_INPUT_RIGHT, 0) ||
@@ -4339,6 +4353,7 @@ int main(void)
                     !avsp_round1_step_first_entry(&reuse_runtime))
                     return 115;
                 if (player_authority_enabled_at_tick_start &&
+                    reuse_runtime.route_state == 4 &&
                     !avsp_round1_step_player(&reuse_runtime, input, 0))
                     return 115;
                 if (reuse_runtime.entry.dependencies_seeded &&
@@ -4519,6 +4534,7 @@ int main(void)
                     return 116;
                 if (source_tick < source_updates &&
                     player_authority_enabled_at_tick_start &&
+                    hit_runtime.route_state == 4 &&
                     !avsp_round1_step_player(&hit_runtime, input, 0))
                     return 116;
                 if (hit_runtime.entry.dependencies_seeded &&
@@ -4541,6 +4557,7 @@ int main(void)
                     return 116;
                 if (source_updates != 0u &&
                     player_authority_enabled_at_tick_start &&
+                    hit_runtime.route_state == 4 &&
                     !avsp_round1_step_player(&hit_runtime, input, 0))
                     return 116;
                 if (phase_updates != 0u &&
@@ -4611,6 +4628,59 @@ int main(void)
                     scene_runtime.first_encounter.source_living_count);
                 return 117;
             }
+            if ((source_frame == 5151u &&
+                 (scene_runtime.entry_controller.state != 0x0204u ||
+                  scene_runtime.entry_controller.substate != 0x0600u ||
+                  scene_runtime.first_encounter.source_progress != 20u ||
+                  scene_runtime.first_encounter.source_intro_timer != 0xffffu)) ||
+                (source_frame == 5152u &&
+                 (scene_runtime.entry_controller.state != 0x0400u ||
+                  scene_runtime.entry_controller.substate != 0u ||
+                  scene_runtime.first_encounter.source_intro_timer != 300u ||
+                  scene_runtime.route_state != 4)))
+            {
+                fprintf(stderr,
+                    "Coffee Shop withdrawal visibility failed frame=%u controller=%04x/%04x progress=%u timer=%u route=%d\n",
+                    source_frame, scene_runtime.entry_controller.state,
+                    scene_runtime.entry_controller.substate,
+                    scene_runtime.first_encounter.source_progress,
+                    scene_runtime.first_encounter.source_intro_timer,
+                    scene_runtime.route_state);
+                return 125;
+            }
+            if ((source_frame == 5451u &&
+                 (scene_runtime.route_state != 4 ||
+                  scene_runtime.entry_controller.state != 0x0400u ||
+                  scene_runtime.first_encounter.source_intro_timer != 1u ||
+                  scene_runtime.entry.gate81f3 != 0u ||
+                  scene_runtime.entry.exit_started != 0u ||
+                  scene_runtime.player.state != 0x0200u)) ||
+                (source_frame == 5452u &&
+                 (scene_runtime.route_state != 4 ||
+                  scene_runtime.entry_controller.state != 0x0400u ||
+                  scene_runtime.first_encounter.source_intro_timer != 0u ||
+                  scene_runtime.entry.gate81f3 != 1u ||
+                  scene_runtime.entry.exit_started != 0u ||
+                  scene_runtime.player.state != 0x0200u ||
+                  scene_runtime.camera_x_upper != 1152)) ||
+                (source_frame == 5453u &&
+                 (scene_runtime.route_state != 6 ||
+                  scene_runtime.entry.gate81f3 != 1u ||
+                  scene_runtime.entry.exit_started != 1u ||
+                  scene_runtime.player.state != 0x0800u)))
+            {
+                fprintf(stderr,
+                    "Coffee Shop clear-route scheduler handoff failed frame=%u controller=%04x/%04x timer=%u gate81f3=%u route=%d exit=%u player=%04x camera_upper=%d\n",
+                    source_frame, scene_runtime.entry_controller.state,
+                    scene_runtime.entry_controller.substate,
+                    scene_runtime.first_encounter.source_intro_timer,
+                    scene_runtime.entry.gate81f3,
+                    scene_runtime.route_state,
+                    scene_runtime.entry.exit_started,
+                    scene_runtime.player.state,
+                    scene_runtime.camera_x_upper);
+                return 126;
+            }
             if (source_frame == 2371u)
             {
                 const AvspRound1WeaponProjectileAllocation *child =
@@ -4650,6 +4720,7 @@ int main(void)
                     return 112;
                 if (source_tick < source_updates &&
                     player_authority_enabled_at_tick_start &&
+                    scene_runtime.route_state == 4 &&
                     !avsp_round1_step_player(&scene_runtime, input, 0))
                     return 111;
                 if (scene_runtime.entry.dependencies_seeded &&
@@ -4679,14 +4750,17 @@ int main(void)
                 return 112;
             if (source_updates != 0u &&
                 player_authority_enabled_at_tick_start &&
+                scene_runtime.route_state == 4 &&
                 !avsp_round1_step_player(&scene_runtime, input, 0))
             {
                 fprintf(stderr,
-                    "Coffee Shop player failed source=%u input=%04x core=%04x/%04x action=%u weapon=%u cleanup=%u recovery=%u return=%u jump=%u jump_cleanup=%u jump_latch=%u stop=%u player_cleanup=%u locomotion=%u source_action=%u position=%d/%d action_position=%d/%d health=%d/%d resource=%u recharge=%u weapon_counts=%lu/%lu alloc=%lu release=%lu free=%u air=%lu empty=%lu/%lu/%lu\n",
+                    "Coffee Shop player failed source=%u input=%04x core=%04x/%04x action=%u weapon=%u weapon_tick=%u weapon_selector=%u cleanup=%u recovery=%u return=%u jump=%u jump_cleanup=%u jump_latch=%u stop=%u player_cleanup=%u locomotion=%u source_action=%u animation=%08lx/%u/%d position=%d/%d action_position=%d/%d health=%d/%d resource=%u recharge=%u weapon_counts=%lu/%lu alloc=%lu release=%lu free=%u air=%lu empty=%lu/%lu/%lu failure=%lu fallback=%lu\n",
                     source_frame, input, scene_runtime.player.state,
                     scene_runtime.player.substate,
                     scene_runtime.player_action.state,
                     scene_runtime.player_weapon_active,
+                    scene_runtime.player_weapon_tick,
+                    scene_runtime.player_weapon_presentation_selector,
                     scene_runtime.player_weapon_cleanup_pending,
                     scene_runtime.player_weapon_recovery_pending,
                     scene_runtime.player_weapon_return_pending,
@@ -4697,6 +4771,9 @@ int main(void)
                     scene_runtime.player_cleanup_pending,
                     scene_runtime.player_locomotion_action,
                     scene_runtime.player.source_action,
+                    scene_runtime.player.animation_record,
+                    scene_runtime.player.animation_timer,
+                    scene_runtime.player.animation_branch,
                     scene_runtime.player.x, scene_runtime.player.z,
                     scene_runtime.player_action.x,
                     scene_runtime.player_action.lane,
@@ -4712,7 +4789,9 @@ int main(void)
                     scene_runtime.player_air_weapon_entries,
                     scene_runtime.player_weapon_empty_auxiliary_requests,
                     scene_runtime.player_weapon_empty_auxiliary_allocations,
-                    scene_runtime.player_weapon_empty_auxiliary_allocation_failures);
+                    scene_runtime.player_weapon_empty_auxiliary_allocation_failures,
+                    scene_runtime.failure_count,
+                    scene_runtime.fallback_count);
                 fprintf(stderr,
                     "Coffee Shop camera=%d/%d target=%d/%d scroll2=%d bounds=%d/%d active=%u lower=%d/%d upper=%d/%d terminal=%u control=%u gate=%u decrements=%u step=%u failures=%lu\n",
                     scene_runtime.camera_x_position,

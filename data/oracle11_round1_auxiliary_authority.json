@@ -12151,16 +12151,88 @@
           "0x0007fdec"
         ],
         "class": "0x20",
-        "classification": "SOURCE_CLOSED_IDENTITY",
+        "classification": "SOURCE_CLOSED_IMPLEMENTATION_FIELDS",
         "dispatch_entry": "0x07f9a8",
         "dispatch_prefix_sha256": "64eaf61ed6e4f0bc0aaebf798320ca55357b0a3423e8091624fb5f0ca7bb6901",
         "first_frame": 4032,
         "fixed_frame_substitute_forbidden": true,
-        "implementation_contract": null,
-        "implementation_status": "BLOCKED_MISSING_SPEC_FIELDS",
+        "implementation_contract": {
+          "classification": "SOURCE_OWNED_PRESENTATION_COORDINATION",
+          "dispatch": "0x07f9a8",
+          "first_visible_frame_u16": 4032,
+          "last_visible_frame_u16": 4063,
+          "presentation": [
+            {
+              "animation_record": "0x0007fdac",
+              "assembly": "0x00080052",
+              "attack_selector_u8": 0,
+              "branch_s16": 0,
+              "hurt_selector_u8": 0,
+              "record_sha256": "203f00007b79e0dc0fa4b45f7d19f7066a345a9ac75a3f180372cf7370170ec8",
+              "timer_u16": 2
+            },
+            {
+              "animation_record": "0x0007fdbc",
+              "assembly": "0x00080060",
+              "attack_selector_u8": 0,
+              "branch_s16": 0,
+              "hurt_selector_u8": 0,
+              "record_sha256": "a42a2924f7dd67c94baf4d79b19d1a5dd19bd03a83e5a802ba0731061fc4f98d",
+              "timer_u16": 4
+            },
+            {
+              "animation_record": "0x0007fdcc",
+              "assembly": "0x00080078",
+              "attack_selector_u8": 0,
+              "branch_s16": 0,
+              "hurt_selector_u8": 0,
+              "record_sha256": "8c5a66a583525e8fff8b688b515f417a46264a0150fd01663bb3122249f9fa7f",
+              "timer_u16": 12
+            },
+            {
+              "animation_record": "0x0007fddc",
+              "assembly": "0x00080090",
+              "attack_selector_u8": 0,
+              "branch_s16": 0,
+              "hurt_selector_u8": 0,
+              "record_sha256": "e91a02647a131cf49d13a34b9eb0b65f28178d876590481325327ceb9bc0996b",
+              "timer_u16": 12
+            },
+            {
+              "animation_record": "0x0007fdec",
+              "assembly": "0x00080050",
+              "attack_selector_u8": 0,
+              "branch_s16": -32768,
+              "hurt_selector_u8": 0,
+              "record_sha256": "ce71c3a43a497cb2b24c4f59832a7df4f9fbdcebfe5d6407a1b29fc08124ca49",
+              "timer_u16": 8
+            }
+          ],
+          "release": "next state-0x0400 dispatch calls 0x0177f0 fixed-pool release",
+          "retained_gameplay_authority": false,
+          "rng": {
+            "calls": [],
+            "consumption_order": []
+          },
+          "semantic_role": "PLAYER_INTERACTION_PRESENTATION_COORDINATION",
+          "source_body": {
+            "first": "0x0007f9a8",
+            "last_exclusive": "0x0007fb52",
+            "sha256": "74e52d2f4745577af8f032f2bbdcb0b80cb90e0f2f288e8ceb3b779e2c0562be"
+          },
+          "source_scheduler": "0x01ba62 record24 after player update",
+          "spec_executable": true,
+          "states": [
+            512,
+            1024
+          ],
+          "terminal_guard": "negative actor+0x24 animation event advances state 0x0200 to 0x0400",
+          "variant_u8": 4
+        },
+        "implementation_status": "SPEC_EXECUTABLE",
         "last_frame": 4063,
         "lifetime_count": 1,
-        "semantic_role": "UNKNOWN",
+        "semantic_role": "PLAYER_INTERACTION_PRESENTATION_COORDINATION",
         "source_scheduler": "0x01ba62",
         "state_substate_contexts": [
           "0x0200:0x0000",
@@ -18763,6 +18835,21 @@
             "source_slot": "0x00ffa240",
             "state_substate": "0x0200:0x0402",
             "table_set": "0x00130ac8"
+          },
+          "class1f_traversal_cadence": {
+            "coffee_shop_witnesses": [
+              {
+                "source_frame_u16": 4394,
+                "source_slot": "0x00ff9c40"
+              },
+              {
+                "source_frame_u16": 4395,
+                "source_slot": "0x00ff9e80"
+              }
+            ],
+            "max_damage_targets_per_frame_u8": 1,
+            "next_frame_resumes_after_ineligible_prior_targets": true,
+            "registration_retained_after_contact": true
           },
           "classification": "SOURCE_CLOSED_IMPLEMENTATION_FIELDS",
           "impact_allocation": {

@@ -63,6 +63,25 @@ assert stage_progress["helper"]["stage_domain_mask_u16"] == 31
 assert [(row["source_frame_u16"], row["stage_after_s16"])
         for row in stage_progress["coffee_shop_calls"][:3]] == [
             (2252, 8), (2342, 8), (2432, 9)]
+interaction = fixtures["authority_data"]["player"][
+    "route_pickup_resource_audio_load_ownership"][
+        "interaction_action_and_interruption"]["implementation_contract"]
+interaction_progress = interaction["active"]["button1_interruption"][
+    "source_stage_progress"]
+interaction_reaction = interaction["current_state_collision"]["target_reaction"]
+assert interaction["source_guard"]["coffee_shop_witness"][
+    "visible_frame_u16"] == 4032
+assert interaction_progress["source_frame_u16"] == 4052
+assert interaction_progress["calls_u8"] == 1
+assert interaction_progress["duplicate_call_forbidden"] is True
+assert interaction["active"]["button1_interruption"][
+    "weapon_dispatch_delay_updates_u8"] == 0
+assert interaction["current_state_collision"]["damage_s16"] == 31
+assert interaction_reaction["reaction_entry"]["record"][
+    "animation_record"] == "0x0012dd78"
+assert interaction_reaction["first_flight"][
+    "x_velocity_s32_16_16"] == -0x30000
+assert interaction_reaction["audio"]["command_u16"] == 0x003d
 assert weapon["empty_fallback"]["cleanup_tick"] == 17
 parent = weapon["record4_parent_class0"]
 child = weapon["record4_child_class4"]
@@ -403,7 +422,9 @@ assert inner8["action_0x0e_motion"]["phase_8_terminal_writes"][
     "wander_cursor_u8"] == 0
 assert inner8["route_interaction"]["timeout_return"]["source_entry"] == "0x0610f6"
 assert inner8["route_interaction"]["timeout_return"]["source_exit_helper"] == "0x0610d4"
-assert inner8["route_interaction"]["timeout_return"]["writes"] == {"special_latch_ad_u8": 0, "inner_timer_u16": 0, "outer_state_u16": 0x0200, "action_substate_u16": 0}
+assert inner8["route_interaction"]["timeout_return"]["writes"] == {"special_latch_ad_u8": 0, "inner_timer_u16": 0, "outer_state_u16": 0x0200, "action_substate_u16": 0, "direction_u8": "((a5_u8 ^ 1) << 4) + 8"}
+assert inner8["route_interaction"]["timeout_return"]["coffee_shop_control"]["direction_writer_pc"] == "0x0610f0"
+assert inner8["route_interaction"]["timeout_return"]["coffee_shop_control"]["direction_after_u8"] == 8
 assert inner8["route_interaction"]["timeout_return"]["coffee_shop_control"]["return_frame_u16"] == 3881
 assert inner8["action_0x0e_motion"]["phase_6"].startswith(
     "step animation; each positive")
@@ -463,6 +484,33 @@ assert camera_edge["native_adapter_binding"]["runtime_field"] == "camera_x_posit
 assert camera_edge["mutation_control"]["accepted_current_camera_x_s16"] == 832
 assert camera_edge["mutation_control"]["rejected_previous_camera_x_s16"] == 830
 assert camera_edge["mutation_control"]["previous_runtime_sample_rejected"] is True
+withdrawal_visibility = progression["exit_controller_program"] \
+    ["controller_dispatch"]["withdrawal_visibility"]
+assert withdrawal_visibility["scheduler_write_source_frame_u16"] == 5151
+assert withdrawal_visibility["source_visible_frame_u16"] == 5152
+assert withdrawal_visibility["source_visible_timer_u16"] == 300
+assert withdrawal_visibility["first_decrement_visible_frame_u16"] == 5153
+assert withdrawal_visibility["first_decrement_timer_u16"] == 299
+assert withdrawal_visibility["route_state_during_transition_s16"] == 4
+assert withdrawal_visibility["player_update_after_controller_same_source_frame"] is True
+withdrawal_handoff = progression["exit_controller_program"] \
+    ["controller_dispatch"]["withdrawal_route_handoff"]
+assert withdrawal_handoff["controller_gate_writer"] == "0x028bba"
+assert withdrawal_handoff["gate_write_source_frame_u16"] == 5451
+assert withdrawal_handoff["gate_visible_frame_u16"] == 5452
+assert withdrawal_handoff["route_dispatcher"] == "0x00840a..0x008438"
+assert withdrawal_handoff["route_writer"] == "0x008418"
+assert withdrawal_handoff["route_write_source_frame_u16"] == 5452
+assert withdrawal_handoff["route_visible_frame_u16"] == 5453
+assert withdrawal_handoff["same_invocation_gate_consumption"] is False
+assert withdrawal_handoff[
+    "player_gameplay_update_after_gate_write_same_source_frame"] is True
+assert [(row["frame_u16"], row["route_state_s16"],
+         row["player_state_u16"], row["timer42_u16"])
+        for row in withdrawal_handoff["source_observations"]] == [
+            (5451, 4, 0x0200, 1),
+            (5452, 4, 0x0200, 0),
+            (5453, 6, 0x0800, 0)]
 assert progression["progress_increment_boundary"]["writer_pc"] == "0x061070"
 assert progression["progress_increment_boundary"]["transition_guard"] == {
     "class_u8": "0x1f", "health_s16": -1, "record_type_u8": 12,
@@ -514,6 +562,8 @@ assert special_collision["class1f_target"]["hurt_record"]["address"] == "0x00130
 assert [row["source_slot"] for row in special_collision["record20_targets"]] == [
     "0x00ffb300", "0x00ffb380"]
 assert special_collision["impact_allocation"]["variant_u8"] == 1
+assert special_collision["class1f_traversal_cadence"][
+    "max_damage_targets_per_frame_u8"] == 1
 class4e0 = dependencies["class_0x4e_type24_variant4_effect"][
     "variant0_collision_effect"]
 assert class4e0["classification"] == "SOURCE_CLOSED_IMPLEMENTATION_FIELDS"
@@ -686,6 +736,7 @@ f = copy.deepcopy(fixtures); next(item for item in f["authority_data"]["enemies"
 f = copy.deepcopy(fixtures); next(item for item in f["authority_data"]["enemies"]["archetypes"] if item["class"] == "0x1f")["first_segment_action_execution_contract"]["inner_state_0x08_program"]["movement"]["tables"][0]["vectors"][8]["x_delta_s16"] -= 1; mutations.append((contract, f, "class1f inner8 movement mutation"))
 f = copy.deepcopy(fixtures); next(item for item in f["authority_data"]["enemies"]["archetypes"] if item["class"] == "0x1f")["first_segment_action_execution_contract"]["inner_state_0x08_program"]["action_0x0e_motion"]["phase_2_terminal"]["x_velocity_by_facing_s32_16_16"].reverse(); mutations.append((contract, f, "class1f inner8 motion-facing mutation"))
 f = copy.deepcopy(fixtures); next(item for item in f["authority_data"]["enemies"]["archetypes"] if item["class"] == "0x1f")["first_segment_action_execution_contract"]["inner_state_0x08_program"]["route_interaction"]["timeout_return"]["writes"]["outer_state_u16"] = 0x0208; mutations.append((contract, f, "class1f inner8 timeout-return mutation"))
+f = copy.deepcopy(fixtures); next(item for item in f["authority_data"]["enemies"]["archetypes"] if item["class"] == "0x1f")["first_segment_action_execution_contract"]["inner_state_0x08_program"]["route_interaction"]["timeout_return"]["coffee_shop_control"]["direction_after_u8"] = 2; mutations.append((contract, f, "class1f inner8 timeout-direction mutation"))
 f = copy.deepcopy(fixtures); next(item for item in f["authority_data"]["enemies"]["archetypes"] if item["class"] == "0x1f")["first_segment_action_execution_contract"]["inner_state_0x08_program"]["type16_emission"]["fixed_frame_spawn_forbidden"] = False; mutations.append((contract, f, "class1f inner8 fixed-frame emission mutation"))
 f = copy.deepcopy(fixtures); next(item for item in f["authority_data"]["enemies"]["archetypes"] if item["class"] == "0x1f")["first_segment_action_execution_contract"]["inner_state_0x08_program"]["mutation_control"]["mutant_type16_spawn_frames"] = [3253]; mutations.append((contract, f, "class1f inner8 suppression mutation"))
 f = copy.deepcopy(fixtures); next(item for item in f["authority_data"]["enemies"]["archetypes"] if item["class"] == "0x1f")["first_segment_action_execution_contract"]["inner_state_0x08_program"]["animation_records"][0]["next_animation_record"] = "0x0012d424"; mutations.append((contract, f, "class1f inner8 next-record mutation"))
@@ -731,6 +782,8 @@ f = copy.deepcopy(fixtures); next(item for item in f["authority_data"]["enemies"
 f = copy.deepcopy(fixtures); f["authority_data"]["route"]["first_segment_recurring_spawn"]["primary_writer"]["fixed_point_record_reuse"]["mutation_control"]["rejected_frame_2514"]["x_fp_s32"] = "0x02a7e200"; mutations.append((contract, f, "encounter recurring reused fraction mutation"))
 f = copy.deepcopy(fixtures); f["authority_data"]["route"]["first_segment_recurring_spawn"]["progress_increment_boundary"]["increment_u16"] = 2; mutations.append((contract, f, "encounter KO progress mutation"))
 f = copy.deepcopy(fixtures); f["authority_data"]["route"]["first_segment_recurring_spawn"]["source_update_cadence"]["exceptions"][0]["updates_u8"] = 1; mutations.append((contract, f, "Coffee Shop scheduler cadence mutation"))
+f = copy.deepcopy(fixtures); f["authority_data"]["route"]["first_segment_recurring_spawn"]["exit_controller_program"]["controller_dispatch"]["withdrawal_visibility"]["source_visible_frame_u16"] = 5151; mutations.append((contract, f, "Coffee Shop withdrawal visibility mutation"))
+f = copy.deepcopy(fixtures); f["authority_data"]["route"]["first_segment_recurring_spawn"]["exit_controller_program"]["controller_dispatch"]["withdrawal_route_handoff"]["same_invocation_gate_consumption"] = True; mutations.append((contract, f, "Coffee Shop withdrawal route-handoff mutation"))
 f = copy.deepcopy(fixtures); f["authority_data"]["auxiliary"]["first_segment_dependencies"]["class_0x09_type20_rng_owner"]["selector_table_u16"][0] = 1; mutations.append((contract, f, "class09 RNG selector mutation"))
 f = copy.deepcopy(fixtures); f["authority_data"]["auxiliary"]["first_segment_dependencies"]["class_0x08_type20_health_pickup"]["stage_spawn"]["record"]["gate_u16"] = 817; mutations.append((contract, f, "class08 health-pickup stage-guard mutation"))
 f = copy.deepcopy(fixtures); f["authority_data"]["auxiliary"]["first_segment_dependencies"]["class_0x05_type20_reactive_prop"]["stage_records"].reverse(); mutations.append((contract, f, "class05 stage-order mutation"))
@@ -745,6 +798,7 @@ f = copy.deepcopy(fixtures); f["authority_data"]["auxiliary"]["first_segment_dep
 f = copy.deepcopy(fixtures); f["authority_data"]["auxiliary"]["first_segment_dependencies"]["class_0x4e_type24_variant4_effect"]["variant1_collision_effect"]["allocation"]["scheduler_guard"] = "projectile first"; mutations.append((contract, f, "class4e variant1 scheduler mutation"))
 f = copy.deepcopy(fixtures); f["authority_data"]["auxiliary"]["first_segment_dependencies"]["class_0x4e_type24_variant4_effect"]["variant1_collision_effect"]["allocation"]["fixed_slot_reuse_presentation"]["animation_record"] = "0x00092914"; mutations.append((contract, f, "class4e retained-presentation mutation"))
 f = copy.deepcopy(fixtures); f["authority_data"]["auxiliary"]["first_segment_dependencies"]["class_0x4e_type24_variant4_effect"]["variant1_collision_effect"]["player_special_collision"]["class1f_target"]["damage_s16"] = 126; mutations.append((contract, f, "player-special class1f damage mutation"))
+f = copy.deepcopy(fixtures); f["authority_data"]["auxiliary"]["first_segment_dependencies"]["class_0x4e_type24_variant4_effect"]["variant1_collision_effect"]["player_special_collision"]["class1f_traversal_cadence"]["max_damage_targets_per_frame_u8"] = 2; mutations.append((contract, f, "player-special class1f traversal cadence mutation"))
 f = copy.deepcopy(fixtures); f["authority_data"]["auxiliary"]["first_segment_dependencies"]["class_0x4e_type24_variant4_effect"]["variant0_collision_effect"]["allocation"]["source_slot"] = "0x00ffc380"; mutations.append((contract, f, "class4e variant0 source-slot mutation"))
 f = copy.deepcopy(fixtures); f["authority_data"]["auxiliary"]["first_segment_dependencies"]["class_0x4e_type24_variant4_effect"]["variant0_collision_effect"]["state0"]["first_seed_before"] = "0xeea2"; mutations.append((contract, f, "class4e variant0 RNG mutation"))
 f = copy.deepcopy(fixtures); f["authority_data"]["auxiliary"]["first_segment_dependencies"]["class_0x4e_type24_variant4_effect"]["variant0_collision_effect"]["active_state"]["animation_records"][0]["animation_record"] = "0x000928f0"; mutations.append((contract, f, "class4e variant0 presentation mutation"))
@@ -775,6 +829,12 @@ f = copy.deepcopy(fixtures); f["authority_data"]["player"]["weapon_projectile_re
 f = copy.deepcopy(fixtures); f["authority_data"]["player"]["weapon_projectile_resource"]["implementation_contract"]["sufficient_action"]["source_stage_progress"]["helper"]["progress_threshold_u16"] = 7; mutations.append((contract, f, "Button1 stage-progress threshold mutation"))
 f = copy.deepcopy(fixtures); f["authority_data"]["player"]["weapon_projectile_resource"]["implementation_contract"]["sufficient_action"]["source_stage_progress"]["coffee_shop_calls"][2]["source_frame_u16"] = 2433; mutations.append((contract, f, "Button1 stage-progress timing mutation"))
 f = copy.deepcopy(fixtures); f["authority_data"]["player"]["weapon_projectile_resource"]["implementation_contract"]["sufficient_action"]["source_stage_progress"]["fixed_frame_substitute"] = True; mutations.append((contract, f, "Button1 stage-progress fixed-frame mutation"))
+f = copy.deepcopy(fixtures); f["authority_data"]["player"]["route_pickup_resource_audio_load_ownership"]["interaction_action_and_interruption"]["implementation_contract"]["active"]["button1_interruption"]["source_stage_progress"]["calls_u8"] = 2; mutations.append((contract, f, "HIT interaction duplicate stage-progress mutation"))
+f = copy.deepcopy(fixtures); f["authority_data"]["player"]["route_pickup_resource_audio_load_ownership"]["interaction_action_and_interruption"]["implementation_contract"]["active"]["button1_interruption"]["weapon_dispatch_delay_updates_u8"] = 1; mutations.append((contract, f, "HIT interaction invented dispatch-delay mutation"))
+f = copy.deepcopy(fixtures); f["authority_data"]["player"]["route_pickup_resource_audio_load_ownership"]["interaction_action_and_interruption"]["implementation_contract"]["current_state_collision"]["target_reaction"]["reaction_entry"]["collision_freeze_ticks_u8"] = 13; mutations.append((contract, f, "HIT interaction target freeze mutation"))
+f = copy.deepcopy(fixtures); f["authority_data"]["player"]["route_pickup_resource_audio_load_ownership"]["interaction_action_and_interruption"]["implementation_contract"]["current_state_collision"]["target_reaction"]["audio"]["command_u16"] = 0x003c; mutations.append((contract, f, "HIT interaction target audio mutation"))
+f = copy.deepcopy(fixtures); f["authority_data"]["player"]["route_pickup_resource_audio_load_ownership"]["interaction_action_and_interruption"]["implementation_contract"]["current_state_collision"]["target_eligibility"]["reaction_state_exclusion"] = True; mutations.append((contract, f, "HIT interaction invented reaction exclusion mutation"))
+f = copy.deepcopy(fixtures); f["authority_data"]["player"]["route_pickup_resource_audio_load_ownership"]["interaction_action_and_interruption"]["implementation_contract"]["current_state_collision"]["collision_identity_latch"]["damage_writes_while_held_u8"] = 2; mutations.append((contract, f, "HIT interaction repeated collision mutation"))
 f = copy.deepcopy(fixtures); f["authority_data"]["player"]["directional_airborne_interruption"]["airborne_actions"]["button1"]["record4_class03"]["class_u8"] = 0; mutations.append((contract, f, "airborne Button1 class-3 identity mutation"))
 f = copy.deepcopy(fixtures); f["authority_data"]["player"]["directional_airborne_interruption"]["airborne_actions"]["button1"]["record4_class03"]["player_phase_0x0406"]["presentation_selector_u8"] = 17; mutations.append((contract, f, "airborne Button1 player presentation selector mutation"))
 f = copy.deepcopy(fixtures); f["authority_data"]["player"]["directional_airborne_interruption"]["airborne_actions"]["button1"]["record4_class03"]["effect_allocation"]["audio_command"] = "0x0008"; mutations.append((contract, f, "class-3 effect mislabeled as audio"))

@@ -39,7 +39,7 @@
         "id": "round1-runtime",
         "load_phase": "runtime",
         "owner": "complete fixed actor pools and mutable route state",
-        "required_bytes": 99380,
+        "required_bytes": 99432,
         "size": 102400
       },
       {
@@ -52,12 +52,12 @@
       },
       {
         "base": "0x22711000",
-        "census_capacity_floor_bytes": 240400,
+        "census_capacity_floor_bytes": 240660,
         "id": "round1-spec-content",
         "load_phase": "boot",
         "owner": "all generated read-only SPEC fixture tables",
-        "required_bytes": 47056,
-        "sha256": "ccf8795a147daf337c1f72364c81f05fc2cfd255d8d21b40a56c74c97f8d15bd",
+        "required_bytes": 47316,
+        "sha256": "2b1946c6c7da2ed3c2e027142c293ea94e7dbddfeea67b354b21072ca32c09df",
         "size": 262144
       },
       {
@@ -80,7 +80,7 @@
   },
   "classification": "REIMPLEMENT-13 bounded memory-plan program",
   "content_archive": {
-    "bytes": 47056,
+    "bytes": 47316,
     "categories": [
       "terrain",
       "timer-selector",
@@ -90,8 +90,8 @@
     ],
     "deterministic_double_build": true,
     "file": "build/avsp_cd/R1/R1SPEC.BIN",
-    "generated_source_sha256": "d33adcd2a38b5642df36671035e37ea147497965f6a62641ec6f89f92e2fb4d1",
-    "sha256": "ccf8795a147daf337c1f72364c81f05fc2cfd255d8d21b40a56c74c97f8d15bd",
+    "generated_source_sha256": "55db3c72615e6bc1036176ce2aa513dd8350cb38953ee718a8bff76b38767e87",
+    "sha256": "2b1946c6c7da2ed3c2e027142c293ea94e7dbddfeea67b354b21072ca32c09df",
     "table_count": 157,
     "target_endian": "SH-2 big endian"
   },
@@ -130,9 +130,9 @@
     "writer_reconciliation_sha256": "e9508e1c621e6448953549817b8d66e9399cbce97f06d7883c013776f34fc39c"
   },
   "work_ram": {
-    "bss_end": "0x060b25e0",
-    "bss_headroom_bytes": 55840,
-    "game_bin_bytes": 373968,
+    "bss_end": "0x060b3140",
+    "bss_headroom_bytes": 52928,
+    "game_bin_bytes": 376880,
     "jo_user_program_data_end_exclusive": "0x060c0000",
     "linked_capacity_bytes": 770048,
     "linked_image_base": "0x06004000",

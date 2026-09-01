@@ -876,6 +876,7 @@ const AvspRound1ContentArchive avsp_round1_content_image
     {
         0xA3C0u,
         600u, 0x0200u, 0x0000u, 0u,
+        1u, 4u, 8u,
         0x6db6u, 0xf555u, 16u, 31u,
         9u,
         { 0u, 0u, 0u, 0u, 0u, 0u, 1u, 1u, 1u, 1u, 2u, 2u, 2u, 2u, 3u, 3u, 3u, 3u, 4u, 4u, 4u, 4u, 5u, 5u, 5u, 5u, 6u, 6u, 6u, 6u, 7u, 7u },
@@ -3325,6 +3326,34 @@ const AvspRound1ContentArchive avsp_round1_content_image
     {
         { 1u, 21u, 5u, { { 1u, 0, 0x160288UL, 0x1629e6UL, 1u, 0u }, { 2u, 0, 0x160298UL, 0x162a04UL, 11u, 21u }, { 2u, 1, 0x1602a8UL, 0x162a04UL, 11u, 0u }, { 5u, 1, 0x1602b8UL, 0x1629e6UL, 1u, 0u }, { 4095u, -32767, 0x1602c8UL, 0x1629e6UL, 1u, 0u }, { 0u, 0, 0UL, 0UL, 0u, 0u } } },
         { 0u, 20u, 6u, { { 2u, 0, 0x1602dcUL, 0x162a32UL, 1u, 0u }, { 1u, 0, 0x1602ecUL, 0x162a5aUL, 1u, 0u }, { 4u, 1, 0x1602fcUL, 0x162a82UL, 11u, 20u }, { 5u, 1, 0x16030cUL, 0x162a5aUL, 1u, 0u }, { 4u, 1, 0x16031cUL, 0x162a32UL, 1u, 0u }, { 4095u, -32767, 0x16032cUL, 0x162a32UL, 1u, 0u } } },
+    },
+    {
+        4u, 512u, 3584u, 3072u,
+        0x0001abfcUL, 0x0001ac48UL, 0x0001a3faUL, 0x07f9a8UL,
+        1u, 24u, 32, 4u, 16u
+    },
+    {
+        { 2u, 0, 0x0015f96cUL, 0x00161376UL, 0u, 0u },
+        { 4u, 0, 0x0015f97cUL, 0x00161348UL, 0u, 10u },
+        { 4u, 0, 0x0015f98cUL, 0x00161320UL, 0u, 10u },
+        { 4u, 0, 0x0015f99cUL, 0x001612f8UL, 0u, 0u },
+        { 8u, -32768, 0x0015f9acUL, 0x001626a4UL, 0u, 0u },
+    },
+    {
+        { 2u, 0, 0x0007fdacUL, 0x00080052UL, 0u, 0u },
+        { 4u, 0, 0x0007fdbcUL, 0x00080060UL, 0u, 0u },
+        { 12u, 0, 0x0007fdccUL, 0x00080078UL, 0u, 0u },
+        { 12u, 0, 0x0007fddcUL, 0x00080090UL, 0u, 0u },
+        { 8u, -32768, 0x0007fdecUL, 0x00080050UL, 0u, 0u },
+    },
+    { 48, 19, 48u, 19u, 0, 8u, 3, 14u, 12u },
+    { -12, 42, 29u, 39u, 0, 8u, 0, 0u, 0u },
+    31,
+    5u,
+    {
+        0x0202u, 0x0000u, 0x0002u, 0x0202u,
+        0x0012dd78UL, 0x0012dd88UL, 0x003Du, 14u, 4u, 1u, 1u, 1u,
+        -196608L, 0L, 327680L, -40960L
     },
     {
         { 0L, 0L, 557056L, -32768L },

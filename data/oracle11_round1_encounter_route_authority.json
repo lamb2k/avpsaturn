@@ -64680,6 +64680,81 @@
             "g81f3=1",
             "camera right edge=1152"
           ]
+        },
+        "withdrawal_route_handoff": {
+          "controller_gate_writer": "0x028bba",
+          "gate_visible_frame_u16": 5452,
+          "gate_write_source_frame_u16": 5451,
+          "player_gameplay_update_after_gate_write_same_source_frame": true,
+          "route_dispatcher": "0x00840a..0x008438",
+          "route_visible_frame_u16": 5453,
+          "route_write_source_frame_u16": 5452,
+          "route_writer": "0x008418",
+          "same_invocation_gate_consumption": false,
+          "scheduler_order": [
+            "global route dispatcher reads prior g81f3",
+            "record-type-32 controller writes current g81f3",
+            "player and fixed pools update"
+          ],
+          "source_observations": [
+            {
+              "frame_u16": 5451,
+              "player_state_u16": 512,
+              "route_state_s16": 4,
+              "timer42_u16": 1
+            },
+            {
+              "frame_u16": 5452,
+              "player_state_u16": 512,
+              "route_state_s16": 4,
+              "timer42_u16": 0
+            },
+            {
+              "frame_u16": 5453,
+              "player_state_u16": 2048,
+              "route_state_s16": 6,
+              "timer42_u16": 0
+            }
+          ]
+        },
+        "withdrawal_visibility": {
+          "first_decrement_timer_u16": 299,
+          "first_decrement_visible_frame_u16": 5153,
+          "player_update_after_controller_same_source_frame": true,
+          "route_state_during_transition_s16": 4,
+          "scheduler_write_source_frame_u16": 5151,
+          "source_observations": [
+            {
+              "frame_u16": 5150,
+              "progress_u16": 19,
+              "state_u16": 516,
+              "substate_u16": 1536,
+              "timer42_u16": 65535
+            },
+            {
+              "frame_u16": 5151,
+              "progress_u16": 20,
+              "state_u16": 516,
+              "substate_u16": 1536,
+              "timer42_u16": 65535
+            },
+            {
+              "frame_u16": 5152,
+              "progress_u16": 20,
+              "state_u16": 1024,
+              "substate_u16": 0,
+              "timer42_u16": 300
+            },
+            {
+              "frame_u16": 5153,
+              "progress_u16": 20,
+              "state_u16": 1024,
+              "substate_u16": 0,
+              "timer42_u16": 299
+            }
+          ],
+          "source_visible_frame_u16": 5152,
+          "source_visible_timer_u16": 300
         }
       },
       "load_boundaries": [
@@ -83468,57 +83543,6 @@
       ]
     }
   ],
-  "overnight_census_extension": {
-    "accepted_evidence": [
-      "data/oracle10_round1_census_extension_5567_6200.json",
-      "data/oracle10_round1_census_extension_6201_6692.json",
-      "data/oracle10_round1_census_extension_6693_7438.json",
-      "data/oracle10_round1_census_extension_7439_7503.json",
-      "data/oracle10_round1_census_extension_7504_9004.json",
-      "data/oracle10_round1_census_extension_9005_9039.json",
-      "data/oracle10_round1_census_extension_9040_9940.json",
-      "data/oracle10_round1_census_extension_9941_9975.json",
-      "data/oracle10_round1_census_extension_9976_11476.json",
-      "data/oracle10_round1_census_extension_11477_11541.json",
-      "data/oracle10_round1_census_extension_11542_12442.json",
-      "data/oracle10_round1_census_extension_12443_12477.json",
-      "data/oracle10_round1_census_extension_12478_12799.json",
-      "data/oracle10_round1_census_extension_12800_13292.json",
-      "data/oracle10_round1_census_extension_13293_15039.json",
-      "data/oracle10_round1_census_extension_15040_15058.json",
-      "data/oracle10_round1_census_extension_15059_15080.json",
-      "data/oracle10_round1_census_extension_15081_15091.json",
-      "data/oracle10_round1_census_extension_15092_15192.json",
-      "data/oracle10_round1_census_extension_15193_15193.json"
-    ],
-    "accepted_evidence_sha256": [
-      "1eeb385455a62edb0d21bf48790aa7ac34c6a29408b40792197ee0798370d9c0",
-      "0cb1e3a8267a4557960705f43a1543283361172415a3d457199901e92455d400",
-      "8fdb7c05d4da1b35aa761f78abbbc182d66b1074edd4dc5a1bfe80464b9f3cc9",
-      "adb7f0caf3cf538826f8210f1e322b88de5b501000ae995356cd83c0a94f405a",
-      "b6bb711eeca20571b06c0cde107960bff46dc475e902708f0f58a0adab563eee",
-      "bf2edfd1377b8f4309d6f329e1765a3dda3540096658d2e8c7c1bbc26e6f0b43",
-      "4572f355ccefe66cc0bc6ba2ead29ec5c65911a2dca28ef0f7b27fcdb99b1566",
-      "ec72ef4e391eb58b21896fb50f67fda1993b17442de6331a817e88737f917881",
-      "8d7aba5b517d9281c3511eb3c48423a68513f6d282872f17b6003801d7dd2dc2",
-      "9fd0986fc835bba44299df599342e1ef6e19cc1fc14b59e0a613960c1c64cae3",
-      "96897579957165df8fa72dacd4853ad8de3fb2d93b86cd6e89538900d0641231",
-      "0e4a78338a3f5054a9389c92e64f6e62cadbf9f35485e75bc5f96dc2b15c0f7a",
-      "2c9b32f78f7a0dfdd7315c6d01d8f183b7f12f62651846bbc3a05700448697a5",
-      "1d85dc4bedaa5808acada030130556da15849cfb420bcd0e5b87c0f8564fc763",
-      "68259fa0bfd0da3d4a8a1d1ddf4a4f08e5a70493216d3e3c366eb0e55b62452e",
-      "6edba055d101afd418c8549f45684721e67c4f187988d9f0451479ea4a16ae5f",
-      "d6e0ff9b4db945efcc78bccd65d86e5eb4a14278cbc615d320268747ed32d6e1",
-      "7db0c73970973b916103f137dfb57c187dfddca8b832cedfbb6dd96795b08358",
-      "82a7113f2b74aef8ecefcc9202449cfd8f51a1a6b5271c0a9973c22779349f11",
-      "87f52ba5366b1f9fad577d58425044091a5502075c82c1e99c389e20bb2456e6"
-    ],
-    "class_type_pairs": 10,
-    "orphan_authority_events": 0,
-    "p2_closure_report": "data/oracle10_round1_p2_closure.json",
-    "source_frame_range": [5567, 15193],
-    "status": "P2_CLOSED"
-  },
   "status": "SOURCE_CLOSED",
   "task": "ORACLE-11-ROUND1-REACHABLE-LOGIC-CLOSURE"
 }

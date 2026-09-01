@@ -19,8 +19,11 @@ OUT = ROOT / "data" / "reimplement13_coffee_shop_scene_parity.json"
 SOURCE_ACTORS = (ROOT / ".deps" / "mame" /
                  "oracle11_progression_lifecycle_cs21a" /
                  "coffee_shop_scene_actors.tsv")
+SOURCE_FRAMES = SOURCE_ACTORS.with_name("coffee_shop_scene_frames.tsv")
 FAILURE_STDOUT = ROOT / ".deps" / "reimplement13_coffee_native_failure.tsv"
 FAILURE_STDERR = ROOT / ".deps" / "reimplement13_coffee_native_failure.stderr"
+FAILURE_DIAGNOSTIC = (ROOT / ".deps" /
+                      "reimplement13_coffee_native_failure.json")
 
 
 def canonical(value: object) -> bytes:
@@ -35,11 +38,12 @@ def wsl(path: Path) -> str:
         check=True, capture_output=True, text=True).stdout.strip()
 
 
-def capture() -> tuple[list[dict[str, str]], str]:
+def capture() -> tuple[list[dict[str, str]], str, int]:
     with tempfile.TemporaryDirectory(prefix="round1-coffee-census-") as name:
         output = f"/tmp/{Path(name).name}-census"
         command = (
             f"cd '{wsl(ROOT)}' && gcc -std=c90 -pedantic -Wall -Wextra "
+            f"-DAVSP_COFFEE_SCENE_RNG_TRACE=1 "
             f"-Werror -I . -I src/port_v2/gameplay/round1 "
             f"-I src/port_v2/gameplay/player_action "
             f"-I src/port_v2/gameplay/street_alien_ai "
@@ -61,11 +65,8 @@ def capture() -> tuple[list[dict[str, str]], str]:
         if result.returncode != 0:
             FAILURE_STDOUT.write_text(result.stdout, encoding="utf-8")
             FAILURE_STDERR.write_text(result.stderr, encoding="utf-8")
-            raise RuntimeError(
-                f"native Coffee Shop census failed ({result.returncode})\n"
-                f"{result.stderr[-8000:]}")
-    return list(csv.DictReader(io.StringIO(result.stdout), delimiter="\t")), \
-        result.stderr.strip()
+    return (list(csv.DictReader(io.StringIO(result.stdout), delimiter="\t")),
+            result.stderr.strip(), result.returncode)
 
 
 def lifetimes(rows: list[dict[str, str]]) -> list[dict[str, object]]:
@@ -323,6 +324,25 @@ def source_native_divergences(
                             item["differences"].values())
     return sorted(divergent, key=lambda item: (item["frame"],
                                                item["source_slot"]))
+
+
+def first_rng_divergence(runtime_summary: str) -> dict[str, object] | None:
+    native = {
+        int(match.group(1)): int(match.group(2), 16)
+        for match in re.finditer(
+            r"^scene_rng frame=(\d+) seed=([0-9a-f]{4})$",
+            runtime_summary, re.MULTILINE)}
+    with SOURCE_FRAMES.open(newline="", encoding="ascii") as handle:
+        source_rows = csv.DictReader(handle, delimiter="\t")
+        for row in source_rows:
+            frame = int(row["frame"])
+            if frame not in native:
+                continue
+            source_seed = int(row["rng"], 16)
+            if source_seed != native[frame]:
+                return {"frame": frame, "source_seed": f"0x{source_seed:04x}",
+                        "native_seed": f"0x{native[frame]:04x}"}
+    return None
 
 
 def collision_chronology(source: dict[str, object],
@@ -1353,7 +1373,6 @@ def validate_report(report: dict[str, object]) -> None:
 def main() -> None:
     fixtures = json.loads(FIXTURES.read_text(encoding="ascii"))
     source = fixtures["scene_manifests"]["coffee_shop"]
-    rows, runtime_summary = capture()
     source_actor_sha256 = hashlib.sha256(SOURCE_ACTORS.read_bytes()).hexdigest()
     expected_source_actor_sha256 = source["capture_identity"][
         "completion_a"]["coffee_shop_scene_actors.tsv"]
@@ -1363,6 +1382,23 @@ def main() -> None:
         source_rows = list(csv.DictReader(handle, delimiter="\t"))
     source_rows = bind_source_collision_selectors(
         source_rows, source["animation_collision_selectors"])
+    rows, runtime_summary, capture_returncode = capture()
+    divergences = source_native_divergences(source_rows, rows)
+    rng_divergence = first_rng_divergence(runtime_summary)
+    if capture_returncode != 0:
+        diagnostic = {
+            "capture_returncode": capture_returncode,
+            "earliest_actor_divergence": divergences[0]
+                if divergences else None,
+            "earliest_rng_divergence": rng_divergence,
+            "native_rows": len(rows),
+            "terminal_line": runtime_summary.splitlines()[-1]
+                if runtime_summary else "",
+        }
+        FAILURE_DIAGNOSTIC.write_bytes(canonical(diagnostic))
+        raise RuntimeError(
+            "native Coffee Shop census failed after diagnostic comparison: " +
+            json.dumps(diagnostic, sort_keys=True))
     native = lifetimes(rows)
     source_by_key = {key(item): item for item in source["actor_lifetimes"]}
     native_by_key = {key(item): item for item in native}
@@ -1397,7 +1433,6 @@ def main() -> None:
                                        "type": item["type"],
                                        "class": item["class"],
                                        "states": unsupported})
-    divergences = source_native_divergences(source_rows, rows)
     report = {
         "schema": "reimplement13-coffee-shop-scene-parity-v1",
         "source_manifest": FIXTURES.relative_to(ROOT).as_posix() +

@@ -194,6 +194,11 @@ def build_fields() -> list[dict[str, object]]:
           "/authority_data/player/weapon_projectile_resource/implementation_contract/sufficient_action/source_stage_progress", "a sufficient Button1 action entry calls the guarded source helper before resource debit, projectile allocation, and the actor scheduler",
           ["global.a5+0x01b0:u8", "global.a5+0x0226:u16", "global.a5+0x01ea:s16", "global.a5+0x021a:s16", "global.a5+0x021c:s16"], ["global.a5+0x0226:u16", "global.a5+0x01ea:s16"],
           "/weapon_projectile_resource/implementation_contract/sufficient_action/source_stage_progress/mutation_controls", "wrong delta, threshold, action-entry timing, or direct stage initialization changes the scheduler-visible class-0x1f action-0x0c branch"),
+        f("player.hit_interaction_action_and_interruption", "predator-warrior-player-authority", "guarded_player_actor_program", True,
+          "player", "/route_pickup_resource_audio_load_ownership/interaction_action_and_interruption/implementation_contract", "0x01abd0..0x01ac48 player program, 0x07f9a8 class-0x20 program, current collision and 0x024094/0x024096 interruption handoff",
+          "/authority_data/player/route_pickup_resource_audio_load_ownership/interaction_action_and_interruption/implementation_contract", "a real Button2 edge during player HIT enters action 0x0e00; animation records own natural completion, current collision owns the class-0x1f reaction, and a real Button1 edge transfers once to action 0x0c00 with exactly one source stage-progress transaction",
+          ["input.current:u16", "input.previous:u16", "player.state:u16", "player.action:u16", "player.animation:u32", "target.state:u16", "target.health:s16", "global.stage_progress:u16"], ["player.action:u16", "player.animation:u32", "record24.class20", "target.health:s16", "target.state:u16", "target.motion:s32", "audio.command:u16", "global.stage_progress:u16"],
+          "/route_pickup_resource_audio_load_ownership/interaction_action_and_interruption/implementation_contract/mutation_controls", "wrong input timing, fixed-frame completion, effect ownership, collision record, target reaction, audio command, or missing/early/duplicate stage-progress transaction changes the accepted Coffee Shop differential"),
         f("player.weapon_projectile_impact_variant", "predator-warrior-player-authority", "attack_record_field", False,
           "player", "/weapon_projectile_resource/implementation_contract/record4_parent_class0/collision_table/attack_entries/1/impact_variant_u8", "0x01d622 reads attack-record +0x08; parent record 0x02fc58 contains 0x0a",
           "/authority_data/player/weapon_projectile_resource/implementation_contract/record4_parent_class0/collision_table/attack_entries/1/impact_variant_u8", "a current-state projectile collision copies the absolute signed attack-record +0x08 byte into the allocated class-0x4e variant",
@@ -1762,6 +1767,64 @@ def validate(contract: dict[str, object], fixtures: dict[str, object],
                 "byte_identical_selected_rows"] is True and
             stage_progress["fixed_frame_substitute"] is False,
             "Predator Button1 stage-progress fixture incomplete or drifted")
+    interaction = fixtures["authority_data"]["player"][
+        "route_pickup_resource_audio_load_ownership"][
+            "interaction_action_and_interruption"]["implementation_contract"]
+    interaction_source = source["player"][
+        "route_pickup_resource_audio_load_ownership"][
+            "interaction_action_and_interruption"]["implementation_contract"]
+    interaction_progress = interaction["active"]["button1_interruption"][
+        "source_stage_progress"]
+    interaction_reaction = interaction["current_state_collision"][
+        "target_reaction"]
+    interaction_eligibility = interaction["current_state_collision"][
+        "target_eligibility"]
+    interaction_latch = interaction["current_state_collision"][
+        "collision_identity_latch"]
+    require(interaction == interaction_source and
+            interaction["classification"] ==
+                "SOURCE_CLOSED_IMPLEMENTATION_FIELDS" and
+            interaction["source_guard"]["coffee_shop_witness"] == {
+                "edge_frame_u16": 4030,
+                "writer_frame_u16": 4031,
+                "visible_frame_u16": 4032} and
+            interaction["active"]["natural_completion"][
+                "visible_frame_u16"] == 4060 and
+            interaction_progress == {
+                "caller": "0x024094 delta load then 0x024096 helper call",
+                "helper": "0x0179e2..0x017b74",
+                "source_frame_u16": 4052,
+                "calls_u8": 1,
+                "progress_before_u16": 3,
+                "progress_after_u16": 6,
+                "stage_before_s16": 11,
+                "stage_after_s16": 11,
+                "duplicate_call_forbidden": True} and
+            interaction["current_state_collision"]["damage_s16"] == 31 and
+            interaction_eligibility["scan_order"] ==
+                "ascending source-slot order" and
+            interaction_eligibility["reaction_state_exclusion"] is False and
+            interaction_eligibility["coffee_shop_first_eligible_target"] == {
+                "source_slot": "0x00ff9dc0", "state_u16": 0x0208,
+                "substate_u16": 0x0c02} and
+            interaction_latch["damage_writes_while_held_u8"] == 1 and
+            interaction_latch["independent_from_melee_attack_active"] is True and
+            interaction_latch["reset_guard"] ==
+                "interaction ends or current attack selector leaves 10" and
+            interaction_reaction["reaction_entry"]["record"][
+                "animation_record"] == "0x0012dd78" and
+            interaction_reaction["reaction_entry"][
+                "collision_freeze_ticks_u8"] == 14 and
+            interaction_reaction["first_flight"][
+                "x_velocity_s32_16_16"] == -0x30000 and
+            interaction_reaction["first_flight"][
+                "y_velocity_s32_16_16"] == 0x50000 and
+            interaction_reaction["audio"] == {
+                "main_frame_u16": 4034,
+                "command_u16": 0x003d,
+                "owner_slot": "0x00ff9dc0"} and
+            interaction["fixed_frame_substitute_forbidden"] is True,
+            "Predator HIT interaction fixture incomplete or drifted")
     child_emitter = weapon_contract["record4_parent_class0"][
         "child_emitter_state"]
     require(child_emitter["child_initial_facing_u8"] == 0 and
@@ -3046,6 +3109,9 @@ def validate(contract: dict[str, object], fixtures: dict[str, object],
             inner8["route_interaction"]["timeout_return"]
                 ["source_exit_helper"] == "0x0610d4" and
             inner8["route_interaction"]["timeout_return"]
+                ["source_exit_window_sha256"] ==
+                "6b09506d487a9af8c04d737045639bd17c60f20cfc96530015bfd1e31703c70a" and
+            inner8["route_interaction"]["timeout_return"]
                 ["source_window_sha256"] ==
                 "e1e231c72ee8540740c632f54bcb2f960262dfd88f1b657fbce4be1d82b497cf" and
             inner8["route_interaction"]["timeout_return"]["writes"] == {
@@ -3053,9 +3119,15 @@ def validate(contract: dict[str, object], fixtures: dict[str, object],
                 "inner_timer_u16": 0,
                 "outer_state_u16": 0x0200,
                 "action_substate_u16": 0,
+                "direction_u8": "((a5_u8 ^ 1) << 4) + 8",
             } and
             inner8["route_interaction"]["timeout_return"]
                 ["coffee_shop_control"]["return_frame_u16"] == 3881 and
+            inner8["route_interaction"]["timeout_return"]
+                ["coffee_shop_control"]["direction_writer_pc"] ==
+                "0x0610f0" and
+            inner8["route_interaction"]["timeout_return"]
+                ["coffee_shop_control"]["direction_after_u8"] == 8 and
             inner8["observed_path_program"]
                 ["fixed_frame_or_authored_transition_forbidden"] is True and
             inner8["mutation_control"] == {

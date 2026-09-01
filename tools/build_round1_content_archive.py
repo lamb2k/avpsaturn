@@ -157,7 +157,7 @@ def main() -> None:
                  "required_bytes": (ROOT / "build/rp4_fixture/STRIPS.BIN").stat().st_size},
                 {"id": "round1-runtime", "base": "0x226de000", "size": 0x19000,
                  "owner": "complete fixed actor pools and mutable route state", "load_phase": "runtime",
-                 "required_bytes": 0x18434},
+                 "required_bytes": 0x18468},
                 {"id": "live-diagnostic-window", "base": "0x226f7000", "size": 0x1A000,
                  "owner": "rolling 575-sample emulator evidence window", "load_phase": "runtime",
                  "required_bytes": 575 * 156},

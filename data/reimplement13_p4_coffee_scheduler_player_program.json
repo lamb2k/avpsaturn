@@ -2,9 +2,9 @@
   "schema": 1,
   "task": "REIMPLEMENT-13-SOURCE-CLOSED-ROUND1",
   "checkpoint": "P4-COFFEE-SCHEDULER-PLAYER-PROGRAM",
-  "result": "PASS_PROGRAM_CLOSED_SCENE_RED",
-  "source_span": [2072, 5457],
-  "closed_divergences": [3782, 4696, 5102],
+  "result": "PASS_PROGRAM_CLOSED_SCENE_RED_VISUAL_FOLLOWUP_BLOCKED",
+  "source_span": [2072, 5522],
+  "closed_divergences": [3782, 4696, 5102, 5458],
   "owning_programs": {
     "scheduler_phase_handoff": {
       "entry_frame": 2072,
@@ -22,6 +22,22 @@
       "source_frame": 5102,
       "special_rejected_when_health_zero": true,
       "button1_priority_preserved": true
+    },
+    "class1f_action10_and_hit_interaction": {
+      "first_divergence_frame": 5458,
+      "class": "0x1f",
+      "state_substate": "0x0208:0x1004",
+      "animation_record": "0x0012d628",
+      "complete_reachable_program_closed": true,
+      "button1_handoff_source_owned": true
+    },
+    "coffee_clear_route": {
+      "withdrawal_writer": "0x028bc2",
+      "global_route_writer": "0x008418",
+      "guard": "u8(g81f3) != 0",
+      "visible_transition_frames": [5451, 5452, 5453],
+      "same_call_route_write_rejected": true,
+      "global_consumer_suppression_rejected": true
     }
   },
   "source_hit_health_sequence": [91, 78, 68, 51, 30],
@@ -29,24 +45,40 @@
     "controller_edge_mutations_rejected": 4,
     "button1_mutations_rejected": 12,
     "special_input_mutations_rejected": 2,
-    "total_real_mutations_rejected": 18
+    "hit_interaction_mutations_rejected": 7,
+    "direction_queue_mutations_rejected": 1,
+    "total_real_mutations_rejected": 26
   },
   "target": {
     "entry_wiring_suppressions_rejected": 130,
-    "game_bin_bytes": 373968,
-    "game_bin_sha256": "068bc8dfd8fa059bfd811e79746310688810877a1334108c8743ce8cf121339d",
-    "bss_end": "0x060b25e0",
-    "content_archive_sha256": "ccf8795a147daf337c1f72364c81f05fc2cfd255d8d21b40a56c74c97f8d15bd"
+    "game_bin_bytes": 376880,
+    "game_bin_sha256": "cb9e18801b287c16cd2e44f8f66d5c2548e94625ba638c8d8dec9d65caa99c66",
+    "bss_end": "0x060b3140",
+    "content_archive_bytes": 47316,
+    "content_archive_sha256": "2b1946c6c7da2ed3c2e027142c293ea94e7dbddfeea67b354b21072ca32c09df",
+    "runtime_bytes": 99432,
+    "runtime_carve_bytes": 102400,
+    "runtime_headroom_bytes": 2968
   },
   "scene_differential": {
     "result": "RED_NEXT_PROGRAM",
-    "first_divergence_source_frame": 5458,
-    "failure_code": 11,
-    "source_slot": "0x00ff9e80",
-    "state": "0x0208",
-    "substate": "0x1004",
-    "animation_record": "0x0012d628",
-    "native_failure_ledger_sha256": "1069882da7909273f9f72332286ff6f8a662bcc39c8e1ac4683ee197ae4212db"
+    "first_divergence_source_frame": 5523,
+    "failure_code": 15,
+    "source_slot": "0x00ff9dc0",
+    "state": "0x0200",
+    "substate": "0x0000",
+    "animation_record": "0x0012e90c",
+    "owning_boundary": "complete class-0x1f state-0 action program"
+  },
+  "paired_emulator": {
+    "result": "PASS",
+    "cold_runs": 2,
+    "samples_per_run": 575,
+    "samples_byte_identical": true,
+    "mutations_rejected": 5,
+    "normalized_iso_sha256": "1ab030f86e328b373423d3313fd3e1b8e993c015d25b8ccf4a5c1b3fa088c863",
+    "emulator_exe_sha256": "d77675912421a7435d02d844625a6ef68ba0e55ef17c9845f08651eb98f54b45",
+    "invalid_video4_launch_excluded": true
   },
   "visual_gate": {
     "mode": "MCP_FRAMEBUFFER_BURST",
@@ -65,6 +97,30 @@
       "coherent VDP2 planes",
       "stable palette and priority"
     ]
+  },
+  "continuation_visual_gate": {
+    "result": "BLOCKED_THREE_ATTEMPTS_EXHAUSTED",
+    "candidate_promoted": false,
+    "attempts": [
+      {
+        "result": "REJECTED_BLACK_FRAMEBUFFER",
+        "frame_range": [460, 490]
+      },
+      {
+        "result": "REJECTED_POST_FREEZE_STATIC_VDP2_ONLY",
+        "frame_range": [640, 670],
+        "manifest_sha256": "dc9d9a05e10be37fd6cbb6feb9e8b681de9e59e765f27e7c450756c1f6c038a9",
+        "contact_sheet_sha256": "9b80d8d586a547a026204438337d9163c7b8c5741c31b4926f2642d994c166ef",
+        "unique_frame_hashes": 1
+      },
+      {
+        "result": "EXACT_FRAME_APPROACH_TIMEOUT",
+        "target_diagnostic_frame": 3400,
+        "last_diagnostic_frame": 2278,
+        "timeout_seconds": 180
+      }
+    ],
+    "exact_unblock_condition": "run a future coherent program visual checkpoint with the accepted dynarec-to-interpreter pre-roll helper and capture before the normal frame-574 diagnostic freeze; do not retry this body"
   },
   "capture_profile": {
     "temporary_autotest_freeze_extension_committed": false,

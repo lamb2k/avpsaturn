@@ -7238,7 +7238,7 @@
           "effect_allocation": {
             "accepted_auxiliary_contract": {
               "artifact": "data/oracle11_round1_auxiliary_authority.json",
-              "artifact_sha256": "0930f892c1f9840844aabebdb725fd79a8487b3ed93a04b07e9d6b5417c01797",
+              "artifact_sha256": "2040ecc4dd7522034df017cfc5e844dfc78f95a19b1dcc8f2caca79c9f5dc78f",
               "dispatch": "0x08f080",
               "presentation_records": [
                 {
@@ -17267,6 +17267,479 @@
       },
       "classification": "SOURCE_CLOSED",
       "effect_actor": "record24 class0x20 is presentation/coordination; pool unavailability does not change gameplay result",
+      "implementation_contract": {
+        "active": {
+          "animation_rule": "source animation runtime decrements timer, advances to the next 16-byte record at zero, and takes the terminal branch only from branch -32768",
+          "button1_interruption": {
+            "edge_frame_u16": 4050,
+            "guard": "one-frame source input pipeline exposes a real new Button1 edge while action 0x0e00 is active",
+            "next_action_u16": 3072,
+            "source_stage_progress": {
+              "caller": "0x024094 delta load then 0x024096 helper call",
+              "calls_u8": 1,
+              "duplicate_call_forbidden": true,
+              "helper": "0x0179e2..0x017b74",
+              "progress_after_u16": 6,
+              "progress_before_u16": 3,
+              "source_frame_u16": 4052,
+              "stage_after_s16": 11,
+              "stage_before_s16": 11
+            },
+            "visible_frame_u16": 4052,
+            "weapon_dispatch_delay_updates_u8": 0,
+            "writer_frame_u16": 4051
+          },
+          "dispatch": "0x01ac48 inner-state 0x00",
+          "natural_completion": {
+            "guard": "terminal player record 0x0015f9ac",
+            "visible_frame_u16": 4060,
+            "writer": "0x01a3fa",
+            "writer_frame_u16": 4059,
+            "writes": {
+              "action_u16": 0,
+              "outer_state_u16": 512
+            }
+          }
+        },
+        "class20_effect": {
+          "classification": "SOURCE_OWNED_PRESENTATION_COORDINATION",
+          "dispatch": "0x07f9a8",
+          "first_visible_frame_u16": 4032,
+          "last_visible_frame_u16": 4063,
+          "presentation": [
+            {
+              "animation_record": "0x0007fdac",
+              "assembly": "0x00080052",
+              "attack_selector_u8": 0,
+              "branch_s16": 0,
+              "hurt_selector_u8": 0,
+              "record_sha256": "203f00007b79e0dc0fa4b45f7d19f7066a345a9ac75a3f180372cf7370170ec8",
+              "timer_u16": 2
+            },
+            {
+              "animation_record": "0x0007fdbc",
+              "assembly": "0x00080060",
+              "attack_selector_u8": 0,
+              "branch_s16": 0,
+              "hurt_selector_u8": 0,
+              "record_sha256": "a42a2924f7dd67c94baf4d79b19d1a5dd19bd03a83e5a802ba0731061fc4f98d",
+              "timer_u16": 4
+            },
+            {
+              "animation_record": "0x0007fdcc",
+              "assembly": "0x00080078",
+              "attack_selector_u8": 0,
+              "branch_s16": 0,
+              "hurt_selector_u8": 0,
+              "record_sha256": "8c5a66a583525e8fff8b688b515f417a46264a0150fd01663bb3122249f9fa7f",
+              "timer_u16": 12
+            },
+            {
+              "animation_record": "0x0007fddc",
+              "assembly": "0x00080090",
+              "attack_selector_u8": 0,
+              "branch_s16": 0,
+              "hurt_selector_u8": 0,
+              "record_sha256": "e91a02647a131cf49d13a34b9eb0b65f28178d876590481325327ceb9bc0996b",
+              "timer_u16": 12
+            },
+            {
+              "animation_record": "0x0007fdec",
+              "assembly": "0x00080050",
+              "attack_selector_u8": 0,
+              "branch_s16": -32768,
+              "hurt_selector_u8": 0,
+              "record_sha256": "ce71c3a43a497cb2b24c4f59832a7df4f9fbdcebfe5d6407a1b29fc08124ca49",
+              "timer_u16": 8
+            }
+          ],
+          "release": "next state-0x0400 dispatch calls 0x0177f0 fixed-pool release",
+          "rng": {
+            "calls": [],
+            "consumption_order": []
+          },
+          "source_scheduler": "0x01ba62 record24 after player update",
+          "states": [
+            512,
+            1024
+          ],
+          "terminal_guard": "negative actor+0x24 animation event advances state 0x0200 to 0x0400",
+          "variant_u8": 4
+        },
+        "classification": "SOURCE_CLOSED_IMPLEMENTATION_FIELDS",
+        "current_state_collision": {
+          "attack_record": {
+            "address": "0x0011af66",
+            "damage_selector_u8": 12,
+            "hit_value_u8": 14,
+            "impact_variant_u8": 5,
+            "knockback_mode_s8": 3,
+            "record_sha256": "24f19a5d1e20d75818aec34dabcb904eefc5773106177d5b2fe54e0421c83599",
+            "x_center_s8": 48,
+            "x_half_u8": 48,
+            "y_center_s8": 19,
+            "y_half_u8": 19,
+            "z_center_s8": 0,
+            "z_half_u8": 8
+          },
+          "attacker": "player 0x00ff8380 action 0x0e00 attack selector 10",
+          "collision_identity_latch": {
+            "damage_writes_while_held_u8": 1,
+            "hold_guard": "player action 0x0e00 current attack selector remains 10",
+            "independent_from_melee_attack_active": true,
+            "reset_guard": "interaction ends or current attack selector leaves 10",
+            "set_on_source_frame_u16": 4033
+          },
+          "damage_s16": 31,
+          "damage_writer": "0x01d590",
+          "defender": "record12 0x00ff9dc0 class0x1f current state 0x0208:0x0c02",
+          "health_after_s16": 56,
+          "health_before_s16": 87,
+          "hurt_record": {
+            "address": "0x00130ad4",
+            "record_sha256": "230bf93a72b398c47ab3890da3959c834cb5b7b75e3209fdef11655063e64caf",
+            "x_center_s8": -12,
+            "x_half_u8": 29,
+            "y_center_s8": 42,
+            "y_half_u8": 39,
+            "z_center_s8": 0,
+            "z_half_u8": 8
+          },
+          "impact": {
+            "class_u8": "0x4e",
+            "first_visible_frame_u16": 4034,
+            "record_type_u8": 24,
+            "variant_u8": 5
+          },
+          "scheduler_order": "player action registration then current record12 collision after record24 dispatch",
+          "source_frame_u16": 4033,
+          "target_eligibility": {
+            "coffee_shop_first_eligible_target": {
+              "source_slot": "0x00ff9dc0",
+              "state_u16": 520,
+              "substate_u16": 3074
+            },
+            "guards": [
+              "active current collision registration",
+              "class_u8 == 0x1f",
+              "health_s16 >= 0",
+              "current hurt selector resolves to 0x00130ad4",
+              "attack/hurt boxes overlap"
+            ],
+            "pool": "record12",
+            "reaction_state_exclusion": false,
+            "scan_order": "ascending source-slot order"
+          },
+          "target_reaction": {
+            "audio": {
+              "command_u16": 61,
+              "main_frame_u16": 4034,
+              "owner_slot": "0x00ff9dc0"
+            },
+            "classification": "SOURCE_CLOSED_IMPLEMENTATION_FIELDS",
+            "collision_handoff": {
+              "preserved_animation_record": "0x0012da2c",
+              "preserved_animation_timer_u16": 3,
+              "state_u16": 514,
+              "substate_u16": 0,
+              "visible_frame_u16": 4034
+            },
+            "first_flight": {
+              "facing_rule": "the captured vector is the final signed motion; do not apply the shared HIT facing inversion a second time",
+              "state_u16": 514,
+              "substate_u16": 514,
+              "terminal_record": {
+                "animation_record": "0x0012dd88",
+                "assembly": "0x00130294",
+                "attack_selector_u8": 0,
+                "branch_s16": -32768,
+                "hurt_selector_u8": 2,
+                "record_sha256": "502c7d3f5baa0d2260733c0292a2e423c1e4e7c6c2e2650086b01be08461e2b6",
+                "timer_u16": 4095
+              },
+              "visible_frame_u16": 4051,
+              "x_acceleration_s32_16_16": 0,
+              "x_velocity_s32_16_16": -196608,
+              "y_acceleration_s32_16_16": -40960,
+              "y_velocity_s32_16_16": 327680
+            },
+            "reaction_entry": {
+              "collision_freeze_ticks_u8": 14,
+              "landing_hold_ticks_u8": 4,
+              "preserved_collision_selectors": {
+                "attack_selector_u8": 1,
+                "hurt_selector_u8": 1
+              },
+              "record": {
+                "animation_record": "0x0012dd78",
+                "assembly": "0x0013020c",
+                "attack_selector_u8": 0,
+                "branch_s16": 0,
+                "hurt_selector_u8": 14,
+                "record_sha256": "d8fd6e8da38297b3874ea3cdafee2cc48af44f62433b4280409eeea714d0a64b",
+                "timer_u16": 4
+              },
+              "state_u16": 514,
+              "substate_u16": 2,
+              "visible_frame_u16": 4035
+            },
+            "rng": {
+              "entry_calls": [],
+              "impact_call_seed_after_u16": 45057,
+              "impact_call_seed_before_u16": 36945
+            },
+            "shared_tail": "phases 0x0204/0x0206/0x0208/0x020a, bounce, RNG hold, terminal animation and normal return reuse the accepted class-0x1f source HIT program",
+            "shared_tail_overrides": {
+              "bounce": {
+                "record": {
+                  "animation_record": "0x0012dd9c",
+                  "assembly": "0x00130294",
+                  "attack_selector_u8": 0,
+                  "branch_s16": -32768,
+                  "hurt_selector_u8": 0,
+                  "record_sha256": "66ed9b2ed74be8a7c8314e23d3dd6aeab745daf8122a03f80f3d5f952e2ada6b",
+                  "timer_u16": 4095
+                },
+                "substate_u16": 518,
+                "visible_frame_u16": 4070
+              },
+              "landing": {
+                "record": {
+                  "animation_record": "0x0012ddb0",
+                  "assembly": "0x00130346",
+                  "attack_selector_u8": 0,
+                  "branch_s16": -32768,
+                  "hurt_selector_u8": 7,
+                  "record_sha256": "2125394d64526eb88fc9761d2740321fb0abd360e78e90348a26cc519ca5f4b5",
+                  "timer_u16": 4095
+                },
+                "same_dispatch_hold_decrement": true,
+                "substate_u16": 516,
+                "visible_frame_u16": 4067
+              },
+              "normal_return": {
+                "state_u16": 512,
+                "substate_u16": 0,
+                "visible_frame_u16": 4196
+              },
+              "rng_hold": {
+                "record": {
+                  "animation_record": "0x0012ddb0",
+                  "assembly": "0x00130346",
+                  "attack_selector_u8": 0,
+                  "branch_s16": -32768,
+                  "hurt_selector_u8": 7,
+                  "record_sha256": "2125394d64526eb88fc9761d2740321fb0abd360e78e90348a26cc519ca5f4b5",
+                  "timer_u16": 4095
+                },
+                "substate_u16": 520,
+                "visible_frame_u16": 4081
+              },
+              "selector_rule": "preserve hurt selector 1 and attack selector 1 through every shared-tail presentation bind",
+              "terminal": {
+                "records": [
+                  {
+                    "animation_record": "0x0012de38",
+                    "assembly": "0x00130346",
+                    "attack_selector_u8": 0,
+                    "branch_s16": 0,
+                    "hurt_selector_u8": 0,
+                    "record_sha256": "a1c42d3eb1976ca140583c6f4ad6165973b4a47812d06a680db7199c343cc8a8",
+                    "timer_u16": 3
+                  },
+                  {
+                    "animation_record": "0x0012de48",
+                    "assembly": "0x00130354",
+                    "attack_selector_u8": 0,
+                    "branch_s16": 0,
+                    "hurt_selector_u8": 0,
+                    "record_sha256": "3cd2e75b9a9ceb21ba20cc2abe47784958e36b10d22360bcc98109a1df689c2f",
+                    "timer_u16": 3
+                  },
+                  {
+                    "animation_record": "0x0012de58",
+                    "assembly": "0x00130346",
+                    "attack_selector_u8": 0,
+                    "branch_s16": 0,
+                    "hurt_selector_u8": 0,
+                    "record_sha256": "a1c42d3eb1976ca140583c6f4ad6165973b4a47812d06a680db7199c343cc8a8",
+                    "timer_u16": 3
+                  },
+                  {
+                    "animation_record": "0x0012de68",
+                    "assembly": "0x00130354",
+                    "attack_selector_u8": 0,
+                    "branch_s16": 0,
+                    "hurt_selector_u8": 0,
+                    "record_sha256": "3cd2e75b9a9ceb21ba20cc2abe47784958e36b10d22360bcc98109a1df689c2f",
+                    "timer_u16": 3
+                  },
+                  {
+                    "animation_record": "0x0012de78",
+                    "assembly": "0x00130362",
+                    "attack_selector_u8": 0,
+                    "branch_s16": 0,
+                    "hurt_selector_u8": 0,
+                    "record_sha256": "276d5aaa3e9c2e30fcca8c98f788b534bead2f263921d6fe89e70fa343f18a47",
+                    "timer_u16": 2
+                  },
+                  {
+                    "animation_record": "0x0012de88",
+                    "assembly": "0x00130370",
+                    "attack_selector_u8": 0,
+                    "branch_s16": 0,
+                    "hurt_selector_u8": 0,
+                    "record_sha256": "a5153db79180d4297a4465dc8bc1396a387f64b22cef29f1b7283baeafc21ee0",
+                    "timer_u16": 2
+                  },
+                  {
+                    "animation_record": "0x0012de98",
+                    "assembly": "0x001303a8",
+                    "attack_selector_u8": 0,
+                    "branch_s16": 0,
+                    "hurt_selector_u8": 0,
+                    "record_sha256": "3fe3261e0e3bdb059b7543f4739dcbbf66687ba392f9eaf0ecdbdd9c5706715f",
+                    "timer_u16": 2
+                  },
+                  {
+                    "animation_record": "0x0012dea8",
+                    "assembly": "0x0012fae8",
+                    "attack_selector_u8": 0,
+                    "branch_s16": 0,
+                    "hurt_selector_u8": 0,
+                    "record_sha256": "27f716fc2e2b258b6e5d63d3c0f0b2170d308f78661219d72c0e42a41de2228a",
+                    "timer_u16": 2
+                  },
+                  {
+                    "animation_record": "0x0012deb8",
+                    "assembly": "0x0012fb10",
+                    "attack_selector_u8": 0,
+                    "branch_s16": 0,
+                    "hurt_selector_u8": 0,
+                    "record_sha256": "60ffa111c3453e35e877f4b49f34f6358ba57765780d7fca7bffe7964fc0400e",
+                    "timer_u16": 2
+                  },
+                  {
+                    "animation_record": "0x0012dec8",
+                    "assembly": "0x0012fb38",
+                    "attack_selector_u8": 0,
+                    "branch_s16": 0,
+                    "hurt_selector_u8": 0,
+                    "record_sha256": "4386a429c3d145e9fde49054343d3de88403ce235d3ee5f0912b688d6fd76e59",
+                    "timer_u16": 2
+                  },
+                  {
+                    "animation_record": "0x0012ded8",
+                    "assembly": "0x0012f5de",
+                    "attack_selector_u8": 0,
+                    "branch_s16": -32768,
+                    "hurt_selector_u8": 0,
+                    "record_sha256": "f966dc8cdd949fdd356a1b4365f7660954e3f0207fc05387fce172ca50fefce3",
+                    "timer_u16": 8
+                  }
+                ],
+                "substate_u16": 522,
+                "visible_frame_u16": 4171
+              }
+            }
+          }
+        },
+        "entry": {
+          "allocation": {
+            "active_increment_u8": 1,
+            "class_u8": "0x20",
+            "facing": "copy player+0x0f:u8",
+            "failure_rule": "pool exhaustion does not change player gameplay state",
+            "pool": "record24",
+            "position": "copy player x/y/z then subtract one from child z",
+            "record_type_u8": 24,
+            "variant_u8": 4
+          },
+          "player_presentation": [
+            {
+              "animation_record": "0x0015f96c",
+              "assembly": "0x00161376",
+              "attack_selector_u8": 0,
+              "branch_s16": 0,
+              "hurt_selector_u8": 0,
+              "record_sha256": "9eba310749209b00a8eaf48390ca9f0d893b8b1b8baa9d68fd78cf84b2d0d590",
+              "timer_u16": 2
+            },
+            {
+              "animation_record": "0x0015f97c",
+              "assembly": "0x00161348",
+              "attack_selector_u8": 10,
+              "branch_s16": 0,
+              "hurt_selector_u8": 0,
+              "record_sha256": "3d0220cd432ab992aba4033fcd72271a1b11189fadf4990ea66674b399054a3b",
+              "timer_u16": 4
+            },
+            {
+              "animation_record": "0x0015f98c",
+              "assembly": "0x00161320",
+              "attack_selector_u8": 10,
+              "branch_s16": 0,
+              "hurt_selector_u8": 0,
+              "record_sha256": "bbe52796c6572fe703245a9ccb88dc9e6d9ec2b1d776709a2b528095eb30c551",
+              "timer_u16": 4
+            },
+            {
+              "animation_record": "0x0015f99c",
+              "assembly": "0x001612f8",
+              "attack_selector_u8": 0,
+              "branch_s16": 0,
+              "hurt_selector_u8": 0,
+              "record_sha256": "779e12a792d6e83bfa9c234f932b9c817f49f4b83dd95d8f323d0399f9f1aaba",
+              "timer_u16": 4
+            },
+            {
+              "animation_record": "0x0015f9ac",
+              "assembly": "0x001626a4",
+              "attack_selector_u8": 0,
+              "branch_s16": -32768,
+              "hurt_selector_u8": 0,
+              "record_sha256": "deba09746dcaaa0e35a3b8977ff1a54fadb161e1d23ec98156132cbc095cc02c",
+              "timer_u16": 8
+            }
+          ],
+          "routine": "0x01abfc..0x01ac48",
+          "selector_argument_u8": 16,
+          "writes": {
+            "action_u16": 3584,
+            "field81_u8": 0,
+            "field9d_u8": 0,
+            "outer_state_u16": 512
+          }
+        },
+        "fixed_frame_substitute_forbidden": true,
+        "mutation_controls": {
+          "class20_pool_failure_changes_gameplay_rejected": true,
+          "fixed_frame_completion_rejected": true,
+          "missing_early_or_duplicate_stage_progress_rejected": true,
+          "same_frame_edge_dispatch_rejected": true,
+          "wrong_guard_rejected": true,
+          "wrong_record_or_selector_rejected": true,
+          "wrong_scheduler_or_release_order_rejected": true,
+          "wrong_target_audio_owner_rejected": true,
+          "wrong_target_reaction_record_or_motion_rejected": true
+        },
+        "scheduler_order": [
+          "player HIT phase dispatch",
+          "record24 class-0x20 dispatch",
+          "current-state collision/damage passes"
+        ],
+        "source_guard": {
+          "coffee_shop_witness": {
+            "edge_frame_u16": 4030,
+            "visible_frame_u16": 4032,
+            "writer_frame_u16": 4031
+          },
+          "facing_guard": "player+0x4f:u8 == player+0x0f:u8",
+          "input_guard": "bit 5 already set in player+0x4f or a real new Button2 edge ((~player+0xef & player+0xee) & 0x20) != 0",
+          "route_guard": "A5+0x01e8:u16 != 0x000a",
+          "routine": "0x01abd0..0x01abfc"
+        }
+      },
       "natural_completion": {
         "entry": 4032,
         "last": 4059,

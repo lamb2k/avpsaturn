@@ -115,6 +115,7 @@ for label,mutate in [
 for label,mutate in [
     ('inner8-writer',lambda x:x['entry_transition'].__setitem__('writer_pc','0x0610ce')),
     ('inner8-timer',lambda x:x['entry_transition'].__setitem__('timer_u16',599)),
+    ('inner8-timeout-direction',lambda x:x['route_interaction']['timeout_return']['coffee_shop_control'].__setitem__('direction_after_u8',2)),
     ('inner8-movement-table',lambda x:x['movement']['tables'][0].__setitem__('table_index_u8',5)),
     ('inner8-motion-sign',lambda x:x['action_0x0e_motion']['phase_2_terminal'].__setitem__('y_acceleration_s32_16_16',38400)),
     ('inner8-fixed-frame',lambda x:x['type16_emission'].__setitem__('fixed_frame_spawn_forbidden',False)),

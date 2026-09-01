@@ -27575,7 +27575,7 @@
         "writes": 153166
       },
       "current_state_implementation_contract": {
-        "accepted_encounter_authority_sha256": "8e8472ff257fa007b8b79157996c31b393753029359e442111e562de49cc096a",
+        "accepted_encounter_authority_sha256": "1b26d353f4823c83d9eed0ede7dfba4aa05cadc7e4f288086da0162ead9d2958",
         "accepted_oracle09_sha256": "a3027c3ffcd19af2656c515e0dfc0e9c56086b1bf3dd029e854d74be372c847f",
         "actions": {
           "above_lane_0x0600": {
@@ -38164,7 +38164,7 @@
         },
         "current_state_player_collision": {
           "accepted_collision_sha256": "49ce678bee49d331a3b9e6cee97708b7644c5b0727de477ffc89671bf64bd78c",
-          "accepted_encounter_authority_sha256": "8e8472ff257fa007b8b79157996c31b393753029359e442111e562de49cc096a",
+          "accepted_encounter_authority_sha256": "1b26d353f4823c83d9eed0ede7dfba4aa05cadc7e4f288086da0162ead9d2958",
           "attacker": {
             "animation_record": "0x0012d8a0",
             "attack_record": "0x130b5c",
@@ -45485,6 +45485,9 @@
               "action_guard": "actor+0x06 high action byte == 0",
               "classification": "SOURCE_CLOSED_IMPLEMENTATION_FIELDS",
               "coffee_shop_control": {
+                "direction_after_u8": 8,
+                "direction_before_u8": 2,
+                "direction_writer_pc": "0x0610f0",
                 "preserved_animation_record": "0x0012e5f0",
                 "preserved_facing_u8": 1,
                 "preserved_x_fp_s32_16_16": "0x04530300",
@@ -45495,18 +45498,26 @@
                 "terminal_action_clear_frame_u16": 3880
               },
               "mutation_control": {
-                "expected_discriminating_effect": "slot 0x00ffa3c0 re-enters inner action 0x0400 instead of returning to outer 0x0200 at frame 3881",
-                "mutation": "do not decrement zero to signed 0xffff"
+                "expected_discriminating_effects": [
+                  "slot 0x00ffa3c0 re-enters inner action 0x0400 instead of returning to outer 0x0200 at frame 3881",
+                  "the later action-0x16 uses movement-table-8 direction 2 instead of source direction 8, diverging x/y at frame 3906"
+                ],
+                "mutations": [
+                  "do not decrement zero to signed 0xffff",
+                  "omit the 0x0610f0 direction reset"
+                ]
               },
               "route_guard": "s16(a5-0x65e4) != 0",
               "signed_underflow_guard": "s16(actor+0xa8) < 0",
               "source_entry": "0x0610f6",
               "source_exit_helper": "0x0610d4",
+              "source_exit_window_sha256": "6b09506d487a9af8c04d737045639bd17c60f20cfc96530015bfd1e31703c70a",
               "source_window_sha256": "e1e231c72ee8540740c632f54bcb2f960262dfd88f1b657fbce4be1d82b497cf",
               "timer_field": "actor+0xa8:u16",
               "timer_update": "predecrement one on every inner-state scheduler invocation, including zero to 0xffff",
               "writes": {
                 "action_substate_u16": 0,
+                "direction_u8": "((a5_u8 ^ 1) << 4) + 8",
                 "inner_timer_u16": 0,
                 "outer_state_u16": 512,
                 "special_latch_ad_u8": 0

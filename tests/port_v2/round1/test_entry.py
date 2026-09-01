@@ -9,7 +9,7 @@ from pathlib import Path
 
 ROOT = Path(__file__).resolve().parents[3]
 SPEC = ROOT / "data/spec02_round1_executable_contract.json"
-EXPECTED = "d83c6422e5e96df5e040d8158754f935f16639c1761554dd9895b6e76d15f879"
+EXPECTED = "bb9edbf2cfd4b664497cb2246f121f2dde5bd5767e77cc9bf6f2f6b8d5cb1465"
 assert hashlib.sha256(SPEC.read_bytes()).hexdigest() == EXPECTED
 assert json.loads(SPEC.read_text())["status"] == "ACCEPTED"
 source = (ROOT / "src/port_v2/gameplay/round1/round1.c").read_text()
@@ -104,12 +104,12 @@ assert scene_checkpoint_marker in test_source
 scene_checkpoint_body = test_source.replace(
     scene_checkpoint_marker,
     scene_checkpoint_marker +
-    "            if (source_frame == 5458u)\n"
+    "            if (source_frame == 5523u)\n"
     "                return 0;\n",
     1)
 scene_checkpoint_flags = {
     "--controller-edge-only", "--weapon-timing-only",
-    "--special-input-only",
+    "--special-input-only", "--hit-interaction-only", "--queue-only",
 }
 
 run(source, header, True,
@@ -133,7 +133,8 @@ subset_flags = {"--inner8-only", "--ko-only", "--registration-only",
                 "--controller-edge-only", "--player-hit-only",
                 "--weapon-timing-only", "--contextual-melee-only",
                 "--action0c-only", "--jump-only",
-                "--type16-terminal-only", "--special-input-only"}
+                "--type16-terminal-only", "--special-input-only",
+                "--hit-interaction-only"}
 if "--queue-only" in sys.argv or not subset_flags.intersection(sys.argv):
     run(source, header, False, "consume-before-direction-queue-shift",
         player_source.replace(queue_before, queue_after, 1))
@@ -203,6 +204,8 @@ locomotion_mutations = {
 controller_edge_mutations = {
     "camera_x = avsp_round1_recurring_spawn.camera_edge_uses_current_position ?\n        (unsigned short)runtime->camera_x_position :\n        (unsigned short)runtime->camera_x_previous;",
     "encounter->source_blocked_by_living_count = 1u;\n    }\n    else",
+    "runtime->entry.gate81f3 = 1u;\n        runtime->camera_x_upper =",
+    "if (!avsp_round1_step_coffee_clear_route(runtime))",
 }
 player_hit_mutations = {
     "runtime->player_hit_x_fp = runtime->player.source_x_fp;",
@@ -272,7 +275,34 @@ jump_mutations = {
     "            runtime->player_jump_x_velocity =\n"
     "                -runtime->player_jump_x_velocity;",
 }
+hit_interaction_mutations = {
+    "runtime->player_hit_interaction_pending = 1u;",
+    "effect->actor_class =\n            avsp_round1_player_hit_interaction.effect_class;",
+    "runtime->player_weapon_stage_progress_pending = 1u;",
+    "actor->source_projectile_reaction_pending = 4u;",
+    "actor->source_x_velocity = spec->launch_x_velocity;",
+    "runtime->class1f_audio_command = spec->audio_command;",
+    "avsp_round1_begin_player_weapon(runtime);\n"
+    "        runtime->player_weapon_dispatch_delay = 0u;",
+}
 for before, after in (
+    ("runtime->player_hit_interaction_pending = 1u;",
+     "runtime->player_hit_interaction_pending = 0u;"),
+    ("effect->actor_class =\n"
+     "            avsp_round1_player_hit_interaction.effect_class;",
+     "effect->actor_class = 0x21;"),
+    ("runtime->player_weapon_stage_progress_pending = 1u;",
+     "runtime->player_weapon_stage_progress_pending = 0u;"),
+    ("actor->source_projectile_reaction_pending = 4u;",
+     "actor->source_projectile_reaction_pending = 1u;"),
+    ("actor->source_x_velocity = spec->launch_x_velocity;",
+     "actor->source_x_velocity = 0L;"),
+    ("runtime->class1f_audio_command = spec->audio_command;",
+     "runtime->class1f_audio_command = 0u;"),
+    ("avsp_round1_begin_player_weapon(runtime);\n"
+     "        runtime->player_weapon_dispatch_delay = 0u;",
+     "avsp_round1_begin_player_weapon(runtime);\n"
+     "        runtime->player_weapon_dispatch_delay = 1u;"),
     ("runtime->player.source_target_low =\n"
      "            avsp_round1_player_contextual_melee.target_low;",
      "runtime->player.source_target_low = 0u;"),
@@ -554,6 +584,10 @@ for before, after in (
      "camera_x = avsp_round1_recurring_spawn.camera_edge_uses_current_position ?\n        (unsigned short)runtime->camera_x_previous :\n        (unsigned short)runtime->camera_x_position;"),
     ("encounter->source_blocked_by_living_count = 1u;\n    }\n    else",
      "encounter->source_blocked_by_living_count = 1u;\n        return 1;\n    }\n    else"),
+    ("runtime->entry.gate81f3 = 1u;\n        runtime->camera_x_upper =",
+     "runtime->route_state = avsp_round1_coffee_exit.route_withdrawal;\n        runtime->camera_x_upper ="),
+    ("if (!avsp_round1_step_coffee_clear_route(runtime))",
+     "if (0)"),
     ("if (avsp_round1_recurring_spawn.preserve_reused_presentation != 0u)",
      "if (0)"),
     ("avsp_round1_class1f_action_program.fall_initial_selector",
@@ -817,6 +851,9 @@ for before, after in (
     if ("--special-input-only" in sys.argv and
             before not in special_input_mutations):
         continue
+    if ("--hit-interaction-only" in sys.argv and
+            before not in hit_interaction_mutations):
+        continue
     if "--generated-walk-only" in sys.argv:
         continue
     assert before in source, before
@@ -876,6 +913,9 @@ if ("--controller-edge-only" in sys.argv or
         raise SystemExit(0)
 if "--player-hit-only" in sys.argv:
     print("REIMPLEMENT-13 Coffee Shop player-HIT program mutation lane: PASS (11 real mutations)")
+    raise SystemExit(0)
+if "--hit-interaction-only" in sys.argv:
+    print("REIMPLEMENT-13 HIT-interaction/Button1 handoff mutation lane: PASS (7 real mutations)")
     raise SystemExit(0)
 if ("--weapon-timing-only" in sys.argv or
         not subset_flags.intersection(sys.argv)):

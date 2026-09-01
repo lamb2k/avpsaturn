@@ -819,6 +819,21 @@ def build_report() -> dict[str, object]:
                                      if row["pc"] == "061152"]
     coffee_shop_lifecycle_writes = list(rows(
         COFFEE_SHOP_SCENE_A / "progression_lifecycle_writes.tsv"))
+    coffee_shop_controller = {int(row["frame"]): row for row in rows(
+        COFFEE_SHOP_SCENE_A / "progression_controller.tsv")}
+    coffee_shop_scene_frames = {int(row["frame"]): row for row in rows(
+        COFFEE_SHOP_SCENE_A / "coffee_shop_scene_frames.tsv")}
+    require(
+        [(frame,
+          int(coffee_shop_scene_frames[frame]["route_state"]),
+          int(coffee_shop_scene_frames[frame]["player_state"]),
+          int(coffee_shop_scene_frames[frame]
+              ["entry_controller_timer42"]))
+         for frame in (5451, 5452, 5453)] == [
+            (5451, 4, 0x0200, 1),
+            (5452, 4, 0x0200, 0),
+            (5453, 6, 0x0800, 0)],
+        "Coffee Shop clear-gate/route-dispatch chronology drift")
     coffee_shop_progress_rows = [row for row in coffee_shop_lifecycle_writes
                                  if row["pc"] == "061070"]
     coffee_shop_progress_frames = [
@@ -1662,6 +1677,54 @@ def build_report() -> dict[str, object]:
             "rng_calls": 0,
             "player_count_u8": 1,
             "progress_threshold_u16": 16,
+            "withdrawal_visibility": {
+                "scheduler_write_source_frame_u16": 5151,
+                "source_visible_frame_u16": 5152,
+                "source_visible_timer_u16": 300,
+                "first_decrement_visible_frame_u16": 5153,
+                "first_decrement_timer_u16": 299,
+                "route_state_during_transition_s16": 4,
+                "player_update_after_controller_same_source_frame": True,
+                "source_observations": [
+                    {"frame_u16": frame,
+                     "state_u16": int(coffee_shop_controller[frame]["state"]),
+                     "substate_u16": int(
+                         coffee_shop_controller[frame]["substate"]),
+                     "timer42_u16": int(
+                         coffee_shop_controller[frame]["timer42"]),
+                     "progress_u16": int(
+                         coffee_shop_controller[frame]["progress"])}
+                    for frame in (5150, 5151, 5152, 5153)
+                ],
+            },
+            "withdrawal_route_handoff": {
+                "controller_gate_writer": "0x028bba",
+                "gate_write_source_frame_u16": 5451,
+                "gate_visible_frame_u16": 5452,
+                "route_dispatcher": "0x00840a..0x008438",
+                "route_writer": "0x008418",
+                "route_write_source_frame_u16": 5452,
+                "route_visible_frame_u16": 5453,
+                "scheduler_order": [
+                    "global route dispatcher reads prior g81f3",
+                    "record-type-32 controller writes current g81f3",
+                    "player and fixed pools update",
+                ],
+                "same_invocation_gate_consumption": False,
+                "player_gameplay_update_after_gate_write_same_source_frame":
+                    True,
+                "source_observations": [
+                    {"frame_u16": frame,
+                     "route_state_s16": int(
+                         coffee_shop_scene_frames[frame]["route_state"]),
+                     "player_state_u16": int(
+                         coffee_shop_scene_frames[frame]["player_state"]),
+                     "timer42_u16": int(
+                         coffee_shop_scene_frames[frame]
+                             ["entry_controller_timer42"])}
+                    for frame in (5451, 5452, 5453)
+                ],
+            },
             "phases": [
                 {"substate_u16": 0x0200,
                  "routine": "0x028960..0x02898e",
@@ -2223,6 +2286,53 @@ def validate(report: dict[str, object]) -> None:
         [row["substate_u16"] for row in
          exit_program["controller_dispatch"]["phases"]] ==
             [0x0200, 0x0400, 0x0600] and
+        exit_program["controller_dispatch"]["withdrawal_visibility"] == {
+            "scheduler_write_source_frame_u16": 5151,
+            "source_visible_frame_u16": 5152,
+            "source_visible_timer_u16": 300,
+            "first_decrement_visible_frame_u16": 5153,
+            "first_decrement_timer_u16": 299,
+            "route_state_during_transition_s16": 4,
+            "player_update_after_controller_same_source_frame": True,
+            "source_observations": [
+                {"frame_u16": 5150, "state_u16": 0x0204,
+                 "substate_u16": 0x0600, "timer42_u16": 0xffff,
+                 "progress_u16": 19},
+                {"frame_u16": 5151, "state_u16": 0x0204,
+                 "substate_u16": 0x0600, "timer42_u16": 0xffff,
+                 "progress_u16": 20},
+                {"frame_u16": 5152, "state_u16": 0x0400,
+                 "substate_u16": 0, "timer42_u16": 300,
+                 "progress_u16": 20},
+                {"frame_u16": 5153, "state_u16": 0x0400,
+                 "substate_u16": 0, "timer42_u16": 299,
+                 "progress_u16": 20},
+            ],
+        } and
+        exit_program["controller_dispatch"]["withdrawal_route_handoff"] == {
+            "controller_gate_writer": "0x028bba",
+            "gate_write_source_frame_u16": 5451,
+            "gate_visible_frame_u16": 5452,
+            "route_dispatcher": "0x00840a..0x008438",
+            "route_writer": "0x008418",
+            "route_write_source_frame_u16": 5452,
+            "route_visible_frame_u16": 5453,
+            "scheduler_order": [
+                "global route dispatcher reads prior g81f3",
+                "record-type-32 controller writes current g81f3",
+                "player and fixed pools update",
+            ],
+            "same_invocation_gate_consumption": False,
+            "player_gameplay_update_after_gate_write_same_source_frame": True,
+            "source_observations": [
+                {"frame_u16": 5451, "route_state_s16": 4,
+                 "player_state_u16": 0x0200, "timer42_u16": 1},
+                {"frame_u16": 5452, "route_state_s16": 4,
+                 "player_state_u16": 0x0200, "timer42_u16": 0},
+                {"frame_u16": 5453, "route_state_s16": 6,
+                 "player_state_u16": 0x0800, "timer42_u16": 0},
+            ],
+        } and
         exit_program["controller_dispatch"]["withdrawal"]
             ["living_enemy_count_is_not_a_guard"] is True and
         [(edge["writer_pc"], edge["from_s16"], edge["to_s16"],
@@ -2381,6 +2491,17 @@ def mutation_self_test(report: dict[str, object]) -> None:
         ["controller_dispatch"]["withdrawal"] \
         ["living_enemy_count_is_not_a_guard"] = False
     mutations.append(wrong_exit_kill_gate)
+    wrong_exit_visibility = copy.deepcopy(report)
+    wrong_exit_visibility["first_segment_recurring_spawn"] \
+        ["exit_controller_program"]["controller_dispatch"] \
+        ["withdrawal_visibility"]["source_visible_frame_u16"] = 5151
+    mutations.append(wrong_exit_visibility)
+    wrong_exit_handoff = copy.deepcopy(report)
+    wrong_exit_handoff["first_segment_recurring_spawn"] \
+        ["exit_controller_program"]["controller_dispatch"] \
+        ["withdrawal_route_handoff"] \
+        ["same_invocation_gate_consumption"] = True
+    mutations.append(wrong_exit_handoff)
     for mutant in mutations:
         try:
             validate(mutant)

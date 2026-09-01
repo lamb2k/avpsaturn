@@ -1165,6 +1165,16 @@ def coffee_shop_scene_component_identities(op,program):
    'records':[row for row in stage_camera_order
               if row['address'] in addresses],
    'mutation_control':'using the post-player next-frame camera moves the threshold-736 actor one visible frame early'}
+ player_route=json.loads(PLAYER_ROUTE.read_text(encoding='ascii'))
+ class20=dict(player_route['interaction_action_and_interruption']
+              ['implementation_contract']['class20_effect'])
+ class20['semantic_role']='PLAYER_INTERACTION_PRESENTATION_COORDINATION'
+ class20['source_body']={
+  'first':'0x0007f9a8','last_exclusive':'0x0007fb52',
+  'sha256':hashlib.sha256(op[0x7f9a8:0x7fb52]).hexdigest()}
+ class20['spec_executable']=True
+ class20['retained_gameplay_authority']=False
+ implementation_contracts[(24,'0x20')]=class20
  components=[]
  for pair in sorted(SCENE_COMPONENT_DISPATCH):
   typ,cls=pair;mutant_path=SCENE_COMPONENT_SUPPRESS[pair]
@@ -1416,6 +1426,15 @@ def first_segment_dependencies(ss,ee,ww,rr,op,program):
         ('record20','ffb380','01d590','ff8380','11af76','0000','ffe7'),
         ('record20','ffb380','01d598','ff8380','11af76','ffe7','ffff')],
       'player-special multi-target write order drift')
+ later_class1f_multi=[r for r in scene_health
+                      if int(r['frame']) in (4394,4395) and
+                      r['target_pool']=='record12' and
+                      r['attack_record']=='11af76']
+ req([(int(r['frame']),r['target_slot'],r['pc'])
+      for r in later_class1f_multi]==[
+       (4394,'ff9c40','01d590'),(4394,'ff9c40','01d598'),
+       (4395,'ff9e80','01d590'),(4395,'ff9e80','01d598')],
+     'player-special class-0x1f traversal cadence drift')
  special_source={r['slot']:r for r in detail_scene_actors
                   if int(r['frame'])==2804 and r['slot'] in
                   {'ff8380','ffa240','ffb300','ffb380'}}
@@ -1554,6 +1573,13 @@ def first_segment_dependencies(ss,ee,ww,rr,op,program):
    'multi_target_rule':('one active player attack registration may damage '
        'every overlapping target in source pool order; the first contact '
        'must not consume the registration'),
+   'class1f_traversal_cadence':{
+    'max_damage_targets_per_frame_u8':1,
+    'registration_retained_after_contact':True,
+    'next_frame_resumes_after_ineligible_prior_targets':True,
+    'coffee_shop_witnesses':[
+     {'source_frame_u16':4394,'source_slot':'0x00ff9c40'},
+     {'source_frame_u16':4395,'source_slot':'0x00ff9e80'}]},
    'impact_allocation':{
     'entry':'0x01d116','allocator':'0x01d622','pool_allocator':'0x0177da',
     'record_type_u8':24,'class_u8':'0x4e','variant_u8':1,
@@ -2611,6 +2637,13 @@ def validate(r):
        'record-type-24 dispatch/release completes before collision allocation',
        'the source player attack registration traverses record-type-12 targets',
        'the same registration then traverses record-type-20 targets'] and
+      psc['class1f_traversal_cadence']=={
+       'max_damage_targets_per_frame_u8':1,
+       'registration_retained_after_contact':True,
+       'next_frame_resumes_after_ineligible_prior_targets':True,
+       'coffee_shop_witnesses':[
+        {'source_frame_u16':4394,'source_slot':'0x00ff9c40'},
+        {'source_frame_u16':4395,'source_slot':'0x00ff9e80'}]} and
       psc['impact_allocation']['variant_u8']==1 and
       psc['capture_identity']['byte_identical'] is True and
       len(psc['mutation_controls'])==7 and
@@ -2831,7 +2864,21 @@ def validate(r):
          0<x['suppression_control']['removed_lifetimes']<=x['lifetime_count'] and
          x['implementation_status']=='BLOCKED_MISSING_SPEC_FIELDS' and
          x['fixed_frame_substitute_forbidden'] is True
-         for x in scene_components['components'][2:]) and
+         for x in scene_components['components'][2:]
+         if not (x['type']==24 and x['class']=='0x20')) and
+     next(x for x in scene_components['components']
+          if x['type']==24 and x['class']=='0x20')['classification']==
+      'SOURCE_CLOSED_IMPLEMENTATION_FIELDS' and
+     next(x for x in scene_components['components']
+          if x['type']==24 and x['class']=='0x20')['implementation_status']==
+      'SPEC_EXECUTABLE' and
+     next(x for x in scene_components['components']
+          if x['type']==24 and x['class']=='0x20')['implementation_contract']
+      ['retained_gameplay_authority'] is False and
+     next(x for x in scene_components['components']
+          if x['type']==24 and x['class']=='0x20')['implementation_contract']
+      ['terminal_guard']==
+       'negative actor+0x24 animation event advances state 0x0200 to 0x0400' and
      all(x['classification']=='SOURCE_CLOSED_IMPLEMENTATION_FIELDS' and
          x['implementation_status']=='SPEC_EXECUTABLE' and
          x['semantic_role']!='UNKNOWN' and

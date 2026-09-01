@@ -105,6 +105,10 @@ int main(void)
              ++index)
             emit_projectile(source_frame,
                             &runtime.player_weapon_projectiles[index]);
+#if defined(AVSP_COFFEE_SCENE_RNG_TRACE) && AVSP_COFFEE_SCENE_RNG_TRACE
+        fprintf(stderr, "scene_rng frame=%u seed=%04x\n",
+                source_frame, runtime.rng_seed);
+#endif
         if (source_frame >= 2467u && source_frame <= 2501u)
         {
             const AvspRound1WeaponProjectileAllocation *parent =
@@ -124,6 +128,7 @@ int main(void)
         }
         if (source_frame == 2072u || source_frame == 2073u ||
             source_frame == 2510u || source_frame == 2511u ||
+            (source_frame >= 4088u && source_frame <= 4095u) ||
             (source_frame >= 2239u && source_frame <= 2244u) ||
             (source_frame >= 2749u && source_frame <= 2759u) ||
             (source_frame >= 2249u && source_frame <= 2294u) ||
@@ -154,6 +159,18 @@ int main(void)
                     retry_actor->animation_timer,
                     retry_actor->animation_branch, runtime.rng_seed);
         }
+        if (source_frame >= 4029u && source_frame <= 4033u)
+            fprintf(stderr,
+                    "hit_interaction_guard frame=%u input=%04x current=%04x previous=%04x edges=%04x action_facing=%d core_facing=%u source_facing=%u hit=%u/%u pending=%u active=%u\n",
+                    source_frame, input,
+                    runtime.player_action.current_mask,
+                    runtime.player_action.previous_mask,
+                    runtime.player_action.input_edges,
+                    runtime.player_action.facing, runtime.player.facing,
+                    runtime.player.source_facing_selector,
+                    runtime.player_hit_active, runtime.player_hit_phase,
+                    runtime.player_hit_interaction_pending,
+                    runtime.player_hit_interaction_active);
         if (source_frame >= 2918u && source_frame <= 2920u)
         {
             const AvspRound1ActorCore *recurring_actor =
