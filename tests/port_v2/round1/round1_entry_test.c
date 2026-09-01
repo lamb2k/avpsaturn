@@ -2295,6 +2295,7 @@ int main(void)
                 latched_retry_actor->source_style85 = 1u;
                 latched_retry_actor->source_b0 = 1u;
                 latched_retry_actor->source_motion_flags = 1u;
+                latched_retry_actor->source_transition_latch_ae = 1u;
                 latched_retry_actor->animation_record = 0x0012e7fcUL;
                 latched_retry_actor->assembly = 0x0012f8b8UL;
                 latched_retry_actor->animation_timer = 2u;
@@ -2311,11 +2312,12 @@ int main(void)
                     latched_retry_actor->facing != 0u ||
                     latched_retry_actor->source_a6 != 2u ||
                     latched_retry_actor->source_motion_flags != 1u ||
+                    latched_retry_actor->source_transition_latch_ae != 1u ||
                     latched_retry_actor->animation_record != 0x0012d5e4UL ||
                     latched_retry_actor->attack_selector != 0u)
                 {
                     fprintf(stderr,
-                        "action16 latched retry code=%u rng=%04x state=%04x/%04x timer=%u facing=%u a6=%u latch=%u attack=%u anim=%08lx failures=%lu\n",
+                        "action16 latched retry code=%u rng=%04x state=%04x/%04x timer=%u facing=%u a6=%u motion=%u latch=%u attack=%u anim=%08lx failures=%lu\n",
                         latched_retry_runtime.scheduler_failure_code,
                         latched_retry_runtime.rng_seed,
                         latched_retry_actor->state,
@@ -2324,6 +2326,7 @@ int main(void)
                         latched_retry_actor->facing,
                         latched_retry_actor->source_a6,
                         latched_retry_actor->source_motion_flags,
+                        latched_retry_actor->source_transition_latch_ae,
                         latched_retry_actor->attack_selector,
                         latched_retry_actor->animation_record,
                         latched_retry_runtime.failure_count);
@@ -4863,6 +4866,49 @@ int main(void)
                     scene_runtime.player_hit_interaction_active,
                     scene_runtime.player_hit_interaction_input_pending);
                 return 127;
+            }
+            if (source_frame == 3606u)
+            {
+                const AvspRound1ActorCore *reused_actor =
+                    &scene_runtime.pools[0].records[18];
+                if (!reused_actor->active ||
+                    reused_actor->source_slot != 0x00ffa300UL ||
+                    reused_actor->actor_class != 0x1f ||
+                    reused_actor->variant != 5u ||
+                    reused_actor->state != 0u ||
+                    reused_actor->substate != 0u ||
+                    reused_actor->source_x_fp != 0x04500000L ||
+                    reused_actor->source_y_fp != 0x01500000L ||
+                    reused_actor->z != 336 ||
+                    reused_actor->facing != 0u ||
+                    reused_actor->animation_record != 0x0012e7ccUL ||
+                    reused_actor->assembly != 0x0012f82cUL ||
+                    reused_actor->animation_timer != 2u ||
+                    reused_actor->animation_branch != 8 ||
+                    reused_actor->health != 87 ||
+                    reused_actor->hurt_selector != 2u ||
+                    reused_actor->attack_selector != 0u)
+                {
+                    fprintf(stderr,
+                        "Coffee Shop class01 fixed-slot reuse failed source=%u active=%u slot=%08lx class=%02x variant=%u state=%04x/%04x fp=%08lx/%08lx z=%d facing=%u anim=%08lx assembly=%08lx timer=%u branch=%d health=%d hurt=%u attack=%u\n",
+                        source_frame, reused_actor->active,
+                        reused_actor->source_slot,
+                        (unsigned int)(unsigned char)
+                            reused_actor->actor_class,
+                        reused_actor->variant, reused_actor->state,
+                        reused_actor->substate,
+                        reused_actor->source_x_fp,
+                        reused_actor->source_y_fp, reused_actor->z,
+                        reused_actor->facing,
+                        reused_actor->animation_record,
+                        reused_actor->assembly,
+                        reused_actor->animation_timer,
+                        reused_actor->animation_branch,
+                        reused_actor->health,
+                        reused_actor->hurt_selector,
+                        reused_actor->attack_selector);
+                    return 130;
+                }
             }
             if (phase_updates != 0u &&
                 scene_runtime.entry.dependencies_seeded)

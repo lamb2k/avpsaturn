@@ -110,6 +110,7 @@ scene_checkpoint_body = test_source.replace(
 scene_checkpoint_flags = {
     "--controller-edge-only", "--weapon-timing-only",
     "--special-input-only", "--hit-interaction-only", "--queue-only",
+    "--class1f-action16-only",
 }
 
 run(source, header, True,
@@ -134,7 +135,8 @@ subset_flags = {"--inner8-only", "--ko-only", "--registration-only",
                 "--weapon-timing-only", "--contextual-melee-only",
                 "--action0c-only", "--jump-only",
                 "--type16-terminal-only", "--special-input-only",
-                "--hit-interaction-only", "--class1f-state0-only"}
+                "--hit-interaction-only", "--class1f-state0-only",
+                "--class1f-action16-only"}
 if "--queue-only" in sys.argv or not subset_flags.intersection(sys.argv):
     run(source, header, False, "consume-before-direction-queue-shift",
         player_source.replace(queue_before, queue_after, 1))
@@ -289,6 +291,12 @@ class1f_state0_mutations = {
     "    if (runtime->entry.exit_started &&\n"
     "        (scene_gate_actor == 0 ||\n"
     "         (scene_gate_actor->animation_record & 0xffff0000UL) == 0UL))",
+}
+class1f_action16_mutations = {
+    "actor = avsp_round1_allocate_pool_actor_preserve_position_fraction(\n"
+    "        runtime, 0u);",
+    "            actor->health = health;",
+    "        actor->source_transition_latch_ae != 0u)",
 }
 for before, after in (
     ("    if (runtime->entry.exit_started &&\n"
@@ -870,6 +878,9 @@ for before, after in (
     if ("--class1f-state0-only" in sys.argv and
             before not in class1f_state0_mutations):
         continue
+    if ("--class1f-action16-only" in sys.argv and
+            before not in class1f_action16_mutations):
+        continue
     if "--generated-walk-only" in sys.argv:
         continue
     assert before in source, before
@@ -882,6 +893,10 @@ if "--inner8-only" in sys.argv:
     raise SystemExit(0)
 if "--class1f-state0-only" in sys.argv:
     print("REIMPLEMENT-13 class-0x1f state-0 mutation lane: PASS (1 real mutation)")
+    raise SystemExit(0)
+if "--class1f-action16-only" in sys.argv:
+    print("REIMPLEMENT-13 class-0x1f action-0x16/fixed-slot lifecycle "
+          "mutation lane: PASS (3 real mutations)")
     raise SystemExit(0)
 if "--ko-only" in sys.argv:
     print("REIMPLEMENT-13 class-0x1f projectile KO mutation lane: PASS (5 real mutations)")

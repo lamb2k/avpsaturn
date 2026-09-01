@@ -3659,3 +3659,27 @@ action `0x16`. Native omits the source actor's health, animation record/timer/
 branch and hurt selector. Continue P4 by closing the complete reusable
 class-0x1f action-0x16 program and slot lifecycle, then rerun focused mutation,
 Target and the whole-scene differential. Candidate promotion remains false.
+
+### P4 class-0x1f action-0x16 / fixed-slot lifecycle checkpoint (2026-09-01)
+
+The complete reusable action-`0x16` program and its fixed-slot allocation
+boundary are native. Reuse of source slot `0x00ffa300` at frame 3606 preserves
+the source X/Y fractional words, prior animation record/assembly/timer/branch,
+health and current collision selectors before the source initializer replaces
+only its owned fields. The action-`0x16` retry guard reads the accepted actor
+byte at `+0xae`; the diagnostic no longer substitutes the unrelated motion
+flags byte.
+
+The focused baseline and three real lifecycle mutations pass. A release
+LiveEncounter Target builds at 377,280 bytes, SHA-256
+`08fdcb6fc2c6bdf0c7da5e94b72d9a2194050b74bb5ce306bdcc219cb86402ba`,
+with BSS end `0x060b32d0`; the protected animation manifest is byte-unchanged.
+The action-`0x16` slot has no later divergence and the next attacker divergence
+moves to frame 5208.
+
+The strict whole-scene differential remains RED on the next independent owning
+program. At frame 2751 source retains player hurt selector 17 on the
+collision-write-visible frame while native clears it immediately; frame 2752
+then binds selector 0 with the HIT presentation record on both. Continue with
+the complete player HIT collision-write-to-next-update chronology. The prior
+visual three-attempt blocker and frozen candidate remain unchanged.

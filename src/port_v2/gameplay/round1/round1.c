@@ -249,6 +249,9 @@ avsp_round1_allocate_pool_actor_preserve_position_fraction(
     unsigned long assembly;
     unsigned short animation_timer;
     short animation_branch;
+    short health;
+    unsigned char hurt_selector;
+    unsigned char attack_selector;
     AvspRound1ActorCore *actor;
     if (runtime == 0 || pool_index >= AVSP_ROUND1_POOL_COUNT)
         return 0;
@@ -266,6 +269,9 @@ avsp_round1_allocate_pool_actor_preserve_position_fraction(
     assembly = pool->records[actor_index].assembly;
     animation_timer = pool->records[actor_index].animation_timer;
     animation_branch = pool->records[actor_index].animation_branch;
+    health = pool->records[actor_index].health;
+    hurt_selector = pool->records[actor_index].hurt_selector;
+    attack_selector = pool->records[actor_index].attack_selector;
     actor = avsp_round1_allocate_pool_actor(runtime, pool_index);
     if (actor != 0)
     {
@@ -277,6 +283,9 @@ avsp_round1_allocate_pool_actor_preserve_position_fraction(
             actor->assembly = assembly;
             actor->animation_timer = animation_timer;
             actor->animation_branch = animation_branch;
+            actor->health = health;
+            actor->hurt_selector = hurt_selector;
+            actor->attack_selector = attack_selector;
         }
     }
     return actor;
@@ -9039,7 +9048,8 @@ static int avsp_round1_spawn_class01_enemy(AvspRound1Runtime *runtime,
 {
     AvspRound1ActorCore *actor;
     ++runtime->class01_spawn_requests;
-    actor = avsp_round1_allocate_pool_actor(runtime, 0u);
+    actor = avsp_round1_allocate_pool_actor_preserve_position_fraction(
+        runtime, 0u);
     if (actor == 0)
     {
         ++runtime->class01_spawn_allocation_failures;
@@ -9055,6 +9065,13 @@ static int avsp_round1_spawn_class01_enemy(AvspRound1Runtime *runtime,
     actor->x = owner->x;
     actor->y = owner->y;
     actor->z = owner->z;
+    actor->source_x_fp = (long)(
+        ((unsigned long)(unsigned short)actor->x << 16) |
+        ((unsigned long)actor->source_x_fp & 0x0000ffffUL));
+    actor->source_y_fp = (long)(
+        ((unsigned long)(unsigned short)actor->y << 16) |
+        ((unsigned long)actor->source_y_fp & 0x0000ffffUL));
+    actor->source_z_fp = (long)actor->z * 65536L;
     ++runtime->first_encounter.source_living_count;
     ++runtime->class01_spawn_allocations;
     return 1;

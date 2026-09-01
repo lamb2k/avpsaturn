@@ -34,9 +34,15 @@ no emulator process remains.
 
 ## Exact next experiment
 
-The strict whole-scene census is RED at source frame 3606: slot `0x00ffa300`,
-record type 12 / class `0x1f`, action `0x16`; native lacks source health,
-animation record/timer/branch and hurt selector. Close the complete reusable
-action-0x16 program and slot lifecycle from SPEC-02, then run focused mutations,
-Target and the whole-scene differential. Keep the candidate frozen. Never
-commit captures, PNGs, ROMs, ISOs, dumps, or protected user files.
+The complete class-`0x1f` action-`0x16` and fixed-slot lifecycle is closed.
+Frame 3606 slot `0x00ffa300` now preserves source fixed-point residue,
+presentation, health and collision selectors; the actor+`0xae` latch owns the
+retry transition. Three mutations and Target pass; the slot has no later
+divergence. GAME.BIN is 377,280 bytes at `08fdcb6f...02ba`, BSS `0x060b32d0`.
+
+The strict scene now stops at the independent frame-2751 player HIT boundary:
+source retains hurt selector 17 on the collision-write-visible frame, native
+clears it immediately; frame 2752 naturally binds selector 0. Close that
+one-update chronology through the complete HIT program, focused mutations,
+Target and whole-scene differential. Keep the candidate frozen. Never commit
+captures, PNGs, ROMs, ISOs, dumps, or protected user files.

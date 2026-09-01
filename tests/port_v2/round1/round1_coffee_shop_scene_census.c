@@ -154,7 +154,8 @@ int main(void)
             fprintf(stderr,
                     "class1f_retry_checkpoint frame=%u state=%04x substate=%04x latch=%u a6=%u b0=%u timer=%u branch=%d rng=%04x\n",
                     source_frame, retry_actor->state,
-                    retry_actor->substate, retry_actor->source_motion_flags,
+                    retry_actor->substate,
+                    retry_actor->source_transition_latch_ae,
                     retry_actor->source_a6, retry_actor->source_b0,
                     retry_actor->animation_timer,
                     retry_actor->animation_branch, runtime.rng_seed);
