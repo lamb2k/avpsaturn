@@ -134,7 +134,7 @@ subset_flags = {"--inner8-only", "--ko-only", "--registration-only",
                 "--weapon-timing-only", "--contextual-melee-only",
                 "--action0c-only", "--jump-only",
                 "--type16-terminal-only", "--special-input-only",
-                "--hit-interaction-only"}
+                "--hit-interaction-only", "--class1f-state0-only"}
 if "--queue-only" in sys.argv or not subset_flags.intersection(sys.argv):
     run(source, header, False, "consume-before-direction-queue-shift",
         player_source.replace(queue_before, queue_after, 1))
@@ -285,7 +285,20 @@ hit_interaction_mutations = {
     "avsp_round1_begin_player_weapon(runtime);\n"
     "        runtime->player_weapon_dispatch_delay = 0u;",
 }
+class1f_state0_mutations = {
+    "    if (runtime->entry.exit_started &&\n"
+    "        (scene_gate_actor == 0 ||\n"
+    "         (scene_gate_actor->animation_record & 0xffff0000UL) == 0UL))",
+}
 for before, after in (
+    ("    if (runtime->entry.exit_started &&\n"
+     "        (scene_gate_actor == 0 ||\n"
+     "         (scene_gate_actor->animation_record & 0xffff0000UL) == 0UL))",
+     "    if (runtime->route_state == 0)\n"
+     "        return 0;\n"
+     "    if (runtime->entry.exit_started &&\n"
+     "        (scene_gate_actor == 0 ||\n"
+     "         (scene_gate_actor->animation_record & 0xffff0000UL) == 0UL))"),
     ("runtime->player_hit_interaction_pending = 1u;",
      "runtime->player_hit_interaction_pending = 0u;"),
     ("effect->actor_class =\n"
@@ -854,6 +867,9 @@ for before, after in (
     if ("--hit-interaction-only" in sys.argv and
             before not in hit_interaction_mutations):
         continue
+    if ("--class1f-state0-only" in sys.argv and
+            before not in class1f_state0_mutations):
+        continue
     if "--generated-walk-only" in sys.argv:
         continue
     assert before in source, before
@@ -863,6 +879,9 @@ for before, after in (
                              else None))
 if "--inner8-only" in sys.argv:
     print("REIMPLEMENT-13 class-0x1f inner-state mutation lane: PASS (15 real mutations)")
+    raise SystemExit(0)
+if "--class1f-state0-only" in sys.argv:
+    print("REIMPLEMENT-13 class-0x1f state-0 mutation lane: PASS (1 real mutation)")
     raise SystemExit(0)
 if "--ko-only" in sys.argv:
     print("REIMPLEMENT-13 class-0x1f projectile KO mutation lane: PASS (5 real mutations)")

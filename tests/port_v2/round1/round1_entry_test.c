@@ -4899,6 +4899,41 @@ int main(void)
                         scene_runtime.rng_seed);
                     return 94;
                 }
+                if (source_frame == 5523u)
+                {
+                    const AvspRound1ActorCore *interrupted_actor = 0;
+                    for (actor_index = 0u;
+                         actor_index < scene_runtime.pools[0].capacity;
+                         ++actor_index)
+                    {
+                        const AvspRound1ActorCore *candidate =
+                            &scene_runtime.pools[0].records[actor_index];
+                        if (candidate->source_slot == 0x00ff9dc0UL)
+                        {
+                            interrupted_actor = candidate;
+                            break;
+                        }
+                    }
+                    if (scene_runtime.route_state != 0 ||
+                        interrupted_actor == 0 ||
+                        interrupted_actor->state != 0x020au)
+                    {
+                        fprintf(stderr,
+                            "Coffee Shop class1f state-0 interruption failed source=%u route=%d active=%u state=%04x/%04x anim=%08lx facing=%u\n",
+                            source_frame, scene_runtime.route_state,
+                            interrupted_actor != 0 ?
+                                interrupted_actor->active : 0u,
+                            interrupted_actor != 0 ?
+                                interrupted_actor->state : 0u,
+                            interrupted_actor != 0 ?
+                                interrupted_actor->substate : 0u,
+                            interrupted_actor != 0 ?
+                                interrupted_actor->animation_record : 0UL,
+                            interrupted_actor != 0 ?
+                                interrupted_actor->facing : 0u);
+                        return 126;
+                    }
+                }
                 for (actor_index = 0u;
                      actor_index < scene_runtime.pools[0].capacity;
                      ++actor_index)

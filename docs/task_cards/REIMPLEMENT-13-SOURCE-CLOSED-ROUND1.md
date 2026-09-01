@@ -3612,3 +3612,18 @@ frame-574 freeze. Evidence is
 
 Continue P4 at frame 5523 and close every Coffee-Shop-reachable branch of the
 complete owning class-`0x1f` state-0 action program.
+
+### P4 class-0x1f state-0 checkpoint in progress (2026-09-01)
+
+The source fixed-slot gate at `0xff9a1c` replaces the incorrect native
+`route_state != 0` shortcut. Frame 5523 now enters outer state `0x020a` for
+slot `0xff9dc0`; the complete reachable action-0/action-2 interruption tail is
+native. The focused source-gate mutation passes and LiveEncounter Target builds
+(`GAME.BIN` 387,648 bytes, SHA-256 `645f2c5a44f2a85756ffda095def535a544f2b02caeeda65b3948915967e0c70`).
+
+The body remains unaccepted after the three-attempt cap: the full host sweep
+exposed two pre-existing HIT-interaction mutations that normalize only in the
+complete-scene harness (`player_weapon_stage_progress_pending` and reaction
+launch velocity). Preserve the gameplay body; repair those causal witnesses,
+then run the pinned-emulator burst and whole-scene census. Candidate promotion
+remains false.

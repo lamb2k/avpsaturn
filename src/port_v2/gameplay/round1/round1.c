@@ -52,6 +52,9 @@ static void avsp_round1_player_weapon_target(
     unsigned char *angle);
 static int avsp_round1_bind_class1f_action_selector(
     AvspRound1ActorCore *actor, unsigned char selector);
+static AvspRound1ActorCore *avsp_round1_find_pool_source_actor(
+    AvspRound1Runtime *runtime, unsigned int pool_index,
+    unsigned short source_slot);
 static int avsp_round1_step_class1f_action_animation(
     AvspRound1Runtime *runtime, AvspRound1ActorCore *actor,
     int apply_movement);
@@ -2566,9 +2569,29 @@ static void avsp_round1_class1f_derive_direction(AvspRound1ActorCore *actor)
 static int avsp_round1_step_class1f_action_zero(
     AvspRound1Runtime *runtime, AvspRound1ActorCore *actor)
 {
+    AvspRound1ActorCore *scene_gate_actor;
     int selector;
-    if (runtime->route_state == 0)
-        return 0;
+    scene_gate_actor = avsp_round1_find_pool_source_actor(
+        runtime, 0u, 0x9a00u);
+    if (runtime->entry.exit_started &&
+        (scene_gate_actor == 0 ||
+         (scene_gate_actor->animation_record & 0xffff0000UL) == 0UL))
+    {
+        if (actor->source_player_collision_latched != 0u)
+            return 1;
+        actor->state = (unsigned short)((actor->state & 0xff00u) | 0x000au);
+        actor->substate = 0u;
+        actor->source_action = 0u;
+        if (actor->facing != 0u)
+            return avsp_round1_bind_class1f_action_selector(actor,
+                actor->source_style85 != 0u ? 1u : 0u);
+        actor->substate = 0x0200u;
+        actor->source_action = actor->substate;
+        actor->facing ^= 1u;
+        return avsp_round1_bind_class1f_action_selector(actor,
+            avsp_round1_class1f_action_program.turn_selectors[
+                actor->source_style85 ? 1u : 0u]);
+    }
     if (avsp_round1_class1f_player_near(runtime, actor))
         return avsp_round1_class1f_enter_near_action4(
             actor, runtime->player_action.x);
@@ -4349,6 +4372,21 @@ static int avsp_round1_step_class1f_source_action(
     avsp_round1_class1f_inner8_update_band(runtime, actor);
     if (actor->state == 0x0208u)
         return avsp_round1_step_class1f_inner8(runtime, actor);
+    if (actor->state == 0x020au)
+    {
+        action = (unsigned char)(actor->substate >> 8);
+        if (action == 0u)
+            return avsp_round1_step_class1f_action_animation(
+                runtime, actor, 0);
+        if (action == 2u)
+        {
+            if (actor->animation_branch < 0)
+                return avsp_round1_step_class1f_action_zero(runtime, actor);
+            return avsp_round1_step_class1f_action_animation(
+                runtime, actor, 0);
+        }
+        return 0;
+    }
     if (actor->state != 0x0200u)
         return 0;
     action = (unsigned char)(actor->substate >> 8);
