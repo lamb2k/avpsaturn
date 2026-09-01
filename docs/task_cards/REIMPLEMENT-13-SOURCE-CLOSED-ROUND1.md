@@ -2397,3 +2397,19 @@ route-wide, and presentation controls remain discriminating. No authority event
 is orphaned. Evidence artifact SHA-256 is
 `8d7aba5b517d9281c3511eb3c48423a68513f6d282872f17b6003801d7dd2dc2`.
 Continue P2 at source frame 11477 through the next source boundary.
+
+### Overnight census segment 11477..11541 checkpoint (2026-08-31)
+
+The third warehouse-stalker entry cluster is census-closed as one 65-frame
+source-owned boundary. Its paired semantic SHA-256 is
+`423e70ebb77bdd6f1f95aa67aae69b51b6bbfb7001a8fc8f945c37f2e9ecd921`.
+Predator identity remains exact. Seven lifetimes cover player, two class
+`0x01/12` enemies, class `0x06/12`, navigation, and two `0x10/24` effects.
+The effects contribute two spawn edges and one despawn; two HIT/KO transitions
+and four owned audio transactions occur.
+
+All 19 visual signatures are source-closed presentation dependencies with no
+progression ownership. Enemy, auxiliary, navigation, and route-wide controls
+remain discriminating. There are zero orphan authority events. Evidence SHA is
+`9fd0986fc835bba44299df599342e1ef6e19cc1fc14b59e0a613960c1c64cae3`.
+Continue P2 at frame 11542 through `round1-warehouse-stalker-3`.

@@ -62,6 +62,11 @@ PROFILES = {
         "id": "round1-chrysalis-battle",
         "output": "oracle10_round1_census_extension_9976_11476.json",
     },
+    "stalker3_interwave": {
+        "first": 11477, "last": 11541,
+        "id": "round1-warehouse-stalker-three-entry-cluster",
+        "output": "oracle10_round1_census_extension_11477_11541.json",
+    },
 }
 WORKRAM_BASE = 0xFF0000
 PLAYER = 0xFF8380
