@@ -3442,7 +3442,13 @@ The attempted full-route tile-union measurement correctly refused its known
 over-budget archive; the current scene-owned street scope was regenerated and
 no carve, asset or memory-plan change was made. This SPEC-only body changes no
 runtime semantics, does not promote the candidate and does not trigger WGC.
-Commit-bound paired cold-emulator evidence remains before closure.
+Two commit-bound cold debug-rig Coffee Shop runs pass byte-identical 575-sample
+semantic ledgers with five real mutations rejected and zero fallback/failure
+at semantic SHA-256
+`1a6a8c39e83ae29ed1ab2c00e2ce735a281445e4b31bb89b7402fec2767f2f59`
+and normalized ISO SHA-256
+`615cd156b2bbe013213be4da7a9dbca426ffffb57edc916b6d8ce3b312efa848`.
+Settings were restored to VideoCore 4 / SoundCore 1.
 
 After the paired evidence is recorded, continue P3 with the first-demand
 route-audio owner family at source frame 6199.

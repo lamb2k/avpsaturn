@@ -38,11 +38,10 @@ Enemy audio is SPEC-executable: 83 groups, 14 commands, 182 exact contexts,
 programs. Artifact SHA is `5d4fff53...37ae`; fixture `8aadcc83...3bca`;
 contract `12c61b10...7ea5`. Focused 19 and aggregate 180 mutations reject.
 Fast/Oracle reach only frame-3782 RED. Target passes; GAME.BIN is
-`0e6fc6cb...cc4b`, archive unchanged. Paired commit-bound emulator is pending.
+`0e6fc6cb...cc4b`, archive unchanged. Paired semantics are `1a6a8c39...2f59`
+and normalized ISO is `615cd156...a848`; settings are restored 4/1.
 ## Exact next sequence
-Commit/push enemy audio with explicit paths, verify remote, run its two cold
-debug-rig captures at Video1/Sound0, restore 4/1, and record/push the result.
-Then close route-audio at first demand source frame 6199 as one reusable owner
+Close route-audio at first demand source frame 6199 as one reusable owner
 family. Bind every reachable caller/guard, command/arguments,
 shared-dispatch/handler transaction, state effects and audio/load/RNG
 ownership from retained evidence, regenerate once, and run the full ceremony.
