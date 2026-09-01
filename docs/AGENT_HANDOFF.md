@@ -34,15 +34,16 @@ inspection. Settings were restored to VideoCore 4 / SoundCore 1. Evidence is
 ## Exact next sequence
 P2 is closed through stable Round 2 seam frame 15193; closure SHA is
 `b5c72089...f94b3`, all authority/table/capacity gates pass, and Round 2 gameplay
-was not censused. All nine P3 actor programs and first-demand route writer
-`0x00c200` are whole-routine SPEC-executable. Artifact `e785f87e...f58c5`
-closes the exact g8236/g81af bitwise guard, 12 decoded operations, eight global
-field profiles, six ordered route/clear/bound writes, helper order
-`0x00c7ae->0x00c784`, zero owned RNG and tail `0x008438`, against both retained
-route ledgers. Focused 11 and SPEC 180 mutations pass; Fast reaches the accepted
-P4 frame-3782 RED without a new failure. Release/live-encounter Target remains
-`aa999046...0a1`, the pinned 575-sample debug-rig scene remains
-`3bb36edb...611de`, and source 5566 code 11 remains the expected census RED.
-Continue P3 with route writer `0x008546` whole program
-(`0x008536..0x008566`, frame-6199 guard), then remaining route/audio/load
-families in demand order. Never commit captures, PNGs, ROMs, ISOs, or dumps.
+was not censused. All nine P3 actor programs and route writers `0x00c200` and
+`0x008546` are SPEC-executable. Artifact `43004b5d...792b` closes the aligned
+`0x008520..0x00855e` route-zero program: 16 operations, 11 global profiles,
+exact `g81af/g81d4` and three-player-presence guard, six ordered writes, two
+source occurrences, zero RNG, and the causal `0xff00` command transaction.
+Focused 12 and SPEC 180 mutations pass. A stale provenance hash in the three
+type-12 fixtures was reconciled to accepted enemy Oracle `ce140c9c...5d52`;
+their programs and witnesses are unchanged. Fast and Target pass; paired cold
+Coffee Shop ledgers are identical at `3bb36edb...611de`. Source frame 5566 code
+11 remains the expected P4 census RED. Continue P3 with failure/continue writer
+`0x008bb2` whole program (`0x008ba2..0x008bd2`, visible frames 6200/12799),
+then remaining route/audio/load families in demand order. Never commit
+captures, PNGs, ROMs, ISOs, or dumps.

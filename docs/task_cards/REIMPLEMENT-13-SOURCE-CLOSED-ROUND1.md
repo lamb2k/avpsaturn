@@ -2970,3 +2970,49 @@ no runtime identity and triggers neither paired cold Emulator nor WGC.
 Continue P3 with next-demand route writer `0x008546` as one whole program over
 `0x008536..0x008566`, including its frame-6199 guard and every Round 1-reachable
 branch.
+
+### P3 route writer 0x008546 whole-program checkpoint (2026-09-01)
+
+The route-zero/failure boundary is SPEC-executable as the aligned source
+program `0x008520..0x00855e`. The accepted writer-centered evidence window
+`0x008536..0x008566` begins inside the extension word of the OR instruction at
+`0x008534`; decoding from that unaligned address is explicitly rejected. The
+aligned body closes 16 operations, 11 exact a5-global profiles and the one
+source-owned external transfer.
+
+The exact guard is `u8(g81af)==0 && u8(g81d4)==0 &&
+(u8(g8380)|u8(g8480)|u8(g8580))==0`. Each failed predicate returns without an
+owned route write, latch write or audio enqueue. The true path writes route
+mode 6, clears route state/substate/timer/aux, writes `g90e8=1`, then calls
+shared wrapper `0x001972`. Accepted global-audio evidence binds that caller to
+command `0xff00`, arguments `d1=0x0000ff00,d2=0,d3=0`, and the null-table
+timing handler transaction; its semantic sound name remains UNKNOWN. No RNG
+is consumed and fixed-frame authority is forbidden.
+
+Both retained route ledgers bind ten identical route writes across source
+frames 6198 and 12797 plus eight aligned samples. Artifact SHA-256 is
+`43004b5d93e191f07e7f0275c021041ddce87fc644f572ef612a15b8f40d792b`;
+instruction-semantics SHA-256 is
+`a1c69d5cbacf87f7858b5892d8b6aa0562185331df2d72da2031e180fba40482`.
+Twelve focused and all 180 SPEC mutations reject.
+
+The full lane exposed three stale provenance-only hashes created when the
+accepted enemy Oracle was corrected earlier. Class `0x00/12`, `0x01/12` and
+`0x06/12` fixtures now bind accepted Oracle SHA-256
+`ce140c9c7e981b6aab0fa0fe103f49beaf79b9092a2785aec226a69ad93d5d52`;
+structural comparison proves that is the sole field changed in each fixture.
+No Oracle evidence, decoded instruction, witness or gameplay contract changed.
+
+Fast passes. Release/live-encounter Target remains byte-identical: GAME.BIN is
+373,840 bytes at `aa99904645fa584952ccba84e4fb28d970dabc4ae6e6e593b401f9e3323910a1`,
+BSS ends at `0x060b2560`, and the cart archive remains
+`ccf8795a147daf337c1f72364c81f05fc2cfd255d8d21b40a56c74c97f8d15bd`.
+Two cold debug-rig Coffee Shop runs pass identical 575-sample source ledgers at
+normalized ISO `3bb36edbd29c0a07867826f7d1ac99e96d84849232a05b3bdea43d5d84a611de`.
+Settings were restored to VideoCore 4 / SoundCore 1. The complete scene census
+remains expected RED at source frame 5566 code 11; this SPEC-only body does not
+promote the runtime candidate or trigger WGC.
+
+Continue P3 with failure/continue writer `0x008bb2` as one whole program over
+accepted source window `0x008ba2..0x008bd2`, including both occurrences visible
+at source frames 6200 and 12799 and every Round 1-reachable branch.
