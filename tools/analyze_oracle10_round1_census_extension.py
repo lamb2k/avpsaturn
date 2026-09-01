@@ -37,6 +37,11 @@ PROFILES = {
         "id": "round1-warehouse-stalker-interwave-presentation-cluster",
         "output": "oracle10_round1_census_extension_7439_7503.json",
     },
+    "warehouse_stalker_2": {
+        "first": 7504, "last": 9004,
+        "id": "round1-warehouse-stalker-second-gameplay-run",
+        "output": "oracle10_round1_census_extension_7504_9004.json",
+    },
 }
 WORKRAM_BASE = 0xFF0000
 PLAYER = 0xFF8380

@@ -2310,3 +2310,22 @@ there are zero unowned actors, lifecycle edges, route/camera, audio, load,
 release, or identity events. Evidence SHA-256 is
 `adb7f0caf3cf538826f8210f1e322b88de5b501000ae995356cd83c0a94f405a`.
 Continue P2 at source frame 7504 through `round1-warehouse-stalker-2`.
+
+### Overnight census segment 7504..9004 checkpoint (2026-08-31)
+
+The complete second warehouse-stalker gameplay run is census-closed. Its two
+independent 1,501-frame semantic projections match at SHA-256
+`976ae53a62b2edc0ab7cb61572e4c01f2c8853b8177ab614bd840c849ced0221`.
+Predator identity remains exact on every active frame. Twenty-eight overlapping
+lifetimes cover seven owned class/type pairs: player `0x00/0`, enemy
+`0x00/12` and `0x06/12`, navigation `0x07/20`, and auxiliary
+`0x10/24`, `0x49/24`, and `0x4e/24`.
+
+The segment binds 25 spawn edges, 23 despawn edges, 60 HIT/KO transitions, and
+135 logical audio-handler transactions across 27 command identities. It has no
+route edge or load boundary and remains within the source-owned camera run.
+Enemy, auxiliary, navigation, route-wide, and presentation-dependency controls
+remain discriminating. No actor, lifecycle, route/camera, audio, load, release,
+or identity event is orphaned. Evidence artifact SHA-256 is
+`b6bb711eeca20571b06c0cde107960bff46dc475e902708f0f58a0adab563eee`.
+Continue P2 at frame 9005 through the next source boundary in scene order.
