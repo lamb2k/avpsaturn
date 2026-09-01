@@ -3523,8 +3523,14 @@ release GAME.BIN is 373,840 bytes at SHA-256
 and the cart archive remains
 `ccf8795a147daf337c1f72364c81f05fc2cfd255d8d21b40a56c74c97f8d15bd`.
 This SPEC-only body changes no runtime semantics, does not promote the
-candidate and does not trigger WGC. Commit-bound paired cold Emulator evidence
-is required before the P3 phase checkpoint is complete.
+candidate and does not trigger WGC. Two commit-bound cold debug-rig Coffee Shop
+runs pass byte-identical 575-sample semantic ledgers with five real mutations
+rejected and zero fallback/failure at semantic SHA-256
+`1a6a8c39e83ae29ed1ab2c00e2ce735a281445e4b31bb89b7402fec2767f2f59`
+and normalized ISO SHA-256
+`728a2a096fee538ecd5c82766d1bf089e430619544031e435ef0dfa9f3020c9d`.
+Settings were restored to VideoCore 4 / SoundCore 1. P3 is complete for every
+P2-discovered reusable actor, route and audio-owner family.
 
-After the paired evidence is recorded, begin P4 with the preserved source
-frame-3782 stage-progress discrepancy and close its complete owning program.
+Begin P4 with the preserved source frame-3782 stage-progress discrepancy and
+close its complete owning program.

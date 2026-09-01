@@ -38,10 +38,11 @@ origins, pseudo-owner type/class 00/00 and four caller programs. Artifact is
 `465c4bf0...c677`; fixture `509b58de...53bb`; contract `d83c6422...f879`;
 focused 19 and aggregate 180 mutations reject. Fast/Oracle reach only
 frame-3782 RED. Target passes; GAME.BIN is `a1c8428d...8e35`, archive unchanged.
-Commit-bound paired Emulator evidence is pending.
+Paired semantics are `1a6a8c39...2f59`; normalized ISO is `728a2a09...0c9d`;
+settings are restored 4/1. All P2-discovered P3 families are now complete.
 ## Exact next sequence
-Commit encounter audio and run its two cold debug-rig captures plus mutations.
-After recording and checkpointing them, begin P4 at the preserved source-frame
-3782 stage-progress discrepancy and close its complete owning program. Keep the
-candidate frozen and Coffee Shop RED until its zero-gap gate passes.
+Begin P4 at the preserved source-frame 3782 stage-progress discrepancy. Use it
+only to identify the complete owning source program, implement every reachable
+branch from SPEC-02, and run focused differential plus MCP burst visual gate.
+Keep the candidate frozen and Coffee Shop RED until its zero-gap gate passes.
 Never commit captures, PNGs, ROMs, ISOs, dumps, or protected user files.
