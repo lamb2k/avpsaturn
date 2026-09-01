@@ -1,18 +1,46 @@
 [CmdletBinding()]
-param()
+param(
+    [ValidateSet('DebugRigMcp', 'Aug10')]
+    [string]$Package = 'DebugRigMcp'
+)
 
 $ErrorActionPreference = 'Stop'
-$packageName = 'yabasanshiro-1.20.37-2986eb'
-$downloadUrl = 'https://d1t36rsydvwkyk.cloudfront.net/yabasanshiro-1.20.37-2986eb.zip'
-$expectedSha256 = 'C34FF6766633F319BDB993481E4B82C9297D4E2A1FF1FDA73A3CFF4D380C2F5C'
+$packages = @{
+    DebugRigMcp = @{
+        Name = 'yabasanshiro-1.20.37-2986eb-debug-rig-mcp-d7767591'
+        DownloadUrl = $null
+        ArchiveSha256 = '6F157F15DA4D01CCA9EF044D32352B8E6D3CF6B71A44AD3303AAEB9939015864'
+        ExeSha256 = 'D77675912421A7435D02D844625A6EF68BA0E55EF17C9845F08651EB98F54B45'
+        Identity = 'owner-built debug rig with framebuffer_screenshot/framebuffer_burst'
+    }
+    Aug10 = @{
+        Name = 'yabasanshiro-1.20.37-2986eb'
+        DownloadUrl = 'https://d1t36rsydvwkyk.cloudfront.net/yabasanshiro-1.20.37-2986eb.zip'
+        ArchiveSha256 = 'C34FF6766633F319BDB993481E4B82C9297D4E2A1FF1FDA73A3CFF4D380C2F5C'
+        ExeSha256 = '016112708FC77EC53B8A36C4EF52E300A78B3FB079E815F60B1A51FA1661999C'
+        Identity = 'Aug-10 clean package pin'
+    }
+}
+$selected = $packages[$Package]
+$packageName = $selected.Name
 $emulatorRoot = Join-Path $PSScriptRoot '.deps\emulators'
 $archivePath = Join-Path $emulatorRoot ($packageName + '.zip')
 $installRoot = Join-Path $emulatorRoot $packageName
 
-$installedExe = Get-ChildItem -LiteralPath $installRoot -Filter 'yabasanshiro.exe' `
-    -File -Recurse -ErrorAction SilentlyContinue | Select-Object -First 1
+function Confirm-EmulatorExe([IO.FileInfo]$Executable) {
+    $actualExeSha256 = (Get-FileHash -Algorithm SHA256 `
+        -LiteralPath $Executable.FullName).Hash
+    if ($actualExeSha256 -ne $selected.ExeSha256) {
+        throw "Yaba Sanshiro EXE hash mismatch. Expected $($selected.ExeSha256) but found $actualExeSha256."
+    }
+    Write-Host "Yaba Sanshiro $($selected.Identity) is ready at $($Executable.FullName)"
+}
+
+$installedExe = Get-ChildItem -LiteralPath $installRoot `
+    -Filter 'yabasanshiro.exe' -File -Recurse -ErrorAction SilentlyContinue |
+    Select-Object -First 1
 if ($installedExe) {
-    Write-Host "Yaba Sanshiro is ready at $($installedExe.FullName)"
+    Confirm-EmulatorExe $installedExe
     return
 }
 
@@ -21,19 +49,22 @@ if (-not (Test-Path -LiteralPath $emulatorRoot)) {
 }
 
 if (-not (Test-Path -LiteralPath $archivePath)) {
-    Invoke-WebRequest -Uri $downloadUrl -OutFile $archivePath
+    if (-not $selected.DownloadUrl) {
+        throw "The owner-built debug-rig archive is missing at $archivePath. Repackage the smoke-tested owner EXE under docs/EMULATOR_MCP_CAPTURE.md."
+    }
+    Invoke-WebRequest -Uri $selected.DownloadUrl -OutFile $archivePath
 }
 
-$actualSha256 = (Get-FileHash -Algorithm SHA256 -LiteralPath $archivePath).Hash
-if ($actualSha256 -ne $expectedSha256) {
-    throw "Yaba Sanshiro archive hash mismatch. Expected $expectedSha256 but found $actualSha256."
+$actualArchiveSha256 = (Get-FileHash -Algorithm SHA256 `
+    -LiteralPath $archivePath).Hash
+if ($actualArchiveSha256 -ne $selected.ArchiveSha256) {
+    throw "Yaba Sanshiro archive hash mismatch. Expected $($selected.ArchiveSha256) but found $actualArchiveSha256."
 }
 
 Expand-Archive -LiteralPath $archivePath -DestinationPath $installRoot -Force
-$installedExe = Get-ChildItem -LiteralPath $installRoot -Filter 'yabasanshiro.exe' `
-    -File -Recurse | Select-Object -First 1
+$installedExe = Get-ChildItem -LiteralPath $installRoot `
+    -Filter 'yabasanshiro.exe' -File -Recurse | Select-Object -First 1
 if (-not $installedExe) {
     throw 'The verified emulator archive did not contain yabasanshiro.exe.'
 }
-
-Write-Host "Yaba Sanshiro is ready at $($installedExe.FullName)"
+Confirm-EmulatorExe $installedExe

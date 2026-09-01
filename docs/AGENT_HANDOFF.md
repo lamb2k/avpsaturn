@@ -12,37 +12,38 @@ Read `project_state.yaml`, the active card, current SPEC-02 contract/fixtures,
 Do not create another Goal, roadmap, workflow, branch, task hierarchy, coverage
 system, or writer.
 
-Workflow pivot / Preserved evidence work: Resume the AvP salvage Goal; retain
-SALVAGE-00-OLD-BUILD-BASELINE, USER-01-PLAYER-BASELINE-REVIEW, and evidence
-candidate `597f4ed517d4e715d814ff841bd00d3977803f85`.
+Workflow pivot / Preserved evidence work: Resume the AvP salvage Goal; retain SALVAGE-00-OLD-BUILD-BASELINE, USER-01-PLAYER-BASELINE-REVIEW, and `597f4ed517d4e715d814ff841bd00d3977803f85`.
 
-## Closed checkpoint
+## Closed checkpoints
 
-The Coffee Shop exit controller is SOURCE_CLOSED and NATIVE_IMPLEMENTED through
-source frame 5566: route `4->6->0->2`, player withdrawal script and ballistic
-motion, source callback cadence, fixed-pool teardown, gate `8236`, and resident
-load no-op boundaries. Focused exit passes three real mutations. Target passes
-with GAME.BIN 373,840 bytes, BSS `0x060b2560`, SHA-256
-`aa99904645fa584952ccba84e4fb28d970dabc4ae6e6e593b401f9e3323910a1`.
-
-The 157-table content archive is 47,056 bytes, SHA-256
-`ccf8795a147daf337c1f72364c81f05fc2cfd255d8d21b40a56c74c97f8d15bd`.
-Runtime is exactly `0x18434` in the unchanged `0x19000` carve. Paired cold
-emulator chronology passes at normalized ISO SHA-256
+Coffee Shop exit authority is source-closed and native through frame 5566:
+route `4->6->0->2`, withdrawal script and ballistics, source callback cadence,
+fixed-pool teardown, gate 8236, and resident load no-op boundaries. Target
+GAME.BIN SHA-256 is
+`aa99904645fa584952ccba84e4fb28d970dabc4ae6e6e593b401f9e3323910a1`;
+paired cold ISO SHA-256 is
 `3bb36edbd29c0a07867826f7d1ac99e96d84849232a05b3bdea43d5d84a611de`.
-Window-only WGC frames 2280/2287/2306/2307/2310 preserve Predator identity,
-P1-only HUD, impact cadence, both VDP2 planes, palette, and priority.
+The complete Coffee Shop host scene remains RED only at the preserved
+source-frame-3782 stage-progress mismatch; do not promote the candidate.
 
-Fast and Oracle pass every focused check and stop only at the preserved
-source-frame-3782 stage-progress mismatch (seven source calls, eight native).
-The complete Coffee Shop scene stays RED; no candidate promotion or accepted
-lock reopening is permitted. The SCU-DMA A-bus rule remains physical-only.
+The owner debug-rig MCP lane passes. Package archive SHA-256 is
+`6f157f15da4d01cca9ef044d32352b8e6d3cf6b71a44ad3303aaeb9939015864`;
+EXE SHA-256 is
+`d77675912421a7435d02d844625a6ef68ba0e55ef17c9845f08651eb98f54b45`.
+Aug-10 and debug-rig cold ledgers match at semantic SHA-256
+`7fae4a7cffe2c35a0df8a3c181a5ffa8f141f5b113500d67de1fd60f071a56fc`.
+Two identical bursts cover frames 2095..2125 at manifest SHA-256
+`13afd26ef889b6f792ade52989749eeec1dc23203b5eb1def55ac85ccca31c1f`;
+seven unique hashes prove animation. MCP cadence-1 visual QA passes direct
+inspection. Settings were restored to VideoCore 4 / SoundCore 1. Evidence is
+`ONE_EMULATOR`; the DMA point is physical-only.
 
 ## Exact next sequence
 
-1. Execute `docs/EMULATOR_MCP_CAPTURE.md` in full: package and re-pin the owner
-   EXE without fork-source edits, run semantic and image negative controls, and
-   add MCP burst mode to visual-QA. Do not commit captures, ROMs, or ISOs.
-2. Execute `docs/ROUND1_OVERNIGHT_PLAN.md` P2: extend paired ORACLE-10/11 census
-   from frame 5566 to Round 1 clear, committing each completed census segment.
-3. Follow P3/P4 in scene order with the three-attempt cap and burst visual gates.
+Execute `docs/ROUND1_OVERNIGHT_PLAN.md` P2. Extend the existing ORACLE-10/11
+source census from frame 5566 toward stable Round 1 clear in scene order with
+paired byte-identical cold captures, character-identity gates, perturbation,
+and counterfactual controls. Commit and push every completed census segment.
+After three failed focused attempts on a body, record its exact blocker and
+continue to the next scene-order body. Never commit captures, PNGs, ROMs, ISOs,
+or dumps. Follow P3/P4 only after the census frontier is complete.

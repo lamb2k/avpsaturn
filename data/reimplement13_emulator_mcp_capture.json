@@ -1,0 +1,60 @@
+{
+  "schema": 1,
+  "task": "REIMPLEMENT-13-SOURCE-CLOSED-ROUND1",
+  "checkpoint": "P1-EMULATOR-MCP-CAPTURE",
+  "result": "PASS",
+  "package": {
+    "name": "yabasanshiro-1.20.37-2986eb-debug-rig-mcp-d7767591",
+    "archive_sha256": "6f157f15da4d01cca9ef044d32352b8e6d3cf6b71a44ad3303aaeb9939015864",
+    "exe_sha256": "d77675912421a7435d02d844625a6ef68ba0e55ef17c9845f08651eb98f54b45",
+    "owner_delta_sha256": "c2986d6e057fd1fa3d3aefc0a9608d895a21c401d5874b346d11273de5de58f",
+    "qt_version": "6.8.3",
+    "gl_only": true,
+    "fork_source_modified": false
+  },
+  "capture_settings": {
+    "video_core": 1,
+    "sound_core": 0,
+    "restored_video_core": 4,
+    "restored_sound_core": 1
+  },
+  "semantic_negative_control": {
+    "aug10_exe_sha256": "016112708fc77ec53b8a36c4ef52e300a78b3fb079e815f60b1a51fa1661999c",
+    "debug_rig_exe_sha256": "d77675912421a7435d02d844625a6ef68ba0e55ef17c9845f08651eb98f54b45",
+    "cold_runs_per_executable": 2,
+    "samples_per_run": 575,
+    "canonical_semantic_sha256": "7fae4a7cffe2c35a0df8a3c181a5ffa8f141f5b113500d67de1fd60f071a56fc",
+    "byte_identical": true
+  },
+  "framebuffer_negative_control": {
+    "cold_runs": ["coffee-shop-control-b", "coffee-shop-control-c"],
+    "aligned_frame": 2094,
+    "alignment_manifest_sha256": "be1b10871ce39e91ce50afcf8a38dab9a55c0c7e97325d019dded641537f9a00",
+    "frame_range": [2095, 2125],
+    "frame_count": 31,
+    "manifest_sha256": "13afd26ef889b6f792ade52989749eeec1dc23203b5eb1def55ac85ccca31c1f",
+    "canonical_frame_hash_sequence_sha256": "531c1e0dc592a1231376966e7b161b9b9933f1f0a39f396ded41f0f793c18833",
+    "unique_frame_hashes": 7,
+    "same_frame_hashes_identical": true,
+    "animated_window_discriminates": true
+  },
+  "visual_qa": {
+    "capture_mode": "MCP_FRAMEBUFFER_BURST",
+    "contact_sheet_sha256": "ff3444630d8ab19fc0f86273261336015fec2b079135787d8f34d05a831e466e",
+    "full_speed_webp_sha256": "2cec2564fef8c37f315b072c5037c84f3089c6e34e0cb52d90028aa15be475a5",
+    "direct_inspection": "PASS",
+    "observed": [
+      "stable Predator Warrior identity",
+      "P1-only HUD",
+      "coherent animated actor progression",
+      "both VDP2 planes",
+      "stable palette and priority"
+    ]
+  },
+  "evidence_tier": "ONE_EMULATOR",
+  "platform_limits": {
+    "scu_dma_a_bus_rule": "PHYSICAL_TIER_ONLY",
+    "rule": "No SCU DMA transfer may have an A-bus endpoint; cart-sourced VDP1 uploads are CPU-mediated."
+  },
+  "physical_saturn": "UNRUN"
+}

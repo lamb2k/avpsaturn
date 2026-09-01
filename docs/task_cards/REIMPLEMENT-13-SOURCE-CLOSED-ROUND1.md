@@ -2142,6 +2142,39 @@ The next dependency-ready body is the owner-defined P1 capture-lane integration
 in `docs/EMULATOR_MCP_CAPTURE.md`, followed by the census-first sequence in
 `docs/ROUND1_OVERNIGHT_PLAN.md`.
 
+### Owner debug-rig MCP capture-lane checkpoint (2026-08-31)
+
+The owner-supplied Yaba Sanshiro debug rig is packaged and pinned without fork
+source edits. Archive SHA-256 is
+`6f157f15da4d01cca9ef044d32352b8e6d3cf6b71a44ad3303aaeb9939015864`;
+EXE SHA-256 is
+`d77675912421a7435d02d844625a6ef68ba0e55ef17c9845f08651eb98f54b45`.
+The Aug-10 executable remains an explicit setup option and negative control.
+
+Two cold runs on each executable produce the same canonical 575-sample
+semantic ledger SHA-256
+`7fae4a7cffe2c35a0df8a3c181a5ffa8f141f5b113500d67de1fd60f071a56fc`.
+Two identical dynarec framebuffer bursts align at frame 2094 and capture
+cadence-1 frames 2095..2125. Same-frame hashes match, manifest SHA-256 is
+`13afd26ef889b6f792ade52989749eeec1dc23203b5eb1def55ac85ccca31c1f`,
+and seven distinct hashes prove the animated-window control. The earlier
+mixed interpreter/dynarec attempt is excluded because its launch conditions
+were not identical.
+
+The new MCP visual-QA mode verifies every image hash and cadence before making
+an ignored lossless WebP and contact sheet. Direct inspection passes with
+stable Predator identity, P1-only HUD, coherent actor animation, both VDP2
+planes, palette, and priority. Artifact SHA-256 values are
+`2cec2564fef8c37f315b072c5037c84f3089c6e34e0cb52d90028aa15be475a5`
+and `ff3444630d8ab19fc0f86273261336015fec2b079135787d8f34d05a831e466e`.
+Capture settings are restored to VideoCore 4 and SoundCore 1. Evidence remains
+`ONE_EMULATOR`; the SCU-DMA A-bus rule remains physical-tier-only and physical
+Saturn remains `UNRUN`.
+
+The next dependency-ready body is `docs/ROUND1_OVERNIGHT_PLAN.md` P2: extend
+the existing paired ORACLE-10/11 source census from frame 5566 toward Round 1
+clear, checkpointing each completed census segment.
+
 ### Coffee Shop reusable-runtime closure checkpoint (2026-08-31)
 
 Four source programs exposed by the complete scene are now closed without

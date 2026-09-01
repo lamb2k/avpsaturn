@@ -72,3 +72,37 @@ modifying the emulator fork remains for everything except the tasks below.
 - The qt CMake target's post-build windeployqt step fails under NMake
   (multi-config path assumption) after a successful link; ignore it, and
   place the three libchdr libs into `Release\` subdirs before linking.
+
+## Integration checkpoint (2026-08-31)
+
+All five integration tasks pass. The owner EXE was repackaged without fork
+source edits as
+`yabasanshiro-1.20.37-2986eb-debug-rig-mcp-d7767591`; archive SHA-256 is
+`6f157f15da4d01cca9ef044d32352b8e6d3cf6b71a44ad3303aaeb9939015864`
+and EXE SHA-256 is
+`d77675912421a7435d02d844625a6ef68ba0e55ef17c9845f08651eb98f54b45`.
+`setup_emulator.ps1` validates both identities and retains the Aug-10 package
+as the explicit `Aug10` control.
+
+Two cold runs on each executable produce identical 575-sample semantic
+ledgers, canonical SHA-256
+`7fae4a7cffe2c35a0df8a3c181a5ffa8f141f5b113500d67de1fd60f071a56fc`.
+Two identical dynarec burst runs align at frame 2094 and capture cadence-1
+frames 2095..2125. Their manifest SHA-256 is
+`13afd26ef889b6f792ade52989749eeec1dc23203b5eb1def55ac85ccca31c1f`;
+same-frame hashes match and the animated window has seven distinct hashes.
+The invalid interpreter/dynarec mixed control is excluded because its launch
+conditions were not identical.
+
+`prepare_mcp_visual_qa.py` verifies every manifest image hash and cadence,
+crops the presented aperture, and emits a lossless full-speed WebP plus a
+cadence-1 contact sheet. Direct inspection passes with stable Predator
+identity, P1-only HUD, coherent actor animation, both VDP2 planes, palette,
+and priority. The visual artifact SHA-256 values are
+`2cec2564fef8c37f315b072c5037c84f3089c6e34e0cb52d90028aa15be475a5`
+and `ff3444630d8ab19fc0f86273261336015fec2b079135787d8f34d05a831e466e`.
+Captured PNGs, manifests, ROMs, and ISOs remain ignored.
+
+Capture settings were restored to VideoCore 4 and SoundCore 1. Evidence tier
+remains `ONE_EMULATOR`; the SCU-DMA A-bus rule remains physical-tier-only and
+physical Saturn remains `UNRUN`.
