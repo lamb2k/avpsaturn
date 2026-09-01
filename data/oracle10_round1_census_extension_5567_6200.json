@@ -1,0 +1,3314 @@
+{
+  "coverage": {
+    "per_frame_character_identity_failures": 0,
+    "unidentified_source_class_type_pairs": 0,
+    "unmapped_spawn_despawn_edges": 0,
+    "unowned_actor_lifetimes": 0,
+    "unowned_audio_events": 0,
+    "unowned_load_release_events": 0,
+    "unowned_route_camera_events": 0
+  },
+  "paired_capture_ceremony": {
+    "independent_raw_captures": [
+      "full_route",
+      "full_route_rerun"
+    ],
+    "paired_route_ledger_sha256": {
+      "dispatches.tsv": "c58ce0b2fd9811112002e717b33ee8364a7808aa6c42ffdceb97380b8f8b9985",
+      "lifecycle_writes.tsv": "21bbd8c035146051401132e86f20f77282348a3227290b5e80bbf58675224656",
+      "result.tsv": "e75dded8c4f6dd02bedcf3e2b32782bd2e53d65256e042e11436435317b734ed",
+      "route_rng.tsv": "8f59258961ea4694e545993331a9478b006a1a3df9913390df01822ad397dd19",
+      "route_samples.tsv": "ad723acfbd3d51c0c833da0eed3490833494bab5af9862244f8ca35e2876a54c",
+      "route_writes.tsv": "6f1e4d6da736d9b886a834bf72fc426e58011f68e512acf1d6e8b7348c4f858a"
+    },
+    "paired_route_ledgers_byte_identical": true,
+    "raw_capture_files_byte_identical": true,
+    "segment_semantics": {
+      "canonical_semantic_sha256": "4a4a0ab9d4485ca37e15e9bb6e1644748cec11455fb8298f1338d96f2629ee30",
+      "character_mismatch_frames": [],
+      "frame_count": 634,
+      "identity_mismatch_frames": [],
+      "per_frame_character_identity_gate": true,
+      "player_active_frames": 632,
+      "required_character_u8": 0
+    }
+  },
+  "physical_saturn": "UNRUN",
+  "route_authority_extension": {
+    "camera_lock_runs": [
+      {
+        "camera_target_at_entry": 776,
+        "camera_target_at_exit": 800,
+        "classification": "SOURCE_CLOSED",
+        "first_frame": 5568,
+        "frames": 93,
+        "last_frame": 5660,
+        "owning_writer_pcs": [
+          "0x0b0706"
+        ],
+        "player_x_at_entry": 1024,
+        "player_x_at_exit": 939,
+        "prior_scroll2_x": 776,
+        "route": 2,
+        "scroll2_x": 712
+      },
+      {
+        "camera_target_at_entry": 864,
+        "camera_target_at_exit": 841,
+        "classification": "SOURCE_CLOSED",
+        "first_frame": 5670,
+        "frames": 53,
+        "last_frame": 5722,
+        "owning_writer_pcs": [
+          "0x0b0706"
+        ],
+        "player_x_at_entry": 939,
+        "player_x_at_exit": 944,
+        "prior_scroll2_x": 790,
+        "route": 2,
+        "scroll2_x": 800
+      },
+      {
+        "camera_target_at_entry": 804,
+        "camera_target_at_exit": 806,
+        "classification": "SOURCE_CLOSED",
+        "first_frame": 5742,
+        "frames": 60,
+        "last_frame": 5801,
+        "owning_writer_pcs": [
+          "0x0b0706"
+        ],
+        "player_x_at_entry": 964,
+        "player_x_at_exit": 1031,
+        "prior_scroll2_x": 741,
+        "route": 4,
+        "scroll2_x": 740
+      },
+      {
+        "camera_target_at_entry": 0,
+        "camera_target_at_exit": 1010,
+        "classification": "SOURCE_CLOSED",
+        "first_frame": 5964,
+        "frames": 761,
+        "last_frame": 6724,
+        "owning_writer_pcs": [
+          "0x008c34",
+          "0x0b0706"
+        ],
+        "player_x_at_entry": 1259,
+        "player_x_at_exit": 1120,
+        "prior_scroll2_x": 959,
+        "route": 4,
+        "scroll2_x": 65472
+      }
+    ],
+    "route_state_edges": [
+      {
+        "caller_chain": [
+          "0x00bfdc",
+          "0x0080a2",
+          "0x000000"
+        ],
+        "classification": "SOURCE_CLOSED",
+        "field": "0xff8008:s16",
+        "sample_transition_frame": 5720,
+        "source_window": {
+          "first": "0x00c1f0",
+          "last_exclusive": "0x00c220",
+          "sha256": "92b117a8ae2c802521389a06a488de0ae9e95c275346b92f98f0ea68d4543c6e"
+        },
+        "transition_guard": "(u8(g8236) & u8(g81af)) == 0",
+        "value": 4,
+        "write_frame": 5719,
+        "writer_pc": "0x00c200"
+      },
+      {
+        "caller_chain": [
+          "0x0080a2",
+          "0x000000",
+          "0x000000"
+        ],
+        "classification": "SOURCE_CLOSED",
+        "field": "0xff8008:s16",
+        "sample_transition_frame": 6199,
+        "source_window": {
+          "first": "0x008536",
+          "last_exclusive": "0x008566",
+          "sha256": "08fe394a5d57592cffc9f64dd7db16cd3268f0ade64969fdf59bf042905e4c6d"
+        },
+        "transition_guard": "u8(g81af)==0 && u8(g81d4)==0 && no active player records",
+        "value": 0,
+        "write_frame": 6198,
+        "writer_pc": "0x008546"
+      },
+      {
+        "caller_chain": [
+          "0x0080a2",
+          "0x000000",
+          "0x000000"
+        ],
+        "classification": "SOURCE_CLOSED",
+        "field": "0xff8008:s16",
+        "sample_transition_frame": 6200,
+        "source_window": {
+          "first": "0x008ba2",
+          "last_exclusive": "0x008bd2",
+          "sha256": "9cd8ee473c743e3b0e3597b8cd5367ffa2b6a382702ad98130e1c48f05db753f"
+        },
+        "transition_guard": "failure/continue dispatcher entered state 0",
+        "value": 2,
+        "write_frame": 6199,
+        "writer_pc": "0x008bb2"
+      }
+    ],
+    "route_wide_perturbation": {
+      "first_input_difference": {
+        "control": {
+          "input_word": "9"
+        },
+        "fields": [
+          "input_word"
+        ],
+        "frame": 4230,
+        "variant": {
+          "input_word": "8"
+        }
+      },
+      "first_semantic_difference": {
+        "control": {
+          "g8009": "4",
+          "p_x": "192",
+          "p_z": "0"
+        },
+        "fields": [
+          "g8009",
+          "p_x",
+          "p_z"
+        ],
+        "frame": 6692,
+        "variant": {
+          "g8009": "2",
+          "p_x": "1233",
+          "p_z": "311"
+        }
+      },
+      "rendered_witness": "private frames/16800.png directly inspected",
+      "stable_round2_handoff_frame": 16425,
+      "status": "PASS",
+      "variant": "route_perturbed"
+    },
+    "segment_bindings": [
+      {
+        "classification": "SOURCE_CLOSED",
+        "enemy_spawn_count": 0,
+        "enemy_spawn_frames": [],
+        "gameplay_route_edges": [],
+        "observational_labels": [],
+        "presentation_boundary": {
+          "classification": "SOURCE_CLOSED_PRESENTATION_DEPENDENCY",
+          "owns_progression": false,
+          "signature": "Sbe4aca5dd5ee"
+        },
+        "route_mode_values": [
+          2
+        ],
+        "route_segment": "round1-barricade-dialogue",
+        "route_writer_refs": [
+          "0x000e86@0xff8018",
+          "0x000e8a@0xff81a2",
+          "0x000e92@0xff81bc",
+          "0x001186@0xff8070",
+          "0x001222@0xff8072",
+          "0x00126c@0xff8054",
+          "0x00126c@0xff8056",
+          "0x001278@0xff8054",
+          "0x001288@0xff8064",
+          "0x001288@0xff8066",
+          "0x00128c@0xff8068",
+          "0x00128c@0xff806a",
+          "0x001298@0xff8064",
+          "0x0012a4@0xff8066",
+          "0x0012b0@0xff8068",
+          "0x0012bc@0xff806a",
+          "0x0012c6@0xff8060",
+          "0x0012c6@0xff8062",
+          "0x0012d2@0xff8060",
+          "0x001432@0xff81a6",
+          "0x001448@0xff81c6",
+          "0x00159c@0xff818a",
+          "0x0015a0@0xff8192",
+          "0x0015a4@0xff819a",
+          "0x0015a8@0xff819e",
+          "0x008090@0xff81bc",
+          "0x00809a@0xff8018",
+          "0x008444@0xff820e",
+          "0x00846a@0xff81f0",
+          "0x008470@0xff81f0",
+          "0x008476@0xff8214",
+          "0x008476@0xff8216",
+          "0x008522@0xff8248",
+          "0x00c1ba@0xff8010",
+          "0x00c1be@0xff8012",
+          "0x00c1c4@0xff8016",
+          "0x00c1d0@0xff8012",
+          "0x00c1da@0xff8016",
+          "0x00c1de@0xff829c",
+          "0x00c1e4@0xff829e",
+          "0x00c1ea@0xff8288",
+          "0x016df2@0xff802c",
+          "0x0170f8@0xff81b8",
+          "0x0170fc@0xff823a",
+          "0x017112@0xff823a",
+          "0x01715a@0xff81b8",
+          "0x017166@0xff823a",
+          "0x017c70@0xff81a8",
+          "0x017c72@0xff81a8",
+          "0x0182e0@0xff81c2",
+          "0x021580@0xff820a",
+          "0x021658@0xff8238",
+          "0x021684@0xff8208",
+          "0x02182e@0xff820a",
+          "0x0a9a42@0xff81a4",
+          "0x0a9a46@0xff81a2",
+          "0x0ad658@0xff8238",
+          "0x0af86c@0xff82c0",
+          "0x0af878@0xff82c2",
+          "0x0af87e@0xff8290",
+          "0x0af884@0xff8294",
+          "0x0b06c0@0xff82ae",
+          "0x0b06e4@0xff82ac",
+          "0x0b06fe@0xff8278",
+          "0x0b0706@0xff8032",
+          "0x0b0720@0xff8288",
+          "0x0b072c@0xff8288",
+          "0x0b0738@0xff8288",
+          "0x0b0746@0xff8288",
+          "0x0b07e2@0xff82ae",
+          "0x0b0820@0xff827c",
+          "0x0b0828@0xff8034",
+          "0x0b085a@0xff828c",
+          "0x0b0862@0xff82c6",
+          "0x0b17ec@0xff82f8",
+          "0x0b17f4@0xff8036",
+          "0x0b1836@0xff82fc",
+          "0x0b183e@0xff8038",
+          "0x0b26ea@0xff8286",
+          "0x0b26f6@0xff8284",
+          "0x0b2712@0xff82aa",
+          "0x0b2716@0xff82a8",
+          "0x0b2896@0xff82aa"
+        ],
+        "source_frame_range": [
+          5567,
+          5658
+        ]
+      },
+      {
+        "classification": "SOURCE_CLOSED",
+        "enemy_spawn_count": 2,
+        "enemy_spawn_frames": [
+          5659
+        ],
+        "gameplay_route_edges": [
+          {
+            "caller_chain": [
+              "0x00bfdc",
+              "0x0080a2",
+              "0x000000"
+            ],
+            "classification": "SOURCE_CLOSED",
+            "field": "0xff8008:s16",
+            "sample_transition_frame": 5720,
+            "source_window": {
+              "first": "0x00c1f0",
+              "last_exclusive": "0x00c220",
+              "sha256": "92b117a8ae2c802521389a06a488de0ae9e95c275346b92f98f0ea68d4543c6e"
+            },
+            "transition_guard": "(u8(g8236) & u8(g81af)) == 0",
+            "value": 4,
+            "write_frame": 5719,
+            "writer_pc": "0x00c200"
+          },
+          {
+            "caller_chain": [
+              "0x0080a2",
+              "0x000000",
+              "0x000000"
+            ],
+            "classification": "SOURCE_CLOSED",
+            "field": "0xff8008:s16",
+            "sample_transition_frame": 6199,
+            "source_window": {
+              "first": "0x008536",
+              "last_exclusive": "0x008566",
+              "sha256": "08fe394a5d57592cffc9f64dd7db16cd3268f0ade64969fdf59bf042905e4c6d"
+            },
+            "transition_guard": "u8(g81af)==0 && u8(g81d4)==0 && no active player records",
+            "value": 0,
+            "write_frame": 6198,
+            "writer_pc": "0x008546"
+          },
+          {
+            "caller_chain": [
+              "0x0080a2",
+              "0x000000",
+              "0x000000"
+            ],
+            "classification": "SOURCE_CLOSED",
+            "field": "0xff8008:s16",
+            "sample_transition_frame": 6200,
+            "source_window": {
+              "first": "0x008ba2",
+              "last_exclusive": "0x008bd2",
+              "sha256": "9cd8ee473c743e3b0e3597b8cd5367ffa2b6a382702ad98130e1c48f05db753f"
+            },
+            "transition_guard": "failure/continue dispatcher entered state 0",
+            "value": 2,
+            "write_frame": 6199,
+            "writer_pc": "0x008bb2"
+          }
+        ],
+        "observational_labels": [],
+        "presentation_boundary": {
+          "classification": "SOURCE_CLOSED_PRESENTATION_DEPENDENCY",
+          "owns_progression": false,
+          "signature": "S6234e483d1ef"
+        },
+        "route_mode_values": [
+          0,
+          2,
+          4
+        ],
+        "route_segment": "round1-warehouse-gameplay",
+        "route_writer_refs": [
+          "0x000e86@0xff8018",
+          "0x000e8a@0xff81a2",
+          "0x000e92@0xff81bc",
+          "0x001186@0xff8070",
+          "0x001222@0xff8072",
+          "0x00126c@0xff8054",
+          "0x00126c@0xff8056",
+          "0x001278@0xff8054",
+          "0x001288@0xff8064",
+          "0x001288@0xff8066",
+          "0x00128c@0xff8068",
+          "0x00128c@0xff806a",
+          "0x001298@0xff8064",
+          "0x0012a4@0xff8066",
+          "0x0012b0@0xff8068",
+          "0x0012bc@0xff806a",
+          "0x0012c6@0xff8060",
+          "0x0012c6@0xff8062",
+          "0x0012d2@0xff8060",
+          "0x001432@0xff81a6",
+          "0x001448@0xff81c6",
+          "0x00159c@0xff818a",
+          "0x0015a0@0xff8192",
+          "0x0015a4@0xff819a",
+          "0x0015a8@0xff819e",
+          "0x001914@0xff801e",
+          "0x001954@0xff8020",
+          "0x008090@0xff81bc",
+          "0x00809a@0xff8018",
+          "0x008444@0xff820e",
+          "0x00846a@0xff81f0",
+          "0x008470@0xff81f0",
+          "0x008476@0xff8214",
+          "0x008476@0xff8216",
+          "0x0084ec@0xff820c",
+          "0x0084fa@0xff827c",
+          "0x0084fe@0xff82fc",
+          "0x008502@0xff8034",
+          "0x008506@0xff8038",
+          "0x008522@0xff8248",
+          "0x008540@0xff8004",
+          "0x008546@0xff8008",
+          "0x00854a@0xff800c",
+          "0x00854e@0xff8010",
+          "0x008552@0xff8014",
+          "0x0085aa@0xff8220",
+          "0x0085b2@0xff8220",
+          "0x0085c6@0xff8224",
+          "0x0085cc@0xff8224",
+          "0x0085fa@0xff8224",
+          "0x0086ec@0xff8240",
+          "0x008bb2@0xff8008",
+          "0x008bb6@0xff800c",
+          "0x008bcc@0xff8248",
+          "0x008c34@0xff8032",
+          "0x008c38@0xff8036",
+          "0x008c3e@0xff8034",
+          "0x008c44@0xff8038",
+          "0x008c48@0xff8278",
+          "0x008c4c@0xff827c",
+          "0x008c76@0xff804a",
+          "0x008d28@0xff8024",
+          "0x008d2e@0xff8026",
+          "0x008d34@0xff8028",
+          "0x008d3a@0xff802c",
+          "0x008d40@0xff802a",
+          "0x00c1d0@0xff8012",
+          "0x00c1d6@0xff8010",
+          "0x00c1da@0xff8016",
+          "0x00c1de@0xff829c",
+          "0x00c1e4@0xff829e",
+          "0x00c1ea@0xff8288",
+          "0x00c200@0xff8008",
+          "0x00c204@0xff800c",
+          "0x00c208@0xff8010",
+          "0x00c20c@0xff8014",
+          "0x00c210@0xff829c",
+          "0x00c216@0xff829e",
+          "0x00c78a@0xff8208",
+          "0x00c78e@0xff81d4",
+          "0x00c792@0xff820a",
+          "0x00c796@0xff8208",
+          "0x00c79a@0xff823a",
+          "0x00c79e@0xff81b8",
+          "0x00c7a6@0xff823c",
+          "0x00c7aa@0xff823e",
+          "0x00c7ae@0xff8248",
+          "0x00c7b4@0xff81ee",
+          "0x00c7b8@0xff8220",
+          "0x00c7c2@0xff8224",
+          "0x00ec74@0xff81d2",
+          "0x016f92@0xff81d6",
+          "0x0170f8@0xff81b8",
+          "0x0170fc@0xff823a",
+          "0x017112@0xff823a",
+          "0x01715a@0xff81b8",
+          "0x017166@0xff823a",
+          "0x017976@0xff81ec",
+          "0x0179ee@0xff8226",
+          "0x017a00@0xff8226",
+          "0x017a1a@0xff81ea",
+          "0x017b74@0xff81ea",
+          "0x017c70@0xff81a8",
+          "0x017c72@0xff81a8",
+          "0x01b57e@0xff81ae",
+          "0x01b582@0xff81d4",
+          "0x01b58c@0xff81d2",
+          "0x01b594@0xff81cc",
+          "0x01b598@0xff81dc",
+          "0x01d772@0xff820a",
+          "0x020648@0xff829c",
+          "0x02064c@0xff829e",
+          "0x0214d6@0xff823c",
+          "0x02151e@0xff8236",
+          "0x021658@0xff8238",
+          "0x049c26@0xff820c",
+          "0x04a494@0xff820c",
+          "0x0a9a42@0xff81a4",
+          "0x0a9a46@0xff81a2",
+          "0x0ad658@0xff8238",
+          "0x0af86c@0xff82c0",
+          "0x0af878@0xff82c2",
+          "0x0af87e@0xff8290",
+          "0x0af884@0xff8294",
+          "0x0b06c0@0xff82ae",
+          "0x0b06cc@0xff82ae",
+          "0x0b06e4@0xff82ac",
+          "0x0b06fe@0xff8278",
+          "0x0b0706@0xff8032",
+          "0x0b0720@0xff8288",
+          "0x0b072c@0xff8288",
+          "0x0b0738@0xff8288",
+          "0x0b0746@0xff8288",
+          "0x0b07e2@0xff82ae",
+          "0x0b0820@0xff827c",
+          "0x0b0828@0xff8034",
+          "0x0b0862@0xff82c6",
+          "0x0b17ec@0xff82f8",
+          "0x0b17f4@0xff8036",
+          "0x0b1836@0xff82fc",
+          "0x0b183e@0xff8038",
+          "0x0b26ea@0xff8286",
+          "0x0b26f6@0xff8284",
+          "0x0b2712@0xff82aa",
+          "0x0b2716@0xff82a8",
+          "0x0b2896@0xff82aa"
+        ],
+        "source_frame_range": [
+          5659,
+          6199
+        ]
+      },
+      {
+        "classification": "SOURCE_CLOSED",
+        "enemy_spawn_count": 0,
+        "enemy_spawn_frames": [],
+        "gameplay_route_edges": [],
+        "observational_labels": [],
+        "presentation_boundary": {
+          "classification": "SOURCE_CLOSED_PRESENTATION_DEPENDENCY",
+          "owns_progression": false,
+          "signature": "Sbdfaec04db65"
+        },
+        "route_mode_values": [
+          2
+        ],
+        "route_segment": "Sbdfaec04db65",
+        "route_writer_refs": [
+          "0x000e86@0xff8018",
+          "0x000e8a@0xff81a2",
+          "0x000e92@0xff81bc",
+          "0x001186@0xff8070",
+          "0x001222@0xff8072",
+          "0x00126c@0xff8054",
+          "0x00126c@0xff8056",
+          "0x001278@0xff8054",
+          "0x001288@0xff8064",
+          "0x001288@0xff8066",
+          "0x00128c@0xff8068",
+          "0x00128c@0xff806a",
+          "0x001298@0xff8064",
+          "0x0012a4@0xff8066",
+          "0x0012b0@0xff8068",
+          "0x0012bc@0xff806a",
+          "0x0012c6@0xff8060",
+          "0x0012c6@0xff8062",
+          "0x0012d2@0xff8060",
+          "0x001432@0xff81a6",
+          "0x001448@0xff81c6",
+          "0x00159c@0xff818a",
+          "0x0015a0@0xff8192",
+          "0x0015a4@0xff819a",
+          "0x0015a8@0xff819e",
+          "0x001914@0xff801e",
+          "0x008090@0xff81bc",
+          "0x00809a@0xff8018",
+          "0x00ec74@0xff81d2",
+          "0x0a9a42@0xff81a4",
+          "0x0a9a46@0xff81a2"
+        ],
+        "source_frame_range": [
+          6200,
+          6200
+        ]
+      }
+    ]
+  },
+  "scene_census_delta": {
+    "actor_lifetimes": [
+      {
+        "accepted_evidence": "data/oracle11_predator_warrior_authority.json",
+        "animation_record_count": 94,
+        "class": "0x00",
+        "classification": "SOURCE_CLOSED",
+        "despawn_in_segment": true,
+        "facings": [
+          0,
+          1
+        ],
+        "id": "player-0-life-1972",
+        "observed_lifetime": [
+          1972,
+          6198
+        ],
+        "segment_lifetime": [
+          5567,
+          6198
+        ],
+        "slot": "0xff8380",
+        "source_owner": "predator-warrior-player-authority",
+        "spawn_in_segment": false,
+        "state_context_count": 34,
+        "type": 0
+      },
+      {
+        "accepted_evidence": "data/oracle11_round1_enemy_archetypes.json",
+        "animation_record_count": 177,
+        "class": "0x06",
+        "classification": "SOURCE_CLOSED",
+        "despawn_in_segment": false,
+        "facings": [
+          0,
+          1
+        ],
+        "id": "actor-19-life-5566",
+        "observed_lifetime": [
+          5566,
+          15047
+        ],
+        "segment_lifetime": [
+          5567,
+          6200
+        ],
+        "slot": "0xffa3c0",
+        "source_owner": "round1-enemy-archetypes",
+        "spawn_in_segment": false,
+        "state_context_count": 39,
+        "type": 12
+      },
+      {
+        "accepted_evidence": "data/oracle11_round1_navigation.json",
+        "animation_record_count": 1,
+        "class": "0x07",
+        "classification": "SOURCE_CLOSED",
+        "despawn_in_segment": false,
+        "facings": [
+          0
+        ],
+        "id": "actor-42-life-5566",
+        "observed_lifetime": [
+          5566,
+          15047
+        ],
+        "segment_lifetime": [
+          5567,
+          6200
+        ],
+        "slot": "0xffb500",
+        "source_owner": "round1-navigation-terrain-camera",
+        "spawn_in_segment": false,
+        "state_context_count": 1,
+        "type": 20
+      },
+      {
+        "accepted_evidence": "data/oracle11_round1_enemy_archetypes.json",
+        "animation_record_count": 79,
+        "class": "0x00",
+        "classification": "SOURCE_CLOSED",
+        "despawn_in_segment": false,
+        "facings": [
+          0,
+          1
+        ],
+        "id": "actor-17-life-5660",
+        "observed_lifetime": [
+          5660,
+          7039
+        ],
+        "segment_lifetime": [
+          5660,
+          6200
+        ],
+        "slot": "0xffa240",
+        "source_owner": "round1-enemy-archetypes",
+        "spawn_in_segment": true,
+        "state_context_count": 32,
+        "type": 12
+      },
+      {
+        "accepted_evidence": "data/oracle11_round1_enemy_archetypes.json",
+        "animation_record_count": 70,
+        "class": "0x00",
+        "classification": "SOURCE_CLOSED",
+        "despawn_in_segment": false,
+        "facings": [
+          0,
+          1
+        ],
+        "id": "actor-18-life-5660",
+        "observed_lifetime": [
+          5660,
+          6939
+        ],
+        "segment_lifetime": [
+          5660,
+          6200
+        ],
+        "slot": "0xffa300",
+        "source_owner": "round1-enemy-archetypes",
+        "spawn_in_segment": true,
+        "state_context_count": 28,
+        "type": 12
+      },
+      {
+        "accepted_evidence": "data/oracle11_round1_auxiliary_authority.json",
+        "animation_record_count": 1,
+        "class": "0x49",
+        "classification": "SOURCE_CLOSED",
+        "despawn_in_segment": true,
+        "facings": [
+          1
+        ],
+        "id": "actor-56-life-5736",
+        "observed_lifetime": [
+          5736,
+          5742
+        ],
+        "segment_lifetime": [
+          5736,
+          5742
+        ],
+        "slot": "0xffbf80",
+        "source_owner": "pickups-equipment-weapons-projectiles-hazards-destructibles",
+        "spawn_in_segment": true,
+        "state_context_count": 1,
+        "type": 24
+      },
+      {
+        "accepted_evidence": "data/oracle11_round1_auxiliary_authority.json",
+        "animation_record_count": 1,
+        "class": "0x49",
+        "classification": "SOURCE_CLOSED",
+        "despawn_in_segment": true,
+        "facings": [
+          1
+        ],
+        "id": "actor-54-life-5742",
+        "observed_lifetime": [
+          5742,
+          5748
+        ],
+        "segment_lifetime": [
+          5742,
+          5748
+        ],
+        "slot": "0xffbe00",
+        "source_owner": "pickups-equipment-weapons-projectiles-hazards-destructibles",
+        "spawn_in_segment": true,
+        "state_context_count": 1,
+        "type": 24
+      },
+      {
+        "accepted_evidence": "data/oracle11_round1_auxiliary_authority.json",
+        "animation_record_count": 1,
+        "class": "0x49",
+        "classification": "SOURCE_CLOSED",
+        "despawn_in_segment": true,
+        "facings": [
+          1
+        ],
+        "id": "actor-56-life-5744",
+        "observed_lifetime": [
+          5744,
+          5750
+        ],
+        "segment_lifetime": [
+          5744,
+          5750
+        ],
+        "slot": "0xffbf80",
+        "source_owner": "pickups-equipment-weapons-projectiles-hazards-destructibles",
+        "spawn_in_segment": true,
+        "state_context_count": 1,
+        "type": 24
+      },
+      {
+        "accepted_evidence": "data/oracle11_round1_auxiliary_authority.json",
+        "animation_record_count": 1,
+        "class": "0x49",
+        "classification": "SOURCE_CLOSED",
+        "despawn_in_segment": true,
+        "facings": [
+          1
+        ],
+        "id": "actor-54-life-5750",
+        "observed_lifetime": [
+          5750,
+          5756
+        ],
+        "segment_lifetime": [
+          5750,
+          5756
+        ],
+        "slot": "0xffbe00",
+        "source_owner": "pickups-equipment-weapons-projectiles-hazards-destructibles",
+        "spawn_in_segment": true,
+        "state_context_count": 1,
+        "type": 24
+      },
+      {
+        "accepted_evidence": "data/oracle11_round1_auxiliary_authority.json",
+        "animation_record_count": 1,
+        "class": "0x49",
+        "classification": "SOURCE_CLOSED",
+        "despawn_in_segment": true,
+        "facings": [
+          1
+        ],
+        "id": "actor-56-life-5752",
+        "observed_lifetime": [
+          5752,
+          5758
+        ],
+        "segment_lifetime": [
+          5752,
+          5758
+        ],
+        "slot": "0xffbf80",
+        "source_owner": "pickups-equipment-weapons-projectiles-hazards-destructibles",
+        "spawn_in_segment": true,
+        "state_context_count": 1,
+        "type": 24
+      },
+      {
+        "accepted_evidence": "data/oracle11_round1_auxiliary_authority.json",
+        "animation_record_count": 1,
+        "class": "0x49",
+        "classification": "SOURCE_CLOSED",
+        "despawn_in_segment": true,
+        "facings": [
+          1
+        ],
+        "id": "actor-56-life-5784",
+        "observed_lifetime": [
+          5784,
+          5790
+        ],
+        "segment_lifetime": [
+          5784,
+          5790
+        ],
+        "slot": "0xffbf80",
+        "source_owner": "pickups-equipment-weapons-projectiles-hazards-destructibles",
+        "spawn_in_segment": true,
+        "state_context_count": 1,
+        "type": 24
+      },
+      {
+        "accepted_evidence": "data/oracle11_round1_auxiliary_authority.json",
+        "animation_record_count": 1,
+        "class": "0x49",
+        "classification": "SOURCE_CLOSED",
+        "despawn_in_segment": true,
+        "facings": [
+          1
+        ],
+        "id": "actor-54-life-5786",
+        "observed_lifetime": [
+          5786,
+          5792
+        ],
+        "segment_lifetime": [
+          5786,
+          5792
+        ],
+        "slot": "0xffbe00",
+        "source_owner": "pickups-equipment-weapons-projectiles-hazards-destructibles",
+        "spawn_in_segment": true,
+        "state_context_count": 1,
+        "type": 24
+      },
+      {
+        "accepted_evidence": "data/oracle11_round1_auxiliary_authority.json",
+        "animation_record_count": 1,
+        "class": "0x49",
+        "classification": "SOURCE_CLOSED",
+        "despawn_in_segment": true,
+        "facings": [
+          1
+        ],
+        "id": "actor-56-life-5792",
+        "observed_lifetime": [
+          5792,
+          5798
+        ],
+        "segment_lifetime": [
+          5792,
+          5798
+        ],
+        "slot": "0xffbf80",
+        "source_owner": "pickups-equipment-weapons-projectiles-hazards-destructibles",
+        "spawn_in_segment": true,
+        "state_context_count": 1,
+        "type": 24
+      },
+      {
+        "accepted_evidence": "data/oracle11_round1_auxiliary_authority.json",
+        "animation_record_count": 1,
+        "class": "0x49",
+        "classification": "SOURCE_CLOSED",
+        "despawn_in_segment": true,
+        "facings": [
+          1
+        ],
+        "id": "actor-54-life-5794",
+        "observed_lifetime": [
+          5794,
+          5800
+        ],
+        "segment_lifetime": [
+          5794,
+          5800
+        ],
+        "slot": "0xffbe00",
+        "source_owner": "pickups-equipment-weapons-projectiles-hazards-destructibles",
+        "spawn_in_segment": true,
+        "state_context_count": 1,
+        "type": 24
+      },
+      {
+        "accepted_evidence": "data/oracle11_round1_auxiliary_authority.json",
+        "animation_record_count": 1,
+        "class": "0x49",
+        "classification": "SOURCE_CLOSED",
+        "despawn_in_segment": true,
+        "facings": [
+          1
+        ],
+        "id": "actor-56-life-5800",
+        "observed_lifetime": [
+          5800,
+          5806
+        ],
+        "segment_lifetime": [
+          5800,
+          5806
+        ],
+        "slot": "0xffbf80",
+        "source_owner": "pickups-equipment-weapons-projectiles-hazards-destructibles",
+        "spawn_in_segment": true,
+        "state_context_count": 1,
+        "type": 24
+      },
+      {
+        "accepted_evidence": "data/oracle11_round1_auxiliary_authority.json",
+        "animation_record_count": 1,
+        "class": "0x49",
+        "classification": "SOURCE_CLOSED",
+        "despawn_in_segment": true,
+        "facings": [
+          1
+        ],
+        "id": "actor-54-life-5802",
+        "observed_lifetime": [
+          5802,
+          5808
+        ],
+        "segment_lifetime": [
+          5802,
+          5808
+        ],
+        "slot": "0xffbe00",
+        "source_owner": "pickups-equipment-weapons-projectiles-hazards-destructibles",
+        "spawn_in_segment": true,
+        "state_context_count": 1,
+        "type": 24
+      }
+    ],
+    "audio": {
+      "command_counts": {
+        "0x0001": 1,
+        "0x000f": 1,
+        "0x0035": 1,
+        "0x003e": 3,
+        "0x003f": 2,
+        "0x004d": 2,
+        "0x004e": 1,
+        "0x004f": 2,
+        "0x0051": 2,
+        "0x0100": 2,
+        "0x0107": 1,
+        "0x0109": 4,
+        "0x010a": 2,
+        "0x0118": 2,
+        "0x0119": 1,
+        "0x011a": 2,
+        "0x0204": 1,
+        "0x0207": 1,
+        "0x024e": 7,
+        "0xff00": 1
+      },
+      "handler_transaction_count": 39,
+      "orphan_handler_transactions": 0,
+      "orphan_trigger_groups": 0,
+      "player_origin_edges": [
+        {
+          "classification": "SOURCE_CLOSED",
+          "command": "0x0107",
+          "frames": [
+            6081
+          ],
+          "id": "player-audio-003b5a-0107"
+        },
+        {
+          "classification": "SOURCE_CLOSED",
+          "command": "0x0204",
+          "frames": [
+            6081
+          ],
+          "id": "player-audio-01b178-0204"
+        },
+        {
+          "classification": "SOURCE_CLOSED",
+          "command": "0x003f",
+          "frames": [
+            6122
+          ],
+          "id": "player-audio-01b310-003f"
+        },
+        {
+          "classification": "SOURCE_CLOSED",
+          "command": "0x003e",
+          "frames": [
+            6137
+          ],
+          "id": "player-audio-01b3da-003e"
+        },
+        {
+          "classification": "SOURCE_CLOSED",
+          "command": "0x0207",
+          "frames": [
+            5719
+          ],
+          "id": "player-audio-02173a-0207"
+        }
+      ],
+      "source_owned_trigger_groups_first_seen": [
+        {
+          "classification": "SOURCE_CLOSED",
+          "command": "0x0001",
+          "first_frame": 6199,
+          "id": "global-audio-ff00d8-003a8e-0001",
+          "owner_families": [
+            "route"
+          ]
+        },
+        {
+          "classification": "SOURCE_CLOSED",
+          "command": "0x004f",
+          "first_frame": 5762,
+          "id": "global-audio-ff8780-003a8e-004f",
+          "owner_families": [
+            "projectile"
+          ]
+        },
+        {
+          "classification": "SOURCE_CLOSED",
+          "command": "0x011a",
+          "first_frame": 5768,
+          "id": "global-audio-ff8800-003a8e-011a",
+          "owner_families": [
+            "projectile"
+          ]
+        },
+        {
+          "classification": "SOURCE_CLOSED",
+          "command": "0x004f",
+          "first_frame": 5774,
+          "id": "global-audio-ff8880-003a8e-004f",
+          "owner_families": [
+            "projectile"
+          ]
+        },
+        {
+          "classification": "SOURCE_CLOSED",
+          "command": "0x0100",
+          "first_frame": 6195,
+          "id": "global-audio-ffa240-003a8e-0100",
+          "owner_families": [
+            "enemy"
+          ]
+        },
+        {
+          "classification": "SOURCE_CLOSED",
+          "command": "0x0035",
+          "first_frame": 6148,
+          "id": "global-audio-ffa300-003a8e-0035",
+          "owner_families": [
+            "enemy"
+          ]
+        },
+        {
+          "classification": "SOURCE_CLOSED",
+          "command": "0x0100",
+          "first_frame": 6073,
+          "id": "global-audio-ffa300-003a8e-0100",
+          "owner_families": [
+            "enemy"
+          ]
+        },
+        {
+          "classification": "SOURCE_CLOSED",
+          "command": "0x0109",
+          "first_frame": 5902,
+          "id": "global-audio-ffa300-003a8e-0109",
+          "owner_families": [
+            "enemy"
+          ]
+        },
+        {
+          "classification": "SOURCE_CLOSED",
+          "command": "0x010a",
+          "first_frame": 5888,
+          "id": "global-audio-ffa300-003a8e-010a",
+          "owner_families": [
+            "enemy"
+          ]
+        },
+        {
+          "classification": "SOURCE_CLOSED",
+          "command": "0x003e",
+          "first_frame": 5881,
+          "id": "global-audio-ffa3c0-003a8e-003e",
+          "owner_families": [
+            "boss",
+            "enemy"
+          ]
+        },
+        {
+          "classification": "SOURCE_CLOSED",
+          "command": "0x003f",
+          "first_frame": 5867,
+          "id": "global-audio-ffa3c0-003a8e-003f",
+          "owner_families": [
+            "boss"
+          ]
+        },
+        {
+          "classification": "SOURCE_CLOSED",
+          "command": "0x000f",
+          "first_frame": 5719,
+          "id": "global-audio-ffd180-003a8e-000f",
+          "owner_families": [
+            "presentation"
+          ]
+        }
+      ]
+    },
+    "class_type_inventory": [
+      {
+        "accepted_evidence": "data/oracle11_predator_warrior_authority.json",
+        "class": "0x00",
+        "classification": "SOURCE_CLOSED",
+        "instance_count": 1,
+        "source_owner": "predator-warrior-player-authority",
+        "type": 0
+      },
+      {
+        "accepted_evidence": "data/oracle11_round1_enemy_archetypes.json",
+        "class": "0x00",
+        "classification": "SOURCE_CLOSED",
+        "instance_count": 2,
+        "source_owner": "round1-enemy-archetypes",
+        "type": 12
+      },
+      {
+        "accepted_evidence": "data/oracle11_round1_enemy_archetypes.json",
+        "class": "0x06",
+        "classification": "SOURCE_CLOSED",
+        "instance_count": 1,
+        "source_owner": "round1-enemy-archetypes",
+        "type": 12
+      },
+      {
+        "accepted_evidence": "data/oracle11_round1_navigation.json",
+        "class": "0x07",
+        "classification": "SOURCE_CLOSED",
+        "instance_count": 1,
+        "source_owner": "round1-navigation-terrain-camera",
+        "type": 20
+      },
+      {
+        "accepted_evidence": "data/oracle11_round1_auxiliary_authority.json",
+        "class": "0x49",
+        "classification": "SOURCE_CLOSED",
+        "instance_count": 11,
+        "source_owner": "pickups-equipment-weapons-projectiles-hazards-destructibles",
+        "type": 24
+      }
+    ],
+    "despawn_edges": [
+      {
+        "accepted_evidence": "data/oracle11_predator_warrior_authority.json",
+        "animation_record_count": 94,
+        "class": "0x00",
+        "classification": "SOURCE_CLOSED",
+        "despawn_in_segment": true,
+        "facings": [
+          0,
+          1
+        ],
+        "id": "player-0-life-1972",
+        "observed_lifetime": [
+          1972,
+          6198
+        ],
+        "segment_lifetime": [
+          5567,
+          6198
+        ],
+        "slot": "0xff8380",
+        "source_owner": "predator-warrior-player-authority",
+        "spawn_in_segment": false,
+        "state_context_count": 34,
+        "type": 0
+      },
+      {
+        "accepted_evidence": "data/oracle11_round1_auxiliary_authority.json",
+        "animation_record_count": 1,
+        "class": "0x49",
+        "classification": "SOURCE_CLOSED",
+        "despawn_in_segment": true,
+        "facings": [
+          1
+        ],
+        "id": "actor-56-life-5736",
+        "observed_lifetime": [
+          5736,
+          5742
+        ],
+        "segment_lifetime": [
+          5736,
+          5742
+        ],
+        "slot": "0xffbf80",
+        "source_owner": "pickups-equipment-weapons-projectiles-hazards-destructibles",
+        "spawn_in_segment": true,
+        "state_context_count": 1,
+        "type": 24
+      },
+      {
+        "accepted_evidence": "data/oracle11_round1_auxiliary_authority.json",
+        "animation_record_count": 1,
+        "class": "0x49",
+        "classification": "SOURCE_CLOSED",
+        "despawn_in_segment": true,
+        "facings": [
+          1
+        ],
+        "id": "actor-54-life-5742",
+        "observed_lifetime": [
+          5742,
+          5748
+        ],
+        "segment_lifetime": [
+          5742,
+          5748
+        ],
+        "slot": "0xffbe00",
+        "source_owner": "pickups-equipment-weapons-projectiles-hazards-destructibles",
+        "spawn_in_segment": true,
+        "state_context_count": 1,
+        "type": 24
+      },
+      {
+        "accepted_evidence": "data/oracle11_round1_auxiliary_authority.json",
+        "animation_record_count": 1,
+        "class": "0x49",
+        "classification": "SOURCE_CLOSED",
+        "despawn_in_segment": true,
+        "facings": [
+          1
+        ],
+        "id": "actor-56-life-5744",
+        "observed_lifetime": [
+          5744,
+          5750
+        ],
+        "segment_lifetime": [
+          5744,
+          5750
+        ],
+        "slot": "0xffbf80",
+        "source_owner": "pickups-equipment-weapons-projectiles-hazards-destructibles",
+        "spawn_in_segment": true,
+        "state_context_count": 1,
+        "type": 24
+      },
+      {
+        "accepted_evidence": "data/oracle11_round1_auxiliary_authority.json",
+        "animation_record_count": 1,
+        "class": "0x49",
+        "classification": "SOURCE_CLOSED",
+        "despawn_in_segment": true,
+        "facings": [
+          1
+        ],
+        "id": "actor-54-life-5750",
+        "observed_lifetime": [
+          5750,
+          5756
+        ],
+        "segment_lifetime": [
+          5750,
+          5756
+        ],
+        "slot": "0xffbe00",
+        "source_owner": "pickups-equipment-weapons-projectiles-hazards-destructibles",
+        "spawn_in_segment": true,
+        "state_context_count": 1,
+        "type": 24
+      },
+      {
+        "accepted_evidence": "data/oracle11_round1_auxiliary_authority.json",
+        "animation_record_count": 1,
+        "class": "0x49",
+        "classification": "SOURCE_CLOSED",
+        "despawn_in_segment": true,
+        "facings": [
+          1
+        ],
+        "id": "actor-56-life-5752",
+        "observed_lifetime": [
+          5752,
+          5758
+        ],
+        "segment_lifetime": [
+          5752,
+          5758
+        ],
+        "slot": "0xffbf80",
+        "source_owner": "pickups-equipment-weapons-projectiles-hazards-destructibles",
+        "spawn_in_segment": true,
+        "state_context_count": 1,
+        "type": 24
+      },
+      {
+        "accepted_evidence": "data/oracle11_round1_auxiliary_authority.json",
+        "animation_record_count": 1,
+        "class": "0x49",
+        "classification": "SOURCE_CLOSED",
+        "despawn_in_segment": true,
+        "facings": [
+          1
+        ],
+        "id": "actor-56-life-5784",
+        "observed_lifetime": [
+          5784,
+          5790
+        ],
+        "segment_lifetime": [
+          5784,
+          5790
+        ],
+        "slot": "0xffbf80",
+        "source_owner": "pickups-equipment-weapons-projectiles-hazards-destructibles",
+        "spawn_in_segment": true,
+        "state_context_count": 1,
+        "type": 24
+      },
+      {
+        "accepted_evidence": "data/oracle11_round1_auxiliary_authority.json",
+        "animation_record_count": 1,
+        "class": "0x49",
+        "classification": "SOURCE_CLOSED",
+        "despawn_in_segment": true,
+        "facings": [
+          1
+        ],
+        "id": "actor-54-life-5786",
+        "observed_lifetime": [
+          5786,
+          5792
+        ],
+        "segment_lifetime": [
+          5786,
+          5792
+        ],
+        "slot": "0xffbe00",
+        "source_owner": "pickups-equipment-weapons-projectiles-hazards-destructibles",
+        "spawn_in_segment": true,
+        "state_context_count": 1,
+        "type": 24
+      },
+      {
+        "accepted_evidence": "data/oracle11_round1_auxiliary_authority.json",
+        "animation_record_count": 1,
+        "class": "0x49",
+        "classification": "SOURCE_CLOSED",
+        "despawn_in_segment": true,
+        "facings": [
+          1
+        ],
+        "id": "actor-56-life-5792",
+        "observed_lifetime": [
+          5792,
+          5798
+        ],
+        "segment_lifetime": [
+          5792,
+          5798
+        ],
+        "slot": "0xffbf80",
+        "source_owner": "pickups-equipment-weapons-projectiles-hazards-destructibles",
+        "spawn_in_segment": true,
+        "state_context_count": 1,
+        "type": 24
+      },
+      {
+        "accepted_evidence": "data/oracle11_round1_auxiliary_authority.json",
+        "animation_record_count": 1,
+        "class": "0x49",
+        "classification": "SOURCE_CLOSED",
+        "despawn_in_segment": true,
+        "facings": [
+          1
+        ],
+        "id": "actor-54-life-5794",
+        "observed_lifetime": [
+          5794,
+          5800
+        ],
+        "segment_lifetime": [
+          5794,
+          5800
+        ],
+        "slot": "0xffbe00",
+        "source_owner": "pickups-equipment-weapons-projectiles-hazards-destructibles",
+        "spawn_in_segment": true,
+        "state_context_count": 1,
+        "type": 24
+      },
+      {
+        "accepted_evidence": "data/oracle11_round1_auxiliary_authority.json",
+        "animation_record_count": 1,
+        "class": "0x49",
+        "classification": "SOURCE_CLOSED",
+        "despawn_in_segment": true,
+        "facings": [
+          1
+        ],
+        "id": "actor-56-life-5800",
+        "observed_lifetime": [
+          5800,
+          5806
+        ],
+        "segment_lifetime": [
+          5800,
+          5806
+        ],
+        "slot": "0xffbf80",
+        "source_owner": "pickups-equipment-weapons-projectiles-hazards-destructibles",
+        "spawn_in_segment": true,
+        "state_context_count": 1,
+        "type": 24
+      },
+      {
+        "accepted_evidence": "data/oracle11_round1_auxiliary_authority.json",
+        "animation_record_count": 1,
+        "class": "0x49",
+        "classification": "SOURCE_CLOSED",
+        "despawn_in_segment": true,
+        "facings": [
+          1
+        ],
+        "id": "actor-54-life-5802",
+        "observed_lifetime": [
+          5802,
+          5808
+        ],
+        "segment_lifetime": [
+          5802,
+          5808
+        ],
+        "slot": "0xffbe00",
+        "source_owner": "pickups-equipment-weapons-projectiles-hazards-destructibles",
+        "spawn_in_segment": true,
+        "state_context_count": 1,
+        "type": 24
+      }
+    ],
+    "hit_ko_transitions": [
+      {
+        "class": "0x06",
+        "classification": "SOURCE_CLOSED",
+        "count": 1,
+        "first_frame": 5720,
+        "from": [
+          512,
+          4612
+        ],
+        "to": [
+          512,
+          4614
+        ],
+        "type": 12
+      },
+      {
+        "class": "0x06",
+        "classification": "SOURCE_CLOSED",
+        "count": 1,
+        "first_frame": 5734,
+        "from": [
+          512,
+          4614
+        ],
+        "to": [
+          512,
+          4616
+        ],
+        "type": 12
+      },
+      {
+        "class": "0x06",
+        "classification": "SOURCE_CLOSED",
+        "count": 1,
+        "first_frame": 5755,
+        "from": [
+          512,
+          4616
+        ],
+        "to": [
+          514,
+          0
+        ],
+        "type": 12
+      },
+      {
+        "class": "0x06",
+        "classification": "SOURCE_CLOSED",
+        "count": 5,
+        "first_frame": 5756,
+        "from": [
+          514,
+          0
+        ],
+        "to": [
+          514,
+          514
+        ],
+        "type": 12
+      },
+      {
+        "class": "0x06",
+        "classification": "SOURCE_CLOSED",
+        "count": 18,
+        "first_frame": 5806,
+        "from": [
+          514,
+          514
+        ],
+        "to": [
+          514,
+          516
+        ],
+        "type": 12
+      },
+      {
+        "class": "0x06",
+        "classification": "SOURCE_CLOSED",
+        "count": 17,
+        "first_frame": 5809,
+        "from": [
+          514,
+          516
+        ],
+        "to": [
+          514,
+          518
+        ],
+        "type": 12
+      },
+      {
+        "class": "0x06",
+        "classification": "SOURCE_CLOSED",
+        "count": 1,
+        "first_frame": 5820,
+        "from": [
+          514,
+          518
+        ],
+        "to": [
+          514,
+          0
+        ],
+        "type": 12
+      },
+      {
+        "class": "0x00",
+        "classification": "SOURCE_CLOSED",
+        "count": 1,
+        "first_frame": 5832,
+        "from": [
+          512,
+          8192
+        ],
+        "to": [
+          514,
+          0
+        ],
+        "type": 12
+      },
+      {
+        "class": "0x00",
+        "classification": "SOURCE_CLOSED",
+        "count": 2,
+        "first_frame": 5833,
+        "from": [
+          514,
+          0
+        ],
+        "to": [
+          514,
+          2
+        ],
+        "type": 12
+      },
+      {
+        "class": "0x00",
+        "classification": "SOURCE_CLOSED",
+        "count": 2,
+        "first_frame": 5842,
+        "from": [
+          514,
+          2
+        ],
+        "to": [
+          514,
+          512
+        ],
+        "type": 12
+      },
+      {
+        "class": "0x00",
+        "classification": "SOURCE_CLOSED",
+        "count": 2,
+        "first_frame": 5843,
+        "from": [
+          514,
+          512
+        ],
+        "to": [
+          514,
+          514
+        ],
+        "type": 12
+      },
+      {
+        "class": "0x00",
+        "classification": "SOURCE_CLOSED",
+        "count": 1,
+        "first_frame": 5866,
+        "from": [
+          512,
+          8192
+        ],
+        "to": [
+          512,
+          0
+        ],
+        "type": 12
+      },
+      {
+        "class": "0x00",
+        "classification": "SOURCE_CLOSED",
+        "count": 2,
+        "first_frame": 5867,
+        "from": [
+          512,
+          0
+        ],
+        "to": [
+          512,
+          3072
+        ],
+        "type": 12
+      },
+      {
+        "class": "0x06",
+        "classification": "SOURCE_CLOSED",
+        "count": 16,
+        "first_frame": 5882,
+        "from": [
+          514,
+          518
+        ],
+        "to": [
+          514,
+          520
+        ],
+        "type": 12
+      },
+      {
+        "class": "0x06",
+        "classification": "SOURCE_CLOSED",
+        "count": 16,
+        "first_frame": 5883,
+        "from": [
+          514,
+          520
+        ],
+        "to": [
+          514,
+          522
+        ],
+        "type": 12
+      },
+      {
+        "class": "0x00",
+        "classification": "SOURCE_CLOSED",
+        "count": 2,
+        "first_frame": 5884,
+        "from": [
+          512,
+          3072
+        ],
+        "to": [
+          512,
+          1024
+        ],
+        "type": 12
+      },
+      {
+        "class": "0x00",
+        "classification": "SOURCE_CLOSED",
+        "count": 3,
+        "first_frame": 5889,
+        "from": [
+          514,
+          514
+        ],
+        "to": [
+          514,
+          516
+        ],
+        "type": 12
+      },
+      {
+        "class": "0x00",
+        "classification": "SOURCE_CLOSED",
+        "count": 2,
+        "first_frame": 5892,
+        "from": [
+          514,
+          516
+        ],
+        "to": [
+          514,
+          518
+        ],
+        "type": 12
+      },
+      {
+        "class": "0x06",
+        "classification": "SOURCE_CLOSED",
+        "count": 9,
+        "first_frame": 5902,
+        "from": [
+          514,
+          522
+        ],
+        "to": [
+          512,
+          3584
+        ],
+        "type": 12
+      },
+      {
+        "class": "0x00",
+        "classification": "SOURCE_CLOSED",
+        "count": 2,
+        "first_frame": 5903,
+        "from": [
+          514,
+          518
+        ],
+        "to": [
+          514,
+          520
+        ],
+        "type": 12
+      },
+      {
+        "class": "0x06",
+        "classification": "SOURCE_CLOSED",
+        "count": 20,
+        "first_frame": 5903,
+        "from": [
+          512,
+          3584
+        ],
+        "to": [
+          512,
+          3586
+        ],
+        "type": 12
+      },
+      {
+        "class": "0x00",
+        "classification": "SOURCE_CLOSED",
+        "count": 1,
+        "first_frame": 5941,
+        "from": [
+          512,
+          1024
+        ],
+        "to": [
+          512,
+          1536
+        ],
+        "type": 12
+      },
+      {
+        "class": "0x00",
+        "classification": "SOURCE_CLOSED",
+        "count": 1,
+        "first_frame": 5943,
+        "from": [
+          514,
+          520
+        ],
+        "to": [
+          514,
+          522
+        ],
+        "type": 12
+      },
+      {
+        "class": "0x00",
+        "classification": "SOURCE_CLOSED",
+        "count": 1,
+        "first_frame": 5954,
+        "from": [
+          512,
+          1536
+        ],
+        "to": [
+          512,
+          0
+        ],
+        "type": 12
+      },
+      {
+        "class": "0x00",
+        "classification": "SOURCE_CLOSED",
+        "count": 1,
+        "first_frame": 5955,
+        "from": [
+          512,
+          0
+        ],
+        "to": [
+          512,
+          5632
+        ],
+        "type": 12
+      },
+      {
+        "class": "0x06",
+        "classification": "SOURCE_CLOSED",
+        "count": 5,
+        "first_frame": 5961,
+        "from": [
+          512,
+          3586
+        ],
+        "to": [
+          512,
+          3590
+        ],
+        "type": 12
+      },
+      {
+        "class": "0x00",
+        "classification": "SOURCE_CLOSED",
+        "count": 1,
+        "first_frame": 5968,
+        "from": [
+          514,
+          522
+        ],
+        "to": [
+          512,
+          0
+        ],
+        "type": 12
+      },
+      {
+        "class": "0x00",
+        "classification": "SOURCE_CLOSED",
+        "count": 1,
+        "first_frame": 5969,
+        "from": [
+          512,
+          0
+        ],
+        "to": [
+          512,
+          5632
+        ],
+        "type": 12
+      },
+      {
+        "class": "0x06",
+        "classification": "SOURCE_CLOSED",
+        "count": 5,
+        "first_frame": 5969,
+        "from": [
+          512,
+          3590
+        ],
+        "to": [
+          512,
+          3588
+        ],
+        "type": 12
+      },
+      {
+        "class": "0x06",
+        "classification": "SOURCE_CLOSED",
+        "count": 1,
+        "first_frame": 5970,
+        "from": [
+          512,
+          3588
+        ],
+        "to": [
+          512,
+          0
+        ],
+        "type": 12
+      },
+      {
+        "class": "0x06",
+        "classification": "SOURCE_CLOSED",
+        "count": 27,
+        "first_frame": 5971,
+        "from": [
+          512,
+          0
+        ],
+        "to": [
+          512,
+          1024
+        ],
+        "type": 12
+      },
+      {
+        "class": "0x00",
+        "classification": "SOURCE_CLOSED",
+        "count": 1,
+        "first_frame": 5972,
+        "from": [
+          512,
+          5632
+        ],
+        "to": [
+          512,
+          1024
+        ],
+        "type": 12
+      },
+      {
+        "class": "0x00",
+        "classification": "SOURCE_CLOSED",
+        "count": 1,
+        "first_frame": 5986,
+        "from": [
+          512,
+          5632
+        ],
+        "to": [
+          512,
+          1024
+        ],
+        "type": 12
+      },
+      {
+        "class": "0x00",
+        "classification": "SOURCE_CLOSED",
+        "count": 1,
+        "first_frame": 6021,
+        "from": [
+          512,
+          1024
+        ],
+        "to": [
+          512,
+          4096
+        ],
+        "type": 12
+      },
+      {
+        "class": "0x06",
+        "classification": "SOURCE_CLOSED",
+        "count": 16,
+        "first_frame": 6028,
+        "from": [
+          512,
+          1024
+        ],
+        "to": [
+          512,
+          3072
+        ],
+        "type": 12
+      },
+      {
+        "class": "0x06",
+        "classification": "SOURCE_CLOSED",
+        "count": 16,
+        "first_frame": 6029,
+        "from": [
+          512,
+          3072
+        ],
+        "to": [
+          512,
+          3074
+        ],
+        "type": 12
+      },
+      {
+        "class": "0x00",
+        "classification": "SOURCE_CLOSED",
+        "count": 1,
+        "first_frame": 6035,
+        "from": [
+          512,
+          1024
+        ],
+        "to": [
+          512,
+          4100
+        ],
+        "type": 12
+      },
+      {
+        "class": "0x00",
+        "classification": "SOURCE_CLOSED",
+        "count": 1,
+        "first_frame": 6052,
+        "from": [
+          512,
+          4100
+        ],
+        "to": [
+          512,
+          4096
+        ],
+        "type": 12
+      },
+      {
+        "class": "0x00",
+        "classification": "SOURCE_CLOSED",
+        "count": 1,
+        "first_frame": 6073,
+        "from": [
+          512,
+          4096
+        ],
+        "to": [
+          512,
+          2560
+        ],
+        "type": 12
+      },
+      {
+        "class": "0x00",
+        "classification": "SOURCE_CLOSED",
+        "count": 1,
+        "first_frame": 6074,
+        "from": [
+          512,
+          2560
+        ],
+        "to": [
+          512,
+          2562
+        ],
+        "type": 12
+      },
+      {
+        "class": "0x00",
+        "classification": "SOURCE_CLOSED",
+        "count": 1,
+        "first_frame": 6082,
+        "from": [
+          512,
+          4096
+        ],
+        "to": [
+          512,
+          4608
+        ],
+        "type": 12
+      },
+      {
+        "class": "0x00",
+        "classification": "SOURCE_CLOSED",
+        "count": 1,
+        "first_frame": 6083,
+        "from": [
+          512,
+          4608
+        ],
+        "to": [
+          512,
+          4610
+        ],
+        "type": 12
+      },
+      {
+        "class": "0x00",
+        "classification": "SOURCE_CLOSED",
+        "count": 1,
+        "first_frame": 6094,
+        "from": [
+          512,
+          4610
+        ],
+        "to": [
+          512,
+          4612
+        ],
+        "type": 12
+      },
+      {
+        "class": "0x00",
+        "classification": "SOURCE_CLOSED",
+        "count": 1,
+        "first_frame": 6115,
+        "from": [
+          512,
+          2562
+        ],
+        "to": [
+          512,
+          2564
+        ],
+        "type": 12
+      },
+      {
+        "class": "0x06",
+        "classification": "SOURCE_CLOSED",
+        "count": 6,
+        "first_frame": 6116,
+        "from": [
+          512,
+          3074
+        ],
+        "to": [
+          512,
+          3584
+        ],
+        "type": 12
+      },
+      {
+        "class": "0x00",
+        "classification": "SOURCE_CLOSED",
+        "count": 1,
+        "first_frame": 6117,
+        "from": [
+          512,
+          2564
+        ],
+        "to": [
+          512,
+          2562
+        ],
+        "type": 12
+      },
+      {
+        "class": "0x00",
+        "classification": "SOURCE_CLOSED",
+        "count": 1,
+        "first_frame": 6142,
+        "from": [
+          512,
+          4612
+        ],
+        "to": [
+          512,
+          4614
+        ],
+        "type": 12
+      },
+      {
+        "class": "0x00",
+        "classification": "SOURCE_CLOSED",
+        "count": 1,
+        "first_frame": 6146,
+        "from": [
+          512,
+          2562
+        ],
+        "to": [
+          512,
+          0
+        ],
+        "type": 12
+      },
+      {
+        "class": "0x00",
+        "classification": "SOURCE_CLOSED",
+        "count": 2,
+        "first_frame": 6147,
+        "from": [
+          512,
+          0
+        ],
+        "to": [
+          512,
+          1024
+        ],
+        "type": 12
+      },
+      {
+        "class": "0x00",
+        "classification": "SOURCE_CLOSED",
+        "count": 1,
+        "first_frame": 6148,
+        "from": [
+          512,
+          1024
+        ],
+        "to": [
+          512,
+          2048
+        ],
+        "type": 12
+      },
+      {
+        "class": "0x00",
+        "classification": "SOURCE_CLOSED",
+        "count": 1,
+        "first_frame": 6149,
+        "from": [
+          512,
+          2048
+        ],
+        "to": [
+          512,
+          2050
+        ],
+        "type": 12
+      },
+      {
+        "class": "0x00",
+        "classification": "SOURCE_CLOSED",
+        "count": 1,
+        "first_frame": 6163,
+        "from": [
+          512,
+          4614
+        ],
+        "to": [
+          512,
+          0
+        ],
+        "type": 12
+      },
+      {
+        "class": "0x06",
+        "classification": "SOURCE_CLOSED",
+        "count": 13,
+        "first_frame": 6175,
+        "from": [
+          512,
+          3586
+        ],
+        "to": [
+          512,
+          0
+        ],
+        "type": 12
+      },
+      {
+        "class": "0x00",
+        "classification": "SOURCE_CLOSED",
+        "count": 1,
+        "first_frame": 6182,
+        "from": [
+          512,
+          1024
+        ],
+        "to": [
+          512,
+          2056
+        ],
+        "type": 12
+      },
+      {
+        "class": "0x00",
+        "classification": "SOURCE_CLOSED",
+        "count": 1,
+        "first_frame": 6189,
+        "from": [
+          512,
+          2050
+        ],
+        "to": [
+          512,
+          0
+        ],
+        "type": 12
+      },
+      {
+        "class": "0x00",
+        "classification": "SOURCE_CLOSED",
+        "count": 1,
+        "first_frame": 6195,
+        "from": [
+          512,
+          2056
+        ],
+        "to": [
+          512,
+          2048
+        ],
+        "type": 12
+      },
+      {
+        "class": "0x00",
+        "classification": "SOURCE_CLOSED",
+        "count": 1,
+        "first_frame": 6196,
+        "from": [
+          512,
+          2048
+        ],
+        "to": [
+          512,
+          2050
+        ],
+        "type": 12
+      }
+    ],
+    "load_release_boundaries": [
+      {
+        "classification": "SOURCE_CLOSED",
+        "completion": {
+          "guard": "all captured source writes complete before the visible boundary snapshot",
+          "next_route_state": {
+            "frame": "6201",
+            "g8009": "2",
+            "player_active": "0",
+            "player_phase": "0",
+            "player_state": "0",
+            "state8002": "0",
+            "state8004": "6",
+            "state8006": "0",
+            "state802c": "37312",
+            "state804a": "1935",
+            "state81c2": "0"
+          },
+          "resulting_package_sha256": "02fd861bf661a94320e84030c5f42901373cae22e739d9579158430d5336a836"
+        },
+        "destination_ownership": {
+          "first_address": "0x910000",
+          "last_address": "0x91fffe",
+          "owner": "CPS2 graphics RAM package plane",
+          "region": "gfxram1"
+        },
+        "failure_control": {
+          "capture": "oracle11_global_load_mut_6200",
+          "kind": "suppress every write to the owned destination region on the source write frame",
+          "mutant_package_sha256": "b56a3cf96eaabda4d58ef92f0b786fad91e6d7207bca3e15a81bee008dc486de",
+          "package_difference": true,
+          "route_and_gameplay_projection_unchanged": true,
+          "stable_round2_route_state": 4,
+          "suppressed_writes": 8960
+        },
+        "id": "route-load-release-6200",
+        "legal_read_window": {
+          "first_frame_inclusive": 6200,
+          "last_frame_inclusive": 12798,
+          "next_package_boundary": 12799
+        },
+        "loader_callers": [
+          {
+            "caller_chains": [
+              [
+                "0x008c50",
+                "0x0080a2",
+                "0x000000"
+              ]
+            ],
+            "destination_first": "0x91e000",
+            "destination_last": "0x91fff2",
+            "origin_a6": [
+              "0xff8680"
+            ],
+            "source_window_sha256": "4b4381f68ec4cb1c6f1f4138b00cf67015055a8c91f606e4d5b1bd636f997e8e",
+            "write_count": 1024,
+            "writer_pc": "0x00a6f2"
+          },
+          {
+            "caller_chains": [
+              [
+                "0x008c50",
+                "0x0080a2",
+                "0x000000"
+              ]
+            ],
+            "destination_first": "0x91e004",
+            "destination_last": "0x91fff6",
+            "origin_a6": [
+              "0xff8680"
+            ],
+            "source_window_sha256": "58961a3d2b0a8330c4865cedf49cd5a01c568560fb94bbe6333f06e3af84d40a",
+            "write_count": 1024,
+            "writer_pc": "0x00a6f4"
+          },
+          {
+            "caller_chains": [
+              [
+                "0x008c50",
+                "0x0080a2",
+                "0x000000"
+              ]
+            ],
+            "destination_first": "0x91e008",
+            "destination_last": "0x91fffa",
+            "origin_a6": [
+              "0xff8680"
+            ],
+            "source_window_sha256": "fca2a7cf1a16ca1189e734e697953dc604003b6dd956cbfdb31363897d2021c5",
+            "write_count": 1024,
+            "writer_pc": "0x00a6f6"
+          },
+          {
+            "caller_chains": [
+              [
+                "0x008c50",
+                "0x0080a2",
+                "0x000000"
+              ]
+            ],
+            "destination_first": "0x91e00c",
+            "destination_last": "0x91fffe",
+            "origin_a6": [
+              "0xff8680"
+            ],
+            "source_window_sha256": "be3958fb2017f79729e2d1bc0d0d4637ce6fbf438a6cdaf8b3a0812c1a3fa768",
+            "write_count": 1024,
+            "writer_pc": "0x00a6f8"
+          },
+          {
+            "caller_chains": [
+              [
+                "0x008c7c",
+                "0x0080a2",
+                "0x000000"
+              ],
+              [
+                "0x016f9e",
+                "0x008c7c",
+                "0x0080a2"
+              ]
+            ],
+            "destination_first": "0x910000",
+            "destination_last": "0x9117fe",
+            "origin_a6": [
+              "0xff8380"
+            ],
+            "source_window_sha256": "89ccb9813ff7093d89919f0bbb58c674c5a3099f729e399a517db97d6e1223bf",
+            "write_count": 1536,
+            "writer_pc": "0x016fc2"
+          },
+          {
+            "caller_chains": [
+              [
+                "0x008c56",
+                "0x0080a2",
+                "0x000000"
+              ],
+              [
+                "0x0180a2",
+                "0x008c56",
+                "0x0080a2"
+              ],
+              [
+                "0x0180b6",
+                "0x008c56",
+                "0x0080a2"
+              ],
+              [
+                "0x0180ca",
+                "0x008c56",
+                "0x0080a2"
+              ]
+            ],
+            "destination_first": "0x91c000",
+            "destination_last": "0x91cfe2",
+            "origin_a6": [
+              "0xff8680"
+            ],
+            "source_window_sha256": "b1ee1de37ad53f52e2edacff76c42e7b188ad0bb5dea12569e48b70ec5e22f7a",
+            "write_count": 256,
+            "writer_pc": "0x017de6"
+          },
+          {
+            "caller_chains": [
+              [
+                "0x008c56",
+                "0x0080a2",
+                "0x000000"
+              ],
+              [
+                "0x0180a2",
+                "0x008c56",
+                "0x0080a2"
+              ],
+              [
+                "0x0180b6",
+                "0x008c56",
+                "0x0080a2"
+              ],
+              [
+                "0x0180ca",
+                "0x008c56",
+                "0x0080a2"
+              ]
+            ],
+            "destination_first": "0x91c004",
+            "destination_last": "0x91cfe6",
+            "origin_a6": [
+              "0xff8680"
+            ],
+            "source_window_sha256": "052611a168e943a0651b4247694d8ae8fd07ec92c98b05c066e7119a9f578a2c",
+            "write_count": 256,
+            "writer_pc": "0x017dec"
+          },
+          {
+            "caller_chains": [
+              [
+                "0x008c56",
+                "0x0080a2",
+                "0x000000"
+              ],
+              [
+                "0x0180a2",
+                "0x008c56",
+                "0x0080a2"
+              ],
+              [
+                "0x0180b6",
+                "0x008c56",
+                "0x0080a2"
+              ],
+              [
+                "0x0180ca",
+                "0x008c56",
+                "0x0080a2"
+              ]
+            ],
+            "destination_first": "0x91c008",
+            "destination_last": "0x91cfea",
+            "origin_a6": [
+              "0xff8680"
+            ],
+            "source_window_sha256": "fa7b556096411e8cbb7be8504c56be71411aca4339381c67b452c7289c8d0bf1",
+            "write_count": 256,
+            "writer_pc": "0x017df2"
+          },
+          {
+            "caller_chains": [
+              [
+                "0x008c56",
+                "0x0080a2",
+                "0x000000"
+              ],
+              [
+                "0x0180a2",
+                "0x008c56",
+                "0x0080a2"
+              ],
+              [
+                "0x0180b6",
+                "0x008c56",
+                "0x0080a2"
+              ],
+              [
+                "0x0180ca",
+                "0x008c56",
+                "0x0080a2"
+              ]
+            ],
+            "destination_first": "0x91c00c",
+            "destination_last": "0x91cfee",
+            "origin_a6": [
+              "0xff8680"
+            ],
+            "source_window_sha256": "4c6c8b8d4e8f0b0a54f5d2402dffff7420501d274672714f33e52014f8e4aa9c",
+            "write_count": 256,
+            "writer_pc": "0x017df8"
+          },
+          {
+            "caller_chains": [
+              [
+                "0x008c56",
+                "0x0080a2",
+                "0x000000"
+              ],
+              [
+                "0x0180a2",
+                "0x008c56",
+                "0x0080a2"
+              ],
+              [
+                "0x0180b6",
+                "0x008c56",
+                "0x0080a2"
+              ],
+              [
+                "0x0180ca",
+                "0x008c56",
+                "0x0080a2"
+              ]
+            ],
+            "destination_first": "0x91c010",
+            "destination_last": "0x91cff2",
+            "origin_a6": [
+              "0xff8680"
+            ],
+            "source_window_sha256": "d70485ccb60e6b5151fe68e794c9ba1fbc3e80db3b705aa21b1111bd14e40970",
+            "write_count": 256,
+            "writer_pc": "0x017dfe"
+          },
+          {
+            "caller_chains": [
+              [
+                "0x008c56",
+                "0x0080a2",
+                "0x000000"
+              ],
+              [
+                "0x0180a2",
+                "0x008c56",
+                "0x0080a2"
+              ],
+              [
+                "0x0180b6",
+                "0x008c56",
+                "0x0080a2"
+              ],
+              [
+                "0x0180ca",
+                "0x008c56",
+                "0x0080a2"
+              ]
+            ],
+            "destination_first": "0x91c014",
+            "destination_last": "0x91cff6",
+            "origin_a6": [
+              "0xff8680"
+            ],
+            "source_window_sha256": "b024e83e6d07737c1520b92bfefc25e25a628236f2bc08e5170e8c1432faf32b",
+            "write_count": 256,
+            "writer_pc": "0x017e04"
+          },
+          {
+            "caller_chains": [
+              [
+                "0x008c56",
+                "0x0080a2",
+                "0x000000"
+              ],
+              [
+                "0x0180a2",
+                "0x008c56",
+                "0x0080a2"
+              ],
+              [
+                "0x0180b6",
+                "0x008c56",
+                "0x0080a2"
+              ],
+              [
+                "0x0180ca",
+                "0x008c56",
+                "0x0080a2"
+              ]
+            ],
+            "destination_first": "0x91c018",
+            "destination_last": "0x91cffa",
+            "origin_a6": [
+              "0xff8680"
+            ],
+            "source_window_sha256": "bcae5f0467bf9ecf0204cf63e8efd55aad873f454367b848ba1b2f981468d4b3",
+            "write_count": 256,
+            "writer_pc": "0x017e0a"
+          },
+          {
+            "caller_chains": [
+              [
+                "0x008c56",
+                "0x0080a2",
+                "0x000000"
+              ],
+              [
+                "0x0180a2",
+                "0x008c56",
+                "0x0080a2"
+              ],
+              [
+                "0x0180b6",
+                "0x008c56",
+                "0x0080a2"
+              ],
+              [
+                "0x0180ca",
+                "0x008c56",
+                "0x0080a2"
+              ]
+            ],
+            "destination_first": "0x91c01c",
+            "destination_last": "0x91cffe",
+            "origin_a6": [
+              "0xff8680"
+            ],
+            "source_window_sha256": "9080c57266d52c705d24c0c7c3df5273b7e9ecc59a2d7c7a068e800512d35075",
+            "write_count": 256,
+            "writer_pc": "0x017e10"
+          },
+          {
+            "caller_chains": [
+              [
+                "0x008c90",
+                "0x0080a2",
+                "0x000000"
+              ],
+              [
+                "0x008ca0",
+                "0x0080a2",
+                "0x000000"
+              ]
+            ],
+            "destination_first": "0x914000",
+            "destination_last": "0x9147fc",
+            "origin_a6": [
+              "0xff8380"
+            ],
+            "source_window_sha256": "96b46eda07b20751160d3c48386d3f723d3b6e7dc5300140eb2aa4d9d725f086",
+            "write_count": 512,
+            "writer_pc": "0x0b27e8"
+          },
+          {
+            "caller_chains": [
+              [
+                "0x008c90",
+                "0x0080a2",
+                "0x000000"
+              ],
+              [
+                "0x008ca0",
+                "0x0080a2",
+                "0x000000"
+              ]
+            ],
+            "destination_first": "0x914002",
+            "destination_last": "0x9147fe",
+            "origin_a6": [
+              "0xff8380"
+            ],
+            "source_window_sha256": "f90058e9fcabf0358cff1a3d89a2d9f36c79b3a17d077ca2763472d45478aaef",
+            "write_count": 512,
+            "writer_pc": "0x0b27ea"
+          },
+          {
+            "caller_chains": [
+              [
+                "0x008cae",
+                "0x0080a2",
+                "0x000000"
+              ],
+              [
+                "0x008cbc",
+                "0x0080a2",
+                "0x000000"
+              ]
+            ],
+            "destination_first": "0x918000",
+            "destination_last": "0x9181fc",
+            "origin_a6": [
+              "0xff8380"
+            ],
+            "source_window_sha256": "886a17a4c8cc7a107684b1b9a8676e3a1005fd65ec021322ee6b458e6a27da1d",
+            "write_count": 128,
+            "writer_pc": "0x0b2cf2"
+          },
+          {
+            "caller_chains": [
+              [
+                "0x008cae",
+                "0x0080a2",
+                "0x000000"
+              ],
+              [
+                "0x008cbc",
+                "0x0080a2",
+                "0x000000"
+              ]
+            ],
+            "destination_first": "0x918002",
+            "destination_last": "0x9181fe",
+            "origin_a6": [
+              "0xff8380"
+            ],
+            "source_window_sha256": "8e65e2ed8a7d7f0e22f069f81eee84f9142a3ebcdfeb9c94a09c754a90d57a63",
+            "write_count": 128,
+            "writer_pc": "0x0b2cf4"
+          }
+        ],
+        "mutation_identity": {
+          "files": {
+            "dispatches.tsv": "3e9a28594c693573d0db1b5f2e08701f93e53c34ccf83d1f91b4333a8fa2dd72",
+            "gfx_writes.tsv": "a2870fb0284ecce8304e5736b1cf77ee1eb0d385427f03c148c55bfaf89731e5",
+            "gfxram0_05565.bin": "73a7529cb37faa6a7ca6c50b0a4f40a59dc908ac41d9cdea8a7dae7c54d00836",
+            "gfxram0_05566.bin": "7bf779b1a9d9f8df6f68d87f904dfce4502dfca356f37b803d8ebfe9f19f8c3d",
+            "gfxram0_06200.bin": "67b66610679a639cc33594ad20721b938e91fd16ee9549589abd3216d695a9c9",
+            "gfxram0_12799.bin": "ca405e1c15bf8ea503c7babedd1c3a851038f6ba78523c957e5f1d6703948a28",
+            "gfxram1_05565.bin": "b56a3cf96eaabda4d58ef92f0b786fad91e6d7207bca3e15a81bee008dc486de",
+            "gfxram1_05566.bin": "b56a3cf96eaabda4d58ef92f0b786fad91e6d7207bca3e15a81bee008dc486de",
+            "gfxram1_06200.bin": "b56a3cf96eaabda4d58ef92f0b786fad91e6d7207bca3e15a81bee008dc486de",
+            "gfxram1_12799.bin": "02fd861bf661a94320e84030c5f42901373cae22e739d9579158430d5336a836",
+            "gfxram2_05565.bin": "42768124ed4684b33f77374a8ad3674b93df0bfa5597fbfc73739722ac2c4247",
+            "gfxram2_05566.bin": "1c716c69090ac02420aaeab2a079b9073bd91eca7a0109c2a40356b95fd50f98",
+            "gfxram2_06200.bin": "1c716c69090ac02420aaeab2a079b9073bd91eca7a0109c2a40356b95fd50f98",
+            "gfxram2_12799.bin": "1c716c69090ac02420aaeab2a079b9073bd91eca7a0109c2a40356b95fd50f98",
+            "load_result.tsv": "a2da88029e3ec585702eaef446482afe4bab0c9c32bb3a8d4dbd33b67c1ecb09",
+            "projectiles.tsv": "0332e5be6eb05db533e4939267f83d4b3d54dc1acd3029ef4180d07b4c8e001a",
+            "result.tsv": "bdbfe46cf955ee4d682b0c59a867be88e2ddd4f0ff4e44d1f7eabe27fc6201a1",
+            "route_windows.tsv": "3cbafaa133bca5ea95f423e2d49e531faa8f9226f7f7b4c420b5e8e2896f7d23",
+            "samples.tsv": "c539b67aeed910c8b425c555b808edbd02a0de3fb8717d3acac3eed4500f918d",
+            "score_writes.tsv": "15e588536d357726b0d64adbf2ecbee78b412a9bf1d55851e7455a541e160ed6"
+          },
+          "manifest_sha256": "43eb7c6872470b855acc34ed2c82ce8aabeec0c03fa29df51aeff5dcc66f8fc4"
+        },
+        "package_identity": {
+          "region": "gfxram1",
+          "snapshot_sha256": "02fd861bf661a94320e84030c5f42901373cae22e739d9579158430d5336a836",
+          "transaction_sha256": "47d5ee64e221e7d1139027630492c2334ed612250557dc2cdea6dbbc8351dd61",
+          "write_count": 8960
+        },
+        "route_guard": {
+          "after": {
+            "frame": "6201",
+            "g8009": "2",
+            "player_active": "0",
+            "player_phase": "0",
+            "player_state": "0",
+            "state8002": "0",
+            "state8004": "6",
+            "state8006": "0",
+            "state802c": "37312",
+            "state804a": "1935",
+            "state81c2": "0"
+          },
+          "at_boundary": {
+            "frame": "6200",
+            "g8009": "2",
+            "player_active": "0",
+            "player_phase": "0",
+            "player_state": "0",
+            "state8002": "0",
+            "state8004": "6",
+            "state8006": "0",
+            "state802c": "37312",
+            "state804a": "1935",
+            "state81c2": "0"
+          },
+          "before": {
+            "frame": "6199",
+            "g8009": "0",
+            "player_active": "0",
+            "player_phase": "0",
+            "player_state": "0",
+            "state8002": "0",
+            "state8004": "6",
+            "state8006": "0",
+            "state802c": "37376",
+            "state804a": "4815",
+            "state81c2": "0"
+          }
+        },
+        "semantic_package_name": "UNKNOWN",
+        "source_write_frame": 6199,
+        "visible_boundary_frame": 6200
+      }
+    ],
+    "spawn_edges": [
+      {
+        "accepted_evidence": "data/oracle11_round1_enemy_archetypes.json",
+        "animation_record_count": 79,
+        "class": "0x00",
+        "classification": "SOURCE_CLOSED",
+        "despawn_in_segment": false,
+        "facings": [
+          0,
+          1
+        ],
+        "id": "actor-17-life-5660",
+        "observed_lifetime": [
+          5660,
+          7039
+        ],
+        "segment_lifetime": [
+          5660,
+          6200
+        ],
+        "slot": "0xffa240",
+        "source_owner": "round1-enemy-archetypes",
+        "spawn_in_segment": true,
+        "state_context_count": 32,
+        "type": 12
+      },
+      {
+        "accepted_evidence": "data/oracle11_round1_enemy_archetypes.json",
+        "animation_record_count": 70,
+        "class": "0x00",
+        "classification": "SOURCE_CLOSED",
+        "despawn_in_segment": false,
+        "facings": [
+          0,
+          1
+        ],
+        "id": "actor-18-life-5660",
+        "observed_lifetime": [
+          5660,
+          6939
+        ],
+        "segment_lifetime": [
+          5660,
+          6200
+        ],
+        "slot": "0xffa300",
+        "source_owner": "round1-enemy-archetypes",
+        "spawn_in_segment": true,
+        "state_context_count": 28,
+        "type": 12
+      },
+      {
+        "accepted_evidence": "data/oracle11_round1_auxiliary_authority.json",
+        "animation_record_count": 1,
+        "class": "0x49",
+        "classification": "SOURCE_CLOSED",
+        "despawn_in_segment": true,
+        "facings": [
+          1
+        ],
+        "id": "actor-56-life-5736",
+        "observed_lifetime": [
+          5736,
+          5742
+        ],
+        "segment_lifetime": [
+          5736,
+          5742
+        ],
+        "slot": "0xffbf80",
+        "source_owner": "pickups-equipment-weapons-projectiles-hazards-destructibles",
+        "spawn_in_segment": true,
+        "state_context_count": 1,
+        "type": 24
+      },
+      {
+        "accepted_evidence": "data/oracle11_round1_auxiliary_authority.json",
+        "animation_record_count": 1,
+        "class": "0x49",
+        "classification": "SOURCE_CLOSED",
+        "despawn_in_segment": true,
+        "facings": [
+          1
+        ],
+        "id": "actor-54-life-5742",
+        "observed_lifetime": [
+          5742,
+          5748
+        ],
+        "segment_lifetime": [
+          5742,
+          5748
+        ],
+        "slot": "0xffbe00",
+        "source_owner": "pickups-equipment-weapons-projectiles-hazards-destructibles",
+        "spawn_in_segment": true,
+        "state_context_count": 1,
+        "type": 24
+      },
+      {
+        "accepted_evidence": "data/oracle11_round1_auxiliary_authority.json",
+        "animation_record_count": 1,
+        "class": "0x49",
+        "classification": "SOURCE_CLOSED",
+        "despawn_in_segment": true,
+        "facings": [
+          1
+        ],
+        "id": "actor-56-life-5744",
+        "observed_lifetime": [
+          5744,
+          5750
+        ],
+        "segment_lifetime": [
+          5744,
+          5750
+        ],
+        "slot": "0xffbf80",
+        "source_owner": "pickups-equipment-weapons-projectiles-hazards-destructibles",
+        "spawn_in_segment": true,
+        "state_context_count": 1,
+        "type": 24
+      },
+      {
+        "accepted_evidence": "data/oracle11_round1_auxiliary_authority.json",
+        "animation_record_count": 1,
+        "class": "0x49",
+        "classification": "SOURCE_CLOSED",
+        "despawn_in_segment": true,
+        "facings": [
+          1
+        ],
+        "id": "actor-54-life-5750",
+        "observed_lifetime": [
+          5750,
+          5756
+        ],
+        "segment_lifetime": [
+          5750,
+          5756
+        ],
+        "slot": "0xffbe00",
+        "source_owner": "pickups-equipment-weapons-projectiles-hazards-destructibles",
+        "spawn_in_segment": true,
+        "state_context_count": 1,
+        "type": 24
+      },
+      {
+        "accepted_evidence": "data/oracle11_round1_auxiliary_authority.json",
+        "animation_record_count": 1,
+        "class": "0x49",
+        "classification": "SOURCE_CLOSED",
+        "despawn_in_segment": true,
+        "facings": [
+          1
+        ],
+        "id": "actor-56-life-5752",
+        "observed_lifetime": [
+          5752,
+          5758
+        ],
+        "segment_lifetime": [
+          5752,
+          5758
+        ],
+        "slot": "0xffbf80",
+        "source_owner": "pickups-equipment-weapons-projectiles-hazards-destructibles",
+        "spawn_in_segment": true,
+        "state_context_count": 1,
+        "type": 24
+      },
+      {
+        "accepted_evidence": "data/oracle11_round1_auxiliary_authority.json",
+        "animation_record_count": 1,
+        "class": "0x49",
+        "classification": "SOURCE_CLOSED",
+        "despawn_in_segment": true,
+        "facings": [
+          1
+        ],
+        "id": "actor-56-life-5784",
+        "observed_lifetime": [
+          5784,
+          5790
+        ],
+        "segment_lifetime": [
+          5784,
+          5790
+        ],
+        "slot": "0xffbf80",
+        "source_owner": "pickups-equipment-weapons-projectiles-hazards-destructibles",
+        "spawn_in_segment": true,
+        "state_context_count": 1,
+        "type": 24
+      },
+      {
+        "accepted_evidence": "data/oracle11_round1_auxiliary_authority.json",
+        "animation_record_count": 1,
+        "class": "0x49",
+        "classification": "SOURCE_CLOSED",
+        "despawn_in_segment": true,
+        "facings": [
+          1
+        ],
+        "id": "actor-54-life-5786",
+        "observed_lifetime": [
+          5786,
+          5792
+        ],
+        "segment_lifetime": [
+          5786,
+          5792
+        ],
+        "slot": "0xffbe00",
+        "source_owner": "pickups-equipment-weapons-projectiles-hazards-destructibles",
+        "spawn_in_segment": true,
+        "state_context_count": 1,
+        "type": 24
+      },
+      {
+        "accepted_evidence": "data/oracle11_round1_auxiliary_authority.json",
+        "animation_record_count": 1,
+        "class": "0x49",
+        "classification": "SOURCE_CLOSED",
+        "despawn_in_segment": true,
+        "facings": [
+          1
+        ],
+        "id": "actor-56-life-5792",
+        "observed_lifetime": [
+          5792,
+          5798
+        ],
+        "segment_lifetime": [
+          5792,
+          5798
+        ],
+        "slot": "0xffbf80",
+        "source_owner": "pickups-equipment-weapons-projectiles-hazards-destructibles",
+        "spawn_in_segment": true,
+        "state_context_count": 1,
+        "type": 24
+      },
+      {
+        "accepted_evidence": "data/oracle11_round1_auxiliary_authority.json",
+        "animation_record_count": 1,
+        "class": "0x49",
+        "classification": "SOURCE_CLOSED",
+        "despawn_in_segment": true,
+        "facings": [
+          1
+        ],
+        "id": "actor-54-life-5794",
+        "observed_lifetime": [
+          5794,
+          5800
+        ],
+        "segment_lifetime": [
+          5794,
+          5800
+        ],
+        "slot": "0xffbe00",
+        "source_owner": "pickups-equipment-weapons-projectiles-hazards-destructibles",
+        "spawn_in_segment": true,
+        "state_context_count": 1,
+        "type": 24
+      },
+      {
+        "accepted_evidence": "data/oracle11_round1_auxiliary_authority.json",
+        "animation_record_count": 1,
+        "class": "0x49",
+        "classification": "SOURCE_CLOSED",
+        "despawn_in_segment": true,
+        "facings": [
+          1
+        ],
+        "id": "actor-56-life-5800",
+        "observed_lifetime": [
+          5800,
+          5806
+        ],
+        "segment_lifetime": [
+          5800,
+          5806
+        ],
+        "slot": "0xffbf80",
+        "source_owner": "pickups-equipment-weapons-projectiles-hazards-destructibles",
+        "spawn_in_segment": true,
+        "state_context_count": 1,
+        "type": 24
+      },
+      {
+        "accepted_evidence": "data/oracle11_round1_auxiliary_authority.json",
+        "animation_record_count": 1,
+        "class": "0x49",
+        "classification": "SOURCE_CLOSED",
+        "despawn_in_segment": true,
+        "facings": [
+          1
+        ],
+        "id": "actor-54-life-5802",
+        "observed_lifetime": [
+          5802,
+          5808
+        ],
+        "segment_lifetime": [
+          5802,
+          5808
+        ],
+        "slot": "0xffbe00",
+        "source_owner": "pickups-equipment-weapons-projectiles-hazards-destructibles",
+        "spawn_in_segment": true,
+        "state_context_count": 1,
+        "type": 24
+      }
+    ]
+  },
+  "schema": "oracle10-round1-census-extension-v1",
+  "segment": {
+    "id": "round1-post-coffee-shop-to-first-failure-boundary",
+    "scene_ids": [
+      "round1-barricade-dialogue",
+      "round1-warehouse-gameplay",
+      "Sbdfaec04db65"
+    ],
+    "source_frame_range": [
+      5567,
+      6200
+    ]
+  },
+  "status": "CENSUS_SEGMENT_COMPLETE",
+  "table_demand_delta": {
+    "accepted_cart_archive_sha256": "ccf8795a147daf337c1f72364c81f05fc2cfd255d8d21b40a56c74c97f8d15bd",
+    "accepted_cart_archive_table_count": 157,
+    "p3_program_families": [
+      {
+        "class": "0x00",
+        "source_owner": "round1-enemy-archetypes",
+        "type": 12
+      },
+      {
+        "class": "0x06",
+        "source_owner": "round1-enemy-archetypes",
+        "type": 12
+      },
+      {
+        "class": "0x07",
+        "source_owner": "round1-navigation-terrain-camera",
+        "type": 20
+      },
+      {
+        "class": "0x49",
+        "source_owner": "pickups-equipment-weapons-projectiles-hazards-destructibles",
+        "type": 24
+      }
+    ],
+    "spec_executable_review_deferred_to_p3": true,
+    "unbound_table_identities": []
+  },
+  "targeted_counterfactuals": {
+    "remove_class_00": {
+      "completed_round1": true,
+      "semantic_difference": {
+        "control": {
+          "actor_population": "00-0c:2,06-0c:1,07-14:1"
+        },
+        "fields": [
+          "actor_population"
+        ],
+        "frame": 5660,
+        "variant": {
+          "actor_population": "06-0c:1,07-14:1"
+        }
+      },
+      "stable_round2_handoff_frame": 14639,
+      "status": "PASS"
+    },
+    "suppress_load_6200": {
+      "capture": "oracle11_global_load_mut_6200",
+      "kind": "suppress every write to the owned destination region on the source write frame",
+      "mutant_package_sha256": "b56a3cf96eaabda4d58ef92f0b786fad91e6d7207bca3e15a81bee008dc486de",
+      "package_difference": true,
+      "route_and_gameplay_projection_unchanged": true,
+      "stable_round2_route_state": 4,
+      "suppressed_writes": 8960
+    },
+    "suppress_warehouse_offense": {
+      "completed_round1": false,
+      "semantic_difference": {
+        "control": {
+          "p_phase": "3072",
+          "p_x": "964"
+        },
+        "fields": [
+          "p_phase",
+          "p_x"
+        ],
+        "frame": 5732,
+        "variant": {
+          "p_phase": "514",
+          "p_x": "966"
+        }
+      },
+      "stable_round2_handoff_frame": null,
+      "status": "PASS"
+    }
+  },
+  "task": "ORACLE-10-ROUND1-END-TO-END-SYSTEM-CENSUS"
+}

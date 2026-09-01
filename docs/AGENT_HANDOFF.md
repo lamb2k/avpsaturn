@@ -40,10 +40,10 @@ inspection. Settings were restored to VideoCore 4 / SoundCore 1. Evidence is
 
 ## Exact next sequence
 
-Execute `docs/ROUND1_OVERNIGHT_PLAN.md` P2. Extend the existing ORACLE-10/11
-source census from frame 5566 toward stable Round 1 clear in scene order with
-paired byte-identical cold captures, character-identity gates, perturbation,
-and counterfactual controls. Commit and push every completed census segment.
-After three failed focused attempts on a body, record its exact blocker and
-continue to the next scene-order body. Never commit captures, PNGs, ROMs, ISOs,
-or dumps. Follow P3/P4 only after the census frontier is complete.
+P2 is complete through source frame 6200 at evidence SHA
+`1eeb385455a62edb0d21bf48790aa7ac34c6a29408b40792197ee0798370d9c0`;
+the paired 634-frame semantic SHA is `4a4a0ab9d4485ca37e15e9bb6e1644748cec11455fb8298f1338d96f2629ee30`.
+Continue at frame 6201 through the credited return at 6692 with the same paired
+identity, route, audio/load, perturbation, and counterfactual gates. Commit each
+segment; after three failed attempts record the blocker and move scene-order.
+Never commit captures, PNGs, ROMs, ISOs, or dumps. P3 follows only after P2.

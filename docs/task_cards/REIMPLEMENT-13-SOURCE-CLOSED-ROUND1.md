@@ -2175,6 +2175,33 @@ The next dependency-ready body is `docs/ROUND1_OVERNIGHT_PLAN.md` P2: extend
 the existing paired ORACLE-10/11 source census from frame 5566 toward Round 1
 clear, checkpointing each completed census segment.
 
+### Overnight census segment 5567..6200 checkpoint (2026-08-31)
+
+The first post-Coffee-Shop census segment is complete from barricade dialogue
+through the first failure boundary. Two independently launched full-route raw
+captures and both ORACLE-11 route ledgers are byte-identical. The 634-frame
+fixed-pool semantic projection has SHA-256
+`4a4a0ab9d4485ca37e15e9bb6e1644748cec11455fb8298f1338d96f2629ee30`.
+All 632 frames with an active player retain character `0`, class/type `0/0`,
+and an accepted Predator animation record; no Major identity is accepted.
+
+The segment census binds 16 actor lifetimes across five class/type pairs,
+13 spawn and 12 despawn edges, route transitions at 5720/6199/6200, four
+camera runs, 57 HIT/KO transitions, 39 audio-handler transactions, five
+player-origin audio edges, and load boundary 6200. The exact source owners are
+Predator Warrior, enemy archetypes, navigation, auxiliary lifecycle, route,
+global audio, and global loading. The class-`0x00` removal, warehouse-offense
+suppression, and 6200 load suppression controls discriminate the segment.
+There are zero unidentified class/type pairs, unowned lifetimes, unmapped
+spawn/despawn edges, or orphan route/camera/audio/load events.
+
+The accepted 157-table cart archive exposes no new unbound table identity.
+P3 implementation-readiness review remains pending for class/type `0x00/12`,
+`0x06/12`, `0x07/20`, and `0x49/24`; this census checkpoint does not promote
+them to native implementation. Evidence artifact SHA-256 is
+`1eeb385455a62edb0d21bf48790aa7ac34c6a29408b40792197ee0798370d9c0`.
+Continue P2 at source frame 6201 through the credited return at frame 6692.
+
 ### Coffee Shop reusable-runtime closure checkpoint (2026-08-31)
 
 Four source programs exposed by the complete scene are now closed without
