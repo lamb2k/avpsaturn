@@ -16,6 +16,18 @@ ROUTE_LEDGER_A = ROOT / ".deps/mame/oracle11_round1_route_a"
 ROUTE_LEDGER_B = ROOT / ".deps/mame/oracle11_round1_route_b"
 FIRST = 5567
 LAST = 6200
+PROFILES = {
+    "post_coffee": {
+        "first": 5567, "last": 6200,
+        "id": "round1-post-coffee-shop-to-first-failure-boundary",
+        "output": "oracle10_round1_census_extension_5567_6200.json",
+    },
+    "continue": {
+        "first": 6201, "last": 6692,
+        "id": "round1-continue-countdown-to-credited-return",
+        "output": "oracle10_round1_census_extension_6201_6692.json",
+    },
+}
 WORKRAM_BASE = 0xFF0000
 PLAYER = 0xFF8380
 
@@ -73,11 +85,12 @@ def segment_semantics(capture: Path) -> dict:
     player_active_frames = 0
     character_mismatches = []
     identity_mismatches = []
-    accepted_player = next(
-        row for row in load("oracle10_round1_route.json")["actor_instances"]
-        if row["slot_kind"] == "player" and
-        row["source_frame_range"][0] <= FIRST <= row["source_frame_range"][1])
-    accepted_animation_records = set(accepted_player["animation_records"])
+    accepted_animation_records = {
+        record
+        for row in load("oracle10_round1_route.json")["actor_instances"]
+        if row["slot_kind"] == "player"
+        for record in row["animation_records"]
+    }
     current: bytes | None = None
     frame_count = 0
     with (capture / "region_workram.bin").open("rb") as stream:
@@ -225,12 +238,16 @@ def audio_census() -> dict:
 
 
 def main() -> None:
+    global FIRST, LAST
     parser = argparse.ArgumentParser()
+    parser.add_argument("--segment", choices=PROFILES, default="post_coffee")
     parser.add_argument("--control-a", type=Path, default=DEFAULT_A)
     parser.add_argument("--control-b", type=Path, default=DEFAULT_B)
-    parser.add_argument("--output", type=Path, default=(
-        ROOT / "data/oracle10_round1_census_extension_5567_6200.json"))
+    parser.add_argument("--output", type=Path)
     args = parser.parse_args()
+    profile = PROFILES[args.segment]
+    FIRST, LAST = profile["first"], profile["last"]
+    output = args.output or ROOT / "data" / profile["output"]
 
     route = load("oracle10_round1_route.json")
     encounter = load("oracle11_round1_encounter_route_authority.json")
@@ -272,8 +289,8 @@ def main() -> None:
     camera_runs = [row for row in navigation["camera"]
                    ["camera_lock_and_unlock_runs"]
                    if row["last_frame"] >= FIRST and row["first_frame"] <= LAST]
-    boundary = next(row for row in load_release["boundaries"]
-                    if row["visible_boundary_frame"] == 6200)
+    boundaries = [row for row in load_release["boundaries"]
+                  if FIRST <= row["visible_boundary_frame"] <= LAST]
 
     enemy = load("oracle11_round1_enemy_archetypes.json")
     hit_ko = []
@@ -286,12 +303,29 @@ def main() -> None:
                     "class": archetype["class"], "type": archetype["type"],
                     **transition, "classification": "SOURCE_CLOSED"})
 
+    if args.segment == "post_coffee":
+        targeted_counterfactuals = {
+            "remove_class_00": enemy["archetypes"][0]["counterfactuals"]
+            ["remove_class_00"],
+            "suppress_warehouse_offense": enemy["archetypes"][0]
+            ["counterfactuals"]["suppress_warehouse_offense"],
+            "suppress_load_6200": boundaries[0]["failure_control"],
+        }
+    else:
+        continue_authority = load("oracle11_predator_hitko_continue.json")
+        targeted_counterfactuals = {
+            "failure_continue": continue_authority["failure_continue"],
+            "input_counterfactuals": continue_authority["counterfactuals"],
+            "route_wide_perturbation_difference": route
+            ["route_wide_perturbation"]["first_semantic_difference"],
+        }
+
     report = {
         "schema": "oracle10-round1-census-extension-v1",
         "task": "ORACLE-10-ROUND1-END-TO-END-SYSTEM-CENSUS",
         "status": "CENSUS_SEGMENT_COMPLETE",
         "segment": {
-            "id": "round1-post-coffee-shop-to-first-failure-boundary",
+            "id": profile["id"],
             "source_frame_range": [FIRST, LAST],
             "scene_ids": [row["route_segment"] for row in segment_bindings],
         },
@@ -320,15 +354,9 @@ def main() -> None:
             "hit_ko_transitions": sorted(hit_ko,
                                           key=lambda row: row["first_frame"]),
             "audio": audio_census(),
-            "load_release_boundaries": [boundary],
+            "load_release_boundaries": boundaries,
         },
-        "targeted_counterfactuals": {
-            "remove_class_00": enemy["archetypes"][0]["counterfactuals"]
-            ["remove_class_00"],
-            "suppress_warehouse_offense": enemy["archetypes"][0]
-            ["counterfactuals"]["suppress_warehouse_offense"],
-            "suppress_load_6200": boundary["failure_control"],
-        },
+        "targeted_counterfactuals": targeted_counterfactuals,
         "table_demand_delta": {
             "accepted_cart_archive_sha256": memory["content_archive"]
             ["sha256"],
@@ -353,9 +381,9 @@ def main() -> None:
         },
         "physical_saturn": "UNRUN",
     }
-    args.output.parent.mkdir(parents=True, exist_ok=True)
-    args.output.write_text(json.dumps(report, indent=2, sort_keys=True) + "\n",
-                           encoding="ascii")
+    output.parent.mkdir(parents=True, exist_ok=True)
+    output.write_text(json.dumps(report, indent=2, sort_keys=True) + "\n",
+                      encoding="ascii")
     print(json.dumps({
         "result": report["status"],
         "frames": semantic_a["frame_count"],

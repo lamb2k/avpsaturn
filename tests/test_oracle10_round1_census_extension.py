@@ -10,6 +10,8 @@ from pathlib import Path
 ROOT = Path(__file__).resolve().parents[1]
 REPORT = json.loads((ROOT / "data/oracle10_round1_census_extension_5567_6200.json")
                     .read_text(encoding="ascii"))
+CONTINUE = json.loads((ROOT / "data/oracle10_round1_census_extension_6201_6692.json")
+                      .read_text(encoding="ascii"))
 GENERATOR = (ROOT / "tools/analyze_oracle10_round1_census_extension.py") \
     .read_text(encoding="utf-8")
 
@@ -93,5 +95,70 @@ reject("audio owner", ("scene_census_delta", "audio",
 reject("load control", ("scene_census_delta", "load_release_boundaries"), [])
 reject("physical claim", ("physical_saturn",), "PASS")
 
-print("ORACLE-10 Round 1 census extension 5567..6200: PASS "
-      "(8 mutations rejected)")
+
+def validate_continue(report: dict[str, object]) -> None:
+    validate_common = report["paired_capture_ceremony"]
+    semantics = validate_common["segment_semantics"]
+    census = report["scene_census_delta"]
+    assert report["status"] == "CENSUS_SEGMENT_COMPLETE"
+    assert report["segment"]["source_frame_range"] == [6201, 6692]
+    assert report["segment"]["scene_ids"] == ["continue-countdown"]
+    assert validate_common["raw_capture_files_byte_identical"] is True
+    assert validate_common["paired_route_ledgers_byte_identical"] is True
+    assert semantics["frame_count"] == 492
+    assert semantics["canonical_semantic_sha256"] == \
+        "d93a3dcd53bf4951d0631bcf0927a6560b399da1bb913414e3de94f212252c2e"
+    assert semantics["player_active_frames"] == 0
+    assert semantics["character_mismatch_frames"] == []
+    assert semantics["identity_mismatch_frames"] == []
+    assert semantics["per_frame_character_identity_gate"] is True
+    assert [(row["class"], row["type"]) for row in
+            census["class_type_inventory"]] == [
+                ("0x00", 12), ("0x06", 12), ("0x07", 20)]
+    assert len(census["actor_lifetimes"]) == 4
+    assert census["spawn_edges"] == [] and census["despawn_edges"] == []
+    assert census["hit_ko_transitions"] == []
+    assert census["audio"]["handler_transaction_count"] == 1
+    assert census["audio"]["command_counts"] == {"0x000f": 1}
+    assert census["load_release_boundaries"] == []
+    edges = report["route_authority_extension"]["route_state_edges"]
+    assert [(row["sample_transition_frame"], row["writer_pc"], row["value"])
+            for row in edges] == [(6692, "0x0090f2", 4)]
+    controls = report["targeted_counterfactuals"]
+    assert controls["failure_continue"]["start_with_available_credit_enters_continue"] is True
+    assert controls["failure_continue"]["direction_only_confirms"] is False
+    assert controls["input_counterfactuals"]["coin_only_no_respawn"] is True
+    assert controls["input_counterfactuals"]["no_continue_no_respawn"] is True
+    assert controls["route_wide_perturbation_difference"]["frame"] == 6692
+    assert all(value == 0 for value in report["coverage"].values())
+    assert report["physical_saturn"] == "UNRUN"
+
+
+validate_continue(CONTINUE)
+for label, path, value in (
+        ("continue semantic identity",
+         ("paired_capture_ceremony", "segment_semantics",
+          "canonical_semantic_sha256"), "0" * 64),
+        ("invented active player",
+         ("paired_capture_ceremony", "segment_semantics",
+          "player_active_frames"), 1),
+        ("missing credited route edge",
+         ("route_authority_extension", "route_state_edges"), []),
+        ("direction confirms", ("targeted_counterfactuals",
+                                "failure_continue",
+                                "direction_only_confirms"), True),
+        ("orphan continue audio", ("coverage", "unowned_audio_events"), 1),
+        ("continue physical claim", ("physical_saturn",), "PASS")):
+    mutant = copy.deepcopy(CONTINUE)
+    target = mutant
+    for key in path[:-1]:
+        target = target[key]
+    target[path[-1]] = value
+    try:
+        validate_continue(mutant)
+    except AssertionError:
+        continue
+    raise AssertionError(f"Round 1 continue census mutation accepted: {label}")
+
+print("ORACLE-10 Round 1 census extension 5567..6692: PASS "
+      "(14 mutations rejected)")

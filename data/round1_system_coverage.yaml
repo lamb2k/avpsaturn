@@ -20400,13 +20400,22 @@
     "unmapped_route_edges": []
   },
   "overnight_census_frontier": {
-    "accepted_evidence": "data/oracle10_round1_census_extension_5567_6200.json",
-    "accepted_evidence_sha256": "1eeb385455a62edb0d21bf48790aa7ac34c6a29408b40792197ee0798370d9c0",
+    "accepted_evidence": [
+      "data/oracle10_round1_census_extension_5567_6200.json",
+      "data/oracle10_round1_census_extension_6201_6692.json"
+    ],
+    "accepted_evidence_sha256": [
+      "1eeb385455a62edb0d21bf48790aa7ac34c6a29408b40792197ee0798370d9c0",
+      "0cb1e3a8267a4557960705f43a1543283361172415a3d457199901e92455d400"
+    ],
     "class_type_pairs": 5,
-    "next_source_frame": 6201,
+    "next_source_frame": 6693,
     "orphan_authority_events": 0,
-    "paired_semantic_sha256": "4a4a0ab9d4485ca37e15e9bb6e1644748cec11455fb8298f1338d96f2629ee30",
-    "source_frame_range": [5567, 6200],
+    "paired_semantic_sha256": [
+      "4a4a0ab9d4485ca37e15e9bb6e1644748cec11455fb8298f1338d96f2629ee30",
+      "d93a3dcd53bf4951d0631bcf0927a6560b399da1bb913414e3de94f212252c2e"
+    ],
+    "source_frame_range": [5567, 6692],
     "status": "CENSUS_SEGMENT_COMPLETE"
   },
   "route_wide_perturbation": {

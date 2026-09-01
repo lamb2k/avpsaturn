@@ -2202,6 +2202,31 @@ them to native implementation. Evidence artifact SHA-256 is
 `1eeb385455a62edb0d21bf48790aa7ac34c6a29408b40792197ee0798370d9c0`.
 Continue P2 at source frame 6201 through the credited return at frame 6692.
 
+### Overnight census segment 6201..6692 checkpoint (2026-08-31)
+
+The complete source continue-countdown is census-closed through the credited
+route-state return. The paired 492-frame fixed-pool semantic projection has
+SHA-256 `d93a3dcd53bf4951d0631bcf0927a6560b399da1bb913414e3de94f212252c2e`.
+No player actor is active in this interval, so the per-frame identity gate
+correctly records zero active-player frames rather than fabricating a hidden
+Predator or Major. Four continuing actor lifetimes cover the already owned
+class/type pairs `0x00/12`, `0x06/12`, and `0x07/20`; there are no new spawn,
+despawn, HIT/KO, or load boundaries.
+
+Writer `0x0090f2` performs the route-state transition to 4 at source frame 6692.
+The interval contains one route-owned `0x000f` audio-handler transaction and no
+orphan audio event. Accepted counterfactuals prove that Button1, Button2, or
+Button3 confirms with credit, direction alone does not confirm, coin alone does
+not respawn, no-input/no-continue does not respawn, and the route-wide
+perturbation first diverges semantically at this exact boundary. The segment
+has zero unidentified class/type pairs or unowned actor, route, camera, audio,
+load, release, or identity events.
+
+Evidence artifact SHA-256 is
+`0cb1e3a8267a4557960705f43a1543283361172415a3d457199901e92455d400`.
+Continue P2 at frame 6693 through the next gameplay scene, including the source
+respawn at 6723 and return to control at 6786.
+
 ### Coffee Shop reusable-runtime closure checkpoint (2026-08-31)
 
 Four source programs exposed by the complete scene are now closed without

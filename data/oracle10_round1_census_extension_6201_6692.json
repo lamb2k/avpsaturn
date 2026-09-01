@@ -1,0 +1,488 @@
+{
+  "coverage": {
+    "per_frame_character_identity_failures": 0,
+    "unidentified_source_class_type_pairs": 0,
+    "unmapped_spawn_despawn_edges": 0,
+    "unowned_actor_lifetimes": 0,
+    "unowned_audio_events": 0,
+    "unowned_load_release_events": 0,
+    "unowned_route_camera_events": 0
+  },
+  "paired_capture_ceremony": {
+    "independent_raw_captures": [
+      "full_route",
+      "full_route_rerun"
+    ],
+    "paired_route_ledger_sha256": {
+      "dispatches.tsv": "c58ce0b2fd9811112002e717b33ee8364a7808aa6c42ffdceb97380b8f8b9985",
+      "lifecycle_writes.tsv": "21bbd8c035146051401132e86f20f77282348a3227290b5e80bbf58675224656",
+      "result.tsv": "e75dded8c4f6dd02bedcf3e2b32782bd2e53d65256e042e11436435317b734ed",
+      "route_rng.tsv": "8f59258961ea4694e545993331a9478b006a1a3df9913390df01822ad397dd19",
+      "route_samples.tsv": "ad723acfbd3d51c0c833da0eed3490833494bab5af9862244f8ca35e2876a54c",
+      "route_writes.tsv": "6f1e4d6da736d9b886a834bf72fc426e58011f68e512acf1d6e8b7348c4f858a"
+    },
+    "paired_route_ledgers_byte_identical": true,
+    "raw_capture_files_byte_identical": true,
+    "segment_semantics": {
+      "canonical_semantic_sha256": "d93a3dcd53bf4951d0631bcf0927a6560b399da1bb913414e3de94f212252c2e",
+      "character_mismatch_frames": [],
+      "frame_count": 492,
+      "identity_mismatch_frames": [],
+      "per_frame_character_identity_gate": true,
+      "player_active_frames": 0,
+      "required_character_u8": 0
+    }
+  },
+  "physical_saturn": "UNRUN",
+  "route_authority_extension": {
+    "camera_lock_runs": [
+      {
+        "camera_target_at_entry": 0,
+        "camera_target_at_exit": 1010,
+        "classification": "SOURCE_CLOSED",
+        "first_frame": 5964,
+        "frames": 761,
+        "last_frame": 6724,
+        "owning_writer_pcs": [
+          "0x008c34",
+          "0x0b0706"
+        ],
+        "player_x_at_entry": 1259,
+        "player_x_at_exit": 1120,
+        "prior_scroll2_x": 959,
+        "route": 4,
+        "scroll2_x": 65472
+      }
+    ],
+    "route_state_edges": [
+      {
+        "caller_chain": [
+          "0x0080a2",
+          "0x000000",
+          "0x000000"
+        ],
+        "classification": "SOURCE_CLOSED",
+        "field": "0xff8008:s16",
+        "sample_transition_frame": 6692,
+        "source_window": {
+          "first": "0x0090e2",
+          "last_exclusive": "0x009112",
+          "sha256": "407c340e5ed1daf8c1a19d3642f4b538e3daa5da4b31cf08f7e4ee12eedccad4"
+        },
+        "transition_guard": "credited continue restore dispatcher entered state 2",
+        "value": 4,
+        "write_frame": 6691,
+        "writer_pc": "0x0090f2"
+      }
+    ],
+    "route_wide_perturbation": {
+      "first_input_difference": {
+        "control": {
+          "input_word": "9"
+        },
+        "fields": [
+          "input_word"
+        ],
+        "frame": 4230,
+        "variant": {
+          "input_word": "8"
+        }
+      },
+      "first_semantic_difference": {
+        "control": {
+          "g8009": "4",
+          "p_x": "192",
+          "p_z": "0"
+        },
+        "fields": [
+          "g8009",
+          "p_x",
+          "p_z"
+        ],
+        "frame": 6692,
+        "variant": {
+          "g8009": "2",
+          "p_x": "1233",
+          "p_z": "311"
+        }
+      },
+      "rendered_witness": "private frames/16800.png directly inspected",
+      "stable_round2_handoff_frame": 16425,
+      "status": "PASS",
+      "variant": "route_perturbed"
+    },
+    "segment_bindings": [
+      {
+        "classification": "SOURCE_CLOSED",
+        "enemy_spawn_count": 0,
+        "enemy_spawn_frames": [],
+        "gameplay_route_edges": [
+          {
+            "caller_chain": [
+              "0x0080a2",
+              "0x000000",
+              "0x000000"
+            ],
+            "classification": "SOURCE_CLOSED",
+            "field": "0xff8008:s16",
+            "sample_transition_frame": 6692,
+            "source_window": {
+              "first": "0x0090e2",
+              "last_exclusive": "0x009112",
+              "sha256": "407c340e5ed1daf8c1a19d3642f4b538e3daa5da4b31cf08f7e4ee12eedccad4"
+            },
+            "transition_guard": "credited continue restore dispatcher entered state 2",
+            "value": 4,
+            "write_frame": 6691,
+            "writer_pc": "0x0090f2"
+          }
+        ],
+        "observational_labels": [],
+        "presentation_boundary": {
+          "classification": "SOURCE_CLOSED_PRESENTATION_DEPENDENCY",
+          "owns_progression": false,
+          "signature": "S0236cab182f2"
+        },
+        "route_mode_values": [
+          2,
+          4
+        ],
+        "route_segment": "continue-countdown",
+        "route_writer_refs": [
+          "0x000e86@0xff8018",
+          "0x000e8a@0xff81a2",
+          "0x000e92@0xff81bc",
+          "0x001186@0xff8070",
+          "0x001222@0xff8072",
+          "0x00126c@0xff8054",
+          "0x00126c@0xff8056",
+          "0x001278@0xff8054",
+          "0x001288@0xff8064",
+          "0x001288@0xff8066",
+          "0x00128c@0xff8068",
+          "0x00128c@0xff806a",
+          "0x001298@0xff8064",
+          "0x0012a4@0xff8066",
+          "0x0012b0@0xff8068",
+          "0x0012bc@0xff806a",
+          "0x0012c6@0xff8060",
+          "0x0012c6@0xff8062",
+          "0x0012d2@0xff8060",
+          "0x001432@0xff81a6",
+          "0x001448@0xff81c6",
+          "0x00159c@0xff818a",
+          "0x0015a0@0xff8192",
+          "0x0015a4@0xff819a",
+          "0x0015a8@0xff819e",
+          "0x001914@0xff801e",
+          "0x001954@0xff8020",
+          "0x008090@0xff81bc",
+          "0x00809a@0xff8018",
+          "0x008444@0xff820e",
+          "0x00846a@0xff81f0",
+          "0x008522@0xff8248",
+          "0x0086ec@0xff8240",
+          "0x0090ec@0xff8004",
+          "0x0090f2@0xff8008",
+          "0x0090f8@0xff800c",
+          "0x0090fc@0xff8010",
+          "0x009100@0xff8014",
+          "0x009104@0xff804a",
+          "0x00910a@0xff8278",
+          "0x009110@0xff827c",
+          "0x009116@0xff82f8",
+          "0x00911c@0xff82fc",
+          "0x009128@0xff81d6",
+          "0x009132@0xff8240",
+          "0x00e9ae@0xff81dc",
+          "0x00e9b2@0xff81f6",
+          "0x00e9bc@0xff81d4",
+          "0x00ec74@0xff81d2",
+          "0x00ee72@0xff818c",
+          "0x00eebc@0xff81d2",
+          "0x00eec0@0xff81d4",
+          "0x00eeea@0xff8212",
+          "0x017066@0xff8024",
+          "0x01706c@0xff8026",
+          "0x017072@0xff8028",
+          "0x017078@0xff802c",
+          "0x01707e@0xff802a",
+          "0x017976@0xff81ec",
+          "0x0179ee@0xff8226",
+          "0x017a00@0xff8226",
+          "0x017a1a@0xff81ea",
+          "0x017b74@0xff81ea",
+          "0x0a9a42@0xff81a4",
+          "0x0a9a46@0xff81a2",
+          "0x0af86c@0xff82c0",
+          "0x0af878@0xff82c2",
+          "0x0af87e@0xff8290",
+          "0x0af884@0xff8294",
+          "0x0b06fe@0xff8278",
+          "0x0b0706@0xff8032",
+          "0x0b0820@0xff827c",
+          "0x0b0828@0xff8034",
+          "0x0b17ec@0xff82f8",
+          "0x0b17f4@0xff8036",
+          "0x0b1836@0xff82fc",
+          "0x0b183e@0xff8038"
+        ],
+        "source_frame_range": [
+          6201,
+          6692
+        ]
+      }
+    ]
+  },
+  "scene_census_delta": {
+    "actor_lifetimes": [
+      {
+        "accepted_evidence": "data/oracle11_round1_enemy_archetypes.json",
+        "animation_record_count": 79,
+        "class": "0x00",
+        "classification": "SOURCE_CLOSED",
+        "despawn_in_segment": false,
+        "facings": [
+          0,
+          1
+        ],
+        "id": "actor-17-life-5660",
+        "observed_lifetime": [
+          5660,
+          7039
+        ],
+        "segment_lifetime": [
+          6201,
+          6692
+        ],
+        "slot": "0xffa240",
+        "source_owner": "round1-enemy-archetypes",
+        "spawn_in_segment": false,
+        "state_context_count": 32,
+        "type": 12
+      },
+      {
+        "accepted_evidence": "data/oracle11_round1_enemy_archetypes.json",
+        "animation_record_count": 70,
+        "class": "0x00",
+        "classification": "SOURCE_CLOSED",
+        "despawn_in_segment": false,
+        "facings": [
+          0,
+          1
+        ],
+        "id": "actor-18-life-5660",
+        "observed_lifetime": [
+          5660,
+          6939
+        ],
+        "segment_lifetime": [
+          6201,
+          6692
+        ],
+        "slot": "0xffa300",
+        "source_owner": "round1-enemy-archetypes",
+        "spawn_in_segment": false,
+        "state_context_count": 28,
+        "type": 12
+      },
+      {
+        "accepted_evidence": "data/oracle11_round1_enemy_archetypes.json",
+        "animation_record_count": 177,
+        "class": "0x06",
+        "classification": "SOURCE_CLOSED",
+        "despawn_in_segment": false,
+        "facings": [
+          0,
+          1
+        ],
+        "id": "actor-19-life-5566",
+        "observed_lifetime": [
+          5566,
+          15047
+        ],
+        "segment_lifetime": [
+          6201,
+          6692
+        ],
+        "slot": "0xffa3c0",
+        "source_owner": "round1-enemy-archetypes",
+        "spawn_in_segment": false,
+        "state_context_count": 39,
+        "type": 12
+      },
+      {
+        "accepted_evidence": "data/oracle11_round1_navigation.json",
+        "animation_record_count": 1,
+        "class": "0x07",
+        "classification": "SOURCE_CLOSED",
+        "despawn_in_segment": false,
+        "facings": [
+          0
+        ],
+        "id": "actor-42-life-5566",
+        "observed_lifetime": [
+          5566,
+          15047
+        ],
+        "segment_lifetime": [
+          6201,
+          6692
+        ],
+        "slot": "0xffb500",
+        "source_owner": "round1-navigation-terrain-camera",
+        "spawn_in_segment": false,
+        "state_context_count": 1,
+        "type": 20
+      }
+    ],
+    "audio": {
+      "command_counts": {
+        "0x000f": 1
+      },
+      "handler_transaction_count": 1,
+      "orphan_handler_transactions": 0,
+      "orphan_trigger_groups": 0,
+      "player_origin_edges": [],
+      "source_owned_trigger_groups_first_seen": [
+        {
+          "classification": "SOURCE_CLOSED",
+          "command": "0x000f",
+          "first_frame": 6691,
+          "id": "global-audio-ff00d8-003a8e-000f",
+          "owner_families": [
+            "route"
+          ]
+        }
+      ]
+    },
+    "class_type_inventory": [
+      {
+        "accepted_evidence": "data/oracle11_round1_enemy_archetypes.json",
+        "class": "0x00",
+        "classification": "SOURCE_CLOSED",
+        "instance_count": 2,
+        "source_owner": "round1-enemy-archetypes",
+        "type": 12
+      },
+      {
+        "accepted_evidence": "data/oracle11_round1_enemy_archetypes.json",
+        "class": "0x06",
+        "classification": "SOURCE_CLOSED",
+        "instance_count": 1,
+        "source_owner": "round1-enemy-archetypes",
+        "type": 12
+      },
+      {
+        "accepted_evidence": "data/oracle11_round1_navigation.json",
+        "class": "0x07",
+        "classification": "SOURCE_CLOSED",
+        "instance_count": 1,
+        "source_owner": "round1-navigation-terrain-camera",
+        "type": 20
+      }
+    ],
+    "despawn_edges": [],
+    "hit_ko_transitions": [],
+    "load_release_boundaries": [],
+    "spawn_edges": []
+  },
+  "schema": "oracle10-round1-census-extension-v1",
+  "segment": {
+    "id": "round1-continue-countdown-to-credited-return",
+    "scene_ids": [
+      "continue-countdown"
+    ],
+    "source_frame_range": [
+      6201,
+      6692
+    ]
+  },
+  "status": "CENSUS_SEGMENT_COMPLETE",
+  "table_demand_delta": {
+    "accepted_cart_archive_sha256": "ccf8795a147daf337c1f72364c81f05fc2cfd255d8d21b40a56c74c97f8d15bd",
+    "accepted_cart_archive_table_count": 157,
+    "p3_program_families": [
+      {
+        "class": "0x00",
+        "source_owner": "round1-enemy-archetypes",
+        "type": 12
+      },
+      {
+        "class": "0x06",
+        "source_owner": "round1-enemy-archetypes",
+        "type": 12
+      },
+      {
+        "class": "0x07",
+        "source_owner": "round1-navigation-terrain-camera",
+        "type": 20
+      }
+    ],
+    "spec_executable_review_deferred_to_p3": true,
+    "unbound_table_identities": []
+  },
+  "targeted_counterfactuals": {
+    "failure_continue": {
+      "classification": "SOURCE_CLOSED",
+      "coin_without_start_confirms": false,
+      "confirmation_rule": "phase +0xd5=2 computes new input edges from +0xee/+0xef; Button1 bit4, Button2 bit5, or Button3 bit6 enters 0x00ea74; left/right bits1/0 only move the selection cursor",
+      "credit_rule": "0x00e880 performs packed-BCD credit debit and rejects borrow before setting player/continue ownership bits",
+      "credited_start": {
+        "frame": 6692,
+        "value": 4,
+        "write_pc": "0x0090f2"
+      },
+      "direction_only_confirms": false,
+      "failure_state": {
+        "frame": 6200,
+        "value": 2,
+        "write_pc": "0x008bb2"
+      },
+      "global_state_byte": "0xff8009",
+      "rng_consumption": "none",
+      "start_with_available_credit_enters_continue": true
+    },
+    "input_counterfactuals": {
+      "activation_frames": {
+        "coin_only": null,
+        "continue_confirm_attack": 6723,
+        "continue_confirm_gun": 6723,
+        "continue_confirm_jump": 6843,
+        "continue_confirm_right": null,
+        "delayed_start": 6768,
+        "no_continue": null,
+        "respawn_input_suppressed": null,
+        "start_only": 6723,
+        "survive_contact": 6200
+      },
+      "all_gameplay_buttons_confirm": true,
+      "coin_only_no_respawn": true,
+      "delayed_start_shifts_continue_and_respawn": true,
+      "direction_alone_does_not_confirm": true,
+      "health_50_suppresses_lethal_ko": true,
+      "no_continue_no_respawn": true,
+      "no_gameplay_input_no_respawn": true,
+      "start_only_matches_baseline": true
+    },
+    "route_wide_perturbation_difference": {
+      "control": {
+        "g8009": "4",
+        "p_x": "192",
+        "p_z": "0"
+      },
+      "fields": [
+        "g8009",
+        "p_x",
+        "p_z"
+      ],
+      "frame": 6692,
+      "variant": {
+        "g8009": "2",
+        "p_x": "1233",
+        "p_z": "311"
+      }
+    }
+  },
+  "task": "ORACLE-10-ROUND1-END-TO-END-SYSTEM-CENSUS"
+}
