@@ -2771,3 +2771,40 @@ SHA-256 `9a7f69e8ee761b8d98a18ec8c4ac98ba9c5f8c1c9f4aaa4a1979734e258da178`
 and is unstaged with `history.txt`.
 
 Continue P3 with class `0x3d/24` as the next whole-routine family.
+
+### P3 class 0x3d/type 24 whole-routine checkpoint (2026-09-01)
+
+Class `0x3d/24` is SPEC-executable as one bounded source program spanning
+`0x0887c8..0x0888a0`. The fixture closes 34 decoded operations, all three
+paired-witness states, the four-entry top-state dispatch, 11 exact field
+read/write profiles, four source-owned external transfers, and nine
+source-owned presentation/collision records. Its exact 16-entry signed movement
+table preserves direction reflection and the source-unwritten Y-field retention
+contract across allocation, active movement, animation and fixed-pool release.
+Runtime 68000 interpretation remains forbidden.
+
+The paired retained ledgers bind 11,476 entries, 12,811 samples, 121,404 writes,
+zero RNG calls, and zero player-effect writes. Artifact SHA-256 is
+`f5ebaeffd6ac873e1e189015a734488c36e9b5326aeb4d4167ccd685963a9216`;
+instruction-semantics SHA-256 is
+`cd19a563651cbe39672e4cbe28887c841fe8eafa3cad22bd4e91eb7313c4fdf4`.
+The movement-table SHA-256 is
+`15e0fc64a7ecbd8ee0c9008f43b9c757cee36991339401e8b383d30f06ed4ecf`.
+Nine class mutations and all 180 SPEC-02 mutations reject. Fast and Target
+pass. GAME.BIN remains unchanged at
+`aa99904645fa584952ccba84e4fb28d970dabc4ae6e6e593b401f9e3323910a1`,
+and the cart content archive remains
+`ccf8795a147daf337c1f72364c81f05fc2cfd255d8d21b40a56c74c97f8d15bd`.
+
+One debug-rig pinned scene run passes all 575 samples with zero failure,
+fallback or unsupported dispatch at normalized ISO
+`3bb36edbd29c0a07867826f7d1ac99e96d84849232a05b3bdea43d5d84a611de`.
+Capture settings were restored to VideoCore 4 / SoundCore 1. The complete
+Coffee Shop census remains expected RED at source frame 5566 (`code=11`, slot
+`0x00009e80`, state `0x0208`, substate `0x1004`); this SPEC-only body neither
+changes runtime identity nor claims scene improvement, so paired cold Emulator
+and WGC were not triggered. Protected `data/avsp_anim_records.json` remains at
+SHA-256 `9a7f69e8ee761b8d98a18ec8c4ac98ba9c5f8c1c9f4aaa4a1979734e258da178`
+and is unstaged with `history.txt`.
+
+Continue P3 with class `0x49/24` as the next whole-routine family.

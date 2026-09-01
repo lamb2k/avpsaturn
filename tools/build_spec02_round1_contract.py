@@ -22,6 +22,7 @@ SOURCES = {
     "class06_program": "data/spec02_class06_type12_program.json",
     "class07_program": "data/spec02_class07_type20_program.json",
     "class10_program": "data/spec02_class10_type24_program.json",
+    "class3d_program": "data/spec02_class3d_type24_program.json",
     "auxiliary": "data/oracle11_round1_auxiliary_authority.json",
     "route": "data/oracle11_round1_encounter_route_authority.json",
     "boss": "data/oracle11_round1_boss_orchestration.json",
@@ -268,6 +269,11 @@ def build_fields() -> list[dict[str, object]]:
           "/authority_data/auxiliary/archetypes/5/whole_routine_implementation_contract", "outer state dispatches only through the bounded source program; variant-indexed signed offsets and animation records, exact current-state guards, presentation updates and fixed-pool release own every transition",
           ["actor.outer_state:u16", "actor.variant:u8", "actor.direction:u8", "actor.position:s16", "actor.animation_branch:s16", "actor.animation_event:u8", "variant.tables"], ["actor.state:u16", "actor.position:s16", "actor.animation_record:u32", "actor.presentation_fields", "pool.free_count:u8"],
           "/mutation_controls", "dispatch, operand width, field offset, signed branch, variant selector, movement table, animation table, presentation or release mutation changes the paired class-0x10 semantic witness"),
+        f("auxiliary.class3d_type24_whole_program", "round1-projectile-pickup-hazard", "guarded_actor_program", True,
+          "class3d_program", "/", "0x0887c8 class entry, four-way top-state dispatch, sixteen-entry signed movement table, and every Round 1-reachable branch",
+          "/authority_data/auxiliary/archetypes/6/whole_routine_implementation_contract", "outer state dispatches only through the bounded source program; retained slot fields, anchor restoration, variant-indexed signed movement, animation terminal guard and fixed-pool release own every transition",
+          ["actor.outer_state:u16", "actor.variant:u8", "actor.direction:u8", "actor.position:s16", "actor.anchor:s16", "actor.animation_branch:s16", "movement.table"], ["actor.state:u16", "actor.variant:u8", "actor.position:s16", "actor.animation_record:u32", "actor.presentation_fields", "pool.free_count:u8"],
+          "/mutation_controls", "dispatch, operand width, field offset, signed branch, retained-y rule, movement selector/sign, animation, presentation or release mutation changes the paired class-0x3d semantic witness"),
         f("enemy.initial_transition_execution", "round1-enemy-archetypes", "guarded_state_program", True,
           "enemies", "/archetypes/3/initial_transition_contract", "0x0606aa/0x0606d4/0x0606fc initializers and 0x060b1a..0x060c1c transition bodies",
           "/authority_data/enemies/archetypes/3/initial_transition_contract", "route-global, timer, animation-branch, landing and source-pool guards own the three initial class-0x1f bodies",
@@ -1130,6 +1136,11 @@ def build_fixtures(source: dict[str, dict]) -> dict[str, object]:
                    if item["class"] == "0x10" and item["type"] == 24)
     class10["whole_routine_implementation_contract"] = copy.deepcopy(
         source["class10_program"])
+    class3d = next(item for item in
+                   fixtures["authority_data"]["auxiliary"]["archetypes"]
+                   if item["class"] == "0x3d" and item["type"] == 24)
+    class3d["whole_routine_implementation_contract"] = copy.deepcopy(
+        source["class3d_program"])
     fixtures["scene_manifests"] = {
         "coffee_shop": build_coffee_shop_scene_manifest(source)}
     return fixtures
@@ -1835,6 +1846,34 @@ def validate(contract: dict[str, object], fixtures: dict[str, object],
             class10_program["implementation_rules"]
                 ["unknown_state_or_transition_logic_allowed"] is False,
             "class-0x10/type-24 whole-routine fixture incomplete or drifted")
+    class3d = next(item for item in
+                   fixtures["authority_data"]["auxiliary"]["archetypes"]
+                   if item["class"] == "0x3d" and item["type"] == 24)
+    class3d_program = class3d["whole_routine_implementation_contract"]
+    require(class3d_program == source["class3d_program"] and
+            class3d_program["status"] == "SPEC_EXECUTABLE" and
+            class3d_program["classification"] ==
+                "SOURCE_CLOSED_IMPLEMENTATION_FIELDS" and
+            len(class3d_program["reachable_state_substate_contexts"]) == 3 and
+            len(class3d_program["dispatch"]) == 1 and
+            sum(row["entry_count"] for row in
+                class3d_program["dispatch"].values()) == 4 and
+            class3d_program["movement_table"]["entry_count"] == 16 and
+            class3d_program["normalized_source_program"]
+                ["instruction_count"] == 34 and
+            len(class3d_program["normalized_source_program"]
+                ["field_access_profiles"]) == 11 and
+            len(class3d_program["normalized_source_program"]
+                ["external_transfers"]) == 4 and
+            class3d_program["dynamic_witness"]["counts"] == {
+                "entries": 11476, "samples": 12811, "writes": 121404,
+                "rng_calls": 0, "player_effects": 0} and
+            all(class3d_program["mutation_controls"].values()) and
+            class3d_program["implementation_rules"]
+                ["runtime_68000_interpretation_forbidden"] is True and
+            class3d_program["implementation_rules"]
+                ["unknown_state_or_transition_logic_allowed"] is False,
+            "class-0x3d/type-24 whole-routine fixture incomplete or drifted")
     class1f = next(item for item in
                    fixtures["authority_data"]["enemies"]["archetypes"]
                    if item["class"] == "0x1f")
