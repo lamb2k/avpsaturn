@@ -31,14 +31,13 @@ Window-only WGC frames 2280/2287/2306/2307/2310 preserve the prior rendered
 gameplay aperture; the scene remains intentionally RED, not accepted. The SCU
 DMA A-bus restriction remains physical-tier-only.
 
-## Owner hold: headless emulator visual capture (do not implement)
+## Headless MCP capture: owner build ready for integration
 
-The MCP `framebuffer_screenshot` fork change is being implemented externally
-by the owner. Do not modify the emulator fork, its patches, or its pins. A
-separate integration handoff (rebuild, re-pin, paired-ledger and image-hash
-controls, visual-QA MCP mode) will follow when the build is ready; window-only
-WGC remains the visual lane until then. Standing rule: keep this handoff under
-50 lines from now on.
+The owner's rebuilt debug-rig EXE with `framebuffer_screenshot` and
+`framebuffer_burst` is smoke-tested and ready. After the current checkpoint,
+execute `docs/EMULATOR_MCP_CAPTURE.md` (package + re-pin + paired-ledger and
+image-hash controls + visual-QA MCP mode). Do not modify the fork source
+beyond re-packaging. Standing rule: keep this handoff under 50 lines.
 
 ## Exact next experiment
 
