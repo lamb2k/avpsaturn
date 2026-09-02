@@ -308,6 +308,8 @@ def build() -> str:
     coffee_exit_handoff = coffee_exit_controller["withdrawal_route_handoff"]
     coffee_exit_script = coffee_exit["player_withdrawal_script"]
     coffee_exit_route_zero = coffee_exit["route_zero_program"]
+    coffee_exit_next_scene = coffee_exit_route_zero[
+        "next_scene_reinitialization"]
     coffee_exit_callbacks = coffee_exit_script["source_display_callback_program"]
     coffee_exit_ballistic = coffee_exit_script["ballistic_mode_3"]
     class1f_initial_actors = class1f_initial["actors"]
@@ -1295,11 +1297,26 @@ def build() -> str:
             "player_gameplay_update_after_gate_write_same_source_frame"] is
             not True or
         [(row["frame_u16"], row["route_state_s16"],
-          row["player_state_u16"], row["timer42_u16"])
+          row["player_state_u16"], row["timer42_u16"],
+          row["player_substate_u16"], row["player_x_fp_s32_16_16"],
+          row["player_y_fp_s32_16_16"],
+          row["player_animation_record_u32"],
+          row["player_animation_timer_u16"],
+          row["player_animation_branch_s16"], row["player_facing_u8"],
+          row["player_action_timer_u16"])
          for row in coffee_exit_handoff["source_observations"]] != [
-            (5451, 4, 0x0200, 1),
-            (5452, 4, 0x0200, 0),
-            (5453, 6, 0x0800, 0)] or
+            (5451, 4, 0x0200, 1, 0x0202, 0x05509000, 0x013fa800,
+             0x0015f218, 2, 0, 1, 0),
+            (5452, 4, 0x0200, 0, 0x0204, 0x05509000, 0x013fa800,
+             0x0015f218, 1, 0, 1, 0x0a00),
+            (5453, 6, 0x0800, 0, 0, 0x05509000, 0x013fa800,
+             0x0015f218, 1, 0, 1, 0x0a00)] or
+        coffee_exit_handoff["player_gate_transition_rule"] != {
+            "guard": "u8(g81f3) becomes nonzero before the player pool update",
+            "movement": "suppress the pending directional delta and preserve signed 16.16 x/y",
+            "transition": "player substate 0x0202 -> 0x0204 while the current walk record advances once",
+            "route_handoff": "the following 0x008418 route write changes outer state to 0x0800 without truncating either fixed-point fraction",
+        } or
         coffee_exit_controller["withdrawal"]["timer_u16"] != 300 or
         coffee_exit_controller["withdrawal"]
             ["living_enemy_count_is_not_a_guard"] is not True or
@@ -1324,6 +1341,25 @@ def build() -> str:
             (0x50000, -0x1000, 0x80000, -0x6000) or
         [row["display_frames_u16"] for row in
          coffee_exit_route_zero["resident_load_stalls"]] != [26, 9, 1] or
+        coffee_exit_next_scene["classification"] !=
+            "SOURCE_CLOSED_IMPLEMENTATION_FIELDS" or
+        coffee_exit_next_scene["camera_reset_visible_frame_u16"] != 5563 or
+        coffee_exit_next_scene["camera_reset_x_s16"] != 0 or
+        coffee_exit_next_scene["camera_reset_z_s16"] != 0 or
+        coffee_exit_next_scene["camera_reset_target_x_s16"] != 128 or
+        coffee_exit_next_scene["player_position_visible_frame_u16"] != 5564 or
+        coffee_exit_next_scene["entry_controller_visible_frame_u16"] != 5566 or
+        coffee_exit_next_scene["player_x_fp_s32_16_16"] != 0x04009200 or
+        coffee_exit_next_scene["player_y_fp_s32_16_16"] != 0x0120d000 or
+        coffee_exit_next_scene["player_z_s16"] != 288 or
+        coffee_exit_next_scene["player_state_u16"] != 0x0800 or
+        coffee_exit_next_scene["player_substate_u16"] != 0 or
+        coffee_exit_next_scene["player_facing_before_controller_u8"] != 1 or
+        coffee_exit_next_scene["player_facing_after_controller_u8"] != 0 or
+        coffee_exit_next_scene["camera_x_s16"] != 776 or
+        coffee_exit_next_scene["camera_z_s16"] != 224 or
+        coffee_exit_next_scene["camera_target_x_s16"] != 776 or
+        coffee_exit_next_scene["entry_controller_state_u16"] != 0x0200 or
         any(row["native_binding"] != "ADAPTED_PRESENTATION_RESIDENCY_NOOP"
             for row in coffee_exit["load_boundaries"])):
         raise ValueError("SPEC-02 first-segment recurring spawn drift")
@@ -2760,10 +2796,49 @@ def build() -> str:
                 ["display_frames_u16"],
             coffee_exit_route_zero["teardown_visible_frame_u16"],
             coffee_exit_route_zero["next_scene_substate2_visible_frame_u16"]),
-        "    0x%04Xu, %sUL, %sUL" % (
+        "    0x%04Xu, %sUL, %sUL," % (
             coffee_exit_script["outer_state_u16"],
             coffee_exit_script["source_program_address"],
             coffee_exit_script["steps"][-1]["cursor"]),
+        "    0x%04Xu, 0x%04Xu," % (
+            coffee_exit_handoff["source_observations"][0]
+                ["player_substate_u16"],
+            coffee_exit_handoff["source_observations"][1]
+                ["player_substate_u16"]),
+        "    0x%08XL, 0x%08XL, 0x%08XUL," % (
+            coffee_exit_handoff["source_observations"][1]
+                ["player_x_fp_s32_16_16"],
+            coffee_exit_handoff["source_observations"][1]
+                ["player_y_fp_s32_16_16"],
+            coffee_exit_handoff["source_observations"][1]
+                ["player_animation_record_u32"]),
+        "    %du, %du, %d, %du," % (
+            coffee_exit_handoff["source_observations"][0]
+                ["player_animation_timer_u16"],
+            coffee_exit_handoff["source_observations"][1]
+                ["player_animation_timer_u16"],
+            coffee_exit_handoff["source_observations"][1]
+                ["player_animation_branch_s16"],
+            coffee_exit_handoff["source_observations"][1]
+                ["player_facing_u8"]),
+        "    1u, 1u, 1u,",
+        "    %d, %d, %d," % (
+            coffee_exit_next_scene["camera_reset_x_s16"],
+            coffee_exit_next_scene["camera_reset_z_s16"],
+            coffee_exit_next_scene["camera_reset_target_x_s16"]),
+        "    0x%08XL, 0x%08XL, %d, 0x%04Xu, 0x%04Xu," % (
+            coffee_exit_next_scene["player_x_fp_s32_16_16"],
+            coffee_exit_next_scene["player_y_fp_s32_16_16"],
+            coffee_exit_next_scene["player_z_s16"],
+            coffee_exit_next_scene["player_state_u16"],
+            coffee_exit_next_scene["player_substate_u16"]),
+        "    %du, %du, %d, %d, %d, 0x%04Xu" % (
+            coffee_exit_next_scene["player_facing_before_controller_u8"],
+            coffee_exit_next_scene["player_facing_after_controller_u8"],
+            coffee_exit_next_scene["camera_x_s16"],
+            coffee_exit_next_scene["camera_z_s16"],
+            coffee_exit_next_scene["camera_target_x_s16"],
+            coffee_exit_next_scene["entry_controller_state_u16"]),
         "};", "",
         "static const AvspRound1CoffeeExitStepSpec avsp_round1_coffee_exit_steps[AVSP_ROUND1_COFFEE_EXIT_STEP_COUNT] =",
         "{",

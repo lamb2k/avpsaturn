@@ -6,7 +6,7 @@
 #include "../../combat/hit_ko/hit_ko.h"
 
 #define AVSP_ROUND1_SPEC02_SHA256 \
-"d5de94cd368126c1315639e443ac6c929c4c7037140f84c1ae7d9083bf7f3bb3"
+"ad27ab57d4fdab734c3371444c1724a9cc2a364aeea125989500fb4a6b987994"
 #define AVSP_ROUND1_CANARY_HEAD 0x52314548UL
 #define AVSP_ROUND1_CANARY_TAIL 0x52314554UL
 #define AVSP_ROUND1_ROUTE_ENTRY_STATE 2
@@ -948,6 +948,32 @@ typedef struct
     unsigned short player_outer_state;
     unsigned long player_program_address;
     unsigned long terminal_cursor;
+    unsigned short gate_prior_player_substate;
+    unsigned short gate_player_substate;
+    long gate_player_x_fp;
+    long gate_player_y_fp;
+    unsigned long gate_player_animation_record;
+    unsigned short gate_prior_animation_timer;
+    unsigned short gate_player_animation_timer;
+    short gate_player_animation_branch;
+    unsigned char gate_player_facing;
+    unsigned char gate_animation_updates;
+    unsigned char preserve_gate_position_fraction;
+    unsigned char preserve_route_handoff_fraction;
+    short next_entry_camera_reset_x;
+    short next_entry_camera_reset_z;
+    short next_entry_camera_reset_target_x;
+    long next_entry_player_x_fp;
+    long next_entry_player_y_fp;
+    short next_entry_player_z;
+    unsigned short next_entry_player_state;
+    unsigned short next_entry_player_substate;
+    unsigned char next_entry_player_facing_before_controller;
+    unsigned char next_entry_player_facing_after_controller;
+    short next_entry_camera_x;
+    short next_entry_camera_z;
+    short next_entry_camera_target_x;
+    unsigned short next_entry_controller_state;
 } AvspRound1CoffeeExitSpec;
 
 typedef struct

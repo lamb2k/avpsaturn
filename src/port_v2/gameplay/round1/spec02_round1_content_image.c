@@ -412,7 +412,14 @@ const AvspRound1ContentArchive avsp_round1_content_image
         16u, 600u, 1008u, 300u, 1152u,
         6, 0, 2, 16u,
         26u, 9u, 1u, 5551u, 5564u,
-        0x0800u, 0x00129b64UL, 0x00129b84UL
+        0x0800u, 0x00129b64UL, 0x00129b84UL,
+        0x0202u, 0x0204u,
+        0x05509000L, 0x013FA800L, 0x0015F218UL,
+        2u, 1u, 0, 1u,
+        1u, 1u, 1u,
+        0, 0, 128,
+        0x04009200L, 0x0120D000L, 288, 0x0800u, 0x0000u,
+        1u, 0u, 776, 224, 776, 0x0200u
     },
     {
         { 0x00129b64UL, 0x00129b68UL, 0x0015f1f4UL, 0, 0, 0u, AVSP_ROUND1_EXIT_STEP_BOOTSTRAP, 0u, 0u },

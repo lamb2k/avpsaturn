@@ -1,8 +1,8 @@
 #ifndef AVSP_SPEC02_ROUND1_ENTRY_DATA_H
 #define AVSP_SPEC02_ROUND1_ENTRY_DATA_H
 
-/* contract_sha256=d5de94cd368126c1315639e443ac6c929c4c7037140f84c1ae7d9083bf7f3bb3 */
-/* fixtures_sha256=bc9fe2f74e80c7dbc5329361237e6ec1e32be2de072d62e5d2cb24a134fe0b84 */
+/* contract_sha256=ad27ab57d4fdab734c3371444c1724a9cc2a364aeea125989500fb4a6b987994 */
+/* fixtures_sha256=83e188db6157d6c14bfef18204e9000ba3f59a611a59ee7657fe7955042aead8 */
 #define AVSP_ROUND1_ENTRY_PROGRAM_SHA256 "e5ef761fadc1b5a7df62e77c03025c0ebff0c2503cbc8be9c0077d4bd6cd24ba"
 
 #if defined(__sh__)
@@ -509,7 +509,14 @@ static const AvspRound1CoffeeExitSpec avsp_round1_coffee_exit =
     16u, 600u, 1008u, 300u, 1152u,
     6, 0, 2, 16u,
     26u, 9u, 1u, 5551u, 5564u,
-    0x0800u, 0x00129b64UL, 0x00129b84UL
+    0x0800u, 0x00129b64UL, 0x00129b84UL,
+    0x0202u, 0x0204u,
+    0x05509000L, 0x013FA800L, 0x0015F218UL,
+    2u, 1u, 0, 1u,
+    1u, 1u, 1u,
+    0, 0, 128,
+    0x04009200L, 0x0120D000L, 288, 0x0800u, 0x0000u,
+    1u, 0u, 776, 224, 776, 0x0200u
 };
 #endif
 

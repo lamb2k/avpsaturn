@@ -72,7 +72,7 @@ item["gaps"]["retained_gameplay_authorities"] = 1
 item["acceptance"] = {"all_zero": False, "ready": True}
 mutations.append(("retained authority false acceptance", item))
 item = copy.deepcopy(BASE)
-item["gaps"]["unowned_saturn_actors"] = 1
+item["gaps"]["unowned_saturn_actors"] += 1
 mutations.append(("native owner count drift", item))
 item = copy.deepcopy(BASE)
 item["missing_source_lifetime_ids"].pop()

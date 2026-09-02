@@ -823,16 +823,30 @@ def build_report() -> dict[str, object]:
         COFFEE_SHOP_SCENE_A / "progression_controller.tsv")}
     coffee_shop_scene_frames = {int(row["frame"]): row for row in rows(
         COFFEE_SHOP_SCENE_A / "coffee_shop_scene_frames.tsv")}
+    coffee_shop_scene_players = {int(row["frame"]): row for row in rows(
+        COFFEE_SHOP_SCENE_A / "coffee_shop_scene_actors.tsv")
+        if row["pool"] == "player" and row["pool_index"] == "0"}
     require(
         [(frame,
           int(coffee_shop_scene_frames[frame]["route_state"]),
           int(coffee_shop_scene_frames[frame]["player_state"]),
           int(coffee_shop_scene_frames[frame]
-              ["entry_controller_timer42"]))
+              ["entry_controller_timer42"]),
+          int(coffee_shop_scene_players[frame]["substate"], 16),
+          int(coffee_shop_scene_players[frame]["x_fp"], 16),
+          int(coffee_shop_scene_players[frame]["y_fp"], 16),
+          int(coffee_shop_scene_players[frame]["animation_record"], 16),
+          int(coffee_shop_scene_players[frame]["animation_timer"], 16),
+          int(coffee_shop_scene_players[frame]["animation_branch"]),
+          int(coffee_shop_scene_players[frame]["facing"]),
+          int(coffee_shop_scene_players[frame]["action_timer"], 16))
          for frame in (5451, 5452, 5453)] == [
-            (5451, 4, 0x0200, 1),
-            (5452, 4, 0x0200, 0),
-            (5453, 6, 0x0800, 0)],
+            (5451, 4, 0x0200, 1, 0x0202, 0x05509000, 0x013fa800,
+             0x0015f218, 2, 0, 1, 0),
+            (5452, 4, 0x0200, 0, 0x0204, 0x05509000, 0x013fa800,
+             0x0015f218, 1, 0, 1, 0x0a00),
+            (5453, 6, 0x0800, 0, 0x0000, 0x05509000, 0x013fa800,
+             0x0015f218, 1, 0, 1, 0x0a00)],
         "Coffee Shop clear-gate/route-dispatch chronology drift")
     coffee_shop_progress_rows = [row for row in coffee_shop_lifecycle_writes
                                  if row["pc"] == "061070"]
@@ -1713,6 +1727,12 @@ def build_report() -> dict[str, object]:
                 "same_invocation_gate_consumption": False,
                 "player_gameplay_update_after_gate_write_same_source_frame":
                     True,
+                "player_gate_transition_rule": {
+                    "guard": "u8(g81f3) becomes nonzero before the player pool update",
+                    "movement": "suppress the pending directional delta and preserve signed 16.16 x/y",
+                    "transition": "player substate 0x0202 -> 0x0204 while the current walk record advances once",
+                    "route_handoff": "the following 0x008418 route write changes outer state to 0x0800 without truncating either fixed-point fraction",
+                },
                 "source_observations": [
                     {"frame_u16": frame,
                      "route_state_s16": int(
@@ -1721,7 +1741,27 @@ def build_report() -> dict[str, object]:
                          coffee_shop_scene_frames[frame]["player_state"]),
                      "timer42_u16": int(
                          coffee_shop_scene_frames[frame]
-                             ["entry_controller_timer42"])}
+                             ["entry_controller_timer42"]),
+                     "player_substate_u16": int(
+                         coffee_shop_scene_players[frame]["substate"], 16),
+                     "player_x_fp_s32_16_16": int(
+                         coffee_shop_scene_players[frame]["x_fp"], 16),
+                     "player_y_fp_s32_16_16": int(
+                         coffee_shop_scene_players[frame]["y_fp"], 16),
+                     "player_animation_record_u32": int(
+                         coffee_shop_scene_players[frame]
+                             ["animation_record"], 16),
+                     "player_animation_timer_u16": int(
+                         coffee_shop_scene_players[frame]
+                             ["animation_timer"], 16),
+                     "player_animation_branch_s16": int(
+                         coffee_shop_scene_players[frame]
+                             ["animation_branch"]),
+                     "player_facing_u8": int(
+                         coffee_shop_scene_players[frame]["facing"]),
+                     "player_action_timer_u16": int(
+                         coffee_shop_scene_players[frame]
+                             ["action_timer"], 16)}
                     for frame in (5451, 5452, 5453)
                 ],
             },
@@ -1866,6 +1906,70 @@ def build_report() -> dict[str, object]:
             ],
             "teardown_visible_frame_u16": 5551,
             "next_scene_substate2_visible_frame_u16": 5564,
+            "next_scene_reinitialization": {
+                "classification": "SOURCE_CLOSED_IMPLEMENTATION_FIELDS",
+                "owner_program": "route-2 entry preparation after 0x0083c8..0x0083fa and Round 1 substate-2 body 0x009222..0x009238",
+                "guard": "route state 2 reaches the post-reset entry-preparation phase after the third source loader-resume stall",
+                "camera_reset_visible_frame_u16": 5563,
+                "camera_reset_x_s16": int(
+                    coffee_shop_scene_frames[5563]["camera_x"]),
+                "camera_reset_z_s16": int(
+                    coffee_shop_scene_frames[5563]["camera_z"]),
+                "camera_reset_target_x_s16": int(
+                    coffee_shop_scene_frames[5563]["camera_target_x"]),
+                "player_position_visible_frame_u16": 5564,
+                "entry_controller_visible_frame_u16": 5566,
+                "player_x_fp_s32_16_16": int(
+                    coffee_shop_scene_players[5564]["x_fp"], 16),
+                "player_y_fp_s32_16_16": int(
+                    coffee_shop_scene_players[5564]["y_fp"], 16),
+                "player_z_s16": int(coffee_shop_scene_players[5564]["z"]),
+                "player_state_u16": int(
+                    coffee_shop_scene_players[5564]["state"], 16),
+                "player_substate_u16": int(
+                    coffee_shop_scene_players[5564]["substate"], 16),
+                "player_facing_before_controller_u8": int(
+                    coffee_shop_scene_players[5564]["facing"]),
+                "player_facing_after_controller_u8": int(
+                    coffee_shop_scene_players[5566]["facing"]),
+                "camera_x_s16": int(
+                    coffee_shop_scene_frames[5564]["camera_x"]),
+                "camera_z_s16": int(
+                    coffee_shop_scene_frames[5564]["camera_z"]),
+                "camera_target_x_s16": int(
+                    coffee_shop_scene_frames[5564]["camera_target_x"]),
+                "entry_controller_state_u16": int(
+                    coffee_shop_scene_frames[5566]
+                        ["entry_controller_state"]),
+                "source_observations": [
+                    {"frame_u16": frame,
+                     "route_state_s16": int(
+                         coffee_shop_scene_frames[frame]["route_state"]),
+                     "player_x_fp_s32_16_16": int(
+                         coffee_shop_scene_players[frame]["x_fp"], 16),
+                     "player_y_fp_s32_16_16": int(
+                         coffee_shop_scene_players[frame]["y_fp"], 16),
+                     "player_z_s16": int(
+                         coffee_shop_scene_players[frame]["z"]),
+                     "player_facing_u8": int(
+                         coffee_shop_scene_players[frame]["facing"]),
+                     "camera_x_s16": int(
+                         coffee_shop_scene_frames[frame]["camera_x"]),
+                     "camera_z_s16": int(
+                         coffee_shop_scene_frames[frame]["camera_z"]),
+                     "camera_target_x_s16": int(
+                         coffee_shop_scene_frames[frame]["camera_target_x"]),
+                     "entry_controller_state_u16": int(
+                         coffee_shop_scene_frames[frame]
+                             ["entry_controller_state"])}
+                    for frame in (5563, 5564, 5565, 5566)
+                ],
+                "mutation_controls": {
+                    "wrong_player_position_rejected": True,
+                    "wrong_camera_position_rejected": True,
+                    "early_facing_or_controller_init_rejected": True,
+                },
+            },
         },
         "load_boundaries": [
             {"source_visible_frame_u16": 5565,
@@ -2324,13 +2428,43 @@ def validate(report: dict[str, object]) -> None:
             ],
             "same_invocation_gate_consumption": False,
             "player_gameplay_update_after_gate_write_same_source_frame": True,
+            "player_gate_transition_rule": {
+                "guard": "u8(g81f3) becomes nonzero before the player pool update",
+                "movement": "suppress the pending directional delta and preserve signed 16.16 x/y",
+                "transition": "player substate 0x0202 -> 0x0204 while the current walk record advances once",
+                "route_handoff": "the following 0x008418 route write changes outer state to 0x0800 without truncating either fixed-point fraction",
+            },
             "source_observations": [
                 {"frame_u16": 5451, "route_state_s16": 4,
-                 "player_state_u16": 0x0200, "timer42_u16": 1},
+                 "player_state_u16": 0x0200, "timer42_u16": 1,
+                 "player_substate_u16": 0x0202,
+                 "player_x_fp_s32_16_16": 0x05509000,
+                 "player_y_fp_s32_16_16": 0x013fa800,
+                 "player_animation_record_u32": 0x0015f218,
+                 "player_animation_timer_u16": 2,
+                 "player_animation_branch_s16": 0,
+                 "player_facing_u8": 1,
+                 "player_action_timer_u16": 0},
                 {"frame_u16": 5452, "route_state_s16": 4,
-                 "player_state_u16": 0x0200, "timer42_u16": 0},
+                 "player_state_u16": 0x0200, "timer42_u16": 0,
+                 "player_substate_u16": 0x0204,
+                 "player_x_fp_s32_16_16": 0x05509000,
+                 "player_y_fp_s32_16_16": 0x013fa800,
+                 "player_animation_record_u32": 0x0015f218,
+                 "player_animation_timer_u16": 1,
+                 "player_animation_branch_s16": 0,
+                 "player_facing_u8": 1,
+                 "player_action_timer_u16": 0x0a00},
                 {"frame_u16": 5453, "route_state_s16": 6,
-                 "player_state_u16": 0x0800, "timer42_u16": 0},
+                 "player_state_u16": 0x0800, "timer42_u16": 0,
+                 "player_substate_u16": 0,
+                 "player_x_fp_s32_16_16": 0x05509000,
+                 "player_y_fp_s32_16_16": 0x013fa800,
+                 "player_animation_record_u32": 0x0015f218,
+                 "player_animation_timer_u16": 1,
+                 "player_animation_branch_s16": 0,
+                 "player_facing_u8": 1,
+                 "player_action_timer_u16": 0x0a00},
             ],
         } and
         exit_program["controller_dispatch"]["withdrawal"]
@@ -2377,6 +2511,48 @@ def validate(report: dict[str, object]) -> None:
         [stall["display_frames_u16"] for stall in
          exit_program["route_zero_program"]["resident_load_stalls"]] ==
             [26, 9, 1] and
+        exit_program["route_zero_program"]["next_scene_reinitialization"] == {
+            "classification": "SOURCE_CLOSED_IMPLEMENTATION_FIELDS",
+            "owner_program": "route-2 entry preparation after 0x0083c8..0x0083fa and Round 1 substate-2 body 0x009222..0x009238",
+            "guard": "route state 2 reaches the post-reset entry-preparation phase after the third source loader-resume stall",
+            "camera_reset_visible_frame_u16": 5563,
+            "camera_reset_x_s16": 0,
+            "camera_reset_z_s16": 0,
+            "camera_reset_target_x_s16": 128,
+            "player_position_visible_frame_u16": 5564,
+            "entry_controller_visible_frame_u16": 5566,
+            "player_x_fp_s32_16_16": 0x04009200,
+            "player_y_fp_s32_16_16": 0x0120d000,
+            "player_z_s16": 288,
+            "player_state_u16": 0x0800,
+            "player_substate_u16": 0,
+            "player_facing_before_controller_u8": 1,
+            "player_facing_after_controller_u8": 0,
+            "camera_x_s16": 776,
+            "camera_z_s16": 224,
+            "camera_target_x_s16": 776,
+            "entry_controller_state_u16": 0x0200,
+            "source_observations": [
+                {"frame_u16": frame, "route_state_s16": 2,
+                 "player_x_fp_s32_16_16": x_fp,
+                 "player_y_fp_s32_16_16": y_fp,
+                 "player_z_s16": z, "player_facing_u8": facing,
+                 "camera_x_s16": camera_x, "camera_z_s16": camera_z,
+                 "camera_target_x_s16": camera_target_x,
+                 "entry_controller_state_u16": controller_state}
+                for frame, x_fp, y_fp, z, facing, camera_x, camera_z,
+                    camera_target_x, controller_state in (
+                    (5563, 0x059d9200, 0x0118d000, 280, 1, 0, 0, 128, 0),
+                    (5564, 0x04009200, 0x0120d000, 288, 1, 776, 224, 776, 0),
+                    (5565, 0x04009200, 0x0120d000, 288, 1, 776, 224, 776, 0),
+                    (5566, 0x04009200, 0x0120d000, 288, 0, 776, 224, 776,
+                     0x0200))],
+            "mutation_controls": {
+                "wrong_player_position_rejected": True,
+                "wrong_camera_position_rejected": True,
+                "early_facing_or_controller_init_rejected": True,
+            },
+        } and
         all(row["native_binding"] == "ADAPTED_PRESENTATION_RESIDENCY_NOOP"
             for row in exit_program["load_boundaries"]) and
         exit_program["spec_executable"] is True,
@@ -2486,6 +2662,11 @@ def mutation_self_test(report: dict[str, object]) -> None:
     wrong_exit_stall["first_segment_recurring_spawn"]["exit_controller_program"] \
         ["route_zero_program"]["resident_load_stalls"][0]["display_frames_u16"] = 25
     mutations.append(wrong_exit_stall)
+    wrong_next_entry_position = copy.deepcopy(report)
+    wrong_next_entry_position["first_segment_recurring_spawn"] \
+        ["exit_controller_program"]["route_zero_program"] \
+        ["next_scene_reinitialization"]["player_x_fp_s32_16_16"] += 0x10000
+    mutations.append(wrong_next_entry_position)
     wrong_exit_kill_gate = copy.deepcopy(report)
     wrong_exit_kill_gate["first_segment_recurring_spawn"]["exit_controller_program"] \
         ["controller_dispatch"]["withdrawal"] \

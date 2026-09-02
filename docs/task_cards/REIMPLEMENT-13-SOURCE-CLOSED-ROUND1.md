@@ -3812,3 +3812,34 @@ to 5459. The earlier next RED is the frame-5452 player/exit lifecycle; close
 its complete Coffee Shop exit-controller and scene-teardown program through
 the frame-5551 population release. Candidate and exhausted visual blocker
 remain frozen.
+
+### P4 Coffee Shop player/route exit-lifecycle checkpoint (2026-09-01)
+
+The source-owned clear-to-exit chronology is now executable through frame 5566.
+The controller gate becomes visible before the player update at frame 5452;
+the player suppresses the pending directional delta, preserves both signed
+16.16 fractions, advances the carried walk record once, and enters stop. Route
+handoff at 5453 preserves that presentation. Centralized pool release remains
+at 5551. Route 2 resets camera position/target at 5563, reinitializes the next
+entry player/camera at 5564, and binds controller state `0x0200` plus source
+facing at 5566 through the first resident load boundary. No fixed-frame
+gameplay result or post-release actor was added.
+
+The complete scene now has no player divergence through 5566 and zero
+route/camera gaps. Raw gaps remain `188/1/0/671/1/93/0/279/0`; the next
+attacker divergence is frame 5459. Focused baseline, nine real controller/exit
+mutations, three exit-program mutations, Oracle (30), SPEC-02 (190), scene
+(20), release Target and the 18-control memory lane pass. Target GAME.BIN is
+377,600 bytes at SHA-256
+`08f1f8b20539a6a29c11b5af473716bf09767daf985e0c7e841423281c13d478`,
+BSS `0x060b3410`. The deterministic 165-table archive is 47,372 bytes at
+SHA-256 `51f2d9ef9edb75c646671d12f73e053ed9419e5228eb31a665064795c9122c91`
+inside the unchanged 256 KiB content carve.
+
+The isolated cold-build packaging lane reached its three-attempt cap before
+emulator launch because the clean worktree lacks ignored `SPR4/BACT.RLE`.
+Emulator/WGC remain blocked rather than inferred from Target; the prior visual
+three-attempt blocker and frozen candidate are unchanged. Continue scene-order
+at frame 5459 by closing the complete final class-`0x1f` action-tail program
+through the last source lifetime at 5550, then preserve centralized release at
+5551. Do not implement native-only stale post-release actors.

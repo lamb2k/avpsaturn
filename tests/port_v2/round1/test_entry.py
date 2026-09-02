@@ -9,7 +9,7 @@ from pathlib import Path
 
 ROOT = Path(__file__).resolve().parents[3]
 SPEC = ROOT / "data/spec02_round1_executable_contract.json"
-EXPECTED = "d5de94cd368126c1315639e443ac6c929c4c7037140f84c1ae7d9083bf7f3bb3"
+EXPECTED = "ad27ab57d4fdab734c3371444c1724a9cc2a364aeea125989500fb4a6b987994"
 assert hashlib.sha256(SPEC.read_bytes()).hexdigest() == EXPECTED
 assert json.loads(SPEC.read_text())["status"] == "ACCEPTED"
 source = (ROOT / "src/port_v2/gameplay/round1/round1.c").read_text()
@@ -114,7 +114,7 @@ class1f_state0_checkpoint_body = test_source.replace(
     "                return 0;\n",
     1)
 scene_checkpoint_flags = {
-    "--controller-edge-only", "--weapon-timing-only",
+    "--weapon-timing-only",
     "--special-input-only", "--hit-interaction-only", "--queue-only",
     "--class1f-action16-only",
 }
@@ -222,6 +222,11 @@ controller_edge_mutations = {
     "encounter->source_blocked_by_living_count = 1u;\n    }\n    else",
     "runtime->entry.gate81f3 = 1u;\n        runtime->camera_x_upper =",
     "if (!avsp_round1_step_coffee_clear_route(runtime))",
+    "if (runtime->entry.gate81f3 != 0u)\n    {",
+    "if (!avsp_round1_coffee_exit.preserve_route_handoff_fraction)\n    {",
+    "runtime->player.source_x_fp =\n            avsp_round1_coffee_exit.next_entry_player_x_fp;",
+    "if (runtime->entry.exit_load_index == 1u)\n            {",
+    "runtime->player.facing = avsp_round1_coffee_exit.\n                    next_entry_player_facing_after_controller;",
 }
 player_hit_mutations = {
     "runtime->player.substate = avsp_round1_player_hit.entry_substate;\n"
@@ -635,6 +640,16 @@ for before, after in (
      "runtime->route_state = avsp_round1_coffee_exit.route_withdrawal;\n        runtime->camera_x_upper ="),
     ("if (!avsp_round1_step_coffee_clear_route(runtime))",
      "if (0)"),
+    ("if (runtime->entry.gate81f3 != 0u)\n    {",
+     "if (runtime->entry.gate81f3 == 0u)\n    {"),
+    ("if (!avsp_round1_coffee_exit.preserve_route_handoff_fraction)\n    {",
+     "if (avsp_round1_coffee_exit.preserve_route_handoff_fraction)\n    {"),
+    ("runtime->player.source_x_fp =\n            avsp_round1_coffee_exit.next_entry_player_x_fp;",
+     "runtime->player.source_x_fp =\n            avsp_round1_coffee_exit.next_entry_player_x_fp + 0x10000L;"),
+    ("if (runtime->entry.exit_load_index == 1u)\n            {",
+     "if (runtime->entry.exit_load_index == 2u)\n            {"),
+    ("runtime->player.facing = avsp_round1_coffee_exit.\n                    next_entry_player_facing_after_controller;",
+     "runtime->player.facing = avsp_round1_coffee_exit.\n                    next_entry_player_facing_before_controller;"),
     ("if (avsp_round1_recurring_spawn.preserve_reused_presentation != 0u)",
      "if (0)"),
     ("avsp_round1_class1f_action_program.fall_initial_selector",
@@ -1001,7 +1016,7 @@ if ("--controller-edge-only" in sys.argv or
     run(source, header, False, "delayed-scene-scheduler-handoff",
         expected_returncode=124, test_body=delayed_scene_scheduler)
     if "--controller-edge-only" in sys.argv:
-        print("REIMPLEMENT-13 controller camera-edge mutation lane: PASS (4 real mutations)")
+        print("REIMPLEMENT-13 controller camera-edge mutation lane: PASS (9 real mutations)")
         raise SystemExit(0)
 if "--player-hit-only" in sys.argv:
     print("REIMPLEMENT-13 Coffee Shop player-HIT program mutation lane: PASS (14 real mutations)")

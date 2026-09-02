@@ -113,6 +113,10 @@ def main() -> None:
         raise SystemExit("accepted Round 1 census sizing inputs drift")
 
     memory = game_map_values()
+    table_count = (ROOT / "src/port_v2/gameplay/round1/spec02_round1_entry_data.h") \
+        .read_text(encoding="ascii").count("#define avsp_round1_")
+    if table_count != 165:
+        raise SystemExit("generated Round 1 content table count drift")
     bss_end = memory["bss_end"]
     manifest = {
         "schema": "reimplement13-round1-memory-plan-v1",
@@ -177,7 +181,7 @@ def main() -> None:
             "bytes": len(payload),
             "sha256": archive_sha,
             "generated_source_sha256": digest(SOURCE),
-            "table_count": 157,
+            "table_count": table_count,
             "categories": ["terrain", "timer-selector", "animation-record", "collision", "route-and-actor-contract"],
             "deterministic_double_build": True,
             "target_endian": "SH-2 big endian",

@@ -4683,7 +4683,14 @@ int main(void)
                   scene_runtime.first_encounter.source_intro_timer != 1u ||
                   scene_runtime.entry.gate81f3 != 0u ||
                   scene_runtime.entry.exit_started != 0u ||
-                  scene_runtime.player.state != 0x0200u)) ||
+                  scene_runtime.player.state != 0x0200u ||
+                  scene_runtime.player.substate != 0x0202u ||
+                  scene_runtime.player.source_x_fp != 0x05509000L ||
+                  scene_runtime.player.source_y_fp != 0x013fa800L ||
+                  scene_runtime.player.animation_record != 0x0015f218UL ||
+                  scene_runtime.player.animation_timer != 2u ||
+                  scene_runtime.player.animation_branch != 0 ||
+                  scene_runtime.player.facing != 1u)) ||
                 (source_frame == 5452u &&
                  (scene_runtime.route_state != 4 ||
                   scene_runtime.entry_controller.state != 0x0400u ||
@@ -4691,15 +4698,29 @@ int main(void)
                   scene_runtime.entry.gate81f3 != 1u ||
                   scene_runtime.entry.exit_started != 0u ||
                   scene_runtime.player.state != 0x0200u ||
+                  scene_runtime.player.substate != 0x0204u ||
+                  scene_runtime.player.source_x_fp != 0x05509000L ||
+                  scene_runtime.player.source_y_fp != 0x013fa800L ||
+                  scene_runtime.player.animation_record != 0x0015f218UL ||
+                  scene_runtime.player.animation_timer != 1u ||
+                  scene_runtime.player.animation_branch != 0 ||
+                  scene_runtime.player.facing != 1u ||
                   scene_runtime.camera_x_upper != 1152)) ||
                 (source_frame == 5453u &&
                  (scene_runtime.route_state != 6 ||
                   scene_runtime.entry.gate81f3 != 1u ||
                   scene_runtime.entry.exit_started != 1u ||
-                  scene_runtime.player.state != 0x0800u)))
+                  scene_runtime.player.state != 0x0800u ||
+                  scene_runtime.player.substate != 0u ||
+                  scene_runtime.player.source_x_fp != 0x05509000L ||
+                  scene_runtime.player.source_y_fp != 0x013fa800L ||
+                  scene_runtime.player.animation_record != 0x0015f218UL ||
+                  scene_runtime.player.animation_timer != 1u ||
+                  scene_runtime.player.animation_branch != 0 ||
+                  scene_runtime.player.facing != 1u)))
             {
                 fprintf(stderr,
-                    "Coffee Shop clear-route scheduler handoff failed frame=%u controller=%04x/%04x timer=%u gate81f3=%u route=%d exit=%u player=%04x camera_upper=%d\n",
+                    "Coffee Shop clear-route scheduler handoff failed frame=%u controller=%04x/%04x timer=%u gate81f3=%u route=%d exit=%u player=%04x/%04x fp=%08lx/%08lx anim=%08lx/%u/%d facing=%u camera_upper=%d\n",
                     source_frame, scene_runtime.entry_controller.state,
                     scene_runtime.entry_controller.substate,
                     scene_runtime.first_encounter.source_intro_timer,
@@ -4707,6 +4728,13 @@ int main(void)
                     scene_runtime.route_state,
                     scene_runtime.entry.exit_started,
                     scene_runtime.player.state,
+                    scene_runtime.player.substate,
+                    scene_runtime.player.source_x_fp,
+                    scene_runtime.player.source_y_fp,
+                    scene_runtime.player.animation_record,
+                    scene_runtime.player.animation_timer,
+                    scene_runtime.player.animation_branch,
+                    scene_runtime.player.facing,
                     scene_runtime.camera_x_upper);
                 return 126;
             }
@@ -5117,6 +5145,58 @@ int main(void)
                         return 126;
                     }
                 }
+                if ((source_frame == 5563u &&
+                     (scene_runtime.route_state != 2 ||
+                      scene_runtime.player.source_x_fp != 0x059d9200L ||
+                      scene_runtime.player.source_y_fp != 0x0118d000L ||
+                      scene_runtime.player.z != 280 ||
+                      scene_runtime.player.facing != 1u ||
+                      scene_runtime.camera_x_position != 0 ||
+                      scene_runtime.camera_z_position != 0 ||
+                      scene_runtime.camera_x_target != 128 ||
+                      scene_runtime.entry_controller.active != 0u)) ||
+                    ((source_frame == 5564u || source_frame == 5565u) &&
+                     (scene_runtime.route_state != 2 ||
+                      scene_runtime.player.state != 0x0800u ||
+                      scene_runtime.player.substate != 0u ||
+                      scene_runtime.player.source_x_fp != 0x04009200L ||
+                      scene_runtime.player.source_y_fp != 0x0120d000L ||
+                      scene_runtime.player.x != 1024 ||
+                      scene_runtime.player.y != 288 ||
+                      scene_runtime.player.z != 288 ||
+                      scene_runtime.player.facing != 1u ||
+                      scene_runtime.camera_x_position != 776 ||
+                      scene_runtime.camera_z_position != 224 ||
+                      scene_runtime.camera_x_target != 776 ||
+                      scene_runtime.entry_controller.active != 0u)) ||
+                    (source_frame == 5566u &&
+                     (scene_runtime.route_state != 2 ||
+                      scene_runtime.player.source_x_fp != 0x04009200L ||
+                      scene_runtime.player.source_y_fp != 0x0120d000L ||
+                      scene_runtime.player.z != 288 ||
+                      scene_runtime.player.facing != 0u ||
+                      scene_runtime.entry_controller.active != 1u ||
+                      scene_runtime.entry_controller.state != 0x0200u ||
+                      scene_runtime.entry_controller.substate != 0u)))
+                {
+                    fprintf(stderr,
+                        "Coffee Shop next-entry reinitialization failed source=%u route=%d player=%04x/%04x fp=%08lx/%08lx xyz=%d/%d/%d facing=%u camera=%d/%d target=%d controller=%u/%04x/%04x\n",
+                        source_frame, scene_runtime.route_state,
+                        scene_runtime.player.state,
+                        scene_runtime.player.substate,
+                        scene_runtime.player.source_x_fp,
+                        scene_runtime.player.source_y_fp,
+                        scene_runtime.player.x, scene_runtime.player.y,
+                        scene_runtime.player.z,
+                        scene_runtime.player.facing,
+                        scene_runtime.camera_x_position,
+                        scene_runtime.camera_z_position,
+                        scene_runtime.camera_x_target,
+                        scene_runtime.entry_controller.active,
+                        scene_runtime.entry_controller.state,
+                        scene_runtime.entry_controller.substate);
+                    return 135;
+                }
                 for (actor_index = 0u;
                      actor_index < scene_runtime.pools[0].capacity;
                      ++actor_index)
@@ -5429,10 +5509,12 @@ int main(void)
                      0x00ffb380UL ||
                  scene_runtime.pools[2].records[10].actor_class != 0x0a ||
                  scene_runtime.pools[2].records[10].animation_record !=
-                     0x0006e136UL ||
-                 scene_runtime.pools[2].records[10].animation_timer !=
-                     4094u))
+                      0x0006e136UL ||
+                  scene_runtime.pools[2].records[10].animation_timer !=
+                      4094u))
                 return 121;
+            if (!avsp_round1_step_coffee_exit_display(&scene_runtime))
+                return 136;
         }
         if (scene_runtime.coffee_shop_obstacle_rng_calls != 1u ||
             scene_runtime.coffee_shop_obstacle_audio_events != 1u ||

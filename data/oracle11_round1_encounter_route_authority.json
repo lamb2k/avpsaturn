@@ -64686,6 +64686,12 @@
           "gate_visible_frame_u16": 5452,
           "gate_write_source_frame_u16": 5451,
           "player_gameplay_update_after_gate_write_same_source_frame": true,
+          "player_gate_transition_rule": {
+            "guard": "u8(g81f3) becomes nonzero before the player pool update",
+            "movement": "suppress the pending directional delta and preserve signed 16.16 x/y",
+            "route_handoff": "the following 0x008418 route write changes outer state to 0x0800 without truncating either fixed-point fraction",
+            "transition": "player substate 0x0202 -> 0x0204 while the current walk record advances once"
+          },
           "route_dispatcher": "0x00840a..0x008438",
           "route_visible_frame_u16": 5453,
           "route_write_source_frame_u16": 5452,
@@ -64699,19 +64705,43 @@
           "source_observations": [
             {
               "frame_u16": 5451,
+              "player_action_timer_u16": 0,
+              "player_animation_branch_s16": 0,
+              "player_animation_record_u32": 1438232,
+              "player_animation_timer_u16": 2,
+              "player_facing_u8": 1,
               "player_state_u16": 512,
+              "player_substate_u16": 514,
+              "player_x_fp_s32_16_16": 89165824,
+              "player_y_fp_s32_16_16": 20948992,
               "route_state_s16": 4,
               "timer42_u16": 1
             },
             {
               "frame_u16": 5452,
+              "player_action_timer_u16": 2560,
+              "player_animation_branch_s16": 0,
+              "player_animation_record_u32": 1438232,
+              "player_animation_timer_u16": 1,
+              "player_facing_u8": 1,
               "player_state_u16": 512,
+              "player_substate_u16": 516,
+              "player_x_fp_s32_16_16": 89165824,
+              "player_y_fp_s32_16_16": 20948992,
               "route_state_s16": 4,
               "timer42_u16": 0
             },
             {
               "frame_u16": 5453,
+              "player_action_timer_u16": 2560,
+              "player_animation_branch_s16": 0,
+              "player_animation_record_u32": 1438232,
+              "player_animation_timer_u16": 1,
+              "player_facing_u8": 1,
               "player_state_u16": 2048,
+              "player_substate_u16": 0,
+              "player_x_fp_s32_16_16": 89165824,
+              "player_y_fp_s32_16_16": 20948992,
               "route_state_s16": 6,
               "timer42_u16": 0
             }
@@ -65330,6 +65360,83 @@
           "initial_u16": 16,
           "terminal_u16": 0,
           "writer": "0x00188c"
+        },
+        "next_scene_reinitialization": {
+          "camera_reset_target_x_s16": 128,
+          "camera_reset_visible_frame_u16": 5563,
+          "camera_reset_x_s16": 0,
+          "camera_reset_z_s16": 0,
+          "camera_target_x_s16": 776,
+          "camera_x_s16": 776,
+          "camera_z_s16": 224,
+          "classification": "SOURCE_CLOSED_IMPLEMENTATION_FIELDS",
+          "entry_controller_state_u16": 512,
+          "entry_controller_visible_frame_u16": 5566,
+          "guard": "route state 2 reaches the post-reset entry-preparation phase after the third source loader-resume stall",
+          "mutation_controls": {
+            "early_facing_or_controller_init_rejected": true,
+            "wrong_camera_position_rejected": true,
+            "wrong_player_position_rejected": true
+          },
+          "owner_program": "route-2 entry preparation after 0x0083c8..0x0083fa and Round 1 substate-2 body 0x009222..0x009238",
+          "player_facing_after_controller_u8": 0,
+          "player_facing_before_controller_u8": 1,
+          "player_position_visible_frame_u16": 5564,
+          "player_state_u16": 2048,
+          "player_substate_u16": 0,
+          "player_x_fp_s32_16_16": 67146240,
+          "player_y_fp_s32_16_16": 18927616,
+          "player_z_s16": 288,
+          "source_observations": [
+            {
+              "camera_target_x_s16": 128,
+              "camera_x_s16": 0,
+              "camera_z_s16": 0,
+              "entry_controller_state_u16": 0,
+              "frame_u16": 5563,
+              "player_facing_u8": 1,
+              "player_x_fp_s32_16_16": 94212608,
+              "player_y_fp_s32_16_16": 18403328,
+              "player_z_s16": 280,
+              "route_state_s16": 2
+            },
+            {
+              "camera_target_x_s16": 776,
+              "camera_x_s16": 776,
+              "camera_z_s16": 224,
+              "entry_controller_state_u16": 0,
+              "frame_u16": 5564,
+              "player_facing_u8": 1,
+              "player_x_fp_s32_16_16": 67146240,
+              "player_y_fp_s32_16_16": 18927616,
+              "player_z_s16": 288,
+              "route_state_s16": 2
+            },
+            {
+              "camera_target_x_s16": 776,
+              "camera_x_s16": 776,
+              "camera_z_s16": 224,
+              "entry_controller_state_u16": 0,
+              "frame_u16": 5565,
+              "player_facing_u8": 1,
+              "player_x_fp_s32_16_16": 67146240,
+              "player_y_fp_s32_16_16": 18927616,
+              "player_z_s16": 288,
+              "route_state_s16": 2
+            },
+            {
+              "camera_target_x_s16": 776,
+              "camera_x_s16": 776,
+              "camera_z_s16": 224,
+              "entry_controller_state_u16": 512,
+              "frame_u16": 5566,
+              "player_facing_u8": 0,
+              "player_x_fp_s32_16_16": 67146240,
+              "player_y_fp_s32_16_16": 18927616,
+              "player_z_s16": 288,
+              "route_state_s16": 2
+            }
+          ]
         },
         "next_scene_substate2_visible_frame_u16": 5564,
         "resident_load_stalls": [
