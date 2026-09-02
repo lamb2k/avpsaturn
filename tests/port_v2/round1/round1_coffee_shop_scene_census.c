@@ -84,11 +84,16 @@ int main(void)
         unsigned int scheduler_updates =
             avsp_round1_coffee_shop_scheduler_source_updates(
                 (unsigned short)source_frame);
+        unsigned int record20_prefix_updates =
+            avsp_round1_coffee_shop_record20_prefix_source_updates(
+                (unsigned short)source_frame);
         unsigned int class02_updates =
             avsp_round1_coffee_shop_class02_source_updates(
                 (unsigned short)source_frame);
         unsigned int phase_updates = source_updates > scheduler_updates ?
             source_updates : scheduler_updates;
+        if (record20_prefix_updates > phase_updates)
+            phase_updates = record20_prefix_updates;
         if (class02_updates > phase_updates)
             phase_updates = class02_updates;
         if (source_frame == 2072u &&
@@ -371,6 +376,8 @@ int main(void)
                     &runtime,
                     phase_tick == 0u ? scheduler_updates != 0u :
                         phase_tick < scheduler_updates,
+                    phase_tick == 0u ? record20_prefix_updates != 0u :
+                        phase_tick < record20_prefix_updates,
                     phase_tick == 0u ? class02_updates != 0u :
                         phase_tick < class02_updates))
             {

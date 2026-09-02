@@ -704,6 +704,69 @@ def class1f_final_action_tail_normalization(
     }
 
 
+def record20_exit_scheduler_phase(
+        source_rows: list[dict[str, str]],
+        native_rows: list[dict[str, str]],
+        contract: dict[str, object]) -> dict[str, object]:
+    """Prove the source traversal split around the first exit divergence."""
+    frames = (5468, 5469, 5470)
+    slots = ("ffb300", "ffb480", "ffb500", "ffb600")
+
+    def project(row: dict[str, str], source_side: bool) -> list[int]:
+        return [
+            int(row["state"], 16), int(row["substate"], 16),
+            int(row["x_fp"], 16) if source_side else int(row["x_fp"]),
+            int(row["y_fp"], 16) if source_side else int(row["y_fp"]),
+            int(row["z"]), int(row["facing"]),
+            int(row["animation_record"], 16),
+            int(row["animation_timer"], 16)
+                if source_side else int(row["animation_timer"]),
+            int(row["animation_branch"]),
+        ]
+
+    source = {(int(row["frame"]), row["slot"]): row
+              for row in source_rows
+              if int(row["frame"]) in frames and row["slot"] in slots}
+    native = {(int(row["frame"]), row["source_slot"][-6:]): row
+              for row in native_rows
+              if int(row["frame"]) in frames and
+              row["source_slot"][-6:] in slots}
+    samples = []
+    for frame in frames:
+        for slot in slots:
+            if (frame, slot) not in source or (frame, slot) not in native:
+                raise ValueError(
+                    f"Coffee Shop record-20 phase sample missing {frame}/{slot}")
+            source_projection = project(source[(frame, slot)], True)
+            native_projection = project(native[(frame, slot)], False)
+            samples.append({
+                "source_frame_u16": frame,
+                "source_slot": "0x00" + slot,
+                "source_projection": source_projection,
+                "native_projection": native_projection,
+                "equal": source_projection == native_projection,
+            })
+    return {
+        "classification": "SOURCE_PROGRAM_DIFFERENTIAL_PASS",
+        "source_pool_scheduler": contract["source_pool_scheduler"],
+        "indirect_caller_pc": contract["indirect_caller_pc"],
+        "source_phase_split_after_slot":
+            contract["source_phase_split_after_slot"],
+        "suffix_first_slot": contract["suffix_first_slot"],
+        "source_frame_range_inclusive_u16":
+            contract["source_frame_range_inclusive_u16"],
+        "groups": contract["groups"],
+        "sample_fields": ["state", "substate", "x_fp", "y_fp", "z",
+                          "facing", "animation_record", "animation_timer",
+                          "animation_branch"],
+        "samples": samples,
+        "source_native_projection_equal": all(
+            item["equal"] for item in samples),
+        "fixed_frame_gameplay_authority_forbidden": True,
+        "mutation_control": contract["mutation_control"],
+    }
+
+
 def airborne_button1_presentation_chronology(
         source_rows: list[dict[str, str]],
         native_rows: list[dict[str, str]]) -> dict[str, object]:
@@ -1560,9 +1623,26 @@ def validate_report(report: dict[str, object]) -> None:
             not final_tail["blanket_animation_ignore_forbidden"] or \
             not final_tail["fixed_frame_or_slot_override_forbidden"] or \
             final_tail[
-                "next_unexplained_actor_divergence_frame_u16"] != 5469:
+                "next_unexplained_actor_divergence_frame_u16"] != 5493:
         raise ValueError("Coffee Shop final class-0x1f tail drift: " +
                          json.dumps(final_tail, sort_keys=True))
+    record20_phase = report["native_capture"][
+        "record20_exit_scheduler_phase"]
+    if (record20_phase["classification"] !=
+            "SOURCE_PROGRAM_DIFFERENTIAL_PASS" or
+        record20_phase["source_pool_scheduler"] !=
+            "0x01bc38..0x01bc78" or
+        record20_phase["indirect_caller_pc"] != "0x01bc6e" or
+        record20_phase["source_phase_split_after_slot"] != "0x00ffb500" or
+        record20_phase["suffix_first_slot"] != "0x00ffb600" or
+        record20_phase["source_frame_range_inclusive_u16"] != [5453, 5523] or
+        len(record20_phase["groups"]) != 16 or
+        len(record20_phase["samples"]) != 12 or
+        not record20_phase["source_native_projection_equal"] or
+        any(not item["equal"] for item in record20_phase["samples"]) or
+        not record20_phase["fixed_frame_gameplay_authority_forbidden"]):
+        raise ValueError("Coffee Shop record-20 scheduler phase drift: " +
+                         json.dumps(record20_phase, sort_keys=True))
     airborne_button1 = report["native_capture"][
         "airborne_button1_presentation"]
     if (not airborne_button1["source_native_semantic_equal"] or
@@ -1588,6 +1668,12 @@ def validate_report(report: dict[str, object]) -> None:
 def main() -> None:
     fixtures = json.loads(FIXTURES.read_text(encoding="ascii"))
     source = fixtures["scene_manifests"]["coffee_shop"]
+    class02_contract = next(
+        item["implementation_contract"] for item in fixtures["authority_data"]
+        ["auxiliary"]["coffee_shop_scene_component_identities"]["components"]
+        if item["type"] == 20 and item["class"] == "0x02")
+    record20_prefix_contract = class02_contract["scheduler_phase_evidence"][
+        "record20_exit_prefix_scheduler"]
     source_actor_sha256 = hashlib.sha256(SOURCE_ACTORS.read_bytes()).hexdigest()
     expected_source_actor_sha256 = source["capture_identity"][
         "completion_a"]["coffee_shop_scene_actors.tsv"]
@@ -1704,6 +1790,10 @@ def main() -> None:
                            "class1f_final_action_tail":
                                class1f_final_action_tail_normalization(
                                    source_rows, rows, divergences),
+                           "record20_exit_scheduler_phase":
+                               record20_exit_scheduler_phase(
+                                   source_rows, rows,
+                                   record20_prefix_contract),
                            "airborne_button1_presentation":
                                airborne_button1_presentation_chronology(
                                    source_rows, rows),

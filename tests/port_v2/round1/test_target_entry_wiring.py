@@ -79,8 +79,11 @@ REQUIRED = (
     "if (jo_is_pad1_key_down(JO_KEY_C)) mask |= AVSP_ROUND1_INPUT_BUTTON3;",
     "input.player_mask = avsp_round1_coffee_shop_source_input(",
     "(unsigned short)source_frame);",
-    "for (source_tick = 0u; source_tick < source_updates; ++source_tick)",
-    "if (round1_player_authority_enabled_at_tick_start &&\n"
+    "avsp_round1_coffee_shop_record20_prefix_source_updates(",
+    "record20_prefix_update_enabled = phase_tick == 0u ?",
+    "for (source_tick = 1u; source_tick <= phase_updates; ++source_tick)",
+    "if (source_update_enabled &&\n"
+    "            round1_player_authority_enabled_at_tick_start &&\n"
     "            round1_runtime.route_state == 4 &&\n"
     "            !avsp_round1_step_player",
     "avsp_diag_round1_player_weapon_entries =",
@@ -128,7 +131,7 @@ REQUIRED = (
     "round1_runtime.frame >= AVSP_FRONTEND_R1HUD_FRAME",
     "round1_runtime.frame >= AVSP_FRONTEND_R1SCENE_POP_FRAME",
     "if (!round1_runtime.entry.started &&\n        round1_runtime.frame == AVSP_ROUND1_NATIVE_ENTRY_STEP_FRAME &&",
-    "if (round1_runtime.entry.started &&\n            round1_runtime.route_state != 4 &&",
+    "if (source_update_enabled && round1_runtime.entry.started &&\n            round1_runtime.route_state != 4 &&",
     "hud_input.players[AVSP_PORT_V2_HUD_P2].visible = 0;",
     "if (round1_runtime.route_state == 4 &&\n        round1_runtime.first_encounter.initialized)",
     "int retained_stepped = 0;",

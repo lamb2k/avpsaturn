@@ -1,8 +1,8 @@
 #ifndef AVSP_SPEC02_ROUND1_ENTRY_DATA_H
 #define AVSP_SPEC02_ROUND1_ENTRY_DATA_H
 
-/* contract_sha256=3cb9e2beb459b30401228b23178fcf8ba1d4bd34e79a7911dad9eb87330db64e */
-/* fixtures_sha256=5cf226708e384c98b278da8b6c8f1f841216551af7112b0d987434902abcb39d */
+/* contract_sha256=1bc3304737b9bccdf8c75e64f9e1b1e8c6573bfcaf040e82b6e3baa01f7f8b06 */
+/* fixtures_sha256=4f7776457e85500a4fd2740c7a3c3e0af1e47c9729d81692378b336f3e5e2e1a */
 #define AVSP_ROUND1_ENTRY_PROGRAM_SHA256 "e5ef761fadc1b5a7df62e77c03025c0ebff0c2503cbc8be9c0077d4bd6cd24ba"
 
 #if defined(__sh__)
@@ -632,6 +632,30 @@ static const AvspRound1CoffeeExitCallbackGroupSpec avsp_round1_coffee_exit_sched
     { 55u, 4u, 3u },
     { 59u, 1u, 4u },
     { 60u, 4u, 3u },
+    { 64u, 6u, 4u },
+    { 70u, 1u, 1u },
+};
+#endif
+
+#if defined(__sh__)
+#define avsp_round1_coffee_exit_record20_prefix_callbacks (avsp_round1_content->content_avsp_round1_coffee_exit_record20_prefix_callbacks)
+#else
+static const AvspRound1CoffeeExitCallbackGroupSpec avsp_round1_coffee_exit_record20_prefix_callbacks[AVSP_ROUND1_COFFEE_EXIT_RECORD20_PREFIX_GROUP_COUNT] =
+{
+    { 0u, 5u, 1u },
+    { 5u, 10u, 3u },
+    { 15u, 1u, 4u },
+    { 16u, 15u, 3u },
+    { 31u, 1u, 4u },
+    { 32u, 7u, 3u },
+    { 39u, 1u, 4u },
+    { 40u, 6u, 3u },
+    { 46u, 1u, 4u },
+    { 47u, 6u, 3u },
+    { 53u, 1u, 4u },
+    { 54u, 4u, 3u },
+    { 58u, 1u, 4u },
+    { 59u, 5u, 3u },
     { 64u, 6u, 4u },
     { 70u, 1u, 1u },
 };
@@ -5357,6 +5381,7 @@ typedef struct
     AvspRound1CoffeeExitMotionSpec content_avsp_round1_coffee_exit_motion[AVSP_ROUND1_COFFEE_EXIT_MOTION_COUNT];
     AvspRound1CoffeeExitCallbackGroupSpec content_avsp_round1_coffee_exit_callbacks[AVSP_ROUND1_COFFEE_EXIT_CALLBACK_GROUP_COUNT];
     AvspRound1CoffeeExitCallbackGroupSpec content_avsp_round1_coffee_exit_scheduler_callbacks[AVSP_ROUND1_COFFEE_EXIT_SCHEDULER_GROUP_COUNT];
+    AvspRound1CoffeeExitCallbackGroupSpec content_avsp_round1_coffee_exit_record20_prefix_callbacks[AVSP_ROUND1_COFFEE_EXIT_RECORD20_PREFIX_GROUP_COUNT];
     AvspRound1CoffeeExitBallisticSpec content_avsp_round1_coffee_exit_ballistic;
     short content_avsp_round1_recurring_lane_offsets[AVSP_ROUND1_RECURRING_LANE_OFFSET_COUNT];
     unsigned char content_avsp_round1_recurring_selector_cycle[AVSP_ROUND1_RECURRING_SELECTOR_COUNT];

@@ -148,6 +148,14 @@ item = copy.deepcopy(BASE)
 item["native_capture"]["class1f_final_action_tail"]["actors"][0][
     "cycle_order_equal"] = False
 mutations.append(("class1f final-tail action order", item))
+item = copy.deepcopy(BASE)
+item["native_capture"]["record20_exit_scheduler_phase"][
+    "source_native_projection_equal"] = False
+mutations.append(("record20 exit prefix projection", item))
+item = copy.deepcopy(BASE)
+item["native_capture"]["record20_exit_scheduler_phase"][
+    "source_phase_split_after_slot"] = "0x00ffb600"
+mutations.append(("record20 exit phase split", item))
 
 for label, mutant in mutations:
     try:

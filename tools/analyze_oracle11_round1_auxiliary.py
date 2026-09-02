@@ -841,6 +841,38 @@ def coffee_shop_scene_component_identities(op,program):
      'Coffee Shop class-0x02 full-scene phase cadence drift')
  class02_phase_exceptions_sha256=hashlib.sha256(
   canon(class02_phase_exceptions)).hexdigest()
+ record20_exit_prefix_counts=Counter(
+  int(r['frame']) for r in phase_callers if r['a6']=='ffb300' and
+  5453<=int(r['frame'])<=5523)
+ record20_exit_prefix_groups=[]
+ for frame in range(5453,5524):
+  updates=record20_exit_prefix_counts[frame]
+  if (record20_exit_prefix_groups and
+      record20_exit_prefix_groups[-1]['updates_u8']==updates):
+   record20_exit_prefix_groups[-1]['display_ticks_u8']+=1
+  else:
+   record20_exit_prefix_groups.append({
+    'program_tick_u8':frame-5453,
+    'display_ticks_u8':1,
+    'updates_u8':updates})
+ req(record20_exit_prefix_groups==[
+      {'program_tick_u8':0,'display_ticks_u8':5,'updates_u8':1},
+      {'program_tick_u8':5,'display_ticks_u8':10,'updates_u8':3},
+      {'program_tick_u8':15,'display_ticks_u8':1,'updates_u8':4},
+      {'program_tick_u8':16,'display_ticks_u8':15,'updates_u8':3},
+      {'program_tick_u8':31,'display_ticks_u8':1,'updates_u8':4},
+      {'program_tick_u8':32,'display_ticks_u8':7,'updates_u8':3},
+      {'program_tick_u8':39,'display_ticks_u8':1,'updates_u8':4},
+      {'program_tick_u8':40,'display_ticks_u8':6,'updates_u8':3},
+      {'program_tick_u8':46,'display_ticks_u8':1,'updates_u8':4},
+      {'program_tick_u8':47,'display_ticks_u8':6,'updates_u8':3},
+      {'program_tick_u8':53,'display_ticks_u8':1,'updates_u8':4},
+      {'program_tick_u8':54,'display_ticks_u8':4,'updates_u8':3},
+      {'program_tick_u8':58,'display_ticks_u8':1,'updates_u8':4},
+      {'program_tick_u8':59,'display_ticks_u8':5,'updates_u8':3},
+      {'program_tick_u8':64,'display_ticks_u8':6,'updates_u8':4},
+      {'program_tick_u8':70,'display_ticks_u8':1,'updates_u8':1}],
+     'Coffee Shop record-20 exit prefix phase drift')
  class02_out_camera=[r for r in phase_callers if r['a6']=='ffb300' and
                      2618<=int(r['frame'])<=2621]
  req([(int(r['frame']),r['animation_timer'],r['field4c'])
@@ -1094,6 +1126,22 @@ def coffee_shop_scene_component_identities(op,program):
      'exceptions_sha256':class02_phase_exceptions_sha256,
      'rule':'diagnostic source-frame replay dispatches the native class-0x02 body once per captured source call from the record-20 scheduler; this does not own gameplay transitions',
      'mutation_control':'controller cadence 3/1 at frames 2075/2076 is rejected in favor of the captured class-0x02 cadence 2/2',
+     'fixed_frame_gameplay_authority_forbidden':True},
+    'record20_exit_prefix_scheduler':{
+     'classification':'SOURCE_CLOSED_IMPLEMENTATION_FIELDS',
+     'source_frame_range_inclusive_u16':[5453,5523],
+     'source_pool':'record20','source_pool_scheduler':'0x01bc38..0x01bc78',
+     'indirect_caller_pc':'0x01bc6e','dispatch_target':'0x06b534',
+     'prefix_probe_slot':'0x00ffb300',
+     'prefix_source_slot_range_inclusive':['0x00ffb180','0x00ffb500'],
+     'source_phase_split_after_slot':'0x00ffb500',
+     'suffix_first_slot':'0x00ffb600',
+     'groups':record20_exit_prefix_groups,
+     'files_sha256':phase_identity_a,
+     'byte_identical':True,
+     'rule':'a complete record-20 pool traversal may cross a display boundary; Coffee Shop exit differential replay therefore preserves the captured prefix phase for every active slot below 0x00ffb600 and the existing suffix cadence from slot 0x00ffb600 onward',
+     'gameplay_transition_owner':'actor state/substate program; scheduler phase changes dispatch count only',
+     'mutation_control':'using the suffix cadence for prefix slots changes frame 5469 class-0x02 timer 1411 to 1412 and class-0x09 timers 2 to 3',
      'fixed_frame_gameplay_authority_forbidden':True},
     'out_of_camera_animation_retention':{
      'source_slot':'0x00ffb300','source_frames_inclusive_u16':[2618,2621],
@@ -2961,6 +3009,22 @@ def validate(r):
      len(scene_components['components'][1]['implementation_contract']
       ['scheduler_phase_evidence']['class02_source_update_cadence']
       ['exceptions'])==113 and
+     scene_components['components'][1]['implementation_contract']
+      ['scheduler_phase_evidence']['record20_exit_prefix_scheduler']
+      ['byte_identical'] is True and
+     scene_components['components'][1]['implementation_contract']
+      ['scheduler_phase_evidence']['record20_exit_prefix_scheduler']
+      ['source_phase_split_after_slot']=='0x00ffb500' and
+     scene_components['components'][1]['implementation_contract']
+      ['scheduler_phase_evidence']['record20_exit_prefix_scheduler']
+      ['suffix_first_slot']=='0x00ffb600' and
+     [(row['program_tick_u8'],row['display_ticks_u8'],row['updates_u8'])
+      for row in scene_components['components'][1]['implementation_contract']
+       ['scheduler_phase_evidence']['record20_exit_prefix_scheduler']
+       ['groups']]==[(0,5,1),(5,10,3),(15,1,4),(16,15,3),
+                     (31,1,4),(32,7,3),(39,1,4),(40,6,3),
+                     (46,1,4),(47,6,3),(53,1,4),(54,4,3),
+                     (58,1,4),(59,5,3),(64,6,4),(70,1,1)] and
      scene_components['components'][1]['implementation_contract']
       ['scheduler_phase_evidence']['out_of_camera_animation_retention']
       ['animation_timer_u16']==4095 and

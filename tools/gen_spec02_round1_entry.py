@@ -376,6 +376,9 @@ def build() -> str:
     class02_source_cadence = class02_contract["scheduler_phase_evidence"][
         "class02_source_update_cadence"]
     class02_source_exceptions = class02_source_cadence["exceptions"]
+    record20_exit_prefix = class02_contract["scheduler_phase_evidence"][
+        "record20_exit_prefix_scheduler"]
+    record20_exit_prefix_groups = record20_exit_prefix["groups"]
     coffee_stage_setup = fixtures["authority_data"]["rng"]["owner_partition"][
         "global_route_and_controller"]["groups"][0][
             "coffee_shop_entry_transaction"]
@@ -2420,6 +2423,26 @@ def build() -> str:
         class02_source_cadence["fixed_frame_gameplay_authority_forbidden"]
             is not True):
         raise ValueError("SPEC-02 Coffee Shop class-0x02 source cadence drift")
+    if (record20_exit_prefix["classification"] !=
+            "SOURCE_CLOSED_IMPLEMENTATION_FIELDS" or
+        record20_exit_prefix["source_frame_range_inclusive_u16"] !=
+            [5453, 5523] or
+        record20_exit_prefix["source_pool_scheduler"] !=
+            "0x01bc38..0x01bc78" or
+        record20_exit_prefix["indirect_caller_pc"] != "0x01bc6e" or
+        record20_exit_prefix["source_phase_split_after_slot"] !=
+            "0x00ffb500" or
+        record20_exit_prefix["suffix_first_slot"] != "0x00ffb600" or
+        [(row["program_tick_u8"], row["display_ticks_u8"],
+          row["updates_u8"]) for row in record20_exit_prefix_groups] !=
+            [(0, 5, 1), (5, 10, 3), (15, 1, 4), (16, 15, 3),
+             (31, 1, 4), (32, 7, 3), (39, 1, 4), (40, 6, 3),
+             (46, 1, 4), (47, 6, 3), (53, 1, 4), (54, 4, 3),
+             (58, 1, 4), (59, 5, 3), (64, 6, 4), (70, 1, 1)] or
+        record20_exit_prefix["byte_identical"] is not True or
+        record20_exit_prefix["fixed_frame_gameplay_authority_forbidden"]
+            is not True):
+        raise ValueError("SPEC-02 Coffee Shop record-20 prefix phase drift")
 
     cursor = int(player["initial_cursor"], 16)
     step_rows = []
@@ -2914,6 +2937,15 @@ def build() -> str:
         "{",
     ])
     for row in coffee_exit_callbacks["fixed_pool_scheduler_groups"]:
+        lines.append("    { %du, %du, %du }," % (
+            row["program_tick_u8"], row["display_ticks_u8"],
+            row["updates_u8"]))
+    lines.extend([
+        "};", "",
+        "static const AvspRound1CoffeeExitCallbackGroupSpec avsp_round1_coffee_exit_record20_prefix_callbacks[AVSP_ROUND1_COFFEE_EXIT_RECORD20_PREFIX_GROUP_COUNT] =",
+        "{",
+    ])
+    for row in record20_exit_prefix_groups:
         lines.append("    { %du, %du, %du }," % (
             row["program_tick_u8"], row["display_ticks_u8"],
             row["updates_u8"]))

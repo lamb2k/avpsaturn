@@ -52,12 +52,12 @@
       },
       {
         "base": "0x22711000",
-        "census_capacity_floor_bytes": 240776,
+        "census_capacity_floor_bytes": 240824,
         "id": "round1-spec-content",
         "load_phase": "boot",
         "owner": "all generated read-only SPEC fixture tables",
-        "required_bytes": 47432,
-        "sha256": "e4994c870c6bfd24507a67bd54c114f3182117f2fe5896e58967d038387d02c6",
+        "required_bytes": 47480,
+        "sha256": "3ffac9b15d79afe7fb026220acb31f1f7d679b78b93afa4f684d3ea42cd4e40d",
         "size": 262144
       },
       {
@@ -80,7 +80,7 @@
   },
   "classification": "REIMPLEMENT-13 bounded memory-plan program",
   "content_archive": {
-    "bytes": 47432,
+    "bytes": 47480,
     "categories": [
       "terrain",
       "timer-selector",
@@ -90,9 +90,9 @@
     ],
     "deterministic_double_build": true,
     "file": "build/avsp_cd/R1/R1SPEC.BIN",
-    "generated_source_sha256": "75b3dfce67f676f09f6b0cb00f2b972708c47790ce184cbfa93a960eef6774e8",
-    "sha256": "e4994c870c6bfd24507a67bd54c114f3182117f2fe5896e58967d038387d02c6",
-    "table_count": 166,
+    "generated_source_sha256": "97d15efe31a7a74b985adb4650bb3307599d8d940c6d9c94771d64cd1797680e",
+    "sha256": "3ffac9b15d79afe7fb026220acb31f1f7d679b78b93afa4f684d3ea42cd4e40d",
+    "table_count": 167,
     "target_endian": "SH-2 big endian"
   },
   "legal_load_seams": [
@@ -130,9 +130,9 @@
     "writer_reconciliation_sha256": "e9508e1c621e6448953549817b8d66e9399cbce97f06d7883c013776f34fc39c"
   },
   "work_ram": {
-    "bss_end": "0x060b3410",
-    "bss_headroom_bytes": 52208,
-    "game_bin_bytes": 377600,
+    "bss_end": "0x060b3790",
+    "bss_headroom_bytes": 51312,
+    "game_bin_bytes": 378496,
     "jo_user_program_data_end_exclusive": "0x060c0000",
     "linked_capacity_bytes": 770048,
     "linked_image_base": "0x06004000",

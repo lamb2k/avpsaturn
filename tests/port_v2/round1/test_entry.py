@@ -9,7 +9,7 @@ from pathlib import Path
 
 ROOT = Path(__file__).resolve().parents[3]
 SPEC = ROOT / "data/spec02_round1_executable_contract.json"
-EXPECTED = "3cb9e2beb459b30401228b23178fcf8ba1d4bd34e79a7911dad9eb87330db64e"
+EXPECTED = "1bc3304737b9bccdf8c75e64f9e1b1e8c6573bfcaf040e82b6e3baa01f7f8b06"
 assert hashlib.sha256(SPEC.read_bytes()).hexdigest() == EXPECTED
 assert json.loads(SPEC.read_text())["status"] == "ACCEPTED"
 source = (ROOT / "src/port_v2/gameplay/round1/round1.c").read_text()
@@ -98,11 +98,16 @@ scene_checkpoint_marker = (
     "            unsigned int scheduler_updates =\n"
     "                avsp_round1_coffee_shop_scheduler_source_updates(\n"
     "                    (unsigned short)source_frame);\n"
+    "            unsigned int record20_prefix_updates =\n"
+    "                avsp_round1_coffee_shop_record20_prefix_source_updates(\n"
+    "                    (unsigned short)source_frame);\n"
     "            unsigned int class02_updates =\n"
     "                avsp_round1_coffee_shop_class02_source_updates(\n"
     "                    (unsigned short)source_frame);\n"
     "            unsigned int phase_updates = source_updates > scheduler_updates ?\n"
     "                source_updates : scheduler_updates;\n"
+    "            if (record20_prefix_updates > phase_updates)\n"
+    "                phase_updates = record20_prefix_updates;\n"
     "            if (class02_updates > phase_updates)\n"
     "                phase_updates = class02_updates;\n")
 assert scene_checkpoint_marker in test_source
@@ -343,6 +348,14 @@ exit_scheduler_mutations = {
     "            AVSP_ROUND1_COFFEE_EXIT_CALLBACK_FIRST_SOURCE_FRAME &&\n"
     "        source_frame <=\n"
             "            AVSP_ROUND1_COFFEE_EXIT_CALLBACK_LAST_SOURCE_FRAME)",
+    "unsigned int avsp_round1_coffee_shop_record20_prefix_source_updates(\n"
+    "    unsigned short source_frame)\n"
+    "{\n"
+    "    if (source_frame >=\n"
+    "            AVSP_ROUND1_COFFEE_EXIT_CALLBACK_FIRST_SOURCE_FRAME &&\n"
+    "        source_frame <=\n"
+            "            AVSP_ROUND1_COFFEE_EXIT_CALLBACK_LAST_SOURCE_FRAME)",
+    "actor->source_slot < 0x00ffb600UL",
     "    if (runtime->coffee_scene_active_flag == 0u)\n"
     "    {\n"
     "        actor->source_special_latch_ad =\n"
@@ -363,6 +376,22 @@ for before, after in (
      "            AVSP_ROUND1_COFFEE_EXIT_CALLBACK_FIRST_SOURCE_FRAME &&\n"
      "        source_frame <=\n"
      "            AVSP_ROUND1_COFFEE_EXIT_CALLBACK_LAST_SOURCE_FRAME)"),
+    ("unsigned int avsp_round1_coffee_shop_record20_prefix_source_updates(\n"
+     "    unsigned short source_frame)\n"
+     "{\n"
+     "    if (source_frame >=\n"
+     "            AVSP_ROUND1_COFFEE_EXIT_CALLBACK_FIRST_SOURCE_FRAME &&\n"
+     "        source_frame <=\n"
+     "            AVSP_ROUND1_COFFEE_EXIT_CALLBACK_LAST_SOURCE_FRAME)",
+     "unsigned int avsp_round1_coffee_shop_record20_prefix_source_updates(\n"
+     "    unsigned short source_frame)\n"
+     "{\n"
+     "    if (0 && source_frame >=\n"
+     "            AVSP_ROUND1_COFFEE_EXIT_CALLBACK_FIRST_SOURCE_FRAME &&\n"
+     "        source_frame <=\n"
+     "            AVSP_ROUND1_COFFEE_EXIT_CALLBACK_LAST_SOURCE_FRAME)"),
+    ("actor->source_slot < 0x00ffb600UL",
+     "actor->source_slot < 0x00ffb500UL"),
     ("    if (runtime->coffee_scene_active_flag == 0u)\n"
      "        return avsp_round1_class1f_route_interruption(actor);",
      "    if (runtime->coffee_scene_active_flag != 0u)\n"
@@ -1042,7 +1071,7 @@ if "--class1f-action16-only" in sys.argv:
     raise SystemExit(0)
 if "--exit-scheduler-only" in sys.argv:
     print("REIMPLEMENT-13 Coffee Shop exit scheduler mutation lane: PASS "
-          "(2 real mutations)")
+          "(4 real mutations)")
     raise SystemExit(0)
 if "--ko-only" in sys.argv:
     print("REIMPLEMENT-13 class-0x1f projectile KO mutation lane: PASS (5 real mutations)")
@@ -1352,6 +1381,12 @@ for before, after in (
      "    { 4u, 0, 0x000928f0UL, 0x00092be8UL, 0u, 0u },"),
     ("    { 4095u, -32768, 0x00092900UL, 0x00092bf6UL, 0u, 0u },",
      "    { 4095u, -32768, 0x00092910UL, 0x00092bf6UL, 0u, 0u },"),
+    ("static const AvspRound1CoffeeExitCallbackGroupSpec avsp_round1_coffee_exit_record20_prefix_callbacks[AVSP_ROUND1_COFFEE_EXIT_RECORD20_PREFIX_GROUP_COUNT] =\n"
+     "{\n"
+     "    { 0u, 5u, 1u },",
+     "static const AvspRound1CoffeeExitCallbackGroupSpec avsp_round1_coffee_exit_record20_prefix_callbacks[AVSP_ROUND1_COFFEE_EXIT_RECORD20_PREFIX_GROUP_COUNT] =\n"
+     "{\n"
+     "    { 0u, 5u, 2u },"),
 ):
     if "--generated-walk-only" in sys.argv and before not in generated_walk_mutations:
         continue
@@ -1398,6 +1433,6 @@ if "--generated-walk-only" in sys.argv:
     raise SystemExit(0)
 if "--generated-all-only" in sys.argv:
     print("REIMPLEMENT-13 generated fixture mutation lane: PASS "
-          "(81 real mutations)")
+          "(82 real mutations)")
     raise SystemExit(0)
-print("REIMPLEMENT-13 entry/player/scheduler/class1f/Coffee-Shop-navigation/neutral-stop/melee/Button1/Button3/type16-projectile/player-HIT/first-encounter differential: PASS (224 real mutations)")
+print("REIMPLEMENT-13 entry/player/scheduler/class1f/Coffee-Shop-navigation/neutral-stop/melee/Button1/Button2/Button3/type16-projectile/player-HIT/first-encounter differential: PASS (227 real mutations)")

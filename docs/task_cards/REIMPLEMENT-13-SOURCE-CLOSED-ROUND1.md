@@ -3878,3 +3878,40 @@ timers 2/3 before their next record/branch edges. Close every Coffee-Shop-
 reachable branch and instance of that owning program, not individual rows.
 Candidate promotion remains frozen and the exhausted emulator/WGC gates remain
 blocked pending owner ruling.
+
+### P4 record-type-20 exit scheduler checkpoint (2026-09-01)
+
+The shared Coffee Shop record-type-20 scheduler is now closed as a reusable
+program through exit frames 5453..5523. Accepted Oracle evidence binds the
+`0x01bc38..0x01bc78` traversal and indirect caller `0x01bc6e`: prefix slots
+through `0x00ffb500` follow the captured 16-run callback phase, while the
+suffix begins at `0x00ffb600`. Production scheduling still dispatches every
+active actor once; the captured phase is used only by the source-differential
+projection and is not gameplay authority.
+
+An initial implementation incorrectly applied the prefix phase to every scene
+frame. The complete-scene harness exposed the resulting new class-`0x09`
+frame-2076 regression, so the rule was narrowed to the proven exit window and
+that regression was removed. Frames 5468..5470 now match source for class-
+`0x02` slot `0x00ffb300` and class-`0x09` slots `0x00ffb480/0x00ffb500` across
+state/substate, signed fixed-point position, facing, animation record/timer/
+branch, health and collision selectors. The focused phase report contains 12
+exact source/native samples and rejects four real mutations.
+
+Oracle auxiliary/enemy evidence rejects 114/107 mutations, SPEC-02 rejects
+190, the host differential rejects 227 runtime plus 82 generated-fixture
+mutations, scene parity rejects 25, and the memory lane rejects 18. Fast,
+Oracle, release/live Target and protected-manifest identity pass. Target
+GAME.BIN is 378,416 bytes at SHA-256
+`ec26c78164f3431831fdb860439b384de0c1d0149d9c9a67072eeccc632dfb74`,
+BSS `0x060b3740`. The deterministic 167-table archive is 47,480 bytes at
+SHA-256 `3ffac9b15d79afe7fb026220acb31f1f7d679b78b93afa4f684d3ea42cd4e40d`
+with 214,664 bytes headroom in the unchanged 256 KiB carve.
+
+Raw gaps remain `188/1/0/671/1/93/0/279/0` with zero retained gameplay
+authority. The next scene-order RED is frame 5493 in the complete class-
+`0x09` type-20 presentation transition program for slots
+`0x00ffb480/0x00ffb500`: source keeps branch 0 and records
+`0x0006dbda/0x0006dc6a`, while native advances one record with branch
+`-32768`. Candidate promotion remains frozen. The isolated cold-emulator and
+WGC gates remain at their recorded three-attempt blocker pending owner ruling.

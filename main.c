@@ -8296,7 +8296,7 @@ static void live_encounter_publish(void)
     avsp_diag_round1_spec_bound =
         avsp_diag_round1_content_loaded &&
         strcmp(AVSP_ROUND1_SPEC02_SHA256,
-               "bb9edbf2cfd4b664497cb2246f121f2dde5bd5767e77cc9bf6f2f6b8d5cb1465") ==
+               "1bc3304737b9bccdf8c75e64f9e1b1e8c6573bfcaf040e82b6e3baa01f7f8b06") ==
         0;
     avsp_diag_round1_entry_valid = avsp_round1_entry_valid(&round1_runtime);
     avsp_diag_round1_route_state = round1_runtime.route_state;
@@ -8489,12 +8489,14 @@ static void live_encounter_frame_callback(void)
     int source_frame;
     unsigned int source_updates;
     unsigned int scheduler_updates;
+    unsigned int record20_prefix_updates;
     unsigned int class02_updates;
     unsigned int phase_updates;
     unsigned int source_tick;
     unsigned int phase_tick;
     int source_update_enabled;
     int scheduler_update_enabled;
+    int record20_prefix_update_enabled;
     int class02_update_enabled;
     if (!runtime_ready)
     {
@@ -8521,10 +8523,15 @@ static void live_encounter_frame_callback(void)
         (unsigned short)source_frame);
     scheduler_updates = avsp_round1_coffee_shop_scheduler_source_updates(
         (unsigned short)source_frame);
+    record20_prefix_updates =
+        avsp_round1_coffee_shop_record20_prefix_source_updates(
+            (unsigned short)source_frame);
     class02_updates = avsp_round1_coffee_shop_class02_source_updates(
         (unsigned short)source_frame);
     phase_updates = source_updates > scheduler_updates ?
         source_updates : scheduler_updates;
+    if (record20_prefix_updates > phase_updates)
+        phase_updates = record20_prefix_updates;
     if (class02_updates > phase_updates)
         phase_updates = class02_updates;
     if (!round1_runtime.entry.started &&
@@ -8551,6 +8558,9 @@ static void live_encounter_frame_callback(void)
             phase_tick < source_updates;
         scheduler_update_enabled = phase_tick == 0u ?
             scheduler_updates != 0u : phase_tick < scheduler_updates;
+        record20_prefix_update_enabled = phase_tick == 0u ?
+            record20_prefix_updates != 0u :
+            phase_tick < record20_prefix_updates;
         class02_update_enabled = phase_tick == 0u ?
             class02_updates != 0u : phase_tick < class02_updates;
         round1_player_authority_enabled_at_tick_start =
@@ -8595,6 +8605,7 @@ static void live_encounter_frame_callback(void)
         if (round1_runtime.entry.dependencies_seeded &&
             !avsp_round1_step_scheduler_post_player_source_differential(
                 &round1_runtime, scheduler_update_enabled,
+                record20_prefix_update_enabled,
                 class02_update_enabled))
         {
             avsp_diag_round1_scheduler_failure_code =

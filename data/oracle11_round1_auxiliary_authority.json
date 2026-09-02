@@ -11766,6 +11766,115 @@
               "source_pool": "record20",
               "source_pool_scheduler": "0x01bc38..0x01bc78"
             },
+            "record20_exit_prefix_scheduler": {
+              "byte_identical": true,
+              "classification": "SOURCE_CLOSED_IMPLEMENTATION_FIELDS",
+              "dispatch_target": "0x06b534",
+              "files_sha256": {
+                "coffee_shop_component20_callers.tsv": "daa23b1ca2442905c1805135a453afedad1c747379f74aac0b64cff868252e0c",
+                "coffee_shop_scheduler_phase.tsv": "ecfc03a567f616ce6a84b63bd9cac91db64a4f59643aaa957cd4aea5ef4af6b3"
+              },
+              "fixed_frame_gameplay_authority_forbidden": true,
+              "gameplay_transition_owner": "actor state/substate program; scheduler phase changes dispatch count only",
+              "groups": [
+                {
+                  "display_ticks_u8": 5,
+                  "program_tick_u8": 0,
+                  "updates_u8": 1
+                },
+                {
+                  "display_ticks_u8": 10,
+                  "program_tick_u8": 5,
+                  "updates_u8": 3
+                },
+                {
+                  "display_ticks_u8": 1,
+                  "program_tick_u8": 15,
+                  "updates_u8": 4
+                },
+                {
+                  "display_ticks_u8": 15,
+                  "program_tick_u8": 16,
+                  "updates_u8": 3
+                },
+                {
+                  "display_ticks_u8": 1,
+                  "program_tick_u8": 31,
+                  "updates_u8": 4
+                },
+                {
+                  "display_ticks_u8": 7,
+                  "program_tick_u8": 32,
+                  "updates_u8": 3
+                },
+                {
+                  "display_ticks_u8": 1,
+                  "program_tick_u8": 39,
+                  "updates_u8": 4
+                },
+                {
+                  "display_ticks_u8": 6,
+                  "program_tick_u8": 40,
+                  "updates_u8": 3
+                },
+                {
+                  "display_ticks_u8": 1,
+                  "program_tick_u8": 46,
+                  "updates_u8": 4
+                },
+                {
+                  "display_ticks_u8": 6,
+                  "program_tick_u8": 47,
+                  "updates_u8": 3
+                },
+                {
+                  "display_ticks_u8": 1,
+                  "program_tick_u8": 53,
+                  "updates_u8": 4
+                },
+                {
+                  "display_ticks_u8": 4,
+                  "program_tick_u8": 54,
+                  "updates_u8": 3
+                },
+                {
+                  "display_ticks_u8": 1,
+                  "program_tick_u8": 58,
+                  "updates_u8": 4
+                },
+                {
+                  "display_ticks_u8": 5,
+                  "program_tick_u8": 59,
+                  "updates_u8": 3
+                },
+                {
+                  "display_ticks_u8": 6,
+                  "program_tick_u8": 64,
+                  "updates_u8": 4
+                },
+                {
+                  "display_ticks_u8": 1,
+                  "program_tick_u8": 70,
+                  "updates_u8": 1
+                }
+              ],
+              "indirect_caller_pc": "0x01bc6e",
+              "mutation_control": "using the suffix cadence for prefix slots changes frame 5469 class-0x02 timer 1411 to 1412 and class-0x09 timers 2 to 3",
+              "prefix_probe_slot": "0x00ffb300",
+              "prefix_source_slot_range_inclusive": [
+                "0x00ffb180",
+                "0x00ffb500"
+              ],
+              "rule": "a complete record-20 pool traversal may cross a display boundary; Coffee Shop exit differential replay therefore preserves the captured prefix phase for every active slot below 0x00ffb600 and the existing suffix cadence from slot 0x00ffb600 onward",
+              "source_frame_range_inclusive_u16": [
+                5453,
+                5523
+              ],
+              "source_phase_split_after_slot": "0x00ffb500",
+              "source_pool": "record20",
+              "source_pool_scheduler": "0x01bc38..0x01bc78",
+              "suffix_first_slot": "0x00ffb600"
+            },
             "source_frame_range_inclusive_u16": [
               2073,
               2077

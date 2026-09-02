@@ -6,7 +6,7 @@
 #include "../../combat/hit_ko/hit_ko.h"
 
 #define AVSP_ROUND1_SPEC02_SHA256 \
-"3cb9e2beb459b30401228b23178fcf8ba1d4bd34e79a7911dad9eb87330db64e"
+"1bc3304737b9bccdf8c75e64f9e1b1e8c6573bfcaf040e82b6e3baa01f7f8b06"
 #define AVSP_ROUND1_CANARY_HEAD 0x52314548UL
 #define AVSP_ROUND1_CANARY_TAIL 0x52314554UL
 #define AVSP_ROUND1_ROUTE_ENTRY_STATE 2
@@ -80,6 +80,7 @@
 #define AVSP_ROUND1_COFFEE_EXIT_MOTION_COUNT 32u
 #define AVSP_ROUND1_COFFEE_EXIT_CALLBACK_GROUP_COUNT 25u
 #define AVSP_ROUND1_COFFEE_EXIT_SCHEDULER_GROUP_COUNT 16u
+#define AVSP_ROUND1_COFFEE_EXIT_RECORD20_PREFIX_GROUP_COUNT 16u
 #define AVSP_ROUND1_COFFEE_EXIT_LOAD_COUNT 2u
 #define AVSP_ROUND1_EXIT_STEP_BOOTSTRAP 0u
 #define AVSP_ROUND1_EXIT_STEP_MOVE_TO 1u
@@ -2327,9 +2328,11 @@ int avsp_round1_step_scheduler(AvspRound1Runtime *runtime);
 int avsp_round1_step_scheduler_pre_player_source_differential(
     AvspRound1Runtime *runtime, int include_default);
 int avsp_round1_step_scheduler_post_player_source_differential(
-    AvspRound1Runtime *runtime, int include_default, int include_class02);
+    AvspRound1Runtime *runtime, int include_default,
+    int include_record20_prefix, int include_record20_suffix);
 int avsp_round1_step_scheduler_source_differential(
-    AvspRound1Runtime *runtime, int include_default, int include_class02);
+    AvspRound1Runtime *runtime, int include_default,
+    int include_record20_prefix, int include_record20_suffix);
 void avsp_round1_first_encounter_view(
     const AvspRound1Runtime *runtime,
     AvspRound1FirstEncounterView *view);
@@ -2347,6 +2350,8 @@ unsigned short avsp_round1_coffee_shop_source_input(
 unsigned int avsp_round1_coffee_shop_source_updates(
     unsigned short source_frame);
 unsigned int avsp_round1_coffee_shop_scheduler_source_updates(
+    unsigned short source_frame);
+unsigned int avsp_round1_coffee_shop_record20_prefix_source_updates(
     unsigned short source_frame);
 unsigned int avsp_round1_coffee_shop_class02_source_updates(
     unsigned short source_frame);

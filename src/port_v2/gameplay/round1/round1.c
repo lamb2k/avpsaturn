@@ -91,6 +91,8 @@ static unsigned int avsp_round1_coffee_exit_callback_updates(
     unsigned char program_tick);
 static unsigned int avsp_round1_coffee_exit_scheduler_callback_updates(
     unsigned char program_tick);
+static unsigned int avsp_round1_coffee_exit_record20_prefix_callback_updates(
+    unsigned char program_tick);
 static int avsp_round1_step_coffee_exit_player(AvspRound1Runtime *runtime);
 static int avsp_round1_bind_player_jump_sequence(
     AvspRound1Runtime *runtime, unsigned char selector);
@@ -154,6 +156,20 @@ unsigned int avsp_round1_coffee_shop_scheduler_source_updates(
             source_frame -
             AVSP_ROUND1_COFFEE_EXIT_CALLBACK_FIRST_SOURCE_FRAME));
     return avsp_round1_coffee_shop_source_updates(source_frame);
+}
+
+unsigned int avsp_round1_coffee_shop_record20_prefix_source_updates(
+    unsigned short source_frame)
+{
+    if (source_frame >=
+            AVSP_ROUND1_COFFEE_EXIT_CALLBACK_FIRST_SOURCE_FRAME &&
+        source_frame <=
+            AVSP_ROUND1_COFFEE_EXIT_CALLBACK_LAST_SOURCE_FRAME)
+        return avsp_round1_coffee_exit_record20_prefix_callback_updates(
+            (unsigned char)(
+            source_frame -
+            AVSP_ROUND1_COFFEE_EXIT_CALLBACK_FIRST_SOURCE_FRAME));
+    return 0u;
 }
 
 unsigned int avsp_round1_coffee_shop_class02_source_updates(
@@ -2877,6 +2893,23 @@ static unsigned int avsp_round1_coffee_exit_scheduler_callback_updates(
     {
         const AvspRound1CoffeeExitCallbackGroupSpec *group =
             &avsp_round1_coffee_exit_scheduler_callbacks[index];
+        if (program_tick >= group->program_tick &&
+            program_tick < (unsigned int)group->program_tick +
+                group->display_ticks)
+            return group->updates;
+    }
+    return 0u;
+}
+
+static unsigned int avsp_round1_coffee_exit_record20_prefix_callback_updates(
+    unsigned char program_tick)
+{
+    unsigned int index;
+    for (index = 0u;
+         index < AVSP_ROUND1_COFFEE_EXIT_RECORD20_PREFIX_GROUP_COUNT; ++index)
+    {
+        const AvspRound1CoffeeExitCallbackGroupSpec *group =
+            &avsp_round1_coffee_exit_record20_prefix_callbacks[index];
         if (program_tick >= group->program_tick &&
             program_tick < (unsigned int)group->program_tick +
                 group->display_ticks)
@@ -11773,13 +11806,19 @@ int avsp_round1_step_scheduler_pre_player_source_differential(
 }
 
 static int avsp_round1_step_scheduler_post_player_mask(
-    AvspRound1Runtime *runtime, int include_default, int include_class02)
+    AvspRound1Runtime *runtime, int include_default,
+    int include_record20_prefix, int include_record20_suffix)
 {
     unsigned int order_index;
     unsigned int pool_index;
     unsigned int slot_index;
     unsigned long hash = 2166136261UL;
-    if (!include_default && !include_class02)
+    unsigned int source_frame = runtime->frame + 2040u;
+    int record20_prefix_phase_active =
+        source_frame >= AVSP_ROUND1_COFFEE_EXIT_CALLBACK_FIRST_SOURCE_FRAME &&
+        source_frame <= AVSP_ROUND1_COFFEE_EXIT_CALLBACK_LAST_SOURCE_FRAME;
+    if (!include_default && !include_record20_prefix &&
+        !include_record20_suffix)
         return 1;
     if (!avsp_round1_scheduler_runtime_valid(runtime))
         return 0;
@@ -11788,20 +11827,22 @@ static int avsp_round1_step_scheduler_post_player_mask(
         runtime->scheduler_trace_count = 0u;
     if (include_default)
         avsp_round1_snapshot_current_collision_state(runtime);
-    if (include_class02 && !avsp_round1_spawn_coffee_scene_records(runtime))
+    if ((include_record20_prefix || include_record20_suffix) &&
+        !avsp_round1_spawn_coffee_scene_records(runtime))
     {
         runtime->scheduler_failure_code = 23u;
         ++runtime->failure_count;
         return 0;
     }
-    if (include_class02 &&
+    if ((include_record20_prefix || include_record20_suffix) &&
         !avsp_round1_spawn_class08_health_pickup_parent(runtime))
     {
         runtime->scheduler_failure_code = 37u;
         ++runtime->failure_count;
         return 0;
     }
-    if (include_class02 && !avsp_round1_spawn_coffee_shop_obstacle(runtime))
+    if ((include_record20_prefix || include_record20_suffix) &&
+        !avsp_round1_spawn_coffee_shop_obstacle(runtime))
     {
         runtime->scheduler_failure_code = 19u;
         ++runtime->failure_count;
@@ -11831,14 +11872,28 @@ static int avsp_round1_step_scheduler_post_player_mask(
             unsigned short expected_slot;
             if (actor->active == 0u)
                 continue;
-            if ((!include_default &&
-                 !(actor->type == 20u && actor->actor_class == 0x02)) ||
-                (!include_class02 && actor->type == 20u &&
-                 actor->actor_class == 0x02))
-                continue;
             expected_slot = (unsigned short)(
                 runtime->pools[pool_index].source_base +
                 slot_index * runtime->pools[pool_index].stride);
+            if ((actor->type == 20u &&
+                 actor->source_slot < 0x00ffb600UL &&
+                 record20_prefix_phase_active &&
+                 !include_record20_prefix) ||
+                (actor->type == 20u &&
+                 actor->source_slot < 0x00ffb600UL &&
+                 !record20_prefix_phase_active &&
+                 actor->actor_class == 0x02 &&
+                 !include_record20_suffix) ||
+                (actor->type == 20u &&
+                 actor->source_slot < 0x00ffb600UL &&
+                 !record20_prefix_phase_active &&
+                 actor->actor_class != 0x02 &&
+                 !include_default) ||
+                (actor->type == 20u &&
+                 actor->source_slot >= 0x00ffb600UL &&
+                 !include_record20_suffix) ||
+                (actor->type != 20u && !include_default))
+                continue;
             if (actor->type != runtime->pools[pool_index].record_type ||
                 (unsigned short)actor->source_slot != expected_slot ||
                 !avsp_round1_dispatch_supported(actor->type,
@@ -12345,26 +12400,31 @@ int avsp_round1_step_scheduler(AvspRound1Runtime *runtime)
     return
         avsp_round1_step_scheduler_pre_player_source_differential(runtime, 1) &&
         avsp_round1_step_scheduler_post_player_source_differential(
-            runtime, 1, 1);
+            runtime, 1, 1, 1);
 }
 
 int avsp_round1_step_scheduler_post_player_source_differential(
-    AvspRound1Runtime *runtime, int include_default, int include_class02)
+    AvspRound1Runtime *runtime, int include_default,
+    int include_record20_prefix, int include_record20_suffix)
 {
     return avsp_round1_step_scheduler_post_player_mask(
-        runtime, include_default, include_class02);
+        runtime, include_default, include_record20_prefix,
+        include_record20_suffix);
 }
 
 int avsp_round1_step_scheduler_source_differential(
-    AvspRound1Runtime *runtime, int include_default, int include_class02)
+    AvspRound1Runtime *runtime, int include_default,
+    int include_record20_prefix, int include_record20_suffix)
 {
-    if (!include_default && !include_class02)
+    if (!include_default && !include_record20_prefix &&
+        !include_record20_suffix)
         return 1;
     return
         avsp_round1_step_scheduler_pre_player_source_differential(
             runtime, include_default) &&
         avsp_round1_step_scheduler_post_player_source_differential(
-            runtime, include_default, include_class02);
+            runtime, include_default, include_record20_prefix,
+            include_record20_suffix);
 }
 
 void avsp_round1_first_encounter_view(

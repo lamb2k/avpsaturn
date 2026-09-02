@@ -4569,6 +4569,7 @@ int main(void)
                 if (hit_runtime.entry.dependencies_seeded &&
                     !avsp_round1_step_scheduler_post_player_source_differential(
                         &hit_runtime, source_tick < source_updates,
+                        source_tick < class02_updates,
                         source_tick < class02_updates))
                     return 116;
             }
@@ -4593,6 +4594,7 @@ int main(void)
                     hit_runtime.entry.dependencies_seeded &&
                     !avsp_round1_step_scheduler_post_player_source_differential(
                         &hit_runtime, source_updates != 0u,
+                        class02_updates != 0u,
                         class02_updates != 0u))
                     return 116;
             }
@@ -4625,7 +4627,25 @@ int main(void)
             avsp_round1_coffee_shop_scheduler_source_updates(5469u) != 3u ||
             avsp_round1_coffee_shop_scheduler_source_updates(5470u) != 4u ||
             avsp_round1_coffee_shop_scheduler_source_updates(5523u) != 1u ||
-            avsp_round1_coffee_shop_scheduler_source_updates(5524u) != 1u)
+            avsp_round1_coffee_shop_scheduler_source_updates(5524u) != 1u ||
+            avsp_round1_coffee_shop_record20_prefix_source_updates(5453u) !=
+                1u ||
+            avsp_round1_coffee_shop_record20_prefix_source_updates(5458u) !=
+                3u ||
+            avsp_round1_coffee_shop_record20_prefix_source_updates(5468u) !=
+                4u ||
+            avsp_round1_coffee_shop_record20_prefix_source_updates(5469u) !=
+                3u ||
+            avsp_round1_coffee_shop_record20_prefix_source_updates(5470u) !=
+                3u ||
+            avsp_round1_coffee_shop_record20_prefix_source_updates(5484u) !=
+                4u ||
+            avsp_round1_coffee_shop_record20_prefix_source_updates(5517u) !=
+                4u ||
+            avsp_round1_coffee_shop_record20_prefix_source_updates(5523u) !=
+                1u ||
+            avsp_round1_coffee_shop_record20_prefix_source_updates(5524u) !=
+                0u)
             return 91;
         for (source_frame = 2040u; source_frame <= 5566u; ++source_frame)
         {
@@ -4638,11 +4658,16 @@ int main(void)
             unsigned int scheduler_updates =
                 avsp_round1_coffee_shop_scheduler_source_updates(
                     (unsigned short)source_frame);
+            unsigned int record20_prefix_updates =
+                avsp_round1_coffee_shop_record20_prefix_source_updates(
+                    (unsigned short)source_frame);
             unsigned int class02_updates =
                 avsp_round1_coffee_shop_class02_source_updates(
                     (unsigned short)source_frame);
             unsigned int phase_updates = source_updates > scheduler_updates ?
                 source_updates : scheduler_updates;
+            if (record20_prefix_updates > phase_updates)
+                phase_updates = record20_prefix_updates;
             if (class02_updates > phase_updates)
                 phase_updates = class02_updates;
             if (source_frame == 2072u &&
@@ -4874,6 +4899,7 @@ int main(void)
                 if (scene_runtime.entry.dependencies_seeded &&
                     !avsp_round1_step_scheduler_post_player_source_differential(
                         &scene_runtime, source_tick < scheduler_updates,
+                        source_tick < record20_prefix_updates,
                         source_tick < class02_updates))
                     return 112;
             }
@@ -5088,6 +5114,7 @@ int main(void)
             {
                 if (!avsp_round1_step_scheduler_post_player_source_differential(
                         &scene_runtime, scheduler_updates != 0u,
+                        record20_prefix_updates != 0u,
                         class02_updates != 0u))
                 {
                     const AvspRound1ActorCore *failed_actor = 0;

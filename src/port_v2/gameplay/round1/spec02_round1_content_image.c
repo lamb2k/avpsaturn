@@ -512,6 +512,24 @@ const AvspRound1ContentArchive avsp_round1_content_image
         { 70u, 1u, 1u },
     },
     {
+        { 0u, 5u, 1u },
+        { 5u, 10u, 3u },
+        { 15u, 1u, 4u },
+        { 16u, 15u, 3u },
+        { 31u, 1u, 4u },
+        { 32u, 7u, 3u },
+        { 39u, 1u, 4u },
+        { 40u, 6u, 3u },
+        { 46u, 1u, 4u },
+        { 47u, 6u, 3u },
+        { 53u, 1u, 4u },
+        { 54u, 4u, 3u },
+        { 58u, 1u, 4u },
+        { 59u, 5u, 3u },
+        { 64u, 6u, 4u },
+        { 70u, 1u, 1u },
+    },
+    {
         327680L, -4096L, 524288L, -24576L, 6u, 4u
     },
     {
