@@ -115,7 +115,7 @@ def main() -> None:
     memory = game_map_values()
     table_count = (ROOT / "src/port_v2/gameplay/round1/spec02_round1_entry_data.h") \
         .read_text(encoding="ascii").count("#define avsp_round1_")
-    if table_count != 165:
+    if table_count != 166:
         raise SystemExit("generated Round 1 content table count drift")
     bss_end = memory["bss_end"]
     manifest = {

@@ -52,12 +52,12 @@
       },
       {
         "base": "0x22711000",
-        "census_capacity_floor_bytes": 240716,
+        "census_capacity_floor_bytes": 240776,
         "id": "round1-spec-content",
         "load_phase": "boot",
         "owner": "all generated read-only SPEC fixture tables",
-        "required_bytes": 47372,
-        "sha256": "51f2d9ef9edb75c646671d12f73e053ed9419e5228eb31a665064795c9122c91",
+        "required_bytes": 47432,
+        "sha256": "e4994c870c6bfd24507a67bd54c114f3182117f2fe5896e58967d038387d02c6",
         "size": 262144
       },
       {
@@ -80,7 +80,7 @@
   },
   "classification": "REIMPLEMENT-13 bounded memory-plan program",
   "content_archive": {
-    "bytes": 47372,
+    "bytes": 47432,
     "categories": [
       "terrain",
       "timer-selector",
@@ -90,9 +90,9 @@
     ],
     "deterministic_double_build": true,
     "file": "build/avsp_cd/R1/R1SPEC.BIN",
-    "generated_source_sha256": "995ed618822698ee342593ebf7d3f540e59300638b5fffec8c5d146f8690caf2",
-    "sha256": "51f2d9ef9edb75c646671d12f73e053ed9419e5228eb31a665064795c9122c91",
-    "table_count": 165,
+    "generated_source_sha256": "75b3dfce67f676f09f6b0cb00f2b972708c47790ce184cbfa93a960eef6774e8",
+    "sha256": "e4994c870c6bfd24507a67bd54c114f3182117f2fe5896e58967d038387d02c6",
+    "table_count": 166,
     "target_endian": "SH-2 big endian"
   },
   "legal_load_seams": [

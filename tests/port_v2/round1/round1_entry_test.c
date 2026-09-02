@@ -4616,7 +4616,16 @@ int main(void)
             avsp_round1_coffee_shop_source_updates(2165u) != 4u ||
             avsp_round1_coffee_shop_source_updates(2260u) != 0u ||
             avsp_round1_coffee_shop_source_updates(2265u) != 0u ||
-            avsp_round1_coffee_shop_source_updates(2266u) != 1u)
+            avsp_round1_coffee_shop_source_updates(2266u) != 1u ||
+            avsp_round1_coffee_shop_source_updates(5458u) != 1u ||
+            avsp_round1_coffee_shop_scheduler_source_updates(5453u) != 1u ||
+            avsp_round1_coffee_shop_scheduler_source_updates(5458u) != 3u ||
+            avsp_round1_coffee_shop_scheduler_source_updates(5460u) != 3u ||
+            avsp_round1_coffee_shop_scheduler_source_updates(5461u) != 3u ||
+            avsp_round1_coffee_shop_scheduler_source_updates(5469u) != 3u ||
+            avsp_round1_coffee_shop_scheduler_source_updates(5470u) != 4u ||
+            avsp_round1_coffee_shop_scheduler_source_updates(5523u) != 1u ||
+            avsp_round1_coffee_shop_scheduler_source_updates(5524u) != 1u)
             return 91;
         for (source_frame = 2040u; source_frame <= 5566u; ++source_frame)
         {
@@ -4626,11 +4635,16 @@ int main(void)
             unsigned int source_updates =
                 avsp_round1_coffee_shop_source_updates(
                     (unsigned short)source_frame);
+            unsigned int scheduler_updates =
+                avsp_round1_coffee_shop_scheduler_source_updates(
+                    (unsigned short)source_frame);
             unsigned int class02_updates =
                 avsp_round1_coffee_shop_class02_source_updates(
                     (unsigned short)source_frame);
-            unsigned int phase_updates = source_updates > class02_updates ?
-                source_updates : class02_updates;
+            unsigned int phase_updates = source_updates > scheduler_updates ?
+                source_updates : scheduler_updates;
+            if (class02_updates > phase_updates)
+                phase_updates = class02_updates;
             if (source_frame == 2072u &&
                 !avsp_round1_begin_first_entry(&scene_runtime))
                 return 90;
@@ -4676,6 +4690,62 @@ int main(void)
                     scene_runtime.first_encounter.source_intro_timer,
                     scene_runtime.route_state);
                 return 125;
+            }
+            if (source_frame == 5155u)
+            {
+                const AvspRound1ActorCore *scene_clear_actor = 0;
+                for (actor_index = 0u;
+                     actor_index < scene_runtime.pools[0].capacity;
+                     ++actor_index)
+                {
+                    const AvspRound1ActorCore *candidate =
+                        &scene_runtime.pools[0].records[actor_index];
+                    if (candidate->source_slot == 0x00ff9f40UL)
+                    {
+                        scene_clear_actor = candidate;
+                        break;
+                    }
+                }
+                if (scene_clear_actor == 0 || !scene_clear_actor->active ||
+                    scene_clear_actor->state != 0x0200u ||
+                    scene_clear_actor->substate != 0x1e00u ||
+                    scene_clear_actor->source_special_latch_ad != 0u ||
+                    scene_clear_actor->transition_timer != 0u ||
+                    scene_clear_actor->source_direction != 8u ||
+                    scene_clear_actor->facing != 0u ||
+                    scene_clear_actor->source_x_fp != 0x05a03e00L ||
+                    scene_clear_actor->source_y_fp != 0x01174700L ||
+                    scene_clear_actor->z != 279 ||
+                    scene_clear_actor->animation_record != 0x0012e8a8UL ||
+                    scene_clear_actor->animation_timer != 9u ||
+                    scene_clear_actor->animation_branch != 0)
+                {
+                    fprintf(stderr,
+                        "Coffee Shop inner-state scene-clear interruption failed frame=%u active=%u state=%04x/%04x latch=%u inner_timer=%u direction=%u facing=%u fp=%08lx/%08lx z=%d animation=%08lx/%u/%d\n",
+                        source_frame,
+                        scene_clear_actor != 0 ? scene_clear_actor->active : 0u,
+                        scene_clear_actor != 0 ? scene_clear_actor->state : 0u,
+                        scene_clear_actor != 0 ? scene_clear_actor->substate : 0u,
+                        scene_clear_actor != 0 ?
+                            scene_clear_actor->source_special_latch_ad : 0u,
+                        scene_clear_actor != 0 ?
+                            scene_clear_actor->transition_timer : 0u,
+                        scene_clear_actor != 0 ?
+                            scene_clear_actor->source_direction : 0u,
+                        scene_clear_actor != 0 ? scene_clear_actor->facing : 0u,
+                        scene_clear_actor != 0 ?
+                            (unsigned long)scene_clear_actor->source_x_fp : 0UL,
+                        scene_clear_actor != 0 ?
+                            (unsigned long)scene_clear_actor->source_y_fp : 0UL,
+                        scene_clear_actor != 0 ? scene_clear_actor->z : 0,
+                        scene_clear_actor != 0 ?
+                            scene_clear_actor->animation_record : 0UL,
+                        scene_clear_actor != 0 ?
+                            scene_clear_actor->animation_timer : 0u,
+                        scene_clear_actor != 0 ?
+                            scene_clear_actor->animation_branch : 0);
+                    return 135;
+                }
             }
             if ((source_frame == 5451u &&
                  (scene_runtime.route_state != 4 ||
@@ -4738,6 +4808,27 @@ int main(void)
                     scene_runtime.camera_x_upper);
                 return 126;
             }
+            if (source_frame == 5459u)
+            {
+                const AvspRound1ActorCore *class1f =
+                    &scene_runtime.pools[0].records[11];
+                const AvspRound1ActorCore *class09 =
+                    &scene_runtime.pools[2].records[12];
+                if (!class1f->active || class1f->source_slot != 0x00ff9dc0UL ||
+                    class1f->animation_record != 0x0012e8fcUL ||
+                    class1f->animation_timer != 1u ||
+                    !class09->active || class09->source_slot != 0x00ffb480UL ||
+                    class09->actor_class != 0x09 ||
+                    class09->animation_timer != 1u)
+                {
+                    fprintf(stderr,
+                        "Coffee Shop exit scheduler cadence failed frame=%u class1f=%08lx/%u class09=%08lx/%u\n",
+                        source_frame, class1f->animation_record,
+                        class1f->animation_timer, class09->animation_record,
+                        class09->animation_timer);
+                    return 134;
+                }
+            }
             if (source_frame == 2371u)
             {
                 const AvspRound1WeaponProjectileAllocation *child =
@@ -4782,7 +4873,7 @@ int main(void)
                     return 111;
                 if (scene_runtime.entry.dependencies_seeded &&
                     !avsp_round1_step_scheduler_post_player_source_differential(
-                        &scene_runtime, source_tick < source_updates,
+                        &scene_runtime, source_tick < scheduler_updates,
                         source_tick < class02_updates))
                     return 112;
             }
@@ -4996,7 +5087,7 @@ int main(void)
                 scene_runtime.entry.dependencies_seeded)
             {
                 if (!avsp_round1_step_scheduler_post_player_source_differential(
-                        &scene_runtime, source_updates != 0u,
+                        &scene_runtime, scheduler_updates != 0u,
                         class02_updates != 0u))
                 {
                     const AvspRound1ActorCore *failed_actor = 0;
@@ -5143,6 +5234,55 @@ int main(void)
                             interrupted_actor != 0 ?
                                 interrupted_actor->facing : 0u);
                         return 126;
+                    }
+                }
+                if (source_frame == 5461u)
+                {
+                    const AvspRound1ActorCore *tail_actor = 0;
+                    for (actor_index = 0u;
+                         actor_index < scene_runtime.pools[0].capacity;
+                         ++actor_index)
+                    {
+                        const AvspRound1ActorCore *candidate =
+                            &scene_runtime.pools[0].records[actor_index];
+                        if (candidate->source_slot == 0x00ff9f40UL)
+                        {
+                            tail_actor = candidate;
+                            break;
+                        }
+                    }
+                    if (tail_actor == 0 || tail_actor->active == 0u ||
+                        tail_actor->state != 0x020au ||
+                        tail_actor->substate != 0u ||
+                        tail_actor->animation_record != 0x0012e8a8UL ||
+                        tail_actor->animation_timer != 8u ||
+                        tail_actor->animation_branch != 0 ||
+                        tail_actor->facing != 1u ||
+                        tail_actor->health != 87 ||
+                        tail_actor->source_x_fp != 0x05a03e00UL ||
+                        tail_actor->source_y_fp != 0x01174700UL ||
+                        tail_actor->z != 279)
+                    {
+                        fprintf(stderr,
+                            "Coffee Shop class1f route-interruption tail failed source=%u active=%u state=%04x/%04x anim=%08lx timer=%u branch=%d facing=%u health=%d fp=%08lx/%08lx z=%d\n",
+                            source_frame,
+                            tail_actor != 0 ? tail_actor->active : 0u,
+                            tail_actor != 0 ? tail_actor->state : 0u,
+                            tail_actor != 0 ? tail_actor->substate : 0u,
+                            tail_actor != 0 ?
+                                tail_actor->animation_record : 0UL,
+                            tail_actor != 0 ?
+                                tail_actor->animation_timer : 0u,
+                            tail_actor != 0 ?
+                                tail_actor->animation_branch : 0,
+                            tail_actor != 0 ? tail_actor->facing : 0u,
+                            tail_actor != 0 ? tail_actor->health : 0,
+                            tail_actor != 0 ?
+                                (unsigned long)tail_actor->source_x_fp : 0UL,
+                            tail_actor != 0 ?
+                                (unsigned long)tail_actor->source_y_fp : 0UL,
+                            tail_actor != 0 ? tail_actor->z : 0);
+                        return 136;
                     }
                 }
                 if ((source_frame == 5563u &&

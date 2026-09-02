@@ -3843,3 +3843,38 @@ three-attempt blocker and frozen candidate are unchanged. Continue scene-order
 at frame 5459 by closing the complete final class-`0x1f` action-tail program
 through the last source lifetime at 5550, then preserve centralized release at
 5551. Do not implement native-only stale post-release actors.
+
+### P4 class-0x1F final action-tail checkpoint (2026-09-01)
+
+The complete Coffee-Shop-reachable final class-`0x1f` action program is now
+closed through the last source lifetime at frame 5550. A real missing native
+boundary was corrected: the shared route interruption at actor byte `+0x1f3`
+now executes before every current class-`0x1f` action dispatch, rather than
+only action 0. Slot `0x00ff9f40` therefore leaves action `0x1e`, enters source
+state/substate `0x020a:0200`, binds its turn presentation, and returns to
+`0x020a:0000` without a frame-authored shortcut.
+
+The scheduler-phase difference in the final state-`0x0a` action-0 program is
+classified at complete action invocation boundaries. Source routines
+`0x060de6`, `0x060e26`, `0x060e3c` and `0x016536` own the two exact record
+cycles `[e8a8,e8b8,e8c8,e8d8]` and `[e8ec,e8fc,e90c,e91c]`. All seven final
+tail slots compare exact state/substate, facing and health plus exact collapsed
+cycle order. Per-frame timer/branch phase differences remain explicitly RED
+outside that normalized program and are not relabeled as closed.
+
+Oracle enemy evidence rejects 107 mutations, SPEC-02 rejects 190, the complete
+host differential passes 242 runtime and 81 generated-fixture mutations, and
+the scene lane rejects 23 real mutations. Raw scene gaps remain
+`188/1/0/671/1/93/0/279/0`. Release/live Target is 378,144 bytes at SHA-256
+`c3c538e8038f777b5620872deea136d4c3052429af4c2fe3180403a532e994f4`,
+BSS `0x060b3630`. The deterministic 166-table archive is 47,432 bytes at
+SHA-256 `e4994c870c6bfd24507a67bd54c114f3182117f2fe5896e58967d038387d02c6`
+and retains 214,712 bytes in the unchanged 256 KiB carve.
+
+The next scene-order RED is frame 5469 in the shared type-20 presentation and
+scheduler program: class-`0x02` slot `0x00ffb300` has source/native animation
+timers 1411/1412, while class-`0x09` slots `0x00ffb480` and `0x00ffb500` have
+timers 2/3 before their next record/branch edges. Close every Coffee-Shop-
+reachable branch and instance of that owning program, not individual rows.
+Candidate promotion remains frozen and the exhausted emulator/WGC gates remain
+blocked pending owner ruling.

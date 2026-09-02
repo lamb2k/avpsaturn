@@ -136,6 +136,18 @@ item["native_capture"]["recurring_spawn_phase_boundary"][
     "fixed_point_record_reuse"]["frames"]["2514"]["native"][
         "x_fp_s32"] = 0x02a76200
 mutations.append(("cleared recurring position fraction", item))
+item = copy.deepcopy(BASE)
+item["native_capture"]["class1f_final_action_tail"][
+    "normalized_action_authority_equal"] = False
+mutations.append(("class1f final-tail gameplay normalization", item))
+item = copy.deepcopy(BASE)
+item["native_capture"]["class1f_final_action_tail"][
+    "blanket_animation_ignore_forbidden"] = False
+mutations.append(("class1f blanket animation ignore", item))
+item = copy.deepcopy(BASE)
+item["native_capture"]["class1f_final_action_tail"]["actors"][0][
+    "cycle_order_equal"] = False
+mutations.append(("class1f final-tail action order", item))
 
 for label, mutant in mutations:
     try:

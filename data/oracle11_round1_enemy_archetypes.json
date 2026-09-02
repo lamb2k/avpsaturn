@@ -27575,7 +27575,7 @@
         "writes": 153166
       },
       "current_state_implementation_contract": {
-        "accepted_encounter_authority_sha256": "1b26d353f4823c83d9eed0ede7dfba4aa05cadc7e4f288086da0162ead9d2958",
+        "accepted_encounter_authority_sha256": "3d5296ded2b371e62c481c5af619dd8751d97097d392968ffead91eb01a649ae",
         "accepted_oracle09_sha256": "a3027c3ffcd19af2656c515e0dfc0e9c56086b1bf3dd029e854d74be372c847f",
         "actions": {
           "above_lane_0x0600": {
@@ -36212,6 +36212,384 @@
             ],
             "upper_lane_u16": 320
           },
+          "final_state_0x0a_action_0x00": {
+            "action_0x00_entry": "0x060e3c",
+            "animation_cycles_by_style": [
+              [
+                "0x0012e8a8",
+                "0x0012e8b8",
+                "0x0012e8c8",
+                "0x0012e8d8"
+              ],
+              [
+                "0x0012e8ec",
+                "0x0012e8fc",
+                "0x0012e90c",
+                "0x0012e91c"
+              ]
+            ],
+            "animation_helper": "0x016536",
+            "classification": "SOURCE_CLOSED_IMPLEMENTATION_FIELDS",
+            "coffee_shop_normalized_projection": {
+              "actors": [
+                {
+                  "animation_transition_count_u16": 44,
+                  "animation_transition_sha256": "cb7db8a0a7c6c23532dff41158ec60d3cd2d03a6bcb4a1195a91cf72c925f0d0",
+                  "first_animation_record": "0x0012e8ec",
+                  "first_source_frame_u16": 5264,
+                  "last_animation_record": "0x0012e8ec",
+                  "last_source_frame_u16": 5550,
+                  "source_slot": "0x00ff9dc0",
+                  "stable_state_fields": {
+                    "attack_selector": [
+                      "01"
+                    ],
+                    "facing": [
+                      "1"
+                    ],
+                    "health": [
+                      "87"
+                    ],
+                    "hurt_selector": [
+                      "01"
+                    ],
+                    "state": [
+                      "020a"
+                    ],
+                    "substate": [
+                      "0000"
+                    ],
+                    "x_fp": [
+                      "042f5800"
+                    ],
+                    "y_fp": [
+                      "01309f00"
+                    ],
+                    "z": [
+                      "304"
+                    ]
+                  },
+                  "visible_rows_u16": 287
+                },
+                {
+                  "animation_transition_count_u16": 44,
+                  "animation_transition_sha256": "cb7db8a0a7c6c23532dff41158ec60d3cd2d03a6bcb4a1195a91cf72c925f0d0",
+                  "first_animation_record": "0x0012e8ec",
+                  "first_source_frame_u16": 5262,
+                  "last_animation_record": "0x0012e8ec",
+                  "last_source_frame_u16": 5550,
+                  "source_slot": "0x00ff9e80",
+                  "stable_state_fields": {
+                    "attack_selector": [
+                      "01"
+                    ],
+                    "facing": [
+                      "1"
+                    ],
+                    "health": [
+                      "87"
+                    ],
+                    "hurt_selector": [
+                      "01"
+                    ],
+                    "state": [
+                      "020a"
+                    ],
+                    "substate": [
+                      "0000"
+                    ],
+                    "x_fp": [
+                      "050ced00"
+                    ],
+                    "y_fp": [
+                      "0112c800"
+                    ],
+                    "z": [
+                      "274"
+                    ]
+                  },
+                  "visible_rows_u16": 289
+                },
+                {
+                  "animation_transition_count_u16": 21,
+                  "animation_transition_sha256": "e0cfe4763cde0f75ba732918ed807d9d3b5abedcf503b94980aedeabe2d7e585",
+                  "first_animation_record": "0x0012e8a8",
+                  "first_source_frame_u16": 5462,
+                  "last_animation_record": "0x0012e8b8",
+                  "last_source_frame_u16": 5550,
+                  "source_slot": "0x00ff9f40",
+                  "stable_state_fields": {
+                    "attack_selector": [
+                      "01"
+                    ],
+                    "facing": [
+                      "1"
+                    ],
+                    "health": [
+                      "87"
+                    ],
+                    "hurt_selector": [
+                      "01"
+                    ],
+                    "state": [
+                      "020a"
+                    ],
+                    "substate": [
+                      "0000"
+                    ],
+                    "x_fp": [
+                      "05a03e00"
+                    ],
+                    "y_fp": [
+                      "01174700"
+                    ],
+                    "z": [
+                      "279"
+                    ]
+                  },
+                  "visible_rows_u16": 89
+                },
+                {
+                  "animation_transition_count_u16": 51,
+                  "animation_transition_sha256": "aa12eb9a2e13c3231e1e7377db74729269bf8bf106ad88758d485d2f2b7dbe6e",
+                  "first_animation_record": "0x0012e8d8",
+                  "first_source_frame_u16": 5208,
+                  "last_animation_record": "0x0012e8c8",
+                  "last_source_frame_u16": 5550,
+                  "source_slot": "0x00ffa000",
+                  "stable_state_fields": {
+                    "attack_selector": [
+                      "01"
+                    ],
+                    "facing": [
+                      "1"
+                    ],
+                    "health": [
+                      "87"
+                    ],
+                    "hurt_selector": [
+                      "01"
+                    ],
+                    "state": [
+                      "020a"
+                    ],
+                    "substate": [
+                      "0000"
+                    ],
+                    "x_fp": [
+                      "05280400"
+                    ],
+                    "y_fp": [
+                      "01274e00"
+                    ],
+                    "z": [
+                      "295"
+                    ]
+                  },
+                  "visible_rows_u16": 343
+                },
+                {
+                  "animation_transition_count_u16": 45,
+                  "animation_transition_sha256": "ff76b057317bea5e86838e1255c27661701c50844a2c4a3e12b22b02021092d4",
+                  "first_animation_record": "0x0012e8a8",
+                  "first_source_frame_u16": 5255,
+                  "last_animation_record": "0x0012e8b8",
+                  "last_source_frame_u16": 5550,
+                  "source_slot": "0x00ffa0c0",
+                  "stable_state_fields": {
+                    "attack_selector": [
+                      "01"
+                    ],
+                    "facing": [
+                      "1"
+                    ],
+                    "health": [
+                      "87"
+                    ],
+                    "hurt_selector": [
+                      "01"
+                    ],
+                    "state": [
+                      "020a"
+                    ],
+                    "substate": [
+                      "0000"
+                    ],
+                    "x_fp": [
+                      "0438d500"
+                    ],
+                    "y_fp": [
+                      "01275400"
+                    ],
+                    "z": [
+                      "295"
+                    ]
+                  },
+                  "visible_rows_u16": 296
+                },
+                {
+                  "animation_transition_count_u16": 50,
+                  "animation_transition_sha256": "d903d1fe5e5377d8893d3077fcce9696e311091d12a6a9fcd9cd4ad1c8ba61c2",
+                  "first_animation_record": "0x0012e8ec",
+                  "first_source_frame_u16": 5208,
+                  "last_animation_record": "0x0012e90c",
+                  "last_source_frame_u16": 5550,
+                  "source_slot": "0x00ffa240",
+                  "stable_state_fields": {
+                    "attack_selector": [
+                      "01"
+                    ],
+                    "facing": [
+                      "1"
+                    ],
+                    "health": [
+                      "87"
+                    ],
+                    "hurt_selector": [
+                      "01"
+                    ],
+                    "state": [
+                      "020a"
+                    ],
+                    "substate": [
+                      "0000"
+                    ],
+                    "x_fp": [
+                      "042f9200"
+                    ],
+                    "y_fp": [
+                      "0130b300"
+                    ],
+                    "z": [
+                      "304"
+                    ]
+                  },
+                  "visible_rows_u16": 343
+                },
+                {
+                  "animation_transition_count_u16": 51,
+                  "animation_transition_sha256": "aa12eb9a2e13c3231e1e7377db74729269bf8bf106ad88758d485d2f2b7dbe6e",
+                  "first_animation_record": "0x0012e8d8",
+                  "first_source_frame_u16": 5208,
+                  "last_animation_record": "0x0012e8c8",
+                  "last_source_frame_u16": 5550,
+                  "source_slot": "0x00ffa3c0",
+                  "stable_state_fields": {
+                    "attack_selector": [
+                      "01"
+                    ],
+                    "facing": [
+                      "1"
+                    ],
+                    "health": [
+                      "87"
+                    ],
+                    "hurt_selector": [
+                      "01"
+                    ],
+                    "state": [
+                      "020a"
+                    ],
+                    "substate": [
+                      "0000"
+                    ],
+                    "x_fp": [
+                      "05404800"
+                    ],
+                    "y_fp": [
+                      "01185f00"
+                    ],
+                    "z": [
+                      "280"
+                    ]
+                  },
+                  "visible_rows_u16": 343
+                }
+              ],
+              "sha256": "919a1edec1f76a43fab41b078f990d4ffe5e0b6fe1e0fcecd92481a0e08ea9b7",
+              "source_frame_range_u16": [
+                5208,
+                5550
+              ]
+            },
+            "mutation_control": {
+              "blanket_animation_ignore_rejected": true,
+              "omitted_timer_decrement_rejected": true,
+              "route_gate_before_action_dispatch_rejected": true,
+              "state_or_gameplay_write_rejected": true,
+              "wrong_record_order_rejected": true
+            },
+            "outer_dispatch_entry": "0x06075a",
+            "paired_capture": {
+              "actor_rows_sha256": "9c0ea88c7eae6b4755b0025d356d49ae136d91de0e443fab0ff767151e43343d",
+              "byte_identical": true,
+              "capture_a": "oracle11_progression_lifecycle_cs21a",
+              "capture_b": "oracle11_progression_lifecycle_cs21b"
+            },
+            "per_invocation_order": [
+              "outer state 0x00 checks global route interruption byte a5+0x1f3 before action dispatch",
+              "when set and actor+0x5c is zero, write inner state 0x0a and clear action/substate",
+              "facing zero enters action 0x02, toggles facing, and binds turn selector 34 or 35; facing nonzero binds idle selector 0 or 1",
+              "state-0x0a action 0x02 steps animation until a negative branch, then repeats the interruption transition into action 0",
+              "read action_u8 from actor+0x06",
+              "dispatch action 0 through the state-0x0a action table",
+              "decrement actor+0x0a animation_timer_u16 exactly once",
+              "when zero advance actor+0x1c by 16 bytes; if the prior branch_s16 is negative follow the record jump pointer",
+              "write next animation record, timer_u16 and branch_s16",
+              "tail-call record-12 registration at 0x0167ac"
+            ],
+            "preserves": [
+              "state/substate",
+              "x/y/z",
+              "facing",
+              "health",
+              "hurt/attack selectors",
+              "RNG",
+              "collision/damage",
+              "audio",
+              "route"
+            ],
+            "registration_tail": "0x0167ac",
+            "scheduler_phase_normalization": {
+              "blanket_animation_ignore_forbidden": true,
+              "fixed_frame_or_slot_override_forbidden": true,
+              "gameplay_fields_must_remain_exact": true,
+              "normalized_boundary": "compare complete action invocations and collapsed record order; do not require an instruction-partial timer value to be a native gameplay event",
+              "scope": "presentation timer/record sampling only",
+              "source_snapshot_can_split": "0x060e3c -> 0x016536 -> 0x060e42 -> 0x0167ac"
+            },
+            "source_windows": {
+              "action_0x02": {
+                "first": "0x060e48",
+                "last_exclusive": "0x060e58",
+                "sha256": "d18a6f72c9edfaefe3ea9c21b52e2cd358449784dee69fdef35b1a378f19d698"
+              },
+              "animation_helper": {
+                "first": "0x016536",
+                "last_exclusive": "0x01656e",
+                "sha256": "c5c4d5a0c07c1da109cb45a870c113b5ff6e0886811e258360471d43d066baf9"
+              },
+              "route_interruption": {
+                "first": "0x060de6",
+                "last_exclusive": "0x060e26",
+                "sha256": "b597c6b73be71b77bdb0c2036a089a126650ca196c10bc7b59b80cb9dc2c90c0"
+              },
+              "state_dispatch": {
+                "first": "0x060e26",
+                "last_exclusive": "0x060e44",
+                "sha256": "32676e51dca5fb2ccd7a9c2dac124a2ad4275c0ebd1429e298aba10013717781"
+              }
+            },
+            "state_0x0a_dispatch_entry": "0x060e26",
+            "writes": [
+              "actor+0x0a:u16",
+              "actor+0x1c:u32",
+              "actor+0x24:s16",
+              "actor+0x05:u8",
+              "actor+0x06:u16",
+              "actor+0x0f:u8"
+            ]
+          },
           "source_bounds": {
             "activation_field_u8": "actor+0x01",
             "camera_operand_u16": "0xff8278",
@@ -38184,7 +38562,7 @@
         },
         "current_state_player_collision": {
           "accepted_collision_sha256": "49ce678bee49d331a3b9e6cee97708b7644c5b0727de477ffc89671bf64bd78c",
-          "accepted_encounter_authority_sha256": "1b26d353f4823c83d9eed0ede7dfba4aa05cadc7e4f288086da0162ead9d2958",
+          "accepted_encounter_authority_sha256": "3d5296ded2b371e62c481c5af619dd8751d97097d392968ffead91eb01a649ae",
           "attacker": {
             "animation_record": "0x0012d8a0",
             "attack_record": "0x130b5c",
@@ -45581,6 +45959,59 @@
               "entry": "0x0412a8",
               "role": "target-seeking movement and transition to 0x0e"
             }
+          },
+          "scene_clear_interruption": {
+            "classification": "SOURCE_CLOSED_IMPLEMENTATION_FIELDS",
+            "coffee_shop_control": {
+              "animation_branch_s16": 0,
+              "animation_record": "0x0012e8a8",
+              "animation_timer_u16": 9,
+              "facing_u8": 0,
+              "first_visible_result_frame_u16": 5155,
+              "guard_writer_frame_u16": 5151,
+              "inner_state_frame_u16": 5154,
+              "source_slot": "0x00ff9f40",
+              "state_u16": "0x0200",
+              "substate_u16": "0x1e00",
+              "x_fp_s32_16_16": "0x05a03e00",
+              "y_fp_s32_16_16": "0x01174700",
+              "z_s16": 279
+            },
+            "guard": "s16(a5-0x65e4) == 0 before inner timer or class action dispatch",
+            "mutation_control": {
+              "fixed_frame_forbidden": true,
+              "omitting_inner_state_guard_must_diverge_at_source_frame_u16": 5155,
+              "wrong_result": "actor remains in inner state 0x0208"
+            },
+            "result": {
+              "action_substate_u16": 7680,
+              "direction_bias_u8": 8,
+              "direction_shift_u8": 4,
+              "direction_xor_u8": 1,
+              "inner_timer_u16": 0,
+              "outer_state_u16": 512,
+              "rng_calls": 0,
+              "selectors_by_style85_u8": [
+                0,
+                1
+              ],
+              "special_latch_ad_u8": 0
+            },
+            "source_action_tail": "0x060dcc",
+            "source_action_window_sha256": "096c65638bc57bbdf62c5fb375d4819909881b65e3ec21ca64f69a6d94ec1388",
+            "source_entry": "0x0610f6",
+            "source_entry_window_sha256": "c7bd110d6c43ed75d802d47b345ad1a2d1da2d2067f7b2012ab3c5174248393b",
+            "source_reset_helper": "0x0610d4",
+            "source_reset_window_sha256": "6b09506d487a9af8c04d737045639bd17c60f20cfc96530015bfd1e31703c70a",
+            "writes_in_order": [
+              "actor+0xad:u8 = 0",
+              "actor+0xa8:u16 = 0",
+              "actor+0x05:u8 = 0, preserving outer high state byte 0x02",
+              "actor+0x06:u16 = 0",
+              "actor+0x0c:u8 = ((actor+0xa5:u8 ^ 1) << 4) + 8",
+              "actor+0x06:u8 = 0x1e",
+              "bind selector 0 when style85_u8 is zero, otherwise selector 1"
+            ]
           },
           "scope": "route-reachable current-state inner byte 0x08 program through action 0x0e02 type-16 emission",
           "type16_emission": {

@@ -94,6 +94,8 @@ for label,mutate in [
     ('first-segment-source-bound-activation',lambda x:x['action_programs']['source_bounds'].__setitem__('activation_field_u8','actor+0x02')),
     ('first-segment-source-bound-phase',lambda x:x['action_programs']['source_bounds']['coffee_shop_hit_return_boundary']['phase_odd'].__setitem__('phase_counter_u8',0x98)),
     ('first-segment-movement-cadence',lambda x:x['action_programs']['animation_movement_helper_0x0165c4'].__setitem__('movement_cadence','every scheduler frame')),
+    ('first-segment-final-tail-order',lambda x:x['action_programs']['final_state_0x0a_action_0x00']['animation_cycles_by_style'][1].__setitem__(1,'0x0012e90c')),
+    ('first-segment-final-tail-blanket-ignore',lambda x:x['action_programs']['final_state_0x0a_action_0x00']['scheduler_phase_normalization'].__setitem__('blanket_animation_ignore_forbidden',False)),
     ('first-segment-direction',lambda x:x['action_programs']['direction_helper_0x061032']['upper_directions_by_a5_u8'].__setitem__(0,0x15)),
     ('first-segment-fall-selector-encoding',lambda x:x['action_programs']['action_0x0c'].__setitem__('initial_selector_u8',35)),
     ('first-segment-jump-vector',lambda x:x['action_programs']['action_0x0e']['z_velocity_table_s32_16_16'].__setitem__(0,-0x0000f000)),
@@ -116,6 +118,7 @@ for label,mutate in [
     ('inner8-writer',lambda x:x['entry_transition'].__setitem__('writer_pc','0x0610ce')),
     ('inner8-timer',lambda x:x['entry_transition'].__setitem__('timer_u16',599)),
     ('inner8-timeout-direction',lambda x:x['route_interaction']['timeout_return']['coffee_shop_control'].__setitem__('direction_after_u8',2)),
+    ('inner8-scene-clear-guard',lambda x:x['scene_clear_interruption']['result'].__setitem__('action_substate_u16',0)),
     ('inner8-movement-table',lambda x:x['movement']['tables'][0].__setitem__('table_index_u8',5)),
     ('inner8-motion-sign',lambda x:x['action_0x0e_motion']['phase_2_terminal'].__setitem__('y_acceleration_s32_16_16',38400)),
     ('inner8-fixed-frame',lambda x:x['type16_emission'].__setitem__('fixed_frame_spawn_forbidden',False)),
@@ -156,4 +159,4 @@ for label,mutate in [
     ('inner8-group-occupancy-order',lambda x:x['observed_path_program']['wander_group_occupancy_program']['selection_order'].__setitem__(2,'reuse prior group')),
 ]:
     mutant=copy.deepcopy(report);target=next(item for item in mutant['archetypes'] if item['class']=='0x1f')['first_segment_action_execution_contract']['inner_state_0x08_program'];mutate(target);reject(mutant,label)
-print('ORACLE-11 Round 1 enemy tests: PASS (104 mutations rejected)')
+print('ORACLE-11 Round 1 enemy tests: PASS (107 mutations rejected)')

@@ -6,7 +6,7 @@
 #include "../../combat/hit_ko/hit_ko.h"
 
 #define AVSP_ROUND1_SPEC02_SHA256 \
-"ad27ab57d4fdab734c3371444c1724a9cc2a364aeea125989500fb4a6b987994"
+"3cb9e2beb459b30401228b23178fcf8ba1d4bd34e79a7911dad9eb87330db64e"
 #define AVSP_ROUND1_CANARY_HEAD 0x52314548UL
 #define AVSP_ROUND1_CANARY_TAIL 0x52314554UL
 #define AVSP_ROUND1_ROUTE_ENTRY_STATE 2
@@ -79,6 +79,7 @@
 #define AVSP_ROUND1_COFFEE_EXIT_STEP_COUNT 9u
 #define AVSP_ROUND1_COFFEE_EXIT_MOTION_COUNT 32u
 #define AVSP_ROUND1_COFFEE_EXIT_CALLBACK_GROUP_COUNT 25u
+#define AVSP_ROUND1_COFFEE_EXIT_SCHEDULER_GROUP_COUNT 16u
 #define AVSP_ROUND1_COFFEE_EXIT_LOAD_COUNT 2u
 #define AVSP_ROUND1_EXIT_STEP_BOOTSTRAP 0u
 #define AVSP_ROUND1_EXIT_STEP_MOVE_TO 1u
@@ -779,6 +780,14 @@ typedef struct
     unsigned char action0c_observed_stage_parameter;
     unsigned short action0c_audio_slots[3];
     unsigned short action0c_audio_commands[3];
+    unsigned short scene_clear_outer_state;
+    unsigned short scene_clear_action_substate;
+    unsigned char scene_clear_special_latch;
+    unsigned short scene_clear_inner_timer;
+    unsigned char scene_clear_direction_xor;
+    unsigned char scene_clear_direction_shift;
+    unsigned char scene_clear_direction_bias;
+    unsigned char scene_clear_selectors[2];
 } AvspRound1Class1fInner8ProgramSpec;
 
 typedef struct
@@ -2336,6 +2345,8 @@ int avsp_round1_player_native_presentation_active(
 unsigned short avsp_round1_coffee_shop_source_input(
     unsigned short source_frame);
 unsigned int avsp_round1_coffee_shop_source_updates(
+    unsigned short source_frame);
+unsigned int avsp_round1_coffee_shop_scheduler_source_updates(
     unsigned short source_frame);
 unsigned int avsp_round1_coffee_shop_class02_source_updates(
     unsigned short source_frame);

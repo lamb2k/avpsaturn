@@ -1,8 +1,8 @@
 #ifndef AVSP_SPEC02_ROUND1_ENTRY_DATA_H
 #define AVSP_SPEC02_ROUND1_ENTRY_DATA_H
 
-/* contract_sha256=ad27ab57d4fdab734c3371444c1724a9cc2a364aeea125989500fb4a6b987994 */
-/* fixtures_sha256=83e188db6157d6c14bfef18204e9000ba3f59a611a59ee7657fe7955042aead8 */
+/* contract_sha256=3cb9e2beb459b30401228b23178fcf8ba1d4bd34e79a7911dad9eb87330db64e */
+/* fixtures_sha256=5cf226708e384c98b278da8b6c8f1f841216551af7112b0d987434902abcb39d */
 #define AVSP_ROUND1_ENTRY_PROGRAM_SHA256 "e5ef761fadc1b5a7df62e77c03025c0ebff0c2503cbc8be9c0077d4bd6cd24ba"
 
 #if defined(__sh__)
@@ -577,6 +577,9 @@ static const AvspRound1CoffeeExitMotionSpec avsp_round1_coffee_exit_motion[AVSP_
 };
 #endif
 
+#define AVSP_ROUND1_COFFEE_EXIT_CALLBACK_FIRST_SOURCE_FRAME 5453u
+#define AVSP_ROUND1_COFFEE_EXIT_CALLBACK_LAST_SOURCE_FRAME 5523u
+
 #if defined(__sh__)
 #define avsp_round1_coffee_exit_callbacks (avsp_round1_content->content_avsp_round1_coffee_exit_callbacks)
 #else
@@ -606,6 +609,30 @@ static const AvspRound1CoffeeExitCallbackGroupSpec avsp_round1_coffee_exit_callb
     { 67u, 1u, 2u },
     { 68u, 1u, 4u },
     { 69u, 1u, 2u },
+    { 70u, 1u, 1u },
+};
+#endif
+
+#if defined(__sh__)
+#define avsp_round1_coffee_exit_scheduler_callbacks (avsp_round1_content->content_avsp_round1_coffee_exit_scheduler_callbacks)
+#else
+static const AvspRound1CoffeeExitCallbackGroupSpec avsp_round1_coffee_exit_scheduler_callbacks[AVSP_ROUND1_COFFEE_EXIT_SCHEDULER_GROUP_COUNT] =
+{
+    { 0u, 5u, 1u },
+    { 5u, 12u, 3u },
+    { 17u, 1u, 4u },
+    { 18u, 14u, 3u },
+    { 32u, 1u, 4u },
+    { 33u, 7u, 3u },
+    { 40u, 1u, 4u },
+    { 41u, 6u, 3u },
+    { 47u, 1u, 4u },
+    { 48u, 6u, 3u },
+    { 54u, 1u, 4u },
+    { 55u, 4u, 3u },
+    { 59u, 1u, 4u },
+    { 60u, 4u, 3u },
+    { 64u, 6u, 4u },
     { 70u, 1u, 1u },
 };
 #endif
@@ -1142,7 +1169,9 @@ static const AvspRound1Class1fInner8ProgramSpec avsp_round1_class1f_inner8_progr
     },
     9u,
     { 0xA000u, 0x9E80u, 0x9DC0u },
-    { 0x0035u, 0x0035u, 0x0100u }
+    { 0x0035u, 0x0035u, 0x0100u },
+    0x0200u, 0x1E00u, 0u, 0x0000u,
+    1u, 4u, 8u, { 0u, 1u }
 };
 #endif
 
@@ -5327,6 +5356,7 @@ typedef struct
     AvspRound1CoffeeExitStepSpec content_avsp_round1_coffee_exit_steps[AVSP_ROUND1_COFFEE_EXIT_STEP_COUNT];
     AvspRound1CoffeeExitMotionSpec content_avsp_round1_coffee_exit_motion[AVSP_ROUND1_COFFEE_EXIT_MOTION_COUNT];
     AvspRound1CoffeeExitCallbackGroupSpec content_avsp_round1_coffee_exit_callbacks[AVSP_ROUND1_COFFEE_EXIT_CALLBACK_GROUP_COUNT];
+    AvspRound1CoffeeExitCallbackGroupSpec content_avsp_round1_coffee_exit_scheduler_callbacks[AVSP_ROUND1_COFFEE_EXIT_SCHEDULER_GROUP_COUNT];
     AvspRound1CoffeeExitBallisticSpec content_avsp_round1_coffee_exit_ballistic;
     short content_avsp_round1_recurring_lane_offsets[AVSP_ROUND1_RECURRING_LANE_OFFSET_COUNT];
     unsigned char content_avsp_round1_recurring_selector_cycle[AVSP_ROUND1_RECURRING_SELECTOR_COUNT];

@@ -52,6 +52,8 @@ for label,change in (
     ('scene-selector-projection',lambda x:x['coffee_shop_scene_census']['animation_collision_selectors']['mutation_control'].__setitem__('wrong_player_field_projection_rejected',False)),
     ('scene-pool-omission',lambda x:x['coffee_shop_scene_census']['pool_scan'].pop()),
     ('scene-silent-unknown',lambda x:x['coffee_shop_scene_census']['negative_controls'].__setitem__('unknown_pair_silently_omitted',True)),
+    ('exit-callback-player-only',lambda x:x['first_segment_recurring_spawn']['exit_controller_program']['player_withdrawal_script']['source_display_callback_program'].__setitem__('scheduler_scope',['route-6 player state dispatcher'])),
+    ('exit-fixed-pool-cadence',lambda x:x['first_segment_recurring_spawn']['exit_controller_program']['player_withdrawal_script']['source_display_callback_program']['fixed_pool_scheduler_groups'][1].__setitem__('display_ticks_u8',11)),
 ):
     mutant=copy.deepcopy(report);change(mutant);reject(mutant,label)
-print('ORACLE-11 encounter/route authority tests: PASS (30 mutations rejected)')
+print('ORACLE-11 encounter/route authority tests: PASS (32 mutations rejected)')

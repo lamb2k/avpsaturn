@@ -9,7 +9,7 @@ from pathlib import Path
 
 ROOT = Path(__file__).resolve().parents[3]
 SPEC = ROOT / "data/spec02_round1_executable_contract.json"
-EXPECTED = "ad27ab57d4fdab734c3371444c1724a9cc2a364aeea125989500fb4a6b987994"
+EXPECTED = "3cb9e2beb459b30401228b23178fcf8ba1d4bd34e79a7911dad9eb87330db64e"
 assert hashlib.sha256(SPEC.read_bytes()).hexdigest() == EXPECTED
 assert json.loads(SPEC.read_text())["status"] == "ACCEPTED"
 source = (ROOT / "src/port_v2/gameplay/round1/round1.c").read_text()
@@ -95,11 +95,16 @@ scene_checkpoint_marker = (
     "            unsigned int source_updates =\n"
     "                avsp_round1_coffee_shop_source_updates(\n"
     "                    (unsigned short)source_frame);\n"
+    "            unsigned int scheduler_updates =\n"
+    "                avsp_round1_coffee_shop_scheduler_source_updates(\n"
+    "                    (unsigned short)source_frame);\n"
     "            unsigned int class02_updates =\n"
     "                avsp_round1_coffee_shop_class02_source_updates(\n"
     "                    (unsigned short)source_frame);\n"
-    "            unsigned int phase_updates = source_updates > class02_updates ?\n"
-    "                source_updates : class02_updates;\n")
+    "            unsigned int phase_updates = source_updates > scheduler_updates ?\n"
+    "                source_updates : scheduler_updates;\n"
+    "            if (class02_updates > phase_updates)\n"
+    "                phase_updates = class02_updates;\n")
 assert scene_checkpoint_marker in test_source
 scene_checkpoint_body = test_source.replace(
     scene_checkpoint_marker,
@@ -144,7 +149,8 @@ subset_flags = {"--inner8-only", "--ko-only", "--registration-only",
                 "--action0c-only", "--jump-only",
                 "--type16-terminal-only", "--special-input-only",
                 "--hit-interaction-only", "--class1f-state0-only",
-                "--class1f-action16-only"}
+                "--class1f-action16-only", "--exit-scheduler-only",
+                "--generated-all-only"}
 if "--queue-only" in sys.argv or not subset_flags.intersection(sys.argv):
     run(source, header, False, "consume-before-direction-queue-shift",
         player_source.replace(queue_before, queue_after, 1))
@@ -316,7 +322,10 @@ hit_interaction_mutations = {
     "        runtime->player_weapon_dispatch_delay = 0u;",
 }
 class1f_state0_mutations = {
-    "    if (runtime->coffee_scene_active_flag == 0u)",
+    "    if (runtime->coffee_scene_active_flag == 0u)\n"
+    "        return avsp_round1_class1f_route_interruption(actor);",
+    "    if (runtime->entry.gate81f3 != 0u)\n"
+    "        return avsp_round1_class1f_route_interruption(actor);",
     "            runtime->coffee_scene_active_flag = 0u;\n"
     "            return 1;",
 }
@@ -326,9 +335,50 @@ class1f_action16_mutations = {
     "            actor->health = health;",
     "        actor->source_transition_latch_ae != 0u)",
 }
+exit_scheduler_mutations = {
+    "unsigned int avsp_round1_coffee_shop_scheduler_source_updates(\n"
+    "    unsigned short source_frame)\n"
+    "{\n"
+    "    if (source_frame >=\n"
+    "            AVSP_ROUND1_COFFEE_EXIT_CALLBACK_FIRST_SOURCE_FRAME &&\n"
+    "        source_frame <=\n"
+            "            AVSP_ROUND1_COFFEE_EXIT_CALLBACK_LAST_SOURCE_FRAME)",
+    "    if (runtime->coffee_scene_active_flag == 0u)\n"
+    "    {\n"
+    "        actor->source_special_latch_ad =\n"
+    "            avsp_round1_class1f_inner8_program.scene_clear_special_latch;"
+}
 for before, after in (
-    ("    if (runtime->coffee_scene_active_flag == 0u)",
-     "    if (runtime->coffee_scene_active_flag != 0u)"),
+    ("unsigned int avsp_round1_coffee_shop_scheduler_source_updates(\n"
+     "    unsigned short source_frame)\n"
+     "{\n"
+     "    if (source_frame >=\n"
+     "            AVSP_ROUND1_COFFEE_EXIT_CALLBACK_FIRST_SOURCE_FRAME &&\n"
+     "        source_frame <=\n"
+     "            AVSP_ROUND1_COFFEE_EXIT_CALLBACK_LAST_SOURCE_FRAME)",
+     "unsigned int avsp_round1_coffee_shop_scheduler_source_updates(\n"
+     "    unsigned short source_frame)\n"
+     "{\n"
+     "    if (0 && source_frame >=\n"
+     "            AVSP_ROUND1_COFFEE_EXIT_CALLBACK_FIRST_SOURCE_FRAME &&\n"
+     "        source_frame <=\n"
+     "            AVSP_ROUND1_COFFEE_EXIT_CALLBACK_LAST_SOURCE_FRAME)"),
+    ("    if (runtime->coffee_scene_active_flag == 0u)\n"
+     "        return avsp_round1_class1f_route_interruption(actor);",
+     "    if (runtime->coffee_scene_active_flag != 0u)\n"
+     "        return avsp_round1_class1f_route_interruption(actor);"),
+    ("    if (runtime->entry.gate81f3 != 0u)\n"
+     "        return avsp_round1_class1f_route_interruption(actor);",
+     "    if (0 && runtime->entry.gate81f3 != 0u)\n"
+     "        return avsp_round1_class1f_route_interruption(actor);"),
+    ("    if (runtime->coffee_scene_active_flag == 0u)\n"
+     "    {\n"
+     "        actor->source_special_latch_ad =\n"
+     "            avsp_round1_class1f_inner8_program.scene_clear_special_latch;",
+     "    if (runtime->coffee_scene_active_flag != 0u)\n"
+     "    {\n"
+     "        actor->source_special_latch_ad =\n"
+     "            avsp_round1_class1f_inner8_program.scene_clear_special_latch;"),
     ("            runtime->coffee_scene_active_flag = 0u;\n"
      "            return 1;",
      "            /* source scene-active clear suppressed */\n"
@@ -394,9 +444,7 @@ for before, after in (
      "            *value = runtime->camera_x_position;"),
     ("            --actor->source_action_timer;\n"
      "            if (actor->source_action_timer != 0u)",
-     "            if (actor->source_action_timer == 0u)\n"
-     "                return 0;\n"
-     "            --actor->source_action_timer;\n"
+     "            actor->source_action_timer = 0u;\n"
      "            if (actor->source_action_timer != 0u)"),
     ("    return (unsigned short)runtime->camera_x_previous;",
      "    return (unsigned short)runtime->camera_x_position;"),
@@ -469,7 +517,9 @@ for before, after in (
      "        special_owned || contextual_owned);"),
     ("if (weapon_motion_hold)\n        input.mask = (unsigned short)(input.mask &\n            (unsigned short)~AVSP_PW_INPUT_ATTACK);",
      "if (weapon_motion_hold)\n        input.mask = (unsigned short)(input.mask & (unsigned short)~(\n            AVSP_PW_INPUT_LEFT | AVSP_PW_INPUT_RIGHT |\n            AVSP_PW_INPUT_UP | AVSP_PW_INPUT_DOWN |\n            AVSP_PW_INPUT_ATTACK));"),
-    ("avsp_round1_observe_player_melee(runtime, prior_state, prior_selector,\n                                    prior_attack_edges);", "/* melee observation suppressed */"),
+    ("        avsp_round1_observe_player_melee(runtime, prior_state, prior_selector,\n"
+     "                                        prior_attack_edges);",
+     "        /* melee observation suppressed */"),
     ("++runtime->player_melee_entries;", "runtime->player_melee_entries += 2u;"),
     ("runtime->player_melee_selector_mask |= 1UL << (selector - 1u);", "runtime->player_melee_selector_mask = 0UL;"),
     ("++runtime->player_melee_completions;", "runtime->player_melee_completions += 2u;"),
@@ -491,9 +541,15 @@ for before, after in (
     ("runtime->player_weapon_tick ==\n            avsp_round1_player_weapon.empty_effect_allocation_tick",
      "runtime->player_weapon_tick == 0u"),
     ("runtime->player_weapon_tick ==\n"
-     "                avsp_round1_player_weapon.parent_allocation_tick",
-     "runtime->player_weapon_tick == (unsigned char)(\n"
-     "                avsp_round1_player_weapon.parent_allocation_tick + 1u)"),
+     "                (unsigned char)(\n"
+     "                    avsp_round1_player_weapon.parent_allocation_tick +\n"
+     "                    avsp_round1_player_weapon.\n"
+     "                        action_dispatch_delay_updates)",
+     "runtime->player_weapon_tick ==\n"
+     "                (unsigned char)(\n"
+     "                    avsp_round1_player_weapon.parent_allocation_tick +\n"
+     "                    avsp_round1_player_weapon.\n"
+     "                        action_dispatch_delay_updates + 1u)"),
     ("avsp_round1_allocate_pool_actor_preserve_position_residue(runtime, 3u);",
      "avsp_round1_allocate_pool_actor(runtime, 3u);"),
     ("actor->y = (short)(actor->y + 4);", "actor->y = (short)(actor->y + 3);"),
@@ -554,8 +610,8 @@ for before, after in (
      "/* Coffee Shop obstacle suppressed */"),
     ("if (z_penetration < x_penetration)",
      "if (z_penetration <= x_penetration)"),
-    ("else if (code == 1u)\n        *selector = 24u;",
-     "else if (code == 1u)\n        *selector = 8u;"),
+    ("runtime->terrain_selector_map[index] & 0xfcu",
+     "runtime->terrain_selector_map[index] & 0xf8u"),
     ("!avsp_round1_apply_first_segment_terrain(runtime)", "0"),
     ("!avsp_round1_step_coffee_shop_camera(runtime)", "0"),
     ("--runtime->camera_guard_countdown;",
@@ -595,8 +651,11 @@ for before, after in (
      "runtime->player_jump_phase_timer = 9u;"),
     ("--runtime->player_jump_phase_timer;",
      "runtime->player_jump_phase_timer -= 2u;"),
-    ("++runtime->player_jump_entries;\n    return avsp_round1_bind_player_jump_sequence(runtime, 3u);",
-     "++runtime->player_jump_entries;\n    avsp_round1_source_rng(runtime);\n    return avsp_round1_bind_player_jump_sequence(runtime, 3u);"),
+    ("            ++runtime->player_jump_entries;\n"
+     "            return avsp_round1_bind_player_jump_sequence(runtime, 3u);",
+     "            ++runtime->player_jump_entries;\n"
+     "            avsp_round1_source_rng(runtime);\n"
+     "            return avsp_round1_bind_player_jump_sequence(runtime, 3u);"),
     ("if (runtime->player_jump_active && received_damage > 0)\n        avsp_round1_interrupt_player_jump(runtime);",
      "if (runtime->player_jump_active && received_damage < 0)\n        avsp_round1_interrupt_player_jump(runtime);"),
     ("input |= 0x08u;",
@@ -694,8 +753,10 @@ for before, after in (
      "if (parent->facing == 0u)\n        x_offset = (short)-x_offset;"),
     ("projectile->source_x_velocity = motion->x_velocity;",
      "projectile->source_x_velocity = motion->y_velocity;"),
-    ("projectile->attack_selector ==\n                avsp_round1_type16.attack_selector",
-     "projectile->attack_selector !=\n                avsp_round1_type16.attack_selector"),
+    ("projectile->source_collision_current_attack_selector !=\n"
+     "                avsp_round1_type16.attack_selector ||",
+     "projectile->source_collision_current_attack_selector ==\n"
+     "                avsp_round1_type16.attack_selector ||"),
     ("runtime->player.hurt_selector !=\n                avsp_round1_type16.player_hurt_selector ||",
      "runtime->player.hurt_selector ==\n                avsp_round1_type16.player_hurt_selector ||"),
     ("(unsigned char)avsp_round1_type16.damage;",
@@ -798,8 +859,8 @@ for before, after in (
      "actor->source_hit_recovery_active = 1u;"),
     ("actor->source_y_velocity = spec->launch_y_velocity;",
      "actor->source_y_velocity = 0L;"),
-    ("actor->source_hit_action_timer =\n                avsp_round1_class1f_source_ko.removal_hold_timer;",
-     "actor->source_hit_action_timer =\n                avsp_round1_class1f_source_ko.landing_hold_timer;"),
+    ("            actor->source_hit_action_timer = spec->removal_hold_timer;",
+     "            actor->source_hit_action_timer = spec->landing_hold_timer;"),
     ("runtime->first_encounter.source_progress = (unsigned short)(\n        runtime->first_encounter.source_progress +\n        avsp_round1_recurring_spawn.progress_increment);",
      "runtime->first_encounter.source_progress = (unsigned short)(\n        runtime->first_encounter.source_progress + 0u);"),
     ("effect->attack_selector = 0u;\n    }\n    if (effect->state == 2u)",
@@ -868,8 +929,9 @@ for before, after in (
      "12u, 0x1f, 1u);"),
     ("special_buttons = runtime->player_special_input_pipeline;",
      "special_buttons = (unsigned char)(input_mask & 0x70u);"),
-    ("if (avsp_round1_player_special_guard(\n                runtime, special_buttons,",
-     "if (0 && avsp_round1_player_special_guard(\n                runtime, special_buttons,"),
+    ("special_edge = (unsigned char)avsp_round1_player_special_guard(\n"
+     "        runtime, special_buttons, runtime->player_special_previous_buttons);",
+     "special_edge = 0u;"),
     ("sufficient_entry_preserves_current_presentation)",
      "sufficient_entry_preserves_current_presentation == 0u)"),
     ("runtime->player_weapon_tick = 1u;",
@@ -914,9 +976,13 @@ for before, after in (
      "    }"),
     ("else if (!avsp_round1_step_player_weapon_animation(runtime, frame))\n            return 0;",
      "else if (0)\n            return 0;"),
-    ("if (runtime->player_weapon_projectiles[slot_index].active &&\n            runtime->player_weapon_projectiles[slot_index].state !=\n                avsp_round1_weapon_projectile.initial_state)",
+    ("if (runtime->player_weapon_projectiles[slot_index].active &&\n"
+     "                runtime->player_weapon_projectiles[slot_index].state !=\n"
+     "                    avsp_round1_weapon_projectile.initial_state)",
      "if (runtime->player_weapon_projectiles[slot_index].active)"),
 ):
+    if "--generated-all-only" in sys.argv:
+        continue
     if "--inner8-only" in sys.argv and before not in inner8_mutations:
         continue
     if "--ko-only" in sys.argv and before not in ko_mutations:
@@ -952,6 +1018,9 @@ for before, after in (
     if ("--class1f-action16-only" in sys.argv and
             before not in class1f_action16_mutations):
         continue
+    if ("--exit-scheduler-only" in sys.argv and
+            before not in exit_scheduler_mutations):
+        continue
     if "--generated-walk-only" in sys.argv:
         continue
     assert before in source, before
@@ -965,11 +1034,15 @@ if "--inner8-only" in sys.argv:
     print("REIMPLEMENT-13 class-0x1f inner-state mutation lane: PASS (15 real mutations)")
     raise SystemExit(0)
 if "--class1f-state0-only" in sys.argv:
-    print("REIMPLEMENT-13 class-0x1f state-0 mutation lane: PASS (2 real mutations)")
+    print("REIMPLEMENT-13 class-0x1f state-0 mutation lane: PASS (3 real mutations)")
     raise SystemExit(0)
 if "--class1f-action16-only" in sys.argv:
     print("REIMPLEMENT-13 class-0x1f action-0x16/fixed-slot lifecycle "
           "mutation lane: PASS (3 real mutations)")
+    raise SystemExit(0)
+if "--exit-scheduler-only" in sys.argv:
+    print("REIMPLEMENT-13 Coffee Shop exit scheduler mutation lane: PASS "
+          "(2 real mutations)")
     raise SystemExit(0)
 if "--ko-only" in sys.argv:
     print("REIMPLEMENT-13 class-0x1f projectile KO mutation lane: PASS (5 real mutations)")
@@ -1175,8 +1248,18 @@ for before, after in (
     ("    { 5, 86 },", "    { 6, 86 },"),
     ("    { 0, 84 },", "    { 0, 83 },"),
     ("{ 4095u, -32767, 0x0007a12cUL, 0x0007a3a0UL, 0u, 0u },", "{ 4095u, -32768, 0x0007a12cUL, 0x0007a3a0UL, 0u, 0u },"),
-    ("{ 0, -8, 4u, 12u, 0, 8u, 0, 8u, 25u },",
-     "{ 0, -8, 4u, 12u, 0, 8u, 0, 8u, 24u },"),
+    ("static const AvspRound1CollisionBoxSpec "
+     "avsp_round1_weapon_parent_attack_boxes"
+     "[AVSP_ROUND1_WEAPON_PROJECTILE_ATTACK_BOX_COUNT] =\n"
+     "{\n"
+     "    { 0, 0, 0u, 0u, 0, 0u, 0, 0u, 0u },\n"
+     "    { 0, -8, 4u, 12u, 0, 8u, 0, 8u, 25u },",
+     "static const AvspRound1CollisionBoxSpec "
+     "avsp_round1_weapon_parent_attack_boxes"
+     "[AVSP_ROUND1_WEAPON_PROJECTILE_ATTACK_BOX_COUNT] =\n"
+     "{\n"
+     "    { 0, 0, 0u, 0u, 0, 0u, 0, 0u, 0u },\n"
+     "    { 0, -8, 4u, 12u, 0, 8u, 0, 8u, 24u },"),
     ("{ 0, 10, 16u, 10u, 0, 8u, 1, 8u, 14u },",
      "{ 0, 10, 16u, 10u, 0, 8u, 1, 8u, 13u },"),
     ("    0, 4,\n    5u,\n    1u,\n    6u, 0x8000u,",
@@ -1219,14 +1302,14 @@ for before, after in (
      "0x0077u, 0u, 0u,"),
     ("{ -65536L, -81920L, -98304L, -131072L },",
      "{ -32768L, -40960L, -49152L, -65536L },"),
-    ("    -59, 64, 0x0058u, 0x0232u, 17, 16u, 0x06, 1u, 20u,",
-     "    -58, 64, 0x0058u, 0x0232u, 17, 16u, 0x06, 1u, 20u,"),
-    ("    -59, 64, 0x0058u, 0x0232u, 17, 16u, 0x06, 1u, 20u,",
-     "    -59, 64, 0x0058u, 0x0232u, 16, 16u, 0x06, 1u, 20u,"),
-    ("    -59, 64, 0x0058u, 0x0232u, 17, 16u, 0x06, 1u, 20u,",
-     "    -59, 64, 0x0058u, 0x0232u, 17, 16u, 0x05, 1u, 20u,"),
-    ("    -59, 64, 0x0058u, 0x0232u, 17, 16u, 0x06, 1u, 20u,",
-     "    -59, 64, 0x0058u, 0x0232u, 17, 16u, 0x06, 2u, 20u,"),
+    ("    -59, 64, 0x0058u, 0x0232u, 17, 16u, 0x06, 1u, 17u, 20u,",
+     "    -58, 64, 0x0058u, 0x0232u, 17, 16u, 0x06, 1u, 17u, 20u,"),
+    ("    -59, 64, 0x0058u, 0x0232u, 17, 16u, 0x06, 1u, 17u, 20u,",
+     "    -59, 64, 0x0058u, 0x0232u, 16, 16u, 0x06, 1u, 17u, 20u,"),
+    ("    -59, 64, 0x0058u, 0x0232u, 17, 16u, 0x06, 1u, 17u, 20u,",
+     "    -59, 64, 0x0058u, 0x0232u, 17, 16u, 0x05, 1u, 17u, 20u,"),
+    ("    -59, 64, 0x0058u, 0x0232u, 17, 16u, 0x06, 1u, 17u, 20u,",
+     "    -59, 64, 0x0058u, 0x0232u, 17, 16u, 0x06, 2u, 17u, 20u,"),
     ("    { 0, 0, 8u, 8u, 0, 8u, 0, 20u, 10u },",
      "    { 100, 0, 8u, 8u, 0, 8u, 0, 20u, 10u },"),
     ("    2750u, 1u, 17u, 10u, 10u,\n"
@@ -1235,10 +1318,10 @@ for before, after in (
      "    2750u, 1u, 17u, 10u, 10u,\n"
      "    { -37, 53, 38u, 8u, 0, 8u, 0, 10u, 0u },\n"
      "    { 101, 45, 20u, 46u, 0, 6u, 0, 0u, 0u }"),
-    ("    -59, 64, 0x0058u, 0x0232u, 17, 16u, 0x06, 1u, 20u,\n"
+    ("    -59, 64, 0x0058u, 0x0232u, 17, 16u, 0x06, 1u, 17u, 20u,\n"
      "    { 0, 0, 8u, 8u, 0, 8u, 0, 20u, 10u },\n"
      "    { 1, 45, 20u, 46u, 0, 6u, 0, 0u, 0u }",
-     "    -59, 64, 0x0058u, 0x0232u, 17, 16u, 0x06, 1u, 20u,\n"
+     "    -59, 64, 0x0058u, 0x0232u, 17, 16u, 0x06, 1u, 17u, 20u,\n"
      "    { 0, 0, 8u, 8u, 0, 8u, 0, 20u, 10u },\n"
      "    { 101, 45, 20u, 46u, 0, 6u, 0, 0u, 0u }"),
     ("    { 524288L, -8192L, 262144L, -16384L, 0L },",
@@ -1259,8 +1342,8 @@ for before, after in (
      "    114687L, -8192L,"),
     ("    { 1u, 0, 0x0015f278UL, 0x00160af2UL, 17u, 0u },",
      "    { 1u, 0, 0x0015f278UL, 0x00160af2UL, 16u, 0u },"),
-    ("    { 2, -2, 2, -2, 2, -2, 2, -2, 2, -2, 2, -2, 2, -2, 2, -2 }",
-     "    { 3, -2, 2, -2, 2, -2, 2, -2, 2, -2, 2, -2, 2, -2, 2, -2 }"),
+    ("    { 2, -2, 2, -2, 2, -2, 2, -2, 2, -2, 2, -2, 2, -2, 2, -2, 2, -2, 2, -2, 2, -2, 2, -2, 2, -2, 2, -2, 2, -2, 2, -2 }",
+     "    { 3, -2, 2, -2, 2, -2, 2, -2, 2, -2, 2, -2, 2, -2, 2, -2, 2, -2, 2, -2, 2, -2, 2, -2, 2, -2, 2, -2, 2, -2, 2, -2 }"),
     ("    0x00ffc300UL, 2751u, 0xeea3u, 0xcb6eu, 1095, 369, 319, 24u, 0x4e, 0u",
      "    0x00ffc380UL, 2751u, 0xeea3u, 0xcb6eu, 1095, 369, 319, 24u, 0x4e, 0u"),
     ("    0x00ffc300UL, 2751u, 0xeea3u, 0xcb6eu, 1095, 369, 319, 24u, 0x4e, 0u",
@@ -1312,5 +1395,9 @@ for before, after in (
         assert result.returncode != 0, f"generated mutation escaped: {before}"
 if "--generated-walk-only" in sys.argv:
     print("REIMPLEMENT-13 generated walk fixture mutation lane: PASS (6 real mutations)")
+    raise SystemExit(0)
+if "--generated-all-only" in sys.argv:
+    print("REIMPLEMENT-13 generated fixture mutation lane: PASS "
+          "(81 real mutations)")
     raise SystemExit(0)
 print("REIMPLEMENT-13 entry/player/scheduler/class1f/Coffee-Shop-navigation/neutral-stop/melee/Button1/Button3/type16-projectile/player-HIT/first-encounter differential: PASS (224 real mutations)")

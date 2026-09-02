@@ -58,6 +58,8 @@ static AvspRound1ActorCore *avsp_round1_find_pool_source_actor(
 static int avsp_round1_step_class1f_action_animation(
     AvspRound1Runtime *runtime, AvspRound1ActorCore *actor,
     int apply_movement);
+static int avsp_round1_class1f_route_interruption(
+    AvspRound1ActorCore *actor);
 static int avsp_round1_apply_first_segment_terrain_position(
     const AvspRound1Runtime *runtime,
     short *world_x, short *world_z,
@@ -85,6 +87,10 @@ static int avsp_round1_player_special_physical_guard(
     unsigned char current, unsigned char previous);
 static unsigned char avsp_round1_class1f_inner8_direction(
     const AvspRound1ActorCore *actor, short target_x, short target_z);
+static unsigned int avsp_round1_coffee_exit_callback_updates(
+    unsigned char program_tick);
+static unsigned int avsp_round1_coffee_exit_scheduler_callback_updates(
+    unsigned char program_tick);
 static int avsp_round1_step_coffee_exit_player(AvspRound1Runtime *runtime);
 static int avsp_round1_bind_player_jump_sequence(
     AvspRound1Runtime *runtime, unsigned char selector);
@@ -134,6 +140,20 @@ unsigned int avsp_round1_coffee_shop_source_updates(
             return entry->updates;
     }
     return AVSP_ROUND1_COFFEE_SHOP_DEFAULT_SOURCE_UPDATES;
+}
+
+unsigned int avsp_round1_coffee_shop_scheduler_source_updates(
+    unsigned short source_frame)
+{
+    if (source_frame >=
+            AVSP_ROUND1_COFFEE_EXIT_CALLBACK_FIRST_SOURCE_FRAME &&
+        source_frame <=
+            AVSP_ROUND1_COFFEE_EXIT_CALLBACK_LAST_SOURCE_FRAME)
+        return avsp_round1_coffee_exit_scheduler_callback_updates(
+            (unsigned char)(
+            source_frame -
+            AVSP_ROUND1_COFFEE_EXIT_CALLBACK_FIRST_SOURCE_FRAME));
+    return avsp_round1_coffee_shop_source_updates(source_frame);
 }
 
 unsigned int avsp_round1_coffee_shop_class02_source_updates(
@@ -2584,22 +2604,7 @@ static int avsp_round1_step_class1f_action_zero(
 {
     int selector;
     if (runtime->coffee_scene_active_flag == 0u)
-    {
-        if (actor->source_player_collision_latched != 0u)
-            return 1;
-        actor->state = (unsigned short)((actor->state & 0xff00u) | 0x000au);
-        actor->substate = 0u;
-        actor->source_action = 0u;
-        if (actor->facing != 0u)
-            return avsp_round1_bind_class1f_action_selector(actor,
-                actor->source_style85 != 0u ? 1u : 0u);
-        actor->substate = 0x0200u;
-        actor->source_action = actor->substate;
-        actor->facing ^= 1u;
-        return avsp_round1_bind_class1f_action_selector(actor,
-            avsp_round1_class1f_action_program.turn_selectors[
-                actor->source_style85 ? 1u : 0u]);
-    }
+        return avsp_round1_class1f_route_interruption(actor);
     if (avsp_round1_class1f_player_near(runtime, actor))
         return avsp_round1_class1f_enter_near_action4(
             actor, runtime->player_action.x);
@@ -2625,6 +2630,25 @@ static int avsp_round1_step_class1f_action_zero(
             avsp_round1_class1f_action_program.idle_selectors[1]);
     return avsp_round1_set_class1f_action(actor, 0x06u,
         avsp_round1_class1f_action_program.idle_selectors[0]);
+}
+
+static int avsp_round1_class1f_route_interruption(
+    AvspRound1ActorCore *actor)
+{
+    if (actor->source_player_collision_latched != 0u)
+        return 1;
+    actor->state = (unsigned short)((actor->state & 0xff00u) | 0x000au);
+    actor->substate = 0u;
+    actor->source_action = 0u;
+    if (actor->facing != 0u)
+        return avsp_round1_bind_class1f_action_selector(actor,
+            actor->source_style85 != 0u ? 1u : 0u);
+    actor->substate = 0x0200u;
+    actor->source_action = actor->substate;
+    actor->facing ^= 1u;
+    return avsp_round1_bind_class1f_action_selector(actor,
+        avsp_round1_class1f_action_program.turn_selectors[
+            actor->source_style85 ? 1u : 0u]);
 }
 
 static int avsp_round1_class1f_action4_bind_group_selector(
@@ -2836,6 +2860,23 @@ static unsigned int avsp_round1_coffee_exit_callback_updates(
     {
         const AvspRound1CoffeeExitCallbackGroupSpec *group =
             &avsp_round1_coffee_exit_callbacks[index];
+        if (program_tick >= group->program_tick &&
+            program_tick < (unsigned int)group->program_tick +
+                group->display_ticks)
+            return group->updates;
+    }
+    return 0u;
+}
+
+static unsigned int avsp_round1_coffee_exit_scheduler_callback_updates(
+    unsigned char program_tick)
+{
+    unsigned int index;
+    for (index = 0u;
+         index < AVSP_ROUND1_COFFEE_EXIT_SCHEDULER_GROUP_COUNT; ++index)
+    {
+        const AvspRound1CoffeeExitCallbackGroupSpec *group =
+            &avsp_round1_coffee_exit_scheduler_callbacks[index];
         if (program_tick >= group->program_tick &&
             program_tick < (unsigned int)group->program_tick +
                 group->display_ticks)
@@ -3646,6 +3687,28 @@ static int avsp_round1_step_class1f_inner8(
     unsigned char random;
     unsigned char selected_style;
     unsigned char target_side;
+    if (runtime->coffee_scene_active_flag == 0u)
+    {
+        actor->source_special_latch_ad =
+            avsp_round1_class1f_inner8_program.scene_clear_special_latch;
+        actor->transition_timer =
+            avsp_round1_class1f_inner8_program.scene_clear_inner_timer;
+        actor->state =
+            avsp_round1_class1f_inner8_program.scene_clear_outer_state;
+        actor->substate =
+            avsp_round1_class1f_inner8_program.scene_clear_action_substate;
+        actor->source_action = actor->substate;
+        actor->source_direction = (unsigned char)(
+            ((actor->source_a5 ^
+              avsp_round1_class1f_inner8_program.
+                scene_clear_direction_xor) <<
+             avsp_round1_class1f_inner8_program.
+                scene_clear_direction_shift) +
+            avsp_round1_class1f_inner8_program.scene_clear_direction_bias);
+        return avsp_round1_bind_class1f_action_selector(actor,
+            avsp_round1_class1f_inner8_program.scene_clear_selectors[
+                actor->source_style85 != 0u ? 1u : 0u]);
+    }
     actor->transition_timer = (unsigned short)(actor->transition_timer - 1u);
     if ((short)actor->transition_timer < 0 && action == 0u)
     {
@@ -4452,6 +4515,8 @@ static int avsp_round1_step_class1f_source_action(
     }
     if (actor->state != 0x0200u)
         return 0;
+    if (runtime->entry.gate81f3 != 0u)
+        return avsp_round1_class1f_route_interruption(actor);
     action = (unsigned char)(actor->substate >> 8);
     ++runtime->class1f_action_dispatches;
     if (action == 0x00u)

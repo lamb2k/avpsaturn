@@ -494,6 +494,24 @@ const AvspRound1ContentArchive avsp_round1_content_image
         { 70u, 1u, 1u },
     },
     {
+        { 0u, 5u, 1u },
+        { 5u, 12u, 3u },
+        { 17u, 1u, 4u },
+        { 18u, 14u, 3u },
+        { 32u, 1u, 4u },
+        { 33u, 7u, 3u },
+        { 40u, 1u, 4u },
+        { 41u, 6u, 3u },
+        { 47u, 1u, 4u },
+        { 48u, 6u, 3u },
+        { 54u, 1u, 4u },
+        { 55u, 4u, 3u },
+        { 59u, 1u, 4u },
+        { 60u, 4u, 3u },
+        { 64u, 6u, 4u },
+        { 70u, 1u, 1u },
+    },
+    {
         327680L, -4096L, 524288L, -24576L, 6u, 4u
     },
     {
@@ -937,7 +955,9 @@ const AvspRound1ContentArchive avsp_round1_content_image
         },
         9u,
         { 0xA000u, 0x9E80u, 0x9DC0u },
-        { 0x0035u, 0x0035u, 0x0100u }
+        { 0x0035u, 0x0035u, 0x0100u },
+        0x0200u, 0x1E00u, 0u, 0x0000u,
+        1u, 4u, 8u, { 0u, 1u }
     },
     {
         30u, 30u, 30u, 30u, 60u, 60u, 60u, 60u, 120u, 120u, 120u, 120u, 160u, 160u, 160u, 160u

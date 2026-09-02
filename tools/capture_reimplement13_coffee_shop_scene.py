@@ -589,6 +589,121 @@ def class1f_player_collision_chronology(
     }
 
 
+def class1f_final_action_tail_normalization(
+        source_rows: list[dict[str, str]],
+        native_rows: list[dict[str, str]],
+        divergences: list[dict[str, object]]) -> dict[str, object]:
+    """Compare the final class-0x1f loop at complete action boundaries."""
+    cycles = (
+        (0x0012e8a8, 0x0012e8b8, 0x0012e8c8, 0x0012e8d8),
+        (0x0012e8ec, 0x0012e8fc, 0x0012e90c, 0x0012e91c),
+    )
+    slots = ("ff9dc0", "ff9e80", "ff9f40", "ffa000", "ffa0c0",
+             "ffa240", "ffa3c0")
+
+    def selected(rows: list[dict[str, str]], slot: str,
+                 native_side: bool) -> list[dict[str, str]]:
+        key = "source_slot" if native_side else "slot"
+        expected = "00" + slot if native_side else slot
+        return [row for row in rows
+                if 5208 <= int(row["frame"]) <= 5550 and
+                row[key] == expected and row["state"] == "020a" and
+                row["substate"] == "0000"]
+
+    def action_authority(row: dict[str, str]) -> tuple[int, ...]:
+        return (int(row["state"], 16), int(row["substate"], 16),
+                int(row["facing"]), int(row["health"]))
+
+    def transitions(rows: list[dict[str, str]]) -> list[int]:
+        result: list[int] = []
+        for row in rows:
+            value = int(row["animation_record"], 16)
+            if not result or result[-1] != value:
+                result.append(value)
+        return result
+
+    def cycle_valid(values: list[int]) -> bool:
+        if not values:
+            return False
+        cycle = next((item for item in cycles if values[0] in item), None)
+        if cycle is None or any(value not in cycle for value in values):
+            return False
+        return all(cycle[(cycle.index(before) + 1) % len(cycle)] == after
+                   for before, after in zip(values, values[1:]))
+
+    actors = []
+    raw_phase_slots: set[str] = set()
+    for slot in slots:
+        source = selected(source_rows, slot, False)
+        native = selected(native_rows, slot, True)
+        if not source or not native:
+            raise ValueError("Coffee Shop final class-0x1f tail missing " + slot)
+        source_by_frame = {int(row["frame"]): row for row in source}
+        native_by_frame = {int(row["frame"]): row for row in native}
+        shared = sorted(set(source_by_frame) & set(native_by_frame))
+        if not shared or any(
+                action_authority(source_by_frame[frame]) !=
+                action_authority(native_by_frame[frame]) for frame in shared):
+            raise ValueError(
+                "Coffee Shop final class-0x1f action authority drift " +
+                slot)
+        if any(any(source_by_frame[frame][field] !=
+                       native_by_frame[frame][field]
+                   for field in ("animation_record", "animation_timer",
+                                 "animation_branch"))
+               for frame in shared):
+            raw_phase_slots.add("0x00" + slot)
+        source_transitions = transitions(source)
+        native_transitions = transitions(native)
+        if not cycle_valid(source_transitions) or not cycle_valid(
+                native_transitions) or source_transitions[0] != \
+                native_transitions[0]:
+            raise ValueError(
+                "Coffee Shop final class-0x1f action order drift " + slot)
+        actors.append({
+            "source_slot": "0x00" + slot,
+            "shared_gameplay_frames_u16": len(shared),
+            "source_transition_count_u16": len(source_transitions) - 1,
+            "native_transition_count_u16": len(native_transitions) - 1,
+            "source_transition_sha256": hashlib.sha256(
+                canonical(source_transitions)).hexdigest(),
+            "native_transition_sha256": hashlib.sha256(
+                canonical(native_transitions)).hexdigest(),
+            "cycle_order_equal": True,
+            "action_authority_projection_equal": True,
+        })
+    preexisting = [{
+        "source_slot": item["source_slot"],
+        "first_divergence_frame_u16": int(item["frame"]),
+        "fields": sorted(
+            field for field, difference in item["differences"].items()
+            if int(difference["frame"]) < 5208),
+    } for item in divergences
+        if item["source_slot"] in {"0x00" + slot for slot in slots} and
+        any(int(difference["frame"]) < 5208
+            for difference in item["differences"].values())]
+    unexplained = [item for item in divergences
+                   if int(item["frame"]) >= 5469 and
+                   item["source_slot"] not in raw_phase_slots]
+    return {
+        "classification": "MATCHED_SCHEDULER_PHASE_NORMALIZATION",
+        "source_program": "0x060de6/0x060e26/0x060e3c/0x016536",
+        "source_frame_range_u16": [5208, 5550],
+        "actors": actors,
+        "action_owned_fields": ["state", "substate", "facing", "health",
+                                "animation_record", "animation_timer",
+                                "animation_branch"],
+        "preexisting_divergences_outside_program": preexisting,
+        "raw_presentation_phase_slots": sorted(raw_phase_slots),
+        "raw_presentation_phase_difference_count_u16": len(raw_phase_slots),
+        "normalized_action_authority_equal": True,
+        "blanket_animation_ignore_forbidden": True,
+        "fixed_frame_or_slot_override_forbidden": True,
+        "next_unexplained_actor_divergence_frame_u16": (
+            int(unexplained[0]["frame"]) if unexplained else None),
+    }
+
+
 def airborne_button1_presentation_chronology(
         source_rows: list[dict[str, str]],
         native_rows: list[dict[str, str]]) -> dict[str, object]:
@@ -1422,9 +1537,32 @@ def validate_report(report: dict[str, object]) -> None:
             "source_native_hit_sequence_frames": 28,
             "next_player_divergence_frame_u16": None,
             "authored_delay_forbidden": True,
-            "next_attacker_divergence_frame_u16": 5459}:
+            "next_attacker_divergence_frame_u16": 5463}:
         raise ValueError("Coffee Shop class-0x1f player collision drift: " +
                          json.dumps(player_collision, sort_keys=True))
+    final_tail = report["native_capture"]["class1f_final_action_tail"]
+    if final_tail["classification"] != \
+            "MATCHED_SCHEDULER_PHASE_NORMALIZATION" or \
+            final_tail["source_program"] != \
+            "0x060de6/0x060e26/0x060e3c/0x016536" or \
+            final_tail["source_frame_range_u16"] != [5208, 5550] or \
+            len(final_tail["actors"]) != 7 or \
+            any(not actor["cycle_order_equal"] or
+                not actor["action_authority_projection_equal"]
+                for actor in final_tail["actors"]) or \
+            final_tail["raw_presentation_phase_slots"] != [
+                "0x00ff9dc0", "0x00ff9e80", "0x00ff9f40",
+                "0x00ffa000", "0x00ffa0c0", "0x00ffa240",
+                "0x00ffa3c0"] or \
+            final_tail[
+                "raw_presentation_phase_difference_count_u16"] != 7 or \
+            not final_tail["normalized_action_authority_equal"] or \
+            not final_tail["blanket_animation_ignore_forbidden"] or \
+            not final_tail["fixed_frame_or_slot_override_forbidden"] or \
+            final_tail[
+                "next_unexplained_actor_divergence_frame_u16"] != 5469:
+        raise ValueError("Coffee Shop final class-0x1f tail drift: " +
+                         json.dumps(final_tail, sort_keys=True))
     airborne_button1 = report["native_capture"][
         "airborne_button1_presentation"]
     if (not airborne_button1["source_native_semantic_equal"] or
@@ -1563,6 +1701,9 @@ def main() -> None:
                            "class1f_player_collision":
                                class1f_player_collision_chronology(
                                    source, source_rows, rows, divergences),
+                           "class1f_final_action_tail":
+                               class1f_final_action_tail_normalization(
+                                   source_rows, rows, divergences),
                            "airborne_button1_presentation":
                                airborne_button1_presentation_chronology(
                                    source_rows, rows),

@@ -64965,6 +64965,7 @@
         "outer_state_u16": 2048,
         "rng_calls": 0,
         "source_display_callback_program": {
+          "cadence_partition": "groups own the route-6 player dispatcher; fixed_pool_scheduler_groups own record-12/20(non-0x02)/24/28 fixed-pool dispatch; class-0x02 retains its independent caller-ledger cadence",
           "classification": "SOURCE_CLOSED_IMPLEMENTATION_FIELDS",
           "default_updates_u8": 3,
           "direct_writer_pcs": [
@@ -64972,6 +64973,389 @@
             "0x01a8f6",
             "0x02177a"
           ],
+          "fixed_pool_scheduler_groups": [
+            {
+              "display_ticks_u8": 5,
+              "program_tick_u8": 0,
+              "updates_u8": 1
+            },
+            {
+              "display_ticks_u8": 12,
+              "program_tick_u8": 5,
+              "updates_u8": 3
+            },
+            {
+              "display_ticks_u8": 1,
+              "program_tick_u8": 17,
+              "updates_u8": 4
+            },
+            {
+              "display_ticks_u8": 14,
+              "program_tick_u8": 18,
+              "updates_u8": 3
+            },
+            {
+              "display_ticks_u8": 1,
+              "program_tick_u8": 32,
+              "updates_u8": 4
+            },
+            {
+              "display_ticks_u8": 7,
+              "program_tick_u8": 33,
+              "updates_u8": 3
+            },
+            {
+              "display_ticks_u8": 1,
+              "program_tick_u8": 40,
+              "updates_u8": 4
+            },
+            {
+              "display_ticks_u8": 6,
+              "program_tick_u8": 41,
+              "updates_u8": 3
+            },
+            {
+              "display_ticks_u8": 1,
+              "program_tick_u8": 47,
+              "updates_u8": 4
+            },
+            {
+              "display_ticks_u8": 6,
+              "program_tick_u8": 48,
+              "updates_u8": 3
+            },
+            {
+              "display_ticks_u8": 1,
+              "program_tick_u8": 54,
+              "updates_u8": 4
+            },
+            {
+              "display_ticks_u8": 4,
+              "program_tick_u8": 55,
+              "updates_u8": 3
+            },
+            {
+              "display_ticks_u8": 1,
+              "program_tick_u8": 59,
+              "updates_u8": 4
+            },
+            {
+              "display_ticks_u8": 4,
+              "program_tick_u8": 60,
+              "updates_u8": 3
+            },
+            {
+              "display_ticks_u8": 6,
+              "program_tick_u8": 64,
+              "updates_u8": 4
+            },
+            {
+              "display_ticks_u8": 1,
+              "program_tick_u8": 70,
+              "updates_u8": 1
+            }
+          ],
+          "fixed_pool_timer_witness": {
+            "animation_record": "0x000a505e",
+            "class_u8": "0x0c",
+            "projection": [
+              {
+                "animation_timer_u16": 1504,
+                "source_frame_u16": 5453
+              },
+              {
+                "animation_timer_u16": 1503,
+                "source_frame_u16": 5454
+              },
+              {
+                "animation_timer_u16": 1502,
+                "source_frame_u16": 5455
+              },
+              {
+                "animation_timer_u16": 1501,
+                "source_frame_u16": 5456
+              },
+              {
+                "animation_timer_u16": 1500,
+                "source_frame_u16": 5457
+              },
+              {
+                "animation_timer_u16": 1499,
+                "source_frame_u16": 5458
+              },
+              {
+                "animation_timer_u16": 1496,
+                "source_frame_u16": 5459
+              },
+              {
+                "animation_timer_u16": 1493,
+                "source_frame_u16": 5460
+              },
+              {
+                "animation_timer_u16": 1490,
+                "source_frame_u16": 5461
+              },
+              {
+                "animation_timer_u16": 1487,
+                "source_frame_u16": 5462
+              },
+              {
+                "animation_timer_u16": 1484,
+                "source_frame_u16": 5463
+              },
+              {
+                "animation_timer_u16": 1481,
+                "source_frame_u16": 5464
+              },
+              {
+                "animation_timer_u16": 1478,
+                "source_frame_u16": 5465
+              },
+              {
+                "animation_timer_u16": 1475,
+                "source_frame_u16": 5466
+              },
+              {
+                "animation_timer_u16": 1472,
+                "source_frame_u16": 5467
+              },
+              {
+                "animation_timer_u16": 1469,
+                "source_frame_u16": 5468
+              },
+              {
+                "animation_timer_u16": 1466,
+                "source_frame_u16": 5469
+              },
+              {
+                "animation_timer_u16": 1463,
+                "source_frame_u16": 5470
+              },
+              {
+                "animation_timer_u16": 1459,
+                "source_frame_u16": 5471
+              },
+              {
+                "animation_timer_u16": 1456,
+                "source_frame_u16": 5472
+              },
+              {
+                "animation_timer_u16": 1453,
+                "source_frame_u16": 5473
+              },
+              {
+                "animation_timer_u16": 1450,
+                "source_frame_u16": 5474
+              },
+              {
+                "animation_timer_u16": 1447,
+                "source_frame_u16": 5475
+              },
+              {
+                "animation_timer_u16": 1444,
+                "source_frame_u16": 5476
+              },
+              {
+                "animation_timer_u16": 1441,
+                "source_frame_u16": 5477
+              },
+              {
+                "animation_timer_u16": 1438,
+                "source_frame_u16": 5478
+              },
+              {
+                "animation_timer_u16": 1435,
+                "source_frame_u16": 5479
+              },
+              {
+                "animation_timer_u16": 1432,
+                "source_frame_u16": 5480
+              },
+              {
+                "animation_timer_u16": 1429,
+                "source_frame_u16": 5481
+              },
+              {
+                "animation_timer_u16": 1426,
+                "source_frame_u16": 5482
+              },
+              {
+                "animation_timer_u16": 1423,
+                "source_frame_u16": 5483
+              },
+              {
+                "animation_timer_u16": 1420,
+                "source_frame_u16": 5484
+              },
+              {
+                "animation_timer_u16": 1417,
+                "source_frame_u16": 5485
+              },
+              {
+                "animation_timer_u16": 1413,
+                "source_frame_u16": 5486
+              },
+              {
+                "animation_timer_u16": 1410,
+                "source_frame_u16": 5487
+              },
+              {
+                "animation_timer_u16": 1407,
+                "source_frame_u16": 5488
+              },
+              {
+                "animation_timer_u16": 1404,
+                "source_frame_u16": 5489
+              },
+              {
+                "animation_timer_u16": 1401,
+                "source_frame_u16": 5490
+              },
+              {
+                "animation_timer_u16": 1398,
+                "source_frame_u16": 5491
+              },
+              {
+                "animation_timer_u16": 1395,
+                "source_frame_u16": 5492
+              },
+              {
+                "animation_timer_u16": 1392,
+                "source_frame_u16": 5493
+              },
+              {
+                "animation_timer_u16": 1388,
+                "source_frame_u16": 5494
+              },
+              {
+                "animation_timer_u16": 1385,
+                "source_frame_u16": 5495
+              },
+              {
+                "animation_timer_u16": 1382,
+                "source_frame_u16": 5496
+              },
+              {
+                "animation_timer_u16": 1379,
+                "source_frame_u16": 5497
+              },
+              {
+                "animation_timer_u16": 1376,
+                "source_frame_u16": 5498
+              },
+              {
+                "animation_timer_u16": 1373,
+                "source_frame_u16": 5499
+              },
+              {
+                "animation_timer_u16": 1370,
+                "source_frame_u16": 5500
+              },
+              {
+                "animation_timer_u16": 1366,
+                "source_frame_u16": 5501
+              },
+              {
+                "animation_timer_u16": 1363,
+                "source_frame_u16": 5502
+              },
+              {
+                "animation_timer_u16": 1360,
+                "source_frame_u16": 5503
+              },
+              {
+                "animation_timer_u16": 1357,
+                "source_frame_u16": 5504
+              },
+              {
+                "animation_timer_u16": 1354,
+                "source_frame_u16": 5505
+              },
+              {
+                "animation_timer_u16": 1351,
+                "source_frame_u16": 5506
+              },
+              {
+                "animation_timer_u16": 1348,
+                "source_frame_u16": 5507
+              },
+              {
+                "animation_timer_u16": 1344,
+                "source_frame_u16": 5508
+              },
+              {
+                "animation_timer_u16": 1341,
+                "source_frame_u16": 5509
+              },
+              {
+                "animation_timer_u16": 1338,
+                "source_frame_u16": 5510
+              },
+              {
+                "animation_timer_u16": 1335,
+                "source_frame_u16": 5511
+              },
+              {
+                "animation_timer_u16": 1332,
+                "source_frame_u16": 5512
+              },
+              {
+                "animation_timer_u16": 1328,
+                "source_frame_u16": 5513
+              },
+              {
+                "animation_timer_u16": 1325,
+                "source_frame_u16": 5514
+              },
+              {
+                "animation_timer_u16": 1322,
+                "source_frame_u16": 5515
+              },
+              {
+                "animation_timer_u16": 1319,
+                "source_frame_u16": 5516
+              },
+              {
+                "animation_timer_u16": 1316,
+                "source_frame_u16": 5517
+              },
+              {
+                "animation_timer_u16": 1312,
+                "source_frame_u16": 5518
+              },
+              {
+                "animation_timer_u16": 1308,
+                "source_frame_u16": 5519
+              },
+              {
+                "animation_timer_u16": 1304,
+                "source_frame_u16": 5520
+              },
+              {
+                "animation_timer_u16": 1300,
+                "source_frame_u16": 5521
+              },
+              {
+                "animation_timer_u16": 1296,
+                "source_frame_u16": 5522
+              },
+              {
+                "animation_timer_u16": 1292,
+                "source_frame_u16": 5523
+              },
+              {
+                "animation_timer_u16": 1291,
+                "source_frame_u16": 5524
+              }
+            ],
+            "projection_sha256": "0bb621d48e4b77e591f9f6f48bc9d0632b5424cf1767acb568c912228f3fc497",
+            "slot": "0xffcd80",
+            "source_frame_range_inclusive": [
+              5453,
+              5524
+            ],
+            "type_u8": 28
+          },
           "groups": [
             {
               "display_ticks_u8": 5,
@@ -65099,8 +65483,53 @@
               "updates_u8": 1
             }
           ],
+          "mutation_controls": {
+            "player_only_callback_cadence_rejected": true
+          },
           "outer_dispatch_entry": "0x0213d0",
-          "scheduler_rule": "execute the route-6 player state dispatcher the captured number of times per displayed tick; state guards and script cursors, never the display tick, own every gameplay transition",
+          "scheduler_rule": "execute the route-6 player state dispatcher and default fixed-pool actor scheduler from their separately captured cadence programs; the independently captured class-0x02 cadence remains authoritative for that class; state guards and script cursors, never the display tick, own every gameplay transition",
+          "scheduler_scope": [
+            "route-6 player state dispatcher",
+            "default fixed-pool actor scheduler"
+          ],
+          "source_scene_scope_witnesses": [
+            {
+              "animation_timer_after_u16": 1,
+              "animation_timer_before_u16": 4,
+              "class_u8": "0x1f",
+              "slot": "0xff9dc0",
+              "source_frame_after_u16": 5459,
+              "source_frame_before_u16": 5458,
+              "type_u8": 12
+            },
+            {
+              "animation_timer_after_u16": 1,
+              "animation_timer_before_u16": 4,
+              "class_u8": "0x09",
+              "slot": "0xffb480",
+              "source_frame_after_u16": 5459,
+              "source_frame_before_u16": 5458,
+              "type_u8": 20
+            },
+            {
+              "animation_timer_after_u16": 1,
+              "animation_timer_before_u16": 4,
+              "class_u8": "0x10",
+              "slot": "0xffba80",
+              "source_frame_after_u16": 5459,
+              "source_frame_before_u16": 5458,
+              "type_u8": 24
+            },
+            {
+              "animation_timer_after_u16": 1496,
+              "animation_timer_before_u16": 1499,
+              "class_u8": "0x0c",
+              "slot": "0xffcd80",
+              "source_frame_after_u16": 5459,
+              "source_frame_before_u16": 5458,
+              "type_u8": 28
+            }
+          ],
           "source_visible_frame_range_inclusive": [
             5453,
             5523

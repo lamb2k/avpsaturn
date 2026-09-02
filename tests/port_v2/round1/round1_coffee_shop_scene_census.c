@@ -78,14 +78,19 @@ int main(void)
         unsigned short input = avsp_round1_coffee_shop_source_input(
             (unsigned short)source_frame);
         unsigned int tick;
-        unsigned int default_updates =
+        unsigned int source_updates =
             avsp_round1_coffee_shop_source_updates(
+                (unsigned short)source_frame);
+        unsigned int scheduler_updates =
+            avsp_round1_coffee_shop_scheduler_source_updates(
                 (unsigned short)source_frame);
         unsigned int class02_updates =
             avsp_round1_coffee_shop_class02_source_updates(
                 (unsigned short)source_frame);
-        unsigned int phase_updates = default_updates > class02_updates ?
-            default_updates : class02_updates;
+        unsigned int phase_updates = source_updates > scheduler_updates ?
+            source_updates : scheduler_updates;
+        if (class02_updates > phase_updates)
+            phase_updates = class02_updates;
         if (source_frame == 2072u &&
             !avsp_round1_begin_first_entry(&runtime))
             return 2;
@@ -328,18 +333,22 @@ int main(void)
                     a->source_action_timer, runtime.rng_seed);
         }
         runtime.frame = source_frame >= 2040u ? source_frame - 2040u : 0u;
-        for (tick = 0u; tick < phase_updates; ++tick)
+        for (tick = 1u; tick <= phase_updates; ++tick)
         {
+            unsigned int phase_tick = tick == phase_updates ? 0u : tick;
             player_authority_enabled_at_tick_start = runtime.route_state == 4;
-            if (tick < default_updates && runtime.entry.started &&
+            if ((phase_tick == 0u ? source_updates != 0u :
+                    phase_tick < source_updates) && runtime.entry.started &&
                 runtime.route_state != 4 &&
                 !avsp_round1_step_first_entry(&runtime))
                 return 3;
             if (runtime.entry.dependencies_seeded &&
                 !avsp_round1_step_scheduler_pre_player_source_differential(
-                    &runtime, tick < default_updates))
+                    &runtime, phase_tick == 0u ? source_updates != 0u :
+                        phase_tick < source_updates))
                 return 5;
-            if (tick < default_updates &&
+            if ((phase_tick == 0u ? source_updates != 0u :
+                    phase_tick < source_updates) &&
                 player_authority_enabled_at_tick_start &&
                 runtime.route_state == 4 &&
                 !avsp_round1_step_player(&runtime, input, 0))
@@ -359,8 +368,11 @@ int main(void)
             }
             if (runtime.entry.dependencies_seeded &&
                 !avsp_round1_step_scheduler_post_player_source_differential(
-                    &runtime, tick < default_updates,
-                    tick < class02_updates))
+                    &runtime,
+                    phase_tick == 0u ? scheduler_updates != 0u :
+                        phase_tick < scheduler_updates,
+                    phase_tick == 0u ? class02_updates != 0u :
+                        phase_tick < class02_updates))
             {
                 fprintf(stderr,
                         "scheduler_failure frame=%u code=%u slot=%08lx state=%04x substate=%04x animation=%08lx failures=%lu\n",

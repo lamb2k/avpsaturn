@@ -1648,21 +1648,46 @@ def build_report() -> dict[str, object]:
         if frame in (5506, 5520):
             updates += 1
         exit_callback_counts.append(updates)
-    callback_groups = []
-    group_start = 0
-    group_updates = exit_callback_counts[0]
-    for offset, updates in enumerate(exit_callback_counts[1:], 1):
-        if updates == group_updates:
-            continue
-        callback_groups.append({"program_tick_u8": group_start,
-                                "display_ticks_u8": offset - group_start,
-                                "updates_u8": group_updates})
-        group_start = offset
-        group_updates = updates
-    callback_groups.append({"program_tick_u8": group_start,
-                            "display_ticks_u8": len(exit_callback_counts) -
-                                group_start,
-                            "updates_u8": group_updates})
+    def cadence_groups(counts: list[int]) -> list[dict[str, int]]:
+        groups = []
+        group_start = 0
+        group_updates = counts[0]
+        for offset, updates in enumerate(counts[1:], 1):
+            if updates == group_updates:
+                continue
+            groups.append({"program_tick_u8": group_start,
+                           "display_ticks_u8": offset - group_start,
+                           "updates_u8": group_updates})
+            group_start = offset
+            group_updates = updates
+        groups.append({"program_tick_u8": group_start,
+                       "display_ticks_u8": len(counts) - group_start,
+                       "updates_u8": group_updates})
+        return groups
+
+    callback_groups = cadence_groups(exit_callback_counts)
+    fixed_pool_timer_rows = [
+        snapshot(scene_actor_rows, frame, "ffcd80")
+        for frame in range(5453, 5525)
+    ]
+    fixed_pool_scheduler_counts = []
+    for before, after in zip(fixed_pool_timer_rows,
+                             fixed_pool_timer_rows[1:]):
+        require(before["animation_record"] == "000a505e" and
+                after["animation_record"] == "000a505e",
+                "Coffee Shop fixed-pool scheduler witness record drift")
+        updates = ((int(before["animation_timer"], 16) -
+                    int(after["animation_timer"], 16)) & 0xffff)
+        require(1 <= updates <= 4,
+                "Coffee Shop fixed-pool scheduler witness cadence drift")
+        fixed_pool_scheduler_counts.append(updates)
+    fixed_pool_scheduler_groups = cadence_groups(
+        fixed_pool_scheduler_counts)
+    fixed_pool_timer_projection = [
+        {"source_frame_u16": int(row["frame"]),
+         "animation_timer_u16": int(row["animation_timer"], 16)}
+        for row in fixed_pool_timer_rows
+    ]
     ballistic_vector = [
         int.from_bytes(program[0x224fa + index * 4:
                                0x224fe + index * 4], "big", signed=True)
@@ -1846,10 +1871,58 @@ def build_report() -> dict[str, object]:
                 "direct_writer_pcs": ["0x016266", "0x01a8f6", "0x02177a"],
                 "default_updates_u8": 3,
                 "groups": callback_groups,
+                "fixed_pool_scheduler_groups": fixed_pool_scheduler_groups,
+                "scheduler_scope": [
+                    "route-6 player state dispatcher",
+                    "default fixed-pool actor scheduler",
+                ],
+                "cadence_partition": (
+                    "groups own the route-6 player dispatcher; "
+                    "fixed_pool_scheduler_groups own record-12/20(non-0x02)/"
+                    "24/28 fixed-pool dispatch; class-0x02 retains its "
+                    "independent caller-ledger cadence"),
+                "fixed_pool_timer_witness": {
+                    "slot": "0xffcd80",
+                    "type_u8": 28,
+                    "class_u8": "0x0c",
+                    "animation_record": "0x000a505e",
+                    "source_frame_range_inclusive": [5453, 5524],
+                    "projection_sha256": hashlib.sha256(canonical(
+                        fixed_pool_timer_projection)).hexdigest(),
+                    "projection": fixed_pool_timer_projection,
+                },
+                "source_scene_scope_witnesses": [
+                    {"source_frame_before_u16": 5458,
+                     "source_frame_after_u16": 5459,
+                     "slot": "0xff9dc0", "type_u8": 12,
+                     "class_u8": "0x1f", "animation_timer_before_u16": 4,
+                     "animation_timer_after_u16": 1},
+                    {"source_frame_before_u16": 5458,
+                     "source_frame_after_u16": 5459,
+                     "slot": "0xffb480", "type_u8": 20,
+                     "class_u8": "0x09", "animation_timer_before_u16": 4,
+                     "animation_timer_after_u16": 1},
+                    {"source_frame_before_u16": 5458,
+                     "source_frame_after_u16": 5459,
+                     "slot": "0xffba80", "type_u8": 24,
+                     "class_u8": "0x10", "animation_timer_before_u16": 4,
+                     "animation_timer_after_u16": 1},
+                    {"source_frame_before_u16": 5458,
+                     "source_frame_after_u16": 5459,
+                     "slot": "0xffcd80", "type_u8": 28,
+                     "class_u8": "0x0c", "animation_timer_before_u16": 0x05db,
+                     "animation_timer_after_u16": 0x05d8},
+                ],
                 "scheduler_rule": ("execute the route-6 player state dispatcher "
-                                   "the captured number of times per displayed tick; "
-                                   "state guards and script cursors, never the display tick, "
-                                   "own every gameplay transition"),
+                                   "and default fixed-pool actor scheduler from their "
+                                   "separately captured cadence programs; the "
+                                   "independently captured class-0x02 cadence remains "
+                                   "authoritative for that class; state guards and "
+                                   "script cursors, never the display tick, own every "
+                                   "gameplay transition"),
+                "mutation_controls": {
+                    "player_only_callback_cadence_rejected": True,
+                },
             },
             "ballistic_mode_3": {
                 "dispatcher": "0x02183a..0x021848",
@@ -2494,6 +2567,52 @@ def validate(report: dict[str, object]) -> None:
                     (54, 2, 3), (56, 1, 4), (57, 6, 3), (63, 1, 4),
                     (64, 1, 3), (65, 2, 4), (67, 1, 2), (68, 1, 4),
                     (69, 1, 2), (70, 1, 1))] and
+        exit_program["player_withdrawal_script"]
+            ["source_display_callback_program"]
+            ["fixed_pool_scheduler_groups"] == [
+                {"program_tick_u8": start, "display_ticks_u8": length,
+                 "updates_u8": updates}
+                for start, length, updates in (
+                    (0, 5, 1), (5, 12, 3), (17, 1, 4),
+                    (18, 14, 3), (32, 1, 4), (33, 7, 3),
+                    (40, 1, 4), (41, 6, 3), (47, 1, 4),
+                    (48, 6, 3), (54, 1, 4), (55, 4, 3),
+                    (59, 1, 4), (60, 4, 3), (64, 6, 4),
+                    (70, 1, 1))] and
+        exit_program["player_withdrawal_script"]
+            ["source_display_callback_program"]["fixed_pool_timer_witness"]
+            ["projection_sha256"] ==
+            "0bb621d48e4b77e591f9f6f48bc9d0632b5424cf1767acb568c912228f3fc497" and
+        exit_program["player_withdrawal_script"]
+            ["source_display_callback_program"]["scheduler_scope"] == [
+                "route-6 player state dispatcher",
+                "default fixed-pool actor scheduler"] and
+        exit_program["player_withdrawal_script"]
+            ["source_display_callback_program"]
+            ["source_scene_scope_witnesses"] == [
+                {"source_frame_before_u16": 5458,
+                 "source_frame_after_u16": 5459, "slot": "0xff9dc0",
+                 "type_u8": 12, "class_u8": "0x1f",
+                 "animation_timer_before_u16": 4,
+                 "animation_timer_after_u16": 1},
+                {"source_frame_before_u16": 5458,
+                 "source_frame_after_u16": 5459, "slot": "0xffb480",
+                 "type_u8": 20, "class_u8": "0x09",
+                 "animation_timer_before_u16": 4,
+                 "animation_timer_after_u16": 1},
+                {"source_frame_before_u16": 5458,
+                 "source_frame_after_u16": 5459, "slot": "0xffba80",
+                 "type_u8": 24, "class_u8": "0x10",
+                 "animation_timer_before_u16": 4,
+                 "animation_timer_after_u16": 1},
+                {"source_frame_before_u16": 5458,
+                 "source_frame_after_u16": 5459, "slot": "0xffcd80",
+                 "type_u8": 28, "class_u8": "0x0c",
+                 "animation_timer_before_u16": 0x05db,
+                 "animation_timer_after_u16": 0x05d8}] and
+        exit_program["player_withdrawal_script"]
+            ["source_display_callback_program"]["mutation_controls"]
+            ["player_only_callback_cadence_rejected"] is True and
         tuple(exit_program["player_withdrawal_script"]["ballistic_mode_3"]
               [name] for name in ("x_velocity_s32", "x_acceleration_s32",
                                   "y_velocity_s32", "y_acceleration_s32")) ==
@@ -2653,6 +2772,18 @@ def mutation_self_test(report: dict[str, object]) -> None:
         ["exit_controller_program"]["player_withdrawal_script"] \
         ["source_display_callback_program"]["groups"][0]["updates_u8"] = 2
     mutations.append(wrong_exit_callback)
+    wrong_exit_callback_scope = copy.deepcopy(report)
+    wrong_exit_callback_scope["first_segment_recurring_spawn"] \
+        ["exit_controller_program"]["player_withdrawal_script"] \
+        ["source_display_callback_program"]["scheduler_scope"] = [
+            "route-6 player state dispatcher"]
+    mutations.append(wrong_exit_callback_scope)
+    wrong_exit_fixed_pool_callback = copy.deepcopy(report)
+    wrong_exit_fixed_pool_callback["first_segment_recurring_spawn"] \
+        ["exit_controller_program"]["player_withdrawal_script"] \
+        ["source_display_callback_program"] \
+        ["fixed_pool_scheduler_groups"][1]["display_ticks_u8"] = 11
+    mutations.append(wrong_exit_fixed_pool_callback)
     wrong_exit_ballistic = copy.deepcopy(report)
     wrong_exit_ballistic["first_segment_recurring_spawn"] \
         ["exit_controller_program"]["player_withdrawal_script"] \

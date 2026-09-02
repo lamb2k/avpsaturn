@@ -8488,7 +8488,14 @@ static void live_encounter_frame_callback(void)
     int native_encounter_visible = 0;
     int source_frame;
     unsigned int source_updates;
+    unsigned int scheduler_updates;
+    unsigned int class02_updates;
+    unsigned int phase_updates;
     unsigned int source_tick;
+    unsigned int phase_tick;
+    int source_update_enabled;
+    int scheduler_update_enabled;
+    int class02_update_enabled;
     if (!runtime_ready)
     {
         if (avsp_diag_live_frame_stage == 0)
@@ -8512,6 +8519,14 @@ static void live_encounter_frame_callback(void)
         (int)round1_runtime.frame;
     source_updates = avsp_round1_coffee_shop_source_updates(
         (unsigned short)source_frame);
+    scheduler_updates = avsp_round1_coffee_shop_scheduler_source_updates(
+        (unsigned short)source_frame);
+    class02_updates = avsp_round1_coffee_shop_class02_source_updates(
+        (unsigned short)source_frame);
+    phase_updates = source_updates > scheduler_updates ?
+        source_updates : scheduler_updates;
+    if (class02_updates > phase_updates)
+        phase_updates = class02_updates;
     if (!round1_runtime.entry.started &&
         round1_runtime.frame == AVSP_ROUND1_NATIVE_ENTRY_STEP_FRAME &&
         !avsp_round1_begin_first_entry(&round1_runtime))
@@ -8529,11 +8544,18 @@ static void live_encounter_frame_callback(void)
 #endif
     round1_player_mask = input.player_mask;
     round1_route_before = round1_runtime.route_state;
-    for (source_tick = 0u; source_tick < source_updates; ++source_tick)
+    for (source_tick = 1u; source_tick <= phase_updates; ++source_tick)
     {
+        phase_tick = source_tick == phase_updates ? 0u : source_tick;
+        source_update_enabled = phase_tick == 0u ? source_updates != 0u :
+            phase_tick < source_updates;
+        scheduler_update_enabled = phase_tick == 0u ?
+            scheduler_updates != 0u : phase_tick < scheduler_updates;
+        class02_update_enabled = phase_tick == 0u ?
+            class02_updates != 0u : phase_tick < class02_updates;
         round1_player_authority_enabled_at_tick_start =
             round1_runtime.route_state == 4;
-        if (round1_runtime.entry.started &&
+        if (source_update_enabled && round1_runtime.entry.started &&
             round1_runtime.route_state != 4 &&
             !avsp_round1_step_first_entry(&round1_runtime))
         {
@@ -8543,7 +8565,7 @@ static void live_encounter_frame_callback(void)
         }
         if (round1_runtime.entry.dependencies_seeded &&
             !avsp_round1_step_scheduler_pre_player_source_differential(
-                &round1_runtime, 1))
+                &round1_runtime, source_update_enabled))
         {
             avsp_diag_round1_scheduler_failure_code =
                 round1_runtime.scheduler_failure_code;
@@ -8561,7 +8583,8 @@ static void live_encounter_frame_callback(void)
             runtime_ready = 0;
             return;
         }
-        if (round1_player_authority_enabled_at_tick_start &&
+        if (source_update_enabled &&
+            round1_player_authority_enabled_at_tick_start &&
             round1_runtime.route_state == 4 &&
             !avsp_round1_step_player(&round1_runtime, round1_player_mask, 0))
         {
@@ -8571,7 +8594,8 @@ static void live_encounter_frame_callback(void)
         }
         if (round1_runtime.entry.dependencies_seeded &&
             !avsp_round1_step_scheduler_post_player_source_differential(
-                &round1_runtime, 1, 1))
+                &round1_runtime, scheduler_update_enabled,
+                class02_update_enabled))
         {
             avsp_diag_round1_scheduler_failure_code =
                 round1_runtime.scheduler_failure_code;

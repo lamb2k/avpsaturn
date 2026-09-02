@@ -267,6 +267,8 @@ def build() -> str:
     class1f_inner8_groups = class1f_inner8_path[
         "wander_group_occupancy_program"]
     class1f_inner8_motion = class1f_inner8["action_0x0e_motion"]
+    class1f_inner8_scene_clear = class1f_inner8[
+        "scene_clear_interruption"]
     class1f_inner8_timeout = class1f_inner8["route_interaction"][
         "timeout_return"]
     action_variants = class1f_actions["initializer"]["variants"]
@@ -1096,6 +1098,26 @@ def build() -> str:
         class1f_inner8_motion["phase_8_terminal_writes"] != {
             "source_entry": "0x040e40", "action_u16": 0,
             "wander_cursor_u8": 0, "field95_u8": 0} or
+        class1f_inner8_scene_clear["classification"] !=
+            "SOURCE_CLOSED_IMPLEMENTATION_FIELDS" or
+        class1f_inner8_scene_clear["source_entry"] != "0x0610f6" or
+        class1f_inner8_scene_clear["source_reset_helper"] != "0x0610d4" or
+        class1f_inner8_scene_clear["source_action_tail"] != "0x060dcc" or
+        class1f_inner8_scene_clear["result"] != {
+            "outer_state_u16": 0x0200,
+            "action_substate_u16": 0x1e00,
+            "special_latch_ad_u8": 0,
+            "inner_timer_u16": 0,
+            "direction_xor_u8": 1,
+            "direction_shift_u8": 4,
+            "direction_bias_u8": 8,
+            "selectors_by_style85_u8": [0, 1],
+            "rng_calls": 0,
+        } or
+        class1f_inner8_scene_clear["coffee_shop_control"]
+            ["first_visible_result_frame_u16"] != 5155 or
+        class1f_inner8_scene_clear["mutation_control"]
+            ["fixed_frame_forbidden"] is not True or
         class1f_inner8_timeout["classification"] !=
             "SOURCE_CLOSED_IMPLEMENTATION_FIELDS" or
         class1f_inner8_timeout["source_entry"] != "0x0610f6" or
@@ -1334,6 +1356,12 @@ def build() -> str:
         len(coffee_exit_callbacks["groups"]) != 25 or
         sum(row["display_ticks_u8"] for row in
             coffee_exit_callbacks["groups"]) != 71 or
+        len(coffee_exit_callbacks["fixed_pool_scheduler_groups"]) != 16 or
+        sum(row["display_ticks_u8"] for row in
+            coffee_exit_callbacks["fixed_pool_scheduler_groups"]) != 71 or
+        coffee_exit_callbacks["fixed_pool_timer_witness"]
+            ["projection_sha256"] !=
+            "0bb621d48e4b77e591f9f6f48bc9d0632b5424cf1767acb568c912228f3fc497" or
         coffee_exit_ballistic["selector_u8"] != 6 or
         tuple(coffee_exit_ballistic[name] for name in
               ("x_velocity_s32", "x_acceleration_s32",
@@ -2868,10 +2896,24 @@ def build() -> str:
         lines.append("    { %d, %d }," % (row["x_s16"], row["z_s16"]))
     lines.extend([
         "};", "",
+        "#define AVSP_ROUND1_COFFEE_EXIT_CALLBACK_FIRST_SOURCE_FRAME %du" %
+            coffee_exit_callbacks["source_visible_frame_range_inclusive"][0],
+        "#define AVSP_ROUND1_COFFEE_EXIT_CALLBACK_LAST_SOURCE_FRAME %du" %
+            coffee_exit_callbacks["source_visible_frame_range_inclusive"][1],
+        "",
         "static const AvspRound1CoffeeExitCallbackGroupSpec avsp_round1_coffee_exit_callbacks[AVSP_ROUND1_COFFEE_EXIT_CALLBACK_GROUP_COUNT] =",
         "{",
     ])
     for row in coffee_exit_callbacks["groups"]:
+        lines.append("    { %du, %du, %du }," % (
+            row["program_tick_u8"], row["display_ticks_u8"],
+            row["updates_u8"]))
+    lines.extend([
+        "};", "",
+        "static const AvspRound1CoffeeExitCallbackGroupSpec avsp_round1_coffee_exit_scheduler_callbacks[AVSP_ROUND1_COFFEE_EXIT_SCHEDULER_GROUP_COUNT] =",
+        "{",
+    ])
+    for row in coffee_exit_callbacks["fixed_pool_scheduler_groups"]:
         lines.append("    { %du, %du, %du }," % (
             row["program_tick_u8"], row["display_ticks_u8"],
             row["updates_u8"]))
@@ -3131,7 +3173,20 @@ def build() -> str:
             f"0x{int(row['source_slot'], 16) & 0xffff:04X}u" for row in
             class1f_inner8_action0c["audio_triggers"]) + " },",
         "    { " + ", ".join(f"{row['command']}u" for row in
-            class1f_inner8_action0c["audio_triggers"]) + " }",
+            class1f_inner8_action0c["audio_triggers"]) + " },",
+        "    0x%04Xu, 0x%04Xu, %du, 0x%04Xu," % (
+            class1f_inner8_scene_clear["result"]["outer_state_u16"],
+            class1f_inner8_scene_clear["result"]["action_substate_u16"],
+            class1f_inner8_scene_clear["result"]["special_latch_ad_u8"],
+            class1f_inner8_scene_clear["result"]["inner_timer_u16"]),
+        "    %du, %du, %du, { %du, %du }" % (
+            class1f_inner8_scene_clear["result"]["direction_xor_u8"],
+            class1f_inner8_scene_clear["result"]["direction_shift_u8"],
+            class1f_inner8_scene_clear["result"]["direction_bias_u8"],
+            class1f_inner8_scene_clear["result"]
+                ["selectors_by_style85_u8"][0],
+            class1f_inner8_scene_clear["result"]
+                ["selectors_by_style85_u8"][1]),
         "};", "",
         "static const unsigned char avsp_round1_class1f_attack_timers[AVSP_ROUND1_CLASS1F_ATTACK_TIMER_COUNT] =",
         "{",

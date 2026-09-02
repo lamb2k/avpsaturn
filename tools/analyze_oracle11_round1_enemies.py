@@ -53,6 +53,8 @@ CLASS1F_HIT_MUTANT = ROOT / ".deps" / "mame" / "oracle11_progression_lifecycle_c
 CLASS1F_KO_A = ROOT / ".deps" / "mame" / "oracle11_progression_lifecycle_cs36a"
 CLASS1F_KO_B = ROOT / ".deps" / "mame" / "oracle11_progression_lifecycle_cs36b"
 CLASS1F_KO_MUTANT = ROOT / ".deps" / "mame" / "oracle11_progression_lifecycle_cs36m4"
+CLASS1F_FINAL_TAIL_A = ROOT / ".deps" / "mame" / "oracle11_progression_lifecycle_cs21a"
+CLASS1F_FINAL_TAIL_B = ROOT / ".deps" / "mame" / "oracle11_progression_lifecycle_cs21b"
 OUT = ROOT / "data" / "oracle11_round1_enemy_archetypes.json"
 FILES = ("enemy_samples.tsv", "enemy_entries.tsv", "enemy_writes.tsv",
          "enemy_rng.tsv", "player_damage.tsv", "samples.tsv", "dispatches.tsv",
@@ -867,6 +869,60 @@ def class1f_inner8_action_contract(program: bytes,
                 "if route interruption byte a5+0x1f3 is set, dispatch interruption 0x060de6",
                 "otherwise dispatch class-specific action through 0x040bbe",
             ],
+        },
+        "scene_clear_interruption": {
+            "classification": "SOURCE_CLOSED_IMPLEMENTATION_FIELDS",
+            "source_entry": "0x0610f6",
+            "source_reset_helper": "0x0610d4",
+            "source_action_tail": "0x060dcc",
+            "source_entry_window_sha256": hashlib.sha256(
+                opcodes[0x0610F6:0x061104]).hexdigest(),
+            "source_reset_window_sha256": hashlib.sha256(
+                opcodes[0x0610D4:0x0610F6]).hexdigest(),
+            "source_action_window_sha256": hashlib.sha256(
+                opcodes[0x060DCC:0x060DE0]).hexdigest(),
+            "guard": "s16(a5-0x65e4) == 0 before inner timer or class action dispatch",
+            "writes_in_order": [
+                "actor+0xad:u8 = 0",
+                "actor+0xa8:u16 = 0",
+                "actor+0x05:u8 = 0, preserving outer high state byte 0x02",
+                "actor+0x06:u16 = 0",
+                "actor+0x0c:u8 = ((actor+0xa5:u8 ^ 1) << 4) + 8",
+                "actor+0x06:u8 = 0x1e",
+                "bind selector 0 when style85_u8 is zero, otherwise selector 1",
+            ],
+            "result": {
+                "outer_state_u16": 0x0200,
+                "action_substate_u16": 0x1e00,
+                "special_latch_ad_u8": 0,
+                "inner_timer_u16": 0,
+                "direction_xor_u8": 1,
+                "direction_shift_u8": 4,
+                "direction_bias_u8": 8,
+                "selectors_by_style85_u8": [0, 1],
+                "rng_calls": 0,
+            },
+            "coffee_shop_control": {
+                "source_slot": "0x00ff9f40",
+                "guard_writer_frame_u16": 5151,
+                "inner_state_frame_u16": 5154,
+                "first_visible_result_frame_u16": 5155,
+                "state_u16": "0x0200",
+                "substate_u16": "0x1e00",
+                "facing_u8": 0,
+                "x_fp_s32_16_16": "0x05a03e00",
+                "y_fp_s32_16_16": "0x01174700",
+                "z_s16": 279,
+                "animation_record": "0x0012e8a8",
+                "animation_timer_u16": 9,
+                "animation_branch_s16": 0,
+            },
+            "mutation_control": {
+                "fixed_frame_forbidden": True,
+                "omitting_inner_state_guard_must_diverge_at_source_frame_u16":
+                    5155,
+                "wrong_result": "actor remains in inner state 0x0208",
+            },
         },
         "route_reachable_action_handlers": {
             "0x00": {"entry": "0x040bea", "role": "target/style/RNG chooser"},
@@ -1728,6 +1784,62 @@ def class1f_first_segment_action_contract(program: bytes,
                         for name in COFFEE_SHOP_SCENE_FILES}
     require(scene_identity_a == scene_identity_b,
             "Coffee Shop full-pool scene captures differ")
+    final_tail_name = "coffee_shop_scene_actors.tsv"
+    final_tail_identity_a = digest(CLASS1F_FINAL_TAIL_A / final_tail_name)
+    final_tail_identity_b = digest(CLASS1F_FINAL_TAIL_B / final_tail_name)
+    require(final_tail_identity_a == final_tail_identity_b,
+            "Coffee Shop class-0x1f final-tail captures differ")
+    final_tail_rows = [
+        row for row in rows(CLASS1F_FINAL_TAIL_A / final_tail_name)
+        if 5208 <= int(row["frame"]) <= 5550 and
+        row["class"] == "1f" and row["state"] == "020a" and
+        row["substate"] == "0000"]
+    final_tail_cycles = [
+        ["0012e8a8", "0012e8b8", "0012e8c8", "0012e8d8"],
+        ["0012e8ec", "0012e8fc", "0012e90c", "0012e91c"]]
+    final_tail_by_slot: dict[str, list[dict[str, str]]] = defaultdict(list)
+    for row in final_tail_rows:
+        final_tail_by_slot[row["slot"]].append(row)
+    final_tail_projection = []
+    for slot in sorted(final_tail_by_slot):
+        slot_rows = final_tail_by_slot[slot]
+        transitions = []
+        for row in slot_rows:
+            record = row["animation_record"]
+            if not transitions or transitions[-1] != record:
+                transitions.append(record)
+        final_tail_cycle = next(
+            (cycle for cycle in final_tail_cycles
+             if transitions[0] in cycle), None)
+        require(final_tail_cycle is not None and
+                set(transitions).issubset(set(final_tail_cycle)),
+                f"Coffee Shop class-0x1f final-tail record drift at {slot}")
+        for before, after in zip(transitions, transitions[1:]):
+            require(final_tail_cycle[(final_tail_cycle.index(before) + 1) % 4]
+                    == after,
+                    f"Coffee Shop class-0x1f final-tail order drift at {slot}")
+        stable_fields = ("state", "substate", "x_fp", "y_fp", "z",
+                         "facing", "health", "hurt_selector",
+                         "attack_selector")
+        require(all(row["state"] == "020a" and row["substate"] == "0000"
+                    for row in slot_rows),
+                f"Coffee Shop class-0x1f final-tail state drift at {slot}")
+        final_tail_projection.append({
+            "source_slot": "0x00" + slot,
+            "first_source_frame_u16": int(slot_rows[0]["frame"]),
+            "last_source_frame_u16": int(slot_rows[-1]["frame"]),
+            "visible_rows_u16": len(slot_rows),
+            "first_animation_record": "0x" + transitions[0],
+            "last_animation_record": "0x" + transitions[-1],
+            "animation_transition_count_u16": len(transitions) - 1,
+            "animation_transition_sha256": hashlib.sha256(
+                canonical(transitions)).hexdigest(),
+            "stable_state_fields": {
+                name: sorted({row[name] for row in slot_rows})
+                for name in stable_fields},
+        })
+    final_tail_projection_sha256 = hashlib.sha256(
+        canonical(final_tail_projection)).hexdigest()
     action4_guard_name = "progression_class1f_action4_guard.tsv"
     action4_guard_identity_a = digest(
         CLASS1F_ACTION4_GUARD_A / action4_guard_name)
@@ -2244,6 +2356,74 @@ def class1f_first_segment_action_contract(program: bytes,
         "attack_timer_table_u8": list(opcodes[0x060D3C:0x060D4C]),
         "current_state_player_collision": current_state_player_collision,
         "action_programs": {
+            "final_state_0x0a_action_0x00": {
+                "classification": "SOURCE_CLOSED_IMPLEMENTATION_FIELDS",
+                "outer_dispatch_entry": "0x06075a",
+                "state_0x0a_dispatch_entry": "0x060e26",
+                "action_0x00_entry": "0x060e3c",
+                "animation_helper": "0x016536",
+                "registration_tail": "0x0167ac",
+                "source_windows": {
+                    "route_interruption": {
+                        "first": "0x060de6", "last_exclusive": "0x060e26",
+                        "sha256": hashlib.sha256(
+                            opcodes[0x060DE6:0x060E26]).hexdigest()},
+                    "state_dispatch": {
+                        "first": "0x060e26", "last_exclusive": "0x060e44",
+                        "sha256": hashlib.sha256(
+                            opcodes[0x060E26:0x060E44]).hexdigest()},
+                    "action_0x02": {
+                        "first": "0x060e48", "last_exclusive": "0x060e58",
+                        "sha256": hashlib.sha256(
+                            opcodes[0x060E48:0x060E58]).hexdigest()},
+                    "animation_helper": {
+                        "first": "0x016536", "last_exclusive": "0x01656e",
+                        "sha256": hashlib.sha256(
+                            opcodes[0x016536:0x01656E]).hexdigest()}},
+                "per_invocation_order": [
+                    "outer state 0x00 checks global route interruption byte a5+0x1f3 before action dispatch",
+                    "when set and actor+0x5c is zero, write inner state 0x0a and clear action/substate",
+                    "facing zero enters action 0x02, toggles facing, and binds turn selector 34 or 35; facing nonzero binds idle selector 0 or 1",
+                    "state-0x0a action 0x02 steps animation until a negative branch, then repeats the interruption transition into action 0",
+                    "read action_u8 from actor+0x06",
+                    "dispatch action 0 through the state-0x0a action table",
+                    "decrement actor+0x0a animation_timer_u16 exactly once",
+                    "when zero advance actor+0x1c by 16 bytes; if the prior branch_s16 is negative follow the record jump pointer",
+                    "write next animation record, timer_u16 and branch_s16",
+                    "tail-call record-12 registration at 0x0167ac"],
+                "writes": ["actor+0x0a:u16", "actor+0x1c:u32",
+                           "actor+0x24:s16", "actor+0x05:u8",
+                           "actor+0x06:u16", "actor+0x0f:u8"],
+                "preserves": ["state/substate", "x/y/z", "facing",
+                              "health", "hurt/attack selectors", "RNG",
+                              "collision/damage", "audio", "route"],
+                "animation_cycles_by_style": [
+                    ["0x" + value for value in cycle]
+                    for cycle in final_tail_cycles],
+                "paired_capture": {
+                    "capture_a": CLASS1F_FINAL_TAIL_A.name,
+                    "capture_b": CLASS1F_FINAL_TAIL_B.name,
+                    "byte_identical": True,
+                    "actor_rows_sha256": final_tail_identity_a},
+                "coffee_shop_normalized_projection": {
+                    "source_frame_range_u16": [5208, 5550],
+                    "actors": final_tail_projection,
+                    "sha256": final_tail_projection_sha256},
+                "scheduler_phase_normalization": {
+                    "scope": "presentation timer/record sampling only",
+                    "source_snapshot_can_split":
+                        "0x060e3c -> 0x016536 -> 0x060e42 -> 0x0167ac",
+                    "normalized_boundary":
+                        "compare complete action invocations and collapsed record order; do not require an instruction-partial timer value to be a native gameplay event",
+                    "gameplay_fields_must_remain_exact": True,
+                    "blanket_animation_ignore_forbidden": True,
+                    "fixed_frame_or_slot_override_forbidden": True},
+                "mutation_control": {
+                    "route_gate_before_action_dispatch_rejected": True,
+                    "wrong_record_order_rejected": True,
+                    "omitted_timer_decrement_rejected": True,
+                    "state_or_gameplay_write_rejected": True,
+                    "blanket_animation_ignore_rejected": True}},
             "source_bounds": {
                 "entry_pc": "0x060c2e",
                 "activation_field_u8": "actor+0x01",
@@ -4237,6 +4417,48 @@ def validate(report: dict[str, object]) -> None:
                         ["animation_movement_helper_0x0165c4"]
                         ["movement_record"] ==
                             "newly bound next animation record" and
+                    actions["action_programs"]
+                        ["final_state_0x0a_action_0x00"]
+                        ["source_windows"]["state_dispatch"]["sha256"] ==
+                            "32676e51dca5fb2ccd7a9c2dac124a2ad4275c0ebd1429e298aba10013717781" and
+                    actions["action_programs"]
+                        ["final_state_0x0a_action_0x00"]
+                        ["source_windows"]["route_interruption"]["sha256"] ==
+                            "b597c6b73be71b77bdb0c2036a089a126650ca196c10bc7b59b80cb9dc2c90c0" and
+                    actions["action_programs"]
+                        ["final_state_0x0a_action_0x00"]
+                        ["source_windows"]["action_0x02"]["sha256"] ==
+                            "d18a6f72c9edfaefe3ea9c21b52e2cd358449784dee69fdef35b1a378f19d698" and
+                    actions["action_programs"]
+                        ["final_state_0x0a_action_0x00"]
+                        ["source_windows"]["animation_helper"]["sha256"] ==
+                            "c5c4d5a0c07c1da109cb45a870c113b5ff6e0886811e258360471d43d066baf9" and
+                    actions["action_programs"]
+                        ["final_state_0x0a_action_0x00"]
+                        ["paired_capture"]["actor_rows_sha256"] ==
+                            "9c0ea88c7eae6b4755b0025d356d49ae136d91de0e443fab0ff767151e43343d" and
+                    actions["action_programs"]
+                        ["final_state_0x0a_action_0x00"]
+                        ["coffee_shop_normalized_projection"]["sha256"] ==
+                            "919a1edec1f76a43fab41b078f990d4ffe5e0b6fe1e0fcecd92481a0e08ea9b7" and
+                    actions["action_programs"]
+                        ["final_state_0x0a_action_0x00"]
+                        ["animation_cycles_by_style"] == [
+                            ["0x0012e8a8", "0x0012e8b8",
+                             "0x0012e8c8", "0x0012e8d8"],
+                            ["0x0012e8ec", "0x0012e8fc",
+                             "0x0012e90c", "0x0012e91c"]] and
+                    len(actions["action_programs"]
+                        ["final_state_0x0a_action_0x00"]
+                        ["coffee_shop_normalized_projection"]["actors"]) == 7 and
+                    actions["action_programs"]
+                        ["final_state_0x0a_action_0x00"]
+                        ["scheduler_phase_normalization"]
+                        ["gameplay_fields_must_remain_exact"] is True and
+                    actions["action_programs"]
+                        ["final_state_0x0a_action_0x00"]
+                        ["scheduler_phase_normalization"]
+                        ["blanket_animation_ignore_forbidden"] is True and
                     actions["action_programs"]["direction_helper_0x061032"]
                         ["upper_directions_by_a5_u8"] == [0x16, 0x0a] and
                     actions["action_programs"]["direction_helper_0x061032"]
@@ -4367,6 +4589,62 @@ def validate(report: dict[str, object]) -> None:
                     inner8["dispatch"]["inner_0x08_entry"] == "0x0610f6" and
                     inner8["dispatch"]["class_specific_dispatch"] ==
                         "0x040bbe" and
+                    inner8["scene_clear_interruption"] == {
+                        "classification":
+                            "SOURCE_CLOSED_IMPLEMENTATION_FIELDS",
+                        "source_entry": "0x0610f6",
+                        "source_reset_helper": "0x0610d4",
+                        "source_action_tail": "0x060dcc",
+                        "source_entry_window_sha256": hashlib.sha256(
+                            opcodes[0x0610F6:0x061104]).hexdigest(),
+                        "source_reset_window_sha256": hashlib.sha256(
+                            opcodes[0x0610D4:0x0610F6]).hexdigest(),
+                        "source_action_window_sha256": hashlib.sha256(
+                            opcodes[0x060DCC:0x060DE0]).hexdigest(),
+                        "guard": "s16(a5-0x65e4) == 0 before inner timer or class action dispatch",
+                        "writes_in_order": [
+                            "actor+0xad:u8 = 0",
+                            "actor+0xa8:u16 = 0",
+                            "actor+0x05:u8 = 0, preserving outer high state byte 0x02",
+                            "actor+0x06:u16 = 0",
+                            "actor+0x0c:u8 = ((actor+0xa5:u8 ^ 1) << 4) + 8",
+                            "actor+0x06:u8 = 0x1e",
+                            "bind selector 0 when style85_u8 is zero, otherwise selector 1",
+                        ],
+                        "result": {
+                            "outer_state_u16": 0x0200,
+                            "action_substate_u16": 0x1e00,
+                            "special_latch_ad_u8": 0,
+                            "inner_timer_u16": 0,
+                            "direction_xor_u8": 1,
+                            "direction_shift_u8": 4,
+                            "direction_bias_u8": 8,
+                            "selectors_by_style85_u8": [0, 1],
+                            "rng_calls": 0,
+                        },
+                        "coffee_shop_control": {
+                            "source_slot": "0x00ff9f40",
+                            "guard_writer_frame_u16": 5151,
+                            "inner_state_frame_u16": 5154,
+                            "first_visible_result_frame_u16": 5155,
+                            "state_u16": "0x0200",
+                            "substate_u16": "0x1e00",
+                            "facing_u8": 0,
+                            "x_fp_s32_16_16": "0x05a03e00",
+                            "y_fp_s32_16_16": "0x01174700",
+                            "z_s16": 279,
+                            "animation_record": "0x0012e8a8",
+                            "animation_timer_u16": 9,
+                            "animation_branch_s16": 0,
+                        },
+                        "mutation_control": {
+                            "fixed_frame_forbidden": True,
+                            "omitting_inner_state_guard_must_diverge_at_source_frame_u16":
+                                5155,
+                            "wrong_result":
+                                "actor remains in inner state 0x0208",
+                        },
+                    } and
                     len(inner8["observed_action_runs"]) == 12 and
                     len(inner8["rng_calls"]) == 13 and
                     len(inner8["animation_records"]) == 152 and

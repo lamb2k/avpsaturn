@@ -2933,6 +2933,23 @@ def validate(contract: dict[str, object], fixtures: dict[str, object],
             inner8["entry_transition"]["timer_u16"] == 600 and
             inner8["dispatch"]["scheduler_position"] ==
                 "type-12 ascending fixed-pool source slot" and
+            inner8["scene_clear_interruption"]["guard"] ==
+                "s16(a5-0x65e4) == 0 before inner timer or class action dispatch" and
+            inner8["scene_clear_interruption"]["result"] == {
+                "outer_state_u16": 0x0200,
+                "action_substate_u16": 0x1e00,
+                "special_latch_ad_u8": 0,
+                "inner_timer_u16": 0,
+                "direction_xor_u8": 1,
+                "direction_shift_u8": 4,
+                "direction_bias_u8": 8,
+                "selectors_by_style85_u8": [0, 1],
+                "rng_calls": 0,
+            } and
+            inner8["scene_clear_interruption"]["coffee_shop_control"]
+                ["first_visible_result_frame_u16"] == 5155 and
+            inner8["scene_clear_interruption"]["mutation_control"]
+                ["fixed_frame_forbidden"] is True and
             list(inner8["route_reachable_action_handlers"]) ==
                 ["0x00", "0x02", "0x04", "0x06", "0x08", "0x0a",
                  "0x0c", "0x0e", "0x10"] and
