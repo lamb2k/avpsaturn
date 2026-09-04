@@ -3915,3 +3915,34 @@ authority. The next scene-order RED is frame 5493 in the complete class-
 `0x0006dbda/0x0006dc6a`, while native advances one record with branch
 `-32768`. Candidate promotion remains frozen. The isolated cold-emulator and
 WGC gates remain at their recorded three-attempt blocker pending owner ruling.
+
+### P4 Coffee Shop class-0x09 presentation program checkpoint (2026-09-04)
+
+The complete Coffee-Shop-reachable record-type-20/class-`0x09` program is
+closed for slots `0x00ffb480/0x00ffb500`. Source dispatch `0x06d926`, state
+bodies `0x06d93a/0x06d96e`, animation bind/update `0x016518/0x016536`, all ten
+animation records and all 898 captured RNG calls are bound. The sole frame-5493
+record/timer difference is classified narrowly as matched source presentation-
+boundary normalization: assembly, hurt/attack selectors, gameplay state and the
+next frame remain identical. It is not a blanket animation exception.
+
+The same comparison exposed and corrected the reusable route-teardown scheduler
+rule. Source performs one final record-type-20 traversal as route state changes
+6->0, then freezes the resident pool through frame 5550 before centralized
+release at 5551. Native now permits that transition traversal and suppresses
+later exit-route updates. Implemented slots `0x00ffb180/b300/b480/b500/b600`
+match source at frames 5524 and 5550; missing slot `0x00ffb100` remains the
+explicit class-`0x0f` next body rather than a silent omission.
+
+SPEC-02 rejects 190 mutations, the complete host differential rejects 227
+runtime plus 82 generated-fixture mutations, auxiliary rejects 133, scene
+parity rejects 31, memory rejects 18, Target wiring rejects 132, and Fast
+passes. Release/live Target is 378,448 bytes at SHA-256
+`aa2dab1efa08dab5b5b48b06e188171b654aa47b24ddec9420c50e144b0507a5`, BSS
+`0x060b3760`. Contract SHA-256 is
+`2179288d73cab3c4b9586eb9819ea37b9775e23f02d02201590129f2cbd59232`;
+the deterministic 167-table archive remains 47,480 bytes at
+`3ffac9b15d79afe7fb026220acb31f1f7d679b78b93afa4f684d3ea42cd4e40d`.
+Raw gaps remain `188/1/0/671/1/93/0/279/0`, retained gameplay authority is
+zero, candidate promotion remains frozen, and the exhausted Emulator/WGC gates
+remain blocked pending owner ruling.

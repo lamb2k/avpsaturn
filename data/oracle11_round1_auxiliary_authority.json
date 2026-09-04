@@ -11865,6 +11865,48 @@
                 "0x00ffb180",
                 "0x00ffb500"
               ],
+              "route_teardown_dispatch_guard": {
+                "active_source_slots": [
+                  "0x00ffb100",
+                  "0x00ffb180",
+                  "0x00ffb300",
+                  "0x00ffb480",
+                  "0x00ffb500",
+                  "0x00ffb600"
+                ],
+                "capture_identity": {
+                  "actors_sha256": "9c0ea88c7eae6b4755b0025d356d49ae136d91de0e443fab0ff767151e43343d",
+                  "entries_sha256": "d51c772c2d4d254ef79e01869d40994a2751c24ab2f2020ec49ad1d32c6ebe3c",
+                  "frames_sha256": "91e4aab3a03586a6c9a143dd58ee03a72ebc52b7fd611fdc6fe0975ebd522d1d"
+                },
+                "central_release_source_frame_u16": 5551,
+                "classification": "SOURCE_CLOSED_IMPLEMENTATION_FIELDS",
+                "fixed_frame_substitute_forbidden": true,
+                "freeze_frame_range_inclusive_u16": [
+                  5524,
+                  5550
+                ],
+                "frozen_fields": [
+                  "state",
+                  "substate",
+                  "x_fp",
+                  "y_fp",
+                  "z",
+                  "facing",
+                  "animation_record",
+                  "animation_timer",
+                  "animation_branch"
+                ],
+                "guard": "route_state == 0 and exit_route_updates != 0 suppresses the complete record-20 pool dispatch until centralized release",
+                "last_source_dispatch_frame_u16": 5523,
+                "mutation_control": "dispatching any active record-20 actor after route state 6 -> 0 changes a frozen animation timer or record before centralized release",
+                "prior_route_state_u16": 6,
+                "route_teardown_state_u16": 0,
+                "scheduler_scope": "complete record-20 pool; record12/class-0x1f teardown continues independently",
+                "source_dispatch_count_u16": 0,
+                "transition_dispatch": "exit_route_updates == 0 permits the final traversal whose result is visible on source frame 5524",
+                "transition_source_frame_u16": 5524
+              },
               "rule": "a complete record-20 pool traversal may cross a display boundary; Coffee Shop exit differential replay therefore preserves the captured prefix phase for every active slot below 0x00ffb600 and the existing suffix cadence from slot 0x00ffb600 onward",
               "source_frame_range_inclusive_u16": [
                 5453,
@@ -15110,6 +15152,262 @@
           "terminal_rule": "negative branch is consumed by state 0x0200 before generic animation update"
         }
       ],
+      "complete_coffee_shop_program": {
+        "animation_record_count_u8": 10,
+        "animation_sequences": [
+          {
+            "records": [
+              {
+                "animation_record": "0x0006dbda",
+                "assembly": "0x0006dd26",
+                "attack_selector_u8": 1,
+                "branch_s16": 0,
+                "hurt_selector_u8": 1,
+                "record_sha256": "837ff7efe8a2376a9b8e3079003f78cc8b101ee46ca6afad7180d87b18b382d0",
+                "timer_u16": 8
+              },
+              {
+                "animation_record": "0x0006dbea",
+                "assembly": "0x0006dd26",
+                "attack_selector_u8": 1,
+                "branch_s16": -32768,
+                "hurt_selector_u8": 1,
+                "record_sha256": "25483d07c54a0b5015479dcf5a6f35eecdc57b9f7fdfe300a11600d2a1ea7890",
+                "timer_u16": 8
+              }
+            ],
+            "selector_u8": 0,
+            "terminal_rule": "negative branch is consumed by state 0x0200 before generic animation update"
+          },
+          {
+            "records": [
+              {
+                "animation_record": "0x0006dbfe",
+                "assembly": "0x0006dd44",
+                "attack_selector_u8": 1,
+                "branch_s16": 0,
+                "hurt_selector_u8": 1,
+                "record_sha256": "5a65f54df1cdfe61cc8c940a60449ad205706bd8a8418d94aebe3269599b0789",
+                "timer_u16": 8
+              },
+              {
+                "animation_record": "0x0006dc0e",
+                "assembly": "0x0006dd44",
+                "attack_selector_u8": 1,
+                "branch_s16": -32768,
+                "hurt_selector_u8": 1,
+                "record_sha256": "76611f37a3afec750f60a39663f176bf3346ab2c1ab47e57463dead8c0bfac45",
+                "timer_u16": 8
+              }
+            ],
+            "selector_u8": 7,
+            "terminal_rule": "negative branch is consumed by state 0x0200 before generic animation update"
+          },
+          {
+            "records": [
+              {
+                "animation_record": "0x0006dc22",
+                "assembly": "0x0006dd68",
+                "attack_selector_u8": 1,
+                "branch_s16": 0,
+                "hurt_selector_u8": 1,
+                "record_sha256": "02ee1be84f864973f511e633f0fc6218854e5ba5289796dd9b591fb7922f82a2",
+                "timer_u16": 8
+              },
+              {
+                "animation_record": "0x0006dc32",
+                "assembly": "0x0006dd68",
+                "attack_selector_u8": 1,
+                "branch_s16": -32768,
+                "hurt_selector_u8": 1,
+                "record_sha256": "b7f5b62a1be6b631cfff69bf721140688b445c6bd460520c2b42c9699c1cafe6",
+                "timer_u16": 8
+              }
+            ],
+            "selector_u8": 8,
+            "terminal_rule": "negative branch is consumed by state 0x0200 before generic animation update"
+          },
+          {
+            "records": [
+              {
+                "animation_record": "0x0006dc46",
+                "assembly": "0x0006dd8c",
+                "attack_selector_u8": 1,
+                "branch_s16": 0,
+                "hurt_selector_u8": 1,
+                "record_sha256": "499423a9fb16df1db70fe94867fe0b05e5eb3b359e70051ed9f0f6a69d3d46d0",
+                "timer_u16": 8
+              },
+              {
+                "animation_record": "0x0006dc56",
+                "assembly": "0x0006dd8c",
+                "attack_selector_u8": 1,
+                "branch_s16": -32768,
+                "hurt_selector_u8": 1,
+                "record_sha256": "93c820e656b83a5a270a86a540a96221c6668e8cff34a0c6411e440b1b6ee3fb",
+                "timer_u16": 8
+              }
+            ],
+            "selector_u8": 9,
+            "terminal_rule": "negative branch is consumed by state 0x0200 before generic animation update"
+          },
+          {
+            "records": [
+              {
+                "animation_record": "0x0006dc6a",
+                "assembly": "0x0006ddb0",
+                "attack_selector_u8": 1,
+                "branch_s16": 0,
+                "hurt_selector_u8": 1,
+                "record_sha256": "d5c7a9f290540c6edbd66bef319a9dd76d7b9021fa44283f8a63581289120fbd",
+                "timer_u16": 8
+              },
+              {
+                "animation_record": "0x0006dc7a",
+                "assembly": "0x0006ddb0",
+                "attack_selector_u8": 1,
+                "branch_s16": -32768,
+                "hurt_selector_u8": 1,
+                "record_sha256": "36d15c17b9f10308bb871b22fbb7e21c98a2c1d63ceaf2566d59615a94bd0801",
+                "timer_u16": 8
+              }
+            ],
+            "selector_u8": 10,
+            "terminal_rule": "negative branch is consumed by state 0x0200 before generic animation update"
+          }
+        ],
+        "capture_identity": {
+          "actors_sha256": "9c0ea88c7eae6b4755b0025d356d49ae136d91de0e443fab0ff767151e43343d",
+          "rng_sha256": "81338529f76629c3d103885c16838bd562beecf783f0b5107a5b7ecd11e219b3"
+        },
+        "classification": "SOURCE_CLOSED_IMPLEMENTATION_FIELDS",
+        "exit_presentation_witness": {
+          "frame_5493": [
+            {
+              "animation_record": "0x0006dbda",
+              "branch_s16": 0,
+              "source_slot": "0x00ffb480",
+              "timer_u16": 0
+            },
+            {
+              "animation_record": "0x0006dc6a",
+              "branch_s16": 0,
+              "source_slot": "0x00ffb500",
+              "timer_u16": 1
+            }
+          ],
+          "frame_5494": [
+            {
+              "animation_record": "0x0006dc22",
+              "branch_s16": 0,
+              "source_slot": "0x00ffb480",
+              "timer_u16": 5
+            },
+            {
+              "animation_record": "0x0006dc22",
+              "branch_s16": 0,
+              "source_slot": "0x00ffb500",
+              "timer_u16": 5
+            }
+          ]
+        },
+        "fixed_frame_substitute_forbidden": true,
+        "mutation_controls": [
+          "state dispatch",
+          "terminal guard",
+          "RNG count/order",
+          "selector mask/table",
+          "animation bind/update order",
+          "record identity",
+          "scheduler slot order",
+          "frame-5493 presentation witness"
+        ],
+        "reachable_state_substate_u16": [
+          "0x0200:0x0000"
+        ],
+        "retained_gameplay_authority": false,
+        "scheduler_order": "record-type-20 ascending source slot; display boundary may fall between pool records",
+        "selector_table_u16": [
+          0,
+          7,
+          8,
+          9,
+          10,
+          8,
+          9,
+          10
+        ],
+        "source_frame_range_u16": [
+          2073,
+          5550
+        ],
+        "source_rng_call_count_u16": 898,
+        "source_rng_frame_range_u16": [
+          2079,
+          5522
+        ],
+        "source_row_count_u16": 6956,
+        "source_slots": [
+          "0x00ffb480",
+          "0x00ffb500"
+        ],
+        "state_0": {
+          "animation_bind_entry": "0x016518",
+          "animation_selector_u8": 0,
+          "animation_table": "0x0006dbc2",
+          "source_body": {
+            "first": "0x06d93a",
+            "last_exclusive": "0x06d96e",
+            "sha256": "8f511a80915d7fd2d1fba2451a5694db037040928ac3e37c80ffdfc353117df9"
+          },
+          "writes": [
+            "state += 0x0200",
+            "table_set = 0x0006de6c",
+            "object_or_u16 = 0x8000",
+            "actor+0x64:u8 = 0x1a",
+            "z_s16 = y_s16",
+            "actor+0x40:u16 = 0",
+            "actor+0x42:u16 = 0"
+          ]
+        },
+        "state_0x0200": {
+          "animation_update_body": {
+            "first": "0x016536",
+            "last_exclusive": "0x01656e",
+            "sha256": "c5c4d5a0c07c1da109cb45a870c113b5ff6e0886811e258360471d43d066baf9"
+          },
+          "collision_damage_result": "no direct collision or damage writes",
+          "movement_result": "x/y/z unchanged across every Coffee Shop-reachable branch",
+          "nonterminal_order": [
+            "advance generic animation through 0x016536"
+          ],
+          "post_animation_calls": [
+            "0x01d87a",
+            "0x06b2e2",
+            "0x0167ac"
+          ],
+          "source_body": {
+            "first": "0x06d96e",
+            "last_exclusive": "0x06d9a4",
+            "sha256": "34c65e23753ec24acbe2e386b698bb51cd92db64e2f043f62d6b160fc4ca49b1"
+          },
+          "terminal_guard": "signed actor+0x24 animation branch is negative",
+          "terminal_order": [
+            "consume one RNG call at 0x017c5e",
+            "mask result with 0x000e",
+            "read u16 selector at 0x06d9a4 + masked offset",
+            "bind selected sequence through 0x016518",
+            "advance generic animation through 0x016536"
+          ]
+        },
+        "state_dispatch": {
+          "entry": "0x06d926",
+          "source_body_sha256": "1eb3cc243cd1aeda800cd85e7637483dd93204495d22d28206491336c291f940",
+          "state_0_target": "0x06d93a",
+          "state_0x0200_target": "0x06d96e",
+          "table_address": "0x06d932"
+        }
+      },
       "dispatch": "0x06d926",
       "first_segment_calls_before_class4e": 44,
       "fixed_frame_substitute_forbidden": true,

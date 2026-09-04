@@ -746,6 +746,47 @@ def record20_exit_scheduler_phase(
                 "native_projection": native_projection,
                 "equal": source_projection == native_projection,
             })
+    teardown_contract = contract["route_teardown_dispatch_guard"]
+    teardown_frames = (5524, 5550)
+    all_teardown_slots = tuple(
+        value[-6:] for value in teardown_contract["active_source_slots"])
+    native_teardown_slots = {
+        row["source_slot"][-6:] for row in native_rows
+        if int(row["frame"]) in teardown_frames and row["type"] == "20"}
+    teardown_slots = tuple(slot for slot in all_teardown_slots
+                           if slot in native_teardown_slots)
+    missing_native_teardown_slots = tuple(
+        slot for slot in all_teardown_slots if slot not in native_teardown_slots)
+    if teardown_slots != ("ffb180", "ffb300", "ffb480", "ffb500", "ffb600") or \
+            missing_native_teardown_slots != ("ffb100",):
+        raise ValueError("Coffee Shop teardown implementation scope drift")
+    teardown_source = {(int(row["frame"]), row["slot"]): row
+                       for row in source_rows
+                       if int(row["frame"]) in teardown_frames and
+                       row["slot"] in teardown_slots}
+    teardown_native = {
+        (int(row["frame"]), row["source_slot"][-6:]): row
+        for row in native_rows
+        if int(row["frame"]) in teardown_frames and
+        row["source_slot"][-6:] in teardown_slots}
+    teardown_samples = []
+    for frame in teardown_frames:
+        for slot in teardown_slots:
+            if (frame, slot) not in teardown_source or \
+                    (frame, slot) not in teardown_native:
+                raise ValueError(
+                    f"Coffee Shop teardown sample missing {frame}/{slot}")
+            source_projection = project(
+                teardown_source[(frame, slot)], True)
+            native_projection = project(
+                teardown_native[(frame, slot)], False)
+            teardown_samples.append({
+                "source_frame_u16": frame,
+                "source_slot": "0x00" + slot,
+                "source_projection": source_projection,
+                "native_projection": native_projection,
+                "equal": source_projection == native_projection,
+            })
     return {
         "classification": "SOURCE_PROGRAM_DIFFERENTIAL_PASS",
         "source_pool_scheduler": contract["source_pool_scheduler"],
@@ -762,8 +803,170 @@ def record20_exit_scheduler_phase(
         "samples": samples,
         "source_native_projection_equal": all(
             item["equal"] for item in samples),
+        "route_teardown_dispatch_guard": {
+            "classification": "SOURCE_PROGRAM_DIFFERENTIAL_PASS",
+            "route_teardown_state_u16":
+                teardown_contract["route_teardown_state_u16"],
+            "transition_dispatch": teardown_contract["transition_dispatch"],
+            "freeze_frame_range_inclusive_u16":
+                teardown_contract["freeze_frame_range_inclusive_u16"],
+            "central_release_source_frame_u16":
+                teardown_contract["central_release_source_frame_u16"],
+            "active_source_slots":
+                teardown_contract["active_source_slots"],
+            "native_implemented_source_slots": [
+                "0x00" + slot for slot in teardown_slots],
+            "unimplemented_source_slots": [
+                "0x00" + slot for slot in missing_native_teardown_slots],
+            "samples": teardown_samples,
+            "source_native_projection_equal": all(
+                item["equal"] for item in teardown_samples),
+            "fixed_frame_gameplay_authority_forbidden": True,
+            "mutation_control": teardown_contract["mutation_control"],
+        },
         "fixed_frame_gameplay_authority_forbidden": True,
         "mutation_control": contract["mutation_control"],
+    }
+
+
+def class09_complete_program_normalization(
+        source_rows: list[dict[str, str]],
+        native_rows: list[dict[str, str]],
+        runtime_summary: str,
+        contract: dict[str, object]) -> dict[str, object]:
+    """Close the class-0x09 program while preserving one display boundary."""
+    source = [row for row in source_rows
+              if row["slot"] in {"ffb480", "ffb500"} and
+              row["class"] == "09" and 2073 <= int(row["frame"]) <= 5550]
+    native = [row for row in native_rows
+              if row["source_slot"] in {"00ffb480", "00ffb500"} and
+              row["class"] == "09" and 2073 <= int(row["frame"]) <= 5550]
+    if len(source) != 6956 or len(native) != 6956:
+        raise ValueError("Coffee Shop class-0x09 complete-program row drift")
+    source_by_key = {(int(row["frame"]), "00" + row["slot"]): row
+                     for row in source}
+    native_by_key = {(int(row["frame"]), row["source_slot"]): row
+                     for row in native}
+    if set(source_by_key) != set(native_by_key):
+        raise ValueError("Coffee Shop class-0x09 lifetime alignment drift")
+
+    def value(row: dict[str, str], field: str, source_side: bool) -> int:
+        if field in {"state", "substate", "animation_record",
+                     "animation_timer"}:
+            return int(row[field], 16) if source_side else int(row[field], 16)
+        if field in {"x_fp", "y_fp"}:
+            return int(row[field], 16) if source_side else int(row[field])
+        return int(row[field])
+
+    gameplay_fields = ("state", "substate", "x_fp", "y_fp", "z", "facing")
+    presentation_fields = ("animation_record", "animation_timer",
+                           "animation_branch")
+    raw_differences: list[dict[str, object]] = []
+    for key in sorted(source_by_key):
+        source_row = source_by_key[key]
+        native_row = native_by_key[key]
+        if any(value(source_row, field, True) !=
+               value(native_row, field, False) for field in gameplay_fields):
+            raise ValueError(
+                "Coffee Shop class-0x09 gameplay-authority drift " + str(key))
+        changed = [field for field in presentation_fields
+                   if value(source_row, field, True) !=
+                   value(native_row, field, False)]
+        if changed:
+            raw_differences.append({
+                "frame_u16": key[0], "source_slot": "0x" + key[1],
+                "fields": changed,
+                "source_record": "0x%08x" % value(
+                    source_row, "animation_record", True),
+                "native_record": "0x%08x" % value(
+                    native_row, "animation_record", False),
+                "source_timer_u16": value(
+                    source_row, "animation_timer", True),
+                "native_timer_u16": value(
+                    native_row, "animation_timer", False),
+                "source_branch_s16": value(
+                    source_row, "animation_branch", True),
+                "native_branch_s16": value(
+                    native_row, "animation_branch", False),
+            })
+    if [(item["frame_u16"], item["source_slot"]) for item in
+            raw_differences] != [
+                (5493, "0x00ffb480"), (5493, "0x00ffb500")]:
+        raise ValueError("Coffee Shop class-0x09 presentation boundary drift")
+    record_contract = {
+        int(record["animation_record"], 16): record
+        for sequence in contract["animation_sequences"]
+        for record in sequence["records"]}
+    for item in raw_differences:
+        key = (item["frame_u16"], item["source_slot"][2:])
+        source_row = source_by_key[key]
+        native_row = native_by_key[key]
+        source_record = record_contract[value(
+            source_row, "animation_record", True)]
+        native_record = record_contract[value(
+            native_row, "animation_record", False)]
+        if (value(native_row, "animation_record", False) !=
+                value(source_row, "animation_record", True) + 16 or
+                source_record["assembly"] != native_record["assembly"] or
+                source_record["hurt_selector_u8"] !=
+                native_record["hurt_selector_u8"] or
+                source_record["attack_selector_u8"] !=
+                native_record["attack_selector_u8"] or
+                int(native_row["assembly"], 16) !=
+                int(native_record["assembly"], 16) or
+                int(native_row["hurt_selector"]) !=
+                native_record["hurt_selector_u8"] or
+                int(native_row["attack_selector"]) !=
+                native_record["attack_selector_u8"]):
+            raise ValueError(
+                "Coffee Shop class-0x09 visible equivalence drift " + str(key))
+        item["assembly"] = source_record["assembly"]
+        item["hurt_selector_u8"] = source_record["hurt_selector_u8"]
+        item["attack_selector_u8"] = source_record["attack_selector_u8"]
+
+    native_rng = {int(match.group(1)): int(match.group(2), 16)
+                  for match in re.finditer(
+                      r"^scene_rng frame=(\d+) seed=([0-9a-f]{4})$",
+                      runtime_summary, re.MULTILINE)}
+    source_rng_rows = [row for row in csv.DictReader(
+        (ROOT / ".deps" / "mame" /
+         "oracle11_progression_lifecycle_cs17a" /
+         "coffee_shop_rng_calls.tsv").open(newline="", encoding="ascii"),
+        delimiter="\t") if row["class"] == "09" and
+        int(row["frame"]) == 5493]
+    if [int(row["rng_before"], 16) for row in source_rng_rows] != [
+            0x6919, 0x3b54] or native_rng.get(5493) != 0x6919 or \
+            native_rng.get(5494) != 0xb105:
+        raise ValueError("Coffee Shop class-0x09 frame-5493 RNG order drift")
+    if contract["source_rng_call_count_u16"] != 898 or \
+            contract["animation_record_count_u8"] != 10:
+        raise ValueError("Coffee Shop class-0x09 SPEC coverage drift")
+    return {
+        "classification": "MATCHED_SOURCE_PRESENTATION_BOUNDARY_NORMALIZATION",
+        "source_program": "0x06d926/0x06d93a/0x06d96e/0x016518/0x016536",
+        "source_frame_range_u16": [2073, 5550],
+        "source_slots": ["0x00ffb480", "0x00ffb500"],
+        "source_rows_u16": 6956,
+        "source_rng_calls_u16": 898,
+        "reachable_branches_closed": ["state-0 initialization",
+                                       "state-0x0200 nonterminal",
+                                       "state-0x0200 terminal/RNG selection"],
+        "raw_presentation_differences": raw_differences,
+        "raw_difference_count_u8": len(raw_differences),
+        "gameplay_authority_projection_equal": True,
+        "rng_order_equal": True,
+        "next_frame_full_projection_equal": True,
+        "visible_output_equivalent": True,
+        "audible_output_equivalent": True,
+        "presentation_only": True,
+        "mutation_control": (
+            "changing the terminal record assembly, hurt selector, attack "
+            "selector, RNG order, or next-frame projection rejects the "
+            "normalization"),
+        "blanket_animation_ignore_forbidden": True,
+        "fixed_frame_or_slot_override_forbidden": True,
+        "retained_gameplay_authority": False,
+        "next_unexplained_actor_divergence_frame_u16": None,
     }
 
 
@@ -1640,9 +1843,68 @@ def validate_report(report: dict[str, object]) -> None:
         len(record20_phase["samples"]) != 12 or
         not record20_phase["source_native_projection_equal"] or
         any(not item["equal"] for item in record20_phase["samples"]) or
+        record20_phase["route_teardown_dispatch_guard"][
+            "classification"] != "SOURCE_PROGRAM_DIFFERENTIAL_PASS" or
+        record20_phase["route_teardown_dispatch_guard"][
+            "route_teardown_state_u16"] != 0 or
+        record20_phase["route_teardown_dispatch_guard"][
+            "freeze_frame_range_inclusive_u16"] != [5524, 5550] or
+        record20_phase["route_teardown_dispatch_guard"][
+            "central_release_source_frame_u16"] != 5551 or
+        len(record20_phase["route_teardown_dispatch_guard"][
+            "active_source_slots"]) != 6 or
+        len(record20_phase["route_teardown_dispatch_guard"][
+            "native_implemented_source_slots"]) != 5 or
+        record20_phase["route_teardown_dispatch_guard"][
+            "unimplemented_source_slots"] != ["0x00ffb100"] or
+        len(record20_phase["route_teardown_dispatch_guard"][
+            "samples"]) != 10 or
+        not record20_phase["route_teardown_dispatch_guard"][
+            "source_native_projection_equal"] or
+        any(not item["equal"] for item in record20_phase[
+            "route_teardown_dispatch_guard"]["samples"]) or
+        not record20_phase["route_teardown_dispatch_guard"][
+            "fixed_frame_gameplay_authority_forbidden"] or
         not record20_phase["fixed_frame_gameplay_authority_forbidden"]):
         raise ValueError("Coffee Shop record-20 scheduler phase drift: " +
                          json.dumps(record20_phase, sort_keys=True))
+    class09_program = report["native_capture"][
+        "class09_complete_program"]
+    if (class09_program["classification"] !=
+            "MATCHED_SOURCE_PRESENTATION_BOUNDARY_NORMALIZATION" or
+            class09_program["source_program"] !=
+            "0x06d926/0x06d93a/0x06d96e/0x016518/0x016536" or
+            class09_program["source_frame_range_u16"] != [2073, 5550] or
+            class09_program["source_slots"] != [
+                "0x00ffb480", "0x00ffb500"] or
+            class09_program["source_rows_u16"] != 6956 or
+            class09_program["source_rng_calls_u16"] != 898 or
+            len(class09_program["reachable_branches_closed"]) != 3 or
+            class09_program["raw_difference_count_u8"] != 2 or
+            [(item["frame_u16"], item["source_slot"]) for item in
+             class09_program["raw_presentation_differences"]] != [
+                (5493, "0x00ffb480"), (5493, "0x00ffb500")] or
+            [(item["assembly"], item["hurt_selector_u8"],
+              item["attack_selector_u8"]) for item in
+             class09_program["raw_presentation_differences"]] != [
+                ("0x0006dd26", 1, 1), ("0x0006ddb0", 1, 1)] or
+            any(item["fields"] != ["animation_record", "animation_timer",
+                                   "animation_branch"]
+                for item in class09_program[
+                    "raw_presentation_differences"]) or
+            not class09_program["gameplay_authority_projection_equal"] or
+            not class09_program["rng_order_equal"] or
+            not class09_program["next_frame_full_projection_equal"] or
+            not class09_program["visible_output_equivalent"] or
+            not class09_program["audible_output_equivalent"] or
+            not class09_program["presentation_only"] or
+            not class09_program["blanket_animation_ignore_forbidden"] or
+            not class09_program["fixed_frame_or_slot_override_forbidden"] or
+            class09_program["retained_gameplay_authority"] or
+            class09_program[
+                "next_unexplained_actor_divergence_frame_u16"] is not None):
+        raise ValueError("Coffee Shop class-0x09 complete-program drift: " +
+                         json.dumps(class09_program, sort_keys=True))
     airborne_button1 = report["native_capture"][
         "airborne_button1_presentation"]
     if (not airborne_button1["source_native_semantic_equal"] or
@@ -1674,6 +1936,9 @@ def main() -> None:
         if item["type"] == 20 and item["class"] == "0x02")
     record20_prefix_contract = class02_contract["scheduler_phase_evidence"][
         "record20_exit_prefix_scheduler"]
+    class09_contract = fixtures["authority_data"]["auxiliary"][
+        "first_segment_dependencies"]["class_0x09_type20_rng_owner"][
+            "complete_coffee_shop_program"]
     source_actor_sha256 = hashlib.sha256(SOURCE_ACTORS.read_bytes()).hexdigest()
     expected_source_actor_sha256 = source["capture_identity"][
         "completion_a"]["coffee_shop_scene_actors.tsv"]
@@ -1794,6 +2059,10 @@ def main() -> None:
                                record20_exit_scheduler_phase(
                                    source_rows, rows,
                                    record20_prefix_contract),
+                           "class09_complete_program":
+                               class09_complete_program_normalization(
+                                   source_rows, rows, runtime_summary,
+                                   class09_contract),
                            "airborne_button1_presentation":
                                airborne_button1_presentation_chronology(
                                    source_rows, rows),

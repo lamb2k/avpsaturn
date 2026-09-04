@@ -11876,6 +11876,10 @@ static int avsp_round1_step_scheduler_post_player_mask(
                 runtime->pools[pool_index].source_base +
                 slot_index * runtime->pools[pool_index].stride);
             if ((actor->type == 20u &&
+                 runtime->route_state ==
+                    avsp_round1_coffee_exit.route_teardown &&
+                 runtime->entry.exit_route_updates != 0u) ||
+                (actor->type == 20u &&
                  actor->source_slot < 0x00ffb600UL &&
                  record20_prefix_phase_active &&
                  !include_record20_prefix) ||

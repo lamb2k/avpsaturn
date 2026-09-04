@@ -156,6 +156,31 @@ item = copy.deepcopy(BASE)
 item["native_capture"]["record20_exit_scheduler_phase"][
     "source_phase_split_after_slot"] = "0x00ffb600"
 mutations.append(("record20 exit phase split", item))
+item = copy.deepcopy(BASE)
+item["native_capture"]["record20_exit_scheduler_phase"][
+    "route_teardown_dispatch_guard"]["samples"][0]["equal"] = False
+mutations.append(("record20 route-teardown dispatch", item))
+item = copy.deepcopy(BASE)
+item["native_capture"]["record20_exit_scheduler_phase"][
+    "route_teardown_dispatch_guard"][
+        "fixed_frame_gameplay_authority_forbidden"] = False
+mutations.append(("record20 route-teardown fixed-frame substitute", item))
+item = copy.deepcopy(BASE)
+item["native_capture"]["class09_complete_program"][
+    "gameplay_authority_projection_equal"] = False
+mutations.append(("class09 gameplay-authority normalization", item))
+item = copy.deepcopy(BASE)
+item["native_capture"]["class09_complete_program"][
+    "raw_presentation_differences"][0]["assembly"] = "0x0006dd44"
+mutations.append(("class09 visible presentation equivalence", item))
+item = copy.deepcopy(BASE)
+item["native_capture"]["class09_complete_program"][
+    "rng_order_equal"] = False
+mutations.append(("class09 RNG order", item))
+item = copy.deepcopy(BASE)
+item["native_capture"]["class09_complete_program"][
+    "next_frame_full_projection_equal"] = False
+mutations.append(("class09 next-frame projection", item))
 
 for label, mutant in mutations:
     try:
