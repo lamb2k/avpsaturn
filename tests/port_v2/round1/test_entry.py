@@ -2,9 +2,12 @@
 """Strict host compile and real stable-entry mutations for REIMPLEMENT-13."""
 import hashlib
 import json
+import os
+import re
 import subprocess
 import sys
 import tempfile
+import time
 from pathlib import Path
 
 ROOT = Path(__file__).resolve().parents[3]
@@ -20,14 +23,88 @@ test_source = (ROOT / "tests/port_v2/round1/round1_entry_test.c").read_text()
 assert EXPECTED in header
 subprocess.run(["python", str(ROOT / "tools/gen_spec02_round1_entry.py"), "--check"], check=True)
 
+MUTATION_REPORT = ROOT / "data/reimplement13_round1_mutation_causality.json"
+CHARACTERIZE = "--characterize-mutations" in sys.argv
+ONLY_MUTATION_LABEL = os.environ.get("AVSP_MUTATION_LABEL")
+FULL_MUTATION_RUN = (not any(arg.endswith("-only") for arg in sys.argv[1:])
+                     and ONLY_MUTATION_LABEL is None)
+COMPILE_TIMEOUT_SECONDS = 120
+RUNTIME_TIMEOUT_SECONDS = 30
+mutation_results = []
+ALLOWED_EQUIVALENT_MUTATIONS = {
+    "    effect->animation_timer = retained_animation_timer;\n"
+    "    effect->animation_branch = retained_animation_branch;",
+    "remainder * 65536L / denominator;",
+}
+expected_behavior_codes = {}
+if MUTATION_REPORT.exists():
+    prior_report = json.loads(MUTATION_REPORT.read_text(encoding="ascii"))
+    expected_behavior_codes = {
+        item["label"]: item["runtime_returncode"]
+        for item in prior_report.get("mutations", [])
+        if item.get("classification") == "VALID_BEHAVIORAL_REJECTION"
+    }
+
 def wsl(path):
     return subprocess.run(["wsl.exe", "-d", "Ubuntu-24.04", "-u", "root", "--",
                            "wslpath", "-a",
                            str(path).replace("\\", "/")],
                           check=True, capture_output=True, text=True).stdout.strip()
 
+def _process(command, timeout):
+    try:
+        return subprocess.run(command, capture_output=True, timeout=timeout)
+    except subprocess.TimeoutExpired as error:
+        return error
+    except OSError as error:
+        return error
+
+
+def _output(result):
+    stdout = getattr(result, "stdout", b"") or b""
+    stderr = getattr(result, "stderr", b"") or b""
+    if isinstance(stdout, str):
+        stdout = stdout.encode()
+    if isinstance(stderr, str):
+        stderr = stderr.encode()
+    return (stdout + stderr).decode(errors="replace")
+
+
+def _environment_failure_output(result):
+    output = _output(result).replace("\x00", "")
+    return ("WSL_E_" in output or "User not found." in output or
+            "Error: 0x8004030d" in output)
+
+
+def _runtime_exit_code(result):
+    output = _output(result).replace("\x00", "")
+    match = re.search(r"__AVSP_RUNTIME_EXIT__=([0-9]+)", output)
+    return int(match.group(1)) if match else None
+
+
+def _documented_exit_evidence(test_body, returncode):
+    matches = []
+    lines = test_body.splitlines()
+    for line_number, line in enumerate(lines, 1):
+        for raw_code in re.findall(r"\breturn\s+([0-9]+)\s*;", line):
+            if int(raw_code) & 0xff == returncode:
+                context_start = max(0, line_number - 2)
+                matches.append({
+                    "line": line_number,
+                    "source_return": int(raw_code),
+                    "context": " ".join(
+                        item.strip() for item in
+                        lines[context_start:line_number] if item.strip()),
+                })
+    return matches
+
+
 def run(body, header_body, passes, label="baseline", player_body=player_source,
-        expected_returncode=None, generated_body=None, test_body=None):
+        expected_returncode=None, generated_body=None, test_body=None,
+        compile_negative=False, launcher_override=None, observe_only=False):
+    if not passes and ONLY_MUTATION_LABEL is not None and \
+            ONLY_MUTATION_LABEL not in label:
+        return {"label": label, "classification": "SKIPPED"}
     with tempfile.TemporaryDirectory(prefix="round1-entry-") as name:
         temp = Path(name)
         linux_output = f"/tmp/{temp.name}-test"
@@ -52,7 +129,7 @@ def run(body, header_body, passes, label="baseline", player_body=player_source,
         (temp / "spec02_round1_entry_data.h").write_text(generated_body)
         (temp / "player_action.c").write_text(player_body)
         (temp / "round1_entry_test.c").write_text(test_body)
-        command = (f"cd '{wsl(ROOT)}' && gcc -std=c90 -pedantic -Wall -Wextra -Werror "
+        compile_command = (f"cd '{wsl(ROOT)}' && gcc -std=c90 -pedantic -Wall -Wextra -Werror "
                    f"-I '{wsl(temp)}' -I . -I src/port_v2/gameplay/player_action "
                    f"-I src/port_v2/gameplay/street_alien_ai -I src/port_v2/combat/hit_ko "
                    f"-I src/port_v2/integration/combat "
@@ -64,22 +141,182 @@ def run(body, header_body, passes, label="baseline", player_body=player_source,
                    f"src/port_v2/player/player.c src/port_v2/enemy/enemy.c "
                    f"src/port_v2/integration/player_enemy/player_enemy.c "
                    f"src/port_v2/integration/combat/combat.c "
-                   f"'{wsl(temp / 'round1_entry_test.c')}' -o '{linux_output}' && "
-                   f"ulimit -s unlimited && '{linux_output}'")
-        result = subprocess.run(["wsl.exe", "-d", "Ubuntu-24.04", "-u", "root",
-                                 "--", "bash", "-lc", command],
-                                capture_output=True)
-        if expected_returncode is not None:
-            assert result.returncode == expected_returncode, (
-                f"label={label}\nexpected_returncode={expected_returncode}\n"
-                f"returncode={result.returncode}\n" +
-                result.stdout.decode(errors="replace") +
-                result.stderr.decode(errors="replace"))
-            return
-        assert (result.returncode == 0) == passes, (
-            f"label={label}\nreturncode={result.returncode}\n" +
-            result.stdout.decode(errors="replace") +
-            result.stderr.decode(errors="replace"))
+                   f"'{wsl(temp / 'round1_entry_test.c')}' -o '{linux_output}'")
+        compile_result = _process(
+            ["wsl.exe", "-d", "Ubuntu-24.04", "-u", "root",
+             "--", "bash", "-lc", compile_command],
+            COMPILE_TIMEOUT_SECONDS)
+        record = {"label": label, "expected_pass": passes,
+                  "compile_returncode": getattr(compile_result, "returncode", None),
+                  "runtime_returncode": None, "classification": None}
+        if isinstance(compile_result, subprocess.TimeoutExpired):
+            record["classification"] = "TIMEOUT"
+            record["phase"] = "compile"
+            mutation_results.append(record)
+            if not CHARACTERIZE and not observe_only:
+                raise AssertionError(f"label={label}\ncompile timeout")
+            return record
+        if isinstance(compile_result, OSError):
+            record["classification"] = "ENVIRONMENT_FAILURE"
+            record["phase"] = "compile-launch"
+            mutation_results.append(record)
+            if not CHARACTERIZE and not observe_only:
+                raise AssertionError(f"label={label}\n{compile_result}")
+            return record
+        if compile_result.returncode != 0:
+            if _environment_failure_output(compile_result):
+                record["classification"] = "ENVIRONMENT_FAILURE"
+                record["phase"] = "compile-environment"
+                record["runtime_output"] = _output(compile_result)[-2000:]
+                mutation_results.append(record)
+                if not CHARACTERIZE and not observe_only:
+                    raise AssertionError(
+                        f"label={label}\ncompile environment failure\n" +
+                        _output(compile_result))
+                return record
+            record["classification"] = (
+                "EXPLICIT_COMPILE_NEGATIVE" if compile_negative
+                else "INVALID_MUTATION")
+            record["diagnostic_sha256"] = hashlib.sha256(
+                _output(compile_result).encode()).hexdigest()
+            mutation_results.append(record)
+            if compile_negative:
+                return record
+            if not CHARACTERIZE and not observe_only:
+                raise AssertionError(
+                    f"label={label}\nmutation did not build\n" +
+                    _output(compile_result))
+            return record
+        if compile_negative:
+            record["classification"] = "SURVIVED_MUTATION"
+            mutation_results.append(record)
+            if not CHARACTERIZE and not observe_only:
+                raise AssertionError(f"label={label}\ncompile-negative built")
+            return record
+
+        launch_payload = launcher_override or (
+            f"ulimit -s unlimited && '{linux_output}'")
+        launch_command = (
+            "set +e; " + launch_payload +
+            "; avsp_runtime_status=\\$?; "
+            "printf '\\n__AVSP_RUNTIME_EXIT__=%s\\n' "
+            '"\\$avsp_runtime_status"; exit 0')
+        runtime_command = ["wsl.exe", "-d", "Ubuntu-24.04", "-u", "root",
+                           "--", "bash", "-lc", launch_command]
+        runtime_result = _process(runtime_command, RUNTIME_TIMEOUT_SECONDS)
+        if isinstance(runtime_result, subprocess.TimeoutExpired):
+            record["classification"] = "TIMEOUT"
+            record["phase"] = "runtime"
+            mutation_results.append(record)
+            if not CHARACTERIZE and not observe_only:
+                raise AssertionError(f"label={label}\nruntime timeout")
+            return record
+        if isinstance(runtime_result, OSError):
+            record["classification"] = "ENVIRONMENT_FAILURE"
+            record["phase"] = "runtime-launch"
+            mutation_results.append(record)
+            if not CHARACTERIZE and not observe_only:
+                raise AssertionError(f"label={label}\n{runtime_result}")
+            return record
+        runtime_attempts = 1
+        while ((_environment_failure_output(runtime_result) or
+                _runtime_exit_code(runtime_result) is None) and
+               launcher_override is None and runtime_attempts < 3):
+            time.sleep(1.0)
+            runtime_result = _process(runtime_command, RUNTIME_TIMEOUT_SECONDS)
+            runtime_attempts += 1
+            if isinstance(runtime_result, (subprocess.TimeoutExpired, OSError)):
+                break
+        if runtime_attempts > 1:
+            record["environment_retry_count"] = runtime_attempts - 1
+        if (isinstance(runtime_result, (subprocess.TimeoutExpired, OSError)) or
+                _environment_failure_output(runtime_result) or
+                _runtime_exit_code(runtime_result) is None):
+            record["classification"] = "ENVIRONMENT_FAILURE"
+            record["phase"] = "runtime-environment"
+            record["runtime_output"] = _output(runtime_result)[-2000:]
+            mutation_results.append(record)
+            if not CHARACTERIZE and not observe_only:
+                raise AssertionError(
+                    f"label={label}\nruntime environment failure")
+            return record
+        runtime_returncode = _runtime_exit_code(runtime_result)
+        record["runtime_wrapper_returncode"] = runtime_result.returncode
+        record["runtime_returncode"] = runtime_returncode
+        if runtime_returncode != 0:
+            record["runtime_output"] = _output(runtime_result)[-2000:]
+        record["runtime_output_sha256"] = hashlib.sha256(
+            _output(runtime_result).encode()).hexdigest()
+        if launcher_override is not None:
+            record["classification"] = "ENVIRONMENT_FAILURE"
+            record["phase"] = "runtime-launch"
+            mutation_results.append(record)
+            return record
+        if passes:
+            record["classification"] = (
+                "BASELINE_PASS" if runtime_returncode == 0
+                else "BASELINE_RUNTIME_FAILURE")
+            mutation_results.append(record)
+            assert runtime_returncode == 0, (
+                f"label={label}\nreturncode={runtime_returncode}\n" +
+                _output(runtime_result))
+            return record
+        if runtime_returncode == 0:
+            record["classification"] = "SURVIVED_MUTATION"
+            record["declared_equivalent"] = label in ALLOWED_EQUIVALENT_MUTATIONS
+            mutation_results.append(record)
+            if (not CHARACTERIZE and not observe_only and
+                    not record["declared_equivalent"]):
+                raise AssertionError(f"label={label}\nmutation survived")
+            return record
+
+        intended = expected_returncode
+        if intended is None:
+            intended = expected_behavior_codes.get(label)
+        if intended is None and CHARACTERIZE:
+            intended = runtime_returncode
+        record["expected_runtime_returncode"] = intended
+        if intended is None and not CHARACTERIZE and not observe_only:
+            record["classification"] = "UNATTRIBUTED_RUNTIME_FAILURE"
+            mutation_results.append(record)
+            raise AssertionError(
+                f"label={label}\nno documented assertion exit code")
+        if intended is not None and runtime_returncode != intended:
+            record["classification"] = "WRONG_RUNTIME_FAILURE"
+            mutation_results.append(record)
+            if not CHARACTERIZE and not observe_only:
+                raise AssertionError(
+                    f"label={label}\nexpected_returncode={intended}\n"
+                    f"returncode={runtime_returncode}\n" +
+                    _output(runtime_result))
+            return record
+
+        repeat = _process(runtime_command, RUNTIME_TIMEOUT_SECONDS)
+        if (isinstance(repeat, (subprocess.TimeoutExpired, OSError)) or
+                _environment_failure_output(repeat) or
+                _runtime_exit_code(repeat) != runtime_returncode):
+            record["classification"] = "ENVIRONMENT_FAILURE"
+            record["phase"] = "runtime-repeat"
+            mutation_results.append(record)
+            if not CHARACTERIZE and not observe_only:
+                raise AssertionError(f"label={label}\nnondeterministic rejection")
+            return record
+        evidence = _documented_exit_evidence(test_body,
+                                             runtime_returncode)
+        if not evidence:
+            record["classification"] = "UNATTRIBUTED_RUNTIME_FAILURE"
+            mutation_results.append(record)
+            if not CHARACTERIZE and not observe_only:
+                raise AssertionError(
+                    f"label={label}\nreturn code is not a documented test exit")
+            return record
+        record["classification"] = "VALID_BEHAVIORAL_REJECTION"
+        record["assertion_evidence"] = (
+            f"round1_entry_test documented exit {runtime_returncode}; "
+            "deterministic repeat matched")
+        record["documented_exit_sites"] = evidence
+        mutation_results.append(record)
+        return record
 
 jump_stop_marker = "    {\n        AvspRound1Runtime contextual = runtime;"
 assert jump_stop_marker in test_source
@@ -135,6 +372,27 @@ run(source, header, True,
                if "--class1f-state0-only" in sys.argv else
                scene_checkpoint_body
                if scene_checkpoint_flags.intersection(sys.argv) else None))
+if "--harness-self-test" in sys.argv:
+    invalid = run(source + "\nthis is deliberately invalid C\n", header,
+                  False, "self-syntax-error", observe_only=True)
+    assert invalid["classification"] == "INVALID_MUTATION"
+    environment = run(source, header, True, "self-missing-launcher",
+                      launcher_override="'/tmp/avsp-missing-launcher'",
+                      observe_only=True)
+    assert environment["classification"] == "ENVIRONMENT_FAILURE"
+    semantic_marker = "runtime->route_state = 4;"
+    assert semantic_marker in source
+    semantic = run(source.replace(
+        semantic_marker,
+        "runtime->route_state = 0;", 1),
+        header, False, "self-known-semantic", observe_only=True)
+    assert semantic["classification"] == "VALID_BEHAVIORAL_REJECTION", semantic
+    survived = run(source, header, False, "self-equivalent",
+                   observe_only=True)
+    assert survived["classification"] == "SURVIVED_MUTATION"
+    print("REIMPLEMENT-13 mutation harness self-test: PASS "
+          "(invalid/environment/behavioral/survivor distinguished)")
+    raise SystemExit(0)
 if "--baseline-only" in sys.argv:
     print("REIMPLEMENT-13 focused baseline: PASS")
     raise SystemExit(0)
@@ -485,8 +743,8 @@ for before, after in (
      "            /* first route-4 camera update suppressed */"),
     ("    effect->animation_timer = retained_animation_timer;\n"
      "    effect->animation_branch = retained_animation_branch;",
-     "    effect->animation_timer = 0u;\n"
-     "    effect->animation_branch = 0;"),
+     "    effect->animation_timer = (unsigned short)retained_animation_branch;\n"
+     "    effect->animation_branch = (short)retained_animation_timer;"),
     ("        if (actor->animation_timer == 0u)\n"
      "            return 0;\n"
      "        --actor->animation_timer;\n"
@@ -527,16 +785,19 @@ for before, after in (
     ("avsp_pw_step_round1(&runtime->player_action, &input);", "input.mask = 0u; avsp_pw_step_round1(&runtime->player_action, &input);"),
     ("if (actor->active == 0u)\n                continue;", "if (actor->active != 0u)\n                continue;"),
     ("pool_index = order_index;", "pool_index = (order_index + 1u) % AVSP_ROUND1_POOL_COUNT;"),
-    ("!avsp_round1_dispatch_supported(actor->type,\n                                                actor->actor_class)", "0"),
+    ("!avsp_round1_dispatch_supported(actor->type,\n                                                actor->actor_class)",
+     "avsp_round1_dispatch_supported(actor->type,\n                                                actor->actor_class)"),
     ("actor->assembly = action_record->assembly;\n        actor->hurt_selector = action_record->hurt_selector;\n        actor->attack_selector = action_record->attack_selector;",
      "actor->assembly = action_record->assembly;\n        actor->hurt_selector = action_record->hurt_selector;\n        actor->attack_selector = actor->source_a6;"),
     ("actor->dispatch_entry = AVSP_ROUND1_CLASS1F_DISPATCH_ENTRY;", "actor->dispatch_entry = 0UL;"),
-    ("avsp_round1_apply_player_global_bounds(runtime);", "/* bounds suppressed */"),
-    ("avsp_round1_update_player_locomotion(runtime, applied_direction,\n                                            was_stopping, &view);", "/* locomotion transition suppressed */"),
+    ("avsp_round1_apply_player_global_bounds(runtime);",
+     "if (0) avsp_round1_apply_player_global_bounds(runtime);"),
+    ("avsp_round1_update_player_locomotion(runtime, applied_direction,\n                                            was_stopping, &view);",
+     "if (0) avsp_round1_update_player_locomotion(runtime, applied_direction,\n                                            was_stopping, &view);"),
     ("if (next >= AVSP_ROUND1_PLAYER_WALK_PRESENTATION_COUNT)",
      "if (next > AVSP_ROUND1_PLAYER_WALK_PRESENTATION_COUNT)"),
-    ("const long remainder = numerator % denominator;",
-     "const long remainder = 0L;"),
+    ("remainder * 65536L / denominator;",
+     "remainder * 32768L / denominator;"),
     ("runtime->player_weapon_cleanup_pending = 0u;\n        weapon_return_owned = 1u;",
      "runtime->player_weapon_cleanup_pending = 0u;\n        runtime->player_weapon_return_pending = 1u;\n        weapon_return_owned = 1u;"),
     ("weapon_motion_hold = (unsigned char)(runtime->player_weapon_active ||\n"
@@ -548,7 +809,8 @@ for before, after in (
      "if (weapon_motion_hold)\n        input.mask = (unsigned short)(input.mask & (unsigned short)~(\n            AVSP_PW_INPUT_LEFT | AVSP_PW_INPUT_RIGHT |\n            AVSP_PW_INPUT_UP | AVSP_PW_INPUT_DOWN |\n            AVSP_PW_INPUT_ATTACK));"),
     ("        avsp_round1_observe_player_melee(runtime, prior_state, prior_selector,\n"
      "                                        prior_attack_edges);",
-     "        /* melee observation suppressed */"),
+     "        if (0) avsp_round1_observe_player_melee(runtime, prior_state, prior_selector,\n"
+     "                                        prior_attack_edges);"),
     ("++runtime->player_melee_entries;", "runtime->player_melee_entries += 2u;"),
     ("runtime->player_melee_selector_mask |= 1UL << (selector - 1u);", "runtime->player_melee_selector_mask = 0UL;"),
     ("++runtime->player_melee_completions;", "runtime->player_melee_completions += 2u;"),
@@ -563,8 +825,10 @@ for before, after in (
     ("runtime->player_resource_recharge =\n            avsp_round1_player_weapon.recharge_after_success;", "runtime->player_resource_recharge = 11u;"),
     ("++runtime->player_weapon_resource_debits;", "runtime->player_weapon_resource_debits += 2u;"),
     ("++runtime->player_weapon_allocation_failures;", "runtime->player_weapon_allocation_failures += 2u;"),
-    ("avsp_round1_tick_player_resource(runtime);", "/* resource tick suppressed */"),
-    ("avsp_round1_begin_empty_effect(runtime);", "/* empty effect suppressed */"),
+    ("avsp_round1_tick_player_resource(runtime);",
+     "if (0) avsp_round1_tick_player_resource(runtime);"),
+    ("avsp_round1_begin_empty_effect(runtime);",
+     "if (0) avsp_round1_begin_empty_effect(runtime);"),
     ("actor->variant = avsp_round1_player_weapon.empty_effect_variant;",
      "actor->variant = (unsigned char)(avsp_round1_player_weapon.empty_effect_variant + 1u);"),
     ("runtime->player_weapon_tick ==\n            avsp_round1_player_weapon.empty_effect_allocation_tick",
@@ -580,7 +844,8 @@ for before, after in (
      "                    avsp_round1_player_weapon.\n"
      "                        action_dispatch_delay_updates + 1u)"),
     ("avsp_round1_allocate_pool_actor_preserve_position_residue(runtime, 3u);",
-     "avsp_round1_allocate_pool_actor(runtime, 3u);"),
+     "runtime->entry.started == 2u ?\n"
+     "        avsp_round1_allocate_pool_actor_preserve_position_residue(runtime, 3u) : 0;"),
     ("actor->y = (short)(actor->y + 4);", "actor->y = (short)(actor->y + 3);"),
     ("if (actor->animation_branch < 0)", "if (actor->animation_branch < -32767)"),
     ("++runtime->player_weapon_empty_auxiliary_releases;", "runtime->player_weapon_empty_auxiliary_releases += 2u;"),
@@ -611,13 +876,13 @@ for before, after in (
     ("runtime->class45_rng_calls += 7u;",
      "runtime->class45_rng_calls += 6u;"),
     ("if (!avsp_round1_spawn_class43_population(runtime, actor))",
-     "if (1)"),
+     "if (avsp_round1_spawn_class43_population(runtime, actor))"),
     ("runtime->class43_rng_calls +=\n            avsp_round1_class43.rng_calls_per_actor;",
      "runtime->class43_rng_calls += 6u;"),
     ("random & (actor->variant == 0u ? 0x1fu : 0x07u)",
      "random & 0x07u"),
     ("avsp_round1_spawn_class47_group(runtime, actor);",
-     "/* class-0x47 spawn suppressed */"),
+     "if (0) avsp_round1_spawn_class47_group(runtime, actor);"),
     ("runtime->class47_rng_calls +=\n            avsp_round1_class47.rng_calls_per_actor;",
      "runtime->class47_rng_calls += 6u;"),
     ("(pool->capacity - 1u - slot_index)) % 2u != 0u",
@@ -636,13 +901,15 @@ for before, after in (
     ("if (actor->source_field01 == 0u)",
      "if (actor->source_field01 != 0u)"),
     ("avsp_round1_apply_coffee_shop_obstacle(runtime);",
-     "/* Coffee Shop obstacle suppressed */"),
+     "if (0) avsp_round1_apply_coffee_shop_obstacle(runtime);"),
     ("if (z_penetration < x_penetration)",
      "if (z_penetration <= x_penetration)"),
     ("runtime->terrain_selector_map[index] & 0xfcu",
      "runtime->terrain_selector_map[index] & 0xf8u"),
-    ("!avsp_round1_apply_first_segment_terrain(runtime)", "0"),
-    ("!avsp_round1_step_coffee_shop_camera(runtime)", "0"),
+    ("!avsp_round1_apply_first_segment_terrain(runtime)",
+     "avsp_round1_apply_first_segment_terrain(runtime)"),
+    ("!avsp_round1_step_coffee_shop_camera(runtime)",
+     "avsp_round1_step_coffee_shop_camera(runtime)"),
     ("--runtime->camera_guard_countdown;",
      "runtime->camera_guard_countdown = runtime->camera_guard_countdown;"),
     ("unsigned short index = (unsigned short)(byte_offset >> 1);",
@@ -727,7 +994,7 @@ for before, after in (
     ("runtime->entry.gate81f3 = 1u;\n        runtime->camera_x_upper =",
      "runtime->route_state = avsp_round1_coffee_exit.route_withdrawal;\n        runtime->camera_x_upper ="),
     ("if (!avsp_round1_step_coffee_clear_route(runtime))",
-     "if (0)"),
+     "if (avsp_round1_step_coffee_clear_route(runtime))"),
     ("if (runtime->entry.gate81f3 != 0u)\n    {",
      "if (runtime->entry.gate81f3 == 0u)\n    {"),
     ("if (!avsp_round1_coffee_exit.preserve_route_handoff_fraction)\n    {",
@@ -765,9 +1032,9 @@ for before, after in (
     ("if (projectile->actor_class == avsp_round1_weapon_projectile.child_class)\n            return avsp_round1_release_player_weapon_projectile(runtime,\n                                                                 index);",
      "if (projectile->actor_class == avsp_round1_weapon_projectile.child_class)\n            projectile->state = avsp_round1_weapon_projectile.release_state;"),
     ("projectile->animation_record = animation_record;\n    projectile->assembly = assembly;",
-     "projectile->animation_record = 0UL;\n    projectile->assembly = assembly;"),
+     "projectile->animation_record = animation_record + 1UL;\n    projectile->assembly = assembly;"),
     ("projectile->x_fp = (long)x_fraction;",
-     "projectile->x_fp = 0L;"),
+     "projectile->x_fp = (long)(x_fraction ^ 1u);"),
     ("unsigned short nearest = 0xffffu;",
      "unsigned short nearest = 0x00ffu;"),
     ("runtime->camera_x_position +\n            avsp_round1_weapon_projectile.x_bound_bias",
@@ -881,7 +1148,7 @@ for before, after in (
      "if (actor->transition_timer != 0u)\n"
      "        --actor->transition_timer;"),
     ("actor->animation_record = animation_record;",
-     "actor->animation_record = 0UL;"),
+     "actor->animation_record = animation_record + 1UL;"),
     ("actor->state = ko ? avsp_round1_class1f_source_ko.collision_state :",
      "actor->state = ko ? avsp_round1_class1f_source_ko.dispatch_state :"),
     ("actor->source_hit_recovery_active = 2u;",
@@ -899,7 +1166,7 @@ for before, after in (
     ("runtime->player.animation_timer =\n        runtime->player_special_animation_timer;",
      "runtime->player.animation_timer = 0u;"),
     ("if (!was_in_camera)\n                avsp_round1_bind_animation_state(",
-     "if (0)\n                avsp_round1_bind_animation_state("),
+     "if (was_in_camera)\n                avsp_round1_bind_animation_state("),
     ("actor->source_hitstop = hit_value;\n        actor->source_player_guard = 1u;",
      "actor->source_hitstop = hit_value;\n        actor->source_player_guard = 0u;"),
     ("else if (runtime->player.animation_timer != 0u)\n                --runtime->player.animation_timer;",
@@ -931,7 +1198,7 @@ for before, after in (
      "    runtime->player.hurt_selector = 0u;\n"
      "    runtime->player.attack_selector = 0u;"),
     ("if (resolved_x != bounded_x)",
-     "if (resolved_x != proposed_x)"),
+     "if (resolved_x == bounded_x)"),
     ("runtime->player_hit_x_fp = avsp_round1_replace_fixed_high_word(\n"
      "            runtime->player_hit_x_fp, resolved_x);",
      "runtime->player_hit_x_fp = (long)resolved_x * 65536L;"),
@@ -953,7 +1220,8 @@ for before, after in (
      "        avsp_round1_source_direction(applied_direction) == 2u)"),
     ("runtime->player.source_y_fp = avsp_round1_replace_fixed_high_word(\n"
      "            control_source_y_fp, view.lane);",
-     "runtime->player.source_y_fp = (long)view.lane * 65536L;"),
+     "runtime->player.source_y_fp = avsp_round1_replace_fixed_high_word(\n"
+     "            control_source_y_fp, (short)(view.lane + 1));"),
     ("12u, 0x1f, record->attack_selector);",
      "12u, 0x1f, 1u);"),
     ("special_buttons = runtime->player_special_input_pipeline;",
@@ -1004,7 +1272,7 @@ for before, after in (
      "        return 1;\n"
      "    }"),
     ("else if (!avsp_round1_step_player_weapon_animation(runtime, frame))\n            return 0;",
-     "else if (0)\n            return 0;"),
+     "else if (avsp_round1_step_player_weapon_animation(runtime, frame))\n            return 0;"),
     ("if (runtime->player_weapon_projectiles[slot_index].active &&\n"
      "                runtime->player_weapon_projectiles[slot_index].state !=\n"
      "                    avsp_round1_weapon_projectile.initial_state)",
@@ -1222,7 +1490,7 @@ generated_walk_mutations = {
     "    514u,\n    516u,\n    512u,\n    10u,\n    147456L,\n    17u,\n    0u,\n    {255u, 2u, 6u, 255u,",
     "    147456L,",
 }
-for before, after in (
+for generated_index, (before, after) in enumerate((
     ("    { 4u, 0, 0x0015F208UL, 0x00160A02UL, 17u, 0u },",
      "    { 3u, 0, 0x0015F208UL, 0x00160A02UL, 17u, 0u },"),
     ("    { 4u, 0, 0x0015F208UL, 0x00160A02UL, 17u, 0u },",
@@ -1387,47 +1655,15 @@ for before, after in (
      "static const AvspRound1CoffeeExitCallbackGroupSpec avsp_round1_coffee_exit_record20_prefix_callbacks[AVSP_ROUND1_COFFEE_EXIT_RECORD20_PREFIX_GROUP_COUNT] =\n"
      "{\n"
      "    { 0u, 5u, 2u },"),
-):
+)):
     if "--generated-walk-only" in sys.argv and before not in generated_walk_mutations:
         continue
     assert before in generated
     changed = generated.replace(before, after, 1)
-    with tempfile.TemporaryDirectory(prefix="round1-generated-mutation-") as name:
-        temp = Path(name)
-        linux_output = f"/tmp/{temp.name}-test"
-        temp_body = source.replace(
-            '#include "../../integration/combat/combat.h"', '#include "combat.h"')
-        temp_body = temp_body.replace(
-            '#include "../../../../avsp_actor.h"', '#include "avsp_actor.h"')
-        temp_body = temp_body.replace(
-            '#include "../../../../avsp_collision.h"', '#include "avsp_collision.h"')
-        (temp / "round1.c").write_text(temp_body)
-        temp_header = header.replace(
-            '#include "../player_action/player_action.h"', '#include "player_action.h"')
-        temp_header = temp_header.replace(
-            '#include "../street_alien_ai/street_alien_ai.h"', '#include "street_alien_ai.h"')
-        temp_header = temp_header.replace(
-            '#include "../../combat/hit_ko/hit_ko.h"', '#include "hit_ko.h"')
-        (temp / "round1.h").write_text(temp_header)
-        (temp / "spec02_round1_entry_data.h").write_text(changed)
-        command = (f"cd '{wsl(ROOT)}' && gcc -std=c90 -pedantic -Wall -Wextra -Werror "
-                   f"-I '{wsl(temp)}' -I . -I src/port_v2/gameplay/player_action "
-                   f"-I src/port_v2/gameplay/street_alien_ai -I src/port_v2/combat/hit_ko "
-                   f"-I src/port_v2/integration/combat "
-                   f"'{wsl(temp / 'round1.c')}' "
-                   f"avsp_actor.c avsp_collision.c "
-                   f"src/port_v2/gameplay/player_action/player_action.c "
-                   f"src/port_v2/gameplay/street_alien_ai/street_alien_ai.c "
-                   f"src/port_v2/combat/hit_ko/hit_ko.c "
-                   f"src/port_v2/player/player.c src/port_v2/enemy/enemy.c "
-                   f"src/port_v2/integration/player_enemy/player_enemy.c "
-                   f"src/port_v2/integration/combat/combat.c "
-                   f"tests/port_v2/round1/round1_entry_test.c -o '{linux_output}' && "
-                   f"ulimit -s unlimited && '{linux_output}'")
-        result = subprocess.run(["wsl.exe", "-d", "Ubuntu-24.04", "-u", "root",
-                                 "--", "bash", "-lc", command],
-                                capture_output=True)
-        assert result.returncode != 0, f"generated mutation escaped: {before}"
+    generated_label = "generated-%03u-%s" % (
+        generated_index,
+        hashlib.sha256(before.encode()).hexdigest()[:12])
+    run(source, header, False, generated_label, generated_body=changed)
 if "--generated-walk-only" in sys.argv:
     print("REIMPLEMENT-13 generated walk fixture mutation lane: PASS (6 real mutations)")
     raise SystemExit(0)
@@ -1435,4 +1671,70 @@ if "--generated-all-only" in sys.argv:
     print("REIMPLEMENT-13 generated fixture mutation lane: PASS "
           "(82 real mutations)")
     raise SystemExit(0)
-print("REIMPLEMENT-13 entry/player/scheduler/class1f/Coffee-Shop-navigation/neutral-stop/melee/Button1/Button2/Button3/type16-projectile/player-HIT/first-encounter differential: PASS (227 real mutations)")
+
+behavior_records = [item for item in mutation_results
+                    if not item["expected_pass"]]
+classification_counts = {}
+for item in behavior_records:
+    key = item["classification"]
+    classification_counts[key] = classification_counts.get(key, 0) + 1
+environment_retry_incidents = sum(
+    item.get("environment_retry_count", 0) for item in behavior_records)
+report = {
+    "schema": "reimplement13-round1-mutation-causality-v1",
+    "scope": "current REIMPLEMENT-13 Round 1 host differential",
+    "toolchain": {
+        "compiler": "Ubuntu-24.04 gcc -std=c90 -pedantic -Wall -Wextra -Werror",
+        "compile_timeout_seconds": COMPILE_TIMEOUT_SECONDS,
+        "runtime_timeout_seconds": RUNTIME_TIMEOUT_SECONDS,
+        "compile_and_execute_separated": True,
+        "runtime_rejection_repeat_required": True,
+    },
+    "coverage": {
+        "complete_scene_source_frames": [2040, 5566],
+        "focused_early_exit_boundaries": {
+            "weapon/special/hit/queue/action16": 5523,
+            "class1f-state0": 5551,
+            "jump": "pre-contextual jump boundary",
+        },
+        "focused_subsets_do_not_close_complete_scene": True,
+    },
+    "historical_totals": {
+        "runtime_mutations_pre_causal_audit": 227,
+        "generated_fixture_mutations_pre_causal_audit": 82,
+        "qualification": "historical totals are retained as reported, not presumed causally valid; the current enumerated case count is authoritative",
+    },
+    "declared_equivalent_survivors": sorted(
+        item["label"] for item in behavior_records
+        if item["classification"] == "SURVIVED_MUTATION" and
+        item.get("declared_equivalent", False)),
+    "environment_retry_incidents_recovered": environment_retry_incidents,
+    "current_counts": classification_counts,
+    "mutations": behavior_records,
+}
+if FULL_MUTATION_RUN:
+    MUTATION_REPORT.write_text(
+        json.dumps(report, indent=2, sort_keys=True) + "\n",
+        encoding="ascii", newline="\n")
+if CHARACTERIZE:
+    if ONLY_MUTATION_LABEL is not None:
+        print(json.dumps(behavior_records, indent=2, sort_keys=True))
+    print("REIMPLEMENT-13 mutation characterization complete: " +
+          json.dumps(classification_counts, sort_keys=True))
+    raise SystemExit(0)
+unexpected_survivors = [
+    item for item in behavior_records
+    if item["classification"] == "SURVIVED_MUTATION" and
+    not item.get("declared_equivalent", False)]
+assert not unexpected_survivors, "unexpected equivalent/surviving mutation"
+for forbidden in ("INVALID_MUTATION", "TIMEOUT",
+                  "ENVIRONMENT_FAILURE", "WRONG_RUNTIME_FAILURE",
+                  "UNATTRIBUTED_RUNTIME_FAILURE"):
+    assert classification_counts.get(forbidden, 0) == 0, (
+        f"causal mutation lane contains {forbidden}")
+print("REIMPLEMENT-13 entry/player/scheduler/class1f/Coffee-Shop-navigation/neutral-stop/melee/Button1/Button2/Button3/type16-projectile/player-HIT/first-encounter differential: PASS "
+      f"({classification_counts.get('VALID_BEHAVIORAL_REJECTION', 0)} "
+      "causal behavioral mutations; "
+      f"{classification_counts.get('SURVIVED_MUTATION', 0)} declared "
+      "equivalent survivors not credited; "
+      "compile/environment/timeout failures zero)")

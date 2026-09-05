@@ -24,26 +24,26 @@ navigation/camera, exit chronology and centralized source release remain
 locked. The global `0xff1a1c` writer and both normalized witnesses remain
 closed. Player/route exit is exact through 5566 and the final class-`0x1f` tail
 is closed through its last source lifetime at 5550.
-
 The record-20 scheduler traversal is source-closed through exit frames
 5453..5523. Prefix slots through `0x00ffb500` use the captured 16-group phase;
 the suffix begins at `0x00ffb600`. Frames 5468..5470 now match source for
 class-`0x02` slot `0x00ffb300` and class-`0x09` slots `0x00ffb480/0x00ffb500`.
 
-Oracle auxiliary/enemy reject 133/107 mutations, SPEC-02 190, host 227 plus 82
-generated, scene parity 31, memory 18. Fast passes. Target is 378,448 bytes at
+Oracle auxiliary/enemy reject 133/107 mutations and SPEC-02 rejects 190. The
+causal host lane rejects 331 behavior mutants at documented exits; two narrow
+survivors receive no credit, with invalid/timeout/environment counts zero.
+Scene parity rejects 31 and memory 18. Fast passes. Target is 378,448 bytes at
 `aa2dab1efa08dab5b5b48b06e188171b654aa47b24ddec9420c50e144b0507a5`, BSS
 `0x060b3760`. The 167-table archive is 47,480 bytes at
 `3ffac9b15d79afe7fb026220acb31f1f7d679b78b93afa4f684d3ea42cd4e40d`;
-headroom is 214,664 bytes. Raw gaps remain `188/1/0/671/1/93/0/279/0`;
-retained gameplay authority is zero.
-
+headroom is 214,664 bytes. Scene RED gaps are: missing source actors 188,
+unowned Saturn actors 1, unidentified pairs 0, spawn/despawn 671, unsupported
+states 1, collision/damage 93, route/camera 0, audio/load 279, retained 0.
 The isolated cold-build emulator package and transition visual gate exhausted
 their three attempts. Do not retry or infer acceptance without owner ruling.
 ## Exact next experiment
-Close Coffee-Shop-reachable class-`0x0f` type-20 slot `0x00ffb100`. Accepted
-auxiliary evidence binds dispatch `0x06ed3e`, lifetime 2673..5550, state/substate
-`0x0200:0000`, record `0x0006ee4a`, and causal actor/RNG/health/dispatch effects;
-the implementation contract remains `BLOCKED_MISSING_SPEC_FIELDS`. Amend only
-the existing SPEC-02 fixture, implement every reachable branch, and rerun
-focused mutations, Target and whole-scene differential. Keep gates frozen.
+Run the smallest bounded Oracle implementation-field follow-up for class-
+`0x0f` type-20 slot `0x00ffb100`, dispatch `0x06ed3e`, lifetime 2673..5550.
+Its accepted identity/suppression record has `implementation_contract: null`.
+Then amend only SPEC-02, implement every reachable branch, and rerun focused
+mutations, Target and whole-scene differential. Keep gates frozen.

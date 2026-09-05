@@ -13,6 +13,17 @@ OPTIONAL_LANES: [Full]
 CLAUDE_ALLOWED: false
 NEXT_ELIGIBLE_CARDS: [QA-13-ROUND1-END-TO-END-DIFFERENTIAL]
 
+## Active owner summary (2026-09-04)
+
+P2 source evidence reaches the stable Round 2 seam at frame 15193 and P3 is
+complete; neither closes native Round 1. P4 Coffee Shop remains RED. Class-
+`0x09` is narrowly closed, while type-20/class-`0x0f` slot `0x00ffb100`
+remains `BLOCKED_MISSING_SPEC_FIELDS` because its accepted component record has
+no implementation contract. Candidate `d04a65a2253175c6e820140feefc35419e2cca07`
+and the exhausted Emulator/WGC gates stay frozen. The next executable body is
+the smallest bounded Oracle implementation-field follow-up for dispatch
+`0x06ed3e`, followed by the existing SPEC-to-native-to-scene differential.
+
 ## Objective
 
 Translate only SPEC-02 and its generated fixtures into portable native C so
@@ -3946,3 +3957,35 @@ the deterministic 167-table archive remains 47,480 bytes at
 Raw gaps remain `188/1/0/671/1/93/0/279/0`, retained gameplay authority is
 zero, candidate promotion remains frozen, and the exhausted Emulator/WGC gates
 remain blocked pending owner ruling.
+
+### Mutation-causality correction checkpoint (2026-09-04)
+
+The Round 1 host mutation helper now compiles and links each case separately
+from execution under the existing strict C90/Werror toolchain. Baselines and
+behavior mutants must build; compile-invalid mutations, explicit compile-
+negative cases, runtime timeouts, launcher/environment failures, survivors and
+behavioral rejections have distinct classifications. Runtime failures are
+accepted only when a deterministic repeat reaches the same documented test
+exit. The executable's logical Bash exit is captured separately from the WSL
+wrapper status, preventing application exit 255 from being misclassified as a
+WSL HRESULT failure.
+
+Self-controls prove syntax error -> `INVALID_MUTATION`, missing launcher ->
+`ENVIRONMENT_FAILURE`, a known route-state mutation -> causal rejection, and
+an unchanged body -> survivor. The complete current lane passes with 331
+causal behavioral rejections, two survivors receiving no kill credit, and zero
+invalid mutations, timeouts or environment failures. The survivors are narrow:
+retained weapon-effect animation timer/branch are overwritten before the
+current post-scheduler observation, and the intermediate fractional-position
+term cancels or is overridden on the currently exercised host paths. Neither
+is a general source-equivalence or normalization waiver. Evidence is
+`data/reimplement13_round1_mutation_causality.json`.
+
+The scene remains RED: missing source actors 188, unowned Saturn actors 1,
+unidentified class/type pairs 0, unmapped spawn/despawn edges 671, unsupported
+active states 1, unowned collision/damage events 93, unowned route/camera
+events 0, unowned audio/load events 279 and retained gameplay authorities 0.
+The isolated clean package remains blocked before emulator launch by ignored
+`SPR4/BACT.RLE`; the separate transition visual gate remains blocked at runtime
+readiness after three attempts. The existing MCP evidence now records assets,
+hashes, exact failure stages and the minimum owner ruling. No retry occurred.

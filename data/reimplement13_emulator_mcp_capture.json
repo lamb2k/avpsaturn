@@ -73,5 +73,98 @@
     "scu_dma_a_bus_rule": "PHYSICAL_TIER_ONLY",
     "rule": "No SCU DMA transfer may have an A-bus endpoint; cart-sourced VDP1 uploads are CPU-mediated."
   },
+  "blocked_transition_gate_readiness": {
+    "classification": "READ_ONLY_PREPARATION_NOT_A_RETRY",
+    "attempt_budget": {
+      "approved_attempts": 3,
+      "consumed_attempts": 3,
+      "reopened": false
+    },
+    "asset_dependencies": [
+      {
+        "path": "build/avsp_cd/SPR4/TILES.BIN",
+        "bytes": 592648,
+        "sha256": "cc964b51f4d9fcb1830ba4af19fcbcde2e8323c50944d9b54342cdc7f108aae4",
+        "status": "PRESENT_REPRODUCIBLY_GENERATABLE_PRIVATE_SOURCE"
+      },
+      {
+        "path": "build/avsp_cd/SPR4/COMBAT.BIN",
+        "bytes": 16712,
+        "sha256": "171f0dfa25d8a1fe94d2889f89c78e71bd3b1cfffa9fd5ff11964b1fc23815fe",
+        "status": "PRESENT_REPRODUCIBLY_GENERATABLE_PRIVATE_SOURCE"
+      },
+      {
+        "path": "build/avsp_cd/SPR4/BACT.RLE",
+        "bytes": 119868,
+        "sha256": "a7efabb6894204475a6aacde4945c6cc4751b150d7d9007349566c86b78220f8",
+        "provenance": "tools/extract_avspu_stage1.py plus validated private boss captures",
+        "status": "PRESENT_PERSISTENT_IGNORED_ABSENT_ISOLATED_CLEAN"
+      },
+      {
+        "path": "build/avsp_cd/SPR4/BHIT.RLE",
+        "bytes": 5900,
+        "sha256": "c4f6db6ce3ec9d3505a543bc8340b9bee949bde297c53dc2f386a10ffe501ebb",
+        "status": "PRESENT_PERSISTENT_IGNORED_PRIVATE_SOURCE"
+      },
+      {
+        "path": "build/avsp_cd/SPR4/BKO.RLE",
+        "bytes": 43232,
+        "sha256": "9ad615f5e61615142d5be3b91a10fd16e9519ff304d204da704f9fe6e609f78a",
+        "status": "PRESENT_PERSISTENT_IGNORED_PRIVATE_SOURCE"
+      },
+      {
+        "path": "build/avsp_cd/ST1/STRIPS.BIN",
+        "bytes": 269654,
+        "sha256": "7c28617351ec2bb2099d10e28de561f0ef64feb2fbb1784c5dae11d29c7f1c22",
+        "status": "PRESENT_REPRODUCIBLY_GENERATABLE_PRIVATE_SOURCE"
+      },
+      {
+        "path": "build/avsp_cd/R1/R1SPEC.BIN",
+        "bytes": 47480,
+        "sha256": "3ffac9b15d79afe7fb026220acb31f1f7d679b78b93afa4f684d3ea42cd4e40d",
+        "status": "PRESENT_DETERMINISTIC_GENERATED_SPEC_CONTENT"
+      },
+      {
+        "path": "stage1_audio.wav",
+        "bytes": 29637952,
+        "sha256": "42e755b02ba0e59e514a07dabe2f8273390e641c2ab410e4af8b7f1b656f2a43",
+        "status": "PRESENT_IGNORED_APPROVED_CDDA_TRACK"
+      }
+    ],
+    "tool_and_profile_prerequisites": {
+      "emulator_package": "yabasanshiro-1.20.37-2986eb-debug-rig-mcp-da2ffb34",
+      "archive_sha256": "0d6b44afae0f99a76f5ba3090a3ce307137c9fc305ffa67d0c0a04bf040dd34b",
+      "exe_sha256": "da2ffb341532f10808d8f9659c875a96cbc29ebc10a454426415059c7cef8746",
+      "target_profile": "LiveEncounter normal interactive Round 1",
+      "capture_pre_roll_core": 3,
+      "capture_fresh_leg_core": 0,
+      "capture_video_core": 1,
+      "capture_sound_core": 0,
+      "restore_video_core": 4,
+      "restore_sound_core": 1,
+      "restore_sh2_core": 3,
+      "cdda_track": "stage1_audio.wav"
+    },
+    "failure_boundaries": [
+      {
+        "lane": "isolated-clean-package",
+        "stage": "build/package preflight before emulator launch",
+        "cause": "ignored SPR4/BACT.RLE absent from clean worktree"
+      },
+      {
+        "lane": "transition-visual",
+        "stage": "runtime readiness before save-state or capture",
+        "cause": "native diagnostic targets 3470/300 seconds and 3400/600 seconds were not reached"
+      }
+    ],
+    "minimum_owner_decision": "Explicitly reopen one bounded transition-visual attempt and approve a changed runtime-readiness boundary; separately approve the private ignored-asset provisioning method for an isolated clean package.",
+    "bounded_changed_hypothesis": "The blocked attempt targeted an unreachable diagnostic ordinal rather than a proven source-owned transition predicate. A reopened attempt must first bind one reachable runtime symbol/state transition to the desired window, then use the already accepted dynarec-save/fresh-interpreter burst flow without changing emulator semantics or image identity.",
+    "forbidden_substitutions": [
+      "copy arbitrary ignored media from another build",
+      "derive assets from screenshots or the internet",
+      "replace the missing archive with an undocumented RLE or framebuffer fallback",
+      "treat old 575-sample or build-only evidence as the blocked transition proof"
+    ]
+  },
   "physical_saturn": "UNRUN"
 }
