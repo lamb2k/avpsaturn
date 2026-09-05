@@ -286,6 +286,7 @@ NATIVE_OWNERS = {
     (28, "0x0a"): "native class-0x0a source-pickup lifecycle",
     (28, "0x00"): "native class-0x00 player companion presentation program",
     (32, "0x01"): "AvspRound1Runtime.entry_controller",
+    (36, "0x03"): "native class-0x03 class-0x1f landing presentation program",
     (36, "0x04"): "native class-0x04 player-weapon presentation program",
     (36, "0x05"): "Coffee Shop obstacle child dispatcher",
 }
@@ -1397,12 +1398,248 @@ def class00_companion_complete_program_differential(
     }
 
 
+def class03_presentation_complete_program_differential(
+        source_rows: list[dict[str, str]],
+        native_rows: list[dict[str, str]],
+        runtime_summary: str,
+        contract: dict[str, object]) -> dict[str, object]:
+    """Compare the complete class-0x03 program without hiding pool residue."""
+    source = [row for row in source_rows if row["class"] == "03" and
+              row["type"] == "36"]
+    native = [row for row in native_rows if row["class"] == "03" and
+              row["type"] == "36"]
+
+    def episodes(rows: list[dict[str, str]], slot_field: str) -> \
+            list[list[dict[str, str]]]:
+        by_frame: dict[int, list[dict[str, str]]] = defaultdict(list)
+        active: dict[str, list[dict[str, str]]] = {}
+        completed: list[list[dict[str, str]]] = []
+        prior: set[str] = set()
+        for row in rows:
+            by_frame[int(row["frame"])].append(row)
+        for frame in range(1972, 5567):
+            current: set[str] = set()
+            for row in by_frame.get(frame, []):
+                slot = row[slot_field]
+                current.add(slot)
+                active.setdefault(slot, []).append(row)
+            for slot in sorted(prior - current):
+                completed.append(active.pop(slot))
+            prior = current
+        completed.extend(active[slot] for slot in sorted(active))
+        return sorted(completed, key=lambda item: (
+            int(item[0]["frame"]), item[0][slot_field]))
+
+    source_episodes = episodes(source, "slot")
+    native_episodes = episodes(native, "source_slot")
+    if (len(source) != 1700 or len(native) != 1700 or
+            len(source_episodes) != 50 or len(native_episodes) != 50):
+        raise ValueError("Coffee Shop class-0x03 population drift")
+    unmatched_native = list(native_episodes)
+    paired_episodes: list[tuple[list[dict[str, str]],
+                                list[dict[str, str]]]] = []
+    for source_episode in source_episodes:
+        source_first = source_episode[0]
+        source_identity = (int(source_episode[0]["frame"]),
+                           int(source_episode[-1]["frame"]))
+        matches = [item for item in unmatched_native if
+                   (int(item[0]["frame"]), int(item[-1]["frame"])) ==
+                   source_identity]
+        if not matches:
+            raise ValueError("Coffee Shop class-0x03 lifetime identity drift: " +
+                             json.dumps(source_identity))
+        source_initial = (int(source_first["x_fp"], 16) >> 16,
+                          int(source_first["y_fp"], 16) >> 16,
+                          int(source_first["z"]))
+        native_episode = min(matches, key=lambda item: (
+            abs((int(item[0]["x_fp"]) >> 16) - source_initial[0]) +
+            abs((int(item[0]["y_fp"]) >> 16) - source_initial[1]) +
+            abs(int(item[0]["z"]) - source_initial[2]),
+            item[0]["source_slot"]))
+        unmatched_native.remove(native_episode)
+        paired_episodes.append((source_episode, native_episode))
+    if unmatched_native:
+        raise ValueError("Coffee Shop class-0x03 unpaired native lifetimes")
+    fields = ("state", "substate", "x_fp", "y_fp", "z", "facing",
+              "animation_record", "animation_timer", "animation_branch")
+
+    def value(row: dict[str, str], field: str, source_side: bool) -> int:
+        if field in {"state", "substate", "animation_record"}:
+            return int(row[field], 16)
+        if source_side and field in {"x_fp", "y_fp", "animation_timer"}:
+            return int(row[field], 16)
+        return int(row[field])
+
+    records = contract["state_0x0000"]["animation_binding"][
+        "record_sequence"]
+
+    def validate_source_program(episode: list[dict[str, str]],
+                                source_side: bool) -> None:
+        current_x = value(episode[0], "x_fp", source_side) & 0xffffffff
+        current_y = value(episode[0], "y_fp", source_side) & 0xffffffff
+        buffers = [current_x >> 16] * 4
+        phase = 0xff
+        y_velocity = 0
+        animation_index = 0
+        animation_timer = int(records[0]["timer_u16"])
+        animation_branch = int(records[0]["branch_s16"])
+        state = 0x0200
+        for row_index, row in enumerate(episode):
+            if row_index != 0:
+                phase = (phase + 1) & 3
+                buffer_index = (0, 2, 3, 1)[phase]
+                velocity = (-163840, 163840, -278528, 278528)[phase]
+                current_x = (((buffers[buffer_index] << 16) |
+                              (current_x & 0xffff)) + velocity) & 0xffffffff
+                current_y = (current_y + y_velocity) & 0xffffffff
+                y_velocity = (y_velocity + 4096) & 0xffffffff
+                buffers[buffer_index] = current_x >> 16
+                if animation_branch < 0:
+                    state = 0x0400
+                animation_timer -= 1
+                if animation_timer == 0:
+                    animation_index += 1
+                    if animation_index >= len(records):
+                        raise ValueError(
+                            "Coffee Shop class-0x03 animation overflow")
+                    animation_timer = int(records[animation_index][
+                        "timer_u16"])
+                    animation_branch = int(records[animation_index][
+                        "branch_s16"])
+            expected = {
+                "state": state,
+                "substate": 0,
+                "x_fp": current_x,
+                "y_fp": current_y,
+                "z": int(episode[0]["z"]),
+                "facing": int(episode[0]["facing"]),
+                "animation_record": int(
+                    records[animation_index]["animation_record"], 16),
+                "animation_timer": animation_timer,
+                "animation_branch": animation_branch,
+            }
+            actual = {field: value(row, field, source_side) & 0xffffffff
+                      if field in {"x_fp", "y_fp"} else
+                      value(row, field, source_side)
+                      for field in fields}
+            if actual != expected:
+                raise ValueError(
+                    "Coffee Shop class-0x03 source-program arithmetic drift: " +
+                    json.dumps({"frame": int(row["frame"]),
+                                "source_side": source_side,
+                                "actual": actual, "expected": expected},
+                               sort_keys=True))
+
+    raw: list[dict[str, object]] = []
+    normalized: list[dict[str, object]] = []
+    for index, pair in enumerate(paired_episodes):
+        source_episode, native_episode = pair
+        validate_source_program(source_episode, True)
+        validate_source_program(native_episode, False)
+        source_slot = "0x00" + source_episode[0]["slot"]
+        native_slot = "0x" + native_episode[0]["source_slot"]
+        source_range = [int(source_episode[0]["frame"]),
+                        int(source_episode[-1]["frame"])]
+        native_range = [int(native_episode[0]["frame"]),
+                        int(native_episode[-1]["frame"])]
+        if len(source_episode) != len(native_episode):
+            normalized.append({"lifetime_ordinal_u8": index,
+                               "field": "row_count"})
+            continue
+        for source_row, native_row in zip(source_episode, native_episode):
+            changed = [field for field in fields
+                       if value(source_row, field, True) !=
+                       value(native_row, field, False)]
+            if source_slot != native_slot:
+                changed.insert(0, "source_slot")
+            if changed:
+                raw.append({"frame_u16": int(source_row["frame"]),
+                            "lifetime_ordinal_u8": index,
+                            "source_slot": source_slot,
+                            "native_slot": native_slot,
+                            "fields": changed})
+            normalized_changed = [field for field in fields
+                                  if field not in {"x_fp", "y_fp", "z"} and
+                                  value(source_row, field, True) !=
+                                  value(native_row, field, False)]
+            if normalized_changed:
+                normalized.append({"frame_u16": int(source_row["frame"]),
+                                   "lifetime_ordinal_u8": index,
+                                   "fields": normalized_changed})
+        if source_range != native_range:
+            normalized.append({"lifetime_ordinal_u8": index,
+                               "field": "frame_range",
+                               "source": source_range,
+                               "native": native_range})
+    if normalized:
+        raise ValueError("Coffee Shop class-0x03 normalized program drift: " +
+                         json.dumps(normalized[:8], sort_keys=True))
+    presentation = {
+        int(row["animation_record"], 16): (
+            int(row["assembly"], 16), int(row["hurt_selector_u8"]),
+            int(row["attack_selector_u8"]))
+        for row in contract["state_0x0000"]["animation_binding"][
+            "record_sequence"]}
+    if any(presentation[int(row["animation_record"], 16)] != (
+            int(row["assembly"], 16), int(row["hurt_selector"]),
+            int(row["attack_selector"])) for row in native):
+        raise ValueError("Coffee Shop class-0x03 assembly/selector drift")
+    match = re.search(
+        r"class03_alloc_requests=(\d+) class03_allocations=(\d+) "
+        r"class03_alloc_failures=(\d+) class03_init=(\d+) "
+        r"class03_motion=(\d+) class03_animation=(\d+) "
+        r"class03_transitions=(\d+) class03_rng=(\d+) "
+        r"class03_releases=(\d+)", runtime_summary)
+    counters = [int(item) for item in match.groups()] if match else []
+    if counters != [50, 50, 0, 50, 1650, 1650, 50, 0, 50]:
+        raise ValueError("Coffee Shop class-0x03 runtime counter drift")
+    raw_slot_differences = [
+        {"lifetime_ordinal_u8": index,
+         "source_frame_range_u16": [int(source_episode[0]["frame"]),
+                                    int(source_episode[-1]["frame"])],
+         "source_slot": "0x00" + source_episode[0]["slot"],
+         "native_slot": "0x" + native_episode[0]["source_slot"]}
+        for index, (source_episode, native_episode) in enumerate(
+            paired_episodes)
+        if "0x00" + source_episode[0]["slot"] !=
+           "0x" + native_episode[0]["source_slot"]]
+    return {
+        "classification":
+            "SOURCE_PROGRAM_DIFFERENTIAL_PASS_RAW_POOL_PROJECTION_RED",
+        "source_program": "0x0009a67e..0x0009a7c6",
+        "source_body_sha256": contract["source_bodies"][
+            "class_dispatch"]["sha256"],
+        "source_lifetimes_u8": 50, "native_lifetimes_u8": 50,
+        "source_rows_u16": len(source), "native_rows_u16": len(native),
+        "raw_difference_count_u16": len(raw),
+        "raw_difference_sha256": hashlib.sha256(canonical(raw)).hexdigest(),
+        "raw_difference_samples": raw[:8] + raw[-8:],
+        "raw_lifetime_slot_difference_count_u8": len(raw_slot_differences),
+        "raw_lifetime_slot_differences": raw_slot_differences,
+        "normalization": (
+            "compare lifetime ordinal and every source-program field; compare "
+            "state, animation and motion deltas from each source-owned parent "
+            "initialization; retain slot, parent-derived absolute position "
+            "and fractional residue differences as raw scene gaps"),
+        "normalized_difference_count_u8": 0,
+        "normalized_program_fields_equal": True,
+        "assembly_output_equal": True,
+        "collision_selector_output_equal": True,
+        "fixed_pool_lifetimes_equal_by_ordinal": True,
+        "raw_scene_gate_remains_red": bool(raw),
+        "direct_rng_calls_u8": 0,
+        "collision_damage_audio_route_camera_load_writes_u8": 0,
+        "fixed_frame_gameplay_authority_forbidden": True,
+        "retained_gameplay_authority": False,
+    }
+
+
 def class04_presentation_complete_program_differential(
         source_rows: list[dict[str, str]],
         native_rows: list[dict[str, str]],
         runtime_summary: str,
         contract: dict[str, object]) -> dict[str, object]:
-    """Compare class-0x04 while retaining its unresolved pool projection."""
+    """Compare class-0x04 while retaining unresolved pool projection."""
     source = [row for row in source_rows if row["class"] == "04" and
               row["type"] == "36"]
     native = [row for row in native_rows if row["class"] == "04" and
@@ -1527,7 +1764,7 @@ def class04_presentation_complete_program_differential(
            "0x" + native_episode[0]["source_slot"]]
     return {
         "classification":
-            "SOURCE_PROGRAM_IMPLEMENTED_SLOT_PROJECTION_BLOCKED_BY_CLASS03",
+            "SOURCE_PROGRAM_DIFFERENTIAL_PASS_RAW_POOL_PROJECTION_RED",
         "source_program": "0x0009aa90..0x0009ac18",
         "source_body_sha256": contract["source_bodies"][
             "class_dispatch"]["sha256"],
@@ -1545,7 +1782,7 @@ def class04_presentation_complete_program_differential(
             "compare lifetime ordinal and all source-program fields; compare "
             "only x/y high words because this program does not read or write "
             "fractional words; retain slot and fractional-word differences "
-            "as raw scene gaps pending the earlier class-0x03 pool occupants"),
+            "as raw scene gaps pending other missing earlier pool occupants"),
         "normalized_difference_count_u8": 0,
         "normalized_program_fields_equal": True,
         "assembly_output_equal": True,
@@ -2590,17 +2827,47 @@ def validate_report(report: dict[str, object]) -> None:
             class00_program["retained_gameplay_authority"]):
         raise ValueError("Coffee Shop class-0x00 companion drift: " +
                          json.dumps(class00_program, sort_keys=True))
+    class03_program = report["native_capture"][
+        "class03_presentation_complete_program"]
+    if (class03_program["classification"] !=
+            "SOURCE_PROGRAM_DIFFERENTIAL_PASS_RAW_POOL_PROJECTION_RED" or
+            class03_program["source_program"] !=
+            "0x0009a67e..0x0009a7c6" or
+            class03_program["source_body_sha256"] !=
+            "ec04165b956a251a6793dc7686dc5681ad6eeaf3db4467e282a1297f87bc823b" or
+            class03_program["source_lifetimes_u8"] != 50 or
+            class03_program["native_lifetimes_u8"] != 50 or
+            class03_program["source_rows_u16"] != 1700 or
+            class03_program["native_rows_u16"] != 1700 or
+            class03_program["raw_difference_count_u16"] != 1360 or
+            class03_program["raw_lifetime_slot_difference_count_u8"] != 38 or
+            class03_program["raw_difference_sha256"] !=
+                "a41eb0857dadd1128ad13acbbb2a1e49646620c6fe87201367124e8481c07f0a" or
+            len(class03_program["raw_difference_samples"]) != 16 or
+            class03_program["normalized_difference_count_u8"] != 0 or
+            not class03_program["normalized_program_fields_equal"] or
+            not class03_program["assembly_output_equal"] or
+            not class03_program["collision_selector_output_equal"] or
+            not class03_program["fixed_pool_lifetimes_equal_by_ordinal"] or
+            not class03_program["raw_scene_gate_remains_red"] or
+            class03_program["direct_rng_calls_u8"] != 0 or
+            class03_program[
+                "collision_damage_audio_route_camera_load_writes_u8"] != 0 or
+            not class03_program["fixed_frame_gameplay_authority_forbidden"] or
+            class03_program["retained_gameplay_authority"]):
+        raise ValueError("Coffee Shop class-0x03 program drift: " +
+                         json.dumps(class03_program, sort_keys=True))
     class04_program = report["native_capture"][
         "class04_presentation_complete_program"]
     if (class04_program["classification"] !=
-            "SOURCE_PROGRAM_IMPLEMENTED_SLOT_PROJECTION_BLOCKED_BY_CLASS03" or
+            "SOURCE_PROGRAM_DIFFERENTIAL_PASS_RAW_POOL_PROJECTION_RED" or
             class04_program["source_program"] !=
             "0x0009aa90..0x0009ac18" or
             class04_program["source_lifetimes_u8"] != 15 or
             class04_program["native_lifetimes_u8"] != 15 or
             class04_program["source_rows_u16"] != 197 or
             class04_program["native_rows_u16"] != 197 or
-            class04_program["raw_lifetime_slot_difference_count_u8"] != 12 or
+            class04_program["raw_lifetime_slot_difference_count_u8"] != 11 or
             not class04_program["raw_differences"] or
             class04_program["normalized_difference_count_u8"] != 0 or
             not class04_program["normalized_program_fields_equal"] or
@@ -2669,6 +2936,11 @@ def main() -> None:
             "authority_data"]["auxiliary"][
                 "coffee_shop_type36_presentation"]["classes"]
         if item["type"] == 36 and item["class"] == "0x04")
+    class03_contract = next(
+        item["implementation_contract"] for item in fixtures[
+            "authority_data"]["auxiliary"][
+                "coffee_shop_type36_presentation"]["classes"]
+        if item["type"] == 36 and item["class"] == "0x03")
     source_actor_sha256 = hashlib.sha256(SOURCE_ACTORS.read_bytes()).hexdigest()
     expected_source_actor_sha256 = source["capture_identity"][
         "completion_a"]["coffee_shop_scene_actors.tsv"]
@@ -2805,6 +3077,10 @@ def main() -> None:
                                class00_companion_complete_program_differential(
                                    source_rows, rows, runtime_summary,
                                    class00_contract),
+                           "class03_presentation_complete_program":
+                               class03_presentation_complete_program_differential(
+                                   source_rows, rows, runtime_summary,
+                                   class03_contract),
                            "class04_presentation_complete_program":
                                class04_presentation_complete_program_differential(
                                    source_rows, rows, runtime_summary,

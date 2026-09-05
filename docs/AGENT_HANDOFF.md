@@ -1,49 +1,54 @@
 # REIMPLEMENT-13 active agent handoff
-Resume the AvP salvage Goal on `codex/avp-playable-loop-pivot`;
-`REIMPLEMENT-13-SOURCE-CLOSED-ROUND1` remains active and P4 Coffee Shop is RED.
-Workflow pivot and Preserved evidence work remain governed by `project_state.yaml`.
-Retain `SALVAGE-00-OLD-BUILD-BASELINE`, `USER-01-PLAYER-BASELINE-REVIEW`, and evidence candidate `597f4ed517d4e715d814ff841bd00d3977803f85`.
-`project_state.yaml`, the active card, plans, and emulator contract govern. Do
-not create another workflow or writer. Candidate
-`d04a65a2253175c6e820140feefc35419e2cca07` remains frozen. Preserve USER-09
-`CHANGES_REQUESTED`, SALVAGE-08 inactive, physical Saturn `UNRUN`, and accepted
-locks. Never stage/reset/overwrite `data/avsp_anim_records.json` or `history.txt`.
-The Target and Emulator/WGC gates remain exhausted at three attempts.
+
+Resume the persistent AvP Goal on `codex/avp-playable-loop-pivot` with
+`REIMPLEMENT-13-SOURCE-CLOSED-ROUND1` active. `project_state.yaml`, the active
+card, plans, and capture contract govern. Do not create another workflow or
+writer. Never stage/reset/overwrite `data/avsp_anim_records.json` or
+`history.txt`.
+
+Candidate `d04a65a2253175c6e820140feefc35419e2cca07` remains frozen. Preserve
+USER-09 `CHANGES_REQUESTED`, USER-10 human approval, SALVAGE-08 inactive,
+physical Saturn `UNRUN`, and all accepted locks. Target and Emulator/WGC gates
+remain exhausted at three attempts; this handoff authorizes no retry.
 
 ## Current checkpoint
+
 P2 closes through stable Round 2 seam frame 15193 and P3 is complete; neither
-means native Round 1 is complete. Class-`0x09` frame 5493 remains only a narrow
-presentation normalization. Type-20/class-`0x0f`, type-24/class-`0x0a`, type-28/
-class-`0x00`, and type-36/class-`0x04` are source/spec/native closed.
+means native Round 1 is complete. P4 Coffee Shop remains RED. Class-`0x09`
+frame 5493 remains only a narrow presentation normalization.
 
-Class-`0x04` covers dispatch `0x09aa90..0x09ac18`, all 15 Coffee Shop
-lifetimes, both player writers, ten animation records, facing-derived signed X
-offset, Y projection, timer/terminal branches, parent backlink, same-visit
-release, and zero direct RNG/gameplay effects. Paired baseline identity and 12
-causal focused mutations pass. Whole-scene output is byte-identical across two
-runs. Class-`0x04` has 197 source/native rows; normalized program fields match,
-while 156 raw differences remain. Twelve lifetimes retain source-slot projection
-differences because earlier type-36/class-`0x03` occupants are absent; these are
-not normalized away.
+Type-36/class-`0x03` dispatch `0x09a67e..0x09a7c6` is source/spec/native closed
+for all 50 Coffee Shop lifetimes and every reachable allocation, four-phase
+motion, animation, parent-backlink, terminal, and release branch. It has zero
+direct RNG, collision, damage, route, audio, or load effects. Paired source
+identity and 14 causal focused mutations pass. All 1,700 source/native rows
+match at the program boundary; 1,360 raw rows and 38 slot projections remain
+visible because the native fixed-pool projection is not yet scene-complete.
 
-Scene RED gaps are: missing source actors 181, unowned Saturn actors 1,
-unidentified pairs 0, spawn/despawn 659, unsupported states 1,
-collision/damage 93, route/camera 0, audio/load 279, retained authority 0.
-The delta is -3 missing actors and -4 spawn/despawn edges; no category rises.
-Current host mutation counts are 342 attributed behavioral rejections including
-12 focused class-`0x04` controls, two declared equivalent survivors not credited,
-and zero invalid/timeout/environment failures. Historical pre-causal totals stay
-qualified in the mutation ledger.
+Whole-scene output is byte-identical across two runs. Raw RED gaps are: missing
+source actors 144; unowned Saturn actors 1; unidentified pairs 0; unmapped
+spawn/despawn 633; unsupported states 1; collision/damage 93; route/camera 0;
+audio/load 279; retained gameplay authority 0. Since class-`0x04`, missing
+actors fall 37 and spawn/despawn gaps fall 26; no category rises.
 
-Runtime measures 99,580/102,400 bytes (`0x184fc`), leaving 2,820. SPEC content
-is 50,324/262,144 bytes, 180 tables, SHA
-`9b3266fa1819efc796fe87a2180b197384f4a053fbf91457545ad790110edda3`;
-contract `b784f11d…f4557`, fixture `1c038863…2103`, census floor 243,668. No current Target artifact exists. The last
-accepted Target GAME.BIN remains historical class-`0x0a`; no retry is authorized.
+Mutation evidence records 330 complete-scene behavioral rejections plus 26
+focused class-`0x03`/class-`0x04` controls = 356; two declared equivalent
+survivors are not credited; invalid/build failures, timeouts, and environment
+failures are zero. Historical pre-causal totals remain qualified.
+
+Runtime is 99,616/102,400 bytes (`0x18520`), leaving 2,784. SPEC content is
+50,504/262,144 bytes, 182 tables, SHA `6427526c2951abeda35655545edf17152f2ba7cbf6dd8b8e47521c1ad9dee3ba`;
+contract `d179b71a83a202cb8e85a279f821e237a3f144644a49f738b500f2e79c172689`,
+fixture `dd996a4d72b9ba8771f611e71c227188e0cb1ac553271ceb29d7289caa1fb2a7`.
+No current Target exists; the historical class-`0x0a` image is not evidence.
 
 ## Exact next experiment
-Close the complete Coffee-Shop-reachable type-36/class-`0x03` source program,
-dispatch `0x09a67e..0x09a7c6`, all 50 lifetimes and every reachable branch.
-Use accepted Oracle evidence and amend only existing SPEC-02 fields. This is the
-earliest owning program for the class-`0x04` fixed-pool slot projection gaps.
-Rerun the whole scene; preserve raw gaps, frozen candidate, and exhausted gates.
+
+Close the earliest source-owned missing program: record-type 28/class-`0x0c`,
+slot `0x00ffcd80`, dispatch `0x0a4922`, lifetime 2806..5550, states
+`0200:{0000,0002,0004,0006,0200}`, animations `000a505e/000a51fa`. The accepted
+fixture has identity and suppression evidence but no implementation contract;
+status is `BLOCKED_MISSING_SPEC_FIELDS`. Use the smallest bounded Oracle
+procedure to establish the missing executable fields, then amend existing
+SPEC-02, implement the whole Coffee-Shop-reachable program, and rerun the full
+scene. Do not retry exhausted gates or promote the candidate.

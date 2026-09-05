@@ -120,8 +120,8 @@
       },
       {
         "path": "build/avsp_cd/R1/R1SPEC.BIN",
-        "bytes": 50324,
-        "sha256": "9b3266fa1819efc796fe87a2180b197384f4a053fbf91457545ad790110edda3",
+        "bytes": 50504,
+        "sha256": "6427526c2951abeda35655545edf17152f2ba7cbf6dd8b8e47521c1ad9dee3ba",
         "status": "PRESENT_DETERMINISTIC_GENERATED_SPEC_CONTENT"
       },
       {

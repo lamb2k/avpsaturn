@@ -181,6 +181,30 @@ item = copy.deepcopy(BASE)
 item["native_capture"]["class09_complete_program"][
     "next_frame_full_projection_equal"] = False
 mutations.append(("class09 next-frame projection", item))
+item = copy.deepcopy(BASE)
+item["native_capture"]["class03_presentation_complete_program"][
+    "assembly_output_equal"] = False
+mutations.append(("class03 wrong assembly", item))
+item = copy.deepcopy(BASE)
+item["native_capture"]["class03_presentation_complete_program"][
+    "collision_selector_output_equal"] = False
+mutations.append(("class03 changed collision selector", item))
+item = copy.deepcopy(BASE)
+item["native_capture"]["class03_presentation_complete_program"][
+    "direct_rng_calls_u8"] = 1
+mutations.append(("class03 extra RNG", item))
+item = copy.deepcopy(BASE)
+item["native_capture"]["class03_presentation_complete_program"][
+    "source_rows_u16"] -= 1
+mutations.append(("class03 omitted invocation", item))
+item = copy.deepcopy(BASE)
+item["native_capture"]["class03_presentation_complete_program"][
+    "raw_difference_sha256"] = "0" * 64
+mutations.append(("class03 raw projection rewrite", item))
+item = copy.deepcopy(BASE)
+item["native_capture"]["class03_presentation_complete_program"][
+    "fixed_pool_lifetimes_equal_by_ordinal"] = False
+mutations.append(("class03 delayed release", item))
 
 for label, mutant in mutations:
     try:

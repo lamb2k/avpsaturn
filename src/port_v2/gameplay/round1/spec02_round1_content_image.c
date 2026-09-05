@@ -4193,6 +4193,21 @@ const AvspRound1ContentArchive avsp_round1_content_image
         { 97u, 21, 44, 14u, 1u },
     },
     {
+        { 4u, 0, 0x0009a884UL, 0x0009a9aeUL, 0u, 0u },
+        { 4u, 0, 0x0009a894UL, 0x0009a9bcUL, 0u, 0u },
+        { 4u, 0, 0x0009a8a4UL, 0x0009a9caUL, 0u, 0u },
+        { 4u, 0, 0x0009a8b4UL, 0x0009a9d8UL, 0u, 0u },
+        { 4u, 0, 0x0009a8c4UL, 0x0009a9e6UL, 0u, 0u },
+        { 4u, 0, 0x0009a8d4UL, 0x0009a9f4UL, 0u, 0u },
+        { 4u, 0, 0x0009a8e4UL, 0x0009aa02UL, 0u, 0u },
+        { 4u, 0, 0x0009a8f4UL, 0x0009aa10UL, 0u, 0u },
+        { 4u, -32768, 0x0009a904UL, 0x0009aa10UL, 0u, 0u },
+    },
+    {
+        0x09A67EUL, 0x0009A884UL, -163840L, -278528L, 0L, 4096L,
+        0x0200u, 0x0400u, 0x0600u, 0x03, 36u, 1u
+    },
+    {
         { 1u, 0, 0x0009ac82UL, 0x0009b5a6UL, 0u, 0u },
         { 1u, 0, 0x0009ac92UL, 0x0009b5b4UL, 0u, 0u },
         { 2u, 0, 0x0009aca2UL, 0x0009b5c2UL, 0u, 0u },

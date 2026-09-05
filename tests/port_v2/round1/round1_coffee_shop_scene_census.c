@@ -498,6 +498,17 @@ int main(void)
             runtime.class00_companion_animation_bindings,
             runtime.class00_companion_helper_calls);
     fprintf(stderr,
+            "class03_alloc_requests=%lu class03_allocations=%lu class03_alloc_failures=%lu class03_init=%lu class03_motion=%lu class03_animation=%lu class03_transitions=%lu class03_rng=%lu class03_releases=%lu\n",
+            runtime.type36_class03_allocation_requests,
+            runtime.type36_class03_allocations,
+            runtime.type36_class03_allocation_failures,
+            runtime.type36_class03_initializations,
+            runtime.type36_class03_motion_steps,
+            runtime.type36_class03_animation_steps,
+            runtime.type36_class03_state_transitions,
+            runtime.type36_class03_rng_calls,
+            runtime.type36_class03_releases);
+    fprintf(stderr,
             "class04_alloc_requests=%lu class04_allocations=%lu class04_alloc_failures=%lu class04_init=%lu class04_animation=%lu class04_transitions=%lu class04_global_moves=%lu class04_rng=%lu class04_releases=%lu\n",
             runtime.type36_class04_allocation_requests,
             runtime.type36_class04_allocations,

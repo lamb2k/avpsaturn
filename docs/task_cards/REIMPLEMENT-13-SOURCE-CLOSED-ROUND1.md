@@ -18,14 +18,16 @@ NEXT_ELIGIBLE_CARDS: [QA-13-ROUND1-END-TO-END-DIFFERENTIAL]
 P2 source evidence reaches the stable Round 2 seam at frame 15193 and P3 is
 complete; neither closes native Round 1. P4 Coffee Shop remains RED. Class-
 `0x09` is narrowly normalized. Complete type-20/class-`0x0f`, type-24/class-
-`0x0a`, type-28/class-`0x00`, and type-36/class-`0x04` source programs are
-source/spec/native closed. Class-`0x04` normalized program fields match, while
-156 raw rows remain different because 12 fixed-pool slots depend on the missing
-earlier type-36/class-`0x03` population; those raw differences remain visible.
-Candidate `d04a65a2253175c6e820140feefc35419e2cca07` and the exhausted Emulator/WGC
-and Target gates stay frozen. The next scene-order body is the complete type-36/
-class-`0x03` program at `0x09a67e..0x09a7c6`; it owns all 50 Coffee Shop
-lifetimes and the class-`0x04` fixed-pool slot projection dependency.
+`0x0a`, type-28/class-`0x00`, and type-36 classes `0x03`/`0x04` are
+source/spec/native closed. Class-`0x03` matches all 1,700 program rows while
+retaining 1,360 raw row and 38 slot-projection differences. Scene gaps are
+`144/1/0/633/1/93/0/279/0` in the report's named order. Candidate
+`d04a65a2253175c6e820140feefc35419e2cca07` and the exhausted Emulator/WGC and
+Target gates stay frozen. The next scene-order body is type-28/class-`0x0c`,
+slot `0x00ffcd80`, dispatch `0x0a4922`, lifetime 2806..5550. Its accepted
+identity fixture is explicitly `BLOCKED_MISSING_SPEC_FIELDS`; use the smallest
+bounded Oracle procedure, then amend existing SPEC-02 and close the whole
+Coffee-Shop-reachable source program.
 
 ## Objective
 
@@ -4171,3 +4173,48 @@ current archive identity but is not a retry. The earliest owning source program
 is type-36/class-`0x03`, dispatch `0x09a67e..0x09a7c6`, with 50 Coffee Shop
 lifetimes; close the whole program next and rerun the scene without suppressing
 raw slot-projection differences. Candidate remains frozen.
+
+### P4 Coffee Shop class-0x03 source-program checkpoint (2026-09-05)
+
+The complete Coffee-Shop-reachable record-type-36/class-`0x03` presentation
+program at `0x09a67e..0x09a7c6` is source/spec/native closed for all 50
+lifetimes. The accepted program binds the five class-`0x1f` landing allocation
+contexts, fixed-pool variant/dispatch identity, parent coordinates and backlink,
+signed 16.16 motion, exact four-phase preincrement/map/wrap arithmetic, nine
+animation records, terminal transition, guarded backlink clearing, and release.
+It positively establishes zero direct RNG, collision, health/damage, route,
+camera, audio, or load effects; frame anchors remain witnesses, not clocks.
+
+Paired source baselines and two whole-scene native runs are byte-identical.
+Fourteen attributed focused mutants reject wrong allocation/state guards,
+motion phases, assembly/selector/RNG behavior, omitted invocation, and delayed
+release. Complete-scene host evidence records 330 behavioral rejections; the
+class-`0x03` and class-`0x04` focused sets add 26, two declared equivalent
+survivors receive no credit, and invalid/build, timeout, and environment counts
+are zero. Fast and Oracle pass. Target and Emulator/WGC were not rerun because
+their approved three-attempt budgets remain exhausted.
+
+All 1,700 source/native class-`0x03` rows match at the declared program boundary.
+The report retains 1,360 raw row differences and 38 raw slot projections; these
+are not normalized into scene acceptance. Scene RED gaps improve from
+`181/1/0/659/1/93/0/279/0` to `144/1/0/633/1/93/0/279/0` (missing actors,
+unowned Saturn actors, unidentified pairs, spawn/despawn, unsupported states,
+collision/damage, route/camera, audio/load, retained authority). No category
+increases. The deterministic scene report SHA-256 is
+`768dc6a6dba23b70e6245a8d9c7e1222be7f1ecb6718820a5defa717cce08a90`.
+
+Runtime is 99,616/102,400 bytes (`0x18520`), leaving 2,784. SPEC content is
+50,504/262,144 bytes across 182 tables at SHA-256
+`6427526c2951abeda35655545edf17152f2ba7cbf6dd8b8e47521c1ad9dee3ba`;
+contract SHA is `d179b71a83a202cb8e85a279f821e237a3f144644a49f738b500f2e79c172689`
+and fixture SHA is `dd996a4d72b9ba8771f611e71c227188e0cb1ac553271ceb29d7289caa1fb2a7`.
+Other carve sizes are unchanged and all host canaries pass; physical cadence
+and bus behavior remain UNRUN.
+
+The next causal source program is record-type-28/class-`0x0c`, slot
+`0x00ffcd80`, dispatch `0x0a4922`, lifetime 2806..5550. Accepted evidence binds
+identity and a causal suppression but its implementation contract is null and
+status is `BLOCKED_MISSING_SPEC_FIELDS`. Use the smallest bounded Oracle
+follow-up for those fields, amend the existing fixture, implement the whole
+Coffee-Shop-reachable program, and rerun the full scene. Candidate remains
+frozen; the read-only emulator readiness record is preparation, not a retry.

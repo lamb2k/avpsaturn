@@ -16030,6 +16030,415 @@
         "dispatch_entry": "0x09a67e",
         "fixed_frame_substitute_forbidden": true,
         "fixed_pool_allocation_is_observable": true,
+        "implementation_contract": {
+          "allocation": {
+            "allocation_failure_rule": "omit the child and return zero to the parent caller; do not synthesize an actor or retry on a frame clock",
+            "frame_anchors_are_witnesses_only": true,
+            "guard": "a route-4 record-type-12/class-0x1f presentation program reaches variant-1 writer 0x09a66e and the shared fixed-pool allocator succeeds",
+            "parent": {
+              "class_u8": "0x1f",
+              "record_type_u8": 12,
+              "source_slot": "dynamic from actor+0x26:u16"
+            },
+            "source_spawn_contexts": [
+              {
+                "allocation_rule": "pop next free type-36 record from shared fixed pool",
+                "count": 1,
+                "parent_active_u8": 1,
+                "parent_animation_record": "0x0012dd88",
+                "parent_class_u8": 31,
+                "parent_record_type_u8": 12,
+                "parent_state_u16": 514,
+                "parent_substate_u16": 516,
+                "route_state_u16": 4,
+                "writer_pc": "0x09a66e"
+              },
+              {
+                "allocation_rule": "pop next free type-36 record from shared fixed pool",
+                "count": 4,
+                "parent_active_u8": 1,
+                "parent_animation_record": "0x0012e08c",
+                "parent_class_u8": 31,
+                "parent_record_type_u8": 12,
+                "parent_state_u16": 514,
+                "parent_substate_u16": 516,
+                "route_state_u16": 4,
+                "writer_pc": "0x09a66e"
+              },
+              {
+                "allocation_rule": "pop next free type-36 record from shared fixed pool",
+                "count": 5,
+                "parent_active_u8": 1,
+                "parent_animation_record": "0x0012dd9c",
+                "parent_class_u8": 31,
+                "parent_record_type_u8": 12,
+                "parent_state_u16": 514,
+                "parent_substate_u16": 520,
+                "route_state_u16": 4,
+                "writer_pc": "0x09a66e"
+              },
+              {
+                "allocation_rule": "pop next free type-36 record from shared fixed pool",
+                "count": 4,
+                "parent_active_u8": 2,
+                "parent_animation_record": "0x0012e05c",
+                "parent_class_u8": 31,
+                "parent_record_type_u8": 12,
+                "parent_state_u16": 1026,
+                "parent_substate_u16": 1024,
+                "route_state_u16": 4,
+                "writer_pc": "0x09a66e"
+              },
+              {
+                "allocation_rule": "pop next free type-36 record from shared fixed pool",
+                "count": 16,
+                "parent_active_u8": 2,
+                "parent_animation_record": "0x0012e254",
+                "parent_class_u8": 31,
+                "parent_record_type_u8": 12,
+                "parent_state_u16": 1026,
+                "parent_substate_u16": 1024,
+                "route_state_u16": 4,
+                "writer_pc": "0x09a66e"
+              },
+              {
+                "allocation_rule": "pop next free type-36 record from shared fixed pool",
+                "count": 4,
+                "parent_active_u8": 2,
+                "parent_animation_record": "0x0012dd9c",
+                "parent_class_u8": 31,
+                "parent_record_type_u8": 12,
+                "parent_state_u16": 1026,
+                "parent_substate_u16": 1536,
+                "route_state_u16": 4,
+                "writer_pc": "0x09a66e"
+              },
+              {
+                "allocation_rule": "pop next free type-36 record from shared fixed pool",
+                "count": 16,
+                "parent_active_u8": 2,
+                "parent_animation_record": "0x0012e254",
+                "parent_class_u8": 31,
+                "parent_record_type_u8": 12,
+                "parent_state_u16": 1026,
+                "parent_substate_u16": 1536,
+                "route_state_u16": 4,
+                "writer_pc": "0x09a66e"
+              }
+            ],
+            "writer": "0x09a66e",
+            "writes_in_order": [
+              "actor+0x00:u8 += 1",
+              "actor+0x02:u8 = 0x03",
+              "actor+0x03:u8 = 0x01",
+              "actor+0x26:u16 = parent source-slot low word"
+            ]
+          },
+          "classification": "SOURCE_CLOSED_IMPLEMENTATION_FIELDS",
+          "counterfactual": {
+            "actor_population_difference": true,
+            "capture": "oracle11_progression_lifecycle_cs15s3",
+            "final_gameplay_projection_unchanged": true,
+            "fixed_pool_order_may_change_downstream_projection": false,
+            "remaining_target_actor_rows": 0,
+            "suppressed_writes": 50
+          },
+          "effects": {
+            "audio_commands": [],
+            "collision_damage": "none",
+            "health_resource": "none",
+            "load_release_events": [],
+            "rng_calls_u8": 0,
+            "route_camera_writes": []
+          },
+          "first_lifetime_witness": {
+            "absent_frame_u16": 2398,
+            "allocation_source_frame_u16": 2363,
+            "animation_record": "0x0009a884",
+            "first_motion_result_16_16": [
+              "0x02578000",
+              "0x01360000"
+            ],
+            "first_visible_frame_u16": 2364,
+            "initial_position_s16": [
+              602,
+              310,
+              310
+            ],
+            "last_visible_frame_u16": 2397,
+            "parent_source_slot": "0x00ffa180",
+            "source_slot": "0x00ffe140"
+          },
+          "fixed_frame_substitute_forbidden": true,
+          "mutation_controls": [
+            "wrong writer or parent state/substate/animation guard",
+            "fixed-frame allocation",
+            "wrong fixed-pool pop order",
+            "wrong dynamic parent slot",
+            "wrong class or variant write",
+            "wrong state dispatch entry",
+            "wrong high-word initialization or fractional-word clearing",
+            "wrong phase pre-increment or mask",
+            "wrong phase-to-buffer mapping",
+            "wrong velocity sign or signed 16.16 arithmetic",
+            "wrong y acceleration order",
+            "wrong animation selector, record, timer, branch, assembly or collision selector",
+            "extra RNG call",
+            "omitted scheduler invocation",
+            "wrong backlink field or guard",
+            "delayed release",
+            "invented collision, damage, audio, route, camera or load effect"
+          ],
+          "pool_and_scheduler": {
+            "allocator": "0x017876",
+            "capacity_u16": 64,
+            "class_u8": "0x03",
+            "pool_base": "0xffd280",
+            "record_type_u8": 36,
+            "release_routine": "0x01788c",
+            "scheduler": "0x01bd48 ascending source-slot order",
+            "scheduler_position": "record type 36 after record types 4, 8, 12, 16, 20, 24, 28 and 32",
+            "stride_u16": 64
+          },
+          "retained_gameplay_authority": false,
+          "source_bodies": {
+            "animation_selector_table": {
+              "first": "0x09a7e6",
+              "last_exclusive": "0x09a884",
+              "sha256": "a285d6f0732ecb801268f306262d221012f5075d940cc646f9f1a472506746b6"
+            },
+            "class_dispatch": {
+              "first": "0x09a67e",
+              "last_exclusive": "0x09a7c6",
+              "sha256": "ec04165b956a251a6793dc7686dc5681ad6eeaf3db4467e282a1297f87bc823b"
+            },
+            "four_phase_motion": {
+              "first": "0x09a6fa",
+              "last_exclusive": "0x09a780",
+              "sha256": "fd41d94bea47ed45a992724f649bad425c5fb52829610099f681c10fc065dcdb"
+            },
+            "motion_table_loader": {
+              "first": "0x09a780",
+              "last_exclusive": "0x09a7a2",
+              "sha256": "1ec051be30f940d4f8f5227d82fce2a687a1d0e6162838ceb0441f7bea0edd4e"
+            },
+            "state_dispatch_table": {
+              "first": "0x09a68a",
+              "last_exclusive": "0x09a692",
+              "sha256": "680b552ad5165adccf1f76268bebfce0664f175f0a206fffb5936eac543f5e78"
+            },
+            "variant1_motion_row": {
+              "first": "0x09a7d6",
+              "last_exclusive": "0x09a7e6",
+              "sha256": "4a8873628913bf62faff91b1d387b075b6411c69e273f7c763db1fc01cdfc370"
+            },
+            "variant1_spawn_writer": {
+              "first": "0x09a660",
+              "last_exclusive": "0x09a67e",
+              "sha256": "52fca632224c98e84fee7d63ea664336f396aa0fff328d26820ed32fd1edcec5"
+            }
+          },
+          "spec_executable": true,
+          "state_0x0000": {
+            "animation_binding": {
+              "first_record": "0x0009a884",
+              "record_sequence": [
+                {
+                  "animation_record": "0x0009a884",
+                  "assembly": "0x0009a9ae",
+                  "attack_selector_u8": 0,
+                  "branch_s16": 0,
+                  "hurt_selector_u8": 0,
+                  "record_sha256": "b2edc0f7dbf0cc2d0905bca5371a8e3e6ce9ace445e345d50cc7e2d5314b6473",
+                  "timer_u16": 4
+                },
+                {
+                  "animation_record": "0x0009a894",
+                  "assembly": "0x0009a9bc",
+                  "attack_selector_u8": 0,
+                  "branch_s16": 0,
+                  "hurt_selector_u8": 0,
+                  "record_sha256": "b624474eb7b9de86d8be1319db05e6dc7dac283497816399033bde272ff1de81",
+                  "timer_u16": 4
+                },
+                {
+                  "animation_record": "0x0009a8a4",
+                  "assembly": "0x0009a9ca",
+                  "attack_selector_u8": 0,
+                  "branch_s16": 0,
+                  "hurt_selector_u8": 0,
+                  "record_sha256": "b20ca2a64957bd47b0ed42da09440ddf77a141a26d96bfd3f95eb9c6c4cf828f",
+                  "timer_u16": 4
+                },
+                {
+                  "animation_record": "0x0009a8b4",
+                  "assembly": "0x0009a9d8",
+                  "attack_selector_u8": 0,
+                  "branch_s16": 0,
+                  "hurt_selector_u8": 0,
+                  "record_sha256": "d024eeb273eed9e027aeec04bc150ac820e365a8bea434c6cf9be46e3f70be0b",
+                  "timer_u16": 4
+                },
+                {
+                  "animation_record": "0x0009a8c4",
+                  "assembly": "0x0009a9e6",
+                  "attack_selector_u8": 0,
+                  "branch_s16": 0,
+                  "hurt_selector_u8": 0,
+                  "record_sha256": "e943abcbcd34a3cd612f6d265a403d2ac802bb0502be3f49a1cc1b343cd24b58",
+                  "timer_u16": 4
+                },
+                {
+                  "animation_record": "0x0009a8d4",
+                  "assembly": "0x0009a9f4",
+                  "attack_selector_u8": 0,
+                  "branch_s16": 0,
+                  "hurt_selector_u8": 0,
+                  "record_sha256": "289bc81e60c74ebba1e21a79450e2931d50f7c34bbba13245e673de5f593705b",
+                  "timer_u16": 4
+                },
+                {
+                  "animation_record": "0x0009a8e4",
+                  "assembly": "0x0009aa02",
+                  "attack_selector_u8": 0,
+                  "branch_s16": 0,
+                  "hurt_selector_u8": 0,
+                  "record_sha256": "137f7038f0aca422abc77725339865d6c8af0de4c3cb641121ca58c393825a5f",
+                  "timer_u16": 4
+                },
+                {
+                  "animation_record": "0x0009a8f4",
+                  "assembly": "0x0009aa10",
+                  "attack_selector_u8": 0,
+                  "branch_s16": 0,
+                  "hurt_selector_u8": 0,
+                  "record_sha256": "b67bd919c69583d179979fbc5a94a5bc9a29c28ed28fbd19fe1673f3d37d5e4a",
+                  "timer_u16": 4
+                },
+                {
+                  "animation_record": "0x0009a904",
+                  "assembly": "0x0009aa10",
+                  "attack_selector_u8": 0,
+                  "branch_s16": -32768,
+                  "hurt_selector_u8": 0,
+                  "record_sha256": "ef768d0255d94b2a2dd35ba9ff8593e1a0b9cecae94611115313dc5c15c56272",
+                  "timer_u16": 4
+                }
+              ],
+              "relative_offset_u16": "0x009e",
+              "selector_source": "actor+0x03:u8",
+              "selector_u8": 1,
+              "table": "0x09a7e6"
+            },
+            "backlink_rule": "variant 1 writes child low source slot to parent+0x7a:u16",
+            "motion_s16_16": {
+              "initial_y_velocity": 0,
+              "phase1_x_velocity": -163840,
+              "phase3_x_velocity": -278528,
+              "y_acceleration": 4096
+            },
+            "position_fields": {
+              "child_x": "actor+0x10:s16",
+              "child_y": "actor+0x14:s16",
+              "child_z": "actor+0x18:s16",
+              "fractional_words": "high-word copies preserve the child fixed-point low words",
+              "parent_x": "parent+0x10:s16",
+              "parent_y": "parent+0x14:s16",
+              "parent_z": "parent+0x18:s16"
+            },
+            "rng_calls_u8": 0,
+            "variant": {
+              "coffee_shop_reachable_u8": 1,
+              "field": "actor+0x03:u8",
+              "other_variant": "NOT_REQUIRED_FOR_R7C"
+            },
+            "writes_in_order": [
+              "actor+0x04:u8 += 2",
+              "copy parent+0x10:u16 to actor+0x10, +0x2c, +0x20, +0x28 and +0x2e:u16",
+              "copy parent+0x14:u16 to actor+0x14:u16",
+              "copy parent+0x18:u16 to actor+0x18:u16",
+              "actor+0x2a:u8 = 0xff",
+              "load variant-1 motion row into actor+0x30, +0x38, +0x34 and +0x3c:s32",
+              "bind variant-1 animation selector",
+              "parent+0x7a:u16 = child source-slot low word"
+            ]
+          },
+          "state_0x0200": {
+            "movement_arithmetic": "replace actor+0x10:s16 high word from the selected phase word while preserving its u16 fraction; add the selected signed 16.16 x velocity with 32-bit wrap; add actor+0x34:s32 to actor+0x14:s32 with 32-bit wrap; then add actor+0x3c:s32 to actor+0x34:s32 with 32-bit wrap; copy the resulting x high word back to the selected phase word",
+            "phase_programs": [
+              {
+                "phase_u8": 0,
+                "x_high_destination": "actor+0x20:u16",
+                "x_high_source": "actor+0x20:u16",
+                "x_velocity_source": "actor+0x30:s32"
+              },
+              {
+                "phase_u8": 1,
+                "x_high_destination": "actor+0x2c:u16",
+                "x_high_source": "actor+0x2c:u16",
+                "x_velocity_source": "actor+0x30:s32 negated"
+              },
+              {
+                "phase_u8": 2,
+                "x_high_destination": "actor+0x2e:u16",
+                "x_high_source": "actor+0x2e:u16",
+                "x_velocity_source": "actor+0x38:s32"
+              },
+              {
+                "phase_u8": 3,
+                "x_high_destination": "actor+0x28:u16",
+                "x_high_source": "actor+0x28:u16",
+                "x_velocity_source": "actor+0x38:s32 negated"
+              }
+            ],
+            "phase_rule": "actor+0x2a:u8 = (actor+0x2a:u8 + 1) & 3 before selecting the phase",
+            "rng_calls_u8": 0,
+            "terminal_guard": "actor+0x24:s16 < 0 advances to state 0x0400 after movement and before the animation call",
+            "update_order": [
+              "advance and mask phase",
+              "select phase x high word and signed velocity",
+              "apply x and y movement",
+              "advance y velocity",
+              "save resulting x high word",
+              "test signed animation branch",
+              "advance state byte by 2 when branch is negative",
+              "advance source animation through 0x016536"
+            ]
+          },
+          "state_0x0400_and_0x0600": {
+            "backlink_result": "clear parent+0x7a:u16 only when the guard is true",
+            "dispatch_rule": "states 0x0400 and 0x0600 share the same terminal target",
+            "parent_missing_rule": "source allocation establishes the parent for every Coffee Shop lifetime; no inferred fallback is permitted",
+            "release_rule": "release through 0x01788c in the same scheduler visit",
+            "variant1_backlink_guard": "parent+0x7a:u16 == child source-slot low word"
+          },
+          "state_dispatch": {
+            "entries": [
+              {
+                "state_u16": "0x0000",
+                "table_offset_u16": "0x0008",
+                "target": "0x09a692"
+              },
+              {
+                "state_u16": "0x0200",
+                "table_offset_u16": "0x005e",
+                "target": "0x09a6e8"
+              },
+              {
+                "state_u16": "0x0400",
+                "table_offset_u16": "0x0118",
+                "target": "0x09a7a2"
+              },
+              {
+                "state_u16": "0x0600",
+                "table_offset_u16": "0x0118",
+                "target": "0x09a7a2"
+              }
+            ],
+            "state_field": "actor+0x04:u8 high state byte selected as an even table index",
+            "unsupported_state_rule": "reject; no fallback"
+          }
+        },
         "implementation_rule": "native source-owned presentation actor in the shared fixed pool; it must not become independent gameplay authority",
         "lifetime_count": 50,
         "lifetimes": [

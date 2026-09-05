@@ -1,8 +1,8 @@
 #ifndef AVSP_SPEC02_ROUND1_ENTRY_DATA_H
 #define AVSP_SPEC02_ROUND1_ENTRY_DATA_H
 
-/* contract_sha256=b784f11da55207e2ac26577a54e2f354cf4c23306794cf1ad77ec300ad1f4557 */
-/* fixtures_sha256=1c038863c4b3f1730663780ce2294e75380abbf2c5b8779ee81028183c392103 */
+/* contract_sha256=d179b71a83a202cb8e85a279f821e237a3f144644a49f738b500f2e79c172689 */
+/* fixtures_sha256=dd996a4d72b9ba8771f611e71c227188e0cb1ac553271ceb29d7289caa1fb2a7 */
 #define AVSP_ROUND1_ENTRY_PROGRAM_SHA256 "e5ef761fadc1b5a7df62e77c03025c0ebff0c2503cbc8be9c0077d4bd6cd24ba"
 
 #if defined(__sh__)
@@ -5171,6 +5171,33 @@ static const AvspRound1Class00CompanionParentEntrySpec avsp_round1_class00_compa
 #endif
 
 #if defined(__sh__)
+#define avsp_round1_type36_class03_records (avsp_round1_content->content_avsp_round1_type36_class03_records)
+#else
+static const AvspRound1AnimationStateSpec avsp_round1_type36_class03_records[AVSP_ROUND1_TYPE36_CLASS03_PRESENTATION_COUNT] =
+{
+    { 4u, 0, 0x0009a884UL, 0x0009a9aeUL, 0u, 0u },
+    { 4u, 0, 0x0009a894UL, 0x0009a9bcUL, 0u, 0u },
+    { 4u, 0, 0x0009a8a4UL, 0x0009a9caUL, 0u, 0u },
+    { 4u, 0, 0x0009a8b4UL, 0x0009a9d8UL, 0u, 0u },
+    { 4u, 0, 0x0009a8c4UL, 0x0009a9e6UL, 0u, 0u },
+    { 4u, 0, 0x0009a8d4UL, 0x0009a9f4UL, 0u, 0u },
+    { 4u, 0, 0x0009a8e4UL, 0x0009aa02UL, 0u, 0u },
+    { 4u, 0, 0x0009a8f4UL, 0x0009aa10UL, 0u, 0u },
+    { 4u, -32768, 0x0009a904UL, 0x0009aa10UL, 0u, 0u },
+};
+#endif
+
+#if defined(__sh__)
+#define avsp_round1_type36_class03 (avsp_round1_content->content_avsp_round1_type36_class03)
+#else
+static const AvspRound1Type36Class03Spec avsp_round1_type36_class03 =
+{
+    0x09A67EUL, 0x0009A884UL, -163840L, -278528L, 0L, 4096L,
+    0x0200u, 0x0400u, 0x0600u, 0x03, 36u, 1u
+};
+#endif
+
+#if defined(__sh__)
 #define avsp_round1_type36_class04_records (avsp_round1_content->content_avsp_round1_type36_class04_records)
 #else
 static const AvspRound1AnimationStateSpec avsp_round1_type36_class04_records[AVSP_ROUND1_TYPE36_CLASS04_PRESENTATION_COUNT] =
@@ -6043,6 +6070,8 @@ typedef struct
     AvspRound1Class00CompanionAnimationSpec content_avsp_round1_class00_companion_records[AVSP_ROUND1_CLASS00_COMPANION_PRESENTATION_COUNT];
     AvspRound1Class00CompanionParentAnimationSpec content_avsp_round1_class00_companion_parent_animations[AVSP_ROUND1_CLASS00_COMPANION_PARENT_ANIMATION_COUNT];
     AvspRound1Class00CompanionParentEntrySpec content_avsp_round1_class00_companion_parent_entries[AVSP_ROUND1_CLASS00_COMPANION_PARENT_ENTRY_COUNT];
+    AvspRound1AnimationStateSpec content_avsp_round1_type36_class03_records[AVSP_ROUND1_TYPE36_CLASS03_PRESENTATION_COUNT];
+    AvspRound1Type36Class03Spec content_avsp_round1_type36_class03;
     AvspRound1AnimationStateSpec content_avsp_round1_type36_class04_records[AVSP_ROUND1_TYPE36_CLASS04_PRESENTATION_COUNT];
     AvspRound1Type36Class04Spec content_avsp_round1_type36_class04;
     AvspRound1AnimationStateSpec content_avsp_round1_class05_records[AVSP_ROUND1_CLASS05_PRESENTATION_COUNT];

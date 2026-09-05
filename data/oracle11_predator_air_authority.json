@@ -7216,7 +7216,7 @@
         "effect_allocation": {
           "accepted_auxiliary_contract": {
             "artifact": "data/oracle11_round1_auxiliary_authority.json",
-            "artifact_sha256": "57de45034f03b903b88d09fd2918d89df3176d2073324a296f28031482ca562d",
+            "artifact_sha256": "662b6e4e3c3b5e9e873cb3867e01c5c0e9b3d170e4e455631d019c0fd0313b2b",
             "dispatch": "0x08f080",
             "presentation_records": [
               {

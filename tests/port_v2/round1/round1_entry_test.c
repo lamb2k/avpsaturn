@@ -2578,7 +2578,17 @@ int main(void)
             }
             for (entry_calls = 0u; entry_calls < 46u; ++entry_calls)
                 if (!avsp_round1_step_scheduler(&source_hit_runtime))
+                {
+                    fprintf(stderr,
+                        "source HIT landing scheduler failed i=%u code=%u slot=%04x state=%04x/%04x record=%08lx\n",
+                        entry_calls,
+                        source_hit_runtime.scheduler_failure_code,
+                        source_hit_runtime.scheduler_failure_source_slot,
+                        source_hit_runtime.scheduler_failure_state,
+                        source_hit_runtime.scheduler_failure_substate,
+                        source_hit_runtime.scheduler_failure_animation_record);
                     return 56;
+                }
             if (source_hit_target->substate != 0x0204u ||
                 source_hit_target->source_x_fp != 0x025a0c00L ||
                 source_hit_target->source_y_fp != 0x0136d600L ||
@@ -5483,6 +5493,100 @@ int main(void)
                         scene_runtime.rng_seed);
                     return 94;
                 }
+#ifdef AVSP_CLASS03_FOCUSED_TEST
+                if ((source_frame >= 2363u && source_frame <= 2367u) ||
+                    source_frame == 2395u || source_frame == 2396u ||
+                    source_frame == 2397u)
+                {
+                    const AvspRound1ActorCore *class03 = 0;
+                    unsigned int class03_index;
+                    for (class03_index = 0u;
+                         class03_index < scene_runtime.pools[5].capacity;
+                         ++class03_index)
+                    {
+                        const AvspRound1ActorCore *candidate =
+                            &scene_runtime.pools[5].records[class03_index];
+                        if (candidate->active &&
+                            candidate->source_slot == 0x00ffe140UL)
+                        {
+                            class03 = candidate;
+                            break;
+                        }
+                    }
+                    if (source_frame == 2397u)
+                    {
+                        const AvspRound1ActorCore *class03_parent = 0;
+                        for (class03_index = 0u;
+                             class03_index < scene_runtime.pools[0].capacity;
+                             ++class03_index)
+                        {
+                            const AvspRound1ActorCore *candidate =
+                                &scene_runtime.pools[0].records[class03_index];
+                            if (candidate->source_slot == 0x00ffa180UL)
+                            {
+                                class03_parent = candidate;
+                                break;
+                            }
+                        }
+                        if (class03 != 0 || class03_parent == 0 ||
+                            !class03_parent->active ||
+                            class03_parent->source_slot != 0x00ffa180UL ||
+                            class03_parent->source_type36_class03_child !=
+                                0xe0c0u)
+                            return 250;
+                    }
+                    else if (class03 == 0 || class03->actor_class != 0x03 ||
+                             class03->variant != 1u ||
+                             class03->dispatch_entry != 0x0009a67eUL ||
+                             class03->z != 310 ||
+                             class03->hurt_selector != 0u ||
+                             class03->attack_selector != 0u)
+                        return 250;
+                    else if (source_frame == 2363u &&
+                             (class03->state != 0x0200u ||
+                              class03->source_x_fp != 0x025a0000L ||
+                              class03->source_y_fp != 0x01360000L ||
+                              class03->animation_record != 0x0009a884UL ||
+                              class03->assembly != 0x0009a9aeUL ||
+                              class03->animation_timer != 4u ||
+                              class03->source_action_timer != 0xffu))
+                        return 250;
+                    else if (source_frame == 2364u &&
+                             (class03->source_x_fp != 0x02578000L ||
+                              class03->source_y_fp != 0x01360000L ||
+                              class03->animation_timer != 3u ||
+                              class03->source_action_timer != 0u))
+                        return 250;
+                    else if (source_frame == 2365u &&
+                             (class03->source_x_fp != 0x025d0000L ||
+                              class03->source_y_fp != 0x01361000L ||
+                              class03->animation_timer != 2u ||
+                              class03->source_action_timer != 1u))
+                        return 250;
+                    else if (source_frame == 2367u &&
+                             (class03->source_x_fp != 0x025f0000L ||
+                              class03->source_y_fp != 0x01366000L ||
+                              class03->animation_record != 0x0009a894UL ||
+                              class03->animation_timer != 4u ||
+                              class03->source_action_timer != 3u))
+                        return 250;
+                    else if (source_frame == 2395u &&
+                             (class03->state != 0x0200u ||
+                              class03->source_x_fp != 0x02820000L ||
+                              class03->source_y_fp != 0x01550000L ||
+                              class03->animation_record != 0x0009a904UL ||
+                              class03->animation_timer != 4u ||
+                              class03->animation_branch != -32768))
+                        return 250;
+                    else if (source_frame == 2396u &&
+                             (class03->state != 0x0400u ||
+                              class03->source_x_fp != 0x023f8000L ||
+                              class03->source_y_fp != 0x01570000L ||
+                              class03->animation_timer != 3u ||
+                              class03->animation_branch != -32768))
+                        return 250;
+                }
+#endif
 #ifdef AVSP_CLASS04_FOCUSED_TEST
                 if (source_frame == 2254u || source_frame == 2255u ||
                     source_frame == 2268u || source_frame == 2269u)
@@ -6093,6 +6197,31 @@ int main(void)
                 scene_runtime.type36_class04_releases,
                 scene_runtime.player.source_type36_class04_child);
             return 249;
+        }
+#endif
+#ifdef AVSP_CLASS03_FOCUSED_TEST
+        if (scene_runtime.type36_class03_allocation_requests != 50u ||
+            scene_runtime.type36_class03_allocations != 50u ||
+            scene_runtime.type36_class03_allocation_failures != 0u ||
+            scene_runtime.type36_class03_initializations != 50u ||
+            scene_runtime.type36_class03_motion_steps != 1650u ||
+            scene_runtime.type36_class03_animation_steps != 1650u ||
+            scene_runtime.type36_class03_state_transitions != 50u ||
+            scene_runtime.type36_class03_rng_calls != 0u ||
+            scene_runtime.type36_class03_releases != 50u)
+        {
+            fprintf(stderr,
+                "class03 program requests=%lu allocations=%lu failures=%lu init=%lu motion=%lu animation=%lu transitions=%lu rng=%lu releases=%lu\n",
+                scene_runtime.type36_class03_allocation_requests,
+                scene_runtime.type36_class03_allocations,
+                scene_runtime.type36_class03_allocation_failures,
+                scene_runtime.type36_class03_initializations,
+                scene_runtime.type36_class03_motion_steps,
+                scene_runtime.type36_class03_animation_steps,
+                scene_runtime.type36_class03_state_transitions,
+                scene_runtime.type36_class03_rng_calls,
+                scene_runtime.type36_class03_releases);
+            return 250;
         }
 #endif
         if (scene_runtime.coffee_shop_obstacle_rng_calls != 1u ||

@@ -12,7 +12,7 @@ from pathlib import Path
 
 ROOT = Path(__file__).resolve().parents[3]
 SPEC = ROOT / "data/spec02_round1_executable_contract.json"
-EXPECTED = "b784f11da55207e2ac26577a54e2f354cf4c23306794cf1ad77ec300ad1f4557"
+EXPECTED = "d179b71a83a202cb8e85a279f821e237a3f144644a49f738b500f2e79c172689"
 assert hashlib.sha256(SPEC.read_bytes()).hexdigest() == EXPECTED
 assert json.loads(SPEC.read_text())["status"] == "ACCEPTED"
 source = (ROOT / "src/port_v2/gameplay/round1/round1.c").read_text()
@@ -116,6 +116,9 @@ def run(body, header_body, passes, label="baseline", player_body=player_source,
         return {"label": label, "classification": "SKIPPED"}
     if (not passes and "--class00-only" in sys.argv and
             not label.startswith(("class00-", "generated-class00-"))):
+        return {"label": label, "classification": "SKIPPED"}
+    if (not passes and "--class03-only" in sys.argv and
+            not label.startswith(("class03-", "generated-class03-"))):
         return {"label": label, "classification": "SKIPPED"}
     if not passes and ONLY_MUTATION_LABEL is not None and \
             ONLY_MUTATION_LABEL not in label:
@@ -417,6 +420,8 @@ class00_checkpoint_body = (
     "#define AVSP_CLASS00_FOCUSED_TEST 1\n" + test_source)
 class04_checkpoint_body = (
     "#define AVSP_CLASS04_FOCUSED_TEST 1\n" + test_source)
+class03_checkpoint_body = (
+    "#define AVSP_CLASS03_FOCUSED_TEST 1\n" + test_source)
 scene_checkpoint_flags = {
     "--weapon-timing-only",
     "--special-input-only", "--hit-interaction-only", "--queue-only",
@@ -431,6 +436,8 @@ run(source, header, True,
                if "--class00-only" in sys.argv else
                class04_checkpoint_body
                if "--class04-only" in sys.argv else
+               class03_checkpoint_body
+               if "--class03-only" in sys.argv else
                class0f_checkpoint_body
                if "--class0f-only" in sys.argv else
                class1f_state0_checkpoint_body
@@ -490,6 +497,7 @@ subset_flags = {"--inner8-only", "--ko-only", "--registration-only",
                 "--hit-interaction-only", "--class1f-state0-only",
                 "--class1f-action16-only", "--exit-scheduler-only",
                 "--class00-only", "--class04-only", "--generated-all-only"}
+subset_flags.add("--class03-only")
 if "--queue-only" in sys.argv or not subset_flags.intersection(sys.argv):
     run(source, header, False, "consume-before-direction-queue-shift",
         player_source.replace(queue_before, queue_after, 1))
@@ -1560,6 +1568,114 @@ if "--special-input-only" in sys.argv:
         test_body=scene_checkpoint_body)
     print("REIMPLEMENT-13 simultaneous special-input arbitration lane: PASS "
           "(3 real mutations)")
+    raise SystemExit(0)
+if "--class03-only" in sys.argv:
+    spawn_call = """            if (!avsp_round1_spawn_type36_class03(runtime, actor))
+                return 0;"""
+    assert source.count(spawn_call) == 5
+    run(source.replace(spawn_call, "", 1), header, False,
+        "class03-first-landing-spawn-owner", expected_returncode=250,
+        test_body=class03_checkpoint_body)
+    parent_guard = """    if (parent->state == 0x0202u)
+    {
+        if (parent->substate == 0x0204u)"""
+    assert source.count(parent_guard) == 1
+    run(source.replace(parent_guard, parent_guard.replace(
+        "parent->state == 0x0202u", "parent->state == 0x0200u"), 1),
+        header, False, "class03-parent-state-guard", expected_returncode=56,
+        test_body=class03_checkpoint_body)
+    allocation_class = (
+        "    actor->actor_class = avsp_round1_type36_class03.actor_class;")
+    assert source.count(allocation_class) == 1
+    run(source.replace(allocation_class,
+        "    actor->actor_class = 0x04;", 1), header, False,
+        "class03-allocation-class", expected_returncode=56,
+        test_body=class03_checkpoint_body)
+    allocation_variant = (
+        "    actor->variant = avsp_round1_type36_class03.variant;")
+    assert source.count(allocation_variant) == 1
+    run(source.replace(allocation_variant, "    actor->variant = 0u;", 1),
+        header, False, "class03-allocation-variant", expected_returncode=56,
+        test_body=class03_checkpoint_body)
+    phase_rule = """        unsigned char phase = (unsigned char)(
+            (actor->source_action_timer + 1u) & 3u);"""
+    assert source.count(phase_rule) == 1
+    run(source.replace(phase_rule, phase_rule.replace("+ 1u", "+ 2u"), 1),
+        header, False, "class03-phase-preincrement", expected_returncode=250,
+        test_body=class03_checkpoint_body)
+    phase_mapping = """        else if (phase == 1u)
+        {
+            buffer_index = 2u;"""
+    assert source.count(phase_mapping) == 1
+    run(source.replace(phase_mapping, phase_mapping.replace(
+        "buffer_index = 2u", "buffer_index = 1u"), 1), header, False,
+        "class03-phase-buffer-map", expected_returncode=250,
+        test_body=class03_checkpoint_body)
+    velocity_sign = "            velocity = -actor->source_x_velocity;"
+    assert source.count(velocity_sign) == 1
+    run(source.replace(velocity_sign,
+        "            velocity = actor->source_x_velocity;", 1),
+        header, False, "class03-phase-velocity-sign", expected_returncode=250,
+        test_body=class03_checkpoint_body)
+    acceleration_order = """        actor->source_y_velocity = (long)(
+            (unsigned long)actor->source_y_velocity +
+            (unsigned long)actor->source_y_acceleration);"""
+    assert source.count(acceleration_order) == 1
+    run(source.replace(acceleration_order, "", 1), header, False,
+        "class03-y-acceleration-order", expected_returncode=250,
+        test_body=class03_checkpoint_body)
+    rng_absence = """        actor->source_action_timer = 0xffu;
+        actor->source_x_velocity = spec->phase1_x_velocity;"""
+    assert source.count(rng_absence) == 1
+    run(source.replace(rng_absence, """        actor->source_action_timer = 0xffu;
+        (void)avsp_round1_source_rng(runtime);
+        ++runtime->type36_class03_rng_calls;
+        actor->source_x_velocity = spec->phase1_x_velocity;""", 1),
+        header, False, "class03-no-direct-rng", expected_returncode=56,
+        test_body=class03_checkpoint_body)
+    backlink = """        if (parent->source_type36_class03_child ==
+                (unsigned short)actor->source_slot)
+            parent->source_type36_class03_child = 0u;"""
+    assert source.count(backlink) == 1
+    run(source.replace(backlink,
+        "        parent->source_type36_class03_child = 0u;", 1),
+        header, False, "class03-backlink-guard", expected_returncode=250,
+        test_body=class03_checkpoint_body)
+    scheduler_dispatch = """                if (!avsp_round1_step_type36_class03(
+                        runtime, &runtime->pools[pool_index], actor))"""
+    assert source.count(scheduler_dispatch) == 1
+    run(source.replace(scheduler_dispatch,
+        scheduler_dispatch.replace("if (!", "if (0 && !"), 1),
+        header, False, "class03-scheduler-invocation", expected_returncode=250,
+        test_body=class03_checkpoint_body)
+    first_record = (
+        "    { 4u, 0, 0x0009a884UL, 0x0009a9aeUL, 0u, 0u },")
+    assert generated.count(first_record) == 1
+    run(source, header, False, "generated-class03-first-assembly",
+        generated_body=generated.replace(first_record, first_record.replace(
+            "0x0009a9aeUL", "0x0009a9bcUL"), 1),
+        expected_returncode=250, test_body=class03_checkpoint_body)
+    terminal_record = (
+        "    { 4u, -32768, 0x0009a904UL, 0x0009aa10UL, 0u, 0u },")
+    assert generated.count(terminal_record) == 1
+    run(source, header, False, "generated-class03-terminal-branch",
+        generated_body=generated.replace(terminal_record,
+            terminal_record.replace("-32768", "0"), 1),
+        expected_returncode=56, test_body=class03_checkpoint_body)
+    generated_motion = (
+        "    0x09A67EUL, 0x0009A884UL, -163840L, -278528L, 0L, 4096L,")
+    assert generated.count(generated_motion) == 1
+    run(source, header, False, "generated-class03-motion-row",
+        generated_body=generated.replace(generated_motion,
+            generated_motion.replace("-163840L", "-163839L"), 1),
+        expected_returncode=56, test_body=class03_checkpoint_body)
+    record_focused_program_controls(
+        "type36_class03_complete_program",
+        "complete Coffee Shop source frames 2040..5566; every route-reachable "
+        "type-36/class-0x03 allocation, four-phase motion, animation, parent "
+        "backlink and release")
+    print("REIMPLEMENT-13 Coffee Shop type-36/class-0x03 presentation "
+          "mutation lane: PASS (14 real mutations)")
     raise SystemExit(0)
 if "--class04-only" in sys.argv:
     ground_allocation = """            avsp_round1_allocate_player_weapon_projectile(runtime);

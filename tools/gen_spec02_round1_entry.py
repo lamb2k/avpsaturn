@@ -369,9 +369,14 @@ def build() -> str:
     class0f_contract = class0f["implementation_contract"]
     class0a_contract = class0a["implementation_contract"]
     class00_companion_contract = class00_companion["implementation_contract"]
-    class04_type36 = next(item for item in
-                          fixtures["authority_data"]["auxiliary"]
-                          ["coffee_shop_type36_presentation"]["classes"]
+    type36_classes = fixtures["authority_data"]["auxiliary"][
+        "coffee_shop_type36_presentation"]["classes"]
+    class03_type36 = next(item for item in type36_classes
+                          if item["class"] == "0x03")
+    class03_type36_contract = class03_type36["implementation_contract"]
+    class03_type36_records = class03_type36_contract["state_0x0000"][
+        "animation_binding"]["record_sequence"]
+    class04_type36 = next(item for item in type36_classes
                           if item["class"] == "0x04")
     class04_type36_contract = class04_type36["implementation_contract"]
     class04_type36_records = class04_type36_contract["state_0x0000"][
@@ -2394,6 +2399,29 @@ def build() -> str:
         class00_companion["classification"] !=
             "SOURCE_CLOSED_IMPLEMENTATION_FIELDS" or
         class00_companion["implementation_status"] != "SPEC_EXECUTABLE" or
+        class03_type36["classification"] != "SOURCE_CLOSED_PRESENTATION" or
+        class03_type36_contract["classification"] !=
+            "SOURCE_CLOSED_IMPLEMENTATION_FIELDS" or
+        class03_type36_contract["spec_executable"] is not True or
+        class03_type36_contract["pool_and_scheduler"]["allocator"] !=
+            "0x017876" or
+        class03_type36_contract["pool_and_scheduler"]["release_routine"] !=
+            "0x01788c" or
+        class03_type36_contract["state_0x0000"]["variant"][
+            "coffee_shop_reachable_u8"] != 1 or
+        class03_type36_contract["state_0x0000"]["motion_s16_16"] != {
+            "phase1_x_velocity": -0x00028000,
+            "phase3_x_velocity": -0x00044000,
+            "initial_y_velocity": 0,
+            "y_acceleration": 0x00001000} or
+        len(class03_type36_records) != 9 or
+        class03_type36_records[0]["animation_record"] != "0x0009a884" or
+        class03_type36_records[-1]["branch_s16"] != -32768 or
+        len(class03_type36_contract["state_0x0200"]["phase_programs"]) != 4 or
+        class03_type36_contract["effects"]["rng_calls_u8"] != 0 or
+        class03_type36_contract["effects"]["audio_commands"] != [] or
+        class03_type36_contract["fixed_frame_substitute_forbidden"] is not True or
+        class03_type36_contract["retained_gameplay_authority"] is not False or
         class04_type36["classification"] != "SOURCE_CLOSED_PRESENTATION" or
         class04_type36_contract["classification"] !=
             "SOURCE_CLOSED_IMPLEMENTATION_FIELDS" or
@@ -5044,6 +5072,27 @@ def build() -> str:
             row["y_offset_s8"], row["animation_selector_u8"],
             row["parent_field56_u8"]))
     lines.extend([
+        "};", "",
+        "static const AvspRound1AnimationStateSpec avsp_round1_type36_class03_records[AVSP_ROUND1_TYPE36_CLASS03_PRESENTATION_COUNT] =",
+        "{",
+    ])
+    for row in class03_type36_records:
+        lines.append("    { %du, %d, %sUL, %sUL, %du, %du }," % (
+            row["timer_u16"], row["branch_s16"], row["animation_record"],
+            row["assembly"], row["hurt_selector_u8"],
+            row["attack_selector_u8"]))
+    class03_motion = class03_type36_contract["state_0x0000"][
+        "motion_s16_16"]
+    lines.extend([
+        "};", "",
+        "static const AvspRound1Type36Class03Spec avsp_round1_type36_class03 =",
+        "{",
+        "    0x09A67EUL, 0x0009A884UL, %dL, %dL, %dL, %dL," % (
+            class03_motion["phase1_x_velocity"],
+            class03_motion["phase3_x_velocity"],
+            class03_motion["initial_y_velocity"],
+            class03_motion["y_acceleration"]),
+        "    0x0200u, 0x0400u, 0x0600u, 0x03, 36u, 1u",
         "};", "",
         "static const AvspRound1AnimationStateSpec avsp_round1_type36_class04_records[AVSP_ROUND1_TYPE36_CLASS04_PRESENTATION_COUNT] =",
         "{",

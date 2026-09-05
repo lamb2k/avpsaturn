@@ -6,7 +6,7 @@
 #include "../../combat/hit_ko/hit_ko.h"
 
 #define AVSP_ROUND1_SPEC02_SHA256 \
-"b784f11da55207e2ac26577a54e2f354cf4c23306794cf1ad77ec300ad1f4557"
+"d179b71a83a202cb8e85a279f821e237a3f144644a49f738b500f2e79c172689"
 #define AVSP_ROUND1_CANARY_HEAD 0x52314548UL
 #define AVSP_ROUND1_CANARY_TAIL 0x52314554UL
 #define AVSP_ROUND1_ROUTE_ENTRY_STATE 2
@@ -46,6 +46,7 @@
 #define AVSP_ROUND1_CLASS4B_PRESENTATION_COUNT 32u
 #define AVSP_ROUND1_CLASS3D_PRESENTATION_COUNT 9u
 #define AVSP_ROUND1_CLASS3D_OFFSET_COUNT 16u
+#define AVSP_ROUND1_TYPE36_CLASS03_PRESENTATION_COUNT 9u
 #define AVSP_ROUND1_TYPE36_CLASS04_PRESENTATION_COUNT 10u
 #define AVSP_ROUND1_WEAPON_PROJECTILE_CAPACITY 24u
 #define AVSP_ROUND1_WEAPON_PARENT_PRESENTATION_COUNT 8u
@@ -294,6 +295,22 @@ typedef struct
     unsigned char field_0d;
     unsigned short timer;
 } AvspRound1CoffeeSceneRecordSpec;
+
+typedef struct
+{
+    unsigned long dispatch;
+    unsigned long first_animation_record;
+    long phase1_x_velocity;
+    long phase3_x_velocity;
+    long initial_y_velocity;
+    long y_acceleration;
+    unsigned short active_state;
+    unsigned short terminal_state;
+    unsigned short release_state;
+    signed char actor_class;
+    unsigned char record_type;
+    unsigned char variant;
+} AvspRound1Type36Class03Spec;
 
 typedef struct
 {
@@ -637,6 +654,10 @@ typedef struct
  * player never uses the class-0x43 timer alias above, so this shared fixed
  * actor storage remains phase-disjoint. */
 #define source_type36_class04_child source_children[0]
+
+/* Class-0x1f+0x7a owns the route-reachable variant-1 type-36/class-0x03
+ * backlink. It is phase-disjoint from the other source child aliases. */
+#define source_type36_class03_child source_children[1]
 
 typedef struct
 {
@@ -2158,6 +2179,15 @@ typedef struct
     unsigned long class00_companion_helper_calls;
     unsigned short source_round_stage_index;
     short source_type36_x_delta;
+    unsigned long type36_class03_allocation_requests;
+    unsigned long type36_class03_allocations;
+    unsigned long type36_class03_allocation_failures;
+    unsigned long type36_class03_initializations;
+    unsigned long type36_class03_motion_steps;
+    unsigned long type36_class03_animation_steps;
+    unsigned long type36_class03_state_transitions;
+    unsigned long type36_class03_rng_calls;
+    unsigned long type36_class03_releases;
     unsigned long type36_class04_allocation_requests;
     unsigned long type36_class04_allocations;
     unsigned long type36_class04_allocation_failures;
