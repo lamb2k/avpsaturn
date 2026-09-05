@@ -23,11 +23,11 @@ source/spec/native closed. Class-`0x03` matches all 1,700 program rows while
 retaining 1,360 raw row and 38 slot-projection differences. Scene gaps are
 `144/1/0/633/1/93/0/279/0` in the report's named order. Candidate
 `d04a65a2253175c6e820140feefc35419e2cca07` and the exhausted Emulator/WGC and
-Target gates stay frozen. The next scene-order body is type-28/class-`0x0c`,
-slot `0x00ffcd80`, dispatch `0x0a4922`, lifetime 2806..5550. Its accepted
-identity fixture is explicitly `BLOCKED_MISSING_SPEC_FIELDS`; use the smallest
-bounded Oracle procedure, then amend existing SPEC-02 and close the whole
-Coffee-Shop-reachable source program.
+Target gates stay frozen. Type-28/class-`0x0c` remains
+`BLOCKED_MISSING_SPEC_FIELDS`: its bounded Oracle follow-up exhausted three
+attempts without a causal interaction witness. Preserve that blocker and
+continue dependency-safe type-36/class-`0x0e`, dispatch
+`0x09d440..0x09d60e`, across all 16 Coffee Shop lifetimes.
 
 ## Objective
 
@@ -4218,3 +4218,24 @@ status is `BLOCKED_MISSING_SPEC_FIELDS`. Use the smallest bounded Oracle
 follow-up for those fields, amend the existing fixture, implement the whole
 Coffee-Shop-reachable program, and rerun the full scene. Candidate remains
 frozen; the read-only emulator readiness record is preparation, not a retry.
+
+### P4 Coffee Shop class-0x0c bounded Oracle blocker (2026-09-05)
+
+The complete decoded type-28/class-`0x0c` source window is
+`0x0a4922..0x0a4f14` (349 instructions; raw opcode SHA-256
+`38b695e0887d105adaaccd2404a4e1c8c090bea6ab4c8f7c04ed246c3f226895`).
+The new program trace records 26,538 rows. A fresh cold baseline is byte-identical
+to accepted `cs68a` for scene frames, actors, and RNG.
+
+The three-attempt allowance is exhausted: `cs69a` failed before capture on the
+Lua 200-local instrumentation limit; `cs69b` is the valid independent cold
+baseline; `cs69m` moved the player to the resident actor for one notifier
+interval but normalized before the class-`0x0c` scheduler visit. After removing
+the four injection markers and injected player coordinates, all 26,538 program
+rows are identical and RNG is unchanged. This mutation is not credited.
+
+Class-`0x0c` therefore remains `BLOCKED_MISSING_SPEC_FIELDS`; no native body or
+SPEC fixture is invented. The exact blocker and owner-reopen condition are in
+`data/reimplement13_class0c_oracle_followup.json`. Continue dependency-safe
+type-36/class-`0x0e` as a whole source program. Candidate and every exhausted
+Target/Emulator/WGC gate remain frozen.

@@ -1,0 +1,76 @@
+{
+  "body": {
+    "class": "0x0c",
+    "dispatch_entry": "0x0a4922",
+    "lifetime_source_frames_inclusive": [2806, 5550],
+    "record_type": 28,
+    "source_slot": "0x00ffcd80"
+  },
+  "classification": "BLOCKED_MISSING_CAUSAL_WITNESS",
+  "cold_reference": {
+    "accepted_baseline": "oracle11_progression_lifecycle_cs68a",
+    "fresh_baseline": "oracle11_progression_lifecycle_cs69b",
+    "identity": {
+      "coffee_shop_rng_calls.tsv": "81338529f76629c3d103885c16838bd562beecf783f0b5107a5b7ecd11e219b3",
+      "coffee_shop_scene_actors.tsv": "b7b1568df038af1cdd7eb5bc6eb30c830efca4952d1077644ab3b31ed2ad1c0f",
+      "coffee_shop_scene_frames.tsv": "91e4aab3a03586a6c9a143dd58ee03a72ebc52b7fd611fdc6fe0975ebd522d1d"
+    },
+    "pair_byte_identical": true
+  },
+  "counterfactual": {
+    "capture": "oracle11_progression_lifecycle_cs69m",
+    "class0c_dispatch_rows_after_removing_markers": 26538,
+    "class0c_program_equal_after_excluding_injected_player_coordinates": true,
+    "injection": "move the source player x/y/z to the resident class-0x0c actor at frame-notifier label 2862 and restore at label 2863",
+    "observed_difference": "only the injected player coordinates at scene frame 2862 and the dependent type-28/class-0x00 companion projection at frame 2863",
+    "production_authority": false,
+    "rng_equal": true,
+    "status": "NON_CAUSAL_PERTURBATION_NOT_CREDITED"
+  },
+  "exact_blocker": "The one-frame notifier mutation normalized before the class-0x0c actor's scheduler visit. It therefore did not discriminate the source interaction, collision, audio, player-effect, terminal, or release branches required to turn the accepted identity contract into an executable SPEC-02 contract.",
+  "external_transfers": [
+    "0x0022ee audio command tail",
+    "0x016518 animation bind",
+    "0x016536 animation movement",
+    "0x0167ac scheduler tail",
+    "0x01783e type-28 release",
+    "0x017c5e allocation",
+    "0x01d768 interaction/collision",
+    "0x09e5a6 shared type-28 runtime",
+    "0x0ae396 shared helper",
+    "0x0b1baa collision/navigation"
+  ],
+  "program": {
+    "decoded_instruction_count": 349,
+    "decoded_instruction_semantics_sha256": "bda68a8bf267b212f1809760b2c4dccddbd2510369f2b95c71e9906f345bd4c7",
+    "dispatch_tables": [
+      {"address": "0x0a492e", "entries": 4, "name": "top"},
+      {"address": "0x0a49ae", "entries": 4, "name": "state_low"},
+      {"address": "0x0a49ce", "entries": 3, "name": "substate_high"},
+      {"address": "0x0a49e0", "entries": 4, "name": "substate_low"},
+      {"address": "0x0a4ba2", "entries": 4, "name": "phase_variant"},
+      {"address": "0x0a4df6", "entries": 2, "name": "terminal_phase"},
+      {"address": "0x0a4e30", "entries": 4, "name": "character"}
+    ],
+    "first": "0x0a4922",
+    "last_exclusive": "0x0a4f14",
+    "raw_opcode_sha256": "38b695e0887d105adaaccd2404a4e1c8c090bea6ab4c8f7c04ed246c3f226895",
+    "size_bytes": 1522
+  },
+  "schema": "reimplement13-bounded-oracle-followup-v1",
+  "source_program_capture": {
+    "fresh_baseline_rows": 26538,
+    "fresh_baseline_sha256": "9835efc004e79a417d365240613b4e13f6ac00a1dc1c59b7505aa6f34deebefb",
+    "mutant_sha256": "bbcba19263d968146f8a5f213ad41125ed86f870846fc367ea6eeaddd849f6ef"
+  },
+  "three_attempt_cap": {
+    "attempts": [
+      {"result": "INVALID_CAPTURE_INSTRUMENTATION", "variant": "cs69a"},
+      {"result": "VALID_COLD_REFERENCE_IDENTITY", "variant": "cs69b"},
+      {"result": "NON_CAUSAL_PERTURBATION_NOT_CREDITED", "variant": "cs69m"}
+    ],
+    "exhausted": true,
+    "retry_authorized": false
+  },
+  "unblock_condition": "Owner authorizes a changed source-counterfactual hypothesis that holds the player overlap through an observed class-0x0c dispatch, or accepted retained evidence independently proves every currently unobserved reachable interaction/effect/terminal branch."
+}
