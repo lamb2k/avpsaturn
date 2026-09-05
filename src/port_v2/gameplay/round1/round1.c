@@ -94,6 +94,9 @@ static unsigned int avsp_round1_coffee_exit_scheduler_callback_updates(
 static unsigned int avsp_round1_coffee_exit_record20_prefix_callback_updates(
     unsigned char program_tick);
 static int avsp_round1_step_coffee_exit_player(AvspRound1Runtime *runtime);
+static int avsp_round1_step_class0a(AvspRound1Runtime *runtime,
+                                    AvspRound1Pool *pool,
+                                    AvspRound1ActorCore *actor);
 static int avsp_round1_bind_player_jump_sequence(
     AvspRound1Runtime *runtime, unsigned char selector);
 static int avsp_round1_step_player_jump_animation(
@@ -156,6 +159,27 @@ unsigned int avsp_round1_coffee_shop_scheduler_source_updates(
             source_frame -
             AVSP_ROUND1_COFFEE_EXIT_CALLBACK_FIRST_SOURCE_FRAME));
     return avsp_round1_coffee_shop_source_updates(source_frame);
+}
+
+unsigned int avsp_round1_coffee_shop_class0a_source_updates(
+    unsigned short source_frame)
+{
+    unsigned int index;
+    if (source_frame <
+            AVSP_ROUND1_COFFEE_SHOP_CLASS0A_FIRST_SOURCE_FRAME ||
+        source_frame >
+            AVSP_ROUND1_COFFEE_SHOP_CLASS0A_LAST_SOURCE_FRAME)
+        return 0u;
+    for (index = 0u;
+         index < AVSP_ROUND1_COFFEE_SHOP_CLASS0A_UPDATE_CADENCE_COUNT;
+         ++index)
+    {
+        const AvspRound1SceneUpdateCadence *entry =
+            &avsp_round1_coffee_shop_class0a_update_cadence[index];
+        if (source_frame == entry->source_frame)
+            return entry->updates;
+    }
+    return AVSP_ROUND1_COFFEE_SHOP_CLASS0A_DEFAULT_SOURCE_UPDATES;
 }
 
 unsigned int avsp_round1_coffee_shop_record20_prefix_source_updates(
@@ -591,6 +615,8 @@ static int avsp_round1_dispatch_supported(unsigned char record_type,
     if (record_type == 24u && actor_class == 0x44)
         return 1;
     if (record_type == 24u && actor_class == 0x47)
+        return 1;
+    if (record_type == 24u && actor_class == 0x0a)
         return 1;
     if (record_type == 24u && actor_class == 0x20)
         return 1;
@@ -3235,6 +3261,19 @@ int avsp_round1_step_coffee_exit_display(AvspRound1Runtime *runtime)
             ++runtime->entry.exit_load_events;
             if (runtime->entry.exit_load_index == 1u)
             {
+                AvspRound1ActorCore *actor =
+                    avsp_round1_allocate_pool_source_slot(
+                        runtime, 3u, (unsigned short)
+                            avsp_round1_class0a.second_source_slot);
+                if (actor == 0)
+                    return 0;
+                actor->actor_class = 0x0a;
+                actor->variant = avsp_round1_class0a.second_variant;
+                actor->dispatch_entry = avsp_round1_class0a.dispatch;
+                if (!avsp_round1_step_class0a(
+                        runtime, &runtime->pools[3], actor))
+                    return 0;
+                ++runtime->class0a_next_entry_spawns;
                 runtime->entry_controller.active = 1u;
                 runtime->entry_controller.state =
                     avsp_round1_coffee_exit.next_entry_controller_state;
@@ -7564,6 +7603,101 @@ static int avsp_round1_step_class09(AvspRound1Runtime *runtime,
     return 1;
 }
 
+static int avsp_round1_class0a_bind_variant(AvspRound1ActorCore *actor)
+{
+    unsigned int selector;
+    if (actor->variant == avsp_round1_class0a.first_variant)
+        selector = 2u;
+    else if (actor->variant == avsp_round1_class0a.second_variant)
+        selector = 0u;
+    else
+        return 0;
+    actor->animation_index = (unsigned char)selector;
+    avsp_round1_bind_animation_state(actor,
+        &avsp_round1_class0a_records[selector]);
+    return 1;
+}
+
+static int avsp_round1_step_class0a(AvspRound1Runtime *runtime,
+                                    AvspRound1Pool *pool,
+                                    AvspRound1ActorCore *actor)
+{
+    unsigned int sequence_first;
+    unsigned int sequence_last;
+    unsigned int index;
+    int guarded = 0;
+    if (actor->dispatch_entry != avsp_round1_class0a.dispatch ||
+        actor->actor_class != 0x0a || actor->type != 24u)
+        return 0;
+    if (actor->state == 0u)
+    {
+        actor->state = avsp_round1_class0a.active_state;
+        actor->substate = 0u;
+        actor->x = 0;
+        actor->y = 0;
+        actor->z = 0;
+        actor->facing = 0u;
+        actor->coordinate_mode = 0u;
+        if (!avsp_round1_class0a_bind_variant(actor))
+            return 0;
+        ++runtime->class0a_initializations;
+        return 1;
+    }
+    if (actor->state == avsp_round1_class0a.release_state)
+    {
+        if (!avsp_round1_release_pool_actor(pool, actor))
+            return 0;
+        ++runtime->class0a_releases;
+        return 1;
+    }
+    if (actor->state != avsp_round1_class0a.active_state)
+        return 0;
+    for (index = 0u; index < 3u; ++index)
+        if (actor->variant == avsp_round1_class0a.guarded_variants[index])
+            guarded = 1;
+    if (guarded)
+    {
+        if ((unsigned short)runtime->camera_x_previous >=
+                avsp_round1_class0a.camera_threshold)
+        {
+            actor->state = avsp_round1_class0a.release_state;
+            ++runtime->class0a_guard_transitions;
+        }
+        return 1;
+    }
+    if (actor->variant == avsp_round1_class0a.first_variant)
+    {
+        sequence_first = 2u;
+        sequence_last = 3u;
+    }
+    else if (actor->variant == avsp_round1_class0a.second_variant)
+    {
+        sequence_first = 0u;
+        sequence_last = 1u;
+    }
+    else
+        return 0;
+    if (actor->animation_timer == 0u)
+        return 0;
+    --actor->animation_timer;
+    ++runtime->class0a_animation_steps;
+    if (actor->animation_timer == 0u && actor->animation_branch < 0)
+    {
+        actor->animation_index = (unsigned char)sequence_first;
+        avsp_round1_bind_animation_state(actor,
+            &avsp_round1_class0a_records[sequence_first]);
+    }
+    else if (actor->animation_timer == 0u)
+    {
+        if (actor->animation_index >= sequence_last)
+            return 0;
+        ++actor->animation_index;
+        avsp_round1_bind_animation_state(actor,
+            &avsp_round1_class0a_records[actor->animation_index]);
+    }
+    return 1;
+}
+
 static void avsp_round1_class0f_bind_presentation(
     AvspRound1ActorCore *actor, unsigned char selector)
 {
@@ -8812,13 +8946,30 @@ static int avsp_round1_seed_first_segment_dependencies(
         actor->substate = avsp_round1_class44_guard.substate;
         actor->dispatch_entry = avsp_round1_class44_guard.dispatch;
     }
+    {
+        unsigned short slot = (unsigned short)
+            avsp_round1_class0a.first_source_slot;
+        unsigned int index = (unsigned int)(slot - pool24->source_base) /
+            pool24->stride;
+        AvspRound1ActorCore *actor;
+        if (slot < pool24->source_base || index >= pool24->capacity)
+            return 0;
+        actor = &pool24->records[index];
+        memset(actor, 0, sizeof(*actor));
+        actor->active = 1u;
+        actor->actor_class = 0x0a;
+        actor->type = 24u;
+        actor->source_slot = avsp_round1_class0a.first_source_slot;
+        actor->variant = avsp_round1_class0a.first_variant;
+        actor->dispatch_entry = avsp_round1_class0a.dispatch;
+    }
     free_index = 0u;
     for (slot_index = 0u; slot_index < pool24->capacity; ++slot_index)
     {
         unsigned short slot = (unsigned short)(pool24->source_base +
                                                slot_index * pool24->stride);
         if (slot == (unsigned short)avsp_round1_class44_guard.source_slot ||
-            slot == 0xc600u)
+            slot == (unsigned short)avsp_round1_class0a.first_source_slot)
             continue;
         pool24->free_stack[free_index++] = slot;
     }
@@ -11954,7 +12105,8 @@ int avsp_round1_step_scheduler_pre_player_source_differential(
 
 static int avsp_round1_step_scheduler_post_player_mask(
     AvspRound1Runtime *runtime, int include_default,
-    int include_record20_prefix, int include_record20_suffix)
+    int include_record20_prefix, int include_record20_suffix,
+    int include_class0a)
 {
     unsigned int order_index;
     unsigned int pool_index;
@@ -11965,7 +12117,7 @@ static int avsp_round1_step_scheduler_post_player_mask(
         source_frame >= AVSP_ROUND1_COFFEE_EXIT_CALLBACK_FIRST_SOURCE_FRAME &&
         source_frame <= AVSP_ROUND1_COFFEE_EXIT_CALLBACK_LAST_SOURCE_FRAME;
     if (!include_default && !include_record20_prefix &&
-        !include_record20_suffix)
+        !include_record20_suffix && !include_class0a)
         return 1;
     if (!avsp_round1_scheduler_runtime_valid(runtime))
         return 0;
@@ -12043,7 +12195,11 @@ static int avsp_round1_step_scheduler_post_player_mask(
                 (actor->type == 20u &&
                  actor->source_slot >= 0x00ffb600UL &&
                  !include_record20_suffix) ||
-                (actor->type != 20u && !include_default))
+                (actor->type == 24u && actor->actor_class == 0x0a &&
+                 !include_class0a) ||
+                (actor->type != 20u &&
+                 !(actor->type == 24u && actor->actor_class == 0x0a) &&
+                 !include_default))
                 continue;
             if (actor->type != runtime->pools[pool_index].record_type ||
                 (unsigned short)actor->source_slot != expected_slot ||
@@ -12194,6 +12350,21 @@ static int avsp_round1_step_scheduler_post_player_mask(
                         runtime, &runtime->pools[pool_index], actor))
                 {
                     runtime->scheduler_failure_code = 38u;
+                    runtime->scheduler_failure_source_slot = actor->source_slot;
+                    runtime->scheduler_failure_state = actor->state;
+                    ++runtime->failure_count;
+                    return 0;
+                }
+                continue;
+            }
+            if (actor->type == 24u && actor->actor_class == 0x0a)
+            {
+                ++actor->scheduler_updates;
+                ++runtime->scheduler_dispatches;
+                if (!avsp_round1_step_class0a(
+                        runtime, &runtime->pools[pool_index], actor))
+                {
+                    runtime->scheduler_failure_code = 46u;
                     runtime->scheduler_failure_source_slot = actor->source_slot;
                     runtime->scheduler_failure_state = actor->state;
                     ++runtime->failure_count;
@@ -12575,7 +12746,17 @@ int avsp_round1_step_scheduler_post_player_source_differential(
 {
     return avsp_round1_step_scheduler_post_player_mask(
         runtime, include_default, include_record20_prefix,
-        include_record20_suffix);
+        include_record20_suffix, include_default);
+}
+
+int avsp_round1_step_scheduler_post_player_source_differential_class0a(
+    AvspRound1Runtime *runtime, int include_default,
+    int include_record20_prefix, int include_record20_suffix,
+    int include_class0a)
+{
+    return avsp_round1_step_scheduler_post_player_mask(
+        runtime, include_default, include_record20_prefix,
+        include_record20_suffix, include_class0a);
 }
 
 int avsp_round1_step_scheduler_source_differential(

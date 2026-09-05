@@ -12718,16 +12718,610 @@
           "0x000782ac"
         ],
         "class": "0x0a",
-        "classification": "SOURCE_CLOSED_IDENTITY",
+        "classification": "SOURCE_CLOSED_IMPLEMENTATION_FIELDS",
         "dispatch_entry": "0x077ccc",
         "dispatch_prefix_sha256": "e3744567b258a1ec61970490c9d1a6bc71f5b3f24aea92940c91a2b2e7702c8a",
         "first_frame": 2073,
         "fixed_frame_substitute_forbidden": true,
-        "implementation_contract": null,
-        "implementation_status": "BLOCKED_MISSING_SPEC_FIELDS",
+        "implementation_contract": {
+          "allocation_initialization": {
+            "allocator": "type-24 fixed pool stage allocator 0x01bf1e..0x01bf40",
+            "lifetimes": [
+              {
+                "allocator_source_frame_u16": 2072,
+                "first_visible_source_frame_u16": 2073,
+                "initial_animation_record": "0x000782a4",
+                "last_visible_source_frame_u16": 5550,
+                "source_slot": "0x00ffc600",
+                "variant_u8": "0x26"
+              },
+              {
+                "allocator_source_frame_u16": 5565,
+                "first_visible_source_frame_u16": 5566,
+                "initial_animation_record": "0x00077e54",
+                "last_visible_source_frame_u16": 5566,
+                "source_slot": "0x00ffc580",
+                "variant_u8": "0x06"
+              }
+            ],
+            "program_init_entry": "0x00077ce0",
+            "program_writes": [
+              "outer_state += 0x0200",
+              "bind animation at 0x016d46 from variant byte offset"
+            ],
+            "scheduler_order": "type-24 fixed pool traverses ascending source slots under 0x01ba62; an allocation into an unvisited slot dispatches in the same traversal",
+            "writes": [
+              "active = 1",
+              "class/variant word from source record",
+              "x = 0",
+              "y = 0",
+              "facing = 0",
+              "coordinate_mode = 0",
+              "actor+0x2a:u8 = 0"
+            ]
+          },
+          "animation_selector": {
+            "coffee_shop_records": [
+              {
+                "animation_record": "0x00077e54",
+                "assembly": "0x00078ba2",
+                "attack_selector_u8": 16,
+                "branch_s16": 3072,
+                "hurt_selector_u8": 0,
+                "record_sha256": "e40359222c4ef5507f455bbd3028de921eb4ec8e164bd400719ec9c89361847a",
+                "timer_u16": 16
+              },
+              {
+                "animation_record": "0x00077e5c",
+                "assembly": "0x00078bac",
+                "attack_selector_u8": 16,
+                "branch_s16": 3072,
+                "hurt_selector_u8": 0,
+                "record_sha256": "e7369782c07d4683ed66f8c15b948320fc0c95b97232e01e38ced125f1e1358a",
+                "timer_u16": 16
+              },
+              {
+                "animation_record": "0x000782a4",
+                "assembly": "0x00078f90",
+                "attack_selector_u8": 4,
+                "branch_s16": 2048,
+                "hurt_selector_u8": 0,
+                "record_sha256": "71a8cd969bc3ca5faa0e8729ac0ee0036b7cd7417e952fbaf961157d1b95af54",
+                "timer_u16": 4
+              },
+              {
+                "animation_record": "0x000782ac",
+                "assembly": "0x00078f96",
+                "attack_selector_u8": 7,
+                "branch_s16": -30720,
+                "hurt_selector_u8": 0,
+                "record_sha256": "dd290004ea8e2b7b10b67177c6c3070bd4ad5db1b4817f2d0a4aae1f6673b383",
+                "timer_u16": 4
+              }
+            ],
+            "index": "actor+0x03 variant:u8 byte offset",
+            "offsets_s16": [
+              74,
+              126,
+              178,
+              302,
+              338,
+              390,
+              514,
+              638,
+              762,
+              814,
+              866,
+              918,
+              970,
+              1022,
+              1074,
+              1126,
+              1178,
+              1230,
+              1282,
+              1406,
+              1426,
+              1462,
+              1514,
+              1638,
+              1666,
+              1774
+            ],
+            "table_address": "0x00077d26",
+            "table_sha256": "3ab654d4e8b0c544fed45f5fe188549b2ecd20addb7dee9a415157ea5727ae66",
+            "variant_bindings": [
+              {
+                "records": [
+                  "0x00077e54",
+                  "0x00077e5c"
+                ],
+                "table_entry_u8": 3,
+                "variant_u8": "0x06"
+              },
+              {
+                "records": [
+                  "0x000782a4",
+                  "0x000782ac"
+                ],
+                "table_entry_u8": 19,
+                "variant_u8": "0x26"
+              }
+            ]
+          },
+          "capture_identity": {
+            "byte_identical": true,
+            "completion_a": "oracle11_progression_lifecycle_cs64a",
+            "completion_b": "oracle11_progression_lifecycle_cs64b",
+            "files_sha256": {
+              "coffee_shop_class0a_program.tsv": "a44ef7779fecd05ec8334c2884063db8c97d0d5e60464a7f6a55e04be1aaaf73",
+              "coffee_shop_rng_calls.tsv": "81338529f76629c3d103885c16838bd562beecf783f0b5107a5b7ecd11e219b3",
+              "coffee_shop_scene_actors.tsv": "b7b1568df038af1cdd7eb5bc6eb30c830efca4952d1077644ab3b31ed2ad1c0f",
+              "coffee_shop_scene_frames.tsv": "91e4aab3a03586a6c9a143dd58ee03a72ebc52b7fd611fdc6fe0975ebd522d1d",
+              "coffee_shop_scene_health_writes.tsv": "7defadcfff16b99b8e2d5b66fc7b42443106837d698e659c64d45a8770d6aa0b",
+              "dispatches.tsv": "a47890edd3e102e8d8db5e4caa21d9b15c5c6e0a3c4800ab1aff578421102903",
+              "progression_result.tsv": "35282cc295239bc64ba06efb916b667a4b5b7d71488be329a00eb762ba9d562c"
+            }
+          },
+          "counterfactual": {
+            "byte_identical": true,
+            "capture_a": "oracle11_progression_lifecycle_cs64m1",
+            "capture_b": "oracle11_progression_lifecycle_cs64m2",
+            "changed_outcomes": [
+              "first lifetime releases at source frame 2074",
+              "later fixed-pool allocation identity",
+              "route, RNG, health and audio projection chronology"
+            ],
+            "classification": "SOURCE_STATE_MUTATION_CONTROL",
+            "covered_branches": [
+              "variant 0x0a camera comparison",
+              "state 0x0200 -> 0x0400",
+              "type-24 release"
+            ],
+            "downstream_differences": {
+              "coffee_shop_class0a_program.tsv": {
+                "baseline_sha256": "a44ef7779fecd05ec8334c2884063db8c97d0d5e60464a7f6a55e04be1aaaf73",
+                "counterfactual_sha256": "decabcfff6fe33b2362c55c93ae0a789ba5419aeec837f2a9bdeb7bc19a94fd8",
+                "different": true
+              },
+              "coffee_shop_rng_calls.tsv": {
+                "baseline_sha256": "81338529f76629c3d103885c16838bd562beecf783f0b5107a5b7ecd11e219b3",
+                "counterfactual_sha256": "aa639541c1f19fc6e3b49b15876f46d5b14d1ca8b8a7f0574096cdc9d3a80d4c",
+                "different": true
+              },
+              "coffee_shop_scene_actors.tsv": {
+                "baseline_sha256": "b7b1568df038af1cdd7eb5bc6eb30c830efca4952d1077644ab3b31ed2ad1c0f",
+                "counterfactual_sha256": "77fcf303759c80ef97bed03e20db2f35206113d88d7847b2726088cdf399f7b7",
+                "different": true
+              },
+              "coffee_shop_scene_frames.tsv": {
+                "baseline_sha256": "91e4aab3a03586a6c9a143dd58ee03a72ebc52b7fd611fdc6fe0975ebd522d1d",
+                "counterfactual_sha256": "5cef752ff117719dded921b10e3cd9db4d8885ec0ec1f1a285faa99e9f1186b6",
+                "different": true
+              },
+              "coffee_shop_scene_health_writes.tsv": {
+                "baseline_sha256": "7defadcfff16b99b8e2d5b66fc7b42443106837d698e659c64d45a8770d6aa0b",
+                "counterfactual_sha256": "77a3dc997ba6e74ccae13c848ab3d1f4057b86afb472b1ed2e37bdc99aaf4d20",
+                "different": true
+              },
+              "dispatches.tsv": {
+                "baseline_sha256": "a47890edd3e102e8d8db5e4caa21d9b15c5c6e0a3c4800ab1aff578421102903",
+                "counterfactual_sha256": "a71bfe51387e84993d2de54b8bb3593f0588c30bb8e0222d0553720ff71728e4",
+                "different": true
+              },
+              "progression_result.tsv": {
+                "baseline_sha256": "35282cc295239bc64ba06efb916b667a4b5b7d71488be329a00eb762ba9d562c",
+                "counterfactual_sha256": "731d30174d51ea17e2d3fde998f71b7680e3a5a7f408e13f9f8b5202e6d7e84a",
+                "different": true
+              }
+            },
+            "files_sha256": {
+              "coffee_shop_class0a_program.tsv": "decabcfff6fe33b2362c55c93ae0a789ba5419aeec837f2a9bdeb7bc19a94fd8",
+              "coffee_shop_rng_calls.tsv": "aa639541c1f19fc6e3b49b15876f46d5b14d1ca8b8a7f0574096cdc9d3a80d4c",
+              "coffee_shop_scene_actors.tsv": "77fcf303759c80ef97bed03e20db2f35206113d88d7847b2726088cdf399f7b7",
+              "coffee_shop_scene_frames.tsv": "5cef752ff117719dded921b10e3cd9db4d8885ec0ec1f1a285faa99e9f1186b6",
+              "coffee_shop_scene_health_writes.tsv": "77a3dc997ba6e74ccae13c848ab3d1f4057b86afb472b1ed2e37bdc99aaf4d20",
+              "dispatches.tsv": "a71bfe51387e84993d2de54b8bb3593f0588c30bb8e0222d0553720ff71728e4",
+              "progression_result.tsv": "731d30174d51ea17e2d3fde998f71b7680e3a5a7f408e13f9f8b5202e6d7e84a"
+            },
+            "injection": "for one source traversal only, change variant 0x26 to source-supported 0x0a and camera_x to 0x0920, then restore both after the guard",
+            "injection_boundary": "opcode read taps are prefetch/capture projection only; actual source writer 0x077d1c and release 0x0177f6 establish execution authority",
+            "production_authority": false
+          },
+          "direct_effects": {
+            "audio_transactions_u8": 0,
+            "collision_memberships_u8": 0,
+            "health_or_damage_writes_u8": 0,
+            "rng_calls_u8": 0,
+            "route_camera_load_writes_u8": 0,
+            "rule": "presentation-only source actors still own fixed-pool occupancy and lifecycle; downstream allocation identity must not omit them"
+          },
+          "dispatch_table": {
+            "address": "0x00077cd8",
+            "entry_count_u8": 3,
+            "index": "actor+0x04 high byte:u8",
+            "offsets_s16": [
+              8,
+              30,
+              72
+            ],
+            "targets": [
+              "0x00077ce0",
+              "0x00077cf6",
+              "0x00077d20"
+            ]
+          },
+          "fields": {
+            "active": "u8 at actor+0x00",
+            "animation_branch": "s16 at actor+0x24",
+            "animation_record": "u32 at actor+0x1c",
+            "animation_timer": "u16 at actor+0x0a",
+            "class_and_variant": "u16 at actor+0x02",
+            "coordinate_mode": "u8 at actor+0x0d",
+            "field_2a": "u8 at actor+0x2a",
+            "outer_state": "u16 at actor+0x04; high byte indexes dispatch table",
+            "visible_facing": "u8 at actor+0x0f",
+            "x_y": "s16 at actor+0x10/+0x14, mirrored by signed 16.16 native fields",
+            "z": "s16 at actor+0x18"
+          },
+          "fixed_frame_substitute_forbidden": true,
+          "mutation_controls": [
+            "source body",
+            "outer dispatch table",
+            "variant animation offset table",
+            "variant byte-offset indexing",
+            "initial state increment",
+            "animation record binding",
+            "animation timer/branch/assembly/selectors",
+            "variant camera guard",
+            "unsigned camera threshold",
+            "type-24 release",
+            "fixed-pool occupancy",
+            "central scene clear",
+            "direct RNG absence",
+            "collision-list absence",
+            "health/damage absence",
+            "audio absence",
+            "fixed-frame substitute"
+          ],
+          "presentation": {
+            "collision_selectors": "assembly records carry hurt selector 0 and attack selectors 4/7 for variant 0x26 and 16 for variant 0x06; the actors are absent from collision lists",
+            "position_facing_rule": "both measured lifetimes retain zero x/y/z and facing",
+            "variant_0x06": "sixteen-tick sequence beginning at 0x00077e54; only the first visible frame is inside this scene boundary",
+            "variant_0x26": "two-record four-tick loop; negative branch 0x8800 returns to 0x000782a4"
+          },
+          "retained_gameplay_authority": false,
+          "route_teardown": {
+            "first_absent_visible_source_frame_u16": 5551,
+            "first_lifetime_release_owner": "centralized scene record clear 0x0173c6",
+            "fixed_frame_release_forbidden": true,
+            "release_writer_source_frame_u16": 5550,
+            "second_lifetime_owner": "next-entry source stage allocation before the stable frame-5566 seam"
+          },
+          "scheduler_cadence": {
+            "classification": "SOURCE_CAPTURE_PROJECTION_ONLY",
+            "default_updates_per_source_frame_u8": 1,
+            "dispatch_count_u16": 3597,
+            "exception_count_u8": 70,
+            "exceptions": [
+              {
+                "source_frame_u16": 2075,
+                "updates_u8": 2
+              },
+              {
+                "source_frame_u16": 2076,
+                "updates_u8": 2
+              },
+              {
+                "source_frame_u16": 2165,
+                "updates_u8": 4
+              },
+              {
+                "source_frame_u16": 2260,
+                "updates_u8": 0
+              },
+              {
+                "source_frame_u16": 2265,
+                "updates_u8": 0
+              },
+              {
+                "source_frame_u16": 5458,
+                "updates_u8": 3
+              },
+              {
+                "source_frame_u16": 5459,
+                "updates_u8": 3
+              },
+              {
+                "source_frame_u16": 5460,
+                "updates_u8": 3
+              },
+              {
+                "source_frame_u16": 5461,
+                "updates_u8": 3
+              },
+              {
+                "source_frame_u16": 5462,
+                "updates_u8": 3
+              },
+              {
+                "source_frame_u16": 5463,
+                "updates_u8": 3
+              },
+              {
+                "source_frame_u16": 5464,
+                "updates_u8": 3
+              },
+              {
+                "source_frame_u16": 5465,
+                "updates_u8": 3
+              },
+              {
+                "source_frame_u16": 5466,
+                "updates_u8": 3
+              },
+              {
+                "source_frame_u16": 5467,
+                "updates_u8": 3
+              },
+              {
+                "source_frame_u16": 5468,
+                "updates_u8": 3
+              },
+              {
+                "source_frame_u16": 5469,
+                "updates_u8": 3
+              },
+              {
+                "source_frame_u16": 5470,
+                "updates_u8": 4
+              },
+              {
+                "source_frame_u16": 5471,
+                "updates_u8": 3
+              },
+              {
+                "source_frame_u16": 5472,
+                "updates_u8": 3
+              },
+              {
+                "source_frame_u16": 5473,
+                "updates_u8": 3
+              },
+              {
+                "source_frame_u16": 5474,
+                "updates_u8": 3
+              },
+              {
+                "source_frame_u16": 5475,
+                "updates_u8": 3
+              },
+              {
+                "source_frame_u16": 5476,
+                "updates_u8": 3
+              },
+              {
+                "source_frame_u16": 5477,
+                "updates_u8": 3
+              },
+              {
+                "source_frame_u16": 5478,
+                "updates_u8": 3
+              },
+              {
+                "source_frame_u16": 5479,
+                "updates_u8": 3
+              },
+              {
+                "source_frame_u16": 5480,
+                "updates_u8": 3
+              },
+              {
+                "source_frame_u16": 5481,
+                "updates_u8": 3
+              },
+              {
+                "source_frame_u16": 5482,
+                "updates_u8": 3
+              },
+              {
+                "source_frame_u16": 5483,
+                "updates_u8": 3
+              },
+              {
+                "source_frame_u16": 5484,
+                "updates_u8": 3
+              },
+              {
+                "source_frame_u16": 5485,
+                "updates_u8": 4
+              },
+              {
+                "source_frame_u16": 5486,
+                "updates_u8": 3
+              },
+              {
+                "source_frame_u16": 5487,
+                "updates_u8": 3
+              },
+              {
+                "source_frame_u16": 5488,
+                "updates_u8": 3
+              },
+              {
+                "source_frame_u16": 5489,
+                "updates_u8": 3
+              },
+              {
+                "source_frame_u16": 5490,
+                "updates_u8": 3
+              },
+              {
+                "source_frame_u16": 5491,
+                "updates_u8": 3
+              },
+              {
+                "source_frame_u16": 5492,
+                "updates_u8": 3
+              },
+              {
+                "source_frame_u16": 5493,
+                "updates_u8": 4
+              },
+              {
+                "source_frame_u16": 5494,
+                "updates_u8": 3
+              },
+              {
+                "source_frame_u16": 5495,
+                "updates_u8": 3
+              },
+              {
+                "source_frame_u16": 5496,
+                "updates_u8": 3
+              },
+              {
+                "source_frame_u16": 5497,
+                "updates_u8": 3
+              },
+              {
+                "source_frame_u16": 5498,
+                "updates_u8": 3
+              },
+              {
+                "source_frame_u16": 5499,
+                "updates_u8": 3
+              },
+              {
+                "source_frame_u16": 5500,
+                "updates_u8": 4
+              },
+              {
+                "source_frame_u16": 5501,
+                "updates_u8": 3
+              },
+              {
+                "source_frame_u16": 5502,
+                "updates_u8": 3
+              },
+              {
+                "source_frame_u16": 5503,
+                "updates_u8": 3
+              },
+              {
+                "source_frame_u16": 5504,
+                "updates_u8": 3
+              },
+              {
+                "source_frame_u16": 5505,
+                "updates_u8": 3
+              },
+              {
+                "source_frame_u16": 5506,
+                "updates_u8": 4
+              },
+              {
+                "source_frame_u16": 5507,
+                "updates_u8": 3
+              },
+              {
+                "source_frame_u16": 5508,
+                "updates_u8": 3
+              },
+              {
+                "source_frame_u16": 5509,
+                "updates_u8": 3
+              },
+              {
+                "source_frame_u16": 5510,
+                "updates_u8": 3
+              },
+              {
+                "source_frame_u16": 5511,
+                "updates_u8": 3
+              },
+              {
+                "source_frame_u16": 5512,
+                "updates_u8": 4
+              },
+              {
+                "source_frame_u16": 5513,
+                "updates_u8": 3
+              },
+              {
+                "source_frame_u16": 5514,
+                "updates_u8": 3
+              },
+              {
+                "source_frame_u16": 5515,
+                "updates_u8": 3
+              },
+              {
+                "source_frame_u16": 5516,
+                "updates_u8": 3
+              },
+              {
+                "source_frame_u16": 5517,
+                "updates_u8": 4
+              },
+              {
+                "source_frame_u16": 5518,
+                "updates_u8": 4
+              },
+              {
+                "source_frame_u16": 5519,
+                "updates_u8": 4
+              },
+              {
+                "source_frame_u16": 5520,
+                "updates_u8": 4
+              },
+              {
+                "source_frame_u16": 5521,
+                "updates_u8": 4
+              },
+              {
+                "source_frame_u16": 5522,
+                "updates_u8": 4
+              }
+            ],
+            "rule": "align the complete-scene source scheduler projection only; never own gameplay state, release, or production timing",
+            "source_frame_range_inclusive_u16": [
+              2072,
+              5523
+            ],
+            "writer_witness": "animation timer writer 0x016d34 plus initialization writer 0x077ce6"
+          },
+          "semantic_role": "SOURCE_PRESENTATION_FIXED_POOL_RESIDENT",
+          "source_body": {
+            "first": "0x00077ccc",
+            "last_exclusive": "0x00077d26",
+            "sha256": "43f6bb2d20750b41ec6e03b6eed22488fee5db651d0680ad2c600e2b53ac0089"
+          },
+          "spec_executable": true,
+          "state_program": {
+            "0x0000": {
+              "entry": "0x00077ce0",
+              "next_state_u16": "0x0200",
+              "result": "bind the variant-selected animation record"
+            },
+            "0x0200": {
+              "camera_guard": "unsigned camera_x_u16 at A5+0x0278 >= 0x0920",
+              "coffee_shop_result": "variants 0x26 and 0x06 bypass the threshold and remain 0x0200 while the shared animation runtime 0x016d2e advances their records",
+              "entry": "0x00077cf6",
+              "guard_result": "outer_state += 0x0200 to 0x0400",
+              "variant_guard": "only variants 0x0a, 0x0c and 0x0e test the camera threshold; every other variant jumps directly to the animation runtime"
+            },
+            "0x0400": {
+              "entry": "0x00077d20",
+              "rule": "release through type-24 fixed-pool release 0x0177f0"
+            }
+          }
+        },
+        "implementation_status": "SPEC_EXECUTABLE",
         "last_frame": 5566,
         "lifetime_count": 2,
-        "semantic_role": "UNKNOWN",
+        "semantic_role": "SOURCE_PRESENTATION_FIXED_POOL_RESIDENT",
         "source_scheduler": "0x01ba62",
         "state_substate_contexts": [
           "0x0200:0x0000"

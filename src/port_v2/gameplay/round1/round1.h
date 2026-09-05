@@ -6,7 +6,7 @@
 #include "../../combat/hit_ko/hit_ko.h"
 
 #define AVSP_ROUND1_SPEC02_SHA256 \
-"c6795cc6955e58beeab87b93e59e002c8519d3994887f2e67b16fb16baa2840f"
+"5fbc0c5cd5941d6fb0cae5ac887fad4320e55d7067c973df6fbd54438caca2ce"
 #define AVSP_ROUND1_CANARY_HEAD 0x52314548UL
 #define AVSP_ROUND1_CANARY_TAIL 0x52314554UL
 #define AVSP_ROUND1_ROUTE_ENTRY_STATE 2
@@ -137,6 +137,7 @@
 #define AVSP_ROUND1_CLASS01_PRESENTATION_COUNT 3u
 #define AVSP_ROUND1_CLASS02_PRESENTATION_COUNT 2u
 #define AVSP_ROUND1_CLASS0F_PRESENTATION_COUNT 3u
+#define AVSP_ROUND1_CLASS0A_PRESENTATION_COUNT 4u
 #define AVSP_ROUND1_CLASS05_PRESENTATION_COUNT 5u
 #define AVSP_ROUND1_CLASS08_PARENT_PRESENTATION_COUNT 5u
 #define AVSP_ROUND1_HEALTH_PICKUP_PRESENTATION_COUNT 1u
@@ -350,6 +351,20 @@ typedef struct
     unsigned short selector0_audio_command;
     unsigned long audio_argument;
 } AvspRound1Class0fSpec;
+
+typedef struct
+{
+    unsigned long dispatch;
+    unsigned long animation_table;
+    unsigned short active_state;
+    unsigned short release_state;
+    unsigned short camera_threshold;
+    unsigned char guarded_variants[3];
+    unsigned long first_source_slot;
+    unsigned long second_source_slot;
+    unsigned char first_variant;
+    unsigned char second_variant;
+} AvspRound1Class0aSpec;
 
 typedef struct
 {
@@ -2054,6 +2069,11 @@ typedef struct
     unsigned short class0f_audio_command;
     unsigned long class0f_audio_argument;
     unsigned long class0f_releases;
+    unsigned long class0a_initializations;
+    unsigned long class0a_animation_steps;
+    unsigned long class0a_guard_transitions;
+    unsigned long class0a_releases;
+    unsigned long class0a_next_entry_spawns;
     unsigned char class08_parent_spawned;
     unsigned char class08_parent_released;
     unsigned char health_pickup_spawned;
@@ -2370,6 +2390,10 @@ int avsp_round1_step_scheduler_pre_player_source_differential(
 int avsp_round1_step_scheduler_post_player_source_differential(
     AvspRound1Runtime *runtime, int include_default,
     int include_record20_prefix, int include_record20_suffix);
+int avsp_round1_step_scheduler_post_player_source_differential_class0a(
+    AvspRound1Runtime *runtime, int include_default,
+    int include_record20_prefix, int include_record20_suffix,
+    int include_class0a);
 int avsp_round1_step_scheduler_source_differential(
     AvspRound1Runtime *runtime, int include_default,
     int include_record20_prefix, int include_record20_suffix);
@@ -2394,6 +2418,8 @@ unsigned int avsp_round1_coffee_shop_scheduler_source_updates(
 unsigned int avsp_round1_coffee_shop_record20_prefix_source_updates(
     unsigned short source_frame);
 unsigned int avsp_round1_coffee_shop_class02_source_updates(
+    unsigned short source_frame);
+unsigned int avsp_round1_coffee_shop_class0a_source_updates(
     unsigned short source_frame);
 int avsp_round1_entry_valid(const AvspRound1Runtime *runtime);
 int avsp_round1_canaries_ok(const AvspRound1Runtime *runtime);

@@ -1,8 +1,8 @@
 #ifndef AVSP_SPEC02_ROUND1_ENTRY_DATA_H
 #define AVSP_SPEC02_ROUND1_ENTRY_DATA_H
 
-/* contract_sha256=c6795cc6955e58beeab87b93e59e002c8519d3994887f2e67b16fb16baa2840f */
-/* fixtures_sha256=6aa9d015186f024520fa53db884b62240bd7d5b0de42aaa5071ce76af2952948 */
+/* contract_sha256=5fbc0c5cd5941d6fb0cae5ac887fad4320e55d7067c973df6fbd54438caca2ce */
+/* fixtures_sha256=75f39cde0615aa687a51b28038e1c7637aa6326ed70336e933f832bcb2c7c833 */
 #define AVSP_ROUND1_ENTRY_PROGRAM_SHA256 "e5ef761fadc1b5a7df62e77c03025c0ebff0c2503cbc8be9c0077d4bd6cd24ba"
 
 #if defined(__sh__)
@@ -4978,6 +4978,18 @@ static const AvspRound1AnimationStateSpec avsp_round1_class0f_records[AVSP_ROUND
 #endif
 
 #if defined(__sh__)
+#define avsp_round1_class0a_records (avsp_round1_content->content_avsp_round1_class0a_records)
+#else
+static const AvspRound1AnimationStateSpec avsp_round1_class0a_records[AVSP_ROUND1_CLASS0A_PRESENTATION_COUNT] =
+{
+    { 16u, 3072, 0x00077e54UL, 0x00078ba2UL, 0u, 16u },
+    { 16u, 3072, 0x00077e5cUL, 0x00078bacUL, 0u, 16u },
+    { 4u, 2048, 0x000782a4UL, 0x00078f90UL, 0u, 4u },
+    { 4u, -30720, 0x000782acUL, 0x00078f96UL, 0u, 7u },
+};
+#endif
+
+#if defined(__sh__)
 #define avsp_round1_class05_records (avsp_round1_content->content_avsp_round1_class05_records)
 #else
 static const AvspRound1AnimationStateSpec avsp_round1_class05_records[AVSP_ROUND1_CLASS05_PRESENTATION_COUNT] =
@@ -5042,6 +5054,17 @@ static const AvspRound1Class0fSpec avsp_round1_class0f =
     0x06ED3EUL, 0x06EE42UL, 0x06EEE6UL,
     0x0200u, 0x0202u, 0x0400u, 0x0600u, 2u, 0x1Du,
     24u, 0x11, 4u, -1, 28u, 0x09, 80, -8, 0x0077u, 0x0142u, 0x00002000UL
+};
+#endif
+
+#if defined(__sh__)
+#define avsp_round1_class0a (avsp_round1_content->content_avsp_round1_class0a)
+#else
+static const AvspRound1Class0aSpec avsp_round1_class0a =
+{
+    0x077CCCUL, 0x077D26UL, 0x0200u, 0x0400u, 0x0920u,
+    { 0x0Au, 0x0Cu, 0x0Eu }, 0x00FFC600UL, 0x00FFC580UL,
+    0x26u, 0x06u
 };
 #endif
 
@@ -5185,6 +5208,90 @@ static const AvspRound1SceneUpdateCadence avsp_round1_coffee_shop_class02_update
     { 5564u, 0u },
     { 5565u, 0u },
     { 5566u, 0u },
+};
+#endif
+
+/* Source-display class-0x0a fixed-pool dispatch cadence. This
+ * aligns the scene differential only and never owns gameplay. */
+#define AVSP_ROUND1_COFFEE_SHOP_CLASS0A_FIRST_SOURCE_FRAME 2072u
+#define AVSP_ROUND1_COFFEE_SHOP_CLASS0A_LAST_SOURCE_FRAME 5523u
+#define AVSP_ROUND1_COFFEE_SHOP_CLASS0A_DEFAULT_SOURCE_UPDATES 1u
+#define AVSP_ROUND1_COFFEE_SHOP_CLASS0A_UPDATE_CADENCE_COUNT 70
+#if defined(__sh__)
+#define avsp_round1_coffee_shop_class0a_update_cadence (avsp_round1_content->content_avsp_round1_coffee_shop_class0a_update_cadence)
+#else
+static const AvspRound1SceneUpdateCadence avsp_round1_coffee_shop_class0a_update_cadence[AVSP_ROUND1_COFFEE_SHOP_CLASS0A_UPDATE_CADENCE_COUNT] =
+{
+    { 2075u, 2u },
+    { 2076u, 2u },
+    { 2165u, 4u },
+    { 2260u, 0u },
+    { 2265u, 0u },
+    { 5458u, 3u },
+    { 5459u, 3u },
+    { 5460u, 3u },
+    { 5461u, 3u },
+    { 5462u, 3u },
+    { 5463u, 3u },
+    { 5464u, 3u },
+    { 5465u, 3u },
+    { 5466u, 3u },
+    { 5467u, 3u },
+    { 5468u, 3u },
+    { 5469u, 3u },
+    { 5470u, 4u },
+    { 5471u, 3u },
+    { 5472u, 3u },
+    { 5473u, 3u },
+    { 5474u, 3u },
+    { 5475u, 3u },
+    { 5476u, 3u },
+    { 5477u, 3u },
+    { 5478u, 3u },
+    { 5479u, 3u },
+    { 5480u, 3u },
+    { 5481u, 3u },
+    { 5482u, 3u },
+    { 5483u, 3u },
+    { 5484u, 3u },
+    { 5485u, 4u },
+    { 5486u, 3u },
+    { 5487u, 3u },
+    { 5488u, 3u },
+    { 5489u, 3u },
+    { 5490u, 3u },
+    { 5491u, 3u },
+    { 5492u, 3u },
+    { 5493u, 4u },
+    { 5494u, 3u },
+    { 5495u, 3u },
+    { 5496u, 3u },
+    { 5497u, 3u },
+    { 5498u, 3u },
+    { 5499u, 3u },
+    { 5500u, 4u },
+    { 5501u, 3u },
+    { 5502u, 3u },
+    { 5503u, 3u },
+    { 5504u, 3u },
+    { 5505u, 3u },
+    { 5506u, 4u },
+    { 5507u, 3u },
+    { 5508u, 3u },
+    { 5509u, 3u },
+    { 5510u, 3u },
+    { 5511u, 3u },
+    { 5512u, 4u },
+    { 5513u, 3u },
+    { 5514u, 3u },
+    { 5515u, 3u },
+    { 5516u, 3u },
+    { 5517u, 4u },
+    { 5518u, 4u },
+    { 5519u, 4u },
+    { 5520u, 4u },
+    { 5521u, 4u },
+    { 5522u, 4u },
 };
 #endif
 
@@ -5543,14 +5650,17 @@ typedef struct
     AvspRound1AnimationStateSpec content_avsp_round1_class01_records[AVSP_ROUND1_CLASS01_PRESENTATION_COUNT];
     AvspRound1AnimationStateSpec content_avsp_round1_class02_records[AVSP_ROUND1_CLASS02_PRESENTATION_COUNT];
     AvspRound1AnimationStateSpec content_avsp_round1_class0f_records[AVSP_ROUND1_CLASS0F_PRESENTATION_COUNT];
+    AvspRound1AnimationStateSpec content_avsp_round1_class0a_records[AVSP_ROUND1_CLASS0A_PRESENTATION_COUNT];
     AvspRound1AnimationStateSpec content_avsp_round1_class05_records[AVSP_ROUND1_CLASS05_PRESENTATION_COUNT];
     AvspRound1Class05Spec content_avsp_round1_class05;
     AvspRound1Class05MotionSpec content_avsp_round1_class05_motion;
     AvspRound1Class01Spec content_avsp_round1_class01;
     AvspRound1Class02Spec content_avsp_round1_class02;
     AvspRound1Class0fSpec content_avsp_round1_class0f;
+    AvspRound1Class0aSpec content_avsp_round1_class0a;
     AvspRound1SceneUpdateCadence content_avsp_round1_coffee_shop_update_cadence[AVSP_ROUND1_COFFEE_SHOP_UPDATE_CADENCE_COUNT];
     AvspRound1SceneUpdateCadence content_avsp_round1_coffee_shop_class02_update_cadence[AVSP_ROUND1_COFFEE_SHOP_CLASS02_UPDATE_CADENCE_COUNT];
+    AvspRound1SceneUpdateCadence content_avsp_round1_coffee_shop_class0a_update_cadence[AVSP_ROUND1_COFFEE_SHOP_CLASS0A_UPDATE_CADENCE_COUNT];
     AvspRound1SceneInputRun content_avsp_round1_coffee_shop_input_runs[AVSP_ROUND1_COFFEE_SHOP_INPUT_RUN_COUNT];
 } AvspRound1ContentArchive;
 extern const AvspRound1ContentArchive *avsp_round1_content;

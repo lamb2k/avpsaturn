@@ -604,6 +604,31 @@ assert class0f_contract["state_program"]["0x0400"]["selector_0"][
 assert [row["command_u16"] for row in
         class0f_contract["audio_transactions"]] == ["0x0077", "0x0142"]
 assert class0f_contract["rng"]["direct_calls"] == 0
+class0a = next(row for row in scene_components["components"]
+               if row["type"] == 24 and row["class"] == "0x0a")
+class0a_contract = class0a["implementation_contract"]
+assert class0a["implementation_status"] == "SPEC_EXECUTABLE"
+assert class0a_contract["source_body"] == {
+    "first": "0x00077ccc", "last_exclusive": "0x00077d26",
+    "sha256": "43f6bb2d20750b41ec6e03b6eed22488fee5db651d0680ad2c600e2b53ac0089"}
+assert class0a_contract["dispatch_table"]["offsets_s16"] == [8, 30, 72]
+assert class0a_contract["animation_selector"]["offsets_s16"][19] == 1406
+assert [row["variant_u8"] for row in
+        class0a_contract["animation_selector"]["variant_bindings"]] == [
+            "0x06", "0x26"]
+assert class0a_contract["state_program"]["0x0200"]["variant_guard"] == (
+    "only variants 0x0a, 0x0c and 0x0e test the camera threshold; every "
+    "other variant jumps directly to the animation runtime")
+assert class0a_contract["direct_effects"] == {
+    "audio_transactions_u8": 0, "collision_memberships_u8": 0,
+    "health_or_damage_writes_u8": 0, "rng_calls_u8": 0,
+    "route_camera_load_writes_u8": 0,
+    "rule": "presentation-only source actors still own fixed-pool occupancy and lifecycle; downstream allocation identity must not omit them"}
+assert class0a_contract["counterfactual"]["byte_identical"] is True
+assert class0a_contract["scheduler_cadence"]["classification"] == (
+    "SOURCE_CAPTURE_PROJECTION_ONLY")
+assert class0a_contract["scheduler_cadence"]["exception_count_u8"] == 70
+assert class0a_contract["scheduler_cadence"]["dispatch_count_u16"] == 3597
 navigation = fixtures["authority_data"]["navigation"]
 assert len(navigation["terrain_resolver"]["records"]) == 6
 assert navigation["terrain_resolver"]["implementation_contract"]["handlers"]["6"][
@@ -827,6 +852,7 @@ f = copy.deepcopy(fixtures); f["authority_data"]["auxiliary"]["first_segment_dep
 f = copy.deepcopy(fixtures); f["authority_data"]["auxiliary"]["coffee_shop_type36_presentation"]["pool"]["capacity"] = 32; mutations.append((contract, f, "Coffee Shop type36 pool mutation"))
 f = copy.deepcopy(fixtures); f["authority_data"]["auxiliary"]["coffee_shop_scene_component_identities"]["unidentified_pairs"] = 1; mutations.append((contract, f, "Coffee Shop component identity mutation"))
 f = copy.deepcopy(fixtures); next(row for row in f["authority_data"]["auxiliary"]["coffee_shop_scene_component_identities"]["components"] if row["type"] == 20 and row["class"] == "0x0f")["implementation_contract"]["audio_transactions"][1]["command_u16"] = "0x0077"; mutations.append((contract, f, "Coffee Shop class0f audio mutation"))
+f = copy.deepcopy(fixtures); next(row for row in f["authority_data"]["auxiliary"]["coffee_shop_scene_component_identities"]["components"] if row["type"] == 24 and row["class"] == "0x0a")["implementation_contract"]["animation_selector"]["offsets_s16"][19] = 1404; mutations.append((contract, f, "Coffee Shop class0a animation-table mutation"))
 f = copy.deepcopy(fixtures); f["authority_data"]["navigation"]["terrain_resolver"]["records"][4]["decoded_six_fields"]["z_parameter_s8"] = -8; mutations.append((contract, f, "terrain record sign mutation"))
 f = copy.deepcopy(fixtures); f["authority_data"]["navigation"]["obstacle_response"]["implementation_contract"]["obstacle_box"]["x_half_u8"] = 16; mutations.append((contract, f, "obstacle box mutation"))
 f = copy.deepcopy(fixtures); f["authority_data"]["navigation"]["obstacle_response"]["lifecycle_contract"]["source_scene_record"]["camera_threshold_u16"] = 689; mutations.append((contract, f, "obstacle spawn threshold mutation"))

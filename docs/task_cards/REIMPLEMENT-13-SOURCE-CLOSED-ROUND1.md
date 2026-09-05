@@ -13,15 +13,16 @@ OPTIONAL_LANES: [Full]
 CLAUDE_ALLOWED: false
 NEXT_ELIGIBLE_CARDS: [QA-13-ROUND1-END-TO-END-DIFFERENTIAL]
 
-## Active owner summary (2026-09-04)
+## Active owner summary (2026-09-05)
 
 P2 source evidence reaches the stable Round 2 seam at frame 15193 and P3 is
 complete; neither closes native Round 1. P4 Coffee Shop remains RED. Class-
-`0x09` is narrowly normalized and the complete type-20/class-`0x0f` source
-program is now source/spec/native closed with zero baseline row differences.
+`0x09` is narrowly normalized, while complete type-20/class-`0x0f` and type-24/
+class-`0x0a` source programs are source/spec/native closed with zero baseline
+row differences.
 Candidate `d04a65a2253175c6e820140feefc35419e2cca07` and the exhausted Emulator/WGC
-gates stay frozen. The next scene-order body is type-24/class-`0x0a` slot
-`0x00ffc600`, dispatch `0x077ccc`, currently `BLOCKED_MISSING_SPEC_FIELDS`.
+gates stay frozen. The next scene-order body is type-28/class-`0x00` slot
+`0x00ffce00`, dispatch `0x09e098`, currently `BLOCKED_MISSING_SPEC_FIELDS`.
 
 ## Objective
 
@@ -4028,3 +4029,44 @@ zero normalized program differences under its narrow rule. The next earliest
 missing source body is type-24/class-`0x0a` slot `0x00ffc600`, dispatch
 `0x077ccc`, lifetime 2073..5550; its accepted identity has no executable
 implementation fields. Candidate and exhausted visual gates remain frozen.
+
+### P4 Coffee Shop class-0x0a source-program checkpoint (2026-09-05)
+
+The complete Coffee-Shop-reachable record-type-24/class-`0x0a` program at
+`0x077ccc..0x077d26` is source/spec/native closed. Paired cold baseline and
+paired counterfactual captures are byte-identical. The contract binds the
+three-way state dispatcher, exact 26-entry signed variant table, unsigned
+camera guard for variants `0x0a/0x0c/0x0e`, four animation records, immediate
+negative-branch looping, fixed-pool release, and both observed lifetimes:
+slot `0x00ffc600` variant `0x26` through 5550 and slot `0x00ffc580` variant
+`0x06` at 5566. Source proves no direct RNG, collision, health, damage, audio,
+route, camera, or load writes. Captured scheduler cadence remains a diagnostic
+projection only and is not native gameplay authority.
+
+Native C dispatches the source program through the existing record-24 pool.
+The whole-scene differential aligns all 3,479 source/native rows with zero raw
+or normalized differences and normalization `NONE`. Seven focused class-
+`0x0a` mutants, 144 auxiliary, 192 SPEC-02, 330 complete host, 132 Target-
+wiring, 31 scene-report, and 18 memory mutants reject at attributed boundaries.
+Two declared equivalent host mutants remain survivors and receive no credit;
+invalid mutation, timeout, and environment-failure counts are zero. Fast and
+Oracle pass. The host total fell from 331 to 330 because one redundant broad
+slot mutant failed before reaching its intended body and was removed; the
+focused ownership mutation remains.
+
+Runtime occupancy is 99,512/102,400 bytes (2,888 remaining). SPEC content is
+47,976/262,144 bytes, 172 tables, SHA-256
+`e41f86ad4e0d25dc87981ee12bf8aa7d3f5e27e5bf7baf19cc55b09a17855df6`;
+the census floor is 241,320 bytes. Tile archive remains 612,720/614,400 for the
+complete route (current street peak 592,648), and composite scratch remains
+11,648/12,288. The final release/live Target is 380,176 bytes at SHA-256
+`8ffb54a957b2c6d2e08798bc5bf787fd40ffd5acfa035e9cb2b7d37bbc15a1c8`,
+BSS `0x060b3e20` with 49,632 linked-work-RAM bytes remaining.
+
+Scene RED gaps improve from `187/1/0/669/1/93/0/279/0` to
+`185/1/0/665/1/93/0/279/0`; no category increases and retained gameplay
+authority remains zero. Class-`0x09` retains only its two narrow raw frame-5493
+presentation differences. The next earliest missing source program is type-28/
+class-`0x00`, slot `0x00ffce00`, dispatch `0x09e098`, lifetime 2075..5550,
+state/substate `0x0206:0x0200`. Candidate promotion and exhausted visual gates
+remain frozen; no Emulator/WGC attempt occurred.

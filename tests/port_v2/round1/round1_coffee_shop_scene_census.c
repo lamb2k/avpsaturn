@@ -90,12 +90,17 @@ int main(void)
         unsigned int class02_updates =
             avsp_round1_coffee_shop_class02_source_updates(
                 (unsigned short)source_frame);
+        unsigned int class0a_updates =
+            avsp_round1_coffee_shop_class0a_source_updates(
+                (unsigned short)source_frame);
         unsigned int phase_updates = source_updates > scheduler_updates ?
             source_updates : scheduler_updates;
         if (record20_prefix_updates > phase_updates)
             phase_updates = record20_prefix_updates;
         if (class02_updates > phase_updates)
             phase_updates = class02_updates;
+        if (class0a_updates > phase_updates)
+            phase_updates = class0a_updates;
         if (source_frame == 2072u &&
             !avsp_round1_begin_first_entry(&runtime))
             return 2;
@@ -372,14 +377,16 @@ int main(void)
                 return 4;
             }
             if (runtime.entry.dependencies_seeded &&
-                !avsp_round1_step_scheduler_post_player_source_differential(
+                !avsp_round1_step_scheduler_post_player_source_differential_class0a(
                     &runtime,
                     phase_tick == 0u ? scheduler_updates != 0u :
                         phase_tick < scheduler_updates,
                     phase_tick == 0u ? record20_prefix_updates != 0u :
                         phase_tick < record20_prefix_updates,
                     phase_tick == 0u ? class02_updates != 0u :
-                        phase_tick < class02_updates))
+                        phase_tick < class02_updates,
+                    phase_tick == 0u ? class0a_updates != 0u :
+                        phase_tick < class0a_updates))
             {
                 fprintf(stderr,
                         "scheduler_failure frame=%u code=%u slot=%08lx state=%04x substate=%04x animation=%08lx failures=%lu\n",
@@ -457,6 +464,13 @@ int main(void)
                     runtime.player_special_attack_contacts);
         }
     }
+    fprintf(stderr,
+            "class0a_init=%lu class0a_animation=%lu class0a_guards=%lu class0a_releases=%lu class0a_next=%lu\n",
+            runtime.class0a_initializations,
+            runtime.class0a_animation_steps,
+            runtime.class0a_guard_transitions,
+            runtime.class0a_releases,
+            runtime.class0a_next_entry_spawns);
     fprintf(stderr,
             "native_scene route=%d progress=%u living=%u releases=%lu damage=%lu collisions=%lu obstacle_spawns=%lu obstacle_damage=%lu obstacle_transitions=%lu obstacle_releases=%lu child_releases=%lu special_entries=%lu special_contacts=%lu camera=%d player_x=%d player_z=%d failures=%lu fallback=%lu class0f_init=%lu class0f_collision=%lu class0f_navigation=%lu class0f_reactions=%lu class0f_audio=%lu class0f_class11=%lu class0f_class09=%lu class0f_releases=%lu\n",
             runtime.route_state, runtime.first_encounter.source_progress,

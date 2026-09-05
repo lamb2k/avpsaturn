@@ -115,7 +115,7 @@ def main() -> None:
     memory = game_map_values()
     table_count = (ROOT / "src/port_v2/gameplay/round1/spec02_round1_entry_data.h") \
         .read_text(encoding="ascii").count("#define avsp_round1_")
-    if table_count != 169:
+    if table_count != 172:
         raise SystemExit("generated Round 1 content table count drift")
     bss_end = memory["bss_end"]
     manifest = {
@@ -161,7 +161,7 @@ def main() -> None:
                  "required_bytes": (ROOT / "build/rp4_fixture/STRIPS.BIN").stat().st_size},
                 {"id": "round1-runtime", "base": "0x226de000", "size": 0x19000,
                  "owner": "complete fixed actor pools and mutable route state", "load_phase": "runtime",
-                 "required_bytes": 0x184A4},
+                 "required_bytes": 0x184B8},
                 {"id": "live-diagnostic-window", "base": "0x226f7000", "size": 0x1A000,
                  "owner": "rolling 575-sample emulator evidence window", "load_phase": "runtime",
                  "required_bytes": 575 * 156},

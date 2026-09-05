@@ -161,6 +161,7 @@ NATIVE_OWNERS = {
     (20, "0x0a"): "Coffee Shop obstacle lifecycle",
     (24, "0x10"): "player empty-resource effect dispatcher",
     (24, "0x44"): "Coffee Shop command-guard presentation dispatcher",
+    (24, "0x0a"): "native class-0x0a fixed-pool presentation dispatcher",
     (24, "0x43"): "native class-0x01 scene presentation population",
     (24, "0x45"): "Coffee Shop class-0x45 presentation population",
     (24, "0x47"): "native class-0x02 child presentation dispatcher",
@@ -1083,6 +1084,93 @@ def class0f_complete_program_differential(
             "freeze_frame_range_inclusive_u16": [5524, 5550],
             "central_release_source_frame_u16": 5551,
         },
+        "fixed_frame_gameplay_authority_forbidden": True,
+        "retained_gameplay_authority": False,
+    }
+
+
+def class0a_complete_program_differential(
+        source_rows: list[dict[str, str]],
+        native_rows: list[dict[str, str]],
+        runtime_summary: str,
+        contract: dict[str, object]) -> dict[str, object]:
+    """Compare both Coffee Shop class-0x0a lifetimes without normalization."""
+    source = [row for row in source_rows if row["class"] == "0a" and
+              row["type"] == "24" and row["slot"] in {"ffc600", "ffc580"}]
+    native = [row for row in native_rows if row["class"] == "0a" and
+              row["type"] == "24" and
+              row["source_slot"] in {"00ffc600", "00ffc580"}]
+    if len(source) != 3479 or len(native) != 3479:
+        raise ValueError("Coffee Shop class-0x0a complete-program row drift")
+    source_by_key = {(int(row["frame"]), row["slot"]): row for row in source}
+    native_by_key = {(int(row["frame"]), row["source_slot"][-6:]): row
+                     for row in native}
+    if set(source_by_key) != set(native_by_key):
+        raise ValueError("Coffee Shop class-0x0a lifetime alignment drift")
+    fields = ("state", "substate", "x_fp", "y_fp", "z", "facing",
+              "animation_record", "animation_timer", "animation_branch")
+
+    def value(row: dict[str, str], field: str, source_side: bool) -> int:
+        if field in {"state", "substate", "animation_record"}:
+            return int(row[field], 16)
+        if field == "animation_timer":
+            return int(row[field], 16) if source_side else int(row[field])
+        if field in {"x_fp", "y_fp"}:
+            return int(row[field], 16) if source_side else int(row[field])
+        return int(row[field])
+
+    raw = []
+    for key in sorted(source_by_key):
+        changed = [field for field in fields
+                   if value(source_by_key[key], field, True) !=
+                   value(native_by_key[key], field, False)]
+        if changed:
+            raw.append({"frame_u16": key[0], "source_slot": "0x00" + key[1],
+                        "fields": changed})
+    if raw:
+        raise ValueError("Coffee Shop class-0x0a raw program drift: " +
+                         json.dumps(raw[:8], sort_keys=True))
+    presentation = {
+        int(row["animation_record"], 16): (
+            int(row["assembly"], 16), int(row["hurt_selector_u8"]),
+            int(row["attack_selector_u8"]))
+        for row in contract["animation_selector"]["coffee_shop_records"]}
+    if any(presentation[int(row["animation_record"], 16)] != (
+            int(row["assembly"], 16), int(row["hurt_selector"]),
+            int(row["attack_selector"])) for row in native):
+        raise ValueError("Coffee Shop class-0x0a assembly/selector drift")
+    match = re.search(
+        r"class0a_init=(\d+) class0a_animation=(\d+) "
+        r"class0a_guards=(\d+) class0a_releases=(\d+) class0a_next=(\d+)",
+        runtime_summary)
+    if match is None or [int(value) for value in match.groups()] != [
+            2, 3596, 0, 0, 1]:
+        raise ValueError("Coffee Shop class-0x0a runtime counter drift")
+    if (contract["source_body"]["sha256"] !=
+            "43f6bb2d20750b41ec6e03b6eed22488fee5db651d0680ad2c600e2b53ac0089" or
+            contract["scheduler_cadence"]["dispatch_count_u16"] != 3597 or
+            contract["direct_effects"]["rng_calls_u8"] != 0 or
+            contract["direct_effects"]["collision_memberships_u8"] != 0):
+        raise ValueError("Coffee Shop class-0x0a SPEC/direct-effect drift")
+    return {
+        "classification": "SOURCE_PROGRAM_DIFFERENTIAL_PASS",
+        "source_program": "0x00077ccc..0x00077d26 + 0x016d2e",
+        "source_body_sha256": contract["source_body"]["sha256"],
+        "source_frame_range_u16": [2073, 5566],
+        "source_slots": ["0x00ffc600", "0x00ffc580"],
+        "source_rows_u16": len(source), "native_rows_u16": len(native),
+        "raw_difference_count_u8": 0, "raw_differences": [],
+        "normalization": "NONE", "normalized_difference_count_u8": 0,
+        "compared_fields": list(fields),
+        "scheduler_projection": {
+            "classification": "SOURCE_CAPTURE_PROJECTION_ONLY",
+            "dispatch_count_u16": 3597,
+            "exception_count_u8": 70,
+            "gameplay_authority": False},
+        "direct_rng_calls_u8": 0, "collision_memberships_u8": 0,
+        "health_damage_audio_route_load_writes_u8": 0,
+        "fixed_pool_lifetimes_equal": True,
+        "counterfactual_guard_and_release_bound": True,
         "fixed_frame_gameplay_authority_forbidden": True,
         "retained_gameplay_authority": False,
     }
@@ -2057,6 +2145,29 @@ def validate_report(report: dict[str, object]) -> None:
             class0f_program["retained_gameplay_authority"]):
         raise ValueError("Coffee Shop class-0x0f complete-program drift: " +
                          json.dumps(class0f_program, sort_keys=True))
+    class0a_program = report["native_capture"][
+        "class0a_complete_program"]
+    if (class0a_program["classification"] !=
+            "SOURCE_PROGRAM_DIFFERENTIAL_PASS" or
+            class0a_program["source_frame_range_u16"] != [2073, 5566] or
+            class0a_program["source_slots"] != [
+                "0x00ffc600", "0x00ffc580"] or
+            class0a_program["source_rows_u16"] != 3479 or
+            class0a_program["native_rows_u16"] != 3479 or
+            class0a_program["raw_difference_count_u8"] != 0 or
+            class0a_program["normalization"] != "NONE" or
+            class0a_program["normalized_difference_count_u8"] != 0 or
+            class0a_program["scheduler_projection"] != {
+                "classification": "SOURCE_CAPTURE_PROJECTION_ONLY",
+                "dispatch_count_u16": 3597,
+                "exception_count_u8": 70,
+                "gameplay_authority": False} or
+            not class0a_program["fixed_pool_lifetimes_equal"] or
+            not class0a_program["counterfactual_guard_and_release_bound"] or
+            not class0a_program["fixed_frame_gameplay_authority_forbidden"] or
+            class0a_program["retained_gameplay_authority"]):
+        raise ValueError("Coffee Shop class-0x0a complete-program drift: " +
+                         json.dumps(class0a_program, sort_keys=True))
     airborne_button1 = report["native_capture"][
         "airborne_button1_presentation"]
     if (not airborne_button1["source_native_semantic_equal"] or
@@ -2096,6 +2207,11 @@ def main() -> None:
             "authority_data"]["auxiliary"][
                 "coffee_shop_scene_component_identities"]["components"]
         if item["type"] == 20 and item["class"] == "0x0f")
+    class0a_contract = next(
+        item["implementation_contract"] for item in fixtures[
+            "authority_data"]["auxiliary"][
+                "coffee_shop_scene_component_identities"]["components"]
+        if item["type"] == 24 and item["class"] == "0x0a")
     source_actor_sha256 = hashlib.sha256(SOURCE_ACTORS.read_bytes()).hexdigest()
     expected_source_actor_sha256 = source["capture_identity"][
         "completion_a"]["coffee_shop_scene_actors.tsv"]
@@ -2224,6 +2340,10 @@ def main() -> None:
                                class0f_complete_program_differential(
                                    source_rows, rows, runtime_summary,
                                    class0f_contract),
+                           "class0a_complete_program":
+                               class0a_complete_program_differential(
+                                   source_rows, rows, runtime_summary,
+                                   class0a_contract),
                            "airborne_button1_presentation":
                                airborne_button1_presentation_chronology(
                                    source_rows, rows),

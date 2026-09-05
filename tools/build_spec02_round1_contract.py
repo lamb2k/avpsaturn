@@ -290,6 +290,11 @@ def build_fields() -> list[dict[str, object]]:
           "/authority_data/auxiliary/coffee_shop_scene_component_identities/components/2/implementation_contract", "source camera/route guards own allocation; exact outer/inner state, delay and reaction-selector predecrements, facing XOR, animation/collision selectors, command transactions, fixed-pool effects and route teardown own every transition",
           ["actor.outer_state:u16", "actor.inner_phase:u8", "actor.delay_timer:u8", "actor.reaction_selector:u16", "actor.hidden_reaction_facing:u8", "actor.position:s16", "actor.animation_record:u32", "camera.position:u16", "route.state:s16", "record24.free_count:u8", "record28.free_count:u8"], ["actor.state:u16", "actor.visible_facing:u8", "actor.animation_record:u32", "actor.collision_selectors:u8", "audio.command:u16", "record24.class0x11.children", "record28.class0x09.child", "pool.free_count:u8"],
           "/coffee_shop_scene_component_identities/components/2/implementation_contract/counterfactual", "source-state perturbation exercises both reaction selectors and changes animation, audio, child population, downstream RNG and scene chronology while fixed-frame substitutes are rejected"),
+        f("auxiliary.coffee_shop_class0a_type24_program", "round1-projectile-pickup-hazard", "guarded_presentation_actor_program", True,
+          "auxiliary", "/coffee_shop_scene_component_identities/components/4/implementation_contract", "0x077ccc class entry, three-way outer-state dispatch, 26-entry signed animation table, and every Coffee-Shop-reachable branch",
+          "/authority_data/auxiliary/coffee_shop_scene_component_identities/components/4/implementation_contract", "source stage allocation owns fixed-pool identity; exact variant byte-offset indexing, animation timer/branch/assembly/selectors, unsigned camera guard, central clear, next-entry allocation and fixed-pool release own every transition while direct gameplay effects remain absent",
+          ["actor.outer_state:u16", "actor.variant:u8", "actor.position:s16", "actor.facing:u8", "actor.animation_timer:u16", "actor.animation_branch:s16", "actor.animation_record:u32", "camera.position:u16", "type24.free_count:u8"], ["actor.state:u16", "actor.animation_record:u32", "actor.presentation_fields", "type24.free_count:u8"],
+          "/coffee_shop_scene_component_identities/components/4/implementation_contract/counterfactual", "source-supported variant and camera perturbation exercises the guarded transition and release, changing pool identity and downstream route, RNG, health and audio chronology while fixed-frame substitutes are rejected"),
         f("auxiliary.class10_type24_whole_program", "round1-projectile-pickup-hazard", "guarded_actor_program", True,
           "class10_program", "/", "0x079ffc class entry, four-way top-state dispatch, six source variant selectors, and every Round 1-reachable branch",
           "/authority_data/auxiliary/archetypes/5/whole_routine_implementation_contract", "outer state dispatches only through the bounded source program; variant-indexed signed offsets and animation records, exact current-state guards, presentation updates and fixed-pool release own every transition",
@@ -528,7 +533,7 @@ def build_coffee_shop_scene_manifest(source: dict[str, dict]) -> dict[str, objec
     native_pairs = {
         (4, 0), (4, 4), (12, 0x1f), (20, 0x09), (20, 0x0a),
         (20, 0x01), (20, 0x02), (20, 0x0f),
-        (24, 0x10), (24, 0x3d), (24, 0x44), (24, 0x45), (24, 0x47),
+        (24, 0x0a), (24, 0x10), (24, 0x3d), (24, 0x44), (24, 0x45), (24, 0x47),
         (24, 0x49), (24, 0x4b), (24, 0x4e),
         (32, 0x01), (36, 0x05),
     }
@@ -1693,7 +1698,7 @@ def validate(contract: dict[str, object], fixtures: dict[str, object],
                  if item["type"] == 12 and item["class"] == "0x1f")
                  ["classification"] == "NATIVE_IMPLEMENTED" and
             sum(scene["classification_counts"].values()) == len(scene_items) and
-            len(scene["blocked_class_type_pairs"]) == 20 and
+            len(scene["blocked_class_type_pairs"]) == 19 and
             scene["acceptance_gate"] == {
                 "source_actor_lifetimes": 747,
                 "source_class_type_pairs": 38,

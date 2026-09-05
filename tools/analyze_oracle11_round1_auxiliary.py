@@ -28,6 +28,10 @@ CLASS0F_DETAIL_A=ROOT/'.deps/mame/oracle11_progression_lifecycle_cs61a'
 CLASS0F_DETAIL_B=ROOT/'.deps/mame/oracle11_progression_lifecycle_cs61b'
 CLASS0F_COUNTER_A=ROOT/'.deps/mame/oracle11_progression_lifecycle_cs61m1'
 CLASS0F_COUNTER_B=ROOT/'.deps/mame/oracle11_progression_lifecycle_cs61m2'
+CLASS0A_DETAIL_A=ROOT/'.deps/mame/oracle11_progression_lifecycle_cs64a'
+CLASS0A_DETAIL_B=ROOT/'.deps/mame/oracle11_progression_lifecycle_cs64b'
+CLASS0A_COUNTER_A=ROOT/'.deps/mame/oracle11_progression_lifecycle_cs64m1'
+CLASS0A_COUNTER_B=ROOT/'.deps/mame/oracle11_progression_lifecycle_cs64m2'
 SCENE_FULL_A=ROOT/'.deps/mame/oracle11_progression_lifecycle_cs21a'
 SCENE_FULL_B=ROOT/'.deps/mame/oracle11_progression_lifecycle_cs21b'
 TYPE16_TRACE_A=ROOT/'.deps/mame/reimplement13_type16_trace_g'
@@ -1334,6 +1338,252 @@ def coffee_shop_scene_component_identities(op,program):
     'route-teardown freeze/release','fixed-frame substitute'],
    'spec_executable':True,'retained_gameplay_authority':False,
    'fixed_frame_substitute_forbidden':True}
+  class0a_files=('coffee_shop_class0a_program.tsv',
+                 'coffee_shop_scene_actors.tsv',
+                 'coffee_shop_scene_frames.tsv','coffee_shop_rng_calls.tsv',
+                 'coffee_shop_scene_health_writes.tsv','dispatches.tsv',
+                 'progression_result.tsv')
+  class0a_detail_a={name:sha(CLASS0A_DETAIL_A/name)
+                    for name in class0a_files}
+  class0a_detail_b={name:sha(CLASS0A_DETAIL_B/name)
+                    for name in class0a_files}
+  class0a_counter_a={name:sha(CLASS0A_COUNTER_A/name)
+                     for name in class0a_files}
+  class0a_counter_b={name:sha(CLASS0A_COUNTER_B/name)
+                     for name in class0a_files}
+  req(class0a_detail_a==class0a_detail_b,
+      'Coffee Shop class-0x0a cold-reference captures differ')
+  req(class0a_counter_a==class0a_counter_b,
+      'Coffee Shop class-0x0a counterfactual captures differ')
+  class0a_base_actors=[r for r in rows(
+      CLASS0A_DETAIL_A/'coffee_shop_scene_actors.tsv')
+      if r['type']=='24' and r['class']=='0a']
+  class0a_lifetimes={slot:[r for r in class0a_base_actors
+                           if r['slot']==slot]
+                       for slot in ('ffc600','ffc580')}
+  req(len(class0a_lifetimes['ffc600'])==3478 and
+      class0a_lifetimes['ffc600'][0]['frame']=='2073' and
+      class0a_lifetimes['ffc600'][-1]['frame']=='5550' and
+      {r['variant'] for r in class0a_lifetimes['ffc600']}=={'26'} and
+      {r['state'] for r in class0a_lifetimes['ffc600']}=={'0200'} and
+      {r['substate'] for r in class0a_lifetimes['ffc600']}=={'0000'} and
+      {r['x_fp'] for r in class0a_lifetimes['ffc600']}=={'00000000'} and
+      {r['y_fp'] for r in class0a_lifetimes['ffc600']}=={'00000000'} and
+      {r['z'] for r in class0a_lifetimes['ffc600']}=={'0'} and
+      {r['facing'] for r in class0a_lifetimes['ffc600']}=={'0'} and
+      {r['animation_record'] for r in
+       class0a_lifetimes['ffc600']}=={'000782a4','000782ac'},
+      'Coffee Shop class-0x0a first lifetime/state drift')
+  req(len(class0a_lifetimes['ffc580'])==1 and
+      class0a_lifetimes['ffc580'][0]['frame']=='5566' and
+      class0a_lifetimes['ffc580'][0]['variant']=='06' and
+      class0a_lifetimes['ffc580'][0]['state']=='0200' and
+      class0a_lifetimes['ffc580'][0]['substate']=='0000' and
+      class0a_lifetimes['ffc580'][0]['animation_record']=='00077e54' and
+      class0a_lifetimes['ffc580'][0]['animation_timer']=='0010' and
+      class0a_lifetimes['ffc580'][0]['animation_branch']=='3072',
+      'Coffee Shop class-0x0a second lifetime/state drift')
+  class0a_writes=rows(CLASS0A_DETAIL_A/'coffee_shop_class0a_program.tsv')
+  class0a_init_writes=[r for r in class0a_writes if r['event']=='write' and
+      r['actual_pc'] in ('01bf1e','01bf22','01bf28','01bf2e','01bf34',
+                         '01bf3a','01bf40','077ce6','016d4a','016d4e',
+                         '016d5a') and
+      ((r['frame']=='2072' and r['slot']=='ffc600') or
+       (r['frame']=='5565' and r['slot']=='ffc580'))]
+  req(len(class0a_init_writes)==24 and
+      [(r['frame'],r['slot'],r['actual_pc'],r['inner'])
+       for r in class0a_init_writes if r['actual_pc']=='077ce6']==[
+        ('2072','ffc600','077ce6','04'),
+        ('5565','ffc580','077ce6','04')],
+      'Coffee Shop class-0x0a initialization writer drift')
+  class0a_dispatch_counts={frame:0 for frame in range(2073,5524)}
+  for row in class0a_writes:
+   if (row['event']=='write' and row['actual_pc']=='016d34' and
+       row['slot']=='ffc600' and 2073<=int(row['frame'])<=5523):
+    class0a_dispatch_counts[int(row['frame'])]+=1
+  class0a_cadence_exceptions=[
+      {'source_frame_u16':frame,'updates_u8':count}
+      for frame,count in sorted(class0a_dispatch_counts.items()) if count!=1]
+  req(len(class0a_cadence_exceptions)==70 and
+      sum(class0a_dispatch_counts.values())==3596 and
+      class0a_cadence_exceptions[:3]==[
+       {'source_frame_u16':2075,'updates_u8':2},
+       {'source_frame_u16':2076,'updates_u8':2},
+       {'source_frame_u16':2165,'updates_u8':4}] and
+      class0a_cadence_exceptions[-1]==
+       {'source_frame_u16':5522,'updates_u8':4},
+      'Coffee Shop class-0x0a fixed-pool dispatch cadence drift')
+  class0a_release=[r for r in class0a_writes if r['event']=='write' and
+      r['frame']=='5550' and r['slot']=='ffc600' and
+      r['actual_pc']=='0173c6' and r['inner']=='00']
+  req(len(class0a_release)==1 and class0a_release[0]['active']=='1' and
+      class0a_release[0]['class']=='0a' and
+      class0a_release[0]['state']=='0200',
+      'Coffee Shop class-0x0a central release writer drift')
+  class0a_direct_rng=[r for r in rows(
+      CLASS0A_DETAIL_A/'coffee_shop_rng_calls.tsv')
+      if r['a6'] in ('ffc580','ffc600') and r['class']=='0a']
+  class0a_direct_audio=[r for r in rows(CLASS0A_DETAIL_A/'dispatches.tsv')
+      if r['a6'] in ('ffc580','ffc600') and r['origin_class']=='0a']
+  class0a_direct_health=[r for r in rows(
+      CLASS0A_DETAIL_A/'coffee_shop_scene_health_writes.tsv')
+      if ((r['target_slot']=='ffc600' or r['attacker']=='ffc600' or
+           r['defender']=='ffc600') and 2073<=int(r['frame'])<=5550) or
+         ((r['target_slot']=='ffc580' or r['attacker']=='ffc580' or
+           r['defender']=='ffc580') and int(r['frame'])==5566)]
+  class0a_collision_membership=[]
+  for r in rows(CLASS0A_DETAIL_A/'coffee_shop_collision_lists.tsv'):
+   frame=int(r['frame'])
+   class0a_collision_membership.extend(
+       slot for slot in ('ffc580','ffc600')
+       if ((slot=='ffc600' and 2073<=frame<=5550) or
+           (slot=='ffc580' and frame==5566)) and
+          (slot in r['attacker_slots'].split(',') or
+           slot in r['defender_slots'].split(',')))
+  req(not class0a_direct_rng and not class0a_direct_audio and
+      not class0a_direct_health and not class0a_collision_membership,
+      'Coffee Shop class-0x0a direct gameplay effect drift')
+  class0a_counter_rows=rows(
+      CLASS0A_COUNTER_A/'coffee_shop_class0a_program.tsv')
+  class0a_counter_state=[r for r in class0a_counter_rows
+      if r['event']=='write' and r['frame']=='2073' and
+         r['slot']=='ffc600' and r['actual_pc']=='077d1c' and
+         r['inner']=='04']
+  class0a_counter_release=[r for r in class0a_counter_rows
+      if r['event']=='write' and r['frame']=='2074' and
+         r['slot']=='ffc600' and r['actual_pc']=='0177f6' and
+         r['inner']=='00']
+  class0a_counter_markers=[r for r in class0a_counter_rows
+      if r['event'].startswith('counterfactual_')]
+  req(len(class0a_counter_state)==1 and
+      class0a_counter_state[0]['data']=='00000404' and
+      class0a_counter_state[0]['mask']=='0000ff00' and
+      len(class0a_counter_release)==1 and
+      class0a_counter_release[0]['state']=='0400' and
+      [(r['event'],r['tap_pc'],r['actual_pc'])
+       for r in class0a_counter_markers]==[
+        ('counterfactual_begin','077cf6','077cd6'),
+        ('counterfactual_end','077d1a','077d18')],
+      'Coffee Shop class-0x0a counterfactual branch/release drift')
+  class0a_offset_bytes=op[0x77d26:0x77d26+52]
+  class0a_offsets=[int.from_bytes(class0a_offset_bytes[index:index+2],
+                                  'big',signed=True)
+                   for index in range(0,len(class0a_offset_bytes),2)]
+  req(class0a_offsets==[74,126,178,302,338,390,514,638,762,814,866,
+      918,970,1022,1074,1126,1178,1230,1282,1406,1426,1462,1514,
+      1638,1666,1774],
+      'Coffee Shop class-0x0a animation offset table drift')
+  class0a_program={
+   'semantic_role':'SOURCE_PRESENTATION_FIXED_POOL_RESIDENT',
+   'source_body':{'first':'0x00077ccc','last_exclusive':'0x00077d26',
+    'sha256':hashlib.sha256(op[0x77ccc:0x77d26]).hexdigest()},
+   'dispatch_table':{'address':'0x00077cd8',
+    'index':'actor+0x04 high byte:u8','entry_count_u8':3,
+    'offsets_s16':[8,30,72],
+    'targets':['0x00077ce0','0x00077cf6','0x00077d20']},
+   'fields':{
+    'active':'u8 at actor+0x00','class_and_variant':'u16 at actor+0x02',
+    'outer_state':'u16 at actor+0x04; high byte indexes dispatch table',
+    'animation_timer':'u16 at actor+0x0a',
+    'coordinate_mode':'u8 at actor+0x0d','visible_facing':'u8 at actor+0x0f',
+    'x_y':'s16 at actor+0x10/+0x14, mirrored by signed 16.16 native fields',
+    'z':'s16 at actor+0x18','animation_record':'u32 at actor+0x1c',
+    'animation_branch':'s16 at actor+0x24','field_2a':'u8 at actor+0x2a'},
+   'allocation_initialization':{
+    'allocator':'type-24 fixed pool stage allocator 0x01bf1e..0x01bf40',
+    'writes':['active = 1','class/variant word from source record',
+              'x = 0','y = 0','facing = 0','coordinate_mode = 0',
+              'actor+0x2a:u8 = 0'],
+    'program_init_entry':'0x00077ce0',
+    'program_writes':['outer_state += 0x0200',
+                      'bind animation at 0x016d46 from variant byte offset'],
+    'lifetimes':[
+     {'source_slot':'0x00ffc600','allocator_source_frame_u16':2072,
+      'first_visible_source_frame_u16':2073,
+      'last_visible_source_frame_u16':5550,'variant_u8':'0x26',
+      'initial_animation_record':'0x000782a4'},
+     {'source_slot':'0x00ffc580','allocator_source_frame_u16':5565,
+      'first_visible_source_frame_u16':5566,
+      'last_visible_source_frame_u16':5566,'variant_u8':'0x06',
+      'initial_animation_record':'0x00077e54'}],
+    'scheduler_order':'type-24 fixed pool traverses ascending source slots under 0x01ba62; an allocation into an unvisited slot dispatches in the same traversal'},
+   'scheduler_cadence':{
+    'classification':'SOURCE_CAPTURE_PROJECTION_ONLY',
+    'source_frame_range_inclusive_u16':[2072,5523],
+    'default_updates_per_source_frame_u8':1,
+    'exceptions':class0a_cadence_exceptions,
+    'exception_count_u8':len(class0a_cadence_exceptions),
+    'dispatch_count_u16':1+sum(class0a_dispatch_counts.values()),
+    'writer_witness':'animation timer writer 0x016d34 plus initialization writer 0x077ce6',
+    'rule':'align the complete-scene source scheduler projection only; never own gameplay state, release, or production timing'},
+   'animation_selector':{
+    'table_address':'0x00077d26','index':'actor+0x03 variant:u8 byte offset',
+    'offsets_s16':class0a_offsets,
+    'table_sha256':hashlib.sha256(class0a_offset_bytes).hexdigest(),
+    'coffee_shop_records':[animation_record(program,0x77e54),
+                           animation_record(program,0x77e5c),
+                           animation_record(program,0x782a4),
+                           animation_record(program,0x782ac)],
+    'variant_bindings':[
+     {'variant_u8':'0x06','table_entry_u8':3,
+      'records':['0x00077e54','0x00077e5c']},
+     {'variant_u8':'0x26','table_entry_u8':19,
+      'records':['0x000782a4','0x000782ac']}]},
+   'state_program':{
+    '0x0000':{'entry':'0x00077ce0',
+              'next_state_u16':'0x0200',
+              'result':'bind the variant-selected animation record'},
+    '0x0200':{'entry':'0x00077cf6',
+     'variant_guard':'only variants 0x0a, 0x0c and 0x0e test the camera threshold; every other variant jumps directly to the animation runtime',
+     'camera_guard':'unsigned camera_x_u16 at A5+0x0278 >= 0x0920',
+     'guard_result':'outer_state += 0x0200 to 0x0400',
+     'coffee_shop_result':'variants 0x26 and 0x06 bypass the threshold and remain 0x0200 while the shared animation runtime 0x016d2e advances their records'},
+    '0x0400':{'entry':'0x00077d20',
+              'rule':'release through type-24 fixed-pool release 0x0177f0'}},
+   'presentation':{
+    'variant_0x26':'two-record four-tick loop; negative branch 0x8800 returns to 0x000782a4',
+    'variant_0x06':'sixteen-tick sequence beginning at 0x00077e54; only the first visible frame is inside this scene boundary',
+    'position_facing_rule':'both measured lifetimes retain zero x/y/z and facing',
+    'collision_selectors':'assembly records carry hurt selector 0 and attack selectors 4/7 for variant 0x26 and 16 for variant 0x06; the actors are absent from collision lists'},
+   'direct_effects':{'rng_calls_u8':0,'collision_memberships_u8':0,
+    'health_or_damage_writes_u8':0,'audio_transactions_u8':0,
+    'route_camera_load_writes_u8':0,
+    'rule':'presentation-only source actors still own fixed-pool occupancy and lifecycle; downstream allocation identity must not omit them'},
+   'route_teardown':{
+    'first_lifetime_release_owner':'centralized scene record clear 0x0173c6',
+    'release_writer_source_frame_u16':5550,
+    'first_absent_visible_source_frame_u16':5551,
+    'second_lifetime_owner':'next-entry source stage allocation before the stable frame-5566 seam',
+    'fixed_frame_release_forbidden':True},
+   'counterfactual':{
+    'classification':'SOURCE_STATE_MUTATION_CONTROL',
+    'capture_a':CLASS0A_COUNTER_A.name,'capture_b':CLASS0A_COUNTER_B.name,
+    'byte_identical':True,'files_sha256':class0a_counter_a,
+    'injection':'for one source traversal only, change variant 0x26 to source-supported 0x0a and camera_x to 0x0920, then restore both after the guard',
+    'injection_boundary':'opcode read taps are prefetch/capture projection only; actual source writer 0x077d1c and release 0x0177f6 establish execution authority',
+    'production_authority':False,
+    'covered_branches':['variant 0x0a camera comparison',
+                        'state 0x0200 -> 0x0400','type-24 release'],
+    'downstream_differences':{
+     name:{'baseline_sha256':class0a_detail_a[name],
+           'counterfactual_sha256':class0a_counter_a[name],
+           'different':class0a_detail_a[name]!=class0a_counter_a[name]}
+     for name in class0a_files},
+    'changed_outcomes':['first lifetime releases at source frame 2074',
+                        'later fixed-pool allocation identity',
+                        'route, RNG, health and audio projection chronology']},
+   'capture_identity':{
+    'completion_a':CLASS0A_DETAIL_A.name,'completion_b':CLASS0A_DETAIL_B.name,
+    'byte_identical':True,'files_sha256':class0a_detail_a},
+   'mutation_controls':['source body','outer dispatch table',
+    'variant animation offset table','variant byte-offset indexing',
+    'initial state increment','animation record binding',
+    'animation timer/branch/assembly/selectors','variant camera guard',
+    'unsigned camera threshold','type-24 release','fixed-pool occupancy',
+    'central scene clear','direct RNG absence','collision-list absence',
+    'health/damage absence','audio absence','fixed-frame substitute'],
+   'spec_executable':True,'retained_gameplay_authority':False,
+   'fixed_frame_substitute_forbidden':True}
   implementation_contracts={
    (20,'0x01'):{
    'semantic_role':'SOURCE_CLASS_0X1F_SPAWN_CONTROLLER',
@@ -1522,7 +1772,10 @@ def coffee_shop_scene_component_identities(op,program):
      'reaction-direction x comparison',
      'effect-count predecrement','audio command','fixed-frame substitute']}}
  implementation_contracts[(20,'0x0f')]=class0f_program
+ implementation_contracts[(24,'0x0a')]=class0a_program
  for contract in implementation_contracts.values():
+   if 'stage_records' not in contract:
+    continue
    addresses={row['address'] for row in contract['stage_records']}
    contract['stage_spawn_guard']['camera_sample_order']={
     'rule':'compare against the camera position projected for the current source frame, before the native player step computes the next frame camera',
@@ -3326,6 +3579,9 @@ def validate(r):
  class0f_component=next(x for x in scene_components['components']
                         if x['type']==20 and x['class']=='0x0f')
  class0f_contract=class0f_component['implementation_contract']
+ class0a_component=next(x for x in scene_components['components']
+                        if x['type']==24 and x['class']=='0x0a')
+ class0a_contract=class0a_component['implementation_contract']
  req(scene_components['classification']=='SOURCE_CLOSED_IDENTITY' and
      scene_components['capture_identity']['byte_identical'] is True and
      scene_components['capture_identity']['implementation_detail_byte_identical'] is True and
@@ -3345,6 +3601,7 @@ def validate(r):
           x['fixed_frame_substitute_forbidden'] is True
           for x in scene_components['components'][2:]
           if not ((x['type']==20 and x['class']=='0x0f') or
+                  (x['type']==24 and x['class']=='0x0a') or
                   (x['type']==24 and x['class']=='0x20'))) and
      next(x for x in scene_components['components']
           if x['type']==20 and x['class']=='0x0f')['classification']==
@@ -3358,6 +3615,33 @@ def validate(r):
      next(x for x in scene_components['components']
           if x['type']==24 and x['class']=='0x20')['implementation_status']==
       'SPEC_EXECUTABLE' and
+     class0a_component['classification']==
+      'SOURCE_CLOSED_IMPLEMENTATION_FIELDS' and
+     class0a_component['implementation_status']=='SPEC_EXECUTABLE' and
+     class0a_component['semantic_role']==
+      'SOURCE_PRESENTATION_FIXED_POOL_RESIDENT' and
+     class0a_contract['source_body']=={
+      'first':'0x00077ccc','last_exclusive':'0x00077d26',
+      'sha256':'43f6bb2d20750b41ec6e03b6eed22488fee5db651d0680ad2c600e2b53ac0089'} and
+     class0a_contract['dispatch_table']['offsets_s16']==[8,30,72] and
+     class0a_contract['animation_selector']['table_sha256']==
+      '3ab654d4e8b0c544fed45f5fe188549b2ecd20addb7dee9a415157ea5727ae66' and
+     class0a_contract['scheduler_cadence']['exception_count_u8']==70 and
+     class0a_contract['scheduler_cadence']['dispatch_count_u16']==3597 and
+     class0a_contract['scheduler_cadence']['classification']==
+      'SOURCE_CAPTURE_PROJECTION_ONLY' and
+     [x['variant_u8'] for x in
+      class0a_contract['allocation_initialization']['lifetimes']]==
+      ['0x26','0x06'] and
+     class0a_contract['direct_effects']=={
+      'rng_calls_u8':0,'collision_memberships_u8':0,
+      'health_or_damage_writes_u8':0,'audio_transactions_u8':0,
+      'route_camera_load_writes_u8':0,
+      'rule':'presentation-only source actors still own fixed-pool occupancy and lifecycle; downstream allocation identity must not omit them'} and
+     class0a_contract['counterfactual']['production_authority'] is False and
+     all(x['different'] for x in
+         class0a_contract['counterfactual']['downstream_differences'].values()) and
+     class0a_contract['retained_gameplay_authority'] is False and
      next(x for x in scene_components['components']
           if x['type']==24 and x['class']=='0x20')['implementation_contract']
       ['retained_gameplay_authority'] is False and

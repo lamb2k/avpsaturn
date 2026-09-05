@@ -49,6 +49,12 @@ local capture_component20_phase =
 local class0f_state_counterfactual =
     os.getenv("AVSP_ORACLE11_CLASS0F_STATE_COUNTERFACTUAL") == "1"
 local class0f_state_counterfactual_count = 0
+local class0a_variant_counterfactual =
+    os.getenv("AVSP_ORACLE11_CLASS0A_VARIANT_COUNTERFACTUAL") == "1"
+local class0a_variant_counterfactual_count = 0
+local class0a_saved_variant = 0
+local class0a_saved_camera_x = 0
+local class0a_counterfactual_active = false
 local capture_terrain_patch =
     os.getenv("AVSP_ORACLE11_TERRAIN_PATCH_CAPTURE") == "1"
 local capture_terrain_stream =
@@ -192,6 +198,8 @@ local player_hit_program = assert(io.open(
     root .. "/coffee_shop_player_hit_program.tsv", "w"))
 local player_hit_writes = assert(io.open(
     root .. "/coffee_shop_player_hit_writes.tsv", "w"))
+local class0a_program = assert(io.open(
+    root .. "/coffee_shop_class0a_program.tsv", "w"))
 local result = assert(io.open(root .. "/progression_result.tsv", "w"))
 
 terrain_patch:write("frame\tevent\taddress\tpc\ta0\ta1\ta2\ta3\ta4\ta5\ta6\tplayer_x\tplayer_z\tcamera_x\tcamera_z\tcamera_phase_x\tcamera_phase_z\tcamera_mode\tcamera_map_index\tcell_236c\tcell_23ac\tcell_23ec\tcell_242c\tdata\tmask\tmutated\n")
@@ -246,7 +254,8 @@ player_resource:write("frame\tevent\tpc\tresource\trecharge\tdepleted\taward_tim
 controller_substate_writes:write("frame\tpc\toffset\tstate\tsubstate\tfield44\ta6\td0\td1\td2\td3\ta0\ta1\ta2\ta3\ta4\ta5\told32\tdata\tmask\tsuppressed\n")
 player_hit_program:write("frame\tevent\tpc\tstate\tsubstate\tinner_phase\tfacing\tx_fp\ty_fp\tz\tground_z\tanimation_record\tanimation_timer\tanimation_branch\taction_timer\tshake_count\thealth\tlatched_health\tactive_body\thit_kind\tpresentation_selector\treaction_facing\tairborne\tmotion_index\tinterrupt\tx_velocity\ty_velocity\tx_acceleration\ty_acceleration\tcollision_flags\td0\td1\td2\td3\ta0\ta1\ta2\ta3\ta4\ta5\n")
 player_hit_writes:write("frame\tpc\toffset\tstate\tsubstate\tinner_phase\tanimation_record\taction_timer\tshake_count\thealth\tlatched_health\tactive_body\thit_kind\tpresentation_selector\treaction_facing\tairborne\tmotion_index\tinterrupt\told32\tdata\tmask\tmutated\n")
-result:write("spawn_suppression\tguard_suppression\tmain_spawn_transactions\taux_spawn_transactions\tsuppressed_writes\tlifecycle_suppressed_writes\taction4_timer_events\taction4_timer_suppressed_writes\ttype4_class03_suppressed_writes\tcoffee_stage_rng_suppressed_writes\ttype36_suppressed_writes\tscene_pair_suppressed_actors\tobstacle_transition_suppressed_writes\tclass1f_hit_selector_mutations\tplayer_hit_body_mutations\tfinal_route\n")
+class0a_program:write("frame\tevent\ttap_pc\tactual_pc\tslot\tinner\tactive\tclass\ttype\tvariant\tstate\tsubstate\tx_fp\ty_fp\tz\tanimation_record\tanimation_timer\tanimation_branch\tcamera_x\troute\td0\td1\ta0\ta5\ta6\tdata\tmask\tmutated\n")
+result:write("spawn_suppression\tguard_suppression\tmain_spawn_transactions\taux_spawn_transactions\tsuppressed_writes\tlifecycle_suppressed_writes\taction4_timer_events\taction4_timer_suppressed_writes\ttype4_class03_suppressed_writes\tcoffee_stage_rng_suppressed_writes\ttype36_suppressed_writes\tscene_pair_suppressed_actors\tobstacle_transition_suppressed_writes\tclass1f_hit_selector_mutations\tplayer_hit_body_mutations\tclass0a_counterfactuals\tfinal_route\n")
 
 local function u8(a) return program:read_u8(a) end
 local function u16(a) return program:read_u16(a) end
@@ -608,6 +617,93 @@ local function emit_component20_dispatch(pc)
         maincpu.state["D1"].value & 0xffffffff,
         maincpu.state["D4"].value & 0xffffffff,
         maincpu.state["D5"].value & 0xffffffff))
+end
+
+local function emit_class0a_program(event, pc, slot, inner, data, mask,
+        mutated)
+    if not capture_scene or frame < 1972 or frame > capture_last_frame then
+        return
+    end
+    if slot ~= 0xffc580 and slot ~= 0xffc600 then return end
+    if event ~= "write" and
+            (u8(slot) == 0 or u8(slot + 2) ~= 0x0a or
+             u8(slot + 8) ~= 24) then
+        return
+    end
+    class0a_program:write(string.format(
+        "%d\t%s\t%06x\t%06x\t%06x\t%02x\t%d\t%02x\t%d\t%02x\t%04x\t%04x\t%08x\t%08x\t%d\t%08x\t%04x\t%d\t%d\t%d\t%08x\t%08x\t%06x\t%06x\t%06x\t%08x\t%08x\t%d\n",
+        frame, event, pc, maincpu.state["PC"].value & 0xffffff,
+        slot, inner, u8(slot), u8(slot + 2),
+        u8(slot + 8), u8(slot + 3), u16(slot + 4), u16(slot + 6),
+        u32(slot + 0x10), u32(slot + 0x14), s16(u16(slot + 0x18)),
+        u32(slot + 0x1c), u16(slot + 0x0a),
+        s16(u16(slot + 0x24)), s16(u16(global + 0x278)),
+        u16(global + 8), maincpu.state["D0"].value & 0xffffffff,
+        maincpu.state["D1"].value & 0xffffffff,
+        maincpu.state["A0"].value & 0xffffff,
+        maincpu.state["A5"].value & 0xffffff,
+        maincpu.state["A6"].value & 0xffffff, data & 0xffffffff,
+        mask & 0xffffffff, mutated and 1 or 0))
+end
+
+oracle11_class0a_counterfactual_begin = opcodes:install_read_tap(
+    0x077cf6, 0x077cf7, "oracle11_class0a_counterfactual_begin",
+    function()
+        local a6 = maincpu.state["A6"].value & 0xffffff
+        if not capture_scene or not class0a_variant_counterfactual or
+                class0a_variant_counterfactual_count ~= 0 or
+                a6 ~= 0xffc600 or u8(a6 + 2) ~= 0x0a or
+                u8(a6 + 8) ~= 24 then
+            return
+        end
+        class0a_saved_variant = u8(a6 + 3)
+        class0a_saved_camera_x = u16(global + 0x278)
+        program:write_u8(a6 + 3, 0x0a)
+        program:write_u16(global + 0x278, 0x0920)
+        class0a_counterfactual_active = true
+        class0a_variant_counterfactual_count = 1
+        emit_class0a_program("counterfactual_begin", 0x077cf6, a6, 3,
+            0x0a, 0x000000ff, true)
+    end)
+
+oracle11_class0a_counterfactual_end = opcodes:install_read_tap(
+    0x077d1a, 0x077d1b, "oracle11_class0a_counterfactual_end",
+    function()
+        local a6 = maincpu.state["A6"].value & 0xffffff
+        if not class0a_counterfactual_active or a6 ~= 0xffc600 then return end
+        program:write_u8(a6 + 3, class0a_saved_variant)
+        program:write_u16(global + 0x278, class0a_saved_camera_x)
+        class0a_counterfactual_active = false
+        emit_class0a_program("counterfactual_end", 0x077d1a, a6, 3,
+            class0a_saved_variant, 0x000000ff, true)
+    end)
+
+local class0a_pcs = {
+    0x077ccc, 0x077ce0, 0x077ce4, 0x077ce8, 0x077cec, 0x077cf0,
+    0x077cf6, 0x077cfc, 0x077cfe, 0x077d04, 0x077d06, 0x077d0c,
+    0x077d0e, 0x077d14, 0x077d16, 0x077d1a, 0x077d20,
+    0x016d46, 0x016d2e, 0x016518, 0x016536, 0x0167ac, 0x0177f0,
+}
+oracle11_class0a_pc_taps = {}
+for _, pc in ipairs(class0a_pcs) do
+    oracle11_class0a_pc_taps[#oracle11_class0a_pc_taps + 1] =
+        opcodes:install_read_tap(pc, pc + 1,
+        string.format("oracle11_class0a_%06x", pc),
+        function()
+            local a6 = maincpu.state["A6"].value & 0xffffff
+            emit_class0a_program("opcode_fetch", pc, a6, 0, 0, 0, false)
+        end)
+end
+
+oracle11_class0a_write_taps = {}
+for _, slot in ipairs({0xffc580, 0xffc600}) do
+    oracle11_class0a_write_taps[#oracle11_class0a_write_taps + 1] =
+        program:install_write_tap(slot, slot + 0x7f,
+        string.format("oracle11_class0a_writes_%06x", slot),
+        function(offset, data, mask)
+            emit_class0a_program("write", maincpu.state["PC"].value &
+                0xffffff, slot, offset - slot, data, mask, false)
+        end)
 end
 
 local component20_pcs = {
@@ -2057,6 +2153,7 @@ oracle11_progression_frame = emu.add_machine_frame_notifier(function()
             obstacle_transition_suppressed_writes,
             class1f_hit_selector_mutations,
             player_hit_body_mutations,
+            class0a_variant_counterfactual_count,
             u8(global + 9)}, "\t") .. "\n")
         transactions:close(); snapshots:close(); writes:close(); global_writes:close()
         controller_samples:close(); lifecycle_writes:close()
@@ -2097,6 +2194,7 @@ oracle11_progression_frame = emu.add_machine_frame_notifier(function()
         controller_substate_writes:close()
         player_hit_program:close()
         player_hit_writes:close()
+        class0a_program:close()
         result:close()
     end
 end)

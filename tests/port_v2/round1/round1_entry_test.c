@@ -1,6 +1,7 @@
 #include "round1.h"
 
 #include <stdio.h>
+#include <string.h>
 
 static int initialize_jump(AvspRound1Runtime *runtime,
                            unsigned short direction_mask)
@@ -343,11 +344,13 @@ int main(void)
         runtime.pools[2].free_count != 12u ||
         runtime.pools[3].free_count != 30u ||
         runtime.scheduler_frames != 170u ||
-        runtime.scheduler_dispatches != 2550u ||
+        runtime.scheduler_dispatches != 2720u ||
         runtime.class1f_initializations != 10u ||
         runtime.class1f_initial_rng_calls != 10u ||
         runtime.class09_initializations != 2u ||
         runtime.class09_rng_calls != 42u ||
+        runtime.class0a_initializations != 1u ||
+        runtime.class0a_animation_steps != 169u ||
         runtime.rng_seed != 0x334fu ||
         runtime.player.source_target_low != 0xce00u ||
         runtime.source_stage_parameter != 8u ||
@@ -512,9 +515,9 @@ int main(void)
         return 6;
     }
     if (!avsp_round1_step_scheduler(&runtime) ||
-        runtime.scheduler_trace_count != 16u ||
+        runtime.scheduler_trace_count != 17u ||
         runtime.scheduler_frames != 171u ||
-        runtime.scheduler_dispatches != 2566u ||
+        runtime.scheduler_dispatches != 2737u ||
         runtime.actor_handler_dispatches != 1710u ||
         runtime.presentation_bindings != 1710u ||
         runtime.state_context_bindings != 1710u ||
@@ -565,9 +568,9 @@ int main(void)
     runtime.pools[3].records[0].source_slot = 0x00ffb680UL;
     runtime.pools[3].free_count = 2u;
     if (!avsp_round1_step_scheduler(&runtime) ||
-        runtime.scheduler_trace_count != 19u ||
+        runtime.scheduler_trace_count != 20u ||
         runtime.scheduler_frames != 172u ||
-        runtime.scheduler_dispatches != 2585u ||
+        runtime.scheduler_dispatches != 2757u ||
         runtime.actor_handler_dispatches != 1720u ||
         runtime.presentation_bindings != 1720u ||
         runtime.state_context_bindings != 1720u ||
@@ -3694,6 +3697,78 @@ int main(void)
                 class0f_runtime.class0f_state_transitions != 2u)
                 return 158;
         }
+#ifdef AVSP_CLASS0A_FOCUSED_TEST
+        {
+            AvspRound1Runtime class0a_runtime = component_runtime;
+            AvspRound1ActorCore *class0a_actor =
+                &class0a_runtime.pools[3].records[31];
+            unsigned short rng_before = class0a_runtime.rng_seed;
+            unsigned char free24_before;
+            if (!class0a_actor->active || class0a_actor->type != 24u ||
+                class0a_actor->actor_class != 0x0a ||
+                class0a_actor->source_slot != 0x00ffc600UL ||
+                class0a_actor->variant != 0x26u ||
+                class0a_actor->state != 0x0200u ||
+                class0a_actor->x != 0 || class0a_actor->y != 0 ||
+                class0a_actor->z != 0 || class0a_actor->facing != 0u ||
+                class0a_runtime.class0a_initializations != 1u ||
+                (class0a_actor->animation_record != 0x000782a4UL &&
+                 class0a_actor->animation_record != 0x000782acUL) ||
+                class0a_actor->hurt_selector != 0u ||
+                (class0a_actor->attack_selector != 4u &&
+                 class0a_actor->attack_selector != 7u))
+                return 159;
+            class0a_actor->state = 0x0200u;
+            class0a_actor->variant = 0x0au;
+            class0a_runtime.camera_x_previous = (short)0x0920u;
+            if (!avsp_round1_step_scheduler_post_player_source_differential(
+                    &class0a_runtime, 1, 1, 1) ||
+                class0a_actor->state != 0x0400u ||
+                class0a_runtime.class0a_guard_transitions != 1u ||
+                class0a_runtime.rng_seed != rng_before)
+                return 160;
+            free24_before = class0a_runtime.pools[3].free_count;
+            if (!avsp_round1_step_scheduler_post_player_source_differential(
+                    &class0a_runtime, 1, 1, 1) || class0a_actor->active ||
+                class0a_runtime.pools[3].free_count !=
+                    (unsigned char)(free24_before + 1u) ||
+                class0a_runtime.class0a_releases != 1u ||
+                class0a_runtime.rng_seed != rng_before)
+                return 161;
+        }
+        {
+            AvspRound1Runtime next_entry_runtime = component_runtime;
+            AvspRound1ActorCore *class0a_actor;
+            unsigned int index = (unsigned int)(0xc580u -
+                next_entry_runtime.pools[3].source_base) /
+                next_entry_runtime.pools[3].stride;
+            memset(&next_entry_runtime.pools[3].records[index], 0,
+                   sizeof(next_entry_runtime.pools[3].records[index]));
+            next_entry_runtime.pools[3].free_stack[0] = 0xc580u;
+            next_entry_runtime.pools[3].free_count = 1u;
+            next_entry_runtime.entry.exit_started = 1u;
+            next_entry_runtime.entry.exit_complete = 0u;
+            next_entry_runtime.entry.exit_route_phase = 5u;
+            next_entry_runtime.entry.exit_stall_remaining = 0u;
+            next_entry_runtime.entry.exit_load_index = 0u;
+            next_entry_runtime.route_state = 2;
+            if (!avsp_round1_step_coffee_exit_display(&next_entry_runtime))
+                return 162;
+            class0a_actor = &next_entry_runtime.pools[3].records[index];
+            if (!class0a_actor->active ||
+                class0a_actor->source_slot != 0x00ffc580UL ||
+                class0a_actor->actor_class != 0x0a ||
+                class0a_actor->variant != 0x06u ||
+                class0a_actor->state != 0x0200u ||
+                class0a_actor->animation_record != 0x00077e54UL ||
+                class0a_actor->assembly != 0x00078ba2UL ||
+                class0a_actor->animation_timer != 16u ||
+                class0a_actor->attack_selector != 16u ||
+                next_entry_runtime.class0a_next_entry_spawns != 1u ||
+                next_entry_runtime.entry.exit_load_index != 1u)
+                return 162;
+        }
+#endif
         class01->state = 0x0204u;
         class01->animation_index = 2u;
         class01->animation_branch = (short)0x8000u;

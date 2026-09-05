@@ -359,9 +359,12 @@ def build() -> str:
                    if item["type"] == 20 and item["class"] == "0x02")
     class0f = next(item for item in scene_components["components"]
                    if item["type"] == 20 and item["class"] == "0x0f")
+    class0a = next(item for item in scene_components["components"]
+                   if item["type"] == 24 and item["class"] == "0x0a")
     class01_contract = class01["implementation_contract"]
     class02_contract = class02["implementation_contract"]
     class0f_contract = class0f["implementation_contract"]
+    class0a_contract = class0a["implementation_contract"]
     coffee_scene_records = sorted(
         class01_contract["stage_records"] +
         class02_contract["stage_records"] +
@@ -374,6 +377,9 @@ def build() -> str:
         "animation_records"]
     class0f_records = class0f_contract["initialization"][
         "animation_records"]
+    class0a_records = class0a_contract["animation_selector"][
+        "coffee_shop_records"]
+    class0a_cadence = class0a_contract["scheduler_cadence"]
     class0f_selector1 = class0f_contract["state_program"]["0x0400"][
         "selector_1"]
     class0f_selector0 = class0f_contract["state_program"]["0x0400"][
@@ -2360,6 +2366,9 @@ def build() -> str:
         class0f["classification"] !=
             "SOURCE_CLOSED_IMPLEMENTATION_FIELDS" or
         class0f["implementation_status"] != "SPEC_EXECUTABLE" or
+        class0a["classification"] !=
+            "SOURCE_CLOSED_IMPLEMENTATION_FIELDS" or
+        class0a["implementation_status"] != "SPEC_EXECUTABLE" or
         [(row["address"], row["observed_source_slot"],
           row["camera_threshold_u16"], row["class_u8"], row["variant_u8"])
          for row in coffee_scene_records] != [
@@ -2445,7 +2454,30 @@ def build() -> str:
          class0f_contract["audio_transactions"]} != {"0x00002000"} or
         class0f_contract["rng"]["direct_calls"] != 0 or
         class0f_contract["retained_gameplay_authority"] is not False or
-        class0f_contract["fixed_frame_substitute_forbidden"] is not True):
+        class0f_contract["fixed_frame_substitute_forbidden"] is not True or
+        class0a_contract["source_body"] != {
+            "first": "0x00077ccc", "last_exclusive": "0x00077d26",
+            "sha256": "43f6bb2d20750b41ec6e03b6eed22488fee5db651d0680ad2c600e2b53ac0089"} or
+        class0a_contract["dispatch_table"]["offsets_s16"] != [8, 30, 72] or
+        class0a_contract["animation_selector"]["table_address"] !=
+            "0x00077d26" or
+        class0a_contract["animation_selector"]["offsets_s16"] != [
+            74, 126, 178, 302, 338, 390, 514, 638, 762, 814, 866,
+            918, 970, 1022, 1074, 1126, 1178, 1230, 1282, 1406,
+            1426, 1462, 1514, 1638, 1666, 1774] or
+        [row["animation_record"] for row in class0a_records] != [
+            "0x00077e54", "0x00077e5c", "0x000782a4", "0x000782ac"] or
+        [row["attack_selector_u8"] for row in class0a_records] !=
+            [16, 16, 4, 7] or
+        class0a_contract["direct_effects"]["rng_calls_u8"] != 0 or
+        class0a_contract["direct_effects"]["collision_memberships_u8"] != 0 or
+        class0a_contract["counterfactual"]["byte_identical"] is not True or
+        class0a_cadence["classification"] !=
+            "SOURCE_CAPTURE_PROJECTION_ONLY" or
+        class0a_cadence["exception_count_u8"] != 70 or
+        class0a_cadence["dispatch_count_u16"] != 3597 or
+        class0a_contract["retained_gameplay_authority"] is not False or
+        class0a_contract["fixed_frame_substitute_forbidden"] is not True):
         raise ValueError("SPEC-02 Coffee Shop component implementation drift")
     if (class02_source_cadence["classification"] !=
             "SOURCE_CLOSED_IMPLEMENTATION_FIELDS" or
@@ -4859,6 +4891,16 @@ def build() -> str:
             row["attack_selector_u8"]))
     lines.extend([
         "};", "",
+        "static const AvspRound1AnimationStateSpec avsp_round1_class0a_records[AVSP_ROUND1_CLASS0A_PRESENTATION_COUNT] =",
+        "{",
+    ])
+    for row in class0a_records:
+        lines.append("    { %du, %d, %sUL, %sUL, %du, %du }," % (
+            row["timer_u16"], row["branch_s16"], row["animation_record"],
+            row["assembly"], row["hurt_selector_u8"],
+            row["attack_selector_u8"]))
+    lines.extend([
+        "};", "",
         "static const AvspRound1AnimationStateSpec avsp_round1_class05_records[AVSP_ROUND1_CLASS05_PRESENTATION_COUNT] =",
         "{",
     ])
@@ -4949,6 +4991,12 @@ def build() -> str:
             class0f_contract["audio_transactions"][1]["command_u16"],
             class0f_contract["audio_transactions"][0]["argument1_u32"]),
         "};", "",
+        "static const AvspRound1Class0aSpec avsp_round1_class0a =",
+        "{",
+        "    0x077CCCUL, 0x077D26UL, 0x0200u, 0x0400u, 0x0920u,",
+        "    { 0x0Au, 0x0Cu, 0x0Eu }, 0x00FFC600UL, 0x00FFC580UL,",
+        "    0x26u, 0x06u",
+        "};", "",
         "/* Source-display cadence derived from the accepted recurring-controller",
         " * transaction ledger. This is diagnostic replay timing, not a gameplay",
         " * transition trigger. */",
@@ -4973,6 +5021,23 @@ def build() -> str:
         "{",
     ])
     for row in class02_source_exceptions:
+        lines.append("    { %su, %su }," % (
+            row["source_frame_u16"], row["updates_u8"]))
+    lines.extend([
+        "};", "",
+        "/* Source-display class-0x0a fixed-pool dispatch cadence. This",
+        " * aligns the scene differential only and never owns gameplay. */",
+        "#define AVSP_ROUND1_COFFEE_SHOP_CLASS0A_FIRST_SOURCE_FRAME %su" %
+            class0a_cadence["source_frame_range_inclusive_u16"][0],
+        "#define AVSP_ROUND1_COFFEE_SHOP_CLASS0A_LAST_SOURCE_FRAME %su" %
+            class0a_cadence["source_frame_range_inclusive_u16"][1],
+        "#define AVSP_ROUND1_COFFEE_SHOP_CLASS0A_DEFAULT_SOURCE_UPDATES %su" %
+            class0a_cadence["default_updates_per_source_frame_u8"],
+        f"#define AVSP_ROUND1_COFFEE_SHOP_CLASS0A_UPDATE_CADENCE_COUNT {len(class0a_cadence['exceptions'])}",
+        "static const AvspRound1SceneUpdateCadence avsp_round1_coffee_shop_class0a_update_cadence[AVSP_ROUND1_COFFEE_SHOP_CLASS0A_UPDATE_CADENCE_COUNT] =",
+        "{",
+    ])
+    for row in class0a_cadence["exceptions"]:
         lines.append("    { %su, %su }," % (
             row["source_frame_u16"], row["updates_u8"]))
     lines.extend([

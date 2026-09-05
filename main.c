@@ -126,7 +126,7 @@
  * the 0x19000 carve preserves 0x0bf0 bytes of headroom inside the fixed arena. */
 #ifdef AVSP_LIVE_ENCOUNTER
 #define AVSP_ROUND1_RUNTIME_REGION_BYTES 0x19000
-#define AVSP_ROUND1_RUNTIME_MEASURED_BYTES 0x184a4
+#define AVSP_ROUND1_RUNTIME_MEASURED_BYTES 0x184b8
 #define AVSP_LIVE_DIAG_REGION_BYTES 0x1A000
 #define AVSP_ROUND1_CONTENT_REGION_BYTES 0x40000
 #define AVSP_COMPOSITE_SCRATCH_REGION_BYTES 0x3000
@@ -8296,7 +8296,7 @@ static void live_encounter_publish(void)
     avsp_diag_round1_spec_bound =
         avsp_diag_round1_content_loaded &&
         strcmp(AVSP_ROUND1_SPEC02_SHA256,
-               "c6795cc6955e58beeab87b93e59e002c8519d3994887f2e67b16fb16baa2840f") ==
+               "5fbc0c5cd5941d6fb0cae5ac887fad4320e55d7067c973df6fbd54438caca2ce") ==
         0;
     avsp_diag_round1_entry_valid = avsp_round1_entry_valid(&round1_runtime);
     avsp_diag_round1_route_state = round1_runtime.route_state;
