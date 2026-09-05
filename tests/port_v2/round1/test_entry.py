@@ -12,7 +12,7 @@ from pathlib import Path
 
 ROOT = Path(__file__).resolve().parents[3]
 SPEC = ROOT / "data/spec02_round1_executable_contract.json"
-EXPECTED = "5fbc0c5cd5941d6fb0cae5ac887fad4320e55d7067c973df6fbd54438caca2ce"
+EXPECTED = "a8c5913f90db7f476155a81d433b200d221e13d45e4ed1a58a6ee0e0e064937c"
 assert hashlib.sha256(SPEC.read_bytes()).hexdigest() == EXPECTED
 assert json.loads(SPEC.read_text())["status"] == "ACCEPTED"
 source = (ROOT / "src/port_v2/gameplay/round1/round1.c").read_text()
@@ -113,6 +113,9 @@ def run(body, header_body, passes, label="baseline", player_body=player_source,
         return {"label": label, "classification": "SKIPPED"}
     if (not passes and "--class0a-only" in sys.argv and
             not label.startswith(("class0a-", "generated-class0a-"))):
+        return {"label": label, "classification": "SKIPPED"}
+    if (not passes and "--class00-only" in sys.argv and
+            not label.startswith(("class00-", "generated-class00-"))):
         return {"label": label, "classification": "SKIPPED"}
     if not passes and ONLY_MUTATION_LABEL is not None and \
             ONLY_MUTATION_LABEL not in label:
@@ -384,6 +387,8 @@ class0f_checkpoint_body = test_source.replace(
     1)
 class0a_checkpoint_body = (
     "#define AVSP_CLASS0A_FOCUSED_TEST 1\n" + class0f_checkpoint_body)
+class00_checkpoint_body = (
+    "#define AVSP_CLASS00_FOCUSED_TEST 1\n" + test_source)
 scene_checkpoint_flags = {
     "--weapon-timing-only",
     "--special-input-only", "--hit-interaction-only", "--queue-only",
@@ -394,6 +399,8 @@ run(source, header, True,
     test_body=(jump_test_body if "--jump-only" in sys.argv else
                class0a_checkpoint_body
                if "--class0a-only" in sys.argv else
+               class00_checkpoint_body
+               if "--class00-only" in sys.argv else
                class0f_checkpoint_body
                if "--class0f-only" in sys.argv else
                class1f_state0_checkpoint_body
@@ -441,7 +448,7 @@ subset_flags = {"--inner8-only", "--ko-only", "--registration-only",
                 "--type16-terminal-only", "--special-input-only",
                 "--hit-interaction-only", "--class1f-state0-only",
                 "--class1f-action16-only", "--exit-scheduler-only",
-                "--generated-all-only"}
+                "--class00-only", "--generated-all-only"}
 if "--queue-only" in sys.argv or not subset_flags.intersection(sys.argv):
     run(source, header, False, "consume-before-direction-queue-shift",
         player_source.replace(queue_before, queue_after, 1))
@@ -1510,6 +1517,85 @@ if "--special-input-only" in sys.argv:
         test_body=scene_checkpoint_body)
     print("REIMPLEMENT-13 simultaneous special-input arbitration lane: PASS "
           "(3 real mutations)")
+    raise SystemExit(0)
+if "--class00-only" in sys.argv:
+    facing_negation = """    if (runtime->player.facing == 0u)
+        x_offset = -x_offset;"""
+    assert source.count(facing_negation) == 1
+    run(source.replace(facing_negation, """    if (runtime->player.facing == 2u)
+        x_offset = -x_offset;""", 1), header, False,
+        "class00-facing-negation", expected_returncode=165,
+        test_body=class00_checkpoint_body)
+    parent_write = (
+        "    runtime->player_presentation_field56 = "
+        "parent_entry->parent_field56;")
+    assert source.count(parent_write) == 1
+    run(source.replace(parent_write,
+        "    runtime->player_presentation_field56 = 0u;", 1),
+        header, False, "class00-parent-field56-write",
+        expected_returncode=165, test_body=class00_checkpoint_body)
+    bind = "    avsp_round1_bind_animation_state(actor, &animation->record);"
+    assert source.count(bind) == 1
+    run(source.replace(bind,
+        """    if (runtime->player.animation_record == 0x0015f43cUL)
+        actor->animation_timer = animation->record.timer;
+    else
+        avsp_round1_bind_animation_state(actor, &animation->record);""", 1),
+        header, False, "class00-animation-binding",
+        expected_returncode=165, test_body=class00_checkpoint_body)
+    direct_effect_scope = """    ++runtime->class00_companion_parent_projections;
+    ++runtime->class00_companion_animation_bindings;"""
+    assert source.count(direct_effect_scope) == 1
+    run(source.replace(direct_effect_scope, """    if (runtime->player.animation_record == 0x0015f43cUL)
+        (void)avsp_round1_source_rng(runtime);
+    ++runtime->class00_companion_parent_projections;
+    ++runtime->class00_companion_animation_bindings;""", 1),
+        header, False, "class00-direct-rng-absence",
+        expected_returncode=168, test_body=class00_checkpoint_body)
+    disable_guard = """    if (actor->source_a6 != 0u)
+        return 1;"""
+    assert source.count(disable_guard) == 1
+    run(source.replace(disable_guard, """    if (actor->source_a6 == 2u)
+        return 1;""", 1), header, False,
+        "class00-disable-guard", expected_returncode=167,
+        test_body=class00_checkpoint_body)
+    generated_spec = (
+        "    0x09E098UL, 0x0BCA3AUL, 0x00FFCE00UL, 0x8380u,\n"
+        "    0x0206u, 0x0200u, 0x8000u, 0x22u, 0xFFu,\n"
+        "    0x13u, 0xFFu, 0u")
+    assert generated.count(generated_spec) == 1
+    run(source, header, False, "generated-class00-init-field44",
+        generated_body=generated.replace(
+            generated_spec, generated_spec.replace("0x13u", "0x12u"), 1),
+        expected_returncode=166, test_body=class00_checkpoint_body)
+    run(source, header, False, "generated-class00-source-slot",
+        generated_body=generated.replace(
+            generated_spec,
+            generated_spec.replace("0x00FFCE00UL", "0x00FFCD80UL"), 1),
+        expected_returncode=5, test_body=class00_checkpoint_body)
+    parent_animation = "    { 0x001600e8UL, 0u },"
+    assert generated.count(parent_animation) == 1
+    run(source, header, False, "generated-class00-parent-record-byte0f",
+        generated_body=generated.replace(
+            parent_animation, "    { 0x001600e8UL, 1u },", 1),
+        expected_returncode=165, test_body=class00_checkpoint_body)
+    parent_entry = "    { 15u, -10, 100, 5u, 1u },"
+    assert generated.count(parent_entry) == 1
+    run(source, header, False, "generated-class00-signed-offset",
+        generated_body=generated.replace(
+            parent_entry, "    { 15u, -9, 100, 5u, 1u },", 1),
+        expected_returncode=165, test_body=class00_checkpoint_body)
+    animation_record = (
+        "    { 1u, { 4095u, -32767, 0x0009e61aUL, "
+        "0x0009e908UL, 0u, 0u } },")
+    assert generated.count(animation_record) == 1
+    run(source, header, False, "generated-class00-animation-assembly",
+        generated_body=generated.replace(
+            animation_record, animation_record.replace(
+                "0x0009e908UL", "0x0009e918UL"), 1),
+        expected_returncode=165, test_body=class00_checkpoint_body)
+    print("REIMPLEMENT-13 Coffee Shop class-0x00 companion mutation lane: "
+          "PASS (10 real mutations)")
     raise SystemExit(0)
 if "--class0a-only" in sys.argv:
     guard = """        if ((unsigned short)runtime->camera_x_previous >=

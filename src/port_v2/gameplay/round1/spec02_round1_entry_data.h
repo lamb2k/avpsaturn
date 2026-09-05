@@ -1,8 +1,8 @@
 #ifndef AVSP_SPEC02_ROUND1_ENTRY_DATA_H
 #define AVSP_SPEC02_ROUND1_ENTRY_DATA_H
 
-/* contract_sha256=5fbc0c5cd5941d6fb0cae5ac887fad4320e55d7067c973df6fbd54438caca2ce */
-/* fixtures_sha256=75f39cde0615aa687a51b28038e1c7637aa6326ed70336e933f832bcb2c7c833 */
+/* contract_sha256=a8c5913f90db7f476155a81d433b200d221e13d45e4ed1a58a6ee0e0e064937c */
+/* fixtures_sha256=da6d39a49afb2c453f0a647f5d33528243816ca8e823c45184a967d73f03a27d */
 #define AVSP_ROUND1_ENTRY_PROGRAM_SHA256 "e5ef761fadc1b5a7df62e77c03025c0ebff0c2503cbc8be9c0077d4bd6cd24ba"
 
 #if defined(__sh__)
@@ -4990,6 +4990,187 @@ static const AvspRound1AnimationStateSpec avsp_round1_class0a_records[AVSP_ROUND
 #endif
 
 #if defined(__sh__)
+#define avsp_round1_class00_companion_records (avsp_round1_content->content_avsp_round1_class00_companion_records)
+#else
+static const AvspRound1Class00CompanionAnimationSpec avsp_round1_class00_companion_records[AVSP_ROUND1_CLASS00_COMPANION_PRESENTATION_COUNT] =
+{
+    { 0u, { 4095u, -32768, 0x0009e606UL, 0x0009e8ecUL, 0u, 0u } },
+    { 1u, { 4095u, -32767, 0x0009e61aUL, 0x0009e908UL, 0u, 0u } },
+    { 2u, { 4095u, -32766, 0x0009e62eUL, 0x0009e934UL, 0u, 0u } },
+    { 4u, { 4095u, -32764, 0x0009e656UL, 0x0009e97cUL, 0u, 0u } },
+    { 5u, { 4095u, -32763, 0x0009e66aUL, 0x0009e998UL, 0u, 0u } },
+    { 7u, { 4095u, -32761, 0x0009e692UL, 0x0009e9e0UL, 0u, 0u } },
+    { 11u, { 4095u, -32757, 0x0009e6e2UL, 0x0009ea80UL, 0u, 0u } },
+    { 12u, { 4095u, -32756, 0x0009e6f6UL, 0x0009ea9cUL, 0u, 0u } },
+    { 13u, { 4095u, -32755, 0x0009e70aUL, 0x0009eab8UL, 0u, 0u } },
+    { 14u, { 4095u, -32754, 0x0009e71eUL, 0x0009ead4UL, 0u, 0u } },
+    { 15u, { 4095u, -32753, 0x0009e732UL, 0x0009eb00UL, 0u, 0u } },
+};
+#endif
+
+#if defined(__sh__)
+#define avsp_round1_class00_companion_parent_animations (avsp_round1_content->content_avsp_round1_class00_companion_parent_animations)
+#else
+static const AvspRound1Class00CompanionParentAnimationSpec avsp_round1_class00_companion_parent_animations[AVSP_ROUND1_CLASS00_COMPANION_PARENT_ANIMATION_COUNT] =
+{
+    { 0x0015e540UL, 42u },
+    { 0x0015e550UL, 43u },
+    { 0x0015e560UL, 42u },
+    { 0x0015e570UL, 43u },
+    { 0x0015e580UL, 42u },
+    { 0x0015e594UL, 42u },
+    { 0x0015e5a4UL, 43u },
+    { 0x0015e5b4UL, 42u },
+    { 0x0015e5c4UL, 43u },
+    { 0x0015e5d4UL, 42u },
+    { 0x0015e9d8UL, 44u },
+    { 0x0015e9e8UL, 44u },
+    { 0x0015e9f8UL, 44u },
+    { 0x0015ea08UL, 44u },
+    { 0x0015ea18UL, 44u },
+    { 0x0015eee8UL, 86u },
+    { 0x0015ef24UL, 89u },
+    { 0x0015ef38UL, 90u },
+    { 0x0015f054UL, 97u },
+    { 0x0015f1f4UL, 1u },
+    { 0x0015f208UL, 2u },
+    { 0x0015f218UL, 3u },
+    { 0x0015f228UL, 4u },
+    { 0x0015f238UL, 5u },
+    { 0x0015f248UL, 6u },
+    { 0x0015f258UL, 7u },
+    { 0x0015f268UL, 8u },
+    { 0x0015f278UL, 9u },
+    { 0x0015f288UL, 10u },
+    { 0x0015f298UL, 11u },
+    { 0x0015f2a8UL, 12u },
+    { 0x0015f2b8UL, 13u },
+    { 0x0015f2ccUL, 14u },
+    { 0x0015f2dcUL, 14u },
+    { 0x0015f2f0UL, 15u },
+    { 0x0015f300UL, 16u },
+    { 0x0015f310UL, 17u },
+    { 0x0015f320UL, 18u },
+    { 0x0015f330UL, 19u },
+    { 0x0015f344UL, 20u },
+    { 0x0015f354UL, 21u },
+    { 0x0015f364UL, 22u },
+    { 0x0015f374UL, 23u },
+    { 0x0015f384UL, 24u },
+    { 0x0015f394UL, 25u },
+    { 0x0015f3a4UL, 20u },
+    { 0x0015f3b8UL, 20u },
+    { 0x0015f3c8UL, 25u },
+    { 0x0015f3d8UL, 24u },
+    { 0x0015f3e8UL, 23u },
+    { 0x0015f3f8UL, 22u },
+    { 0x0015f408UL, 21u },
+    { 0x0015f418UL, 20u },
+    { 0x0015f428UL, 20u },
+    { 0x0015f43cUL, 29u },
+    { 0x0015f44cUL, 30u },
+    { 0x0015f96cUL, 0u },
+    { 0x0015f97cUL, 0u },
+    { 0x0015f98cUL, 0u },
+    { 0x0015fa04UL, 0u },
+    { 0x0015fa14UL, 1u },
+    { 0x0015fcfcUL, 42u },
+    { 0x0015fd10UL, 0u },
+    { 0x0015fd20UL, 0u },
+    { 0x0015fd30UL, 0u },
+    { 0x0015fd40UL, 0u },
+    { 0x0015fd50UL, 0u },
+    { 0x0015fd60UL, 0u },
+    { 0x0015fd70UL, 0u },
+    { 0x0015fd80UL, 0u },
+    { 0x0015fd90UL, 0u },
+    { 0x0015fda0UL, 0u },
+    { 0x0015fdb0UL, 0u },
+    { 0x0015fdc0UL, 0u },
+    { 0x0015fdd0UL, 0u },
+    { 0x0015fde0UL, 0u },
+    { 0x0015fdf0UL, 0u },
+    { 0x0015fe00UL, 0u },
+    { 0x0015fe10UL, 1u },
+    { 0x001600e8UL, 0u },
+    { 0x001600f8UL, 0u },
+    { 0x00160108UL, 0u },
+    { 0x00160118UL, 0u },
+    { 0x0016012cUL, 0u },
+    { 0x0016013cUL, 0u },
+    { 0x0016014cUL, 0u },
+    { 0x0016015cUL, 0u },
+    { 0x0016016cUL, 0u },
+    { 0x0016017cUL, 0u },
+    { 0x00160190UL, 0u },
+    { 0x001601a0UL, 0u },
+    { 0x001601b0UL, 0u },
+    { 0x001601c0UL, 0u },
+    { 0x001601d0UL, 0u },
+    { 0x001601e0UL, 0u },
+    { 0x001601f4UL, 0u },
+    { 0x00160204UL, 0u },
+    { 0x00160214UL, 0u },
+    { 0x00160224UL, 0u },
+    { 0x00160234UL, 0u },
+    { 0x00160244UL, 0u },
+    { 0x00160254UL, 0u },
+    { 0x00160264UL, 0u },
+    { 0x00160274UL, 0u },
+    { 0x00160288UL, 51u },
+    { 0x00160298UL, 52u },
+    { 0x001602a8UL, 52u },
+    { 0x001602b8UL, 51u },
+    { 0x001602c8UL, 51u },
+};
+#endif
+
+#if defined(__sh__)
+#define avsp_round1_class00_companion_parent_entries (avsp_round1_content->content_avsp_round1_class00_companion_parent_entries)
+#else
+static const AvspRound1Class00CompanionParentEntrySpec avsp_round1_class00_companion_parent_entries[AVSP_ROUND1_CLASS00_COMPANION_PARENT_ENTRY_COUNT] =
+{
+    { 0u, 0, 0, 0u, 0u },
+    { 1u, 5, 62, 15u, 1u },
+    { 2u, 23, 47, 14u, 1u },
+    { 3u, 22, 45, 14u, 1u },
+    { 4u, 16, 44, 13u, 1u },
+    { 5u, 9, 44, 13u, 1u },
+    { 6u, 4, 42, 12u, 1u },
+    { 7u, -3, 42, 12u, 1u },
+    { 8u, -5, 42, 12u, 1u },
+    { 9u, -2, 42, 12u, 1u },
+    { 10u, 2, 42, 13u, 1u },
+    { 11u, 10, 44, 13u, 1u },
+    { 12u, 18, 42, 14u, 1u },
+    { 13u, 23, 45, 14u, 1u },
+    { 14u, 6, 56, 15u, 1u },
+    { 15u, -10, 100, 5u, 1u },
+    { 16u, 1, 58, 0u, 1u },
+    { 17u, -9, 45, 14u, 1u },
+    { 18u, 1, 58, 0u, 1u },
+    { 19u, -10, 100, 5u, 1u },
+    { 20u, 17, 78, 2u, 1u },
+    { 21u, 22, 53, 0u, 1u },
+    { 22u, -1, 41, 11u, 1u },
+    { 23u, -14, 61, 7u, 1u },
+    { 24u, -22, 70, 5u, 1u },
+    { 25u, -10, 83, 4u, 1u },
+    { 29u, 10, 64, 1u, 1u },
+    { 30u, -8, 56, 14u, 1u },
+    { 42u, 34, 52, 15u, 255u },
+    { 43u, 33, 52, 15u, 255u },
+    { 44u, 18, 58, 15u, 1u },
+    { 51u, 37, 67, 14u, 1u },
+    { 52u, 66, 74, 13u, 1u },
+    { 86u, -1, 42, 14u, 1u },
+    { 89u, 20, 58, 0u, 1u },
+    { 90u, 47, 55, 15u, 1u },
+    { 97u, 21, 44, 14u, 1u },
+};
+#endif
+
+#if defined(__sh__)
 #define avsp_round1_class05_records (avsp_round1_content->content_avsp_round1_class05_records)
 #else
 static const AvspRound1AnimationStateSpec avsp_round1_class05_records[AVSP_ROUND1_CLASS05_PRESENTATION_COUNT] =
@@ -5065,6 +5246,17 @@ static const AvspRound1Class0aSpec avsp_round1_class0a =
     0x077CCCUL, 0x077D26UL, 0x0200u, 0x0400u, 0x0920u,
     { 0x0Au, 0x0Cu, 0x0Eu }, 0x00FFC600UL, 0x00FFC580UL,
     0x26u, 0x06u
+};
+#endif
+
+#if defined(__sh__)
+#define avsp_round1_class00_companion (avsp_round1_content->content_avsp_round1_class00_companion)
+#else
+static const AvspRound1Class00CompanionSpec avsp_round1_class00_companion =
+{
+    0x09E098UL, 0x0BCA3AUL, 0x00FFCE00UL, 0x8380u,
+    0x0206u, 0x0200u, 0x8000u, 0x22u, 0xFFu,
+    0x13u, 0xFFu, 0u
 };
 #endif
 
@@ -5292,6 +5484,175 @@ static const AvspRound1SceneUpdateCadence avsp_round1_coffee_shop_class0a_update
     { 5520u, 4u },
     { 5521u, 4u },
     { 5522u, 4u },
+};
+#endif
+
+/* Source-display class-0x00 record-28 dispatch cadence. This
+ * aligns the source-owned player companion with its pool phase;
+ * it is not a fixed-frame gameplay transition. */
+#define AVSP_ROUND1_COFFEE_SHOP_CLASS00_FIRST_SOURCE_FRAME 2074u
+#define AVSP_ROUND1_COFFEE_SHOP_CLASS00_LAST_SOURCE_FRAME 5523u
+#define AVSP_ROUND1_COFFEE_SHOP_CLASS00_DEFAULT_SOURCE_UPDATES 1u
+#define AVSP_ROUND1_COFFEE_SHOP_CLASS00_UPDATE_CADENCE_COUNT 70
+#if defined(__sh__)
+#define avsp_round1_coffee_shop_class00_update_cadence (avsp_round1_content->content_avsp_round1_coffee_shop_class00_update_cadence)
+#else
+static const AvspRound1SceneUpdateCadence avsp_round1_coffee_shop_class00_update_cadence[AVSP_ROUND1_COFFEE_SHOP_CLASS00_UPDATE_CADENCE_COUNT] =
+{
+    { 2075u, 2u },
+    { 2076u, 2u },
+    { 2165u, 4u },
+    { 2260u, 0u },
+    { 2265u, 0u },
+    { 5458u, 3u },
+    { 5459u, 3u },
+    { 5460u, 3u },
+    { 5461u, 3u },
+    { 5462u, 3u },
+    { 5463u, 3u },
+    { 5464u, 3u },
+    { 5465u, 3u },
+    { 5466u, 3u },
+    { 5467u, 3u },
+    { 5468u, 3u },
+    { 5469u, 3u },
+    { 5470u, 4u },
+    { 5471u, 3u },
+    { 5472u, 3u },
+    { 5473u, 3u },
+    { 5474u, 3u },
+    { 5475u, 3u },
+    { 5476u, 3u },
+    { 5477u, 3u },
+    { 5478u, 3u },
+    { 5479u, 3u },
+    { 5480u, 3u },
+    { 5481u, 3u },
+    { 5482u, 3u },
+    { 5483u, 3u },
+    { 5484u, 3u },
+    { 5485u, 4u },
+    { 5486u, 3u },
+    { 5487u, 3u },
+    { 5488u, 3u },
+    { 5489u, 3u },
+    { 5490u, 3u },
+    { 5491u, 3u },
+    { 5492u, 3u },
+    { 5493u, 4u },
+    { 5494u, 3u },
+    { 5495u, 3u },
+    { 5496u, 3u },
+    { 5497u, 3u },
+    { 5498u, 3u },
+    { 5499u, 3u },
+    { 5500u, 4u },
+    { 5501u, 3u },
+    { 5502u, 3u },
+    { 5503u, 3u },
+    { 5504u, 3u },
+    { 5505u, 3u },
+    { 5506u, 3u },
+    { 5507u, 4u },
+    { 5508u, 3u },
+    { 5509u, 3u },
+    { 5510u, 3u },
+    { 5511u, 3u },
+    { 5512u, 4u },
+    { 5513u, 3u },
+    { 5514u, 3u },
+    { 5515u, 3u },
+    { 5516u, 3u },
+    { 5517u, 4u },
+    { 5518u, 4u },
+    { 5519u, 4u },
+    { 5520u, 4u },
+    { 5521u, 4u },
+    { 5522u, 4u },
+};
+#endif
+
+/* Complete route-6 callback/fixed-pool phase program from the
+ * paired class-0x00 scheduler witness. Two bits encode each event
+ * from least-significant to most-significant. */
+#define AVSP_ROUND1_COFFEE_EXIT_CLASS00_PHASE_FIRST_SOURCE_FRAME 5453u
+#define AVSP_ROUND1_COFFEE_EXIT_CLASS00_PHASE_COUNT 71
+#if defined(__sh__)
+#define avsp_round1_coffee_exit_class00_phase (avsp_round1_content->content_avsp_round1_coffee_exit_class00_phase)
+#else
+static const AvspRound1CoffeeExitClass00PhaseSpec avsp_round1_coffee_exit_class00_phase[AVSP_ROUND1_COFFEE_EXIT_CLASS00_PHASE_COUNT] =
+{
+    { 4u, 0x01u, 0x000000E4UL },
+    { 4u, 0x01u, 0x000000E4UL },
+    { 4u, 0x01u, 0x000000E4UL },
+    { 4u, 0x01u, 0x000000E4UL },
+    { 4u, 0x01u, 0x000000E4UL },
+    { 12u, 0x07u, 0x00E4E4E4UL },
+    { 12u, 0x07u, 0x00E4E4E4UL },
+    { 13u, 0x0Fu, 0x00E4E4E4UL },
+    { 12u, 0x07u, 0x00393939UL },
+    { 12u, 0x07u, 0x00393939UL },
+    { 12u, 0x07u, 0x00393939UL },
+    { 12u, 0x07u, 0x00393939UL },
+    { 12u, 0x07u, 0x00393939UL },
+    { 12u, 0x07u, 0x00393939UL },
+    { 12u, 0x07u, 0x00393939UL },
+    { 12u, 0x07u, 0x00393939UL },
+    { 13u, 0x07u, 0x01393939UL },
+    { 14u, 0x07u, 0x0E4E4E4EUL },
+    { 12u, 0x07u, 0x00E4E4E4UL },
+    { 12u, 0x07u, 0x00E4E4E4UL },
+    { 12u, 0x07u, 0x00E4E4E4UL },
+    { 12u, 0x07u, 0x00E4E4E4UL },
+    { 12u, 0x01u, 0x00E4E4E4UL },
+    { 12u, 0x01u, 0x00E4E4E4UL },
+    { 12u, 0x07u, 0x00E4E4E4UL },
+    { 12u, 0x07u, 0x00E4E4E4UL },
+    { 12u, 0x07u, 0x00E4E4E4UL },
+    { 13u, 0x0Fu, 0x00E4E4E4UL },
+    { 12u, 0x07u, 0x00393939UL },
+    { 12u, 0x07u, 0x00393939UL },
+    { 12u, 0x07u, 0x00393939UL },
+    { 12u, 0x07u, 0x00393939UL },
+    { 15u, 0x07u, 0x39393939UL },
+    { 12u, 0x07u, 0x00E4E4E4UL },
+    { 12u, 0x07u, 0x00E4E4E4UL },
+    { 12u, 0x07u, 0x00E4E4E4UL },
+    { 12u, 0x07u, 0x00E4E4E4UL },
+    { 13u, 0x0Fu, 0x00E4E4E4UL },
+    { 12u, 0x07u, 0x00393939UL },
+    { 12u, 0x07u, 0x00393939UL },
+    { 15u, 0x07u, 0x39393939UL },
+    { 12u, 0x07u, 0x00E4E4E4UL },
+    { 12u, 0x07u, 0x00E4E4E4UL },
+    { 12u, 0x07u, 0x00E4E4E4UL },
+    { 13u, 0x0Fu, 0x00E4E4E4UL },
+    { 12u, 0x07u, 0x00393939UL },
+    { 12u, 0x07u, 0x00393939UL },
+    { 15u, 0x07u, 0x39393939UL },
+    { 12u, 0x07u, 0x00E4E4E4UL },
+    { 12u, 0x07u, 0x00E4E4E4UL },
+    { 13u, 0x0Fu, 0x00E4E4E4UL },
+    { 12u, 0x07u, 0x00393939UL },
+    { 12u, 0x06u, 0x00393939UL },
+    { 14u, 0x06u, 0x09393939UL },
+    { 13u, 0x07u, 0x03939393UL },
+    { 12u, 0x07u, 0x00E4E4E4UL },
+    { 13u, 0x0Fu, 0x00E4E4E4UL },
+    { 12u, 0x07u, 0x00393939UL },
+    { 13u, 0x07u, 0x01393939UL },
+    { 14u, 0x07u, 0x0E4E4E4EUL },
+    { 12u, 0x07u, 0x00E4E4E4UL },
+    { 12u, 0x07u, 0x00E4E4E4UL },
+    { 12u, 0x07u, 0x00E4E4E4UL },
+    { 13u, 0x0Fu, 0x00E4E4E4UL },
+    { 15u, 0x07u, 0x39393939UL },
+    { 16u, 0x0Fu, 0xE4E4E4E4UL },
+    { 16u, 0x0Fu, 0xE4E4E4E4UL },
+    { 16u, 0x03u, 0xE4E4E4E4UL },
+    { 16u, 0x0Fu, 0xE4E4E4E4UL },
+    { 16u, 0x03u, 0xE4E4E4E4UL },
+    { 4u, 0x01u, 0x000000E4UL },
 };
 #endif
 
@@ -5651,6 +6012,9 @@ typedef struct
     AvspRound1AnimationStateSpec content_avsp_round1_class02_records[AVSP_ROUND1_CLASS02_PRESENTATION_COUNT];
     AvspRound1AnimationStateSpec content_avsp_round1_class0f_records[AVSP_ROUND1_CLASS0F_PRESENTATION_COUNT];
     AvspRound1AnimationStateSpec content_avsp_round1_class0a_records[AVSP_ROUND1_CLASS0A_PRESENTATION_COUNT];
+    AvspRound1Class00CompanionAnimationSpec content_avsp_round1_class00_companion_records[AVSP_ROUND1_CLASS00_COMPANION_PRESENTATION_COUNT];
+    AvspRound1Class00CompanionParentAnimationSpec content_avsp_round1_class00_companion_parent_animations[AVSP_ROUND1_CLASS00_COMPANION_PARENT_ANIMATION_COUNT];
+    AvspRound1Class00CompanionParentEntrySpec content_avsp_round1_class00_companion_parent_entries[AVSP_ROUND1_CLASS00_COMPANION_PARENT_ENTRY_COUNT];
     AvspRound1AnimationStateSpec content_avsp_round1_class05_records[AVSP_ROUND1_CLASS05_PRESENTATION_COUNT];
     AvspRound1Class05Spec content_avsp_round1_class05;
     AvspRound1Class05MotionSpec content_avsp_round1_class05_motion;
@@ -5658,9 +6022,12 @@ typedef struct
     AvspRound1Class02Spec content_avsp_round1_class02;
     AvspRound1Class0fSpec content_avsp_round1_class0f;
     AvspRound1Class0aSpec content_avsp_round1_class0a;
+    AvspRound1Class00CompanionSpec content_avsp_round1_class00_companion;
     AvspRound1SceneUpdateCadence content_avsp_round1_coffee_shop_update_cadence[AVSP_ROUND1_COFFEE_SHOP_UPDATE_CADENCE_COUNT];
     AvspRound1SceneUpdateCadence content_avsp_round1_coffee_shop_class02_update_cadence[AVSP_ROUND1_COFFEE_SHOP_CLASS02_UPDATE_CADENCE_COUNT];
     AvspRound1SceneUpdateCadence content_avsp_round1_coffee_shop_class0a_update_cadence[AVSP_ROUND1_COFFEE_SHOP_CLASS0A_UPDATE_CADENCE_COUNT];
+    AvspRound1SceneUpdateCadence content_avsp_round1_coffee_shop_class00_update_cadence[AVSP_ROUND1_COFFEE_SHOP_CLASS00_UPDATE_CADENCE_COUNT];
+    AvspRound1CoffeeExitClass00PhaseSpec content_avsp_round1_coffee_exit_class00_phase[AVSP_ROUND1_COFFEE_EXIT_CLASS00_PHASE_COUNT];
     AvspRound1SceneInputRun content_avsp_round1_coffee_shop_input_runs[AVSP_ROUND1_COFFEE_SHOP_INPUT_RUN_COUNT];
 } AvspRound1ContentArchive;
 extern const AvspRound1ContentArchive *avsp_round1_content;

@@ -13550,16 +13550,2119 @@
           "0x0009e732"
         ],
         "class": "0x00",
-        "classification": "SOURCE_CLOSED_IDENTITY",
+        "classification": "SOURCE_CLOSED_IMPLEMENTATION_FIELDS",
         "dispatch_entry": "0x09e098",
         "dispatch_prefix_sha256": "6476f61c61197b1cc6d2d61a074cba9990321ae7541b35c99177de2f35e8cb92",
         "first_frame": 2075,
         "fixed_frame_substitute_forbidden": true,
-        "implementation_contract": null,
-        "implementation_status": "BLOCKED_MISSING_SPEC_FIELDS",
+        "implementation_contract": {
+          "active_helper": {
+            "first": "0x000bca3a",
+            "last_exclusive": "0x000bcaa8",
+            "sha256": "af83dda6984a7ba504945d4ee313b6b133d342e1fac8fb7e51edba4f655161e1"
+          },
+          "allocation_initialization": {
+            "allocator": "player-owned companion allocator 0x0212c8..0x0212ea",
+            "chronology": "allocation occurs during the entry subhandler return; state-0 dispatch follows in the same ascending record-28 scheduler traversal; first visible source row is the next source frame",
+            "guard": "player source slot 0x00ff8380 is initialized and the companion slot is free",
+            "lifetime": {
+              "allocation_source_frame_u16": 2074,
+              "first_visible_source_frame_u16": 2075,
+              "last_visible_source_frame_u16": 5550
+            },
+            "program_state0_writes": [
+              "field_2e=0x8000",
+              "actor+0x09=0",
+              "field_62=0",
+              "field_65=0xff",
+              "field_64=0x22",
+              "source_table_pointer_50=0x0009eb2c",
+              "x/y/z copied from parent",
+              "state/action=0x0206",
+              "substate=0x0200"
+            ],
+            "source_class_s8": 0,
+            "source_record_type_u8": 28,
+            "source_slot": "0x00ffce00",
+            "source_variant_u8": 0,
+            "writes": [
+              "active=1",
+              "type=28",
+              "class=0",
+              "parent_slot=0x8380",
+              "state/action=0x0000",
+              "substate=0x0000",
+              "disable_guard_54=0"
+            ]
+          },
+          "animation_selector": {
+            "bind_rule": "selector from the parent projection indexes the signed offset table; 0x016518 binds record, timer, branch, assembly and selectors",
+            "offset_table_address": "0x0009e5da",
+            "offset_table_sha256": "7bec721ce9e2d403b24515c60b202958f3defeb4508efe7de1ec295f79bde83f",
+            "offsets_s16": [
+              44,
+              64,
+              84,
+              104,
+              124,
+              144,
+              164,
+              184,
+              204,
+              224,
+              244,
+              264,
+              284,
+              304,
+              324,
+              344
+            ],
+            "records": [
+              {
+                "animation_record": "0x0009e606",
+                "assembly": "0x0009e8ec",
+                "attack_selector_u8": 0,
+                "branch_s16": -32768,
+                "hurt_selector_u8": 0,
+                "record_sha256": "30d5f20951afe72f7daad4fb8ec9883b8d24556bccb781c4d4b8f1e795d69e99",
+                "timer_u16": 4095
+              },
+              {
+                "animation_record": "0x0009e61a",
+                "assembly": "0x0009e908",
+                "attack_selector_u8": 0,
+                "branch_s16": -32767,
+                "hurt_selector_u8": 0,
+                "record_sha256": "b4255967518d2cfb591cdd69c7398a5ee60b048f5eb020dda4beb3062c33f888",
+                "timer_u16": 4095
+              },
+              {
+                "animation_record": "0x0009e62e",
+                "assembly": "0x0009e934",
+                "attack_selector_u8": 0,
+                "branch_s16": -32766,
+                "hurt_selector_u8": 0,
+                "record_sha256": "b68ea9f8e2a3c9719ad1e0291081df3f35463365c9afdc31e75fc15b1f319aad",
+                "timer_u16": 4095
+              },
+              {
+                "animation_record": "0x0009e656",
+                "assembly": "0x0009e97c",
+                "attack_selector_u8": 0,
+                "branch_s16": -32764,
+                "hurt_selector_u8": 0,
+                "record_sha256": "198d266a48981beb8e000dde155e62100349b4716fa11705686eb6518570fd71",
+                "timer_u16": 4095
+              },
+              {
+                "animation_record": "0x0009e66a",
+                "assembly": "0x0009e998",
+                "attack_selector_u8": 0,
+                "branch_s16": -32763,
+                "hurt_selector_u8": 0,
+                "record_sha256": "abcf34e13f067ef8ff167e01d48518c8e1396fcdd253b6583e3fb4420467eba1",
+                "timer_u16": 4095
+              },
+              {
+                "animation_record": "0x0009e692",
+                "assembly": "0x0009e9e0",
+                "attack_selector_u8": 0,
+                "branch_s16": -32761,
+                "hurt_selector_u8": 0,
+                "record_sha256": "15cf4dd691a1ed49f21581406be2862a7497979ff49f5d28e1a206c3fbf4b859",
+                "timer_u16": 4095
+              },
+              {
+                "animation_record": "0x0009e6e2",
+                "assembly": "0x0009ea80",
+                "attack_selector_u8": 0,
+                "branch_s16": -32757,
+                "hurt_selector_u8": 0,
+                "record_sha256": "6a71f10e50b711e01fe69c1a265d4b3e4da552a5840c1fdf41e5d807711702a6",
+                "timer_u16": 4095
+              },
+              {
+                "animation_record": "0x0009e6f6",
+                "assembly": "0x0009ea9c",
+                "attack_selector_u8": 0,
+                "branch_s16": -32756,
+                "hurt_selector_u8": 0,
+                "record_sha256": "42c10d62d8681e25e318f838b79a3fbc59c999738b15ab64c5e157360bf3f47a",
+                "timer_u16": 4095
+              },
+              {
+                "animation_record": "0x0009e70a",
+                "assembly": "0x0009eab8",
+                "attack_selector_u8": 0,
+                "branch_s16": -32755,
+                "hurt_selector_u8": 0,
+                "record_sha256": "21ee9574aa559bf49f6c63d33bbcaf058172c96cd8fab7851b77f58a91bdca8d",
+                "timer_u16": 4095
+              },
+              {
+                "animation_record": "0x0009e71e",
+                "assembly": "0x0009ead4",
+                "attack_selector_u8": 0,
+                "branch_s16": -32754,
+                "hurt_selector_u8": 0,
+                "record_sha256": "36b4524e95bd7da141085e9ab8da1025b089fd036054adc0e064f73342a6b69b",
+                "timer_u16": 4095
+              },
+              {
+                "animation_record": "0x0009e732",
+                "assembly": "0x0009eb00",
+                "attack_selector_u8": 0,
+                "branch_s16": -32753,
+                "hurt_selector_u8": 0,
+                "record_sha256": "c7f70b0ccf4e54e11e9bd310cd5fe957cb29071da0abdcb43c031f39f86fbbda",
+                "timer_u16": 4095
+              }
+            ]
+          },
+          "capture_identity": {
+            "byte_identical": true,
+            "completion_a": "oracle11_progression_lifecycle_cs65a4",
+            "completion_b": "oracle11_progression_lifecycle_cs65b3",
+            "files_sha256": {
+              "coffee_shop_class00_program.tsv": "dbda41ffb28d675d83d8ef5bffd78a49cca8fd36880a344945b3ce2d619dbb63",
+              "coffee_shop_collision_lists.tsv": "53258f407e3d19d33a552a6d1a14565a7a4ced1f687884c319fa9fd0e7c479d2",
+              "coffee_shop_rng_calls.tsv": "81338529f76629c3d103885c16838bd562beecf783f0b5107a5b7ecd11e219b3",
+              "coffee_shop_scene_actors.tsv": "b7b1568df038af1cdd7eb5bc6eb30c830efca4952d1077644ab3b31ed2ad1c0f",
+              "coffee_shop_scene_frames.tsv": "91e4aab3a03586a6c9a143dd58ee03a72ebc52b7fd611fdc6fe0975ebd522d1d",
+              "coffee_shop_scene_health_writes.tsv": "7defadcfff16b99b8e2d5b66fc7b42443106837d698e659c64d45a8770d6aa0b",
+              "dispatches.tsv": "a47890edd3e102e8d8db5e4caa21d9b15c5c6e0a3c4800ab1aff578421102903",
+              "progression_lifecycle_writes.tsv": "bafce924823779cf6ca1e58f5b251c9eaa773f73a3e1eeb2a849e3270d090e11",
+              "progression_result.tsv": "15d32f9c0ab847ab1e83cf79b5fcfcab1fbda4f086d504a1386726b002658192"
+            }
+          },
+          "counterfactual": {
+            "byte_identical": true,
+            "capture_a": "oracle11_progression_lifecycle_cs65m5",
+            "capture_b": "oracle11_progression_lifecycle_cs65m6",
+            "classification": "SOURCE_STATE_MUTATION_CONTROL_WITH_MATCHED_NORMALIZATION",
+            "complete_scene_normalization": "source complete-scene actor, route, RNG, health, collision and audio projections remain byte-identical because the initialization body normalizes before the owning active-body output",
+            "downstream_differences": {
+              "coffee_shop_class00_program.tsv": {
+                "baseline_sha256": "dbda41ffb28d675d83d8ef5bffd78a49cca8fd36880a344945b3ce2d619dbb63",
+                "counterfactual_sha256": "5a2b90385a04a95b36d9a0888e89773d520bb8cde52d7a03f80ba76f530ac2b7",
+                "different": true
+              },
+              "coffee_shop_collision_lists.tsv": {
+                "baseline_sha256": "53258f407e3d19d33a552a6d1a14565a7a4ced1f687884c319fa9fd0e7c479d2",
+                "counterfactual_sha256": "53258f407e3d19d33a552a6d1a14565a7a4ced1f687884c319fa9fd0e7c479d2",
+                "different": false
+              },
+              "coffee_shop_rng_calls.tsv": {
+                "baseline_sha256": "81338529f76629c3d103885c16838bd562beecf783f0b5107a5b7ecd11e219b3",
+                "counterfactual_sha256": "81338529f76629c3d103885c16838bd562beecf783f0b5107a5b7ecd11e219b3",
+                "different": false
+              },
+              "coffee_shop_scene_actors.tsv": {
+                "baseline_sha256": "b7b1568df038af1cdd7eb5bc6eb30c830efca4952d1077644ab3b31ed2ad1c0f",
+                "counterfactual_sha256": "b7b1568df038af1cdd7eb5bc6eb30c830efca4952d1077644ab3b31ed2ad1c0f",
+                "different": false
+              },
+              "coffee_shop_scene_frames.tsv": {
+                "baseline_sha256": "91e4aab3a03586a6c9a143dd58ee03a72ebc52b7fd611fdc6fe0975ebd522d1d",
+                "counterfactual_sha256": "91e4aab3a03586a6c9a143dd58ee03a72ebc52b7fd611fdc6fe0975ebd522d1d",
+                "different": false
+              },
+              "coffee_shop_scene_health_writes.tsv": {
+                "baseline_sha256": "7defadcfff16b99b8e2d5b66fc7b42443106837d698e659c64d45a8770d6aa0b",
+                "counterfactual_sha256": "7defadcfff16b99b8e2d5b66fc7b42443106837d698e659c64d45a8770d6aa0b",
+                "different": false
+              },
+              "dispatches.tsv": {
+                "baseline_sha256": "a47890edd3e102e8d8db5e4caa21d9b15c5c6e0a3c4800ab1aff578421102903",
+                "counterfactual_sha256": "a47890edd3e102e8d8db5e4caa21d9b15c5c6e0a3c4800ab1aff578421102903",
+                "different": false
+              },
+              "progression_lifecycle_writes.tsv": {
+                "baseline_sha256": "bafce924823779cf6ca1e58f5b251c9eaa773f73a3e1eeb2a849e3270d090e11",
+                "counterfactual_sha256": "bafce924823779cf6ca1e58f5b251c9eaa773f73a3e1eeb2a849e3270d090e11",
+                "different": false
+              },
+              "progression_result.tsv": {
+                "baseline_sha256": "15d32f9c0ab847ab1e83cf79b5fcfcab1fbda4f086d504a1386726b002658192",
+                "counterfactual_sha256": "f73fa4a325ba466b877eaf8d718bba35c813bc7f1ad15ce7ddb79650ffb362d2",
+                "different": true
+              }
+            },
+            "field_level_difference": [
+              "substate 0x0200 -> 0x0000 -> 0x0200",
+              "field_65 OR=4",
+              "field_44=0x13",
+              "field_45=0xff",
+              "0x0ae396 invocation"
+            ],
+            "files_sha256": {
+              "coffee_shop_class00_program.tsv": "5a2b90385a04a95b36d9a0888e89773d520bb8cde52d7a03f80ba76f530ac2b7",
+              "coffee_shop_collision_lists.tsv": "53258f407e3d19d33a552a6d1a14565a7a4ced1f687884c319fa9fd0e7c479d2",
+              "coffee_shop_rng_calls.tsv": "81338529f76629c3d103885c16838bd562beecf783f0b5107a5b7ecd11e219b3",
+              "coffee_shop_scene_actors.tsv": "b7b1568df038af1cdd7eb5bc6eb30c830efca4952d1077644ab3b31ed2ad1c0f",
+              "coffee_shop_scene_frames.tsv": "91e4aab3a03586a6c9a143dd58ee03a72ebc52b7fd611fdc6fe0975ebd522d1d",
+              "coffee_shop_scene_health_writes.tsv": "7defadcfff16b99b8e2d5b66fc7b42443106837d698e659c64d45a8770d6aa0b",
+              "dispatches.tsv": "a47890edd3e102e8d8db5e4caa21d9b15c5c6e0a3c4800ab1aff578421102903",
+              "progression_lifecycle_writes.tsv": "bafce924823779cf6ca1e58f5b251c9eaa773f73a3e1eeb2a849e3270d090e11",
+              "progression_result.tsv": "f73fa4a325ba466b877eaf8d718bba35c813bc7f1ad15ce7ddb79650ffb362d2"
+            },
+            "injection": "for one source traversal only, change substate 0x0200 to 0x0000 before the action-0x06 nested dispatch",
+            "production_authority": false
+          },
+          "direct_effects": {
+            "audio_transactions_u8": 0,
+            "collision_memberships_u8": 0,
+            "health_or_damage_writes_u8": 0,
+            "parent_presentation_field_writes_per_dispatch_u8": 1,
+            "rng_calls_u8": 0,
+            "route_camera_load_writes_u8": 0,
+            "rule": "source-owned presentation companion and parent presentation coordination only; no gameplay-authoritative effect is inferred"
+          },
+          "dispatch": {
+            "action_0x06_substate_high_byte_offsets_s16": [
+              8,
+              38
+            ],
+            "action_0x06_targets": [
+              "0x0009e43a",
+              "0x0009e458"
+            ],
+            "active_action_low_byte_offsets_s16": [
+              8,
+              8,
+              8,
+              774
+            ],
+            "active_action_targets": [
+              "0x0009e128",
+              "0x0009e128",
+              "0x0009e128",
+              "0x0009e426"
+            ],
+            "entry": "0x0009e098",
+            "outer_state_high_byte_offsets_s16": [
+              8,
+              112,
+              980,
+              1006
+            ],
+            "outer_targets": [
+              "0x0009e0ac",
+              "0x0009e114",
+              "0x0009e478",
+              "0x0009e492"
+            ]
+          },
+          "fields": {
+            "active": "u8 at actor+0x00",
+            "animation_branch": "s16 at actor+0x24",
+            "animation_record": "u32 at actor+0x1c",
+            "animation_timer": "u16 at actor+0x0a",
+            "class_variant": "u16 at actor+0x02",
+            "disable_guard_54": "u8",
+            "field_2e": "u16",
+            "field_44_45": "u8/u8",
+            "field_5c_62_64_65": "u8/u8/u8/u8",
+            "parent_animation_branch": "u8 at parent animation_record+0x0f",
+            "parent_character_index": "u8 at parent+0xd2",
+            "parent_slot_5a": "u16 source pointer",
+            "source_table_pointer_50": "u32",
+            "state_action": "u16 at actor+0x04; high byte outer state, low byte action",
+            "substate": "u16 at actor+0x06; high byte nested dispatch",
+            "timer_2a": "u8 at actor+0x2a",
+            "type": "u8 at actor+0x08",
+            "visible_facing": "u8 at actor+0x0f",
+            "x_y": "s16 at actor+0x10/+0x14; native mirrors signed 16.16",
+            "z": "s16 at actor+0x18"
+          },
+          "fixed_frame_substitute_forbidden": true,
+          "mutation_controls": [
+            "source body",
+            "outer dispatch table",
+            "action dispatch table",
+            "nested substate dispatch",
+            "allocation chronology",
+            "parent pointer",
+            "state-0 writes",
+            "counterfactual init writes",
+            "parent animation-record byte-0x0f mapping",
+            "parent branch table",
+            "signed x offset and facing negation",
+            "signed y offset",
+            "parent field56 write",
+            "animation selector table",
+            "animation record/assembly/selectors",
+            "dispatch cadence",
+            "exit callback player-before-record28 phase",
+            "surplus exit player update after final record28 traversal",
+            "frozen resident interval",
+            "central scene clear",
+            "direct RNG absence",
+            "collision-list absence",
+            "health/damage absence",
+            "audio absence",
+            "fixed-frame substitute"
+          ],
+          "parent_projection": {
+            "animation_record_branch_rule": "the accepted player animation record address resolves byte +0x0f; native must not substitute actor animation_branch at +0x24",
+            "character_offset_table_address": "0x001fcbc0",
+            "character_offset_table_prefix_sha256": "983c55a363d5f871ecf2c49adba03eff90060086bcd384207d624290d96e8cf8",
+            "character_table_base": "0x001fcbc8",
+            "coffee_shop_animation_record_branches": [
+              {
+                "animation_record": "0x0015e540",
+                "evidence": "class-0x00 paired completion capture",
+                "parent_animation_branch_u8": 42,
+                "record_sha256": "fe49dfa0f7b76a492d58eabcf5d94b46776ee5d1f5945b62f8ee2085677893f6"
+              },
+              {
+                "animation_record": "0x0015e550",
+                "evidence": "class-0x00 paired completion capture",
+                "parent_animation_branch_u8": 43,
+                "record_sha256": "224423353d1a019faee365575cf42e755ed976c12411628e9ec37ce57653ff87"
+              },
+              {
+                "animation_record": "0x0015e560",
+                "evidence": "class-0x00 paired completion capture",
+                "parent_animation_branch_u8": 42,
+                "record_sha256": "8b8711550ee0628c7fe52b33409c5fa53c7f0a592f4ee24327f1611f6f56f944"
+              },
+              {
+                "animation_record": "0x0015e570",
+                "evidence": "class-0x00 paired completion capture",
+                "parent_animation_branch_u8": 43,
+                "record_sha256": "224423353d1a019faee365575cf42e755ed976c12411628e9ec37ce57653ff87"
+              },
+              {
+                "animation_record": "0x0015e580",
+                "evidence": "class-0x00 paired completion capture",
+                "parent_animation_branch_u8": 42,
+                "record_sha256": "e41f62c23957b6765872a77de68e23a844f69b9d29a887e5a91502db5fdefa42"
+              },
+              {
+                "animation_record": "0x0015e594",
+                "evidence": "class-0x00 paired completion capture",
+                "parent_animation_branch_u8": 42,
+                "record_sha256": "b8f398a3f058b8a1de8457e178dbc0816c0c5f4ea04fd52f65d49bbaea7661d5"
+              },
+              {
+                "animation_record": "0x0015e5a4",
+                "evidence": "class-0x00 paired completion capture",
+                "parent_animation_branch_u8": 43,
+                "record_sha256": "57ebeb7d74b60cfb89dad9afcf5a582e9aa0a76a904a0793d1f785754bd9b41f"
+              },
+              {
+                "animation_record": "0x0015e5b4",
+                "evidence": "class-0x00 paired completion capture",
+                "parent_animation_branch_u8": 42,
+                "record_sha256": "d417ef25b89cd4ed4ec4d5de25246c500a73504e878db92e1d7005d4e2cea9df"
+              },
+              {
+                "animation_record": "0x0015e5c4",
+                "evidence": "class-0x00 paired completion capture",
+                "parent_animation_branch_u8": 43,
+                "record_sha256": "57ebeb7d74b60cfb89dad9afcf5a582e9aa0a76a904a0793d1f785754bd9b41f"
+              },
+              {
+                "animation_record": "0x0015e5d4",
+                "evidence": "class-0x00 paired completion capture",
+                "parent_animation_branch_u8": 42,
+                "record_sha256": "e38ff901320f3ad4005f1b5f3c880ba3a565bc580fb45e9369469545f4b062f9"
+              },
+              {
+                "animation_record": "0x0015e9d8",
+                "evidence": "class-0x00 paired completion capture",
+                "parent_animation_branch_u8": 44,
+                "record_sha256": "c28715e3a3594cafbbfffef0399d8358e96eb24fc33585907a72290e2fa5f548"
+              },
+              {
+                "animation_record": "0x0015e9e8",
+                "evidence": "class-0x00 paired completion capture",
+                "parent_animation_branch_u8": 44,
+                "record_sha256": "d369ff6519e4342aff31262ebc3becd17065dc1d32550bf0eadd459012b2fef5"
+              },
+              {
+                "animation_record": "0x0015e9f8",
+                "evidence": "class-0x00 paired completion capture",
+                "parent_animation_branch_u8": 44,
+                "record_sha256": "486eed3a10994a92edb0157fdc4e73ae24b423a07fe404b91df0f22997fc5567"
+              },
+              {
+                "animation_record": "0x0015ea08",
+                "evidence": "class-0x00 paired completion capture",
+                "parent_animation_branch_u8": 44,
+                "record_sha256": "d369ff6519e4342aff31262ebc3becd17065dc1d32550bf0eadd459012b2fef5"
+              },
+              {
+                "animation_record": "0x0015ea18",
+                "evidence": "class-0x00 paired completion capture",
+                "parent_animation_branch_u8": 44,
+                "record_sha256": "7f5de383305bf8695b5566f0679906b8944c22040012d1f54ac6ee3e7fb3a031"
+              },
+              {
+                "animation_record": "0x0015eee8",
+                "evidence": "class-0x00 paired completion capture",
+                "parent_animation_branch_u8": 86,
+                "record_sha256": "b8b49a731d28a351a74a9db0e7cb44d5cfb338d65ff977fda79e3eb39b2a7367"
+              },
+              {
+                "animation_record": "0x0015ef24",
+                "evidence": "class-0x00 paired completion capture",
+                "parent_animation_branch_u8": 89,
+                "record_sha256": "1de8aa22850db10088e5d6f99219f02236d786f11be73107d091d21892a4752b"
+              },
+              {
+                "animation_record": "0x0015ef38",
+                "evidence": "class-0x00 paired completion capture",
+                "parent_animation_branch_u8": 90,
+                "record_sha256": "7d6c5aa89551165e36194ace0123e6a454b2bc2f0d91110d19271404869ff394"
+              },
+              {
+                "animation_record": "0x0015f054",
+                "evidence": "accepted ORACLE-07 player action sequence hit",
+                "parent_animation_branch_u8": 97,
+                "record_sha256": "05524c70d500911aa9a61d3339cbf54b4e95ebf7f00286c2a4f1ffdd195f652e"
+              },
+              {
+                "animation_record": "0x0015f1f4",
+                "evidence": "class-0x00 paired completion capture",
+                "parent_animation_branch_u8": 1,
+                "record_sha256": "28ff074b1e6e554544e4c197cae211a68240ea9d9e0a9e50a64e39448c09581e"
+              },
+              {
+                "animation_record": "0x0015f208",
+                "evidence": "class-0x00 paired completion capture",
+                "parent_animation_branch_u8": 2,
+                "record_sha256": "e2f1ec25d9b000079eed63dcff5af792a2b36e98aabfb7aac072a96b33a7ce25"
+              },
+              {
+                "animation_record": "0x0015f218",
+                "evidence": "class-0x00 paired completion capture",
+                "parent_animation_branch_u8": 3,
+                "record_sha256": "a22791b17245af1bcadccfc5dfee4c53f5a878efb967a9bbd4a9c0789bc9f148"
+              },
+              {
+                "animation_record": "0x0015f228",
+                "evidence": "class-0x00 paired completion capture",
+                "parent_animation_branch_u8": 4,
+                "record_sha256": "a83e5b349eb054661ed9b6f313a9dadade4ac83c7765d3117a7908fa63131746"
+              },
+              {
+                "animation_record": "0x0015f238",
+                "evidence": "class-0x00 paired completion capture",
+                "parent_animation_branch_u8": 5,
+                "record_sha256": "e2097ec1549d3cec30592b042cc22e64387441f07cf9d70aa0ea618cf2186c96"
+              },
+              {
+                "animation_record": "0x0015f248",
+                "evidence": "class-0x00 paired completion capture",
+                "parent_animation_branch_u8": 6,
+                "record_sha256": "32c95db069d96ddeabf38b6a9f5c5cd1d2effb3dbb1b3e20e68f5425e86f50e4"
+              },
+              {
+                "animation_record": "0x0015f258",
+                "evidence": "class-0x00 paired completion capture",
+                "parent_animation_branch_u8": 7,
+                "record_sha256": "ea82a26e65efac3239d50ed523c988cfd1f22cc64113b5e8fe3fb8e5f7f54c73"
+              },
+              {
+                "animation_record": "0x0015f268",
+                "evidence": "class-0x00 paired completion capture",
+                "parent_animation_branch_u8": 8,
+                "record_sha256": "7aa9aa37fe7c952e551d657f8ff5ed0a3062e672a6bac711f572c708bb7efd26"
+              },
+              {
+                "animation_record": "0x0015f278",
+                "evidence": "class-0x00 paired completion capture",
+                "parent_animation_branch_u8": 9,
+                "record_sha256": "0e6b953f36b6d4d8973a9a91fab5476ed56e9e461c7eb3ae11e318bb2f14159a"
+              },
+              {
+                "animation_record": "0x0015f288",
+                "evidence": "class-0x00 paired completion capture",
+                "parent_animation_branch_u8": 10,
+                "record_sha256": "e21925df4e5619e1b00da7f0e0f9876cfec9eb575c00edfd14bc72bbeec83015"
+              },
+              {
+                "animation_record": "0x0015f298",
+                "evidence": "class-0x00 paired completion capture",
+                "parent_animation_branch_u8": 11,
+                "record_sha256": "2ff074e2301e652e8f8736d93660667c7ec776d891aef06104ec5f61f9d17841"
+              },
+              {
+                "animation_record": "0x0015f2a8",
+                "evidence": "class-0x00 paired completion capture",
+                "parent_animation_branch_u8": 12,
+                "record_sha256": "4aa7c9e41e242593ab60b7ced95eb284f8d16ba50e76bc7ca6286967b9e9ea8c"
+              },
+              {
+                "animation_record": "0x0015f2b8",
+                "evidence": "class-0x00 paired completion capture",
+                "parent_animation_branch_u8": 13,
+                "record_sha256": "4a4ceee40107a984fde836c1b2a517f86326263a02a4508f593db8311d37e867"
+              },
+              {
+                "animation_record": "0x0015f2cc",
+                "evidence": "class-0x00 paired completion capture",
+                "parent_animation_branch_u8": 14,
+                "record_sha256": "878dbbd5dc2a58187a529228167cab02c00ebe4ba497cddbbd1431d0a1c00b64"
+              },
+              {
+                "animation_record": "0x0015f2dc",
+                "evidence": "class-0x00 paired completion capture",
+                "parent_animation_branch_u8": 14,
+                "record_sha256": "e520ad47f00be8121ca02d189548c52bc9e4c13f75ca1049d127b5a0adb995cc"
+              },
+              {
+                "animation_record": "0x0015f2f0",
+                "evidence": "accepted ORACLE-07 player action sequence jump",
+                "parent_animation_branch_u8": 15,
+                "record_sha256": "92240a556a0556fc6935d91f42107ddb7deadb1df519fa479920394b1cda4a8b"
+              },
+              {
+                "animation_record": "0x0015f300",
+                "evidence": "accepted ORACLE-07 player action sequence jump",
+                "parent_animation_branch_u8": 16,
+                "record_sha256": "64224c8703027404c51ec475c1ee9587a95708419ef045bb979fe9b53de70980"
+              },
+              {
+                "animation_record": "0x0015f310",
+                "evidence": "accepted ORACLE-07 player action sequence jump",
+                "parent_animation_branch_u8": 17,
+                "record_sha256": "98145182457da91d33cc8e1d70f2723dd8cf236238c75deef80b36055527b08b"
+              },
+              {
+                "animation_record": "0x0015f320",
+                "evidence": "accepted ORACLE-07 player action sequence jump",
+                "parent_animation_branch_u8": 18,
+                "record_sha256": "8f611cbef82a24509528858cf2ed24e01dc778bec0f35f5c8829abbda9b5a70b"
+              },
+              {
+                "animation_record": "0x0015f330",
+                "evidence": "accepted ORACLE-07 player action sequence jump",
+                "parent_animation_branch_u8": 19,
+                "record_sha256": "2cb870692962ba1c47efdfff6413a6d8b44e752156f0a9c328b1074bab4be154"
+              },
+              {
+                "animation_record": "0x0015f344",
+                "evidence": "class-0x00 paired completion capture",
+                "parent_animation_branch_u8": 20,
+                "record_sha256": "7f96984e9421ab3354f54b17fd096d491cc5b4f3d65c9a256859bd4756c2d794"
+              },
+              {
+                "animation_record": "0x0015f354",
+                "evidence": "class-0x00 paired completion capture",
+                "parent_animation_branch_u8": 21,
+                "record_sha256": "d75a0b223479a0689c2e135a5df5467131934ee38c83bbc940798a1c487985df"
+              },
+              {
+                "animation_record": "0x0015f364",
+                "evidence": "class-0x00 paired completion capture",
+                "parent_animation_branch_u8": 22,
+                "record_sha256": "5d681f8a1b42caff6fcd6b3c4795078e9806de0420629ed05db5c79d6318331a"
+              },
+              {
+                "animation_record": "0x0015f374",
+                "evidence": "class-0x00 paired completion capture",
+                "parent_animation_branch_u8": 23,
+                "record_sha256": "ceb036544bc8375951d9fe8ed0be91d02247bb7b43c8a3b6ca788b5f1d2eaef3"
+              },
+              {
+                "animation_record": "0x0015f384",
+                "evidence": "class-0x00 paired completion capture",
+                "parent_animation_branch_u8": 24,
+                "record_sha256": "46901d782b3e8a1e1511ae260af33f7c8fe23233490ca94307d5c1a5b2606213"
+              },
+              {
+                "animation_record": "0x0015f394",
+                "evidence": "class-0x00 paired completion capture",
+                "parent_animation_branch_u8": 25,
+                "record_sha256": "3563ca9e90da9f9461667ee615e354bc24cc51b4532bd2336d364141dca2644b"
+              },
+              {
+                "animation_record": "0x0015f3a4",
+                "evidence": "class-0x00 paired completion capture",
+                "parent_animation_branch_u8": 20,
+                "record_sha256": "d35ad1b52afae96e450904eb97233c1f44c32e6f120502cbd834033a58717672"
+              },
+              {
+                "animation_record": "0x0015f3b8",
+                "evidence": "class-0x00 paired completion capture",
+                "parent_animation_branch_u8": 20,
+                "record_sha256": "b3fcf3b6c96616f9988ea67b4fc130bb24251b8cbdb3c505ea424c32d04a57a7"
+              },
+              {
+                "animation_record": "0x0015f3c8",
+                "evidence": "class-0x00 paired completion capture",
+                "parent_animation_branch_u8": 25,
+                "record_sha256": "97169c80ef65ae70476e695e0901c0db2688bfc658878253cbb9046a5921f1e9"
+              },
+              {
+                "animation_record": "0x0015f3d8",
+                "evidence": "class-0x00 paired completion capture",
+                "parent_animation_branch_u8": 24,
+                "record_sha256": "895946719f73efe0e8d4c37e2807940847e5187cec6af8d9888059d732e66ee6"
+              },
+              {
+                "animation_record": "0x0015f3e8",
+                "evidence": "class-0x00 paired completion capture",
+                "parent_animation_branch_u8": 23,
+                "record_sha256": "a5706786bff4db10f80180da0b49f1fd2d89211a5996b7ecef6a4ffef9839946"
+              },
+              {
+                "animation_record": "0x0015f3f8",
+                "evidence": "class-0x00 paired completion capture",
+                "parent_animation_branch_u8": 22,
+                "record_sha256": "8e4affd5d72030b27b7f4045f7153fc28b934faddc702e6cfd7821f1c7c1a8c5"
+              },
+              {
+                "animation_record": "0x0015f408",
+                "evidence": "class-0x00 paired completion capture",
+                "parent_animation_branch_u8": 21,
+                "record_sha256": "fdab314f15c028011c7a11a87c31865db9e6b8e9b2634ba1c1e709f02e1eeecd"
+              },
+              {
+                "animation_record": "0x0015f418",
+                "evidence": "class-0x00 paired completion capture",
+                "parent_animation_branch_u8": 20,
+                "record_sha256": "bbf594f7997429ec665e76f3b2e7a824d4100284ce25fcf16e80e4dd05c84411"
+              },
+              {
+                "animation_record": "0x0015f428",
+                "evidence": "class-0x00 paired completion capture",
+                "parent_animation_branch_u8": 20,
+                "record_sha256": "7b776452259ce1d4276490783cbdf848f0dfb1e6afee23afb70098df0cffa3fe"
+              },
+              {
+                "animation_record": "0x0015f43c",
+                "evidence": "accepted ORACLE-07 player action sequence dash_right_observed_before_hit",
+                "parent_animation_branch_u8": 29,
+                "record_sha256": "daccc2354cfad5172a54300dbfde6886694f67ac0f1982c383f96f7d37e25787"
+              },
+              {
+                "animation_record": "0x0015f44c",
+                "evidence": "accepted ORACLE-07 player action sequence dash_right_observed_before_hit",
+                "parent_animation_branch_u8": 30,
+                "record_sha256": "d11f6ef6ffc64ef225fa89dc1ddf02cd098ad7c767ca2c6a75f7381d401a5cec"
+              },
+              {
+                "animation_record": "0x0015f96c",
+                "evidence": "class-0x00 paired completion capture",
+                "parent_animation_branch_u8": 0,
+                "record_sha256": "9eba310749209b00a8eaf48390ca9f0d893b8b1b8baa9d68fd78cf84b2d0d590"
+              },
+              {
+                "animation_record": "0x0015f97c",
+                "evidence": "class-0x00 paired completion capture",
+                "parent_animation_branch_u8": 0,
+                "record_sha256": "3d0220cd432ab992aba4033fcd72271a1b11189fadf4990ea66674b399054a3b"
+              },
+              {
+                "animation_record": "0x0015f98c",
+                "evidence": "class-0x00 paired completion capture",
+                "parent_animation_branch_u8": 0,
+                "record_sha256": "bbe52796c6572fe703245a9ccb88dc9e6d9ec2b1d776709a2b528095eb30c551"
+              },
+              {
+                "animation_record": "0x0015fa04",
+                "evidence": "class-0x00 paired completion capture",
+                "parent_animation_branch_u8": 0,
+                "record_sha256": "4795518361192ba458d949480f95999d3135ae9d35dee97576035650a453e444"
+              },
+              {
+                "animation_record": "0x0015fa14",
+                "evidence": "class-0x00 paired completion capture",
+                "parent_animation_branch_u8": 1,
+                "record_sha256": "b1f8b4a3fcf5fcb6a43ba5ce2bc38f07e99ef41af39078ba725774e8d0cd4f13"
+              },
+              {
+                "animation_record": "0x0015fcfc",
+                "evidence": "class-0x00 paired completion capture",
+                "parent_animation_branch_u8": 42,
+                "record_sha256": "e41f62c23957b6765872a77de68e23a844f69b9d29a887e5a91502db5fdefa42"
+              },
+              {
+                "animation_record": "0x0015fd10",
+                "evidence": "class-0x00 paired completion capture",
+                "parent_animation_branch_u8": 0,
+                "record_sha256": "99a1dc2459f4b88a255bd891c0d2f55612fd0e14b54b6526a37521088092ac6b"
+              },
+              {
+                "animation_record": "0x0015fd20",
+                "evidence": "class-0x00 paired completion capture",
+                "parent_animation_branch_u8": 0,
+                "record_sha256": "c5a66c7ce4cda95c5ca2b566ed56bb8da4f00358ba96ebd9c9cfa47a9193daeb"
+              },
+              {
+                "animation_record": "0x0015fd30",
+                "evidence": "class-0x00 paired completion capture",
+                "parent_animation_branch_u8": 0,
+                "record_sha256": "ed80fc42bf88e4f5a5a9f8c07062665e69750add64aea37e213a1cc67421ddd6"
+              },
+              {
+                "animation_record": "0x0015fd40",
+                "evidence": "class-0x00 paired completion capture",
+                "parent_animation_branch_u8": 0,
+                "record_sha256": "536b993496586f6a6a056fc2d56c46538bda6dfacb017fd2946c24f773251c95"
+              },
+              {
+                "animation_record": "0x0015fd50",
+                "evidence": "class-0x00 paired completion capture",
+                "parent_animation_branch_u8": 0,
+                "record_sha256": "a214af8405d1df391efd704646f5757ea2135d0095404d5292dbfc557d94d2ce"
+              },
+              {
+                "animation_record": "0x0015fd60",
+                "evidence": "class-0x00 paired completion capture",
+                "parent_animation_branch_u8": 0,
+                "record_sha256": "08ca8f657c3af4034035d40aec217853a0525fc96e9b09ff1707e243d8331b78"
+              },
+              {
+                "animation_record": "0x0015fd70",
+                "evidence": "class-0x00 paired completion capture",
+                "parent_animation_branch_u8": 0,
+                "record_sha256": "8bcb8f2d136394e321f355c5b312ad88f50f65779d32ce3af9b4459672733c11"
+              },
+              {
+                "animation_record": "0x0015fd80",
+                "evidence": "class-0x00 paired completion capture",
+                "parent_animation_branch_u8": 0,
+                "record_sha256": "08ca8f657c3af4034035d40aec217853a0525fc96e9b09ff1707e243d8331b78"
+              },
+              {
+                "animation_record": "0x0015fd90",
+                "evidence": "class-0x00 paired completion capture",
+                "parent_animation_branch_u8": 0,
+                "record_sha256": "da1254eb3da9a3d9ea63ffca5739bc8a6e22409ca2e0aa2b06ef84f144f758f7"
+              },
+              {
+                "animation_record": "0x0015fda0",
+                "evidence": "class-0x00 paired completion capture",
+                "parent_animation_branch_u8": 0,
+                "record_sha256": "08ca8f657c3af4034035d40aec217853a0525fc96e9b09ff1707e243d8331b78"
+              },
+              {
+                "animation_record": "0x0015fdb0",
+                "evidence": "class-0x00 paired completion capture",
+                "parent_animation_branch_u8": 0,
+                "record_sha256": "8bcb8f2d136394e321f355c5b312ad88f50f65779d32ce3af9b4459672733c11"
+              },
+              {
+                "animation_record": "0x0015fdc0",
+                "evidence": "class-0x00 paired completion capture",
+                "parent_animation_branch_u8": 0,
+                "record_sha256": "08ca8f657c3af4034035d40aec217853a0525fc96e9b09ff1707e243d8331b78"
+              },
+              {
+                "animation_record": "0x0015fdd0",
+                "evidence": "class-0x00 paired completion capture",
+                "parent_animation_branch_u8": 0,
+                "record_sha256": "f2ed8756847a252b9bc13be653a06d08780ed40f3a32225d0a8c6a0269b03a8b"
+              },
+              {
+                "animation_record": "0x0015fde0",
+                "evidence": "class-0x00 paired completion capture",
+                "parent_animation_branch_u8": 0,
+                "record_sha256": "adb78958c1f125ffed14d74e22cb3277d4ba61bd2faa8a5332a429dcfa05dba3"
+              },
+              {
+                "animation_record": "0x0015fdf0",
+                "evidence": "class-0x00 paired completion capture",
+                "parent_animation_branch_u8": 0,
+                "record_sha256": "9a2d82e0a702ef9126bff2fc238c9fbbb94407085b70583ccaaf670e1acdde24"
+              },
+              {
+                "animation_record": "0x0015fe00",
+                "evidence": "class-0x00 paired completion capture",
+                "parent_animation_branch_u8": 0,
+                "record_sha256": "d4d52b1778661a873caddd8d31af447096e9ecc97d322d984eb7629b831337ce"
+              },
+              {
+                "animation_record": "0x0015fe10",
+                "evidence": "class-0x00 paired completion capture",
+                "parent_animation_branch_u8": 1,
+                "record_sha256": "878a9a5d7080366d644ff4ee844212021f5870f9b9b6af86bfa4c3b8bafd082c"
+              },
+              {
+                "animation_record": "0x001600e8",
+                "evidence": "accepted ORACLE-07 player action sequence close_1",
+                "parent_animation_branch_u8": 0,
+                "record_sha256": "1c51dbdf98bcc4dbc3862372a9122adc0ec4518fcb62c268196954ce7910ded0"
+              },
+              {
+                "animation_record": "0x001600f8",
+                "evidence": "accepted ORACLE-07 player action sequence close_1",
+                "parent_animation_branch_u8": 0,
+                "record_sha256": "96b90112494302b04df1f496b05659b997e4287e68a233881a0dbdfef1b15560"
+              },
+              {
+                "animation_record": "0x00160108",
+                "evidence": "accepted ORACLE-07 player action sequence close_1",
+                "parent_animation_branch_u8": 0,
+                "record_sha256": "ce7a39a71e2116ba53b82a0df74555528b5e36eb1402538b9a2e5e3b43a81171"
+              },
+              {
+                "animation_record": "0x00160118",
+                "evidence": "accepted ORACLE-07 player action sequence close_1",
+                "parent_animation_branch_u8": 0,
+                "record_sha256": "7b9a85ec6b4f275967a3aa07a3917aa666d0445d7e0c471c277a609f32b12bb4"
+              },
+              {
+                "animation_record": "0x0016012c",
+                "evidence": "accepted ORACLE-07 player action sequence close_2",
+                "parent_animation_branch_u8": 0,
+                "record_sha256": "b79be151175bb20c4ccb62b9f7e0d12b63f0fc466b28e17c47efac9855a53638"
+              },
+              {
+                "animation_record": "0x0016013c",
+                "evidence": "accepted ORACLE-07 player action sequence close_2",
+                "parent_animation_branch_u8": 0,
+                "record_sha256": "0826af687cc573aa3b62a438a9c1309666fd70a1ec1a2932a60ea113e26b30d7"
+              },
+              {
+                "animation_record": "0x0016014c",
+                "evidence": "accepted ORACLE-07 player action sequence close_2",
+                "parent_animation_branch_u8": 0,
+                "record_sha256": "2f00190fe2ce74c92a024c67bb2cbdfbe1d953c91024cdf53da6b26057e4fb96"
+              },
+              {
+                "animation_record": "0x0016015c",
+                "evidence": "accepted ORACLE-07 player action sequence close_2",
+                "parent_animation_branch_u8": 0,
+                "record_sha256": "f95924cc21935868ce5ee4c997b4ca4905dc9f551efc0bbe0d718fe5dec0330d"
+              },
+              {
+                "animation_record": "0x0016016c",
+                "evidence": "accepted ORACLE-07 player action sequence close_2",
+                "parent_animation_branch_u8": 0,
+                "record_sha256": "aad158343afaf257afd9d6f3969066d885d0f8d7175c3d339318f11fc10589b1"
+              },
+              {
+                "animation_record": "0x0016017c",
+                "evidence": "accepted ORACLE-07 player action sequence close_2",
+                "parent_animation_branch_u8": 0,
+                "record_sha256": "053879d6138e6570a5c88c7f50d49bc0489fd93599d26c047b3bcf2c2bfdf696"
+              },
+              {
+                "animation_record": "0x00160190",
+                "evidence": "accepted ORACLE-07 player action sequence close_3",
+                "parent_animation_branch_u8": 0,
+                "record_sha256": "b79be151175bb20c4ccb62b9f7e0d12b63f0fc466b28e17c47efac9855a53638"
+              },
+              {
+                "animation_record": "0x001601a0",
+                "evidence": "accepted ORACLE-07 player action sequence close_3",
+                "parent_animation_branch_u8": 0,
+                "record_sha256": "4634c17031ff52d62573951fe8212cee28197015a6fb19cf7ceb7a3da0dbb8c6"
+              },
+              {
+                "animation_record": "0x001601b0",
+                "evidence": "accepted ORACLE-07 player action sequence close_3",
+                "parent_animation_branch_u8": 0,
+                "record_sha256": "cea23e5890859fb587a139420dad3bc4602a0be85bd6023c7dde60b789b0f5c5"
+              },
+              {
+                "animation_record": "0x001601c0",
+                "evidence": "accepted ORACLE-07 player action sequence close_3",
+                "parent_animation_branch_u8": 0,
+                "record_sha256": "45411fba5e0e11d99a786e814ecb46a5c741b82648cf1603ca406e319963a525"
+              },
+              {
+                "animation_record": "0x001601d0",
+                "evidence": "accepted ORACLE-07 player action sequence close_3",
+                "parent_animation_branch_u8": 0,
+                "record_sha256": "501b5162a824171e3c80cee70058f9b7661a4348a1601975fc4cbd21cf321a9e"
+              },
+              {
+                "animation_record": "0x001601e0",
+                "evidence": "accepted ORACLE-07 player action sequence close_3",
+                "parent_animation_branch_u8": 0,
+                "record_sha256": "5ed9e9bd6f6c885d74f678664cf4f799d3a58358be1546f630ff290537b26aa9"
+              },
+              {
+                "animation_record": "0x001601f4",
+                "evidence": "accepted ORACLE-07 player action sequence close_4",
+                "parent_animation_branch_u8": 0,
+                "record_sha256": "4ff7fd6834496f84fa8b20c7d370dfaa18d92636957394755dff6c09c7a29c4a"
+              },
+              {
+                "animation_record": "0x00160204",
+                "evidence": "accepted ORACLE-07 player action sequence close_4",
+                "parent_animation_branch_u8": 0,
+                "record_sha256": "5c63b9b781447b05c436051dfabc942609c448eb7387a53bb372f665d97b0cdd"
+              },
+              {
+                "animation_record": "0x00160214",
+                "evidence": "accepted ORACLE-07 player action sequence close_4",
+                "parent_animation_branch_u8": 0,
+                "record_sha256": "d4e88a13b5e4caf14a44ea61bef53a75cc6e1c02b431bd7e75949d22f2a1eec7"
+              },
+              {
+                "animation_record": "0x00160224",
+                "evidence": "accepted ORACLE-07 player action sequence close_4",
+                "parent_animation_branch_u8": 0,
+                "record_sha256": "7bffdf8bb2b8f0dbb93a3ecc02334ca118bfc333b486ce32ad98ca67d55c6513"
+              },
+              {
+                "animation_record": "0x00160234",
+                "evidence": "accepted ORACLE-07 player action sequence close_4",
+                "parent_animation_branch_u8": 0,
+                "record_sha256": "680ec4c09cf4acfdd6d55015b8912a81e0f14f80524154409c0e3eb9ba8c7eda"
+              },
+              {
+                "animation_record": "0x00160244",
+                "evidence": "accepted ORACLE-07 player action sequence close_4",
+                "parent_animation_branch_u8": 0,
+                "record_sha256": "28e7c191ec5c2b398610112a74476dbad14629ff33945a87a0ca4309f84768a7"
+              },
+              {
+                "animation_record": "0x00160254",
+                "evidence": "accepted ORACLE-07 player action sequence close_4",
+                "parent_animation_branch_u8": 0,
+                "record_sha256": "2b30eee967d0e8f9dce3721f7e4dec7ed57e6236e71cf8f13f3d52ed8f189e3a"
+              },
+              {
+                "animation_record": "0x00160264",
+                "evidence": "accepted ORACLE-07 player action sequence close_4",
+                "parent_animation_branch_u8": 0,
+                "record_sha256": "4ff7fd6834496f84fa8b20c7d370dfaa18d92636957394755dff6c09c7a29c4a"
+              },
+              {
+                "animation_record": "0x00160274",
+                "evidence": "accepted ORACLE-07 player action sequence close_4",
+                "parent_animation_branch_u8": 0,
+                "record_sha256": "81d0539394cc44d9aa62ea6ffa32e98c20bcc98f30a963f640eb91fc34989e4b"
+              },
+              {
+                "animation_record": "0x00160288",
+                "evidence": "class-0x00 paired completion capture",
+                "parent_animation_branch_u8": 51,
+                "record_sha256": "b700dc2cc2084bac8e035cd167d1a18967caed9fe9cd5b243b8da4906fbaf049"
+              },
+              {
+                "animation_record": "0x00160298",
+                "evidence": "class-0x00 paired completion capture",
+                "parent_animation_branch_u8": 52,
+                "record_sha256": "1c0691d87f2245de702713064efd801b05d45dad19412998775dbf8d9e694786"
+              },
+              {
+                "animation_record": "0x001602a8",
+                "evidence": "class-0x00 paired completion capture",
+                "parent_animation_branch_u8": 52,
+                "record_sha256": "b0cdeca7338d46e1d7043ab0ac434373c98926dc8fbcea9e4c57e16fddd58c13"
+              },
+              {
+                "animation_record": "0x001602b8",
+                "evidence": "class-0x00 paired completion capture",
+                "parent_animation_branch_u8": 51,
+                "record_sha256": "7968e91240ecaebb949b768e7b0a690d23f30cf506c64de0ff3baad307f27d0a"
+              },
+              {
+                "animation_record": "0x001602c8",
+                "evidence": "class-0x00 paired completion capture",
+                "parent_animation_branch_u8": 51,
+                "record_sha256": "689eae9272ecac7c463c88e8f9082025e21c17a014b30ecac945f5b53274744a"
+              }
+            ],
+            "coffee_shop_entries": [
+              {
+                "animation_selector_u8": 0,
+                "entry_sha256": "df3f619804a92fdb4057192dc43dd748ea778adc52bc498ce80524c014b81119",
+                "parent_animation_branch_u8": 0,
+                "parent_field56_u8": 0,
+                "table_address": "0x001fcbc8",
+                "x_offset_s8": 0,
+                "y_offset_s8": 0
+              },
+              {
+                "animation_selector_u8": 15,
+                "entry_sha256": "6a5ee10654f945b9c2fdfa24f45e6ca0d9d4b561b0e225be9e22d9061329ad16",
+                "parent_animation_branch_u8": 1,
+                "parent_field56_u8": 1,
+                "table_address": "0x001fcbcc",
+                "x_offset_s8": 5,
+                "y_offset_s8": 62
+              },
+              {
+                "animation_selector_u8": 14,
+                "entry_sha256": "d809aed66fc16b8f01a2b53d013b8b5b02a6bdf51b6437da2e3e7fc92193c4e5",
+                "parent_animation_branch_u8": 2,
+                "parent_field56_u8": 1,
+                "table_address": "0x001fcbd0",
+                "x_offset_s8": 23,
+                "y_offset_s8": 47
+              },
+              {
+                "animation_selector_u8": 14,
+                "entry_sha256": "c6c652bc9b003516b53c4ded01d387b7d08971ea54d3d3384906f951f92a8c25",
+                "parent_animation_branch_u8": 3,
+                "parent_field56_u8": 1,
+                "table_address": "0x001fcbd4",
+                "x_offset_s8": 22,
+                "y_offset_s8": 45
+              },
+              {
+                "animation_selector_u8": 13,
+                "entry_sha256": "a5b18c459903462db98fa4da43e4abafecc8ad9131f99bb74e6fa85103febf1f",
+                "parent_animation_branch_u8": 4,
+                "parent_field56_u8": 1,
+                "table_address": "0x001fcbd8",
+                "x_offset_s8": 16,
+                "y_offset_s8": 44
+              },
+              {
+                "animation_selector_u8": 13,
+                "entry_sha256": "cf725f781e78826b9afdc73fd4b694c725faf58a16dcf97ad899cae6a22a77c6",
+                "parent_animation_branch_u8": 5,
+                "parent_field56_u8": 1,
+                "table_address": "0x001fcbdc",
+                "x_offset_s8": 9,
+                "y_offset_s8": 44
+              },
+              {
+                "animation_selector_u8": 12,
+                "entry_sha256": "c4a951beae905ce5cf5e8e2a7b5e780e9c386a2064a5e42bfeabd03767eefe73",
+                "parent_animation_branch_u8": 6,
+                "parent_field56_u8": 1,
+                "table_address": "0x001fcbe0",
+                "x_offset_s8": 4,
+                "y_offset_s8": 42
+              },
+              {
+                "animation_selector_u8": 12,
+                "entry_sha256": "c569a3c25499ab4e554206f3f3811ec32f2d292f47012d57b893ab0eeccf0d62",
+                "parent_animation_branch_u8": 7,
+                "parent_field56_u8": 1,
+                "table_address": "0x001fcbe4",
+                "x_offset_s8": -3,
+                "y_offset_s8": 42
+              },
+              {
+                "animation_selector_u8": 12,
+                "entry_sha256": "d78652539ef8bdc8f39b2ea5c4779abbc44173bbab84bcbd2a78989a46be5e01",
+                "parent_animation_branch_u8": 8,
+                "parent_field56_u8": 1,
+                "table_address": "0x001fcbe8",
+                "x_offset_s8": -5,
+                "y_offset_s8": 42
+              },
+              {
+                "animation_selector_u8": 12,
+                "entry_sha256": "20a5d2586df90729340ea2f99abe1b8a8ae4a94be2d1549ba5a58bbd06bf1234",
+                "parent_animation_branch_u8": 9,
+                "parent_field56_u8": 1,
+                "table_address": "0x001fcbec",
+                "x_offset_s8": -2,
+                "y_offset_s8": 42
+              },
+              {
+                "animation_selector_u8": 13,
+                "entry_sha256": "c0d20b51d27be74fd6917c7ca4e0d05c58524cd9da2f8a101b0398dfb0601f4e",
+                "parent_animation_branch_u8": 10,
+                "parent_field56_u8": 1,
+                "table_address": "0x001fcbf0",
+                "x_offset_s8": 2,
+                "y_offset_s8": 42
+              },
+              {
+                "animation_selector_u8": 13,
+                "entry_sha256": "34543f1f2504cea479b3c3462a68b733c4332d2133cec83af25f779df3a7ae89",
+                "parent_animation_branch_u8": 11,
+                "parent_field56_u8": 1,
+                "table_address": "0x001fcbf4",
+                "x_offset_s8": 10,
+                "y_offset_s8": 44
+              },
+              {
+                "animation_selector_u8": 14,
+                "entry_sha256": "5309537b7881b7df594ee7fc267b4e7f969c43627aa2f6d8f3c746ae634290a6",
+                "parent_animation_branch_u8": 12,
+                "parent_field56_u8": 1,
+                "table_address": "0x001fcbf8",
+                "x_offset_s8": 18,
+                "y_offset_s8": 42
+              },
+              {
+                "animation_selector_u8": 14,
+                "entry_sha256": "27640901e470e60494291b6f3ffc7b48e54e9b00cfb06932fb1221b8bfa11eb6",
+                "parent_animation_branch_u8": 13,
+                "parent_field56_u8": 1,
+                "table_address": "0x001fcbfc",
+                "x_offset_s8": 23,
+                "y_offset_s8": 45
+              },
+              {
+                "animation_selector_u8": 15,
+                "entry_sha256": "abc2c05d85f31a9c1bae31dff1e0bb7f0b9a4769c2a4426d7a04b38208860f38",
+                "parent_animation_branch_u8": 14,
+                "parent_field56_u8": 1,
+                "table_address": "0x001fcc00",
+                "x_offset_s8": 6,
+                "y_offset_s8": 56
+              },
+              {
+                "animation_selector_u8": 5,
+                "entry_sha256": "1011315efb2ae5d2d15b1aa770087f1066d928d6f6fe367b20433b99a71d27d8",
+                "parent_animation_branch_u8": 15,
+                "parent_field56_u8": 1,
+                "table_address": "0x001fcc04",
+                "x_offset_s8": -10,
+                "y_offset_s8": 100
+              },
+              {
+                "animation_selector_u8": 0,
+                "entry_sha256": "f610549b09cdf3eb7f1f2219f77ec73047fd3769b2e9fad4e872edd615dcd04a",
+                "parent_animation_branch_u8": 16,
+                "parent_field56_u8": 1,
+                "table_address": "0x001fcc08",
+                "x_offset_s8": 1,
+                "y_offset_s8": 58
+              },
+              {
+                "animation_selector_u8": 14,
+                "entry_sha256": "571bdf739b3d78dc74a6880d3b46f8cd94c777ed29d7827197d1466f5a6935e7",
+                "parent_animation_branch_u8": 17,
+                "parent_field56_u8": 1,
+                "table_address": "0x001fcc0c",
+                "x_offset_s8": -9,
+                "y_offset_s8": 45
+              },
+              {
+                "animation_selector_u8": 0,
+                "entry_sha256": "f610549b09cdf3eb7f1f2219f77ec73047fd3769b2e9fad4e872edd615dcd04a",
+                "parent_animation_branch_u8": 18,
+                "parent_field56_u8": 1,
+                "table_address": "0x001fcc10",
+                "x_offset_s8": 1,
+                "y_offset_s8": 58
+              },
+              {
+                "animation_selector_u8": 5,
+                "entry_sha256": "1011315efb2ae5d2d15b1aa770087f1066d928d6f6fe367b20433b99a71d27d8",
+                "parent_animation_branch_u8": 19,
+                "parent_field56_u8": 1,
+                "table_address": "0x001fcc14",
+                "x_offset_s8": -10,
+                "y_offset_s8": 100
+              },
+              {
+                "animation_selector_u8": 2,
+                "entry_sha256": "a2cd8cc3ecf63a527074330d9fe95d31bde42d148c0b8102b27cfd838d09b73d",
+                "parent_animation_branch_u8": 20,
+                "parent_field56_u8": 1,
+                "table_address": "0x001fcc18",
+                "x_offset_s8": 17,
+                "y_offset_s8": 78
+              },
+              {
+                "animation_selector_u8": 0,
+                "entry_sha256": "6b46af779937051ab1e22be34c7d1dd09bd04d8cc3d0cd6c695e6f8bf8447ac2",
+                "parent_animation_branch_u8": 21,
+                "parent_field56_u8": 1,
+                "table_address": "0x001fcc1c",
+                "x_offset_s8": 22,
+                "y_offset_s8": 53
+              },
+              {
+                "animation_selector_u8": 11,
+                "entry_sha256": "6ed138f7a4c7f39d04a5a7f7503a3d4244aa9d9176c3f072225aa169028468dc",
+                "parent_animation_branch_u8": 22,
+                "parent_field56_u8": 1,
+                "table_address": "0x001fcc20",
+                "x_offset_s8": -1,
+                "y_offset_s8": 41
+              },
+              {
+                "animation_selector_u8": 7,
+                "entry_sha256": "f0763401b5849663490c4ec29e8759c0ebe751f07a8bc9635348b8325d4645a7",
+                "parent_animation_branch_u8": 23,
+                "parent_field56_u8": 1,
+                "table_address": "0x001fcc24",
+                "x_offset_s8": -14,
+                "y_offset_s8": 61
+              },
+              {
+                "animation_selector_u8": 5,
+                "entry_sha256": "1fd03ee1cde425587b63edb5960f65e9a98d707f469f23cf8e82295f81a939fd",
+                "parent_animation_branch_u8": 24,
+                "parent_field56_u8": 1,
+                "table_address": "0x001fcc28",
+                "x_offset_s8": -22,
+                "y_offset_s8": 70
+              },
+              {
+                "animation_selector_u8": 4,
+                "entry_sha256": "eca8a05cb3df164741c57be7f92c387d4a05fa0a0f9549bdbc25a581ed1d2512",
+                "parent_animation_branch_u8": 25,
+                "parent_field56_u8": 1,
+                "table_address": "0x001fcc2c",
+                "x_offset_s8": -10,
+                "y_offset_s8": 83
+              },
+              {
+                "animation_selector_u8": 1,
+                "entry_sha256": "239073b5f4b1661bb44a9e23279248a0e655b6d6162a3e931aaf93ceaedf71d6",
+                "parent_animation_branch_u8": 29,
+                "parent_field56_u8": 1,
+                "table_address": "0x001fcc3c",
+                "x_offset_s8": 10,
+                "y_offset_s8": 64
+              },
+              {
+                "animation_selector_u8": 14,
+                "entry_sha256": "964c41fb8cd5b4aeba940bbd294644fecef0bde311ee957b45dd3a813a8a40c1",
+                "parent_animation_branch_u8": 30,
+                "parent_field56_u8": 1,
+                "table_address": "0x001fcc40",
+                "x_offset_s8": -8,
+                "y_offset_s8": 56
+              },
+              {
+                "animation_selector_u8": 15,
+                "entry_sha256": "6a6df85a433993c027f283b880598855c19dbde75ee4faf7c447d7f36f22617a",
+                "parent_animation_branch_u8": 42,
+                "parent_field56_u8": 255,
+                "table_address": "0x001fcc70",
+                "x_offset_s8": 34,
+                "y_offset_s8": 52
+              },
+              {
+                "animation_selector_u8": 15,
+                "entry_sha256": "df53fe14dba295047d46a35330f3f1224dfb2410262d7908bf3b3d06dce8bb9d",
+                "parent_animation_branch_u8": 43,
+                "parent_field56_u8": 255,
+                "table_address": "0x001fcc74",
+                "x_offset_s8": 33,
+                "y_offset_s8": 52
+              },
+              {
+                "animation_selector_u8": 15,
+                "entry_sha256": "6c4b0fbb6205deb3877e8332a94b85cf77c997f5eba7cc48c0699c13bc2435b4",
+                "parent_animation_branch_u8": 44,
+                "parent_field56_u8": 1,
+                "table_address": "0x001fcc78",
+                "x_offset_s8": 18,
+                "y_offset_s8": 58
+              },
+              {
+                "animation_selector_u8": 14,
+                "entry_sha256": "36f5cff701a5092bf27d7afb78cf54f914ac3d2fd6d152719d89155ef1c7b5f5",
+                "parent_animation_branch_u8": 51,
+                "parent_field56_u8": 1,
+                "table_address": "0x001fcc94",
+                "x_offset_s8": 37,
+                "y_offset_s8": 67
+              },
+              {
+                "animation_selector_u8": 13,
+                "entry_sha256": "9378fe7ff9aef8a059d844c230e1312aee4703cd956c650892b5500e2db3fef4",
+                "parent_animation_branch_u8": 52,
+                "parent_field56_u8": 1,
+                "table_address": "0x001fcc98",
+                "x_offset_s8": 66,
+                "y_offset_s8": 74
+              },
+              {
+                "animation_selector_u8": 14,
+                "entry_sha256": "925ffedd77a20eaee64f8ab54d37bc8e298f054cda2ec08da0a60a61af3de30c",
+                "parent_animation_branch_u8": 86,
+                "parent_field56_u8": 1,
+                "table_address": "0x001fcd20",
+                "x_offset_s8": -1,
+                "y_offset_s8": 42
+              },
+              {
+                "animation_selector_u8": 0,
+                "entry_sha256": "2fed899b64f648fa3853bffe6ba37b93ae9cba931ef7e583e7c6ef9e3643804c",
+                "parent_animation_branch_u8": 89,
+                "parent_field56_u8": 1,
+                "table_address": "0x001fcd2c",
+                "x_offset_s8": 20,
+                "y_offset_s8": 58
+              },
+              {
+                "animation_selector_u8": 15,
+                "entry_sha256": "f53a07c47e342366bd4eb853ab6a4115de20d718eb33efa982846405e0cf6cb4",
+                "parent_animation_branch_u8": 90,
+                "parent_field56_u8": 1,
+                "table_address": "0x001fcd30",
+                "x_offset_s8": 47,
+                "y_offset_s8": 55
+              },
+              {
+                "animation_selector_u8": 14,
+                "entry_sha256": "b922b6c89b084c670b6b825c73644fb606d1aa556738b626e1dc412d3eb70acc",
+                "parent_animation_branch_u8": 97,
+                "parent_field56_u8": 1,
+                "table_address": "0x001fcd4c",
+                "x_offset_s8": 21,
+                "y_offset_s8": 44
+              }
+            ],
+            "entry_fields": [
+              "x_offset_s8",
+              "y_offset_s8",
+              "companion_animation_selector_u8",
+              "parent_field56_u8"
+            ],
+            "entry_rule": "base + parent animation-record byte 0x0f * 4",
+            "parent_character_index_u8": 0,
+            "parent_source_slot": "0x00ff8380",
+            "parent_write": "entry byte 3 writes parent+0x56:u8",
+            "position_rule": "child x/y/z/facing copy parent signed words; negate signed x offset when parent facing is zero; add signed x/y offsets; z is unchanged"
+          },
+          "reachable_state_program": {
+            "0x0000:0x0000": {
+              "entry": "0x0009e0ac",
+              "guard": "parent_slot_5a is nonzero",
+              "result": "initialize source fields, copy parent position, set 0x0206:0x0200, and tail-dispatch the active body"
+            },
+            "0x0206:0x0000": {
+              "classification": "SOURCE_COUNTERFACTUAL_REACHABLE",
+              "entry": "0x0009e43a",
+              "result": "substate += 0x0200, field_65 OR=4, field_44=0x13, field_45=0xff, invoke 0x0ae396, then execute the 0x0200 body"
+            },
+            "0x0206:0x0200": {
+              "entries": [
+                "0x0009e114",
+                "0x0009e426",
+                "0x0009e458"
+              ],
+              "guard": "disable_guard_54 == 0 and parent remains source player slot 0x00ff8380",
+              "result": "copy parent position/z/facing, apply signed parent-animation offsets, write parent field56, and bind the selected companion animation every traversal"
+            },
+            "not_required_for_coffee_shop": [
+              {
+                "reason": "action-low-byte 0/2/4 branches are absent from baseline, completion, perturbation and suppression routes",
+                "states": [
+                  "0x0200",
+                  "0x0202",
+                  "0x0204"
+                ]
+              },
+              {
+                "reason": "actor remains frozen at 0x0206:0x0200 after final dispatch; centralized scene clear owns release",
+                "states": [
+                  "0x0400",
+                  "0x0600"
+                ]
+              }
+            ]
+          },
+          "retained_gameplay_authority": false,
+          "route_teardown": {
+            "first_absent_visible_source_frame_u16": 5551,
+            "fixed_frame_release_forbidden": true,
+            "frozen_resident_source_frame_range_inclusive_u16": [
+              5524,
+              5550
+            ],
+            "last_dispatch_source_frame_u16": 5523,
+            "release_owner": "central scene record clear 0x0173f8",
+            "release_source_frame_u16": 5550
+          },
+          "scheduler_cadence": {
+            "classification": "SOURCE_CAPTURE_PROJECTION_ONLY",
+            "default_updates_per_source_frame_u8": 1,
+            "dispatch_count_u16": 3595,
+            "exception_count_u8": 70,
+            "exceptions": [
+              {
+                "source_frame_u16": 2075,
+                "updates_u8": 2
+              },
+              {
+                "source_frame_u16": 2076,
+                "updates_u8": 2
+              },
+              {
+                "source_frame_u16": 2165,
+                "updates_u8": 4
+              },
+              {
+                "source_frame_u16": 2260,
+                "updates_u8": 0
+              },
+              {
+                "source_frame_u16": 2265,
+                "updates_u8": 0
+              },
+              {
+                "source_frame_u16": 5458,
+                "updates_u8": 3
+              },
+              {
+                "source_frame_u16": 5459,
+                "updates_u8": 3
+              },
+              {
+                "source_frame_u16": 5460,
+                "updates_u8": 3
+              },
+              {
+                "source_frame_u16": 5461,
+                "updates_u8": 3
+              },
+              {
+                "source_frame_u16": 5462,
+                "updates_u8": 3
+              },
+              {
+                "source_frame_u16": 5463,
+                "updates_u8": 3
+              },
+              {
+                "source_frame_u16": 5464,
+                "updates_u8": 3
+              },
+              {
+                "source_frame_u16": 5465,
+                "updates_u8": 3
+              },
+              {
+                "source_frame_u16": 5466,
+                "updates_u8": 3
+              },
+              {
+                "source_frame_u16": 5467,
+                "updates_u8": 3
+              },
+              {
+                "source_frame_u16": 5468,
+                "updates_u8": 3
+              },
+              {
+                "source_frame_u16": 5469,
+                "updates_u8": 3
+              },
+              {
+                "source_frame_u16": 5470,
+                "updates_u8": 4
+              },
+              {
+                "source_frame_u16": 5471,
+                "updates_u8": 3
+              },
+              {
+                "source_frame_u16": 5472,
+                "updates_u8": 3
+              },
+              {
+                "source_frame_u16": 5473,
+                "updates_u8": 3
+              },
+              {
+                "source_frame_u16": 5474,
+                "updates_u8": 3
+              },
+              {
+                "source_frame_u16": 5475,
+                "updates_u8": 3
+              },
+              {
+                "source_frame_u16": 5476,
+                "updates_u8": 3
+              },
+              {
+                "source_frame_u16": 5477,
+                "updates_u8": 3
+              },
+              {
+                "source_frame_u16": 5478,
+                "updates_u8": 3
+              },
+              {
+                "source_frame_u16": 5479,
+                "updates_u8": 3
+              },
+              {
+                "source_frame_u16": 5480,
+                "updates_u8": 3
+              },
+              {
+                "source_frame_u16": 5481,
+                "updates_u8": 3
+              },
+              {
+                "source_frame_u16": 5482,
+                "updates_u8": 3
+              },
+              {
+                "source_frame_u16": 5483,
+                "updates_u8": 3
+              },
+              {
+                "source_frame_u16": 5484,
+                "updates_u8": 3
+              },
+              {
+                "source_frame_u16": 5485,
+                "updates_u8": 4
+              },
+              {
+                "source_frame_u16": 5486,
+                "updates_u8": 3
+              },
+              {
+                "source_frame_u16": 5487,
+                "updates_u8": 3
+              },
+              {
+                "source_frame_u16": 5488,
+                "updates_u8": 3
+              },
+              {
+                "source_frame_u16": 5489,
+                "updates_u8": 3
+              },
+              {
+                "source_frame_u16": 5490,
+                "updates_u8": 3
+              },
+              {
+                "source_frame_u16": 5491,
+                "updates_u8": 3
+              },
+              {
+                "source_frame_u16": 5492,
+                "updates_u8": 3
+              },
+              {
+                "source_frame_u16": 5493,
+                "updates_u8": 4
+              },
+              {
+                "source_frame_u16": 5494,
+                "updates_u8": 3
+              },
+              {
+                "source_frame_u16": 5495,
+                "updates_u8": 3
+              },
+              {
+                "source_frame_u16": 5496,
+                "updates_u8": 3
+              },
+              {
+                "source_frame_u16": 5497,
+                "updates_u8": 3
+              },
+              {
+                "source_frame_u16": 5498,
+                "updates_u8": 3
+              },
+              {
+                "source_frame_u16": 5499,
+                "updates_u8": 3
+              },
+              {
+                "source_frame_u16": 5500,
+                "updates_u8": 4
+              },
+              {
+                "source_frame_u16": 5501,
+                "updates_u8": 3
+              },
+              {
+                "source_frame_u16": 5502,
+                "updates_u8": 3
+              },
+              {
+                "source_frame_u16": 5503,
+                "updates_u8": 3
+              },
+              {
+                "source_frame_u16": 5504,
+                "updates_u8": 3
+              },
+              {
+                "source_frame_u16": 5505,
+                "updates_u8": 3
+              },
+              {
+                "source_frame_u16": 5506,
+                "updates_u8": 3
+              },
+              {
+                "source_frame_u16": 5507,
+                "updates_u8": 4
+              },
+              {
+                "source_frame_u16": 5508,
+                "updates_u8": 3
+              },
+              {
+                "source_frame_u16": 5509,
+                "updates_u8": 3
+              },
+              {
+                "source_frame_u16": 5510,
+                "updates_u8": 3
+              },
+              {
+                "source_frame_u16": 5511,
+                "updates_u8": 3
+              },
+              {
+                "source_frame_u16": 5512,
+                "updates_u8": 4
+              },
+              {
+                "source_frame_u16": 5513,
+                "updates_u8": 3
+              },
+              {
+                "source_frame_u16": 5514,
+                "updates_u8": 3
+              },
+              {
+                "source_frame_u16": 5515,
+                "updates_u8": 3
+              },
+              {
+                "source_frame_u16": 5516,
+                "updates_u8": 3
+              },
+              {
+                "source_frame_u16": 5517,
+                "updates_u8": 4
+              },
+              {
+                "source_frame_u16": 5518,
+                "updates_u8": 4
+              },
+              {
+                "source_frame_u16": 5519,
+                "updates_u8": 4
+              },
+              {
+                "source_frame_u16": 5520,
+                "updates_u8": 4
+              },
+              {
+                "source_frame_u16": 5521,
+                "updates_u8": 4
+              },
+              {
+                "source_frame_u16": 5522,
+                "updates_u8": 4
+              }
+            ],
+            "exit_callback_phase": {
+              "byte_identical": true,
+              "capture_a": "oracle11_progression_lifecycle_cs68a",
+              "capture_b": "oracle11_progression_lifecycle_cs68b",
+              "classification": "SOURCE_CLOSED_IMPLEMENTATION_FIELDS",
+              "event_codes": {
+                "A": "type-24/class-0x0a dispatch",
+                "C": "type-28/class-0x00 dispatch",
+                "D": "remaining fixed-pool traversal through record-28 entry",
+                "P": "route-6 player dispatcher 0x0213d0"
+              },
+              "file": "coffee_shop_class00_scheduler_phase.tsv",
+              "frame_5460_witness": {
+                "final_traversal_child_x_fp": "0x05320000",
+                "final_traversal_child_z_s16": 311,
+                "next_visible_child_x_fp": "0x05320000",
+                "next_visible_child_z_s16": 311,
+                "player_updates_u8": 4,
+                "post_traversal_player_x_fp": "0x0539ad00",
+                "record28_traversals_u8": 3
+              },
+              "mutation_control": "batching route-6 player dispatches before fixed-pool traversal, counting only subordinate coordinate writes as player callbacks, or applying the ballistic handoff to the wrong dispatcher events changes the raw class-0x00 projection",
+              "ordering_rule": "the packed program preserves the complete route-6 player-dispatch, class-0x0a, record-28 traversal and class-0x00 order; an exit player dispatch may begin or end a source-frame observation boundary independently of the subordinate coordinate writer",
+              "player_program_projection": {
+                "classification": "SOURCE_CAPTURE_PROJECTION_ONLY",
+                "dispatcher_events_u16": 213,
+                "mutation_control": "first-event application at the 5505/5506 ballistic handoff changes the class-0x00 raw x/y projection at source frames 5506/5507",
+                "native_program_applications_u16": 203,
+                "rule": "the accepted 203-call player bytecode projection is applied to the first dispatcher events in each observation interval except the source 5505/5506 ballistic handoff, where the trailing two events own the collapsed native transition; all 213 dispatcher events remain ordered for fixed-pool presentation",
+                "source_program_artifact": "oracle11_round1_encounter_route_authority.json",
+                "source_program_sha256": "3d5296ded2b371e62c481c5af619dd8751d97097d392968ffead91eb01a649ae",
+                "trace_scope": "Coffee Shop withdrawal source frames 5453..5523; not general gameplay timing authority"
+              },
+              "program": [
+                {
+                  "events": "PADC",
+                  "player_program_apply_mask_u8": 1,
+                  "source_frame_u16": 5453
+                },
+                {
+                  "events": "PADC",
+                  "player_program_apply_mask_u8": 1,
+                  "source_frame_u16": 5454
+                },
+                {
+                  "events": "PADC",
+                  "player_program_apply_mask_u8": 1,
+                  "source_frame_u16": 5455
+                },
+                {
+                  "events": "PADC",
+                  "player_program_apply_mask_u8": 1,
+                  "source_frame_u16": 5456
+                },
+                {
+                  "events": "PADC",
+                  "player_program_apply_mask_u8": 1,
+                  "source_frame_u16": 5457
+                },
+                {
+                  "events": "PADCPADCPADC",
+                  "player_program_apply_mask_u8": 7,
+                  "source_frame_u16": 5458
+                },
+                {
+                  "events": "PADCPADCPADC",
+                  "player_program_apply_mask_u8": 7,
+                  "source_frame_u16": 5459
+                },
+                {
+                  "events": "PADCPADCPADCP",
+                  "player_program_apply_mask_u8": 15,
+                  "source_frame_u16": 5460
+                },
+                {
+                  "events": "ADCPADCPADCP",
+                  "player_program_apply_mask_u8": 7,
+                  "source_frame_u16": 5461
+                },
+                {
+                  "events": "ADCPADCPADCP",
+                  "player_program_apply_mask_u8": 7,
+                  "source_frame_u16": 5462
+                },
+                {
+                  "events": "ADCPADCPADCP",
+                  "player_program_apply_mask_u8": 7,
+                  "source_frame_u16": 5463
+                },
+                {
+                  "events": "ADCPADCPADCP",
+                  "player_program_apply_mask_u8": 7,
+                  "source_frame_u16": 5464
+                },
+                {
+                  "events": "ADCPADCPADCP",
+                  "player_program_apply_mask_u8": 7,
+                  "source_frame_u16": 5465
+                },
+                {
+                  "events": "ADCPADCPADCP",
+                  "player_program_apply_mask_u8": 7,
+                  "source_frame_u16": 5466
+                },
+                {
+                  "events": "ADCPADCPADCP",
+                  "player_program_apply_mask_u8": 7,
+                  "source_frame_u16": 5467
+                },
+                {
+                  "events": "ADCPADCPADCP",
+                  "player_program_apply_mask_u8": 7,
+                  "source_frame_u16": 5468
+                },
+                {
+                  "events": "ADCPADCPADCPA",
+                  "player_program_apply_mask_u8": 7,
+                  "source_frame_u16": 5469
+                },
+                {
+                  "events": "DCPADCPADCPADC",
+                  "player_program_apply_mask_u8": 7,
+                  "source_frame_u16": 5470
+                },
+                {
+                  "events": "PADCPADCPADC",
+                  "player_program_apply_mask_u8": 7,
+                  "source_frame_u16": 5471
+                },
+                {
+                  "events": "PADCPADCPADC",
+                  "player_program_apply_mask_u8": 7,
+                  "source_frame_u16": 5472
+                },
+                {
+                  "events": "PADCPADCPADC",
+                  "player_program_apply_mask_u8": 7,
+                  "source_frame_u16": 5473
+                },
+                {
+                  "events": "PADCPADCPADC",
+                  "player_program_apply_mask_u8": 7,
+                  "source_frame_u16": 5474
+                },
+                {
+                  "events": "PADCPADCPADC",
+                  "player_program_apply_mask_u8": 1,
+                  "source_frame_u16": 5475
+                },
+                {
+                  "events": "PADCPADCPADC",
+                  "player_program_apply_mask_u8": 1,
+                  "source_frame_u16": 5476
+                },
+                {
+                  "events": "PADCPADCPADC",
+                  "player_program_apply_mask_u8": 7,
+                  "source_frame_u16": 5477
+                },
+                {
+                  "events": "PADCPADCPADC",
+                  "player_program_apply_mask_u8": 7,
+                  "source_frame_u16": 5478
+                },
+                {
+                  "events": "PADCPADCPADC",
+                  "player_program_apply_mask_u8": 7,
+                  "source_frame_u16": 5479
+                },
+                {
+                  "events": "PADCPADCPADCP",
+                  "player_program_apply_mask_u8": 15,
+                  "source_frame_u16": 5480
+                },
+                {
+                  "events": "ADCPADCPADCP",
+                  "player_program_apply_mask_u8": 7,
+                  "source_frame_u16": 5481
+                },
+                {
+                  "events": "ADCPADCPADCP",
+                  "player_program_apply_mask_u8": 7,
+                  "source_frame_u16": 5482
+                },
+                {
+                  "events": "ADCPADCPADCP",
+                  "player_program_apply_mask_u8": 7,
+                  "source_frame_u16": 5483
+                },
+                {
+                  "events": "ADCPADCPADCP",
+                  "player_program_apply_mask_u8": 7,
+                  "source_frame_u16": 5484
+                },
+                {
+                  "events": "ADCPADCPADCPADC",
+                  "player_program_apply_mask_u8": 7,
+                  "source_frame_u16": 5485
+                },
+                {
+                  "events": "PADCPADCPADC",
+                  "player_program_apply_mask_u8": 7,
+                  "source_frame_u16": 5486
+                },
+                {
+                  "events": "PADCPADCPADC",
+                  "player_program_apply_mask_u8": 7,
+                  "source_frame_u16": 5487
+                },
+                {
+                  "events": "PADCPADCPADC",
+                  "player_program_apply_mask_u8": 7,
+                  "source_frame_u16": 5488
+                },
+                {
+                  "events": "PADCPADCPADC",
+                  "player_program_apply_mask_u8": 7,
+                  "source_frame_u16": 5489
+                },
+                {
+                  "events": "PADCPADCPADCP",
+                  "player_program_apply_mask_u8": 15,
+                  "source_frame_u16": 5490
+                },
+                {
+                  "events": "ADCPADCPADCP",
+                  "player_program_apply_mask_u8": 7,
+                  "source_frame_u16": 5491
+                },
+                {
+                  "events": "ADCPADCPADCP",
+                  "player_program_apply_mask_u8": 7,
+                  "source_frame_u16": 5492
+                },
+                {
+                  "events": "ADCPADCPADCPADC",
+                  "player_program_apply_mask_u8": 7,
+                  "source_frame_u16": 5493
+                },
+                {
+                  "events": "PADCPADCPADC",
+                  "player_program_apply_mask_u8": 7,
+                  "source_frame_u16": 5494
+                },
+                {
+                  "events": "PADCPADCPADC",
+                  "player_program_apply_mask_u8": 7,
+                  "source_frame_u16": 5495
+                },
+                {
+                  "events": "PADCPADCPADC",
+                  "player_program_apply_mask_u8": 7,
+                  "source_frame_u16": 5496
+                },
+                {
+                  "events": "PADCPADCPADCP",
+                  "player_program_apply_mask_u8": 15,
+                  "source_frame_u16": 5497
+                },
+                {
+                  "events": "ADCPADCPADCP",
+                  "player_program_apply_mask_u8": 7,
+                  "source_frame_u16": 5498
+                },
+                {
+                  "events": "ADCPADCPADCP",
+                  "player_program_apply_mask_u8": 7,
+                  "source_frame_u16": 5499
+                },
+                {
+                  "events": "ADCPADCPADCPADC",
+                  "player_program_apply_mask_u8": 7,
+                  "source_frame_u16": 5500
+                },
+                {
+                  "events": "PADCPADCPADC",
+                  "player_program_apply_mask_u8": 7,
+                  "source_frame_u16": 5501
+                },
+                {
+                  "events": "PADCPADCPADC",
+                  "player_program_apply_mask_u8": 7,
+                  "source_frame_u16": 5502
+                },
+                {
+                  "events": "PADCPADCPADCP",
+                  "player_program_apply_mask_u8": 15,
+                  "source_frame_u16": 5503
+                },
+                {
+                  "events": "ADCPADCPADCP",
+                  "player_program_apply_mask_u8": 7,
+                  "source_frame_u16": 5504
+                },
+                {
+                  "events": "ADCPADCPADCP",
+                  "player_program_apply_mask_u8": 6,
+                  "source_frame_u16": 5505
+                },
+                {
+                  "events": "ADCPADCPADCPAD",
+                  "player_program_apply_mask_u8": 6,
+                  "source_frame_u16": 5506
+                },
+                {
+                  "events": "CPADCPADCPADC",
+                  "player_program_apply_mask_u8": 7,
+                  "source_frame_u16": 5507
+                },
+                {
+                  "events": "PADCPADCPADC",
+                  "player_program_apply_mask_u8": 7,
+                  "source_frame_u16": 5508
+                },
+                {
+                  "events": "PADCPADCPADCP",
+                  "player_program_apply_mask_u8": 15,
+                  "source_frame_u16": 5509
+                },
+                {
+                  "events": "ADCPADCPADCP",
+                  "player_program_apply_mask_u8": 7,
+                  "source_frame_u16": 5510
+                },
+                {
+                  "events": "ADCPADCPADCPA",
+                  "player_program_apply_mask_u8": 7,
+                  "source_frame_u16": 5511
+                },
+                {
+                  "events": "DCPADCPADCPADC",
+                  "player_program_apply_mask_u8": 7,
+                  "source_frame_u16": 5512
+                },
+                {
+                  "events": "PADCPADCPADC",
+                  "player_program_apply_mask_u8": 7,
+                  "source_frame_u16": 5513
+                },
+                {
+                  "events": "PADCPADCPADC",
+                  "player_program_apply_mask_u8": 7,
+                  "source_frame_u16": 5514
+                },
+                {
+                  "events": "PADCPADCPADC",
+                  "player_program_apply_mask_u8": 7,
+                  "source_frame_u16": 5515
+                },
+                {
+                  "events": "PADCPADCPADCP",
+                  "player_program_apply_mask_u8": 15,
+                  "source_frame_u16": 5516
+                },
+                {
+                  "events": "ADCPADCPADCPADC",
+                  "player_program_apply_mask_u8": 7,
+                  "source_frame_u16": 5517
+                },
+                {
+                  "events": "PADCPADCPADCPADC",
+                  "player_program_apply_mask_u8": 15,
+                  "source_frame_u16": 5518
+                },
+                {
+                  "events": "PADCPADCPADCPADC",
+                  "player_program_apply_mask_u8": 15,
+                  "source_frame_u16": 5519
+                },
+                {
+                  "events": "PADCPADCPADCPADC",
+                  "player_program_apply_mask_u8": 3,
+                  "source_frame_u16": 5520
+                },
+                {
+                  "events": "PADCPADCPADCPADC",
+                  "player_program_apply_mask_u8": 15,
+                  "source_frame_u16": 5521
+                },
+                {
+                  "events": "PADCPADCPADCPADC",
+                  "player_program_apply_mask_u8": 3,
+                  "source_frame_u16": 5522
+                },
+                {
+                  "events": "PADC",
+                  "player_program_apply_mask_u8": 1,
+                  "source_frame_u16": 5523
+                }
+              ],
+              "sha256": "06db63941a57793c60fedc63698db6c6bdd2c93a524e0de8c2af055e3683a0eb",
+              "source_frame_range_inclusive_u16": [
+                5450,
+                5524
+              ]
+            },
+            "rule": "projection aligns repeated source scheduler traversals; it never owns player state or production gameplay timing",
+            "scheduler": "record-28 fixed pool ascending under 0x01bcda",
+            "source_frame_range_inclusive_u16": [
+              2074,
+              5523
+            ]
+          },
+          "semantic_role": "SOURCE_PLAYER_ANCHORED_PRESENTATION_COMPANION",
+          "source_body": {
+            "first": "0x0009e098",
+            "last_exclusive": "0x0009e5be",
+            "sha256": "5ae219377db297092601b14a1e9f055fc7c18a6ccd6358c6dbbb55e3d586f3e1"
+          },
+          "spec_executable": true
+        },
+        "implementation_status": "SPEC_EXECUTABLE",
         "last_frame": 5550,
         "lifetime_count": 1,
-        "semantic_role": "UNKNOWN",
+        "semantic_role": "SOURCE_PLAYER_ANCHORED_PRESENTATION_COMPANION",
         "source_scheduler": "0x01bcda",
         "state_substate_contexts": [
           "0x0206:0x0200"

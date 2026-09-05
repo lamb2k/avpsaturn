@@ -5,7 +5,8 @@ param(
     [string]$Variant,
     [string]$TransitionWriter = '',
     [string]$CaptureNameOverride = '',
-    [switch]$Class0aCounterfactual
+    [switch]$Class0aCounterfactual,
+    [switch]$Class00InitCounterfactual
 )
 
 $ErrorActionPreference = 'Stop'
@@ -79,6 +80,7 @@ $env:AVSP_ORACLE11_CONTROLLER_SUBSTATE_CAPTURE = if ($Variant -match '^cs38') { 
 $env:AVSP_ORACLE11_COMPONENT20_PHASE_CAPTURE = if ($Variant -match '^cs4[2345]') { '1' } else { '0' }
 $env:AVSP_ORACLE11_CLASS0F_STATE_COUNTERFACTUAL = if ($Variant -match '^cs61m') { '1' } else { '0' }
 $env:AVSP_ORACLE11_CLASS0A_VARIANT_COUNTERFACTUAL = if ($Class0aCounterfactual) { '1' } else { '0' }
+$env:AVSP_ORACLE11_CLASS00_INIT_COUNTERFACTUAL = if ($Class00InitCounterfactual) { '1' } else { '0' }
 $env:AVSP_ORACLE11_CLASS1F_ACTION4_GUARD_CAPTURE = if ($Variant -match '^cs46') { '1' } else { '0' }
 $env:AVSP_ORACLE11_CLASS1F_INNER8_GROUP_CAPTURE = if ($Variant -match '^cs(4[789]|50)') { '1' } else { '0' }
 $env:AVSP_ORACLE11_CLASS1F_INNER8_GROUP_MUTATE = if ($Variant -in @('cs47m', 'cs48m', 'cs49m', 'cs50m')) { '1' } else { '0' }
@@ -139,6 +141,7 @@ finally {
         'AVSP_ORACLE11_COMPONENT20_PHASE_CAPTURE',
         'AVSP_ORACLE11_CLASS0F_STATE_COUNTERFACTUAL',
         'AVSP_ORACLE11_CLASS0A_VARIANT_COUNTERFACTUAL',
+        'AVSP_ORACLE11_CLASS00_INIT_COUNTERFACTUAL',
         'AVSP_ORACLE11_CLASS1F_ACTION4_GUARD_CAPTURE',
         'AVSP_ORACLE11_CLASS1F_INNER8_GROUP_CAPTURE',
         'AVSP_ORACLE11_CLASS1F_INNER8_GROUP_MUTATE',

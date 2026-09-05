@@ -39,7 +39,7 @@
         "id": "round1-runtime",
         "load_phase": "runtime",
         "owner": "complete fixed actor pools and mutable route state",
-        "required_bytes": 99512,
+        "required_bytes": 99540,
         "size": 102400
       },
       {
@@ -52,12 +52,12 @@
       },
       {
         "base": "0x22711000",
-        "census_capacity_floor_bytes": 241320,
+        "census_capacity_floor_bytes": 243476,
         "id": "round1-spec-content",
         "load_phase": "boot",
         "owner": "all generated read-only SPEC fixture tables",
-        "required_bytes": 47976,
-        "sha256": "e41f86ad4e0d25dc87981ee12bf8aa7d3f5e27e5bf7baf19cc55b09a17855df6",
+        "required_bytes": 50132,
+        "sha256": "95ca47501e420fc45af50e560531b33be50b49c60c0ef3c7203855f4b5fc43fb",
         "size": 262144
       },
       {
@@ -80,7 +80,7 @@
   },
   "classification": "REIMPLEMENT-13 bounded memory-plan program",
   "content_archive": {
-    "bytes": 47976,
+    "bytes": 50132,
     "categories": [
       "terrain",
       "timer-selector",
@@ -90,9 +90,9 @@
     ],
     "deterministic_double_build": true,
     "file": "build/avsp_cd/R1/R1SPEC.BIN",
-    "generated_source_sha256": "de8a9ad8a5c68cd9bd6e510aa6677439ed715402aef2668c993285ed46dd6b45",
-    "sha256": "e41f86ad4e0d25dc87981ee12bf8aa7d3f5e27e5bf7baf19cc55b09a17855df6",
-    "table_count": 172,
+    "generated_source_sha256": "6c2d38e7f6942163ff097942810c29f7b37207b8f7c14457de408626f4ee9f3b",
+    "sha256": "95ca47501e420fc45af50e560531b33be50b49c60c0ef3c7203855f4b5fc43fb",
+    "table_count": 178,
     "target_endian": "SH-2 big endian"
   },
   "legal_load_seams": [
@@ -130,13 +130,13 @@
     "writer_reconciliation_sha256": "e9508e1c621e6448953549817b8d66e9399cbce97f06d7883c013776f34fc39c"
   },
   "work_ram": {
-    "bss_end": "0x060b3e20",
-    "bss_headroom_bytes": 49632,
-    "game_bin_bytes": 380176,
+    "bss_end": null,
+    "bss_headroom_bytes": null,
+    "game_bin_bytes": null,
     "jo_user_program_data_end_exclusive": "0x060c0000",
     "linked_capacity_bytes": 770048,
     "linked_image_base": "0x06004000",
-    "linked_rodata_bytes": 74992,
+    "linked_rodata_bytes": null,
     "loader_low_ram_file_staging_limit_bytes": 1048576
   }
 }

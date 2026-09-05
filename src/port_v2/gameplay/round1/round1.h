@@ -6,7 +6,7 @@
 #include "../../combat/hit_ko/hit_ko.h"
 
 #define AVSP_ROUND1_SPEC02_SHA256 \
-"5fbc0c5cd5941d6fb0cae5ac887fad4320e55d7067c973df6fbd54438caca2ce"
+"a8c5913f90db7f476155a81d433b200d221e13d45e4ed1a58a6ee0e0e064937c"
 #define AVSP_ROUND1_CANARY_HEAD 0x52314548UL
 #define AVSP_ROUND1_CANARY_TAIL 0x52314554UL
 #define AVSP_ROUND1_ROUTE_ENTRY_STATE 2
@@ -138,6 +138,13 @@
 #define AVSP_ROUND1_CLASS02_PRESENTATION_COUNT 2u
 #define AVSP_ROUND1_CLASS0F_PRESENTATION_COUNT 3u
 #define AVSP_ROUND1_CLASS0A_PRESENTATION_COUNT 4u
+#define AVSP_ROUND1_CLASS00_COMPANION_PRESENTATION_COUNT 11u
+#define AVSP_ROUND1_CLASS00_COMPANION_PARENT_ANIMATION_COUNT 109u
+#define AVSP_ROUND1_CLASS00_COMPANION_PARENT_ENTRY_COUNT 37u
+#define AVSP_ROUND1_COFFEE_EXIT_PHASE_PLAYER 0u
+#define AVSP_ROUND1_COFFEE_EXIT_PHASE_CLASS0A 1u
+#define AVSP_ROUND1_COFFEE_EXIT_PHASE_DEFAULT 2u
+#define AVSP_ROUND1_COFFEE_EXIT_PHASE_CLASS00 3u
 #define AVSP_ROUND1_CLASS05_PRESENTATION_COUNT 5u
 #define AVSP_ROUND1_CLASS08_PARENT_PRESENTATION_COUNT 5u
 #define AVSP_ROUND1_HEALTH_PICKUP_PRESENTATION_COUNT 1u
@@ -365,6 +372,43 @@ typedef struct
     unsigned char first_variant;
     unsigned char second_variant;
 } AvspRound1Class0aSpec;
+
+typedef struct
+{
+    unsigned char selector;
+    AvspRound1AnimationStateSpec record;
+} AvspRound1Class00CompanionAnimationSpec;
+
+typedef struct
+{
+    unsigned long animation_record;
+    unsigned char parent_animation_branch;
+} AvspRound1Class00CompanionParentAnimationSpec;
+
+typedef struct
+{
+    unsigned char parent_animation_branch;
+    signed char x_offset;
+    signed char y_offset;
+    unsigned char animation_selector;
+    unsigned char parent_field56;
+} AvspRound1Class00CompanionParentEntrySpec;
+
+typedef struct
+{
+    unsigned long dispatch;
+    unsigned long active_helper;
+    unsigned long source_slot;
+    unsigned short parent_source_slot;
+    unsigned short active_state;
+    unsigned short active_substate;
+    unsigned short initial_field2e;
+    unsigned char initial_field64;
+    unsigned char initial_field65;
+    unsigned char init_field44;
+    unsigned char init_field45;
+    unsigned char parent_character_index;
+} AvspRound1Class00CompanionSpec;
 
 typedef struct
 {
@@ -1074,6 +1118,13 @@ typedef struct
     unsigned short source_frame;
     unsigned char updates;
 } AvspRound1SceneUpdateCadence;
+
+typedef struct
+{
+    unsigned char event_count;
+    unsigned char player_program_apply_mask;
+    unsigned long packed_events;
+} AvspRound1CoffeeExitClass00PhaseSpec;
 
 typedef struct
 {
@@ -1991,6 +2042,7 @@ typedef struct
     unsigned long player_stage_progress_carries;
     unsigned short source_global_hit_pause;
     unsigned short player_variant;
+    unsigned char player_presentation_field56;
     unsigned char source_stage_record_type;
     unsigned char coffee_stage_setup_complete;
     unsigned long coffee_stage_setup_calls;
@@ -2074,6 +2126,13 @@ typedef struct
     unsigned long class0a_guard_transitions;
     unsigned long class0a_releases;
     unsigned long class0a_next_entry_spawns;
+    unsigned long class00_companion_allocation_requests;
+    unsigned long class00_companion_allocations;
+    unsigned long class00_companion_initializations;
+    unsigned long class00_companion_init_substates;
+    unsigned long class00_companion_parent_projections;
+    unsigned long class00_companion_animation_bindings;
+    unsigned long class00_companion_helper_calls;
     unsigned char class08_parent_spawned;
     unsigned char class08_parent_released;
     unsigned char health_pickup_spawned;
@@ -2380,6 +2439,11 @@ int avsp_round1_bind_content_archive(const void *data,
                                      unsigned long bytes);
 int avsp_round1_begin_first_entry(AvspRound1Runtime *runtime);
 int avsp_round1_step_first_entry(AvspRound1Runtime *runtime);
+int avsp_round1_step_first_entry_source_differential(
+    AvspRound1Runtime *runtime, int include_exit_player_update,
+    int complete_exit_display_tick);
+int avsp_round1_step_coffee_exit_source_phase_program(
+    AvspRound1Runtime *runtime, unsigned short source_frame);
 int avsp_round1_step_coffee_exit_display(AvspRound1Runtime *runtime);
 int avsp_round1_step_player(AvspRound1Runtime *runtime,
                             unsigned short input_mask,
@@ -2394,6 +2458,10 @@ int avsp_round1_step_scheduler_post_player_source_differential_class0a(
     AvspRound1Runtime *runtime, int include_default,
     int include_record20_prefix, int include_record20_suffix,
     int include_class0a);
+int avsp_round1_step_scheduler_post_player_source_differential_scene(
+    AvspRound1Runtime *runtime, int include_default,
+    int include_record20_prefix, int include_record20_suffix,
+    int include_class0a, int include_class00);
 int avsp_round1_step_scheduler_source_differential(
     AvspRound1Runtime *runtime, int include_default,
     int include_record20_prefix, int include_record20_suffix);
@@ -2421,6 +2489,13 @@ unsigned int avsp_round1_coffee_shop_class02_source_updates(
     unsigned short source_frame);
 unsigned int avsp_round1_coffee_shop_class0a_source_updates(
     unsigned short source_frame);
+unsigned int avsp_round1_coffee_shop_class00_source_updates(
+    unsigned short source_frame);
+unsigned int avsp_round1_coffee_exit_player_source_updates(
+    unsigned short source_frame);
+unsigned int avsp_round1_coffee_exit_class00_phase_events(
+    unsigned short source_frame, unsigned long *packed_events,
+    unsigned char *player_program_apply_mask);
 int avsp_round1_entry_valid(const AvspRound1Runtime *runtime);
 int avsp_round1_canaries_ok(const AvspRound1Runtime *runtime);
 

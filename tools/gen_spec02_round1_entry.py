@@ -361,10 +361,14 @@ def build() -> str:
                    if item["type"] == 20 and item["class"] == "0x0f")
     class0a = next(item for item in scene_components["components"]
                    if item["type"] == 24 and item["class"] == "0x0a")
+    class00_companion = next(item for item in scene_components["components"]
+                             if item["type"] == 28 and
+                             item["class"] == "0x00")
     class01_contract = class01["implementation_contract"]
     class02_contract = class02["implementation_contract"]
     class0f_contract = class0f["implementation_contract"]
     class0a_contract = class0a["implementation_contract"]
+    class00_companion_contract = class00_companion["implementation_contract"]
     coffee_scene_records = sorted(
         class01_contract["stage_records"] +
         class02_contract["stage_records"] +
@@ -380,6 +384,17 @@ def build() -> str:
     class0a_records = class0a_contract["animation_selector"][
         "coffee_shop_records"]
     class0a_cadence = class0a_contract["scheduler_cadence"]
+    class00_companion_records = class00_companion_contract[
+        "animation_selector"]["records"]
+    class00_companion_parent_animations = class00_companion_contract[
+        "parent_projection"]["coffee_shop_animation_record_branches"]
+    class00_companion_parent_entries = class00_companion_contract[
+        "parent_projection"]["coffee_shop_entries"]
+    class00_companion_cadence = class00_companion_contract[
+        "scheduler_cadence"]
+    class00_companion_exit_phase = class00_companion_cadence[
+        "exit_callback_phase"]
+    class00_exit_phase_program = class00_companion_exit_phase["program"]
     class0f_selector1 = class0f_contract["state_program"]["0x0400"][
         "selector_1"]
     class0f_selector0 = class0f_contract["state_program"]["0x0400"][
@@ -2369,6 +2384,9 @@ def build() -> str:
         class0a["classification"] !=
             "SOURCE_CLOSED_IMPLEMENTATION_FIELDS" or
         class0a["implementation_status"] != "SPEC_EXECUTABLE" or
+        class00_companion["classification"] !=
+            "SOURCE_CLOSED_IMPLEMENTATION_FIELDS" or
+        class00_companion["implementation_status"] != "SPEC_EXECUTABLE" or
         [(row["address"], row["observed_source_slot"],
           row["camera_threshold_u16"], row["class_u8"], row["variant_u8"])
          for row in coffee_scene_records] != [
@@ -2477,7 +2495,72 @@ def build() -> str:
         class0a_cadence["exception_count_u8"] != 70 or
         class0a_cadence["dispatch_count_u16"] != 3597 or
         class0a_contract["retained_gameplay_authority"] is not False or
-        class0a_contract["fixed_frame_substitute_forbidden"] is not True):
+        class0a_contract["fixed_frame_substitute_forbidden"] is not True or
+        class00_companion_contract["source_body"] != {
+            "first": "0x0009e098", "last_exclusive": "0x0009e5be",
+            "sha256": "5ae219377db297092601b14a1e9f055fc7c18a6ccd6358c6dbbb55e3d586f3e1"} or
+        class00_companion_contract["active_helper"]["sha256"] !=
+            "af83dda6984a7ba504945d4ee313b6b133d342e1fac8fb7e51edba4f655161e1" or
+        class00_companion_contract["dispatch"][
+            "outer_state_high_byte_offsets_s16"] != [8, 112, 980, 1006] or
+        class00_companion_contract["allocation_initialization"][
+            "source_slot"] != "0x00ffce00" or
+        class00_companion_contract["allocation_initialization"][
+            "lifetime"] != {
+                "allocation_source_frame_u16": 2074,
+                "first_visible_source_frame_u16": 2075,
+                "last_visible_source_frame_u16": 5550} or
+        len(class00_companion_parent_animations) != 109 or
+        len({row["animation_record"] for row in
+             class00_companion_parent_animations}) != 109 or
+        any(row["parent_animation_branch_u8"] < 0 or
+            row["parent_animation_branch_u8"] > 255
+            for row in class00_companion_parent_animations) or
+        len(class00_companion_parent_entries) != 37 or
+        [row["parent_animation_branch_u8"] for row in
+         class00_companion_parent_entries] != [
+            0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14,
+            15, 16, 17, 18, 19, 20, 21, 22, 23, 24, 25, 29, 30,
+            42, 43, 44, 51, 52, 86, 89, 90, 97] or
+        len(class00_companion_records) != 11 or
+        [row["animation_record"] for row in class00_companion_records] != [
+            "0x0009e606", "0x0009e61a", "0x0009e62e", "0x0009e656", "0x0009e66a",
+            "0x0009e692", "0x0009e6e2", "0x0009e6f6", "0x0009e70a",
+            "0x0009e71e", "0x0009e732"] or
+        any(row["hurt_selector_u8"] != 0 or row["attack_selector_u8"] != 0
+            for row in class00_companion_records) or
+        class00_companion_cadence["dispatch_count_u16"] != 3595 or
+        class00_companion_cadence["exception_count_u8"] != 70 or
+        class00_companion_exit_phase["classification"] !=
+            "SOURCE_CLOSED_IMPLEMENTATION_FIELDS" or
+        class00_companion_exit_phase["byte_identical"] is not True or
+        class00_companion_exit_phase["sha256"] !=
+            "06db63941a57793c60fedc63698db6c6bdd2c93a524e0de8c2af055e3683a0eb" or
+        class00_companion_exit_phase["player_program_projection"][
+            "dispatcher_events_u16"] != 213 or
+        class00_companion_exit_phase["player_program_projection"][
+            "native_program_applications_u16"] != 203 or
+        len(class00_exit_phase_program) != 71 or
+        class00_exit_phase_program[7]["events"] != "PADCPADCPADCP" or
+        class00_exit_phase_program[8]["events"] != "ADCPADCPADCP" or
+        class00_exit_phase_program[52]["player_program_apply_mask_u8"] != 6 or
+        class00_exit_phase_program[53]["player_program_apply_mask_u8"] != 6 or
+        max(len(row["events"]) for row in class00_exit_phase_program) != 16 or
+        class00_companion_exit_phase["frame_5460_witness"] != {
+            "player_updates_u8": 4,
+            "record28_traversals_u8": 3,
+            "final_traversal_child_x_fp": "0x05320000",
+            "final_traversal_child_z_s16": 311,
+            "post_traversal_player_x_fp": "0x0539ad00",
+            "next_visible_child_x_fp": "0x05320000",
+            "next_visible_child_z_s16": 311} or
+        class00_companion_contract["direct_effects"]["rng_calls_u8"] != 0 or
+        class00_companion_contract["direct_effects"][
+            "collision_memberships_u8"] != 0 or
+        class00_companion_contract["counterfactual"]["classification"] !=
+            "SOURCE_STATE_MUTATION_CONTROL_WITH_MATCHED_NORMALIZATION" or
+        class00_companion_contract["retained_gameplay_authority"] is not False or
+        class00_companion_contract["fixed_frame_substitute_forbidden"] is not True):
         raise ValueError("SPEC-02 Coffee Shop component implementation drift")
     if (class02_source_cadence["classification"] !=
             "SOURCE_CLOSED_IMPLEMENTATION_FIELDS" or
@@ -4901,6 +4984,35 @@ def build() -> str:
             row["attack_selector_u8"]))
     lines.extend([
         "};", "",
+        "static const AvspRound1Class00CompanionAnimationSpec avsp_round1_class00_companion_records[AVSP_ROUND1_CLASS00_COMPANION_PRESENTATION_COUNT] =",
+        "{",
+    ])
+    for row in class00_companion_records:
+        lines.append("    { %du, { %du, %d, %sUL, %sUL, %du, %du } }," % (
+            row["branch_s16"] + 32768, row["timer_u16"],
+            row["branch_s16"], row["animation_record"], row["assembly"],
+            row["hurt_selector_u8"], row["attack_selector_u8"]))
+    lines.extend([
+        "};", "",
+        "static const AvspRound1Class00CompanionParentAnimationSpec avsp_round1_class00_companion_parent_animations[AVSP_ROUND1_CLASS00_COMPANION_PARENT_ANIMATION_COUNT] =",
+        "{",
+    ])
+    for row in class00_companion_parent_animations:
+        lines.append("    { %sUL, %du }," % (
+            row["animation_record"],
+            row["parent_animation_branch_u8"]))
+    lines.extend([
+        "};", "",
+        "static const AvspRound1Class00CompanionParentEntrySpec avsp_round1_class00_companion_parent_entries[AVSP_ROUND1_CLASS00_COMPANION_PARENT_ENTRY_COUNT] =",
+        "{",
+    ])
+    for row in class00_companion_parent_entries:
+        lines.append("    { %du, %d, %d, %du, %du }," % (
+            row["parent_animation_branch_u8"], row["x_offset_s8"],
+            row["y_offset_s8"], row["animation_selector_u8"],
+            row["parent_field56_u8"]))
+    lines.extend([
+        "};", "",
         "static const AvspRound1AnimationStateSpec avsp_round1_class05_records[AVSP_ROUND1_CLASS05_PRESENTATION_COUNT] =",
         "{",
     ])
@@ -4997,6 +5109,12 @@ def build() -> str:
         "    { 0x0Au, 0x0Cu, 0x0Eu }, 0x00FFC600UL, 0x00FFC580UL,",
         "    0x26u, 0x06u",
         "};", "",
+        "static const AvspRound1Class00CompanionSpec avsp_round1_class00_companion =",
+        "{",
+        "    0x09E098UL, 0x0BCA3AUL, 0x00FFCE00UL, 0x8380u,",
+        "    0x0206u, 0x0200u, 0x8000u, 0x22u, 0xFFu,",
+        "    0x13u, 0xFFu, 0u",
+        "};", "",
         "/* Source-display cadence derived from the accepted recurring-controller",
         " * transaction ledger. This is diagnostic replay timing, not a gameplay",
         " * transition trigger. */",
@@ -5040,6 +5158,44 @@ def build() -> str:
     for row in class0a_cadence["exceptions"]:
         lines.append("    { %su, %su }," % (
             row["source_frame_u16"], row["updates_u8"]))
+    lines.extend([
+        "};", "",
+        "/* Source-display class-0x00 record-28 dispatch cadence. This",
+        " * aligns the source-owned player companion with its pool phase;",
+        " * it is not a fixed-frame gameplay transition. */",
+        "#define AVSP_ROUND1_COFFEE_SHOP_CLASS00_FIRST_SOURCE_FRAME %su" %
+            class00_companion_cadence[
+                "source_frame_range_inclusive_u16"][0],
+        "#define AVSP_ROUND1_COFFEE_SHOP_CLASS00_LAST_SOURCE_FRAME %su" %
+            class00_companion_cadence[
+                "source_frame_range_inclusive_u16"][1],
+        "#define AVSP_ROUND1_COFFEE_SHOP_CLASS00_DEFAULT_SOURCE_UPDATES %su" %
+            class00_companion_cadence[
+                "default_updates_per_source_frame_u8"],
+        f"#define AVSP_ROUND1_COFFEE_SHOP_CLASS00_UPDATE_CADENCE_COUNT {len(class00_companion_cadence['exceptions'])}",
+        "static const AvspRound1SceneUpdateCadence avsp_round1_coffee_shop_class00_update_cadence[AVSP_ROUND1_COFFEE_SHOP_CLASS00_UPDATE_CADENCE_COUNT] =",
+        "{",
+    ])
+    for row in class00_companion_cadence["exceptions"]:
+        lines.append("    { %su, %su }," % (
+            row["source_frame_u16"], row["updates_u8"]))
+    lines.extend([
+        "};", "",
+        "/* Complete route-6 callback/fixed-pool phase program from the",
+        " * paired class-0x00 scheduler witness. Two bits encode each event",
+        " * from least-significant to most-significant. */",
+        "#define AVSP_ROUND1_COFFEE_EXIT_CLASS00_PHASE_FIRST_SOURCE_FRAME 5453u",
+        f"#define AVSP_ROUND1_COFFEE_EXIT_CLASS00_PHASE_COUNT {len(class00_exit_phase_program)}",
+        "static const AvspRound1CoffeeExitClass00PhaseSpec avsp_round1_coffee_exit_class00_phase[AVSP_ROUND1_COFFEE_EXIT_CLASS00_PHASE_COUNT] =",
+        "{",
+    ])
+    phase_codes = {"P": 0, "A": 1, "D": 2, "C": 3}
+    for row in class00_exit_phase_program:
+        packed = 0
+        for index, event in enumerate(row["events"]):
+            packed |= phase_codes[event] << (index * 2)
+        lines.append("    { %su, 0x%02Xu, 0x%08XUL }," % (
+            len(row["events"]), row["player_program_apply_mask_u8"], packed))
     lines.extend([
         "};", "",
         "/* Diagnostic-only replay of the accepted ORACLE-10 Coffee Shop",

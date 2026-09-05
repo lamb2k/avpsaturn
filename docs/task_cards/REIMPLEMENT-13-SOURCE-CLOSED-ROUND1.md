@@ -4070,3 +4070,47 @@ presentation differences. The next earliest missing source program is type-28/
 class-`0x00`, slot `0x00ffce00`, dispatch `0x09e098`, lifetime 2075..5550,
 state/substate `0x0206:0x0200`. Candidate promotion and exhausted visual gates
 remain frozen; no Emulator/WGC attempt occurred.
+
+### P4 Coffee Shop class-0x00 source-program checkpoint (2026-09-05)
+
+The complete Coffee-Shop-reachable record-type-28/class-`0x00` presentation-
+companion program at `0x09e098..0x09e5be` is source/spec/native closed for slot
+`0x00ffce00`, lifetime 2075..5550. The accepted contract binds allocation and
+same-traversal initialization, all outer/action/substate dispatches, parent
+pointer and animation-record-byte projection, signed position offsets and
+facing negation, parent field coordination, the 16-entry selector table and
+records, repeated scheduler phases, the frozen resident interval, and central
+scene-clear release. It positively establishes zero direct RNG, collision,
+health/damage, audio, route, camera, or load effects; capture scheduling remains
+a diagnostic projection rather than gameplay authority.
+
+Two baseline captures are byte-identical. The paired source-state mutation
+changes the nested initialization fields and focused program ledger, while the
+complete-scene actor/route/RNG/health/collision/audio projections normalize
+identically in source and native. That matched normalization is scoped to this
+initialization witness; the production baseline requires no normalization.
+Native aligns all 3,476 source rows with zero raw and normalized mismatches.
+
+Ten focused class-`0x00` mutants, 144 auxiliary, 192 SPEC-02, 330 causal host,
+two external whole-scene scheduler-phase, 31 scene, and 18 memory controls pass.
+Two declared equivalent host survivors receive no credit; invalid mutation,
+timeout, and environment-failure counts remain zero. Fast and Oracle pass.
+Scene RED gaps improve from `185/1/0/665/1/93/0/279/0` to
+`184/1/0/663/1/93/0/279/0`; no category increases.
+
+Runtime measures 99,540/102,400 bytes by the SH compiler, leaving 2,860 bytes.
+SPEC content is 50,132/262,144 bytes, 178 tables, SHA-256
+`95ca47501e420fc45af50e560531b33be50b49c60c0ef3c7203855f4b5fc43fb`;
+its census capacity floor is 243,476 bytes. Tile archive remains
+612,720/614,400 for the complete route, current street peak 592,648, and
+composite scratch remains 11,648/12,288 with CPU-mediated cart-to-VDP1 upload.
+
+Target consumed its three-attempt cap before a current image was produced:
+the attempts exposed stale fixture identity and two stale/guessed exact-runtime
+size assertions. The measured `0x184d4` correction and refreshed identities are
+host-validated, not Target-validated. The last accepted Target artifact remains
+the class-`0x0a` GAME.BIN and is not evidence for this body. Owner must explicitly
+reopen a bounded Target attempt; Emulator/WGC attempts remain exhausted. The
+next dependency-safe whole program is Coffee Shop type-36/class-`0x04`
+presentation, beginning at source frame 2254. Candidate remains frozen and
+physical Saturn remains UNRUN.

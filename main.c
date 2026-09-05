@@ -121,12 +121,12 @@
  * transient diagnostic storage. Reserve one aligned block immediately after
  * the existing tile/strip carve so debug and release use the same 4 MB-cart
  * ownership without consuming Saturn work RAM. The SH-2 runtime measures
- * 0x18468 bytes with all six source pools, the Coffee Shop terrain stream,
+ * 0x184d4 bytes with all six source pools, the Coffee Shop terrain stream,
  * and the source-owned Coffee Shop exit-controller state;
- * the 0x19000 carve preserves 0x0bf0 bytes of headroom inside the fixed arena. */
+ * the 0x19000 carve preserves 0x0b2c bytes of headroom inside the fixed arena. */
 #ifdef AVSP_LIVE_ENCOUNTER
 #define AVSP_ROUND1_RUNTIME_REGION_BYTES 0x19000
-#define AVSP_ROUND1_RUNTIME_MEASURED_BYTES 0x184b8
+#define AVSP_ROUND1_RUNTIME_MEASURED_BYTES 0x184d4
 #define AVSP_LIVE_DIAG_REGION_BYTES 0x1A000
 #define AVSP_ROUND1_CONTENT_REGION_BYTES 0x40000
 #define AVSP_COMPOSITE_SCRATCH_REGION_BYTES 0x3000
@@ -8296,7 +8296,7 @@ static void live_encounter_publish(void)
     avsp_diag_round1_spec_bound =
         avsp_diag_round1_content_loaded &&
         strcmp(AVSP_ROUND1_SPEC02_SHA256,
-               "5fbc0c5cd5941d6fb0cae5ac887fad4320e55d7067c973df6fbd54438caca2ce") ==
+               "a8c5913f90db7f476155a81d433b200d221e13d45e4ed1a58a6ee0e0e064937c") ==
         0;
     avsp_diag_round1_entry_valid = avsp_round1_entry_valid(&round1_runtime);
     avsp_diag_round1_route_state = round1_runtime.route_state;
@@ -8491,6 +8491,9 @@ static void live_encounter_frame_callback(void)
     unsigned int scheduler_updates;
     unsigned int record20_prefix_updates;
     unsigned int class02_updates;
+    unsigned int class0a_updates;
+    unsigned int class00_updates;
+    unsigned int exit_player_updates;
     unsigned int phase_updates;
     unsigned int source_tick;
     unsigned int phase_tick;
@@ -8498,6 +8501,9 @@ static void live_encounter_frame_callback(void)
     int scheduler_update_enabled;
     int record20_prefix_update_enabled;
     int class02_update_enabled;
+    int class0a_update_enabled;
+    int class00_update_enabled;
+    int exit_source_phase;
     if (!runtime_ready)
     {
         if (avsp_diag_live_frame_stage == 0)
@@ -8528,12 +8534,26 @@ static void live_encounter_frame_callback(void)
             (unsigned short)source_frame);
     class02_updates = avsp_round1_coffee_shop_class02_source_updates(
         (unsigned short)source_frame);
+    class0a_updates = avsp_round1_coffee_shop_class0a_source_updates(
+        (unsigned short)source_frame);
+    class00_updates = avsp_round1_coffee_shop_class00_source_updates(
+        (unsigned short)source_frame);
+    exit_player_updates = avsp_round1_coffee_exit_player_source_updates(
+        (unsigned short)source_frame);
     phase_updates = source_updates > scheduler_updates ?
         source_updates : scheduler_updates;
     if (record20_prefix_updates > phase_updates)
         phase_updates = record20_prefix_updates;
     if (class02_updates > phase_updates)
         phase_updates = class02_updates;
+    if (class0a_updates > phase_updates)
+        phase_updates = class0a_updates;
+    if (class00_updates > phase_updates)
+        phase_updates = class00_updates;
+    if (exit_player_updates > phase_updates)
+        phase_updates = exit_player_updates;
+    exit_source_phase = exit_player_updates != 0u &&
+        round1_runtime.entry.exit_started && round1_runtime.route_state != 4;
     if (!round1_runtime.entry.started &&
         round1_runtime.frame == AVSP_ROUND1_NATIVE_ENTRY_STEP_FRAME &&
         !avsp_round1_begin_first_entry(&round1_runtime))
@@ -8551,7 +8571,17 @@ static void live_encounter_frame_callback(void)
 #endif
     round1_player_mask = input.player_mask;
     round1_route_before = round1_runtime.route_state;
-    for (source_tick = 1u; source_tick <= phase_updates; ++source_tick)
+    if (exit_source_phase)
+    {
+        if (!avsp_round1_step_coffee_exit_source_phase_program(
+                &round1_runtime, (unsigned short)source_frame))
+        {
+            avsp_diag_live_frame_stage = -8;
+            runtime_ready = 0;
+            return;
+        }
+    }
+    else for (source_tick = 1u; source_tick <= phase_updates; ++source_tick)
     {
         phase_tick = source_tick == phase_updates ? 0u : source_tick;
         source_update_enabled = phase_tick == 0u ? source_updates != 0u :
@@ -8563,9 +8593,14 @@ static void live_encounter_frame_callback(void)
             phase_tick < record20_prefix_updates;
         class02_update_enabled = phase_tick == 0u ?
             class02_updates != 0u : phase_tick < class02_updates;
+        class0a_update_enabled = phase_tick == 0u ?
+            class0a_updates != 0u : phase_tick < class0a_updates;
+        class00_update_enabled = phase_tick == 0u ?
+            class00_updates != 0u : phase_tick < class00_updates;
         round1_player_authority_enabled_at_tick_start =
             round1_runtime.route_state == 4;
-        if (source_update_enabled && round1_runtime.entry.started &&
+        if (source_update_enabled &&
+            round1_runtime.entry.started &&
             round1_runtime.route_state != 4 &&
             !avsp_round1_step_first_entry(&round1_runtime))
         {
@@ -8603,10 +8638,11 @@ static void live_encounter_frame_callback(void)
             return;
         }
         if (round1_runtime.entry.dependencies_seeded &&
-            !avsp_round1_step_scheduler_post_player_source_differential(
+            !avsp_round1_step_scheduler_post_player_source_differential_scene(
                 &round1_runtime, scheduler_update_enabled,
                 record20_prefix_update_enabled,
-                class02_update_enabled))
+                class02_update_enabled, class0a_update_enabled,
+                class00_update_enabled))
         {
             avsp_diag_round1_scheduler_failure_code =
                 round1_runtime.scheduler_failure_code;

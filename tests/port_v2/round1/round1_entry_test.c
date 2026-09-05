@@ -343,14 +343,31 @@ int main(void)
         runtime.pools[0].free_count != 10u ||
         runtime.pools[2].free_count != 12u ||
         runtime.pools[3].free_count != 30u ||
+        runtime.pools[4].free_count != 15u ||
         runtime.scheduler_frames != 170u ||
-        runtime.scheduler_dispatches != 2720u ||
+        runtime.scheduler_dispatches != 2889u ||
         runtime.class1f_initializations != 10u ||
         runtime.class1f_initial_rng_calls != 10u ||
         runtime.class09_initializations != 2u ||
         runtime.class09_rng_calls != 42u ||
         runtime.class0a_initializations != 1u ||
         runtime.class0a_animation_steps != 169u ||
+        runtime.class00_companion_allocation_requests != 1u ||
+        runtime.class00_companion_allocations != 1u ||
+        runtime.class00_companion_initializations != 1u ||
+        runtime.class00_companion_parent_projections != 169u ||
+        runtime.class00_companion_animation_bindings != 169u ||
+        !runtime.pools[4].records[15].active ||
+        runtime.pools[4].records[15].source_slot != 0x00ffce00UL ||
+        runtime.pools[4].records[15].actor_class != 0x00 ||
+        runtime.pools[4].records[15].state != 0x0206u ||
+        runtime.pools[4].records[15].substate != 0x0200u ||
+        runtime.pools[4].records[15].source_target_low != 0x8380u ||
+        runtime.pools[4].records[15].animation_record != 0x0009e732UL ||
+        runtime.pools[4].records[15].assembly != 0x0009eb00UL ||
+        runtime.pools[4].records[15].animation_timer != 4095u ||
+        runtime.pools[4].records[15].hurt_selector != 0u ||
+        runtime.pools[4].records[15].attack_selector != 0u ||
         runtime.rng_seed != 0x334fu ||
         runtime.player.source_target_low != 0xce00u ||
         runtime.source_stage_parameter != 8u ||
@@ -515,9 +532,9 @@ int main(void)
         return 6;
     }
     if (!avsp_round1_step_scheduler(&runtime) ||
-        runtime.scheduler_trace_count != 17u ||
+        runtime.scheduler_trace_count != 18u ||
         runtime.scheduler_frames != 171u ||
-        runtime.scheduler_dispatches != 2737u ||
+        runtime.scheduler_dispatches != 2907u ||
         runtime.actor_handler_dispatches != 1710u ||
         runtime.presentation_bindings != 1710u ||
         runtime.state_context_bindings != 1710u ||
@@ -568,9 +585,9 @@ int main(void)
     runtime.pools[3].records[0].source_slot = 0x00ffb680UL;
     runtime.pools[3].free_count = 2u;
     if (!avsp_round1_step_scheduler(&runtime) ||
-        runtime.scheduler_trace_count != 20u ||
+        runtime.scheduler_trace_count != 21u ||
         runtime.scheduler_frames != 172u ||
-        runtime.scheduler_dispatches != 2757u ||
+        runtime.scheduler_dispatches != 2928u ||
         runtime.actor_handler_dispatches != 1720u ||
         runtime.presentation_bindings != 1720u ||
         runtime.state_context_bindings != 1720u ||
@@ -600,6 +617,78 @@ int main(void)
             runtime.scheduler_failure_code);
         return 9;
     }
+    {
+        AvspRound1Runtime companion_runtime = runtime;
+        AvspRound1ActorCore *companion =
+            &companion_runtime.pools[4].records[15];
+        unsigned short rng_before = companion_runtime.rng_seed;
+        short health_before = companion_runtime.player.health;
+        short route_before = companion_runtime.route_state;
+        companion_runtime.player.x = 1000;
+        companion_runtime.player.y = 300;
+        companion_runtime.player.z = 300;
+        companion_runtime.player.source_x_fp = 1000L * 65536L;
+        companion_runtime.player.source_y_fp = 300L * 65536L;
+        companion_runtime.player.facing = 1u;
+        companion_runtime.player.animation_record = 0x001600e8UL;
+        if (!avsp_round1_step_scheduler_post_player_source_differential_class0a(
+                &companion_runtime, 0, 0, 0, 1) ||
+            companion->x != 1000 || companion->y != 300 ||
+            companion->z != 300 || companion->facing != 1u ||
+            companion->animation_record != 0x0009e606UL ||
+            companion->assembly != 0x0009e8ecUL ||
+            companion->animation_timer != 4095u ||
+            companion_runtime.player_presentation_field56 != 0u ||
+            companion_runtime.class00_companion_parent_projections != 172u ||
+            companion_runtime.class00_companion_animation_bindings != 172u)
+            return 165;
+        companion_runtime.player.facing = 0u;
+        companion_runtime.player.animation_record = 0x0015f2f0UL;
+        if (!avsp_round1_step_scheduler_post_player_source_differential_class0a(
+                &companion_runtime, 0, 0, 0, 1) ||
+            companion->x != 1010 || companion->y != 400 ||
+            companion->z != 300 || companion->facing != 0u ||
+            companion->animation_record != 0x0009e66aUL ||
+            companion->assembly != 0x0009e998UL ||
+            companion_runtime.player_presentation_field56 != 1u)
+            return 165;
+        companion_runtime.player.facing = 1u;
+        companion_runtime.player.animation_record = 0x0015f43cUL;
+        if (!avsp_round1_step_scheduler_post_player_source_differential_class0a(
+                &companion_runtime, 0, 0, 0, 1) ||
+            companion->x != 1010 || companion->y != 364 ||
+            companion->z != 300 || companion->facing != 1u ||
+            companion->animation_record != 0x0009e61aUL ||
+            companion->assembly != 0x0009e908UL ||
+            companion_runtime.player_presentation_field56 != 1u)
+            return 165;
+        companion->substate = 0u;
+        companion->source_a4 = 0u;
+        companion->source_a5 = 0u;
+        companion->source_player_guard = 0u;
+        if (!avsp_round1_step_scheduler_post_player_source_differential_class0a(
+                &companion_runtime, 0, 0, 0, 1) ||
+            companion->substate != 0x0200u || companion->source_a4 != 0x13u ||
+            companion->source_a5 != 0xffu ||
+            companion->source_player_guard != 4u ||
+            companion_runtime.class00_companion_init_substates != 1u ||
+            companion_runtime.class00_companion_helper_calls != 1u)
+            return 166;
+        companion->source_a6 = 1u;
+        companion_runtime.player.animation_record = 0x00deadbeUL;
+        if (!avsp_round1_step_scheduler_post_player_source_differential_class0a(
+                &companion_runtime, 0, 0, 0, 1) ||
+            companion_runtime.class00_companion_parent_projections != 175u ||
+            companion_runtime.class00_companion_animation_bindings != 175u)
+            return 167;
+        if (companion_runtime.rng_seed != rng_before ||
+            companion_runtime.player.health != health_before ||
+            companion_runtime.route_state != route_before)
+            return 168;
+    }
+#if defined(AVSP_CLASS00_FOCUSED_TEST) && AVSP_CLASS00_FOCUSED_TEST
+    return 0;
+#endif
     runtime.pools[3].records[0].active = 0u;
     runtime.pools[3].free_count = 30u;
     first = &runtime.pools[0].records[19];
@@ -3166,7 +3255,7 @@ int main(void)
                     avsp_round1_entry_valid(&integrated_runtime),
                     integrated_runtime.failure_count);
                 fprintf(stderr,
-                    "player core=%04x/%04x source_action=%04x action_state=%u loco=%04x stop=%u cleanup=%u jump=%u/%04x weapon=%u/%u return=%u pos=%d/%d action_pos=%d/%d camera=%d/%d target=%d/%d bounds=%d/%d\n",
+                    "player core=%04x/%04x source_action=%04x action_state=%u loco=%04x stop=%u cleanup=%u jump=%u/%04x weapon=%u/%u return=%u pos=%d/%d action_pos=%d/%d camera=%d/%d target=%d/%d bounds=%d/%d animation=%08lx\n",
                     integrated_runtime.player.state,
                     integrated_runtime.player.substate,
                     integrated_runtime.player.source_action,
@@ -3188,7 +3277,8 @@ int main(void)
                     integrated_runtime.camera_x_target,
                     integrated_runtime.camera_z_target,
                     integrated_runtime.navigation_bound_x,
-                    integrated_runtime.navigation_bound_z);
+                    integrated_runtime.navigation_bound_z,
+                    integrated_runtime.player.animation_record);
                 fprintf(stderr,
                     "pools=%u/%u/%u/%u life_release=%lu life_spawn=%u encounter=%u unlock=%u scroll2=%d nav=%u entry=%u/%u/%u/%u timer=%u route=%u\n",
                     integrated_runtime.pools[0].free_count,

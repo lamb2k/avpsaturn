@@ -8,6 +8,7 @@ import io
 import json
 import re
 import subprocess
+import sys
 import tempfile
 from collections import defaultdict
 from pathlib import Path
@@ -16,6 +17,8 @@ from pathlib import Path
 ROOT = Path(__file__).resolve().parents[1]
 FIXTURES = ROOT / "data" / "spec02_round1_generated_fixtures.json"
 OUT = ROOT / "data" / "reimplement13_coffee_shop_scene_parity.json"
+MUTATION_REPORT = (ROOT / "data" /
+                   "reimplement13_round1_mutation_causality.json")
 SOURCE_ACTORS = (ROOT / ".deps" / "mame" /
                  "oracle11_progression_lifecycle_cs21a" /
                  "coffee_shop_scene_actors.tsv")
@@ -38,18 +41,50 @@ def wsl(path: Path) -> str:
         check=True, capture_output=True, text=True).stdout.strip()
 
 
-def capture() -> tuple[list[dict[str, str]], str, int]:
+def capture(generated_override: str | None = None) -> \
+        tuple[list[dict[str, str]], str, int]:
     with tempfile.TemporaryDirectory(prefix="round1-coffee-census-") as name:
+        temp = Path(name)
         output = f"/tmp/{Path(name).name}-census"
+        round1_source = "src/port_v2/gameplay/round1/round1.c"
+        extra_include = ""
+        if generated_override is not None:
+            round1_body = (ROOT / round1_source).read_text(encoding="ascii")
+            round1_body = round1_body.replace(
+                '#include "../../integration/combat/combat.h"',
+                '#include "combat.h"')
+            round1_body = round1_body.replace(
+                '#include "../../../../avsp_actor.h"',
+                '#include "avsp_actor.h"')
+            round1_body = round1_body.replace(
+                '#include "../../../../avsp_collision.h"',
+                '#include "avsp_collision.h"')
+            header_body = (ROOT / "src/port_v2/gameplay/round1/round1.h").read_text(
+                encoding="ascii")
+            header_body = header_body.replace(
+                '#include "../player_action/player_action.h"',
+                '#include "player_action.h"')
+            header_body = header_body.replace(
+                '#include "../street_alien_ai/street_alien_ai.h"',
+                '#include "street_alien_ai.h"')
+            header_body = header_body.replace(
+                '#include "../../combat/hit_ko/hit_ko.h"',
+                '#include "hit_ko.h"')
+            (temp / "round1.c").write_text(round1_body, encoding="ascii")
+            (temp / "round1.h").write_text(header_body, encoding="ascii")
+            (temp / "spec02_round1_entry_data.h").write_text(
+                generated_override, encoding="ascii")
+            round1_source = f"'{wsl(temp / 'round1.c')}'"
+            extra_include = f"-I '{wsl(temp)}' "
         command = (
             f"cd '{wsl(ROOT)}' && gcc -std=c90 -pedantic -Wall -Wextra "
             f"-DAVSP_COFFEE_SCENE_RNG_TRACE=1 "
-            f"-Werror -I . -I src/port_v2/gameplay/round1 "
+            f"-Werror {extra_include}-I . -I src/port_v2/gameplay/round1 "
             f"-I src/port_v2/gameplay/player_action "
             f"-I src/port_v2/gameplay/street_alien_ai "
             f"-I src/port_v2/combat/hit_ko "
             f"-I src/port_v2/integration/combat "
-            f"src/port_v2/gameplay/round1/round1.c avsp_actor.c "
+            f"{round1_source} avsp_actor.c "
             f"avsp_collision.c src/port_v2/gameplay/player_action/player_action.c "
             f"src/port_v2/gameplay/street_alien_ai/street_alien_ai.c "
             f"src/port_v2/combat/hit_ko/hit_ko.c "
@@ -62,11 +97,90 @@ def capture() -> tuple[list[dict[str, str]], str, int]:
             ["wsl.exe", "-d", "Ubuntu-24.04", "-u", "root", "--",
              "bash", "-lc", command], check=False, capture_output=True,
              text=True)
-        if result.returncode != 0:
-            FAILURE_STDOUT.write_text(result.stdout, encoding="utf-8")
-            FAILURE_STDERR.write_text(result.stderr, encoding="utf-8")
+        FAILURE_STDOUT.write_text(result.stdout, encoding="utf-8")
+        FAILURE_STDERR.write_text(result.stderr, encoding="utf-8")
     return (list(csv.DictReader(io.StringIO(result.stdout), delimiter="\t")),
             result.stderr.strip(), result.returncode)
+
+
+def run_class00_phase_mutation_control() -> None:
+    fixtures = json.loads(FIXTURES.read_text(encoding="ascii"))
+    class00_contract = next(
+        item["implementation_contract"] for item in fixtures[
+            "authority_data"]["auxiliary"][
+                "coffee_shop_scene_component_identities"]["components"]
+        if item["type"] == 28 and item["class"] == "0x00")
+    generated_path = (ROOT / "src" / "port_v2" / "gameplay" / "round1" /
+                      "spec02_round1_entry_data.h")
+    generated = generated_path.read_text(encoding="ascii")
+    with SOURCE_ACTORS.open(newline="", encoding="ascii") as handle:
+        source_rows = list(csv.DictReader(handle, delimiter="\t"))
+    source_rows = bind_source_collision_selectors(
+        source_rows, fixtures["scene_manifests"]["coffee_shop"]
+        ["animation_collision_selectors"])
+
+    records: list[dict[str, object]] = []
+
+    def reject(mutant: str, label: str, expected_frame: int) -> None:
+        rows, runtime_summary, returncode = capture(mutant)
+        if returncode != 0:
+            raise RuntimeError(label + " did not execute: " +
+                               runtime_summary.splitlines()[-1])
+        try:
+            class00_companion_complete_program_differential(
+                source_rows, rows, runtime_summary, class00_contract)
+        except ValueError as error:
+            message = str(error)
+            if ("class-0x00 companion raw drift" not in message or
+                    f'"frame_u16": {expected_frame}' not in message):
+                raise
+            print("mutation " + label +
+                  ": VALID_BEHAVIORAL_REJECTION (raw frame-" +
+                  str(expected_frame) + " differential)")
+            records.append({
+                "assertion_evidence":
+                    "complete-scene comparator raw frame-" +
+                    str(expected_frame) + " differential",
+                "classification": "VALID_BEHAVIORAL_REJECTION",
+                "compile_and_link_success": True,
+                "expected_runtime_returncode": 0,
+                "label": label,
+                "runtime_returncode": 0,
+                "source_program_coverage":
+                    "type28/class0x00 scheduler-phase projection",
+            })
+            return
+        raise AssertionError(label + " survived")
+
+    mask_source = "    { 12u, 0x06u, 0x00393939UL },"
+    mask_mutant = "    { 12u, 0x03u, 0x00393939UL },"
+    if generated.count(mask_source) != 1:
+        raise ValueError("class-0x00 ballistic phase fixture identity drift")
+    reject(generated.replace(mask_source, mask_mutant, 1),
+           "class00-ballistic-apply-mask", 5506)
+    order_source = "    { 13u, 0x0Fu, 0x00E4E4E4UL },"
+    order_mutant = "    { 13u, 0x0Fu, 0x039E7900UL },"
+    if generated.count(order_source) != 7:
+        raise ValueError("class-0x00 phase ordering fixture identity drift")
+    reject(generated.replace(order_source, order_mutant, 1),
+           "class00-batched-player-before-pools", 5461)
+    report = json.loads(MUTATION_REPORT.read_text(encoding="ascii"))
+    report["whole_scene_controls"] = records
+    report["current_counts_with_external_whole_scene_controls"] = {
+        "SURVIVED_MUTATION": report["current_counts"].get(
+            "SURVIVED_MUTATION", 0),
+        "VALID_BEHAVIORAL_REJECTION": report["current_counts"].get(
+            "VALID_BEHAVIORAL_REJECTION", 0) + len(records),
+    }
+    report["whole_scene_control_qualification"] = (
+        "These two controls compile and execute the complete scene outside "
+        "test_entry.py; they supplement rather than rewrite its enumerated "
+        "host-mutation count.")
+    MUTATION_REPORT.write_text(
+        json.dumps(report, indent=2, sort_keys=True) + "\n",
+        encoding="ascii", newline="\n")
+    print("REIMPLEMENT-13 class-0x00 scheduler-phase mutation lane: PASS "
+          "(2 real whole-scene mutations)")
 
 
 def lifetimes(rows: list[dict[str, str]]) -> list[dict[str, object]]:
@@ -170,6 +284,7 @@ NATIVE_OWNERS = {
     (24, "0x3d"): "native Predator special event-effect dispatcher",
     (24, "0x4e"): "class-0x4e effect dispatcher",
     (28, "0x0a"): "native class-0x0a source-pickup lifecycle",
+    (28, "0x00"): "native class-0x00 player companion presentation program",
     (32, "0x01"): "AvspRound1Runtime.entry_controller",
     (36, "0x05"): "Coffee Shop obstacle child dispatcher",
 }
@@ -1176,6 +1291,111 @@ def class0a_complete_program_differential(
     }
 
 
+def class00_companion_complete_program_differential(
+        source_rows: list[dict[str, str]],
+        native_rows: list[dict[str, str]],
+        runtime_summary: str,
+        contract: dict[str, object]) -> dict[str, object]:
+    """Compare the source-owned player companion without normalization."""
+    source = [row for row in source_rows if row["class"] == "00" and
+              row["type"] == "28" and row["slot"] == "ffce00"]
+    native = [row for row in native_rows if row["class"] == "00" and
+              row["type"] == "28" and
+              row["source_slot"] == "00ffce00"]
+    if len(source) != 3476 or len(native) != 3476:
+        raise ValueError("Coffee Shop class-0x00 companion row drift")
+    source_by_frame = {int(row["frame"]): row for row in source}
+    native_by_frame = {int(row["frame"]): row for row in native}
+    if set(source_by_frame) != set(native_by_frame):
+        raise ValueError("Coffee Shop class-0x00 companion lifetime drift")
+    fields = ("state", "substate", "x_fp", "y_fp", "z", "facing",
+              "animation_record", "animation_timer", "animation_branch")
+
+    def value(row: dict[str, str], field: str, source_side: bool) -> int:
+        if field in {"state", "substate", "animation_record"}:
+            return int(row[field], 16)
+        if field == "animation_timer":
+            return int(row[field], 16) if source_side else int(row[field])
+        if field in {"x_fp", "y_fp"}:
+            return int(row[field], 16) if source_side else int(row[field])
+        return int(row[field])
+
+    raw = []
+    for frame in sorted(source_by_frame):
+        changed = [field for field in fields
+                   if value(source_by_frame[frame], field, True) !=
+                   value(native_by_frame[frame], field, False)]
+        if changed:
+            raw.append({"frame_u16": frame, "source_slot": "0x00ffce00",
+                        "fields": changed,
+                        "source": {field: value(
+                            source_by_frame[frame], field, True)
+                            for field in changed},
+                        "native": {field: value(
+                            native_by_frame[frame], field, False)
+                            for field in changed}})
+    if raw:
+        raise ValueError("Coffee Shop class-0x00 companion raw drift: " +
+                         json.dumps(raw[:8], sort_keys=True))
+    presentation = {
+        int(row["animation_record"], 16): (
+            int(row["assembly"], 16), int(row["hurt_selector_u8"]),
+            int(row["attack_selector_u8"]))
+        for row in contract["animation_selector"]["records"]}
+    if any(presentation[int(row["animation_record"], 16)] != (
+            int(row["assembly"], 16), int(row["hurt_selector"]),
+            int(row["attack_selector"])) for row in native):
+        raise ValueError("Coffee Shop class-0x00 assembly/selector drift")
+    match = re.search(
+        r"class00_alloc_requests=(\d+) class00_allocations=(\d+) "
+        r"class00_init=(\d+) class00_init_substates=(\d+) "
+        r"class00_projection=(\d+) class00_bindings=(\d+) "
+        r"class00_helpers=(\d+)", runtime_summary)
+    if match is None or [int(value) for value in match.groups()] != [
+            1, 1, 1, 0, 3595, 3595, 0]:
+        raise ValueError("Coffee Shop class-0x00 runtime counter drift")
+    if (contract["source_body"]["sha256"] !=
+            "5ae219377db297092601b14a1e9f055fc7c18a6ccd6358c6dbbb55e3d586f3e1" or
+            len(contract["parent_projection"][
+                "coffee_shop_animation_record_branches"]) != 109 or
+            len(contract["parent_projection"]["coffee_shop_entries"]) != 37 or
+            len(contract["animation_selector"]["records"]) != 11 or
+            contract["direct_effects"]["rng_calls_u8"] != 0 or
+            contract["direct_effects"]["collision_memberships_u8"] != 0):
+        raise ValueError("Coffee Shop class-0x00 SPEC/direct-effect drift")
+    return {
+        "classification": "SOURCE_PROGRAM_DIFFERENTIAL_PASS",
+        "source_program": "0x0009e098..0x0009e5be + 0x000bca3a..0x000bcaa8",
+        "source_body_sha256": contract["source_body"]["sha256"],
+        "source_frame_range_u16": [2075, 5550],
+        "source_slot": "0x00ffce00",
+        "source_rows_u16": len(source), "native_rows_u16": len(native),
+        "raw_difference_count_u8": 0, "raw_differences": [],
+        "normalization": "NONE", "normalized_difference_count_u8": 0,
+        "compared_fields": list(fields),
+        "assembly_output_equal": True,
+        "collision_selector_output_equal": True,
+        "scheduler_projection": {
+            "classification": "SOURCE_CAPTURE_PROJECTION_ONLY",
+            "dispatch_count_u16": 3595,
+            "exception_count_u8": 70,
+            "gameplay_authority": False},
+        "direct_rng_calls_u8": 0, "collision_memberships_u8": 0,
+        "health_damage_audio_route_load_writes_u8": 0,
+        "parent_animation_record_mapping_count_u16": 109,
+        "parent_projection_entry_count_u8": 37,
+        "fixed_pool_lifetimes_equal": True,
+        "counterfactual_matched_normalization_bound": True,
+        "route_teardown": {
+            "last_dispatch_source_frame_u16": 5523,
+            "freeze_frame_range_inclusive_u16": [5524, 5550],
+            "central_release_source_frame_u16": 5550,
+            "first_absent_visible_source_frame_u16": 5551},
+        "fixed_frame_gameplay_authority_forbidden": True,
+        "retained_gameplay_authority": False,
+    }
+
+
 def airborne_button1_presentation_chronology(
         source_rows: list[dict[str, str]],
         native_rows: list[dict[str, str]]) -> dict[str, object]:
@@ -2168,6 +2388,45 @@ def validate_report(report: dict[str, object]) -> None:
             class0a_program["retained_gameplay_authority"]):
         raise ValueError("Coffee Shop class-0x0a complete-program drift: " +
                          json.dumps(class0a_program, sort_keys=True))
+    class00_program = report["native_capture"][
+        "class00_companion_complete_program"]
+    if (class00_program["classification"] !=
+            "SOURCE_PROGRAM_DIFFERENTIAL_PASS" or
+            class00_program["source_program"] !=
+            "0x0009e098..0x0009e5be + 0x000bca3a..0x000bcaa8" or
+            class00_program["source_frame_range_u16"] != [2075, 5550] or
+            class00_program["source_slot"] != "0x00ffce00" or
+            class00_program["source_rows_u16"] != 3476 or
+            class00_program["native_rows_u16"] != 3476 or
+            class00_program["raw_difference_count_u8"] != 0 or
+            class00_program["raw_differences"] or
+            class00_program["normalization"] != "NONE" or
+            class00_program["normalized_difference_count_u8"] != 0 or
+            not class00_program["assembly_output_equal"] or
+            not class00_program["collision_selector_output_equal"] or
+            class00_program["scheduler_projection"] != {
+                "classification": "SOURCE_CAPTURE_PROJECTION_ONLY",
+                "dispatch_count_u16": 3595,
+                "exception_count_u8": 70,
+                "gameplay_authority": False} or
+            class00_program["direct_rng_calls_u8"] != 0 or
+            class00_program["collision_memberships_u8"] != 0 or
+            class00_program["health_damage_audio_route_load_writes_u8"] != 0 or
+            class00_program["parent_animation_record_mapping_count_u16"] !=
+                109 or
+            class00_program["parent_projection_entry_count_u8"] != 37 or
+            not class00_program["fixed_pool_lifetimes_equal"] or
+            not class00_program[
+                "counterfactual_matched_normalization_bound"] or
+            class00_program["route_teardown"] != {
+                "last_dispatch_source_frame_u16": 5523,
+                "freeze_frame_range_inclusive_u16": [5524, 5550],
+                "central_release_source_frame_u16": 5550,
+                "first_absent_visible_source_frame_u16": 5551} or
+            not class00_program["fixed_frame_gameplay_authority_forbidden"] or
+            class00_program["retained_gameplay_authority"]):
+        raise ValueError("Coffee Shop class-0x00 companion drift: " +
+                         json.dumps(class00_program, sort_keys=True))
     airborne_button1 = report["native_capture"][
         "airborne_button1_presentation"]
     if (not airborne_button1["source_native_semantic_equal"] or
@@ -2212,6 +2471,11 @@ def main() -> None:
             "authority_data"]["auxiliary"][
                 "coffee_shop_scene_component_identities"]["components"]
         if item["type"] == 24 and item["class"] == "0x0a")
+    class00_contract = next(
+        item["implementation_contract"] for item in fixtures[
+            "authority_data"]["auxiliary"][
+                "coffee_shop_scene_component_identities"]["components"]
+        if item["type"] == 28 and item["class"] == "0x00")
     source_actor_sha256 = hashlib.sha256(SOURCE_ACTORS.read_bytes()).hexdigest()
     expected_source_actor_sha256 = source["capture_identity"][
         "completion_a"]["coffee_shop_scene_actors.tsv"]
@@ -2344,6 +2608,10 @@ def main() -> None:
                                class0a_complete_program_differential(
                                    source_rows, rows, runtime_summary,
                                    class0a_contract),
+                           "class00_companion_complete_program":
+                               class00_companion_complete_program_differential(
+                                   source_rows, rows, runtime_summary,
+                                   class00_contract),
                            "airborne_button1_presentation":
                                airborne_button1_presentation_chronology(
                                    source_rows, rows),
@@ -2422,4 +2690,7 @@ def main() -> None:
 
 
 if __name__ == "__main__":
-    main()
+    if "--class00-phase-mutation-control" in sys.argv:
+        run_class00_phase_mutation_control()
+    else:
+        main()

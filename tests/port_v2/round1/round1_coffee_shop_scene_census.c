@@ -93,14 +93,26 @@ int main(void)
         unsigned int class0a_updates =
             avsp_round1_coffee_shop_class0a_source_updates(
                 (unsigned short)source_frame);
+        unsigned int class00_updates =
+            avsp_round1_coffee_shop_class00_source_updates(
+                (unsigned short)source_frame);
+        unsigned int exit_player_updates =
+            avsp_round1_coffee_exit_player_source_updates(
+                (unsigned short)source_frame);
         unsigned int phase_updates = source_updates > scheduler_updates ?
             source_updates : scheduler_updates;
+        int exit_source_phase = exit_player_updates != 0u &&
+            runtime.entry.exit_started && runtime.route_state != 4;
         if (record20_prefix_updates > phase_updates)
             phase_updates = record20_prefix_updates;
         if (class02_updates > phase_updates)
             phase_updates = class02_updates;
         if (class0a_updates > phase_updates)
             phase_updates = class0a_updates;
+        if (class00_updates > phase_updates)
+            phase_updates = class00_updates;
+        if (exit_player_updates > phase_updates)
+            phase_updates = exit_player_updates;
         if (source_frame == 2072u &&
             !avsp_round1_begin_first_entry(&runtime))
             return 2;
@@ -343,61 +355,66 @@ int main(void)
                     a->source_action_timer, runtime.rng_seed);
         }
         runtime.frame = source_frame >= 2040u ? source_frame - 2040u : 0u;
-        for (tick = 1u; tick <= phase_updates; ++tick)
+        if (exit_source_phase)
         {
-            unsigned int phase_tick = tick == phase_updates ? 0u : tick;
-            player_authority_enabled_at_tick_start = runtime.route_state == 4;
-            if ((phase_tick == 0u ? source_updates != 0u :
-                    phase_tick < source_updates) && runtime.entry.started &&
-                runtime.route_state != 4 &&
-                !avsp_round1_step_first_entry(&runtime))
-                return 3;
-            if (runtime.entry.dependencies_seeded &&
-                !avsp_round1_step_scheduler_pre_player_source_differential(
-                    &runtime, phase_tick == 0u ? source_updates != 0u :
-                        phase_tick < source_updates))
-                return 5;
-            if ((phase_tick == 0u ? source_updates != 0u :
-                    phase_tick < source_updates) &&
-                player_authority_enabled_at_tick_start &&
-                runtime.route_state == 4 &&
-                !avsp_round1_step_player(&runtime, input, 0))
+            if (!avsp_round1_step_coffee_exit_source_phase_program(
+                    &runtime, (unsigned short)source_frame))
             {
                 fprintf(stderr,
-                        "player_failure frame=%u state=%04x substate=%04x action_state=%u hit_active=%u hit_phase=%u invulnerability=%u cleanup=%u locomotion=%04x failures=%lu\n",
-                        source_frame, runtime.player.state,
-                        runtime.player.substate,
-                        runtime.player_action.state,
-                        runtime.player_hit_active,
-                        runtime.player_hit_phase,
-                        runtime.player_hit_invulnerability,
-                        runtime.player_cleanup_pending,
-                        runtime.player_locomotion_action,
-                        runtime.failure_count);
-                return 4;
-            }
-            if (runtime.entry.dependencies_seeded &&
-                !avsp_round1_step_scheduler_post_player_source_differential_class0a(
-                    &runtime,
-                    phase_tick == 0u ? scheduler_updates != 0u :
-                        phase_tick < scheduler_updates,
-                    phase_tick == 0u ? record20_prefix_updates != 0u :
-                        phase_tick < record20_prefix_updates,
-                    phase_tick == 0u ? class02_updates != 0u :
-                        phase_tick < class02_updates,
-                    phase_tick == 0u ? class0a_updates != 0u :
-                        phase_tick < class0a_updates))
-            {
-                fprintf(stderr,
-                        "scheduler_failure frame=%u code=%u slot=%08lx state=%04x substate=%04x animation=%08lx failures=%lu\n",
+                        "exit_phase_failure frame=%u code=%u slot=%04x state=%04x substate=%04x animation=%08lx route=%d exit_updates=%lu script_step=%u script_cursor=%08lx failures=%lu\n",
                         source_frame, runtime.scheduler_failure_code,
-                        (unsigned long)
-                            runtime.scheduler_failure_source_slot,
+                        runtime.scheduler_failure_source_slot,
                         runtime.scheduler_failure_state,
                         runtime.scheduler_failure_substate,
                         runtime.scheduler_failure_animation_record,
+                        runtime.route_state,
+                        runtime.entry.exit_route_updates,
+                        runtime.entry.exit_script_step,
+                        runtime.entry.exit_script_cursor,
                         runtime.failure_count);
-                return 5;
+                return 3;
+            }
+        }
+        else
+        {
+            for (tick = 1u; tick <= phase_updates; ++tick)
+            {
+                unsigned int phase_tick = tick == phase_updates ? 0u : tick;
+                int source_update_enabled = phase_tick == 0u ?
+                    source_updates != 0u : phase_tick < source_updates;
+                int scheduler_update_enabled = phase_tick == 0u ?
+                    scheduler_updates != 0u : phase_tick < scheduler_updates;
+                int record20_prefix_update_enabled = phase_tick == 0u ?
+                    record20_prefix_updates != 0u :
+                    phase_tick < record20_prefix_updates;
+                int class02_update_enabled = phase_tick == 0u ?
+                    class02_updates != 0u : phase_tick < class02_updates;
+                int class0a_update_enabled = phase_tick == 0u ?
+                    class0a_updates != 0u : phase_tick < class0a_updates;
+                int class00_update_enabled = phase_tick == 0u ?
+                    class00_updates != 0u : phase_tick < class00_updates;
+                player_authority_enabled_at_tick_start =
+                    runtime.route_state == 4;
+                if (source_update_enabled && runtime.entry.started &&
+                    runtime.route_state != 4 &&
+                    !avsp_round1_step_first_entry(&runtime))
+                    return 3;
+                if (runtime.entry.dependencies_seeded &&
+                    !avsp_round1_step_scheduler_pre_player_source_differential(
+                        &runtime, source_update_enabled))
+                    return 5;
+                if (source_update_enabled &&
+                    player_authority_enabled_at_tick_start &&
+                    runtime.route_state == 4 &&
+                    !avsp_round1_step_player(&runtime, input, 0))
+                    return 4;
+                if (runtime.entry.dependencies_seeded &&
+                    !avsp_round1_step_scheduler_post_player_source_differential_scene(
+                        &runtime, scheduler_update_enabled,
+                        record20_prefix_update_enabled,
+                        class02_update_enabled, class0a_update_enabled,
+                        class00_update_enabled))
+                    return 5;
             }
         }
         if (!avsp_round1_step_coffee_exit_display(&runtime))
@@ -471,6 +488,15 @@ int main(void)
             runtime.class0a_guard_transitions,
             runtime.class0a_releases,
             runtime.class0a_next_entry_spawns);
+    fprintf(stderr,
+            "class00_alloc_requests=%lu class00_allocations=%lu class00_init=%lu class00_init_substates=%lu class00_projection=%lu class00_bindings=%lu class00_helpers=%lu\n",
+            runtime.class00_companion_allocation_requests,
+            runtime.class00_companion_allocations,
+            runtime.class00_companion_initializations,
+            runtime.class00_companion_init_substates,
+            runtime.class00_companion_parent_projections,
+            runtime.class00_companion_animation_bindings,
+            runtime.class00_companion_helper_calls);
     fprintf(stderr,
             "native_scene route=%d progress=%u living=%u releases=%lu damage=%lu collisions=%lu obstacle_spawns=%lu obstacle_damage=%lu obstacle_transitions=%lu obstacle_releases=%lu child_releases=%lu special_entries=%lu special_contacts=%lu camera=%d player_x=%d player_z=%d failures=%lu fallback=%lu class0f_init=%lu class0f_collision=%lu class0f_navigation=%lu class0f_reactions=%lu class0f_audio=%lu class0f_class11=%lu class0f_class09=%lu class0f_releases=%lu\n",
             runtime.route_state, runtime.first_encounter.source_progress,

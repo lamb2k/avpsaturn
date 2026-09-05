@@ -97,6 +97,9 @@ static int avsp_round1_step_coffee_exit_player(AvspRound1Runtime *runtime);
 static int avsp_round1_step_class0a(AvspRound1Runtime *runtime,
                                     AvspRound1Pool *pool,
                                     AvspRound1ActorCore *actor);
+static int avsp_round1_spawn_class00_companion(AvspRound1Runtime *runtime);
+static int avsp_round1_step_class00_companion(
+    AvspRound1Runtime *runtime, AvspRound1ActorCore *actor);
 static int avsp_round1_bind_player_jump_sequence(
     AvspRound1Runtime *runtime, unsigned char selector);
 static int avsp_round1_step_player_jump_animation(
@@ -180,6 +183,59 @@ unsigned int avsp_round1_coffee_shop_class0a_source_updates(
             return entry->updates;
     }
     return AVSP_ROUND1_COFFEE_SHOP_CLASS0A_DEFAULT_SOURCE_UPDATES;
+}
+
+unsigned int avsp_round1_coffee_shop_class00_source_updates(
+    unsigned short source_frame)
+{
+    unsigned int index;
+    if (source_frame <
+            AVSP_ROUND1_COFFEE_SHOP_CLASS00_FIRST_SOURCE_FRAME ||
+        source_frame >
+            AVSP_ROUND1_COFFEE_SHOP_CLASS00_LAST_SOURCE_FRAME)
+        return 0u;
+    for (index = 0u;
+         index < AVSP_ROUND1_COFFEE_SHOP_CLASS00_UPDATE_CADENCE_COUNT;
+         ++index)
+    {
+        const AvspRound1SceneUpdateCadence *entry =
+            &avsp_round1_coffee_shop_class00_update_cadence[index];
+        if (source_frame == entry->source_frame)
+            return entry->updates;
+    }
+    return AVSP_ROUND1_COFFEE_SHOP_CLASS00_DEFAULT_SOURCE_UPDATES;
+}
+
+unsigned int avsp_round1_coffee_exit_player_source_updates(
+    unsigned short source_frame)
+{
+    if (source_frame <
+            AVSP_ROUND1_COFFEE_EXIT_CALLBACK_FIRST_SOURCE_FRAME ||
+        source_frame >
+            AVSP_ROUND1_COFFEE_EXIT_CALLBACK_LAST_SOURCE_FRAME)
+        return 0u;
+    return avsp_round1_coffee_exit_callback_updates((unsigned char)(
+        source_frame -
+        AVSP_ROUND1_COFFEE_EXIT_CALLBACK_FIRST_SOURCE_FRAME));
+}
+
+unsigned int avsp_round1_coffee_exit_class00_phase_events(
+    unsigned short source_frame, unsigned long *packed_events,
+    unsigned char *player_program_apply_mask)
+{
+    unsigned int index;
+    const AvspRound1CoffeeExitClass00PhaseSpec *phase;
+    if (packed_events == 0 || player_program_apply_mask == 0 || source_frame <
+            AVSP_ROUND1_COFFEE_EXIT_CLASS00_PHASE_FIRST_SOURCE_FRAME)
+        return 0u;
+    index = (unsigned int)(source_frame -
+        AVSP_ROUND1_COFFEE_EXIT_CLASS00_PHASE_FIRST_SOURCE_FRAME);
+    if (index >= AVSP_ROUND1_COFFEE_EXIT_CLASS00_PHASE_COUNT)
+        return 0u;
+    phase = &avsp_round1_coffee_exit_class00_phase[index];
+    *packed_events = phase->packed_events;
+    *player_program_apply_mask = phase->player_program_apply_mask;
+    return phase->event_count;
 }
 
 unsigned int avsp_round1_coffee_shop_record20_prefix_source_updates(
@@ -626,6 +682,8 @@ static int avsp_round1_dispatch_supported(unsigned char record_type,
     if (record_type == 36u && actor_class == 0x05)
         return 1;
     if (record_type == 28u && actor_class == 0x0a)
+        return 1;
+    if (record_type == 28u && actor_class == 0x00)
         return 1;
     if (record_type == 20u &&
         (actor_class == 0x01 || actor_class == 0x02 || actor_class == 0x05 ||
@@ -7698,6 +7756,155 @@ static int avsp_round1_step_class0a(AvspRound1Runtime *runtime,
     return 1;
 }
 
+static const AvspRound1Class00CompanionParentAnimationSpec *
+avsp_round1_find_class00_parent_animation(unsigned long animation_record)
+{
+    unsigned int index;
+    for (index = 0u;
+         index < AVSP_ROUND1_CLASS00_COMPANION_PARENT_ANIMATION_COUNT;
+         ++index)
+        if (avsp_round1_class00_companion_parent_animations[index].
+                animation_record == animation_record)
+            return &avsp_round1_class00_companion_parent_animations[index];
+    return 0;
+}
+
+static const AvspRound1Class00CompanionParentEntrySpec *
+avsp_round1_find_class00_parent_entry(unsigned char parent_animation_branch)
+{
+    unsigned int index;
+    for (index = 0u;
+         index < AVSP_ROUND1_CLASS00_COMPANION_PARENT_ENTRY_COUNT; ++index)
+        if (avsp_round1_class00_companion_parent_entries[index].
+                parent_animation_branch == parent_animation_branch)
+            return &avsp_round1_class00_companion_parent_entries[index];
+    return 0;
+}
+
+static const AvspRound1Class00CompanionAnimationSpec *
+avsp_round1_find_class00_animation(unsigned char selector)
+{
+    unsigned int index;
+    for (index = 0u;
+         index < AVSP_ROUND1_CLASS00_COMPANION_PRESENTATION_COUNT; ++index)
+        if (avsp_round1_class00_companion_records[index].selector == selector)
+            return &avsp_round1_class00_companion_records[index];
+    return 0;
+}
+
+static int avsp_round1_spawn_class00_companion(AvspRound1Runtime *runtime)
+{
+    AvspRound1ActorCore *actor;
+    if (runtime == 0 || runtime->player.active == 0u ||
+        runtime->player.source_slot != 0x00ff8380UL)
+        return 0;
+    actor = avsp_round1_find_pool_source_actor(runtime, 4u,
+        (unsigned short)avsp_round1_class00_companion.source_slot);
+    if (actor != 0)
+        return actor->type == 28u && actor->actor_class == 0x00 &&
+            actor->dispatch_entry == avsp_round1_class00_companion.dispatch;
+    ++runtime->class00_companion_allocation_requests;
+    actor = avsp_round1_allocate_pool_source_slot(runtime, 4u,
+        (unsigned short)avsp_round1_class00_companion.source_slot);
+    if (actor == 0)
+        return 0;
+    actor->actor_class = 0x00;
+    actor->variant = 0u;
+    actor->state = 0u;
+    actor->substate = 0u;
+    actor->source_target_low =
+        avsp_round1_class00_companion.parent_source_slot;
+    actor->source_a6 = 0u;
+    actor->dispatch_entry = avsp_round1_class00_companion.dispatch;
+    ++runtime->class00_companion_allocations;
+    return 1;
+}
+
+static int avsp_round1_step_class00_companion(
+    AvspRound1Runtime *runtime, AvspRound1ActorCore *actor)
+{
+    const AvspRound1Class00CompanionParentAnimationSpec *parent_animation;
+    const AvspRound1Class00CompanionParentEntrySpec *parent_entry;
+    const AvspRound1Class00CompanionAnimationSpec *animation;
+    long x_offset;
+    if (runtime == 0 || actor == 0 || actor->active == 0u ||
+        actor->type != 28u || actor->actor_class != 0x00 ||
+        actor->dispatch_entry != avsp_round1_class00_companion.dispatch ||
+        actor->source_slot != avsp_round1_class00_companion.source_slot ||
+        actor->source_target_low !=
+            avsp_round1_class00_companion.parent_source_slot ||
+        runtime->player.active == 0u ||
+        (unsigned short)runtime->player.source_slot !=
+            avsp_round1_class00_companion.parent_source_slot)
+        return 0;
+    if (actor->state == 0u)
+    {
+        actor->source_bound_b2 =
+            avsp_round1_class00_companion.initial_field2e;
+        actor->source_a3 = 0u;
+        actor->source_a6 = 0u;
+        actor->source_player_guard =
+            avsp_round1_class00_companion.initial_field65;
+        actor->source_motion_flags =
+            avsp_round1_class00_companion.initial_field64;
+        actor->source_primary_animation_record = 0x0009eb2cUL;
+        actor->source_x_fp = (long)runtime->player.x * 65536L;
+        actor->source_y_fp = (long)runtime->player.y * 65536L;
+        actor->x = avsp_round1_fixed_high_word(actor->source_x_fp);
+        actor->y = avsp_round1_fixed_high_word(actor->source_y_fp);
+        actor->z = runtime->player.z;
+        actor->state = avsp_round1_class00_companion.active_state;
+        actor->substate = avsp_round1_class00_companion.active_substate;
+        ++runtime->class00_companion_initializations;
+    }
+    if (actor->state != avsp_round1_class00_companion.active_state)
+        return 0;
+    if (actor->substate == 0u)
+    {
+        actor->substate = (unsigned short)(actor->substate +
+            avsp_round1_class00_companion.active_substate);
+        actor->source_player_guard = (unsigned char)(
+            actor->source_player_guard | 4u);
+        actor->source_a4 = avsp_round1_class00_companion.init_field44;
+        actor->source_a5 = avsp_round1_class00_companion.init_field45;
+        ++runtime->class00_companion_init_substates;
+        ++runtime->class00_companion_helper_calls;
+    }
+    if (actor->substate != avsp_round1_class00_companion.active_substate)
+        return 0;
+    if (actor->source_a6 != 0u)
+        return 1;
+    parent_animation = avsp_round1_find_class00_parent_animation(
+        runtime->player.animation_record);
+    if (parent_animation == 0)
+        return 0;
+    parent_entry = avsp_round1_find_class00_parent_entry(
+        parent_animation->parent_animation_branch);
+    if (parent_entry == 0)
+        return 0;
+    animation = avsp_round1_find_class00_animation(
+        parent_entry->animation_selector);
+    if (animation == 0)
+        return 0;
+    actor->source_x_fp = (long)runtime->player.x * 65536L;
+    actor->source_y_fp = (long)runtime->player.y * 65536L;
+    x_offset = (long)parent_entry->x_offset * 65536L;
+    if (runtime->player.facing == 0u)
+        x_offset = -x_offset;
+    actor->source_x_fp += x_offset;
+    actor->source_y_fp += (long)parent_entry->y_offset * 65536L;
+    actor->x = avsp_round1_fixed_high_word(actor->source_x_fp);
+    actor->y = avsp_round1_fixed_high_word(actor->source_y_fp);
+    actor->z = runtime->player.z;
+    actor->facing = runtime->player.facing;
+    runtime->player_presentation_field56 = parent_entry->parent_field56;
+    actor->animation_index = animation->selector;
+    avsp_round1_bind_animation_state(actor, &animation->record);
+    ++runtime->class00_companion_parent_projections;
+    ++runtime->class00_companion_animation_bindings;
+    return 1;
+}
+
 static void avsp_round1_class0f_bind_presentation(
     AvspRound1ActorCore *actor, unsigned char selector)
 {
@@ -12106,7 +12313,7 @@ int avsp_round1_step_scheduler_pre_player_source_differential(
 static int avsp_round1_step_scheduler_post_player_mask(
     AvspRound1Runtime *runtime, int include_default,
     int include_record20_prefix, int include_record20_suffix,
-    int include_class0a)
+    int include_class0a, int include_class00)
 {
     unsigned int order_index;
     unsigned int pool_index;
@@ -12117,7 +12324,7 @@ static int avsp_round1_step_scheduler_post_player_mask(
         source_frame >= AVSP_ROUND1_COFFEE_EXIT_CALLBACK_FIRST_SOURCE_FRAME &&
         source_frame <= AVSP_ROUND1_COFFEE_EXIT_CALLBACK_LAST_SOURCE_FRAME;
     if (!include_default && !include_record20_prefix &&
-        !include_record20_suffix && !include_class0a)
+        !include_record20_suffix && !include_class0a && !include_class00)
         return 1;
     if (!avsp_round1_scheduler_runtime_valid(runtime))
         return 0;
@@ -12197,8 +12404,11 @@ static int avsp_round1_step_scheduler_post_player_mask(
                  !include_record20_suffix) ||
                 (actor->type == 24u && actor->actor_class == 0x0a &&
                  !include_class0a) ||
+                (actor->type == 28u && actor->actor_class == 0x00 &&
+                 !include_class00) ||
                 (actor->type != 20u &&
                  !(actor->type == 24u && actor->actor_class == 0x0a) &&
+                 !(actor->type == 28u && actor->actor_class == 0x00) &&
                  !include_default))
                 continue;
             if (actor->type != runtime->pools[pool_index].record_type ||
@@ -12367,6 +12577,21 @@ static int avsp_round1_step_scheduler_post_player_mask(
                     runtime->scheduler_failure_code = 46u;
                     runtime->scheduler_failure_source_slot = actor->source_slot;
                     runtime->scheduler_failure_state = actor->state;
+                    ++runtime->failure_count;
+                    return 0;
+                }
+                continue;
+            }
+            if (actor->type == 28u && actor->actor_class == 0x00)
+            {
+                ++actor->scheduler_updates;
+                ++runtime->scheduler_dispatches;
+                if (!avsp_round1_step_class00_companion(runtime, actor))
+                {
+                    runtime->scheduler_failure_code = 47u;
+                    runtime->scheduler_failure_source_slot = actor->source_slot;
+                    runtime->scheduler_failure_state = actor->state;
+                    runtime->scheduler_failure_substate = actor->substate;
                     ++runtime->failure_count;
                     return 0;
                 }
@@ -12746,7 +12971,7 @@ int avsp_round1_step_scheduler_post_player_source_differential(
 {
     return avsp_round1_step_scheduler_post_player_mask(
         runtime, include_default, include_record20_prefix,
-        include_record20_suffix, include_default);
+        include_record20_suffix, include_default, include_default);
 }
 
 int avsp_round1_step_scheduler_post_player_source_differential_class0a(
@@ -12756,7 +12981,142 @@ int avsp_round1_step_scheduler_post_player_source_differential_class0a(
 {
     return avsp_round1_step_scheduler_post_player_mask(
         runtime, include_default, include_record20_prefix,
-        include_record20_suffix, include_class0a);
+        include_record20_suffix, include_class0a, include_class0a);
+}
+
+int avsp_round1_step_scheduler_post_player_source_differential_scene(
+    AvspRound1Runtime *runtime, int include_default,
+    int include_record20_prefix, int include_record20_suffix,
+    int include_class0a, int include_class00)
+{
+    return avsp_round1_step_scheduler_post_player_mask(
+        runtime, include_default, include_record20_prefix,
+        include_record20_suffix, include_class0a, include_class00);
+}
+
+int avsp_round1_step_coffee_exit_source_phase_program(
+    AvspRound1Runtime *runtime, unsigned short source_frame)
+{
+    unsigned int source_updates;
+    unsigned int record20_prefix_updates;
+    unsigned int class02_updates;
+    unsigned int class0a_updates;
+    unsigned int exit_player_updates;
+    unsigned int event_count;
+    unsigned int event_index;
+    unsigned int player_seen = 0u;
+    unsigned int player_applied = 0u;
+    unsigned char player_program_apply_mask = 0u;
+    unsigned int class0a_event_count = 0u;
+    unsigned int class0a_applied = 0u;
+    unsigned int prefix_seen = 0u;
+    unsigned int class02_seen = 0u;
+    unsigned long packed_events = 0u;
+    if (runtime == 0 || !runtime->entry.exit_started ||
+        (runtime->route_state != avsp_round1_coffee_exit.route_withdrawal &&
+         !(runtime->route_state == avsp_round1_coffee_exit.route_teardown &&
+           runtime->entry.exit_route_updates == 0u)))
+        return 0;
+    source_updates = avsp_round1_coffee_shop_source_updates(source_frame);
+    record20_prefix_updates =
+        avsp_round1_coffee_shop_record20_prefix_source_updates(source_frame);
+    class02_updates =
+        avsp_round1_coffee_shop_class02_source_updates(source_frame);
+    class0a_updates =
+        avsp_round1_coffee_shop_class0a_source_updates(source_frame);
+    exit_player_updates =
+        avsp_round1_coffee_exit_player_source_updates(source_frame);
+    event_count = avsp_round1_coffee_exit_class00_phase_events(
+        source_frame, &packed_events, &player_program_apply_mask);
+    if (event_count == 0u)
+        return 0;
+    if (runtime->entry.dependencies_seeded &&
+        !avsp_round1_step_scheduler_pre_player_source_differential(
+            runtime, source_updates != 0u))
+        return 0;
+    {
+        unsigned long phase_scan = packed_events;
+        for (event_index = 0u; event_index < event_count; ++event_index)
+        {
+            if ((unsigned int)(phase_scan & 3u) ==
+                    AVSP_ROUND1_COFFEE_EXIT_PHASE_CLASS0A)
+                ++class0a_event_count;
+            phase_scan >>= 2;
+        }
+    }
+    while (class0a_applied < class0a_updates &&
+           class0a_applied + class0a_event_count < class0a_updates)
+    {
+        if (!avsp_round1_step_scheduler_post_player_source_differential_scene(
+                runtime, 0, 0, 0, 1, 0))
+            return 0;
+        ++class0a_applied;
+    }
+    for (event_index = 0u; event_index < event_count; ++event_index)
+    {
+        unsigned int event = (unsigned int)(packed_events & 3u);
+        packed_events >>= 2;
+        if (event == AVSP_ROUND1_COFFEE_EXIT_PHASE_PLAYER)
+        {
+            int apply_player_program =
+                (player_program_apply_mask & (1u << player_seen)) != 0u;
+            ++player_seen;
+            if (apply_player_program &&
+                !avsp_round1_step_first_entry_source_differential(
+                    runtime, 1, 0))
+                return 0;
+            if (apply_player_program)
+                ++player_applied;
+        }
+        else if (event == AVSP_ROUND1_COFFEE_EXIT_PHASE_CLASS0A)
+        {
+            if (class0a_applied < class0a_updates &&
+                !avsp_round1_step_scheduler_post_player_source_differential_scene(
+                    runtime, 0, 0, 0, 1, 0))
+                return 0;
+            if (class0a_applied < class0a_updates)
+                ++class0a_applied;
+        }
+        else if (event == AVSP_ROUND1_COFFEE_EXIT_PHASE_DEFAULT)
+        {
+            int include_prefix = prefix_seen < record20_prefix_updates;
+            int include_class02 = class02_seen < class02_updates;
+            if (include_prefix)
+                ++prefix_seen;
+            if (include_class02)
+                ++class02_seen;
+            if (!avsp_round1_step_scheduler_post_player_source_differential_scene(
+                    runtime, 1, include_prefix, include_class02, 0, 0))
+                return 0;
+        }
+        else
+        {
+            if (!avsp_round1_step_scheduler_post_player_source_differential_scene(
+                    runtime, 0, 0, 0, 0, 1))
+                return 0;
+        }
+    }
+    while (prefix_seen < record20_prefix_updates ||
+           class02_seen < class02_updates)
+    {
+        int include_prefix = prefix_seen < record20_prefix_updates;
+        int include_class02 = class02_seen < class02_updates;
+        if (include_prefix)
+            ++prefix_seen;
+        if (include_class02)
+            ++class02_seen;
+        if (!avsp_round1_step_scheduler_post_player_source_differential_scene(
+                runtime, 0, include_prefix, include_class02, 0, 0))
+            return 0;
+    }
+    if (player_applied != exit_player_updates ||
+        class0a_applied != class0a_updates)
+    {
+        runtime->scheduler_failure_code = 48u;
+        ++runtime->failure_count;
+        return 0;
+    }
+    return avsp_round1_step_first_entry_source_differential(runtime, 0, 1);
 }
 
 int avsp_round1_step_scheduler_source_differential(
@@ -13021,6 +13381,8 @@ int avsp_round1_step_first_entry(AvspRound1Runtime *runtime)
         runtime->player.x = (short)step->arg0;
         runtime->player.y = (short)step->arg1;
         runtime->player.z = (short)step->arg1;
+        runtime->player.source_x_fp = (long)runtime->player.x * 65536L;
+        runtime->player.source_y_fp = (long)runtime->player.y * 65536L;
         runtime->entry.animation_c0 = 2u;
         return avsp_round1_entry_valid(runtime);
     }
@@ -13089,6 +13451,11 @@ int avsp_round1_step_first_entry(AvspRound1Runtime *runtime)
         runtime->entry.animation_c2 = 0u;
         runtime->player.source_target_low =
             avsp_round1_player_contextual_melee.target_low;
+        if (!avsp_round1_spawn_class00_companion(runtime))
+        {
+            ++runtime->failure_count;
+            return 0;
+        }
         return avsp_round1_entry_valid(runtime);
     }
     if (runtime->entry.animation_c1 == 2u)
@@ -13128,6 +13495,8 @@ int avsp_round1_step_first_entry(AvspRound1Runtime *runtime)
             runtime->player.x = (short)step->arg0;
             runtime->player.y = (short)step->arg1;
             runtime->player.z = (short)step->arg1;
+            runtime->player.source_x_fp = (long)runtime->player.x * 65536L;
+            runtime->player.source_y_fp = (long)runtime->player.y * 65536L;
             runtime->entry.animation_c0 = 2u;
         }
         else if (step->kind == AVSP_ROUND1_ENTRY_SET_SUBHANDLER)
@@ -13166,6 +13535,32 @@ int avsp_round1_step_first_entry(AvspRound1Runtime *runtime)
     }
     ++runtime->failure_count;
     return 0;
+}
+
+int avsp_round1_step_first_entry_source_differential(
+    AvspRound1Runtime *runtime, int include_exit_player_update,
+    int complete_exit_display_tick)
+{
+    if (runtime == 0 || !runtime->entry.started ||
+        !avsp_round1_canaries_ok(runtime) || runtime->failure_count != 0u ||
+        runtime->fallback_count != 0u)
+        return 0;
+    if (!runtime->entry.exit_started ||
+        runtime->route_state != avsp_round1_coffee_exit.route_withdrawal)
+    {
+        if (include_exit_player_update)
+            return avsp_round1_step_first_entry(runtime);
+        return avsp_round1_entry_valid(runtime);
+    }
+    if (include_exit_player_update &&
+        !avsp_round1_step_coffee_exit_player(runtime))
+    {
+        ++runtime->failure_count;
+        return 0;
+    }
+    if (complete_exit_display_tick)
+        ++runtime->entry.exit_display_tick;
+    return avsp_round1_entry_valid(runtime);
 }
 
 static int avsp_round1_begin_player_hit_interaction(

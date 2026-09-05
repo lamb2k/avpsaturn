@@ -8,9 +8,11 @@ from pathlib import Path
 ROOT=Path(__file__).resolve().parents[1]
 A=ROOT/'.deps/mame/oracle11_round1_auxiliary_a';B=ROOT/'.deps/mame/oracle11_round1_auxiliary_b'
 ROUTE=ROOT/'data/oracle10_round1_route.json';SCHED=ROOT/'data/oracle11_actor_scheduler_lifecycle.json'
+ENCOUNTER_ROUTE=ROOT/'data/oracle11_round1_encounter_route_authority.json'
 PLAYER=ROOT/'data/oracle11_predator_weapon_projectile_resource.json';NAV=ROOT/'data/oracle11_round1_navigation.json'
 PLAYER_ROUTE=ROOT/'data/oracle11_predator_route_ownership.json'
 PLAYER_AUDIO=ROOT/'data/oracle11_predator_player_audio.json'
+PLAYER_ACTION_GRAPH=ROOT/'data/oracle07_predator_warrior_action_graph_equipment.json'
 OPCODES=ROOT/'.deps/mame/actorprobe/decrypted_opcodes_2m.bin';PROGRAM=ROOT/'.deps/mame/actorprobe/decrypted_program_2m.bin'
 OUT=ROOT/'data/oracle11_round1_auxiliary_authority.json'
 TYPE36_A=ROOT/'.deps/mame/oracle11_progression_lifecycle_cs15a';TYPE36_B=ROOT/'.deps/mame/oracle11_progression_lifecycle_cs15b'
@@ -32,6 +34,12 @@ CLASS0A_DETAIL_A=ROOT/'.deps/mame/oracle11_progression_lifecycle_cs64a'
 CLASS0A_DETAIL_B=ROOT/'.deps/mame/oracle11_progression_lifecycle_cs64b'
 CLASS0A_COUNTER_A=ROOT/'.deps/mame/oracle11_progression_lifecycle_cs64m1'
 CLASS0A_COUNTER_B=ROOT/'.deps/mame/oracle11_progression_lifecycle_cs64m2'
+CLASS00_DETAIL_A=ROOT/'.deps/mame/oracle11_progression_lifecycle_cs65a4'
+CLASS00_DETAIL_B=ROOT/'.deps/mame/oracle11_progression_lifecycle_cs65b3'
+CLASS00_COUNTER_A=ROOT/'.deps/mame/oracle11_progression_lifecycle_cs65m5'
+CLASS00_COUNTER_B=ROOT/'.deps/mame/oracle11_progression_lifecycle_cs65m6'
+CLASS00_PHASE_A=ROOT/'.deps/mame/oracle11_progression_lifecycle_cs68a'
+CLASS00_PHASE_B=ROOT/'.deps/mame/oracle11_progression_lifecycle_cs68b'
 SCENE_FULL_A=ROOT/'.deps/mame/oracle11_progression_lifecycle_cs21a'
 SCENE_FULL_B=ROOT/'.deps/mame/oracle11_progression_lifecycle_cs21b'
 TYPE16_TRACE_A=ROOT/'.deps/mame/reimplement13_type16_trace_g'
@@ -1584,6 +1592,419 @@ def coffee_shop_scene_component_identities(op,program):
     'health/damage absence','audio absence','fixed-frame substitute'],
    'spec_executable':True,'retained_gameplay_authority':False,
    'fixed_frame_substitute_forbidden':True}
+  class00_files=('coffee_shop_class00_program.tsv',
+                 'coffee_shop_scene_actors.tsv',
+                 'coffee_shop_scene_frames.tsv','coffee_shop_rng_calls.tsv',
+                 'coffee_shop_scene_health_writes.tsv','dispatches.tsv',
+                 'progression_lifecycle_writes.tsv',
+                 'coffee_shop_collision_lists.tsv','progression_result.tsv')
+  class00_detail_a={name:sha(CLASS00_DETAIL_A/name)
+                    for name in class00_files}
+  class00_detail_b={name:sha(CLASS00_DETAIL_B/name)
+                    for name in class00_files}
+  class00_counter_a={name:sha(CLASS00_COUNTER_A/name)
+                     for name in class00_files}
+  class00_counter_b={name:sha(CLASS00_COUNTER_B/name)
+                     for name in class00_files}
+  req(class00_detail_a==class00_detail_b,
+      'Coffee Shop type-28/class-0x00 cold-reference captures differ')
+  req(class00_counter_a==class00_counter_b,
+      'Coffee Shop type-28/class-0x00 counterfactual captures differ')
+  class00_actors=[r for r in rows(
+      CLASS00_DETAIL_A/'coffee_shop_scene_actors.tsv')
+      if r['slot']=='ffce00' and r['type']=='28' and r['class']=='00']
+  req(len(class00_actors)==3476 and
+      class00_actors[0]['frame']=='2075' and
+      class00_actors[-1]['frame']=='5550' and
+      {r['variant'] for r in class00_actors}=={'00'} and
+      {r['state'] for r in class00_actors}=={'0206'} and
+      {r['substate'] for r in class00_actors}=={'0200'} and
+      {r['animation_timer'] for r in class00_actors}=={'0fff'} and
+      {r['animation_record'] for r in class00_actors}=={
+       '0009e606','0009e62e','0009e656','0009e66a','0009e692',
+       '0009e6e2','0009e6f6','0009e70a','0009e71e','0009e732'},
+      'Coffee Shop type-28/class-0x00 lifetime/state drift')
+  class00_rows=rows(CLASS00_DETAIL_A/'coffee_shop_class00_program.tsv')
+  class00_entry_rows=[r for r in class00_rows
+      if r['event']=='opcode_fetch' and r['tap_pc']=='09e098']
+  req(len(class00_entry_rows)==3595 and
+      class00_entry_rows[0]['frame']=='2074' and
+      class00_entry_rows[-1]['frame']=='5523' and
+      sum(r['tap_pc']=='09e0ac' for r in class00_rows)==1 and
+      sum(r['tap_pc']=='09e114' for r in class00_rows)==3594 and
+      sum(r['tap_pc']=='09e426' for r in class00_rows)==3595 and
+      sum(r['tap_pc']=='09e46e' for r in class00_rows)==3595 and
+      sum(r['tap_pc']=='0bca3a' for r in class00_rows)==3595 and
+      sum(r['tap_pc']=='0bcaa0' for r in class00_rows)==3595,
+      'Coffee Shop type-28/class-0x00 dispatch coverage drift')
+  class00_init_writes=[r for r in class00_rows if r['event']=='write' and
+      r['frame']=='2074' and r['actual_pc'] in (
+       '0212c8','0212ca','0212e0','0212ea','09e0b2','09e0b8','09e0bc',
+       '09e0c0','09e0ce','09e0da','09e0e8','09e0ee','09e0f4','09e0fe')]
+  req(len(class00_init_writes)==16 and
+      [(r['actual_pc'],r['inner'],r['data'],r['mask'])
+       for r in class00_init_writes if r['actual_pc']=='0212ca']==
+      [('0212ca','5a','00008380','0000ffff')] and
+      [(r['actual_pc'],r['inner'],r['data'],r['mask'])
+       for r in class00_init_writes if r['actual_pc']=='09e0fe']==[
+        ('09e0fe','04','00000206','0000ffff'),
+        ('09e0fe','06','00000200','0000ffff')],
+      'Coffee Shop type-28/class-0x00 initialization writer drift')
+  class00_dispatch_counts=Counter(int(r['frame']) for r in class00_entry_rows)
+  class00_cadence_exceptions=[
+      {'source_frame_u16':frame,'updates_u8':class00_dispatch_counts[frame]}
+      for frame in range(2074,5524) if class00_dispatch_counts[frame]!=1]
+  req(len(class00_cadence_exceptions)==70 and
+      Counter(r['updates_u8'] for r in class00_cadence_exceptions)==
+       Counter({3:53,4:13,2:2,0:2}) and
+      class00_cadence_exceptions[:3]==[
+       {'source_frame_u16':2075,'updates_u8':2},
+       {'source_frame_u16':2076,'updates_u8':2},
+       {'source_frame_u16':2165,'updates_u8':4}] and
+      class00_cadence_exceptions[-1]==
+       {'source_frame_u16':5522,'updates_u8':4},
+      'Coffee Shop type-28/class-0x00 scheduler cadence drift')
+  class00_phase_name='coffee_shop_class00_scheduler_phase.tsv'
+  class00_phase_sha_a=sha(CLASS00_PHASE_A/class00_phase_name)
+  class00_phase_sha_b=sha(CLASS00_PHASE_B/class00_phase_name)
+  req(class00_phase_sha_a==class00_phase_sha_b,
+      'Coffee Shop type-28/class-0x00 scheduler-phase identity drift')
+  class00_phase_rows=rows(CLASS00_PHASE_A/class00_phase_name)
+  frame5460=[r for r in class00_phase_rows if r['frame']=='5460']
+  frame5461=[r for r in class00_phase_rows if r['frame']=='5461']
+  phase_event_codes={'exit_player_dispatch':'P','class0a_dispatch':'A',
+      'record28_scheduler':'D','class00_dispatch':'C'}
+  exit_projection=json.loads(ENCOUNTER_ROUTE.read_text(encoding='ascii'))[
+      'first_segment_recurring_spawn']['exit_controller_program'][
+      'player_withdrawal_script']['source_display_callback_program']
+  exit_projection_groups=exit_projection['groups']
+  def player_program_updates(source_frame):
+    program_tick=source_frame-5453
+    for group in exit_projection_groups:
+      if (program_tick>=group['program_tick_u8'] and
+          program_tick<group['program_tick_u8']+
+              group['display_ticks_u8']):
+        return group['updates_u8']
+    return 0
+  class00_exit_phase_program=[]
+  for source_frame in range(5453,5524):
+    events=''.join(phase_event_codes[r['event']]
+        for r in class00_phase_rows if int(r['frame'])==source_frame and
+        r['event'] in phase_event_codes)
+    player_events=events.count('P')
+    applied_updates=player_program_updates(source_frame)
+    req(player_events>=applied_updates,
+        'Coffee Shop player program projection exceeds dispatcher events')
+    player_apply_mask=(1<<applied_updates)-1
+    if source_frame in (5505,5506):
+      player_apply_mask <<= player_events-applied_updates
+    class00_exit_phase_program.append({
+        'source_frame_u16':source_frame,'events':events,
+        'player_program_apply_mask_u8':player_apply_mask})
+  frame5460_direct=[r for r in frame5460
+      if r['event']=='exit_direct_writer']
+  req(len(frame5460_direct)==4 and
+      frame5460_direct[-1]['child_x_fp']=='05320000' and
+      frame5460_direct[-1]['child_z']=='311' and
+      frame5460_direct[-1]['player_x_fp']=='053b8b00' and
+      frame5461[0]['player_x_fp']=='0539ad00' and
+      frame5461[0]['child_x_fp']=='05320000' and
+      frame5461[0]['child_z']=='311' and
+      len(class00_exit_phase_program)==71 and
+      max(len(r['events']) for r in class00_exit_phase_program)==16 and
+      all(r['events']=='PADC' for r in class00_exit_phase_program[:5]) and
+      class00_exit_phase_program[7]['events']=='PADCPADCPADCP' and
+      class00_exit_phase_program[8]['events']=='ADCPADCPADCP',
+      'Coffee Shop type-28/class-0x00 exit scheduler-phase drift')
+  class00_player_applied=sum(
+      r['player_program_apply_mask_u8'].bit_count()
+      for r in class00_exit_phase_program)
+  class00_player_dispatches=sum(r['events'].count('P')
+      for r in class00_exit_phase_program)
+  class00_phase_by_frame={r['source_frame_u16']:r
+      for r in class00_exit_phase_program}
+  req(class00_player_dispatches==213 and class00_player_applied==203 and
+      class00_phase_by_frame[5475]['player_program_apply_mask_u8']==1 and
+      class00_phase_by_frame[5476]['player_program_apply_mask_u8']==1 and
+      class00_phase_by_frame[5505]['player_program_apply_mask_u8']==6 and
+      class00_phase_by_frame[5506]['player_program_apply_mask_u8']==6 and
+      class00_phase_by_frame[5520]['player_program_apply_mask_u8']==3 and
+      class00_phase_by_frame[5522]['player_program_apply_mask_u8']==3,
+      'Coffee Shop player dispatcher/program projection drift')
+  class00_release=[r for r in class00_rows if r['event']=='write' and
+      r['frame']=='5550' and r['actual_pc']=='0173f8' and r['inner']=='00']
+  req(len(class00_release)==1 and class00_release[0]['active']=='1' and
+      class00_release[0]['class']=='00' and
+      class00_release[0]['state']=='0206',
+      'Coffee Shop type-28/class-0x00 central release drift')
+  class00_direct_rng=[r for r in rows(
+      CLASS00_DETAIL_A/'coffee_shop_rng_calls.tsv')
+      if r['a6']=='ffce00' and r['class']=='00']
+  class00_direct_audio=[r for r in rows(CLASS00_DETAIL_A/'dispatches.tsv')
+      if r['a6']=='ffce00' and r['origin_class']=='00']
+  class00_direct_health=[r for r in rows(
+      CLASS00_DETAIL_A/'coffee_shop_scene_health_writes.tsv')
+      if (r['target_slot']=='ffce00' or r['attacker']=='ffce00' or
+          r['defender']=='ffce00') and 2074<=int(r['frame'])<=5550]
+  class00_collision_membership=[]
+  for r in rows(CLASS00_DETAIL_A/'coffee_shop_collision_lists.tsv'):
+   frame=int(r['frame'])
+   if 2074<=frame<=5550 and (
+       'ffce00' in r['attacker_slots'].split(',') or
+       'ffce00' in r['defender_slots'].split(',')):
+    class00_collision_membership.append(r)
+  req(not class00_direct_rng and not class00_direct_audio and
+      not class00_direct_health and not class00_collision_membership,
+      'Coffee Shop type-28/class-0x00 direct gameplay effect drift')
+  class00_counter_rows=rows(
+      CLASS00_COUNTER_A/'coffee_shop_class00_program.tsv')
+  class00_counter_markers=[r for r in class00_counter_rows
+      if r['event'].startswith('counterfactual_')]
+  req([(r['event'],r['tap_pc'],r['state'],r['substate'],r['field44'],
+        r['field45'],r['field65']) for r in class00_counter_markers]==[
+       ('counterfactual_before','09e426','0206','0200','0','0','255'),
+       ('counterfactual_after','09e426','0206','0000','0','0','255'),
+       ('counterfactual_end','09e458','0206','0200','19','255','255')],
+      'Coffee Shop type-28/class-0x00 init counterfactual drift')
+  class00_animation_offset_bytes=program[0x9e5da:0x9e5fa]
+  class00_animation_offsets=[int.from_bytes(
+      class00_animation_offset_bytes[index:index+2],'big',signed=True)
+      for index in range(0,len(class00_animation_offset_bytes),2)]
+  req(class00_animation_offsets==[44,64,84,104,124,144,164,184,204,
+      224,244,264,284,304,324,344],
+      'Coffee Shop type-28/class-0x00 animation offset table drift')
+  class00_observed_parent_branches=sorted({int(r['parent_animation_branch'])
+      for r in class00_rows if r['event']=='opcode_fetch' and
+      r['tap_pc']=='0bca68'})
+  req(class00_observed_parent_branches==[0,1,2,3,4,5,6,7,8,9,10,11,12,13,14,
+      20,21,22,23,24,25,42,43,44,51,52,86,89,90],
+      'Coffee Shop type-28/class-0x00 parent branch set drift')
+  class00_parent_animation_map={}
+  class00_parent_animation_provenance={}
+  for row in class00_entry_rows:
+   address=int(row['parent_animation_record'],16)
+   branch=int(row['parent_animation_branch'])
+   req(address+16<=len(program),
+       'Coffee Shop type-28/class-0x00 parent animation outside program')
+   req(program[address+15]==branch,
+       'Coffee Shop type-28/class-0x00 parent animation byte-0x0f drift')
+   if address in class00_parent_animation_map:
+    req(class00_parent_animation_map[address]==branch,
+        'Coffee Shop type-28/class-0x00 parent animation mapping conflict')
+   else:
+    class00_parent_animation_map[address]=branch
+    class00_parent_animation_provenance[address]=(
+      'class-0x00 paired completion capture')
+  player_action_graph=json.loads(PLAYER_ACTION_GRAPH.read_text())
+  for sequence_name,sequence in player_action_graph[
+      'presentation_identity']['sequences'].items():
+   for item in sequence:
+    address=int(item['record'],16)
+    req(address+16<=len(program),
+        'Coffee Shop class-0x00 player action record outside program')
+    branch=program[address+15]
+    if address in class00_parent_animation_map:
+     req(class00_parent_animation_map[address]==branch,
+         'Coffee Shop class-0x00 player action mapping conflict')
+    else:
+     class00_parent_animation_map[address]=branch
+     class00_parent_animation_provenance[address]=(
+       'accepted ORACLE-07 player action sequence '+sequence_name)
+  class00_parent_animation_records=[{
+    'animation_record':f'0x{address:08x}',
+    'parent_animation_branch_u8':class00_parent_animation_map[address],
+    'evidence':class00_parent_animation_provenance[address],
+    'record_sha256':hashlib.sha256(
+      program[address:address+16]).hexdigest()}
+    for address in sorted(class00_parent_animation_map)]
+  req(len(class00_parent_animation_records)==109,
+      'Coffee Shop type-28/class-0x00 parent animation record count drift')
+  class00_parent_branches=sorted(set(class00_observed_parent_branches)|
+      set(class00_parent_animation_map.values()))
+  class00_parent_entries=[]
+  for branch in class00_parent_branches:
+   address=0x1fcbc8+branch*4;raw=program[address:address+4]
+   class00_parent_entries.append({
+    'parent_animation_branch_u8':branch,
+    'table_address':f'0x{address:08x}',
+    'x_offset_s8':int.from_bytes(raw[0:1],'big',signed=True),
+    'y_offset_s8':int.from_bytes(raw[1:2],'big',signed=True),
+    'animation_selector_u8':raw[2],
+    'parent_field56_u8':raw[3],
+    'entry_sha256':hashlib.sha256(raw).hexdigest()})
+  class00_animation_addresses=sorted({0x9e5da+
+      class00_animation_offsets[entry['animation_selector_u8']]
+      for entry in class00_parent_entries})
+  class00_counter_differences={
+      name:{'baseline_sha256':class00_detail_a[name],
+            'counterfactual_sha256':class00_counter_a[name],
+            'different':class00_detail_a[name]!=class00_counter_a[name]}
+      for name in class00_files}
+  req(class00_counter_differences['coffee_shop_class00_program.tsv']
+       ['different'] and
+      class00_counter_differences['progression_result.tsv']['different'] and
+      all(not value['different'] for name,value in
+          class00_counter_differences.items() if name not in
+          ('coffee_shop_class00_program.tsv','progression_result.tsv')),
+      'Coffee Shop type-28/class-0x00 counterfactual scope drift')
+  class00_program={
+   'semantic_role':'SOURCE_PLAYER_ANCHORED_PRESENTATION_COMPANION',
+   'source_body':{'first':'0x0009e098','last_exclusive':'0x0009e5be',
+    'sha256':hashlib.sha256(op[0x9e098:0x9e5be]).hexdigest()},
+   'active_helper':{'first':'0x000bca3a','last_exclusive':'0x000bcaa8',
+    'sha256':hashlib.sha256(op[0xbca3a:0xbcaa8]).hexdigest()},
+   'dispatch':{
+    'entry':'0x0009e098','outer_state_high_byte_offsets_s16':[8,112,980,1006],
+    'outer_targets':['0x0009e0ac','0x0009e114','0x0009e478','0x0009e492'],
+    'active_action_low_byte_offsets_s16':[8,8,8,774],
+    'active_action_targets':['0x0009e128','0x0009e128','0x0009e128','0x0009e426'],
+    'action_0x06_substate_high_byte_offsets_s16':[8,38],
+    'action_0x06_targets':['0x0009e43a','0x0009e458']},
+   'fields':{
+    'active':'u8 at actor+0x00','class_variant':'u16 at actor+0x02',
+    'state_action':'u16 at actor+0x04; high byte outer state, low byte action',
+    'substate':'u16 at actor+0x06; high byte nested dispatch',
+    'type':'u8 at actor+0x08','visible_facing':'u8 at actor+0x0f',
+    'x_y':'s16 at actor+0x10/+0x14; native mirrors signed 16.16',
+    'z':'s16 at actor+0x18','animation_record':'u32 at actor+0x1c',
+    'animation_timer':'u16 at actor+0x0a','animation_branch':'s16 at actor+0x24',
+    'timer_2a':'u8 at actor+0x2a','field_2e':'u16',
+    'field_44_45':'u8/u8','source_table_pointer_50':'u32',
+    'disable_guard_54':'u8','parent_slot_5a':'u16 source pointer',
+    'field_5c_62_64_65':'u8/u8/u8/u8',
+    'parent_animation_branch':'u8 at parent animation_record+0x0f',
+    'parent_character_index':'u8 at parent+0xd2'},
+   'allocation_initialization':{
+    'allocator':'player-owned companion allocator 0x0212c8..0x0212ea',
+    'source_slot':'0x00ffce00','source_record_type_u8':28,
+    'source_class_s8':0,'source_variant_u8':0,
+    'guard':'player source slot 0x00ff8380 is initialized and the companion slot is free',
+    'chronology':'allocation occurs during the entry subhandler return; state-0 dispatch follows in the same ascending record-28 scheduler traversal; first visible source row is the next source frame',
+    'writes':['active=1','type=28','class=0','parent_slot=0x8380',
+              'state/action=0x0000','substate=0x0000','disable_guard_54=0'],
+    'program_state0_writes':['field_2e=0x8000','actor+0x09=0',
+      'field_62=0','field_65=0xff','field_64=0x22',
+      'source_table_pointer_50=0x0009eb2c',
+      'x/y/z copied from parent','state/action=0x0206',
+      'substate=0x0200'],
+    'lifetime':{'allocation_source_frame_u16':2074,
+      'first_visible_source_frame_u16':2075,
+      'last_visible_source_frame_u16':5550}},
+   'reachable_state_program':{
+    '0x0000:0x0000':{'entry':'0x0009e0ac',
+      'guard':'parent_slot_5a is nonzero',
+      'result':'initialize source fields, copy parent position, set 0x0206:0x0200, and tail-dispatch the active body'},
+    '0x0206:0x0200':{'entries':['0x0009e114','0x0009e426','0x0009e458'],
+      'guard':'disable_guard_54 == 0 and parent remains source player slot 0x00ff8380',
+      'result':'copy parent position/z/facing, apply signed parent-animation offsets, write parent field56, and bind the selected companion animation every traversal'},
+    '0x0206:0x0000':{'entry':'0x0009e43a',
+      'classification':'SOURCE_COUNTERFACTUAL_REACHABLE',
+      'result':'substate += 0x0200, field_65 OR=4, field_44=0x13, field_45=0xff, invoke 0x0ae396, then execute the 0x0200 body'},
+    'not_required_for_coffee_shop':[
+      {'states':['0x0200','0x0202','0x0204'],
+       'reason':'action-low-byte 0/2/4 branches are absent from baseline, completion, perturbation and suppression routes'},
+      {'states':['0x0400','0x0600'],
+       'reason':'actor remains frozen at 0x0206:0x0200 after final dispatch; centralized scene clear owns release'}]},
+   'parent_projection':{
+    'parent_source_slot':'0x00ff8380','parent_character_index_u8':0,
+    'character_offset_table_address':'0x001fcbc0',
+    'character_offset_table_prefix_sha256':hashlib.sha256(
+      program[0x1fcbc0:0x1fcbc8]).hexdigest(),
+    'character_table_base':'0x001fcbc8',
+    'entry_rule':'base + parent animation-record byte 0x0f * 4',
+    'entry_fields':['x_offset_s8','y_offset_s8',
+                    'companion_animation_selector_u8','parent_field56_u8'],
+    'coffee_shop_animation_record_branches':
+      class00_parent_animation_records,
+    'animation_record_branch_rule':
+      'the accepted player animation record address resolves byte +0x0f; native must not substitute actor animation_branch at +0x24',
+    'coffee_shop_entries':class00_parent_entries,
+    'position_rule':'child x/y/z/facing copy parent signed words; negate signed x offset when parent facing is zero; add signed x/y offsets; z is unchanged',
+    'parent_write':'entry byte 3 writes parent+0x56:u8'},
+   'animation_selector':{
+    'offset_table_address':'0x0009e5da','offsets_s16':class00_animation_offsets,
+    'offset_table_sha256':hashlib.sha256(
+      class00_animation_offset_bytes).hexdigest(),
+    'records':[animation_record(program,address)
+               for address in class00_animation_addresses],
+    'bind_rule':'selector from the parent projection indexes the signed offset table; 0x016518 binds record, timer, branch, assembly and selectors'},
+   'scheduler_cadence':{
+    'classification':'SOURCE_CAPTURE_PROJECTION_ONLY',
+    'source_frame_range_inclusive_u16':[2074,5523],
+    'default_updates_per_source_frame_u8':1,
+    'exceptions':class00_cadence_exceptions,
+    'exception_count_u8':len(class00_cadence_exceptions),
+    'dispatch_count_u16':len(class00_entry_rows),
+    'scheduler':'record-28 fixed pool ascending under 0x01bcda',
+    'rule':'projection aligns repeated source scheduler traversals; it never owns player state or production gameplay timing',
+    'exit_callback_phase':{
+      'classification':'SOURCE_CLOSED_IMPLEMENTATION_FIELDS',
+      'capture_a':CLASS00_PHASE_A.name,'capture_b':CLASS00_PHASE_B.name,
+      'byte_identical':True,'file':class00_phase_name,
+      'sha256':class00_phase_sha_a,
+      'source_frame_range_inclusive_u16':[5450,5524],
+      'event_codes':{'P':'route-6 player dispatcher 0x0213d0',
+        'A':'type-24/class-0x0a dispatch',
+        'D':'remaining fixed-pool traversal through record-28 entry',
+        'C':'type-28/class-0x00 dispatch'},
+      'program':class00_exit_phase_program,
+      'ordering_rule':'the packed program preserves the complete route-6 player-dispatch, class-0x0a, record-28 traversal and class-0x00 order; an exit player dispatch may begin or end a source-frame observation boundary independently of the subordinate coordinate writer',
+      'player_program_projection':{
+        'classification':'SOURCE_CAPTURE_PROJECTION_ONLY',
+        'dispatcher_events_u16':class00_player_dispatches,
+        'native_program_applications_u16':class00_player_applied,
+        'source_program_artifact':ENCOUNTER_ROUTE.name,
+        'source_program_sha256':sha(ENCOUNTER_ROUTE),
+        'rule':'the accepted 203-call player bytecode projection is applied to the first dispatcher events in each observation interval except the source 5505/5506 ballistic handoff, where the trailing two events own the collapsed native transition; all 213 dispatcher events remain ordered for fixed-pool presentation',
+        'trace_scope':'Coffee Shop withdrawal source frames 5453..5523; not general gameplay timing authority',
+        'mutation_control':'first-event application at the 5505/5506 ballistic handoff changes the class-0x00 raw x/y projection at source frames 5506/5507'},
+      'frame_5460_witness':{'player_updates_u8':4,
+        'record28_traversals_u8':3,
+        'final_traversal_child_x_fp':'0x05320000',
+        'final_traversal_child_z_s16':311,
+        'post_traversal_player_x_fp':'0x0539ad00',
+        'next_visible_child_x_fp':'0x05320000',
+        'next_visible_child_z_s16':311},
+      'mutation_control':'batching route-6 player dispatches before fixed-pool traversal, counting only subordinate coordinate writes as player callbacks, or applying the ballistic handoff to the wrong dispatcher events changes the raw class-0x00 projection'}},
+   'direct_effects':{'rng_calls_u8':0,'collision_memberships_u8':0,
+    'health_or_damage_writes_u8':0,'audio_transactions_u8':0,
+    'route_camera_load_writes_u8':0,
+    'parent_presentation_field_writes_per_dispatch_u8':1,
+    'rule':'source-owned presentation companion and parent presentation coordination only; no gameplay-authoritative effect is inferred'},
+   'route_teardown':{
+    'last_dispatch_source_frame_u16':5523,
+    'frozen_resident_source_frame_range_inclusive_u16':[5524,5550],
+    'release_owner':'central scene record clear 0x0173f8',
+    'release_source_frame_u16':5550,
+    'first_absent_visible_source_frame_u16':5551,
+    'fixed_frame_release_forbidden':True},
+   'counterfactual':{
+    'classification':'SOURCE_STATE_MUTATION_CONTROL_WITH_MATCHED_NORMALIZATION',
+    'capture_a':CLASS00_COUNTER_A.name,'capture_b':CLASS00_COUNTER_B.name,
+    'byte_identical':True,'files_sha256':class00_counter_a,
+    'injection':'for one source traversal only, change substate 0x0200 to 0x0000 before the action-0x06 nested dispatch',
+    'production_authority':False,
+    'field_level_difference':['substate 0x0200 -> 0x0000 -> 0x0200',
+      'field_65 OR=4','field_44=0x13','field_45=0xff',
+      '0x0ae396 invocation'],
+    'complete_scene_normalization':'source complete-scene actor, route, RNG, health, collision and audio projections remain byte-identical because the initialization body normalizes before the owning active-body output',
+    'downstream_differences':class00_counter_differences},
+   'capture_identity':{
+    'completion_a':CLASS00_DETAIL_A.name,'completion_b':CLASS00_DETAIL_B.name,
+    'byte_identical':True,'files_sha256':class00_detail_a},
+   'mutation_controls':['source body','outer dispatch table','action dispatch table',
+    'nested substate dispatch','allocation chronology','parent pointer',
+    'state-0 writes','counterfactual init writes',
+    'parent animation-record byte-0x0f mapping','parent branch table',
+    'signed x offset and facing negation','signed y offset','parent field56 write',
+    'animation selector table','animation record/assembly/selectors',
+    'dispatch cadence','exit callback player-before-record28 phase',
+    'surplus exit player update after final record28 traversal',
+    'frozen resident interval','central scene clear',
+    'direct RNG absence','collision-list absence','health/damage absence',
+    'audio absence','fixed-frame substitute'],
+   'spec_executable':True,'retained_gameplay_authority':False,
+   'fixed_frame_substitute_forbidden':True}
   implementation_contracts={
    (20,'0x01'):{
    'semantic_role':'SOURCE_CLASS_0X1F_SPAWN_CONTROLLER',
@@ -1773,6 +2194,7 @@ def coffee_shop_scene_component_identities(op,program):
      'effect-count predecrement','audio command','fixed-frame substitute']}}
  implementation_contracts[(20,'0x0f')]=class0f_program
  implementation_contracts[(24,'0x0a')]=class0a_program
+ implementation_contracts[(28,'0x00')]=class00_program
  for contract in implementation_contracts.values():
    if 'stage_records' not in contract:
     continue
@@ -3074,6 +3496,7 @@ def build():
  validate(report);return report
 
 def validate(r):
+ program=PROGRAM.read_bytes()
  req(r['schema']=='oracle11-round1-auxiliary-authority-v1' and r['status']=='SOURCE_CLOSED','aux family status drift');req(r['capture_identity']['byte_identical'] is True and r['capture_identity']['sample_rows']==120620 and r['capture_identity']['entry_rows']==59865 and r['capture_identity']['write_rows']==428764 and r['capture_identity']['rng_rows']==1348 and r['capture_identity']['player_effect_rows']==2,'aux capture drift')
  op=OPCODES.read_bytes();req(len(r['archetypes'])==12 and {(x['type'],x['class']) for x in r['archetypes']}==set(DISPATCH),'aux inventory drift')
  for x in r['archetypes']:
@@ -3582,6 +4005,9 @@ def validate(r):
  class0a_component=next(x for x in scene_components['components']
                         if x['type']==24 and x['class']=='0x0a')
  class0a_contract=class0a_component['implementation_contract']
+ class00_component=next(x for x in scene_components['components']
+                        if x['type']==28 and x['class']=='0x00')
+ class00_contract=class00_component['implementation_contract']
  req(scene_components['classification']=='SOURCE_CLOSED_IDENTITY' and
      scene_components['capture_identity']['byte_identical'] is True and
      scene_components['capture_identity']['implementation_detail_byte_identical'] is True and
@@ -3602,6 +4028,7 @@ def validate(r):
           for x in scene_components['components'][2:]
           if not ((x['type']==20 and x['class']=='0x0f') or
                   (x['type']==24 and x['class']=='0x0a') or
+                  (x['type']==28 and x['class']=='0x00') or
                   (x['type']==24 and x['class']=='0x20'))) and
      next(x for x in scene_components['components']
           if x['type']==20 and x['class']=='0x0f')['classification']==
@@ -3642,6 +4069,37 @@ def validate(r):
      all(x['different'] for x in
          class0a_contract['counterfactual']['downstream_differences'].values()) and
      class0a_contract['retained_gameplay_authority'] is False and
+     class00_component['classification']==
+      'SOURCE_CLOSED_IMPLEMENTATION_FIELDS' and
+     class00_component['implementation_status']=='SPEC_EXECUTABLE' and
+     class00_component['semantic_role']==
+      'SOURCE_PLAYER_ANCHORED_PRESENTATION_COMPANION' and
+     class00_contract['source_body']=={
+      'first':'0x0009e098','last_exclusive':'0x0009e5be',
+      'sha256':'5ae219377db297092601b14a1e9f055fc7c18a6ccd6358c6dbbb55e3d586f3e1'} and
+     class00_contract['active_helper']['sha256']==
+      'af83dda6984a7ba504945d4ee313b6b133d342e1fac8fb7e51edba4f655161e1' and
+     class00_contract['dispatch']['outer_state_high_byte_offsets_s16']==
+      [8,112,980,1006] and
+     class00_contract['animation_selector']['offset_table_sha256']==
+      '7bec721ce9e2d403b24515c60b202958f3defeb4508efe7de1ec295f79bde83f' and
+     len(class00_contract['parent_projection'][
+       'coffee_shop_animation_record_branches'])==109 and
+     all(int(row['animation_record'],16)+16<=len(program) and
+       program[int(row['animation_record'],16)+15]==
+         row['parent_animation_branch_u8']
+       for row in class00_contract['parent_projection'][
+         'coffee_shop_animation_record_branches']) and
+     len(class00_contract['parent_projection']['coffee_shop_entries'])==37 and
+     len(class00_contract['animation_selector']['records'])==11 and
+     class00_contract['scheduler_cadence']['dispatch_count_u16']==3595 and
+     class00_contract['scheduler_cadence']['exception_count_u8']==70 and
+     class00_contract['direct_effects']['rng_calls_u8']==0 and
+     class00_contract['direct_effects']['collision_memberships_u8']==0 and
+     class00_contract['counterfactual']['production_authority'] is False and
+     class00_contract['counterfactual']['classification']==
+      'SOURCE_STATE_MUTATION_CONTROL_WITH_MATCHED_NORMALIZATION' and
+     class00_contract['retained_gameplay_authority'] is False and
      next(x for x in scene_components['components']
           if x['type']==24 and x['class']=='0x20')['implementation_contract']
       ['retained_gameplay_authority'] is False and
