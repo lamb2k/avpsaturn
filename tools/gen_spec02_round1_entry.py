@@ -357,17 +357,27 @@ def build() -> str:
                    if item["type"] == 20 and item["class"] == "0x01")
     class02 = next(item for item in scene_components["components"]
                    if item["type"] == 20 and item["class"] == "0x02")
+    class0f = next(item for item in scene_components["components"]
+                   if item["type"] == 20 and item["class"] == "0x0f")
     class01_contract = class01["implementation_contract"]
     class02_contract = class02["implementation_contract"]
+    class0f_contract = class0f["implementation_contract"]
     coffee_scene_records = sorted(
         class01_contract["stage_records"] +
         class02_contract["stage_records"] +
+        class0f_contract["stage_records"] +
         class05_prop["stage_records"],
         key=lambda row: int(row["address"], 16))
     class01_records = class01_contract["initialization"][
         "animation_records"]
     class02_records = class02_contract["initialization"][
         "animation_records"]
+    class0f_records = class0f_contract["initialization"][
+        "animation_records"]
+    class0f_selector1 = class0f_contract["state_program"]["0x0400"][
+        "selector_1"]
+    class0f_selector0 = class0f_contract["state_program"]["0x0400"][
+        "selector_0"]
     class02_collision = class02_contract["collision_damage"]
     class05_records = class05_prop["presentation_records"]
     class05_collision = class05_prop["current_state_collision"]
@@ -2347,6 +2357,9 @@ def build() -> str:
         class02["classification"] !=
             "SOURCE_CLOSED_IMPLEMENTATION_FIELDS" or
         class02["implementation_status"] != "SPEC_EXECUTABLE" or
+        class0f["classification"] !=
+            "SOURCE_CLOSED_IMPLEMENTATION_FIELDS" or
+        class0f["implementation_status"] != "SPEC_EXECUTABLE" or
         [(row["address"], row["observed_source_slot"],
           row["camera_threshold_u16"], row["class_u8"], row["variant_u8"])
          for row in coffee_scene_records] != [
@@ -2355,11 +2368,16 @@ def build() -> str:
             ("0x0015c158", "0x00ffb400", 672, 1, 1),
             ("0x0015c178", "0x00ffb300", 736, 2, 0),
             ("0x0015c188", "0x00ffb280", 816, 5, 0),
-            ("0x0015c1a8", "0x00ffb180", 816, 5, 0)] or
+            ("0x0015c1a8", "0x00ffb180", 816, 5, 0),
+            ("0x0015c1b8", "0x00ffb100", 816, 15, 0)] or
         [row["animation_record"] for row in class01_records] !=
             ["0x0006b45a", "0x0006b46a", "0x0006b47a"] or
         [row["animation_record"] for row in class02_records] !=
             ["0x0006b66c", "0x0006b680"] or
+        [row["animation_record"] for row in class0f_records] !=
+            ["0x0006ee4a", "0x0006ee5e", "0x0006ee72"] or
+        [(row["hurt_selector_u8"], row["attack_selector_u8"])
+         for row in class0f_records] != [(1, 1), (2, 2), (0, 3)] or
         class05_prop["classification"] !=
             "SOURCE_CLOSED_IMPLEMENTATION_FIELDS" or
         class05_prop["spec_executable"] is not True or
@@ -2375,13 +2393,15 @@ def build() -> str:
         class02_contract["rng"] != {"calls": 0, "consumption_order": []} or
         sorted((row["address"], row["writer_source_frame_u16"],
                 row["camera_x_u16"], row["first_actor_visible_frame_u16"])
-               for contract in (class01_contract, class02_contract)
+               for contract in (class01_contract, class02_contract,
+                                class0f_contract)
                for row in contract["stage_spawn_guard"]
                    ["camera_sample_order"]["records"]) != [
             ("0x0015c108", 2072, 640, 2073),
             ("0x0015c128", 2072, 640, 2073),
             ("0x0015c158", 2242, 675, 2243),
-            ("0x0015c178", 2617, 736, 2618)] or
+            ("0x0015c178", 2617, 736, 2618),
+            ("0x0015c1b8", 2672, 817, 2673)] or
         class01_contract["route_interaction"]["clear_writer"] !=
             "0x0289fc (captured successor 0x028a02) in recurring controller writes 0" or
         class02_collision["attack_record"] != "0x0011af76" or
@@ -2408,7 +2428,24 @@ def build() -> str:
             "scheduler_phase_evidence"]["controller_dispatch_counts"]] !=
             [0, 1, 3, 1, 1] or
         class02_contract["scheduler_phase_evidence"]
-            ["fixed_frame_gameplay_authority_forbidden"] is not True):
+            ["fixed_frame_gameplay_authority_forbidden"] is not True or
+        class0f_contract["source_body"] != {
+            "first": "0x0006ed3e", "last_exclusive": "0x0006ee42",
+            "sha256": "d3ae68e588d84042b1f937279588d4974bc1bbd64778c8e77625735b859ba8de"} or
+        [row["offsets_s16"] for row in class0f_contract["dispatch_tables"]] !=
+            [[8, 64, 112, 242], [4, 6], [10, 4]] or
+        class0f_selector1["allocation"]["variant_iteration_s8"] !=
+            [3, 2, 1, 0] or
+        class0f_selector1["allocation"]["child_rng_calls_u8"] != 28 or
+        class0f_selector0["first_source_effect"]["record_type_u8"] != 28 or
+        class0f_selector0["first_source_effect"]["class_u8"] != 9 or
+        [row["command_u16"] for row in
+         class0f_contract["audio_transactions"]] != ["0x0077", "0x0142"] or
+        {row["argument1_u32"] for row in
+         class0f_contract["audio_transactions"]} != {"0x00002000"} or
+        class0f_contract["rng"]["direct_calls"] != 0 or
+        class0f_contract["retained_gameplay_authority"] is not False or
+        class0f_contract["fixed_frame_substitute_forbidden"] is not True):
         raise ValueError("SPEC-02 Coffee Shop component implementation drift")
     if (class02_source_cadence["classification"] !=
             "SOURCE_CLOSED_IMPLEMENTATION_FIELDS" or
@@ -4812,6 +4849,16 @@ def build() -> str:
             row["attack_selector_u8"]))
     lines.extend([
         "};", "",
+        "static const AvspRound1AnimationStateSpec avsp_round1_class0f_records[AVSP_ROUND1_CLASS0F_PRESENTATION_COUNT] =",
+        "{",
+    ])
+    for row in class0f_records:
+        lines.append("    { %du, %d, %sUL, %sUL, %du, %du }," % (
+            row["timer_u16"], row["branch_s16"], row["animation_record"],
+            row["assembly"], row["hurt_selector_u8"],
+            row["attack_selector_u8"]))
+    lines.extend([
+        "};", "",
         "static const AvspRound1AnimationStateSpec avsp_round1_class05_records[AVSP_ROUND1_CLASS05_PRESENTATION_COUNT] =",
         "{",
     ])
@@ -4892,6 +4939,15 @@ def build() -> str:
             hurt_box["x_center_s8"], hurt_box["y_center_s8"],
             hurt_box["x_half_u8"], hurt_box["y_half_u8"],
             hurt_box["z_center_s8"], hurt_box["z_half_u8"]),
+        "};", "",
+        "static const AvspRound1Class0fSpec avsp_round1_class0f =",
+        "{",
+        "    0x06ED3EUL, 0x06EE42UL, 0x06EEE6UL,",
+        "    0x0200u, 0x0202u, 0x0400u, 0x0600u, 2u, 0x1Du,",
+        "    24u, 0x11, 4u, -1, 28u, 0x09, 80, -8, %su, %su, %sUL" % (
+            class0f_contract["audio_transactions"][0]["command_u16"],
+            class0f_contract["audio_transactions"][1]["command_u16"],
+            class0f_contract["audio_transactions"][0]["argument1_u32"]),
         "};", "",
         "/* Source-display cadence derived from the accepted recurring-controller",
         " * transaction ledger. This is diagnostic replay timing, not a gameplay",

@@ -4007,6 +4007,7 @@ const AvspRound1ContentArchive avsp_round1_content_image
         { 0x0015c178UL, 0x00ffb300UL, 2617u, 736u, 1152, 336, 4u, 0x02, 0u, 0, 0u, 0u, 0u, 0u },
         { 0x0015c188UL, 0x00ffb280UL, 2672u, 816u, 1264, 293, 4u, 0x05, 0u, 0, 0u, 0u, 48u, 0u },
         { 0x0015c1a8UL, 0x00ffb180UL, 2672u, 816u, 1284, 268, 4u, 0x05, 0u, 0, 0u, 0u, 34u, 0u },
+        { 0x0015c1b8UL, 0x00ffb100UL, 2672u, 816u, 1301, 240, 4u, 0x0F, 0u, 0, 0u, 0u, 0u, 0u },
     },
     {
         { 8u, 0, 0x0006b45aUL, 0x0006b48eUL, 0u, 0u },
@@ -4016,6 +4017,11 @@ const AvspRound1ContentArchive avsp_round1_content_image
     {
         { 4095u, -32768, 0x0006b66cUL, 0x0006b6a8UL, 1u, 0u },
         { 4095u, -32768, 0x0006b680UL, 0x0006b6baUL, 1u, 0u },
+    },
+    {
+        { 4095u, -32768, 0x0006ee4aUL, 0x0006ee86UL, 1u, 1u },
+        { 4095u, -32768, 0x0006ee5eUL, 0x0006eeaaUL, 2u, 2u },
+        { 4095u, -32768, 0x0006ee72UL, 0x0006eec8UL, 0u, 3u },
     },
     {
         { 4095u, -32768, 0x0006cc62UL, 0x0006ccd6UL, 1u, 1u },
@@ -4043,6 +4049,11 @@ const AvspRound1ContentArchive avsp_round1_content_image
         16u, 0x01A0u, 5u, 28u, 0x05, 1u, 8, 64, -8, 25, -1, 0x0077u, 1u, 0u,
         { 0, 48, 88u, 48u, 0, 40u, 1, 3u, 0u },
         { 8, 64, 8u, 32u, -4, 4u, 0, 0u, 0u }
+    },
+    {
+        0x06ED3EUL, 0x06EE42UL, 0x06EEE6UL,
+        0x0200u, 0x0202u, 0x0400u, 0x0600u, 2u, 0x1Du,
+        24u, 0x11, 4u, -1, 28u, 0x09, 80, -8, 0x0077u, 0x0142u, 0x00002000UL
     },
     {
         { 2075u, 3u },

@@ -82,7 +82,7 @@
       "documented_exit_sites": [
         {
           "context": "0u) return 91;",
-          "line": 4649,
+          "line": 4785,
           "source_return": 91
         }
       ],
@@ -101,7 +101,7 @@
       "documented_exit_sites": [
         {
           "context": "0u) return 91;",
-          "line": 4649,
+          "line": 4785,
           "source_return": 91
         }
       ],
@@ -125,52 +125,52 @@
         },
         {
           "context": "!avsp_round1_begin_first_entry(&hit_runtime)) return 116;",
-          "line": 4491,
+          "line": 4627,
           "source_return": 116
         },
         {
           "context": "} return 116;",
-          "line": 4547,
+          "line": 4683,
           "source_return": 116
         },
         {
           "context": "!avsp_round1_step_first_entry(&hit_runtime)) return 116;",
-          "line": 4559,
+          "line": 4695,
           "source_return": 116
         },
         {
           "context": "&hit_runtime, source_tick < source_updates)) return 116;",
-          "line": 4563,
+          "line": 4699,
           "source_return": 116
         },
         {
           "context": "!avsp_round1_step_player(&hit_runtime, input, 0)) return 116;",
-          "line": 4568,
+          "line": 4704,
           "source_return": 116
         },
         {
           "context": "source_tick < class02_updates)) return 116;",
-          "line": 4574,
+          "line": 4710,
           "source_return": 116
         },
         {
           "context": "!avsp_round1_step_first_entry(&hit_runtime)) return 116;",
-          "line": 4582,
+          "line": 4718,
           "source_return": 116
         },
         {
           "context": "&hit_runtime, source_updates != 0u)) return 116;",
-          "line": 4587,
+          "line": 4723,
           "source_return": 116
         },
         {
           "context": "!avsp_round1_step_player(&hit_runtime, input, 0)) return 116;",
-          "line": 4592,
+          "line": 4728,
           "source_return": 116
         },
         {
           "context": "class02_updates != 0u)) return 116;",
-          "line": 4599,
+          "line": 4735,
           "source_return": 116
         }
       ],
@@ -248,12 +248,12 @@
       "documented_exit_sites": [
         {
           "context": "tail_actor != 0 ? tail_actor->z : 0); return 136;",
-          "line": 5312,
+          "line": 5448,
           "source_return": 136
         },
         {
           "context": "if (!avsp_round1_step_coffee_exit_display(&scene_runtime)) return 136;",
-          "line": 5684,
+          "line": 5820,
           "source_return": 136
         }
       ],
@@ -272,37 +272,37 @@
       "documented_exit_sites": [
         {
           "context": "terrain_turn_runtime.failure_count); return 110;",
-          "line": 4069,
+          "line": 4205,
           "source_return": 110
         },
         {
           "context": "terrain_turn_runtime.failure_count); return 110;",
-          "line": 4108,
+          "line": 4244,
           "source_return": 110
         },
         {
           "context": "terrain_turn_runtime.failure_count); return 110;",
-          "line": 4153,
+          "line": 4289,
           "source_return": 110
         },
         {
           "context": "terrain_turn_runtime.failure_count); return 110;",
-          "line": 4202,
+          "line": 4338,
           "source_return": 110
         },
         {
           "context": "terrain_turn_runtime.failure_count); return 110;",
-          "line": 4232,
+          "line": 4368,
           "source_return": 110
         },
         {
           "context": "terrain_turn_runtime.failure_count); return 110;",
-          "line": 4278,
+          "line": 4414,
           "source_return": 110
         },
         {
           "context": "!avsp_round1_step_first_entry(&scene_runtime)) return 110;",
-          "line": 4889,
+          "line": 5025,
           "source_return": 110
         }
       ],
@@ -321,12 +321,12 @@
       "documented_exit_sites": [
         {
           "context": "scene_clear_actor->animation_branch : 0); return 135;",
-          "line": 4772,
+          "line": 4908,
           "source_return": 135
         },
         {
           "context": "scene_runtime.entry_controller.substate); return 135;",
-          "line": 5365,
+          "line": 5501,
           "source_return": 135
         }
       ],
@@ -345,7 +345,7 @@
       "documented_exit_sites": [
         {
           "context": "scene_runtime.class1f_audio_events); return 129;",
-          "line": 5385,
+          "line": 5521,
           "source_return": 129
         }
       ],
@@ -369,7 +369,7 @@
         },
         {
           "context": "scene_runtime.rng_seed); return 94;",
-          "line": 5171,
+          "line": 5307,
           "source_return": 94
         }
       ],
@@ -388,7 +388,7 @@
       "documented_exit_sites": [
         {
           "context": "scene_runtime.player_hit_interaction_input_pending); return 127;",
-          "line": 5039,
+          "line": 5175,
           "source_return": 127
         }
       ],
@@ -412,7 +412,7 @@
         },
         {
           "context": "scene_runtime.rng_seed); return 94;",
-          "line": 5171,
+          "line": 5307,
           "source_return": 94
         }
       ],
@@ -436,7 +436,7 @@
         },
         {
           "context": "attack_actor->animation_record : 0UL); return 128;",
-          "line": 5569,
+          "line": 5705,
           "source_return": 128
         }
       ],
@@ -455,7 +455,7 @@
       "documented_exit_sites": [
         {
           "context": "scene_runtime.class1f_audio_events); return 129;",
-          "line": 5385,
+          "line": 5521,
           "source_return": 129
         }
       ],
@@ -474,7 +474,7 @@
       "documented_exit_sites": [
         {
           "context": "scene_runtime.player_hit_interaction_input_pending); return 127;",
-          "line": 5039,
+          "line": 5175,
           "source_return": 127
         }
       ],
@@ -532,12 +532,12 @@
         },
         {
           "context": "scene_runtime.class1f_phase_guard_counter != 7u)) return 124;",
-          "line": 4681,
+          "line": 4817,
           "source_return": 124
         },
         {
           "context": "reaction_target != 0 ? reaction_target->facing : 0u); return 124;",
-          "line": 5417,
+          "line": 5553,
           "source_return": 124
         }
       ],
@@ -566,7 +566,7 @@
         },
         {
           "context": "scene_runtime.player.z); return 131;",
-          "line": 5048,
+          "line": 5184,
           "source_return": 131
         }
       ],
@@ -605,12 +605,12 @@
         },
         {
           "context": "scene_runtime.class1f_phase_guard_counter != 7u)) return 124;",
-          "line": 4681,
+          "line": 4817,
           "source_return": 124
         },
         {
           "context": "reaction_target != 0 ? reaction_target->facing : 0u); return 124;",
-          "line": 5417,
+          "line": 5553,
           "source_return": 124
         }
       ],
@@ -649,12 +649,12 @@
         },
         {
           "context": "scene_runtime.class1f_phase_guard_counter != 7u)) return 124;",
-          "line": 4681,
+          "line": 4817,
           "source_return": 124
         },
         {
           "context": "reaction_target != 0 ? reaction_target->facing : 0u); return 124;",
-          "line": 5417,
+          "line": 5553,
           "source_return": 124
         }
       ],
@@ -688,12 +688,12 @@
         },
         {
           "context": "scene_runtime.route_state); return 125;",
-          "line": 4717,
+          "line": 4853,
           "source_return": 125
         },
         {
           "context": "timeout_actor->animation_record : 0UL); return 125;",
-          "line": 5463,
+          "line": 5599,
           "source_return": 125
         }
       ],
@@ -722,7 +722,7 @@
         },
         {
           "context": "scene_runtime.player.z); return 131;",
-          "line": 5048,
+          "line": 5184,
           "source_return": 131
         }
       ],
@@ -756,12 +756,12 @@
         },
         {
           "context": "scene_runtime.route_state); return 125;",
-          "line": 4717,
+          "line": 4853,
           "source_return": 125
         },
         {
           "context": "timeout_actor->animation_record : 0UL); return 125;",
-          "line": 5463,
+          "line": 5599,
           "source_return": 125
         }
       ],
@@ -785,7 +785,7 @@
         },
         {
           "context": "scene_runtime.rng_seed); return 94;",
-          "line": 5171,
+          "line": 5307,
           "source_return": 94
         }
       ],
@@ -804,7 +804,7 @@
       "documented_exit_sites": [
         {
           "context": "scene_runtime.player_hit_invulnerability); return 123;",
-          "line": 5644,
+          "line": 5780,
           "source_return": 123
         }
       ],
@@ -823,37 +823,37 @@
       "documented_exit_sites": [
         {
           "context": "terrain_turn_runtime.failure_count); return 110;",
-          "line": 4069,
+          "line": 4205,
           "source_return": 110
         },
         {
           "context": "terrain_turn_runtime.failure_count); return 110;",
-          "line": 4108,
+          "line": 4244,
           "source_return": 110
         },
         {
           "context": "terrain_turn_runtime.failure_count); return 110;",
-          "line": 4153,
+          "line": 4289,
           "source_return": 110
         },
         {
           "context": "terrain_turn_runtime.failure_count); return 110;",
-          "line": 4202,
+          "line": 4338,
           "source_return": 110
         },
         {
           "context": "terrain_turn_runtime.failure_count); return 110;",
-          "line": 4232,
+          "line": 4368,
           "source_return": 110
         },
         {
           "context": "terrain_turn_runtime.failure_count); return 110;",
-          "line": 4278,
+          "line": 4414,
           "source_return": 110
         },
         {
           "context": "!avsp_round1_step_first_entry(&scene_runtime)) return 110;",
-          "line": 4889,
+          "line": 5025,
           "source_return": 110
         }
       ],
@@ -887,12 +887,12 @@
         },
         {
           "context": "scene_runtime.route_state); return 125;",
-          "line": 4717,
+          "line": 4853,
           "source_return": 125
         },
         {
           "context": "timeout_actor->animation_record : 0UL); return 125;",
-          "line": 5463,
+          "line": 5599,
           "source_return": 125
         }
       ],
@@ -931,12 +931,12 @@
         },
         {
           "context": "scene_runtime.class1f_phase_guard_counter != 7u)) return 124;",
-          "line": 4681,
+          "line": 4817,
           "source_return": 124
         },
         {
           "context": "reaction_target != 0 ? reaction_target->facing : 0u); return 124;",
-          "line": 5417,
+          "line": 5553,
           "source_return": 124
         }
       ],
@@ -1097,52 +1097,52 @@
         },
         {
           "context": "!avsp_round1_begin_first_entry(&hit_runtime)) return 116;",
-          "line": 4491,
+          "line": 4627,
           "source_return": 116
         },
         {
           "context": "} return 116;",
-          "line": 4547,
+          "line": 4683,
           "source_return": 116
         },
         {
           "context": "!avsp_round1_step_first_entry(&hit_runtime)) return 116;",
-          "line": 4559,
+          "line": 4695,
           "source_return": 116
         },
         {
           "context": "&hit_runtime, source_tick < source_updates)) return 116;",
-          "line": 4563,
+          "line": 4699,
           "source_return": 116
         },
         {
           "context": "!avsp_round1_step_player(&hit_runtime, input, 0)) return 116;",
-          "line": 4568,
+          "line": 4704,
           "source_return": 116
         },
         {
           "context": "source_tick < class02_updates)) return 116;",
-          "line": 4574,
+          "line": 4710,
           "source_return": 116
         },
         {
           "context": "!avsp_round1_step_first_entry(&hit_runtime)) return 116;",
-          "line": 4582,
+          "line": 4718,
           "source_return": 116
         },
         {
           "context": "&hit_runtime, source_updates != 0u)) return 116;",
-          "line": 4587,
+          "line": 4723,
           "source_return": 116
         },
         {
           "context": "!avsp_round1_step_player(&hit_runtime, input, 0)) return 116;",
-          "line": 4592,
+          "line": 4728,
           "source_return": 116
         },
         {
           "context": "class02_updates != 0u)) return 116;",
-          "line": 4599,
+          "line": 4735,
           "source_return": 116
         }
       ],
@@ -1166,52 +1166,52 @@
         },
         {
           "context": "!avsp_round1_begin_first_entry(&hit_runtime)) return 116;",
-          "line": 4491,
+          "line": 4627,
           "source_return": 116
         },
         {
           "context": "} return 116;",
-          "line": 4547,
+          "line": 4683,
           "source_return": 116
         },
         {
           "context": "!avsp_round1_step_first_entry(&hit_runtime)) return 116;",
-          "line": 4559,
+          "line": 4695,
           "source_return": 116
         },
         {
           "context": "&hit_runtime, source_tick < source_updates)) return 116;",
-          "line": 4563,
+          "line": 4699,
           "source_return": 116
         },
         {
           "context": "!avsp_round1_step_player(&hit_runtime, input, 0)) return 116;",
-          "line": 4568,
+          "line": 4704,
           "source_return": 116
         },
         {
           "context": "source_tick < class02_updates)) return 116;",
-          "line": 4574,
+          "line": 4710,
           "source_return": 116
         },
         {
           "context": "!avsp_round1_step_first_entry(&hit_runtime)) return 116;",
-          "line": 4582,
+          "line": 4718,
           "source_return": 116
         },
         {
           "context": "&hit_runtime, source_updates != 0u)) return 116;",
-          "line": 4587,
+          "line": 4723,
           "source_return": 116
         },
         {
           "context": "!avsp_round1_step_player(&hit_runtime, input, 0)) return 116;",
-          "line": 4592,
+          "line": 4728,
           "source_return": 116
         },
         {
           "context": "class02_updates != 0u)) return 116;",
-          "line": 4599,
+          "line": 4735,
           "source_return": 116
         }
       ],
@@ -2057,7 +2057,7 @@
         },
         {
           "context": "scene_runtime.player.attack_selector != 0u)) return 118;",
-          "line": 5652,
+          "line": 5788,
           "source_return": 118
         }
       ],
@@ -2110,12 +2110,12 @@
         },
         {
           "context": "scene_runtime.route_state); return 125;",
-          "line": 4717,
+          "line": 4853,
           "source_return": 125
         },
         {
           "context": "timeout_actor->animation_record : 0UL); return 125;",
-          "line": 5463,
+          "line": 5599,
           "source_return": 125
         }
       ],
@@ -2139,7 +2139,7 @@
         },
         {
           "context": "scene_runtime.rng_seed); return 94;",
-          "line": 5171,
+          "line": 5307,
           "source_return": 94
         }
       ],
@@ -2163,7 +2163,7 @@
         },
         {
           "context": "scene_runtime.rng_seed); return 94;",
-          "line": 5171,
+          "line": 5307,
           "source_return": 94
         }
       ],
@@ -2206,7 +2206,7 @@
         },
         {
           "context": "scene_runtime.rng_seed); return 94;",
-          "line": 5171,
+          "line": 5307,
           "source_return": 94
         }
       ],
@@ -2587,7 +2587,7 @@
         },
         {
           "context": "scene_runtime.first_encounter.ko_events); return 95;",
-          "line": 5711,
+          "line": 5847,
           "source_return": 95
         }
       ],
@@ -3181,17 +3181,17 @@
       "documented_exit_sites": [
         {
           "context": "component_runtime.scheduler_failure_code); return 99;",
-          "line": 3683,
+          "line": 3819,
           "source_return": 99
         },
         {
           "context": "component_runtime.scheduler_failure_code); return 99;",
-          "line": 3736,
+          "line": 3872,
           "source_return": 99
         },
         {
           "context": "component_runtime.class02_damage_writes != 2u) return 99;",
-          "line": 3745,
+          "line": 3881,
           "source_return": 99
         }
       ],
@@ -3210,17 +3210,17 @@
       "documented_exit_sites": [
         {
           "context": "component_runtime.scheduler_failure_code); return 99;",
-          "line": 3683,
+          "line": 3819,
           "source_return": 99
         },
         {
           "context": "component_runtime.scheduler_failure_code); return 99;",
-          "line": 3736,
+          "line": 3872,
           "source_return": 99
         },
         {
           "context": "component_runtime.class02_damage_writes != 2u) return 99;",
-          "line": 3745,
+          "line": 3881,
           "source_return": 99
         }
       ],
@@ -3268,17 +3268,17 @@
       "documented_exit_sites": [
         {
           "context": "component_runtime.scheduler_failure_code); return 99;",
-          "line": 3683,
+          "line": 3819,
           "source_return": 99
         },
         {
           "context": "component_runtime.scheduler_failure_code); return 99;",
-          "line": 3736,
+          "line": 3872,
           "source_return": 99
         },
         {
           "context": "component_runtime.class02_damage_writes != 2u) return 99;",
-          "line": 3745,
+          "line": 3881,
           "source_return": 99
         }
       ],
@@ -3297,17 +3297,17 @@
       "documented_exit_sites": [
         {
           "context": "component_runtime.scheduler_failure_code); return 99;",
-          "line": 3683,
+          "line": 3819,
           "source_return": 99
         },
         {
           "context": "component_runtime.scheduler_failure_code); return 99;",
-          "line": 3736,
+          "line": 3872,
           "source_return": 99
         },
         {
           "context": "component_runtime.class02_damage_writes != 2u) return 99;",
-          "line": 3745,
+          "line": 3881,
           "source_return": 99
         }
       ],
@@ -3489,37 +3489,37 @@
       "documented_exit_sites": [
         {
           "context": "terrain_turn_runtime.failure_count); return 110;",
-          "line": 4069,
+          "line": 4205,
           "source_return": 110
         },
         {
           "context": "terrain_turn_runtime.failure_count); return 110;",
-          "line": 4108,
+          "line": 4244,
           "source_return": 110
         },
         {
           "context": "terrain_turn_runtime.failure_count); return 110;",
-          "line": 4153,
+          "line": 4289,
           "source_return": 110
         },
         {
           "context": "terrain_turn_runtime.failure_count); return 110;",
-          "line": 4202,
+          "line": 4338,
           "source_return": 110
         },
         {
           "context": "terrain_turn_runtime.failure_count); return 110;",
-          "line": 4232,
+          "line": 4368,
           "source_return": 110
         },
         {
           "context": "terrain_turn_runtime.failure_count); return 110;",
-          "line": 4278,
+          "line": 4414,
           "source_return": 110
         },
         {
           "context": "!avsp_round1_step_first_entry(&scene_runtime)) return 110;",
-          "line": 4889,
+          "line": 5025,
           "source_return": 110
         }
       ],
@@ -4212,7 +4212,7 @@
         },
         {
           "context": "scene_runtime.rng_seed); return 94;",
-          "line": 5171,
+          "line": 5307,
           "source_return": 94
         }
       ],
@@ -4236,7 +4236,7 @@
         },
         {
           "context": "scene_runtime.rng_seed); return 94;",
-          "line": 5171,
+          "line": 5307,
           "source_return": 94
         }
       ],
@@ -4260,7 +4260,7 @@
         },
         {
           "context": "scene_runtime.rng_seed); return 94;",
-          "line": 5171,
+          "line": 5307,
           "source_return": 94
         }
       ],
@@ -4366,17 +4366,17 @@
       "documented_exit_sites": [
         {
           "context": "!avsp_round1_step_first_entry(&reuse_runtime)) return 115;",
-          "line": 4383,
+          "line": 4519,
           "source_return": 115
         },
         {
           "context": "!avsp_round1_step_player(&reuse_runtime, input, 0)) return 115;",
-          "line": 4387,
+          "line": 4523,
           "source_return": 115
         },
         {
           "context": "!avsp_round1_step_scheduler(&reuse_runtime)) return 115;",
-          "line": 4390,
+          "line": 4526,
           "source_return": 115
         }
       ],
@@ -4728,7 +4728,7 @@
         },
         {
           "context": "scene_runtime.first_encounter.source_living_count); return 117;",
-          "line": 4697,
+          "line": 4833,
           "source_return": 117
         }
       ],
@@ -4752,7 +4752,7 @@
         },
         {
           "context": "scene_runtime.first_encounter.source_living_count); return 117;",
-          "line": 4697,
+          "line": 4833,
           "source_return": 117
         }
       ],
@@ -4776,7 +4776,7 @@
         },
         {
           "context": "scene_runtime.rng_seed); return 94;",
-          "line": 5171,
+          "line": 5307,
           "source_return": 94
         }
       ],
@@ -4868,12 +4868,12 @@
       "documented_exit_sites": [
         {
           "context": "scene_runtime.camera_x_upper); return 126;",
-          "line": 4834,
+          "line": 4970,
           "source_return": 126
         },
         {
           "context": "interrupted_actor->facing : 0u); return 126;",
-          "line": 5263,
+          "line": 5399,
           "source_return": 126
         }
       ],
@@ -4892,12 +4892,12 @@
       "documented_exit_sites": [
         {
           "context": "scene_clear_actor->animation_branch : 0); return 135;",
-          "line": 4772,
+          "line": 4908,
           "source_return": 135
         },
         {
           "context": "scene_runtime.entry_controller.substate); return 135;",
-          "line": 5365,
+          "line": 5501,
           "source_return": 135
         }
       ],
@@ -4916,12 +4916,12 @@
       "documented_exit_sites": [
         {
           "context": "scene_clear_actor->animation_branch : 0); return 135;",
-          "line": 4772,
+          "line": 4908,
           "source_return": 135
         },
         {
           "context": "scene_runtime.entry_controller.substate); return 135;",
-          "line": 5365,
+          "line": 5501,
           "source_return": 135
         }
       ],
@@ -4940,12 +4940,12 @@
       "documented_exit_sites": [
         {
           "context": "scene_clear_actor->animation_branch : 0); return 135;",
-          "line": 4772,
+          "line": 4908,
           "source_return": 135
         },
         {
           "context": "scene_runtime.entry_controller.substate); return 135;",
-          "line": 5365,
+          "line": 5501,
           "source_return": 135
         }
       ],
@@ -4964,12 +4964,12 @@
       "documented_exit_sites": [
         {
           "context": "!avsp_round1_begin_first_entry(&reuse_runtime)) return 114;",
-          "line": 4339,
+          "line": 4475,
           "source_return": 114
         },
         {
           "context": "reused->animation_timer, reused->animation_branch); return 114;",
-          "line": 4369,
+          "line": 4505,
           "source_return": 114
         }
       ],
@@ -4988,12 +4988,12 @@
       "documented_exit_sites": [
         {
           "context": "!avsp_round1_begin_first_entry(&reuse_runtime)) return 114;",
-          "line": 4339,
+          "line": 4475,
           "source_return": 114
         },
         {
           "context": "reused->animation_timer, reused->animation_branch); return 114;",
-          "line": 4369,
+          "line": 4505,
           "source_return": 114
         }
       ],
@@ -5566,7 +5566,7 @@
       "documented_exit_sites": [
         {
           "context": "child->animation_timer, child->animation_branch); return 113;",
-          "line": 4876,
+          "line": 5012,
           "source_return": 113
         }
       ],
@@ -5741,7 +5741,7 @@
         },
         {
           "context": "scene_runtime.rng_seed); return 94;",
-          "line": 5171,
+          "line": 5307,
           "source_return": 94
         }
       ],
@@ -5760,7 +5760,7 @@
       "documented_exit_sites": [
         {
           "context": "type16_runtime.pools[1].free_count != 19u) return 102;",
-          "line": 3780,
+          "line": 3916,
           "source_return": 102
         }
       ],
@@ -5779,7 +5779,7 @@
       "documented_exit_sites": [
         {
           "context": "parent->animation_timer != 4u) return 103;",
-          "line": 3800,
+          "line": 3936,
           "source_return": 103
         }
       ],
@@ -5798,7 +5798,7 @@
       "documented_exit_sites": [
         {
           "context": "parent->animation_timer != 4u) return 103;",
-          "line": 3800,
+          "line": 3936,
           "source_return": 103
         }
       ],
@@ -5817,7 +5817,7 @@
       "documented_exit_sites": [
         {
           "context": "type16_runtime.failure_count); return 104;",
-          "line": 3886,
+          "line": 4022,
           "source_return": 104
         }
       ],
@@ -5836,7 +5836,7 @@
       "documented_exit_sites": [
         {
           "context": "type16_runtime.failure_count); return 104;",
-          "line": 3886,
+          "line": 4022,
           "source_return": 104
         }
       ],
@@ -5855,7 +5855,7 @@
       "documented_exit_sites": [
         {
           "context": "type16_runtime.failure_count); return 104;",
-          "line": 3886,
+          "line": 4022,
           "source_return": 104
         }
       ],
@@ -5874,12 +5874,12 @@
       "documented_exit_sites": [
         {
           "context": "terminal_runtime.scheduler_failure_code); return 108;",
-          "line": 3837,
+          "line": 3973,
           "source_return": 108
         },
         {
           "context": "scene_runtime.type16_spawn_requests); return 108;",
-          "line": 5718,
+          "line": 5854,
           "source_return": 108
         }
       ],
@@ -5898,7 +5898,7 @@
       "documented_exit_sites": [
         {
           "context": "parent->animation_timer != 4u) return 103;",
-          "line": 3800,
+          "line": 3936,
           "source_return": 103
         }
       ],
@@ -5917,7 +5917,7 @@
       "documented_exit_sites": [
         {
           "context": "type16_runtime.pools[1].free_count != 20u) return 106;",
-          "line": 3911,
+          "line": 4047,
           "source_return": 106
         }
       ],
@@ -5936,7 +5936,7 @@
       "documented_exit_sites": [
         {
           "context": "scene_runtime.player_hit_invulnerability); return 123;",
-          "line": 5644,
+          "line": 5780,
           "source_return": 123
         }
       ],
@@ -5960,52 +5960,52 @@
         },
         {
           "context": "!avsp_round1_begin_first_entry(&hit_runtime)) return 116;",
-          "line": 4491,
+          "line": 4627,
           "source_return": 116
         },
         {
           "context": "} return 116;",
-          "line": 4547,
+          "line": 4683,
           "source_return": 116
         },
         {
           "context": "!avsp_round1_step_first_entry(&hit_runtime)) return 116;",
-          "line": 4559,
+          "line": 4695,
           "source_return": 116
         },
         {
           "context": "&hit_runtime, source_tick < source_updates)) return 116;",
-          "line": 4563,
+          "line": 4699,
           "source_return": 116
         },
         {
           "context": "!avsp_round1_step_player(&hit_runtime, input, 0)) return 116;",
-          "line": 4568,
+          "line": 4704,
           "source_return": 116
         },
         {
           "context": "source_tick < class02_updates)) return 116;",
-          "line": 4574,
+          "line": 4710,
           "source_return": 116
         },
         {
           "context": "!avsp_round1_step_first_entry(&hit_runtime)) return 116;",
-          "line": 4582,
+          "line": 4718,
           "source_return": 116
         },
         {
           "context": "&hit_runtime, source_updates != 0u)) return 116;",
-          "line": 4587,
+          "line": 4723,
           "source_return": 116
         },
         {
           "context": "!avsp_round1_step_player(&hit_runtime, input, 0)) return 116;",
-          "line": 4592,
+          "line": 4728,
           "source_return": 116
         },
         {
           "context": "class02_updates != 0u)) return 116;",
-          "line": 4599,
+          "line": 4735,
           "source_return": 116
         }
       ],
@@ -6024,7 +6024,7 @@
       "documented_exit_sites": [
         {
           "context": "scene_runtime.player.z); return 132;",
-          "line": 5057,
+          "line": 5193,
           "source_return": 132
         }
       ],
@@ -6043,7 +6043,7 @@
       "documented_exit_sites": [
         {
           "context": "scene_runtime.player.z); return 132;",
-          "line": 5057,
+          "line": 5193,
           "source_return": 132
         }
       ],
@@ -6062,12 +6062,12 @@
       "documented_exit_sites": [
         {
           "context": "terminal_runtime.scheduler_failure_code); return 108;",
-          "line": 3837,
+          "line": 3973,
           "source_return": 108
         },
         {
           "context": "scene_runtime.type16_spawn_requests); return 108;",
-          "line": 5718,
+          "line": 5854,
           "source_return": 108
         }
       ],
@@ -6086,7 +6086,7 @@
       "documented_exit_sites": [
         {
           "context": "scene_runtime.tail_canary); return 93;",
-          "line": 5014,
+          "line": 5150,
           "source_return": 93
         }
       ],
@@ -6105,7 +6105,7 @@
       "documented_exit_sites": [
         {
           "context": "scene_runtime.player.source_y_fp); return 133;",
-          "line": 5067,
+          "line": 5203,
           "source_return": 133
         }
       ],
@@ -6148,37 +6148,37 @@
       "documented_exit_sites": [
         {
           "context": "if (!avsp_round1_begin_first_entry(&inner_runtime)) return 109;",
-          "line": 3920,
+          "line": 4056,
           "source_return": 109
         },
         {
           "context": "inner_runtime.failure_count); return 109;",
-          "line": 3934,
+          "line": 4070,
           "source_return": 109
         },
         {
           "context": "if (!avsp_round1_step_scheduler(&inner_runtime)) return 109;",
-          "line": 3967,
+          "line": 4103,
           "source_return": 109
         },
         {
           "context": "inner_runtime.failure_count); return 109;",
-          "line": 4006,
+          "line": 4142,
           "source_return": 109
         },
         {
           "context": "if (!avsp_round1_step_scheduler(&inner_runtime)) return 109;",
-          "line": 4297,
+          "line": 4433,
           "source_return": 109
         },
         {
           "context": "if (!avsp_round1_step_scheduler(&inner_runtime)) return 109;",
-          "line": 4303,
+          "line": 4439,
           "source_return": 109
         },
         {
           "context": "inner_runtime.class01_spawn_allocations); return 109;",
-          "line": 4325,
+          "line": 4461,
           "source_return": 109
         }
       ],
@@ -6275,37 +6275,37 @@
       "documented_exit_sites": [
         {
           "context": "if (!avsp_round1_begin_first_entry(&inner_runtime)) return 109;",
-          "line": 3920,
+          "line": 4056,
           "source_return": 109
         },
         {
           "context": "inner_runtime.failure_count); return 109;",
-          "line": 3934,
+          "line": 4070,
           "source_return": 109
         },
         {
           "context": "if (!avsp_round1_step_scheduler(&inner_runtime)) return 109;",
-          "line": 3967,
+          "line": 4103,
           "source_return": 109
         },
         {
           "context": "inner_runtime.failure_count); return 109;",
-          "line": 4006,
+          "line": 4142,
           "source_return": 109
         },
         {
           "context": "if (!avsp_round1_step_scheduler(&inner_runtime)) return 109;",
-          "line": 4297,
+          "line": 4433,
           "source_return": 109
         },
         {
           "context": "if (!avsp_round1_step_scheduler(&inner_runtime)) return 109;",
-          "line": 4303,
+          "line": 4439,
           "source_return": 109
         },
         {
           "context": "inner_runtime.class01_spawn_allocations); return 109;",
-          "line": 4325,
+          "line": 4461,
           "source_return": 109
         }
       ],
@@ -6418,37 +6418,37 @@
       "documented_exit_sites": [
         {
           "context": "terrain_turn_runtime.failure_count); return 110;",
-          "line": 4069,
+          "line": 4205,
           "source_return": 110
         },
         {
           "context": "terrain_turn_runtime.failure_count); return 110;",
-          "line": 4108,
+          "line": 4244,
           "source_return": 110
         },
         {
           "context": "terrain_turn_runtime.failure_count); return 110;",
-          "line": 4153,
+          "line": 4289,
           "source_return": 110
         },
         {
           "context": "terrain_turn_runtime.failure_count); return 110;",
-          "line": 4202,
+          "line": 4338,
           "source_return": 110
         },
         {
           "context": "terrain_turn_runtime.failure_count); return 110;",
-          "line": 4232,
+          "line": 4368,
           "source_return": 110
         },
         {
           "context": "terrain_turn_runtime.failure_count); return 110;",
-          "line": 4278,
+          "line": 4414,
           "source_return": 110
         },
         {
           "context": "!avsp_round1_step_first_entry(&scene_runtime)) return 110;",
-          "line": 4889,
+          "line": 5025,
           "source_return": 110
         }
       ],
@@ -6467,37 +6467,37 @@
       "documented_exit_sites": [
         {
           "context": "terrain_turn_runtime.failure_count); return 110;",
-          "line": 4069,
+          "line": 4205,
           "source_return": 110
         },
         {
           "context": "terrain_turn_runtime.failure_count); return 110;",
-          "line": 4108,
+          "line": 4244,
           "source_return": 110
         },
         {
           "context": "terrain_turn_runtime.failure_count); return 110;",
-          "line": 4153,
+          "line": 4289,
           "source_return": 110
         },
         {
           "context": "terrain_turn_runtime.failure_count); return 110;",
-          "line": 4202,
+          "line": 4338,
           "source_return": 110
         },
         {
           "context": "terrain_turn_runtime.failure_count); return 110;",
-          "line": 4232,
+          "line": 4368,
           "source_return": 110
         },
         {
           "context": "terrain_turn_runtime.failure_count); return 110;",
-          "line": 4278,
+          "line": 4414,
           "source_return": 110
         },
         {
           "context": "!avsp_round1_step_first_entry(&scene_runtime)) return 110;",
-          "line": 4889,
+          "line": 5025,
           "source_return": 110
         }
       ],
@@ -6516,37 +6516,37 @@
       "documented_exit_sites": [
         {
           "context": "terrain_turn_runtime.failure_count); return 110;",
-          "line": 4069,
+          "line": 4205,
           "source_return": 110
         },
         {
           "context": "terrain_turn_runtime.failure_count); return 110;",
-          "line": 4108,
+          "line": 4244,
           "source_return": 110
         },
         {
           "context": "terrain_turn_runtime.failure_count); return 110;",
-          "line": 4153,
+          "line": 4289,
           "source_return": 110
         },
         {
           "context": "terrain_turn_runtime.failure_count); return 110;",
-          "line": 4202,
+          "line": 4338,
           "source_return": 110
         },
         {
           "context": "terrain_turn_runtime.failure_count); return 110;",
-          "line": 4232,
+          "line": 4368,
           "source_return": 110
         },
         {
           "context": "terrain_turn_runtime.failure_count); return 110;",
-          "line": 4278,
+          "line": 4414,
           "source_return": 110
         },
         {
           "context": "!avsp_round1_step_first_entry(&scene_runtime)) return 110;",
-          "line": 4889,
+          "line": 5025,
           "source_return": 110
         }
       ],
@@ -6565,37 +6565,37 @@
       "documented_exit_sites": [
         {
           "context": "terrain_turn_runtime.failure_count); return 110;",
-          "line": 4069,
+          "line": 4205,
           "source_return": 110
         },
         {
           "context": "terrain_turn_runtime.failure_count); return 110;",
-          "line": 4108,
+          "line": 4244,
           "source_return": 110
         },
         {
           "context": "terrain_turn_runtime.failure_count); return 110;",
-          "line": 4153,
+          "line": 4289,
           "source_return": 110
         },
         {
           "context": "terrain_turn_runtime.failure_count); return 110;",
-          "line": 4202,
+          "line": 4338,
           "source_return": 110
         },
         {
           "context": "terrain_turn_runtime.failure_count); return 110;",
-          "line": 4232,
+          "line": 4368,
           "source_return": 110
         },
         {
           "context": "terrain_turn_runtime.failure_count); return 110;",
-          "line": 4278,
+          "line": 4414,
           "source_return": 110
         },
         {
           "context": "!avsp_round1_step_first_entry(&scene_runtime)) return 110;",
-          "line": 4889,
+          "line": 5025,
           "source_return": 110
         }
       ],
@@ -6698,12 +6698,12 @@
         },
         {
           "context": "scene_runtime.route_state); return 125;",
-          "line": 4717,
+          "line": 4853,
           "source_return": 125
         },
         {
           "context": "timeout_actor->animation_record : 0UL); return 125;",
-          "line": 5463,
+          "line": 5599,
           "source_return": 125
         }
       ],
@@ -7180,7 +7180,7 @@
         },
         {
           "context": "scene_runtime.player.attack_selector != 0u)) return 118;",
-          "line": 5652,
+          "line": 5788,
           "source_return": 118
         }
       ],
@@ -7209,7 +7209,7 @@
         },
         {
           "context": "scene_runtime.player.attack_selector != 0u)) return 118;",
-          "line": 5652,
+          "line": 5788,
           "source_return": 118
         }
       ],
@@ -7228,7 +7228,7 @@
       "documented_exit_sites": [
         {
           "context": "4093u)) return 119;",
-          "line": 5661,
+          "line": 5797,
           "source_return": 119
         }
       ],
@@ -7266,7 +7266,7 @@
       "documented_exit_sites": [
         {
           "context": "scene_runtime.player.animation_branch, source_updates); return 120;",
-          "line": 5672,
+          "line": 5808,
           "source_return": 120
         }
       ],
@@ -7285,7 +7285,7 @@
       "documented_exit_sites": [
         {
           "context": "4094u)) return 121;",
-          "line": 5682,
+          "line": 5818,
           "source_return": 121
         }
       ],
@@ -7304,7 +7304,7 @@
       "documented_exit_sites": [
         {
           "context": "4094u)) return 121;",
-          "line": 5682,
+          "line": 5818,
           "source_return": 121
         }
       ],
@@ -7333,7 +7333,7 @@
         },
         {
           "context": "scene_runtime.player.attack_selector != 0u)) return 118;",
-          "line": 5652,
+          "line": 5788,
           "source_return": 118
         }
       ],
@@ -7357,52 +7357,52 @@
         },
         {
           "context": "!avsp_round1_begin_first_entry(&hit_runtime)) return 116;",
-          "line": 4491,
+          "line": 4627,
           "source_return": 116
         },
         {
           "context": "} return 116;",
-          "line": 4547,
+          "line": 4683,
           "source_return": 116
         },
         {
           "context": "!avsp_round1_step_first_entry(&hit_runtime)) return 116;",
-          "line": 4559,
+          "line": 4695,
           "source_return": 116
         },
         {
           "context": "&hit_runtime, source_tick < source_updates)) return 116;",
-          "line": 4563,
+          "line": 4699,
           "source_return": 116
         },
         {
           "context": "!avsp_round1_step_player(&hit_runtime, input, 0)) return 116;",
-          "line": 4568,
+          "line": 4704,
           "source_return": 116
         },
         {
           "context": "source_tick < class02_updates)) return 116;",
-          "line": 4574,
+          "line": 4710,
           "source_return": 116
         },
         {
           "context": "!avsp_round1_step_first_entry(&hit_runtime)) return 116;",
-          "line": 4582,
+          "line": 4718,
           "source_return": 116
         },
         {
           "context": "&hit_runtime, source_updates != 0u)) return 116;",
-          "line": 4587,
+          "line": 4723,
           "source_return": 116
         },
         {
           "context": "!avsp_round1_step_player(&hit_runtime, input, 0)) return 116;",
-          "line": 4592,
+          "line": 4728,
           "source_return": 116
         },
         {
           "context": "class02_updates != 0u)) return 116;",
-          "line": 4599,
+          "line": 4735,
           "source_return": 116
         }
       ],
@@ -7426,52 +7426,52 @@
         },
         {
           "context": "!avsp_round1_begin_first_entry(&hit_runtime)) return 116;",
-          "line": 4491,
+          "line": 4627,
           "source_return": 116
         },
         {
           "context": "} return 116;",
-          "line": 4547,
+          "line": 4683,
           "source_return": 116
         },
         {
           "context": "!avsp_round1_step_first_entry(&hit_runtime)) return 116;",
-          "line": 4559,
+          "line": 4695,
           "source_return": 116
         },
         {
           "context": "&hit_runtime, source_tick < source_updates)) return 116;",
-          "line": 4563,
+          "line": 4699,
           "source_return": 116
         },
         {
           "context": "!avsp_round1_step_player(&hit_runtime, input, 0)) return 116;",
-          "line": 4568,
+          "line": 4704,
           "source_return": 116
         },
         {
           "context": "source_tick < class02_updates)) return 116;",
-          "line": 4574,
+          "line": 4710,
           "source_return": 116
         },
         {
           "context": "!avsp_round1_step_first_entry(&hit_runtime)) return 116;",
-          "line": 4582,
+          "line": 4718,
           "source_return": 116
         },
         {
           "context": "&hit_runtime, source_updates != 0u)) return 116;",
-          "line": 4587,
+          "line": 4723,
           "source_return": 116
         },
         {
           "context": "!avsp_round1_step_player(&hit_runtime, input, 0)) return 116;",
-          "line": 4592,
+          "line": 4728,
           "source_return": 116
         },
         {
           "context": "class02_updates != 0u)) return 116;",
-          "line": 4599,
+          "line": 4735,
           "source_return": 116
         }
       ],
@@ -7495,52 +7495,52 @@
         },
         {
           "context": "!avsp_round1_begin_first_entry(&hit_runtime)) return 116;",
-          "line": 4491,
+          "line": 4627,
           "source_return": 116
         },
         {
           "context": "} return 116;",
-          "line": 4547,
+          "line": 4683,
           "source_return": 116
         },
         {
           "context": "!avsp_round1_step_first_entry(&hit_runtime)) return 116;",
-          "line": 4559,
+          "line": 4695,
           "source_return": 116
         },
         {
           "context": "&hit_runtime, source_tick < source_updates)) return 116;",
-          "line": 4563,
+          "line": 4699,
           "source_return": 116
         },
         {
           "context": "!avsp_round1_step_player(&hit_runtime, input, 0)) return 116;",
-          "line": 4568,
+          "line": 4704,
           "source_return": 116
         },
         {
           "context": "source_tick < class02_updates)) return 116;",
-          "line": 4574,
+          "line": 4710,
           "source_return": 116
         },
         {
           "context": "!avsp_round1_step_first_entry(&hit_runtime)) return 116;",
-          "line": 4582,
+          "line": 4718,
           "source_return": 116
         },
         {
           "context": "&hit_runtime, source_updates != 0u)) return 116;",
-          "line": 4587,
+          "line": 4723,
           "source_return": 116
         },
         {
           "context": "!avsp_round1_step_player(&hit_runtime, input, 0)) return 116;",
-          "line": 4592,
+          "line": 4728,
           "source_return": 116
         },
         {
           "context": "class02_updates != 0u)) return 116;",
-          "line": 4599,
+          "line": 4735,
           "source_return": 116
         }
       ],
@@ -7564,52 +7564,52 @@
         },
         {
           "context": "!avsp_round1_begin_first_entry(&hit_runtime)) return 116;",
-          "line": 4491,
+          "line": 4627,
           "source_return": 116
         },
         {
           "context": "} return 116;",
-          "line": 4547,
+          "line": 4683,
           "source_return": 116
         },
         {
           "context": "!avsp_round1_step_first_entry(&hit_runtime)) return 116;",
-          "line": 4559,
+          "line": 4695,
           "source_return": 116
         },
         {
           "context": "&hit_runtime, source_tick < source_updates)) return 116;",
-          "line": 4563,
+          "line": 4699,
           "source_return": 116
         },
         {
           "context": "!avsp_round1_step_player(&hit_runtime, input, 0)) return 116;",
-          "line": 4568,
+          "line": 4704,
           "source_return": 116
         },
         {
           "context": "source_tick < class02_updates)) return 116;",
-          "line": 4574,
+          "line": 4710,
           "source_return": 116
         },
         {
           "context": "!avsp_round1_step_first_entry(&hit_runtime)) return 116;",
-          "line": 4582,
+          "line": 4718,
           "source_return": 116
         },
         {
           "context": "&hit_runtime, source_updates != 0u)) return 116;",
-          "line": 4587,
+          "line": 4723,
           "source_return": 116
         },
         {
           "context": "!avsp_round1_step_player(&hit_runtime, input, 0)) return 116;",
-          "line": 4592,
+          "line": 4728,
           "source_return": 116
         },
         {
           "context": "class02_updates != 0u)) return 116;",
-          "line": 4599,
+          "line": 4735,
           "source_return": 116
         }
       ],
@@ -7628,7 +7628,7 @@
       "documented_exit_sites": [
         {
           "context": "scene_runtime.player.source_y_fp); return 133;",
-          "line": 5067,
+          "line": 5203,
           "source_return": 133
         }
       ],
@@ -7652,52 +7652,52 @@
         },
         {
           "context": "!avsp_round1_begin_first_entry(&hit_runtime)) return 116;",
-          "line": 4491,
+          "line": 4627,
           "source_return": 116
         },
         {
           "context": "} return 116;",
-          "line": 4547,
+          "line": 4683,
           "source_return": 116
         },
         {
           "context": "!avsp_round1_step_first_entry(&hit_runtime)) return 116;",
-          "line": 4559,
+          "line": 4695,
           "source_return": 116
         },
         {
           "context": "&hit_runtime, source_tick < source_updates)) return 116;",
-          "line": 4563,
+          "line": 4699,
           "source_return": 116
         },
         {
           "context": "!avsp_round1_step_player(&hit_runtime, input, 0)) return 116;",
-          "line": 4568,
+          "line": 4704,
           "source_return": 116
         },
         {
           "context": "source_tick < class02_updates)) return 116;",
-          "line": 4574,
+          "line": 4710,
           "source_return": 116
         },
         {
           "context": "!avsp_round1_step_first_entry(&hit_runtime)) return 116;",
-          "line": 4582,
+          "line": 4718,
           "source_return": 116
         },
         {
           "context": "&hit_runtime, source_updates != 0u)) return 116;",
-          "line": 4587,
+          "line": 4723,
           "source_return": 116
         },
         {
           "context": "!avsp_round1_step_player(&hit_runtime, input, 0)) return 116;",
-          "line": 4592,
+          "line": 4728,
           "source_return": 116
         },
         {
           "context": "class02_updates != 0u)) return 116;",
-          "line": 4599,
+          "line": 4735,
           "source_return": 116
         }
       ],
@@ -7721,52 +7721,52 @@
         },
         {
           "context": "!avsp_round1_begin_first_entry(&hit_runtime)) return 116;",
-          "line": 4491,
+          "line": 4627,
           "source_return": 116
         },
         {
           "context": "} return 116;",
-          "line": 4547,
+          "line": 4683,
           "source_return": 116
         },
         {
           "context": "!avsp_round1_step_first_entry(&hit_runtime)) return 116;",
-          "line": 4559,
+          "line": 4695,
           "source_return": 116
         },
         {
           "context": "&hit_runtime, source_tick < source_updates)) return 116;",
-          "line": 4563,
+          "line": 4699,
           "source_return": 116
         },
         {
           "context": "!avsp_round1_step_player(&hit_runtime, input, 0)) return 116;",
-          "line": 4568,
+          "line": 4704,
           "source_return": 116
         },
         {
           "context": "source_tick < class02_updates)) return 116;",
-          "line": 4574,
+          "line": 4710,
           "source_return": 116
         },
         {
           "context": "!avsp_round1_step_first_entry(&hit_runtime)) return 116;",
-          "line": 4582,
+          "line": 4718,
           "source_return": 116
         },
         {
           "context": "&hit_runtime, source_updates != 0u)) return 116;",
-          "line": 4587,
+          "line": 4723,
           "source_return": 116
         },
         {
           "context": "!avsp_round1_step_player(&hit_runtime, input, 0)) return 116;",
-          "line": 4592,
+          "line": 4728,
           "source_return": 116
         },
         {
           "context": "class02_updates != 0u)) return 116;",
-          "line": 4599,
+          "line": 4735,
           "source_return": 116
         }
       ],
@@ -7790,52 +7790,52 @@
         },
         {
           "context": "!avsp_round1_begin_first_entry(&hit_runtime)) return 116;",
-          "line": 4491,
+          "line": 4627,
           "source_return": 116
         },
         {
           "context": "} return 116;",
-          "line": 4547,
+          "line": 4683,
           "source_return": 116
         },
         {
           "context": "!avsp_round1_step_first_entry(&hit_runtime)) return 116;",
-          "line": 4559,
+          "line": 4695,
           "source_return": 116
         },
         {
           "context": "&hit_runtime, source_tick < source_updates)) return 116;",
-          "line": 4563,
+          "line": 4699,
           "source_return": 116
         },
         {
           "context": "!avsp_round1_step_player(&hit_runtime, input, 0)) return 116;",
-          "line": 4568,
+          "line": 4704,
           "source_return": 116
         },
         {
           "context": "source_tick < class02_updates)) return 116;",
-          "line": 4574,
+          "line": 4710,
           "source_return": 116
         },
         {
           "context": "!avsp_round1_step_first_entry(&hit_runtime)) return 116;",
-          "line": 4582,
+          "line": 4718,
           "source_return": 116
         },
         {
           "context": "&hit_runtime, source_updates != 0u)) return 116;",
-          "line": 4587,
+          "line": 4723,
           "source_return": 116
         },
         {
           "context": "!avsp_round1_step_player(&hit_runtime, input, 0)) return 116;",
-          "line": 4592,
+          "line": 4728,
           "source_return": 116
         },
         {
           "context": "class02_updates != 0u)) return 116;",
-          "line": 4599,
+          "line": 4735,
           "source_return": 116
         }
       ],
@@ -7859,52 +7859,52 @@
         },
         {
           "context": "!avsp_round1_begin_first_entry(&hit_runtime)) return 116;",
-          "line": 4491,
+          "line": 4627,
           "source_return": 116
         },
         {
           "context": "} return 116;",
-          "line": 4547,
+          "line": 4683,
           "source_return": 116
         },
         {
           "context": "!avsp_round1_step_first_entry(&hit_runtime)) return 116;",
-          "line": 4559,
+          "line": 4695,
           "source_return": 116
         },
         {
           "context": "&hit_runtime, source_tick < source_updates)) return 116;",
-          "line": 4563,
+          "line": 4699,
           "source_return": 116
         },
         {
           "context": "!avsp_round1_step_player(&hit_runtime, input, 0)) return 116;",
-          "line": 4568,
+          "line": 4704,
           "source_return": 116
         },
         {
           "context": "source_tick < class02_updates)) return 116;",
-          "line": 4574,
+          "line": 4710,
           "source_return": 116
         },
         {
           "context": "!avsp_round1_step_first_entry(&hit_runtime)) return 116;",
-          "line": 4582,
+          "line": 4718,
           "source_return": 116
         },
         {
           "context": "&hit_runtime, source_updates != 0u)) return 116;",
-          "line": 4587,
+          "line": 4723,
           "source_return": 116
         },
         {
           "context": "!avsp_round1_step_player(&hit_runtime, input, 0)) return 116;",
-          "line": 4592,
+          "line": 4728,
           "source_return": 116
         },
         {
           "context": "class02_updates != 0u)) return 116;",
-          "line": 4599,
+          "line": 4735,
           "source_return": 116
         }
       ],
@@ -7928,52 +7928,52 @@
         },
         {
           "context": "!avsp_round1_begin_first_entry(&hit_runtime)) return 116;",
-          "line": 4491,
+          "line": 4627,
           "source_return": 116
         },
         {
           "context": "} return 116;",
-          "line": 4547,
+          "line": 4683,
           "source_return": 116
         },
         {
           "context": "!avsp_round1_step_first_entry(&hit_runtime)) return 116;",
-          "line": 4559,
+          "line": 4695,
           "source_return": 116
         },
         {
           "context": "&hit_runtime, source_tick < source_updates)) return 116;",
-          "line": 4563,
+          "line": 4699,
           "source_return": 116
         },
         {
           "context": "!avsp_round1_step_player(&hit_runtime, input, 0)) return 116;",
-          "line": 4568,
+          "line": 4704,
           "source_return": 116
         },
         {
           "context": "source_tick < class02_updates)) return 116;",
-          "line": 4574,
+          "line": 4710,
           "source_return": 116
         },
         {
           "context": "!avsp_round1_step_first_entry(&hit_runtime)) return 116;",
-          "line": 4582,
+          "line": 4718,
           "source_return": 116
         },
         {
           "context": "&hit_runtime, source_updates != 0u)) return 116;",
-          "line": 4587,
+          "line": 4723,
           "source_return": 116
         },
         {
           "context": "!avsp_round1_step_player(&hit_runtime, input, 0)) return 116;",
-          "line": 4592,
+          "line": 4728,
           "source_return": 116
         },
         {
           "context": "class02_updates != 0u)) return 116;",
-          "line": 4599,
+          "line": 4735,
           "source_return": 116
         }
       ],
@@ -8114,7 +8114,7 @@
       "documented_exit_sites": [
         {
           "context": "scene_runtime.player_hit_invulnerability); return 123;",
-          "line": 5644,
+          "line": 5780,
           "source_return": 123
         }
       ],
@@ -8138,52 +8138,52 @@
         },
         {
           "context": "!avsp_round1_begin_first_entry(&hit_runtime)) return 116;",
-          "line": 4491,
+          "line": 4627,
           "source_return": 116
         },
         {
           "context": "} return 116;",
-          "line": 4547,
+          "line": 4683,
           "source_return": 116
         },
         {
           "context": "!avsp_round1_step_first_entry(&hit_runtime)) return 116;",
-          "line": 4559,
+          "line": 4695,
           "source_return": 116
         },
         {
           "context": "&hit_runtime, source_tick < source_updates)) return 116;",
-          "line": 4563,
+          "line": 4699,
           "source_return": 116
         },
         {
           "context": "!avsp_round1_step_player(&hit_runtime, input, 0)) return 116;",
-          "line": 4568,
+          "line": 4704,
           "source_return": 116
         },
         {
           "context": "source_tick < class02_updates)) return 116;",
-          "line": 4574,
+          "line": 4710,
           "source_return": 116
         },
         {
           "context": "!avsp_round1_step_first_entry(&hit_runtime)) return 116;",
-          "line": 4582,
+          "line": 4718,
           "source_return": 116
         },
         {
           "context": "&hit_runtime, source_updates != 0u)) return 116;",
-          "line": 4587,
+          "line": 4723,
           "source_return": 116
         },
         {
           "context": "!avsp_round1_step_player(&hit_runtime, input, 0)) return 116;",
-          "line": 4592,
+          "line": 4728,
           "source_return": 116
         },
         {
           "context": "class02_updates != 0u)) return 116;",
-          "line": 4599,
+          "line": 4735,
           "source_return": 116
         }
       ],
@@ -8207,52 +8207,52 @@
         },
         {
           "context": "!avsp_round1_begin_first_entry(&hit_runtime)) return 116;",
-          "line": 4491,
+          "line": 4627,
           "source_return": 116
         },
         {
           "context": "} return 116;",
-          "line": 4547,
+          "line": 4683,
           "source_return": 116
         },
         {
           "context": "!avsp_round1_step_first_entry(&hit_runtime)) return 116;",
-          "line": 4559,
+          "line": 4695,
           "source_return": 116
         },
         {
           "context": "&hit_runtime, source_tick < source_updates)) return 116;",
-          "line": 4563,
+          "line": 4699,
           "source_return": 116
         },
         {
           "context": "!avsp_round1_step_player(&hit_runtime, input, 0)) return 116;",
-          "line": 4568,
+          "line": 4704,
           "source_return": 116
         },
         {
           "context": "source_tick < class02_updates)) return 116;",
-          "line": 4574,
+          "line": 4710,
           "source_return": 116
         },
         {
           "context": "!avsp_round1_step_first_entry(&hit_runtime)) return 116;",
-          "line": 4582,
+          "line": 4718,
           "source_return": 116
         },
         {
           "context": "&hit_runtime, source_updates != 0u)) return 116;",
-          "line": 4587,
+          "line": 4723,
           "source_return": 116
         },
         {
           "context": "!avsp_round1_step_player(&hit_runtime, input, 0)) return 116;",
-          "line": 4592,
+          "line": 4728,
           "source_return": 116
         },
         {
           "context": "class02_updates != 0u)) return 116;",
-          "line": 4599,
+          "line": 4735,
           "source_return": 116
         }
       ],
@@ -8281,7 +8281,7 @@
         },
         {
           "context": "scene_runtime.player.attack_selector != 0u)) return 118;",
-          "line": 5652,
+          "line": 5788,
           "source_return": 118
         }
       ],
@@ -8315,12 +8315,12 @@
         },
         {
           "context": "scene_runtime.route_state); return 125;",
-          "line": 4717,
+          "line": 4853,
           "source_return": 125
         },
         {
           "context": "timeout_actor->animation_record : 0UL); return 125;",
-          "line": 5463,
+          "line": 5599,
           "source_return": 125
         }
       ],
@@ -8349,7 +8349,7 @@
         },
         {
           "context": "scene_runtime.player.z); return 131;",
-          "line": 5048,
+          "line": 5184,
           "source_return": 131
         }
       ],
@@ -8383,12 +8383,12 @@
         },
         {
           "context": "scene_runtime.route_state); return 125;",
-          "line": 4717,
+          "line": 4853,
           "source_return": 125
         },
         {
           "context": "timeout_actor->animation_record : 0UL); return 125;",
-          "line": 5463,
+          "line": 5599,
           "source_return": 125
         }
       ],
@@ -8422,12 +8422,12 @@
         },
         {
           "context": "scene_runtime.route_state); return 125;",
-          "line": 4717,
+          "line": 4853,
           "source_return": 125
         },
         {
           "context": "timeout_actor->animation_record : 0UL); return 125;",
-          "line": 5463,
+          "line": 5599,
           "source_return": 125
         }
       ],
@@ -8446,7 +8446,7 @@
       "documented_exit_sites": [
         {
           "context": "scene_runtime.player_hit_invulnerability); return 123;",
-          "line": 5644,
+          "line": 5780,
           "source_return": 123
         }
       ],
@@ -8475,7 +8475,7 @@
         },
         {
           "context": "scene_runtime.player.attack_selector != 0u)) return 118;",
-          "line": 5652,
+          "line": 5788,
           "source_return": 118
         }
       ],
@@ -8504,7 +8504,7 @@
         },
         {
           "context": "scene_runtime.player.attack_selector != 0u)) return 118;",
-          "line": 5652,
+          "line": 5788,
           "source_return": 118
         }
       ],
@@ -8552,7 +8552,7 @@
         },
         {
           "context": "scene_runtime.player.attack_selector != 0u)) return 118;",
-          "line": 5652,
+          "line": 5788,
           "source_return": 118
         }
       ],
@@ -8635,7 +8635,7 @@
         },
         {
           "context": "scene_runtime.first_encounter.source_living_count); return 117;",
-          "line": 4697,
+          "line": 4833,
           "source_return": 117
         }
       ],
@@ -8674,12 +8674,12 @@
         },
         {
           "context": "scene_runtime.class1f_phase_guard_counter != 7u)) return 124;",
-          "line": 4681,
+          "line": 4817,
           "source_return": 124
         },
         {
           "context": "reaction_target != 0 ? reaction_target->facing : 0u); return 124;",
-          "line": 5417,
+          "line": 5553,
           "source_return": 124
         }
       ],
@@ -8698,7 +8698,7 @@
       "documented_exit_sites": [
         {
           "context": "scene_runtime.player_hit_invulnerability); return 123;",
-          "line": 5644,
+          "line": 5780,
           "source_return": 123
         }
       ],
@@ -8717,7 +8717,7 @@
       "documented_exit_sites": [
         {
           "context": "scene_runtime.player_hit_invulnerability); return 123;",
-          "line": 5646,
+          "line": 5782,
           "source_return": 123
         }
       ],
@@ -8736,7 +8736,7 @@
       "documented_exit_sites": [
         {
           "context": "scene_runtime.tail_canary); return 93;",
-          "line": 5016,
+          "line": 5152,
           "source_return": 93
         }
       ],
@@ -10966,17 +10966,17 @@
       "documented_exit_sites": [
         {
           "context": "component_runtime.scheduler_failure_code); return 99;",
-          "line": 3683,
+          "line": 3819,
           "source_return": 99
         },
         {
           "context": "component_runtime.scheduler_failure_code); return 99;",
-          "line": 3736,
+          "line": 3872,
           "source_return": 99
         },
         {
           "context": "component_runtime.class02_damage_writes != 2u) return 99;",
-          "line": 3745,
+          "line": 3881,
           "source_return": 99
         }
       ],
@@ -10995,17 +10995,17 @@
       "documented_exit_sites": [
         {
           "context": "component_runtime.scheduler_failure_code); return 99;",
-          "line": 3683,
+          "line": 3819,
           "source_return": 99
         },
         {
           "context": "component_runtime.scheduler_failure_code); return 99;",
-          "line": 3736,
+          "line": 3872,
           "source_return": 99
         },
         {
           "context": "component_runtime.class02_damage_writes != 2u) return 99;",
-          "line": 3745,
+          "line": 3881,
           "source_return": 99
         }
       ],
@@ -11024,17 +11024,17 @@
       "documented_exit_sites": [
         {
           "context": "component_runtime.scheduler_failure_code); return 99;",
-          "line": 3683,
+          "line": 3819,
           "source_return": 99
         },
         {
           "context": "component_runtime.scheduler_failure_code); return 99;",
-          "line": 3736,
+          "line": 3872,
           "source_return": 99
         },
         {
           "context": "component_runtime.class02_damage_writes != 2u) return 99;",
-          "line": 3745,
+          "line": 3881,
           "source_return": 99
         }
       ],
@@ -11082,17 +11082,17 @@
       "documented_exit_sites": [
         {
           "context": "component_runtime.scheduler_failure_code); return 99;",
-          "line": 3683,
+          "line": 3819,
           "source_return": 99
         },
         {
           "context": "component_runtime.scheduler_failure_code); return 99;",
-          "line": 3736,
+          "line": 3872,
           "source_return": 99
         },
         {
           "context": "component_runtime.class02_damage_writes != 2u) return 99;",
-          "line": 3745,
+          "line": 3881,
           "source_return": 99
         }
       ],
@@ -11111,17 +11111,17 @@
       "documented_exit_sites": [
         {
           "context": "component_runtime.scheduler_failure_code); return 99;",
-          "line": 3683,
+          "line": 3819,
           "source_return": 99
         },
         {
           "context": "component_runtime.scheduler_failure_code); return 99;",
-          "line": 3736,
+          "line": 3872,
           "source_return": 99
         },
         {
           "context": "component_runtime.class02_damage_writes != 2u) return 99;",
-          "line": 3745,
+          "line": 3881,
           "source_return": 99
         }
       ],
@@ -11145,27 +11145,27 @@
         },
         {
           "context": "component_runtime.class01_audio_command != 0x006du) return 98;",
-          "line": 3576,
+          "line": 3712,
           "source_return": 98
         },
         {
           "context": "component_runtime.scheduler_failure_code); return 98;",
-          "line": 3625,
+          "line": 3761,
           "source_return": 98
         },
         {
           "context": "component_runtime.failure_count); return 98;",
-          "line": 3638,
+          "line": 3774,
           "source_return": 98
         },
         {
           "context": "component_runtime.scheduler_failure_code); return 98;",
-          "line": 3650,
+          "line": 3786,
           "source_return": 98
         },
         {
           "context": "jump_actor->state == 0x0600u || jump_actor->source_a2 != 0u) return 98;",
-          "line": 3662,
+          "line": 3798,
           "source_return": 98
         }
       ],
@@ -11184,7 +11184,7 @@
       "documented_exit_sites": [
         {
           "context": "parent->animation_timer != 4u) return 103;",
-          "line": 3800,
+          "line": 3936,
           "source_return": 103
         }
       ],
@@ -11227,7 +11227,7 @@
       "documented_exit_sites": [
         {
           "context": "type16_runtime.pools[1].free_count != 19u) return 102;",
-          "line": 3780,
+          "line": 3916,
           "source_return": 102
         }
       ],
@@ -11246,7 +11246,7 @@
       "documented_exit_sites": [
         {
           "context": "type16_runtime.failure_count); return 104;",
-          "line": 3886,
+          "line": 4022,
           "source_return": 104
         }
       ],
@@ -11265,7 +11265,7 @@
       "documented_exit_sites": [
         {
           "context": "type16_runtime.failure_count); return 104;",
-          "line": 3886,
+          "line": 4022,
           "source_return": 104
         }
       ],
@@ -11333,7 +11333,7 @@
       "documented_exit_sites": [
         {
           "context": "type16_runtime.failure_count); return 104;",
-          "line": 3886,
+          "line": 4022,
           "source_return": 104
         }
       ],
@@ -11352,7 +11352,7 @@
       "documented_exit_sites": [
         {
           "context": "parent->animation_timer != 4u) return 103;",
-          "line": 3800,
+          "line": 3936,
           "source_return": 103
         }
       ],
@@ -11371,7 +11371,7 @@
       "documented_exit_sites": [
         {
           "context": "type16_runtime.pools[1].free_count != 19u) return 102;",
-          "line": 3780,
+          "line": 3916,
           "source_return": 102
         }
       ],
@@ -11885,52 +11885,52 @@
         },
         {
           "context": "!avsp_round1_begin_first_entry(&hit_runtime)) return 116;",
-          "line": 4491,
+          "line": 4627,
           "source_return": 116
         },
         {
           "context": "} return 116;",
-          "line": 4547,
+          "line": 4683,
           "source_return": 116
         },
         {
           "context": "!avsp_round1_step_first_entry(&hit_runtime)) return 116;",
-          "line": 4559,
+          "line": 4695,
           "source_return": 116
         },
         {
           "context": "&hit_runtime, source_tick < source_updates)) return 116;",
-          "line": 4563,
+          "line": 4699,
           "source_return": 116
         },
         {
           "context": "!avsp_round1_step_player(&hit_runtime, input, 0)) return 116;",
-          "line": 4568,
+          "line": 4704,
           "source_return": 116
         },
         {
           "context": "source_tick < class02_updates)) return 116;",
-          "line": 4574,
+          "line": 4710,
           "source_return": 116
         },
         {
           "context": "!avsp_round1_step_first_entry(&hit_runtime)) return 116;",
-          "line": 4582,
+          "line": 4718,
           "source_return": 116
         },
         {
           "context": "&hit_runtime, source_updates != 0u)) return 116;",
-          "line": 4587,
+          "line": 4723,
           "source_return": 116
         },
         {
           "context": "!avsp_round1_step_player(&hit_runtime, input, 0)) return 116;",
-          "line": 4592,
+          "line": 4728,
           "source_return": 116
         },
         {
           "context": "class02_updates != 0u)) return 116;",
-          "line": 4599,
+          "line": 4735,
           "source_return": 116
         }
       ],
@@ -11954,52 +11954,52 @@
         },
         {
           "context": "!avsp_round1_begin_first_entry(&hit_runtime)) return 116;",
-          "line": 4491,
+          "line": 4627,
           "source_return": 116
         },
         {
           "context": "} return 116;",
-          "line": 4547,
+          "line": 4683,
           "source_return": 116
         },
         {
           "context": "!avsp_round1_step_first_entry(&hit_runtime)) return 116;",
-          "line": 4559,
+          "line": 4695,
           "source_return": 116
         },
         {
           "context": "&hit_runtime, source_tick < source_updates)) return 116;",
-          "line": 4563,
+          "line": 4699,
           "source_return": 116
         },
         {
           "context": "!avsp_round1_step_player(&hit_runtime, input, 0)) return 116;",
-          "line": 4568,
+          "line": 4704,
           "source_return": 116
         },
         {
           "context": "source_tick < class02_updates)) return 116;",
-          "line": 4574,
+          "line": 4710,
           "source_return": 116
         },
         {
           "context": "!avsp_round1_step_first_entry(&hit_runtime)) return 116;",
-          "line": 4582,
+          "line": 4718,
           "source_return": 116
         },
         {
           "context": "&hit_runtime, source_updates != 0u)) return 116;",
-          "line": 4587,
+          "line": 4723,
           "source_return": 116
         },
         {
           "context": "!avsp_round1_step_player(&hit_runtime, input, 0)) return 116;",
-          "line": 4592,
+          "line": 4728,
           "source_return": 116
         },
         {
           "context": "class02_updates != 0u)) return 116;",
-          "line": 4599,
+          "line": 4735,
           "source_return": 116
         }
       ],
@@ -12018,7 +12018,7 @@
       "documented_exit_sites": [
         {
           "context": "0u) return 91;",
-          "line": 4649,
+          "line": 4785,
           "source_return": 91
         }
       ],

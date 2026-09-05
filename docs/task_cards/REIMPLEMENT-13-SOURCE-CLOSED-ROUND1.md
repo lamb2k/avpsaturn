@@ -17,12 +17,11 @@ NEXT_ELIGIBLE_CARDS: [QA-13-ROUND1-END-TO-END-DIFFERENTIAL]
 
 P2 source evidence reaches the stable Round 2 seam at frame 15193 and P3 is
 complete; neither closes native Round 1. P4 Coffee Shop remains RED. Class-
-`0x09` is narrowly closed, while type-20/class-`0x0f` slot `0x00ffb100`
-remains `BLOCKED_MISSING_SPEC_FIELDS` because its accepted component record has
-no implementation contract. Candidate `d04a65a2253175c6e820140feefc35419e2cca07`
-and the exhausted Emulator/WGC gates stay frozen. The next executable body is
-the smallest bounded Oracle implementation-field follow-up for dispatch
-`0x06ed3e`, followed by the existing SPEC-to-native-to-scene differential.
+`0x09` is narrowly normalized and the complete type-20/class-`0x0f` source
+program is now source/spec/native closed with zero baseline row differences.
+Candidate `d04a65a2253175c6e820140feefc35419e2cca07` and the exhausted Emulator/WGC
+gates stay frozen. The next scene-order body is type-24/class-`0x0a` slot
+`0x00ffc600`, dispatch `0x077ccc`, currently `BLOCKED_MISSING_SPEC_FIELDS`.
 
 ## Objective
 
@@ -3989,3 +3988,43 @@ The isolated clean package remains blocked before emulator launch by ignored
 `SPR4/BACT.RLE`; the separate transition visual gate remains blocked at runtime
 readiness after three attempts. The existing MCP evidence now records assets,
 hashes, exact failure stages and the minimum owner ruling. No retry occurred.
+
+### P4 Coffee Shop class-0x0f source-program checkpoint (2026-09-04)
+
+The bounded Oracle follow-up closes the complete Coffee-Shop-reachable record-
+type-20/class-`0x0f` program at `0x06ed3e..0x06ee42` for slot `0x00ffb100`.
+Two independent baseline captures and two state counterfactual captures are
+pairwise byte-identical. The contract binds all three dispatch tables,
+initialization, state `0x0200/0x0202/0x0400/0x0600`, predecrement guards,
+collision/navigation ordering, three presentation records, two audio commands,
+record24/class-`0x11` and record28/class-`0x09` allocation ownership, direct RNG
+absence, fixed-pool release and route teardown. Counterfactual source state
+`0x0400` is evidence only; it is not production authority.
+
+Native C implements those branches through the existing fixed pools. The
+baseline whole-scene comparison has 2,878/2,878 aligned rows from 2673..5550
+with zero raw differences and no normalization. Both reaction branches are
+covered by focused causal controls; their child programs remain separate
+authorities. Seventeen class-`0x0f` behavioral mutants, 144 auxiliary, 191
+SPEC-02, 331 complete host, 132 Target-wiring, 31 scene-report and 18 memory
+mutations reject at attributed boundaries. Oracle and debug/release live-
+encounter Target pass. No Emulator/WGC retry was run.
+
+Release/live GAME.BIN is 379,472 bytes at
+`df9bb1107a6fed2e5c86d63ae414cfade62bc3088caee2d9b974a1ae9b87574b`,
+BSS ends at `0x060b3b60` with 50,336 linked-work-RAM bytes remaining. Runtime
+occupancy is 99,492/102,400 bytes (2,908 remaining); no carve changed. SPEC
+content is 47,600/262,144 bytes, 169 tables, at
+`a5b3dcb677d0c015162fb1defaf4dc0f12aae223c931a9e4f9dae05466f93357`;
+the census floor is 240,944 bytes. The complete-route tile budget remains
+612,720/614,400, current street peak is 592,648, and composite scratch remains
+11,648/12,288. Target assertions pass; physical canary/cadence remain UNRUN.
+
+Scene RED gaps improve from `188/1/0/671/1/93/0/279/0` to
+`187/1/0/669/1/93/0/279/0`: missing source actors and unmapped spawn/despawn
+edges each fall by the class-`0x0f` lifetime contribution; no category
+increases. Class-`0x09` keeps two raw frame-5493 presentation differences and
+zero normalized program differences under its narrow rule. The next earliest
+missing source body is type-24/class-`0x0a` slot `0x00ffc600`, dispatch
+`0x077ccc`, lifetime 2073..5550; its accepted identity has no executable
+implementation fields. Candidate and exhausted visual gates remain frozen.

@@ -458,7 +458,7 @@ int main(void)
         }
     }
     fprintf(stderr,
-            "native_scene route=%d progress=%u living=%u releases=%lu damage=%lu collisions=%lu obstacle_spawns=%lu obstacle_damage=%lu obstacle_transitions=%lu obstacle_releases=%lu child_releases=%lu special_entries=%lu special_contacts=%lu camera=%d player_x=%d player_z=%d failures=%lu fallback=%lu\n",
+            "native_scene route=%d progress=%u living=%u releases=%lu damage=%lu collisions=%lu obstacle_spawns=%lu obstacle_damage=%lu obstacle_transitions=%lu obstacle_releases=%lu child_releases=%lu special_entries=%lu special_contacts=%lu camera=%d player_x=%d player_z=%d failures=%lu fallback=%lu class0f_init=%lu class0f_collision=%lu class0f_navigation=%lu class0f_reactions=%lu class0f_audio=%lu class0f_class11=%lu class0f_class09=%lu class0f_releases=%lu\n",
             runtime.route_state, runtime.first_encounter.source_progress,
             runtime.first_encounter.source_living_count,
             runtime.class1f_action_releases,
@@ -474,6 +474,14 @@ int main(void)
             runtime.camera_x_position,
             runtime.player_action.x,
             runtime.player_action.lane,
-            runtime.failure_count, runtime.fallback_count);
+            runtime.failure_count, runtime.fallback_count,
+            runtime.class0f_initializations,
+            runtime.class0f_collision_calls,
+            runtime.class0f_navigation_calls,
+            runtime.class0f_reaction_entries,
+            runtime.class0f_audio_events,
+            runtime.class0f_class11_allocations,
+            runtime.class0f_class09_allocations,
+            runtime.class0f_releases);
     return 0;
 }

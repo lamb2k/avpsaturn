@@ -12,7 +12,7 @@ from pathlib import Path
 
 ROOT = Path(__file__).resolve().parents[3]
 SPEC = ROOT / "data/spec02_round1_executable_contract.json"
-EXPECTED = "2179288d73cab3c4b9586eb9819ea37b9775e23f02d02201590129f2cbd59232"
+EXPECTED = "c6795cc6955e58beeab87b93e59e002c8519d3994887f2e67b16fb16baa2840f"
 assert hashlib.sha256(SPEC.read_bytes()).hexdigest() == EXPECTED
 assert json.loads(SPEC.read_text())["status"] == "ACCEPTED"
 source = (ROOT / "src/port_v2/gameplay/round1/round1.c").read_text()
@@ -46,10 +46,16 @@ if MUTATION_REPORT.exists():
     }
 
 def wsl(path):
-    return subprocess.run(["wsl.exe", "-d", "Ubuntu-24.04", "-u", "root", "--",
-                           "wslpath", "-a",
-                           str(path).replace("\\", "/")],
-                          check=True, capture_output=True, text=True).stdout.strip()
+    key = str(path)
+    if key not in wsl.cache:
+        wsl.cache[key] = subprocess.run(
+            ["wsl.exe", "-d", "Ubuntu-24.04", "-u", "root", "--",
+             "wslpath", "-a", key.replace("\\", "/")],
+            check=True, capture_output=True, text=True).stdout.strip()
+    return wsl.cache[key]
+
+
+wsl.cache = {}
 
 def _process(command, timeout):
     try:
@@ -102,11 +108,16 @@ def _documented_exit_evidence(test_body, returncode):
 def run(body, header_body, passes, label="baseline", player_body=player_source,
         expected_returncode=None, generated_body=None, test_body=None,
         compile_negative=False, launcher_override=None, observe_only=False):
+    if (not passes and "--class0f-only" in sys.argv and
+            not label.startswith(("class0f-", "generated-class0f-"))):
+        return {"label": label, "classification": "SKIPPED"}
     if not passes and ONLY_MUTATION_LABEL is not None and \
             ONLY_MUTATION_LABEL not in label:
         return {"label": label, "classification": "SKIPPED"}
     with tempfile.TemporaryDirectory(prefix="round1-entry-") as name:
         temp = Path(name)
+        linux_root = wsl(ROOT)
+        linux_temp = wsl(temp)
         linux_output = f"/tmp/{temp.name}-test"
         if generated_body is None:
             generated_body = generated
@@ -129,19 +140,19 @@ def run(body, header_body, passes, label="baseline", player_body=player_source,
         (temp / "spec02_round1_entry_data.h").write_text(generated_body)
         (temp / "player_action.c").write_text(player_body)
         (temp / "round1_entry_test.c").write_text(test_body)
-        compile_command = (f"cd '{wsl(ROOT)}' && gcc -std=c90 -pedantic -Wall -Wextra -Werror "
-                   f"-I '{wsl(temp)}' -I . -I src/port_v2/gameplay/player_action "
+        compile_command = (f"cd '{linux_root}' && gcc -std=c90 -pedantic -Wall -Wextra -Werror "
+                   f"-I '{linux_temp}' -I . -I src/port_v2/gameplay/player_action "
                    f"-I src/port_v2/gameplay/street_alien_ai -I src/port_v2/combat/hit_ko "
                    f"-I src/port_v2/integration/combat "
-                   f"'{wsl(temp / 'round1.c')}' "
+                   f"'{linux_temp}/round1.c' "
                    f"avsp_actor.c avsp_collision.c "
-                   f"'{wsl(temp / 'player_action.c')}' "
+                   f"'{linux_temp}/player_action.c' "
                    f"src/port_v2/gameplay/street_alien_ai/street_alien_ai.c "
                    f"src/port_v2/combat/hit_ko/hit_ko.c "
                    f"src/port_v2/player/player.c src/port_v2/enemy/enemy.c "
                    f"src/port_v2/integration/player_enemy/player_enemy.c "
                    f"src/port_v2/integration/combat/combat.c "
-                   f"'{wsl(temp / 'round1_entry_test.c')}' -o '{linux_output}'")
+                   f"'{linux_temp}/round1_entry_test.c' -o '{linux_output}'")
         compile_result = _process(
             ["wsl.exe", "-d", "Ubuntu-24.04", "-u", "root",
              "--", "bash", "-lc", compile_command],
@@ -316,6 +327,8 @@ def run(body, header_body, passes, label="baseline", player_body=player_source,
             "deterministic repeat matched")
         record["documented_exit_sites"] = evidence
         mutation_results.append(record)
+        print(f"mutation {label}: VALID_BEHAVIORAL_REJECTION "
+              f"(exit {runtime_returncode})", flush=True)
         return record
 
 jump_stop_marker = "    {\n        AvspRound1Runtime contextual = runtime;"
@@ -360,6 +373,12 @@ class1f_state0_checkpoint_body = test_source.replace(
     "            if (source_frame == 5551u)\n"
     "                return 0;\n",
     1)
+class0f_checkpoint_marker = "        class01->state = 0x0204u;"
+assert class0f_checkpoint_marker in test_source
+class0f_checkpoint_body = test_source.replace(
+    class0f_checkpoint_marker,
+    "        return 0;\n" + class0f_checkpoint_marker,
+    1)
 scene_checkpoint_flags = {
     "--weapon-timing-only",
     "--special-input-only", "--hit-interaction-only", "--queue-only",
@@ -368,6 +387,8 @@ scene_checkpoint_flags = {
 
 run(source, header, True,
     test_body=(jump_test_body if "--jump-only" in sys.argv else
+               class0f_checkpoint_body
+               if "--class0f-only" in sys.argv else
                class1f_state0_checkpoint_body
                if "--class1f-state0-only" in sys.argv else
                scene_checkpoint_body
@@ -1483,6 +1504,110 @@ if "--special-input-only" in sys.argv:
         test_body=scene_checkpoint_body)
     print("REIMPLEMENT-13 simultaneous special-input arbitration lane: PASS "
           "(3 real mutations)")
+    raise SystemExit(0)
+if "--class0f-only" in sys.argv:
+    delay_body = """        if (actor->source_action_timer != 0u)
+            --actor->source_action_timer;"""
+    assert source.count(delay_body) == 1
+    run(source.replace(delay_body, """        if (actor->source_action_timer != 0u)
+            actor->source_action_timer = actor->source_action_timer;""", 1),
+        header, False, "class0f-delay-predecrement",
+        expected_returncode=152, test_body=class0f_checkpoint_body)
+    variant_loop = """    for (variant = (signed char)(avsp_round1_class0f.class11_child_count - 1u);
+         variant >= 0; --variant)"""
+    assert variant_loop in source
+    run(source.replace(variant_loop, """    for (variant = 0;
+         variant < (signed char)avsp_round1_class0f.class11_child_count;
+         ++variant)""", 1),
+        header, False, "class0f-child-variant-order",
+        expected_returncode=154, test_body=class0f_checkpoint_body)
+    facing_rule = "actor->facing = (unsigned char)(actor->source_facing_selector ^ 1u);"
+    assert source.count(facing_rule) >= 1
+    class0f_facing_scope = """        actor->facing = (unsigned char)(actor->source_facing_selector ^ 1u);
+        ++runtime->class0f_reaction_entries;"""
+    assert class0f_facing_scope in source
+    run(source.replace(class0f_facing_scope, """        actor->facing = actor->source_facing_selector;
+        ++runtime->class0f_reaction_entries;""", 1),
+        header, False, "class0f-visible-facing-xor",
+        expected_returncode=155, test_body=class0f_checkpoint_body)
+    collision_nav = """    ++runtime->class0f_collision_calls;
+    ++runtime->class0f_navigation_calls;"""
+    assert source.count(collision_nav) == 1
+    for label, changed in (
+        ("collision-invocation", "    ++runtime->class0f_navigation_calls;"),
+        ("navigation-invocation", "    ++runtime->class0f_collision_calls;"),
+    ):
+        run(source.replace(collision_nav, changed, 1), header, False,
+            "class0f-" + label, expected_returncode=151,
+            test_body=class0f_checkpoint_body)
+    audio_owner = """        runtime->class0f_audio_command = command;
+        runtime->class0f_audio_argument = avsp_round1_class0f.audio_argument;"""
+    assert source.count(audio_owner) == 1
+    run(source.replace(audio_owner, """        (void)avsp_round1_source_rng(runtime);
+        runtime->class0f_audio_command = command;
+        runtime->class0f_audio_argument = avsp_round1_class0f.audio_argument;""", 1),
+        header, False, "class0f-direct-rng-call",
+        expected_returncode=155, test_body=class0f_checkpoint_body)
+    class09_flag = """    child->substate = 0u;
+    child->source_motion_flags = 1u;
+    child->x = owner->x;"""
+    assert source.count(class09_flag) == 1
+    run(source.replace(class09_flag, """    child->substate = 0u;
+    child->source_motion_flags = 0u;
+    child->x = owner->x;""", 1),
+        header, False, "class0f-class09-field5c",
+        expected_returncode=157, test_body=class0f_checkpoint_body)
+    release_rule = """    else if (actor->state == avsp_round1_class0f.release_state)
+    {
+        if (!avsp_round1_release_pool_actor(pool, actor))
+            return 0;
+        ++runtime->class0f_releases;
+        return 1;
+    }"""
+    assert source.count(release_rule) == 1
+    run(source.replace(release_rule, """    else if (actor->state == avsp_round1_class0f.release_state)
+    {
+        (void)pool;
+        ++runtime->class0f_releases;
+        return 1;
+    }""", 1),
+        header, False, "class0f-fixed-pool-release",
+        expected_returncode=158, test_body=class0f_checkpoint_body)
+    generated_class0f = (
+        "    0x0200u, 0x0202u, 0x0400u, 0x0600u, 2u, 0x1Du,\n"
+        "    24u, 0x11, 4u, -1, 28u, 0x09, 80, -8, "
+        "0x0077u, 0x0142u, 0x00002000UL")
+    assert generated.count(generated_class0f) == 1
+    for label, changed, code in (
+        ("initial-selector", generated_class0f.replace(
+            "0x0600u, 2u,", "0x0600u, 1u,"), 151),
+        ("presentation-mode", generated_class0f.replace(
+            "2u, 0x1Du", "2u, 0x1Cu"), 151),
+        ("class11-z", generated_class0f.replace(
+            "4u, -1,", "4u, 0,"), 154),
+        ("class09-y", generated_class0f.replace(
+            "0x09, 80, -8", "0x09, 79, -8"), 157),
+        ("class09-z", generated_class0f.replace(
+            "0x09, 80, -8", "0x09, 80, -7"), 157),
+        ("selector1-audio", generated_class0f.replace(
+            "0x0077u, 0x0142u", "0x0076u, 0x0142u"), 155),
+        ("selector0-audio", generated_class0f.replace(
+            "0x0077u, 0x0142u", "0x0077u, 0x0141u"), 157),
+        ("audio-argument", generated_class0f.replace(
+            "0x00002000UL", "0x00001000UL"), 155),
+    ):
+        run(source, header, False, "generated-class0f-" + label,
+            generated_body=generated.replace(generated_class0f, changed, 1),
+            expected_returncode=code, test_body=class0f_checkpoint_body)
+    record0 = "{ 4095u, -32768, 0x0006ee4aUL, 0x0006ee86UL, 1u, 1u },"
+    assert generated.count(record0) == 1
+    run(source, header, False, "generated-class0f-initial-assembly",
+        generated_body=generated.replace(
+            record0,
+            "{ 4095u, -32768, 0x0006ee4aUL, 0x0006ee96UL, 1u, 1u },", 1),
+        expected_returncode=151, test_body=class0f_checkpoint_body)
+    print("REIMPLEMENT-13 Coffee Shop class-0x0f program mutation lane: "
+          "PASS (17 real mutations)")
     raise SystemExit(0)
 generated_walk_mutations = {
     "    { 4u, 0, 0x0015F208UL, 0x00160A02UL, 17u, 0u },",

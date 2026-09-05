@@ -3558,6 +3558,142 @@ int main(void)
             component_runtime.pools[2].records[9].source_slot !=
                 0x00ffb300UL)
             return 97;
+        {
+            AvspRound1Runtime class0f_runtime = component_runtime;
+            AvspRound1ActorCore *class0f_actor;
+            AvspRound1ActorCore *class09_child = 0;
+            unsigned short rng_before;
+            unsigned short expected_class11_slots[4];
+            unsigned short expected_class09_slot;
+            unsigned char free20_before;
+            unsigned int class11_count = 0u;
+            unsigned int class11_variants = 0u;
+            unsigned int pool_slot;
+            class0f_runtime.camera_x_position = 817;
+            class0f_runtime.camera_x_previous = 817;
+            if (!avsp_round1_step_scheduler(&class0f_runtime) ||
+                class0f_runtime.coffee_scene_record_cursor != 7u)
+                return 150;
+            class0f_actor = &class0f_runtime.pools[2].records[5];
+            if (!class0f_actor->active ||
+                class0f_actor->source_slot != 0x00ffb100UL ||
+                class0f_actor->actor_class != 0x0f ||
+                class0f_actor->dispatch_entry != 0x0006ed3eUL ||
+                class0f_actor->state != 0x0200u ||
+                class0f_actor->substate != 0u ||
+                class0f_actor->source_a4 != 2u ||
+                class0f_actor->object_or != 0x8000u ||
+                class0f_actor->source_flags != 0x1du ||
+                class0f_actor->x != 1301 || class0f_actor->y != 240 ||
+                class0f_actor->z != 240 ||
+                class0f_actor->animation_record != 0x0006ee4aUL ||
+                class0f_actor->assembly != 0x0006ee86UL ||
+                class0f_actor->hurt_selector != 1u ||
+                class0f_actor->attack_selector != 1u ||
+                class0f_runtime.class0f_initializations != 1u ||
+                class0f_runtime.class0f_collision_calls != 1u ||
+                class0f_runtime.class0f_navigation_calls != 1u)
+                return 151;
+            class0f_runtime.frame = 5523u - 2040u;
+            class0f_actor->source_action_timer = 2u;
+            if (!avsp_round1_step_scheduler_post_player_source_differential(
+                    &class0f_runtime, 0, 1, 0) ||
+                class0f_actor->source_action_timer != 1u ||
+                class0f_actor->state != 0x0200u ||
+                class0f_actor->animation_record != 0x0006ee4aUL ||
+                class0f_runtime.class0f_collision_calls != 2u ||
+                class0f_runtime.class0f_navigation_calls != 2u)
+                return 152;
+            class0f_actor->state = 0x0400u;
+            class0f_actor->source_facing_selector = 1u;
+            rng_before = class0f_runtime.rng_seed;
+            for (pool_slot = 0u; pool_slot < 4u; ++pool_slot)
+                expected_class11_slots[pool_slot] =
+                    class0f_runtime.pools[3].free_stack[
+                        class0f_runtime.pools[3].free_count - 4u + pool_slot];
+            if (!avsp_round1_step_scheduler_post_player_source_differential(
+                    &class0f_runtime, 0, 1, 0))
+                return 153;
+            for (pool_slot = 0u;
+                 pool_slot < class0f_runtime.pools[3].capacity; ++pool_slot)
+            {
+                const AvspRound1ActorCore *child =
+                    &class0f_runtime.pools[3].records[pool_slot];
+                if (child->active == 2u && child->actor_class == 0x11)
+                {
+                    ++class11_count;
+                    class11_variants |= 1u << child->variant;
+                    if ((unsigned short)child->source_slot !=
+                            expected_class11_slots[child->variant] ||
+                        child->x != 1301 || child->y != 240 ||
+                        child->z != 239 || child->facing != 0u ||
+                        child->source_facing_selector != 1u ||
+                        child->source_primary_x_fp != 1301L * 65536L ||
+                        child->source_primary_y_fp != 240L * 65536L ||
+                        child->source_alternate_x_fp != 1301L * 65536L ||
+                        child->source_alternate_y_fp != 240L * 65536L)
+                        return 154;
+                }
+            }
+            if (class0f_actor->state != 0x0200u ||
+                class0f_actor->source_a4 != 1u ||
+                class0f_actor->facing != 0u ||
+                class0f_actor->animation_record != 0x0006ee5eUL ||
+                class0f_actor->assembly != 0x0006eeaaUL ||
+                class0f_actor->hurt_selector != 2u ||
+                class0f_actor->attack_selector != 2u ||
+                class0f_runtime.class0f_audio_events != 1u ||
+                class0f_runtime.class0f_audio_command != 0x0077u ||
+                class0f_runtime.class0f_audio_argument != 0x00002000UL ||
+                class0f_runtime.class0f_class11_allocation_requests != 4u ||
+                class0f_runtime.class0f_class11_allocations != 4u ||
+                class0f_runtime.class0f_class11_allocation_failures != 0u ||
+                class11_count != 4u || class11_variants != 0x0fu ||
+                class0f_runtime.rng_seed != rng_before)
+                return 155;
+            class0f_actor->state = 0x0202u;
+            expected_class09_slot = class0f_runtime.pools[4].free_stack[
+                class0f_runtime.pools[4].free_count - 1u];
+            if (!avsp_round1_step_scheduler_post_player_source_differential(
+                    &class0f_runtime, 0, 1, 0))
+                return 156;
+            for (pool_slot = 0u;
+                 pool_slot < class0f_runtime.pools[4].capacity; ++pool_slot)
+            {
+                AvspRound1ActorCore *child =
+                    &class0f_runtime.pools[4].records[pool_slot];
+                if (child->active == 2u && child->actor_class == 0x09)
+                    class09_child = child;
+            }
+            if (class0f_actor->state != 0x0200u ||
+                class0f_actor->source_a4 != 0u ||
+                class0f_actor->animation_record != 0x0006ee72UL ||
+                class0f_actor->assembly != 0x0006eec8UL ||
+                class0f_actor->hurt_selector != 0u ||
+                class0f_actor->attack_selector != 3u ||
+                class0f_runtime.class0f_audio_events != 2u ||
+                class0f_runtime.class0f_audio_command != 0x0142u ||
+                class0f_runtime.class0f_class09_allocation_requests != 1u ||
+                class0f_runtime.class0f_class09_allocations != 1u ||
+                class0f_runtime.class0f_class09_allocation_failures != 0u ||
+                class09_child == 0 ||
+                (unsigned short)class09_child->source_slot !=
+                    expected_class09_slot || class09_child->x != 1301 ||
+                class09_child->y != 320 || class09_child->z != 232 ||
+                class09_child->source_motion_flags != 1u ||
+                class0f_runtime.rng_seed != rng_before)
+                return 157;
+            free20_before = class0f_runtime.pools[2].free_count;
+            class0f_actor->state = 0x0600u;
+            if (!avsp_round1_step_scheduler_post_player_source_differential(
+                    &class0f_runtime, 0, 1, 0) || class0f_actor->active ||
+                class0f_runtime.pools[2].free_count !=
+                    (unsigned char)(free20_before + 1u) ||
+                class0f_runtime.class0f_releases != 1u ||
+                class0f_runtime.class0f_reaction_entries != 2u ||
+                class0f_runtime.class0f_state_transitions != 2u)
+                return 158;
+        }
         class01->state = 0x0204u;
         class01->animation_index = 2u;
         class01->animation_branch = (short)0x8000u;

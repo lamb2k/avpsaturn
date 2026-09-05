@@ -6,7 +6,7 @@
 #include "../../combat/hit_ko/hit_ko.h"
 
 #define AVSP_ROUND1_SPEC02_SHA256 \
-"2179288d73cab3c4b9586eb9819ea37b9775e23f02d02201590129f2cbd59232"
+"c6795cc6955e58beeab87b93e59e002c8519d3994887f2e67b16fb16baa2840f"
 #define AVSP_ROUND1_CANARY_HEAD 0x52314548UL
 #define AVSP_ROUND1_CANARY_TAIL 0x52314554UL
 #define AVSP_ROUND1_ROUTE_ENTRY_STATE 2
@@ -133,9 +133,10 @@
 #define AVSP_ROUND1_TYPE16_MOTION_COUNT 3u
 #define AVSP_ROUND1_TYPE16_PARENT_PRESENTATION_COUNT 11u
 #define AVSP_ROUND1_TYPE16_PRESENTATION_COUNT 11u
-#define AVSP_ROUND1_COFFEE_SCENE_RECORD_COUNT 6u
+#define AVSP_ROUND1_COFFEE_SCENE_RECORD_COUNT 7u
 #define AVSP_ROUND1_CLASS01_PRESENTATION_COUNT 3u
 #define AVSP_ROUND1_CLASS02_PRESENTATION_COUNT 2u
+#define AVSP_ROUND1_CLASS0F_PRESENTATION_COUNT 3u
 #define AVSP_ROUND1_CLASS05_PRESENTATION_COUNT 5u
 #define AVSP_ROUND1_CLASS08_PARENT_PRESENTATION_COUNT 5u
 #define AVSP_ROUND1_HEALTH_PICKUP_PRESENTATION_COUNT 1u
@@ -325,6 +326,30 @@ typedef struct
     AvspRound1CollisionBoxSpec attack_box;
     AvspRound1CollisionBoxSpec hurt_box;
 } AvspRound1Class02Spec;
+
+typedef struct
+{
+    unsigned long dispatch;
+    unsigned long animation_table;
+    unsigned long table_set;
+    unsigned short active_state;
+    unsigned short inner_reaction_state;
+    unsigned short reaction_state;
+    unsigned short release_state;
+    unsigned short initial_reaction_selector;
+    unsigned char presentation_mode;
+    unsigned char class11_child_type;
+    signed char class11_child_class;
+    unsigned char class11_child_count;
+    signed char class11_z_add;
+    unsigned char class09_child_type;
+    signed char class09_child_class;
+    short class09_y_add;
+    short class09_z_add;
+    unsigned short selector1_audio_command;
+    unsigned short selector0_audio_command;
+    unsigned long audio_argument;
+} AvspRound1Class0fSpec;
 
 typedef struct
 {
@@ -2014,6 +2039,21 @@ typedef struct
     unsigned short coffee_shop_obstacle_audio_command;
     unsigned long class02_state_transitions;
     unsigned long class02_releases;
+    unsigned long class0f_initializations;
+    unsigned long class0f_collision_calls;
+    unsigned long class0f_navigation_calls;
+    unsigned long class0f_reaction_entries;
+    unsigned long class0f_state_transitions;
+    unsigned long class0f_class11_allocation_requests;
+    unsigned long class0f_class11_allocations;
+    unsigned long class0f_class11_allocation_failures;
+    unsigned long class0f_class09_allocation_requests;
+    unsigned long class0f_class09_allocations;
+    unsigned long class0f_class09_allocation_failures;
+    unsigned long class0f_audio_events;
+    unsigned short class0f_audio_command;
+    unsigned long class0f_audio_argument;
+    unsigned long class0f_releases;
     unsigned char class08_parent_spawned;
     unsigned char class08_parent_released;
     unsigned char health_pickup_spawned;

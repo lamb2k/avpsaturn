@@ -46,6 +46,9 @@ local capture_controller_substate =
     os.getenv("AVSP_ORACLE11_CONTROLLER_SUBSTATE_CAPTURE") == "1"
 local capture_component20_phase =
     os.getenv("AVSP_ORACLE11_COMPONENT20_PHASE_CAPTURE") == "1"
+local class0f_state_counterfactual =
+    os.getenv("AVSP_ORACLE11_CLASS0F_STATE_COUNTERFACTUAL") == "1"
+local class0f_state_counterfactual_count = 0
 local capture_terrain_patch =
     os.getenv("AVSP_ORACLE11_TERRAIN_PATCH_CAPTURE") == "1"
 local capture_terrain_stream =
@@ -493,6 +496,7 @@ local scene_pools = {
 }
 
 local component20_slots = {
+    [0xffb100] = true,
     [0xffb300] = true, [0xffb400] = true,
     [0xffb580] = true, [0xffb600] = true,
 }
@@ -611,7 +615,8 @@ local component20_pcs = {
     0x06b39a, 0x06b3c0, 0x06b3ea, 0x06b3f2, 0x06b42e,
     0x06b434, 0x06b44c, 0x06b534, 0x06b548, 0x06b588,
     0x06b5aa, 0x06b5ca, 0x06b624, 0x06b62a, 0x06b644,
-    0x06b652,
+    0x06b652, 0x06ed3e, 0x06ed52, 0x06ed8a, 0x06edb8,
+    0x06edba, 0x06ee02, 0x06ee08, 0x06ee3c,
 }
 oracle11_component20_pc_taps = {}
 for _, pc in ipairs(component20_pcs) do
@@ -657,7 +662,8 @@ local function emit_component20_collision(pc)
     if not capture_scene or frame < 2700 or frame > 2850 then return end
     local a6 = maincpu.state["A6"].value & 0xffffff
     local a1 = maincpu.state["A1"].value & 0xffffff
-    if a6 ~= 0xffb300 and a1 ~= 0xffb300 then return end
+    if a6 ~= 0xffb100 and a1 ~= 0xffb100 and
+            a6 ~= 0xffb300 and a1 ~= 0xffb300 then return end
     component20_collision:write(string.format(
         "%d\t%06x\t%06x\t%06x\t%06x\t%06x\t%06x\t%06x\t%06x\t%08x\t%08x\t%08x\t%08x\t%08x\t%08x\t%08x\t%08x\t%04x\t%04x\t%08x\t%02x\t%02x\t%d\n",
         frame, pc,
@@ -748,7 +754,7 @@ oracle11_component20_global_write_tap = program:install_write_tap(
     end)
 
 oracle11_component20_write_tap = program:install_write_tap(
-    0xffb300, 0xffb67f, "oracle11_component20_writes",
+    0xffb100, 0xffb67f, "oracle11_component20_writes",
     function(offset, data, mask)
         if not capture_scene or frame < 1972 or frame > capture_last_frame then
             return
@@ -1970,6 +1976,14 @@ oracle11_player_hit_write_tap = program:install_write_tap(
 oracle11_progression_frame = emu.add_machine_frame_notifier(function()
     frame = frame + 1
     suppress_selected_scene_pair()
+    if capture_scene and class0f_state_counterfactual and
+            class0f_state_counterfactual_count < 2 and
+            u8(0xffb100) ~= 0 and u8(0xffb102) == 0x0f and
+            u8(0xffb108) == 20 then
+        program:write_u16(0xffb104, 0x0400)
+        class0f_state_counterfactual_count =
+            class0f_state_counterfactual_count + 1
+    end
     if capture_terrain_patch and frame >= 1972 and
             frame <= capture_last_frame then
         emit_terrain_patch("sample", 0, 0, 0, false)

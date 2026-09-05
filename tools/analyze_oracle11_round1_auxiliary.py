@@ -24,6 +24,10 @@ SCENE_CADENCE_A=ROOT/'.deps/mame/oracle11_progression_lifecycle_cs39a'
 SCENE_CADENCE_B=ROOT/'.deps/mame/oracle11_progression_lifecycle_cs39b'
 SCENE_PHASE_A=ROOT/'.deps/mame/oracle11_progression_lifecycle_cs45a'
 SCENE_PHASE_B=ROOT/'.deps/mame/oracle11_progression_lifecycle_cs45b'
+CLASS0F_DETAIL_A=ROOT/'.deps/mame/oracle11_progression_lifecycle_cs61a'
+CLASS0F_DETAIL_B=ROOT/'.deps/mame/oracle11_progression_lifecycle_cs61b'
+CLASS0F_COUNTER_A=ROOT/'.deps/mame/oracle11_progression_lifecycle_cs61m1'
+CLASS0F_COUNTER_B=ROOT/'.deps/mame/oracle11_progression_lifecycle_cs61m2'
 SCENE_FULL_A=ROOT/'.deps/mame/oracle11_progression_lifecycle_cs21a'
 SCENE_FULL_B=ROOT/'.deps/mame/oracle11_progression_lifecycle_cs21b'
 TYPE16_TRACE_A=ROOT/'.deps/mame/reimplement13_type16_trace_g'
@@ -1015,12 +1019,18 @@ def coffee_shop_scene_component_identities(op,program):
    {'address':'0x0015c178','camera_threshold_u16':736,'x_s16':1152,
     'y_s16':336,'allocator_u16':4,'class_u8':2,'variant_u8':0,
     'guard_0a_s8':0,'guard_0b_u8':0,'facing_u8':0,'field_0d_u8':0,
-   'timer_u16':0}]}
+    'timer_u16':0}],
+   (20,'0x0f'):[
+    {'address':'0x0015c1b8','camera_threshold_u16':816,'x_s16':1301,
+     'y_s16':240,'allocator_u16':4,'class_u8':15,'variant_u8':0,
+     'guard_0a_s8':0,'guard_0b_u8':0,'facing_u8':0,'field_0d_u8':0,
+     'timer_u16':0}]}
  observed_spawns={
   '0x0015c108':(2072,'0x00ffb600'),
-  '0x0015c128':(2072,'0x00ffb580'),
-  '0x0015c158':(2242,'0x00ffb400'),
-  '0x0015c178':(2617,'0x00ffb300')}
+   '0x0015c128':(2072,'0x00ffb580'),
+   '0x0015c158':(2242,'0x00ffb400'),
+   '0x0015c178':(2617,'0x00ffb300'),
+   '0x0015c1b8':(2672,'0x00ffb100')}
  scene_frame_by_id={int(r['frame']):r for r in
                     baseline['coffee_shop_scene_frames.tsv']}
  scene_actor_rows=baseline['coffee_shop_scene_actors.tsv']
@@ -1045,9 +1055,12 @@ def coffee_shop_scene_component_identities(op,program):
       {'address':'0x0015c158','writer_source_frame_u16':2242,
        'camera_x_u16':675,'first_actor_visible_frame_u16':2243,
        'source_slot':'0x00ffb400'},
-      {'address':'0x0015c178','writer_source_frame_u16':2617,
-       'camera_x_u16':736,'first_actor_visible_frame_u16':2618,
-       'source_slot':'0x00ffb300'}],
+       {'address':'0x0015c178','writer_source_frame_u16':2617,
+        'camera_x_u16':736,'first_actor_visible_frame_u16':2618,
+        'source_slot':'0x00ffb300'},
+       {'address':'0x0015c1b8','writer_source_frame_u16':2672,
+        'camera_x_u16':817,'first_actor_visible_frame_u16':2673,
+        'source_slot':'0x00ffb100'}],
      'Coffee Shop stage camera-sample chronology drift')
  for records_ in stage_records.values():
   for record in records_:
@@ -1064,8 +1077,265 @@ def coffee_shop_scene_component_identities(op,program):
    record['record_sha256']=hashlib.sha256(raw).hexdigest()
    record['observed_source_frame'],record['observed_source_slot']=\
     observed_spawns[record['address']]
- implementation_contracts={
-  (20,'0x01'):{
+  class0f_files=('coffee_shop_component20_writes.tsv',
+                 'coffee_shop_component20_dispatch.tsv',
+                 'coffee_shop_component20_collision.tsv',
+                 'coffee_shop_scene_actors.tsv',
+                 'coffee_shop_scene_frames.tsv','coffee_shop_rng_calls.tsv',
+                 'coffee_shop_scene_health_writes.tsv','dispatches.tsv',
+                 'progression_result.tsv')
+  class0f_detail_a={name:sha(CLASS0F_DETAIL_A/name)
+                    for name in class0f_files}
+  class0f_detail_b={name:sha(CLASS0F_DETAIL_B/name)
+                    for name in class0f_files}
+  class0f_counter_a={name:sha(CLASS0F_COUNTER_A/name)
+                     for name in class0f_files}
+  class0f_counter_b={name:sha(CLASS0F_COUNTER_B/name)
+                     for name in class0f_files}
+  req(class0f_detail_a==class0f_detail_b,
+      'Coffee Shop class-0x0f cold-reference captures differ')
+  req(class0f_counter_a==class0f_counter_b,
+      'Coffee Shop class-0x0f counterfactual captures differ')
+  class0f_base_actors=[r for r in rows(
+      CLASS0F_DETAIL_A/'coffee_shop_scene_actors.tsv')
+      if r['slot']=='ffb100']
+  req(len(class0f_base_actors)==2878 and
+      class0f_base_actors[0]['frame']=='2673' and
+      class0f_base_actors[-1]['frame']=='5550' and
+      {r['state'] for r in class0f_base_actors}=={'0200'} and
+      {r['substate'] for r in class0f_base_actors}=={'0000'} and
+      {r['animation_record'] for r in class0f_base_actors}=={'0006ee4a'} and
+      {r['x_fp'] for r in class0f_base_actors}=={'05150000'} and
+      {r['y_fp'] for r in class0f_base_actors}=={'00f00000'} and
+      {r['z'] for r in class0f_base_actors}=={'240'},
+      'Coffee Shop class-0x0f baseline lifetime/state drift')
+  class0f_base_dispatch=[r for r in rows(
+      CLASS0F_DETAIL_A/'coffee_shop_component20_dispatch.tsv')
+      if r['slot']=='ffb100' and r['pc'] in
+      ('06ed3e','06ed52','06ed8a','06edb8','06edba','06ee02','06ee08','06ee3c')]
+  class0f_base_counts=Counter((r['pc'],r['state'])
+                              for r in class0f_base_dispatch)
+  req(class0f_base_counts==Counter({
+      ('06ed3e','0200'):2993,('06ed8a','0200'):2993,
+      ('06edb8','0200'):2993,('06edba','0200'):2993,
+      ('06ed3e','0000'):1,('06ed52','0000'):1}),
+      'Coffee Shop class-0x0f baseline dispatch drift')
+  class0f_base_collision=[r for r in rows(
+      CLASS0F_DETAIL_A/'coffee_shop_component20_collision.tsv')
+      if r['a6']=='ffb100']
+  req(len(class0f_base_collision)==151 and
+      all(r['pc']=='01d87a' and r['state']=='0200'
+          for r in class0f_base_collision),
+      'Coffee Shop class-0x0f collision caller drift')
+  class0f_base_health=[r for r in rows(
+      CLASS0F_DETAIL_A/'coffee_shop_scene_health_writes.tsv')
+      if r['target_slot']=='ffb100' or r['attacker']=='ffb100' or
+         r['defender']=='ffb100']
+  req(class0f_base_health and
+      all(r['damage_writer']=='0' for r in class0f_base_health),
+      'Coffee Shop class-0x0f unexpected direct damage write')
+  class0f_base_rng=[r for r in rows(
+      CLASS0F_DETAIL_A/'coffee_shop_rng_calls.tsv') if r['a6']=='ffb100']
+  req(not class0f_base_rng,'Coffee Shop class-0x0f direct RNG drift')
+  class0f_counter_writes=[r for r in rows(
+      CLASS0F_COUNTER_A/'coffee_shop_component20_writes.tsv')
+      if r['slot']=='ffb100']
+  forced_state_writes=[r for r in class0f_counter_writes
+      if r['pc'] in ('000d9c','000da8') and r['inner']=='04']
+  req([(r['frame'],r['data'],r['mask']) for r in forced_state_writes]==[
+      ('2673','00000400','0000ffff'),('2674','00000400','0000ffff')],
+      'Coffee Shop class-0x0f counterfactual injection drift')
+  class0f_counter_dispatch=[r for r in rows(
+      CLASS0F_COUNTER_A/'coffee_shop_component20_dispatch.tsv')
+      if r['slot']=='ffb100']
+  class0f_counter_counts=Counter((r['pc'],r['state'])
+                                 for r in class0f_counter_dispatch)
+  req(class0f_counter_counts[('06ed3e','0400')]==2 and
+      class0f_counter_counts[('06edba','0400')]==2 and
+      class0f_counter_counts[('06ee02','0200')]==1 and
+      class0f_counter_counts[('06ee08','0200')]==1,
+      'Coffee Shop class-0x0f reaction branch coverage drift')
+  class0f_counter_audio=[r for r in rows(CLASS0F_COUNTER_A/'dispatches.tsv')
+                         if r['a6']=='ffb100']
+  req([(r['frame'],r['command'],r['return1'],r['d2'])
+       for r in class0f_counter_audio]==[
+       ('2673','0077','06edc0','00002000'),
+       ('2674','0142','06edc0','00002000')],
+      'Coffee Shop class-0x0f audio transactions drift')
+  class0f_counter_actors=rows(CLASS0F_COUNTER_A/
+                              'coffee_shop_scene_actors.tsv')
+  class0f_effect=[r for r in class0f_counter_actors if r['slot']=='ffcd80']
+  req(class0f_effect and class0f_effect[0]['frame']=='2675' and
+      class0f_effect[0]['type']=='28' and class0f_effect[0]['class']=='09' and
+      class0f_effect[0]['active']=='2' and
+      class0f_effect[0]['x_fp']=='05150000' and
+      class0f_effect[0]['y_fp']=='01400000' and
+      class0f_effect[0]['z']=='232' and
+      class0f_effect[1]['animation_record']=='000a34da',
+      'Coffee Shop class-0x0f record28 effect allocation drift')
+  class0f_class11=[r for r in class0f_counter_actors
+                   if r['frame']=='2674' and r['type']=='24' and
+                      r['class']=='11']
+  req([(r['slot'],r['variant'],r['z']) for r in class0f_class11]==[
+      ('ffb900','00','239'),('ffbb00','02','239'),
+      ('ffbf00','01','239'),('ffc300','03','239')],
+      'Coffee Shop class-0x0f class-0x11 child population drift')
+  class0f_child_rng=[r for r in rows(
+      CLASS0F_COUNTER_A/'coffee_shop_rng_calls.tsv')
+      if r['frame']=='2673' and r['type']=='24' and r['class']=='11']
+  req(len(class0f_child_rng)==28 and
+      Counter(r['a6'] for r in class0f_child_rng)==Counter({
+       'ffb900':7,'ffbb00':7,'ffbf00':7,'ffc300':7}),
+      'Coffee Shop class-0x0f class-0x11 child RNG ownership drift')
+  class0f_counter_rng=[r for r in rows(
+      CLASS0F_COUNTER_A/'coffee_shop_rng_calls.tsv') if r['a6']=='ffb100']
+  req(not class0f_counter_rng,
+      'Coffee Shop class-0x0f counterfactual consumed direct RNG')
+  class0f_program={
+   'semantic_role':'SOURCE_STATIC_COLLIDABLE_SCENE_COMPONENT',
+   'source_body':{'first':'0x0006ed3e','last_exclusive':'0x0006ee42',
+    'sha256':hashlib.sha256(op[0x6ed3e:0x6ee42]).hexdigest()},
+   'dispatch_tables':[
+    {'address':'0x0006ed4a','index':'actor+0x04 high byte:u8',
+     'entry_count_u8':4,'offsets_s16':[8,64,112,242],
+     'targets':['0x0006ed52','0x0006ed8a','0x0006edba','0x0006ee3c']},
+    {'address':'0x0006edb4','index':'actor+0x05 low byte:u8',
+     'entry_count_u8':2,'offsets_s16':[4,6],
+     'targets':['0x0006edb8','0x0006edba']},
+    {'address':'0x0006edfe','index':'2 * actor+0x42:u16 after decrement',
+     'entry_count_u8':2,'offsets_s16':[10,4],
+     'targets':['0x0006ee08','0x0006ee02']}],
+   'stage_records':stage_records[(20,'0x0f')],
+   'stage_spawn_guard':{
+    'order':'16-byte records in source order; allocate all eligible records',
+    'camera_predicate':'record.camera_threshold_u16 <= camera_x_u16',
+    'guard_0b':'zero or equal to global route byte +0x20e',
+    'guard_0a':'if negative abs(value)>global+0x1eb; otherwise value<=global+0x1eb',
+    'allocation':'type-20 fixed pool under ascending scheduler 0x01bc38'},
+   'scheduler':{'pool':'record20','scheduler':'0x01bc38..0x01bc78',
+    'indirect_caller_pc':'0x01bc6e','source_slot':'0x00ffb100',
+    'measured_lifetime_inclusive_u16':[2673,5550],
+    'baseline_dispatch_counts':[
+     {'pc':pc,'state_u16':f'0x{int(state,16):04x}','count_u16':count}
+     for (pc,state),count in sorted(class0f_base_counts.items())]},
+   'fields':{
+    'active':'u8 at actor+0x00','class_and_type':'u16 at actor+0x02',
+    'outer_state':'u16 at actor+0x04; high byte selects the outer table',
+    'inner_phase':'u8 at actor+0x05; low byte selects the state-0x0200 table',
+    'visible_facing':'u8 at actor+0x0f','x_y':'s16 source positions mirrored by signed 16.16 native coordinates',
+    'z':'s16 at actor+0x18','animation_record':'u32 at actor+0x1c',
+    'animation_timer':'u16 at actor+0x0a','animation_branch':'s16 at actor+0x24',
+    'delay_timer':'u8 at actor+0x2c','object_flags':'u16 at actor+0x2e',
+    'mode':'u16 at actor+0x40','reaction_selector':'u16 at actor+0x42',
+    'hidden_reaction_facing':'u8 at actor+0x4f','table_set':'u32 at actor+0x50',
+    'presentation_mode':'u8 at actor+0x64'},
+   'initialization':{
+    'entry':'0x0006ed52',
+    'writes':['outer_state += 0x0200','table_set = 0x0006eee6',
+              'object_flags = 0x8000','presentation_mode = 0x1d',
+              'z = y','reaction_selector = 2','mode = 0',
+              'bind animation selector 2'],
+    'animation_selector_base':'0x0006ee42',
+    'animation_records':[animation_record(program,0x6ee4a),
+                         animation_record(program,0x6ee5e),
+                         animation_record(program,0x6ee72)]},
+   'state_program':{
+    '0x0200':{'entry':'0x0006ed8a',
+     'delay_guard':'if delay_timer:u8 is nonzero, predecrement; skip the inner handler while the result remains nonzero',
+     'inner_0x00':'0x0006edb8 returns without actor-owned state changes',
+     'post_handler_order':['current-state collision 0x01d87a',
+                           'type-20 navigation 0x06b2e2',
+                           'scheduler/presentation tail 0x0167ac']},
+    '0x0202':{'entry':'outer 0x0006ed8a then inner 0x0006edba',
+     'rule':'the low-byte inner phase aliases the reaction program; it is not a separate actor+0x06 substate'},
+    '0x0400':{'entry':'0x0006edba',
+     'order':['source command owner 0x002630','write outer_state = 0x0200',
+              'predecrement reaction_selector:u16',
+              'dispatch selector branch','visible_facing = hidden_reaction_facing XOR 1',
+              'bind animation selector reaction_selector',
+              'current-state collision 0x01d87a',
+              'scheduler/presentation tail 0x0167ac'],
+     'selector_1':{'entry':'0x0006ee02','shared_program':'0x0007a926',
+      'allocation':{'allocator':'record24 0x0177da',
+       'variant_iteration_s8':[3,2,1,0],
+       'writes':['child.active += 2','child.class = 0x11',
+                 'child.variant = loop counter','child.x/y/z = parent.x/y/z',
+                 'child.z -= 1','child anchor x/y pairs = parent.x/y',
+                 'child.hidden_reaction_facing = parent.hidden_reaction_facing',
+                 'child.visible_facing = parent.visible_facing'],
+       'first_visible_source_frame_u16':2674,
+       'observed_source_slots_by_variant':{
+        '0':'0x00ffb900','1':'0x00ffbf00','2':'0x00ffbb00',
+        '3':'0x00ffc300'},
+       'scheduler_order':'record20 source program allocates before the following record24 pool traversal; every child consumes seven RNG calls in its independently owned class-0x11 program',
+       'child_rng_calls_u8':28,
+       'child_program_ownership':'separate type24/class-0x11 source program'},
+      'animation_record':'0x0006ee5e'},
+     'selector_0':{'entry':'0x0006ee08','allocator':'record28 0x017828',
+      'success_writes':['child.active += 2','child.class/type word = 0x0900',
+                        'child+0x5c = 1','child.x = parent.x',
+                        'child.y = parent.y + 80','child.z = parent.z - 8'],
+      'first_source_effect':{'source_frame_u16':2675,
+       'source_slot':'0x00ffcd80','record_type_u8':28,'class_u8':9,
+       'active_u8':2,'x_s16':1301,'y_s16':320,'z_s16':232,
+       'next_animation_record':'0x000a34da'},
+      'animation_record':'0x0006ee72'}},
+    '0x0600':{'entry':'0x0006ee3c',
+              'rule':'release through type-20 fixed-pool release 0x017706'}},
+   'collision_damage':{
+    'current_state_caller':'0x0001d87a',
+    'baseline_captured_calls_u16':len(class0f_base_collision),
+    'animation_selectors':[
+     {'animation_record':'0x0006ee4a','hurt_u8':1,'attack_u8':1},
+     {'animation_record':'0x0006ee5e','hurt_u8':2,'attack_u8':2},
+     {'animation_record':'0x0006ee72','hurt_u8':0,'attack_u8':3}],
+    'direct_damage_writes_u8':0,
+    'rule':'collision consequences, including a state 0x0202 reaction write, remain owned by the accepted current-state collision program; this class does not synthesize health or damage'},
+   'audio_transactions':[
+    {'trigger':'reaction_selector predecrements 2 -> 1',
+     'source_frame_u16':2673,'source_slot':'0x00ffb100',
+     'source_caller':'0x00002630','return_pc':'0x0006edc0',
+     'command_u16':'0x0077','argument1_u32':'0x00002000',
+     'shared_dispatch':'0x001922'},
+    {'trigger':'reaction_selector predecrements 1 -> 0',
+     'source_frame_u16':2674,'source_slot':'0x00ffb100',
+     'source_caller':'0x00002630','return_pc':'0x0006edc0',
+     'command_u16':'0x0142','argument1_u32':'0x00002000',
+     'shared_dispatch':'0x001922'}],
+   'rng':{'direct_calls':0,'direct_consumption_order':[],
+    'rule':'the class-0x0f program consumes no RNG; the allocated record28/class-0x09 child owns any downstream RNG changes'},
+   'route_teardown':record20_route_teardown_guard,
+   'counterfactual':{
+    'classification':'SOURCE_STATE_MUTATION_CONTROL',
+    'capture_a':CLASS0F_COUNTER_A.name,'capture_b':CLASS0F_COUNTER_B.name,
+    'byte_identical':True,'files_sha256':class0f_counter_a,
+    'injection':'write source outer_state 0x0400 for the first two active class-0x0f traversals only',
+    'injection_writers':['0x000d9c','0x000da8'],
+    'production_authority':False,
+    'covered_branches':['reaction selector 1 -> 0x06ee02',
+                        'reaction selector 0 -> 0x06ee08'],
+    'downstream_differences':{
+     name:{'baseline_sha256':class0f_detail_a[name],
+           'counterfactual_sha256':class0f_counter_a[name],
+           'different':class0f_detail_a[name]!=class0f_counter_a[name]}
+     for name in class0f_files},
+    'changed_outcomes':['animation selector and assembly output',
+                        'two source-owned audio commands',
+                        'record28/class-0x09 effect allocation',
+                        'downstream scene/RNG chronology']},
+   'capture_identity':{
+    'completion_a':CLASS0F_DETAIL_A.name,'completion_b':CLASS0F_DETAIL_B.name,
+    'byte_identical':True,'files_sha256':class0f_detail_a},
+   'mutation_controls':['source body','outer dispatch table','inner dispatch table',
+    'reaction selector table','stage threshold/class/allocator','initial selector',
+    'delay predecrement','reaction-selector predecrement','selector branch order',
+    'visible-facing XOR','animation selector','collision invocation',
+    'direct RNG absence','audio command identity','record28 allocation geometry',
+    'route-teardown freeze/release','fixed-frame substitute'],
+   'spec_executable':True,'retained_gameplay_authority':False,
+   'fixed_frame_substitute_forbidden':True}
+  implementation_contracts={
+   (20,'0x01'):{
    'semantic_role':'SOURCE_CLASS_0X1F_SPAWN_CONTROLLER',
    'source_body':{'first':'0x0006b2fa','last_exclusive':'0x0006b458',
     'sha256':hashlib.sha256(op[0x6b2fa:0x6b458]).hexdigest()},
@@ -1246,18 +1516,19 @@ def coffee_shop_scene_component_identities(op,program):
     'command_u16':'0x0077','argument1_u32':'0x00001d00',
     'player_side_caller':'0x0084bc','shared_dispatch':'0x001922'}],
    'rng':{'calls':0,'consumption_order':[]},
-   'mutation_controls':['stage threshold','stage class','camera-bounds span',
-    'bounds sign','collision writer','attack record','signed health clamp',
-    'reaction delay/hit-value','reaction-direction attack-mode guard',
-    'reaction-direction x comparison',
-    'effect-count predecrement','audio command','fixed-frame substitute']}}
+    'mutation_controls':['stage threshold','stage class','camera-bounds span',
+     'bounds sign','collision writer','attack record','signed health clamp',
+     'reaction delay/hit-value','reaction-direction attack-mode guard',
+     'reaction-direction x comparison',
+     'effect-count predecrement','audio command','fixed-frame substitute']}}
+ implementation_contracts[(20,'0x0f')]=class0f_program
  for contract in implementation_contracts.values():
-  addresses={row['address'] for row in contract['stage_records']}
-  contract['stage_spawn_guard']['camera_sample_order']={
-   'rule':'compare against the camera position projected for the current source frame, before the native player step computes the next frame camera',
-   'records':[row for row in stage_camera_order
-              if row['address'] in addresses],
-   'mutation_control':'using the post-player next-frame camera moves the threshold-736 actor one visible frame early'}
+   addresses={row['address'] for row in contract['stage_records']}
+   contract['stage_spawn_guard']['camera_sample_order']={
+    'rule':'compare against the camera position projected for the current source frame, before the native player step computes the next frame camera',
+    'records':[row for row in stage_camera_order
+               if row['address'] in addresses],
+    'mutation_control':'using the post-player next-frame camera moves the threshold-736 actor one visible frame early'}
  player_route=json.loads(PLAYER_ROUTE.read_text(encoding='ascii'))
  class20=dict(player_route['interaction_action_and_interruption']
               ['implementation_contract']['class20_effect'])
@@ -3052,6 +3323,9 @@ def validate(r):
      type36['retained_gameplay_authority'] is False,
      'Coffee Shop type-36 presentation contract drift')
  scene_components=r['coffee_shop_scene_component_identities']
+ class0f_component=next(x for x in scene_components['components']
+                        if x['type']==20 and x['class']=='0x0f')
+ class0f_contract=class0f_component['implementation_contract']
  req(scene_components['classification']=='SOURCE_CLOSED_IDENTITY' and
      scene_components['capture_identity']['byte_identical'] is True and
      scene_components['capture_identity']['implementation_detail_byte_identical'] is True and
@@ -3067,10 +3341,17 @@ def validate(r):
          x['semantic_role']=='UNKNOWN' and x['state_substate_contexts'] and
          x['animation_records'] and
          0<x['suppression_control']['removed_lifetimes']<=x['lifetime_count'] and
-         x['implementation_status']=='BLOCKED_MISSING_SPEC_FIELDS' and
-         x['fixed_frame_substitute_forbidden'] is True
-         for x in scene_components['components'][2:]
-         if not (x['type']==24 and x['class']=='0x20')) and
+          x['implementation_status']=='BLOCKED_MISSING_SPEC_FIELDS' and
+          x['fixed_frame_substitute_forbidden'] is True
+          for x in scene_components['components'][2:]
+          if not ((x['type']==20 and x['class']=='0x0f') or
+                  (x['type']==24 and x['class']=='0x20'))) and
+     next(x for x in scene_components['components']
+          if x['type']==20 and x['class']=='0x0f')['classification']==
+      'SOURCE_CLOSED_IMPLEMENTATION_FIELDS' and
+     next(x for x in scene_components['components']
+          if x['type']==20 and x['class']=='0x0f')['implementation_status']==
+      'SPEC_EXECUTABLE' and
      next(x for x in scene_components['components']
           if x['type']==24 and x['class']=='0x20')['classification']==
       'SOURCE_CLOSED_IMPLEMENTATION_FIELDS' and
@@ -3208,7 +3489,86 @@ def validate(r):
        ['scheduler_phase_evidence']['controller_dispatch_counts']]==
       [0,1,3,1,1] and
      scene_components['components'][1]['implementation_contract']
-      ['audio_transactions'][0]['command_u16']=='0x0077',
+      ['audio_transactions'][0]['command_u16']=='0x0077' and
+     next(x for x in scene_components['components']
+          if x['type']==20 and x['class']=='0x0f')['implementation_contract']
+      ['source_body']=={
+       'first':'0x0006ed3e','last_exclusive':'0x0006ee42',
+       'sha256':'d3ae68e588d84042b1f937279588d4974bc1bbd64778c8e77625735b859ba8de'} and
+     [(x['address'],x['offsets_s16']) for x in
+      class0f_contract['dispatch_tables']]==[
+       ('0x0006ed4a',[8,64,112,242]),('0x0006edb4',[4,6]),
+       ('0x0006edfe',[10,4])] and
+     next(x for x in scene_components['components']
+          if x['type']==20 and x['class']=='0x0f')['implementation_contract']
+      ['stage_records'][0]['record_sha256']==
+       '4cbbe2b63951094c908d42f83436d66f29177b96257a190304549889eb6379e1' and
+     next(x for x in scene_components['components']
+          if x['type']==20 and x['class']=='0x0f')['implementation_contract']
+      ['stage_spawn_guard']['camera_sample_order']['records']==[
+       {'address':'0x0015c1b8','writer_source_frame_u16':2672,
+        'camera_x_u16':817,'first_actor_visible_frame_u16':2673,
+        'source_slot':'0x00ffb100'}] and
+     [x['animation_record'] for x in next(x for x in
+       scene_components['components'] if x['type']==20 and
+       x['class']=='0x0f')['implementation_contract']['initialization']
+       ['animation_records']]==[
+        '0x0006ee4a','0x0006ee5e','0x0006ee72'] and
+     [(x['hurt_selector_u8'],x['attack_selector_u8']) for x in next(x for x in
+       scene_components['components'] if x['type']==20 and
+       x['class']=='0x0f')['implementation_contract']['initialization']
+       ['animation_records']]==[(1,1),(2,2),(0,3)] and
+     next(x for x in scene_components['components']
+          if x['type']==20 and x['class']=='0x0f')['implementation_contract']
+      ['state_program']['0x0202']['entry'].endswith('0x0006edba') and
+     class0f_contract['state_program']['0x0200']['delay_guard'].startswith(
+      'if delay_timer:u8 is nonzero, predecrement') and
+     class0f_contract['state_program']['0x0400']['selector_1']['allocation']
+      ['variant_iteration_s8']==[3,2,1,0] and
+     class0f_contract['state_program']['0x0400']['selector_1']['allocation']
+      ['observed_source_slots_by_variant']=={
+       '0':'0x00ffb900','1':'0x00ffbf00','2':'0x00ffbb00',
+       '3':'0x00ffc300'} and
+     class0f_contract['state_program']['0x0400']['selector_1']['allocation']
+      ['child_rng_calls_u8']==28 and
+     next(x for x in scene_components['components']
+          if x['type']==20 and x['class']=='0x0f')['implementation_contract']
+      ['state_program']['0x0400']['selector_0']['first_source_effect']=={
+       'source_frame_u16':2675,'source_slot':'0x00ffcd80',
+       'record_type_u8':28,'class_u8':9,'active_u8':2,
+       'x_s16':1301,'y_s16':320,'z_s16':232,
+       'next_animation_record':'0x000a34da'} and
+     [x['command_u16'] for x in next(x for x in
+       scene_components['components'] if x['type']==20 and
+       x['class']=='0x0f')['implementation_contract']['audio_transactions']]==
+      ['0x0077','0x0142'] and
+     all(x['argument1_u32']=='0x00002000' and
+         x['source_caller']=='0x00002630' for x in
+         class0f_contract['audio_transactions']) and
+     class0f_contract['collision_damage']['current_state_caller']==
+      '0x0001d87a' and
+     class0f_contract['collision_damage']['direct_damage_writes_u8']==0 and
+     [(x['hurt_u8'],x['attack_u8']) for x in
+       class0f_contract['collision_damage']['animation_selectors']]==
+      [(1,1),(2,2),(0,3)] and
+     next(x for x in scene_components['components']
+          if x['type']==20 and x['class']=='0x0f')['implementation_contract']
+      ['rng']['direct_calls']==0 and
+     next(x for x in scene_components['components']
+          if x['type']==20 and x['class']=='0x0f')['implementation_contract']
+      ['counterfactual']['byte_identical'] is True and
+     class0f_contract['counterfactual']['production_authority'] is False and
+     all(v['different'] for v in next(x for x in
+       scene_components['components'] if x['type']==20 and
+       x['class']=='0x0f')['implementation_contract']['counterfactual']
+       ['downstream_differences'].values()) and
+     next(x for x in scene_components['components']
+          if x['type']==20 and x['class']=='0x0f')['implementation_contract']
+      ['retained_gameplay_authority'] is False and
+     len(class0f_contract['mutation_controls'])>=16 and
+     next(x for x in scene_components['components']
+          if x['type']==20 and x['class']=='0x0f')['implementation_contract']
+      ['fixed_frame_substitute_forbidden'] is True,
      'Coffee Shop remaining component identity drift')
  teardown=scene_components['components'][1]['implementation_contract'][
   'scheduler_phase_evidence']['record20_exit_prefix_scheduler'][

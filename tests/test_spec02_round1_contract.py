@@ -587,6 +587,23 @@ assert [(row["class"], row["lifetime_count"])
             ("0x03", 50), ("0x04", 15), ("0x05", 4), ("0x0e", 16)]
 assert scene_components["identified_pairs"] == 9
 assert scene_components["unidentified_pairs"] == 0
+class0f = next(row for row in scene_components["components"]
+               if row["type"] == 20 and row["class"] == "0x0f")
+class0f_contract = class0f["implementation_contract"]
+assert class0f["implementation_status"] == "SPEC_EXECUTABLE"
+assert class0f_contract["source_body"]["first"] == "0x0006ed3e"
+assert [row["offsets_s16"] for row in class0f_contract["dispatch_tables"]] == [
+    [8, 64, 112, 242], [4, 6], [10, 4]]
+assert [row["animation_record"] for row in
+        class0f_contract["initialization"]["animation_records"]] == [
+            "0x0006ee4a", "0x0006ee5e", "0x0006ee72"]
+assert class0f_contract["state_program"]["0x0400"]["selector_1"][
+    "allocation"]["variant_iteration_s8"] == [3, 2, 1, 0]
+assert class0f_contract["state_program"]["0x0400"]["selector_0"][
+    "first_source_effect"]["source_slot"] == "0x00ffcd80"
+assert [row["command_u16"] for row in
+        class0f_contract["audio_transactions"]] == ["0x0077", "0x0142"]
+assert class0f_contract["rng"]["direct_calls"] == 0
 navigation = fixtures["authority_data"]["navigation"]
 assert len(navigation["terrain_resolver"]["records"]) == 6
 assert navigation["terrain_resolver"]["implementation_contract"]["handlers"]["6"][
@@ -809,6 +826,7 @@ f = copy.deepcopy(fixtures); f["authority_data"]["player"]["weapon_projectile_re
 f = copy.deepcopy(fixtures); f["authority_data"]["auxiliary"]["first_segment_dependencies"]["class_0x4e_type24_variant4_effect"]["variant10_collision_effect"]["state0"]["first_seed_after"] = "0xe34d"; mutations.append((contract, f, "class4e variant10 RNG mutation"))
 f = copy.deepcopy(fixtures); f["authority_data"]["auxiliary"]["coffee_shop_type36_presentation"]["pool"]["capacity"] = 32; mutations.append((contract, f, "Coffee Shop type36 pool mutation"))
 f = copy.deepcopy(fixtures); f["authority_data"]["auxiliary"]["coffee_shop_scene_component_identities"]["unidentified_pairs"] = 1; mutations.append((contract, f, "Coffee Shop component identity mutation"))
+f = copy.deepcopy(fixtures); next(row for row in f["authority_data"]["auxiliary"]["coffee_shop_scene_component_identities"]["components"] if row["type"] == 20 and row["class"] == "0x0f")["implementation_contract"]["audio_transactions"][1]["command_u16"] = "0x0077"; mutations.append((contract, f, "Coffee Shop class0f audio mutation"))
 f = copy.deepcopy(fixtures); f["authority_data"]["navigation"]["terrain_resolver"]["records"][4]["decoded_six_fields"]["z_parameter_s8"] = -8; mutations.append((contract, f, "terrain record sign mutation"))
 f = copy.deepcopy(fixtures); f["authority_data"]["navigation"]["obstacle_response"]["implementation_contract"]["obstacle_box"]["x_half_u8"] = 16; mutations.append((contract, f, "obstacle box mutation"))
 f = copy.deepcopy(fixtures); f["authority_data"]["navigation"]["obstacle_response"]["lifecycle_contract"]["source_scene_record"]["camera_threshold_u16"] = 689; mutations.append((contract, f, "obstacle spawn threshold mutation"))

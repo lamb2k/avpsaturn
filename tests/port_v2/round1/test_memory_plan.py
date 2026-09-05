@@ -70,10 +70,10 @@ for token in REQUIRED_ROUND1:
 
 payload = ARCHIVE.read_bytes()
 archive = PLAN["content_archive"]
-assert len(payload) == archive["bytes"] == 47480
+assert len(payload) == archive["bytes"] == 47600
 assert hashlib.sha256(payload).hexdigest() == archive["sha256"]
 assert struct.unpack(">III", payload[:12]) == (0x52314341, 1, len(payload))
-assert HEADER.count("#define avsp_round1_") == archive["table_count"] == 167
+assert HEADER.count("#define avsp_round1_") == archive["table_count"] == 169
 assert archive["deterministic_double_build"] is True
 
 regions = PLAN["cartridge_dram1"]["regions"]

@@ -1,8 +1,8 @@
 #ifndef AVSP_SPEC02_ROUND1_ENTRY_DATA_H
 #define AVSP_SPEC02_ROUND1_ENTRY_DATA_H
 
-/* contract_sha256=2179288d73cab3c4b9586eb9819ea37b9775e23f02d02201590129f2cbd59232 */
-/* fixtures_sha256=3f17604a4b33db53accd04fe660594f1e875006cb485392d3ea37aea31602bda */
+/* contract_sha256=c6795cc6955e58beeab87b93e59e002c8519d3994887f2e67b16fb16baa2840f */
+/* fixtures_sha256=6aa9d015186f024520fa53db884b62240bd7d5b0de42aaa5071ce76af2952948 */
 #define AVSP_ROUND1_ENTRY_PROGRAM_SHA256 "e5ef761fadc1b5a7df62e77c03025c0ebff0c2503cbc8be9c0077d4bd6cd24ba"
 
 #if defined(__sh__)
@@ -4941,6 +4941,7 @@ static const AvspRound1CoffeeSceneRecordSpec avsp_round1_coffee_scene_records[AV
     { 0x0015c178UL, 0x00ffb300UL, 2617u, 736u, 1152, 336, 4u, 0x02, 0u, 0, 0u, 0u, 0u, 0u },
     { 0x0015c188UL, 0x00ffb280UL, 2672u, 816u, 1264, 293, 4u, 0x05, 0u, 0, 0u, 0u, 48u, 0u },
     { 0x0015c1a8UL, 0x00ffb180UL, 2672u, 816u, 1284, 268, 4u, 0x05, 0u, 0, 0u, 0u, 34u, 0u },
+    { 0x0015c1b8UL, 0x00ffb100UL, 2672u, 816u, 1301, 240, 4u, 0x0F, 0u, 0, 0u, 0u, 0u, 0u },
 };
 #endif
 
@@ -4962,6 +4963,17 @@ static const AvspRound1AnimationStateSpec avsp_round1_class02_records[AVSP_ROUND
 {
     { 4095u, -32768, 0x0006b66cUL, 0x0006b6a8UL, 1u, 0u },
     { 4095u, -32768, 0x0006b680UL, 0x0006b6baUL, 1u, 0u },
+};
+#endif
+
+#if defined(__sh__)
+#define avsp_round1_class0f_records (avsp_round1_content->content_avsp_round1_class0f_records)
+#else
+static const AvspRound1AnimationStateSpec avsp_round1_class0f_records[AVSP_ROUND1_CLASS0F_PRESENTATION_COUNT] =
+{
+    { 4095u, -32768, 0x0006ee4aUL, 0x0006ee86UL, 1u, 1u },
+    { 4095u, -32768, 0x0006ee5eUL, 0x0006eeaaUL, 2u, 2u },
+    { 4095u, -32768, 0x0006ee72UL, 0x0006eec8UL, 0u, 3u },
 };
 #endif
 
@@ -5019,6 +5031,17 @@ static const AvspRound1Class02Spec avsp_round1_class02 =
     16u, 0x01A0u, 5u, 28u, 0x05, 1u, 8, 64, -8, 25, -1, 0x0077u, 1u, 0u,
     { 0, 48, 88u, 48u, 0, 40u, 1, 3u, 0u },
     { 8, 64, 8u, 32u, -4, 4u, 0, 0u, 0u }
+};
+#endif
+
+#if defined(__sh__)
+#define avsp_round1_class0f (avsp_round1_content->content_avsp_round1_class0f)
+#else
+static const AvspRound1Class0fSpec avsp_round1_class0f =
+{
+    0x06ED3EUL, 0x06EE42UL, 0x06EEE6UL,
+    0x0200u, 0x0202u, 0x0400u, 0x0600u, 2u, 0x1Du,
+    24u, 0x11, 4u, -1, 28u, 0x09, 80, -8, 0x0077u, 0x0142u, 0x00002000UL
 };
 #endif
 
@@ -5519,11 +5542,13 @@ typedef struct
     AvspRound1CoffeeSceneRecordSpec content_avsp_round1_coffee_scene_records[AVSP_ROUND1_COFFEE_SCENE_RECORD_COUNT];
     AvspRound1AnimationStateSpec content_avsp_round1_class01_records[AVSP_ROUND1_CLASS01_PRESENTATION_COUNT];
     AvspRound1AnimationStateSpec content_avsp_round1_class02_records[AVSP_ROUND1_CLASS02_PRESENTATION_COUNT];
+    AvspRound1AnimationStateSpec content_avsp_round1_class0f_records[AVSP_ROUND1_CLASS0F_PRESENTATION_COUNT];
     AvspRound1AnimationStateSpec content_avsp_round1_class05_records[AVSP_ROUND1_CLASS05_PRESENTATION_COUNT];
     AvspRound1Class05Spec content_avsp_round1_class05;
     AvspRound1Class05MotionSpec content_avsp_round1_class05_motion;
     AvspRound1Class01Spec content_avsp_round1_class01;
     AvspRound1Class02Spec content_avsp_round1_class02;
+    AvspRound1Class0fSpec content_avsp_round1_class0f;
     AvspRound1SceneUpdateCadence content_avsp_round1_coffee_shop_update_cadence[AVSP_ROUND1_COFFEE_SHOP_UPDATE_CADENCE_COUNT];
     AvspRound1SceneUpdateCadence content_avsp_round1_coffee_shop_class02_update_cadence[AVSP_ROUND1_COFFEE_SHOP_CLASS02_UPDATE_CADENCE_COUNT];
     AvspRound1SceneInputRun content_avsp_round1_coffee_shop_input_runs[AVSP_ROUND1_COFFEE_SHOP_INPUT_RUN_COUNT];

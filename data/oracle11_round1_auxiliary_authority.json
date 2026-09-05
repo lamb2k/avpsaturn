@@ -12068,16 +12068,512 @@
           "0x0006ee4a"
         ],
         "class": "0x0f",
-        "classification": "SOURCE_CLOSED_IDENTITY",
+        "classification": "SOURCE_CLOSED_IMPLEMENTATION_FIELDS",
         "dispatch_entry": "0x06ed3e",
         "dispatch_prefix_sha256": "055b597d4d513fb6a8c7e128fa8819565780008502f3a02cf26be716ce16f62b",
         "first_frame": 2673,
         "fixed_frame_substitute_forbidden": true,
-        "implementation_contract": null,
-        "implementation_status": "BLOCKED_MISSING_SPEC_FIELDS",
+        "implementation_contract": {
+          "audio_transactions": [
+            {
+              "argument1_u32": "0x00002000",
+              "command_u16": "0x0077",
+              "return_pc": "0x0006edc0",
+              "shared_dispatch": "0x001922",
+              "source_caller": "0x00002630",
+              "source_frame_u16": 2673,
+              "source_slot": "0x00ffb100",
+              "trigger": "reaction_selector predecrements 2 -> 1"
+            },
+            {
+              "argument1_u32": "0x00002000",
+              "command_u16": "0x0142",
+              "return_pc": "0x0006edc0",
+              "shared_dispatch": "0x001922",
+              "source_caller": "0x00002630",
+              "source_frame_u16": 2674,
+              "source_slot": "0x00ffb100",
+              "trigger": "reaction_selector predecrements 1 -> 0"
+            }
+          ],
+          "capture_identity": {
+            "byte_identical": true,
+            "completion_a": "oracle11_progression_lifecycle_cs61a",
+            "completion_b": "oracle11_progression_lifecycle_cs61b",
+            "files_sha256": {
+              "coffee_shop_component20_collision.tsv": "e9bf13927996a9af7563b4e8e7383a080c9e41b637b041c7191f70e9a30effec",
+              "coffee_shop_component20_dispatch.tsv": "fe0df8d401c5e8ccb8c413559ce3d5a560fcc5e8faefcedd681f69b6addd9faa",
+              "coffee_shop_component20_writes.tsv": "a8ce200dedfb660d1d3195891cdcb8d640334f3f63b8837558811b5f57e84adc",
+              "coffee_shop_rng_calls.tsv": "81338529f76629c3d103885c16838bd562beecf783f0b5107a5b7ecd11e219b3",
+              "coffee_shop_scene_actors.tsv": "b7b1568df038af1cdd7eb5bc6eb30c830efca4952d1077644ab3b31ed2ad1c0f",
+              "coffee_shop_scene_frames.tsv": "91e4aab3a03586a6c9a143dd58ee03a72ebc52b7fd611fdc6fe0975ebd522d1d",
+              "coffee_shop_scene_health_writes.tsv": "7defadcfff16b99b8e2d5b66fc7b42443106837d698e659c64d45a8770d6aa0b",
+              "dispatches.tsv": "a47890edd3e102e8d8db5e4caa21d9b15c5c6e0a3c4800ab1aff578421102903",
+              "progression_result.tsv": "8a9e8fb46c65ee794435692a60801a5abc417539814a2f35e8c561f6f84653bf"
+            }
+          },
+          "collision_damage": {
+            "animation_selectors": [
+              {
+                "animation_record": "0x0006ee4a",
+                "attack_u8": 1,
+                "hurt_u8": 1
+              },
+              {
+                "animation_record": "0x0006ee5e",
+                "attack_u8": 2,
+                "hurt_u8": 2
+              },
+              {
+                "animation_record": "0x0006ee72",
+                "attack_u8": 3,
+                "hurt_u8": 0
+              }
+            ],
+            "baseline_captured_calls_u16": 151,
+            "current_state_caller": "0x0001d87a",
+            "direct_damage_writes_u8": 0,
+            "rule": "collision consequences, including a state 0x0202 reaction write, remain owned by the accepted current-state collision program; this class does not synthesize health or damage"
+          },
+          "counterfactual": {
+            "byte_identical": true,
+            "capture_a": "oracle11_progression_lifecycle_cs61m1",
+            "capture_b": "oracle11_progression_lifecycle_cs61m2",
+            "changed_outcomes": [
+              "animation selector and assembly output",
+              "two source-owned audio commands",
+              "record28/class-0x09 effect allocation",
+              "downstream scene/RNG chronology"
+            ],
+            "classification": "SOURCE_STATE_MUTATION_CONTROL",
+            "covered_branches": [
+              "reaction selector 1 -> 0x06ee02",
+              "reaction selector 0 -> 0x06ee08"
+            ],
+            "downstream_differences": {
+              "coffee_shop_component20_collision.tsv": {
+                "baseline_sha256": "e9bf13927996a9af7563b4e8e7383a080c9e41b637b041c7191f70e9a30effec",
+                "counterfactual_sha256": "8e494a35fed1598c4b17fbfd30c5cc1bc0808db8cfa0c0e8ee089ba932870528",
+                "different": true
+              },
+              "coffee_shop_component20_dispatch.tsv": {
+                "baseline_sha256": "fe0df8d401c5e8ccb8c413559ce3d5a560fcc5e8faefcedd681f69b6addd9faa",
+                "counterfactual_sha256": "6fabfe490efde055a898c513228ea302dc440a98773345b6708128ac8ef5acff",
+                "different": true
+              },
+              "coffee_shop_component20_writes.tsv": {
+                "baseline_sha256": "a8ce200dedfb660d1d3195891cdcb8d640334f3f63b8837558811b5f57e84adc",
+                "counterfactual_sha256": "97e2f2b03035a0f336bdf1b13db86c23a6582d07e85b039dae0fe5cb3b5d2bb4",
+                "different": true
+              },
+              "coffee_shop_rng_calls.tsv": {
+                "baseline_sha256": "81338529f76629c3d103885c16838bd562beecf783f0b5107a5b7ecd11e219b3",
+                "counterfactual_sha256": "c9de824450ce7060f5f610e3d4839c2f52022dd524b21ec529322b0a78f0e612",
+                "different": true
+              },
+              "coffee_shop_scene_actors.tsv": {
+                "baseline_sha256": "b7b1568df038af1cdd7eb5bc6eb30c830efca4952d1077644ab3b31ed2ad1c0f",
+                "counterfactual_sha256": "6ee85191522c6ace10ad03b660e3deec9ced01164870be785eaacc26c4f1591e",
+                "different": true
+              },
+              "coffee_shop_scene_frames.tsv": {
+                "baseline_sha256": "91e4aab3a03586a6c9a143dd58ee03a72ebc52b7fd611fdc6fe0975ebd522d1d",
+                "counterfactual_sha256": "51b19224d28ce5a7b294dddf2507ea7d0bf4b439dd57faee1d498ac898a0042d",
+                "different": true
+              },
+              "coffee_shop_scene_health_writes.tsv": {
+                "baseline_sha256": "7defadcfff16b99b8e2d5b66fc7b42443106837d698e659c64d45a8770d6aa0b",
+                "counterfactual_sha256": "63a0e9bc8cbd2ab790997cadb475864cceac17035cb188fda3d578a81d18e712",
+                "different": true
+              },
+              "dispatches.tsv": {
+                "baseline_sha256": "a47890edd3e102e8d8db5e4caa21d9b15c5c6e0a3c4800ab1aff578421102903",
+                "counterfactual_sha256": "dd9bf1af632c5c510d7587c08030fbde9ab49173faf45eabcab3b9b6ec4013a1",
+                "different": true
+              },
+              "progression_result.tsv": {
+                "baseline_sha256": "8a9e8fb46c65ee794435692a60801a5abc417539814a2f35e8c561f6f84653bf",
+                "counterfactual_sha256": "80c340d034805a67ee02672af75b5f37d45c99f4756b99f6f158f7efd03b74a9",
+                "different": true
+              }
+            },
+            "files_sha256": {
+              "coffee_shop_component20_collision.tsv": "8e494a35fed1598c4b17fbfd30c5cc1bc0808db8cfa0c0e8ee089ba932870528",
+              "coffee_shop_component20_dispatch.tsv": "6fabfe490efde055a898c513228ea302dc440a98773345b6708128ac8ef5acff",
+              "coffee_shop_component20_writes.tsv": "97e2f2b03035a0f336bdf1b13db86c23a6582d07e85b039dae0fe5cb3b5d2bb4",
+              "coffee_shop_rng_calls.tsv": "c9de824450ce7060f5f610e3d4839c2f52022dd524b21ec529322b0a78f0e612",
+              "coffee_shop_scene_actors.tsv": "6ee85191522c6ace10ad03b660e3deec9ced01164870be785eaacc26c4f1591e",
+              "coffee_shop_scene_frames.tsv": "51b19224d28ce5a7b294dddf2507ea7d0bf4b439dd57faee1d498ac898a0042d",
+              "coffee_shop_scene_health_writes.tsv": "63a0e9bc8cbd2ab790997cadb475864cceac17035cb188fda3d578a81d18e712",
+              "dispatches.tsv": "dd9bf1af632c5c510d7587c08030fbde9ab49173faf45eabcab3b9b6ec4013a1",
+              "progression_result.tsv": "80c340d034805a67ee02672af75b5f37d45c99f4756b99f6f158f7efd03b74a9"
+            },
+            "injection": "write source outer_state 0x0400 for the first two active class-0x0f traversals only",
+            "injection_writers": [
+              "0x000d9c",
+              "0x000da8"
+            ],
+            "production_authority": false
+          },
+          "dispatch_tables": [
+            {
+              "address": "0x0006ed4a",
+              "entry_count_u8": 4,
+              "index": "actor+0x04 high byte:u8",
+              "offsets_s16": [
+                8,
+                64,
+                112,
+                242
+              ],
+              "targets": [
+                "0x0006ed52",
+                "0x0006ed8a",
+                "0x0006edba",
+                "0x0006ee3c"
+              ]
+            },
+            {
+              "address": "0x0006edb4",
+              "entry_count_u8": 2,
+              "index": "actor+0x05 low byte:u8",
+              "offsets_s16": [
+                4,
+                6
+              ],
+              "targets": [
+                "0x0006edb8",
+                "0x0006edba"
+              ]
+            },
+            {
+              "address": "0x0006edfe",
+              "entry_count_u8": 2,
+              "index": "2 * actor+0x42:u16 after decrement",
+              "offsets_s16": [
+                10,
+                4
+              ],
+              "targets": [
+                "0x0006ee08",
+                "0x0006ee02"
+              ]
+            }
+          ],
+          "fields": {
+            "active": "u8 at actor+0x00",
+            "animation_branch": "s16 at actor+0x24",
+            "animation_record": "u32 at actor+0x1c",
+            "animation_timer": "u16 at actor+0x0a",
+            "class_and_type": "u16 at actor+0x02",
+            "delay_timer": "u8 at actor+0x2c",
+            "hidden_reaction_facing": "u8 at actor+0x4f",
+            "inner_phase": "u8 at actor+0x05; low byte selects the state-0x0200 table",
+            "mode": "u16 at actor+0x40",
+            "object_flags": "u16 at actor+0x2e",
+            "outer_state": "u16 at actor+0x04; high byte selects the outer table",
+            "presentation_mode": "u8 at actor+0x64",
+            "reaction_selector": "u16 at actor+0x42",
+            "table_set": "u32 at actor+0x50",
+            "visible_facing": "u8 at actor+0x0f",
+            "x_y": "s16 source positions mirrored by signed 16.16 native coordinates",
+            "z": "s16 at actor+0x18"
+          },
+          "fixed_frame_substitute_forbidden": true,
+          "initialization": {
+            "animation_records": [
+              {
+                "animation_record": "0x0006ee4a",
+                "assembly": "0x0006ee86",
+                "attack_selector_u8": 1,
+                "branch_s16": -32768,
+                "hurt_selector_u8": 1,
+                "record_sha256": "9fa3eb70f3d76f97f670c87efbe909c07eec16052e4725708f2b85f3994f6bc0",
+                "timer_u16": 4095
+              },
+              {
+                "animation_record": "0x0006ee5e",
+                "assembly": "0x0006eeaa",
+                "attack_selector_u8": 2,
+                "branch_s16": -32768,
+                "hurt_selector_u8": 2,
+                "record_sha256": "9b3c8ecd19df067b4cf4bc9b7d455fbbe094949062ca9b048bfd8c36efdf93d7",
+                "timer_u16": 4095
+              },
+              {
+                "animation_record": "0x0006ee72",
+                "assembly": "0x0006eec8",
+                "attack_selector_u8": 3,
+                "branch_s16": -32768,
+                "hurt_selector_u8": 0,
+                "record_sha256": "f0a62a63455dc91074e74da7cfbdd773f74e2e9b816fade89cee155d869f953d",
+                "timer_u16": 4095
+              }
+            ],
+            "animation_selector_base": "0x0006ee42",
+            "entry": "0x0006ed52",
+            "writes": [
+              "outer_state += 0x0200",
+              "table_set = 0x0006eee6",
+              "object_flags = 0x8000",
+              "presentation_mode = 0x1d",
+              "z = y",
+              "reaction_selector = 2",
+              "mode = 0",
+              "bind animation selector 2"
+            ]
+          },
+          "mutation_controls": [
+            "source body",
+            "outer dispatch table",
+            "inner dispatch table",
+            "reaction selector table",
+            "stage threshold/class/allocator",
+            "initial selector",
+            "delay predecrement",
+            "reaction-selector predecrement",
+            "selector branch order",
+            "visible-facing XOR",
+            "animation selector",
+            "collision invocation",
+            "direct RNG absence",
+            "audio command identity",
+            "record28 allocation geometry",
+            "route-teardown freeze/release",
+            "fixed-frame substitute"
+          ],
+          "retained_gameplay_authority": false,
+          "rng": {
+            "direct_calls": 0,
+            "direct_consumption_order": [],
+            "rule": "the class-0x0f program consumes no RNG; the allocated record28/class-0x09 child owns any downstream RNG changes"
+          },
+          "route_teardown": {
+            "active_source_slots": [
+              "0x00ffb100",
+              "0x00ffb180",
+              "0x00ffb300",
+              "0x00ffb480",
+              "0x00ffb500",
+              "0x00ffb600"
+            ],
+            "capture_identity": {
+              "actors_sha256": "9c0ea88c7eae6b4755b0025d356d49ae136d91de0e443fab0ff767151e43343d",
+              "entries_sha256": "d51c772c2d4d254ef79e01869d40994a2751c24ab2f2020ec49ad1d32c6ebe3c",
+              "frames_sha256": "91e4aab3a03586a6c9a143dd58ee03a72ebc52b7fd611fdc6fe0975ebd522d1d"
+            },
+            "central_release_source_frame_u16": 5551,
+            "classification": "SOURCE_CLOSED_IMPLEMENTATION_FIELDS",
+            "fixed_frame_substitute_forbidden": true,
+            "freeze_frame_range_inclusive_u16": [
+              5524,
+              5550
+            ],
+            "frozen_fields": [
+              "state",
+              "substate",
+              "x_fp",
+              "y_fp",
+              "z",
+              "facing",
+              "animation_record",
+              "animation_timer",
+              "animation_branch"
+            ],
+            "guard": "route_state == 0 and exit_route_updates != 0 suppresses the complete record-20 pool dispatch until centralized release",
+            "last_source_dispatch_frame_u16": 5523,
+            "mutation_control": "dispatching any active record-20 actor after route state 6 -> 0 changes a frozen animation timer or record before centralized release",
+            "prior_route_state_u16": 6,
+            "route_teardown_state_u16": 0,
+            "scheduler_scope": "complete record-20 pool; record12/class-0x1f teardown continues independently",
+            "source_dispatch_count_u16": 0,
+            "transition_dispatch": "exit_route_updates == 0 permits the final traversal whose result is visible on source frame 5524",
+            "transition_source_frame_u16": 5524
+          },
+          "scheduler": {
+            "baseline_dispatch_counts": [
+              {
+                "count_u16": 1,
+                "pc": "06ed3e",
+                "state_u16": "0x0000"
+              },
+              {
+                "count_u16": 2993,
+                "pc": "06ed3e",
+                "state_u16": "0x0200"
+              },
+              {
+                "count_u16": 1,
+                "pc": "06ed52",
+                "state_u16": "0x0000"
+              },
+              {
+                "count_u16": 2993,
+                "pc": "06ed8a",
+                "state_u16": "0x0200"
+              },
+              {
+                "count_u16": 2993,
+                "pc": "06edb8",
+                "state_u16": "0x0200"
+              },
+              {
+                "count_u16": 2993,
+                "pc": "06edba",
+                "state_u16": "0x0200"
+              }
+            ],
+            "indirect_caller_pc": "0x01bc6e",
+            "measured_lifetime_inclusive_u16": [
+              2673,
+              5550
+            ],
+            "pool": "record20",
+            "scheduler": "0x01bc38..0x01bc78",
+            "source_slot": "0x00ffb100"
+          },
+          "semantic_role": "SOURCE_STATIC_COLLIDABLE_SCENE_COMPONENT",
+          "source_body": {
+            "first": "0x0006ed3e",
+            "last_exclusive": "0x0006ee42",
+            "sha256": "d3ae68e588d84042b1f937279588d4974bc1bbd64778c8e77625735b859ba8de"
+          },
+          "spec_executable": true,
+          "stage_records": [
+            {
+              "address": "0x0015c1b8",
+              "allocator_u16": 4,
+              "camera_threshold_u16": 816,
+              "class_u8": 15,
+              "facing_u8": 0,
+              "field_0d_u8": 0,
+              "guard_0a_s8": 0,
+              "guard_0b_u8": 0,
+              "observed_source_frame": 2672,
+              "observed_source_slot": "0x00ffb100",
+              "record_sha256": "4cbbe2b63951094c908d42f83436d66f29177b96257a190304549889eb6379e1",
+              "timer_u16": 0,
+              "variant_u8": 0,
+              "x_s16": 1301,
+              "y_s16": 240
+            }
+          ],
+          "stage_spawn_guard": {
+            "allocation": "type-20 fixed pool under ascending scheduler 0x01bc38",
+            "camera_predicate": "record.camera_threshold_u16 <= camera_x_u16",
+            "camera_sample_order": {
+              "mutation_control": "using the post-player next-frame camera moves the threshold-736 actor one visible frame early",
+              "records": [
+                {
+                  "address": "0x0015c1b8",
+                  "camera_x_u16": 817,
+                  "first_actor_visible_frame_u16": 2673,
+                  "source_slot": "0x00ffb100",
+                  "writer_source_frame_u16": 2672
+                }
+              ],
+              "rule": "compare against the camera position projected for the current source frame, before the native player step computes the next frame camera"
+            },
+            "guard_0a": "if negative abs(value)>global+0x1eb; otherwise value<=global+0x1eb",
+            "guard_0b": "zero or equal to global route byte +0x20e",
+            "order": "16-byte records in source order; allocate all eligible records"
+          },
+          "state_program": {
+            "0x0200": {
+              "delay_guard": "if delay_timer:u8 is nonzero, predecrement; skip the inner handler while the result remains nonzero",
+              "entry": "0x0006ed8a",
+              "inner_0x00": "0x0006edb8 returns without actor-owned state changes",
+              "post_handler_order": [
+                "current-state collision 0x01d87a",
+                "type-20 navigation 0x06b2e2",
+                "scheduler/presentation tail 0x0167ac"
+              ]
+            },
+            "0x0202": {
+              "entry": "outer 0x0006ed8a then inner 0x0006edba",
+              "rule": "the low-byte inner phase aliases the reaction program; it is not a separate actor+0x06 substate"
+            },
+            "0x0400": {
+              "entry": "0x0006edba",
+              "order": [
+                "source command owner 0x002630",
+                "write outer_state = 0x0200",
+                "predecrement reaction_selector:u16",
+                "dispatch selector branch",
+                "visible_facing = hidden_reaction_facing XOR 1",
+                "bind animation selector reaction_selector",
+                "current-state collision 0x01d87a",
+                "scheduler/presentation tail 0x0167ac"
+              ],
+              "selector_0": {
+                "allocator": "record28 0x017828",
+                "animation_record": "0x0006ee72",
+                "entry": "0x0006ee08",
+                "first_source_effect": {
+                  "active_u8": 2,
+                  "class_u8": 9,
+                  "next_animation_record": "0x000a34da",
+                  "record_type_u8": 28,
+                  "source_frame_u16": 2675,
+                  "source_slot": "0x00ffcd80",
+                  "x_s16": 1301,
+                  "y_s16": 320,
+                  "z_s16": 232
+                },
+                "success_writes": [
+                  "child.active += 2",
+                  "child.class/type word = 0x0900",
+                  "child+0x5c = 1",
+                  "child.x = parent.x",
+                  "child.y = parent.y + 80",
+                  "child.z = parent.z - 8"
+                ]
+              },
+              "selector_1": {
+                "allocation": {
+                  "allocator": "record24 0x0177da",
+                  "child_program_ownership": "separate type24/class-0x11 source program",
+                  "child_rng_calls_u8": 28,
+                  "first_visible_source_frame_u16": 2674,
+                  "observed_source_slots_by_variant": {
+                    "0": "0x00ffb900",
+                    "1": "0x00ffbf00",
+                    "2": "0x00ffbb00",
+                    "3": "0x00ffc300"
+                  },
+                  "scheduler_order": "record20 source program allocates before the following record24 pool traversal; every child consumes seven RNG calls in its independently owned class-0x11 program",
+                  "variant_iteration_s8": [
+                    3,
+                    2,
+                    1,
+                    0
+                  ],
+                  "writes": [
+                    "child.active += 2",
+                    "child.class = 0x11",
+                    "child.variant = loop counter",
+                    "child.x/y/z = parent.x/y/z",
+                    "child.z -= 1",
+                    "child anchor x/y pairs = parent.x/y",
+                    "child.hidden_reaction_facing = parent.hidden_reaction_facing",
+                    "child.visible_facing = parent.visible_facing"
+                  ]
+                },
+                "animation_record": "0x0006ee5e",
+                "entry": "0x0006ee02",
+                "shared_program": "0x0007a926"
+              }
+            },
+            "0x0600": {
+              "entry": "0x0006ee3c",
+              "rule": "release through type-20 fixed-pool release 0x017706"
+            }
+          }
+        },
+        "implementation_status": "SPEC_EXECUTABLE",
         "last_frame": 5550,
         "lifetime_count": 1,
-        "semantic_role": "UNKNOWN",
+        "semantic_role": "SOURCE_STATIC_COLLIDABLE_SCENE_COMPONENT",
         "source_scheduler": "0x01bc38",
         "state_substate_contexts": [
           "0x0200:0x0000"
