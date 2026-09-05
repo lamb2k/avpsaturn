@@ -1,8 +1,8 @@
 #ifndef AVSP_SPEC02_ROUND1_ENTRY_DATA_H
 #define AVSP_SPEC02_ROUND1_ENTRY_DATA_H
 
-/* contract_sha256=a8c5913f90db7f476155a81d433b200d221e13d45e4ed1a58a6ee0e0e064937c */
-/* fixtures_sha256=da6d39a49afb2c453f0a647f5d33528243816ca8e823c45184a967d73f03a27d */
+/* contract_sha256=b784f11da55207e2ac26577a54e2f354cf4c23306794cf1ad77ec300ad1f4557 */
+/* fixtures_sha256=1c038863c4b3f1730663780ce2294e75380abbf2c5b8779ee81028183c392103 */
 #define AVSP_ROUND1_ENTRY_PROGRAM_SHA256 "e5ef761fadc1b5a7df62e77c03025c0ebff0c2503cbc8be9c0077d4bd6cd24ba"
 
 #if defined(__sh__)
@@ -5171,6 +5171,34 @@ static const AvspRound1Class00CompanionParentEntrySpec avsp_round1_class00_compa
 #endif
 
 #if defined(__sh__)
+#define avsp_round1_type36_class04_records (avsp_round1_content->content_avsp_round1_type36_class04_records)
+#else
+static const AvspRound1AnimationStateSpec avsp_round1_type36_class04_records[AVSP_ROUND1_TYPE36_CLASS04_PRESENTATION_COUNT] =
+{
+    { 1u, 0, 0x0009ac82UL, 0x0009b5a6UL, 0u, 0u },
+    { 1u, 0, 0x0009ac92UL, 0x0009b5b4UL, 0u, 0u },
+    { 2u, 0, 0x0009aca2UL, 0x0009b5c2UL, 0u, 0u },
+    { 2u, 0, 0x0009acb2UL, 0x0009b5d0UL, 0u, 0u },
+    { 1u, 0, 0x0009acc2UL, 0x0009b5deUL, 0u, 0u },
+    { 1u, 0, 0x0009acd2UL, 0x0009b5ecUL, 0u, 0u },
+    { 1u, 0, 0x0009ace2UL, 0x0009b5faUL, 0u, 0u },
+    { 1u, 0, 0x0009acf2UL, 0x0009b608UL, 0u, 0u },
+    { 1u, 0, 0x0009ad02UL, 0x0009b616UL, 0u, 0u },
+    { 1u, -32768, 0x0009ad12UL, 0x0009b616UL, 0u, 0u },
+};
+#endif
+
+#if defined(__sh__)
+#define avsp_round1_type36_class04 (avsp_round1_content->content_avsp_round1_type36_class04)
+#else
+static const AvspRound1Type36Class04Spec avsp_round1_type36_class04 =
+{
+    0x09AA90UL, 0x02F8DCUL, 0x0009AC82UL,
+    0x8380u, 0x0200u, 0x0400u, 0x0600u, 5, 86, 10u, 0x04, 36u, 0u
+};
+#endif
+
+#if defined(__sh__)
 #define avsp_round1_class05_records (avsp_round1_content->content_avsp_round1_class05_records)
 #else
 static const AvspRound1AnimationStateSpec avsp_round1_class05_records[AVSP_ROUND1_CLASS05_PRESENTATION_COUNT] =
@@ -6015,6 +6043,8 @@ typedef struct
     AvspRound1Class00CompanionAnimationSpec content_avsp_round1_class00_companion_records[AVSP_ROUND1_CLASS00_COMPANION_PRESENTATION_COUNT];
     AvspRound1Class00CompanionParentAnimationSpec content_avsp_round1_class00_companion_parent_animations[AVSP_ROUND1_CLASS00_COMPANION_PARENT_ANIMATION_COUNT];
     AvspRound1Class00CompanionParentEntrySpec content_avsp_round1_class00_companion_parent_entries[AVSP_ROUND1_CLASS00_COMPANION_PARENT_ENTRY_COUNT];
+    AvspRound1AnimationStateSpec content_avsp_round1_type36_class04_records[AVSP_ROUND1_TYPE36_CLASS04_PRESENTATION_COUNT];
+    AvspRound1Type36Class04Spec content_avsp_round1_type36_class04;
     AvspRound1AnimationStateSpec content_avsp_round1_class05_records[AVSP_ROUND1_CLASS05_PRESENTATION_COUNT];
     AvspRound1Class05Spec content_avsp_round1_class05;
     AvspRound1Class05MotionSpec content_avsp_round1_class05_motion;

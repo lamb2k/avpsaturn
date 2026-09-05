@@ -4193,6 +4193,22 @@ const AvspRound1ContentArchive avsp_round1_content_image
         { 97u, 21, 44, 14u, 1u },
     },
     {
+        { 1u, 0, 0x0009ac82UL, 0x0009b5a6UL, 0u, 0u },
+        { 1u, 0, 0x0009ac92UL, 0x0009b5b4UL, 0u, 0u },
+        { 2u, 0, 0x0009aca2UL, 0x0009b5c2UL, 0u, 0u },
+        { 2u, 0, 0x0009acb2UL, 0x0009b5d0UL, 0u, 0u },
+        { 1u, 0, 0x0009acc2UL, 0x0009b5deUL, 0u, 0u },
+        { 1u, 0, 0x0009acd2UL, 0x0009b5ecUL, 0u, 0u },
+        { 1u, 0, 0x0009ace2UL, 0x0009b5faUL, 0u, 0u },
+        { 1u, 0, 0x0009acf2UL, 0x0009b608UL, 0u, 0u },
+        { 1u, 0, 0x0009ad02UL, 0x0009b616UL, 0u, 0u },
+        { 1u, -32768, 0x0009ad12UL, 0x0009b616UL, 0u, 0u },
+    },
+    {
+        0x09AA90UL, 0x02F8DCUL, 0x0009AC82UL,
+        0x8380u, 0x0200u, 0x0400u, 0x0600u, 5, 86, 10u, 0x04, 36u, 0u
+    },
+    {
         { 4095u, -32768, 0x0006cc62UL, 0x0006ccd6UL, 1u, 1u },
         { 1u, 0, 0x0006cc8aUL, 0x0006cd0cUL, 0u, 0u },
         { 4095u, -32768, 0x0006cc9aUL, 0x0006cd1aUL, 0u, 0u },

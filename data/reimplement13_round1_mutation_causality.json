@@ -15,15 +15,320 @@
     "SURVIVED_MUTATION": 2,
     "VALID_BEHAVIORAL_REJECTION": 330
   },
-  "current_counts_with_external_whole_scene_controls": {
+  "current_counts_with_focused_program_controls": {
     "SURVIVED_MUTATION": 2,
-    "VALID_BEHAVIORAL_REJECTION": 332
+    "VALID_BEHAVIORAL_REJECTION": 342
   },
   "declared_equivalent_survivors": [
     "    effect->animation_timer = retained_animation_timer;\n    effect->animation_branch = retained_animation_branch;",
     "remainder * 65536L / denominator;"
   ],
   "environment_retry_incidents_recovered": 0,
+  "focused_program_controls": {
+    "type36_class04_complete_program": {
+      "counts": {
+        "VALID_BEHAVIORAL_REJECTION": 12
+      },
+      "coverage": "complete Coffee Shop source frames 2040..5566; every route-reachable type-36/class-0x04 allocation, state, animation and release",
+      "mutations": [
+        {
+          "assertion_evidence": "round1_entry_test documented exit 249; deterministic repeat matched",
+          "classification": "VALID_BEHAVIORAL_REJECTION",
+          "compile_returncode": 0,
+          "documented_exit_sites": [
+            {
+              "context": "scene_runtime.type36_class04_releases); return 249;",
+              "line": 5555,
+              "source_return": 249
+            },
+            {
+              "context": "scene_runtime.player.source_type36_class04_child); return 249;",
+              "line": 6096,
+              "source_return": 249
+            }
+          ],
+          "expected_pass": false,
+          "expected_runtime_returncode": 249,
+          "label": "class04-ground-allocation-writer",
+          "runtime_output": "covery=1 record=0012de78 index=4 animation=2/0 action_timer=0 hit_timer=0 health=56 rng=7a26 updates=330\nA180 transition frame=2402 active=1 state=0202/020a action=020a recovery=1 record=0012de88 index=5 animation=2/0 action_timer=0 hit_timer=0 health=56 rng=7a26 updates=332\nA180 transition frame=2404 active=1 state=0202/020a action=020a recovery=1 record=0012de98 index=6 animation=2/0 action_timer=0 hit_timer=0 health=56 rng=7a26 updates=334\nA180 transition frame=2406 active=1 state=0202/020a action=020a recovery=1 record=0012dea8 index=7 animation=2/0 action_timer=0 hit_timer=0 health=56 rng=7a26 updates=336\nA180 transition frame=2408 active=1 state=0202/020a action=020a recovery=1 record=0012deb8 index=8 animation=2/0 action_timer=0 hit_timer=0 health=56 rng=4bdf updates=338\nA180 transition frame=2410 active=1 state=0202/020a action=020a recovery=1 record=0012dec8 index=9 animation=2/0 action_timer=0 hit_timer=0 health=56 rng=e3c2 updates=340\nA180 transition frame=2412 active=1 state=0202/020a action=020a recovery=1 record=0012ded8 index=10 animation=8/-32768 action_timer=0 hit_timer=0 health=56 rng=e3c2 updates=342\nA180 transition frame=2413 active=1 state=0200/0000 action=0000 recovery=0 record=0012ded8 index=10 animation=8/-32768 action_timer=0 hit_timer=0 health=56 rng=e3c2 updates=343\nA180 transition frame=2414 active=1 state=0200/1600 action=1600 recovery=0 record=0012eafc index=0 animation=3/8 action_timer=0 hit_timer=0 health=56 rng=e3c2 updates=344\nA180 transition frame=2415 active=1 state=0600/0000 action=1600 recovery=0 record=0012eafc index=0 animation=3/8 action_timer=0 hit_timer=0 health=56 rng=026f updates=345\nA180 active edge frame=2416 active=0 state=0600/0000 action=1600 record=0012eafc health=56 living=10 progress=1\nclass04 focused witness frame=2254 active=0 class=00 state=0000 slot=00000000 position=0/0/0 facing=0 animation=00000000 assembly=00000000 timer=0 branch=0 selectors=0/0 allocations=0 init=0 steps=0 transitions=0 moves=0 releases=0\n",
+          "runtime_output_sha256": "4d64858adc28b2d5492a47ed6952e5038979fd96bcceb73b0c0fcc50545bb0be",
+          "runtime_returncode": 249,
+          "runtime_wrapper_returncode": 0
+        },
+        {
+          "assertion_evidence": "round1_entry_test documented exit 249; deterministic repeat matched",
+          "classification": "VALID_BEHAVIORAL_REJECTION",
+          "compile_returncode": 0,
+          "documented_exit_sites": [
+            {
+              "context": "scene_runtime.type36_class04_releases); return 249;",
+              "line": 5555,
+              "source_return": 249
+            },
+            {
+              "context": "scene_runtime.player.source_type36_class04_child); return 249;",
+              "line": 6096,
+              "source_return": 249
+            }
+          ],
+          "expected_pass": false,
+          "expected_runtime_returncode": 249,
+          "label": "class04-facing-derived-x-offset",
+          "runtime_output": "=1 record=0012de78 index=4 animation=2/0 action_timer=0 hit_timer=0 health=56 rng=7a26 updates=330\nA180 transition frame=2402 active=1 state=0202/020a action=020a recovery=1 record=0012de88 index=5 animation=2/0 action_timer=0 hit_timer=0 health=56 rng=7a26 updates=332\nA180 transition frame=2404 active=1 state=0202/020a action=020a recovery=1 record=0012de98 index=6 animation=2/0 action_timer=0 hit_timer=0 health=56 rng=7a26 updates=334\nA180 transition frame=2406 active=1 state=0202/020a action=020a recovery=1 record=0012dea8 index=7 animation=2/0 action_timer=0 hit_timer=0 health=56 rng=7a26 updates=336\nA180 transition frame=2408 active=1 state=0202/020a action=020a recovery=1 record=0012deb8 index=8 animation=2/0 action_timer=0 hit_timer=0 health=56 rng=4bdf updates=338\nA180 transition frame=2410 active=1 state=0202/020a action=020a recovery=1 record=0012dec8 index=9 animation=2/0 action_timer=0 hit_timer=0 health=56 rng=e3c2 updates=340\nA180 transition frame=2412 active=1 state=0202/020a action=020a recovery=1 record=0012ded8 index=10 animation=8/-32768 action_timer=0 hit_timer=0 health=56 rng=e3c2 updates=342\nA180 transition frame=2413 active=1 state=0200/0000 action=0000 recovery=0 record=0012ded8 index=10 animation=8/-32768 action_timer=0 hit_timer=0 health=56 rng=e3c2 updates=343\nA180 transition frame=2414 active=1 state=0200/1600 action=1600 recovery=0 record=0012eafc index=0 animation=3/8 action_timer=0 hit_timer=0 health=56 rng=e3c2 updates=344\nA180 transition frame=2415 active=1 state=0600/0000 action=1600 recovery=0 record=0012eafc index=0 animation=3/8 action_timer=0 hit_timer=0 health=56 rng=026f updates=345\nA180 active edge frame=2416 active=0 state=0600/0000 action=1600 record=0012eafc health=56 living=10 progress=1\nclass04 focused witness frame=2254 active=2 class=04 state=0200 slot=00ffe140 position=949/406/320 facing=0 animation=0009ac92 assembly=0009b5b4 timer=1 branch=0 selectors=0/0 allocations=1 init=1 steps=1 transitions=0 moves=0 releases=0\n",
+          "runtime_output_sha256": "4e2e3c50b30ffb5e35da80452e7d774e57dfbf64127492aa47d90d9483efc84b",
+          "runtime_returncode": 249,
+          "runtime_wrapper_returncode": 0
+        },
+        {
+          "assertion_evidence": "round1_entry_test documented exit 249; deterministic repeat matched",
+          "classification": "VALID_BEHAVIORAL_REJECTION",
+          "compile_returncode": 0,
+          "documented_exit_sites": [
+            {
+              "context": "scene_runtime.type36_class04_releases); return 249;",
+              "line": 5555,
+              "source_return": 249
+            },
+            {
+              "context": "scene_runtime.player.source_type36_class04_child); return 249;",
+              "line": 6096,
+              "source_return": 249
+            }
+          ],
+          "expected_pass": false,
+          "expected_runtime_returncode": 249,
+          "label": "class04-signed-y-offset",
+          "runtime_output": "=1 record=0012de78 index=4 animation=2/0 action_timer=0 hit_timer=0 health=56 rng=7a26 updates=330\nA180 transition frame=2402 active=1 state=0202/020a action=020a recovery=1 record=0012de88 index=5 animation=2/0 action_timer=0 hit_timer=0 health=56 rng=7a26 updates=332\nA180 transition frame=2404 active=1 state=0202/020a action=020a recovery=1 record=0012de98 index=6 animation=2/0 action_timer=0 hit_timer=0 health=56 rng=7a26 updates=334\nA180 transition frame=2406 active=1 state=0202/020a action=020a recovery=1 record=0012dea8 index=7 animation=2/0 action_timer=0 hit_timer=0 health=56 rng=7a26 updates=336\nA180 transition frame=2408 active=1 state=0202/020a action=020a recovery=1 record=0012deb8 index=8 animation=2/0 action_timer=0 hit_timer=0 health=56 rng=4bdf updates=338\nA180 transition frame=2410 active=1 state=0202/020a action=020a recovery=1 record=0012dec8 index=9 animation=2/0 action_timer=0 hit_timer=0 health=56 rng=e3c2 updates=340\nA180 transition frame=2412 active=1 state=0202/020a action=020a recovery=1 record=0012ded8 index=10 animation=8/-32768 action_timer=0 hit_timer=0 health=56 rng=e3c2 updates=342\nA180 transition frame=2413 active=1 state=0200/0000 action=0000 recovery=0 record=0012ded8 index=10 animation=8/-32768 action_timer=0 hit_timer=0 health=56 rng=e3c2 updates=343\nA180 transition frame=2414 active=1 state=0200/1600 action=1600 recovery=0 record=0012eafc index=0 animation=3/8 action_timer=0 hit_timer=0 health=56 rng=e3c2 updates=344\nA180 transition frame=2415 active=1 state=0600/0000 action=1600 recovery=0 record=0012eafc index=0 animation=3/8 action_timer=0 hit_timer=0 health=56 rng=026f updates=345\nA180 active edge frame=2416 active=0 state=0600/0000 action=1600 record=0012eafc health=56 living=10 progress=1\nclass04 focused witness frame=2254 active=2 class=04 state=0200 slot=00ffe140 position=939/234/320 facing=0 animation=0009ac92 assembly=0009b5b4 timer=1 branch=0 selectors=0/0 allocations=1 init=1 steps=1 transitions=0 moves=0 releases=0\n",
+          "runtime_output_sha256": "ca45edc796fa8565e7efe0141b46c1d176c4decf06eeca7ba547f5d4605a22cb",
+          "runtime_returncode": 249,
+          "runtime_wrapper_returncode": 0
+        },
+        {
+          "assertion_evidence": "round1_entry_test documented exit 249; deterministic repeat matched",
+          "classification": "VALID_BEHAVIORAL_REJECTION",
+          "compile_returncode": 0,
+          "documented_exit_sites": [
+            {
+              "context": "scene_runtime.type36_class04_releases); return 249;",
+              "line": 5555,
+              "source_return": 249
+            },
+            {
+              "context": "scene_runtime.player.source_type36_class04_child); return 249;",
+              "line": 6096,
+              "source_return": 249
+            }
+          ],
+          "expected_pass": false,
+          "expected_runtime_returncode": 249,
+          "label": "class04-parent-facing-copy",
+          "runtime_output": "=1 record=0012de78 index=4 animation=2/0 action_timer=0 hit_timer=0 health=56 rng=7a26 updates=330\nA180 transition frame=2402 active=1 state=0202/020a action=020a recovery=1 record=0012de88 index=5 animation=2/0 action_timer=0 hit_timer=0 health=56 rng=7a26 updates=332\nA180 transition frame=2404 active=1 state=0202/020a action=020a recovery=1 record=0012de98 index=6 animation=2/0 action_timer=0 hit_timer=0 health=56 rng=7a26 updates=334\nA180 transition frame=2406 active=1 state=0202/020a action=020a recovery=1 record=0012dea8 index=7 animation=2/0 action_timer=0 hit_timer=0 health=56 rng=7a26 updates=336\nA180 transition frame=2408 active=1 state=0202/020a action=020a recovery=1 record=0012deb8 index=8 animation=2/0 action_timer=0 hit_timer=0 health=56 rng=4bdf updates=338\nA180 transition frame=2410 active=1 state=0202/020a action=020a recovery=1 record=0012dec8 index=9 animation=2/0 action_timer=0 hit_timer=0 health=56 rng=e3c2 updates=340\nA180 transition frame=2412 active=1 state=0202/020a action=020a recovery=1 record=0012ded8 index=10 animation=8/-32768 action_timer=0 hit_timer=0 health=56 rng=e3c2 updates=342\nA180 transition frame=2413 active=1 state=0200/0000 action=0000 recovery=0 record=0012ded8 index=10 animation=8/-32768 action_timer=0 hit_timer=0 health=56 rng=e3c2 updates=343\nA180 transition frame=2414 active=1 state=0200/1600 action=1600 recovery=0 record=0012eafc index=0 animation=3/8 action_timer=0 hit_timer=0 health=56 rng=e3c2 updates=344\nA180 transition frame=2415 active=1 state=0600/0000 action=1600 recovery=0 record=0012eafc index=0 animation=3/8 action_timer=0 hit_timer=0 health=56 rng=026f updates=345\nA180 active edge frame=2416 active=0 state=0600/0000 action=1600 record=0012eafc health=56 living=10 progress=1\nclass04 focused witness frame=2254 active=2 class=04 state=0200 slot=00ffe140 position=939/406/320 facing=1 animation=0009ac92 assembly=0009b5b4 timer=1 branch=0 selectors=0/0 allocations=1 init=1 steps=1 transitions=0 moves=0 releases=0\n",
+          "runtime_output_sha256": "bf5943f93fe2d47a79be56dd4fe86018f0bb18216073a38892b08bbc867ed089",
+          "runtime_returncode": 249,
+          "runtime_wrapper_returncode": 0
+        },
+        {
+          "assertion_evidence": "round1_entry_test documented exit 114; deterministic repeat matched",
+          "classification": "VALID_BEHAVIORAL_REJECTION",
+          "compile_returncode": 0,
+          "documented_exit_sites": [
+            {
+              "context": "!avsp_round1_begin_first_entry(&reuse_runtime)) return 114;",
+              "line": 4641,
+              "source_return": 114
+            },
+            {
+              "context": "reused->animation_timer, reused->animation_branch); return 114;",
+              "line": 4671,
+              "source_return": 114
+            }
+          ],
+          "expected_pass": false,
+          "expected_runtime_returncode": 114,
+          "label": "class04-no-direct-rng",
+          "runtime_output": "\n__AVSP_RUNTIME_EXIT__=114\nCoffee Shop recurring presentation reuse failed frame=2572 active=1 class=1f state=0208/0400 animation=0012d51c assembly=0012f890 timer=6 branch=11\n",
+          "runtime_output_sha256": "4f04d3d862370d6de3dbca366111cbb053832398b85ddefbb5773d4465efb1ab",
+          "runtime_returncode": 114,
+          "runtime_wrapper_returncode": 0
+        },
+        {
+          "assertion_evidence": "round1_entry_test documented exit 249; deterministic repeat matched",
+          "classification": "VALID_BEHAVIORAL_REJECTION",
+          "compile_returncode": 0,
+          "documented_exit_sites": [
+            {
+              "context": "scene_runtime.type36_class04_releases); return 249;",
+              "line": 5555,
+              "source_return": 249
+            },
+            {
+              "context": "scene_runtime.player.source_type36_class04_child); return 249;",
+              "line": 6096,
+              "source_return": 249
+            }
+          ],
+          "expected_pass": false,
+          "expected_runtime_returncode": 249,
+          "label": "class04-global-movement-guard",
+          "runtime_output": "=1 record=0012de78 index=4 animation=2/0 action_timer=0 hit_timer=0 health=56 rng=7a26 updates=330\nA180 transition frame=2402 active=1 state=0202/020a action=020a recovery=1 record=0012de88 index=5 animation=2/0 action_timer=0 hit_timer=0 health=56 rng=7a26 updates=332\nA180 transition frame=2404 active=1 state=0202/020a action=020a recovery=1 record=0012de98 index=6 animation=2/0 action_timer=0 hit_timer=0 health=56 rng=7a26 updates=334\nA180 transition frame=2406 active=1 state=0202/020a action=020a recovery=1 record=0012dea8 index=7 animation=2/0 action_timer=0 hit_timer=0 health=56 rng=7a26 updates=336\nA180 transition frame=2408 active=1 state=0202/020a action=020a recovery=1 record=0012deb8 index=8 animation=2/0 action_timer=0 hit_timer=0 health=56 rng=4bdf updates=338\nA180 transition frame=2410 active=1 state=0202/020a action=020a recovery=1 record=0012dec8 index=9 animation=2/0 action_timer=0 hit_timer=0 health=56 rng=e3c2 updates=340\nA180 transition frame=2412 active=1 state=0202/020a action=020a recovery=1 record=0012ded8 index=10 animation=8/-32768 action_timer=0 hit_timer=0 health=56 rng=e3c2 updates=342\nA180 transition frame=2413 active=1 state=0200/0000 action=0000 recovery=0 record=0012ded8 index=10 animation=8/-32768 action_timer=0 hit_timer=0 health=56 rng=e3c2 updates=343\nA180 transition frame=2414 active=1 state=0200/1600 action=1600 recovery=0 record=0012eafc index=0 animation=3/8 action_timer=0 hit_timer=0 health=56 rng=e3c2 updates=344\nA180 transition frame=2415 active=1 state=0600/0000 action=1600 recovery=0 record=0012eafc index=0 animation=3/8 action_timer=0 hit_timer=0 health=56 rng=026f updates=345\nA180 active edge frame=2416 active=0 state=0600/0000 action=1600 record=0012eafc health=56 living=10 progress=1\nclass04 focused witness frame=2255 active=2 class=04 state=0200 slot=00ffe140 position=939/406/320 facing=0 animation=0009aca2 assembly=0009b5c2 timer=2 branch=0 selectors=0/0 allocations=1 init=1 steps=2 transitions=0 moves=1 releases=0\n",
+          "runtime_output_sha256": "fd7fd1138ac72858713cd7c4acddd476eaf039661a3260cc6f2b5c13ba0fff4e",
+          "runtime_returncode": 249,
+          "runtime_wrapper_returncode": 0
+        },
+        {
+          "assertion_evidence": "round1_entry_test documented exit 249; deterministic repeat matched",
+          "classification": "VALID_BEHAVIORAL_REJECTION",
+          "compile_returncode": 0,
+          "documented_exit_sites": [
+            {
+              "context": "scene_runtime.type36_class04_releases); return 249;",
+              "line": 5555,
+              "source_return": 249
+            },
+            {
+              "context": "scene_runtime.player.source_type36_class04_child); return 249;",
+              "line": 6096,
+              "source_return": 249
+            }
+          ],
+          "expected_pass": false,
+          "expected_runtime_returncode": 249,
+          "label": "class04-same-visit-release",
+          "runtime_output": "ord=0012de78 index=4 animation=2/0 action_timer=0 hit_timer=0 health=56 rng=7a26 updates=330\nA180 transition frame=2402 active=1 state=0202/020a action=020a recovery=1 record=0012de88 index=5 animation=2/0 action_timer=0 hit_timer=0 health=56 rng=7a26 updates=332\nA180 transition frame=2404 active=1 state=0202/020a action=020a recovery=1 record=0012de98 index=6 animation=2/0 action_timer=0 hit_timer=0 health=56 rng=7a26 updates=334\nA180 transition frame=2406 active=1 state=0202/020a action=020a recovery=1 record=0012dea8 index=7 animation=2/0 action_timer=0 hit_timer=0 health=56 rng=7a26 updates=336\nA180 transition frame=2408 active=1 state=0202/020a action=020a recovery=1 record=0012deb8 index=8 animation=2/0 action_timer=0 hit_timer=0 health=56 rng=4bdf updates=338\nA180 transition frame=2410 active=1 state=0202/020a action=020a recovery=1 record=0012dec8 index=9 animation=2/0 action_timer=0 hit_timer=0 health=56 rng=e3c2 updates=340\nA180 transition frame=2412 active=1 state=0202/020a action=020a recovery=1 record=0012ded8 index=10 animation=8/-32768 action_timer=0 hit_timer=0 health=56 rng=e3c2 updates=342\nA180 transition frame=2413 active=1 state=0200/0000 action=0000 recovery=0 record=0012ded8 index=10 animation=8/-32768 action_timer=0 hit_timer=0 health=56 rng=e3c2 updates=343\nA180 transition frame=2414 active=1 state=0200/1600 action=1600 recovery=0 record=0012eafc index=0 animation=3/8 action_timer=0 hit_timer=0 health=56 rng=e3c2 updates=344\nA180 transition frame=2415 active=1 state=0600/0000 action=1600 recovery=0 record=0012eafc index=0 animation=3/8 action_timer=0 hit_timer=0 health=56 rng=026f updates=345\nA180 active edge frame=2416 active=0 state=0600/0000 action=1600 record=0012eafc health=56 living=10 progress=1\nclass04 focused witness frame=2268 active=2 class=04 state=0600 slot=00ffe140 position=942/406/320 facing=0 animation=0009ad12 assembly=0009b616 timer=1 branch=-32768 selectors=0/0 allocations=1 init=1 steps=11 transitions=2 moves=1 releases=0\n",
+          "runtime_output_sha256": "02c3763cd0522751729d2174918cfc1937df69ff3c56975683a09adc0b37c584",
+          "runtime_returncode": 249,
+          "runtime_wrapper_returncode": 0
+        },
+        {
+          "assertion_evidence": "round1_entry_test documented exit 249; deterministic repeat matched",
+          "classification": "VALID_BEHAVIORAL_REJECTION",
+          "compile_returncode": 0,
+          "documented_exit_sites": [
+            {
+              "context": "scene_runtime.type36_class04_releases); return 249;",
+              "line": 5555,
+              "source_return": 249
+            },
+            {
+              "context": "scene_runtime.player.source_type36_class04_child); return 249;",
+              "line": 6096,
+              "source_return": 249
+            }
+          ],
+          "expected_pass": false,
+          "expected_runtime_returncode": 249,
+          "label": "class04-backlink-clear",
+          "runtime_output": "008 hit=1/1 reaction=2 entries=5 completions=3 collision=5 damage=5 pending=15 actor=00ff9dc0 active=1 type=12 class=1f state=0208/0c02 x=1288 z=310 facing=1 anim=0012da0c attack=4 field01=1 hitstop=10 guard=1 latch=1 xvel=-65536 yvel=-826368 recovery=14 projectile_pending=0\nclass1f_post_action0c_probe frame=4006 slot=9dc0 state=0208/0c02 xfp=05085a00 yfp=01368800 z=310 facing=1 anim=0012da0c timer=1 branch=0 attack=4 plan=14 cursor=0 selector=12 phase=2 action_timer=0 rng=2bc0\nclass1f_post_action0c_probe frame=4006 slot=a000 state=0200/1600 xfp=04030c00 yfp=01499300 z=329 facing=1 anim=0012ec14 timer=2 branch=8 attack=0 plan=0 cursor=0 selector=0 phase=0 action_timer=0 rng=2bc0\nplayer_hit_scene_probe frame=4007 player=0202/0200 x=1360 z=319 facing=1 anim=0015ef38 timer=8 health=30 hurt=0 input=0008 hit=1/2 reaction=2 entries=5 completions=3 collision=5 damage=5 pending=0 actor=00ff9dc0 active=1 type=12 class=1f state=0208/0c02 x=1288 z=310 facing=1 anim=0012da0c attack=4 field01=1 hitstop=9 guard=1 latch=1 xvel=-65536 yvel=-826368 recovery=14 projectile_pending=0\nplayer_hit_scene_probe frame=4032 player=0200/0e00 x=1360 z=319 facing=1 anim=0015f96c timer=1 health=30 hurt=0 input=0028 hit=0/0 reaction=2 entries=5 completions=3 collision=5 damage=5 pending=0 actor=00ff9dc0 active=1 type=12 class=1f state=0208/0c02 x=1288 z=310 facing=1 anim=0012da2c attack=0 field01=1 hitstop=0 guard=1 latch=0 xvel=-65536 yvel=-826368 recovery=14 projectile_pending=0\nplayer_hit_scene_probe frame=4052 player=0200/0c02 x=1360 z=319 facing=1 anim=0015e540 timer=2 health=30 hurt=1 input=0018 hit=0/0 reaction=2 entries=5 completions=3 collision=5 damage=5 pending=0 actor=00ff9dc0 active=1 type=12 class=1f state=0202/0202 x=1279 z=310 facing=1 anim=0012dd78 attack=0 field01=1 hitstop=0 guard=1 latch=0 xvel=-196608 yvel=204800 recovery=4 projectile_pending=0\nclass04 focused totals requests=15 allocations=15 failures=0 init=15 steps=165 transitions=30 moves=1 rng=0 releases=15 backlink=e240\n",
+          "runtime_output_sha256": "1a3d5bed2b531348af89152dd74c0183f5daa61fa79863e1e771c9ddbd0cfdf2",
+          "runtime_returncode": 249,
+          "runtime_wrapper_returncode": 0
+        },
+        {
+          "assertion_evidence": "round1_entry_test documented exit 94; deterministic repeat matched",
+          "classification": "VALID_BEHAVIORAL_REJECTION",
+          "compile_returncode": 0,
+          "documented_exit_sites": [
+            {
+              "context": "air_runtime.player_air_weapon_effect_x_delta); return 94;",
+              "line": 1146,
+              "source_return": 94
+            },
+            {
+              "context": "scene_runtime.rng_seed); return 94;",
+              "line": 5485,
+              "source_return": 94
+            }
+          ],
+          "expected_pass": false,
+          "expected_runtime_returncode": 94,
+          "label": "generated-class04-signed-offset",
+          "runtime_output": "\n__AVSP_RUNTIME_EXIT__=94\nair start phase=0406 action=0406 coll=9 selector=18 anim=0015e9d8 assembly=00161dfc resource=64 recharge=12 entries=0 alloc=0 debit=0 pactive=0 class=0 pstate=0 angle=0 attack=00000000 collision=0 xdelta=0\n",
+          "runtime_output_sha256": "52b55d0743b14ee23ff3e2913079404398c03658cfc939ce190a3cce0d06f56c",
+          "runtime_returncode": 94,
+          "runtime_wrapper_returncode": 0
+        },
+        {
+          "assertion_evidence": "round1_entry_test documented exit 94; deterministic repeat matched",
+          "classification": "VALID_BEHAVIORAL_REJECTION",
+          "compile_returncode": 0,
+          "documented_exit_sites": [
+            {
+              "context": "air_runtime.player_air_weapon_effect_x_delta); return 94;",
+              "line": 1146,
+              "source_return": 94
+            },
+            {
+              "context": "scene_runtime.rng_seed); return 94;",
+              "line": 5485,
+              "source_return": 94
+            }
+          ],
+          "expected_pass": false,
+          "expected_runtime_returncode": 94,
+          "label": "generated-class04-first-assembly",
+          "runtime_output": "\n__AVSP_RUNTIME_EXIT__=94\nair start phase=0406 action=0406 coll=9 selector=18 anim=0015e9d8 assembly=00161dfc resource=64 recharge=12 entries=0 alloc=0 debit=0 pactive=0 class=0 pstate=0 angle=0 attack=00000000 collision=0 xdelta=0\n",
+          "runtime_output_sha256": "52b55d0743b14ee23ff3e2913079404398c03658cfc939ce190a3cce0d06f56c",
+          "runtime_returncode": 94,
+          "runtime_wrapper_returncode": 0
+        },
+        {
+          "assertion_evidence": "round1_entry_test documented exit 94; deterministic repeat matched",
+          "classification": "VALID_BEHAVIORAL_REJECTION",
+          "compile_returncode": 0,
+          "documented_exit_sites": [
+            {
+              "context": "air_runtime.player_air_weapon_effect_x_delta); return 94;",
+              "line": 1146,
+              "source_return": 94
+            },
+            {
+              "context": "scene_runtime.rng_seed); return 94;",
+              "line": 5485,
+              "source_return": 94
+            }
+          ],
+          "expected_pass": false,
+          "expected_runtime_returncode": 94,
+          "label": "generated-class04-first-selector",
+          "runtime_output": "\n__AVSP_RUNTIME_EXIT__=94\nair start phase=0406 action=0406 coll=9 selector=18 anim=0015e9d8 assembly=00161dfc resource=64 recharge=12 entries=0 alloc=0 debit=0 pactive=0 class=0 pstate=0 angle=0 attack=00000000 collision=0 xdelta=0\n",
+          "runtime_output_sha256": "52b55d0743b14ee23ff3e2913079404398c03658cfc939ce190a3cce0d06f56c",
+          "runtime_returncode": 94,
+          "runtime_wrapper_returncode": 0
+        },
+        {
+          "assertion_evidence": "round1_entry_test documented exit 94; deterministic repeat matched",
+          "classification": "VALID_BEHAVIORAL_REJECTION",
+          "compile_returncode": 0,
+          "documented_exit_sites": [
+            {
+              "context": "air_runtime.player_air_weapon_effect_x_delta); return 94;",
+              "line": 1146,
+              "source_return": 94
+            },
+            {
+              "context": "scene_runtime.rng_seed); return 94;",
+              "line": 5485,
+              "source_return": 94
+            }
+          ],
+          "expected_pass": false,
+          "expected_runtime_returncode": 94,
+          "label": "generated-class04-terminal-branch",
+          "runtime_output": "\n__AVSP_RUNTIME_EXIT__=94\nair start phase=0406 action=0406 coll=9 selector=18 anim=0015e9d8 assembly=00161dfc resource=64 recharge=12 entries=0 alloc=0 debit=0 pactive=0 class=0 pstate=0 angle=0 attack=00000000 collision=0 xdelta=0\n",
+          "runtime_output_sha256": "52b55d0743b14ee23ff3e2913079404398c03658cfc939ce190a3cce0d06f56c",
+          "runtime_returncode": 94,
+          "runtime_wrapper_returncode": 0
+        }
+      ]
+    }
+  },
+  "harness_self_test": {
+    "behavioral_rejection_credit_requires_runtime_execution": true,
+    "known_semantic_mutant": "VALID_BEHAVIORAL_REJECTION",
+    "missing_launcher": "ENVIRONMENT_FAILURE",
+    "syntax_error": "INVALID_MUTATION",
+    "unchanged_equivalent_mutant": "SURVIVED_MUTATION"
+  },
   "historical_totals": {
     "generated_fixture_mutations_pre_causal_audit": 82,
     "qualification": "historical totals are retained as reported, not presumed causally valid; the current enumerated case count is authoritative",
@@ -252,12 +557,12 @@
       "documented_exit_sites": [
         {
           "context": "tail_actor != 0 ? tail_actor->z : 0); return 136;",
-          "line": 5613,
+          "line": 5697,
           "source_return": 136
         },
         {
           "context": "if (!avsp_round1_step_coffee_exit_display(&scene_runtime)) return 136;",
-          "line": 5985,
+          "line": 6069,
           "source_return": 136
         }
       ],
@@ -306,7 +611,7 @@
         },
         {
           "context": "!avsp_round1_step_first_entry(&scene_runtime)) return 110;",
-          "line": 5190,
+          "line": 5202,
           "source_return": 110
         }
       ],
@@ -330,7 +635,7 @@
         },
         {
           "context": "scene_runtime.entry_controller.substate); return 135;",
-          "line": 5666,
+          "line": 5750,
           "source_return": 135
         }
       ],
@@ -349,7 +654,7 @@
       "documented_exit_sites": [
         {
           "context": "scene_runtime.class1f_audio_events); return 129;",
-          "line": 5686,
+          "line": 5770,
           "source_return": 129
         }
       ],
@@ -373,7 +678,7 @@
         },
         {
           "context": "scene_runtime.rng_seed); return 94;",
-          "line": 5472,
+          "line": 5484,
           "source_return": 94
         }
       ],
@@ -392,7 +697,7 @@
       "documented_exit_sites": [
         {
           "context": "scene_runtime.player_hit_interaction_input_pending); return 127;",
-          "line": 5340,
+          "line": 5352,
           "source_return": 127
         }
       ],
@@ -416,7 +721,7 @@
         },
         {
           "context": "scene_runtime.rng_seed); return 94;",
-          "line": 5472,
+          "line": 5484,
           "source_return": 94
         }
       ],
@@ -440,7 +745,7 @@
         },
         {
           "context": "attack_actor->animation_record : 0UL); return 128;",
-          "line": 5870,
+          "line": 5954,
           "source_return": 128
         }
       ],
@@ -459,7 +764,7 @@
       "documented_exit_sites": [
         {
           "context": "scene_runtime.class1f_audio_events); return 129;",
-          "line": 5686,
+          "line": 5770,
           "source_return": 129
         }
       ],
@@ -478,7 +783,7 @@
       "documented_exit_sites": [
         {
           "context": "scene_runtime.player_hit_interaction_input_pending); return 127;",
-          "line": 5340,
+          "line": 5352,
           "source_return": 127
         }
       ],
@@ -541,7 +846,7 @@
         },
         {
           "context": "reaction_target != 0 ? reaction_target->facing : 0u); return 124;",
-          "line": 5718,
+          "line": 5802,
           "source_return": 124
         }
       ],
@@ -570,7 +875,7 @@
         },
         {
           "context": "scene_runtime.player.z); return 131;",
-          "line": 5349,
+          "line": 5361,
           "source_return": 131
         }
       ],
@@ -614,7 +919,7 @@
         },
         {
           "context": "reaction_target != 0 ? reaction_target->facing : 0u); return 124;",
-          "line": 5718,
+          "line": 5802,
           "source_return": 124
         }
       ],
@@ -658,7 +963,7 @@
         },
         {
           "context": "reaction_target != 0 ? reaction_target->facing : 0u); return 124;",
-          "line": 5718,
+          "line": 5802,
           "source_return": 124
         }
       ],
@@ -697,7 +1002,7 @@
         },
         {
           "context": "timeout_actor->animation_record : 0UL); return 125;",
-          "line": 5764,
+          "line": 5848,
           "source_return": 125
         }
       ],
@@ -726,7 +1031,7 @@
         },
         {
           "context": "scene_runtime.player.z); return 131;",
-          "line": 5349,
+          "line": 5361,
           "source_return": 131
         }
       ],
@@ -765,7 +1070,7 @@
         },
         {
           "context": "timeout_actor->animation_record : 0UL); return 125;",
-          "line": 5764,
+          "line": 5848,
           "source_return": 125
         }
       ],
@@ -789,7 +1094,7 @@
         },
         {
           "context": "scene_runtime.rng_seed); return 94;",
-          "line": 5472,
+          "line": 5484,
           "source_return": 94
         }
       ],
@@ -808,7 +1113,7 @@
       "documented_exit_sites": [
         {
           "context": "scene_runtime.player_hit_invulnerability); return 123;",
-          "line": 5945,
+          "line": 6029,
           "source_return": 123
         }
       ],
@@ -857,7 +1162,7 @@
         },
         {
           "context": "!avsp_round1_step_first_entry(&scene_runtime)) return 110;",
-          "line": 5190,
+          "line": 5202,
           "source_return": 110
         }
       ],
@@ -896,7 +1201,7 @@
         },
         {
           "context": "timeout_actor->animation_record : 0UL); return 125;",
-          "line": 5764,
+          "line": 5848,
           "source_return": 125
         }
       ],
@@ -940,7 +1245,7 @@
         },
         {
           "context": "reaction_target != 0 ? reaction_target->facing : 0u); return 124;",
-          "line": 5718,
+          "line": 5802,
           "source_return": 124
         }
       ],
@@ -2061,7 +2366,7 @@
         },
         {
           "context": "scene_runtime.player.attack_selector != 0u)) return 118;",
-          "line": 5953,
+          "line": 6037,
           "source_return": 118
         }
       ],
@@ -2119,7 +2424,7 @@
         },
         {
           "context": "timeout_actor->animation_record : 0UL); return 125;",
-          "line": 5764,
+          "line": 5848,
           "source_return": 125
         }
       ],
@@ -2143,7 +2448,7 @@
         },
         {
           "context": "scene_runtime.rng_seed); return 94;",
-          "line": 5472,
+          "line": 5484,
           "source_return": 94
         }
       ],
@@ -2167,7 +2472,7 @@
         },
         {
           "context": "scene_runtime.rng_seed); return 94;",
-          "line": 5472,
+          "line": 5484,
           "source_return": 94
         }
       ],
@@ -2210,7 +2515,7 @@
         },
         {
           "context": "scene_runtime.rng_seed); return 94;",
-          "line": 5472,
+          "line": 5484,
           "source_return": 94
         }
       ],
@@ -2591,7 +2896,7 @@
         },
         {
           "context": "scene_runtime.first_encounter.ko_events); return 95;",
-          "line": 6012,
+          "line": 6123,
           "source_return": 95
         }
       ],
@@ -3499,7 +3804,7 @@
         },
         {
           "context": "!avsp_round1_step_first_entry(&scene_runtime)) return 110;",
-          "line": 5190,
+          "line": 5202,
           "source_return": 110
         }
       ],
@@ -4192,7 +4497,7 @@
         },
         {
           "context": "scene_runtime.rng_seed); return 94;",
-          "line": 5472,
+          "line": 5484,
           "source_return": 94
         }
       ],
@@ -4216,7 +4521,7 @@
         },
         {
           "context": "scene_runtime.rng_seed); return 94;",
-          "line": 5472,
+          "line": 5484,
           "source_return": 94
         }
       ],
@@ -4240,7 +4545,7 @@
         },
         {
           "context": "scene_runtime.rng_seed); return 94;",
-          "line": 5472,
+          "line": 5484,
           "source_return": 94
         }
       ],
@@ -4756,7 +5061,7 @@
         },
         {
           "context": "scene_runtime.rng_seed); return 94;",
-          "line": 5472,
+          "line": 5484,
           "source_return": 94
         }
       ],
@@ -4853,7 +5158,7 @@
         },
         {
           "context": "interrupted_actor->facing : 0u); return 126;",
-          "line": 5564,
+          "line": 5648,
           "source_return": 126
         }
       ],
@@ -4877,7 +5182,7 @@
         },
         {
           "context": "scene_runtime.entry_controller.substate); return 135;",
-          "line": 5666,
+          "line": 5750,
           "source_return": 135
         }
       ],
@@ -4901,7 +5206,7 @@
         },
         {
           "context": "scene_runtime.entry_controller.substate); return 135;",
-          "line": 5666,
+          "line": 5750,
           "source_return": 135
         }
       ],
@@ -4925,7 +5230,7 @@
         },
         {
           "context": "scene_runtime.entry_controller.substate); return 135;",
-          "line": 5666,
+          "line": 5750,
           "source_return": 135
         }
       ],
@@ -5721,7 +6026,7 @@
         },
         {
           "context": "scene_runtime.rng_seed); return 94;",
-          "line": 5472,
+          "line": 5484,
           "source_return": 94
         }
       ],
@@ -5859,7 +6164,7 @@
         },
         {
           "context": "scene_runtime.type16_spawn_requests); return 108;",
-          "line": 6019,
+          "line": 6130,
           "source_return": 108
         }
       ],
@@ -5916,7 +6221,7 @@
       "documented_exit_sites": [
         {
           "context": "scene_runtime.player_hit_invulnerability); return 123;",
-          "line": 5945,
+          "line": 6029,
           "source_return": 123
         }
       ],
@@ -6004,7 +6309,7 @@
       "documented_exit_sites": [
         {
           "context": "scene_runtime.player.z); return 132;",
-          "line": 5358,
+          "line": 5370,
           "source_return": 132
         }
       ],
@@ -6023,7 +6328,7 @@
       "documented_exit_sites": [
         {
           "context": "scene_runtime.player.z); return 132;",
-          "line": 5358,
+          "line": 5370,
           "source_return": 132
         }
       ],
@@ -6047,7 +6352,7 @@
         },
         {
           "context": "scene_runtime.type16_spawn_requests); return 108;",
-          "line": 6019,
+          "line": 6130,
           "source_return": 108
         }
       ],
@@ -6066,7 +6371,7 @@
       "documented_exit_sites": [
         {
           "context": "scene_runtime.tail_canary); return 93;",
-          "line": 5315,
+          "line": 5327,
           "source_return": 93
         }
       ],
@@ -6085,7 +6390,7 @@
       "documented_exit_sites": [
         {
           "context": "scene_runtime.player.source_y_fp); return 133;",
-          "line": 5368,
+          "line": 5380,
           "source_return": 133
         }
       ],
@@ -6428,7 +6733,7 @@
         },
         {
           "context": "!avsp_round1_step_first_entry(&scene_runtime)) return 110;",
-          "line": 5190,
+          "line": 5202,
           "source_return": 110
         }
       ],
@@ -6477,7 +6782,7 @@
         },
         {
           "context": "!avsp_round1_step_first_entry(&scene_runtime)) return 110;",
-          "line": 5190,
+          "line": 5202,
           "source_return": 110
         }
       ],
@@ -6526,7 +6831,7 @@
         },
         {
           "context": "!avsp_round1_step_first_entry(&scene_runtime)) return 110;",
-          "line": 5190,
+          "line": 5202,
           "source_return": 110
         }
       ],
@@ -6575,7 +6880,7 @@
         },
         {
           "context": "!avsp_round1_step_first_entry(&scene_runtime)) return 110;",
-          "line": 5190,
+          "line": 5202,
           "source_return": 110
         }
       ],
@@ -6683,7 +6988,7 @@
         },
         {
           "context": "timeout_actor->animation_record : 0UL); return 125;",
-          "line": 5764,
+          "line": 5848,
           "source_return": 125
         }
       ],
@@ -7160,7 +7465,7 @@
         },
         {
           "context": "scene_runtime.player.attack_selector != 0u)) return 118;",
-          "line": 5953,
+          "line": 6037,
           "source_return": 118
         }
       ],
@@ -7189,7 +7494,7 @@
         },
         {
           "context": "scene_runtime.player.attack_selector != 0u)) return 118;",
-          "line": 5953,
+          "line": 6037,
           "source_return": 118
         }
       ],
@@ -7208,7 +7513,7 @@
       "documented_exit_sites": [
         {
           "context": "4093u)) return 119;",
-          "line": 5962,
+          "line": 6046,
           "source_return": 119
         }
       ],
@@ -7246,7 +7551,7 @@
       "documented_exit_sites": [
         {
           "context": "scene_runtime.player.animation_branch, source_updates); return 120;",
-          "line": 5973,
+          "line": 6057,
           "source_return": 120
         }
       ],
@@ -7265,7 +7570,7 @@
       "documented_exit_sites": [
         {
           "context": "4094u)) return 121;",
-          "line": 5983,
+          "line": 6067,
           "source_return": 121
         }
       ],
@@ -7284,7 +7589,7 @@
       "documented_exit_sites": [
         {
           "context": "4094u)) return 121;",
-          "line": 5983,
+          "line": 6067,
           "source_return": 121
         }
       ],
@@ -7313,7 +7618,7 @@
         },
         {
           "context": "scene_runtime.player.attack_selector != 0u)) return 118;",
-          "line": 5953,
+          "line": 6037,
           "source_return": 118
         }
       ],
@@ -7608,7 +7913,7 @@
       "documented_exit_sites": [
         {
           "context": "scene_runtime.player.source_y_fp); return 133;",
-          "line": 5368,
+          "line": 5380,
           "source_return": 133
         }
       ],
@@ -8094,7 +8399,7 @@
       "documented_exit_sites": [
         {
           "context": "scene_runtime.player_hit_invulnerability); return 123;",
-          "line": 5945,
+          "line": 6029,
           "source_return": 123
         }
       ],
@@ -8261,7 +8566,7 @@
         },
         {
           "context": "scene_runtime.player.attack_selector != 0u)) return 118;",
-          "line": 5953,
+          "line": 6037,
           "source_return": 118
         }
       ],
@@ -8300,7 +8605,7 @@
         },
         {
           "context": "timeout_actor->animation_record : 0UL); return 125;",
-          "line": 5764,
+          "line": 5848,
           "source_return": 125
         }
       ],
@@ -8329,7 +8634,7 @@
         },
         {
           "context": "scene_runtime.player.z); return 131;",
-          "line": 5349,
+          "line": 5361,
           "source_return": 131
         }
       ],
@@ -8368,7 +8673,7 @@
         },
         {
           "context": "timeout_actor->animation_record : 0UL); return 125;",
-          "line": 5764,
+          "line": 5848,
           "source_return": 125
         }
       ],
@@ -8407,7 +8712,7 @@
         },
         {
           "context": "timeout_actor->animation_record : 0UL); return 125;",
-          "line": 5764,
+          "line": 5848,
           "source_return": 125
         }
       ],
@@ -8426,7 +8731,7 @@
       "documented_exit_sites": [
         {
           "context": "scene_runtime.player_hit_invulnerability); return 123;",
-          "line": 5945,
+          "line": 6029,
           "source_return": 123
         }
       ],
@@ -8455,7 +8760,7 @@
         },
         {
           "context": "scene_runtime.player.attack_selector != 0u)) return 118;",
-          "line": 5953,
+          "line": 6037,
           "source_return": 118
         }
       ],
@@ -8484,15 +8789,15 @@
         },
         {
           "context": "scene_runtime.player.attack_selector != 0u)) return 118;",
-          "line": 5953,
+          "line": 6037,
           "source_return": 118
         }
       ],
       "expected_pass": false,
       "expected_runtime_returncode": 118,
       "label": "avsp_round1_player_weapon.parent_allocation_tick +\n                    avsp_round1_player_weapon.\n                        action_dispatch_delay_updates",
-      "runtime_output": "\n__AVSP_RUNTIME_EXIT__=118\nButton1 action entry mismatch active=1 tick=2 action=0c02 substate=0c02 animation=0015e594/0015e594 assembly=0016179a/0016179a timer=2/2 branch=0/0 selectors=1/1:0/0 entries=1 attempts=1 allocations=1 debits=0 resource=64 recharge=12 player_state=0 interruptions=0 position=732/272 expected=732/272\n",
-      "runtime_output_sha256": "4318fd0ae0dfc59047edf800b3ebc231ee96217bff4cbe8df8aab694354ef063",
+      "runtime_output": "\n__AVSP_RUNTIME_EXIT__=118\nButton1 action entry mismatch active=1 tick=1 action=0c00 substate=0c00 animation=0015f208/0015e594 assembly=00160a02/0016179a timer=4/2 branch=0/0 selectors=17/1:0/0 entries=1 attempts=1 allocations=1 debits=0 resource=64 recharge=12 player_state=0 interruptions=0 position=732/272 expected=732/272\n",
+      "runtime_output_sha256": "94c22237035f04b0267517d64ebfd05f35d99ddb59cb64af505b2a2ba87ccb15",
       "runtime_returncode": 118,
       "runtime_wrapper_returncode": 0
     },
@@ -8532,7 +8837,7 @@
         },
         {
           "context": "scene_runtime.player.attack_selector != 0u)) return 118;",
-          "line": 5953,
+          "line": 6037,
           "source_return": 118
         }
       ],
@@ -8659,7 +8964,7 @@
         },
         {
           "context": "reaction_target != 0 ? reaction_target->facing : 0u); return 124;",
-          "line": 5718,
+          "line": 5802,
           "source_return": 124
         }
       ],
@@ -8678,7 +8983,7 @@
       "documented_exit_sites": [
         {
           "context": "scene_runtime.player_hit_invulnerability); return 123;",
-          "line": 5945,
+          "line": 6029,
           "source_return": 123
         }
       ],
@@ -8697,7 +9002,7 @@
       "documented_exit_sites": [
         {
           "context": "scene_runtime.player_hit_invulnerability); return 123;",
-          "line": 5947,
+          "line": 6031,
           "source_return": 123
         }
       ],
@@ -8716,7 +9021,7 @@
       "documented_exit_sites": [
         {
           "context": "scene_runtime.tail_canary); return 93;",
-          "line": 5317,
+          "line": 5329,
           "source_return": 93
         }
       ],
@@ -12019,26 +12324,5 @@
     "compiler": "Ubuntu-24.04 gcc -std=c90 -pedantic -Wall -Wextra -Werror",
     "runtime_rejection_repeat_required": true,
     "runtime_timeout_seconds": 30
-  },
-  "whole_scene_control_qualification": "These two controls compile and execute the complete scene outside test_entry.py; they supplement rather than rewrite its enumerated host-mutation count.",
-  "whole_scene_controls": [
-    {
-      "assertion_evidence": "complete-scene comparator raw frame-5506 differential",
-      "classification": "VALID_BEHAVIORAL_REJECTION",
-      "compile_and_link_success": true,
-      "expected_runtime_returncode": 0,
-      "label": "class00-ballistic-apply-mask",
-      "runtime_returncode": 0,
-      "source_program_coverage": "type28/class0x00 scheduler-phase projection"
-    },
-    {
-      "assertion_evidence": "complete-scene comparator raw frame-5461 differential",
-      "classification": "VALID_BEHAVIORAL_REJECTION",
-      "compile_and_link_success": true,
-      "expected_runtime_returncode": 0,
-      "label": "class00-batched-player-before-pools",
-      "runtime_returncode": 0,
-      "source_program_coverage": "type28/class0x00 scheduler-phase projection"
-    }
-  ]
+  }
 }

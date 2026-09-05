@@ -12,7 +12,7 @@ from pathlib import Path
 
 ROOT = Path(__file__).resolve().parents[3]
 SPEC = ROOT / "data/spec02_round1_executable_contract.json"
-EXPECTED = "a8c5913f90db7f476155a81d433b200d221e13d45e4ed1a58a6ee0e0e064937c"
+EXPECTED = "b784f11da55207e2ac26577a54e2f354cf4c23306794cf1ad77ec300ad1f4557"
 assert hashlib.sha256(SPEC.read_bytes()).hexdigest() == EXPECTED
 assert json.loads(SPEC.read_text())["status"] == "ACCEPTED"
 source = (ROOT / "src/port_v2/gameplay/round1/round1.c").read_text()
@@ -337,6 +337,32 @@ def run(body, header_body, passes, label="baseline", player_body=player_source,
               f"(exit {runtime_returncode})", flush=True)
         return record
 
+
+def record_focused_program_controls(name, coverage):
+    if not MUTATION_REPORT.exists():
+        raise AssertionError("focused controls require the existing full report")
+    report = json.loads(MUTATION_REPORT.read_text(encoding="ascii"))
+    controls = [item for item in mutation_results
+                if not item["expected_pass"]]
+    counts = {}
+    for item in controls:
+        classification = item["classification"]
+        counts[classification] = counts.get(classification, 0) + 1
+    report.setdefault("focused_program_controls", {})[name] = {
+        "coverage": coverage,
+        "counts": counts,
+        "mutations": controls,
+    }
+    combined = dict(report.get("current_counts", {}))
+    for program in report["focused_program_controls"].values():
+        for classification, count in program["counts"].items():
+            combined[classification] = combined.get(classification, 0) + count
+    report["current_counts_with_focused_program_controls"] = combined
+    MUTATION_REPORT.write_text(
+        json.dumps(report, indent=2, sort_keys=True) + "\n",
+        encoding="ascii", newline="\n")
+
+
 jump_stop_marker = "    {\n        AvspRound1Runtime contextual = runtime;"
 assert jump_stop_marker in test_source
 jump_test_body = test_source.replace(
@@ -389,6 +415,8 @@ class0a_checkpoint_body = (
     "#define AVSP_CLASS0A_FOCUSED_TEST 1\n" + class0f_checkpoint_body)
 class00_checkpoint_body = (
     "#define AVSP_CLASS00_FOCUSED_TEST 1\n" + test_source)
+class04_checkpoint_body = (
+    "#define AVSP_CLASS04_FOCUSED_TEST 1\n" + test_source)
 scene_checkpoint_flags = {
     "--weapon-timing-only",
     "--special-input-only", "--hit-interaction-only", "--queue-only",
@@ -401,6 +429,8 @@ run(source, header, True,
                if "--class0a-only" in sys.argv else
                class00_checkpoint_body
                if "--class00-only" in sys.argv else
+               class04_checkpoint_body
+               if "--class04-only" in sys.argv else
                class0f_checkpoint_body
                if "--class0f-only" in sys.argv else
                class1f_state0_checkpoint_body
@@ -425,6 +455,17 @@ if "--harness-self-test" in sys.argv:
     survived = run(source, header, False, "self-equivalent",
                    observe_only=True)
     assert survived["classification"] == "SURVIVED_MUTATION"
+    harness_report = json.loads(MUTATION_REPORT.read_text(encoding="ascii"))
+    harness_report["harness_self_test"] = {
+        "syntax_error": invalid["classification"],
+        "missing_launcher": environment["classification"],
+        "known_semantic_mutant": semantic["classification"],
+        "unchanged_equivalent_mutant": survived["classification"],
+        "behavioral_rejection_credit_requires_runtime_execution": True,
+    }
+    MUTATION_REPORT.write_text(
+        json.dumps(harness_report, indent=2, sort_keys=True) + "\n",
+        encoding="ascii", newline="\n")
     print("REIMPLEMENT-13 mutation harness self-test: PASS "
           "(invalid/environment/behavioral/survivor distinguished)")
     raise SystemExit(0)
@@ -448,7 +489,7 @@ subset_flags = {"--inner8-only", "--ko-only", "--registration-only",
                 "--type16-terminal-only", "--special-input-only",
                 "--hit-interaction-only", "--class1f-state0-only",
                 "--class1f-action16-only", "--exit-scheduler-only",
-                "--class00-only", "--generated-all-only"}
+                "--class00-only", "--class04-only", "--generated-all-only"}
 if "--queue-only" in sys.argv or not subset_flags.intersection(sys.argv):
     run(source, header, False, "consume-before-direction-queue-shift",
         player_source.replace(queue_before, queue_after, 1))
@@ -1354,6 +1395,8 @@ for before, after in (
         continue
     if "--generated-walk-only" in sys.argv:
         continue
+    if "--class04-only" in sys.argv:
+        continue
     assert before in source, before
     run(source.replace(before, after), header, False, before,
         test_body=(jump_test_body if "--jump-only" in sys.argv else
@@ -1517,6 +1560,109 @@ if "--special-input-only" in sys.argv:
         test_body=scene_checkpoint_body)
     print("REIMPLEMENT-13 simultaneous special-input arbitration lane: PASS "
           "(3 real mutations)")
+    raise SystemExit(0)
+if "--class04-only" in sys.argv:
+    ground_allocation = """            avsp_round1_allocate_player_weapon_projectile(runtime);
+            if (!avsp_round1_spawn_type36_class04(runtime))"""
+    assert source.count(ground_allocation) == 1
+    run(source.replace(ground_allocation,
+        """            avsp_round1_allocate_player_weapon_projectile(runtime);
+            if (0 && !avsp_round1_spawn_type36_class04(runtime))""", 1),
+        header, False, "class04-ground-allocation-writer",
+        expected_returncode=249, test_body=class04_checkpoint_body)
+    x_rule = """        x = parent->facing == 0u ?
+            (short)((unsigned short)parent->x -
+                    (unsigned short)spec->offset_x) :
+            (short)((unsigned short)parent->x +
+                    (unsigned short)spec->offset_x);"""
+    assert source.count(x_rule) == 1
+    run(source.replace(x_rule, x_rule.replace(
+        "parent->facing == 0u", "parent->facing != 0u"), 1),
+        header, False, "class04-facing-derived-x-offset",
+        expected_returncode=249, test_body=class04_checkpoint_body)
+    y_rule = """        y = (short)((unsigned short)parent->y +
+                    (unsigned short)spec->offset_y);"""
+    assert source.count(y_rule) == 1
+    run(source.replace(y_rule, """        y = (short)((unsigned short)parent->y -
+                    (unsigned short)spec->offset_y);""", 1),
+        header, False, "class04-signed-y-offset",
+        expected_returncode=249, test_body=class04_checkpoint_body)
+    facing_rule = "        actor->facing = parent->facing;"
+    assert source.count(facing_rule) == 1
+    run(source.replace(facing_rule,
+        "        actor->facing = (unsigned char)(parent->facing ^ 1u);", 1),
+        header, False, "class04-parent-facing-copy",
+        expected_returncode=249, test_body=class04_checkpoint_body)
+    rng_absence = """        actor->facing = parent->facing;
+        actor->animation_index = 0u;"""
+    assert source.count(rng_absence) == 1
+    run(source.replace(rng_absence, """        actor->facing = parent->facing;
+        (void)avsp_round1_source_rng(runtime);
+        ++runtime->type36_class04_rng_calls;
+        actor->animation_index = 0u;""", 1),
+        header, False, "class04-no-direct-rng",
+        expected_returncode=114, test_body=class04_checkpoint_body)
+    global_guard = (
+        "if (runtime->source_round_stage_index == spec->global_guard_value)")
+    assert source.count(global_guard) == 1
+    run(source.replace(global_guard,
+        "if (runtime->source_round_stage_index != spec->global_guard_value)", 1),
+        header, False, "class04-global-movement-guard",
+        expected_returncode=249, test_body=class04_checkpoint_body)
+    release_delay = """        actor->state = spec->release_state;
+        ++runtime->type36_class04_state_transitions;
+    }
+    if (actor->state == spec->release_state)"""
+    assert source.count(release_delay) == 1
+    run(source.replace(release_delay, """        actor->state = spec->release_state;
+        ++runtime->type36_class04_state_transitions;
+        return 1;
+    }
+    if (actor->state == spec->release_state)""", 1),
+        header, False, "class04-same-visit-release",
+        expected_returncode=249, test_body=class04_checkpoint_body)
+    backlink = """        if (parent->source_type36_class04_child ==
+                (unsigned short)actor->source_slot)
+            parent->source_type36_class04_child = 0u;"""
+    assert source.count(backlink) == 1
+    run(source.replace(backlink, "        (void)parent;", 1),
+        header, False, "class04-backlink-clear",
+        expected_returncode=249, test_body=class04_checkpoint_body)
+    generated_spec = (
+        "    0x8380u, 0x0200u, 0x0400u, 0x0600u, 5, 86, 10u, "
+        "0x04, 36u, 0u")
+    assert generated.count(generated_spec) == 1
+    run(source, header, False, "generated-class04-signed-offset",
+        generated_body=generated.replace(
+            generated_spec, generated_spec.replace(
+                "0x0600u, 5, 86", "0x0600u, 6, 86"), 1),
+        expected_returncode=94, test_body=class04_checkpoint_body)
+    first_record = (
+        "    { 1u, 0, 0x0009ac82UL, 0x0009b5a6UL, 0u, 0u },")
+    assert generated.count(first_record) == 1
+    run(source, header, False, "generated-class04-first-assembly",
+        generated_body=generated.replace(
+            first_record, first_record.replace(
+                "0x0009b5a6UL", "0x0009b5b6UL"), 1),
+        expected_returncode=94, test_body=class04_checkpoint_body)
+    run(source, header, False, "generated-class04-first-selector",
+        generated_body=generated.replace(
+            first_record, first_record.replace(
+                "0x0009b5a6UL, 0u, 0u", "0x0009b5a6UL, 1u, 0u"), 1),
+        expected_returncode=94, test_body=class04_checkpoint_body)
+    terminal_record = (
+        "    { 1u, -32768, 0x0009ad12UL, 0x0009b616UL, 0u, 0u },")
+    assert generated.count(terminal_record) == 1
+    run(source, header, False, "generated-class04-terminal-branch",
+        generated_body=generated.replace(
+            terminal_record, terminal_record.replace("-32768", "0"), 1),
+        expected_returncode=94, test_body=class04_checkpoint_body)
+    record_focused_program_controls(
+        "type36_class04_complete_program",
+        "complete Coffee Shop source frames 2040..5566; every route-reachable "
+        "type-36/class-0x04 allocation, state, animation and release")
+    print("REIMPLEMENT-13 Coffee Shop type-36/class-0x04 presentation "
+          "mutation lane: PASS (12 real mutations)")
     raise SystemExit(0)
 if "--class00-only" in sys.argv:
     facing_negation = """    if (runtime->player.facing == 0u)

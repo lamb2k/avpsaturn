@@ -498,6 +498,17 @@ int main(void)
             runtime.class00_companion_animation_bindings,
             runtime.class00_companion_helper_calls);
     fprintf(stderr,
+            "class04_alloc_requests=%lu class04_allocations=%lu class04_alloc_failures=%lu class04_init=%lu class04_animation=%lu class04_transitions=%lu class04_global_moves=%lu class04_rng=%lu class04_releases=%lu\n",
+            runtime.type36_class04_allocation_requests,
+            runtime.type36_class04_allocations,
+            runtime.type36_class04_allocation_failures,
+            runtime.type36_class04_initializations,
+            runtime.type36_class04_animation_steps,
+            runtime.type36_class04_state_transitions,
+            runtime.type36_class04_global_moves,
+            runtime.type36_class04_rng_calls,
+            runtime.type36_class04_releases);
+    fprintf(stderr,
             "native_scene route=%d progress=%u living=%u releases=%lu damage=%lu collisions=%lu obstacle_spawns=%lu obstacle_damage=%lu obstacle_transitions=%lu obstacle_releases=%lu child_releases=%lu special_entries=%lu special_contacts=%lu camera=%d player_x=%d player_z=%d failures=%lu fallback=%lu class0f_init=%lu class0f_collision=%lu class0f_navigation=%lu class0f_reactions=%lu class0f_audio=%lu class0f_class11=%lu class0f_class09=%lu class0f_releases=%lu\n",
             runtime.route_state, runtime.first_encounter.source_progress,
             runtime.first_encounter.source_living_count,

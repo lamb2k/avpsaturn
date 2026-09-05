@@ -16514,6 +16514,363 @@
         "dispatch_entry": "0x09aa90",
         "fixed_frame_substitute_forbidden": true,
         "fixed_pool_allocation_is_observable": true,
+        "implementation_contract": {
+          "allocation": {
+            "allocation_failure_rule": "omit the child and continue the player caller; do not synthesize an actor or retry on a frame clock",
+            "frame_anchors_are_witnesses_only": true,
+            "guard": "the route-4 Predator Warrior player program reaches writer 0x02417a in state/substate 0x0200:0x0c02 or writer 0x023946 in state/substate 0x0200:0x0406 and the fixed-pool allocator succeeds",
+            "parent": {
+              "character_selector_u8": 0,
+              "class_u8": "0x00",
+              "record_type_u8": 0,
+              "source_slot": "0x00ff8380"
+            },
+            "source_spawn_contexts": [
+              {
+                "allocation_rule": "pop next free type-36 record from shared fixed pool",
+                "count": 1,
+                "parent_active_u8": 1,
+                "parent_animation_record": "0x0015e9d8",
+                "parent_class_u8": 0,
+                "parent_record_type_u8": 0,
+                "parent_state_u16": 512,
+                "parent_substate_u16": 1030,
+                "route_state_u16": 4,
+                "writer_pc": "0x023946"
+              },
+              {
+                "allocation_rule": "pop next free type-36 record from shared fixed pool",
+                "count": 12,
+                "parent_active_u8": 1,
+                "parent_animation_record": "0x0015e540",
+                "parent_class_u8": 0,
+                "parent_record_type_u8": 0,
+                "parent_state_u16": 512,
+                "parent_substate_u16": 3074,
+                "route_state_u16": 4,
+                "writer_pc": "0x02417a"
+              },
+              {
+                "allocation_rule": "pop next free type-36 record from shared fixed pool",
+                "count": 2,
+                "parent_active_u8": 1,
+                "parent_animation_record": "0x0015e594",
+                "parent_class_u8": 0,
+                "parent_record_type_u8": 0,
+                "parent_state_u16": 512,
+                "parent_substate_u16": 3074,
+                "route_state_u16": 4,
+                "writer_pc": "0x02417a"
+              }
+            ],
+            "writers": [
+              "0x02417a",
+              "0x023946"
+            ],
+            "writes_in_order": [
+              "actor+0x00:u8 += 1",
+              "actor+0x02:u16 = 0x0400",
+              "actor+0x28:u16 = parent source-slot low word"
+            ]
+          },
+          "classification": "SOURCE_CLOSED_IMPLEMENTATION_FIELDS",
+          "counterfactual": {
+            "actor_population_difference": true,
+            "capture": "oracle11_progression_lifecycle_cs15s4all",
+            "final_gameplay_projection_unchanged": false,
+            "fixed_pool_order_may_change_downstream_projection": true,
+            "remaining_target_actor_rows": 0,
+            "suppressed_writes": 15
+          },
+          "effects": {
+            "audio_commands": [],
+            "collision_damage": "none",
+            "health_resource": "none",
+            "load_release_events": [],
+            "rng_calls_u8": 0,
+            "route_camera_writes": []
+          },
+          "first_lifetime_witness": {
+            "absent_frame_u16": 2269,
+            "allocation_source_frame_u16": 2253,
+            "animation_record": "0x0009ac82",
+            "facing_u8": 0,
+            "first_visible_frame_u16": 2254,
+            "last_visible_frame_u16": 2268,
+            "parent_position_s16": [
+              944,
+              320,
+              320
+            ],
+            "result_position_s16": [
+              939,
+              406,
+              320
+            ],
+            "source_slot": "0x00ffe140"
+          },
+          "fixed_frame_substitute_forbidden": true,
+          "mutation_controls": [
+            "wrong spawn writer or player state/substate guard",
+            "fixed-frame allocation",
+            "wrong fixed-pool pop order",
+            "wrong parent source slot",
+            "wrong state dispatch entry",
+            "wrong signed offset row or selector index",
+            "wrong x subtraction or y addition",
+            "wrong facing copy",
+            "wrong animation selector, record, timer, branch, assembly or collision selector",
+            "wrong 0xff81e8 guard or 0xff82c0 signed delta",
+            "extra RNG call",
+            "omitted scheduler invocation",
+            "wrong backlink guard",
+            "delayed release",
+            "invented collision, damage, audio, route, camera or load effect"
+          ],
+          "pool_and_scheduler": {
+            "allocator": "0x017876",
+            "capacity_u16": 64,
+            "class_u8": "0x04",
+            "pool_base": "0xffd280",
+            "record_type_u8": 36,
+            "release_routine": "0x01788c",
+            "scheduler": "0x01bd48 ascending source-slot order",
+            "scheduler_position": "record type 36 after record types 4, 8, 12, 16, 20, 24, 28 and 32",
+            "stride_u16": 64
+          },
+          "retained_gameplay_authority": false,
+          "source_bodies": {
+            "animation_selector_table": {
+              "first": "0x09ac18",
+              "last_exclusive": "0x09ac82",
+              "sha256": "67fcbfcedad9d8bdc55be1965d0edf5368a6f2e42bbd4a1d2bc2b117a4c56215"
+            },
+            "class_dispatch": {
+              "first": "0x09aa90",
+              "last_exclusive": "0x09ac18",
+              "sha256": "63bdf188af16583e833a1e0cdd9570451c2f59d331e430caa65cf05ca0f8c9f2"
+            },
+            "facing_offset_branch": {
+              "first": "0x09aae6",
+              "last_exclusive": "0x09aaf8",
+              "sha256": "8645fc156c9c1c38a939a81afedbc0b41bc246351f0b6c8eaa9999849a9ec4f1"
+            },
+            "offset_helper": {
+              "first": "0x02f8dc",
+              "last_exclusive": "0x02f8e8",
+              "sha256": "4a3e8b502ca0fae33f8caa6a729e0b98df7bdd5a2a62f8358412a878ee3fb6cf"
+            },
+            "selector0_offset_row": {
+              "first": "0x02f8e8",
+              "last_exclusive": "0x02f8ec",
+              "sha256": "ae9fd805b42e06e5b59278903fe272d9c5e5f9c6bad401e6b8272b5d34e79143"
+            },
+            "spawn_writer_0x023946": {
+              "first": "0x02393e",
+              "last_exclusive": "0x023956",
+              "sha256": "fd51f13a19559e811cf216763103e4154a1b079572ff2f8ce689974fdc250943"
+            },
+            "spawn_writer_0x02417a": {
+              "first": "0x024172",
+              "last_exclusive": "0x02418a",
+              "sha256": "7daedaa8bc818dc0ee2ed4b5829022302f7e1045f6712c0853af4a0e467dba2e"
+            },
+            "state_dispatch_table": {
+              "first": "0x09aa9c",
+              "last_exclusive": "0x09aaa4",
+              "sha256": "2edba5a68fd53a7c1b91ad01102488f815eee0471283e8554f15a707bb07a55c"
+            }
+          },
+          "spec_executable": true,
+          "state_0x0000": {
+            "animation_binding": {
+              "first_record": "0x0009ac82",
+              "record_sequence": [
+                {
+                  "animation_record": "0x0009ac82",
+                  "assembly": "0x0009b5a6",
+                  "attack_selector_u8": 0,
+                  "branch_s16": 0,
+                  "hurt_selector_u8": 0,
+                  "record_sha256": "920c27d925f3b466e462c135be422e6e185e8ee28ff59af06dc14da62edc5099",
+                  "timer_u16": 1
+                },
+                {
+                  "animation_record": "0x0009ac92",
+                  "assembly": "0x0009b5b4",
+                  "attack_selector_u8": 0,
+                  "branch_s16": 0,
+                  "hurt_selector_u8": 0,
+                  "record_sha256": "ad03b549b26e13f2566943d93d24a2340416d7888f991662c35144e33c7e639a",
+                  "timer_u16": 1
+                },
+                {
+                  "animation_record": "0x0009aca2",
+                  "assembly": "0x0009b5c2",
+                  "attack_selector_u8": 0,
+                  "branch_s16": 0,
+                  "hurt_selector_u8": 0,
+                  "record_sha256": "f2fd7887e982c76ae44183801aefa112d1bec15c4cde08ec941dbc3c6a2713b8",
+                  "timer_u16": 2
+                },
+                {
+                  "animation_record": "0x0009acb2",
+                  "assembly": "0x0009b5d0",
+                  "attack_selector_u8": 0,
+                  "branch_s16": 0,
+                  "hurt_selector_u8": 0,
+                  "record_sha256": "dca60121d7c49908a95f4646f07110a1d418a6e380c22112103bc4a8c4467ae5",
+                  "timer_u16": 2
+                },
+                {
+                  "animation_record": "0x0009acc2",
+                  "assembly": "0x0009b5de",
+                  "attack_selector_u8": 0,
+                  "branch_s16": 0,
+                  "hurt_selector_u8": 0,
+                  "record_sha256": "089253c4f672d3e2f9b296ce03abecca55e8f5cda4ea8eeed4dd5b73bc9d7c33",
+                  "timer_u16": 1
+                },
+                {
+                  "animation_record": "0x0009acd2",
+                  "assembly": "0x0009b5ec",
+                  "attack_selector_u8": 0,
+                  "branch_s16": 0,
+                  "hurt_selector_u8": 0,
+                  "record_sha256": "500dce5e435114fa1d85ec429f2d24acefacb9f85563427ec7013758296ca30d",
+                  "timer_u16": 1
+                },
+                {
+                  "animation_record": "0x0009ace2",
+                  "assembly": "0x0009b5fa",
+                  "attack_selector_u8": 0,
+                  "branch_s16": 0,
+                  "hurt_selector_u8": 0,
+                  "record_sha256": "6b47b27b8b6456c745c7951aef8f143cd8fd21311b840d04b77d718f5598f610",
+                  "timer_u16": 1
+                },
+                {
+                  "animation_record": "0x0009acf2",
+                  "assembly": "0x0009b608",
+                  "attack_selector_u8": 0,
+                  "branch_s16": 0,
+                  "hurt_selector_u8": 0,
+                  "record_sha256": "54a653fce374b5028e7d593d1dfd81b5a528a1e48131e139347cfd28be92e068",
+                  "timer_u16": 1
+                },
+                {
+                  "animation_record": "0x0009ad02",
+                  "assembly": "0x0009b616",
+                  "attack_selector_u8": 0,
+                  "branch_s16": 0,
+                  "hurt_selector_u8": 0,
+                  "record_sha256": "b4917ed4a0c58f2aa3c2e76715e969cc7164ae87a25f689fffba9cdb23ff08d8",
+                  "timer_u16": 1
+                },
+                {
+                  "animation_record": "0x0009ad12",
+                  "assembly": "0x0009b616",
+                  "attack_selector_u8": 0,
+                  "branch_s16": -32768,
+                  "hurt_selector_u8": 0,
+                  "record_sha256": "5c2a2a56e9f51c3cccdf2cc80fc33633f0a799eb9bae3832bc5df0d14f678074",
+                  "timer_u16": 1
+                }
+              ],
+              "relative_offset_u16": "0x006a",
+              "selector_u8": 0,
+              "table": "0x09ac18"
+            },
+            "character_dispatch": {
+              "coffee_shop_reachable_selector_u8": 0,
+              "other_character_branches": "NOT_REQUIRED_FOR_R7C",
+              "selector": "parent+0x03:u8 * 2",
+              "target": "0x09aac8"
+            },
+            "facing_rule": "child+0x0f:u8 equals parent+0x0f:u8 for the route-reachable 0/1 values",
+            "offset_lookup": {
+              "coffee_shop_reachable_selector_u8": 0,
+              "helper": "0x02f8dc",
+              "index_rule": "selector_u8 * 4 indexes signed x/y words",
+              "offset_sign_rule": "signed_x_offset_s16 = -offset_x_s16 when parent+0x0f:u8 == 0; otherwise +offset_x_s16",
+              "offset_x_s16": 5,
+              "offset_y_s16": 86,
+              "selector_source": "parent+0x24:u8",
+              "x_rule": "child_x_s16 = parent_x_s16 + signed_x_offset_s16",
+              "y_rule": "child_y_s16 = parent_y_s16 + offset_y_s16",
+              "z_rule": "child_z_s16 = parent_z_s16"
+            },
+            "position_fields": {
+              "child_x": "actor+0x10:s16",
+              "child_y": "actor+0x14:s16",
+              "child_z": "actor+0x18:s16",
+              "fractional_words": "not read or written by this program",
+              "parent_x": "parent+0x10:s16",
+              "parent_y": "parent+0x14:s16",
+              "parent_z": "parent+0x18:s16"
+            },
+            "rng_calls_u8": 0,
+            "writes_in_order": [
+              "actor+0x04:u8 += 2",
+              "parent+0x7c:u16 = child source-slot low word",
+              "copy parent+0x10:u16 to actor+0x10:u16",
+              "copy parent+0x14:u16 to actor+0x14:u16",
+              "copy parent+0x18:u16 to actor+0x18:u16",
+              "actor+0x0f:u8 = 1",
+              "if parent+0x0f:u8 == 0 then actor+0x0f:u8 = 0",
+              "actor+0x10:u16 = parent x + facing-derived signed offset_x",
+              "actor+0x14:u16 = parent y + offset_y",
+              "bind animation selector 0"
+            ]
+          },
+          "state_0x0200": {
+            "guard": "s16(0xff81e8) == 10",
+            "guard_false_result": "x high word unchanged",
+            "guard_true_arithmetic": "actor+0x10:s16 += s16(0xff82c0), preserving actor+0x12:u16 fraction",
+            "rng_calls_u8": 0,
+            "terminal_guard": "actor+0x24:s16 < 0 advances to state 0x0400 before the animation call",
+            "update_order": [
+              "evaluate global guard",
+              "conditionally add signed x delta",
+              "test signed animation branch",
+              "advance state byte by 2 when branch is negative",
+              "advance source animation through 0x016536"
+            ]
+          },
+          "state_0x0400_and_0x0600": {
+            "backlink_guard": "parent+0x7c:u16 == child source-slot low word",
+            "backlink_result": "clear parent+0x7c:u16 only when the guard is true",
+            "parent_missing_rule": "source allocation establishes the parent for every Coffee Shop lifetime; no inferred fallback is permitted",
+            "release_rule": "release through 0x01788c in the same scheduler visit",
+            "state_0x0400_rule": "increment state byte by 2 and fall through to the 0x0600 body in the same scheduler visit"
+          },
+          "state_dispatch": {
+            "entries": [
+              {
+                "state_u16": "0x0000",
+                "table_offset_u16": "0x0008",
+                "target": "0x09aaa4"
+              },
+              {
+                "state_u16": "0x0200",
+                "table_offset_u16": "0x0142",
+                "target": "0x09abde"
+              },
+              {
+                "state_u16": "0x0400",
+                "table_offset_u16": "0x0162",
+                "target": "0x09abfe"
+              },
+              {
+                "state_u16": "0x0600",
+                "table_offset_u16": "0x0166",
+                "target": "0x09ac02"
+              }
+            ],
+            "state_field": "actor+0x04:u8 high state byte selected as an even table index",
+            "unsupported_state_rule": "reject; no fallback"
+          }
+        },
         "implementation_rule": "native source-owned presentation actor in the shared fixed pool; it must not become independent gameplay authority",
         "lifetime_count": 15,
         "lifetimes": [

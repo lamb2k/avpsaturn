@@ -5178,6 +5178,18 @@ int main(void)
                 }
             }
             scene_runtime.frame = source_frame - 2040u;
+#ifdef AVSP_CLASS04_FOCUSED_TEST
+            if (source_frame == 2255u)
+            {
+                scene_runtime.source_round_stage_index = 10u;
+                scene_runtime.source_type36_x_delta = 3;
+            }
+            else if (source_frame == 2256u)
+            {
+                scene_runtime.source_round_stage_index = 0u;
+                scene_runtime.source_type36_x_delta = 0;
+            }
+#endif
             for (source_tick = 1u; source_tick < phase_updates;
                  ++source_tick)
             {
@@ -5471,6 +5483,78 @@ int main(void)
                         scene_runtime.rng_seed);
                     return 94;
                 }
+#ifdef AVSP_CLASS04_FOCUSED_TEST
+                if (source_frame == 2254u || source_frame == 2255u ||
+                    source_frame == 2268u || source_frame == 2269u)
+                {
+                    const AvspRound1ActorCore *weapon_child = 0;
+                    for (actor_index = 0u;
+                         actor_index < scene_runtime.pools[5].capacity;
+                         ++actor_index)
+                    {
+                        const AvspRound1ActorCore *candidate =
+                            &scene_runtime.pools[5].records[actor_index];
+                        if (candidate->source_slot == 0x00ffe140UL)
+                        {
+                            weapon_child = candidate;
+                            break;
+                        }
+                    }
+                    if (weapon_child == 0 ||
+                        (source_frame == 2254u &&
+                         (weapon_child->active != 2u ||
+                          weapon_child->actor_class != 0x04 ||
+                          weapon_child->state != 0x0200u ||
+                          weapon_child->x != 939 || weapon_child->y != 406 ||
+                          weapon_child->z != 320 || weapon_child->facing != 0u ||
+                          weapon_child->animation_record != 0x0009ac92UL ||
+                          weapon_child->assembly != 0x0009b5b4UL ||
+                          weapon_child->animation_timer != 1u ||
+                          weapon_child->hurt_selector != 0u ||
+                          weapon_child->attack_selector != 0u)) ||
+                        (source_frame == 2255u &&
+                         (weapon_child->active != 2u ||
+                          weapon_child->state != 0x0200u ||
+                          weapon_child->x != 942 ||
+                          weapon_child->animation_record != 0x0009aca2UL)) ||
+                        (source_frame == 2268u &&
+                         (weapon_child->active != 0u ||
+                          weapon_child->state != 0x0600u)) ||
+                        (source_frame == 2269u && weapon_child->active != 0u))
+                    {
+                        fprintf(stderr,
+                            "class04 focused witness frame=%u active=%u class=%02x state=%04x slot=%08lx position=%d/%d/%d facing=%u animation=%08lx assembly=%08lx timer=%u branch=%d selectors=%u/%u allocations=%lu init=%lu steps=%lu transitions=%lu moves=%lu releases=%lu\n",
+                            source_frame,
+                            weapon_child != 0 ? weapon_child->active : 0u,
+                            weapon_child != 0 ?
+                                (unsigned int)(unsigned char)
+                                    weapon_child->actor_class : 0u,
+                            weapon_child != 0 ? weapon_child->state : 0u,
+                            weapon_child != 0 ? weapon_child->source_slot : 0UL,
+                            weapon_child != 0 ? weapon_child->x : 0,
+                            weapon_child != 0 ? weapon_child->y : 0,
+                            weapon_child != 0 ? weapon_child->z : 0,
+                            weapon_child != 0 ? weapon_child->facing : 0u,
+                            weapon_child != 0 ?
+                                weapon_child->animation_record : 0UL,
+                            weapon_child != 0 ? weapon_child->assembly : 0UL,
+                            weapon_child != 0 ?
+                                weapon_child->animation_timer : 0u,
+                            weapon_child != 0 ?
+                                weapon_child->animation_branch : 0,
+                            weapon_child != 0 ? weapon_child->hurt_selector : 0u,
+                            weapon_child != 0 ?
+                                weapon_child->attack_selector : 0u,
+                            scene_runtime.type36_class04_allocations,
+                            scene_runtime.type36_class04_initializations,
+                            scene_runtime.type36_class04_animation_steps,
+                            scene_runtime.type36_class04_state_transitions,
+                            scene_runtime.type36_class04_global_moves,
+                            scene_runtime.type36_class04_releases);
+                        return 249;
+                    }
+                }
+#endif
                 /* The post-update state for frame 5207 is the source row at 5208. */
                 if (source_frame == 5207u)
                 {
@@ -5984,6 +6068,33 @@ int main(void)
             if (!avsp_round1_step_coffee_exit_display(&scene_runtime))
                 return 136;
         }
+#ifdef AVSP_CLASS04_FOCUSED_TEST
+        if (scene_runtime.type36_class04_allocation_requests != 15u ||
+            scene_runtime.type36_class04_allocations != 15u ||
+            scene_runtime.type36_class04_allocation_failures != 0u ||
+            scene_runtime.type36_class04_initializations != 15u ||
+            scene_runtime.type36_class04_animation_steps != 165u ||
+            scene_runtime.type36_class04_state_transitions != 30u ||
+            scene_runtime.type36_class04_global_moves != 1u ||
+            scene_runtime.type36_class04_rng_calls != 0u ||
+            scene_runtime.type36_class04_releases != 15u ||
+            scene_runtime.player.source_type36_class04_child != 0u)
+        {
+            fprintf(stderr,
+                "class04 focused totals requests=%lu allocations=%lu failures=%lu init=%lu steps=%lu transitions=%lu moves=%lu rng=%lu releases=%lu backlink=%04x\n",
+                scene_runtime.type36_class04_allocation_requests,
+                scene_runtime.type36_class04_allocations,
+                scene_runtime.type36_class04_allocation_failures,
+                scene_runtime.type36_class04_initializations,
+                scene_runtime.type36_class04_animation_steps,
+                scene_runtime.type36_class04_state_transitions,
+                scene_runtime.type36_class04_global_moves,
+                scene_runtime.type36_class04_rng_calls,
+                scene_runtime.type36_class04_releases,
+                scene_runtime.player.source_type36_class04_child);
+            return 249;
+        }
+#endif
         if (scene_runtime.coffee_shop_obstacle_rng_calls != 1u ||
             scene_runtime.coffee_shop_obstacle_audio_events != 1u ||
             scene_runtime.coffee_shop_obstacle_audio_command != 0x0142u)

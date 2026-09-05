@@ -300,6 +300,11 @@ def build_fields() -> list[dict[str, object]]:
           "/authority_data/auxiliary/coffee_shop_scene_component_identities/components/6/implementation_contract", "the player entry subhandler owns allocation; exact parent-slot identity, signed parent-animation offsets, facing-dependent x reflection, parent presentation-field write, companion animation selector, frozen resident interval and centralized clear own the source presentation program while gameplay effects remain absent",
           ["actor.state_action:u16", "actor.substate:u16", "actor.parent_slot:u16", "actor.disable_guard:u8", "player.position:s16", "player.facing:u8", "player.animation_branch:u8", "record28.free_count:u8"], ["actor.state_action:u16", "actor.substate:u16", "actor.position:s16", "actor.facing:u8", "actor.animation_record:u32", "actor.presentation_fields", "player.presentation_field56:u8", "record28.free_count:u8"],
           "/coffee_shop_scene_component_identities/components/6/implementation_contract/counterfactual", "a source-state perturbation executes the missing initialization substate and proves field-level normalization; independent actor suppression changes scene ownership while wrong selector, offset, facing, parent, cadence or release mutations are rejected"),
+        f("auxiliary.coffee_shop_class04_type36_program", "round1-projectile-pickup-hazard", "guarded_presentation_actor_program", True,
+          "auxiliary", "/coffee_shop_type36_presentation/classes/1/implementation_contract", "0x09aa90 class entry, four-way state dispatch, player-owned allocation writers 0x02417a/0x023946, selector-0 offset helper and every Coffee-Shop-reachable lifetime",
+          "/authority_data/auxiliary/coffee_shop_type36_presentation/classes/1/implementation_contract", "source player action/substate guards and fixed-pool allocation own creation; exact parent copy, signed selector offset, facing copy, animation sequence, conditional global x delta, backlink clear and centralized release own the presentation program while gameplay effects remain absent",
+          ["actor.outer_state:u8/u16", "actor.parent_slot:u16", "actor.position:s16", "actor.facing:u8", "actor.animation_record:u32", "actor.animation_timer:u16", "actor.animation_branch:s16", "player.state_substate:u16", "player.position:s16", "player.facing:u8", "player.animation_branch:u8", "global.0xff81e8:s16", "global.0xff82c0:s16", "type36.free_count:u8"], ["actor.active:u8", "actor.class:u8", "actor.state:u8/u16", "actor.parent_slot:u16", "actor.position:s16", "actor.facing:u8", "actor.animation_record:u32", "actor.presentation_fields", "player.child_slot:u16", "type36.free_count:u8"],
+          "/coffee_shop_type36_presentation/classes/1/implementation_contract/counterfactual", "independent actor suppression removes all fifteen lifetimes and changes fixed-pool projection while wrong writer, guard, pool order, parent, offset, facing, animation, global delta, backlink or release mutations are rejected"),
         f("auxiliary.class10_type24_whole_program", "round1-projectile-pickup-hazard", "guarded_actor_program", True,
           "class10_program", "/", "0x079ffc class entry, four-way top-state dispatch, six source variant selectors, and every Round 1-reachable branch",
           "/authority_data/auxiliary/archetypes/5/whole_routine_implementation_contract", "outer state dispatches only through the bounded source program; variant-indexed signed offsets and animation records, exact current-state guards, presentation updates and fixed-pool release own every transition",
@@ -1935,6 +1940,49 @@ def validate(contract: dict[str, object], fixtures: dict[str, object],
             class03["suppression_control"]["suppressed_writes"] == 1 and
             class03["rng_calls"] == [],
             "airborne Button1 class-3 implementation fixture drift")
+    class04 = next(item for item in fixtures["authority_data"]["auxiliary"]
+                   ["coffee_shop_type36_presentation"]["classes"]
+                   if item["class"] == "0x04")
+    class04_program = class04["implementation_contract"]
+    source_class04 = next(item for item in source["auxiliary"]
+                          ["coffee_shop_type36_presentation"]["classes"]
+                          if item["class"] == "0x04")["implementation_contract"]
+    require(class04_program == source_class04 and
+            class04_program["classification"] ==
+                "SOURCE_CLOSED_IMPLEMENTATION_FIELDS" and
+            class04_program["spec_executable"] is True and
+            class04_program["pool_and_scheduler"]["allocator"] ==
+                "0x017876" and
+            class04_program["pool_and_scheduler"]["release_routine"] ==
+                "0x01788c" and
+            [entry["state_u16"] for entry in
+             class04_program["state_dispatch"]["entries"]] ==
+                ["0x0000", "0x0200", "0x0400", "0x0600"] and
+            class04_program["state_0x0000"]["offset_lookup"][
+                "coffee_shop_reachable_selector_u8"] == 0 and
+            class04_program["state_0x0000"]["offset_lookup"][
+                "offset_x_s16"] == 5 and
+            class04_program["state_0x0000"]["offset_lookup"][
+                "offset_sign_rule"] ==
+                ("signed_x_offset_s16 = -offset_x_s16 when "
+                 "parent+0x0f:u8 == 0; otherwise +offset_x_s16") and
+            class04_program["state_0x0000"]["offset_lookup"][
+                "offset_y_s16"] == 86 and
+            class04_program["state_0x0000"]["animation_binding"][
+                "first_record"] == "0x0009ac82" and
+            len(class04_program["state_0x0000"]["animation_binding"][
+                "record_sequence"]) == 10 and
+            class04_program["state_0x0200"]["guard"] ==
+                "s16(0xff81e8) == 10" and
+            "s16(0xff82c0)" in class04_program["state_0x0200"][
+                "guard_true_arithmetic"] and
+            class04_program["first_lifetime_witness"][
+                "result_position_s16"] == [939, 406, 320] and
+            class04_program["effects"]["rng_calls_u8"] == 0 and
+            class04_program["effects"]["audio_commands"] == [] and
+            class04_program["fixed_frame_substitute_forbidden"] is True and
+            class04_program["retained_gameplay_authority"] is False,
+            "type-36 class-0x04 implementation fixture incomplete or drifted")
     class00 = next(item for item in
                    fixtures["authority_data"]["enemies"]["archetypes"]
                    if item["class"] == "0x00" and item["type"] == 12)

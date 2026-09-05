@@ -6,7 +6,7 @@
 #include "../../combat/hit_ko/hit_ko.h"
 
 #define AVSP_ROUND1_SPEC02_SHA256 \
-"a8c5913f90db7f476155a81d433b200d221e13d45e4ed1a58a6ee0e0e064937c"
+"b784f11da55207e2ac26577a54e2f354cf4c23306794cf1ad77ec300ad1f4557"
 #define AVSP_ROUND1_CANARY_HEAD 0x52314548UL
 #define AVSP_ROUND1_CANARY_TAIL 0x52314554UL
 #define AVSP_ROUND1_ROUTE_ENTRY_STATE 2
@@ -46,6 +46,7 @@
 #define AVSP_ROUND1_CLASS4B_PRESENTATION_COUNT 32u
 #define AVSP_ROUND1_CLASS3D_PRESENTATION_COUNT 9u
 #define AVSP_ROUND1_CLASS3D_OFFSET_COUNT 16u
+#define AVSP_ROUND1_TYPE36_CLASS04_PRESENTATION_COUNT 10u
 #define AVSP_ROUND1_WEAPON_PROJECTILE_CAPACITY 24u
 #define AVSP_ROUND1_WEAPON_PARENT_PRESENTATION_COUNT 8u
 #define AVSP_ROUND1_WEAPON_PARENT_SELECTOR_COUNT 6u
@@ -412,6 +413,23 @@ typedef struct
 
 typedef struct
 {
+    unsigned long dispatch;
+    unsigned long offset_helper;
+    unsigned long first_animation_record;
+    unsigned short parent_source_slot;
+    unsigned short active_state;
+    unsigned short terminal_state;
+    unsigned short release_state;
+    short offset_x;
+    short offset_y;
+    unsigned short global_guard_value;
+    signed char actor_class;
+    unsigned char record_type;
+    unsigned char offset_selector;
+} AvspRound1Type36Class04Spec;
+
+typedef struct
+{
     unsigned char class_index;
     unsigned short route_index;
     unsigned char value;
@@ -614,6 +632,11 @@ typedef struct
  * fixed-pool scratch instead of adding four bytes to every actor record. */
 #define source_primary_animation_timer source_children[0]
 #define source_primary_animation_branch source_motion_fields[6]
+
+/* Player+0x7c owns the route-reachable type-36/class-0x04 backlink. The
+ * player never uses the class-0x43 timer alias above, so this shared fixed
+ * actor storage remains phase-disjoint. */
+#define source_type36_class04_child source_children[0]
 
 typedef struct
 {
@@ -2133,6 +2156,17 @@ typedef struct
     unsigned long class00_companion_parent_projections;
     unsigned long class00_companion_animation_bindings;
     unsigned long class00_companion_helper_calls;
+    unsigned short source_round_stage_index;
+    short source_type36_x_delta;
+    unsigned long type36_class04_allocation_requests;
+    unsigned long type36_class04_allocations;
+    unsigned long type36_class04_allocation_failures;
+    unsigned long type36_class04_initializations;
+    unsigned long type36_class04_animation_steps;
+    unsigned long type36_class04_state_transitions;
+    unsigned long type36_class04_global_moves;
+    unsigned long type36_class04_rng_calls;
+    unsigned long type36_class04_releases;
     unsigned char class08_parent_spawned;
     unsigned char class08_parent_released;
     unsigned char health_pickup_spawned;

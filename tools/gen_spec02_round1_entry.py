@@ -369,6 +369,13 @@ def build() -> str:
     class0f_contract = class0f["implementation_contract"]
     class0a_contract = class0a["implementation_contract"]
     class00_companion_contract = class00_companion["implementation_contract"]
+    class04_type36 = next(item for item in
+                          fixtures["authority_data"]["auxiliary"]
+                          ["coffee_shop_type36_presentation"]["classes"]
+                          if item["class"] == "0x04")
+    class04_type36_contract = class04_type36["implementation_contract"]
+    class04_type36_records = class04_type36_contract["state_0x0000"][
+        "animation_binding"]["record_sequence"]
     coffee_scene_records = sorted(
         class01_contract["stage_records"] +
         class02_contract["stage_records"] +
@@ -2387,6 +2394,31 @@ def build() -> str:
         class00_companion["classification"] !=
             "SOURCE_CLOSED_IMPLEMENTATION_FIELDS" or
         class00_companion["implementation_status"] != "SPEC_EXECUTABLE" or
+        class04_type36["classification"] != "SOURCE_CLOSED_PRESENTATION" or
+        class04_type36_contract["classification"] !=
+            "SOURCE_CLOSED_IMPLEMENTATION_FIELDS" or
+        class04_type36_contract["spec_executable"] is not True or
+        class04_type36_contract["pool_and_scheduler"]["allocator"] !=
+            "0x017876" or
+        class04_type36_contract["pool_and_scheduler"]["release_routine"] !=
+            "0x01788c" or
+        class04_type36_contract["state_0x0000"]["offset_lookup"][
+            "coffee_shop_reachable_selector_u8"] != 0 or
+        class04_type36_contract["state_0x0000"]["offset_lookup"][
+            "offset_x_s16"] != 5 or
+        class04_type36_contract["state_0x0000"]["offset_lookup"][
+            "offset_y_s16"] != 86 or
+        len(class04_type36_records) != 10 or
+        class04_type36_records[0]["animation_record"] != "0x0009ac82" or
+        class04_type36_records[-1]["branch_s16"] != -32768 or
+        class04_type36_contract["state_0x0200"]["guard"] !=
+            "s16(0xff81e8) == 10" or
+        "s16(0xff82c0)" not in class04_type36_contract[
+            "state_0x0200"]["guard_true_arithmetic"] or
+        class04_type36_contract["effects"]["rng_calls_u8"] != 0 or
+        class04_type36_contract["effects"]["audio_commands"] != [] or
+        class04_type36_contract["fixed_frame_substitute_forbidden"] is not True or
+        class04_type36_contract["retained_gameplay_authority"] is not False or
         [(row["address"], row["observed_source_slot"],
           row["camera_threshold_u16"], row["class_u8"], row["variant_u8"])
          for row in coffee_scene_records] != [
@@ -5012,6 +5044,21 @@ def build() -> str:
             row["y_offset_s8"], row["animation_selector_u8"],
             row["parent_field56_u8"]))
     lines.extend([
+        "};", "",
+        "static const AvspRound1AnimationStateSpec avsp_round1_type36_class04_records[AVSP_ROUND1_TYPE36_CLASS04_PRESENTATION_COUNT] =",
+        "{",
+    ])
+    for row in class04_type36_records:
+        lines.append("    { %du, %d, %sUL, %sUL, %du, %du }," % (
+            row["timer_u16"], row["branch_s16"], row["animation_record"],
+            row["assembly"], row["hurt_selector_u8"],
+            row["attack_selector_u8"]))
+    lines.extend([
+        "};", "",
+        "static const AvspRound1Type36Class04Spec avsp_round1_type36_class04 =",
+        "{",
+        "    0x09AA90UL, 0x02F8DCUL, 0x0009AC82UL,",
+        "    0x8380u, 0x0200u, 0x0400u, 0x0600u, 5, 86, 10u, 0x04, 36u, 0u",
         "};", "",
         "static const AvspRound1AnimationStateSpec avsp_round1_class05_records[AVSP_ROUND1_CLASS05_PRESENTATION_COUNT] =",
         "{",

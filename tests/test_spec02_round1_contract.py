@@ -585,6 +585,18 @@ assert type36["pool"] == {"record_type_u8": 36, "base": "0xffd280",
 assert [(row["class"], row["lifetime_count"])
         for row in type36["classes"]] == [
             ("0x03", 50), ("0x04", 15), ("0x05", 4), ("0x0e", 16)]
+class04_program = next(row for row in type36["classes"]
+                       if row["class"] == "0x04")["implementation_contract"]
+assert class04_program["classification"] == "SOURCE_CLOSED_IMPLEMENTATION_FIELDS"
+assert class04_program["spec_executable"] is True
+assert class04_program["pool_and_scheduler"]["allocator"] == "0x017876"
+assert class04_program["state_0x0000"]["offset_lookup"]["offset_x_s16"] == 5
+assert class04_program["state_0x0000"]["offset_lookup"]["offset_sign_rule"] == (
+    "signed_x_offset_s16 = -offset_x_s16 when parent+0x0f:u8 == 0; "
+    "otherwise +offset_x_s16")
+assert class04_program["state_0x0000"]["offset_lookup"]["offset_y_s16"] == 86
+assert class04_program["state_0x0200"]["guard"] == "s16(0xff81e8) == 10"
+assert class04_program["first_lifetime_witness"]["result_position_s16"] == [939, 406, 320]
 assert scene_components["identified_pairs"] == 9
 assert scene_components["unidentified_pairs"] == 0
 class0f = next(row for row in scene_components["components"]
@@ -850,6 +862,10 @@ f = copy.deepcopy(fixtures); f["authority_data"]["player"]["weapon_projectile_re
 f = copy.deepcopy(fixtures); f["authority_data"]["player"]["weapon_projectile_resource"]["implementation_contract"]["record4_parent_class0"]["effect_allocation"]["state0"]["falls_through_to_state2"] = False; mutations.append((contract, f, "class49 state0 fallthrough mutation"))
 f = copy.deepcopy(fixtures); f["authority_data"]["auxiliary"]["first_segment_dependencies"]["class_0x4e_type24_variant4_effect"]["variant10_collision_effect"]["state0"]["first_seed_after"] = "0xe34d"; mutations.append((contract, f, "class4e variant10 RNG mutation"))
 f = copy.deepcopy(fixtures); f["authority_data"]["auxiliary"]["coffee_shop_type36_presentation"]["pool"]["capacity"] = 32; mutations.append((contract, f, "Coffee Shop type36 pool mutation"))
+f = copy.deepcopy(fixtures); next(row for row in f["authority_data"]["auxiliary"]["coffee_shop_type36_presentation"]["classes"] if row["class"] == "0x04")["implementation_contract"]["state_0x0000"]["offset_lookup"]["offset_x_s16"] = 4; mutations.append((contract, f, "Coffee Shop type36 class04 offset mutation"))
+f = copy.deepcopy(fixtures); next(row for row in f["authority_data"]["auxiliary"]["coffee_shop_type36_presentation"]["classes"] if row["class"] == "0x04")["implementation_contract"]["state_0x0000"]["offset_lookup"]["offset_sign_rule"] = "always negative"; mutations.append((contract, f, "Coffee Shop type36 class04 facing-offset mutation"))
+f = copy.deepcopy(fixtures); next(row for row in f["authority_data"]["auxiliary"]["coffee_shop_type36_presentation"]["classes"] if row["class"] == "0x04")["implementation_contract"]["state_0x0200"]["guard"] = "fixed frame"; mutations.append((contract, f, "Coffee Shop type36 class04 guard mutation"))
+f = copy.deepcopy(fixtures); next(row for row in f["authority_data"]["auxiliary"]["coffee_shop_type36_presentation"]["classes"] if row["class"] == "0x04")["implementation_contract"]["effects"]["audio_commands"] = [0x77]; mutations.append((contract, f, "Coffee Shop type36 class04 effect mutation"))
 f = copy.deepcopy(fixtures); f["authority_data"]["auxiliary"]["coffee_shop_scene_component_identities"]["unidentified_pairs"] = 1; mutations.append((contract, f, "Coffee Shop component identity mutation"))
 f = copy.deepcopy(fixtures); next(row for row in f["authority_data"]["auxiliary"]["coffee_shop_scene_component_identities"]["components"] if row["type"] == 20 and row["class"] == "0x0f")["implementation_contract"]["audio_transactions"][1]["command_u16"] = "0x0077"; mutations.append((contract, f, "Coffee Shop class0f audio mutation"))
 f = copy.deepcopy(fixtures); next(row for row in f["authority_data"]["auxiliary"]["coffee_shop_scene_component_identities"]["components"] if row["type"] == 24 and row["class"] == "0x0a")["implementation_contract"]["animation_selector"]["offsets_s16"][19] = 1404; mutations.append((contract, f, "Coffee Shop class0a animation-table mutation"))

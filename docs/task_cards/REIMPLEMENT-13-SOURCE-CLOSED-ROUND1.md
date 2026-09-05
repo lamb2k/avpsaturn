@@ -17,12 +17,15 @@ NEXT_ELIGIBLE_CARDS: [QA-13-ROUND1-END-TO-END-DIFFERENTIAL]
 
 P2 source evidence reaches the stable Round 2 seam at frame 15193 and P3 is
 complete; neither closes native Round 1. P4 Coffee Shop remains RED. Class-
-`0x09` is narrowly normalized, while complete type-20/class-`0x0f` and type-24/
-class-`0x0a` source programs are source/spec/native closed with zero baseline
-row differences.
+`0x09` is narrowly normalized. Complete type-20/class-`0x0f`, type-24/class-
+`0x0a`, type-28/class-`0x00`, and type-36/class-`0x04` source programs are
+source/spec/native closed. Class-`0x04` normalized program fields match, while
+156 raw rows remain different because 12 fixed-pool slots depend on the missing
+earlier type-36/class-`0x03` population; those raw differences remain visible.
 Candidate `d04a65a2253175c6e820140feefc35419e2cca07` and the exhausted Emulator/WGC
-gates stay frozen. The next scene-order body is type-28/class-`0x00` slot
-`0x00ffce00`, dispatch `0x09e098`, currently `BLOCKED_MISSING_SPEC_FIELDS`.
+and Target gates stay frozen. The next scene-order body is the complete type-36/
+class-`0x03` program at `0x09a67e..0x09a7c6`; it owns all 50 Coffee Shop
+lifetimes and the class-`0x04` fixed-pool slot projection dependency.
 
 ## Objective
 
@@ -4114,3 +4117,57 @@ reopen a bounded Target attempt; Emulator/WGC attempts remain exhausted. The
 next dependency-safe whole program is Coffee Shop type-36/class-`0x04`
 presentation, beginning at source frame 2254. Candidate remains frozen and
 physical Saturn remains UNRUN.
+
+### P4 Coffee Shop class-0x04 source-program checkpoint (2026-09-05)
+
+The complete Coffee-Shop-reachable record-type-36/class-`0x04` presentation
+program at `0x09aa90..0x09ac18` is source/spec/native closed for all 15 observed
+lifetimes. The accepted program binds both player allocation writers, shared
+fixed-pool allocation and ascending scheduling, initialization, ten generated
+animation records, the source facing-derived signed X offset (`-5` when facing
+zero, `+5` otherwise), Y projection, parent facing and backlink, movement guard,
+animation/timer/terminal branches, same-visit release, and backlink clearing.
+It positively establishes zero direct RNG, collision, health/damage, audio,
+route, camera, or load effects. Source-frame anchors remain witnesses, not
+runtime clocks.
+
+Paired baseline captures are byte-identical. Twelve focused behavioral mutants
+reject at attributed exits; syntax-error, launcher-failure, known semantic, and
+equivalent-mutant self-controls prove the corrected mutation helper distinguishes
+`INVALID_MUTATION`, `ENVIRONMENT_FAILURE`, causal rejection, and survivor states.
+Current host counts are 342 attributed behavioral rejections including the 12
+focused controls, two declared equivalent survivors not credited, and zero
+invalid, timeout, or environment failures. Historical pre-causal totals remain
+qualified rather than retroactively asserted causal.
+
+The whole-scene run is byte-identical across two captures. All 197 source and
+native class-`0x04` rows align at the normalized program boundary; assembly and
+selectors match. There are 156 raw differences: 12 of 15 lifetimes use different
+fixed-pool slots because the earlier type-36/class-`0x03` population is not yet
+implemented, and residual low fractional X words remain visible in the raw
+projection. These differences are not normalized out or accepted as scene
+parity. Scene RED gaps improve from `184/1/0/663/1/93/0/279/0` to
+`181/1/0/659/1/93/0/279/0`, meaning missing actors, unowned Saturn actors,
+unidentified pairs, spawn/despawn, unsupported states, collision/damage,
+route/camera, audio/load, and retained authority respectively. No category
+increases.
+
+Runtime measures 99,580/102,400 bytes (`0x184fc`), leaving 2,820 bytes. SPEC
+content is 50,324/262,144 bytes across 180 tables at SHA-256
+`9b3266fa1819efc796fe87a2180b197384f4a053fbf91457545ad790110edda3`;
+the executable contract is `b784f11da55207e2ac26577a54e2f354cf4c23306794cf1ad77ec300ad1f4557`
+and fixture is `1c038863c4b3f1730663780ce2294e75380abbf2c5b8779ee81028183c392103`.
+The census floor is 243,668 bytes, leaving 18,476. Tile archive remains
+612,720/614,400, current street peak 592,648, stage strips 269,654/294,912,
+diagnostic window 89,700/106,496, and composite scratch 11,648/12,288. No carve
+changed. The CPU-mediated cart-to-VDP1 rule remains locked. Physical canary and
+cadence remain UNRUN.
+
+No current Target artifact exists because the approved three-attempt budget was
+already exhausted; this body does not reset it. The last accepted Target image
+is historical class-`0x0a`, not evidence for this body. Emulator/WGC transition
+attempts also remain exhausted. The read-only readiness record now carries the
+current archive identity but is not a retry. The earliest owning source program
+is type-36/class-`0x03`, dispatch `0x09a67e..0x09a7c6`, with 50 Coffee Shop
+lifetimes; close the whole program next and rerun the scene without suppressing
+raw slot-projection differences. Candidate remains frozen.

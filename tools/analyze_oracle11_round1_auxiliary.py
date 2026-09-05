@@ -740,7 +740,7 @@ def coffee_shop_type36_presentation(op,program):
   direct_health=sum(0xffd280<=int(r['attacker'],16)<=0xffe27f or
                     0xffd280<=int(r['defender'],16)<=0xffe27f for r in health)
   first,last=TYPE36_BODY[cls]
-  classes.append({'type':36,'class':cls,
+  item={'type':36,'class':cls,
    'classification':'SOURCE_CLOSED_PRESENTATION','semantic_name':'UNKNOWN',
    'scheduler':'0x01bd48, ascending 0x40-byte fixed-pool slots',
    'dispatch_entry':f'0x{first:06x}','source_body_end_exclusive':f'0x{last:06x}',
@@ -764,7 +764,126 @@ def coffee_shop_type36_presentation(op,program):
           for field in projection_fields),
       'fixed_pool_order_may_change_downstream_projection':cls in ('0x04','0x05')},
    'implementation_rule':'native source-owned presentation actor in the shared fixed pool; it must not become independent gameplay authority',
-   'fixed_frame_substitute_forbidden':True})
+   'fixed_frame_substitute_forbidden':True}
+  if cls=='0x04':
+   first_rows=[r for r in writes if r['slot']=='ffe140' and
+               int(r['frame']) in (2253,2254)]
+   first_values={(r['pc'],r['inner']):r['data'] for r in first_rows}
+   req(first_values[('09aace','10')]=='000003b0' and
+       first_values[('09aad4','14')]=='00000140' and
+       first_values[('09aada','18')]=='00000140' and
+       first_values[('09aafe','10')]=='000003ab' and
+       first_values[('09ab02','14')]=='00000196' and
+       first_values[('01652a','1e')]=='0000ac82' and
+       first_values[('016534','24')]=='00000000',
+       'type-36 class-0x04 first-state write witness drift')
+   item['implementation_contract']={
+    'classification':'SOURCE_CLOSED_IMPLEMENTATION_FIELDS',
+    'spec_executable':True,
+    'source_bodies':{
+     'class_dispatch':{'first':'0x09aa90','last_exclusive':'0x09ac18',
+      'sha256':hashlib.sha256(op[0x09aa90:0x09ac18]).hexdigest()},
+     'state_dispatch_table':{'first':'0x09aa9c','last_exclusive':'0x09aaa4',
+      'sha256':hashlib.sha256(op[0x09aa9c:0x09aaa4]).hexdigest()},
+     'offset_helper':{'first':'0x02f8dc','last_exclusive':'0x02f8e8',
+      'sha256':hashlib.sha256(op[0x02f8dc:0x02f8e8]).hexdigest()},
+     'facing_offset_branch':{'first':'0x09aae6','last_exclusive':'0x09aaf8',
+      'sha256':hashlib.sha256(op[0x09aae6:0x09aaf8]).hexdigest()},
+     'selector0_offset_row':{'first':'0x02f8e8','last_exclusive':'0x02f8ec',
+      'sha256':hashlib.sha256(op[0x02f8e8:0x02f8ec]).hexdigest()},
+     'animation_selector_table':{'first':'0x09ac18','last_exclusive':'0x09ac82',
+      'sha256':hashlib.sha256(program[0x09ac18:0x09ac82]).hexdigest()},
+     'spawn_writer_0x02417a':window(op,0x02417a),
+     'spawn_writer_0x023946':window(op,0x023946)},
+    'pool_and_scheduler':{
+     'record_type_u8':36,'class_u8':'0x04','pool_base':'0xffd280',
+     'capacity_u16':64,'stride_u16':0x40,
+     'allocator':'0x017876','release_routine':'0x01788c',
+     'scheduler':'0x01bd48 ascending source-slot order',
+     'scheduler_position':'record type 36 after record types 4, 8, 12, 16, 20, 24, 28 and 32'},
+    'allocation':{
+     'writers':['0x02417a','0x023946'],
+     'source_spawn_contexts':spawn_contexts,
+     'guard':('the route-4 Predator Warrior player program reaches writer '
+              '0x02417a in state/substate 0x0200:0x0c02 or writer 0x023946 '
+              'in state/substate 0x0200:0x0406 and the fixed-pool allocator succeeds'),
+     'writes_in_order':['actor+0x00:u8 += 1','actor+0x02:u16 = 0x0400',
+                        'actor+0x28:u16 = parent source-slot low word'],
+     'parent':{'source_slot':'0x00ff8380','record_type_u8':0,
+               'class_u8':'0x00','character_selector_u8':0},
+     'allocation_failure_rule':'omit the child and continue the player caller; do not synthesize an actor or retry on a frame clock',
+     'frame_anchors_are_witnesses_only':True},
+    'state_dispatch':{
+     'state_field':'actor+0x04:u8 high state byte selected as an even table index',
+     'entries':[{'state_u16':'0x0000','table_offset_u16':'0x0008','target':'0x09aaa4'},
+                {'state_u16':'0x0200','table_offset_u16':'0x0142','target':'0x09abde'},
+                {'state_u16':'0x0400','table_offset_u16':'0x0162','target':'0x09abfe'},
+                {'state_u16':'0x0600','table_offset_u16':'0x0166','target':'0x09ac02'}],
+     'unsupported_state_rule':'reject; no fallback'},
+    'state_0x0000':{
+     'writes_in_order':['actor+0x04:u8 += 2','parent+0x7c:u16 = child source-slot low word',
+                        'copy parent+0x10:u16 to actor+0x10:u16',
+                        'copy parent+0x14:u16 to actor+0x14:u16',
+                        'copy parent+0x18:u16 to actor+0x18:u16',
+                        'actor+0x0f:u8 = 1','if parent+0x0f:u8 == 0 then actor+0x0f:u8 = 0',
+                        'actor+0x10:u16 = parent x + facing-derived signed offset_x',
+                        'actor+0x14:u16 = parent y + offset_y',
+                        'bind animation selector 0'],
+     'position_fields':{'parent_x':'parent+0x10:s16','parent_y':'parent+0x14:s16',
+                        'parent_z':'parent+0x18:s16','child_x':'actor+0x10:s16',
+                        'child_y':'actor+0x14:s16','child_z':'actor+0x18:s16',
+                        'fractional_words':'not read or written by this program'},
+     'offset_lookup':{'helper':'0x02f8dc','selector_source':'parent+0x24:u8',
+      'index_rule':'selector_u8 * 4 indexes signed x/y words',
+      'coffee_shop_reachable_selector_u8':0,'offset_x_s16':5,'offset_y_s16':86,
+      'x_rule':'child_x_s16 = parent_x_s16 + signed_x_offset_s16',
+      'offset_sign_rule':('signed_x_offset_s16 = -offset_x_s16 when '
+                          'parent+0x0f:u8 == 0; otherwise +offset_x_s16'),
+      'y_rule':'child_y_s16 = parent_y_s16 + offset_y_s16',
+      'z_rule':'child_z_s16 = parent_z_s16'},
+     'facing_rule':'child+0x0f:u8 equals parent+0x0f:u8 for the route-reachable 0/1 values',
+     'character_dispatch':{'selector':'parent+0x03:u8 * 2',
+      'coffee_shop_reachable_selector_u8':0,'target':'0x09aac8',
+      'other_character_branches':'NOT_REQUIRED_FOR_R7C'},
+     'animation_binding':{'selector_u8':0,'table':'0x09ac18',
+      'relative_offset_u16':'0x006a','first_record':'0x0009ac82',
+      'record_sequence':records},
+     'rng_calls_u8':0},
+    'state_0x0200':{
+     'guard':'s16(0xff81e8) == 10',
+     'guard_true_arithmetic':'actor+0x10:s16 += s16(0xff82c0), preserving actor+0x12:u16 fraction',
+     'guard_false_result':'x high word unchanged',
+     'update_order':['evaluate global guard','conditionally add signed x delta',
+                     'test signed animation branch','advance state byte by 2 when branch is negative',
+                     'advance source animation through 0x016536'],
+     'terminal_guard':'actor+0x24:s16 < 0 advances to state 0x0400 before the animation call',
+     'rng_calls_u8':0},
+    'state_0x0400_and_0x0600':{
+     'state_0x0400_rule':'increment state byte by 2 and fall through to the 0x0600 body in the same scheduler visit',
+     'backlink_guard':'parent+0x7c:u16 == child source-slot low word',
+     'backlink_result':'clear parent+0x7c:u16 only when the guard is true',
+     'release_rule':'release through 0x01788c in the same scheduler visit',
+     'parent_missing_rule':'source allocation establishes the parent for every Coffee Shop lifetime; no inferred fallback is permitted'},
+    'effects':{'collision_damage':'none','health_resource':'none','rng_calls_u8':0,
+               'audio_commands':[],'route_camera_writes':[],'load_release_events':[]},
+    'first_lifetime_witness':{
+     'allocation_source_frame_u16':2253,'first_visible_frame_u16':2254,
+     'source_slot':'0x00ffe140','parent_position_s16':[944,320,320],
+     'result_position_s16':[939,406,320],'facing_u8':0,
+     'animation_record':'0x0009ac82','last_visible_frame_u16':2268,
+     'absent_frame_u16':2269},
+    'counterfactual':item['counterfactual'],
+    'mutation_controls':['wrong spawn writer or player state/substate guard',
+     'fixed-frame allocation','wrong fixed-pool pop order','wrong parent source slot',
+     'wrong state dispatch entry','wrong signed offset row or selector index',
+     'wrong x subtraction or y addition','wrong facing copy',
+     'wrong animation selector, record, timer, branch, assembly or collision selector',
+     'wrong 0xff81e8 guard or 0xff82c0 signed delta','extra RNG call',
+     'omitted scheduler invocation','wrong backlink guard','delayed release',
+     'invented collision, damage, audio, route, camera or load effect'],
+    'fixed_frame_substitute_forbidden':True,
+    'retained_gameplay_authority':False}
+  classes.append(item)
  req(all(item['direct_collision_damage_writes']==0 and
          item['direct_audio_writes']==0 and
          item['direct_route_camera_writes']==0 and
@@ -3974,6 +4093,8 @@ def validate(r):
      c3d['scene_actor_rows_u16']==4032,
      'class-0x3d Predator special effect contract drift')
  type36=r['coffee_shop_type36_presentation']
+ class04=next(x for x in type36['classes'] if x['class']=='0x04')
+ class04_program=class04['implementation_contract']
  req(type36['classification']=='SOURCE_CLOSED_IMPLEMENTATION_FIELDS' and
      type36['capture_identity']['byte_identical'] is True and
      type36['capture_identity']['spawn_context_byte_identical'] is True and
@@ -3998,6 +4119,37 @@ def validate(r):
          for x in type36['classes']) and
      type36['retained_gameplay_authority'] is False,
      'Coffee Shop type-36 presentation contract drift')
+ req(class04_program['classification']=='SOURCE_CLOSED_IMPLEMENTATION_FIELDS' and
+     class04_program['spec_executable'] is True and
+     class04_program['source_bodies']['class_dispatch']['sha256']==
+      '63bdf188af16583e833a1e0cdd9570451c2f59d331e430caa65cf05ca0f8c9f2' and
+     class04_program['pool_and_scheduler']['allocator']=='0x017876' and
+     class04_program['pool_and_scheduler']['release_routine']=='0x01788c' and
+     [x['state_u16'] for x in class04_program['state_dispatch']['entries']]==
+      ['0x0000','0x0200','0x0400','0x0600'] and
+     class04_program['allocation']['parent']['source_slot']=='0x00ff8380' and
+     class04_program['allocation']['frame_anchors_are_witnesses_only'] is True and
+     class04_program['state_0x0000']['offset_lookup']['coffee_shop_reachable_selector_u8']==0 and
+     class04_program['state_0x0000']['offset_lookup']['offset_x_s16']==5 and
+     class04_program['state_0x0000']['offset_lookup']['offset_y_s16']==86 and
+     class04_program['state_0x0000']['offset_lookup']['offset_sign_rule']==
+      ('signed_x_offset_s16 = -offset_x_s16 when parent+0x0f:u8 == 0; '
+       'otherwise +offset_x_s16') and
+     class04_program['state_0x0000']['animation_binding']['first_record']=='0x0009ac82' and
+     len(class04_program['state_0x0000']['animation_binding']['record_sequence'])==10 and
+     class04_program['state_0x0200']['guard']=='s16(0xff81e8) == 10' and
+     's16(0xff82c0)' in class04_program['state_0x0200']['guard_true_arithmetic'] and
+     class04_program['state_0x0400_and_0x0600']['backlink_guard'].startswith(
+      'parent+0x7c:u16 ==') and
+     class04_program['effects']=={'collision_damage':'none',
+      'health_resource':'none','rng_calls_u8':0,'audio_commands':[],
+      'route_camera_writes':[],'load_release_events':[]} and
+     class04_program['first_lifetime_witness']['result_position_s16']==
+      [939,406,320] and
+     len(class04_program['mutation_controls'])>=15 and
+     class04_program['fixed_frame_substitute_forbidden'] is True and
+     class04_program['retained_gameplay_authority'] is False,
+     'Coffee Shop type-36 class-0x04 executable contract drift')
  scene_components=r['coffee_shop_scene_component_identities']
  class0f_component=next(x for x in scene_components['components']
                         if x['type']==20 and x['class']=='0x0f')

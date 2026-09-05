@@ -679,7 +679,8 @@ static int avsp_round1_dispatch_supported(unsigned char record_type,
     if (record_type == 24u &&
         (actor_class == 0x4b || actor_class == 0x3d))
         return 1;
-    if (record_type == 36u && actor_class == 0x05)
+    if (record_type == 36u &&
+        (actor_class == 0x04 || actor_class == 0x05))
         return 1;
     if (record_type == 28u && actor_class == 0x0a)
         return 1;
@@ -8049,6 +8050,167 @@ static int avsp_round1_step_class0f(AvspRound1Runtime *runtime,
     return 1;
 }
 
+static int avsp_round1_type36_class04_contract_valid(void)
+{
+    const AvspRound1Type36Class04Spec *spec =
+        &avsp_round1_type36_class04;
+    return spec->record_type == 36u && spec->actor_class == 0x04 &&
+        spec->parent_source_slot == 0x8380u &&
+        spec->dispatch == 0x0009aa90UL &&
+        spec->offset_helper == 0x0002f8dcUL &&
+        spec->first_animation_record == 0x0009ac82UL &&
+        spec->active_state == 0x0200u &&
+        spec->terminal_state == 0x0400u &&
+        spec->release_state == 0x0600u && spec->offset_x == 5 &&
+        spec->offset_y == 86 && spec->global_guard_value == 10u &&
+        spec->offset_selector == 0u &&
+        avsp_round1_type36_class04_records[0].animation_record ==
+            spec->first_animation_record &&
+        avsp_round1_type36_class04_records[0].assembly == 0x0009b5a6UL &&
+        avsp_round1_type36_class04_records[0].hurt_selector == 0u &&
+        avsp_round1_type36_class04_records[0].attack_selector == 0u &&
+        avsp_round1_type36_class04_records[
+            AVSP_ROUND1_TYPE36_CLASS04_PRESENTATION_COUNT - 1u].branch < 0;
+}
+
+static int avsp_round1_spawn_type36_class04(AvspRound1Runtime *runtime)
+{
+    const AvspRound1Type36Class04Spec *spec =
+        &avsp_round1_type36_class04;
+    AvspRound1ActorCore *actor;
+    unsigned short substate;
+    unsigned long animation_record;
+    if (runtime == 0 || !avsp_round1_type36_class04_contract_valid() ||
+        runtime->route_state != 4 || runtime->player.active == 0u ||
+        (unsigned short)runtime->player.source_slot !=
+            spec->parent_source_slot)
+        return 0;
+    substate = runtime->player.substate;
+    animation_record = runtime->player.animation_record;
+    if (!((substate == 0x0c02u &&
+           (animation_record == 0x0015e540UL ||
+            animation_record == 0x0015e594UL)) ||
+          (substate == 0x0406u && animation_record == 0x0015e9d8UL)))
+        return 0;
+    ++runtime->type36_class04_allocation_requests;
+    actor = avsp_round1_allocate_pool_actor_preserve_position_fraction(
+        runtime, 5u);
+    if (actor == 0)
+    {
+        ++runtime->type36_class04_allocation_failures;
+        return 1;
+    }
+    actor->active = 2u;
+    actor->actor_class = spec->actor_class;
+    actor->state = 0u;
+    actor->substate = 0u;
+    actor->variant = 0u;
+    actor->source_target_low = spec->parent_source_slot;
+    actor->dispatch_entry = spec->dispatch;
+    ++runtime->type36_class04_allocations;
+    return 1;
+}
+
+static int avsp_round1_step_type36_class04(AvspRound1Runtime *runtime,
+                                            AvspRound1Pool *pool,
+                                            AvspRound1ActorCore *actor)
+{
+    const AvspRound1Type36Class04Spec *spec =
+        &avsp_round1_type36_class04;
+    AvspRound1ActorCore *parent;
+    if (runtime == 0 || pool == 0 || actor == 0 ||
+        !avsp_round1_type36_class04_contract_valid() ||
+        actor->active != 2u || actor->type != spec->record_type ||
+        actor->actor_class != spec->actor_class ||
+        actor->dispatch_entry != spec->dispatch ||
+        actor->source_target_low != spec->parent_source_slot)
+        return 0;
+    parent = &runtime->player;
+    if (parent->active == 0u ||
+        (unsigned short)parent->source_slot != spec->parent_source_slot)
+        return 0;
+    if (actor->state == 0u)
+    {
+        short x;
+        short y;
+        if (spec->offset_selector != 0u)
+            return 0;
+        actor->state = spec->active_state;
+        actor->substate = 0u;
+        parent->source_type36_class04_child =
+            (unsigned short)actor->source_slot;
+        x = parent->facing == 0u ?
+            (short)((unsigned short)parent->x -
+                    (unsigned short)spec->offset_x) :
+            (short)((unsigned short)parent->x +
+                    (unsigned short)spec->offset_x);
+        y = (short)((unsigned short)parent->y +
+                    (unsigned short)spec->offset_y);
+        actor->source_x_fp = avsp_round1_replace_fixed_high_word(
+            actor->source_x_fp, x);
+        actor->source_y_fp = avsp_round1_replace_fixed_high_word(
+            actor->source_y_fp, y);
+        actor->source_z_fp = avsp_round1_replace_fixed_high_word(
+            actor->source_z_fp, parent->z);
+        actor->x = x;
+        actor->y = y;
+        actor->z = parent->z;
+        actor->facing = parent->facing;
+        actor->animation_index = 0u;
+        avsp_round1_bind_animation_state(
+            actor, &avsp_round1_type36_class04_records[0]);
+        ++runtime->type36_class04_initializations;
+        return 1;
+    }
+    if (actor->state == spec->active_state)
+    {
+        if (runtime->source_round_stage_index == spec->global_guard_value)
+        {
+            short x = (short)((unsigned short)actor->x +
+                              (unsigned short)runtime->source_type36_x_delta);
+            actor->source_x_fp = avsp_round1_replace_fixed_high_word(
+                actor->source_x_fp, x);
+            actor->x = x;
+            ++runtime->type36_class04_global_moves;
+        }
+        if (actor->animation_branch < 0)
+        {
+            actor->state = spec->terminal_state;
+            ++runtime->type36_class04_state_transitions;
+            return 1;
+        }
+        if (actor->animation_timer == 0u ||
+            actor->animation_index + 1u >=
+                AVSP_ROUND1_TYPE36_CLASS04_PRESENTATION_COUNT)
+            return 0;
+        --actor->animation_timer;
+        ++runtime->type36_class04_animation_steps;
+        if (actor->animation_timer == 0u)
+        {
+            ++actor->animation_index;
+            avsp_round1_bind_animation_state(actor,
+                &avsp_round1_type36_class04_records[actor->animation_index]);
+        }
+        return 1;
+    }
+    if (actor->state == spec->terminal_state)
+    {
+        actor->state = spec->release_state;
+        ++runtime->type36_class04_state_transitions;
+    }
+    if (actor->state == spec->release_state)
+    {
+        if (parent->source_type36_class04_child ==
+                (unsigned short)actor->source_slot)
+            parent->source_type36_class04_child = 0u;
+        if (!avsp_round1_release_pool_actor(pool, actor))
+            return 0;
+        ++runtime->type36_class04_releases;
+        return 1;
+    }
+    return 0;
+}
+
 static int avsp_round1_step_class4e(AvspRound1Runtime *runtime,
                                     AvspRound1Pool *pool,
                                     AvspRound1ActorCore *actor)
@@ -12036,6 +12198,9 @@ static int avsp_round1_begin_player_air_weapon(AvspRound1Runtime *runtime,
        retains the record's complete two-tick duration. */
     ++runtime->player_jump_animation_timer;
     ++runtime->player.animation_timer;
+    runtime->player.substate = 0x0406u;
+    if (!avsp_round1_spawn_type36_class04(runtime))
+        return 0;
     allocated = avsp_round1_allocate_player_air_weapon_projectile(
         runtime, input_mask);
     if (allocated)
@@ -12218,6 +12383,11 @@ static int avsp_round1_step_player_weapon(AvspRound1Runtime *runtime,
         {
             ++runtime->player_weapon_attempts_total;
             avsp_round1_allocate_player_weapon_projectile(runtime);
+            if (!avsp_round1_spawn_type36_class04(runtime))
+            {
+                ++runtime->failure_count;
+                return 0;
+            }
         }
         if (runtime->player_weapon_presentation_selector < 4u ||
             runtime->player_weapon_presentation_selector > 7u)
@@ -12621,6 +12791,23 @@ static int avsp_round1_step_scheduler_post_player_mask(
                 {
                     runtime->scheduler_failure_code = 21u;
                     runtime->scheduler_failure_source_slot = actor->source_slot;
+                    ++runtime->failure_count;
+                    return 0;
+                }
+                continue;
+            }
+            if (actor->type == 36u && actor->actor_class == 0x04)
+            {
+                ++actor->scheduler_updates;
+                ++runtime->scheduler_dispatches;
+                if (!avsp_round1_step_type36_class04(
+                        runtime, &runtime->pools[pool_index], actor))
+                {
+                    runtime->scheduler_failure_code = 48u;
+                    runtime->scheduler_failure_source_slot =
+                        actor->source_slot;
+                    runtime->scheduler_failure_state = actor->state;
+                    runtime->scheduler_failure_substate = actor->substate;
                     ++runtime->failure_count;
                     return 0;
                 }
