@@ -8,13 +8,18 @@ forward decisions introduced by `ARCH-01-TITLE-TO-CREDITS-PRODUCTION-PLAN`.
 
 ## Development and evidence boundary
 
-The architecture is reached through the interactive salvage-and-promotion loop
-in `docs/PARITY_PLAN.md`. Existing mixed-runtime systems are isolated and
-tested, placed behind temporary adapters, and displaced only after production
-replacements preserve their accepted locks. Lab and prototype results inform
-reuse decisions but do not advance production parity or physical capability
-gates. Host, MAME, Saturn emulator, human-review, and physical Saturn evidence
-remain distinct.
+The interactive salvage-and-promotion loop established the accepted adapters;
+do not repeat it for every R7C actor/program. Current implementation closes
+complete source programs and playable scenes under `docs/PARITY_PLAN.md`.
+Reuse the existing boundaries and preserve their locks. Lab/prototype results
+do not advance production parity or physical capability gates. Host, MAME,
+Saturn emulator, human-review and physical Saturn evidence remain distinct.
+
+The normal interactive scheduler must consume current state/input and recovered
+source guards, not source-frame cadence or packed observation-phase tables.
+Those tables belong to the differential adapter. The 2026-09-07 live-callback
+audit found this boundary violated; current state/card record it as blocked.
+No architecture declaration or hardcoded zero is implementation proof.
 
 ## Target shape
 

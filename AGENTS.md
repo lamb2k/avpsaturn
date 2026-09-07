@@ -1,135 +1,119 @@
 # AvP Saturn port agent policy
 
-## Authority and control loop
+## Authority and immediate scope
 
-Codex Goal Mode owns interactive implementation, sequencing, acceptance, and
-task-card activation. `docs/PARITY_PLAN.md` is the only roadmap,
-`project_state.yaml` is the machine-readable state, and files under
-`docs/task_cards/` are the bounded work queue. Do not create another
-orchestrator, autonomous state machine, master plan, or competing backlog.
-
-Read `AGENTS.md`, `project_state.yaml`, and the active task card completely
-before work. Read `docs/TEST_PLAN.md` for verification and
-`docs/HARDWARE_TEST.md` before physical work. Read
-`docs/research/CPS2_TO_SATURN_RESET.md` for behavioral, runtime, device, or
-architecture changes.
-
+Codex Goal Mode owns interactive implementation. `docs/PARITY_PLAN.md` is the only roadmap;
+`project_state.yaml` is state authority; the existing active task card owns execution.
 Exactly one implementation task owns writes at a time. Direct Codex
 implementation is the default for ordinary work; nested Codex executors are
 not used for ordinary implementation. Claude is an optional bounded provider
-only when the active task card explicitly permits it. The task card fixes the
-scope, owned paths, checks, exclusions, hard stops, and next eligible cards.
+only when the active card explicitly permits it. Preserve owner-selected
+`gpt-5.6-sol` / `high`; do not change model/provider or add a controller.
 
-Interactive implementation sessions for this line run on Codex `gpt-5.6-sol`
-at `high` reasoning (owner decision, 2026-08-30). Do not change the model
-or reasoning tier without new owner authority.
+Current delivery is R7C: one-player Predator Warrior, direct Round 1 entry,
+complete stage and boss, clear, and specified stable Round 2 handoff.
+Frontend, other characters, multiplayer and Round 2 gameplay are out of scope.
+A complete source census or accepted SPEC is not an implemented playable level.
 
-While a physical card is stopped at `READY_FOR_PHYSICAL`, Goal Mode may run
-only a predeclared `independent_read_only_cards` Oracle body. Exactly one
-Oracle writer may operate at a time. It may write only card-scoped source
-research, derived evidence, ledgers, state, and its card; it may not write
-production runtime paths, change the active physical card, advance physical
-status, or activate an implementation successor.
+Read this file, the handoff, current state fields and the complete active card.
+State history and accepted cards are provenance, not new instructions: read
+only the history needed by the selected body. Use TEST_PLAN for checks,
+EMULATOR_MCP_CAPTURE for capture, and HARDWARE_TEST before physical work.
+The dated CPS2_TO_SATURN_RESET audit is architecture context, not a command to
+restart completed research. Read its relevant section for boundary changes.
+Do not reread thousands of historical checkpoint lines each iteration.
 
-## Branch and worktree continuity
+## Work that advances delivery
 
-A new tranche, task card, milestone, or checkpoint does not by itself justify
-a new branch or worktree. For each approved card, coherently commit the
-completed work, push it to `private-origin`, and verify that the remote branch
-SHA equals the local commit. Before activating its successor, inspect the
-current repository state and select the existing branch and worktree that best
-continue the dependency chain and intended development line. Continue there
-sequentially from the approved predecessor, using explicit, clean commits as
-meaningful milestone and checkpoint boundaries.
+Continue REIMPLEMENT-13 in complete source-program bodies, then whole scenes.
+Do not restart salvage benches or request human review after every actor/body.
+Reuse accepted rendering, input, collision/HIT/KO, camera, HUD, PCM/CDDA,
+loading/residency and diagnostics. The earlier salvage loop remains history.
 
-Create a new branch or worktree only when required isolation, parallel
-development, incompatible dependencies, an unsafe dirty state, or a genuinely
-separate line of development makes reuse inappropriate. Preserve existing
-worktrees; do not remove, migrate, reset, or rewrite them merely to conform to
-this routing policy.
+1. Select the highest-fan-out dependency-safe gameplay body on the active card.
+2. Implement from executable SPEC and accepted interfaces. If a required field
+   is missing, amend the existing fixture from accepted Oracle evidence.
+   New capture is a smallest bounded follow-up only when that evidence lacks it.
+3. Run strict host compile, focused differential, deterministic repeat and
+   attributable behavior mutations. Check a whole program, not one frame/slot.
+4. Run broader lanes at TEST_PLAN risk boundaries. Inspect a real interactive
+   image before describing it as playable. Keep every failed/unrun gate visible.
+5. Coherently commit completed work, push it to `private-origin`, verify that
+   the remote branch SHA equals local, and continue the existing dependency chain.
 
-## Development loop
+Within owned paths, automatically correct ordinary compile, test and integration
+defects. Do not request permission for routine edits, tests or checkpoints.
+An exhausted named gate stays blocked until the owner explicitly reopens it;
+a deadline or a fresh commit does not renew its attempt budget. Preserve work
+and continue another dependency-safe body when possible. Never count a failed
+build/launcher/timeout as a behavioral mutation kill.
 
-Use this loop for each existing subsystem:
+## Gameplay and evidence boundary
 
-1. isolate it in a salvage bench;
-2. run focused machine validation with a deterministic repeat and a real
-   negative control;
-3. build its dedicated Saturn diagnostic and self-review it in the pinned
-   emulator;
-4. obtain human review when appearance or feel is subjective;
-5. record `SALVAGE_AS_IS`, `SALVAGE_WITH_ADAPTER`, `REPAIR`, or `REPLACE`;
-6. promote it behind a `port_v2` production interface;
-7. integrate it with one additional dependency and repeat.
+Use MAME set `avspu`, USA 940520, and pinned MAME 0.289. The architecture is
+offline ROM extraction, source-addressed tables/routines, portable native C
+on SH-2, fixed pools, VDP1 actors, VDP2 backgrounds and SCSP/PCM/CDDA adapters.
+Do not build a CPS-2 emulator, general lifter, whole-program recompiler or ECS.
 
-The old mixed runtime is reusable evidence and implementation material, not
-the production gameplay authority. Loading, graphics, animation, input, VDP1,
-VDP2, palette, HUD, audio, diagnostic, build, and emulator systems must receive
-a bounded salvage experiment before replacement. The lab and prototype may
-prove reuse or falsify a candidate; they do not advance parity or physical
-capability gates.
+The normal interactive image must not use a captured frame ledger to select
+gameplay invocations, movement, damage, lifetime, release or route outcomes.
+Legitimate source timers, hitstop, scheduler guards and animation clocks are
+allowed; recovered source rules, not observation rows, must own their updates.
+Keep replay/capture alignment in the diagnostic/oracle adapter. Compare
+source-slot/field/state semantics across platforms, not identical CPU addresses.
 
-Within the active card's owned paths, automatically correct ordinary compile,
-focused-test, asset, integration, emulator, readback, palette, pivot, and
-animation problems. Stop only for a declared hard stop, missing evidence,
-unsafe worktree state, required physical interaction, a material architecture
-decision, or an exhausted bounded correction cycle.
+Require current input/state, changed-input causal behavior, full-scene coverage,
+raw alongside narrowly normalized differences, and no unsupported dispatch.
+A hardcoded zero is not evidence of absent retained authority.
+A passing emulator check is not human approval or physical proof. No deadline
+changes those gates. Do not promote a candidate from a fixture hash or commit.
 
-## Saturn self-review and human checkpoints
+## Review, physical and stop boundaries
 
-Every Saturn-facing bench must use its dedicated diagnostic build, the pinned
-emulator, automated runtime-ready and asset-failure readback, relevant actor
-position and render-count diagnostics, a bounded stability run, and a
-screenshot or short clip. Compare it with the old-build baseline and existing
-source evidence before presenting it to the user.
+USER-09 remains CHANGES_REQUESTED. USER-10 follows QA-13 and cannot be
+self-approved. SALVAGE-08 remains gated on explicit accepted USER-10.
+No per-body subjective review is required; approved behavior remains locked.
+A user-approved component is locked; report a source contradiction and request
+renewed review before intentionally changing its subjective behavior.
 
-Do not self-approve subjective visual scale, pivot or grounding, animation
-cadence, movement feel, camera feel, palette preference, composition, or audio
-feel. Every visible or audible checkpoint creates an ignored package at
-`build/feedback/<task-id>/` with the practical evidence listed in the task
-card and asks: "What should remain unchanged, what looks or feels wrong, and
-which issue should be fixed first?"
+At USER-10 provide the exact interactive build, controls, continuous source and
+Saturn clips, adaptations, comparisons and physical status under ignored
+`build/feedback/<task-id>/`. Ask exactly:
+"What should remain unchanged, what looks or feels wrong, and which issue should be fixed first?"
+Stop for the answer. Never infer approval from silence.
 
-A `USER_REVIEW` card performs no implementation and never infers approval from
-silence. While feedback is pending, activate only a predeclared dependency-safe
-card that cannot alter the result under review. Record the user's exact
-response in `data/port_v2_migration_map.yaml`, then derive approved components,
-requested changes, priority, and the next bounded repair or promotion card.
+Physical Saturn remains UNRUN; HW-01 remains READY_FOR_PHYSICAL. Its parked
+status does not prohibit independent software R7C work. The historic
+`independent_read_only_cards` exception remains source-only, serial and unable
+to advance physical status. No emulator result advances physical acceptance.
 
-A user-approved component is locked. Later work may change it only after
-identifying the approved behavior at risk and requesting renewed review.
+Stop for unsafe worktree ownership, required credentials/legal permission,
+destructive/device work, physical interaction, an unresolved material architecture
+choice, or an exhausted/source blocker with no dependency-safe work remaining.
+Reports state the blocker and exact unblock condition, not a request to redo a plan.
 
-## Evidence and acceptance
+## Continuity, memory and repository safety
 
-Machine validation, fidelity evidence, emulator review, human approval, and
-physical Saturn proof are independent. A passing emulator check is not human
-visual approval, and neither is physical-hardware proof. Preserve the evidence
-vocabulary and never promote a tier.
+Use the existing branch/worktree. Preserve newer work and all ignored evidence.
+Never reset, clean, stash, rebase, broadly restore, force-push or use `git add -A`.
+Never modify or stage `data/avsp_anim_records.json` or `history.txt`.
+Stage explicit owned paths only. No ROMs, keys, ISOs, raw traces, dumps, PNGs,
+savestates or generated copyrighted media enter Git. No MSHvSF lane merge.
 
-The only title target is MAME set `avspu`, `Alien vs. Predator (USA 940520)`.
-The selected architecture remains offline extraction, address-traceable data,
-bounded selective lifting into native C, native SH-2 subsystems, MAME 0.289 as
-semantic oracle, VDP1 actors, VDP2 stage layers, fixed cartridge arenas, SCSP
-PCM, CDDA music, and one master-SH-2 loop until profiling proves otherwise.
-Do not build a CPS-2 emulator, whole-program recompiler, generalized Capcom
-engine, or presentation-first substitute.
+Preserve the existing per-region memory plan/asserts and CPU-mediated
+cartridge-to-VDP1 upload rule. No SCU DMA A-bus endpoint, arena enlargement or
+mid-combat data read. SPEC headroom is not runtime/texture/work-RAM headroom.
+Physical DMA legality and timing margins need physical evidence.
 
-Use the smallest verification lane justified by the active card. DEV and BENCH
-checks are the ordinary inner loop. Oracle, Full, release Target, normal-release
-emulator acceptance, and physical lanes are reserved for the risk boundaries
-defined in `docs/TEST_PLAN.md` and `docs/HARDWARE_TEST.md`.
+## Handoff and reporting
 
-## Repository safety
+Keep AGENT_HANDOFF under 50 lines and the active card under 220 lines.
+Keep historical detail in Git and existing evidence, not appended active prose.
+Report material results: playable extent, objective defects, named gap counts,
+checks, build/commit/remote identities, blocked tiers and exact next body.
+Never substitute mutation totals or row-match percentages for playability.
 
-The repository contains dirty implementation worktrees and private evidence.
-Never reset, clean, stash, rebase, broadly restore, force, use `git add -A`, or
-run diagnostics that overwrite captures. Stage explicit owned paths only.
-Preserve prototype, V2-2B, recovery, ROM, `.deps`, capture, and untracked work.
-Never commit ROMs, keys, original disc data, generated copyrighted media, raw
-captures, memory dumps, screenshots, ISO/cue files, or private logs.
-
-The final acceptance target remains a normal-release, deterministic physical
-Saturn capability slice with controller input, player, class `0x1F` enemy,
-movement, animation, collision, damage, HIT/KO, camera/stage, palettes, VDP1,
-VDP2, PCM, CDDA, residency, timing, final scanout, and soak evidence. No bench,
-host, MAME, emulator, or user-review result substitutes for that gate.
+At a review/owner boundary include CODEX_REVIEW_INVOCATION with task, exact
+local/remote/production/candidate identities, tested artifact, PASS/FAIL/UNRUN
+lanes, evidence paths, disposition and one executable next assignment.
+Do not emit a bare marker. Normal checkpoint commits are not human boundaries.

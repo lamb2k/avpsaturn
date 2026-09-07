@@ -1,45 +1,45 @@
-# REIMPLEMENT-13 active agent handoff
+# REIMPLEMENT-13-SOURCE-CLOSED-ROUND1 handoff (2026-09-07 owner delivery focus)
 
-Resume the persistent AvP Goal on `codex/avp-playable-loop-pivot` with
-`REIMPLEMENT-13-SOURCE-CLOSED-ROUND1` active. State, active card, plans, and
-capture contract govern. Never stage/reset/overwrite `data/avsp_anim_records.json`
-or `history.txt`; do not create another workflow or writer.
+Continue the same Goal, branch `codex/avp-playable-loop-pivot`, one writer.
+Read AGENTS, current state, the concise active card and TEST_PLAN.
+Do not touch `history.txt` or `data/avsp_anim_records.json`.
 
-Candidate `d04a65a2253175c6e820140feefc35419e2cca07` remains frozen. Preserve
-USER-09 `CHANGES_REQUESTED`, USER-10 human approval, SALVAGE-08 inactive,
-physical Saturn `UNRUN`, and all locks. Target and Emulator/WGC gates remain
-exhausted at three attempts; no retry is authorized.
-
-## Current checkpoint
-
-P2 closes through stable Round 2 seam frame 15193 and P3 is complete; native
-Round 1 is not. P4 Coffee Shop remains RED. Class-`0x09` frame 5493 is only a
-narrow presentation normalization.
-
-Type-36/class-`0x03` is source/spec/native closed for all 50 lifetimes. All
-1,700 program rows match; 1,360 raw rows and 38 fixed-pool projections remain
-visible. Whole-scene output repeats byte-identically. Raw gaps are: missing
-source actors 144; unowned Saturn actors 1; unidentified pairs 0; unmapped
-spawn/despawn 633; unsupported states 1; collision/damage 93; route/camera 0;
-audio/load 279; retained gameplay authority 0.
-
-Type-28/class-`0x0c` remains `BLOCKED_MISSING_SPEC_FIELDS`. Its bounded Oracle
-follow-up used all three attempts: invalid Lua-local instrumentation, valid
-cold identity, then a non-causal contact mutation that normalized before the
-actor scheduler visit. Do not credit or retry it. Evidence and exact unblock
-condition: `data/reimplement13_class0c_oracle_followup.json`.
-
-Runtime is 99,616/102,400 bytes, leaving 2,784. SPEC content is
-50,504/262,144 bytes across 182 tables at SHA
-`6427526c2951abeda35655545edf17152f2ba7cbf6dd8b8e47521c1ad9dee3ba`.
-Contract is `d179b71a83a202cb8e85a279f821e237a3f144644a49f738b500f2e79c172689`;
-fixture is `dd996a4d72b9ba8771f611e71c227188e0cb1ac553271ceb29d7289caa1fb2a7`.
+Audit base local/private-origin: `2e446d4303fa50bac14ec3c00222635066a7712c`.
+This is not candidate promotion. Frozen candidate:
+`d04a65a2253175c6e820140feefc35419e2cca07`.
+Production: `236eef0c42aaa5c39b105420f8130fcde308e34e`.
+P2 reaches15193; P3 recorded complete; native full Round1 is NOT complete.
+P4 Coffee Shop remains RED. USER-09 CHANGES_REQUESTED; SALVAGE-08 inactive;
+USER-10 requires QA and explicit feedback. Physical UNRUN; HW-01 parked.
 
 ## Exact next experiment
 
-Continue the next dependency-safe whole program: type-36/class-`0x0e`, dispatch
-`0x09d440..0x09d60e`, 16 Coffee Shop lifetimes. Accepted Oracle already binds
-its allocation/parent, attachment, animation, terminal/release, zero-RNG, and
-zero gameplay-effect contract. Amend existing SPEC-02, implement through fixed
-pools, and rerun focused mutations plus the whole scene. Do not retry exhausted
-gates, promote the candidate, or erase the class-`0x0c` blocker.
+Close the captured-schedule leak in the normal interactive call graph.
+main.c live callback uses source-frame cadence OUTSIDE AUTOTEST; round1.c
+post-player/exit helpers also use captured phase windows/events.
+Input is real, but scheduling is not independent of the reference route.
+Amend only the necessary scheduler SPEC from accepted top-level/pool guards.
+Do not guess one tick per display frame. Isolate diagnostic alignment and prove
+changed-input plus shifted-observation-label invariants through the whole program.
+The scene report's retained-authority0 is hardcoded, not proof of this boundary.
+See the active card for exact functions, causal controls and remaining families.
+
+If missing evidence blocks this body, preserve it and continue already-declared
+type36/class0e, 16 lifetimes, dispatch0x09d440..0x09d60e.
+Type28/class0c remains blocked under its exhausted causal-witness budget.
+Target and transition Emulator/WGC also remain exhausted: no retry was authorized.
+Read-only provenance/preflight and a precise changed hypothesis are allowed.
+
+Scene report:144/747 missing source lifetimes;1/692 unowned native lifetimes;
+0/38 unidentified pairs;633/1494 lifetime endpoints;1/692 unsupported records;
+93/149 health-write events;0/11 route/camera;279/281 audio/load. No percentages.
+Raw/normalized program distinctions remain in the report/card. No scene promotion.
+Runtime99,616/102,400; SPEC50,504/262,144; no current accepted Target artifact.
+Source/spec hashes and region evidence remain in state and existing data files.
+Read-only package preflight matches seven staged assets plus original CDDA source;
+pinned EXE/archive match. Root CDDA output is regeneratable by existing build.
+
+Use Fast -WorkflowOnly for docs; DEV for edits; full ceremony at program/platform
+risk boundaries. Keep all acceptance tests and three-attempt rulings.
+Today's full-level target is at risk, not promised. Deliver verified playable
+extent, not a replay or a falsely labelled full round. Continue existing scene order.

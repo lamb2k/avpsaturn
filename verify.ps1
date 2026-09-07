@@ -25,6 +25,7 @@ param(
         'LiveEncounterBench', 'LiveEncounter')]
     [string]$TargetProfile = 'Default',
 
+    [switch]$WorkflowOnly,
     [switch]$Regenerate,
     [switch]$BuildOnly,
     [switch]$Emulator,
@@ -34,6 +35,9 @@ param(
 )
 
 $ErrorActionPreference = 'Stop'
+if ($WorkflowOnly -and $Lane -ne 'Fast') {
+    throw '-WorkflowOnly is an explicit Fast scope, not an acceptance-lane override.'
+}
 if ($ProjectRoot) {
     $projectRoot = (Resolve-Path -LiteralPath $ProjectRoot).Path
 }
@@ -149,62 +153,65 @@ function Invoke-FastLane {
     }
     Invoke-PythonTest 'tests\test_task_card_state.py'
     Invoke-PythonTest 'tests\test_port_v2_migration_map.py'
-    Invoke-PythonTest 'tests\test_avsp_hit_ko_writer_set.py'
-    Invoke-PythonTest 'tests\port_v2\combat\hit_ko\test_contract.py'
-    Invoke-PythonTest 'tests\port_v2\integration\combat\test_contract.py'
-    Invoke-PythonTest 'tests\port_v2\integration\slice\test_contract.py'
-    Invoke-PythonTest 'tests\port_v2\camera_stage\test_contract.py'
-    Invoke-PythonTest 'tests\port_v2\cdda_residency_bench\test_contract.py'
-    Invoke-PythonTest 'tests\port_v2\cdda_residency\test_contract.py'
-    Invoke-PythonTest 'tests\test_avsp_vertical_slice_oracle.py'
-    Invoke-PythonTest 'tests\test_oracle04_predator_controls.py'
-    Invoke-PythonTest 'tests\test_oracle05_street_alien_ai.py'
-    Invoke-PythonTest 'tests\test_oracle06_round1_encounter.py'
-    Invoke-PythonTest 'tests\test_oracle07_player_action.py'
-    Invoke-PythonTest 'tests\test_oracle08_navigation.py'
-    Invoke-PythonTest 'tests\test_oracle09_alien_state.py'
-    Invoke-PythonTest 'tests\test_oracle10_round1_census.py'
-    Invoke-PythonTest 'tests\test_oracle11_actor_scheduler.py'
-    Invoke-PythonTest 'tests\test_oracle11_player_air_authority.py'
-    Invoke-PythonTest 'tests\test_oracle11_player_hitko_continue.py'
-    Invoke-PythonTest 'tests\test_oracle11_player_route_ownership.py'
-    Invoke-PythonTest 'tests\test_oracle11_player_audio.py'
-    Invoke-PythonTest 'tests\test_oracle11_global_audio_load_release.py'
-    Invoke-PythonTest 'tests\test_oracle11_global_audio_handlers.py'
-    Invoke-PythonTest 'tests\test_oracle11_global_audio_trigger_owners.py'
-    Invoke-PythonTest 'tests\test_oracle11_global_load_release_boundaries.py'
-    Invoke-PythonTest 'tests\test_oracle11_round1_navigation.py'
-    Invoke-PythonTest 'tests\test_oracle11_round1_enemies.py'
-    Invoke-PythonTest 'tests\test_oracle11_round1_auxiliary.py'
-    Invoke-PythonTest 'tests\test_oracle11_round1_encounters.py'
-    Invoke-PythonTest 'tests\test_oracle11_round1_boss.py'
-    Invoke-PythonTest 'tests\test_oracle11_round1_handoff.py'
-    Invoke-PythonTest 'tests\test_oracle11_round1_rng.py'
-    Invoke-PythonTest 'tests\test_oracle11_round1_writer_reconciliation.py'
-    Invoke-PythonTest 'tests\test_oracle11_player_authority.py'
-    Invoke-PythonTest 'tests\test_oracle11_player_weapon.py'
-    Invoke-PythonTest 'tests\test_round1_authority_matrix.py'
-    Invoke-PythonTest 'tests\test_spec02_round1_contract.py'
-    Invoke-PythonTest 'tests\port_v2\round1\test_entry.py'
-    Invoke-PythonTest 'tests\port_v2\round1\test_target_entry_wiring.py'
-    Invoke-PythonTest 'tests\test_spec01_encounter_contract.py'
-    Invoke-PythonTest 'tests\port_v2\predator_warrior_action_bench\test_contract.py'
-    Invoke-PythonTest 'tests\port_v2\predator_warrior_action\test_contract.py'
-    Invoke-PythonTest 'tests\port_v2\street_alien_ai_bench\test_contract.py'
-    Invoke-PythonTest 'tests\port_v2\street_alien_ai\test_contract.py'
-    Invoke-PythonTest 'tests\port_v2\integration\live_encounter\test_contract.py'
-    Invoke-PythonTest 'tests\port_v2\integration\source_closed_live_encounter\test_contract.py'
-    Invoke-PythonTest 'tests\test_avsp_translation_boundary.py'
-    Invoke-PythonTest 'tests\hardware\probe3\test_probe3.py'
+    if (-not $WorkflowOnly) {
+        Invoke-PythonTest 'tests\test_avsp_hit_ko_writer_set.py'
+        Invoke-PythonTest 'tests\port_v2\combat\hit_ko\test_contract.py'
+        Invoke-PythonTest 'tests\port_v2\integration\combat\test_contract.py'
+        Invoke-PythonTest 'tests\port_v2\integration\slice\test_contract.py'
+        Invoke-PythonTest 'tests\port_v2\camera_stage\test_contract.py'
+        Invoke-PythonTest 'tests\port_v2\cdda_residency_bench\test_contract.py'
+        Invoke-PythonTest 'tests\port_v2\cdda_residency\test_contract.py'
+        Invoke-PythonTest 'tests\test_avsp_vertical_slice_oracle.py'
+        Invoke-PythonTest 'tests\test_oracle04_predator_controls.py'
+        Invoke-PythonTest 'tests\test_oracle05_street_alien_ai.py'
+        Invoke-PythonTest 'tests\test_oracle06_round1_encounter.py'
+        Invoke-PythonTest 'tests\test_oracle07_player_action.py'
+        Invoke-PythonTest 'tests\test_oracle08_navigation.py'
+        Invoke-PythonTest 'tests\test_oracle09_alien_state.py'
+        Invoke-PythonTest 'tests\test_oracle10_round1_census.py'
+        Invoke-PythonTest 'tests\test_oracle11_actor_scheduler.py'
+        Invoke-PythonTest 'tests\test_oracle11_player_air_authority.py'
+        Invoke-PythonTest 'tests\test_oracle11_player_hitko_continue.py'
+        Invoke-PythonTest 'tests\test_oracle11_player_route_ownership.py'
+        Invoke-PythonTest 'tests\test_oracle11_player_audio.py'
+        Invoke-PythonTest 'tests\test_oracle11_global_audio_load_release.py'
+        Invoke-PythonTest 'tests\test_oracle11_global_audio_handlers.py'
+        Invoke-PythonTest 'tests\test_oracle11_global_audio_trigger_owners.py'
+        Invoke-PythonTest 'tests\test_oracle11_global_load_release_boundaries.py'
+        Invoke-PythonTest 'tests\test_oracle11_round1_navigation.py'
+        Invoke-PythonTest 'tests\test_oracle11_round1_enemies.py'
+        Invoke-PythonTest 'tests\test_oracle11_round1_auxiliary.py'
+        Invoke-PythonTest 'tests\test_oracle11_round1_encounters.py'
+        Invoke-PythonTest 'tests\test_oracle11_round1_boss.py'
+        Invoke-PythonTest 'tests\test_oracle11_round1_handoff.py'
+        Invoke-PythonTest 'tests\test_oracle11_round1_rng.py'
+        Invoke-PythonTest 'tests\test_oracle11_round1_writer_reconciliation.py'
+        Invoke-PythonTest 'tests\test_oracle11_player_authority.py'
+        Invoke-PythonTest 'tests\test_oracle11_player_weapon.py'
+        Invoke-PythonTest 'tests\test_round1_authority_matrix.py'
+        Invoke-PythonTest 'tests\test_spec02_round1_contract.py'
+        Invoke-PythonTest 'tests\port_v2\round1\test_entry.py'
+        Invoke-PythonTest 'tests\port_v2\round1\test_target_entry_wiring.py'
+        Invoke-PythonTest 'tests\test_spec01_encounter_contract.py'
+        Invoke-PythonTest 'tests\port_v2\predator_warrior_action_bench\test_contract.py'
+        Invoke-PythonTest 'tests\port_v2\predator_warrior_action\test_contract.py'
+        Invoke-PythonTest 'tests\port_v2\street_alien_ai_bench\test_contract.py'
+        Invoke-PythonTest 'tests\port_v2\street_alien_ai\test_contract.py'
+        Invoke-PythonTest 'tests\port_v2\integration\live_encounter\test_contract.py'
+        Invoke-PythonTest 'tests\port_v2\integration\source_closed_live_encounter\test_contract.py'
+        Invoke-PythonTest 'tests\test_avsp_translation_boundary.py'
+        Invoke-PythonTest 'tests\hardware\probe3\test_probe3.py'
 
-    $portV2Root = Join-Path $projectRoot 'tests\port_v2'
-    if (Test-Path -LiteralPath $portV2Root) {
-        Get-ChildItem -LiteralPath $portV2Root -Filter 'test_*.py' -File |
-            Sort-Object Name | ForEach-Object {
-                Invoke-ExternalCheck -Name ("tests\port_v2\" + $_.Name) `
-                    -Executable $script:resolvedPython -Arguments @('-B', $_.FullName)
-            }
-    }
+        $portV2Root = Join-Path $projectRoot 'tests\port_v2'
+        if (Test-Path -LiteralPath $portV2Root) {
+            Get-ChildItem -LiteralPath $portV2Root -Filter 'test_*.py' -File |
+                Sort-Object Name | ForEach-Object {
+                    Invoke-ExternalCheck -Name ("tests\port_v2\" + $_.Name) `
+                        -Executable $script:resolvedPython -Arguments @('-B', $_.FullName)
+                }
+        }
+
+    } # Full Fast inventory; excluded only by explicit -WorkflowOnly.
 
     foreach ($relative in $Test) {
         Invoke-PythonTest $relative
@@ -626,6 +633,8 @@ finally {
     $summary = [ordered]@{
         schema = 2
         lane = $Lane
+        scope = $(if ($WorkflowOnly) { 'workflow-only' } else { 'complete-lane' })
+        workflow_only = [bool]$WorkflowOnly
         status = $laneStatus
         started_utc = $laneStarted.ToUniversalTime().ToString('o')
         finished_utc = (Get-Date).ToUniversalTime().ToString('o')
@@ -646,7 +655,8 @@ finally {
     }
     $outputRoot = Join-Path $projectRoot 'build\verification'
     New-Item -ItemType Directory -Path $outputRoot -Force | Out-Null
-    $outputPath = Join-Path $outputRoot ($Lane.ToLowerInvariant() + '.json')
+    $reportName = if ($WorkflowOnly) { 'fast-workflow-only.json' } else { $Lane.ToLowerInvariant() + '.json' }
+    $outputPath = Join-Path $outputRoot $reportName
     $summary | ConvertTo-Json -Depth 8 | Set-Content -LiteralPath $outputPath `
         -Encoding UTF8
     Write-Host "Verification summary: $outputPath"

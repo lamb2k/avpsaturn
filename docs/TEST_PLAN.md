@@ -4,6 +4,23 @@ Tests retire one claim at one evidence tier. Machine validation, fidelity
 evidence, emulator self-review, user approval, and physical proof remain
 independent.
 
+## R7C cadence (current owner delivery focus)
+
+| Change boundary | Required work |
+| --- | --- |
+| Docs/state/policy only | Fast -WorkflowOnly, policy negatives, diff check |
+| Small native/SPEC edit | DEV below plus relevant fixture validation |
+| Complete source program | Whole-program and complete-scene host comparison, attributable mutations; Oracle and Target as owned |
+| Scheduler, memory, renderer, audio or nondeterminism | Prior checks plus paired cold Emulator and focused continuous visual/audio evidence |
+| Complete scene | Full census, changed-input route, zero unexplained gameplay/ownership gaps, actual continuous scene inspection |
+| Full R7C candidate | QA-13 full completion/repeat/perturbed/failure routes, normal interactive build, then USER-10 |
+
+A blocked or exhausted lane stays required and incomplete. No deadline, docs
+change or source-only PASS reopens it. Do not launch exhausted gates without
+the existing owner ruling. Small edits do not run full capture ceremony.
+No per-actor/per-program human review; QA-13 then USER-10 is the current gate.
+Old BENCH instructions below apply only to actual salvage cards.
+
 ## DEV inner loop
 
 For every implementation iteration run:
@@ -55,9 +72,17 @@ questions. Approval is explicit and component-scoped; silence is not approval.
 .\verify.ps1 -Lane Fast
 ```
 
-Fast runs workflow-policy, task-card/state, migration-map schema, and existing
-focused deterministic checks without regenerating private captures. Run it for
-this governance update and as the ordinary repository-level smoke lane.
+For documentation/state-only changes:
+
+```powershell
+.\verify.ps1 -Lane Fast -WorkflowOnly
+```
+
+This explicit scope runs workflow-policy, task-card/state and migration-map
+checks only. The report records workflow-only, not a complete Fast acceptance.
+Default Fast retains every existing focused deterministic check; Oracle retains
+its full inventory. Nothing is deleted from acceptance to accelerate docs.
+Use -Test to add a directly relevant host check without the entire runtime lane.
 
 For the live-gameplay pivot, Fast also verifies the serial read-only Oracle
 exception, the player-action/AI/encounter dependency chain, the frontend gate,
@@ -129,3 +154,23 @@ isolated shadow copy and review every generated diff.
 Physical Saturn testing is separate and follows `docs/HARDWARE_TEST.md`. Only
 that procedure may create `PHYSICAL_SATURN` evidence. Oracle, Full, Target,
 normal-release emulator, and human-review results do not substitute for it.
+
+## Interactive authority and mutation quality
+
+The normal callback must not select gameplay updates from captured source-frame
+cadence/phase arrays. The same source clock/input semantics must drive real
+controller and differential adapters. Absolute source-frame labels are observation
+coordinates only; test shifted labels and source-supported changed-input routes.
+Pool ordering, hitstop, timers and release remain source-bound.
+
+A literal retained-authority0 in the scene generator is not a measured gate.
+Measure the production call graph and emitted native ownership, including
+capture-schedule reachability, before claiming zero hidden authority.
+Keep complete1972..5566 source population and native boot2040..5566 alignment;
+early exits at5523/5551 cannot accept a complete Coffee Shop scene.
+
+Compile/link must pass strict C90 before a behavior mutant executes. Require the
+intended assertion/differential/exit, bounded process timeouts, and report kills,
+survivors, invalid builds, timeouts, environment errors and compile-negative tests
+separately. An unrelated error is not a kill. Existing causal tests remain binding.
+SoundCore0 technical visual capture cannot establish audible PCM/CDDA parity.

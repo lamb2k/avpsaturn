@@ -75,6 +75,7 @@
   },
   "blocked_transition_gate_readiness": {
     "classification": "READ_ONLY_PREPARATION_NOT_A_RETRY",
+    "last_read_only_check": "2026-09-07; seven staged asset files match size/hash; CDDA output absent but approved source matches; pinned EXE/archive hashes match; no build, launch, capture, copy or configuration change",
     "attempt_budget": {
       "approved_attempts": 3,
       "consumed_attempts": 3,
@@ -128,7 +129,9 @@
         "path": "stage1_audio.wav",
         "bytes": 29637952,
         "sha256": "42e755b02ba0e59e514a07dabe2f8273390e641c2ab410e4af8b7f1b656f2a43",
-        "status": "PRESENT_IGNORED_APPROVED_CDDA_TRACK"
+        "status": "OUTPUT_ABSENT_APPROVED_SOURCE_HASH_VERIFIED",
+        "source_path": ".deps/mame/captures/stage1_route_reference.wav",
+        "provenance": "Existing build.ps1 copies this verified source to stage1_audio.wav; no arbitrary review-package copy is required or performed"
       }
     ],
     "tool_and_profile_prerequisites": {
@@ -157,7 +160,7 @@
         "cause": "native diagnostic targets 3470/300 seconds and 3400/600 seconds were not reached"
       }
     ],
-    "minimum_owner_decision": "Explicitly reopen one bounded transition-visual attempt and approve a changed runtime-readiness boundary; separately approve the private ignored-asset provisioning method for an isolated clean package.",
+    "minimum_owner_decision": "Explicitly reopen one bounded current-Target validation and one transition-visual attempt after source-owned interactive scheduler correction; approve provenance-verified provisioning of the declared private inputs for an isolated clean package and a reachable state-based capture window. Existing attempt budgets remain exhausted until that ruling.",
     "bounded_changed_hypothesis": "The blocked attempt targeted an unreachable diagnostic ordinal rather than a proven source-owned transition predicate. A reopened attempt must first bind one reachable runtime symbol/state transition to the desired window, then use the already accepted dynarec-save/fresh-interpreter burst flow without changing emulator semantics or image identity.",
     "forbidden_substitutions": [
       "copy arbitrary ignored media from another build",

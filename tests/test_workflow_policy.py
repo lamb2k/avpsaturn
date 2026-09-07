@@ -1,11 +1,14 @@
 #!/usr/bin/env python3
-"""Fast policy invariants for the interactive AvP salvage workflow."""
+"""Workflow invariants; R7C delivery policy plus preserved historical ledgers."""
 
 from __future__ import annotations
 
 import json
 import re
+import contextlib
+import io
 from pathlib import Path
+from unittest.mock import patch
 
 
 ROOT = Path(__file__).resolve().parents[1]
@@ -22,31 +25,31 @@ def scalar(text: str, name: str) -> str:
     return match.group(1).strip()
 
 
-def main() -> None:
+def main(*, run_negative_controls: bool = True) -> None:
     agents = (ROOT / "AGENTS.md").read_text(encoding="utf-8")
     require(len(agents.splitlines()) < 150, "AGENTS.md is not concise")
+    policy = re.sub(r"\s+", " ", agents)
     for token in (
         "Codex Goal Mode owns interactive implementation",
         "`docs/PARITY_PLAN.md` is the only roadmap",
         "Exactly one implementation task owns writes at a time",
         "implementation is the default for ordinary work",
-        "nested Codex executors are",
-        "not used for ordinary implementation",
+        "nested Codex executors are not used for ordinary implementation",
         "Claude is an optional bounded provider",
+        "gpt-5.6-sol",
         "automatically correct ordinary compile",
-        "A passing emulator check is not human",
+        "A passing emulator check is not human approval or physical proof",
         "A user-approved component is locked",
         "build/feedback/<task-id>/",
-        "For each approved card, coherently commit",
         "push it to `private-origin`",
-        "verify that the remote branch",
-        "select the existing branch and worktree",
-        "sequentially from the approved predecessor",
+        "remote branch SHA equals local",
         "independent_read_only_cards",
-        "Exactly one\nOracle writer",
-        "advance physical\nstatus",
+        "Do not restart salvage benches",
+        "normal interactive image must not use a captured frame ledger",
+        "An exhausted named gate stays blocked",
+        "CODEX_REVIEW_INVOCATION",
     ):
-        require(token in agents, f"AGENTS.md missing policy: {token}")
+        require(token in policy, f"AGENTS.md missing policy: {token}")
     require(not re.search(r"\b[0-9a-f]{40}\b", agents),
             "AGENTS.md contains a volatile commit SHA")
 
@@ -80,7 +83,7 @@ def main() -> None:
         "FIRST LIVE GAMEPLAY ENCOUNTER",
         "current gameplay state",
     ):
-        require(token in goal, f"goal missing {token}")
+        require(token in re.sub(r"\s+", " ", goal), f"goal missing {token}")
 
     architecture = (ROOT / "docs/ARCHITECTURE.md").read_text(encoding="utf-8")
     require("interactive salvage-and-promotion loop" in architecture and
@@ -146,56 +149,20 @@ def main() -> None:
 
     roadmap = (ROOT / "docs/PARITY_PLAN.md").read_text(encoding="utf-8")
     for milestone in [*(f"R{index}" for index in range(7)),
-                      "R7A", "R7B",
+                      "R7A", "R7B", "R7C",
                       *(f"R{index}" for index in range(8, 14))]:
         require(f"### {milestone} " in roadmap,
                 f"roadmap missing {milestone}")
     for token in (
-        "only roadmap",
-        "Isolated salvage benches",
-        "Define production interfaces",
-        "V2-2B is accepted",
-        "not loading, controller input",
-        "909-tile",
-        "15%",
-        "physical capability slice",
-        "PROMOTE-04-CAMERA-STAGE",
-        "PROMOTE-05-HUD",
-        "PROMOTE-06-PCM",
-        "SALVAGE-07-CDDA-RESIDENCY",
-        "PROMOTE-07-CDDA-RESIDENCY",
-        "SALVAGE-08-FRONTEND",
-        "QA-08-FRONTEND",
-        "USER-08-FRONTEND",
-        "PROMOTE-08-FRONTEND",
-        "INTEGRATE-04-COLD-BOOT-TO-ROUND1",
-        "ORACLE-01-FULL-REFERENCE-ROUTE",
-        "ORACLE-02-FOUR-CHARACTER-ACTION-MATRIX",
-        "ORACLE-03-ENDING-CREDITS-DELTAS",
-        "FIRST LIVE GAMEPLAY ENCOUNTER",
-        "ORACLE-04-PREDATOR-WARRIOR-CONTROL-ACTIONS",
-        "ORACLE-05-STREET-ALIEN-AI",
-        "ORACLE-06-ROUND1-ENCOUNTER-RULES",
-        "SALVAGE-10-PREDATOR-WARRIOR-ACTION-CONTROLLER",
-        "PROMOTE-10-PREDATOR-WARRIOR-ACTION-CONTROLLER",
-        "SALVAGE-11-STREET-ALIEN-AI",
-        "PROMOTE-11-STREET-ALIEN-AI",
-        "INTEGRATE-04A-LIVE-CONTROL-AND-AI-ENCOUNTER",
-        "USER-09-LIVE-ENCOUNTER-REVIEW",
-        "ORACLE-07-PREDATOR-WARRIOR-ACTION-GRAPH-AND-EQUIPMENT",
-        "ORACLE-08-ROUND1-NAVIGATION-AND-BOUNDS",
-        "ORACLE-09-STREET-ALIEN-STATE-FACING-AND-PRESENTATION",
-        "SPEC-01-FIRST-LIVE-ENCOUNTER-EXECUTABLE-CONTRACT",
-        "REIMPLEMENT-12-SOURCE-CLOSED-LIVE-ENCOUNTER",
-        "QA-12-LIVE-ENCOUNTER-SOURCE-DIFFERENTIAL",
-        "specification firewall",
-        "fixed-frame",
-        "all four playable characters",
-        "up to three simultaneous",
+        "only roadmap", "REIMPLEMENT-13", "QA-13", "USER-10",
+        "SOURCE-CLOSED ROUND 1 END-TO-END PLAYABLE SLICE",
+        "1972..15193", "Coffee Shop is RED", "AT RISK",
+        "interactive scheduler", "captured-schedule authority",
+        "changed input", "909-tile", "15%", "SALVAGE-08",
     ):
         require(token in roadmap, f"roadmap missing {token}")
-    require("three-character" not in roadmap.lower(),
-            "roadmap retains obsolete three-character scope")
+    require(len(roadmap.splitlines()) < 180,
+            "roadmap became a repeated checkpoint history")
     state = (ROOT / "project_state.yaml").read_text(encoding="utf-8")
     for token in (
         "worktree_routing_policy:",
@@ -241,15 +208,40 @@ def main() -> None:
     require(len(handoff.splitlines()) < 50,
             "handoff became a historical narrative")
     for token in (
-        "Workflow pivot",
-        "Preserved evidence work",
-        "SALVAGE-00-OLD-BUILD-BASELINE",
-        "USER-01-PLAYER-BASELINE-REVIEW",
         scalar(state, "active_task_id"),
-        scalar(state, "evidence_candidate_head"),
-        "Resume the AvP salvage Goal",
+        scalar(state, "candidate_head"),
+        "Exact next experiment",
+        "captured-schedule",
+        "P4 Coffee Shop remains RED",
+        "no retry was authorized",
     ):
         require(token in handoff, f"handoff missing {token}")
+    card = (ROOT / scalar(state, "active_task_card")).read_text(encoding="utf-8")
+    require(len(card.splitlines()) < 220, "active card became a running history")
+    for token in (
+        "changed input", "1972..5566", "hardcoded",
+        "93", "279", "BLOCKED_MISSING_SPEC_FIELDS",
+        "Target and transition Emulator/WGC budgets remain exhausted",
+    ):
+        require(token in card, f"active delivery card missing {token}")
+    require("interactive_authority_status: BLOCKED_CAPTURE_SCHEDULE_IN_NORMAL_CALLBACK"
+            in state,
+            "known interactive-authority defect lost before corrective evidence")
+    verify = (ROOT / "verify.ps1").read_text(encoding="utf-8")
+    require("[switch]$WorkflowOnly" in verify and
+            "if (-not $WorkflowOnly)" in verify and
+            "fast-workflow-only.json" in verify and
+            "complete-lane" in verify,
+            "workflow-only result could masquerade as complete Fast")
+    require(verify.index("tests\\test_task_card_state.py") <
+            verify.index("if (-not $WorkflowOnly)"),
+            "workflow-only scope skips state/dependency checks")
+    for test in (
+        "tests\\port_v2\\round1\\test_entry.py",
+        "tests\\port_v2\\round1\\test_target_entry_wiring.py",
+    ):
+        require(verify.count(test) == 2,
+                f"default Fast and Oracle lost existing runtime test {test}")
 
     require((ROOT / "data/port_v2_migration_map.yaml").is_file(),
             "migration ledger is missing")
@@ -451,7 +443,44 @@ def main() -> None:
                     path.read_text(encoding="utf-8", errors="replace")) is None,
                     f"Port V2 core includes Jo/SGL: {path.relative_to(ROOT)}")
 
+    if run_negative_controls:
+        check_policy_negative_controls()
     print("workflow policy: PASS")
+
+
+def check_policy_negative_controls() -> None:
+    """Mutate policy text in memory; require each intended diagnostic."""
+    original_read = Path.read_text
+    cases = (
+        ("docs/AGENT_HANDOFF.md", "no retry was authorized", "retry approved",
+         "handoff missing no retry"),
+        ("project_state.yaml",
+         "interactive_authority_status: BLOCKED_CAPTURE_SCHEDULE_IN_NORMAL_CALLBACK",
+         "interactive_authority_status: PASS",
+         "known interactive-authority defect lost"),
+        ("verify.ps1", "fast-workflow-only.json", "fast.json",
+         "workflow-only result could masquerade"),
+    )
+    for relative, before, after, diagnostic in cases:
+        target = ROOT / relative
+
+        def altered_read(path, *args, **kwargs):
+            text = original_read(path, *args, **kwargs)
+            if path.resolve() == target:
+                require(before in text, f"invalid policy mutation: {relative}")
+                return text.replace(before, after)
+            return text
+
+        with patch.object(Path, "read_text", altered_read), \
+                contextlib.redirect_stdout(io.StringIO()):
+            try:
+                main(run_negative_controls=False)
+            except AssertionError as exc:
+                require(diagnostic in str(exc),
+                        f"unrelated policy rejection: {relative}: {exc}")
+            else:
+                raise AssertionError(f"policy mutation survived: {relative}")
+    print("workflow policy negatives: PASS (3 intended diagnostics; no file edits)")
 
 
 if __name__ == "__main__":

@@ -1,5 +1,11 @@
 # CPS-2 to Sega Saturn architecture reset
 
+Historical architecture audit, not current execution instructions. The pause,
+frontier, estimates and next steps below describe 2026-08-20 only. Current R7C
+work follows project_state.yaml, PARITY_PLAN and the active REIMPLEMENT-13 card.
+Preserve the source/architecture/platform constraints; do not restart completed
+Oracle, SPEC or salvage work because of this historical recommendation.
+
 Audit date: 2026-08-20
 
 Implementation target: `avspu` only
