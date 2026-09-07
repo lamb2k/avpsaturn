@@ -13,7 +13,7 @@ OPTIONAL_LANES: [Full]
 CLAUDE_ALLOWED: false
 NEXT_ELIGIBLE_CARDS: [QA-13-ROUND1-END-TO-END-DIFFERENTIAL]
 
-## Current assignment (owner delivery correction, 2026-09-07)
+## Current assignment (PAUSED by owner; explicit resume required)
 
 R7C is incomplete. P2 reaches source frame 15193 and P3 is recorded complete.
 Native Coffee Shop is RED; no native full-round or current Target acceptance.
@@ -26,7 +26,7 @@ does not bind loop00808a, tail008140, trap3/001060 or interrupt-owned guards.
 Run analyzer --interactive-readiness for exact fields; nine identity controls PASS.
 Class0e native16 lifetimes/1776 rows reproduce state/facing/animation/timers and attachment formula;333 inherited position rows stay RED.
 Alias/clear, strict host10 causal controls and whole-scene suppression/repeat PASS; tiers separate.
-Class0a palette SPEC Fast/Oracle PASS; native pending. Audio sizing third attempt blocked; tile1551028/614400 unresolved. Type28/class0e timer pair64 and collection pair65 ledgers PASS;2 causal SOURCE controls/8 analyzer negatives/1 equivalent survivor/0 native kills. Parent drop and retained fractions/motion/resource600/class54/queue/release source-bound; native omissions remain. Follow-up report ed9df102 remains PARTIAL pending terrain/animation/queue guards and executable fixture integration. No timing/map/platform retry.
+Pending type28/class0e SPEC836518b1/fixturesc70d4583 integrates source report ed9df102 plus accepted terrain/player contracts. Auxiliary17 attributable SPEC controls, focused SPEC and generation --check PASS. Fast FAILED at test_entry.py:16 stale EXPECTED6bf90605 before host execution (no kill); Oracle UNRUN; process terminal. Resume by reviewing/reconciling hash pin then Fast/Oracle before native class05 drop and residue-preserving allocation. No new gameplay/archive growth or acceptance. Prior source pair64/collection pair65,2 SOURCE controls/8 analyzer negatives/1 equivalent survivor retained. Audio sizing budget3 and platform gates stay blocked; no candidate promotion.
 
 ## Objective
 

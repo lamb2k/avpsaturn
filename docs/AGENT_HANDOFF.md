@@ -1,13 +1,13 @@
 # REIMPLEMENT-13-SOURCE-CLOSED-ROUND1 handoff (2026-09-07 owner delivery focus)
 
-Continue the new persistent R7C Goal, branch `codex/avp-playable-loop-pivot`, one writer.
+PAUSED by owner. Resume only on request; branch `codex/avp-playable-loop-pivot`, one writer.
 Owner deleted the prior goal; replacement was created on 2026-09-07.
 Implementation model is Astra low ("light"); project defaults and policy agree.
 The new goal does not reopen exhausted gates or change acceptance boundaries.
 Read AGENTS, current state, the concise active card and TEST_PLAN.
 Do not touch `history.txt` or `data/avsp_anim_records.json`.
 
-Native checkpoint local/private-origin: `19431ec322dc8e81c91a71bef16d4f822183fbdf`.
+Native checkpoint: `19431ec322dc8e81c91a71bef16d4f822183fbdf`; source parent `1838e6635ad1237f31036eb4baba31ad62df3927`.
 This is not candidate promotion. Frozen candidate:
 `d04a65a2253175c6e820140feefc35419e2cca07`.
 Production: `236eef0c42aaa5c39b105420f8130fcde308e34e`.
@@ -46,4 +46,4 @@ pinned EXE/archive match. Root CDDA output is regeneratable by existing build.
 Use Fast -WorkflowOnly for docs; DEV for edits; full ceremony at program/platform
 risk boundaries. Keep all acceptance tests and three-attempt rulings.
 Audio sizing: paired1220 descriptor calls; control downstream0, budget3 exhausted; no source/native kill.
-Next: type28/class0e0a726c terrain/animation/queue guards and executable fixture integration. Parent/motion/collection/release now source-witnessed (report ed9df102); collection pair65 ledgers/no-edge control PASS. Native class05 drops omitted; allocator loses source fractions. PARTIAL, no native change or gate retry.
+Pause checkpoint: type28/class0e SPEC amendment836518b1, fixturesc70d4583 pending acceptance; auxiliary17 controls, SPEC focused and generation --check PASS. Fast FAILED at tests/port_v2/round1/test_entry.py:16 stale EXPECTED6bf90605 (before host execution, not a mutation kill); Oracle UNRUN. Process terminal, no retry. On resume reconcile test identity against reviewed amendment, rerun Fast/Oracle, then implement class05 drop/residue-preserving allocation and whole class0e body. No gameplay/archive growth, scene or candidate promotion.

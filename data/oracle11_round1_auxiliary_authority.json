@@ -16114,16 +16114,511 @@
           "0x000a74a8"
         ],
         "class": "0x0e",
-        "classification": "SOURCE_CLOSED_IDENTITY",
+        "classification": "SOURCE_CLOSED_IMPLEMENTATION_FIELDS",
         "dispatch_entry": "0x0a726c",
         "dispatch_prefix_sha256": "62d8439e2f692781d399dfcbc05fe03a2a5be07fa4ad0df99c4c547369ff2ab3",
         "first_frame": 3892,
         "fixed_frame_substitute_forbidden": true,
-        "implementation_contract": null,
-        "implementation_status": "BLOCKED_MISSING_SPEC_FIELDS",
+        "implementation_contract": {
+          "active_dispatch_order": {
+            "byte05_nonzero_2_4_6": [
+              "ground timer/animation body only; no outer cull or registration"
+            ],
+            "byte05_zero": [
+              "dispatch byte06/07 body",
+              "camera cull0x09e5a6",
+              "visibility/list registration0x0167ac"
+            ],
+            "ground": "byte06==2 executes ground timer/animation, then outer cull/registration",
+            "motion_entry": "byte06==0 byte07==0 increments byte07 by2, then terrain; no integration that invocation",
+            "moving": "byte06==0 byte07==2 or4 executes specified motion, then terrain; does not advance animation"
+          },
+          "animation": {
+            "advance_entry": "0x016536",
+            "advance_rule": "predecrement u16 timer; at zero advance16bytes, or load long at next16bytes when old branch_s16<0; read new timer and branch",
+            "facing_rule": "no direct facing writer; allocator release clears+0c long including facing, parent does not override it",
+            "loop_pointer_address": "0x0a74b8",
+            "loop_target": "0x000a7458",
+            "records": [
+              {
+                "animation_record": "0x000a7408",
+                "assembly": "0x000a74bc",
+                "attack_selector_u8": 0,
+                "branch_s16": 0,
+                "hurt_selector_u8": 1,
+                "record_sha256": "b6e477c285e3949a2008d486c94a380b368456c7f9fd13a816251b6d0688550a",
+                "timer_u16": 8
+              },
+              {
+                "animation_record": "0x000a7418",
+                "assembly": "0x000a74ca",
+                "attack_selector_u8": 0,
+                "branch_s16": 0,
+                "hurt_selector_u8": 1,
+                "record_sha256": "24da4e70ce33ace0e9ccedc3cb320bb19f1ffad4bdd4153091b766924e04824a",
+                "timer_u16": 2
+              },
+              {
+                "animation_record": "0x000a7428",
+                "assembly": "0x000a74e6",
+                "attack_selector_u8": 0,
+                "branch_s16": 0,
+                "hurt_selector_u8": 1,
+                "record_sha256": "19ef4bd3874df4489077fd188ac630f95939feb7041957bc2188985754ee0bab",
+                "timer_u16": 2
+              },
+              {
+                "animation_record": "0x000a7438",
+                "assembly": "0x000a7502",
+                "attack_selector_u8": 0,
+                "branch_s16": 0,
+                "hurt_selector_u8": 1,
+                "record_sha256": "d428bffbe61b64b5b6acd4c53ef592b2726c3ab0aee4859df4f1217df79f113b",
+                "timer_u16": 2
+              },
+              {
+                "animation_record": "0x000a7448",
+                "assembly": "0x000a751e",
+                "attack_selector_u8": 0,
+                "branch_s16": 0,
+                "hurt_selector_u8": 1,
+                "record_sha256": "2c438a24a6a7d079366e9691384472e2c9a7e7f1563d588ea204bbbbf68fb6d7",
+                "timer_u16": 2
+              },
+              {
+                "animation_record": "0x000a7458",
+                "assembly": "0x000a753a",
+                "attack_selector_u8": 0,
+                "branch_s16": 0,
+                "hurt_selector_u8": 1,
+                "record_sha256": "67f488878fc62c9a4915f3a7878e0af252ea4301fa8d0f35cfd469ed46af8bea",
+                "timer_u16": 1
+              },
+              {
+                "animation_record": "0x000a7468",
+                "assembly": "0x000a7556",
+                "attack_selector_u8": 0,
+                "branch_s16": 0,
+                "hurt_selector_u8": 1,
+                "record_sha256": "9424fbefef8d96c0c439db5aac4de2909a0b6b810eec1f3841e6fd9c3df66578",
+                "timer_u16": 1
+              },
+              {
+                "animation_record": "0x000a7478",
+                "assembly": "0x000a7572",
+                "attack_selector_u8": 0,
+                "branch_s16": 0,
+                "hurt_selector_u8": 1,
+                "record_sha256": "7546bf06ef49369a53eea7f34525812f0ec2b7c0909a132e1f144d4ae4b92af3",
+                "timer_u16": 1
+              },
+              {
+                "animation_record": "0x000a7488",
+                "assembly": "0x000a758e",
+                "attack_selector_u8": 0,
+                "branch_s16": 0,
+                "hurt_selector_u8": 1,
+                "record_sha256": "da0ac7cfd5074d9b1c5bc57dbdce52041d17315e7049742179d8972d7cdb1ec1",
+                "timer_u16": 1
+              },
+              {
+                "animation_record": "0x000a7498",
+                "assembly": "0x000a75aa",
+                "attack_selector_u8": 0,
+                "branch_s16": 0,
+                "hurt_selector_u8": 1,
+                "record_sha256": "9b2a266aba748a313920786a0de6b109f699a1c21b22e79ecbd93abefbba0cf1",
+                "timer_u16": 1
+              },
+              {
+                "animation_record": "0x000a74a8",
+                "assembly": "0x000a75c6",
+                "attack_selector_u8": 0,
+                "branch_s16": -32768,
+                "hurt_selector_u8": 1,
+                "record_sha256": "e8f353fcf0c89afe1e5c7b1c9d943af22311093b07455713c4532fbec4bca288",
+                "timer_u16": 1
+              }
+            ],
+            "select_entry": "0x016518",
+            "table_address": "0x0a7404"
+          },
+          "camera_cull": {
+            "entry": "0x09e5a6",
+            "guard": "u16(camera_global+0x029c -0x0100) >= actor x high:u16",
+            "result": "write long+04=0x06000000; still finish current registration call; release only on next dispatched state6"
+          },
+          "class_u8": 14,
+          "classification": "SOURCE_CLOSED_IMPLEMENTATION_FIELDS",
+          "collection": {
+            "accepted_player_contract": "data/oracle11_predator_route_ownership.json#/temporary_resource_pickup",
+            "global_guard": "if signed global+01f4>=0 set byte1; otherwise preserve negative value",
+            "no_player_authority_reopen": true,
+            "player_resource": "unconditional player+0xae:u16=600; if previous value0 attempt class54 display allocation, failure does not suppress grant",
+            "source_body": "0x019f9a..0x01a1d8",
+            "target_write": "long+04=0x04000000; +65:u8=player+0xd1:u8"
+          },
+          "collision": {
+            "attack_selector_u8": 0,
+            "direct_damage_writes": 0,
+            "hurt_box": {
+              "address": "0x000a75ee",
+              "record_sha256": "2e31b2cc04bd8f3b535afc106a6a551e651bfc6142a629683b8f571d514b5b80",
+              "x_center_s8": 0,
+              "x_half_u8": 20,
+              "y_center_s8": 0,
+              "y_half_u8": 1,
+              "z_center_s8": 0,
+              "z_half_u8": 16
+            },
+            "hurt_selector_u8": 1,
+            "player_interaction": "reuse accepted player route target scan0x01ce98/overlap0x01d1f8 and Button2-edge predicate0x019f9a; target pointer injection is not production authority",
+            "registration": "visible active byte exactly1 enters record28 target list0x0169a8 and generic render list0x0169bc",
+            "table_set": "0x0a75e2"
+          },
+          "direct_audio_load_rng": "no direct audio/load/RNG calls in0x0a726c..0x0a7404; child/queue/player adapters own their downstream events",
+          "dispatch_entry": "0x0a726c",
+          "dispatch_tables": {
+            "state_byte04": {
+              "base": "0x0a7278",
+              "index_type": "u8 even byte offset",
+              "offsets_s16": [
+                8,
+                70,
+                362,
+                390
+              ],
+              "targets": [
+                "0x0a7280",
+                "0x0a72be",
+                "0x0a73e2",
+                "0x0a73fe"
+              ]
+            },
+            "state_byte05": {
+              "base": "0x0a72ca",
+              "index_type": "u8 even byte offset",
+              "offsets_s16": [
+                8,
+                202,
+                202,
+                202
+              ],
+              "targets": [
+                "0x0a72d2",
+                "0x0a7394",
+                "0x0a7394",
+                "0x0a7394"
+              ]
+            },
+            "substate_byte06": {
+              "base": "0x0a72ea",
+              "index_type": "u8 even byte offset",
+              "offsets_s16": [
+                4,
+                170
+              ],
+              "targets": [
+                "0x0a72ee",
+                "0x0a7394"
+              ]
+            },
+            "substate_byte07": {
+              "base": "0x0a72fa",
+              "index_type": "u8 even byte offset",
+              "offsets_s16": [
+                6,
+                16,
+                90
+              ],
+              "targets": [
+                "0x0a7300",
+                "0x0a730a",
+                "0x0a7354"
+              ]
+            }
+          },
+          "event_queue": {
+            "advance": "cursor=(cursor+1)&31",
+            "capacity_u16": 32,
+            "direct_qsound_calls": 0,
+            "disabled_guards": [
+              "global-0x6ff4:u16 !=0",
+              "global+0x0247:u8 !=0",
+              "actor+65:s8 <0"
+            ],
+            "entry": "0x0ae396",
+            "index": "(actor+65 &3)*8; current one-player owner index0; no invented fourth-player queue",
+            "slot_guard": "queue[cursor_u16*8] first word has sign bit; otherwise return without write/cursor advance",
+            "source_pointer_table": [
+              {
+                "cursor": "0x00ff1e6c",
+                "queue": "0x00ff1b6a"
+              },
+              {
+                "cursor": "0x00ff1e6e",
+                "queue": "0x00ff1c6a"
+              },
+              {
+                "cursor": "0x00ff1e70",
+                "queue": "0x00ff1d6a"
+              }
+            ],
+            "writes": [
+              "byte65",
+              "byte64",
+              "word44",
+              "word40",
+              "word42"
+            ]
+          },
+          "field_types": {
+            "+00": "u8 active",
+            "+01": "u8 visibility",
+            "+02": "u8 class",
+            "+04..07": "four u8 dispatch fields",
+            "+09": "u8 coordinate mode",
+            "+0a": "u16 animation timer",
+            "+0f": "u8 facing",
+            "+10,+14,+18": "s32 fixed-point coordinates; high word also u16 for comparisons",
+            "+1c": "u32 animation record",
+            "+24": "s16 animation branch",
+            "+2a": "s16 spawn timer",
+            "+2e": "u16 object attributes",
+            "+30,+34,+38,+3c": "s32 velocities/acceleration",
+            "+40,+42,+44": "u16 event arguments",
+            "+50": "u32 collision table",
+            "+5c,+5d,+5f,+64,+65": "u8 flags/event fields",
+            "+74": "u16 terrain sync guard"
+          },
+          "fixed_frame_substitute_forbidden": true,
+          "ground_timer": {
+            "child": {
+              "allocator": "0x0177da",
+              "class_u8": 16,
+              "record_type_u8": 24,
+              "unwritten_fields": "retain free-record values; do not zero fractions or infer parent facing",
+              "variant_u8": 4,
+              "writes": [
+                "active byte +=1",
+                "class/variant word=0x1004",
+                "parent x/y/z highwords -> child highwords"
+              ]
+            },
+            "disabled_guard": "if any of the three global bytes is nonzero reselect animation0 without changing timer or allocating",
+            "enabled_rule": "predecrement timer modulo16; nonnegative result advances animation via0x016536; negative result reloads48 then attempts child allocation",
+            "entry": "0x0a7394",
+            "failure_rule": "allocation failure still reselects animation0; never retry or manufacture a child",
+            "reads": [
+              "global+022a:u8",
+              "global+01f3:u8",
+              "global+0208:u8",
+              "actor+2a:s16"
+            ],
+            "rng_calls_u8": 0
+          },
+          "motion": {
+            "first_landing": "increment byte+7 by2; copy z highword to y highword preserving y fraction; vy=0x10000; ay=-0x4000",
+            "landing_guard": "unsigned high16(y32) < unsigned high16(z32)",
+            "native_implementation": false,
+            "order": [
+              "x32 += vx32",
+              "z32 += vz32",
+              "y32 += vy32",
+              "vy32 += ay32"
+            ],
+            "overflow": "u32 modulo arithmetic with signed fixed-point interpretation",
+            "second_landing": "word+6=0x0200; copy z highword to y highword preserving y fraction; byte+0x5c=0",
+            "source_blocks": [
+              "0x0a730a..0x0a7354",
+              "0x0a7354..0x0a7394"
+            ],
+            "source_write_counts": {
+              "0a7314": 44,
+              "0a731c": 44,
+              "0a7324": 44,
+              "0a732c": 44,
+              "0a735e": 20,
+              "0a7366": 20,
+              "0a736e": 20,
+              "0a7376": 20
+            }
+          },
+          "mutation_controls": [
+            "drop selector/RNG reuse",
+            "retained fraction",
+            "motion arithmetic/order/sign",
+            "landing guard",
+            "terrain sync guard",
+            "timer signed predecrement",
+            "disabled spawn guard",
+            "child identity/coordinates/failure",
+            "animation loop/selector",
+            "visibility/cull",
+            "Button2 edge/resource grant",
+            "queue guard/cursor",
+            "release fields/guard",
+            "captured-frame substitute"
+          ],
+          "parent_allocation": {
+            "allocator": "0x017828 pops record28 free stack; failure leaves no child",
+            "caller": "0x06ca66",
+            "class": "0x05",
+            "coordinate_copy": "copy high words +0x10,+0x14,+0x18 only; retain each free-record low word",
+            "guard": "parent state0400/substate0000; source drop selector actor+0x0c:u8",
+            "native_gap": "class05 currently discards RNG result; generic explicit-slot allocation memsets the record. Do not replace source residue with captured constants.",
+            "record_type": 20,
+            "retained_y_fraction_witness_u16": 16384,
+            "rng": "one 0x017c5e call; select row[new_seed&31]; no second RNG in class0e initialization",
+            "selector_row_address": "0x0bd4aa",
+            "selector_row_u8": [
+              52,
+              52,
+              52,
+              52,
+              52,
+              52,
+              52,
+              52,
+              52,
+              52,
+              52,
+              52,
+              52,
+              52,
+              52,
+              52,
+              52,
+              52,
+              52,
+              52,
+              52,
+              52,
+              52,
+              52,
+              52,
+              52,
+              52,
+              52,
+              52,
+              52,
+              52,
+              52
+            ],
+            "source_slot_witness": "0x00ffb280",
+            "velocity_fields_in_table_order": [
+              "+0x30:s32",
+              "+0x38:s32",
+              "+0x34:s32",
+              "+0x3c:s32"
+            ],
+            "velocity_table_selection": "left0x0bcd8a when bit15(u16(u16(parent_x-camera_x)-0x00c0)) is set; otherwise right0x0bce0a",
+            "velocity_tables_s32": {
+              "0x0bcd8a": [
+                229376,
+                0,
+                327680,
+                -32768
+              ],
+              "0x0bce0a": [
+                -229376,
+                0,
+                327680,
+                -32768
+              ]
+            }
+          },
+          "record_type_u8": 28,
+          "retained_gameplay_authority": false,
+          "scheduler": {
+            "capture_clock_forbidden": true,
+            "entry": "0x01bcda",
+            "order": "record28 ascending fixed slots; actor allocated in preceding record20 phase may run later in same scheduler pass",
+            "route_teardown": "caller owns whether this pool dispatches; frozen resident records retain state until authorized dispatch or centralized route release"
+          },
+          "semantic_role": "SOURCE_OWNED_TEMPORARY_RESOURCE_PICKUP_WITH_PERIODIC_CHILD",
+          "source_evidence": {
+            "artifact": "data/reimplement13_type28_class0e_oracle_followup.json",
+            "causal_controls": 2,
+            "opcode_sha256": "e423127bc04889161657032fcb40a8a8f871f4d4f08bd99726e3babdf6e81501",
+            "program_sha256": "0c14f4094d25787401aa949657620ff495ae8606c1cfd8ae2d059b94c3d478e9",
+            "sha256": "ed9df1020d68eeb3d3c694579457de9795a4e143e1c864e15f489423bf791a4b"
+          },
+          "spec_executable": true,
+          "state0": {
+            "animation": "select index0 via0x016518 with table0x0a7404; return without motion/visibility submission",
+            "grounded_guard": "if +5c ==0 set byte+6=2 and copy y highword to z highword; preserve fractions",
+            "reads": [
+              "+5c:u8",
+              "y high:u16"
+            ],
+            "writes": [
+              "+04:u8 +=2",
+              "+2e:u16=0x8000",
+              "+09:u8=0",
+              "+50:u32=0x0a75e2",
+              "+64:u8=0x2e",
+              "+2a:u16=0"
+            ]
+          },
+          "state4": {
+            "entry": "0x0a73e2",
+            "next": "tail-call shared event queue0x0ae396; no immediate free",
+            "writes": [
+              "byte+04 +=2",
+              "byte+65 OR=4",
+              "byte+44=0x34",
+              "byte+45=0xff"
+            ]
+          },
+          "state6": {
+            "clear_long_offsets": [
+              0,
+              4,
+              12,
+              44,
+              84,
+              92,
+              76,
+              112,
+              108,
+              116
+            ],
+            "entry": "0x01783e",
+            "free_stack": "push slot through global+6e70, increment global+6e8c byte; preserve all other record bytes",
+            "guard": "executed state6 dispatch, not a source frame or elapsed presentation counter"
+          },
+          "terrain": {
+            "accepted_fixture": "authority_data.navigation.terrain_resolver.implementation_contract",
+            "artifact": "data/oracle11_round1_navigation.json",
+            "do_not_inherit": "player-only global bounds/obstacle order is not an actor invocation rule",
+            "entry": "0x0b1baa",
+            "order": "after motion/landing and before camera cull and registration",
+            "reads": [
+              "actor x/z high words",
+              "source terrain selector map",
+              "+5c:u8",
+              "+5f:u8",
+              "+74:u16"
+            ],
+            "sha256": "1bc052f668e2b10b662e7c0239dc533901c0df0d9408c4b60d7845884a104a38",
+            "sync_guard": "after resolver, if (+5c:u8 OR +5f:u8 OR +74:u16)==0 copy z highword to y highword; preserve y low word",
+            "writes": [
+              "source resolver x/z high words and velocity response",
+              "+5d:u8 contact bits"
+            ]
+          },
+          "visibility": {
+            "entry": "0x0167ac",
+            "guard": "u16(x_high-camera_x+64)<=512 AND u16(y_high-camera_y+32)<=320",
+            "inside": "byte+01=1; record28 active==1 target list then generic render list",
+            "outside": "byte+01=0, no list submission"
+          }
+        },
+        "implementation_status": "SPEC_EXECUTABLE",
         "last_frame": 5550,
         "lifetime_count": 1,
-        "semantic_role": "UNKNOWN",
+        "semantic_role": "SOURCE_OWNED_TEMPORARY_RESOURCE_PICKUP_WITH_PERIODIC_CHILD",
         "source_scheduler": "0x01bcda",
         "state_substate_contexts": [
           "0x0200:0x0000",

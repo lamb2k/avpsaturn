@@ -156,6 +156,32 @@ for label,mutate in [
  except ValueError as error:assert str(error)=='class0a palette consumer source contract drift',label
  else:raise AssertionError('survived palette source-contract control: '+label)
 print('Class0a palette contract: PASS (9 attributable specification controls; source suppression separately recorded)')
+for label,mutate in [
+ ('byte-dispatch',lambda c:c['dispatch_tables']['state_byte05']['targets'].__setitem__(1,'0x0a72d2')),
+ ('drop-selector',lambda c:c['parent_allocation']['selector_row_u8'].__setitem__(0,0)),
+ ('fraction',lambda c:c['parent_allocation'].__setitem__('coordinate_copy','clear all fractions')),
+ ('motion-order',lambda c:c['motion']['order'].reverse()),
+ ('landing-sign',lambda c:c['motion'].__setitem__('landing_guard','signed y < z')),
+ ('terrain-sync',lambda c:c['terrain'].__setitem__('sync_guard','always copy z to y')),
+ ('timer-sign',lambda c:c['ground_timer'].__setitem__('enabled_rule','unsigned decrement')),
+ ('disabled-guard',lambda c:c['ground_timer'].__setitem__('disabled_guard','never disabled')),
+ ('child-class',lambda c:c['ground_timer']['child'].__setitem__('class_u8',17)),
+ ('allocation-failure',lambda c:c['ground_timer'].__setitem__('failure_rule','retry until available')),
+ ('animation-loop',lambda c:c['animation'].__setitem__('loop_target','0x000a7408')),
+ ('collision-selector',lambda c:c['collision'].__setitem__('hurt_selector_u8',2)),
+ ('camera-cull',lambda c:c['camera_cull'].__setitem__('guard','source frame reached')),
+ ('resource-grant',lambda c:c['collection'].__setitem__('player_resource','grant only on display allocation')),
+ ('queue-guard',lambda c:c['event_queue'].__setitem__('slot_guard','always overwrite')),
+ ('release-fields',lambda c:c['state6']['clear_long_offsets'].append(0x10)),
+ ('frame-authority',lambda c:c['scheduler'].__setitem__('capture_clock_forbidden',False))]:
+ x=copy.deepcopy(report)
+ c=next(c for c in x['coffee_shop_scene_component_identities']['components']
+        if c['type']==28 and c['class']=='0x0e')['implementation_contract']
+ mutate(c)
+ try:m.validate(x)
+ except ValueError as error:assert str(error)=='type28/class0e executable source program drift',label
+ else:raise AssertionError('survived type28/class0e contract control: '+label)
+print('Type28/class0e executable contract: PASS (17 attributable specification controls; not native behavioral kills)')
 print('ORACLE-11 auxiliary authority tests: PASS '
       '(154 existing field controls; 12 alias and16 whole-program attributable '
       'class0e controls; these are not native behavioral kills)')

@@ -2724,6 +2724,7 @@ def coffee_shop_scene_component_identities(op,program):
  implementation_contracts[(20,'0x0f')]=class0f_program
  implementation_contracts[(24,'0x0a')]=class0a_program
  implementation_contracts[(28,'0x00')]=class00_program
+ implementation_contracts[(28,'0x0e')]=coffee_shop_type28_class0e_contract()
  for contract in implementation_contracts.values():
    if 'stage_records' not in contract:
     continue
@@ -4612,6 +4613,13 @@ def validate(r):
  class00_component=next(x for x in scene_components['components']
                         if x['type']==28 and x['class']=='0x00')
  class00_contract=class00_component['implementation_contract']
+ class0e_component=next((x for x in scene_components['components']
+                       if x['type']==28 and x['class']=='0x0e'),None)
+ req(class0e_component is not None and
+     class0e_component['classification']=='SOURCE_CLOSED_IMPLEMENTATION_FIELDS' and
+     class0e_component['implementation_status']=='SPEC_EXECUTABLE' and
+     class0e_component['implementation_contract']==coffee_shop_type28_class0e_contract(),
+     'type28/class0e executable source program drift')
  req(scene_components['classification']=='SOURCE_CLOSED_IDENTITY' and
      scene_components['capture_identity']['byte_identical'] is True and
      scene_components['capture_identity']['implementation_detail_byte_identical'] is True and
@@ -4633,6 +4641,7 @@ def validate(r):
           if not ((x['type']==20 and x['class']=='0x0f') or
                   (x['type']==24 and x['class']=='0x0a') or
                   (x['type']==28 and x['class']=='0x00') or
+                  (x['type']==28 and x['class']=='0x0e') or
                   (x['type']==24 and x['class']=='0x20'))) and
      next(x for x in scene_components['components']
           if x['type']==20 and x['class']=='0x0f')['classification']==
@@ -5223,6 +5232,120 @@ def type28_class0e_parent_motion_fields(records):
   'source_windows':{f'{a:06x}..{b:06x}':hashlib.sha256(op[a:b]).hexdigest()
                     for a,b in ((0xbc692,0xbc704),(0xbc820,0xbc85c),
                                 (0xa726c,0xa7404),(0x17828,0x17876))}}
+
+
+@lru_cache(maxsize=1)
+def coffee_shop_type28_class0e_contract():
+ evidence=type28_class0e_readiness()
+ op=OPCODES.read_bytes();program=PROGRAM.read_bytes()
+ navigation=json.loads(NAV.read_text(encoding='ascii'))['terrain_resolver']
+ req(navigation['implementation_contract']['classification']=='SOURCE_CLOSED_IMPLEMENTATION_FIELDS',
+     'class0e shared terrain contract unavailable')
+ animation=[animation_record(program,0xa7408+i*16) for i in range(11)]
+ req([r['timer_u16'] for r in animation]==[8,2,2,2,2,1,1,1,1,1,1] and
+     [r['branch_s16'] for r in animation]==[0]*10+[-32768] and
+     all(r['hurt_selector_u8']==1 and r['attack_selector_u8']==0 for r in animation),
+     'class0e animation/collision source records')
+ loop=int.from_bytes(program[0xa74b8:0xa74bc],'big')
+ req(loop==0xa7458 and int.from_bytes(program[0xa7404:0xa7406],'big')==4,
+     'class0e animation table/loop target')
+ def table(base,count):
+  offsets=[int.from_bytes(op[base+2*i:base+2*i+2],'big',signed=True) for i in range(count)]
+  return {'base':f'0x{base:06x}','index_type':'u8 even byte offset',
+          'offsets_s16':offsets,'targets':[f'0x{base+n:06x}' for n in offsets]}
+ dispatch={'state_byte04':table(0xa7278,4),'state_byte05':table(0xa72ca,4),
+           'substate_byte06':table(0xa72ea,2),'substate_byte07':table(0xa72fa,3)}
+ req(dispatch['state_byte04']['targets']==['0x0a7280','0x0a72be','0x0a73e2','0x0a73fe']
+     and dispatch['state_byte05']['targets']==['0x0a72d2']+['0x0a7394']*3
+     and dispatch['substate_byte06']['targets']==['0x0a72ee','0x0a7394']
+     and dispatch['substate_byte07']['targets']==['0x0a7300','0x0a730a','0x0a7354'],
+     'class0e byte-dispatch targets')
+ queues=[]
+ for i in range(3):
+  base=0xae37e+i*8
+  queues.append({'queue':f'0x{int.from_bytes(op[base:base+4],"big"):08x}',
+                 'cursor':f'0x{int.from_bytes(op[base+4:base+8],"big"):08x}'})
+ req(queues[0]=={'queue':'0x00ff1b6a','cursor':'0x00ff1e6c'},'class0e event queue pointer table')
+ return {'classification':'SOURCE_CLOSED_IMPLEMENTATION_FIELDS','spec_executable':True,
+  'semantic_role':'SOURCE_OWNED_TEMPORARY_RESOURCE_PICKUP_WITH_PERIODIC_CHILD',
+  'retained_gameplay_authority':False,'dispatch_entry':'0x0a726c','record_type_u8':28,
+  'class_u8':14,'dispatch_tables':dispatch,
+  'source_evidence':{'artifact':'data/reimplement13_type28_class0e_oracle_followup.json',
+   'sha256':sha(ROOT/'data/reimplement13_type28_class0e_oracle_followup.json'),
+   'opcode_sha256':sha(OPCODES),'program_sha256':sha(PROGRAM),
+   'causal_controls':evidence['causal_source_controls']},
+  'parent_allocation':evidence['parent_motion_fields']['parent'],
+  'field_types':{'+00':'u8 active','+01':'u8 visibility','+02':'u8 class','+04..07':'four u8 dispatch fields',
+   '+09':'u8 coordinate mode','+0a':'u16 animation timer','+0f':'u8 facing',
+   '+10,+14,+18':'s32 fixed-point coordinates; high word also u16 for comparisons',
+   '+1c':'u32 animation record','+24':'s16 animation branch','+2a':'s16 spawn timer',
+   '+2e':'u16 object attributes','+30,+34,+38,+3c':'s32 velocities/acceleration',
+   '+40,+42,+44':'u16 event arguments','+50':'u32 collision table',
+   '+5c,+5d,+5f,+64,+65':'u8 flags/event fields','+74':'u16 terrain sync guard'},
+  'state0':{'reads':['+5c:u8','y high:u16'],
+   'writes':['+04:u8 +=2','+2e:u16=0x8000','+09:u8=0','+50:u32=0x0a75e2',
+             '+64:u8=0x2e','+2a:u16=0'],
+   'grounded_guard':'if +5c ==0 set byte+6=2 and copy y highword to z highword; preserve fractions',
+   'animation':'select index0 via0x016518 with table0x0a7404; return without motion/visibility submission'},
+  'active_dispatch_order':{'byte05_zero':['dispatch byte06/07 body','camera cull0x09e5a6','visibility/list registration0x0167ac'],
+   'byte05_nonzero_2_4_6':['ground timer/animation body only; no outer cull or registration'],
+   'motion_entry':'byte06==0 byte07==0 increments byte07 by2, then terrain; no integration that invocation',
+   'moving':'byte06==0 byte07==2 or4 executes specified motion, then terrain; does not advance animation',
+   'ground':'byte06==2 executes ground timer/animation, then outer cull/registration'},
+  'motion':evidence['parent_motion_fields']['motion'],
+  'terrain':{'accepted_fixture':'authority_data.navigation.terrain_resolver.implementation_contract',
+   'artifact':'data/oracle11_round1_navigation.json','sha256':sha(NAV),
+   'entry':'0x0b1baa','order':'after motion/landing and before camera cull and registration',
+   'reads':['actor x/z high words','source terrain selector map','+5c:u8','+5f:u8','+74:u16'],
+   'writes':['source resolver x/z high words and velocity response','+5d:u8 contact bits'],
+   'sync_guard':'after resolver, if (+5c:u8 OR +5f:u8 OR +74:u16)==0 copy z highword to y highword; preserve y low word',
+   'do_not_inherit':'player-only global bounds/obstacle order is not an actor invocation rule'},
+  'ground_timer':{'entry':'0x0a7394','reads':['global+022a:u8','global+01f3:u8','global+0208:u8','actor+2a:s16'],
+   'disabled_guard':'if any of the three global bytes is nonzero reselect animation0 without changing timer or allocating',
+   'enabled_rule':'predecrement timer modulo16; nonnegative result advances animation via0x016536; negative result reloads48 then attempts child allocation',
+   'failure_rule':'allocation failure still reselects animation0; never retry or manufacture a child',
+   'child':{'allocator':'0x0177da','record_type_u8':24,'class_u8':16,'variant_u8':4,
+    'writes':['active byte +=1','class/variant word=0x1004','parent x/y/z highwords -> child highwords'],
+    'unwritten_fields':'retain free-record values; do not zero fractions or infer parent facing'},
+   'rng_calls_u8':0},
+  'animation':{'select_entry':'0x016518','advance_entry':'0x016536','table_address':'0x0a7404',
+   'records':animation,'loop_pointer_address':'0x0a74b8','loop_target':f'0x{loop:08x}',
+   'advance_rule':'predecrement u16 timer; at zero advance16bytes, or load long at next16bytes when old branch_s16<0; read new timer and branch',
+   'facing_rule':'no direct facing writer; allocator release clears+0c long including facing, parent does not override it'},
+  'collision':{'table_set':'0x0a75e2','hurt_selector_u8':1,'attack_selector_u8':0,
+   'hurt_box':hurt_box(program[0xa75ee:0xa75f6],0xa75ee),
+   'registration':'visible active byte exactly1 enters record28 target list0x0169a8 and generic render list0x0169bc',
+   'player_interaction':'reuse accepted player route target scan0x01ce98/overlap0x01d1f8 and Button2-edge predicate0x019f9a; target pointer injection is not production authority',
+   'direct_damage_writes':0},
+  'camera_cull':{'entry':'0x09e5a6','guard':'u16(camera_global+0x029c -0x0100) >= actor x high:u16',
+   'result':'write long+04=0x06000000; still finish current registration call; release only on next dispatched state6'},
+  'visibility':{'entry':'0x0167ac','guard':'u16(x_high-camera_x+64)<=512 AND u16(y_high-camera_y+32)<=320',
+   'outside':'byte+01=0, no list submission','inside':'byte+01=1; record28 active==1 target list then generic render list'},
+  'collection':{'accepted_player_contract':'data/oracle11_predator_route_ownership.json#/temporary_resource_pickup',
+   'source_body':'0x019f9a..0x01a1d8','target_write':'long+04=0x04000000; +65:u8=player+0xd1:u8',
+   'player_resource':'unconditional player+0xae:u16=600; if previous value0 attempt class54 display allocation, failure does not suppress grant',
+   'global_guard':'if signed global+01f4>=0 set byte1; otherwise preserve negative value',
+   'no_player_authority_reopen':True},
+  'state4':{'entry':'0x0a73e2','writes':['byte+04 +=2','byte+65 OR=4','byte+44=0x34','byte+45=0xff'],
+   'next':'tail-call shared event queue0x0ae396; no immediate free'},
+  'event_queue':{'entry':'0x0ae396','disabled_guards':['global-0x6ff4:u16 !=0','global+0x0247:u8 !=0','actor+65:s8 <0'],
+   'index':'(actor+65 &3)*8; current one-player owner index0; no invented fourth-player queue',
+   'source_pointer_table':queues,'capacity_u16':32,
+   'slot_guard':'queue[cursor_u16*8] first word has sign bit; otherwise return without write/cursor advance',
+   'writes':['byte65','byte64','word44','word40','word42'],
+   'advance':'cursor=(cursor+1)&31','direct_qsound_calls':0},
+  'state6':{'entry':'0x01783e','clear_long_offsets':[0,4,0x0c,0x2c,0x54,0x5c,0x4c,0x70,0x6c,0x74],
+   'free_stack':'push slot through global+6e70, increment global+6e8c byte; preserve all other record bytes',
+   'guard':'executed state6 dispatch, not a source frame or elapsed presentation counter'},
+  'scheduler':{'entry':'0x01bcda','order':'record28 ascending fixed slots; actor allocated in preceding record20 phase may run later in same scheduler pass',
+   'route_teardown':'caller owns whether this pool dispatches; frozen resident records retain state until authorized dispatch or centralized route release',
+   'capture_clock_forbidden':True},
+  'direct_audio_load_rng':'no direct audio/load/RNG calls in0x0a726c..0x0a7404; child/queue/player adapters own their downstream events',
+  'mutation_controls':['drop selector/RNG reuse','retained fraction','motion arithmetic/order/sign',
+   'landing guard','terrain sync guard','timer signed predecrement','disabled spawn guard',
+   'child identity/coordinates/failure','animation loop/selector','visibility/cull',
+   'Button2 edge/resource grant','queue guard/cursor','release fields/guard','captured-frame substitute'],
+  'fixed_frame_substitute_forbidden':True}
 
 
 def type28_class0e_readiness():
