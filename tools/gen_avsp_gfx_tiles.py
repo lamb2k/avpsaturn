@@ -681,6 +681,7 @@ def measure_round1_capture_demand(capture: Path) -> dict:
     peak_frame = None
     peak_composite_bytes = peak_composite_slots = largest_composite = 0
     peak_small_tiles = 0
+    peak_palette_banks = 0
     scenes = [{"first": 1972, "last": 5566}]
     for path in sorted((ROOT / "data").glob("oracle10_round1_census_extension_*.json")):
         first, last = path.stem.rsplit("_", 2)[1:]
@@ -730,6 +731,7 @@ def measure_round1_capture_demand(capture: Path) -> dict:
             if len(ft) > peak_tiles:
                 peak_tiles, peak_frame = len(ft), frame
             peak_entries = max(peak_entries, count)
+            peak_palette_banks = max(peak_palette_banks, len(fb))
             peak_composite_bytes = max(peak_composite_bytes, sum(composites.values()))
             peak_composite_slots = max(peak_composite_slots, len(composites))
             largest_composite = max([largest_composite] + list(composites.values()))
@@ -749,6 +751,7 @@ def measure_round1_capture_demand(capture: Path) -> dict:
             "tile_code_sha256": hashlib.sha256(b"".join(t.to_bytes(4, "big") for t in sorted(tiles))).hexdigest(),
             "peak_frame_tile_union": peak_tiles, "peak_tile_frame": peak_frame,
             "peak_object_entries": peak_entries, "segments": scenes,
+            "peak_simultaneous_palette_banks": peak_palette_banks,
             "source_object_projection": {"threshold_tiles": 14,
                 "peak_composite_bytes": peak_composite_bytes,
                 "peak_composite_slots": peak_composite_slots,

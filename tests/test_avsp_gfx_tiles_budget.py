@@ -503,6 +503,8 @@ if __name__ == "__main__":
         assert baseline["tile_count"] == 10920
         assert baseline["archive_bytes"] == 1442128
         assert baseline["frames"] == 13222
+        assert baseline["peak_simultaneous_palette_banks"] == 12
+        assert len(baseline["palette_banks"]) == 20
         assert baseline["segments"][0]["archive_bytes"] == 703460
         original_tiles = generator.entry_tile_codes
         generator.entry_tile_codes = lambda *args: set()

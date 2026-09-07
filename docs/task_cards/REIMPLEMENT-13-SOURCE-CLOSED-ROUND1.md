@@ -174,7 +174,7 @@ Memory: runtime101,192/102,400 (1,208 free); tile612,720/614,400;
 scratch11,648/12,288; SPEC51,580/262,144 (census floor244,924).
 186 SPEC tables SHA07dd476777ce58b0ed391fda4b62b506b017c25bf0b350495469fc6f102e2f4b.
 SH-2 core232->236; runtime+1,576/content+1,076; archive/layout probe is not a Target or capture retry.
-Existing map/asserts remain binding. No resize, squeeze or mid-combat read.
+Existing map/asserts binding. Full-route20-bank union exceeds loader16-bank colors buffer; proposal must bind palette residency too. No resize, squeeze or mid-combat read.
 Last historical class0a GAME.BIN380,176, BSS0x060b3e20, SHA
 8ffb54a957b2c6d2e08798bc5bf787fd40ffd5acfa035e9cb2b7d37bbc15a1c8 is NOT current.
 

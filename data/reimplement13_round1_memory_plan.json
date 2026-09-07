@@ -12,6 +12,19 @@
     "tile_code_sha256": "58a8f00980188c937fd2f3da5edd3198f69bcbcbc9567e4f06e03a0667b2ecf7",
     "tile_count": 10920,
     "palette_banks": 20,
+    "peak_simultaneous_palette_banks": 12,
+    "palette_integration_blocker": {
+      "owner": "main.c load_tile_archive / avsp_tiles.c avsp_tiles_open",
+      "format_maximum_banks": 32,
+      "loader_color_buffer_entries": 256,
+      "loader_bank_capacity": 16,
+      "full_route_bank_union": 20,
+      "highest_written_color_index_with20_banks": 318,
+      "finding": "Archive parser permits20 banks, then loader writes colors[slot*16+index] for index0..14 into colors[256]. Full-route union cannot be staged through this loader unchanged.",
+      "required_proposal_boundary": "Bound palette residency/remapping and source palette updates through existing renderer interface;12 simultaneous observed banks is not a general branch bound or permission to overwrite HUD/other CRAM owners. A capacity rejection guard is also required before any expanded archive may boot.",
+      "current_staged_archive_changed": false,
+      "production_fix_implemented": false
+    },
     "observed_archive_bytes": 1442128,
     "current_reserved_bytes": 614400,
     "observed_deficit_bytes": 827728,
@@ -75,6 +88,7 @@
         "round1_text_palette_fade": 512
       },
       "unresolved": "Complete preprocessed profile allocation/free sequence, loader temporary buffers, Jo headers/alignment, SGL initial allocations, fragmentation and later native audio/content demands. Do not equate static payload sum with measured peak or remove retained assets without owning-interface regression proof.",
+      "additional_order_findings": "build.ps1 normal live profile enables combat integration, so PCMBT.RLE51850 and18432 decode buffer are included. Per-file avsp_fs_read_file_in_dir probes through jo_fs_open:2048-byte temporary buffer, freed before destination allocation. Its subsequent GFS read uses static staging. TGA loader holds131884-byte file(+terminator) alongside131072 decoded pixels, then frees file. Round1 text512/960-byte sprite payloads are freed after upload;512-byte fade remains. Jo block header is short zone plus unsigned-int size; target ABI alignment must be retained in the allocator model.",
       "implementation_changed": false
     },
     "scope": "Paired observed full-route demand, not all reachable branches or native/physical acceptance.",

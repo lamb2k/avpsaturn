@@ -32,7 +32,7 @@ Owner authorized sizing only: paired full-route tiles1442128/614400; no resize.
 Normal callback still uses captured schedules; reported authority0 is hardcoded.
 Type28/class0c remains blocked under its exhausted causal-witness budget.
 Target and transition Emulator/WGC also remain exhausted: no retry was authorized.
-Read-only demand recorded in memory plan; proposed resize NOT executed.
+Memory plan records20-bank union/16-bank loader overflow; no expanded load allowed.
 
 Scene report:103/747 missing source lifetimes;1/708 unowned native lifetimes;
 0/38 unidentified pairs;501/1494 lifetime endpoints;1/708 unsupported records;
