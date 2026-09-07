@@ -62,7 +62,8 @@ readiness = oracle11.interactive_readiness(opcodes)
 assert readiness == oracle11.interactive_readiness(opcodes), "readiness repeat drift"
 assert readiness["status"] == "BLOCKED_MISSING_EXECUTABLE_TICK_CONTRACT"
 assert readiness["production_implementation_authorized_by_this_audit"] is False
-for address in (0x0011EA, 0x001060, 0x00808A, 0x008140, 0x014B44, 0x001092):
+for address in (0x0011EA, 0x001060, 0x00808A, 0x008140, 0x014B44, 0x001092,
+                0x017090, 0x00C772, 0x01613C):
     changed = bytearray(opcodes)
     changed[address] ^= 1
     try:
@@ -71,7 +72,7 @@ for address in (0x0011EA, 0x001060, 0x00808A, 0x008140, 0x014B44, 0x001092):
         assert str(error) == f"interactive scheduler source window drift: 0x{address:06x}"
     else:
         raise AssertionError(f"accepted changed scheduler source window {address:06x}")
-print("Interactive scheduler readiness: BLOCKED (6 attributable identity controls; no runtime kills)")
+print("Interactive scheduler readiness: BLOCKED (9 attributable identity controls; no runtime kills)")
 
 # Write ownership controls are evidence-validation controls, not native kills.
 guard = {"event": "guard_write", "address": "ff81bc", "pc": "008090",
@@ -88,3 +89,47 @@ for field, value in (("event", "opcode_fetch"), ("address", "ff81a6"),
     else:
         raise AssertionError(f"credited changed guard ownership: {field}")
 print("Scheduler clock write provenance: PASS (5 attributable evidence controls; no runtime kills)")
+
+wake = {"event": "control_write", "address": "ff81b8", "pc": "01715a",
+        "data": "257", "mask": "255", "wake_counter": "5", "wake_request": "1",
+        "participation": "1", "input1": "16"}
+oracle11.validate_wake_write(wake)
+oracle11.validate_wake_write(dict(wake))
+for field, value, diagnostic in (
+    ("pc", "000e92", "unowned wake-control writer"),
+    ("address", "ff1744", "wake-control write arithmetic or field drift"),
+    ("data", "0", "wake-control write arithmetic or field drift"),
+    ("mask", "65280", "wake-control write arithmetic or field drift"),
+    ("wake_counter", "4", "wake-control threshold guard drift"),
+    ("wake_request", "0", "wake-control request guard drift"),
+):
+    try:
+        oracle11.validate_wake_write(dict(wake, **{field: value}))
+    except ValueError as error:
+        assert str(error) == diagnostic
+    else:
+        raise AssertionError(f"credited changed wake control: {field}")
+input_write = dict(wake, pc="017112", address="ff823a", mask="65280")
+oracle11.validate_wake_write(input_write)
+for field in ("participation", "input1"):
+    try:
+        oracle11.validate_wake_write(dict(input_write, **{field: "0"}))
+    except ValueError as error:
+        assert str(error) == "wake-control participating input guard drift"
+    else:
+        raise AssertionError(f"credited missing participating input: {field}")
+print("Scheduler wake arithmetic/guards: PASS (8 attributable evidence controls; no native kills)")
+increment = dict(wake, pc="01714e", address="ff1744", mask="65535",
+                 wake_counter="65535", data="0")
+oracle11.validate_wake_write(increment)
+try:
+    oracle11.validate_wake_write(dict(increment, data="65536"))
+except ValueError:
+    raise AssertionError("irrelevant bits outside the bus mask changed the selected write")
+try:
+    oracle11.validate_wake_write(dict(increment, data="1"))
+except ValueError as error:
+    assert str(error) == "wake-control write arithmetic or field drift"
+else:
+    raise AssertionError("accepted wrong counter wrap")
+print("Scheduler counter width: PASS (1 arithmetic control; masked equivalent not credited)")

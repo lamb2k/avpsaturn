@@ -11,7 +11,8 @@ param(
     [switch]$Class0eAliasCapture,
     [switch]$Class0eAliasSuppress,
     [switch]$SchedulerClockCapture,
-    [switch]$SchedulerInputPerturb
+    [switch]$SchedulerInputPerturb,
+    [switch]$SchedulerWakeSuppress
 )
 
 $ErrorActionPreference = 'Stop'
@@ -20,6 +21,9 @@ if ($Class0eAliasSuppress -and -not $Class0eAliasCapture) {
 }
 if ($SchedulerInputPerturb -and -not $SchedulerClockCapture) {
     throw 'SchedulerInputPerturb requires SchedulerClockCapture'
+}
+if ($SchedulerWakeSuppress -and -not $SchedulerClockCapture) {
+    throw 'SchedulerWakeSuppress requires SchedulerClockCapture'
 }
 $root = $PSScriptRoot
 $mame = Join-Path $root '.deps\mame\mame0289\mame.exe'
@@ -51,6 +55,7 @@ $env:AVSP_ORACLE11_COFFEE_SHOP_SCENE = if ($Variant -match '^cs') { '1' } else {
 $env:AVSP_ORACLE11_CLASS0E_ALIAS_CAPTURE = if ($Class0eAliasCapture) { '1' } else { '0' }
 $env:AVSP_ORACLE11_CLASS0E_ALIAS_SUPPRESS = if ($Class0eAliasSuppress) { '1' } else { '0' }
 $env:AVSP_ORACLE11_SCHEDULER_CLOCK_CAPTURE = if ($SchedulerClockCapture) { '1' } else { '0' }
+$env:AVSP_ORACLE11_SCHEDULER_WAKE_SUPPRESS = if ($SchedulerWakeSuppress) { '1' } else { '0' }
 $env:AVSP_ORACLE11_NAVIGATION_PERTURB = if ($SchedulerInputPerturb) { '1' } else { '0' }
 $env:AVSP_ORACLE11_SUPPRESS_ACTION4_TIMER = if ($Variant -in @('css', 'cs2s', 'cs3s', 'cs4s', 'cs5s', 'cs6s')) { '1' } else { '0' }
 $env:AVSP_ORACLE11_SUPPRESS_TYPE4_CLASS03_PC = if ($Variant -eq 'cs7s') { $TransitionWriter } else { '' }
@@ -139,6 +144,7 @@ finally {
         'AVSP_ORACLE11_CLASS0E_ALIAS_CAPTURE',
         'AVSP_ORACLE11_CLASS0E_ALIAS_SUPPRESS',
         'AVSP_ORACLE11_SCHEDULER_CLOCK_CAPTURE',
+        'AVSP_ORACLE11_SCHEDULER_WAKE_SUPPRESS',
         'AVSP_ORACLE11_NAVIGATION_PERTURB',
         'AVSP_ORACLE11_SUPPRESS_ACTION4_TIMER',
         'AVSP_ORACLE11_SUPPRESS_TYPE4_CLASS03_PC',

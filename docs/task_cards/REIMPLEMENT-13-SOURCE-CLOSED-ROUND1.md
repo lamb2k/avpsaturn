@@ -23,10 +23,10 @@ preserved in Git at checkpoint `2e446d4303fa50bac14ec3c00222635066a7712c`.
 
 Scheduler audit: BLOCKED_MISSING_EXECUTABLE_TICK_CONTRACT; accepted pool order
 does not bind loop00808a, tail008140, trap3/001060 or interrupt-owned guards.
-Run analyzer --interactive-readiness for exact fields; six identity controls PASS.
+Run analyzer --interactive-readiness for exact fields; nine identity controls PASS.
 Class0e native16 lifetimes/1776 rows reproduce state/facing/animation/timers and attachment formula;333 inherited position rows stay RED.
 Alias/clear, strict host10 causal controls and whole-scene suppression/repeat PASS; tiers separate.
-Fast/Oracle native PASS; scheduler a1/b1 all8 ledgers identical, p1 exit12 frames earlier. Next014b44 ff81b9/trap4 binding; scene/candidate RED/frozen.
+Fast/Oracle native PASS; scheduler a3/b3 all8 ledgers identical, p3 exit12 frames earlier; source wake suppression causal. Native timing/1614a continuation remains blocked; owner adaptation choice pending. Safe next class0e archive demand.
 
 ## Objective
 

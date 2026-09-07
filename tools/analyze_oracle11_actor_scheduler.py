@@ -307,6 +307,9 @@ def interactive_readiness(opcodes: bytes) -> dict[str, object]:
         (0x008140, 0x008164, "9c47f48acc7abecc4de586864aefa5d0846f188aa88bab1e89ee724ebcb8e449"),
         (0x014B44, 0x014B92, "9a02807a79055309d019558970d588dfcd59f40de30b801522bc975912472acf"),
         (0x001092, 0x0010B0, "434d2236afa89ad8cff4be34d82ff1d0cafe42ded16426f817a7680c198732af"),
+        (0x017090, 0x017176, "c0241a33d06237d9e317532523da6be772022b5b0776a4e65f75728d8242eab7"),
+        (0x00C772, 0x00C7AA, "e627f7b48b0d427488075b2bd9998184b8b15b3903c731cfe984bbb25d2824bb"),
+        (0x01613C, 0x016196, "00717a1058c3bddb27684f727105a92547ef2f43f390befa8f76ab17b18a8b0f"),
     )
     for start, end, expected in windows:
         require(sha256_bytes(opcodes[start:end]) == expected,
@@ -353,7 +356,89 @@ def clock_guard_owner(row: dict[str, str]) -> str:
     return owners[key]
 
 
-def scheduler_clock_evidence() -> dict[str, object]:
+def validate_wake_write(row: dict[str, str], suppressed: bool = False) -> None:
+    """Validate measured one-player control writes against bounded source code.
+
+    Read values are pre-write. The helper is Oracle validation, not a native
+    execution contract and not authority to replay these observations.
+    """
+    pc = row["pc"]
+    counter, request = int(row["wake_counter"]), int(row["wake_request"])
+    # (address, bus mask, value after selecting the addressed byte/word).
+    writes = {
+        "00c774": ("ff823a", 65280, 0), "00c778": ("ff81b8", 255, 0),
+        "00c77c": ("ff1744", 65535, 0), "00c79a": ("ff823a", 65280, 0),
+        "00c79e": ("ff81b8", 255, 0), "00c7a2": ("ff1744", 65535, 0),
+        "017096": ("ff81b8", 255, 0), "0170ac": ("ff823a", 65280, 1),
+        "0170e2": ("ff1744", 65535, 1), "0170ee": ("ff1744", 65535, 0),
+        "0170f2": ("ff823a", 65280, 0), "0170f8": ("ff81b8", 255, 0),
+        "0170fc": ("ff823a", 65280, 0), "017112": ("ff823a", 65280, 1),
+        "01714e": ("ff1744", 65535, (counter + 1) & 65535),
+        "01715a": ("ff81b8", 255, 0 if suppressed else 1),
+        "017160": ("ff1744", 65535, 5), "017166": ("ff823a", 65280, 1),
+        "01716e": ("ff1744", 65535, 0), "017172": ("ff81b8", 255, 0),
+        "017176": ("ff823a", 65280, 0), "0174ba": ("ff823a", 65535, 0),
+    }
+    require(row["event"] == "control_write" and pc in writes,
+            "unowned wake-control writer")
+    address, mask, value = writes[pc]
+    actual = (int(row["data"]) & mask) >> (8 if mask == 65280 else 0)
+    require(row["address"] == address and int(row["mask"]) == mask and actual == value,
+            "wake-control write arithmetic or field drift")
+    if pc in ("0170ac", "017112"):
+        require(int(row["participation"]) & 1 and int(row["input1"]) & 127,
+                "wake-control participating input guard drift")
+    if pc in ("01714e", "01715a", "017160", "017166"):
+        require(request != 0, "wake-control request guard drift")
+    if pc in ("01715a", "017160", "017166"):
+        require(counter >= 5, "wake-control threshold guard drift")
+    if pc in ("0170ee", "0170f2", "01716e", "017172", "017176"):
+        require(request == 0, "wake-control release guard drift")
+
+
+def wake_suppression_evidence(baseline_rows: list[dict[str, str]]) -> dict[str, object]:
+    directory = ROOT / ".deps/mame/oracle11_scheduler_clock_m3"
+    with (directory / "coffee_shop_scene_frames.tsv").open() as stream:
+        rows = list(csv.DictReader(stream, delimiter="\t"))
+    require([int(row["frame"]) for row in rows] == list(range(1972, 5567)),
+            "incomplete source suppression run")
+    difference = next(({"frame": int(a["frame"]), "fields": {
+        key: [a[key], m[key]] for key in a if a[key] != m[key]}}
+        for a, m in zip(baseline_rows, rows) if a != m), None)
+    suppressions, secondary_ready, first_trigger = 0, 0, None
+    pending = False
+    with (directory / "coffee_shop_scheduler_clock.tsv").open() as stream:
+        for row in csv.DictReader(stream, delimiter="\t"):
+            if pending:
+                require(row["event"] == "control_write" and row["pc"] == "01715a",
+                        "source suppression did not reach its intended write")
+                validate_wake_write(row, suppressed=True)
+                pending = False
+            if row["event"] == "wake_suppression":
+                validate_wake_write(dict(row, event="control_write"))
+                first_trigger = first_trigger if first_trigger is not None else int(row["frame"])
+                suppressions += 1
+                pending = True
+            elif (row["event"], row["address"], row["pc"]) == (
+                    "task_write", "ff00d8", "014b6a"):
+                secondary_ready += 1
+    require(suppressions > 0 and not pending, "source suppression never executed")
+    require(secondary_ready == 0, "source secondary wake survived suppression")
+    require(difference is not None and difference["frame"] >= first_trigger,
+            "source suppression lacks an attributable downstream state difference")
+    hashes = {}
+    for name in ("coffee_shop_scheduler_clock.tsv", "coffee_shop_scene_frames.tsv"):
+        with (directory / name).open("rb") as stream:
+            hashes[name] = hashlib.file_digest(stream, "sha256").hexdigest()
+    return {"status": "VALID_SOURCE_CAUSAL_REJECTION", "native_mutation_kills": 0,
+            "path": directory.relative_to(ROOT).as_posix(), "files_sha256": hashes,
+            "source_trigger_suppressions": suppressions, "first_trigger_frame": first_trigger,
+            "secondary_main_task_ready_writes": secondary_ready,
+            "first_scene_difference": difference, "final_scene_state": rows[-1],
+            "route_completion_required_of_this_negative_control": False}
+
+
+def scheduler_clock_evidence(revision: int = 1) -> dict[str, object]:
     """Summarize ignored paired/changed-input evidence; NOT executable SPEC.
 
     This intentionally does not change the accepted pool-authority artifact.
@@ -364,9 +449,12 @@ def scheduler_clock_evidence() -> dict[str, object]:
              "coffee_shop_scene_frames.tsv", "coffee_shop_scene_health_writes.tsv",
              "coffee_shop_rng_calls.tsv", "samples.tsv", "dispatches.tsv",
              "coffee_shop_type36_writes.tsv")
+    require(revision in (1, 2, 3), "unknown scheduler probe revision")
+    labels = tuple(letter + str(revision) for letter in ("a", "b", "p"))
+    baseline, repeat, perturb = labels
     captures = {}
     scenes = {}
-    for suffix in ("a1", "b1", "p1"):
+    for suffix in labels:
         directory = ROOT / ".deps/mame" / ("oracle11_scheduler_clock_" + suffix)
         identities = {}
         for name in names:
@@ -387,31 +475,39 @@ def scheduler_clock_evidence() -> dict[str, object]:
         captures[suffix] = {"path": directory.relative_to(ROOT).as_posix(),
                             "files_sha256": identities, "route_edges": edges,
                             "final_state": rows[-1]}
-    require(captures["a1"]["files_sha256"] == captures["b1"]["files_sha256"],
+    require(captures[baseline]["files_sha256"] == captures[repeat]["files_sha256"],
             "scheduler cold pair differs")
     first = next(({"frame": int(a["frame"]), "fields": {
         key: [a[key], p[key]] for key in a if a[key] != p[key]}}
-        for a, p in zip(scenes["a1"], scenes["p1"]) if a != p), None)
+        for a, p in zip(scenes[baseline], scenes[perturb]) if a != p), None)
     require(first is not None, "scheduler changed-input witness is equivalent")
-    require(captures["a1"]["route_edges"] != captures["p1"]["route_edges"],
+    require(captures[baseline]["route_edges"] != captures[perturb]["route_edges"],
             "changed input did not alter route chronology")
     # Stream the large ledgers; do not retain millions of dictionaries in RAM.
-    for suffix in ("a1", "p1"):
+    for suffix in (baseline, perturb):
         directory = ROOT / captures[suffix]["path"]
         events, guards, main_task_writes = Counter(), Counter(), Counter()
+        control_writes, trap3_callers = Counter(), Counter()
         previous = 0
         with (directory / names[0]).open() as stream:
             for row in csv.DictReader(stream, delimiter="\t"):
                 sequence = int(row["sequence"])
                 require(sequence == previous + 1, "scheduler event sequence gap")
                 previous = sequence
-                require(1972 <= int(row["frame"]) < 5566,
+                lower = 0 if row["event"] == "control_write" else 1972
+                require(lower <= int(row["frame"]) < 5566,
                         "scheduler event outside declared observation window")
                 events[row["event"]] += 1
                 if row["event"] == "guard_write":
                     guards[clock_guard_owner(row)] += 1
                 elif row["event"] == "task_write" and row["address"] == "ff00d8":
                     main_task_writes[(row["pc"], row["data"], row["mask"])] += 1
+                    if revision >= 2 and row["pc"] == "001082":
+                        trap3_callers[int(row["user_plus60"])] += 1
+                elif row["event"] == "control_write" and int(row["frame"]) >= 1972:
+                    if revision == 3:
+                        validate_wake_write(row)
+                    control_writes[(row["pc"], row["address"], row["data"], row["mask"])] += 1
         require(all(guards[name] > 0 for name in (
             "loop_00808a_set", "irq2_000e8c_clear", "irq2_helper_00142e_clear")),
             "missing scheduler guard owner witness")
@@ -419,7 +515,14 @@ def scheduler_clock_evidence() -> dict[str, object]:
             main_task_state_writers=[{"tap_pc": pc, "data": int(data),
                 "mask": int(mask), "count": count}
                 for (pc, data, mask), count in sorted(main_task_writes.items())])
-    return {
+        if revision >= 2:
+            captures[suffix].update(
+                scene_control_writers=[{"tap_pc": pc, "address": address,
+                    "data": int(data), "mask": int(mask), "count": count}
+                    for (pc, address, data, mask), count in sorted(control_writes.items())],
+                main_task_trap3_callers=[{"return_pc": f"0x{pc:06x}", "count": count}
+                    for pc, count in sorted(trap3_callers.items())])
+    report = {
         "status": "PAIRED_AND_CHANGED_INPUT_WITNESSES_BOUND_TICK_CONTRACT_PARTIAL",
         "scope": "Coffee Shop source observation1972..5566, not Round1 completion",
         "captures": captures, "first_changed_scene_state": first,
@@ -433,12 +536,46 @@ def scheduler_clock_evidence() -> dict[str, object]:
         "remaining_blocker": "Bind ff81b9-controlled task-countdown program014b44 and trap4 plus route/task continuations and CPU-overrun versus explicit-yield behavior; no guessed per-video-frame invocation rule",
         "target_emulator_visual_retries": 0,
     }
+    if revision == 3:
+        report["source_wake_suppression"] = wake_suppression_evidence(scenes[baseline])
+        report["source_identity"] = {
+            "decoded_opcodes_sha256": sha256_bytes(OPCODES.read_bytes()),
+            "program_sha256": sha256_bytes(PROGRAM.read_bytes()),
+            "windows": interactive_readiness(OPCODES.read_bytes())["source_windows"],
+            "pinned_mame_sha256": "af6966108d9b52c22465c6d50f4e5d50cc371b50f2d27dc443935f287aad37a3",
+        }
+        report["bounded_source_wake_rules"] = {
+            "status": "SOURCE_WITNESSED_NOT_YET_EXECUTABLE_SPEC",
+            "owners": ["0x017090..0x017176", "0x014b44..0x014b92"],
+            "fields": {"0xff81b9": "u8 wake guard", "0xff823a": "u8 input request",
+                       "0xff1744": "u16 counter", "0xff81bf": "u8 participation bits",
+                       "0xff8064/66/68": "u8 raw controller input"},
+            "initialization": "17090 clears wake guard, preserves prior request then ORs participating input; counter becomes1 if request is nonzero else0",
+            "update": "170f2 clears guard/request; participating input masked127 sets request; increment u16 counter before unsigned compare5; at least5 sets guard1 and clamps counter5; absent input clears counter/guard/request",
+            "secondary_task_scan": "014b44 only when wake guard nonzero: ascending16 tasks ff0058 stride32; state byte1 countdown decremented, zero becomesstate4; exclude index3 (descending DBRA counter12)",
+            "continuation": "014b70 calls trap4 wrapper001092; resumes at014b76; task queue ordering and route/load continuation contract remain incomplete",
+            "prohibited_native_substitute": "recorded frame or task-write count",
+        }
+        report["remaining_blocker"] = (
+            "No executable source-to-native clock contract for CPU-throughput-dependent "
+            "secondary task scans and IRQ preemption, or command-queue/result continuation "
+            "01614a waiting on ff837b. Fixed per-video-frame invocation or authored "
+            "acceleration would be a gameplay-timing adaptation, not proven source parity. "
+            "No such adaptation is authorized by this evidence.")
+        report["probe_passes"] = [
+            "1: paired loop/IRQ/task write baseline and changed-input source route",
+            "2: secondary guard writer and correct user-stack return provenance",
+            "3: full wake guard/counter/input fields, repeat/perturb and causal suppression",
+        ]
+    return report
 
 
 def main() -> None:
-    if sys.argv[1:] == ["--scheduler-clock-evidence"]:
-        report = scheduler_clock_evidence()
-        output = ROOT / "build/verification/oracle11_scheduler_clock.json"
+    if sys.argv[1:] in (["--scheduler-clock-evidence"], ["--scheduler-clock-evidence2"], ["--scheduler-clock-evidence3"]):
+        revision = int(sys.argv[1][-1]) if sys.argv[1][-1].isdigit() else 1
+        report = scheduler_clock_evidence(revision)
+        filename = "oracle11_scheduler_clock" + (f"_v{revision}" if revision > 1 else "") + ".json"
+        output = ROOT / "build/verification" / filename
         output.parent.mkdir(parents=True, exist_ok=True)
         output.write_bytes(canonical(report))
         print(f"Scheduler source witnesses: {report['status']}; {output}")

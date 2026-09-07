@@ -20,15 +20,15 @@ USER-10 requires QA and explicit feedback. Physical UNRUN; HW-01 parked.
 Class0e native body now reproduces16 lifetimes/1776 rows, state/facing/animation,
 attachment formula, alias and release. Keep333 inherited world-position rows RED.
 Strict host10 causal controls plus whole-scene allocation suppression and repeat PASS.
-Source-only scheduler a1/b1 match all8 ledgers; p1 changes exit5562->5550.
+Source-only scheduler a3/b3 match all8 ledgers; p3 changes exit5562->5550.
 The captured-schedule defect is BLOCKED_MISSING_EXECUTABLE_TICK_CONTRACT.
 Wrapper source probe uses -SchedulerClockCapture; p1 also -SchedulerInputPerturb.
 Pool callee0011ea is RTS; loop00808a/tail008140 reaches trap3 wrapper001060.
-Next: bind program014b44 ff81b9 guard and trap4;151 main-task wakeups are not IRQ2.
-Missing: this guard's writers, continuation/input/hitstop and CPU-overrun order.
+Wake guard/counter/input rules validated; source suppression removes151 wakeups.
+Missing: native CPU-timing policy and command/result continuation1614a/ff837b.
 Class0e source/SPEC c952687; Fast/Oracle PASS; host report, Saturn draw NOT wired.
 Its50 assembly headers are absent from sparse archive; tag8 no-op adapter pending.
-Return to the scheduler with bounded source evidence; never guess display ticks.
+Owner timing-adaptation choice pending; safe next: class0e archive/header demand.
 Normal callback still uses captured schedules; reported authority0 is hardcoded.
 Type28/class0c remains blocked under its exhausted causal-witness budget.
 Target and transition Emulator/WGC also remain exhausted: no retry was authorized.

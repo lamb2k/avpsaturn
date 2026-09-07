@@ -20,6 +20,7 @@ class0e_alias = {
 }
 oracle11_scheduler_clock = {
     capture = os.getenv("AVSP_ORACLE11_SCHEDULER_CLOCK_CAPTURE") == "1",
+    suppress_wake = os.getenv("AVSP_ORACLE11_SCHEDULER_WAKE_SUPPRESS") == "1",
     internal = false, sequence = 0, taps = {}
 }
 local suppress_action4_timer =
@@ -1408,16 +1409,18 @@ oracle11_type4_class03_writes = program:install_write_tap(
 -- available to discriminate prefetch/projection. No source state is changed.
 if oracle11_scheduler_clock.capture then
     oracle11_scheduler_clock.log = assert(io.open(root .. "/coffee_shop_scheduler_clock.tsv", "w"))
-    oracle11_scheduler_clock.log:write("sequence\tframe\tevent\tsite\tpc\ta0\ta5\ta6\tsp\tusp\tstack_return\ttask\ttask_state\ttask_resume\tcatchup\tloop_guard\tpause_guard\tirq_counter\tloop_counter\troute\tinput_current\tinput_previous\tplayer_state\tplayer_action\tplayer_x\tplayer_y\tplayer_z\trng\taddress\tdata\tmask\n")
+    oracle11_scheduler_clock.log:write("sequence\tframe\tevent\tsite\tpc\ta0\ta5\ta6\tsp\tusp\tstack_return\ttask\ttask_state\ttask_resume\tcatchup\tloop_guard\tpause_guard\tirq_counter\tloop_counter\troute\tinput_current\tinput_previous\tplayer_state\tplayer_action\tplayer_x\tplayer_y\tplayer_z\trng\taddress\tdata\tmask\twake_guard\tinput_mode\tuser_top\tuser_plus60\tinput1\tinput2\tinput3\tparticipation\twake_request\twake_counter\n")
 end
 function oracle11_scheduler_clock.emit(event, site, address, data, mask)
     if not oracle11_scheduler_clock.capture or oracle11_scheduler_clock.internal or
-            frame < 1972 or frame >= capture_last_frame then return end
+            (frame < 1972 and event ~= "control_write") or frame >= capture_last_frame then return end
     oracle11_scheduler_clock.internal = true
     local task = u32(0xff025c) & 0xffffff
     local valid_task = task >= 0xff0058 and task < 0xff0258 and
         (task - 0xff0058) % 0x20 == 0
     local sp = maincpu.state["SP"].value & 0xffffff
+    local usp = maincpu.state["USP"].value & 0xffffff
+    local valid_usp = usp >= 0xff0000 and usp < 0xffffc0
     oracle11_scheduler_clock.sequence = oracle11_scheduler_clock.sequence + 1
     oracle11_scheduler_clock.log:write(table.concat({
         oracle11_scheduler_clock.sequence, frame, event, string.format("%06x", site),
@@ -1433,7 +1436,12 @@ function oracle11_scheduler_clock.emit(event, site, address, data, mask)
         u16(0xff8008), u8(0xff846e), u8(0xff846f),
         u16(player + 4), u16(player + 6), u32(player + 0x10),
         u32(player + 0x14), u32(player + 0x18), u16(0xff81a8),
-        string.format("%06x", address), data, mask}, "\t") .. "\n")
+        string.format("%06x", address), data, mask,
+        u8(0xff81b9), u8(0xff81b0),
+        valid_usp and u32(usp) or -1,
+        valid_usp and u32(usp + 60) or -1,
+        u8(0xff8064), u8(0xff8066), u8(0xff8068),
+        u8(0xff81bf), u8(0xff823a), u16(0xff1744)}, "\t") .. "\n")
     oracle11_scheduler_clock.internal = false
 end
 if oracle11_scheduler_clock.capture then
@@ -1451,6 +1459,27 @@ if oracle11_scheduler_clock.capture then
         0xff81a6, 0xff81bd, "clock_guard_writes", function(offset, data, mask)
             if offset == 0xff81a6 or offset == 0xff81bc then
                 oracle11_scheduler_clock.emit("guard_write", 0, offset, data, mask)
+            elseif (offset == 0xff81b8 and (mask & 0xff) ~= 0) or
+                    (offset == 0xff81b0 and (mask & 0xff00) ~= 0) then
+                if offset == 0xff81b8 and oracle11_scheduler_clock.suppress_wake and
+                        frame >= 1972 and frame < capture_last_frame and
+                        maincpu.state["PC"].value == 0x01715a then
+                    oracle11_scheduler_clock.emit("wake_suppression", 0, offset, data, mask)
+                    data = data & 0xff00
+                    oracle11_scheduler_clock.emit("control_write", 0, offset, data, mask)
+                    return data
+                end
+                oracle11_scheduler_clock.emit("control_write", 0, offset, data, mask)
+            end
+        end)
+    oracle11_scheduler_clock.counter_tap = program:install_write_tap(
+        0xff1744, 0xff1745, "clock_wake_counter", function(offset, data, mask)
+            oracle11_scheduler_clock.emit("control_write", 0, offset, data, mask)
+        end)
+    oracle11_scheduler_clock.request_tap = program:install_write_tap(
+        0xff823a, 0xff823b, "clock_wake_request", function(offset, data, mask)
+            if (mask & 0xff00) ~= 0 then
+                oracle11_scheduler_clock.emit("control_write", 0, offset, data, mask)
             end
         end)
     oracle11_scheduler_clock.task_tap = program:install_write_tap(
