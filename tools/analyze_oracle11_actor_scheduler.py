@@ -9,6 +9,8 @@ from __future__ import annotations
 import hashlib
 import json
 import sys
+import csv
+from collections import Counter
 from pathlib import Path
 
 
@@ -303,6 +305,8 @@ def interactive_readiness(opcodes: bytes) -> dict[str, object]:
         (0x001060, 0x00106C, "3171b913384c360ab2d261089a5f08184d3a8c83585cf24942d8ce04748817ff"),
         (0x00808A, 0x0080B6, "5f2ab7570b4e2f33993224d1f93200d99b15e5f40dbb623cbe031cc1a0e003fa"),
         (0x008140, 0x008164, "9c47f48acc7abecc4de586864aefa5d0846f188aa88bab1e89ee724ebcb8e449"),
+        (0x014B44, 0x014B92, "9a02807a79055309d019558970d588dfcd59f40de30b801522bc975912472acf"),
+        (0x001092, 0x0010B0, "434d2236afa89ad8cff4be34d82ff1d0cafe42ded16426f817a7680c198732af"),
     )
     for start, end, expected in windows:
         require(sha256_bytes(opcodes[start:end]) == expected,
@@ -327,15 +331,118 @@ def interactive_readiness(opcodes: bytes) -> dict[str, object]:
             "Route entry/exit calls that suspend within a pool traversal and resume it",
             "Input sampling, hitstop and source-phase-counter order across resumes",
             "Independent changed-input witness for the complete top-level invocation rule",
+            "0x014b44 task-countdown owner: ff81b9 guard writers, excluded task index3 and trap4 continuation ordering",
         ],
         "unblock": "Bound the loop, trap-3 and owning interrupt/route continuations in existing Oracle/SPEC; validate retained or bounded independent source witnesses before native translation",
         "forbidden_substitute": "one update per displayed frame or captured phase counts",
-        "next_dependency_safe_body": "record-type36/class0e whole presentation program",
+        "next_dependency_safe_body": "class0e normal presentation archive/allowlist/no-op adapter, host body already implemented",
+        "target_emulator_visual_retries": 0,
+    }
+
+
+def clock_guard_owner(row: dict[str, str]) -> str:
+    """Attribute actual write taps, never opcode-prefetch counts, to a writer."""
+    key = (row["address"], row["pc"], int(row["data"]), int(row["mask"]))
+    owners = {
+        ("ff81bc", "008090", 65535, 65280): "loop_00808a_set",
+        ("ff81bc", "000e92", 0, 65280): "irq2_000e8c_clear",
+        ("ff81a6", "001432", 0, 65280): "irq2_helper_00142e_clear",
+    }
+    require(row["event"] == "guard_write" and key in owners,
+            "unowned scheduler guard write")
+    return owners[key]
+
+
+def scheduler_clock_evidence() -> dict[str, object]:
+    """Summarize ignored paired/changed-input evidence; NOT executable SPEC.
+
+    This intentionally does not change the accepted pool-authority artifact.
+    Fetch taps include prefetches. SP is the supervisor stack during these
+    observations: the historical stack_return column is NOT a caller witness.
+    """
+    names = ("coffee_shop_scheduler_clock.tsv", "coffee_shop_scene_actors.tsv",
+             "coffee_shop_scene_frames.tsv", "coffee_shop_scene_health_writes.tsv",
+             "coffee_shop_rng_calls.tsv", "samples.tsv", "dispatches.tsv",
+             "coffee_shop_type36_writes.tsv")
+    captures = {}
+    scenes = {}
+    for suffix in ("a1", "b1", "p1"):
+        directory = ROOT / ".deps/mame" / ("oracle11_scheduler_clock_" + suffix)
+        identities = {}
+        for name in names:
+            with (directory / name).open("rb") as stream:
+                identities[name] = hashlib.file_digest(stream, "sha256").hexdigest()
+        with (directory / "coffee_shop_scene_frames.tsv").open() as stream:
+            rows = list(csv.DictReader(stream, delimiter="\t"))
+        require([int(row["frame"]) for row in rows] == list(range(1972, 5567)),
+                "incomplete scheduler scene witness")
+        edges = []
+        for row in rows:
+            state = int(row["route_state"])
+            if not edges or edges[-1][1] != state:
+                edges.append([int(row["frame"]), state])
+        require([state for _, state in edges] == [2, 4, 6, 0, 2],
+                "scheduler witness did not traverse Coffee Shop exit")
+        scenes[suffix] = rows
+        captures[suffix] = {"path": directory.relative_to(ROOT).as_posix(),
+                            "files_sha256": identities, "route_edges": edges,
+                            "final_state": rows[-1]}
+    require(captures["a1"]["files_sha256"] == captures["b1"]["files_sha256"],
+            "scheduler cold pair differs")
+    first = next(({"frame": int(a["frame"]), "fields": {
+        key: [a[key], p[key]] for key in a if a[key] != p[key]}}
+        for a, p in zip(scenes["a1"], scenes["p1"]) if a != p), None)
+    require(first is not None, "scheduler changed-input witness is equivalent")
+    require(captures["a1"]["route_edges"] != captures["p1"]["route_edges"],
+            "changed input did not alter route chronology")
+    # Stream the large ledgers; do not retain millions of dictionaries in RAM.
+    for suffix in ("a1", "p1"):
+        directory = ROOT / captures[suffix]["path"]
+        events, guards, main_task_writes = Counter(), Counter(), Counter()
+        previous = 0
+        with (directory / names[0]).open() as stream:
+            for row in csv.DictReader(stream, delimiter="\t"):
+                sequence = int(row["sequence"])
+                require(sequence == previous + 1, "scheduler event sequence gap")
+                previous = sequence
+                require(1972 <= int(row["frame"]) < 5566,
+                        "scheduler event outside declared observation window")
+                events[row["event"]] += 1
+                if row["event"] == "guard_write":
+                    guards[clock_guard_owner(row)] += 1
+                elif row["event"] == "task_write" and row["address"] == "ff00d8":
+                    main_task_writes[(row["pc"], row["data"], row["mask"])] += 1
+        require(all(guards[name] > 0 for name in (
+            "loop_00808a_set", "irq2_000e8c_clear", "irq2_helper_00142e_clear")),
+            "missing scheduler guard owner witness")
+        captures[suffix].update(event_counts=dict(events), guard_writers=dict(guards),
+            main_task_state_writers=[{"tap_pc": pc, "data": int(data),
+                "mask": int(mask), "count": count}
+                for (pc, data, mask), count in sorted(main_task_writes.items())])
+    return {
+        "status": "PAIRED_AND_CHANGED_INPUT_WITNESSES_BOUND_TICK_CONTRACT_PARTIAL",
+        "scope": "Coffee Shop source observation1972..5566, not Round1 completion",
+        "captures": captures, "first_changed_scene_state": first,
+        "accepted_pool_authority_changed": False,
+        "native_implementation_authorized": False,
+        "projection_limits": [
+            "opcode_fetch is not an instruction invocation or scheduler tick",
+            "stack_return reads supervisor SP, not the suspended user caller",
+            "write-tap PC is the observation PC; source instruction precedes it",
+        ],
+        "remaining_blocker": "Bind ff81b9-controlled task-countdown program014b44 and trap4 plus route/task continuations and CPU-overrun versus explicit-yield behavior; no guessed per-video-frame invocation rule",
         "target_emulator_visual_retries": 0,
     }
 
 
 def main() -> None:
+    if sys.argv[1:] == ["--scheduler-clock-evidence"]:
+        report = scheduler_clock_evidence()
+        output = ROOT / "build/verification/oracle11_scheduler_clock.json"
+        output.parent.mkdir(parents=True, exist_ok=True)
+        output.write_bytes(canonical(report))
+        print(f"Scheduler source witnesses: {report['status']}; {output}")
+        return
     if sys.argv[1:] == ["--interactive-readiness"]:
         print(canonical(interactive_readiness(OPCODES.read_bytes())).decode("ascii"), end="")
         return

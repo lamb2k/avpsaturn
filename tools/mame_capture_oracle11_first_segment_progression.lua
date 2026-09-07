@@ -18,6 +18,10 @@ class0e_alias = {
     suppress = os.getenv("AVSP_ORACLE11_CLASS0E_ALIAS_SUPPRESS") == "1",
     internal = false, pending = {}, sequence = 0
 }
+oracle11_scheduler_clock = {
+    capture = os.getenv("AVSP_ORACLE11_SCHEDULER_CLOCK_CAPTURE") == "1",
+    internal = false, sequence = 0, taps = {}
+}
 local suppress_action4_timer =
     os.getenv("AVSP_ORACLE11_SUPPRESS_ACTION4_TIMER") == "1"
 local suppress_coffee_stage_rng =
@@ -1399,6 +1403,62 @@ oracle11_type4_class03_writes = program:install_write_tap(
         end
     end)
 
+-- Source-only loop/IRQ/trap3 witness. Opcode reads are labelled fetches, not
+-- assumed instruction invocations; actual PC and ordered field writes remain
+-- available to discriminate prefetch/projection. No source state is changed.
+if oracle11_scheduler_clock.capture then
+    oracle11_scheduler_clock.log = assert(io.open(root .. "/coffee_shop_scheduler_clock.tsv", "w"))
+    oracle11_scheduler_clock.log:write("sequence\tframe\tevent\tsite\tpc\ta0\ta5\ta6\tsp\tusp\tstack_return\ttask\ttask_state\ttask_resume\tcatchup\tloop_guard\tpause_guard\tirq_counter\tloop_counter\troute\tinput_current\tinput_previous\tplayer_state\tplayer_action\tplayer_x\tplayer_y\tplayer_z\trng\taddress\tdata\tmask\n")
+end
+function oracle11_scheduler_clock.emit(event, site, address, data, mask)
+    if not oracle11_scheduler_clock.capture or oracle11_scheduler_clock.internal or
+            frame < 1972 or frame >= capture_last_frame then return end
+    oracle11_scheduler_clock.internal = true
+    local task = u32(0xff025c) & 0xffffff
+    local valid_task = task >= 0xff0058 and task < 0xff0258 and
+        (task - 0xff0058) % 0x20 == 0
+    local sp = maincpu.state["SP"].value & 0xffffff
+    oracle11_scheduler_clock.sequence = oracle11_scheduler_clock.sequence + 1
+    oracle11_scheduler_clock.log:write(table.concat({
+        oracle11_scheduler_clock.sequence, frame, event, string.format("%06x", site),
+        string.format("%06x", maincpu.state["PC"].value & 0xffffff),
+        string.format("%06x", maincpu.state["A0"].value & 0xffffff),
+        string.format("%06x", maincpu.state["A5"].value & 0xffffff),
+        string.format("%06x", maincpu.state["A6"].value & 0xffffff),
+        string.format("%06x", sp), string.format("%06x", maincpu.state["USP"].value & 0xffffff),
+        string.format("%08x", u32(sp)), string.format("%06x", task),
+        valid_task and u16(task) or -1, valid_task and u32(task + 4) or -1,
+        valid_task and u8(task + 0x10) or -1,
+        u8(0xff81bc), u8(0xff81a6), u8(0xff8018), u8(0xff8019),
+        u16(0xff8008), u8(0xff846e), u8(0xff846f),
+        u16(player + 4), u16(player + 6), u32(player + 0x10),
+        u32(player + 0x14), u32(player + 0x18), u16(0xff81a8),
+        string.format("%06x", address), data, mask}, "\t") .. "\n")
+    oracle11_scheduler_clock.internal = false
+end
+if oracle11_scheduler_clock.capture then
+    for _, pc in ipairs({0x000db8,0x000ddc,0x000de6,0x000dea,0x000dfa,
+            0x000e0e,0x000e80,0x000e8c,0x000e9e,0x000ea4,0x000eb6,
+            0x001060,0x001066,0x00106c,0x00107e,0x00108e,0x00142c,0x001432,
+            0x00808a,0x008094,0x008098,0x00809e,0x0080a2,0x008140,
+            0x00814a,0x008156,0x008162,0x008164,0x00849e,0x0084ce,
+            0x0166ac,0x0166c6,0x0166d8,0x0196ac,0x01bc38,0x01bc6e,0x01bc78}) do
+        oracle11_scheduler_clock.taps[#oracle11_scheduler_clock.taps + 1] =
+            opcodes:install_read_tap(pc, pc + 1, string.format("clock_%06x", pc),
+                function() oracle11_scheduler_clock.emit("opcode_fetch", pc, 0, 0, 0) end)
+    end
+    oracle11_scheduler_clock.guard_tap = program:install_write_tap(
+        0xff81a6, 0xff81bd, "clock_guard_writes", function(offset, data, mask)
+            if offset == 0xff81a6 or offset == 0xff81bc then
+                oracle11_scheduler_clock.emit("guard_write", 0, offset, data, mask)
+            end
+        end)
+    oracle11_scheduler_clock.task_tap = program:install_write_tap(
+        0xff0058, 0xff0267, "clock_task_writes", function(offset, data, mask)
+            oracle11_scheduler_clock.emit("task_write", 0, offset, data, mask)
+        end)
+end
+
 -- Bounded class-0x0e follow-up. +0x5c is outside a type-36 record:
 -- observe the destination and subsequent tapped reads until overwrite (existing
 -- harness reads also trigger taps; these are not an exclusive CPU-reader census),
@@ -2548,6 +2608,7 @@ oracle11_progression_frame = emu.add_machine_frame_notifier(function()
         scene_rng_calls:close(); stage_setup:close(); stage_setup_writes:close()
         class1f_bounds:close(); type36_writes:close()
         if class0e_alias.log then class0e_alias.log:close() end
+        if oracle11_scheduler_clock.log then oracle11_scheduler_clock.log:close() end
         pair_suppression:close(); obstacle_trace:close(); obstacle_writes:close()
         component20_writes:close(); component20_dispatch:close()
         component20_collision:close()

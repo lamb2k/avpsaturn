@@ -7,7 +7,7 @@ The new goal does not reopen exhausted gates or change acceptance boundaries.
 Read AGENTS, current state, the concise active card and TEST_PLAN.
 Do not touch `history.txt` or `data/avsp_anim_records.json`.
 
-Audit base local/private-origin: `2e446d4303fa50bac14ec3c00222635066a7712c`.
+Native checkpoint local/private-origin: `19431ec322dc8e81c91a71bef16d4f822183fbdf`.
 This is not candidate promotion. Frozen candidate:
 `d04a65a2253175c6e820140feefc35419e2cca07`.
 Production: `236eef0c42aaa5c39b105420f8130fcde308e34e`.
@@ -20,12 +20,12 @@ USER-10 requires QA and explicit feedback. Physical UNRUN; HW-01 parked.
 Class0e native body now reproduces16 lifetimes/1776 rows, state/facing/animation,
 attachment formula, alias and release. Keep333 inherited world-position rows RED.
 Strict host10 causal controls plus whole-scene allocation suppression and repeat PASS.
-Next: validate source-only oracle11_scheduler_clock_a1/b1/p1, then loop/trap3 SPEC.
+Source-only scheduler a1/b1 match all8 ledgers; p1 changes exit5562->5550.
 The captured-schedule defect is BLOCKED_MISSING_EXECUTABLE_TICK_CONTRACT.
 Wrapper source probe uses -SchedulerClockCapture; p1 also -SchedulerInputPerturb.
 Pool callee0011ea is RTS; loop00808a/tail008140 reaches trap3 wrapper001060.
-Missing: ff81bc/ff81a6 interrupt-writer ordering; suspend/resume and route
-continuations; input/hitstop/phase order; independent changed-input witness.
+Next: bind program014b44 ff81b9 guard and trap4;151 main-task wakeups are not IRQ2.
+Missing: this guard's writers, continuation/input/hitstop and CPU-overrun order.
 Class0e source/SPEC c952687; Fast/Oracle PASS; host report, Saturn draw NOT wired.
 Its50 assembly headers are absent from sparse archive; tag8 no-op adapter pending.
 Return to the scheduler with bounded source evidence; never guess display ticks.

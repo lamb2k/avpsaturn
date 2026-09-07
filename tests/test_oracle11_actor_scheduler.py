@@ -62,7 +62,7 @@ readiness = oracle11.interactive_readiness(opcodes)
 assert readiness == oracle11.interactive_readiness(opcodes), "readiness repeat drift"
 assert readiness["status"] == "BLOCKED_MISSING_EXECUTABLE_TICK_CONTRACT"
 assert readiness["production_implementation_authorized_by_this_audit"] is False
-for address in (0x0011EA, 0x001060, 0x00808A, 0x008140):
+for address in (0x0011EA, 0x001060, 0x00808A, 0x008140, 0x014B44, 0x001092):
     changed = bytearray(opcodes)
     changed[address] ^= 1
     try:
@@ -71,4 +71,20 @@ for address in (0x0011EA, 0x001060, 0x00808A, 0x008140):
         assert str(error) == f"interactive scheduler source window drift: 0x{address:06x}"
     else:
         raise AssertionError(f"accepted changed scheduler source window {address:06x}")
-print("Interactive scheduler readiness: BLOCKED (4 attributable identity controls; no runtime kills)")
+print("Interactive scheduler readiness: BLOCKED (6 attributable identity controls; no runtime kills)")
+
+# Write ownership controls are evidence-validation controls, not native kills.
+guard = {"event": "guard_write", "address": "ff81bc", "pc": "008090",
+         "data": "65535", "mask": "65280"}
+assert oracle11.clock_guard_owner(guard) == "loop_00808a_set"
+assert oracle11.clock_guard_owner(dict(guard)) == "loop_00808a_set"
+for field, value in (("event", "opcode_fetch"), ("address", "ff81a6"),
+                     ("pc", "000e92"), ("data", "0"), ("mask", "255")):
+    mutant = dict(guard, **{field: value})
+    try:
+        oracle11.clock_guard_owner(mutant)
+    except ValueError as error:
+        assert str(error) == "unowned scheduler guard write"
+    else:
+        raise AssertionError(f"credited changed guard ownership: {field}")
+print("Scheduler clock write provenance: PASS (5 attributable evidence controls; no runtime kills)")
