@@ -25,6 +25,8 @@ Scheduler audit: BLOCKED_MISSING_EXECUTABLE_TICK_CONTRACT; accepted pool order
 does not bind loop00808a, tail008140, trap3/001060 or interrupt-owned guards.
 Run analyzer --interactive-readiness for exact fields; four identity controls PASS.
 Continue type36/class0e (16 lifetimes, 0x09d440..0x09d60e) through existing SPEC.
+Bind source09d464's +0x5c byte alias:11 neighboring records (2 active),5 writes
+to record24_aux0xffe29c outside the type36 tap. Do not omit this source side effect.
 Return to scheduler with bounded source evidence; scene and candidate stay RED/frozen.
 
 ## Objective

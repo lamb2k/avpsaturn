@@ -19,6 +19,8 @@ USER-10 requires QA and explicit feedback. Physical UNRUN; HW-01 parked.
 
 Complete type36/class0e, all16 lifetimes, dispatch0x09d440..0x09d60e,
 from accepted auxiliary evidence through executable SPEC then native fixed pools.
+First bind +0x5c cross-record byte write: paired cs16a/b proves11 neighbor writes,
+2 into active actors;5 more target record24_aux0xffe29c outside the type36 tap.
 The captured-schedule defect is BLOCKED_MISSING_EXECUTABLE_TICK_CONTRACT.
 Read-only command: python tools/analyze_oracle11_actor_scheduler.py --interactive-readiness
 Pool callee0011ea is RTS; loop00808a/tail008140 reaches trap3 wrapper001060.
