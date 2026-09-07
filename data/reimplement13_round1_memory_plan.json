@@ -51,6 +51,32 @@
       ]
     },
     "remaining_sizing_assignment": "Audit normal-profile Jo allocations and full reachable content union using retained evidence; refine proposal without changing runtime, staging assets, or launching an emulator.",
+    "allocator_static_audit": {
+      "profile_path": "AVSP_PLAYABLE_SLICE + AVSP_LIVE_ENCOUNTER: main -> jo_core_init -> load_round1_content_archive -> playable_slice_init -> avsp_port_v2_slice_load -> player_enemy_load -> HUD/PCM -> Round1 text -> fixed VDP1 pools",
+      "initialization_owner": ".deps/joengine/jo_engine/core.c registers262144-byte work-RAM heap then complete DRAM0 at0x22400000 size2097152; main adds DRAM1 upper704512 bytes.",
+      "zeroing_rule": "jo_add_memory_zone clears the complete registered range. A DRAM0 tile carve requires allocator exclusion BEFORE tile loading and before competing allocations; a pointer-only change is unsafe.",
+      "allocator_rule": "Ascending zone order; four-byte allocation alignment plus jo_memory_block header; reuse consumes the entire qualifying free block without splitting. Aggregate free bytes do not prove contiguous fit.",
+      "maximum_zone_definition": 9,
+      "guard_usable_zone_count": 8,
+      "current_normal_zone_count": 3,
+      "proposed_zone_count_if_reclaimed_dram1_prefix_registered": 4,
+      "known_normal_payloads_bytes_not_complete_peak": {
+        "background_retained_pixels": 131072,
+        "background_tga_temporary_file": 131884,
+        "two_idle_cels": 36864,
+        "player_action_archive": 419280,
+        "three_player_action_decode_buffers": 55296,
+        "combat_player_archive_when_integration_define_active": 51850,
+        "combat_player_decode_when_integration_define_active": 18432,
+        "p1_hud_and_prompt": 12288,
+        "p2_hud_assets_still_loaded_not_visible": 8960,
+        "melee_pcm": 144752,
+        "round1_text_sprite_payloads": 1472,
+        "round1_text_palette_fade": 512
+      },
+      "unresolved": "Complete preprocessed profile allocation/free sequence, loader temporary buffers, Jo headers/alignment, SGL initial allocations, fragmentation and later native audio/content demands. Do not equate static payload sum with measured peak or remove retained assets without owning-interface regression proof.",
+      "implementation_changed": false
+    },
     "scope": "Paired observed full-route demand, not all reachable branches or native/physical acceptance.",
     "active_map_changed": false,
     "runtime_structure_delta_bytes": 0,
