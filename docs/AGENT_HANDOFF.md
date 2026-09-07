@@ -17,18 +17,17 @@ USER-10 requires QA and explicit feedback. Physical UNRUN; HW-01 parked.
 
 ## Exact next experiment
 
-Close the captured-schedule leak in the normal interactive call graph.
-main.c live callback uses source-frame cadence OUTSIDE AUTOTEST; round1.c
-post-player/exit helpers also use captured phase windows/events.
-Input is real, but scheduling is not independent of the reference route.
-Amend only the necessary scheduler SPEC from accepted top-level/pool guards.
-Do not guess one tick per display frame. Isolate diagnostic alignment and prove
-changed-input plus shifted-observation-label invariants through the whole program.
-The scene report's retained-authority0 is hardcoded, not proof of this boundary.
-See the active card for exact functions, causal controls and remaining families.
-
-If missing evidence blocks this body, preserve it and continue already-declared
-type36/class0e, 16 lifetimes, dispatch0x09d440..0x09d60e.
+Complete type36/class0e, all16 lifetimes, dispatch0x09d440..0x09d60e,
+from accepted auxiliary evidence through executable SPEC then native fixed pools.
+The captured-schedule defect is BLOCKED_MISSING_EXECUTABLE_TICK_CONTRACT.
+Read-only command: python tools/analyze_oracle11_actor_scheduler.py --interactive-readiness
+Pool callee0011ea is RTS; loop00808a/tail008140 reaches trap3 wrapper001060.
+Missing: ff81bc/ff81a6 interrupt-writer ordering; suspend/resume and route
+continuations; input/hitstop/phase order; independent changed-input witness.
+Existing scheduler test passes, including four new attributable source-identity
+controls (not runtime kills). Oracle regenerates byte-identically; SPEC unchanged.
+Return to the scheduler with bounded source evidence; never guess display ticks.
+Normal callback still uses captured schedules; reported authority0 is hardcoded.
 Type28/class0c remains blocked under its exhausted causal-witness budget.
 Target and transition Emulator/WGC also remain exhausted: no retry was authorized.
 Read-only provenance/preflight and a precise changed hypothesis are allowed.

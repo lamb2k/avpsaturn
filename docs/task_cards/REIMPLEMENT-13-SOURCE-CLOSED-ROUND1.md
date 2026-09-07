@@ -21,11 +21,11 @@ Do not restart Oracle/SPEC, revert completed programs or create another card.
 This concise card replaces its 4,241-line running history; all old text is
 preserved in Git at checkpoint `2e446d4303fa50bac14ec3c00222635066a7712c`.
 
-First close the production scheduler/capture boundary described below, before
-more isolated presentation matching. Then close the complete Coffee Shop scene
-and continue the existing source-scene vertical plan. The previous next program,
-type-36/class-0x0e (16 lifetimes, 0x09d440..0x09d60e), remains dependency-safe
-fallback work if the gameplay boundary needs unavailable evidence.
+Scheduler audit: BLOCKED_MISSING_EXECUTABLE_TICK_CONTRACT; accepted pool order
+does not bind loop00808a, tail008140, trap3/001060 or interrupt-owned guards.
+Run analyzer --interactive-readiness for exact fields; four identity controls PASS.
+Continue type36/class0e (16 lifetimes, 0x09d440..0x09d60e) through existing SPEC.
+Return to scheduler with bounded source evidence; scene and candidate stay RED/frozen.
 
 ## Objective
 

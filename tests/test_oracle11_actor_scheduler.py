@@ -55,3 +55,20 @@ reject(mutant, "inferred USER-09 approval")
 rebuilt = oracle11.build_report()
 assert oracle11.canonical(rebuilt) == ARTIFACT.read_bytes(), "derived report drift"
 print("ORACLE-11 actor scheduler/lifecycle tests: PASS (6 mutations rejected)")
+
+# This is an evidence-readiness check, not a runtime semantic mutation kill.
+opcodes = oracle11.OPCODES.read_bytes()
+readiness = oracle11.interactive_readiness(opcodes)
+assert readiness == oracle11.interactive_readiness(opcodes), "readiness repeat drift"
+assert readiness["status"] == "BLOCKED_MISSING_EXECUTABLE_TICK_CONTRACT"
+assert readiness["production_implementation_authorized_by_this_audit"] is False
+for address in (0x0011EA, 0x001060, 0x00808A, 0x008140):
+    changed = bytearray(opcodes)
+    changed[address] ^= 1
+    try:
+        oracle11.interactive_readiness(bytes(changed))
+    except ValueError as error:
+        assert str(error) == f"interactive scheduler source window drift: 0x{address:06x}"
+    else:
+        raise AssertionError(f"accepted changed scheduler source window {address:06x}")
+print("Interactive scheduler readiness: BLOCKED (4 attributable identity controls; no runtime kills)")

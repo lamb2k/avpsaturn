@@ -8,6 +8,7 @@ from __future__ import annotations
 
 import hashlib
 import json
+import sys
 from pathlib import Path
 
 
@@ -291,7 +292,54 @@ def validate(report: dict[str, object]) -> None:
     }, "protected boundary drift")
 
 
+def interactive_readiness(opcodes: bytes) -> dict[str, object]:
+    """Read-only implementation-gap audit; does not amend accepted authority.
+
+    These bounded identities locate the missing contract. They do not license
+    native implementation from disassembly or claim a verified tick policy.
+    """
+    windows = (
+        (0x0011EA, 0x0011EC, "1ceeabf0c6a5a30bad12cdac0e3ab015a7188a42e6aebb556aad00bb9cd693ad"),
+        (0x001060, 0x00106C, "3171b913384c360ab2d261089a5f08184d3a8c83585cf24942d8ce04748817ff"),
+        (0x00808A, 0x0080B6, "5f2ab7570b4e2f33993224d1f93200d99b15e5f40dbb623cbe031cc1a0e003fa"),
+        (0x008140, 0x008164, "9c47f48acc7abecc4de586864aefa5d0846f188aa88bab1e89ee724ebcb8e449"),
+    )
+    for start, end, expected in windows:
+        require(sha256_bytes(opcodes[start:end]) == expected,
+                f"interactive scheduler source window drift: 0x{start:06x}")
+    return {
+        "status": "BLOCKED_MISSING_EXECUTABLE_TICK_CONTRACT",
+        "production_implementation_authorized_by_this_audit": False,
+        "accepted_pool_order_unchanged": True,
+        "source_windows": [source_window(opcodes, a, b) for a, b, _ in windows],
+        "ruled_out": "0x0011ea is RTS, not a pool scheduler yield",
+        "located_boundary": {
+            "loop": "0x00808a..0x0080b6",
+            "loop_tail": "0x008140..0x008164",
+            "suspend_wrapper": "0x001060..0x00106c invokes trap 3",
+            "observed_fields": ["0xff81a6:u8", "0xff8019:u8",
+                                "0xff81bc:u8", "0xff025c:u32 task pointer",
+                                "task+0x10:u8", "0xff8054:u8"],
+        },
+        "missing_implementation_fields": [
+            "All writers and interrupt/reset ordering of 0xff81bc and 0xff81a6",
+            "Trap-3 suspend/resume guard, task countdown and video-boundary ownership",
+            "Route entry/exit calls that suspend within a pool traversal and resume it",
+            "Input sampling, hitstop and source-phase-counter order across resumes",
+            "Independent changed-input witness for the complete top-level invocation rule",
+        ],
+        "unblock": "Bound the loop, trap-3 and owning interrupt/route continuations in existing Oracle/SPEC; validate retained or bounded independent source witnesses before native translation",
+        "forbidden_substitute": "one update per displayed frame or captured phase counts",
+        "next_dependency_safe_body": "record-type36/class0e whole presentation program",
+        "target_emulator_visual_retries": 0,
+    }
+
+
 def main() -> None:
+    if sys.argv[1:] == ["--interactive-readiness"]:
+        print(canonical(interactive_readiness(OPCODES.read_bytes())).decode("ascii"), end="")
+        return
+    require(not sys.argv[1:], "unknown scheduler analyzer arguments")
     report = build_report()
     OUT.write_bytes(canonical(report))
     print(f"ORACLE-11 actor scheduler/lifecycle: SOURCE_CLOSED ({len(report['pools'])} pools, {report['required_dispatch_count']} required dispatches)")
