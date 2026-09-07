@@ -5069,6 +5069,162 @@ def validate_type28_class0e_timer(records, reload_value):
          'spawn_witness_frames':[int(r['frame']) for r in children]}
 
 
+def type28_class0e_collection_readiness():
+ roots=[ROOT/('.deps/mame/oracle11_type28_class0e_collect_'+v)
+        for v in ('a','b','noedge')]
+ names=sorted(p.name for p in roots[0].glob('*.tsv'))
+ req(len(names)==65,'type28/class0e collection ledger inventory')
+ hashes={name:[sha(root/name) for root in roots] for name in names}
+ req(all(h[0]==h[1] for h in hashes.values()),'type28/class0e collection cold pair')
+ unchanged=('coffee_shop_scene_actors.tsv','coffee_shop_scene_frames.tsv',
+            'coffee_shop_scene_health_writes.tsv','coffee_shop_rng_calls.tsv',
+            'qsound.tsv','score_writes.tsv','progression_result.tsv')
+ req(all(hashes[name][2]==sha(ROOT/'.deps/mame/oracle11_type28_class0e_a'/name)
+         for name in unchanged),'type28/class0e no-edge gameplay projection drift')
+ captures=[rows(root/'coffee_shop_type28_class0e_collection.tsv') for root in roots]
+ for records,edge in ((captures[0],True),(captures[2],False)):
+  before=[r for r in records if r['event']=='injection_before']
+  after=[r for r in records if r['event']=='injection_after']
+  req(len(before)==len(after)==1,'type28/class0e collection one-shot counterfactual')
+  b=bytes.fromhex(before[0]['player_hex']); a=bytes.fromhex(after[0]['player_hex'])
+  expected=bytearray(b);expected[0x8e:0x90]=bytes.fromhex('cd00')
+  expected[0xef]&=0xdf;expected[0xee]=(expected[0xee]&0xdf)|(0x20 if edge else 0)
+  req(a==expected and before[0]['actor_hex']==after[0]['actor_hex'],
+      'type28/class0e collection injection confinement')
+  req(b[0xab]==0 and int.from_bytes(b[0xae:0xb0],'big')==0,
+      'type28/class0e resource precondition')
+  owned=[r for r in records if r['event']=='write' and
+         (r['a6']=='ffcd00' or 0x19fec<=int(r['pc'],16)<=0x1a1d8)]
+  if not edge:
+   req(not owned,'type28/class0e no-edge control unexpectedly collected')
+   continue
+  def write(pc,address,value,mask):
+   found=[r for r in owned if int(r['pc'],16)==pc and
+          int(r['address'],16)==address and int(r['data'],16)==value and
+          int(r['mask'],16)==mask]
+   req(len(found)==1,f'type28/class0e collection writer {pc:06x}:{address:06x}')
+   return found[0]
+  write(0x1a19e,0xffcd04,0x0400,0xffff)
+  write(0x1a19e,0xffcd06,0,0xffff)
+  allocation=next(r for r in owned if r['pc']=='01a1bc')
+  child=int(allocation['a4'],16)
+  write(0x1a1bc,child+2,0x5454,0xff00)
+  write(0x1a1c0,child+0x28,0x8380,0xffff)
+  grant=write(0x1a1c6,0xff842e,600,0xffff)
+  after_grant=write(0x1a1d4,0xff81f4,0x0101,0xff00)
+  req(int(after_grant['player_hex'][0xae*2:0xb0*2],16)==600,
+      'type28/class0e resource award did not persist')
+  write(0xa73e8,0xffcd04,0x0606,0xff00)
+  write(0xa73ee,0xffcd64,0x0404,0xff)
+  write(0xa73f2,0xffcd44,0x3434,0xff00)
+  write(0xa73f8,0xffcd44,0xffff,0xff)
+  queue=[r for r in owned if r['a6']=='ffcd00' and r['pc'].startswith('0ae3')]
+  req([(r['pc'],int(r['data'],16),int(r['mask'],16)) for r in queue]==[
+       ('0ae3cc',0x0404,0xff00),('0ae3d0',0x2e2e,0xff),
+       ('0ae3d4',0x34ff,0xffff),('0ae3d8',0,0xffff),
+       ('0ae3dc',0,0xffff),('0ae3de',12,0xffff)],
+      'type28/class0e event queue transaction')
+  req(all(r['g900c']=='0000' and r['g0247']=='00' for r in queue),
+      'type28/class0e event queue guards')
+  scene=rows(roots[0]/'coffee_shop_scene_actors.tsv')
+  display=[r for r in scene if int(r['type'])==24 and r['class']=='54' and
+           int(r['slot'],16)==child]
+  req(display and int(display[0]['frame'])==int(grant['frame'])+1,
+      'type28/class0e downstream class54 missing')
+  snapshots=[r for r in rows(roots[0]/'coffee_shop_type28_class0e.tsv')
+             if r['event']=='write' and r['pc']=='017844' and
+             r['address']=='ffcd00' and r['actor_hex'][4:6]=='0e']
+  req(len(snapshots)==1 and snapshots[0]['actor_hex'][8:16]=='06000000',
+      'type28/class0e centralized release state')
+ source=json.loads(PLAYER_ROUTE.read_text(encoding='ascii'))
+ req(source['temporary_resource_pickup']['grant']['value']==600 and
+     source['temporary_resource_pickup']['classification']=='SOURCE_CLOSED',
+     'type28/class0e accepted player ownership contradiction')
+ return {'classification':'SOURCE_STATE_COUNTERFACTUAL_BOUND_NOT_NATIVE_ACCEPTANCE',
+  'hashes':hashes,'paired_ledgers':65,'causal_controls':1,
+  'no_edge_equals_unmodified_baseline':list(unchanged),
+  'accepted_player_contract':str(PLAYER_ROUTE.relative_to(ROOT)),
+  'accepted_player_contract_sha256':sha(PLAYER_ROUTE),
+  'existing_real_input_witness':'oracle11_player_route_ownership_e/resource_pickup_near: position perturbation, source target acquisition and real Button2 edge; new probe bypasses target acquisition and does not independently prove overlap',
+  'injection_scope':'one live target pointer and Button2 edge at source predicate; no injected outcome or position',
+  'resource_grant_u16':600,'child_class':'0x54','child_role':'source-owned resource display per accepted player contract',
+  'event_queue_bytes':[4,0x2e,0x34,0xff,0,0,0,0],
+  'release':'source 0x01783e..0x017874 on next dispatched state6; no frame deadline',
+  'native_runtime_changed':False}
+
+
+def type28_class0e_parent_motion_fields(records):
+ program=PROGRAM.read_bytes();op=OPCODES.read_bytes()
+ parent=[r for r in records if r['event']=='write' and
+         0xbc82a<=int(r['pc'],16)<=0xbc85a and r['a6']=='ffb280']
+ req(len(parent)==14,'type28/class0e complete measured parent stores')
+ row_address=0xbceaa+0x30*32
+ req(program[row_address:row_address+32]==bytes([0x34])*32,
+     'type28/class0e source drop selector row')
+ velocities={}
+ for address in (0xbcd8a,0xbce0a):
+  velocities[f'0x{address:06x}']=[int.from_bytes(program[address+i:address+i+4],
+                               'big',signed=True) for i in range(0,16,4)]
+ req(velocities=={'0x0bcd8a':[0x38000,0,0x50000,-0x8000],
+                 '0x0bce0a':[-0x38000,0,0x50000,-0x8000]},
+     'type28/class0e parent source velocity tables')
+ for pc,offset,value in ((0xbc83c,0x30,-0x38000),(0xbc840,0x38,0),
+                         (0xbc844,0x34,0x50000),(0xbc848,0x3c,-0x8000)):
+  halves=[r for r in parent if int(r['pc'],16)==pc]
+  req([int(r['address'],16) for r in halves]==[0xffcd00+offset,0xffcd02+offset]
+      and [int(r['data'],16) for r in halves]==[(value>>16)&0xffff,value&0xffff],
+      'type28/class0e parent velocity provenance')
+ before=next(r for r in parent if r['pc']=='0bc854')
+ req(int(before['actor_hex'][0x16*2:0x18*2],16)==0x4000 and
+     int(before['data'],16)==0x125 and int(before['mask'],16)==0xffff,
+     'type28/class0e allocation retains source coordinate fraction')
+ arithmetic={'0a7314':(0x10,0x30),'0a731c':(0x18,0x38),
+             '0a7324':(0x14,0x34),'0a732c':(0x34,0x3c),
+             '0a735e':(0x10,0x30),'0a7366':(0x18,0x38),
+             '0a736e':(0x14,0x34),'0a7376':(0x34,0x3c)}
+ counts=Counter()
+ motion=[r for r in records if r['event']=='write' and r['pc'] in arithmetic]
+ req(len(motion)%2==0,'type28/class0e split-long store missing')
+ for r,high in zip(motion[::2],motion[1::2]):
+  dst,src=arithmetic[r['pc']];raw=bytes.fromhex(r['actor_hex'])
+  req(int(r['address'],16)==0xffcd00+dst+2 and
+      int(high['address'],16)==0xffcd00+dst and high['pc']==r['pc'] and
+      high['frame']==r['frame'] and int(r['mask'],16)==int(high['mask'],16)==0xffff,
+      'type28/class0e motion field/width')
+  value=(int.from_bytes(raw[dst:dst+4],'big')+
+         int.from_bytes(raw[src:src+4],'big'))&0xffffffff
+  req(int(r['data'],16)==value&0xffff and int(high['data'],16)==value>>16,
+      'type28/class0e motion arithmetic')
+  req(int(high['actor_hex'][(dst+2)*2:(dst+4)*2],16)==value&0xffff,
+      'type28/class0e split-long low-word persistence')
+  counts[r['pc']]+=2
+ req(dict(counts)=={pc:(44 if pc.startswith('0a73') and pc in
+     ('0a7314','0a731c','0a7324','0a732c') else 20) for pc in arithmetic},
+     'type28/class0e motion store inventory')
+ return {'classification':'SOURCE_PROGRAM_FIELDS_BOUND_PENDING_SPEC_INTEGRATION',
+  'parent':{'record_type':20,'class':'0x05','caller':'0x06ca66',
+   'guard':'parent state0400/substate0000; source drop selector actor+0x0c:u8',
+   'source_slot_witness':'0x00ffb280','selector_row_address':f'0x{row_address:06x}',
+   'selector_row_u8':[0x34]*32,'rng':'one 0x017c5e call; select row[new_seed&31]; no second RNG in class0e initialization',
+   'allocator':'0x017828 pops record28 free stack; failure leaves no child',
+   'velocity_table_selection':'left0x0bcd8a when bit15(u16(u16(parent_x-camera_x)-0x00c0)) is set; otherwise right0x0bce0a',
+   'velocity_fields_in_table_order':['+0x30:s32','+0x38:s32','+0x34:s32','+0x3c:s32'],
+   'velocity_tables_s32':velocities,
+   'coordinate_copy':'copy high words +0x10,+0x14,+0x18 only; retain each free-record low word',
+   'retained_y_fraction_witness_u16':0x4000,
+   'native_gap':'class05 currently discards RNG result; generic explicit-slot allocation memsets the record. Do not replace source residue with captured constants.'},
+  'motion':{'source_blocks':['0x0a730a..0x0a7354','0x0a7354..0x0a7394'],
+   'order':['x32 += vx32','z32 += vz32','y32 += vy32','vy32 += ay32'],
+   'overflow':'u32 modulo arithmetic with signed fixed-point interpretation',
+   'landing_guard':'unsigned high16(y32) < unsigned high16(z32)',
+   'first_landing':'increment byte+7 by2; copy z highword to y highword preserving y fraction; vy=0x10000; ay=-0x4000',
+   'second_landing':'word+6=0x0200; copy z highword to y highword preserving y fraction; byte+0x5c=0',
+   'source_write_counts':dict(counts),'native_implementation':False},
+  'source_windows':{f'{a:06x}..{b:06x}':hashlib.sha256(op[a:b]).hexdigest()
+                    for a,b in ((0xbc692,0xbc704),(0xbc820,0xbc85c),
+                                (0xa726c,0xa7404),(0x17828,0x17876))}}
+
+
 def type28_class0e_readiness():
  req(sha(OPCODES)=='e423127bc04889161657032fcb40a8a8f871f4d4f08bd99726e3babdf6e81501'
      and sha(PROGRAM)=='0c14f4094d25787401aa949657620ff495ae8606c1cfd8ae2d059b94c3d478e9',
@@ -5125,22 +5281,38 @@ def type28_class0e_readiness():
    raise ValueError('type28/class0e analyzer negative survived: '+diagnostic)
  req(validate_type28_class0e_timer([dict(r) for r in baseline],0x30)==a,
      'type28/class0e unchanged control must survive')
+ parent_motion=type28_class0e_parent_motion_fields(baseline)
+ motion_controls=(('0bc83c','data','00000001','parent velocity provenance'),
+                  ('0a7314','data','00000000','motion arithmetic'),
+                  ('0a735e','mask','000000ff','motion field/width'))
+ for pc,field,value,diagnostic in motion_controls:
+  changed=[dict(r) for r in baseline]
+  next(r for r in changed if r['event']=='write' and r['pc']==pc)[field]=value
+  try:
+   type28_class0e_parent_motion_fields(changed)
+  except ValueError as exc:
+   req(diagnostic in str(exc),'type28/class0e unrelated motion negative: '+str(exc))
+  else:
+   raise ValueError('type28/class0e motion negative survived: '+diagnostic)
  return {'status':'PARTIAL_SOURCE_PROGRAM_WITNESS_NOT_EXECUTABLE_SPEC',
   'record_type':28,'class':'0x0e','dispatch':'0x0a726c','source_slot':'0x00ffcd00',
   'capture_pair':[root.name for root in roots[:2]],'control':roots[2].name,
   'paired_ledger_count':len(names),'hashes':hashes,'baseline':a,'control_result':m,
   'opcode_sha256':sha(OPCODES),'program_sha256':sha(PROGRAM),
   'program_window_sha256':hashlib.sha256(OPCODES.read_bytes()[0xa726c:0xa7404]).hexdigest(),
-  'causal_source_controls':1,'native_behavioral_kills':0,
-  'analyzer_field_negatives':len(controls),'equivalent_analyzer_survivors':1,
+  'causal_source_controls':2,'native_behavioral_kills':0,
+  'analyzer_field_negatives':len(controls)+len(motion_controls),'equivalent_analyzer_survivors':1,
   'rejected_control':'m also changed decrement writer0a73a8; froze counter. Not credited.',
   'changed_ledgers':[name for name,h in hashes.items() if h[0]!=h[2]],
   'unchanged_projections':['score writes','QSound writes','completion result'],
   'coupling_scope':'Actor/RNG/health/controller ledgers differ after child cadence changes; these consequences remain source-observed, not individually closed by this timer witness.',
   'observation_scope':'Full Coffee Shop capture through5566; ffcd00 earlier class12 generation excluded. Opcode reads include prefetch and are not invocation counts. Frame anchors are witnesses, not gameplay clocks.',
-  'remaining_fields':['parent allocation/table arguments and generation',
-   'terrain helper interface for this actor','collection/event queue and reachable guards',
-   'route teardown/frozen residency/central release','animation and collision contract integration'],
+  'collection_boundary':type28_class0e_collection_readiness(),
+  'parent_motion_fields':parent_motion,
+  'remaining_fields':['executable fixture integration of bound parent, motion and collection fields',
+   'terrain helper interface for this actor','event queue alternate guards and executable integration',
+   'route teardown/frozen residency integration (central release source writes bound)',
+   'animation and collision contract integration'],
   'native_runtime_changed':False,'target':'BLOCKED_NOT_RETRIED',
   'emulator_visual':'BLOCKED_NOT_RETRIED','physical':'UNRUN'}
 

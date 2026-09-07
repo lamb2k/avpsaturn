@@ -26,7 +26,7 @@ does not bind loop00808a, tail008140, trap3/001060 or interrupt-owned guards.
 Run analyzer --interactive-readiness for exact fields; nine identity controls PASS.
 Class0e native16 lifetimes/1776 rows reproduce state/facing/animation/timers and attachment formula;333 inherited position rows stay RED.
 Alias/clear, strict host10 causal controls and whole-scene suppression/repeat PASS; tiers separate.
-Class0a palette SPEC Fast/Oracle PASS; native pending. Audio sizing third attempt blocked, no kill credited. Tile1551028/614400 unresolved. Type28/class0e0a726c paired64 ledgers; exact reload48->49 changes children32->31;5 analyzer negatives/1 equivalent survivor,1 causal SOURCE control/0 native kills. Earlier frozen-counter control rejected. Existing follow-up report records PARTIAL parent0bc820/terrain/collection/release/animation fields; no timing/map/platform retry.
+Class0a palette SPEC Fast/Oracle PASS; native pending. Audio sizing third attempt blocked; tile1551028/614400 unresolved. Type28/class0e timer pair64 and collection pair65 ledgers PASS;2 causal SOURCE controls/8 analyzer negatives/1 equivalent survivor/0 native kills. Parent drop and retained fractions/motion/resource600/class54/queue/release source-bound; native omissions remain. Follow-up report ed9df102 remains PARTIAL pending terrain/animation/queue guards and executable fixture integration. No timing/map/platform retry.
 
 ## Objective
 

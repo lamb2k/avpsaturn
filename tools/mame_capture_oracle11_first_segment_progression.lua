@@ -1052,6 +1052,8 @@ oracle11_class0c_cross_write_tap = program:install_write_tap(
 type28_class0e_probe = {
     enabled = os.getenv("AVSP_ORACLE11_TYPE28_CLASS0E_CAPTURE") == "1",
     timer_control = os.getenv("AVSP_ORACLE11_TYPE28_CLASS0E_TIMER_CONTROL") == "1",
+    collection = os.getenv("AVSP_ORACLE11_TYPE28_CLASS0E_COLLECTION") or "off",
+    collection_injected = false,
     slot = 0xffcd00, taps = {},
     pcs = {0x0a726c,0x0a7280,0x0a72b2,0x0a72be,0x0a72d2,
            0x0a72de,0x0a72e4,0x0a72ee,0x0a7300,0x0a730a,
@@ -1105,6 +1107,54 @@ if type28_class0e_probe.enabled then
             if pc >= 0x0a7280 and pc < 0x0a7404 and
                     (address < 0xffcd00 or address > 0xffcd7f) then
                 emit_type28_class0e("cross_write",pc,address,data,mask,data)
+            end
+        end)
+end
+
+-- Source-state counterfactual only: supply a valid collected-object pointer and
+-- one attack edge at the existing player pickup predicate. No world-position,
+-- health, actor-state, resource-result or native runtime writes are injected.
+function emit_type28_class0e_collection(event, pc, address, data, mask)
+    local probe = type28_class0e_probe
+    if not probe.collection_file or frame < 1972 or frame > capture_last_frame then return end
+    local actor, player_record = {}, {}
+    for offset=0,127 do actor[#actor+1]=hexv(u8(probe.slot+offset),2) end
+    for offset=0,255 do player_record[#player_record+1]=hexv(u8(player+offset),2) end
+    probe.collection_file:write(table.concat({frame,event,hexv(pc,6),hexv(address,6),
+        hexv(data & 0xffffffff,8),hexv(mask & 0xffffffff,8),
+        hexv(maincpu.state["A4"].value & 0xffffff,6),
+        hexv(maincpu.state["A6"].value & 0xffffff,6),
+        table.concat(actor),table.concat(player_record),
+        hexv(u8(global+0x1f4),2),hexv(u16(global-0x6ff4),4),
+        hexv(u8(global+0x247),2),hexv(u16(0xff81a8),4)},"\t").."\n")
+end
+if type28_class0e_probe.enabled and type28_class0e_probe.collection ~= "off" then
+    type28_class0e_probe.collection_file=assert(io.open(root.."/coffee_shop_type28_class0e_collection.tsv","w"))
+    type28_class0e_probe.collection_file:write("frame\tevent\tpc\taddress\tdata\tmask\ta4\ta6\tactor_hex\tplayer_hex\tg01f4\tg900c\tg0247\trng\n")
+    type28_class0e_probe.collection_entry=opcodes:install_read_tap(0x019f9a,0x019f9b,
+        "type28_class0e_collection_predicate",function()
+            local probe=type28_class0e_probe
+            if probe.collection_injected or (maincpu.state["A6"].value & 0xffffff) ~= player or
+                u8(probe.slot) ~= 1 or u8(probe.slot+2) ~= 0x0e or
+                u16(probe.slot+4) ~= 0x0200 or u16(probe.slot+6) ~= 0x0200 or
+                u8(player+0xab) ~= 0 then return end
+            probe.collection_injected=true
+            emit_type28_class0e_collection("injection_before",0x019f9a,0,0,0)
+            program:write_u16(player+0x8e,probe.slot & 0xffff)
+            program:write_u8(player+0xef,u8(player+0xef) & 0xdf)
+            local current=u8(player+0xee) & 0xdf
+            if probe.collection == "collect" then current=current | 0x20 end
+            program:write_u8(player+0xee,current)
+            emit_type28_class0e_collection("injection_after",0x019f9a,0,0,0)
+        end)
+    type28_class0e_probe.collection_writes=program:install_write_tap(0xff0000,0xffffff,
+        "type28_class0e_collection_writers",function(address,data,mask)
+            local pc=maincpu.state["PC"].value & 0xffffff
+            if type28_class0e_probe.collection_injected and
+                ((pc >= 0x019fec and pc <= 0x01a1d8) or
+                 (pc >= 0x0a73e2 and pc <= 0x0a7404) or
+                 (pc >= 0x0ae396 and pc <= 0x0ae3e0)) then
+                emit_type28_class0e_collection("write",pc,address,data,mask)
             end
         end)
 end
@@ -2782,6 +2832,7 @@ oracle11_progression_frame = emu.add_machine_frame_notifier(function()
         class00_scheduler_phase:close()
         class0c_program:close()
         if type28_class0e_probe.file then type28_class0e_probe.file:close() end
+        if type28_class0e_probe.collection_file then type28_class0e_probe.collection_file:close() end
         result:close()
     end
 end)
