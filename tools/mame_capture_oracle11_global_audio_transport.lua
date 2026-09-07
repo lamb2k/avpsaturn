@@ -4,7 +4,15 @@ local machine = manager.machine
 local audio_cpu = machine.devices[":audiocpu"]
 local audio_program = audio_cpu.spaces["program"]
 local root = assert(os.getenv("AVSP_ORACLE11_GLOBAL_AUDIO_ROOT"))
-local first_frame, last_frame, frame = 1972, 18000, 0
+local first_frame, last_frame, frame = 1972,
+    tonumber(os.getenv("AVSP_ORACLE11_PLAYER_AUDIO_LAST_FRAME") or "") or 18000, 0
+local descriptor_file = nil
+local descriptor_sequence = 0
+local descriptor_control = os.getenv("AVSP_ORACLE11_SUPPRESS_DESCRIPTOR_BANK") == "1"
+if os.getenv("AVSP_ORACLE11_SAMPLE_DESCRIPTORS") == "1" then
+    descriptor_file = assert(io.open(root .. "/audio_sample_descriptors.tsv", "w"))
+    descriptor_file:write("frame\tsequence\treturn_pc\tix\tiy\tregister\trequested\tapplied\tdescriptor_bytes\n")
+end
 local shared_counts, bus_counts, queue_counts, state_write_counts = {}, {}, {}, {}
 local shared_sequence, dispatch_sequence = 0, 0
 local shared_bytes = {}
@@ -62,6 +70,33 @@ oracle11_global_audio_bus_write = audio_program:install_write_tap(
         local key = string.format("%04x:%04x", offset & 0xffff,
             audio_cpu.state["PC"].value & 0xffff)
         update(bus_counts, key)
+        if descriptor_file and (offset & 0xffff) == 0xd002 then
+            local sp = audio_cpu.state["SP"].value & 0xffff
+            local caller = audio_program:read_u8(sp) |
+                (audio_program:read_u8((sp + 1) & 0xffff) << 8)
+            if caller >= 0x1094 and caller <= 0x10d4 then
+                local ix = audio_cpu.state["IX"].value & 0xffff
+                local iy = audio_cpu.state["IY"].value & 0xffff
+                local descriptor = {}
+                for index = 0, 7 do
+                    descriptor[#descriptor + 1] = string.format("%02x",
+                        audio_program:read_u8((iy + index) & 0xffff))
+                end
+                local requested = data & 0xff
+                local applied = requested
+                -- Mutate the bank REGISTER destination, not a guessed sound.
+                -- This is a source-only control; never staged into the port.
+                if descriptor_control and caller == 0x10d4 then
+                    applied = (requested + 8) & 0x78
+                end
+                descriptor_sequence = descriptor_sequence + 1
+                descriptor_file:write(string.format(
+                    "%d\t%d\t%04x\t%04x\t%04x\t%02x\t%02x\t%02x\t%s\n",
+                    frame, descriptor_sequence, caller, ix, iy, requested,
+                    requested, applied, table.concat(descriptor)))
+                if applied ~= requested then return applied end
+            end
+        end
     end)
 
 oracle11_global_audio_queue_read = audio_program:install_read_tap(
@@ -122,6 +157,7 @@ oracle11_global_audio_frame = emu.add_machine_frame_notifier(function()
         state_file:close()
         commands_file:close()
         dispatch_file:close()
+        if descriptor_file then descriptor_file:close() end
     end
 end)
 

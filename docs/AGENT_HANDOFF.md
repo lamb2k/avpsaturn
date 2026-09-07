@@ -45,5 +45,5 @@ pinned EXE/archive match. Root CDDA output is regeneratable by existing build.
 
 Use Fast -WorkflowOnly for docs; DEV for edits; full ceremony at program/platform
 risk boundaries. Keep all acceptance tests and three-attempt rulings.
-Class0a palette SPEC:4 streams; Fast/Oracle PASS,330 rerun kills/2 survivors; native pending.
-Next: source-command PCM residency proposal;15 old clips2727832 bytes are not approved cues. No resize/retry.
+Audio sizing: paired1220 descriptor calls; control downstream0, budget3 exhausted; no source/native kill.
+Next: type28/class0e dispatch0a726c SPEC fields from retained evidence; distinct from closed type36/class0e. No gate retry.

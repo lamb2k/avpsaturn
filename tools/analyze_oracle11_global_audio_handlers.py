@@ -369,7 +369,147 @@ def validate(report: dict[str, object]) -> None:
             "protected player/SPEC boundary drift")
 
 
+def sample_descriptor_transactions(rom: bytes, transactions: list[bytes],
+                                   descriptor_addresses: list[int]) -> dict:
+    """Read-only sample-table sizing; never converts bus rows to game events."""
+    require(hashlib.sha256(rom[0x1077:0x10db]).hexdigest() ==
+            "a7b363fc1aca9416839480b9609c2045e822bb213c4862ad296cb3f94fd53d33",
+            "sample descriptor consumer identity drift")
+    table = {}
+    for address in descriptor_addresses:
+        require(address % 8 == 0 and 0 <= address <= 0xbff8,
+                "sample descriptor is outside source ROM mapping")
+        record = rom[address:address+8]
+        bank = 0x8000 | record[0]
+        start = int.from_bytes(record[1:3], "little")
+        loop = int.from_bytes(record[3:5], "little")
+        end = int.from_bytes(record[5:7], "little")
+        table.setdefault((bank, start, end, (end-loop) & 65535), []).append(address)
+    matches = []
+    for offset in range(len(transactions) - 4):
+        group = transactions[offset:offset+5]
+        registers = [r[2] for r in group]
+        values = [int.from_bytes(r[3:], "big") for r in group]
+        base = registers[0] - 2
+        if (base < 0 or base >= 128 or base % 8 or values[0] != 0 or
+                registers != [base+2, base+1, base+5, base+4, (base-8) & 0x78]):
+            continue
+        key = (values[4], values[1], values[2], values[3])
+        require(key in table, "sample descriptor transaction does not match source table")
+        matches.append({"first_frame": int.from_bytes(group[0][:2], "big"),
+                        "last_frame": int.from_bytes(group[-1][:2], "big"),
+                        "voice": base // 8, "descriptor_addresses": table[key],
+                        "bank": key[0] & 0x7fff, "start": key[1],
+                        "end": key[2], "loop_length": key[3]})
+    return {"matches": matches,
+            "descriptor_table_sha256": hashlib.sha256(rom[0x8000:0x9000]).hexdigest()}
+
+
+def sample_residency_readiness() -> dict:
+    rom = ROM.read_bytes()
+    require(digest(ROM) == "88f7f38e64c5d5c16264768230fc599a4f8de5904633a814789a192a8baa19b3",
+            "audio ROM identity drift")
+    accepted = json.loads(OUT.read_text(encoding="ascii"))
+    left = identity(COMPACT_A, COMPACT_FILES)
+    right = identity(COMPACT_B, COMPACT_FILES)
+    require(left["files"] == right["files"], "paired audio residency input drift")
+    require(left == accepted["capture_identity"]["compact_completion_a"],
+            "audio residency capture is not the accepted compact baseline")
+    stream = (COMPACT_A / "audio_bus_stream.bin").read_bytes()
+    roots = [ROOT / (".deps/mame/oracle11_audio_sample_descriptors_" + label)
+             for label in ("a", "b", "m")]
+    names = TRANSPORT_FILES + ("audio_sample_descriptors.tsv",)
+    captures = [identity(root, names) for root in roots]
+    require(captures[0]["files"] == captures[1]["files"],
+            "paired descriptor source captures differ")
+    for name in ("samples.tsv", "dispatches.tsv", "projectiles.tsv",
+                 "score_writes.tsv", "result.tsv"):
+        require(captures[0]["files"][name] == captures[2]["files"][name],
+                "descriptor control changed gameplay: " + name)
+    witness = rows(roots[0] / "audio_sample_descriptors.tsv")
+    mutant = rows(roots[2] / "audio_sample_descriptors.tsv")
+    require(len(witness) == len(mutant) and len(witness) % 5 == 0,
+            "descriptor witness transaction alignment drift")
+    addresses = sorted({int(row["iy"], 16) for row in witness})
+    for index, row in enumerate(witness):
+        require(row["return_pc"] == ("1094", "10a6", "10b2", "10c3", "10d4")[index % 5],
+                "descriptor source caller order drift")
+        address = int(row["iy"], 16)
+        require(bytes.fromhex(row["descriptor_bytes"]) == rom[address:address+8],
+                "descriptor source ROM read drift")
+        require({k: v for k,v in row.items() if k != "applied"} ==
+                {k: v for k,v in mutant[index].items() if k != "applied"},
+                "descriptor control changed source program context")
+        expected = int(row["requested"],16)
+        if row["return_pc"] == "10d4":
+            expected = (expected + 8) & 0x78
+        require(int(mutant[index]["applied"],16) == expected,
+                "descriptor source control was not applied")
+
+    def recorded_bus(root):
+        result = bytearray()
+        with (root / "qsound.tsv").open(encoding="ascii", newline="") as source:
+            for row in csv.DictReader(source, delimiter="\t"):
+                if row["port"] == "d002":
+                    result.extend(int(row["frame"]).to_bytes(2, "big"))
+                    result.append(int(row["register"], 16))
+                    result.extend(int(row["value"], 16).to_bytes(2, "big"))
+        return bytes(result)
+
+    baseline_bus = recorded_bus(roots[0])
+    mutated_bus = recorded_bus(roots[2])
+    require(baseline_bus == b"".join(bus_records(stream, 15192)),
+            "descriptor capture changed accepted source bus chronology")
+    baseline_transactions = bus_records(baseline_bus)
+    mutant_transactions = bus_records(mutated_bus)
+    require(len(baseline_transactions) == len(mutant_transactions),
+            "descriptor control changed transaction count")
+    differences = []
+    for original, changed in zip(baseline_transactions, mutant_transactions):
+        if original != changed:
+            require(original[:2] == changed[:2] and original[3:] == changed[3:] and
+                    changed[2] == (original[2] + 8) & 0x78,
+                    "descriptor control caused an unrelated bus difference")
+            differences.append(original)
+    require(len(differences) == len(witness) // 5 and len(differences) > 0,
+            "descriptor control lacks attributable downstream differences")
+    result = sample_descriptor_transactions(rom, baseline_transactions, addresses)
+    route = result["matches"]
+    require(len(route) == len(witness) // 5,
+            "source descriptor callers and bus groups do not reconcile")
+    intervals = {}
+    for record in route:
+        require(0 <= record["bank"] < 64 and record["start"] < record["end"],
+                "source sample range needs explicit wrap/bank treatment")
+        intervals.setdefault(record["bank"], []).append((record["start"], record["end"]))
+    merged = []
+    for bank, spans in sorted(intervals.items()):
+        for start, end in sorted(spans):
+            if merged and merged[-1][0] == bank and start <= merged[-1][2]:
+                merged[-1][2] = max(merged[-1][2], end)
+            else:
+                merged.append([bank, start, end])
+    return {"classification": "READ_ONLY_SOURCE_DESCRIPTOR_SIZING_NOT_NATIVE_CUE_APPROVAL",
+            "paired_compact_stream_sha256": hashlib.sha256(stream).hexdigest(),
+            "source_frame_window": [1972, 15193],
+            "round1_descriptor_transactions": len(route),
+            "descriptor_table_sha256": result["descriptor_table_sha256"],
+            "source_probe_files": captures[0]["files"],
+            "source_control_files": captures[2]["files"],
+            "source_control_bus_differences": len(differences),
+            "unique_descriptor_addresses": addresses,
+            "below_8000_source_invocations": sum(int(r["iy"],16) < 0x8000 for r in witness[::5]),
+            "ambiguous_descriptor_transactions": sum(len(r["descriptor_addresses"]) != 1 for r in route),
+            "source_address_intervals": merged,
+            "source_address_span_bytes": sum(end-start for bank,start,end in merged),
+            "scope": "Source0x1077 five-write sequence matched to directly witnessed ROM descriptors, including16-bit pointer-wrap read0x7800; not individual bus writes as gameplay events. Address span excludes interpolation guards and does not size SCSP conversion, voice overlap, effects or source-supported unobserved branches. Includes source music; CDDA ownership must distinguish native sample demand. No native implementation or memory-map change."}
+
+
 def main() -> None:
+    import sys
+    if "--sample-residency-readiness" in sys.argv:
+        print(json.dumps(sample_residency_readiness(), indent=2, sort_keys=True))
+        return
     report = build_report()
     OUT.write_bytes(canonical(report))
     print("ORACLE-11 global audio handlers: SOURCE_CLOSED; 1161 commands, "
