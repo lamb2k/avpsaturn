@@ -24,6 +24,16 @@
       "status": "INCOMPLETE_SIZING_NOT_MAP_APPROVAL",
       "scope": "Walk explicit fixture assembly fields, numerically deduplicate, decode both facings/modes for conservative discovery. Not proof all reachable fields were enumerated or palette modes bound. Four rejections remain visible, not omitted as zero cost.",
       "next_experiment": "Use accepted class0a presentation contract to identify its emitter/table format and measure the four rejected records; do not infer standard object layout from an assembly label."
+      ,"class0a_contract_audit": {
+        "accepted_fixture_path": "authority_data.auxiliary.coffee_shop_scene_component_identities.components[4].implementation_contract",
+        "accepted_lifecycle_capture_pair": ["oracle11_progression_lifecycle_cs64a", "oracle11_progression_lifecycle_cs64b"],
+        "accepted_program_ledger_sha256": "a44ef7779fecd05ec8334c2884063db8c97d0d5e60464a7f6a55e04be1aaaf73",
+        "fields_bound": "Allocation, variant animation record selection, timer/branch, outer state, camera guard, fixed-pool release and route teardown.",
+        "missing_sizing_fields": ["presentation consumer entry and dispatch", "topword0x0020 interpretation", "record length/termination", "destination domain: object RAM, palette, background or other source-owned output", "tile/palette dependencies and output ordering"],
+        "retained_ledger_scope": "Actor write/dispatch fields, not presentation-consumer read/write provenance. Generic sprite failure must not be solved by declaring these records blank or forcing an object format.",
+        "status": "BLOCKED_MISSING_PRESENTATION_CONSUMER_CONTRACT",
+        "next_bounded_source_experiment": "Locate the source consumer of pointers0x078ba2/0x078bac/0x078f90/0x078f96 in retained emitter evidence; if absent, use smallest read-only source read/write attribution follow-up. Preserve accepted class0a gameplay program, no Yaba/Target retry."
+      }
     },
     "audio_capacity_status": {
       "source_audio_command_transactions": 72,
