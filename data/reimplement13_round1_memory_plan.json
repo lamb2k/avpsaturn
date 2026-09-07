@@ -1,4 +1,54 @@
 {
+  "class0e_read_only_readiness_2026_09_07": {
+    "status": "BLOCKED_CAPACITY_OWNER_RULING_REQUIRED",
+    "active_memory_map_changed": false,
+    "base_checkpoint": "da1bebd2927698fd17075373b951fae08fcc93df",
+    "fixture_sha256": "16fed6d5be46ce018b112498520aaef79333975e7f2679fe2af5fa3c5cea7a35",
+    "method": "Read existing class0e SPEC animation records; decode 49 nonblank assemblies in both facing and coordinate modes with existing object decoder; union entry_tile_codes against staged AVTL code index. Source-owned tag8 assembly 0x09dca6 is blank. No assets or Target regenerated.",
+    "staged_archive": {
+      "path": "build/avsp_cd/SPR4/TILES.BIN",
+      "sha256": "cc964b51f4d9fcb1830ba4af19fcbcde2e8323c50944d9b54342cdc7f108aae4",
+      "bytes": 592648,
+      "tile_codes": 4486,
+      "scope": "staged street artifact, not historical four-route demand"
+    },
+    "missing_assembly_headers": 50,
+    "missing_tile_codes": 178,
+    "tile_payload_and_index_increment_bytes": 23496,
+    "tile_union_lower_bound_bytes": 616144,
+    "tile_reserved_bytes": 614400,
+    "tile_deficit_lower_bound_bytes": 1744,
+    "conditional_missing_palette_banks": ["0x0b", "0x14"],
+    "conditional_palette_increment_bytes": 64,
+    "presentation_blockers": [
+      "Bind actual source coordinate mode and palette inheritance before draw integration; scanning both modes is asset discovery, not a native rule.",
+      "Sparse windows omit all50 headers; top-level tag8 no-op and valid zero emission need bounded adapter support.",
+      "Full Round1 union and simultaneous VDP1 working-set peak remain unmeasured."
+    ],
+    "composite_inventory_not_simultaneous_peak": {
+      "unique_entries": 10,
+      "union_texture_bytes": 23552,
+      "largest_single_bytes": 2688
+    },
+    "proposal_only_not_authorized": {
+      "minimum_demonstration_not_full_route_plan": true,
+      "tile_reserved_bytes": 618496,
+      "tile_lower_bound_headroom_bytes": 2352,
+      "tile_headroom_if_two_palettes_required_bytes": 2288,
+      "stage_strip_base": "0x22697000",
+      "stage_strip_reserved_bytes": 290816,
+      "stage_strip_required_bytes": 269654,
+      "stage_strip_headroom_bytes": 21162,
+      "unchanged_subsequent_base": "0x226de000",
+      "other_regions": "Runtime101192/102400 headroom1208; diagnostics89700/106496 headroom16796; SPEC51580/262144 occupancy headroom210564 but census floor244924 leaves17220; scratch11648/12288 headroom640. Jo occupancy unknown; no free-space claim.",
+      "required_before_resize": "Owner authorizes bounded full-route tile/palette/working-set census and a resulting region proposal. The illustrative4096-byte transfer is not adequate proof for all Round1 and must not be executed as an ad-hoc squeeze."
+    },
+    "current_target_identity": null,
+    "linked_image_bss_and_canaries": "UNRUN; no current measurements",
+    "runtime_structure_delta_bytes": 0,
+    "physical_status": "UNRUN",
+    "exhausted_gates_reopened": false
+  },
   "build_only_runtime_layout": {
     "actor_core_bytes": 236,
     "runtime_bytes": 101192,

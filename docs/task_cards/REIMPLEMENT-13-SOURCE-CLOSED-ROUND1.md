@@ -26,7 +26,7 @@ does not bind loop00808a, tail008140, trap3/001060 or interrupt-owned guards.
 Run analyzer --interactive-readiness for exact fields; nine identity controls PASS.
 Class0e native16 lifetimes/1776 rows reproduce state/facing/animation/timers and attachment formula;333 inherited position rows stay RED.
 Alias/clear, strict host10 causal controls and whole-scene suppression/repeat PASS; tiers separate.
-Fast/Oracle native PASS; scheduler a3/b3 all8 ledgers identical, p3 exit12 frames earlier; source wake suppression causal. Native timing/1614a continuation remains blocked; owner adaptation choice pending. Safe next class0e archive demand.
+Fast/Oracle native PASS; scheduler a3/b3 all8 ledgers identical, p3 exit12 frames earlier; source wake suppression causal. Timing/1614a blocked; owner choice pending. Class0e tile union616144 exceeds614400 minimum; memory plan records proposal only. Stop for capacity ruling; no resize/retry authorized.
 
 ## Objective
 

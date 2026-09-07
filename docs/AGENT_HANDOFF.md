@@ -28,11 +28,11 @@ Wake guard/counter/input rules validated; source suppression removes151 wakeups.
 Missing: native CPU-timing policy and command/result continuation1614a/ff837b.
 Class0e source/SPEC c952687; Fast/Oracle PASS; host report, Saturn draw NOT wired.
 Its50 assembly headers are absent from sparse archive; tag8 no-op adapter pending.
-Owner timing-adaptation choice pending; safe next: class0e archive/header demand.
+Owner ruling needed: class0e tile union616144 exceeds614400 by1744 minimum.
 Normal callback still uses captured schedules; reported authority0 is hardcoded.
 Type28/class0c remains blocked under its exhausted causal-witness budget.
 Target and transition Emulator/WGC also remain exhausted: no retry was authorized.
-Read-only provenance/preflight and a precise changed hypothesis are allowed.
+Read-only demand recorded in memory plan; proposed resize NOT executed.
 
 Scene report:103/747 missing source lifetimes;1/708 unowned native lifetimes;
 0/38 unidentified pairs;501/1494 lifetime endpoints;1/708 unsupported records;
@@ -45,5 +45,5 @@ pinned EXE/archive match. Root CDDA output is regeneratable by existing build.
 
 Use Fast -WorkflowOnly for docs; DEV for edits; full ceremony at program/platform
 risk boundaries. Keep all acceptance tests and three-attempt rulings.
-Today's full-level target is at risk, not promised. Deliver verified playable
-extent, not a replay or a falsely labelled full round. Continue existing scene order.
+Next: owner-authorized full-route tile/palette census and bounded resize proposal;
+timing-policy choice also pending. No full-level promise or candidate promotion.
