@@ -17,28 +17,28 @@ USER-10 requires QA and explicit feedback. Physical UNRUN; HW-01 parked.
 
 ## Exact next experiment
 
-Implement type36/class0e, all16 lifetimes, from the now executable SPEC program:
-parent KO allocation, signed attachment/selector tables, final visit and pool release.
-+0x5c byte alias includes inactive auxiliary residue and central clear; never omit it.
-All1776 source rows match recovered formulas; this is not native or scene acceptance.
+Class0e native body now reproduces16 lifetimes/1776 rows, state/facing/animation,
+attachment formula, alias and release. Keep333 inherited world-position rows RED.
+Strict host10 causal controls plus whole-scene allocation suppression and repeat PASS.
+Next: validate source-only oracle11_scheduler_clock_a1/b1/p1, then loop/trap3 SPEC.
 The captured-schedule defect is BLOCKED_MISSING_EXECUTABLE_TICK_CONTRACT.
-Read-only command: python tools/analyze_oracle11_actor_scheduler.py --interactive-readiness
+Wrapper source probe uses -SchedulerClockCapture; p1 also -SchedulerInputPerturb.
 Pool callee0011ea is RTS; loop00808a/tail008140 reaches trap3 wrapper001060.
 Missing: ff81bc/ff81a6 interrupt-writer ordering; suspend/resume and route
 continuations; input/hitstop/phase order; independent changed-input witness.
-Use complete existing class0e implementation_contract and generated SPEC fixture.
-Controls: Oracle12 alias+16 program; SPEC5 alias+5 program; no native behavioral kills.
+Class0e source/SPEC c952687; Fast/Oracle PASS; host report, Saturn draw NOT wired.
+Its50 assembly headers are absent from sparse archive; tag8 no-op adapter pending.
 Return to the scheduler with bounded source evidence; never guess display ticks.
 Normal callback still uses captured schedules; reported authority0 is hardcoded.
 Type28/class0c remains blocked under its exhausted causal-witness budget.
 Target and transition Emulator/WGC also remain exhausted: no retry was authorized.
 Read-only provenance/preflight and a precise changed hypothesis are allowed.
 
-Scene report:144/747 missing source lifetimes;1/692 unowned native lifetimes;
-0/38 unidentified pairs;633/1494 lifetime endpoints;1/692 unsupported records;
+Scene report:103/747 missing source lifetimes;1/708 unowned native lifetimes;
+0/38 unidentified pairs;501/1494 lifetime endpoints;1/708 unsupported records;
 93/149 health-write events;0/11 route/camera;279/281 audio/load. No percentages.
 Raw/normalized program distinctions remain in the report/card. No scene promotion.
-Runtime99,616/102,400; SPEC50,504/262,144; no current accepted Target artifact.
+Runtime101,192/102,400; SPEC51,580/262,144; no current accepted Target artifact.
 Source/spec hashes and region evidence remain in state and existing data files.
 Read-only package preflight matches seven staged assets plus original CDDA source;
 pinned EXE/archive match. Root CDDA output is regeneratable by existing build.

@@ -96,7 +96,7 @@ def capture(generated_override: str | None = None) -> \
         result = subprocess.run(
             ["wsl.exe", "-d", "Ubuntu-24.04", "-u", "root", "--",
              "bash", "-lc", command], check=False, capture_output=True,
-             text=True)
+             text=True, timeout=120)
         FAILURE_STDOUT.write_text(result.stdout, encoding="utf-8")
         FAILURE_STDERR.write_text(result.stderr, encoding="utf-8")
     return (list(csv.DictReader(io.StringIO(result.stdout), delimiter="\t")),
@@ -289,11 +289,31 @@ NATIVE_OWNERS = {
     (36, "0x03"): "native class-0x03 class-0x1f landing presentation program",
     (36, "0x04"): "native class-0x04 player-weapon presentation program",
     (36, "0x05"): "Coffee Shop obstacle child dispatcher",
+    (36, "0x0e"): "native class-0x0e source parent-KO attachment program",
 }
 
 
 def native_owner(item: dict[str, object]) -> str | None:
     return NATIVE_OWNERS.get((int(item["type"]), str(item["class"])))
+
+
+def current_component(item: dict[str, object]) -> dict[str, object]:
+    result = dict(item, native_owner=native_owner(item))
+    # The source inventory predates these proven native program comparisons.
+    # Preserve its old label as provenance, not as current implementation state.
+    proven_programs = {
+        (28, "0x00"): "class00_companion_complete_program",
+        (36, "0x03"): "class03_presentation_complete_program",
+        (36, "0x04"): "class04_presentation_complete_program",
+        (36, "0x0e"): "class0e_presentation_complete_program"}
+    program = proven_programs.get((int(item["type"]), str(item["class"])))
+    if program:
+        result["source_inventory_classification"] = item["classification"]
+        result["classification"] = "NATIVE_IMPLEMENTED"
+        result["exact_blocker"] = None
+        result["program_evidence"] = "native_capture/" + program
+        result["acceptance_scope"] = "host program only; raw gaps and blocked platform/interactive gates retained"
+    return result
 
 
 def edge_timeline(items: list[dict[str, object]], side: str) -> list[dict[str, object]]:
@@ -1796,6 +1816,198 @@ def class04_presentation_complete_program_differential(
     }
 
 
+def class0e_presentation_complete_program_differential(
+        source_rows: list[dict[str, str]], native_rows: list[dict[str, str]],
+        runtime_summary: str, family: dict[str, object]) -> dict[str, object]:
+    """Keep parent-world gaps RED while independently checking attachment.
+
+    No position normalization is applied to scene acceptance. The secondary
+    formula check isolates this program from already-divergent parent motion.
+    Source spawn witnesses are diagnostic input only, never native content.
+    """
+    contract = next(item["implementation_contract"] for item in family[
+        "classes"] if item["class"] == "0x0e")
+    writes_path = ROOT / ".deps/mame/oracle11_progression_lifecycle_cs16a/coffee_shop_type36_writes.tsv"
+    writes_sha = hashlib.sha256(writes_path.read_bytes()).hexdigest()
+    if writes_sha != family["capture_identity"]["spawn_context_a"][
+            "coffee_shop_type36_writes.tsv"]:
+        raise ValueError("class0e source parent-writer identity drift")
+    with writes_path.open(encoding="ascii", newline="") as handle:
+        writes = list(csv.DictReader(handle, delimiter="\t"))
+    bindings = {(int(row["frame"]), int(row["slot"], 16)):
+                int(row["a6"], 16) for row in writes
+                if row["pc"] == "09d3ec" and row["inner"] == "26"}
+    source_all = {(int(r["frame"]), int(r["slot"], 16)): r
+                  for r in source_rows}
+    native_all = {(int(r["frame"]), int(r["source_slot"], 16)): r
+                  for r in native_rows}
+    source = {k: r for k, r in source_all.items()
+              if r["type"] == "36" and r["class"] == "0e"}
+    native = {k: r for k, r in native_all.items()
+              if r["type"] == "36" and r["class"] == "0e"}
+    if len(bindings) != 16 or len(source) != 1776 or source.keys() != native.keys():
+        raise ValueError("class0e population/lifetime/slot drift")
+    fields = ("state", "substate", "x_fp", "y_fp", "z", "facing",
+              "animation_record", "animation_timer", "animation_branch")
+    def number(r: dict[str, str], field: str, is_source: bool) -> int:
+        base = 16 if field in {"state", "substate", "animation_record"} or (
+            is_source and field in {"x_fp", "y_fp", "animation_timer"}) else 10
+        return int(r[field], base)
+    raw: list[list[object]] = []
+    owner_by_slot: dict[int, int] = {}
+    projection: list[object] = []
+    records = {int(r["animation_record"], 16): r
+               for r in contract["animation_bind"]["records"]}
+    for key in sorted(source):
+        frame, slot = key
+        if (frame - 1, slot) in bindings:
+            # Write taps use the preceding interval label; actor census is
+            # the following boundary. This is observation alignment only.
+            owner_by_slot[slot] = bindings[(frame - 1, slot)]
+        parent_slot = owner_by_slot[slot]
+        s, n = source[key], native[key]
+        if int(n["source_target_low"]) != (parent_slot & 0xffff):
+            raise ValueError(f"class0e parent identity drift at {frame}")
+        changed = [field for field in fields if number(s, field, True) !=
+                   number(n, field, False)]
+        if any(field not in {"x_fp", "y_fp", "z"} for field in changed):
+            raise ValueError(f"class0e state/presentation drift at {frame}: {changed}")
+        sp, np = source_all[(frame, parent_slot)], native_all[(frame, parent_slot)]
+        if changed:
+            raw.append([frame, f"0x{slot:08x}", f"0x{parent_slot:08x}",
+                        [fields.index(f) for f in changed],
+                        [number(s, f, True) for f in changed],
+                        [number(n, f, False) for f in changed],
+                        [number(sp, f, True) for f in changed],
+                        [number(np, f, False) for f in changed]])
+        for child, parent, is_source in ((s, sp, True), (n, np, False)):
+            branch = number(parent, "animation_branch", is_source) & 255
+            attachment = contract["attachment"]["records"][branch]
+            facing = int(parent["facing"])
+            dx = attachment["x_offset_s8"] * (-1 if facing else 1)
+            expected = (
+                ((number(parent, "x_fp", is_source) >> 16) + dx) & 0xffff,
+                ((number(parent, "y_fp", is_source) >> 16) +
+                    attachment["y_offset_s8"]) & 0xffff,
+                int(parent["z"]) & 0xffff,
+                attachment["facing_u8"] ^ (1 if facing else 0))
+            actual = ((number(child, "x_fp", is_source) >> 16) & 0xffff,
+                      (number(child, "y_fp", is_source) >> 16) & 0xffff,
+                      int(child["z"]) & 0xffff, int(child["facing"]))
+            if actual != expected:
+                raise ValueError(f"class0e attachment formula drift at {frame} source={is_source}")
+            projection.append([frame, slot, is_source, branch, actual, expected])
+        record = records[number(n, "animation_record", False)]
+        if (int(n["assembly"], 16) != int(record["assembly"], 16) or
+                int(n["hurt_selector"]) != record["hurt_selector_u8"] or
+                int(n["attack_selector"]) != record["attack_selector_u8"]):
+            raise ValueError(f"class0e emitted assembly/collision drift at {frame}")
+    match = re.search(r"class0e_allocations=(\d+) class0e_alloc_failures=(\d+) "
+        r"class0e_init=(\d+) class0e_attachment=(\d+) class0e_transitions=(\d+) "
+        r"class0e_alias=(\d+) class0e_releases=(\d+) class0e_aux=(\d+)", runtime_summary)
+    counters = [int(v) for v in match.groups()] if match else []
+    if counters != [16, 0, 16, 1776, 16, 16, 16, 0]:
+        raise ValueError(f"class0e allocation/alias/release drift: {counters}")
+    windows = json.loads((ROOT / "data/avsp_emit_windows.json").read_bytes())["windows"]
+    assemblies = {int(record["assembly"], 16)
+                  for record in contract["animation_bind"]["records"]}
+    missing_headers = sum(not any(int(w["base"], 16) <= address and
+        address + 2 <= int(w["base"], 16) + w["size"] for w in windows)
+        for address in assemblies)
+    main = (ROOT / "main.c").read_text()
+    draw = main[main.index("static int draw_round1_initial_source_actors(void)"):]
+    draw = draw[:draw.index("#endif")]
+    submitted = "(actor->type == 36u && actor->actor_class == 0x0e)" in draw
+    return {
+        "classification": "SOURCE_PROGRAM_PASS_INHERITED_PARENT_POSITION_RED",
+        "source_program": "0x09d3c4..0x09d60e",
+        "source_body_sha256": contract["source_bodies"]["class_dispatch"]["sha256"],
+        "source_parent_writes_sha256": writes_sha,
+        "source_lifetimes": 16, "native_lifetimes": 16,
+        "source_rows": len(source), "native_rows": len(native),
+        "raw_difference_field_names": list(fields),
+        "raw_difference_columns": ["frame", "slot", "parent_slot", "field_indices",
+            "source", "native", "source_parent", "native_parent"],
+        "raw_difference_count": len(raw), "raw_differences": raw,
+        "raw_difference_sha256": hashlib.sha256(canonical(raw)).hexdigest(),
+        "normalized_position_difference_count": len(raw),
+        "normalization": "NONE; parent-relative formula comparison is attribution, not world-position equality",
+        "independent_source_and_native_attachment_formula_mismatches": 0,
+        "formula_projection_sha256": hashlib.sha256(canonical(projection)).hexdigest(),
+        "state_facing_animation_timer_branch_mismatches": 0,
+        "assembly_collision_selector_mismatches": 0,
+        "runtime_counters": counters,
+        "saturn_presentation": {"status": "BLOCKED_NOT_WIRED",
+            "submitted": submitted, "missing_assembly_headers": missing_headers,
+            "tag8_adapter": "PENDING", "visual": "EXHAUSTED_NOT_RETRIED"},
+        "source_direct_effects": contract["effects"],
+        "restored_pool_occupancy_effects": {
+            "prior_checkpoint": "c952687399e799a13b26b20e997e0da93787bf9c",
+            "class03_raw_rows_before_after": [1360, 408],
+            "class03_raw_lifetime_slot_gaps_before_after": [38, 0],
+            "class04_raw_lifetime_slot_gaps_before_after": [11, 0],
+            "class04_current_raw_rows": 0,
+            "reason": "source-owned class0e occupants restore shared free-stack reuse; parent-position gaps remain visible"},
+        "scope": "complete1972..5566 scene with captured diagnostic schedule; NOT independent interactive tick proof",
+        "scene_gate_remains_red": True,
+    }
+
+
+def run_class0e_program_controls() -> None:
+    """Behavioral output controls require a compiled, completed whole scene."""
+    fixtures = json.loads(FIXTURES.read_text(encoding="ascii"))
+    family = fixtures["authority_data"]["auxiliary"]["coffee_shop_type36_presentation"]
+    with SOURCE_ACTORS.open(encoding="ascii", newline="") as handle:
+        source_rows = list(csv.DictReader(handle, delimiter="\t"))
+    header = (ROOT / "src/port_v2/gameplay/round1/spec02_round1_entry_data.h").read_text(encoding="ascii")
+    baseline, summary, code = capture()
+    if code != 0:
+        raise ValueError("class0e control baseline did not complete; no behavioral credit")
+    report = class0e_presentation_complete_program_differential(source_rows, baseline, summary, family)
+    controls = []
+    filter_match = re.search(r"(static const signed char avsp_round1_type36_class0e_filter\[[^\]]+\] =\s*\{)(.*?)(\};)", header, re.DOTALL)
+    if filter_match is None:
+        raise ValueError("class0e filter mutation marker absent")
+    mutant = header[:filter_match.start(2)] + "    " + ", ".join(["-1"] * 24) + header[filter_match.end(2):]
+    rows, changed_summary, code = capture(mutant)
+    if code != 0:
+        raise ValueError("class0e suppression failed compile/runtime/environment; INVALID, no behavioral credit")
+    try:
+        class0e_presentation_complete_program_differential(source_rows, rows, changed_summary, family)
+    except ValueError as error:
+        if str(error) != "class0e population/lifetime/slot drift":
+            raise
+    else:
+        raise ValueError("class0e suppression survived population assertion")
+    remaining = sum(r["type"] == "36" and r["class"] == "0e" for r in rows)
+    if remaining != 0:
+        raise ValueError("class0e suppression did not remove intended population")
+    controls.append({"label": "suppress-class0e-allocation-filter",
+        "classification": "VALID_BEHAVIORAL_REJECTION", "runtime_returncode": 0,
+        "assertion": "class0e population/lifetime/slot drift", "remaining_rows": remaining,
+        "related_source_actor_suppression": next(x["counterfactual"] for x in family["classes"] if x["class"] == "0x0e"),
+        "control_scope": "native filter prevents allocation; retained source control suppresses the class write, not the identical mutation; no matched-normalization claim"})
+    repeat, repeated_summary, code = capture()
+    if code != 0 or canonical(repeat) != canonical(baseline) or repeated_summary != summary:
+        raise ValueError("class0e complete-scene repeat failed")
+    repeated_report = class0e_presentation_complete_program_differential(source_rows, repeat, repeated_summary, family)
+    if report != repeated_report:
+        raise ValueError("class0e program report repeat drift")
+    prior = json.loads(MUTATION_REPORT.read_text(encoding="ascii"))
+    prior.setdefault("focused_program_controls", {})["type36_class0e_whole_scene"] = {
+        "coverage": "complete1972..5566 Coffee Shop; native omitted-allocation population assertion with related, nonidentical source actor-suppression evidence; baseline repeated byte-identically",
+        "counts": {"VALID_BEHAVIORAL_REJECTION": 1}, "mutations": controls,
+        "unchanged_repeat": "PASS_NOT_A_KILL",
+        "baseline_rows_sha256": hashlib.sha256(canonical(baseline)).hexdigest()}
+    counts = dict(prior["current_counts"])
+    for program in prior["focused_program_controls"].values():
+        for category, count in program["counts"].items():
+            counts[category] = counts.get(category, 0) + count
+    prior["current_counts_with_focused_program_controls"] = counts
+    MUTATION_REPORT.write_text(json.dumps(prior, indent=2, sort_keys=True) + "\n", encoding="ascii", newline="\n")
+    print("class0e whole-scene control: PASS (one population rejection; unchanged repeat not credited; inherited raw position gaps retained)")
+
+
 def airborne_button1_presentation_chronology(
         source_rows: list[dict[str, str]],
         native_rows: list[dict[str, str]]) -> dict[str, object]:
@@ -2839,10 +3051,10 @@ def validate_report(report: dict[str, object]) -> None:
             class03_program["native_lifetimes_u8"] != 50 or
             class03_program["source_rows_u16"] != 1700 or
             class03_program["native_rows_u16"] != 1700 or
-            class03_program["raw_difference_count_u16"] != 1360 or
-            class03_program["raw_lifetime_slot_difference_count_u8"] != 38 or
+            class03_program["raw_difference_count_u16"] != 408 or
+            class03_program["raw_lifetime_slot_difference_count_u8"] != 0 or
             class03_program["raw_difference_sha256"] !=
-                "a41eb0857dadd1128ad13acbbb2a1e49646620c6fe87201367124e8481c07f0a" or
+                "f1b30c47a2a85d44d176c944e9ccffb423582d18f82274b16a6ead500110ff68" or
             len(class03_program["raw_difference_samples"]) != 16 or
             class03_program["normalized_difference_count_u8"] != 0 or
             not class03_program["normalized_program_fields_equal"] or
@@ -2867,8 +3079,8 @@ def validate_report(report: dict[str, object]) -> None:
             class04_program["native_lifetimes_u8"] != 15 or
             class04_program["source_rows_u16"] != 197 or
             class04_program["native_rows_u16"] != 197 or
-            class04_program["raw_lifetime_slot_difference_count_u8"] != 11 or
-            not class04_program["raw_differences"] or
+            class04_program["raw_lifetime_slot_difference_count_u8"] != 0 or
+            class04_program["raw_differences"] or
             class04_program["normalized_difference_count_u8"] != 0 or
             not class04_program["normalized_program_fields_equal"] or
             not class04_program["assembly_output_equal"] or
@@ -2884,6 +3096,30 @@ def validate_report(report: dict[str, object]) -> None:
                          json.dumps(class04_program, sort_keys=True))
     airborne_button1 = report["native_capture"][
         "airborne_button1_presentation"]
+    class0e_program = report["native_capture"]["class0e_presentation_complete_program"]
+    if (class0e_program["source_lifetimes"] != 16 or
+            class0e_program["native_lifetimes"] != 16 or
+            class0e_program["source_rows"] != 1776 or
+            class0e_program["native_rows"] != 1776 or
+            class0e_program["raw_difference_count"] != 333 or
+            class0e_program["normalized_position_difference_count"] != 333 or
+            len(class0e_program["raw_differences"]) != 333 or
+            hashlib.sha256(canonical(class0e_program["raw_differences"])).hexdigest() !=
+                "403ea3e0dee3102244e76f2b981dd666be382b7ba5af3ac7a417e0b218a69fd9" or
+            class0e_program["raw_difference_sha256"] !=
+                "403ea3e0dee3102244e76f2b981dd666be382b7ba5af3ac7a417e0b218a69fd9" or
+            class0e_program["raw_difference_field_names"] != ["state", "substate", "x_fp", "y_fp", "z", "facing", "animation_record", "animation_timer", "animation_branch"] or
+            class0e_program["raw_difference_columns"] != ["frame", "slot", "parent_slot", "field_indices",
+                "source", "native", "source_parent", "native_parent"] or
+            class0e_program["independent_source_and_native_attachment_formula_mismatches"] != 0 or
+            class0e_program["state_facing_animation_timer_branch_mismatches"] != 0 or
+            class0e_program["assembly_collision_selector_mismatches"] != 0 or
+            class0e_program["runtime_counters"] != [16, 0, 16, 1776, 16, 16, 16, 0] or
+            class0e_program["saturn_presentation"] != {"status": "BLOCKED_NOT_WIRED",
+                "submitted": False, "missing_assembly_headers": 50,
+                "tag8_adapter": "PENDING", "visual": "EXHAUSTED_NOT_RETRIED"} or
+            not class0e_program["scene_gate_remains_red"]):
+        raise ValueError("class0e program scope/output/population drift")
     if (not airborne_button1["source_native_semantic_equal"] or
             airborne_button1["equal_frame_count_u16"] != 26 or
             airborne_button1["source_projection_sha256"] !=
@@ -2900,7 +3136,8 @@ def validate_report(report: dict[str, object]) -> None:
         raise ValueError("Coffee Shop airborne Button1 presentation drift: " +
                          json.dumps(airborne_button1, sort_keys=True))
     all_zero = all(value == 0 for value in report["gaps"].values())
-    if report["acceptance"] != {"all_zero": all_zero, "ready": all_zero}:
+    ready = all_zero and class0e_program["saturn_presentation"]["status"] == "PASS"
+    if report["acceptance"] != {"all_zero": all_zero, "ready": ready}:
         raise ValueError("Coffee Shop scene accepted before the zero-gap gate")
 
 
@@ -3085,6 +3322,11 @@ def main() -> None:
                                class04_presentation_complete_program_differential(
                                    source_rows, rows, runtime_summary,
                                    class04_contract),
+                           "class0e_presentation_complete_program":
+                               class0e_presentation_complete_program_differential(
+                                   source_rows, rows, runtime_summary,
+                                   fixtures["authority_data"]["auxiliary"][
+                                       "coffee_shop_type36_presentation"]),
                            "airborne_button1_presentation":
                                airborne_button1_presentation_chronology(
                                    source_rows, rows),
@@ -3107,9 +3349,7 @@ def main() -> None:
                                 key(item) in source_by_key))
                        for item in native],
         },
-        "scene_component_map": [
-            dict(item, native_owner=NATIVE_OWNERS.get(
-                (int(item["type"]), str(item["class"]))))
+        "scene_component_map": [current_component(item)
             for item in source["class_type_inventory"]],
         "spawn_despawn_timeline": grouped_edge_timeline(
             source["actor_lifetimes"], native),
@@ -3154,7 +3394,11 @@ def main() -> None:
     }
     report["acceptance"]["all_zero"] = all(
         value == 0 for value in report["gaps"].values())
-    report["acceptance"]["ready"] = report["acceptance"]["all_zero"]
+    # Population numbers alone cannot approve the known unsubmitted body.
+    # Target/interactive/visual gates remain independently required as well.
+    report["acceptance"]["ready"] = report["acceptance"]["all_zero"] and (
+        report["native_capture"]["class0e_presentation_complete_program"][
+            "saturn_presentation"]["status"] == "PASS")
     validate_report(report)
     OUT.write_bytes(canonical(report))
     print("Coffee Shop native scene census: " +
@@ -3163,7 +3407,9 @@ def main() -> None:
 
 
 if __name__ == "__main__":
-    if "--class00-phase-mutation-control" in sys.argv:
+    if "--class0e-program-controls" in sys.argv:
+        run_class0e_program_controls()
+    elif "--class00-phase-mutation-control" in sys.argv:
         run_class00_phase_mutation_control()
     else:
         main()

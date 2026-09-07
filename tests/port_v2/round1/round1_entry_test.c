@@ -4044,6 +4044,13 @@ int main(void)
                 component_runtime.pools[3].records[14].z,
                 component_runtime.pools[3].records[14].animation_record,
                 component_runtime.scheduler_failure_code);
+            fprintf(stderr, "scheduler detail slot=%04x state=%04x substate=%04x class0e=%lu/%lu/%lu\n",
+                component_runtime.scheduler_failure_source_slot,
+                component_runtime.scheduler_failure_state,
+                component_runtime.scheduler_failure_substate,
+                component_runtime.type36_class0e_allocations,
+                component_runtime.type36_class0e_initializations,
+                component_runtime.type36_class0e_releases);
             return 99;
         }
         class02->health = 63;

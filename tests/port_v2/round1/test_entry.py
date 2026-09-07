@@ -12,7 +12,7 @@ from pathlib import Path
 
 ROOT = Path(__file__).resolve().parents[3]
 SPEC = ROOT / "data/spec02_round1_executable_contract.json"
-EXPECTED = "d179b71a83a202cb8e85a279f821e237a3f144644a49f738b500f2e79c172689"
+EXPECTED = "dd76666bb46e15e0876185a9c092c7350ed7fe0134f80be54579bf3df1d335e4"
 assert hashlib.sha256(SPEC.read_bytes()).hexdigest() == EXPECTED
 assert json.loads(SPEC.read_text())["status"] == "ACCEPTED"
 source = (ROOT / "src/port_v2/gameplay/round1/round1.c").read_text()
@@ -20,6 +20,7 @@ header = (ROOT / "src/port_v2/gameplay/round1/round1.h").read_text()
 generated = (ROOT / "src/port_v2/gameplay/round1/spec02_round1_entry_data.h").read_text()
 player_source = (ROOT / "src/port_v2/gameplay/player_action/player_action.c").read_text()
 test_source = (ROOT / "tests/port_v2/round1/round1_entry_test.c").read_text()
+class0e_test_source = (ROOT / "tests/port_v2/round1/round1_class0e_program_test.c").read_text()
 assert EXPECTED in header
 subprocess.run(["python", str(ROOT / "tools/gen_spec02_round1_entry.py"), "--check"], check=True)
 
@@ -132,6 +133,9 @@ def run(body, header_body, passes, label="baseline", player_body=player_source,
             generated_body = generated
         if test_body is None:
             test_body = test_source
+        if "--class0e-only" in sys.argv:
+            body += "\n#define AVSP_CLASS0E_INTERNAL_TEST 1\n" + class0e_test_source
+            test_body = class0e_test_source
         temp_body = body.replace(
             '#include "../../integration/combat/combat.h"', '#include "combat.h"')
         temp_body = temp_body.replace(
@@ -444,6 +448,28 @@ run(source, header, True,
                if "--class1f-state0-only" in sys.argv else
                scene_checkpoint_body
                if scene_checkpoint_flags.intersection(sys.argv) else None))
+if "--class0e-only" in sys.argv:
+    controls = [
+        ('alias-value', '0x01000000UL', '0x02000000UL', 203),
+        ('parent-byte', 'parent->source_field2b = 6u;', 'parent->source_field2b = 5u;', 201),
+        ('facing-sign', 'dx = (short)-dx;', 'dx = (short)dx;', 205),
+        ('palette-index', '(unsigned char)(actor->palette - 0x10u)', '(unsigned char)(actor->palette - 0x11u)', 205),
+        ('final-visit', 'actor->state = 0x0600u;\n            ++runtime->type36_class0e_transitions;', 'actor->state = 0x0600u;\n            return 1;\n            ++runtime->type36_class0e_transitions;', 207),
+        ('backlink', 'parent->source_type36_class04_child = 0u;', 'parent->source_type36_class04_child = 1u;', 208),
+        ('aux-clear', 'runtime->source_aux_ffe29c = 0UL;', 'runtime->source_aux_ffe29c = 1UL;', 209),
+        ('filter', 'avsp_round1_type36_class0e_filter[hit_kind] < 0', 'avsp_round1_type36_class0e_filter[hit_kind] > 0', 210),
+        ('release-field01', 'actor->source_field01 = 0u;', 'actor->source_field01 = 1u;', 208),
+        ('z-residue', 'actor->source_z_fp = (long)z_fraction;', 'actor->source_z_fp = (long)z_fraction + 1L;', 204),
+    ]
+    for label, old, new, expected in controls:
+        assert old in source, label
+        run(source.replace(old,new), header, False, 'class0e-'+label,
+            expected_returncode=expected, test_body=class0e_test_source)
+    run(source, header, True, 'class0e-unchanged-repeat', test_body=class0e_test_source)
+    record_focused_program_controls('type36_class0e_complete_program',
+        'initialized-state host counterfactuals for class0e allocation, attachment/facing, alias, final visit and release; complete1972..5566 scene compared separately; not an independent interactive scheduler proof')
+    print('Class0e bounded native program: PASS (10 attributable behavioral rejections; unchanged repeat PASS; complete scene remains separately gated)')
+    sys.exit(0)
 if "--harness-self-test" in sys.argv:
     invalid = run(source + "\nthis is deliberately invalid C\n", header,
                   False, "self-syntax-error", observe_only=True)
@@ -1737,11 +1763,15 @@ if "--class04-only" in sys.argv:
     if (actor->state == spec->release_state)""", 1),
         header, False, "class04-same-visit-release",
         expected_returncode=249, test_body=class04_checkpoint_body)
-    backlink = """        if (parent->source_type36_class04_child ==
+    backlink = """    if (actor->state == spec->release_state)
+    {
+        if (parent->source_type36_class04_child ==
                 (unsigned short)actor->source_slot)
             parent->source_type36_class04_child = 0u;"""
     assert source.count(backlink) == 1
-    run(source.replace(backlink, "        (void)parent;", 1),
+    run(source.replace(backlink, """    if (actor->state == spec->release_state)
+    {
+        (void)parent;""", 1),
         header, False, "class04-backlink-clear",
         expected_returncode=249, test_body=class04_checkpoint_body)
     generated_spec = (
@@ -2255,6 +2285,15 @@ report = {
     "mutations": behavior_records,
 }
 if FULL_MUTATION_RUN:
+    # A full historical inventory rerun must not erase later named program
+    # controls. Retain their separately labelled coverage and measured counts.
+    previous = json.loads(MUTATION_REPORT.read_text(encoding="ascii"))
+    report["focused_program_controls"] = previous.get("focused_program_controls", {})
+    combined = dict(classification_counts)
+    for program in report["focused_program_controls"].values():
+        for classification, count in program["counts"].items():
+            combined[classification] = combined.get(classification, 0) + count
+    report["current_counts_with_focused_program_controls"] = combined
     MUTATION_REPORT.write_text(
         json.dumps(report, indent=2, sort_keys=True) + "\n",
         encoding="ascii", newline="\n")

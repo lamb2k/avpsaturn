@@ -21,7 +21,7 @@ static void emit_actor(unsigned int frame, const char *pool,
         (actor->actor_class == 0x10 || actor->actor_class == 0x49) &&
         source_state != 0u && source_state <= 6u)
         source_state = (unsigned short)(source_state << 8);
-    printf("%u\t%s\t%08lx\t%u\t%02x\t%04x\t%04x\t%ld\t%ld\t%d\t%u\t%08lx\t%08lx\t%d\t%u\t%u\t%d\t%d\t%u\t%u\t%u\t%u\t%u\t%u\t%u\t%u\t%u\t0\t0\t0\t0\t0\t0\t0\t%d\t%u\t%u\t%u\t%u\t%u\t%u\t%u\n",
+    printf("%u\t%s\t%08lx\t%u\t%02x\t%04x\t%04x\t%ld\t%ld\t%d\t%u\t%08lx\t%08lx\t%d\t%u\t%u\t%d\t%d\t%u\t%u\t%u\t%u\t%u\t%u\t%u\t%u\t%u\t0\t0\t0\t0\t0\t0\t0\t%d\t%u\t%u\t%u\t%u\t%u\t%u\t%u\t%u\t%u\t%u\n",
            frame, pool, actor->source_slot, actor->type,
            (unsigned int)(unsigned char)actor->actor_class,
            source_state, actor->substate, x_fp, y_fp, actor->z,
@@ -37,7 +37,8 @@ static void emit_actor(unsigned int frame, const char *pool,
            actor->source_hit_recovery_active,
            actor->source_transition_latch_ae,
            actor->source_action_timer,
-           actor->variant);
+           actor->variant, actor->source_target_low,
+           actor->source_field09, actor->source_field2b);
 }
 
 static void emit_projectile(unsigned int frame,
@@ -72,7 +73,7 @@ int main(void)
     avsp_round1_init(&runtime);
     fputs("frame\tpool\tsource_slot\ttype\tclass\tstate\tsubstate\tx_fp\ty_fp\tz\tfacing\tanimation_record\tassembly\thealth\thurt_selector\tattack_selector\tx\ty\tsource_a3\tsource_a4\tsource_a5\tsource_a6\tsource_style85\tsource_b0\tsource_direction\tsource_player_guard\tanimation_timer\tattack_table\tcurrent_attack_record\tcollision_result\tcollision_identity\tcollision_registered\tangle\tprogress\tanimation_branch\tsource_field01\tsource_collision_guard6d\tsource_collision_suppress70\tsource_hit_recovery_active",
           stdout);
-    puts("\tsource_transition_latch_ae\tsource_action_timer\tsource_variant");
+    puts("\tsource_transition_latch_ae\tsource_action_timer\tsource_variant\tsource_target_low\tsource_field09\tsource_field2b");
     for (source_frame = 1972u; source_frame <= 5566u; ++source_frame)
     {
         unsigned short input = avsp_round1_coffee_shop_source_input(
@@ -519,6 +520,16 @@ int main(void)
             runtime.type36_class04_global_moves,
             runtime.type36_class04_rng_calls,
             runtime.type36_class04_releases);
+    fprintf(stderr,
+            "class0e_allocations=%lu class0e_alloc_failures=%lu class0e_init=%lu class0e_attachment=%lu class0e_transitions=%lu class0e_alias=%lu class0e_releases=%lu class0e_aux=%lu\n",
+            runtime.type36_class0e_allocations,
+            runtime.type36_class0e_allocation_failures,
+            runtime.type36_class0e_initializations,
+            runtime.type36_class0e_attachment_steps,
+            runtime.type36_class0e_transitions,
+            runtime.type36_class0e_alias_writes,
+            runtime.type36_class0e_releases,
+            runtime.source_aux_ffe29c);
     fprintf(stderr,
             "native_scene route=%d progress=%u living=%u releases=%lu damage=%lu collisions=%lu obstacle_spawns=%lu obstacle_damage=%lu obstacle_transitions=%lu obstacle_releases=%lu child_releases=%lu special_entries=%lu special_contacts=%lu camera=%d player_x=%d player_z=%d failures=%lu fallback=%lu class0f_init=%lu class0f_collision=%lu class0f_navigation=%lu class0f_reactions=%lu class0f_audio=%lu class0f_class11=%lu class0f_class09=%lu class0f_releases=%lu\n",
             runtime.route_state, runtime.first_encounter.source_progress,

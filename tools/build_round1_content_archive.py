@@ -7,6 +7,7 @@ import hashlib
 import json
 import os
 import re
+import struct
 import subprocess
 import tempfile
 from pathlib import Path
@@ -66,6 +67,34 @@ def game_map_values() -> dict[str, int | None]:
     return result
 
 
+def runtime_layout(compiler: Path, objcopy: Path) -> dict[str, int]:
+    """SH-2 sizeof probe only: never a Target image, launch or gate retry."""
+    with tempfile.TemporaryDirectory(prefix="layout-", dir=ROOT / "build/round1_content") as name:
+        probe = Path(name)
+        (probe / "probe.c").write_text(
+            '#include "round1.h"\n'
+            'const unsigned long layout[] __attribute__((section(".layoutprobe"))) = '
+            '{sizeof(AvspRound1ActorCore), sizeof(AvspRound1Runtime)};\n',
+            encoding="ascii")
+        environment = os.environ.copy()
+        environment["PATH"] = str(compiler.resolve().parent) + os.pathsep + environment.get("PATH", "")
+        subprocess.run([str(compiler), "-m2", "-Os", "-I.",
+            "-Isrc/port_v2/gameplay/round1", "-c",
+            (probe / "probe.c").relative_to(ROOT).as_posix(), "-o",
+            (probe / "probe.o").relative_to(ROOT).as_posix()],
+            cwd=ROOT, env=environment, check=True, timeout=120)
+        subprocess.run([str(objcopy), "-O", "binary", "-j", ".layoutprobe",
+            (probe / "probe.o").relative_to(ROOT).as_posix(),
+            (probe / "probe.bin").relative_to(ROOT).as_posix()],
+            cwd=ROOT, env=environment, check=True, timeout=30)
+        core, runtime = struct.unpack(">II", (probe / "probe.bin").read_bytes())
+    if (core, runtime) != (236, 0x18B48) or runtime > 0x19000:
+        raise SystemExit("SH-2 runtime layout/region drift; no automatic resize")
+    return {"actor_core_bytes": core, "runtime_bytes": runtime,
+            "runtime_reserved_bytes": 0x19000,
+            "runtime_headroom_bytes": 0x19000 - runtime}
+
+
 def main() -> None:
     parser = argparse.ArgumentParser()
     parser.add_argument("--compiler", type=Path, required=True)
@@ -76,6 +105,7 @@ def main() -> None:
 
     control_root = ROOT / "build/round1_content"
     control_root.mkdir(parents=True, exist_ok=True)
+    layout = runtime_layout(args.compiler, args.objcopy)
     with tempfile.TemporaryDirectory(prefix="control-", dir=control_root) as name:
         first = Path(name) / "first.bin"
         second = Path(name) / "second.bin"
@@ -115,7 +145,7 @@ def main() -> None:
     memory = game_map_values()
     table_count = (ROOT / "src/port_v2/gameplay/round1/spec02_round1_entry_data.h") \
         .read_text(encoding="ascii").count("#define avsp_round1_")
-    if table_count != 182:
+    if table_count != 186:
         raise SystemExit("generated Round 1 content table count drift")
     bss_end = memory["bss_end"]
     manifest = {
@@ -161,7 +191,7 @@ def main() -> None:
                  "required_bytes": (ROOT / "build/rp4_fixture/STRIPS.BIN").stat().st_size},
                 {"id": "round1-runtime", "base": "0x226de000", "size": 0x19000,
                  "owner": "complete fixed actor pools and mutable route state", "load_phase": "runtime",
-                 "required_bytes": 0x18520},
+                 "required_bytes": 0x18B48},
                 {"id": "live-diagnostic-window", "base": "0x226f7000", "size": 0x1A000,
                  "owner": "rolling 575-sample emulator evidence window", "load_phase": "runtime",
                  "required_bytes": 575 * 156},
@@ -203,6 +233,7 @@ def main() -> None:
             "GAME.BIN BSS ends before 0x060c0000",
         ],
         "physical_saturn": "UNRUN",
+        "build_only_runtime_layout": layout,
     }
     MANIFEST.write_text(json.dumps(manifest, indent=2, sort_keys=True) + "\n",
                         encoding="ascii", newline="\n")

@@ -6,7 +6,7 @@
 #include "../../combat/hit_ko/hit_ko.h"
 
 #define AVSP_ROUND1_SPEC02_SHA256 \
-"d179b71a83a202cb8e85a279f821e237a3f144644a49f738b500f2e79c172689"
+"dd76666bb46e15e0876185a9c092c7350ed7fe0134f80be54579bf3df1d335e4"
 #define AVSP_ROUND1_CANARY_HEAD 0x52314548UL
 #define AVSP_ROUND1_CANARY_TAIL 0x52314554UL
 #define AVSP_ROUND1_ROUTE_ENTRY_STATE 2
@@ -48,6 +48,8 @@
 #define AVSP_ROUND1_CLASS3D_OFFSET_COUNT 16u
 #define AVSP_ROUND1_TYPE36_CLASS03_PRESENTATION_COUNT 9u
 #define AVSP_ROUND1_TYPE36_CLASS04_PRESENTATION_COUNT 10u
+#define AVSP_ROUND1_TYPE36_CLASS0E_ATTACHMENT_COUNT 55u
+#define AVSP_ROUND1_TYPE36_CLASS0E_PRESENTATION_COUNT 50u
 #define AVSP_ROUND1_WEAPON_PROJECTILE_CAPACITY 24u
 #define AVSP_ROUND1_WEAPON_PARENT_PRESENTATION_COUNT 8u
 #define AVSP_ROUND1_WEAPON_PARENT_SELECTOR_COUNT 6u
@@ -311,6 +313,14 @@ typedef struct
     unsigned char record_type;
     unsigned char variant;
 } AvspRound1Type36Class03Spec;
+
+typedef struct
+{
+    signed char x_offset;
+    signed char y_offset;
+    unsigned char facing;
+    unsigned char selector;
+} AvspRound1Type36Class0eAttachmentSpec;
 
 typedef struct
 {
@@ -596,6 +606,8 @@ typedef struct
     short source_motion_fields[8];
     unsigned short source_children[4];
     unsigned char source_field01;
+    unsigned char source_field09;
+    unsigned char source_field2b;
     unsigned char source_collision_guard6d;
     unsigned char source_collision_latches[8];
     unsigned char source_collision_suppress70;
@@ -2179,6 +2191,15 @@ typedef struct
     unsigned long class00_companion_helper_calls;
     unsigned short source_round_stage_index;
     short source_type36_x_delta;
+    /* Source-owned inactive record24_aux+0x1c residue, not a fake actor. */
+    unsigned long source_aux_ffe29c;
+    unsigned long type36_class0e_allocations;
+    unsigned long type36_class0e_allocation_failures;
+    unsigned long type36_class0e_initializations;
+    unsigned long type36_class0e_attachment_steps;
+    unsigned long type36_class0e_transitions;
+    unsigned long type36_class0e_alias_writes;
+    unsigned long type36_class0e_releases;
     unsigned long type36_class03_allocation_requests;
     unsigned long type36_class03_allocations;
     unsigned long type36_class03_allocation_failures;

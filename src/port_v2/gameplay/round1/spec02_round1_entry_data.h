@@ -1,8 +1,8 @@
 #ifndef AVSP_SPEC02_ROUND1_ENTRY_DATA_H
 #define AVSP_SPEC02_ROUND1_ENTRY_DATA_H
 
-/* contract_sha256=1b82882fb7f3ec1b6f859f8f29dfcabe71da1b961959ea1a974a86ac8df8ec2e */
-/* fixtures_sha256=f5e706182d9190b201993680760c9960ac874c0c6a25ef22614506459a04685f */
+/* contract_sha256=dd76666bb46e15e0876185a9c092c7350ed7fe0134f80be54579bf3df1d335e4 */
+/* fixtures_sha256=16fed6d5be46ce018b112498520aaef79333975e7f2679fe2af5fa3c5cea7a35 */
 #define AVSP_ROUND1_ENTRY_PROGRAM_SHA256 "e5ef761fadc1b5a7df62e77c03025c0ebff0c2503cbc8be9c0077d4bd6cd24ba"
 
 #if defined(__sh__)
@@ -5225,6 +5225,140 @@ static const AvspRound1Type36Class04Spec avsp_round1_type36_class04 =
 };
 #endif
 
+/* SPEC class0e: PC-relative filter/palette and program-data attachment/animation. */
+#if defined(__sh__)
+#define avsp_round1_type36_class0e_filter (avsp_round1_content->content_avsp_round1_type36_class0e_filter)
+#else
+static const signed char avsp_round1_type36_class0e_filter[24] =
+{ 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, -1, 0, -1 };
+#endif
+#if defined(__sh__)
+#define avsp_round1_type36_class0e_palette (avsp_round1_content->content_avsp_round1_type36_class0e_palette)
+#else
+static const unsigned char avsp_round1_type36_class0e_palette[32] =
+{ 17u, 16u, 20u, 19u, 21u, 16u, 16u, 16u, 17u, 16u, 20u, 19u, 21u, 16u, 16u, 16u, 17u, 16u, 20u, 19u, 21u, 16u, 16u, 16u, 17u, 16u, 20u, 19u, 21u, 16u, 16u, 16u };
+#endif
+#if defined(__sh__)
+#define avsp_round1_type36_class0e_attachment (avsp_round1_content->content_avsp_round1_type36_class0e_attachment)
+#else
+static const AvspRound1Type36Class0eAttachmentSpec avsp_round1_type36_class0e_attachment[AVSP_ROUND1_TYPE36_CLASS0E_ATTACHMENT_COUNT] =
+{
+    { 0, 0, 0u, 29u },
+    { 11, 73, 0u, 4u },
+    { 11, 73, 0u, 5u },
+    { -11, 75, 0u, 3u },
+    { -11, 75, 1u, 4u },
+    { -11, 75, 1u, 5u },
+    { 24, 76, 0u, 3u },
+    { 24, 76, 0u, 4u },
+    { 24, 76, 0u, 5u },
+    { 3, 81, 0u, 3u },
+    { 3, 81, 1u, 4u },
+    { 3, 81, 1u, 5u },
+    { 39, 26, 0u, 23u },
+    { 47, 7, 1u, 18u },
+    { -63, 14, 0u, 18u },
+    { -66, 7, 0u, 19u },
+    { 21, 18, 0u, 21u },
+    { 41, 11, 0u, 17u },
+    { -39, 6, 0u, 17u },
+    { -46, -3, 0u, 23u },
+    { 48, 22, 1u, 24u },
+    { 51, 10, 1u, 24u },
+    { -59, 27, 3u, 25u },
+    { -65, 9, 0u, 19u },
+    { 25, 17, 0u, 21u },
+    { 27, 10, 0u, 17u },
+    { -37, 13, 1u, 24u },
+    { -35, 13, 1u, 26u },
+    { 8, 55, 0u, 0u },
+    { 8, 55, 0u, 1u },
+    { 8, 55, 0u, 2u },
+    { -18, 58, 1u, 0u },
+    { -18, 58, 1u, 1u },
+    { -18, 58, 1u, 2u },
+    { -4, 55, 0u, 0u },
+    { -4, 55, 0u, 1u },
+    { -4, 55, 0u, 2u },
+    { -25, 57, 1u, 0u },
+    { -25, 57, 1u, 1u },
+    { -25, 57, 1u, 2u },
+    { 11, 73, 0u, 3u },
+    { 29, 52, 0u, 0u },
+    { 29, 52, 0u, 1u },
+    { 29, 52, 0u, 2u },
+    { 24, 54, 0u, 0u },
+    { 24, 54, 0u, 1u },
+    { 24, 54, 0u, 2u },
+    { 27, 78, 0u, 19u },
+    { 7, 75, 0u, 19u },
+    { 27, 72, 0u, 19u },
+    { 12, 72, 0u, 19u },
+    { 27, 72, 0u, 19u },
+    { 34, 72, 0u, 19u },
+    { 0, 0, 0u, 0u },
+    { 0, 0, 0u, 0u },
+};
+#endif
+
+#if defined(__sh__)
+#define avsp_round1_type36_class0e_records (avsp_round1_content->content_avsp_round1_type36_class0e_records)
+#else
+static const AvspRound1AnimationStateSpec avsp_round1_type36_class0e_records[AVSP_ROUND1_TYPE36_CLASS0E_PRESENTATION_COUNT] =
+{
+    { 4095u, -32768, 0x0009d676UL, 0x0009d946UL, 0u, 0u },
+    { 4095u, -32768, 0x0009d6b2UL, 0x0009d9d6UL, 0u, 0u },
+    { 4095u, -32768, 0x0009d6eeUL, 0x0009da66UL, 0u, 0u },
+    { 4095u, -32768, 0x0009d72aUL, 0x0009daf6UL, 0u, 0u },
+    { 4095u, -32768, 0x0009d766UL, 0x0009db86UL, 0u, 0u },
+    { 4095u, -32768, 0x0009d7a2UL, 0x0009dc16UL, 0u, 0u },
+    { 4095u, -32768, 0x0009d68aUL, 0x0009d95eUL, 0u, 0u },
+    { 4095u, -32768, 0x0009d6c6UL, 0x0009d9eeUL, 0u, 0u },
+    { 4095u, -32768, 0x0009d702UL, 0x0009da7eUL, 0u, 0u },
+    { 4095u, -32768, 0x0009d73eUL, 0x0009db0eUL, 0u, 0u },
+    { 4095u, -32768, 0x0009d77aUL, 0x0009db9eUL, 0u, 0u },
+    { 4095u, -32768, 0x0009d7b6UL, 0x0009dc2eUL, 0u, 0u },
+    { 4095u, -32768, 0x0009d69eUL, 0x0009d976UL, 0u, 0u },
+    { 4095u, -32768, 0x0009d6daUL, 0x0009da06UL, 0u, 0u },
+    { 4095u, -32768, 0x0009d716UL, 0x0009da96UL, 0u, 0u },
+    { 4095u, -32768, 0x0009d752UL, 0x0009db26UL, 0u, 0u },
+    { 4095u, -32768, 0x0009d78eUL, 0x0009dbb6UL, 0u, 0u },
+    { 4095u, -32768, 0x0009d7caUL, 0x0009dc46UL, 0u, 0u },
+    { 4095u, -32768, 0x0009d7deUL, 0x0009d98eUL, 0u, 0u },
+    { 4095u, -32768, 0x0009d81aUL, 0x0009da1eUL, 0u, 0u },
+    { 4095u, -32768, 0x0009d856UL, 0x0009daaeUL, 0u, 0u },
+    { 4095u, -32768, 0x0009d892UL, 0x0009db3eUL, 0u, 0u },
+    { 4095u, -32768, 0x0009d8ceUL, 0x0009dbceUL, 0u, 0u },
+    { 4095u, -32768, 0x0009d90aUL, 0x0009dc5eUL, 0u, 0u },
+    { 7u, -32768, 0x0009d7f2UL, 0x0009d9a6UL, 0u, 0u },
+    { 7u, -32768, 0x0009d82eUL, 0x0009da36UL, 0u, 0u },
+    { 7u, -32768, 0x0009d86aUL, 0x0009dac6UL, 0u, 0u },
+    { 7u, -32768, 0x0009d8a6UL, 0x0009db56UL, 0u, 0u },
+    { 7u, -32768, 0x0009d8e2UL, 0x0009dbe6UL, 0u, 0u },
+    { 7u, -32768, 0x0009d91eUL, 0x0009dc76UL, 0u, 0u },
+    { 4095u, -32768, 0x0009d806UL, 0x0009d9beUL, 0u, 0u },
+    { 7u, -32768, 0x0009d842UL, 0x0009da4eUL, 0u, 0u },
+    { 7u, -32768, 0x0009d87eUL, 0x0009dadeUL, 0u, 0u },
+    { 7u, -32768, 0x0009d8baUL, 0x0009db6eUL, 0u, 0u },
+    { 7u, -32768, 0x0009d8f6UL, 0x0009dbfeUL, 0u, 0u },
+    { 7u, -32768, 0x0009d932UL, 0x0009dc8eUL, 0u, 0u },
+    { 8u, -32768, 0x0009dcbcUL, 0x0009ddc0UL, 0u, 0u },
+    { 8u, -32767, 0x0009dcd0UL, 0x0009ddceUL, 0u, 0u },
+    { 8u, -32766, 0x0009dce4UL, 0x0009dddcUL, 0u, 0u },
+    { 8u, -32765, 0x0009dcf8UL, 0x0009ddeaUL, 0u, 0u },
+    { 8u, -32764, 0x0009dd0cUL, 0x0009ddf8UL, 0u, 0u },
+    { 8u, -32763, 0x0009dd20UL, 0x0009de06UL, 0u, 0u },
+    { 8u, -32762, 0x0009dd34UL, 0x0009de14UL, 0u, 0u },
+    { 8u, -32761, 0x0009dd48UL, 0x0009de22UL, 0u, 0u },
+    { 8u, -32760, 0x0009dd5cUL, 0x0009de30UL, 0u, 0u },
+    { 8u, -32759, 0x0009dd70UL, 0x0009de3eUL, 0u, 0u },
+    { 8u, -32758, 0x0009dd84UL, 0x0009de4cUL, 0u, 0u },
+    { 8u, -32757, 0x0009dd98UL, 0x0009de5aUL, 0u, 0u },
+    { 8u, -32756, 0x0009ddacUL, 0x0009de68UL, 0u, 0u },
+    { 4095u, -32768, 0x0009dca8UL, 0x0009dca6UL, 0u, 0u },
+};
+#endif
+
 #if defined(__sh__)
 #define avsp_round1_class05_records (avsp_round1_content->content_avsp_round1_class05_records)
 #else
@@ -6074,6 +6208,10 @@ typedef struct
     AvspRound1Type36Class03Spec content_avsp_round1_type36_class03;
     AvspRound1AnimationStateSpec content_avsp_round1_type36_class04_records[AVSP_ROUND1_TYPE36_CLASS04_PRESENTATION_COUNT];
     AvspRound1Type36Class04Spec content_avsp_round1_type36_class04;
+    signed char content_avsp_round1_type36_class0e_filter[24];
+    unsigned char content_avsp_round1_type36_class0e_palette[32];
+    AvspRound1Type36Class0eAttachmentSpec content_avsp_round1_type36_class0e_attachment[AVSP_ROUND1_TYPE36_CLASS0E_ATTACHMENT_COUNT];
+    AvspRound1AnimationStateSpec content_avsp_round1_type36_class0e_records[AVSP_ROUND1_TYPE36_CLASS0E_PRESENTATION_COUNT];
     AvspRound1AnimationStateSpec content_avsp_round1_class05_records[AVSP_ROUND1_CLASS05_PRESENTATION_COUNT];
     AvspRound1Class05Spec content_avsp_round1_class05;
     AvspRound1Class05MotionSpec content_avsp_round1_class05_motion;

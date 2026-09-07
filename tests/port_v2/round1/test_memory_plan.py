@@ -26,7 +26,7 @@ REQUIRED_MAIN = (
     "#define AVSP_ROUND1_CONTENT_BASE \\",
     "#define AVSP_ROUND1_CART_ALLOCATOR_BASE \\",
     "AVSP_ROUND1_CONTENT_ARCHIVE_EXPECTED_BYTES <=",
-    "0x3A924UL <= AVSP_ROUND1_CONTENT_REGION_BYTES",
+    "0x3BCBCUL <= AVSP_ROUND1_CONTENT_REGION_BYTES",
     "AVSP_COMPOSITE_MAX_TEXTURE_BYTES <=",
     "static int load_round1_content_archive(void)",
     "const int read_bytes = avsp_fs_read_into(\n"
@@ -73,7 +73,7 @@ archive = PLAN["content_archive"]
 assert len(payload) == archive["bytes"]
 assert hashlib.sha256(payload).hexdigest() == archive["sha256"]
 assert struct.unpack(">III", payload[:12]) == (0x52314341, 1, len(payload))
-assert HEADER.count("#define avsp_round1_") == archive["table_count"] == 182
+assert HEADER.count("#define avsp_round1_") == archive["table_count"] == 186
 assert archive["deterministic_double_build"] is True
 
 regions = PLAN["cartridge_dram1"]["regions"]

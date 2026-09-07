@@ -126,7 +126,7 @@
  * the 0x19000 carve preserves 0x0b2c bytes of headroom inside the fixed arena. */
 #ifdef AVSP_LIVE_ENCOUNTER
 #define AVSP_ROUND1_RUNTIME_REGION_BYTES 0x19000
-#define AVSP_ROUND1_RUNTIME_MEASURED_BYTES 0x18520
+#define AVSP_ROUND1_RUNTIME_MEASURED_BYTES 0x18B48
 #define AVSP_LIVE_DIAG_REGION_BYTES 0x1A000
 #define AVSP_ROUND1_CONTENT_REGION_BYTES 0x40000
 #define AVSP_COMPOSITE_SCRATCH_REGION_BYTES 0x3000
@@ -605,7 +605,7 @@ typedef char AvspRound1ContentArchiveFitsCensusSizedCartRegion[
         ? 1
         : -1];
 typedef char AvspRound1ContentCensusCapacityFitsCartRegion[
-    0x3A924UL <= AVSP_ROUND1_CONTENT_REGION_BYTES ? 1 : -1];
+    0x3BCBCUL <= AVSP_ROUND1_CONTENT_REGION_BYTES ? 1 : -1];
 typedef char AvspRound1CompositeScratchFitsReservedCartRegion[
     AVSP_COMPOSITE_MAX_TEXTURE_BYTES <=
             AVSP_COMPOSITE_SCRATCH_REGION_BYTES
@@ -8296,7 +8296,7 @@ static void live_encounter_publish(void)
     avsp_diag_round1_spec_bound =
         avsp_diag_round1_content_loaded &&
         strcmp(AVSP_ROUND1_SPEC02_SHA256,
-               "d179b71a83a202cb8e85a279f821e237a3f144644a49f738b500f2e79c172689") ==
+               "dd76666bb46e15e0876185a9c092c7350ed7fe0134f80be54579bf3df1d335e4") ==
         0;
     avsp_diag_round1_entry_valid = avsp_round1_entry_valid(&round1_runtime);
     avsp_diag_round1_route_state = round1_runtime.route_state;

@@ -60,6 +60,8 @@ static int avsp_round1_step_class1f_action_animation(
     int apply_movement);
 static int avsp_round1_class1f_route_interruption(
     AvspRound1ActorCore *actor);
+static int avsp_round1_spawn_type36_class0e(
+    AvspRound1Runtime *runtime, AvspRound1ActorCore *parent);
 static int avsp_round1_apply_first_segment_terrain_position(
     const AvspRound1Runtime *runtime,
     short *world_x, short *world_z,
@@ -682,7 +684,8 @@ static int avsp_round1_dispatch_supported(unsigned char record_type,
         (actor_class == 0x4b || actor_class == 0x3d))
         return 1;
     if (record_type == 36u &&
-        (actor_class == 0x03 || actor_class == 0x04 || actor_class == 0x05))
+        (actor_class == 0x03 || actor_class == 0x04 || actor_class == 0x05 ||
+         actor_class == 0x0e))
         return 1;
     if (record_type == 28u && actor_class == 0x0a)
         return 1;
@@ -1076,6 +1079,8 @@ static int avsp_round1_class1f_consume_projectile_reaction(
             return 0;
         actor->active = special->dispatch_active;
         actor->state = special->dispatch_state;
+        if (!avsp_round1_spawn_type36_class0e(runtime, actor))
+            return 0;
         actor->source_hit_recovery_active = 3u;
         actor->source_action_timer = special->recovery_timer;
         actor->animation_timer = 1u;
@@ -1104,6 +1109,8 @@ static int avsp_round1_class1f_consume_projectile_reaction(
         return 0;
     actor->active = avsp_round1_class1f_source_ko.dispatch_active;
     actor->state = avsp_round1_class1f_source_ko.dispatch_state;
+    if (!avsp_round1_spawn_type36_class0e(runtime, actor))
+        return 0;
     actor->source_hit_mode = avsp_round1_class1f_source_ko.hit_mode;
     actor->source_reaction_selector =
         avsp_round1_class1f_source_ko.reaction_selector;
@@ -2963,6 +2970,7 @@ static void avsp_round1_clear_coffee_scene_pools(AvspRound1Runtime *runtime)
     runtime->entry_controller.active = 0u;
     runtime->first_encounter.source_living_count = 0u;
     runtime->coffee_scene_active_flag = 0u;
+    runtime->source_aux_ffe29c = 0UL;
     ++runtime->entry.exit_pool_teardowns;
 }
 
@@ -8263,6 +8271,161 @@ static int avsp_round1_step_type36_class03(AvspRound1Runtime *runtime,
     return 0;
 }
 
+static int avsp_round1_spawn_type36_class0e(
+    AvspRound1Runtime *runtime, AvspRound1ActorCore *parent)
+{
+    AvspRound1ActorCore *actor;
+    unsigned int next_index;
+    unsigned short z_fraction;
+    int hit_kind;
+    if (runtime == 0 || parent == 0 || parent->type != 12u ||
+        parent->actor_class != 0x1f || parent->state != 0x0402u ||
+        parent->substate != 0u)
+        return 0;
+    /* SPEC owner01f266 calls09d3c4 before selecting the KO animation. */
+    parent->source_field2b = 6u;
+    hit_kind = (signed char)parent->source_hit_kind;
+    if (hit_kind < 0 || hit_kind >= 24)
+        return 0;
+    if (avsp_round1_type36_class0e_filter[hit_kind] < 0)
+        return 1;
+    if (runtime->pools[5].free_count == 0u)
+    {
+        ++runtime->type36_class0e_allocation_failures;
+        return 1;
+    }
+    next_index = (runtime->pools[5].free_stack[
+        runtime->pools[5].free_count - 1u] - runtime->pools[5].source_base) /
+        runtime->pools[5].stride;
+    if (next_index >= runtime->pools[5].capacity)
+        return 0;
+    z_fraction = (unsigned short)runtime->pools[5].records[next_index].source_z_fp;
+    actor = avsp_round1_allocate_pool_actor_preserve_position_fraction(
+        runtime, 5u);
+    if (actor == 0)
+        return 0;
+    actor->source_z_fp = (long)z_fraction;
+    actor->actor_class = 0x0e;
+    actor->source_target_low = (unsigned short)parent->source_slot;
+    actor->palette = parent->coordinate_mode != 0u ? parent->palette :
+        avsp_round1_type36_class0e_palette[(unsigned char)parent->actor_class];
+    actor->dispatch_entry = 0x09d440UL;
+    ++runtime->type36_class0e_allocations;
+    return 1;
+}
+
+static int avsp_round1_step_type36_class0e(AvspRound1Runtime *runtime,
+                                          AvspRound1Pool *pool,
+                                          AvspRound1ActorCore *actor)
+{
+    AvspRound1Pool *parent_pool = &runtime->pools[0];
+    AvspRound1ActorCore *parent;
+    const AvspRound1Type36Class0eAttachmentSpec *attachment;
+    unsigned int parent_index;
+    unsigned int actor_index;
+    unsigned int branch;
+    unsigned int family;
+    unsigned int record_index;
+    short dx;
+    if (actor->active != 1u || actor->type != 36u ||
+        actor->actor_class != 0x0e || actor->dispatch_entry != 0x09d440UL ||
+        actor->source_target_low < parent_pool->source_base ||
+        (actor->source_target_low - parent_pool->source_base) % parent_pool->stride != 0u)
+        return 0;
+    parent_index = (actor->source_target_low - parent_pool->source_base) /
+        parent_pool->stride;
+    if (parent_index >= parent_pool->capacity)
+        return 0;
+    /* Source reads the record by address even after the parent is inactive. */
+    parent = &parent_pool->records[parent_index];
+    if (actor->state == 0x0400u || actor->state == 0x0600u)
+    {
+        if (parent->source_type36_class04_child ==
+                (unsigned short)actor->source_slot)
+            parent->source_type36_class04_child = 0u;
+        actor->palette = 0u;
+        if (!avsp_round1_release_pool_actor(pool, actor))
+            return 0;
+        /* Source01788c clears longwords+0,+4,+0c, not the retained pointer. */
+        actor->source_field01 = 0u;
+        actor->actor_class = 0;
+        actor->variant = 0u;
+        actor->state = 0u;
+        actor->substate = 0u;
+        actor->coordinate_mode = 0u;
+        actor->facing = 0u;
+        ++runtime->type36_class0e_releases;
+        return 1;
+    }
+    if (actor->state == 0u)
+    {
+        actor->state = 0x0200u;
+        actor->object_or = 0x8000u;
+        actor->source_field09 = 0u;
+        actor_index = ((unsigned short)actor->source_slot - pool->source_base) /
+            pool->stride;
+        if (actor_index >= pool->capacity)
+            return 0;
+        if (actor_index + 1u < pool->capacity)
+            pool->records[actor_index + 1u].animation_record =
+                (pool->records[actor_index + 1u].animation_record & 0x00ffffffUL) |
+                0x01000000UL;
+        else
+            runtime->source_aux_ffe29c =
+                (runtime->source_aux_ffe29c & 0x00ffffffUL) | 0x01000000UL;
+        ++runtime->type36_class0e_alias_writes;
+        actor->effect_timer = 8u;
+        parent->source_type36_class04_child = (unsigned short)actor->source_slot;
+        ++runtime->type36_class0e_initializations;
+    }
+    else if (actor->state == 0x0200u)
+    {
+        if ((parent->state >> 8) == 6u)
+        {
+            actor->state = 0x0600u;
+            ++runtime->type36_class0e_transitions;
+        }
+    }
+    else
+        return 0;
+    branch = (unsigned char)parent->animation_branch;
+    if (branch >= AVSP_ROUND1_TYPE36_CLASS0E_ATTACHMENT_COUNT)
+        return 0;
+    attachment = &avsp_round1_type36_class0e_attachment[branch];
+    dx = attachment->x_offset;
+    actor->facing = attachment->facing;
+    if (parent->facing != 0u)
+    {
+        dx = (short)-dx;
+        actor->facing ^= 1u;
+    }
+    actor->x = (short)((unsigned short)parent->x + (unsigned short)dx);
+    actor->y = (short)((unsigned short)parent->y +
+                       (unsigned short)(short)attachment->y_offset);
+    actor->z = parent->z;
+    actor->source_x_fp = avsp_round1_replace_fixed_high_word(actor->source_x_fp, actor->x);
+    actor->source_y_fp = avsp_round1_replace_fixed_high_word(actor->source_y_fp, actor->y);
+    actor->source_z_fp = avsp_round1_replace_fixed_high_word(actor->source_z_fp, actor->z);
+    actor->source_flags = attachment->selector;
+    family = attachment->selector >> 4;
+    record_index = attachment->selector & 15u;
+    if (family == 0u)
+    {
+        record_index = (unsigned char)(record_index * 6u +
+            (unsigned char)(actor->palette - 0x10u));
+        if (record_index >= 36u)
+            return 0;
+    }
+    else if (family == 1u && record_index < 14u)
+        record_index += 36u;
+    else
+        return 0;
+    avsp_round1_bind_animation_state(actor,
+        &avsp_round1_type36_class0e_records[record_index]);
+    ++runtime->type36_class0e_attachment_steps;
+    return 1;
+}
+
 static int avsp_round1_type36_class04_contract_valid(void)
 {
     const AvspRound1Type36Class04Spec *spec =
@@ -13019,6 +13182,22 @@ static int avsp_round1_step_scheduler_post_player_mask(
                     runtime->scheduler_failure_code = 49u;
                     runtime->scheduler_failure_source_slot =
                         actor->source_slot;
+                    runtime->scheduler_failure_state = actor->state;
+                    runtime->scheduler_failure_substate = actor->substate;
+                    ++runtime->failure_count;
+                    return 0;
+                }
+                continue;
+            }
+            if (actor->type == 36u && actor->actor_class == 0x0e)
+            {
+                ++actor->scheduler_updates;
+                ++runtime->scheduler_dispatches;
+                if (!avsp_round1_step_type36_class0e(
+                        runtime, &runtime->pools[pool_index], actor))
+                {
+                    runtime->scheduler_failure_code = 50u;
+                    runtime->scheduler_failure_source_slot = actor->source_slot;
                     runtime->scheduler_failure_state = actor->state;
                     runtime->scheduler_failure_substate = actor->substate;
                     ++runtime->failure_count;

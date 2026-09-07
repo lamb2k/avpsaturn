@@ -24,10 +24,9 @@ preserved in Git at checkpoint `2e446d4303fa50bac14ec3c00222635066a7712c`.
 Scheduler audit: BLOCKED_MISSING_EXECUTABLE_TICK_CONTRACT; accepted pool order
 does not bind loop00808a, tail008140, trap3/001060 or interrupt-owned guards.
 Run analyzer --interactive-readiness for exact fields; four identity controls PASS.
-Implement type36/class0e (16 lifetimes, 0x09d440..0x09d60e) from executable SPEC.
-Allocation/attachment/selector/release and byte alias bound;1776 source rows match formulas, no normalization;28 Oracle +10 SPEC attributable controls.
-Keep inactive auxiliary residue and central clear; native and scene acceptance pending.
-Return to scheduler with bounded source evidence; scene and candidate stay RED/frozen.
+Class0e native16 lifetimes/1776 rows reproduce state/facing/animation/timers and attachment formula;333 inherited position rows stay RED.
+Alias/clear, strict host10 causal controls and whole-scene suppression/repeat PASS; tiers separate.
+Fast/Oracle PASS; source scheduler probe a1/b1/p1 now in flight. Scene/candidate stay RED/frozen.
 
 ## Objective
 
@@ -78,16 +77,16 @@ three-attempt capture gate under a renamed attempt.
 ## Current scene evidence, not percentages
 
 `data/reimplement13_coffee_shop_scene_parity.json` covers 1972..5566:
-747 source lifetimes / 95,149 source rows; 692 native lifetimes / 88,402 rows.
+747 source lifetimes / 95,149 source rows; 708 native lifetimes / 90,178 rows.
 The report computes matching occurrences and classifications, not bug counts.
 
 | Raw category | Current gaps | Compared population |
 | --- | ---: | --- |
-| Source actor population missing on Saturn | 144 | 747 source lifetimes |
-| Unowned Saturn actors | 1 | 692 native lifetimes |
+| Source actor population missing on Saturn | 103 | 747 source lifetimes |
+| Unowned Saturn actors | 1 | 708 native lifetimes |
 | Unidentified source class/type pairs | 0 | 38 source pairs |
-| Unmapped source spawn/despawn edges | 633 | 1,494 source lifetime endpoints |
-| Unsupported active states | 1 | 692 native lifetime records tested |
+| Unmapped source spawn/despawn edges | 501 | 1,494 source lifetime endpoints |
+| Unsupported active states | 1 | 708 native lifetime records tested |
 | Unowned collision/damage events | 93 | 149 source health-write events |
 | Unowned route/camera events | 0 | 4 route + 7 camera records |
 | Unowned audio/load events | 279 | 279 audio + 2 load records |
@@ -99,8 +98,9 @@ Reconcile from actual implementations and source owners, not appearance or label
 
 Closed program comparisons include type20/class0f 2,878 rows raw/normalized0;
 type24/class0a 3,479 rows raw/normalized0; type28/class00 3,476 rows raw/normalized0;
-type36/class04 197 normalized rows0 with156 raw differences; type36/class03
-1,700 normalized rows0 with1,360 raw differences and38 fixed-pool projections.
+type36/class04 197 rows raw/normalized0; class03 1,700 rows normalized0, raw408 and0 slot gaps.
+Class0e restores occupants: lifetime gaps144->103, endpoints633->501, class03 slots38->0, class04 slots11->0; no category increased.
+Class0e333 raw/normalized world-position rows stay RED from parent motion; formula equality is not world-position or interactive acceptance.
 Class09 frame5493 normalization remains narrow. Preserve all raw differences.
 These are host/program results, not full-scene, current Target or physical passes.
 
@@ -123,7 +123,7 @@ current gap fan-out and later scene reuse before coding. The report's labels alo
 are insufficient to call an existing program unimplemented. Type28/class0c remains
 BLOCKED_MISSING_SPEC_FIELDS with an exhausted non-causal witness; evidence:
 `data/reimplement13_class0c_oracle_followup.json`. No retry without owner ruling.
-Class0e/type36 is the already-declared independent whole program, not a new task.
+Class0e/type36 host logic implemented; normal draw allowlist omits it, all50 assembly headers absent from sparse archive, standalone tag8 handling pending. This is NOT visible Saturn closure; platform gates blocked.
 
 After Coffee Shop passes, reuse the existing title-specific pool/scheduler,
 animation, combat, projectile/effect, navigation/camera and route boundaries.
@@ -155,8 +155,7 @@ trace-owned gameplay and authored fallback are disabled.
 Use TEST_PLAN: strict C90 compile/link before behavior, focused differential,
 deterministic repeat and attributable mutations each iteration. Preserve survivor,
 invalid, timeout and environment classifications. No compile failure is a kill.
-Historical causal evidence records356 behavioral rejections and2 equivalent
-survivors; not rerun or re-credited by a docs checkpoint.
+Existing causal inventory356 kills/2 survivors plus11 new class0e controls; report-field mutations are separate, not native kills. Consult current lane reports.
 
 Whole-program checkpoint: complete host scene plus relevant regressions/Oracle,
 Target and focused rendering at their authorized risk boundaries. Scheduler,
@@ -171,9 +170,10 @@ adapter for comparison. Do not describe an AUTOTEST image as interactive proof.
 Pinned private assets must have declared provenance/hashes; no arbitrary media copy.
 No current Target artifact exists for latest runtime/fixtures; do not reuse old hashes.
 
-Memory: runtime99,616/102,400 (2,784 free); tile612,720/614,400;
-scratch11,648/12,288; SPEC50,504/262,144 (census floor243,848).
-182 SPEC tables SHA6427526c2951abeda35655545edf17152f2ba7cbf6dd8b8e47521c1ad9dee3ba.
+Memory: runtime101,192/102,400 (1,208 free); tile612,720/614,400;
+scratch11,648/12,288; SPEC51,580/262,144 (census floor244,924).
+186 SPEC tables SHA07dd476777ce58b0ed391fda4b62b506b017c25bf0b350495469fc6f102e2f4b.
+SH-2 core232->236; runtime+1,576/content+1,076; archive/layout probe is not a Target or capture retry.
 Existing map/asserts remain binding. No resize, squeeze or mid-combat read.
 Last historical class0a GAME.BIN380,176, BSS0x060b3e20, SHA
 8ffb54a957b2c6d2e08798bc5bf787fd40ffd5acfa035e9cb2b7d37bbc15a1c8 is NOT current.

@@ -206,6 +206,19 @@ item["native_capture"]["class03_presentation_complete_program"][
     "fixed_pool_lifetimes_equal_by_ordinal"] = False
 mutations.append(("class03 delayed release", item))
 
+for field, wrong in (
+        ("native_lifetimes", 15), ("native_rows", 1775),
+        ("normalized_position_difference_count", 0),
+        ("assembly_collision_selector_mismatches", 1),
+        ("state_facing_animation_timer_branch_mismatches", 1),
+        ("independent_source_and_native_attachment_formula_mismatches", 1),
+        ("runtime_counters", [16, 0, 16, 1776, 16, 15, 16, 0]),
+        ("saturn_presentation", {"status": "PASS"}),
+        ("raw_difference_sha256", "0" * 64)):
+    item = copy.deepcopy(BASE)
+    item["native_capture"]["class0e_presentation_complete_program"][field] = wrong
+    mutations.append(("class0e " + field, item))
+
 for label, mutant in mutations:
     try:
         MODULE.validate_report(mutant)
@@ -213,5 +226,21 @@ for label, mutant in mutations:
         continue
     raise AssertionError("mutation accepted: " + label)
 
-print("REIMPLEMENT-13 Coffee Shop scene parity: PASS "
-      f"({len(mutations)} mutations rejected)")
+# Raw all-zero counts are insufficient while the native actor is unsubmitted.
+# Do not credit this report acceptance control as a native behavioral kill.
+all_zero = copy.deepcopy(BASE)
+all_zero["gaps"] = dict.fromkeys(all_zero["gaps"], 0)
+all_zero["unowned_native_lifetimes"] = []
+all_zero["missing_source_lifetime_ids"] = []
+all_zero["acceptance"] = {"all_zero": True, "ready": False}
+MODULE.validate_report(all_zero)
+all_zero["acceptance"]["ready"] = True
+try:
+    MODULE.validate_report(all_zero)
+except ValueError as error:
+    assert str(error) == "Coffee Shop scene accepted before the zero-gap gate"
+else:
+    raise AssertionError("all-zero raw counts credited while presentation blocked")
+
+print("REIMPLEMENT-13 Coffee Shop scene REPORT validation: PASS "
+      f"({len(mutations)} report-field mutations rejected; not native behavioral kills or scene acceptance)")

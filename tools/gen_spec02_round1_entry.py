@@ -381,6 +381,19 @@ def build() -> str:
     class04_type36_contract = class04_type36["implementation_contract"]
     class04_type36_records = class04_type36_contract["state_0x0000"][
         "animation_binding"]["record_sequence"]
+    class0e_type36_contract = next(item for item in type36_classes
+                                  if item["class"] == "0x0e")["implementation_contract"]
+    if (class0e_type36_contract["spec_executable"] is not True or
+            class0e_type36_contract["attachment"]["address_space"] != "program data after LEA" or
+            class0e_type36_contract["animation_bind"]["rebind_each_invocation"] is not True or
+            class0e_type36_contract["cross_record_write_contract"]["control"]["permits_omitting_source_write"] is not False):
+        raise ValueError("class0e executable fixture incomplete")
+    class0e_animation = class0e_type36_contract["animation_bind"]
+    class0e_records_by_address = {int(row["animation_record"], 16): row
+                                 for row in class0e_animation["records"]}
+    class0e_records = [class0e_records_by_address[int(family["base"], 16) + offset]
+                       for family in class0e_animation["families"]
+                       for offset in family["offsets_s16"]]
     coffee_scene_records = sorted(
         class01_contract["stage_records"] +
         class02_contract["stage_records"] +
@@ -5108,6 +5121,28 @@ def build() -> str:
         "{",
         "    0x09AA90UL, 0x02F8DCUL, 0x0009AC82UL,",
         "    0x8380u, 0x0200u, 0x0400u, 0x0600u, 5, 86, 10u, 0x04, 36u, 0u",
+        "};", "",
+        "/* SPEC class0e: PC-relative filter/palette and program-data attachment/animation. */",
+        "static const signed char avsp_round1_type36_class0e_filter[24] =",
+        "{ " + ", ".join(str(v) for v in class0e_type36_contract["allocation"]["effect_filter_table"]["values_s8"]) + " };",
+        "static const unsigned char avsp_round1_type36_class0e_palette[32] =",
+        "{ " + ", ".join(str(v) + "u" for v in class0e_type36_contract["allocation"]["palette_table"]["values_u8"]) + " };",
+        "static const AvspRound1Type36Class0eAttachmentSpec avsp_round1_type36_class0e_attachment[AVSP_ROUND1_TYPE36_CLASS0E_ATTACHMENT_COUNT] =",
+        "{",
+    ])
+    for row in class0e_type36_contract["attachment"]["records"]:
+        lines.append("    { %d, %d, %du, %du }," % (
+            row["x_offset_s8"], row["y_offset_s8"], row["facing_u8"], row["selector_u8"]))
+    lines.extend([
+        "};", "",
+        "static const AvspRound1AnimationStateSpec avsp_round1_type36_class0e_records[AVSP_ROUND1_TYPE36_CLASS0E_PRESENTATION_COUNT] =",
+        "{",
+    ])
+    for row in class0e_records:
+        lines.append("    { %du, %d, %sUL, %sUL, %du, %du }," % (
+            row["timer_u16"], row["branch_s16"], row["animation_record"], row["assembly"],
+            row["hurt_selector_u8"], row["attack_selector_u8"]))
+    lines.extend([
         "};", "",
         "static const AvspRound1AnimationStateSpec avsp_round1_class05_records[AVSP_ROUND1_CLASS05_PRESENTATION_COUNT] =",
         "{",

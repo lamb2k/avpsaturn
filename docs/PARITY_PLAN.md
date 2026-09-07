@@ -23,7 +23,9 @@ gates. At the current audit it is AT RISK, not a defensible completion promise.
   P3 specifications are recorded complete. Preserve both; neither proves native
   completion or that every implementation field is executable.
 - P4 Coffee Shop is RED. The checked report covers source frames 1972..5566.
-  Its native replay has 88,402 actor rows, not a verified full native Round 1.
+  Its native diagnostic sequence has 90,178 actor rows after class0e; not a
+  verified full native Round1. Missing lifetimes103; unowned health events93;
+  unowned audio/load279. Class0e resolves pool gaps, not the independent tick rule.
 - Normal controller input is real, but main's live callback uses captured-frame
   update-count and phase tables to dispatch gameplay. This is an interactive
   authority defect, not a cosmetic mismatch. Details and gates are on the card.
