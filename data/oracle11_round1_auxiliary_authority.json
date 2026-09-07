@@ -18008,6 +18008,1380 @@
         "dispatch_entry": "0x09d440",
         "fixed_frame_substitute_forbidden": true,
         "fixed_pool_allocation_is_observable": true,
+        "implementation_contract": {
+          "active": {
+            "after_guard": "attachment then animation_bind in this same invocation; no early return on terminal transition",
+            "guard": "parent+4:u8 == 6",
+            "guard_true_write": "actor+4:u8=6",
+            "local_timer_decrement": false,
+            "rng_calls_u8": 0
+          },
+          "allocation": {
+            "accepted_writer_set_sha256": "fce4e7b91ce6c16a0ffdb83c5620709f058c0c02473ce95f28bec1c2f5eb61cc",
+            "effect_filter_table": {
+              "address_space": "decrypted PC-relative operand",
+              "base": "0x09d428",
+              "negative_indices": [
+                21,
+                23
+              ],
+              "values_s8": [
+                0,
+                0,
+                0,
+                0,
+                0,
+                0,
+                0,
+                0,
+                0,
+                0,
+                0,
+                0,
+                0,
+                0,
+                0,
+                0,
+                0,
+                0,
+                0,
+                0,
+                0,
+                -1,
+                0,
+                -1
+              ]
+            },
+            "free_pool": "0xffd280 stride0x40 capacity64;0x017876; stack metadata+0x6e76/+0x6e8f",
+            "guard": "parent outer0x0400/action0 enters lethal program; parent+5 is incremented by2 before helper; execute helper once per actual entry",
+            "not_guards": [
+              "source frame",
+              "prior animation identity",
+              "lifetime ordinal"
+            ],
+            "observed_allocations_u16": 16,
+            "observed_parent_class_u8": 31,
+            "observed_parent_type_u8": 12,
+            "ordered_operations": [
+              "parent+0x2b:u8 = 6",
+              "d1 = sign_extend_s8(parent+0x49); d6 = zero_extend_u8(opcodes[0x09d428+d1]); return when d6 bit7 set",
+              "allocate via0x017876; zero free count returns without allocation; never retry on a fabricated frame",
+              "child.active:u8 +=1; child.class:u8=0x0e; child+0x26:u16=low16(parent source slot)",
+              "if parent+0x0d:u8 !=0 copy parent+0x0e:u8 palette; else copy opcode byte table0x09d408 indexed by parent class:u8"
+            ],
+            "owner": "class1f lethal-entry action0 0x01f250 via call0x01f266 and class-index dispatcher0x01f184",
+            "palette_table": {
+              "address_space": "decrypted PC-relative operand",
+              "base": "0x09d408",
+              "values_u8": [
+                17,
+                16,
+                20,
+                19,
+                21,
+                16,
+                16,
+                16,
+                17,
+                16,
+                20,
+                19,
+                21,
+                16,
+                16,
+                16,
+                17,
+                16,
+                20,
+                19,
+                21,
+                16,
+                16,
+                16,
+                17,
+                16,
+                20,
+                19,
+                21,
+                16,
+                16,
+                16
+              ]
+            }
+          },
+          "animation_bind": {
+            "collision_selectors": "current source animation record fields; observed hurt0/attack0; no independent collision call",
+            "entry": "0x09d5d8",
+            "families": [
+              {
+                "address_space": "program data",
+                "base": "0x09d612",
+                "high_nibble_u8": 0,
+                "offsets_s16": [
+                  100,
+                  160,
+                  220,
+                  280,
+                  340,
+                  400,
+                  120,
+                  180,
+                  240,
+                  300,
+                  360,
+                  420,
+                  140,
+                  200,
+                  260,
+                  320,
+                  380,
+                  440,
+                  460,
+                  520,
+                  580,
+                  640,
+                  700,
+                  760,
+                  480,
+                  540,
+                  600,
+                  660,
+                  720,
+                  780,
+                  500,
+                  560,
+                  620,
+                  680,
+                  740,
+                  800
+                ],
+                "sha256": "870f85424853a63bf05c1b441cbc7d81a655f2f181a508a8e059dd6a7696247a"
+              },
+              {
+                "address_space": "program data",
+                "base": "0x09d65a",
+                "high_nibble_u8": 1,
+                "offsets_s16": [
+                  1634,
+                  1654,
+                  1674,
+                  1694,
+                  1714,
+                  1734,
+                  1754,
+                  1774,
+                  1794,
+                  1814,
+                  1834,
+                  1854,
+                  1874,
+                  1614
+                ],
+                "sha256": "106777221872342d592a69ce6690088c473acc1b856c8722338e12c6f45f16b4"
+              }
+            ],
+            "family_rule": "high=(selector &0xf0)>>4; s16 PC-relative table0x09d60e[high] locates family base",
+            "helper": "0x016518",
+            "independent_animation_advance": false,
+            "index_rule": "high0 uses u8((selector&15)*6 + u8(palette-0x10)); high1 uses selector&15",
+            "ordered_writes": [
+              "actor+0x1c:u32 = family_base + s16(program[family_base+2*index])",
+              "actor+0x0a:u16 = record timer",
+              "actor+0x24:s16 = record branch"
+            ],
+            "rebind_each_invocation": true,
+            "records": [
+              {
+                "animation_record": "0x0009d676",
+                "assembly": "0x0009d946",
+                "attack_selector_u8": 0,
+                "branch_s16": -32768,
+                "hurt_selector_u8": 0,
+                "record_sha256": "6a04a05c0ed45566db58dbf4e9a83e6ba9a1a75274da0afa8b1e608380498ee0",
+                "timer_u16": 4095
+              },
+              {
+                "animation_record": "0x0009d68a",
+                "assembly": "0x0009d95e",
+                "attack_selector_u8": 0,
+                "branch_s16": -32768,
+                "hurt_selector_u8": 0,
+                "record_sha256": "86d6b27eddbe3b43680564497911db35dfeff749b3e10a41dcf760277bc3743e",
+                "timer_u16": 4095
+              },
+              {
+                "animation_record": "0x0009d69e",
+                "assembly": "0x0009d976",
+                "attack_selector_u8": 0,
+                "branch_s16": -32768,
+                "hurt_selector_u8": 0,
+                "record_sha256": "0e59e5be17b40829faea50a4cf9f9da09050ef4e95446d2618d837ebf56606cd",
+                "timer_u16": 4095
+              },
+              {
+                "animation_record": "0x0009d6b2",
+                "assembly": "0x0009d9d6",
+                "attack_selector_u8": 0,
+                "branch_s16": -32768,
+                "hurt_selector_u8": 0,
+                "record_sha256": "261152a94212f1605cec2a71f826d634950af435bf61f382a92ac7987f9bb041",
+                "timer_u16": 4095
+              },
+              {
+                "animation_record": "0x0009d6c6",
+                "assembly": "0x0009d9ee",
+                "attack_selector_u8": 0,
+                "branch_s16": -32768,
+                "hurt_selector_u8": 0,
+                "record_sha256": "aa85e7a417b4aea20eb167fbf80079476657361f12d87460078e34873ba5f320",
+                "timer_u16": 4095
+              },
+              {
+                "animation_record": "0x0009d6da",
+                "assembly": "0x0009da06",
+                "attack_selector_u8": 0,
+                "branch_s16": -32768,
+                "hurt_selector_u8": 0,
+                "record_sha256": "06e45ab07ee18bab3cf56dfa644e6d77eeefd938eab09210796b9f8a629ee982",
+                "timer_u16": 4095
+              },
+              {
+                "animation_record": "0x0009d6ee",
+                "assembly": "0x0009da66",
+                "attack_selector_u8": 0,
+                "branch_s16": -32768,
+                "hurt_selector_u8": 0,
+                "record_sha256": "bce3b6761c7f5682ec18e51bb5b58d338ff9cee8c5c534b9450d0cf47c9e0fa0",
+                "timer_u16": 4095
+              },
+              {
+                "animation_record": "0x0009d702",
+                "assembly": "0x0009da7e",
+                "attack_selector_u8": 0,
+                "branch_s16": -32768,
+                "hurt_selector_u8": 0,
+                "record_sha256": "a3d1e80923e0ef42a3ae866cdc8408f625369f6cfb464b92820da3793cbaec8d",
+                "timer_u16": 4095
+              },
+              {
+                "animation_record": "0x0009d716",
+                "assembly": "0x0009da96",
+                "attack_selector_u8": 0,
+                "branch_s16": -32768,
+                "hurt_selector_u8": 0,
+                "record_sha256": "b08d9dc193f25babfafb083df1c61590d3e6bce24bafb138c8bc361c6b7feecd",
+                "timer_u16": 4095
+              },
+              {
+                "animation_record": "0x0009d72a",
+                "assembly": "0x0009daf6",
+                "attack_selector_u8": 0,
+                "branch_s16": -32768,
+                "hurt_selector_u8": 0,
+                "record_sha256": "455ce80f41f2932f6f41a3731a50a5e4b989abad3b9383f6b69f2e5e958988e3",
+                "timer_u16": 4095
+              },
+              {
+                "animation_record": "0x0009d73e",
+                "assembly": "0x0009db0e",
+                "attack_selector_u8": 0,
+                "branch_s16": -32768,
+                "hurt_selector_u8": 0,
+                "record_sha256": "1ccd60a06f4fb437e89a341326263b93ed77e937a6b13f516f675cc87f70e7dc",
+                "timer_u16": 4095
+              },
+              {
+                "animation_record": "0x0009d752",
+                "assembly": "0x0009db26",
+                "attack_selector_u8": 0,
+                "branch_s16": -32768,
+                "hurt_selector_u8": 0,
+                "record_sha256": "1196378f9bda0449faa21200f297d257d3c6db892728b0d567b55863ff3ecb37",
+                "timer_u16": 4095
+              },
+              {
+                "animation_record": "0x0009d766",
+                "assembly": "0x0009db86",
+                "attack_selector_u8": 0,
+                "branch_s16": -32768,
+                "hurt_selector_u8": 0,
+                "record_sha256": "cf516813fbcf5e0e071ebe2de49787f4e0fdb59cb5db487f9c5510773b96ca8f",
+                "timer_u16": 4095
+              },
+              {
+                "animation_record": "0x0009d77a",
+                "assembly": "0x0009db9e",
+                "attack_selector_u8": 0,
+                "branch_s16": -32768,
+                "hurt_selector_u8": 0,
+                "record_sha256": "7e680a5b00823cbbc24224e62adbc5a9d44ff87cca31f7c285b719fe1596687c",
+                "timer_u16": 4095
+              },
+              {
+                "animation_record": "0x0009d78e",
+                "assembly": "0x0009dbb6",
+                "attack_selector_u8": 0,
+                "branch_s16": -32768,
+                "hurt_selector_u8": 0,
+                "record_sha256": "a4dceabf47dd0acf617c6f73f5e93eeb3f957e7cb9ac8f0f979e9578ed2714e4",
+                "timer_u16": 4095
+              },
+              {
+                "animation_record": "0x0009d7a2",
+                "assembly": "0x0009dc16",
+                "attack_selector_u8": 0,
+                "branch_s16": -32768,
+                "hurt_selector_u8": 0,
+                "record_sha256": "a3bd7b63e06b816df7eb661338734fe2f8e7f527fe98ff12a8a4c4e34e7ce2c3",
+                "timer_u16": 4095
+              },
+              {
+                "animation_record": "0x0009d7b6",
+                "assembly": "0x0009dc2e",
+                "attack_selector_u8": 0,
+                "branch_s16": -32768,
+                "hurt_selector_u8": 0,
+                "record_sha256": "5d2c59b8f66771a5361674e75557f57922bb537bb163d9e5cee96ceffa787150",
+                "timer_u16": 4095
+              },
+              {
+                "animation_record": "0x0009d7ca",
+                "assembly": "0x0009dc46",
+                "attack_selector_u8": 0,
+                "branch_s16": -32768,
+                "hurt_selector_u8": 0,
+                "record_sha256": "2d3fa5a73d826a2a38bec33a8e96e2d2089bc455636e337862931b0df7be27c1",
+                "timer_u16": 4095
+              },
+              {
+                "animation_record": "0x0009d7de",
+                "assembly": "0x0009d98e",
+                "attack_selector_u8": 0,
+                "branch_s16": -32768,
+                "hurt_selector_u8": 0,
+                "record_sha256": "636c077bf6c30eef828a8974a75a4b093c9ba0628f7b1223c646c6b2b66faab6",
+                "timer_u16": 4095
+              },
+              {
+                "animation_record": "0x0009d7f2",
+                "assembly": "0x0009d9a6",
+                "attack_selector_u8": 0,
+                "branch_s16": -32768,
+                "hurt_selector_u8": 0,
+                "record_sha256": "a0a5573af547a7d9e7e0f39814e3074bbda0dc705ca116c4cc8b5b0010da2dbb",
+                "timer_u16": 7
+              },
+              {
+                "animation_record": "0x0009d806",
+                "assembly": "0x0009d9be",
+                "attack_selector_u8": 0,
+                "branch_s16": -32768,
+                "hurt_selector_u8": 0,
+                "record_sha256": "4cc6464386af204ce6474ad376fc518af845a34913cf489ff2f8d1178c64ef8d",
+                "timer_u16": 4095
+              },
+              {
+                "animation_record": "0x0009d81a",
+                "assembly": "0x0009da1e",
+                "attack_selector_u8": 0,
+                "branch_s16": -32768,
+                "hurt_selector_u8": 0,
+                "record_sha256": "a9bdce59632049604f32e51bb58560dcbd24b76e745cd2c8bc7c57c455e2c60e",
+                "timer_u16": 4095
+              },
+              {
+                "animation_record": "0x0009d82e",
+                "assembly": "0x0009da36",
+                "attack_selector_u8": 0,
+                "branch_s16": -32768,
+                "hurt_selector_u8": 0,
+                "record_sha256": "888afef8c803325ed84736d885bf1e7a4ccda132073552fca074351487b9cb9b",
+                "timer_u16": 7
+              },
+              {
+                "animation_record": "0x0009d842",
+                "assembly": "0x0009da4e",
+                "attack_selector_u8": 0,
+                "branch_s16": -32768,
+                "hurt_selector_u8": 0,
+                "record_sha256": "f36d607dcf4b01de3b87d446508a1cdb6de6ba94f6b94ce414af169d25133ec7",
+                "timer_u16": 7
+              },
+              {
+                "animation_record": "0x0009d856",
+                "assembly": "0x0009daae",
+                "attack_selector_u8": 0,
+                "branch_s16": -32768,
+                "hurt_selector_u8": 0,
+                "record_sha256": "44c48e018866bcc0c0033670e459532c57a7c41d48b4c2d1eefee584d1221aae",
+                "timer_u16": 4095
+              },
+              {
+                "animation_record": "0x0009d86a",
+                "assembly": "0x0009dac6",
+                "attack_selector_u8": 0,
+                "branch_s16": -32768,
+                "hurt_selector_u8": 0,
+                "record_sha256": "ecf7e7427de51fe2dd542fb5524a3869cb9ac2d0cbad120e938ec458bfa1ec6b",
+                "timer_u16": 7
+              },
+              {
+                "animation_record": "0x0009d87e",
+                "assembly": "0x0009dade",
+                "attack_selector_u8": 0,
+                "branch_s16": -32768,
+                "hurt_selector_u8": 0,
+                "record_sha256": "465dc3806ee30d8bd5507801a83b1628d0219f049bb1e7a16417bc5e22c8a7e6",
+                "timer_u16": 7
+              },
+              {
+                "animation_record": "0x0009d892",
+                "assembly": "0x0009db3e",
+                "attack_selector_u8": 0,
+                "branch_s16": -32768,
+                "hurt_selector_u8": 0,
+                "record_sha256": "ff7022d42d3da0dd8136fea168ba7eca4c2bbd8e863a067fd2fdc353964df541",
+                "timer_u16": 4095
+              },
+              {
+                "animation_record": "0x0009d8a6",
+                "assembly": "0x0009db56",
+                "attack_selector_u8": 0,
+                "branch_s16": -32768,
+                "hurt_selector_u8": 0,
+                "record_sha256": "3da8388f106d43e3354a3fb97487d71f77c199381749e6d9ef7da6ce2f81e201",
+                "timer_u16": 7
+              },
+              {
+                "animation_record": "0x0009d8ba",
+                "assembly": "0x0009db6e",
+                "attack_selector_u8": 0,
+                "branch_s16": -32768,
+                "hurt_selector_u8": 0,
+                "record_sha256": "444905ab15b8bcb17d54c423a95caab8baa23194b808649c3155fa6cad14ff93",
+                "timer_u16": 7
+              },
+              {
+                "animation_record": "0x0009d8ce",
+                "assembly": "0x0009dbce",
+                "attack_selector_u8": 0,
+                "branch_s16": -32768,
+                "hurt_selector_u8": 0,
+                "record_sha256": "90ebcfaf716b712e95c25b2098c2ae4a5d967dee303ac45cce9deabad9a574f1",
+                "timer_u16": 4095
+              },
+              {
+                "animation_record": "0x0009d8e2",
+                "assembly": "0x0009dbe6",
+                "attack_selector_u8": 0,
+                "branch_s16": -32768,
+                "hurt_selector_u8": 0,
+                "record_sha256": "62bf7f4a172076a62d4f488991901f3e3faab5a65649886a0862b91c5f73c0d0",
+                "timer_u16": 7
+              },
+              {
+                "animation_record": "0x0009d8f6",
+                "assembly": "0x0009dbfe",
+                "attack_selector_u8": 0,
+                "branch_s16": -32768,
+                "hurt_selector_u8": 0,
+                "record_sha256": "f1de74144094a5d18c3a14e2dc190aa9745b943003056d241840ea5f26a38ebc",
+                "timer_u16": 7
+              },
+              {
+                "animation_record": "0x0009d90a",
+                "assembly": "0x0009dc5e",
+                "attack_selector_u8": 0,
+                "branch_s16": -32768,
+                "hurt_selector_u8": 0,
+                "record_sha256": "a1764401e71b0d1516696be3a7c1df7648cfbb1bb01376a6400b7e4e929c3925",
+                "timer_u16": 4095
+              },
+              {
+                "animation_record": "0x0009d91e",
+                "assembly": "0x0009dc76",
+                "attack_selector_u8": 0,
+                "branch_s16": -32768,
+                "hurt_selector_u8": 0,
+                "record_sha256": "58d6dab62716a52b9c429d46d49f0217571d82ef96d2c62abd4e3b3ecce610bc",
+                "timer_u16": 7
+              },
+              {
+                "animation_record": "0x0009d932",
+                "assembly": "0x0009dc8e",
+                "attack_selector_u8": 0,
+                "branch_s16": -32768,
+                "hurt_selector_u8": 0,
+                "record_sha256": "a069756e5852dd9fb3aefe86f5db92102129684a2a3869c0dbdcde02b87e8ff4",
+                "timer_u16": 7
+              },
+              {
+                "animation_record": "0x0009dca8",
+                "assembly": "0x0009dca6",
+                "attack_selector_u8": 0,
+                "branch_s16": -32768,
+                "hurt_selector_u8": 0,
+                "record_sha256": "7c026b1be85eba7e38ae5fecc2b1e6ef52fefd47ec9285eb37a580197243f663",
+                "timer_u16": 4095
+              },
+              {
+                "animation_record": "0x0009dcbc",
+                "assembly": "0x0009ddc0",
+                "attack_selector_u8": 0,
+                "branch_s16": -32768,
+                "hurt_selector_u8": 0,
+                "record_sha256": "508b1a6f7dad89ac797d93c40f62695dbf66f1147d862c6689d67935a40afe91",
+                "timer_u16": 8
+              },
+              {
+                "animation_record": "0x0009dcd0",
+                "assembly": "0x0009ddce",
+                "attack_selector_u8": 0,
+                "branch_s16": -32767,
+                "hurt_selector_u8": 0,
+                "record_sha256": "5574a6c45621e8b4bdb487afd7b62c7a024af4c23497eee23d875cfc3342772e",
+                "timer_u16": 8
+              },
+              {
+                "animation_record": "0x0009dce4",
+                "assembly": "0x0009dddc",
+                "attack_selector_u8": 0,
+                "branch_s16": -32766,
+                "hurt_selector_u8": 0,
+                "record_sha256": "333f41dbb7d80a85065242b9ed1ce5c378e2b54710c5de51003dcb6af2a9c0c9",
+                "timer_u16": 8
+              },
+              {
+                "animation_record": "0x0009dcf8",
+                "assembly": "0x0009ddea",
+                "attack_selector_u8": 0,
+                "branch_s16": -32765,
+                "hurt_selector_u8": 0,
+                "record_sha256": "90855b01f172110cc19a02e7ee808ef4892936bb75261688661ca373d264ef43",
+                "timer_u16": 8
+              },
+              {
+                "animation_record": "0x0009dd0c",
+                "assembly": "0x0009ddf8",
+                "attack_selector_u8": 0,
+                "branch_s16": -32764,
+                "hurt_selector_u8": 0,
+                "record_sha256": "2c3ea54bf40638e15b7c18b001ead5f9991d47bd2414b3b4ded156d6e053f80b",
+                "timer_u16": 8
+              },
+              {
+                "animation_record": "0x0009dd20",
+                "assembly": "0x0009de06",
+                "attack_selector_u8": 0,
+                "branch_s16": -32763,
+                "hurt_selector_u8": 0,
+                "record_sha256": "ba85515b36dc0b5b276e6222413dc9330b91d3647c98ed8f4290935b57c93c31",
+                "timer_u16": 8
+              },
+              {
+                "animation_record": "0x0009dd34",
+                "assembly": "0x0009de14",
+                "attack_selector_u8": 0,
+                "branch_s16": -32762,
+                "hurt_selector_u8": 0,
+                "record_sha256": "8182ce4bafccb103232c8ddd7f50de5e4788fb21282a79b26c62d1f23c580271",
+                "timer_u16": 8
+              },
+              {
+                "animation_record": "0x0009dd48",
+                "assembly": "0x0009de22",
+                "attack_selector_u8": 0,
+                "branch_s16": -32761,
+                "hurt_selector_u8": 0,
+                "record_sha256": "0811423458068b18c645b1c3895b5f327c6e9d094ea8f48bce716d85ea02f418",
+                "timer_u16": 8
+              },
+              {
+                "animation_record": "0x0009dd5c",
+                "assembly": "0x0009de30",
+                "attack_selector_u8": 0,
+                "branch_s16": -32760,
+                "hurt_selector_u8": 0,
+                "record_sha256": "71c2b90ae3399bb0033b6b54904339b013c40cd06f805d76c183319ed886c0a2",
+                "timer_u16": 8
+              },
+              {
+                "animation_record": "0x0009dd70",
+                "assembly": "0x0009de3e",
+                "attack_selector_u8": 0,
+                "branch_s16": -32759,
+                "hurt_selector_u8": 0,
+                "record_sha256": "fb29fc79d312de2f8c8f21a7f72ecf317ceaecf5ea98b027327076d2db66e71b",
+                "timer_u16": 8
+              },
+              {
+                "animation_record": "0x0009dd84",
+                "assembly": "0x0009de4c",
+                "attack_selector_u8": 0,
+                "branch_s16": -32758,
+                "hurt_selector_u8": 0,
+                "record_sha256": "a0ced7628dcfcb934a7cadb2033a1f54c76b222e7f31fef07d25f324294b8ab6",
+                "timer_u16": 8
+              },
+              {
+                "animation_record": "0x0009dd98",
+                "assembly": "0x0009de5a",
+                "attack_selector_u8": 0,
+                "branch_s16": -32757,
+                "hurt_selector_u8": 0,
+                "record_sha256": "643beeb589edf0d63ed2f5cddc7d10e12cdcdb6e14f691e25c373ac100f1a90c",
+                "timer_u16": 8
+              },
+              {
+                "animation_record": "0x0009ddac",
+                "assembly": "0x0009de68",
+                "attack_selector_u8": 0,
+                "branch_s16": -32756,
+                "hurt_selector_u8": 0,
+                "record_sha256": "5d393f4559502401b8314a56245cf54c3684c4f712f405c8fa63249a734e036a",
+                "timer_u16": 8
+              }
+            ],
+            "selector_field": "actor+0x30:u8"
+          },
+          "attachment": {
+            "address_space": "program data after LEA",
+            "arithmetic": "sign_extend x/y bytes; parent facing nonzero negates x and XOR1 child facing; copy parent x/y/z high words preserving child fractional words; add x/y offsets modulo16 bits",
+            "entry": "0x09d4b2",
+            "index": "zero_extend_u8(parent+0x25) *4",
+            "records": [
+              {
+                "facing_u8": 0,
+                "parent_branch_low_u8": 0,
+                "selector_u8": 29,
+                "x_offset_s8": 0,
+                "y_offset_s8": 0
+              },
+              {
+                "facing_u8": 0,
+                "parent_branch_low_u8": 1,
+                "selector_u8": 4,
+                "x_offset_s8": 11,
+                "y_offset_s8": 73
+              },
+              {
+                "facing_u8": 0,
+                "parent_branch_low_u8": 2,
+                "selector_u8": 5,
+                "x_offset_s8": 11,
+                "y_offset_s8": 73
+              },
+              {
+                "facing_u8": 0,
+                "parent_branch_low_u8": 3,
+                "selector_u8": 3,
+                "x_offset_s8": -11,
+                "y_offset_s8": 75
+              },
+              {
+                "facing_u8": 1,
+                "parent_branch_low_u8": 4,
+                "selector_u8": 4,
+                "x_offset_s8": -11,
+                "y_offset_s8": 75
+              },
+              {
+                "facing_u8": 1,
+                "parent_branch_low_u8": 5,
+                "selector_u8": 5,
+                "x_offset_s8": -11,
+                "y_offset_s8": 75
+              },
+              {
+                "facing_u8": 0,
+                "parent_branch_low_u8": 6,
+                "selector_u8": 3,
+                "x_offset_s8": 24,
+                "y_offset_s8": 76
+              },
+              {
+                "facing_u8": 0,
+                "parent_branch_low_u8": 7,
+                "selector_u8": 4,
+                "x_offset_s8": 24,
+                "y_offset_s8": 76
+              },
+              {
+                "facing_u8": 0,
+                "parent_branch_low_u8": 8,
+                "selector_u8": 5,
+                "x_offset_s8": 24,
+                "y_offset_s8": 76
+              },
+              {
+                "facing_u8": 0,
+                "parent_branch_low_u8": 9,
+                "selector_u8": 3,
+                "x_offset_s8": 3,
+                "y_offset_s8": 81
+              },
+              {
+                "facing_u8": 1,
+                "parent_branch_low_u8": 10,
+                "selector_u8": 4,
+                "x_offset_s8": 3,
+                "y_offset_s8": 81
+              },
+              {
+                "facing_u8": 1,
+                "parent_branch_low_u8": 11,
+                "selector_u8": 5,
+                "x_offset_s8": 3,
+                "y_offset_s8": 81
+              },
+              {
+                "facing_u8": 0,
+                "parent_branch_low_u8": 12,
+                "selector_u8": 23,
+                "x_offset_s8": 39,
+                "y_offset_s8": 26
+              },
+              {
+                "facing_u8": 1,
+                "parent_branch_low_u8": 13,
+                "selector_u8": 18,
+                "x_offset_s8": 47,
+                "y_offset_s8": 7
+              },
+              {
+                "facing_u8": 0,
+                "parent_branch_low_u8": 14,
+                "selector_u8": 18,
+                "x_offset_s8": -63,
+                "y_offset_s8": 14
+              },
+              {
+                "facing_u8": 0,
+                "parent_branch_low_u8": 15,
+                "selector_u8": 19,
+                "x_offset_s8": -66,
+                "y_offset_s8": 7
+              },
+              {
+                "facing_u8": 0,
+                "parent_branch_low_u8": 16,
+                "selector_u8": 21,
+                "x_offset_s8": 21,
+                "y_offset_s8": 18
+              },
+              {
+                "facing_u8": 0,
+                "parent_branch_low_u8": 17,
+                "selector_u8": 17,
+                "x_offset_s8": 41,
+                "y_offset_s8": 11
+              },
+              {
+                "facing_u8": 0,
+                "parent_branch_low_u8": 18,
+                "selector_u8": 17,
+                "x_offset_s8": -39,
+                "y_offset_s8": 6
+              },
+              {
+                "facing_u8": 0,
+                "parent_branch_low_u8": 19,
+                "selector_u8": 23,
+                "x_offset_s8": -46,
+                "y_offset_s8": -3
+              },
+              {
+                "facing_u8": 1,
+                "parent_branch_low_u8": 20,
+                "selector_u8": 24,
+                "x_offset_s8": 48,
+                "y_offset_s8": 22
+              },
+              {
+                "facing_u8": 1,
+                "parent_branch_low_u8": 21,
+                "selector_u8": 24,
+                "x_offset_s8": 51,
+                "y_offset_s8": 10
+              },
+              {
+                "facing_u8": 3,
+                "parent_branch_low_u8": 22,
+                "selector_u8": 25,
+                "x_offset_s8": -59,
+                "y_offset_s8": 27
+              },
+              {
+                "facing_u8": 0,
+                "parent_branch_low_u8": 23,
+                "selector_u8": 19,
+                "x_offset_s8": -65,
+                "y_offset_s8": 9
+              },
+              {
+                "facing_u8": 0,
+                "parent_branch_low_u8": 24,
+                "selector_u8": 21,
+                "x_offset_s8": 25,
+                "y_offset_s8": 17
+              },
+              {
+                "facing_u8": 0,
+                "parent_branch_low_u8": 25,
+                "selector_u8": 17,
+                "x_offset_s8": 27,
+                "y_offset_s8": 10
+              },
+              {
+                "facing_u8": 1,
+                "parent_branch_low_u8": 26,
+                "selector_u8": 24,
+                "x_offset_s8": -37,
+                "y_offset_s8": 13
+              },
+              {
+                "facing_u8": 1,
+                "parent_branch_low_u8": 27,
+                "selector_u8": 26,
+                "x_offset_s8": -35,
+                "y_offset_s8": 13
+              },
+              {
+                "facing_u8": 0,
+                "parent_branch_low_u8": 28,
+                "selector_u8": 0,
+                "x_offset_s8": 8,
+                "y_offset_s8": 55
+              },
+              {
+                "facing_u8": 0,
+                "parent_branch_low_u8": 29,
+                "selector_u8": 1,
+                "x_offset_s8": 8,
+                "y_offset_s8": 55
+              },
+              {
+                "facing_u8": 0,
+                "parent_branch_low_u8": 30,
+                "selector_u8": 2,
+                "x_offset_s8": 8,
+                "y_offset_s8": 55
+              },
+              {
+                "facing_u8": 1,
+                "parent_branch_low_u8": 31,
+                "selector_u8": 0,
+                "x_offset_s8": -18,
+                "y_offset_s8": 58
+              },
+              {
+                "facing_u8": 1,
+                "parent_branch_low_u8": 32,
+                "selector_u8": 1,
+                "x_offset_s8": -18,
+                "y_offset_s8": 58
+              },
+              {
+                "facing_u8": 1,
+                "parent_branch_low_u8": 33,
+                "selector_u8": 2,
+                "x_offset_s8": -18,
+                "y_offset_s8": 58
+              },
+              {
+                "facing_u8": 0,
+                "parent_branch_low_u8": 34,
+                "selector_u8": 0,
+                "x_offset_s8": -4,
+                "y_offset_s8": 55
+              },
+              {
+                "facing_u8": 0,
+                "parent_branch_low_u8": 35,
+                "selector_u8": 1,
+                "x_offset_s8": -4,
+                "y_offset_s8": 55
+              },
+              {
+                "facing_u8": 0,
+                "parent_branch_low_u8": 36,
+                "selector_u8": 2,
+                "x_offset_s8": -4,
+                "y_offset_s8": 55
+              },
+              {
+                "facing_u8": 1,
+                "parent_branch_low_u8": 37,
+                "selector_u8": 0,
+                "x_offset_s8": -25,
+                "y_offset_s8": 57
+              },
+              {
+                "facing_u8": 1,
+                "parent_branch_low_u8": 38,
+                "selector_u8": 1,
+                "x_offset_s8": -25,
+                "y_offset_s8": 57
+              },
+              {
+                "facing_u8": 1,
+                "parent_branch_low_u8": 39,
+                "selector_u8": 2,
+                "x_offset_s8": -25,
+                "y_offset_s8": 57
+              },
+              {
+                "facing_u8": 0,
+                "parent_branch_low_u8": 40,
+                "selector_u8": 3,
+                "x_offset_s8": 11,
+                "y_offset_s8": 73
+              },
+              {
+                "facing_u8": 0,
+                "parent_branch_low_u8": 41,
+                "selector_u8": 0,
+                "x_offset_s8": 29,
+                "y_offset_s8": 52
+              },
+              {
+                "facing_u8": 0,
+                "parent_branch_low_u8": 42,
+                "selector_u8": 1,
+                "x_offset_s8": 29,
+                "y_offset_s8": 52
+              },
+              {
+                "facing_u8": 0,
+                "parent_branch_low_u8": 43,
+                "selector_u8": 2,
+                "x_offset_s8": 29,
+                "y_offset_s8": 52
+              },
+              {
+                "facing_u8": 0,
+                "parent_branch_low_u8": 44,
+                "selector_u8": 0,
+                "x_offset_s8": 24,
+                "y_offset_s8": 54
+              },
+              {
+                "facing_u8": 0,
+                "parent_branch_low_u8": 45,
+                "selector_u8": 1,
+                "x_offset_s8": 24,
+                "y_offset_s8": 54
+              },
+              {
+                "facing_u8": 0,
+                "parent_branch_low_u8": 46,
+                "selector_u8": 2,
+                "x_offset_s8": 24,
+                "y_offset_s8": 54
+              },
+              {
+                "facing_u8": 0,
+                "parent_branch_low_u8": 47,
+                "selector_u8": 19,
+                "x_offset_s8": 27,
+                "y_offset_s8": 78
+              },
+              {
+                "facing_u8": 0,
+                "parent_branch_low_u8": 48,
+                "selector_u8": 19,
+                "x_offset_s8": 7,
+                "y_offset_s8": 75
+              },
+              {
+                "facing_u8": 0,
+                "parent_branch_low_u8": 49,
+                "selector_u8": 19,
+                "x_offset_s8": 27,
+                "y_offset_s8": 72
+              },
+              {
+                "facing_u8": 0,
+                "parent_branch_low_u8": 50,
+                "selector_u8": 19,
+                "x_offset_s8": 12,
+                "y_offset_s8": 72
+              },
+              {
+                "facing_u8": 0,
+                "parent_branch_low_u8": 51,
+                "selector_u8": 19,
+                "x_offset_s8": 27,
+                "y_offset_s8": 72
+              },
+              {
+                "facing_u8": 0,
+                "parent_branch_low_u8": 52,
+                "selector_u8": 19,
+                "x_offset_s8": 34,
+                "y_offset_s8": 72
+              },
+              {
+                "facing_u8": 0,
+                "parent_branch_low_u8": 53,
+                "selector_u8": 0,
+                "x_offset_s8": 0,
+                "y_offset_s8": 0
+              },
+              {
+                "facing_u8": 0,
+                "parent_branch_low_u8": 54,
+                "selector_u8": 0,
+                "x_offset_s8": 0,
+                "y_offset_s8": 0
+              }
+            ],
+            "table_base": "0x09d4fc",
+            "table_sha256": "856fa65d58d0fa49cbad5e1516447110907d4ff6d61736210f19baf96a7ea1ea",
+            "writes": [
+              "actor+0x0f:u8",
+              "actor+0x30:u8",
+              "actor+0x10:u16",
+              "actor+0x14:u16",
+              "actor+0x18:u16"
+            ]
+          },
+          "auxiliary_boundary_residue": {
+            "active_actor_rows_in_measured_scene": 0,
+            "frame_owned_clear_forbidden": true,
+            "initial_value_u32": 0,
+            "initialization_owner": "0x01729c sets d1=0; shared initializer0x017472 clears16 auxiliary128-byte records with loop0x01748a",
+            "release_owner": "shared pool reinitialization0x01748a, observed PC0x01748e; zero the residue with central scene-pool teardown",
+            "source_address": "0xffe29c",
+            "source_owner": "inactive record24_aux slot0xffe280 +0x1c",
+            "witness_only": {
+              "alias_write_count": 5,
+              "first_alias_frame": 2830,
+              "zeroing_frame": 5550
+            },
+            "write_rule": "cross-record high byte only; do not allocate or invent an active auxiliary actor"
+          },
+          "classification": "SOURCE_CLOSED_IMPLEMENTATION_FIELDS",
+          "counterfactual": {
+            "actor_population_difference": true,
+            "capture": "oracle11_progression_lifecycle_cs15se",
+            "final_gameplay_projection_unchanged": true,
+            "fixed_pool_order_may_change_downstream_projection": false,
+            "remaining_target_actor_rows": 0,
+            "suppressed_writes": 16
+          },
+          "cross_record_write_contract": {
+            "address_rule": "u24(source_actor_slot + 0x5c)",
+            "attempts": {
+              "failed_pre_capture_recipes": 2,
+              "failure": "Lua main-chunk 200-local limit; no evidence credited",
+              "limit": 3,
+              "repair": "one process-local global probe table; Lua54 load preflight PASS",
+              "successful_recipe": 3
+            },
+            "capture_identity": {
+              "a": {
+                "coffee_shop_class0e_alias.tsv": "fc86aec0c933ab6b83b50ac3a36d857a88f496548f47f1752945a8b55255d0a6",
+                "coffee_shop_rng_calls.tsv": "81338529f76629c3d103885c16838bd562beecf783f0b5107a5b7ecd11e219b3",
+                "coffee_shop_scene_actors.tsv": "b7b1568df038af1cdd7eb5bc6eb30c830efca4952d1077644ab3b31ed2ad1c0f",
+                "coffee_shop_scene_frames.tsv": "91e4aab3a03586a6c9a143dd58ee03a72ebc52b7fd611fdc6fe0975ebd522d1d",
+                "coffee_shop_scene_health_writes.tsv": "7defadcfff16b99b8e2d5b66fc7b42443106837d698e659c64d45a8770d6aa0b",
+                "dispatches.tsv": "a47890edd3e102e8d8db5e4caa21d9b15c5c6e0a3c4800ab1aff578421102903",
+                "progression_result.tsv": "c7bacd855ddbe40c5cee5895c183bbf4ec547c8f7ac24ccd9338e7ad5c43538e",
+                "samples.tsv": "51964bb2a5d68f44996c9a5bddd4102d131ebf2e9649b904dff91066221a7611"
+              },
+              "b": {
+                "coffee_shop_class0e_alias.tsv": "fc86aec0c933ab6b83b50ac3a36d857a88f496548f47f1752945a8b55255d0a6",
+                "coffee_shop_rng_calls.tsv": "81338529f76629c3d103885c16838bd562beecf783f0b5107a5b7ecd11e219b3",
+                "coffee_shop_scene_actors.tsv": "b7b1568df038af1cdd7eb5bc6eb30c830efca4952d1077644ab3b31ed2ad1c0f",
+                "coffee_shop_scene_frames.tsv": "91e4aab3a03586a6c9a143dd58ee03a72ebc52b7fd611fdc6fe0975ebd522d1d",
+                "coffee_shop_scene_health_writes.tsv": "7defadcfff16b99b8e2d5b66fc7b42443106837d698e659c64d45a8770d6aa0b",
+                "dispatches.tsv": "a47890edd3e102e8d8db5e4caa21d9b15c5c6e0a3c4800ab1aff578421102903",
+                "progression_result.tsv": "c7bacd855ddbe40c5cee5895c183bbf4ec547c8f7ac24ccd9338e7ad5c43538e",
+                "samples.tsv": "51964bb2a5d68f44996c9a5bddd4102d131ebf2e9649b904dff91066221a7611"
+              },
+              "byte_identical": true,
+              "capture_script_sha256": "d8ab4402340226cae8a79ca50809250598bf08c5c7e9292976ce81771b33a858",
+              "captures": [
+                "oracle11_class0e_alias_a3",
+                "oracle11_class0e_alias_b3",
+                "oracle11_class0e_alias_m3"
+              ],
+              "mame_sha256": "af6966108d9b52c22465c6d50f4e5d50cc371b50f2d27dc443935f287aad37a3",
+              "suppression": {
+                "coffee_shop_class0e_alias.tsv": "585919da5f76697a083ee4f2386241ef2683ab444d6f01bf34ef156817ab76b0",
+                "coffee_shop_rng_calls.tsv": "81338529f76629c3d103885c16838bd562beecf783f0b5107a5b7ecd11e219b3",
+                "coffee_shop_scene_actors.tsv": "b7b1568df038af1cdd7eb5bc6eb30c830efca4952d1077644ab3b31ed2ad1c0f",
+                "coffee_shop_scene_frames.tsv": "91e4aab3a03586a6c9a143dd58ee03a72ebc52b7fd611fdc6fe0975ebd522d1d",
+                "coffee_shop_scene_health_writes.tsv": "7defadcfff16b99b8e2d5b66fc7b42443106837d698e659c64d45a8770d6aa0b",
+                "dispatches.tsv": "a47890edd3e102e8d8db5e4caa21d9b15c5c6e0a3c4800ab1aff578421102903",
+                "progression_result.tsv": "c7bacd855ddbe40c5cee5895c183bbf4ec547c8f7ac24ccd9338e7ad5c43538e",
+                "samples.tsv": "51964bb2a5d68f44996c9a5bddd4102d131ebf2e9649b904dff91066221a7611"
+              }
+            },
+            "classification": "SOURCE_CLOSED_IMPLEMENTATION_FIELDS",
+            "control": {
+              "classification": "SOURCE_RAW_STATE_DIFFERENCE_WITH_MATCHED_SCENE_PROJECTION",
+              "complete_scene_domains_byte_identical": [
+                "coffee_shop_scene_actors.tsv",
+                "coffee_shop_scene_frames.tsv",
+                "coffee_shop_scene_health_writes.tsv",
+                "coffee_shop_rng_calls.tsv",
+                "samples.tsv",
+                "dispatches.tsv",
+                "progression_result.tsv"
+              ],
+              "permits_omitting_source_write": false,
+              "raw_pointer_difference": true,
+              "suppressed_writes": 16
+            },
+            "direct_audio_commands": [],
+            "direct_rng_calls": 0,
+            "guard": "class0e state0 initialization reaches the source instruction",
+            "lifetime_and_order": "write during initialization before attachment and animation bind; preserve neighbor alias until its source-owned overwrite, not until an authored frame",
+            "native_implemented": false,
+            "observation": {
+              "actor_rows": 95149,
+              "alias_writes": 16,
+              "class0e_rows": 1776,
+              "overwrite_events": 12,
+              "raw_pointer_difference_rows": 726,
+              "read_caveat": "existing harness reads can trigger taps; no claim of exhaustive CPU reader ownership from tap PCs alone",
+              "reads_are_cpu_only": false,
+              "scene_span": [
+                1972,
+                5566
+              ],
+              "tap_reads": 710
+            },
+            "observed_write_pc": "0x09d46a",
+            "owners": [
+              {
+                "active_class0e_destinations": 2,
+                "destination": "next source-slot record, animation_record+0x00 (most significant byte)",
+                "guard": "type36 source slot below 0xffe240",
+                "observed_writes": 11,
+                "pointer_rule": "(animation_record_u32 & 0x00ffffff) | 0x01000000"
+              },
+              {
+                "destination": "record24_aux slot0xffe280 +0x1c at 0xffe29c",
+                "guard": "type36 source slot equals 0xffe240",
+                "observed_writes": 5
+              }
+            ],
+            "physical_saturn": "UNRUN",
+            "scope": "Coffee Shop class0e cross-record byte writer only; not the complete class contract",
+            "source_instruction": "0x09d464",
+            "source_instruction_sha256": "c6e6b3aa919651d086934139aeeb7bf4ecad36a902ffc4ccb1798816bae455ba",
+            "value_u8": 1,
+            "width_bits": 8,
+            "write_rule": "replace only the addressed byte; preserve the other bytes and all actor metadata"
+          },
+          "effects": {
+            "direct_audio_commands": [],
+            "direct_collision_damage_calls": 0,
+            "direct_load_calls": 0,
+            "direct_rng_calls": 0,
+            "direct_route_camera_writes": 0,
+            "score_boundary": "0x0abdd2 runs earlier in parent KO entry, outside this class; score is not audio",
+            "source_owned_writes": [
+              "parent timer byte",
+              "parent backlink",
+              "fixed pool",
+              "cross-record alias"
+            ]
+          },
+          "fixed_frame_substitute_forbidden": true,
+          "native_implemented": false,
+          "retained_gameplay_authority": false,
+          "scheduler": {
+            "entry": "0x01bd48",
+            "order": "ascending source slots after record12 parent program; native display-frame cadence remains independently blocked",
+            "route_teardown": "central source scheduler/pool ownership applies; no class-specific frame release; all16 measured lifetimes finish before Coffee Shop teardown"
+          },
+          "scope": "all16 measured Coffee Shop class0e lifetimes and bounded source program branches; source timers, never frame anchors, own behavior",
+          "source_bodies": {
+            "allocation": {
+              "first": "0x09d3c4",
+              "last_exclusive": "0x09d408",
+              "sha256": "0ba900e0ec8f50f4754a559d502f558aaad9c67343f2510727a29b91b8709192"
+            },
+            "animation_bind": {
+              "first": "0x016518",
+              "last_exclusive": "0x016536",
+              "sha256": "53411ef0851d3310cc50fe931ca3f10f0159342cb1c8cba6c36b8dd47ee2e714"
+            },
+            "auxiliary_pool_initializer": {
+              "first": "0x017472",
+              "last_exclusive": "0x0174a0",
+              "sha256": "7727502a004e8265f9f717b232653cd57d2164d5d223b0db5227ffbb178e5fd6"
+            },
+            "class_dispatch": {
+              "first": "0x09d440",
+              "last_exclusive": "0x09d60e",
+              "sha256": "4c1cd40eb75141d17a66de6128530028087b087db0c090cffc3489684e7065f1"
+            },
+            "ko_entry": {
+              "first": "0x01f250",
+              "last_exclusive": "0x01f276",
+              "sha256": "71e4b4190c316e511ea21a8957cd30789692c241fe7d7ff33be15a00ea3fa5a7"
+            },
+            "owner_dispatch": {
+              "first": "0x01f184",
+              "last_exclusive": "0x01f192",
+              "sha256": "897d9bc948acf2e02a311431f6c92fdf2ae12101ad3937b5f57efff0036d4801"
+            },
+            "pool": {
+              "first": "0x017876",
+              "last_exclusive": "0x0178a8",
+              "sha256": "3bd9431298936bedf0e40d697d01de6fe99cd34a0396aa94eb66eb6f8c5af3e0"
+            }
+          },
+          "source_formula_validation": {
+            "frame_labels_used_for": "source observation alignment only, never state transition or lifetime authority",
+            "normalization": "none for compared position/facing/animation/timer/branch",
+            "observed_family_indices": [
+              {
+                "family": 0,
+                "index": 0,
+                "rows": 12
+              },
+              {
+                "family": 0,
+                "index": 1,
+                "rows": 12
+              },
+              {
+                "family": 0,
+                "index": 2,
+                "rows": 4
+              },
+              {
+                "family": 0,
+                "index": 3,
+                "rows": 4
+              },
+              {
+                "family": 0,
+                "index": 6,
+                "rows": 30
+              },
+              {
+                "family": 0,
+                "index": 7,
+                "rows": 30
+              },
+              {
+                "family": 0,
+                "index": 8,
+                "rows": 10
+              },
+              {
+                "family": 0,
+                "index": 9,
+                "rows": 10
+              },
+              {
+                "family": 0,
+                "index": 12,
+                "rows": 42
+              },
+              {
+                "family": 0,
+                "index": 13,
+                "rows": 42
+              },
+              {
+                "family": 0,
+                "index": 14,
+                "rows": 14
+              },
+              {
+                "family": 0,
+                "index": 15,
+                "rows": 14
+              },
+              {
+                "family": 1,
+                "index": 1,
+                "rows": 1024
+              },
+              {
+                "family": 1,
+                "index": 5,
+                "rows": 464
+              },
+              {
+                "family": 1,
+                "index": 13,
+                "rows": 64
+              }
+            ],
+            "observed_parent_branch_low_u8": {
+              "0": 64,
+              "24": 464,
+              "25": 1024,
+              "34": 32,
+              "35": 80,
+              "36": 112
+            },
+            "raw_position_facing_animation_mismatches": 0,
+            "rows": 1776
+          },
+          "spec_executable": true,
+          "state0": {
+            "ordered_writes": [
+              "actor+4:u8 +=2",
+              "actor+0x2e:u16=0x8000",
+              "actor+9:u8=0",
+              "cross_record_write_contract",
+              "actor+0x2a:u8=8",
+              "parent+0x7c:u16=low16(actor source slot)",
+              "attachment",
+              "animation_bind"
+            ],
+            "parent_pointer": "sign_extend_s16(actor+0x26) masked to source24-bit bus; identity survives parent inactive state"
+          },
+          "state_dispatch": {
+            "address_space": "decrypted PC-relative operand",
+            "entries": [
+              {
+                "entry": "0x09d454",
+                "state_u16": "0x0000"
+              },
+              {
+                "entry": "0x09d47e",
+                "state_u16": "0x0200"
+              },
+              {
+                "entry": "0x09d498",
+                "state_u16": "0x0400"
+              },
+              {
+                "entry": "0x09d498",
+                "state_u16": "0x0600"
+              }
+            ],
+            "read": "actor+4:u8",
+            "table": "0x09d44c"
+          },
+          "terminal": {
+            "always": "actor+0x0e:u8=0 then0x01788c",
+            "backlink_guard": "u16(parent+0x7c) == low16(actor source slot)",
+            "guard_true_write": "parent+0x7c:u16=0",
+            "release_clears_u32_offsets": [
+              0,
+              4,
+              12
+            ],
+            "release_order": "predecrement free stack pointer, push actor low16, publish pointer, increment free count:u8",
+            "release_preserves": "other record residue, including position fractions and animation pointer, persists in fixed pool",
+            "states_u16": [
+              "0x0400",
+              "0x0600"
+            ]
+          }
+        },
         "implementation_rule": "native source-owned presentation actor in the shared fixed pool; it must not become independent gameplay authority",
         "lifetime_count": 16,
         "lifetimes": [

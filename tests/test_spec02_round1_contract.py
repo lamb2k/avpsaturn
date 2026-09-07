@@ -939,6 +939,28 @@ for label, mutate in class0e_controls:
     else:
         raise AssertionError('survived class0e fixture control: ' + label)
 spec02.validate(copy.deepcopy(contract), copy.deepcopy(fixtures))
+program_controls = [
+    ('signed-offset', lambda x: x['attachment']['records'][34].__setitem__('x_offset_s8', 4)),
+    ('filter', lambda x: x['allocation']['effect_filter_table']['negative_indices'].pop()),
+    ('final-visit', lambda x: x['active'].__setitem__('after_guard', 'skip final attachment')),
+    ('record', lambda x: x['animation_bind']['families'][0]['offsets_s16'].__setitem__(0, 0)),
+    ('release', lambda x: x['terminal']['release_clears_u32_offsets'].append(0x1c)),
+]
+for label, mutate in program_controls:
+    changed = copy.deepcopy(fixtures)
+    program = next(row for row in changed['authority_data']['auxiliary']
+                   ['coffee_shop_type36_presentation']['classes']
+                   if row['class'] == '0x0e')['implementation_contract']
+    mutate(program)
+    bound_contract = copy.deepcopy(contract)
+    bound_contract['generated_fixtures']['sha256'] = hashlib.sha256(
+        spec02.canonical(changed)).hexdigest()
+    try:
+        spec02.validate(bound_contract, changed)
+    except ValueError as error:
+        assert str(error) == 'type-36 class-0x0e whole-program fixture drift', (label, str(error))
+    else:
+        raise AssertionError('survived class0e program fixture control: ' + label)
 print(f"SPEC-02 Round 1 executable contract: PASS ({len(mutations)} existing "
-      "metadata/hash controls; 5 attributable class0e field controls; "
+      "metadata/hash controls; 5 alias and5 whole-program attributable class0e field controls; "
       "unchanged-fixture control accepted; not native behavioral kills)")

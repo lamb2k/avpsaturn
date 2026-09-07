@@ -310,6 +310,11 @@ def build_fields() -> list[dict[str, object]]:
           "/authority_data/auxiliary/coffee_shop_type36_presentation/classes/3/cross_record_write_contract", "class0e state0 reaches the source instruction; write u8(1) at u24(source slot + 0x5c), preserving every other byte and owner field until its source-owned overwrite",
           ["actor.source_slot:u24", "actor.state:u8", "destination.animation_record:u32"], ["destination.animation_record_most_significant_byte:u8"],
           "/coffee_shop_type36_presentation/classes/3/cross_record_write_contract/control", "sixteen suppressed source writes change raw pointer state while seven complete-scene projection domains remain byte-identical; matched projection does not permit omitting the write"),
+        f("auxiliary.coffee_shop_class0e_type36_program", "round1-projectile-pickup-hazard", "guarded_presentation_actor_program", True,
+          "auxiliary", "/coffee_shop_type36_presentation/classes/3/implementation_contract", "0x09d3c4 allocation, KO caller0x01f266, class0x09d440, attachment0x09d4b2, animation0x09d5d8 and fixed-pool release0x01788c",
+          "/authority_data/auxiliary/coffee_shop_type36_presentation/classes/3/implementation_contract", "actual parent KO entry owns allocation; parent branch, palette and facing select source tables; parent state6 requests terminal state then final attachment/bind; next class visit clears matching backlink and releases",
+          ["parent.state:u16", "parent.hit_kind:s8", "parent.palette:u8", "parent.position:s16", "parent.facing:u8", "parent.animation_branch:u8", "actor.state:u8", "actor.source_slot:u24", "actor.parent_slot:u16", "actor.position_fraction:u16", "pool.free_count:u8"], ["parent.timer:u8", "parent.backlink:u16", "actor.state:u8", "actor.position:s16", "actor.facing:u8", "actor.animation_record:u32", "actor.animation_timer:u16", "actor.animation_branch:s16", "cross_record.animation_pointer_msb:u8", "pool.free_count:u8"],
+          "/coffee_shop_type36_presentation/classes/3/implementation_contract/counterfactual", "source actor suppression removes all16 lifetimes; raw byte suppression is separately causal; complete1776-row source formula comparison rejects wrong offset/sign/address-space/selector/timer and release rules without frame-owned outcomes"),
         f("auxiliary.class10_type24_whole_program", "round1-projectile-pickup-hazard", "guarded_actor_program", True,
           "class10_program", "/", "0x079ffc class entry, four-way top-state dispatch, six source variant selectors, and every Round 1-reachable branch",
           "/authority_data/auxiliary/archetypes/5/whole_routine_implementation_contract", "outer state dispatches only through the bounded source program; variant-indexed signed offsets and animation records, exact current-state guards, presentation updates and fixed-pool release own every transition",
@@ -1957,6 +1962,17 @@ def validate(contract: dict[str, object], fixtures: dict[str, object],
             class0e_alias["observation"]["reads_are_cpu_only"] is False and
             class0e_alias["control"]["permits_omitting_source_write"] is False,
             "type-36 class-0x0e cross-record fixture drift")
+    class0e_program = next(item for item in fixtures["authority_data"]["auxiliary"]
+                          ["coffee_shop_type36_presentation"]["classes"]
+                          if item["class"] == "0x0e")["implementation_contract"]
+    source_class0e_program = next(item for item in source["auxiliary"]
+                                 ["coffee_shop_type36_presentation"]["classes"]
+                                 if item["class"] == "0x0e")["implementation_contract"]
+    require(class0e_program == source_class0e_program and
+            class0e_program["spec_executable"] is True and
+            class0e_program["source_formula_validation"]["rows"] == 1776 and
+            class0e_program["source_formula_validation"]["raw_position_facing_animation_mismatches"] == 0,
+            "type-36 class-0x0e whole-program fixture drift")
     class04 = next(item for item in fixtures["authority_data"]["auxiliary"]
                    ["coffee_shop_type36_presentation"]["classes"]
                    if item["class"] == "0x04")

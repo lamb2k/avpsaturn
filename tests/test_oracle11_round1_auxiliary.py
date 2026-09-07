@@ -111,6 +111,33 @@ for label,mutate in alias_controls:
  except ValueError as error:
   assert str(error)=='class0e cross-record writer contract drift', (label,str(error))
  else:raise AssertionError('survived class0e contract control: '+label)
+class0e_program_controls = [
+ ('offset-sign',lambda x:x['attachment']['records'][34].__setitem__('x_offset_s8',4)),
+ ('address-space',lambda x:x['attachment'].__setitem__('address_space','decrypted opcodes')),
+ ('facing',lambda x:x['attachment']['records'][0].__setitem__('facing_u8',1)),
+ ('selector',lambda x:x['attachment']['records'][24].__setitem__('selector_u8',0)),
+ ('palette',lambda x:x['allocation']['palette_table']['values_u8'].__setitem__(31,17)),
+ ('allocation-filter',lambda x:x['allocation']['effect_filter_table']['negative_indices'].pop()),
+ ('state-guard',lambda x:x['active'].__setitem__('guard','fixed frame')),
+ ('early-terminal-return',lambda x:x['active'].__setitem__('after_guard','return immediately')),
+ ('decrement',lambda x:x['active'].__setitem__('local_timer_decrement',True)),
+ ('record-offset',lambda x:x['animation_bind']['families'][0]['offsets_s16'].__setitem__(0,0)),
+ ('assembly',lambda x:x['animation_bind']['records'][0].__setitem__('assembly','0x00000000')),
+ ('backlink',lambda x:x['terminal'].__setitem__('backlink_guard','always clear')),
+ ('release-residue',lambda x:x['terminal']['release_clears_u32_offsets'].append(0x1c)),
+ ('extra-rng',lambda x:x['effects'].__setitem__('direct_rng_calls',1)),
+ ('extra-audio',lambda x:x['effects'].__setitem__('direct_audio_commands',[0x77])),
+ ('fixed-frame',lambda x:x.__setitem__('fixed_frame_substitute_forbidden',False)),
+]
+for label,mutate in class0e_program_controls:
+ x=copy.deepcopy(report)
+ program=next(c for c in x['coffee_shop_type36_presentation']['classes']
+              if c['class']=='0x0e')['implementation_contract']
+ mutate(program)
+ try:m.validate(x)
+ except ValueError as error:
+  assert str(error)=='class0e whole-program contract drift', (label,str(error))
+ else:raise AssertionError('survived class0e program control: '+label)
 print('ORACLE-11 auxiliary authority tests: PASS '
-      '(154 existing field controls; 12 attributable class0e contract controls; '
-      'these are not native behavioral kills)')
+      '(154 existing field controls; 12 alias and16 whole-program attributable '
+      'class0e controls; these are not native behavioral kills)')

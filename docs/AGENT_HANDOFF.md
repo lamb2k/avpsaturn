@@ -17,17 +17,17 @@ USER-10 requires QA and explicit feedback. Physical UNRUN; HW-01 parked.
 
 ## Exact next experiment
 
-Complete type36/class0e, all16 lifetimes, dispatch0x09d440..0x09d60e,
-from accepted auxiliary evidence through executable SPEC then native fixed pools.
-+0x5c byte writer is now bound in Oracle/SPEC: paired cold a3/b3,16 suppressions,
-raw pointer difference but7 scene ledgers identical; no omission waiver or class pass.
+Implement type36/class0e, all16 lifetimes, from the now executable SPEC program:
+parent KO allocation, signed attachment/selector tables, final visit and pool release.
++0x5c byte alias includes inactive auxiliary residue and central clear; never omit it.
+All1776 source rows match recovered formulas; this is not native or scene acceptance.
 The captured-schedule defect is BLOCKED_MISSING_EXECUTABLE_TICK_CONTRACT.
 Read-only command: python tools/analyze_oracle11_actor_scheduler.py --interactive-readiness
 Pool callee0011ea is RTS; loop00808a/tail008140 reaches trap3 wrapper001060.
 Missing: ff81bc/ff81a6 interrupt-writer ordering; suspend/resume and route
 continuations; input/hitstop/phase order; independent changed-input witness.
-Next bind allocation guards, attachment/data-space tables, selector and release.
-Alias checks PASS12 Oracle +5 SPEC attributable controls; no native behavioral kills.
+Use complete existing class0e implementation_contract and generated SPEC fixture.
+Controls: Oracle12 alias+16 program; SPEC5 alias+5 program; no native behavioral kills.
 Return to the scheduler with bounded source evidence; never guess display ticks.
 Normal callback still uses captured schedules; reported authority0 is hardcoded.
 Type28/class0c remains blocked under its exhausted causal-witness budget.

@@ -24,9 +24,9 @@ preserved in Git at checkpoint `2e446d4303fa50bac14ec3c00222635066a7712c`.
 Scheduler audit: BLOCKED_MISSING_EXECUTABLE_TICK_CONTRACT; accepted pool order
 does not bind loop00808a, tail008140, trap3/001060 or interrupt-owned guards.
 Run analyzer --interactive-readiness for exact fields; four identity controls PASS.
-Continue type36/class0e (16 lifetimes, 0x09d440..0x09d60e) through existing SPEC.
-Source09d464's +0x5c alias bound: paired a3/b3,16 raw-changing suppressions;7 scene ledgers identical, no omission waiver;12 Oracle +5 SPEC controls.
-Next bind allocation, attachment/data-space tables, selector and release.
+Implement type36/class0e (16 lifetimes, 0x09d440..0x09d60e) from executable SPEC.
+Allocation/attachment/selector/release and byte alias bound;1776 source rows match formulas, no normalization;28 Oracle +10 SPEC attributable controls.
+Keep inactive auxiliary residue and central clear; native and scene acceptance pending.
 Return to scheduler with bounded source evidence; scene and candidate stay RED/frozen.
 
 ## Objective

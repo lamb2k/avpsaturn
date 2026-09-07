@@ -750,6 +750,179 @@ def validate_class0e_alias_contract(x):
      'class0e cross-record writer contract drift')
 
 
+def coffee_shop_class0e_program(op,program,item,sample,context_writes,actors):
+ """Recover the whole bounded attachment program; witnesses never drive it."""
+ spans=[('allocation',0x09d3c4,0x09d408),('class_dispatch',0x09d440,0x09d60e),
+        ('owner_dispatch',0x01f184,0x01f192),('ko_entry',0x01f250,0x01f276),
+        ('animation_bind',0x016518,0x016536),('pool',0x017876,0x0178a8),
+        ('auxiliary_pool_initializer',0x017472,0x0174a0)]
+ bodies={name:{'first':f'0x{a:06x}','last_exclusive':f'0x{b:06x}',
+               'sha256':hashlib.sha256(op[a:b]).hexdigest()} for name,a,b in spans}
+ req(bodies['allocation']['sha256']=='0ba900e0ec8f50f4754a559d502f558aaad9c67343f2510727a29b91b8709192'
+     and bodies['class_dispatch']['sha256']=='4c1cd40eb75141d17a66de6128530028087b087db0c090cffc3489684e7065f1',
+     'class0e executable source identity drift')
+ writer_set=json.loads((ROOT/'data/avsp_hit_ko_writer_set.json').read_text())
+ req(any(e['source']=='0x01f266' and e['target']=='0x01f184'
+         for e in writer_set['closure']['selected_edges']) and
+     any(e['source']=='0x01f190' and e['target']=='0x09d3c4'
+         for e in writer_set['closure']['selected_edges']) and
+     int.from_bytes(op[0x01f20e:0x01f212],'big')==0x09d3c4,
+     'class0e accepted KO caller ownership missing')
+ offsets=[{'parent_branch_low_u8':i,
+           'x_offset_s8':int.from_bytes(program[a:a+1],'big',signed=True),
+           'y_offset_s8':int.from_bytes(program[a+1:a+2],'big',signed=True),
+           'facing_u8':program[a+2],'selector_u8':program[a+3]}
+          for i,a in enumerate(range(0x09d4fc,0x09d5d8,4))]
+ families=[]
+ for high,count in [(0,36),(1,14)]:
+  address=0x09d60e+int.from_bytes(op[0x09d60e+high*2:0x09d610+high*2],'big',signed=True)
+  entries=[int.from_bytes(program[address+i*2:address+i*2+2],'big',signed=True)
+           for i in range(count)]
+  families.append({'high_nibble_u8':high,'base':f'0x{address:06x}',
+                   'offsets_s16':entries,'address_space':'program data',
+                   'sha256':hashlib.sha256(program[address:address+count*2]).hexdigest()})
+ record_addresses=sorted({int(f['base'],16)+v for f in families for v in f['offsets_s16']})
+ records=[animation_record(program,a) for a in record_addresses]
+ spawn=[r for r in context_writes if r['pc']=='09d3ec' and r['inner']=='26']
+ palettes={(r['frame'],r['slot']):int(r['data'],16)&255 for r in context_writes
+           if r['pc'] in ('09d3f8','09d406') and r['inner']=='0e'}
+ actor_index={(int(r['frame']),r['slot']):r for r in actors}
+ observed_branches=Counter();observed_indices=Counter();mismatches=[]
+ for row in sample:
+  frame=int(row['frame'])
+  owner=max((r for r in spawn if r['slot']==row['slot'] and int(r['frame'])<frame),
+            key=lambda r:int(r['frame']))
+  parent=actor_index[(frame,'ff'+owner['data'][-4:])]
+  branch=int(parent['animation_branch'])&255;offset=offsets[branch]
+  observed_branches[branch]+=1
+  dx=offset['x_offset_s8']*(-1 if int(parent['facing']) else 1)
+  facing=offset['facing_u8']^(1 if int(parent['facing']) else 0)
+  expected_position=(((int(parent['x_fp'],16)>>16)+dx)&65535,
+                     ((int(parent['y_fp'],16)>>16)+offset['y_offset_s8'])&65535,
+                     int(parent['z']),facing)
+  actual_position=(int(row['x_fp'],16)>>16,int(row['y_fp'],16)>>16,int(row['z']),int(row['facing']))
+  selector=offset['selector_u8'];high=selector>>4;low=selector&15
+  palette=palettes[(owner['frame'],owner['slot'])]
+  index=((low*6+palette-16)&255) if high==0 else low
+  observed_indices[(high,index)]+=1
+  record=int(families[high]['base'],16)+families[high]['offsets_s16'][index]
+  expected_animation=(record,int.from_bytes(program[record:record+2],'big'),
+                      int.from_bytes(program[record+2:record+4],'big',signed=True))
+  actual_animation=(int(row['animation_record'],16),int(row['animation_timer'],16),int(row['animation_branch']))
+  if expected_position!=actual_position or expected_animation!=actual_animation:
+   mismatches.append({'frame':frame,'slot':row['slot']})
+ req(len(sample)==1776 and not mismatches,'class0e source projection formula drift')
+ return {
+  'classification':'SOURCE_CLOSED_IMPLEMENTATION_FIELDS','spec_executable':True,
+  'scope':'all16 measured Coffee Shop class0e lifetimes and bounded source program branches; source timers, never frame anchors, own behavior',
+  'source_bodies':bodies,
+  'allocation':{'owner':'class1f lethal-entry action0 0x01f250 via call0x01f266 and class-index dispatcher0x01f184',
+    'accepted_writer_set_sha256':sha(ROOT/'data/avsp_hit_ko_writer_set.json'),
+    'guard':'parent outer0x0400/action0 enters lethal program; parent+5 is incremented by2 before helper; execute helper once per actual entry',
+    'not_guards':['source frame','prior animation identity','lifetime ordinal'],
+    'ordered_operations':['parent+0x2b:u8 = 6',
+      'd1 = sign_extend_s8(parent+0x49); d6 = zero_extend_u8(opcodes[0x09d428+d1]); return when d6 bit7 set',
+      'allocate via0x017876; zero free count returns without allocation; never retry on a fabricated frame',
+      'child.active:u8 +=1; child.class:u8=0x0e; child+0x26:u16=low16(parent source slot)',
+      'if parent+0x0d:u8 !=0 copy parent+0x0e:u8 palette; else copy opcode byte table0x09d408 indexed by parent class:u8'],
+    'effect_filter_table':{'base':'0x09d428','address_space':'decrypted PC-relative operand',
+                           'values_s8':[v if v<128 else v-256 for v in op[0x09d428:0x09d440]],
+                           'negative_indices':[21,23]},
+    'palette_table':{'base':'0x09d408','address_space':'decrypted PC-relative operand','values_u8':list(op[0x09d408:0x09d428])},
+    'observed_parent_type_u8':12,'observed_parent_class_u8':31,
+    'observed_allocations_u16':16,'free_pool':'0xffd280 stride0x40 capacity64;0x017876; stack metadata+0x6e76/+0x6e8f'},
+  'state_dispatch':{'read':'actor+4:u8','table':'0x09d44c','address_space':'decrypted PC-relative operand',
+                    'entries':[{'state_u16':s,'entry':e} for s,e in
+                               [('0x0000','0x09d454'),('0x0200','0x09d47e'),('0x0400','0x09d498'),('0x0600','0x09d498')]]},
+  'state0':{'ordered_writes':['actor+4:u8 +=2','actor+0x2e:u16=0x8000','actor+9:u8=0',
+              'cross_record_write_contract','actor+0x2a:u8=8','parent+0x7c:u16=low16(actor source slot)',
+              'attachment','animation_bind'],
+            'parent_pointer':'sign_extend_s16(actor+0x26) masked to source24-bit bus; identity survives parent inactive state'},
+  'active':{'guard':'parent+4:u8 == 6','guard_true_write':'actor+4:u8=6',
+            'after_guard':'attachment then animation_bind in this same invocation; no early return on terminal transition',
+            'local_timer_decrement':False,'rng_calls_u8':0},
+  'attachment':{'entry':'0x09d4b2','table_base':'0x09d4fc','address_space':'program data after LEA',
+                'table_sha256':hashlib.sha256(program[0x09d4fc:0x09d5d8]).hexdigest(),
+                'index':'zero_extend_u8(parent+0x25) *4','records':offsets,
+                'arithmetic':'sign_extend x/y bytes; parent facing nonzero negates x and XOR1 child facing; copy parent x/y/z high words preserving child fractional words; add x/y offsets modulo16 bits',
+                'writes':['actor+0x0f:u8','actor+0x30:u8','actor+0x10:u16','actor+0x14:u16','actor+0x18:u16']},
+  'animation_bind':{'entry':'0x09d5d8','helper':'0x016518','selector_field':'actor+0x30:u8',
+    'family_rule':'high=(selector &0xf0)>>4; s16 PC-relative table0x09d60e[high] locates family base',
+    'index_rule':'high0 uses u8((selector&15)*6 + u8(palette-0x10)); high1 uses selector&15',
+    'families':families,'records':records,
+    'ordered_writes':['actor+0x1c:u32 = family_base + s16(program[family_base+2*index])',
+                      'actor+0x0a:u16 = record timer','actor+0x24:s16 = record branch'],
+    'rebind_each_invocation':True,'independent_animation_advance':False,
+    'collision_selectors':'current source animation record fields; observed hurt0/attack0; no independent collision call'},
+  'terminal':{'states_u16':['0x0400','0x0600'],
+    'backlink_guard':'u16(parent+0x7c) == low16(actor source slot)',
+    'guard_true_write':'parent+0x7c:u16=0','always':'actor+0x0e:u8=0 then0x01788c',
+    'release_clears_u32_offsets':[0,4,12],
+    'release_preserves':'other record residue, including position fractions and animation pointer, persists in fixed pool',
+    'release_order':'predecrement free stack pointer, push actor low16, publish pointer, increment free count:u8'},
+  'auxiliary_boundary_residue':{
+    'source_address':'0xffe29c','source_owner':'inactive record24_aux slot0xffe280 +0x1c',
+    'active_actor_rows_in_measured_scene':0,'initial_value_u32':0,
+    'initialization_owner':'0x01729c sets d1=0; shared initializer0x017472 clears16 auxiliary128-byte records with loop0x01748a',
+    'write_rule':'cross-record high byte only; do not allocate or invent an active auxiliary actor',
+    'release_owner':'shared pool reinitialization0x01748a, observed PC0x01748e; zero the residue with central scene-pool teardown',
+    'witness_only':{'first_alias_frame':2830,'alias_write_count':5,'zeroing_frame':5550},
+    'frame_owned_clear_forbidden':True},
+  'scheduler':{'entry':'0x01bd48','order':'ascending source slots after record12 parent program; native display-frame cadence remains independently blocked',
+    'route_teardown':'central source scheduler/pool ownership applies; no class-specific frame release; all16 measured lifetimes finish before Coffee Shop teardown'},
+  'effects':{'direct_collision_damage_calls':0,'direct_rng_calls':0,'direct_audio_commands':[],
+             'direct_load_calls':0,'direct_route_camera_writes':0,
+             'source_owned_writes':['parent timer byte','parent backlink','fixed pool','cross-record alias'],
+             'score_boundary':'0x0abdd2 runs earlier in parent KO entry, outside this class; score is not audio'},
+  'source_formula_validation':{'rows':len(sample),'raw_position_facing_animation_mismatches':len(mismatches),
+     'observed_parent_branch_low_u8':dict(sorted(observed_branches.items())),
+     'observed_family_indices':[{'family':f,'index':i,'rows':n} for (f,i),n in sorted(observed_indices.items())],
+     'frame_labels_used_for':'source observation alignment only, never state transition or lifetime authority',
+     'normalization':'none for compared position/facing/animation/timer/branch'},
+  'counterfactual':item['counterfactual'],
+  'cross_record_write_contract':item['cross_record_write_contract'],
+  'native_implemented':False,'retained_gameplay_authority':False,
+  'fixed_frame_substitute_forbidden':True}
+
+
+def validate_class0e_program(x):
+ p=PROGRAM.read_bytes();op=OPCODES.read_bytes()
+ for body in x['source_bodies'].values():
+  req(body['sha256']==hashlib.sha256(op[int(body['first'],16):int(body['last_exclusive'],16)]).hexdigest(),
+      'class0e executable source identity drift')
+ attach=x['attachment'];bind=x['animation_bind']
+ req(x['classification']=='SOURCE_CLOSED_IMPLEMENTATION_FIELDS' and x['spec_executable'] is True and
+     x['allocation']['observed_allocations_u16']==16 and
+     x['allocation']['effect_filter_table']['negative_indices']==[21,23] and
+     x['allocation']['palette_table']['values_u8']==list(op[0x09d408:0x09d428]) and
+     x['allocation']['effect_filter_table']['values_s8']==[v if v<128 else v-256 for v in op[0x09d428:0x09d440]] and
+     [r['state_u16'] for r in x['state_dispatch']['entries']]==['0x0000','0x0200','0x0400','0x0600'] and
+     x['active']['guard']=='parent+4:u8 == 6' and
+     x['active']['after_guard']=='attachment then animation_bind in this same invocation; no early return on terminal transition' and
+     x['active']['local_timer_decrement'] is False and
+     attach['address_space']=='program data after LEA' and len(attach['records'])==55 and
+     bytes(v&255 for r in attach['records'] for v in
+           (r['x_offset_s8'],r['y_offset_s8'],r['facing_u8'],r['selector_u8']))==p[0x09d4fc:0x09d5d8] and
+     attach['arithmetic']=='sign_extend x/y bytes; parent facing nonzero negates x and XOR1 child facing; copy parent x/y/z high words preserving child fractional words; add x/y offsets modulo16 bits' and
+     [len(f['offsets_s16']) for f in bind['families']]==[36,14] and
+     all(b''.join(v.to_bytes(2,'big',signed=True) for v in f['offsets_s16'])==
+         p[int(f['base'],16):int(f['base'],16)+len(f['offsets_s16'])*2] for f in bind['families']) and
+     all(r==animation_record(p,int(r['animation_record'],16)) for r in bind['records']) and
+     bind['rebind_each_invocation'] is True and bind['independent_animation_advance'] is False and
+     x['terminal']['backlink_guard']=='u16(parent+0x7c) == low16(actor source slot)' and
+     x['terminal']['release_clears_u32_offsets']==[0,4,12] and
+     x['auxiliary_boundary_residue']['initial_value_u32']==0 and
+     x['auxiliary_boundary_residue']['frame_owned_clear_forbidden'] is True and
+     x['effects']['direct_rng_calls']==0 and x['effects']['direct_audio_commands']==[] and
+     x['source_formula_validation']['rows']==1776 and
+     x['source_formula_validation']['raw_position_facing_animation_mismatches']==0 and
+     x['counterfactual']['suppressed_writes']==16 and
+     x['counterfactual']['remaining_target_actor_rows']==0 and
+     x['fixed_frame_substitute_forbidden'] is True and x['native_implemented'] is False,
+     'class0e whole-program contract drift')
+ validate_class0e_alias_contract(x['cross_record_write_contract'])
+
+
 def coffee_shop_type36_presentation(op,program):
  files=('coffee_shop_type36_writes.tsv','coffee_shop_scene_actors.tsv',
         'coffee_shop_scene_frames.tsv','coffee_shop_scene_health_writes.tsv',
@@ -1115,6 +1288,9 @@ def coffee_shop_type36_presentation(op,program):
   if cls=='0x0e':
    item['cross_record_write_contract']=coffee_shop_class0e_alias_contract(op)
    validate_class0e_alias_contract(item['cross_record_write_contract'])
+   item['implementation_contract']=coffee_shop_class0e_program(
+       op,program,item,sample,context_writes,actors)
+   validate_class0e_program(item['implementation_contract'])
   classes.append(item)
  req(all(item['direct_collision_damage_writes']==0 and
          item['direct_audio_writes']==0 and
@@ -4355,6 +4531,8 @@ def validate(r):
      'Coffee Shop type-36 presentation contract drift')
  validate_class0e_alias_contract(next(x for x in type36['classes']
                                     if x['class']=='0x0e')['cross_record_write_contract'])
+ validate_class0e_program(next(x for x in type36['classes']
+                             if x['class']=='0x0e')['implementation_contract'])
  req(class03_program['classification']=='SOURCE_CLOSED_IMPLEMENTATION_FIELDS' and
      class03_program['spec_executable'] is True and
      class03_program['source_bodies']['class_dispatch']['sha256']==
