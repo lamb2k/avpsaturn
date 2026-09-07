@@ -760,6 +760,55 @@ def measure_round1_capture_demand(capture: Path) -> dict:
             "limits": "Observed baseline union expanded for both facings; not all reachable branches, actual simultaneous Saturn composite allocation, dynamic palette correctness, or physical cadence proof."}
 
 
+def measure_fixture_asset_candidates() -> dict:
+    """Conservative discovery only: addresses do not establish reachability."""
+    import contextlib
+    import io
+    from gen_avsp_emit_windows import ROM_PATH
+    fixture_path = ROOT / "data/spec02_round1_generated_fixtures.json"
+    payload = fixture_path.read_bytes()
+    addresses = set()
+    def walk(value):
+        if isinstance(value, dict):
+            for key, item in value.items():
+                if key in ("assembly", "state0_assembly", "initialized_assembly", "retained_assembly") and isinstance(item, str) and item.startswith("0x"):
+                    addresses.add(int(item, 16))
+                walk(item)
+        elif isinstance(value, list):
+            for item in value:
+                walk(item)
+    walk(json.loads(payload))
+    rom_bytes = ROM_PATH.read_bytes()
+    rom = Rom(rom_bytes)
+    tiles, banks, blanks, failures = set(), set(), [], []
+    for address in sorted(addresses):
+        if rom.u16(address) == 8:
+            blanks.append("0x%06x" % address)
+            continue
+        items = [dict(kind="sizing-only", assembly=address, facing=f,
+                      coordinate_mode=m, palette=0, object_or=0x8000)
+                 for f in (0, 1) for m in (0, 1)]
+        try:
+            results = decode_spec02_presentations(rom, items)
+        except (AssertionError, IndexError) as exc:
+            failures.append({"assembly": "0x%06x" % address, "reason": str(exc)})
+            continue
+        for _, _, _, flat in results:
+            for i in range(0, len(flat), 4):
+                tiles.update(entry_tile_codes(flat[i+2], flat[i+1], flat[i+3]))
+    decoded_count = len(tiles)
+    with contextlib.redirect_stdout(io.StringIO()):
+        collect_full_route_entries("full_route:1972:15193", tiles, banks)
+    return {"fixture_sha256": hashlib.sha256(payload).hexdigest(),
+            "rom_view_sha256": hashlib.sha256(rom_bytes).hexdigest(),
+            "candidate_addresses": len(addresses), "tag8_blank_addresses": blanks,
+            "decode_failures": failures, "decoded_fixture_tiles": decoded_count,
+            "combined_observed_and_decoded_tile_count": len(tiles),
+            "combined_tile_code_sha256": hashlib.sha256(b"".join(t.to_bytes(4,"big") for t in sorted(tiles))).hexdigest(),
+            "archive_lower_bound_with_observed_palettes_bytes": 48 + 132*len(tiles) + 32*len(banks),
+            "classification": "INCOMPLETE_SIZING: both-mode candidate union, not reachability or source palette binding; undecoded addresses and unlisted branches remain explicit."}
+
+
 def main() -> int:
     parser = argparse.ArgumentParser(description=__doc__)
     source = parser.add_mutually_exclusive_group(required=True)
@@ -784,7 +833,8 @@ def main() -> int:
         b = measure_round1_capture_demand(ROOT / ".deps/mame/full_route_rerun")
         if a != b:
             raise ValueError("paired route asset demand mismatch")
-        print(json.dumps({"paired_identity": True, "observed_demand": a}, sort_keys=True, indent=2))
+        print(json.dumps({"paired_identity": True, "observed_demand": a,
+                          "fixture_candidate_demand": measure_fixture_asset_candidates()}, sort_keys=True, indent=2))
         return 0
     avsp.verify_roms()
     gfx = avsp.load_gfx_region()

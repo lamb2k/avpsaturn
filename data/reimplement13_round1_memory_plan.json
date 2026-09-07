@@ -11,6 +11,28 @@
     "object_stream_sha256": "a29bbc4d548c7d39e00e7b3f4e3cf053c9fa8a206e34bb1f5d994fba3fd46a78",
     "tile_code_sha256": "58a8f00980188c937fd2f3da5edd3198f69bcbcbc9567e4f06e03a0667b2ecf7",
     "tile_count": 10920,
+    "fixture_candidate_extension": {
+      "candidate_unique_numeric_addresses": 640,
+      "blank_tag8_addresses": 10,
+      "decoded_tile_count": 10386,
+      "combined_baseline_and_decoded_tile_count": 11745,
+      "combined_tile_code_sha256": "d5731d65bfdaa8fd7047e2648bd969bd9e1701d556446054d5184c3790609bef",
+      "archive_lower_bound_with_observed_palettes_bytes": 1551028,
+      "proposed_1572864_byte_carve_remaining_bytes": 21836,
+      "generic_decoder_rejections": ["0x078ba2", "0x078bac", "0x078f90", "0x078f96"],
+      "rejection_owner": "record24/class0a dispatch0x077ccc; source presentation fixed-pool resident; topword0x0020; generic object decoder is not its proven format contract",
+      "status": "INCOMPLETE_SIZING_NOT_MAP_APPROVAL",
+      "scope": "Walk explicit fixture assembly fields, numerically deduplicate, decode both facings/modes for conservative discovery. Not proof all reachable fields were enumerated or palette modes bound. Four rejections remain visible, not omitted as zero cost.",
+      "next_experiment": "Use accepted class0a presentation contract to identify its emitter/table format and measure the four rejected records; do not infer standard object layout from an assembly label."
+    },
+    "audio_capacity_status": {
+      "source_audio_command_transactions": 72,
+      "known_current_native_pcm_bytes": 144752,
+      "complete_native_command_to_payload_budget": null,
+      "scope": "72 source commands include control/reset transactions and are not72 logical PCM sounds. Accepted source ownership/QSound effects do not themselves specify Saturn sample payloads, rate, channels, shared samples or resident lifetimes.",
+      "missing": "Source-command-to-native-payload or approved synthesis adaptation, payload hashes/bytes, simultaneous voices, retirement and source-owned load seams. Do not extrapolate full-route PCM cost from the approved melee cue.",
+      "adaptation_approved": false
+    },
     "palette_banks": 20,
     "peak_simultaneous_palette_banks": 12,
     "palette_integration_blocker": {
