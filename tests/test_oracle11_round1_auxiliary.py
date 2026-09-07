@@ -88,4 +88,29 @@ next(c for c in x['coffee_shop_scene_component_identities']['components']
       'scheduler_phase_evidence']['record20_exit_prefix_scheduler'][
        'route_teardown_dispatch_guard']['route_teardown_state_u16']=2
 reject(x,'record20 route-teardown dispatch guard')
-print('ORACLE-11 auxiliary authority tests: PASS (154 mutations rejected)')
+alias_controls = [
+ ('address',lambda x:x.__setitem__('address_rule','source_actor_slot + 0x1c')),
+ ('width',lambda x:x.__setitem__('width_bits',32)),
+ ('value',lambda x:x.__setitem__('value_u8',0)),
+ ('pointer-mask',lambda x:x['owners'][0].__setitem__('pointer_rule','clear pointer')),
+ ('pair',lambda x:x['capture_identity']['b'].__setitem__('samples.tsv','0'*64)),
+ ('no-causal-difference',lambda x:x['observation'].__setitem__('raw_pointer_difference_rows',0)),
+ ('reader-overclaim',lambda x:x['observation'].__setitem__('reads_are_cpu_only',True)),
+ ('suppression',lambda x:x['control'].__setitem__('suppressed_writes',0)),
+ ('omit-write',lambda x:x['control'].__setitem__('permits_omitting_source_write',True)),
+ ('normalized-gameplay',lambda x:x['capture_identity']['suppression'].__setitem__('samples.tsv','0'*64)),
+ ('native-overclaim',lambda x:x.__setitem__('native_implemented',True)),
+ ('physical-overclaim',lambda x:x.__setitem__('physical_saturn','PASS')),
+]
+for label,mutate in alias_controls:
+ x=copy.deepcopy(report)
+ alias=next(c for c in x['coffee_shop_type36_presentation']['classes']
+            if c['class']=='0x0e')['cross_record_write_contract']
+ mutate(alias)
+ try:m.validate(x)
+ except ValueError as error:
+  assert str(error)=='class0e cross-record writer contract drift', (label,str(error))
+ else:raise AssertionError('survived class0e contract control: '+label)
+print('ORACLE-11 auxiliary authority tests: PASS '
+      '(154 existing field controls; 12 attributable class0e contract controls; '
+      'these are not native behavioral kills)')

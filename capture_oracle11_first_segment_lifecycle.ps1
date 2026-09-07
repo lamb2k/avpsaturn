@@ -7,10 +7,15 @@ param(
     [string]$CaptureNameOverride = '',
     [switch]$Class0aCounterfactual,
     [switch]$Class00InitCounterfactual,
-    [switch]$Class0cContactCounterfactual
+    [switch]$Class0cContactCounterfactual,
+    [switch]$Class0eAliasCapture,
+    [switch]$Class0eAliasSuppress
 )
 
 $ErrorActionPreference = 'Stop'
+if ($Class0eAliasSuppress -and -not $Class0eAliasCapture) {
+    throw 'Class0eAliasSuppress requires Class0eAliasCapture'
+}
 $root = $PSScriptRoot
 $mame = Join-Path $root '.deps\mame\mame0289\mame.exe'
 $baseline = Join-Path $root '.deps\mame\full_route_nvram_baseline'
@@ -38,6 +43,8 @@ $env:AVSP_ORACLE11_PROGRESSION_LIFECYCLE = '1'
 $env:AVSP_ORACLE11_PROGRESSION_SUPPRESS_LIFECYCLE = if ($Variant -in @('s', 's2')) { '1' } else { '0' }
 $env:AVSP_ORACLE11_PROGRESSION_SUPPRESS_TRANSITION_PC = if ($Variant -in @('t1s', 't2s', 'cs30s')) { $TransitionWriter } else { '' }
 $env:AVSP_ORACLE11_COFFEE_SHOP_SCENE = if ($Variant -match '^cs') { '1' } else { '0' }
+$env:AVSP_ORACLE11_CLASS0E_ALIAS_CAPTURE = if ($Class0eAliasCapture) { '1' } else { '0' }
+$env:AVSP_ORACLE11_CLASS0E_ALIAS_SUPPRESS = if ($Class0eAliasSuppress) { '1' } else { '0' }
 $env:AVSP_ORACLE11_SUPPRESS_ACTION4_TIMER = if ($Variant -in @('css', 'cs2s', 'cs3s', 'cs4s', 'cs5s', 'cs6s')) { '1' } else { '0' }
 $env:AVSP_ORACLE11_SUPPRESS_TYPE4_CLASS03_PC = if ($Variant -eq 'cs7s') { $TransitionWriter } else { '' }
 $env:AVSP_ORACLE11_SUPPRESS_COFFEE_STAGE_RNG = if ($Variant -eq 'cs10s') { '1' } else { '0' }
@@ -122,6 +129,8 @@ finally {
         'AVSP_ORACLE11_PROGRESSION_SUPPRESS_LIFECYCLE',
         'AVSP_ORACLE11_PROGRESSION_SUPPRESS_TRANSITION_PC',
         'AVSP_ORACLE11_COFFEE_SHOP_SCENE',
+        'AVSP_ORACLE11_CLASS0E_ALIAS_CAPTURE',
+        'AVSP_ORACLE11_CLASS0E_ALIAS_SUPPRESS',
         'AVSP_ORACLE11_SUPPRESS_ACTION4_TIMER',
         'AVSP_ORACLE11_SUPPRESS_TYPE4_CLASS03_PC',
         'AVSP_ORACLE11_SUPPRESS_COFFEE_STAGE_RNG',

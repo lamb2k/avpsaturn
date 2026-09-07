@@ -17895,6 +17895,113 @@
           "remaining_target_actor_rows": 0,
           "suppressed_writes": 16
         },
+        "cross_record_write_contract": {
+          "address_rule": "u24(source_actor_slot + 0x5c)",
+          "attempts": {
+            "failed_pre_capture_recipes": 2,
+            "failure": "Lua main-chunk 200-local limit; no evidence credited",
+            "limit": 3,
+            "repair": "one process-local global probe table; Lua54 load preflight PASS",
+            "successful_recipe": 3
+          },
+          "capture_identity": {
+            "a": {
+              "coffee_shop_class0e_alias.tsv": "fc86aec0c933ab6b83b50ac3a36d857a88f496548f47f1752945a8b55255d0a6",
+              "coffee_shop_rng_calls.tsv": "81338529f76629c3d103885c16838bd562beecf783f0b5107a5b7ecd11e219b3",
+              "coffee_shop_scene_actors.tsv": "b7b1568df038af1cdd7eb5bc6eb30c830efca4952d1077644ab3b31ed2ad1c0f",
+              "coffee_shop_scene_frames.tsv": "91e4aab3a03586a6c9a143dd58ee03a72ebc52b7fd611fdc6fe0975ebd522d1d",
+              "coffee_shop_scene_health_writes.tsv": "7defadcfff16b99b8e2d5b66fc7b42443106837d698e659c64d45a8770d6aa0b",
+              "dispatches.tsv": "a47890edd3e102e8d8db5e4caa21d9b15c5c6e0a3c4800ab1aff578421102903",
+              "progression_result.tsv": "c7bacd855ddbe40c5cee5895c183bbf4ec547c8f7ac24ccd9338e7ad5c43538e",
+              "samples.tsv": "51964bb2a5d68f44996c9a5bddd4102d131ebf2e9649b904dff91066221a7611"
+            },
+            "b": {
+              "coffee_shop_class0e_alias.tsv": "fc86aec0c933ab6b83b50ac3a36d857a88f496548f47f1752945a8b55255d0a6",
+              "coffee_shop_rng_calls.tsv": "81338529f76629c3d103885c16838bd562beecf783f0b5107a5b7ecd11e219b3",
+              "coffee_shop_scene_actors.tsv": "b7b1568df038af1cdd7eb5bc6eb30c830efca4952d1077644ab3b31ed2ad1c0f",
+              "coffee_shop_scene_frames.tsv": "91e4aab3a03586a6c9a143dd58ee03a72ebc52b7fd611fdc6fe0975ebd522d1d",
+              "coffee_shop_scene_health_writes.tsv": "7defadcfff16b99b8e2d5b66fc7b42443106837d698e659c64d45a8770d6aa0b",
+              "dispatches.tsv": "a47890edd3e102e8d8db5e4caa21d9b15c5c6e0a3c4800ab1aff578421102903",
+              "progression_result.tsv": "c7bacd855ddbe40c5cee5895c183bbf4ec547c8f7ac24ccd9338e7ad5c43538e",
+              "samples.tsv": "51964bb2a5d68f44996c9a5bddd4102d131ebf2e9649b904dff91066221a7611"
+            },
+            "byte_identical": true,
+            "capture_script_sha256": "d8ab4402340226cae8a79ca50809250598bf08c5c7e9292976ce81771b33a858",
+            "captures": [
+              "oracle11_class0e_alias_a3",
+              "oracle11_class0e_alias_b3",
+              "oracle11_class0e_alias_m3"
+            ],
+            "mame_sha256": "af6966108d9b52c22465c6d50f4e5d50cc371b50f2d27dc443935f287aad37a3",
+            "suppression": {
+              "coffee_shop_class0e_alias.tsv": "585919da5f76697a083ee4f2386241ef2683ab444d6f01bf34ef156817ab76b0",
+              "coffee_shop_rng_calls.tsv": "81338529f76629c3d103885c16838bd562beecf783f0b5107a5b7ecd11e219b3",
+              "coffee_shop_scene_actors.tsv": "b7b1568df038af1cdd7eb5bc6eb30c830efca4952d1077644ab3b31ed2ad1c0f",
+              "coffee_shop_scene_frames.tsv": "91e4aab3a03586a6c9a143dd58ee03a72ebc52b7fd611fdc6fe0975ebd522d1d",
+              "coffee_shop_scene_health_writes.tsv": "7defadcfff16b99b8e2d5b66fc7b42443106837d698e659c64d45a8770d6aa0b",
+              "dispatches.tsv": "a47890edd3e102e8d8db5e4caa21d9b15c5c6e0a3c4800ab1aff578421102903",
+              "progression_result.tsv": "c7bacd855ddbe40c5cee5895c183bbf4ec547c8f7ac24ccd9338e7ad5c43538e",
+              "samples.tsv": "51964bb2a5d68f44996c9a5bddd4102d131ebf2e9649b904dff91066221a7611"
+            }
+          },
+          "classification": "SOURCE_CLOSED_IMPLEMENTATION_FIELDS",
+          "control": {
+            "classification": "SOURCE_RAW_STATE_DIFFERENCE_WITH_MATCHED_SCENE_PROJECTION",
+            "complete_scene_domains_byte_identical": [
+              "coffee_shop_scene_actors.tsv",
+              "coffee_shop_scene_frames.tsv",
+              "coffee_shop_scene_health_writes.tsv",
+              "coffee_shop_rng_calls.tsv",
+              "samples.tsv",
+              "dispatches.tsv",
+              "progression_result.tsv"
+            ],
+            "permits_omitting_source_write": false,
+            "raw_pointer_difference": true,
+            "suppressed_writes": 16
+          },
+          "direct_audio_commands": [],
+          "direct_rng_calls": 0,
+          "guard": "class0e state0 initialization reaches the source instruction",
+          "lifetime_and_order": "write during initialization before attachment and animation bind; preserve neighbor alias until its source-owned overwrite, not until an authored frame",
+          "native_implemented": false,
+          "observation": {
+            "actor_rows": 95149,
+            "alias_writes": 16,
+            "class0e_rows": 1776,
+            "overwrite_events": 12,
+            "raw_pointer_difference_rows": 726,
+            "read_caveat": "existing harness reads can trigger taps; no claim of exhaustive CPU reader ownership from tap PCs alone",
+            "reads_are_cpu_only": false,
+            "scene_span": [
+              1972,
+              5566
+            ],
+            "tap_reads": 710
+          },
+          "observed_write_pc": "0x09d46a",
+          "owners": [
+            {
+              "active_class0e_destinations": 2,
+              "destination": "next source-slot record, animation_record+0x00 (most significant byte)",
+              "guard": "type36 source slot below 0xffe240",
+              "observed_writes": 11,
+              "pointer_rule": "(animation_record_u32 & 0x00ffffff) | 0x01000000"
+            },
+            {
+              "destination": "record24_aux slot0xffe280 +0x1c at 0xffe29c",
+              "guard": "type36 source slot equals 0xffe240",
+              "observed_writes": 5
+            }
+          ],
+          "physical_saturn": "UNRUN",
+          "scope": "Coffee Shop class0e cross-record byte writer only; not the complete class contract",
+          "source_instruction": "0x09d464",
+          "source_instruction_sha256": "c6e6b3aa919651d086934139aeeb7bf4ecad36a902ffc4ccb1798816bae455ba",
+          "value_u8": 1,
+          "width_bits": 8,
+          "write_rule": "replace only the addressed byte; preserve the other bytes and all actor metadata"
+        },
         "direct_audio_writes": 0,
         "direct_collision_damage_writes": 0,
         "direct_route_camera_writes": 0,

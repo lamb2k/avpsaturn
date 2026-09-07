@@ -1,6 +1,7 @@
 #!/usr/bin/env python3
 """Validate deterministic SPEC-02 generation and real field-family controls."""
 import copy
+import hashlib
 import importlib.util
 import json
 from pathlib import Path
@@ -913,4 +914,31 @@ m = copy.deepcopy(contract); m["protected_boundaries"]["physical_saturn"] = "PAS
 m = copy.deepcopy(contract); m["next_card"] = "SALVAGE-08-FRONTEND"; mutations.append((m, fixtures, "frontend bypass"))
 for args in mutations:
     reject(*args)
-print(f"SPEC-02 Round 1 executable contract: PASS ({len(mutations)} mutations rejected)")
+# Rebind the enclosing digest for these field controls: rejecting merely because
+# the fixture hash changed would not prove the source-to-fixture field boundary.
+class0e_controls = [
+    ('width', lambda x: x.__setitem__('width_bits', 32)),
+    ('address', lambda x: x.__setitem__('address_rule', 'source_actor_slot + 0x1c')),
+    ('value', lambda x: x.__setitem__('value_u8', 0)),
+    ('omission', lambda x: x['control'].__setitem__('permits_omitting_source_write', True)),
+    ('cpu-reader-overclaim', lambda x: x['observation'].__setitem__('reads_are_cpu_only', True)),
+]
+for label, mutate in class0e_controls:
+    changed = copy.deepcopy(fixtures)
+    alias = next(row for row in changed['authority_data']['auxiliary']
+                 ['coffee_shop_type36_presentation']['classes']
+                 if row['class'] == '0x0e')['cross_record_write_contract']
+    mutate(alias)
+    bound_contract = copy.deepcopy(contract)
+    bound_contract['generated_fixtures']['sha256'] = hashlib.sha256(
+        spec02.canonical(changed)).hexdigest()
+    try:
+        spec02.validate(bound_contract, changed)
+    except ValueError as error:
+        assert str(error) == 'type-36 class-0x0e cross-record fixture drift', (label, str(error))
+    else:
+        raise AssertionError('survived class0e fixture control: ' + label)
+spec02.validate(copy.deepcopy(contract), copy.deepcopy(fixtures))
+print(f"SPEC-02 Round 1 executable contract: PASS ({len(mutations)} existing "
+      "metadata/hash controls; 5 attributable class0e field controls; "
+      "unchanged-fixture control accepted; not native behavioral kills)")

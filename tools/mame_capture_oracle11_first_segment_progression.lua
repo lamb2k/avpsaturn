@@ -11,6 +11,13 @@ local suppress_guard = os.getenv("AVSP_ORACLE11_PROGRESSION_SUPPRESS_GUARD") == 
 local capture_lifecycle = os.getenv("AVSP_ORACLE11_PROGRESSION_LIFECYCLE") == "1"
 local suppress_lifecycle = os.getenv("AVSP_ORACLE11_PROGRESSION_SUPPRESS_LIFECYCLE") == "1"
 local capture_scene = os.getenv("AVSP_ORACLE11_COFFEE_SHOP_SCENE") == "1"
+-- The legacy main chunk already reaches Lua's 200-local ceiling. Like the
+-- retained tap handles below, this probe state is process-local global state.
+class0e_alias = {
+    capture = os.getenv("AVSP_ORACLE11_CLASS0E_ALIAS_CAPTURE") == "1",
+    suppress = os.getenv("AVSP_ORACLE11_CLASS0E_ALIAS_SUPPRESS") == "1",
+    internal = false, pending = {}, sequence = 0
+}
 local suppress_action4_timer =
     os.getenv("AVSP_ORACLE11_SUPPRESS_ACTION4_TIMER") == "1"
 local suppress_coffee_stage_rng =
@@ -1392,6 +1399,61 @@ oracle11_type4_class03_writes = program:install_write_tap(
         end
     end)
 
+-- Bounded class-0x0e follow-up. +0x5c is outside a type-36 record:
+-- observe the destination and subsequent tapped reads until overwrite (existing
+-- harness reads also trigger taps; these are not an exclusive CPU-reader census),
+-- including the record24_aux boundary. Do not localize it to actor scratch.
+if class0e_alias.capture then
+    class0e_alias.log = assert(io.open(root .. "/coffee_shop_class0e_alias.tsv", "w"))
+    class0e_alias.log:write("sequence\tframe\tevent\tpc\ta6\taddress\tdata\tmask\tpointer_before\tsuppressed\n")
+end
+function class0e_alias.emit(event, pc, a6, offset, data, mask, suppressed)
+    class0e_alias.internal = true
+    local prior = u32(offset & 0xfffffc)
+    class0e_alias.sequence = class0e_alias.sequence + 1
+    class0e_alias.log:write(string.format(
+        "%d\t%d\t%s\t%06x\t%06x\t%06x\t%08x\t%08x\t%08x\t%d\n",
+        class0e_alias.sequence, frame, event, pc, a6, offset,
+        data & 0xffffffff, mask & 0xffffffff, prior, suppressed and 1 or 0))
+    class0e_alias.internal = false
+end
+if class0e_alias.capture then
+    oracle11_class0e_alias_write = program:install_write_tap(
+        0xffd280, 0xffea7f, "oracle11_class0e_alias_write",
+        function(offset, data, mask)
+            if class0e_alias.internal or frame < 1972 or frame > capture_last_frame then return end
+            local pc = maincpu.state["PC"].value & 0xffffff
+            local a6 = maincpu.state["A6"].value & 0xffffff
+            local alias = pc == 0x09d46a and a6 >= 0xffd280 and a6 < 0xffe280 and
+                (a6 - 0xffd280) % 0x40 == 0 and offset == a6 + 0x5c and
+                mask == 0xff00 and u8(a6 + 2) == 0x0e
+            if alias then
+                class0e_alias.pending[offset] = true
+                class0e_alias.emit("alias_write", pc, a6, offset, data, mask,
+                    class0e_alias.suppress)
+                if class0e_alias.suppress then
+                    class0e_alias.internal = true
+                    local prior = u16(offset)
+                    class0e_alias.internal = false
+                    return prior
+                end
+            elseif class0e_alias.pending[offset] and (mask & 0xff00) ~= 0 then
+                class0e_alias.emit("overwrite", pc, a6, offset, data, mask, false)
+                class0e_alias.pending[offset] = nil
+            end
+        end)
+    oracle11_class0e_alias_read = program:install_read_tap(
+        0xffd280, 0xffea7f, "oracle11_class0e_alias_read",
+        function(offset, data, mask)
+            if class0e_alias.internal or frame < 1972 or frame > capture_last_frame then return end
+            local pointer = offset & 0xfffffc
+            if not class0e_alias.pending[pointer] then return end
+            class0e_alias.emit("read_before_overwrite",
+                maincpu.state["PC"].value & 0xffffff,
+                maincpu.state["A6"].value & 0xffffff, offset, data, mask, false)
+        end)
+end
+
 oracle11_type36_writes = program:install_write_tap(
     0xffd280, 0xffe27f, "oracle11_type36_writes",
     function(offset, data, mask)
@@ -2485,6 +2547,7 @@ oracle11_progression_frame = emu.add_machine_frame_notifier(function()
         scene_health_writes:close(); type4_class03:close()
         scene_rng_calls:close(); stage_setup:close(); stage_setup_writes:close()
         class1f_bounds:close(); type36_writes:close()
+        if class0e_alias.log then class0e_alias.log:close() end
         pair_suppression:close(); obstacle_trace:close(); obstacle_writes:close()
         component20_writes:close(); component20_dispatch:close()
         component20_collision:close()

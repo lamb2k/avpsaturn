@@ -305,6 +305,11 @@ def build_fields() -> list[dict[str, object]]:
           "/authority_data/auxiliary/coffee_shop_type36_presentation/classes/1/implementation_contract", "source player action/substate guards and fixed-pool allocation own creation; exact parent copy, signed selector offset, facing copy, animation sequence, conditional global x delta, backlink clear and centralized release own the presentation program while gameplay effects remain absent",
           ["actor.outer_state:u8/u16", "actor.parent_slot:u16", "actor.position:s16", "actor.facing:u8", "actor.animation_record:u32", "actor.animation_timer:u16", "actor.animation_branch:s16", "player.state_substate:u16", "player.position:s16", "player.facing:u8", "player.animation_branch:u8", "global.0xff81e8:s16", "global.0xff82c0:s16", "type36.free_count:u8"], ["actor.active:u8", "actor.class:u8", "actor.state:u8/u16", "actor.parent_slot:u16", "actor.position:s16", "actor.facing:u8", "actor.animation_record:u32", "actor.presentation_fields", "player.child_slot:u16", "type36.free_count:u8"],
           "/coffee_shop_type36_presentation/classes/1/implementation_contract/counterfactual", "independent actor suppression removes all fifteen lifetimes and changes fixed-pool projection while wrong writer, guard, pool order, parent, offset, facing, animation, global delta, backlink or release mutations are rejected"),
+        f("auxiliary.coffee_shop_class0e_cross_record_write", "round1-projectile-pickup-hazard", "guarded_cross_record_byte_write", False,
+          "auxiliary", "/coffee_shop_type36_presentation/classes/3/cross_record_write_contract", "0x09d464 byte writer observed at PC 0x09d46a; this field binding is not the complete class-0x0e executable program",
+          "/authority_data/auxiliary/coffee_shop_type36_presentation/classes/3/cross_record_write_contract", "class0e state0 reaches the source instruction; write u8(1) at u24(source slot + 0x5c), preserving every other byte and owner field until its source-owned overwrite",
+          ["actor.source_slot:u24", "actor.state:u8", "destination.animation_record:u32"], ["destination.animation_record_most_significant_byte:u8"],
+          "/coffee_shop_type36_presentation/classes/3/cross_record_write_contract/control", "sixteen suppressed source writes change raw pointer state while seven complete-scene projection domains remain byte-identical; matched projection does not permit omitting the write"),
         f("auxiliary.class10_type24_whole_program", "round1-projectile-pickup-hazard", "guarded_actor_program", True,
           "class10_program", "/", "0x079ffc class entry, four-way top-state dispatch, six source variant selectors, and every Round 1-reachable branch",
           "/authority_data/auxiliary/archetypes/5/whole_routine_implementation_contract", "outer state dispatches only through the bounded source program; variant-indexed signed offsets and animation records, exact current-state guards, presentation updates and fixed-pool release own every transition",
@@ -1940,6 +1945,18 @@ def validate(contract: dict[str, object], fixtures: dict[str, object],
             class03["suppression_control"]["suppressed_writes"] == 1 and
             class03["rng_calls"] == [],
             "airborne Button1 class-3 implementation fixture drift")
+    class0e_alias = next(item for item in fixtures["authority_data"]["auxiliary"]
+                        ["coffee_shop_type36_presentation"]["classes"]
+                        if item["class"] == "0x0e")["cross_record_write_contract"]
+    source_class0e_alias = next(item for item in source["auxiliary"]
+                               ["coffee_shop_type36_presentation"]["classes"]
+                               if item["class"] == "0x0e")["cross_record_write_contract"]
+    require(class0e_alias == source_class0e_alias and
+            class0e_alias["width_bits"] == 8 and
+            class0e_alias["value_u8"] == 1 and
+            class0e_alias["observation"]["reads_are_cpu_only"] is False and
+            class0e_alias["control"]["permits_omitting_source_write"] is False,
+            "type-36 class-0x0e cross-record fixture drift")
     class04 = next(item for item in fixtures["authority_data"]["auxiliary"]
                    ["coffee_shop_type36_presentation"]["classes"]
                    if item["class"] == "0x04")

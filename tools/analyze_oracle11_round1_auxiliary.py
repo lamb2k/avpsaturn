@@ -656,6 +656,100 @@ def coffee_shop_class1f_type16_projectile(op,program,aux_writes):
   'fixed_frame_substitute_forbidden':True,
   'retained_gameplay_authority':False}
 
+def coffee_shop_class0e_alias_contract(op):
+ """Bind the cross-record writer without treating tap reads as CPU-only."""
+ roots=[ROOT/'.deps/mame'/('oracle11_class0e_alias_'+x)
+        for x in ('a3','b3','m3')]
+ ledger='coffee_shop_class0e_alias.tsv'
+ domains=('coffee_shop_scene_actors.tsv','coffee_shop_scene_frames.tsv',
+          'coffee_shop_scene_health_writes.tsv','coffee_shop_rng_calls.tsv',
+          'samples.tsv','dispatches.tsv','progression_result.tsv')
+ identities=[{f:sha(r/f) for f in (ledger,)+domains} for r in roots]
+ req(identities[0]==identities[1],'class0e alias cold captures differ')
+ req(all(identities[0][f]==identities[2][f] for f in domains),
+     'class0e alias suppression changes complete-scene projection')
+ baseline=rows(roots[0]/ledger);mutant=rows(roots[2]/ledger)
+ req(len(baseline)==len(mutant)==738,'class0e alias observation count drift')
+ req(all(all(a[k]==b[k] for k in ('sequence','frame','event','pc','a6','address','mask'))
+         for a,b in zip(baseline,mutant)),
+     'class0e alias suppression changes observation ordering')
+ writes=[r for r in baseline if r['event']=='alias_write']
+ suppressed=[r for r in mutant if r['suppressed']=='1']
+ req(len(writes)==len(suppressed)==16,'class0e alias suppression not exercised')
+ for row in writes:
+  req(row['pc']=='09d46a' and int(row['address'],16)==int(row['a6'],16)+0x5c
+      and int(row['mask'],16)==0xff00 and int(row['data'],16)&0xff00==0x100,
+      'class0e alias writer/address/value drift')
+ differences=sum(a['pointer_before']!=b['pointer_before']
+                 for a,b in zip(baseline,mutant))
+ req(differences>0,'class0e alias suppression has no raw-state witness')
+ retained=rows(TYPE36_CONTEXT_A/'coffee_shop_scene_actors.tsv')
+ current=rows(roots[0]/'coffee_shop_scene_actors.tsv')
+ select=lambda rr:[r for r in rr if r['pool']=='record36' and r['class']=='0e']
+ req(select(retained)==select(current) and len(select(current))==1776,
+     'class0e alias follow-up changed accepted actor trajectory')
+ req(op[0x09d464:0x09d46a].hex()=='1d7c0001005c',
+     'class0e cross-record instruction drift')
+ return {
+  'classification':'SOURCE_CLOSED_IMPLEMENTATION_FIELDS',
+  'scope':'Coffee Shop class0e cross-record byte writer only; not the complete class contract',
+  'source_instruction':'0x09d464','observed_write_pc':'0x09d46a',
+  'source_instruction_sha256':hashlib.sha256(op[0x09d464:0x09d46a]).hexdigest(),
+  'guard':'class0e state0 initialization reaches the source instruction',
+  'address_rule':'u24(source_actor_slot + 0x5c)',
+  'width_bits':8,'value_u8':1,
+  'write_rule':'replace only the addressed byte; preserve the other bytes and all actor metadata',
+  'owners':[
+   {'guard':'type36 source slot below 0xffe240',
+    'destination':'next source-slot record, animation_record+0x00 (most significant byte)',
+    'pointer_rule':'(animation_record_u32 & 0x00ffffff) | 0x01000000',
+    'observed_writes':11,'active_class0e_destinations':2},
+   {'guard':'type36 source slot equals 0xffe240',
+    'destination':'record24_aux slot0xffe280 +0x1c at 0xffe29c',
+    'observed_writes':5}],
+  'lifetime_and_order':'write during initialization before attachment and animation bind; preserve neighbor alias until its source-owned overwrite, not until an authored frame',
+  'direct_rng_calls':0,'direct_audio_commands':[],
+  'capture_identity':{'a':identities[0],'b':identities[1],
+                      'suppression':identities[2],'byte_identical':True,
+                      'captures':[r.name for r in roots],
+                      'mame_sha256':'af6966108d9b52c22465c6d50f4e5d50cc371b50f2d27dc443935f287aad37a3',
+                      'capture_script_sha256':'d8ab4402340226cae8a79ca50809250598bf08c5c7e9292976ce81771b33a858'},
+  'observation':{'scene_span':[1972,5566],'actor_rows':95149,
+                 'class0e_rows':1776,'alias_writes':16,'overwrite_events':12,
+                 'tap_reads':710,'raw_pointer_difference_rows':differences,
+                 'reads_are_cpu_only':False,
+                 'read_caveat':'existing harness reads can trigger taps; no claim of exhaustive CPU reader ownership from tap PCs alone'},
+  'control':{'suppressed_writes':16,'raw_pointer_difference':True,
+             'complete_scene_domains_byte_identical':list(domains),
+             'classification':'SOURCE_RAW_STATE_DIFFERENCE_WITH_MATCHED_SCENE_PROJECTION',
+             'permits_omitting_source_write':False},
+  'attempts':{'limit':3,'successful_recipe':3,
+              'failed_pre_capture_recipes':2,
+              'failure':'Lua main-chunk 200-local limit; no evidence credited',
+              'repair':'one process-local global probe table; Lua54 load preflight PASS'},
+  'native_implemented':False,'physical_saturn':'UNRUN'}
+
+
+def validate_class0e_alias_contract(x):
+ req(x['classification']=='SOURCE_CLOSED_IMPLEMENTATION_FIELDS' and
+     x['source_instruction']=='0x09d464' and x['observed_write_pc']=='0x09d46a' and
+     x['address_rule']=='u24(source_actor_slot + 0x5c)' and
+     x['width_bits']==8 and x['value_u8']==1 and
+     x['owners'][0]['pointer_rule']=='(animation_record_u32 & 0x00ffffff) | 0x01000000' and
+     [r['observed_writes'] for r in x['owners']]==[11,5] and
+     x['capture_identity']['a']==x['capture_identity']['b'] and
+     x['observation']['raw_pointer_difference_rows']>0 and
+     x['observation']['reads_are_cpu_only'] is False and
+     x['control']['suppressed_writes']==16 and
+     x['control']['raw_pointer_difference'] is True and
+     len(x['control']['complete_scene_domains_byte_identical'])==7 and
+     all(x['capture_identity']['a'][f]==x['capture_identity']['suppression'][f]
+         for f in x['control']['complete_scene_domains_byte_identical']) and
+     x['control']['permits_omitting_source_write'] is False and
+     x['native_implemented'] is False and x['physical_saturn']=='UNRUN',
+     'class0e cross-record writer contract drift')
+
+
 def coffee_shop_type36_presentation(op,program):
  files=('coffee_shop_type36_writes.tsv','coffee_shop_scene_actors.tsv',
         'coffee_shop_scene_frames.tsv','coffee_shop_scene_health_writes.tsv',
@@ -1018,6 +1112,9 @@ def coffee_shop_type36_presentation(op,program):
      'invented collision, damage, audio, route, camera or load effect'],
     'fixed_frame_substitute_forbidden':True,
     'retained_gameplay_authority':False}
+  if cls=='0x0e':
+   item['cross_record_write_contract']=coffee_shop_class0e_alias_contract(op)
+   validate_class0e_alias_contract(item['cross_record_write_contract'])
   classes.append(item)
  req(all(item['direct_collision_damage_writes']==0 and
          item['direct_audio_writes']==0 and
@@ -4256,6 +4353,8 @@ def validate(r):
          for x in type36['classes']) and
      type36['retained_gameplay_authority'] is False,
      'Coffee Shop type-36 presentation contract drift')
+ validate_class0e_alias_contract(next(x for x in type36['classes']
+                                    if x['class']=='0x0e')['cross_record_write_contract'])
  req(class03_program['classification']=='SOURCE_CLOSED_IMPLEMENTATION_FIELDS' and
      class03_program['spec_executable'] is True and
      class03_program['source_bodies']['class_dispatch']['sha256']==
