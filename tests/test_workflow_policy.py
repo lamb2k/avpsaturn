@@ -36,7 +36,7 @@ def main(*, run_negative_controls: bool = True) -> None:
         "implementation is the default for ordinary work",
         "nested Codex executors are not used for ordinary implementation",
         "Claude is an optional bounded provider",
-        "gpt-5.6-sol",
+        "gpt-6-astra",
         "automatically correct ordinary compile",
         "A passing emulator check is not human approval or physical proof",
         "A user-approved component is locked",
@@ -68,6 +68,9 @@ def main(*, run_negative_controls: bool = True) -> None:
     codex_config = (ROOT / ".codex/config.toml").read_text(encoding="utf-8")
     require("enabled = false" in codex_config,
             "project still enables nested agents")
+    require('model = "gpt-6-astra"' in codex_config and
+            'model_reasoning_effort = "low"' in codex_config,
+            "owner-selected Astra low project defaults drifted")
 
     goal = (ROOT / "docs/GOAL.md").read_text(encoding="utf-8")
     for token in (

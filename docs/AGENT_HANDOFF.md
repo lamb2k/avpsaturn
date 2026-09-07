@@ -1,6 +1,9 @@
 # REIMPLEMENT-13-SOURCE-CLOSED-ROUND1 handoff (2026-09-07 owner delivery focus)
 
-Continue the same Goal, branch `codex/avp-playable-loop-pivot`, one writer.
+Continue the new persistent R7C Goal, branch `codex/avp-playable-loop-pivot`, one writer.
+Owner deleted the prior goal; replacement was created on 2026-09-07.
+Implementation model is Astra low ("light"); project defaults and policy agree.
+The new goal does not reopen exhausted gates or change acceptance boundaries.
 Read AGENTS, current state, the concise active card and TEST_PLAN.
 Do not touch `history.txt` or `data/avsp_anim_records.json`.
 

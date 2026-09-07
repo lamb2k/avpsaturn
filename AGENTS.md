@@ -7,8 +7,8 @@ Codex Goal Mode owns interactive implementation. `docs/PARITY_PLAN.md` is the on
 Exactly one implementation task owns writes at a time. Direct Codex
 implementation is the default for ordinary work; nested Codex executors are
 not used for ordinary implementation. Claude is an optional bounded provider
-only when the active card explicitly permits it. Preserve owner-selected
-`gpt-5.6-sol` / `high`; do not change model/provider or add a controller.
+only when the active card explicitly permits it. Owner selection (2026-09-07):
+`gpt-6-astra` / `low` ("Astra light"); do not change it or add a controller.
 
 Current delivery is R7C: one-player Predator Warrior, direct Round 1 entry,
 complete stage and boss, clear, and specified stable Round 2 handoff.
