@@ -12,10 +12,15 @@ param(
     [switch]$Class0eAliasSuppress,
     [switch]$SchedulerClockCapture,
     [switch]$SchedulerInputPerturb,
-    [switch]$SchedulerWakeSuppress
+    [switch]$SchedulerWakeSuppress,
+    [switch]$Class0aPresentationReads,
+    [switch]$Class0aPaletteSuppress
 )
 
 $ErrorActionPreference = 'Stop'
+if ($Class0aPaletteSuppress -and -not $Class0aPresentationReads) {
+    throw 'Class0aPaletteSuppress requires Class0aPresentationReads'
+}
 if ($Class0eAliasSuppress -and -not $Class0eAliasCapture) {
     throw 'Class0eAliasSuppress requires Class0eAliasCapture'
 }
@@ -56,6 +61,8 @@ $env:AVSP_ORACLE11_CLASS0E_ALIAS_CAPTURE = if ($Class0eAliasCapture) { '1' } els
 $env:AVSP_ORACLE11_CLASS0E_ALIAS_SUPPRESS = if ($Class0eAliasSuppress) { '1' } else { '0' }
 $env:AVSP_ORACLE11_SCHEDULER_CLOCK_CAPTURE = if ($SchedulerClockCapture) { '1' } else { '0' }
 $env:AVSP_ORACLE11_SCHEDULER_WAKE_SUPPRESS = if ($SchedulerWakeSuppress) { '1' } else { '0' }
+$env:AVSP_ORACLE11_CLASS0A_PRESENTATION_READS = if ($Class0aPresentationReads) { '1' } else { '0' }
+$env:AVSP_ORACLE11_CLASS0A_PALETTE_SUPPRESS = if ($Class0aPaletteSuppress) { '1' } else { '0' }
 $env:AVSP_ORACLE11_NAVIGATION_PERTURB = if ($SchedulerInputPerturb) { '1' } else { '0' }
 $env:AVSP_ORACLE11_SUPPRESS_ACTION4_TIMER = if ($Variant -in @('css', 'cs2s', 'cs3s', 'cs4s', 'cs5s', 'cs6s')) { '1' } else { '0' }
 $env:AVSP_ORACLE11_SUPPRESS_TYPE4_CLASS03_PC = if ($Variant -eq 'cs7s') { $TransitionWriter } else { '' }
@@ -168,6 +175,8 @@ finally {
         'AVSP_ORACLE11_COMPONENT20_PHASE_CAPTURE',
         'AVSP_ORACLE11_CLASS0F_STATE_COUNTERFACTUAL',
         'AVSP_ORACLE11_CLASS0A_VARIANT_COUNTERFACTUAL',
+        'AVSP_ORACLE11_CLASS0A_PRESENTATION_READS',
+        'AVSP_ORACLE11_CLASS0A_PALETTE_SUPPRESS',
         'AVSP_ORACLE11_CLASS00_INIT_COUNTERFACTUAL',
         'AVSP_ORACLE11_CLASS0C_PROGRAM_CAPTURE',
         'AVSP_ORACLE11_CLASS0C_CONTACT_COUNTERFACTUAL',

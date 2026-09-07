@@ -31,7 +31,27 @@
         "fields_bound": "Allocation, variant animation record selection, timer/branch, outer state, camera guard, fixed-pool release and route teardown.",
         "missing_sizing_fields": ["presentation consumer entry and dispatch", "topword0x0020 interpretation", "record length/termination", "destination domain: object RAM, palette, background or other source-owned output", "tile/palette dependencies and output ordering"],
         "retained_ledger_scope": "Actor write/dispatch fields, not presentation-consumer read/write provenance. Generic sprite failure must not be solved by declaring these records blank or forcing an object format.",
-        "status": "BLOCKED_MISSING_PRESENTATION_CONSUMER_CONTRACT",
+        "status": "SOURCE_PALETTE_CONSUMER_WITNESSED_SPEC_AMENDMENT_PENDING",
+        "bounded_followup": {
+          "command": "python tools/analyze_oracle11_round1_auxiliary.py --class0a-palette-readiness",
+          "paired_captures": ["oracle11_class0a_presentation_reads_a3", "oracle11_class0a_presentation_reads_b3"],
+          "source_suppression": "oracle11_class0a_presentation_reads_m3",
+          "read_ledger_sha256": "f6b5559c9b35ebeb2f27f869a7e96a6ab4bc9671c0ce2d68f777f85df298c6dc",
+          "baseline_write_sha256": "4bd822e6846aa1d476b20c3a01edec60d9782d86897c3e4b52368bc5f7e34e91",
+          "suppressed_write_sha256": "34a971097b650de8616d1ec222b6d056045e1b20f63c9d9e63e0edaa561df60d",
+          "opcode_window_016d2e_016dba_sha256": "5bf40e8b5c35d92d6672ac0fdc127ed20645f72e4d516cede1d61fc356277824",
+          "source_command_invocations": 902,
+          "source_palette_writes": 14432,
+          "suppression_output_differences": 2262,
+          "gameplay_actor_health_route_rng_byte_identical": true,
+          "actual_write_instruction": "0x016db0",
+          "reported_write_pc": "0x016db4",
+          "consumer": "0x016d92..0x016db8: signed destination offset negative terminates; nonnegative selects palette destination, next word indexes source palette table;16-word copy preserves destination high nibble and replaces low12 RGB bits.",
+          "tile_demand_from_palette_records": 0,
+          "scope": "Measured variants0x26/0x06. Fourth record0x078bac remains source-table derived, not claimed live-read in Coffee Shop. No generic topword0x20 exemption; class-specific consumer ownership required.",
+          "attempt_history": "a1/b1 identify reads; a2/b2 wrong write-PC filter produced no evidence; a3/b3/m3 bind writes and suppression. No empty probe credited. No Yaba/Target/visual retry.",
+          "native_or_fixture_changed": false
+        },
         "next_bounded_source_experiment": "Locate the source consumer of pointers0x078ba2/0x078bac/0x078f90/0x078f96 in retained emitter evidence; if absent, use smallest read-only source read/write attribution follow-up. Preserve accepted class0a gameplay program, no Yaba/Target retry."
       }
     },

@@ -113,6 +113,50 @@ local class1f_hit_last_frame = tonumber(
 local class1f_hit_selector_entry = tonumber(
     os.getenv("AVSP_ORACLE11_CLASS1F_HIT_SELECTOR_ENTRY") or "1f890", 16)
 local frame = 0
+-- Bounded read-only source consumer attribution; no opcode replacement or
+-- gameplay writes. Separate from the accepted class0a lifecycle evidence.
+oracle11_class0a_presentation_reads = { taps = {} }
+if os.getenv("AVSP_ORACLE11_CLASS0A_PRESENTATION_READS") == "1" then
+    oracle11_class0a_presentation_reads.writes = assert(io.open(
+        root .. "/coffee_shop_class0a_palette_writes.tsv", "w"))
+    oracle11_class0a_presentation_reads.writes:write(
+        "frame\taddress\tpc\tslot\told\trequested\tapplied\tmask\n")
+    table.insert(oracle11_class0a_presentation_reads.taps,
+        program:install_write_tap(0x90c000, 0x90cfff,
+            "class0a_palette_writer", function(address, data, mask)
+                if frame < 1972 or frame > capture_last_frame then return end
+                local pc = maincpu.state["PC"].value & 0xffffff
+                local slot = maincpu.state["A6"].value & 0xffffff
+                if pc < 0x016da0 or pc > 0x016db6 or (slot ~= 0xffc600 and slot ~= 0xffc580) then return end
+                local old = program:read_u16(address)
+                local applied = data
+                if os.getenv("AVSP_ORACLE11_CLASS0A_PALETTE_SUPPRESS") == "1" then applied = old end
+                oracle11_class0a_presentation_reads.writes:write(string.format(
+                    "%d\t%06x\t%06x\t%06x\t%04x\t%04x\t%04x\t%04x\n",
+                    frame, address, pc, slot, old, data, applied, mask))
+                return applied
+            end))
+    oracle11_class0a_presentation_reads.log = assert(io.open(
+        root .. "/coffee_shop_class0a_presentation_reads.tsv", "w"))
+    oracle11_class0a_presentation_reads.log:write(
+        "frame\taddress\tdata\tmask\tpc\ta0\ta4\ta6\td0\td3\n")
+    for _, range in ipairs({{0x078ba2, 0x078bb5}, {0x078f90, 0x078f9b}}) do
+        table.insert(oracle11_class0a_presentation_reads.taps,
+            program:install_read_tap(range[1], range[2],
+                "class0a_presentation_source_read", function(address, data, mask)
+                    if frame < 1972 or frame > capture_last_frame then return end
+                    oracle11_class0a_presentation_reads.log:write(string.format(
+                        "%d\t%06x\t%04x\t%04x\t%06x\t%06x\t%06x\t%06x\t%08x\t%08x\n",
+                        frame, address, data, mask,
+                        maincpu.state["PC"].value & 0xffffff,
+                        maincpu.state["A0"].value & 0xffffff,
+                        maincpu.state["A4"].value & 0xffffff,
+                        maincpu.state["A6"].value & 0xffffff,
+                        maincpu.state["D0"].value & 0xffffffff,
+                        maincpu.state["D3"].value & 0xffffffff))
+                end))
+    end
+end
 local controller = 0xffd180
 local global = 0xff8000
 local player = 0xff8380
@@ -2638,6 +2682,8 @@ oracle11_progression_frame = emu.add_machine_frame_notifier(function()
         class1f_bounds:close(); type36_writes:close()
         if class0e_alias.log then class0e_alias.log:close() end
         if oracle11_scheduler_clock.log then oracle11_scheduler_clock.log:close() end
+        if oracle11_class0a_presentation_reads.log then oracle11_class0a_presentation_reads.log:close() end
+        if oracle11_class0a_presentation_reads.writes then oracle11_class0a_presentation_reads.writes:close() end
         pair_suppression:close(); obstacle_trace:close(); obstacle_writes:close()
         component20_writes:close(); component20_dispatch:close()
         component20_collision:close()

@@ -4935,5 +4935,55 @@ def validate(r):
      'Coffee Shop record-20 route-teardown guard drift')
  req(len(r['phantom_census_aliases'])==4 and all(x['classification']=='NOT_REQUIRED_FOR_ROUND1' and x['scheduler_dispatch'] is None for x in r['phantom_census_aliases']),'phantom alias classification drift');req(all(v==0 for k,v in r['coverage'].items() if k.startswith('orphan_')) and r['coverage']['invalid_zero_removal_controls_accepted']==0,'aux zero gap drift');req(r['correction_record']['invalid_controls_removed_zero_actors'] is True and r['correction_record']['accepted_controls_all_remove_actors'] is True and r['negative_controls']['zero_removal_suppression_rejected'] is True,'invalid suppression admitted');req(r['protected_boundaries']['production_runtime_writes']==0 and r['protected_boundaries']['yaba_runs']==0 and r['protected_boundaries']['physical_saturn']=='UNRUN' and r['protected_boundaries']['spec02_active'] is False,'protected boundary drift')
 
+def class0a_palette_consumer_readiness():
+ roots=[ROOT/('.deps/mame/oracle11_class0a_presentation_reads_'+v) for v in ('a3','b3','m3')]
+ names=['coffee_shop_class0a_presentation_reads.tsv','coffee_shop_class0a_palette_writes.tsv',
+        'coffee_shop_scene_actors.tsv','coffee_shop_scene_frames.tsv',
+        'coffee_shop_scene_health_writes.tsv','coffee_shop_rng_calls.tsv','progression_result.tsv']
+ hashes={}
+ for name in names:
+  raw=[(root/name).read_bytes() for root in roots]
+  assert raw[0]==raw[1], 'paired identity: '+name
+  if 'presentation_reads' not in name and 'palette_writes' not in name:
+   assert raw[0]==raw[2], 'suppression gameplay coupling: '+name
+  hashes[name]=[hashlib.sha256(x).hexdigest() for x in raw]
+ def rows(root,name):
+  with (root/name).open() as stream: return list(csv.DictReader(stream,delimiter='\t'))
+ reads=rows(roots[0],names[0]); writes=rows(roots[0],names[1]); mutant=rows(roots[2],names[1])
+ commands=[r for r in reads if int(r['pc'],16)==0x016d9c]
+ assert len(commands)*16==len(writes)==len(mutant)>0
+ source=PROGRAM.read_bytes()
+ for i,command in enumerate(commands):
+  address=int(command['address'],16)
+  base=0x1f6e00 if address<0x078f90 else 0x1f4e00
+  source_start=base+int(command['data'],16)
+  destination=int(command['a0'],16)
+  for j,row in enumerate(writes[i*16:(i+1)*16]):
+   assert int(row['address'],16)==destination+2*j
+   assert row['frame']==command['frame'] and row['pc']=='016db4'
+   color=int.from_bytes(source[source_start+2*j:source_start+2*j+2],'big')
+   expected=(int(row['old'],16)&0xf000)|(color&0xfff)
+   assert int(row['requested'],16)==expected and row['applied']==row['requested']
+ changed=sum(r['applied']!=s['applied'] for r,s in zip(writes,mutant))
+ assert changed>0 and all(r['applied']==r['old'] for r in mutant)
+ return {'status':'SOURCE_PALETTE_CONSUMER_WITNESSED_NOT_NATIVE_SPEC_AMENDMENT',
+  'capture_pair':['oracle11_class0a_presentation_reads_a3','oracle11_class0a_presentation_reads_b3'],
+  'suppression':'oracle11_class0a_presentation_reads_m3','hashes':hashes,
+  'command_invocations':len(commands),'palette_writes':len(writes),
+  'suppressed_output_differences':changed,'paired_identity':True,'gameplay_projection_unchanged':True,
+  'actual_write_instruction':'0x016db0','reported_write_pc':'0x016db4',
+  'copy_loop':'0x016d92..0x016db8','source_program_sha256':hashlib.sha256(source).hexdigest(),
+  'opcode_window_sha256':hashlib.sha256(OPCODES.read_bytes()[0x16d2e:0x16dba]).hexdigest(),
+  'effect':'16 palette words per nonnegative destination offset; retain destination high nibble, replace low12 bits from source table; negative offset terminates',
+  'sprite_tile_demand_from_these_records':0,
+  'scope':'class0a measured variants0x26/0x06; header address0x078bac is source-table bound but not claimed live-read in this Coffee Shop window; not a blanket tag0x20 sprite rule',
+  'prior_probe':'a1/b1 read identity established consumer; a2/b2 empty writes due wrong PC filter, not a causal PASS',
+  'native_runtime_changed':False,'yaba_runs':0,'physical':'UNRUN'}
+
+
+if __name__=='__main__' and '--class0a-palette-readiness' in __import__('sys').argv:
+ print(json.dumps(class0a_palette_consumer_readiness(),sort_keys=True,indent=2))
+ raise SystemExit(0)
+
 if __name__=='__main__':
  report=build();OUT.write_bytes(canon(report));print('ORACLE-11 auxiliary authority: SOURCE_CLOSED; 12 dispatched pairs closed, 4 census aliases NOT_REQUIRED, zero orphans')

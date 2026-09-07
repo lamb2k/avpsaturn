@@ -45,5 +45,5 @@ pinned EXE/archive match. Root CDDA output is regeneratable by existing build.
 
 Use Fast -WorkflowOnly for docs; DEV for edits; full ceremony at program/platform
 risk boundaries. Keep all acceptance tests and three-attempt rulings.
-Next: normal-profile Jo allocation and reachable-content union audit; refine
-DRAM0 tile proposal in memory plan. Timing choice/gate reopenings still pending.
+Next: amend existing class0a SPEC for source palette consumer016d92, then finish
+residency proposal. Paired902 commands/14432 writes proven; timing/gates pending.
