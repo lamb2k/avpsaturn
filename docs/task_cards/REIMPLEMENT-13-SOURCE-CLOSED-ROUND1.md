@@ -26,7 +26,7 @@ does not bind loop00808a, tail008140, trap3/001060 or interrupt-owned guards.
 Run analyzer --interactive-readiness for exact fields; nine identity controls PASS.
 Class0e native16 lifetimes/1776 rows reproduce state/facing/animation/timers and attachment formula;333 inherited position rows stay RED.
 Alias/clear, strict host10 causal controls and whole-scene suppression/repeat PASS; tiers separate.
-Fast/Oracle native PASS; source timing/1614a blocked. Sizing lower bound1551028/614400; proposal only. Class0a palette consumer016d92 now paired/suppression witnessed:902 commands14432 writes,2262 colors changed, gameplay identical. Next existing SPEC amendment, then residency proposal; no resize/retry authorized.
+Class0a palette SPEC Fast/Oracle PASS:4 streams,902 commands14432 writes,2262 suppression differences, gameplay identical;9 SPEC controls. Host330 rerun kills/2 survivors; native palette pending. Tile sizing1551028/614400;15 old PCM clips2727832 bytes are not an approved native set. Next source-command residency proposal; source timing/1614a and platform gates blocked, no resize/retry.
 
 ## Objective
 

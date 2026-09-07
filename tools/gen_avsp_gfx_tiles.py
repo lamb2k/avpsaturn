@@ -777,11 +777,20 @@ def measure_fixture_asset_candidates() -> dict:
         elif isinstance(value, list):
             for item in value:
                 walk(item)
-    walk(json.loads(payload))
+    fixture = json.loads(payload)
+    walk(fixture)
+    component = next(c for c in fixture['authority_data']['auxiliary'][
+        'coffee_shop_scene_component_identities']['components']
+        if c['type'] == 24 and c['class'] == '0x0a')
+    palette_streams = component['implementation_contract']['palette_consumer']['streams']
+    palette_pointers = {int(s['pointer'],16) for s in palette_streams
+                        if s['pointer_kind'] == 'PALETTE_COMMAND_STREAM_NOT_SPRITE_ASSEMBLY'}
     rom_bytes = ROM_PATH.read_bytes()
     rom = Rom(rom_bytes)
     tiles, banks, blanks, failures = set(), set(), [], []
     for address in sorted(addresses):
+        if address in palette_pointers:
+            continue
         if rom.u16(address) == 8:
             blanks.append("0x%06x" % address)
             continue
@@ -802,6 +811,7 @@ def measure_fixture_asset_candidates() -> dict:
     return {"fixture_sha256": hashlib.sha256(payload).hexdigest(),
             "rom_view_sha256": hashlib.sha256(rom_bytes).hexdigest(),
             "candidate_addresses": len(addresses), "tag8_blank_addresses": blanks,
+            "source_owned_palette_streams": ["0x%06x" % a for a in sorted(palette_pointers)],
             "decode_failures": failures, "decoded_fixture_tiles": decoded_count,
             "combined_observed_and_decoded_tile_count": len(tiles),
             "combined_tile_code_sha256": hashlib.sha256(b"".join(t.to_bytes(4,"big") for t in sorted(tiles))).hexdigest(),

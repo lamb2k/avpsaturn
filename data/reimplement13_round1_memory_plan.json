@@ -22,8 +22,8 @@
       "generic_decoder_rejections": ["0x078ba2", "0x078bac", "0x078f90", "0x078f96"],
       "rejection_owner": "record24/class0a dispatch0x077ccc; source presentation fixed-pool resident; topword0x0020; generic object decoder is not its proven format contract",
       "status": "INCOMPLETE_SIZING_NOT_MAP_APPROVAL",
-      "scope": "Walk explicit fixture assembly fields, numerically deduplicate, decode both facings/modes for conservative discovery. Not proof all reachable fields were enumerated or palette modes bound. Four rejections remain visible, not omitted as zero cost.",
-      "next_experiment": "Use accepted class0a presentation contract to identify its emitter/table format and measure the four rejected records; do not infer standard object layout from an assembly label."
+      "scope": "Walk explicit fixture assembly fields, numerically deduplicate, decode both facings/modes for conservative discovery. Not proof all reachable fields were enumerated or native palette residency bound. Historical four generic rejections below are now source-bound palette streams, not blank sprites; current generic failures0.",
+      "next_experiment": "Finish native audio/residency sizing proposal; class0a palette source fields are now in the existing SPEC, but the native palette adapter and map approval remain pending."
       ,"class0a_contract_audit": {
         "accepted_fixture_path": "authority_data.auxiliary.coffee_shop_scene_component_identities.components[4].implementation_contract",
         "accepted_lifecycle_capture_pair": ["oracle11_progression_lifecycle_cs64a", "oracle11_progression_lifecycle_cs64b"],
@@ -31,7 +31,29 @@
         "fields_bound": "Allocation, variant animation record selection, timer/branch, outer state, camera guard, fixed-pool release and route teardown.",
         "missing_sizing_fields": ["presentation consumer entry and dispatch", "topword0x0020 interpretation", "record length/termination", "destination domain: object RAM, palette, background or other source-owned output", "tile/palette dependencies and output ordering"],
         "retained_ledger_scope": "Actor write/dispatch fields, not presentation-consumer read/write provenance. Generic sprite failure must not be solved by declaring these records blank or forcing an object format.",
-        "status": "SOURCE_PALETTE_CONSUMER_WITNESSED_SPEC_AMENDMENT_PENDING",
+        "status": "SOURCE_PALETTE_CONSUMER_SPEC_EXECUTABLE_NATIVE_ADAPTER_PENDING",
+        "current_spec_identity": {
+          "auxiliary_sha256": "3689ab46c933150a1be43259a7f7de12afa7302e75a559f33b7d8635cd997823",
+          "contract_sha256": "6bf90605505f500774e3f9b974c30b27f03cec4bbe17a9ebff1c4899b2723285",
+          "fixtures_sha256": "9af2f930013b0be76133f8cd7588ea2b0bf925f7e39b8a55ce045264f7308405",
+          "classification_field": "class0a implementation_contract.palette_consumer.streams[].pointer_kind",
+          "source_owned_palette_streams": 4,
+          "current_generic_decoder_failures": 0,
+          "new_specification_controls": 9,
+          "checkpoint_checks": {
+            "Fast": "PASS",
+            "Fast_report_sha256": "42887c2c7364c5db8abf3f4cfff8b6cef58481e6191793d44cd6ee6a6b1e338a",
+            "Oracle": "PASS",
+            "Oracle_report_sha256": "124652869c8a0b44b6770bc7465df7795b596b5a7285202514e9735a0f13cd39",
+            "full_host_behavioral_rejections_rerun": 330,
+            "declared_equivalent_survivors_not_credited": 2,
+            "invalid_timeout_environment_failures": 0,
+            "retained_total_including_prior_focused_controls": 367,
+            "qualification": "Prior stale derived Oracle/SPEC identity pins failed before behavior and were corrected, never credited as mutation kills. New9 palette and2 audio sizing controls are metadata controls, not native kills. Whole Coffee Shop gap counts unchanged; no Target/Emulator/WGC retry."
+          },
+          "native_runtime_or_content_archive_growth_bytes": 0,
+          "note": "Historical four decoder rejections and prior identity retained above as discovery evidence; current generator excludes only these source-bound palette pointers, never every topword0x20."
+        },
         "bounded_followup": {
           "command": "python tools/analyze_oracle11_round1_auxiliary.py --class0a-palette-readiness",
           "paired_captures": ["oracle11_class0a_presentation_reads_a3", "oracle11_class0a_presentation_reads_b3"],
@@ -52,12 +74,26 @@
           "attempt_history": "a1/b1 identify reads; a2/b2 wrong write-PC filter produced no evidence; a3/b3/m3 bind writes and suppression. No empty probe credited. No Yaba/Target/visual retry.",
           "native_or_fixture_changed": false
         },
-        "next_bounded_source_experiment": "Locate the source consumer of pointers0x078ba2/0x078bac/0x078f90/0x078f96 in retained emitter evidence; if absent, use smallest read-only source read/write attribution follow-up. Preserve accepted class0a gameplay program, no Yaba/Target retry."
+        "next_bounded_source_experiment": "Completed by paired a3/b3 and suppression m3; source consumer and four table streams now bound in SPEC. No further capture needed for this body; native palette adapter remains pending."
       }
     },
     "audio_capacity_status": {
       "source_audio_command_transactions": 72,
       "known_current_native_pcm_bytes": 144752,
+      "historical_capture_inventory": {
+        "classification": "READ_ONLY_RECORDED_PAYLOAD_SIZING_NOT_NATIVE_EVENT_APPROVAL",
+        "inputs": "data/qsound_*_capture.json sorted by path; path/payload_bytes/payload_sha256 projected, canonical sorted-key compact JSON",
+        "manifest_sha256": "24e25ba285c504b10d1fd1aead158708e7457dbeb6374c21fb4874ad50765ade",
+        "distinct_recorded_payloads": 15,
+        "recorded_bytes_total": 2727832,
+        "largest_recorded_payload_bytes": 637084,
+        "additional_bytes_beyond_current_melee": 2583080,
+        "current_approved_adapter": "src/port_v2/audio/pcm/pcm.c validates melee cue1 only:144752 bytes,44100Hz,stereo16bit,SCSP channel1. Historical extraction reports do not approve other native commands.",
+        "capacity_conclusion": "Naively retaining all15 historical stereo clips exceeds proposed entire cart allocator1843200 even before other allocations. These overlapping/composite recordings are neither a minimal sound set nor a proven complete Round1 set; do not treat sum as a required lower bound or use it to justify silent resampling/streaming.",
+        "next_assignment": "Reconcile accepted native-command ownership with reusable source sample/voice programs and recorded payloads; propose explicit SCSP conversion/residency only after exact source guards, overlap and retirement are bound. Preserve approved melee output; no automatic sample-rate change or new load seam.",
+        "payload_files_revalidated": false,
+        "native_audio_changed": false
+      },
       "complete_native_command_to_payload_budget": null,
       "scope": "72 source commands include control/reset transactions and are not72 logical PCM sounds. Accepted source ownership/QSound effects do not themselves specify Saturn sample payloads, rate, channels, shared samples or resident lifetimes.",
       "missing": "Source-command-to-native-payload or approved synthesis adaptation, payload hashes/bytes, simultaneous voices, retirement and source-owned load seams. Do not extrapolate full-route PCM cost from the approved melee cue.",

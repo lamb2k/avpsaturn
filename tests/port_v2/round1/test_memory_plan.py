@@ -165,3 +165,46 @@ def proposed_boot_allocations():
 
 print("Conditional boot allocation model (NOT native/physical proof): " +
       json.dumps(proposed_boot_allocations(), sort_keys=True))
+
+
+def recorded_audio_inventory():
+    """Report metadata demand, not native cue acceptance or payload presence."""
+    records = []
+    for path in sorted((ROOT / "data").glob("qsound_*_capture.json")):
+        report = json.loads(path.read_text(encoding="ascii"))
+        pcm = report["saturn_pcm"]
+        assert pcm["bytes"] == report["wave"]["event_sample_frames"] * 4
+        records.append({"path": path.relative_to(ROOT).as_posix(),
+                        "payload_bytes": pcm["bytes"],
+                        "payload_sha256": pcm["sha256"]})
+    return records
+
+
+def check_recorded_audio_inventory(records):
+    expected = PLAN["full_route_read_only_sizing_2026_09_07"][
+        "audio_capacity_status"]["historical_capture_inventory"]
+    fingerprint = hashlib.sha256(json.dumps(
+        records, sort_keys=True, separators=(",", ":")).encode()).hexdigest()
+    if (fingerprint != expected["manifest_sha256"] or
+            len(records) != expected["distinct_recorded_payloads"] or
+            sum(r["payload_bytes"] for r in records) !=
+            expected["recorded_bytes_total"]):
+        raise ValueError("recorded audio inventory identity/size drift")
+
+
+audio_records = recorded_audio_inventory()
+check_recorded_audio_inventory(audio_records)
+for mutation in ("size", "omission"):
+    changed = [dict(record) for record in audio_records]
+    if mutation == "size":
+        changed[0]["payload_bytes"] -= 4
+    else:
+        changed.pop()
+    try:
+        check_recorded_audio_inventory(changed)
+    except ValueError as error:
+        assert str(error) == "recorded audio inventory identity/size drift"
+    else:
+        raise AssertionError("audio sizing control survived: " + mutation)
+print("Recorded audio sizing: PASS (15 payload reports,2727832 bytes; "
+      "2 attributable metadata controls; NOT native behavioral kills or cue approval)")

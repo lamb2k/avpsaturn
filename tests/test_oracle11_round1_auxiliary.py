@@ -138,6 +138,24 @@ for label,mutate in class0e_program_controls:
  except ValueError as error:
   assert str(error)=='class0e whole-program contract drift', (label,str(error))
  else:raise AssertionError('survived class0e program control: '+label)
+for label,mutate in [
+ ('wrong-kind',lambda p:p['streams'][0].__setitem__('pointer_kind','SPRITE_ASSEMBLY')),
+ ('wrong-destination',lambda p:p['streams'][0].__setitem__('destination_base','0x90c000')),
+ ('wrong-source',lambda p:p['streams'][0].__setitem__('source_base','0x1f4600')),
+ ('wrong-color',lambda p:p['streams'][0]['commands'][0]['source_colors_u16'].__setitem__(0,0)),
+ ('omitted-command',lambda p:p['streams'][0]['commands'].pop()),
+ ('wrong-terminator',lambda p:p['streams'][0].__setitem__('terminator_s16',0)),
+ ('fixed-frame',lambda p:p.__setitem__('guard','every displayed frame')),
+ ('brightness-loss',lambda p:p.__setitem__('arithmetic','destination=source')),
+ ('order',lambda p:p.__setitem__('order','reverse commands'))]:
+ x=copy.deepcopy(report)
+ p=next(c for c in x['coffee_shop_scene_component_identities']['components']
+        if c['type']==24 and c['class']=='0x0a')['implementation_contract']['palette_consumer']
+ mutate(p)
+ try:m.validate(x)
+ except ValueError as error:assert str(error)=='class0a palette consumer source contract drift',label
+ else:raise AssertionError('survived palette source-contract control: '+label)
+print('Class0a palette contract: PASS (9 attributable specification controls; source suppression separately recorded)')
 print('ORACLE-11 auxiliary authority tests: PASS '
       '(154 existing field controls; 12 alias and16 whole-program attributable '
       'class0e controls; these are not native behavioral kills)')

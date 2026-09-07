@@ -2,6 +2,7 @@
 """Close Round 1 projectile/pickup/hazard/destructible actor authority."""
 from __future__ import annotations
 import csv,hashlib,json
+from functools import lru_cache
 from collections import Counter,defaultdict
 from pathlib import Path
 
@@ -2051,6 +2052,7 @@ def coffee_shop_scene_component_identities(op,program):
     'dispatch_count_u16':1+sum(class0a_dispatch_counts.values()),
     'writer_witness':'animation timer writer 0x016d34 plus initialization writer 0x077ce6',
     'rule':'align the complete-scene source scheduler projection only; never own gameplay state, release, or production timing'},
+   'palette_consumer':class0a_palette_contract(),
    'animation_selector':{
     'table_address':'0x00077d26','index':'actor+0x03 variant:u8 byte offset',
     'offsets_s16':class0a_offsets,
@@ -4605,6 +4607,8 @@ def validate(r):
  class0a_component=next(x for x in scene_components['components']
                         if x['type']==24 and x['class']=='0x0a')
  class0a_contract=class0a_component['implementation_contract']
+ req(class0a_contract.get('palette_consumer')==class0a_palette_contract(),
+     'class0a palette consumer source contract drift')
  class00_component=next(x for x in scene_components['components']
                         if x['type']==28 and x['class']=='0x00')
  class00_contract=class00_component['implementation_contract']
@@ -4934,6 +4938,45 @@ def validate(r):
      teardown['fixed_frame_substitute_forbidden'] is True,
      'Coffee Shop record-20 route-teardown guard drift')
  req(len(r['phantom_census_aliases'])==4 and all(x['classification']=='NOT_REQUIRED_FOR_ROUND1' and x['scheduler_dispatch'] is None for x in r['phantom_census_aliases']),'phantom alias classification drift');req(all(v==0 for k,v in r['coverage'].items() if k.startswith('orphan_')) and r['coverage']['invalid_zero_removal_controls_accepted']==0,'aux zero gap drift');req(r['correction_record']['invalid_controls_removed_zero_actors'] is True and r['correction_record']['accepted_controls_all_remove_actors'] is True and r['negative_controls']['zero_removal_suppression_rejected'] is True,'invalid suppression admitted');req(r['protected_boundaries']['production_runtime_writes']==0 and r['protected_boundaries']['yaba_runs']==0 and r['protected_boundaries']['physical_saturn']=='UNRUN' and r['protected_boundaries']['spec02_active'] is False,'protected boundary drift')
+
+@lru_cache(maxsize=1)
+def class0a_palette_contract():
+ evidence=class0a_palette_consumer_readiness()
+ assert evidence['opcode_window_sha256']=='5bf40e8b5c35d92d6672ac0fdc127ed20645f72e4d516cede1d61fc356277824'
+ program=PROGRAM.read_bytes();streams=[]
+ for record in (0x77e54,0x77e5c,0x782a4,0x782ac):
+  flags=int.from_bytes(program[record+2:record+4],'big')
+  group=flags&0xc00
+  source_base={0:0x1f4600,0x400:0x1f4600,0x800:0x1f4e00,0xc00:0x1f6e00}[group]
+  pointer=int.from_bytes(program[record+4:record+8],'big');at=pointer;commands=[]
+  while True:
+   offset=int.from_bytes(program[at:at+2],'big');at+=2
+   if offset&0x8000:break
+   source_offset=int.from_bytes(program[at:at+2],'big');at+=2
+   colors=program[source_base+source_offset:source_base+source_offset+32]
+   assert len(colors)==32 and offset%2==0 and offset+32<=0x400
+   commands.append({'destination_offset_s16':offset,'source_offset_s16':source_offset,
+    'source_address':'0x%06x'%(source_base+source_offset),
+    'source_colors_u16':[int.from_bytes(colors[i:i+2],'big') for i in range(0,32,2)],
+    'source_colors_sha256':hashlib.sha256(colors).hexdigest()})
+   assert len(commands)<=2
+  streams.append({'animation_record':'0x%08x'%record,'pointer':'0x%08x'%pointer,
+   'pointer_kind':'PALETTE_COMMAND_STREAM_NOT_SPRITE_ASSEMBLY','flags_mask_u16':group,
+   'destination_base':'0x%06x'%(0x90c000+group),'source_base':'0x%06x'%source_base,
+   'commands':commands,'terminator_s16':offset-65536,
+   'stream_sha256':hashlib.sha256(program[pointer:at]).hexdigest(),
+   'live_witness':record!=0x77e5c})
+ return {'classification':'SOURCE_CLOSED_IMPLEMENTATION_FIELDS','entry':'0x016d46',
+  'consumer':'0x016d92','writer':'0x016db0','evidence':evidence,'streams':streams,
+  'guard':'on animation initialization or source timer reaching zero, after binding actor record/timer/branch; not every displayed frame',
+  'reads':['animation.flags:u16','animation.pointer:u32','destination_offset:s16','source_offset:s16','source_color:u16','current_destination_color:u16'],
+  'writes':['CPS2 palette RAM destination:u16'],
+  'arithmetic':'destination_base=0x90c000+(flags&0x0c00); destination_offset signed-negative ends stream; next source offset is signed16 address arithmetic; each of16 words writes (old&0xf000)|(source&0x0fff), then both pointers+=2',
+  'order':'commands in stream order; sixteen words ascending; same type24 dispatch that advances animation; no object emission',
+  'native_projection':'CPS2 palette state update precedes Saturn CRAM conversion; retain high nibble source brightness and existing palette/priority ownership. Native adapter not yet implemented.',
+  'mutation_controls':['wrong destination group','wrong source table','wrong offset sign','wrong16-word bound','overwrite high nibble','drop source low12','omit command','execute every frame','misclassify as sprite'],
+  'native_implemented':False}
+
 
 def class0a_palette_consumer_readiness():
  roots=[ROOT/('.deps/mame/oracle11_class0a_presentation_reads_'+v) for v in ('a3','b3','m3')]

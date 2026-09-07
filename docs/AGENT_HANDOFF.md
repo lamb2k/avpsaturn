@@ -45,5 +45,5 @@ pinned EXE/archive match. Root CDDA output is regeneratable by existing build.
 
 Use Fast -WorkflowOnly for docs; DEV for edits; full ceremony at program/platform
 risk boundaries. Keep all acceptance tests and three-attempt rulings.
-Next: amend existing class0a SPEC for source palette consumer016d92, then finish
-residency proposal. Paired902 commands/14432 writes proven; timing/gates pending.
+Class0a palette SPEC:4 streams; Fast/Oracle PASS,330 rerun kills/2 survivors; native pending.
+Next: source-command PCM residency proposal;15 old clips2727832 bytes are not approved cues. No resize/retry.

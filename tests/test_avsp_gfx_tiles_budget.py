@@ -510,7 +510,8 @@ if __name__ == "__main__":
         assert candidates["candidate_addresses"] == 640
         assert candidates["combined_observed_and_decoded_tile_count"] == 11745
         assert candidates["archive_lower_bound_with_observed_palettes_bytes"] == 1551028
-        assert [x["assembly"] for x in candidates["decode_failures"]] == [
+        assert candidates["decode_failures"] == []
+        assert candidates["source_owned_palette_streams"] == [
             "0x078ba2", "0x078bac", "0x078f90", "0x078f96"]
         assert candidates["classification"].startswith("INCOMPLETE_SIZING:")
         original_tiles = generator.entry_tile_codes

@@ -12984,6 +12984,299 @@
             "audio absence",
             "fixed-frame substitute"
           ],
+          "palette_consumer": {
+            "arithmetic": "destination_base=0x90c000+(flags&0x0c00); destination_offset signed-negative ends stream; next source offset is signed16 address arithmetic; each of16 words writes (old&0xf000)|(source&0x0fff), then both pointers+=2",
+            "classification": "SOURCE_CLOSED_IMPLEMENTATION_FIELDS",
+            "consumer": "0x016d92",
+            "entry": "0x016d46",
+            "evidence": {
+              "actual_write_instruction": "0x016db0",
+              "capture_pair": [
+                "oracle11_class0a_presentation_reads_a3",
+                "oracle11_class0a_presentation_reads_b3"
+              ],
+              "command_invocations": 902,
+              "copy_loop": "0x016d92..0x016db8",
+              "effect": "16 palette words per nonnegative destination offset; retain destination high nibble, replace low12 bits from source table; negative offset terminates",
+              "gameplay_projection_unchanged": true,
+              "hashes": {
+                "coffee_shop_class0a_palette_writes.tsv": [
+                  "4bd822e6846aa1d476b20c3a01edec60d9782d86897c3e4b52368bc5f7e34e91",
+                  "4bd822e6846aa1d476b20c3a01edec60d9782d86897c3e4b52368bc5f7e34e91",
+                  "34a971097b650de8616d1ec222b6d056045e1b20f63c9d9e63e0edaa561df60d"
+                ],
+                "coffee_shop_class0a_presentation_reads.tsv": [
+                  "f6b5559c9b35ebeb2f27f869a7e96a6ab4bc9671c0ce2d68f777f85df298c6dc",
+                  "f6b5559c9b35ebeb2f27f869a7e96a6ab4bc9671c0ce2d68f777f85df298c6dc",
+                  "f6b5559c9b35ebeb2f27f869a7e96a6ab4bc9671c0ce2d68f777f85df298c6dc"
+                ],
+                "coffee_shop_rng_calls.tsv": [
+                  "81338529f76629c3d103885c16838bd562beecf783f0b5107a5b7ecd11e219b3",
+                  "81338529f76629c3d103885c16838bd562beecf783f0b5107a5b7ecd11e219b3",
+                  "81338529f76629c3d103885c16838bd562beecf783f0b5107a5b7ecd11e219b3"
+                ],
+                "coffee_shop_scene_actors.tsv": [
+                  "b7b1568df038af1cdd7eb5bc6eb30c830efca4952d1077644ab3b31ed2ad1c0f",
+                  "b7b1568df038af1cdd7eb5bc6eb30c830efca4952d1077644ab3b31ed2ad1c0f",
+                  "b7b1568df038af1cdd7eb5bc6eb30c830efca4952d1077644ab3b31ed2ad1c0f"
+                ],
+                "coffee_shop_scene_frames.tsv": [
+                  "91e4aab3a03586a6c9a143dd58ee03a72ebc52b7fd611fdc6fe0975ebd522d1d",
+                  "91e4aab3a03586a6c9a143dd58ee03a72ebc52b7fd611fdc6fe0975ebd522d1d",
+                  "91e4aab3a03586a6c9a143dd58ee03a72ebc52b7fd611fdc6fe0975ebd522d1d"
+                ],
+                "coffee_shop_scene_health_writes.tsv": [
+                  "7defadcfff16b99b8e2d5b66fc7b42443106837d698e659c64d45a8770d6aa0b",
+                  "7defadcfff16b99b8e2d5b66fc7b42443106837d698e659c64d45a8770d6aa0b",
+                  "7defadcfff16b99b8e2d5b66fc7b42443106837d698e659c64d45a8770d6aa0b"
+                ],
+                "progression_result.tsv": [
+                  "c7bacd855ddbe40c5cee5895c183bbf4ec547c8f7ac24ccd9338e7ad5c43538e",
+                  "c7bacd855ddbe40c5cee5895c183bbf4ec547c8f7ac24ccd9338e7ad5c43538e",
+                  "c7bacd855ddbe40c5cee5895c183bbf4ec547c8f7ac24ccd9338e7ad5c43538e"
+                ]
+              },
+              "native_runtime_changed": false,
+              "opcode_window_sha256": "5bf40e8b5c35d92d6672ac0fdc127ed20645f72e4d516cede1d61fc356277824",
+              "paired_identity": true,
+              "palette_writes": 14432,
+              "physical": "UNRUN",
+              "prior_probe": "a1/b1 read identity established consumer; a2/b2 empty writes due wrong PC filter, not a causal PASS",
+              "reported_write_pc": "0x016db4",
+              "scope": "class0a measured variants0x26/0x06; header address0x078bac is source-table bound but not claimed live-read in this Coffee Shop window; not a blanket tag0x20 sprite rule",
+              "source_program_sha256": "0c14f4094d25787401aa949657620ff495ae8606c1cfd8ae2d059b94c3d478e9",
+              "sprite_tile_demand_from_these_records": 0,
+              "status": "SOURCE_PALETTE_CONSUMER_WITNESSED_NOT_NATIVE_SPEC_AMENDMENT",
+              "suppressed_output_differences": 2262,
+              "suppression": "oracle11_class0a_presentation_reads_m3",
+              "yaba_runs": 0
+            },
+            "guard": "on animation initialization or source timer reaching zero, after binding actor record/timer/branch; not every displayed frame",
+            "mutation_controls": [
+              "wrong destination group",
+              "wrong source table",
+              "wrong offset sign",
+              "wrong16-word bound",
+              "overwrite high nibble",
+              "drop source low12",
+              "omit command",
+              "execute every frame",
+              "misclassify as sprite"
+            ],
+            "native_implemented": false,
+            "native_projection": "CPS2 palette state update precedes Saturn CRAM conversion; retain high nibble source brightness and existing palette/priority ownership. Native adapter not yet implemented.",
+            "order": "commands in stream order; sixteen words ascending; same type24 dispatch that advances animation; no object emission",
+            "reads": [
+              "animation.flags:u16",
+              "animation.pointer:u32",
+              "destination_offset:s16",
+              "source_offset:s16",
+              "source_color:u16",
+              "current_destination_color:u16"
+            ],
+            "streams": [
+              {
+                "animation_record": "0x00077e54",
+                "commands": [
+                  {
+                    "destination_offset_s16": 32,
+                    "source_address": "0x1f7400",
+                    "source_colors_sha256": "9cf8a3e381e57af3ead172d264073bf7d6aacea2c77de493340afc996f4515f7",
+                    "source_colors_u16": [
+                      291,
+                      580,
+                      851,
+                      1123,
+                      581,
+                      1398,
+                      1943,
+                      2775,
+                      564,
+                      837,
+                      1110,
+                      1655,
+                      2200,
+                      1875,
+                      4088,
+                      48
+                    ],
+                    "source_offset_s16": 1536
+                  },
+                  {
+                    "destination_offset_s16": 64,
+                    "source_address": "0x1f7c40",
+                    "source_colors_sha256": "2318910ddf942a7e1aaf54062e44d210da324fb3afb4e99ddfaff7b65d54bf06",
+                    "source_colors_u16": [
+                      291,
+                      579,
+                      1959,
+                      820,
+                      1092,
+                      1365,
+                      1637,
+                      1670,
+                      579,
+                      852,
+                      1126,
+                      1400,
+                      1673,
+                      1946,
+                      2221,
+                      114
+                    ],
+                    "source_offset_s16": 3648
+                  }
+                ],
+                "destination_base": "0x90cc00",
+                "flags_mask_u16": 3072,
+                "live_witness": true,
+                "pointer": "0x00078ba2",
+                "pointer_kind": "PALETTE_COMMAND_STREAM_NOT_SPRITE_ASSEMBLY",
+                "source_base": "0x1f6e00",
+                "stream_sha256": "8e8ed1e430228046aa5c519d6b70331fdd82198b4ab7b010d4f3ebafc43f8626",
+                "terminator_s16": -1
+              },
+              {
+                "animation_record": "0x00077e5c",
+                "commands": [
+                  {
+                    "destination_offset_s16": 32,
+                    "source_address": "0x1f7420",
+                    "source_colors_sha256": "2d4217a5a37d5ba9462aeedb45262662b34e7be09f553fd8e664944c2f49741a",
+                    "source_colors_u16": [
+                      291,
+                      580,
+                      851,
+                      1123,
+                      580,
+                      1125,
+                      1670,
+                      2230,
+                      564,
+                      837,
+                      1110,
+                      1655,
+                      2200,
+                      1875,
+                      4088,
+                      49
+                    ],
+                    "source_offset_s16": 1568
+                  },
+                  {
+                    "destination_offset_s16": 64,
+                    "source_address": "0x1f7c20",
+                    "source_colors_sha256": "69c37e377e4527a927c68ca6e1bc3e15b0c7a4d076ea91921d747f27c030d998",
+                    "source_colors_u16": [
+                      291,
+                      579,
+                      1687,
+                      820,
+                      1092,
+                      1365,
+                      1637,
+                      1655,
+                      579,
+                      852,
+                      1126,
+                      1400,
+                      1673,
+                      1946,
+                      2221,
+                      113
+                    ],
+                    "source_offset_s16": 3616
+                  }
+                ],
+                "destination_base": "0x90cc00",
+                "flags_mask_u16": 3072,
+                "live_witness": false,
+                "pointer": "0x00078bac",
+                "pointer_kind": "PALETTE_COMMAND_STREAM_NOT_SPRITE_ASSEMBLY",
+                "source_base": "0x1f6e00",
+                "stream_sha256": "c9dcf95926bff9597b9b677c6a5e89e0aa718f384c5a4569da7a231438ccfbfa",
+                "terminator_s16": -1
+              },
+              {
+                "animation_record": "0x000782a4",
+                "commands": [
+                  {
+                    "destination_offset_s16": 32,
+                    "source_address": "0x1f6160",
+                    "source_colors_sha256": "46fe7b1d202d86dc6b0a600563c42a2d14ba21ac3aba2479a552046a6805ac9a",
+                    "source_colors_u16": [
+                      818,
+                      1365,
+                      1911,
+                      2457,
+                      784,
+                      1312,
+                      3411,
+                      3411,
+                      1091,
+                      1364,
+                      1637,
+                      1910,
+                      2183,
+                      2456,
+                      2728,
+                      155
+                    ],
+                    "source_offset_s16": 4960
+                  }
+                ],
+                "destination_base": "0x90c800",
+                "flags_mask_u16": 2048,
+                "live_witness": true,
+                "pointer": "0x00078f90",
+                "pointer_kind": "PALETTE_COMMAND_STREAM_NOT_SPRITE_ASSEMBLY",
+                "source_base": "0x1f4e00",
+                "stream_sha256": "5443a1eb00fe7420075b08dae7bd06f663e59307ab892652f1f742ccda6b62ad",
+                "terminator_s16": -1
+              },
+              {
+                "animation_record": "0x000782ac",
+                "commands": [
+                  {
+                    "destination_offset_s16": 32,
+                    "source_address": "0x1f6180",
+                    "source_colors_sha256": "139d58e7453e318bcdfe80614d0f92dc2b8609d2f76000feff5babd511b8263f",
+                    "source_colors_u16": [
+                      818,
+                      1365,
+                      1911,
+                      2457,
+                      784,
+                      1312,
+                      3411,
+                      818,
+                      1091,
+                      1364,
+                      1637,
+                      1910,
+                      2183,
+                      2456,
+                      2728,
+                      156
+                    ],
+                    "source_offset_s16": 4992
+                  }
+                ],
+                "destination_base": "0x90c800",
+                "flags_mask_u16": 2048,
+                "live_witness": true,
+                "pointer": "0x00078f96",
+                "pointer_kind": "PALETTE_COMMAND_STREAM_NOT_SPRITE_ASSEMBLY",
+                "source_base": "0x1f4e00",
+                "stream_sha256": "631be525000a5f24cd0143ef2a249a4abcb89eea6cdf4b374f938506ddd1cfd1",
+                "terminator_s16": -1
+              }
+            ],
+            "writer": "0x016db0",
+            "writes": [
+              "CPS2 palette RAM destination:u16"
+            ]
+          },
           "presentation": {
             "collision_selectors": "assembly records carry hurt selector 0 and attack selectors 4/7 for variant 0x26 and 16 for variant 0x06; the actors are absent from collision lists",
             "position_facing_rule": "both measured lifetimes retain zero x/y/z and facing",
