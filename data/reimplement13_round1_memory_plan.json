@@ -91,6 +91,17 @@
       "additional_order_findings": "build.ps1 normal live profile enables combat integration, so PCMBT.RLE51850 and18432 decode buffer are included. Per-file avsp_fs_read_file_in_dir probes through jo_fs_open:2048-byte temporary buffer, freed before destination allocation. Its subsequent GFS read uses static staging. TGA loader holds131884-byte file(+terminator) alongside131072 decoded pixels, then frees file. Round1 text512/960-byte sprite payloads are freed after upload;512-byte fade remains. Jo block header is short zone plus unsigned-int size; target ABI alignment must be retained in the allocator model.",
       "implementation_changed": false
     },
+    "conditional_boot_allocation_model": {
+      "command": "python tests/port_v2/round1/test_memory_plan.py",
+      "classification": "HOST_SIZING_MODEL_NOT_NATIVE_EXECUTION",
+      "work_ram_available_assumed_bytes": 0,
+      "proposed_cart_zone_capacities": [524288, 614400, 704512],
+      "known_sequence_high_water_bytes": [433020, 564048, 0],
+      "conditional_tail_headroom_bytes": [91268, 50352, 704512],
+      "includes": "TGA stream/pixels coexistence; file-probe temporaries; idle cels; action and combat archives/decode buffers; both HUD asset sets; current PCM; title sprite temporary frees and retained fade; whole-block reuse controls.",
+      "excludes": "Unmeasured engine startup allocations, block-fragmentation changes outside modeled calls, final complete native Round1 audio and additional content, physical behavior.",
+      "conclusion": "Known retained boot payloads fit the provisional zones even without work-RAM heap availability. This does not approve the proposed map or prove full-route residency; reachable content and later audio/load demand remain required."
+    },
     "scope": "Paired observed full-route demand, not all reachable branches or native/physical acceptance.",
     "active_map_changed": false,
     "runtime_structure_delta_bytes": 0,

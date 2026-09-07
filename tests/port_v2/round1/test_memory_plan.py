@@ -91,6 +91,77 @@ assert all(not seam["active"] for seam in PLAN["legal_load_seams"][1:])
 assert "no SCU DMA transfer with an A-bus endpoint" in \
     PLAN["placement_rule"]["scu_dma"]
 
-print("REIMPLEMENT-13 complete-Round-1 memory plan: PASS "
-      f"({mutations} real ownership/capacity/load mutations rejected; "
+print("REIMPLEMENT-13 existing memory-map structural checks: PASS "
+      f"({mutations} source-token omission controls rejected; "
       f"archive {len(payload)} bytes / 0x40000 census carve)")
+
+
+def proposed_boot_allocations():
+    """Conditional payload-order model; not a native execution or peak proof.
+
+    Model the SH2 Jo block's8-byte header and4-byte alignment. Exclude the
+    work-RAM heap entirely to avoid claiming unmeasured available space.
+    Complete later content and engine allocations remain outside this model.
+    """
+    capacities = [524288, 614400, 704512]
+    zones = [[] for _ in capacities]
+    peaks = [0, 0, 0]
+
+    def alloc(size, reuse=True):
+        needed = (size + 8 + 3) & ~3
+        for i, zone in enumerate(zones):
+            if reuse:
+                for block in zone:
+                    if block[1] and block[0] >= needed:
+                        block[1] = False
+                        return i, block
+            used = sum(b[0] for b in zone)
+            if used + needed <= capacities[i]:
+                block = [needed, False]
+                zone.append(block)
+                peaks[i] = max(peaks[i], used + needed)
+                return i, block
+        raise ValueError("conditional boot payload does not fit")
+
+    def free(handle):
+        i, block = handle
+        if zones[i][-1] is block:
+            zones[i].pop()
+        else:
+            block[1] = True
+
+    def file(size):
+        free(alloc(2048))  # jo_fs_open probe closes before destination
+        return alloc(size)
+
+    stream = alloc(131885)
+    alloc(131072)
+    free(stream)
+    for size in (18432, 18432, 419280):
+        file(size)
+    for _ in range(3):
+        alloc(18432, False)
+    file(51850)
+    alloc(18432, False)
+    for size in (7040, 3328, 1920, 7040, 1920, 144752):
+        file(size)
+    for size in (512, 960):
+        free(file(size))
+    file(512)
+    # Real allocator-specific controls: reused blocks retain their full size;
+    # an unrelated surviving allocation prevents rollback across a free hole.
+    large = file(4096)
+    guard = alloc(64, False)
+    old_size = large[1][0]
+    free(large)
+    small = alloc(32)
+    assert small[1] is large[1] and small[1][0] == old_size
+    free(small)
+    free(guard)
+    return {"capacities": capacities, "conditional_high_water_bytes": peaks,
+            "tail_headroom_bytes": [c-p for c,p in zip(capacities, peaks)],
+            "unmeasured_engine_and_later_content": True}
+
+
+print("Conditional boot allocation model (NOT native/physical proof): " +
+      json.dumps(proposed_boot_allocations(), sort_keys=True))
