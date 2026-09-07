@@ -488,4 +488,43 @@ def main() -> int:
 
 
 if __name__ == "__main__":
+    if "--measure-only" in sys.argv:
+        import hashlib
+        sys.path.insert(0, str(ROOT / "tools"))
+        import gen_avsp_gfx_tiles as generator
+        paths = [ARCHIVE, MANIFEST, ROOT / "main.c"]
+        before = [hashlib.sha256(p.read_bytes()).hexdigest() for p in paths]
+        run_result = subprocess.run(
+            [sys.executable, str(GENERATOR), "--measure-round1-demand"],
+            capture_output=True, text=True, timeout=90, check=True)
+        report = json.loads(run_result.stdout)
+        baseline = report["observed_demand"]
+        assert report["paired_identity"]
+        assert baseline["tile_count"] == 10920
+        assert baseline["archive_bytes"] == 1442128
+        assert baseline["frames"] == 13222
+        assert baseline["segments"][0]["archive_bytes"] == 703460
+        original_tiles = generator.entry_tile_codes
+        generator.entry_tile_codes = lambda *args: set()
+        mutant = generator.measure_round1_capture_demand(ROOT / ".deps/mame/full_route")
+        assert mutant["tile_count"] == 0 and mutant["tile_code_sha256"] != baseline["tile_code_sha256"]
+        generator.entry_tile_codes = original_tiles
+        original_state = generator.RouteState
+        class MissingFrame(original_state):
+            def frames(self):
+                for rec in super().frames():
+                    if rec["frame"] != 2398:
+                        yield rec
+        generator.RouteState = MissingFrame
+        try:
+            generator.measure_round1_capture_demand(ROOT / ".deps/mame/full_route")
+        except ValueError as exc:
+            assert str(exc) == "incomplete Round1 capture"
+        else:
+            raise AssertionError("missing-frame mutation survived")
+        finally:
+            generator.RouteState = original_state
+        assert before == [hashlib.sha256(p.read_bytes()).hexdigest() for p in paths]
+        print("Read-only paired demand PASS; two attributable measurement controls; zero native gameplay kills; staged archive/manifest/runtime unchanged")
+        raise SystemExit(0)
     raise SystemExit(main())

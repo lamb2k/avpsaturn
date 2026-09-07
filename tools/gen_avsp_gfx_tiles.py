@@ -672,9 +672,96 @@ def build_archive_blob(codes, banks, palette_path, gfx):
     return blob, slots
 
 
+def measure_round1_capture_demand(capture: Path) -> dict:
+    """Read-only observed demand, not a reachable-branch residency proof."""
+    state = RouteState(capture)
+    tiles, banks = set(), set()
+    digest = hashlib.sha256()
+    frames = entries = peak_tiles = peak_entries = 0
+    peak_frame = None
+    peak_composite_bytes = peak_composite_slots = largest_composite = 0
+    peak_small_tiles = 0
+    scenes = [{"first": 1972, "last": 5566}]
+    for path in sorted((ROOT / "data").glob("oracle10_round1_census_extension_*.json")):
+        first, last = path.stem.rsplit("_", 2)[1:]
+        scenes.append({"first": int(first), "last": int(last)})
+    scenes.sort(key=lambda row: row["first"])
+    for scene in scenes:
+        scene.update(tiles=set(), banks=set(), frames=0)
+    try:
+        for rec in state.frames():
+            frame = rec["frame"]
+            if frame < 1972:
+                continue
+            if frame > 15193:
+                break
+            if frame != 1972 + frames:
+                raise ValueError("incomplete Round1 capture")
+            owners = [s for s in scenes if s["first"] <= frame <= s["last"]]
+            if len(owners) != 1:
+                raise ValueError("nonunique census segment at frame %d" % frame)
+            scene = owners[0]
+            active = state.current["objram2" if rec["active_bank"] else "objram1"]
+            ft, fb = set(), set()
+            count = 0
+            composites, small_tiles = {}, set()
+            for offset in range(0, len(active) - 7, 8):
+                row = active[offset:offset + 8]
+                y, code, attr = (int.from_bytes(row[i:i + 2], "big") for i in (2, 4, 6))
+                if y >= 0x8000 or attr >= 0xff00:
+                    break
+                ft.update(entry_tile_codes(code, y, attr))
+                size = (((attr >> 8) & 15) + 1) * (((attr >> 12) & 15) + 1)
+                if size > 14:
+                    composites[(y & 0x6000, code, attr & 0xffe0)] = size * 128
+                else:
+                    small_tiles.update(entry_tile_codes(code, y, attr))
+                fb.add(attr & 31)
+                count += 1
+                digest.update(row)
+            digest.update(frame.to_bytes(4, "big") + count.to_bytes(4, "big"))
+            tiles.update(ft)
+            banks.update(fb)
+            scene["tiles"].update(ft)
+            scene["banks"].update(fb)
+            scene["frames"] += 1
+            frames += 1
+            entries += count
+            if len(ft) > peak_tiles:
+                peak_tiles, peak_frame = len(ft), frame
+            peak_entries = max(peak_entries, count)
+            peak_composite_bytes = max(peak_composite_bytes, sum(composites.values()))
+            peak_composite_slots = max(peak_composite_slots, len(composites))
+            largest_composite = max([largest_composite] + list(composites.values()))
+            peak_small_tiles = max(peak_small_tiles, len(small_tiles))
+    finally:
+        state.close()
+    if frames != 15193 - 1972 + 1:
+        raise ValueError("incomplete Round1 capture")
+    for scene in scenes:
+        scene["tile_count"] = len(scene.pop("tiles"))
+        scene["palette_banks"] = sorted(scene.pop("banks"))
+        scene["archive_bytes"] = 48 + 132 * scene["tile_count"] + 32 * len(scene["palette_banks"])
+    return {"first": 1972, "last": 15193, "frames": frames, "entries": entries,
+            "tile_count": len(tiles), "palette_banks": sorted(banks),
+            "archive_bytes": 48 + 132 * len(tiles) + 32 * len(banks),
+            "object_stream_sha256": digest.hexdigest(),
+            "tile_code_sha256": hashlib.sha256(b"".join(t.to_bytes(4, "big") for t in sorted(tiles))).hexdigest(),
+            "peak_frame_tile_union": peak_tiles, "peak_tile_frame": peak_frame,
+            "peak_object_entries": peak_entries, "segments": scenes,
+            "source_object_projection": {"threshold_tiles": 14,
+                "peak_composite_bytes": peak_composite_bytes,
+                "peak_composite_slots": peak_composite_slots,
+                "largest_composite_bytes": largest_composite,
+                "peak_small_tile_union": peak_small_tiles},
+            "limits": "Observed baseline union expanded for both facings; not all reachable branches, actual simultaneous Saturn composite allocation, dynamic palette correctness, or physical cadence proof."}
+
+
 def main() -> int:
     parser = argparse.ArgumentParser(description=__doc__)
     source = parser.add_mutually_exclusive_group(required=True)
+    source.add_argument("--measure-round1-demand", action="store_true",
+                        help="read paired retained full routes; emit counts only, never stage assets")
     source.add_argument("--scope", choices=("street", "round1"),
                         help="street: the archive proven to fit the current "
                              "cartridge budget. round1: the complete "
@@ -689,6 +776,13 @@ def main() -> int:
                              "runtime's AVSP_TILE_REGION_BYTES carve "
                              "(measurement only - never for a build).")
     args = parser.parse_args()
+    if args.measure_round1_demand:
+        a = measure_round1_capture_demand(ROOT / ".deps/mame/full_route")
+        b = measure_round1_capture_demand(ROOT / ".deps/mame/full_route_rerun")
+        if a != b:
+            raise ValueError("paired route asset demand mismatch")
+        print(json.dumps({"paired_identity": True, "observed_demand": a}, sort_keys=True, indent=2))
+        return 0
     avsp.verify_roms()
     gfx = avsp.load_gfx_region()
     avsp.verify_loaded_gfx_region(gfx)

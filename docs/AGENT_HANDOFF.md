@@ -28,7 +28,7 @@ Wake guard/counter/input rules validated; source suppression removes151 wakeups.
 Missing: native CPU-timing policy and command/result continuation1614a/ff837b.
 Class0e source/SPEC c952687; Fast/Oracle PASS; host report, Saturn draw NOT wired.
 Its50 assembly headers are absent from sparse archive; tag8 no-op adapter pending.
-Owner ruling needed: class0e tile union616144 exceeds614400 by1744 minimum.
+Owner authorized sizing only: paired full-route tiles1442128/614400; no resize.
 Normal callback still uses captured schedules; reported authority0 is hardcoded.
 Type28/class0c remains blocked under its exhausted causal-witness budget.
 Target and transition Emulator/WGC also remain exhausted: no retry was authorized.
@@ -45,5 +45,5 @@ pinned EXE/archive match. Root CDDA output is regeneratable by existing build.
 
 Use Fast -WorkflowOnly for docs; DEV for edits; full ceremony at program/platform
 risk boundaries. Keep all acceptance tests and three-attempt rulings.
-Next: owner-authorized full-route tile/palette census and bounded resize proposal;
-timing-policy choice also pending. No full-level promise or candidate promotion.
+Next: normal-profile Jo allocation and reachable-content union audit; refine
+DRAM0 tile proposal in memory plan. Timing choice/gate reopenings still pending.
