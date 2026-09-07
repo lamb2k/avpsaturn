@@ -1,0 +1,457 @@
+{
+  "analyzer_field_negatives": 5,
+  "baseline": {
+    "child_allocations": 32,
+    "decrement_stores": 1526,
+    "reload_stores": 32,
+    "spawn_witness_frames": [
+      3925,
+      3974,
+      4023,
+      4072,
+      4121,
+      4170,
+      4219,
+      4268,
+      4317,
+      4366,
+      4415,
+      4464,
+      4513,
+      4562,
+      4611,
+      4660,
+      4709,
+      4758,
+      4807,
+      4856,
+      4905,
+      4954,
+      5003,
+      5052,
+      5101,
+      5150,
+      5199,
+      5248,
+      5297,
+      5346,
+      5395,
+      5444
+    ]
+  },
+  "capture_pair": [
+    "oracle11_type28_class0e_a",
+    "oracle11_type28_class0e_b"
+  ],
+  "causal_source_controls": 1,
+  "changed_ledgers": [
+    "coffee_shop_class00_program.tsv",
+    "coffee_shop_class00_scheduler_phase.tsv",
+    "coffee_shop_class0a_program.tsv",
+    "coffee_shop_component20_dispatch.tsv",
+    "coffee_shop_component20_global.tsv",
+    "coffee_shop_component20_writes.tsv",
+    "coffee_shop_obstacle_guard.tsv",
+    "coffee_shop_player_resource.tsv",
+    "coffee_shop_rng_calls.tsv",
+    "coffee_shop_scene_actors.tsv",
+    "coffee_shop_scene_frames.tsv",
+    "coffee_shop_scene_health_writes.tsv",
+    "coffee_shop_type28_class0e.tsv",
+    "coffee_shop_type4_class03.tsv",
+    "progression_class1f_transitions.tsv",
+    "progression_controller.tsv",
+    "samples.tsv"
+  ],
+  "class": "0x0e",
+  "control": "oracle11_type28_class0e_m2",
+  "control_result": {
+    "child_allocations": 31,
+    "decrement_stores": 1526,
+    "reload_stores": 31,
+    "spawn_witness_frames": [
+      3925,
+      3975,
+      4025,
+      4075,
+      4125,
+      4175,
+      4225,
+      4275,
+      4325,
+      4375,
+      4425,
+      4475,
+      4525,
+      4575,
+      4625,
+      4675,
+      4725,
+      4775,
+      4825,
+      4875,
+      4925,
+      4975,
+      5025,
+      5075,
+      5125,
+      5175,
+      5225,
+      5275,
+      5325,
+      5375,
+      5425
+    ]
+  },
+  "coupling_scope": "Actor/RNG/health/controller ledgers differ after child cadence changes; these consequences remain source-observed, not individually closed by this timer witness.",
+  "dispatch": "0x0a726c",
+  "emulator_visual": "BLOCKED_NOT_RETRIED",
+  "equivalent_analyzer_survivors": 1,
+  "hashes": {
+    "coffee_shop_class00_program.tsv": [
+      "dbda41ffb28d675d83d8ef5bffd78a49cca8fd36880a344945b3ce2d619dbb63",
+      "dbda41ffb28d675d83d8ef5bffd78a49cca8fd36880a344945b3ce2d619dbb63",
+      "616c5c4786737308194335503ffd2ae59cd93379eb40e0a33dd54d00545b021c"
+    ],
+    "coffee_shop_class00_scheduler_phase.tsv": [
+      "06db63941a57793c60fedc63698db6c6bdd2c93a524e0de8c2af055e3683a0eb",
+      "06db63941a57793c60fedc63698db6c6bdd2c93a524e0de8c2af055e3683a0eb",
+      "89b9247553166511402e0ca77342d7bba06df6dd8d44fff684390bf7eb8a683b"
+    ],
+    "coffee_shop_class0a_program.tsv": [
+      "a44ef7779fecd05ec8334c2884063db8c97d0d5e60464a7f6a55e04be1aaaf73",
+      "a44ef7779fecd05ec8334c2884063db8c97d0d5e60464a7f6a55e04be1aaaf73",
+      "18b073d70fbba56249de7a589e3360fddc0237e695e498821593d586cac7e13f"
+    ],
+    "coffee_shop_class0c_program.tsv": [
+      "bee2381147ed2a9e120ce4360035f6b6ea0d008ca261016dabac37c669ad8c4d",
+      "bee2381147ed2a9e120ce4360035f6b6ea0d008ca261016dabac37c669ad8c4d",
+      "bee2381147ed2a9e120ce4360035f6b6ea0d008ca261016dabac37c669ad8c4d"
+    ],
+    "coffee_shop_class1f_action0c.tsv": [
+      "f5503829e5eb3a7f5ae70df3abb29d6a5bf975416e0521c30f48731c77fa79c6",
+      "f5503829e5eb3a7f5ae70df3abb29d6a5bf975416e0521c30f48731c77fa79c6",
+      "f5503829e5eb3a7f5ae70df3abb29d6a5bf975416e0521c30f48731c77fa79c6"
+    ],
+    "coffee_shop_class1f_hit.tsv": [
+      "8a9a6c738e7cd0e96f5825ee65d9eea10b5b429474fa90dc21c15c83864d96a7",
+      "8a9a6c738e7cd0e96f5825ee65d9eea10b5b429474fa90dc21c15c83864d96a7",
+      "8a9a6c738e7cd0e96f5825ee65d9eea10b5b429474fa90dc21c15c83864d96a7"
+    ],
+    "coffee_shop_class1f_hit_program.tsv": [
+      "09a421a65ce77346e715f11ed5ca3b2b103c29bf208c77afc13e15adac5d3b0f",
+      "09a421a65ce77346e715f11ed5ca3b2b103c29bf208c77afc13e15adac5d3b0f",
+      "09a421a65ce77346e715f11ed5ca3b2b103c29bf208c77afc13e15adac5d3b0f"
+    ],
+    "coffee_shop_class1f_hit_writes.tsv": [
+      "c8b8399e72441bcd7cdf5fb5fd5961a26553fd7420fe7946efb91cbdba09c623",
+      "c8b8399e72441bcd7cdf5fb5fd5961a26553fd7420fe7946efb91cbdba09c623",
+      "c8b8399e72441bcd7cdf5fb5fd5961a26553fd7420fe7946efb91cbdba09c623"
+    ],
+    "coffee_shop_class1f_inner8_entries.tsv": [
+      "3b33c51d0fd14da7c6a0dbb106b9ea2613f47cc57d4610e371633443024596f9",
+      "3b33c51d0fd14da7c6a0dbb106b9ea2613f47cc57d4610e371633443024596f9",
+      "3b33c51d0fd14da7c6a0dbb106b9ea2613f47cc57d4610e371633443024596f9"
+    ],
+    "coffee_shop_class1f_inner8_group.tsv": [
+      "dbe1b54b46f278cbe19bf00c6c114ecf3fa897ec60a9eb056dd577ec7312a0d5",
+      "dbe1b54b46f278cbe19bf00c6c114ecf3fa897ec60a9eb056dd577ec7312a0d5",
+      "dbe1b54b46f278cbe19bf00c6c114ecf3fa897ec60a9eb056dd577ec7312a0d5"
+    ],
+    "coffee_shop_class1f_inner8_writes.tsv": [
+      "95872ca262fc61bcbc02fc34f2fe00dfacb4977308f97f0bcaf3d88f487411e4",
+      "95872ca262fc61bcbc02fc34f2fe00dfacb4977308f97f0bcaf3d88f487411e4",
+      "95872ca262fc61bcbc02fc34f2fe00dfacb4977308f97f0bcaf3d88f487411e4"
+    ],
+    "coffee_shop_class1f_source_bounds.tsv": [
+      "27c040494176b31730cb08e471dfa775ee6463f3e355d8fed04e26ac20a84c4d",
+      "27c040494176b31730cb08e471dfa775ee6463f3e355d8fed04e26ac20a84c4d",
+      "27c040494176b31730cb08e471dfa775ee6463f3e355d8fed04e26ac20a84c4d"
+    ],
+    "coffee_shop_collision_actor_flags.tsv": [
+      "3a98ac853e13eddeb9231f5b84cc6dae75467e79a6ebd410a534599c783b398b",
+      "3a98ac853e13eddeb9231f5b84cc6dae75467e79a6ebd410a534599c783b398b",
+      "3a98ac853e13eddeb9231f5b84cc6dae75467e79a6ebd410a534599c783b398b"
+    ],
+    "coffee_shop_collision_identity_assignments.tsv": [
+      "893f4871cc7e586badabbfc47252635226e0da59841f95fe82e84178ad44b4b4",
+      "893f4871cc7e586badabbfc47252635226e0da59841f95fe82e84178ad44b4b4",
+      "893f4871cc7e586badabbfc47252635226e0da59841f95fe82e84178ad44b4b4"
+    ],
+    "coffee_shop_collision_list_writes.tsv": [
+      "47accbc781619fad4be8723c16318b672d6c0cfc2cf35017958abb49f95e6edb",
+      "47accbc781619fad4be8723c16318b672d6c0cfc2cf35017958abb49f95e6edb",
+      "47accbc781619fad4be8723c16318b672d6c0cfc2cf35017958abb49f95e6edb"
+    ],
+    "coffee_shop_collision_lists.tsv": [
+      "53258f407e3d19d33a552a6d1a14565a7a4ced1f687884c319fa9fd0e7c479d2",
+      "53258f407e3d19d33a552a6d1a14565a7a4ced1f687884c319fa9fd0e7c479d2",
+      "53258f407e3d19d33a552a6d1a14565a7a4ced1f687884c319fa9fd0e7c479d2"
+    ],
+    "coffee_shop_component20_callers.tsv": [
+      "f5ec7749e5b3f819f7079da9ed357fa70b9f2dcfabe814c35d4457b050fcfc7f",
+      "f5ec7749e5b3f819f7079da9ed357fa70b9f2dcfabe814c35d4457b050fcfc7f",
+      "f5ec7749e5b3f819f7079da9ed357fa70b9f2dcfabe814c35d4457b050fcfc7f"
+    ],
+    "coffee_shop_component20_collision.tsv": [
+      "e9bf13927996a9af7563b4e8e7383a080c9e41b637b041c7191f70e9a30effec",
+      "e9bf13927996a9af7563b4e8e7383a080c9e41b637b041c7191f70e9a30effec",
+      "e9bf13927996a9af7563b4e8e7383a080c9e41b637b041c7191f70e9a30effec"
+    ],
+    "coffee_shop_component20_dispatch.tsv": [
+      "fe0df8d401c5e8ccb8c413559ce3d5a560fcc5e8faefcedd681f69b6addd9faa",
+      "fe0df8d401c5e8ccb8c413559ce3d5a560fcc5e8faefcedd681f69b6addd9faa",
+      "5074bc147431d41f9844bacb264b88e6c447c4bde757cacc219e74c290a96162"
+    ],
+    "coffee_shop_component20_global.tsv": [
+      "f0d6256e3b298e4e87b827c3744356b748d1f2b070b84fda8bc50f303c1ca385",
+      "f0d6256e3b298e4e87b827c3744356b748d1f2b070b84fda8bc50f303c1ca385",
+      "72845393279d0013936cf259ee2a16e34f329362fd29765fcf986ce215783c80"
+    ],
+    "coffee_shop_component20_phase.tsv": [
+      "f3875e6653c047cb5b482e5c6bd6e925c51bf732c981d733772a4d97ed75b6b8",
+      "f3875e6653c047cb5b482e5c6bd6e925c51bf732c981d733772a4d97ed75b6b8",
+      "f3875e6653c047cb5b482e5c6bd6e925c51bf732c981d733772a4d97ed75b6b8"
+    ],
+    "coffee_shop_component20_writes.tsv": [
+      "a8ce200dedfb660d1d3195891cdcb8d640334f3f63b8837558811b5f57e84adc",
+      "a8ce200dedfb660d1d3195891cdcb8d640334f3f63b8837558811b5f57e84adc",
+      "86a7892eead465f6d31ca233043cdb8a4b74ad35f068ff95ba356ecb5e7c55ba"
+    ],
+    "coffee_shop_controller_substate_writes.tsv": [
+      "24852ec44992b6f350f4f1fceba2159eca4474b865a056fefb32f499bf034866",
+      "24852ec44992b6f350f4f1fceba2159eca4474b865a056fefb32f499bf034866",
+      "24852ec44992b6f350f4f1fceba2159eca4474b865a056fefb32f499bf034866"
+    ],
+    "coffee_shop_obstacle_guard.tsv": [
+      "897f2c02ef8d5a948052255e9a8a260ce0576f594ee115a13defec1f259f0974",
+      "897f2c02ef8d5a948052255e9a8a260ce0576f594ee115a13defec1f259f0974",
+      "fc95c110ad6aad5829d97fb78b1e9b449d03bc7962d66908587c9e5efec239db"
+    ],
+    "coffee_shop_obstacle_trace.tsv": [
+      "69737be56541f2fb105ac0622b9a88c8be81b14d22a4a9c62b6261565cedd8b7",
+      "69737be56541f2fb105ac0622b9a88c8be81b14d22a4a9c62b6261565cedd8b7",
+      "69737be56541f2fb105ac0622b9a88c8be81b14d22a4a9c62b6261565cedd8b7"
+    ],
+    "coffee_shop_obstacle_writes.tsv": [
+      "1fb9b88000f4c77e648a6d67306ce74c0c321d15839b154de9fa22bf8128ce5b",
+      "1fb9b88000f4c77e648a6d67306ce74c0c321d15839b154de9fa22bf8128ce5b",
+      "1fb9b88000f4c77e648a6d67306ce74c0c321d15839b154de9fa22bf8128ce5b"
+    ],
+    "coffee_shop_pair_suppression.tsv": [
+      "46e8a875a89e0f90a30e5ef74c55484d6d7a11b5895172a2232957674d17250d",
+      "46e8a875a89e0f90a30e5ef74c55484d6d7a11b5895172a2232957674d17250d",
+      "46e8a875a89e0f90a30e5ef74c55484d6d7a11b5895172a2232957674d17250d"
+    ],
+    "coffee_shop_player_animation_writes.tsv": [
+      "bc3c9cc7df2830bbf61cd8a4a8bbebd57e7860b0a2d3aacad9e6c75a07575438",
+      "bc3c9cc7df2830bbf61cd8a4a8bbebd57e7860b0a2d3aacad9e6c75a07575438",
+      "bc3c9cc7df2830bbf61cd8a4a8bbebd57e7860b0a2d3aacad9e6c75a07575438"
+    ],
+    "coffee_shop_player_dispatch.tsv": [
+      "78cca3bdb3cb33a1e34579168914dcc1a1d16c6a05483fe287500caaa04f664c",
+      "78cca3bdb3cb33a1e34579168914dcc1a1d16c6a05483fe287500caaa04f664c",
+      "78cca3bdb3cb33a1e34579168914dcc1a1d16c6a05483fe287500caaa04f664c"
+    ],
+    "coffee_shop_player_hit_program.tsv": [
+      "b650731cd8a0af2c451c40c20d9e1409cf6951ffb9ac0173663b44448c0ffd3c",
+      "b650731cd8a0af2c451c40c20d9e1409cf6951ffb9ac0173663b44448c0ffd3c",
+      "b650731cd8a0af2c451c40c20d9e1409cf6951ffb9ac0173663b44448c0ffd3c"
+    ],
+    "coffee_shop_player_hit_writes.tsv": [
+      "397d9402a920b5829eeda0d7375889f3b694856ad3c64d9bb187b26d416c63c0",
+      "397d9402a920b5829eeda0d7375889f3b694856ad3c64d9bb187b26d416c63c0",
+      "397d9402a920b5829eeda0d7375889f3b694856ad3c64d9bb187b26d416c63c0"
+    ],
+    "coffee_shop_player_resource.tsv": [
+      "af67295b879521e0aba388ebe4b1bd9e8698c21c86e9d5b837da14efe086b4cb",
+      "af67295b879521e0aba388ebe4b1bd9e8698c21c86e9d5b837da14efe086b4cb",
+      "4a720d96dcbb4785f8a69874dfdb1de1ff082c39ed3fc3986c41e757abc9bd64"
+    ],
+    "coffee_shop_record12_guard6d_writes.tsv": [
+      "abc6098785193c5ef0ee9141d53dd60d5ab8fae7b787ce3b61c2050b6f255ed9",
+      "abc6098785193c5ef0ee9141d53dd60d5ab8fae7b787ce3b61c2050b6f255ed9",
+      "abc6098785193c5ef0ee9141d53dd60d5ab8fae7b787ce3b61c2050b6f255ed9"
+    ],
+    "coffee_shop_record4_collision_guard.tsv": [
+      "056ddbe9d39fb7dcf818f9e49ea3057162271a0609f75e1d16b59d475a4b8b63",
+      "056ddbe9d39fb7dcf818f9e49ea3057162271a0609f75e1d16b59d475a4b8b63",
+      "056ddbe9d39fb7dcf818f9e49ea3057162271a0609f75e1d16b59d475a4b8b63"
+    ],
+    "coffee_shop_record4_collision_identity_writes.tsv": [
+      "3c9177646661e4fc00e89c2972b88fc88dd628cfc9a605a9a5352b3e8e6aa354",
+      "3c9177646661e4fc00e89c2972b88fc88dd628cfc9a605a9a5352b3e8e6aa354",
+      "3c9177646661e4fc00e89c2972b88fc88dd628cfc9a605a9a5352b3e8e6aa354"
+    ],
+    "coffee_shop_rng_calls.tsv": [
+      "81338529f76629c3d103885c16838bd562beecf783f0b5107a5b7ecd11e219b3",
+      "81338529f76629c3d103885c16838bd562beecf783f0b5107a5b7ecd11e219b3",
+      "d8d4aa4f29d96b0a855f91e4507bb821392e7c1df5ee36d3319bcd7f6080898c"
+    ],
+    "coffee_shop_scene_actors.tsv": [
+      "b7b1568df038af1cdd7eb5bc6eb30c830efca4952d1077644ab3b31ed2ad1c0f",
+      "b7b1568df038af1cdd7eb5bc6eb30c830efca4952d1077644ab3b31ed2ad1c0f",
+      "f8b83319badd9cf7a9d6ad442e3dd6fde5b42c65280bbda086123858c300503e"
+    ],
+    "coffee_shop_scene_frames.tsv": [
+      "91e4aab3a03586a6c9a143dd58ee03a72ebc52b7fd611fdc6fe0975ebd522d1d",
+      "91e4aab3a03586a6c9a143dd58ee03a72ebc52b7fd611fdc6fe0975ebd522d1d",
+      "a30b697b728f4e3a7a585eeb671182b01e20d6a1d66b1b97353c750c930dc035"
+    ],
+    "coffee_shop_scene_health_writes.tsv": [
+      "7defadcfff16b99b8e2d5b66fc7b42443106837d698e659c64d45a8770d6aa0b",
+      "7defadcfff16b99b8e2d5b66fc7b42443106837d698e659c64d45a8770d6aa0b",
+      "d1baa33b43ebe7f0b4668a2345a9045a88678f2b26d0dc17481665246da3f13b"
+    ],
+    "coffee_shop_scheduler_phase.tsv": [
+      "c3449656835dbad89b89c6f9a0535c4cbb67fd87a346a55fdc1368a4a17e9da2",
+      "c3449656835dbad89b89c6f9a0535c4cbb67fd87a346a55fdc1368a4a17e9da2",
+      "c3449656835dbad89b89c6f9a0535c4cbb67fd87a346a55fdc1368a4a17e9da2"
+    ],
+    "coffee_shop_stage_setup.tsv": [
+      "bdb725859cc14eb330255bec01ea214908bf426938a5dec51e3223e2ac99e461",
+      "bdb725859cc14eb330255bec01ea214908bf426938a5dec51e3223e2ac99e461",
+      "bdb725859cc14eb330255bec01ea214908bf426938a5dec51e3223e2ac99e461"
+    ],
+    "coffee_shop_stage_setup_writes.tsv": [
+      "76993f138d29fa211e585822435aa6ec6d7f36401c16e62feaa678d3b8ab3832",
+      "76993f138d29fa211e585822435aa6ec6d7f36401c16e62feaa678d3b8ab3832",
+      "76993f138d29fa211e585822435aa6ec6d7f36401c16e62feaa678d3b8ab3832"
+    ],
+    "coffee_shop_terrain_patch.tsv": [
+      "d7524ac0b6e3aa2ef2553ccf03b08d765b341697f49de16c42d452ee5f52cf38",
+      "d7524ac0b6e3aa2ef2553ccf03b08d765b341697f49de16c42d452ee5f52cf38",
+      "d7524ac0b6e3aa2ef2553ccf03b08d765b341697f49de16c42d452ee5f52cf38"
+    ],
+    "coffee_shop_terrain_stream.tsv": [
+      "9b91ce7e29918d54781301be69c942100761b48ec243949b8147aa8fe556c33e",
+      "9b91ce7e29918d54781301be69c942100761b48ec243949b8147aa8fe556c33e",
+      "9b91ce7e29918d54781301be69c942100761b48ec243949b8147aa8fe556c33e"
+    ],
+    "coffee_shop_type16_class06_collision.tsv": [
+      "ae23be024a10169daef06ed6591b2af26143cab9cb2ff6a07ed6cbcf427b93ae",
+      "ae23be024a10169daef06ed6591b2af26143cab9cb2ff6a07ed6cbcf427b93ae",
+      "ae23be024a10169daef06ed6591b2af26143cab9cb2ff6a07ed6cbcf427b93ae"
+    ],
+    "coffee_shop_type28_class0e.tsv": [
+      "e0bcc534de01ee92572d59e629f743128ec3a37864ed4f19dd5675d50546f165",
+      "e0bcc534de01ee92572d59e629f743128ec3a37864ed4f19dd5675d50546f165",
+      "ceda39fcc8bea4b131a8d8b560a07e121cfc1c8f57f6fb12a3e900e76e48540c"
+    ],
+    "coffee_shop_type36_writes.tsv": [
+      "1a931a2fef38f298d0149d7e6e20e2cc68f837f9fba3fa531e54e0e172200d20",
+      "1a931a2fef38f298d0149d7e6e20e2cc68f837f9fba3fa531e54e0e172200d20",
+      "1a931a2fef38f298d0149d7e6e20e2cc68f837f9fba3fa531e54e0e172200d20"
+    ],
+    "coffee_shop_type4_class03.tsv": [
+      "39df9cfddb1dd7032825fbc99cb334017e01d0522c2fe9aeb91678c4eb452df1",
+      "39df9cfddb1dd7032825fbc99cb334017e01d0522c2fe9aeb91678c4eb452df1",
+      "19d514b0d4783d318c356c10c61510abe8197daf30ef735780094ca8e40c6817"
+    ],
+    "dispatches.tsv": [
+      "a47890edd3e102e8d8db5e4caa21d9b15c5c6e0a3c4800ab1aff578421102903",
+      "a47890edd3e102e8d8db5e4caa21d9b15c5c6e0a3c4800ab1aff578421102903",
+      "a47890edd3e102e8d8db5e4caa21d9b15c5c6e0a3c4800ab1aff578421102903"
+    ],
+    "progression_class1f_action4_guard.tsv": [
+      "5ed4626a9ea696b88d8583ad4204651b22925151623f42ae2e4f290fbfddf9c2",
+      "5ed4626a9ea696b88d8583ad4204651b22925151623f42ae2e4f290fbfddf9c2",
+      "5ed4626a9ea696b88d8583ad4204651b22925151623f42ae2e4f290fbfddf9c2"
+    ],
+    "progression_class1f_action4_timers.tsv": [
+      "749bd0e8680ff18369a0e7d00d4c9a948b1ac9137fa61b17f6a9b6896b8b3c8e",
+      "749bd0e8680ff18369a0e7d00d4c9a948b1ac9137fa61b17f6a9b6896b8b3c8e",
+      "749bd0e8680ff18369a0e7d00d4c9a948b1ac9137fa61b17f6a9b6896b8b3c8e"
+    ],
+    "progression_class1f_transitions.tsv": [
+      "a9867149040dccd58597422a23c9db042b2df9fd2ee6b0d008f84c09aa3a754d",
+      "a9867149040dccd58597422a23c9db042b2df9fd2ee6b0d008f84c09aa3a754d",
+      "492b4e90113743772b4ae0223d4b81b72d9150ef5cad666a3abaff30fa627fee"
+    ],
+    "progression_controller.tsv": [
+      "0ed5a95ce86fca539bc84c09aa1af24cb5c383e14b7d042f291bb70a1191612b",
+      "0ed5a95ce86fca539bc84c09aa1af24cb5c383e14b7d042f291bb70a1191612b",
+      "640173b99a87c639b633a4af271fe9a18f65744f9eb3c321fe9baca8c3a7df9b"
+    ],
+    "progression_global_writes.tsv": [
+      "01040603c09d56a215747c9ca3a2b0d9378f26eb55beb0614d6dc78ace6ff15a",
+      "01040603c09d56a215747c9ca3a2b0d9378f26eb55beb0614d6dc78ace6ff15a",
+      "01040603c09d56a215747c9ca3a2b0d9378f26eb55beb0614d6dc78ace6ff15a"
+    ],
+    "progression_lifecycle_writes.tsv": [
+      "bafce924823779cf6ca1e58f5b251c9eaa773f73a3e1eeb2a849e3270d090e11",
+      "bafce924823779cf6ca1e58f5b251c9eaa773f73a3e1eeb2a849e3270d090e11",
+      "bafce924823779cf6ca1e58f5b251c9eaa773f73a3e1eeb2a849e3270d090e11"
+    ],
+    "progression_result.tsv": [
+      "c7bacd855ddbe40c5cee5895c183bbf4ec547c8f7ac24ccd9338e7ad5c43538e",
+      "c7bacd855ddbe40c5cee5895c183bbf4ec547c8f7ac24ccd9338e7ad5c43538e",
+      "c7bacd855ddbe40c5cee5895c183bbf4ec547c8f7ac24ccd9338e7ad5c43538e"
+    ],
+    "progression_snapshots.tsv": [
+      "d74e7d69cf1590136696011fd020c2108bccaf768a85196ec599bf4e5959ff29",
+      "d74e7d69cf1590136696011fd020c2108bccaf768a85196ec599bf4e5959ff29",
+      "d74e7d69cf1590136696011fd020c2108bccaf768a85196ec599bf4e5959ff29"
+    ],
+    "progression_transactions.tsv": [
+      "710cafe9ebe7ce295d1c4b07dc6b997fd55efa4670673f940cd59ad37a6f5625",
+      "710cafe9ebe7ce295d1c4b07dc6b997fd55efa4670673f940cd59ad37a6f5625",
+      "710cafe9ebe7ce295d1c4b07dc6b997fd55efa4670673f940cd59ad37a6f5625"
+    ],
+    "progression_writes.tsv": [
+      "69ace4c61050b122b72ae0dd205690a21f7d9b7eec09ffbaede1759fc9e16c14",
+      "69ace4c61050b122b72ae0dd205690a21f7d9b7eec09ffbaede1759fc9e16c14",
+      "69ace4c61050b122b72ae0dd205690a21f7d9b7eec09ffbaede1759fc9e16c14"
+    ],
+    "projectiles.tsv": [
+      "323f89b97c779375272bcaf0bdfc337f3bd3601435607d7ee5804d38bf8443fa",
+      "323f89b97c779375272bcaf0bdfc337f3bd3601435607d7ee5804d38bf8443fa",
+      "323f89b97c779375272bcaf0bdfc337f3bd3601435607d7ee5804d38bf8443fa"
+    ],
+    "qsound.tsv": [
+      "48148bb4ea7d02a1854a091616dbbb44c20c3df4b2afaf54e647cce6ee902507",
+      "48148bb4ea7d02a1854a091616dbbb44c20c3df4b2afaf54e647cce6ee902507",
+      "48148bb4ea7d02a1854a091616dbbb44c20c3df4b2afaf54e647cce6ee902507"
+    ],
+    "result.tsv": [
+      "9357ad1423accca7aacef157e481e73331859914e109790e92c32eb0852bd50c",
+      "9357ad1423accca7aacef157e481e73331859914e109790e92c32eb0852bd50c",
+      "9357ad1423accca7aacef157e481e73331859914e109790e92c32eb0852bd50c"
+    ],
+    "samples.tsv": [
+      "51964bb2a5d68f44996c9a5bddd4102d131ebf2e9649b904dff91066221a7611",
+      "51964bb2a5d68f44996c9a5bddd4102d131ebf2e9649b904dff91066221a7611",
+      "c74aaeae1863cd8764f0a47cb770afb86ce4fc537a152361326759971bedd4b0"
+    ],
+    "score_writes.tsv": [
+      "da1652439ffcf28d23957d6e56675a8963c1bc519ec7f46de46a2ef934a6f327",
+      "da1652439ffcf28d23957d6e56675a8963c1bc519ec7f46de46a2ef934a6f327",
+      "da1652439ffcf28d23957d6e56675a8963c1bc519ec7f46de46a2ef934a6f327"
+    ]
+  },
+  "native_behavioral_kills": 0,
+  "native_runtime_changed": false,
+  "observation_scope": "Full Coffee Shop capture through5566; ffcd00 earlier class12 generation excluded. Opcode reads include prefetch and are not invocation counts. Frame anchors are witnesses, not gameplay clocks.",
+  "opcode_sha256": "e423127bc04889161657032fcb40a8a8f871f4d4f08bd99726e3babdf6e81501",
+  "paired_ledger_count": 64,
+  "physical": "UNRUN",
+  "program_sha256": "0c14f4094d25787401aa949657620ff495ae8606c1cfd8ae2d059b94c3d478e9",
+  "program_window_sha256": "2e386e4ffe15af08c403c32c0750e5b484aa3795c9e8e22436aa7f4b91b3a4ae",
+  "record_type": 28,
+  "rejected_control": "m also changed decrement writer0a73a8; froze counter. Not credited.",
+  "remaining_fields": [
+    "parent allocation/table arguments and generation",
+    "terrain helper interface for this actor",
+    "collection/event queue and reachable guards",
+    "route teardown/frozen residency/central release",
+    "animation and collision contract integration"
+  ],
+  "source_slot": "0x00ffcd00",
+  "status": "PARTIAL_SOURCE_PROGRAM_WITNESS_NOT_EXECUTABLE_SPEC",
+  "target": "BLOCKED_NOT_RETRIED",
+  "unchanged_projections": [
+    "score writes",
+    "QSound writes",
+    "completion result"
+  ]
+}

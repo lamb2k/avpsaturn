@@ -46,4 +46,4 @@ pinned EXE/archive match. Root CDDA output is regeneratable by existing build.
 Use Fast -WorkflowOnly for docs; DEV for edits; full ceremony at program/platform
 risk boundaries. Keep all acceptance tests and three-attempt rulings.
 Audio sizing: paired1220 descriptor calls; control downstream0, budget3 exhausted; no source/native kill.
-Next: type28/class0e dispatch0a726c SPEC fields from retained evidence; distinct from closed type36/class0e. No gate retry.
+Next: type28/class0e0a726c parent0bc820/terrain/collection/release SPEC fields; paired64 ledgers, causal reload48->49 changes children32->31. Evidence data/reimplement13_type28_class0e_oracle_followup.json; PARTIAL, no native change. No gate retry.

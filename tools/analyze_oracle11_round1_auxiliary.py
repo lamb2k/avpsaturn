@@ -5024,6 +5024,134 @@ def class0a_palette_consumer_readiness():
   'native_runtime_changed':False,'yaba_runs':0,'physical':'UNRUN'}
 
 
+def validate_type28_class0e_timer(records, reload_value):
+ """Validate actual stores, not instruction-fetch/prefetch counts."""
+ owned=[r for r in records if r['actor_hex'][4:6]=='0e' and
+        r['actor_hex'][16:18]=='1c']
+ stores=[r for r in owned if r['event']=='write' and r['address']=='ffcd2a'
+         and r['pc'] in ('0a73a8','0a73ae')]
+ req(stores,'type28/class0e timer stores missing')
+ previous=None; decrements=0; reloads=0
+ for r in stores:
+  before=int(r['actor_hex'][84:88],16)
+  requested=int(r['data'],16); applied=int(r['applied'],16)
+  req(int(r['mask'],16)==0xffff,'type28/class0e timer width')
+  req(all(int(r[g],16)==0 for g in ('g022a','g01f3','g0208')),
+      'type28/class0e timer guard')
+  if previous is not None:
+   req(before==previous,'type28/class0e downstream timer continuity')
+  if r['pc']=='0a73a8':
+   req(requested==((before-1)&0xffff) and applied==requested,
+       'type28/class0e decrement arithmetic or unrelated mutation')
+   decrements+=1
+  else:
+   req(before==0xffff and requested==0x30 and applied==reload_value,
+       'type28/class0e attributable reload')
+   reloads+=1
+  previous=applied
+ children=[r for r in owned if r['event']=='cross_write' and r['pc']=='0a73be']
+ req(len(children)==reloads,'type28/class0e measured allocation/reload count')
+ for child in children:
+  req(int(child['data'],16)==0x1004 and int(child['mask'],16)==0xffff and
+      int(child['address'],16)==int(child['a4'],16)+2,
+      'type28/class0e child identity writer')
+  for pc,offset in (('0a73c4',0x10),('0a73ca',0x14),('0a73d0',0x18)):
+   matches=[r for r in owned if r['event']=='cross_write' and r['pc']==pc
+            and r['frame']==child['frame'] and r['a4']==child['a4']]
+   req(len(matches)==1,'type28/class0e child position writer missing')
+   r=matches[0]
+   req(int(r['address'],16)==int(r['a4'],16)+offset and
+       int(r['mask'],16)==0xffff and
+       int(r['data'],16)==int(r['actor_hex'][offset*2:offset*2+4],16),
+       'type28/class0e child parent-coordinate ownership')
+ return {'decrement_stores':decrements,'reload_stores':reloads,
+         'child_allocations':len(children),
+         'spawn_witness_frames':[int(r['frame']) for r in children]}
+
+
+def type28_class0e_readiness():
+ req(sha(OPCODES)=='e423127bc04889161657032fcb40a8a8f871f4d4f08bd99726e3babdf6e81501'
+     and sha(PROGRAM)=='0c14f4094d25787401aa949657620ff495ae8606c1cfd8ae2d059b94c3d478e9',
+     'type28/class0e pinned source image identity')
+ roots=[ROOT/('.deps/mame/oracle11_type28_class0e_'+v) for v in ('a','b','m2')]
+ names=sorted(p.name for p in roots[0].glob('*.tsv'))
+ req(names and all(sorted(p.name for p in root.glob('*.tsv'))==names
+                   for root in roots),'type28/class0e paired ledger inventory')
+ hashes={name:[sha(root/name) for root in roots] for name in names}
+ req(all(h[0]==h[1] for h in hashes.values()),'type28/class0e cold pair identity')
+ req(hashes['coffee_shop_scene_actors.tsv'][0]==
+     'b7b1568df038af1cdd7eb5bc6eb30c830efca4952d1077644ab3b31ed2ad1c0f',
+     'type28/class0e accepted scene identity')
+ name='coffee_shop_type28_class0e.tsv'
+ baseline=rows(roots[0]/name); mutant=rows(roots[2]/name)
+ a=validate_type28_class0e_timer(baseline,0x30)
+ m=validate_type28_class0e_timer(mutant,0x31)
+ req(a['child_allocations']==32 and m['child_allocations']==31,
+     'type28/class0e discriminating downstream child allocation')
+ for result,interval in ((a,49),(m,50)):
+  frames=result['spawn_witness_frames']
+  req(all(y-x==interval for x,y in zip(frames,frames[1:])),
+      'type28/class0e timer cadence witness')
+  # This assertion describes this capture only. It is never runtime scheduling.
+ changes=[r for r in mutant if r['data']!=r['applied']]
+ req(len(changes)==31 and all(r['pc']=='0a73ae' and
+     r['address']=='ffcd2a' for r in changes),'type28/class0e mutation confinement')
+ for name in ('score_writes.tsv','qsound.tsv','progression_result.tsv'):
+  req(hashes[name][0]==hashes[name][2],'type28/class0e unexpected coupling: '+name)
+ rejected=rows(ROOT/'.deps/mame/oracle11_type28_class0e_m'/
+               'coffee_shop_type28_class0e.tsv')
+ try:
+  validate_type28_class0e_timer(rejected,0x31)
+ except ValueError as exc:
+  req('decrement arithmetic' in str(exc),'type28/class0e wrong rejection reason')
+ else:
+  raise ValueError('type28/class0e frozen-counter control was incorrectly credited')
+ # Analyzer negatives are not native behavioral kills. Each must hit its own guard.
+ controls=(('0a73a8','data','00001234','decrement arithmetic'),
+           ('0a73ae','applied','00000031','attributable reload'),
+           ('0a73a8','g022a','01','timer guard'),
+           ('0a73be','data','00001005','child identity writer'),
+           ('0a73c4','data','00000000','parent-coordinate ownership'))
+ for pc,field,value,diagnostic in controls:
+  changed=[dict(r) for r in baseline]
+  target=next(r for r in changed if r['pc']==pc and
+              r['event'] in ('write','cross_write'))
+  target[field]=value
+  try:
+   validate_type28_class0e_timer(changed,0x30)
+  except ValueError as exc:
+   req(diagnostic in str(exc),'type28/class0e unrelated negative: '+str(exc))
+  else:
+   raise ValueError('type28/class0e analyzer negative survived: '+diagnostic)
+ req(validate_type28_class0e_timer([dict(r) for r in baseline],0x30)==a,
+     'type28/class0e unchanged control must survive')
+ return {'status':'PARTIAL_SOURCE_PROGRAM_WITNESS_NOT_EXECUTABLE_SPEC',
+  'record_type':28,'class':'0x0e','dispatch':'0x0a726c','source_slot':'0x00ffcd00',
+  'capture_pair':[root.name for root in roots[:2]],'control':roots[2].name,
+  'paired_ledger_count':len(names),'hashes':hashes,'baseline':a,'control_result':m,
+  'opcode_sha256':sha(OPCODES),'program_sha256':sha(PROGRAM),
+  'program_window_sha256':hashlib.sha256(OPCODES.read_bytes()[0xa726c:0xa7404]).hexdigest(),
+  'causal_source_controls':1,'native_behavioral_kills':0,
+  'analyzer_field_negatives':len(controls),'equivalent_analyzer_survivors':1,
+  'rejected_control':'m also changed decrement writer0a73a8; froze counter. Not credited.',
+  'changed_ledgers':[name for name,h in hashes.items() if h[0]!=h[2]],
+  'unchanged_projections':['score writes','QSound writes','completion result'],
+  'coupling_scope':'Actor/RNG/health/controller ledgers differ after child cadence changes; these consequences remain source-observed, not individually closed by this timer witness.',
+  'observation_scope':'Full Coffee Shop capture through5566; ffcd00 earlier class12 generation excluded. Opcode reads include prefetch and are not invocation counts. Frame anchors are witnesses, not gameplay clocks.',
+  'remaining_fields':['parent allocation/table arguments and generation',
+   'terrain helper interface for this actor','collection/event queue and reachable guards',
+   'route teardown/frozen residency/central release','animation and collision contract integration'],
+  'native_runtime_changed':False,'target':'BLOCKED_NOT_RETRIED',
+  'emulator_visual':'BLOCKED_NOT_RETRIED','physical':'UNRUN'}
+
+
+if __name__=='__main__' and '--type28-class0e-readiness' in __import__('sys').argv:
+ report=type28_class0e_readiness()
+ if '--write' in __import__('sys').argv:
+  (ROOT/'data/reimplement13_type28_class0e_oracle_followup.json').write_bytes(canon(report))
+ print(json.dumps(report,sort_keys=True,indent=2))
+ raise SystemExit(0)
+
 if __name__=='__main__' and '--class0a-palette-readiness' in __import__('sys').argv:
  print(json.dumps(class0a_palette_consumer_readiness(),sort_keys=True,indent=2))
  raise SystemExit(0)

@@ -1047,6 +1047,68 @@ oracle11_class0c_cross_write_tap = program:install_write_tap(
         end
     end)
 
+-- Separate record28/class0e source program. Does not enable class0c or
+-- change its exhausted witness. Raw full records stay in ignored evidence.
+type28_class0e_probe = {
+    enabled = os.getenv("AVSP_ORACLE11_TYPE28_CLASS0E_CAPTURE") == "1",
+    timer_control = os.getenv("AVSP_ORACLE11_TYPE28_CLASS0E_TIMER_CONTROL") == "1",
+    slot = 0xffcd00, taps = {},
+    pcs = {0x0a726c,0x0a7280,0x0a72b2,0x0a72be,0x0a72d2,
+           0x0a72de,0x0a72e4,0x0a72ee,0x0a7300,0x0a730a,
+           0x0a732a,0x0a7334,0x0a734e,0x0a7354,0x0a7374,
+           0x0a737e,0x0a738e,0x0a7394,0x0a73a2,0x0a73a8,
+           0x0a73ae,0x0a73b4,0x0a73d0,0x0a73dc,0x0a73e2,
+           0x0a73fe,0x09e5a6,0x016518,0x016536,0x0167ac,
+           0x0177da,0x01783e,0x0ae396,0x0b1baa,0x017c5e}
+}
+function emit_type28_class0e(event, pc, address, data, mask, applied)
+    local probe = type28_class0e_probe
+    if not probe.enabled or frame < 1972 or frame > capture_last_frame then return end
+    if event ~= "write" and event ~= "cross_write" and
+            ((maincpu.state["A6"].value & 0xffffff) ~= probe.slot or
+             u8(probe.slot + 2) ~= 0x0e or u8(probe.slot + 8) ~= 28) then return end
+    local actor = {}
+    for offset = 0, 127 do actor[#actor + 1] = hexv(u8(probe.slot + offset),2) end
+    probe.file:write(table.concat({frame,event,hexv(pc,6),hexv(address,6),
+        hexv(data & 0xffffffff,8),hexv(mask & 0xffffffff,8),hexv(applied & 0xffffffff,8),
+        table.concat(actor),hexv(u8(global+0x22a),2),hexv(u8(global+0x1f3),2),
+        hexv(u8(global+0x208),2),hexv(u16(global+0x29c),4),
+        hexv(u16(0xff81a8),4),hexv(u16(global+8),4),
+        hexv(maincpu.state["D0"].value & 0xffffffff,8),
+        hexv(maincpu.state["D1"].value & 0xffffffff,8),
+        hexv(maincpu.state["A0"].value & 0xffffff,6),
+        hexv(maincpu.state["A4"].value & 0xffffff,6),
+        hexv(maincpu.state["A6"].value & 0xffffff,6)},"\t") .. "\n")
+end
+if type28_class0e_probe.enabled then
+    type28_class0e_probe.file = assert(io.open(root .. "/coffee_shop_type28_class0e.tsv","w"))
+    type28_class0e_probe.file:write("frame\tevent\tpc\taddress\tdata\tmask\tapplied\tactor_hex\tg022a\tg01f3\tg0208\tg029c\trng\troute\td0\td1\ta0\ta4\ta6\n")
+    for _, pc in ipairs(type28_class0e_probe.pcs) do
+        type28_class0e_probe.taps[#type28_class0e_probe.taps+1] =
+            opcodes:install_read_tap(pc,pc+1,string.format("type28_class0e_%06x",pc),
+                function() emit_type28_class0e("opcode",pc,0,0,0,0) end)
+    end
+    type28_class0e_probe.write = program:install_write_tap(0xffcd00,0xffcd7f,
+        "type28_class0e_write",function(address,data,mask)
+            local pc = maincpu.state["PC"].value & 0xffffff
+            local applied = data
+            if type28_class0e_probe.timer_control and address == 0xffcd2a and
+                    pc == 0x0a73ae and (data & 0xffff) == 0x30 then
+                applied = (data & 0xffff0000) | 0x31
+            end
+            emit_type28_class0e("write",pc,address,data,mask,applied)
+            if applied ~= data then return applied end
+        end)
+    type28_class0e_probe.cross = program:install_write_tap(0xff8380,0xffe67f,
+        "type28_class0e_cross",function(address,data,mask)
+            local pc = maincpu.state["PC"].value & 0xffffff
+            if pc >= 0x0a7280 and pc < 0x0a7404 and
+                    (address < 0xffcd00 or address > 0xffcd7f) then
+                emit_type28_class0e("cross_write",pc,address,data,mask,data)
+            end
+        end)
+end
+
 local component20_pcs = {
     0x06b2fa, 0x06b30e, 0x06b358, 0x06b374, 0x06b38a,
     0x06b39a, 0x06b3c0, 0x06b3ea, 0x06b3f2, 0x06b42e,
@@ -2719,6 +2781,7 @@ oracle11_progression_frame = emu.add_machine_frame_notifier(function()
         class00_program:close()
         class00_scheduler_phase:close()
         class0c_program:close()
+        if type28_class0e_probe.file then type28_class0e_probe.file:close() end
         result:close()
     end
 end)
