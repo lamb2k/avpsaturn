@@ -2,14 +2,14 @@
 
 Owner, 2026-11-06: "yes pelase write code you can completely rethink the approach since it didn't make much progress ebfore and leverage the apoproach from the decomp / recomp repo", then "I emant the decomp / recomp agent skill iuf there are best practices for that coordinattor that supersese the prvious avp attempt".
 
-This replaces Codex ownership, Astra selection, one-writer rule, `CLAUDE_ALLOWED`, the task-card chain, the old PARITY_PLAN and REIMPLEMENT-13's counters. The old versions are in docs/archive/decomp-reset-20261106.
-Method: the skills at E:\AvP\tools\decomp-skill\.claude\skills (not copied here; no licence file). Plan: docs/PARITY_PLAN.md. Campaign detail: docs/research/AVP_SOURCE_CAMPAIGN.md.
+This replaces the earlier process; its documents are in docs/archive/decomp-reset-20261106 and are not instructions.
+Method: the skills at E:\AvP\tools\decomp-skill\.claude\skills (not copied here; no licence file). Backlog: docs/BACKLOG.md. Current state: docs/STATUS.md only. Campaign detail: docs/notes/AVP_SOURCE_CAMPAIGN.md.
 
 ## What stays
 
 - Private repo only. No public remote; no ROM, derived assets, listings or dumps outside the private repo and this PC. Raw dumps under E:\AvP.
 - Evidence tiers on every result: HOST, MAME, EMULATOR, HARDWARE. Never claim hardware without hardware. Modelled numbers say MODELLED.
-- Never touch `history.txt` or `data/avsp_anim_records.json`. Keep NOTICE.md and every licence file. Stage named paths only. No force-push, reset or clean on shared trees.
+- Never touch `history.txt` or `data/avsp_anim_records.json`. Keep NOTICE.md and every licence file. Lost Odyssey notes (E:\AvP	ools\lo-notes) are GPL-3.0 reference: methods only, no code. Stage named paths only. No force-push, reset or clean on shared trees.
 - Set `avspu` USA 940520, MAME 0.289.
 
 ## Objective
@@ -41,7 +41,7 @@ Plus the frames the whole-game comparison holds to, and the tier.
 
 ## Code rules (project profile)
 
-Dialect, layout, names, placeholders, parking and ledger: docs/research/AVP_SOURCE_CAMPAIGN.md, "Project profile". Reader test: would someone write this to express the behaviour without opening the disassembly? A function that only works by transliterating registers is open work.
+Dialect, layout, names, placeholders, parking and ledger: docs/notes/AVP_SOURCE_CAMPAIGN.md, "Project profile". Reader test: would someone write this to express the behaviour without opening the disassembly? A function that only works by transliterating registers is open work.
 
 ## Lanes
 

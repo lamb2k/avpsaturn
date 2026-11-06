@@ -1,4 +1,5 @@
 # AvP source campaign
+nStatus: Reference.
 
 Lead lane: avp-source, branch `learn/source`. Method taken from github.com/lemiur/Game-Decompilation-Skill-For-Claude
 (kept at E:\AvP\tools\decomp-skill, outside this repo; it has no licence file, so its text is not copied here).

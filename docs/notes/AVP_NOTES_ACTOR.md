@@ -1,4 +1,5 @@
 # AvP source campaign: actor lane notes
+nStatus: Investigation. Evidence: Fact or Historical evidence per its tier labels; old numbers are not a baseline.
 
 Lane 2 of AVP_SOURCE_CAMPAIGN.md. Reconstruction in `source_recon/avsrc_actor.c`, gate in `source_recon/gates/actor.*`.
 Tiers: **source** (read), **unicorn-differential** (learn_unit), **MAME** (probe `tools/learn_actor_probe_alloc.lua`, run `actor_alloc_d`,

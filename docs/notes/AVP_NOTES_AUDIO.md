@@ -1,4 +1,5 @@
 # AvP audio command path (lane 3)
+nStatus: Investigation. Evidence: Fact or Historical evidence per its tier labels; old numbers are not a baseline.
 
 Tiers: **source** (read from code), **unicorn-differential** (`learn_unit.py`), **MAME** (`learn_run_probe.py`, MAME 0.289). Nothing here ran on a Saturn or a CPS2 board.
 Sound names stay UNKNOWN: numbers and owners are evidence, what a sound "is" is not. Private dumps: `E:\AvP\learning\audio` and `mame\audio_base`, `mame\audio_ff`.

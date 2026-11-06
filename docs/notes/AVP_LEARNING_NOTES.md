@@ -1,4 +1,5 @@
 # AvP learning notes
+nStatus: Investigation. Evidence: Fact or Historical evidence per its tier labels; old numbers are not a baseline.
 
 Running notes from the learning lane. This is research, not acceptance: it does not move
 task status, candidate, gates or review state. Evidence tier is labelled on every result.
