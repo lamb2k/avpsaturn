@@ -9,3 +9,26 @@ ab4c0	ca	UNDERSTOOD	fade_helper_task	avsrc_fade		Helper task: starts the palette
 1827c	82	UNDERSTOOD	fade_in_child	avsrc_fade		Brighten until sum 0, clears ff8378
 8062	d8	UNDERSTOOD	gameplay_loop_task	avsrc_kernel		See notes: tick loop, input latch, route dispatch, exit
 14b44	4e	UNDERSTOOD	idle_task	avsrc_kernel		Fast-forward decrement and helper command ring drain
+1870	26	GATE-PASS	audio_vblank_tick	avsrc_audio	audio_vblank_tick	Vblank: stereo option to Z80, music delay countdown, then one send
+188a	140	GATE-PASS	audio_send_pending	avsrc_audio	audio_send_pending	One ring entry to the Z80 mailbox when handshake reads 0xff
+1916	12	GATE-PASS	audio_enqueue	avsrc_audio	audio_enqueue	Gameplay enqueue; silently dropped in attract with demo sound off
+1922	58	GATE-PASS	audio_enqueue_always	avsrc_audio	audio_enqueue_always	Enqueue 3 longs; 63 usable entries; nonzero when full, caller ignores it
+195c	22	GATE-PASS	audio_ring_clear	avsrc_audio	audio_ring_clear	Zero the ring at boot; pointers cleared separately at 0xc16
+1972	18	GATE-PASS	audio_stop_all	avsrc_audio	audio_stop_all	Clear current music, send control 0: everything stops
+1992	20	GATE-PASS	audio_key_off_channel	avsrc_audio	audio_key_off_channel	Control 2 for channel d0&15: key off one SFX channel
+19c4	14	GATE-PASS	audio_stop_music	avsrc_audio	audio_stop_music	Clear current music, send control 5
+19d2	12	GATE-PASS	audio_control	avsrc_audio	audio_control_6	Control 6: music fade in at rate
+19de	12	GATE-PASS	audio_control	avsrc_audio	audio_control_7	Control 7: music fade out at rate
+19ea	12	GATE-PASS	audio_control	avsrc_audio	audio_control_8	Control 8: music tempo offset; one caller, 0xb457e
+19f6	12	GATE-PASS	audio_control	avsrc_audio	audio_control_9	Control 9: music tuning offset f01b; one caller, 0xb461a
+1a02	10	GATE-PASS	audio_control	avsrc_audio	audio_control_a	Control a: Z80 flag f041; one caller
+1a0c	10	GATE-PASS	audio_control	avsrc_audio	audio_control_b	Control b: clears f041; one caller
+1a16	12	GATE-PASS	audio_control	avsrc_audio	audio_control_c	Control c: no callers; Z80 also rejects it (CP 12). Dead both sides
+1a22	10	GATE-PASS	audio_control	avsrc_audio	audio_control_d	Control d: no callers; Z80 also rejects it. Dead both sides
+1aa6	42	GATE-PASS	audio_play_alternating	avsrc_audio	audio_alt_1aa6	Sound pair with toggle byte and actor pan; pair on separate channels
+1ad0	42	GATE-PASS	audio_play_alternating	avsrc_audio	audio_alt_1ad0	As 0x1aa6, next pair
+1afa	42	GATE-PASS	audio_play_alternating	avsrc_audio	audio_alt_1afa	As 0x1aa6, next pair
+1b24	42	GATE-PASS	audio_play_alternating	avsrc_audio	audio_alt_1b24	As 0x1aa6, next pair
+1b4e	42	GATE-PASS	audio_play_alternating	avsrc_audio	audio_alt_1b4e	As 0x1aa6, next pair
+3bdc	86	GATE-PASS	audio_music_request	avsrc_audio	audio_music_request	Music change: same-number no-op; fade out with delay, or start with optional fade in
+3abc	48	UNDERSTOOD	audio_voice_with_actor_pan	avsrc_audio		Pan from actor x minus camera; no RAM effect, exercised through the audio_alt_* gates

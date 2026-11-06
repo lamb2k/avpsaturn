@@ -64,6 +64,9 @@ class Rom:
         self.u = u
         self.calls = []
         self.stubs = {}
+        self.extra = []                # optional ranges from a gate module's setup()
+        self.ignore = []
+        self.stack = STACK             # a gate whose RAM sits near the default stack moves it
         u.hook_add(UC_HOOK_CODE, self._code)
 
     def _code(self, u, addr, size, _):
@@ -78,9 +81,12 @@ class Rom:
         u = self.u
         u.mem_write(RAM[0], bytes(RAM[1]))
         u.mem_write(PAL[0], bytes(PAL[1]))
+        for b, n in self.extra:
+            u.mem_write(b, bytes(n))
         for a, v in seeds:
             u.mem_write(a, bytes([v]))
-        self.before = {b: bytes(u.mem_read(b, n)) for b, n in (RAM, PAL)}
+        ranges = [RAM, PAL] + list(self.extra)
+        self.before = {b: bytes(u.mem_read(b, n)) for b, n in ranges}
         self.stubs = set(stubs)
         self.calls = []
         for i in range(8):
@@ -88,17 +94,17 @@ class Rom:
         for i in range(7):
             u.reg_write(UC_M68K_REG_A0 + i, regs.get(f"a{i}", 0xff8000 if i == 5 else 0))
         u.reg_write(UC_M68K_REG_SR, 0x2700)
-        u.mem_write(STACK, struct.pack(">I", SENTINEL))
-        u.reg_write(UC_M68K_REG_A7, STACK)
+        u.mem_write(self.stack, struct.pack(">I", SENTINEL))
+        u.reg_write(UC_M68K_REG_A7, self.stack)
         u.emu_start(entry, SENTINEL, count=2000000)
         out = {}
-        for b, n in (RAM, PAL):
+        for b, n in ranges:
             now = bytes(u.mem_read(b, n))
             old = self.before[b]
             if now != old:
                 for i in range(n):
                     if now[i] != old[i]:
-                        if not (STACK - 0x100 <= b + i < STACK + 4):
+                        if not (self.stack - 0x100 <= b + i < self.stack + 4) and not any(lo <= b + i < hi for lo, hi in self.ignore):
                             out[b + i] = now[i]
         return out, list(self.calls)
 
@@ -118,6 +124,8 @@ def wsl(path):
 def run_group(gatefile, only, cases):
     mod = load_unit(gatefile)
     rom = Rom()
+    if hasattr(mod, "setup"):
+        mod.setup(rom)
     work = LEARN / "gate_work"
     work.mkdir(exist_ok=True)
     exe = work / (gatefile.stem + ".bin")
