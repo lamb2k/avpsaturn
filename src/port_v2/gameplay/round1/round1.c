@@ -14159,6 +14159,118 @@ int avsp_round1_step_first_entry_source_differential(
     return avsp_round1_entry_valid(runtime);
 }
 
+/* Executable tick rule (docs/research/AVP_LEARNING_NOTES.md, source 0x808a,
+ * 0x8140, 0x14b44, 0x170f2, 0x1614a). No frame label or capture table is read
+ * on this path: only current input and runtime state. */
+void avsp_round1_tick_rule_init(AvspRound1TickRule *rule)
+{
+    rule->fast_forward = 0u;
+    rule->fast_forward_polls = 0u;
+    rule->last_frame_ticks = 0u;
+    rule->total_ticks = 0UL;
+    rule->fast_forward_frames = 0UL;
+    rule->held_frames = 0UL;
+}
+
+/* Source 0x170f2: a participating player's input (& 0x7f) must be seen on
+ * AVSP_ROUND1_FAST_FORWARD_POLLS polls in a row; any idle poll clears it. */
+static void avsp_round1_tick_rule_poll(AvspRound1TickRule *rule,
+                                       unsigned short held_input)
+{
+    rule->fast_forward = 0u;
+    if (held_input == 0u)
+    {
+        rule->fast_forward_polls = 0u;
+        return;
+    }
+    if (rule->fast_forward_polls < AVSP_ROUND1_FAST_FORWARD_POLLS)
+        ++rule->fast_forward_polls;
+    if (rule->fast_forward_polls >= AVSP_ROUND1_FAST_FORWARD_POLLS)
+        rule->fast_forward = 1u;
+}
+
+/* The route tick suspended in the fade wait (0x1614a family: set ff837b, queue
+ * a helper, sleep a vblank until it clears). Native form: the teardown phases
+ * of the exit display machine own the frames and no gameplay tick runs. */
+static int avsp_round1_tick_rule_route_held(const AvspRound1Runtime *runtime)
+{
+    return runtime->entry.exit_started && !runtime->entry.exit_complete &&
+        runtime->route_state == avsp_round1_coffee_exit.route_teardown &&
+        runtime->entry.exit_route_updates != 0u;
+}
+
+static int avsp_round1_tick_once(AvspRound1Runtime *runtime,
+                                 unsigned short input_mask)
+{
+    int authority_at_tick_start = runtime->route_state == 4;
+    int exit_withdrawal = runtime->entry.exit_started &&
+        runtime->route_state == avsp_round1_coffee_exit.route_withdrawal;
+    if (runtime->entry.started && runtime->route_state != 4)
+    {
+        if (exit_withdrawal)
+        {
+            if (!avsp_round1_step_first_entry_source_differential(
+                    runtime, 1, 1))
+                return 0;
+        }
+        else if (!avsp_round1_step_first_entry(runtime))
+            return 0;
+    }
+    if (runtime->entry.dependencies_seeded &&
+        !avsp_round1_step_scheduler_pre_player_source_differential(runtime, 1))
+        return 0;
+    if (authority_at_tick_start && runtime->route_state == 4 &&
+        !avsp_round1_step_player(runtime, input_mask, 0))
+        return 0;
+    if (runtime->entry.dependencies_seeded &&
+        !avsp_round1_step_scheduler_post_player_source_differential_scene(
+            runtime, 1, 1, 1, 1, 1))
+        return 0;
+    return 1;
+}
+
+int avsp_round1_step_interactive_frame(AvspRound1Runtime *runtime,
+                                       AvspRound1TickRule *rule,
+                                       unsigned short input_mask,
+                                       unsigned short held_input)
+{
+    unsigned int tick;
+    unsigned int ticks = 1u;
+    if (runtime == 0 || rule == 0)
+        return 0;
+    rule->last_frame_ticks = 0u;
+    if (avsp_round1_tick_rule_route_held(runtime))
+        ++rule->held_frames;
+    else
+    {
+        for (tick = 0u; tick < ticks; ++tick)
+        {
+            /* Only the scripted exit is witnessed polling input here. */
+            if (runtime->entry.exit_started &&
+                runtime->route_state ==
+                    avsp_round1_coffee_exit.route_withdrawal)
+                avsp_round1_tick_rule_poll(rule, held_input);
+            else
+            {
+                rule->fast_forward = 0u;
+                rule->fast_forward_polls = 0u;
+            }
+            if (tick == 0u && rule->fast_forward)
+            {
+                ticks = AVSP_ROUND1_FAST_FORWARD_TICKS;
+                ++rule->fast_forward_frames;
+            }
+            if (!avsp_round1_tick_once(runtime, input_mask))
+                return 0;
+            ++rule->last_frame_ticks;
+            ++rule->total_ticks;
+            if (avsp_round1_tick_rule_route_held(runtime))
+                break;
+        }
+    }
+    return avsp_round1_step_coffee_exit_display(runtime);
+}
+
 static int avsp_round1_begin_player_hit_interaction(
     AvspRound1Runtime *runtime)
 {

@@ -8475,6 +8475,22 @@ static void live_encounter_publish(void)
         round1_runtime.scheduler_failure_animation_record;
 }
 
+static AvspRound1TickRule round1_tick_rule;
+volatile int avsp_diag_round1_tick_last;
+volatile long avsp_diag_round1_tick_total;
+volatile long avsp_diag_round1_tick_fast_forward_frames;
+
+/* Held state for source 0x170f2, which reads levels; the action mask above
+ * carries button edges. */
+static unsigned short live_encounter_held_input(void)
+{
+    unsigned short mask = live_encounter_real_input();
+    if (jo_is_pad1_key_pressed(JO_KEY_A)) mask |= AVSP_ROUND1_INPUT_BUTTON1;
+    if (jo_is_pad1_key_pressed(JO_KEY_B)) mask |= AVSP_PW_INPUT_ATTACK;
+    if (jo_is_pad1_key_pressed(JO_KEY_C)) mask |= AVSP_ROUND1_INPUT_BUTTON3;
+    return mask;
+}
+
 static void live_encounter_frame_callback(void)
 {
     AvspLiveEncounterInput input;
@@ -8483,10 +8499,13 @@ static void live_encounter_frame_callback(void)
     AvspPortV2CddaAudioOps cdda_operations;
     AvspPortV2HudRenderOps hud_operations;
     int round1_route_before;
+#ifdef AVSP_LIVE_ENCOUNTER_AUTOTEST
     int round1_player_authority_enabled_at_tick_start;
+#endif
     int retained_stepped = 0;
     int native_encounter_visible = 0;
     int source_frame;
+#ifdef AVSP_LIVE_ENCOUNTER_AUTOTEST
     unsigned int source_updates;
     unsigned int scheduler_updates;
     unsigned int record20_prefix_updates;
@@ -8504,6 +8523,7 @@ static void live_encounter_frame_callback(void)
     int class0a_update_enabled;
     int class00_update_enabled;
     int exit_source_phase;
+#endif
     if (!runtime_ready)
     {
         if (avsp_diag_live_frame_stage == 0)
@@ -8525,6 +8545,7 @@ static void live_encounter_frame_callback(void)
     street_test_frame();
     source_frame = AVSP_ROUND1_DIAGNOSTIC_SOURCE_BASE_FRAME +
         (int)round1_runtime.frame;
+#ifdef AVSP_LIVE_ENCOUNTER_AUTOTEST
     source_updates = avsp_round1_coffee_shop_source_updates(
         (unsigned short)source_frame);
     scheduler_updates = avsp_round1_coffee_shop_scheduler_source_updates(
@@ -8554,6 +8575,7 @@ static void live_encounter_frame_callback(void)
         phase_updates = exit_player_updates;
     exit_source_phase = exit_player_updates != 0u &&
         round1_runtime.entry.exit_started && round1_runtime.route_state != 4;
+#endif
     if (!round1_runtime.entry.started &&
         round1_runtime.frame == AVSP_ROUND1_NATIVE_ENTRY_STEP_FRAME &&
         !avsp_round1_begin_first_entry(&round1_runtime))
@@ -8571,6 +8593,7 @@ static void live_encounter_frame_callback(void)
 #endif
     round1_player_mask = input.player_mask;
     round1_route_before = round1_runtime.route_state;
+#ifdef AVSP_LIVE_ENCOUNTER_AUTOTEST
     if (exit_source_phase)
     {
         if (!avsp_round1_step_coffee_exit_source_phase_program(
@@ -8667,6 +8690,24 @@ static void live_encounter_frame_callback(void)
         runtime_ready = 0;
         return;
     }
+#else
+    /* Normal play: the executable tick rule owns every gameplay update. */
+    if (!avsp_round1_step_interactive_frame(&round1_runtime, &round1_tick_rule,
+                                            round1_player_mask,
+                                            live_encounter_held_input()))
+    {
+        avsp_diag_round1_scheduler_failure_code =
+            round1_runtime.scheduler_failure_code;
+        avsp_diag_round1_failure_count = (int)round1_runtime.failure_count;
+        avsp_diag_live_frame_stage = -10;
+        runtime_ready = 0;
+        return;
+    }
+    avsp_diag_round1_tick_last = (int)round1_tick_rule.last_frame_ticks;
+    avsp_diag_round1_tick_total = (long)round1_tick_rule.total_ticks;
+    avsp_diag_round1_tick_fast_forward_frames =
+        (long)round1_tick_rule.fast_forward_frames;
+#endif
     if (round1_route_before != 4 && round1_runtime.route_state == 4)
     {
         avsp_live_encounter_init(&live_encounter_runtime);

@@ -2566,6 +2566,26 @@ unsigned short avsp_round1_coffee_shop_source_input(
     unsigned short source_frame);
 unsigned int avsp_round1_coffee_shop_source_updates(
     unsigned short source_frame);
+/* Port policy: the source's fast-forward rate is 68000-time bound (MAME 3..5). */
+#define AVSP_ROUND1_FAST_FORWARD_TICKS 3u
+#define AVSP_ROUND1_FAST_FORWARD_POLLS 5u
+
+typedef struct AvspRound1TickRule
+{
+    unsigned char fast_forward;
+    unsigned char fast_forward_polls;
+    unsigned char last_frame_ticks;
+    unsigned long total_ticks;
+    unsigned long fast_forward_frames;
+    unsigned long held_frames;
+} AvspRound1TickRule;
+
+void avsp_round1_tick_rule_init(AvspRound1TickRule *rule);
+int avsp_round1_step_interactive_frame(AvspRound1Runtime *runtime,
+                                       AvspRound1TickRule *rule,
+                                       unsigned short input_mask,
+                                       unsigned short held_input);
+
 unsigned int avsp_round1_coffee_shop_scheduler_source_updates(
     unsigned short source_frame);
 unsigned int avsp_round1_coffee_shop_record20_prefix_source_updates(
