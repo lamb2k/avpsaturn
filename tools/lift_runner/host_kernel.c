@@ -59,7 +59,7 @@ u32 f_divs(u32 n,u32 d,int*ov){ int dv=(short)d; if(!dv) return n; long long nn=
 u32 f_roxl(u32 o,int n,int w,int*x){ int left=w>0; if(!left)w=-w; u32 m=w==32?0xffffffffu:(1u<<w)-1; n%=(w+1); for(;n>0;n--){ if(left){int c=(o>>(w-1))&1;o=((o<<1)|*x)&m;*x=c;} else {int c=o&1;o=(o>>1)|((u32)*x<<(w-1));*x=c;} } return o&m; }
 u32 f_abcd(u32 d,u32 s,int*x){ u32 r=(s&15)+(d&15)+*x; if(r>9) r+=6; r+=(s&0xf0)+(d&0xf0); *x=r>0x99; if(*x) r-=0xa0; return r&0xff; }
 u32 f_sbcd(u32 d,u32 s,int*x){ u32 r=(d&15)-(s&15)-*x; if(r>9) r-=6; r+=(d&0xf0)-(s&0xf0); *x=r>0x99; if(*x) r+=0xa0; return r&0xff; }
-void f_badjump(u32 a){ printf("BADJUMP at %x vblank %ld\n",a,curv); fflush(stdout); exit(3); }
+void f_badjump(u32 a){ printf("d0 %x d1 %x a6 %x cur %d ",cpu.d[0],cpu.d[1],cpu.a[6],cur); printf("BADJUMP at %x vblank %ld\n",a,curv); fflush(stdout); exit(3); }
 void f_sysreg(void){}
 void f_unhandled(u32 a){ printf("UNHANDLED at %x vblank %ld\n",a,curv); fflush(stdout); exit(3); }
 #include "dispatch.inc"

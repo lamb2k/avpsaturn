@@ -67,10 +67,11 @@ def table_offsets(t, limit=256):
     while p < low and len(out) < limit:
         v = sbe16(p)
         tgt = t + v
-        if v <= 0 or tgt & 1 or tgt >= ROM_END or not plausible(tgt):
+        if v == 0 or tgt & 1 or tgt < 0x400 or tgt >= ROM_END or not plausible(tgt):
             break
         out.append(tgt)
-        low = min(low, tgt)
+        if v > 0:                      # a backward target is legal and says nothing about where the table ends
+            low = min(low, tgt)
         p += 2
     return out
 
