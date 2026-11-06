@@ -1,0 +1,175 @@
+#!/usr/bin/env python
+"""Drive the Saturn image under Yaba with real pad input: key messages posted to Yaba's OWN window handle, never global input.
+Path: PostMessage(WM_KEYDOWN) -> Yaba's Qt key handler -> emulated Saturn pad -> SMPC INTBACK -> pad.c -> the game's latch (0x804000/0x804020).
+Tier: EMULATOR.
+usage: play_yaba.py WORK SCRIPT.py [seconds]
+SCRIPT.py defines step(vblank, s) called about every 50 ms; s has press(name), release(name), set(names), latch(), ram8(off), ram16(off), shot(name), log(...), stop().
+Pad names: up right down left start a b c x y z l r. The build must not use -DSAT_INPUT_SCRIPT."""
+import ctypes
+import ctypes.wintypes as wt
+import importlib.util
+import os
+import pathlib
+import re
+import socket
+import subprocess
+import sys
+import time
+
+HERE = pathlib.Path(__file__).resolve().parent
+sys.path.insert(0, str(HERE.parents[1] / "tools"))
+from capture_frontend_cram import Mcp
+
+JO = pathlib.Path("E:/AvP/worktrees/saturn-hw/.deps")
+EXE = pathlib.Path(os.environ.get("YABA_EXE", JO / "emulators/yabasanshiro-1.20.37-2986eb-debug-rig-mcp-da2ffb34/yabasanshiro-1.20.37-2986eb-debug-rig-mcp-d7767591/yabasanshiro.exe"))
+NM = JO / "joengine/Compiler/WINDOWS/sh-elf/bin/nm.exe"
+INI = pathlib.Path(os.environ["APPDATA"]) / "YabaSanshiro/yabause.ini"
+# Windows virtual keys for the bindings in yabause.ini (Port 1 pad).
+VK = dict(up=0x57, right=0x44, down=0x53, left=0x41, r=0x36, l=0x35, start=0x0d, a=0x47, b=0x48, c=0x4a, x=0x54, y=0x59, z=0x55)
+WM_KEYDOWN, WM_KEYUP = 0x100, 0x101
+u32 = ctypes.WinDLL("user32", use_last_error=True)
+u32.MapVirtualKeyW.restype = wt.UINT
+u32.PostMessageW.argtypes = (wt.HWND, wt.UINT, wt.WPARAM, wt.LPARAM)
+ENUM = ctypes.WINFUNCTYPE(wt.BOOL, wt.HWND, wt.LPARAM)
+
+
+def windows_of(pid):
+    found = []
+    def cb(h, _):
+        p = wt.DWORD()
+        u32.GetWindowThreadProcessId(h, ctypes.byref(p))
+        if p.value == pid and u32.IsWindowVisible(h):
+            n = ctypes.create_unicode_buffer(200)
+            u32.GetWindowTextW(h, n, 200)
+            r = wt.RECT()
+            u32.GetWindowRect(h, ctypes.byref(r))
+            found.append((h, n.value, r.right - r.left, r.bottom - r.top))
+        return True
+    u32.EnumWindows(ENUM(cb), 0)
+    return found
+
+
+def port_busy():
+    s = socket.socket()
+    s.settimeout(0.3)
+    busy = s.connect_ex(("127.0.0.1", 9640)) == 0
+    s.close()
+    return busy
+
+
+class Session:
+    def __init__(self, m, syms, hwnd, work):
+        self.m, self.syms, self.hwnd, self.work = m, syms, hwnd, work
+        self.down = set()
+        self.done = False
+        (work / "shots").mkdir(exist_ok=True)
+
+    def _key(self, name, down):
+        vk = VK[name]
+        scan = u32.MapVirtualKeyW(vk, 0)
+        lp = 1 | (scan << 16) | (0 if down else (3 << 30))
+        if not u32.PostMessageW(self.hwnd, WM_KEYDOWN if down else WM_KEYUP, vk, lp):
+            raise OSError(ctypes.get_last_error())
+
+    def press(self, n):
+        if n not in self.down:
+            self.down.add(n); self._key(n, True)
+
+    def release(self, n):
+        if n in self.down:
+            self.down.discard(n); self._key(n, False)
+
+    def set(self, names):
+        names = set(names)
+        for n in list(self.down - names):
+            self.release(n)
+        for n in names - self.down:
+            self.press(n)
+
+    def word(self, sym, off=0, n=4):
+        return int.from_bytes(self.m.read(self.syms[sym] + off, n), "big")
+
+    def ram8(self, off):
+        return self.m.read(self.syms["RAMB"] + off, 1)[0]
+
+    def ram16(self, off):
+        return int.from_bytes(self.m.read(self.syms["RAMB"] + off, 2), "big")
+
+    def ram(self, off, n):
+        return self.m.read(self.syms["RAMB"] + off, n)
+
+    def latch(self):
+        return dict(raw=self.word("sat_pad_raw"), in0=self.word("in0", 0, 2), in2=self.word("in2", 0, 2))
+
+    def shot(self, name):
+        self.m.call("framebuffer_screenshot", path=str(self.work / "shots" / f"{name}.png"))
+
+    def log(self, *a):
+        print(f"[{time.time() - self.t0:6.1f}s v{self.v}]", *a, flush=True)
+
+    def stop(self):
+        self.done = True
+
+
+def main():
+    work = pathlib.Path(sys.argv[1])
+    spec = importlib.util.spec_from_file_location("play_script", sys.argv[2])
+    script = importlib.util.module_from_spec(spec)
+    spec.loader.exec_module(script)
+    secs = float(sys.argv[3]) if len(sys.argv) > 3 else 55
+    while port_busy():
+        print("Yaba lock held, waiting", flush=True); time.sleep(10)
+    syms = {}
+    for l in subprocess.run([str(NM), str(work / "sat.elf")], capture_output=True, text=True).stdout.splitlines():
+        p = l.split()
+        if len(p) == 3:
+            syms[p[2].lstrip("_")] = int(p[0], 16)
+    orig = INI.read_bytes()
+    set_ = {r"Video\VideoCore": "1", r"Sound\SoundCore": os.environ.get("YABA_SOUND", "0"), r"General\CdRomISO": str(work / "sat.cue").replace("\\", "/"), "autostart": "true", r"Cartridge\Type": "7", r"General\EnableEmulatedBios": "true"}
+    out = [f"{l.split('=')[0]}={set_[l.split('=')[0]]}" if l.split("=")[0] in set_ else l for l in orig.decode("latin-1").splitlines()]
+    INI.write_bytes(("\n".join(out) + "\n").encode("latin-1"))
+    proc = subprocess.Popen([str(EXE)], cwd=str(EXE.parent))
+    s = None
+    try:
+        m = Mcp("http://127.0.0.1:9640/mcp")
+        t0 = time.time()
+        while True:
+            try:
+                m.initialize(); break
+            except Exception:
+                if time.time() - t0 > 30: raise
+                time.sleep(0.3)
+        print("tools", [x["name"] for x in m._post("tools/list", {})["result"]["tools"]], flush=True)
+        wins = []
+        while not wins and time.time() - t0 < 40:
+            time.sleep(0.2)
+            wins = windows_of(proc.pid)
+        print("windows", wins, flush=True)
+        hwnd = max(wins, key=lambda w: w[2] * w[3])[0]
+        s = Session(m, syms, hwnd, work)
+        s.t0 = t0
+        s.v = 0
+        while time.time() - t0 < secs and not s.done:
+            d = m.read(syms["sat_dbg"], 40)
+            s.v = int.from_bytes(d[8:12], "big")
+            fatal = int.from_bytes(d[28:32], "big")
+            if fatal:
+                det = int.from_bytes(d[32:36], "big")
+                s.log(f"FATAL {fatal:#x} detail {det:#x}")
+                getattr(script, "fatal", lambda *a: None)(s, fatal, det)
+                break
+            script.step(s.v, s)
+            time.sleep(0.03)
+        getattr(script, "end", lambda s: None)(s)
+    finally:
+        if s:
+            s.set([])
+        proc.kill(); proc.wait(10)
+        text = orig.decode("latin-1")
+        for key, value in ((r"Video\VideoCore", "4"), (r"Sound\SoundCore", "1")):
+            text = re.sub(rf"(?m)^{re.escape(key)}=.*$", (key + "=" + value).replace(chr(92), chr(92) * 2), text)
+        INI.write_bytes(text.encode("latin-1"))
+
+
+if __name__ == "__main__":
+    main()
