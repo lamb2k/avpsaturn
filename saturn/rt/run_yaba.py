@@ -100,6 +100,9 @@ try:
             cw = struct.unpack(">41I", m.read(syms["sat_gfx_census"], 41 * 4))
             print("CENSUS", dict(zip("tiles offscreen empty commands runs banks banks_peak peak_frame missing_n".split(), cw)), "missing(section<<28|key)", [hex(x) for x in cw[9:9 + min(cw[8], 32)]], flush=True)
         print("PROF(MODELLED, Yaba FRT)", dict(zip("from to ticks done over skipped".split(), hd)), {k: row(i) for i, k in enumerate(("frame", "gfx", "snap"))}, flush=True)
+    if "sat_speed" in syms:
+        names = "frames upload_ticks uploads layer_uploads missing clean_frames clean_ticks clean_commands dirty_ticks commands peak_upload_ticks".split()
+        print("SPEED", dict(zip(names, struct.unpack(">11I", m.read(syms["sat_speed"], 44)))), flush=True)
     if "sat_pcn" in syms:
         n = int.from_bytes(m.read(syms["sat_pcn"], 4), "big")
         (WORK / "pcs.bin").write_bytes(m.read(0x02557000, n * 8))

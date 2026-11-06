@@ -218,15 +218,40 @@ static long pack_find(const Section *s, u32 key)
     return -1;
 }
 
+#ifdef SAT_PROF
+/* Test flag: costs on the drawing side over the window. Upload time, and sprite stage time on frames with no upload, which leaves lookups and command writes. */
+typedef struct { u32 frames, upload_ticks, uploads, layer_uploads, missing, clean_frames, clean_ticks, clean_commands, dirty_ticks, commands, peak_upload_ticks; } SatSpeed;
+SatSpeed sat_speed;
+static int speed_on;
+extern u32 sat_vblanks_now(void);
+#define FRT_NOW() (((u32)*(volatile u8 *)0xfffffe12UL << 8) | *(volatile u8 *)0xfffffe13UL)
+#endif
+
 static void vram_copy(u8 *dest, const u8 *src, u32 bytes)
 {
     u32 i;
+#ifdef SAT_PROF
+    u32 t0 = FRT_NOW();
+#endif
+#if defined(SAT_TILE_DMA) && !defined(SAT_GFX_HOST)
+    /* Experiment: SCU DMA level 0, direct mode, longs read, words written, waiting for the end. */
+    {
+        volatile u32 *scu = (volatile u32 *)0x25fe0000UL;
+        scu[0] = (u32)src & 0x0fffffffUL; scu[1] = (u32)dest & 0x0fffffffUL; scu[2] = bytes; scu[3] = 0x101; scu[5] = 7; scu[4] = 0x101;
+        while (*(volatile u32 *)0x25fe007cUL & 0x10) ;
+    }
+    (void)i;
+#else
 #ifdef SAT_GFX_HOST
     for (i = 0; i < bytes; i++) dest[i] = src[i];
 #else
     volatile u32 *d = (volatile u32 *)(void *)dest;
     const u32 *s = (const u32 *)(const void *)src;
     for (i = 0; i < bytes / 4; i++) d[i] = s[i];
+#endif
+#endif
+#ifdef SAT_PROF
+    if (speed_on) { u32 t = FRT_NOW() - t0; sat_speed.upload_ticks += t; if (t > sat_speed.peak_upload_ticks) sat_speed.peak_upload_ticks = t; }
 #endif
 }
 
@@ -853,9 +878,23 @@ void sat_gfx_draw(void)
     VDP2R(0x92) = (u16)((s1y + CPS_TOP) & 0x7ff);
 
     STAGE(4);
+#ifdef SAT_PROF
+    { u32 v = sat_vblanks_now(); speed_on = v >= 1000 && v < 1650; }
+#endif
     draw_sprites();
     note_slots();
     STAGE(5);
+#ifdef SAT_PROF
+    if (speed_on)
+    {
+        u32 t = sat_gfx_stage[5] - sat_gfx_stage[4];
+        sat_speed.frames++;
+        sat_speed.uploads += sat_gfx_stats.uploads; sat_speed.layer_uploads += sat_gfx_stats.layer_uploads; sat_speed.missing = sat_gfx_stats.missing;
+        sat_speed.commands += sat_gfx_stats.commands;
+        if (sat_gfx_stats.uploads == 0) { sat_speed.clean_frames++; sat_speed.clean_ticks += t; sat_speed.clean_commands += sat_gfx_stats.commands; }
+        else sat_speed.dirty_ticks += t;
+    }
+#endif
 
     /* Plot into the back buffer now; the swap comes with the next vblank. */
     VDP1R(FBCR) = 3;
