@@ -19,7 +19,9 @@ int avsp_tiles_open(AvspTileArchive *archive, const unsigned char *data,
     unsigned long need;
 
     if (data == 0 || size < 0x30) return 0;
-    if (read_u32(data) != AVSP_TILE_MAGIC) return 0;
+    if (read_u32(data) != AVSP_TILE_MAGIC &&
+        read_u32(data) != AVSP_TILE_MAGIC_DEDUPED) return 0;
+    archive->deduped = read_u32(data) == AVSP_TILE_MAGIC_DEDUPED;
     archive->data = data;
     archive->size = size;
     archive->tile_count = read_u32(data + 4);
@@ -30,9 +32,27 @@ int avsp_tiles_open(AvspTileArchive *archive, const unsigned char *data,
     if (archive->palette_slots == 0 || archive->palette_slots > 32) return 0;
     if (codes_offset != 0x10UL + 32UL + archive->palette_slots * 32UL)
         return 0;
-    need = codes_offset + archive->tile_count * 4UL +
-           archive->tile_count * (unsigned long)AVSP_TILE_BYTES;
+    need = codes_offset + archive->tile_count * 4UL;
     if (size < need) return 0;
+    if (archive->deduped)
+    {
+        /* Every code entry must name a stored payload. */
+        const unsigned long payloads =
+            (size - need) / (unsigned long)AVSP_TILE_BYTES;
+        unsigned long index;
+        if (payloads == 0 ||
+            (size - need) % (unsigned long)AVSP_TILE_BYTES != 0)
+            return 0;
+        for (index = 0; index < archive->tile_count; ++index)
+            if ((read_u32(data + codes_offset + index * 4UL) >>
+                 AVSP_TILE_CODE_BITS) >= payloads)
+                return 0;
+    }
+    else
+    {
+        need += archive->tile_count * (unsigned long)AVSP_TILE_BYTES;
+        if (size < need) return 0;
+    }
     archive->bank_map = data + 0x10;
     archive->cram = data + 0x10 + 32;
     archive->codes = data + codes_offset;
@@ -48,6 +68,7 @@ long avsp_tiles_find(const AvspTileArchive *archive, unsigned long code)
     {
         long mid = lo + ((hi - lo) >> 1);
         unsigned long value = read_u32(archive->codes + mid * 4);
+        if (archive->deduped) value &= AVSP_TILE_CODE_MASK;
         if (value == code) return mid;
         if (value < code) lo = mid + 1;
         else hi = mid - 1;
@@ -59,12 +80,18 @@ const unsigned char *avsp_tiles_texture(const AvspTileArchive *archive,
                                         long rank)
 {
     if (rank < 0 || (unsigned long)rank >= archive->tile_count) return 0;
+    if (archive->deduped)
+        return archive->tiles +
+               (read_u32(archive->codes + rank * 4) >> AVSP_TILE_CODE_BITS) *
+                   AVSP_TILE_BYTES;
     return archive->tiles + (unsigned long)rank * AVSP_TILE_BYTES;
 }
 
 unsigned long avsp_tiles_code(const AvspTileArchive *archive, long rank)
 {
     if (rank < 0 || (unsigned long)rank >= archive->tile_count) return 0;
+    if (archive->deduped)
+        return read_u32(archive->codes + rank * 4) & AVSP_TILE_CODE_MASK;
     return read_u32(archive->codes + rank * 4);
 }
 
