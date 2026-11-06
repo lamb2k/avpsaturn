@@ -200,3 +200,46 @@ send per frame. This is a lead, not a tested design.
 1. Stack chain at 0x1060 for hold frames, and the cause of 2260/2265 (needs a small new MAME read).
 2. Task 5's real entry, and an end-to-end trace of task 3.
 3. Per-frame object flips under fast-forward (MAME).
+
+## 2026-11-06, source campaign: route wait closed
+
+Method, gate and lanes are in AVP_SOURCE_CAMPAIGN.md. Reconstruction lives in `source_recon/`.
+
+### Command/result continuation at 0x1614a / ff837b (source + MAME)
+
+- Waiter: gameplay task sets ff837b, pushes command 0x0800 (fade out) or 0x0804 (fade in) with param 1 on ring ff8086, then sleeps one
+  frame at a time until ff837b clears. About 25 sites plus 45 direct users of the flag, all shaped the same.
+- Ring: head ff801a, tail ff801c, 64 pairs, full ring drops the command. Idle task (0x14b1c) pops one per pass, only with a free pool task.
+  Command high byte selects a task entry at 0x14b92 (8 entries); low byte is the helper's state; param is +0x12/+0x13 (repeat, sleep).
+- Helper 0xab4c0 starts child palette task (command 0x0000 or 0x0002), polls ff8378, on fade-out clears palette and object state via 0xac15e, sleeps 4+param, clears ff837b.
+- Writers of ff837b: 70 reachable uses; only 6 clears, all in these helpers. Result of the "command" is just that flag and ff8378.
+- Fade rule: per frame, each palette's first colour decides. Top nibble 0 means done, else add -0x1000 to all 16 colours. The sum of the four masks reaches -4 when black.
+
+Durations, MAME probe hold_b, Coffee Shop route, 16 fades:
+
+| Wait | Measured frames | C model |
+| --- | --- | --- |
+| Out, from full | 25 (419, 646, 952, 5523), 26 (1085, 1231, 1938) | 25 |
+| Out, black, not flagged | 10 (82) | 10 |
+| Out, already flagged black | 7 (1259, 5550) | 7 |
+| In, from black | 18 (94, 986, 1114) | 18 |
+
+The 25 versus 26 split is a one-frame phase; cause not identified. The fade-in stage constant is fitted to the measurement, since counting from source gives 18 or 19.
+Native contract: `route_wait_begin/route_wait_frame` in `source_recon/avsrc_fade.c`. No frame table: duration comes from palette state and ff8378.
+
+### Zero-tick frames: answered
+
+All 39 are explained (MAME, hold_a, frames 1972..5566):
+- 5524..5549 and 5551..5559: the gameplay task in 0x1614a, from the ff837b set/clear pairs at 5523/5548 and 5550/5557.
+- 5562, 5564: the same flag set from 0xc05a at frame 5563. Its clear is outside the window.
+- 2260, 2265: no sleep and no tick from task ff00d8 in the frame: the tick begun earlier ran through the whole frame. CPU overrun, MAME timing only. A port should not reproduce it.
+- The stack read at 0x1060 was not needed and is unreliable: at the fetch tap SP gives junk chains. Set/clear pairs and task id settle it.
+
+### Object flips under fast-forward (MAME)
+
+ff81a4 toggles at most once per frame, across 3,594 frames: 0 flips 137, 1 flip 3,457. In all 68 multi-tick frames, exactly one. It usually comes first in the frame (55 of 68, before any new tick begins), so what is displayed is the tick that finished right after the vblank; later ticks' lists are not shown. Main writer 0xa9a42.
+For a port: render one tick per video frame, and in fast-forward skip rendering of the rest. This is now measured.
+
+### Second fast-forward path
+
+0x158e0 was never fetched in the route (0 hits to 5566). Still unwitnessed. It stays source-only, no native need yet.

@@ -1,0 +1,11 @@
+addr	size	status	name	unit	gate	note
+1620a	22	GATE-PASS	cmd_ring_push	avsrc_fade	cmd_ring_push	Push command+param on the helper ring; drops when full
+1840e	46	GATE-PASS	palette_fade_step	avsrc_fade	palette_fade_step	One palette, one brightness step, sets or clears its done bit (bit 31-index)
+183b6	50	GATE-PASS	palette_fade_all	avsrc_fade	palette_fade_all	All banks: step and sum done masks; sum -4 means all black. Includes 0x183f8 bank loop
+1614a	72	UNDERSTOOD	route_fade_out_wait	avsrc_fade		Route wait: set ff837b, push 0x800, sleep until cleared, two object-clear frames. MAME-measured durations in route_wait_test
+161bc	22	UNDERSTOOD	route_fade_in_wait	avsrc_fade		Same with 0x804, no object clear
+ab4c0	ca	UNDERSTOOD	fade_helper_task	avsrc_fade		Helper task: starts the palette child, polls ff8378, clears palette RAM, settle sleep, clears ff837b
+18194	e8	UNDERSTOOD	fade_out_child	avsrc_fade		Palette fade task, darken per sleep until sum -4, then two flip frames, sets ff8378
+1827c	82	UNDERSTOOD	fade_in_child	avsrc_fade		Brighten until sum 0, clears ff8378
+8062	d8	UNDERSTOOD	gameplay_loop_task	avsrc_kernel		See notes: tick loop, input latch, route dispatch, exit
+14b44	4e	UNDERSTOOD	idle_task	avsrc_kernel		Fast-forward decrement and helper command ring drain
