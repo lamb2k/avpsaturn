@@ -26,6 +26,7 @@ SEEN = {int(k, 16): v for k, v in D["seen"].items()}
 FUNCS = set(D["funcs"])
 TABLES = {int(k, 16): v for k, v in D["tables"].items()}
 stats = collections.Counter()
+ABORTS = set()
 unh = collections.Counter()
 COND = {"eq": "fz", "ne": "!fz", "cc": "!fc", "hs": "!fc", "cs": "fc", "lo": "fc", "pl": "!fn", "mi": "fn",
         "vc": "!fv", "vs": "fv", "hi": "(!fc&&!fz)", "ls": "(fc||fz)", "ge": "(fn==fv)", "lt": "(fn!=fv)",
@@ -99,7 +100,7 @@ def mem_read(addr, size, const=None):
 
 def mem_write(addr, size, v, const=None):
     if const is not None and const >= 0xff0000:
-        return f"RAM{size * 8}(0x{const - 0xff0000:x})=({CT[size]})({v});"
+        return f"RAMW{size * 8}(0x{const - 0xff0000:x},({CT[size]})({v}));"
     return f"WR{size * 8}({addr},({CT[size]})({v}));"
 
 
@@ -196,7 +197,7 @@ def uses_defs(i):
     if m in ("move", "moveq", "and", "andi", "or", "ori", "eor", "eori", "not", "clr", "tst", "ext", "swap", "mulu", "muls",
              "divu", "divs", "rol", "ror"):
         defs = {"z", "n", "c", "v"}
-    elif m in ("add", "addi", "addq", "sub", "subi", "subq", "neg", "addx", "subx", "negx", "lsl", "lsr", "asl", "asr", "roxl", "roxr"):
+    elif m in ("add", "addi", "addq", "sub", "subi", "subq", "neg", "addx", "subx", "negx", "abcd", "sbcd", "lsl", "lsr", "asl", "asr", "roxl", "roxr"):
         defs = set("zncvx")
     elif m in ("cmp", "cmpi", "cmpa", "cmpm"):
         defs = {"z", "n", "c", "v"}
@@ -295,17 +296,22 @@ def lift(entry, ccret, mode):
             out |= live.get(s, set())
         if m == "rts" and entry in ccret:
             out |= {"z", "n", "c", "v"}
-        lab = f"L{a:x}:;" if a in labels else ""
+        lab = f"L{a:x}:;" if a in labels or (a == entry and order[0] != entry) else ""
         stats["insns"] += 1
         try:
             st = emit(fn, a, i, m, sz, out, ccret, entry)
-        except ValueError:
+        except (ValueError, TypeError, AttributeError, KeyError, IndexError):
             unh[m] += 1
+            ABORTS.add(a)
             st = f"UNHANDLED(0x{a:x});"
         code.append(f"{lab}{{{st}}}")
         nxt = a + i.size
         if nxt not in body and succ[a] and nxt in succ[a]:
             code.append(f"{{f_{nxt:x}();return;}}")
+    if order and order[0] != entry:
+        code.insert(0, f"goto L{entry:x};")
+    if live.get(entry):
+        code.insert(0, "{CCAFTER();}")
     return fn, code
 
 
@@ -316,7 +322,10 @@ def call(fn, t):
 def emit(fn, a, i, m, sz, live, ccret, entry):
     ops = split_ops(i.op_str)
     nxt = a + i.size
-    if m in ("rts", "rte", "rtr"):
+    if m in ("rte", "rtr"):
+        ABORTS.add(a)
+        return "f_sysreg();"
+    if m == "rts":
         return "CCOUT();return;" if entry in ccret and m == "rts" else "return;"
     if m == "nop":
         return ""
@@ -340,10 +349,22 @@ def emit(fn, a, i, m, sz, live, ccret, entry):
             t0 = int(pc[1], 16)
             ix = fn.reg(pc[2])
             cases = []
-            for n, t in enumerate(TABLES[t0]):
+            seen_off = set()
+            offs = []
+            if t0 in SEEN:              # table of branch instructions: the index register is a byte offset into it
+                p = t0
+                for t in TABLES[t0]:
+                    offs.append((p - t0, t))
+                    p += cfg.insn(p).size
+            else:                       # word offsets: the register already holds target minus table start
+                offs = [(t - t0, t) for t in TABLES[t0]]
+            for off, t in offs:
+                if off in seen_off:
+                    continue
+                seen_off.add(off)
                 go = f"goto L{t:x};" if t in fn_body_targets(entry) else f"f_{t:x}();return;"
-                cases.append(f"case {n}:{go}")
-            return f"switch(((s16){ix})>>1){{{''.join(cases)}default:BADJUMP(0x{a:x});}}"
+                cases.append(f"case {off}:{go}")
+            return f"switch((s16){ix}){{{''.join(cases)}default:BADJUMP(0x{a:x});}}"
         t = cfg.hexval(ops[0]) if re.fullmatch(r"\$[0-9a-f]+(\.[lw]|\(pc\))?", ops[0]) else None
         if t is not None:
             s = call(fn, t) + CCIN(live)
@@ -377,10 +398,12 @@ def emit(fn, a, i, m, sz, live, ccret, entry):
     if m in ("moveq", "move", "movea"):
         if "sr" in ops or "ccr" in ops or "usp" in ops:
             stats["sr_ops"] += 1
+            ABORTS.add(a)
             return "SYSREG();"
         if m == "moveq":
             s, sz = None, 4
-            v = f"0x{num(ops[0][1:]) & 0xffffffff:x}u"
+            q = num(ops[0][1:]) & 0xff
+            v = f"0x{(q - 256 if q >= 128 else q) & 0xffffffff:x}u"
             return reg_write(fn, fn.reg(ops[1]), 4, v) + fl_nz(live, 4, ops[1])
         s = Operand(fn, ops[0], sz)
         d = Operand(fn, ops[1], sz)
@@ -390,13 +413,14 @@ def emit(fn, a, i, m, sz, live, ccret, entry):
         return "".join(s.pre) + f"{{{CT[sz]} v={s.read()};" + "".join(d.pre) + d.write("v") + fl_nz(live, sz, "v") + "}"
     if m == "clr":
         d = Operand(fn, ops[0], sz)
-        return "".join(d.pre) + d.write("0") + (("fz=1;fn=0;" if live else ""))
+        return "".join(d.pre) + d.write("0") + (("fz=1;fn=0;fc=0;fv=0;" if live else ""))
     if m == "tst":
         s = Operand(fn, ops[0], sz)
         return "".join(s.pre) + f"{{{CT[sz]} v={s.read()};" + fl_nz(live, sz, "v") + "}"
     if m in ("and", "andi", "or", "ori", "eor", "eori"):
         if "sr" in ops or "ccr" in ops:
             stats["sr_ops"] += 1
+            ABORTS.add(a)
             return "SYSREG();"
         s = Operand(fn, ops[0], sz)
         d = Operand(fn, ops[1], sz)
@@ -421,7 +445,7 @@ def emit(fn, a, i, m, sz, live, ccret, entry):
     if m in ("divu", "divs"):
         s = Operand(fn, ops[0], 2)
         r = fn.reg(ops[1])
-        return "".join(s.pre) + f"{r}=DIV{m[3].upper()}({r},{s.read()});" + fl_nz(live, 2, r)
+        return "".join(s.pre) + f"{{int ov=0;{r}=f_div{m[3]}({r},{s.read()},&ov);fv=ov;fc=0;if(!ov){{fz=(u16){r}==0;fn=(s16){r}<0;}}}}"
     if m in ("btst", "bset", "bclr", "bchg"):
         isreg = re.fullmatch(r"d[0-7]", ops[1]) is not None
         w = 4 if isreg else 1
@@ -437,7 +461,31 @@ def emit(fn, a, i, m, sz, live, ccret, entry):
         d = Operand(fn, ops[1], sz)
         op = "+" if m == "addx" else "-"
         return "".join(s.pre + d.pre) + f"{{{CT[sz]} s={s.read()},o={d.read()},v=o{op}s{op}fx;" + d.write("v") + \
-            ("if(v)fz=0;fn=(" + ST[sz] + ")v<0;" if live else "") + ("fx=fc=CARRY" + op.replace("+", "A").replace("-", "S") + "(o,s,v,fx);" if live & set("cx") or True else "") + "}"
+            ("if(v)fz=0;fn=(" + ST[sz] + ")v<0;" if live else "") + ("{int ox=fx;fx=fc=CARRY" + op.replace("+", "A").replace("-", "S") + "(o,s,v,ox);}") + (f"fv=(({ST[sz]})((o^s)&(o^v)))<0;" if m == "subx" else f"fv=(({ST[sz]})((o^v)&(s^v)))<0;") + "}"
+    if m == "movep":
+        tomem = ops[0][0] == "d"
+        mm = re.fullmatch(r"(-?\$[0-9a-f]+)?\(a([0-7])\)", ops[1] if tomem else ops[0])
+        if not mm:
+            raise ValueError(m)
+        disp = num(mm[1]) if mm[1] else 0
+        b = fn.reg("a" + mm[2])
+        r = fn.reg(ops[0] if tomem else ops[1])
+        parts = []
+        for k in range(sz):
+            sh = (sz - 1 - k) * 8
+            ad = f"({b}+({disp + 2 * k}))"
+            parts.append(f"WR8({ad},(u8)({r}>>{sh}));" if tomem else f"v|=(u32)RD8({ad})<<{sh};")
+        if tomem:
+            return "".join(parts)
+        return "{u32 v=0;" + "".join(parts) + reg_write(fn, r, sz, "v") + "}"
+    if m == "negx":
+        d = Operand(fn, ops[0], sz)
+        return "".join(d.pre) + f"{{{CT[sz]} s={d.read()},v=({CT[sz]})(0-s-fx);" + d.write("v") + "if(v)fz=0;" + f"fn=({ST[sz]})v<0;fv=(({ST[sz]})(s&v))<0;fc=fx=(s|fx)!=0;}}"
+    if m in ("abcd", "sbcd"):
+        s = Operand(fn, ops[0], 1)
+        d = Operand(fn, ops[1], 1)
+        h = "f_abcd" if m == "abcd" else "f_sbcd"
+        return "".join(s.pre + d.pre) + f"{{u32 v={h}({d.read()},{s.read()},&fx);" + d.write("v") + "if((u8)v)fz=0;fc=fx;}"
     raise ValueError(m)
 
 
@@ -446,7 +494,12 @@ def CCIN(live):
 
 
 def fl_nz(live, sz, v):
-    return nz(sz, v) if live & {"z", "n"} else ""
+    out = nz(sz, v) if live & {"z", "n"} else ""
+    if "c" in live:
+        out += "fc=0;"
+    if "v" in live:
+        out += "fv=0;"
+    return out
 
 
 def emit_arith(fn, m, sz, ops, live):
@@ -491,11 +544,20 @@ def emit_shift(fn, m, sz, ops, live):
     e = {"lsl": f"SHL{bits}(o,n)", "lsr": f"SHR{bits}(o,n)", "asl": f"SHL{bits}(o,n)", "asr": f"ASR{bits}(o,n)",
          "rol": f"ROL{bits}(o,n)", "ror": f"ROR{bits}(o,n)", "roxl": f"ROXL{bits}(o,n)", "roxr": f"ROXR{bits}(o,n)"}[m]
     out = "".join(d.pre) + f"{{{t} o={d.read()};int n={n};{t} v={e};" + d.write("v") + fl_nz(live, sz, "v")
-    if live & {"c", "x"}:
-        left = m[-1] == "l"
-        out += f"if(n){{fc=(o>>({bits}-n))&1;fx=fc;}}else fc=0;" if left else "if(n){fc=(o>>(n-1))&1;fx=fc;}else fc=0;"
-    if "v" in live:
-        out += "fv=0;"
+    if m in ("rol", "ror"):
+        if "c" in live:
+            out += f"fc=n?(v>>{'0' if m == 'rol' else bits - 1})&1:0;"
+    elif m in ("roxl", "roxr"):
+        out += "fc=fx;"
+    elif live & {"c", "x"}:
+        if m[-1] == "l":
+            out += f"if(n){{fc=n<={bits}?(o>>({bits}-n))&1:0;fx=fc;}}else fc=0;"
+        elif m == "lsr":
+            out += f"if(n){{fc=n<={bits}?(o>>(n-1))&1:0;fx=fc;}}else fc=0;"
+        else:
+            out += f"if(n){{fc=n<{bits}?(o>>(n-1))&1:(({ST[sz]})o<0);fx=fc;}}else fc=0;"
+    if m == "asl" and "v" in live:
+        out += f"{{int k;fv=0;for(k=1;k<=n&&k<={bits};k++)if(((o>>({bits}-1))^(o>>({bits}-1-k)))&1){{fv=1;break;}}if(n>={bits}&&o)fv=1;}}"
     return out + "}"
 
 
@@ -513,15 +575,20 @@ def emit_movem(fn, i, ops, sz):
     out = []
     if pre:
         r = fn.reg(f"a{pre[1]}")
+        out.append(f"{{u32 p={r},b={r};")
         for x in reversed(regs):
             fn.reg(x)
-            out.append(f"{r}-={sz};WR{sz * 8}({r},({CT[sz]}){x});")
+            val = "b" if x == r else x
+            out.append(f"p-={sz};WR{sz * 8}(p,({CT[sz]}){val});")
+        out.append(f"{r}=p;}}")
     elif post:
         r = fn.reg(f"a{post[1]}")
+        out.append(f"{{u32 p={r};")
         for x in regs:
             fn.reg(x)
-            v = f"RD{sz * 8}({r})"
-            out.append(f"{x}=(u32)(s32)({ST[sz]}){v};{r}+={sz};" if sz == 2 else f"{x}={v};{r}+={sz};")
+            v = f"RD{sz * 8}(p)"
+            out.append(f"{x}=(u32)(s32)({ST[sz]}){v};p+={sz};" if sz == 2 else f"{x}={v};p+={sz};")
+        out.append(f"{r}=p;}}")
     else:
         o = Operand(fn, mem, sz)
         out.append(f"{{u32 p={o.addr};")
@@ -563,7 +630,32 @@ def cc_return_set():
 
 HEADER = """typedef unsigned char u8;typedef unsigned short u16;typedef unsigned int u32;
 typedef signed char s8;typedef short s16;typedef int s32;
-typedef struct{u32 d[8];u32 a[8];u32 ccz,ccn,ccc,ccv;}Cpu;
+typedef struct{u32 d[8];u32 a[8];u32 ccz,ccn,ccc,ccv,ccx;}Cpu;
+#ifdef HOST
+extern Cpu *R;
+extern u8 *PAGE[256];
+extern u8 RAMB[];extern u8 ROMB[];
+static inline u32 be16r(const volatile u8*p){return (u32)p[0]<<8|p[1];}
+static inline u32 be32r(const volatile u8*p){return (u32)p[0]<<24|(u32)p[1]<<16|(u32)p[2]<<8|p[3];}
+static inline void be16w(volatile u8*p,u32 v){p[0]=v>>8;p[1]=v;}
+static inline void be32w(volatile u8*p,u32 v){p[0]=v>>24;p[1]=v>>16;p[2]=v>>8;p[3]=v;}
+#define PB(a) (PAGE[((u32)(a)>>16)&0xff]+((u32)(a)&0xffff))
+#define RAM8(o) (RAMB[o])
+#define RAM16(o) ((u16)be16r(RAMB+(o)))
+#define RAM32(o) be32r(RAMB+(o))
+#define RAMW8(o,v) (RAMB[o]=(v))
+#define RAMW16(o,v) be16w(RAMB+(o),(v))
+#define RAMW32(o,v) be32w(RAMB+(o),(v))
+#define ROM8(o) (ROMB[o])
+#define ROM16(o) ((u16)be16r(ROMB+(o)))
+#define ROM32(o) be32r(ROMB+(o))
+#define RD8(a) (*PB(a))
+#define RD16(a) ((u16)be16r(PB(a)))
+#define RD32(a) be32r(PB(a))
+#define WR8(a,v) (*PB(a)=(v))
+#define WR16(a,v) be16w(PB(a),(v))
+#define WR32(a,v) be32w(PB(a),(v))
+#else
 register Cpu *R __asm__("r14");
 extern u8 *PAGE[256];
 extern u8 RAMB[];extern u8 ROMB[];
@@ -580,6 +672,10 @@ extern u8 RAMB[];extern u8 ROMB[];
 #define WR8(a,v) (*PA(volatile u8,(u32)(a))=(v))
 #define WR16(a,v) (*PA(volatile u16,(u32)(a))=(v))
 #define WR32(a,v) (*PA(volatile u32,(u32)(a))=(v))
+#define RAMW8(o,v) (RAM8(o)=(v))
+#define RAMW16(o,v) (RAM16(o)=(v))
+#define RAMW32(o,v) (RAM32(o)=(v))
+#endif
 #define SHL8(o,n) ((n)>=8?0:(u8)((o)<<(n)))
 #define SHL16(o,n) ((n)>=16?0:(u16)((o)<<(n)))
 #define SHL32(o,n) ((n)>=32?0:((o)<<(n)))
@@ -602,15 +698,15 @@ extern u32 f_roxl(u32,int,int,int*);
 #define ROXR8(o,n) ((u8)f_roxl(o,n,-8,&fx))
 #define ROXR16(o,n) ((u16)f_roxl(o,n,-16,&fx))
 #define ROXR32(o,n) f_roxl(o,n,-32,&fx)
-extern u32 f_divu(u32,u32),f_divs(u32,u32);extern void f_dispatch(u32),f_badjump(u32),f_sysreg(void),f_unhandled(u32);
+extern u32 f_abcd(u32,u32,int*),f_sbcd(u32,u32,int*);extern u32 f_divu(u32,u32,int*),f_divs(u32,u32,int*);extern void f_dispatch(u32),f_badjump(u32),f_sysreg(void),f_unhandled(u32);
 #define DIVU(a,b) f_divu(a,b)
 #define DIVS(a,b) f_divs(a,b)
 #define BADJUMP(a) f_badjump(a)
 #define DISPATCH(a) f_dispatch(a)
 #define SYSREG() f_sysreg()
 #define UNHANDLED(a) f_unhandled(a)
-#define CCOUT() (R->ccz=fz,R->ccn=fn,R->ccc=fc,R->ccv=fv)
-#define CCAFTER() (fz=R->ccz,fn=R->ccn,fc=R->ccc,fv=R->ccv)
+#define CCOUT() (R->ccz=fz,R->ccn=fn,R->ccc=fc,R->ccv=fv,R->ccx=fx)
+#define CCAFTER() (fz=R->ccz,fn=R->ccn,fc=R->ccc,fv=R->ccv,fx=R->ccx)
 #define CARRYA(o,s,v,x) ((u32)(v)<(u32)(o)||(x&&(u32)(v)==(u32)(o)))
 #define CARRYS(o,s,v,x) ((u32)(o)<(u32)(s)||(x&&(u32)(o)==(u32)(s)))
 """
@@ -658,8 +754,10 @@ def main():
     (out / f"lifted_{mode}.c").write_text(HEADER + decl + "".join(text))
     stats["functions"] = len(addrs)
     stats["cc_return_funcs"] = len(ccret)
+    (out / f"aborts_{mode}.txt").write_text(" ".join(f"{a:x}" for a in sorted(ABORTS)))
     json.dump(dict(stats=stats, unhandled=unh.most_common()), open(out / f"stats_{mode}.json", "w"), indent=0)
     print(dict(stats), unh.most_common(15))
 
 
-main()
+if __name__ == "__main__":
+    main()
