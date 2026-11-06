@@ -35,7 +35,7 @@ CART = dict(ROMB=0x02400000, OPX=0x02600000, SAT_SINK=0x02638000, SAT_OBJ=0x0264
 CART_END = 0x02800000
 OPX_MAX = 0x38000
 COLD2 = (0x0253f000, 116 * 1024)   # a ROM stretch the Round 1 route never read: lifted code of a cold chunk fits here
-HOLE_ROM = 0x198000  # pack_hole.bin
+HOLE_ROM, HOLE_SIZE = 0x198000, 200 * 1024  # pack_hole.bin
 
 
 OPMAP = json.loads((WORK / "opx.json").read_text())
@@ -135,7 +135,10 @@ def main():
     pack_size = (WORK / "pack.bin").stat().st_size
     cold1_at = (CART["SAT_PACK"] + pack_size + 3) & ~3
     cold2 = sorted((o for o in cold if sizes[o] <= COLD2[1]), key=lambda o: -sizes[o])[:1]
-    cold1 = [o for o in cold if o not in cold2]
+    hole_free = HOLE_SIZE - (WORK / "pack_hole.bin").stat().st_size
+    cold3 = sorted((o for o in cold if o not in cold2 and sizes[o] <= hole_free - 16), key=lambda o: -sizes[o])[:1]   # the rest of the tile stretch of ROM
+    cold3_at = 0x02400000 + HOLE_ROM + ((WORK / "pack_hole.bin").stat().st_size + 3 & ~3)
+    cold1 = [o for o in cold if o not in cold2 and o not in cold3]
     print("placement", {"hw": len(hw), "lw": [o.stem for o in lw], "cold1": [(o.stem, sizes[o], heat.get(o.stem)) for o in cold1], "cold2": [(o.stem, sizes[o], heat.get(o.stem)) for o in cold2]})
     inp = lambda l, s: "\n".join(f'    "{o.as_posix()}"({s})' for o in l)
     tx = ".text .text.* .rodata .rodata.* .data .data.*"
@@ -164,6 +167,11 @@ SECTIONS {{
     . = ALIGN(4);
     _sat_cold2_end = .;
   }}
+  .cold3 {cold3_at:#x} : {{
+{inp(cold3, tx)}
+    . = ALIGN(4);
+    _sat_cold3_end = .;
+  }}
   .lw {LW_BASE:#x} : {{
     *(.text .text.* .rodata .rodata.* .data .data.*)
     . = ALIGN(4);
@@ -184,6 +192,7 @@ SECTIONS {{
         raise SystemExit("NO-GO: store past its room")
     sh([OBJCOPY, "-O", "binary", "-j", ".cold1", elf, ISO / "COLD1.BIN"])
     sh([OBJCOPY, "-O", "binary", "-j", ".cold2", elf, WORK / "cold2.bin"])
+    sh([OBJCOPY, "-O", "binary", "-j", ".cold3", elf, WORK / "cold3.bin"])
     hw_end, lw_end = syms["_sat_bss_end"], syms["_sat_lw_bss_end"]
     print({"hw_image": (ISO / "HW.BIN").stat().st_size, "hw_end": hex(hw_end), "hw_free": HW_LIMIT - hw_end,
            "lw_image": (ISO / "LW.BIN").stat().st_size, "lw_end": hex(lw_end), "lw_free": LW_LIMIT - lw_end,
@@ -194,7 +203,7 @@ SECTIONS {{
     if hw_end > HW_LIMIT or lw_end > LW_LIMIT:
         raise SystemExit("NO-GO on this layout: segment past its RAM")
     rom = bytearray((WORK / "rt.bin").read_bytes())
-    for at, name in ((HOLE_ROM, "pack_hole.bin"), (COLD2[0] - CART["ROMB"], "cold2.bin")):
+    for at, name in ((HOLE_ROM, "pack_hole.bin"), (COLD2[0] - CART["ROMB"], "cold2.bin"), (cold3_at - CART["ROMB"], "cold3.bin")):
         d = (WORK / name).read_bytes()
         rom[at:at + len(d)] = d
     (ISO / "ROM.BIN").write_bytes(rom)
