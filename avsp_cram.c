@@ -48,3 +48,9 @@ int avsp_cram_surface_is_one_based(const unsigned char *pixels,
         if (pixels[index] == 0) return 0;
     return 1;
 }
+
+int avsp_cram_tile_blocks(int slots)
+{
+    if (slots <= 0 || slots > 2 * AVSP_CRAM_SUBBANK_COUNT) return 0;
+    return slots > AVSP_CRAM_SUBBANK_COUNT ? 2 : 1;
+}
