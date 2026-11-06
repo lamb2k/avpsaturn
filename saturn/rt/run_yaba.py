@@ -50,7 +50,7 @@ try:
         try:
             m.initialize(); break
         except Exception:
-            if time.time() - t0 > 30: raise
+            if time.time() - t0 > 120: raise
             time.sleep(0.3)
     if os.environ.get("LIST_TOOLS"): print("tools", [x["name"] for x in m._post("tools/list", {})["result"]["tools"]], flush=True)
     shots = sorted(int(x) for x in os.environ.get("SHOTS", "").split(",") if x)

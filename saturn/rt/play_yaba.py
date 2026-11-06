@@ -141,11 +141,11 @@ def main():
             try:
                 m.initialize(); break
             except Exception:
-                if time.time() - t0 > 30: raise
+                if time.time() - t0 > 120: raise
                 time.sleep(0.3)
         print("tools", [x["name"] for x in m._post("tools/list", {})["result"]["tools"]], flush=True)
         wins = []
-        while not wins and time.time() - t0 < 40:
+        while not wins and time.time() - t0 < 130:
             time.sleep(0.2)
             wins = windows_of(proc.pid)
         print("windows", wins, flush=True)
