@@ -19,7 +19,7 @@
 #define SAT_GFX_CROP_X 16 /* 1:1 centre crop of the 384 wide picture */
 #define SAT_GFX_PAGES 4
 #define SAT_GFX_BANKS_PER_PAGE 32
-#define SAT_GFX_MAX_COMMANDS 2045 /* 64 KB table less clip, local and end */
+#define SAT_GFX_MAX_COMMANDS 2044 /* 64 KB table less clip, local, clear and end */
 #define SAT_GFX_SPRITE_SLOTS 3584 /* 448 KB of 128 byte textures */
 #define SAT_GFX_S1_SLOTS 992 /* 4 stay clear */
 #define SAT_GFX_S2_SLOTS 1024
@@ -54,8 +54,13 @@ extern SatGfxStats sat_gfx_stats;
  * Returns 1, or 0 for a bad pack (nothing is touched). */
 int sat_gfx_init(const void *pack);
 
-/* Draw the current game state. */
+/* Draw the current game state: snapshot then draw. */
 void sat_gfx_frame(void);
+
+/* The two halves, for two CPUs. sat_gfx_snapshot copies what drawing needs out of game state and runs on the game's CPU, with the buffer
+ * not in use by sat_gfx_draw. sat_gfx_draw reads only that buffer and owns the video chips, caches and stats. The caller does the handoff. */
+void sat_gfx_snapshot(void);
+void sat_gfx_draw(void);
 
 /* CRAM bank of a CPS palette page and bank, or -1 when outside the map: the capacity refusal. */
 int sat_gfx_bank(int page, int bank);

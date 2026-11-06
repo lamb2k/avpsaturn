@@ -11,6 +11,18 @@ _sat_start:
 1:  bra     1b
     nop
 
+! Slave SH-2 starts here (BIOS reads 0x06000250). Own stack; interrupts stay masked.
+    .global _sat_slave_entry
+_sat_slave_entry:
+    mov     #-16,r0
+    extu.b  r0,r0
+    ldc     r0,sr
+    mov.l   .Lslave_sp,r15
+    mov.l   .Lcpu,r14
+    mov.l   .Lslave,r0
+    jmp     @r0
+    nop
+
     .global _sat_switch
 ! void sat_switch(void **save_sp, void *load_sp)
 _sat_switch:
@@ -92,9 +104,11 @@ _sat_exc_addr:
     jmp     @r0
     nop
     .align 2
+.Lslave_sp: .long _sat_slave_stack+1024
+.Lslave:   .long _sat_slave_main
 .Lexcc:    .long _sat_exception
 .Lboot_sp: .long _sat_boot_stack+8192
-.Lirq_sp:  .long _sat_irq_stack+16384
+.Lirq_sp:  .long _sat_irq_stack+8192
 .Lcpu:     .long _sat_cpu
 .Lmain:    .long _sat_main
 .Lvblank:  .long _sat_vblank

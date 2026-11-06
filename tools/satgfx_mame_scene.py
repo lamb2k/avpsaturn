@@ -4,7 +4,7 @@ usage: satgfx_mame_scene.py NAME IRQ[,IRQ...]   Output E:/AvP/learning/lane-satg
 import os, pathlib, shutil, subprocess, sys
 REPO = pathlib.Path("C:/Game Dev/BrooklynBangoutX/AvPSaturnCapabilityTest-playable-loop-pivot")
 name, irqs = sys.argv[1], sys.argv[2]
-out = pathlib.Path("E:/AvP/learning/lane-satgfx") / name
+out = pathlib.Path(os.environ.get("SATGFX_ROOT", "E:/AvP/learning/lane-satgfx")) / name
 out.mkdir(parents=True)
 shutil.copytree(REPO / ".deps/mame/full_route_nvram_baseline", out / "nvram/avspu")
 (out / "cfg").mkdir()

@@ -102,6 +102,7 @@ static void put32(u8 *p, u32 v) { p[0] = (u8)(v >> 24); p[1] = (u8)(v >> 16); p[
 typedef struct
 {
     u32 count;
+    int shift; /* key >> shift picks an index bucket */
     const u8 *keys; /* u32: key << 14 | payload index, ascending; BLANK_INDEX marks a tile with no visible pen */
     const u8 *data;
 } Section;
@@ -121,10 +122,32 @@ typedef struct
     u16 *slot_stamp;
     u16 *slot_next;
     u16 *head;
+    u32 memo_key[2]; /* last answer per column parity this frame: runs of one tile, mostly blank, skip the lookup */
+    u16 memo_slot[2];
 } Cache;
 
 #define NOSLOT 0xffffU
 #define NOKEY 0xffffffffUL
+
+#ifdef SAT_PROF
+/* Test flag: the tile funnel of the frame with the most VDP1 commands, live banks, the keys the pack lacks. */
+typedef struct
+{
+    u32 tiles, offscreen, empty, commands, runs, banks, banks_peak, peak_frame, missing_n, missing_key[32];
+} SatGfxCensus;
+SatGfxCensus sat_gfx_census;
+static u32 c_tiles, c_off, c_empty, c_runs, c_bankmask[4];
+#define CENSUS(x) x
+static void census_bank(u32 b) { c_bankmask[b >> 5] |= 1UL << (b & 31); }
+static u32 census_count(void)
+{
+    u32 n = 0, i, m;
+    for (i = 0; i < 4; i++) for (m = c_bankmask[i]; m; m &= m - 1) n++;
+    return n;
+}
+#else
+#define CENSUS(x)
+#endif
 
 static Section sections[4];
 static u16 stamp;
@@ -148,15 +171,42 @@ static void cache_setup(Cache *c, u8 *vram, u32 slot_bytes, u16 capacity, u16 fi
 {
     u32 i;
     c->vram = vram; c->slot_bytes = slot_bytes; c->capacity = capacity; c->hand = first; c->first = first; c->used = 0;
+    c->memo_key[0] = c->memo_key[1] = NOKEY; c->memo_slot[0] = c->memo_slot[1] = NOSLOT;
     c->section = section; c->slot_key = key; c->slot_stamp = st; c->slot_next = next; c->head = head;
     for (i = 0; i < capacity; i++) { key[i] = NOKEY; st[i] = 0; next[i] = NOSLOT; }
     for (i = 0; i < HASH_SIZE; i++) head[i] = NOSLOT;
 }
 
+/* A coarse index in RAM over each section's keys on the cart: the search reads a handful of keys over the slow bus, not fourteen. */
+#define INDEX_BUCKETS 256
+static u16 pack_index[4][INDEX_BUCKETS + 1]
+#ifndef SAT_GFX_HOST
+    __attribute__((section(".lwgfx")))
+#endif
+    ;
+
+static void index_section(Section *s, int which)
+{
+    u16 *index = pack_index[which];
+    u32 top = s->count ? be32(s->keys + (s->count - 1) * 4) >> KEY_SHIFT : 0, i, b = 0;
+    s->shift = 0;
+    while ((top >> s->shift) >= INDEX_BUCKETS) s->shift++;
+    for (i = 0; i < s->count; i++)
+    {
+        u32 k = (be32(s->keys + i * 4) >> KEY_SHIFT) >> s->shift;
+        while (b <= k) index[b++] = (u16)i;
+    }
+    while (b <= INDEX_BUCKETS) index[b++] = (u16)s->count;
+}
+
 /* Payload index of a key, BLANK_INDEX for an empty tile, or -1 when the pack lacks it. */
 static long pack_find(const Section *s, u32 key)
 {
-    long lo = 0, hi = (long)s->count - 1;
+    u32 bucket = key >> s->shift;
+    const u16 *index = pack_index[s - sections];
+    long lo, hi;
+    if (bucket >= INDEX_BUCKETS) return -1;
+    lo = index[bucket]; hi = (long)index[bucket + 1] - 1;
     while (lo <= hi)
     {
         long mid = (lo + hi) >> 1;
@@ -181,6 +231,54 @@ static void vram_copy(u8 *dest, const u8 *src, u32 bytes)
 }
 
 #define HASH(k) (((k) ^ ((k) >> 10)) & (HASH_SIZE - 1))
+/* The per-frame snapshot: everything drawing reads from the game, copied once by the game's CPU. The two sides never share a structure: the
+   master owns game RAM, object RAM and graphics RAM; the drawing side owns VDP1, VDP2, CRAM, the caches and the shadows. */
+#define S1_ROWS (SAT_GFX_SCREEN_H / 8 + 1)
+#define S1_COLS (SAT_GFX_SCREEN_W / 8 + 1)
+#define S2_ROWS (SAT_GFX_SCREEN_H / 16 + 1)
+#define S2_COLS (SAT_GFX_SCREEN_W / 16 + 1)
+#define S3_ROWS (SAT_GFX_SCREEN_H / 32 + 1)
+#define S3_COLS (SAT_GFX_SCREEN_W / 32 + 1)
+#define MAX_OBJECTS 0x400
+typedef struct
+{
+    u16 layers, priority, pal_pages, back_valid, back, row_active, objects, pad;
+    u16 s1x, s1y, s2x, s2y, s3x, s3y;
+    u16 row[SAT_GFX_SCREEN_H];
+    u8 palette[SAT_GFX_PAGES][0x400];
+    u32 s1[S1_ROWS * S1_COLS], s2[S2_ROWS * 64], s3[S3_ROWS * S3_COLS]; /* code << 16 | attribute, visible cells only */
+    u8 obj[MAX_OBJECTS * 8];
+    u32 pal_sum[SAT_GFX_PAGES], s1_sum, s2_sum, s3_sum; /* change detection: position and every visible word */
+} Snapshot;
+
+/* Polynomial, not rotate and xor: a palette fade changes every long by one mask, and with 256 longs a rotate cancels it out. */
+#define MIX(sum, w) ((((sum) << 5) + (sum)) + (w))
+
+#ifdef SAT_GFX_HOST
+static Snapshot snap;
+#else
+static Snapshot snap __attribute__((section(".lwgfx"), aligned(4)));
+#endif
+
+#ifdef SAT_GFX_HOST
+#define put32_ram(p, v) put32((p), (v))
+#else
+#define put32_ram(p, v) (*(u32 *)(void *)(p) = (v))
+#endif
+
+static void snap_copy(u8 *dest, const u8 *src, u32 bytes)
+{
+    /* Whole longs: the sources are aligned object and graphics RAM. */
+    u32 i;
+#ifdef SAT_GFX_HOST
+    for (i = 0; i < bytes; i++) dest[i] = src[i];
+#else
+    u32 *d = (u32 *)(void *)dest;
+    const u32 *s = (const u32 *)(const void *)src;
+    for (i = 0; i < bytes / 4; i++) d[i] = s[i];
+#endif
+}
+
 /* Blank tiles fill most layers and never get a slot, so without this each one means a binary search of the pack on the cart, every frame. */
 #define BLANK_WAYS 2048
 #ifdef SAT_GFX_HOST
@@ -190,7 +288,7 @@ static u32 blank_seen[BLANK_WAYS] __attribute__((section(".lwgfx")));
 #endif
 
 /* Slot holding a tile, uploading it on a miss. NOSLOT for a blank, missing or refused tile. */
-static u16 cache_get(Cache *c, u32 key, unsigned long *refused)
+static u16 cache_find(Cache *c, u32 key, unsigned long *refused)
 {
     u32 h = HASH(key);
     u16 s = c->head[h];
@@ -210,7 +308,12 @@ static u16 cache_get(Cache *c, u32 key, unsigned long *refused)
         u32 tag = (key << 2) | (u32)c->section, way = (tag ^ (tag >> 11)) & (BLANK_WAYS - 1);
         if (blank_seen[way] == tag) return NOSLOT;
         idx = pack_find(&sections[c->section], key);
-        if (idx < 0) { sat_gfx_stats.missing++; blank_seen[way] = tag; return NOSLOT; }
+        if (idx < 0)
+        {
+            sat_gfx_stats.missing++; blank_seen[way] = tag;
+            CENSUS(if (sat_gfx_census.missing_n < 32) sat_gfx_census.missing_key[sat_gfx_census.missing_n++] = key | ((u32)c->section << 28);)
+            return NOSLOT;
+        }
         if ((u32)idx == BLANK_INDEX) { blank_seen[way] = tag; return NOSLOT; }
     }
     for (scan = c->first; scan < c->capacity; scan++)
@@ -231,6 +334,23 @@ static u16 cache_get(Cache *c, u32 key, unsigned long *refused)
     vram_copy(c->vram + (u32)n * c->slot_bytes, sections[c->section].data + (u32)idx * c->slot_bytes, c->slot_bytes);
     if (c == &spr_cache) sat_gfx_stats.uploads++; else sat_gfx_stats.layer_uploads++;
     return n;
+}
+
+static u16 cache_get(Cache *c, u32 key, unsigned long *refused)
+{
+    u32 way = key & 1;
+    if (c->memo_key[way] != key)
+    {
+        c->memo_key[way] = key;
+        c->memo_slot[way] = cache_find(c, key, refused);
+    }
+    return c->memo_slot[way];
+}
+
+static void cache_frame(Cache *c)
+{
+    c->used = 0;
+    c->memo_key[0] = c->memo_key[1] = NOKEY;
 }
 
 int sat_gfx_bank(int page, int bank)
@@ -267,19 +387,21 @@ static const u8 *palette_page(const u8 *base, u16 mask, int page)
     return base + (u32)at * 0x400;
 }
 
+/* What the chips already show: a layer whose words and position are unchanged does no lookups, so its cache sees no upload and can't lose a slot. */
+static u32 drawn_pal[SAT_GFX_PAGES], drawn_s1, drawn_s2, drawn_s3;
+static int drawn_valid;
+
 static void update_palette(void)
 {
-    u16 reg = RAM16(SH_PALETTE_BASE);
-    u16 mask = RAM16(SH_PAL_PAGES);
-    const u8 *base = GFX(reg);
-    const u8 *last;
     int page;
     u16 written = 0;
     for (page = 0; page < SAT_GFX_PAGES; page++)
     {
-        const u8 *src = palette_page(base, mask, page);
+        const u8 *src = snap.palette[page];
         int i;
-        if (!src) continue;
+        if (!((snap.pal_pages >> page) & 1)) continue;
+        if (drawn_valid && snap.pal_sum[page] == drawn_pal[page]) continue;
+        drawn_pal[page] = snap.pal_sum[page];
         for (i = 0; i < SAT_GFX_BANKS_PER_PAGE * 16; i++)
         {
             /* Pen p at entry p + 1 of its bank; pen 15 is clear on the board and has no entry. */
@@ -296,11 +418,9 @@ static void update_palette(void)
             }
         }
     }
-    /* The board fills with pen 0xbff: page 5, bank 31, pen 15. */
-    last = palette_page(base, mask, 5);
-    if (last)
+    if (snap.back_valid)
     {
-        u16 c = be16(last + 0x3feUL);
+        u16 c = snap.back;
         if (c != back_shadow)
         {
             back_shadow = c;
@@ -341,9 +461,9 @@ static u32 name_of(u16 attr, int page, u32 charno)
     return n;
 }
 
-static void draw_scroll1(u16 base, u16 sx, u16 sy)
+static void draw_scroll1(u16 sx, u16 sy)
 {
-    const u8 *map = GFX(base & 0xffc0U);
+    const u32 *cell = snap.s1;
     u32 x0 = (u32)sx + CPS_LEFT + SAT_GFX_CROP_X, y0 = (u32)sy + CPS_TOP;
     u32 row, col;
     for (row = 0; row <= SAT_GFX_SCREEN_H / 8; row++)
@@ -351,7 +471,8 @@ static void draw_scroll1(u16 base, u16 sx, u16 sy)
         {
             u32 c = ((x0 >> 3) + col) & 63, r = ((y0 >> 3) + row) & 63;
             u32 idx = (r & 0x1f) + (c << 5) + ((r & 0x20) << 6);
-            u16 code = be16(map + idx * 4), attr = be16(map + idx * 4 + 2);
+            u32 word = *cell++;
+            u16 code = (u16)(word >> 16), attr = (u16)word;
             /* Odd columns read the right half of the 16 pixel row. */
             u16 slot = cache_get(&s1_cache, ((u32)code << 1) | ((idx >> 5) & 1), &sat_gfx_stats.refused_layer);
             u32 name = CLEAR_NAME;
@@ -366,17 +487,17 @@ static u8 *s2_name(u32 r, u32 c)
     return VDP2_VRAM + MAP_S2 + (((r >> 5) * 2 + (c >> 5)) * 0x1000) + (((r & 31) * 32 + (c & 31)) * 4);
 }
 
-static void draw_scroll2(u16 base, u16 sx, u16 sy, int full_row)
+static void draw_scroll2(u16 sx, u16 sy, int full_row)
 {
-    const u8 *map = GFX(base & 0xffc0U);
+    const u32 *cell = snap.s2;
     u32 x0 = (u32)sx + CPS_LEFT + SAT_GFX_CROP_X, y0 = (u32)sy + CPS_TOP;
     u32 row, col, cols = full_row ? 64 : SAT_GFX_SCREEN_W / 16 + 1;
     for (row = 0; row <= SAT_GFX_SCREEN_H / 16; row++)
         for (col = 0; col < cols; col++)
         {
             u32 c = ((full_row ? 0 : x0 >> 4) + col) & 63, r = ((y0 >> 4) + row) & 63;
-            u32 idx = (r & 0x0f) + (c << 4) + ((r & 0x30) << 6);
-            u16 code = be16(map + idx * 4), attr = be16(map + idx * 4 + 2);
+            u32 word = *cell++;
+            u16 code = (u16)(word >> 16), attr = (u16)word;
             u16 slot = cache_get(&s2_cache, code, &sat_gfx_stats.refused_layer);
             u32 name = CLEAR_NAME;
             if (slot != NOSLOT) name = name_of(attr, 2, (CELL_S2 + (u32)slot * 128) >> 5);
@@ -392,17 +513,17 @@ static u8 *s3_name(u32 r, u32 c)
     return VDP2_VRAM + MAP_S3 + plane * 0x4000 + ((rr >> 5) * 2 + (cc >> 5)) * 0x1000 + ((rr & 31) * 32 + (cc & 31)) * 4;
 }
 
-static void draw_scroll3(u16 base, u16 sx, u16 sy)
+static void draw_scroll3(u16 sx, u16 sy)
 {
-    const u8 *map = GFX(base & 0xffc0U);
+    const u32 *cell = snap.s3;
     u32 x0 = (u32)sx + CPS_LEFT + SAT_GFX_CROP_X, y0 = (u32)sy + CPS_TOP;
     u32 row, col;
     for (row = 0; row <= SAT_GFX_SCREEN_H / 32; row++)
         for (col = 0; col <= SAT_GFX_SCREEN_W / 32; col++)
         {
             u32 c = ((x0 >> 5) + col) & 63, r = ((y0 >> 5) + row) & 63;
-            u32 idx = (r & 7) + (c << 3) + ((r & 0x38) << 6);
-            u16 code = (u16)(be16(map + idx * 4) & 0x3fff), attr = be16(map + idx * 4 + 2);
+            u32 word = *cell++;
+            u16 code = (u16)((word >> 16) & 0x3fff), attr = (u16)word;
             u16 slot = cache_get(&s3_cache, code, &sat_gfx_stats.refused_layer);
             u32 sub, id = ((u32)attr << 16) | slot;
             if (sh_s3[r * 64 + c] == id) continue;
@@ -422,19 +543,12 @@ static void draw_scroll3(u16 base, u16 sx, u16 sy)
         }
 }
 
-/* Row scroll: returns 1 when any visible line moves. Only offsets are stored; VDP2 adds them to the layer's scroll. */
-static int update_rowscroll(u16 base, u16 offs)
+/* Row scroll: only offsets are stored; VDP2 adds them to the layer's scroll. */
+static void update_rowscroll(void)
 {
-    const u8 *tab = GFX(base);
     u32 line;
-    int any = 0;
     for (line = 0; line < SAT_GFX_SCREEN_H; line++)
-    {
-        u16 v = be16(tab + (((line + CPS_TOP + offs) & 0x3ff) * 2));
-        if (v) any = 1;
-        write_name(VDP2_VRAM + ROWTAB + line * 4, (u32)v << 16, &sh_row[line]);
-    }
-    return any;
+        write_name(VDP2_VRAM + ROWTAB + line * 4, (u32)snap.row[line] << 16, &sh_row[line]);
 }
 
 /* Layer order and the priority table. VDP2 levels: layers 2, 4, 6; a sprite level sits just under the highest layer it hides behind. */
@@ -483,11 +597,19 @@ static void put_sprite(u8 *cmd, u16 flip, u16 colr, u32 tex, int x, int y)
    list order, tiles of a block last to first. Each 16 pixel tile is one command. */
 static void draw_sprites(void)
 {
-    const u8 *list = PAGE[0x70] + 0x8000;
+    const u8 *list = snap.obj;
     u8 *cmd = VDP1_VRAM + 0x40; /* after clip and local */
-    int count = 0, i;
+    int count = snap.objects, i;
     u16 commands = 0;
-    while (count < 0x400 && be16(list + count * 8 + 2) < 0x8000 && be16(list + count * 8 + 6) < 0xff00) count++;
+    /* Clear the buffer: plotting by hand gives no automatic erase, and old sprites otherwise pile up as trails. A polygon in colour 0 reads as clear. */
+    put16(cmd + 0, 0x0004);
+    put16(cmd + 4, 0x00c0);
+    put16(cmd + 6, 0);
+    put16(cmd + 12, 0); put16(cmd + 14, 0);
+    put16(cmd + 16, SAT_GFX_SCREEN_W - 1); put16(cmd + 18, 0);
+    put16(cmd + 20, SAT_GFX_SCREEN_W - 1); put16(cmd + 22, SAT_GFX_SCREEN_H - 1);
+    put16(cmd + 24, 0); put16(cmd + 26, SAT_GFX_SCREEN_H - 1);
+    cmd += 32;
     sat_gfx_stats.objects = (u16)count;
     for (i = 0; i < count; i++)
     {
@@ -506,27 +628,45 @@ static void draw_sprites(void)
         x += CPS_LEFT - OBJ_XOFFS;
         y += CPS_TOP - OBJ_YOFFS;
         for (ty = ny - 1; ty >= 0; ty--)
+        {
+            CENSUS(int prev = -2;)
             for (tx = nx - 1; tx >= 0; tx--)
             {
                 int sx = ((x + tx * 16) & 0x3ff) - CPS_LEFT - SAT_GFX_CROP_X;
                 int sy = ((y + ty * 16) & 0x3ff) - CPS_TOP;
                 u32 tile;
                 u16 slot;
-                if (sx <= -16 || sx >= SAT_GFX_SCREEN_W || sy <= -16 || sy >= SAT_GFX_SCREEN_H) continue;
+                CENSUS(c_tiles++;)
+                if (sx <= -16 || sx >= SAT_GFX_SCREEN_W || sy <= -16 || sy >= SAT_GFX_SCREEN_H) { CENSUS(c_off++;) continue; }
                 if (fx || fy)
                     tile = code + (u32)(fx ? nx - 1 - tx : tx) + 0x10UL * (u32)(fy ? ny - 1 - ty : ty);
                 else
                     tile = (code & ~0xfUL) + ((code + (u32)tx) & 0xfUL) + 0x10UL * (u32)ty;
                 slot = cache_get(&spr_cache, tile, &sat_gfx_stats.refused_sprite);
-                if (slot == NOSLOT) continue;
+                if (slot == NOSLOT) { CENSUS(c_empty++;) continue; }
+                CENSUS(if (prev != tx + 1) c_runs++; prev = tx; census_bank((u32)bank);)
                 if (commands >= SAT_GFX_MAX_COMMANDS) { sat_gfx_stats.refused_commands++; continue; }
                 put_sprite(cmd, flip, colr, TEX_BASE + (u32)slot * 128, sx, sy);
                 cmd += 32;
                 commands++;
             }
+        }
     }
     put16(cmd, 0x8000); /* end */
     sat_gfx_stats.commands = commands;
+#ifdef SAT_PROF
+    {
+        u32 live = census_count();
+        if (live > sat_gfx_census.banks_peak) sat_gfx_census.banks_peak = live;
+        if (commands > sat_gfx_census.commands)
+        {
+            sat_gfx_census.commands = commands; sat_gfx_census.tiles = c_tiles; sat_gfx_census.offscreen = c_off; sat_gfx_census.empty = c_empty;
+            sat_gfx_census.runs = c_runs; sat_gfx_census.banks = live; sat_gfx_census.peak_frame = sat_gfx_stats.frames;
+        }
+        c_tiles = c_off = c_empty = c_runs = 0;
+        c_bankmask[0] = c_bankmask[1] = c_bankmask[2] = c_bankmask[3] = 0;
+    }
+#endif
     if (commands > sat_gfx_stats.commands_peak) sat_gfx_stats.commands_peak = commands;
 }
 
@@ -549,16 +689,137 @@ unsigned long sat_gfx_stage[6];
 #define STAGE(i) (sat_gfx_stage[i] = ((u32)*(volatile u8 *)0xfffffe12UL << 8) | *(volatile u8 *)0xfffffe13UL)
 #endif
 
-void sat_gfx_frame(void)
+/* Master side. Takes what drawing needs from game state, visible cells only, at the point the game's level 2 IRQ would start. */
+void sat_gfx_snapshot(void)
 {
-    u16 layers = RAM16(SH_LAYERS);
-    u16 video = RAM16(SH_VIDEO);
-    u16 s1x = RAM16(SH_S1X), s1y = RAM16(SH_S1Y), s2x = RAM16(SH_S2X), s2y = RAM16(SH_S2Y), s3x = RAM16(SH_S3X), s3y = RAM16(SH_S3Y);
+    u16 layers = RAM16(SH_LAYERS), video = RAM16(SH_VIDEO), pal_reg = RAM16(SH_PALETTE_BASE), pal_mask = RAM16(SH_PAL_PAGES);
+    const u8 *pal = GFX(pal_reg);
+    const u8 *list = PAGE[0x70] + 0x8000;
+    const u8 *last;
+    u32 x0, y0, row, col, n;
+    u32 *cell;
+    int page, count = 0;
+
+    snap.layers = layers;
+    snap.priority = RAM16(SH_PRIORITY);
+    snap.s1x = RAM16(SH_S1X); snap.s1y = RAM16(SH_S1Y);
+    snap.s2x = RAM16(SH_S2X); snap.s2y = RAM16(SH_S2Y);
+    snap.s3x = RAM16(SH_S3X); snap.s3y = RAM16(SH_S3Y);
+
+    snap.pal_pages = 0;
+    for (page = 0; page < SAT_GFX_PAGES; page++)
+    {
+        const u8 *src = palette_page(pal, pal_mask, page);
+        if (!src) continue;
+        snap.pal_pages |= (u16)(1U << page);
+        {
+            u32 sum = 0;
+            for (n = 0; n < 0x400; n += 4)
+            {
+                u32 w = be32(src + n);
+                put32_ram(snap.palette[page] + n, w);
+                sum = MIX(sum, w);
+            }
+            snap.pal_sum[page] = sum;
+        }
+    }
+    /* The board fills with pen 0xbff: page 5, bank 31, pen 15. */
+    last = palette_page(pal, pal_mask, 5);
+    snap.back_valid = (u16)(last != 0);
+    if (last) snap.back = be16(last + 0x3feUL);
+
+    snap.row_active = 0;
+    if (video & 1)
+    {
+        const u8 *tab = GFX(RAM16(SH_ROWSCROLL_BASE));
+        u16 offs = RAM16(SH_ROWOFFS), any = 0;
+        for (n = 0; n < SAT_GFX_SCREEN_H; n++)
+        {
+            u16 v = be16(tab + (((n + CPS_TOP + offs) & 0x3ff) * 2));
+            snap.row[n] = v;
+            any |= v;
+        }
+        snap.row_active = (u16)(any != 0);
+    }
+    else
+        for (n = 0; n < SAT_GFX_SCREEN_H; n++) snap.row[n] = 0;
+
+    /* Column outer: the game's maps run down columns, so the reads stay on cache lines. */
+    if (layers & 2)
+    {
+        const u8 *map = GFX(RAM16(SH_SCROLL1_BASE) & 0xffc0U);
+        u32 sum;
+        x0 = (u32)snap.s1x + CPS_LEFT + SAT_GFX_CROP_X; y0 = (u32)snap.s1y + CPS_TOP;
+        sum = (x0 >> 3) | ((y0 >> 3) << 16);
+        for (col = 0; col < S1_COLS; col++)
+        {
+            u32 c = ((x0 >> 3) + col) & 63;
+            cell = snap.s1 + col;
+            for (row = 0; row < S1_ROWS; row++, cell += S1_COLS)
+            {
+                u32 r = ((y0 >> 3) + row) & 63;
+                u32 w = be32(map + ((r & 0x1f) + (c << 5) + ((r & 0x20) << 6)) * 4);
+                *cell = w;
+                sum = MIX(sum, w);
+            }
+        }
+        snap.s1_sum = sum;
+    }
+    if (layers & 4)
+    {
+        const u8 *map = GFX(RAM16(SH_SCROLL2_BASE) & 0xffc0U);
+        u32 cols = snap.row_active ? 64 : S2_COLS, sum;
+        x0 = (u32)snap.s2x + CPS_LEFT + SAT_GFX_CROP_X; y0 = (u32)snap.s2y + CPS_TOP;
+        sum = (snap.row_active ? 0x80000000UL : (x0 >> 4)) | ((y0 >> 4) << 16);
+        for (col = 0; col < cols; col++)
+        {
+            u32 c = ((snap.row_active ? 0 : x0 >> 4) + col) & 63;
+            cell = snap.s2 + col;
+            for (row = 0; row < S2_ROWS; row++, cell += cols)
+            {
+                u32 r = ((y0 >> 4) + row) & 63;
+                u32 w = be32(map + ((r & 0x0f) + (c << 4) + ((r & 0x30) << 6)) * 4);
+                *cell = w;
+                sum = MIX(sum, w);
+            }
+        }
+        snap.s2_sum = sum;
+    }
+    if (layers & 8)
+    {
+        const u8 *map = GFX(RAM16(SH_SCROLL3_BASE) & 0xffc0U);
+        u32 sum;
+        x0 = (u32)snap.s3x + CPS_LEFT + SAT_GFX_CROP_X; y0 = (u32)snap.s3y + CPS_TOP;
+        sum = (x0 >> 5) | ((y0 >> 5) << 16);
+        for (col = 0; col < S3_COLS; col++)
+        {
+            u32 c = ((x0 >> 5) + col) & 63;
+            cell = snap.s3 + col;
+            for (row = 0; row < S3_ROWS; row++, cell += S3_COLS)
+            {
+                u32 r = ((y0 >> 5) + row) & 63;
+                u32 w = be32(map + ((r & 7) + (c << 3) + ((r & 0x38) << 6)) * 4);
+                *cell = w;
+                sum = MIX(sum, w);
+            }
+        }
+        snap.s3_sum = sum;
+    }
+    while (count < MAX_OBJECTS && be16(list + count * 8 + 2) < 0x8000 && be16(list + count * 8 + 6) < 0xff00) count++;
+    snap.objects = (u16)count;
+    snap_copy(snap.obj, list, (u32)count * 8);
+}
+
+/* Drawing side: everything from the snapshot. On the Saturn this runs on the slave SH-2. */
+void sat_gfx_draw(void)
+{
+    u16 layers = snap.layers;
+    u16 s1x = snap.s1x, s1y = snap.s1y, s2x = snap.s2x, s2y = snap.s2y, s3x = snap.s3x, s3y = snap.s3y;
     u16 bgon = 0;
-    int row_active = 0;
+    int row_active = snap.row_active;
 
     stamp = (u16)(stamp + 1U == 0x10000UL ? 1U : stamp + 1U);
-    spr_cache.used = s1_cache.used = s2_cache.used = s3_cache.used = 0;
+    cache_frame(&spr_cache); cache_frame(&s1_cache); cache_frame(&s2_cache); cache_frame(&s3_cache);
     sat_gfx_stats.uploads = 0;
     sat_gfx_stats.layer_uploads = 0;
     sat_gfx_stats.layer_writes = 0;
@@ -566,15 +827,28 @@ void sat_gfx_frame(void)
 
     STAGE(0);
     update_palette();
-    update_priority(layers, RAM16(SH_PRIORITY));
+    update_priority(layers, snap.priority);
     STAGE(1);
-    if (video & 1) row_active = update_rowscroll(RAM16(SH_ROWSCROLL_BASE), RAM16(SH_ROWOFFS));
+    update_rowscroll();
     VDP2R(0x9a) = (u16)(row_active ? 0x0002 : 0);
 
     STAGE(2);
-    if (layers & 4) { bgon |= 1; draw_scroll2(RAM16(SH_SCROLL2_BASE), s2x, s2y, row_active); }
-    if (layers & 8) { bgon |= 2; draw_scroll3(RAM16(SH_SCROLL3_BASE), s3x, s3y); }
-    if (layers & 2) { bgon |= 4; draw_scroll1(RAM16(SH_SCROLL1_BASE), s1x, s1y); }
+    if (layers & 4)
+    {
+        bgon |= 1;
+        if (!drawn_valid || snap.s2_sum != drawn_s2) { draw_scroll2(s2x, s2y, row_active); drawn_s2 = snap.s2_sum; }
+    }
+    if (layers & 8)
+    {
+        bgon |= 2;
+        if (!drawn_valid || snap.s3_sum != drawn_s3) { draw_scroll3(s3x, s3y); drawn_s3 = snap.s3_sum; }
+    }
+    if (layers & 2)
+    {
+        bgon |= 4;
+        if (!drawn_valid || snap.s1_sum != drawn_s1) { draw_scroll1(s1x, s1y); drawn_s1 = snap.s1_sum; }
+    }
+    drawn_valid = 1;
     STAGE(3);
     #ifdef SAT_GFX_BGMASK
     bgon &= SAT_GFX_BGMASK;
@@ -598,6 +872,12 @@ void sat_gfx_frame(void)
     sat_gfx_stats.frames++;
 }
 
+void sat_gfx_frame(void)
+{
+    sat_gfx_snapshot();
+    sat_gfx_draw();
+}
+
 static int open_pack(const u8 *p)
 {
     int i;
@@ -607,6 +887,7 @@ static int open_pack(const u8 *p)
         sections[i].count = be32(p + 4 + i * 12);
         sections[i].keys = p + be32(p + 8 + i * 12);
         sections[i].data = p + be32(p + 12 + i * 12);
+        index_section(&sections[i], i);
     }
     return 1;
 }
@@ -639,6 +920,7 @@ int sat_gfx_init(const void *pack)
     cache_setup(&s2_cache, VDP2_VRAM + CELL_S2, 128, SAT_GFX_S2_SLOTS, 0, SEC_S2, s2_key, s2_stamp, s2_next, s2_head);
     cache_setup(&s3_cache, VDP2_VRAM + CELL_S3, 512, SAT_GFX_S3_SLOTS, 0, SEC_S3, s3_key, s3_stamp, s3_next, s3_head);
     stamp = 0;
+    drawn_valid = 0;
 
     /* VRAM split into four banks, CRAM mode 1. */
     VDP2R(0x0e) = 0x1300;
