@@ -39,6 +39,12 @@ def main():
     stage, seconds = Path(sys.argv[1]), float(sys.argv[2])
     every = float(sys.argv[3]) if len(sys.argv) > 3 else 10.0
     syms = symbols(stage / "game.map")
+    # One debug port and one ini are shared across lanes: never run alongside.
+    while subprocess.run(["tasklist", "/FI", "IMAGENAME eq yabasanshiro.exe"],
+                         capture_output=True, text=True
+                         ).stdout.lower().count("yabasanshiro.exe"):
+        print("emulator busy, waiting", flush=True)
+        time.sleep(10)
     original = INI.read_bytes()
     text = original.decode("latin-1")
     for key, value in (("Video\\VideoCore", "1"), ("Sound\\SoundCore", "0"),
@@ -64,11 +70,14 @@ def main():
         next_shot = 0.0
         while time.time() - start < seconds and proc.poll() is None:
             row = {"t": round(time.time() - start, 1)}
-            for name, addr in syms.items():
-                if name != "avsp_round1_containment":
-                    row[name.replace("avsp_diag_", "")] = int.from_bytes(
-                        mcp.read(addr, 4), "big", signed=True)
-            row["contained"] = mcp.u32(syms["avsp_round1_containment"] + 4)
+            try:
+                for name, addr in syms.items():
+                    if name != "avsp_round1_containment":
+                        row[name.replace("avsp_diag_", "")] = int.from_bytes(
+                            mcp.read(addr, 4), "big", signed=True)
+                row["contained"] = mcp.u32(syms["avsp_round1_containment"] + 4)
+            except RuntimeError as error:  # memory not readable during boot
+                row["read_error"] = str(error)
             if row["t"] >= next_shot:
                 shot = stage / f"t{int(row['t']):04}.png"
                 row["shot"] = mcp.call("framebuffer_screenshot", path=str(shot))[:120]

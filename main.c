@@ -9796,6 +9796,9 @@ void jo_main(void)
     memset(&live_encounter_runtime, 0, sizeof(live_encounter_runtime));
     memset(&live_encounter_frame, 0, sizeof(live_encounter_frame));
     round1_native_capture_frame = 0UL;
+#ifndef AVSP_LIVE_ENCOUNTER_AUTOTEST
+    avsp_round1_tick_rule_init(&round1_tick_rule);
+#endif
     memset((void *)avsp_diag_round1_startup_trace, 0,
            sizeof(avsp_diag_round1_startup_trace));
     avsp_diag_round1_startup_trace_count = 0;
