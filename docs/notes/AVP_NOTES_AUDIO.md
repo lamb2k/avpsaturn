@@ -146,3 +146,18 @@ The gate uses the runner's optional hooks in `tools/learn_unit.py`: `setup(rom)`
 - Z80 sequencer bytecode (0xadc onward): channel programs, envelopes and pitch are not decoded; only entry, stop and priority rules are.
 - Semantic names of sounds: unknown by policy.
 - Native side wiring is avp-native's.
+
+## Saturn library, saturn/audio (2026-11-06)
+
+Method: each sound command is rendered once through the real Z80 driver and QSound under MAME 0.289 (`render_mame.lua`, with the 68000's handshake blocked after boot), then lowered to 8 bit 11025 Hz clips and CD tracks by `build_pack.py`. The Z80 sequencer did not need decoding.
+Integration is in `sat_audio.h`. A hook on IOW8 at 0x618000..0x619fff is needed, since the kernel reports always ready and the game's sender drains the ring by itself.
+
+Budget (route = `command_map.tsv`, 62 SFX): 539,738 bytes, 433,730 once 16 near-identical alternating pairs share a clip, against 524,288 of SCSP RAM less 32 for the 68000 idle loop. Every table SFX is 5,397,793 bytes before sharing, so other rounds need banks. The 15 commands that never ended in 10 s, 0x5a and others, are not on the route; a looping clip over 65,535 samples fails the build.
+
+Differences from the arcade: see the head of `sat_audio.c`. Music renders have a seam where no repeat was found within 110 s (0x1, 0x6, 0x7, 0xf, 0x16), and the track repeats whole.
+
+Evidence, tier EMULATOR unless marked, `standalone.py`, 14 recorded commands, debug-rig Yaba:
+- SCSP RAM read back equals the pack; key-on, TL, pan, start and play position read back from the SCSP; priority refusal counted (0x3d under 0x30); CD track and position advance at real time; intro to loop switches.
+- MODELLED, not a capture: a mix from that trace and RAM, against MAME for the same commands, gives median 10 ms loudness correlation 0.956 over 8 events, level -1 to -6 dB.
+- No audio capture exists. The debug-rig and plain Yaba produced only silence under per-process loopback, including an old disc with CD audio and every SDL driver tried; the SDL disk driver wrote no file. System loopback picks up whatever else the PC is playing, so it is not evidence.
+- Yaba did not stop at the Play Disc end position, so the intro's end is timed from the pack. Seam timing on a real drive is unknown.
