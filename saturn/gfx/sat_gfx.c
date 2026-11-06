@@ -307,6 +307,12 @@ static u16 cache_find(Cache *c, u32 key, unsigned long *refused)
     {
         u32 tag = (key << 2) | (u32)c->section, way = (tag ^ (tag >> 11)) & (BLANK_WAYS - 1);
         if (blank_seen[way] == tag) return NOSLOT;
+#ifdef SAT_KEYLOG
+        {   /* Test build only: every key the running game asks for, as bits in spare SCSP RAM, read back over MCP to size the tile pack by real play. */
+            static const u32 base[4] = { 0x25A70000UL, 0x25A78000UL, 0x25A7C000UL, 0x25A7E000UL };
+            *(volatile u8 *)(base[c->section] + (key >> 3)) |= (u8)(1u << (key & 7));
+        }
+#endif
         idx = pack_find(&sections[c->section], key);
         if (idx < 0)
         {
@@ -593,6 +599,21 @@ static void put_sprite(u8 *cmd, u16 flip, u16 colr, u32 tex, int x, int y)
     put16(cmd + 14, (u16)y);
 }
 
+#ifdef SAT_READOUT
+/* Frame-cost bars for a real console, where no debugger reads the timers: 8 pixels per ms from the left, top bar game on the master, second bar drawing on the slave, white tick at 16.7 ms.
+   Values come from the kernel through the uncached alias. Physical numbers are read from a capture of the screen. */
+extern volatile unsigned long sat_readout[2];
+static u8 *bar(u8 *cmd, int w, int y, u16 rgb)
+{
+    if (w > SAT_GFX_SCREEN_W - 1) w = SAT_GFX_SCREEN_W - 1;
+    put16(cmd + 0, 0x0004); put16(cmd + 4, 0x00c0); put16(cmd + 6, rgb);
+    put16(cmd + 12, 0); put16(cmd + 14, y);
+    put16(cmd + 16, w); put16(cmd + 18, y);
+    put16(cmd + 20, w); put16(cmd + 22, y + 2);
+    put16(cmd + 24, 0); put16(cmd + 26, y + 2);
+    return cmd + 32;
+}
+#endif
 /* Object list at 0x708000. The board keeps the first pixel down, drawing from the end of the list, so later entries win: VDP1 paints in
    list order, tiles of a block last to first. Each 16 pixel tile is one command. */
 static void draw_sprites(void)
@@ -652,6 +673,14 @@ static void draw_sprites(void)
             }
         }
     }
+#ifdef SAT_READOUT
+    {
+        volatile unsigned long *r = (volatile unsigned long *)((unsigned long)sat_readout | 0x20000000UL);
+        cmd = bar(cmd, (int)(r[0] / 26), 0, 0x83e0);
+        cmd = bar(cmd, (int)(r[1] / 26), 4, 0x801f);
+        cmd = bar(cmd, 133, 8, 0xffff);
+    }
+#endif
     put16(cmd, 0x8000); /* end */
     sat_gfx_stats.commands = commands;
 #ifdef SAT_PROF

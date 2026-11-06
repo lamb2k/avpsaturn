@@ -11,6 +11,7 @@ Cpu sat_cpu;
 u8 *PAGE[256];
 u8 RAMB[0x10000] __attribute__((aligned(4)));
 SatDebug sat_dbg;
+volatile unsigned long sat_readout[2];   /* FRT ticks, game and drawing, for the SAT_READOUT bars */
 
 #define TASKS 16
 #define TASK_STACK 4096
@@ -266,7 +267,7 @@ void sat_slave_main(void)
         FRTH = 0; FRTL = 0;
         sat_gfx_draw();
         t = frt();
-        sat_dbg.gfx_ticks = t;
+        sat_dbg.gfx_ticks = t; *(volatile unsigned long *)((unsigned long)&sat_readout[1] | 0x20000000UL) = t;
         if (t > sat_dbg.gfx_peak) sat_dbg.gfx_peak = t;
 #ifdef SAT_PROF
         if (IN_WINDOW) prof_add(sat_prof.gfx, t);
@@ -309,7 +310,7 @@ void f_d86(void)
         }
         if (i == TASKS) {
             if (!game_done) {
-                game_done = 1; sat_dbg.game_ticks = frt(); if (sat_dbg.game_ticks > sat_dbg.game_peak) sat_dbg.game_peak = sat_dbg.game_ticks;
+                game_done = 1; sat_dbg.game_ticks = frt(); *(volatile unsigned long *)((unsigned long)sat_readout | 0x20000000UL) = sat_dbg.game_ticks; if (sat_dbg.game_ticks > sat_dbg.game_peak) sat_dbg.game_peak = sat_dbg.game_ticks;
 #ifdef SAT_PROF
                 if (IN_WINDOW) { prof_add(sat_prof.frame, frame_carry + sat_dbg.game_ticks); sat_prof.done++; }
                 frame_carry = 0;
