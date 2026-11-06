@@ -4,7 +4,7 @@ usage: satint_census.py [LUA] [OUTNAME]   default satint_census.lua census; sati
 env for the census: SATINT_STOP_IRQ (15113 ends at the Round 1 clear), SATINT_SNAPS. Output E:/AvP/learning/lane-satint/OUTNAME (ROM-derived, never commit)."""
 import os, pathlib, shutil, subprocess, sys
 REPO = pathlib.Path("C:/Game Dev/BrooklynBangoutX/AvPSaturnCapabilityTest-playable-loop-pivot")
-out = pathlib.Path("E:/AvP/learning/lane-satint") / (sys.argv[2] if len(sys.argv) > 2 else "census")
+out = pathlib.Path(os.environ.get("SATINT_ROOT", "E:/AvP/learning/lane-satint")) / (sys.argv[2] if len(sys.argv) > 2 else "census")
 out.mkdir(parents=True, exist_ok=True)
 if not (out / "nvram/avspu").exists():
     shutil.copytree(REPO / ".deps/mame/full_route_nvram_baseline", out / "nvram/avspu")

@@ -86,4 +86,23 @@ satint_tap = ops:install_read_tap(0xe0e, 0xe0f, "satint", function()
         dump()
     end
 end)
-dofile("tools/mame_capture_oracle11_player_audio.lua")
+local route = os.getenv("AVSP_ROUTE")
+if route then   -- a saved input file (tools/make_route.py), real ports only
+    local in0 = machine.ioport.ports[":IN0"].fields
+    local in2 = machine.ioport.ports[":IN2"].fields
+    local F = {in2["Coin 1"], in2["1 Player Start"], in0["P1 Left"], in0["P1 Right"], in0["P1 Button 1"], in0["P1 Button 2"], in0["P1 Button 3"], in0["P1 Up"], in0["P1 Down"]}
+    local steps, last = {}, nil
+    for l in io.lines(route) do
+        local a, b = l:match("^(%d+) (%d+)")
+        if a then steps[tonumber(a)] = tonumber(b) else last = tonumber(l:match("^last (%d+)")) end
+    end
+    local frame = 0
+    satint_route = emu.add_machine_frame_notifier(function()
+        frame = frame + 1
+        local w = steps[frame]
+        if w then for i, f in ipairs(F) do if w & (1 << (i - 1)) ~= 0 then f:set_value(1) else f:clear_value() end end end
+        if frame == last then dump(); machine:exit() end
+    end)
+else
+    dofile("tools/mame_capture_oracle11_player_audio.lua")
+end
