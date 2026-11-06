@@ -1,3 +1,4 @@
+# SUPERSEDED 2026-11-06 by owner decision, see AGENTS.md: decomp campaign on decomp/main. Fields below are history and do not direct work.
 schema: 2
 architecture: avp-hybrid-native-v2
 workflow_model: interactive-salvage-promotion-integration
