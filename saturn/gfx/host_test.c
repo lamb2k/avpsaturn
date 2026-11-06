@@ -26,7 +26,7 @@ static unsigned char *make_pack(unsigned long n)
     w32(p, 0x53475031UL);
     w32(p + 4, n); w32(p + 8, hdr); w32(p + 12, hdr + n * 4);
     for (i = 1; i < 4; i++) { w32(p + 4 + i * 12, 0); w32(p + 8 + i * 12, hdr); w32(p + 12 + i * 12, hdr); }
-    for (i = 0; i < n; i++) { w32(p + hdr + i * 4, i << 13 | (i & 0x1fff)); p[hdr + n * 4 + i * 128] = 0x11; }
+    for (i = 0; i < n; i++) { w32(p + hdr + i * 4, i << 14 | (i & 0x3fff)); p[hdr + n * 4 + i * 128] = 0x11; }
     return p;
 }
 

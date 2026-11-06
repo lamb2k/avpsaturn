@@ -13,7 +13,7 @@ u8 RAMB[0x10000] __attribute__((aligned(4)));
 SatDebug sat_dbg;
 
 #define TASKS 16
-#define TASK_STACK 8192
+#define TASK_STACK 4096
 #define REC(i) (0xff0058u + (u32)(i) * 0x20u)
 #define G_CUR 0xff025cu
 #define G_FREEP 0xff0260u
@@ -34,6 +34,8 @@ extern void f_dispatch(u32);
 extern void f_e0e(void);
 extern void f_800(void);
 extern void f_11ec(void);
+extern u8 SAT_SINK[], SAT_OBJ[], SAT_PACK[];
+u8 sat_gfxram[0x20000] __attribute__((section(".lwgfx"), aligned(4)));
 
 static u32 task_stacks[TASKS][TASK_STACK / 4];
 u32 sat_boot_stack[2048];
@@ -55,25 +57,24 @@ void sat_fatal(u32 code, u32 detail)
 void *memcpy(void *d, const void *s, unsigned long n) { u8 *a = d; const u8 *b = s; while (n--) *a++ = *b++; return d; }
 void *memset(void *d, int v, unsigned long n) { u8 *a = d; while (n--) *a++ = (u8)v; return d; }
 
-/* Stub I/O: neutral inputs, nothing pressed, idle sound status. The input lane replaces this for the player ports. */
+/* The board's input latch comes from the pad (pad.c); the other ports read idle. */
+extern u32 sat_pad_in0(void), sat_pad_in2(void);
+extern void sat_pad_tick(void);
+u32 sat_vblanks_now(void) { return sat_dbg.vblanks; }
 static u32 io_read(u32 a)
 {
     a &= 0xfffffe;
     if (a == 0x804030) return 0xe021;
-#ifdef SAT_INPUT_SCRIPT   /* test only: coin then start at the golden run's vblanks, to leave attract without a pad */
-    if (a == 0x804020) {
-        u32 v = sat_dbg.vblanks;
-        if (v >= 1120 && v <= 1122) return 0xefff;
-        if (v >= 1150 && v <= 1152) return 0xfeff;
-    }
-#endif
-    return 0xffff;
+    if (a == 0x804000) return sat_pad_in0();
+    if (a == 0x804020) return sat_pad_in2();
+    return 0xffff;   /* 0x804010 players 3 and 4 */
 }
 u32 IOR8(u32 a) { u32 v = io_read(a); return (a & 1) ? (v & 0xff) : (v >> 8); }
 u32 IOR16(u32 a) { return io_read(a) & 0xffff; }
 u32 IOR32(u32 a) { return (io_read(a) << 16) | io_read(a + 2); }
 void IOW8(u32 a, u32 v) { (void)a; (void)v; }
-void IOW16(u32 a, u32 v) { (void)a; (void)v; }
+/* Two object banks: 0x8040e0 bit 0 picks the one the game sees at 0x708000. Only those 8 KB exist; the page below them aliases the sink. */
+void IOW16(u32 a, u32 v) { if (a == 0x8040e0) { PAGE[0x70] = SAT_OBJ + (v & 1) * 0x2000 - 0x8000; sat_dbg.obj_flips++; } }
 void IOW32(u32 a, u32 v) { (void)a; (void)v; }
 
 u32 f_divu(u32 n, u32 d, int *ov) { u32 q; d &= 0xffff; if (!d) return n; q = n / d; if (q > 0xffff) { *ov = 1; return n; } return ((n % d) << 16) | q; }
@@ -219,6 +220,13 @@ static void irq_enable(void)
     __asm__ volatile ("ldc %0,sr" : : "r"(0x00));
 }
 
+/* Free running timer at clock / 128 (about 4.5 us a tick), restarted at each vblank. Readings are emulator-only until run on a console. */
+#define FRTH (*(volatile u8 *)0xfffffe12u)
+#define FRTL (*(volatile u8 *)0xfffffe13u)
+#define FTCR (*(volatile u8 *)0xfffffe16u)
+static inline u32 frt(void) { u32 h = FRTH; return (h << 8) | FRTL; }
+static volatile int game_done;
+
 /* Dispatcher 0xd86. A vblank sets the game's flag at 0xff0266 through f_e0e, which restarts the walk from task 0. */
 void f_d86(void)
 {
@@ -240,7 +248,10 @@ void f_d86(void)
             }
             cur = -1;
         }
-        if (i == TASKS) { cpu.a[0] = REC(15) + 0x20; cpu.d[0] |= 0xffff; f_11ec(); sat_dbg.idle_calls++; }
+        if (i == TASKS) {
+            if (!game_done) { game_done = 1; sat_dbg.game_ticks = frt(); if (sat_dbg.game_ticks > sat_dbg.game_peak) sat_dbg.game_peak = sat_dbg.game_ticks; }
+            cpu.a[0] = REC(15) + 0x20; cpu.d[0] |= 0xffff; f_11ec(); sat_dbg.idle_calls++;
+        }
     }
 }
 
@@ -263,13 +274,25 @@ void sat_vblank(void)
 {
     static Cpu save;
     int sc = cur;
+    u32 t0, t1, t2;
     *(volatile u32 *)0x25fe00a4 = ~1u;
     sat_dbg.vblanks++;
+    if (!game_done) sat_dbg.overruns++;
+    game_done = 0;
+    FRTH = 0; FRTL = 0;
+    sat_pad_tick();
+    t0 = frt();
+    sat_gfx_frame();   /* before the IRQ body, which moves the next frame's scroll words into place */
+    t1 = frt();
     save = cpu;
     cur = -1; cpu.a[5] = 0xff8000; cpu.a[7] = 0xff8000;
     f_e0e();
     cpu = save; cur = sc;
-    sat_present();
+    sat_audio_frame();
+    t2 = frt();
+    sat_dbg.gfx_ticks = t1 - t0; sat_dbg.irq_ticks = t2;
+    if (t1 - t0 > sat_dbg.gfx_peak) sat_dbg.gfx_peak = t1 - t0;
+    if (t2 > sat_dbg.irq_peak) sat_dbg.irq_peak = t2;
     sat_dbg.ff8018 = RAM16(0x8018);
     if ((sat_dbg.vblanks & 63) == 0) stack_scan();
 }
@@ -281,8 +304,6 @@ static const u8 hw_test_seed[16] = {
 };
 
 extern u32 sat_bss_start[], sat_bss_end[], sat_lw_bss_start[], sat_lw_bss_end[];
-extern u8 SAT_SINK[], SAT_OBJ[];
-
 void sat_main(void)
 {
     u32 *p; int i;
@@ -293,13 +314,18 @@ void sat_main(void)
     exceptions_install();
     for (i = 0; i < TASKS; i++) { u32 k; for (k = 0; k < TASK_STACK / 4; k++) task_stacks[i][k] = 0xa5a5a5a5u; }
     for (i = 0; i < 256; i++) PAGE[i] = SAT_SINK;
+    PAGE[0x90] = sat_gfxram; PAGE[0x91] = sat_gfxram + 0x10000;   /* the game uses only these two of the three pages */
     for (i = 0; i < 0x20; i++) PAGE[i] = ROMB + ((u32)i << 16);
-    PAGE[0xff] = RAMB; PAGE[0x70] = SAT_OBJ;
-    { u32 n; for (n = 0; n < 0x20000; n++) SAT_SINK[n] = 0; }
+    PAGE[0xff] = RAMB; PAGE[0x70] = SAT_OBJ - 0x8000;
+    { u32 n; for (n = 0; n < 0x4000; n++) SAT_OBJ[n] = 0xff; }
+    { u32 n; for (n = 0; n < 0x10000; n++) SAT_SINK[n] = 0; }
     for (i = 0; i < 16; i++) RAMB[0xe90 + i] = hw_test_seed[i];
     /* Registers the skipped hardware test left, seen through f_1a36. */
     cpu.d[3] = 4; cpu.a[4] = 0x800; cpu.a[7] = 0xff8000; cpu.a[5] = 0xff8000;
-    sat_gfx_init();
+    FTCR = 2;
+    game_done = 1;
+    if (!sat_gfx_init(SAT_PACK)) sat_fatal(0xeb, 0);
+    sat_audio_init();
     sat_dbg.stage = 1;
     f_800();
     sat_fatal(0xe8, 0);

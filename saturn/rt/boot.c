@@ -38,7 +38,9 @@ int main(void)
     if (GFS_Init(1, gfs_work, &dir) < 0) halt(0xe001, 0);
     load("LW.BIN", (void *)0x00200000u, 0x100);
     load("ROM.BIN", (void *)0x02400000u, 0x200);
-    load("OP.BIN", (void *)0x02600000u, 0x300);
+    load("OPX.BIN", (void *)0x02600000u, 0x300);
+    load("PACK.BIN", (void *)0x0264c000u, 0x500);
+    load("COLD1.BIN", (void *)COLD1_ADDR, 0x600);
     load("HW.BIN", (void *)ENTRY, 0x400);
     GFS_Reset();
     *(volatile unsigned char *)0xfffffe92 = 0x10;

@@ -96,13 +96,13 @@ static void put32(u8 *p, u32 v) { p[0] = (u8)(v >> 24); p[1] = (u8)(v >> 16); p[
 #define SEC_S1 1
 #define SEC_S2 2
 #define SEC_S3 3
-#define BLANK_INDEX 0x1fffUL
-#define KEY_SHIFT 13
+#define BLANK_INDEX 0x3fffUL
+#define KEY_SHIFT 14
 
 typedef struct
 {
     u32 count;
-    const u8 *keys; /* u32: key << 13 | payload index, ascending; BLANK_INDEX marks a tile with no visible pen */
+    const u8 *keys; /* u32: key << 14 | payload index, ascending; BLANK_INDEX marks a tile with no visible pen */
     const u8 *data;
 } Section;
 
@@ -181,6 +181,13 @@ static void vram_copy(u8 *dest, const u8 *src, u32 bytes)
 }
 
 #define HASH(k) (((k) ^ ((k) >> 10)) & (HASH_SIZE - 1))
+/* Blank tiles fill most layers and never get a slot, so without this each one means a binary search of the pack on the cart, every frame. */
+#define BLANK_WAYS 2048
+#ifdef SAT_GFX_HOST
+static u32 blank_seen[BLANK_WAYS];
+#else
+static u32 blank_seen[BLANK_WAYS] __attribute__((section(".lwgfx")));
+#endif
 
 /* Slot holding a tile, uploading it on a miss. NOSLOT for a blank, missing or refused tile. */
 static u16 cache_get(Cache *c, u32 key, unsigned long *refused)
@@ -199,9 +206,13 @@ static u16 cache_get(Cache *c, u32 key, unsigned long *refused)
         }
         s = c->slot_next[s];
     }
-    idx = pack_find(&sections[c->section], key);
-    if (idx < 0) { sat_gfx_stats.missing++; return NOSLOT; }
-    if ((u32)idx == BLANK_INDEX) return NOSLOT;
+    {
+        u32 tag = (key << 2) | (u32)c->section, way = (tag ^ (tag >> 11)) & (BLANK_WAYS - 1);
+        if (blank_seen[way] == tag) return NOSLOT;
+        idx = pack_find(&sections[c->section], key);
+        if (idx < 0) { sat_gfx_stats.missing++; blank_seen[way] = tag; return NOSLOT; }
+        if ((u32)idx == BLANK_INDEX) { blank_seen[way] = tag; return NOSLOT; }
+    }
     for (scan = c->first; scan < c->capacity; scan++)
     {
         u16 t = c->hand;
@@ -299,11 +310,20 @@ static void update_palette(void)
     sat_gfx_stats.colours_written = written;
 }
 
-/* Layer maps: only the words the picture can show are looked at, and only changed words are written. */
-static void write_name(u8 *addr, u32 name)
+/* Layer maps: only the words the picture can show are looked at, and only changed words are written. The comparison is against shadows in
+   work RAM: a read from VDP2 VRAM stalls the CPU, and these loops touch over 2000 words a frame. */
+#ifdef SAT_GFX_HOST
+#define LOW_RAM
+#else
+#define LOW_RAM __attribute__((section(".lwgfx")))
+#endif
+static u32 sh_s1[64 * 64] LOW_RAM, sh_s2[64 * 64] LOW_RAM, sh_s3[64 * 64] LOW_RAM, sh_row[SAT_GFX_SCREEN_H] LOW_RAM;
+
+static void write_name(u8 *addr, u32 name, u32 *shadow)
 {
-    if (get32(addr) != name)
+    if (*shadow != name)
     {
+        *shadow = name;
         put32(addr, name);
         sat_gfx_stats.layer_writes++;
     }
@@ -336,7 +356,7 @@ static void draw_scroll1(u16 base, u16 sx, u16 sy)
             u16 slot = cache_get(&s1_cache, ((u32)code << 1) | ((idx >> 5) & 1), &sat_gfx_stats.refused_layer);
             u32 name = CLEAR_NAME;
             if (slot != NOSLOT) name = name_of(attr, 1, (CELL_S1 + (u32)slot * 32) >> 5);
-            write_name(VDP2_VRAM + MAP_S1 + (r * 64 + c) * 4, name);
+            write_name(VDP2_VRAM + MAP_S1 + (r * 64 + c) * 4, name, &sh_s1[r * 64 + c]);
         }
 }
 
@@ -360,7 +380,7 @@ static void draw_scroll2(u16 base, u16 sx, u16 sy, int full_row)
             u16 slot = cache_get(&s2_cache, code, &sat_gfx_stats.refused_layer);
             u32 name = CLEAR_NAME;
             if (slot != NOSLOT) name = name_of(attr, 2, (CELL_S2 + (u32)slot * 128) >> 5);
-            write_name(s2_name(r, c), name);
+            write_name(s2_name(r, c), name, &sh_s2[r * 64 + c]);
         }
 }
 
@@ -384,7 +404,9 @@ static void draw_scroll3(u16 base, u16 sx, u16 sy)
             u32 idx = (r & 7) + (c << 3) + ((r & 0x38) << 6);
             u16 code = (u16)(be16(map + idx * 4) & 0x3fff), attr = be16(map + idx * 4 + 2);
             u16 slot = cache_get(&s3_cache, code, &sat_gfx_stats.refused_layer);
-            u32 sub;
+            u32 sub, id = ((u32)attr << 16) | slot;
+            if (sh_s3[r * 64 + c] == id) continue;
+            sh_s3[r * 64 + c] = id;
             for (sub = 0; sub < 4; sub++)
             {
                 u32 name = CLEAR_NAME;
@@ -394,7 +416,8 @@ static void draw_scroll3(u16 base, u16 sx, u16 sy)
                     u32 use = sub ^ ((attr & 0x20) ? 1U : 0U) ^ ((attr & 0x40) ? 2U : 0U);
                     name = name_of(attr, 3, (CELL_S3 + (u32)slot * 512 + use * 128) >> 5);
                 }
-                write_name(s3_name(r * 2 + (sub >> 1), c * 2 + (sub & 1)), name);
+                put32(s3_name(r * 2 + (sub >> 1), c * 2 + (sub & 1)), name);
+                sat_gfx_stats.layer_writes++;
             }
         }
 }
@@ -409,7 +432,7 @@ static int update_rowscroll(u16 base, u16 offs)
     {
         u16 v = be16(tab + (((line + CPS_TOP + offs) & 0x3ff) * 2));
         if (v) any = 1;
-        write_name(VDP2_VRAM + ROWTAB + line * 4, (u32)v << 16);
+        write_name(VDP2_VRAM + ROWTAB + line * 4, (u32)v << 16, &sh_row[line]);
     }
     return any;
 }
@@ -518,6 +541,14 @@ static void note_slots(void)
     if (s3_cache.used > t->layer_slots_peak[2]) t->layer_slots_peak[2] = s3_cache.used;
 }
 
+#ifdef SAT_GFX_HOST
+#define STAGE(i)
+#else
+/* Timer at each stage, for the frame profile. The kernel owns and restarts the timer. */
+unsigned long sat_gfx_stage[6];
+#define STAGE(i) (sat_gfx_stage[i] = ((u32)*(volatile u8 *)0xfffffe12UL << 8) | *(volatile u8 *)0xfffffe13UL)
+#endif
+
 void sat_gfx_frame(void)
 {
     u16 layers = RAM16(SH_LAYERS);
@@ -533,14 +564,18 @@ void sat_gfx_frame(void)
     sat_gfx_stats.layer_writes = 0;
     sat_gfx_stats.top_bank = 0;
 
+    STAGE(0);
     update_palette();
     update_priority(layers, RAM16(SH_PRIORITY));
+    STAGE(1);
     if (video & 1) row_active = update_rowscroll(RAM16(SH_ROWSCROLL_BASE), RAM16(SH_ROWOFFS));
     VDP2R(0x9a) = (u16)(row_active ? 0x0002 : 0);
 
+    STAGE(2);
     if (layers & 4) { bgon |= 1; draw_scroll2(RAM16(SH_SCROLL2_BASE), s2x, s2y, row_active); }
     if (layers & 8) { bgon |= 2; draw_scroll3(RAM16(SH_SCROLL3_BASE), s3x, s3y); }
     if (layers & 2) { bgon |= 4; draw_scroll1(RAM16(SH_SCROLL1_BASE), s1x, s1y); }
+    STAGE(3);
     #ifdef SAT_GFX_BGMASK
     bgon &= SAT_GFX_BGMASK;
 #endif
@@ -552,8 +587,10 @@ void sat_gfx_frame(void)
     VDP2R(0x90) = (u16)((s1x + CPS_LEFT + SAT_GFX_CROP_X) & 0x7ff);
     VDP2R(0x92) = (u16)((s1y + CPS_TOP) & 0x7ff);
 
+    STAGE(4);
     draw_sprites();
     note_slots();
+    STAGE(5);
 
     /* Plot into the back buffer now; the swap comes with the next vblank. */
     VDP1R(FBCR) = 3;
@@ -594,6 +631,9 @@ int sat_gfx_init(const void *pack)
     back_shadow = 0;
 
     for (n = 0; n < CELL_S1; n += 4) put32(VDP2_VRAM + n, CLEAR_NAME);
+    for (n = 0; n < 64 * 64; n++) { sh_s1[n] = CLEAR_NAME; sh_s2[n] = CLEAR_NAME; sh_s3[n] = NOKEY; }
+    for (n = 0; n < SAT_GFX_SCREEN_H; n++) sh_row[n] = 0;
+    for (n = 0; n < BLANK_WAYS; n++) blank_seen[n] = NOKEY;
     cache_setup(&spr_cache, VDP1_VRAM + TEX_BASE, 128, SAT_GFX_SPRITE_SLOTS, 0, SEC_SPRITE, spr_key, spr_stamp, spr_next, spr_head);
     cache_setup(&s1_cache, VDP2_VRAM + CELL_S1, 32, SAT_GFX_S1_SLOTS, 4, SEC_S1, s1_key, s1_stamp, s1_next, s1_head);
     cache_setup(&s2_cache, VDP2_VRAM + CELL_S2, 128, SAT_GFX_S2_SLOTS, 0, SEC_S2, s2_key, s2_stamp, s2_next, s2_head);

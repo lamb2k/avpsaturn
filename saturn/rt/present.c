@@ -1,3 +1,3 @@
-void __attribute__((weak)) sat_gfx_init(void) { }
-void __attribute__((weak)) sat_gfx_frame(void) { }
-void __attribute__((weak)) sat_present(void) { sat_gfx_frame(); }
+/* Weak stubs, replaced when the lane that owns these links in. */
+void __attribute__((weak)) sat_audio_init(void) { }
+void __attribute__((weak)) sat_audio_frame(void) { }

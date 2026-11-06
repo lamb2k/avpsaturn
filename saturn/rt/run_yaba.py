@@ -1,7 +1,7 @@
 #!/usr/bin/env python
 """Run the Saturn image under Yaba for a bounded time and read the runtime's debug block over MCP. Tier: EMULATOR.
 usage: run_yaba.py [WORK] [seconds] [dump.bin]"""
-import json, os, pathlib, re, socket, subprocess, sys, time
+import json, os, pathlib, re, socket, struct, subprocess, sys, time
 HERE = pathlib.Path(__file__).resolve().parent
 sys.path.insert(0, str(HERE.parents[1] / "tools"))
 from capture_frontend_cram import Mcp
@@ -12,7 +12,8 @@ JO = pathlib.Path("E:/AvP/worktrees/saturn-hw/.deps")
 EXE = JO / "emulators/yabasanshiro-1.20.37-2986eb-debug-rig-mcp-da2ffb34/yabasanshiro-1.20.37-2986eb-debug-rig-mcp-d7767591/yabasanshiro.exe"
 NM = JO / "joengine/Compiler/WINDOWS/sh-elf/bin/nm.exe"
 INI = pathlib.Path(os.environ["APPDATA"]) / "YabaSanshiro/yabause.ini"
-FIELDS = "magic stage vblanks ff8018 task_runs idle_calls task_stack_high fatal fatal_detail fatal_task a0 a1 a7 exc_pc exc_pr".split()
+STATS = ">I" + "H" * 14 + "I" * 6
+FIELDS = "magic stage vblanks ff8018 task_runs idle_calls task_stack_high fatal fatal_detail fatal_task a0 a1 a7 exc_pc exc_pr gfx_ticks irq_ticks game_ticks gfx_peak irq_peak game_peak overruns obj_flips".split()
 
 
 def port_busy():
@@ -36,6 +37,7 @@ def sym_of(a):
     i = bisect.bisect_right(_k, a) - 1
     return f"{_t[i][1]}+{a - _k[i]:#x}" if i >= 0 else hex(a)
 orig = INI.read_bytes()
+(WORK / "shots").mkdir(exist_ok=True)
 lines = orig.decode("latin-1").splitlines()
 set_ = {"Video\VideoCore": "1", "Sound\SoundCore": "0", "General\CdRomISO": str(WORK / "sat.cue").replace("\\", "/"), "autostart": "true", "Cartridge\Type": "7", "General\EnableEmulatedBios": "true"}
 out = [f"{l.split('=')[0]}={set_[l.split('=')[0]]}" if l.split("=")[0] in set_ else l for l in lines]
@@ -50,23 +52,36 @@ try:
         except Exception:
             if time.time() - t0 > 30: raise
             time.sleep(0.3)
-    prev = None
+    if os.environ.get("LIST_TOOLS"): print("tools", [x["name"] for x in m._post("tools/list", {})["result"]["tools"]], flush=True)
+    shots = sorted(int(x) for x in os.environ.get("SHOTS", "").split(",") if x)
+    stats_names = "frames objects commands commands_peak uploads uploads_peak slots slots_peak layer_uploads layer_writes s1_peak s2_peak s3_peak colours top_bank missing ref_cmd ref_spr ref_layer ref_bank nonmono".split()
+    last = 0
+    tick_us = 128 / 26.8741  # 352 mode clock 26.8741 MHz
     while time.time() - t0 < SECS:
-        time.sleep(4)
+        time.sleep(0.25)
         b = m.read(syms["sat_dbg"], 4 * len(FIELDS))
         d = {f: int.from_bytes(b[i * 4:i * 4 + 4], "big") for i, f in enumerate(FIELDS)}
-        diag = m.read(0x06013fe0, 20).hex()
-        print(round(time.time() - t0), json.dumps({k: hex(v) for k, v in d.items()}), "loader", diag, "ff8018", m.read(syms["RAMB"] + 0x8018, 4).hex(), flush=True)
+        while shots and d["vblanks"] >= shots[0]:
+            n = shots.pop(0)
+            m.call("framebuffer_screenshot", path=str(WORK / "shots" / f"y{n:05d}.png"))
+            print("shot", n, "at vblank", d["vblanks"], flush=True)
+        if time.time() - last > 4:
+            last = time.time()
+            raw = m.read(syms["sat_gfx_stats"], struct.calcsize(STATS))
+            print(round(time.time() - t0), {k: d[k] for k in ("stage", "vblanks", "task_runs", "idle_calls", "overruns", "obj_flips", "task_stack_high", "fatal", "fatal_detail", "fatal_task")},
+                  "ms(emulator-only)", {k: round(d[k] * tick_us / 1000, 2) for k in ("gfx_ticks", "irq_ticks", "game_ticks", "gfx_peak", "irq_peak", "game_peak")},
+                  "gfx", dict(zip(stats_names, struct.unpack(STATS, raw))), "ff8018", m.read(syms["RAMB"] + 0x8018, 2).hex(), "stages", [int.from_bytes(m.read(syms["sat_gfx_stage"] + i * 4, 4), "big") for i in range(6)], flush=True)
         if d["fatal"]:
-            print("fatal symbols", sym_of(d["exc_pc"]), sym_of(d["exc_pr"]))
-            s = m.read(syms["sat_boot_stack"] + 8192 - 1600, 1600) if d["fatal_task"] > 15 else m.read(syms["task_stacks"] + (d["fatal_task"] + 1) * 8192 - 1600, 1600)
+            print("fatal", hex(d["fatal"]), hex(d["fatal_detail"]), "symbols", sym_of(d["exc_pc"]), sym_of(d["exc_pr"]))
+            s = m.read(syms["sat_boot_stack"] + 8192 - 1600, 1600) if d["fatal_task"] > 15 else m.read(syms["task_stacks"] + (d["fatal_task"] + 1) * 4096 - 1600, 1600)
             words = [int.from_bytes(s[i:i + 4], "big") for i in range(0, 1600, 4)]
-            print("stack", [sym_of(w) for w in words if 0x06014000 <= w < 0x060fff00 or 0x00200000 <= w < 0x002f0000][:60])
-            if os.environ.get("REGS"): print("cpu", m.read(syms["sat_cpu"], 84).hex())
+            print("stack", [sym_of(w) for w in words if 0x06014000 <= w < 0x060fff00 or 0x00200000 <= w < 0x00300000 or 0x02400000 <= w < 0x02800000][:60])
+            print("cpu", m.read(syms["sat_cpu"], 84).hex())
             break
     import bisect, re
     table = sorted((v, k) for k, v in syms.items())
     keys = [x[0] for x in table]
+    print("pad raw", hex(int.from_bytes(m.read(syms["sat_pad_raw"], 4), "big")))
     print("status", m.call("debug_status")[:600])
     print("cpu", m.read(syms["sat_cpu"], 84).hex())
     m.call("pause")
@@ -80,7 +95,7 @@ try:
     if DUMP:
         m.call("pause")
         pathlib.Path(DUMP).write_bytes(m.read(syms["RAMB"], 0x10000))
-        pathlib.Path(DUMP + ".obj").write_bytes(m.read(syms["SAT_OBJ"] + 0x8000, 0x2000))
+        pathlib.Path(DUMP + ".obj").write_bytes(m.read(syms["SAT_OBJ"], 0x4000))
         print("dump at vblank", int.from_bytes(m.read(syms["sat_dbg"] + 8, 4), "big"))
         m.call("resume")
     try:
@@ -89,4 +104,8 @@ try:
         print("no shot", e)
 finally:
     proc.kill(); proc.wait(10)
-    INI.write_bytes(orig)
+    # Lanes share this file: the campaign's settings go back whatever this run found.
+    text = orig.decode("latin-1")
+    for key, value in ((r"Video\VideoCore", "4"), (r"Sound\SoundCore", "1")):
+        text = re.sub(rf"(?m)^{re.escape(key)}=.*$", (key + "=" + value).replace(chr(92), chr(92) * 2), text)
+    INI.write_bytes(text.encode("latin-1"))

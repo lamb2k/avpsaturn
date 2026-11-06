@@ -1,11 +1,13 @@
 #!/usr/bin/env python
 """Build the Saturn image of the lifted game. Everything ROM-derived stays in the work directory, never in git.
-usage: build.py [WORK]   default E:/AvP/learning/lane-satrt, which holds src/c*.c, dispatch.inc, rt.bin, op.bin.
-env: KERNEL_CFLAGS, LIFT_OPT (-Os; -O2 overflows work RAM), HW_FIRST (chunks placed in high work RAM first), JO (Jo Engine root)."""
+usage: build.py [WORK]   default E:/AvP/learning/lane-satrt, which holds src/c*.c, dispatch.inc, rt.bin, opx.bin, opx.json, heat.json (tools/satint_merge.py), pack.bin, pack_hole.bin (tools/satint_pack.py).
+env: KERNEL_CFLAGS, LIFT_OPT (-Os; -O2 overflows work RAM), JO (Jo Engine root)."""
 import concurrent.futures as cf
+import json
 import os
 import pathlib
 import re
+import shutil
 import subprocess
 import time
 import sys
@@ -26,10 +28,17 @@ GEN, OBJ, ISO = WORK / "gen", WORK / f"obj{OPT}", WORK / "disc"
 for d in (GEN, OBJ, ISO):
     d.mkdir(parents=True, exist_ok=True)
 HW_BASE, HW_LIMIT, LW_BASE, LW_LIMIT = 0x06014000, 0x06100000, 0x00200000, 0x00300000
-HW_RESERVED = 0x10000 + 16 * 8192 + 8192 + 16384 + 0x8000   # game RAM, stacks, kernel
-OPS_SIZE = 0x110000
+HW_RESERVED = 0x10000 + 16 * 4096 + 8192 + 16384 + 0x8000 + 0x8000   # game RAM, stacks, kernel, graphics tables and code
+LW_RESERVED = 0x20000 + 0x4000 + 0xe400   # graphics RAM, lifted bss, layer shadows, blank tags
 NATIVE = ("41ca", "42e4")   # EEPROM block read and write
-CART = dict(ROMB=0x02400000, OPS=0x02600000, SAT_SINK=0x02710000, SAT_OBJ=0x02730000, SAT_CART_FREE=0x02740000)
+CART = dict(ROMB=0x02400000, OPX=0x02600000, SAT_SINK=0x02638000, SAT_OBJ=0x02648000, SAT_PACK=0x0264c000)
+CART_END = 0x02800000
+OPX_MAX = 0x38000
+COLD2 = (0x0253f000, 116 * 1024)   # a ROM stretch the Round 1 route never read: lifted code of a cold chunk fits here
+HOLE_ROM = 0x198000  # pack_hole.bin
+
+
+OPMAP = json.loads((WORK / "opx.json").read_text())
 
 
 def sh(cmd):
@@ -45,12 +54,18 @@ def update(path, text):
     return path
 
 
+def opx_rewrite(m):
+    paren = "((" if m[0].count("(") == 2 else "("
+    return f"OP{m[1]}{paren}0x{OPMAP[hex(int(m[2], 16))]:x}u"
+
+
 def gen_sources():
     out = []
     for s in sorted((WORK / "src").glob("c*.c"), key=lambda p: int(p.stem[1:])):
         t = s.read_text()
         a, b = t.index("#else\nregister Cpu *R"), t.index("#define SHL8(")
         t = t[:a] + '#else\n#include "lift_target.h"\n#endif\n' + t[b:]
+        t = re.sub(r"\bOP(8|16|32)\(\(?0x([0-9a-f]+)u", opx_rewrite, t)
         for n in NATIVE:   # replaced natively in kernel.c; the lifted body stays linked as lifted_NNN
             t = t.replace(f"void f_{n}(void){{", f"void lifted_{n}(void){{")
         out.append(update(GEN / s.name, t))
@@ -75,8 +90,10 @@ def gen_sources():
 
 def cc(src, obj, extra=()):
     newest = max(src.stat().st_mtime, (HERE / "lift_target.h").stat().st_mtime)
-    if src.name == "kernel.c":
+    if src.name in ("kernel.c", "pad.c"):
         newest = max(newest, (HERE / "sat_rt.h").stat().st_mtime, time.time() if os.environ.get("KERNEL_CFLAGS") else 0)
+    if src.name == "sat_gfx.c":
+        newest = max(newest, (src.parent / "sat_gfx.h").stat().st_mtime)
     if not obj.exists() or obj.stat().st_mtime < newest:
         sh([GCC, *CF, *extra, "-c", src, "-o", obj])
     return obj
@@ -92,25 +109,36 @@ def main():
     with cf.ThreadPoolExecutor(max_workers=3) as ex:
         objs = list(ex.map(lambda s: cc(s, OBJ / (s.stem + ".o"), [OPT]), gen))
     gfx_dir = REPO / "saturn/gfx"
-    gfx = sorted(gfx_dir.glob("*.c")) if gfx_dir.exists() else []
-    own = [cc(HERE / "ctx.s", OBJ / "ctx.o"), cc(HERE / "kernel.c", OBJ / "kernel.o", ["-O2", "-I", GEN] + os.environ.get("KERNEL_CFLAGS", "").split()), cc(HERE / "present.c", OBJ / "present.o", ["-O2"])]
+    gfx = [gfx_dir / "sat_gfx.c"]
+    own = [cc(HERE / "ctx.s", OBJ / "ctx.o"), cc(HERE / "kernel.c", OBJ / "kernel.o", ["-O2", "-I", GEN] + os.environ.get("KERNEL_CFLAGS", "").split()), cc(HERE / "present.c", OBJ / "present.o", ["-O2"]), cc(HERE / "pad.c", OBJ / "pad.o", ["-O2"] + os.environ.get("KERNEL_CFLAGS", "").split())]
     own += [cc(s, OBJ / f"gfx_{s.stem}.o", ["-O2", "-I", gfx_dir]) for s in gfx]
     sizes = {o: code_size(o) for o in objs}
-    first = [x for x in os.environ.get("HW_FIRST", "").split(",") if x]
-    objs_o = sorted(objs, key=lambda o: first.index(o.stem) if o.stem in first else 999)
-    room, used, hw, lw = HW_LIMIT - HW_BASE - HW_RESERVED, 0, [], []
+    # Hottest chunks in high work RAM, then low work RAM; the coldest run from the cart. Heat comes from the MAME route.
+    heat = json.loads((WORK / "heat.json").read_text())
+    objs_o = sorted(objs, key=lambda o: -heat.get(o.stem, 1 << 40))
+    room_hw = HW_LIMIT - HW_BASE - HW_RESERVED
+    room_lw = LW_LIMIT - LW_BASE - LW_RESERVED
+    hw, lw, cold = [], [], []
+    used = usedl = 0
     for o in objs_o:
-        if used + sizes[o] <= room:
-            hw.append(o)
-            used += sizes[o]
+        if used + sizes[o] <= room_hw:
+            hw.append(o); used += sizes[o]
+        elif usedl + sizes[o] <= room_lw:
+            lw.append(o); usedl += sizes[o]
         else:
-            lw.append(o)
+            cold.append(o)
+    pack_size = (WORK / "pack.bin").stat().st_size
+    cold1_at = (CART["SAT_PACK"] + pack_size + 3) & ~3
+    cold2 = sorted((o for o in cold if sizes[o] <= COLD2[1]), key=lambda o: -sizes[o])[:1]
+    cold1 = [o for o in cold if o not in cold2]
+    print("placement", {"hw": len(hw), "lw": [o.stem for o in lw], "cold1": [(o.stem, sizes[o], heat.get(o.stem)) for o in cold1], "cold2": [(o.stem, sizes[o], heat.get(o.stem)) for o in cold2]})
     inp = lambda l, s: "\n".join(f'    "{o.as_posix()}"({s})' for o in l)
+    tx = ".text .text.* .rodata .rodata.* .data .data.*"
     ld = f"""ENTRY(_sat_start)
 SECTIONS {{
   .hw {HW_BASE:#x} : {{
 {inp(own, '.text .text.*')}
-{inp(hw, '.text .text.* .rodata .rodata.* .data .data.*')}
+{inp(hw, tx)}
 {inp(own, '.rodata .rodata.* .data .data.*')}
     . = ALIGN(4);
   }}
@@ -121,11 +149,21 @@ SECTIONS {{
     . = ALIGN(4);
     _sat_bss_end = .;
   }}
+  .cold1 {cold1_at:#x} : {{
+{inp(cold1, tx)}
+    . = ALIGN(4);
+    _sat_cold1_end = .;
+  }}
+  .cold2 {COLD2[0]:#x} : {{
+{inp(cold2, tx)}
+    . = ALIGN(4);
+    _sat_cold2_end = .;
+  }}
   .lw {LW_BASE:#x} : {{
     *(.text .text.* .rodata .rodata.* .data .data.*)
     . = ALIGN(4);
   }}
-  .lwbss (NOLOAD) : {{ _sat_lw_bss_start = .; *(.bss COMMON) . = ALIGN(4); _sat_lw_bss_end = .; }}
+  .lwbss (NOLOAD) : {{ _sat_lw_bss_start = .; *(.lwgfx) *(.bss COMMON) . = ALIGN(4); _sat_lw_bss_end = .; }}
   /DISCARD/ : {{ *(.comment) *(.eh_frame*) }}
 }}
 """ + "".join(f"_{k} = {v:#x};\n" for k, v in CART.items())
@@ -135,17 +173,29 @@ SECTIONS {{
     sh([OBJCOPY, "-O", "binary", "-j", ".hw", elf, ISO / "HW.BIN"])
     sh([OBJCOPY, "-O", "binary", "-j", ".lw", elf, ISO / "LW.BIN"])
     syms = {p[2]: int(p[0], 16) for p in (l.split() for l in sh([NM, elf]).splitlines()) if len(p) == 3}
+    shutil.copy(WORK / "pack.bin", ISO / "PACK.BIN")
+    shutil.copy(WORK / "opx.bin", ISO / "OPX.BIN")
+    if (WORK / "opx.bin").stat().st_size > OPX_MAX:
+        raise SystemExit("NO-GO: store past its room")
+    sh([OBJCOPY, "-O", "binary", "-j", ".cold1", elf, ISO / "COLD1.BIN"])
+    sh([OBJCOPY, "-O", "binary", "-j", ".cold2", elf, WORK / "cold2.bin"])
     hw_end, lw_end = syms["_sat_bss_end"], syms["_sat_lw_bss_end"]
     print({"hw_image": (ISO / "HW.BIN").stat().st_size, "hw_end": hex(hw_end), "hw_free": HW_LIMIT - hw_end,
            "lw_image": (ISO / "LW.BIN").stat().st_size, "lw_end": hex(lw_end), "lw_free": LW_LIMIT - lw_end,
            "lifted_code_total": sum(sizes.values()), "lifted_in_hw": used, "chunks_lw": [o.stem for o in lw],
-           "cart_free": 0x02800000 - CART["SAT_CART_FREE"]})
+           "pack": pack_size, "cart_free": CART_END - syms["_sat_cold1_end"], "cold2_free": COLD2[0] + COLD2[1] - syms["_sat_cold2_end"]})
+    if syms["_sat_cold1_end"] > CART_END or syms["_sat_cold2_end"] > COLD2[0] + COLD2[1]:
+        raise SystemExit("NO-GO: past the cart")
     if hw_end > HW_LIMIT or lw_end > LW_LIMIT:
         raise SystemExit("NO-GO on this layout: segment past its RAM")
-    (ISO / "ROM.BIN").write_bytes((WORK / "rt.bin").read_bytes())
-    (ISO / "OP.BIN").write_bytes((WORK / "op.bin").read_bytes()[:OPS_SIZE])
+    rom = bytearray((WORK / "rt.bin").read_bytes())
+    for at, name in ((HOLE_ROM, "pack_hole.bin"), (COLD2[0] - CART["ROMB"], "cold2.bin")):
+        d = (WORK / name).read_bytes()
+        rom[at:at + len(d)] = d
+    (ISO / "ROM.BIN").write_bytes(rom)
+    (WORK / "rom_final.bin").write_bytes(rom)
     b = OBJ / "boot.o"
-    sh([GCC, "-m2", "-mb", "-O2", "-w", "-fno-builtin", "-I", SGL / "INC", "-c", HERE / "boot.c", "-o", b])
+    sh([GCC, "-m2", "-mb", "-O2", "-w", "-fno-builtin", "-I", SGL / "INC", f"-DCOLD1_ADDR={cold1_at:#x}u", "-c", HERE / "boot.c", "-o", b])
     lib = SGL / "LIB_ELF"
     sh([GCC, "-m2", "-mb", "-nostartfiles", "-T", HERE / "boot.ld", b, "-Wl,--start-group", lib / "SEGA_SYS.A", lib / "LIBCD.A", lib / "LIBSGL.A", "-lgcc", "-lc", "-Wl,--end-group",
         "-o", WORK / "boot.elf", f"-Wl,-Map={WORK / 'boot.map'},-e,_main"])
