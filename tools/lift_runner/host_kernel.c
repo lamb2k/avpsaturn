@@ -102,13 +102,13 @@ static void run_irq(void){ Cpu save=cpu; int sc=cur; u32 sr=r32(G_CUR); cur=-1; 
 u32 irq_pc=0xffffffffu; static u32 ipr[15]; static long nmatch, nkern, nmiss; static long nregmiss; static int in_irq;
 static int peek_ip(void){ long pos=ftell(gold); u8 h[72]; int ok=fread(h,1,72,gold)==72; fseek(gold,pos,SEEK_SET); if(!ok) return 0; irq_pc=be(h+8); for(int i=0;i<15;i++) ipr[i]=be(h+12+i*4); return 1; }
 static void finish(const char*why){ printf("%s vblank %ld: clean %ld diff %ld first divergence %ld | irq at instruction %ld, in kernel %ld, missed %ld\n",why,curv,nclean,ndiv,firstdiv,nmatch,nkern,nmiss); fflush(stdout); exit(0); }
-static void take_irq(void){ u32 t=irq_pc; irq_pc=0xffffffffu; in_irq=1; if(curv>=maxv) finish("end"); if(!golden_next()) finish("golden end"); curv++; iop=vstart[curv<vn?curv:vn-1]; compare(); run_irq(); in_irq=0; (void)t; if(!peek_ip()) finish("golden end"); }
+static void take_irq(void){ u32 t=irq_pc; { char*e=getenv("IRQLOG"); if(e&&curv>=atol(e)&&curv<atol(e)+12) fprintf(stdout,"irq %ld at %x cur %d d0 %x%c",curv,t,cur,cpu.d[0],10); } irq_pc=0xffffffffu; in_irq=1; if(curv>=maxv) finish("end"); if(!golden_next()) finish("golden end"); curv++; iop=vstart[curv<vn?curv:vn-1]; compare(); run_irq(); in_irq=0; (void)t; if(!peek_ip()) finish("golden end"); }
 /* Whole walks with only the idle task running and an empty command ring look the same; an IRQ there lands once work has drained. */
 static int quiet; static int ring_empty(void){ int i; for(i=0;i<TASKS;i++) if(i!=6&&r8(REC(i))>=4&&i!=cur) return 0; return r16(0xff801a)==r16(0xff801c)||r16(G_FREEN)==0; }
 void irq_check(u32 a){ int i; if(in_irq) return; if(cur==6&&!(quiet&&ring_empty())) return; if(a>=0x11ec&&a<0x1214&&cur<0){ if(quiet&&ring_empty()){ nkern++; take_irq(); } return; } /* the idle call: dispatcher leftovers in its registers aren't modelled */ { int bad=0; for(i=0;i<8;i++) if(cpu.d[i]!=ipr[i]) bad++; for(i=0;i<7;i++) if(cpu.a[i]!=ipr[8+i]) bad++; if(bad>2){ static long lastp=-1; if(curv!=lastp&&getenv("REGDBG")){ lastp=curv; printf("nearmiss v%ld pc %x bad %d:",curv,a,bad); for(i=0;i<8;i++) if(cpu.d[i]!=ipr[i]) printf(" d%d %x/%x",i,cpu.d[i],ipr[i]); for(i=0;i<7;i++) if(cpu.a[i]!=ipr[8+i]) printf(" a%d %x/%x",i,cpu.a[i],ipr[8+i]); puts(""); } return; } if(bad) nregmiss++; } nmatch++; take_irq(); }
 /* At the dispatcher: the IRQ was in the dispatcher or a trap body (native here), or its point was missed. */
 static int kern_pc(u32 p){ return (p>=0xd86&&p<0xdb8)||(p>=0xf00&&p<0x1188); }
-static void start_irq(void){ if(irq_pc>=0xdb8&&irq_pc<0xe0e&&ipr[8]==(u32)REC(cur)){ nkern++; take_irq(); } } /* between marking the task running and its rte */
+static void start_irq(void){ if(irq_pc>=0xdb8&&irq_pc<0xe0e&&!(irq_pc>=0xddc&&irq_pc<0xde6)&&ipr[8]==(u32)REC(cur)&&(cur!=6||ring_empty())){ nkern++; take_irq(); } } /* between marking the task running and its rte */
 static void disp_irq(void){ if(irq_pc==0xffffffffu) return; if(kern_pc(irq_pc)){ nkern++; take_irq(); return; } }
 static void idle_irq(void){ if(irq_pc==0xffffffffu) return; if(kern_pc(irq_pc)) nkern++; else { nmiss++; if(nmiss<20){ printf("missed irq at %x vblank %ld\n",irq_pc,curv); fflush(stdout);} } take_irq(); }
 
@@ -121,7 +121,7 @@ extern void f_11ec(void);
 void f_d86(void){ getcontext(&sched); peek_ip();
   for(;;){ int i, ran=0; w8(G_VFLAG,0);
     for(i=0;i<TASKS;i++){ if(r8(G_VFLAG)) break;
-        u32 st=r8(REC(i)); cpu.a[0]=REC(i); cpu.d[0]=(cpu.d[0]&0xffff0000u)|(15-i); cpu.d[1]=(cpu.d[1]&0xffffff00u)|st; if(st>=4){ run_task(i); if(i!=6) ran=1; cpu.a[0]=REC(i); cpu.d[0]=(cpu.d[0]&0xffff0000u)|(15-i); } cur=-1;
+        u32 st=r8(REC(i)); cpu.a[0]=REC(i); cpu.d[0]=(cpu.d[0]&0xffff0000u)|(15-i); cpu.d[1]=(cpu.d[1]&0xffffff00u)|st; if(st>=4){ run_task(i); if(i!=6) ran=1; if(irq_pc>=0xddc&&irq_pc<0xde6&&ipr[8]==(u32)REC(i)&&(i!=6||ring_empty())){ nkern++; take_irq(); } cpu.a[0]=REC(i); cpu.d[0]=(cpu.d[0]&0xffff0000u)|(15-i); } cur=-1;
         
         if(quiet&&ring_empty()&&(kern_pc(irq_pc)||(irq_pc>=0xdb8&&irq_pc<0xe0e))){ nkern++; take_irq(); } }
     quiet=(i==TASKS&&!ran); if(i==TASKS){ cpu.a[0]=REC(15)+0x20; cpu.d[0]|=0xffff; f_11ec(); }

@@ -290,7 +290,7 @@ def lift(entry, ccret, mode):
                 if s in live:
                     out |= live[s]
                 else:
-                    out |= set("zncvx") if s in ccret else set()
+                    out |= set("zncvx")     # a tail call or a split function may read them
             if m == "rts" and entry in ccret:
                 out |= {"z", "n", "c", "v"}
             new = u | (out - d)
@@ -307,7 +307,7 @@ def lift(entry, ccret, mode):
         sz = {"b": 1, "w": 2, "l": 4}.get(m0.split(".")[1] if "." in m0 else "", None)
         out = set()
         for s in succ[a]:
-            out |= live.get(s, set())
+            out |= live.get(s, set("zncvx"))
         if m == "rts" and entry in ccret:
             out |= {"z", "n", "c", "v"}
         lab = f"L{a:x}:;" if a in labels or (a == entry and order[0] != entry) else ""
@@ -321,7 +321,7 @@ def lift(entry, ccret, mode):
         code.append(f"{lab}P(0x{a:x}u);{{{st}}}")
         nxt = a + i.size
         if nxt not in body and succ[a] and nxt in succ[a]:
-            code.append(f"{{f_{nxt:x}();return;}}")
+            code.append(f"{{CCOUT();f_{nxt:x}();return;}}")
     if order and order[0] != entry:
         code.insert(0, f"goto L{entry:x};")
     if live.get(entry):
@@ -345,15 +345,15 @@ def emit(fn, a, i, m, sz, live, ccret, entry):
         return ""
     if m == "bra":
         t = cfg.hexval(ops[0])
-        return f"goto L{t:x};" if t in fn_body_targets(entry) else f"f_{t:x}();return;"
+        return f"goto L{t:x};" if t in fn_body_targets(entry) else f"CCOUT();f_{t:x}();return;"
     if m[0] == "b" and m[1:] in FLAGS_OF:
         t = cfg.hexval(ops[0])
-        go = f"goto L{t:x};" if t in fn_body_targets(entry) else f"{{f_{t:x}();return;}}"
+        go = f"goto L{t:x};" if t in fn_body_targets(entry) else f"{{CCOUT();f_{t:x}();return;}}"
         return f"if({COND[m[1:]]}){go}"
     if m.startswith("db"):
         t = cfg.hexval(ops[1])
         r = fn.reg(ops[0])
-        go = f"goto L{t:x};" if t in fn_body_targets(entry) else f"{{f_{t:x}();return;}}"
+        go = f"goto L{t:x};" if t in fn_body_targets(entry) else f"{{CCOUT();f_{t:x}();return;}}"
         c = COND[m[2:]]
         return f"if(!{c}){{{r}=({r}&0xffff0000u)|(u16)({r}-1);if((u16){r}!=0xffff){go}}}"
     if m in ("jsr", "bsr", "jmp"):
@@ -377,15 +377,16 @@ def emit(fn, a, i, m, sz, live, ccret, entry):
                     continue
                 seen_off.add(off)
                 if tail:
-                    go = f"goto L{t:x};" if t in fn_body_targets(entry) else f"f_{t:x}();return;"
+                    go = f"goto L{t:x};" if t in fn_body_targets(entry) else f"CCOUT();f_{t:x}();return;"
                 else:
                     go = f"f_{t:x}();break;"
                 cases.append(f"case {off}:{go}")
             return f"switch((s16){ix}){{{''.join(cases)}default:BADJUMP(0x{a:x});}}" + ("" if tail else CCIN(live))
         t = cfg.hexval(ops[0]) if re.fullmatch(r"\$[0-9a-f]+(\.[lw]|\(pc\))?", ops[0]) else None
         if t is not None:
-            s = call(fn, t) + CCIN(live)
-            return s + ("return;" if tail else "")
+            if tail:
+                return "CCOUT();" + call(fn, t) + "return;"
+            return call(fn, t) + CCIN(live)
         stats["indirect_calls"] += 1
         o = Operand(fn, ops[0].replace("(a", "(a"), 4) if False else None
         rr = re.fullmatch(r"\(a([0-7])\)", ops[0])
