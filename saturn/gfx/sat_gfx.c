@@ -129,6 +129,26 @@ typedef struct
 #define NOSLOT 0xffffU
 #define NOKEY 0xffffffffUL
 
+#ifdef SAT_PROF
+/* Test flag: the tile funnel of the frame with the most VDP1 commands, live banks, the keys the pack lacks. */
+typedef struct
+{
+    u32 tiles, offscreen, empty, commands, runs, banks, banks_peak, peak_frame, missing_n, missing_key[32];
+} SatGfxCensus;
+SatGfxCensus sat_gfx_census;
+static u32 c_tiles, c_off, c_empty, c_runs, c_bankmask[4];
+#define CENSUS(x) x
+static void census_bank(u32 b) { c_bankmask[b >> 5] |= 1UL << (b & 31); }
+static u32 census_count(void)
+{
+    u32 n = 0, i, m;
+    for (i = 0; i < 4; i++) for (m = c_bankmask[i]; m; m &= m - 1) n++;
+    return n;
+}
+#else
+#define CENSUS(x)
+#endif
+
 static Section sections[4];
 static u16 stamp;
 
@@ -287,7 +307,12 @@ static u16 cache_find(Cache *c, u32 key, unsigned long *refused)
         u32 tag = (key << 2) | (u32)c->section, way = (tag ^ (tag >> 11)) & (BLANK_WAYS - 1);
         if (blank_seen[way] == tag) return NOSLOT;
         idx = pack_find(&sections[c->section], key);
-        if (idx < 0) { sat_gfx_stats.missing++; blank_seen[way] = tag; return NOSLOT; }
+        if (idx < 0)
+        {
+            sat_gfx_stats.missing++; blank_seen[way] = tag;
+            CENSUS(if (sat_gfx_census.missing_n < 32) sat_gfx_census.missing_key[sat_gfx_census.missing_n++] = key | ((u32)c->section << 28);)
+            return NOSLOT;
+        }
         if ((u32)idx == BLANK_INDEX) { blank_seen[way] = tag; return NOSLOT; }
     }
     for (scan = c->first; scan < c->capacity; scan++)
@@ -593,27 +618,45 @@ static void draw_sprites(void)
         x += CPS_LEFT - OBJ_XOFFS;
         y += CPS_TOP - OBJ_YOFFS;
         for (ty = ny - 1; ty >= 0; ty--)
+        {
+            CENSUS(int prev = -2;)
             for (tx = nx - 1; tx >= 0; tx--)
             {
                 int sx = ((x + tx * 16) & 0x3ff) - CPS_LEFT - SAT_GFX_CROP_X;
                 int sy = ((y + ty * 16) & 0x3ff) - CPS_TOP;
                 u32 tile;
                 u16 slot;
-                if (sx <= -16 || sx >= SAT_GFX_SCREEN_W || sy <= -16 || sy >= SAT_GFX_SCREEN_H) continue;
+                CENSUS(c_tiles++;)
+                if (sx <= -16 || sx >= SAT_GFX_SCREEN_W || sy <= -16 || sy >= SAT_GFX_SCREEN_H) { CENSUS(c_off++;) continue; }
                 if (fx || fy)
                     tile = code + (u32)(fx ? nx - 1 - tx : tx) + 0x10UL * (u32)(fy ? ny - 1 - ty : ty);
                 else
                     tile = (code & ~0xfUL) + ((code + (u32)tx) & 0xfUL) + 0x10UL * (u32)ty;
                 slot = cache_get(&spr_cache, tile, &sat_gfx_stats.refused_sprite);
-                if (slot == NOSLOT) continue;
+                if (slot == NOSLOT) { CENSUS(c_empty++;) continue; }
+                CENSUS(if (prev != tx + 1) c_runs++; prev = tx; census_bank((u32)bank);)
                 if (commands >= SAT_GFX_MAX_COMMANDS) { sat_gfx_stats.refused_commands++; continue; }
                 put_sprite(cmd, flip, colr, TEX_BASE + (u32)slot * 128, sx, sy);
                 cmd += 32;
                 commands++;
             }
+        }
     }
     put16(cmd, 0x8000); /* end */
     sat_gfx_stats.commands = commands;
+#ifdef SAT_PROF
+    {
+        u32 live = census_count();
+        if (live > sat_gfx_census.banks_peak) sat_gfx_census.banks_peak = live;
+        if (commands > sat_gfx_census.commands)
+        {
+            sat_gfx_census.commands = commands; sat_gfx_census.tiles = c_tiles; sat_gfx_census.offscreen = c_off; sat_gfx_census.empty = c_empty;
+            sat_gfx_census.runs = c_runs; sat_gfx_census.banks = live; sat_gfx_census.peak_frame = sat_gfx_stats.frames;
+        }
+        c_tiles = c_off = c_empty = c_runs = 0;
+        c_bankmask[0] = c_bankmask[1] = c_bankmask[2] = c_bankmask[3] = 0;
+    }
+#endif
     if (commands > sat_gfx_stats.commands_peak) sat_gfx_stats.commands_peak = commands;
 }
 

@@ -94,6 +94,9 @@ try:
         for name, size in (("sat_irq_stack", 8192), ("sat_slave_stack", 1024)):
             s = m.read(syms[name], size)
             print(name, "used", size - (len(s) - len(s.lstrip(b"\0"))), "of", size)
+        if "sat_gfx_census" in syms:
+            cw = struct.unpack(">41I", m.read(syms["sat_gfx_census"], 41 * 4))
+            print("CENSUS", dict(zip("tiles offscreen empty commands runs banks banks_peak peak_frame missing_n".split(), cw)), "missing(section<<28|key)", [hex(x) for x in cw[9:9 + min(cw[8], 32)]], flush=True)
         print("PROF(MODELLED, Yaba FRT)", dict(zip("from to ticks done over skipped".split(), hd)), {k: row(i) for i, k in enumerate(("frame", "gfx", "snap"))}, flush=True)
     import bisect, re
     table = sorted((v, k) for k, v in syms.items())
