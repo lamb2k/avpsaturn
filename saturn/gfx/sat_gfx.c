@@ -251,7 +251,8 @@ typedef struct
     u32 pal_sum[SAT_GFX_PAGES], s1_sum, s2_sum, s3_sum; /* change detection: position and every visible word */
 } Snapshot;
 
-#define MIX(sum, w) ((((sum) << 1) | ((sum) >> 31)) ^ (w))
+/* Polynomial, not rotate and xor: a palette fade changes every long by one mask, and with 256 longs a rotate cancels it out. */
+#define MIX(sum, w) ((((sum) << 5) + (sum)) + (w))
 
 #ifdef SAT_GFX_HOST
 static Snapshot snap;
@@ -600,6 +601,15 @@ static void draw_sprites(void)
     u8 *cmd = VDP1_VRAM + 0x40; /* after clip and local */
     int count = snap.objects, i;
     u16 commands = 0;
+    /* Clear the buffer: plotting by hand gives no automatic erase, and old sprites otherwise pile up as trails. A polygon in colour 0 reads as clear. */
+    put16(cmd + 0, 0x0004);
+    put16(cmd + 4, 0x00c0);
+    put16(cmd + 6, 0);
+    put16(cmd + 12, 0); put16(cmd + 14, 0);
+    put16(cmd + 16, SAT_GFX_SCREEN_W - 1); put16(cmd + 18, 0);
+    put16(cmd + 20, SAT_GFX_SCREEN_W - 1); put16(cmd + 22, SAT_GFX_SCREEN_H - 1);
+    put16(cmd + 24, 0); put16(cmd + 26, SAT_GFX_SCREEN_H - 1);
+    cmd += 32;
     sat_gfx_stats.objects = (u16)count;
     for (i = 0; i < count; i++)
     {

@@ -85,7 +85,7 @@ int main(void)
     sat_gfx_frame();
     CHECK(sat_gfx_stats.commands == 1);
     CHECK(sat_gfx_stats.top_bank == 23);
-    CHECK(r16(V1 + 0x40 + 6) == ((4U << 13) | (23U << 4)));
+    CHECK(r16(V1 + 0x60 + 6) == ((4U << 13) | (23U << 4)));
     CHECK(r16(CR + (23 * 16 + 3 + 1) * 2) == sat_gfx_colour(0xf123));
 
     /* Texture refusal: 15 x 15 blocks, 14 rows on screen, all different: 4200 tiles against 3584 slots. */
@@ -106,7 +106,7 @@ int main(void)
     printf("command case: commands %u refused %lu uploads %u\n", sat_gfx_stats.commands, sat_gfx_stats.refused_commands, sat_gfx_stats.uploads);
     CHECK(sat_gfx_stats.commands == SAT_GFX_MAX_COMMANDS);
     CHECK(sat_gfx_stats.refused_commands == 1024UL * 9 - SAT_GFX_MAX_COMMANDS);
-    CHECK(r16(V1 + 0x40 + 32 * SAT_GFX_MAX_COMMANDS) == 0x8000);
+    CHECK(r16(V1 + 0x60 + 32 * SAT_GFX_MAX_COMMANDS) == 0x8000);
 
     /* Reuse: a second frame on the same list copies nothing; a new list takes slots no longer drawn. */
     sat_gfx_frame();

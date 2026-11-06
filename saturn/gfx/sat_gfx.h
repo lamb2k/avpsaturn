@@ -19,7 +19,7 @@
 #define SAT_GFX_CROP_X 16 /* 1:1 centre crop of the 384 wide picture */
 #define SAT_GFX_PAGES 4
 #define SAT_GFX_BANKS_PER_PAGE 32
-#define SAT_GFX_MAX_COMMANDS 2045 /* 64 KB table less clip, local and end */
+#define SAT_GFX_MAX_COMMANDS 2044 /* 64 KB table less clip, local, clear and end */
 #define SAT_GFX_SPRITE_SLOTS 3584 /* 448 KB of 128 byte textures */
 #define SAT_GFX_S1_SLOTS 992 /* 4 stay clear */
 #define SAT_GFX_S2_SLOTS 1024
