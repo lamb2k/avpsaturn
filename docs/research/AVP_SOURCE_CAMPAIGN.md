@@ -72,6 +72,10 @@ and globals are stated; and it passes the reader test (below). It counts as gate
 | Hidden input | differs only with unseeded state | a global or register input is missing from the generator: widen seeds |
 | Kernel | routine sleeps or yields | stub 0x1060/0x1092 as calls, then write a frame-stepped continuation; MAME tier for timing |
 
+## Coverage denominator
+
+Coffee Shop route to frame 5400 executes 62,042 bytes, 15.24% of reachable code (`cover_a`, fetch tap, prefetch overcounts slightly). Round-1-wide cover is the next denominator.
+
 ## Lanes
 
 | Lane | Module | Owns |

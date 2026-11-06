@@ -207,15 +207,16 @@ Method, gate and lanes are in AVP_SOURCE_CAMPAIGN.md. Reconstruction lives in `s
 
 ### Command/result continuation at 0x1614a / ff837b (source + MAME)
 
-- Waiter: gameplay task sets ff837b, pushes command 0x0800 (fade out) or 0x0804 (fade in) with param 1 on ring ff8086, then sleeps one
-  frame at a time until ff837b clears. About 25 sites plus 45 direct users of the flag, all shaped the same.
+- Blocking form, 38 call sites (0x1614a 25, 0x161bc 9, 0x161de 3, 0x161f4 1): task sets ff837b, pushes command 0x0800 (fade out) or 0x0804 (fade in)
+  with param on ring ff8086, then sleeps one frame at a time until ff837b clears.
+- Non-blocking form, 64 reachable uses of 0x14bb2 (lead: many pair with a later `tst ff837b` in a route state): starts the helper directly, returns at once, and a later route state polls the flag. E.g. 0xc054 starts, 0xc06c polls. A native port needs both forms.
 - Ring: head ff801a, tail ff801c, 64 pairs, full ring drops the command. Idle task (0x14b1c) pops one per pass, only with a free pool task.
   Command high byte selects a task entry at 0x14b92 (8 entries); low byte is the helper's state; param is +0x12/+0x13 (repeat, sleep).
 - Helper 0xab4c0 starts child palette task (command 0x0000 or 0x0002), polls ff8378, on fade-out clears palette and object state via 0xac15e, sleeps 4+param, clears ff837b.
 - Writers of ff837b: 70 reachable uses; only 6 clears, all in these helpers. Result of the "command" is just that flag and ff8378.
 - Fade rule: per frame, each palette's first colour decides. Top nibble 0 means done, else add -0x1000 to all 16 colours. The sum of the four masks reaches -4 when black.
 
-Durations, MAME probe hold_b, Coffee Shop route, 16 fades:
+Durations, MAME probe hold_b, Coffee Shop route:
 
 | Wait | Measured frames | C model |
 | --- | --- | --- |
@@ -231,8 +232,7 @@ Native contract: `route_wait_begin/route_wait_frame` in `source_recon/avsrc_fade
 
 All 39 are explained (MAME, hold_a, frames 1972..5566):
 - 5524..5549 and 5551..5559: the gameplay task in 0x1614a, from the ff837b set/clear pairs at 5523/5548 and 5550/5557.
-- 5562, 5564: the same flag set from 0xc05a at frame 5563. Its clear is outside the window.
-- 2260, 2265: no sleep and no tick from task ff00d8 in the frame: the tick begun earlier ran through the whole frame. CPU overrun, MAME timing only. A port should not reproduce it.
+- 2260, 2265, 5562, 5564: no new tick began in the frame, because the tick begun in the frame before ran across the vblank (5562 shows its sleep arriving late). CPU overrun, MAME timing only. A port should not reproduce it. 5563 is a route step that starts a fade-in without waiting (next section); that is not a hold.
 - The stack read at 0x1060 was not needed and is unreliable: at the fetch tap SP gives junk chains. Set/clear pairs and task id settle it.
 
 ### Object flips under fast-forward (MAME)
@@ -242,4 +242,12 @@ For a port: render one tick per video frame, and in fast-forward skip rendering 
 
 ### Second fast-forward path
 
-0x158e0 was never fetched in the route (0 hits to 5566). Still unwitnessed. It stays source-only, no native need yet.
+0x158e0 was never fetched in the route (0 hits to 5566). Source: routine 0x158c8, reached by 9 `bra.w` sites in 0x15020..0x15722. Button (mask 0x70) on a participant sets ff81b9 and counts ff8016; at 600 counts it sets route fields 8, c, 6: holding a button long enough skips the segment. Attract or ending segment by its callers; not read further, outside R7C.
+
+### Kernel units
+
+`tick_should_sleep`, `idle_fast_forward`, `hold_button_fast_forward`: unit gate PASS, 500 cases each. Together with the notes' tick rule this is the native tick contract in C.
+
+### Task 3
+
+Pass over the three player blocks, skipped if +0xd0 set, dispatched on +0xd4; sleeps at 0x1613c. Credit and join by its reads, with R7C direct entry in one player. Not read further: nothing native needs it now beyond continuing at video rate.
