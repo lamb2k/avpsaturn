@@ -21,10 +21,10 @@ shutil.copytree(REPO / ".deps/mame/full_route_nvram_baseline", out / "nvram/avsp
 (out / "cfg").mkdir()
 env = dict(os.environ)
 env.update(AVSP_ORACLE11_PROGRESSION_ROOT=str(out).replace("\\", "/"),
-           AVSP_ORACLE11_COFFEE_SHOP_SCENE="1", AVSP_ORACLE11_PROGRESSION_LIFECYCLE="1",
+           AVSP_ORACLE11_ROUTE_ROOT=str(out).replace("\\", "/"), AVSP_ORACLE11_COFFEE_SHOP_SCENE="1", AVSP_ORACLE11_PROGRESSION_LIFECYCLE="1",
            AVSP_ORACLE11_NAVIGATION_PERTURB="1" if perturb else "0",
            AVSP_ORACLE11_PLAYER_AUDIO_ROOT=str(out).replace("\\", "/"), AVSP_ORACLE11_PLAYER_AUDIO_VARIANT="baseline",
-           AVSP_ORACLE11_PLAYER_AUDIO_COMPACT_QSOUND="1", AVSP_ORACLE11_PLAYER_AUDIO_LAST_FRAME="5566",
+           AVSP_ORACLE11_PLAYER_AUDIO_COMPACT_QSOUND="1", AVSP_ORACLE11_PLAYER_AUDIO_LAST_FRAME=os.environ.get("LEARN_LAST","5566"),
            AVSP_LEARN_PROBE_OUT=str(out / "probe.tsv").replace("\\", "/"))
 r = subprocess.run([str(REPO / ".deps/mame/mame0289/mame.exe"), "avspu", "-rompath",
                     "C:/Game Dev/BrooklynBangoutX/AvPSaturnCapabilityTest", "-video", "none", "-sound", "none",
