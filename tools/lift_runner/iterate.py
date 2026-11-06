@@ -1,11 +1,14 @@
 #!/usr/bin/env python
 """Boundary loop: run the host check, add a root for each dispatch to an unlifted ROM address, rebuild, repeat."""
 import re, subprocess, sys, time
-T = "E:/AvP/worktrees/decomp-main/tools"
+import pathlib
+T = pathlib.Path(__file__).resolve().parents[1].as_posix()
+WT = "/mnt/" + T[0].lower() + T[2:]
+GOLDEN = sys.argv[2] if len(sys.argv) > 2 else "golden_r1s"
 ROOTS = "E:/AvP/learning/roots.txt"
 end = time.time() + float(sys.argv[1]) if len(sys.argv) > 1 else time.time() + 500
 while time.time() < end:
-    r = subprocess.run(["wsl.exe", "-e", "sh", "/mnt/e/AvP/worktrees/decomp-main/tools/lift_runner/run.sh", "6000", "100000"], capture_output=True, text=True, errors="replace")
+    r = subprocess.run(["wsl.exe", "-e", "sh", "-c", f"GOLDEN={GOLDEN} TMO=280 sh {WT}/lift_runner/run.sh 30000 100000"], capture_output=True, text=True, errors="replace")
     m = re.search(r"NOFN ([0-9a-f]+) vblank (\d+)", r.stdout)
     print(r.stdout.strip().splitlines()[-1][:160], flush=True)
     if not m:
