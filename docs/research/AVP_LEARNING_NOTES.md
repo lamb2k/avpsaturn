@@ -1,0 +1,133 @@
+# AvP learning notes
+
+Running notes from the learning lane. This is research, not acceptance: it does not move
+task status, candidate, gates or review state. Evidence tier is labelled on every result.
+Source = offline decode of the private decrypted opcode image. MAME = retained pinned 0.289 ledgers.
+Nothing here has been run on a Saturn.
+
+## 2026-11-06: the top-level tick rule
+
+Why this first: the handoff blocks interactive play on BLOCKED_MISSING_EXECUTABLE_TICK_CONTRACT,
+and `main.c` still picks gameplay updates from captured cadence tables.
+
+Result: most of the contract was recoverable from retained evidence, with no new capture.
+
+### Kernel (source)
+
+a5 = 0xff8000. Sixteen cooperative tasks of 0x20 bytes at 0xff0058, plus eight more at 0xff0158 (free stack below 0xff0a88).
+Per-task fields: +0 state, +1 countdown, +2 SR, +4 PC, +8 USP,
++0xc stack top, +0x10 catch-up count (loop task).
+
+| State | Meaning | Who sets it |
+| --- | --- | --- |
+| 0 | free | exit traps 1, 2, 9 |
+| 1 | sleeping, countdown in +1 | trap 3 (0x106c) with d0 != 0 |
+| 2 | suspended until woken | trap 3 with d0 = 0, trap 5 |
+| 4 | ready | countdown reaches 0, trap 4 yield, trap 6 |
+| 8 | was running, resumes via 0xdea | dispatcher at 0xde6 |
+| 0xc | new, starts via 0xdfa | traps 0, 10, 7 |
+
+- Dispatcher 0xd86: clear the vblank flag ff0266, walk tasks 0..15 in order with IRQs masked for
+  each check. If the flag was set, restart from task 0. Dispatch table 0xdd0 = 0xde6, 0xdea, 0xdfa.
+- Level 2 IRQ 0xe0e (vector 26): pushes video registers, samples inputs (0x1214), runs sound and
+  palette steps, `ff8018++`, sets ff0266, clears ff81bc, and decrements the countdown of every
+  state-1 task, moving it to state 4 at zero.
+- Boot starts task 0 at 0x4538 and task 6 (offset 0xc0) at 0x14b44.
+
+### Gameplay loop (source; task at ff00d8 in the Coffee Shop ledger)
+
+```
+0x808a: ff81bc = 0xff
+        if ff81a6 == 0: ff8019++; 0x166ac (latch inputs); 0x8164 (dispatch on ff8000)
+        if ff8054 bit 1: leave loop
+        0x1188 (output latch)
+0x8140: if ff81bc still set      -> catchup = 0; sleep 1 vblank
+        else (vblank hit the tick): catchup++; if catchup >= 4 sleep, else run next tick now
+```
+
+Writer closure, from a raw opcode-image scan as well as the linear sweep:
+- ff81bc: set only at 0x808a, cleared only at 0xe8c in the IRQ, read only at 0x8144.
+- ff81a6: only writer 0x142e, which always stores 0 (`moveq #0,d1`). The pause branch is dead in this ROM.
+
+### Fast-forward (source + MAME control)
+
+Idle task 0x14b44, once per scheduler pass: if ff81b9 != 0, decrement the countdown of every state-1
+task except index 3 (ff00b8). Then yield with trap 4.
+
+So while ff81b9 is set, the gameplay task's one-vblank sleep ends on the next idle pass. Tick rate is
+then bound by CPU time, not video. ff81b9 is set at 0x17154 after a pressed button (`input & 0x7f`
+on a participating player, ff81bf mask) is seen on 5 polls via ff823a / ff1744. A second family at
+0x158e0..0x15954 uses `& 0x70` and a 600-count timer; not yet witnessed.
+Plain reading: holding a button fast-forwards scripted segments.
+
+### Measured ticks per video frame (MAME, retained ledgers, frames 1972..5566)
+
+Ticks = fetches of 0x808a per frame. Guard = ff81b9 nonzero at any logged event in that frame.
+
+| Ledger | Guard off: 0 / 1 tick | Guard on: 1 / 2 / 3 / 4 / 5 ticks |
+| --- | --- | --- |
+| a3 baseline (b3 aggregate counts identical) | 40 / 3486 | 1 / 1 / 54 / 13 / 0 |
+| p3 input perturbed | 40 / 3479 | 1 / 1 / 29 / 37 / 8 |
+| m3 wake write suppressed | 1 / 3594 (no guard frames) | none |
+
+- With the guard off, a frame never ran more than one tick, in any ledger.
+- Suppressing the wake write removes every multi-tick frame: the m3 control is causal.
+- Guard-on rate moves with the scene (mean 3.14 in a3, 3.66 in p3). It has no fixed source value.
+- IRQ count was exactly 1 per frame on every compared frame of a3, b3 and p1.
+- Overrun branch: 71 times in a3, 12 of them guard-off. Those guard-off frames still ran one tick,
+  and catch-up never exceeded 2 in a3 (3 in p1). The four-tick limit was never reached.
+- Zero-tick frames: the loop task is held inside a tick or in other route work during transitions
+  (2260, 2265, 5524..5549, 5551..5559, 5562, 5564; 5566 is the window edge). The ledger's
+  `stack_return` column only repeats the task pointer, so the holding caller is NOT yet identified.
+- Task ff00b8 (index 3, excluded from fast-forward) suspended 3592 times in 3595 frames: it keeps
+  video rate during fast-forward. Its job is not yet identified.
+
+### What this means for the native rule
+
+Proposed contract, not yet implemented or tested natively:
+
+1. Run one gameplay tick per video frame while ff81b9 is clear. This is what the source does when a
+   tick fits, and the measured overruns did not change the count. This is NOT the guessed loop the
+   card forbids: it now has a source rule and a causal control behind it.
+2. While ff81b9 is set, run N ticks per frame. N is a port policy, since the source's N comes from
+   68000 speed. Measured MAME range is 3..5. Whether SH-2 can afford it is unmeasured.
+3. Keep task 3 at video rate in both modes.
+4. Model transition holds as a real suspended continuation, not as a frame table.
+
+MAME's 68000 timing is an approximation of the board. Overrun counts and guard-on rates may differ
+on real CPS2 hardware, so they are emulator-tier only. Rules 1 and 3 come from code and do not depend on it.
+
+### Readiness list status (`analyze_oracle11_actor_scheduler.py --interactive-readiness`)
+
+| Missing field | Now |
+| --- | --- |
+| Writers and IRQ/reset order of ff81bc, ff81a6 | Closed for writers and IRQ order; reset order not checked |
+| Trap 3 suspend/resume, countdown, video boundary | Closed (source) |
+| 0x14b44 owner: ff81b9 writers, excluded index 3, trap 4 | Mostly closed; 0x158e0 family and other writers unwitnessed |
+| Input sampling order across resumes | Partly: hardware read in IRQ, latched per tick at 0x166ac |
+| Hitstop order across resumes | Open |
+| Route entry/exit suspend and resume inside a pool traversal | Open: holding caller not identified |
+| Independent changed-input witness | p3 is one witness for the fast-forward window; not whole-route |
+
+The analyzer and the state file were not edited. These are claims for the next implementer to verify.
+
+### Reproduce
+
+```
+python tools/learn_dis68k.py 8060 80c0 8140 8170 14b44 14b92
+python tools/learn_tick_rule.py .deps/mame/oracle11_scheduler_clock_a3
+python tools/learn_tick_runs.py .deps/mame/oracle11_scheduler_clock_a3   # also p3, m3
+python tools/learn_task_census.py .deps/mame/oracle11_scheduler_clock_a3
+```
+
+A linear disassembly sweep of the first 1 MB, for cross-references, is at E:\AvP\learning\sweep.txt.
+It is private ROM-derived data and stays on this PC. A sweep can desynchronize in mixed code and data,
+so only the ff81bc/ff81a6 closure was re-checked by raw scan; other writer lists are leads.
+
+## Next learning steps, in order
+
+1. Identify the holding caller for zero-tick frames: new bounded read of the a7 chain at 0x1060, or
+   offline decode of the ff8000 route handlers at 0x8170.
+2. Identify task 3 (ff00b8) and the other live tasks (ff00f8, ff0158, ff0178).
+3. Hitstop: where it sits relative to the loop tick and the pool order 0x849e..0x84ce.
+4. Check what the source does to audio and object output during fast-forward.

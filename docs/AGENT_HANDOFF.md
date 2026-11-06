@@ -4,7 +4,7 @@ PAUSED by owner. Resume only on request; branch `codex/avp-playable-loop-pivot`,
 Owner deleted the prior goal; replacement was created on 2026-09-07.
 Implementation model is Astra low ("light"); project defaults and policy agree.
 The new goal does not reopen exhausted gates or change acceptance boundaries.
-Read AGENTS, current state, the concise active card and TEST_PLAN.
+Read AGENTS, state, active card, TEST_PLAN; tick-rule research: docs/research/AVP_LEARNING_NOTES.md.
 Do not touch `history.txt` or `data/avsp_anim_records.json`.
 
 Native checkpoint: `19431ec322dc8e81c91a71bef16d4f822183fbdf`; source parent `1838e6635ad1237f31036eb4baba31ad62df3927`.
