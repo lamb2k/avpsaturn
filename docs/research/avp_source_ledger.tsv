@@ -15,3 +15,40 @@ ab4c0	ca	UNDERSTOOD	fade_helper_task	avsrc_fade		Helper task: starts the palette
 158c8	8e	UNDERSTOOD	hold_button_segment_skip	avsrc_kernel		Second path: mask 0x70, 600-count timer sets route fields to skip a segment; source only
 14bb2	1e	UNDERSTOOD	start_helper_now	avsrc_fade		Non-blocking helper start; flag polled later by route state
 e658	34	UNDERSTOOD	player_credit_pass_task	avsrc_kernel		Task 3: per-player pass at video rate; handlers not read
+1773e	16	GATE-PASS	pool_alloc	avsrc_actor	pool_alloc_0	Free-stack pop, tag 4. No clear on alloc; 0 when empty
+17654	16	GATE-PASS	pool_alloc_tag8	avsrc_actor	pool_alloc_1	Alloc, tag 8
+1769e	16	GATE-PASS	pool_alloc_tag12	avsrc_actor	pool_alloc_2	Alloc, tag 12
+1778c	16	GATE-PASS	pool_alloc_tag16	avsrc_actor	pool_alloc_3	Alloc, tag 16
+176f0	16	GATE-PASS	pool_alloc_tag20	avsrc_actor	pool_alloc_4	Alloc, tag 20
+177da	16	GATE-PASS	pool_alloc_tag24	avsrc_actor	pool_alloc_5	Alloc, tag 24 effects, 218 call sites
+17828	16	GATE-PASS	pool_alloc_tag28	avsrc_actor	pool_alloc_6	Alloc, tag 28
+178a8	16	GATE-PASS	pool_alloc_tag32	avsrc_actor	pool_alloc_7	Alloc, tag 32
+17876	16	GATE-PASS	pool_alloc_tag36	avsrc_actor	pool_alloc_8	Alloc, tag 36
+178da	16	GATE-PASS	pool_alloc_ffe280	avsrc_actor	pool_alloc_9	Alloc, second tag 0x18 pool at ffe280
+17754	38	GATE-PASS	pool_release	avsrc_actor	pool_release_0	Clear lifecycle longs, push slot, tag 4; +8 tag and +40 health survive
+1766a	34	GATE-PASS	pool_release_tag8	avsrc_actor	pool_release_1	Release, tag 8: keeps +6c
+176b4	3c	GATE-PASS	pool_release_tag12	avsrc_actor	pool_release_2	Release, tag 12: also clears +46
+177a2	38	GATE-PASS	pool_release_tag16	avsrc_actor	pool_release_3	Release, tag 16
+17706	38	GATE-PASS	pool_release_tag20	avsrc_actor	pool_release_4	Release, tag 20
+177f0	38	GATE-PASS	pool_release_tag24	avsrc_actor	pool_release_5	Release, tag 24
+1783e	38	GATE-PASS	pool_release_tag28	avsrc_actor	pool_release_6	Release, tag 28
+178be	1c	GATE-PASS	pool_release_tag32	avsrc_actor	pool_release_7	Release, tag 32: +0,+4,+c only
+1788c	1c	GATE-PASS	pool_release_tag36	avsrc_actor	pool_release_8	Release, tag 36: +0,+4,+c only
+178f0	1c	GATE-PASS	pool_release_ffe280	avsrc_actor	pool_release_9	Release, ffe280 pool
+1729c	376	GATE-PASS	pools_reset	avsrc_actor	pools_reset	Round reset: wipe pools, set tags, fill stacks, clear globals. Some globals named only by address
+1b846	32	GATE-PASS	pool_traverse_tag4	avsrc_actor	pool_traverse_0	Dispatch active slots by class; tick order from 849e
+1b916	42	GATE-PASS	pool_traverse_tag8	avsrc_actor	pool_traverse_1	Same, with +48 countdown clearing +47
+1b974	42	GATE-PASS	pool_traverse_tag12	avsrc_actor	pool_traverse_2	Same, with +48 countdown clearing +47
+1b8bc	32	GATE-PASS	pool_traverse_tag16	avsrc_actor	pool_traverse_3	Dispatch by class
+1bc38	42	GATE-PASS	pool_traverse_tag20	avsrc_actor	pool_traverse_4	Clears three per-player words and ff221c, then dispatch
+1ba62	32	GATE-PASS	pool_traverse_tag24	avsrc_actor	pool_traverse_5	Dispatch by class
+1bcda	32	GATE-PASS	pool_traverse_tag28	avsrc_actor	pool_traverse_6	Dispatch by class
+1bd48	32	GATE-PASS	pool_traverse_tag36	avsrc_actor	pool_traverse_8	Dispatch by class
+1be5e	112	GATE-PASS	spawn_table_step	avsrc_actor	spawn_table_step	Camera-driven 16-byte spawn table; filter by difficulty and form; full pool retries next tick
+1d504	9a	GATE-PASS	damage_apply	avsrc_actor	damage_apply	Enemy path 1d518 and player path 1d59e; table damage, halving, floors. a4 save at ff189a is register housekeeping, not modelled
+1b492	2a	GATE-PASS	player_energy_drain	avsrc_actor	player_energy_drain	Player special cost by +9f; under 6 becomes 0; latches +42
+bc60a	58	GATE-PASS	pickup_heal	avsrc_actor	pickup_heal	Heal from table, 5 base at 0, cap 0x65; at full scores through abdd2
+1cfca	6c	GATE-PASS	hit_commit_single	avsrc_actor	hit_commit_single	Hitstop to both sides, id at +2d, reaction facing, five effect calls
+1d0a8	66	GATE-PASS	hit_commit_per_player	avsrc_actor	hit_commit_player	Same, id per +d1 player at +68
+1d186	6c	GATE-PASS	hit_commit_per_row	avsrc_actor	hit_commit_row65	Same, id by signed +65, negative records none
+a7394	4a	GATE-PASS	emitter_tick	avsrc_actor	emitter_tick	Tag 28 class 0x0e: every 49 ticks spawns tag 24 class 0x10 variant 4 at its position; pauses on three globals
