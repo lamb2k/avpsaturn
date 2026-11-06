@@ -37,7 +37,7 @@ def wsl(p):
 def build():
     H.mkdir(exist_ok=True)
     d = json.load(open("E:/AvP/learning/cfg.json"))
-    funcs = sorted(d["funcs"])
+    funcs = sorted(a for a in d["funcs"] if a != 0xd86)
     chunks = [funcs[i:i + 400] for i in range(0, len(funcs), 400)]
     aborts = set()
     for n, c in enumerate(chunks):
@@ -62,7 +62,7 @@ def build():
     shutil.copy(TOOLS / "lift_host_main.c", H / "main.c")
     srcs = " ".join(f"c{n}/lifted_mem.c" for n in range(len(chunks)))
     cmd = (f"cd '{wsl(H)}' && for n in {' '.join(str(i) for i in range(len(chunks)))}; do echo c$n; done | "
-           f"xargs -P3 -I@ sh -c 'gcc -DHOST -w -O1 -fno-strict-aliasing -c @/lifted_mem.c -o @.o' && "
+           f"xargs -P3 -I@ sh -c 'gcc -DHOST -DLIFT_TEST -w -O1 -fno-strict-aliasing -c @/lifted_mem.c -o @.o' && "
            f"gcc -w -O1 -I. main.c {' '.join(f'c{n}.o' for n in range(len(chunks)))} -o lift_host && echo built")
     r = subprocess.run(["wsl.exe", "-e", "sh", "-c", cmd], capture_output=True, text=True)
     print(r.stdout[-300:], r.stderr[-1500:])

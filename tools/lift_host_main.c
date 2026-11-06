@@ -33,6 +33,8 @@ u32 f_divs(u32 n, u32 d, int*ov){ int dv=(short)d; if(!dv) stop("div0"); long lo
 u32 f_roxl(u32 o,int n,int w,int*x){ int left=w>0; if(!left)w=-w; u32 m=w==32?0xffffffffu:(1u<<w)-1; n%=(w+1); for(;n>0;n--){ if(left){int c=(o>>(w-1))&1;o=((o<<1)|*x)&m;*x=c;} else {int c=o&1;o=(o>>1)|((u32)*x<<(w-1));*x=c;} } return o&m; }
 u32 f_abcd(u32 d,u32 s,int*x){ u32 r=(s&15)+(d&15)+*x; if(r>9) r+=6; r+=(s&0xf0)+(d&0xf0); *x=r>0x99; if(*x) r-=0xa0; return r&0xff; }
 u32 f_sbcd(u32 d,u32 s,int*x){ u32 r=(d&15)-(s&15)-*x; if(r>9) r-=6; r+=(d&0xf0)-(s&0xf0); *x=r>0x99; if(*x) r+=0xa0; return r&0xff; }
+u32 IOR8(u32 a){return 0;} u32 IOR16(u32 a){return 0;} u32 IOR32(u32 a){return 0;} void IOW8(u32 a,u32 v){} void IOW16(u32 a,u32 v){} void IOW32(u32 a,u32 v){}
+void f_d86(void){stop("trap");}
 #include "dispatch.inc"
 static void setup_pages(void){ int i; for(i=0;i<256;i++) PAGE[i]=ZERO[i]; for(i=0;i<0x20;i++) PAGE[i]=ROMB+((u32)i<<16); PAGE[0xff]=RAMB; PAGE[0x90]=GFX; PAGE[0x70]=OBJ; }
 static void diff(FILE*o,const u8*a,const u8*b,u32 base,u32 n,u32 skipl,u32 skiph){ u32 i; for(i=0;i<n;i++) if(a[i]!=b[i]&&!(base+i>=skipl&&base+i<skiph)) fprintf(o,"%x:%x ",base+i,a[i]); }

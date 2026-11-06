@@ -103,10 +103,65 @@ def validates(a, cap=500):
         if i is None or i.mnemonic.startswith("dc."):
             return False
         if base(i.mnemonic) in ("rts", "rte", "rtr", "bra", "jmp"):
-            return n >= 1
+            return True
         a += i.size
         n += 1
     return False
+
+
+def walk(root, seen_i, interior):
+    """Direct flow only from root. Returns its instruction map, or None if it collides with accepted code."""
+    out = {}
+    work = [root]
+    while work:
+        a = work.pop()
+        while a not in out and a not in seen_i:
+            if a in interior:
+                return None
+            i = insn(a)
+            if i is None or i.mnemonic.startswith("dc."):
+                return None
+            for k in range(a + 2, a + i.size, 2):
+                if k in seen_i:
+                    return None
+            out[a] = i.size
+            m = base(i.mnemonic)
+            ops = i.op_str
+            if m in ("bra", "bsr") or m in COND or m.startswith("db"):
+                t = hexval(ops.split(",")[-1])
+                if t is not None:
+                    work.append(t)
+            elif m in ("jsr", "jmp") and re.fullmatch(r"\$[0-9a-f]+(\.[lw]|\(pc\))?", ops.strip()):
+                work.append(hexval(ops))
+            if m in ("bra", "jmp", "rts", "rte", "rtr", "stop", "illegal"):
+                break
+            a += i.size
+    return out
+
+
+def filter_roots(certain, scanned):
+    """Boundary rule: a scanned root must not overlap code already accepted. A bad split never joins the target list."""
+    seen_i, interior = {}, set()
+    def accept(w):
+        for a, n in w.items():
+            seen_i[a] = n
+            for k in range(a + 2, a + n, 2):
+                interior.add(k)
+    for r in certain:
+        w = walk(r, seen_i, interior)
+        if w:
+            accept(w)
+    kept, dropped = {}, 0
+    order = sorted(scanned, key=lambda r: (0 if "abs" in scanned[r] else 1 if "bsr" in scanned[r] else 2, r))
+    for r in order:
+        w = walk(r, seen_i, interior)
+        if w is None:
+            dropped += 1
+            continue
+        accept(w)
+        kept[r] = scanned[r]
+    print(f"scan roots kept {len(kept)}, dropped for overlap {dropped}")
+    return kept
 
 
 def scan_roots():
@@ -155,7 +210,7 @@ def build(depth=0):
     if extra.exists():
         for line in extra.read_text().split():
             roots[int(line, 16)] = "extra"
-    roots.update(scan_roots())
+    roots.update(filter_roots(list(roots), scan_roots()))
     work = list(roots)
     func_entries = set(roots)
     seen = {}
@@ -219,7 +274,7 @@ def build(depth=0):
                 v = hexval(ops.split(",")[0])
                 if v is not None and "#" in ops.split(",")[0] and 0x400 <= v < ROM_END and not v & 1 and i.size >= 6:
                     leas[v] = a
-                if m == "lea" and "(pc" not in ops and v is not None and 0x400 <= v < ROM_END:
+                if m == "lea" and v is not None and 0x400 <= v < ROM_END:
                     leas.setdefault(v, a)
             prev.append(i)
             prev = prev[-4:]

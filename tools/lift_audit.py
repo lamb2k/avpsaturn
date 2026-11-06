@@ -118,7 +118,7 @@ def main():
             cases.append((key, a, d, ar, rng.randrange(32)))
     (W / "cases.txt").write_text("".join(f"{a:x} " + " ".join(f"{x:x}" for x in d + ar) + f" {f}\n" for _, a, d, ar, f in cases))
     wsl = "/mnt/e/AvP/learning/lift/audit"
-    cmd = (f"cd {wsl} && cp '/mnt/e/AvP/worktrees/decomp-main/tools/lift_audit_main.c' m.c && gcc -DHOST -w -O1 -fno-strict-aliasing -c audit_{variant}.c -o a_{variant}.o && "
+    cmd = (f"cd {wsl} && cp '/mnt/e/AvP/worktrees/decomp-main/tools/lift_audit_main.c' m.c && gcc -DHOST -DLIFT_TEST -w -O1 -fno-strict-aliasing -c audit_{variant}.c -o a_{variant}.o && "
            f"gcc -w -O1 m.c a_{variant}.o -o a_{variant} && ./a_{variant} ram.bin /mnt/e/AvP/learning/merged.bin cases.txt > out_{variant}.txt")
     r = subprocess.run(["wsl.exe", "-e", "sh", "-c", cmd], capture_output=True, text=True)
     if r.returncode:

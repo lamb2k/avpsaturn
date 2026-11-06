@@ -25,6 +25,7 @@ D = json.load(open(cfg.OUT / "cfg.json"))
 SEEN = {int(k, 16): v for k, v in D["seen"].items()}
 FUNCS = set(D["funcs"])
 TABLES = {int(k, 16): v for k, v in D["tables"].items()}
+NATIVE = {0xd86}                 # replaced by the native kernel
 stats = collections.Counter()
 ABORTS = set()
 unh = collections.Counter()
@@ -90,7 +91,13 @@ def reg_write(fn, r, size, v):
     return f"{r}=({r}&{m})|(({CT[size]})({v}));"
 
 
+def is_io(c):
+    return c is not None and (0x400000 <= c < 0x410000 or 0x618000 <= c < 0x61a000 or 0x800000 <= c < 0x810000 or 0x660000 <= c < 0x664000)
+
+
 def mem_read(addr, size, const=None):
+    if is_io(const):
+        return f"(({CT[size]})IOR{size * 8}(0x{const:x}u))"
     if const is not None and const >= 0xff0000:
         return f"RAM{size * 8}(0x{const - 0xff0000:x})"
     if const is not None and const < 0x200000:
@@ -99,6 +106,8 @@ def mem_read(addr, size, const=None):
 
 
 def mem_write(addr, size, v, const=None):
+    if is_io(const):
+        return f"IOW{size * 8}(0x{const:x}u,({CT[size]})({v}));"
     if const is not None and const >= 0xff0000:
         return f"RAMW{size * 8}(0x{const - 0xff0000:x},({CT[size]})({v}));"
     return f"WR{size * 8}({addr},({CT[size]})({v}));"
@@ -215,7 +224,7 @@ def collect(entry):
     while work:
         a = work.pop()
         while a not in body and a in SEEN:
-            if a != entry and a in FUNCS:
+            if a != entry and (a in FUNCS or a in NATIVE):
                 break
             i = cfg.insn(a)
             body[a] = i
@@ -324,7 +333,7 @@ def emit(fn, a, i, m, sz, live, ccret, entry):
     nxt = a + i.size
     if m in ("rte", "rtr"):
         ABORTS.add(a)
-        return "f_sysreg();"
+        return "RTE();"
     if m == "rts":
         return "CCOUT();return;" if entry in ccret and m == "rts" else "return;"
     if m == "nop":
@@ -703,6 +712,12 @@ extern u32 f_abcd(u32,u32,int*),f_sbcd(u32,u32,int*);extern u32 f_divu(u32,u32,i
 #define DIVS(a,b) f_divs(a,b)
 #define BADJUMP(a) f_badjump(a)
 #define DISPATCH(a) f_dispatch(a)
+extern u32 IOR8(u32),IOR16(u32),IOR32(u32);extern void IOW8(u32,u32),IOW16(u32,u32),IOW32(u32,u32);
+#ifdef LIFT_TEST
+#define RTE() f_sysreg()
+#else
+#define RTE() return
+#endif
 #define SYSREG() f_sysreg()
 #define UNHANDLED(a) f_unhandled(a)
 #define CCOUT() (R->ccz=fz,R->ccn=fn,R->ccc=fc,R->ccv=fv,R->ccx=fx)
@@ -739,7 +754,7 @@ def main():
     addrs = _argv[3:]
     if addrs and addrs[0].startswith("@"):
         addrs = pathlib.Path(addrs[0][1:]).read_text().split()
-    addrs = [int(a, 16) for a in addrs] or sorted(FUNCS)
+    addrs = [int(a, 16) for a in addrs if int(a, 16) not in NATIVE] or sorted(FUNCS - NATIVE)
     out.mkdir(parents=True, exist_ok=True)
     ccret = cc_return_set()
     calls = set()
