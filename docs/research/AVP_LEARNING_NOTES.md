@@ -131,3 +131,72 @@ so only the ff81bc/ff81a6 closure was re-checked by raw scan; other writer lists
 2. Identify task 3 (ff00b8) and the other live tasks (ff00f8, ff0158, ff0178).
 3. Hitstop: where it sits relative to the loop tick and the pool order 0x849e..0x84ce.
 4. Check what the source does to audio and object output during fast-forward.
+
+## 2026-11-06, second pass: the four follow-up questions
+
+Same tiers as above. Nothing native was changed, and no card or gate moved.
+Reproduce with `tools/learn_task_resume.py` and `tools/learn_dis68k.py`.
+
+### Long-lived and transient tasks
+
+| Task | Entry | Evidence | What it does |
+| --- | --- | --- | --- |
+| 0 (ff0058) | 0x4538 | source | Top-level start; fade wrappers at entry. Details not read |
+| 3 (ff00b8) | 0xe658 | source, started at 0x53a0 | Per-player pass over ff8380/480/580, dispatched on +0xd4, with one-vblank sleep. Handlers read the coin/credit block ff8186 |
+| 4 (ff00d8) | 0x8062 | source + MAME | Gameplay loop |
+| 5 (ff00f8) | 0xb395a at 0x812a is the spawn found | MAME frames 5151..5523 only | Unconfirmed: the one resume value seen, 134590, is 0x20dbe |
+| 6 (ff0118) | 0x14b44 | source | Idle: fast-forward decrement, drains the spawn ring |
+| pool (ff0158, ff0178) | table 0x14b92, by command high byte | MAME resume values 0xab4c0 and 0x18164 match table entries 2 and 0 | Transient helpers from ring ff8086: fades and similar |
+
+Task 3 is credit, continue and join logic by inference: its handlers read the coin block, but no handler
+was traced end to end. This would explain why fast-forward excludes it: the player's credit timing keeps
+real time. Task 3 is also stopped by route code (trap 2 at 0x157b0, trap 5 at 0x85e6, 0x878e).
+
+### Zero-tick frames
+
+Most likely holder (source, with an indirect MAME witness): the fade wait at 0x1614a and its siblings.
+It sets ff837b, queues a helper via 0x1620a, then sleeps one vblank in a loop until ff837b clears.
+Route handlers call it at around 25 sites.
+
+- USP at the loop task's suspend is ff04a8 on normal frames and ff04a0 or ff04a4 in holds, so a hold is
+  one or two calls deeper, inside the tick dispatched from 0x809e.
+- Pool helper tasks are alive across the same frames (ff0178 5523..5540; ff0158 up to 5552).
+- NOT proven: no ledger logged the return chain, and 2260/2265 show normal depth ff04a8. Those two are a
+  different cause, not yet explained. A bounded read of the stack at 0x1060 would settle this.
+
+Consequence for a native version: a route tick can span many video frames, so it needs a real
+continuation or state machine around these waits.
+
+### Hitstop
+
+No global hitstop was found. It is a per-actor byte, +0x2c, consumed inside each actor body during pool
+traversal, e.g. 0x40baa: if nonzero, decrement it and skip the action dispatch, then still run 0x167ac.
+Similar test-and-decrement pairs exist at 0x197fe, 0x1aad0, 0x1b234, 0x1cfd2. The existing native
+`source_hitstop` follows this shape.
+
+- It counts gameplay ticks, not vblanks, so it would run faster in fast-forward.
+- +0x2c also has other uses in other classes (long writes at 0x17676 and others), so match it per class.
+- Order: inside the 0x8164 route dispatch of each tick, in the pool order 0x849e..0x84ce. Inputs were
+  latched earlier in that tick by 0x166ac. Whether all classes consume it the same way was not surveyed.
+
+### Audio and objects during fast-forward
+
+Audio (source + MAME): commands go into a ring of 64 16-byte entries at ff0a88, head ff801e, tail ff8020.
+The IRQ sends at most one per vblank, and only when the sound CPU handshake byte 61801f reads 0xff.
+So extra ticks can queue faster, but output stays at most one per frame.
+Measured: 921 commands over frames 2031..15191 (`oracle11_audio_sample_descriptors_a`), never more than one
+in a frame. Only 1 of them fell in 5449..5559, so the ring under fast-forward load is barely witnessed.
+
+Objects (source only): the object bank flip at 0x28ebc, 0x29b34 and the fade path only fires if ff81a2 is
+zero; it then sets ff81a2 until the next IRQ clears it. At most one flip per vblank. In a 3-tick frame,
+only the first tick that submits can flip. Not witnessed per frame in any ledger, and it was not traced
+which tick's list the hardware finally shows.
+
+For a port this suggests: run the extra fast-forward ticks without rendering them, and keep one audio
+send per frame. This is a lead, not a tested design.
+
+## Remaining unknowns
+
+1. Stack chain at 0x1060 for hold frames, and the cause of 2260/2265 (needs a small new MAME read).
+2. Task 5's real entry, and an end-to-end trace of task 3.
+3. Per-frame object flips under fast-forward (MAME).
