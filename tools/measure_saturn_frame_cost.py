@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
 """Boot game.cue on the pinned debug-rig Yaba Sanshiro and read frame cost (ONE_EMULATOR).
 
-Owns only the process it starts. Saves and restores yabause.ini. Yaba does not
+Owns only the process it starts. Saves and restores the shared yabause.ini. Yaba does not
 model SH-2 bus wait states or VDP1 draw time, so ticks are not hardware timing.
 """
 from __future__ import annotations
@@ -20,22 +20,21 @@ sys.path.insert(0, str(ROOT / "tools"))
 from capture_frontend_cram import Mcp  # noqa: E402
 
 EXE = ROOT / ".deps/emulators/yabasanshiro-1.20.37-2986eb-debug-rig-mcp-da2ffb34"
-INI = Path(os.environ["APPDATA"]) / "YabaSanshiro/yabause.ini"
+SHARED_INI = Path(os.environ["APPDATA"]) / "YabaSanshiro/yabause.ini"
+INI = SHARED_INI
 BIN = ROOT / ".deps/joengine/Compiler/WINDOWS/bin"
 COST = ["fields", "callbacks", "late_callbacks", "peak_fields", "work_ticks", "work_peak",
         "work_sum_low", "tcr", "vdp1_busy_at_entry"]
 EXTRA = ["avsp_diag_live_frame", "avsp_diag_round1_presentation_commands_peak",
-         "__jo_current_palette_id"]
+         "jo_current_palette_id", "avsp_diag_round1_native_composite_exhaustions"]
 
 
 def symbols() -> dict[str, int]:
-    out = subprocess.run([str(BIN / "sh-elf-nm.exe"), "--target=coff-sh", str(ROOT / "game.elf")],
-                         capture_output=True, text=True, check=True).stdout
     table = {}
-    for line in out.splitlines():
+    for line in (ROOT / "game.map").read_text(errors="ignore").splitlines():
         parts = line.split()
-        if len(parts) == 3:
-            table[parts[2].lstrip("_") if parts[2].startswith("_") else parts[2]] = int(parts[0], 16)
+        if len(parts) == 2 and parts[0].startswith("0x"):
+            table[parts[1].lstrip("_")] = int(parts[0], 16)
     return table
 
 
@@ -57,6 +56,9 @@ def main() -> int:
     parser.add_argument("--shot", type=Path)
     args = parser.parse_args()
     exe = next(EXE.rglob("yabasanshiro.exe"))
+    # The rig reads one shared ini (Qt ignores APPDATA) and one fixed MCP port.
+    if subprocess.run(["tasklist"], capture_output=True, text=True).stdout.lower().count("yabasanshiro"):
+        raise SystemExit("another lane owns the emulator")
     backup = args.output.with_suffix(".ini.bak")
     shutil.copy2(INI, backup)
     cue = args.output.with_suffix(".cue")
@@ -67,7 +69,8 @@ def main() -> int:
              "Cartridge\\Type": "7", "autostart": "true", "Video\\VideoCore": "1",
              "Sound\\SoundCore": "0", "Advanced\\SH2Interpreter": "3"})
     table = symbols()
-    process = subprocess.Popen([str(exe), "-nb", "-a", "-i", str(cue)], cwd=str(ROOT))
+    process = subprocess.Popen([str(exe), "-nb", "-a", "-i", str(cue)], cwd=str(ROOT),
+                               env=dict(os.environ))
     samples, result = [], {"tier": "ONE_EMULATOR", "exe": exe.name, "boot": False}
     try:
         mcp = Mcp("http://127.0.0.1:9640/mcp")
@@ -87,21 +90,30 @@ def main() -> int:
         end = time.time() + args.seconds
         while time.time() < end and process.poll() is None:
             row = {"t": round(time.time(), 1)}
-            for name in COST:
-                row[name] = mcp.u32(table["avsp_diag_frame_cost_" + name])
-            for name in EXTRA:
-                if name in table:
-                    row[name] = mcp.u32(table[name])
-            samples.append(row)
+            try:
+                for name in COST:
+                    row[name] = mcp.u32(table["avsp_diag_frame_cost_" + name])
+                for name in EXTRA:
+                    if name in table:
+                        row[name] = mcp.u32(table[name])
+                samples.append(row)
+            except RuntimeError as error:
+                result["last_read_error"] = str(error)
+                result["raw"] = mcp.call("memory_read", address=hex(table["avsp_diag_frame_cost_tcr"]), length=4)[:200]
             time.sleep(5)
         result["boot"] = bool(samples) and samples[-1]["callbacks"] > 0
         if args.shot:
             result["shot"] = mcp.call("framebuffer_screenshot", path=str(args.shot))[:200]
     finally:
+        shutil.copy2(backup, INI)
+        result["samples"] = samples
+        args.output.write_text(json.dumps(result, indent=1))
         if process.poll() is None:
             process.kill()
-            process.wait(10)
-        shutil.copy2(backup, INI)
+            try:
+                process.wait(60)
+            except subprocess.TimeoutExpired:
+                result["kill_timeout"] = True
     result["alive_at_end"] = True
     result["samples"] = samples
     args.output.write_text(json.dumps(result, indent=1))
