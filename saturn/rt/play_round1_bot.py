@@ -35,7 +35,7 @@ def step(v,s):
     if top!=4: inko=False
     if sec==2 and d[2]==6 and boss is None: boss=v; s.log('BOSS present',v); s.shot(f'boss_{v}')
     if sec==2 and f3 and not h and sec2clear is None: sec2clear=v; s.log('BOSS CLEAR f3 in section 2, attract 0, ko',ko,'continues',cont); s.shot(f'clear_{v}')
-    if sec==3 and sec2clear is not None: s.log('SECTION 3 reached, attract',h,'ko',ko,'continues',cont); s.shot(f'after_{v}'); s.stop(); return
+    if sec==3: s.log('SECTION 3 reached, attract',h,'ko',ko,'continues',cont); s.shot(f'after_{v}'); s.stop(); return
     now=time.time()
     if h or mode==4 or mode==0:
         s.set([])

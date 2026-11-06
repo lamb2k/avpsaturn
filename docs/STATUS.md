@@ -59,3 +59,5 @@ The stream sounds closer by this measure, at about 22 times the worst cost, and 
 Game image capture: non-silent; clips 0x24e, 0x254 and 0x203 matched by correlation 0.81-0.997. CD music is in the capture. Not compared to a MAME run of the same play, because the play differs. No person has listened.
 
 Package, item 26: `saturn/package/build_package.py`, output E:\AvP\package-play: two data images (DMA off and on), cue, tracks, hashes, HARDWARE_TEST.md, with on-screen bars for game, drawing and VDP1 time, and Y and Z test modes for fetch against fill. Hardware: UNRUN. The bars ran on Yaba; the DMA image did not get a gameplay run, only the build.
+
+Later build, same day, after the speed merge and with 2 KB task stacks: one continuous process, 57 vblanks/s, route rerun by the bot from boot. Round 1 boss cleared, section 3 at about v21400, no fatal. Stack canary, read at each KO and every 600 vblanks through 8 KOs and continues: least free 1728 of 2048 bytes (task 4), then 1808 (task 2). No stack room change needed. The run went on into Round 2 (not built: wrong background and tiles, as expected) until stopped.
