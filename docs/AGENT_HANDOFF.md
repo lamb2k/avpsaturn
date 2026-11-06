@@ -1,49 +1,45 @@
-# REIMPLEMENT-13-SOURCE-CLOSED-ROUND1 handoff (2026-09-07 owner delivery focus)
+# REIMPLEMENT-13-SOURCE-CLOSED-ROUND1 handoff (2026-11-06, lane avp-native)
 
-PAUSED by owner. Resume only on request; branch `codex/avp-playable-loop-pivot`, one writer.
-Owner deleted the prior goal; replacement was created on 2026-09-07.
-Implementation model is Astra low ("light"); project defaults and policy agree.
-The new goal does not reopen exhausted gates or change acceptance boundaries.
-Read AGENTS, state, active card, TEST_PLAN; tick-rule research: docs/research/AVP_LEARNING_NOTES.md.
-Do not touch `history.txt` or `data/avsp_anim_records.json`.
+RESUMED by owner 2026-11-06; decision recorded in project_state.yaml owner_decision_2026_11_06.
+Branch `codex/avp-playable-loop-pivot`, one writer. Do not touch `history.txt` or `data/avsp_anim_records.json`.
+Card says CLAUDE_ALLOWED false and AGENTS names Astra; left unedited and reported to the owner as an open conflict.
+Not candidate promotion. USER-09/USER-10/HW-01 unchanged; physical Saturn UNRUN.
 
-Native checkpoint: `19431ec322dc8e81c91a71bef16d4f822183fbdf`; source parent `1838e6635ad1237f31036eb4baba31ad62df3927`.
-This is not candidate promotion. Frozen candidate:
-`d04a65a2253175c6e820140feefc35419e2cca07`.
-Production: `236eef0c42aaa5c39b105420f8130fcde308e34e`.
-P2 reaches15193; P3 recorded complete; native full Round1 is NOT complete.
-P4 Coffee Shop remains RED. USER-09 CHANGES_REQUESTED; SALVAGE-08 inactive;
-USER-10 requires QA and explicit feedback. Physical UNRUN; HW-01 parked.
+## What changed
 
-## Exact next experiment
+- Normal play runs `avsp_round1_step_interactive_frame` (round1.c): 1 tick per frame; 3 per frame in fast-forward
+  (5 polls of held input during the scripted exit; port policy). AUTOTEST keeps the capture adapter.
+- Fade waits: teardown phases of the exit display machine hold gameplay ticks. Durations still come from SPEC
+  coffee_exit stall constants; `source_recon/avsrc_fade.c` has a palette-driven contract not yet wired.
+- Containment: in normal play an actor body that leaves covered source programs is released and logged in
+  `avsp_round1_containment`; differential builds still fail closed. This is a counted gap, not a pass.
+- Boundary check: tests/port_v2/round1/test_interactive_tick_boundary.py (with a negative control).
+- Host sim: tests/port_v2/round1/round1_interactive_tick_sim.c (idle/source/bot/fuzzN).
+- Emulator driver: tools/run_interactive_emulator.py; waits for any other yabasanshiro (one MCP port, one ini).
+- Scripted input profile: env AVSP_INPUT_SCRIPT=1 at build. Never label it interactive proof.
 
-Class0e native body now reproduces16 lifetimes/1776 rows, state/facing/animation,
-attachment formula, alias and release. Keep333 inherited world-position rows RED.
-Strict host10 causal controls plus whole-scene allocation suppression and repeat PASS.
-Source-only scheduler a3/b3 match all8 ledgers; p3 changes exit5562->5550.
-The captured-schedule defect is BLOCKED_MISSING_EXECUTABLE_TICK_CONTRACT.
-Wrapper source probe uses -SchedulerClockCapture; p1 also -SchedulerInputPerturb.
-Pool callee0011ea is RTS; loop00808a/tail008140 reaches trap3 wrapper001060.
-Wake guard/counter/input rules validated; source suppression removes151 wakeups.
-Missing: native CPU-timing policy and command/result continuation1614a/ff837b.
-Class0e source/SPEC c952687; Fast/Oracle PASS; host report, Saturn draw NOT wired.
-Its50 assembly headers are absent from sparse archive; tag8 no-op adapter pending.
-Owner authorized sizing only: paired full-route tiles1442128/614400; no resize.
-Normal callback still uses captured schedules; reported authority0 is hardcoded.
-Type28/class0c remains blocked under its exhausted causal-witness budget.
-Target and transition Emulator/WGC also remain exhausted: no retry was authorized.
-Memory plan records20-bank union/16-bank loader overflow; no expanded load allowed.
+## Known defects in normal play (emulator frames, E:\AvP\native\script2)
 
-Scene report:103/747 missing source lifetimes;1/708 unowned native lifetimes;
-0/38 unidentified pairs;501/1494 lifetime endpoints;1/708 unsupported records;
-93/149 health-write events;0/11 route/camera;279/281 audio/load. No percentages.
-Raw/normalized program distinctions remain in the report/card. No scene promotion.
-Runtime101,192/102,400; SPEC51,580/262,144; no current accepted Target artifact.
-Source/spec hashes and region evidence remain in state and existing data files.
-Read-only package preflight matches seven staged assets plus original CDDA source;
-pinned EXE/archive match. Root CDDA output is regeneratable by existing build.
+1. Player has no KO or continue: health reaches zero and play goes on (host idle shows -9).
+2. Two repair-unit props stay at a fixed screen position while the camera scrolls. Cause not examined.
+3. Score and enemy health bar did not change in the frames viewed.
+4. After the Coffee Shop exit, live_frame stops at 4718 and no next-room gameplay exists natively.
+5. PCM cues are silent by design in live_encounter_audio_step; audio/load gap stays 279/281.
+6. Class0e Saturn draw not wired. tag8 no-op is already in avsp_emit.c.
 
-Use Fast -WorkflowOnly for docs; DEV for edits; full ceremony at program/platform
-risk boundaries. Keep all acceptance tests and three-attempt rulings.
-Audio sizing: paired1220 descriptor calls; control downstream0, budget3 exhausted; no source/native kill.
-Pause checkpoint: type28/class0e SPEC amendment836518b1, fixturesc70d4583 pending acceptance; auxiliary17 controls, SPEC focused and generation --check PASS. Fast FAILED at tests/port_v2/round1/test_entry.py:16 stale EXPECTED6bf90605 (before host execution, not a mutation kill); Oracle UNRUN. Process terminal, no retry. On resume reconcile test identity against reviewed amendment, rerun Fast/Oracle, then implement class05 drop/residue-preserving allocation and whole class0e body. No gameplay/archive growth, scene or candidate promotion.
+## Scene report (host, differential path, unchanged by this work)
+
+103/747 missing lifetimes; 1/708 unowned; 501/1494 endpoints; 93/149 health events; 279/281 audio/load. RED.
+
+## Not run
+
+Fast and Oracle lanes, test_entry.py (EXPECTED now pins SPEC 836518b1; review of that pin is not independent),
+paired cold Emulator runs, real pad input on an emulator, audio output (SoundCore 0), physical.
+The Target exhaustion note on the card predates the owner decision; see the state file for the new budget.
+
+## Next, in order
+
+1. Player KO/continue from accepted oracle11 player_hitko_continue evidence (defect 1).
+2. Drive containment down: host trace by site, top entries are player-step site 2 and class1f codes 11/15.
+3. Props and HUD defects 2 and 3. 4. Wire route_wait from avsrc_fade.c. 5. Class0e draw. 6. Audio commands to PCM.
+7. Run Fast and Oracle. Build regenerates data/reimplement13_round1_memory_plan.json: review before staging.
