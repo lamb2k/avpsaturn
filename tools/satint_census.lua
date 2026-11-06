@@ -16,6 +16,7 @@ local function dump()
 end
 local rd = function(a) return prog:read_u16(a) end
 local stop_at = tonumber(os.getenv("SATINT_STOP_IRQ") or "") or 99999999
+local start_at = tonumber(os.getenv("SATINT_START_IRQ") or "") or 0
 local snaps = {}
 for s in string.gmatch(os.getenv("SATINT_SNAPS") or "", "%d+") do snaps[tonumber(s)] = true end
 local screen = machine.screens[":screen"]
@@ -24,6 +25,7 @@ satint_tap = ops:install_read_tap(0xe0e, 0xe0f, "satint", function()
     if cpu.state["PC"].value ~= 0x68 then return end
     if snaps[irq] then screen:snapshot(string.format("s%05d.png", irq)) end
     if irq > stop_at then return end
+    if irq < start_at then irq = irq + 1; return end
     -- sprites
     local n, fr = 0, {0, 0, 0, 0}
     local kk = keys[1]

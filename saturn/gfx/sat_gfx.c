@@ -929,6 +929,9 @@ static void clear_vram(u8 *p, u32 bytes)
 
 int sat_gfx_init(const void *pack)
 {
+#ifdef SAT_KEYLOG
+    { u32 i; for (i = 0; i < 0x10000; i += 2) *(volatile u16 *)(0x25A70000UL + i) = 0; }
+#endif
     int i;
     u32 n;
     u8 *c;

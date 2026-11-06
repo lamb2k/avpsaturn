@@ -150,6 +150,11 @@ def main():
             wins = windows_of(proc.pid)
         print("windows", wins, flush=True)
         hwnd = max(wins, key=lambda w: w[2] * w[3])[0]
+        if os.environ.get("YABA_LOAD"):   # one fresh process per leg, as docs/EMULATOR_MCP_CAPTURE.md says
+            time.sleep(3)
+            m.call("pause")
+            print(m.call("load_state", slot=int(os.environ["YABA_LOAD"]))[:160], flush=True)
+            m.call("resume")
         s = Session(m, syms, hwnd, work)
         s.t0 = t0
         s.v = 0
