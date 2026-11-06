@@ -52,7 +52,8 @@ static u32 io_read(u32 a){ a&=0xfffffe; long i; long end=(curv+1<vn)?vstart[curv
 u32 IOR8(u32 a){ u32 v=io_read(a); return (a&1)?(v&0xff):(v>>8); }
 u32 IOR16(u32 a){ return io_read(a)&0xffff; }
 u32 IOR32(u32 a){ return (io_read(a)<<16)|io_read(a+2); }
-void IOW8(u32 a,u32 v){(void)a;(void)v;} void IOW16(u32 a,u32 v){(void)a;(void)v;} void IOW32(u32 a,u32 v){(void)a;(void)v;}
+static u8 OBJB[2][0x10000]; u8 *OBJ_CUR=OBJB[0];
+void IOW8(u32 a,u32 v){(void)a;(void)v;} void IOW16(u32 a,u32 v){ if(a==0x8040e0){ OBJ_CUR=OBJB[v&1]; PAGE[0x70]=OBJ_CUR; } } void IOW32(u32 a,u32 v){(void)a;(void)v;}
 
 u32 f_divu(u32 n,u32 d,int*ov){ d&=0xffff; if(!d) return n; u32 q=n/d; if(q>0xffff){*ov=1;return n;} return ((n%d)<<16)|q; }
 u32 f_divs(u32 n,u32 d,int*ov){ int dv=(short)d; if(!dv) return n; long long nn=(int)n; long long q=nn/dv; if(q>32767||q<-32768){*ov=1;return n;} return ((u32)((nn%dv)&0xffff)<<16)|(u32)(q&0xffff); }
@@ -86,14 +87,14 @@ void f_trap11(void){} void f_trap12(void){} void f_trap13(void){} void f_trap14(
 
 /* Whole-game comparison */
 static FILE *gold; static u8 grec[8+64+0x10000+0x2000]; static u8 *gbuf=grec+64; static u8 cur_ip[64]; static int have_next;
-static u8 OBJ[0x10000]; static u8 mask[0x10000];
+static u8 mask[0x10000];
 static long firstdiv=-1, ndiv, nclean;
 static long maxv=1L<<40;
 static u32 be(u8*p){return ((u32)p[0]<<24)|(p[1]<<16)|(p[2]<<8)|p[3];}
 static int golden_next(void){ if(fread(grec,1,sizeof grec,gold)!=sizeof grec) return 0; memcpy(grec+64,grec,8); return 1; }
 static long midrun; static void compare(void){ long i,d=0; long first=-1; for(i=0;i<0x10000;i++) if(!mask[i]&&RAMB[i]!=gbuf[8+i]){ if(first<0) first=i; d++; }
-    long od=0; for(i=0;i<0x2000;i++) if(OBJ[0x8000+i]!=gbuf[8+0x10000+i]) od++;
-    if(od&&getenv("OBJDBG")){ for(i=0;i<0x2000;i++) if(OBJ[0x8000+i]!=gbuf[8+0x10000+i]){ printf(" obj %lx:%02x/%02x",i,OBJ[0x8000+i],gbuf[8+0x10000+i]); if(i>64)break; } printf("\n"); } if(d||od){ ndiv++; if(ndiv<=40||firstdiv<0){ printf("vblank %ld: ram diffs %ld first %lx (host %02x mame %02x) obj diffs %ld\n",curv,d,first<0?0:0xff0000+first,first<0?0:RAMB[first],first<0?0:gbuf[8+first],od); { long k,sh=0; for(k=first;k>=0&&k<0x10000&&sh<12;k++) if(!mask[k]&&RAMB[k]!=gbuf[8+k]){ printf(" %lx:%02x/%02x",0xff0000+k,RAMB[k],gbuf[8+k]); sh++; } printf("\n"); } fflush(stdout);} if(firstdiv<0) firstdiv=curv; if(getenv("STOP_DIV")&&ndiv>=atoi(getenv("STOP_DIV"))){ printf("stop\n"); exit(0);} } else nclean++; }
+    long od=0; for(i=0;i<0x2000;i++) if(OBJ_CUR[0x8000+i]!=gbuf[8+0x10000+i]) od++;
+    if(od&&getenv("OBJDBG")){ for(i=0;i<0x2000;i++) if(OBJ_CUR[0x8000+i]!=gbuf[8+0x10000+i]){ printf(" obj %lx:%02x/%02x",i,OBJ_CUR[0x8000+i],gbuf[8+0x10000+i]); if(i>64)break; } printf("\n"); } if(d||od){ ndiv++; if(ndiv<=40||firstdiv<0){ printf("vblank %ld: ram diffs %ld first %lx (host %02x mame %02x) obj diffs %ld\n",curv,d,first<0?0:0xff0000+first,first<0?0:RAMB[first],first<0?0:gbuf[8+first],od); { long k,sh=0; for(k=first;k>=0&&k<0x10000&&sh<12;k++) if(!mask[k]&&RAMB[k]!=gbuf[8+k]){ printf(" %lx:%02x/%02x",0xff0000+k,RAMB[k],gbuf[8+k]); sh++; } printf("\n"); } fflush(stdout);} if(firstdiv<0) firstdiv=curv; if(getenv("STOP_DIV")&&ndiv>=atoi(getenv("STOP_DIV"))){ printf("stop\n"); exit(0);} } else nclean++; }
 
 static void run_irq(void){ Cpu save=cpu; int sc=cur; u32 sr=r32(G_CUR); cur=-1; cpu.a[5]=0xff8000; cpu.a[7]=0xff8000; f_e0e(); cpu=save; cur=sc; (void)sr; }
 
@@ -132,6 +133,6 @@ static char altstk[1<<16];
 static void segv(int n){ void*bt[14]; int nb=backtrace(bt,14); printf("SEGV vblank %ld task %d a0 %x a1 %x a6 %x a7 %x\n",curv,cur,cpu.a[0],cpu.a[1],cpu.a[6],cpu.a[7]); fflush(stdout); backtrace_symbols_fd(bt,nb,1); _exit(4); }
 int main(int c,char**v){ { stack_t st; st.ss_sp=altstk; st.ss_size=sizeof altstk; st.ss_flags=0; sigaltstack(&st,0); struct sigaction sa; memset(&sa,0,sizeof sa); sa.sa_handler=segv; sa.sa_flags=SA_ONSTACK; sigaction(SIGSEGV,&sa,0);} FILE*rf=fopen(v[1],"rb"); int i; if(!rf||fread(ROMB,1,sizeof ROMB,rf)!=sizeof ROMB) return 2; { char op[512]; strcpy(op,v[1]); strcpy(strrchr(op,'/')+1,"op.bin"); FILE*of=fopen(op,"rb"); if(!of||fread(OPSPACE,1,sizeof OPSPACE,of)!=sizeof OPSPACE) return 2; fclose(of); } gold=fopen(v[2],"rb"); io_load(v[3]); if(c>4) maxv=atol(v[4]);
     if(c>5){ FILE*m=fopen(v[5],"r"); char l[64]; while(fgets(l,64,m)){ u32 a,b; if(sscanf(l,"%x %x",&a,&b)==2) for(;a<=b;a++) mask[a-0xff0000]=1; } fclose(m);}
-    for(i=0;i<256;i++) PAGE[i]=ZERO[i]; for(i=0;i<0x20;i++) PAGE[i]=ROMB+((u32)i<<16); PAGE[0xff]=RAMB; PAGE[0x70]=OBJ;
-    golden_next(); memcpy(OBJ+0x8000,gbuf+8+0x10000,0x2000); memcpy(RAMB+0xe90,gbuf+8+0xe90,16); /* what the skipped hardware test left */ curv=0; iop=0; fseek(gold,0,SEEK_SET); gbuf[8+0x8019]=0;
+    for(i=0;i<256;i++) PAGE[i]=ZERO[i]; for(i=0;i<0x20;i++) PAGE[i]=ROMB+((u32)i<<16); PAGE[0xff]=RAMB; PAGE[0x70]=OBJ_CUR;
+    golden_next(); memcpy(OBJB[0]+0x8000,gbuf+8+0x10000,0x2000); memcpy(OBJB[1]+0x8000,gbuf+8+0x10000,0x2000); memcpy(RAMB+0xe90,gbuf+8+0xe90,16); /* what the skipped hardware test left */ curv=0; iop=0; fseek(gold,0,SEEK_SET); gbuf[8+0x8019]=0;
     cpu.d[3]=4; cpu.a[4]=0x800; /* registers the skipped hardware test left, seen through f_1a36 */ cpu.a[7]=0xff8000; cpu.a[5]=0xff8000; f_800(); printf("boot returned\n"); return 1; }
