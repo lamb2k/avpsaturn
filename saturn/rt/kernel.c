@@ -39,7 +39,7 @@ u8 sat_gfxram[0x20000] __attribute__((section(".lwgfx"), aligned(4)));
 
 static u32 task_stacks[TASKS][TASK_STACK / 4];
 u32 sat_boot_stack[2048];
-u32 sat_irq_stack[4096];
+u32 sat_irq_stack[2048];   /* drawing left this stack with the move to the slave */
 
 static void *task_sp[TASKS];
 static void *sched_sp;
@@ -227,6 +227,64 @@ static void irq_enable(void)
 static inline u32 frt(void) { u32 h = FRTH; return (h << 8) | FRTL; }
 static volatile int game_done;
 
+#ifdef SAT_PROF
+/* Test flag: per-frame histograms over a fixed vblank window, 128 FRT ticks a bucket (about 0.61 ms). MODELLED until run on a console.
+   frame: master busy from the vblank that started a game frame until its idle, across overruns. gfx: drawing. snap: snapshot on the master. */
+#define PROF_FROM 1000
+#define PROF_TO 1650
+typedef struct { u32 from, to, ticks, done, over, skipped; u16 frame[128], gfx[128], snap[128]; } SatProf;
+SatProf sat_prof __attribute__((section(".lwgfx")));
+static u32 frame_carry;
+static void prof_add(u16 *h, u32 t) { t >>= 7; h[t > 127 ? 127 : t]++; }
+#define IN_WINDOW (sat_dbg.vblanks >= PROF_FROM && sat_dbg.vblanks < PROF_TO)
+#endif
+
+/* Slave SH-2: draws, nothing else. Interface is one handoff: while gfx_handed != gfx_done the slave owns the snapshot, otherwise the master does.
+   Each counter has one writer and is read through the cache-through alias. The slave waits on its own FRT input-capture flag, set by a master
+   write to 0x21000000, so its idle loop stays off the bus. The whole cache is purged per frame: the snapshot changed under it, nothing else it caches does. */
+#define UNCACHED(v) (*(volatile u32 *)((u32)&(v) | 0x20000000u))
+#define CCR (*(volatile u8 *)0xfffffe92u)
+#define FTCSR (*(volatile u8 *)0xfffffe11u)
+#define SLAVE_WAKE (*(volatile u16 *)0x21000000u)
+#define SMPC(o) (*(volatile u8 *)(0x20100000u + (o)))
+extern void sat_slave_entry(void);
+static u32 gfx_handed, gfx_done;
+u32 sat_slave_stack[256] __attribute__((section(".lwgfx")));
+
+void sat_slave_main(void)
+{
+    CCR = 0x10; CCR = 0x01;
+    FTCR = 2;
+    for (;;) {
+        u32 t, seen;
+        while (!(FTCSR & 0x80)) ;
+        FTCSR = (u8)(FTCSR & 0x7f);
+        CCR = 0x11;
+        seen = UNCACHED(gfx_handed);
+        if (seen == UNCACHED(gfx_done)) continue;
+        FRTH = 0; FRTL = 0;
+        sat_gfx_draw();
+        t = frt();
+        sat_dbg.gfx_ticks = t;
+        if (t > sat_dbg.gfx_peak) sat_dbg.gfx_peak = t;
+#ifdef SAT_PROF
+        if (IN_WINDOW) prof_add(sat_prof.gfx, t);
+#endif
+        UNCACHED(gfx_done) = seen;
+    }
+}
+
+static void slave_start(void)
+{
+    while (SMPC(0x63) & 1) ;
+    SMPC(0x63) = 1; SMPC(0x1f) = 0x03;   /* SSHOFF */
+    while (SMPC(0x63) & 1) ;
+    *(void (**)(void))0x06000250u = sat_slave_entry;
+    *(u32 *)0x060002acu = (u32)(sat_slave_stack + 256);
+    SMPC(0x63) = 1; SMPC(0x1f) = 0x02;   /* SSHON */
+    while (SMPC(0x63) & 1) ;
+}
+
 /* Dispatcher 0xd86. A vblank sets the game's flag at 0xff0266 through f_e0e, which restarts the walk from task 0. */
 void f_d86(void)
 {
@@ -249,7 +307,13 @@ void f_d86(void)
             cur = -1;
         }
         if (i == TASKS) {
-            if (!game_done) { game_done = 1; sat_dbg.game_ticks = frt(); if (sat_dbg.game_ticks > sat_dbg.game_peak) sat_dbg.game_peak = sat_dbg.game_ticks; }
+            if (!game_done) {
+                game_done = 1; sat_dbg.game_ticks = frt(); if (sat_dbg.game_ticks > sat_dbg.game_peak) sat_dbg.game_peak = sat_dbg.game_ticks;
+#ifdef SAT_PROF
+                if (IN_WINDOW) { prof_add(sat_prof.frame, frame_carry + sat_dbg.game_ticks); sat_prof.done++; }
+                frame_carry = 0;
+#endif
+            }
             cpu.a[0] = REC(15) + 0x20; cpu.d[0] |= 0xffff; f_11ec(); sat_dbg.idle_calls++;
         }
     }
@@ -278,11 +342,22 @@ void sat_vblank(void)
     *(volatile u32 *)0x25fe00a4 = ~1u;
     sat_dbg.vblanks++;
     if (!game_done) sat_dbg.overruns++;
+#ifdef SAT_PROF
+    sat_prof.from = PROF_FROM; sat_prof.to = PROF_TO;
+    if (IN_WINDOW) { sat_prof.ticks++; if (!game_done) sat_prof.over++; }
+    if (!game_done) frame_carry += frt();
+#endif
     game_done = 0;
     FRTH = 0; FRTL = 0;
     sat_pad_tick();
     t0 = frt();
-    sat_gfx_frame();   /* before the IRQ body, which moves the next frame's scroll words into place */
+    /* Before the IRQ body, which moves the next frame's scroll words into place. A slave still drawing skips this frame's picture, never the game. */
+    if (UNCACHED(gfx_done) == UNCACHED(gfx_handed)) {
+        sat_gfx_snapshot();
+        UNCACHED(gfx_handed) = UNCACHED(gfx_handed) + 1;
+        SLAVE_WAKE = 0xffff;
+    } else
+        sat_dbg.gfx_skips++;
     t1 = frt();
     save = cpu;
     cur = -1; cpu.a[5] = 0xff8000; cpu.a[7] = 0xff8000;
@@ -290,8 +365,11 @@ void sat_vblank(void)
     cpu = save; cur = sc;
     sat_audio_frame();
     t2 = frt();
-    sat_dbg.gfx_ticks = t1 - t0; sat_dbg.irq_ticks = t2;
-    if (t1 - t0 > sat_dbg.gfx_peak) sat_dbg.gfx_peak = t1 - t0;
+    sat_dbg.snap_ticks = t1 - t0; sat_dbg.irq_ticks = t2;
+    if (t1 - t0 > sat_dbg.snap_peak) sat_dbg.snap_peak = t1 - t0;
+#ifdef SAT_PROF
+    if (IN_WINDOW) { prof_add(sat_prof.snap, t1 - t0); sat_prof.skipped = sat_dbg.gfx_skips; }
+#endif
     if (t2 > sat_dbg.irq_peak) sat_dbg.irq_peak = t2;
     sat_dbg.ff8018 = RAM16(0x8018);
     if ((sat_dbg.vblanks & 63) == 0) stack_scan();
@@ -326,6 +404,7 @@ void sat_main(void)
     game_done = 1;
     if (!sat_gfx_init(SAT_PACK)) sat_fatal(0xeb, 0);
     sat_audio_init();
+    slave_start();
     sat_dbg.stage = 1;
     f_800();
     sat_fatal(0xe8, 0);

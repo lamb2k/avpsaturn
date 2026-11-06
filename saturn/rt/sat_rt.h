@@ -4,13 +4,15 @@
 typedef struct {
     u32 magic, stage, vblanks, ff8018, task_runs, idle_calls, task_stack_high;
     u32 fatal, fatal_detail, fatal_task, fatal_a[3], exc_pc, exc_pr;
-    u32 gfx_ticks, irq_ticks, game_ticks, gfx_peak, irq_peak, game_peak, overruns, obj_flips;
+    u32 gfx_ticks, irq_ticks, game_ticks, gfx_peak, irq_peak, game_peak, overruns, obj_flips, snap_ticks, snap_peak, gfx_skips;
 } SatDebug;
 extern SatDebug sat_dbg;
 void sat_fatal(u32 code, u32 detail);
-/* saturn/gfx, called at the start of each vblank before the game's IRQ body. */
+/* saturn/gfx. The master takes a snapshot at the start of a vblank, before the game's IRQ body, when the slave has finished the last one;
+   the slave draws it. */
 int sat_gfx_init(const void *pack);
-void sat_gfx_frame(void);
+void sat_gfx_snapshot(void);
+void sat_gfx_draw(void);
 /* saturn/audio, weak stubs in present.c. */
 void sat_audio_init(void);
 void sat_audio_frame(void);

@@ -54,8 +54,13 @@ extern SatGfxStats sat_gfx_stats;
  * Returns 1, or 0 for a bad pack (nothing is touched). */
 int sat_gfx_init(const void *pack);
 
-/* Draw the current game state. */
+/* Draw the current game state: snapshot then draw. */
 void sat_gfx_frame(void);
+
+/* The two halves, for two CPUs. sat_gfx_snapshot copies what drawing needs out of game state and runs on the game's CPU, with the buffer
+ * not in use by sat_gfx_draw. sat_gfx_draw reads only that buffer and owns the video chips, caches and stats. The caller does the handoff. */
+void sat_gfx_snapshot(void);
+void sat_gfx_draw(void);
 
 /* CRAM bank of a CPS palette page and bank, or -1 when outside the map: the capacity refusal. */
 int sat_gfx_bank(int page, int bank);

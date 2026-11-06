@@ -13,7 +13,7 @@ EXE = JO / "emulators/yabasanshiro-1.20.37-2986eb-debug-rig-mcp-da2ffb34/yabasan
 NM = JO / "joengine/Compiler/WINDOWS/sh-elf/bin/nm.exe"
 INI = pathlib.Path(os.environ["APPDATA"]) / "YabaSanshiro/yabause.ini"
 STATS = ">I" + "H" * 14 + "I" * 6
-FIELDS = "magic stage vblanks ff8018 task_runs idle_calls task_stack_high fatal fatal_detail fatal_task a0 a1 a7 exc_pc exc_pr gfx_ticks irq_ticks game_ticks gfx_peak irq_peak game_peak overruns obj_flips".split()
+FIELDS = "magic stage vblanks ff8018 task_runs idle_calls task_stack_high fatal fatal_detail fatal_task a0 a1 a7 exc_pc exc_pr gfx_ticks irq_ticks game_ticks gfx_peak irq_peak game_peak overruns obj_flips snap_ticks snap_peak gfx_skips".split()
 
 
 def port_busy():
@@ -68,8 +68,8 @@ try:
         if time.time() - last > 4:
             last = time.time()
             raw = m.read(syms["sat_gfx_stats"], struct.calcsize(STATS))
-            print(round(time.time() - t0), {k: d[k] for k in ("stage", "vblanks", "task_runs", "idle_calls", "overruns", "obj_flips", "task_stack_high", "fatal", "fatal_detail", "fatal_task")},
-                  "ms(emulator-only)", {k: round(d[k] * tick_us / 1000, 2) for k in ("gfx_ticks", "irq_ticks", "game_ticks", "gfx_peak", "irq_peak", "game_peak")},
+            print(round(time.time() - t0), {k: d[k] for k in ("stage", "vblanks", "task_runs", "idle_calls", "overruns", "gfx_skips", "obj_flips", "task_stack_high", "fatal", "fatal_detail", "fatal_task")},
+                  "ms(emulator-only)", {k: round(d[k] * tick_us / 1000, 2) for k in ("gfx_ticks", "irq_ticks", "game_ticks", "gfx_peak", "irq_peak", "game_peak", "snap_ticks", "snap_peak")},
                   "gfx", dict(zip(stats_names, struct.unpack(STATS, raw))), "ff8018", m.read(syms["RAMB"] + 0x8018, 2).hex(), "stages", [int.from_bytes(m.read(syms["sat_gfx_stage"] + i * 4, 4), "big") for i in range(6)], flush=True)
         if d["fatal"]:
             print("fatal", hex(d["fatal"]), hex(d["fatal_detail"]), "symbols", sym_of(d["exc_pc"]), sym_of(d["exc_pr"]))
@@ -78,6 +78,23 @@ try:
             print("stack", [sym_of(w) for w in words if 0x06014000 <= w < 0x060fff00 or 0x00200000 <= w < 0x00300000 or 0x02400000 <= w < 0x02800000][:60])
             print("cpu", m.read(syms["sat_cpu"], 84).hex())
             break
+    if "sat_prof" in syms:
+        raw = m.read(syms["sat_prof"], 24 + 768)
+        hd = struct.unpack(">6I", raw[:24])
+        def row(i):
+            h = struct.unpack(">128H", raw[24 + i * 256:24 + (i + 1) * 256])
+            n = sum(h)
+            if not n: return None
+            bucket = 128 * tick_us / 1000
+            cum, p95 = 0, 0
+            for b, c in enumerate(h):
+                cum += c
+                if cum >= n * 0.95: p95 = b; break
+            return dict(n=n, mean=round(sum((b + .5) * c for b, c in enumerate(h)) / n * bucket, 2), p95=round((p95 + 1) * bucket, 2), top=round((max(b for b, c in enumerate(h) if c) + 1) * bucket, 2))
+        for name, size in (("sat_irq_stack", 8192), ("sat_slave_stack", 1024)):
+            s = m.read(syms[name], size)
+            print(name, "used", size - (len(s) - len(s.lstrip(b"\0"))), "of", size)
+        print("PROF(MODELLED, Yaba FRT)", dict(zip("from to ticks done over skipped".split(), hd)), {k: row(i) for i, k in enumerate(("frame", "gfx", "snap"))}, flush=True)
     import bisect, re
     table = sorted((v, k) for k, v in syms.items())
     keys = [x[0] for x in table]
