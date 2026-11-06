@@ -27,8 +27,7 @@ for f in sorted((work / "audio/music").glob("t*.raw")):
     shutil.copy(f, out / f.name)
     cue += f'FILE "{f.name}" BINARY\n  TRACK {int(f.name[1:3]):02d} AUDIO\n    PREGAP 00:02:00\n    INDEX 01 00:00:00\n'
 (out / "avp_saturn.cue").write_text(cue, newline="\n")
-(out / "avp_saturn_dma.cue").write_text(cue.replace("avp_saturn.iso", "avp_saturn_dma.iso"), newline="
-")
+(out / "avp_saturn_dma.cue").write_text(cue.replace("avp_saturn.iso", "avp_saturn_dma.iso"), newline="\n")
 shutil.copy(HERE / "HARDWARE_TEST.md", out / "HARDWARE_TEST.md")
 commit = subprocess.run(["git", "-C", str(REPO), "rev-parse", "HEAD"], capture_output=True, text=True).stdout.strip()
 dirty = subprocess.run(["git", "-C", str(REPO), "status", "--short", "saturn"], capture_output=True, text=True).stdout.strip()
