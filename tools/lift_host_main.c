@@ -14,7 +14,7 @@ static Cpu cpu;
 Cpu *R = &cpu;
 u8 *PAGE[256];
 u8 RAMB[0x10000];
-u8 ROMB[0x200000];
+u8 ROMB[0x200000]; u8 *OPB=ROMB;
 static u8 GFX[0x10000], OBJ[0x10000], ZERO[256][0x10000];
 static u8 RAM0[0x10000], GFX0[0x10000], OBJ0[0x10000];
 static sigjmp_buf jb;

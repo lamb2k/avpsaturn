@@ -10,7 +10,7 @@ static Cpu cpu;
 Cpu *R = &cpu;
 u8 *PAGE[256];
 u8 RAMB[0x10000];
-u8 ROMB[0x200000];
+u8 ROMB[0x200000]; u8 *OPB=ROMB;
 static u8 ZERO[256][0x10000], RAM0[0x10000];
 static jmp_buf jb;
 static const char *why;

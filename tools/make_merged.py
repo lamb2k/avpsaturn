@@ -50,28 +50,6 @@ for t in pcuse - set(tables):
 (c.OUT / "merged.bin").write_bytes(img)
 print("merged", len(pcuse), "pc-relative data sites;", len(tables), "tables")
 
-# Runtime image for lifted code. Lifted code fetches no instructions, so code bytes are never read as code: every read is data.
-# Program bytes everywhere; opcode bytes only where an instruction reads pc-relative. False code decodes can't shadow data here.
-rt = bytearray(c.PR)
-SZ = {"b": 1, "w": 2, "l": 4}
-for a in seen:
-    i = c.insn(a)
-    if i.mnemonic.split(".")[0] in ("lea", "pea", "jmp", "jsr"):
-        continue
-    for m in re.finditer(r"\$([0-9a-f]+)\(pc(,[^)]*)?\)", i.op_str):
-        t = int(m[1], 16)
-        if t in tables:
-            continue
-        if m[2]:                       # indexed: extent unknown, up to the next instruction
-            e = t + 2
-            while e < t + 64 and e not in seen:
-                e += 2
-        else:
-            e = t + SZ.get(i.mnemonic.rsplit(".", 1)[-1], 2)
-        rt[t:e] = c.OP[t:e]
-for t, tg in tables.items():
-    if t in seen:
-        continue
-    n = len(tg) * widths.get(t, 2)
-    rt[t:t + n] = c.OP[t:t + n]
-(c.OUT / "rt.bin").write_bytes(rt)
+# Opcode-space image: lifted pc-relative reads use it. Lifted register reads use the plain program image, c.PR.
+(c.OUT / "op.bin").write_bytes(bytes(c.OP))
+(c.OUT / "rt.bin").write_bytes(bytes(c.PR))

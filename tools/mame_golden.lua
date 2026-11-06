@@ -15,8 +15,16 @@ local function dump(base, n)
     out:write(table.concat(t))
 end
 learn_g1 = ops:install_read_tap(0xe0e, 0xe0f, "learn_golden", function()
+    -- The tap also fires on prefetch past the rte at 0xe0c. At a real IRQ entry PC still reads as the vector, 0x68, and the frame is at SP.
+    if cpu.state["PC"].value ~= 0x68 then return end
     if irq < maxirq then
         out:write(string.pack(">c4I4", "VBLK", irq))
+        -- Interrupted point: stacked PC, then d0-d7, a0-a6, so the host can take this IRQ at the same instruction.
+        local sp = cpu.state["SP"].value
+        local rr = {prog:read_u32(sp + 2) & 0xffffff}
+        for i = 0, 7 do rr[#rr + 1] = cpu.state["D" .. i].value end
+        for i = 0, 6 do rr[#rr + 1] = cpu.state["A" .. i].value end
+        out:write(string.pack(">" .. string.rep("I4", 16), table.unpack(rr)))
         dump(0xff0000, 0x10000)
         dump(0x708000, 0x2000)
         out:flush()

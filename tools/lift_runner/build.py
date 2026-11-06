@@ -26,5 +26,5 @@ inc += [f'void f_{a:x}(void){{puts("MISSING {a:x}");fflush(stdout);exit(3);}}' f
 print("missing", len(miss))
 w = "/mnt/e/AvP/learning/lift/run"
 main = "/mnt/e/AvP/worktrees/decomp-main/tools/lift_runner/host_kernel.c"
-cmd = f"cd {w} && for n in {' '.join(map(str,range(len(chunks))))}; do echo c$n; done | xargs -P3 -I@ sh -c 'test -f @.o || gcc -DHOST -w -O1 -g -fno-strict-aliasing -c @/lifted_mem.c -o @.o' && gcc -w -O1 -g -rdynamic -I. '{main}' {' '.join(f'c{n}.o' for n in range(len(chunks)))} -o lift_runner && echo built"
+cmd = f"cd {w} && for n in {' '.join(map(str,range(len(chunks))))}; do echo c$n; done | xargs -P3 -I@ sh -c 'test -f @.o || gcc -DHOST -DPREEMPT -w -O1 -g -fno-strict-aliasing -c @/lifted_mem.c -o @.o' && gcc -w -O1 -g -rdynamic -I. '{main}' {' '.join(f'c{n}.o' for n in range(len(chunks)))} -o lift_runner && echo built"
 r = subprocess.run(["wsl.exe","-e","sh","-c",cmd],capture_output=True,text=True); print(r.stdout[-200:], r.stderr[-1200:])

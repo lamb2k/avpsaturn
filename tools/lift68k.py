@@ -122,6 +122,7 @@ class Operand:
         t = text
         self.kind = None
         self.const = None
+        self.pcrel = False             # pc-relative reads go through the board's opcode space
         step = 2 if size == 1 and t.startswith(("-(a7", "(a7")) else size
         if t.startswith("#"):
             self.kind, self.val = "imm", num(t[1:]) & 0xffffffff
@@ -153,10 +154,12 @@ class Operand:
         elif (m := re.fullmatch(r"\$([0-9a-f]+)\(pc\)", t)):
             self.kind, self.const = "mem", int(m[1], 16)
             self.addr = f"0x{self.const:x}u"
+            self.pcrel = True
         elif (m := re.fullmatch(r"\$([0-9a-f]+)\(pc,\s*([da][0-7])\.([wl])\)", t)):
             ix = fn.reg(m[2])
             ix = f"(s32)(s16){ix}" if m[3] == "w" else ix
             self.kind, self.addr = "mem", f"(0x{int(m[1], 16):x}u+{ix})"
+            self.pcrel = True
         elif (m := re.fullmatch(r"\$([0-9a-f]+)\.([wl])", t)):
             v = int(m[1], 16)
             if m[2] == "w" and v >= 0x8000:
@@ -171,6 +174,8 @@ class Operand:
             return f"(({CT[self.size]})0x{self.val:x}u)"
         if self.kind == "reg":
             return reg_read(self.fn, self.r, self.size)
+        if self.pcrel:
+            return f"OP{self.size * 8}({self.addr})"
         return mem_read(self.addr, self.size, self.const)
 
     def write(self, v):
@@ -313,7 +318,7 @@ def lift(entry, ccret, mode):
             unh[m] += 1
             ABORTS.add(a)
             st = f"UNHANDLED(0x{a:x});"
-        code.append(f"{lab}{{{st}}}")
+        code.append(f"{lab}P(0x{a:x}u);{{{st}}}")
         nxt = a + i.size
         if nxt not in body and succ[a] and nxt in succ[a]:
             code.append(f"{{f_{nxt:x}();return;}}")
@@ -648,7 +653,13 @@ typedef struct{u32 d[8];u32 a[8];u32 ccz,ccn,ccc,ccv,ccx;}Cpu;
 #ifdef HOST
 extern Cpu *R;
 extern u8 *PAGE[256];
-extern u8 RAMB[];extern u8 ROMB[];
+extern u8 RAMB[];extern u8 ROMB[];extern u8 *OPB;
+#ifdef PREEMPT
+extern u32 irq_pc;extern void irq_check(u32);
+#define P(a) do{if((a)==irq_pc)irq_check(a);}while(0)
+#else
+#define P(a)
+#endif
 static inline u32 be16r(const volatile u8*p){return (u32)p[0]<<8|p[1];}
 static inline u32 be32r(const volatile u8*p){return (u32)p[0]<<24|(u32)p[1]<<16|(u32)p[2]<<8|p[3];}
 static inline void be16w(volatile u8*p,u32 v){p[0]=v>>8;p[1]=v;}
@@ -660,6 +671,9 @@ static inline void be32w(volatile u8*p,u32 v){p[0]=v>>24;p[1]=v>>16;p[2]=v>>8;p[
 #define RAMW8(o,v) (RAMB[o]=(v))
 #define RAMW16(o,v) be16w(RAMB+(o),(v))
 #define RAMW32(o,v) be32w(RAMB+(o),(v))
+#define OP8(a) (OPB[(u32)(a)&0x1fffff])
+#define OP16(a) ((u16)be16r(OPB+((u32)(a)&0x1fffff)))
+#define OP32(a) be32r(OPB+((u32)(a)&0x1fffff))
 #define ROM8(o) (ROMB[o])
 #define ROM16(o) ((u16)be16r(ROMB+(o)))
 #define ROM32(o) be32r(ROMB+(o))
@@ -672,10 +686,19 @@ static inline void be32w(volatile u8*p,u32 v){p[0]=v>>24;p[1]=v>>16;p[2]=v>>8;p[
 #else
 register Cpu *R __asm__("r14");
 extern u8 *PAGE[256];
-extern u8 RAMB[];extern u8 ROMB[];
+extern u8 RAMB[];extern u8 ROMB[];extern u8 *OPB;
+#ifdef PREEMPT
+extern u32 irq_pc;extern void irq_check(u32);
+#define P(a) do{if((a)==irq_pc)irq_check(a);}while(0)
+#else
+#define P(a)
+#endif
 #define RAM8(o) (*(volatile u8*)(RAMB+(o)))
 #define RAM16(o) (*(volatile u16*)(RAMB+(o)))
 #define RAM32(o) (*(volatile u32*)(RAMB+(o)))
+#define OP8(a) (OPB[(u32)(a)&0x1fffff])
+#define OP16(a) (*(const u16*)(OPB+((u32)(a)&0x1fffff)))
+#define OP32(a) (*(const u32*)(OPB+((u32)(a)&0x1fffff)))
 #define ROM8(o) (*(const u8*)(ROMB+(o)))
 #define ROM16(o) (*(const u16*)(ROMB+(o)))
 #define ROM32(o) (*(const u32*)(ROMB+(o)))
