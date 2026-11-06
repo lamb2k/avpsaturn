@@ -12,7 +12,7 @@ import sys
 import capstone
 
 ROOT = pathlib.Path(__file__).resolve().parents[1]
-BASE = ROOT / ".deps" / "mame" / "actorprobe"
+BASE = pathlib.Path(__import__("os").environ.get("AVP_DEPS", "C:/Game Dev/BrooklynBangoutX/AvPSaturnCapabilityTest-playable-loop-pivot/.deps")) / "mame" / "actorprobe"
 OP = (BASE / "decrypted_opcodes_2m.bin").read_bytes()
 PR = (BASE / "decrypted_program_2m.bin").read_bytes()
 MD = capstone.Cs(capstone.CS_ARCH_M68K, capstone.CS_MODE_M68K_000 | capstone.CS_MODE_BIG_ENDIAN)
