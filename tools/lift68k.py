@@ -645,6 +645,33 @@ def cc_return_set():
                 nm = n.mnemonic.split(".")[0]
                 if (nm[0] == "b" and nm[1:] in FLAGS_OF):
                     out.add(t)
+    # a fragment reached by tail from a flag-returning function returns the flags too
+    tails = {}
+    for f in FUNCS:
+        try:
+            body, _ = collect(f)
+        except Exception:
+            continue
+        ts = set()
+        for a2, i2 in body.items():
+            m2 = i2.mnemonic.split(".")[0]
+            n2 = a2 + i2.size
+            if m2 not in ("bra", "jmp", "rts", "rte", "rtr", "stop") and n2 not in body and n2 in FUNCS:
+                ts.add(n2)
+            if m2 == "bra" or m2 == "jmp" or (m2[0] == "b" and m2[1:] in FLAGS_OF) or m2.startswith("db"):
+                try:
+                    t2 = cfg.hexval(i2.op_str.split(",")[-1])
+                except Exception:
+                    continue
+                if t2 in FUNCS and t2 not in body:
+                    ts.add(t2)
+        tails[f] = ts
+    work = list(out)
+    while work:
+        for t2 in tails.get(work.pop(), ()):
+            if t2 not in out:
+                out.add(t2)
+                work.append(t2)
     return out
 
 
@@ -657,7 +684,8 @@ extern u8 *PAGE[256];
 extern u8 RAMB[];extern u8 ROMB[];extern u8 *OPB;
 #ifdef PREEMPT
 extern u32 irq_pc;extern void irq_check(u32);
-#define P(a) do{if((a)==irq_pc)irq_check(a);}while(0)
+extern int p_watch;
+#define P(a) do{if((a)==irq_pc||p_watch)irq_check(a);}while(0)
 #else
 #define P(a)
 #endif
@@ -690,7 +718,8 @@ extern u8 *PAGE[256];
 extern u8 RAMB[];extern u8 ROMB[];extern u8 *OPB;
 #ifdef PREEMPT
 extern u32 irq_pc;extern void irq_check(u32);
-#define P(a) do{if((a)==irq_pc)irq_check(a);}while(0)
+extern int p_watch;
+#define P(a) do{if((a)==irq_pc||p_watch)irq_check(a);}while(0)
 #else
 #define P(a)
 #endif
