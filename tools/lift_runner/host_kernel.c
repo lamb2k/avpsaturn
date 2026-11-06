@@ -78,8 +78,9 @@ static void task_end(void){ int me=cur; T[me].live=0; setcontext(&sched); (void)
 void f_trap1(void){ clear_rec(REC(cur)); task_end(); }
 void f_trap9(void){ u32 r=REC(cur); clear_rec(r); u32 p=r32(G_FREEP)-4; w32(p,r); w32(G_FREEP,p); w16(G_FREEN,r16(G_FREEN)+1); task_end(); }
 void f_trap2(void){ u32 off=cpu.d[0]&0xffff; u32 r=0xff0058u+off; cpu.a[4]=0xff0058u; if(r8(r)){ cpu.d[1]=0; clear_rec(r); T[off/0x20].live=0; } }
-void f_trap3(void){ u32 r=REC(cur); u32 bit=(cpu.d[0]&0xff)?0x100:0x200; u32 v=(cpu.d[0]&0xffff)|bit; cpu.d[1]=(cpu.d[1]&0xffff0000u)|bit; cpu.d[0]=(cpu.d[0]&0xffff0000u)|v; w16(r,v); w32(r+8,cpu.a[7]); to_sched(); }
-void f_trap4(void){ u32 r=REC(cur); w8(r,4); w32(r+8,cpu.a[7]); to_sched(); }
+static void trap_irq(u32 lo,u32 hi);
+void f_trap3(void){ trap_irq(0x106c,0x108e); u32 r=REC(cur); u32 bit=(cpu.d[0]&0xff)?0x100:0x200; u32 v=(cpu.d[0]&0xffff)|bit; cpu.d[1]=(cpu.d[1]&0xffff0000u)|bit; cpu.d[0]=(cpu.d[0]&0xffff0000u)|v; w16(r,v); w32(r+8,cpu.a[7]); to_sched(); }
+void f_trap4(void){ trap_irq(0x1096,0x10ac); u32 r=REC(cur); w8(r,4); w32(r+8,cpu.a[7]); to_sched(); }
 void f_trap5(void){ u32 r=0xff0058u+(cpu.d[0]&0xffff); w8(r,2); w8(r+1,0); cpu.a[4]=0xff0058u; }
 void f_trap6(void){ u32 r=0xff0058u+(cpu.d[0]&0xffff); w8(r,4); w8(r+1,cpu.d[1]); cpu.a[4]=0xff0058u; }
 void f_trap8(void){ u32 tag=r8(0xff81b3); int i; w8(0xff81b3,0); for(i=8;i<16;i++){ u32 r=REC(i); if(r8(r)&&r8(r+0x16)==tag){ clear_rec(r); T[i].live=0; { u32 p=r32(G_FREEP)-4; w32(p,r); w32(G_FREEP,p); w16(G_FREEN,r16(G_FREEN)+1);} } } }
@@ -109,6 +110,7 @@ static int quiet; static int ring_empty(void){ int i; for(i=0;i<TASKS;i++) if(i!
 void irq_check(u32 a){ int i; if(in_irq) return; if(r8(0xff8019)!=(u32)want19) return; /* several ticks in one frame repeat the same PC and registers */ if(cur==6&&!(quiet&&ring_empty())) return; if(a>=0x11ec&&a<0x1214&&cur<0){ if(quiet&&ring_empty()){ nkern++; take_irq(); } return; } /* the idle call: dispatcher leftovers in its registers aren't modelled */ { int bad=0; for(i=0;i<8;i++) if(cpu.d[i]!=ipr[i]) bad++; for(i=0;i<7;i++) if(cpu.a[i]!=ipr[8+i]) bad++; if(bad>(getenv("REGBAD")?atoi(getenv("REGBAD")):2)){ static long lastp=-1; if(curv!=lastp&&getenv("REGDBG")){ lastp=curv; printf("nearmiss v%ld pc %x bad %d:",curv,a,bad); for(i=0;i<8;i++) if(cpu.d[i]!=ipr[i]) printf(" d%d %x/%x",i,cpu.d[i],ipr[i]); for(i=0;i<7;i++) if(cpu.a[i]!=ipr[8+i]) printf(" a%d %x/%x",i,cpu.a[i],ipr[8+i]); puts(""); } return; } if(bad) nregmiss++; } nmatch++; take_irq(); }
 /* At the dispatcher: the IRQ was in the dispatcher or a trap body (native here), or its point was missed. */
 static int kern_pc(u32 p){ return (p>=0xd86&&p<0xdb8)||(p>=0xf00&&p<0x1188); }
+static void trap_irq(u32 lo,u32 hi){ if(irq_pc>=lo&&irq_pc<hi&&cur!=6&&ipr[8]==cpu.a[0]&&r8(0xff8019)==(u32)want19){ nkern++; take_irq(); } }
 static void start_irq(void){ if(irq_pc>=0xdb8&&irq_pc<0xe0e&&!(irq_pc>=0xddc&&irq_pc<0xde6)&&ipr[8]==(u32)REC(cur)&&(cur!=6||ring_empty())){ nkern++; take_irq(); } } /* between marking the task running and its rte */
 static void disp_irq(void){ if(irq_pc==0xffffffffu) return; if(kern_pc(irq_pc)){ nkern++; take_irq(); return; } }
 static void idle_irq(void){ if(irq_pc==0xffffffffu) return; if(kern_pc(irq_pc)) nkern++; else { nmiss++; if(nmiss<20){ printf("missed irq at %x vblank %ld\n",irq_pc,curv); fflush(stdout);} } take_irq(); }
