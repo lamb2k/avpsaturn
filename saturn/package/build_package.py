@@ -19,11 +19,16 @@ for f in out.iterdir():
     if f.is_file():
         f.unlink()
 shutil.copy(work / "sat.iso", out / "avp_saturn.iso")
+dma = dict(env, KERNEL_CFLAGS=env["KERNEL_CFLAGS"] + " -DSAT_TILE_DMA")   # second data track: tile uploads by SCU DMA, for the on/off decision
+subprocess.run([sys.executable, str(REPO / "saturn/rt/build.py"), str(work)], check=True, env=dma)
+shutil.copy(work / "sat.iso", out / "avp_saturn_dma.iso")
 cue = 'FILE "avp_saturn.iso" BINARY\n  TRACK 01 MODE1/2048\n    INDEX 01 00:00:00\n'
 for f in sorted((work / "audio/music").glob("t*.raw")):
     shutil.copy(f, out / f.name)
     cue += f'FILE "{f.name}" BINARY\n  TRACK {int(f.name[1:3]):02d} AUDIO\n    PREGAP 00:02:00\n    INDEX 01 00:00:00\n'
 (out / "avp_saturn.cue").write_text(cue, newline="\n")
+(out / "avp_saturn_dma.cue").write_text(cue.replace("avp_saturn.iso", "avp_saturn_dma.iso"), newline="
+")
 shutil.copy(HERE / "HARDWARE_TEST.md", out / "HARDWARE_TEST.md")
 commit = subprocess.run(["git", "-C", str(REPO), "rev-parse", "HEAD"], capture_output=True, text=True).stdout.strip()
 dirty = subprocess.run(["git", "-C", str(REPO), "status", "--short", "saturn"], capture_output=True, text=True).stdout.strip()

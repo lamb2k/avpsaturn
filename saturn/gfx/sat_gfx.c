@@ -255,6 +255,10 @@ static void vram_copy(u8 *dest, const u8 *src, u32 bytes)
 #endif
 }
 
+#ifdef SAT_READOUT
+extern u32 sat_pad_raw;
+static u32 readout_pad(void) { return *(volatile u32 *)((unsigned long)&sat_pad_raw | 0x20000000UL); }
+#endif
 #define HASH(k) (((k) ^ ((k) >> 10)) & (HASH_SIZE - 1))
 /* The per-frame snapshot: everything drawing reads from the game, copied once by the game's CPU. The two sides never share a structure: the
    master owns game RAM, object RAM and graphics RAM; the drawing side owns VDP1, VDP2, CRAM, the caches and the shadows. */
@@ -619,7 +623,11 @@ static void put_sprite(u8 *cmd, u16 flip, u16 colr, u32 tex, int x, int y)
     put16(cmd + 4, 0x0880);        /* pre-clip off, end codes off, pen 0 clear, 16 colour bank */
     put16(cmd + 6, colr);
     put16(cmd + 8, (u16)(tex >> 3));
+#ifdef SAT_READOUT
+    put16(cmd + 10, readout_pad() & 0x0010 ? 0x0210 : 0x0101);   /* pad Z held: 8 x 1 texels per tile, so fetch cost stays and fill nearly goes */
+#else
     put16(cmd + 10, 0x0210);       /* 16 x 16 */
+#endif
     put16(cmd + 12, (u16)x);
     put16(cmd + 14, (u16)y);
 }
@@ -627,7 +635,7 @@ static void put_sprite(u8 *cmd, u16 flip, u16 colr, u32 tex, int x, int y)
 #ifdef SAT_READOUT
 /* Frame-cost bars for a real console, where no debugger reads the timers: 8 pixels per ms from the left, top bar game on the master, second bar drawing on the slave, white tick at 16.7 ms.
    Values come from the kernel through the uncached alias. Physical numbers are read from a capture of the screen. */
-extern volatile unsigned long sat_readout[2];
+extern volatile unsigned long sat_readout[3];
 static u8 *bar(u8 *cmd, int w, int y, u16 rgb)
 {
     if (w > SAT_GFX_SCREEN_W - 1) w = SAT_GFX_SCREEN_W - 1;
@@ -701,9 +709,12 @@ static void draw_sprites(void)
 #ifdef SAT_READOUT
     {
         volatile unsigned long *r = (volatile unsigned long *)((unsigned long)sat_readout | 0x20000000UL);
-        cmd = bar(cmd, (int)(r[0] / 26), 0, 0x83e0);
-        cmd = bar(cmd, (int)(r[1] / 26), 4, 0x801f);
-        cmd = bar(cmd, 133, 8, 0xffff);
+        /* Four colours at the top of CRAM, past any palette page in use; sprite priority 7 so they sit over every layer. */
+        put16(CRAM_AT(2041), 0x83e0); put16(CRAM_AT(2042), 0xfc00); put16(CRAM_AT(2043), 0xffff); put16(CRAM_AT(2044), 0xfc1f);
+        cmd = bar(cmd, (int)(r[0] / 26), 0, 0xe000 | 2041);
+        cmd = bar(cmd, (int)(r[1] / 26), 3, 0xe000 | 2042);
+        cmd = bar(cmd, 133, 6, 0xe000 | 2043);
+        cmd = bar(cmd, (int)(r[2] / 26), 9, 0xe000 | 2044);
     }
 #endif
     put16(cmd, 0x8000); /* end */
@@ -928,6 +939,14 @@ void sat_gfx_draw(void)
     /* Plot into the back buffer now; the swap comes with the next vblank. */
     VDP1R(FBCR) = 3;
     VDP1R(PTMR) = 1;
+#ifdef SAT_READOUT
+    if (!(readout_pad() & 0x0020))   /* pad Y held: wait here for the list's end and show VDP1's time as the fourth bar. It costs the slave that wait. */
+    {
+        u32 t0 = ((u32)*(volatile u8 *)0xfffffe12u << 8) | *(volatile u8 *)0xfffffe13u, t = 0;
+        while (!(*(volatile u16 *)0x25D00010UL & 2) && t < 8000u) t = (((u32)*(volatile u8 *)0xfffffe12u << 8 | *(volatile u8 *)0xfffffe13u) - t0) & 0xffffu;
+        *(volatile unsigned long *)((unsigned long)&sat_readout[2] | 0x20000000UL) = t;
+    }
+#endif
     sat_gfx_stats.frames++;
 }
 

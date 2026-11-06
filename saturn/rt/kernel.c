@@ -11,7 +11,7 @@ Cpu sat_cpu;
 u8 *PAGE[256];
 u8 RAMB[0x10000] __attribute__((aligned(4)));
 SatDebug sat_dbg;
-volatile unsigned long sat_readout[2];   /* FRT ticks, game and drawing, for the SAT_READOUT bars */
+volatile unsigned long sat_readout[3];   /* FRT ticks, game and drawing, for the SAT_READOUT bars */
 
 #define TASKS 16
 #define TASK_STACK 4096

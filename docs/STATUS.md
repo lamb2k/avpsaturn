@@ -37,3 +37,25 @@ Two artefacts: the grey wall was VDP1 trails, fixed by a clear polygon at the he
 Missing tiles: real pixels the pack lacks, because the pack is a census of one MAME route. 493 of about 500 lookups fall at vblanks 550-803, before Round 1 gameplay on this script's earlier coin; few arrive in gameplay. Not fixed.
 Sprite tiles over golden_r1s (tools/sat_tile_funnel.py, MAME data, 15618 frames): commands mean 149.6, p95 373, max 520; 800-tile worst frame loses 172 off screen and 108 empty, already culled per tile. Row runs on that frame 153. Live sprite banks mean 5.1, p95 9, max 11 of 32. Merging rows is not built: it needs contiguous texture slots.
 Unproven: VDP1 fill time and bus contention on hardware; command table overwritten while VDP1 still plots a late list.
+
+## Round 1 played on real pad input, 2026-11-06 (EMULATOR, Yaba; not hardware)
+
+Real input: `saturn/rt/play_yaba.py` posts key messages to Yaba's own window; the emulated pad goes through SMPC to the game's latch. No scripted flag. Closed-loop bot `saturn/rt/play_round1_bot.py` reads RAM over MCP and picks keys.
+Run: Predator Warrior from coin to Round 2 title card, attract 0 throughout, 2 process legs joined by a save state at v10919. Section 1 clear v4909-range, boss (ffa3c0 class 06) from v5834, 5 KOs in the leg counts with credited continues returning 101 health, boss health to below zero about v23085, ff81f3 set v23142, section 3 v23325. Screenshots and logs: E:\AvP\learning\lane-play\proof.
+ff81f3 is a section clear flag, not boss clear. Boss clear is ff81f3 set in section 2 (ffd182) followed by section 3. An earlier run's flag at v4885 was section 1.
+Fixes: 25 targets in 7 unresolved jump tables (tools/satint_scan_tables.py; the fatal was 0xe1 at 0x4af24), added as an extra lifted chunk in the lane's work directory only: they still need adding to the shared roots.
+Not re-proven: that run predates the new pack, the speed merge and the readout. The final image had short runs only (about 2200 vblanks, no fatal). The bot played far worse than the MAME route and needed many more ticks.
+Yaba speed in gameplay falls from about 60 to about 20 vblanks/s within a minute, the same with near-zero polling, key input or heavy reads, from one save state. So it is not MCP. Cause not found. A long-lived process fell further, to about 3-5, with other host load present.
+
+Pack: real-play key log (SAT_KEYLOG, first ~2600 vblanks) plus a census from Round 1 start. 1079 sprite and 64 scroll 1 keys were missed by the old pack; 1202 of 1883 sprite extras fit, in play census order first, and attract-only tiles left the pack. Main 1,648,296 bytes. Missing counter 1224 before (about v2600), 940 at v2157 after: not the same point, and not fixed. The title's digits and some round card letters still draw blank in shots taken before this pack; not rechecked after. Room came from moving one more cold chunk into the rest of the tile ROM stretch.
+
+Audio: hooked in; clips load through low RAM to SCSP RAM at boot. Pick: per-channel slots. Capture from a patched Yaba (saturn/audio/yaba_wav_dump.patch, SCSP output), same 14 commands, against MAME, saturn/audio/compare_raw.py:
+| | per channel | single mixed stream |
+| --- | --- | --- |
+| frame cost, worst, emulator timer | 0.10 ms | 2.16 ms |
+| 10 ms loudness correlation, median per second | 0.735 | 0.844 |
+| level against MAME | +1.0 dB | +2.1 dB |
+The stream sounds closer by this measure, at about 22 times the worst cost, and Yaba likely undercharges its bus reads. The mix uses 2 slots and 16 KB, not the 3 slots of the MSHvSF evidence. Effects in the slot build run quieter than MAME over the first 11 s. Not tuned.
+Game image capture: non-silent; clips 0x24e, 0x254 and 0x203 matched by correlation 0.81-0.997. CD music is in the capture. Not compared to a MAME run of the same play, because the play differs. No person has listened.
+
+Package, item 26: `saturn/package/build_package.py`, output E:\AvP\package-play: two data images (DMA off and on), cue, tracks, hashes, HARDWARE_TEST.md, with on-screen bars for game, drawing and VDP1 time, and Y and Z test modes for fetch against fill. Hardware: UNRUN. The bars ran on Yaba; the DMA image did not get a gameplay run, only the build.

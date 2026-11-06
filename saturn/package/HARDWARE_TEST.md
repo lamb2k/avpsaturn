@@ -5,7 +5,7 @@ Status: UNRUN on hardware. Everything so far ran on Yaba Sanshiro only. Emulator
 ## You need
 
 - NTSC Saturn with the 4 MB RAM cart (32 Mbit, the kind sold with King of Fighters 97 or X-Men vs Street Fighter).
-- This folder written to a CD-R (cue and raw tracks) or loaded on an optical drive emulator.
+- Either disc from this folder (avp_saturn.cue normally) written to a CD-R (cue and raw tracks) or loaded on an optical drive emulator.
 - A standard pad in port 1.
 - A way to record the screen, if you can, for reading the bars.
 
@@ -44,14 +44,34 @@ For each step: pass or fail, and what happened.
 
 ## Frame-cost bars
 
-Three thin bars sit at the top left of the screen. Each 8 pixels is 1 ms.
+Thin bars sit near the top left of the screen, over the score bar. Each 8 pixels is 1 ms, so the screen's 352 pixels hold 44 ms.
 
 - Green, top: game logic on the main CPU, last finished frame.
-- Blue, middle: drawing on the second CPU, last picture.
-- White, bottom: fixed length, 16.7 ms, one 60 Hz field.
+- Blue, second: drawing on the second CPU, last picture.
+- White, third: fixed length, 16.7 ms, one 60 Hz field.
+- Magenta, fourth: VDP1's time for the sprite list. It only updates while you hold Y.
 
-A bar past the white one means that part missed 60 Hz. The timer is restarted at each vblank, so a frame that runs long resets the reading and the bar can look short: read the bars over several seconds, and record video if possible.
+A bar past the white one means that part missed 60 Hz. A frame that runs long restarts the timer, so read over several seconds. Record video and step through it if you can.
+
+## Numbers we need
+
+Do these in the same busy place, the Coffee Shop fight, for about 20 seconds each. Write down typical and worst bar lengths in pixels.
+
+| Test | Disc | Hold | Decides |
+| --- | --- | --- | --- |
+| A. Game and drawing | avp_saturn.cue | nothing | Green and blue: console frame cost |
+| B. VDP1 full | avp_saturn.cue | Y | Magenta: fetch plus fill |
+| C. VDP1 fetch only | avp_saturn.cue | Y and Z | Magenta: nearly fetch alone. Sprites look like garbage in this test, that is expected |
+| D. DMA on | avp_saturn_dma.cue | nothing, then Y | Compare blue and magenta with A and B |
+
+- Fill is B minus C. If fetch dominates, merging tile rows is worth doing; if fill dominates, it is not.
+- Blue in D lower than in A with no corruption means tile DMA stays on.
+- Note any corruption on the DMA disc. SCU DMA from the cart is not legal in every direction, so this may misbehave: that is a result, not a failure of the test.
 
 ## Known limits
 
-See `KNOWN_LIMITS` in docs/STATUS.md for the state of this build. Round 1 only: the image holds Round 1 data, and other rounds are not built. The cart hold only this round's tiles, so a tile the pack lacks draws blank.
+- Round 1 only. Round 2 shows its title card, then is not built: stop there.
+- Tiles the pack lacks draw blank. Letters and digits are missing in places on the title and round cards, and some attract and select graphics.
+- Under 60 fps in busy fights is expected. Only Yaba has run this, split into legs with save states.
+- Music is CD audio and effects are 8 bit 11 kHz. Effects run about 3 dB quiet against MAME on Yaba.
+- Settings live in RAM. Nothing saves.
