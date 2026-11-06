@@ -6,6 +6,14 @@ lastsave=0
 def save(s,v):
     global lastsave
     lastsave=v; s.log('save',s.m.call('save_state',slot=1)[:120])
+minfree={}
+def stacks(s):
+    sz=s.syms.get('sat_task_stack_size') or int(__import__('os').environ.get('TASK_STACK','2048'))
+    for i in range(16):
+        b=s.m.read(s.syms['task_stacks']+i*sz,sz); n=0
+        while n<sz and b[n:n+4]==bytes([0xa5]*4): n+=4
+        minfree[i]=min(minfree.get(i,sz),n)
+    s.log('stack min free bytes per task',minfree)
 def keylog(s):
     import pathlib
     b=b''.join(s.m.read(0x25A70000+a,0x4000) for a in range(0,0x10000,0x4000))
@@ -20,10 +28,10 @@ def step(v,s):
     cur=(mode,h,g9,f3,p0,top,sec,d[2],d[4])
     if cur!=prev: s.log('m',mode,'att',h,'cred',cred,'g09',g9,'f3',f3,'p',p0,top,'hp',hp,'x',x,'sec',sec,'a3c0 type',d[0],d[2],hex(d[4]<<8|d[5])); prev=cur
     if v-lastshot>=600:
-        lastshot=v; s.shot(f'b_{v:06d}'); keylog(s)
+        lastshot=v; s.shot(f'b_{v:06d}'); stacks(s)
         if v-lastsave>=1800: save(s,v)
         s.log('hp',hp,'x',x,'cred',cred,'rate v/s',round(v/(time.time()-t0-20),1))
-    if top==4 and not inko: inko=True; ko+=1; s.log('KO',ko,'att',h); s.shot(f'ko{ko}_{v}')
+    if top==4 and not inko: inko=True; ko+=1; s.log('KO',ko,'att',h); s.shot(f'ko{ko}_{v}'); stacks(s)
     if top!=4: inko=False
     if sec==2 and d[2]==6 and boss is None: boss=v; s.log('BOSS present',v); s.shot(f'boss_{v}')
     if sec==2 and f3 and not h and sec2clear is None: sec2clear=v; s.log('BOSS CLEAR f3 in section 2, attract 0, ko',ko,'continues',cont); s.shot(f'clear_{v}')
@@ -46,5 +54,5 @@ def step(v,s):
     s.set(['right'])
     for k in range(8):
         s.pulse('c' if k<5 else ('a' if k<7 else 'b'),0.05); time.sleep(0.05)
-def fatal(s,c,d): s.shot('fatal'); keylog(s)
-def end(s): keylog(s)
+def fatal(s,c,d): s.shot('fatal'); stacks(s)
+def end(s): stacks(s)

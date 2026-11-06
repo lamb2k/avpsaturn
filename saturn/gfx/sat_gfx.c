@@ -220,7 +220,7 @@ static long pack_find(const Section *s, u32 key)
 
 #ifdef SAT_PROF
 /* Test flag: costs on the drawing side over the window. Upload time, and sprite stage time on frames with no upload, which leaves lookups and command writes. */
-typedef struct { u32 frames, upload_ticks, uploads, layer_uploads, missing, clean_frames, clean_ticks, clean_commands, dirty_ticks, commands, peak_upload_ticks; } SatSpeed;
+typedef struct { u32 frames, upload_ticks, uploads, layer_uploads, missing, clean_frames, clean_ticks, clean_commands, dirty_ticks, commands, peak_upload_ticks, peak_total, peak_vblank, peak_stage[6], peak_uploads, peak_layer_uploads, peak_commands, verify_checked, verify_bad; } SatSpeed;
 SatSpeed sat_speed;
 static int speed_on;
 extern u32 sat_vblanks_now(void);
@@ -769,7 +769,19 @@ static u32 snap_layer(u32 *dest, const u8 *map, u32 xc, u32 yc, u32 rows, u32 co
         const u8 *base = map + ((((xc + col) & 63) << row_bits) * 4);
         for (row = 0; row < rows; row++) sum = MIX(sum, be32(base + row_off[row]));
     }
+#ifdef SAT_SNAP_VERIFY
+    /* Test flag: an unchanged sum must mean unchanged words, or the trim would draw stale cells. */
+    if (sum == old)
+        for (col = 0; col < cols; col++)
+        {
+            const u8 *base = map + ((((xc + col) & 63) << row_bits) * 4);
+            u32 *cell = dest + col;
+            for (row = 0; row < rows; row++, cell += cols) { sat_speed.verify_checked++; if (*cell != be32(base + row_off[row])) sat_speed.verify_bad++; }
+        }
+#endif
+#ifndef SAT_SNAP_ALWAYS
     if (sum == old) return sum;
+#endif
     for (col = 0; col < cols; col++)
     {
         const u8 *base = map + ((((xc + col) & 63) << row_bits) * 4);
@@ -805,7 +817,15 @@ void sat_gfx_snapshot(void)
         if (!src) continue;
         snap.pal_pages |= (u16)(1U << page);
         for (n = 0; n < 0x400; n += 4) sum = MIX(sum, be32(src + n));
+#ifdef SAT_SNAP_VERIFY
+        if (sum == snap.pal_sum[page])
+            for (n = 0; n < 0x400; n += 4) { sat_speed.verify_checked++; if (*(u32 *)(void *)(snap.palette[page] + n) != be32(src + n)) sat_speed.verify_bad++; }
+#endif
+#ifdef SAT_SNAP_ALWAYS
+        if (1)
+#else
         if (sum != snap.pal_sum[page])
+#endif
         {
             for (n = 0; n < 0x400; n += 4) put32_ram(snap.palette[page] + n, be32(src + n));
             snap.pal_sum[page] = sum;
@@ -933,6 +953,13 @@ void sat_gfx_draw(void)
         sat_speed.commands += sat_gfx_stats.commands;
         if (sat_gfx_stats.uploads == 0) { sat_speed.clean_frames++; sat_speed.clean_ticks += t; sat_speed.clean_commands += sat_gfx_stats.commands; }
         else sat_speed.dirty_ticks += t;
+        if (sat_gfx_stage[5] > sat_speed.peak_total)
+        {
+            int k;
+            sat_speed.peak_total = sat_gfx_stage[5]; sat_speed.peak_vblank = sat_vblanks_now();
+            for (k = 0; k < 6; k++) sat_speed.peak_stage[k] = sat_gfx_stage[k];
+            sat_speed.peak_uploads = sat_gfx_stats.uploads; sat_speed.peak_layer_uploads = sat_gfx_stats.layer_uploads; sat_speed.peak_commands = sat_gfx_stats.commands;
+        }
     }
 #endif
 
