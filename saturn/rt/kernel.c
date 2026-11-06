@@ -239,6 +239,36 @@ static void prof_add(u16 *h, u32 t) { t >>= 7; h[t > 127 ? 127 : t]++; }
 #define IN_WINDOW (sat_dbg.vblanks >= PROF_FROM && sat_dbg.vblanks < PROF_TO)
 #endif
 
+#ifdef SAT_PROF_PC
+/* Test flag: PC and PR sampled by the master's FRT compare interrupt, level 15, about every 5 ms with a per-vblank phase, over the window, in unused cart space. Read by run_yaba.py, ranked by tools/sat_pc_rank.py. MODELLED. */
+#define PC_STEP 1100
+#define PC_MAX 2500
+#define FTIER (*(volatile u8 *)0xfffffe10u)
+#define FTCSR_M (*(volatile u8 *)0xfffffe11u)
+#define OCRAH (*(volatile u8 *)0xfffffe14u)
+#define OCRAL (*(volatile u8 *)0xfffffe15u)
+#define TOCR (*(volatile u8 *)0xfffffe17u)
+#define sat_pcs ((u32 *)0x02557000u)
+u32 sat_pcn;
+extern void sat_pc_entry(void);
+static u32 pc_next;
+static void pc_arm(u32 at) { pc_next = at; TOCR = 0; OCRAH = (u8)(at >> 8); OCRAL = (u8)at; }
+void sat_pc_sample(u32 pc, u32 pr)
+{
+    FTCSR_M = (u8)(FTCSR_M & ~0x08);
+    if (IN_WINDOW && sat_pcn < PC_MAX) { sat_pcs[sat_pcn * 2] = pc; sat_pcs[sat_pcn * 2 + 1] = pr; sat_pcn++; }
+    pc_arm(pc_next + PC_STEP);
+}
+static void pc_start(void)
+{
+    ((void (**)(void))0x06000000)[0x70] = sat_pc_entry;
+    *(volatile u16 *)0xfffffe66u = 0x0070;   /* VCRC: compare vector */
+    *(volatile u16 *)0xfffffe60u = (u16)(*(volatile u16 *)0xfffffe60u | 0x0f00); /* IPRB: FRT level 15 */
+    pc_arm(PC_STEP);
+    FTIER = 0x09;
+}
+#endif
+
 /* Slave SH-2: draws, nothing else. Interface is one handoff: while gfx_handed != gfx_done the slave owns the snapshot, otherwise the master does.
    Each counter has one writer and is read through the cache-through alias. The slave waits on its own FRT input-capture flag, set by a master
    write to 0x21000000, so its idle loop stays off the bus. The whole cache is purged per frame: the snapshot changed under it, nothing else it caches does. */
@@ -290,6 +320,9 @@ void f_d86(void)
 {
     if (!irq_on) irq_enable();
     sat_dbg.stage = 2;
+#ifdef SAT_PROF_PC
+    pc_start();
+#endif
     for (;;) {
         int i;
         w8(G_VFLAG, 0);
@@ -349,6 +382,9 @@ void sat_vblank(void)
 #endif
     game_done = 0;
     FRTH = 0; FRTL = 0;
+#ifdef SAT_PROF_PC
+    pc_arm(200 + (sat_dbg.vblanks * 37) % PC_STEP);
+#endif
     sat_pad_tick();
     t0 = frt();
     /* Before the IRQ body, which moves the next frame's scroll words into place. A slave still drawing skips this frame's picture, never the game. */

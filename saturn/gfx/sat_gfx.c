@@ -689,6 +689,33 @@ unsigned long sat_gfx_stage[6];
 #define STAGE(i) (sat_gfx_stage[i] = ((u32)*(volatile u8 *)0xfffffe12UL << 8) | *(volatile u8 *)0xfffffe13UL)
 #endif
 
+/* One scroll layer's visible cells. Most frames nothing changed, so the first pass only sums and the copy runs when the sum moved: the drawing side
+   skips an unchanged sum, and the snapshot still holds those words. The game's maps run down columns, so the reads stay on cache lines. */
+static u32 snap_layer(u32 *dest, const u8 *map, u32 xc, u32 yc, u32 rows, u32 cols, u32 row_bits, u32 sum, u32 old)
+{
+    u32 row_off[S1_ROWS], col, row, low = (1UL << row_bits) - 1;
+    for (row = 0; row < rows; row++)
+    {
+        u32 r = (yc + row) & 63;
+        row_off[row] = ((r & low) + ((r & (63UL & ~low)) << 6)) * 4;
+    }
+    for (col = 0; col < cols; col++)
+    {
+        const u8 *base = map + ((((xc + col) & 63) << row_bits) * 4);
+        for (row = 0; row < rows; row++) sum = MIX(sum, be32(base + row_off[row]));
+    }
+    if (sum == old) return sum;
+    for (col = 0; col < cols; col++)
+    {
+        const u8 *base = map + ((((xc + col) & 63) << row_bits) * 4);
+        u32 *cell = dest + col;
+        for (row = 0; row < rows; row++, cell += cols) *cell = be32(base + row_off[row]);
+    }
+    return sum;
+}
+
+static int rows_clear;
+
 /* Master side. Takes what drawing needs from game state, visible cells only, at the point the game's level 2 IRQ would start. */
 void sat_gfx_snapshot(void)
 {
@@ -696,8 +723,7 @@ void sat_gfx_snapshot(void)
     const u8 *pal = GFX(pal_reg);
     const u8 *list = PAGE[0x70] + 0x8000;
     const u8 *last;
-    u32 x0, y0, row, col, n;
-    u32 *cell;
+    u32 x0, y0, n;
     int page, count = 0;
 
     snap.layers = layers;
@@ -710,16 +736,13 @@ void sat_gfx_snapshot(void)
     for (page = 0; page < SAT_GFX_PAGES; page++)
     {
         const u8 *src = palette_page(pal, pal_mask, page);
+        u32 sum = 0;
         if (!src) continue;
         snap.pal_pages |= (u16)(1U << page);
+        for (n = 0; n < 0x400; n += 4) sum = MIX(sum, be32(src + n));
+        if (sum != snap.pal_sum[page])
         {
-            u32 sum = 0;
-            for (n = 0; n < 0x400; n += 4)
-            {
-                u32 w = be32(src + n);
-                put32_ram(snap.palette[page] + n, w);
-                sum = MIX(sum, w);
-            }
+            for (n = 0; n < 0x400; n += 4) put32_ram(snap.palette[page] + n, be32(src + n));
             snap.pal_sum[page] = sum;
         }
     }
@@ -740,74 +763,42 @@ void sat_gfx_snapshot(void)
             any |= v;
         }
         snap.row_active = (u16)(any != 0);
+        rows_clear = 0;
     }
-    else
+    else if (!rows_clear)
+    {
         for (n = 0; n < SAT_GFX_SCREEN_H; n++) snap.row[n] = 0;
+        rows_clear = 1;
+    }
 
-    /* Column outer: the game's maps run down columns, so the reads stay on cache lines. */
     if (layers & 2)
     {
-        const u8 *map = GFX(RAM16(SH_SCROLL1_BASE) & 0xffc0U);
-        u32 sum;
         x0 = (u32)snap.s1x + CPS_LEFT + SAT_GFX_CROP_X; y0 = (u32)snap.s1y + CPS_TOP;
-        sum = (x0 >> 3) | ((y0 >> 3) << 16);
-        for (col = 0; col < S1_COLS; col++)
-        {
-            u32 c = ((x0 >> 3) + col) & 63;
-            cell = snap.s1 + col;
-            for (row = 0; row < S1_ROWS; row++, cell += S1_COLS)
-            {
-                u32 r = ((y0 >> 3) + row) & 63;
-                u32 w = be32(map + ((r & 0x1f) + (c << 5) + ((r & 0x20) << 6)) * 4);
-                *cell = w;
-                sum = MIX(sum, w);
-            }
-        }
-        snap.s1_sum = sum;
+        snap.s1_sum = snap_layer(snap.s1, GFX(RAM16(SH_SCROLL1_BASE) & 0xffc0U), x0 >> 3, y0 >> 3, S1_ROWS, S1_COLS, 5, (x0 >> 3) | ((y0 >> 3) << 16), snap.s1_sum);
     }
     if (layers & 4)
     {
-        const u8 *map = GFX(RAM16(SH_SCROLL2_BASE) & 0xffc0U);
-        u32 cols = snap.row_active ? 64 : S2_COLS, sum;
+        u32 whole = snap.row_active != 0;
         x0 = (u32)snap.s2x + CPS_LEFT + SAT_GFX_CROP_X; y0 = (u32)snap.s2y + CPS_TOP;
-        sum = (snap.row_active ? 0x80000000UL : (x0 >> 4)) | ((y0 >> 4) << 16);
-        for (col = 0; col < cols; col++)
-        {
-            u32 c = ((snap.row_active ? 0 : x0 >> 4) + col) & 63;
-            cell = snap.s2 + col;
-            for (row = 0; row < S2_ROWS; row++, cell += cols)
-            {
-                u32 r = ((y0 >> 4) + row) & 63;
-                u32 w = be32(map + ((r & 0x0f) + (c << 4) + ((r & 0x30) << 6)) * 4);
-                *cell = w;
-                sum = MIX(sum, w);
-            }
-        }
-        snap.s2_sum = sum;
+        snap.s2_sum = snap_layer(snap.s2, GFX(RAM16(SH_SCROLL2_BASE) & 0xffc0U), whole ? 0 : x0 >> 4, y0 >> 4, S2_ROWS, whole ? 64 : S2_COLS, 4,
+                                 (whole ? 0x80000000UL : (x0 >> 4)) | ((y0 >> 4) << 16), snap.s2_sum);
     }
     if (layers & 8)
     {
-        const u8 *map = GFX(RAM16(SH_SCROLL3_BASE) & 0xffc0U);
-        u32 sum;
         x0 = (u32)snap.s3x + CPS_LEFT + SAT_GFX_CROP_X; y0 = (u32)snap.s3y + CPS_TOP;
-        sum = (x0 >> 5) | ((y0 >> 5) << 16);
-        for (col = 0; col < S3_COLS; col++)
-        {
-            u32 c = ((x0 >> 5) + col) & 63;
-            cell = snap.s3 + col;
-            for (row = 0; row < S3_ROWS; row++, cell += S3_COLS)
-            {
-                u32 r = ((y0 >> 5) + row) & 63;
-                u32 w = be32(map + ((r & 7) + (c << 3) + ((r & 0x38) << 6)) * 4);
-                *cell = w;
-                sum = MIX(sum, w);
-            }
-        }
-        snap.s3_sum = sum;
+        snap.s3_sum = snap_layer(snap.s3, GFX(RAM16(SH_SCROLL3_BASE) & 0xffc0U), x0 >> 5, y0 >> 5, S3_ROWS, S3_COLS, 3, (x0 >> 5) | ((y0 >> 5) << 16), snap.s3_sum);
     }
-    while (count < MAX_OBJECTS && be16(list + count * 8 + 2) < 0x8000 && be16(list + count * 8 + 6) < 0xff00) count++;
+    {
+        u8 *out = snap.obj;
+        for (; count < MAX_OBJECTS; count++, list += 8, out += 8)
+        {
+            u32 first = be32(list), second = be32(list + 4);
+            if ((first & 0xffffUL) >= 0x8000UL || (second & 0xffffUL) >= 0xff00UL) break;
+            put32_ram(out, first);
+            put32_ram(out + 4, second);
+        }
+    }
     snap.objects = (u16)count;
-    snap_copy(snap.obj, list, (u32)count * 8);
 }
 
 /* Drawing side: everything from the snapshot. On the Saturn this runs on the slave SH-2. */

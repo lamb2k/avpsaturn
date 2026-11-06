@@ -61,6 +61,8 @@ try:
         time.sleep(0.25)
         b = m.read(syms["sat_dbg"], 4 * len(FIELDS))
         d = {f: int.from_bytes(b[i * 4:i * 4 + 4], "big") for i, f in enumerate(FIELDS)}
+        if os.environ.get("UNTIL_VBLANK") and d["vblanks"] >= int(os.environ["UNTIL_VBLANK"]):
+            break
         while shots and d["vblanks"] >= shots[0]:
             n = shots.pop(0)
             m.call("framebuffer_screenshot", path=str(WORK / "shots" / f"y{n:05d}.png"))
@@ -98,6 +100,10 @@ try:
             cw = struct.unpack(">41I", m.read(syms["sat_gfx_census"], 41 * 4))
             print("CENSUS", dict(zip("tiles offscreen empty commands runs banks banks_peak peak_frame missing_n".split(), cw)), "missing(section<<28|key)", [hex(x) for x in cw[9:9 + min(cw[8], 32)]], flush=True)
         print("PROF(MODELLED, Yaba FRT)", dict(zip("from to ticks done over skipped".split(), hd)), {k: row(i) for i, k in enumerate(("frame", "gfx", "snap"))}, flush=True)
+    if "sat_pcn" in syms:
+        n = int.from_bytes(m.read(syms["sat_pcn"], 4), "big")
+        (WORK / "pcs.bin").write_bytes(m.read(0x02557000, n * 8))
+        print("PCS", n, flush=True)
     import bisect, re
     table = sorted((v, k) for k, v in syms.items())
     keys = [x[0] for x in table]
