@@ -505,6 +505,7 @@ try {
             $makeArguments += 'AVSP_COMBAT_INTEGRATION_BENCH=1'
             $makeArguments += 'AVSP_PLAYABLE_SLICE=1'
         }
+        if ($env:AVSP_INPUT_SCRIPT) { $makeArguments += 'AVSP_INPUT_SCRIPT=1' }
         if ($LiveEncounterBench -or $LiveEncounter) {
             $makeArguments += 'AVSP_LIVE_ENCOUNTER=1'
         }

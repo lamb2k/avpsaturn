@@ -8589,7 +8589,16 @@ static void live_encounter_frame_callback(void)
     input.player_mask = avsp_round1_coffee_shop_source_input(
         (unsigned short)source_frame);
 #else
+#ifdef AVSP_INPUT_SCRIPT
+    /* Emulator evidence only: a fixed walk-and-attack script, not source data. */
+    input.player_mask = (round1_runtime.frame % 240u) < 40u ?
+        (unsigned short)((round1_runtime.frame % 7u) == 0u ?
+            AVSP_PW_INPUT_ATTACK : 0u) :
+        (unsigned short)(AVSP_PW_INPUT_RIGHT |
+            ((round1_runtime.frame % 11u) == 0u ? AVSP_PW_INPUT_ATTACK : 0u));
+#else
     input.player_mask = live_encounter_real_input();
+#endif
 #endif
     round1_player_mask = input.player_mask;
     round1_route_before = round1_runtime.route_state;

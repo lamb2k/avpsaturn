@@ -2580,6 +2580,18 @@ typedef struct AvspRound1TickRule
     unsigned long held_frames;
 } AvspRound1TickRule;
 
+#define AVSP_ROUND1_CONTAINMENT_LOG 16u
+typedef struct AvspRound1ContainmentLog
+{
+    unsigned char enabled;
+    unsigned long total;
+    unsigned short site[AVSP_ROUND1_CONTAINMENT_LOG];
+    unsigned short code[AVSP_ROUND1_CONTAINMENT_LOG];
+    unsigned short slot[AVSP_ROUND1_CONTAINMENT_LOG];
+    unsigned short state[AVSP_ROUND1_CONTAINMENT_LOG];
+} AvspRound1ContainmentLog;
+extern AvspRound1ContainmentLog avsp_round1_containment;
+
 void avsp_round1_tick_rule_init(AvspRound1TickRule *rule);
 int avsp_round1_step_interactive_frame(AvspRound1Runtime *runtime,
                                        AvspRound1TickRule *rule,

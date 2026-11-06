@@ -1366,3 +1366,12 @@ capability_conditions:
     status: OPEN
   - id: normal_release_soak
     status: OPEN
+owner_decision_2026_11_06:
+  date: 2026-11-06
+  owner_words: "yes I want a few lanes working on advancing the learnings and making it work on the sega saturn"
+  relayed_by: Claude coordinator, lane avp-native
+  effect_as_relayed: resumes the paused REIMPLEMENT-13 card with one writer on this branch; authorises a modest new budget of emulator and Target runs to prove it boots and plays
+  coordinator_interpretations_not_owner_words: [budget scope, fixed 3 fast-forward ticks per frame]
+  budget_declared_by_lane: 6 Target builds and 12 Saturn emulator runs, spent on boot and play evidence only
+  unchanged: USER-09, USER-10, HW-01, physical UNRUN, candidate and production heads; type28/class0c causal budget not reopened
+  open_policy_conflict: card says CLAUDE_ALLOWED false and AGENTS names Astra as implementation model; left unedited, reported to owner

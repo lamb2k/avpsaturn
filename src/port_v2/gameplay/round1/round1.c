@@ -123,6 +123,8 @@ static int avsp_round1_step_player_special(AvspRound1Runtime *runtime);
 #define AVSP_ROUND1_PLAYER_HIT_RETURN 4u
 #define AVSP_ROUND1_PLAYER_HIT_SETTLE 5u
 
+AvspRound1ContainmentLog avsp_round1_containment;
+
 unsigned short avsp_round1_coffee_shop_source_input(
     unsigned short source_frame)
 {
@@ -5705,7 +5707,8 @@ static void avsp_round1_update_player_locomotion(
     direction = avsp_round1_source_direction(applied_direction);
     if (was_stopping)
     {
-        if (runtime->player_stop_ticks == 0u)
+        if (runtime->player_stop_ticks == 0u &&
+            !avsp_round1_containment.enabled)
         {
             ++runtime->failure_count;
             return;
@@ -9526,10 +9529,15 @@ static int avsp_round1_spawn_class45_group(
         if (actor == 0)
             return group->attempts == 0xffffu;
         allocation_index = (unsigned int)runtime->class45_allocations;
-        if (allocation_index >= AVSP_ROUND1_CLASS45_SCENE_ACTOR_COUNT ||
+        if (avsp_round1_containment.enabled &&
+            allocation_index >= AVSP_ROUND1_CLASS45_SCENE_ACTOR_COUNT)
+            allocation_index = allocation_index %
+                AVSP_ROUND1_CLASS45_SCENE_ACTOR_COUNT;
+        else if (!avsp_round1_containment.enabled &&
+            (allocation_index >= AVSP_ROUND1_CLASS45_SCENE_ACTOR_COUNT ||
             actor->source_slot != avsp_round1_class45_source_slots[
                 AVSP_ROUND1_CLASS45_SCENE_ACTOR_COUNT - 1u -
-                allocation_index])
+                allocation_index]))
             return 0;
         actor->actor_class = 0x45;
         actor->state = 0u;
@@ -12759,7 +12767,8 @@ static int avsp_round1_step_player_weapon(AvspRound1Runtime *runtime,
         {
             ++runtime->player_weapon_attempts_total;
             avsp_round1_allocate_player_weapon_projectile(runtime);
-            if (!avsp_round1_spawn_type36_class04(runtime))
+            if (!avsp_round1_spawn_type36_class04(runtime) &&
+                !avsp_round1_containment.enabled)
             {
                 ++runtime->failure_count;
                 return 0;
@@ -12853,6 +12862,39 @@ int avsp_round1_step_scheduler_pre_player_source_differential(
     }
     runtime->class1f_phase_guard_counter =
         runtime->first_encounter.source_phase_counter;
+    return 1;
+}
+
+/* Interactive containment. Differential builds never enable it: a body that
+ * leaves the source-covered route still fails closed there. In normal play an
+ * actor whose source program is not yet covered is released and logged, so the
+ * gap stays countable without halting the game. */
+static void avsp_round1_containment_note(AvspRound1Runtime *runtime,
+                                         unsigned int site)
+{
+    unsigned int index = avsp_round1_containment.total %
+        AVSP_ROUND1_CONTAINMENT_LOG;
+    avsp_round1_containment.site[index] = (unsigned short)site;
+    avsp_round1_containment.code[index] =
+        (unsigned short)runtime->scheduler_failure_code;
+    avsp_round1_containment.slot[index] =
+        (unsigned short)runtime->scheduler_failure_source_slot;
+    avsp_round1_containment.state[index] =
+        (unsigned short)runtime->scheduler_failure_state;
+    ++avsp_round1_containment.total;
+    runtime->failure_count = 0u;
+    runtime->fallback_count = 0u;
+}
+
+static int avsp_round1_contain_actor(AvspRound1Runtime *runtime,
+                                     AvspRound1Pool *pool,
+                                     AvspRound1ActorCore *actor)
+{
+    if (!avsp_round1_containment.enabled)
+        return 0;
+    avsp_round1_containment_note(runtime, 1u);
+    if (actor->active != 0u)
+        (void)avsp_round1_release_pool_actor(pool, actor);
     return 1;
 }
 
@@ -12965,6 +13007,11 @@ static int avsp_round1_step_scheduler_post_player_mask(
                     AVSP_ROUND1_SCHEDULER_TRACE_CAPACITY)
             {
                 runtime->scheduler_failure_code = 4u;
+                runtime->scheduler_failure_source_slot = actor->source_slot;
+                runtime->scheduler_failure_state = actor->state;
+                if (avsp_round1_contain_actor(runtime,
+                        &runtime->pools[pool_index], actor))
+                    continue;
                 ++runtime->failure_count;
                 return 0;
             }
@@ -12987,6 +13034,9 @@ static int avsp_round1_step_scheduler_post_player_mask(
                         &runtime->pools[pool_index], actor))
                 {
                     runtime->scheduler_failure_code = 5u;
+                    if (avsp_round1_contain_actor(runtime,
+                            &runtime->pools[pool_index], actor))
+                        continue;
                     ++runtime->failure_count;
                     return 0;
                 }
@@ -13000,6 +13050,9 @@ static int avsp_round1_step_scheduler_post_player_mask(
                         &runtime->pools[pool_index], actor))
                 {
                     runtime->scheduler_failure_code = 16u;
+                    if (avsp_round1_contain_actor(runtime,
+                            &runtime->pools[pool_index], actor))
+                        continue;
                     ++runtime->failure_count;
                     return 0;
                 }
@@ -13019,6 +13072,9 @@ static int avsp_round1_step_scheduler_post_player_mask(
                         actor->source_slot;
                     runtime->scheduler_failure_state = actor->state;
                     runtime->scheduler_failure_substate = actor->substate;
+                    if (avsp_round1_contain_actor(runtime,
+                            &runtime->pools[pool_index], actor))
+                        continue;
                     ++runtime->failure_count;
                     return 0;
                 }
@@ -13033,6 +13089,9 @@ static int avsp_round1_step_scheduler_post_player_mask(
                 {
                     runtime->scheduler_failure_code = 20u;
                     runtime->scheduler_failure_source_slot = actor->source_slot;
+                    if (avsp_round1_contain_actor(runtime,
+                            &runtime->pools[pool_index], actor))
+                        continue;
                     ++runtime->failure_count;
                     return 0;
                 }
@@ -13048,6 +13107,9 @@ static int avsp_round1_step_scheduler_post_player_mask(
                     runtime->scheduler_failure_code = 24u;
                     runtime->scheduler_failure_source_slot = actor->source_slot;
                     runtime->scheduler_failure_state = actor->state;
+                    if (avsp_round1_contain_actor(runtime,
+                            &runtime->pools[pool_index], actor))
+                        continue;
                     ++runtime->failure_count;
                     return 0;
                 }
@@ -13063,6 +13125,9 @@ static int avsp_round1_step_scheduler_post_player_mask(
                     runtime->scheduler_failure_code = 25u;
                     runtime->scheduler_failure_source_slot = actor->source_slot;
                     runtime->scheduler_failure_state = actor->state;
+                    if (avsp_round1_contain_actor(runtime,
+                            &runtime->pools[pool_index], actor))
+                        continue;
                     ++runtime->failure_count;
                     return 0;
                 }
@@ -13078,6 +13143,9 @@ static int avsp_round1_step_scheduler_post_player_mask(
                     runtime->scheduler_failure_code = 42u;
                     runtime->scheduler_failure_source_slot = actor->source_slot;
                     runtime->scheduler_failure_state = actor->state;
+                    if (avsp_round1_contain_actor(runtime,
+                            &runtime->pools[pool_index], actor))
+                        continue;
                     ++runtime->failure_count;
                     return 0;
                 }
@@ -13093,6 +13161,9 @@ static int avsp_round1_step_scheduler_post_player_mask(
                     runtime->scheduler_failure_code = 45u;
                     runtime->scheduler_failure_source_slot = actor->source_slot;
                     runtime->scheduler_failure_state = actor->state;
+                    if (avsp_round1_contain_actor(runtime,
+                            &runtime->pools[pool_index], actor))
+                        continue;
                     ++runtime->failure_count;
                     return 0;
                 }
@@ -13108,6 +13179,9 @@ static int avsp_round1_step_scheduler_post_player_mask(
                     runtime->scheduler_failure_code = 38u;
                     runtime->scheduler_failure_source_slot = actor->source_slot;
                     runtime->scheduler_failure_state = actor->state;
+                    if (avsp_round1_contain_actor(runtime,
+                            &runtime->pools[pool_index], actor))
+                        continue;
                     ++runtime->failure_count;
                     return 0;
                 }
@@ -13123,6 +13197,9 @@ static int avsp_round1_step_scheduler_post_player_mask(
                     runtime->scheduler_failure_code = 46u;
                     runtime->scheduler_failure_source_slot = actor->source_slot;
                     runtime->scheduler_failure_state = actor->state;
+                    if (avsp_round1_contain_actor(runtime,
+                            &runtime->pools[pool_index], actor))
+                        continue;
                     ++runtime->failure_count;
                     return 0;
                 }
@@ -13138,6 +13215,9 @@ static int avsp_round1_step_scheduler_post_player_mask(
                     runtime->scheduler_failure_source_slot = actor->source_slot;
                     runtime->scheduler_failure_state = actor->state;
                     runtime->scheduler_failure_substate = actor->substate;
+                    if (avsp_round1_contain_actor(runtime,
+                            &runtime->pools[pool_index], actor))
+                        continue;
                     ++runtime->failure_count;
                     return 0;
                 }
@@ -13153,6 +13233,9 @@ static int avsp_round1_step_scheduler_post_player_mask(
                     runtime->scheduler_failure_code = 39u;
                     runtime->scheduler_failure_source_slot = actor->source_slot;
                     runtime->scheduler_failure_state = actor->state;
+                    if (avsp_round1_contain_actor(runtime,
+                            &runtime->pools[pool_index], actor))
+                        continue;
                     ++runtime->failure_count;
                     return 0;
                 }
@@ -13167,6 +13250,9 @@ static int avsp_round1_step_scheduler_post_player_mask(
                 {
                     runtime->scheduler_failure_code = 21u;
                     runtime->scheduler_failure_source_slot = actor->source_slot;
+                    if (avsp_round1_contain_actor(runtime,
+                            &runtime->pools[pool_index], actor))
+                        continue;
                     ++runtime->failure_count;
                     return 0;
                 }
@@ -13184,6 +13270,9 @@ static int avsp_round1_step_scheduler_post_player_mask(
                         actor->source_slot;
                     runtime->scheduler_failure_state = actor->state;
                     runtime->scheduler_failure_substate = actor->substate;
+                    if (avsp_round1_contain_actor(runtime,
+                            &runtime->pools[pool_index], actor))
+                        continue;
                     ++runtime->failure_count;
                     return 0;
                 }
@@ -13200,6 +13289,9 @@ static int avsp_round1_step_scheduler_post_player_mask(
                     runtime->scheduler_failure_source_slot = actor->source_slot;
                     runtime->scheduler_failure_state = actor->state;
                     runtime->scheduler_failure_substate = actor->substate;
+                    if (avsp_round1_contain_actor(runtime,
+                            &runtime->pools[pool_index], actor))
+                        continue;
                     ++runtime->failure_count;
                     return 0;
                 }
@@ -13217,6 +13309,9 @@ static int avsp_round1_step_scheduler_post_player_mask(
                         actor->source_slot;
                     runtime->scheduler_failure_state = actor->state;
                     runtime->scheduler_failure_substate = actor->substate;
+                    if (avsp_round1_contain_actor(runtime,
+                            &runtime->pools[pool_index], actor))
+                        continue;
                     ++runtime->failure_count;
                     return 0;
                 }
@@ -13229,6 +13324,9 @@ static int avsp_round1_step_scheduler_post_player_mask(
                 if (!avsp_round1_step_class09(runtime, actor))
                 {
                     runtime->scheduler_failure_code = 6u;
+                    if (avsp_round1_contain_actor(runtime,
+                            &runtime->pools[pool_index], actor))
+                        continue;
                     ++runtime->failure_count;
                     return 0;
                 }
@@ -13242,6 +13340,9 @@ static int avsp_round1_step_scheduler_post_player_mask(
                         &runtime->pools[pool_index], actor))
                 {
                     runtime->scheduler_failure_code = 7u;
+                    if (avsp_round1_contain_actor(runtime,
+                            &runtime->pools[pool_index], actor))
+                        continue;
                     ++runtime->failure_count;
                     return 0;
                 }
@@ -13257,6 +13358,9 @@ static int avsp_round1_step_scheduler_post_player_mask(
                     runtime->scheduler_failure_code = 43u;
                     runtime->scheduler_failure_source_slot = actor->source_slot;
                     runtime->scheduler_failure_state = actor->state;
+                    if (avsp_round1_contain_actor(runtime,
+                            &runtime->pools[pool_index], actor))
+                        continue;
                     ++runtime->failure_count;
                     return 0;
                 }
@@ -13273,6 +13377,9 @@ static int avsp_round1_step_scheduler_post_player_mask(
                     runtime->scheduler_failure_source_slot =
                         actor->source_slot;
                     runtime->scheduler_failure_state = actor->state;
+                    if (avsp_round1_contain_actor(runtime,
+                            &runtime->pools[pool_index], actor))
+                        continue;
                     ++runtime->failure_count;
                     return 0;
                 }
@@ -13288,6 +13395,9 @@ static int avsp_round1_step_scheduler_post_player_mask(
                     runtime->scheduler_failure_code = 22u;
                     runtime->scheduler_failure_source_slot =
                         actor->source_slot;
+                    if (avsp_round1_contain_actor(runtime,
+                            &runtime->pools[pool_index], actor))
+                        continue;
                     ++runtime->failure_count;
                     return 0;
                 }
@@ -13304,6 +13414,9 @@ static int avsp_round1_step_scheduler_post_player_mask(
                     runtime->scheduler_failure_source_slot =
                         actor->source_slot;
                     runtime->scheduler_failure_state = actor->state;
+                    if (avsp_round1_contain_actor(runtime,
+                            &runtime->pools[pool_index], actor))
+                        continue;
                     ++runtime->failure_count;
                     return 0;
                 }
@@ -13320,6 +13433,9 @@ static int avsp_round1_step_scheduler_post_player_mask(
                     runtime->scheduler_failure_source_slot =
                         actor->source_slot;
                     runtime->scheduler_failure_state = actor->state;
+                    if (avsp_round1_contain_actor(runtime,
+                            &runtime->pools[pool_index], actor))
+                        continue;
                     ++runtime->failure_count;
                     return 0;
                 }
@@ -13336,6 +13452,9 @@ static int avsp_round1_step_scheduler_post_player_mask(
                     runtime->scheduler_failure_source_slot =
                         actor->source_slot;
                     runtime->scheduler_failure_state = actor->state;
+                    if (avsp_round1_contain_actor(runtime,
+                            &runtime->pools[pool_index], actor))
+                        continue;
                     ++runtime->failure_count;
                     return 0;
                 }
@@ -13348,6 +13467,9 @@ static int avsp_round1_step_scheduler_post_player_mask(
                 if (!avsp_round1_step_class44_guard(runtime, actor))
                 {
                     runtime->scheduler_failure_code = 8u;
+                    if (avsp_round1_contain_actor(runtime,
+                            &runtime->pools[pool_index], actor))
+                        continue;
                     ++runtime->failure_count;
                     return 0;
                 }
@@ -13391,6 +13513,9 @@ static int avsp_round1_step_scheduler_post_player_mask(
                         runtime->scheduler_failure_substate = actor->substate;
                         runtime->scheduler_failure_animation_record =
                             actor->animation_record;
+                        if (avsp_round1_contain_actor(runtime,
+                                &runtime->pools[pool_index], actor))
+                            continue;
                         ++runtime->failure_count;
                         return 0;
                     }
@@ -13406,6 +13531,9 @@ static int avsp_round1_step_scheduler_post_player_mask(
                         runtime->scheduler_failure_substate = actor->substate;
                         runtime->scheduler_failure_animation_record =
                             actor->animation_record;
+                        if (avsp_round1_contain_actor(runtime,
+                                &runtime->pools[pool_index], actor))
+                            continue;
                         ++runtime->failure_count;
                         return 0;
                     }
@@ -13421,6 +13549,9 @@ static int avsp_round1_step_scheduler_post_player_mask(
                         runtime->scheduler_failure_substate = actor->substate;
                         runtime->scheduler_failure_animation_record =
                             actor->animation_record;
+                        if (avsp_round1_contain_actor(runtime,
+                                &runtime->pools[pool_index], actor))
+                            continue;
                         ++runtime->failure_count;
                         return 0;
                     }
@@ -13443,6 +13574,9 @@ static int avsp_round1_step_scheduler_post_player_mask(
                         runtime->scheduler_failure_substate = actor->substate;
                         runtime->scheduler_failure_animation_record =
                             actor->animation_record;
+                        if (avsp_round1_contain_actor(runtime,
+                                &runtime->pools[pool_index], actor))
+                            continue;
                         ++runtime->failure_count;
                         return 0;
                     }
@@ -13462,6 +13596,9 @@ static int avsp_round1_step_scheduler_post_player_mask(
                     runtime->scheduler_failure_substate = actor->substate;
                     runtime->scheduler_failure_animation_record =
                         actor->animation_record;
+                    if (avsp_round1_contain_actor(runtime,
+                            &runtime->pools[pool_index], actor))
+                        continue;
                     ++runtime->failure_count;
                     return 0;
                 }
@@ -13485,6 +13622,9 @@ static int avsp_round1_step_scheduler_post_player_mask(
                     runtime->scheduler_failure_substate = actor->substate;
                     runtime->scheduler_failure_animation_record =
                         actor->animation_record;
+                    if (avsp_round1_contain_actor(runtime,
+                            &runtime->pools[pool_index], actor))
+                        continue;
                     ++runtime->failure_count;
                     return 0;
                 }
@@ -14170,6 +14310,8 @@ void avsp_round1_tick_rule_init(AvspRound1TickRule *rule)
     rule->total_ticks = 0UL;
     rule->fast_forward_frames = 0UL;
     rule->held_frames = 0UL;
+    memset(&avsp_round1_containment, 0, sizeof(avsp_round1_containment));
+    avsp_round1_containment.enabled = 1u;
 }
 
 /* Source 0x170f2: a participating player's input (& 0x7f) must be seen on
@@ -14218,14 +14360,26 @@ static int avsp_round1_tick_once(AvspRound1Runtime *runtime,
     }
     if (runtime->entry.dependencies_seeded &&
         !avsp_round1_step_scheduler_pre_player_source_differential(runtime, 1))
-        return 0;
+    {
+        if (!avsp_round1_containment.enabled)
+            return 0;
+        avsp_round1_containment_note(runtime, 3u);
+    }
     if (authority_at_tick_start && runtime->route_state == 4 &&
         !avsp_round1_step_player(runtime, input_mask, 0))
-        return 0;
+    {
+        if (!avsp_round1_containment.enabled)
+            return 0;
+        avsp_round1_containment_note(runtime, 2u);
+    }
     if (runtime->entry.dependencies_seeded &&
         !avsp_round1_step_scheduler_post_player_source_differential_scene(
             runtime, 1, 1, 1, 1, 1))
-        return 0;
+    {
+        if (!avsp_round1_containment.enabled)
+            return 0;
+        avsp_round1_containment_note(runtime, 4u);
+    }
     return 1;
 }
 
