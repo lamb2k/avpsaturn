@@ -19,12 +19,19 @@
 #define AVSP_TILE_BYTES 128
 #define AVSP_TILE_MAGIC 0x4156544CUL /* 'AVTL' */
 
+/* AVT2 stores each distinct tile payload once. Its code table entries are
+ * code | payload_index << 17; everything else matches AVTL. */
+#define AVSP_TILE_MAGIC_DEDUPED 0x41565432UL
+#define AVSP_TILE_CODE_BITS 17
+#define AVSP_TILE_CODE_MASK 0x1FFFFUL
+
 typedef struct
 {
     const unsigned char *data;
     unsigned long size;
     unsigned long tile_count;
     unsigned long palette_slots;
+    int deduped; /* AVT2: code table carries a payload index */
     const unsigned char *bank_map; /* [32] CPS2 colour -> slot, 0xFF unused */
     const unsigned char *cram;     /* palette_slots*16 big-endian u16 */
     const unsigned char *codes;    /* tile_count big-endian u32, ascending */

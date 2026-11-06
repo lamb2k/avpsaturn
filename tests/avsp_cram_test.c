@@ -178,6 +178,12 @@ int main(void)
         fail("negative control: a zero-colour surface copy was accepted");
     if (avsp_cram_copy_source_indexed(data, source, AVSP_CRAM_BLOCK_ENTRIES))
         fail("negative control: 256 source-indexed colours were accepted");
+    /* Full-route union of 20 banks needs two blocks; 33 is refused. */
+    if (avsp_cram_tile_blocks(0) != 0 || avsp_cram_tile_blocks(1) != 1 ||
+        avsp_cram_tile_blocks(16) != 1 || avsp_cram_tile_blocks(17) != 2 ||
+        avsp_cram_tile_blocks(20) != 2 || avsp_cram_tile_blocks(32) != 2 ||
+        avsp_cram_tile_blocks(33) != 0)
+        fail("tile block capacity rule failed");
     if (avsp_cram_copy_subbank(data, subfile, AVSP_CRAM_SUBBANK_COUNT))
         fail("negative control: sub-bank 16 was accepted");
     if (avsp_cram_copy_subbank(data, subfile, -1))

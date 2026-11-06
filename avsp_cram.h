@@ -37,6 +37,10 @@
 #define AVSP_CRAM_SUBBANK_COLOURS 15
 #define AVSP_CRAM_SUBBANK_COUNT 16
 
+/* CRAM blocks a 4bpp tile archive with `slots` banks needs: 1 for 1..16, 2 for
+ * 17..32, and 0 for an archive the loader must refuse. */
+int avsp_cram_tile_blocks(int slots);
+
 /* Copy a palette file that is indexed by one-based pixel value.
  *
  * `file` holds AVSP_CRAM_BLOCK_ENTRIES entries whose entry zero is the

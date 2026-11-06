@@ -235,6 +235,12 @@ def main() -> None:
         "physical_saturn": "UNRUN",
         "build_only_runtime_layout": layout,
     }
+    # Hand-recorded sizing and audit sections are not regenerated here; a build
+    # must never erase them. Generated keys still win.
+    if MANIFEST.exists():
+        recorded = json.loads(MANIFEST.read_text(encoding="ascii"))
+        for key, value in recorded.items():
+            manifest.setdefault(key, value)
     MANIFEST.write_text(json.dumps(manifest, indent=2, sort_keys=True) + "\n",
                         encoding="ascii", newline="\n")
     print(f"Round 1 content archive: PASS ({len(payload)} bytes, {archive_sha})")

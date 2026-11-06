@@ -3193,6 +3193,7 @@ volatile int avsp_diag_combat_presented_frame;
 volatile int avsp_diag_combat_tile_sprite_misses;
 #endif
 
+extern int __jo_current_palette_id;
 static int load_tile_archive(void)
 {
     int read_bytes;
@@ -3229,12 +3230,39 @@ static int load_tile_archive(void)
 #endif
     /* Pixel value p+1 reads palette array entry p after Jo's CRAM base+1
        shift, so slot colours transcribe directly. */
+    /* An archive may hold up to 32 banks. Jo hands out 256-entry CRAM blocks in
+       order, and jo_sprite_set_palette_4bits is linear (256 * id + 16 * slot),
+       so slots 16..31 land in the next block when it is contiguous. Refuse any
+       archive that needs more, or a second block Jo cannot give. */
+    if (avsp_cram_tile_blocks((int)tile_archive.palette_slots) == 0 ||
+        (avsp_cram_tile_blocks((int)tile_archive.palette_slots) == 2 &&
+         __jo_current_palette_id + 2 >= JO_PALETTE_MAX))
+    {
+        failed_asset = "TILES.BIN palette capacity";
+        return 0;
+    }
     for (index = 0; index < 256; ++index) colors[index] = JO_COLOR_Black;
-    for (slot = 0; slot < (int)tile_archive.palette_slots; ++slot)
+    for (slot = 0; slot < (int)tile_archive.palette_slots && slot < 16; ++slot)
         for (index = 0; index < 15; ++index)
             colors[slot * 16 + index] = (jo_color)
                 avsp_tiles_cram_color(&tile_archive, slot, index);
     jo_create_palette_from(&tile_palette, colors, AVSP_CRAM_MAX_COLOURS);
+    if (tile_archive.palette_slots > 16UL)
+    {
+        static jo_palette tile_palette_upper;
+        for (index = 0; index < 256; ++index) colors[index] = JO_COLOR_Black;
+        for (slot = 16; slot < (int)tile_archive.palette_slots; ++slot)
+            for (index = 0; index < 15; ++index)
+                colors[(slot - 16) * 16 + index] = (jo_color)
+                    avsp_tiles_cram_color(&tile_archive, slot, index);
+        jo_create_palette_from(&tile_palette_upper, colors,
+                               AVSP_CRAM_MAX_COLOURS);
+        if (tile_palette_upper.id != tile_palette.id + 1)
+        {
+            failed_asset = "TILES.BIN palette block order";
+            return 0;
+        }
+    }
 #ifdef AVSP_PROBE3
     probe3_cram_writes_pending = AVSP_CRAM_MAX_COLOURS;
 #endif
@@ -9643,6 +9671,56 @@ static void frame_callback(void)
     avsp_diag_frontend_commands = frontend_runtime.vdp1_commands_last_frame;
 }
 
+#ifdef AVSP_LIVE_ENCOUNTER
+/* Frame-cost readback (MCP or physical capture). Master SH-2 only: the slave is
+ * idle in this profile (JO_COMPILE_WITH_DUAL_CPU_MODULE = 0). Ticks are the
+ * master FRT at the divider in avsp_diag_frame_cost_tcr. The work window covers
+ * game logic and command preparation, not slSynch or VDP1 drawing. Emulator
+ * values are not hardware timing. Fields per callback is the 60 fps verdict:
+ * every callback that takes more than one field is counted as late. */
+volatile unsigned long avsp_diag_frame_cost_fields;
+volatile unsigned long avsp_diag_frame_cost_callbacks;
+volatile unsigned long avsp_diag_frame_cost_late_callbacks;
+volatile unsigned long avsp_diag_frame_cost_peak_fields;
+volatile unsigned long avsp_diag_frame_cost_work_ticks;
+volatile unsigned long avsp_diag_frame_cost_work_peak;
+volatile unsigned long avsp_diag_frame_cost_work_sum_low;
+volatile unsigned long avsp_diag_frame_cost_tcr;
+volatile unsigned long avsp_diag_frame_cost_vdp1_busy_at_entry;
+static unsigned long frame_cost_last_field;
+
+static void frame_cost_vblank_callback(void)
+{
+    ++avsp_diag_frame_cost_fields;
+}
+
+static void frame_cost_callback(void)
+{
+    const unsigned long field = avsp_diag_frame_cost_fields;
+    const unsigned long elapsed = field - frame_cost_last_field;
+    const unsigned long start = (unsigned long)(unsigned int)jo_time_get_frc();
+    unsigned long ticks;
+    /* EDSR bit 1 (CEF) clear at entry: the previous list had not finished. */
+    if (avsp_diag_frame_cost_callbacks != 0UL && (JO_VDP1_EDSR & 2) == 0)
+        ++avsp_diag_frame_cost_vdp1_busy_at_entry;
+    if (avsp_diag_frame_cost_callbacks != 0UL)
+    {
+        if (elapsed > 1UL) ++avsp_diag_frame_cost_late_callbacks;
+        if (elapsed > avsp_diag_frame_cost_peak_fields)
+            avsp_diag_frame_cost_peak_fields = elapsed;
+    }
+    frame_cost_last_field = field;
+    frame_callback();
+    ticks = ((unsigned long)(unsigned int)jo_time_get_frc() - start) & 0xFFFFUL;
+    avsp_diag_frame_cost_work_ticks = ticks;
+    if (ticks > avsp_diag_frame_cost_work_peak)
+        avsp_diag_frame_cost_work_peak = ticks;
+    avsp_diag_frame_cost_work_sum_low += ticks;
+    avsp_diag_frame_cost_tcr = *(volatile unsigned char *)0xFFFFFE16UL;
+    ++avsp_diag_frame_cost_callbacks;
+}
+#endif
+
 void jo_main(void)
 {
     int index;
@@ -10079,7 +10157,12 @@ void jo_main(void)
 #ifdef AVSP_PROBE3
     probe3_run_loop();
 #else
+#ifdef AVSP_LIVE_ENCOUNTER
+    jo_core_add_vblank_callback(frame_cost_vblank_callback);
+    jo_core_add_callback(frame_cost_callback);
+#else
     jo_core_add_callback(frame_callback);
+#endif
     jo_core_run();
 #endif
 }

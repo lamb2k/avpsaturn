@@ -652,12 +652,15 @@ def read_tile_region_bytes() -> int:
     return int(m.group(1), 16)
 
 
-def build_archive_blob(codes, banks, palette_path, gfx):
-    """Serialize one deterministic AVTL archive from an exact tile set."""
+def build_archive_blob(codes, banks, palette_path, gfx, dedupe=False):
+    """Serialize one deterministic archive from an exact tile set.
+
+    dedupe writes AVT2: each distinct payload once, with the payload index in
+    the upper bits of the code table entry. Drawn pixels are unchanged."""
     bank_map, slots, cram = build_palette_block(banks, palette_path)
     header_bytes = 0x10 + 32 + len(cram) * 2
     blob = bytearray()
-    blob += b"AVTL"
+    blob += b"AVT2" if dedupe else b"AVTL"
     blob += len(codes).to_bytes(4, "big")
     blob += len(slots).to_bytes(4, "big")
     blob += header_bytes.to_bytes(4, "big")
@@ -665,6 +668,14 @@ def build_archive_blob(codes, banks, palette_path, gfx):
     for value in cram:
         blob += value.to_bytes(2, "big")
     assert len(blob) == header_bytes
+    if dedupe:
+        payloads = {}
+        for code in codes:
+            index = payloads.setdefault(tile_texture(gfx, code), len(payloads))
+            blob += (code | (index << 17)).to_bytes(4, "big")
+        for payload in payloads:
+            blob += payload
+        return blob, slots
     for code in codes:
         blob += code.to_bytes(4, "big")
     for code in codes:
