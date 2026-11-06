@@ -13,8 +13,8 @@ void sat_fatal(u32 code, u32 detail);
 int sat_gfx_init(const void *pack);
 void sat_gfx_snapshot(void);
 void sat_gfx_draw(void);
-/* saturn/audio, weak stubs in present.c. */
-void sat_audio_init(void);
+/* saturn/audio */
+int sat_audio_init(const void *pack);
 void sat_audio_frame(void);
 /* Remap one 64 KB page of the 68000 address space for indirect accesses. */
 void sat_map_page(u32 page, u8 *base);

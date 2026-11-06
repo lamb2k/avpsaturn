@@ -108,9 +108,14 @@ def main():
     gen = gen_sources()
     with cf.ThreadPoolExecutor(max_workers=3) as ex:
         objs = list(ex.map(lambda s: cc(s, OBJ / (s.stem + ".o"), [OPT]), gen))
+    audio = pathlib.Path(os.environ.get("AUDIO_PACK", WORK / "audio/pack.bin")).read_bytes()
+    keep = 12 + 16 * (int.from_bytes(audio[4:6], "big") + int.from_bytes(audio[6:8], "big"))
+    update(GEN / "audio_tables.inc", ",".join(str(x) for x in audio[:keep]))
+    (ISO / "CLIPS.BIN").write_bytes(audio[keep:])
     gfx_dir = REPO / "saturn/gfx"
     gfx = [gfx_dir / "sat_gfx.c"]
     own = [cc(HERE / "ctx.s", OBJ / "ctx.o"), cc(HERE / "kernel.c", OBJ / "kernel.o", ["-O2", "-I", GEN] + os.environ.get("KERNEL_CFLAGS", "").split()), cc(HERE / "present.c", OBJ / "present.o", ["-O2"]), cc(HERE / "pad.c", OBJ / "pad.o", ["-O2"] + os.environ.get("KERNEL_CFLAGS", "").split())]
+    own += [cc(REPO / "saturn/audio/sat_audio.c", OBJ / "sat_audio.o", ["-Os"] + os.environ.get("AUDIO_CFLAGS", "").split())]
     own += [cc(s, OBJ / f"gfx_{s.stem}.o", ["-O2", "-I", gfx_dir] + os.environ.get("KERNEL_CFLAGS", "").split()) for s in gfx]
     sizes = {o: code_size(o) for o in objs}
     # Hottest chunks in high work RAM, then low work RAM; the coldest run from the cart. Heat comes from the MAME route.
@@ -195,7 +200,7 @@ SECTIONS {{
     (ISO / "ROM.BIN").write_bytes(rom)
     (WORK / "rom_final.bin").write_bytes(rom)
     b = OBJ / "boot.o"
-    sh([GCC, "-m2", "-mb", "-O2", "-w", "-fno-builtin", "-I", SGL / "INC", f"-DCOLD1_ADDR={cold1_at:#x}u", "-c", HERE / "boot.c", "-o", b])
+    sh([GCC, "-m2", "-mb", "-O2", "-w", "-fno-builtin", "-I", SGL / "INC", f"-DCOLD1_ADDR={cold1_at:#x}u", f"-DCLIPS_BYTES={len(audio) - keep}u", "-c", HERE / "boot.c", "-o", b])
     lib = SGL / "LIB_ELF"
     sh([GCC, "-m2", "-mb", "-nostartfiles", "-T", HERE / "boot.ld", b, "-Wl,--start-group", lib / "SEGA_SYS.A", lib / "LIBCD.A", lib / "LIBSGL.A", "-lgcc", "-lc", "-Wl,--end-group",
         "-o", WORK / "boot.elf", f"-Wl,-Map={WORK / 'boot.map'},-e,_main"])

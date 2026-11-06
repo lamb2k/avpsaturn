@@ -13,6 +13,7 @@
 
 int sat_audio_init(const void *pack);                     /* 1 ok; 0 bad magic or clips larger than SCSP RAM */
 unsigned long sat_audio_pack_keep(const void *pack);
+extern int sat_audio_clips_loaded;                       /* set before init if the clips are already in SCSP RAM at 0x20 */
 void sat_audio_io_write8(unsigned long addr, unsigned long value);
 void sat_audio_frame(void);
 

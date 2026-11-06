@@ -12,7 +12,7 @@ JO = pathlib.Path("E:/AvP/worktrees/saturn-hw/.deps")
 BIN = JO / "joengine/Compiler/WINDOWS/bin"
 OBJ = JO / "joengine/Compiler/WINDOWS/sh-elf/bin"
 MKISOFS = JO / "joengine/Compiler/WINDOWS/Other Utilities/mkisofs.exe"
-EXE = JO / "emulators/yabasanshiro-1.20.37-2986eb-debug-rig-mcp-da2ffb34/yabasanshiro-1.20.37-2986eb-debug-rig-mcp-d7767591/yabasanshiro.exe"
+EXE = pathlib.Path(os.environ.get("YABA_EXE", JO / "emulators/yabasanshiro-1.20.37-2986eb-debug-rig-mcp-da2ffb34/yabasanshiro-1.20.37-2986eb-debug-rig-mcp-d7767591/yabasanshiro.exe"))
 INI = pathlib.Path(os.environ["APPDATA"]) / "YabaSanshiro/yabause.ini"
 STATS = "commands sfx_started sfx_refused sfx_unknown music_started controls frames cd_sent cd_status last_command".split()
 EVENT = "on_frame off_frame slot word0 sa_low tl pan position_max".split()
@@ -34,7 +34,7 @@ def build(work, script):
     rows = [l.split() for l in open(script) if l.strip()]
     (work / "script.inc").write_text("".join(f"{{{r[0]}UL,0x{r[1]}UL,0x{r[2]}UL,0x{r[3]}UL}},\n" for r in rows))
     elf = work / "audio.elf"
-    sh([BIN / "sh-elf-gcc.exe", "-m2", "-mb", "-O2", "-std=gnu89", "-Wall", "-Wextra", "-Werror", "-fno-builtin", "-nostdlib", "-T", HERE / "standalone.ld",
+    sh([BIN / "sh-elf-gcc.exe", "-m2", "-mb", "-O2", *os.environ.get("AUDIO_CFLAGS", "").split(), "-std=gnu89", "-Wall", "-Wextra", "-Werror", "-fno-builtin", "-nostdlib", "-T", HERE / "standalone.ld",
         "-I", work, "-I", HERE, "-Wa,-I" + str(work), HERE / "standalone_main.c", HERE / "sat_audio.c", "-lgcc", "-o", elf, f"-Wl,-Map={work / 'audio.map'}"])
     iso_dir = work / "disc"
     shutil.rmtree(iso_dir, ignore_errors=True)

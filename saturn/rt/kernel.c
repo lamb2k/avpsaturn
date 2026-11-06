@@ -72,7 +72,8 @@ static u32 io_read(u32 a)
 u32 IOR8(u32 a) { u32 v = io_read(a); return (a & 1) ? (v & 0xff) : (v >> 8); }
 u32 IOR16(u32 a) { return io_read(a) & 0xffff; }
 u32 IOR32(u32 a) { return (io_read(a) << 16) | io_read(a + 2); }
-void IOW8(u32 a, u32 v) { (void)a; (void)v; }
+extern void sat_audio_io_write8(unsigned long addr, unsigned long value);
+void IOW8(u32 a, u32 v) { if (a >= 0x618000 && a <= 0x619fff) sat_audio_io_write8(a, v); }
 /* Two object banks: 0x8040e0 bit 0 picks the one the game sees at 0x708000. Only those 8 KB exist; the page below them aliases the sink. */
 void IOW16(u32 a, u32 v) { if (a == 0x8040e0) { PAGE[0x70] = SAT_OBJ + (v & 1) * 0x2000 - 0x8000; sat_dbg.obj_flips++; } }
 void IOW32(u32 a, u32 v) { (void)a; (void)v; }
@@ -381,6 +382,10 @@ static const u8 hw_test_seed[16] = {
 #include "seed.inc"
 };
 
+static const u8 sat_audio_tables[] __attribute__((aligned(4))) = {
+#include "audio_tables.inc"
+};
+extern int sat_audio_clips_loaded;
 extern u32 sat_bss_start[], sat_bss_end[], sat_lw_bss_start[], sat_lw_bss_end[];
 void sat_main(void)
 {
@@ -403,7 +408,8 @@ void sat_main(void)
     FTCR = 2;
     game_done = 1;
     if (!sat_gfx_init(SAT_PACK)) sat_fatal(0xeb, 0);
-    sat_audio_init();
+    sat_audio_clips_loaded = 1;   /* the loader put them in SCSP RAM */
+    if (!sat_audio_init(sat_audio_tables)) sat_fatal(0xec, 0);
     slave_start();
     sat_dbg.stage = 1;
     f_800();

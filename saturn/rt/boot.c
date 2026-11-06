@@ -36,6 +36,14 @@ int main(void)
     GFS_DIRTBL_DIRNAME(&dir) = names;
     GFS_DIRTBL_NDIR(&dir) = 16;
     if (GFS_Init(1, gfs_work, &dir) < 0) halt(0xe001, 0);
+    /* Clips through low RAM by word into SCSP RAM, while the 68000 is off; LW.BIN then takes the room back. */
+    load("CLIPS.BIN", (void *)0x00200000u, 0x700);
+    {
+        volatile unsigned short *d = (volatile unsigned short *)(0x25A00000u + 0x20u);
+        const unsigned short *s = (const unsigned short *)0x00200000u;
+        unsigned long i;
+        for (i = 0; i < CLIPS_BYTES / 2u + 1u; i++) d[i] = s[i];
+    }
     load("LW.BIN", (void *)0x00200000u, 0x100);
     load("ROM.BIN", (void *)0x02400000u, 0x200);
     load("OPX.BIN", (void *)0x02600000u, 0x300);

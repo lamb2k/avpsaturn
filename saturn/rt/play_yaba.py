@@ -163,7 +163,7 @@ def main():
                 getattr(script, "fatal", lambda *a: None)(s, fatal, det)
                 break
             script.step(s.v, s)
-            time.sleep(0.03)
+            time.sleep(float(os.environ.get("POLL", "0.03")))
         getattr(script, "end", lambda s: None)(s)
     finally:
         if s:

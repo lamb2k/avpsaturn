@@ -1,0 +1,11 @@
+--- a/yabause/src/scsp.cpp
++++ b/yabause/src/scsp.cpp
+@@ ScspExecAsync, right after the block that generates samples @@
+      scspsoundgenpos += scspsoundlen;
+      scspsoundoutleft += scspsoundlen;
++     { /* AVP_SCSP_RAW=path: raw 44.1 kHz s16le stereo of what the SCSP emulation generated, independent of the sound driver */
++       static FILE *f; static int tried;
++       if (!tried) { const char *p = getenv("AVP_SCSP_RAW"); tried = 1; if (p) f = fopen(p, "wb"); }
++       if (f) { u32 i; for (i = 0; i < scspsoundlen; i++) { s32 l = bufL[i], r = bufR[i]; s16 o[2];
++         o[0] = (s16)(l > 32767 ? 32767 : l < -32768 ? -32768 : l); o[1] = (s16)(r > 32767 ? 32767 : r < -32768 ? -32768 : r);
++         fwrite(o, 2, 2, f); } fflush(f); } }

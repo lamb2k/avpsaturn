@@ -69,6 +69,66 @@ static u32 fade_level = 0xffffUL;
 static s16 fade_dir;
 static u16 fade_rate;
 volatile SatAudioStats sat_audio_stats;
+int sat_audio_clips_loaded;   /* set by a caller whose loader already put the clips in SCSP RAM; then pack need only hold the tables */
+
+#ifdef SAT_AUDIO_MIX
+/* Test mode: one mixed stream instead of a slot per channel. Clips are read from SCSP RAM by the SH-2, summed, and written ahead of two static looping slots. */
+#define MIX_LEFT 0x70000UL
+#define MIX_RIGHT 0x72000UL
+#define MIX_RING 8192UL
+#define MIX_LEAD 1200UL
+typedef struct Voice { u32 at, left; u8 on, loop; u32 start, samples; u16 gl, gr; } Voice;
+static Voice voice[CHANNELS];
+static u32 mix_pos, mix_frac;
+static u16 mix_gain_tl[CHANNELS];
+#define RAM8_AT(a) (*(volatile signed char *)(0x25A00000UL + (a)))
+static u16 tl_gain(unsigned tl)     /* 256 * 10^(-0.375 tl / 20): halves every 16 steps */
+{
+    static const u8 frac[16] = { 255, 244, 234, 224, 215, 206, 197, 189, 181, 173, 166, 159, 152, 146, 140, 134 };
+    return tl >= 128 ? 0 : (u16)(frac[tl & 15] >> (tl >> 4));
+}
+static void mix_init(void)
+{
+    u32 i;
+    for (i = 0; i < 2 * MIX_RING; i += 2) SCSP_RAM[(MIX_LEFT + i) >> 1] = 0;
+    for (i = 0; i < 2; i++) {
+        u32 a = i ? MIX_RIGHT : MIX_LEFT;
+        SLOT(i, 0x00) = (u16)(PCM8 | LOOP_NORMAL | (a >> 16));
+        SLOT(i, 0x02) = (u16)a; SLOT(i, 0x04) = 0; SLOT(i, 0x06) = (u16)MIX_RING;
+        SLOT(i, 0x08) = 0x001fu | 1u << 5; SLOT(i, 0x0a) = 0x001fu; SLOT(i, 0x0c) = 0; SLOT(i, 0x0e) = 0;
+        SLOT(i, 0x10) = (u16)(0xeu << 11); SLOT(i, 0x12) = 0; SLOT(i, 0x14) = 0;
+        SLOT(i, 0x16) = (u16)(7u << 13 | (i ? 0x00u : 0x10u) << 8);
+    }
+    SLOT(0, 0) = (u16)(SLOT(0, 0) | KEY_ON); SLOT(1, 0) = (u16)(SLOT(1, 0) | KEY_ON | KEY_EXECUTE);
+    mix_pos = MIX_LEAD;
+}
+static void mix_frame(void)
+{
+    u32 count = 183;
+    u32 i, n;
+    mix_frac += 934;                                /* 11025 / 59.94 = 183.934 */
+    if (mix_frac >= 1000) { mix_frac -= 1000; count++; }
+    for (i = 0; i < count; i++) {
+        long l = 0, r = 0;
+        for (n = 0; n < CHANNELS; n++) {
+            Voice *v = &voice[n];
+            long s;
+            if (!v->on) continue;
+            s = RAM8_AT(v->at++);
+            l += s * v->gl; r += s * v->gr;
+            if (--v->left == 0) {
+                if (v->loop) { v->at = v->start; v->left = v->samples; } else v->on = 0;
+            }
+        }
+        l >>= 8; r >>= 8;
+        if (l > 127) l = 127; else if (l < -128) l = -128;
+        if (r > 127) r = 127; else if (r < -128) r = -128;
+        RAM8_AT(MIX_LEFT + mix_pos) = (signed char)l;
+        RAM8_AT(MIX_RIGHT + mix_pos) = (signed char)r;
+        if (++mix_pos == MIX_RING) mix_pos = 0;
+    }
+}
+#endif
 
 static u32 be32(const u8 *p) { return ((u32)p[0] << 24) | ((u32)p[1] << 16) | ((u32)p[2] << 8) | p[3]; }
 static u32 be16(const u8 *p) { return ((u32)p[0] << 8) | p[1]; }
@@ -130,6 +190,13 @@ static unsigned scsp_pan(unsigned pan)
 
 static void slot_pan(int n)
 {
+#ifdef SAT_AUDIO_MIX
+    unsigned pan = scsp_pan((unsigned)(channel[n].pos >> 8)), cut = pan & 15u;
+    u16 g = mix_gain_tl[n], c = (u16)(g >> (cut / 2u));   /* the slot's 3 dB steps, to the nearest 6 dB */
+    voice[n].gl = pan & 16u ? g : c;
+    voice[n].gr = pan & 16u ? c : g;
+    return;
+#endif
     SLOT(n, 0x16) = (u16)(7u << 13 | scsp_pan((unsigned)(channel[n].pos >> 8)) << 8);
 }
 
@@ -174,7 +241,11 @@ static void pan_setup(Channel *c, const u8 *mb)
 static void channel_end(int n)
 {
     Channel *c = &channel[n];
+#ifdef SAT_AUDIO_MIX
+    voice[n].on = 0;
+#else
     if (c->has_clip) SLOT(n, 0) = (u16)((SLOT(n, 0) & ~KEY_ON) | KEY_EXECUTE);
+#endif
     c->prio = 0; c->frames_left = 0; c->has_clip = 0; c->pan_mode = 0;
 }
 
@@ -208,6 +279,14 @@ static void start_sfx(const Sfx *s, const u8 *mb)
     channel[clip].has_clip = 1;
     pan_setup(&channel[clip], mb);
     offset += CLIP_BASE;
+#ifdef SAT_AUDIO_MIX
+    voice[clip].start = voice[clip].at = offset; voice[clip].samples = voice[clip].left = samples;
+    voice[clip].loop = s->flags & 1; voice[clip].on = 1;
+    mix_gain_tl[clip] = tl_gain(s->tl);
+    slot_pan(clip);
+    sat_audio_stats.sfx_started++;
+    return;
+#endif
     SLOT(clip, 0x00) = (u16)(PCM8 | (s->flags & 1 ? LOOP_NORMAL : 0) | (offset >> 16));
     SLOT(clip, 0x02) = (u16)offset;
     SLOT(clip, 0x04) = 0;
@@ -315,6 +394,9 @@ void sat_audio_frame(void)
         if (!cd_intro_left) { cd_play_track(cd_loop_next, 1); cd_loop_next = 0; }
     }
     cd_service();
+#ifdef SAT_AUDIO_MIX
+    mix_frame();
+#endif
 }
 
 unsigned long sat_audio_pack_keep(const void *pack)
@@ -350,7 +432,11 @@ int sat_audio_init(const void *pack)
     SCSP_MIXER = 0x0200u | 0xfu;                       /* 512 KB RAM, master volume full */
     for (n = 0; n < 32; n++) for (i = 0; i < 0x18; i += 2) SLOT(n, i) = 0;
     SLOT(0, 0) = KEY_EXECUTE;
-    for (i = 0; i + 1 < bytes; i += 2) SCSP_RAM[(CLIP_BASE + i) >> 1] = (u16)(clips[i] << 8 | clips[i + 1]);
+    if (!sat_audio_clips_loaded)
+        for (i = 0; i + 1 < bytes; i += 2) SCSP_RAM[(CLIP_BASE + i) >> 1] = (u16)(clips[i] << 8 | clips[i + 1]);
     cd_level(fade_level >> 13);
+#ifdef SAT_AUDIO_MIX
+    mix_init();
+#endif
     return 1;
 }
