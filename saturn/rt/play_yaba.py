@@ -124,12 +124,12 @@ def main():
     while port_busy():
         print("Yaba lock held, waiting", flush=True); time.sleep(10)
     syms = {}
-    for l in subprocess.run([str(NM), str(work / "sat.elf")], capture_output=True, text=True).stdout.splitlines():
+    for l in subprocess.run([str(NM), os.environ.get("YABA_ELF", str(work / "sat.elf"))], capture_output=True, text=True).stdout.splitlines():
         p = l.split()
         if len(p) == 3:
             syms[p[2].lstrip("_")] = int(p[0], 16)
     orig = INI.read_bytes()
-    set_ = {r"Video\VideoCore": "1", r"Sound\SoundCore": os.environ.get("YABA_SOUND", "0"), r"General\CdRomISO": str(work / "sat.cue").replace("\\", "/"), "autostart": "true", r"Cartridge\Type": "7", r"General\EnableEmulatedBios": "true"}
+    set_ = {r"Video\VideoCore": "1", r"Sound\SoundCore": os.environ.get("YABA_SOUND", "0"), r"General\CdRomISO": os.environ.get("YABA_CUE", str(work / "sat.cue")).replace("\\", "/"), "autostart": "true", r"Cartridge\Type": "7", r"General\EnableEmulatedBios": "true"}
     out = [f"{l.split('=')[0]}={set_[l.split('=')[0]]}" if l.split("=")[0] in set_ else l for l in orig.decode("latin-1").splitlines()]
     INI.write_bytes(("\n".join(out) + "\n").encode("latin-1"))
     proc = subprocess.Popen([str(EXE)], cwd=str(EXE.parent))

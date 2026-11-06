@@ -105,6 +105,8 @@ typedef struct
     int shift; /* key >> shift picks an index bucket */
     const u8 *keys; /* u32: key << 14 | payload index, ascending; BLANK_INDEX marks a tile with no visible pen */
     const u8 *data;
+    const u8 *spill; /* payload indexes from split on live here: a second stretch of the cart */
+    u32 split;
 } Section;
 
 /* A set of VRAM slots holding pack tiles; a slot not drawn this frame can be taken. */
@@ -366,7 +368,11 @@ static u16 cache_find(Cache *c, u32 key, unsigned long *refused)
     }
     c->slot_key[n] = key; c->slot_stamp[n] = stamp; c->used++;
     c->slot_next[n] = c->head[h]; c->head[h] = n;
-    vram_copy(c->vram + (u32)n * c->slot_bytes, sections[c->section].data + (u32)idx * c->slot_bytes, c->slot_bytes);
+    {
+        const Section *sec = &sections[c->section];
+        const u8 *from = (u32)idx < sec->split ? sec->data + (u32)idx * c->slot_bytes : sec->spill + ((u32)idx - sec->split) * c->slot_bytes;
+        vram_copy(c->vram + (u32)n * c->slot_bytes, from, c->slot_bytes);
+    }
     if (c == &spr_cache) sat_gfx_stats.uploads++; else sat_gfx_stats.layer_uploads++;
     return n;
 }
@@ -992,6 +998,8 @@ static int open_pack(const u8 *p)
         sections[i].count = be32(p + 4 + i * 12);
         sections[i].keys = p + be32(p + 8 + i * 12);
         sections[i].data = p + be32(p + 12 + i * 12);
+        sections[i].split = be32(p + 52 + i * 8);
+        sections[i].spill = p + be32(p + 56 + i * 8);
         index_section(&sections[i], i);
     }
     return 1;

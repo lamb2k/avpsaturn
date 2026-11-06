@@ -9,7 +9,7 @@ Status: UNRUN on hardware. Everything so far ran on Yaba Sanshiro only. Emulator
 - A standard pad in port 1.
 - A way to record the screen, if you can, for reading the bars.
 
-Check `SHA256SUMS.txt` first. It names the commit the image came from.
+Check `SHA256SUMS.txt` first with `sha256sum -c SHA256SUMS.txt`. Its first line, a comment, names the commit the image came from.
 
 ## Controls
 
@@ -71,7 +71,8 @@ Do these in the same busy place, the Coffee Shop fight, for about 20 seconds eac
 ## Known limits
 
 - Round 1 only. Round 2 shows its title card, then is not built: stop there.
-- Tiles the pack lacks draw blank. Letters and digits are missing in places on the title and round cards, and some attract and select graphics.
-- Under 60 fps in busy fights is expected. Only Yaba has run this, split into legs with save states.
+- Tiles the pack lacks draw blank. Text and the attract story are in. Later attract demo scenes still lack some sprites and backgrounds.
+- Predator Warrior only: other characters' tiles are not packed, and other rounds' ROM data is overwritten by tiles and code.
+- Under 60 fps in busy fights is expected. Only Yaba has run this, in one continuous process.
 - Music is CD audio and effects are 8 bit 11 kHz. Effects run about 3 dB quiet against MAME on Yaba.
 - Settings live in RAM. Nothing saves.

@@ -1,7 +1,7 @@
 #!/usr/bin/env python
 """Lane satgfx: tile pack for saturn/gfx, from the graphics region. ROM-derived output: stays under E:/AvP/learning/lane-satgfx.
 
-Format SGP1, big endian: magic, then per section (sprite, scroll 1, 2, 3) count, key table offset, data offset. Key word = key << 14 |
+Format SGP1, big endian: magic, then per section (sprite, scroll 1, 2, 3) count, key table offset, data offset, then per section split index, spill offset. Key word = key << 14 |
 payload index; index 0x3fff means no visible pen. Identical payloads are stored once. Texture pens: 15 -> 0, p -> p + 1.
 Sprite: 16 rows of 8 bytes. Scroll 1: one 8x8 cell, key = code << 1 | column bit 5. Scroll 2: four cells TL TR BL BR, key = code.
 Scroll 3: four such 16 pixel characters, key = code.
@@ -73,7 +73,7 @@ def pack(raw, used):
         assert len(seen) < 0x3fff
         secs.append((keys, bytes(data)))
     hdr = struct.pack(">I", 0x53475031)
-    off = 4 + 12 * 4
+    off = 4 + 12 * 4 + 8 * 4   # four (split index, spill offset) pairs follow the sections; see satint_pack.py
     body = bytearray()
     for keys, data in secs:
         ko = off + len(body)
@@ -82,4 +82,5 @@ def pack(raw, used):
         body += data
         body += b"\0" * (-len(body) % 4)
         hdr += struct.pack(">III", len(keys), ko, do)
+    hdr += struct.pack(">II", 0xffffffff, 0) * 4
     return hdr + bytes(body), [(len(k), len(d)) for k, d in secs]

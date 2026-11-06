@@ -19,6 +19,7 @@ for f in out.iterdir():
     if f.is_file():
         f.unlink()
 shutil.copy(work / "sat.iso", out / "avp_saturn.iso")
+shutil.copy(work / "sat.elf", work / "sat_package.elf")   # symbols of exactly this image, for a run on the package
 dma = dict(env, KERNEL_CFLAGS=env["KERNEL_CFLAGS"] + " -DSAT_TILE_DMA")   # second data track: tile uploads by SCU DMA, for the on/off decision
 subprocess.run([sys.executable, str(REPO / "saturn/rt/build.py"), str(work)], check=True, env=dma)
 shutil.copy(work / "sat.iso", out / "avp_saturn_dma.iso")
@@ -31,7 +32,7 @@ for f in sorted((work / "audio/music").glob("t*.raw")):
 shutil.copy(HERE / "HARDWARE_TEST.md", out / "HARDWARE_TEST.md")
 commit = subprocess.run(["git", "-C", str(REPO), "rev-parse", "HEAD"], capture_output=True, text=True).stdout.strip()
 dirty = subprocess.run(["git", "-C", str(REPO), "status", "--short", "saturn"], capture_output=True, text=True).stdout.strip()
-lines = [f"commit {commit}{' (saturn/ has uncommitted changes)' if dirty else ''}"]
+lines = [f"# commit {commit}{' (saturn/ has uncommitted changes)' if dirty else ''}"]   # sha256sum -c skips a line starting with #
 for f in sorted(out.iterdir()):
     if f.name != "SHA256SUMS.txt":
         lines.append(f"{hashlib.sha256(f.read_bytes()).hexdigest()}  {f.name}")

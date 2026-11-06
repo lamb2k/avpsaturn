@@ -1,6 +1,6 @@
 # Closed loop: reads game RAM over MCP rarely, chooses pad keys, sends them to Yaba's own window. Proof markers from golden_r1s:
 # ff81b0 attract must be 0; ffd182 section 1, 2, 3; boss = ffa3c0 type 06 in section 2; ff81f3 is a SECTION clear flag, the boss clear is f3=1 in section 2, then section 3.
-import time
+import threading, time
 prev=None; lastshot=0; n=0; ko=0; cont=0; inko=False; boss=None; t0=time.time(); lastpress=0; sec2clear=None; hpmin=999
 lastsave=0
 def save(s,v):
@@ -18,8 +18,26 @@ def keylog(s):
     import pathlib
     b=b''.join(s.m.read(0x25A70000+a,0x4000) for a in range(0,0x10000,0x4000))
     pathlib.Path('keylog.bin').write_bytes(b)
+def watch(s):
+    # The flag can be set for less time than one step of the main loop takes, so a second MCP session polls only the proof markers. One read holds attract and flag; section is read right after.
+    global sec2clear
+    from capture_frontend_cram import Mcp
+    m=Mcp('http://127.0.0.1:9640/mcp'); m.initialize()
+    while not s.done:
+        try:
+            a=m.read(s.syms['RAMB']+0x81b0,0x44); sec=m.read(s.syms['RAMB']+0xd182,1)[0]
+            v=int.from_bytes(m.read(s.syms['sat_dbg']+8,4),'big')
+        except Exception as e:
+            s.log('watch error',e); time.sleep(0.5); continue
+        if a[0x43] and sec==2 and not a[0] and sec2clear is None:
+            sec2clear=v; s.log('BOSS CLEAR f3 set in section 2, attract 0, watcher, vblank',v,'ko',ko,'continues',cont)
+        time.sleep(0.005)
+started=False
+shotclear=[0]
 def step(v,s):
-    global prev,lastshot,n,ko,cont,inko,boss,lastpress,sec2clear
+    global prev,lastshot,n,ko,cont,inko,boss,lastpress,started
+    if not started:
+        started=True; threading.Thread(target=watch,args=(s,),daemon=True).start()
     n+=1
     a=s.ram(0x8000,0x460); d=s.ram(0xa3c0,6); c=s.ram(0xd180,6)
     g=lambda o:a[o]
@@ -34,7 +52,7 @@ def step(v,s):
     if top==4 and not inko: inko=True; ko+=1; s.log('KO',ko,'att',h); s.shot(f'ko{ko}_{v}'); stacks(s)
     if top!=4: inko=False
     if sec==2 and d[2]==6 and boss is None: boss=v; s.log('BOSS present',v); s.shot(f'boss_{v}')
-    if sec==2 and f3 and not h and sec2clear is None: sec2clear=v; s.log('BOSS CLEAR f3 in section 2, attract 0, ko',ko,'continues',cont); s.shot(f'clear_{v}')
+    if sec2clear is not None and not shotclear[0]: shotclear[0]=1; s.shot(f'clear_{sec2clear}')
     if sec==3: s.log('SECTION 3 reached, attract',h,'ko',ko,'continues',cont); s.shot(f'after_{v}'); s.stop(); return
     now=time.time()
     if h or mode==4 or mode==0:

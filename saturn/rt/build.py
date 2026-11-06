@@ -36,7 +36,9 @@ OVERRIDES = () if os.environ.get("GAME_OVERRIDES") == "0" else tuple((REPO / "sa
 CART = dict(ROMB=0x02400000, OPX=0x02600000, SAT_SINK=0x02638000, SAT_OBJ=0x02648000, SAT_PACK=0x0264c000)
 CART_END = 0x02800000
 OPX_MAX = 0x38000
-COLD2 = (0x0253f000, 116 * 1024)   # a ROM stretch the Round 1 route never read: lifted code of a cold chunk fits here
+# ROM stretches the Round 1 route never reads (checked by a host run with them overwritten): lifted code of cold chunks goes here, leaving the cart for tiles.
+COLD2 = (0x0253f000, 116 * 1024)
+STRETCHES = [(0x024d1000, 188 * 1024), COLD2, (0x02584000, 48 * 1024)]   # 0x105000 and 0x171000 hold tile spill, pack_spill.bin
 HOLE_ROM, HOLE_SIZE = 0x198000, 200 * 1024  # pack_hole.bin
 
 
@@ -156,10 +158,13 @@ def main():
         out = [o for i, o in enumerate(rest) if mask >> i & 1]
         if sum(sizes[o] for o in rest) - sum(sizes[o] for o in out) > room_lw - 8192:   # margin: bss the size count leaves out
             continue
-        two, room = [], COLD2[1]
-        for o in sorted(out, key=lambda o: -sizes[o]):   # largest first into the ROM stretch
-            if sizes[o] <= room:
-                two.append(o); room -= sizes[o]
+        placed, rooms = [[] for _ in STRETCHES], [s[1] for s in STRETCHES]
+        for o in sorted(out, key=lambda o: -sizes[o]):   # largest first into the ROM stretches, tightest that fits
+            fit = [i for i in range(len(rooms)) if sizes[o] <= rooms[i]]
+            if fit:
+                i = min(fit, key=lambda i: rooms[i])
+                placed[i].append(o); rooms[i] -= sizes[o]
+        two = [o for p in placed for o in p]
         three, room3 = [], hole_free
         for o in sorted((o for o in out if o not in two), key=lambda o: -sizes[o]):   # then the rest of the tile stretch
             if sizes[o] <= room3:
@@ -168,18 +173,25 @@ def main():
             continue
         score = (sum(heat.get(o.stem, 1 << 40) for o in out), len(out))
         if best is None or score < best[0]:
-            best = (score, out, two, three)
+            best = (score, out, placed, three)
     if best is None:
-        raise SystemExit(f"NO-GO: no placement fits: rest {sum(sizes[o] for o in rest)} room_lw {room_lw} cold1 {room_cold1} cold2 {COLD2[1]} sizes {sorted(sizes[o] for o in rest)}")
+        raise SystemExit(f"NO-GO: no placement fits: rest {sum(sizes[o] for o in rest)} room_lw {room_lw} cold1 {room_cold1} stretches {STRETCHES} sizes {sorted(sizes[o] for o in rest)}")
     cold = best[1]
-    cold2 = best[2]
+    placed = best[2]
+    cold2 = [o for p in placed for o in p]
     cold3 = best[3]
     cold1 = [o for o in cold if o not in cold2 and o not in cold3]
     lw = [o for o in rest if o not in cold]
     usedl = sum(sizes[o] for o in lw)
-    print("placement", {"hw": len(hw), "lw": [o.stem for o in lw], "cold1": [(o.stem, sizes[o], heat.get(o.stem)) for o in cold1], "cold2": [(o.stem, sizes[o], heat.get(o.stem)) for o in cold2]})
+    print("placement", {"hw": len(hw), "lw": [o.stem for o in lw], "cold1": [(o.stem, sizes[o], heat.get(o.stem)) for o in cold1], "stretches": [[o.stem for o in p] for p in placed]})
     inp = lambda l, s: "\n".join(f'    "{o.as_posix()}"({s})' for o in l)
     tx = ".text .text.* .rodata .rodata.* .data .data.*"
+    stretch_ld = "".join(f"""  .st{i} {s[0]:#x} : {{
+{inp(placed[i], tx)}
+    . = ALIGN(4);
+    _sat_st{i}_end = .;
+  }}
+""" for i, s in enumerate(STRETCHES))
     ld = f"""ENTRY(_sat_start)
 SECTIONS {{
   .hw {HW_BASE:#x} : {{
@@ -200,12 +212,7 @@ SECTIONS {{
     . = ALIGN(4);
     _sat_cold1_end = .;
   }}
-  .cold2 {COLD2[0]:#x} : {{
-{inp(cold2, tx)}
-    . = ALIGN(4);
-    _sat_cold2_end = .;
-  }}
-  .cold3 {cold3_at:#x} : {{
+{stretch_ld}  .cold3 {cold3_at:#x} : {{
 {inp(cold3, tx)}
     . = ALIGN(4);
     _sat_cold3_end = .;
@@ -229,21 +236,28 @@ SECTIONS {{
     if (WORK / "opx.bin").stat().st_size > OPX_MAX:
         raise SystemExit("NO-GO: store past its room")
     sh([OBJCOPY, "-O", "binary", "-j", ".cold1", elf, ISO / "COLD1.BIN"])
-    sh([OBJCOPY, "-O", "binary", "-j", ".cold2", elf, WORK / "cold2.bin"])
+    if not (ISO / "COLD1.BIN").stat().st_size:   # the loader halts on an empty read
+        (ISO / "COLD1.BIN").write_bytes(bytes(4))
+    for i in range(len(STRETCHES)):
+        sh([OBJCOPY, "-O", "binary", "-j", f".st{i}", elf, WORK / f"st{i}.bin"])
     sh([OBJCOPY, "-O", "binary", "-j", ".cold3", elf, WORK / "cold3.bin"])
     hw_end, lw_end = syms["_sat_bss_end"], syms["_sat_lw_bss_end"]
     print({"hw_image": (ISO / "HW.BIN").stat().st_size, "hw_end": hex(hw_end), "hw_free": HW_LIMIT - hw_end,
            "lw_image": (ISO / "LW.BIN").stat().st_size, "lw_end": hex(lw_end), "lw_free": LW_LIMIT - lw_end,
            "lifted_code_total": sum(sizes.values()), "lifted_in_hw": used, "chunks_lw": [o.stem for o in lw],
-           "pack": pack_size, "cart_free": CART_END - syms["_sat_cold1_end"], "cold2_free": COLD2[0] + COLD2[1] - syms["_sat_cold2_end"]})
-    if syms["_sat_cold1_end"] > CART_END or syms["_sat_cold2_end"] > COLD2[0] + COLD2[1]:
+           "pack": pack_size, "cart_free": CART_END - syms["_sat_cold1_end"], "stretch_free": [s[0] + s[1] - syms[f"_sat_st{i}_end"] for i, s in enumerate(STRETCHES)]})
+    if syms["_sat_cold1_end"] > CART_END or any(syms[f"_sat_st{i}_end"] > s[0] + s[1] for i, s in enumerate(STRETCHES)):
         raise SystemExit("NO-GO: past the cart")
     if hw_end > HW_LIMIT or lw_end > LW_LIMIT:
         raise SystemExit("NO-GO on this layout: segment past its RAM")
     rom = bytearray((WORK / "rt.bin").read_bytes())
-    for at, name in ((HOLE_ROM, "pack_hole.bin"), (COLD2[0] - CART["ROMB"], "cold2.bin"), (cold3_at - CART["ROMB"], "cold3.bin")):
+    for at, name in ((HOLE_ROM, "pack_hole.bin"), *((s[0] - CART["ROMB"], f"st{i}.bin") for i, s in enumerate(STRETCHES)), (cold3_at - CART["ROMB"], "cold3.bin")):
         d = (WORK / name).read_bytes()
         rom[at:at + len(d)] = d
+    sp, at = (WORK / "pack_spill.bin").read_bytes() if (WORK / "pack_spill.bin").exists() else b"", 0
+    while at < len(sp):
+        a, n = int.from_bytes(sp[at:at + 4], "big"), int.from_bytes(sp[at + 4:at + 8], "big")
+        rom[a:a + n] = sp[at + 8:at + 8 + n]; at += 8 + n
     (ISO / "ROM.BIN").write_bytes(rom)
     (WORK / "rom_final.bin").write_bytes(rom)
     b = OBJ / "boot.o"
