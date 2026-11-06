@@ -365,7 +365,7 @@ def emit(fn, a, i, m, sz, live, ccret, entry):
             cases = []
             seen_off = set()
             offs = []
-            if t0 in SEEN:              # table of branch instructions: the index register is a byte offset into it
+            if t0 in SEEN and cfg.insn(t0) is not None and cfg.insn(t0).mnemonic.startswith(("bra", "jmp", "b")) and not cfg.insn(t0).mnemonic.startswith("btst"):   # table of branch instructions: the index register is a byte offset into it
                 p = t0
                 for t in TABLES[t0]:
                     offs.append((p - t0, t))
