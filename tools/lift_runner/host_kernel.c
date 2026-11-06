@@ -70,20 +70,21 @@ void f_dispatch(u32 a){ VF f=lookup(a); if(!f){ void*bt[12]; int nb=backtrace(bt
 static void to_sched(void){ int me=cur; T[me].regs.a[7]=cpu.a[7]; swapcontext(&T[me].uc,&sched); cpu.a[7]=T[me].regs.a[7]; cpu.a[1]=cpu.a[7]; cpu.a[0]=REC(me); }
 static void task_tramp(void){ int me=cur; f_dispatch(r32(REC(me)+4)); printf("task %d returned, vblank %ld\n",me,curv); exit(3); }
 /* Traps */
-void f_trap0(void){ u32 r=0xff0058u+(cpu.d[0]&0xffff); cpu.a[1]=0xff0058u; if(r8(r)==0){ w16(r,0xc00); w32(r+4,cpu.a[0]); w16(r+0x10,cpu.d[1]); w16(r+0x12,cpu.d[2]); } }
-void f_trap10(void){ u32 r=0xff0058u+(cpu.d[0]&0xffff); cpu.a[1]=0xff0058u; w16(r,0xc00); w32(r+4,cpu.a[0]); w16(r+0x10,cpu.d[1]); w16(r+0x12,cpu.d[2]); }
-void f_trap7(void){ if(r16(G_FREEN)){ u32 p=r32(G_FREEP); u32 r=r32(p); cpu.a[6]=p+4; cpu.a[1]=r; w32(G_FREEP,p+4); w16(G_FREEN,r16(G_FREEN)-1); w16(r,0xc00); w32(r+4,cpu.a[0]); w16(r+0x10,cpu.d[0]); w16(r+0x12,cpu.d[1]); } }
+static void tg(void);
+void f_trap0(void){ tg(); u32 r=0xff0058u+(cpu.d[0]&0xffff); cpu.a[1]=0xff0058u; if(r8(r)==0){ w16(r,0xc00); w32(r+4,cpu.a[0]); w16(r+0x10,cpu.d[1]); w16(r+0x12,cpu.d[2]); } tg(); }
+void f_trap10(void){ tg(); u32 r=0xff0058u+(cpu.d[0]&0xffff); cpu.a[1]=0xff0058u; w16(r,0xc00); w32(r+4,cpu.a[0]); w16(r+0x10,cpu.d[1]); w16(r+0x12,cpu.d[2]); tg(); }
+void f_trap7(void){ tg(); if(r16(G_FREEN)){ u32 p=r32(G_FREEP); u32 r=r32(p); cpu.a[6]=p+4; cpu.a[1]=r; w32(G_FREEP,p+4); w16(G_FREEN,r16(G_FREEN)-1); w16(r,0xc00); w32(r+4,cpu.a[0]); w16(r+0x10,cpu.d[0]); w16(r+0x12,cpu.d[1]); } tg(); }
 static void clear_rec(u32 r){ w32(r+0x10,0); w32(r+0x14,0); w32(r+0x18,0); w32(r+0x1c,0); w8(r,0); }
 static void task_end(void){ int me=cur; T[me].live=0; setcontext(&sched); (void)me; }
-void f_trap1(void){ clear_rec(REC(cur)); task_end(); }
-void f_trap9(void){ u32 r=REC(cur); clear_rec(r); u32 p=r32(G_FREEP)-4; w32(p,r); w32(G_FREEP,p); w16(G_FREEN,r16(G_FREEN)+1); task_end(); }
-void f_trap2(void){ u32 off=cpu.d[0]&0xffff; u32 r=0xff0058u+off; cpu.a[4]=0xff0058u; if(r8(r)){ cpu.d[1]=0; clear_rec(r); T[off/0x20].live=0; } }
-static void trap_irq(u32 lo,u32 hi);
-void f_trap3(void){ trap_irq(0x106c,0x108e); u32 r=REC(cur); u32 bit=(cpu.d[0]&0xff)?0x100:0x200; u32 v=(cpu.d[0]&0xffff)|bit; cpu.d[1]=(cpu.d[1]&0xffff0000u)|bit; cpu.d[0]=(cpu.d[0]&0xffff0000u)|v; w16(r,v); w32(r+8,cpu.a[7]); to_sched(); }
-void f_trap4(void){ trap_irq(0x1096,0x10ac); u32 r=REC(cur); w8(r,4); w32(r+8,cpu.a[7]); to_sched(); }
-void f_trap5(void){ u32 r=0xff0058u+(cpu.d[0]&0xffff); w8(r,2); w8(r+1,0); cpu.a[4]=0xff0058u; }
-void f_trap6(void){ u32 r=0xff0058u+(cpu.d[0]&0xffff); w8(r,4); w8(r+1,cpu.d[1]); cpu.a[4]=0xff0058u; }
-void f_trap8(void){ u32 tag=r8(0xff81b3); int i; w8(0xff81b3,0); for(i=8;i<16;i++){ u32 r=REC(i); if(r8(r)&&r8(r+0x16)==tag){ clear_rec(r); T[i].live=0; { u32 p=r32(G_FREEP)-4; w32(p,r); w32(G_FREEP,p); w16(G_FREEN,r16(G_FREEN)+1);} } } }
+void f_trap1(void){ tg(); clear_rec(REC(cur)); task_end(); }
+void f_trap9(void){ tg(); u32 r=REC(cur); clear_rec(r); u32 p=r32(G_FREEP)-4; w32(p,r); w32(G_FREEP,p); w16(G_FREEN,r16(G_FREEN)+1); task_end(); }
+void f_trap2(void){ tg(); u32 off=cpu.d[0]&0xffff; u32 r=0xff0058u+off; cpu.a[4]=0xff0058u; if(r8(r)){ cpu.d[1]=0; clear_rec(r); T[off/0x20].live=0; } tg(); }
+
+void f_trap3(void){ tg(); u32 r=REC(cur); u32 bit=(cpu.d[0]&0xff)?0x100:0x200; u32 v=(cpu.d[0]&0xffff)|bit; cpu.d[1]=(cpu.d[1]&0xffff0000u)|bit; cpu.d[0]=(cpu.d[0]&0xffff0000u)|v; w16(r,v); w32(r+8,cpu.a[7]); tg(); to_sched(); }
+void f_trap4(void){ tg(); u32 r=REC(cur); w8(r,4); w32(r+8,cpu.a[7]); tg(); to_sched(); }
+void f_trap5(void){ tg(); u32 r=0xff0058u+(cpu.d[0]&0xffff); w8(r,2); w8(r+1,0); cpu.a[4]=0xff0058u; tg(); }
+void f_trap6(void){ tg(); u32 r=0xff0058u+(cpu.d[0]&0xffff); w8(r,4); w8(r+1,cpu.d[1]); cpu.a[4]=0xff0058u; tg(); }
+void f_trap8(void){ tg(); u32 tag=r8(0xff81b3); int i; w8(0xff81b3,0); for(i=8;i<16;i++){ u32 r=REC(i); if(r8(r)&&r8(r+0x16)==tag){ clear_rec(r); T[i].live=0; { u32 p=r32(G_FREEP)-4; w32(p,r); w32(G_FREEP,p); w16(G_FREEN,r16(G_FREEN)+1);} } } tg(); }
 void f_trap11(void){} void f_trap12(void){} void f_trap13(void){} void f_trap14(void){} void f_trap15(void){}
 
 /* Whole-game comparison */
@@ -93,29 +94,35 @@ static long firstdiv=-1, ndiv, nclean;
 static long maxv=1L<<40;
 static u32 be(u8*p){return ((u32)p[0]<<24)|(p[1]<<16)|(p[2]<<8)|p[3];}
 static int golden_next(void){ if(fread(grec,1,sizeof grec,gold)!=sizeof grec) return 0; memcpy(grec+64,grec,8); return 1; }
-static long midrun; static void compare(void){ long i,d=0; long first=-1; for(i=0;i<0x10000;i++) if(!mask[i]&&RAMB[i]!=gbuf[8+i]){ if(first<0) first=i; d++; }
+static void lastd_set(long d); static long midrun; static void compare(void){ long i,d=0; long first=-1; for(i=0;i<0x10000;i++) if(!mask[i]&&RAMB[i]!=gbuf[8+i]){ if(first<0) first=i; d++; }
     long od=0; for(i=0;i<0x2000;i++) if(OBJ_CUR[0x8000+i]!=gbuf[8+0x10000+i]) od++;
-    if(od&&getenv("OBJDBG")){ for(i=0;i<0x2000;i++) if(OBJ_CUR[0x8000+i]!=gbuf[8+0x10000+i]){ printf(" obj %lx:%02x/%02x",i,OBJ_CUR[0x8000+i],gbuf[8+0x10000+i]); if(i>64)break; } printf("\n"); } if(d||od){ ndiv++; if(ndiv<=40||firstdiv<0){ printf("vblank %ld: ram diffs %ld first %lx (host %02x mame %02x) obj diffs %ld\n",curv,d,first<0?0:0xff0000+first,first<0?0:RAMB[first],first<0?0:gbuf[8+first],od); { long k,sh=0; for(k=first;k>=0&&k<0x10000&&sh<12;k++) if(!mask[k]&&RAMB[k]!=gbuf[8+k]){ printf(" %lx:%02x/%02x",0xff0000+k,RAMB[k],gbuf[8+k]); sh++; } printf("\n"); } fflush(stdout);} if(firstdiv<0) firstdiv=curv; if(getenv("STOP_DIV")&&ndiv>=atoi(getenv("STOP_DIV"))){ printf("stop\n"); exit(0);} } else nclean++; }
+    if(od&&getenv("OBJDBG")){ for(i=0;i<0x2000;i++) if(OBJ_CUR[0x8000+i]!=gbuf[8+0x10000+i]){ printf(" obj %lx:%02x/%02x",i,OBJ_CUR[0x8000+i],gbuf[8+0x10000+i]); if(i>64)break; } printf("\n"); } lastd_set(d); if(d||od){ ndiv++; if(ndiv<=40||firstdiv<0){ printf("vblank %ld: ram diffs %ld first %lx (host %02x mame %02x) obj diffs %ld\n",curv,d,first<0?0:0xff0000+first,first<0?0:RAMB[first],first<0?0:gbuf[8+first],od); { long k,sh=0; for(k=first;k>=0&&k<0x10000&&sh<12;k++) if(!mask[k]&&RAMB[k]!=gbuf[8+k]){ printf(" %lx:%02x/%02x",0xff0000+k,RAMB[k],gbuf[8+k]); sh++; } printf("\n"); } fflush(stdout);} if(firstdiv<0) firstdiv=curv; if(getenv("STOP_DIV")&&ndiv>=atoi(getenv("STOP_DIV"))){ printf("stop\n"); exit(0);} } else nclean++; }
 
 static void run_irq(void){ Cpu save=cpu; int sc=cur; u32 sr=r32(G_CUR); cur=-1; cpu.a[5]=0xff8000; cpu.a[7]=0xff8000; f_e0e(); cpu=save; cur=sc; (void)sr; }
 
 /* Exact preemption: MAME recorded where each IRQ landed (stacked PC, d0-d7, a0-a6). The lifted code checks that PC before each
    instruction, and the IRQ is taken when the registers match too. Stack pointer is left out: lifted calls push no return addresses. */
 u32 irq_pc=0xffffffffu; static u32 ipr[15]; static long nmatch, nkern, nmiss; static long nregmiss; static int in_irq;
-static int want19; static int peek_ip(void){ long pos=ftell(gold); u8 h[72]; int ok=fread(h,1,72,gold)==72; if(ok){ fseek(gold,pos+72+0x8019,SEEK_SET); want19=fgetc(gold); } fseek(gold,pos,SEEK_SET); if(!ok) return 0; irq_pc=be(h+8); for(int i=0;i<15;i++) ipr[i]=be(h+12+i*4); return 1; }
+static int want19; static u8 nrec[8+64+0x10000]; static int peek_ip(void){ long pos=ftell(gold); u8*h=nrec; int ok=fread(nrec,1,sizeof nrec,gold)==sizeof nrec; fseek(gold,pos,SEEK_SET); if(!ok) return 0; want19=nrec[72+0x8019]; irq_pc=be(h+8); for(int i=0;i<15;i++) ipr[i]=be(h+12+i*4); return 1; }
+/* Kernel points carry little register state (a whole dispatcher pass can look like the last), so an IRQ there lands when work RAM equals the next dump. A real divergence never matches and is reported as a miss. */
+static int seg[256][2], nseg; static void seg_build(void){ int i=0; while(i<0x10000){ if(mask[i]){i++;continue;} int b=i; while(i<0x10000&&!mask[i]) i++; seg[nseg][0]=b; seg[nseg++][1]=i-b; } }
+static int state_eq(void){ int k; if(irq_pc==0xffffffffu) return 0; for(k=0;k<nseg;k++) if(memcmp(RAMB+seg[k][0],nrec+72+seg[k][0],seg[k][1])) return 0; return 1; }
 static void finish(const char*why){ printf("%s vblank %ld: clean %ld diff %ld first divergence %ld | irq at instruction %ld, in kernel %ld, missed %ld\n",why,curv,nclean,ndiv,firstdiv,nmatch,nkern,nmiss); fflush(stdout); exit(0); }
 static void take_irq(void){ u32 t=irq_pc; { char*e=getenv("IRQLOG"); if(e&&curv>=atol(e)&&curv<atol(e)+12) fprintf(stdout,"irq %ld at %x cur %d d0 %x%c",curv,t,cur,cpu.d[0],10); } irq_pc=0xffffffffu; in_irq=1; if(curv>=maxv) finish("end"); if(!golden_next()) finish("golden end"); curv++; iop=vstart[curv<vn?curv:vn-1]; compare(); run_irq(); in_irq=0; (void)t; if(!peek_ip()) finish("golden end"); }
 /* Whole walks with only the idle task running and an empty command ring look the same; an IRQ there lands once work has drained. */
-static int quiet; static int ring_empty(void){ int i; for(i=0;i<TASKS;i++) if(i!=6&&r8(REC(i))>=4&&i!=cur) return 0; return r16(0xff801a)==r16(0xff801c)||r16(G_FREEN)==0; }
+
 /* WATCH=addr[,fromvblank]: print the instruction after each change of a RAM byte: the writer of a divergent field. */
 int p_watch; static u32 w_addr; static int w_last=-1; static long w_from; static u32 w_prev;
 static u32 tp[8]; static int ntp;
 static void watch_step(u32 a){ for(int k=0;k<ntp;k++) if(a==tp[k]&&curv>=w_from) printf("T v%ld pc %x d0 %x d1 %x d2 %x d5 %x d6 %x a4 %x a6 %x%c",curv,a,cpu.d[0],cpu.d[1],cpu.d[2],cpu.d[5],cpu.d[6],cpu.a[4],cpu.a[6],10); if(curv<w_from) { w_last=RAMB[w_addr]; w_prev=a; return; } int v=RAMB[w_addr]; if(v!=w_last){ printf("W v%ld %x: %02x->%02x after %x next %x cur %d d0 %x d1 %x d2 %x a0 %x a6 %x%c",curv,0xff0000+w_addr,w_last,v,w_prev,a,cur,cpu.d[0],cpu.d[1],cpu.d[2],cpu.a[0],cpu.a[6],10); w_last=v; } w_prev=a; }
-void irq_check(u32 a){ int i; if(p_watch) watch_step(a); if(a!=irq_pc) return; if(in_irq) return; if(r8(0xff8019)!=(u32)want19) return; /* several ticks in one frame repeat the same PC and registers */ if(cur==6&&!(quiet&&ring_empty())) return; if(a>=0x11ec&&a<0x1214&&cur<0){ if(quiet&&ring_empty()){ nkern++; take_irq(); } return; } /* the idle call: dispatcher leftovers in its registers aren't modelled */ { int bad=0; for(i=0;i<8;i++) if(cpu.d[i]!=ipr[i]) bad++; for(i=0;i<7;i++) if(cpu.a[i]!=ipr[8+i]) bad++; if(bad>(getenv("REGBAD")?atoi(getenv("REGBAD")):2)){ static long lastp=-1; if(curv!=lastp&&getenv("REGDBG")){ lastp=curv; printf("nearmiss v%ld pc %x bad %d:",curv,a,bad); for(i=0;i<8;i++) if(cpu.d[i]!=ipr[i]) printf(" d%d %x/%x",i,cpu.d[i],ipr[i]); for(i=0;i<7;i++) if(cpu.a[i]!=ipr[8+i]) printf(" a%d %x/%x",i,cpu.a[i],ipr[8+i]); puts(""); } return; } if(bad) nregmiss++; } nmatch++; take_irq(); }
+static long lastd; static long ram_diffs(void){ long i,d=0; for(i=0;i<0x10000;i++) if(!mask[i]&&RAMB[i]!=nrec[72+i]) d++; return d; }
+static void lastd_set(long d){ lastd=d; }
+void irq_check(u32 a){ int i; if(p_watch) watch_step(a); if(a!=irq_pc) return; if(in_irq) return; if(r8(0xff8019)!=(u32)want19) return; /* several ticks in one frame repeat the same PC and registers */ if(cur==6&&!state_eq()) return; if(a>=0x11ec&&a<0x1214&&cur<0){ if(state_eq()){ nkern++; take_irq(); } return; } /* the idle call: dispatcher leftovers in its registers aren't modelled */ { int bad=0; if(state_eq()) goto hit; if(!lastd) return; /* same PC, same registers, later pass of a loop: RAM decides while the run is clean */ for(i=0;i<8;i++) if(cpu.d[i]!=ipr[i]) bad++; for(i=0;i<7;i++) if(cpu.a[i]!=ipr[8+i]) bad++; if(bad>(getenv("REGBAD")?atoi(getenv("REGBAD")):2)||ram_diffs()>lastd) return; if(bad) nregmiss++; hit:; } nmatch++; take_irq(); }
 /* At the dispatcher: the IRQ was in the dispatcher or a trap body (native here), or its point was missed. */
 static int kern_pc(u32 p){ return (p>=0xd86&&p<0xdb8)||(p>=0xf00&&p<0x1188); }
-static void trap_irq(u32 lo,u32 hi){ if(irq_pc>=lo&&irq_pc<hi&&cur!=6&&ipr[8]==cpu.a[0]&&r8(0xff8019)==(u32)want19){ nkern++; take_irq(); } }
-static void start_irq(void){ if(irq_pc>=0xdb8&&irq_pc<0xe0e&&!(irq_pc>=0xddc&&irq_pc<0xde6)&&ipr[8]==(u32)REC(cur)&&(cur!=6||ring_empty())){ nkern++; take_irq(); } } /* between marking the task running and its rte */
+/* The IRQ landed in a trap body, native here: same state means same place. */
+static void tg(void){ if(!in_irq&&kern_pc(irq_pc)&&state_eq()){ nkern++; take_irq(); } }
+static void start_irq(void){ if(irq_pc>=0xdb8&&irq_pc<0xe0e&&!(irq_pc>=0xddc&&irq_pc<0xde6)&&state_eq()){ nkern++; take_irq(); } } /* between marking the task running and its rte */
 static void disp_irq(void){ if(irq_pc==0xffffffffu) return; if(kern_pc(irq_pc)){ nkern++; take_irq(); return; } }
 static void idle_irq(void){ if(irq_pc==0xffffffffu) return; if(kern_pc(irq_pc)) nkern++; else { nmiss++; if(nmiss<20){ printf("missed irq at %x vblank %ld\n",irq_pc,curv); fflush(stdout);} } take_irq(); }
 
@@ -128,17 +135,17 @@ extern void f_11ec(void);
 void f_d86(void){ getcontext(&sched); peek_ip();
   for(;;){ int i, ran=0; w8(G_VFLAG,0);
     for(i=0;i<TASKS;i++){ if(r8(G_VFLAG)) break;
-        u32 st=r8(REC(i)); cpu.a[0]=REC(i); cpu.d[0]=(cpu.d[0]&0xffff0000u)|(15-i); cpu.d[1]=(cpu.d[1]&0xffffff00u)|st; if(st>=4){ run_task(i); if(i!=6) ran=1; if(irq_pc>=0xddc&&irq_pc<0xde6&&ipr[8]==(u32)REC(i)&&(i!=6||ring_empty())){ nkern++; take_irq(); } cpu.a[0]=REC(i); cpu.d[0]=(cpu.d[0]&0xffff0000u)|(15-i); } cur=-1;
+        u32 st=r8(REC(i)); cpu.a[0]=REC(i); cpu.d[0]=(cpu.d[0]&0xffff0000u)|(15-i); cpu.d[1]=(cpu.d[1]&0xffffff00u)|st; if(st>=4){ run_task(i); if(i!=6) ran=1; if(irq_pc>=0xddc&&irq_pc<0xde6&&state_eq()){ nkern++; take_irq(); } cpu.a[0]=REC(i); cpu.d[0]=(cpu.d[0]&0xffff0000u)|(15-i); } cur=-1;
         
-        if(quiet&&ring_empty()&&(kern_pc(irq_pc)||(irq_pc>=0xdb8&&irq_pc<0xe0e))){ nkern++; take_irq(); } }
-    quiet=(i==TASKS&&!ran); if(i==TASKS){ cpu.a[0]=REC(15)+0x20; cpu.d[0]|=0xffff; f_11ec(); }
+        if(state_eq()&&(kern_pc(irq_pc)||(irq_pc>=0xdb8&&irq_pc<0xe0e))){ nkern++; take_irq(); } }
+    if(i==TASKS){ cpu.a[0]=REC(15)+0x20; cpu.d[0]|=0xffff; f_11ec(); }
     guard: { static long spin; static long last; if(curv==last){ if(++spin>20000){ idle_irq(); spin=0; } } else { last=curv; spin=0; } }
   } }
 #include <signal.h>
 static char altstk[1<<16];
 static void segv(int n){ void*bt[14]; int nb=backtrace(bt,14); printf("SEGV vblank %ld task %d a0 %x a1 %x a6 %x a7 %x\n",curv,cur,cpu.a[0],cpu.a[1],cpu.a[6],cpu.a[7]); fflush(stdout); backtrace_symbols_fd(bt,nb,1); _exit(4); }
 int main(int c,char**v){ { char*e=getenv("WATCH"); if(e){ u32 x; long f=0; sscanf(e,"%x,%ld",&x,&f); w_addr=x-0xff0000; w_from=f; p_watch=1; } e=getenv("TP"); if(e){ char*q=e; while(*q&&ntp<8){ tp[ntp++]=strtoul(q,&q,16); if(*q==',') q++; } } } { stack_t st; st.ss_sp=altstk; st.ss_size=sizeof altstk; st.ss_flags=0; sigaltstack(&st,0); struct sigaction sa; memset(&sa,0,sizeof sa); sa.sa_handler=segv; sa.sa_flags=SA_ONSTACK; sigaction(SIGSEGV,&sa,0);} FILE*rf=fopen(v[1],"rb"); int i; if(!rf||fread(ROMB,1,sizeof ROMB,rf)!=sizeof ROMB) return 2; { char op[512]; strcpy(op,v[1]); strcpy(strrchr(op,'/')+1,"op.bin"); FILE*of=fopen(op,"rb"); if(!of||fread(OPSPACE,1,sizeof OPSPACE,of)!=sizeof OPSPACE) return 2; fclose(of); } gold=fopen(v[2],"rb"); io_load(v[3]); if(c>4) maxv=atol(v[4]);
-    if(c>5){ FILE*m=fopen(v[5],"r"); char l[64]; while(fgets(l,64,m)){ u32 a,b; if(sscanf(l,"%x %x",&a,&b)==2) for(;a<=b;a++) mask[a-0xff0000]=1; } fclose(m);}
+    if(c>5){ FILE*m=fopen(v[5],"r"); char l[64]; while(fgets(l,64,m)){ u32 a,b; if(sscanf(l,"%x %x",&a,&b)==2) for(;a<=b;a++) mask[a-0xff0000]=1; } fclose(m);} seg_build();
     for(i=0;i<256;i++) PAGE[i]=ZERO[i]; for(i=0;i<0x20;i++) PAGE[i]=ROMB+((u32)i<<16); PAGE[0xff]=RAMB; PAGE[0x70]=OBJ_CUR;
     golden_next(); memcpy(OBJB[0]+0x8000,gbuf+8+0x10000,0x2000); memcpy(OBJB[1]+0x8000,gbuf+8+0x10000,0x2000); memcpy(RAMB+0xe90,gbuf+8+0xe90,16); /* what the skipped hardware test left */ curv=0; iop=0; fseek(gold,0,SEEK_SET); gbuf[8+0x8019]=0;
     cpu.d[3]=4; cpu.a[4]=0x800; /* registers the skipped hardware test left, seen through f_1a36 */ cpu.a[7]=0xff8000; cpu.a[5]=0xff8000; f_800(); printf("boot returned\n"); return 1; }

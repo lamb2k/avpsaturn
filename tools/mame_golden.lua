@@ -40,4 +40,33 @@ end
 learn_g2 = rt("learn_io1", 0x800000, 0x80ffff)
 learn_g3 = rt("learn_io2", 0x618000, 0x619fff)
 learn_g4 = emu.add_machine_frame_notifier(function() iolog:flush() end)
-dofile("tools/mame_capture_oracle11_first_segment_progression.lua")
+-- AVSP_ROUTE: a saved input file (tools/make_route.py), real ports only. Without it the retained route harness drives the run.
+-- LEARN_SAVE="frame,frame": MAME state saves at those frames, named by frame, for state fixtures (item 14).
+local route = os.getenv("AVSP_ROUTE")
+if route then
+    local in0 = manager.machine.ioport.ports[":IN0"].fields
+    local in2 = manager.machine.ioport.ports[":IN2"].fields
+    local F = {in2["Coin 1"], in2["1 Player Start"], in0["P1 Left"], in0["P1 Right"], in0["P1 Button 1"], in0["P1 Button 2"], in0["P1 Button 3"], in0["P1 Up"], in0["P1 Down"]}
+    local steps, last = {}, nil
+    for l in io.lines(route) do
+        local a, b = l:match("^(%d+) (%d+)")
+        if a then steps[tonumber(a)] = tonumber(b) else last = tonumber(l:match("^last (%d+)")) end
+    end
+    last = tonumber(os.getenv("LEARN_LAST") or "") or last
+    local saves = {}
+    for n in (os.getenv("LEARN_SAVE") or ""):gmatch("%d+") do saves[tonumber(n)] = true end
+    local frame = 0
+    learn_g5 = emu.add_machine_frame_notifier(function()
+        frame = frame + 1
+        local w = steps[frame]
+        if w then
+            for i, f in ipairs(F) do
+                if w & (1 << (i - 1)) ~= 0 then f:set_value(1) else f:clear_value() end
+            end
+        end
+        if saves[frame] then manager.machine:save("f" .. frame) end
+        if frame == last then iolog:close(); out:close(); manager.machine:exit() end
+    end)
+else
+    dofile("tools/mame_capture_oracle11_first_segment_progression.lua")
+end

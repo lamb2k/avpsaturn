@@ -200,7 +200,7 @@ def uses_defs(i):
     """Flag use and def sets of one instruction, for liveness."""
     m = i.mnemonic.split(".")[0]
     use, defs = set(), set()
-    if m == "move" and ("sr" in i.op_str or "ccr" in i.op_str):
+    if m in ("move", "andi", "ori", "eori") and ("sr" in i.op_str or "ccr" in i.op_str):
         return set("zncvx"), set("zncvx")
     if (m[0] == "b" and m[1:] in FLAGS_OF) or (m[0] == "s" and m[1:] in FLAGS_OF):
         use = set(FLAGS_OF[m[1:]])
@@ -415,6 +415,9 @@ def emit(fn, a, i, m, sz, live, ccret, entry):
         if sz == 2:
             return reg_write(fn, r, 2, f"(s16)(s8){r}") + fl_nz(live, 2, r)
         return f"{r}=(u32)(s32)(s16){r};" + fl_nz(live, 4, r)
+    if m == "move" and ops[1] == "ccr" and ops[0][0] == "#":
+        k = num(ops[0][1:])
+        return "".join(f"{f}={(k >> b) & 1};" for f, b in (("fc", 0), ("fv", 1), ("fz", 2), ("fn", 3), ("fx", 4)))
     if m in ("moveq", "move", "movea"):
         if "sr" in ops or "ccr" in ops or "usp" in ops:
             stats["sr_ops"] += 1
@@ -438,6 +441,9 @@ def emit(fn, a, i, m, sz, live, ccret, entry):
         s = Operand(fn, ops[0], sz)
         return "".join(s.pre) + f"{{{CT[sz]} v={s.read()};" + fl_nz(live, sz, "v") + "}"
     if m in ("and", "andi", "or", "ori", "eor", "eori"):
+        if "ccr" in ops:  # the condition codes are real state: abcd/sbcd/addx read X
+            k = num(ops[0][1:])
+            return "".join(f"{f}={ {'a': f'{f}&&{(k >> b) & 1}', 'o': f'{f}||{(k >> b) & 1}', 'e': f'(!!{f})^{(k >> b) & 1}'}[m[0]] };" for f, b in (("fc", 0), ("fv", 1), ("fz", 2), ("fn", 3), ("fx", 4)))
         if "sr" in ops or "ccr" in ops:
             stats["sr_ops"] += 1
             ABORTS.add(a)
