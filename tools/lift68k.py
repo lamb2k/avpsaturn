@@ -371,9 +371,12 @@ def emit(fn, a, i, m, sz, live, ccret, entry):
                 if off in seen_off:
                     continue
                 seen_off.add(off)
-                go = f"goto L{t:x};" if t in fn_body_targets(entry) else f"f_{t:x}();return;"
+                if tail:
+                    go = f"goto L{t:x};" if t in fn_body_targets(entry) else f"f_{t:x}();return;"
+                else:
+                    go = f"f_{t:x}();break;"
                 cases.append(f"case {off}:{go}")
-            return f"switch((s16){ix}){{{''.join(cases)}default:BADJUMP(0x{a:x});}}"
+            return f"switch((s16){ix}){{{''.join(cases)}default:BADJUMP(0x{a:x});}}" + ("" if tail else CCIN(live))
         t = cfg.hexval(ops[0]) if re.fullmatch(r"\$[0-9a-f]+(\.[lw]|\(pc\))?", ops[0]) else None
         if t is not None:
             s = call(fn, t) + CCIN(live)
@@ -381,8 +384,10 @@ def emit(fn, a, i, m, sz, live, ccret, entry):
         stats["indirect_calls"] += 1
         o = Operand(fn, ops[0].replace("(a", "(a"), 4) if False else None
         rr = re.fullmatch(r"\(a([0-7])\)", ops[0])
-        tgt = fn.reg(f"a{rr[1]}") if rr else "0"
-        return f"DISPATCH({tgt});" + CCIN(live) + ("return;" if tail else "")
+        if rr:
+            return f"DISPATCH({fn.reg(f'a{rr[1]}')});" + CCIN(live) + ("return;" if tail else "")
+        o = Operand(fn, ops[0], 4)
+        return "".join(o.pre) + f"DISPATCH({o.addr});" + CCIN(live) + ("return;" if tail else "")
     if m == "trap":
         return f"f_trap{num(ops[0][1:])}();" + CCIN(live)
     if m == "movem":
