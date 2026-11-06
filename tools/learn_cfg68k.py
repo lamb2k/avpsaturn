@@ -207,7 +207,7 @@ def build(depth=0):
         auto = {int(x, 16) for x in (OUT / "roots_auto.txt").read_text().split()}
         roots.update({v: "auto" for v in auto})
     # Task entries in code are found as lea/move pointers; add immediates that look like code on demand
-    extra = OUT / "roots.txt"
+    extra = pathlib.Path(__file__).parent / "roots.txt"
     if extra.exists():
         for line in extra.read_text().split():
             roots[int(line, 16)] = "extra"

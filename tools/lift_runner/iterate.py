@@ -5,7 +5,7 @@ import pathlib
 T = pathlib.Path(__file__).resolve().parents[1].as_posix()
 WT = "/mnt/" + T[0].lower() + T[2:]
 GOLDEN = sys.argv[2] if len(sys.argv) > 2 else "golden_r1s"
-ROOTS = "E:/AvP/learning/roots.txt"
+ROOTS = T + "/roots.txt"
 end = time.time() + float(sys.argv[1]) if len(sys.argv) > 1 else time.time() + 500
 while time.time() < end:
     r = subprocess.run(["wsl.exe", "-e", "sh", "-c", f"GOLDEN={GOLDEN} TMO=280 sh {WT}/lift_runner/run.sh 30000 100000"], capture_output=True, text=True, errors="replace")

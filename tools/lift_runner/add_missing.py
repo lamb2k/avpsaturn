@@ -3,7 +3,7 @@
 import re
 s = open("E:/AvP/learning/lift/run/dispatch.inc").read()
 m = {int(x, 16) for x in re.findall(r"MISSING ([0-9a-f]+)", s)}
-p = "E:/AvP/learning/roots.txt"
+p = str(__import__("pathlib").Path(__file__).parents[1] / "roots.txt")
 have = open(p).read().split()
 new = [f"{a:x}" for a in sorted(m) if a % 2 == 0 and f"{a:x}" not in have and a < 0x200000]
 open(p, "a").write("\n" + "\n".join(new) + "\n")
