@@ -8,7 +8,7 @@ The current state of each item belongs in docs/STATUS.md, not here. Order is pri
 
 ## P0: reset the repo
 
-1. **Discard legacy agent files** on `decomp/main`: delete CODEX.md and QWEN.md (owner: "qwen should go too"), replace CLAUDE.md and AGENTS.md with short new ones from the skill's template (project profile, the rules below). History keeps the old text. Check: no live doc mentions CLAUDE_ALLOWED, Astra or the card chain.
+1. **Discard legacy agent files** on `decomp/main`: replace CLAUDE.md and AGENTS.md with short new ones from the skill's template (project profile, the rules below). History keeps the old text. Check: no live doc mentions CLAUDE_ALLOWED, Astra or the card chain.
 2. **Doc layout, from the LO notes:** docs/STATUS.md (only source of current state), docs/BACKLOG.md (this file), docs/notes/ with each note marked Reference, Historical, Investigation or Draft, and docs/archive/ for old cards, PARITY_PLAN and handoffs. Evidence grades: Fact, Historical evidence, Assumption, Pre-implementation gate; old numbers never count as today's baseline.
 3. **Merge the learning lanes:** learn/source, learn/actor, learn/audio, then re-run all gates once. Fix learn_unit.py first: per-lane work directory, audio hooks, wrong bytes for pc-relative word tables in merged.bin, and FAIL rows from mutation runs polluting gate_runs.tsv. Settle the 2 surviving spawn_table_step mutations.
 
