@@ -52,7 +52,7 @@ def static_contract() -> dict:
         encoding="utf-8")
     residency_header = (ROOT / "src/port_v2/residency/residency.h").read_text(
         encoding="utf-8")
-    card = (ROOT / "docs/task_cards/USER-07-CDDA-RESIDENCY-REVIEW.md").read_text(
+    card = (ROOT / "docs/archive/decomp-reset-20261106/task_cards/USER-07-CDDA-RESIDENCY-REVIEW.md").read_text(
         encoding="utf-8")
     build = (ROOT / "build.ps1").read_text(encoding="utf-8")
     verify = (ROOT / "verify.ps1").read_text(encoding="utf-8")

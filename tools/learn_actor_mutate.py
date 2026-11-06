@@ -1,7 +1,7 @@
 #!/usr/bin/env python
 """Sensitivity check for the actor gate: each deliberate wrong constant must make its unit FAIL.
-usage: learn_actor_mutate.py   Restores the source after each mutation. Re-run the gate afterwards,
-since a mutated run appends a FAIL row to gate_runs.tsv and the last row per unit is what counts."""
+usage: learn_actor_mutate.py [UNIT] [CASES]   Restores the source after each mutation. Mutated runs use --no-record,
+so they never reach gate_runs.tsv. A gate run while this runs in the same worktree would see mutated source."""
 import pathlib
 import subprocess
 import sys
@@ -30,20 +30,24 @@ M = [
     ("ACT_TIMER2A, 0x30)", "ACT_TIMER2A, 0x31)", "emitter_tick"),
     ("0x1004", "0x1005", "emitter_tick"),
 ]
+CASES = sys.argv[2] if len(sys.argv) > 2 else "200"
 orig = SRC.read_bytes()
 survived = 0
 try:
     for old, new, unit in M:
+        if len(sys.argv) > 1 and unit != sys.argv[1]:
+            continue
         text = orig.decode()
         if text.count(old) != 1:
             print("NOT APPLICABLE", old, text.count(old))
             survived += 1
             continue
         SRC.write_bytes(text.replace(old, new).encode())
-        r = subprocess.run([sys.executable, str(REPO / "tools/learn_unit.py"), unit, "200"], capture_output=True, text=True)
+        r = subprocess.run([sys.executable, str(REPO / "tools/learn_unit.py"), unit, CASES, "--no-record"], capture_output=True, text=True)
         killed = r.returncode != 0 and "FAIL" in r.stdout
         print("killed" if killed else "SURVIVED", unit, "|", old[:50])
         survived += not killed
 finally:
     SRC.write_bytes(orig)
-print("survived", survived, "of", len(M))
+print("survived", survived)
+sys.exit(1 if survived else 0)

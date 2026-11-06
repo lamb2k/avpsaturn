@@ -1,17 +1,13 @@
 """Gate definitions for the sound command path. Adds the Z80 mailbox range and hides the helper register save area."""
-import pathlib
 SOURCES = ["avsrc_audio.c", "avsrc_fade.c"]
 SHARED = (0x618000, 0x2000)
 # 0xff0e88..0xff0e9b only shuttles caller registers (0x1a36/0x1a4c, no other reader); not behaviour.
 IGNORE = (0xff0e88, 0xff0e9c)
-OP = pathlib.Path("C:/Game Dev/BrooklynBangoutX/AvPSaturnCapabilityTest-playable-loop-pivot/.deps/mame/actorprobe/decrypted_opcodes_2m.bin")
+# pc-relative word tables merged.bin leaves out: read through opcode space, as the board does.
+OP_READS = ((0x3aec, 96), (0x3c32, 44), (0x1acc, 4), (0x1af6, 4), (0x1b20, 4), (0x1b4a, 4), (0x1b74, 4))
 
 
 def setup(rom):
-    """pc-relative word tables the merged image lacks: read them through opcode space, as the board does."""
-    op = OP.read_bytes()
-    for a, n in ((0x3aec, 96), (0x3c32, 44), (0x1acc, 4), (0x1af6, 4), (0x1b20, 4), (0x1b4a, 4), (0x1b74, 4)):
-        rom.u.mem_write(a, op[a:a + n])
     rom.u.mem_map(SHARED[0], SHARED[1])
     rom.extra = [SHARED]
     rom.ignore = [IGNORE]

@@ -11,7 +11,7 @@ HERE = pathlib.Path(__file__).resolve().parent
 sys.path.insert(0, str(HERE))
 import learn_unit as lu  # noqa: E402
 
-OP = (lu.DEPS / "decrypted_opcodes_2m.bin").read_bytes()
+OP = lu.OP
 rom = lu.Rom()
 rom.stack = 0xff7f00
 rom.u.mem_write(0, OP[:0x10000])  # helpers and their small pc-relative tables live here

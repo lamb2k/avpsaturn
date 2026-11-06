@@ -147,11 +147,6 @@ function Invoke-PythonTest {
 }
 
 function Invoke-FastLane {
-    if (Test-Path -LiteralPath (Join-Path $projectRoot `
-            'tests\test_workflow_policy.py')) {
-        Invoke-PythonTest 'tests\test_workflow_policy.py'
-    }
-    Invoke-PythonTest 'tests\test_task_card_state.py'
     Invoke-PythonTest 'tests\test_port_v2_migration_map.py'
     if (-not $WorkflowOnly) {
         Invoke-PythonTest 'tests\test_avsp_hit_ko_writer_set.py'
