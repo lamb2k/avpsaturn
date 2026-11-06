@@ -86,6 +86,10 @@ class Session:
         for n in names - self.down:
             self.press(n)
 
+    def pulse(self, n, secs=0.05):
+        """Down and up without going through MCP, whose reads each wait for a frame."""
+        self._key(n, True); time.sleep(secs); self._key(n, False)
+
     def word(self, sym, off=0, n=4):
         return int.from_bytes(self.m.read(self.syms[sym] + off, n), "big")
 
