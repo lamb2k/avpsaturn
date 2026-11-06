@@ -103,7 +103,7 @@ Entry 0xa726c. `emitter_tick` (0xa7394): while ff822a, ff81f3 and ff8208 are all
 
 ## Gate notes
 
-`gates/actor.py` runs inside learn_unit.py and adds, for its own units only: own work dir under E:\AvP\learning\actor (the shared input file is overwritten by other lanes), 0xffffxxxx mapped onto RAM (word pointers sign-extend; the board folds them), an overlay of pc-relative data read through the opcode space, a4 as result, d0 ignored at stubs where it is scratch.
+`gates/actor.py` uses the optional gate hooks in learn_unit.py, for its own units only: `setup` maps 0xffffxxxx onto RAM (word pointers sign-extend; the board folds them), `OP_READS` overlays pc-relative data read through the opcode space, `after_run` reports a4 as result and ignores d0 at stubs where it is scratch.
 
 Limits of the gate:
 - Unicorn does not expose live condition codes, so the Z result of alloc is compared through its callers (spawn, emitter), not directly.

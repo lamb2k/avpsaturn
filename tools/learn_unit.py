@@ -1,15 +1,25 @@
 #!/usr/bin/env python
 """Unit gate: run a ROM routine under Unicorn and its C reconstruction on the same random inputs.
 
-usage: learn_unit.py UNIT [CASES]   |   learn_unit.py all [CASES]
-Compares all changed RAM and palette bytes, and the ordered stubbed calls. Prints PASS/FAIL per unit
-and appends to E:/AvP/learning/gate_runs.tsv. The ROM side is run from a merged image: instruction
-bytes from the decrypted opcode image, data from the decrypted program image, as the board fetches.
-A unit is defined in source_recon/gates/*.py with: entry, stubs, a generator of inputs, the C call.
-Tier label: unicorn-differential. It is not a MAME or console result.
+usage: learn_unit.py UNIT|all [CASES] [--no-record]
+Compares all changed RAM and palette bytes, and the ordered stubbed calls. Prints PASS/FAIL per unit.
+Every run appends one row per unit to E:/AvP/learning/gate_runs.tsv, FAIL included:
+time, unit, entry, cases, bad, changed, PASS|FAIL, commit, worktree. The last row of a unit is its state.
+--no-record is for runs on deliberately wrong source (mutations); they must never reach that file.
+
+Work files go to E:/AvP/learning/<worktree name>, or AVP_GATE_WORK, so lanes never share an input file.
+
+ROM side: E:/AvP/learning/merged.bin, built by tools/make_merged.py; this tool only reads it. The lifted runtime
+uses rt.bin and op.bin instead, because it knows which space each read goes through. Here one image serves all
+reads, so a gate whose routine reads pc-relative data merged.bin leaves out lists it in OP_READS.
+A gate is source_recon/gates/*.py with SOURCES, UNITS (entry, stubs, input generator) and these optional hooks:
+  OP_READS = [(addr, size)]            overlaid from op.bin, for this gate only
+  setup(rom)                           maps ranges, sets rom.extra, rom.ignore, rom.stack
+  after_run(rom, regs, out, calls)     returns (out, calls), to report results that are not in memory
+Hooks apply to their own gate only. Tier label: unicorn-differential. It is not a MAME or console result.
 """
 import importlib.util
-import json
+import os
 import pathlib
 import random
 import struct
@@ -22,8 +32,8 @@ from unicorn import Uc, UC_ARCH_M68K, UC_MODE_BIG_ENDIAN, UC_HOOK_CODE, UC_HOOK_
 from unicorn.m68k_const import UC_CPU_M68K_M68000, UC_M68K_REG_A0, UC_M68K_REG_A7, UC_M68K_REG_D0, UC_M68K_REG_PC, UC_M68K_REG_SR  # noqa: E402
 
 REPO = pathlib.Path(__file__).resolve().parents[1]
-DEPS = pathlib.Path("C:/Game Dev/BrooklynBangoutX/AvPSaturnCapabilityTest-playable-loop-pivot/.deps/mame/actorprobe")
 LEARN = pathlib.Path("E:/AvP/learning")
+WORK = pathlib.Path(os.environ.get("AVP_GATE_WORK") or LEARN / REPO.name)
 SENTINEL = 0x1ffff0
 STACK = 0xff0f00
 RAM = (0xff0000, 0x10000)
@@ -32,33 +42,31 @@ OBJ = (0x700000, 0x10000)
 IO = (0x800000, 0x10000)
 
 
-def merged():
-    p = LEARN / "merged.bin"
-    if p.exists():
-        return p.read_bytes()
-    op = (DEPS / "decrypted_opcodes_2m.bin").read_bytes()
-    img = bytearray((DEPS / "decrypted_program_2m.bin").read_bytes())
-    d = json.load(open(LEARN / "cfg.json"))
-    for k, n in d["seen"].items():
-        a = int(k, 16)
-        img[a:a + n] = op[a:a + n]
-    for k, tg in d["tables"].items():
-        a = int(k, 16)                 # pc-relative tables are read through the opcode space
-        n = len(tg) * 4
-        img[a:a + n] = op[a:a + n]
-    p.write_bytes(img)
+def _image(name):
+    p = LEARN / name
+    if not p.exists():
+        sys.exit(f"{p} is missing: run tools/make_merged.py")
+    return p.read_bytes()
+
+
+IMG = _image("merged.bin")
+OP = _image("op.bin")
+
+
+def overlay(reads):
+    """The merged image with these ranges read through opcode space. Private to the caller."""
+    img = bytearray(IMG)
+    for a, n in reads:
+        img[a:a + n] = OP[a:a + n]
     return bytes(img)
 
 
-IMG = merged()
-
-
 class Rom:
-    def __init__(self):
+    def __init__(self, image=IMG, after_run=None):
         u = Uc(UC_ARCH_M68K, UC_MODE_BIG_ENDIAN)
         u.ctl_set_cpu_model(UC_CPU_M68K_M68000)
         u.mem_map(0, 0x200000)
-        u.mem_write(0, IMG)
+        u.mem_write(0, image)
         for b, n in (RAM, PAL, OBJ, IO):
             u.mem_map(b, n)
         self.u = u
@@ -67,6 +75,7 @@ class Rom:
         self.extra = []                # optional ranges from a gate module's setup()
         self.ignore = []
         self.stack = STACK             # a gate whose RAM sits near the default stack moves it
+        self.after_run = after_run
         u.hook_add(UC_HOOK_CODE, self._code)
 
     def _code(self, u, addr, size, _):
@@ -106,6 +115,8 @@ class Rom:
                     if now[i] != old[i]:
                         if not (self.stack - 0x100 <= b + i < self.stack + 4) and not any(lo <= b + i < hi for lo, hi in self.ignore):
                             out[b + i] = now[i]
+        if self.after_run:
+            return self.after_run(self, regs, out, list(self.calls))
         return out, list(self.calls)
 
 
@@ -121,18 +132,28 @@ def wsl(path):
     return "/mnt/" + s[0].lower() + s[2:]
 
 
-def run_group(gatefile, only, cases):
+def commit():
+    r = subprocess.run(["git", "-C", str(REPO), "rev-parse", "--short", "HEAD"], capture_output=True, text=True)
+    d = subprocess.run(["git", "-C", str(REPO), "status", "--porcelain", "--", "source_recon", "tools/learn_unit.py"],
+                       capture_output=True, text=True)
+    return r.stdout.strip() + ("+dirty" if d.stdout.strip() else "")
+
+
+def run_group(gatefile, only, cases, record):
     mod = load_unit(gatefile)
-    rom = Rom()
+    if only and only not in mod.UNITS:
+        return {}
+    rom = Rom(overlay(getattr(mod, "OP_READS", ())), getattr(mod, "after_run", None))
     if hasattr(mod, "setup"):
         mod.setup(rom)
-    work = LEARN / "gate_work"
-    work.mkdir(exist_ok=True)
-    exe = work / (gatefile.stem + ".bin")
+    WORK.mkdir(parents=True, exist_ok=True)
+    exe = WORK / (gatefile.stem + ".bin")
+    inp = WORK / (gatefile.stem + ".in.txt")
     srcs = " ".join(f"'{wsl(REPO / 'source_recon' / s)}'" for s in mod.SOURCES)
     cmd = (f"gcc -std=c90 -pedantic -Wall -Wextra -Werror -Wno-unused-result -Wno-unused-function -O1 -I'{wsl(REPO / 'source_recon')}' "
            f"'{wsl(gatefile.with_suffix('.c'))}' {srcs} -o '{wsl(exe)}'")
     subprocess.run(["wsl.exe", "-e", "sh", "-c", cmd], check=True)
+    rev = commit()
     results = {}
     for name, unit in mod.UNITS.items():
         if only and name != only:
@@ -145,10 +166,10 @@ def run_group(gatefile, only, cases):
             expect.append((sorted(out.items()), calls))
             args = " ".join(f"{regs.get(k, 0):x}" for k in [f"d{i}" for i in range(8)] + [f"a{i}" for i in range(7)])
             lines.append(f"{name} {args} {len(seeds)} " + " ".join(f"{a:x} {v:x}" for a, v in seeds))
-        (work / "in.txt").write_text("\n".join(lines) + "\n")
-        r = subprocess.run(["wsl.exe", "-e", "sh", "-c", f"'{wsl(exe)}' < '{wsl(work / 'in.txt')}'"],
-                           capture_output=True, text=True, check=True)
-        got = r.stdout.splitlines()
+        inp.write_text("\n".join(lines) + "\n")
+        r = subprocess.run(["wsl.exe", "-e", "sh", "-c", f"'{wsl(exe)}' < '{wsl(inp)}'"],
+                           capture_output=True, text=True)
+        got = r.stdout.splitlines()     # a crash in the C is a FAIL of this unit, not a harness error
         bad = 0
         first = None
         for i, (exp, line) in enumerate(zip(expect, got)):
@@ -158,13 +179,19 @@ def run_group(gatefile, only, cases):
                 if first is None:
                     first = (i, lines[i][:200], [e for e in exp[0] if e not in mem][:6], [e for e in mem if e not in exp[0]][:6], exp[1][:4], calls[:4])
         changed = sum(1 for e in expect if e[0])
-        ok = bad == 0 and len(got) == cases and changed > 0
+        ok = r.returncode == 0 and bad == 0 and len(got) == cases and changed > 0
         results[name] = ok
         print(f"{'PASS' if ok else 'FAIL'} {name} entry={unit['entry']:x} cases={cases} changed={changed} bad={bad}")
         if first:
             print("  first:", first)
-        with open(LEARN / "gate_runs.tsv", "a") as f:
-            f.write(f"{time.strftime('%F %T')}\t{name}\t{unit['entry']:x}\t{cases}\t{bad}\t{changed}\n")
+        if r.returncode:
+            print(f"  C side exit {r.returncode}, {len(got)} of {cases} lines")
+        if record:
+            # A crash reports its missing lines as bad, so the ledger's bad == 0 test agrees with the verdict.
+            shown = bad if ok or bad else max(1, cases - len(got))
+            with open(LEARN / "gate_runs.tsv", "a") as f:
+                f.write(f"{time.strftime('%F %T')}\t{name}\t{unit['entry']:x}\t{cases}\t{shown}\t{changed}\t"
+                        f"{'PASS' if ok else 'FAIL'}\t{rev}\t{REPO.name}\n")
     return results
 
 
@@ -177,10 +204,14 @@ def parse(line):
 
 
 if __name__ == "__main__":
-    only = None if sys.argv[1] == "all" else sys.argv[1]
-    cases = int(sys.argv[2]) if len(sys.argv) > 2 else 500
-    bad = False
+    argv = [x for x in sys.argv[1:] if x != "--no-record"]
+    record = len(argv) == len(sys.argv) - 1
+    only = None if argv[0] == "all" else argv[0]
+    cases = int(argv[1]) if len(argv) > 1 else 500
+    results = {}
     for g in sorted((REPO / "source_recon" / "gates").glob("*.py")):
-        r = run_group(g, only, cases)
-        bad |= not all(r.values())
-    sys.exit(1 if bad else 0)
+        results.update(run_group(g, only, cases, record))
+    if not results:
+        sys.exit(f"no such unit: {only}")
+    print(f"{sum(results.values())} passed, {sum(not v for v in results.values())} failed, tier unicorn-differential (HOST)")
+    sys.exit(0 if all(results.values()) else 1)

@@ -138,7 +138,7 @@ Findings:
 `python tools/learn_unit.py all 500` (unicorn-differential): 22 audio units with 0 bad at 500 cases; alternating units 2000 cases. `audio_voice_with_actor_pan` changes no RAM, so it is covered through `audio_alt_*`.
 Sensitivity: a wrong pan constant failed `audio_alt_1aa6`; a swapped mailbox byte failed `audio_send_pending`.
 Replay (MAME values, C model): `source_recon/tests/audio_ring_replay.c` fed every enqueue from both probes; send frames and tails match, given the first-ready frame as input (Z80 boot ends between frames 79 and 82).
-The gate runner gained small optional hooks in `tools/learn_unit.py` for this: `setup(rom)`, extra ranges, ignore ranges, stack. Default behaviour is unchanged. Trap fixed by it: the default stack exclusion hid ff0e00..ff0f03, which overlaps the ring end and music state. Also, `merged.bin` holds wrong bytes for small pc-relative word tables not listed in cfg `tables`; `setup` writes them from opcode space.
+The gate uses the runner's optional hooks in `tools/learn_unit.py`: `setup(rom)` with extra ranges, ignore ranges and stack, and `OP_READS`. Trap fixed by them: the default stack exclusion hid ff0e00..ff0f03, which overlaps the ring end and music state. Also, `merged.bin` leaves out pc-relative bytes past its 64-byte limit (0x3aec needs 96), so `OP_READS` lists them.
 
 ## Left
 

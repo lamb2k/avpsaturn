@@ -1,32 +1,30 @@
 """Gate definitions for pools, spawn table, damage, hit commit and the emitter.
-ROM side extras (handled here so learn_unit.py stays shared): a run can report a4 at
-scratch 0xff0e00 (Unicorn does not expose the live condition codes), and can ignore d0 at stubbed calls where it is only scratch in the routine."""
-import atexit
+A run can report a4 at scratch 0xff0e00 (Unicorn does not expose the live condition codes), and can ignore d0 at
+stubbed calls where it is only scratch in the routine."""
+import ctypes
 import struct
 import sys
 
+from unicorn import UC_PROT_ALL
+from unicorn.m68k_const import UC_M68K_REG_A4
+
 SOURCES = ["avsrc_actor.c", "avsrc_fade.c"]
-_lu = sys.modules["__main__"]
-_run = _lu.Rom.run
-_init = _lu.Rom.__init__
+# pc-relative data these units read through opcode space, beyond what merged.bin carries (it stops at 64 bytes).
+OP_READS = ((0x1be6a, 6), (0x1be82, 76), (0x1c14c, 24), (0x1b4bc, 16), (0x1d612, 16))
+IMG = sys.modules["__main__"].overlay(OP_READS)
 
 
-def _init_alias(self):
+def setup(rom):
     """Word pointers sign-extend to 0xffffxxxx; the board's 24-bit bus folds them onto RAM."""
-    import ctypes
-    from unicorn import UC_PROT_ALL
-    _init(self)
-    self._ram = ctypes.create_string_buffer(0x10000)
-    self.u.mem_unmap(0xff0000, 0x10000)
-    self.u.mem_map_ptr(0xff0000, 0x10000, UC_PROT_ALL, self._ram)
-    self.u.mem_map_ptr(0xffff0000, 0x10000, UC_PROT_ALL, self._ram)
+    rom._ram = ctypes.create_string_buffer(0x10000)
+    rom.u.mem_unmap(0xff0000, 0x10000)
+    rom.u.mem_map_ptr(0xff0000, 0x10000, UC_PROT_ALL, rom._ram)
+    rom.u.mem_map_ptr(0xffff0000, 0x10000, UC_PROT_ALL, rom._ram)
 
 
-def _patched(self, entry, stubs, regs, seeds):
-    out, calls = _run(self, entry, stubs, regs, seeds)
+def after_run(rom, regs, out, calls):
     if regs.get("_result"):
-        from unicorn.m68k_const import UC_M68K_REG_A4
-        a4 = self.u.reg_read(UC_M68K_REG_A4) & 0xffff
+        a4 = rom.u.reg_read(UC_M68K_REG_A4) & 0xffff
         if a4 >> 8:
             out[0xff0e00] = a4 >> 8
         if a4 & 255:
@@ -38,32 +36,6 @@ def _patched(self, entry, stubs, regs, seeds):
     return out, calls
 
 
-if _lu.Rom.run.__name__ != "_patched":
-    _lu.Rom.run = _patched
-    _lu.Rom.__init__ = _init_alias
-# Lanes share the default work dir and overwrite each other's input file: use our own, then report rows.
-_main_runs = _lu.LEARN / "gate_runs.tsv"
-_lu.LEARN = _lu.LEARN / "actor"
-_lu.LEARN.mkdir(exist_ok=True)
-
-
-def _publish():
-    mine = _lu.LEARN / "gate_runs.tsv"
-    if mine.exists():
-        with open(_main_runs, "a") as f:
-            f.write(mine.read_text())
-        mine.unlink()
-
-
-atexit.register(_publish)
-# pc-relative data reads are fetched through the opcode space on this board; cfg.json only lists jump
-# tables, so the extra ranges these units read are overlaid here. Private copy, never committed.
-_op = (_lu.DEPS / "decrypted_opcodes_2m.bin").read_bytes()
-_img = bytearray(_lu.IMG)
-for _a, _n in ((0x1be6a, 6), (0x1be82, 76), (0x1c14c, 24), (0x1b4bc, 16), (0x1d612, 16)):
-    _img[_a:_a + _n] = _op[_a:_a + _n]
-_lu.IMG = IMG = bytes(_img)
-(_lu.LEARN / "merged_actor.bin").write_bytes(IMG)
 PA = dict(p4=0x1773e, p8=0x17654, p12=0x1769e, p16=0x1778c, p20=0x176f0, p24=0x177da, p28=0x17828, p32=0x178a8, p36=0x17876, p40=0x178da)
 PR = dict(p4=0x17754, p8=0x1766a, p12=0x176b4, p16=0x177a2, p20=0x17706, p24=0x177f0, p28=0x1783e, p32=0x178be, p36=0x1788c, p40=0x178f0)
 POOLS = [  # name, first, n, stride, count, top, stack_end, dispatch, traverse entry, classes
