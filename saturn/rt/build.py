@@ -28,7 +28,7 @@ GEN, OBJ, ISO = WORK / "gen", WORK / f"obj{OPT}", WORK / "disc"
 for d in (GEN, OBJ, ISO):
     d.mkdir(parents=True, exist_ok=True)
 HW_BASE, HW_LIMIT, LW_BASE, LW_LIMIT = 0x06014000, 0x06100000, 0x00200000, 0x00300000
-HW_RESERVED = 0x10000 + 16 * 4096 + 8192 + 16384 + 0x8000 + 0x8000   # game RAM, stacks, kernel, graphics tables and code
+HW_RESERVED = 0x10000 + 16 * 2048 + 8192 + 16384 + 0x8000 + 0x8000   # game RAM, stacks, kernel, graphics tables and code
 LW_RESERVED = 0x20000 + 0x4000 + 0xe400   # graphics RAM, lifted bss, layer shadows, blank tags
 NATIVE = ("41ca", "42e4")   # EEPROM block read and write
 # Readable replacements, saturn/game. GAME_OVERRIDES=0 builds without them, for an A/B.
@@ -70,6 +70,8 @@ def gen_sources():
         t = re.sub(r"\bOP(8|16|32)\(\(?0x([0-9a-f]+)u", opx_rewrite, t)
         for n in NATIVE + OVERRIDES:   # replaced natively; the lifted body stays linked as lifted_NNN
             t = t.replace(f"void f_{n}(void){{", f"void lifted_{n}(void){{")
+        for n in OVERRIDES:   # memory is tight and the target never falls back: the replaced body goes
+            t = re.sub(r"^void lifted_%s\(void\)\{.*?^\}\n" % n, "", t, flags=re.M | re.S)
         out.append(update(GEN / s.name, t))
     d = re.sub(r'void f_([0-9a-f]+)\(void\)\{puts\("MISSING [0-9a-f]+"\);fflush\(stdout\);exit\(3\);\}',
                lambda m: f"void f_{m[1]}(void){{sat_fatal(0xe9,0x{m[1]}u);}}", (WORK / "dispatch.inc").read_text())
@@ -127,32 +129,44 @@ def main():
     objs_o = sorted(objs, key=lambda o: -heat.get(o.stem, 1 << 40))
     room_hw = HW_LIMIT - HW_BASE - HW_RESERVED
     room_lw = LW_LIMIT - LW_BASE - LW_RESERVED
-    hw, rest = [], []
-    used = 0
-    for o in objs_o:
+    # The seven hottest chunks hold about 97% of the instructions and always go first. The rest barely differ in heat, so they are chosen to fill the RAM.
+    hw, used = [], 0
+    room_hw -= 9600   # own code and data the count leaves out
+    for o in objs_o[:7]:
         if used + sizes[o] <= room_hw:
             hw.append(o); used += sizes[o]
-        else:
-            rest.append(o)
+    tail = [o for o in objs_o if o not in hw]
+    fill = {0: []}
+    for o in tail:
+        for total, picked in list(fill.items()):
+            t = total + sizes[o]
+            if used + t <= room_hw and t not in fill:
+                fill[t] = picked + [o]
+    best_fill = max(fill)
+    hw += fill[best_fill]; used += best_fill
+    rest = [o for o in objs_o if o not in hw]
     pack_size = (WORK / "pack.bin").stat().st_size
     cold1_at = (CART["SAT_PACK"] + pack_size + 3) & ~3
-    # What stays off low work RAM must fit the cart's two holes: the lowest total heat that does. A chunk can sit in the ROM stretch only alone.
+    # What stays off low work RAM must fit the cart's two holes: the lowest total heat that does. 
     room_cold1 = CART_END - cold1_at
     best = None
     for mask in range(1 << len(rest)):
         out = [o for i, o in enumerate(rest) if mask >> i & 1]
-        if sum(sizes[o] for o in rest) - sum(sizes[o] for o in out) > room_lw - 16384:   # margin: bss the size count leaves out
+        if sum(sizes[o] for o in rest) - sum(sizes[o] for o in out) > room_lw - 8192:   # margin: bss the size count leaves out
             continue
-        one = max((o for o in out if sizes[o] <= COLD2[1]), key=lambda o: sizes[o], default=None)
-        if sum(sizes[o] for o in out) - (sizes[one] if one else 0) > room_cold1:
+        two, room = [], COLD2[1]
+        for o in sorted(out, key=lambda o: -sizes[o]):   # largest first into the ROM stretch
+            if sizes[o] <= room:
+                two.append(o); room -= sizes[o]
+        if sum(sizes[o] for o in out if o not in two) > room_cold1:
             continue
         score = (sum(heat.get(o.stem, 1 << 40) for o in out), len(out))
         if best is None or score < best[0]:
-            best = (score, out, one)
+            best = (score, out, two)
     if best is None:
-        raise SystemExit("NO-GO: no placement fits")
+        raise SystemExit(f"NO-GO: no placement fits: rest {sum(sizes[o] for o in rest)} room_lw {room_lw} cold1 {room_cold1} cold2 {COLD2[1]} sizes {sorted(sizes[o] for o in rest)}")
     cold = best[1]
-    cold2 = [best[2]] if best[2] else []
+    cold2 = best[2]
     cold1 = [o for o in cold if o not in cold2]
     lw = [o for o in rest if o not in cold]
     usedl = sum(sizes[o] for o in lw)

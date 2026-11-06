@@ -13,7 +13,7 @@ u8 RAMB[0x10000] __attribute__((aligned(4)));
 SatDebug sat_dbg;
 
 #define TASKS 16
-#define TASK_STACK 4096
+#define TASK_STACK 2048   /* high water 308 bytes on the route; stack_scan stops the game if one fills */
 #define REC(i) (0xff0058u + (u32)(i) * 0x20u)
 #define G_CUR 0xff025cu
 #define G_FREEP 0xff0260u
