@@ -84,6 +84,41 @@ _sat_vblank_entry:
     rte
     nop
 
+! FRT compare sampler, test flag SAT_PROF_PC. Takes the stacked PC and live PR.
+    .global _sat_pc_entry
+_sat_pc_entry:
+    mov.l   r14,@-r15
+    mov.l   r0,@-r15
+    mov.l   r1,@-r15
+    mov.l   r2,@-r15
+    mov.l   r3,@-r15
+    mov.l   r4,@-r15
+    mov.l   r5,@-r15
+    mov.l   r6,@-r15
+    mov.l   r7,@-r15
+    sts.l   mach,@-r15
+    sts.l   macl,@-r15
+    sts.l   pr,@-r15
+    mov.l   @(48,r15),r4
+    sts     pr,r5
+    mov.l   .Lpcs,r0
+    jsr     @r0
+    nop
+    lds.l   @r15+,pr
+    lds.l   @r15+,macl
+    lds.l   @r15+,mach
+    mov.l   @r15+,r7
+    mov.l   @r15+,r6
+    mov.l   @r15+,r5
+    mov.l   @r15+,r4
+    mov.l   @r15+,r3
+    mov.l   @r15+,r2
+    mov.l   @r15+,r1
+    mov.l   @r15+,r0
+    mov.l   @r15+,r14
+    rte
+    nop
+
 ! CPU exceptions: record the stacked PC, then stop. Vector number comes from which stub ran.
     .global _sat_exc_illegal
     .global _sat_exc_slot
@@ -104,6 +139,8 @@ _sat_exc_addr:
     jmp     @r0
     nop
     .align 2
+    .weak _sat_pc_sample
+.Lpcs:     .long _sat_pc_sample
 .Lslave_sp: .long _sat_slave_stack+1024
 .Lslave:   .long _sat_slave_main
 .Lexcc:    .long _sat_exception
