@@ -31,6 +31,8 @@ HW_BASE, HW_LIMIT, LW_BASE, LW_LIMIT = 0x06014000, 0x06100000, 0x00200000, 0x003
 HW_RESERVED = 0x10000 + 16 * 4096 + 8192 + 16384 + 0x8000 + 0x8000   # game RAM, stacks, kernel, graphics tables and code
 LW_RESERVED = 0x20000 + 0x4000 + 0xe400   # graphics RAM, lifted bss, layer shadows, blank tags
 NATIVE = ("41ca", "42e4")   # EEPROM block read and write
+# Readable replacements, saturn/game. GAME_OVERRIDES=0 builds without them, for an A/B.
+OVERRIDES = () if os.environ.get("GAME_OVERRIDES") == "0" else tuple((REPO / "saturn/game/overrides.txt").read_text().split())
 CART = dict(ROMB=0x02400000, OPX=0x02600000, SAT_SINK=0x02638000, SAT_OBJ=0x02648000, SAT_PACK=0x0264c000)
 CART_END = 0x02800000
 OPX_MAX = 0x38000
@@ -66,7 +68,7 @@ def gen_sources():
         a, b = t.index("#else\nregister Cpu *R"), t.index("#define SHL8(")
         t = t[:a] + '#else\n#include "lift_target.h"\n#endif\n' + t[b:]
         t = re.sub(r"\bOP(8|16|32)\(\(?0x([0-9a-f]+)u", opx_rewrite, t)
-        for n in NATIVE:   # replaced natively in kernel.c; the lifted body stays linked as lifted_NNN
+        for n in NATIVE + OVERRIDES:   # replaced natively; the lifted body stays linked as lifted_NNN
             t = t.replace(f"void f_{n}(void){{", f"void lifted_{n}(void){{")
         out.append(update(GEN / s.name, t))
     d = re.sub(r'void f_([0-9a-f]+)\(void\)\{puts\("MISSING [0-9a-f]+"\);fflush\(stdout\);exit\(3\);\}',
@@ -117,25 +119,43 @@ def main():
     own = [cc(HERE / "ctx.s", OBJ / "ctx.o"), cc(HERE / "kernel.c", OBJ / "kernel.o", ["-O2", "-I", GEN] + os.environ.get("KERNEL_CFLAGS", "").split()), cc(HERE / "present.c", OBJ / "present.o", ["-O2"]), cc(HERE / "pad.c", OBJ / "pad.o", ["-O2"] + os.environ.get("KERNEL_CFLAGS", "").split())]
     own += [cc(REPO / "saturn/audio/sat_audio.c", OBJ / "sat_audio.o", ["-Os"] + os.environ.get("AUDIO_CFLAGS", "").split())]
     own += [cc(s, OBJ / f"gfx_{s.stem}.o", ["-O2", "-I", gfx_dir] + os.environ.get("KERNEL_CFLAGS", "").split()) for s in gfx]
+    if OVERRIDES:
+        own += [cc(REPO / "saturn/game" / f"{n}.c", OBJ / f"game_{n}.o", ["-O2", "-DSAT_TARGET", "-I", REPO / "saturn/game"]) for n in ("game_hot", "game_bind")]
     sizes = {o: code_size(o) for o in objs}
     # Hottest chunks in high work RAM, then low work RAM; the coldest run from the cart. Heat comes from the MAME route.
     heat = json.loads((WORK / "heat.json").read_text())
     objs_o = sorted(objs, key=lambda o: -heat.get(o.stem, 1 << 40))
     room_hw = HW_LIMIT - HW_BASE - HW_RESERVED
     room_lw = LW_LIMIT - LW_BASE - LW_RESERVED
-    hw, lw, cold = [], [], []
-    used = usedl = 0
+    hw, rest = [], []
+    used = 0
     for o in objs_o:
         if used + sizes[o] <= room_hw:
             hw.append(o); used += sizes[o]
-        elif usedl + sizes[o] <= room_lw:
-            lw.append(o); usedl += sizes[o]
         else:
-            cold.append(o)
+            rest.append(o)
     pack_size = (WORK / "pack.bin").stat().st_size
     cold1_at = (CART["SAT_PACK"] + pack_size + 3) & ~3
-    cold2 = sorted((o for o in cold if sizes[o] <= COLD2[1]), key=lambda o: -sizes[o])[:1]
+    # What stays off low work RAM must fit the cart's two holes: the lowest total heat that does. A chunk can sit in the ROM stretch only alone.
+    room_cold1 = CART_END - cold1_at
+    best = None
+    for mask in range(1 << len(rest)):
+        out = [o for i, o in enumerate(rest) if mask >> i & 1]
+        if sum(sizes[o] for o in rest) - sum(sizes[o] for o in out) > room_lw - 16384:   # margin: bss the size count leaves out
+            continue
+        one = max((o for o in out if sizes[o] <= COLD2[1]), key=lambda o: sizes[o], default=None)
+        if sum(sizes[o] for o in out) - (sizes[one] if one else 0) > room_cold1:
+            continue
+        score = (sum(heat.get(o.stem, 1 << 40) for o in out), len(out))
+        if best is None or score < best[0]:
+            best = (score, out, one)
+    if best is None:
+        raise SystemExit("NO-GO: no placement fits")
+    cold = best[1]
+    cold2 = [best[2]] if best[2] else []
     cold1 = [o for o in cold if o not in cold2]
+    lw = [o for o in rest if o not in cold]
+    usedl = sum(sizes[o] for o in lw)
     print("placement", {"hw": len(hw), "lw": [o.stem for o in lw], "cold1": [(o.stem, sizes[o], heat.get(o.stem)) for o in cold1], "cold2": [(o.stem, sizes[o], heat.get(o.stem)) for o in cold2]})
     inp = lambda l, s: "\n".join(f'    "{o.as_posix()}"({s})' for o in l)
     tx = ".text .text.* .rodata .rodata.* .data .data.*"
