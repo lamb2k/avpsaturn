@@ -18,7 +18,7 @@ emmake make -f Makefile platform=emscripten clean >/dev/null 2>&1 || true
 emmake make -f Makefile platform=emscripten HAVE_THREADS=0 -j4 >/dev/null 2>&1
 cp yabause_libretro_emscripten.bc "$WORK/EJS-RetroArch/libretro_emscripten.a"
 cd "$WORK/EJS-RetroArch"; rm -f yabause_libretro.js yabause_libretro.wasm
-EMCC_CFLAGS="--profiling-funcs" emmake make -f Makefile.emulatorjs LIBRETRO=yabause TARGET=yabause_libretro.js HAVE_THREADS=0 HAVE_OPENGLES3=0 LTO=0 STACK_SIZE=4194304 INITIAL_HEAP=134217728 -j4 >/dev/null 2>&1
+EMCC_CFLAGS="--profiling-funcs -O3" emmake make -f Makefile.emulatorjs LIBRETRO=yabause TARGET=yabause_libretro.js HAVE_THREADS=0 HAVE_OPENGLES3=0 MIN_ASYNC=1 LTO=0 STACK_SIZE=4194304 INITIAL_HEAP=134217728 -j4 >/dev/null 2>&1
 cp yabause_libretro.js yabause_libretro.wasm "$OUT/"; cp "$WORK/yabause/yabause/COPYING" "$OUT/license.txt"
 cd "$OUT"
 printf '{"name":"yabause","extensions":["cue","iso","chd","ccd","mds","m3u"],"options":{"defaultWebGL2":false},"save":"srm","repo":"https://github.com/libretro/yabause"}' > core.json

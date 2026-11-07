@@ -1,7 +1,7 @@
 // Hash-pinned core. A rebuilt core changes this pin on purpose; see core/README.md. The game image is not pinned here: it comes from /files/build.json.
 export const CORE = {
   file: "cores/yabause-legacy-wasm.data",   // EmulatorJS asks for the legacy name without WebGL 2
-  sha256: "11f0cc2954e584e398b3c6406e5a3f9a1361ae4279b9ccd52547edfc44be2976"
+  sha256: "c5e05626039d29f7a5300dbb954a6455447e947715af19686122b2744a675eef"
 };
 export const OPTIONS = {
   yabause_addon_cartridge: "4M_ram",
