@@ -555,7 +555,11 @@ void sat_main(void)
     u32 *p; int i;
     __asm__ volatile ("ldc %0,sr" : : "r"(0xf0));
     for (p = sat_bss_start; p < sat_bss_end; p++) { if (p >= sat_boot_stack && p < sat_boot_stack + 2048) continue; *p = 0; }
+#ifdef SAT_HOME   /* a restart runs this with the slave already up, on this stack */
     for (p = sat_lw_bss_start; p < sat_lw_bss_end; p++) { if (p >= sat_slave_stack && p < sat_slave_stack + 256) continue; *p = 0; }
+#else
+    for (p = sat_lw_bss_start; p < sat_lw_bss_end; p++) *p = 0;
+#endif
     sat_dbg.magic = 0x53415452;
     exceptions_install();
     for (i = 0; i < TASKS; i++) { u32 k; for (k = 0; k < TASK_STACK / 4; k++) task_stacks[i][k] = 0xa5a5a5a5u; }
