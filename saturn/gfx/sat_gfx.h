@@ -54,6 +54,10 @@ extern SatGfxStats sat_gfx_stats;
  * Returns 1, or 0 for a bad pack (nothing is touched). */
 int sat_gfx_init(const void *pack);
 
+/* A new pack between rounds, with the slave idle: same keys mean same pixels, so tiles already in VRAM stay. Returns 1, or 0 for a bad pack. */
+int sat_gfx_swap_pack(const void *pack);
+void sat_gfx_display(int on);
+
 /* Draw the current game state: snapshot then draw. */
 void sat_gfx_frame(void);
 

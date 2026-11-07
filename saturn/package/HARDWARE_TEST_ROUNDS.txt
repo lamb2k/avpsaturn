@@ -1,0 +1,4 @@
+Round loading, what to watch on a real Saturn (UNRUN):
+The screen goes black between stages for the disc load, then the game and its music come back.
+Expected load, MODELLED at 2x CD (300 KB/s): 1.6 to 10 s by stage, plus seek and drive start.
+Report any stage where the picture does not return, music stays off, or the game stops.

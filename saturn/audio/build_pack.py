@@ -16,7 +16,7 @@ import numpy as np
 
 CD_FRAME = 588   # stereo samples at 44.1 kHz
 SILENT = 40      # of 32767, the end trim threshold
-MUSIC_MAX_S = 110.0
+MUSIC_MAX_S = 80.0   # every track fits one CD with the data track
 SAME_SOUND = 0.985   # correlation for two renders to share one clip
 SAME_LENGTH = 32     # samples
 NEAR_SAME = 1.5   # mean absolute difference of 8 bit samples
@@ -130,7 +130,7 @@ def main():
             continue
         pcm, tl = to_pcm8(y)
         if len(pcm) > 0xffff:
-            raise SystemExit(f"{cmd:x}: {len(pcm)} samples, past the SCSP's 16 bit loop end")
+            census.setdefault("too_long", []).append(hex(cmd)); print(f"{cmd:x}: {len(pcm)} samples, past the SCSP's 16 bit loop end, left out"); continue
         off = None
         for u, uo in uniq:
             k = min(len(u), len(pcm))

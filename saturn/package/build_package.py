@@ -30,6 +30,7 @@ for f in sorted((work / "audio/music").glob("t*.raw")):
 (out / "avp_saturn.cue").write_text(cue, newline="\n")
 (out / "avp_saturn_dma.cue").write_text(cue.replace("avp_saturn.iso", "avp_saturn_dma.iso"), newline="\n")
 shutil.copy(HERE / "HARDWARE_TEST.md", out / "HARDWARE_TEST.md")
+shutil.copy(HERE / "HARDWARE_TEST_ROUNDS.txt", out / "HARDWARE_TEST_ROUNDS.txt")
 commit = subprocess.run(["git", "-C", str(REPO), "rev-parse", "HEAD"], capture_output=True, text=True).stdout.strip()
 dirty = subprocess.run(["git", "-C", str(REPO), "status", "--short", "saturn"], capture_output=True, text=True).stdout.strip()
 lines = [f"# commit {commit}{' (saturn/ has uncommitted changes)' if dirty else ''}"]   # sha256sum -c skips a line starting with #

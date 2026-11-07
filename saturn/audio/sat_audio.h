@@ -16,6 +16,8 @@ unsigned long sat_audio_pack_keep(const void *pack);
 extern int sat_audio_clips_loaded;                       /* set before init if the clips are already in SCSP RAM at 0x20 */
 void sat_audio_io_write8(unsigned long addr, unsigned long value);
 void sat_audio_frame(void);
+int sat_audio_swap(const void *tables, const void *clips);   /* between rounds, interrupts masked */
+void sat_audio_resume_music(void);                          /* after a disc load */
 
 /* Counters for a debugger. */
 typedef struct SatAudioStats {

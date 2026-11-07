@@ -303,12 +303,14 @@ static void start_sfx(const Sfx *s, const u8 *mb)
     sat_audio_stats.sfx_started++;
 }
 
+static unsigned last_music;   /* the music the game last asked for, replayed after a disc load took the drive */
 static int music_start(unsigned cmd)
 {
     u32 i;
     for (i = 0; i < music_count; i++) {
         const Music *m = &music_table[i];
         if ((unsigned)(m->cmd_hi << 8 | m->cmd_lo) != cmd) continue;
+        last_music = cmd;
         fade_level = 0xffffUL; fade_dir = 0;
         cd_play_track(m->intro_track ? m->intro_track : m->loop_track, !m->intro_track);
         cd_loop_next = m->intro_track ? m->loop_track : 0;
@@ -324,10 +326,10 @@ static void control(unsigned code, unsigned param)
     int n;
     sat_audio_stats.controls++;
     switch (code) {
-    case 0: for (n = 0; n < CHANNELS; n++) channel_end(n); cd_pause(); fade_dir = 0; break;
+    case 0: for (n = 0; n < CHANNELS; n++) channel_end(n); cd_pause(); last_music = 0; fade_dir = 0; break;
     case 1: for (n = 0; n < CHANNELS; n++) channel_end(n); break;
     case 2: if ((param & 0xffu) < CHANNELS) channel_end((int)(param & 0xffu)); break;
-    case 5: cd_pause(); break;
+    case 5: cd_pause(); last_music = 0; break;
     case 6:                                            /* fade in; no-op at rate 0 or when already going this way */
         if (!param || fade_dir > 0) break;
         if (!fade_dir) fade_level = 0;
@@ -397,6 +399,34 @@ void sat_audio_frame(void)
 #ifdef SAT_AUDIO_MIX
     mix_frame();
 #endif
+}
+
+/* New sound set between rounds. tables: this round's header and tables, in RAM for as long as it is in use. clips: its 8 bit samples, written to SCSP RAM here.
+   Running clips are stopped first; the 68000 stays parked. Interrupts masked by the caller. */
+int sat_audio_swap(const void *tables, const void *clips)
+{
+    const u8 *p = tables, *c = clips;
+    u32 bytes, i;
+    int n;
+    if (p[0] != 'S' || p[1] != 'A' || p[2] != 'U' || p[3] != '1') return 0;
+    bytes = be32(p + 8);
+    if (bytes + CLIP_BASE > SCSP_RAM_BYTES) return 0;
+    for (n = 0; n < CHANNELS; n++) channel_end(n);
+    for (n = 0; n < 32; n++) for (i = 0; i < 0x18; i += 2) SLOT(n, i) = 0;
+    SLOT(0, 0) = KEY_EXECUTE;
+    sfx_count = be16(p + 4); music_count = be16(p + 6);
+    sfx_table = (const Sfx *)(p + 12);
+    music_table = (const Music *)(sfx_table + sfx_count);
+    for (i = 0; i + 1 < bytes; i += 2) SCSP_RAM[(CLIP_BASE + i) >> 1] = (u16)(c[i] << 8 | c[i + 1]);
+    return 1;
+}
+/* The drive is free again after a load, so the music the game asked for goes back on. */
+void sat_audio_resume_music(void)
+{
+    cd_want = 0; cd_loop_next = 0;
+    cd_level_now = 0xff;
+    if (last_music) music_start(last_music);
+    cd_level(fade_level >> 13);
 }
 
 unsigned long sat_audio_pack_keep(const void *pack)

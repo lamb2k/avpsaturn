@@ -33,13 +33,14 @@ LW_RESERVED = 0x20000 + 0x4000 + 0xe400   # graphics RAM, lifted bss, layer shad
 NATIVE = ("41ca", "42e4")   # EEPROM block read and write
 # Readable replacements, saturn/game. GAME_OVERRIDES=0 builds without them, for an A/B.
 OVERRIDES = () if os.environ.get("GAME_OVERRIDES") == "0" else tuple((REPO / "saturn/game/overrides.txt").read_text().split())
-CART = dict(ROMB=0x02400000, OPX=0x02600000, SAT_SINK=0x02638000, SAT_OBJ=0x02648000, SAT_PACK=0x0264c000)
+CART = dict(ROMB=0x02400000, OPX=0x02600000, SAT_SINK=0x02640000, SAT_OBJ=0x02650000, SAT_PACK=0x02654000)
 CART_END = 0x02800000
-OPX_MAX = 0x38000
-# ROM stretches the Round 1 route never reads (checked by a host run with them overwritten): lifted code of cold chunks goes here, leaving the cart for tiles.
-COLD2 = (0x0253f000, 116 * 1024)
-STRETCHES = [(0x024d1000, 188 * 1024), COLD2, (0x02584000, 48 * 1024)]   # 0x105000 and 0x171000 hold tile spill, pack_spill.bin
-HOLE_ROM, HOLE_SIZE = 0x198000, 200 * 1024  # pack_hole.bin
+OPX_MAX = 0x40000
+COLD1_ROOM = 0x20000   # cart tail for cold code that no ROM stretch takes
+COLD1_AT = CART_END - COLD1_ROOM
+# ROM stretches no walk of any stage or character reads (tools/rounds_census.py, WORK/rounds.json): cold chunks of lifted code stay in them for the whole game, per-round tiles take the rest.
+ROUNDS = json.loads((WORK / "rounds.json").read_text())
+STRETCHES = [(0x02400000 + a, n) for a, n in ROUNDS["holes"] if n >= 0x4000]
 
 
 OPMAP = json.loads((WORK / "opx.json").read_text())
@@ -91,6 +92,7 @@ def gen_sources():
             f.seek(72 + 0xef0)
             save.write_bytes(f.read(0x80))
     update(GEN / "save_seed.inc", ",".join(str(x) for x in save.read_bytes()))
+    update(GEN / "rounds.inc", ",".join(str(ROUNDS["stage_file"].get(str(i), 0)) for i in range(256)))
     return out
 
 
@@ -110,14 +112,56 @@ def code_size(o):
     return sum(int(r[2], 16) for r in rows if len(r) > 3 and r[1].startswith((".text", ".rodata", ".data")))
 
 
+def round_files(rom, code_end):
+    """One RNN.BIN per stage. Sprites past the cart's room go to ROM stretches that stage does not read; whatever any file overwrites, each stage that reads it gets back."""
+    sys.path.insert(0, str(REPO / "tools"))
+    import rounds_pack
+    raw = pathlib.Path(os.environ.get("GFX_BIN", "E:/AvP/learning/lane-satgfx/gfx.bin")).read_bytes()
+    room = COLD1_AT - CART["SAT_PACK"]
+    page = ROUNDS["page"]
+    code = bytearray(0x200000 // page)   # pages holding lifted cold code never take tiles
+    for at, end in code_end:
+        for q in range((at - CART["ROMB"]) // page, (end - CART["ROMB"] + page - 1) // page):
+            code[q] = 1
+    plans, written = [], set()
+    for f in ROUNDS["files"]:
+        keep = set(f["keep_pages"])
+        free, st = [], None
+        for q in range(0x200000 // page + 1):
+            ok = q < 0x200000 // page and q not in keep and not code[q]
+            if ok and st is None:
+                st = q
+            if not ok and st is not None:
+                if q - st >= 4:
+                    free.append([st * page, (q - st) * page])
+                st = None
+        free.sort(key=lambda r: -r[1])
+        p, dropped = rounds_pack.fit(raw, [set(k) for k in f["keys"]], room, free)
+        for first, a, take in p["segs"]:
+            written.update(range(a // page, (a + take * 128 + page - 1) // page))
+        plans.append((p, dropped))
+    stats = {}
+    for i, (f, (p, dropped)) in enumerate(zip(ROUNDS["files"], plans)):
+        own = {x for first, a, take in p["segs"] for x in range(a // page, (a + take * 128 + page - 1) // page)}
+        back = sorted((written & set(f["keep_pages"])) - own)
+        restores, st = [], None
+        for q in back + [None]:
+            if st is not None and (q is None or q != st[1]):
+                restores.append((CART["ROMB"] + st[0] * page, bytes(rom[st[0] * page:st[1] * page]))); st = None
+            if q is None:
+                break
+            st = [q, q + 1] if st is None else [st[0], q + 1]
+        audio = (WORK / "audio" / f"r{i:02d}.bin").read_bytes()
+        n = rounds_pack.write_file(ISO / f"R{i:02d}.BIN", audio, restores, rounds_pack.assemble(p, CART["SAT_PACK"]))
+        stats[f["name"]] = dict(file=n, sprites_in_main=p["inmain"], sprites_spill=sum(x[2] for x in p["segs"]), spill_runs=len(p["segs"]), restore=sum(len(d) for _, d in restores), restore_runs=len(restores), dropped_keys=dropped, audio=len(audio))
+        print(f["name"], stats[f["name"]], flush=True)
+    (WORK / "round_stats.json").write_text(json.dumps(stats, indent=0))
+
+
 def main():
     gen = gen_sources()
     with cf.ThreadPoolExecutor(max_workers=3) as ex:
         objs = list(ex.map(lambda s: cc(s, OBJ / (s.stem + ".o"), [OPT]), gen))
-    audio = pathlib.Path(os.environ.get("AUDIO_PACK", WORK / "audio/pack.bin")).read_bytes()
-    keep = 12 + 16 * (int.from_bytes(audio[4:6], "big") + int.from_bytes(audio[6:8], "big"))
-    update(GEN / "audio_tables.inc", ",".join(str(x) for x in audio[:keep]))
-    (ISO / "CLIPS.BIN").write_bytes(audio[keep:])
     gfx_dir = REPO / "saturn/gfx"
     gfx = [gfx_dir / "sat_gfx.c"]
     own = [cc(HERE / "ctx.s", OBJ / "ctx.o"), cc(HERE / "kernel.c", OBJ / "kernel.o", ["-O2", "-I", GEN] + os.environ.get("KERNEL_CFLAGS", "").split()), cc(HERE / "present.c", OBJ / "present.o", ["-O2"]), cc(HERE / "pad.c", OBJ / "pad.o", ["-O2"] + os.environ.get("KERNEL_CFLAGS", "").split())]
@@ -147,12 +191,8 @@ def main():
     best_fill = max(fill)
     hw += fill[best_fill]; used += best_fill
     rest = [o for o in objs_o if o not in hw]
-    pack_size = (WORK / "pack.bin").stat().st_size
-    cold1_at = (CART["SAT_PACK"] + pack_size + 3) & ~3
-    # What stays off low work RAM must fit the cart's two holes: the lowest total heat that does. 
-    room_cold1 = CART_END - cold1_at
-    hole_free = HOLE_SIZE - (WORK / "pack_hole.bin").stat().st_size - 16   # the rest of the tile stretch of ROM takes one more
-    cold3_at = 0x02400000 + HOLE_ROM + ((WORK / "pack_hole.bin").stat().st_size + 3 & ~3)
+    cold1_at = COLD1_AT
+    room_cold1 = COLD1_ROOM
     best = None
     for mask in range(1 << len(rest)):
         out = [o for i, o in enumerate(rest) if mask >> i & 1]
@@ -165,10 +205,7 @@ def main():
                 i = min(fit, key=lambda i: rooms[i])
                 placed[i].append(o); rooms[i] -= sizes[o]
         two = [o for p in placed for o in p]
-        three, room3 = [], hole_free
-        for o in sorted((o for o in out if o not in two), key=lambda o: -sizes[o]):   # then the rest of the tile stretch
-            if sizes[o] <= room3:
-                three.append(o); room3 -= sizes[o]
+        three = []
         if sum(sizes[o] for o in out if o not in two and o not in three) > room_cold1:
             continue
         score = (sum(heat.get(o.stem, 1 << 40) for o in out), len(out))
@@ -212,12 +249,7 @@ SECTIONS {{
     . = ALIGN(4);
     _sat_cold1_end = .;
   }}
-{stretch_ld}  .cold3 {cold3_at:#x} : {{
-{inp(cold3, tx)}
-    . = ALIGN(4);
-    _sat_cold3_end = .;
-  }}
-  .lw {LW_BASE:#x} : {{
+{stretch_ld}  .lw {LW_BASE:#x} : {{
     *(.text .text.* .rodata .rodata.* .data .data.*)
     . = ALIGN(4);
   }}
@@ -231,7 +263,6 @@ SECTIONS {{
     sh([OBJCOPY, "-O", "binary", "-j", ".hw", elf, ISO / "HW.BIN"])
     sh([OBJCOPY, "-O", "binary", "-j", ".lw", elf, ISO / "LW.BIN"])
     syms = {p[2]: int(p[0], 16) for p in (l.split() for l in sh([NM, elf]).splitlines()) if len(p) == 3}
-    shutil.copy(WORK / "pack.bin", ISO / "PACK.BIN")
     shutil.copy(WORK / "opx.bin", ISO / "OPX.BIN")
     if (WORK / "opx.bin").stat().st_size > OPX_MAX:
         raise SystemExit("NO-GO: store past its room")
@@ -240,28 +271,25 @@ SECTIONS {{
         (ISO / "COLD1.BIN").write_bytes(bytes(4))
     for i in range(len(STRETCHES)):
         sh([OBJCOPY, "-O", "binary", "-j", f".st{i}", elf, WORK / f"st{i}.bin"])
-    sh([OBJCOPY, "-O", "binary", "-j", ".cold3", elf, WORK / "cold3.bin"])
     hw_end, lw_end = syms["_sat_bss_end"], syms["_sat_lw_bss_end"]
     print({"hw_image": (ISO / "HW.BIN").stat().st_size, "hw_end": hex(hw_end), "hw_free": HW_LIMIT - hw_end,
            "lw_image": (ISO / "LW.BIN").stat().st_size, "lw_end": hex(lw_end), "lw_free": LW_LIMIT - lw_end,
            "lifted_code_total": sum(sizes.values()), "lifted_in_hw": used, "chunks_lw": [o.stem for o in lw],
-           "pack": pack_size, "cart_free": CART_END - syms["_sat_cold1_end"], "stretch_free": [s[0] + s[1] - syms[f"_sat_st{i}_end"] for i, s in enumerate(STRETCHES)]})
+           "cart_free": CART_END - syms["_sat_cold1_end"], "stretch_free": [s[0] + s[1] - syms[f"_sat_st{i}_end"] for i, s in enumerate(STRETCHES)]})
     if syms["_sat_cold1_end"] > CART_END or any(syms[f"_sat_st{i}_end"] > s[0] + s[1] for i, s in enumerate(STRETCHES)):
         raise SystemExit("NO-GO: past the cart")
     if hw_end > HW_LIMIT or lw_end > LW_LIMIT:
         raise SystemExit("NO-GO on this layout: segment past its RAM")
     rom = bytearray((WORK / "rt.bin").read_bytes())
-    for at, name in ((HOLE_ROM, "pack_hole.bin"), *((s[0] - CART["ROMB"], f"st{i}.bin") for i, s in enumerate(STRETCHES)), (cold3_at - CART["ROMB"], "cold3.bin")):
-        d = (WORK / name).read_bytes()
+    for i, st in enumerate(STRETCHES):
+        d = (WORK / f"st{i}.bin").read_bytes()
+        at = st[0] - CART["ROMB"]
         rom[at:at + len(d)] = d
-    sp, at = (WORK / "pack_spill.bin").read_bytes() if (WORK / "pack_spill.bin").exists() else b"", 0
-    while at < len(sp):
-        a, n = int.from_bytes(sp[at:at + 4], "big"), int.from_bytes(sp[at + 4:at + 8], "big")
-        rom[a:a + n] = sp[at + 8:at + 8 + n]; at += 8 + n
     (ISO / "ROM.BIN").write_bytes(rom)
+    round_files(rom, [(st[0], syms[f"_sat_st{i}_end"]) for i, st in enumerate(STRETCHES)])
     (WORK / "rom_final.bin").write_bytes(rom)
     b = OBJ / "boot.o"
-    sh([GCC, "-m2", "-mb", "-O2", "-w", "-fno-builtin", "-I", SGL / "INC", f"-DCOLD1_ADDR={cold1_at:#x}u", f"-DCLIPS_BYTES={len(audio) - keep}u", "-c", HERE / "boot.c", "-o", b])
+    sh([GCC, "-m2", "-mb", "-O2", "-w", "-fno-builtin", "-I", SGL / "INC", f"-DCOLD1_ADDR={cold1_at:#x}u", "-c", HERE / "boot.c", "-o", b])
     lib = SGL / "LIB_ELF"
     sh([GCC, "-m2", "-mb", "-nostartfiles", "-T", HERE / "boot.ld", b, "-Wl,--start-group", lib / "SEGA_SYS.A", lib / "LIBCD.A", lib / "LIBSGL.A", "-lgcc", "-lc", "-Wl,--end-group",
         "-o", WORK / "boot.elf", f"-Wl,-Map={WORK / 'boot.map'},-e,_main"])

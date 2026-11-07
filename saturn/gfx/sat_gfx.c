@@ -105,7 +105,7 @@ typedef struct
     int shift; /* key >> shift picks an index bucket */
     const u8 *keys; /* u32: key << 14 | payload index, ascending; BLANK_INDEX marks a tile with no visible pen */
     const u8 *data;
-    const u8 *spill; /* payload indexes from split on live here: a second stretch of the cart */
+    const u8 *spill; /* payload indexes from split on live in other stretches of the cart: count, then (first index, offset from the pack) pairs, ascending */
     u32 split;
 } Section;
 
@@ -178,6 +178,8 @@ static void cache_setup(Cache *c, u8 *vram, u32 slot_bytes, u16 capacity, u16 fi
     for (i = 0; i < capacity; i++) { key[i] = NOKEY; st[i] = 0; next[i] = NOSLOT; }
     for (i = 0; i < HASH_SIZE; i++) head[i] = NOSLOT;
 }
+
+static const u8 *pack_start;
 
 /* A coarse index in RAM over each section's keys on the cart: the search reads a handful of keys over the slow bus, not fourteen. */
 #define INDEX_BUCKETS 256
@@ -370,7 +372,16 @@ static u16 cache_find(Cache *c, u32 key, unsigned long *refused)
     c->slot_next[n] = c->head[h]; c->head[h] = n;
     {
         const Section *sec = &sections[c->section];
-        const u8 *from = (u32)idx < sec->split ? sec->data + (u32)idx * c->slot_bytes : sec->spill + ((u32)idx - sec->split) * c->slot_bytes;
+        const u8 *from = sec->data + (u32)idx * c->slot_bytes;
+        if ((u32)idx >= sec->split)
+        {
+            u32 k = be32(sec->spill);
+            while (k-- > 0)
+            {
+                u32 first = be32(sec->spill + 4 + k * 8);
+                if ((u32)idx >= first) { from = pack_start + be32(sec->spill + 8 + k * 8) + ((u32)idx - first) * c->slot_bytes; break; }
+            }
+        }
         vram_copy(c->vram + (u32)n * c->slot_bytes, from, c->slot_bytes);
     }
     if (c == &spr_cache) sat_gfx_stats.uploads++; else sat_gfx_stats.layer_uploads++;
@@ -992,6 +1003,7 @@ void sat_gfx_frame(void)
 static int open_pack(const u8 *p)
 {
     int i;
+    pack_start = p;
     if (be32(p) != 0x53475031UL) return 0; /* SGP1 */
     for (i = 0; i < 4; i++)
     {
@@ -1010,6 +1022,16 @@ static void clear_vram(u8 *p, u32 bytes)
     u32 i;
     for (i = 0; i < bytes; i += 4) put32(p + i, 0);
 }
+
+int sat_gfx_swap_pack(const void *pack)
+{
+    u32 n;
+    if (!pack || !open_pack((const u8 *)pack)) return 0;
+    for (n = 0; n < BLANK_WAYS; n++) blank_seen[n] = NOKEY;
+    return 1;
+}
+
+void sat_gfx_display(int on) { VDP2R(0x00) = on ? 0x8001 : 0x0001; }
 
 int sat_gfx_init(const void *pack)
 {

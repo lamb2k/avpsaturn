@@ -49,6 +49,17 @@ def windows_of(pid):
     return found
 
 
+class RetryMcp(Mcp):
+    """memory_read can answer empty while the core is starting or inside a long CD read."""
+    def read(self, a, n):
+        for tries in range(600):
+            try:
+                return Mcp.read(self, a, n)
+            except RuntimeError:
+                time.sleep(0.1)
+        return Mcp.read(self, a, n)
+
+
 def port_busy():
     s = socket.socket()
     s.settimeout(0.3)
@@ -129,13 +140,13 @@ def main():
         if len(p) == 3:
             syms[p[2].lstrip("_")] = int(p[0], 16)
     orig = INI.read_bytes()
-    set_ = {r"Video\VideoCore": "1", r"Sound\SoundCore": os.environ.get("YABA_SOUND", "0"), r"General\CdRomISO": os.environ.get("YABA_CUE", str(work / "sat.cue")).replace("\\", "/"), "autostart": "true", r"Cartridge\Type": "7", r"General\EnableEmulatedBios": "true"}
+    set_ = {r"Video\VideoCore": os.environ.get("YABA_VIDEO", "4"), r"Sound\SoundCore": os.environ.get("YABA_SOUND", "0"), r"General\CdRomISO": os.environ.get("YABA_CUE", str(work / "sat.cue")).replace("\\", "/"), "autostart": "true", r"Cartridge\Type": "7", r"General\EnableEmulatedBios": "true"}
     out = [f"{l.split('=')[0]}={set_[l.split('=')[0]]}" if l.split("=")[0] in set_ else l for l in orig.decode("latin-1").splitlines()]
     INI.write_bytes(("\n".join(out) + "\n").encode("latin-1"))
     proc = subprocess.Popen([str(EXE)], cwd=str(EXE.parent))
     s = None
     try:
-        m = Mcp("http://127.0.0.1:9640/mcp")
+        m = RetryMcp("http://127.0.0.1:9640/mcp")
         t0 = time.time()
         while True:
             try:
@@ -159,7 +170,10 @@ def main():
         s.t0 = t0
         s.v = 0
         while time.time() - t0 < secs and not s.done:
-            d = m.read(syms["sat_dbg"], 40)
+            try:
+                d = m.read(syms["sat_dbg"], 40)
+            except RuntimeError:   # the core is not up yet
+                time.sleep(0.5); continue
             s.v = int.from_bytes(d[8:12], "big")
             fatal = int.from_bytes(d[28:32], "big")
             if fatal:
