@@ -18,8 +18,7 @@ def step(v,s):
         s.shot(f"h{cnt:02d}_{v}")
         if s.word("sat_rounds",4) and now-(t0 or now)>10 and not checked():
             ok=(a[0x4b]&0xc)!=0 and a[0x278:0x27a]!=b"\x00\x00"
-            (s.work/"layer_check.txt").write_text(("PASS" if ok else "FAIL")+f" v{v} layers {a[0x4a:0x4c].hex()} cam {a[0x278:0x27a].hex()} pool {s.ram(0xee80,1).hex()}
-"); s.log("LAYER CHECK","PASS" if ok else "FAIL"); done.append(1)
+            (s.work/"layer_check.txt").write_text(("PASS" if ok else "FAIL")+f" v{v} layers {a[0x4a:0x4c].hex()} cam {a[0x278:0x27a].hex()} pool {s.ram(0xee80,1).hex()}\n"); s.log("LAYER CHECK","PASS" if ok else "FAIL"); done.append(1)
         if s.word("sat_rounds",4) and t0 is None: t0=now
         if cnt>=10: s.stop()
     s.set(["right"] + (["c"] if n%6==0 else []))
