@@ -4,21 +4,30 @@
    Runs on the master between task walks, once per game tick, interrupts masked: a vblank body uses the same 68000 stack and registers. */
 extern void f_1d03e(void);
 #define PL(i) (0xff8380u + (u32)(i) * 0x100u)
+#ifndef DUEL_LINE
 #define DUEL_LINE 8   /* pixels of depth two fighters may differ by */
+#endif
 #define DUEL_PLAYERS 2   /* pairs are a loop, so player 3 stays open */
 volatile u32 sat_duel_on;
 struct { u32 hits[2], last_health[2]; } sat_duel_stats;
+/* Hit log for the bot: one row per landed hit, ring of 16; n counts all. Row: game tick, attacker, attack byte (+0xd1), target health before and after. */
+struct { u32 n; struct { u16 tick; u8 who, attack; u16 before, after; } row[16]; } sat_duel_log;
 static u8 duel_tick_seen;
 static void duel_pair(int a, int t)
 {
     u32 pa = PL(a), pt = PL(t);
+    u16 hp0;
     if (!r8(pa) || !r8(pt) || r8(pa + 0x9e)) return;
     { int dz = (int)r16(pa + 0x18) - (int)r16(pt + 0x18); if (dz < -DUEL_LINE || dz > DUEL_LINE) return; }   /* the arcade pass wants the exact line; two players cannot hold that */
+    hp0 = r16(pt + 0x40);
     cpu.a[6] = pa; cpu.a[1] = pt;
     w8(pa + 8, 1);
     f_1d03e();
     w8(pa + 8, 0);
     if (cpu.d[0] & 0xff) {
+        u32 i = sat_duel_log.n++ & 15;
+        sat_duel_log.row[i].tick = r16(0xff8018); sat_duel_log.row[i].who = (u8)a; sat_duel_log.row[i].attack = r8(pa + 0xd1);
+        sat_duel_log.row[i].before = hp0; sat_duel_log.row[i].after = r16(pt + 0x40);
         w8(pt + 0x65, r8(pa + 0xd1));
         w8(pa + 0x6e, 1);
         if (!r8(pa + 0x80)) w8(pa + 0x80, 1);
@@ -46,11 +55,13 @@ static void duel_tick(void)
 /* Arena: fighters stay on the screen where the duel began, so the camera and the stage's spawn table, driven by it, do not walk on. */
 static u16 arena_cam;
 static u8 arena_set;
+static u16 arena_hold;
 static void duel_arena(void)
 {
     int i;
     /* Centre: where the two fighters stand once both are in play; the screen is 384 wide. */
-    if (!arena_set) { if (r8(PL(0) + 4) != 2 || r8(PL(1) + 4) != 2) return; arena_cam = (u16)((r16(PL(0) + 0x10) + r16(PL(1) + 0x10)) / 2 - 192); arena_set = 1; }
+    if (!arena_set) { if (r8(PL(0) + 4) != 2 || r8(PL(1) + 4) != 2) return; arena_cam = (u16)((r16(PL(0) + 0x10) + r16(PL(1) + 0x10)) / 2 - 192); arena_hold = r16(0xff8278); arena_set = 1; }
+    w16(0xff8278, arena_hold);   /* the camera stays where it was at the lock: it led the fighters about 80 px further before */
     for (i = 0; i < DUEL_PLAYERS; i++) {
         u32 p = PL(i);
         int x = (int)r16(p + 0x10), lo = arena_cam + 72, hi = arena_cam + 312;   /* 240 wide: the camera leads the fighters, so the bounds sit inside the screen */

@@ -48,6 +48,15 @@ static void put32(u8 *p, u32 v) { p[0] = (u8)(v >> 24); p[1] = (u8)(v >> 16); p[
 
 /* Game state, by address. */
 #define RAM16(a) be16(RAMB + ((a) - 0xff0000UL))
+/* Screen adjust (home options): the whole picture moves by this many pixels; layers by their scroll, sprites by the VDP1 local origin. */
+#ifdef SAT_HOME
+int sat_gfx_nudge_x, sat_gfx_nudge_y;
+#define NUDGE_X sat_gfx_nudge_x
+#define NUDGE_Y sat_gfx_nudge_y
+#else
+#define NUDGE_X 0
+#define NUDGE_Y 0
+#endif
 #define SH_SCROLL1_BASE 0xff8024UL
 #define SH_SCROLL2_BASE 0xff8026UL
 #define SH_SCROLL3_BASE 0xff8028UL
@@ -1055,12 +1064,15 @@ void sat_gfx_draw(void)
     bgon &= SAT_GFX_BGMASK;
 #endif
     VDP2R(0x20) = bgon;
-    VDP2R(0x70) = (u16)((s2x + CPS_LEFT + SAT_GFX_CROP_X) & 0x7ff);
-    VDP2R(0x74) = (u16)((s2y + CPS_TOP) & 0x7ff);
-    VDP2R(0x80) = (u16)((s3x + CPS_LEFT + SAT_GFX_CROP_X) & 0x7ff);
-    VDP2R(0x84) = (u16)((s3y + CPS_TOP) & 0x7ff);
-    VDP2R(0x90) = (u16)((s1x + CPS_LEFT + S1_REG_CROP) & 0x7ff);
-    VDP2R(0x92) = (u16)((s1y + CPS_TOP) & 0x7ff);
+    VDP2R(0x70) = (u16)((s2x + CPS_LEFT + SAT_GFX_CROP_X - NUDGE_X) & 0x7ff);
+    VDP2R(0x74) = (u16)((s2y + CPS_TOP - NUDGE_Y) & 0x7ff);
+    VDP2R(0x80) = (u16)((s3x + CPS_LEFT + SAT_GFX_CROP_X - NUDGE_X) & 0x7ff);
+    VDP2R(0x84) = (u16)((s3y + CPS_TOP - NUDGE_Y) & 0x7ff);
+    VDP2R(0x90) = (u16)((s1x + CPS_LEFT + S1_REG_CROP - NUDGE_X) & 0x7ff);
+    VDP2R(0x92) = (u16)((s1y + CPS_TOP - NUDGE_Y) & 0x7ff);
+#ifdef SAT_HOME
+    put16(VDP1_VRAM + 32 + 12, (u16)NUDGE_X); put16(VDP1_VRAM + 32 + 14, (u16)NUDGE_Y);   /* local origin follows the screen adjust */
+#endif
 
     STAGE(4);
 #ifdef SAT_PROF

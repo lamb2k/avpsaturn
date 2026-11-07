@@ -12,7 +12,7 @@ typedef unsigned char u8; typedef unsigned short u16; typedef unsigned int u32;
 u32 sat_pad_raw = 0xffff;
 #ifdef SAT_HOME
 u32 sat_pad_raw2 = 0xffff;
-extern u32 sat_home_pad(u32), sat_home_pad2(u32);
+extern u32 sat_home_pad(u32), sat_home_pad2(u32), sat_home_remap(u32);
 #endif
 static u16 in0 = 0xffff, in2 = 0xffff;
 
@@ -67,7 +67,7 @@ static void map_pad(u32 p)
     in2 = (u16)w;
 #ifdef SAT_HOME
     {
-        u32 q = sat_home_pad2(sat_pad_raw2), v = 0xff;
+        u32 q = sat_home_pad2(sat_home_remap(sat_pad_raw2)), v = 0xff;
         if (!(q & 0x8000)) v &= ~1u;
         if (!(q & 0x4000)) v &= ~2u;
         if (!(q & 0x2000)) v &= ~4u;
@@ -99,7 +99,7 @@ void sat_pad_tick(void)
 #ifdef SAT_INPUT_SCRIPT
     map_pad(script_word(sat_vblanks_now()));
 #elif defined(SAT_HOME)
-    map_pad(sat_home_pad(sat_pad_raw));
+    map_pad(sat_home_pad(sat_home_remap(sat_pad_raw)));
 #else
     map_pad(sat_pad_raw);
 #endif

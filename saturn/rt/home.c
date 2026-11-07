@@ -13,6 +13,19 @@ char sat_home_text[28][44];
 /* Where the menus are, read by the bot over MCP. */
 volatile u32 sat_home_screen;          /* 0 none, 1 home, 2 options, 3 pause */
 volatile u32 sat_home_cursor;
+volatile u32 sat_home_warp;
+/* Screen adjust and button map (home_cold.c): this power-on only. btn: Saturn button index (A B C X Y Z L R) for the game's gun, attack, jump. */
+struct { signed char nx, ny; u8 btn[3]; } sat_home_cfg = { 0, 0, { 2, 0, 1 } };
+static const u16 btn_bit[8] = { 0x0400, 0x0100, 0x0200, 0x0040, 0x0020, 0x0010, 0x0008, 0x0080 };
+/* The pad word with the chosen buttons moved onto C (gun), A (attack), B (jump); X Y Z L R read idle to the game. */
+u32 sat_home_remap(u32 p)
+{
+    static const u16 to[3] = { 0x0200, 0x0400, 0x0100 };
+    u32 o = p | 0x07f8u;
+    int i;
+    for (i = 0; i < 3; i++) if (!(p & btn_bit[sat_home_cfg.btn[i] & 7])) o &= ~(u32)to[i];
+    return o;
+}           /* stage word to start at, 0 off (see sat_home_poll) */
 #define G(a) RAMB[(a) - 0xff0000u]
 #define P_UP 0x1000u
 #define P_DOWN 0x2000u
@@ -76,7 +89,7 @@ int sat_home_list(int screen, int row0, const char *const *items, int n, int sta
     sat_home_screen = (u32)screen;
     for (;;) {
         u32 e;
-        for (i = 0; i < n; i++) sat_home_centre(row0 + i * 2, items[i], i == cur);
+        for (i = 0; i < n; i++) sat_home_centre(row0 + i * (n > 4 ? 1 : 2), items[i], i == cur);
         sat_home_cursor = (u32)cur;
         sat_home_frame();
         e = sat_home_edges();
@@ -129,6 +142,15 @@ void sat_home_poll(void)
         }
     }
 #endif
+    /* Start at another stage (set by a bot over MCP, or a menu): the game's start path sets the stage word to 2; it is replaced
+       with the chosen word while it reads 2, so the stage's own setup reads the new one. Re-armed in attract. */
+    {
+        static u32 warp_polls;
+        if (IN_ATTRACT) warp_polls = 0;
+        else if (sat_home_warp && warp_polls < 120 && (G(0xff81e8) << 8 | G(0xff81e9)) == 2) {
+            G(0xff81e8) = (u8)(sat_home_warp >> 8); G(0xff81e9) = (u8)sat_home_warp; if (G(0xff8380)) warp_polls++;
+        }
+    }
     if (inject && !IN_ATTRACT) inject = 0;
     if (inject) return;
     if (IN_ATTRACT) {

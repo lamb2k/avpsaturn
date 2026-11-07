@@ -83,25 +83,152 @@ static void options(void)
     }
 }
 
+/* Home settings beyond the game's own block: screen adjust and button map. Kept in work RAM (home.c) for this power-on; backup saves are not decided. */
+typedef struct { signed char nx, ny; u8 btn[3]; } HomeCfg;
+extern HomeCfg sat_home_cfg;
+extern int sat_gfx_nudge_x, sat_gfx_nudge_y;
+extern volatile u32 sat_home_warp;
+static void num(char *b, int v)   /* signed, up to 2 digits */
+{
+    int i = 0;
+    if (v < 0) { b[i++] = '-'; v = -v; } else b[i++] = '+';
+    if (v >= 10) b[i++] = (char)('0' + v / 10);
+    b[i++] = (char)('0' + v % 10); b[i] = 0;
+}
+static void hex4(char *b, unsigned v) { static const char h[] = "0123456789ABCDEF"; int i; for (i = 0; i < 4; i++) b[i] = h[(v >> (12 - 4 * i)) & 15]; b[4] = 0; }
+/* Sound test: any id of the game's sound command table (0 to 0x38c, the driver's size), sent through the game's own mailbox path as its sender writes it.
+   Effects play only when their clip is in the loaded stage file; music ids start their CD track. A plays, C stops all (the game's control 0), B leaves. */
+extern void sat_audio_io_write8(unsigned long, unsigned long);
+static void sound_send(unsigned hi, unsigned lo, unsigned b3, unsigned b4)
+{
+    int i;
+    for (i = 0; i < 15; i++) sat_audio_io_write8(0x618001UL + 2UL * (unsigned long)i, 0);
+    sat_audio_io_write8(0x618001UL, hi); sat_audio_io_write8(0x618003UL, lo);
+    sat_audio_io_write8(0x618007UL, b3); sat_audio_io_write8(0x618009UL, b4);
+    sat_audio_io_write8(0x61801fUL, 0);
+}
+static void sound_test(void)
+{
+    static unsigned id = 1;
+    sat_home_screen = 4;
+    for (;;) {
+        char b[8];
+        u32 e;
+        panel(19);
+        centre(20, "SOUND TEST", 0);
+        hex4(b, id); put(22, 18, b, 1);
+        centre(24, "A PLAY  C STOP  B EXIT", 0);
+        sat_home_cursor = id;
+        frame();
+        e = edges();
+        if (e & P_B) return;
+        if (e & P_LEFT) id = id ? id - 1 : 0x38c;
+        if (e & P_RIGHT) id = id < 0x38c ? id + 1 : 0;
+        if (e & P_UP) id = id + 16 <= 0x38c ? id + 16 : id;
+        if (e & P_DOWN) id = id >= 16 ? id - 16 : id;
+        if (e & P_A) sound_send(id >> 8, id & 0xff, 0, 0);
+        if (e & P_C) sound_send(0xff, 0, 0, 0);
+    }
+}
+/* Screen adjust: pad moves the whole picture, up to 16 pixels each way; A centres; B leaves. */
+static void screen_adjust(void)
+{
+    sat_home_screen = 5;
+    for (;;) {
+        char b[8];
+        u32 e;
+        panel(19);
+        centre(20, "SCREEN ADJUST", 0);
+        put(22, 12, "X", 0); num(b, sat_home_cfg.nx); put(22, 15, b, 1);
+        put(22, 24, "Y", 0); num(b, sat_home_cfg.ny); put(22, 27, b, 1);
+        centre(24, "A CENTRE  B EXIT", 0);
+        sat_home_cursor = (u32)(u8)sat_home_cfg.nx | (u32)(u8)sat_home_cfg.ny << 8;
+        frame();
+        e = edges();
+        if (e & P_B) return;
+        if ((e & P_LEFT) && sat_home_cfg.nx > -16) sat_home_cfg.nx--;
+        if ((e & P_RIGHT) && sat_home_cfg.nx < 16) sat_home_cfg.nx++;
+        if ((e & P_UP) && sat_home_cfg.ny > -16) sat_home_cfg.ny--;
+        if ((e & P_DOWN) && sat_home_cfg.ny < 16) sat_home_cfg.ny++;
+        if (e & P_A) sat_home_cfg.nx = sat_home_cfg.ny = 0;
+        sat_gfx_nudge_x = sat_home_cfg.nx; sat_gfx_nudge_y = sat_home_cfg.ny;
+    }
+}
+/* Buttons: which Saturn button gives the game's gun, attack and jump (defaults C, A, B as before). */
+static const char *const pads[] = { "A", "B", "C", "X", "Y", "Z", "L", "R" };
+static void buttons(void)
+{
+    static const char *const what[] = { "GUN", "ATTACK", "JUMP" };
+    int cur = 0, i;
+    sat_home_screen = 6;
+    for (;;) {
+        u32 e;
+        panel(19);
+        for (i = 0; i < 3; i++) { put(20 + i, 10, what[i], i == cur); put(20 + i, 24, pads[sat_home_cfg.btn[i] & 7], i == cur); }
+        centre(24, "EXIT", cur == 3);
+        sat_home_cursor = (u32)cur;
+        frame();
+        e = edges();
+        if (e & P_B) return;
+        if (e & P_UP) cur = cur ? cur - 1 : 3;
+        if (e & P_DOWN) cur = cur < 3 ? cur + 1 : 0;
+        if (cur == 3) { if (e & (P_START | P_A | P_C)) return; continue; }
+        if (e & P_LEFT) sat_home_cfg.btn[cur] = (u8)((sat_home_cfg.btn[cur] + 7) & 7);
+        if (e & P_RIGHT) sat_home_cfg.btn[cur] = (u8)((sat_home_cfg.btn[cur] + 1) & 7);
+    }
+}
+/* Stage select: start the game at one of its own stage words (02 to 24 by 2, as the game advances them); sat_home_poll puts it in place of the start's 02. */
+static int stage_select(void)
+{
+    static int st = 1;
+    sat_home_screen = 7;
+    for (;;) {
+        char b[8];
+        u32 e;
+        panel(19);
+        centre(20, "STAGE SELECT", 0);
+        b[0] = (char)('0' + st / 10); b[1] = (char)('0' + st % 10); b[2] = 0;
+        put(22, 21, b, 1);
+        centre(24, "START PLAY  B EXIT", 0);
+        sat_home_cursor = (u32)st;
+        frame();
+        e = edges();
+        if (e & P_B) return 0;
+        if (e & P_LEFT) st = st > 1 ? st - 1 : 18;
+        if (e & P_RIGHT) st = st < 18 ? st + 1 : 1;
+        if (e & (P_START | P_A | P_C)) { sat_home_warp = (u32)(st * 2); return 1; }
+    }
+}
 void sat_home_menu(void)
 {
+    /* Fixed positions: 0 start, 1 options, 2 duel, 3 stage select, 4 sound test, 5 screen, 6 buttons. Without the duel, item 2 is absent and the rest move up. */
 #ifdef SAT_DUEL_MENU   /* until the duel is finished */
-    static const char *const items[] = { "START GAME", "OPTIONS", "DUEL" };
-#define HOME_ITEMS 3
+    static const char *const items[] = { "START GAME", "OPTIONS", "DUEL", "STAGE SELECT", "SOUND TEST", "SCREEN ADJUST", "BUTTONS" };
+#define HOME_ITEMS 7
+#define DUEL_SHIFT 0
 #else
-    static const char *const items[] = { "START GAME", "OPTIONS" };
-#define HOME_ITEMS 2
+    static const char *const items[] = { "START GAME", "OPTIONS", "STAGE SELECT", "SOUND TEST", "SCREEN ADJUST", "BUTTONS" };
+#define HOME_ITEMS 6
+#define DUEL_SHIFT 1
 #endif
     int pick = 0;
     sat_home_hold = 1;
     sat_home_mode = 1;
     prev = sat_pad_raw & 0xffff;
     for (;;) {
+        int p;
         panel(19);
-        pick = menu_list(1, 20, items, HOME_ITEMS, pick < 0 ? 0 : pick, HOME_IDLE);
-        if (pick != 1) break;
-        options();
+        pick = menu_list(1, 19, items, HOME_ITEMS, pick < 0 ? 0 : pick, HOME_IDLE);
+        p = pick >= 2 ? pick + DUEL_SHIFT : pick;
+        sat_home_warp = 0;
+        if (p == 1) options();
+        else if (p == 3) { if (stage_select()) { pick = 0; break; } }
+        else if (p == 4) sound_test();
+        else if (p == 5) screen_adjust();
+        else if (p == 6) buttons();
+        else break;
     }
+    if (pick > 0 && pick + DUEL_SHIFT != 2) pick = 0;
     sat_home_screen = 0;
     sat_home_mode = 0;
     sat_home_hold = 0;
