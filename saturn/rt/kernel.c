@@ -380,8 +380,9 @@ static void round_check(void)
     sat_rounds.current = (u32)want;
     sat_rounds.loads++;
     sat_rounds.last_vblank = sat_dbg.vblanks;
-    *(volatile u32 *)0x25fe00a4 = ~1u;
-    __asm__ volatile ("ldc %0,sr" : : "r"(0x00));
+    /* GFS takes the SCU mask and vectors for itself: without this the vblank never comes back after a load. */
+    exceptions_install();
+    irq_enable();
 }
 
 /* Dispatcher 0xd86. A vblank sets the game's flag at 0xff0266 through f_e0e, which restarts the walk from task 0. */

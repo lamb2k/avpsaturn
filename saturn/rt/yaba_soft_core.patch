@@ -1,0 +1,26 @@
+35c35
+< #define USE_OPENGL
+---
+> /* lane-emu: no GL use in the soft core; dispbuffer is the output */
+2183d2182
+< 
+118c118
+< //&VIDSoft,
+---
+> &VIDSoft,
+21a22,24
+> extern "C" {
+> #include "../../vidsoft.h"
+> }
+1510a1514,1524
+> 		}
+> 	}
+> 	else if (VIDCore && VIDCore->id == VIDCORE_SOFT) {
+> 		/* lane-emu: soft core output is dispbuffer at the VDP2 display size */
+> 		int sw = 0, sh = 0, si = 0;
+> 		VIDCore->GetNativeResolution(&sw, &sh, &si);
+> 		if (dispbuffer && sw > 0 && sh > 0) {
+> 			QImage img((const uchar*)dispbuffer, sw, sh, sw * 4, QImage::Format_RGBA8888);
+> 			QImage opaque = img.convertToFormat(QImage::Format_RGB32);
+> 			QImageWriter iw(fname);
+> 			iw.write(opaque);
