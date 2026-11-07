@@ -344,12 +344,11 @@ static void slave_start(void)
 }
 
 /* Rounds: each round's tile pack and sound set come from CD between rounds (RNN.BIN, tools/rounds_pack.py), on the master, with the game stopped and the slave idle.
-   The game's stage word, ff81e8, says which: 0 in attract and on the front end. rounds.inc maps a stage word to its file; the same path for every round. */
+   The game's stage word, ff81e8, says which: 0 in attract and on the front end. rounds.inc maps a stage word and the characters in play to a file; the same path for every round.
+   ff81cc holds a bit per character in play. It drops bits around a KO and follows the cursor on the select screen, so bits are gathered while in a stage and cleared at the front end's load. A character who joins mid-stage gets their file at the next stage word. */
 #define LOADER_API ((volatile u32 *)0x06013fd0u)
 #define CCR_M (*(volatile u8 *)0xfffffe92u)
-static const u8 stage_file[256] = {
 #include "rounds.inc"
-};
 u8 sat_aud_tables[0x2000] __attribute__((section(".lwgfx"), aligned(4)));
 static int round_loaded = -1;
 struct { u32 current, loads, sectors, last_vblank; } sat_rounds;
@@ -368,9 +367,9 @@ static void round_sound_ready(void)
 }
 static void load_round(int file)
 {
-    char name[] = "R00.BIN";
+    char name[] = "R000.BIN";
     long got;
-    name[1] = (char)('0' + file / 10); name[2] = (char)('0' + file % 10);
+    name[1] = (char)('0' + file / 100); name[2] = (char)('0' + file / 10 % 10); name[3] = (char)('0' + file % 10);
     got = ((long (*)(const char *, void (*)(void)))LOADER_API[0])(name, round_sound_ready);
     CCR_M = 0x11;
     if (got < 0) sat_fatal(0xed, (u32)-got);
@@ -378,13 +377,19 @@ static void load_round(int file)
 }
 static void round_check(void)
 {
-    int want = stage_file[(r8(0xff81b0) || r8(0xff8001) != 2) ? 0 : r16(0xff81e8) & 0xff];
+    int row = stage_row[(r8(0xff81b0) || r8(0xff8001) != 2) ? 0 : r16(0xff81e8) & 0xff], want;
     static u32 settled;
-    if (want == round_loaded) { settled = 0; return; }
+    static int row_loaded;
+    static u8 chars;
+    if (row) chars |= r8(0xff81cc) & 15;
+    if (row == row_loaded) { settled = 0; return; }
     /* The word flickers for a few frames as a scene closes; go only when it has held. */
     if (!settled) settled = sat_dbg.vblanks;
     if (sat_dbg.vblanks - settled < 12) return;
     settled = 0;
+    if (!row) chars = 0;
+    want = row_file[row][mask_variant[chars]];
+    row_loaded = row;
     while (UNCACHED(gfx_done) != UNCACHED(gfx_handed)) ;   /* the slave finishes the picture in hand and stays off the pack */
     __asm__ volatile ("ldc %0,sr" : : "r"(0xf0));
     sat_gfx_display(0);

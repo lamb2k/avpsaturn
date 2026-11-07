@@ -6,7 +6,7 @@
 extern unsigned char _bstart, _bend;
 static unsigned char gfs_work[GFS_WORK_SIZE(1)];
 static GfsDirTbl dir;
-static GfsDirName names[64];
+static GfsDirName names[256];
 static void halt(unsigned long s, unsigned long d) { LOADER_DIAG[0] = 0x4156504c; LOADER_DIAG[1] = s; LOADER_DIAG[2] = d; for (;;) __asm__ volatile ("nop"); }
 static void load(const char *name, void *dest, unsigned long code)
 {
@@ -62,7 +62,7 @@ int main(void)
     if (cart[0] != 0x12345678 || cart[1] != 0xedcba987) halt(0xe0f0, cart[0]);
     GFS_DIRTBL_TYPE(&dir) = GFS_DIR_NAME;
     GFS_DIRTBL_DIRNAME(&dir) = names;
-    GFS_DIRTBL_NDIR(&dir) = 64;
+    GFS_DIRTBL_NDIR(&dir) = 256;
     if (GFS_Init(1, gfs_work, &dir) < 0) halt(0xe001, 0);
     load("LW.BIN", (void *)0x00200000u, 0x100);
     load("ROM.BIN", (void *)0x02400000u, 0x200);
