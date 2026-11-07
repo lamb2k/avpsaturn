@@ -27,17 +27,22 @@ const cacheGet = hash => idb("readonly", s => s.get(hash)).catch(() => undefined
 const cachePut = (hash, blob) => idb("readwrite", s => { s.clear(); return s.put(blob, hash); }).catch(() => undefined);
 
 async function download(image) {
-  const res = await fetch(image.path);
-  if (!res.ok) throw new Error(`Image download failed: HTTP ${res.status}`);
-  const reader = res.body.getReader(), bytes = new Uint8Array(image.bytes);
+  // One file, or parts joined in order; the whole-file hash is checked afterwards.
+  const parts = image.parts ?? [{ path: image.path, bytes: image.bytes }];
+  const bytes = new Uint8Array(image.bytes);
   let at = 0;
-  for (;;) {
-    const { done, value } = await reader.read();
-    if (done) break;
-    if (at + value.length > image.bytes) throw new Error("Image is larger than build.json says");
-    bytes.set(value, at); at += value.length;
-    progress(at / image.bytes);
-    status(`Downloading game ${mib(at)} of ${mib(image.bytes)}`);
+  for (const part of parts) {
+    const res = await fetch(part.path);
+    if (!res.ok) throw new Error(`Image download failed: HTTP ${res.status}`);
+    const reader = res.body.getReader();
+    for (;;) {
+      const { done, value } = await reader.read();
+      if (done) break;
+      if (at + value.length > image.bytes) throw new Error("Image is larger than build.json says");
+      bytes.set(value, at); at += value.length;
+      progress(at / image.bytes);
+      status(`Downloading game ${mib(at)} of ${mib(image.bytes)}`);
+    }
   }
   if (at !== image.bytes) throw new Error("Image is smaller than build.json says");
   return bytes;
@@ -66,7 +71,7 @@ async function prepare() {
     await cachePut(build.image.sha256, blob);
   }
   timing.ready = performance.now();
-  const name = build.image.path.split("/").pop();
+  const name = build.image.name ?? build.image.path.split("/").pop();
   return new File([blob], name);
 }
 

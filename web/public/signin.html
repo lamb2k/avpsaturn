@@ -1,0 +1,12 @@
+<!doctype html>
+<html lang="en">
+<head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>AvP Saturn test build</title><link rel="stylesheet" href="/style.css"></head>
+<body><main>
+  <h1>AvP Saturn test build</h1>
+  <form id="signin" method="post" action="/signin">
+    <p><label for="username">Username</label><br><input id="username" autocomplete="username" maxlength="64" required autofocus></p>
+    <p><label for="password">Password</label><br><input id="password" type="password" autocomplete="current-password" maxlength="256" required></p>
+    <button type="submit">Sign in</button><p id="status" role="status"></p>
+  </form>
+  <p class="meta"><a href="/licenses.html">Source and licences</a></p>
+</main><script type="module" src="/signin.mjs"></script></body></html>
