@@ -6,7 +6,7 @@ REPO = pathlib.Path("C:/Game Dev/BrooklynBangoutX/AvPSaturnCapabilityTest-playab
 name, irqs = sys.argv[1], sys.argv[2]
 out = pathlib.Path(os.environ.get("SATGFX_ROOT", "E:/AvP/learning/lane-satgfx")) / name
 out.mkdir(parents=True)
-shutil.copytree(REPO / ".deps/mame/full_route_nvram_baseline", out / "nvram/avspu")
+shutil.copytree(REPO / ".deps/mame/full_route_nvram_baseline", out / "nvram/avspu", copy_function=shutil.copyfile)
 (out / "cfg").mkdir()
 root = str(out).replace("\\", "/")
 last = max(int(x) for x in irqs.split(",")) + 8

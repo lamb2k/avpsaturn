@@ -17,7 +17,7 @@ if free < 10:
     sys.exit(f"free commit {free:.1f} GB under 10 GB: not starting")
 out = pathlib.Path("E:/AvP/learning/mame") / name
 out.mkdir(parents=True)
-shutil.copytree(REPO / ".deps/mame/full_route_nvram_baseline", out / "nvram/avspu")
+shutil.copytree(REPO / ".deps/mame/full_route_nvram_baseline", out / "nvram/avspu", copy_function=shutil.copyfile)
 (out / "cfg").mkdir()
 env = dict(os.environ)
 env.update(AVSP_ORACLE11_PROGRESSION_ROOT=str(out).replace("\\", "/"),

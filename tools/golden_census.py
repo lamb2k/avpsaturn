@@ -25,7 +25,7 @@ def run(route, out):
     out.mkdir(parents=True, exist_ok=True)
     w = out / "mame"
     shutil.rmtree(w, ignore_errors=True)
-    shutil.copytree(OLD / ".deps/mame/full_route_nvram_baseline", w / "nvram/avspu")
+    shutil.copytree(OLD / ".deps/mame/full_route_nvram_baseline", w / "nvram/avspu", copy_function=shutil.copyfile)
     (w / "cfg").mkdir()
     env = dict(os.environ, AVSP_ROUTE=str(route).replace("\\", "/"), CENSUS_RAW=str(out / "raw.txt").replace("\\", "/"))
     r = subprocess.run([str(OLD / ".deps/mame/mame0289/mame.exe"), "avspu", "-rompath", "C:/Game Dev/BrooklynBangoutX/AvPSaturnCapabilityTest", "-video", "none", "-sound", "none", "-nothrottle", "-skip_gameinfo", "-autoboot_delay", "0",

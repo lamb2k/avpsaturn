@@ -8,7 +8,7 @@ prefix = sys.argv[4] if len(sys.argv) > 4 else None
 if not prefix:
     prefix = str(L / "prefix0.txt")
     pathlib.Path(prefix).write_text("last 0\n")
-shutil.copytree(OLD / ".deps/mame/full_route_nvram_baseline", L / "nvram/avspu")
+shutil.copytree(OLD / ".deps/mame/full_route_nvram_baseline", L / "nvram/avspu", copy_function=shutil.copyfile)
 (L / "cfg").mkdir()
 u = lambda p: str(p).replace("\\", "/")
 env = dict(os.environ, BOT_PREFIX=u(prefix), BOT_OUT=u(L / "route.txt"), BOT_LOG=u(L / "log.txt"), BOT_MAX=maxf, BOT_CHAR=want)

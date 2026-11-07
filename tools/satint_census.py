@@ -7,7 +7,7 @@ REPO = pathlib.Path("C:/Game Dev/BrooklynBangoutX/AvPSaturnCapabilityTest-playab
 out = pathlib.Path(os.environ.get("SATINT_ROOT", "E:/AvP/learning/lane-satint")) / (sys.argv[2] if len(sys.argv) > 2 else "census")
 out.mkdir(parents=True, exist_ok=True)
 if not (out / "nvram/avspu").exists():
-    shutil.copytree(REPO / ".deps/mame/full_route_nvram_baseline", out / "nvram/avspu")
+    shutil.copytree(REPO / ".deps/mame/full_route_nvram_baseline", out / "nvram/avspu", copy_function=shutil.copyfile)
 (out / "cfg").mkdir(exist_ok=True)
 root = str(out).replace("\\", "/")
 env = dict(os.environ, SATINT_CENSUS_OUT=root, AVSP_ORACLE11_PLAYER_AUDIO_ROOT=root, AVSP_ORACLE11_PLAYER_AUDIO_VARIANT="baseline",
