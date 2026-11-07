@@ -123,6 +123,7 @@ def code_size(o):
     return sum(int(r[2], 16) for r in rows if len(r) > 3 and r[1].startswith((".text", ".rodata", ".data")))
 
 
+SHARED_MIN = int(os.environ.get("ROUND_SHARED_MIN", "10"))   # stages
 MIN_RUN = int(os.environ.get("ROUND_MIN_RUN", "1"))   # pages; a stretch costs 8 bytes of table, about 1 KB of a page is 8 sprites
 
 
@@ -138,9 +139,16 @@ def round_files(rom, code_end, cold1_at):
         for q in range((at - CART["ROMB"]) // page, (end - CART["ROMB"] + page - 1) // page):
             code[q] = 1
     plans, written = [], set()
+    # Census gap: a mode or setting outside the census can read common tables a walk of this stage never touched. Pages most stages read stay in every stage. Costs sprites only in stages already short of room.
+    base = [f for f in ROUNDS["files"] if re.fullmatch(r"stage[0-9a-f]{2}", f["name"])]
+    seen = {}
+    for f in base:
+        for q in set(f["keep_pages"]):
+            seen[q] = seen.get(q, 0) + 1
+    shared = {q for q, c in seen.items() if c >= SHARED_MIN}
     rank = json.loads((WORK / "key_rank.json").read_text()) if (WORK / "key_rank.json").exists() else {}   # tools/rounds_rank.py
     for f in ROUNDS["files"]:
-        keep = set(f["keep_pages"])
+        keep = set(f["keep_pages"]) | shared
         free, st = [], None
         for q in range(0x200000 // page + 1):
             ok = q < 0x200000 // page and q not in keep and not code[q]
@@ -158,7 +166,7 @@ def round_files(rom, code_end, cold1_at):
     stats = {}
     for i, (f, (p, dropped)) in enumerate(zip(ROUNDS["files"], plans)):
         own = {x for first, a, take in p["segs"] for x in range(a // page, (a + (take * 128 + 2047 & -2048) + page - 1) // page)}
-        back = sorted((written & set(f["keep_pages"])) - own)
+        back = sorted((written & (set(f["keep_pages"]) | shared)) - own)
         restores, st = [], None
         for q in back + [None]:
             if st is not None and (q is None or q != st[1]):
@@ -209,6 +217,7 @@ def main():
     own += [cc(s, OBJ / f"gfx_{s.stem}.o", ["-O2", "-I", gfx_dir, "-I", GEN] + os.environ.get("KERNEL_CFLAGS", "").split()) for s in gfx]
     if home:
         own += [cc(HERE / "home.c", OBJ / "home.o", ["-Os"] + os.environ.get("KERNEL_CFLAGS", "").split())]
+    home_cold = [cc(HERE / "home_cold.c", OBJ / "home_cold.o", ["-Os"] + os.environ.get("KERNEL_CFLAGS", "").split())] if home else []
     if OVERRIDES:
         own += [cc(REPO / "saturn/game" / f"{n}.c", OBJ / f"game_{n}.o", ["-O2", "-DSAT_TARGET", "-I", REPO / "saturn/game"]) for n in ("game_hot", "game_bind")]
     sizes = {o: code_size(o) for o in objs}
@@ -261,7 +270,7 @@ def main():
     cold3 = best[3]
     cold1 = [o for o in cold if o not in cold2 and o not in cold3]
     # The cart tail holds only what cold code needs; the rest is sprite room.
-    cold1_at = CART_END - ((sum(sizes[o] for o in cold1) + 0x1fff) & ~0xfff)
+    cold1_at = CART_END - ((sum(sizes[o] for o in cold1) + sum(code_size(o) for o in home_cold) + 0x1fff) & ~0xfff)
     lw = [o for o in rest if o not in cold]
     usedl = sum(sizes[o] for o in lw)
     print("placement", {"hw": len(hw), "lw": [o.stem for o in lw], "cold1": [(o.stem, sizes[o], heat.get(o.stem)) for o in cold1], "stretches": [[o.stem for o in p] for p in placed]})
@@ -289,7 +298,7 @@ SECTIONS {{
     _sat_bss_end = .;
   }}
   .cold1 {cold1_at:#x} : {{
-{inp(cold1, tx)}
+{inp(cold1 + home_cold, tx)}
     . = ALIGN(4);
     _sat_cold1_end = .;
   }}
@@ -303,7 +312,7 @@ SECTIONS {{
 """ + "".join(f"_{k} = {v:#x};\n" for k, v in CART.items())
     (WORK / "sat.ld").write_text(ld)
     elf = WORK / "sat.elf"
-    sh([GCC, "-m2", "-mb", "-nostdlib", "-T", WORK / "sat.ld", *own, *objs, "-lgcc", "-o", elf, f"-Wl,-Map={WORK / 'sat.map'}"])
+    sh([GCC, "-m2", "-mb", "-nostdlib", "-T", WORK / "sat.ld", *own, *home_cold, *objs, "-lgcc", "-o", elf, f"-Wl,-Map={WORK / 'sat.map'}"])
     sh([OBJCOPY, "-O", "binary", "-j", ".hw", elf, ISO / "HW.BIN"])
     sh([OBJCOPY, "-O", "binary", "-j", ".lw", elf, ISO / "LW.BIN"])
     syms = {p[2]: int(p[0], 16) for p in (l.split() for l in sh([NM, elf]).splitlines()) if len(p) == 3}

@@ -16,7 +16,17 @@
 
 #define SAT_GFX_SCREEN_W 352
 #define SAT_GFX_SCREEN_H 224
+/* SAT_GFX_FIT, a crop still choice for the owner: 0 the 1:1 centre crop. 1 scale the 384 wide picture to 352: VDP2 zoom on NBG0 and NBG1, scaled VDP1 sprites, HUD flush. 2 the crop, HUD flush. */
+#ifndef SAT_GFX_FIT
+#define SAT_GFX_FIT 0
+#endif
+#if SAT_GFX_FIT == 1
+#define SAT_GFX_CROP_X 0
+#define SAT_GFX_SRC_W 384
+#else
 #define SAT_GFX_CROP_X 16 /* 1:1 centre crop of the 384 wide picture */
+#define SAT_GFX_SRC_W 352
+#endif
 #define SAT_GFX_PAGES 4
 #define SAT_GFX_BANKS_PER_PAGE 32
 #define SAT_GFX_MAX_COMMANDS 2044 /* 64 KB table less clip, local, clear and end */

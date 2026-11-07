@@ -268,11 +268,19 @@ static u32 readout_pad(void) { return *(volatile u32 *)((unsigned long)&sat_pad_
 /* The per-frame snapshot: everything drawing reads from the game, copied once by the game's CPU. The two sides never share a structure: the
    master owns game RAM, object RAM and graphics RAM; the drawing side owns VDP1, VDP2, CRAM, the caches and the shadows. */
 #define S1_ROWS (SAT_GFX_SCREEN_H / 8 + 1)
+#if SAT_GFX_FIT
+#define S1_COLS (384 / 8 + 1)
+#define S1_REG_CROP 16 /* scroll 1 text never scales: it stays 1:1 over the 16 pixel crop */
+#define S1_READ_X 0
+#else
 #define S1_COLS (SAT_GFX_SCREEN_W / 8 + 1)
+#define S1_REG_CROP SAT_GFX_CROP_X
+#define S1_READ_X SAT_GFX_CROP_X
+#endif
 #define S2_ROWS (SAT_GFX_SCREEN_H / 16 + 1)
-#define S2_COLS (SAT_GFX_SCREEN_W / 16 + 1)
+#define S2_COLS (SAT_GFX_SRC_W / 16 + 1)
 #define S3_ROWS (SAT_GFX_SCREEN_H / 32 + 1)
-#define S3_COLS (SAT_GFX_SCREEN_W / 32 + 1)
+#define S3_COLS (SAT_GFX_SRC_W / 32 + 1)
 #define MAX_OBJECTS 0x400
 typedef struct
 {
@@ -280,6 +288,7 @@ typedef struct
     u16 s1x, s1y, s2x, s2y, s3x, s3y;
     u16 row[SAT_GFX_SCREEN_H];
     u8 palette[SAT_GFX_PAGES][0x400];
+    u16 hud_flush;
     u32 s1[S1_ROWS * S1_COLS], s2[S2_ROWS * 64], s3[S3_ROWS * S3_COLS]; /* code << 16 | attribute, visible cells only */
     u8 obj[MAX_OBJECTS * 8];
     u32 pal_sum[SAT_GFX_PAGES], s1_sum, s2_sum, s3_sum; /* change detection: position and every visible word */
@@ -527,17 +536,27 @@ static const u8 home_pal[64] __attribute__((aligned(2))) = {
 #include "home_pal.inc"
 };
 #endif
+#define HUD_ROWS_TOP 4
+#define HUD_ROWS_BOT 26
 static void draw_scroll1(u16 sx, u16 sy)
 {
     const u32 *cell = snap.s1;
-    u32 x0 = (u32)sx + CPS_LEFT + SAT_GFX_CROP_X, y0 = (u32)sy + CPS_TOP;
+    u32 x0 = (u32)sx + CPS_LEFT + S1_REG_CROP, y0 = (u32)sy + CPS_TOP;
     u32 row, col;
     for (row = 0; row <= SAT_GFX_SCREEN_H / 8; row++)
         for (col = 0; col <= SAT_GFX_SCREEN_W / 8; col++)
         {
             u32 c = ((x0 >> 3) + col) & 63, r = ((y0 >> 3) + row) & 63;
+#if SAT_GFX_FIT
+            /* The arcade's 48 columns on 44: the HUD rows lose four empty columns at the middle, so it sits flush at both edges; other rows are the centre crop. */
+            u32 src = (snap.hud_flush && (row < HUD_ROWS_TOP || row >= HUD_ROWS_BOT)) ? (col < 22 ? col : col + 4) : col + 2;
+            u32 c_src = (((x0 - S1_REG_CROP) >> 3) + src) & 63;
+            u32 idx = (r & 0x1f) + (c_src << 5) + ((r & 0x20) << 6);
+            u32 word = cell[row * S1_COLS + src];
+#else
             u32 idx = (r & 0x1f) + (c << 5) + ((r & 0x20) << 6);
             u32 word = *cell++;
+#endif
             u16 code = (u16)(word >> 16), attr = (u16)word;
             /* Odd columns read the right half of the 16 pixel row. */
             u16 slot = cache_get(&s1_cache, ((u32)code << 1) | ((idx >> 5) & 1), &sat_gfx_stats.refused_layer);
@@ -569,7 +588,7 @@ static void draw_scroll2(u16 sx, u16 sy, int full_row)
 {
     const u32 *cell = snap.s2;
     u32 x0 = (u32)sx + CPS_LEFT + SAT_GFX_CROP_X, y0 = (u32)sy + CPS_TOP;
-    u32 row, col, cols = full_row ? 64 : SAT_GFX_SCREEN_W / 16 + 1;
+    u32 row, col, cols = full_row ? 64 : SAT_GFX_SRC_W / 16 + 1;
     for (row = 0; row <= SAT_GFX_SCREEN_H / 16; row++)
         for (col = 0; col < cols; col++)
         {
@@ -597,7 +616,7 @@ static void draw_scroll3(u16 sx, u16 sy)
     u32 x0 = (u32)sx + CPS_LEFT + SAT_GFX_CROP_X, y0 = (u32)sy + CPS_TOP;
     u32 row, col;
     for (row = 0; row <= SAT_GFX_SCREEN_H / 32; row++)
-        for (col = 0; col <= SAT_GFX_SCREEN_W / 32; col++)
+        for (col = 0; col <= SAT_GFX_SRC_W / 32; col++)
         {
             u32 c = ((x0 >> 5) + col) & 63, r = ((y0 >> 5) + row) & 63;
             u32 word = *cell++;
@@ -675,6 +694,21 @@ static void put_sprite(u8 *cmd, u16 flip, u16 colr, u32 tex, int x, int y)
     put16(cmd + 14, (u16)y);
 }
 
+#if SAT_GFX_FIT == 1
+/* sx + 16 in, source column out at 11/12. Each tile its two end columns, so neighbours meet. */
+static u16 fit_x[417];
+static void put_sprite_fit(u8 *cmd, u16 flip, u16 colr, u32 tex, int x, int y)
+{
+    int a = (int)fit_x[x + 16] - 14, b = (int)fit_x[x + 32] - 15; /* fit_x[16] = 14 is screen 0 */
+    put16(cmd + 0, (u16)(flip | 1));   /* scaled sprite, two corners */
+    put16(cmd + 4, 0x0880);
+    put16(cmd + 6, colr);
+    put16(cmd + 8, (u16)(tex >> 3));
+    put16(cmd + 10, 0x0210);
+    put16(cmd + 12, (u16)a); put16(cmd + 14, (u16)y);
+    put16(cmd + 20, (u16)b); put16(cmd + 22, (u16)(y + 15));
+}
+#endif
 #ifdef SAT_READOUT
 /* Frame-cost bars for a real console, where no debugger reads the timers: 8 pixels per ms from the left, top bar game on the master, second bar drawing on the slave, white tick at 16.7 ms.
    Values come from the kernel through the uncached alias. Physical numbers are read from a capture of the screen. */
@@ -734,7 +768,7 @@ static void draw_sprites(void)
                 u32 tile;
                 u16 slot;
                 CENSUS(c_tiles++;)
-                if (sx <= -16 || sx >= SAT_GFX_SCREEN_W || sy <= -16 || sy >= SAT_GFX_SCREEN_H) { CENSUS(c_off++;) continue; }
+                if (sx <= -16 || sx >= SAT_GFX_SRC_W || sy <= -16 || sy >= SAT_GFX_SCREEN_H) { CENSUS(c_off++;) continue; }
                 if (fx || fy)
                     tile = code + (u32)(fx ? nx - 1 - tx : tx) + 0x10UL * (u32)(fy ? ny - 1 - ty : ty);
                 else
@@ -743,7 +777,11 @@ static void draw_sprites(void)
                 if (slot == NOSLOT) { CENSUS(c_empty++;) continue; }
                 CENSUS(if (prev != tx + 1) c_runs++; prev = tx; census_bank((u32)bank);)
                 if (commands >= SAT_GFX_MAX_COMMANDS) { sat_gfx_stats.refused_commands++; continue; }
+#if SAT_GFX_FIT == 1
+                put_sprite_fit(cmd, flip, colr, TEX_BASE + (u32)slot * 128, sx, sy);
+#else
                 put_sprite(cmd, flip, colr, TEX_BASE + (u32)slot * 128, sx, sy);
+#endif
                 cmd += 32;
                 commands++;
             }
@@ -901,8 +939,11 @@ void sat_gfx_snapshot(void)
 
     if (layers & 2)
     {
-        x0 = (u32)snap.s1x + CPS_LEFT + SAT_GFX_CROP_X; y0 = (u32)snap.s1y + CPS_TOP;
-        snap.s1_sum = snap_layer(snap.s1, GFX(RAM16(SH_SCROLL1_BASE) & 0xffc0U), x0 >> 3, y0 >> 3, S1_ROWS, S1_COLS, 5, (x0 >> 3) | ((y0 >> 3) << 16), snap.s1_sum);
+#if SAT_GFX_FIT
+        snap.hud_flush = RAMB[0x8001] == 2 && RAMB[0x8380] != 0;
+#endif
+        x0 = (u32)snap.s1x + CPS_LEFT + S1_READ_X; y0 = (u32)snap.s1y + CPS_TOP;
+        snap.s1_sum = snap_layer(snap.s1, GFX(RAM16(SH_SCROLL1_BASE) & 0xffc0U), x0 >> 3, y0 >> 3, S1_ROWS, S1_COLS, 5, (x0 >> 3) | ((y0 >> 3) << 16) | ((u32)snap.hud_flush << 31), snap.s1_sum);
     }
     if (layers & 4)
     {
@@ -939,7 +980,7 @@ void sat_gfx_snapshot(void)
             snap.layers &= (u16)~0xcU;
             snap.objects = 0;
             snap.back_valid = 1; snap.back = 0xf000;
-            snap.s1x = (u16)-(CPS_LEFT + SAT_GFX_CROP_X); snap.s1y = (u16)-CPS_TOP;
+            snap.s1x = (u16)-(CPS_LEFT + S1_REG_CROP); snap.s1y = (u16)-CPS_TOP;
             snap.row_active = 0;
         }
         /* Banks 30 and 31 of the scroll 1 page, white and yellow; the next normal snapshot sees a changed sum and restores them. */
@@ -1002,7 +1043,7 @@ void sat_gfx_draw(void)
     VDP2R(0x74) = (u16)((s2y + CPS_TOP) & 0x7ff);
     VDP2R(0x80) = (u16)((s3x + CPS_LEFT + SAT_GFX_CROP_X) & 0x7ff);
     VDP2R(0x84) = (u16)((s3y + CPS_TOP) & 0x7ff);
-    VDP2R(0x90) = (u16)((s1x + CPS_LEFT + SAT_GFX_CROP_X) & 0x7ff);
+    VDP2R(0x90) = (u16)((s1x + CPS_LEFT + S1_REG_CROP) & 0x7ff);
     VDP2R(0x92) = (u16)((s1y + CPS_TOP) & 0x7ff);
 
     STAGE(4);
@@ -1133,7 +1174,14 @@ int sat_gfx_init(const void *pack)
     VDP2R(0x72) = 0; VDP2R(0x76) = 0; VDP2R(0x82) = 0; VDP2R(0x86) = 0;
     VDP2R(0x78) = 1; VDP2R(0x7a) = 0; VDP2R(0x7c) = 1; VDP2R(0x7e) = 0;
     VDP2R(0x88) = 1; VDP2R(0x8a) = 0; VDP2R(0x8c) = 1; VDP2R(0x8e) = 0;
+#if SAT_GFX_FIT == 1
+    /* 384 source pixels on 352: increment 1 + 23/256 (the register keeps 8 fraction bits), half-reduction mode; NBG0 and NBG1 already have two character reads a slot. */
+    VDP2R(0x78) = 1; VDP2R(0x7a) = 0x1700; VDP2R(0x88) = 1; VDP2R(0x8a) = 0x1700;
+    VDP2R(0x98) = 0x0101;
+    { int i2; for (i2 = 0; i2 <= 416; i2++) fit_x[i2] = (u16)(i2 * 11 / 12); }
+#else
     VDP2R(0x98) = 0;
+#endif
     VDP2R(0xa0) = 0; VDP2R(0xa2) = (u16)(ROWTAB >> 1);
     VDP2R(0xac) = (u16)(BACKCOL >> 17); VDP2R(0xae) = (u16)((BACKCOL >> 1) & 0xffff);
     VDP2R(0xe0) = 0x0001;                         /* sprite type 1: 3 priority bits, 11 colour bits */
