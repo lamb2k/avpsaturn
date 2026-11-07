@@ -114,8 +114,6 @@ static u8 save_block[128] __attribute__((aligned(2))) = {
 #include "save_seed.inc"
 };
 #ifdef SAT_HOME
-/* Home mode: the game's own free play, coinage byte 9 in both settings copies. The game then starts on Start and continues without credits. Off in the arcade image. */
-static void home_settings(void) { save_block[0] = 9; save_block[0x30] = 9; }
 int sat_home_get(int off) { return save_block[off]; }
 void sat_home_set(int off, int v) { save_block[off] = (u8)v; save_block[off + 0x30] = (u8)v; }
 extern volatile int sat_home_hold;
@@ -572,8 +570,8 @@ void sat_main(void)
     cpu.d[3] = 4; cpu.a[4] = 0x800; cpu.a[7] = 0xff8000; cpu.a[5] = 0xff8000;
     FTCR = 2;
     game_done = 1;
-#ifdef SAT_HOME
-    home_settings();
+#ifdef SAT_FREEPLAY_ONLY   /* test flag: the game's free play coinage; its paths are outside the census, 0xe2 fatal on stage 02 */
+    save_block[0] = 9; save_block[0x30] = 9;
 #endif
     load_round(0);
     round_loaded = 0;

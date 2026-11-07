@@ -22,9 +22,10 @@ volatile u32 sat_home_cursor;
 #define P_A 0x0400u
 #define P_B 0x0100u
 #define P_C 0x0200u
+#define P_COIN 0x0040u
 #define HOME_IDLE 1800u                /* 30 s on the title menu, then the attract runs */
 extern volatile u32 sat_duel_on;
-static u32 inject;
+static u32 inject, coin_on, coin_gap;
 static u32 prev = 0xffff;
 static int shown;
 #define IN_ATTRACT (G(0xff81b0) != 0)
@@ -34,15 +35,24 @@ static int shown;
 u32 sat_home_pad2(u32 raw)
 {
     if (sat_home_hold) return 0xffff;
-    if (inject && sat_duel_on) return (inject & 4) ? raw | P_START : raw & ~P_START;
+    if (inject && sat_duel_on && G(0xff818c) >= 2) return (inject & 4) ? raw | P_START : raw & ~P_START;
     if (IN_ATTRACT) return raw | P_START;
     return raw;
 }
 /* Pad word as the game sees it (pad.c): idle while held; Start belongs to these menus where they own it. */
 u32 sat_home_pad(u32 raw)
 {
+    u32 cred = G(0xff818c);
     if (sat_home_hold) return 0xffff;
-    if (inject) { inject--; return (inject & 4) ? raw | P_START : raw & ~P_START; }
+    raw |= P_COIN;
+    /* No coin to insert at home: the game's own credit path, through its own coin line, keeps a credit ready whenever one is wanted. Free play's own coinage is not used: its paths are outside the census the stage files keep ROM for. */
+    if (coin_gap) coin_gap--;
+    if (coin_on) { coin_on--; raw &= ~P_COIN; }
+    else if (!coin_gap && cred < (sat_duel_on ? 2u : 1u) && (inject || !IN_ATTRACT)) { coin_on = 6; coin_gap = 40; raw &= ~P_COIN; }
+    if (inject) {
+        if (cred) { inject--; return (inject & 4) ? raw | P_START : raw & ~P_START; }
+        return raw | P_START;
+    }
     if (IN_ATTRACT || PAUSE_OK) return raw | P_START;
     return raw;
 }

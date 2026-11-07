@@ -73,6 +73,15 @@ def port_busy():
     return busy
 
 
+def port_owner():
+    """The pid listening on the MCP port. Two lanes can both see the port free and both start Yaba: only one binds it, and the other's bot would then drive the wrong machine."""
+    for l in subprocess.run(["netstat", "-ano", "-p", "TCP"], capture_output=True, text=True).stdout.splitlines():
+        p = l.split()
+        if len(p) >= 5 and p[1].endswith(":9640") and p[3] == "LISTENING":
+            return int(p[4])
+    return None
+
+
 class Session:
     def __init__(self, m, syms, hwnd, work):
         self.m, self.syms, self.hwnd, self.work = m, syms, hwnd, work
@@ -161,6 +170,9 @@ def main():
     INI.write_bytes(("\n".join(out) + "\n").encode("latin-1"))
     proc = subprocess.Popen([str(EXE)], cwd=str(EXE.parent))
     s = None
+    global foreign
+    foreign = False
+    last_own = time.time()
     try:
         m = RetryMcp("http://127.0.0.1:9640/mcp")
         t0 = time.time()
@@ -170,6 +182,10 @@ def main():
             except Exception:
                 if time.time() - t0 > 120: raise
                 time.sleep(0.3)
+        if port_owner() != proc.pid:
+            print("port 9640 belongs to another Yaba, this leg did not run", flush=True)
+            foreign = True
+            return
         print("tools", [x["name"] for x in m._post("tools/list", {})["result"]["tools"]], flush=True)
         wins = []
         while not wins and time.time() - t0 < 130:
@@ -193,6 +209,12 @@ def main():
             if d[:4] != b"SATR":   # the runtime has not cleared its memory yet: what is there is the loader's fill
                 time.sleep(0.2); continue
             s.v = int.from_bytes(d[8:12], "big")
+            if time.time() - last_own > 15:
+                last_own = time.time()
+                if port_owner() != proc.pid:
+                    print("port 9640 lost to another Yaba, leg void", flush=True)
+                    foreign = True
+                    return
             fatal = int.from_bytes(d[28:32], "big")
             if fatal:
                 det = int.from_bytes(d[32:36], "big")
@@ -214,3 +236,5 @@ def main():
 
 if __name__ == "__main__":
     main()
+    if foreign:
+        sys.exit(3)   # no save was taken from this leg; the caller repeats it

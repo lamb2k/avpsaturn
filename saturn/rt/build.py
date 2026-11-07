@@ -173,6 +173,28 @@ def round_files(rom, code_end, cold1_at):
     (WORK / "round_stats.json").write_text(json.dumps(stats, indent=0))
 
 
+def refresh_restores(rom):
+    """Round files restore ROM pages, and a page can hold cold code, whose calls name kernel addresses: a kept file must carry this build's bytes. Layout as boot.c reads it: one head sector of count, then destination and bytes pairs."""
+    import struct
+    n = 0
+    for f in ISO.glob("R[0-9][0-9][0-9].BIN"):
+        with open(f, "r+b") as h:
+            head = h.read(2048)
+            at, changed = 2048, False
+            for i in range(struct.unpack_from(">I", head)[0]):
+                dest, size = struct.unpack_from(">II", head, 4 + i * 8)
+                if dest == 1:
+                    continue
+                if CART["ROMB"] <= dest < CART["ROMB"] + len(rom):
+                    h.seek(at)
+                    want = bytes(rom[dest - CART["ROMB"]:dest - CART["ROMB"] + size])
+                    if h.read(size) != want:
+                        h.seek(at); h.write(want); changed = True
+                at += size
+            n += changed
+    return n
+
+
 def main():
     gen = gen_sources()
     with cf.ThreadPoolExecutor(max_workers=3) as ex:
@@ -312,7 +334,8 @@ SECTIONS {{
     ends = [[st[0], syms[f"_sat_st{i}_end"]] for i, st in enumerate(STRETCHES)]
     ends_file = WORK / "round_code_ends.json"
     if os.environ.get("KEEP_ROUND_FILES") and (not ends_file.exists() or json.loads(ends_file.read_text()) == ends):
-        print("round files kept")
+        n = refresh_restores(rom)
+        print("round files kept; ROM restore bytes refreshed in", n, "files")
     else:
         round_files(rom, [tuple(e) for e in ends], cold1_at)
     ends_file.write_text(json.dumps(ends))
