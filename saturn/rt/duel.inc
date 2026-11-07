@@ -10,7 +10,7 @@ extern void f_1d03e(void);
 #define DUEL_PLAYERS 2   /* pairs are a loop, so player 3 stays open */
 volatile u32 sat_duel_on;
 struct { u32 hits[2], last_health[2]; } sat_duel_stats;
-/* Hit log for the bot: one row per landed hit, ring of 16; n counts all. Row: game tick, attacker, attack byte (+0xd1), target health before and after. */
+/* Hit log for the bot: one row per landed hit, ring of 16; n counts all. Row: vblank (low 16 bits), attacker, the attacker's source byte (+0xd1, which the hit writes to the target's +0x65), target health before and after. */
 struct { u32 n; struct { u16 tick; u8 who, attack; u16 before, after; } row[16]; } sat_duel_log;
 static u8 duel_tick_seen;
 static void duel_pair(int a, int t)
@@ -26,7 +26,7 @@ static void duel_pair(int a, int t)
     w8(pa + 8, 0);
     if (cpu.d[0] & 0xff) {
         u32 i = sat_duel_log.n++ & 15;
-        sat_duel_log.row[i].tick = r16(0xff8018); sat_duel_log.row[i].who = (u8)a; sat_duel_log.row[i].attack = r8(pa + 0xd1);
+        sat_duel_log.row[i].tick = (u16)sat_dbg.vblanks; sat_duel_log.row[i].who = (u8)a; sat_duel_log.row[i].attack = r8(pa + 0xd1);
         sat_duel_log.row[i].before = hp0; sat_duel_log.row[i].after = r16(pt + 0x40);
         w8(pt + 0x65, r8(pa + 0xd1));
         w8(pa + 0x6e, 1);
