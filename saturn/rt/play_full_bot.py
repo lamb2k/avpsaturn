@@ -3,7 +3,8 @@
 import json, os, random, time
 loaded = False
 stage = sec = None; n = 0; ko = 0; presses = 0; inko = False; lastshot = 0; lastsave = 0; seen = False; ended = False
-stall = (0, 0); stall_t = 0; wander_to = 0; wander = []; last_press = 0; last_load = 0; endv = None; t0 = time.time(); lastend = 0; late = False; prog = None; prog_v = 0; stuck = 0
+stall = (0, 0); stall_t = 0; wander_to = 0; wander = []; last_press = 0; last_load = 0; endv = None; t0 = time.time(); lastend = 0; late = False; prog = None; prog_v = 0; stuck = 0; lastw = None
+_w = os.environ.get("BOT_WATCH", "").split(","); WATCH = int(_w[0], 16) if _w[0] else 0; WATCHST = int(_w[1], 16) if WATCH else 0
 POOLS = ((0x8680, 24, 0x80), (0x9280, 4, 0xc0), (0x9580, 20, 0xc0))
 LEG = ("ko", "presses", "late", "seen", "ended", "endv")   # kept across process legs joined by a save state
 def load_leg(s):
@@ -19,7 +20,7 @@ def note(s, *a):
 def rounds(s):
     return [int.from_bytes(s.m.read(s.syms["sat_rounds"] + i * 4, 4), "big") for i in range(4)]
 def step(v, s):
-    global stage, sec, n, ko, presses, inko, lastshot, lastsave, seen, ended, stall, stall_t, wander_to, wander, last_press, last_load, endv, lastend, late, prog, prog_v, stuck
+    global stage, sec, n, ko, presses, inko, lastshot, lastsave, seen, ended, stall, stall_t, wander_to, wander, last_press, last_load, endv, lastend, late, prog, prog_v, stuck, lastw
     if not loaded:
         load_leg(s)
     n += 1
@@ -28,6 +29,16 @@ def step(v, s):
     s16 = lambda o: u16(o) - 0x10000 if u16(o) >= 0x8000 else u16(o)
     st, att, mode, cred, p0, top = u16(0x1e8), a[0x1b0], a[1], a[0x18c], a[0x380], a[0x384]
     se = s.ram(0xd182, 1)[0]
+    if WATCH:   # BOT_WATCH=ffa240,0a: log one object's motion fields on every change in that stage, and save slot 4 on entering it
+        if st == WATCHST and stage != st:
+            s.log("watch save", str(s.m.call("save_state", slot=4))[:40])
+        if st == WATCHST:
+            r = s.ram(WATCH - 0xff0000, 0x70)
+            k = (r[2:8], r[0x30:0x40], r[0x5c])
+            if k != lastw:
+                lastw = k
+                with open(s.work / "watch.txt", "a") as f:
+                    f.write(f"{v} {r[:8].hex()} x{r[0x10:0x14].hex()} y{r[0x14:0x18].hex()} v{r[0x30:0x34].hex()} {r[0x34:0x38].hex()} a{r[0x38:0x3c].hex()} {r[0x3c:0x40].hex()} h{r[0x40:0x42].hex()} 5c{r[0x5c]:02x} 6c{r[0x6c]:02x}" + chr(10))
     if st != stage or se != sec:
         r = rounds(s)
         if st != stage:

@@ -6,7 +6,8 @@ usage: satint_merge.py WORK   Reads rt.bin, op.bin, src/, oreads/oreads.txt, cfg
 (data view with the store overlaid: what an OP read outside the store would see). ROM-derived: never commit."""
 import bisect, json, os, pathlib, re, sys
 W = pathlib.Path(sys.argv[1])
-CAP = 0x100
+CAP = 0x100   # how far an indexed base may run before the next function. Too short and an index the census never saw reads other bytes (0x6259a, stage 0a: fatal in play, not in any golden).
+LONGCAP = int(os.environ.get("OPX_LONGCAP", "0x200"), 16)
 rt, op = (W / "rt.bin").read_bytes(), (W / "op.bin").read_bytes()
 LEARN = pathlib.Path(os.environ.get("LEARN_OUT", "E:/AvP/learning"))
 D = json.load(open(LEARN / "cfg.json"))
@@ -29,7 +30,11 @@ for f in (W / "src").glob("c*.c"):
         bases.add(a)
         if m[3]:
             j = bisect.bisect_right(funcs, a)
-            end = min(funcs[j] if j < len(funcs) else a + 0x100, a + CAP)
+            nextf = funcs[j] if j < len(funcs) else a + 0x100
+            end = min(nextf, a + CAP)
+            # Past CAP, a table goes on through words that are not instructions, up to real code. An index the census never saw must still read the table.
+            while end < min(nextf, a + LONGCAP) and end >= a + CAP and end not in insn:
+                end += 1
             if tables.get(a):
                 end = max(end, a + w * len(tables[a]))
             # A false code root inside a table (0x4ccc0 in the table at 0x4ccb0) must not end it: go on through words the route read, up to code the host really ran.
