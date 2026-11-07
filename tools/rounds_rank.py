@@ -1,10 +1,10 @@
 #!/usr/bin/env python
 """Lane fit: per-stage use rank of sprite keys. score = 1000 * sections of the real, unassisted full route (golden census) that drew the key + walks that drew it in that stage + 500 if a KO or continue drew it.
-usage: rounds_rank.py WORK CENSUS WALKDIR...   Writes WORK/key_rank.json: file name -> {key: score}. Prints what each stage's lowest ranks are. ROM-derived: E:/AvP/learning only."""
+usage: rounds_rank.py WORK CENSUS[,CENSUS...] WALKDIR...   Each CENSUS is one real route (tools/golden_census.py).   Writes WORK/key_rank.json: file name -> {key: score}. Prints what each stage's lowest ranks are. ROM-derived: E:/AvP/learning only."""
 import collections, glob, json, pathlib, sys
-W, C = pathlib.Path(sys.argv[1]), pathlib.Path(sys.argv[2])
+W, CS = pathlib.Path(sys.argv[1]), sys.argv[2].split(",")
 R = collections.defaultdict(collections.Counter)
-for f in glob.glob(str(C / "sections/*.tiles.txt")):
+for f in (x for C in CS for x in glob.glob(C + "/sections/*.tiles.txt")):
     s = int(pathlib.Path(f).name[:4], 16) & 0xff
     for l in open(f):
         a, k = l.split()

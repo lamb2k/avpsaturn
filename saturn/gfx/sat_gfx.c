@@ -96,14 +96,14 @@ static void put32(u8 *p, u32 v) { p[0] = (u8)(v >> 24); p[1] = (u8)(v >> 16); p[
 #define SEC_S1 1
 #define SEC_S2 2
 #define SEC_S3 3
-#define BLANK_INDEX 0x3fffUL
-#define KEY_SHIFT 14
+#define BLANK_INDEX 0xffffffUL /* what pack_find returns for an empty tile */
+#define KEY_SHIFT(s) ((s) == sections ? 16 : 14) /* sprite words are key << 16 | index, for more than 16K tiles; scroll keys need 18 bits */
 
 typedef struct
 {
     u32 count;
     int shift; /* key >> shift picks an index bucket */
-    const u8 *keys; /* u32: key << 14 | payload index, ascending; BLANK_INDEX marks a tile with no visible pen */
+    const u8 *keys; /* u32: key << KEY_SHIFT | payload index, ascending; an index of all ones marks a tile with no visible pen */
     const u8 *data;
     const u8 *spill; /* payload indexes from split on live in other stretches of the cart: count, then (first index, offset from the pack) pairs, ascending */
     u32 split;
@@ -192,12 +192,12 @@ static u16 pack_index[4][INDEX_BUCKETS + 1]
 static void index_section(Section *s, int which)
 {
     u16 *index = pack_index[which];
-    u32 top = s->count ? be32(s->keys + (s->count - 1) * 4) >> KEY_SHIFT : 0, i, b = 0;
+    u32 top = s->count ? be32(s->keys + (s->count - 1) * 4) >> KEY_SHIFT(s) : 0, i, b = 0;
     s->shift = 0;
     while ((top >> s->shift) >= INDEX_BUCKETS) s->shift++;
     for (i = 0; i < s->count; i++)
     {
-        u32 k = (be32(s->keys + i * 4) >> KEY_SHIFT) >> s->shift;
+        u32 k = (be32(s->keys + i * 4) >> KEY_SHIFT(s)) >> s->shift;
         while (b <= k) index[b++] = (u16)i;
     }
     while (b <= INDEX_BUCKETS) index[b++] = (u16)s->count;
@@ -209,14 +209,15 @@ static long pack_find(const Section *s, u32 key)
     u32 bucket = key >> s->shift;
     const u16 *index = pack_index[s - sections];
     long lo, hi;
+    int ks = KEY_SHIFT(s);
     if (bucket >= INDEX_BUCKETS) return -1;
     lo = index[bucket]; hi = (long)index[bucket + 1] - 1;
     while (lo <= hi)
     {
         long mid = (lo + hi) >> 1;
         u32 v = be32(s->keys + (u32)mid * 4);
-        u32 k = v >> KEY_SHIFT;
-        if (k == key) return (long)(v & BLANK_INDEX);
+        u32 k = v >> ks;
+        if (k == key) { u32 i = v & ((1UL << ks) - 1); return i == (1UL << ks) - 1 ? (long)BLANK_INDEX : (long)i; }
         if (k < key) lo = mid + 1; else hi = mid - 1;
     }
     return -1;

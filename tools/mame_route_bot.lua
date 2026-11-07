@@ -1,6 +1,7 @@
 -- Closed-loop route bot: real ports only, no RAM writes. Replays a prefix route, then chooses the pad word each frame from work RAM
 -- and writes the whole route, which tools/mame_golden_run.py replays. Word bits as tools/make_route.py.
 -- Env: BOT_PREFIX route file, BOT_OUT route out, BOT_LOG log, BOT_MAX frames, BOT_STOP_ATTRACT frames after attract returns.
+-- BOT_CHAR: select grid position (0 warrior, 1 right, 2 down, 3 right then down), as tools/rounds_walk.lua.
 local cpu = manager.machine.devices[":maincpu"]
 local p = cpu.spaces["program"]
 local in0 = manager.machine.ioport.ports[":IN0"].fields
@@ -32,7 +33,30 @@ local function finish(why)
     o:close(); manager.machine:exit()
 end
 local snapev, snapfrom = tonumber(os.getenv("BOT_SNAPEV") or "1000000"), tonumber(os.getenv("BOT_SNAPFROM") or "0")
+local want = tonumber(os.getenv("BOT_CHAR") or "0")
+local story, picked, lastg = false, nil, nil
+local function pick()
+    local g = r8(0xff8009)
+    if g ~= lastg and frame < 6000 then log:write(string.format("g09 %d f%d att %d stage %x mode %d cr %d", g, frame, r8(0xff81b0), r16(0xff81e8), r8(0xff8001), r8(0xff818c)), string.char(10)); lastg = g end
+    if g == 16 then story = true end
+    if not (want ~= 0 and story and r16(0xff81e8) == 0 and r8(0xff81b0) == 0 and g == 2) then return nil end
+    if not picked then picked = frame; log:write("SELECT f", frame, string.char(10)) end
+    local since = frame - picked
+    if since >= 260 then return nil end
+    local w = 0
+    if since >= 190 and since < 194 and want & 1 ~= 0 then w = w | 8 end
+    if since >= 225 and since < 229 and want & 2 ~= 0 then w = w | 256 end
+    return w
+end
+local function save_route()
+    local o = assert(io.open(os.getenv("BOT_OUT"), "w"))
+    o:write(string.format("last %d", frame), string.char(10))
+    for _, e in ipairs(route) do o:write(e[1], " ", e[2], string.char(10)) end
+    o:close()
+end
 local function bot()
+    local pw = pick()
+    if pw then return pw end
     if r16(0xff81e8) >= 0x10 then late = true end
     if late and r8(0xff81b0) ~= 0 then
         if not endf then endf = frame; log:write("ATTRACT RETURNED f", frame, string.char(10)) end
@@ -111,5 +135,7 @@ learn_bot = emu.add_machine_frame_notifier(function()
         log:write(table.concat(t, " | "), string.char(10)); log:flush()
         if os.getenv("BOT_SHOT") then manager.machine.video:snapshot() end
     end
+    if frame % 30000 == 0 then save_route() end
+    if frame % 30000 == 0 then save_route() end
     if frame >= maxf then finish("max") end
 end)
