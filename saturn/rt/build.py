@@ -138,16 +138,16 @@ def round_files(rom, code_end):
         free.sort(key=lambda r: -r[1])
         p, dropped = rounds_pack.fit(raw, [set(k) for k in f["keys"]], room, free)
         for first, a, take in p["segs"]:
-            written.update(range(a // page, (a + take * 128 + page - 1) // page))
+            written.update(range(a // page, (a + (take * 128 + 2047 & -2048) + page - 1) // page))
         plans.append((p, dropped))
     stats = {}
     for i, (f, (p, dropped)) in enumerate(zip(ROUNDS["files"], plans)):
-        own = {x for first, a, take in p["segs"] for x in range(a // page, (a + take * 128 + page - 1) // page)}
+        own = {x for first, a, take in p["segs"] for x in range(a // page, (a + (take * 128 + 2047 & -2048) + page - 1) // page)}
         back = sorted((written & set(f["keep_pages"])) - own)
         restores, st = [], None
         for q in back + [None]:
             if st is not None and (q is None or q != st[1]):
-                restores.append((CART["ROMB"] + st[0] * page, bytes(rom[st[0] * page:st[1] * page]))); st = None
+                restores.append((CART["ROMB"] + st[0] * page, bytes(rom[st[0] * page:st[0] * page + ((st[1] - st[0]) * page + 2047 & -2048)]))); st = None   # whole sectors of ROM, so no padding lands on the next page
             if q is None:
                 break
             st = [q, q + 1] if st is None else [st[0], q + 1]

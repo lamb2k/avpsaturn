@@ -39,7 +39,7 @@ def plan(raw, keys, main_room, free):
         for a, n in free:
             if not need:
                 break
-            take = min(need, n // 128)
+            take = min(need, (n & -SEC) // 128)   # whole sectors: the loader pads a region to a sector, which must stay in the stretch
             if take:
                 segs.append((first, a, take)); first += take; need -= take
         if need:

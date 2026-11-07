@@ -26,6 +26,7 @@ NM = JO / "joengine/Compiler/WINDOWS/sh-elf/bin/nm.exe"
 INI = pathlib.Path(os.environ["APPDATA"]) / "YabaSanshiro/yabause.ini"
 # Windows virtual keys for the bindings in yabause.ini (Port 1 pad).
 VK = dict(up=0x57, right=0x44, down=0x53, left=0x41, r=0x36, l=0x35, start=0x0d, a=0x47, b=0x48, c=0x4a, x=0x54, y=0x59, z=0x55)
+QT = dict(start=16777220)   # Qt key code where it differs from the virtual key
 WM_KEYDOWN, WM_KEYUP = 0x100, 0x101
 u32 = ctypes.WinDLL("user32", use_last_error=True)
 u32.MapVirtualKeyW.restype = wt.UINT
@@ -76,6 +77,11 @@ class Session:
         (work / "shots").mkdir(exist_ok=True)
 
     def _key(self, name, down):
+        if os.environ.get("YABA_PAD") == "mcp":   # patched exe (saturn/rt/yaba_pad_set.patch): tool calls PerKeyDown/PerKeyUp, as the key handler does
+            self.held = getattr(self, "held", set())
+            (self.held.add if down else self.held.discard)(QT.get(name, VK[name]))
+            self.m.call("pad_set", keys=sorted(self.held))
+            return
         vk = VK[name]
         scan = u32.MapVirtualKeyW(vk, 0)
         lp = 1 | (scan << 16) | (0 if down else (3 << 30))

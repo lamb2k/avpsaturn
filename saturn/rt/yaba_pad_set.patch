@@ -1,0 +1,38 @@
+--- DebugMcpServer.orig.cpp	2026-11-07 01:07:54.936762800 -0500
++++ tree/yabause/src/qt/DebugMcpServer.cpp	2026-11-07 01:08:08.323185000 -0500
+@@ -1,4 +1,8 @@
+-#include "DebugMcpServer.h"
++#include "DebugMcpServer.h"
++#include <QSet>
++extern "C" {
++#include "peripheral.h"
++}
+ 
+ #include <QCoreApplication>
+ #include <QCryptographicHash>
+@@ -505,6 +509,17 @@
+     return textResult(t);
+   }
+ 
++  if (name == "pad_set") {
++    // lane-proof: real pad path. Same call as UIYabause::keyPressEvent, on the same thread; the emulated pad goes through SMPC.
++    static QSet<qint64> held;
++    QSet<qint64> want;
++    for (const QJsonValue& v : args.value("keys").toArray()) want.insert((qint64)v.toDouble());
++    for (qint64 k : held) if (!want.contains(k)) PerKeyUp((u32)k);
++    for (qint64 k : want) if (!held.contains(k)) PerKeyDown((u32)k);
++    held = want;
++    return textResult(QString("held %1").arg(held.size()));
++  }
++
+   if (name == "pause") {
+     if (isStopped()) return errorResult("already stopped");
+     if (!mYabauseThread->pauseEmulation(true, false))
+@@ -1140,6 +1155,7 @@
+ QJsonArray DebugMcpServer::toolDefinitions() const {
+   const char* json = R"JSON([
+     {"name":"debug_status","description":"Get emulator debug status: run/stop state, stop reason, PCs of both SH2 CPUs, frame count, game id, CPU core, history recording state.","inputSchema":{"type":"object","properties":{}}},
++    {"name":"pad_set","description":"Hold exactly these key codes on the emulated pad (PerKeyDown/PerKeyUp).","inputSchema":{"type":"object","properties":{"keys":{"type":"array","items":{"type":"integer"}}}}},
+     {"name":"pause","description":"Pause emulation at the next frame boundary and mark it stopped for debugging.","inputSchema":{"type":"object","properties":{}}},
+     {"name":"resume","description":"Clear halt requests on both SH2 CPUs and resume emulation. Requires being stopped.","inputSchema":{"type":"object","properties":{}}},
+     {"name":"load_state","description":"Load a numbered savestate slot (<itemnum>_<slot>.yss from the configured SaveStates directory). Pauses emulation around the load and resumes if it was running.","inputSchema":{"type":"object","properties":{"slot":{"type":"integer"}}}},
