@@ -17,6 +17,13 @@ def load_leg(s):
     f = s.work / "leg.json"
     if os.environ.get("YABA_LOAD") and f.exists():
         globals().update(json.loads(f.read_text()))
+def safe_save(s, slot):
+    """Save only while vblanks advance. A load masks interrupts for seconds, and a state saved inside a CD read never resumes (Linn, stage 1e)."""
+    for i in range(400):
+        a = int.from_bytes(s.m.read(s.syms["sat_dbg"] + 8, 4), "big"); time.sleep(0.15)
+        if int.from_bytes(s.m.read(s.syms["sat_dbg"] + 8, 4), "big") != a:
+            return str(s.m.call("save_state", slot=slot))[:50]
+    return "no save: vblanks stopped"
 def note(s, *a):
     _r = os.environ.get("AVP_SCSP_RAW")
     if _r and os.path.exists(_r):   # where this line falls in the sound capture
@@ -112,7 +119,7 @@ def step(v, s):
         lastshot = v; s.shot(f"g_{v:07d}")
         s.log("st", hex(st), "sec", se, "hp", u16(0x3c0), "cred", cred, "ko", ko, "rate", round(v / (time.time() - t0), 1))
     if v - lastsave >= 6000:
-        lastsave = v; s.log("save", str(s.m.call("save_state", slot=3))[:50])
+        lastsave = v; s.log("save", safe_save(s, 3))
     if top == 4 and not inko:
         ko += 1
     inko = top == 4
@@ -197,7 +204,7 @@ def fatal(s, c, d):
 def end(s):
     if not s.done:   # time limit: save for the next leg
         s.set([])
-        s.log("leg save", str(s.m.call("save_state", slot=3))[:50])
+        s.log("leg save", safe_save(s, 3))
         (s.work / "leg.json").write_text(json.dumps({k: globals()[k] for k in LEG}))
     else:
         (s.work / "DONE").write_text("stopped by bot")
