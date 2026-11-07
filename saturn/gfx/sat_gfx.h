@@ -18,9 +18,14 @@
 #define SAT_GFX_SCREEN_H 224
 /* SAT_GFX_FIT, a crop still choice for the owner: 0 the 1:1 centre crop. 1 scale the 384 wide picture to 352: VDP2 zoom on NBG0 and NBG1, scaled VDP1 sprites, HUD flush. 2 the crop, HUD flush. */
 #ifndef SAT_GFX_FIT
-#define SAT_GFX_FIT 0
+#define SAT_GFX_FIT 1   /* scaled: the owner's default, 2026-11-07 */
 #endif
-#if SAT_GFX_FIT == 1
+#if SAT_GFX_FIT == 3 /* test build: A and B on one image, switched at run time for a same-frame comparison */
+extern volatile int sat_fit_scale;
+#define SAT_FIT_ON (*(volatile int *)((unsigned long)&sat_fit_scale | 0x20000000UL))
+#define SAT_GFX_CROP_X (SAT_FIT_ON ? 0 : 16)
+#define SAT_GFX_SRC_W (SAT_FIT_ON ? 384 : 352)
+#elif SAT_GFX_FIT == 1
 #define SAT_GFX_CROP_X 0
 #define SAT_GFX_SRC_W 384
 #else

@@ -26,11 +26,14 @@ volatile u32 sat_home_cursor;
 extern volatile u32 sat_duel_on;
 u32 sat_home_inject;
 #define inject sat_home_inject
-static u32 coin_on, coin_gap;
 u32 sat_home_prev = 0xffff;
 #define prev sat_home_prev
 
+#ifdef SAT_HOME_NOFIRST
+static int shown = 1;
+#else
 static int shown;
+#endif
 #define IN_ATTRACT (G(0xff81b0) != 0)
 #define PAUSE_OK (!IN_ATTRACT && G(0xff8001) == 2 && G(0xff8380) != 0 && G(0xff8384) != 4)
 
@@ -48,10 +51,8 @@ u32 sat_home_pad(u32 raw)
     u32 cred = G(0xff818c);
     if (sat_home_hold) return 0xffff;
     raw |= P_COIN;
-    /* No coin to insert at home: the game's own credit path, through its own coin line, keeps a credit ready whenever one is wanted. Free play's own coinage is not used: its paths are outside the census the stage files keep ROM for. */
-    if (coin_gap) coin_gap--;
-    if (coin_on) { coin_on--; raw &= ~P_COIN; }
-    else if (!coin_gap && cred < (sat_duel_on ? 2u : 1u) && (inject || !IN_ATTRACT)) { coin_on = 6; coin_gap = 40; raw &= ~P_COIN; }
+    /* No coin to insert at home, and no coin sound: a credit is simply there whenever one is wanted. The game's start path spends it. Free play's own coinage is not used: its paths are outside the census the stage files keep ROM for. */
+    if (cred < (sat_duel_on ? 2u : 1u) && (inject || !IN_ATTRACT)) { G(0xff818c) = (u8)(sat_duel_on ? 2 : 1); cred = G(0xff818c); }
     if (inject) {
         if (cred) { inject--; return (inject & 4) ? raw | P_START : raw & ~P_START; }
         return raw | P_START;
@@ -111,11 +112,33 @@ void sat_home_poll(void)
 {
     u32 raw = sat_pad_raw & 0xffff, e = prev & ~raw;
     prev = raw;
+#if SAT_GFX_FIT == 3   /* test build: pad Z switches picture fit, pad Y holds the game */
+    {
+        extern volatile int sat_fit_scale;
+        if (e & 0x10) *(volatile int *)((unsigned long)&sat_fit_scale | 0x20000000UL) ^= 1;
+        if (e & 0x20) {
+            sat_home_hold = 1;
+            for (;;) {
+                sat_home_frame();
+                e = sat_home_edges();
+                if (e & 0x10) *(volatile int *)((unsigned long)&sat_fit_scale | 0x20000000UL) ^= 1;
+                if (e & 0x20) break;
+            }
+            sat_home_hold = 0;
+            e = 0;
+        }
+    }
+#endif
     if (inject && !IN_ATTRACT) inject = 0;
     if (inject) return;
     if (IN_ATTRACT) {
         /* First sight once the boot warning has gone, then on Start. */
-        if ((!shown && G(0xff8001) == 8) || (e & P_START)) { shown = 1; sat_home_menu(); }
+        /* The game's own title (mode 4) is the backdrop: logo and art as the game draws them. Start elsewhere in the attract goes back to it. */
+        static u32 title_at;   /* the logo fades in: wait for it */
+        if (G(0xff8001) != 4) title_at = 0;
+        else if (!title_at) title_at = sat_vblanks_now();
+        if (title_at && sat_vblanks_now() - title_at > 150 && (!shown || (e & P_START))) { shown = 1; sat_home_menu(); }
+        else if ((e & P_START) && !title_at) { shown = 0; sat_home_restart(); }
     } else if ((e & P_START) && PAUSE_OK)
         pause_menu();
 }

@@ -43,23 +43,29 @@ static const Opt opts[] = {
     { "DEMO SOUND", 0x03, 0x81ad, 2, on_off },
 };
 #define OPTS (int)(sizeof opts / sizeof opts[0])
+/* Text under the game's own logo: clear cells hide the game's start and credits lines. */
+static void panel(int top)
+{
+    int r, c;
+    clear();
+    for (r = top; r < 28; r++) for (c = 0; c < 44; c++) sat_home_text[r][c] = 1;
+}
 static void options(void)
 {
     int cur = 0, i;
     sat_home_screen = 2;
     for (;;) {
         u32 e;
-        clear();
-        centre(3, "OPTIONS", 1);
+        panel(19);
         for (i = 0; i < OPTS; i++) {
             const Opt *o = &opts[i];
             int v = sat_home_get(o->off);
             char num[2];
             num[0] = (char)('1' + v); num[1] = 0;
-            put(8 + i * 2, 8, o->label, i == cur);
-            put(8 + i * 2, 22, o->names ? o->names[v] : num, i == cur);
+            put(20 + i, 8, o->label, i == cur);
+            put(20 + i, 22, o->names ? o->names[v] : num, i == cur);
         }
-        centre(8 + OPTS * 2 + 1, "EXIT", cur == OPTS);
+        centre(20 + OPTS + 1, "EXIT", cur == OPTS);
         sat_home_cursor = (u32)cur;
         frame();
         e = edges();
@@ -88,12 +94,11 @@ void sat_home_menu(void)
 #endif
     int pick = 0;
     sat_home_hold = 1;
-    sat_home_mode = 2;
+    sat_home_mode = 1;
     prev = sat_pad_raw & 0xffff;
     for (;;) {
-        clear();
-        centre(5, "ALIEN VS PREDATOR", 1);
-        pick = menu_list(1, 12, items, HOME_ITEMS, pick < 0 ? 0 : pick, HOME_IDLE);
+        panel(19);
+        pick = menu_list(1, 20, items, HOME_ITEMS, pick < 0 ? 0 : pick, HOME_IDLE);
         if (pick != 1) break;
         options();
     }

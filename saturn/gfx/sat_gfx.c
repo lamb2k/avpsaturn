@@ -11,6 +11,9 @@
 
 extern unsigned char *PAGE[256];
 extern unsigned char RAMB[];
+#if SAT_GFX_FIT == 3
+volatile int sat_fit_scale;
+#endif
 
 typedef unsigned char u8;
 typedef unsigned short u16;
@@ -289,7 +292,7 @@ typedef struct
     u16 row[SAT_GFX_SCREEN_H];
     u8 palette[SAT_GFX_PAGES][0x400];
     u16 hud_flush;
-    u32 s1[S1_ROWS * S1_COLS], s2[S2_ROWS * 64], s3[S3_ROWS * S3_COLS]; /* code << 16 | attribute, visible cells only */
+    u32 s1[S1_ROWS * S1_COLS], s2[S2_ROWS * 64], s3[S3_ROWS * (384 / 32 + 1)]; /* code << 16 | attribute, visible cells only */
     u8 obj[MAX_OBJECTS * 8];
     u32 pal_sum[SAT_GFX_PAGES], s1_sum, s2_sum, s3_sum; /* change detection: position and every visible word */
 #ifdef SAT_HOME
@@ -694,7 +697,7 @@ static void put_sprite(u8 *cmd, u16 flip, u16 colr, u32 tex, int x, int y)
     put16(cmd + 14, (u16)y);
 }
 
-#if SAT_GFX_FIT == 1
+#if SAT_GFX_FIT == 1 || SAT_GFX_FIT == 3
 /* sx + 16 in, source column out at 11/12. Each tile its two end columns, so neighbours meet. */
 static u16 fit_x[417];
 static void put_sprite_fit(u8 *cmd, u16 flip, u16 colr, u32 tex, int x, int y)
@@ -777,7 +780,10 @@ static void draw_sprites(void)
                 if (slot == NOSLOT) { CENSUS(c_empty++;) continue; }
                 CENSUS(if (prev != tx + 1) c_runs++; prev = tx; census_bank((u32)bank);)
                 if (commands >= SAT_GFX_MAX_COMMANDS) { sat_gfx_stats.refused_commands++; continue; }
-#if SAT_GFX_FIT == 1
+#if SAT_GFX_FIT == 3
+                if (SAT_FIT_ON) put_sprite_fit(cmd, flip, colr, TEX_BASE + (u32)slot * 128, sx, sy);
+                else put_sprite(cmd, flip, colr, TEX_BASE + (u32)slot * 128, sx, sy);
+#elif SAT_GFX_FIT == 1
                 put_sprite_fit(cmd, flip, colr, TEX_BASE + (u32)slot * 128, sx, sy);
 #else
                 put_sprite(cmd, flip, colr, TEX_BASE + (u32)slot * 128, sx, sy);
@@ -1007,6 +1013,16 @@ void sat_gfx_draw(void)
     sat_gfx_stats.layer_writes = 0;
     sat_gfx_stats.top_bank = 0;
 
+#if SAT_GFX_FIT == 3
+    {
+        static int was;
+        if (was != SAT_FIT_ON)
+        {
+            was = SAT_FIT_ON; drawn_valid = 0;
+            VDP2R(0x7a) = VDP2R(0x8a) = (u16)(was ? 0x1700 : 0); VDP2R(0x98) = (u16)(was ? 0x0101 : 0);
+        }
+    }
+#endif
     STAGE(0);
     update_palette();
     update_priority(layers, snap.priority);
@@ -1178,9 +1194,13 @@ int sat_gfx_init(const void *pack)
     /* 384 source pixels on 352: increment 1 + 23/256 (the register keeps 8 fraction bits), half-reduction mode; NBG0 and NBG1 already have two character reads a slot. */
     VDP2R(0x78) = 1; VDP2R(0x7a) = 0x1700; VDP2R(0x88) = 1; VDP2R(0x8a) = 0x1700;
     VDP2R(0x98) = 0x0101;
-    { int i2; for (i2 = 0; i2 <= 416; i2++) fit_x[i2] = (u16)(i2 * 11 / 12); }
+#elif SAT_GFX_FIT == 3
+    VDP2R(0x98) = 0;
 #else
     VDP2R(0x98) = 0;
+#endif
+#if SAT_GFX_FIT == 1 || SAT_GFX_FIT == 3
+    { int i2; for (i2 = 0; i2 <= 416; i2++) fit_x[i2] = (u16)(i2 * 11 / 12); }
 #endif
     VDP2R(0xa0) = 0; VDP2R(0xa2) = (u16)(ROWTAB >> 1);
     VDP2R(0xac) = (u16)(BACKCOL >> 17); VDP2R(0xae) = (u16)((BACKCOL >> 1) & 0xffff);
