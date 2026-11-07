@@ -43,4 +43,49 @@ static void duel_tick(void)
     __asm__ volatile ("ldc %0,sr" : : "r"(sr));
     for (a = 0; a < 2; a++) sat_duel_stats.last_health[a] = r16(PL(a) + 0x40);
 }
-void sat_duel_step(void) { duel_tick(); }
+/* Arena: fighters stay on the screen where the duel began, so the camera and the stage's spawn table, driven by it, do not walk on. */
+static u16 arena_cam;
+static u8 arena_set;
+static void duel_arena(void)
+{
+    int i;
+    /* Centre: where the two fighters stand once both are in play; the screen is 384 wide. */
+    if (!arena_set) { if (r8(PL(0) + 4) != 2 || r8(PL(1) + 4) != 2) return; arena_cam = (u16)((r16(PL(0) + 0x10) + r16(PL(1) + 0x10)) / 2 - 192); arena_set = 1; }
+    for (i = 0; i < DUEL_PLAYERS; i++) {
+        u32 p = PL(i);
+        int x = (int)r16(p + 0x10), lo = arena_cam + 72, hi = arena_cam + 312;   /* 240 wide: the camera leads the fighters, so the bounds sit inside the screen */
+        if (!r8(p)) continue;
+        if (x < lo) w16(p + 0x10, (u16)lo);
+        if (x > hi) w16(p + 0x10, (u16)hi);
+    }
+}
+/* KO ends the duel: no continue. The other player wins; both down is a draw. Result over the held picture, then the title. */
+extern volatile int sat_home_hold, sat_home_mode;
+extern char sat_home_text[28][44];
+extern void sat_home_centre(int, const char *, int), sat_home_clear(void), sat_home_frame(void), sat_home_restart(void);
+volatile u32 sat_duel_result;   /* 1 player 1, 2 player 2, 3 draw; for the bot */
+static void duel_end(void)
+{
+    int ko0 = r8(PL(0) + 4) == 4, ko1 = r8(PL(1) + 4) == 4, n;
+    if (!ko0 && !ko1) return;
+    for (n = 0; n < 20; n++) sat_home_frame();   /* both may fall in the same moment */
+    ko0 = r8(PL(0) + 4) == 4; ko1 = r8(PL(1) + 4) == 4;
+    sat_duel_result = ko0 && ko1 ? 3 : ko1 ? 1 : 2;
+    sat_home_hold = 1;
+    sat_home_clear();
+    { int r, c; for (r = 9; r < 15; r++) for (c = 10; c < 34; c++) sat_home_text[r][c] = 1; }
+    sat_home_centre(11, sat_duel_result == 3 ? "DRAW" : sat_duel_result == 1 ? "PLAYER 1 WINS" : "PLAYER 2 WINS", 1);
+    sat_home_mode = 1;
+    for (n = 0; n < 240; n++) sat_home_frame();
+    sat_home_mode = 0;
+    sat_home_hold = 0;
+    sat_duel_on = 0; arena_set = 0;
+    sat_home_restart();
+}
+void sat_duel_step(void)
+{
+    if (!sat_duel_on || r8(0xff81b0) || r8(0xff8001) != 2 || !r8(PL(0)) || !r8(PL(1))) { duel_tick(); return; }
+    duel_arena();
+    duel_tick();
+    duel_end();
+}
