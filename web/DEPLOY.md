@@ -4,7 +4,11 @@ Private test site on the owner's Cloudflare account. Worker and R2 bucket are bo
 
 ## Access
 
-Everything but the sign-in and licence pages needs a session. The username and password are Worker secrets (`TEST_USERNAME`, `TEST_PASSWORD`), kept locally in `E:\AvP\learning\lane-web\site-password.txt`, never in the repo. Failed sign-ins are limited to 10 a minute.
+Open: no password or sign-in (owner: "Open is fine"). Anyone with the URL can load the page, core and image. The bucket itself has no public access; the Worker serves it. `/files` is limited to 120 requests a minute per address, per Worker instance. Image parts are cached for a year because their names carry a hash; the page also keeps one verified copy in the browser.
+
+## Status
+
+Not deployed yet: the upload was refused by a permission check. See the hand-back.
 
 ## Publish a new image
 
@@ -26,6 +30,5 @@ A rebuilt core also changes its pin in `public/runtime-config.mjs`.
 
 - Previous page or Worker: `npx wrangler@4.131.1 deployments list`, then `npx wrangler@4.131.1 rollback VERSION_ID`.
 - Previous image: put the old parts and old `build.json` back; put `build.json` last.
-- Take the site offline, keeping data: `npx wrangler@4.131.1 delete` removes the Worker and its custom domain. The bucket has no public access, so the data is then unreachable.
+- **Take the site down**, keeping data: `npx wrangler@4.131.1 delete` removes the Worker and its custom domain. The bucket has no public access, so the data is then unreachable.
 - Remove the data too: delete each object with `npx wrangler@4.131.1 r2 object delete avp-private-test/NAME --remote`, then `npx wrangler@4.131.1 r2 bucket delete avp-private-test`.
-- Change the password: `npx wrangler@4.131.1 secret put TEST_PASSWORD`. All sessions end, since they are signed with it.
