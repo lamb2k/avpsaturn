@@ -19,7 +19,7 @@ def plan(raw, keys, main_room, free):
     """Returns (pack parts) or None if over. free: [[rom offset, bytes]] for this stage, in order of use."""
     try:
         data, _ = satgfx_pack.pack(raw, keys)
-    except AssertionError:   # past the 14 bit payload index
+    except AssertionError:   # past the payload index of a section
         return None
     secs = [struct.unpack_from(">III", data, 4 + i * 12) for i in range(4)]
     ends = [secs[i + 1][1] if i < 3 else len(data) for i in range(4)]

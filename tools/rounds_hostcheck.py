@@ -6,6 +6,8 @@ P = R["page"]
 assert P == 0x400   # host_kernel.c SW_PAGE
 with open(sys.argv[2], "w", newline="\n") as f:
     for fl in R["files"]:
+        if "mask" in fl:   # a variant keeps what its stage's base file keeps
+            continue
         keep = set(fl["keep_pages"])
         junk = [p for p in range(0x200000 // P) if p not in keep]
         f.write(f"{fl['stages'][0]} {len(junk)} " + " ".join(map(str, junk)) + "\n")

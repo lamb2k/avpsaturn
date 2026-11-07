@@ -8,7 +8,7 @@ n, ko, _ = struct.unpack_from(">III", pack, 4)
 solid, blank = set(), set()
 for i in range(n):
     v = struct.unpack_from(">I", pack, ko + i * 4)[0]
-    (blank if (v & 0x3fff) == 0x3fff else solid).add(v >> 14)
+    (blank if (v & 0xffff) == 0xffff else solid).add(v >> 16)
 rows = []
 with open(sys.argv[1], "rb") as f:
     frame = 0

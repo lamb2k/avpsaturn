@@ -96,6 +96,7 @@ end
 local in0 = machine.ioport.ports[":IN0"].fields
 local in2 = machine.ioport.ports[":IN2"].fields
 local F = {in2["Coin 1"], in2["1 Player Start"], in0["P1 Left"], in0["P1 Right"], in0["P1 Button 1"], in0["P1 Button 2"], in0["P1 Button 3"], in0["P1 Up"], in0["P1 Down"]}
+for _, n in ipairs{{2, "Coin 2"}, {2, "2 Players Start"}, {0, "P2 Left"}, {0, "P2 Right"}, {0, "P2 Button 1"}, {0, "P2 Button 2"}, {0, "P2 Button 3"}, {0, "P2 Up"}, {0, "P2 Down"}} do F[#F + 1] = (n[1] == 2 and in2 or in0)[n[2]] end   -- route word bits 9 to 17
 local steps, last = {}, nil
 for l in io.lines(os.getenv("AVSP_ROUTE")) do
     local a, b = l:match("^(%d+) (%d+)")

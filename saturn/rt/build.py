@@ -92,7 +92,18 @@ def gen_sources():
             f.seek(72 + 0xef0)
             save.write_bytes(f.read(0x80))
     update(GEN / "save_seed.inc", ",".join(str(x) for x in save.read_bytes()))
-    update(GEN / "rounds.inc", ",".join(str(ROUNDS["stage_file"].get(str(i), 0)) for i in range(256)))
+    # Stage word -> row; row, variant -> file. Row 0 is the front end. Mask ff81cc -> variant; 0 is the one-for-all file.
+    vf, masks = ROUNDS.get("variant_file", {}), ROUNDS.get("variant_masks", [])
+    rows = [[0] * (len(masks) + 1)]
+    srow = [0] * 256
+    for i in range(256):
+        f = ROUNDS["stage_file"].get(str(i), 0)
+        if f:
+            srow[i] = len(rows)
+            rows.append(vf.get(str(i), [f] * (len(masks) + 1)))
+    mvar = [masks.index(m) + 1 if m in masks else 0 for m in range(16)]
+    update(GEN / "rounds.inc", "static const u8 stage_row[256] = {%s};\nstatic const u8 mask_variant[16] = {%s};\nstatic const unsigned short row_file[%d][%d] = {%s};\n" % (
+        ",".join(map(str, srow)), ",".join(map(str, mvar)), len(rows), len(masks) + 1, ",".join("{" + ",".join(map(str, r)) + "}" for r in rows)))
     return out
 
 
@@ -155,8 +166,8 @@ def round_files(rom, code_end, cold1_at):
             if q is None:
                 break
             st = [q, q + 1] if st is None else [st[0], q + 1]
-        audio = (WORK / "audio" / f"r{i:02d}.bin").read_bytes()
-        n = rounds_pack.write_file(ISO / f"R{i:02d}.BIN", audio, restores, rounds_pack.assemble(p, CART["SAT_PACK"]))
+        audio = (WORK / "audio" / f"r{i:03d}.bin").read_bytes()
+        n = rounds_pack.write_file(ISO / f"R{i:03d}.BIN", audio, restores, rounds_pack.assemble(p, CART["SAT_PACK"]))
         stats[f["name"]] = dict(file=n, sprites_in_main=p["inmain"], sprites_spill=sum(x[2] for x in p["segs"]), spill_runs=len(p["segs"]), restore=sum(len(d) for _, d in restores), restore_runs=len(restores), dropped_keys=len(dropped), dropped=dropped, audio=len(audio))
         print(f["name"], {k: v for k, v in stats[f["name"]].items() if k != "dropped"}, flush=True)
     (WORK / "round_stats.json").write_text(json.dumps(stats, indent=0))

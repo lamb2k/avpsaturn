@@ -1,8 +1,8 @@
 #!/usr/bin/env python
 """Lane satgfx: tile pack for saturn/gfx, from the graphics region. ROM-derived output: stays under E:/AvP/learning/lane-satgfx.
 
-Format SGP1, big endian: magic, then per section (sprite, scroll 1, 2, 3) count, key table offset, data offset, then per section split index, spill offset. Key word = key << 14 |
-payload index; index 0x3fff means no visible pen. Identical payloads are stored once. Texture pens: 15 -> 0, p -> p + 1.
+Format SGP1, big endian: magic, then per section (sprite, scroll 1, 2, 3) count, key table offset, data offset, then per section split index, spill offset. Key word = key << 16 |
+payload index in the sprite section, key << 14 | index in the scroll sections (scroll 1 keys need 18 bits); an index of all ones means no visible pen. Identical payloads are stored once. Texture pens: 15 -> 0, p -> p + 1.
 Sprite: 16 rows of 8 bytes. Scroll 1: one 8x8 cell, key = code << 1 | column bit 5. Scroll 2: four cells TL TR BL BR, key = code.
 Scroll 3: four such 16 pixel characters, key = code.
 """
@@ -61,16 +61,18 @@ def pack(raw, used):
     secs = []
     for s in range(4):
         seen, data, keys = {}, bytearray(), []
+        ks = 16 if s == 0 else 14
+        blank = (1 << ks) - 1
         for k in sorted(used[s]):
             pl, vis = payload(raw, s, k)
             if not vis:
-                keys.append(k << 14 | 0x3fff)
+                keys.append(k << ks | blank)
                 continue
             if pl not in seen:
                 seen[pl] = len(seen)
                 data += pl
-            keys.append(k << 14 | seen[pl])
-        assert len(seen) < 0x3fff
+            keys.append(k << ks | seen[pl])
+        assert len(seen) < blank and all(k >> 32 == 0 for k in keys)
         secs.append((keys, bytes(data)))
     hdr = struct.pack(">I", 0x53475031)
     off = 4 + 12 * 4 + 8 * 4   # four (split index, spill offset) pairs follow the sections; see satint_pack.py

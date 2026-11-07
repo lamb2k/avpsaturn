@@ -98,3 +98,40 @@ Sprite drops: 0e 600 to 0, 24 225 to 174. Room came from ROM stretches of one pa
 Sound drops are unchanged and still go largest first. Stage 10 drops clips the real route uses often, 0x4d and 0x118 at 232 uses each.
 Other characters: single game each, health written, tools/rounds_walk.py with ROUNDS_ONCE. Stills show the character's own name and portrait in play in all 19 stages and the ending. No key, ROM page or sound falls outside the stage files; keys dropped in stage 24: Dutch 9, Linn 45, Hunter 120. No unassisted run and no host check for them.
 Unproven: any boot of this image, the kernel change at run time, other characters' OP read ranges, 2 players, load times.
+
+## Other characters and two players, 2026-11-07 (lane chars; HOST against MAME 0.289; image built, not booted; hardware UNRUN)
+
+Saved routes, real ports only, no RAM writes (tools/mame_route_bot.lua with BOT_CHAR, BOT_P2): tools/routes/full_c1.txt, full_c2.txt, full_c3.txt, co2p_to_1e.txt. Goldens LEARN_DELTA=1.
+| Route | Dumps clean, plain | Dumps clean, Saturn form | KOs |
+| --- | --- | --- | --- |
+| Schaefer (golden_c1), to attract | 272171 of 272171 | 272171 of 272171 | 94 |
+| Linn (golden_c2), to attract | 369051 of 369051 | 369051 of 369051 | 57 |
+| Hunter (golden_c3), to attract | 333669 of 333669 | 333669 of 333669 | 116 |
+| Warrior (golden_full), to attract | 317908 of 317908 | 317908 of 317908 | 115 |
+| Warrior + Schaefer (golden_2p), to stage 1e only | 329918 of 329918 | 329918 of 329918 | |
+golden_r1s plain: clean 15618 of 15618, before the last audio-only change. Missed IRQ 0 on all. Saturn form means per-stage ROM garbage and OP reads through the store. The Saturn-form lift was checked with the keep lists and store of image 97790a2e; the final rebuild changed only sound sets. The two-player bot stuck in stage 1c or 1e on both tries, so stages 20 to 26 have no two-player data.
+Kernel fixes, host and saturn/rt/kernel.c, the Saturn side not run: trap 11 was empty (ends all eight records; Schaefer and Linn reach it at game over); trap 8 now ends only the first live record with tag d1, as the board does; a resumed task gets d1 and a1 as the board leaves them. Host IRQ placement at dispatcher points now follows the golden's a0, since free-stack order depends on it. One root added, 30e0.
+Sound drops go by use on the real routes (tools/rounds_config.py, WORK/sound_rank.json). Warrior census alone: stage 10 keeps 0x4d, 0x118, 0x4e, 0x119, 0x4f and 0x11a; only 2 route uses drop in the whole game. All five routes in one image: lost plays per route 143 to 307; worst stages 24 (64 clips, 53 used on a route), 20 (55, 40), 10 (67, 48), 1c (54, 48). All 516 KB of SCSP RAM is in use on those stages.
+Sprite index: sprite words are now key << 16 | index. The 16K cap is gone; stages are limited by room.
+Sprite keys dropped, one image for all routes, by rank: 0e 2681, 1c 158, 1e 733, 24 2561. Without two-player data: 0e 1915, 1e 363, 24 2561. Keys on a real route that draw blank: Warrior 0e 35, 24 336; Schaefer 24 1200; Linn 0e 296, 24 148; Hunter 0e 884, 24 62; two players 0e 779. Stage 0e and 24 are real gaps: room is the limit, about 2.2 MB of tiles against about 2.5 MB wanted.
+Store 237,828 bytes of 256 KB. High RAM free 19.6 KB, low RAM 4.1 KB. Image E:/AvP/learning/lane-chars/work/sat.iso, 51.6 MB, sha256 97790a2e2a6ae6b86962900559c7ede49ec1111cec648e5d90e29dc6ff044747.
+Two players, against the one-player union: 5983 new sprite keys summed over stages, new sound commands in nearly every stage (0x32x, the second player's clips), peak objects up to 132 from 96 (stage 18). Player 3 has no run; its cost is not measured. Second player was Schaefer only.
+Unproven: any boot of this image, kernel fixes at run time on Saturn, any second player but Schaefer, three players, two players past stage 1e, other branches and endings, cycle timing inside native kernel code.
+
+## Per-character stage files, 2026-11-07 (lane packs; HOST and replay against MAME 0.289; image built, not booted; hardware UNRUN)
+
+Every stage now has 11 files on one disc: the one-for-all file, one per character, one per pair. Same candidates and keep lists; what will not fit drops other characters' material first (tools/rounds_variants.py, ROUNDS_VARIANTS). Three characters use the one-for-all file.
+Selection: ff81cc holds a bit per character in play (1 Warrior, 2 Schaefer, 4 Hunter, 8 Linn). Bits are gathered while in a stage and cleared at the front end's load, as they drop around a KO and follow the cursor on the select screen. Replaying this over all five goldens picked the right file at all 95 loads (tools/rounds_variants_report.py); the kernel code itself has not run.
+| Route | Blank keys, before | after | Lost sound plays, before | after |
+| --- | --- | --- | --- | --- |
+| Warrior | 371 | 0 | 157 | 7 (stage 24) |
+| Schaefer | 1200 | 0 | 164 | 0 |
+| Linn | 444 | 0 | 306 | 0 |
+| Hunter | 946 | 0 | 215 | 4 (stage 24) |
+| Warrior + Schaefer, to stage 1e | 779 | 0 | 143 | 28 (1c 13, 10 7, 08 6, 1a 1, 0e 1) |
+Solo files drop no key that character's route, walks or KO showed. Each file still drops other characters' keys (about 5700 to 6000 per character over the game), and the sound table's lost plays above are all that character's route loses. In stage 0e two pairs not measured lose keys ranked from their walks, KO runs or the stand-in two-player run: Schaefer + Hunter 432, Hunter + Linn 1743. No pair drops a key from its own solo routes. Pairs not measured also lose 15 to 70 sound plays counted from their two solo routes, mostly stage 24.
+Those pairs rank the second player's additions from the Warrior + Schaefer run only, so their real need is not measured.
+Join path, not run: a character who joins or changes on a continue mid-stage keeps the current file until the next stage word, then gets the pair's file. Until then their keys outside that file draw blank and clips outside it are silent. A mid-stage load stays the owner's call.
+Host check in Saturn form, same keep lists and store as image 97790a2e: clean 272171 of 272171 (c1), 369051 of 369051 (c2), 333669 of 333669 (c3), 317908 of 317908 (full), 329918 of 329918 (2p), missed IRQ 0. Sound and sprite files are not part of this check.
+Image E:/AvP/learning/lane-packs/work/sat.iso, 502.6 MB (was 51.6), 210 round files, sha256 b5d86cd84a63ad3aa5d3cc3720f7959c1e3362ca677f1ea302cdedb9be9484fc. High RAM free 19.1 KB, low RAM 4.1 KB.
+Unproven: any boot; GFS with 219 root entries in a directory over one sector (names table now 256, was 64); the kernel selector at run time; seek time on a larger disc; three players; any second player but Schaefer; two players past stage 1e.

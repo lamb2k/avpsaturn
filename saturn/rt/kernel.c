@@ -180,11 +180,27 @@ void f_trap5(void) { u32 r = 0xff0058u + (cpu.d[0] & 0xffff); w8(r, 2); w8(r + 1
 void f_trap6(void) { u32 r = 0xff0058u + (cpu.d[0] & 0xffff); w8(r, 4); w8(r + 1, cpu.d[1]); cpu.a[4] = 0xff0058u; }
 void f_trap8(void)
 {
-    u32 tag = r8(0xff81b3); int i;
+    /* Board 0xfde: the first live record of the eight with tag d1 only. a4, d7, d0 and a6 stay as it leaves them. */
+    u32 r = REC(8); int n = 7;
     w8(0xff81b3, 0);
-    for (i = 8; i < 16; i++) { u32 r = REC(i); if (r8(r) && r8(r + 0x16) == tag) { clear_rec(r); free_push(r); } }
+    LOWW(cpu.d[7], 7);
+    for (;;)
+    {
+        if (r8(r) && r8(r + 0x16) == (cpu.d[1] & 0xff)) { cpu.d[0] = 0; clear_rec(r); free_push(r); cpu.a[6] = r32(G_FREEP); break; }
+        r += 0x20;
+        if (--n < 0) { LOWW(cpu.d[7], 0xffff); break; }
+        LOWW(cpu.d[7], n);
+    }
+    cpu.a[4] = r;
 }
-void f_trap11(void) { } void f_trap12(void) { } void f_trap13(void) { } void f_trap14(void) { } void f_trap15(void) { }
+/* Board 0x1026: end every live record of the eight. */
+void f_trap11(void)
+{
+    u32 r = REC(8); int i;
+    for (i = 8; i < 16; i++, r += 0x20) if (r8(r)) { cpu.d[0] = 0; clear_rec(r); free_push(r); cpu.a[6] = r32(G_FREEP); }
+    cpu.a[4] = r; LOWW(cpu.d[7], 0xffff);
+}
+void f_trap12(void) { } void f_trap13(void) { } void f_trap14(void) { } void f_trap15(void) { }
 
 static void run_task(int i)
 {
@@ -201,7 +217,7 @@ static void run_task(int i)
         sat_switch(&sched_sp, sp);
     } else {
         w8(r, 8);
-        LOWW(cpu.d[1], 8);
+        LOWW(cpu.d[1], st); cpu.a[1] = r32(r + 8); cpu.a[0] = r;   /* board 0xdc8, 0xdea: lifted code can read these */
         if (!task_sp[i]) sat_fatal(0xe6, (u32)i);
         sat_switch(&sched_sp, task_sp[i]);
     }
@@ -328,12 +344,11 @@ static void slave_start(void)
 }
 
 /* Rounds: each round's tile pack and sound set come from CD between rounds (RNN.BIN, tools/rounds_pack.py), on the master, with the game stopped and the slave idle.
-   The game's stage word, ff81e8, says which: 0 in attract and on the front end. rounds.inc maps a stage word to its file; the same path for every round. */
+   The game's stage word, ff81e8, says which: 0 in attract and on the front end. rounds.inc maps a stage word and the characters in play to a file; the same path for every round.
+   ff81cc holds a bit per character in play. It drops bits around a KO and follows the cursor on the select screen, so bits are gathered while in a stage and cleared at the front end's load. A character who joins mid-stage gets their file at the next stage word. */
 #define LOADER_API ((volatile u32 *)0x06013fd0u)
 #define CCR_M (*(volatile u8 *)0xfffffe92u)
-static const u8 stage_file[256] = {
 #include "rounds.inc"
-};
 u8 sat_aud_tables[0x2000] __attribute__((section(".lwgfx"), aligned(4)));
 static int round_loaded = -1;
 struct { u32 current, loads, sectors, last_vblank; } sat_rounds;
@@ -352,9 +367,9 @@ static void round_sound_ready(void)
 }
 static void load_round(int file)
 {
-    char name[] = "R00.BIN";
+    char name[] = "R000.BIN";
     long got;
-    name[1] = (char)('0' + file / 10); name[2] = (char)('0' + file % 10);
+    name[1] = (char)('0' + file / 100); name[2] = (char)('0' + file / 10 % 10); name[3] = (char)('0' + file % 10);
     got = ((long (*)(const char *, void (*)(void)))LOADER_API[0])(name, round_sound_ready);
     CCR_M = 0x11;
     if (got < 0) sat_fatal(0xed, (u32)-got);
@@ -362,13 +377,19 @@ static void load_round(int file)
 }
 static void round_check(void)
 {
-    int want = stage_file[(r8(0xff81b0) || r8(0xff8001) != 2) ? 0 : r16(0xff81e8) & 0xff];
+    int row = stage_row[(r8(0xff81b0) || r8(0xff8001) != 2) ? 0 : r16(0xff81e8) & 0xff], want;
     static u32 settled;
-    if (want == round_loaded) { settled = 0; return; }
+    static int row_loaded;
+    static u8 chars;
+    if (row) chars |= r8(0xff81cc) & 15;
+    if (row == row_loaded) { settled = 0; return; }
     /* The word flickers for a few frames as a scene closes; go only when it has held. */
     if (!settled) settled = sat_dbg.vblanks;
     if (sat_dbg.vblanks - settled < 12) return;
     settled = 0;
+    if (!row) chars = 0;
+    want = row_file[row][mask_variant[chars]];
+    row_loaded = row;
     while (UNCACHED(gfx_done) != UNCACHED(gfx_handed)) ;   /* the slave finishes the picture in hand and stays off the pack */
     __asm__ volatile ("ldc %0,sr" : : "r"(0xf0));
     sat_gfx_display(0);

@@ -12,6 +12,8 @@ Near-identical renders share one clip (the alternating pairs are the same sample
 CD tracks start at 2, track 1 being data; WORK/music/tNN_cccc.raw are 16 bit little endian 44.1 kHz stereo, whole CD frames.
 """
 import json, pathlib, struct, sys, wave
+import os
+
 import numpy as np
 
 CD_FRAME = 588   # stereo samples at 44.1 kHz
@@ -150,10 +152,15 @@ def main():
             w.setnchannels(1); w.setsampwidth(2); w.setframerate(rate)
             w.writeframes(np.clip(y, -32768, 32767).astype("<i2").tobytes())
     st = None
-    music, track, ms = [], 2, read_wav(work / "music.wav")
-    for cmd, a, b, capped in sorted(log_rows(work / "music.tsv")):
-        if not (full or cmd in route):
-            continue
+    # Reading and looping the music is most of a run, and its result depends only on which tracks: many pack builds with the same tracks reuse it (env PACK_MUSIC_CACHE).
+    rows = [r for r in sorted(log_rows(work / "music.tsv")) if full or r[0] in route]
+    cache, cached = work / "music_cache.json", None
+    if os.environ.get("PACK_MUSIC_CACHE") and cache.exists():
+        c = json.load(open(cache))
+        if c["cmds"] == [r[0] for r in rows]:
+            cached = c["music"]
+    music, track, ms = [], 2, None if cached is not None else read_wav(work / "music.wav")
+    for cmd, a, b, capped in [] if cached is not None else rows:
         m = ms[int(a * 44100):int(min(b, a + MUSIC_MAX_S) * 44100)]
         loud = np.nonzero(np.abs(m).max(axis=1) > SILENT)[0]
         if not len(loud):
@@ -179,6 +186,10 @@ def main():
             intro = cd_track(m[:loud[-1] + 1])
         intro_frames = (work / "music" / f"t{intro:02d}_{cmd:04x}.raw").stat().st_size // (CD_FRAME * 4) if intro else 0
         music.append(dict(cmd=cmd, intro=intro, loop=loop, intro_cd_frames=intro_frames, loop_s=lp, seam=bool(loop and not lp)))
+    if cached is not None:
+        music = cached
+    elif os.environ.get("PACK_MUSIC_CACHE"):
+        json.dump(dict(cmds=[r[0] for r in rows], music=music), open(cache, "w"))
     hdr = struct.pack(">4sHHI", b"SAU1", len(sfx), len(music), len(blob))
     for s in sfx:
         hdr += struct.pack(">HBBBBBBII", s["cmd"], s["prio"], s["mask"] >> 8, s["mask"] & 255, s["tl"], int(s["loop"]), 0, s["off"], s["n"])
