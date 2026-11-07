@@ -1,6 +1,6 @@
 #!/usr/bin/env python
 """Golden from a saved input route, without the retained route harness.
-usage: mame_golden_run.py NAME ROUTE [LAST]    env LEARN_SAVE=frame,frame   Output: E:/AvP/learning/mame/NAME. Refuses to overwrite; checks free commit and E: space."""
+usage: mame_golden_run.py NAME ROUTE [LAST]    env LEARN_SAVE=frame,frame LEARN_DELTA=1 (changed words only)   Output: E:/AvP/learning/mame/NAME. Refuses to overwrite; checks free commit and E: space."""
 import os, pathlib, shutil, subprocess, sys
 OLD = pathlib.Path("C:/Game Dev/BrooklynBangoutX/AvPSaturnCapabilityTest-playable-loop-pivot")
 HERE = pathlib.Path(__file__).resolve().parent
@@ -21,5 +21,5 @@ if last:
 r = subprocess.run([str(OLD / ".deps/mame/mame0289/mame.exe"), "avspu", "-rompath", "C:/Game Dev/BrooklynBangoutX/AvPSaturnCapabilityTest", "-video", "none", "-sound", "none",
                     "-nothrottle", "-skip_gameinfo", "-autoboot_delay", "0", "-nvram_directory", str(out / "nvram"), "-cfg_directory", str(out / "cfg"),
                     "-state_directory", str(out / "sta"), "-autoboot_script", str(HERE / "mame_golden.lua")],
-                   cwd=OLD, env=env, stdout=open(out / "stdout.txt", "w"), stderr=subprocess.STDOUT, timeout=int(os.environ.get("LEARN_PROBE_TIMEOUT", "1500")))
-print("exit", r.returncode, "dumps", (out / "probe.tsv").stat().st_size // (8 + 64 + 0x12000))
+                   cwd=OLD, env=env, stdout=open(out / "stdout.txt", "w"), stderr=subprocess.STDOUT, timeout=int(os.environ.get("LEARN_PROBE_TIMEOUT", "3000")))
+print("exit", r.returncode, "bytes", (out / "probe.tsv").stat().st_size, "IRQ", (out / "probe.tsv.io.txt").read_bytes().count(bytes([86,13,10])))

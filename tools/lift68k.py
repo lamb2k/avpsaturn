@@ -826,6 +826,8 @@ def main():
     for a in addrs:
         fn, code = lift(a, ccret, mode)
         t = render(fn, code, mode)
+        # A 68000 branch to an odd address is an address error, never a function: such targets come from data decoded as code.
+        t = re.sub(r"(?<![0-9a-zA-Z_])f_([0-9a-f]*[13579bdf])[(][)];", lambda m: f"UNHANDLED(0x{m[1]});", t)
         calls |= set(re.findall(r"\bf_([0-9a-f]+)\(\)", t))
         calls |= set(re.findall(r"\bf_(trap\d+)\(\)", t))
         text.append(t)
