@@ -27,6 +27,10 @@ INI = pathlib.Path(os.environ["APPDATA"]) / "YabaSanshiro/yabause.ini"
 # Windows virtual keys for the bindings in yabause.ini (Port 1 pad).
 VK = dict(up=0x57, right=0x44, down=0x53, left=0x41, r=0x36, l=0x35, start=0x0d, a=0x47, b=0x48, c=0x4a, x=0x54, y=0x59, z=0x55)
 QT = dict(start=16777220)   # Qt key code where it differs from the virtual key
+# Second pad, YABA_P2=1 (needs YABA_PAD=mcp): names p2up and so on, bound in the ini for the run only.
+P2 = dict(up=73, right=76, down=75, left=79, r=49, l=50, start=51, a=52, b=55, c=56, x=57, y=48, z=77)
+P2_ORDER = "up right down left r l start a b c x y z".split()
+VK.update({"p2" + k: v for k, v in P2.items()})
 WM_KEYDOWN, WM_KEYUP = 0x100, 0x101
 u32 = ctypes.WinDLL("user32", use_last_error=True)
 u32.MapVirtualKeyW.restype = wt.UINT
@@ -148,6 +152,12 @@ def main():
     orig = INI.read_bytes()
     set_ = {r"Video\VideoCore": os.environ.get("YABA_VIDEO", "4"), r"Sound\SoundCore": os.environ.get("YABA_SOUND", "0"), r"General\CdRomISO": os.environ.get("YABA_CUE", str(work / "sat.cue")).replace("\\", "/"), "autostart": "true", r"Cartridge\Type": "7", r"General\EnableEmulatedBios": "true"}
     out = [f"{l.split('=')[0]}={set_[l.split('=')[0]]}" if l.split("=")[0] in set_ else l for l in orig.decode("latin-1").splitlines()]
+    if os.environ.get("YABA_P2"):
+        out = [l for l in out if not l.startswith("Input\\Port\\2\\")]
+        idx = next(i for i, l in enumerate(out) if l.startswith("Input\\Port\\1\\Id\\1\\Type"))
+        add = ["Input\\Port\\2\\Id\\1\\Type=2", "Input\\Port\\2\\Id\\1\\Device=keyboard", "Input\\Port\\2\\Id\\1\\DeviceName=Keyboard"]
+        add += [f"Input\\Port\\2\\Id\\1\\Controller\\2\\Key\\{i}={P2[n]}" for i, n in enumerate(P2_ORDER)]
+        out[idx:idx] = add
     INI.write_bytes(("\n".join(out) + "\n").encode("latin-1"))
     proc = subprocess.Popen([str(EXE)], cwd=str(EXE.parent))
     s = None
@@ -180,6 +190,8 @@ def main():
                 d = m.read(syms["sat_dbg"], 40)
             except RuntimeError:   # the core is not up yet
                 time.sleep(0.5); continue
+            if d[:4] != b"SATR":   # the runtime has not cleared its memory yet: what is there is the loader's fill
+                time.sleep(0.2); continue
             s.v = int.from_bytes(d[8:12], "big")
             fatal = int.from_bytes(d[28:32], "big")
             if fatal:

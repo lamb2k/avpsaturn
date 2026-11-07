@@ -10,6 +10,10 @@ typedef unsigned char u8; typedef unsigned short u16; typedef unsigned int u32;
 #define SR SMPC(0x61)
 #define SF SMPC(0x63)
 u32 sat_pad_raw = 0xffff;
+#ifdef SAT_HOME
+u32 sat_pad_raw2 = 0xffff;
+extern u32 sat_home_pad(u32), sat_home_pad2(u32);
+#endif
 static u16 in0 = 0xffff, in2 = 0xffff;
 
 #ifdef SAT_INPUT_SCRIPT
@@ -61,6 +65,20 @@ static void map_pad(u32 p)
     if (!(p & 0x0800)) w &= ~0x0100u;
     if (!(p & 0x0040)) w &= ~0x1000u;
     in2 = (u16)w;
+#ifdef SAT_HOME
+    {
+        u32 q = sat_home_pad2(sat_pad_raw2), v = 0xff;
+        if (!(q & 0x8000)) v &= ~1u;
+        if (!(q & 0x4000)) v &= ~2u;
+        if (!(q & 0x2000)) v &= ~4u;
+        if (!(q & 0x1000)) v &= ~8u;
+        if (!(q & 0x0200)) v &= ~0x10u;
+        if (!(q & 0x0400)) v &= ~0x20u;
+        if (!(q & 0x0100)) v &= ~0x40u;
+        in0 = (u16)((v << 8) | (in0 & 0xff));
+        if (!(q & 0x0800)) in2 &= (u16)~0x0200u;
+    }
+#endif
 }
 
 /* Called once per vblank, first thing. */
@@ -70,11 +88,18 @@ void sat_pad_tick(void)
         u32 st = OREG(0), id = OREG(1);
         if (st == 0xf1 && (id >> 4) == 0) sat_pad_raw = ((u32)OREG(2) << 8) | OREG(3);
         else if (st == 0xf0) sat_pad_raw = 0xffff;
+#ifdef SAT_HOME
+        /* Second port follows the first's two data bytes when a plain pad is there; a multitap or other device reads idle here. */
+        if (st == 0xf1 && (id >> 4) == 0 && OREG(4) == 0xf1 && (OREG(5) >> 4) == 0) sat_pad_raw2 = ((u32)OREG(6) << 8) | OREG(7);
+        else sat_pad_raw2 = 0xffff;
+#endif
         if (SR & 0x20) { IREG(0) = 0x40; SF = 1; }  /* more ports queued, drop them */
         else { IREG(0) = 0x00; IREG(1) = 0x0a; IREG(2) = 0xf0; COMREG = 0x10; SF = 1; }
     }
 #ifdef SAT_INPUT_SCRIPT
     map_pad(script_word(sat_vblanks_now()));
+#elif defined(SAT_HOME)
+    map_pad(sat_home_pad(sat_pad_raw));
 #else
     map_pad(sat_pad_raw);
 #endif

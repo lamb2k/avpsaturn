@@ -283,6 +283,9 @@ typedef struct
     u32 s1[S1_ROWS * S1_COLS], s2[S2_ROWS * 64], s3[S3_ROWS * S3_COLS]; /* code << 16 | attribute, visible cells only */
     u8 obj[MAX_OBJECTS * 8];
     u32 pal_sum[SAT_GFX_PAGES], s1_sum, s2_sum, s3_sum; /* change detection: position and every visible word */
+#ifdef SAT_HOME
+    u16 home, home_clear; /* menu text in front; cells without text cleared */
+#endif
 } Snapshot;
 
 /* Polynomial, not rotate and xor: a palette fade changes every long by one mask, and with 256 longs a rotate cancels it out. */
@@ -514,6 +517,16 @@ static u32 name_of(u16 attr, int page, u32 charno)
     return n;
 }
 
+#ifdef SAT_HOME
+extern volatile int sat_home_mode;
+extern char sat_home_text[28][44];
+static const u8 home_font[58 * 32] __attribute__((aligned(4))) = {
+#include "home_font.inc"
+};
+static const u8 home_pal[64] __attribute__((aligned(2))) = {
+#include "home_pal.inc"
+};
+#endif
 static void draw_scroll1(u16 sx, u16 sy)
 {
     const u32 *cell = snap.s1;
@@ -530,6 +543,18 @@ static void draw_scroll1(u16 sx, u16 sy)
             u16 slot = cache_get(&s1_cache, ((u32)code << 1) | ((idx >> 5) & 1), &sat_gfx_stats.refused_layer);
             u32 name = CLEAR_NAME;
             if (slot != NOSLOT) name = name_of(attr, 1, (CELL_S1 + (u32)slot * 32) >> 5);
+#ifdef SAT_HOME
+            if (snap.home)
+            {
+                u32 ch = (row < 28 && col < 44) ? *(volatile u8 *)((unsigned long)&sat_home_text[row][col] | 0x20000000UL) : 0;
+                if (ch == 1)
+                    name = CLEAR_NAME; /* a clear panel behind menu text */
+                else if (ch & 0x7f)
+                    name = name_of((ch & 0x80) ? 31 : 30, 1, (CELL_S1 + (u32)(SAT_GFX_S1_SLOTS + (ch & 0x7f) - 33) * 32) >> 5);
+                else if (snap.home_clear)
+                    name = CLEAR_NAME;
+            }
+#endif
             write_name(VDP2_VRAM + MAP_S1 + (r * 64 + c) * 4, name, &sh_s1[r * 64 + c]);
         }
 }
@@ -902,6 +927,28 @@ void sat_gfx_snapshot(void)
         }
     }
     snap.objects = (u16)count;
+#ifdef SAT_HOME
+    snap.home = (u16)sat_home_mode;
+    if (snap.home)
+    {
+        static u32 home_tick;
+        snap.home_clear = (u16)(snap.home == 2 || !(layers & 2));
+        snap.layers |= 2;
+        if (snap.home == 2)
+        {
+            snap.layers &= (u16)~0xcU;
+            snap.objects = 0;
+            snap.back_valid = 1; snap.back = 0xf000;
+            snap.s1x = (u16)-(CPS_LEFT + SAT_GFX_CROP_X); snap.s1y = (u16)-CPS_TOP;
+            snap.row_active = 0;
+        }
+        /* Banks 30 and 31 of the scroll 1 page, white and yellow; the next normal snapshot sees a changed sum and restores them. */
+        snap.pal_pages |= 2;
+        for (n = 0; n < 64; n++) snap.palette[1][30 * 32 + n] = home_pal[n];
+        snap.pal_sum[1]++;
+        snap.s1_sum += ++home_tick;
+    }
+#endif
 }
 
 /* Drawing side: everything from the snapshot. On the Saturn this runs on the slave SH-2. */
@@ -922,6 +969,9 @@ void sat_gfx_draw(void)
     STAGE(0);
     update_palette();
     update_priority(layers, snap.priority);
+#ifdef SAT_HOME
+    if (snap.home) VDP2R(0xfa) = 7; /* text in front */
+#endif
     STAGE(1);
     update_rowscroll();
     VDP2R(0x9a) = (u16)(row_active ? 0x0002 : 0);
@@ -1104,5 +1154,8 @@ int sat_gfx_init(const void *pack)
     VDP1R(PTMR) = 0;
 
     VDP2R(0x00) = 0x8001;                         /* display on */
+    #ifdef SAT_HOME
+    vram_copy(VDP2_VRAM + CELL_S1 + (u32)SAT_GFX_S1_SLOTS * 32, home_font, sizeof home_font);
+#endif
     return 1;
 }

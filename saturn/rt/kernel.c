@@ -113,6 +113,15 @@ void f_sysreg(void) { }
 static u8 save_block[128] __attribute__((aligned(2))) = {
 #include "save_seed.inc"
 };
+#ifdef SAT_HOME
+/* Home mode: the game's own free play, coinage byte 9 in both settings copies. The game then starts on Start and continues without credits. Off in the arcade image. */
+static void home_settings(void) { save_block[0] = 9; save_block[0x30] = 9; }
+int sat_home_get(int off) { return save_block[off]; }
+void sat_home_set(int off, int v) { save_block[off] = (u8)v; save_block[off + 0x30] = (u8)v; }
+extern volatile int sat_home_hold;
+extern void sat_home_poll(void);
+extern void sat_duel_step(void);
+#endif
 void f_41ca(void)
 {
     u32 p = r32(0xff0ffc), n = r16(0xff1000) + 1u, w = r16(0xff1002);
@@ -417,6 +426,10 @@ void f_d86(void)
     for (;;) {
         int i;
         round_check();
+#ifdef SAT_HOME
+        sat_home_poll();
+        sat_duel_step();
+#endif
         w8(G_VFLAG, 0);
         for (i = 0; i < TASKS; i++) {
             u32 st;
@@ -444,6 +457,9 @@ void f_d86(void)
     }
 }
 
+#ifdef SAT_HOME
+#include "duel.inc"
+#endif
 static void stack_scan(void)
 {
     int i;
@@ -479,6 +495,18 @@ void sat_vblank(void)
 #endif
     sat_pad_tick();
     t0 = frt();
+#ifdef SAT_HOME
+    if (sat_home_hold) {   /* the game is held: picture and sound only */
+        if (UNCACHED(gfx_done) == UNCACHED(gfx_handed)) {
+            sat_gfx_snapshot();
+            UNCACHED(gfx_handed) = UNCACHED(gfx_handed) + 1;
+            SLAVE_WAKE = 0xffff;
+        }
+        sat_audio_frame();
+        game_done = 1;
+        return;
+    }
+#endif
     /* Before the IRQ body, which moves the next frame's scroll words into place. A slave still drawing skips this frame's picture, never the game. */
     if (UNCACHED(gfx_done) == UNCACHED(gfx_handed)) {
         sat_gfx_snapshot();
@@ -510,12 +538,26 @@ static const u8 hw_test_seed[16] = {
 };
 
 extern u32 sat_bss_start[], sat_bss_end[], sat_lw_bss_start[], sat_lw_bss_end[];
+#ifdef SAT_HOME
+static int home_slave_on __attribute__((section(".data")));
+void sat_main(void);
+/* Quit to title: the game starts over from its boot, front end file included; settings in save_block (initialised data) stay. */
+void sat_home_restart(void)
+{
+    __asm__ volatile ("ldc %0,sr" : : "r"(0xf0));
+    while (UNCACHED(gfx_done) != UNCACHED(gfx_handed)) ;
+    *(volatile u32 *)0x25fe00a4 = 0;
+    cur = -1; round_loaded = -1;
+    __asm__ volatile ("mov %0,r15\n jmp @%1\n nop" : : "r"(sat_boot_stack + 2048), "r"(sat_main));
+    for (;;) ;
+}
+#endif
 void sat_main(void)
 {
     u32 *p; int i;
     __asm__ volatile ("ldc %0,sr" : : "r"(0xf0));
     for (p = sat_bss_start; p < sat_bss_end; p++) { if (p >= sat_boot_stack && p < sat_boot_stack + 2048) continue; *p = 0; }
-    for (p = sat_lw_bss_start; p < sat_lw_bss_end; p++) *p = 0;
+    for (p = sat_lw_bss_start; p < sat_lw_bss_end; p++) { if (p >= sat_slave_stack && p < sat_slave_stack + 256) continue; *p = 0; }
     sat_dbg.magic = 0x53415452;
     exceptions_install();
     for (i = 0; i < TASKS; i++) { u32 k; for (k = 0; k < TASK_STACK / 4; k++) task_stacks[i][k] = 0xa5a5a5a5u; }
@@ -530,10 +572,17 @@ void sat_main(void)
     cpu.d[3] = 4; cpu.a[4] = 0x800; cpu.a[7] = 0xff8000; cpu.a[5] = 0xff8000;
     FTCR = 2;
     game_done = 1;
+#ifdef SAT_HOME
+    home_settings();
+#endif
     load_round(0);
     round_loaded = 0;
     if (!sat_gfx_init(SAT_PACK)) sat_fatal(0xeb, 0);
+#ifdef SAT_HOME
+    if (!home_slave_on) { home_slave_on = 1; slave_start(); }
+#else
     slave_start();
+#endif
     sat_dbg.stage = 1;
     f_800();
     sat_fatal(0xe8, 0);

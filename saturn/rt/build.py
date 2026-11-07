@@ -109,7 +109,7 @@ def gen_sources():
 
 def cc(src, obj, extra=()):
     newest = max(src.stat().st_mtime, (HERE / "lift_target.h").stat().st_mtime)
-    if src.name in ("kernel.c", "pad.c", "sat_gfx.c"):
+    if src.name in ("kernel.c", "pad.c", "sat_gfx.c", "home.c"):
         newest = max(newest, (HERE / "sat_rt.h").stat().st_mtime, time.time() if os.environ.get("KERNEL_CFLAGS") else 0)
     if src.name == "sat_gfx.c":
         newest = max(newest, (src.parent / "sat_gfx.h").stat().st_mtime)
@@ -177,11 +177,16 @@ def main():
     gen = gen_sources()
     with cf.ThreadPoolExecutor(max_workers=3) as ex:
         objs = list(ex.map(lambda s: cc(s, OBJ / (s.stem + ".o"), [OPT]), gen))
+    home = "SAT_HOME" in os.environ.get("KERNEL_CFLAGS", "")
+    if home:
+        sh([sys.executable, REPO / "tools/home_font.py", WORK, os.environ.get("GFX_BIN", "E:/AvP/learning/lane-satgfx/gfx.bin")])
     gfx_dir = REPO / "saturn/gfx"
     gfx = [gfx_dir / "sat_gfx.c"]
     own = [cc(HERE / "ctx.s", OBJ / "ctx.o"), cc(HERE / "kernel.c", OBJ / "kernel.o", ["-O2", "-I", GEN] + os.environ.get("KERNEL_CFLAGS", "").split()), cc(HERE / "present.c", OBJ / "present.o", ["-O2"]), cc(HERE / "pad.c", OBJ / "pad.o", ["-O2"] + os.environ.get("KERNEL_CFLAGS", "").split())]
     own += [cc(REPO / "saturn/audio/sat_audio.c", OBJ / "sat_audio.o", ["-Os"] + os.environ.get("AUDIO_CFLAGS", "").split())]
-    own += [cc(s, OBJ / f"gfx_{s.stem}.o", ["-O2", "-I", gfx_dir] + os.environ.get("KERNEL_CFLAGS", "").split()) for s in gfx]
+    own += [cc(s, OBJ / f"gfx_{s.stem}.o", ["-O2", "-I", gfx_dir, "-I", GEN] + os.environ.get("KERNEL_CFLAGS", "").split()) for s in gfx]
+    if home:
+        own += [cc(HERE / "home.c", OBJ / "home.o", ["-Os"] + os.environ.get("KERNEL_CFLAGS", "").split())]
     if OVERRIDES:
         own += [cc(REPO / "saturn/game" / f"{n}.c", OBJ / f"game_{n}.o", ["-O2", "-DSAT_TARGET", "-I", REPO / "saturn/game"]) for n in ("game_hot", "game_bind")]
     sizes = {o: code_size(o) for o in objs}
@@ -303,7 +308,14 @@ SECTIONS {{
         at = st[0] - CART["ROMB"]
         rom[at:at + len(d)] = d
     (ISO / "ROM.BIN").write_bytes(rom)
-    round_files(rom, [(st[0], syms[f"_sat_st{i}_end"]) for i, st in enumerate(STRETCHES)], cold1_at)
+    # KEEP_ROUND_FILES=1, for a kernel-only rebuild: round files never touch pages holding cold code, so they stay valid while those pages are the same.
+    ends = [[st[0], syms[f"_sat_st{i}_end"]] for i, st in enumerate(STRETCHES)]
+    ends_file = WORK / "round_code_ends.json"
+    if os.environ.get("KEEP_ROUND_FILES") and (not ends_file.exists() or json.loads(ends_file.read_text()) == ends):
+        print("round files kept")
+    else:
+        round_files(rom, [tuple(e) for e in ends], cold1_at)
+    ends_file.write_text(json.dumps(ends))
     (WORK / "rom_final.bin").write_bytes(rom)
     b = OBJ / "boot.o"
     sh([GCC, "-m2", "-mb", "-O2", "-w", "-fno-builtin", "-I", SGL / "INC", f"-DCOLD1_ADDR={cold1_at:#x}u", "-c", HERE / "boot.c", "-o", b])
