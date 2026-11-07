@@ -56,3 +56,10 @@ Aliens also get hit by both players through the game's normal loops. A dying ali
 - KO flow can't be held without changing lifted code. Fallback: a lifted override used only in duel mode, with host check rerun.
 - 0x1d716 or weapon code assumes enemy targets and misbehaves with a player as target.
 - Fighting at closer range than the arcade's co-op stresses player state the routes never exercised, so the goldens prove nothing here. Only bot runs cover it.
+
+## First read results (READ, nothing run)
+
+- 0x1c9a8 is the game's own player-pair melee pass, one hit routine 0x1d03e per pair. It runs only with an empty enemy pool (ffee80 = 0x14) and not on stage 14, so live aliens stop it. The driver must call 0x1d03e itself.
+- It does token damage: 1, or 0 at health 0. Setting the attacker's tag byte +8 for the call sends `damage_apply` down its enemy path. Whether that table gives sensible numbers for a player's attack needs a run.
+- 0x1d716 only checks the recent-attack list used by 0x1cf54. 0x1d03e uses its own one-hit id.
+- 0x1d492 sets the KO state when health goes below 0. Blocking the continue is still to read.
