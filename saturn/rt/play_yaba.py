@@ -27,6 +27,8 @@ INI = pathlib.Path(os.environ["APPDATA"]) / "YabaSanshiro/yabause.ini"
 # Windows virtual keys for the bindings in yabause.ini (Port 1 pad).
 VK = dict(up=0x57, right=0x44, down=0x53, left=0x41, r=0x36, l=0x35, start=0x0d, a=0x47, b=0x48, c=0x4a, x=0x54, y=0x59, z=0x55)
 QT = dict(start=16777220)   # Qt key code where it differs from the virtual key
+VK.update(p2_up=0x49, p2_right=0x4c, p2_down=0x4b, p2_left=0x4a, p2_start=0x4f, p2_a=0x5a, p2_b=0x58, p2_c=0x43, p2_x=0x56)   # second pad, YABA_P2=1: keys only pad_set uses
+P2_INI = dict(enumerate((0x49, 0x4c, 0x4b, 0x4a, 0x3a, 0x3b, 0x4f, 0x5a, 0x58, 0x43, 0x56, 0x3c, 0x3d)))   # Yaba's pad key order, as port 1 in yabause.ini
 WM_KEYDOWN, WM_KEYUP = 0x100, 0x101
 u32 = ctypes.WinDLL("user32", use_last_error=True)
 u32.MapVirtualKeyW.restype = wt.UINT
@@ -148,6 +150,10 @@ def main():
     orig = INI.read_bytes()
     set_ = {r"Video\VideoCore": os.environ.get("YABA_VIDEO", "4"), r"Sound\SoundCore": os.environ.get("YABA_SOUND", "0"), r"General\CdRomISO": os.environ.get("YABA_CUE", str(work / "sat.cue")).replace("\\", "/"), "autostart": "true", r"Cartridge\Type": "7", r"General\EnableEmulatedBios": "true"}
     out = [f"{l.split('=')[0]}={set_[l.split('=')[0]]}" if l.split("=")[0] in set_ else l for l in orig.decode("latin-1").splitlines()]
+    if os.environ.get("YABA_P2"):
+        out = [l for l in out if not l.startswith("Input\\Port\\2\\")]
+        at = next(i for i, l in enumerate(out) if l.startswith("Input\\Port\\1\\"))
+        out[at:at] = ["Input\\Port\\2\\Id\\1\\Type=2", "Input\\Port\\2\\Id\\1\\Device=keyboard", "Input\\Port\\2\\Id\\1\\DeviceName=Keyboard"] + [f"Input\\Port\\2\\Id\\1\\Controller\\2\\Key\\{k}={v}" for k, v in P2_INI.items()]
     INI.write_bytes(("\n".join(out) + "\n").encode("latin-1"))
     proc = subprocess.Popen([str(EXE)], cwd=str(EXE.parent))
     s = None

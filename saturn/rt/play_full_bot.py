@@ -5,6 +5,9 @@ loaded = False
 stage = sec = None; n = 0; ko = 0; presses = 0; inko = False; lastshot = 0; lastsave = 0; seen = False; ended = False
 stall = (0, 0); stall_t = 0; wander_to = 0; wander = []; last_press = 0; last_load = 0; endv = None; t0 = time.time(); lastend = 0; late = False; prog = None; prog_v = 0; stuck = 0; lastw = None
 _w = os.environ.get("BOT_WATCH", "").split(","); WATCH = int(_w[0], 16) if _w[0] else 0; WATCHST = int(_w[1], 16) if WATCH else 0
+WANT = int(os.environ.get("BOT_CHAR", "0"))   # select grid as tools/mame_route_bot.lua: 0 Warrior, 1 right Schaefer, 2 down Linn, 3 right and down Hunter
+BIT = (1, 2, 8, 4)
+P2 = os.environ.get("BOT_P2") == "1"; P2K = []; wrapped = False; p2_last = 0; p2_ph = 0; pick_t = 0
 POOLS = ((0x8680, 24, 0x80), (0x9280, 4, 0xc0), (0x9580, 20, 0xc0))
 LEG = ("ko", "presses", "late", "seen", "ended", "endv")   # kept across process legs joined by a save state
 def load_leg(s):
@@ -19,8 +22,43 @@ def note(s, *a):
         f.write(" ".join(str(x) for x in a) + "\n")
 def rounds(s):
     return [int.from_bytes(s.m.read(s.syms["sat_rounds"] + i * 4, 4), "big") for i in range(4)]
+def p2_keys(a, v, now):
+    """The second player on the second pad: coin, start, then nearest enemy, as bot2 in tools/mame_route_bot.lua."""
+    global p2_last, p2_ph
+    u = lambda o: int.from_bytes(a[o:o + 2], "big")
+    sg = lambda o: u(o) - 0x10000 if u(o) >= 0x8000 else u(o)
+    B = 0x480
+    if a[0x1b0]:
+        return []
+    if a[1] != 2 or a[B] == 0 or a[B + 4] == 4:
+        if now - p2_last > 0.4:
+            p2_last = now; p2_ph += 1
+            return ["p2_x"] if a[0x18c] == 0 else (["p2_start"] if p2_ph % 2 else ["p2_c"])
+        return []
+    px, py, cam = u(B + 0x10), u(B + 0x14), u(0x278)
+    best = None; bd = 1 << 30
+    for base, cnt, size in POOLS:
+        for i in range(cnt):
+            o = base - 0x8000 + i * size
+            if a[o] and sg(o + 0x40) >= 0:
+                x, y = u(o + 0x10), u(o + 0x14)
+                if cam - 32 < x < cam + 416:
+                    d = abs(x - px) + 2 * abs(y - py)
+                    if d < bd:
+                        best, bd = (x, y), d
+    k = ["p2_c"] if n % 4 == 1 else []
+    if n % 30 == 7: k.append("p2_a")
+    if not best:
+        return k + ["p2_right"]
+    dx, dy = best[0] - px, best[1] - py
+    if dy < -6: k.append("p2_up")
+    elif dy > 6: k.append("p2_down")
+    if dx > 48: k.append("p2_right")
+    elif dx < -48: k.append("p2_left")
+    elif n % 12 == 3: k.append("p2_right" if dx >= 0 else "p2_left")
+    return k
 def step(v, s):
-    global stage, sec, n, ko, presses, inko, lastshot, lastsave, seen, ended, stall, stall_t, wander_to, wander, last_press, last_load, endv, lastend, late, prog, prog_v, stuck, lastw
+    global P2K, wrapped, pick_t, stage, sec, n, ko, presses, inko, lastshot, lastsave, seen, ended, stall, stall_t, wander_to, wander, last_press, last_load, endv, lastend, late, prog, prog_v, stuck, lastw
     if not loaded:
         load_leg(s)
     n += 1
@@ -28,6 +66,21 @@ def step(v, s):
     u16 = lambda o: int.from_bytes(a[o:o + 2], "big")
     s16 = lambda o: u16(o) - 0x10000 if u16(o) >= 0x8000 else u16(o)
     st, att, mode, cred, p0, top = u16(0x1e8), a[0x1b0], a[1], a[0x18c], a[0x380], a[0x384]
+    if P2:
+        if not wrapped:
+            wrapped = True; _set = s.set; s.set = lambda names: _set(list(names) + P2K)
+        P2K = p2_keys(a, v, time.time())
+    if WANT and st == 0 and not att and mode == 2 and cred >= 1 and a[9] == 2:   # on the select screen: walk the cursor to the character (ff81cc follows it), then the normal presses confirm
+        cur = a[0x1cc] & 15
+        if cur & BIT[WANT] == 0:
+            s.set([])
+            if time.time() - pick_t > 0.7:
+                pick_t = time.time()
+                c = {1: 0, 2: 1, 8: 0, 4: 1}.get(cur & -cur, 0); r = {1: 0, 2: 0, 8: 1, 4: 1}.get(cur & -cur, 0)
+                k = ("right" if WANT & 1 else "left") if c != (WANT & 1) else (("down" if WANT & 2 else "up") if r != (WANT >> 1) else None)
+                note(s, "SELECT cur", cur, "want", BIT[WANT], "press", k, "vblank", v)
+                if k: s.pulse(k, 0.15)
+            return
     se = s.ram(0xd182, 1)[0]
     if WATCH:   # BOT_WATCH=ffa240,0a: log one object's motion fields on every change in that stage, and save slot 4 on entering it
         if st == WATCHST and stage != st:
@@ -125,6 +178,12 @@ def fatal(s, c, d):
         for r in regs[8:]:
             if 0 < r < 0x200000:
                 note(s, "at", hex(r), s.m.read(0x02400000 + (r & ~1), 32).hex())
+        for r in regs[8:15]:   # the record chain a sprite script read walks: a+0x1c, then its +4
+            if 0xff0000 <= r & 0xffffff < 0x1000000:
+                x = int.from_bytes(s.ram((r & 0xffff) + 0x1c, 4), "big")
+                note(s, "rec", hex(r), s.ram(r & 0xffff, 0xc0).hex(), "1c", hex(x), "1c.h", s.m.read(0x02400000 + (x & 0x1ffffc), 16).hex() if x < 0x200000 else s.ram(x & 0xffff, 16).hex())
+        (s.work / "fatal_ram.bin").write_bytes(s.ram(0, 0x10000))   # ROM-derived evidence, under E:/AvP/learning
+        s.log("fatal save", str(s.m.call("save_state", slot=5))[:50])
     except Exception as e:
         note(s, "no regs", e)
     s.shot("fatal"); note(s, "FATAL", hex(c), hex(d), "stage", hex(stage or 0), "rounds", rounds(s), "vblank", s.v)

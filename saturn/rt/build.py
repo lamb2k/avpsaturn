@@ -150,7 +150,9 @@ def round_files(rom, code_end, cold1_at):
                 if q - st >= MIN_RUN:
                     free.append([st * page, (q - st) * page])
                 st = None
-        free.sort(key=lambda r: -r[1])
+        # Pages no route of any stage reads take tiles first. A read the census missed then more often finds the ROM's bytes (open: fatal 0xe2 at 0xa9cc4).
+        read_ever = set(ROUNDS["files"][0]["keep_pages"])
+        free.sort(key=lambda r: (any(x in read_ever for x in range(r[0] // page, (r[0] + r[1]) // page)), -r[1]))
         p, dropped = rounds_pack.fit(raw, [set(k) for k in f["keys"]], room, free, {int(x): v for x, v in rank.get(f["name"], {}).items()})
         for first, a, take in p["segs"]:
             written.update(range(a // page, (a + (take * 128 + 2047 & -2048) + page - 1) // page))

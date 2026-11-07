@@ -9,7 +9,7 @@ typedef unsigned char u8; typedef unsigned short u16; typedef unsigned int u32;
 #define COMREG SMPC(0x1f)
 #define SR SMPC(0x61)
 #define SF SMPC(0x63)
-u32 sat_pad_raw = 0xffff;
+u32 sat_pad_raw = 0xffff, sat_pad_raw2 = 0xffff;
 static u16 in0 = 0xffff, in2 = 0xffff;
 
 #ifdef SAT_INPUT_SCRIPT
@@ -46,7 +46,7 @@ static u32 script_word(u32 v)
 }
 #endif
 
-static void map_pad(u32 p)
+static u32 pad_game(u32 p)
 {
     u32 w = 0xff;
     if (!(p & 0x8000)) w &= ~1u;
@@ -56,10 +56,17 @@ static void map_pad(u32 p)
     if (!(p & 0x0200)) w &= ~0x10u;   /* C gun, the game's button 1 */
     if (!(p & 0x0400)) w &= ~0x20u;   /* A attack, button 2 */
     if (!(p & 0x0100)) w &= ~0x40u;   /* B jump, button 3 */
-    in0 = (u16)(0xff00u | w);
-    w = 0xffff;
+    return w;
+}
+/* Second pad: the upper byte of in0, Start 0x200 and coin 0x2000 in in2, as the board's second set of ports. */
+static void map_pad(u32 p, u32 q)
+{
+    u32 w = 0xffff;
+    in0 = (u16)(pad_game(q) << 8 | pad_game(p));
     if (!(p & 0x0800)) w &= ~0x0100u;
     if (!(p & 0x0040)) w &= ~0x1000u;
+    if (!(q & 0x0800)) w &= ~0x0200u;
+    if (!(q & 0x0040)) w &= ~0x2000u;
     in2 = (u16)w;
 }
 
@@ -67,16 +74,22 @@ static void map_pad(u32 p)
 void sat_pad_tick(void)
 {
     if (!(SF & 1)) {
-        u32 st = OREG(0), id = OREG(1);
-        if (st == 0xf1 && (id >> 4) == 0) sat_pad_raw = ((u32)OREG(2) << 8) | OREG(3);
+        u32 st = OREG(0), id = OREG(1), n = 1;   /* port status, then for a pad its id and two data bytes; an empty port is the status alone */
+        if (st == 0xf1 && (id >> 4) == 0) { sat_pad_raw = ((u32)OREG(2) << 8) | OREG(3); n = 4; }
         else if (st == 0xf0) sat_pad_raw = 0xffff;
+        else n = 0;
+        if (n) {
+            st = OREG(n); id = OREG(n + 1);
+            if (st == 0xf1 && (id >> 4) == 0) sat_pad_raw2 = ((u32)OREG(n + 2) << 8) | OREG(n + 3);
+            else if (st == 0xf0) sat_pad_raw2 = 0xffff;
+        }
         if (SR & 0x20) { IREG(0) = 0x40; SF = 1; }  /* more ports queued, drop them */
         else { IREG(0) = 0x00; IREG(1) = 0x0a; IREG(2) = 0xf0; COMREG = 0x10; SF = 1; }
     }
 #ifdef SAT_INPUT_SCRIPT
-    map_pad(script_word(sat_vblanks_now()));
+    map_pad(script_word(sat_vblanks_now()), 0xffff);
 #else
-    map_pad(sat_pad_raw);
+    map_pad(sat_pad_raw, sat_pad_raw2);
 #endif
 }
 u32 sat_pad_in0(void) { return in0; }
