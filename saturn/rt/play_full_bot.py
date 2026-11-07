@@ -9,7 +9,8 @@ WANT = int(os.environ.get("BOT_CHAR", "0"))   # select grid as tools/mame_route_
 BIT = (1, 2, 8, 4)
 P2 = os.environ.get("BOT_P2") == "1"; P2K = []; wrapped = False; p2_last = 0; p2_ph = 0; pick_t = 0
 POOLS = ((0x8680, 24, 0x80), (0x9280, 4, 0xc0), (0x9580, 20, 0xc0))
-LEG = ("ko", "presses", "late", "seen", "ended", "endv")   # kept across process legs joined by a save state
+lastv = 0
+LEG = ("ko", "presses", "late", "seen", "ended", "endv", "lastv")   # kept across process legs joined by a save state
 def load_leg(s):
     global loaded
     loaded = True
@@ -61,10 +62,13 @@ def p2_keys(a, v, now):
     elif n % 12 == 3: k.append("p2_right" if dx >= 0 else "p2_left")
     return k
 def step(v, s):
-    global P2K, wrapped, pick_t, stage, sec, n, ko, presses, inko, lastshot, lastsave, seen, ended, stall, stall_t, wander_to, wander, last_press, last_load, endv, lastend, late, prog, prog_v, stuck, lastw
+    global lastv, P2K, wrapped, pick_t, stage, sec, n, ko, presses, inko, lastshot, lastsave, seen, ended, stall, stall_t, wander_to, wander, last_press, last_load, endv, lastend, late, prog, prog_v, stuck, lastw
     if not loaded:
         load_leg(s)
     n += 1
+    if v + 1000 < lastv:   # the machine restarted under the bot: not an ending, and the leg must not save over it
+        s.shot(f"reset_{v}"); note(s, "RESET vblank", v, "after", lastv, "stage was", hex(stage or 0)); s.done = True; return
+    lastv = v
     a = s.ram(0x8000, 0x2000) + s.ram(0xa000, 0x500)
     u16 = lambda o: int.from_bytes(a[o:o + 2], "big")
     s16 = lambda o: u16(o) - 0x10000 if u16(o) >= 0x8000 else u16(o)
