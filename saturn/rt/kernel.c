@@ -180,11 +180,27 @@ void f_trap5(void) { u32 r = 0xff0058u + (cpu.d[0] & 0xffff); w8(r, 2); w8(r + 1
 void f_trap6(void) { u32 r = 0xff0058u + (cpu.d[0] & 0xffff); w8(r, 4); w8(r + 1, cpu.d[1]); cpu.a[4] = 0xff0058u; }
 void f_trap8(void)
 {
-    u32 tag = r8(0xff81b3); int i;
+    /* Board 0xfde: the first live record of the eight with tag d1 only. a4, d7, d0 and a6 stay as it leaves them. */
+    u32 r = REC(8); int n = 7;
     w8(0xff81b3, 0);
-    for (i = 8; i < 16; i++) { u32 r = REC(i); if (r8(r) && r8(r + 0x16) == tag) { clear_rec(r); free_push(r); } }
+    LOWW(cpu.d[7], 7);
+    for (;;)
+    {
+        if (r8(r) && r8(r + 0x16) == (cpu.d[1] & 0xff)) { cpu.d[0] = 0; clear_rec(r); free_push(r); cpu.a[6] = r32(G_FREEP); break; }
+        r += 0x20;
+        if (--n < 0) { LOWW(cpu.d[7], 0xffff); break; }
+        LOWW(cpu.d[7], n);
+    }
+    cpu.a[4] = r;
 }
-void f_trap11(void) { } void f_trap12(void) { } void f_trap13(void) { } void f_trap14(void) { } void f_trap15(void) { }
+/* Board 0x1026: end every live record of the eight. */
+void f_trap11(void)
+{
+    u32 r = REC(8); int i;
+    for (i = 8; i < 16; i++, r += 0x20) if (r8(r)) { cpu.d[0] = 0; clear_rec(r); free_push(r); cpu.a[6] = r32(G_FREEP); }
+    cpu.a[4] = r; LOWW(cpu.d[7], 0xffff);
+}
+void f_trap12(void) { } void f_trap13(void) { } void f_trap14(void) { } void f_trap15(void) { }
 
 static void run_task(int i)
 {
@@ -201,7 +217,7 @@ static void run_task(int i)
         sat_switch(&sched_sp, sp);
     } else {
         w8(r, 8);
-        LOWW(cpu.d[1], 8);
+        LOWW(cpu.d[1], st); cpu.a[1] = r32(r + 8); cpu.a[0] = r;   /* board 0xdc8, 0xdea: lifted code can read these */
         if (!task_sp[i]) sat_fatal(0xe6, (u32)i);
         sat_switch(&sched_sp, task_sp[i]);
     }

@@ -85,8 +85,10 @@ void f_trap3(void){ tg(); u32 r=REC(cur); u32 bit=(cpu.d[0]&0xff)?0x100:0x200; u
 void f_trap4(void){ tg(); u32 r=REC(cur); w8(r,4); w32(r+8,cpu.a[7]); tg(); to_sched(); }
 void f_trap5(void){ tg(); u32 r=0xff0058u+(cpu.d[0]&0xffff); w8(r,2); w8(r+1,0); cpu.a[4]=0xff0058u; tg(); }
 void f_trap6(void){ tg(); u32 r=0xff0058u+(cpu.d[0]&0xffff); w8(r,4); w8(r+1,cpu.d[1]); cpu.a[4]=0xff0058u; tg(); }
-void f_trap8(void){ tg(); u32 tag=r8(0xff81b3); int i; w8(0xff81b3,0); for(i=8;i<16;i++){ u32 r=REC(i); if(r8(r)&&r8(r+0x16)==tag){ clear_rec(r); T[i].live=0; { u32 p=r32(G_FREEP)-4; w32(p,r); w32(G_FREEP,p); w16(G_FREEN,r16(G_FREEN)+1);} } } tg(); }
-void f_trap11(void){} void f_trap12(void){} void f_trap13(void){} void f_trap14(void){} void f_trap15(void){}
+/* Board 0xfde: the first live record of the eight with tag d1 only, then rte. a4, d7, d0 and a6 stay as it leaves them. */
+void f_trap8(void){ tg(); w8(0xff81b3,0); { u32 a4=REC(8); int n=7; cpu.d[7]=(cpu.d[7]&0xffff0000u)|7; for(;;){ if(r8(a4)&&r8(a4+0x16)==(cpu.d[1]&0xff)){ int i=8+7-n; cpu.d[0]=0; clear_rec(a4); T[i].live=0; { u32 p=r32(G_FREEP)-4; w32(p,a4); w32(G_FREEP,p); w16(G_FREEN,r16(G_FREEN)+1); cpu.a[6]=p; } break; } a4+=0x20; if(--n<0){ cpu.d[7]|=0xffff; break; } cpu.d[7]=(cpu.d[7]&0xffff0000u)|n; } cpu.a[4]=a4; } tg(); }
+/* Board 0x1026: end every live record of the eight. */
+void f_trap11(void){ tg(); { u32 a4=REC(8); int i; for(i=8;i<16;i++,a4+=0x20){ if(r8(a4)){ cpu.d[0]=0; clear_rec(a4); T[i].live=0; { u32 p=r32(G_FREEP)-4; w32(p,a4); w32(G_FREEP,p); w16(G_FREEN,r16(G_FREEN)+1); cpu.a[6]=p; } } } cpu.a[4]=a4; cpu.d[7]|=0xffff; } tg(); } void f_trap12(void){} void f_trap13(void){} void f_trap14(void){} void f_trap15(void){}
 
 /* Whole-game comparison */
 static FILE *gold; static u8 grec[8+64+0x10000+0x2000]; static u8 *gbuf=grec+64; static u8 cur_ip[64]; static int have_next;
@@ -142,23 +144,26 @@ void irq_check(u32 a){ int i; if(cs_on) cs_step(); if(pf_n){ if(curv>=pf_from&&c
 /* At the dispatcher: the IRQ was in the dispatcher or a trap body (native here), or its point was missed. */
 static int kern_pc(u32 p){ return (p>=0xd86&&p<0xdb8)||(p>=0xf00&&p<0x1188); }
 /* The IRQ landed in a trap body, native here: same state means same place. */
-static void tg(void){ if(!in_irq&&kern_pc(irq_pc)&&state_eq()&&!memcmp(RAMB+0x25c,nrec+72+0x25c,4)){ nkern++; take_irq(); } }
+/* Points of the dispatcher loop itself: only f_d86 takes them, at the record the board's a0 names (tasks after this one may change nothing visible, yet their order counts, as the free stack shows). */
+static int disp_loop(u32 p){ return p>=0xd92&&p<0xdb0; }
+static int disp_at(int i){ if(irq_pc>=0xda4&&irq_pc<0xdac) return ipr[8]==REC(i); if(irq_pc>=0xdac&&irq_pc<0xdb0) return ipr[8]==REC(i)+0x20; return !disp_loop(irq_pc); }
+static void tg(void){ if(!in_irq&&kern_pc(irq_pc)&&!disp_loop(irq_pc)&&state_eq()&&!memcmp(RAMB+0x25c,nrec+72+0x25c,4)){ nkern++; take_irq(); } }
 static void start_irq(void){ if(irq_pc>=0xdb8&&irq_pc<0xe0e&&!(irq_pc>=0xddc&&irq_pc<0xde6)&&state_eq()){ nkern++; take_irq(); } } /* between marking the task running and its rte */
 static void disp_irq(void){ if(irq_pc==0xffffffffu) return; if(kern_pc(irq_pc)){ nkern++; take_irq(); return; } }
 static void idle_irq(void){ if(irq_pc==0xffffffffu) return; if(kern_pc(irq_pc)) nkern++; else { nmiss++; if(nmiss<20){ printf("missed irq at %x vblank %ld\n",irq_pc,curv); fflush(stdout);} } take_irq(); }
 
 static void run_task(int i){ u32 r=REC(i); u32 st=r8(r); cur=i; w32(G_CUR,r);
     if(st==0xc){ w8(r,8); start_irq(); getcontext(&T[i].uc); if(!T[i].stack) T[i].stack=malloc(STK); T[i].uc.uc_stack.ss_sp=T[i].stack; T[i].uc.uc_stack.ss_size=STK; T[i].uc.uc_link=0; cpu.a[7]=r32(r+0xc); cpu.a[4]=r32(r+0xc); cpu.a[1]=r32(r+4); cpu.a[0]=r; cpu.d[1]=(cpu.d[1]&0xffff0000u)|0xc; cpu.a[5]=0xff8000; T[i].live=1; makecontext(&T[i].uc,task_tramp,0); swapcontext(&sched,&T[i].uc); }
-    else { w8(r,8); start_irq(); cpu.d[1]=(cpu.d[1]&0xffff0000u)|8; swapcontext(&sched,&T[i].uc); } }
+    else { w8(r,8); start_irq(); /* board 0xdc8, 0xdea: d1 keeps the state it read, a1 the saved stack; lifted code can read these */ cpu.d[1]=(cpu.d[1]&0xffff0000u)|st; cpu.a[1]=r32(r+8); cpu.a[0]=r; swapcontext(&sched,&T[i].uc); } }
 #define GAME_TASK 4
 extern void f_11ec(void);
 /* Dispatcher 0xd86 as the board runs it. Checks run with the IRQ masked; it opens at 0xda4 after each task. */
 void f_d86(void){ getcontext(&sched); peek_ip();
   for(;;){ int i, ran=0; w8(G_VFLAG,0);
-    for(i=0;i<TASKS;i++){ if(r8(G_VFLAG)) break;
+    for(i=0;i<TASKS;i++){ if(irq_pc>=0xd92&&irq_pc<0xda4&&ipr[8]==REC(i)&&state_eq()&&!memcmp(RAMB+0x25c,nrec+72+0x25c,4)){ nkern++; take_irq(); } if(r8(G_VFLAG)) break;
         u32 st=r8(REC(i)); cpu.a[0]=REC(i); cpu.d[0]=(cpu.d[0]&0xffff0000u)|(15-i); cpu.d[1]=(cpu.d[1]&0xffffff00u)|st; if(st>=4){ run_task(i); if(i!=6) ran=1; if(irq_pc>=0xddc&&irq_pc<0xde6&&state_eq()){ nkern++; take_irq(); } cpu.a[0]=REC(i); cpu.d[0]=(cpu.d[0]&0xffff0000u)|(15-i); } cur=-1;
         
-        if(state_eq()&&!memcmp(RAMB+0x25c,nrec+72+0x25c,4)&&(kern_pc(irq_pc)||(irq_pc>=0xdb8&&irq_pc<0xe0e))){ nkern++; take_irq(); } }
+        if(state_eq()&&!memcmp(RAMB+0x25c,nrec+72+0x25c,4)&&(kern_pc(irq_pc)||(irq_pc>=0xdb8&&irq_pc<0xe0e))&&disp_at(i)){ nkern++; take_irq(); } }
     if(i==TASKS){ cpu.a[0]=REC(15)+0x20; cpu.d[0]|=0xffff; f_11ec(); }
     guard: { static long spin; static long last; if(curv==last){ if(++spin>20000){ idle_irq(); spin=0; } } else { last=curv; spin=0; } }
   } }
