@@ -80,11 +80,12 @@ for i, f in enumerate(files):
     real = (aw / "pack.bin").stat().st_size
     add = []
     for c in (c for c in want if c not in keep):
-        if real + size[c] <= SCSP_ROOM:
-            add.append(c); real += size[c]
+        if real + 16 + size[c] <= SCSP_ROOM:   # 16: its table row
+            add.append(c); real += 16 + size[c]
     if add:
         keep += add
         p = run(sorted(set(keep) | set(music)))
+    assert (aw / "pack.bin").stat().st_size <= SCSP_ROOM
     dropped[f["name"]] = [hex(c) for c in want if c not in keep]
     ranks[f["name"]] = {hex(c): use.get(c, 0) for c in want if c not in keep}
     shutil.copy(aw / "pack.bin", W / "audio" / f"r{i:02d}.bin")

@@ -7,6 +7,7 @@ local p = cpu.spaces["program"]
 local in0 = manager.machine.ioport.ports[":IN0"].fields
 local in2 = manager.machine.ioport.ports[":IN2"].fields
 local F = {in2["Coin 1"], in2["1 Player Start"], in0["P1 Left"], in0["P1 Right"], in0["P1 Button 1"], in0["P1 Button 2"], in0["P1 Button 3"], in0["P1 Up"], in0["P1 Down"]}
+for _, n in ipairs{{2, "Coin 2"}, {2, "2 Players Start"}, {0, "P2 Left"}, {0, "P2 Right"}, {0, "P2 Button 1"}, {0, "P2 Button 2"}, {0, "P2 Button 3"}, {0, "P2 Up"}, {0, "P2 Down"}} do F[#F + 1] = (n[1] == 2 and in2 or in0)[n[2]] end   -- route word bits 9 to 17
 local steps, plast = {}, 0
 for l in io.lines(os.getenv("BOT_PREFIX")) do
     local a, b = l:match("^(%d+) (%d+)")
@@ -53,6 +54,40 @@ local function save_route()
     o:write(string.format("last %d", frame), string.char(10))
     for _, e in ipairs(route) do o:write(e[1], " ", e[2], string.char(10)) end
     o:close()
+end
+-- BOT_P2=1: a second player on the second set of ports; the result is ORed in at bit 9.
+local p2 = os.getenv("BOT_P2") == "1"
+local function bot2()
+    local B = 0xff8480
+    local pz, top, cred, ph = r8(B), r8(B + 4), r8(0xff818c), frame % 40
+    if r8(0xff81b0) ~= 0 then return 0 end
+    if r8(0xff8001) ~= 2 or pz == 0 or top == 4 then
+        if cred == 0 then if ph >= 8 and ph < 11 then return 1 end return 0 end
+        if ph >= 12 and ph < 15 then return 2 end
+        if ph >= 30 and ph < 33 then return 16 end
+        return 0
+    end
+    local px, py, cam = r16(B + 0x10), r16(B + 0x14), r16(0xff8278)
+    local best, bd, bx, by = nil, 1 << 30, 0, 0
+    for _, q in ipairs(POOLS) do for i = 0, q[2] - 1 do
+        local a = q[1] + i * q[3]
+        if r8(a) ~= 0 and s16(a + 0x40) >= 0 then
+            local x, y = r16(a + 0x10), r16(a + 0x14)
+            if x > cam - 32 and x < cam + 416 then
+                local d = math.abs(x - px) + 2 * math.abs(y - py)
+                if d < bd then best, bd, bx, by = a, d, x, y end
+            end
+        end
+    end end
+    local w = ((frame + 5) % 16 < 3) and 16 or 0
+    if (frame + 90) % 180 < 8 then w = w | 32 end
+    if not best then return w | 8 end
+    local dx, dy = bx - px, by - py
+    if dy < -6 then w = w | 128 elseif dy > 6 then w = w | 256 end
+    if dx > 48 then w = w | 8 elseif dx < -48 then w = w | 4
+    elseif dx >= 0 then if frame % 32 < 2 then w = w | 8 end
+    else if frame % 32 < 2 then w = w | 4 end end
+    return w
 end
 local function bot()
     local pw = pick()
@@ -111,7 +146,7 @@ end
 learn_bot = emu.add_machine_frame_notifier(function()
     frame = frame + 1
     local w
-    if frame <= plast then w = steps[frame] else w = bot() end
+    if frame <= plast then w = steps[frame] else w = bot(); if p2 then w = w | (bot2() << 9) end end
     if w and w ~= prevw then
         route[#route + 1] = {frame, w}; prevw = w
         for i, f in ipairs(F) do

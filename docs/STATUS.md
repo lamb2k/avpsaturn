@@ -98,3 +98,22 @@ Sprite drops: 0e 600 to 0, 24 225 to 174. Room came from ROM stretches of one pa
 Sound drops are unchanged and still go largest first. Stage 10 drops clips the real route uses often, 0x4d and 0x118 at 232 uses each.
 Other characters: single game each, health written, tools/rounds_walk.py with ROUNDS_ONCE. Stills show the character's own name and portrait in play in all 19 stages and the ending. No key, ROM page or sound falls outside the stage files; keys dropped in stage 24: Dutch 9, Linn 45, Hunter 120. No unassisted run and no host check for them.
 Unproven: any boot of this image, the kernel change at run time, other characters' OP read ranges, 2 players, load times.
+
+## Other characters and two players, 2026-11-07 (lane chars; HOST against MAME 0.289; image built, not booted; hardware UNRUN)
+
+Saved routes, real ports only, no RAM writes (tools/mame_route_bot.lua with BOT_CHAR, BOT_P2): tools/routes/full_c1.txt, full_c2.txt, full_c3.txt, co2p_to_1e.txt. Goldens LEARN_DELTA=1.
+| Route | Dumps clean, plain | Dumps clean, Saturn form | KOs |
+| --- | --- | --- | --- |
+| Schaefer (golden_c1), to attract | 272171 of 272171 | 272171 of 272171 | 94 |
+| Linn (golden_c2), to attract | 369051 of 369051 | 369051 of 369051 | 57 |
+| Hunter (golden_c3), to attract | 333669 of 333669 | 333669 of 333669 | 116 |
+| Warrior (golden_full), to attract | 317908 of 317908 | 317908 of 317908 | 115 |
+| Warrior + Schaefer (golden_2p), to stage 1e only | 329918 of 329918 | 329918 of 329918 | |
+golden_r1s plain: clean 15618 of 15618, before the last audio-only change. Missed IRQ 0 on all. Saturn form means per-stage ROM garbage and OP reads through the store. The Saturn-form lift was checked with the keep lists and store of image 97790a2e; the final rebuild changed only sound sets. The two-player bot stuck in stage 1c or 1e on both tries, so stages 20 to 26 have no two-player data.
+Kernel fixes, host and saturn/rt/kernel.c, the Saturn side not run: trap 11 was empty (ends all eight records; Schaefer and Linn reach it at game over); trap 8 now ends only the first live record with tag d1, as the board does; a resumed task gets d1 and a1 as the board leaves them. Host IRQ placement at dispatcher points now follows the golden's a0, since free-stack order depends on it. One root added, 30e0.
+Sound drops go by use on the real routes (tools/rounds_config.py, WORK/sound_rank.json). Warrior census alone: stage 10 keeps 0x4d, 0x118, 0x4e, 0x119, 0x4f and 0x11a; only 2 route uses drop in the whole game. All five routes in one image: lost plays per route 143 to 307; worst stages 24 (64 clips, 53 used on a route), 20 (55, 40), 10 (67, 48), 1c (54, 48). All 516 KB of SCSP RAM is in use on those stages.
+Sprite index: sprite words are now key << 16 | index. The 16K cap is gone; stages are limited by room.
+Sprite keys dropped, one image for all routes, by rank: 0e 2681, 1c 158, 1e 733, 24 2561. Without two-player data: 0e 1915, 1e 363, 24 2561. Keys on a real route that draw blank: Warrior 0e 35, 24 336; Schaefer 24 1200; Linn 0e 296, 24 148; Hunter 0e 884, 24 62; two players 0e 779. Stage 0e and 24 are real gaps: room is the limit, about 2.2 MB of tiles against about 2.5 MB wanted.
+Store 237,828 bytes of 256 KB. High RAM free 19.6 KB, low RAM 4.1 KB. Image E:/AvP/learning/lane-chars/work/sat.iso, 51.6 MB, sha256 97790a2e2a6ae6b86962900559c7ede49ec1111cec648e5d90e29dc6ff044747.
+Two players, against the one-player union: 5983 new sprite keys summed over stages, new sound commands in nearly every stage (0x32x, the second player's clips), peak objects up to 132 from 96 (stage 18). Player 3 has no run; its cost is not measured. Second player was Schaefer only.
+Unproven: any boot of this image, kernel fixes at run time on Saturn, any second player but Schaefer, three players, two players past stage 1e, other branches and endings, cycle timing inside native kernel code.
