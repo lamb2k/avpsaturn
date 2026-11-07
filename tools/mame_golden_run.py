@@ -1,9 +1,13 @@
 #!/usr/bin/env python
 """Golden from a saved input route, without the retained route harness.
 usage: mame_golden_run.py NAME ROUTE [LAST]    env LEARN_SAVE=frame,frame LEARN_DELTA=1 (changed words only)   Output: E:/AvP/learning/mame/NAME. Refuses to overwrite; checks free commit and E: space."""
-import os, pathlib, shutil, subprocess, sys
+import hashlib, os, pathlib, shutil, subprocess, sys
 OLD = pathlib.Path("C:/Game Dev/BrooklynBangoutX/AvPSaturnCapabilityTest-playable-loop-pivot")
 HERE = pathlib.Path(__file__).resolve().parent
+BASE = OLD / ".deps/mame/full_route_nvram_baseline"
+ee = (BASE / "eeprom").read_bytes()
+if len(ee) != 128 or not hashlib.sha256(ee).hexdigest().startswith("35720ff0"):
+    sys.exit(f"baseline eeprom bad ({len(ee)} bytes): not starting; good copy is 128 bytes, sha256 35720ff0")
 name, route = sys.argv[1], pathlib.Path(sys.argv[2]).resolve()
 last = sys.argv[3] if len(sys.argv) > 3 else None
 free = int(subprocess.check_output(["powershell", "-NoProfile", "-c", "(Get-CimInstance Win32_OperatingSystem).FreeVirtualMemory"]).strip()) / (1 << 20)
@@ -13,7 +17,7 @@ if shutil.disk_usage("E:/").free < 4 << 30:
     sys.exit("E: under 4 GB")
 out = pathlib.Path("E:/AvP/learning/mame") / name
 out.mkdir(parents=True)
-shutil.copytree(OLD / ".deps/mame/full_route_nvram_baseline", out / "nvram/avspu")
+shutil.copytree(BASE, out / "nvram/avspu", copy_function=shutil.copyfile)  # no copy of the read-only flag: MAME saves here
 (out / "cfg").mkdir()
 env = dict(os.environ, AVSP_ROUTE=str(route).replace("\\", "/"), AVSP_LEARN_PROBE_OUT=str(out / "probe.tsv").replace("\\", "/"), LEARN_MAXIRQ=os.environ.get("LEARN_MAXIRQ", "30000"))
 if last:
