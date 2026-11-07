@@ -79,18 +79,25 @@ def assemble(p, pack_addr):
     return regions
 
 
-def fit(raw, keys, main_room, free):
-    """Fits a stage, dropping the highest keys of the sprite section only if it must. Returns (plan, tiles dropped)."""
+def fit(raw, keys, main_room, free, rank=None):
+    """Fits a stage. If it must drop sprite keys, drops the fewest, least used first (rank: key -> use, higher kept; unranked keys count 0, then highest key first).
+    Returns (plan, keys dropped as a list)."""
     k = [set(s) for s in keys]
-    dropped = 0
-    while True:
-        p = plan(raw, k, main_room, free)
-        if p:
-            return p, dropped
-        n = max(64, len(k[0]) // 100)
-        for x in sorted(k[0])[-n:]:
-            k[0].discard(x)
-        dropped += n
+    p = plan(raw, k, main_room, free)
+    if p:
+        return p, []
+    rank = rank or {}
+    order = sorted(k[0], key=lambda x: (rank.get(x, 0), -x))
+    lo, hi = 0, len(order)   # lo does not fit, hi does
+    best = None
+    while hi - lo > 1:
+        m = (lo + hi) // 2
+        q = plan(raw, [k[0] - set(order[:m]), k[1], k[2], k[3]], main_room, free)
+        if q:
+            hi, best = m, q
+        else:
+            lo = m
+    return best or plan(raw, [set(), k[1], k[2], k[3]], main_room, free), order[:hi]
 
 
 def write_file(out, audio, restores, regions):

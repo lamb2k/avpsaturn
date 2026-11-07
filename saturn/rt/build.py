@@ -112,18 +112,22 @@ def code_size(o):
     return sum(int(r[2], 16) for r in rows if len(r) > 3 and r[1].startswith((".text", ".rodata", ".data")))
 
 
-def round_files(rom, code_end):
+MIN_RUN = int(os.environ.get("ROUND_MIN_RUN", "1"))   # pages; a stretch costs 8 bytes of table, about 1 KB of a page is 8 sprites
+
+
+def round_files(rom, code_end, cold1_at):
     """One RNN.BIN per stage. Sprites past the cart's room go to ROM stretches that stage does not read; whatever any file overwrites, each stage that reads it gets back."""
     sys.path.insert(0, str(REPO / "tools"))
     import rounds_pack
     raw = pathlib.Path(os.environ.get("GFX_BIN", "E:/AvP/learning/lane-satgfx/gfx.bin")).read_bytes()
-    room = COLD1_AT - CART["SAT_PACK"]
+    room = cold1_at - CART["SAT_PACK"]
     page = ROUNDS["page"]
     code = bytearray(0x200000 // page)   # pages holding lifted cold code never take tiles
     for at, end in code_end:
         for q in range((at - CART["ROMB"]) // page, (end - CART["ROMB"] + page - 1) // page):
             code[q] = 1
     plans, written = [], set()
+    rank = json.loads((WORK / "key_rank.json").read_text()) if (WORK / "key_rank.json").exists() else {}   # tools/rounds_rank.py
     for f in ROUNDS["files"]:
         keep = set(f["keep_pages"])
         free, st = [], None
@@ -132,11 +136,11 @@ def round_files(rom, code_end):
             if ok and st is None:
                 st = q
             if not ok and st is not None:
-                if q - st >= 4:
+                if q - st >= MIN_RUN:
                     free.append([st * page, (q - st) * page])
                 st = None
         free.sort(key=lambda r: -r[1])
-        p, dropped = rounds_pack.fit(raw, [set(k) for k in f["keys"]], room, free)
+        p, dropped = rounds_pack.fit(raw, [set(k) for k in f["keys"]], room, free, {int(x): v for x, v in rank.get(f["name"], {}).items()})
         for first, a, take in p["segs"]:
             written.update(range(a // page, (a + take * 128 + page - 1) // page))
         plans.append((p, dropped))
@@ -153,8 +157,8 @@ def round_files(rom, code_end):
             st = [q, q + 1] if st is None else [st[0], q + 1]
         audio = (WORK / "audio" / f"r{i:02d}.bin").read_bytes()
         n = rounds_pack.write_file(ISO / f"R{i:02d}.BIN", audio, restores, rounds_pack.assemble(p, CART["SAT_PACK"]))
-        stats[f["name"]] = dict(file=n, sprites_in_main=p["inmain"], sprites_spill=sum(x[2] for x in p["segs"]), spill_runs=len(p["segs"]), restore=sum(len(d) for _, d in restores), restore_runs=len(restores), dropped_keys=dropped, audio=len(audio))
-        print(f["name"], stats[f["name"]], flush=True)
+        stats[f["name"]] = dict(file=n, sprites_in_main=p["inmain"], sprites_spill=sum(x[2] for x in p["segs"]), spill_runs=len(p["segs"]), restore=sum(len(d) for _, d in restores), restore_runs=len(restores), dropped_keys=len(dropped), dropped=dropped, audio=len(audio))
+        print(f["name"], {k: v for k, v in stats[f["name"]].items() if k != "dropped"}, flush=True)
     (WORK / "round_stats.json").write_text(json.dumps(stats, indent=0))
 
 
@@ -218,6 +222,8 @@ def main():
     cold2 = [o for p in placed for o in p]
     cold3 = best[3]
     cold1 = [o for o in cold if o not in cold2 and o not in cold3]
+    # The cart tail holds only what cold code needs; the rest is sprite room.
+    cold1_at = CART_END - ((sum(sizes[o] for o in cold1) + 0x1fff) & ~0xfff)
     lw = [o for o in rest if o not in cold]
     usedl = sum(sizes[o] for o in lw)
     print("placement", {"hw": len(hw), "lw": [o.stem for o in lw], "cold1": [(o.stem, sizes[o], heat.get(o.stem)) for o in cold1], "stretches": [[o.stem for o in p] for p in placed]})
@@ -286,7 +292,7 @@ SECTIONS {{
         at = st[0] - CART["ROMB"]
         rom[at:at + len(d)] = d
     (ISO / "ROM.BIN").write_bytes(rom)
-    round_files(rom, [(st[0], syms[f"_sat_st{i}_end"]) for i, st in enumerate(STRETCHES)])
+    round_files(rom, [(st[0], syms[f"_sat_st{i}_end"]) for i, st in enumerate(STRETCHES)], cold1_at)
     (WORK / "rom_final.bin").write_bytes(rom)
     b = OBJ / "boot.o"
     sh([GCC, "-m2", "-mb", "-O2", "-w", "-fno-builtin", "-I", SGL / "INC", f"-DCOLD1_ADDR={cold1_at:#x}u", "-c", HERE / "boot.c", "-o", b])

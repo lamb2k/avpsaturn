@@ -23,10 +23,11 @@ volatile unsigned long sat_readout[3];   /* FRT ticks, game and drawing, for the
 #define O(a) ((a) - 0xff0000u)
 #define r8(a) RAM8(O(a))
 #define r16(a) RAM16(O(a))
-#define r32(a) w2_rd32(RAMB + O(a))
+/* The 68000 takes an IRQ between longs, never inside one (seen at 0xf66 in the task record clear). A vblank here can land anywhere, so a long on a 4-byte boundary is one bus write; the split form is only for the boundaries the SH-2 cannot do. */
+#define r32(a) RAM32(O(a))
 #define w8(a, v) (RAM8(O(a)) = (u8)(v))
 #define w16(a, v) (RAM16(O(a)) = (u16)(v))
-#define w32(a, v) w2_wr32(RAMB + O(a), (v))
+#define w32(a, v) RAMW32(O(a), (v))
 #define cpu (*R)
 
 extern void sat_switch(void **save_sp, void *load_sp);
@@ -144,7 +145,16 @@ static void task_end(void)
     if (cur < 0 || !sched_sp) sat_fatal(0xe5, (u32)cur);
     sat_switch(&dead, sched_sp);
 }
-static void free_push(u32 r) { u32 p = r32(G_FREEP) - 4; w32(p, r); w32(G_FREEP, p); w16(G_FREEN, r16(G_FREEN) + 1); }
+/* addq.w and subq.w on the free count are one instruction on the board; the vblank body may start tasks (not checked), so it stays one step here. Pointer steps stay interruptible, as on the board. */
+static void free_count_add(int d)
+{
+    u32 sr;
+    __asm__ volatile ("stc sr,%0" : "=r"(sr));
+    __asm__ volatile ("ldc %0,sr" : : "r"(sr | 0xf0));
+    w16(G_FREEN, r16(G_FREEN) + d);
+    __asm__ volatile ("ldc %0,sr" : : "r"(sr));
+}
+static void free_push(u32 r) { u32 p = r32(G_FREEP) - 4; w32(p, r); w32(G_FREEP, p); free_count_add(1); }
 #define LOWW(reg, v) ((reg) = ((reg) & 0xffff0000u) | ((v) & 0xffff))
 
 void f_trap0(void) { u32 r = 0xff0058u + (cpu.d[0] & 0xffff); cpu.a[1] = 0xff0058u; if (r8(r) == 0) { w16(r, 0xc00); w32(r + 4, cpu.a[0]); w16(r + 0x10, cpu.d[1]); w16(r + 0x12, cpu.d[2]); } }
@@ -153,7 +163,7 @@ void f_trap7(void)
 {
     if (r16(G_FREEN)) {
         u32 p = r32(G_FREEP), r = r32(p);
-        cpu.a[6] = p + 4; cpu.a[1] = r; w32(G_FREEP, p + 4); w16(G_FREEN, r16(G_FREEN) - 1);
+        cpu.a[6] = p + 4; cpu.a[1] = r; w32(G_FREEP, p + 4); free_count_add(-1);
         w16(r, 0xc00); w32(r + 4, cpu.a[0]); w16(r + 0x10, cpu.d[0]); w16(r + 0x12, cpu.d[1]);
     }
 }

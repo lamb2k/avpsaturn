@@ -12,6 +12,8 @@ local rd = function(a) return prog:read_u16(a) end
 local rb = function(a) return prog:read_u8(a) end
 local R = {}
 local cur = 0
+local once = os.getenv("ROUNDS_ONCE") ~= nil   -- one character's game only: stops when the stage word leaves the ending, before attract and a new default game
+local seen26, stage_at = false, nil
 local function bucket(s)
     local b = R[s]
     if not b then b = {keys = {{}, {}, {}, {}}, reads = {}, oreads = {}, snd = {}, frames = 0}; R[s] = b end
@@ -110,12 +112,18 @@ rw_f = emu.add_machine_frame_notifier(function()
         cur = b; B = bucket(b)
         log:write(string.format("STAGE %x frame %d sec %d\n", b, frame, sec))
         dump()
+        if once then
+            stage_at = frame + 400
+            if b == 0x26 then seen26 = true end
+            if seen26 and b == 0 then machine:exit(); return end
+        end
     end
     local st = string.format("st %x sec %d cr %d att %d mode %d g09 %d p0 %d", stage, sec, cred, att, rb(0xff8001), rb(0xff8009), p0)
     if st ~= last or frame % 600 == 0 then
         last = st
         log:write(string.format("%d\t%s\tx %d cam %d hp %d f3 %d\n", frame, st, x, rd(0xffee1a), rd(0xff83c0), rb(0xff81f3))); log:flush()
     end
+    if stage_at == frame then screen:snapshot(string.format("stage%02x_%06d.png", cur & 0xff, frame)) end
     if frame % shotn == 0 then screen:snapshot(string.format("w%06d.png", frame)) end
     if frame % 3000 == 0 then dump() end
     if frame >= maxf then dump(); machine:exit(); return end
