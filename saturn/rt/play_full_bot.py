@@ -2,7 +2,7 @@
 # Writes rounds_proof.txt in WORK: one line per stage, with vblank, wall time, KOs and the loader's counters.
 import random, time
 stage = sec = None; n = 0; ko = 0; presses = 0; inko = False; lastshot = 0; lastsave = 0; seen = False; ended = False
-stall = (0, 0); stall_t = 0; wander_to = 0; wander = []; last_press = 0; last_load = 0; endv = None; t0 = time.time()
+stall = (0, 0); stall_t = 0; wander_to = 0; wander = []; last_press = 0; last_load = 0; endv = None; t0 = time.time(); lastend = 0; late = False
 POOLS = ((0x8680, 24, 0x80), (0x9280, 4, 0xc0), (0x9580, 20, 0xc0))
 def note(s, *a):
     s.log(*a)
@@ -11,7 +11,7 @@ def note(s, *a):
 def rounds(s):
     return [int.from_bytes(s.m.read(s.syms["sat_rounds"] + i * 4, 4), "big") for i in range(4)]
 def step(v, s):
-    global stage, sec, n, ko, presses, inko, lastshot, lastsave, seen, ended, stall, stall_t, wander_to, wander, last_press, last_load, endv
+    global stage, sec, n, ko, presses, inko, lastshot, lastsave, seen, ended, stall, stall_t, wander_to, wander, last_press, last_load, endv, lastend, late
     n += 1
     a = s.ram(0x8000, 0x2000) + s.ram(0xa000, 0x500)
     u16 = lambda o: int.from_bytes(a[o:o + 2], "big")
@@ -36,7 +36,10 @@ def step(v, s):
         ko += 1
     inko = top == 4
     now = time.time()
-    if st >= 0x10 and att and seen:
+    if st >= 0x26 and v - lastend >= 240:   # the ending and credits: dense stills, they only count if seen
+        lastend = v; s.shot(f"end_{v:07d}")
+    late = late or st >= 0x10
+    if late and att and seen:
         if not ended:
             ended = True; endv = v; note(s, "BACK TO ATTRACT vblank", v, "stage", hex(st), "ko", ko, "wall", round(now - t0)); s.shot(f"attract_{v}")
         s.set([])
