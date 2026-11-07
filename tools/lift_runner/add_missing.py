@@ -1,7 +1,8 @@
 #!/usr/bin/env python
 """Add referenced-but-unlifted even ROM addresses to roots.txt. Odd values come from data decoded as code and are left out."""
 import re
-s = open("E:/AvP/learning/lift/run/dispatch.inc").read()
+import os
+s = open(os.environ.get("LEARN_OUT", "E:/AvP/learning") + "/lift/run/dispatch.inc").read()
 m = {int(x, 16) for x in re.findall(r"MISSING ([0-9a-f]+)", s)}
 p = str(__import__("pathlib").Path(__file__).parents[1] / "roots.txt")
 have = open(p).read().split()

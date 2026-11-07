@@ -14,6 +14,28 @@ local function dump(base, n)
     for i = 0, n - 4, 4 do t[#t + 1] = string.pack(">I4", prog:read_u32(base + i)) end
     out:write(table.concat(t))
 end
+-- LEARN_DELTA=1: every IRQ still has its record, but only the 32-bit words that changed since the last record are written:
+-- u32 run count, then per run u16 first word, u16 words, data. Word index counts work RAM from 0, object RAM from 0x4000. First record is all changed.
+local delta = os.getenv("LEARN_DELTA") == "1"
+local prevw = {}
+local RUNS_NW = 0x4800
+function delta_dump()
+    local cur = {}
+    for i = 0, 0x3fff do cur[i] = prog:read_u32(0xff0000 + i * 4) end
+    for i = 0, 0x7ff do cur[0x4000 + i] = prog:read_u32(0x708000 + i * 4) end
+    local t, nruns, i = {}, 0, 0
+    while i < RUNS_NW do
+        if cur[i] ~= prevw[i] then
+            local b = i
+            while i < RUNS_NW and cur[i] ~= prevw[i] and i - b < 0xffff do i = i + 1 end
+            t[#t + 1] = string.pack(">I2I2", b, i - b)
+            for k = b, i - 1 do t[#t + 1] = string.pack(">I4", cur[k]) end
+            nruns = nruns + 1
+        else i = i + 1 end
+    end
+    out:write(string.pack(">I4", nruns)); out:write(table.concat(t))
+    prevw = cur
+end
 learn_g1 = ops:install_read_tap(0xe0e, 0xe0f, "learn_golden", function()
     -- The tap also fires on prefetch past the rte at 0xe0c. At a real IRQ entry PC still reads as the vector, 0x68, and the frame is at SP.
     if cpu.state["PC"].value ~= 0x68 then return end
@@ -25,8 +47,10 @@ learn_g1 = ops:install_read_tap(0xe0e, 0xe0f, "learn_golden", function()
         for i = 0, 7 do rr[#rr + 1] = cpu.state["D" .. i].value end
         for i = 0, 6 do rr[#rr + 1] = cpu.state["A" .. i].value end
         out:write(string.pack(">" .. string.rep("I4", 16), table.unpack(rr)))
+        if delta then delta_dump() else
         dump(0xff0000, 0x10000)
         dump(0x708000, 0x2000)
+        end
         out:flush()
     end
     irq = irq + 1

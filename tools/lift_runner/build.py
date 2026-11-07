@@ -1,9 +1,10 @@
 #!/usr/bin/env python
 """Lift all functions and build the host runner under E:/AvP/learning/lift/run. Output is ROM-derived and stays on this PC."""
-import json, pathlib, re, subprocess, sys
+import json, os, pathlib, re, subprocess, sys
 T = pathlib.Path(__file__).resolve().parents[1]
-H = pathlib.Path("E:/AvP/learning/lift/run"); H.mkdir(parents=True, exist_ok=True)
-d = json.load(open("E:/AvP/learning/cfg.json"))
+OUT = pathlib.Path(os.environ.get("LEARN_OUT", "E:/AvP/learning"))
+H = OUT / "lift/run"; H.mkdir(parents=True, exist_ok=True)
+d = json.load(open(OUT / "cfg.json"))
 funcs = sorted(a for a in d["funcs"] if a != 0xd86)
 groups = {}
 for a in funcs:
@@ -24,7 +25,8 @@ inc = ["typedef void (*VF)(void);"] + [f"extern void f_{a:x}(void);" for a in fu
 inc += [f'void f_{a:x}(void){{puts("MISSING {a:x}");fflush(stdout);exit(3);}}' for a in miss]
 (H/"dispatch.inc").write_text("\n".join(inc)+"\n")
 print("missing", len(miss))
-w = "/mnt/e/AvP/learning/lift/run"
+_w = H.as_posix()
+w = "/mnt/" + _w[0].lower() + _w[2:]
 _h = (T / "lift_runner/host_kernel.c").as_posix()
 main = "/mnt/" + _h[0].lower() + _h[2:]
 cmd = f"cd {w} && for n in {' '.join(map(str,range(len(chunks))))}; do echo c$n; done | xargs -P3 -I@ sh -c 'test -f @.o || gcc -DHOST -DPREEMPT -w -O1 -g -fno-strict-aliasing -c @/lifted_mem.c -o @.o' && gcc -w -O1 -g -rdynamic -I. '{main}' {' '.join(f'c{n}.o' for n in range(len(chunks)))} -o lift_runner && echo built"
