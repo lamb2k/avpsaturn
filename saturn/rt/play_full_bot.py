@@ -118,6 +118,15 @@ def step(v, s):
     s.set(keys)
 def fatal(s, c, d):
     s.done = True   # never let end() save a faulted state over the leg's slot
+    try:   # the 68000 registers and which ROM pages differ, for the fault's cause
+        c = s.m.read(s.syms[os.environ.get("BOT_CPU", "sat_cpu")], 64)
+        regs = [int.from_bytes(c[i:i + 4], "big") for i in range(0, 64, 4)]
+        note(s, "REGS d", [hex(x) for x in regs[:8]], "a", [hex(x) for x in regs[8:]])
+        for r in regs[8:]:
+            if 0 < r < 0x200000:
+                note(s, "at", hex(r), s.m.read(0x02400000 + (r & ~1), 32).hex())
+    except Exception as e:
+        note(s, "no regs", e)
     s.shot("fatal"); note(s, "FATAL", hex(c), hex(d), "stage", hex(stage or 0), "rounds", rounds(s), "vblank", s.v)
 def end(s):
     if not s.done:   # time limit: save for the next leg
