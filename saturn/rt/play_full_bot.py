@@ -2,7 +2,7 @@
 # Writes rounds_proof.txt in WORK: one line per stage, with vblank, wall time, KOs and the loader's counters.
 import random, time
 stage = sec = None; n = 0; ko = 0; presses = 0; inko = False; lastshot = 0; lastsave = 0; seen = False; ended = False
-stall = (0, 0); stall_t = 0; wander_to = 0; wander = []; last_press = 0; last_load = 0; endv = None; t0 = time.time(); lastend = 0; late = False
+stall = (0, 0); stall_t = 0; wander_to = 0; wander = []; last_press = 0; last_load = 0; endv = None; t0 = time.time(); lastend = 0; late = False; prog = None; prog_v = 0; stuck = 0
 POOLS = ((0x8680, 24, 0x80), (0x9280, 4, 0xc0), (0x9580, 20, 0xc0))
 def note(s, *a):
     s.log(*a)
@@ -11,7 +11,7 @@ def note(s, *a):
 def rounds(s):
     return [int.from_bytes(s.m.read(s.syms["sat_rounds"] + i * 4, 4), "big") for i in range(4)]
 def step(v, s):
-    global stage, sec, n, ko, presses, inko, lastshot, lastsave, seen, ended, stall, stall_t, wander_to, wander, last_press, last_load, endv, lastend, late
+    global stage, sec, n, ko, presses, inko, lastshot, lastsave, seen, ended, stall, stall_t, wander_to, wander, last_press, last_load, endv, lastend, late, prog, prog_v, stuck
     n += 1
     a = s.ram(0x8000, 0x2000) + s.ram(0xa000, 0x500)
     u16 = lambda o: int.from_bytes(a[o:o + 2], "big")
@@ -54,6 +54,17 @@ def step(v, s):
         return
     seen = True
     px, py, cam = u16(0x390), u16(0x394), u16(0x278)
+    # Stuck section: stage, section and camera all unchanged. Log what is alive, and leave the fight for a while on a rotating heading.
+    mark = (st, se, cam)
+    if mark != prog:
+        prog, prog_v = mark, v
+    elif v - prog_v >= 3000:
+        prog_v = v; stuck += 1
+        live = [(hex(b + i * z), hex(a[b - 0x8000 + i * z]), s16(b - 0x8000 + i * z + 0x40)) for b, c, z in POOLS for i in range(c) if a[b - 0x8000 + i * z]]
+        s.shot(f"stuck{stuck:03d}_st{st:02x}_{v}")
+        note(s, "STUCK", stuck, "stage", hex(st), "section", se, "vblank", v, "cam", hex(cam), "x", hex(px), "y", hex(py), "ko", ko, "live", live[:12])
+        wander = [("right",), ("left",), ("right", "up"), ("right", "down"), ("left", "up"), ("left", "down")][stuck % 6]
+        wander = list(wander); wander_to = now + 6
     fire = ["c"] if n % 4 == 0 else []
     if now < wander_to:
         s.set(wander + fire); return
