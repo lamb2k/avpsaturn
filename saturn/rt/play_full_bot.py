@@ -1,9 +1,17 @@
 # Whole-game closed loop for play_yaba.py: the choices of tools/mame_route_bot.lua (nearest live enemy, line up, fire, wander when stalled), on the real pad. RAM is only read.
 # Writes rounds_proof.txt in WORK: one line per stage, with vblank, wall time, KOs and the loader's counters.
-import random, time
+import json, os, random, time
+loaded = False
 stage = sec = None; n = 0; ko = 0; presses = 0; inko = False; lastshot = 0; lastsave = 0; seen = False; ended = False
 stall = (0, 0); stall_t = 0; wander_to = 0; wander = []; last_press = 0; last_load = 0; endv = None; t0 = time.time(); lastend = 0; late = False; prog = None; prog_v = 0; stuck = 0
 POOLS = ((0x8680, 24, 0x80), (0x9280, 4, 0xc0), (0x9580, 20, 0xc0))
+LEG = ("ko", "presses", "late", "seen", "ended", "endv")   # kept across process legs joined by a save state
+def load_leg(s):
+    global loaded
+    loaded = True
+    f = s.work / "leg.json"
+    if os.environ.get("YABA_LOAD") and f.exists():
+        globals().update(json.loads(f.read_text()))
 def note(s, *a):
     s.log(*a)
     with open(s.work / "rounds_proof.txt", "a") as f:
@@ -12,6 +20,8 @@ def rounds(s):
     return [int.from_bytes(s.m.read(s.syms["sat_rounds"] + i * 4, 4), "big") for i in range(4)]
 def step(v, s):
     global stage, sec, n, ko, presses, inko, lastshot, lastsave, seen, ended, stall, stall_t, wander_to, wander, last_press, last_load, endv, lastend, late, prog, prog_v, stuck
+    if not loaded:
+        load_leg(s)
     n += 1
     a = s.ram(0x8000, 0x2000) + s.ram(0xa000, 0x500)
     u16 = lambda o: int.from_bytes(a[o:o + 2], "big")
@@ -96,6 +106,13 @@ def step(v, s):
     elif n % 12 == 0: keys.append("right" if dx >= 0 else "left")
     s.set(keys)
 def fatal(s, c, d):
+    s.done = True   # never let end() save a faulted state over the leg's slot
     s.shot("fatal"); note(s, "FATAL", hex(c), hex(d), "stage", hex(stage or 0), "rounds", rounds(s), "vblank", s.v)
 def end(s):
+    if not s.done:   # time limit: save for the next leg
+        s.set([])
+        s.log("leg save", str(s.m.call("save_state", slot=3))[:50])
+        (s.work / "leg.json").write_text(json.dumps({k: globals()[k] for k in LEG}))
+    else:
+        (s.work / "DONE").write_text("stopped by bot")
     note(s, "END vblank", s.v, "stage", hex(stage or 0), "ko", ko, "presses", presses, "rounds", rounds(s), "wall", round(time.time() - t0))
