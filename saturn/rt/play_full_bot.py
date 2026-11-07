@@ -17,6 +17,9 @@ def load_leg(s):
     if os.environ.get("YABA_LOAD") and f.exists():
         globals().update(json.loads(f.read_text()))
 def note(s, *a):
+    _r = os.environ.get("AVP_SCSP_RAW")
+    if _r and os.path.exists(_r):   # where this line falls in the sound capture
+        a += ("raw", os.path.basename(_r), os.path.getsize(_r))
     s.log(*a)
     with open(s.work / "rounds_proof.txt", "a") as f:
         f.write(" ".join(str(x) for x in a) + "\n")
