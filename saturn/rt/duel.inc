@@ -4,6 +4,7 @@
    Runs on the master between task walks, once per game tick, interrupts masked: a vblank body uses the same 68000 stack and registers. */
 extern void f_1d03e(void);
 #define PL(i) (0xff8380u + (u32)(i) * 0x100u)
+#define DUEL_LINE 8   /* pixels of depth two fighters may differ by */
 #define DUEL_PLAYERS 2   /* pairs are a loop, so player 3 stays open */
 volatile u32 sat_duel_on;
 struct { u32 hits[2], last_health[2]; } sat_duel_stats;
@@ -11,7 +12,8 @@ static u8 duel_tick_seen;
 static void duel_pair(int a, int t)
 {
     u32 pa = PL(a), pt = PL(t);
-    if (!r8(pa) || !r8(pt) || r8(pa + 0x9e) || r16(pa + 0x18) != r16(pt + 0x18)) return;
+    if (!r8(pa) || !r8(pt) || r8(pa + 0x9e)) return;
+    { int dz = (int)r16(pa + 0x18) - (int)r16(pt + 0x18); if (dz < -DUEL_LINE || dz > DUEL_LINE) return; }   /* the arcade pass wants the exact line; two players cannot hold that */
     cpu.a[6] = pa; cpu.a[1] = pt;
     w8(pa + 8, 1);
     f_1d03e();
