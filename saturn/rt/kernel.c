@@ -177,7 +177,7 @@ static const HomeText HOME_COIN_TEXT[] = {
     { 2, 38, 8 }, { 2, 39, 9 }, { 2, 40, 10 }, { 2, 41, 8 }, { 2, 42, 9 }, { 2, 43, 10 },
     { 2, 44, 8 }, { 2, 45, 9 }, { 2, 46, 10 },
 };
-#define HOME_OS __attribute__((optimize("Os"), section(".data.homefit")))   /* low work RAM (.lw): the high work RAM image is full */
+#define HOME_OS __attribute__((optimize("Os"), section(".lwcode")))   /* low work RAM (.lw): the high work RAM image is full */
 static HOME_OS u32 home_text(u32 table, u32 idx)
 {
     u32 i;
