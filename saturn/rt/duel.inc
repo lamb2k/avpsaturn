@@ -61,7 +61,7 @@ static void duel_tick(void)
         for (t = 0; t < DUEL_PLAYERS; t++)
             if (a != t) duel_pair(a, t);
 #ifdef SAT_DUEL_MENU
-    if (sat_smash.set) duel_shots();
+    if (sat_smash.set) { duel_aim(); duel_shots(); }
 #endif
     cpu = save;
     __asm__ volatile ("ldc %0,sr" : : "r"(sr));

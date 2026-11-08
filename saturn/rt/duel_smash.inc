@@ -274,49 +274,76 @@ static void smash_aliens(int lo, int hi)
 
 /* Weapons: player shots and thrown items live in the tag 4 pool (0xff8680, 24 slots of 0x80; live list of words ending at 0xfff072, count ee7d),
    which the arcade tests only against enemies (0x1cbcc). The duel also runs the game's own hit test 0x1cf54 for each live shot against the
-   player who did not fire it. The owner is found by a probe of the shot's record for a pointer to a player (sat_shot_probe, logged by the bot). */
-#define SHOT_LIST 0xfff072u
+   player who did not fire it. sat_shot_probe counts the shot records seen per owner (logged by the bot). */
 struct { u32 seen; u8 off[2][8]; u8 n[2]; } sat_shot_probe;
 u32 sat_shot_hits;
-static int shot_owner_off = -1;
+u16 sat_shot_diag[8];
+/* The owner is the word at +0x26: the gun's allocation writer 0x024164 stores the player's low address word there (READ).
+   A child shot (class 4, spawned by the class 0 parent) is followed one step to its parent. */
 static int shot_owner(u32 s)
 {
-    int o, i;
-    if (shot_owner_off >= 0) { u32 v = r32(s + (u32)shot_owner_off) & 0xffffffu; return v == PL(0) ? 0 : v == PL(1) ? 1 : -1; }
-    /* probe: offsets holding a player address, kept per player; an offset seen for both players' shots is the owner field */
-    sat_shot_probe.seen++;
-    for (o = 0; o < 0x80; o += 2) {
-        u32 v = r32(s + (u32)o) & 0xffffffu;
-        for (i = 0; i < 2; i++) if (v == PL(i) && sat_shot_probe.n[i] < 8) {
-            int k, dup = 0;
-            for (k = 0; k < sat_shot_probe.n[i]; k++) if (sat_shot_probe.off[i][k] == o) dup = 1;
-            if (!dup) sat_shot_probe.off[i][sat_shot_probe.n[i]++] = (u8)o;
-        }
-    }
-    {
-        int a, b;
-        for (a = 0; a < sat_shot_probe.n[0]; a++) for (b = 0; b < sat_shot_probe.n[1]; b++)
-            if (sat_shot_probe.off[0][a] == sat_shot_probe.off[1][b]) shot_owner_off = sat_shot_probe.off[0][a];
+    int d;
+    for (d = 0; d < 2; d++) {
+        u16 w = r16(s + 0x26);
+        if (w == (u16)PL(0)) return 0;
+        if (w == (u16)PL(1)) return 1;
+        if (w < 0x8680u || w >= 0x9280u) return -1;
+        s = 0xff0000u | w;
     }
     return -1;
 }
+/* Aim: the gun's entry (player action 0x0c, 0x024060) picks its angle +0x8a from the nearest tag 12 enemy in front within 16 of depth
+   (0x0241f0, READ); with none it fires at the default angle (index 15), which flies past a fighter standing in its path (s29.log: the
+   nearest shot passed at 168 height and 95 depth off). In the duel the other fighter is also a target: when it is in front, within the
+   same depth band, the angle is set from its distance with the game's own table (0x024266)
+   in the tick after entry, before the shot is allocated (+0x89 count, 0x024114). */
+u32 sat_shot_aimed;
+static u8 aim_done[2];
+static void duel_aim(void)
+{
+    int i;
+    for (i = 0; i < 2; i++) {
+        u32 p = PL(i), q = PL(i ^ 1);
+        int dx, dz, k, idx, ang;
+        if (r8(p + 6) != 0x0c || r8(p + 7) != 2) { aim_done[i] = 0; continue; }
+        if (aim_done[i]) continue;
+        aim_done[i] = 1;
+        if (!r8(q) || !smash_can_hit(i ^ 1)) continue;
+        dz = (s16)(r16(q + 0x18) - r16(p + 0x18)) + 16;
+        if (dz < 0 || dz >= 32) continue;
+        dx = (s16)(r16(q + 0x10) - r16(p + 0x10));
+        if (r8(p + 0x0f) ? dx < 0 : dx >= 0) continue;   /* behind */
+        if (dx < 0) dx = -dx;
+        for (idx = 15, k = 15; k >= 0; k--) if (dx >= (int)RD16(0x24266u + (u32)k * 2)) { idx = k; break; }
+        ang = 0x20 - idx;
+        if (!r8(p + 0x0f)) ang = -ang & 0x3f;
+        w8(p + 0x8a, (u8)ang);
+        sat_shot_aimed++;
+    }
+}
 static void duel_shots(void)
 {
-    int n = r8(0xffee7d), k;
-    u32 l = SHOT_LIST;
-    for (k = 0; k < n && k < 24; k++) {
-        u32 s, t, pt;
+    int k;
+    for (k = 0; k < 24; k++) {   /* every live tag 4 slot: the live word list's order is not needed */
+        u32 s = 0xff8680u + (u32)k * 0x80u, t, pt;
         int own;
         u16 hp0;
-        l -= 2;
-        s = 0xff0000u | r16(l);
+        if (!r8(s)) continue;
         own = shot_owner(s);
         if (own < 0) continue;
+        sat_shot_probe.seen++; sat_shot_probe.n[own]++;
         t = (u32)(own ^ 1); pt = PL(t);
         if (!r8(pt) || !smash_can_hit((int)t)) continue;
         hp0 = r16(pt + 0x40);
+        {   /* diagnostic (logged by the bot): calls, nearest x gap with its y and z gaps, hit-test results */
+            int dx = (s16)(r16(s + 0x10) - r16(pt + 0x10)), dy = (s16)(r16(s + 0x14) - r16(pt + 0x14)), dz = (s16)(r16(s + 0x18) - r16(pt + 0x18));
+            if (dx < 0) dx = -dx;
+            sat_shot_diag[0]++;
+            if (!sat_shot_diag[1] || dx < sat_shot_diag[1]) { sat_shot_diag[1] = (u16)dx; sat_shot_diag[2] = (u16)dy; sat_shot_diag[3] = (u16)dz; sat_shot_diag[5] = r8(pt + 0x70) | (r8(s + 0x67) << 8); }
+        }
         cpu.a[6] = s; cpu.a[1] = pt;
         f_1cf54();
+        if (cpu.d[0]) sat_shot_diag[4]++;
         if ((s16)r16(pt + 0x40) < (s16)hp0) {
             sat_shot_hits++;
             smash_hit(own, (int)t, (int)hp0 - (int)(s16)r16(pt + 0x40));

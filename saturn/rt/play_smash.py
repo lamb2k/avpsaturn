@@ -69,7 +69,24 @@ def step(v,s):
     elif ph<80:
         k=["right" if px<qx else "left"] if ph<56 or abs(qx-px)>110 else []
         if ph>=56 and ph%6<2: k.append("c")
-    if 50<=n%200<80 and n%3==0: s.log("T4",[s.ram(0x8680+i*0x80,4).hex()+"@"+str(int.from_bytes(s.ram(0x8690+i*0x80,2),"big"))+","+str(int.from_bytes(s.ram(0x8694+i*0x80,2),"big")) for i in range(24) if s.ram(0x8680+i*0x80,1)!=bytes(1)],"T8",[s.ram(0x9280+i*0x80,4).hex()+"@"+str(int.from_bytes(s.ram(0x9290+i*0x80,2),"big")) for i in range(6) if s.ram(0x9280+i*0x80,1)!=bytes(1)],"T12",[s.ram(0x9580+i*0xc0,4).hex()+"@"+str(int.from_bytes(s.ram(0x9590+i*0xc0,2),"big")) for i in range(20) if s.ram(0x9580+i*0xc0,1)!=bytes(1) and s.ram(0x9582+i*0xc0,1)!=b""],"pl",px,py,qx,qy,"face",s.ram(0x8380,0x80).hex()[:64],"ee7d",s.ram(0xee7d,1)[0],"shots",s.word("sat_shot_hits"),"probe",s.word("sat_shot_probe"))
+    if 50<=ph<80 or os.environ.get("GUNLOG"):
+        r=a[0x380:0x480]; s.log("GUN act",r[4:8].hex(),"8b",r[0x8b],"8c",r[0x8c],"d2",r[0xd2],"ee",hex(r[0xee]),"shots",s.word("sat_shot_hits"),"seen",s.word("sat_shot_probe"),"aimed",s.word("sat_shot_aimed"),"diag",[s.word("sat_shot_diag",i*2,2) for i in range(6)],"facing",a[0x38f],a[0x48f],"pct",s.word("sat_smash",0,2),s.word("sat_smash",2,2),"x",u16(0x390),u16(0x490))
+        P=s.ram(0x8680,0xc00)
+        for i in range(24):
+            q=P[i*0x80:i*0x80+0x80]
+            if q[0] and int.from_bytes(q[0x26:0x28],"big") in (0x8380,0x8480): s.log("SREC",hex(0x8680+i*0x80),q[:8].hex(),"x",int.from_bytes(q[0x10:0x12],"big"),"y",int.from_bytes(q[0x14:0x16],"big"),"z",int.from_bytes(q[0x18:0x1a],"big"),"f",q[0xf],"1c",q[0x1c:0x20].hex())
+    sh=s.word("sat_shot_hits")
+    if sh!=getattr(s,"shn",0):
+        s.shn=sh; s.log("SHOT HIT",sh,"pct",s.word("sat_smash",0,2),s.word("sat_smash",2,2))
+        if not getattr(s,"shotstill",0): s.shotstill=1; time.sleep(.1); s.shot("shot_hit")
     if ph>=80 and abs(qx-px)<70 and n%8>=5 and abs(qy-py)<=8: k.append("p2a")
+    if os.environ.get("GUNLOG"):   # P1 walks off, turns to face P2, then fires every other step; P2 stands
+        # P2 walks to 110 px on the side P1 faces (+0x0f: 0 fires toward lower x, from the shot records), then P1 fires every other step
+        s.gn=getattr(s,"gn",0)+1; g=s.gn; tx=px-110 if a[0x38f]==0 else px+110
+        k=["p2left"] if qx>tx+12 else ["p2right"] if qx<tx-12 else []
+        if qy<py-3: k.append("p2up")
+        elif qy>py+3: k.append("p2down")
+        if abs(qx-tx)<=12 and g%2: k.append("c")
+        if g==20 and not getattr(s,"gs",0): s.gs=1; s.shot("gun_fire")
     s.set(k)
     if now-t0>float(os.environ.get('FIGHT',300)): s.shot("duel_end"); s.stop()
