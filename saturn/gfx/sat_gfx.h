@@ -20,6 +20,10 @@
 #ifndef SAT_GFX_FIT
 #define SAT_GFX_FIT 1   /* scaled: the owner's default, 2026-11-07 */
 #endif
+/* SAT_GFX_RANKFIX (default 1): redraw every layer after a tile pack swap, and the sprite level over a lower-valued upper layer (score table). 0 builds as before. */
+#ifndef SAT_GFX_RANKFIX
+#define SAT_GFX_RANKFIX 1
+#endif
 #if SAT_GFX_FIT == 3 /* test build: A and B on one image, switched at run time for a same-frame comparison */
 extern volatile int sat_fit_scale;
 #define SAT_FIT_ON (*(volatile int *)((unsigned long)&sat_fit_scale | 0x20000000UL))
