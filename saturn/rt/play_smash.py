@@ -64,7 +64,12 @@ def step(v,s):
     if px<qx-60: k.append("right")
     elif px>qx+60: k.append("left")
     if n%8<3 and abs(qx-px)<70: k.append("a")
-    if abs(qx-px)>=90 and n%10<2: k.append("c"); k.append("p2c")   # C is the gun (pad.c), B is jump
-    if abs(qx-px)<70 and n%8>=5 and abs(qy-py)<=8: k.append("p2a")
+    ph=n%200   # gun phase: P1 backs off for 50 steps while P2 holds, then P1 faces P2 and fires (C is the gun, pad.c; B is jump)
+    if ph<50: k=["left" if px<qx else "right"]
+    elif ph<80:
+        k=["right" if px<qx else "left"] if ph<56 or abs(qx-px)>110 else []
+        if ph>=56 and ph%6<2: k.append("c")
+    if 50<=n%200<80 and n%3==0: s.log("T4",[s.ram(0x8680+i*0x80,4).hex()+"@"+str(int.from_bytes(s.ram(0x8690+i*0x80,2),"big"))+","+str(int.from_bytes(s.ram(0x8694+i*0x80,2),"big")) for i in range(24) if s.ram(0x8680+i*0x80,1)!=bytes(1)],"T8",[s.ram(0x9280+i*0x80,4).hex()+"@"+str(int.from_bytes(s.ram(0x9290+i*0x80,2),"big")) for i in range(6) if s.ram(0x9280+i*0x80,1)!=bytes(1)],"T12",[s.ram(0x9580+i*0xc0,4).hex()+"@"+str(int.from_bytes(s.ram(0x9590+i*0xc0,2),"big")) for i in range(20) if s.ram(0x9580+i*0xc0,1)!=bytes(1) and s.ram(0x9582+i*0xc0,1)!=b""],"pl",px,py,qx,qy,"face",s.ram(0x8380,0x80).hex()[:64],"ee7d",s.ram(0xee7d,1)[0],"shots",s.word("sat_shot_hits"),"probe",s.word("sat_shot_probe"))
+    if ph>=80 and abs(qx-px)<70 and n%8>=5 and abs(qy-py)<=8: k.append("p2a")
     s.set(k)
-    if now-t0>300: s.shot("duel_end"); s.stop()
+    if now-t0>float(os.environ.get('FIGHT',300)): s.shot("duel_end"); s.stop()
