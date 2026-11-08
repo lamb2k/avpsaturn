@@ -7,4 +7,4 @@ PY="${MSHVSF_PY:-$HOME/.cache/codex-runtimes/codex-primary-runtime/dependencies/
 out=${5:?}; rm -rf "${out:?}"; mkdir -p "$out/snap/wv"
 export WV_ROOT="$(cygpath -m "$out")" WV_SEQ="$(cygpath -m "$1")" WV_LAST=$2 WV_FROM=$3 WV_SNAP=$4
 cd "$R"
-"$PY" tools/run_mshvsf_mame.py -- mshvsf -video none -sound none -nothrottle -skip_gameinfo -snapshot_directory "$(cygpath -m "$out/snap")" -autoboot_script "$(cygpath -m "$H/mame_wolverine.lua")" 2>&1 | tail -3
+"$PY" tools/run_mshvsf_mame.py -- mshvsf -video none -sound none -nothrottle -skip_gameinfo ${WV_MAMEARGS:-} -snapshot_directory "$(cygpath -m "$out/snap")" -autoboot_script "$(cygpath -m "$H/mame_wolverine.lua")" 2>&1 | tail -3

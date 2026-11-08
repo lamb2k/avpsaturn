@@ -11,6 +11,19 @@ local from, snap = tonumber(os.getenv("WV_FROM")), tonumber(os.getenv("WV_SNAP")
 -- WV_POKE "frame:addr:value,...": byte writes before a frame (used once to end a round for the win pose).
 local pokes = {}
 for f, a, v in (os.getenv("WV_POKE") or ""):gmatch("(%d+):(%x+):(%x+)") do pokes[#pokes + 1] = {tonumber(f), tonumber(a, 16), tonumber(v, 16)} end
+-- WV_TRACE "from:to:file": MAME debugger execution trace of the main CPU for that frame window (needs -debug; the interface census).
+local trace = nil
+do local a, b, f = (os.getenv("WV_TRACE") or ""):match("^(%d+):(%d+):(.+)$"); if a then trace = {tonumber(a), tonumber(b), f} end end
+-- WV_CHTAP: log which entry of MSHvSF's per-character table (0xc38a, read at 0xc220 with a6 = player) each player reads, once per player.
+if os.getenv("WV_CHTAP") then
+  local cpu = machine.devices[":maincpu"]
+  local seen = {}
+  chtap = prog:install_read_tap(0xc38a, 0xc47f, "wv_ch", function(o, d, m)
+    local a6 = cpu.state["A6"].value
+    local k = string.format("%x:%x", a6, o)
+    if not seen[k] then seen[k] = true; io.open(root .. "/chtab.txt", "a"):write(string.format("CHTAB a6=%06x off=%x id52=%04x d=%04x x=%04x", a6, o - 0xc38a, prog:read_u16(a6 + 0x52), d, prog:read_u16(a6 + 0x10)) .. string.char(10)) end
+  end)
+end
 local edges = {}
 for line in io.lines(os.getenv("WV_SEQ")) do
   local f, name, v = line:match("^(%d+)%s+(.-)%s+(%d)$")
@@ -64,6 +77,14 @@ sub = emu.add_machine_frame_notifier(function()
       if fl then fl:set_value(e[3]) else print("nofield " .. e[2]) end
     end
   end
+  if os.getenv("WV_CHTAP") and (frame == 1995 or frame == 2061) then
+    io.open(root .. "/chtab.txt", "a"):write((function() local t = {"F" .. frame} for b = 0xff3800, 0xff3c00, 0x400 do local h = {} for i = 0, 0x1ff do h[#h + 1] = string.format("%02x", prog:read_u8(b + i)) end t[#t + 1] = table.concat(h) end return table.concat(t, " ") end)() .. string.char(10))
+  end
+  if os.getenv("WV_DBGCMD") and frame == tonumber(os.getenv("WV_DBGAT") or "0") then
+    for c in os.getenv("WV_DBGCMD"):gmatch("[^;]+") do machine.debugger:command(c) end
+  end
+  if trace and frame == trace[1] then machine.debugger:command("trace " .. (trace[3]:find(",") and trace[3] or trace[3] .. ",maincpu,noloop")) end
+  if trace and frame == trace[2] then machine.debugger:command("trace off") end
   for _, p in ipairs(pokes) do if p[1] == frame then prog:write_u8(p[2], p[3]) end end
   if snap > 0 and frame % snap == 0 then screen:snapshot(string.format("wv/f_%05d.png", frame)) end
   if frame >= from then dump() end

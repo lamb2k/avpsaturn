@@ -13,7 +13,8 @@ extern u8 RAMB[];
 #define PL(i) (0xff8380u + (u32)(i) * 0x100u)
 /* Calibrated in Yaba on stage 02 (probe_sch.py, lane avp-wolverine): see WV_* below. */
 /* Yaba probe, stage 02, Schaefer as player 1 (probe_sch.py): block byte +1 is the character (mask bit 1 << it, Schaefer 1); his sprites are
-   palette row 1, big blocks centred about 72 px right of (+0x10 x - ff8278 camera) in object coordinates; feet at about 523 - (+0x14). */
+   palette row 1, big blocks centred about 72 px right of (+0x10 x - ff8278 camera) in object coordinates; feet at about 523 - (+0x14) with the camera's depth word ff827c at rest (0x100); ff827c follows the player's depth and scrolls
+   his sprites by (ff827c - 0x100) (probe_cam.py, 11-08: before that fix Wolverine stood up to 48 px below Schaefer's body at the front of the stage). */
 #define WV_CHAR_OFF 1
 #define WV_CHAR_SCH 1
 #define WV_SCH_PAL 1        /* Schaefer's sprite palette row: his sprites leave the list, Wolverine's first row takes it */
@@ -24,6 +25,9 @@ static const u8 wv_row1[0x28] = {10,22,21,22,20,22,18,22,22,22,8,22,23,22,22,22,
 #define WV_OX 72
 #define WV_OY 523
 
+/* Debug (lane avp-wolverine, anchor check): per player, the box of Schaefer's removed sprites and of Wolverine's drawn tiles in object
+   coordinates (x0, y0, x1, y1), plus his state and pose. Read by the Yaba probe; never written to the screen. */
+s16 wv_dbg[2][12];
 static u8 step_[2], left_[2], face_[2], moving_[2], cur_[2] = {255, 255}, chain_[2], lastc_[2], held_[2];
 
 /* Schaefer's player block state +4 +5 +6, measured under MAME (tools/wolverine/schaefer_states.lua, 11-08):
@@ -65,11 +69,38 @@ static int is_wolverine(int i)
     return R8(PL(i)) != 0 && R8(PL(i) + WV_CHAR_OFF) == WV_CHAR_SCH;
 }
 
+/* Names: the game prints its character names from text in its ROM image, which the Saturn keeps in cart RAM (ROMB). While Wolverine is
+   chosen, Schaefer's HUD name (16-byte field at 0xaedca) and his select-screen name (0xac699) read WOLVERINE; turned off, the bytes go back.
+   Both are on pages the game reads, which stage files never take for tiles. */
+#define ROMB ((volatile u8 *)0x02400000u)
+static const struct { u32 at; u8 n; const char *wv; } wv_names[2] = {
+    { 0xaedca, 16, "WOLVERINE       " },
+    { 0xac699, 14, "  WOLVERINE   " },
+};
+static u8 name_saved[2][16], names_on;
+static void names(int on)
+{
+    int i, k;
+    if (on == names_on) {
+        if (!on) return;
+        for (i = 0; i < 2; i++) for (k = 0; k < wv_names[i].n; k++) if (ROMB[wv_names[i].at + k] != (u8)wv_names[i].wv[k]) goto write;   /* a stage load restored the page */
+        return;
+    }
+write:
+    for (i = 0; i < 2; i++)
+        for (k = 0; k < wv_names[i].n; k++) {
+            if (on && !names_on) name_saved[i][k] = ROMB[wv_names[i].at + k];
+            ROMB[wv_names[i].at + k] = on ? (u8)wv_names[i].wv[k] : name_saved[i][k];
+        }
+    names_on = (u8)on;
+}
+
 /* obj: the frame's object list (8 bytes each), count entries; returns the new count. pal0: sprite palette page (32 rows of 16 words). */
 int sat_guest_touched;   /* set when this frame's palette page was changed */
 int sat_guest_objects(u8 *obj, int count, int max, u8 *pal0)
 {
     int i, k, n, j, any = 0;
+    names(sat_guest_sel & 1);
     if (!(sat_guest_sel & 1)) return count;
     for (i = 0; i < 2; i++) {
         u16 x, cam;
@@ -92,13 +123,23 @@ int sat_guest_objects(u8 *obj, int count, int max, u8 *pal0)
         st = wv_steps[wv_move_start[move] + step_[i]].pose;
         cam = R16(0xff8278);
         sx = (int)x - (int)cam + WV_OX;
-        sy = WV_OY - (s16)R16(PL(i) + 0x14);
+        sy = WV_OY - 0x100 - (s16)R16(PL(i) + 0x14) + (s16)R16(0xff827c);   /* the camera's depth (ff827c, 0x100 at rest) scrolls him as it does Schaefer */
+        wv_dbg[i][0] = wv_dbg[i][1] = wv_dbg[i][4] = wv_dbg[i][5] = 9999; wv_dbg[i][2] = wv_dbg[i][3] = wv_dbg[i][6] = wv_dbg[i][7] = -9999;
+        wv_dbg[i][8] = (s16)sx; wv_dbg[i][9] = (s16)sy; wv_dbg[i][10] = (s16)(R8(PL(i) + 6) | R8(PL(i) + 5) << 8); wv_dbg[i][11] = (s16)(st | face_[i] << 12);
         /* Schaefer's own sprites near him go */
         for (j = k = 0; j < count; j++) {
             u8 *e = obj + j * 8;
             int ex = ((e[0] << 8 | e[1]) & 0x3ff), pal = e[7] & 31;
             if (ex >= 768) ex -= 1024;
-            if (pal == WV_SCH_PAL && ex > sx - 140 && ex < sx + 140) continue;
+            if (pal == WV_SCH_PAL && ex > sx - 140 && ex < sx + 140) {
+                int ey = ((e[2] << 8 | e[3]) & 0x3ff), w = ((e[6] >> 0) & 15) + 1, h = ((e[6] >> 4) & 15) + 1;
+                if (ey >= 768) ey -= 1024;
+                if (ex < wv_dbg[i][0]) wv_dbg[i][0] = (s16)ex;
+                if (ey < wv_dbg[i][1]) wv_dbg[i][1] = (s16)ey;
+                if (ex + 16 * w > wv_dbg[i][2]) wv_dbg[i][2] = (s16)(ex + 16 * w);
+                if (ey + 16 * h > wv_dbg[i][3]) wv_dbg[i][3] = (s16)(ey + 16 * h);
+                continue;
+            }
             if (k != j) { int b; for (b = 0; b < 8; b++) obj[k * 8 + b] = e[b]; }
             k++;
         }
@@ -111,6 +152,10 @@ int sat_guest_objects(u8 *obj, int count, int max, u8 *pal0)
             const WvTile *t = &wv_tiles[wv_pose_start[st] + k];
             int hf = (t->flags & 1) ^ face_[i], dx = face_[i] ? -t->dx - 16 : t->dx;
             u8 *o = obj + k * 8;
+            if (sx + dx < wv_dbg[i][4]) wv_dbg[i][4] = (s16)(sx + dx);
+            if (sy + t->dy < wv_dbg[i][5]) wv_dbg[i][5] = (s16)(sy + t->dy);
+            if (sx + dx + 16 > wv_dbg[i][6]) wv_dbg[i][6] = (s16)(sx + dx + 16);
+            if (sy + t->dy + 16 > wv_dbg[i][7]) wv_dbg[i][7] = (s16)(sy + t->dy + 16);
             put16(o, (u16)((sx + dx) & 0x3ff));
             put16(o + 2, (u16)((sy + t->dy) & 0x3ff));
             put16(o + 4, t->key);
