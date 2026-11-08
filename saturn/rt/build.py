@@ -197,11 +197,14 @@ def refresh_restores(rom):
     for f in ISO.glob("R[0-9][0-9][0-9].BIN"):
         with open(f, "r+b") as h:
             head = h.read(2048)
-            at, changed = 2048, False
+            at, changed, packs = 2048, False, 0
             for i in range(struct.unpack_from(">I", head)[0]):
                 dest, size = struct.unpack_from(">II", head, 4 + i * 8)
                 if dest == 1:
                     continue
+                packs += dest == CART["SAT_PACK"]
+                if packs >= 2:   # the tile pack and its sprite spills into ROM stretches follow: those are tiles, not ROM restores (rounds_pack.write_file order)
+                    break
                 if CART["ROMB"] <= dest < CART["ROMB"] + len(rom):
                     h.seek(at)
                     want = bytes(rom[dest - CART["ROMB"]:dest - CART["ROMB"] + size])
