@@ -548,7 +548,7 @@ static const u8 home_pal[64] __attribute__((aligned(2))) = {
 #include "home_pal.inc"
 };
 #endif
-#define HUD_ROWS_TOP 4
+#define HUD_ROWS_TOP 5   /* rows 0..4: names, health bars, the enemy label and its bar (row 4 was centre-cropped, 16 px off the rest) */
 #define HUD_ROWS_BOT 26
 static void draw_scroll1(u16 sx, u16 sy)
 {

@@ -64,14 +64,16 @@ static void smash_hud(void)
     extern char sat_home_text[28][44];
     if (sat_home_hold) return;
     if (sat_home_mode != 1) { sat_home_clear(); sat_home_mode = 1; }
+    /* The game's health bars are held full and its enemy bars repeat the opponent: rows 2 to 4 are a clear panel in the duel. */
+    { int r, c; for (r = 2; r < 5; r++) for (c = 0; c < 44; c++) sat_home_text[r][c] = 1; }
     for (i = 0; i < 2; i++) {
         char b[12]; int n = 0, p = sat_smash.pct[i], s;
         if (sat_smash.out[i]) { b[n++] = '-'; b[n++] = '-'; b[n++] = '-'; }
         else { if (p >= 100) b[n++] = (char)('0' + p / 100); if (p >= 10) b[n++] = (char)('0' + p / 10 % 10); b[n++] = (char)('0' + p % 10); }
-        b[n++] = '%';
-        while (n < 5) b[n++] = 0;
+        b[n++] = '%'; b[n++] = 0;
         if (!sat_duel_opt.minutes || sat_smash.sudden) for (s = 0; s < sat_duel_opt.stocks; s++) b[n++] = s < sat_smash.stocks[i] ? '*' : 0;
-        for (s = 0; s < n; s++) sat_home_text[5][(i ? 33 : 3) + s] = b[s] ? (char)(b[s] | ((sat_smash.inv[i] & 8) ? 0x80 : 0)) : 0;   /* blanks leave the game's own picture */
+        /* centred under the player's name: the name and bar block spans screen x 24..167 (P1) and 200..343 (P2), centres at columns 12 and 34 */
+        { int c0 = (i ? 34 : 12) - n / 2; for (s = 0; s < n; s++) sat_home_text[3][c0 + s] = b[s] ? (char)(b[s] | ((sat_smash.inv[i] & 8) ? 0x80 : 0)) : 1; }
     }
 }
 
@@ -142,9 +144,18 @@ static int smash_tick(int lo, int hi)
 
 /* Stage spawns off: the stage's spawn table task (record 0xff1812, state byte +4: 0 init, 2 walk, 4 done) is parked at done once it has set up,
    so only the duel's own aliens come in. Bodies the table already placed are not touched. */
+/* Door and hive aliens: they allocate from the tag 12 pool (0xff9580, alloc 0x1769e fails when the free count ee80 is 0). The duel holds
+   that count at 0 and keeps the real one aside, so the doors' own allocation fails, as on a full pool; releases still push their slot
+   back and are moved aside too. The count is put back when the duel ends. Bodies already out stay. */
+static u8 door_stash, door_held;
 static void smash_no_stage_spawns(void)
 {
     if (r8(0xff1816) == 2) w8(0xff1816, 4);
+    { u8 n = r8(0xffee80); if (n) { door_stash = (u8)(door_stash + n); w8(0xffee80, 0); } door_held = 1; }
+}
+static void smash_doors_back(void)
+{
+    if (door_held) { w8(0xffee80, (u8)(r8(0xffee80) + door_stash)); door_stash = 0; door_held = 0; }
 }
 
 /* Random aliens: the game's own alien rows from stage 02's spawn table (ROM 0x15c108 on, tag 4 rows), spawned through the table's own
