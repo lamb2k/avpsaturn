@@ -87,6 +87,14 @@ def step(v,s):
                 else: i+=1
             s.log("ROMDIFF",len(ch)," ".join("%x+%d:%s<-%s"%c for c in ch[:24]))
         s.romt=now
+    if os.environ.get("RAMPTR") and t0 and n%60==0:   # work RAM longs that point into the listed ROM pages (spill-overlap check)
+        import json as _j
+        if not hasattr(s,"pg"): s.pg=set(int(x) for x in _j.load(open(os.environ["RAMPTR"]))["stage1c_m3"])
+        M=s.ram(0,0x10000); hit={}
+        for o in range(0,0x10000-3,2):
+            v=int.from_bytes(M[o:o+4],"big")
+            if v<0x200000 and (v>>10) in s.pg: hit.setdefault(hex((v>>10)<<10),[]).append("%x=%x"%(0xff0000+o,v))
+        s.log("RAMPTR",len(hit)," ".join("%s:%d[%s]"%(k,len(v)," ".join(v[:4])) for k,v in sorted(hit.items())))
     if os.environ.get("IDLESHOTS") and n%60==30: s.shot(f"idle_{int(now-t0)}")
     if t0 and now-t0>20 and not getattr(s,"hs",0):
         s.hs=1; s.shot("smash_hud")

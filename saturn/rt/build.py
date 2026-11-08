@@ -149,6 +149,12 @@ def round_files(rom, code_end, cold1_at):
     rank = json.loads((WORK / "key_rank.json").read_text()) if (WORK / "key_rank.json").exists() else {}   # tools/rounds_rank.py
     # ARENA_KEEP (test): the duel's RANDOM arenas also keep the pages stage 02's walk reads, so their spilled sprites stay off what the duel reads there.
     k02 = set(next(f for f in base if f["name"] == "stage02")["keep_pages"]) if os.environ.get("ARENA_KEEP") else set()
+    if os.environ.get("ARENA_KEEP", "1") not in ("1", "all"):   # ranges of byte addresses, e.g. ffc00-105400,bf000-bf400: only those of 02's pages
+        want = set()
+        for r in os.environ["ARENA_KEEP"].split(","):
+            lo, hi = (int(x, 16) for x in r.split("-"))
+            want.update(range(lo // page, (hi + page - 1) // page))
+        k02 &= want
     for f in ROUNDS["files"]:
         keep = set(f["keep_pages"]) | shared
         if k02 and set(f.get("stages", [])) & {0x0e, 0x1c, 0x1e, 0x24}: keep |= k02
