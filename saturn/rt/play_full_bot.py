@@ -157,8 +157,7 @@ def step(v, s):
     k = f"{st:x}.{se}"
     if k != sec_mark:
         sec_mark, sec_v = k, v
-    elif v - sec_v > 15000 and (n // 150) % 3 != 2:   # one section for 15000 vblanks while enemies keep coming: push on to the right through them, as a player would
-        s.set(["right"] + (["b"] if n % 50 == 0 else []) + (["c"] if n % 8 == 0 else [])); return
+    long_sec = v - sec_v > 15000 and (n // 150) % 3 != 2   # one section for 15000 vblanks with nothing in reach: push on to the right
     if stuck >= 2 and prog and prog[:2] == (st, se) and n % 40 < 25:   # stuck again in one section: let the gun cool and use the other attacks (a powered suit overheats under steady fire)
         fire = ["a"] if n % 6 == 0 else (["b"] if n % 23 == 0 else [])
     if now < wander_to:
@@ -181,9 +180,13 @@ def step(v, s):
                         best, bd = (x, y), d
     keys = list(fire)
     if n % 30 == 0: keys.append("a")
+    if not best and long_sec:
+        s.set(["right"] + (["b"] if n % 50 == 0 else []) + (["c"] if n % 8 == 0 else [])); return
     if not best:
         s.set(keys + ["right"] + (["b"] if n % 40 == 0 else [])); return
     dx, dy = best[0] - px, best[1] - py
+    if dy < -40 and n % 10 < 5:   # high above the floor (a boss on the wall, Chrysalis in 1e): jump and attack
+        keys += ["b"] + (["a"] if n % 10 > 1 else [])
     if dy < -6: keys.append("up")
     elif dy > 6: keys.append("down")
     if dx > 48: keys.append("right")
