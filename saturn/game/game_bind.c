@@ -55,6 +55,9 @@ void f_aa59a(void)
     SpriteOriginResult r;
     u32 shifted, out;
     GUARD(lifted_aa59a, 0xaa59au, 0xaa5e8u)
+#ifdef SAT_GUESTS
+    { extern void sat_guest_group(unsigned long actor, unsigned long objptr); sat_guest_group(R->a[4], R->a[1]); }   /* bonus characters: rt/guests.c */
+#endif
     sprite_origin_compute(&r, R->a[4], R->a[0]);
     R->a[0] += 4;
     R->d[2] = r.offset_swapped;

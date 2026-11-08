@@ -1011,6 +1011,10 @@ void sat_gfx_snapshot(void)
             put32_ram(out + 4, second);
         }
     }
+#ifdef SAT_GUESTS
+    { extern int sat_guest_objects(u8 *obj, int count, int max, u8 *page0); count = sat_guest_objects(snap.obj, count, MAX_OBJECTS, snap.palette[0]);
+      extern unsigned char sat_guest_sel; if (sat_guest_sel) snap.pal_sum[0] ^= 0x47554553UL; }   /* guest colours sit in page 0: push it */   /* bonus characters: rt/guests.c */
+#endif
     snap.objects = (u16)count;
 #ifdef SAT_HOME
     snap.home = (u16)sat_home_mode;
