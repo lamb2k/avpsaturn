@@ -87,7 +87,7 @@ static void options(void)
 typedef struct { signed char nx, ny; u8 btn[3]; } HomeCfg;
 extern HomeCfg sat_home_cfg;
 extern int sat_gfx_nudge_x, sat_gfx_nudge_y;
-extern volatile u32 sat_home_warp;
+extern volatile u32 sat_home_warp, sat_home_rush;
 static void num(char *b, int v)   /* signed, up to 2 digits */
 {
     int i = 0;
@@ -251,14 +251,14 @@ static int duel_setup(void)
 #endif
 void sat_home_menu(void)
 {
-    /* Fixed positions: 0 start, 1 options, 2 duel, 3 stage select, 4 sound test, 5 screen, 6 buttons. Without the duel, item 2 is absent and the rest move up. */
+    /* Fixed positions: 0 start, 1 options, 2 duel, 3 stage select, 4 sound test, 5 screen, 6 buttons, 7 boss rush. Without the duel, item 2 is absent and the rest move up. */
 #ifdef SAT_DUEL_MENU   /* until the duel is finished */
-    static const char *const items[] = { "START GAME", "OPTIONS", "DUEL", "STAGE SELECT", "SOUND TEST", "SCREEN ADJUST", "BUTTONS" };
-#define HOME_ITEMS 7
+    static const char *const items[] = { "START GAME", "OPTIONS", "DUEL", "STAGE SELECT", "SOUND TEST", "SCREEN ADJUST", "BUTTONS", "BOSS RUSH" };
+#define HOME_ITEMS 8
 #define DUEL_SHIFT 0
 #else
-    static const char *const items[] = { "START GAME", "OPTIONS", "STAGE SELECT", "SOUND TEST", "SCREEN ADJUST", "BUTTONS" };
-#define HOME_ITEMS 6
+    static const char *const items[] = { "START GAME", "OPTIONS", "STAGE SELECT", "SOUND TEST", "SCREEN ADJUST", "BUTTONS", "BOSS RUSH" };
+#define HOME_ITEMS 7
 #define DUEL_SHIFT 1
 #endif
     int pick = 0;
@@ -270,7 +270,7 @@ void sat_home_menu(void)
         panel(19);
         pick = menu_list(1, 19, items, HOME_ITEMS, pick < 0 ? 0 : pick, HOME_IDLE);
         p = pick >= 2 ? pick + DUEL_SHIFT : pick;
-        sat_home_warp = 0;
+        sat_home_warp = 0; sat_home_rush = 0;
         if (p == 1) options();
         else if (p == 3) { if (stage_select()) { pick = 0; break; } }
 #ifdef SAT_DUEL_MENU
@@ -279,6 +279,7 @@ void sat_home_menu(void)
         else if (p == 4) sound_test();
         else if (p == 5) screen_adjust();
         else if (p == 6) buttons();
+        else if (p == 7) { sat_home_warp = 4; sat_home_rush = 1; pick = 0; break; }
         else break;
     }
     if (pick > 0 && pick + DUEL_SHIFT != 2) pick = 0;
