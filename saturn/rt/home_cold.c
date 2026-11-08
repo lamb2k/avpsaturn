@@ -50,12 +50,18 @@ static void panel(int top)
     clear();
     for (r = top; r < 28; r++) for (c = 0; c < 44; c++) sat_home_text[r][c] = 1;
 }
-/* A screen inside the menus, as Capcom's Saturn option screens draw it: a translucent panel under the game's logo (VDP2 colour calculation on the panel
-   cells, sat_gfx.c) with the screen's name as its header. The logo is on the same scroll layer as this text, so the panel cannot lie over it. */
+/* A screen inside the menus, as Capcom's Saturn option screens draw it (MSHvSF OPTION MODE): a translucent panel over the game's logo
+   (the menu layer NBG3 with per-dot colour calculation, sat_gfx.c), the screen's name as its header at the top, the page under it. */
+static void panel_rows(int top, int bottom)
+{
+    int r, c;
+    clear();
+    for (r = top; r <= bottom; r++) for (c = 2; c < 42; c++) sat_home_text[r][c] = 1;
+}
 static void sub(const char *title)
 {
-    panel(18);
-    centre(19, title, 1);
+    panel_rows(2, 25);
+    centre(4, title, 1);
 }
 /* One page of the game's settings: opts[first..first+n), then up to two items that open screens (returns 1 or 2), then EXIT. B goes back;
    Start on a setting leaves too, as Capcom's Saturn option screens do ("PRESS START BUTTON TO EXIT"). */
@@ -71,13 +77,13 @@ static int opt_page(const char *title, u32 screen, int first, int n, const char 
             int v = sat_home_get(o->off);
             char num[2];
             num[0] = (char)('1' + v); num[1] = 0;
-            put(21 + i, 8, o->label, i == cur);
-            put(21 + i, 22, o->names ? o->names[v] : num, i == cur);
+            put(7 + i, 8, o->label, i == cur);
+            put(7 + i, 22, o->names ? o->names[v] : num, i == cur);
         }
-        if (x1) put(21 + n, 8, x1, cur == n);
-        if (x2) put(22 + n, 8, x2, cur == n + 1);
-        centre(21 + n + x, "EXIT", cur == n + x);
-        centre(26, "PRESS START BUTTON TO EXIT", 0);
+        if (x1) put(7 + n, 8, x1, cur == n);
+        if (x2) put(8 + n, 8, x2, cur == n + 1);
+        centre(7 + n + x, "EXIT", cur == n + x);
+        centre(24, "PRESS START BUTTON TO EXIT", 0);
         sat_home_cursor = (u32)cur;
         frame();
         e = edges();
@@ -106,7 +112,7 @@ static void options(void)
     int pick = 0;
     for (;;) {
         sub("OPTION MODE");
-        pick = menu_list(2, 21, items, 5, pick < 0 ? 0 : pick, 0);
+        pick = menu_list(2, 7, items, 5, pick < 0 ? 0 : pick, 0);
         if (pick == -2) return;
         if (pick == 0) opt_page("GAME OPTION", 10, 0, 3, 0, 0);
         else if (pick == 1) buttons();
@@ -149,7 +155,7 @@ static void sound_test(void)
         u32 e;
         sub("SE TEST");
         
-        hex4(b, id); put(21, 18, b, 1);
+        hex4(b, id); put(7, 18, b, 1);
         centre(24, "A PLAY  C STOP  B EXIT", 0);
         sat_home_cursor = id;
         frame();
@@ -187,10 +193,10 @@ static void music(void)
         sub("SOUND TEST");
         
         b[0] = 'T'; b[1] = (char)('0' + songs[cur].track / 10); b[2] = (char)('0' + songs[cur].track % 10); b[3] = 0;
-        put(21, 8, b, 1);
-        put(21, 13, songs[cur].name, 1);
-        if (playing) centre(22, "PLAYING", 0);
-        centre(25, "A PLAY  C STOP  B EXIT", 0);
+        put(7, 8, b, 1);
+        put(7, 13, songs[cur].name, 1);
+        if (playing) centre(8, "PLAYING", 0);
+        centre(24, "A PLAY  C STOP  B EXIT", 0);
         sat_home_cursor = (u32)cur | (u32)playing << 8;
         frame();
         e = edges();
@@ -210,8 +216,8 @@ static void screen_adjust(void)
         u32 e;
         sub("SCREEN ADJUST");
         
-        put(21, 12, "X", 0); num(b, sat_home_cfg.nx); put(21, 15, b, 1);
-        put(21, 24, "Y", 0); num(b, sat_home_cfg.ny); put(21, 27, b, 1);
+        put(7, 12, "X", 0); num(b, sat_home_cfg.nx); put(7, 15, b, 1);
+        put(7, 24, "Y", 0); num(b, sat_home_cfg.ny); put(7, 27, b, 1);
         centre(24, "A CENTRE  B EXIT", 0);
         sat_home_cursor = (u32)(u8)sat_home_cfg.nx | (u32)(u8)sat_home_cfg.ny << 8;
         frame();
@@ -235,8 +241,8 @@ static void buttons(void)
     for (;;) {
         u32 e;
         sub("BUTTON CONFIG.");
-        for (i = 0; i < 3; i++) { put(21 + i, 10, what[i], i == cur); put(21 + i, 24, pads[sat_home_cfg.btn[i] & 7], i == cur); }
-        centre(24, "EXIT", cur == 3);
+        for (i = 0; i < 3; i++) { put(7 + i, 10, what[i], i == cur); put(7 + i, 24, pads[sat_home_cfg.btn[i] & 7], i == cur); }
+        centre(10, "EXIT", cur == 3);
         sat_home_cursor = (u32)cur;
         frame();
         e = edges();
@@ -259,7 +265,7 @@ static int stage_select(void)
         sub("STAGE SELECT MODE");
         
         b[0] = (char)('0' + st / 10); b[1] = (char)('0' + st % 10); b[2] = 0;
-        put(21, 21, b, 1);
+        put(7, 21, b, 1);
         centre(24, "START PLAY  B EXIT", 0);
         sat_home_cursor = (u32)st;
         frame();
@@ -284,7 +290,7 @@ void sat_home_menu(void)
 #endif
     int pick = 0, p;
     sat_home_hold = 1;
-    sat_home_mode = 1;
+    sat_home_mode = 3;                 /* title menus: text over the logo, the game's start lines hidden */
     prev = sat_pad_raw & 0xffff;
     for (;;) {
         panel(19);

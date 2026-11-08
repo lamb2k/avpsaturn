@@ -8,8 +8,12 @@ extern void sat_home_set(int block_off, int value);
 extern int sat_home_get(int block_off);
 extern void sat_home_restart(void);
 volatile int sat_home_hold;
-volatile int sat_home_mode;            /* 0 off, 1 text over the held picture, 2 text alone */
+volatile int sat_home_mode;            /* 0 off, 1 text over the held picture, 2 text alone, 3 title menus (1 with the title's start lines hidden) */
 char sat_home_text[28][44];
+/* What the slave draws: a copy taken in sat_home_frame, after the screen is built and away from the vblank the slave draws in (the menu loops rebuild
+   sat_home_text right after each vblank, so drawing from it showed half-built rows). sat_home_seq is odd while the copy is made. */
+char sat_home_shown[28][44];
+volatile u32 sat_home_seq;
 /* Where the menus are, read by the bot over MCP. */
 volatile u32 sat_home_screen;          /* 0 none, 1 home, 2 options, 3 pause */
 volatile u32 sat_home_cursor;
@@ -83,7 +87,15 @@ void sat_home_clear(void) { int r, c; for (r = 0; r < 28; r++) for (c = 0; c < 4
 void sat_home_put(int r, int c, const char *s, int hi) { for (; *s && c < 44; s++, c++) sat_home_text[r][c] = (char)(*s == ' ' ? 1 : (*s | (hi ? 0x80 : 0))); }
 void sat_home_centre(int r, const char *s, int hi) { int n = 0; while (s[n]) n++; sat_home_put(r, (44 - n) / 2, s, hi); }
 
-void sat_home_frame(void) { u32 v = sat_vblanks_now(); while (sat_vblanks_now() == v) ; }
+void sat_home_frame(void)
+{
+    u32 v = sat_vblanks_now();
+    int i;
+    sat_home_seq++;
+    for (i = 0; i < 28 * 44; i++) (&sat_home_shown[0][0])[i] = (&sat_home_text[0][0])[i];
+    sat_home_seq++;
+    while (sat_vblanks_now() == v) ;
+}
 u32 sat_home_edges(void) { u32 raw = sat_pad_raw & 0xffff, e = prev & ~raw; prev = raw; return e; }
 
 int sat_home_list(int screen, int row0, const char *const *items, int n, int start, u32 idle)
