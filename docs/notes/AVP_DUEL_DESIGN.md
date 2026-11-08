@@ -84,5 +84,5 @@ Code: saturn/rt/duel_smash.inc, hooks in duel.inc and home.c, menu in home_cold.
 ## Duel 3 (2026-11-08; EMULATOR, hardware UNRUN)
 
 - **Weapons, resolved for the Predators:** the gun fires without a target; the target pick (0x0241f0) only sets the angle +0x8a, from the nearest tag 12 enemy in front within 16 of depth, by the distance table at 0x024266, default index 15. The duel's `duel_aim` does the same with the other fighter in the tick after entry; `duel_shots` walks every live tag 4 slot and takes the owner from +0x26 (a class 4 child is followed to its parent). Hits go through 0x1cf54 as before. Linn's and Schaefer's guns are other routines and are not aimed.
-- **Stage end held:** stage 02's controller (class 1, 0x0287e8) ends its wave by timer +0x40 (0xf3c) or kill quota +0x4a against 0xff9a1a; `smash_hold_stage` holds both and the talk timer +0x46. Stage 02 only.
+- **Stage end held:** stage 02's controller (class 1, 0x0287e8) ends its wave by timer +0x40 (0xf3c) or kill quota +0x4a against 0xff9a1a; `smash_hold_stage` holds both and the talk timer +0x46. RANDOM arenas (Duel 5): controller class = stage word / 2 (table 0x1bdf0); 0e, 1c, 1e and 24 wait in state 2 for the section script's done flag +0x1b, held at 0.
 - **KO test build:** -DDUEL_KO_TEST holds health at 1 with 2 stocks, so any hit is a game KO. Test only; never in a package.
