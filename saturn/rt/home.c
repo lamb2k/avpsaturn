@@ -51,9 +51,16 @@ static int shown;
 #define PAUSE_OK (!IN_ATTRACT && G(0xff8001) == 2 && G(0xff8380) != 0 && G(0xff8384) != 4)
 
 /* Second pad: idle while held; Start only as the duel's start path sends it, or to join or continue in play. */
+#ifdef SAT_DUEL_MENU
+extern u8 sat_duel_stun[2];
+#define STUN(i) if (sat_duel_on && sat_duel_stun[i]) raw |= ~P_START & 0xffffu   /* hitstun: no moves, Start still pauses */
+#else
+#define STUN(i)
+#endif
 u32 sat_home_pad2(u32 raw)
 {
     if (sat_home_hold) return 0xffff;
+    STUN(1);
     if (inject && sat_duel_on && G(0xff818c) >= 2) return (inject & 4) ? raw | P_START : raw & ~P_START;
     if (IN_ATTRACT) return raw | P_START;
     return raw;
@@ -63,6 +70,7 @@ u32 sat_home_pad(u32 raw)
 {
     u32 cred = G(0xff818c);
     if (sat_home_hold) return 0xffff;
+    STUN(0);
     raw |= P_COIN;
     /* No coin to insert at home, and no coin sound: a credit is simply there whenever one is wanted. The game's start path spends it. Free play's own coinage is not used: its paths are outside the census the stage files keep ROM for. */
     if (cred < (sat_duel_on ? 2u : 1u) && (inject || !IN_ATTRACT)) { G(0xff818c) = (u8)(sat_duel_on ? 2 : 1); cred = G(0xff818c); }

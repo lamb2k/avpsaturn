@@ -13,11 +13,19 @@ struct { u32 hits[2], last_health[2]; } sat_duel_stats;
 /* Hit log for the bot: one row per landed hit, ring of 16; n counts all. Row: vblank (low 16 bits), attacker, the attacker's source byte (+0xd1, which the hit writes to the target's +0x65), target health before and after. */
 struct { u32 n; struct { u16 tick; u8 who, attack; u16 before, after; } row[16]; } sat_duel_log;
 static u8 duel_tick_seen;
+#ifdef SAT_DUEL_MENU
+extern volatile int sat_home_mode;
+extern void sat_home_clear(void);
+#include "duel_smash.inc"
+#endif
 static void duel_pair(int a, int t)
 {
     u32 pa = PL(a), pt = PL(t);
     u16 hp0;
     if (!r8(pa) || !r8(pt) || r8(pa + 0x9e)) return;
+#ifdef SAT_DUEL_MENU
+    if (!smash_can_hit(t) || !smash_can_hit(a)) return;
+#endif
     { int dz = (int)r16(pa + 0x18) - (int)r16(pt + 0x18); if (dz < -DUEL_LINE || dz > DUEL_LINE) return; }   /* the arcade pass wants the exact line; two players cannot hold that */
     hp0 = r16(pt + 0x40);
     cpu.a[6] = pa; cpu.a[1] = pt;
@@ -32,6 +40,10 @@ static void duel_pair(int a, int t)
         w8(pa + 0x6e, 1);
         if (!r8(pa + 0x80)) w8(pa + 0x80, 1);
         sat_duel_stats.hits[a]++;
+#ifdef SAT_DUEL_MENU
+        smash_hit(a, t, (int)hp0 - (int)(s16)r16(pt + 0x40));
+        w16(pt + 0x40, hp0);
+#endif
     }
 }
 static void duel_tick(void)
@@ -56,12 +68,24 @@ static void duel_tick(void)
 static u16 arena_cam;
 static u8 arena_set;
 static u16 arena_hold;
+#ifdef SAT_DUEL_MENU
+static u8 smash_tick_seen;
+static int smash_lost;
+#endif
 static void duel_arena(void)
 {
     int i;
     /* Centre: where the two fighters stand once both are in play; the screen is 384 wide. */
+#ifdef SAT_DUEL_MENU
+    /* A cleared section walks both fighters on (state 8) to the next: let the camera go with it and lock again where they stop. */
+    if (r8(PL(0) + 4) == 8 || r8(PL(1) + 4) == 8) { arena_set = 0; return; }
+#endif
     if (!arena_set) { if (r8(PL(0) + 4) != 2 || r8(PL(1) + 4) != 2) return; arena_cam = (u16)((r16(PL(0) + 0x10) + r16(PL(1) + 0x10)) / 2 - 192); arena_hold = r16(0xff8278); arena_set = 1; }
-    w16(0xff8278, arena_hold);   /* the camera stays where it was at the lock: it led the fighters about 80 px further before */
+    w16(0xff8278, arena_hold);
+#ifdef SAT_DUEL_MENU
+    if (r8(0xff8019) != smash_tick_seen) { smash_tick_seen = r8(0xff8019); smash_lost = smash_tick(arena_cam + 72, arena_cam + 312); }
+    return;
+#endif   /* the camera stays where it was at the lock: it led the fighters about 80 px further before */
     for (i = 0; i < DUEL_PLAYERS; i++) {
         u32 p = PL(i);
         int x = (int)r16(p + 0x10), lo = arena_cam + 72, hi = arena_cam + 312;   /* 240 wide: the camera leads the fighters, so the bounds sit inside the screen */
@@ -78,9 +102,15 @@ volatile u32 sat_duel_result;   /* 1 player 1, 2 player 2, 3 draw; for the bot *
 static void duel_end(void)
 {
     int ko0 = r8(PL(0) + 4) == 4, ko1 = r8(PL(1) + 4) == 4, n;
+#ifdef SAT_DUEL_MENU
+    if (smash_lost) { ko0 = smash_lost == 1; ko1 = smash_lost == 2; }
     if (!ko0 && !ko1) return;
-    for (n = 0; n < 20; n++) sat_home_frame();   /* both may fall in the same moment */
-    ko0 = r8(PL(0) + 4) == 4; ko1 = r8(PL(1) + 4) == 4;
+    if (!smash_lost)
+#else
+    if (!ko0 && !ko1) return;
+#endif
+    { for (n = 0; n < 20; n++) sat_home_frame();   /* both may fall in the same moment */
+    ko0 = r8(PL(0) + 4) == 4; ko1 = r8(PL(1) + 4) == 4; }
     sat_duel_result = ko0 && ko1 ? 3 : ko1 ? 1 : 2;
     sat_home_hold = 1;
     sat_home_clear();
@@ -91,6 +121,9 @@ static void duel_end(void)
     sat_home_mode = 0;
     sat_home_hold = 0;
     sat_duel_on = 0; arena_set = 0;
+#ifdef SAT_DUEL_MENU
+    smash_lost = 0; sat_smash.set = 0; sat_duel_stun[0] = sat_duel_stun[1] = 0;
+#endif
     sat_home_restart();
 }
 void sat_duel_step(void)
@@ -98,5 +131,8 @@ void sat_duel_step(void)
     if (!sat_duel_on || r8(0xff81b0) || r8(0xff8001) != 2 || !r8(PL(0)) || !r8(PL(1))) { duel_tick(); return; }
     duel_arena();
     duel_tick();
+#ifdef SAT_DUEL_MENU
+    if (sat_smash_freeze) { u32 n = sat_smash_freeze; sat_smash_freeze = 0; while (n--) sat_home_frame(); }
+#endif
     duel_end();
 }
