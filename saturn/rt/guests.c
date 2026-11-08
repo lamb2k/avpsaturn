@@ -33,6 +33,95 @@ int sat_guest_file(int row, int chars, int variant, int arcade_file)
     return arcade_file;
 }
 
-/* A guest's drawing (saturn/guests/<name>), linked when the build has its assets; without them nothing is drawn. */
+/* Drawing (phase 2): the game's sprite origin routine (0xaa59a, game_bind.c) runs once per sprite group with the actor in a4 and the
+   object write pointer in a1; sat_guest_group() notes where each group starts. At the snapshot, sat_guest_objects() swaps a guest slot's
+   player body groups for the guest's own pose (per-guest draw functions, weak: a guest without one keeps the AvP character's look). */
+typedef unsigned char gu8;
+typedef unsigned long gu32;
+extern int sat_guest_megaman_draw(gu8 *out, int room, gu32 actor, int ax, int bottom, unsigned short xhi, unsigned short ahi) __attribute__((weak));
+extern void sat_guest_megaman_palette(gu8 *page0) __attribute__((weak));
+/* Wolverine's whole-list pass (saturn/guests/wolverine/wolverine.c, built with -Dsat_guest_objects=sat_guest_wolverine_objects) */
+extern int sat_guest_wolverine_objects(gu8 *obj, int count, int max, gu8 *pal0) __attribute__((weak));
 __attribute__((weak)) int sat_guest_touched;
-__attribute__((weak)) int sat_guest_objects(unsigned char *obj, int count, int max, unsigned char *pal0) { (void)obj; (void)max; (void)pal0; return count; }
+extern gu8 *PAGE[256];
+#define GROUPS 96
+static struct { unsigned short at; gu32 actor; } grp[GROUPS];
+static int ngrp;
+
+void sat_guest_group(gu32 actor, gu32 objptr)
+{
+    unsigned at = (unsigned)((objptr - 0x708000UL) >> 3);
+    if (at >= 0x400) return;
+    if (ngrp && grp[ngrp - 1].at >= at) ngrp = 0;   /* the game began a new list */
+    if (ngrp < GROUPS) { grp[ngrp].at = (unsigned short)at; grp[ngrp].actor = actor & 0xffffffUL; ngrp++; }
+}
+
+static int (*guest_draw(gu32 actor))(gu8 *, int, gu32, int, int, unsigned short, unsigned short)
+{
+    int kind, i;
+    if (actor < 0xff8380UL || actor >= 0xff8680UL || (actor & 0xff) != 0x80) return 0;
+    kind = PAGE[0xff][(actor + 0xd2) & 0xffff] & 3;   /* +0xd2: character, the ff81cc bit index */
+    for (i = 0; i < sat_guest_count; i++)
+        if ((sat_guest_sel & sat_guests[i].sel_bit) && sat_guests[i].slot_mask == (1 << kind)) {
+            if (sat_guests[i].slot_mask == 4) return sat_guest_megaman_draw;
+            return 0;
+        }
+    return 0;
+}
+
+static int be16(const gu8 *p) { return (p[0] << 8) | p[1]; }
+
+/* obj: the snapshot's copy of the object list (count entries, room for max). page0: the snapshot's sprite palette page. Returns the new count. */
+int sat_guest_objects(gu8 *obj, int count, int max, gu8 *page0)
+{
+    int g, used = 0, shift = 0, wv = 0;
+    if (!sat_guest_sel) return count;
+    if (sat_guest_megaman_palette && (sat_guest_sel & 2)) sat_guest_megaman_palette(page0);
+    for (g = 0; g < ngrp; g++) {
+        int (*draw)(gu8 *, int, gu32, int, int, unsigned short, unsigned short) = guest_draw(grp[g].actor);
+        int s = grp[g].at + shift, e = g + 1 < ngrp ? grp[g + 1].at + shift : count, i, x0 = 0, x1 = 0, bottom = -1000, n, room;
+        int bx;
+        gu8 tmp[8 * 64];
+        if (!draw || s >= count) continue;
+        if (e > count) e = count;
+        bx = be16(obj + s * 8) & 0x3ff;
+        for (i = s; i < e; i++) {   /* the body's entries: near the first one (HUD words written by other routines are not) */
+            const gu8 *o = obj + i * 8;
+            int x = be16(o) & 0x3ff, y = be16(o + 2) & 0x3ff, a = be16(o + 6);
+            int h = (((a >> 12) & 15) + 1) * 16, d = (x - bx) & 0x3ff;
+            if (d > 160 && d < 1024 - 160) break;
+            if (y + h > bottom) bottom = y + h;
+        }
+        e = i;
+        if (used & (1 << (((grp[g].actor - 0xff8380UL) >> 8) & 3))) {   /* weapon or extra groups of the same body: drop */
+            n = 0;
+        } else {
+            for (i = s; i < e; i++) {
+                const gu8 *o = obj + i * 8;
+                int x = be16(o) & 0x3ff, y = be16(o + 2) & 0x3ff, a = be16(o + 6);
+                int w = (((a >> 8) & 15) + 1) * 16, h = (((a >> 12) & 15) + 1) * 16;
+                if (y + h <= bottom - 32) continue;
+                if (!x1 || x < x0) x0 = x;
+                if (!x1 || x + w > x1) x1 = x + w;
+            }
+            n = draw(tmp, 64, grp[g].actor, (x0 + x1) / 2, bottom, (unsigned short)(be16(obj + s * 8) & 0xfc00), (unsigned short)(be16(obj + s * 8 + 6) & 0x80));
+            used |= 1 << (((grp[g].actor - 0xff8380UL) >> 8) & 3);
+        }
+        /* replace entries s..e-1 by the n new ones, shifting the rest */
+        room = max - count + (e - s);
+        if (n > room) n = room;
+        if (n != e - s) {
+            gu8 *src = obj + e * 8, *dst = obj + (s + n) * 8;
+            int bytes = (count - e) * 8, k;
+            if (dst < src) for (k = 0; k < bytes; k++) dst[k] = src[k];
+            else for (k = bytes - 1; k >= 0; k--) dst[k] = src[k];
+        }
+        for (i = 0; i < n * 8; i++) obj[s * 8 + i] = tmp[i];
+        count += n - (e - s);
+        shift += n - (e - s);
+    }
+    /* Wolverine's pass works on the whole list by palette and place, so it runs after the group-indexed guests */
+    if (sat_guest_wolverine_objects) { count = sat_guest_wolverine_objects(obj, count, max, page0); wv = sat_guest_touched; }
+    sat_guest_touched = wv || (sat_guest_megaman_palette && (sat_guest_sel & 2));
+    return count;
+}
