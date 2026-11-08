@@ -5,7 +5,7 @@
 #   AVP_WORK: a finished build's WORK dir (rounds.json, screen_keys.txt, key_rank.json, round_code_ends.json, rom_final.bin)
 set -e
 H=$(cd "$(dirname "$0")" && pwd)
-WORK=${1:?AVP_WORK}; OUT=${2:-/e/AvP/learning/lane-megaman}; EXCL=${3:-/e/AvP/learning/lane-wolverine/out/remap.json}
+WORK=${1:?AVP_WORK}; OUT=${2:-/e/AvP/learning/lane-megaman}; EXCL=${3:-/e/AvP/learning/lane-wolverine/one4/remap.json}
 mkdir -p "$OUT"
 python "$H/schedule.py" "${MSEQ3:-E:/AvP/learning/guest-analysis/mseq3.txt}" "$(cygpath -m "$OUT/full.txt")" "$(cygpath -m "$OUT/windows.json")"
 python "$H/schedule_win.py" "${MSEQ3:-E:/AvP/learning/guest-analysis/mseq3.txt}" "$(cygpath -m "$OUT/win.txt")"
