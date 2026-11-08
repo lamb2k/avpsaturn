@@ -1,4 +1,6 @@
-# Alien vs. Predator native Sega Saturn port
+# AvP Saturn
+
+Alien vs. Predator (Capcom CPS2 arcade, 1994) as a native Sega Saturn game.
 
 ![Alien vs. Predator, Sega Saturn cover](docs/images/cover/avp-saturn-cover.jpg)
 
