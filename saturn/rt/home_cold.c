@@ -50,10 +50,11 @@ static void panel(int top)
     clear();
     for (r = top; r < 28; r++) for (c = 0; c < 44; c++) sat_home_text[r][c] = 1;
 }
-/* One page of the game's settings: opts[first..first+n), then an optional extra item (opens a screen; returns 1), then EXIT. B goes back. */
-static int opt_page(u32 screen, int first, int n, const char *extra)
+/* One page of the game's settings: opts[first..first+n), then up to two items that open screens (returns 1 or 2), then EXIT. B goes back;
+   Start on a setting leaves too, as Capcom's Saturn option screens do ("PRESS START BUTTON TO EXIT"). */
+static int opt_page(u32 screen, int first, int n, const char *x1, const char *x2)
 {
-    int cur = 0, i, x = extra ? 1 : 0;
+    int cur = 0, i, x = (x1 ? 1 : 0) + (x2 ? 1 : 0);
     sat_home_screen = screen;
     for (;;) {
         u32 e;
@@ -66,7 +67,8 @@ static int opt_page(u32 screen, int first, int n, const char *extra)
             put(20 + i, 8, o->label, i == cur);
             put(20 + i, 22, o->names ? o->names[v] : num, i == cur);
         }
-        if (x) put(20 + n, 8, extra, cur == n);
+        if (x1) put(20 + n, 8, x1, cur == n);
+        if (x2) put(21 + n, 8, x2, cur == n + 1);
         centre(20 + n + x + 1, "EXIT", cur == n + x);
         sat_home_cursor = (u32)cur;
         frame();
@@ -74,7 +76,8 @@ static int opt_page(u32 screen, int first, int n, const char *extra)
         if (e & P_B) return 0;
         if (e & P_UP) cur = cur ? cur - 1 : n + x;
         if (e & P_DOWN) cur = cur < n + x ? cur + 1 : 0;
-        if (cur >= n) { if (e & (P_START | P_A | P_C)) return cur == n && x; continue; }
+        if (cur >= n) { if (e & (P_START | P_A | P_C)) return cur < n + x ? cur - n + 1 : 0; continue; }
+        if (e & P_START) return 0;
         if (e & (P_LEFT | P_RIGHT | P_A | P_C)) {
             const Opt *o = &opts[first + cur];
             int v = sat_home_get(o->off);
@@ -85,6 +88,7 @@ static int opt_page(u32 screen, int first, int n, const char *extra)
     }
 }
 static void sound_test(void);
+static void music(void);
 static void screen_adjust(void);
 static void buttons(void);
 /* OPTIONS, as Capcom's Saturn fighters lay it out: GAME (difficulty, extend, continue), BUTTONS, SOUND (mode, demo sound, sound test), SCREEN ADJUST, EXIT. */
@@ -95,9 +99,9 @@ static void options(void)
     for (;;) {
         panel(19);
         pick = menu_list(2, 20, items, 5, pick < 0 ? 0 : pick, 0);
-        if (pick == 0) opt_page(10, 0, 3, 0);
+        if (pick == 0) opt_page(10, 0, 3, 0, 0);
         else if (pick == 1) buttons();
-        else if (pick == 2) { while (opt_page(11, 3, 2, "SOUND TEST")) sound_test(); }
+        else if (pick == 2) { int x; while ((x = opt_page(11, 3, 2, "MUSIC", "SOUND TEST")) != 0) { if (x == 1) music(); else sound_test(); } }
         else if (pick == 3) screen_adjust();
         else return;
     }
@@ -148,6 +152,44 @@ static void sound_test(void)
         if (e & P_DOWN) id = id >= 16 ? id - 16 : id;
         if (e & P_A) sound_send(id >> 8, id & 0xff, 0, 0);
         if (e & P_C) sound_send(0xff, 0, 0, 0);
+    }
+}
+/* Music: the game's 24 songs on the disc's 26 CD audio tracks (02 to 27; 0x18 and 0x1f have an intro track before their loop), played by their sound
+   command through the same mailbox as the game, so the driver starts the CD track as in play. Names: where the stage files use each song
+   (WORK/rounds.json sound sets); songs every stage file carries are named by number only. Left/right pick, A plays, C stops, B leaves. */
+typedef struct { u8 cmd, track; const char *name; } Song;
+static const Song songs[] = {
+    { 0x01, 2, "ALL STAGES 1" }, { 0x03, 3, "ENDING 1" }, { 0x04, 4, "BOSS STAGES 1" }, { 0x05, 5, "TITLE" },
+    { 0x06, 6, "ALL STAGES 2" }, { 0x07, 7, "ALL STAGES 3" }, { 0x08, 8, "STAGES 0A 10 22 24" }, { 0x09, 9, "ALL STAGES 4" },
+    { 0x0a, 10, "ALL STAGES 5" }, { 0x0b, 11, "STAGES 12 16" }, { 0x0e, 12, "STAGE 24" }, { 0x0f, 13, "ALL STAGES 6" },
+    { 0x10, 14, "ALL STAGES 7" }, { 0x11, 15, "STAGE 10" }, { 0x12, 16, "ALL STAGES 8" }, { 0x13, 17, "STAGE 1A" },
+    { 0x15, 18, "STAGES 0A 10" }, { 0x16, 19, "STAGES 06 10" }, { 0x17, 20, "STAGES 12 22" }, { 0x18, 21, "STAGES 0E 1C 24" },
+    { 0x1a, 23, "FRONT END" }, { 0x1b, 24, "ENDING 2" }, { 0x1c, 25, "STAGE 14" }, { 0x1f, 26, "BOSS" },
+};
+#define SONGS (int)(sizeof songs / sizeof songs[0])
+static void music(void)
+{
+    static int cur;
+    int playing = 0;
+    sat_home_screen = 12;
+    for (;;) {
+        char b[8];
+        u32 e;
+        panel(19);
+        centre(20, "MUSIC", 0);
+        b[0] = 'T'; b[1] = (char)('0' + songs[cur].track / 10); b[2] = (char)('0' + songs[cur].track % 10); b[3] = 0;
+        put(22, 8, b, 1);
+        put(22, 13, songs[cur].name, 1);
+        if (playing) centre(23, "PLAYING", 0);
+        centre(25, "A PLAY  C STOP  B EXIT", 0);
+        sat_home_cursor = (u32)cur | (u32)playing << 8;
+        frame();
+        e = edges();
+        if (e & P_B) { if (playing) sound_send(0xff, 0, 0, 0); return; }
+        if (e & P_LEFT) cur = cur ? cur - 1 : SONGS - 1;
+        if (e & P_RIGHT) cur = cur + 1 < SONGS ? cur + 1 : 0;
+        if (e & P_A) { sound_send(0, songs[cur].cmd, 0, 0); playing = 1; }
+        if (e & P_C) { sound_send(0xff, 0, 0, 0); playing = 0; }
     }
 }
 /* Screen adjust: pad moves the whole picture, up to 16 pixels each way; A centres; B leaves. */
