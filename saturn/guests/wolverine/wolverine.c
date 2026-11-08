@@ -17,7 +17,10 @@ extern u8 RAMB[];
 #define WV_CHAR_OFF 1
 #define WV_CHAR_SCH 1
 #define WV_SCH_PAL 1        /* Schaefer's sprite palette row: his sprites leave the list, Wolverine's first row takes it */
-#define WV_PALROW1 6        /* Wolverine's second row (claws, highlights): free on stage 02 in the alien-measure census; per-stage choice still open */
+/* Wolverine's second row (claws, highlights), per stage word: from a per-frame census of four whole-game MAME walks (tools/wolverine/pal_census.lua,
+   11-08), the fourth row no sprite uses in that stage; Mega Man (lane avp-megaman) takes the first three. Odd words: 22. */
+static const u8 wv_row1[0x28] = {10,22,21,22,20,22,18,22,22,22,8,22,23,22,22,22,21,22,22,22,10,22,21,22,27,22,18,22,31,22,18,22,21,22,18,22,21,22,12,22};
+#define WV_PALROW1 ((R16(0xff81e8) & 0xff) < 0x28 ? wv_row1[R16(0xff81e8) & 0xff] : 22)
 #define WV_OX 72
 #define WV_OY 523
 
