@@ -54,6 +54,15 @@ The current state of each item belongs in docs/STATUS.md, not here. Order is pri
 26. **Hardware package:** ISO, cue, hashes, HARDWARE_TEST steps for the owner's Saturn with a 4 MB cart. Physical stays UNRUN until the owner runs it. Physical frame-cost readout included.
 27. **Rest of the game:** other rounds, other characters, front end, co-op. Sized after item 25. Round 2 handoff first.
 
+## P7: later (owner, 2026-11-08)
+
+28. **CPS2 cross-platform porter utility:** turn this port's pipeline into a reusable tool that ports other CPS2 games to other consoles, not just AvP to Saturn. Owner: "queue up a cross-platform game porter utility for cps2 in the backlog". Scope when picked up:
+    - the shared CPS2 front end: MAME capture, 68000 lifter, boundary convergence, semantics audit, object-list, palette and tilemap extraction, and audio command capture;
+    - one backend per target console (Saturn first, from this repo; then candidates such as Dreamcast), each with a sprite, background, palette, input, audio and memory-map layer;
+    - per-game profiles: ROM set, crop and fit rules, guest-character hooks;
+    - a game-agnostic gate set: host differential against MAME, stills, the six-golden identity.
+    Check: a second CPS2 game boots to its first round on the Saturn backend with no AvP-specific code, and a second backend boots AvP. Start only after item 25, and size it then.
+
 ## Open questions for the owner, when numbers exist
 
 - Fast-forward rate: fixed 3 ticks or the arcade's 3 to 5.
