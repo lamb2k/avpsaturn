@@ -5,30 +5,41 @@ Layout (boot.c load_regions reads it):
   sectors 1..   runs, u32 each: store sector << 14 | sectors (1..16383), all rounds' runs back to back
   then          data sectors, in first-use order (round 0, 1, ...), so a round's reads stay mostly sequential.
 Reading a round's runs in order gives back its R*.BIN byte for byte; the loader then walks that stream exactly as it walks the file.
+env STORE_DUP (default 32): stretches of at most this many already-stored sectors are stored again in line, trading space for fewer seeks.
 usage: sector_store.py DISC_DIR [--keep DIR]   writes STORE.BIN, verifies all rounds, moves R*.BIN to DIR (default: removed)."""
-import hashlib, pathlib, shutil, struct, sys
+import hashlib, os, pathlib, shutil, struct, sys
 
 SEC = 2048
 MAGIC = 0x53535431
 CMAX = (1 << 14) - 1
 
 
-def build(files):
-    """files: list of bytes (round files). Returns STORE.BIN bytes and per-round run lists."""
-    where, data, rounds = {}, [], []
+def build(files, dup=32):
+    """files: list of bytes (round files). Returns STORE.BIN bytes and per-round run lists.
+    dup: a stretch of already-stored sectors of this length or shorter is stored again in line, so a round reads as few long runs (fewer seeks)."""
+    data, rounds, where = [], [], {}
     for b in files:
         assert len(b) % SEC == 0
-        runs = []
-        for o in range(0, len(b), SEC):
-            s = b[o:o + SEC]
-            k = hashlib.blake2b(s, digest_size=16).digest()
-            if k not in where:
-                where[k] = len(data); data.append(s)
-            q = where[k]
-            if runs and runs[-1][0] + runs[-1][1] == q and runs[-1][1] < CMAX:
-                runs[-1][1] += 1
+        h = [hashlib.blake2b(b[o:o + SEC], digest_size=16).digest() for o in range(0, len(b), SEC)]
+        runs, i = [], 0
+        def add(q, n):
+            if runs and runs[-1][0] + runs[-1][1] == q and runs[-1][1] + n <= CMAX:
+                runs[-1][1] += n
             else:
-                runs.append([q, 1])
+                runs.append([q, n])
+        while i < len(h):
+            j = i + 1
+            if h[i] in where:
+                while j < len(h) and h[j] in where and where[h[j]] == where[h[j - 1]] + 1:
+                    j += 1
+                if j - i > dup:
+                    add(where[h[i]], j - i); i = j; continue
+            else:
+                while j < len(h) and h[j] not in where:
+                    j += 1
+            for k in range(i, j):   # new sectors, or a short stretch stored again: appended in reading order
+                where[h[k]] = len(data); data.append(b[k * SEC:(k + 1) * SEC]); add(len(data) - 1, 1)
+            i = j
         rounds.append(runs)
     nruns = sum(len(r) for r in rounds)
     if 8 + 8 * len(rounds) > SEC:
@@ -68,7 +79,7 @@ def main():
     if nums != list(range(len(nums))):
         raise SystemExit("sector store: round files not numbered 0..n-1")
     files = [p.read_bytes() for p in names]
-    store, rounds = build(files)
+    store, rounds = build(files, int(os.environ.get("STORE_DUP", "32")))
     bad = [i for i, b in enumerate(files) if rebuild(store, i) != b]
     if bad:
         raise SystemExit(f"sector store: rounds differ {bad}")
