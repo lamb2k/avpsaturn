@@ -117,6 +117,7 @@ static u8 save_block[128] __attribute__((aligned(2))) = {
 int sat_home_get(int off) { return save_block[off]; }
 void sat_home_set(int off, int v) { save_block[off] = (u8)v; save_block[off + 0x30] = (u8)v; }
 extern volatile int sat_home_hold;
+extern void sat_home_loading(int);
 extern void sat_home_poll(void);
 extern void sat_duel_step(void);
 #endif
@@ -397,13 +398,22 @@ static void round_check(void)
     if (!row) chars = 0;
     want = row_file[row][mask_variant[chars]];
     row_loaded = row;
+#ifdef SAT_HOME
+    sat_home_loading(1);   /* NOW LOADING stays on screen through the load */
+#endif
     while (UNCACHED(gfx_done) != UNCACHED(gfx_handed)) ;   /* the slave finishes the picture in hand and stays off the pack */
     __asm__ volatile ("ldc %0,sr" : : "r"(0xf0));
+#ifndef SAT_HOME
     sat_gfx_display(0);
+#endif
     load_round(want);
     if (!sat_gfx_swap_pack(SAT_PACK)) sat_fatal(0xeb, 1);
     sat_audio_resume_music();
+#ifdef SAT_HOME
+    sat_home_loading(0);
+#else
     sat_gfx_display(1);
+#endif
     round_loaded = want;
     sat_rounds.current = (u32)want;
     sat_rounds.loads++;

@@ -108,6 +108,26 @@ int sat_home_list(int screen, int row0, const char *const *items, int n, int sta
 
 extern void sat_home_menu(void);
 
+/* NOW LOADING, as Capcom's Saturn ports show it: the game held, a black picture with the line in the game's font in the bottom right corner,
+   drawn before a stage file load (round_check, kernel.c) and left on screen while the load runs; off again before the stage's first picture. */
+void sat_home_loading(int on)
+{
+    static int was_hold, was_mode;
+    if (on) {
+        int i;
+        was_hold = sat_home_hold; was_mode = sat_home_mode;
+        sat_home_clear();
+        sat_home_put(25, 31, "NOW LOADING", 0);
+        sat_home_hold = 1;
+        sat_home_mode = 2;
+        for (i = 0; i < 3; i++) sat_home_frame();   /* the slave draws it before the load takes the bus */
+    } else {
+        sat_home_clear();
+        sat_home_mode = was_mode;
+        sat_home_hold = was_hold;
+    }
+}
+
 static void pause_menu(void)
 {
     static const char *const items[] = { "RESUME", "QUIT TO TITLE" };
