@@ -45,6 +45,10 @@ for s in order:
         for p in set(pg[s]):
             _n[p] = _n.get(p, 0) + 1
 SHARED = {p for p, c in _n.items() if c >= SHARED_MIN} if SHARED_MIN else set()
+# Pages holding tables the lifted code reads at constant addresses (tools/const_pages.py): every stage keeps them. Stage 0c's alien grab read the per-character
+# table at 0x56632 from a page stage 0c did not keep, got 0 and set the player's animation pointer to 0x4a9: fatal 0xe2 at 0xa9cc4.
+if os.environ.get("ROUNDS_CONST_PAGES"):
+    SHARED |= set(json.load(open(os.environ["ROUNDS_CONST_PAGES"])))
 for f in files:
     s = f["stages"][0]
     if s == 0:
