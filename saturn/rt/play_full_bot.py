@@ -196,8 +196,8 @@ def step(v, s):
 def fatal(s, c, d):
     s.done = True   # never let end() save a faulted state over the leg's slot
     try:   # the 68000 registers and which ROM pages differ, for the fault's cause
-        c = s.m.read(s.syms[os.environ.get("BOT_CPU", "sat_cpu")], 64)
-        regs = [int.from_bytes(c[i:i + 4], "big") for i in range(0, 64, 4)]
+        cb = s.m.read(s.syms[os.environ.get("BOT_CPU", "sat_cpu")], 64)
+        regs = [int.from_bytes(cb[i:i + 4], "big") for i in range(0, 64, 4)]
         note(s, "REGS d", [hex(x) for x in regs[:8]], "a", [hex(x) for x in regs[8:]])
         for r in regs[8:]:
             if 0 < r < 0x200000:
