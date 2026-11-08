@@ -48,6 +48,7 @@ static int shown = 1;
 static int shown;
 #endif
 #define IN_ATTRACT (G(0xff81b0) != 0)
+#define SELECTING (!IN_ATTRACT && G(0xff8001) == 2 && !G(0xff8380) && !G(0xff81e8) && !G(0xff81e9))
 #define PAUSE_OK (!IN_ATTRACT && G(0xff8001) == 2 && G(0xff8380) != 0 && G(0xff8384) != 4)
 
 /* Second pad: idle while held; Start only as the duel's start path sends it, or to join or continue in play. */
@@ -71,6 +72,9 @@ u32 sat_home_pad(u32 raw)
         return raw | P_START;
     }
     if (IN_ATTRACT || PAUSE_OK) return raw | P_START;
+    /* Character select (and the story before it): the arcade takes only Attack (MAME 0.289: Start leaves the timer running), but a Saturn player
+       confirms with Start, so player 1's Start is Attack there. Player 2 keeps Start to join. */
+    if (SELECTING && !(raw & P_START)) return (raw | P_START) & ~P_A;
     return raw;
 }
 
