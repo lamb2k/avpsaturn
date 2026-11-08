@@ -6,7 +6,7 @@ rm = importlib.util.module_from_spec(spec); spec.loader.exec_module(rm)
 done = False
 def step(v, s):
     global done
-    if not done:
+    if not done and v > 300:   # after the runtime's own start (its data init would undo an earlier write), before the game start
         done = True
         s.m.call("memory_write", address=hex(s.syms["sat_warp"]), bytes="%08x" % int(os.environ["WARP"], 16))
         s.log("warp", os.environ["WARP"], s.m.read(s.syms["sat_warp"], 4).hex())

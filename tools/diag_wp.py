@@ -9,10 +9,10 @@ def step(v, s):
     global armed, hits
     if not armed:
         armed = True
-        s.log("hist", str(s.m.call("set_debug_option", history="on"))[:100])
+        s.log("hist", str(s.m.call("set_debug_option", history="on", cpu_core="interpreter"))[:100])
         for off, val in ((0x1c, os.environ.get("WPV", "0x4a9")), (0x1e, os.environ.get("WPV", "0x4a9"))):
             a = hex(s.syms["RAMB"] + REC + off); ADDRS.append(a)
-            s.log("bp", a, str(s.m.call("breakpoint_add", cpu="master", type="memory", address=a, write=True, value=val))[:120])
+            s.log("bp", a, str(s.m.call("breakpoint_add", cpu="master", type="memory", address=a, read=False, write=True, value=val))[:120])
     import time as _t
     t1 = _t.time()
     while _t.time() - t1 < 0.045:
@@ -20,12 +20,12 @@ def step(v, s):
         if "stopped: true" not in st:
             continue
         x = int.from_bytes(s.ram(REC + 0x1c, 4), "big")
-        if 0x100000 <= x < 0x200000 or x == 0:
+        if False:
             s.m.call("resume"); continue
         hits += 1
         s.log("WPHIT", hex(x), str(s.m.call("debug_status"))[:600])
-        for t, kw in (("registers_get", dict(cpu="master")), ("exec_history", dict(cpu="master", count=60))):
-            try: s.log(t, str(s.m.call(t, **kw))[:4000])
+        for t, kw in (("registers_get", dict(cpu="master")), ("exec_history", dict(cpu="master", count=400, with_registers=True))):
+            try: s.log(t, str(s.m.call(t, **kw))[:60000])
             except Exception as e: s.log(t, "err", e)
         cb = s.m.read(s.syms["sat_cpu"], 64)
         s.log("68k", [hex(int.from_bytes(cb[i:i + 4], "big")) for i in range(0, 64, 4)], "rec", s.ram(REC, 0x40).hex())
