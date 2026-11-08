@@ -340,13 +340,14 @@ SECTIONS {{
         rom[at:at + len(d)] = d
     (ISO / "ROM.BIN").write_bytes(rom)
     # KEEP_ROUND_FILES=1, for a kernel-only rebuild: round files never touch pages holding cold code, so they stay valid while those pages are the same.
-    ends = [[st[0], syms[f"_sat_st{i}_end"]] for i, st in enumerate(STRETCHES)]
+    # The pack in main ends where cold1 starts: a kept file built for a lower cold1 would have its last tiles overwritten by cold code (seen as wrong tiles on crates in stages 24 and 1e).
+    ends = [[st[0], syms[f"_sat_st{i}_end"]] for i, st in enumerate(STRETCHES)] + [[cold1_at, 0]]
     ends_file = WORK / "round_code_ends.json"
     if os.environ.get("KEEP_ROUND_FILES") and (not ends_file.exists() or json.loads(ends_file.read_text()) == ends):
         n = refresh_restores(rom)
         print("round files kept; ROM restore bytes refreshed in", n, "files")
     else:
-        round_files(rom, [tuple(e) for e in ends], cold1_at)
+        round_files(rom, [tuple(e) for e in ends[:-1]], cold1_at)
     ends_file.write_text(json.dumps(ends))
     (WORK / "rom_final.bin").write_bytes(rom)
     b = OBJ / "boot.o"
