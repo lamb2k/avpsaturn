@@ -468,7 +468,9 @@ static const u8 *palette_page(const u8 *base, u16 mask, int page)
 static u32 drawn_pal[SAT_GFX_PAGES], drawn_s1, drawn_s2, drawn_s3;
 static int drawn_valid;
 /* Master side: counts pack swaps; each snapshot carries it to the drawing side (snap.pad). */
+#if SAT_GFX_RANKFIX
 static u16 pack_gen;
+#endif
 
 static void update_palette(void)
 {
@@ -714,8 +716,10 @@ static void update_priority(u16 layers, u16 pri)
                and that upper layer shows the sprite over itself unless it hides the sprite too. One VDP2 level cannot do both, so the sprite goes
                over the highest such layer. The score table needs it: the heading's sprites (priority 4) sit on scroll 3's band (value 2), drawn over
                scroll 1 (value 7) so the list scrolls away under it; under the band the heading vanished. */
+#if SAT_GFX_RANKFIX
             for (i = n - 1; i > below; i--)
                 if (lp[i] < lp[below] && p > lp[i]) { level = 3 + 2 * i; sat_gfx_stats.nonmonotone++; break; }
+#endif
         }
 #ifdef SAT_HOME
         if (snap.home && level > 6) level = 6;   /* the menu layer (NBG3, 7) in front of sprites too; a sprite wins ties, so 7 would hide it */
@@ -1020,7 +1024,9 @@ void sat_gfx_snapshot(void)
         }
     }
     snap.objects = (u16)count;
+#if SAT_GFX_RANKFIX
     snap.pad = pack_gen;
+#endif
 #ifdef SAT_HOME
     snap.home = (u16)sat_home_mode;
     if (snap.home)
@@ -1050,12 +1056,15 @@ void sat_gfx_draw(void)
     u16 s1x = snap.s1x, s1y = snap.s1y, s2x = snap.s2x, s2y = snap.s2y, s3x = snap.s3x, s3y = snap.s3y;
     u16 bgon = 0;
     int row_active = snap.row_active;
+#if SAT_GFX_RANKFIX
     static u16 gen_seen;
+#endif
 
     /* A new pack came in (sat_gfx_swap_pack, on the master). The master's clear of the blank list can sit behind stale lines in this CPU's
        cache, and a layer whose words held through the load is skipped by its unchanged sum: cells drawn blank while their tiles were missing
        from the old pack stayed blank. The score table after GAME OVER starts on the stage's pack, which lacks its picture, and kept a black
        background and an empty scroll 2 after the front end's pack came in. So forget the blanks here too and redraw every layer. */
+#if SAT_GFX_RANKFIX
     if (snap.pad != gen_seen)
     {
         u32 n;
@@ -1063,6 +1072,7 @@ void sat_gfx_draw(void)
         for (n = 0; n < BLANK_WAYS; n++) blank_seen[n] = NOKEY;
         drawn_valid = 0;
     }
+#endif
 
     stamp = (u16)(stamp + 1U == 0x10000UL ? 1U : stamp + 1U);
     cache_frame(&spr_cache); cache_frame(&s1_cache); cache_frame(&s2_cache); cache_frame(&s3_cache);
@@ -1222,7 +1232,9 @@ int sat_gfx_swap_pack(const void *pack)
     u32 n;
     if (!pack || !open_pack((const u8 *)pack)) return 0;
     for (n = 0; n < BLANK_WAYS; n++) blank_seen[n] = NOKEY;
+#if SAT_GFX_RANKFIX
     pack_gen++;   /* the drawing side forgets its blanks and redraws every layer when the next snapshot carries this */
+#endif
     return 1;
 }
 
