@@ -339,7 +339,7 @@ SECTIONS {{
     _sat_cold1_end = .;
   }}
 {stretch_ld}  .lw {LW_BASE:#x} : {{
-    *(.text .text.* .rodata .rodata.* .data .data.*)
+    *(.text .text.* .rodata .rodata.* .data .data.*) *(.lwcode)
     . = ALIGN(4);
   }}
   .lwbss (NOLOAD) : {{ _sat_lw_bss_start = .; *(.lwgfx) *(.bss COMMON) . = ALIGN(4); _sat_lw_bss_end = .; }}

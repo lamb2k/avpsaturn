@@ -562,7 +562,7 @@ static const u8 home_pal[64] __attribute__((aligned(2))) = {
    a space between words; rows of one block share one map (home_row_map).
    Fallback: a row with fewer than 4 blank columns keeps the 16 pixel centre crop (no arcade text line found has fewer; the continue line
    has 7). Play's HUD rows (0-5 and 25 up, the audit's quick fix: the enemy and boss portraits sit on rows 5 and 25) keep the flush map (their middle 4 columns dropped) when those are blank. Replaces the HUD-only map at home. */
-#define HOME_OS __attribute__((optimize("Os"), section(".data.homefit")))   /* low work RAM (.lw): the high work RAM image is full */
+#define HOME_OS __attribute__((optimize("Os"), section(".lwcode")))   /* low work RAM (.lw): the high work RAM image is full */
 #define BL(m, c) (((m)[(c) >> 5] >> ((c) & 31)) & 1)
 /* Droppable columns of one row, bit c of m[0..1]: no tile, the row's fill cell, the continue line's space cells (0x1100/0x1110, a solid
    tile), or a cell inside a run of one repeated cell (a banner or rule line). */
