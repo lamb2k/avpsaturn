@@ -37,7 +37,7 @@ extern volatile int sat_fit_scale;
 #define SAT_GFX_MAX_COMMANDS 2044 /* 64 KB table less clip, local, clear and end */
 #define SAT_GFX_SPRITE_SLOTS 3584 /* 448 KB of 128 byte textures */
 #ifdef SAT_HOME
-#define SAT_GFX_S1_SLOTS (992 - 58) /* the menu font takes the top 58 cells */
+#define SAT_GFX_S1_SLOTS (992 - 59) /* the menu font takes the top 58 cells, the menu panel one more */
 #else
 #define SAT_GFX_S1_SLOTS 992 /* 4 stay clear */
 #endif

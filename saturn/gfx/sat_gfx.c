@@ -579,7 +579,8 @@ static void draw_scroll1(u16 sx, u16 sy)
             {
                 u32 ch = (row < 28 && col < 44) ? *(volatile u8 *)((unsigned long)&sat_home_text[row][col] | 0x20000000UL) : 0;
                 if (ch == 1)
-                    name = CLEAR_NAME; /* a clear panel behind menu text */
+                    name = snap.home == 1 ? name_of(30, 1, (CELL_S1 + (u32)(SAT_GFX_S1_SLOTS + 58) * 32) >> 5) /* the translucent menu panel */
+                                          : CLEAR_NAME;
                 else if (ch & 0x7f)
                     name = name_of((ch & 0x80) ? 31 : 30, 1, (CELL_S1 + (u32)(SAT_GFX_S1_SLOTS + (ch & 0x7f) - 33) * 32) >> 5);
                 else if (snap.home_clear)
@@ -1037,6 +1038,10 @@ void sat_gfx_draw(void)
     update_priority(layers, snap.priority);
 #ifdef SAT_HOME
     if (snap.home) VDP2R(0xfa) = 7; /* text in front */
+    /* The menu panel: scroll 1 (NBG2) cells of dot code 15 blend with what lies under them (special colour calculation per dot, code group A);
+       the font's dots (codes 1 to 9) stay solid. Off again with the menus. */
+    if (snap.home == 1) { VDP2R(0x24) = 0; VDP2R(0x26) = 0x0080; VDP2R(0xee) = 0x0020; VDP2R(0x10a) = 22; VDP2R(0xec) = 0x0004; }
+    else VDP2R(0xec) = 0;
 #endif
     STAGE(1);
     update_rowscroll();
@@ -1235,7 +1240,11 @@ int sat_gfx_init(const void *pack)
 
     VDP2R(0x00) = 0x8001;                         /* display on */
     #ifdef SAT_HOME
-    vram_copy(VDP2_VRAM + CELL_S1 + (u32)SAT_GFX_S1_SLOTS * 32, home_font, sizeof home_font);
+    /* The font with its clear dots as dot code 15, the panel's: letters sit on the translucent panel, not in holes through it. */
+    { u32 n; for (n = 0; n < sizeof home_font; n += 4) { u32 w = (u32)home_font[n] << 24 | (u32)home_font[n + 1] << 16 | (u32)home_font[n + 2] << 8 | home_font[n + 3], o = 0; int k;
+        for (k = 0; k < 32; k += 4) o |= (((w >> k) & 15) ? ((w >> k) & 15) : 15u) << k;
+        put32(VDP2_VRAM + CELL_S1 + (u32)SAT_GFX_S1_SLOTS * 32 + n, o); } }
+    { u32 n; for (n = 0; n < 32; n += 4) put32(VDP2_VRAM + CELL_S1 + (u32)(SAT_GFX_S1_SLOTS + 58) * 32 + n, 0xffffffffUL); }   /* the menu panel: every dot code 15 (pen 14, near black) */
 #endif
     return 1;
 }
