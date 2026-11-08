@@ -163,6 +163,17 @@ u32 sat_stage_ctl;
 static void smash_hold_stage(void)
 {
     u32 a;
+    {   /* RANDOM arenas 0e, 1c, 1e, 24 (READ): the stage's controller is the pool record (0xffce80, stride 0x100, 4 of them, run by 0x1bdbe)
+           whose class +2 is stage word / 2 (table 0x1bdf0: 0x2a7cc, 0x2d3d6, 0x2dcaa, 0x2f104). Each waits in state +4 = 2 (0e and 24: sub-state
+           +5 = 0) for its section script's done flag +0x1b (set at 0x207b4), then walks on to the end state that sets 0xff81f3 and the next stage.
+           Holding the flag at 0 keeps the arena a fight; s87.log: 0e sat in that state the whole run. */
+        u16 sw = r16(0xff81e8);
+        if (sw == 0x0e || sw == 0x1c || sw == 0x1e || sw == 0x24) {
+            for (a = 0xffce80u; a < 0xffd280u; a += 0x100u)
+                if (r8(a) && r8(a + 2) == (u8)(sw >> 1) && r8(a + 4) == 2 && ((sw == 0x1c || sw == 0x1e) || r8(a + 5) == 0)) w8(a + 0x1b, 0);
+            return;
+        }
+    }
     if (r16(0xff81e8) != 2) return;
     if (!sat_stage_ctl) {
         for (a = 0xffce80u; a < 0xffd680u; a += 0x40u) {
