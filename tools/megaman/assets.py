@@ -8,7 +8,7 @@ Reads the MAME captures of tools/megaman/run_mame.sh (obj.txt, pal.bin, tiles.bi
 Tiles are deduped across all poses with H/V flips counted as the same tile. Keys come from sprite keys no AvP stage file uses
 (EXCLUDE_KEYS_FROM: another guest's remap.json, so the two guests never share a key).
 usage: assets.py FULL_CAPTURE WIN_CAPTURE SELECT_CAPTURE WINDOWS_JSON AVP_WORK OUT [AVP_GFX] [EXCLUDE_KEYS_FROM]"""
-import colorsys, json, pathlib, struct, sys
+import colorsys, json, os, pathlib, struct, sys
 from PIL import Image
 
 HUD_CODE = 0x16000               # MvC HUD/portrait bank and above
@@ -146,8 +146,12 @@ def main():
     def body_only(tl):
         """Palette 0 also carries his dust and afterimage objects: keep the largest 16-px-connected group of
         palette 0 tiles (his body), and Rush/effect tiles as captured."""
-        b = [t for t in tl if t[5] == 0]
-        rest = [t for t in tl if t[5] != 0]
+        rest = [t for t in tl if t[5] not in (0, 14)]
+        return largest(tl, 0) + largest(tl, 14) + rest     # palette 14: one Mega Buster shot on screen (owner fit rule)
+
+    def largest(tl, pal):
+        b = [t for t in tl if t[5] == pal]
+        rest = []
         if not b:
             return rest
         left, groups = set(range(len(b))), []
@@ -178,6 +182,49 @@ def main():
             else:
                 seq.append([pid, 1, list(anc)])
         moves[name] = seq
+    # Throw: MvC's throw window is mostly walking and punches; keep only poses no other move shows (owner: real throw frames only).
+    other = {pid for m, sq in moves.items() if m != "throw" for pid, *_ in sq}
+    moves["throw"] = [x for x in moves["throw"] if x[0] not in other]
+
+    def thin(seq, n):
+        """Keep the first and last pose, holds of 5+ frames (start-up/active/end), and every n-th pose between;
+        a cut pose's frames go to the kept pose before it, so the move's timing is unchanged. No move is dropped."""
+        out = []
+        for i, (pid, d, anc) in enumerate(seq):
+            if i == 0 or i == len(seq) - 1 or d >= 5 or i % n == 0:
+                out.append([pid, d, anc])
+            else:
+                out[-1][1] += d
+        return out
+    def trim_to_budget(budget, keyof):
+        """Owner 11-08: one set for every stage, no bigger than the Hunter's own tiles. Every move keeps its first pose,
+        its longest hold (active frame) and its last pose; then poses are added back, longest holds first, while the
+        total stays within budget, one rank per move at a time. Cut poses give their frames to the kept pose before them, so timing is unchanged."""
+        keep = {}
+        for m, sq in moves.items():
+            mid = [max(sq[1:-1], key=lambda x: x[1])[0]] if len(sq) > 2 else []
+            keep[m] = {x[0] for x in sq[:1] + sq[-1:]} | set(mid)
+        have = set().union(*(keyof(p) for ks in keep.values() for p in ks)) if keep else set()
+        # round robin over moves (each move's longest holds first), so no move is starved
+        ranked = {m: sorted(((d, pid) for pid, d, _ in sq), reverse=True) for m, sq in moves.items()}
+        cand = sorted(((r, -d, m, pid) for m, lst in ranked.items() for r, (d, pid) in enumerate(lst)))
+        for r, d, m, pid in cand:
+            if pid in keep[m]:
+                continue
+            new = keyof(pid) - have
+            if len(have) + len(new) <= budget:
+                keep[m].add(pid); have |= new
+        out = {}
+        for m, sq in moves.items():
+            o = []
+            for pid, d, anc in sq:
+                if pid in keep[m] or not o:
+                    o.append([pid, d, anc])
+                else:
+                    o[-1][1] += d
+            out[m] = o
+        return out
+    BUDGET = int(os.environ.get("MM_BUDGET", "795"))     # smallest Hunter own-tile figure over the play stages (fit_all.log)
     fr = caps["sel"][0]
 
     def group(f, box, pals):
@@ -212,7 +259,12 @@ def main():
 
     def keyset(names):
         return sorted({keys[e[2]] for m in names for pid, _, _ in moves.get(m, []) for e in P[pid]})
-    A = dict(keys=keys, tiles=len(canon), poses=P, moves=moves, portraits=portraits, colours=cols, default_colour=DEFAULT_TONE,
+    pkeys = {keys[e[2]] for v in portraits.values() for e in v["tiles"]}
+    loose = sorted(set(keyset(moves)) | pkeys)
+    tight_moves = trim_to_budget(BUDGET - len(pkeys), lambda pid: {keys[e[2]] for e in P[pid]})
+    tight = sorted({keys[e[2]] for m, sq in tight_moves.items() for pid, *_ in sq for e in P[pid]} | pkeys)
+    # Owner 11-08: ONE trimmed set on every stage, sized to the tightest stage, so he behaves the same everywhere.
+    A = dict(keys=tight, all_keys=keys, untrimmed_keys=len(loose), thinned_moves=tight_moves, budget=BUDGET, poses_kept={m: len(sq) for m, sq in tight_moves.items()}, tiles=len(canon), poses=P, moves=moves, portraits=portraits, colours=cols, default_colour=DEFAULT_TONE,
              codes_seen=len(ckey), source="MvC (user ROM set mvsc) via tools/megaman/run_mame.sh",
              move_keys={m: len(keyset([m])) for m in moves}, portrait_keys=len({e[2] for v in portraits.values() for e in v["tiles"]}))
     (out / "remap.json").write_text(json.dumps(A))
@@ -243,7 +295,7 @@ def main():
         for j, pid in enumerate(ids):
             draw(P[pid], cols[DEFAULT_TONE], img, 65 + 130 * j, 155)
         img.save(strips / f"move_{m}.png")
-    print(json.dumps(dict(tiles=len(canon), codes=len(ckey), poses=len(poses), moves={m: (len(s), sum(x[1] for x in s)) for m, s in moves.items()},
+    print(json.dumps(dict(loose_keys=len(loose), tight_keys=len(tight), tiles=len(canon), codes=len(ckey), poses=len(poses), moves={m: (len(s), sum(x[1] for x in s)) for m, s in moves.items()},
                           move_keys=A["move_keys"], portraits={k: len(v["tiles"]) for k, v in portraits.items()}, free_keys=len(free))))
 
 
