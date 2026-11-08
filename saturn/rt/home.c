@@ -129,6 +129,9 @@ static const u8 rush_round[5] = { 0, 1, 2, 5, 6 };
 volatile u32 sat_home_rush;            /* 0 off, else fight number 1 to 5; 6 result shown */
 u32 sat_home_rush_t[10];               /* vblanks: start and clear of each fight */
 static u16 rush_hp;
+extern struct { u32 current, loads, sectors, last_vblank; } sat_rounds;
+static u32 rush_mark;                  /* stage file loads when the fight was set up */
+static u8 rush_mark_set;
 static u8 rush_played;                 /* the rush's game has left attract */
 static u8 rush_phase;                  /* 0 wait for the fight, 1 in the fight, 2 cleared, wait for the advance */
 static void rush_time(char *b, u32 v)  /* mm:ss.cc from vblanks (60 per second) */
@@ -187,12 +190,16 @@ static void rush_result(void)
 static void rush_poll(void)
 {
     u32 n = sat_home_rush, w;
-    if (!n || n > 5) { rush_played = 0; return; }
+    if (!n || n > 5) { rush_played = 0; rush_mark_set = 0; return; }
     if (IN_ATTRACT) { if (rush_played) { sat_home_rush = 0; rush_phase = 0; rush_played = 0; } return; }   /* game over (the start itself leaves attract after the menu) */
     rush_played = 1;
     w = (u32)(G(0xff81e8) << 8 | G(0xff81e9));
     if (rush_phase == 0) {
-        if (w == rush_stage[n - 1] && G(0xff8001) == 2 && G(0xff8380) && !G(0xff81f3)) {
+        /* The card waits for the fight's stage file (sat_rounds.loads moves on) and 90 vblanks of its picture. */
+        if (!rush_mark_set) { rush_mark = sat_rounds.loads; rush_mark_set = 1; }
+        if (w == rush_stage[n - 1] && G(0xff8001) == 2 && G(0xff8380) && !G(0xff81f3)
+            && sat_rounds.loads != rush_mark && sat_vblanks_now() - sat_rounds.last_vblank > 90) {
+            rush_mark_set = 0;
             if (n > 1 && rush_hp) { G(0xff83c0) = (u8)(rush_hp >> 8); G(0xff83c1) = (u8)rush_hp; }
             rush_card((int)n);
             sat_home_rush_t[2 * n - 2] = sat_vblanks_now();
