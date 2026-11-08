@@ -2,8 +2,8 @@
 # Run through saturn/rt/play_yaba.py WORK this_file SECONDS with the lane's own Yaba (YABA_EXE, YABA_INI, YABA_PORT).
 import time
 n = 0; lastp = 0; sel_at = None; play_at = None; shots = 0; nextshot = 0
-PLAN = [(0, 3, ["right"]), (3, 4.5, ["up"]), (4.5, 6, ["down"]), (6, 7, ["b"]), (7, 8, ["a"]), (8, 10, ["left"]), (10, 11, ["c"]), (11, 12, ["right", "b"]),
-        (12, 14, []), (14, 30, ["right"])]
+PLAN = [(0, 2, ["right"]), (2, 3, ["up"]), (3, 4, ["down"]), (4, 4.15, ["a"]), (5, 5.15, ["a"]), (6, 6.15, ["b"]), (6.5, 6.65, ["b"]), (7, 7.15, ["b"]),
+        (8, 8.15, ["c"]), (9, 9.15, ["b", "c"]), (11, 13, ["left"]), (13, 13.15, ["a"]), (14, 30, [])]
 
 
 def step(v, s):
@@ -29,13 +29,14 @@ def step(v, s):
         if n % 30 == 0: s.shot(f"pre{n:04d}")
         return
     if play_at is None:
-        play_at = now; s.log("play kind", a[0x380 + 0xd2], "file", s.word("sat_rounds", 0))
+        if a[0x384] != 2: return   # the round proper: the player block leaves its entry state (08xxxx)
+        play_at = now - 4; s.log("play kind", a[0x380 + 0xd2], "file", s.word("sat_rounds", 0))
     t = now - play_at
     keys = []
     for t0, t1, k in PLAN:
         if t0 <= t - 4 < t1: keys = k
     s.set(keys)
     if now > nextshot and t > 3:
-        nextshot = now + 0.7; shots += 1
+        nextshot = now + 0.35; shots += 1
         s.shot(f"mm{shots:02d}_{a[0x384:0x387].hex()}")
     if t > 36: s.stop()

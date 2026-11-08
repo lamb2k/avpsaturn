@@ -11,13 +11,38 @@ usage: gen_runtime.py REMAP_JSON OUT_INC"""
 import json, sys
 
 MOVES = ("idle", "walk", "walkback", "dash", "crouch", "jump", "lp", "hp", "hk", "slide", "buster", "rush", "throw", "hit_etc", "win",
-         "shoot", "shot")
+         "shoot", "shot", "hit", "knockdown", "getup", "ko")
+
+
+def split_hits(P, M):
+    """MvC's hit window (hit_etc) holds his idle loop, stagger poses, the fall and the lying pose: split it into hit (stagger),
+    knockdown (fall then lying), getup (the fall poses reversed, then standing) and ko (lying, held)."""
+    idle = {pid for pid, *_ in M["idle"]}
+    def h(p):
+        e = [x for x in P[p] if x[5] == 0]
+        return max(x[1] for x in e) + 16 - min(x[1] for x in e) if e else 0
+    hit, fall, lying = [], [], []
+    for pid, d, anc in M["hit_etc"]:
+        if pid in idle:
+            continue
+        if h(pid) <= 48:
+            if pid not in [x[0] for x in lying]: lying.append([pid, d, anc])
+        elif h(pid) < 80:
+            if pid not in [x[0] for x in fall]: fall.append([pid, d, anc])
+        elif pid not in [x[0] for x in hit]:
+            hit.append([pid, d, anc])
+    stand = M["idle"][0] if M["idle"] else None
+    M["hit"] = hit or M["idle"][:1]
+    M["knockdown"] = fall + [[p, 40, a] for p, _, a in lying[:1]]
+    M["getup"] = [[p, 6, a] for p, _, a in reversed(fall)] + ([stand] if stand else [])
+    M["ko"] = [[p, 255, a] for p, _, a in lying[:1]] or M["knockdown"]
 TONES = ("capcom", "soft", "avp", "dark")
 
 
 def main():
     A = json.loads(open(sys.argv[1]).read())
     P, M = A["poses"], A["thinned_moves"]
+    split_hits(P, M)
     used = sorted({pid for m in MOVES for pid, *_ in M.get(m, [])})
     pidx = {p: i for i, p in enumerate(used)}
     ents, poses = [], []

@@ -81,7 +81,7 @@ int sat_guest_objects(gu8 *obj, int count, int max, gu8 *page0)
         int (*draw)(gu8 *, int, gu32, int, int, unsigned short, unsigned short) = guest_draw(grp[g].actor);
         int s = grp[g].at + shift, e = g + 1 < ngrp ? grp[g + 1].at + shift : count, i, x0 = 0, x1 = 0, bottom = -1000, n, room;
         int bx;
-        gu8 tmp[8 * 64];
+        gu8 tmp[8 * 96];
         if (!draw || s >= count) continue;
         if (e > count) e = count;
         bx = be16(obj + s * 8) & 0x3ff;
@@ -104,7 +104,7 @@ int sat_guest_objects(gu8 *obj, int count, int max, gu8 *page0)
                 if (!x1 || x < x0) x0 = x;
                 if (!x1 || x + w > x1) x1 = x + w;
             }
-            n = draw(tmp, 64, grp[g].actor, (x0 + x1) / 2, bottom, (unsigned short)(be16(obj + s * 8) & 0xfc00), (unsigned short)(be16(obj + s * 8 + 6) & 0x80));
+            n = draw(tmp, 96, grp[g].actor, (x0 + x1) / 2, bottom, (unsigned short)(be16(obj + s * 8) & 0xfc00), (unsigned short)(be16(obj + s * 8 + 6) & 0x80));
             used |= 1 << (((grp[g].actor - 0xff8380UL) >> 8) & 3);
         }
         /* replace entries s..e-1 by the n new ones, shifting the rest */
