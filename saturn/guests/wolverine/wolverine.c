@@ -24,7 +24,38 @@ static const u8 wv_row1[0x28] = {10,22,21,22,20,22,18,22,22,22,8,22,23,22,22,22,
 #define WV_OX 72
 #define WV_OY 523
 
-static u8 step_[2], left_[2], face_[2], moving_[2];
+static u8 step_[2], left_[2], face_[2], moving_[2], cur_[2] = {255, 255}, chain_[2], lastc_[2], held_[2];
+
+/* Schaefer's player block state +4 +5 +6, measured under MAME (tools/wolverine/schaefer_states.lua, 11-08):
+   020000 stand, 020002 walk (also depth and the dash), 020004 jump, 020006 attack (chain), 02000e chain finisher, 02000c gun,
+   020008 special (attack + jump), 0202xx hit (about 28 frames; 107 when knocked down), 0204xx grab and throw (walking into an enemy),
+   0208xx getting up, 04xxxx dying, 08xxxx entering. His own moves take their place: the gun is the Berserker Barrage (no gun for him),
+   the special the Tornado Claw, a hit held past 40 frames the knockdown. */
+#define ONCE(m) ((m) == WV_LP || (m) == WV_HP || (m) == WV_HK || (m) == WV_TORNADO || (m) == WV_KNOCKDOWN || (m) == WV_THROW || (m) == WV_HIT_ETC)
+static int move_for(int i)
+{
+    u8 a = R8(PL(i) + 4), b = R8(PL(i) + 5), c = R8(PL(i) + 6);
+    int m = WV_IDLE;
+    if (a == 2 && b == 0) {
+        switch (c) {
+        case 0x02: m = WV_WALK; break;
+        case 0x04: m = WV_JUMP; break;
+        case 0x06:   /* each new attack takes the next of his normals */
+            if (lastc_[i] != 0x06) chain_[i] = (u8)((chain_[i] + 1) & 1);
+            m = chain_[i] ? WV_HP : WV_LP; break;
+        case 0x0e: m = WV_HK; break;
+        case 0x0c: m = WV_BERSERKER; break;
+        case 0x08: m = WV_TORNADO; break;
+        }
+    } else if (a == 2 && b == 2) m = held_[i] > 40 ? WV_KNOCKDOWN : WV_HIT_ETC;
+    else if (a == 2 && b == 4) m = WV_THROW;
+    else if (a == 2 && b == 8) m = WV_CROUCH;   /* getting up: his crouch rises back to stand */
+    else if (a == 4) m = WV_KNOCKDOWN;
+    else if (a == 8) m = WV_WALK;
+    held_[i] = (a == 2 && b == 2) ? (u8)(held_[i] < 255 ? held_[i] + 1 : 255) : 0;
+    lastc_[i] = (a == 2 && b == 0) ? c : 0;
+    return m;
+}
 static u16 lastx_[2];
 
 static void put16(u8 *p, u16 v) { p[0] = (u8)(v >> 8); p[1] = (u8)v; }
@@ -46,14 +77,18 @@ int sat_guest_objects(u8 *obj, int count, int max, u8 *pal0)
         if (!is_wolverine(i)) continue;
         any = 1;
         x = R16(PL(i) + 0x10);
-        if (x != lastx_[i]) { face_[i] = x < lastx_[i]; moving_[i] = 6; }
-        else if (moving_[i]) moving_[i]--;
+        face_[i] = (u8)(R8(PL(i) + 0x0f) & 1);
         lastx_[i] = x;
-        move = moving_[i] ? WV_WALK : WV_IDLE;
-        /* the move's steps: hold each pose its captured frames */
+        move = move_for(i);
+        if (move != cur_[i]) { cur_[i] = (u8)move; step_[i] = 0; left_[i] = 0; }
+        /* the move's steps: hold each pose its captured frames; one-shot moves keep their last pose until the state changes */
         n = wv_move_start[move + 1] - wv_move_start[move];
         if (step_[i] >= n) step_[i] = 0;
-        if (++left_[i] >= wv_steps[wv_move_start[move] + step_[i]].frames) { left_[i] = 0; step_[i] = (u8)((step_[i] + 1) % n); }
+        if (++left_[i] >= wv_steps[wv_move_start[move] + step_[i]].frames) {
+            left_[i] = 0;
+            if (step_[i] + 1 < n) step_[i]++;
+            else if (!ONCE(move)) step_[i] = 0;
+        }
         st = wv_steps[wv_move_start[move] + step_[i]].pose;
         cam = R16(0xff8278);
         sx = (int)x - (int)cam + WV_OX;
