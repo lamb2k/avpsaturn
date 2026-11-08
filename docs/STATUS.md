@@ -6,6 +6,13 @@ Only source of current state. Branch `decomp/main`. Backlog: docs/BACKLOG.md.
 - P1: first gate measured, docs/notes/AVP_FIRST_GATE.md; recommendation GO, awaiting coordinator.
 - Whole-game comparison: not run. Hardware: UNRUN.
 
+## Wolverine option B, part 1, 2026-11-08 (lane avp-wolverine-b; EMULATOR, Yaba; hardware UNRUN)
+
+- Done: MSHvSF hit and hurt boxes per move step (tools/wolverine/boxes.py from a WV_BOXES=1 MAME run; game_bind.c wraps f_1cf54 under SAT_GUESTS and writes them over the AvP records around each collision call, depth and damage kept). Motion inputs: QCF+A -> gun slot (Berserker Barrage), F,D,DF+A -> special slot (Tornado Claw); both reached 02000c / 020008 on Yaba. Draw facing fixed (+0f set = facing right).
+- Checked: box sheets E:/AvP/learning/lane-wolverine/stills/boxb/box_before_stage02.png and box_after_stage02.png. Route: home menu, stage 02 to its clear, stage 04 played to vblank 8119, 1 KO, 0 fatals (route_wv.log). Option off: the 7 disc members match 138bdf1's (disc_base.sha).
+- Approximate: Berserker's box is the HP box (the capture caught him in hitstun). Startup and recovery are still Schaefer's state lengths; only active frames are his.
+- Open: muzzle flash still drawn (not the gun-shot pool; effect actors near ffe1xx/ffe2xx are the lead); gun bullets still hit; HUD name graphic and portrait not started.
+
 ## Whole-game check, 2026-11-06 (HOST against MAME, attract run, golden_c)
 
 Exact IRQ preemption: MAME records each real IRQ's interrupted PC and registers; lifted code takes the IRQ at the same instruction. Registers are global across tasks, as on the board. Masked as non-state: task SR/PC/USP fields, stacks, ff0258, f_1a36 save area, idle task state byte, current-task pointer. Seeded from MAME because the hardware test is skipped: object RAM, d3, a4. First divergence at dump 1179 after a one-object difference at 1125.
