@@ -63,3 +63,17 @@ Aliens also get hit by both players through the game's normal loops. A dying ali
 - It does token damage: 1, or 0 at health 0. Setting the attacker's tag byte +8 for the call sends `damage_apply` down its enemy path. Whether that table gives sensible numbers for a player's attack needs a run.
 - 0x1d716 only checks the recent-attack list used by 0x1cf54. 0x1d03e uses its own one-hit id.
 - 0x1d492 sets the KO state when health goes below 0. Blocking the continue is still to read.
+
+## Party rules, built (lane duel, 2026-11-07; EMULATOR, soft-core Yaba; hardware UNRUN)
+
+Code: saturn/rt/duel_smash.inc, hooks in duel.inc and home.c, menu in home_cold.c; all behind SAT_DUEL_MENU. Numbers are this lane's own tuning (ESTIMATE, from bot runs).
+- **Percent:** player health is held full each tick; whatever the game takes off (0x1d03e player hits, enemy hits, weapon energy drain) goes onto a percent, shown with stocks on text row 5 in the home font. Blank cells leave the game's picture.
+- **Knockback:** speed = 8 + damage x percent / 12 (1/16 px per tick, cap 400, friction 2). Hitstun idles the pad (Start still works); hit-freeze 3 to 7 vblanks on strong hits.
+- **Ring-out:** a launched fighter keeps its own place past the game's edge; 72 px past the arena bound costs a stock; back after 90 ticks at 0%, 180 ticks flashing and not hittable.
+- **Modes:** stocks 1 to 5, or 2 or 3 minutes (score is minus one per fall; a tie goes to sudden death, one stock each at 300%).
+- **Stage spawns off:** the spawn table task (record 0xff1812) is parked at its done state (+4 = 4) once it has set up. This also stops the stage's story rows: the "DEMONSTRATION" text seen in the first stills was the stage's scripted dialogue and caption, not attract mode.
+- **Pools (pools_reset 0x1729c, READ):** tag 4 0xff8680 24 x 0x80 (player shots; live list ending 0xfff072, count ee7d); tag 8 0xff9280; tag 12 0xff9580 20 x 0xc0 (aliens sent by doors and hives); tag 20 0xffae80 16 x 0x80 (spawn rows of kind 4: 0x1c146 index 4 -> alloc 0x176f0, release 0x17706).
+- **Random aliens:** the stage's own kind-4 rows (plain ones: bytes +12..+14 zero) through the table's own alloc path, entering at a random arena edge. First after 10 s, then every 8 to 15 s (low) or 3 to 6 s (high), cap 2 (low) or 3 (high). Tag 20 aliens of the stage's alien classes that the duel did not spawn are released (props in that pool stay).
+- **Open:** door and hive aliens (tag 12) still come in. Releasing them from the duel froze both players for good (s7.log), so that code is off (DUEL_CULL_DOORS). A cleared section still walks both fighters on (state 8); the arena locks again where they stop.
+- **Weapons:** each live player shot is run through the game's own hit test 0x1cf54 against the player who did not fire it. The owner field is found by a probe (sat_shot_probe). In the bot runs no shot was seen, so this is not proven.
+- **Characters:** the game's own select screen, each player with its own pad. **Arena:** ROUND 1, or RANDOM from stage words 02, 0e, 1c, 1e, 24. Random has not been run.

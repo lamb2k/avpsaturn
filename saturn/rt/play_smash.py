@@ -1,5 +1,6 @@
 # Party duel (SAT_DUEL_MENU): both pads on the real path, both attack. Logs percent, stocks, ring-outs, the knockback hit log; stills of the HUD, a launch and a ring-out.
-import time
+import time, os
+def sat_v(s): return s.word('sat_dbg',0) if 0 else int(time.time()*10)%100000
 n=0; hits=(0,0); shots=0; t0=None; pick=0; lastp=0
 def step(v,s):
     global n,hits,shots,t0,pick,lastp
@@ -15,6 +16,15 @@ def step(v,s):
             if now-lastp>.5: lastp=now; s.pulse("up",.12)
         elif now-lastp>.5: lastp=now; s.shot("home_duel"); s.pulse("start",.12)
         return
+    if sc==8:
+        if not getattr(s,"menushot",0): s.menushot=1; time.sleep(.3); s.shot("duel_menu")
+        if os.environ.get("ALIENS") and not getattr(s,"setal",0):
+            s.setal=1
+            for _ in range(3): s.pulse("down",.1); time.sleep(.3)
+            for _ in range(int(os.environ["ALIENS"])): s.pulse("right",.1); time.sleep(.3)
+            for _ in range(3): s.pulse("up",.1); time.sleep(.3)
+        if now-lastp>.8: lastp=now; s.pulse("start",.12)
+        return
     r=s.word("sat_duel_result")
     if r and not getattr(s,"res",0): s.res=now; s.log("RESULT",r,"t",round(now-(t0 or now)),"hp",u16(0x3c0),u16(0x4c0)); time.sleep(.5); s.shot(f"duel_result{r}")
     if getattr(s,"res",0):
@@ -24,6 +34,7 @@ def step(v,s):
     if a[0x380]==0 or a[0x480]==0 or a[1]!=2 or a[0x384]==4 or a[0x484]==4:
         if now-lastp>.6:
             lastp=now; pick+=1
+            if pick==2: time.sleep(1.5); s.shot("char_select")
             s.pulse("start" if pick%2 else "p2start",.1)
             if pick%6==0: s.pulse("c",.08); s.pulse("p2c",.08)
         s.set([]); return
@@ -37,7 +48,8 @@ def step(v,s):
     if rg!=getattr(s,"rg",0):
         s.rg=rg; s.log("RINGOUT",rg,"stocks",st,"pct",pc,"t",round(now-t0)); time.sleep(.2)
         if rg<=2: s.shot(f"smash_ringout{rg}")
-    if n%120==0: s.log("PCT",pc,"STOCKS",st,"rings",rg,"t",round(now-t0))
+    if os.environ.get("SHOTS") and now-getattr(s,"lastshot",0)>6: s.lastshot=now; s.shot(f"p_{sat_v(s)}"); s.log("SHOT",sat_v(s),"st",a[0x384],a[0x484],"out",s.word("sat_smash",20,1),s.word("sat_smash",21,1),"cred",a[0x18c],"x",u16(0x390),u16(0x490),"b0",a[0x1b0],"mode",a[1])
+    if n%120==0: s.log("PCT",pc,"STOCKS",st,"rings",rg,"t",round(now-t0),"aliens",s.word("sat_alien_spawns"),hex(s.word("sat_alien_last")),"spawner",s.ram(0x1816,1)[0],"culled",s.word("sat_alien_culled"),"shots",s.word("sat_shot_hits"),"probe",s.word("sat_shot_probe"),s.word("sat_shot_probe",4,16).to_bytes(16,"big").hex(),s.word("sat_shot_probe",20,2),"pool",sum(1 for i in range(16) if s.ram(0xae80+i*0x80,4)!=bytes(4)))
     if t0 and now-t0>20 and not getattr(s,"hs",0): s.hs=1; s.shot("smash_hud")
     h=(s.word("sat_duel_stats",0),s.word("sat_duel_stats",4))
     if h!=hits:
@@ -52,6 +64,7 @@ def step(v,s):
     if px<qx-60: k.append("right")
     elif px>qx+60: k.append("left")
     if n%8<3 and abs(qx-px)<70: k.append("a")
+    if abs(qx-px)>=90 and n%10<2: k.append("b"); k.append("p2b")
     if abs(qx-px)<70 and n%8>=5 and abs(qy-py)<=8: k.append("p2a")
     s.set(k)
     if now-t0>300: s.shot("duel_end"); s.stop()

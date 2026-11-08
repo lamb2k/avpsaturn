@@ -2,7 +2,7 @@
    Uses the game's own player-pair hit test (0x1d03e, as 0x1c9a8 calls it in the arcade when no enemies live, with its 1 damage friendly hit).
    The attacker's tag byte +8 is set for the call, so damage_apply takes its enemy-attack path: the game's own table, by attack and by the target's health, and the game's own hit or KO state.
    Runs on the master between task walks, once per game tick, interrupts masked: a vblank body uses the same 68000 stack and registers. */
-extern void f_1d03e(void);
+extern void f_1d03e(void), f_1cf54(void);
 #define PL(i) (0xff8380u + (u32)(i) * 0x100u)
 #ifndef DUEL_LINE
 #define DUEL_LINE 8   /* pixels of depth two fighters may differ by */
@@ -60,6 +60,9 @@ static void duel_tick(void)
     for (a = 0; a < DUEL_PLAYERS; a++)
         for (t = 0; t < DUEL_PLAYERS; t++)
             if (a != t) duel_pair(a, t);
+#ifdef SAT_DUEL_MENU
+    if (sat_smash.set) duel_shots();
+#endif
     cpu = save;
     __asm__ volatile ("ldc %0,sr" : : "r"(sr));
     for (a = 0; a < 2; a++) sat_duel_stats.last_health[a] = r16(PL(a) + 0x40);
@@ -83,7 +86,7 @@ static void duel_arena(void)
     if (!arena_set) { if (r8(PL(0) + 4) != 2 || r8(PL(1) + 4) != 2) return; arena_cam = (u16)((r16(PL(0) + 0x10) + r16(PL(1) + 0x10)) / 2 - 192); arena_hold = r16(0xff8278); arena_set = 1; }
     w16(0xff8278, arena_hold);
 #ifdef SAT_DUEL_MENU
-    if (r8(0xff8019) != smash_tick_seen) { smash_tick_seen = r8(0xff8019); smash_lost = smash_tick(arena_cam + 72, arena_cam + 312); }
+    if (r8(0xff8019) != smash_tick_seen) { smash_tick_seen = r8(0xff8019); smash_lost = smash_tick(arena_cam + 72, arena_cam + 312); smash_aliens(arena_cam + 72, arena_cam + 312); }
     return;
 #endif   /* the camera stays where it was at the lock: it led the fighters about 80 px further before */
     for (i = 0; i < DUEL_PLAYERS; i++) {
@@ -122,12 +125,15 @@ static void duel_end(void)
     sat_home_hold = 0;
     sat_duel_on = 0; arena_set = 0;
 #ifdef SAT_DUEL_MENU
-    smash_lost = 0; sat_smash.set = 0; sat_duel_stun[0] = sat_duel_stun[1] = 0;
+    smash_lost = 0; sat_smash.set = 0; alien_seed = 0; alien_own = 0; sat_duel_stun[0] = sat_duel_stun[1] = 0;
 #endif
     sat_home_restart();
 }
 void sat_duel_step(void)
 {
+#ifdef SAT_DUEL_MENU
+    if (sat_duel_on && !r8(0xff81b0) && r8(0xff8001) == 2) smash_no_stage_spawns();
+#endif
     if (!sat_duel_on || r8(0xff81b0) || r8(0xff8001) != 2 || !r8(PL(0)) || !r8(PL(1))) { duel_tick(); return; }
     duel_arena();
     duel_tick();

@@ -199,6 +199,56 @@ static int stage_select(void)
         if (e & (P_START | P_A | P_C)) { sat_home_warp = (u32)(st * 2); return 1; }
     }
 }
+#ifdef SAT_DUEL_MENU
+/* Duel rules (duel_smash.inc reads them). Characters are picked on the game's own select screen after this, each player with its own pad. */
+typedef struct { u8 stocks, minutes, aliens, p1, p2, arena; } DuelOpt;
+extern DuelOpt sat_duel_opt;
+extern u32 sat_vblanks_now(void);
+static const u8 arenas[] = { 0x02, 0x0e, 0x1c, 0x1e, 0x24 };   /* stages played through from the home start (STATUS, home features 3) */
+static int duel_setup(void)
+{
+    static const char *const labels[] = { "STOCKS", "TIME", "ALIENS", "ARENA" };
+    static const char *const times[] = { "OFF", "2 MIN", "3 MIN" };
+    static const char *const freq[] = { "OFF", "LOW", "HIGH" };
+    static const char *const arena[] = { "ROUND 1", "RANDOM" };
+    static int cur = 4;
+    sat_home_screen = 8;
+    for (;;) {
+        char b[4];
+        u32 e;
+        int i;
+        panel(19);
+        centre(19, "DUEL", 0);
+        for (i = 0; i < 4; i++) {
+            put(20 + i, 10, labels[i], i == cur);
+            b[0] = (char)('0' + sat_duel_opt.stocks); b[1] = 0;
+            put(20 + i, 22, i == 0 ? (sat_duel_opt.minutes ? "-" : b) : i == 1 ? times[sat_duel_opt.minutes ? sat_duel_opt.minutes - 1 : 0] : i == 2 ? freq[sat_duel_opt.aliens] : arena[sat_duel_opt.arena], i == cur);
+        }
+        centre(25, "START", cur == 4);
+        sat_home_cursor = (u32)cur;
+        frame();
+        e = edges();
+        if (e & P_B) return 0;
+        if (e & P_UP) cur = cur ? cur - 1 : 4;
+        if (e & P_DOWN) cur = cur < 4 ? cur + 1 : 0;
+        if (cur == 4) {
+            if (e & (P_START | P_A | P_C)) {
+                sat_home_warp = sat_duel_opt.arena ? arenas[sat_vblanks_now() % sizeof arenas] : 0;
+                if (sat_home_warp == 2) sat_home_warp = 0;
+                return 1;
+            }
+            continue;
+        }
+        if (e & (P_LEFT | P_RIGHT | P_A | P_C)) {
+            int d = (e & P_LEFT) ? -1 : 1;
+            if (cur == 0) sat_duel_opt.stocks = (u8)(sat_duel_opt.stocks + d < 1 ? 5 : sat_duel_opt.stocks + d > 5 ? 1 : sat_duel_opt.stocks + d);
+            if (cur == 1) sat_duel_opt.minutes = (u8)((sat_duel_opt.minutes == 0 ? (d > 0 ? 2 : 3) : sat_duel_opt.minutes == 2 ? (d > 0 ? 3 : 0) : (d > 0 ? 0 : 2)));
+            if (cur == 2) sat_duel_opt.aliens = (u8)((sat_duel_opt.aliens + 3 + d) % 3);
+            if (cur == 3) sat_duel_opt.arena ^= 1;
+        }
+    }
+}
+#endif
 void sat_home_menu(void)
 {
     /* Fixed positions: 0 start, 1 options, 2 duel, 3 stage select, 4 sound test, 5 screen, 6 buttons. Without the duel, item 2 is absent and the rest move up. */
@@ -223,6 +273,9 @@ void sat_home_menu(void)
         sat_home_warp = 0;
         if (p == 1) options();
         else if (p == 3) { if (stage_select()) { pick = 0; break; } }
+#ifdef SAT_DUEL_MENU
+        else if (p == 2) { if (duel_setup()) break; }
+#endif
         else if (p == 4) sound_test();
         else if (p == 5) screen_adjust();
         else if (p == 6) buttons();
