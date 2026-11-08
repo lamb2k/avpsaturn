@@ -1067,17 +1067,25 @@ void sat_gfx_vblank(void)
     }
 }
 static inline u32 slave_ticks(void) { return ((u32)*(volatile u8 *)0xfffffe12u << 8) | *(volatile u8 *)0xfffffe13u; }
-/* Before the table is touched: the last plot has ended and the master has asked for its change. */
-static void plot_wait_shown(void)
+/* Before the table and the texture slots are touched: the last plot has ended (its change may still be pending; only PTMR waits for that). */
+static void plot_wait_end(void)
 {
     u32 t0 = slave_ticks();
     if (!UNC32(plot_sync)) return;
+    while (UNC32(plot_started) != UNC32(plot_shown) && !(VDP1R(0x10) & EDSR_CEF))
+        if (((slave_ticks() - t0) & 0xffffUL) > SLAVE_WAIT_MAX) break;
+}
+/* Before PTMR: the change for the last plot has been asked for, so the new plot goes into the other buffer. */
+static void plot_wait_shown(void)
+{
+    u32 t0 = slave_ticks();
     while (UNC32(plot_started) != UNC32(plot_shown))
         if (((slave_ticks() - t0) & 0xffffUL) > SLAVE_WAIT_MAX) { VDP1R(FBCR) = 3; UNC32(plot_shown) = UNC32(plot_started); break; }
 }
 static void plot_start(void)
 {
     if (!UNC32(plot_sync)) { VDP1R(FBCR) = 3; VDP1R(PTMR) = 1; return; }
+    plot_wait_shown();
     while (VDP2R(0x04) & TVSTAT_VBLANK) ;   /* the change asked for in this vblank happens at its end; plot into the new back buffer after it */
     VDP1R(PTMR) = 1;
     UNC32(plot_started) = UNC32(plot_started) + 1;
@@ -1123,7 +1131,7 @@ void sat_gfx_draw(void)
     /* Sprites first, then the plot starts: VDP1 draws while the slave does the layers below, instead of only in what is left of the
        frame after them (lane avp-vanish: heavy layer frames left VDP1 too little time and the change came mid-plot). */
 #ifndef SAT_GFX_HOST
-    plot_wait_shown();
+    plot_wait_end();
 #endif
 #ifdef SAT_HOME
     put16(VDP1_VRAM + 32 + 12, (u16)NUDGE_X); put16(VDP1_VRAM + 32 + 14, (u16)NUDGE_Y);   /* local origin follows the screen adjust */
