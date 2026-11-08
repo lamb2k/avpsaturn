@@ -44,7 +44,7 @@ static int move_for(u32 actor, int slot)
     }
     if (a == 2 && (b == 2 || b == 4)) return M_HIT;
     if (a == 2 && b == 8) return M_GETUP;
-    if (a == 4 && b == 2) return c == 4 ? M_KNOCKDOWN : c == 6 ? M_KO : M_HIT;
+    if (a == 4 && b == 2) return c == 4 ? M_KNOCKDOWN : c == 6 ? M_KO : c == 8 ? M_GETUP : M_HIT;   /* 040208: up again (Yaba run5) */
     if (a == 4) return M_KO;
     return M_IDLE;
 }
@@ -90,7 +90,7 @@ int sat_guest_megaman_draw(u8 *out, int room, u32 actor, int ax, int bottom, u16
     n = put_pose(out, room, pose, ax, bottom, xhi, ahi, left);
     if (anim[slot].shot_t && MM_MOVES[M_SHOT][1]) {
         int sst = MM_MOVES[M_SHOT][0] + anim[slot].shot_step;
-        n += put_pose(out + n * 8, room - n, MM_STEPS[sst][0], ax + anim[slot].shot_x, bottom - 36, xhi, ahi, anim[slot].shot_dir);
+        n += put_pose(out + n * 8, room - n, MM_STEPS[sst][0], ax + anim[slot].shot_x, bottom - 4, xhi, ahi, !anim[slot].shot_dir);   /* the captured shot faces left */
         anim[slot].shot_x = (short)(anim[slot].shot_x + (anim[slot].shot_dir ? -6 : 6));
         if (++anim[slot].shot_left >= MM_STEPS[sst][1]) { anim[slot].shot_left = 0; anim[slot].shot_step = (u8)((anim[slot].shot_step + 1) % MM_MOVES[M_SHOT][1]); }
         anim[slot].shot_t--;

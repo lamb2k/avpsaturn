@@ -19,12 +19,12 @@ def step(v, s):
     playing = a[1] == 2 and a[0x380] and a[0x1e9] and a[0x1b0] == 0
     if not playing:
         if a[0x1b0] == 0 and a[9] == 2 and not a[0x1e9] and sc == 0:   # the game's select screen (ff8009 = 2, as tools/alien_measure walks it)
-            if sel_at is None: sel_at = now; s.log("select"); s.shot("sel0")
-            t = now - sel_at
-            if 3.1 < t < 3.25: s.pulse("right", .1)
-            if 3.7 < t < 3.85: s.pulse("down", .1)
-            if 4.0 < t < 4.15: s.shot("sel1")
-            if t > 4.4 and now - lastp > .6: lastp = now; s.pulse("a", .08)
+            if sel_at is None: sel_at = v; s.log("select"); s.shot("sel0"); step.done = set()
+            t = v - sel_at   # vblanks, as tools/alien_measure walks the select (right at 190, down at 225)
+            for k, at in (("right", 190), ("down", 225)):
+                if t >= at and k not in step.done: step.done.add(k); s.pulse(k, .1)
+            if t >= 245 and "shot" not in step.done: step.done.add("shot"); s.shot("sel1")
+            if t > 270 and now - lastp > .6: lastp = now; s.pulse("a", .08)
         elif a[0x1b0] == 0 and now - lastp > .7: lastp = now; s.pulse("start", .1)
         if n % 30 == 0: s.shot(f"pre{n:04d}")
         return
