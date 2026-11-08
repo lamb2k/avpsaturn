@@ -69,6 +69,17 @@ static int (*guest_draw(gu32 actor))(gu8 *, int, gu32, int, int, unsigned short,
     return 0;
 }
 
+/* The player gun shot pool (tag +8 = 4 from ff8680, class +2 = 0, owner word +0x26; MAME, tools/megaman/avp_shot.lua): a Mega Man player's
+   shot keeps hitting through the game's own path but is not drawn; his Mega Buster shot is drawn with his pose instead. */
+static int is_guest_shot(gu32 actor)
+{
+    gu8 *b = PAGE[0xff];
+    gu32 o = actor & 0xffff, owner;
+    if ((actor >> 16) != 0xff || o < 0x8680 || o >= 0x9580 || b[o + 8] != 4 || b[o + 2] != 0) return 0;
+    owner = 0xff0000UL | ((gu32)b[o + 0x26] << 8) | b[o + 0x27];
+    return guest_draw(owner) == sat_guest_megaman_draw && sat_guest_megaman_draw;
+}
+
 static int be16(const gu8 *p) { return (p[0] << 8) | p[1]; }
 
 /* obj: the snapshot's copy of the object list (count entries, room for max). page0: the snapshot's sprite palette page. Returns the new count. */
@@ -79,6 +90,8 @@ int sat_guest_objects(gu8 *obj, int count, int max, gu8 *page0)
     if (sat_guest_megaman_palette && (sat_guest_sel & 2)) sat_guest_megaman_palette(page0);
     for (g = 0; g < ngrp; g++) {
         int (*draw)(gu8 *, int, gu32, int, int, unsigned short, unsigned short) = guest_draw(grp[g].actor);
+        int shot = 0;
+        if (!draw && sat_guest_megaman_draw && is_guest_shot(grp[g].actor)) { draw = sat_guest_megaman_draw; shot = 1; }
         int s = grp[g].at + shift, e = g + 1 < ngrp ? grp[g + 1].at + shift : count, i, x0 = 0, x1 = 0, bottom = -1000, n, room;
         int bx;
         gu8 tmp[8 * 96];
@@ -93,7 +106,7 @@ int sat_guest_objects(gu8 *obj, int count, int max, gu8 *page0)
             if (y + h > bottom) bottom = y + h;
         }
         e = i;
-        if (used & (1 << (((grp[g].actor - 0xff8380UL) >> 8) & 3))) {   /* weapon or extra groups of the same body: drop */
+        if (shot || used & (1 << (((grp[g].actor - 0xff8380UL) >> 8) & 3))) {   /* weapon or extra groups of the same body, or its gun shot: drop */
             n = 0;
         } else {
             for (i = s; i < e; i++) {
