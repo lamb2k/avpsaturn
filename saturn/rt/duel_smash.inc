@@ -97,7 +97,7 @@ static int smash_tick(int lo, int hi)
         sat_smash.set = 1;
         for (i = 0; i < 2; i++) { sat_smash.held[i] = r16(PL(i) + 0x40); sat_smash.stocks[i] = sat_duel_opt.minutes ? 99 : sat_duel_opt.stocks; sat_smash.score[i] = 0; sat_smash.pct[i] = 0; sat_smash.v[i] = 0; sat_smash.out[i] = sat_smash.inv[i] = sat_smash.stun[i] = 0; }
 #ifdef DUEL_KO_TEST   /* test build only: health held at 1, so any hit is the game's own KO (state 4), to reach the KO-as-fall path */
-        for (i = 0; i < 2; i++) { sat_smash.held[i] = 1; w16(PL(i) + 0x40, 1); }
+        for (i = 0; i < 2; i++) { sat_smash.held[i] = 1; w16(PL(i) + 0x40, 1); sat_smash.stocks[i] = 2; }
 #endif
         sat_smash.clock = (u32)sat_duel_opt.minutes * 60u * 60u; sat_smash.sudden = 0;
         sat_home_clear(); sat_home_mode = 1;

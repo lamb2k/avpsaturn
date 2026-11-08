@@ -23,6 +23,10 @@ def step(v,s):
             for _ in range(3): s.pulse("down",.1); time.sleep(.3)
             for _ in range(int(os.environ["ALIENS"])): s.pulse("right",.1); time.sleep(.3)
             for _ in range(3): s.pulse("up",.1); time.sleep(.3)
+        if os.environ.get("MENU") and not getattr(s,"setmenu",0):   # e.g. MENU=up,right,right: cursor starts on START
+            s.setmenu=1
+            for kk in os.environ["MENU"].split(","): s.pulse(kk,.1); time.sleep(.3)
+            time.sleep(.3); s.shot("duel_menu_set")
         if now-lastp>.8: lastp=now; s.pulse("start",.12)
         return
     r=s.word("sat_duel_result")
@@ -32,13 +36,22 @@ def step(v,s):
         return
     if a[0x1b0]: return
     if a[0x380]==0 or a[0x480]==0 or a[1]!=2 or a[0x384]==4 or a[0x484]==4:
+        if os.environ.get("SELSHOTS") and getattr(s,"seln",0)<24 and now-getattr(s,"sellast",0)>.5:
+            s.sellast=now; s.seln=getattr(s,"seln",0)+1; s.shot(f"sel_{s.seln:02d}"); s.log("SEL",s.seln,"mode",a[1],"p",a[0x380],a[0x480],"pick",pick)
+        if a[1]==2 and getattr(s,"menushot",0) and getattr(s,"m2",None) is None: s.m2=pick
+        if getattr(s,"m2",None) is not None and pick>=s.m2+2 and not getattr(s,"selwait",0):   # after both start presses   # the select screen: it changes resolution, so wait for the picture (s36.log: about 3 s after mode 2)
+            s.selwait=1
+            for j in range(4): time.sleep(0.8); s.shot(f"char_select_{j}")
+            for side,keys in (("",os.environ.get("P1MOVE","")),("p2",os.environ.get("P2MOVE",""))):
+                for kk in keys.split(","):
+                    if kk: s.pulse(side+kk,.1); time.sleep(.35)
+            time.sleep(.4); s.shot("char_select_moved"); lastp=time.time()
         if now-lastp>.6:
             lastp=now; pick+=1
-            if pick==2: time.sleep(1.5); s.shot("char_select")
             s.pulse("start" if pick%2 else "p2start",.1)
             if pick%6==0: s.pulse("c",.08); s.pulse("p2c",.08)
         s.set([]); return
-    if t0 is None: t0=now; s.shot("duel_begin")
+    if t0 is None: t0=now; s.shot("duel_begin"); s.log("CHARS d2",a[0x380+0xd2],a[0x480+0xd2],"stage",hex(u16(0x1e8)),"menu",s.word("sat_duel_opt",0,4).to_bytes(4,"big").hex() if "sat_duel_opt" in s.syms else "")
     pc=(s.word("sat_smash",0,2),s.word("sat_smash",2,2)); st=(s.word("sat_smash",16,1),s.word("sat_smash",17,1)); rg=s.word("sat_smash",44)
     ln=s.word("sat_smash_log")
     while getattr(s,"logn",0)<ln:
