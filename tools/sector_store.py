@@ -1,7 +1,7 @@
 #!/usr/bin/env python
 """Shared sector store: every unique 2 KB sector of the round files R*.BIN once, in one disc file STORE.BIN, so the full game fits an 80-minute CD-R.
 Layout (boot.c load_regions reads it):
-  sector 0      u32 'SST1', u32 rounds, then per round u32 first run, u32 runs (round i at byte 8 + 8 i)
+  sector 0      (0 and 1 past 255 rounds) u32 'SST1', u32 rounds, then per round u32 first run, u32 runs (round i at byte 8 + 8 i)
   sectors 1..   runs, u32 each: store sector << 14 | sectors (1..16383), all rounds' runs back to back
   then          data sectors, in first-use order (round 0, 1, ...), so a round's reads stay mostly sequential.
 Reading a round's runs in order gives back its R*.BIN byte for byte; the loader then walks that stream exactly as it walks the file.
@@ -42,10 +42,11 @@ def build(files, dup=512):
             i = j
         rounds.append(runs)
     nruns = sum(len(r) for r in rounds)
-    if 8 + 8 * len(rounds) > SEC:
+    hs = -(-(8 + 8 * len(rounds)) // SEC)   # header sectors: 1 up to 255 rounds; 2 (up to 511) only with guest files, which boot.c reads under STORE_HEAD2
+    if hs > 2:
         raise SystemExit("sector store: too many rounds")
     run_secs = -(-nruns * 4 // SEC)
-    base = 1 + run_secs
+    base = hs + run_secs
     if base + len(data) >= 1 << 18:
         raise SystemExit("sector store: too large")
     head = struct.pack(">II", MAGIC, len(rounds))
@@ -54,7 +55,7 @@ def build(files, dup=512):
         head += struct.pack(">II", first, len(r)); first += len(r)
         for q, n in r:
             tab += struct.pack(">I", (base + q) << 14 | n)
-    out = head + bytes(SEC - len(head)) + tab + bytes(run_secs * SEC - len(tab)) + b"".join(data)
+    out = head + bytes(hs * SEC - len(head)) + tab + bytes(run_secs * SEC - len(tab)) + b"".join(data)
     return out, rounds
 
 
@@ -63,9 +64,10 @@ def rebuild(store, i):
     magic, n = struct.unpack_from(">II", store)
     assert magic == MAGIC and i < n
     first, cnt = struct.unpack_from(">II", store, 8 + 8 * i)
+    hs = -(-(8 + 8 * n) // SEC)
     out = bytearray()
     for j in range(first, first + cnt):
-        w = struct.unpack_from(">I", store, SEC + 4 * j)[0]
+        w = struct.unpack_from(">I", store, hs * SEC + 4 * j)[0]
         q, c = w >> 14, w & CMAX
         out += store[q * SEC:(q + c) * SEC]
     return bytes(out)

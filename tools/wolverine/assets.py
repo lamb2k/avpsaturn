@@ -27,7 +27,7 @@ def sx(v):
 def frames(path):
     fr, cur = {}, None
     for l in open(path):
-        if l[0] == "f":
+        if l.startswith("f "):
             cur = int(l[2:]); fr[cur] = []; continue
         x, y, c, a = (int(v, 16) for v in l.split())
         if c or a:
@@ -99,6 +99,16 @@ def main():
     gfx = pathlib.Path(sys.argv[6] if len(sys.argv) > 6 else "E:/AvP/learning/lane-satgfx/gfx.bin")
     out.mkdir(parents=True, exist_ok=True)
     fr, T = frames(cap / "obj.txt"), tiles(cap / "tiles.bin")
+    # Extra captures: WV_EXTRA="DIR:name=a-b,..." (frames of that run, kept apart by an offset), e.g. the throw run (throw.txt).
+    for n, spec in enumerate(x for x in os.environ.get("WV_EXTRA", "").split(";") if x):
+        d, ws = spec.rsplit(":", 1)
+        off = 100000 * (n + 1)
+        fr.update({f + off: v for f, v in frames(pathlib.Path(d) / "obj.txt").items()})
+        T.update(tiles(pathlib.Path(d) / "tiles.bin"))
+        for w in ws.split(","):
+            nm, r = w.split("=")
+            a, b = (int(v) for v in r.split("-"))
+            WINDOWS[nm] = (a + off, b + off)
     canon, ckey = {}, {}         # canonical pixels -> index; code -> (index, hflip, vflip)
 
     def tile(code):

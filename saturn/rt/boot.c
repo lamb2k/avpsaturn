@@ -28,7 +28,13 @@ static unsigned long load_head[512];
 #ifdef SECTOR_STORE
 /* SECTOR_STORE (tools/sector_store.py): the round files live as runs of one shared STORE.BIN. RNNN.BIN names round NNN; its runs, read in order,
    are that file's sectors, so the walk below sees the same stream and the cart gets the same bytes. Adjacent runs were joined when packed. */
+#ifdef STORE_HEAD2   /* guest builds: more than 255 rounds, a two-sector directory */
+static unsigned long store_dir[1024], store_run[512];
+#define STORE_HS (store_dir[1] > 255 ? 2 : 1)
+#else
 static unsigned long store_dir[512], store_run[512];
+#define STORE_HS 1
+#endif
 static Sint32 run_at, run_left, run_sec = -1, run_next, run_end;
 static Sint32 vread(GfsHn h, Sint32 secs, unsigned char *dest)
 {
@@ -37,7 +43,7 @@ static Sint32 vread(GfsHn h, Sint32 secs, unsigned char *dest)
         if (!run_left) {
             Sint32 s;
             if (run_next >= run_end) return -1;
-            s = 1 + run_next / 512;
+            s = STORE_HS + run_next / 512;
             if (s != run_sec) {
                 if (GFS_Seek(h, s, GFS_SEEK_SET) < 0 || GFS_Fread(h, 1, store_run, 2048) != 2048) return -2;
                 run_sec = s;
@@ -66,6 +72,9 @@ static long load_regions(const char *name, void (*mark)(void))
     /* The directory is read once and kept (the loader stays resident); so is a one-sector run table, so a load seeks only to its own runs. */
     if (store_dir[0] != 0x53535431u) {
         if (GFS_Fread(h, 1, store_dir, 2048) != 2048 || store_dir[0] != 0x53535431u) { store_dir[0] = 0; GFS_Close(h); GFS_Reset(); return -0x100; }
+#ifdef STORE_HEAD2
+        if (STORE_HS == 2 && GFS_Fread(h, 1, store_dir + 512, 2048) != 2048) { store_dir[0] = 0; GFS_Close(h); GFS_Reset(); return -0x100; }
+#endif
         run_sec = -1;
     }
     if ((unsigned long)r >= store_dir[1]) { GFS_Close(h); GFS_Reset(); return -0x100; }
