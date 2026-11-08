@@ -25,6 +25,58 @@ static void load(const char *name, void *dest, unsigned long code)
 /* Between rounds the runtime calls this through LOADER_API (lifted code never does): one file of whole sectors, its first sector a list of
    u32 count, then count pairs of u32 destination, u32 bytes (multiples of 2048), destination 1 being a call to mark. The caller has masked interrupts and stopped the slave. Returns sectors read, or a negative stage. */
 static unsigned long load_head[512];
+#ifdef SECTOR_STORE
+/* SECTOR_STORE (tools/sector_store.py): the round files live as runs of one shared STORE.BIN. RNNN.BIN names round NNN; its runs, read in order,
+   are that file's sectors, so the walk below sees the same stream and the cart gets the same bytes. Adjacent runs were joined when packed. */
+static unsigned long store_dir[512], store_run[512];
+static Sint32 run_at, run_left, run_sec = -1, run_next, run_end;
+static Sint32 vread(GfsHn h, Sint32 secs, unsigned char *dest)
+{
+    while (secs) {
+        Sint32 take, got;
+        if (!run_left) {
+            Sint32 s;
+            if (run_next >= run_end) return -1;
+            s = 1 + run_next / 512;
+            if (s != run_sec) {
+                if (GFS_Seek(h, s, GFS_SEEK_SET) < 0 || GFS_Fread(h, 1, store_run, 2048) != 2048) return -2;
+                run_sec = s;
+            }
+            run_at = (Sint32)(store_run[run_next % 512] >> 14); run_left = (Sint32)(store_run[run_next % 512] & 0x3fff); run_next++;
+            if (GFS_Seek(h, run_at, GFS_SEEK_SET) < 0) return -3;
+        }
+        take = secs < run_left ? secs : run_left;
+        got = GFS_Fread(h, take, dest, take * 2048);
+        if (got != take * 2048) return -4;
+        run_at += take; run_left -= take; secs -= take; dest += take * 2048;
+    }
+    return 0;
+}
+static long load_regions(const char *name, void (*mark)(void))
+{
+    Sint32 id, total = 1, r = (name[1] - '0') * 100 + (name[2] - '0') * 10 + (name[3] - '0');
+    GfsHn h;
+    unsigned long i;
+    if (GFS_Init(1, gfs_work, &dir) < 0) return -1;
+    id = GFS_NameToId((Sint8 *)"STORE.BIN");
+    if (id < 0) { GFS_Reset(); return -2; }
+    h = GFS_Open(id);
+    if (!h) { GFS_Reset(); return -3; }
+    GFS_SetTmode(h, GFS_TMODE_CPU);
+    if (GFS_Fread(h, 1, store_dir, 2048) != 2048 || store_dir[0] != 0x53535431u || (unsigned long)r >= store_dir[1]) { GFS_Close(h); GFS_Reset(); return -0x100; }
+    run_next = (Sint32)store_dir[2 + r * 2]; run_end = run_next + (Sint32)store_dir[3 + r * 2]; run_left = 0; run_sec = -1;
+    if (vread(h, 1, (unsigned char *)load_head)) { GFS_Close(h); GFS_Reset(); return -0x101; }
+    for (i = 0; i < load_head[0]; i++) {
+        Sint32 secs = (Sint32)(load_head[2 + i * 2] / 2048u);
+        if (load_head[1 + i * 2] == 1) { mark(); continue; }
+        if (vread(h, secs, (unsigned char *)load_head[1 + i * 2])) { GFS_Close(h); GFS_Reset(); return -4 - (long)i; }
+        total += secs;
+    }
+    GFS_Close(h);
+    GFS_Reset();
+    return total;
+}
+#else
 static long load_regions(const char *name, void (*mark)(void))
 {
     Sint32 id, ss, n, last, got, total = 1;
@@ -49,6 +101,7 @@ static long load_regions(const char *name, void (*mark)(void))
     GFS_Reset();
     return total;
 }
+#endif
 int main(void)
 {
     unsigned char *c;

@@ -352,6 +352,9 @@ SECTIONS {{
     # The pack in main ends where cold1 starts: a kept file built for a lower cold1 would have its last tiles overwritten by cold code (seen as wrong tiles on crates in stages 24 and 1e).
     ends = [[st[0], syms[f"_sat_st{i}_end"]] for i, st in enumerate(STRETCHES)] + [[cold1_at, 0]]
     ends_file = WORK / "round_code_ends.json"
+    for f in (WORK / "rounds").glob("R[0-9][0-9][0-9].BIN"):   # SECTOR_STORE parks the round files here; kept files come back first
+        if not (ISO / f.name).exists():
+            shutil.move(str(f), ISO / f.name)
     if os.environ.get("KEEP_ROUND_FILES") and (not ends_file.exists() or json.loads(ends_file.read_text()) == ends):
         n = refresh_restores(rom)
         print("round files kept; ROM restore bytes refreshed in", n, "files")
@@ -360,7 +363,13 @@ SECTIONS {{
     ends_file.write_text(json.dumps(ends))
     (WORK / "rom_final.bin").write_bytes(rom)
     b = OBJ / "boot.o"
-    sh([GCC, "-m2", "-mb", "-O2", "-w", "-fno-builtin", "-I", SGL / "INC", f"-DCOLD1_ADDR={cold1_at:#x}u", "-c", HERE / "boot.c", "-o", b])
+    # SECTOR_STORE (default 1; 0 = old R*.BIN files, for A/B): the round files become runs of one shared STORE.BIN (tools/sector_store.py), so the game fits an 80-minute CD-R.
+    store = os.environ.get("SECTOR_STORE", "1") != "0"
+    if store:
+        print(sh([sys.executable, REPO / "tools/sector_store.py", ISO, "--keep", WORK / "rounds"]).strip())
+    else:
+        (ISO / "STORE.BIN").unlink(missing_ok=True)
+    sh([GCC, "-m2", "-mb", "-O2", "-w", "-fno-builtin", "-I", SGL / "INC", f"-DCOLD1_ADDR={cold1_at:#x}u"] + (["-DSECTOR_STORE"] if store else []) + [ "-c", HERE / "boot.c", "-o", b])
     lib = SGL / "LIB_ELF"
     sh([GCC, "-m2", "-mb", "-nostartfiles", "-T", HERE / "boot.ld", b, "-Wl,--start-group", lib / "SEGA_SYS.A", lib / "LIBCD.A", lib / "LIBSGL.A", "-lgcc", "-lc", "-Wl,--end-group",
         "-o", WORK / "boot.elf", f"-Wl,-Map={WORK / 'boot.map'},-e,_main"])
