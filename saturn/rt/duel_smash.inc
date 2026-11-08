@@ -96,6 +96,9 @@ static int smash_tick(int lo, int hi)
     if (!sat_smash.set) {
         sat_smash.set = 1;
         for (i = 0; i < 2; i++) { sat_smash.held[i] = r16(PL(i) + 0x40); sat_smash.stocks[i] = sat_duel_opt.minutes ? 99 : sat_duel_opt.stocks; sat_smash.score[i] = 0; sat_smash.pct[i] = 0; sat_smash.v[i] = 0; sat_smash.out[i] = sat_smash.inv[i] = sat_smash.stun[i] = 0; }
+#ifdef DUEL_KO_TEST   /* test build only: health held at 1, so any hit is the game's own KO (state 4), to reach the KO-as-fall path */
+        for (i = 0; i < 2; i++) { sat_smash.held[i] = 1; w16(PL(i) + 0x40, 1); }
+#endif
         sat_smash.clock = (u32)sat_duel_opt.minutes * 60u * 60u; sat_smash.sudden = 0;
         sat_home_clear(); sat_home_mode = 1;
     }
@@ -151,9 +154,33 @@ static int smash_tick(int lo, int hi)
 
 /* Stage spawns off: the stage's spawn table task (record 0xff1812, state byte +4: 0 init, 2 walk, 4 done) is parked at done once it has set up,
    so only the duel's own aliens come in. Bodies the table already placed are not touched. */
+/* Stage 02 also ends on its own (READ, controller class 1, 0x0287e8): its wave state 0x0288e2 counts a timer +0x40 down from 0xf3c
+   (3900 ticks, about 65 s) and compares the kill count 0xff9a1a against a quota +0x4a; either one ends the wave, the game holds the
+   fighters and walks them on to stage 04 (s12.log, pkg_duel.log: still about 55 s, then stage word 04 and state 8). Its talk timers
+   +0x46/+0x48 call 0x028a06 at 0x258. The duel finds that record (signature: quota from the table at 0x02884c, timer <= 0xf3c) in the
+   controller pool and holds the timer, the kill count and the first talk timer, so the arena stays a fight. */
+u32 sat_stage_ctl;
+static void smash_hold_stage(void)
+{
+    u32 a;
+    if (r16(0xff81e8) != 2) return;
+    if (!sat_stage_ctl) {
+        for (a = 0xffce80u; a < 0xffd680u; a += 0x40u) {
+            u16 q = r16(a + 0x4a);
+            if (r8(a) && (q == 0x23 || q == 0x37 || q == 0x46) && r16(a + 0x40) <= 0xf3c && r16(a + 0x48) <= 0x834 && r16(a + 0x46) <= 0x4b0 && (s16)r16(a + 0x42) <= 0x3c) { sat_stage_ctl = a; break; }
+        }
+        if (!sat_stage_ctl) return;
+    }
+    a = sat_stage_ctl;
+    if (!r8(a)) { sat_stage_ctl = 0; return; }
+    w16(a + 0x40, 0xf3c);
+    w16(a + 0x46, 0x4b0);
+    w16(0xff9a1a, 0);
+}
 static void smash_no_stage_spawns(void)
 {
     if (r8(0xff1816) == 2) w8(0xff1816, 4);
+    smash_hold_stage();
 }
 
 /* Random aliens: the game's own alien rows from stage 02's spawn table (ROM 0x15c108 on, tag 4 rows), spawned through the table's own
