@@ -58,6 +58,51 @@ if os.environ.get("SCREEN_KEYS_REQUIRED", "1") == "1" and not SCREEN_KEYS[0]:
 STRETCHES = [(0x02400000 + a, n) for a, n in ROUNDS["holes"] if n >= 0x4000]
 
 
+def guest_plan():
+    """Bonus characters (SAT_GUESTS with SAT_GUEST_DATA="IDX=DIR[;IDX=DIR]", IDX the guests.c row, DIR an assets.py output with remap.json
+    and gfx_*.bin): one extra round file per AvP file of the replaced slot, keys = that file's keys - the slot character's own keys + the
+    guest's one trimmed set, tiles from the guest's graphics region. Appended after the arcade's files, so their numbers do not move.
+    GUEST_STAGES (e.g. "02") limits the stages, for a quick test build. Without SAT_GUEST_DATA nothing changes."""
+    spec = os.environ.get("SAT_GUEST_DATA", "")
+    if not spec or "SAT_GUESTS" not in os.environ.get("KERNEL_CFLAGS", ""):
+        return
+    sys.path.insert(0, str(REPO / "tools"))
+    import rounds_variants
+    data = rounds_variants.Data(os.environ.get("GUEST_SPEC", "E:/AvP/learning/lane-packs/spec.json"))
+    slots = {0: 2, 1: 4}   # guests.c rows: Wolverine (Schaefer), Mega Man (Hunter)
+    only = [int(x, 16) for x in os.environ.get("GUEST_STAGES", "").split(",") if x]
+    masks, vf = ROUNDS.get("variant_masks", []), ROUNDS.get("variant_file", {})
+    gf = ROUNDS.setdefault("guest_files", {})
+    for item in spec.split(";"):
+        gi, d = item.split("=", 1)
+        gi, d = int(gi), pathlib.Path(d)
+        A = json.loads((d / "remap.json").read_text())
+        gfx = str(next(d.glob("gfx_*.bin")))
+        slot, gkeys = slots[gi], set(A["keys"])
+        made, per = {}, gf.setdefault(str(gi), {})
+        for st, files in vf.items():
+            if only and int(st) not in only:
+                continue
+            row = [0] * (len(masks) + 1)
+            for v in range(1, len(masks) + 1):
+                if not masks[v - 1] & slot:
+                    continue
+                b = files[v]
+                if b not in made:
+                    base = ROUNDS["files"][b]
+                    own = set(base["keys"][0]) & data.own[slot]
+                    nf = dict(base, name=base["name"] + f"_g{gi}", rank_from=base["name"], audio_from=b, gfx=gfx, guest_keys=sorted(gkeys),
+                              keys=[sorted(set(base["keys"][0]) - own | gkeys)] + [list(k) for k in base["keys"][1:]])
+                    made[b] = len(ROUNDS["files"])
+                    ROUNDS["files"].append(nf)
+                row[v] = made[b]
+            per[st] = row
+        print("guest", gi, "files", len(made), flush=True)
+
+
+guest_plan()
+
+
 OPMAP = json.loads((WORK / "opx.json").read_text())
 
 
@@ -121,20 +166,21 @@ def gen_sources():
         ",".join(map(str, srow)), ",".join(map(str, mvar)), len(rows), len(masks) + 1, ",".join("{" + ",".join(map(str, r)) + "}" for r in rows)))
     # Bonus characters (SAT_GUESTS): guest -> stage word -> file per variant, from rounds.json "guest_files"; 0 = the arcade's file.
     gf = ROUNDS.get("guest_files", {})
-    ng = max(1, len(gf))
+    ng = max([1] + [int(g) + 1 for g in gf])   # indexed by the guests.c row
     tab = [[[0] * (len(masks) + 1) for _ in rows] for _ in range(ng)]
-    for gi, (g, per) in enumerate(sorted(gf.items(), key=lambda x: int(x[0]))):
+    for g, per in gf.items():
+        gi = int(g)
         for st, files in per.items():
             if srow[int(st)]:
                 tab[gi][srow[int(st)]] = files
     update(GEN / "guest_files.inc", ("#define GUEST_ROWS %d" + chr(10) + "static const unsigned short guest_file[%d][%d][%d] = {%s};" + chr(10)) % (
-        len(gf), ng, len(rows), len(masks) + 1, ",".join("{" + ",".join("{" + ",".join(map(str, r)) + "}" for r in t) + "}" for t in tab)))
+        len(gf) and ng, ng, len(rows), len(masks) + 1, ",".join("{" + ",".join("{" + ",".join(map(str, r)) + "}" for r in t) + "}" for t in tab)))
     return out
 
 
 def cc(src, obj, extra=()):
     newest = max(src.stat().st_mtime, (HERE / "lift_target.h").stat().st_mtime)
-    if src.name in ("kernel.c", "pad.c", "sat_gfx.c", "home.c", "home_cold.c"):
+    if src.name in ("kernel.c", "pad.c", "sat_gfx.c", "home.c", "home_cold.c", "guests.c", "megaman.c", "wolverine.c", "game_bind.c"):
         newest = max(newest, (HERE / "sat_rt.h").stat().st_mtime, time.time() if os.environ.get("KERNEL_CFLAGS") else 0)
     if src.name == "sat_gfx.c":
         newest = max(newest, (src.parent / "sat_gfx.h").stat().st_mtime)
@@ -152,8 +198,9 @@ SHARED_MIN = int(os.environ.get("ROUND_SHARED_MIN", "10"))   # stages
 MIN_RUN = int(os.environ.get("ROUND_MIN_RUN", "1"))   # pages; a stretch costs 8 bytes of table, about 1 KB of a page is 8 sprites
 
 
-def round_files(rom, code_end, cold1_at):
-    """One RNN.BIN per stage. Sprites past the cart's room go to ROM stretches that stage does not read; whatever any file overwrites, each stage that reads it gets back."""
+def round_files(rom, code_end, cold1_at, only=None):
+    """only: file numbers to build alone (kept round files beside them; guest files): no spill into ROM stretches, every kept page restored.
+    One RNN.BIN per stage. Sprites past the cart's room go to ROM stretches that stage does not read; whatever any file overwrites, each stage that reads it gets back."""
     sys.path.insert(0, str(REPO / "tools"))
     import rounds_pack
     raw = pathlib.Path(os.environ.get("GFX_BIN", "E:/AvP/learning/lane-satgfx/gfx.bin")).read_bytes()
@@ -180,7 +227,11 @@ def round_files(rom, code_end, cold1_at):
             lo, hi = (int(x, 16) for x in r.split("-"))
             want.update(range(lo // page, (hi + page - 1) // page))
         k02 &= want
-    for f in ROUNDS["files"]:
+    raws = {}
+    for fi, f in enumerate(ROUNDS["files"]):
+        if only is not None and fi not in only:
+            plans.append(None)
+            continue
         keep = set(f["keep_pages"]) | shared
         if k02 and set(f.get("stages", [])) & {0x0e, 0x1c, 0x1e, 0x24}: keep |= k02
         free, st = [], None
@@ -195,15 +246,24 @@ def round_files(rom, code_end, cold1_at):
         free.sort(key=lambda r: -r[1])
         keys, frank = [set(k) for k in f["keys"]], {int(x): v for x, v in rank.get(f.get("rank_from", f["name"]), {}).items()}
         frank.update({k: 1 << 39 for k in f.get("guest_keys", ())})   # a guest's frames rank as the playing character's own route
+        if only is not None:
+            free = []
         if f["name"] != "front":   # continue and game over screens: reachable from every stage, kept first (tools/screen_keys.py)
             keys = [k | e for k, e in zip(keys, SCREEN_KEYS)]
             frank.update({k: 1 << 40 for k in SCREEN_KEYS[0]})
-        p, dropped = rounds_pack.fit(raw, keys, room, free, frank)
+        if f.get("gfx") and f["gfx"] not in raws:
+            raws[f["gfx"]] = pathlib.Path(f["gfx"]).read_bytes()
+        p, dropped = rounds_pack.fit(raws.get(f.get("gfx"), raw), keys, room, free, frank)
         for first, a, take in p["segs"]:
             written.update(range(a // page, (a + (take * 128 + 2047 & -2048) + page - 1) // page))
         plans.append((p, dropped))
     stats = {}
-    for i, (f, (p, dropped)) in enumerate(zip(ROUNDS["files"], plans)):
+    for i, (f, pl) in enumerate(zip(ROUNDS["files"], plans)):
+        if pl is None:
+            continue
+        p, dropped = pl
+        if only is not None:
+            written = set(f["keep_pages"]) | shared   # built alone: restore every kept page
         own = {x for first, a, take in p["segs"] for x in range(a // page, (a + (take * 128 + 2047 & -2048) + page - 1) // page)}
         back = sorted((written & (set(f["keep_pages"]) | shared)) - own)
         restores, st = [], None
@@ -217,7 +277,10 @@ def round_files(rom, code_end, cold1_at):
         n = rounds_pack.write_file(ISO / f"R{i:03d}.BIN", audio, restores, rounds_pack.assemble(p, CART["SAT_PACK"]))
         stats[f["name"]] = dict(file=n, sprites_in_main=p["inmain"], sprites_spill=sum(x[2] for x in p["segs"]), spill_runs=len(p["segs"]), restore=sum(len(d) for _, d in restores), restore_runs=len(restores), dropped_keys=len(dropped), dropped=dropped, audio=len(audio))
         print(f["name"], {k: v for k, v in stats[f["name"]].items() if k != "dropped"}, flush=True)
-    (WORK / "round_stats.json").write_text(json.dumps(stats, indent=0))
+    if only is None:
+        (WORK / "round_stats.json").write_text(json.dumps(stats, indent=0))
+    else:
+        (WORK / "guest_round_stats.json").write_text(json.dumps(stats, indent=0))
 
 
 def refresh_restores(rom):
@@ -259,16 +322,23 @@ def main():
     own += [cc(s, OBJ / f"gfx_{s.stem}.o", ["-O2", "-I", gfx_dir, "-I", GEN] + os.environ.get("KERNEL_CFLAGS", "").split()) for s in gfx]
     if home:
         own += [cc(HERE / "home.c", OBJ / "home.o", ["-Os"] + os.environ.get("KERNEL_CFLAGS", "").split())]
-    home_cold_extra = []
+    home_cold_extra = []   # guest code and tables run from the cart tail with the cold home code (high RAM is full)
     if "SAT_GUESTS" in os.environ.get("KERNEL_CFLAGS", ""):   # bonus characters; builds without the flag are unchanged
-        own += [cc(HERE / "guests.c", OBJ / "guests.o", ["-Os", "-I", GEN] + os.environ.get("KERNEL_CFLAGS", "").split())]
+        home_cold_extra.append(cc(HERE / "guests.c", OBJ / "guests.o", ["-Os", "-I", GEN] + os.environ.get("KERNEL_CFLAGS", "").split()))
         if os.environ.get("GUEST_ASSETS"):   # Wolverine's tables come from the user's ROM set at build time; his code runs from the cart
             sh([sys.executable, REPO / "tools/wolverine/gen_c.py", os.environ["GUEST_ASSETS"], GEN / "wolverine_data.inc"])
-            home_cold_extra = [cc(REPO / "saturn/guests/wolverine/wolverine.c", OBJ / "wolverine.o", ["-Os", "-I", GEN, "-I", HERE] + os.environ.get("KERNEL_CFLAGS", "").split())]
+            # guests.c dispatches: his whole-list pass is renamed so the group-indexed guests (Mega Man) run first
+            home_cold_extra.append(cc(REPO / "saturn/guests/wolverine/wolverine.c", OBJ / "wolverine.o", ["-Os", "-I", GEN, "-I", HERE, "-Dsat_guest_objects=sat_guest_wolverine_objects"] + os.environ.get("KERNEL_CFLAGS", "").split()))
+        for item in filter(None, os.environ.get("SAT_GUEST_DATA", "").split(";")):   # per-guest drawing code and tables (saturn/guests/<name>)
+            gi, d = item.split("=", 1)
+            name = {"1": "megaman"}.get(gi)
+            if name:
+                sh([sys.executable, REPO / f"tools/{name}/gen_runtime.py", pathlib.Path(d) / "remap.json", GEN / f"guest_{name}.inc"])
+                home_cold_extra.append(cc(REPO / f"saturn/guests/{name}/{name}.c", OBJ / f"guest_{name}.o", ["-Os", "-I", GEN] + os.environ.get("KERNEL_CFLAGS", "").split()))
     home_cold = [cc(HERE / "home_cold.c", OBJ / "home_cold.o", ["-Os"] + os.environ.get("KERNEL_CFLAGS", "").split())] if home else []
     home_cold += home_cold_extra
     if OVERRIDES:
-        own += [cc(REPO / "saturn/game" / f"{n}.c", OBJ / f"game_{n}.o", ["-O2", "-DSAT_TARGET", "-I", REPO / "saturn/game"]) for n in ("game_hot", "game_bind")]
+        own += [cc(REPO / "saturn/game" / f"{n}.c", OBJ / f"game_{n}.o", ["-O2", "-DSAT_TARGET", "-I", REPO / "saturn/game"] + (["-DSAT_GUESTS"] if "SAT_GUESTS" in os.environ.get("KERNEL_CFLAGS", "") else [])) for n in ("game_hot", "game_bind")]
     sizes = {o: code_size(o) for o in objs}
     # Hottest chunks in high work RAM, then low work RAM; the coldest run from the cart. Heat comes from the MAME route.
     heat = json.loads((WORK / "heat.json").read_text())
@@ -398,6 +468,9 @@ SECTIONS {{
     if os.environ.get("KEEP_ROUND_FILES") and (not ends_file.exists() or json.loads(ends_file.read_text()) == ends):
         n = refresh_restores(rom)
         print("round files kept; ROM restore bytes refreshed in", n, "files")
+        miss = [i for i in range(len(ROUNDS["files"])) if not (ISO / f"R{i:03d}.BIN").exists()]
+        if miss:   # bonus character files (guest_plan) are new: build them beside the kept ones
+            round_files(rom, [tuple(e) for e in ends[:-1]], cold1_at, set(miss))
     else:
         round_files(rom, [tuple(e) for e in ends[:-1]], cold1_at)
     ends_file.write_text(json.dumps(ends))
