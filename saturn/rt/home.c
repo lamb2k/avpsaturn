@@ -120,6 +120,98 @@ static void pause_menu(void)
     if (pick == 1) sat_home_restart();
 }
 
+/* Boss rush (menu, home_cold.c): the last stage of each of the game's seven rounds ends on its boss (the stage's controller waits on the boss-down flag ff822a, then clears with ff81f3).
+   Five of them are arenas that start at the boss (stage words 04 08 0a 1a 24); the 0e and 10 bosses sit at the end of a long stage and are left out until a start near them is built.
+   The rush starts at the first through the stage warp; when the game advances the stage word past a cleared boss it is moved on to the next boss, with the round byte ff8222 set from the game's
+   own table (0xcca0, copied here), within the loader's 12-vblank settle. Health is carried from the clear to the next fight. */
+static const u8 rush_stage[5] = { 0x04, 0x08, 0x0a, 0x1a, 0x24 };
+static const u8 rush_round[5] = { 0, 1, 2, 5, 6 };
+volatile u32 sat_home_rush;            /* 0 off, else fight number 1 to 5; 6 result shown */
+u32 sat_home_rush_t[10];               /* vblanks: start and clear of each fight */
+static u16 rush_hp;
+static u8 rush_played;                 /* the rush's game has left attract */
+static u8 rush_phase;                  /* 0 wait for the fight, 1 in the fight, 2 cleared, wait for the advance */
+static void rush_time(char *b, u32 v)  /* mm:ss.cc from vblanks (60 per second) */
+{
+    u32 cs = v * 100u / 60u, s = cs / 100u, m = s / 60u;
+    b[0] = (char)('0' + m / 10 % 10); b[1] = (char)('0' + m % 10); b[2] = ':';
+    b[3] = (char)('0' + s % 60 / 10); b[4] = (char)('0' + s % 10); b[5] = '.';
+    b[6] = (char)('0' + cs % 100 / 10); b[7] = (char)('0' + cs % 10); b[8] = 0;
+}
+static void rush_card(int n)           /* the break before a fight: the game held, a short card over its picture */
+{
+    char b[12] = "FIGHT 1 OF 5";
+    int i, r, c;
+    b[6] = (char)('0' + n);
+    sat_home_hold = 1;
+    sat_home_clear();
+    for (r = 10; r < 15; r++) for (c = 12; c < 32; c++) sat_home_text[r][c] = 1;
+    sat_home_centre(11, "BOSS RUSH", 1);
+    sat_home_centre(13, b, 0);
+    sat_home_mode = 1;
+    sat_home_screen = 8;
+    for (i = 0; i < 120; i++) sat_home_frame();
+    sat_home_screen = 0;
+    sat_home_mode = 0;
+    sat_home_hold = 0;
+}
+static void rush_result(void)
+{
+    char b[12];
+    int i;
+    u32 tot = 0;
+    sat_home_hold = 1;
+    sat_home_clear();
+    sat_home_centre(6, "BOSS RUSH CLEAR", 1);
+    for (i = 0; i < 5; i++) {
+        char t[] = "FIGHT 1";
+        t[6] = (char)('1' + i);
+        sat_home_put(9 + 2 * i, 12, t, 0);
+        tot += sat_home_rush_t[2 * i + 1] - sat_home_rush_t[2 * i];
+        rush_time(b, sat_home_rush_t[2 * i + 1] - sat_home_rush_t[2 * i]); sat_home_put(9 + 2 * i, 23, b, 0);
+    }
+    sat_home_put(20, 12, "TOTAL", 1);
+    rush_time(b, tot); sat_home_put(20, 23, b, 1);
+    sat_home_centre(24, "PRESS START", 0);
+    sat_home_mode = 2;
+    sat_home_screen = 9;
+    prev = sat_pad_raw & 0xffff;
+    while (!(sat_home_edges() & P_START)) sat_home_frame();
+    sat_home_screen = 0;
+    sat_home_mode = 0;
+    sat_home_hold = 0;
+    sat_home_rush = 0;
+    sat_home_restart();
+}
+/* Fight times count from the end of each card; the break between fights (clear, card) is not in the total. */
+static void rush_poll(void)
+{
+    u32 n = sat_home_rush, w;
+    if (!n || n > 5) { rush_played = 0; return; }
+    if (IN_ATTRACT) { if (rush_played) { sat_home_rush = 0; rush_phase = 0; rush_played = 0; } return; }   /* game over (the start itself leaves attract after the menu) */
+    rush_played = 1;
+    w = (u32)(G(0xff81e8) << 8 | G(0xff81e9));
+    if (rush_phase == 0) {
+        if (w == rush_stage[n - 1] && G(0xff8001) == 2 && G(0xff8380) && !G(0xff81f3)) {
+            if (n > 1 && rush_hp) { G(0xff83c0) = (u8)(rush_hp >> 8); G(0xff83c1) = (u8)rush_hp; }
+            rush_card((int)n);
+            sat_home_rush_t[2 * n - 2] = sat_vblanks_now();
+            rush_phase = 1;
+        }
+    } else if (rush_phase == 1) {
+        if (w == rush_stage[n - 1] && G(0xff81f3)) {
+            sat_home_rush_t[2 * n - 1] = sat_vblanks_now();
+            rush_hp = (u16)(G(0xff83c0) << 8 | G(0xff83c1));
+            if (n == 5) { rush_phase = 0; sat_home_rush = 6; rush_result(); return; }
+            rush_phase = 2;
+        }
+    } else if (w != rush_stage[n - 1] && w) {
+        G(0xff81e8) = 0; G(0xff81e9) = rush_stage[n];
+        G(0xff8222) = 0; G(0xff8223) = rush_round[n];
+        sat_home_rush = n + 1; rush_phase = 0;
+    }
+}
+
 /* Once per task walk. */
 void sat_home_poll(void)
 {
@@ -151,6 +243,7 @@ void sat_home_poll(void)
             G(0xff81e8) = (u8)(sat_home_warp >> 8); G(0xff81e9) = (u8)sat_home_warp; if (G(0xff8380)) warp_polls++;
         }
     }
+    rush_poll();
     if (inject && !IN_ATTRACT) inject = 0;
     if (inject) return;
     if (IN_ATTRACT) {
