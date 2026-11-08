@@ -154,6 +154,8 @@ def step(v, s):
         wander = [("right",), ("left",), ("right", "up"), ("right", "down"), ("left", "up"), ("left", "down")][stuck % 6]
         wander = list(wander); wander_to = now + 6
     fire = ["c"] if n % 4 == 0 else []
+    if stuck >= 2 and prog and prog[:2] == (st, se) and n % 40 < 25:   # stuck again in one section: let the gun cool and use the other attacks (a powered suit overheats under steady fire)
+        fire = ["a"] if n % 6 == 0 else (["b"] if n % 23 == 0 else [])
     if now < wander_to:
         s.set(wander + fire); return
     if (px, py) != stall:
