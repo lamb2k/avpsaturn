@@ -9,8 +9,8 @@ WANT = int(os.environ.get("BOT_CHAR", "0"))   # select grid as tools/mame_route_
 BIT = (1, 2, 8, 4)
 P2 = os.environ.get("BOT_P2") == "1"; P2K = []; wrapped = False; p2_last = 0; p2_ph = 0; pick_t = 0
 POOLS = ((0x8680, 24, 0x80), (0x9280, 4, 0xc0), (0x9580, 20, 0xc0))
-lastv = 0
-LEG = ("ko", "presses", "late", "seen", "ended", "endv", "lastv")   # kept across process legs joined by a save state
+lastv = 0; sec_mark = ""; sec_v = 0
+LEG = ("ko", "presses", "late", "seen", "ended", "endv", "lastv", "sec_mark", "sec_v")   # kept across process legs joined by a save state
 def load_leg(s):
     global loaded
     loaded = True
@@ -69,7 +69,7 @@ def p2_keys(a, v, now):
     elif n % 12 == 3: k.append("p2_right" if dx >= 0 else "p2_left")
     return k
 def step(v, s):
-    global lastv, P2K, wrapped, pick_t, stage, sec, n, ko, presses, inko, lastshot, lastsave, seen, ended, stall, stall_t, wander_to, wander, last_press, last_load, endv, lastend, late, prog, prog_v, stuck, lastw
+    global sec_mark, sec_v, lastv, P2K, wrapped, pick_t, stage, sec, n, ko, presses, inko, lastshot, lastsave, seen, ended, stall, stall_t, wander_to, wander, last_press, last_load, endv, lastend, late, prog, prog_v, stuck, lastw
     if not loaded:
         load_leg(s)
     n += 1
@@ -154,6 +154,11 @@ def step(v, s):
         wander = [("right",), ("left",), ("right", "up"), ("right", "down"), ("left", "up"), ("left", "down")][stuck % 6]
         wander = list(wander); wander_to = now + 6
     fire = ["c"] if n % 4 == 0 else []
+    k = f"{st:x}.{se}"
+    if k != sec_mark:
+        sec_mark, sec_v = k, v
+    elif v - sec_v > 15000 and (n // 150) % 3 != 2:   # one section for 15000 vblanks while enemies keep coming: push on to the right through them, as a player would
+        s.set(["right"] + (["b"] if n % 50 == 0 else []) + (["c"] if n % 8 == 0 else [])); return
     if stuck >= 2 and prog and prog[:2] == (st, se) and n % 40 < 25:   # stuck again in one section: let the gun cool and use the other attacks (a powered suit overheats under steady fire)
         fire = ["a"] if n % 6 == 0 else (["b"] if n % 23 == 0 else [])
     if now < wander_to:
