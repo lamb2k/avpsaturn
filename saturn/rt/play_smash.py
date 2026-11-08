@@ -78,12 +78,13 @@ def step(v,s):
     if px<qx-60: k.append("right")
     elif px>qx+60: k.append("left")
     if n%8<3 and abs(qx-px)<70: k.append("a")
-    ph=n%200   # gun phase: P1 backs off for 50 steps while P2 holds, then P1 faces P2 and fires (C is the gun, pad.c; B is jump)
-    if ph<50: k=["left" if px<qx else "right"]
-    elif ph<80:
-        k=["right" if px<qx else "left"] if ph<56 or abs(qx-px)>110 else []
-        if ph>=56 and ph%6<2: k.append("c")
-    if 50<=ph<80 or os.environ.get("GUNLOG"):
+    ph=n%200   # gun phase (C is the gun, pad.c): P1 backs off for 20 steps, then faces P2 and fires for 20; P2 keeps its own moves
+    p2k=[x for x in k if x.startswith("p2")]
+    if ph<20: k=["left" if px<qx else "right"]+p2k
+    elif ph<40:
+        k=(["right" if px<qx else "left"] if ph<23 else [])+p2k
+        if ph>=23 and ph%4<2: k.append("c")
+    if os.environ.get("GUNLOG"):
         r=a[0x380:0x480]; s.log("GUN act",r[4:8].hex(),"8b",r[0x8b],"8c",r[0x8c],"d2",r[0xd2],"ee",hex(r[0xee]),"shots",s.word("sat_shot_hits"),"seen",s.word("sat_shot_probe"),"aimed",s.word("sat_shot_aimed"),"diag",[s.word("sat_shot_diag",i*2,2) for i in range(6)],"facing",a[0x38f],a[0x48f],"pct",s.word("sat_smash",0,2),s.word("sat_smash",2,2),"x",u16(0x390),u16(0x490))
         P=s.ram(0x8680,0xc00)
         for i in range(24):
