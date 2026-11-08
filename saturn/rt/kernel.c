@@ -148,6 +148,124 @@ void f_212f8(void)
 #endif
 }
 
+#ifdef SAT_HOME
+/* Home text (lane avp-home-5). Owner 11-08: no credit or coin text anywhere at home; the credit and continue logic is untouched, only text.
+   Every arcade line that mentions coins or credits comes from three text writers, each drawing message N of its own table (ROM strings at
+   0x119790, 0x11a65e and 0x11a870, searched for COIN, CREDIT, INSERT and FREE: no other copies in the ROM), plus the credit task 0xab438,
+   which draws "CREDITS:" and writes the count beside it. HOME_COIN_TEXT is the one list: each entry hides that message (0xff) or draws the
+   game's own PRESS START message in its place. Messages not listed draw as the arcade's, but moved in as one block so every non-space
+   character lies in columns 3 to 44 of 48: the 16 pixel crop of scroll 1 would cut column 0, 1 and 46, 47 (P1's PRESS at column 1, P2's
+   START to 47, the title's TM to 45). */
+#define TXT_SMALL 0x119790u   /* writer 0xaba96, 8 px font */
+#define TXT_MID 0x11a65eu     /* writer 0xabb0a */
+#define TXT_BIG 0x11a870u     /* writer 0xabbae, 16 px font */
+typedef struct { u8 table, idx, to; } HomeText;   /* table: 0 small, 1 mid, 2 big */
+static const HomeText HOME_COIN_TEXT[] = {
+    { 0, 6, 0xff }, { 0, 7, 0xff },                            /* "CREDITS:" "COINS:" (bottom right, one player) */
+    { 0, 8, 0xff }, { 0, 9, 0xff }, { 0, 10, 0xff },   /* "CREDITS:" "  COINS:" per player */
+    { 0, 11, 0xff }, { 0, 12, 0xff }, { 0, 13, 0xff },
+    { 1, 0, 0xff },                                                      /* continue: "CONTINUE REQUIRES ONLY 1 (COIN)" */
+    { 2, 0, 3 }, { 2, 1, 3 },                                      /* title: "INSERT COIN", "FREE PLAY" -> PRESS START BUTTON */
+    { 2, 17, 3 }, { 2, 18, 3 }, { 2, 19, 3 }, { 2, 20, 3 }, { 2, 21, 3 }, { 2, 22, 3 },   /* "INSERT n (MORE) COIN(S)" */
+    { 2, 23, 3 }, { 2, 24, 3 }, { 2, 55, 3 },                /* "PRESS 1P START OR ..", "INSERT 2 COINS" */
+    { 2, 25, 0xff }, { 2, 26, 0xff }, { 2, 27, 0xff },      /* "n MORE COIN(S) FOR" "2P" "3P" */
+    { 2, 28, 0xff }, { 2, 29, 0xff }, { 2, 30, 0xff }, { 2, 31, 0xff },
+    /* each player's slot: "INSERT COIN", "1 MORE COIN", "FREE PLAY", "INSERT n COINS", "n MORE COINS" -> that player's PRESS START (8, 9, 10) */
+    { 2, 5, 8 }, { 2, 6, 9 }, { 2, 7, 10 }, { 2, 11, 8 }, { 2, 12, 9 }, { 2, 13, 10 },
+    { 2, 14, 8 }, { 2, 15, 9 }, { 2, 16, 10 },
+    { 2, 32, 8 }, { 2, 33, 9 }, { 2, 34, 10 }, { 2, 35, 8 }, { 2, 36, 9 }, { 2, 37, 10 },
+    { 2, 38, 8 }, { 2, 39, 9 }, { 2, 40, 10 }, { 2, 41, 8 }, { 2, 42, 9 }, { 2, 43, 10 },
+    { 2, 44, 8 }, { 2, 45, 9 }, { 2, 46, 10 },
+};
+#define HOME_OS __attribute__((optimize("Os")))
+static HOME_OS u32 home_text(u32 table, u32 idx)
+{
+    u32 i;
+    for (i = 0; i < sizeof HOME_COIN_TEXT / sizeof HOME_COIN_TEXT[0]; i++)
+        if (HOME_COIN_TEXT[i].table == table && HOME_COIN_TEXT[i].idx == idx) return HOME_COIN_TEXT[i].to;
+    return idx;
+}
+extern void f_f7a(void);
+extern void lifted_aba96(void), lifted_abb0a(void), lifted_abbae(void);
+void f_ab438(void) { f_f7a(); }   /* the credit task's frame: draws nothing at home (its tail, the frame wait, as the arcade's) */
+HOME_OS static u32 txt_msg(u32 table, u32 idx) { return table + (u32)(s32)(s16)RD16(table + idx * 2); }
+HOME_OS static u32 txt_cell(u32 col, u32 rowb) { u32 o = (col << 7) & 0xffffu; return 0x900000u + ((o & 0xff00u) | ((o + rowb) & 0xffu)); }
+/* Columns to move the whole message so that every non-space character sits in columns 3 to 44 (8 pixels inside each edge, as on the arcade). */
+HOME_OS static int txt_shift(u32 p, int w)
+{
+    int lo = 99, hi = -1;
+    for (;;)
+    {
+        int col = RD8(p), i = 0, c;
+        p += 3;
+        while ((c = RD8(p)) != 0 && c != '/')
+        {
+            if (c != ' ') { if (col + i * w < lo) lo = col + i * w; if (col + (i + 1) * w > hi) hi = col + (i + 1) * w; }
+            i++; p++;
+        }
+        if (!c) break;
+        p++;
+    }
+    if (hi < 0) return 0;
+    if (lo < 3 && hi - (lo - 3) <= 45) return 3 - lo;
+    if (hi > 45 && lo - (hi - 45) >= 3) return 45 - hi;
+    return 0;
+}
+/* The writers 0xaba96 (small) and 0xabbae (big) with a column shift, same cells and attributes. */
+HOME_OS static void txt_draw(u32 p, int big, int erase, int sh)
+{
+    for (;;)
+    {
+        u32 a = txt_cell((u32)((int)RD8(p) + sh), RD8(p + 1));
+        u32 pal = (u16)(s16)(s8)RD8(p + 2), c;
+        p += 3;
+        while ((c = RD8(p)) != 0 && c != '/')
+        {
+            p++;
+            if (erase) { WR32(a, 0x200000u | (pal & 0xff)); if (big) { WR32(a + 4, 0x200000u | (pal & 0xff)); WR32(a + 128, 0x200000u | (pal & 0xff)); WR32(a + 132, 0x200000u | (pal & 0xff)); a += 256; } else a += 128; continue; }
+            if (!big) { WR16(a, (u16)c); WR16(a + 2, (u16)pal); a += 128; continue; }
+            {
+                u32 v = (u8)(c - 0x20);
+                u16 code = (v & 0x80) ? 0 : RD16(0xab8b4u + v * 2);
+                if (!code) { WR32(a, 0x20000000u); WR32(a + 4, 0x20000000u); WR32(a + 128, 0x20000000u); WR32(a + 132, 0x20000000u); }
+                else
+                {
+                    WR16(a, code); WR16(a + 2, (u16)pal); WR16(a + 4, (u16)(code + 0x10)); WR16(a + 6, (u16)pal);
+                    WR16(a + 128, (u16)(code + 1)); WR16(a + 130, (u16)pal); WR16(a + 132, (u16)(code + 0x11)); WR16(a + 134, (u16)pal);
+                }
+                a += 256;
+            }
+        }
+        if (!c) break;
+        p++;
+    }
+}
+HOME_OS void f_aba96(void)
+{
+    u32 idx = home_text(0, cpu.d[0] & 0x7f), erase = cpu.d[0] & 0x80;
+    int sh;
+    if (idx == 0xff) return;
+    sh = txt_shift(txt_msg(TXT_SMALL, idx), 1);
+    if (!sh) { lifted_aba96(); return; }
+    txt_draw(txt_msg(TXT_SMALL, idx), 0, erase != 0, sh);
+}
+HOME_OS void f_abb0a(void)
+{
+    if (home_text(1, cpu.d[0] & 0x7f) == 0xff) return;
+    lifted_abb0a();
+}
+HOME_OS void f_abbae(void)
+{
+    u32 idx = home_text(2, cpu.d[0] & 0x7f), erase = cpu.d[0] & 0x80;
+    int sh;
+    if (idx == 0xff) return;
+    cpu.d[0] = (cpu.d[0] & ~0xffu) | idx | erase;
+    sh = txt_shift(txt_msg(TXT_BIG, idx), 2);
+    if (!sh) { lifted_abbae(); return; }
+    txt_draw(txt_msg(TXT_BIG, idx), 1, erase != 0, sh);
+}
+#endif
+
 /* Scheduler */
 static void to_sched(void)
 {

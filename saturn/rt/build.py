@@ -31,6 +31,8 @@ HW_BASE, HW_LIMIT, LW_BASE, LW_LIMIT = 0x06014000, 0x06100000, 0x00200000, 0x003
 HW_RESERVED = 0x10000 + 16 * 2048 + 8192 + 16384 + 0x8000 + 0x8000   # game RAM, stacks, kernel, graphics tables and code
 LW_RESERVED = 0x20000 + 0x4000 + 0xe400   # graphics RAM, lifted bss, layer shadows, blank tags
 NATIVE = ("41ca", "42e4", "212f8")   # EEPROM block read and write; start stock (kernel.c wraps the lifted body for the home LIVES setting)
+if "SAT_HOME" in os.environ.get("KERNEL_CFLAGS", ""):   # home only (the arcade build is unchanged): the credit display and the text writers (kernel.c)
+    NATIVE += ("ab438", "aba96", "abb0a", "abbae")
 # Readable replacements, saturn/game. GAME_OVERRIDES=0 builds without them, for an A/B.
 OVERRIDES = () if os.environ.get("GAME_OVERRIDES") == "0" else tuple((REPO / "saturn/game/overrides.txt").read_text().split())
 CART = dict(ROMB=0x02400000, OPX=0x02600000, SAT_SINK=0x02640000, SAT_OBJ=0x02650000, SAT_PACK=0x02654000)
@@ -51,6 +53,11 @@ for l in (open(WORK / "screen_keys.txt") if (WORK / "screen_keys.txt").exists() 
 SCREEN_KEYS[0].discard(0)
 if os.environ.get("SCREEN_KEYS_REQUIRED", "1") == "1" and not SCREEN_KEYS[0]:
     raise SystemExit("WORK/screen_keys.txt missing: run tools/screen_keys.py (SCREEN_KEYS_REQUIRED=0 to build without)")
+# Home builds only: scroll 1 tiles at the outer columns (arcade 0, 1, 47) that the census never read (it reads the centre crop); the home
+# picture shows them on the HUD rows and fitted text rows (P1's portrait and 1P mark). tools/edge_keys.lua writes WORK/edge_keys.txt.
+EDGE_KEYS = set()
+if "SAT_HOME" in os.environ.get("KERNEL_CFLAGS", "") and (WORK / "edge_keys.txt").exists():
+    EDGE_KEYS = {int(l.split()[1], 16) for l in open(WORK / "edge_keys.txt") if l.strip() and l.split()[0] == "1"}
 STRETCHES = [(0x02400000 + a, n) for a, n in ROUNDS["holes"] if n >= 0x4000]
 
 
@@ -183,6 +190,8 @@ def round_files(rom, code_end, cold1_at):
         if f["name"] != "front":   # continue and game over screens: reachable from every stage, kept first (tools/screen_keys.py)
             keys = [k | e for k, e in zip(keys, SCREEN_KEYS)]
             frank.update({k: 1 << 40 for k in SCREEN_KEYS[0]})
+        if EDGE_KEYS:
+            keys[1] = keys[1] | EDGE_KEYS
         p, dropped = rounds_pack.fit(raw, keys, room, free, frank)
         for first, a, take in p["segs"]:
             written.update(range(a // page, (a + (take * 128 + 2047 & -2048) + page - 1) // page))

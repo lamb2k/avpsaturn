@@ -554,18 +554,81 @@ static const u8 home_pal[64] __attribute__((aligned(2))) = {
 #endif
 #define HUD_ROWS_TOP 5   /* rows 0..4: names, health bars, the enemy label and its bar (row 4 was centre-cropped, 16 px off the rest) */
 #define HUD_ROWS_BOT 26
+#if SAT_GFX_FIT && defined(SAT_HOME)
+/* Home: scroll 1 on the 352 picture by the crop audit's rule (E:/AvP/learning/crop-audit/AUDIT.md, owner-approved 11-08). NBG0/1 and the
+   sprites are scaled 11/12; scroll 1 cannot be, so each row drops 4 of its 48 columns, blank ones, nearest to columns 6, 18, 30 and 42 (where
+   the scaled picture has gained 8 pixels on the 1:1 one), and the other 44 keep their order. Every non-blank cell then sits within about
+   4 pixels of round(col * 11/12), the column its scaled art moved to, and nothing leaves the screen; a column inside a wider gap goes before
+   a space between words. Blank = no tile (cache_get NOSLOT), the row's fill cell, or a cell inside a run of one repeated cell (a rule line).
+   Fallback: a row with fewer than 4 blank columns keeps the 16 pixel centre crop (no arcade text line found has fewer; the continue line
+   has 7). Play's HUD rows (0-5 and 25 up, the audit's quick fix: the enemy and boss portraits sit on rows 5 and 25) keep the flush map (their middle 4 columns dropped) when those are blank. Replaces the HUD-only map at home. */
+static void home_row_map(u32 row, u32 x0, u8 *map)
+{
+    unsigned long dummy = 0;
+    u8 blank[48];
+    int drop[4], k, c, n = 0, last = -1;
+    const u32 *w = snap.s1 + row * S1_COLS;
+    u32 fill = w[47];   /* the row's fill cell: an edge cell repeated at least 4 times (the continue screen's black band is a tile, not a blank) */
+    for (c = 0, k = 0; c < 48; c++) k += w[c] == w[0];
+    if (k >= 4) fill = w[0];
+    for (c = 0, k = 0; c < 48; c++) k += w[c] == fill;
+    if (k < 4) fill = 0xffffffffUL;
+    for (c = 0; c < 48; c++)
+    {
+        /* Droppable: no tile, the row's fill cell, the continue line's space cells (0x1100/0x1110, a solid tile), or a cell inside a run of one repeated cell (a rule line). */
+        int a = c == 0 ? 1 : c == 47 ? 46 : c - 1, b = c == 0 ? 2 : c == 47 ? 45 : c + 1;
+        u32 c_src = (((x0 - S1_REG_CROP) >> 3) + (u32)c) & 63;
+        blank[c] = w[c] == fill || ((w[c] >> 16) & 0xffef) == 0x1100 || (w[c] == w[a] && w[c] == w[b]) || cache_get(&s1_cache, ((w[c] >> 16) << 1) | (c_src & 1), &dummy) == NOSLOT;
+        n += blank[c];
+    }
+    if (n < 4) { for (c = 0; c < 44; c++) map[c] = (u8)(c + 2); return; }
+    if (snap.hud_flush && (row < 6 || row >= 25) && blank[22] && blank[23] && blank[24] && blank[25]) { for (c = 0; c < 44; c++) map[c] = (u8)(c < 22 ? c : c + 4); return; }   /* the HUD's flush map */
+    for (k = 0; k < 4; k++)
+    {
+        /* Cheapest blank column after the last drop: distance from its target, plus 6 if it is not inside a run of 3 blanks and 16 more
+           if it stands alone (a space between words), so words keep their spaces when the row has room elsewhere. */
+        int want = 12 * k + 6, best = -1, cost = 1 << 30;
+        for (c = last + 1; c <= 44 + k; c++)
+        {
+            int d;
+            if (!blank[c]) continue;
+            d = (c > want ? c - want : want - c);
+            if (!(c > 0 && blank[c - 1] && c < 47 && blank[c + 1])) d += 6;
+            if (!(c > 0 && blank[c - 1]) && !(c < 47 && blank[c + 1])) d += 16;
+            if (c == last + 1) d += 20;   /* one column per gap first: "1UP!  CAN" keeps a space */
+            if (d < cost) { cost = d; best = c; }
+        }
+        if (best < 0) { for (c = 0; c < 44; c++) map[c] = (u8)(c + 2); return; }   /* not enough blanks after the last drop: centre crop */
+        drop[k] = last = best;
+    }
+    for (c = 0, n = 0, k = 0; c < 48 && n < 44; c++)
+    {
+        if (k < 4 && c == drop[k]) { k++; continue; }
+        map[n++] = (u8)c;
+    }
+}
+#endif
 static void draw_scroll1(u16 sx, u16 sy)
 {
     const u32 *cell = snap.s1;
     u32 x0 = (u32)sx + CPS_LEFT + S1_REG_CROP, y0 = (u32)sy + CPS_TOP;
     u32 row, col;
     for (row = 0; row <= SAT_GFX_SCREEN_H / 8; row++)
+    {
+#if SAT_GFX_FIT && defined(SAT_HOME)
+        u8 map[44];
+        home_row_map(row < S1_ROWS ? row : S1_ROWS - 1, x0, map);
+#endif
         for (col = 0; col <= SAT_GFX_SCREEN_W / 8; col++)
         {
             u32 c = ((x0 >> 3) + col) & 63, r = ((y0 >> 3) + row) & 63;
 #if SAT_GFX_FIT
             /* The arcade's 48 columns on 44: the HUD rows lose four empty columns at the middle, so it sits flush at both edges; other rows are the centre crop. */
+#ifdef SAT_HOME
+            u32 src = col < 44 ? map[col] : (u32)map[43] + 1;   /* column 44 is the fine-scroll spill */
+#else
             u32 src = (snap.hud_flush && (row < HUD_ROWS_TOP || row >= HUD_ROWS_BOT)) ? (col < 22 ? col : col + 4) : col + 2;
+#endif
             u32 c_src = (((x0 - S1_REG_CROP) >> 3) + src) & 63;
             u32 idx = (r & 0x1f) + (c_src << 5) + ((r & 0x20) << 6);
             u32 word = cell[row * S1_COLS + src];
@@ -583,6 +646,7 @@ static void draw_scroll1(u16 sx, u16 sy)
 #endif
             write_name(VDP2_VRAM + MAP_S1 + (r * 64 + c) * 4, name, &sh_s1[r * 64 + c]);
         }
+    }
 }
 
 #ifdef SAT_HOME
