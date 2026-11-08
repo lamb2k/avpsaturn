@@ -88,5 +88,25 @@ sub = emu.add_machine_frame_notifier(function()
   for _, p in ipairs(pokes) do if p[1] == frame then prog:write_u8(p[2], p[3]) end end
   if snap > 0 and frame % snap == 0 then screen:snapshot(string.format("wv/f_%05d.png", frame)) end
   if frame >= from then dump() end
+  -- WV_BOXES: player 1's hit and hurt boxes each frame (boxes.txt), in MSHvSF's own layout (mame-rr marvel-hitboxes.lua, mshvsf profile):
+  -- box table pointer +6c, attack ids +70 +72, hurt ids +74..+7a; a record is table + (id & 0x1fff) * 8: s16 x, u16 x radius, s16 y, u16 y radius.
+  -- Also the screen origin (stage base ff8000 + per-stage offset, +0c x, +10 y) so boxes can be placed against the sprite list.
+  if os.getenv("WV_BOXES") and frame >= from then
+    local b, sb = 0xff3800, {-0x34c0, -0x35c0, -0x35c0, -0x3540, -0x35c0, -0x35c0, -0x34c0, -0x35c0, -0x3540, -0x3540, -0x35c0, -0x35c0, -0x35c0, -0x35c0, -0x35c0, -0x35c0}
+    local st = 0xff8000 + sb[(prog:read_u8(0xff4913) & 15) + 1]
+    local function s16(v) return v >= 0x8000 and v - 0x10000 or v end
+    local t = {"b", frame, s16(prog:read_u16(b + 0x0c)) - s16(prog:read_u16(st + 0x0c)) - 0x40, s16(prog:read_u16(b + 0x10)) - s16(prog:read_u16(st + 0x10)) - 0x0f,
+               prog:read_u8(b + 0x4b), prog:read_u8(b + 0x82), prog:read_u8(b + 0x83), prog:read_u16(b + 0x06)}
+    local tab = prog:read_u32(b + 0x6c)
+    for _, o in ipairs({0x70, 0x72, 0x74, 0x76, 0x78, 0x7a}) do
+      local id = prog:read_u16(b + o)
+      if id == 0 then t[#t + 1] = "-" else
+        local a = tab + (id & 0x1fff) * 8
+        t[#t + 1] = string.format("%x:%d,%d,%d,%d", id, s16(prog:read_u16(a)), prog:read_u16(a + 2), s16(prog:read_u16(a + 4)), prog:read_u16(a + 6))
+      end
+    end
+    if not boxf then boxf = assert(io.open(root .. "/boxes.txt", "w")) end
+    boxf:write(table.concat(t, " ") .. string.char(10))
+  end
   if frame >= last then finish(); machine:exit() end
 end)

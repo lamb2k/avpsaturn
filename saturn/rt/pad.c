@@ -103,6 +103,9 @@ void sat_pad_tick(void)
 #else
     map_pad(sat_pad_raw);
 #endif
+#ifdef SAT_GUESTS
+    { extern void sat_guest_wolverine_pad(u16 *in0) __attribute__((weak)); if (sat_guest_wolverine_pad) sat_guest_wolverine_pad(&in0); }   /* bonus characters: motion inputs */
+#endif
 }
 u32 sat_pad_in0(void) { return in0; }
 u32 sat_pad_in2(void) { return in2; }

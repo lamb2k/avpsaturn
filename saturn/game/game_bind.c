@@ -68,6 +68,20 @@ void f_aa59a(void)
     FLAGS(shifted == 0, (shifted & 0x80u) != 0, out, 0, out);
 }
 
+#ifdef SAT_GUESTS
+/* Bonus characters: the collision pass (attacker a6, target a1) runs with a guest's own boxes in place (saturn/guests/wolverine/wolverine.c);
+   the lifted body is kept whole (build.py GUEST_WRAP). */
+void f_1cf54(void)
+{
+    extern void lifted_1cf54(void);
+    extern void sat_guest_wolverine_boxes(unsigned long a6, unsigned long a1, int restore) __attribute__((weak));
+    if (!sat_guest_wolverine_boxes) { lifted_1cf54(); return; }
+    sat_guest_wolverine_boxes(R->a[6], R->a[1], 0);
+    lifted_1cf54();
+    sat_guest_wolverine_boxes(0, 0, 1);
+}
+#endif
+
 void f_1689a(void)
 {
     MeleeCheck c;

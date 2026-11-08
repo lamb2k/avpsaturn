@@ -62,6 +62,104 @@ static int move_for(int i)
 }
 static u16 lastx_[2];
 
+/* Boxes (option B, lane avp-wolverine-b). AvP's collision pass f_1cf54 (attacker a6, target a1) takes the attack box from the attacker's
+   frame record (+1c) byte 9 and the hurt box from the target's byte 8, as indexes into the character's box table (+50):
+   attack = T + word T[2] + idx * 16, hurt = T + word T[0] + idx * 8; bytes 0..5 of either: x (forward, s8), y (up, s8), x half, y half,
+   depth, depth half (f_1d25e). Around each call for a Wolverine player the hook writes his MSHvSF box for the step he shows
+   (gen/wolverine_data.inc wv_box, tools/wolverine/boxes.py) over x, y and the halves, keeps AvP's depth bytes and the rest of the record
+   (damage, knockback), and puts every byte back after the call. Records are ROM image pages the game reads, so stage tiles never take them.
+   His hit is out only on the steps where MSHvSF had one, in Schaefer's attack states; when Schaefer's own frame has none there, the frame's
+   index is borrowed from the last attack Schaefer's state showed (same damage record). */
+static int is_wolverine(int i);
+extern u8 *PAGE[256];
+#define PBY(a) (PAGE[((u32)(a) >> 16) & 0xff] + ((u32)(a) & 0xffff))
+static u16 wv_step_now[2] = {0xffff, 0xffff};   /* index into wv_box of the step he shows, per player; 0xffff none */
+static u8 atk_cache[2][16];                       /* last nonzero attack index per Schaefer state +6 (by state >> 1) */
+static struct { u8 *p; u8 v[4]; } undo[8];
+static int nundo;
+static u32 rd32(u32 a) { u8 *p = PBY(a); return (u32)p[0] << 24 | (u32)p[1] << 16 | (u32)p[2] << 8 | p[3]; }
+static u32 rd16(u32 a) { u8 *p = PBY(a); return (u32)p[0] << 8 | p[1]; }
+static void poke4(u8 *p, int a, int b, int c, int d)
+{
+    int k;
+    if (nundo >= 8) return;
+    undo[nundo].p = p;
+    for (k = 0; k < 4; k++) undo[nundo].v[k] = p[k];
+    nundo++;
+    p[0] = (u8)a; p[1] = (u8)b; p[2] = (u8)c; p[3] = (u8)d;
+}
+static int wv_player(u32 b)
+{
+    if (!(sat_guest_sel & 1) || (b != PL(0) && b != PL(1))) return -1;
+    return is_wolverine((int)((b - PL(0)) >> 8)) ? (int)((b - PL(0)) >> 8) : -1;
+}
+static int attack_state(int i, int *slot)
+{
+    u8 a = R8(PL(i) + 4), b = R8(PL(i) + 5), c = R8(PL(i) + 6);
+    *slot = (c >> 1) & 15;
+    return a == 2 && b == 0 && (c == 0x06 || c == 0x0e || c == 0x0c || c == 0x08);
+}
+static const WvBox *box_now(int i)
+{
+    u16 k = wv_step_now[i];
+    if (k == 0xffff) return 0;
+    if (!wv_box[k].uw) return &wv_box[wv_move_start[WV_IDLE]];   /* a step without a capture keeps his standing hurt box */
+    return &wv_box[k];
+}
+/* restore = 0: before the call; 1: after it */
+void sat_guest_wolverine_boxes(unsigned long a6, unsigned long a1, int restore)
+{
+    int i, slot;
+    if (restore) {
+        while (nundo > 0) { nundo--; { int k; for (k = 0; k < 4; k++) undo[nundo].p[k] = undo[nundo].v[k]; } }
+        return;
+    }
+    nundo = 0;
+    if (!WV_HAVE_BOXES) return;
+    if ((i = wv_player((u32)a6)) >= 0) {   /* his hit */
+        const WvBox *w = box_now(i);
+        u32 fr = rd32((u32)a6 + 0x1c), t = rd32((u32)a6 + 0x50);
+        u8 *f = PBY(fr), idx = f[9];
+        int att = attack_state(i, &slot);
+        if (att && idx) atk_cache[i][slot] = idx;
+        if (!att || !w || !w->hw) { if (idx) poke4(f + 8, f[8], 0, f[10], f[11]); }
+        else {
+            if (!idx) idx = atk_cache[i][slot];
+            if (idx) {
+                u8 *r = PBY(t + rd16(t + 2) + (u32)(s8)idx * 16);
+                if (idx != f[9]) poke4(f + 8, f[8], idx, f[10], f[11]);
+                poke4(r, -w->hx, w->hy, w->hw, w->hh);   /* AvP's record x is backward-positive (f_1d25e negates it when +0f is set, facing right) */
+            }
+        }
+    }
+    if ((i = wv_player((u32)a1)) >= 0) {   /* his hurt box */
+        const WvBox *w = box_now(i);
+        u32 fr = rd32((u32)a1 + 0x1c), t = rd32((u32)a1 + 0x50);
+        u8 idx = PBY(fr)[8];
+        if (w && idx) poke4(PBY(t + rd16(t) + (u32)(s8)idx * 8), -w->ux, w->uy, w->uw, w->uh);
+    }
+}
+/* Debug for the box sheets (wv_box_dbg[player]): Schaefer's own attack and hurt box from his frame (x0 y0 x1 y1, object coordinates),
+   then Wolverine's. 9999 = none. */
+s16 wv_box_dbg[2][16];
+static void box_rect(s16 *o, int sx, int sy, int face, int x, int y, int hw, int hh)
+{
+    int cx = face ? sx - x : sx + x, cy = sy - y;
+    o[0] = (s16)(cx - hw); o[1] = (s16)(cy - hh); o[2] = (s16)(cx + hw); o[3] = (s16)(cy + hh);
+}
+static void box_debug(int i, int sx, int sy)
+{
+    u32 b = PL(i), fr = rd32(b + 0x1c), t = rd32(b + 0x50);
+    u8 *f = PBY(fr), *r;
+    const WvBox *w = box_now(i);
+    int k, face = R8(b + 0x0f) != 0, slot, att = attack_state(i, &slot);
+    for (k = 0; k < 16; k++) wv_box_dbg[i][k] = 9999;
+    if (f[9]) { r = PBY(t + rd16(t + 2) + (u32)(s8)f[9] * 16); box_rect(&wv_box_dbg[i][0], sx, sy, face, (s8)r[0], (s8)r[1], r[2], r[3]); }
+    if (f[8]) { r = PBY(t + rd16(t) + (u32)(s8)f[8] * 8); box_rect(&wv_box_dbg[i][4], sx, sy, face, (s8)r[0], (s8)r[1], r[2], r[3]); }
+    if (w && w->hw && att) box_rect(&wv_box_dbg[i][8], sx, sy, face, -w->hx, w->hy, w->hw, w->hh);
+    if (w) box_rect(&wv_box_dbg[i][12], sx, sy, face, -w->ux, w->uy, w->uw, w->uh);
+}
+
 static void put16(u8 *p, u16 v) { p[0] = (u8)(v >> 8); p[1] = (u8)v; }
 
 static int is_wolverine(int i)
@@ -108,7 +206,7 @@ int sat_guest_objects(u8 *obj, int count, int max, u8 *pal0)
         if (!is_wolverine(i)) continue;
         any = 1;
         x = R16(PL(i) + 0x10);
-        face_[i] = (u8)(R8(PL(i) + 0x0f) & 1);
+        face_[i] = (u8)((R8(PL(i) + 0x0f) & 1) ^ 1);   /* +0f set = facing right (Yaba 11-08: set while walking right); his poses were captured facing right, so they mirror when it is clear */
         lastx_[i] = x;
         move = move_for(i);
         if (move != cur_[i]) { cur_[i] = (u8)move; step_[i] = 0; left_[i] = 0; }
@@ -121,10 +219,12 @@ int sat_guest_objects(u8 *obj, int count, int max, u8 *pal0)
             else if (!ONCE(move)) step_[i] = 0;
         }
         st = wv_steps[wv_move_start[move] + step_[i]].pose;
+        wv_step_now[i] = (u16)(wv_move_start[move] + step_[i]);
         cam = R16(0xff8278);
         sx = (int)x - (int)cam + WV_OX;
         sy = WV_OY - 0x100 - (s16)R16(PL(i) + 0x14) + (s16)R16(0xff827c);   /* the camera's depth (ff827c, 0x100 at rest) scrolls him as it does Schaefer */
         wv_dbg[i][0] = wv_dbg[i][1] = wv_dbg[i][4] = wv_dbg[i][5] = 9999; wv_dbg[i][2] = wv_dbg[i][3] = wv_dbg[i][6] = wv_dbg[i][7] = -9999;
+        box_debug(i, sx, sy);
         wv_dbg[i][8] = (s16)sx; wv_dbg[i][9] = (s16)sy; wv_dbg[i][10] = (s16)(R8(PL(i) + 6) | R8(PL(i) + 5) << 8); wv_dbg[i][11] = (s16)(st | face_[i] << 12);
         /* Schaefer's own sprites near him go */
         for (j = k = 0; j < count; j++) {
@@ -166,4 +266,57 @@ int sat_guest_objects(u8 *obj, int count, int max, u8 *pal0)
     sat_guest_touched = any;
     if (any) for (k = 0; k < 16; k++) { put16(pal0 + WV_SCH_PAL * 32 + k * 2, wv_pal[k]); put16(pal0 + WV_PALROW1 * 32 + k * 2, wv_pal[16 + k]); }
     return count;
+}
+
+/* Motion inputs (option B), MSHvSF style: the game's pad word (pad.c in0: per player byte, active low, 1 right, 2 left, 4 down, 8 up,
+   0x10 gun, 0x20 attack, 0x40 jump) passes through here once a vblank. Directions are read against his facing (+0f: 1 right).
+   Berserker Barrage: down, down-forward, forward, then attack within the window -> the gun button (his gun state slot, 020c).
+   Tornado Claw: forward, down, down-forward, then attack -> attack + jump (the special slot, 0208). The attack press that ends the motion
+   is replaced, so the plain attack does not also come out. Each step of the motion must follow the last within WV_CMD_GAP vblanks, and the
+   button within WV_CMD_GAP of the last direction (MSHvSF's buffer is of this order; tuned on Yaba). */
+#define WV_CMD_GAP 10
+#define WV_CMD_HOLD 4
+static u8 dir_hist[2][4], dir_age[2][4], inj_left[2], inj_bits[2], last_btn[2];
+static int dir_of(u8 w, int face)   /* 1 forward, 2 down-forward, 3 down, 0 other; w active high */
+{
+    int fwd = face ? (w & 1) : (w & 2), dn = w & 4;   /* +0f set: facing right (Yaba, stage 02: Schaefer's attack box sits right of him) */
+    if (dn && fwd) return 2;
+    if (dn) return 3;
+    if (fwd && !(w & 8)) return 1;
+    return 0;
+}
+static int seen(int i, const u8 *seq)   /* the last three distinct directions, oldest first, inside the gap */
+{
+    return dir_hist[i][2] == seq[0] && dir_hist[i][1] == seq[1] && dir_hist[i][0] == seq[2] &&
+           dir_age[i][0] <= WV_CMD_GAP && dir_age[i][1] <= WV_CMD_GAP * 2 && dir_age[i][2] <= WV_CMD_GAP * 3;
+}
+void sat_guest_wolverine_pad(u16 *in0)
+{
+    static const u8 qcf[3] = {3, 2, 1}, dp[3] = {1, 3, 2};
+    int i, k;
+    if (!(sat_guest_sel & 1)) return;
+    for (i = 0; i < 2; i++) {
+        int sh = i * 8, d;
+        u8 w = (u8)~(*in0 >> sh), btn;
+        if (!is_wolverine(i)) { inj_left[i] = 0; continue; }
+        for (k = 0; k < 4; k++) if (dir_age[i][k] < 255) dir_age[i][k]++;
+        d = dir_of(w, R8(PL(i) + 0x0f) != 0);
+        if (d && d != dir_hist[i][0]) {
+            for (k = 3; k > 0; k--) { dir_hist[i][k] = dir_hist[i][k - 1]; dir_age[i][k] = dir_age[i][k - 1]; }
+            dir_hist[i][0] = (u8)d;
+        }
+        if (d) dir_age[i][0] = 0;
+        btn = w & 0x20;
+        if (btn && !last_btn[i] && !inj_left[i]) {
+            if (seen(i, dp)) { inj_bits[i] = 0x60; inj_left[i] = WV_CMD_HOLD; }        /* Tornado Claw: attack + jump */
+            else if (seen(i, qcf)) { inj_bits[i] = 0x10; inj_left[i] = WV_CMD_HOLD; }  /* Berserker Barrage: gun */
+            if (inj_left[i]) for (k = 0; k < 4; k++) dir_hist[i][k] = 0;
+        }
+        last_btn[i] = btn;
+        if (inj_left[i]) {
+            u16 m = (u16)(0x70u << sh);
+            inj_left[i]--;
+            *in0 = (u16)((*in0 | m) & ~((u16)inj_bits[i] << sh));
+        }
+    }
 }

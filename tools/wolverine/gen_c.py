@@ -38,5 +38,26 @@ lines = [
     "enum { " + ", ".join(f"WV_{m.upper()}" for m in names) + ", WV_MOVES };",
     f"static const unsigned short wv_pal[{len(pal)}] = {{{','.join(hex(c) for c in pal)}}};",
 ]
+# Boxes per move step (tools/wolverine/boxes.py -> boxes.json beside remap.json): centre and half size, x forward and y up of his feet.
+# WvBox: hit x, hit half w, hit y, hit half h, hurt x, hurt half w, hurt y, hurt half h; hit half w 0 = no hit box on that step.
+bj = pathlib.Path(sys.argv[1]) / "boxes.json"
+B = json.loads(bj.read_text()) if bj.exists() else {}
+def cw(r):
+    if not r:
+        return (0, 0, 0, 0)
+    c = lambda a, b: max(-128, min(127, (a + b) // 2))
+    h = lambda a, b: max(1, min(255, (b - a + 1) // 2))
+    return (c(r[0], r[1]), h(r[0], r[1]), c(r[2], r[3]), h(r[2], r[3]))
+bx = []
+for m, s in moves.items():
+    bs = B.get(m, [])
+    for k in range(len(s)):
+        st = bs[k] if k < len(bs) else {}
+        bx.append("{%d,%d,%d,%d,%d,%d,%d,%d}" % (cw(st.get("hit")) + cw(st.get("hurt"))))
+lines += [
+    "typedef struct { signed char hx; unsigned char hw; signed char hy; unsigned char hh; signed char ux; unsigned char uw; signed char uy; unsigned char uh; } WvBox;",
+    f"#define WV_HAVE_BOXES {1 if B else 0}",
+    f"static const WvBox wv_box[{len(bx)}] = {{{','.join(bx)}}};",
+]
 out.write_text("\n".join(lines) + "\n")
 print("poses", len(used), "tiles", len(ent), "steps", len(seq), "bytes ~", len(ent) * 8 + len(seq) * 2 + len(pal) * 2)

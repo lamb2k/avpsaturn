@@ -80,6 +80,23 @@ static int is_guest_shot(gu32 actor)
     return guest_draw(owner) == sat_guest_megaman_draw && sat_guest_megaman_draw;
 }
 
+/* Wolverine has no gun: a Wolverine player's shots (muzzle flash and tracer, the same pool) are not drawn. Their hits still go through the
+   game's path; his Berserker Barrage takes the gun's state slot (saturn/guests/wolverine/wolverine.c). */
+static int is_wolverine_shot(gu32 actor)
+{
+    gu8 *b = PAGE[0xff];
+    gu32 o = actor & 0xffff, owner;
+    if (!(sat_guest_sel & 1) || (actor >> 16) != 0xff || o < 0x8680 || o >= 0x9580 || b[o + 8] != 4 || b[o + 2] != 0) return 0;
+    owner = ((gu32)b[o + 0x26] << 8) | b[o + 0x27];
+    if (owner < 0x8380 || owner >= 0x8580 || (owner & 0xff) != 0x80) return 0;
+    return b[owner] != 0 && (b[owner + 0xd2] & 3) == 1;   /* +0xd2 character: 1 Schaefer, whose slot Wolverine takes */
+}
+static int no_draw(gu8 *out, int room, gu32 actor, int ax, int bottom, unsigned short xhi, unsigned short ahi)
+{
+    (void)out; (void)room; (void)actor; (void)ax; (void)bottom; (void)xhi; (void)ahi;
+    return 0;
+}
+
 static int be16(const gu8 *p) { return (p[0] << 8) | p[1]; }
 
 /* obj: the snapshot's copy of the object list (count entries, room for max). page0: the snapshot's sprite palette page. Returns the new count. */
@@ -92,6 +109,7 @@ int sat_guest_objects(gu8 *obj, int count, int max, gu8 *page0)
         int (*draw)(gu8 *, int, gu32, int, int, unsigned short, unsigned short) = guest_draw(grp[g].actor);
         int shot = 0;
         if (!draw && sat_guest_megaman_draw && is_guest_shot(grp[g].actor)) { draw = sat_guest_megaman_draw; shot = 1; }
+        if (!draw && is_wolverine_shot(grp[g].actor)) { draw = no_draw; shot = 1; }
         int s = grp[g].at + shift, e = g + 1 < ngrp ? grp[g + 1].at + shift : count, i, x0 = 0, x1 = 0, bottom = -1000, n, room;
         int bx;
         gu8 tmp[8 * 96];

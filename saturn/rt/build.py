@@ -33,6 +33,8 @@ LW_RESERVED = 0x20000 + 0x4000 + 0xe400   # graphics RAM, lifted bss, layer shad
 NATIVE = ("41ca", "42e4", "212f8")   # EEPROM block read and write; start stock (kernel.c wraps the lifted body for the home LIVES setting)
 # Readable replacements, saturn/game. GAME_OVERRIDES=0 builds without them, for an A/B.
 OVERRIDES = () if os.environ.get("GAME_OVERRIDES") == "0" else tuple((REPO / "saturn/game/overrides.txt").read_text().split())
+# Bonus characters (SAT_GUESTS only): lifted routines wrapped in game_bind.c, body kept (the collision pass, for guest boxes).
+GUEST_WRAP = ("1cf54",) if "SAT_GUESTS" in os.environ.get("KERNEL_CFLAGS", "") else ()
 CART = dict(ROMB=0x02400000, OPX=0x02600000, SAT_SINK=0x02640000, SAT_OBJ=0x02650000, SAT_PACK=0x02654000)
 CART_END = 0x02800000
 OPX_MAX = 0x40000
@@ -131,7 +133,7 @@ def gen_sources():
         a, b = t.index("#else\nregister Cpu *R"), t.index("#define SHL8(")
         t = t[:a] + '#else\n#include "lift_target.h"\n#endif\n' + t[b:]
         t = re.sub(r"\bOP(8|16|32)\(\(?0x([0-9a-f]+)u", opx_rewrite, t)
-        for n in NATIVE + OVERRIDES:   # replaced natively; the lifted body stays linked as lifted_NNN
+        for n in NATIVE + OVERRIDES + GUEST_WRAP:   # replaced natively; the lifted body stays linked as lifted_NNN
             t = t.replace(f"void f_{n}(void){{", f"void lifted_{n}(void){{")
         for n in OVERRIDES:   # memory is tight and the target never falls back: the replaced body goes
             t = re.sub(r"^void lifted_%s\(void\)\{.*?^\}\n" % n, "", t, flags=re.M | re.S)
