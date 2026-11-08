@@ -5,7 +5,7 @@ Layout (boot.c load_regions reads it):
   sectors 1..   runs, u32 each: store sector << 14 | sectors (1..16383), all rounds' runs back to back
   then          data sectors, in first-use order (round 0, 1, ...), so a round's reads stay mostly sequential.
 Reading a round's runs in order gives back its R*.BIN byte for byte; the loader then walks that stream exactly as it walks the file.
-env STORE_DUP (default 32): stretches of at most this many already-stored sectors are stored again in line, trading space for fewer seeks.
+env STORE_DUP (default 512): stretches of at most this many already-stored sectors are stored again in line, trading space for fewer seeks.
 usage: sector_store.py DISC_DIR [--keep DIR]   writes STORE.BIN, verifies all rounds, moves R*.BIN to DIR (default: removed)."""
 import hashlib, os, pathlib, shutil, struct, sys
 
@@ -14,7 +14,7 @@ MAGIC = 0x53535431
 CMAX = (1 << 14) - 1
 
 
-def build(files, dup=32):
+def build(files, dup=512):
     """files: list of bytes (round files). Returns STORE.BIN bytes and per-round run lists.
     dup: a stretch of already-stored sectors of this length or shorter is stored again in line, so a round reads as few long runs (fewer seeks)."""
     data, rounds, where = [], [], {}
@@ -79,7 +79,7 @@ def main():
     if nums != list(range(len(nums))):
         raise SystemExit("sector store: round files not numbered 0..n-1")
     files = [p.read_bytes() for p in names]
-    store, rounds = build(files, int(os.environ.get("STORE_DUP", "32")))
+    store, rounds = build(files, int(os.environ.get("STORE_DUP", "512")))
     bad = [i for i, b in enumerate(files) if rebuild(store, i) != b]
     if bad:
         raise SystemExit(f"sector store: rounds differ {bad}")

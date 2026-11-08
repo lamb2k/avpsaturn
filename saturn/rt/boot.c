@@ -63,8 +63,13 @@ static long load_regions(const char *name, void (*mark)(void))
     h = GFS_Open(id);
     if (!h) { GFS_Reset(); return -3; }
     GFS_SetTmode(h, GFS_TMODE_CPU);
-    if (GFS_Fread(h, 1, store_dir, 2048) != 2048 || store_dir[0] != 0x53535431u || (unsigned long)r >= store_dir[1]) { GFS_Close(h); GFS_Reset(); return -0x100; }
-    run_next = (Sint32)store_dir[2 + r * 2]; run_end = run_next + (Sint32)store_dir[3 + r * 2]; run_left = 0; run_sec = -1;
+    /* The directory is read once and kept (the loader stays resident); so is a one-sector run table, so a load seeks only to its own runs. */
+    if (store_dir[0] != 0x53535431u) {
+        if (GFS_Fread(h, 1, store_dir, 2048) != 2048 || store_dir[0] != 0x53535431u) { store_dir[0] = 0; GFS_Close(h); GFS_Reset(); return -0x100; }
+        run_sec = -1;
+    }
+    if ((unsigned long)r >= store_dir[1]) { GFS_Close(h); GFS_Reset(); return -0x100; }
+    run_next = (Sint32)store_dir[2 + r * 2]; run_end = run_next + (Sint32)store_dir[3 + r * 2]; run_left = 0;
     if (vread(h, 1, (unsigned char *)load_head)) { GFS_Close(h); GFS_Reset(); return -0x101; }
     for (i = 0; i < load_head[0]; i++) {
         Sint32 secs = (Sint32)(load_head[2 + i * 2] / 2048u);
