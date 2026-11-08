@@ -74,6 +74,19 @@ def step(v,s):
     if os.environ.get("CTLDUMP") and n%30==0:   # controller pool: live records, +0..+7 and words +0x40..+0x4f
         P=s.ram(0xce80,0x800); s.log("CTL stw",s.ram(0x81e8,2).hex()," ".join("%x:%s/%s"%(0xce80+o,P[o:o+8].hex(),P[o+0x40:o+0x50].hex()) for o in range(0,0x800,0x40) if P[o]))
     if os.environ.get("GUNLOG") and a[0x486]==0x0c: s.log("GUN2 act",a[0x484:0x488].hex(),"n",s.ram(0,0) and 0,s.word("sat_shot_probe",20,2),"hits",s.word("sat_shot_hits"),"z",u16(0x398),u16(0x498),"x",u16(0x390),u16(0x490),"facing",a[0x38f],a[0x48f])
+    if os.environ.get("DIFFROM") and t0 and (not hasattr(s,"rom0") or now-getattr(s,"romt",0)>15):   # program image on the cart: what changes during the fight
+        img=b"".join(s.m.read(0x02400000+i,0x10000) for i in range(0,0x200000,0x10000))
+        if not hasattr(s,"rom0"): s.rom0=img; s.log("ROMSNAP",len(img))
+        else:
+            ch=[]; i=0; a=s.rom0
+            while i<len(img):
+                if img[i]!=a[i]:
+                    j=i
+                    while j<len(img) and img[j]!=a[j]: j+=1
+                    ch.append((i,j-i,img[i:min(j,i+8)].hex(),a[i:min(j,i+8)].hex())); i=j
+                else: i+=1
+            s.log("ROMDIFF",len(ch)," ".join("%x+%d:%s<-%s"%c for c in ch[:24]))
+        s.romt=now
     if os.environ.get("IDLESHOTS") and n%60==30: s.shot(f"idle_{int(now-t0)}")
     if t0 and now-t0>20 and not getattr(s,"hs",0):
         s.hs=1; s.shot("smash_hud")

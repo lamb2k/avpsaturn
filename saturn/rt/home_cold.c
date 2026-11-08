@@ -204,7 +204,10 @@ static int stage_select(void)
 typedef struct { u8 stocks, minutes, aliens, p1, p2, arena; } DuelOpt;
 extern DuelOpt sat_duel_opt;
 extern u32 sat_vblanks_now(void);
-static const u8 arenas[] = { 0x02, 0x0e, 0x1c, 0x1e, 0x24 };   /* stages played through from the home start (STATUS, home features 3) */
+/* RANDOM picks from arenas that draw clean. 0e, 1c, 1e and 24 show wrong tile data in the duel (Duel 5): their round files spill sprites into
+   ROM pages the stage's own walk never reads, and the duel reads some of them (with ROUND_SHARED_MIN=1 the 1c fight drew clean, s92.log).
+   They come back once the duel has round files that keep those pages. */
+static const u8 arenas[] = { 0x02 };
 static int duel_setup(void)
 {
     static const char *const labels[] = { "STOCKS", "TIME", "ALIENS", "ARENA" };

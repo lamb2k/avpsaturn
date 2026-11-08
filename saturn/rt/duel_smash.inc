@@ -102,6 +102,10 @@ static int smash_tick(int lo, int hi)
         sat_smash.clock = (u32)sat_duel_opt.minutes * 60u * 60u; sat_smash.sudden = 0;
         sat_home_clear(); sat_home_mode = 1;
     }
+#ifdef DUEL_TIE_TEST   /* test build only: a 20 s clock and scores forced level at time-up, to reach sudden death */
+    if (sat_smash.clock > 20u * 60u) sat_smash.clock = 20u * 60u;
+    if (sat_smash.clock == 1) sat_smash.score[1] = sat_smash.score[0];
+#endif
     if (sat_smash.clock && --sat_smash.clock == 0) {   /* time: more score wins; a tie goes to sudden death, one stock each at 300% */
         if (sat_smash.score[0] != sat_smash.score[1]) { smash_hud(); return sat_smash.score[0] < sat_smash.score[1] ? 1 : 2; }
         sat_smash.sudden = 1;
