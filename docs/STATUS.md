@@ -136,6 +136,30 @@ Host check in Saturn form, same keep lists and store as image 97790a2e: clean 27
 Image E:/AvP/learning/lane-packs/work/sat.iso, 502.6 MB (was 51.6), 210 round files, sha256 b5d86cd84a63ad3aa5d3cc3720f7959c1e3362ca677f1ea302cdedb9be9484fc. High RAM free 19.1 KB, low RAM 4.1 KB.
 Unproven: any boot; GFS with 219 root entries in a directory over one sector (names table now 256, was 64); the kernel selector at run time; seek time on a larger disc; three players; any second player but Schaefer; two players past stage 1e.
 
+## Characters, two players and sound on the Saturn image, 2026-11-08 (lane all; EMULATOR, soft-core Yaba; HOST against MAME 0.289; hardware UNRUN)
+
+Package E:\AvP\learning\lane-all\pkgF, commit 5b60af3, avp_saturn.iso sha256 b9201af10abc27333c3a98a7ef5ff074202015bcfd6aa455bf144e419abcd3cb. Not copied to E:\AvP\package-all: two characters do not reach the ending on it. package-r7 untouched.
+Host check, Saturn form, keep lists of this package: clean 317908 of 317908 (full), 272171 (c1), 369051 (c2), 333669 (c3), 329918 (2p), missed IRQ 0.
+
+| Run, this package | Result |
+| --- | --- |
+| Linn | Boot to stage 26 and back to attract, vblank 277856, 82 KOs, 0 fatals. Selector picked stage*_m8 at every load. |
+| Schaefer | Stages 02 to 1e, 0 fatals; held in 1e section 15 from vblank 221200 to 897123. |
+| Hunter | Stages 02 to 1e, 0 fatals, past the 1c fault below; held in 1e section 15. |
+| Two players | Not run on this package. |
+
+Stage 1e hold: the Chrysalis (record ff a180, hp 49) sits on the wall at y 0xe9 and its whole record stays unchanged; Linn killed it on the same bytes. Writing ROM bytes back into the 287 pages stage 1e's file overwrote did not wake it from a held state, so a bad read before that point is not ruled out. Bot or image: not proven.
+Previous package (52941db, sha256 49ce3871...): Schaefer and Linn to the ending, Hunter fatal 0xe2 in 1c, two players (Warrior + Schaefer) stages 02 to 1c on real port 2, where the bot stays in section 14.
+
+Fatal 0xe2 at 0xa9cc4, found: an object's record at 0x333d4 (page 204) is read in stages 06, 10 and 12 but was not kept in 1c; its page held other bytes there, the script pointer read as 0, and the word at 0 indexed past the 8-entry table. Fix: every stage keeps pages two or more stages read (tools/rounds_config.py, ROUNDS_SHARED_MIN=2, no page either side). Cost in dropped sprite keys: 0e 2681 to 3521, 1c 158 to 1285, 1e 733 to 1757, 24 2561 to 3688; the file each character gets still drops no key of its own route (tools/rounds_variants_report.py). Pages read by one stage only stay exposed.
+Earlier odd pointer (0x7767) on the old image: Yaba rounds an odd word read down; real hardware raises an address error there.
+
+Other fixes: second pad read (saturn/rt/pad.c, P2 in the upper byte of in0, start 0x200, coin 0x2000); tiles fill never-read pages first; the Yaba runner voids a leg whose emulator does not own port 9640 (two lanes raced for it); the bot never saves state inside a load (such a state never resumes).
+Sound: lane-emu's yabasanshiro.exe already has the AVP_SCSP_RAW hook and it runs under soft-core with SoundCore 0. Per-stage 20 s clips of Schaefer on the previous package: E:\AvP\learning\lane-all\capt\schaefer, all 20 stage words with sound. Against MAME clips anywhere in that capture: 62 clips, median correlation 0.567, 18 at 0.8 or above. The capture runs at wall rate, not game time. Nobody has listened.
+Two-player HUD at 352 wide: the P2 health bar and score run to the right edge, no end cap; P1's portrait is cut on the left.
+Tools: tools/whole_game_legs.py, tools/capture_stage_clips.py, tools/capture_clip_match.py; BOT_CHAR, BOT_P2/YABA_P2 in saturn/rt/play_full_bot.py and play_yaba.py.
+Unproven: the stage 1e hold, two players on this package, three players, any boot outside soft-core Yaba, hardware.
+
 ## Whole game to the ending on the Saturn image, 2026-11-07 (EMULATOR, soft-core Yaba, VideoCore 2, SoundCore 0; hardware UNRUN)
 
 E:\AvP\package-r7, commit 84d6810, avp_saturn.iso sha256 cd2af4acc9bd9ec6b0b4bc1a70b68424e26c38580c1f3bac12bfba66b6ec7c7b, hashes equal before and after the run. Predator Warrior from boot through stages 02 to 24, stage 26 (ship, staff credits, epilogue, GAME OVER) seen on stills, back to attract at vblank 338866. Pad through pad_set, RAM only read. 130 KOs with continues, 0 fatals, 21 loads.
