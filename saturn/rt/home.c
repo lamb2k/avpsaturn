@@ -140,7 +140,7 @@ static void rush_time(char *b, u32 v)  /* mm:ss.cc from vblanks (60 per second) 
 }
 static void rush_card(int n)           /* the break before a fight: the game held, a short card over its picture */
 {
-    char b[12] = "FIGHT 1 OF 5";
+    char b[13] = "FIGHT 1 OF 5";
     int i, r, c;
     b[6] = (char)('0' + n);
     sat_home_hold = 1;
