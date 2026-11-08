@@ -559,46 +559,56 @@ static const u8 home_pal[64] __attribute__((aligned(2))) = {
    sprites are scaled 11/12; scroll 1 cannot be, so each row drops 4 of its 48 columns, blank ones, nearest to columns 6, 18, 30 and 42 (where
    the scaled picture has gained 8 pixels on the 1:1 one), and the other 44 keep their order. Every non-blank cell then sits within about
    4 pixels of round(col * 11/12), the column its scaled art moved to, and nothing leaves the screen; a column inside a wider gap goes before
-   a space between words. Blank = no tile (cache_get NOSLOT), the row's fill cell, or a cell inside a run of one repeated cell (a rule line).
+   a space between words; rows of one block share one map (home_row_map).
    Fallback: a row with fewer than 4 blank columns keeps the 16 pixel centre crop (no arcade text line found has fewer; the continue line
    has 7). Play's HUD rows (0-5 and 25 up, the audit's quick fix: the enemy and boss portraits sit on rows 5 and 25) keep the flush map (their middle 4 columns dropped) when those are blank. Replaces the HUD-only map at home. */
-static void home_row_map(u32 row, u32 x0, u8 *map)
+#define HOME_OS __attribute__((optimize("Os")))
+#define BL(m, c) (((m)[(c) >> 5] >> ((c) & 31)) & 1)
+/* Droppable columns of one row, bit c of m[0..1]: no tile, the row's fill cell, the continue line's space cells (0x1100/0x1110, a solid
+   tile), or a cell inside a run of one repeated cell (a banner or rule line). */
+static HOME_OS void home_row_blank(u32 row, u32 x0, u32 *m)
 {
     unsigned long dummy = 0;
-    u8 blank[48];
-    int drop[4], k, c, n = 0, last = -1;
+    int k, c;
     const u32 *w = snap.s1 + row * S1_COLS;
     u32 fill = w[47];   /* the row's fill cell: an edge cell repeated at least 4 times (the continue screen's black band is a tile, not a blank) */
     for (c = 0, k = 0; c < 48; c++) k += w[c] == w[0];
     if (k >= 4) fill = w[0];
     for (c = 0, k = 0; c < 48; c++) k += w[c] == fill;
     if (k < 4) fill = 0xffffffffUL;
+    m[0] = m[1] = 0;
     for (c = 0; c < 48; c++)
     {
-        /* Droppable: no tile, the row's fill cell, the continue line's space cells (0x1100/0x1110, a solid tile), or a cell inside a run of one repeated cell (a rule line). */
         int a = c == 0 ? 1 : c == 47 ? 46 : c - 1, b = c == 0 ? 2 : c == 47 ? 45 : c + 1;
         u32 c_src = (((x0 - S1_REG_CROP) >> 3) + (u32)c) & 63;
-        blank[c] = w[c] == fill || ((w[c] >> 16) & 0xffef) == 0x1100 || (w[c] == w[a] && w[c] == w[b]) || cache_get(&s1_cache, ((w[c] >> 16) << 1) | (c_src & 1), &dummy) == NOSLOT;
-        n += blank[c];
+        if (w[c] == fill || ((w[c] >> 16) & 0xffef) == 0x1100 || (w[c] == w[a] && w[c] == w[b]) || cache_get(&s1_cache, ((w[c] >> 16) << 1) | (c_src & 1), &dummy) == NOSLOT)
+            m[c >> 5] |= 1UL << (c & 31);
     }
+}
+/* The 44 source columns from a droppable mask (see above): the HUD's flush map on play's HUD rows when their middle 4 columns are blank,
+   else 4 drops nearest 6, 18, 30, 42, else the centre crop. */
+static HOME_OS void home_map(const u32 *m, int hud, u8 *map)
+{
+    int drop[4], k, c, n, last = -1;
+    for (c = 0, n = 0; c < 48; c++) n += BL(m, c);
     if (n < 4) { for (c = 0; c < 44; c++) map[c] = (u8)(c + 2); return; }
-    if (snap.hud_flush && (row < 6 || row >= 25) && blank[22] && blank[23] && blank[24] && blank[25]) { for (c = 0; c < 44; c++) map[c] = (u8)(c < 22 ? c : c + 4); return; }   /* the HUD's flush map */
+    if (hud && BL(m, 22) && BL(m, 23) && BL(m, 24) && BL(m, 25)) { for (c = 0; c < 44; c++) map[c] = (u8)(c < 22 ? c : c + 4); return; }
     for (k = 0; k < 4; k++)
     {
-        /* Cheapest blank column after the last drop: distance from its target, plus 6 if it is not inside a run of 3 blanks and 16 more
-           if it stands alone (a space between words), so words keep their spaces when the row has room elsewhere. */
+        /* Cheapest droppable column after the last drop: distance from its target, plus 6 if it is not inside a run of 3 and 16 more if it
+           stands alone (a space between words), plus 20 next to the last drop (one column per gap first). */
         int want = 12 * k + 6, best = -1, cost = 1 << 30;
         for (c = last + 1; c <= 44 + k; c++)
         {
-            int d;
-            if (!blank[c]) continue;
+            int d, l = c > 0 && BL(m, c - 1), r = c < 47 && BL(m, c + 1);
+            if (!BL(m, c)) continue;
             d = (c > want ? c - want : want - c);
-            if (!(c > 0 && blank[c - 1] && c < 47 && blank[c + 1])) d += 6;
-            if (!(c > 0 && blank[c - 1]) && !(c < 47 && blank[c + 1])) d += 16;
-            if (c == last + 1) d += 20;   /* one column per gap first: "1UP!  CAN" keeps a space */
+            if (!(l && r)) d += 6;
+            if (!l && !r) d += 16;
+            if (c == last + 1) d += 20;
             if (d < cost) { cost = d; best = c; }
         }
-        if (best < 0) { for (c = 0; c < 44; c++) map[c] = (u8)(c + 2); return; }   /* not enough blanks after the last drop: centre crop */
+        if (best < 0) { for (c = 0; c < 44; c++) map[c] = (u8)(c + 2); return; }
         drop[k] = last = best;
     }
     for (c = 0, n = 0, k = 0; c < 48 && n < 44; c++)
@@ -607,17 +617,40 @@ static void home_row_map(u32 row, u32 x0, u8 *map)
         map[n++] = (u8)c;
     }
 }
+/* One map per block of rows: rows that hold anything (not all droppable) and touch each other share the columns all of them can drop, so
+   a 16 pixel letter's top and bottom halves, and a banner's rows, stay together (owner 11-08: the select screen's names broke apart). */
+static HOME_OS void home_maps_rows(u32 x0, u32 (*bm)[2])
+{
+    u32 r;
+    for (r = 0; r < S1_ROWS; r++) home_row_blank(r, x0, bm[r]);
+}
+static HOME_OS void home_row_map(u32 row, u32 (*bm)[2], u8 *map)
+{
+    u32 m[2], a = row, b = row;
+    int full = bm[row][0] == 0xffffffffUL && bm[row][1] == 0xffffUL;
+    m[0] = bm[row][0]; m[1] = bm[row][1];
+    if (!full)
+    {
+        while (a > 0 && !(bm[a - 1][0] == 0xffffffffUL && bm[a - 1][1] == 0xffffUL)) { a--; m[0] &= bm[a][0]; m[1] &= bm[a][1]; }
+        while (b + 1 < S1_ROWS && !(bm[b + 1][0] == 0xffffffffUL && bm[b + 1][1] == 0xffffUL)) { b++; m[0] &= bm[b][0]; m[1] &= bm[b][1]; }
+    }
+    home_map(m, snap.hud_flush && (row < 6 || row >= 25), map);
+}
 #endif
 static void draw_scroll1(u16 sx, u16 sy)
 {
     const u32 *cell = snap.s1;
     u32 x0 = (u32)sx + CPS_LEFT + S1_REG_CROP, y0 = (u32)sy + CPS_TOP;
     u32 row, col;
+#if SAT_GFX_FIT && defined(SAT_HOME)
+    u32 bm[S1_ROWS][2];
+    home_maps_rows(x0, bm);
+#endif
     for (row = 0; row <= SAT_GFX_SCREEN_H / 8; row++)
     {
 #if SAT_GFX_FIT && defined(SAT_HOME)
         u8 map[44];
-        home_row_map(row < S1_ROWS ? row : S1_ROWS - 1, x0, map);
+        home_row_map(row < S1_ROWS ? row : S1_ROWS - 1, bm, map);
 #endif
         for (col = 0; col <= SAT_GFX_SCREEN_W / 8; col++)
         {
