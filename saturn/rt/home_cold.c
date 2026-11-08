@@ -235,6 +235,9 @@ static int duel_setup(void)
             if (e & (P_START | P_A | P_C)) {
                 sat_home_warp = sat_duel_opt.arena ? arenas[sat_vblanks_now() % sizeof arenas] : 0;
                 if (sat_home_warp == 2) sat_home_warp = 0;
+#ifdef DUEL_ARENA_TEST   /* test build only: RANDOM always picks this stage */
+                if (sat_duel_opt.arena) sat_home_warp = DUEL_ARENA_TEST;
+#endif
                 return 1;
             }
             continue;

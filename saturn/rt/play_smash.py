@@ -63,6 +63,17 @@ def step(v,s):
         if rg<=2: s.shot(f"smash_ringout{rg}")
     if os.environ.get("SHOTS") and now-getattr(s,"lastshot",0)>6: s.lastshot=now; s.shot(f"p_{sat_v(s)}"); s.log("SHOT",sat_v(s),"st",a[0x384],a[0x484],"out",s.word("sat_smash",20,1),s.word("sat_smash",21,1),"cred",a[0x18c],"x",u16(0x390),u16(0x490),"b0",a[0x1b0],"mode",a[1])
     if n%60==0: s.log("PCT",pc,"STOCKS",st,"rings",rg,"t",round(now-t0),"aliens",s.word("sat_alien_spawns"),hex(s.word("sat_alien_last")),"spawner",s.ram(0x1816,1)[0],"culled",s.word("sat_alien_culled"),"shots",s.word("sat_shot_hits"),"probe",s.word("sat_shot_probe"),s.word("sat_shot_probe",4,16).to_bytes(16,"big").hex(),s.word("sat_shot_probe",20,2),"pool",(lambda P:sum(1 for i in range(16) if P[i*0x80:i*0x80+4]!=bytes(4)))(s.ram(0xae80,0x800)),"t12",(lambda P:len([i for i in range(20) if P[i*0xc0:i*0xc0+4]!=bytes(4)]))(s.ram(0x9580,0xf00)),"parked",s.word("sat_doors_parked"),"ee7d",s.ram(0xee7d,1)[0],"kos",s.word("sat_smash_kos"),"ctl",hex(s.word("sat_stage_ctl")),"gfxmiss",s.word("sat_gfx_stats",32),"81cc",a[0x1cc],"round",s.word("sat_rounds"),"refbank",s.word("sat_gfx_stats",48),"topbank",s.word("sat_gfx_stats",28,2),"8218",s.ram(0x8218,2).hex(),"81f3",s.ram(0x81f3,1).hex(),"stw",s.ram(0x81e8,2).hex(),"xy",u16(0x390),u16(0x394),u16(0x490),u16(0x494))
+    if n%60==0 and "sat_gfx_census" in s.syms:   # SAT_PROF build: the keys the tile pack lacks (section<<28|key)
+        mn=s.word("sat_gfx_census",32); s.log("MISSING",mn," ".join(hex(s.word("sat_gfx_census",36+4*i)) for i in range(min(mn,32))))
+    if os.environ.get("GUNSCAN") and n%5==0:   # any record whose +0x26 word names a fighter
+        R=s.ram(0x8600,0x7a00); hits_=[]
+        for o in range(0,len(R)-0x40,0x20):
+            w=int.from_bytes(R[o+0x26:o+0x28],"big")
+            if w in (0x8380,0x8480) and R[o]: hits_.append("%x:%02x/%x x%d y%d z%d"%(0x8600+o,R[o],w,int.from_bytes(R[o+0x10:o+0x12],"big"),int.from_bytes(R[o+0x14:o+0x16],"big"),int.from_bytes(R[o+0x18:o+0x1a],"big")))
+        if hits_: s.log("GS",len(hits_)," ".join(hits_[:10]))
+    if os.environ.get("CTLDUMP") and n%30==0:   # controller pool: live records, +0..+7 and words +0x40..+0x4f
+        P=s.ram(0xce80,0x800); s.log("CTL stw",s.ram(0x81e8,2).hex()," ".join("%x:%s/%s"%(0xce80+o,P[o:o+8].hex(),P[o+0x40:o+0x50].hex()) for o in range(0,0x800,0x40) if P[o]))
+    if os.environ.get("GUNLOG") and a[0x486]==0x0c: s.log("GUN2 act",a[0x484:0x488].hex(),"n",s.ram(0,0) and 0,s.word("sat_shot_probe",20,2),"hits",s.word("sat_shot_hits"),"z",u16(0x398),u16(0x498),"x",u16(0x390),u16(0x490),"facing",a[0x38f],a[0x48f])
     if os.environ.get("IDLESHOTS") and n%60==30: s.shot(f"idle_{int(now-t0)}")
     if t0 and now-t0>20 and not getattr(s,"hs",0):
         s.hs=1; s.shot("smash_hud")
@@ -80,6 +91,26 @@ def step(v,s):
         hits=h; shots+=1
         s.log("HIT",h,"hp",u16(0x3c0),u16(0x4c0),"state",a[0x384:0x388].hex(),a[0x484:0x488].hex())
     px,py,qx,qy=u16(0x390),u16(0x394),u16(0x490),u16(0x494)
+    if os.environ.get("GUNTEST"):   # pad check: P2's C alone, then P1's C alone
+        if not getattr(s,"gt0",0):
+            if a[0x384]==2 and a[0x484]==2: s.gt0=now
+            else: return
+        el=now-s.gt0; k=["p2c"] if 3<el<4.5 else ["c"] if 8<el<9.5 else []
+        if os.environ.get("GUNTEST")=="2":   # lined up: P2 to P1's depth, 80-120 to its right, facing it, then P2 fires bursts (P1 idle)
+            k=[]; G=os.environ.get("GUNNER","p2")
+            if el<8:
+                if qy>py+1: k.append("p2down")
+                elif qy<py-1: k.append("p2up")
+                d=abs(qx-px); away="p2right" if qx>px else "p2left"; to="p2left" if qx>px else "p2right"
+                if d>120: k.append(to)
+                elif d<80: k.append(away)
+            elif el<8.25: k=["p2left" if qx>px else "p2right"]
+            elif el<9: k=[]
+            else: k=[G+"c"] if int(el*3)%2==0 else []
+            if el>20: s.log("GT END hits",s.word("sat_shot_hits"),"n",s.word("sat_shot_probe",20,2),"diag",[s.word("sat_shot_diag",i*2,2) for i in range(6)],"pct",s.word("sat_smash",0,2),s.word("sat_smash",2,2)); s.shot("guntest"); s.stop(); return
+        s.set(k); s.log("GT",round(el,1),k,a[0x384:0x388].hex(),a[0x484:0x488].hex(),"xyz",px,py,u16(0x398),qx,qy,u16(0x498),"hits",s.word("sat_shot_hits"),"n",s.word("sat_shot_probe",20,2),"diag",[s.word("sat_shot_diag",i*2,2) for i in range(6)])
+        if el>14 and os.environ["GUNTEST"]=="1": s.stop()
+        return
     # Both close in on each other in x and meet in depth (down raises +0x14), then trade attacks in turn.
     # Every 150 steps one fighter backs off and fires its gun (C) for a while, P1 and P2 by turns; the other keeps closing in.
     k=[]; dx=qx-px; dy=qy-py
@@ -90,7 +121,7 @@ def step(v,s):
     if abs(dx)<=60 and abs(dy)<=6:
         if n%6<2: k.append("a")
         elif 3<=n%6<5: k.append("p2a")
-    ph=n%150; gunner=(n//150)%2
+    GP=int(os.environ.get("GUNP","150")); ph=n%GP; gunner=(n//GP)%2
     if ph<30:
         me,them=("","p2") if gunner==0 else ("p2","")
         mx,ox=(px,qx) if gunner==0 else (qx,px)
@@ -99,6 +130,7 @@ def step(v,s):
         if ph<12: k.append(me+("left" if mx<ox else "right"))
         elif ph<14: k.append(me+("right" if mx<ox else "left"))
         elif ph%4<2: k.append(me+"c")
+    if os.environ.get("GUNLOG") and ph<30 and gunner==1: s.log("P2PH",ph,"keys",k,"p2",a[0x484:0x488].hex(),"x",qx,px)
     if os.environ.get("GUNLOG"):
         r=a[0x380:0x480]; s.log("GUN act",r[4:8].hex(),"8b",r[0x8b],"8c",r[0x8c],"d2",r[0xd2],"ee",hex(r[0xee]),"shots",s.word("sat_shot_hits"),"seen",s.word("sat_shot_probe"),"aimed",s.word("sat_shot_aimed"),"diag",[s.word("sat_shot_diag",i*2,2) for i in range(6)],"facing",a[0x38f],a[0x48f],"pct",s.word("sat_smash",0,2),s.word("sat_smash",2,2),"x",u16(0x390),u16(0x490))
         P=s.ram(0x8680,0xc00)
