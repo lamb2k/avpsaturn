@@ -54,8 +54,18 @@ try {
   if (!g) throw Error("START GAME did not reach play");
   const hold = key("right", 3000); await sleep(1000); await key("attack"); await hold; await still("04-stage");
   await key("start"); await sleep(1500); await still("05-pause"); const p1 = await guest(); await sleep(1000); const p2 = await guest();
+  R.cdda = await ev("(()=>{const M=EJS_emulator.gameManager.Module;return [M._web_pc(8),M._web_pc(9)]})()");
   R.pause = { hpSame: p1.hp === p2.hp, vb: [p1.vb, p2.vb] };
   await key("start"); await sleep(1500); await still("06-resumed"); await step("resumed", { guest: await guest() });
+  if (process.env.BOSS) {
+    // BOSS RUSH is the last title item: quit to title, Up wraps to it, Start opens it.
+    await key("start"); await sleep(1200); await call("Input.dispatchKeyEvent", { type: "keyDown", key: "ArrowDown", code: "ArrowDown", windowsVirtualKeyCode: 40 }); await sleep(120); await call("Input.dispatchKeyEvent", { type: "keyUp", key: "ArrowDown", code: "ArrowDown", windowsVirtualKeyCode: 40 });
+    await key("start"); await sleep(3000); await untilGuest(g => g.vb > 950 && g.mode === 4, 60000); await still("08-title-again");
+    for (const k of ["ArrowUp"]) { await call("Input.dispatchKeyEvent", { type: "keyDown", key: k, code: k, windowsVirtualKeyCode: 38 }); await sleep(120); await call("Input.dispatchKeyEvent", { type: "keyUp", key: k, code: k, windowsVirtualKeyCode: 38 }); }
+    await sleep(500); await still("09-boss-rush-selected"); await key("start");
+    R.boss = [];
+    for (let n = 0; n < 8; n++) { await sleep(2500); R.boss.push(await guest()); await still(`10-boss-${n}`); if (n === 2 || n === 4) await key("start"); }
+  }
   const before = await guest(); await step("played", { guest: before });
   if (before.fatal) throw Error("guest fatal " + before.fatal);
   await ev("document.getElementById('reset').click()"); const after = await untilGuest(g => g.vb > 200, 40000) ; await sleep(0); await step("reset", { guest: after, before: before.vb }); await still("07-after-reset");
