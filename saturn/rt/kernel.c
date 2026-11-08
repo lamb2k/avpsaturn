@@ -11,7 +11,11 @@ Cpu sat_cpu;
 u8 *PAGE[256];
 u8 RAMB[0x10000] __attribute__((aligned(4)));
 SatDebug sat_dbg;
-volatile unsigned long sat_readout[3];   /* FRT ticks, game and drawing, for the SAT_READOUT bars */
+volatile unsigned long sat_readout[3];
+#ifdef SAT_VLOG
+/* Lane avp-vanish diagnostic: per frame, VDP1 end-of-draw state at the vblank and at the slave's list write. Read by MCP. */
+volatile unsigned long sat_vlog[16 * 4];
+#endif   /* FRT ticks, game and drawing, for the SAT_READOUT bars */
 
 #define TASKS 16
 #define TASK_STACK 2048   /* high water 308 bytes on the route; stack_scan stops the game if one fills */
@@ -32,6 +36,7 @@ volatile unsigned long sat_readout[3];   /* FRT ticks, game and drawing, for the
 
 extern void sat_switch(void **save_sp, void *load_sp);
 extern void sat_vblank_entry(void);
+void sat_gfx_vblank(void);
 extern void f_dispatch(u32);
 extern void f_e0e(void);
 extern void f_800(void);
@@ -505,7 +510,14 @@ void sat_vblank(void)
     int sc = cur;
     u32 t0, t1, t2;
     *(volatile u32 *)0x25fe00a4 = ~1u;
+#ifndef SAT_VDP1_RACE_OLD
+    sat_gfx_vblank();   /* first: the frame change for a finished plot belongs early in vblank-in */
+#endif
     sat_dbg.vblanks++;
+#ifdef SAT_VLOG
+    { volatile unsigned long *e = (volatile unsigned long *)((unsigned long)&sat_vlog[(sat_dbg.vblanks & 15) * 4] | 0x20000000UL);
+      e[0] = sat_dbg.vblanks << 16 | *(volatile unsigned short *)0x25D00010UL; e[1] = 0; e[2] = 0; e[3] = (UNCACHED(gfx_done) != UNCACHED(gfx_handed)); }
+#endif
     if (!game_done) sat_dbg.overruns++;
 #ifdef SAT_PROF
     sat_prof.from = PROF_FROM; sat_prof.to = PROF_TO;

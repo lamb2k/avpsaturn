@@ -1035,12 +1035,70 @@ void sat_gfx_snapshot(void)
 }
 
 /* Drawing side: everything from the snapshot. On the Saturn this runs on the slave SH-2. */
+/* VDP1 frame change, safe against a list still plotting (lane avp-vanish, 11-08). One command table, rewritten each frame, so:
+   the slave starts a plot (PTMR) and counts it in plot_started; the master, first thing in each vblank-in, asks for the frame change
+   (FBCR) only when VDP1 reports the end of that plot (EDSR CEF) and counts it in plot_shown. The slave touches the table again only
+   once the last plot is shown, and starts the next plot only after the vblank in which the change happens. A list that is still
+   plotting at a vblank keeps the last whole picture on screen one more frame, as a dropped frame, never a half-drawn one.
+   Before the master's first vblank hook (standalone and host builds) the old path runs: change asked for at the plot. */
+#ifndef SAT_GFX_HOST
+#define UNC32(v) (*(volatile u32 *)((u32)&(v) | 0x20000000UL))
+#define EDSR_CEF 2
+#define TVSTAT_VBLANK 8
+static u32 plot_started, plot_shown, plot_held, plot_sync;   /* started: slave; shown, held, sync: master */
+u32 sat_gfx_plot_waits;   /* frames the master held the last picture because VDP1 had not finished (diagnostic) */
+#define PLOT_WAIT_MAX 2   /* vblanks the master waits for the end flag before it changes anyway: an emulator without the flag still runs */
+#define SLAVE_WAIT_MAX 7000UL   /* about two frames of slave FRT ticks: a master with interrupts off (restart) cannot hold the slave */
+void sat_gfx_vblank(void)
+{
+    u32 s = UNC32(plot_started);
+    UNC32(plot_sync) = 1;
+    if (s == UNC32(plot_shown)) return;
+    if ((VDP1R(0x10) & EDSR_CEF) || UNC32(plot_held) >= PLOT_WAIT_MAX)
+    {
+        VDP1R(FBCR) = 3;
+        UNC32(plot_shown) = s;
+        UNC32(plot_held) = 0;
+    }
+    else
+    {
+        UNC32(plot_held) = UNC32(plot_held) + 1;
+        UNC32(sat_gfx_plot_waits) = UNC32(sat_gfx_plot_waits) + 1;
+    }
+}
+static inline u32 slave_ticks(void) { return ((u32)*(volatile u8 *)0xfffffe12u << 8) | *(volatile u8 *)0xfffffe13u; }
+/* Before the table is touched: the last plot has ended and the master has asked for its change. */
+static void plot_wait_shown(void)
+{
+    u32 t0 = slave_ticks();
+    if (!UNC32(plot_sync)) return;
+    while (UNC32(plot_started) != UNC32(plot_shown))
+        if (((slave_ticks() - t0) & 0xffffUL) > SLAVE_WAIT_MAX) { VDP1R(FBCR) = 3; UNC32(plot_shown) = UNC32(plot_started); break; }
+}
+static void plot_start(void)
+{
+    if (!UNC32(plot_sync)) { VDP1R(FBCR) = 3; VDP1R(PTMR) = 1; return; }
+    while (VDP2R(0x04) & TVSTAT_VBLANK) ;   /* the change asked for in this vblank happens at its end; plot into the new back buffer after it */
+    VDP1R(PTMR) = 1;
+    UNC32(plot_started) = UNC32(plot_started) + 1;
+}
+#endif
+
+#ifdef SAT_VLOG
+extern volatile unsigned long sat_vlog[16 * 4];
+#define VLOG(v) ((volatile unsigned long *)((unsigned long)&sat_vlog[((v) & 15) * 4] | 0x20000000UL))
+#define SFRT() (((unsigned long)*(volatile u8 *)0xfffffe12u << 8) | *(volatile u8 *)0xfffffe13u)
+#endif
 void sat_gfx_draw(void)
 {
     u16 layers = snap.layers;
     u16 s1x = snap.s1x, s1y = snap.s1y, s2x = snap.s2x, s2y = snap.s2y, s3x = snap.s3x, s3y = snap.s3y;
     u16 bgon = 0;
     int row_active = snap.row_active;
+#ifdef SAT_VLOG
+    u32 vlog_v = sat_vblanks_now();
+    VLOG(vlog_v)[1] = (unsigned long)*(volatile unsigned short *)0x25D00010UL << 16 | (SFRT() & 0xffff);
+#endif
 
     stamp = (u16)(stamp + 1U == 0x10000UL ? 1U : stamp + 1U);
     cache_frame(&spr_cache); cache_frame(&s1_cache); cache_frame(&s2_cache); cache_frame(&s3_cache);
@@ -1062,6 +1120,38 @@ void sat_gfx_draw(void)
     STAGE(0);
     update_palette();
     update_priority(layers, snap.priority);
+    /* Sprites first, then the plot starts: VDP1 draws while the slave does the layers below, instead of only in what is left of the
+       frame after them (lane avp-vanish: heavy layer frames left VDP1 too little time and the change came mid-plot). */
+#ifndef SAT_GFX_HOST
+    plot_wait_shown();
+#endif
+#ifdef SAT_HOME
+    put16(VDP1_VRAM + 32 + 12, (u16)NUDGE_X); put16(VDP1_VRAM + 32 + 14, (u16)NUDGE_Y);   /* local origin follows the screen adjust */
+#endif
+
+    STAGE(4);
+#ifdef SAT_VLOG
+    VLOG(vlog_v)[2] = (unsigned long)*(volatile unsigned short *)0x25D00010UL << 16 | (SFRT() & 0xffff);
+#endif
+#ifdef SAT_PROF
+    { u32 v = sat_vblanks_now(); speed_on = v >= 1000 && v < 1650; }
+#endif
+    draw_sprites();
+    note_slots();
+    STAGE(5);
+#ifdef SAT_GFX_HOST
+    VDP1R(FBCR) = 3;
+    VDP1R(PTMR) = 1;
+#else
+    plot_start();
+#endif
+#ifdef SAT_VLOG
+    VLOG(vlog_v)[3] |= (sat_vblanks_now() - vlog_v) << 28 | (unsigned long)sat_gfx_stats.commands << 16 | (SFRT() & 0xffff) << 0;
+#endif
+#ifdef SAT_VLOG_VDP1
+    /* Measurement build only: the slave waits for VDP1's end flag and logs plot time in FRT ticks (costs the slave that wait). */
+    { u32 a = SFRT(), t = 0; while (!(VDP1R(0x10) & 2) && t < 30000u) t = (SFRT() - a) & 0xffffUL; VLOG(vlog_v)[2] = (VLOG(vlog_v)[2] & 0xffff0000UL) | (t & 0xffff); }
+#endif
 #ifdef SAT_HOME
     /* The menus on NBG3, in front of everything: panel cells (dot code 15) blend with the picture under them by colour calculation in MSB mode
        (only the panel colour, dot 15 of banks 62-63, has the MSB; per-dot mode drew opaque grey in Yaba); the font's dots stay solid. NBG3 gets cycle slots T3 (names) and T7 (cells) of bank A0 only while the menus are up;
@@ -1122,17 +1212,6 @@ void sat_gfx_draw(void)
     VDP2R(0x84) = (u16)((s3y + CPS_TOP - NUDGE_Y) & 0x7ff);
     VDP2R(0x90) = (u16)((s1x + CPS_LEFT + S1_REG_CROP - NUDGE_X) & 0x7ff);
     VDP2R(0x92) = (u16)((s1y + CPS_TOP - NUDGE_Y) & 0x7ff);
-#ifdef SAT_HOME
-    put16(VDP1_VRAM + 32 + 12, (u16)NUDGE_X); put16(VDP1_VRAM + 32 + 14, (u16)NUDGE_Y);   /* local origin follows the screen adjust */
-#endif
-
-    STAGE(4);
-#ifdef SAT_PROF
-    { u32 v = sat_vblanks_now(); speed_on = v >= 1000 && v < 1650; }
-#endif
-    draw_sprites();
-    note_slots();
-    STAGE(5);
 #ifdef SAT_PROF
     if (speed_on)
     {
@@ -1152,9 +1231,6 @@ void sat_gfx_draw(void)
     }
 #endif
 
-    /* Plot into the back buffer now; the swap comes with the next vblank. */
-    VDP1R(FBCR) = 3;
-    VDP1R(PTMR) = 1;
 #ifdef SAT_READOUT
     if (!(readout_pad() & 0x0020))   /* pad Y held: wait here for the list's end and show VDP1's time as the fourth bar. It costs the slave that wait. */
     {
