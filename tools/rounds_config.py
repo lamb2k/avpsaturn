@@ -36,7 +36,7 @@ order = sorted(int(k, 16) for k in C["stages"])
 P = C["page"]
 pad = lambda ps: sorted({p + d for p in ps for d in (-1, 0, 1) if 0 <= p + d < 0x200000 // P})
 pg = {s: C["stages"][f"{s:02x}"]["pages"] for s in order}
-# Pages that two or more stages read hold data any stage can reach (object records, scripts): every stage keeps them. A record at 0x333d4,
+# Pages that two or more stages read hold data any stage can reach (object records, scripts): every stage keeps them, without the page either side. A record at 0x333d4,
 # read in stages 06, 10 and 12 but not kept in 1c, read as zeros there and gave fatal 0xe2 at 0xa9cc4 (Hunter, whole-game run).
 SHARED_MIN = int(os.environ.get("ROUNDS_SHARED_MIN", "2"))
 _n = {}
@@ -51,7 +51,7 @@ for f in files:
         f["keep_pages"] = pad(sorted({p for v in pg.values() for p in v}))
     else:
         nxt = next((x for x in order if x > s), None)
-        f["keep_pages"] = pad(sorted(set(pg[s]) | set(pg[0]) | set(pg.get(nxt, [])) | SHARED))
+        f["keep_pages"] = sorted(set(pad(sorted(set(pg[s]) | set(pg[0]) | set(pg.get(nxt, []))))) | SHARED)
 VD, variant_file = None, {}
 if os.environ.get("ROUNDS_VARIANTS"):
     sys.path.insert(0, str(pathlib.Path(__file__).parent))
