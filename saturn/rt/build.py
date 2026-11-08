@@ -24,7 +24,7 @@ MKISOFS = str(JO / "Compiler/WINDOWS/Other Utilities/mkisofs.exe")
 SGL = JO / "Compiler/COMMON/SGL_302j"
 OPT = os.environ.get("LIFT_OPT", "-Os")
 CF = ["-m2", "-mb", "-fno-strict-aliasing", "-ffixed-r14", "-w", "-fno-builtin", "-I", str(HERE)]
-GEN, OBJ, ISO = WORK / "gen", WORK / f"obj{OPT}", WORK / "disc"
+GEN, OBJ, ISO = WORK / "gen", WORK / ("obj" + OPT.replace(" ", "")), WORK / "disc"
 for d in (GEN, OBJ, ISO):
     d.mkdir(parents=True, exist_ok=True)
 HW_BASE, HW_LIMIT, LW_BASE, LW_LIMIT = 0x06014000, 0x06100000, 0x00200000, 0x00300000
@@ -147,19 +147,19 @@ def round_files(rom, code_end, cold1_at):
             if ok and st is None:
                 st = q
             if not ok and st is not None:
-                if q - st >= MIN_RUN:
-                    free.append([st * page, (q - st) * page])
+                if q - st >= MIN_RUN:   # third: the page after is kept ROM, so the last sector may carry its bytes (rounds_pack.plan)
+                    free.append([st * page, (q - st) * page, q < 0x200000 // page and not code[q] and page * 2 == 2048])
                 st = None
         # Pages no route of any stage reads take tiles first. A read the census missed then more often finds the ROM's bytes (open: fatal 0xe2 at 0xa9cc4).
         read_ever = set(ROUNDS["files"][0]["keep_pages"])
         free.sort(key=lambda r: (any(x in read_ever for x in range(r[0] // page, (r[0] + r[1]) // page)), -r[1]))
         p, dropped = rounds_pack.fit(raw, [set(k) for k in f["keys"]], room, free, {int(x): v for x, v in rank.get(f["name"], {}).items()})
-        for first, a, take in p["segs"]:
-            written.update(range(a // page, (a + (take * 128 + 2047 & -2048) + page - 1) // page))
+        for first, a, take in p["segs"]:   # pages with tiles; a sector's tail past them holds ROM bytes (rounds_pack.assemble)
+            written.update(range(a // page, (a + take * 128 + page - 1) // page))
         plans.append((p, dropped))
     stats = {}
     for i, (f, (p, dropped)) in enumerate(zip(ROUNDS["files"], plans)):
-        own = {x for first, a, take in p["segs"] for x in range(a // page, (a + (take * 128 + 2047 & -2048) + page - 1) // page)}
+        own = {x for first, a, take in p["segs"] for x in range(a // page, (a + take * 128 + page - 1) // page)}
         back = sorted((written & set(f["keep_pages"])) - own)
         restores, st = [], None
         for q in back + [None]:
@@ -169,7 +169,7 @@ def round_files(rom, code_end, cold1_at):
                 break
             st = [q, q + 1] if st is None else [st[0], q + 1]
         audio = (WORK / "audio" / f"r{i:03d}.bin").read_bytes()
-        n = rounds_pack.write_file(ISO / f"R{i:03d}.BIN", audio, restores, rounds_pack.assemble(p, CART["SAT_PACK"]))
+        n = rounds_pack.write_file(ISO / f"R{i:03d}.BIN", audio, restores, rounds_pack.assemble(p, CART["SAT_PACK"], rom))
         stats[f["name"]] = dict(file=n, sprites_in_main=p["inmain"], sprites_spill=sum(x[2] for x in p["segs"]), spill_runs=len(p["segs"]), restore=sum(len(d) for _, d in restores), restore_runs=len(restores), dropped_keys=len(dropped), dropped=dropped, audio=len(audio))
         print(f["name"], {k: v for k, v in stats[f["name"]].items() if k != "dropped"}, flush=True)
     (WORK / "round_stats.json").write_text(json.dumps(stats, indent=0))
@@ -178,7 +178,7 @@ def round_files(rom, code_end, cold1_at):
 def main():
     gen = gen_sources()
     with cf.ThreadPoolExecutor(max_workers=3) as ex:
-        objs = list(ex.map(lambda s: cc(s, OBJ / (s.stem + ".o"), [OPT]), gen))
+        objs = list(ex.map(lambda s: cc(s, OBJ / (s.stem + ".o"), OPT.split()), gen))
     gfx_dir = REPO / "saturn/gfx"
     gfx = [gfx_dir / "sat_gfx.c"]
     own = [cc(HERE / "ctx.s", OBJ / "ctx.o"), cc(HERE / "kernel.c", OBJ / "kernel.o", ["-O2", "-I", GEN] + os.environ.get("KERNEL_CFLAGS", "").split()), cc(HERE / "present.c", OBJ / "present.o", ["-O2"]), cc(HERE / "pad.c", OBJ / "pad.o", ["-O2"] + os.environ.get("KERNEL_CFLAGS", "").split())]

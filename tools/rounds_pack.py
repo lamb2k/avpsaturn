@@ -36,10 +36,12 @@ def plan(raw, keys, main_room, free):
         inmain = min(n_tiles, room // 128)
         left = n_tiles - inmain
         segs, need, first = [], left, inmain
-        for a, n in free:
+        for a, n, *pad_ok in free:
             if not need:
                 break
-            take = min(need, (n & -SEC) // 128)   # whole sectors: the loader pads a region to a sector, which must stay in the stretch
+            # The loader writes whole sectors. A stretch with an odd page uses it too when the page after it is ROM the stage keeps: the region's
+            # last sector then carries that page's ROM bytes (assemble, rom=), so the kept page stays exact.
+            take = min(need, (n if pad_ok and pad_ok[0] else n & -SEC) // 128)
             if take:
                 segs.append((first, a, take)); first += take; need -= take
         if need:
@@ -51,7 +53,7 @@ def plan(raw, keys, main_room, free):
     return dict(key=key, tile=tile, secs=secs, inmain=inmain, segs=segs)
 
 
-def assemble(p, pack_addr):
+def assemble(p, pack_addr, rom=None):
     key, tile, secs, inmain, segs = p["key"], p["tile"], p["secs"], p["inmain"], p["segs"]
     main = bytearray(HEAD)
     keyoff = []
@@ -75,7 +77,11 @@ def assemble(p, pack_addr):
     regions = [(pack_addr, bytes(main))]
     off = inmain * 128
     for first, a, take in segs:
-        regions.append((ROMB + a, tile[0][(first) * 128:(first + take) * 128]))
+        d = tile[0][(first) * 128:(first + take) * 128]
+        if rom is not None and len(d) % SEC:   # the sector's tail: ROM bytes of what follows, never zeros over a kept page
+            d += rom[a + len(d):a + (len(d) + SEC - 1) // SEC * SEC]
+            assert len(d) % SEC == 0
+        regions.append((ROMB + a, d))
     return regions
 
 
