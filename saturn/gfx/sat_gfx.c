@@ -591,28 +591,30 @@ static HOME_OS void home_row_blank(u32 row, u32 x0, u32 *m)
    else 4 drops nearest 6, 18, 30, 42, else the centre crop. */
 static HOME_OS void home_map(const u32 *m, int hud, u8 *map)
 {
-    int drop[4], k, c, n, last = -1;
+    int drop[4], k, c, n;
     for (c = 0, n = 0; c < 48; c++) n += BL(m, c);
     if (n < 4) { for (c = 0; c < 44; c++) map[c] = (u8)(c + 2); return; }
     if (hud && BL(m, 22) && BL(m, 23) && BL(m, 24) && BL(m, 25)) { for (c = 0; c < 44; c++) map[c] = (u8)(c < 22 ? c : c + 4); return; }
     for (k = 0; k < 4; k++)
     {
-        /* Cheapest droppable column after the last drop: distance from its target, plus 6 if it is not inside a run of 3 and 16 more if it
-           stands alone (a space between words), plus 20 next to the last drop (one column per gap first). */
-        int want = 12 * k + 6, best = -1, cost = 1 << 30;
-        for (c = last + 1; c <= 44 + k; c++)
+        /* Cheapest droppable column not yet taken: distance from its target, plus 6 if it is not inside a run of 3 and 40 if it stands
+           alone (a space between words, kept unless the row has no other room), plus 20 next to a column already taken. */
+        int want = 12 * k + 6, best = -1, cost = 1 << 30, j;
+        for (c = 0; c < 48; c++)
         {
             int d, l = c > 0 && BL(m, c - 1), r = c < 47 && BL(m, c + 1);
             if (!BL(m, c)) continue;
+            for (j = 0; j < k && drop[j] != c; j++) ;
+            if (j < k) continue;
             d = (c > want ? c - want : want - c);
             if (!(l && r)) d += 6;
-            if (!l && !r) d += 16;
-            if (c == last + 1) d += 20;
+            if (!l && !r) d += 40;
+            for (j = 0; j < k; j++) if (drop[j] == c - 1 || drop[j] == c + 1) d += 20;
             if (d < cost) { cost = d; best = c; }
         }
-        if (best < 0) { for (c = 0; c < 44; c++) map[c] = (u8)(c + 2); return; }
-        drop[k] = last = best;
+        drop[k] = best;
     }
+    for (k = 1; k < 4; k++) { int v = drop[k], j = k; while (j > 0 && drop[j - 1] > v) { drop[j] = drop[j - 1]; j--; } drop[j] = v; }
     for (c = 0, n = 0, k = 0; c < 48 && n < 44; c++)
     {
         if (k < 4 && c == drop[k]) { k++; continue; }
