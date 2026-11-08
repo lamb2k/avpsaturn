@@ -13,9 +13,10 @@ BODY = (0x6000, 0xa000)          # his own sprite bank in MSHvSF
 PALS = (12, 13)                  # player 1 rows in the capture
 # Capture schedule windows (frames of full.txt / seq2.txt); hit_etc holds hitstun, knockdown, getup and the KO.
 WINDOWS = dict(idle=(1990, 1999), walk=(2000, 2062), jump=(2063, 2179), lp=(2180, 2239), hp=(2240, 2309), hk=(2310, 2399),
-               berserker=(2400, 2519), tornado=(2520, 2599), dash=(2600, 2659), crouch=(2660, 2739), throw_hp=(2740, 2859),
-               throw_hk=(2860, 2959), throw_hp2=(2960, 3099), hit_etc=(3100, 4500))
+               berserker=(2400, 2519), tornado=(2520, 2599), dash=(2600, 2659), crouch=(2660, 2739), hit_etc=(3100, 4500))
+# Owner 11-08: the throw-attempt windows (2740-3099) are dropped; no real throw was captured.
 SELECT_FRAME, HUD_FRAME = 900, 2000
+TIGHT = (0x06, 0x0e, 0x1c, 0x1e, 0x24)   # stages that drop the most with his tiles (fit_thin, 11-08)
 
 
 def sx(v):
@@ -212,6 +213,58 @@ def main():
     A = dict(keys=keys, tiles=len(canon), poses=[[list(e) for e in p] for p, _ in sorted(poses.items(), key=lambda x: x[1])],
              moves=moves, portraits=portraits, colours=cols, default_colour=default, luma=lum,
              codes_seen=len(ckey), source="MSHvSF (user ROM set) via tools/wolverine/run_mame.sh")
+    # One trimmed set for every stage (owner 11-08), no bigger than BUDGET tiles (Schaefer's smallest own count). Every move kept: its first,
+    # its longest-held (active) and its last pose are required; in hit_etc (hitstun, knockdown, getup, KO) every pose held 8+ frames too.
+    # Then other poses are added, walk first, cheapest new tiles first, while the total stays within BUDGET. A removed pose's frames go to
+    # the pose before it, so timing is unchanged.
+    budget = int(os.environ.get("BUDGET", "971"))
+    P = A["poses"]
+    por = {e[2] for v in portraits.values() for e in v}
+    # A move's own poses: those an earlier window (idle first) did not show; windows start and end in idle, so those frames say nothing.
+    seen, fresh = set(), {}
+    for name, seq in moves.items():
+        fresh[name] = [x for x in dict.fromkeys(q[0] for q in seq) if x not in seen] if name != "idle" else list(dict.fromkeys(q[0] for q in seq))
+        seen |= {q[0] for q in seq}
+    hold = {}
+    for seq in moves.values():
+        for pid, n, _ in seq:
+            hold[pid] = max(hold.get(pid, 0), n)
+    need = set()
+    for name, fr_ in fresh.items():
+        if fr_:
+            need |= {fr_[0], max(fr_, key=lambda i: hold[i]), fr_[-1]}
+            if name == "hit_etc":
+                need |= {i for i in fr_ if hold[i] >= 8}
+    cost = lambda ids: len(por | {e[2] for i in ids for e in P[i]})
+    floor = cost(need)
+    # Fill: round robin over moves (walk first), each time the move's unkept pose farthest from its kept ones in the timeline.
+    names = ["walk"] + [m for m in fresh if m != "walk"]
+    progress = True
+    while progress:
+        progress = False
+        for m in names:
+            fr_ = fresh[m]
+            cand = [j for j, i in enumerate(fr_) if i not in need]
+            if not cand:
+                continue
+            kept = [j for j, i in enumerate(fr_) if i in need]
+            j = max(cand, key=lambda j: min(abs(j - k) for k in kept) if kept else 0)
+            if cost(need | {fr_[j]}) <= budget:
+                need.add(fr_[j]); progress = True
+    have = por | {e[2] for i in need for e in P[i]}
+    mt = {}
+    for name, seq in moves.items():
+        o = []
+        for pid, n, anc in seq:
+            if pid in need or not o:
+                o.append([pid, n, anc])
+            else:
+                o[-1][1] += n
+        mt[name] = o
+    A["moves_one"] = mt
+    A["one_set"] = dict(budget=budget, floor=floor, tiles=len(have), poses=len(need))
+    A["stage_keys"] = {f"{st:02x}": sorted(keys[i] for i in have) for st in range(2, 0x28, 2)}
+    print("one set", A["one_set"], {m: (len({x[0] for x in q}), len(moves[m])) for m, q in mt.items()})
     (out / "remap.json").write_text(json.dumps(A))
     # Strips: each colour set on idle/walk/lp/hp/tornado first poses; every move's poses in the default colours.
     strips = out / "strips"; strips.mkdir(exist_ok=True)
