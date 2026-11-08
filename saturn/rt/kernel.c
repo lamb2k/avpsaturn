@@ -382,8 +382,23 @@ static void load_round(int file)
     { int i; for (i = 0; i < 256; i++) sat_readmap[i] = 0; }
 #endif
 }
+#ifdef SAT_WARP
+/* Diagnostic: start the game at stage word sat_warp (SAT_WARP at build, or set over the debugger before the start; 0 = off). The start path sets the stage word to 2; while it reads 2 it is replaced, so the stage's
+   own setup reads the new one (as lane home's stage select, sat_home_warp). Re-armed in attract. */
+volatile u32 sat_warp = SAT_WARP;
+static void warp_poll(void)
+{
+    static u32 polls;
+    if (!sat_warp) return;
+    if (r8(0xff81b0)) polls = 0;
+    else if (polls < 120 && r16(0xff81e8) == 2) { w8(0xff81e8, sat_warp >> 8); w8(0xff81e9, sat_warp & 0xff); if (r8(0xff8380)) polls++; }
+}
+#endif
 static void round_check(void)
 {
+#ifdef SAT_WARP
+    warp_poll();
+#endif
     int row = stage_row[(r8(0xff81b0) || r8(0xff8001) != 2) ? 0 : r16(0xff81e8) & 0xff], want;
     static u32 settled;
     static int row_loaded;

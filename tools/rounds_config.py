@@ -52,6 +52,12 @@ for f in files:
     else:
         nxt = next((x for x in order if x > s), None)
         f["keep_pages"] = sorted(set(pad(sorted(set(pg[s]) | set(pg[0]) | set(pg.get(nxt, []))))) | SHARED)
+# Pages the lifted code read on real runs (-DSAT_READMAP, readmiss.py --out) that a stage's file did not keep: env ROUNDS_READ_EXTRA=JSON {stage hex: [pages]}.
+if os.environ.get("ROUNDS_READ_EXTRA"):
+    _x = json.load(open(os.environ["ROUNDS_READ_EXTRA"]))
+    for f in files:
+        f["keep_pages"] = sorted(set(f["keep_pages"]) | set(_x.get(hex(f["stages"][0]), [])))
+    print("read extra pages", sum(len(v) for v in _x.values()))
 VD, variant_file = None, {}
 if os.environ.get("ROUNDS_VARIANTS"):
     sys.path.insert(0, str(pathlib.Path(__file__).parent))
