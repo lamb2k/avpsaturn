@@ -115,6 +115,16 @@ def gen_sources():
     mvar = [masks.index(m) + 1 if m in masks else 0 for m in range(16)]
     update(GEN / "rounds.inc", "static const u8 stage_row[256] = {%s};\nstatic const u8 mask_variant[16] = {%s};\nstatic const unsigned short row_file[%d][%d] = {%s};\n" % (
         ",".join(map(str, srow)), ",".join(map(str, mvar)), len(rows), len(masks) + 1, ",".join("{" + ",".join(map(str, r)) + "}" for r in rows)))
+    # Bonus characters (SAT_GUESTS): guest -> stage word -> file per variant, from rounds.json "guest_files"; 0 = the arcade's file.
+    gf = ROUNDS.get("guest_files", {})
+    ng = max(1, len(gf))
+    tab = [[[0] * (len(masks) + 1) for _ in rows] for _ in range(ng)]
+    for gi, (g, per) in enumerate(sorted(gf.items(), key=lambda x: int(x[0]))):
+        for st, files in per.items():
+            if srow[int(st)]:
+                tab[gi][srow[int(st)]] = files
+    update(GEN / "guest_files.inc", ("#define GUEST_ROWS %d" + chr(10) + "static const unsigned short guest_file[%d][%d][%d] = {%s};" + chr(10)) % (
+        len(gf), ng, len(rows), len(masks) + 1, ",".join("{" + ",".join("{" + ",".join(map(str, r)) + "}" for r in t) + "}" for t in tab)))
     return out
 
 
@@ -244,6 +254,8 @@ def main():
     own += [cc(s, OBJ / f"gfx_{s.stem}.o", ["-O2", "-I", gfx_dir, "-I", GEN] + os.environ.get("KERNEL_CFLAGS", "").split()) for s in gfx]
     if home:
         own += [cc(HERE / "home.c", OBJ / "home.o", ["-Os"] + os.environ.get("KERNEL_CFLAGS", "").split())]
+    if "SAT_GUESTS" in os.environ.get("KERNEL_CFLAGS", ""):   # bonus characters; builds without the flag are unchanged
+        own += [cc(HERE / "guests.c", OBJ / "guests.o", ["-Os", "-I", GEN] + os.environ.get("KERNEL_CFLAGS", "").split())]
     home_cold = [cc(HERE / "home_cold.c", OBJ / "home_cold.o", ["-Os"] + os.environ.get("KERNEL_CFLAGS", "").split())] if home else []
     if OVERRIDES:
         own += [cc(REPO / "saturn/game" / f"{n}.c", OBJ / f"game_{n}.o", ["-O2", "-DSAT_TARGET", "-I", REPO / "saturn/game"]) for n in ("game_hot", "game_bind")]

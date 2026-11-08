@@ -373,6 +373,9 @@ static void slave_start(void)
 #define LOADER_API ((volatile u32 *)0x06013fd0u)
 #define CCR_M (*(volatile u8 *)0xfffffe92u)
 #include "rounds.inc"
+#ifdef SAT_GUESTS
+#include "guests.h"
+#endif
 u8 sat_aud_tables[0x2000] __attribute__((section(".lwgfx"), aligned(4)));
 static int round_loaded = -1;
 struct { u32 current, loads, sectors, last_vblank; } sat_rounds;
@@ -413,6 +416,9 @@ static void round_check(void)
     settled = 0;
     if (!row) chars = 0;
     want = row_file[row][mask_variant[chars]];
+#ifdef SAT_GUESTS
+    want = sat_guest_file(row, chars, mask_variant[chars], want);   /* bonus characters: guests.c */
+#endif
     row_loaded = row;
 #ifdef SAT_HOME
     sat_home_loading(1);   /* NOW LOADING stays on screen through the load */
