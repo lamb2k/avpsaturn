@@ -26,7 +26,7 @@ const ev = async x => { const r = await call("Runtime.evaluate", { expression: x
 const still = async l => { const s = await call("Page.captureScreenshot", { format: "png" }); await writeFile(path.join(out, `${l}.png`), Buffer.from(s.data, "base64")); R.stills.push(l); };
 const step = async (l, x = {}) => { R.steps.push({ l, s: S(), status: await ev("document.getElementById('status').textContent"), ...x }); await save(); };
 const until = async (x, ms) => { const end = Date.now() + ms; while (Date.now() < end) { if (await ev(x).catch(() => false)) return true; await sleep(200); } return false; };
-const KEYS = { coin: ["5", "Digit5", 53], start: ["Enter", "Enter", 13], gun: ["c", "KeyC", 67], attack: ["z", "KeyZ", 90], right: ["ArrowRight", "ArrowRight", 39] };
+const KEYS = { coin: ["5", "Digit5", 53], start: ["Enter", "Enter", 13], gun: ["c", "KeyC", 67], attack: ["z", "KeyZ", 90], right: ["ArrowRight", "ArrowRight", 39], down: ["ArrowDown", "ArrowDown", 40], p2start: ["2", "Digit2", 50], p2gun: ["e", "KeyE", 69], p2left: ["f", "KeyF", 70], p2attack: ["q", "KeyQ", 81] };
 const key = async (name, hold = 120) => { const [k, code, vk] = KEYS[name]; const a = { key: k, code, windowsVirtualKeyCode: vk, nativeVirtualKeyCode: vk };
   await call("Input.dispatchKeyEvent", { type: "keyDown", ...a }); await sleep(hold); await call("Input.dispatchKeyEvent", { type: "keyUp", ...a }); };
 const guest = () => ev(`(()=>{const M=EJS_emulator.gameManager.Module,p=M._web_peek8;if(!p)return null;const r=a=>((p(a)<<24)|(p(a+1)<<16)|(p(a+2)<<8)|p(a+3))>>>0;if(!window.__d)for(let a=0x060c0000;a<0x060fff00;a+=4)if(r(a)===0x53415452){window.__d=a;break}const d=window.__d;if(!d)return null;const b=d+${process.env.RAMB_OFF||"0x84"};return{vb:r(d+8),fatal:r(d+28),att:p(b+0x81b0),cred:p(b+0x818c),sec:p(b+0xd182),hp:(p(b+0x83c0)<<8)|p(b+0x83c1),mode:p(b+0x8001),stage:p(b+0x81e9)}})()`).catch(() => null);
@@ -48,6 +48,19 @@ try {
   // Home build: no coin. The title menu shows about 150 vblanks after the title; Start confirms START GAME.
   if (!await untilGuest(g => g.vb > 900, 60000)) throw Error("attract stalled");
   await still("03-home-menu"); await step("home-menu", { guest: await guest() });
+  if (process.env.DUEL) {
+    // DUEL is the third title item: Down twice, Start. Player 2 uses its own keys.
+    await key("down"); await sleep(300); await key("down"); await sleep(300); await still("03b-duel-selected"); await key("start");
+    R.duel = [];
+    for (let n = 0; n < 12; n++) {
+      await sleep(2000);
+      const d = await guest(); d.hp2 = await ev(`(()=>{const p=EJS_emulator.gameManager.Module._web_peek8,b=window.__d+${process.env.RAMB_OFF||"0x84"};return (p(b+0x84c0)<<8)|p(b+0x84c1)})()`); R.duel.push(d);
+      await still(`d-${String(n).padStart(2, "0")}`);
+      if (n < 6) { await key(n % 2 ? "gun" : "start"); await key(n % 2 ? "p2gun" : "p2start"); }
+      else { await Promise.all([key("right", 800), key("p2left", 800)]); await key("attack"); await key("p2attack"); }
+    }
+    await step("duel", { guest: await guest() }); await save(); stop(0);
+  }
   let g = null;
   for (let n = 0; n < 20 && !(g = await untilGuest(x => x.att === 0 && x.mode === 2 && x.hp > 0, 1500)); n++) { await key(n % 2 ? "gun" : "start"); }
   await step("in-play", { guest: g });
