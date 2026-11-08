@@ -40,6 +40,17 @@ COLD1_ROOM = 0x20000   # cart tail for cold code that no ROM stretch takes
 COLD1_AT = CART_END - COLD1_ROOM
 # ROM stretches no walk of any stage or character reads (tools/rounds_census.py, WORK/rounds.json): cold chunks of lifted code stay in them for the whole game, per-round tiles take the rest.
 ROUNDS = json.loads((WORK / "rounds.json").read_text())
+# Tile keys (sprites and the three layers) of the screens after a KO with no lives left: the continue countdown, name entry, GAME OVER.
+# The census routes continue at once, so they never saw the low countdown digits, and a stage whose census had no game over lacked the
+# screen's text and picture: the countdown and the "CONTINUE AND GET 1UP!" line drew blank. tools/screen_keys.py writes the list;
+# tools/check_screen_keys.py checks every stage file holds it.
+SCREEN_KEYS = [set(), set(), set(), set()]   # per section: sprite, scroll 1, 2, 3
+for l in (open(WORK / "screen_keys.txt") if (WORK / "screen_keys.txt").exists() else []):
+    if l.strip():
+        SCREEN_KEYS[int(l.split()[0])].add(int(l.split()[1], 16))
+SCREEN_KEYS[0].discard(0)
+if os.environ.get("SCREEN_KEYS_REQUIRED", "1") == "1" and not SCREEN_KEYS[0]:
+    raise SystemExit("WORK/screen_keys.txt missing: run tools/screen_keys.py (SCREEN_KEYS_REQUIRED=0 to build without)")
 STRETCHES = [(0x02400000 + a, n) for a, n in ROUNDS["holes"] if n >= 0x4000]
 
 
@@ -168,7 +179,11 @@ def round_files(rom, code_end, cold1_at):
                     free.append([st * page, (q - st) * page])
                 st = None
         free.sort(key=lambda r: -r[1])
-        p, dropped = rounds_pack.fit(raw, [set(k) for k in f["keys"]], room, free, {int(x): v for x, v in rank.get(f["name"], {}).items()})
+        keys, frank = [set(k) for k in f["keys"]], {int(x): v for x, v in rank.get(f["name"], {}).items()}
+        if f["name"] != "front":   # continue and game over screens: reachable from every stage, kept first (tools/screen_keys.py)
+            keys = [k | e for k, e in zip(keys, SCREEN_KEYS)]
+            frank.update({k: 1 << 40 for k in SCREEN_KEYS[0]})
+        p, dropped = rounds_pack.fit(raw, keys, room, free, frank)
         for first, a, take in p["segs"]:
             written.update(range(a // page, (a + (take * 128 + 2047 & -2048) + page - 1) // page))
         plans.append((p, dropped))
