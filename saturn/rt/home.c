@@ -19,7 +19,10 @@ volatile u32 sat_home_screen;          /* 0 none, 1 home, 2 options, 3 pause */
 volatile u32 sat_home_cursor;
 volatile u32 sat_home_warp;
 /* Screen adjust and button map (home_cold.c): this power-on only. btn: Saturn button index (A B C X Y Z L R) for the game's gun, attack, jump. */
-struct { signed char nx, ny; u8 btn[3]; } sat_home_cfg = { 0, 0, { 2, 0, 1 } };
+/* lives: OPTIONS > GAME OPTION > LIVES, 0 = the arcade's (nothing written), else 1 to 9 (stock lives - 1); arcade and boss rush, not the duel. */
+typedef struct { signed char nx, ny; u8 btn[3]; u8 lives; } HomeCfg;   /* same in home_cold.c */
+#define HOME_CFG_T
+HomeCfg sat_home_cfg = { 0, 0, { 2, 0, 1 }, 0 };
 static const u16 btn_bit[8] = { 0x0400, 0x0100, 0x0200, 0x0040, 0x0020, 0x0010, 0x0008, 0x0080 };
 /* The pad word with the chosen buttons moved onto C (gun), A (attack), B (jump); X Y Z L R read idle to the game. */
 u32 sat_home_remap(u32 p)
@@ -41,6 +44,7 @@ u32 sat_home_remap(u32 p)
 #define P_C 0x0200u
 #define P_COIN 0x0040u
 extern volatile u32 sat_duel_on;
+int sat_home_start_stock(void) { return (!sat_home_cfg.lives || sat_duel_on) ? -1 : sat_home_cfg.lives - 1; }
 u32 sat_home_inject;
 #define inject sat_home_inject
 u32 sat_home_prev = 0xffff;

@@ -29,6 +29,10 @@ extern int sat_home_list(int, int, const char *const *, int, int, u32);
 #define frame sat_home_frame
 #define edges sat_home_edges
 #define menu_list sat_home_list
+#ifndef HOME_CFG_T   /* home.c has it when both are in one unit (tests/home_lives_test.c) */
+typedef struct { signed char nx, ny; u8 btn[3]; u8 lives; } HomeCfg;
+#endif
+extern HomeCfg sat_home_cfg;
 /* Player settings: the game's own bytes in its settings block, both copies, and the RAM byte its boot code loads them to. */
 typedef struct { const char *label; u8 off; u16 ram; u8 n; const char *const *names; } Opt;
 static const char *const on_off[] = { "OFF", "ON" };
@@ -39,6 +43,7 @@ static const Opt opts[] = {
     { "DIFFICULTY", 0x10, 0x81cf, 8, 0 },
     { "EXTEND", 0x11, 0x81d0, 8, extend },
     { "CONTINUE", 0x01, 0x81be, 2, on_off },
+    { "LIVES", 0xff, 0, 9, 0 },          /* not the game's: sat_home_cfg.lives, see opt_get */
     { "AUDIO", 0x04, 0x81d2, 2, sound },
     { "DEMO SOUND", 0x03, 0x81ad, 2, on_off },
 };
@@ -52,6 +57,11 @@ static void panel(int top)
 }
 /* A screen inside the menus, as Capcom's Saturn option screens draw it (MSHvSF OPTION MODE): a translucent panel over the game's logo
    (the menu layer NBG3 with per-dot colour calculation, sat_gfx.c), the screen's name as its header at the top, the page under it. */
+/* LIVES shows the arcade's start lives until one is chosen: stock from the game's table at 0x21330 by its lives byte (settings 0x12 = ff81d1), plus 1.
+   (The game adds 1 more for settings 4 to 7 when the player's +0xff flag is set; the default shows without it.) */
+static const u8 start_stock[8] = { 0, 1, 2, 4, 0, 1, 2, 4 };
+static int opt_get(const Opt *o) { return o->off == 0xff ? (sat_home_cfg.lives ? sat_home_cfg.lives - 1 : start_stock[sat_home_get(0x12) & 7]) : sat_home_get(o->off); }
+static void opt_set(const Opt *o, int v) { if (o->off == 0xff) sat_home_cfg.lives = (u8)(v + 1); else { sat_home_set(o->off, v); RAMB[o->ram] = (u8)v; } }
 static void panel_rows(int top, int bottom)
 {
     int r, c;
@@ -74,7 +84,7 @@ static int opt_page(const char *title, u32 screen, int first, int n, const char 
         sub(title);
         for (i = 0; i < n; i++) {
             const Opt *o = &opts[first + i];
-            int v = sat_home_get(o->off);
+            int v = opt_get(o);
             char num[2];
             num[0] = (char)('1' + v); num[1] = 0;
             put(7 + i, 8, o->label, i == cur);
@@ -94,10 +104,9 @@ static int opt_page(const char *title, u32 screen, int first, int n, const char 
         if (e & P_START) return 0;
         if (e & (P_LEFT | P_RIGHT | P_A | P_C)) {
             const Opt *o = &opts[first + cur];
-            int v = sat_home_get(o->off);
+            int v = opt_get(o);
             v = (e & P_LEFT) ? (v ? v - 1 : o->n - 1) : (v + 1 < o->n ? v + 1 : 0);
-            sat_home_set(o->off, v);
-            RAMB[o->ram] = (u8)v;
+            opt_set(o, v);
         }
     }
 }
@@ -114,17 +123,15 @@ static void options(void)
         sub("OPTION MODE");
         pick = menu_list(2, 7, items, 5, pick < 0 ? 0 : pick, 0);
         if (pick == -2) return;
-        if (pick == 0) opt_page("GAME OPTION", 10, 0, 3, 0, 0);
+        if (pick == 0) opt_page("GAME OPTION", 10, 0, 4, 0, 0);
         else if (pick == 1) buttons();
-        else if (pick == 2) { int x; while ((x = opt_page("SOUND OPTION", 11, 3, 2, "SOUND TEST", "SE TEST")) != 0) { if (x == 1) music(); else sound_test(); } }
+        else if (pick == 2) { int x; while ((x = opt_page("SOUND OPTION", 11, 4, 2, "SOUND TEST", "SE TEST")) != 0) { if (x == 1) music(); else sound_test(); } }
         else if (pick == 3) screen_adjust();
         else return;
     }
 }
 
 /* Home settings beyond the game's own block: screen adjust and button map. Kept in work RAM (home.c) for this power-on; backup saves are not decided. */
-typedef struct { signed char nx, ny; u8 btn[3]; } HomeCfg;
-extern HomeCfg sat_home_cfg;
 extern int sat_gfx_nudge_x, sat_gfx_nudge_y;
 extern volatile u32 sat_home_warp, sat_home_rush;
 static void num(char *b, int v)   /* signed, up to 2 digits */

@@ -132,6 +132,22 @@ void f_42e4(void)
     for (; n && w < 64; n--, w++, p += 2) ((u16 *)save_block)[w] = RD16(p);
 }
 
+/* Start stock, 0x212f8 (a6 = player object; +0xf1 is the stock the HUD shows after "x"): the game's own routine, then in home builds the
+   LIVES option when one was chosen. The game calls it at a game start, a join and a continue, so a chosen value is the stock per credit, as the
+   game's own lives byte (ff81d1) already is. Left at its default the option writes nothing and play is the arcade's. */
+void f_212f8(void)
+{
+    extern void lifted_212f8(void);
+    lifted_212f8();
+#ifdef SAT_HOME
+    {
+        extern int sat_home_start_stock(void);
+        int s = sat_home_start_stock();
+        if (s >= 0) WR8(cpu.a[6] + 0xf1u, (u8)s);
+    }
+#endif
+}
+
 /* Scheduler */
 static void to_sched(void)
 {

@@ -30,7 +30,7 @@ for d in (GEN, OBJ, ISO):
 HW_BASE, HW_LIMIT, LW_BASE, LW_LIMIT = 0x06014000, 0x06100000, 0x00200000, 0x00300000
 HW_RESERVED = 0x10000 + 16 * 2048 + 8192 + 16384 + 0x8000 + 0x8000   # game RAM, stacks, kernel, graphics tables and code
 LW_RESERVED = 0x20000 + 0x4000 + 0xe400   # graphics RAM, lifted bss, layer shadows, blank tags
-NATIVE = ("41ca", "42e4")   # EEPROM block read and write
+NATIVE = ("41ca", "42e4", "212f8")   # EEPROM block read and write; start stock (kernel.c wraps the lifted body for the home LIVES setting)
 # Readable replacements, saturn/game. GAME_OVERRIDES=0 builds without them, for an A/B.
 OVERRIDES = () if os.environ.get("GAME_OVERRIDES") == "0" else tuple((REPO / "saturn/game/overrides.txt").read_text().split())
 CART = dict(ROMB=0x02400000, OPX=0x02600000, SAT_SINK=0x02640000, SAT_OBJ=0x02650000, SAT_PACK=0x02654000)
