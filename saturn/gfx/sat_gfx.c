@@ -165,6 +165,11 @@ static u32 census_count(void)
 
 static Section sections[4];
 static u16 stamp;
+static u16 prev_stamp;   /* the frame before: its sprite slots may still be read by a plot an emulator renders late */
+/* Two command tables, so the one VDP1 plots is never the one the slave writes: 0x20 to 0x8000 and 0x8020 to 0x10000, each local
+   coordinates, clear polygon, sprites, end. The system clip at 0 jumps to the table of the plot being started. */
+static u32 table_base;
+#define TABLE_B 0x8000UL
 
 static u32 spr_key[SAT_GFX_SPRITE_SLOTS];
 static u16 spr_stamp[SAT_GFX_SPRITE_SLOTS], spr_next[SAT_GFX_SPRITE_SLOTS], spr_head[HASH_SIZE];
@@ -384,7 +389,7 @@ static u16 cache_find(Cache *c, u32 key, unsigned long *refused)
     {
         u16 t = c->hand;
         c->hand = (u16)(t + 1U >= c->capacity ? c->first : t + 1U);
-        if (c->slot_stamp[t] != stamp) { n = t; break; }
+        if (c->slot_stamp[t] != stamp && !(c->section == SEC_SPRITE && prev_stamp && c->slot_stamp[t] == prev_stamp)) { n = t; break; }
     }
     if (n == NOSLOT) { (*refused)++; return NOSLOT; }
     if (c->slot_key[n] != NOKEY)
@@ -770,7 +775,7 @@ static u8 *bar(u8 *cmd, int w, int y, u16 rgb)
 static void draw_sprites(void)
 {
     const u8 *list = snap.obj;
-    u8 *cmd = VDP1_VRAM + 0x40; /* after clip and local */
+    u8 *cmd = VDP1_VRAM + table_base + 0x40; /* after clip and this table's local */
     int count = snap.objects, i;
     u16 commands = 0;
     /* Clear the buffer: plotting by hand gives no automatic erase, and old sprites otherwise pile up as trails. A polygon in colour 0 reads as clear. */
@@ -1108,6 +1113,7 @@ void sat_gfx_draw(void)
     VLOG(vlog_v)[1] = (unsigned long)*(volatile unsigned short *)0x25D00010UL << 16 | (SFRT() & 0xffff);
 #endif
 
+    prev_stamp = stamp;
     stamp = (u16)(stamp + 1U == 0x10000UL ? 1U : stamp + 1U);
     cache_frame(&spr_cache); cache_frame(&s1_cache); cache_frame(&s2_cache); cache_frame(&s3_cache);
     sat_gfx_stats.uploads = 0;
@@ -1134,7 +1140,7 @@ void sat_gfx_draw(void)
     plot_wait_end();
 #endif
 #ifdef SAT_HOME
-    put16(VDP1_VRAM + 32 + 12, (u16)NUDGE_X); put16(VDP1_VRAM + 32 + 14, (u16)NUDGE_Y);   /* local origin follows the screen adjust */
+    put16(VDP1_VRAM + table_base + 32 + 12, (u16)NUDGE_X); put16(VDP1_VRAM + table_base + 32 + 14, (u16)NUDGE_Y);   /* local origin follows the screen adjust */
 #endif
 
     STAGE(4);
@@ -1147,12 +1153,15 @@ void sat_gfx_draw(void)
     draw_sprites();
     note_slots();
     STAGE(5);
+    put16(VDP1_VRAM + 0, 0x1009);   /* system clip, then jump (assign) to this table */
+    put16(VDP1_VRAM + 2, (u16)((table_base + 0x20) >> 3));
 #ifdef SAT_GFX_HOST
     VDP1R(FBCR) = 3;
     VDP1R(PTMR) = 1;
 #else
     plot_start();
 #endif
+    table_base ^= TABLE_B;
 #ifdef SAT_VLOG
     VLOG(vlog_v)[3] |= (sat_vblanks_now() - vlog_v) << 28 | (unsigned long)sat_gfx_stats.commands << 16 | (SFRT() & 0xffff) << 0;
 #endif
@@ -1314,6 +1323,8 @@ int sat_gfx_init(const void *pack)
     cache_setup(&s2_cache, VDP2_VRAM + CELL_S2, 128, SAT_GFX_S2_SLOTS, 0, SEC_S2, s2_key, s2_stamp, s2_next, s2_head);
     cache_setup(&s3_cache, VDP2_VRAM + CELL_S3, 512, SAT_GFX_S3_SLOTS, 0, SEC_S3, s3_key, s3_stamp, s3_next, s3_head);
     stamp = 0;
+    prev_stamp = 0;
+    table_base = 0;
     drawn_valid = 0;
 
     /* VRAM split into four banks, CRAM mode 1. */
@@ -1366,6 +1377,8 @@ int sat_gfx_init(const void *pack)
     put16(c + 20, SAT_GFX_SCREEN_W - 1);
     put16(c + 22, SAT_GFX_SCREEN_H - 1);
     put16(c + 32, 0x000a);                        /* local origin 0, 0 */
+    put16(c + TABLE_B + 32, 0x000a);              /* the second table's */
+    put16(c + TABLE_B + 64, 0x8000);
     put16(c + 64, 0x8000);
     VDP1R(PTMR) = 0;
 

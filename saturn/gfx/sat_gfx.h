@@ -34,7 +34,7 @@ extern volatile int sat_fit_scale;
 #endif
 #define SAT_GFX_PAGES 4
 #define SAT_GFX_BANKS_PER_PAGE 32
-#define SAT_GFX_MAX_COMMANDS 2044 /* 64 KB table less clip, local, clear and end */
+#define SAT_GFX_MAX_COMMANDS 1016 /* two 32 KB tables (built and plotting), each less local, clear, end and the four readout bars */
 #define SAT_GFX_SPRITE_SLOTS 3584 /* 448 KB of 128 byte textures */
 #ifdef SAT_HOME
 #define SAT_GFX_S1_SLOTS 768 /* 0x18000-0x1e000; the menu layer (NBG3) map and its font take the rest */
