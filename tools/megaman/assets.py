@@ -224,7 +224,7 @@ def main():
                     o[-1][1] += d
             out[m] = o
         return out
-    BUDGET = int(os.environ.get("MM_BUDGET", "795"))     # smallest Hunter own-tile figure over the play stages (fit_all.log)
+    BUDGET = int(os.environ.get("MM_BUDGET", "590"))     # largest budget whose one set passes every stage (stage 24 binds; 620 failed it by 21-36 keys)
     fr = caps["sel"][0]
 
     def group(f, box, pals):
