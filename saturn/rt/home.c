@@ -8,14 +8,21 @@ extern void sat_home_set(int block_off, int value);
 extern int sat_home_get(int block_off);
 extern void sat_home_restart(void);
 volatile int sat_home_hold;
-volatile int sat_home_mode;            /* 0 off, 1 text over the held picture, 2 text alone */
+volatile int sat_home_mode;            /* 0 off, 1 text over the held picture, 2 text alone, 3 title menus (1 with the title's start lines hidden) */
 char sat_home_text[28][44];
+/* What the slave draws: a copy taken in sat_home_frame, after the screen is built and away from the vblank the slave draws in (the menu loops rebuild
+   sat_home_text right after each vblank, so drawing from it showed half-built rows). sat_home_seq is odd while the copy is made. */
+char sat_home_shown[28][44];
+volatile u32 sat_home_seq;
 /* Where the menus are, read by the bot over MCP. */
 volatile u32 sat_home_screen;          /* 0 none, 1 home, 2 options, 3 pause */
 volatile u32 sat_home_cursor;
 volatile u32 sat_home_warp;
 /* Screen adjust and button map (home_cold.c): this power-on only. btn: Saturn button index (A B C X Y Z L R) for the game's gun, attack, jump. */
-struct { signed char nx, ny; u8 btn[3]; } sat_home_cfg = { 0, 0, { 2, 0, 1 } };
+/* lives: OPTIONS > GAME OPTION > LIVES, 0 = the arcade's (nothing written), else 1 to 9 (stock lives - 1); arcade and boss rush, not the duel. */
+typedef struct { signed char nx, ny; u8 btn[3]; u8 lives; } HomeCfg;   /* same in home_cold.c */
+#define HOME_CFG_T
+HomeCfg sat_home_cfg = { 0, 0, { 2, 0, 1 }, 0 };
 static const u16 btn_bit[8] = { 0x0400, 0x0100, 0x0200, 0x0040, 0x0020, 0x0010, 0x0008, 0x0080 };
 /* The pad word with the chosen buttons moved onto C (gun), A (attack), B (jump); X Y Z L R read idle to the game. */
 u32 sat_home_remap(u32 p)
@@ -37,6 +44,7 @@ u32 sat_home_remap(u32 p)
 #define P_C 0x0200u
 #define P_COIN 0x0040u
 extern volatile u32 sat_duel_on;
+int sat_home_start_stock(void) { return (!sat_home_cfg.lives || sat_duel_on) ? -1 : sat_home_cfg.lives - 1; }
 u32 sat_home_inject;
 #define inject sat_home_inject
 u32 sat_home_prev = 0xffff;
@@ -48,6 +56,7 @@ static int shown = 1;
 static int shown;
 #endif
 #define IN_ATTRACT (G(0xff81b0) != 0)
+#define SELECTING (!IN_ATTRACT && G(0xff8001) == 2 && !G(0xff8380) && !G(0xff81e8) && !G(0xff81e9))
 #define PAUSE_OK (!IN_ATTRACT && G(0xff8001) == 2 && G(0xff8380) != 0 && G(0xff8384) != 4)
 
 /* Second pad: idle while held; Start only as the duel's start path sends it, or to join or continue in play. */
@@ -79,15 +88,47 @@ u32 sat_home_pad(u32 raw)
         return raw | P_START;
     }
     if (IN_ATTRACT || PAUSE_OK) return raw | P_START;
+    /* Character select (and the story before it): the arcade takes only Attack (MAME 0.289: Start leaves the timer running), but a Saturn player
+       confirms with Start, so player 1's Start is Attack there. Player 2 keeps Start to join. */
+    if (SELECTING && !(raw & P_START)) return (raw | P_START) & ~P_A;
     return raw;
 }
 
 void sat_home_clear(void) { int r, c; for (r = 0; r < 28; r++) for (c = 0; c < 44; c++) sat_home_text[r][c] = 0; }
 /* High bit: highlight colour. */
 void sat_home_put(int r, int c, const char *s, int hi) { for (; *s && c < 44; s++, c++) sat_home_text[r][c] = (char)(*s == ' ' ? 1 : (*s | (hi ? 0x80 : 0))); }
+/* A screen name in large letters (rows r and r + 1), centred: letters as two cell codes (2 to 0x20, then 0x81 to 0xa0; sat_gfx draws them from
+   its large cells), a space as panel, anything else as a small letter on the lower row. */
+void sat_home_big(int r, const char *s)
+{
+    int n = 0, c, i;
+    while (s[n]) n++;
+    c = (44 - n) / 2;
+    for (i = 0; i < n && c + i < 44; i++) {
+        char ch = s[i];
+        if (ch >= 'A' && ch <= 'Z') {
+            int k = (ch - 'A') * 2;
+            sat_home_text[r][c + i] = (char)(k < 31 ? 2 + k : 0x81 + k - 31);
+            k++;
+            sat_home_text[r + 1][c + i] = (char)(k < 31 ? 2 + k : 0x81 + k - 31);
+        } else {
+            sat_home_text[r][c + i] = 1;
+            sat_home_text[r + 1][c + i] = (char)(ch == ' ' ? 1 : ch);
+        }
+    }
+}
+int sat_home_list_gap;                 /* rows between list items; 0: 1 for more than 4 items, else 2 */
 void sat_home_centre(int r, const char *s, int hi) { int n = 0; while (s[n]) n++; sat_home_put(r, (44 - n) / 2, s, hi); }
 
-void sat_home_frame(void) { u32 v = sat_vblanks_now(); while (sat_vblanks_now() == v) ; }
+void sat_home_frame(void)
+{
+    u32 v = sat_vblanks_now();
+    int i;
+    sat_home_seq++;
+    for (i = 0; i < 28 * 44; i++) (&sat_home_shown[0][0])[i] = (&sat_home_text[0][0])[i];
+    sat_home_seq++;
+    while (sat_vblanks_now() == v) ;
+}
 u32 sat_home_edges(void) { u32 raw = sat_pad_raw & 0xffff, e = prev & ~raw; prev = raw; return e; }
 
 int sat_home_list(int screen, int row0, const char *const *items, int n, int start, u32 idle)
@@ -97,7 +138,7 @@ int sat_home_list(int screen, int row0, const char *const *items, int n, int sta
     sat_home_screen = (u32)screen;
     for (;;) {
         u32 e;
-        for (i = 0; i < n; i++) sat_home_centre(row0 + i * (n > 4 ? 1 : 2), items[i], i == cur);
+        for (i = 0; i < n; i++) sat_home_centre(row0 + i * (sat_home_list_gap ? sat_home_list_gap : n > 4 ? 1 : 2), items[i], i == cur);
         sat_home_cursor = (u32)cur;
         sat_home_frame();
         e = sat_home_edges();
@@ -106,10 +147,31 @@ int sat_home_list(int screen, int row0, const char *const *items, int n, int sta
         if (e & P_UP) cur = cur ? cur - 1 : n - 1;
         if (e & P_DOWN) cur = cur + 1 < n ? cur + 1 : 0;
         if (e & (P_START | P_A | P_C)) return cur;
+        if (e & P_B) return -2;              /* back one level */
     }
 }
 
 extern void sat_home_menu(void);
+
+/* NOW LOADING, as Capcom's Saturn ports show it: the game held, a black picture with the line in the game's font in the bottom right corner,
+   drawn before a stage file load (round_check, kernel.c) and left on screen while the load runs; off again before the stage's first picture. */
+void sat_home_loading(int on)
+{
+    static int was_hold, was_mode;
+    if (on) {
+        int i;
+        was_hold = sat_home_hold; was_mode = sat_home_mode;
+        sat_home_clear();
+        sat_home_put(25, 31, "NOW LOADING", 0);
+        sat_home_hold = 1;
+        sat_home_mode = 2;
+        for (i = 0; i < 3; i++) sat_home_frame();   /* the slave draws it before the load takes the bus */
+    } else {
+        sat_home_clear();
+        sat_home_mode = was_mode;
+        sat_home_hold = was_hold;
+    }
+}
 
 static void pause_menu(void)
 {

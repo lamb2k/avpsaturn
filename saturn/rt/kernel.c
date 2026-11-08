@@ -117,6 +117,7 @@ static u8 save_block[128] __attribute__((aligned(2))) = {
 int sat_home_get(int off) { return save_block[off]; }
 void sat_home_set(int off, int v) { save_block[off] = (u8)v; save_block[off + 0x30] = (u8)v; }
 extern volatile int sat_home_hold;
+extern void sat_home_loading(int);
 extern void sat_home_poll(void);
 extern void sat_duel_step(void);
 #endif
@@ -129,6 +130,22 @@ void f_42e4(void)
 {
     u32 p = r32(0xff0ffc), n = r16(0xff1000) + 1u, w = r16(0xff1002);
     for (; n && w < 64; n--, w++, p += 2) ((u16 *)save_block)[w] = RD16(p);
+}
+
+/* Start stock, 0x212f8 (a6 = player object; +0xf1 is the stock the HUD shows after "x"): the game's own routine, then in home builds the
+   LIVES option when one was chosen. The game calls it at a game start, a join and a continue, so a chosen value is the stock per credit, as the
+   game's own lives byte (ff81d1) already is. Left at its default the option writes nothing and play is the arcade's. */
+void f_212f8(void)
+{
+    extern void lifted_212f8(void);
+    lifted_212f8();
+#ifdef SAT_HOME
+    {
+        extern int sat_home_start_stock(void);
+        int s = sat_home_start_stock();
+        if (s >= 0) WR8(cpu.a[6] + 0xf1u, (u8)s);
+    }
+#endif
 }
 
 /* Scheduler */
@@ -397,13 +414,22 @@ static void round_check(void)
     if (!row) chars = 0;
     want = row_file[row][mask_variant[chars]];
     row_loaded = row;
+#ifdef SAT_HOME
+    sat_home_loading(1);   /* NOW LOADING stays on screen through the load */
+#endif
     while (UNCACHED(gfx_done) != UNCACHED(gfx_handed)) ;   /* the slave finishes the picture in hand and stays off the pack */
     __asm__ volatile ("ldc %0,sr" : : "r"(0xf0));
+#ifndef SAT_HOME
     sat_gfx_display(0);
+#endif
     load_round(want);
     if (!sat_gfx_swap_pack(SAT_PACK)) sat_fatal(0xeb, 1);
     sat_audio_resume_music();
+#ifdef SAT_HOME
+    sat_home_loading(0);
+#else
     sat_gfx_display(1);
+#endif
     round_loaded = want;
     sat_rounds.current = (u32)want;
     sat_rounds.loads++;

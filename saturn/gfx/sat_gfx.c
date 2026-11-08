@@ -305,7 +305,7 @@ typedef struct
     u8 obj[MAX_OBJECTS * 8];
     u32 pal_sum[SAT_GFX_PAGES], s1_sum, s2_sum, s3_sum; /* change detection: position and every visible word */
 #ifdef SAT_HOME
-    u16 home, home_clear; /* menu text in front; cells without text cleared */
+    u16 home; /* menu text on its own layer (NBG3) */
 #endif
 } Snapshot;
 
@@ -541,6 +541,10 @@ static u32 name_of(u16 attr, int page, u32 charno)
 #ifdef SAT_HOME
 extern volatile int sat_home_mode;
 extern char sat_home_text[28][44];
+#ifndef SAT_HOME_RATIO
+#define SAT_HOME_RATIO 11   /* logo kept at about 0.45 of its brightness, as MSHvSF OPTION MODE keeps its own (0.47); measured from stills at 2, 5, 8 (lane-home overlay/dark_sheet.png) */
+#endif
+volatile unsigned short sat_home_ratio = SAT_HOME_RATIO; /* panel colour calculation ratio (CCRNB NBG3), 0 to 31 */
 static const u8 home_font[58 * 32] __attribute__((aligned(4))) = {
 #include "home_font.inc"
 };
@@ -575,20 +579,40 @@ static void draw_scroll1(u16 sx, u16 sy)
             u32 name = CLEAR_NAME;
             if (slot != NOSLOT) name = name_of(attr, 1, (CELL_S1 + (u32)slot * 32) >> 5);
 #ifdef SAT_HOME
-            if (snap.home)
-            {
-                u32 ch = (row < 28 && col < 44) ? *(volatile u8 *)((unsigned long)&sat_home_text[row][col] | 0x20000000UL) : 0;
-                if (ch == 1)
-                    name = CLEAR_NAME; /* a clear panel behind menu text */
-                else if (ch & 0x7f)
-                    name = name_of((ch & 0x80) ? 31 : 30, 1, (CELL_S1 + (u32)(SAT_GFX_S1_SLOTS + (ch & 0x7f) - 33) * 32) >> 5);
-                else if (snap.home_clear)
-                    name = CLEAR_NAME;
-            }
+            if (snap.home >= 3 && row >= 19) name = CLEAR_NAME;   /* the game's start and credits lines under the menus; its logo stays */
 #endif
             write_name(VDP2_VRAM + MAP_S1 + (r * 64 + c) * 4, name, &sh_s1[r * 64 + c]);
         }
 }
+
+#ifdef SAT_HOME
+/* The menu layer: NBG3, one page of 1-word names at MAP_HOME (rows 0 to 27 used; the rest of the page is never shown), font and panel cells after it.
+   Palette supplement 3 and character supplement 3 (reg 0x36) make name bank 14/15 = banks 62/63 (scroll 1 page banks 30/31) and cells 0xc00 up. */
+#define MAP_HOME 0x1e000UL
+static u16 sh_home[28 * 44] LOW_RAM;
+extern char sat_home_shown[28][44];
+extern volatile u32 sat_home_seq;
+static void draw_home(int fresh)
+{
+    u32 row, col;
+    if (*(volatile u32 *)((unsigned long)&sat_home_seq | 0x20000000UL) & 1) return;   /* the master is copying a new screen: next frame */
+    for (row = 0; row < 28; row++)
+        for (col = 0; col < 44; col++)
+        {
+            u32 ch = *(volatile u8 *)((unsigned long)&sat_home_shown[row][col] | 0x20000000UL);
+            u16 name = 0;                                                       /* cell 0xc00: clear */
+            if (ch == 1) name = (u16)(14u << 12 | ((SAT_GFX_HOME_FONT + 58) & 0x3ff));   /* the translucent panel */
+            else if ((ch >= 2 && ch <= 0x20) || (ch >= 0x81 && ch <= 0xa0))   /* a large letter's half (sat_home_big) */
+                name = (u16)(15u << 12 | ((SAT_GFX_HOME_FONT + 59 + (ch <= 0x20 ? ch - 2 : ch - 0x81 + 31)) & 0x3ff));
+            else if (ch & 0x7f) name = (u16)(((ch & 0x80) ? 15u : 14u) << 12 | ((SAT_GFX_HOME_FONT + (ch & 0x7f) - 33) & 0x3ff));
+            if (fresh || sh_home[row * 44 + col] != name)
+            {
+                sh_home[row * 44 + col] = name;
+                put16(VDP2_VRAM + MAP_HOME + (row * 64 + col) * 2, name);
+            }
+        }
+}
+#endif
 
 /* A 2x2 page plane of 16 pixel characters. */
 static u8 *s2_name(u32 r, u32 c)
@@ -660,6 +684,7 @@ static void update_rowscroll(void)
         write_name(VDP2_VRAM + ROWTAB + line * 4, (u32)snap.row[line] << 16, &sh_row[line]);
 }
 
+static u16 prinb_last; /* VDP2 registers are write-only: what update_priority last put in PRINB */
 /* Layer order and the priority table. VDP2 levels: layers 2, 4, 6; a sprite level sits just under the highest layer it hides behind. */
 static void update_priority(u16 layers, u16 pri)
 {
@@ -674,6 +699,7 @@ static void update_priority(u16 layers, u16 pri)
     for (i = 0; i < n; i++) prin[order[i] - 1] = (u16)(2 + 2 * i);
     VDP2R(0xf8) = (u16)(prin[1] | (prin[2] << 8)); /* NBG0 = scroll 2, NBG1 = scroll 3 */
     VDP2R(0xfa) = prin[0];                          /* NBG2 = scroll 1 */
+    prinb_last = prin[0];
     for (p = 0; p < 8; p++)
     {
         int level = 7, below = -1;
@@ -683,6 +709,9 @@ static void update_priority(u16 layers, u16 pri)
             level = 1 + 2 * below;
             for (i = 0; i < below; i++) if (p > lp[i]) { sat_gfx_stats.nonmonotone++; break; }
         }
+#ifdef SAT_HOME
+        if (snap.home && level > 6) level = 6;   /* the menu layer (NBG3, 7) in front of sprites too; a sprite wins ties, so 7 would hide it */
+#endif
         s[p] = (u16)level;
     }
     VDP2R(0xf0) = (u16)(s[0] | (s[1] << 8));
@@ -987,12 +1016,10 @@ void sat_gfx_snapshot(void)
     snap.home = (u16)sat_home_mode;
     if (snap.home)
     {
-        static u32 home_tick;
-        snap.home_clear = (u16)(snap.home == 2 || !(layers & 2));
-        snap.layers |= 2;
+        if (snap.home == 4) snap.objects = 0;   /* sub-screens: the logo's sprites (its "vs.") off, nothing beside the values */
         if (snap.home == 2)
         {
-            snap.layers &= (u16)~0xcU;
+            snap.layers &= (u16)~0xeU;
             snap.objects = 0;
             snap.back_valid = 1; snap.back = 0xf000;
             snap.s1x = (u16)-(CPS_LEFT + S1_REG_CROP); snap.s1y = (u16)-CPS_TOP;
@@ -1002,7 +1029,7 @@ void sat_gfx_snapshot(void)
         snap.pal_pages |= 2;
         for (n = 0; n < 64; n++) snap.palette[1][30 * 32 + n] = home_pal[n];
         snap.pal_sum[1]++;
-        snap.s1_sum += ++home_tick;
+        if (snap.home >= 3) snap.s1_sum++;    /* scroll 1 redrawn on the title menus (its bottom rows hidden) */
     }
 #endif
 }
@@ -1036,7 +1063,29 @@ void sat_gfx_draw(void)
     update_palette();
     update_priority(layers, snap.priority);
 #ifdef SAT_HOME
-    if (snap.home) VDP2R(0xfa) = 7; /* text in front */
+    /* The menus on NBG3, in front of everything: panel cells (dot code 15) blend with the picture under them by colour calculation in MSB mode
+       (only the panel colour, dot 15 of banks 62-63, has the MSB; per-dot mode drew opaque grey in Yaba); the font's dots stay solid. NBG3 gets cycle slots T3 (names) and T7 (cells) of bank A0 only while the menus are up;
+       leaving restores play's pattern, colour calculation and priority (update_priority writes 0xfa every frame). */
+    {
+        static int home_was;
+        if (snap.home)
+        {
+            VDP2R(0x10) = 0x0123; VDP2R(0x12) = 0xff67;
+            VDP2R(0x36) = 0x8063; VDP2R(0x4c) = 0x0f0f; VDP2R(0x4e) = 0x0f0f; VDP2R(0x94) = 0; VDP2R(0x96) = 0;
+            VDP2R(0xfa) = (u16)(prinb_last | 0x0700);
+            VDP2R(0x24) = 0; VDP2R(0x26) = 0x0080; VDP2R(0xee) = 0x00c0; VDP2R(0x10a) = (u16)(sat_home_ratio << 8); VDP2R(0xec) = 0x0008;
+            draw_home(!home_was);
+            /* Colour calculation by the colour's MSB (SFCCMD NBG3 mode 3): banks 62 and 63 written here with the MSB only on dot 15, the panel's. */
+            { int e; for (e = 62 * 16 + 1; e < 64 * 16; e++) if (e & 15) put16(CRAM_AT(e), (u16)((sat_gfx_colour(cram_shadow[e]) & 0x7fffU) | ((e & 15) == 15 ? 0x8000U : 0))); }
+        }
+        else if (home_was)
+        {
+            VDP2R(0x10) = 0x012f; VDP2R(0x12) = 0xff6f;
+            VDP2R(0xec) = 0; VDP2R(0xee) = 0; VDP2R(0x10a) = 0;
+            { int e; for (e = 62 * 16 + 1; e < 64 * 16; e++) put16(CRAM_AT(e), sat_gfx_colour(cram_shadow[e])); }   /* the game's colours back, MSB as everywhere */
+        }
+        home_was = snap.home;
+    }
 #endif
     STAGE(1);
     update_rowscroll();
@@ -1062,6 +1111,9 @@ void sat_gfx_draw(void)
     STAGE(3);
     #ifdef SAT_GFX_BGMASK
     bgon &= SAT_GFX_BGMASK;
+#endif
+#ifdef SAT_HOME
+    if (snap.home) bgon |= 8;
 #endif
     VDP2R(0x20) = bgon;
     VDP2R(0x70) = (u16)((s2x + CPS_LEFT + SAT_GFX_CROP_X - NUDGE_X) & 0x7ff);
@@ -1235,7 +1287,18 @@ int sat_gfx_init(const void *pack)
 
     VDP2R(0x00) = 0x8001;                         /* display on */
     #ifdef SAT_HOME
-    vram_copy(VDP2_VRAM + CELL_S1 + (u32)SAT_GFX_S1_SLOTS * 32, home_font, sizeof home_font);
+    /* The font with its clear dots as dot code 15, the panel's: letters sit on the translucent panel, not in holes through it. */
+    { u32 n; for (n = 0; n < sizeof home_font; n += 4) { u32 w = (u32)home_font[n] << 24 | (u32)home_font[n + 1] << 16 | (u32)home_font[n + 2] << 8 | home_font[n + 3], o = 0; int k;
+        for (k = 0; k < 32; k += 4) o |= (((w >> k) & 15) ? ((w >> k) & 15) : 15u) << k;
+        put32(VDP2_VRAM + CELL_S1 + (u32)SAT_GFX_HOME_FONT * 32 + n, o); } }
+    { u32 n; for (n = 0; n < 32; n += 4) put32(VDP2_VRAM + CELL_S1 + (u32)(SAT_GFX_HOME_FONT + 58) * 32 + n, 0xffffffffUL); }   /* the menu panel: every dot code 15 (pen 14, near black) */
+    /* Screen names in large letters, as MSHvSF's OPTION MODE header: A to Z from the same font, each row doubled (8 x 16, two cells) and
+       thickened by one dot to the right; clear dots are the panel's. 52 cells after the panel, up to 0x1fbe0 (the row table is at 0x1fc00). */
+    { int L, h, y; for (L = 0; L < 26; L++) for (h = 0; h < 2; h++) for (y = 0; y < 8; y++) {
+        const u8 *f = home_font + (32 + L) * 32 + (h * 4 + y / 2) * 4;
+        u32 w = (u32)f[0] << 24 | (u32)f[1] << 16 | (u32)f[2] << 8 | f[3], o = 0; int k;
+        for (k = 28; k >= 0; k -= 4) { u32 d = (w >> k) & 15, l = k < 28 ? (w >> (k + 4)) & 15 : 0; d = d ? d : l; o |= (d ? d : 15u) << k; }
+        put32(VDP2_VRAM + CELL_S1 + (u32)(SAT_GFX_HOME_FONT + 59 + L * 2 + h) * 32 + (u32)y * 4, o); } }
 #endif
     return 1;
 }
