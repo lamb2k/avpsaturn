@@ -107,6 +107,16 @@ static void duel_end(void)
     int ko0 = r8(PL(0) + 4) == 4, ko1 = r8(PL(1) + 4) == 4, n;
 #ifdef SAT_DUEL_MENU
     if (smash_lost) { ko0 = smash_lost == 1; ko1 = smash_lost == 2; }
+    else if (ko0 || ko1) {   /* the game's own KO (state 4) while stocks remain: a fall like a ring-out, back in after the respawn wait */
+        int i;
+        for (i = 0; i < 2; i++) if (i ? ko1 : ko0) {
+            if (smash_fall(i)) { smash_lost = i + 1; break; }
+            sat_smash_kos++;
+            w8(PL(i) + 4, 2); w8(PL(i) + 5, 0); w8(PL(i) + 6, 0); w16(PL(i) + 0x40, sat_smash.held[i]);
+        }
+        if (!smash_lost) return;
+        ko0 = smash_lost == 1; ko1 = smash_lost == 2;
+    }
     if (!ko0 && !ko1) return;
     if (!smash_lost)
 #else

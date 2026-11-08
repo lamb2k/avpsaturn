@@ -77,6 +77,18 @@ static void smash_hud(void)
     }
 }
 
+u32 sat_smash_kos;   /* game KOs turned into falls, for the bot */
+/* A fall (ring-out or the game's own KO): one stock, minus one score; returns 1 when that was the last stock, else starts the respawn wait. */
+static int smash_fall(int i)
+{
+    sat_smash.rings++;
+    sat_smash.launched[i] = 0; sat_smash.v[i] = 0;
+    if (sat_smash.stocks[i]) sat_smash.stocks[i]--;
+    sat_smash.score[i]--;
+    if (!sat_smash.stocks[i]) return 1;
+    sat_smash.out[i] = SM_RESPAWN;
+    return 0;
+}
 /* Once per game tick, after the hit pass. Returns the player who lost the last stock + 1, or 0. */
 static int smash_tick(int lo, int hi)
 {
@@ -124,12 +136,7 @@ static int smash_tick(int lo, int hi)
             if (sat_smash.v[i] == 0) sat_smash.launched[i] = 0;
         }
         if (sat_smash.launched[i] && (x < lo - SM_BLAST || x > hi + SM_BLAST)) {   /* ring-out */
-            sat_smash.rings++;
-            sat_smash.launched[i] = 0; sat_smash.v[i] = 0;
-            if (sat_smash.stocks[i]) sat_smash.stocks[i]--;
-            sat_smash.score[i]--;
-            if (!sat_smash.stocks[i]) { smash_hud(); return i + 1; }
-            sat_smash.out[i] = SM_RESPAWN;
+            if (smash_fall(i)) { smash_hud(); return i + 1; }
             w16(p + 0x10, (u16)(lo - 400));
             continue;
         }
@@ -144,18 +151,9 @@ static int smash_tick(int lo, int hi)
 
 /* Stage spawns off: the stage's spawn table task (record 0xff1812, state byte +4: 0 init, 2 walk, 4 done) is parked at done once it has set up,
    so only the duel's own aliens come in. Bodies the table already placed are not touched. */
-/* Door and hive aliens: they allocate from the tag 12 pool (0xff9580, alloc 0x1769e fails when the free count ee80 is 0). The duel holds
-   that count at 0 and keeps the real one aside, so the doors' own allocation fails, as on a full pool; releases still push their slot
-   back and are moved aside too. The count is put back when the duel ends. Bodies already out stay. */
-static u8 door_stash, door_held;
 static void smash_no_stage_spawns(void)
 {
     if (r8(0xff1816) == 2) w8(0xff1816, 4);
-    { u8 n = r8(0xffee80); if (n) { door_stash = (u8)(door_stash + n); w8(0xffee80, 0); } door_held = 1; }
-}
-static void smash_doors_back(void)
-{
-    if (door_held) { w8(0xffee80, (u8)(r8(0xffee80) + door_stash)); door_stash = 0; door_held = 0; }
 }
 
 /* Random aliens: the game's own alien rows from stage 02's spawn table (ROM 0x15c108 on, tag 4 rows), spawned through the table's own
@@ -189,12 +187,12 @@ static u32 alien_seed;
 static u16 alien_wait;
 u32 sat_alien_spawns, sat_alien_last;
 static u32 alien_rand(void) { alien_seed = alien_seed * 1103515245u + 12345u; return alien_seed >> 16; }
-u32 sat_alien_culled;
+u32 sat_alien_culled, sat_doors_parked;
 extern void f_17706(void), f_176b4(void);
 static int alien_live(void) { int i, n = 0; for (i = 0; i < ALIEN_SLOTS; i++) if ((alien_own >> i) & 1) n++; return n; }
 /* Stage spawns off, part 2: the stage's own bodies (doors, hives) keep sending tag 4 aliens. Any live slot in the pool the duel did not spawn
    is released through the pool's own release (0x17706); a duel slot that went free (its body released it) leaves the set. */
-static void alien_cull(void)
+static void alien_cull(int lo)
 {
     static Cpu save;
     u32 sr;
@@ -214,6 +212,15 @@ static void alien_cull(void)
     }
     /* The doors and hives send their aliens into the tag 12 pool (0xff9580, 20 slots of 0xc0, release 0x176b4). Releasing them from here
        froze both players for good in the emulator (s7.log), so it is off until the door bodies are read. */
+    /* Instead the duel parks them: each tick an alien of the stage's alien classes in that pool is put 400 px off the arena's left edge, where
+       it is not drawn and cannot reach a fighter. It stays allocated, so the doors and the pool's other users (many allocate with no failure
+       path; holding the free count at 0 hung the game, s10.log) carry on as before. */
+    for (i = 0; i < 20; i++) {
+        u32 a = 0xff9580u + (u32)i * 0xc0u;
+        if (!r32(a) || (r8(a + 2) != 0x1f && !alien_class(r8(a + 2)))) continue;   /* 0x1f: the class the stage 02 doors send (s11.log; READ by run) */
+        w16(a + 16, (u16)(lo - 400));
+        sat_doors_parked++;
+    }
 #ifdef DUEL_CULL_DOORS
     for (i = 0; i < 20; i++) {
         u32 a = 0xff9580u + (u32)i * 0xc0u;
@@ -232,7 +239,7 @@ static void smash_aliens(int lo, int hi)
     u32 sr, row;
     int cap = sat_duel_opt.aliens >= 2 ? 3 : 2;
     if (!alien_seed) { alien_seed = sat_dbg.vblanks * 2654435761u + 1; alien_wait = 600; alien_find_rows(); }
-    alien_cull();
+    alien_cull(lo);
     if (!sat_duel_opt.aliens) return;   /* none in the first 10 s */
     if (alien_wait) { alien_wait--; return; }
     alien_wait = (u16)(sat_duel_opt.aliens >= 2 ? 180 + alien_rand() % 180 : 480 + alien_rand() % 420);

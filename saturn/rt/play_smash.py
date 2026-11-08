@@ -49,7 +49,7 @@ def step(v,s):
         s.rg=rg; s.log("RINGOUT",rg,"stocks",st,"pct",pc,"t",round(now-t0)); time.sleep(.2)
         if rg<=2: s.shot(f"smash_ringout{rg}")
     if os.environ.get("SHOTS") and now-getattr(s,"lastshot",0)>6: s.lastshot=now; s.shot(f"p_{sat_v(s)}"); s.log("SHOT",sat_v(s),"st",a[0x384],a[0x484],"out",s.word("sat_smash",20,1),s.word("sat_smash",21,1),"cred",a[0x18c],"x",u16(0x390),u16(0x490),"b0",a[0x1b0],"mode",a[1])
-    if n%120==0: s.log("PCT",pc,"STOCKS",st,"rings",rg,"t",round(now-t0),"aliens",s.word("sat_alien_spawns"),hex(s.word("sat_alien_last")),"spawner",s.ram(0x1816,1)[0],"culled",s.word("sat_alien_culled"),"shots",s.word("sat_shot_hits"),"probe",s.word("sat_shot_probe"),s.word("sat_shot_probe",4,16).to_bytes(16,"big").hex(),s.word("sat_shot_probe",20,2),"pool",sum(1 for i in range(16) if s.ram(0xae80+i*0x80,4)!=bytes(4)))
+    if n%60==0: s.log("PCT",pc,"STOCKS",st,"rings",rg,"t",round(now-t0),"aliens",s.word("sat_alien_spawns"),hex(s.word("sat_alien_last")),"spawner",s.ram(0x1816,1)[0],"culled",s.word("sat_alien_culled"),"shots",s.word("sat_shot_hits"),"probe",s.word("sat_shot_probe"),s.word("sat_shot_probe",4,16).to_bytes(16,"big").hex(),s.word("sat_shot_probe",20,2),"pool",sum(1 for i in range(16) if s.ram(0xae80+i*0x80,4)!=bytes(4)),"t12",[s.ram(0x9580+i*0xc0+2,1).hex() for i in range(20) if s.ram(0x9580+i*0xc0,4)!=bytes(4)],"parked",s.word("sat_doors_parked"),"ee7d",s.ram(0xee7d,1)[0],"kos",s.word("sat_smash_kos"))
     if t0 and now-t0>20 and not getattr(s,"hs",0): s.hs=1; s.shot("smash_hud")
     h=(s.word("sat_duel_stats",0),s.word("sat_duel_stats",4))
     if h!=hits:
@@ -64,7 +64,7 @@ def step(v,s):
     if px<qx-60: k.append("right")
     elif px>qx+60: k.append("left")
     if n%8<3 and abs(qx-px)<70: k.append("a")
-    if abs(qx-px)>=90 and n%10<2: k.append("b"); k.append("p2b")
+    if abs(qx-px)>=90 and n%10<2: k.append("c"); k.append("p2c")   # C is the gun (pad.c), B is jump
     if abs(qx-px)<70 and n%8>=5 and abs(qy-py)<=8: k.append("p2a")
     s.set(k)
     if now-t0>300: s.shot("duel_end"); s.stop()
