@@ -102,6 +102,7 @@ int sat_home_list(int screen, int row0, const char *const *items, int n, int sta
         if (e & P_UP) cur = cur ? cur - 1 : n - 1;
         if (e & P_DOWN) cur = cur + 1 < n ? cur + 1 : 0;
         if (e & (P_START | P_A | P_C)) return cur;
+        if (e & P_B) return -2;              /* back one level */
     }
 }
 

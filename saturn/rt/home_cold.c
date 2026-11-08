@@ -50,36 +50,56 @@ static void panel(int top)
     clear();
     for (r = top; r < 28; r++) for (c = 0; c < 44; c++) sat_home_text[r][c] = 1;
 }
-static void options(void)
+/* One page of the game's settings: opts[first..first+n), then an optional extra item (opens a screen; returns 1), then EXIT. B goes back. */
+static int opt_page(u32 screen, int first, int n, const char *extra)
 {
-    int cur = 0, i;
-    sat_home_screen = 2;
+    int cur = 0, i, x = extra ? 1 : 0;
+    sat_home_screen = screen;
     for (;;) {
         u32 e;
         panel(19);
-        for (i = 0; i < OPTS; i++) {
-            const Opt *o = &opts[i];
+        for (i = 0; i < n; i++) {
+            const Opt *o = &opts[first + i];
             int v = sat_home_get(o->off);
             char num[2];
             num[0] = (char)('1' + v); num[1] = 0;
             put(20 + i, 8, o->label, i == cur);
             put(20 + i, 22, o->names ? o->names[v] : num, i == cur);
         }
-        centre(20 + OPTS + 1, "EXIT", cur == OPTS);
+        if (x) put(20 + n, 8, extra, cur == n);
+        centre(20 + n + x + 1, "EXIT", cur == n + x);
         sat_home_cursor = (u32)cur;
         frame();
         e = edges();
-        if (e & P_B) return;
-        if (e & P_UP) cur = cur ? cur - 1 : OPTS;
-        if (e & P_DOWN) cur = cur < OPTS ? cur + 1 : 0;
-        if (cur == OPTS) { if (e & (P_START | P_A | P_C)) return; continue; }
+        if (e & P_B) return 0;
+        if (e & P_UP) cur = cur ? cur - 1 : n + x;
+        if (e & P_DOWN) cur = cur < n + x ? cur + 1 : 0;
+        if (cur >= n) { if (e & (P_START | P_A | P_C)) return cur == n && x; continue; }
         if (e & (P_LEFT | P_RIGHT | P_A | P_C)) {
-            const Opt *o = &opts[cur];
+            const Opt *o = &opts[first + cur];
             int v = sat_home_get(o->off);
             v = (e & P_LEFT) ? (v ? v - 1 : o->n - 1) : (v + 1 < o->n ? v + 1 : 0);
             sat_home_set(o->off, v);
             RAMB[o->ram] = (u8)v;
         }
+    }
+}
+static void sound_test(void);
+static void screen_adjust(void);
+static void buttons(void);
+/* OPTIONS, as Capcom's Saturn fighters lay it out: GAME (difficulty, extend, continue), BUTTONS, SOUND (mode, demo sound, sound test), SCREEN ADJUST, EXIT. */
+static void options(void)
+{
+    static const char *const items[] = { "GAME", "BUTTONS", "SOUND", "SCREEN ADJUST", "EXIT" };
+    int pick = 0;
+    for (;;) {
+        panel(19);
+        pick = menu_list(2, 20, items, 5, pick < 0 ? 0 : pick, 0);
+        if (pick == 0) opt_page(10, 0, 3, 0);
+        else if (pick == 1) buttons();
+        else if (pick == 2) { while (opt_page(11, 3, 2, "SOUND TEST")) sound_test(); }
+        else if (pick == 3) screen_adjust();
+        else return;
     }
 }
 
@@ -201,35 +221,33 @@ static int stage_select(void)
 }
 void sat_home_menu(void)
 {
-    /* Fixed positions: 0 start, 1 options, 2 duel, 3 stage select, 4 sound test, 5 screen, 6 buttons, 7 boss rush. Without the duel, item 2 is absent and the rest move up. */
+    /* Fixed positions: 0 arcade, 1 duel, 2 boss rush, 3 stage select, 4 options. Without the duel, item 1 is absent and the rest move up. */
 #ifdef SAT_DUEL_MENU   /* until the duel is finished */
-    static const char *const items[] = { "START GAME", "OPTIONS", "DUEL", "STAGE SELECT", "SOUND TEST", "SCREEN ADJUST", "BUTTONS", "BOSS RUSH" };
-#define HOME_ITEMS 8
+    static const char *const items[] = { "ARCADE", "DUEL", "BOSS RUSH", "STAGE SELECT", "OPTIONS" };
+#define HOME_ITEMS 5
 #define DUEL_SHIFT 0
 #else
-    static const char *const items[] = { "START GAME", "OPTIONS", "STAGE SELECT", "SOUND TEST", "SCREEN ADJUST", "BUTTONS", "BOSS RUSH" };
-#define HOME_ITEMS 7
+    static const char *const items[] = { "ARCADE", "BOSS RUSH", "STAGE SELECT", "OPTIONS" };
+#define HOME_ITEMS 4
 #define DUEL_SHIFT 1
 #endif
-    int pick = 0;
+    int pick = 0, p;
     sat_home_hold = 1;
     sat_home_mode = 1;
     prev = sat_pad_raw & 0xffff;
     for (;;) {
-        int p;
         panel(19);
         pick = menu_list(1, 19, items, HOME_ITEMS, pick < 0 ? 0 : pick, HOME_IDLE);
-        p = pick >= 2 ? pick + DUEL_SHIFT : pick;
+        if (pick == -2) { pick = (int)sat_home_cursor; continue; }   /* B at the top level: nothing above it */
+        p = pick >= 1 ? pick + DUEL_SHIFT : pick;
         sat_home_warp = 0; sat_home_rush = 0;
-        if (p == 1) options();
+        if (p == 4) options();
         else if (p == 3) { if (stage_select()) { pick = 0; break; } }
-        else if (p == 4) sound_test();
-        else if (p == 5) screen_adjust();
-        else if (p == 6) buttons();
-        else if (p == 7) { sat_home_warp = 4; sat_home_rush = 1; pick = 0; break; }
+        else if (p == 2) { sat_home_warp = 4; sat_home_rush = 1; pick = 0; break; }
         else break;
     }
-    if (pick > 0 && pick + DUEL_SHIFT != 2) pick = 0;
+    p = pick >= 1 ? pick + DUEL_SHIFT : pick;
+    if (pick < 0 || p != 1) pick = pick < 0 ? -1 : 0; else pick = 2;
     sat_home_screen = 0;
     sat_home_mode = 0;
     sat_home_hold = 0;
