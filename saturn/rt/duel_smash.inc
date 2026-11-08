@@ -325,6 +325,9 @@ static int shot_owner(u32 s)
    same depth band, the angle is set from its distance with the game's own table (0x024266)
    in the tick after entry, before the shot is allocated (+0x89 count, 0x024114). */
 u32 sat_shot_aimed;
+/* 0x024266 is read PC-relative, so the CPU sees it through the opcode decryption: these are the opcode image's words. The data image
+   (ROMB, rt.bin) holds other bytes there, which the first version read by mistake. */
+static const u16 aim_dist[16] = { 0x0000, 0x000d, 0x0010, 0x0016, 0x001e, 0x0026, 0x0030, 0x003a, 0x0046, 0x0058, 0x0067, 0x007b, 0x0099, 0x00c0, 0x00fb, 0x0160 };
 static u8 aim_done[2];
 static void duel_aim(void)
 {
@@ -341,7 +344,7 @@ static void duel_aim(void)
         dx = (s16)(r16(q + 0x10) - r16(p + 0x10));
         if (r8(p + 0x0f) ? dx < 0 : dx >= 0) continue;   /* behind */
         if (dx < 0) dx = -dx;
-        for (idx = 15, k = 15; k >= 0; k--) if (dx >= (int)RD16(0x24266u + (u32)k * 2)) { idx = k; break; }
+        for (idx = 15, k = 15; k >= 0; k--) if (dx >= (int)aim_dist[k]) { idx = k; break; }
         ang = 0x20 - idx;
         if (!r8(p + 0x0f)) ang = -ang & 0x3f;
         w8(p + 0x8a, (u8)ang);

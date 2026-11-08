@@ -44,14 +44,14 @@ def step(v,s):
             for j in range(4): time.sleep(0.8); s.shot(f"char_select_{j}")
             for side,keys in (("",os.environ.get("P1MOVE","")),("p2",os.environ.get("P2MOVE",""))):
                 for kk in keys.split(","):
-                    if kk: s.pulse(side+kk,.1); time.sleep(.35)
+                    if kk: s.pulse(side+kk,.15); time.sleep(.5)
             time.sleep(.4); s.shot("char_select_moved"); lastp=time.time()
         if now-lastp>.6:
             lastp=now; pick+=1
             s.pulse("start" if pick%2 else "p2start",.1)
             if pick%6==0: s.pulse("c",.08); s.pulse("p2c",.08)
         s.set([]); return
-    if t0 is None: t0=now; s.shot("duel_begin"); s.log("CHARS d2",a[0x380+0xd2],a[0x480+0xd2],"stage",hex(u16(0x1e8)),"menu",s.word("sat_duel_opt",0,4).to_bytes(4,"big").hex() if "sat_duel_opt" in s.syms else "")
+    if t0 is None: t0=now; s.shot("duel_begin"); s.log("CHARS d2",a[0x380+0xd2],a[0x480+0xd2],"81cc",a[0x1cc],"round",s.word("sat_rounds"),"loads",s.word("sat_rounds",4),"stage",hex(u16(0x1e8)),"menu",s.word("sat_duel_opt",0,4).to_bytes(4,"big").hex() if "sat_duel_opt" in s.syms else "")
     pc=(s.word("sat_smash",0,2),s.word("sat_smash",2,2)); st=(s.word("sat_smash",16,1),s.word("sat_smash",17,1)); rg=s.word("sat_smash",44)
     ln=s.word("sat_smash_log")
     while getattr(s,"logn",0)<ln:
@@ -62,28 +62,43 @@ def step(v,s):
         s.rg=rg; s.log("RINGOUT",rg,"stocks",st,"pct",pc,"t",round(now-t0)); time.sleep(.2)
         if rg<=2: s.shot(f"smash_ringout{rg}")
     if os.environ.get("SHOTS") and now-getattr(s,"lastshot",0)>6: s.lastshot=now; s.shot(f"p_{sat_v(s)}"); s.log("SHOT",sat_v(s),"st",a[0x384],a[0x484],"out",s.word("sat_smash",20,1),s.word("sat_smash",21,1),"cred",a[0x18c],"x",u16(0x390),u16(0x490),"b0",a[0x1b0],"mode",a[1])
-    if n%60==0: s.log("PCT",pc,"STOCKS",st,"rings",rg,"t",round(now-t0),"aliens",s.word("sat_alien_spawns"),hex(s.word("sat_alien_last")),"spawner",s.ram(0x1816,1)[0],"culled",s.word("sat_alien_culled"),"shots",s.word("sat_shot_hits"),"probe",s.word("sat_shot_probe"),s.word("sat_shot_probe",4,16).to_bytes(16,"big").hex(),s.word("sat_shot_probe",20,2),"pool",sum(1 for i in range(16) if s.ram(0xae80+i*0x80,4)!=bytes(4)),"t12",[s.ram(0x9580+i*0xc0+2,1).hex() for i in range(20) if s.ram(0x9580+i*0xc0,4)!=bytes(4)],"parked",s.word("sat_doors_parked"),"ee7d",s.ram(0xee7d,1)[0],"kos",s.word("sat_smash_kos"),"ctl",hex(s.word("sat_stage_ctl")),"8218",s.ram(0x8218,2).hex(),"81f3",s.ram(0x81f3,1).hex(),"stw",s.ram(0x81e8,2).hex(),"xy",u16(0x390),u16(0x394),u16(0x490),u16(0x494))
+    if n%60==0: s.log("PCT",pc,"STOCKS",st,"rings",rg,"t",round(now-t0),"aliens",s.word("sat_alien_spawns"),hex(s.word("sat_alien_last")),"spawner",s.ram(0x1816,1)[0],"culled",s.word("sat_alien_culled"),"shots",s.word("sat_shot_hits"),"probe",s.word("sat_shot_probe"),s.word("sat_shot_probe",4,16).to_bytes(16,"big").hex(),s.word("sat_shot_probe",20,2),"pool",(lambda P:sum(1 for i in range(16) if P[i*0x80:i*0x80+4]!=bytes(4)))(s.ram(0xae80,0x800)),"t12",(lambda P:len([i for i in range(20) if P[i*0xc0:i*0xc0+4]!=bytes(4)]))(s.ram(0x9580,0xf00)),"parked",s.word("sat_doors_parked"),"ee7d",s.ram(0xee7d,1)[0],"kos",s.word("sat_smash_kos"),"ctl",hex(s.word("sat_stage_ctl")),"gfxmiss",s.word("sat_gfx_stats",32),"81cc",a[0x1cc],"round",s.word("sat_rounds"),"refbank",s.word("sat_gfx_stats",48),"topbank",s.word("sat_gfx_stats",28,2),"8218",s.ram(0x8218,2).hex(),"81f3",s.ram(0x81f3,1).hex(),"stw",s.ram(0x81e8,2).hex(),"xy",u16(0x390),u16(0x394),u16(0x490),u16(0x494))
     if os.environ.get("IDLESHOTS") and n%60==30: s.shot(f"idle_{int(now-t0)}")
-    if t0 and now-t0>20 and not getattr(s,"hs",0): s.hs=1; s.shot("smash_hud")
+    if t0 and now-t0>20 and not getattr(s,"hs",0):
+        s.hs=1; s.shot("smash_hud")
+        if os.environ.get("PALDUMP"):   # sprite palette page (CPS2 palette base register ff802c), one line per bank
+            reg=u16(0x2c); base=s.word("PAGE",((reg>>8)&0xff)*4)+((reg<<8)&0xffff); pal=s.m.read(base,0x400)
+            for b in range(32): s.log("PAL",b,pal[b*32:b*32+32].hex())
+            for j in range(4): s.log("REC1",j,s.ram(0x8380+j*0x40,0x40).hex()); s.log("REC2",j,s.ram(0x8480+j*0x40,0x40).hex())
+            o=s.m.read(s.word("PAGE",0x70*4)+0x8000,0x800)   # object list: x, y, code, attr per entry; attr low 5 bits the bank
+            ents=[(int.from_bytes(o[i:i+2],"big")&0x3ff,int.from_bytes(o[i+2:i+4],"big")&0x3ff,int.from_bytes(o[i+4:i+6],"big"),int.from_bytes(o[i+6:i+8],"big")) for i in range(0,0x800,8)]
+            ents=ents[:next((j for j,e in enumerate(ents) if e[3]&0xff00==0xff00),len(ents))]
+            import collections; s.log("OBJN",len(ents),"banks",sorted(collections.Counter(e[3]&0x1f for e in ents).items()))
+            for j in range(0,len(ents),12): s.log("OBJ",j," ".join("%d,%d,%x,%x"%e for e in ents[j:j+12]))
     h=(s.word("sat_duel_stats",0),s.word("sat_duel_stats",4))
     if h!=hits:
         hits=h; shots+=1
         s.log("HIT",h,"hp",u16(0x3c0),u16(0x4c0),"state",a[0x384:0x388].hex(),a[0x484:0x488].hex())
     px,py,qx,qy=u16(0x390),u16(0x394),u16(0x490),u16(0x494)
-    k=[]
-    if qx<px-24: k.append("p2right")
-    elif qx>px+24: k.append("p2left")
-    if qy<py-3: k.append("p2up")
-    elif qy>py+3: k.append("p2down")
-    if px<qx-60: k.append("right")
-    elif px>qx+60: k.append("left")
-    if n%8<3 and abs(qx-px)<70: k.append("a")
-    ph=n%200   # gun phase (C is the gun, pad.c): P1 backs off for 20 steps, then faces P2 and fires for 20; P2 keeps its own moves
-    p2k=[x for x in k if x.startswith("p2")]
-    if ph<20: k=["left" if px<qx else "right"]+p2k
-    elif ph<40:
-        k=(["right" if px<qx else "left"] if ph<23 else [])+p2k
-        if ph>=23 and ph%4<2: k.append("c")
+    # Both close in on each other in x and meet in depth (down raises +0x14), then trade attacks in turn.
+    # Every 150 steps one fighter backs off and fires its gun (C) for a while, P1 and P2 by turns; the other keeps closing in.
+    k=[]; dx=qx-px; dy=qy-py
+    if dx>40: k+=["right","p2left"]
+    elif dx<-40: k+=["left","p2right"]
+    if dy>4: k+=["down","p2down"]   # the harness's P2 up/down raise and lower +0x14 the other way round from P1 (s58, s59)
+    elif dy<-4: k+=["up","p2up"]
+    if abs(dx)<=60 and abs(dy)<=6:
+        if n%6<2: k.append("a")
+        elif 3<=n%6<5: k.append("p2a")
+    ph=n%150; gunner=(n//150)%2
+    if ph<30:
+        me,them=("","p2") if gunner==0 else ("p2","")
+        mx,ox=(px,qx) if gunner==0 else (qx,px)
+        k=[x for x in k if (x.startswith("p2") if gunner==0 else not x.startswith("p2"))]
+        k=[x for x in k if x not in ("a","p2a")]
+        if ph<12: k.append(me+("left" if mx<ox else "right"))
+        elif ph<14: k.append(me+("right" if mx<ox else "left"))
+        elif ph%4<2: k.append(me+"c")
     if os.environ.get("GUNLOG"):
         r=a[0x380:0x480]; s.log("GUN act",r[4:8].hex(),"8b",r[0x8b],"8c",r[0x8c],"d2",r[0xd2],"ee",hex(r[0xee]),"shots",s.word("sat_shot_hits"),"seen",s.word("sat_shot_probe"),"aimed",s.word("sat_shot_aimed"),"diag",[s.word("sat_shot_diag",i*2,2) for i in range(6)],"facing",a[0x38f],a[0x48f],"pct",s.word("sat_smash",0,2),s.word("sat_smash",2,2),"x",u16(0x390),u16(0x490))
         P=s.ram(0x8680,0xc00)
