@@ -365,6 +365,10 @@ static void round_sound_ready(void)
     }
     if (!sat_audio_swap(sat_aud_tables, SAT_PACK + keep)) sat_fatal(0xec, 1);
 }
+#ifdef SAT_READMAP
+u8 sat_readmap[256];
+u8 *pb_rm(u32 a) { if ((a & 0xffffff) < 0x200000) sat_readmap[(a >> 13) & 0xff] |= (u8)(1 << ((a >> 10) & 7)); return PAGE[(a >> 16) & 0xff] + (a & 0xffff); }
+#endif
 static void load_round(int file)
 {
     char name[] = "R000.BIN";
@@ -374,6 +378,9 @@ static void load_round(int file)
     CCR_M = 0x11;
     if (got < 0) sat_fatal(0xed, (u32)-got);
     sat_rounds.sectors = (u32)got;
+#ifdef SAT_READMAP
+    { int i; for (i = 0; i < 256; i++) sat_readmap[i] = 0; }
+#endif
 }
 static void round_check(void)
 {

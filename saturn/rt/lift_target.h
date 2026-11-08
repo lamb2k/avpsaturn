@@ -11,7 +11,12 @@ extern u8 ROMB[];            /* program image, flat, cart */
 
 static inline u32 w2_rd32(const volatile void *p) { const volatile u16 *q = (const volatile u16 *)p; return ((u32)q[0] << 16) | q[1]; }
 static inline void w2_wr32(volatile void *p, u32 v) { volatile u16 *q = (volatile u16 *)p; q[0] = (u16)(v >> 16); q[1] = (u16)v; }
+#ifdef SAT_READMAP   /* diagnostic: one bit per 1 KB page of the program ROM the lifted code reads, cleared at each stage file load (kernel.c) */
+extern u8 *pb_rm(u32 a);
+#define pb_at pb_rm
+#else
 static inline u8 *pb_at(u32 a) { return PAGE[(a >> 16) & 0xff] + (a & 0xffff); }
+#endif
 
 #define RAM8(o) (*(volatile u8 *)(RAMB + (o)))
 #define RAM16(o) (*(volatile u16 *)(RAMB + (o)))
