@@ -23,7 +23,9 @@ from capture_frontend_cram import Mcp
 JO = pathlib.Path("E:/AvP/worktrees/saturn-hw/.deps")
 EXE = pathlib.Path(os.environ.get("YABA_EXE", JO / "emulators/yabasanshiro-1.20.37-2986eb-debug-rig-mcp-da2ffb34/yabasanshiro-1.20.37-2986eb-debug-rig-mcp-d7767591/yabasanshiro.exe"))
 NM = JO / "joengine/Compiler/WINDOWS/sh-elf/bin/nm.exe"
-INI = pathlib.Path(os.environ["APPDATA"]) / "YabaSanshiro/yabause.ini"
+# A second instance: YABA_EXE in its own folder with a yabause.ini beside it (Qt then uses that file), YABA_INI that file, YABA_PORT its Debug\McpServerPort.
+INI = pathlib.Path(os.environ["YABA_INI"]) if os.environ.get("YABA_INI") else pathlib.Path(os.environ["APPDATA"]) / "YabaSanshiro/yabause.ini"
+PORT = int(os.environ.get("YABA_PORT", "9640"))
 # Windows virtual keys for the bindings in yabause.ini (Port 1 pad).
 VK = dict(up=0x57, right=0x44, down=0x53, left=0x41, r=0x36, l=0x35, start=0x0d, a=0x47, b=0x48, c=0x4a, x=0x54, y=0x59, z=0x55)
 QT = dict(start=16777220)   # Qt key code where it differs from the virtual key
@@ -66,7 +68,7 @@ class RetryMcp(Mcp):
 def port_busy():
     s = socket.socket()
     s.settimeout(0.3)
-    busy = s.connect_ex(("127.0.0.1", 9640)) == 0
+    busy = s.connect_ex(("127.0.0.1", PORT)) == 0
     s.close()
     return busy
 
@@ -75,7 +77,7 @@ def port_owner():
     """The pid listening on the MCP port. Two lanes can both see the port free and both start Yaba: only one binds it, and the other's bot would then drive the wrong machine."""
     for l in subprocess.run(["netstat", "-ano", "-p", "TCP"], capture_output=True, text=True).stdout.splitlines():
         p = l.split()
-        if len(p) >= 5 and p[1].endswith(":9640") and p[3] == "LISTENING":
+        if len(p) >= 5 and p[1].endswith(f":{PORT}") and p[3] == "LISTENING":
             return int(p[4])
     return None
 
@@ -170,7 +172,7 @@ def main():
     foreign = False
     last_own = time.time()
     try:
-        m = RetryMcp("http://127.0.0.1:9640/mcp")
+        m = RetryMcp(f"http://127.0.0.1:{PORT}/mcp")
         t0 = time.time()
         while True:
             try:
@@ -179,7 +181,7 @@ def main():
                 if time.time() - t0 > 120: raise
                 time.sleep(0.3)
         if port_owner() != proc.pid:
-            print("port 9640 belongs to another Yaba, this leg did not run", flush=True)
+            print(f"port {PORT} belongs to another Yaba, this leg did not run", flush=True)
             foreign = True
             return
         print("tools", [x["name"] for x in m._post("tools/list", {})["result"]["tools"]], flush=True)
@@ -206,7 +208,7 @@ def main():
             if time.time() - last_own > 15:
                 last_own = time.time()
                 if port_owner() != proc.pid:
-                    print("port 9640 lost to another Yaba, leg void", flush=True)
+                    print(f"port {PORT} lost to another Yaba, leg void", flush=True)
                     foreign = True
                     return
             fatal = int.from_bytes(d[28:32], "big")
