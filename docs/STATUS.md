@@ -263,3 +263,23 @@ Evidence E:\AvP\learning\lane-duel (s61 to s89 logs, stills5, stills6).
 - Arena garbage, narrowed further: with ARENA_KEEP=1 (build.py, off by default: the four arena stages' files also keep the 34 to 53 ROM pages stage 02's walk reads) the 1c fight drew clean to 71 s (s94.log, b_ak.log, stills6/1c/arena_keep_idle_71_clean.png). So the duel reads stage-02 pages on any arena. Not shipped: those files are also normal play's files for 0e/1c/1e/24, and their dropped sprite keys rise (m3: 0e 2744 to 2999, 1c 165 to 727, 1e 923 to 1308, 24 2108 to 2493). Next: find which of those pages the duel reads (bisect the page set, or trace reads), keep only those, and decide whether the remaining drop cost is acceptable for normal play.
 - Disc budget: the package is already about 372,500 sectors (ISO 240,771 + 26 audio tracks 127,872 + pregaps), over an 80 min CD-R (360,000). Fine for an ODE/emulator; a burned disc would not fit. Extra duel-only round files are not an option without cutting something.
 - Page hunt (Duel 7): tools at E:\AvP\learning\lane-duel\tools\spillpages.py list which of stage 02's pages each arena file's spill overwrites (spill02.json): common to all four arenas are 0xbf000, 0xcf400-0xd07ff, 0xffc00-0x1053ff and 0x190800-0x190fff; 1c/1e also 0x22000-0x22bff, 0x8cc00-0x8e3ff, 1e/24 0xa5800-0xa67ff. ARENA_KEEP=ffc00-105400 (22 pages): 1c no longer shows noise blocks, but at a ring-out two leaping alien-shaped sprites draw solid black (s96.log, stills7/1c_keepE_idle61_black_aliens.png; clean at 95 s, stills7/1c_keepE_idle95.png). So 0xffc00-0x1053ff holds tile-side data the duel reads, and a second group (colour or palette) is still overwritten. m3 drop counts with that keep: 0e 2932, 1c 509, 1e 1147, 24 2358 (today 2744, 165, 923, 2108). Next: add 0xbf000-0xbf3ff, 0xcf400-0xd07ff, 0x190800-0x190fff and retest; then the normal-play still pair on 1c (ss1c.py, STAGE SELECT 14).
+
+## Duel 8, 2026-11-08 (lane avp-duel-5; EMULATOR, soft-core Yaba port 9642; hardware UNRUN)
+
+Evidence E:\AvP\learning\lane-duel (keep1.sh, b_/s_ k4, k6, kall, kE_0e/1e/24, nnow, nkeep logs; stills8).
+- Minimal set: ARENA_KEEP=ffc00-105400 (22 pages). The black leaping aliens of Duel 7 are not an overwritten page group: the full keep (ARENA_KEEP=1, all of 02's pages) shows the same black shapes at a ring-out (s_kall.log, stills8/kall_grid.png), and so do k4 (+bf000, cf400, 190800 groups) and k6 (+22000, 8cc00) at their shot hit (stills8/k4_grid.png, k6_grid.png). On stage 02 the same leaping aliens draw in colour (stills8/stage02_ringouts.png). So that is a separate open defect on the arenas (likely the stage's own aliens' colour), not fixed by any page set. No noise blocks with ffc00-105400 on 1c (s96, stills7), 0e, 1e, 24 (stills8/kE_0e_grid.png, kE_1e_grid.png, kE_24_grid.png). Still seen: stage enemies on 1e (aliens) and 24 (soldiers), as in Duel 5.
+- Trap: keep1.sh first ran with KEEP_ROUND_FILES=1, which skips writing the round files, so ARENA_KEEP had no effect (stills8/k4_invalid_*). ARENA_KEEP tests need a build without it.
+- Normal play, dropped sprite keys per player combination (round file stageXX_mN, N = ff81cc: 1 Warrior, 2 Schaefer, 4 Hunter, 8 Linn), today (full6.log) / with ffc00-105400 (b_akE.log):
+| mask | 0e now / keep | 1c now / keep | 1e now / keep | 24 now / keep |
+| m1 | 2950 / 3140 | 151 / 405 | 983 / 1214 | 2299 / 2516 |
+| m2 | 2870 / 3059 | 155 / 456 | 981 / 1210 | 2108 / 2358 |
+| m3 | 2744 / 2932 | 165 / 509 | 923 / 1147 | 2108 / 2358 |
+| m4 | 2847 / 3058 | 143 / 384 | 868 / 1086 | 2192 / 2412 |
+| m5 | 2622 / 2825 | 219 / 484 | 798 / 1059 | 2192 / 2412 |
+| m6 | 2812 / 3027 | 176 / 371 | 807 / 1032 | 2151 / 2546 |
+| m8 | 2930 / 3195 | 155 / 384 | 977 / 1206 | 2325 / 2564 |
+| m9 | 2738 / 2948 | 195 / 600 | 922 / 1185 | 2325 / 2564 |
+| ma | 2728 / 2999 | 195 / 532 | 967 / 1198 | 2403 / 2607 |
+| mc | 2903 / 3135 | 251 / 470 | 837 / 1067 | 2256 / 2597 |
+- Normal-play still pair on 1c (home STAGE SELECT 14, Warrior alone, mask 1: 151 / 405 dropped keys): stills8/1c_normal_pair_now_left_keep_right.png (15/30/45 s, now left, keep right). No sprite visibly missing in the keep stills; gfx miss counter at 45 s 3191 now, 3444 keep (s_nnow.log, s_nkeep.log). Census build (SAT_PROF) not run. ss1c.py must not press START while the attract runs (a[0x1b0] set): that hangs the boot (vblank count stays 0).
+- Not done, waits for the owner's look call: arenas[] unchanged (RANDOM = 02 only), no package. Work ISO rebuilt as the normal build (no test flags, no ARENA_KEEP; b_nnow.log).
