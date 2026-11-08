@@ -283,6 +283,7 @@ typedef struct
     u32 s1[S1_ROWS * S1_COLS], s2[S2_ROWS * 64], s3[S3_ROWS * S3_COLS]; /* code << 16 | attribute, visible cells only */
     u8 obj[MAX_OBJECTS * 8];
     u32 pal_sum[SAT_GFX_PAGES], s1_sum, s2_sum, s3_sum; /* change detection: position and every visible word */
+    u32 s1_base; /* scroll 1 sum before the HUD split */
 } Snapshot;
 
 /* Polynomial, not rotate and xor: a palette fade changes every long by one mask, and with 256 longs a rotate cancels it out. */
@@ -502,6 +503,37 @@ static void write_name(u8 *addr, u32 name, u32 *shadow)
     }
 }
 
+/* HUD split: the 16 pixel centre crop cuts P1's portrait and runs P2's bar off the right. On the HUD rows only, the left half of the picture
+   shows the 384 wide picture 16 pixels further left and the right half 16 pixels further right, so each panel is whole. Scroll 1 cells here,
+   HUD sprites in draw_sprites. Off with SAT_GFX_NO_HUD_SPLIT. */
+#ifndef SAT_GFX_NO_HUD_SPLIT
+#define HUD_SHIFT 16
+#define HUD_TOP 48     /* screen rows above this and from HUD_BOT down are HUD */
+#define HUD_BOT 208
+#define HUD_SPRITE(aw) ((aw) & 0x80)   /* fixed to the screen, not the camera */
+static int hud_row(int sy, int h) { return sy < HUD_TOP || sy + h > HUD_BOT; }
+static u32 hud_split_s1(const u8 *map, u32 x0, u32 y0, u32 sum)
+{
+    u32 row, col, xc = x0 >> 3, yc = y0 >> 3;
+    for (row = 0; row < S1_ROWS; row++)
+    {
+        u32 r = (yc + row) & 63, *cell = snap.s1 + row * S1_COLS;
+        const u8 *base = map + (((r & 31) + ((r & 32) << 6)) * 4);
+        if (!hud_row((int)(row * 8) - (int)(y0 & 7), 8)) continue;
+        for (col = 0; col < S1_COLS; col++)
+        {
+            u32 c = col < S1_COLS / 2 ? xc + col - HUD_SHIFT / 8 : xc + col + HUD_SHIFT / 8;
+            u32 w = be32(base + (((c & 63) << 5) * 4));
+            cell[col] = w;
+            sum = MIX(sum, w);
+        }
+    }
+    return MIX(sum, 0x48554400UL);
+}
+#else
+static u32 hud_split_s1(const u8 *map, u32 x0, u32 y0, u32 sum) { (void)map; (void)x0; (void)y0; return sum; }
+#endif
+
 #define PN_VFLIP 0x80000000UL
 #define PN_HFLIP 0x40000000UL
 
@@ -699,6 +731,13 @@ static void draw_sprites(void)
         if (aw & 0x80) { x += OBJ_XOFFS; y += OBJ_YOFFS; }
         x += CPS_LEFT - OBJ_XOFFS;
         y += CPS_TOP - OBJ_YOFFS;
+#ifndef SAT_GFX_NO_HUD_SPLIT
+        if (HUD_SPRITE(aw))   /* HUD split, as hud_split_s1: by the block's middle */
+        {
+            int ox = ((x + nx * 8) & 0x3ff) - CPS_LEFT - SAT_GFX_CROP_X, oy = ((y + ny * 8) & 0x3ff) - CPS_TOP;
+            if (hud_row(oy, 1)) x += ox < SAT_GFX_SCREEN_W / 2 ? HUD_SHIFT : -HUD_SHIFT;
+        }
+#endif
         for (ty = ny - 1; ty >= 0; ty--)
         {
             CENSUS(int prev = -2;)
@@ -877,7 +916,8 @@ void sat_gfx_snapshot(void)
     if (layers & 2)
     {
         x0 = (u32)snap.s1x + CPS_LEFT + SAT_GFX_CROP_X; y0 = (u32)snap.s1y + CPS_TOP;
-        snap.s1_sum = snap_layer(snap.s1, GFX(RAM16(SH_SCROLL1_BASE) & 0xffc0U), x0 >> 3, y0 >> 3, S1_ROWS, S1_COLS, 5, (x0 >> 3) | ((y0 >> 3) << 16), snap.s1_sum);
+        snap.s1_base = snap_layer(snap.s1, GFX(RAM16(SH_SCROLL1_BASE) & 0xffc0U), x0 >> 3, y0 >> 3, S1_ROWS, S1_COLS, 5, (x0 >> 3) | ((y0 >> 3) << 16), snap.s1_base);
+        snap.s1_sum = hud_split_s1(GFX(RAM16(SH_SCROLL1_BASE) & 0xffc0U), x0, y0, snap.s1_base);
     }
     if (layers & 4)
     {
