@@ -123,12 +123,13 @@ static void pause_menu(void)
 /* Boss rush (menu, home_cold.c): the last stage of each of the game's seven rounds ends on its boss (the stage's controller waits on the boss-down flag ff822a, then clears with ff81f3).
    Five of them are arenas that start at the boss (stage words 04 08 0a 1a 24); the 0e and 10 bosses sit at the end of a long stage and are left out until a start near them is built.
    The rush starts at the first through the stage warp; when the game advances the stage word past a cleared boss it is moved on to the next boss, with the round byte ff8222 set from the game's
-   own table (0xcca0, copied here), within the loader's 12-vblank settle. Health is carried from the clear to the next fight. */
+   own table (0xcca0, copied here), within the loader's 12-vblank settle. Health is carried from the boss going down to the next fight. */
 static const u8 rush_stage[5] = { 0x04, 0x08, 0x0a, 0x1a, 0x24 };
 static const u8 rush_round[5] = { 0, 1, 2, 5, 6 };
 volatile u32 sat_home_rush;            /* 0 off, else fight number 1 to 5; 6 result shown */
 u32 sat_home_rush_t[10];               /* vblanks: start and clear of each fight */
-static u16 rush_hp;
+u16 sat_home_rush_hp;               /* health carried to the next fight */
+#define rush_hp sat_home_rush_hp
 extern struct { u32 current, loads, sectors, last_vblank; } sat_rounds;
 static u32 rush_mark;                  /* stage file loads when the fight was set up */
 static u8 rush_mark_set;
@@ -206,9 +207,11 @@ static void rush_poll(void)
             rush_phase = 1;
         }
     } else if (rush_phase == 1) {
+        /* Health as the fight leaves it: taken until the boss goes down (ff822a), since the game fills it again during its clear. */
+        if (w == rush_stage[n - 1] && !G(0xff822a) && !G(0xff81f3) && G(0xff8380) && !(G(0xff83c0) & 0x80))
+            rush_hp = (u16)(G(0xff83c0) << 8 | G(0xff83c1));
         if (w == rush_stage[n - 1] && G(0xff81f3)) {
             sat_home_rush_t[2 * n - 1] = sat_vblanks_now();
-            rush_hp = (u16)(G(0xff83c0) << 8 | G(0xff83c1));
             if (n == 5) { rush_phase = 0; sat_home_rush = 6; rush_result(); return; }
             rush_phase = 2;
         }
