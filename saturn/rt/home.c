@@ -89,6 +89,27 @@ u32 sat_home_pad(u32 raw)
 void sat_home_clear(void) { int r, c; for (r = 0; r < 28; r++) for (c = 0; c < 44; c++) sat_home_text[r][c] = 0; }
 /* High bit: highlight colour. */
 void sat_home_put(int r, int c, const char *s, int hi) { for (; *s && c < 44; s++, c++) sat_home_text[r][c] = (char)(*s == ' ' ? 1 : (*s | (hi ? 0x80 : 0))); }
+/* A screen name in large letters (rows r and r + 1), centred: letters as two cell codes (2 to 0x20, then 0x81 to 0xa0; sat_gfx draws them from
+   its large cells), a space as panel, anything else as a small letter on the lower row. */
+void sat_home_big(int r, const char *s)
+{
+    int n = 0, c, i;
+    while (s[n]) n++;
+    c = (44 - n) / 2;
+    for (i = 0; i < n && c + i < 44; i++) {
+        char ch = s[i];
+        if (ch >= 'A' && ch <= 'Z') {
+            int k = (ch - 'A') * 2;
+            sat_home_text[r][c + i] = (char)(k < 31 ? 2 + k : 0x81 + k - 31);
+            k++;
+            sat_home_text[r + 1][c + i] = (char)(k < 31 ? 2 + k : 0x81 + k - 31);
+        } else {
+            sat_home_text[r][c + i] = 1;
+            sat_home_text[r + 1][c + i] = (char)(ch == ' ' ? 1 : ch);
+        }
+    }
+}
+int sat_home_list_gap;                 /* rows between list items; 0: 1 for more than 4 items, else 2 */
 void sat_home_centre(int r, const char *s, int hi) { int n = 0; while (s[n]) n++; sat_home_put(r, (44 - n) / 2, s, hi); }
 
 void sat_home_frame(void)
@@ -109,7 +130,7 @@ int sat_home_list(int screen, int row0, const char *const *items, int n, int sta
     sat_home_screen = (u32)screen;
     for (;;) {
         u32 e;
-        for (i = 0; i < n; i++) sat_home_centre(row0 + i * (n > 4 ? 1 : 2), items[i], i == cur);
+        for (i = 0; i < n; i++) sat_home_centre(row0 + i * (sat_home_list_gap ? sat_home_list_gap : n > 4 ? 1 : 2), items[i], i == cur);
         sat_home_cursor = (u32)cur;
         sat_home_frame();
         e = sat_home_edges();

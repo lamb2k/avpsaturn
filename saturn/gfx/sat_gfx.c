@@ -542,7 +542,7 @@ static u32 name_of(u16 attr, int page, u32 charno)
 extern volatile int sat_home_mode;
 extern char sat_home_text[28][44];
 #ifndef SAT_HOME_RATIO
-#define SAT_HOME_RATIO 14   /* picked from stills at 8, 14 and 22 against MSHvSF OPTION MODE (lane-home overlay/ratio_sheet.png) */
+#define SAT_HOME_RATIO 11   /* logo kept at about 0.45 of its brightness, as MSHvSF OPTION MODE keeps its own (0.47); measured from stills at 2, 5, 8 (lane-home overlay/dark_sheet.png) */
 #endif
 volatile unsigned short sat_home_ratio = SAT_HOME_RATIO; /* panel colour calculation ratio (CCRNB NBG3), 0 to 31 */
 static const u8 home_font[58 * 32] __attribute__((aligned(4))) = {
@@ -579,7 +579,7 @@ static void draw_scroll1(u16 sx, u16 sy)
             u32 name = CLEAR_NAME;
             if (slot != NOSLOT) name = name_of(attr, 1, (CELL_S1 + (u32)slot * 32) >> 5);
 #ifdef SAT_HOME
-            if (snap.home == 3 && row >= 19) name = CLEAR_NAME;   /* the game's start and credits lines under the menus; its logo stays */
+            if (snap.home >= 3 && row >= 19) name = CLEAR_NAME;   /* the game's start and credits lines under the menus; its logo stays */
 #endif
             write_name(VDP2_VRAM + MAP_S1 + (r * 64 + c) * 4, name, &sh_s1[r * 64 + c]);
         }
@@ -602,6 +602,8 @@ static void draw_home(int fresh)
             u32 ch = *(volatile u8 *)((unsigned long)&sat_home_shown[row][col] | 0x20000000UL);
             u16 name = 0;                                                       /* cell 0xc00: clear */
             if (ch == 1) name = (u16)(14u << 12 | ((SAT_GFX_HOME_FONT + 58) & 0x3ff));   /* the translucent panel */
+            else if ((ch >= 2 && ch <= 0x20) || (ch >= 0x81 && ch <= 0xa0))   /* a large letter's half (sat_home_big) */
+                name = (u16)(15u << 12 | ((SAT_GFX_HOME_FONT + 59 + (ch <= 0x20 ? ch - 2 : ch - 0x81 + 31)) & 0x3ff));
             else if (ch & 0x7f) name = (u16)(((ch & 0x80) ? 15u : 14u) << 12 | ((SAT_GFX_HOME_FONT + (ch & 0x7f) - 33) & 0x3ff));
             if (fresh || sh_home[row * 44 + col] != name)
             {
@@ -1014,6 +1016,7 @@ void sat_gfx_snapshot(void)
     snap.home = (u16)sat_home_mode;
     if (snap.home)
     {
+        if (snap.home == 4) snap.objects = 0;   /* sub-screens: the logo's sprites (its "vs.") off, nothing beside the values */
         if (snap.home == 2)
         {
             snap.layers &= (u16)~0xeU;
@@ -1026,7 +1029,7 @@ void sat_gfx_snapshot(void)
         snap.pal_pages |= 2;
         for (n = 0; n < 64; n++) snap.palette[1][30 * 32 + n] = home_pal[n];
         snap.pal_sum[1]++;
-        if (snap.home == 3) snap.s1_sum++;    /* scroll 1 redrawn on the title menus (its bottom rows hidden) */
+        if (snap.home >= 3) snap.s1_sum++;    /* scroll 1 redrawn on the title menus (its bottom rows hidden) */
     }
 #endif
 }
@@ -1289,6 +1292,13 @@ int sat_gfx_init(const void *pack)
         for (k = 0; k < 32; k += 4) o |= (((w >> k) & 15) ? ((w >> k) & 15) : 15u) << k;
         put32(VDP2_VRAM + CELL_S1 + (u32)SAT_GFX_HOME_FONT * 32 + n, o); } }
     { u32 n; for (n = 0; n < 32; n += 4) put32(VDP2_VRAM + CELL_S1 + (u32)(SAT_GFX_HOME_FONT + 58) * 32 + n, 0xffffffffUL); }   /* the menu panel: every dot code 15 (pen 14, near black) */
+    /* Screen names in large letters, as MSHvSF's OPTION MODE header: A to Z from the same font, each row doubled (8 x 16, two cells) and
+       thickened by one dot to the right; clear dots are the panel's. 52 cells after the panel, up to 0x1fbe0 (the row table is at 0x1fc00). */
+    { int L, h, y; for (L = 0; L < 26; L++) for (h = 0; h < 2; h++) for (y = 0; y < 8; y++) {
+        const u8 *f = home_font + (32 + L) * 32 + (h * 4 + y / 2) * 4;
+        u32 w = (u32)f[0] << 24 | (u32)f[1] << 16 | (u32)f[2] << 8 | f[3], o = 0; int k;
+        for (k = 28; k >= 0; k -= 4) { u32 d = (w >> k) & 15, l = k < 28 ? (w >> (k + 4)) & 15 : 0; d = d ? d : l; o |= (d ? d : 15u) << k; }
+        put32(VDP2_VRAM + CELL_S1 + (u32)(SAT_GFX_HOME_FONT + 59 + L * 2 + h) * 32 + (u32)y * 4, o); } }
 #endif
     return 1;
 }

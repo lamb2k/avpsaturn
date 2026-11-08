@@ -62,17 +62,23 @@ static void panel(int top)
 static const u8 start_stock[8] = { 0, 1, 2, 4, 0, 1, 2, 4 };
 static int opt_get(const Opt *o) { return o->off == 0xff ? (sat_home_cfg.lives ? sat_home_cfg.lives - 1 : start_stock[sat_home_get(0x12) & 7]) : sat_home_get(o->off); }
 static void opt_set(const Opt *o, int v) { if (o->off == 0xff) sat_home_cfg.lives = (u8)(v + 1); else { sat_home_set(o->off, v); RAMB[o->ram] = (u8)v; } }
-static void panel_rows(int top, int bottom)
+/* MSHvSF's OPTION MODE layout: the whole picture under the panel, the screen's name in large letters at the top, rows two apart from row 7 with
+   labels ending at column 20 and values from column 23, "PRESS START BUTTON TO EXIT" at the bottom. Mode 4 also takes the logo's sprites off. */
+#define ROW(i) (7 + 2 * (i))
+#define FOOT 25
+extern void sat_home_big(int, const char *);
+extern int sat_home_list_gap;
+static void sub(const char *title)
 {
     int r, c;
     clear();
-    for (r = top; r <= bottom; r++) for (c = 2; c < 42; c++) sat_home_text[r][c] = 1;
+    for (r = 0; r < 28; r++) for (c = 0; c < 44; c++) sat_home_text[r][c] = 1;
+    sat_home_big(3, title);
+    sat_home_mode = 4;
 }
-static void sub(const char *title)
-{
-    panel_rows(2, 25);
-    centre(4, title, 1);
-}
+static void label(int r, const char *s, int hi) { int n = 0; while (s[n]) n++; put(r, 21 - n, s, hi); }
+static void value(int r, const char *s, int hi) { put(r, 23, s, hi); }
+static void foot(void) { centre(FOOT, "PRESS START BUTTON TO EXIT", 0); }
 /* One page of the game's settings: opts[first..first+n), then up to two items that open screens (returns 1 or 2), then EXIT. B goes back;
    Start on a setting leaves too, as Capcom's Saturn option screens do ("PRESS START BUTTON TO EXIT"). */
 static int opt_page(const char *title, u32 screen, int first, int n, const char *x1, const char *x2)
@@ -87,13 +93,13 @@ static int opt_page(const char *title, u32 screen, int first, int n, const char 
             int v = opt_get(o);
             char num[2];
             num[0] = (char)('1' + v); num[1] = 0;
-            put(7 + i, 8, o->label, i == cur);
-            put(7 + i, 22, o->names ? o->names[v] : num, i == cur);
+            label(ROW(i), o->label, i == cur);
+            value(ROW(i), o->names ? o->names[v] : num, i == cur);
         }
-        if (x1) put(7 + n, 8, x1, cur == n);
-        if (x2) put(8 + n, 8, x2, cur == n + 1);
-        centre(7 + n + x, "EXIT", cur == n + x);
-        centre(24, "PRESS START BUTTON TO EXIT", 0);
+        if (x1) label(ROW(n), x1, cur == n);
+        if (x2) label(ROW(n + 1), x2, cur == n + 1);
+        label(ROW(n + x), "EXIT", cur == n + x);
+        foot();
         sat_home_cursor = (u32)cur;
         frame();
         e = edges();
@@ -121,7 +127,9 @@ static void options(void)
     int pick = 0;
     for (;;) {
         sub("OPTION MODE");
-        pick = menu_list(2, 7, items, 5, pick < 0 ? 0 : pick, 0);
+        sat_home_list_gap = 2;
+        pick = menu_list(2, ROW(0), items, 5, pick < 0 ? 0 : pick, 0);
+        sat_home_list_gap = 0;
         if (pick == -2) return;
         if (pick == 0) opt_page("GAME OPTION", 10, 0, 4, 0, 0);
         else if (pick == 1) buttons();
@@ -162,12 +170,13 @@ static void sound_test(void)
         u32 e;
         sub("SE TEST");
         
-        hex4(b, id); put(7, 18, b, 1);
-        centre(24, "A PLAY  C STOP  B EXIT", 0);
+        hex4(b, id); label(ROW(0), "SOUND ID", 0); value(ROW(0), b, 1);
+        centre(ROW(3), "A PLAY  C STOP", 0);
+        foot();
         sat_home_cursor = id;
         frame();
         e = edges();
-        if (e & P_B) return;
+        if (e & (P_B | P_START)) return;
         if (e & P_LEFT) id = id ? id - 1 : 0x38c;
         if (e & P_RIGHT) id = id < 0x38c ? id + 1 : 0;
         if (e & P_UP) id = id + 16 <= 0x38c ? id + 16 : id;
@@ -200,14 +209,15 @@ static void music(void)
         sub("SOUND TEST");
         
         b[0] = 'T'; b[1] = (char)('0' + songs[cur].track / 10); b[2] = (char)('0' + songs[cur].track % 10); b[3] = 0;
-        put(7, 8, b, 1);
-        put(7, 13, songs[cur].name, 1);
-        if (playing) centre(8, "PLAYING", 0);
-        centre(24, "A PLAY  C STOP  B EXIT", 0);
+        label(ROW(0), b, 1);
+        value(ROW(0), songs[cur].name, 1);
+        if (playing) centre(ROW(1), "PLAYING", 0);
+        centre(ROW(3), "A PLAY  C STOP", 0);
+        foot();
         sat_home_cursor = (u32)cur | (u32)playing << 8;
         frame();
         e = edges();
-        if (e & P_B) { if (playing) sound_send(0xff, 0, 0, 0); return; }
+        if (e & (P_B | P_START)) { if (playing) sound_send(0xff, 0, 0, 0); return; }
         if (e & P_LEFT) cur = cur ? cur - 1 : SONGS - 1;
         if (e & P_RIGHT) cur = cur + 1 < SONGS ? cur + 1 : 0;
         if (e & P_A) { sound_send(0, songs[cur].cmd, 0, 0); playing = 1; }
@@ -223,13 +233,14 @@ static void screen_adjust(void)
         u32 e;
         sub("SCREEN ADJUST");
         
-        put(7, 12, "X", 0); num(b, sat_home_cfg.nx); put(7, 15, b, 1);
-        put(7, 24, "Y", 0); num(b, sat_home_cfg.ny); put(7, 27, b, 1);
-        centre(24, "A CENTRE  B EXIT", 0);
+        num(b, sat_home_cfg.nx); label(ROW(0), "X", 0); value(ROW(0), b, 1);
+        num(b, sat_home_cfg.ny); label(ROW(1), "Y", 0); value(ROW(1), b, 1);
+        centre(ROW(3), "PAD MOVES  A CENTRE", 0);
+        foot();
         sat_home_cursor = (u32)(u8)sat_home_cfg.nx | (u32)(u8)sat_home_cfg.ny << 8;
         frame();
         e = edges();
-        if (e & P_B) return;
+        if (e & (P_B | P_START)) return;
         if ((e & P_LEFT) && sat_home_cfg.nx > -16) sat_home_cfg.nx--;
         if ((e & P_RIGHT) && sat_home_cfg.nx < 16) sat_home_cfg.nx++;
         if ((e & P_UP) && sat_home_cfg.ny > -16) sat_home_cfg.ny--;
@@ -248,15 +259,17 @@ static void buttons(void)
     for (;;) {
         u32 e;
         sub("BUTTON CONFIG.");
-        for (i = 0; i < 3; i++) { put(7 + i, 10, what[i], i == cur); put(7 + i, 24, pads[sat_home_cfg.btn[i] & 7], i == cur); }
-        centre(10, "EXIT", cur == 3);
+        for (i = 0; i < 3; i++) { label(ROW(i), what[i], i == cur); value(ROW(i), pads[sat_home_cfg.btn[i] & 7], i == cur); }
+        label(ROW(3), "EXIT", cur == 3);
+        foot();
         sat_home_cursor = (u32)cur;
         frame();
         e = edges();
         if (e & P_B) return;
         if (e & P_UP) cur = cur ? cur - 1 : 3;
         if (e & P_DOWN) cur = cur < 3 ? cur + 1 : 0;
-        if (cur == 3) { if (e & (P_START | P_A | P_C)) return; continue; }
+        if (e & P_START) return;
+        if (cur == 3) { if (e & (P_A | P_C)) return; continue; }
         if (e & P_LEFT) sat_home_cfg.btn[cur] = (u8)((sat_home_cfg.btn[cur] + 7) & 7);
         if (e & P_RIGHT) sat_home_cfg.btn[cur] = (u8)((sat_home_cfg.btn[cur] + 1) & 7);
     }
@@ -272,8 +285,8 @@ static int stage_select(void)
         sub("STAGE SELECT MODE");
         
         b[0] = (char)('0' + st / 10); b[1] = (char)('0' + st % 10); b[2] = 0;
-        put(7, 21, b, 1);
-        centre(24, "START PLAY  B EXIT", 0);
+        label(ROW(0), "STAGE", 0); value(ROW(0), b, 1);
+        centre(FOOT, "PRESS START BUTTON TO PLAY", 0);
         sat_home_cursor = (u32)st;
         frame();
         e = edges();
@@ -301,6 +314,7 @@ void sat_home_menu(void)
     prev = sat_pad_raw & 0xffff;
     for (;;) {
         panel(19);
+        sat_home_mode = 3;
         pick = menu_list(1, 19, items, HOME_ITEMS, pick < 0 ? 0 : pick, HOME_IDLE);
         if (pick == -2) { pick = (int)sat_home_cursor; continue; }   /* B at the top level: nothing above it */
         p = pick >= 1 ? pick + DUEL_SHIFT : pick;
