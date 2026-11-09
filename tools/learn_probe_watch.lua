@@ -7,6 +7,6 @@ a, b = tonumber(a, 16), tonumber(b, 16)
 local n = 0
 learn_w = prog:install_write_tap(a, b, "learn_watch", function(off, data, mask)
     n = n + 1
-    if n < 200 then out:write(string.format("%x %x %x pc %x\n", off, data, mask, cpu.state["PC"].value)); out:flush() end
+    out:write(string.format("%x %x %x pc %x\n", off, data, mask, cpu.state["PC"].value)); out:flush()
 end)
 dofile("tools/mame_capture_oracle11_first_segment_progression.lua")
