@@ -57,7 +57,24 @@ deterministic: two runs of the full.txt schedule give identical object lists). N
 - Grab/throw is walking into an enemy (state 0204xx); there is no throw button.
 - A native fighter (step 4) would own all six; steps 2 and 3 (speed, native timing) stay switchable on top of the tables.
 
+## Results
+
+| Check | Result | Tier |
+| --- | --- | --- |
+| Python tests | 91 run in WSL: 61 pass, 30 error loading private MAME deps (the known set); `test_wolverine_*` 22 of 22 pass with the C fixture running (gcc in WSL) | HOST |
+| fit.py, all 76 stage files, assets D5 | gate True, 0 own tiles dropped, no missing guest keys, 1,493 Wolverine tiles (same as v4.1; stage 24 limit about 1,514) | HOST |
+| Build (POSE_KEYS=0 KEEP_ROUND_FILES=1, flags as v4.1) | rc 0, 1,792 s (packs rebuilt), hw_free 4,624, lw_free 92 (v4.1 left 104), iso 377,784,320 bytes | HOST |
+| Idle, Yaba stage 02, 240 frames | published step changes 86 (v4.1, 4-pose 10-tick loop) vs 54 (59-tick loop); contact sheet shows a smooth breathing loop, no side pops | EMULATOR |
+| Chain, Yaba, mashed attack (state 020006 throughout) | v4.1: one HP held 58 ticks; now LP 32, HP 51, HK 17 (cut by a hit) in one 020006 run: the chain advances and the kick is reached for the first time | EMULATOR |
+| Save/load, pick-ups, scripts, Round 1 to boss run | not run | - |
+
+Disc: `E:\AvP\learning\lane-wolverine-anim\w1\sat.iso`. Clips (before = v4.1, after = this build, same harness `v4rec.py`):
+`E:\AvP\learning\lane-wolverine-anim\clips\{idle,walk,chain}_{before_v41,after_anim}.gif`, `idle_after_sheet.png`.
+
 ## Not done in this pass
 
-Movement (walk speed, jump arc, dash) and `SAT_WV_NATIVE_TIMING` (his own frame data for timing, damage, pushback) were not started; the Round 1 to boss
-gameplay-equivalence run was not made. See the report.
+Step 2 (his walk speed, jump arc, dash for his slot only) and step 3 (`SAT_WV_NATIVE_TIMING`: his own timing, damage and pushback) were not started, and
+the Round 1 to boss gameplay-equivalence run was not made; the chain change touches only which move is shown and the hold lengths, but it is not gated.
+One number for step 2: Schaefer's walk is about 2 px a tick (x 944 to 1182 in 120 ticks incl. start-up, MAME states.tsv); MSHvSF's is about 2.8 px a frame.
+The invisible-Wolverine case is untouched. Walk poses 10 and 12 (and ?0..?3 of the loop) need 117 + about 120 more tiles; the lossy near-duplicate tile
+merge (idea: merge tiles within a few pixels) was not measured because numpy is missing in the lane python.
