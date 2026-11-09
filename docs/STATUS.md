@@ -347,6 +347,6 @@ Evidence E:/AvP/learning/lane-vanish (s1..s3, j2..j4, c2..c4, g2..g4 stepped run
 ### Combined package, 2026-11-08 (branch test/play-combined; lane avp-vanish; EMULATOR Yaba GL; hardware UNRUN)
 
 - test/play-combined = test/home-rank (ec714e2) + fix/ranking (to 032f1a3) + fix/vdp1-race (CEF-gated plot start, pose keys). Built with KERNEL_CFLAGS="-DSAT_HOME -DSAT_DUEL_MENU", commit fe08ad2 plus STATUS only.
-- Memory fit: hw_free 36 B, lw_free 104 B (the menu work left 776 B high and 104 B low; the pose keys cost no code, the CEF wait cost 740 B of high RAM). Fits; nothing of others trimmed.
+- Memory fit: hw_free 36 B, lw_free 104 B (the menu work left 776 B high and 104 B low; the fix/vdp1-race code (second command table, ring diagnostics off, CEF wait) takes 740 B of the 776 B high; low unchanged). Fits; nothing of others trimmed.
 - Package E:/AvP/package-combined (avp_play.cue, avp_play.iso sha256 21817c592134c0061c2a90625178d42608b4724208071ac0a07de0b6db1196d9, 26 audio tracks, SHA256SUMS).
 - Runs (my Yaba, soft core, VideoCore 1, from the cue): bot fight 1500 vblanks then 400 stepped frames with jumps, no freeze, no fatal. Two lost rounds through CONTINUE? (28 to 03), GAME OVER, ranking, title: both reached the title and kept running 12 s there (lose_c2: 126 s, lose_c3: 123 s wall), no freeze. int/play-latest alone froze at CONTINUE? 07; fix/ranking cures it, confirmed.
