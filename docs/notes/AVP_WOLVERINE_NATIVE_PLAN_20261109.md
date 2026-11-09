@@ -348,8 +348,9 @@ Total about 12 to 15 working days (about 11 if Stage 3 is cut to the damage curv
 No gameplay change, no hardware or Yaba result, no damage-per-hit number. Frame data, byte-9 indices, reach and hitstop in sections 4 and 5.2 are proposals scaled from the measured columns. Code and data sizes of the native build are estimates until Stage 1 links. Absolute enemy HP loss per hit and the heal table are open.
 
 ## 10. Owner decisions (2026-11-09)
-- Colours: no change. He stays the colour he is already: his in-game sprite keeps its red and yellow palette, and the artist's
-  select portrait, HUD face and rank icon stay exactly as delivered. No recolour of either.
+- Colours: his costume is the colour he already is in play, red and yellow (sprite palette unchanged). The artist's select portrait,
+  HUD face and rank icon are recoloured to match: PNG indices 7-10 blue -> #ee3300 #cc0000 #880000 #550000 (from his in-game sprite), and
+  the backdrop (index 1, was crimson #cc3333) -> navy #112255. Built as asset set E:\AvP\learning\lane-wolverine-merge\D8r.
 - Move set: an overall minimal combo and move set, with Berserker Barrage as the special (attack+jump, 6 health), not Tornado Claw.
   Minimal set = walk (Schaefer weight), jump, chain LP LP HP + finisher kick (button chain, Linn speed), one jump attack, Berserker Barrage,
   plus the shared states (hit, knockdown, getup, KO, held). Dropped: Tornado Claw (107 exclusive tiles), hit_h (99), dash, motion inputs,
