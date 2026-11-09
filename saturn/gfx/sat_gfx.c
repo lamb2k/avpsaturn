@@ -824,6 +824,10 @@ static const u8 *palette_page(const u8 *base, u16 mask, int page)
 /* What the chips already show: a layer whose words and position are unchanged does no lookups, so its cache sees no upload and can't lose a slot. */
 static u32 drawn_pal[SAT_GFX_PAGES], drawn_s1, drawn_s2, drawn_s3;
 static int drawn_valid;
+/* Master side: counts pack swaps; each snapshot carries it to the drawing side (snap.pad). */
+#if SAT_GFX_RANKFIX
+static u16 pack_gen;
+#endif
 
 static void update_palette(void)
 {
@@ -911,18 +915,152 @@ static const u8 home_pal[64] __attribute__((aligned(2))) = {
 #endif
 #define HUD_ROWS_TOP 5   /* rows 0..4: names, health bars, the enemy label and its bar (row 4 was centre-cropped, 16 px off the rest) */
 #define HUD_ROWS_BOT 26
+#if SAT_GFX_FIT && defined(SAT_HOME)
+/* Home: scroll 1 on the 352 picture by the crop audit's rule (E:/AvP/learning/crop-audit/AUDIT.md, owner-approved 11-08). NBG0/1 and the
+   sprites are scaled 11/12; scroll 1 cannot be, so each row drops 4 of its 48 columns, blank ones, nearest to columns 6, 18, 30 and 42 (where
+   the scaled picture has gained 8 pixels on the 1:1 one), and the other 44 keep their order. Every non-blank cell then sits within about
+   4 pixels of round(col * 11/12), the column its scaled art moved to, and nothing leaves the screen; a column inside a wider gap goes before
+   a space between words; rows of one block share one map (home_row_map).
+   Fallback: a row with fewer than 4 blank columns keeps the 16 pixel centre crop (no arcade text line found has fewer; the continue line
+   has 7). Play's HUD rows (0-5 and 25 up, the audit's quick fix: the enemy and boss portraits sit on rows 5 and 25) keep the flush map (their middle 4 columns dropped) when those are blank. Replaces the HUD-only map at home. */
+#define HOME_OS __attribute__((optimize("Os")))
+#define BL(m, c) (((m)[(c) >> 5] >> ((c) & 31)) & 1)
+#ifdef SAT_HOME_DIAG   /* test builds only: which non-blank source cells the fit drops (banner runs, fallback crops), per frame; read over MCP */
+volatile u32 sat_diag_lost, sat_diag_frames, sat_diag_rowmask, sat_diag_row, sat_diag_s1miss, sat_diag_s1key[3];
+static u32 diag_nb[S1_ROWS][2];
+static unsigned long diag_miss0;
+#endif
+/* Droppable columns of one row, bit c of m[0..1]: no tile, the row's fill cell, the continue line's space cells (0x1100/0x1110, a solid
+   tile), or a cell inside a run of one repeated cell (a banner or rule line). */
+static HOME_OS void home_row_blank(u32 row, u32 x0, u32 *m)
+{
+    unsigned long dummy = 0;
+    int k, c;
+    const u32 *w = snap.s1 + row * S1_COLS;
+    u32 fill = w[47];   /* the row's fill cell: an edge cell repeated at least 4 times (the continue screen's black band is a tile, not a blank) */
+    for (c = 0, k = 0; c < 48; c++) k += w[c] == w[0];
+    if (k >= 4) fill = w[0];
+    for (c = 0, k = 0; c < 48; c++) k += w[c] == fill;
+    if (k < 4) fill = 0xffffffffUL;
+    m[0] = m[1] = 0;
+#ifdef SAT_HOME_DIAG
+    diag_nb[row][0] = diag_nb[row][1] = 0;
+#endif
+    for (c = 0; c < 48; c++)
+    {
+        int a = c == 0 ? 1 : c == 47 ? 46 : c - 1, b = c == 0 ? 2 : c == 47 ? 45 : c + 1;
+        u32 c_src = (((x0 - S1_REG_CROP) >> 3) + (u32)c) & 63;
+        if (w[c] == fill || ((w[c] >> 16) & 0xffef) == 0x1100 || (w[c] == w[a] && w[c] == w[b]) || cache_get(&s1_cache, ((w[c] >> 16) << 1) | (c_src & 1), &dummy) == NOSLOT)
+        {
+            m[c >> 5] |= 1UL << (c & 31);
+#ifdef SAT_HOME_DIAG
+            { u16 sl = cache_get(&s1_cache, ((w[c] >> 16) << 1) | (c_src & 1), &dummy);
+              if (w[c] != fill && ((w[c] >> 16) & 0xffef) != 0x1100 && sl != NOSLOT)
+              {   /* a block of one pen is a filler (shadow, band), not a letter */
+                  const u32 *cell = (const u32 *)(VDP2_VRAM + CELL_S1 + (u32)sl * 32); u32 q, a0 = cell[0] & 15, same = 1;
+                  for (q = 0; q < 8; q++) { u32 v = cell[q]; if (v != a0 * 0x11111111UL) same = 0; }
+                  if (!same) { diag_nb[row][c >> 5] |= 1UL << (c & 31); }
+              } }
+#endif
+        }
+    }
+}
+/* The 44 source columns from a droppable mask (see above): the HUD's flush map on play's HUD rows when their middle 4 columns are blank,
+   else 4 drops nearest 6, 18, 30, 42, else the centre crop. */
+static HOME_OS void home_map(const u32 *m, int hud, u8 *map)
+{
+    int drop[4], k, c, n;
+    for (c = 0, n = 0; c < 48; c++) n += BL(m, c);
+    if (n < 4) { for (c = 0; c < 44; c++) map[c] = (u8)(c + 2); return; }
+    if (hud && BL(m, 22) && BL(m, 23) && BL(m, 24) && BL(m, 25)) { for (c = 0; c < 44; c++) map[c] = (u8)(c < 22 ? c : c + 4); return; }
+    for (k = 0; k < 4; k++)
+    {
+        /* Cheapest droppable column not yet taken: distance from its target, plus 6 if it is not inside a run of 3 and 40 if it stands
+           alone (a space between words, kept unless the row has no other room), plus 20 next to a column already taken. */
+        int want = 12 * k + 6, best = -1, cost = 1 << 30, j;
+        for (c = 0; c < 48; c++)
+        {
+            int d, l = c > 0 && BL(m, c - 1), r = c < 47 && BL(m, c + 1);
+            if (!BL(m, c)) continue;
+            for (j = 0; j < k && drop[j] != c; j++) ;
+            if (j < k) continue;
+            d = (c > want ? c - want : want - c);
+            if (!(l && r)) d += 6;
+            if (!l && !r) d += 40;
+            for (j = 0; j < k; j++) if (drop[j] == c - 1 || drop[j] == c + 1) d += 20;
+            if (d < cost) { cost = d; best = c; }
+        }
+        drop[k] = best;
+    }
+    for (k = 1; k < 4; k++) { int v = drop[k], j = k; while (j > 0 && drop[j - 1] > v) { drop[j] = drop[j - 1]; j--; } drop[j] = v; }
+    for (c = 0, n = 0, k = 0; c < 48 && n < 44; c++)
+    {
+        if (k < 4 && c == drop[k]) { k++; continue; }
+        map[n++] = (u8)c;
+    }
+}
+/* One map per block of rows: rows that hold anything (not all droppable) and touch each other share the columns all of them can drop, so
+   a 16 pixel letter's top and bottom halves, and a banner's rows, stay together (owner 11-08: the select screen's names broke apart). */
+static HOME_OS void home_maps_rows(u32 x0, u32 (*bm)[2])
+{
+    u32 r;
+    for (r = 0; r < S1_ROWS; r++) home_row_blank(r, x0, bm[r]);
+}
+static HOME_OS void home_row_map(u32 row, u32 (*bm)[2], u8 *map)
+{
+    u32 m[2], a = row, b = row;
+    int full = bm[row][0] == 0xffffffffUL && bm[row][1] == 0xffffUL;
+    m[0] = bm[row][0]; m[1] = bm[row][1];
+    if (!full)
+    {
+        while (a > 0 && !(bm[a - 1][0] == 0xffffffffUL && bm[a - 1][1] == 0xffffUL)) { a--; m[0] &= bm[a][0]; m[1] &= bm[a][1]; }
+        while (b + 1 < S1_ROWS && !(bm[b + 1][0] == 0xffffffffUL && bm[b + 1][1] == 0xffffUL)) { b++; m[0] &= bm[b][0]; m[1] &= bm[b][1]; }
+    }
+    home_map(m, snap.hud_flush && (row < 6 || row >= 25), map);
+}
+#endif
 static void draw_scroll1(u16 sx, u16 sy)
 {
     const u32 *cell = snap.s1;
     u32 x0 = (u32)sx + CPS_LEFT + S1_REG_CROP, y0 = (u32)sy + CPS_TOP;
     u32 row, col;
+#if SAT_GFX_FIT && defined(SAT_HOME)
+    u32 bm[S1_ROWS][2];
+    home_maps_rows(x0, bm);
+#ifdef SAT_HOME_DIAG
+    sat_diag_frames++;
+    diag_miss0 = sat_gfx_stats.missing;
+#endif
+#endif
     for (row = 0; row <= SAT_GFX_SCREEN_H / 8; row++)
+    {
+#if SAT_GFX_FIT && defined(SAT_HOME)
+        u8 map[44];
+        home_row_map(row < S1_ROWS ? row : S1_ROWS - 1, bm, map);
+#ifdef SAT_HOME_DIAG
+        if (row < S1_ROWS && snap.home < 3)
+        {
+            u32 kept0 = 0, kept1 = 0, lm0, lm1; int i2;
+            for (i2 = 0; i2 < 44; i2++) { if (map[i2] < 32) kept0 |= 1UL << map[i2]; else kept1 |= 1UL << (map[i2] - 32); }
+            lm0 = diag_nb[row][0] & ~kept0; lm1 = diag_nb[row][1] & ~kept1;
+            if (lm0 | lm1)
+            {
+                u32 n = 0, v; for (v = lm0; v; v &= v - 1) n++; for (v = lm1; v; v &= v - 1) n++;
+                sat_diag_lost += n; sat_diag_rowmask |= 1UL << row; sat_diag_row = row;
+            }
+        }
+#endif
+#endif
         for (col = 0; col <= SAT_GFX_SCREEN_W / 8; col++)
         {
             u32 c = ((x0 >> 3) + col) & 63, r = ((y0 >> 3) + row) & 63;
 #if SAT_GFX_FIT
             /* The arcade's 48 columns on 44: the HUD rows lose four empty columns at the middle, so it sits flush at both edges; other rows are the centre crop. */
+#ifdef SAT_HOME
+            u32 src = col < 44 ? map[col] : (u32)map[43] + 1;   /* column 44 is the fine-scroll spill */
+#else
             u32 src = (snap.hud_flush && (row < HUD_ROWS_TOP || row >= HUD_ROWS_BOT)) ? (col < 22 ? col : col + 4) : col + 2;
+#endif
             u32 c_src = (((x0 - S1_REG_CROP) >> 3) + src) & 63;
             u32 idx = (r & 0x1f) + (c_src << 5) + ((r & 0x20) << 6);
             u32 word = cell[row * S1_COLS + src];
@@ -932,7 +1070,13 @@ static void draw_scroll1(u16 sx, u16 sy)
 #endif
             u16 code = (u16)(word >> 16), attr = (u16)word;
             /* Odd columns read the right half of the 16 pixel row. */
+#ifdef SAT_HOME_DIAG
+            unsigned long dm0 = sat_gfx_stats.missing;
+#endif
             u16 slot = cache_get(&s1_cache, ((u32)code << 1) | ((idx >> 5) & 1), &sat_gfx_stats.refused_layer);
+#ifdef SAT_HOME_DIAG
+            if (sat_gfx_stats.missing != dm0) { sat_diag_s1key[0] = ((u32)code << 1) | ((idx >> 5) & 1); sat_diag_s1key[1] = row * 64 + col; sat_diag_s1key[2]++; }
+#endif
             u32 name = CLEAR_NAME;
             if (slot != NOSLOT) name = name_of(attr, 1, (CELL_S1 + (u32)slot * 32) >> 5);
 #ifdef SAT_HOME
@@ -940,6 +1084,10 @@ static void draw_scroll1(u16 sx, u16 sy)
 #endif
             write_name(VDP2_VRAM + MAP_S1 + (r * 64 + c) * 4, name, &sh_s1[r * 64 + c]);
         }
+    }
+#if defined(SAT_HOME_DIAG) && SAT_GFX_FIT && defined(SAT_HOME)
+    sat_diag_s1miss += sat_gfx_stats.missing - diag_miss0;
+#endif
 }
 
 #ifdef SAT_HOME
@@ -949,23 +1097,57 @@ static void draw_scroll1(u16 sx, u16 sy)
 static u16 sh_home[28 * 44] LOW_RAM;
 extern char sat_home_shown[28][44];
 extern volatile u32 sat_home_seq;
-static void draw_home(int fresh)
+/* One 8x8 menu cell from the game's font: big = 1 doubles rows 0-3 of the glyph (a large letter's half) and thickens it one dot to the right.
+   Lit dots keep their pens (the font's own blue lower edge is its outline). Clear dots take bg: 0, clear, so the picture shows between the
+   letters (the title list, straight on the title art as Capcom's Saturn menus draw their mode list); 15, the panel's dot code, so the letters
+   sit on the translucent panel (the pause menu); or 14, a halo: only the clear dots touching a lit dot (8 neighbours, inside the cell) take the
+   panel's dot code, so the option screens have no panel but each letter keeps a darkened margin of the picture and reads over the logo (owner 11-09). */
+static void home_cell(const u8 *f, u32 cell, int big, u32 bg)
+{
+    u8 d[8][8]; int x, y, halo = bg == 14;
+    if (halo) bg = 0;
+    for (y = 0; y < 8; y++) for (x = 0; x < 8; x++) { int sy = big ? y / 2 : y; d[y][x] = (u8)((f[sy * 4 + x / 2] >> (x & 1 ? 0 : 4)) & 15); }
+    if (big) for (y = 0; y < 8; y++) for (x = 7; x > 0; x--) if (!d[y][x]) d[y][x] = d[y][x - 1];
+    if (halo)
+    {
+        u8 h[8][8];
+        for (y = 0; y < 8; y++) for (x = 0; x < 8; x++)
+        {
+            int j, k;
+            h[y][x] = 0;
+            for (j = y - 1; j <= y + 1; j++) for (k = x - 1; k <= x + 1; k++) if (j >= 0 && j < 8 && k >= 0 && k < 8 && d[j][k]) h[y][x] = 15;
+        }
+        for (y = 0; y < 8; y++) for (x = 0; x < 8; x++) if (!d[y][x]) d[y][x] = h[y][x];
+    }
+    for (y = 0; y < 8; y++) { u32 o = 0;
+        for (x = 0; x < 8; x++) { u32 v = d[y][x];
+            o |= (v ? v : bg) << (28 - 4 * x); }
+        put32(VDP2_VRAM + CELL_S1 + cell * 32 + (u32)y * 4, o); }
+}
+static HOME_OS void draw_home(int fresh)
 {
     u32 row, col;
+    static u32 font_bg = 99;
     static u32 redo;
     u32 s0, spin = 0;
     /* The master copies a new screen (sat_home_seq odd while it does) right after the vblank, where this frame chain's slave also starts drawing, so
-       skipping the frame drew nothing at all: wait for the copy (about 20 us), and draw everything again next frame if one began during this pass
-       (b0b5929 on fix/home-mode-flow-fps-20261109). */
+       skipping the frame drew nothing at all: wait for the copy (about 20 us), and draw everything again next frame if one began during this pass. */
     while (((s0 = *(volatile u32 *)((unsigned long)&sat_home_seq | 0x20000000UL)) & 1) && ++spin < 20000u) ;
     if (s0 & 1) { redo = 1; return; }
     fresh |= (int)redo; redo = 0;
+    if (font_bg != (snap.home == 3 ? 0u : snap.home == 4 ? 14u : 15u))   /* the title list's letters have no panel behind them, the option screens' a halo, the pause menu's a panel */
+    {
+        int g, L;
+        font_bg = snap.home == 3 ? 0u : snap.home == 4 ? 14u : 15u;
+        for (g = 0; g < 58; g++) home_cell(home_font + g * 32, (u32)SAT_GFX_HOME_FONT + (u32)g, 0, font_bg);
+        for (L = 0; L < 52; L++) home_cell(home_font + 32 * 32 + L * 16, (u32)SAT_GFX_HOME_FONT + 59 + (u32)L, 1, font_bg);   /* the header's large letters */
+    }
     for (row = 0; row < 28; row++)
         for (col = 0; col < 44; col++)
         {
             u32 ch = *(volatile u8 *)((unsigned long)&sat_home_shown[row][col] | 0x20000000UL);
             u16 name = 0;                                                       /* cell 0xc00: clear */
-            if (ch == 1) name = (u16)(14u << 12 | ((SAT_GFX_HOME_FONT + 58) & 0x3ff));   /* the translucent panel */
+            if (ch == 1) name = snap.home >= 3 ? 0 : (u16)(14u << 12 | ((SAT_GFX_HOME_FONT + 58) & 0x3ff));   /* the pause menu's translucent panel; the title list and the option screens have none (owner 11-09) */
             else if ((ch >= 2 && ch <= 0x20) || (ch >= 0x81 && ch <= 0xa0))   /* a large letter's half (sat_home_big) */
                 name = (u16)(15u << 12 | ((SAT_GFX_HOME_FONT + 59 + (ch <= 0x20 ? ch - 2 : ch - 0x81 + 31)) & 0x3ff));
             else if (ch & 0x7f) name = (u16)(((ch & 0x80) ? 15u : 14u) << 12 | ((SAT_GFX_HOME_FONT + (ch & 0x7f) - 33) & 0x3ff));
@@ -1073,6 +1255,14 @@ static void update_priority(u16 layers, u16 pri)
         {
             level = 1 + 2 * below;
             for (i = 0; i < below; i++) if (p > lp[i]) { sat_gfx_stats.nonmonotone++; break; }
+            /* The board's mask (MAME cps2 primasks): a layer hides a sprite only where no layer above it with a lower priority value is opaque,
+               and that upper layer shows the sprite over itself unless it hides the sprite too. One VDP2 level cannot do both, so the sprite goes
+               over the highest such layer. The score table needs it: the heading's sprites (priority 4) sit on scroll 3's band (value 2), drawn over
+               scroll 1 (value 7) so the list scrolls away under it; under the band the heading vanished. */
+#if SAT_GFX_RANKFIX
+            for (i = n - 1; i > below; i--)
+                if (lp[i] < lp[below] && p > lp[i]) { level = 3 + 2 * i; sat_gfx_stats.nonmonotone++; break; }
+#endif
         }
 #ifdef SAT_HOME
         if (snap.home && level > 6) level = 6;   /* the menu layer (NBG3, 7) in front of sprites too; a sprite wins ties, so 7 would hide it */
@@ -1561,6 +1751,9 @@ void sat_gfx_snapshot_begin(void)
     }
 #endif
     snap.objects = (u16)count;
+#if SAT_GFX_RANKFIX
+    snap.pad = pack_gen;
+#endif
 #ifdef SAT_HOME
     snap.home = (u16)sat_home_mode;
     if (snap.home)
@@ -1857,6 +2050,23 @@ void sat_gfx_draw(void)
     u16 s1x = snap.s1x, s1y = snap.s1y, s2x = snap.s2x, s2y = snap.s2y, s3x = snap.s3x, s3y = snap.s3y;
     u16 bgon = 0;
     int row_active = snap.row_active;
+#if SAT_GFX_RANKFIX
+    static u16 gen_seen;
+#endif
+
+    /* A new pack came in (sat_gfx_swap_pack, on the master). The master's clear of the blank list can sit behind stale lines in this CPU's
+       cache, and a layer whose words held through the load is skipped by its unchanged sum: cells drawn blank while their tiles were missing
+       from the old pack stayed blank. The score table after GAME OVER starts on the stage's pack, which lacks its picture, and kept a black
+       background and an empty scroll 2 after the front end's pack came in. So forget the blanks here too and redraw every layer. */
+#if SAT_GFX_RANKFIX
+    if (snap.pad != gen_seen)
+    {
+        u32 n;
+        gen_seen = snap.pad;
+        for (n = 0; n < BLANK_WAYS; n++) blank_seen[n] = NOKEY;
+        drawn_valid = 0;
+    }
+#endif
 #ifdef SAT_VLOG
     u32 vlog_v = sat_vblanks_now();
     VLOG(vlog_v)[1] = (unsigned long)VDP1R(0x10) << 16 | (SFRT() & 0xffff);
@@ -2082,6 +2292,9 @@ int sat_gfx_swap_pack(const void *pack)
     for (n = 0; n < SAT_GFX_SPRITE_PAIRS * 2; n += 2)
         if (spr_slots[n].next) spr_slots[n].key = NOKEY;
 #endif
+#if SAT_GFX_RANKFIX
+    pack_gen++;   /* the drawing side forgets its blanks and redraws every layer when the next snapshot carries this */
+#endif
     return 1;
 }
 
@@ -2190,18 +2403,12 @@ COLD_OS int sat_gfx_init(const void *pack)
 
     VDP2R(0x00) = 0x8001;                         /* display on */
     #ifdef SAT_HOME
-    /* The font with its clear dots as dot code 15, the panel's: letters sit on the translucent panel, not in holes through it. */
-    { u32 n; for (n = 0; n < sizeof home_font; n += 4) { u32 w = (u32)home_font[n] << 24 | (u32)home_font[n + 1] << 16 | (u32)home_font[n + 2] << 8 | home_font[n + 3], o = 0; int k;
-        for (k = 0; k < 32; k += 4) o |= (((w >> k) & 15) ? ((w >> k) & 15) : 15u) << k;
-        put32(VDP2_VRAM + CELL_S1 + (u32)SAT_GFX_HOME_FONT * 32 + n, o); } }
-    { u32 n; for (n = 0; n < 32; n += 4) put32(VDP2_VRAM + CELL_S1 + (u32)(SAT_GFX_HOME_FONT + 58) * 32 + n, 0xffffffffUL); }   /* the menu panel: every dot code 15 (pen 14, near black) */
+    /* The menu font's cells are written by draw_home (clear dots clear on the title list, panel dots on the option screens). The panel cell:
+       every dot code 15 (pen 14, near black). */
+    { u32 n; for (n = 0; n < 32; n += 4) put32(VDP2_VRAM + CELL_S1 + (u32)(SAT_GFX_HOME_FONT + 58) * 32 + n, 0xffffffffUL); }
     /* Screen names in large letters, as MSHvSF's OPTION MODE header: A to Z from the same font, each row doubled (8 x 16, two cells) and
-       thickened by one dot to the right; clear dots are the panel's. 52 cells after the panel, up to 0x1fbe0 (the row table is at 0x1fc00). */
-    { int L, h, y; for (L = 0; L < 26; L++) for (h = 0; h < 2; h++) for (y = 0; y < 8; y++) {
-        const u8 *f = home_font + (32 + L) * 32 + (h * 4 + y / 2) * 4;
-        u32 w = (u32)f[0] << 24 | (u32)f[1] << 16 | (u32)f[2] << 8 | f[3], o = 0; int k;
-        for (k = 28; k >= 0; k -= 4) { u32 d = (w >> k) & 15, l = k < 28 ? (w >> (k + 4)) & 15 : 0; d = d ? d : l; o |= (d ? d : 15u) << k; }
-        put32(VDP2_VRAM + CELL_S1 + (u32)(SAT_GFX_HOME_FONT + 59 + L * 2 + h) * 32 + (u32)y * 4, o); } }
+       thickened by one dot to the right; clear dots are the panel's (option screens only). 52 cells after the panel, up to 0x1fbe0 (the row table is at 0x1fc00). */
+    { int L, h; for (L = 0; L < 26; L++) for (h = 0; h < 2; h++) home_cell(home_font + (32 + L) * 32 + h * 16, (u32)SAT_GFX_HOME_FONT + 59 + (u32)(L * 2 + h), 1, 15); }
 #endif
     return 1;
 }
