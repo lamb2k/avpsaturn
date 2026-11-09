@@ -1,5 +1,5 @@
 #!/usr/bin/env python
-"""Host check: every stage round file's tile pack holds every key of WORK/screen_keys.txt, all four sections (continue and GAME OVER screens).
+"""Host check: every stage round file's tile pack holds every key of WORK/screen_keys.txt, all four sections (continue and GAME OVER screens, and the timed stages' HURRY UP! banner and countdown, tools/system_banner_keys.py).
 Catches the continue screen drawing blank: on lane/disc 4408ef1 all 209 stage files missed some (countdown digits, the scroll 1 text line).
 Reads the round files as boot.c does: head sector, then destination/size pairs; the second region at SAT_PACK is the tile pack (SGP1).
 usage: check_screen_keys.py WORK   exit 1 on any file missing a key."""
@@ -46,6 +46,9 @@ def main():
         if l.strip():
             want[int(l.split()[0])].add(int(l.split()[1], 16))
     want[0].discard(0)
+    sys.path.insert(0, str(pathlib.Path(__file__).resolve().parent))
+    import system_banner_keys   # the timed stages' "HURRY UP!" banner and countdown (scroll 1)
+    want[1] |= system_banner_keys.from_work(work)
     names = [f["name"] for f in json.loads((work / "rounds.json").read_text())["files"]]
     bad = 0
     for i, blob in round_files(work).items():

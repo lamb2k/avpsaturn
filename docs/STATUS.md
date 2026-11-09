@@ -460,3 +460,12 @@ Merged private-origin/fix/home-mode-flow-fps-20261109 (mode flow, transparent op
 - Residual: a text line of 27 or more characters ends flush with the box's right edge (text cannot be scaled; dropping word spaces was rejected).
 - Talk face with Wolverine selected is Schaefer's face in Wolverine's palette (art decision pending, not changed).
 - fit.py on D11: gate True, fail [], 76 files, 0 Wolverine-own dropped, 0 missing. WSL tests: 105 run, the same 30 private-dependency load errors as before the merge, every test_wolverine_* passes; test_round_cache namespace updated for the menu key sets.
+
+## HURRY UP! banner, second U blank (lane hurryup, 2026-11-09; EMULATOR: MAME 0.289 and Yaba, no hardware)
+
+- Owner report: "the U is missing from hurry up"; owner: it shows when time runs out on a stage.
+- The arcade keeps a stage countdown in work RAM (minutes and seconds as BCD at 0xff8224/0xff8225, routine 0x85a0 to 0x8700; stage 02 and the bonus stage 14 are skipped). From 1:00 it writes the countdown and a flashing "HURRY UP!" into the scroll 1 map in the large chrome font (glyph table 0x20e92, writer 0x20d2c). Seen in MAME on stage 0a at 0:59 (the timer sits at 0xff8224 = 0x0059).
+- Cause: the letters are drawn at map columns 16 to 32, so one glyph is keyed by code << 1 | column parity and the two U's (columns 18 and 27) need all eight half-cell keys. The route censuses never reach the banner; the stage files for 04, 08, 1a and 24 hold only the first U's four keys (02 and 26 none, and the banner's other letters or the countdown digits are short in them too). The second U draws blank: "HURRY  P". Same in base files and the Wolverine `_wv` files (identical font keys), so it does not depend on Wolverine.
+- Yaba, w1 combined disc, stage 04 (stage word written while Round 1 loads, then the debug write 0xff820e = 1 and 0xff8224 = 0x0059 in the first quiet frame): before, "HURRY  P" with no countdown digits.
+- Fix: tools/system_banner_keys.py derives the banner and countdown scroll 1 keys from the ROM's own tables (72 keys, checked against the table words) and build.py, tools/wolverine/fit.py and tools/check_screen_keys.py add them to every stage file's key set, like the continue screen's keys. tests/test_system_banner_keys.py (host, synthetic image).
+- Not covered: the rest of the large font and weapon text such as OVER HEAT are still census-only (about 300 more visible large-font keys per stage file; adding them all costs pack room, not tried).

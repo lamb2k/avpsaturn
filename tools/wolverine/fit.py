@@ -63,6 +63,10 @@ def load(work, environ):
                 raise ValueError("screen key section outside 0..3")
             screens[section].add(int(key, 16))
     screens[0].discard(0)
+    sys.path.insert(0, str(REPO / "tools"))
+    import system_banner_keys   # the "HURRY UP!" banner and countdown tiles: kept in every stage file, as build.py does
+    if (work / "rt.bin").exists() and (work / "op.bin").exists():   # every real work dir has both; a synthetic one (tests) does not
+        screens[1] |= system_banner_keys.from_work(work)
     if environ.get("SCREEN_KEYS_REQUIRED", "1") == "1" and not screens[0]:
         raise ValueError("WORK/screen_keys.txt missing or empty (SCREEN_KEYS_REQUIRED=0 to omit)")
     rank_file = work / "key_rank.json"

@@ -70,6 +70,11 @@ for l in (open(WORK / "screen_keys.txt") if (WORK / "screen_keys.txt").exists() 
     if l.strip():
         SCREEN_KEYS[int(l.split()[0])].add(int(l.split()[1], 16))
 SCREEN_KEYS[0].discard(0)
+# The arcade's rare system banners (the timed stages' "HURRY UP!" and its countdown): tools/system_banner_keys.py derives the scroll 1 keys from the
+# ROM's own tables. The census never sees them, and a stage file without them drew the second U of the banner blank.
+sys.path.insert(0, str(REPO / "tools"))
+import system_banner_keys
+SCREEN_KEYS[1] |= system_banner_keys.from_work(WORK)
 if os.environ.get("SCREEN_KEYS_REQUIRED", "1") == "1" and not SCREEN_KEYS[0]:
     raise SystemExit("WORK/screen_keys.txt missing: run tools/screen_keys.py (SCREEN_KEYS_REQUIRED=0 to build without)")
 if os.environ.get("GUEST_ASSETS"):
