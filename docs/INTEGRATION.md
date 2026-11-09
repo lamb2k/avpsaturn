@@ -49,5 +49,8 @@ Still awaiting the owner's choice: SAT_WV_GROUND (feet on the floor; ground.py d
 | Stage font glyph gaps (packs keep only census-seen font glyphs) | not started | found by the hurryup lane |
 
 ## Owner discs
-The discs the owner has (wolverine-v4, package-fps, package-home-combined) predate this line and are superseded. The next owner disc is built from
-avp/integration once the menu lane merges.
+| Disc | Commit | Package | State |
+| --- | --- | --- | --- |
+| avp_integration_1 | a6e58aa | E:\AvP\package-integration\avp_integration_1 (27 tracks, README.txt) | current; Yaba boot/menu/fight check passed, fit 76/76 (stage24_ma 38 tiles of margin), hw_free 2,028, lw_free 64 |
+
+wolverine-v4, package-fps and package-home-combined are superseded.
