@@ -966,38 +966,44 @@ static HOME_OS void home_row_blank(u32 row, u32 x0, u32 *m)
     }
 }
 /* The 44 source columns from a droppable mask (see above): the HUD's flush map on play's HUD rows when their middle 4 columns are blank,
-   else 4 drops nearest 6, 18, 30, 42, else the centre crop. */
-static HOME_OS void home_map(const u32 *m, int hud, u8 *map)
+   else the 4 drops that leave the block's cells closest to where their scaled art moved to, else the centre crop.
+   Dropping k columns left of column c puts it 12k/12 columns from where round(c * 11/12) is; the cost of a kept column is its weight (the
+   cells it holds in the block's rows) times |12k - c|, times four when the cell ends up left of its art, so a drop sits just before the content that needs the shift. The greedy pick this
+   replaces took the droppable columns nearest 6, 18, 30, 42, and the story box's face and text (the only blank columns of its rows lie at the
+   far left and right) got two drops left of the face: 8 pixels out of the box and the text 8 pixels off (owner 11-09). A drop costs its distance
+   from 12k+6, 6 more if it is not inside a run of 3 droppable columns, and 30000 more if it stands alone (a space between words, kept
+   unless nothing else is left). One row of states, one bit per column and state to walk back. */
+static HOME_OS void home_map(const u32 *m, const u8 *wgt, int hud, u8 *map)
 {
-    int drop[4], k, c, n;
+    int dp[5], nw[5];
+    u8 ch[48], dropped[48];
+    int k, c, n;
     for (c = 0, n = 0; c < 48; c++) n += BL(m, c);
     if (n < 4) { for (c = 0; c < 44; c++) map[c] = (u8)(c + 2); return; }
     if (hud && BL(m, 22) && BL(m, 23) && BL(m, 24) && BL(m, 25)) { for (c = 0; c < 44; c++) map[c] = (u8)(c < 22 ? c : c + 4); return; }
-    for (k = 0; k < 4; k++)
+    dp[0] = 0; for (k = 1; k < 5; k++) dp[k] = 0x3fffffff;
+    for (c = 0; c < 48; c++)
     {
-        /* Cheapest droppable column not yet taken: distance from its target, plus 6 if it is not inside a run of 3 and 40 if it stands
-           alone (a space between words, kept unless the row has no other room), plus 20 next to a column already taken. */
-        int want = 12 * k + 6, best = -1, cost = 1 << 30, j;
-        for (c = 0; c < 48; c++)
+        int l = c > 0 && BL(m, c - 1), r = c < 47 && BL(m, c + 1), pen = BL(m, c) ? (!(l && r) ? 6 : 0) + (!l && !r ? 30000 : 0) : -1;
+        for (k = 0; k < 5; k++) nw[k] = 0x3fffffff;
+        ch[c] = 0;
+        for (k = 0; k < 5; k++)
         {
-            int d, l = c > 0 && BL(m, c - 1), r = c < 47 && BL(m, c + 1);
-            if (!BL(m, c)) continue;
-            for (j = 0; j < k && drop[j] != c; j++) ;
-            if (j < k) continue;
-            d = (c > want ? c - want : want - c);
-            if (!(l && r)) d += 6;
-            if (!l && !r) d += 40;
-            for (j = 0; j < k; j++) if (drop[j] == c - 1 || drop[j] == c + 1) d += 20;
-            if (d < cost) { cost = d; best = c; }
+            int v = dp[k], d;
+            if (v >= 0x3fffffff) continue;
+            d = 12 * k - c; d = d > 0 ? 4 * d : -d;   /* a cell left of its art costs four times: it can leave the box it sits in, one to the right has room */
+            if (v + 8 * wgt[c] * d < nw[k]) { nw[k] = v + 8 * wgt[c] * d; ch[c] &= (u8)~(1 << k); }
+            if (k < 4 && pen >= 0)
+            {
+                d = c - (12 * k + 6); if (d < 0) d = -d;
+                if (v + d + pen < nw[k + 1]) { nw[k + 1] = v + d + pen; ch[c] |= (u8)(1 << (k + 1)); }
+            }
         }
-        drop[k] = best;
+        for (k = 0; k < 5; k++) dp[k] = nw[k];
     }
-    for (k = 1; k < 4; k++) { int v = drop[k], j = k; while (j > 0 && drop[j - 1] > v) { drop[j] = drop[j - 1]; j--; } drop[j] = v; }
-    for (c = 0, n = 0, k = 0; c < 48 && n < 44; c++)
-    {
-        if (k < 4 && c == drop[k]) { k++; continue; }
-        map[n++] = (u8)c;
-    }
+    for (c = 0; c < 48; c++) dropped[c] = 0;
+    for (c = 47, k = 4; c >= 0; c--) if (ch[c] >> k & 1) { dropped[c] = 1; k--; }
+    for (c = 0, n = 0; c < 48 && n < 44; c++) if (!dropped[c]) map[n++] = (u8)c;
 }
 /* One map per block of rows: rows that hold anything (not all droppable) and touch each other share the columns all of them can drop, so
    a 16 pixel letter's top and bottom halves, and a banner's rows, stay together (owner 11-08: the select screen's names broke apart). */
@@ -1008,15 +1014,18 @@ static HOME_OS void home_maps_rows(u32 x0, u32 (*bm)[2])
 }
 static HOME_OS void home_row_map(u32 row, u32 (*bm)[2], u8 *map)
 {
-    u32 m[2], a = row, b = row;
-    int full = bm[row][0] == 0xffffffffUL && bm[row][1] == 0xffffUL;
+    u32 m[2], a = row, b = row, q;
+    u8 wgt[48];
+    int c, full = bm[row][0] == 0xffffffffUL && bm[row][1] == 0xffffUL;
     m[0] = bm[row][0]; m[1] = bm[row][1];
+    for (c = 0; c < 48; c++) wgt[c] = 0;
     if (!full)
     {
         while (a > 0 && !(bm[a - 1][0] == 0xffffffffUL && bm[a - 1][1] == 0xffffUL)) { a--; m[0] &= bm[a][0]; m[1] &= bm[a][1]; }
         while (b + 1 < S1_ROWS && !(bm[b + 1][0] == 0xffffffffUL && bm[b + 1][1] == 0xffffUL)) { b++; m[0] &= bm[b][0]; m[1] &= bm[b][1]; }
+        for (q = a; q <= b; q++) for (c = 0; c < 48; c++) wgt[c] = (u8)(wgt[c] + !BL(bm[q], c));
     }
-    home_map(m, snap.hud_flush && (row < 6 || row >= 25), map);
+    home_map(m, wgt, snap.hud_flush && (row < 6 || row >= 25), map);
 }
 #endif
 static void draw_scroll1(u16 sx, u16 sy)
