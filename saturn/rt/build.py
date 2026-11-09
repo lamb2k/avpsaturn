@@ -75,6 +75,10 @@ SCREEN_KEYS[0].discard(0)
 sys.path.insert(0, str(REPO / "tools"))
 import system_banner_keys
 SCREEN_KEYS[1] |= system_banner_keys.from_work(WORK)
+# Every text font the arcade can print (tools/font_glyph_keys.py: the ROM's glyph tables, both banks, both column parities) in every round file, front end included:
+# a glyph no census route reached drew blank. FONT_KEYS=0 builds without them (A/B).
+import font_glyph_keys
+FONT_KEYS = font_glyph_keys.from_work(WORK) if os.environ.get("FONT_KEYS", "1") == "1" else set()
 if os.environ.get("SCREEN_KEYS_REQUIRED", "1") == "1" and not SCREEN_KEYS[0]:
     raise SystemExit("WORK/screen_keys.txt missing: run tools/screen_keys.py (SCREEN_KEYS_REQUIRED=0 to build without)")
 if os.environ.get("GUEST_ASSETS"):
@@ -318,6 +322,8 @@ def round_files(rom, code_end, cold1_at, only=None):
             frank.update({k: 1 << 40 for k in SCREEN_KEYS[0]})
         if f.get("gfx") and f["gfx"] not in raws:
             raws[f["gfx"]] = pathlib.Path(f["gfx"]).read_bytes()
+        if FONT_KEYS:
+            keys[1] = keys[1] | FONT_KEYS
         if EDGE_KEYS:
             keys[1] = keys[1] | EDGE_KEYS
         if CAPTION_KEYS:

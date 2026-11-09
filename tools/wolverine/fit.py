@@ -48,7 +48,11 @@ def settings(environ):
                 arena_keep=environ.get("ARENA_KEEP") or None)
 
 
+FONT_KEYS = set()   # load() fills it: every text font glyph (tools/font_glyph_keys.py), kept in every file as build.py does
+
+
 def load(work, environ):
+    global FONT_KEYS
     rounds = json.loads((work / "rounds.json").read_text())
     ends = json.loads((work / "round_code_ends.json").read_text())
     if not ends or not CART_PACK <= ends[-1][0] <= CART_END or ends[-1][1] != 0:
@@ -67,6 +71,8 @@ def load(work, environ):
     import system_banner_keys   # the "HURRY UP!" banner and countdown tiles: kept in every stage file, as build.py does
     if (work / "rt.bin").exists() and (work / "op.bin").exists():   # every real work dir has both; a synthetic one (tests) does not
         screens[1] |= system_banner_keys.from_work(work)
+        import font_glyph_keys   # the text fonts' glyph tables (both banks, both column parities), every file including the front end
+        FONT_KEYS = font_glyph_keys.from_work(work) if environ.get("FONT_KEYS", "1") == "1" else set()
     if environ.get("SCREEN_KEYS_REQUIRED", "1") == "1" and not screens[0]:
         raise ValueError("WORK/screen_keys.txt missing or empty (SCREEN_KEYS_REQUIRED=0 to omit)")
     rank_file = work / "key_rank.json"
@@ -159,6 +165,7 @@ def run(raw, f, keys, room, free, rank, screens, guest_keys=(), fit_fn=None):
         import rounds_pack
         fit_fn = rounds_pack.fit
     keys = [set(k) for k in keys]
+    keys[1] |= FONT_KEYS
     frank = {int(key): value for key, value in rank.items()}
     frank.update({key: 1 << 39 for key in guest_keys})
     if not f["name"].startswith("front"):   # front_wv too

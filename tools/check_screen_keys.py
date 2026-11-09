@@ -1,5 +1,5 @@
 #!/usr/bin/env python
-"""Host check: every stage round file's tile pack holds every key of WORK/screen_keys.txt, all four sections (continue and GAME OVER screens, and the timed stages' HURRY UP! banner and countdown, tools/system_banner_keys.py).
+"""Host check: every stage round file's tile pack holds every key of WORK/screen_keys.txt, all four sections (continue and GAME OVER screens, and the timed stages' HURRY UP! banner and countdown, tools/system_banner_keys.py), and every text font glyph (tools/font_glyph_keys.py; front files too).
 Catches the continue screen drawing blank: on lane/disc 4408ef1 all 209 stage files missed some (countdown digits, the scroll 1 text line).
 Reads the round files as boot.c does: head sector, then destination/size pairs; the second region at SAT_PACK is the tile pack (SGP1).
 usage: check_screen_keys.py WORK   exit 1 on any file missing a key."""
@@ -49,17 +49,19 @@ def main():
     sys.path.insert(0, str(pathlib.Path(__file__).resolve().parent))
     import system_banner_keys   # the timed stages' "HURRY UP!" banner and countdown (scroll 1)
     want[1] |= system_banner_keys.from_work(work)
+    import font_glyph_keys   # every text font glyph, both banks and both column parities (tools/font_glyph_keys.py)
+    fonts = font_glyph_keys.from_work(work)
+    want[1] |= fonts
     names = [f["name"] for f in json.loads((work / "rounds.json").read_text())["files"]]
     bad = 0
     for i, blob in round_files(work).items():
-        if names[i] == "front":
-            continue
         have = pack_keys(blob)
-        miss = [w - h for w, h in zip(want, have)]
+        front = names[i].startswith("front")   # the front end holds the fonts only (no continue screen starts there)
+        miss = [w - h for w, h in zip([set(), fonts, set(), set()] if front else want, have)]
         if any(miss):
             bad += 1
             print(f"FAIL R{i:03d} {names[i]}: missing per section (sprite, scroll 1, 2, 3) {[len(x) for x in miss]}, first {[hex(k) for x in miss for k in sorted(x)[:2]]}")
-    print(f"{'FAIL' if bad else 'PASS'}: {bad} of {len(names) - 1} stage files miss continue/game over keys (wanted per section {[len(w) for w in want]})")
+    print(f"{'FAIL' if bad else 'PASS'}: {bad} of {len(names)} round files miss continue/game over, banner or font keys (wanted per section {[len(w) for w in want]})")
     sys.exit(1 if bad else 0)
 
 
