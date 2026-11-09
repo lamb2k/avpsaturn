@@ -19,8 +19,11 @@ import numpy as np
 HERE = pathlib.Path(__file__).resolve().parent
 QSOUND_HZ = 24038.0
 OUT_HZ = 22050
-# (bank, first address, end address) in the sample ROM: byte offset = (bank & 0x7f) << 16 | address. See docs/notes/AVP_WOLVERINE_REVEAL_20261109.md for how it was found.
-CLIP = (0x60, 0x8000, 0xe75c)
+# (bank, first address, end address) in the sample ROM: byte offset = (bank & 0x7f) << 16 | address. The clip is NOT identified yet (docs/notes/AVP_WOLVERINE_REVEAL_20261109.md, "Voice"):
+# set REVEAL_VOICE_CLIP=BANK:START:END (hex, e.g. 20:b400:e7ff) to cut one, or fill CLIP in here once the owner has picked it by ear. With neither, no voice file is made and the reveal is silent.
+CLIP = None
+if os.environ.get("REVEAL_VOICE_CLIP"):
+    CLIP = tuple(int(x, 16) for x in os.environ["REVEAL_VOICE_CLIP"].split(":"))
 PEAK = 120          # the clip is scaled to this peak (of 127) so the SCSP plays it at full level without clipping
 FADE_MS = 4         # a 4 ms fade at both ends takes the click out
 
@@ -41,6 +44,8 @@ def dump(work):
 
 def cut(work, out):
     rom = np.fromfile(pathlib.Path(work) / "qsound.bin", dtype=np.int8)
+    if not CLIP:
+        raise SystemExit("no clip chosen: set REVEAL_VOICE_CLIP=BANK:START:END (hex) or CLIP in reveal_voice.py")
     bank, a, e = CLIP
     clip = rom[(bank & 0x7f) << 16 | a:(bank & 0x7f) << 16 | e].astype(np.float64)
     n = int(len(clip) * OUT_HZ / QSOUND_HZ)

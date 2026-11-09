@@ -150,10 +150,11 @@ static long unlock_io(unsigned op, unsigned bits, unsigned char *scratch)
     unsigned char old[SAVE_SIZE], rec[SAVE_SIZE];
     unsigned have = 0, flags;
     long r;
-    unsigned long vec = *(volatile unsigned long *)0x6000354, init = *(volatile unsigned long *)0x6000358;
+    unsigned long init = *(volatile unsigned long *)0x6000358;
     if (op == 1) LOADER_API[3] |= 0x80000000u | bits; else if (op == 2) LOADER_API[3] &= ~bits;
-    if (vec < 0x100 || vec >= 0x80000 || init < 0x100 || init >= 0x80000) return -1;
+    if (init < 0x100 || init >= 0x80000) return -1;   /* the BIOS's library entry; the function table pointer at 0x6000354 is set by BUP_Init itself */
     BUP_Init((volatile Uint32 *)scratch, (Uint32 *)(scratch + 0x4000), cfg);
+    if (!*(volatile unsigned long *)0x6000354) return -1;
     r = BUP_Stat(0, SAVE_SIZE, &st);
     if (r == BUP_UNFORMAT && op) { if (BUP_Format(0)) return -2; r = BUP_Stat(0, SAVE_SIZE, &st); }
     if (r) return -3;
@@ -184,7 +185,6 @@ int main(void)
     LOADER_API[2] = (unsigned long)unlock_io;
     LOADER_API[3] = 0;
     LOADER_DIAG[5] = 0; LOADER_DIAG[6] = 0; LOADER_DIAG[7] = 0;   /* the reveal's takeover flag and state (reveal.c) */
-    unlock_io(0, 0, (unsigned char *)ENTRY);   /* the unlock record, before the runtime lands on this RAM */
     cart[0] = 0x12345678; cart[1] = 0xedcba987;
     if (cart[0] != 0x12345678 || cart[1] != 0xedcba987) halt(0xe0f0, cart[0]);
     GFS_DIRTBL_TYPE(&dir) = GFS_DIR_NAME;
@@ -197,6 +197,7 @@ int main(void)
     load("COLD1.BIN", (void *)COLD1_ADDR, 0x600);
     load("HW.BIN", (void *)ENTRY, 0x400);
     GFS_Reset();
+    unlock_io(0, 0, (unsigned char *)0x02754000u);   /* the unlock record, once the loads are done; scratch in the cart's pack room, which the first round file fills later */
     LOADER_API[0] = (unsigned long)load_regions;
     *(volatile unsigned char *)0xfffffe92 = 0x10;
     *(volatile unsigned char *)0xfffffe92 = 0x01;
