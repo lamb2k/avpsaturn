@@ -64,10 +64,42 @@ extern gu8 *PAGE[256];
 #define GROUPS 96
 static struct { unsigned short at; gu32 actor; } grp[GROUPS];
 static int ngrp;
+#ifndef SAT_GUEST_GROUPS_EARLY
+#define SAT_GUEST_GROUPS_EARLY 0   /* default off: the group loop classifies every group in the snapshot (v4.1) */
+#endif
+#if SAT_GUEST_GROUPS_EARLY
+/* GROUPS_EARLY=1: the classification of every group (which one is a guest body, a guest shot, a Wolverine shot or flash) is done when the game's
+   frame is finished (kernel.c, f_d86, right after game_done), in the time the master would otherwise spend waiting for the vblank. The snapshot then
+   only consumes it. The result carries a stamp and is used only if all of these hold, else the snapshot classifies as before:
+   - gpre.vb + 1 == the vblank count now: it was made in the frame that this vblank ends (the vblank count rises before the snapshot runs);
+   - gpre.seq == gseq: no group was written since (sat_guest_group counts every call);
+   - gpre.sel == sat_guest_sel: the guest setting is the same;
+   - gpre.ok: not invalidated: kernel.c clears it before any game task runs after game_done.
+   GROUPS_EARLY=2 is the check build: the snapshot always classifies as before, and counts the groups whose early class differs. */
+extern unsigned int sat_vblanks_now(void);
+#ifndef GFRT   /* the free running timer, as the gfx code reads it; a host test defines GFRT() */
+#define GFRT() ((unsigned int)(((gu32)*(volatile gu8 *)0xfffffe12UL << 8) | *(volatile gu8 *)0xfffffe13UL))
+#endif
+#define GHI __attribute__((section(".data")))   /* high work RAM: every .bss goes to low work RAM, which has about 100 bytes left */
+static gu8 gkind[GROUPS] GHI;   /* 0 none, 1 guest body (draw), 2 guest shot (draw, drop), 3 Wolverine shot or flash (drop) */
+static volatile struct { gu32 vb, seq, sel; gu8 ok, special; } gpre GHI;   /* volatile: the vblank may interrupt the early run */
+static gu32 gseq GHI;
+#if SAT_GUEST_GROUPS_EARLY == 2 || defined(SAT_GUEST_PROF) || defined(SAT_GUEST_GSTAT)
+#define GSTAT(i, e) (sat_gearly[i] e)
+#else
+#define GSTAT(i, e) ((void)0)
+#endif
+#if SAT_GUEST_GROUPS_EARLY == 2 || defined(SAT_GUEST_PROF) || defined(SAT_GUEST_GSTAT)
+unsigned int sat_gearly[8] GHI;
+#endif   /* 0 snapshots seen, 1 early result used, 2 snapshots that classified themselves, 3 groups whose early class differed (check build), 4 early runs, 5 sum of ticks of the early run, 6 snapshots with a special group */
+#endif
 
 void sat_guest_group(gu32 actor, gu32 objptr)
 {
     unsigned at = (unsigned)((objptr - 0x708000UL) >> 3);
+#if SAT_GUEST_GROUPS_EARLY
+    gseq++;
+#endif
     if (at >= 0x400) return;
     if (ngrp && grp[ngrp - 1].at >= at) ngrp = 0;   /* the game began a new list */
     if (ngrp < GROUPS) { grp[ngrp].at = (unsigned short)at; grp[ngrp].actor = actor & 0xffffffUL; ngrp++; }
@@ -97,6 +129,16 @@ static int is_guest_shot(gu32 actor)
     return guest_draw(owner) == sat_guest_megaman_draw && sat_guest_megaman_draw;
 }
 
+#if SAT_GUEST_GROUPS_EARLY
+static int is_wolverine_shot(gu32 actor);
+static gu8 classify(gu32 actor)
+{
+    if (guest_draw(actor)) return 1;
+    if (sat_guest_megaman_draw && is_guest_shot(actor)) return 2;
+    if (is_wolverine_shot(actor)) return 3;
+    return 0;
+}
+#endif
 /* Wolverine has no gun: a Wolverine player's shots and the muzzle flash are not drawn. Berserker Barrage takes the gun's state slot
    (saturn/guests/wolverine/wolverine.c). Yaba, stage 02, 11-08: a shot is a tag +8 = 4 actor (+2 = 5 while alive) in ff8680.. with the owner's
    block word at +0x26; the muzzle flash is a tag 0x24 actor (+2 = 4, +3 = 1) in ffe080..ffe17f with the owner word at +0x28. The shots also do
@@ -120,20 +162,65 @@ static int no_draw(gu8 *out, int room, gu32 actor, int ax, int bottom, unsigned 
 
 static int be16(const gu8 *p) { return (p[0] << 8) | p[1]; }
 
+#if SAT_GUEST_GROUPS_EARLY
+/* kernel.c, f_d86: the game's frame is finished (game_done just set). */
+void sat_guest_groups_early(void)
+{
+    int g;
+    gu8 special = 0;
+    unsigned int t0 = GFRT(), t1;
+    gpre.ok = 0;
+    for (g = 0; g < ngrp; g++) { gkind[g] = sat_guest_sel ? classify(grp[g].actor) : 0; special |= gkind[g]; }
+    gpre.vb = sat_vblanks_now(); gpre.seq = gseq; gpre.sel = sat_guest_sel; gpre.special = special;
+    __asm__ volatile ("" : : : "memory");
+    gpre.ok = 1;
+    t1 = GFRT();
+    GSTAT(4, ++); GSTAT(5, += (t1 - t0) & 0xffffu);
+}
+/* kernel.c, f_d86: a game task is about to run after the frame was finished (or anything else that may change what the result was made from). */
+void sat_guest_groups_invalidate(void) { gpre.ok = 0; }
+#endif
+
 /* obj: the snapshot's copy of the object list (count entries, room for max). page0: the snapshot's sprite palette page. Returns the new count. */
 int sat_guest_objects(gu8 *obj, int count, int max, gu8 *page0)
 {
     int g, used = 0, shift = 0, wv = 0;
+#if SAT_GUEST_GROUPS_EARLY
+    int pre_ok;
+#endif
     if (!sat_guest_sel) return count;
     if (sat_guest_megaman_palette && (sat_guest_sel & 2)) sat_guest_megaman_palette(page0);
 #ifdef SAT_GUEST_ABL_NOGROUPS
     ngrp = 0;   /* measurement only: what the group loop costs in the snapshot (it also stops dropping Wolverine's shots) */
 #endif
-    for (g = 0; g < ngrp; g++) {
-        int (*draw)(gu8 *, int, gu32, int, int, unsigned short, unsigned short) = guest_draw(grp[g].actor);
+#if SAT_GUEST_GROUPS_EARLY
+    GSTAT(0, ++);
+    pre_ok = gpre.ok && gpre.vb + 1 == sat_vblanks_now() && gpre.seq == gseq && gpre.sel == sat_guest_sel;
+    if (pre_ok && gpre.special) GSTAT(6, ++);
+    if (SAT_GUEST_GROUPS_EARLY == 2) {   /* check build: classify now as well and compare */
+        GSTAT(pre_ok ? 1 : 2, ++);
+        if (pre_ok) for (g = 0; g < ngrp; g++) if (gkind[g] != classify(grp[g].actor)) GSTAT(3, ++);
+        pre_ok = 0;
+    } else GSTAT(pre_ok ? 1 : 2, ++);
+    g = (pre_ok && !gpre.special) ? ngrp : 0;   /* no group needs anything: skip the loop below */
+#else
+    g = 0;
+#endif
+    for (; g < ngrp; g++) {
+        int (*draw)(gu8 *, int, gu32, int, int, unsigned short, unsigned short);
         int shot = 0;
-        if (!draw && sat_guest_megaman_draw && is_guest_shot(grp[g].actor)) { draw = sat_guest_megaman_draw; shot = 1; }
-        if (!draw && is_wolverine_shot(grp[g].actor)) { draw = no_draw; shot = 1; }
+#if SAT_GUEST_GROUPS_EARLY
+        if (pre_ok) {
+            gu8 k = gkind[g];
+            draw = k == 3 ? no_draw : k ? sat_guest_megaman_draw : 0;
+            shot = k >= 2;
+        } else
+#endif
+        {
+            draw = guest_draw(grp[g].actor);
+            if (!draw && sat_guest_megaman_draw && is_guest_shot(grp[g].actor)) { draw = sat_guest_megaman_draw; shot = 1; }
+            if (!draw && is_wolverine_shot(grp[g].actor)) { draw = no_draw; shot = 1; }
+        }
         int s = grp[g].at + shift, e = g + 1 < ngrp ? grp[g + 1].at + shift : count, i, x0 = 0, x1 = 0, bottom = -1000, n, room;
         int bx;
         gu8 tmp[8 * 96];

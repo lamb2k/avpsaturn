@@ -423,6 +423,10 @@ static void slave_start(void)
 #include "rounds.inc"
 #ifdef SAT_GUESTS
 #include "guests.h"
+#if SAT_GUEST_GROUPS_EARLY
+void sat_guest_groups_early(void);
+void sat_guest_groups_invalidate(void);
+#endif
 #endif
 u8 sat_aud_tables[0x2000] __attribute__((section(".lwgfx"), aligned(4)));
 static int round_loaded = -1;
@@ -539,6 +543,9 @@ void f_d86(void)
             cpu.a[0] = REC(i); LOWW(cpu.d[0], 15 - i);
             cpu.d[1] = (cpu.d[1] & 0xffffff00u) | st;
             if (st >= 4) {
+#if defined(SAT_GUESTS) && SAT_GUEST_GROUPS_EARLY
+                if (game_done) sat_guest_groups_invalidate();   /* a task runs after the frame was finished: the early group result is no longer safe */
+#endif
                 run_task(i);
                 sat_dbg.task_runs++;
                 cpu.a[0] = REC(i); LOWW(cpu.d[0], 15 - i);
@@ -550,6 +557,9 @@ void f_d86(void)
                 game_done = 1; sat_dbg.game_ticks = frt(); *(volatile unsigned long *)((unsigned long)sat_readout | 0x20000000UL) = sat_dbg.game_ticks; if (sat_dbg.game_ticks > sat_dbg.game_peak) sat_dbg.game_peak = sat_dbg.game_ticks;
 #ifdef SAT_CPU_SLACK_PROFILE
                 cpu_slack_mark_idle();
+#endif
+#if defined(SAT_GUESTS) && SAT_GUEST_GROUPS_EARLY
+                sat_guest_groups_early();   /* the game's frame is finished: classify the sprite groups now, in the wait for the vblank, not in the snapshot */
 #endif
 #ifdef SAT_PROF
                 if (IN_WINDOW) { prof_add(sat_prof.frame, frame_carry + sat_dbg.game_ticks); sat_prof.done++; }
