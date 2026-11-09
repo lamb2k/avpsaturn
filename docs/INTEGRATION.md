@@ -15,7 +15,7 @@ An item leaves "In progress" only when it is merged here; a paused or parked lan
 | Wolverine animation steps 1-3 (chain mapping, walk/jump, native timing switch) | lane/wolverine-anim 9728e4e | walk/jump on; SAT_WV_NATIVE_TIMING off | anim notes |
 | Wolverine select/HUD/rank art | lane/wolverine-art f518e5c | on with guest | art check 11-09 |
 | Wolverine KO invisibility fix; Round 1 gate notes | lane/wolverine-gate d5f2dda, 43f9c7d | on | host test wolverine_clock_test; AVP_WOLVERINE_GATE_20261109.md (boss clear and section 3 off/on/Schaefer, harness assists) |
-| Wolverine slowdown fix (FAST_LIST, NAMES_LAZY, PAL_KEEP) | lane/fps-held 457508b | all off (Yaba: held 11.4% -> 2.3% with all on) | AVP_FPS_HELD_20261109.md |
+| Wolverine slowdown fix (FAST_LIST, NAMES_LAZY, PAL_KEEP; FOLD measured, no gain) | lane/fps-held 457508b, 82cf075 | ON in the owner recipe (Yaba: held 11.4% -> 2.3-2.9%, snapshot 644 -> 486 ticks) | AVP_FPS_HELD_20261109.md |
 | Saturn on-screen perf readout (SAT_PERF_HUD) + PAL_KEEP page-0-only fix | lane/hwtest 8a75ccb | readout off; used for console A/B discs | AVP_HWTEST_20261109.md |
 | Wolverine ground contact, jump height, size comparison (SAT_WV_GROUND=1/2, SAT_WV_JUMP=1/2, SAT_WV_SCALE=14) | lane/wolverine-ground 9745da7 | all off; owner comparison discs in E:\AvP\learning\lane-wolverine-ground\discs | AVP_WOLVERINE_GROUND_20261109.md; ground.py data must be regenerated for D11 before a switch is turned on |
 
@@ -25,12 +25,12 @@ colour entry `eighties`, his sprite in the 80s red-brown/gold to match the art; 
 
 ## Owner disc recipe (avp/integration)
 ```
-POSE_KEYS=0 KEEP_ROUND_FILES=1 GUEST_ASSETS=/e/AvP/learning/lane-wolverine-merge/D11 KERNEL_CFLAGS="-DSAT_HOME -DSAT_DUEL_MENU -DSAT_GUESTS -DSAT_GUEST_DEFAULT=1 -DSAT_WV_JUMP=1" python saturn/rt/build.py <workdir>
+POSE_KEYS=0 KEEP_ROUND_FILES=1 GUEST_ASSETS=/e/AvP/learning/lane-wolverine-merge/D11 KERNEL_CFLAGS="-DSAT_HOME -DSAT_DUEL_MENU -DSAT_GUESTS -DSAT_GUEST_DEFAULT=1 -DSAT_WV_JUMP=1 \n  -DSAT_GUEST_FAST_LIST=1 -DSAT_GUEST_NAMES_LAZY=1 -DSAT_GUEST_PAL_KEEP=1" python saturn/rt/build.py <workdir>
 ```
 Owner decisions in the recipe: SAT_WV_JUMP=1 (jump apex 88 px, owner 11-09). Wolverine keeps his current size: SAT_WV_SCALE stays off (owner 11-09).
 D11 carries the ground lane's `jumpair` data; its moves and lift match G1.
-Still awaiting the owner's choice: SAT_WV_GROUND (feet on the floor; ground.py data for D11 still to be generated), and the slowdown switches.
-The slowdown switches are waiting on the release fit and the PAL_KEEP look check.
+Slowdown switches ON (11-09): release link fits (hw_free 4,476 / lw_free 104 on the compare base), fit 76/76; PAL_KEEP exact palette check clean (lane fps-held 82cf075). SAT_GUEST_FOLD stays off (no gain).
+Still awaiting the owner's choice: SAT_WV_GROUND (feet on the floor; ground.py data for D11 still to be generated).
 
 ## In progress (not merged yet)
 
@@ -42,7 +42,6 @@ The slowdown switches are waiting on the release fit and the PAL_KEEP look check
 | Post-credits reveal + unlock + Berserker Barrage voice | lane/wolverine-reveal | running |
 | HURRY UP missing U (stage timer banner) | lane/hurryup | finding the banner |
 | Saturn hardware FPS test discs | E:\AvP\package-hwtest-20261109 (built from lane/hwtest, pre-integration) | to be rebuilt from avp/integration with the owner disc |
-| Slowdown fix follow-ups (release fit, PAL_KEEP look check, fold pass) | lane/fps-held | running |
 | Talk-box face for Wolverine (crop of recoloured portrait) | not started | after the menu lane |
 | Stage font glyph gaps (packs keep only census-seen font glyphs) | not started | found by the hurryup lane |
 
