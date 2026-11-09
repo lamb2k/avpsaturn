@@ -899,7 +899,13 @@ static HOME_OS void draw_home(int fresh)
 {
     u32 row, col;
     static u32 font_bg = 99;
-    if (*(volatile u32 *)((unsigned long)&sat_home_seq | 0x20000000UL) & 1) return;   /* the master is copying a new screen: next frame */
+    static u32 redo;
+    u32 s0, spin = 0;
+    /* The master copies a new screen (sat_home_seq odd while it does) right after the vblank, where this frame chain's slave also starts drawing, so
+       skipping the frame drew nothing at all: wait for the copy (about 20 us), and draw everything again next frame if one began during this pass. */
+    while (((s0 = *(volatile u32 *)((unsigned long)&sat_home_seq | 0x20000000UL)) & 1) && ++spin < 20000u) ;
+    if (s0 & 1) { redo = 1; return; }
+    fresh |= (int)redo; redo = 0;
     if (font_bg != (snap.home == 3 ? 0u : snap.home == 4 ? 14u : 15u))   /* the title list's letters have no panel behind them, the option screens' a halo, the pause menu's a panel */
     {
         int g, L;
@@ -922,6 +928,7 @@ static HOME_OS void draw_home(int fresh)
                 put16(VDP2_VRAM + MAP_HOME + (row * 64 + col) * 2, name);
             }
         }
+    redo = *(volatile u32 *)((unsigned long)&sat_home_seq | 0x20000000UL) != s0;
 }
 #endif
 
