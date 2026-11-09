@@ -160,6 +160,31 @@ Two-player HUD at 352 wide: the P2 health bar and score run to the right edge, n
 Tools: tools/whole_game_legs.py, tools/capture_stage_clips.py, tools/capture_clip_match.py; BOT_CHAR, BOT_P2/YABA_P2 in saturn/rt/play_full_bot.py and play_yaba.py.
 Unproven: the stage 1e hold, two players on this package, three players, any boot outside soft-core Yaba, hardware.
 
+## Constant-address tables per stage, no more tile room than before, alien grab run, 2026-11-08 (lane all; EMULATOR, soft-core Yaba, VideoCore 2 on own instances; HOST analysis; hardware UNRUN)
+
+The 636 pages in every stage file cost sprite keys (stage 06 0 to 595 dropped, 1c 450 to 2327, 24 3070 to 4762). New layout, same fix for the read that faulted, no extra drops:
+- tools/const_live.py: a stage keeps the constant-address table pages (page and the page after) of the functions that ran in that stage's census (instruction fetch ranges of the golden runs, sections/*.fetch.txt), plus those of any function that ran in 8 or more stages. 319 to 406 pages a stage; page 0x159 (f_5526a, the grab) is kept in stage 0c and 1c. Stage 0c's census ran f_5526a but not its grab branch, so function level is what catches it.
+- tools/rounds_config.py: ROUNDS_CONST_LIVE=json, ROUNDS_PAD_MODE=budget, ROUNDS_FILL_MARGIN=10. Budget mode keeps the census pages without the page either side, adds the page after each own page (most read by other stages first) until the keep list is 10 pages smaller than the pkgG list (census, page either side, shared by 2 stages). Evidence for dropping the back padding: over the 16 readmap runs 2 of 4948 run-time page reads fell in padding that the census pages did not cover (one forward, one backward); forward padding is kept in budget order. Default (no env) is unchanged.
+- Package E:\AvP\learning\lane-all\pkgJ\avp_saturn.iso (iso only, 496,470,016 bytes, sha256 6d72281c29f3ddadab13bf786df87787318b8fe311c6de0902f05619e9b543c5; warp image for the tests runW2\warpJ.iso, same keep lists).
+
+Dropped sprite keys, one-for-all file per stage (pkgG before constants, pkgH 636 pages in every stage, pkgJ new):
+| Stage | pkgG | pkgH | pkgJ |
+| --- | --- | --- | --- |
+| 06 | 0 | 595 | 0 |
+| 0e | 3047 | 4379 | 2941 |
+| 1c | 450 | 2327 | 334 |
+| 1e | 1117 | 2742 | 975 |
+| 24 | 3070 | 4762 | 3031 |
+| all other stages | 0 | 0 | 0 |
+All 210 files (20 stage files and 190 character files): none drops more keys than pkgG. Total over the 190 character files 72,912 (pkgG), 144,227 (pkgH), 69,551 (pkgJ). Largest file 3,112,960 bytes (pkgG 3,084,288). The front file restores 583,680 bytes on load (pkgG 479,232). Kernel RAM unchanged (hw_free 17,276, lw_free 4,104, same as pkgG).
+
+ROM view check (tools/diag_romcheck.py, tools/romcheckN.sh, -DSAT_WARP image runW2\warpJ.iso, Warrior, after each stage's load, runW2\rc_*, rcR_*, rcT_*): the stage's own const pages differ from ROM in 0 of 319 to 406 in each of the 18 stages 02 to 24 (26 not run, no spill). The other const pages of the 636 (those of functions that never ran in that stage's census and run in fewer than 8 stages, 82 to 122 a stage) differ in 0 to 97 pages, in the stages that spill tiles into ROM pages (04 06 08 0c 0e 10 18 1c 1e 20 24). So the layout does not keep all 636 in every stage: that needs about 170 more pages a stage than the keep lists held before, and the stages at capacity (0e, 1c, 1e, 24) had none left. Several warp runs hung at boot or at the load and were rerun (stage 10 took 4 tries).
+
+Alien grab, stage 0c section 6, Schaefer, write watchpoint on ff8380+0x1c and +0x1e for 0x4a9, execute breakpoint on f_5526a, read breakpoints on the character table at 0x56632 (tools/diag_wp2.py; states from tools/diag_mkstate.py; runs up to 200 s):
+- pkgJ keep lists (runW2\hp9_1): f_5526a entered at v15251, 0 stops on 0x4a9, no FATAL to vblank 18206 (end of the stage 0c section).
+- 636-page image (runW\cont4_seed53): f_5526a entered at v13294, then 119 stops at the table read (R0 = 0x2456636, ROM view 0x56636, Schaefer's entry), the player's +0x1c held 0x163220, 0x164f54, 0x164ff4, never 0x4a9, no FATAL to vblank 18780. Also runW\cont_seed13 and cont4_seed51: f_5526a entered, no 0x4a9, no FATAL.
+Only a grab that latches reads the table (the old fault came from one): 1 in 3 of the grabs seen. Grabs are about 1 in 10 runs from these states. Unproven: a latching grab on the pkgJ keep lists; other characters; two players.
+
 ## Constant-address tables kept in every stage file, checked in the running ROM view, 2026-11-08 (lane all; EMULATOR, soft-core Yaba, VideoCore 2; hardware UNRUN)
 
 Cause of fatal 0xe2 at 0xa9cc4 in stage 0c (an alien's grab, f_5526a, reads the table at 0x56632): page 0x159 was not in stage 0c's keep list, so the lifted code read 0 there, a2 += 0 gave 0x4a9, and 0x4a9 went into the player's animation pointer (ff8380 + 0x1c). Fix c0cfe85 plus d98f04d: tools/const_pages.py lists the 636 pages (1 KB, each with the page after) of tables the lifted code addresses by constant (lea or move #imm into a0-a6, OP or RD of a literal), and ROUNDS_CONST_PAGES makes every stage file keep them. Default is the whole 2 MB ROM (636 pages); the argument c0000 gives 550 and is not used. Package E:\AvP\learning\lane-all\pkgH holds avp_saturn.iso only (sha256 a40aa76eb3366b097df1e822d095375e25d2ea4cef78491ce80f34def0f31ecd); its second, DMA, build failed because another rounds config run rewrote rounds.json under it, not because of the fix. pkgI is the complete package for the 550 list (482,166,784 bytes, 3 MB larger).
@@ -176,7 +201,7 @@ The grab itself did not recur on the new image: 3 Linn seeds of about 11,000 vbl
 Cost, 636 pages against none (pkgG against pkgH, one-for-all files): kept pages per stage file +147 to +198 KB (stage 0e 147, stage 26 198); dropped sprite keys 0e 3047 to 4379, 1c 450 to 2327, 1e 1117 to 2742, 24 3070 to 4762, 06 0 to 595 (the 550 list: 0e 4217, 1c 1932, 1e 2392, 24 4302, 06 187); spill in stage 06 5084 to 4608, 0e 5016 to 3912; stage files 10 to 220 KB smaller (tiles dropped), largest 2,861,056 bytes. Every stage still fits: both builds finish with no assertion, image 479,176,704 bytes (pkgH), kernel RAM unchanged (hw_free 17,308, lw_free 4,104, cart_free 5,764 bytes). tools/rounds_variants_report.py was not rerun on the 636 list, so "no key of a character file's own route dropped" is not rechecked.
 Coverage: const_pages.py takes direct reads and lea only. The new argument "all" takes every immediate address in the lifted code (7,633 sites, 829 pages, 193 more): it also covers pointers loaded by move.l #imm (script pointers stored into records, 0x1412aa and the like) and lea with an index. Over the 16 readmap runs of earlier packages no page read at run time was missing from the census keep lists, so page 0x159 is the one the list added in practice; 219 of the 636 pages were read in none of those runs. In the running ROM view 2 to 27 of the extra 193 pages differ from ROM in the spill stages. Pointer chains (a table of pointers to data) are covered by the census only.
 Tools: tools/diag_wp2.py (seeded bot, watchpoint, grab breakpoint), diag_mkstate.py, diag_romcheck.py, diag_romcheck_state.py, diag_runH.sh, mkstateW.sh, romcheckW.sh.
-Unproven: the grab on the new image; the stage 1e hold (not rerun, may be the same class); hardware.
+The grab is run in the next section (pkgJ layout). Unproven: the stage 1e hold (not rerun, may be the same class); hardware.
 
 ## Whole game to the ending on the Saturn image, 2026-11-07 (EMULATOR, soft-core Yaba, VideoCore 2, SoundCore 0; hardware UNRUN)
 
