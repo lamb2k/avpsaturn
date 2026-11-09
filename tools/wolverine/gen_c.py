@@ -186,5 +186,28 @@ lines += [
     f"#define WV_HAVE_BOXES {1 if B else 0}",
     f"static const WvBox wv_box[{len(bx)}] = {{{','.join(bx)}}};",
 ]
+# Lane wv-native-gfx (11-09), default off (-DSAT_WV_NATIVE_GFX): the game's own animation data for ONE pose, his stand (first step of idle).
+# A pose is a family 0x000A assembly the game's emitter (0xaa38a, avsp_emit.c) walks: [000a][budget][count][pad][D2 hi][D2 lo] then per tile [code][attr][dx][dy].
+# The assembly is authored for facing = 0 (the emitter draws it at origin + dx; for facing = 1 it mirrors: x = origin - 16 - dx, attr hflip toggled), so a tile
+# captured facing right at dx has native dx = -16 - dx with its hflip toggled. D2 hi = 0 (the mirror axis of the emitter is fixed at the actor's x); D2 lo = 0xfff5
+# puts the feet where the skin puts them (origin_y - D2 lo = origin_y + 11). attr: palette row 1 (Schaefer's row, WV_SCH_PAL) for his first row; the second-row
+# tiles hold row 1 too until the runtime patches their palette bits (wv_nat_p1: byte offsets of those attr low bytes).
+nat_tiles = P[moves["idle"][0][0]]
+nat = bytearray()
+be = lambda v: (v & 0xffff).to_bytes(2, "big")
+nat += be(0x000a) + be(len(nat_tiles)) + be(len(nat_tiles)) + be(0) + be(0) + be(0xfff5)
+nat_p1 = []
+for dx, dy, t, hf, vf, prow in nat_tiles:
+    if prow:
+        nat_p1.append(len(nat) + 3)
+    nat += be(keys[t]) + be(vf << 6 | (hf ^ 1) << 5 | 1) + be(-16 - dx) + be(dy)
+lines += [
+    "#ifdef SAT_WV_NATIVE_GFX",
+    f"#define WV_NAT_LEN {len(nat)}",
+    f"static unsigned char wv_nat_asm[{len(nat)}] __attribute__((aligned(4))) = {{{','.join(map(str, nat))}}};   /* non-const: the runtime sets the second row's palette bits */",
+    f"#define WV_NAT_NP1 {len(nat_p1)}",
+    f"static const unsigned short wv_nat_p1[{max(1, len(nat_p1))}] = {{{','.join(map(str, nat_p1)) if nat_p1 else '0'}}};",
+    "#endif",
+]
 out.write_text("\n".join(lines) + "\n")
 print("poses", len(used), "tiles", len(ent), "steps", len(seq), "bytes ~", len(ent) * 8 + len(seq) * 2 + len(pal) * 2)
