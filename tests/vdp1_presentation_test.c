@@ -112,10 +112,11 @@ static void late_completion(unsigned char *pack)
     /* Exercise timeout arithmetic across FRT wrap. */
     clock_reset(65530, 1000, 0);
     sat_gfx_draw();
-    CHECK(clock_calls < 24);
+    CHECK(clock_calls < 40);   /* two bounds: the lost plot is started again once, then the wait ends */
     CHECK(stamp == saved_stamp && prev_stamp == saved_previous);
     CHECK(table_base == saved_table && sat_gfx_stats.frames == saved_frames);
-    CHECK(sat_gfx_host_vdp1r[PTMR / 2] == 0);
+    CHECK(sat_gfx_host_vdp1r[PTMR / 2] == 1 && sat_gfx_replots == 1);   /* the plot whose end never came is started again once */
+    sat_gfx_host_vdp1r[PTMR / 2] = 0;
     CHECK(!memcmp(before_v1, V1, sizeof V1));
     CHECK(!memcmp(before_cr, CR, sizeof CR));
 #ifdef SAT_VDP1_PROFILE
