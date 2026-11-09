@@ -96,8 +96,8 @@ class WolverineRuntimeTest(unittest.TestCase):
             (temp / "boxes.json").write_text(json.dumps(boxes))
             subprocess.run([sys.executable, str(ROOT / "tools/wolverine/gen_c.py"), str(temp), str(temp / "wolverine_data.inc")], check=True)
             (temp / "wv_patch.inc").write_text(
-                "typedef struct { unsigned long addr; unsigned char len, orig[4], now[4]; } WvPatch;\n#define WV_PATCHES 2\n"
-                "static const WvPatch wv_patch_tab[WV_PATCHES] = {{0x1000, 2, {0,2,0,0}, {0,1,0,0}}, {0x1100, 2, {0,6,0,0}, {0,4,0,0}}};\n")
+                "typedef struct { unsigned long addr; unsigned short orig, now; } WvPatch;\n#define WV_PATCHES 2\n"
+                "static const WvPatch wv_patch_tab[WV_PATCHES] = {{0x1000, 0x0002, 0x0001}, {0x1100, 0x0006, 0x0004}};\n")
             exe = temp / "native-test"
             subprocess.run(["gcc", "-std=c90", "-pedantic", "-Wall", "-Wextra", "-Werror", "-O2", "-DSAT_WV_NATIVE", "-DWV_HOST_ROM",
                             "-I" + str(temp), "-I" + str(ROOT / "saturn/rt"), str(ROOT / "tests/wolverine_native_test.c"), "-o", str(exe)], check=True)

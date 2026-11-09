@@ -24,21 +24,25 @@ static void fresh(void)
 
 static void set_rom(int now)
 {
-    int k, j;
-    for (k = 0; k < WV_PATCHES; k++) for (j = 0; j < wv_patch_tab[k].len; j++) test_rom[wv_patch_tab[k].addr + j] = now ? wv_patch_tab[k].now[j] : wv_patch_tab[k].orig[j];
+    int k;
+    for (k = 0; k < WV_PATCHES; k++) {
+        u16 v = now ? wv_patch_tab[k].now : wv_patch_tab[k].orig;
+        test_rom[wv_patch_tab[k].addr] = (u8)(v >> 8); test_rom[wv_patch_tab[k].addr + 1] = (u8)v;
+    }
 }
 
 static int rom_is(int now)
 {
-    int k, j;
-    for (k = 0; k < WV_PATCHES; k++) for (j = 0; j < wv_patch_tab[k].len; j++)
-        if (test_rom[wv_patch_tab[k].addr + j] != (now ? wv_patch_tab[k].now[j] : wv_patch_tab[k].orig[j])) return 0;
+    int k;
+    for (k = 0; k < WV_PATCHES; k++) {
+        u16 v = now ? wv_patch_tab[k].now : wv_patch_tab[k].orig;
+        if (test_rom[wv_patch_tab[k].addr] != (u8)(v >> 8) || test_rom[wv_patch_tab[k].addr + 1] != (u8)v) return 0;
+    }
     return 1;
 }
 
 static void test_patch(void)
 {
-    int j;
     fresh();
     set_rom(0);
     wv_patch_sync(1);
@@ -51,7 +55,7 @@ static void test_patch(void)
     assert(rom_is(0) && wv_patch_bad == 0);
     /* a stage load restores the page: patched again before the next read */
     wv_patch_sync(1);
-    for (j = 0; j < wv_patch_tab[0].len; j++) test_rom[wv_patch_tab[0].addr + j] = wv_patch_tab[0].orig[j];
+    test_rom[wv_patch_tab[0].addr] = (u8)(wv_patch_tab[0].orig >> 8); test_rom[wv_patch_tab[0].addr + 1] = (u8)wv_patch_tab[0].orig;
     wv_patch_sync(1);
     assert(rom_is(1));
     /* an unexpected layout is refused, not patched */

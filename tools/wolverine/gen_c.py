@@ -130,5 +130,65 @@ lines += [
     f"#define WV_HAVE_BOXES {1 if B else 0}",
     f"static const WvBox wv_box[{len(bx)}] = {{{','.join(bx)}}};",
 ]
+# Agreed attack lengths of the native pass (-DSAT_WV_NATIVE, default off): startup, active and recovery ticks of each played-over move. The capture's own
+# steps are played over them: the steps before the first hit-box step over the startup, the hit-box steps over the active part, the rest over the recovery
+# (piecewise linear). The per-tick step table is made here so the runtime only looks it up. remap.json "native_sar" overrides.
+SAR = dict(lp=(2, 4, 6), hp=(3, 5, 8))
+SAR.update({k: tuple(v) for k, v in A.get("native_sar", {}).items()})
+stance = pid.get(A.get("stance_pose", 17), 65535)
+mfirst = {}
+k0 = 0
+for m, s_ in moves.items():
+    mfirst[m] = k0
+    k0 += len(s_)
+wm, wsar, wat, wtab = [], [], [0], []
+for m, (sn, an, rn) in SAR.items():
+    if m not in moves:
+        continue
+    st = moves[m]
+    hws = [bool(cw(B.get(m, [{}] * len(st))[k].get("hit"))[1]) if B else False for k in range(len(st))]
+    fr = [x[1] for x in st]
+    first = next((k for k, h in enumerate(hws) if h), -1)
+    last = max((k for k, h in enumerate(hws) if h), default=-1)
+    # capture length: up to the ready stance after the last hit-box step (wolverine.c wv_move_len_capture)
+    to = 0
+    for k in range(len(st)):
+        if last >= 0 and k > last and pid.get(st[k][0], -2) == stance:
+            break
+        to += fr[k]
+    so = sum(fr[:first]) if first >= 0 else 0
+    ao = sum(fr[first:last + 1]) if first >= 0 else 0
+    ro = max(0, to - so - ao)
+    def at(w):
+        if first < 0:
+            return min(w, len(st) - 1)
+        if w < sn:
+            t = w * so // sn
+        elif w < sn + an:
+            t = so + (w - sn) * ao // an
+        elif w < sn + an + rn:
+            t = so + ao + (w - sn - an) * ro // rn
+        else:
+            t = to
+        acc = 0
+        for k in range(len(st)):
+            acc += fr[k]
+            if t < acc:
+                return k
+        return len(st) - 1
+    wm.append("WV_" + m.upper())
+    wsar.append("{%d,%d,%d,%d}" % (sn, an, rn, at(sn + an + rn)))
+    wtab += [at(w) for w in range(sn + an + rn)]
+    wat.append(len(wtab))
+lines += [
+    f"#define WV_WARPS {len(wm)}",
+]
+if wm:
+    lines += [
+        f"static const unsigned char wv_warp_move[WV_WARPS] = {{{','.join(wm)}}};   /* moves played over agreed lengths */",
+        f"static const unsigned char wv_warp_sar[WV_WARPS][4] = {{{','.join(wsar)}}};   /* startup, active, recovery, step after the end */",
+        f"static const unsigned char wv_warp_at[WV_WARPS + 1] = {{{','.join(map(str, wat))}}};",
+        f"static const unsigned char wv_warp_tab[{len(wtab)}] = {{{','.join(map(str, wtab))}}};   /* step shown at each tick of those moves */",
+    ]
 out.write_text("\n".join(lines) + "\n")
 print("poses", len(used), "tiles", len(ent), "steps", len(seq), "bytes ~", len(ent) * 8 + len(seq) * 2 + len(pal) * 2)

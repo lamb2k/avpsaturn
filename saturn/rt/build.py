@@ -42,7 +42,7 @@ GUEST_WRAP = ("1cf54", "1d03e", "1d116", "195ec", "19f9a") if "SAT_GUESTS" in os
 sys.path.insert(0, str(REPO / "tools/wolverine"))
 import forkgen
 _KCF = os.environ.get("KERNEL_CFLAGS", "").split()
-WV_FORK_IDS = () if "-DSAT_GUESTS" not in _KCF or "-DSAT_WV_NATIVE" not in _KCF else (forkgen.ALL_IDS if "-DSAT_WV_FORK_ALL" in _KCF else forkgen.SHIP_IDS)
+WV_FORK_IDS = () if "-DSAT_GUESTS" not in _KCF or "-DSAT_WV_NATIVE" not in _KCF or "-DSAT_WV_NO_FORK" in _KCF else (forkgen.ALL_IDS if "-DSAT_WV_FORK_ALL" in _KCF else forkgen.SHIP_IDS)
 GUEST_WRAP += forkgen.wrapped_names(WV_FORK_IDS)
 WV_FORK_SOURCES = {}   # chunk name -> text after the OP rewrite, before the renames (forkgen input)
 CART = dict(ROMB=0x02400000, OPX=0x02600000, SAT_SINK=0x02640000, SAT_OBJ=0x02650000, SAT_PACK=0x02654000)

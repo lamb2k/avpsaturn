@@ -302,8 +302,9 @@ static u16 wv_nat(int move)
 /* Agreed ticks of a move (startup, active, recovery): the capture's own pose order and box windows, played over these lengths. 0 = the capture's timing. */
 static int wv_native_sar(int move, int *s, int *a, int *r)
 {
-    if (move == WV_LP) { *s = 2; *a = 4; *r = 6; return 1; }
-    if (move == WV_HP) { *s = 3; *a = 5; *r = 8; return 1; }
+    int k;
+    for (k = 0; k < WV_WARPS; k++)
+        if (wv_warp_move[k] == move) { *s = wv_warp_sar[k][0]; *a = wv_warp_sar[k][1]; *r = wv_warp_sar[k][2]; return 1; }
     return 0;
 }
 #endif
@@ -327,23 +328,13 @@ static int wv_move_len(int move)
 }
 #ifdef SAT_WV_NATIVE
 /* The step shown at tick w of a move played over its agreed startup / active / recovery: each part of the capture (before the first hit-box step, the
-   hit-box steps, the rest) is stretched or squeezed linearly onto its agreed length. */
+   hit-box steps, the rest) is stretched or squeezed linearly onto its agreed length. The table is made at generation time (tools/wolverine/gen_c.py). */
 static int wv_warp_step(int move, int w)
 {
-    int s0 = wv_move_start[move], n = wv_move_start[move + 1] - s0, first = -1, last = -1, k, So = 0, Ao = 0, Ro, To = wv_move_len_capture(move), Sn = 1, An = 1, Rn = 1, t, acc = 0;
-    wv_native_sar(move, &Sn, &An, &Rn);
-    for (k = 0; k < n; k++) if (wv_box[s0 + k].hw) { if (first < 0) first = k; last = k; }
-    if (first < 0) return w < n ? w : n - 1;
-    for (k = 0; k < first; k++) So += wv_steps[s0 + k].frames;
-    for (k = first; k <= last; k++) Ao += wv_steps[s0 + k].frames;
-    Ro = To - So - Ao;
-    if (Ro < 0) Ro = 0;
-    if (w < Sn) t = w * So / Sn;
-    else if (w < Sn + An) t = So + (w - Sn) * Ao / An;
-    else if (w < Sn + An + Rn) t = So + Ao + (w - Sn - An) * Ro / Rn;
-    else t = To;
-    for (k = 0; k < n; k++) { acc += wv_steps[s0 + k].frames; if (t < acc) return k; }
-    return n - 1;
+    int k;
+    for (k = 0; k < WV_WARPS; k++)
+        if (wv_warp_move[k] == move) return w < wv_warp_at[k + 1] - wv_warp_at[k] ? wv_warp_tab[wv_warp_at[k] + w] : wv_warp_sar[k][3];
+    return 0;
 }
 #endif
 /* A native attack can return sooner than wv_nat predicts. Keep only its remaining
@@ -495,27 +486,26 @@ static void wv_speed(int i)
     R16W(PL(i) + 0x18, (u16)(R16(PL(i) + 0x18) + e));
 }
 #ifdef SAT_WV_NATIVE
-/* Gameplay data patch (plan section 4.2). Stateless: each entry holds the original bytes (generated from the ROM image at build time, so no RAM backup)
-   and the patched ones. want = 1 turns every entry that still reads original into patched; want = 0 undoes. Any other pattern is counted in wv_patch_bad and
+/* Gameplay data patch (plan section 4.2). Stateless: each entry holds the original 16-bit word (generated from the ROM image at build time, so no RAM backup)
+   and the patched one. want = 1 turns every entry that still reads original into patched; want = 0 undoes. Any other pattern is counted in wv_patch_bad and
    left alone (a layout this table was not made for). Run before the player update reads the records; a stage load that restored the page is simply
    patched again. The patched pages are kept by every stage file (nativepatch.py). */
 static u8 wv_patch_bad;
 static void wv_patch_sync(int want)
 {
-    int k, j;
+    int k;
     for (k = 0; k < WV_PATCHES; k++) {
-        const WvPatch *p = &wv_patch_tab[k];
-        volatile u8 *m = ROMB + p->addr;
-        const u8 *from = want ? p->orig : p->now, *to = want ? p->now : p->orig;
-        int is_from = 1, is_to = 1;
-        for (j = 0; j < p->len; j++) { if (m[j] != from[j]) is_from = 0; if (m[j] != to[j]) is_to = 0; }
-        if (is_from) { for (j = 0; j < p->len; j++) m[j] = to[j]; }
-        else if (!is_to && wv_patch_bad < 255) wv_patch_bad++;
+        volatile u8 *m = ROMB + wv_patch_tab[k].addr;
+        u16 cur = (u16)((m[0] << 8) | m[1]), from = want ? wv_patch_tab[k].orig : wv_patch_tab[k].now, to = want ? wv_patch_tab[k].now : wv_patch_tab[k].orig;
+        if (cur == from) { m[0] = (u8)(to >> 8); m[1] = (u8)to; }
+        else if (cur != to && wv_patch_bad < 255) wv_patch_bad++;
     }
 }
+#ifndef SAT_WV_NO_FORK   /* SAT_WV_NO_FORK: data patch, timings and walk weight only (a build-size comparison) */
 /* forkgen.py wrappers (f_24454 attack, f_24f04 special): the fork runs for a Wolverine player only. */
 int sat_wv_fork_on(unsigned long a6, int id);
 int sat_wv_fork_on(unsigned long a6, int id) { (void)id; return wv_player((u32)a6) >= 0; }
+#endif
 #endif
 #ifdef WV_HOST_TRACE   /* host runner only (tools/lift_runner/host_guests.c): one record per player update, for the pacing reference */
 extern void wv_host_trace(int kind, int player, int a, int b, int c, int cur, int step, int left, int exec, int wall, int chain, int cstg, int hw, int x, int z);
