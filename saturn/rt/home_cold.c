@@ -2,6 +2,7 @@
 typedef unsigned char u8; typedef unsigned short u16; typedef unsigned int u32;
 extern u8 RAMB[];
 extern u32 sat_pad_raw;
+extern u32 sat_vblanks_now(void);
 extern void sat_home_set(int block_off, int value);
 extern int sat_home_get(int block_off);
 extern volatile int sat_home_hold, sat_home_mode;
@@ -291,33 +292,33 @@ static void buttons(void)
         if (e & P_RIGHT) sat_home_cfg.btn[cur] = (u8)((sat_home_cfg.btn[cur] + 1) & 7);
     }
 }
-/* Stage select: start the game at one of its own stage words (02 to 24 by 2, as the game advances them); sat_home_poll puts it in place of the start's 02. */
+/* Stage select, now after the character select (owner 11-09: mode > select character > select level). Opened by sat_home_flow when the select hands
+   the game stage word 02; the game is held, the picture black. Returns the stage word (02 to 24 by 2, as the game advances them), which goes in place of 02. */
 static int stage_select(void)
 {
     static int st = 1;
     sat_home_screen = 7;
+    prev = sat_pad_raw & 0xffff;
     for (;;) {
         char b[8];
         u32 e;
         sub("STAGE SELECT MODE");
-        
+        sat_home_mode = 2;             /* black: the select's own picture is what the held game shows */
         b[0] = (char)('0' + st / 10); b[1] = (char)('0' + st % 10); b[2] = 0;
         label(ROW(0), "STAGE", 0); value(ROW(0), b, 1);
         centre(FOOT, "PRESS START BUTTON TO PLAY", 0);
         sat_home_cursor = (u32)st;
         frame();
         e = edges();
-        if (e & P_B) return 0;
         if (e & P_LEFT) st = st > 1 ? st - 1 : 18;
         if (e & P_RIGHT) st = st < 18 ? st + 1 : 1;
-        if (e & (P_START | P_A | P_C)) { sat_home_warp = (u32)(st * 2); return 1; }
+        if (e & (P_START | P_A | P_C)) { sat_home_warp = (u32)(st * 2); return st * 2; }
     }
 }
 #ifdef SAT_DUEL_MENU
 /* Duel rules (duel_smash.inc reads them). Characters are picked on the game's own select screen after this, each player with its own pad. */
 typedef struct { u8 stocks, minutes, aliens, p1, p2, arena; } DuelOpt;
 extern DuelOpt sat_duel_opt;
-extern u32 sat_vblanks_now(void);
 /* RANDOM picks from arenas that draw clean. 0e, 1c, 1e and 24 show wrong tile data in the duel (Duel 5): their round files spill sprites into
    ROM pages the stage's own walk never reads, and the duel reads some of them (with ROUND_SHARED_MIN=1 the 1c fight drew clean, s92.log).
    They come back once the duel has round files that keep those pages. */
@@ -368,6 +369,110 @@ static int duel_setup(void)
     }
 }
 #endif
+/* Pause and boss rush screens, moved out of home.c (work RAM is full; they run between stages). */
+extern void sat_home_restart(void);
+void pause_menu(void)
+{
+    static const char *const items[] = { "RESUME", "QUIT TO TITLE" };
+    int pick;
+    sat_home_hold = 1;
+    sat_home_clear();
+    { int r, c; for (r = 7; r < 17; r++) for (c = 12; c < 32; c++) sat_home_text[r][c] = 1; }
+    sat_home_centre(9, "PAUSE", 1);
+    sat_home_mode = 1;
+    prev = sat_pad_raw & 0xffff;
+    pick = sat_home_list(3, 13, items, 2, 0, 0);
+    sat_home_screen = 0;
+    sat_home_mode = 0;
+    sat_home_hold = 0;
+    if (pick == 1) sat_home_restart();
+}
+
+extern u32 sat_home_rush_t[10];
+static void rush_time(char *b, u32 v)  /* mm:ss.cc from vblanks (60 per second) */
+{
+    u32 cs = v * 100u / 60u, s = cs / 100u, m = s / 60u;
+    b[0] = (char)('0' + m / 10 % 10); b[1] = (char)('0' + m % 10); b[2] = ':';
+    b[3] = (char)('0' + s % 60 / 10); b[4] = (char)('0' + s % 10); b[5] = '.';
+    b[6] = (char)('0' + cs % 100 / 10); b[7] = (char)('0' + cs % 10); b[8] = 0;
+}
+void rush_card(int n)           /* the break before a fight: the game held, a short card over its picture */
+{
+    char b[13] = "FIGHT 1 OF 5";
+    int i, r, c;
+    b[6] = (char)('0' + n);
+    sat_home_hold = 1;
+    sat_home_clear();
+    for (r = 10; r < 15; r++) for (c = 12; c < 32; c++) sat_home_text[r][c] = 1;
+    sat_home_centre(11, "BOSS RUSH", 1);
+    sat_home_centre(13, b, 0);
+    sat_home_mode = 1;
+    sat_home_screen = 8;
+    for (i = 0; i < 120; i++) sat_home_frame();
+    sat_home_screen = 0;
+    sat_home_mode = 0;
+    sat_home_hold = 0;
+}
+void rush_result(void)
+{
+    char b[12];
+    int i;
+    u32 tot = 0;
+    sat_home_hold = 1;
+    sat_home_clear();
+    sat_home_centre(6, "BOSS RUSH CLEAR", 1);
+    for (i = 0; i < 5; i++) {
+        char t[] = "FIGHT 1";
+        t[6] = (char)('1' + i);
+        sat_home_put(9 + 2 * i, 12, t, 0);
+        tot += sat_home_rush_t[2 * i + 1] - sat_home_rush_t[2 * i];
+        rush_time(b, sat_home_rush_t[2 * i + 1] - sat_home_rush_t[2 * i]); sat_home_put(9 + 2 * i, 23, b, 0);
+    }
+    sat_home_put(20, 12, "TOTAL", 1);
+    rush_time(b, tot); sat_home_put(20, 23, b, 1);
+    sat_home_centre(24, "PRESS START", 0);
+    sat_home_mode = 2;
+    sat_home_screen = 9;
+    prev = sat_pad_raw & 0xffff;
+    while (!(sat_home_edges() & P_START)) sat_home_frame();
+    sat_home_screen = 0;
+    sat_home_mode = 0;
+    sat_home_hold = 0;
+    sat_home_rush = 0;
+    sat_home_restart();
+}
+/* Mode flow (owner 11-09: "it should flow mode > select character > select level"). The game's own start plays the stage 1 intro story, then the character
+   select; only the arcade keeps that. Stage select, boss rush and the duel arm sat_home_flow when picked: once the game has left attract it blanks the
+   picture and presses Attack on player 1's pad (the Start presses of the start path, which sat_home_pad turns into Attack on the story and the select),
+   each press skipping a part of the story, until the select shows. ff81cc bit 0 is player 1 in the game, set when the select puts the 1P cursor up.
+   Stage select then waits for the select to hand the game stage word 02 and asks for the stage (stage_select) before the stage file loads. */
+#define G(a) RAMB[(a) - 0xff0000u]
+static u8 flow;                        /* 0 off, 1 armed (waits for the game to leave attract), 2 skipping the story, 3 stage select: waiting for the select to end */
+static u8 stage_after;                 /* the title list's STAGE SELECT MODE was picked */
+static u32 flow_t;
+void sat_home_flow(void)
+{
+    if (!flow) return;
+    if (flow == 1) {
+        if (G(0xff81b0)) return;       /* still in attract: the start path is running */
+        flow = 2; flow_t = sat_vblanks_now();
+        sat_home_clear(); sat_home_mode = 2;   /* black while the story is skipped, as NOW LOADING shows */
+    }
+    if (flow == 2) {
+        if (!G(0xff81b0) && !(G(0xff81cc) & 1) && !G(0xff8380) && sat_vblanks_now() - flow_t < 1800u) { sat_home_inject = 900; return; }   /* keeps the pad path pressing */
+        sat_home_inject = 0; sat_home_mode = 0;   /* select up, a stage running, back at the title, or no luck in 30 s */
+        flow = stage_after ? 3 : 0;
+    }
+    if (G(0xff81b0)) { flow = 0; return; }        /* back at the title: quit or game over */
+    if (G(0xff81e8) == 0 && G(0xff81e9) == 2) {   /* the select is done and the game starts stage 02: ask for the stage first */
+        int w;
+        sat_home_hold = 1; prev = sat_pad_raw & 0xffff;
+        w = stage_select();
+        G(0xff81e8) = (u8)(w >> 8); G(0xff81e9) = (u8)w;
+        sat_home_screen = 0; sat_home_mode = 0; sat_home_hold = 0;
+        flow = 0;
+    }
+}
 void sat_home_menu(void)
 {
     /* Fixed positions: 0 arcade, 1 duel, 2 boss rush, 3 stage select, 4 options. Without the duel, item 1 is absent and the rest move up. */
@@ -387,12 +492,12 @@ void sat_home_menu(void)
     for (;;) {
         panel(19);
         sat_home_mode = 3;
-        pick = menu_list(1, 19, items, HOME_ITEMS, pick < 0 ? 0 : pick, HOME_IDLE);
+        pick = menu_list(1, 21, items, HOME_ITEMS, pick < 0 ? 0 : pick, HOME_IDLE);
         if (pick == -2) { pick = (int)sat_home_cursor; continue; }   /* B at the top level: nothing above it */
         p = pick >= 1 ? pick + DUEL_SHIFT : pick;
-        sat_home_warp = 0; sat_home_rush = 0;
+        sat_home_warp = 0; sat_home_rush = 0; stage_after = 0;
         if (p == 4) options();
-        else if (p == 3) { if (stage_select()) { pick = 0; break; } }
+        else if (p == 3) { stage_after = 1; pick = 0; break; }   /* the stage is asked for after the character select (sat_home_flow) */
 #ifdef SAT_DUEL_MENU
         else if (p == 1) { if (duel_setup()) break; }   /* VERSUS MODE: duel rules, then the game's select */
 #endif
@@ -400,6 +505,7 @@ void sat_home_menu(void)
         else break;
     }
     p = pick >= 1 ? pick + DUEL_SHIFT : pick;
+    flow = (u8)(p == 1 || sat_home_rush || stage_after);   /* versus, boss rush and stage select: no intro story before the select */
     if (pick < 0 || p != 1) pick = pick < 0 ? -1 : 0; else pick = 2;
     sat_home_screen = 0;
     sat_home_mode = 0;

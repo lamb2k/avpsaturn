@@ -33,6 +33,8 @@ HW_BASE, HW_LIMIT, LW_BASE, LW_LIMIT = 0x06014000, 0x06100000, 0x00200000, 0x003
 HW_RESERVED = 0x10000 + 16 * 2048 + 8192 + 16384 + 0x8000 + 0x8000   # game RAM, stacks, kernel, graphics tables and code
 LW_RESERVED = 0x20000 + 0x4000 + 0xe400   # graphics RAM, lifted bss, layer shadows, blank tags
 NATIVE = ("41ca", "42e4", "212f8")   # EEPROM block read and write; start stock (kernel.c wraps the lifted body for the home LIVES setting)
+if "SAT_HOME" in os.environ.get("KERNEL_CFLAGS", ""):   # home only (the arcade build is unchanged): the credit display and the text writers (kernel.c)
+    NATIVE += ("ab438", "aba96", "abb0a", "abbae")
 # Readable replacements, saturn/game. GAME_OVERRIDES=0 builds without them, for an A/B.
 OVERRIDES = () if os.environ.get("GAME_OVERRIDES") == "0" else tuple((REPO / "saturn/game/overrides.txt").read_text().split())
 # Bonus characters (SAT_GUESTS only): lifted routines wrapped in game_bind.c, body kept (the collision passes for guest boxes, the player state machine for guest timings).
@@ -74,6 +76,16 @@ if os.environ.get("GUEST_ASSETS"):
     assets = pathlib.Path(os.environ["GUEST_ASSETS"])
     remap = json.loads((assets / "remap.json").read_text())
     round_cache.require_unused_remap("Wolverine", remap["keys"], ARCADE_SPRITE_KEYS | SCREEN_KEYS[0])
+# The character select's countdown digits (scroll 1 codes 0x0b00-0x0b3f, two cells wide, three rows high, both column halves) in the front file. The census routes press
+# Start at once, so only the digits 1, 4 and 5 were ever looked up; 6, 3, 2 and 0 drew blank. The digit's cells are blank or filled from one second to the next, and
+# home's column fit shares one map across the screen's rows, so the whole select screen (the stat bars, names, portraits) jumped one column each time the digit appeared
+# or vanished (owner 11-08, stat bars shifting on select; lane home-3, selcap/ logs).
+SELECT_DIGIT_KEYS = {(c << 1) | h for c in range(0x0b00, 0x0b40) for h in (0, 1)}
+# Home builds only: scroll 1 tiles at the outer columns (arcade 0, 1, 47) that the census never read (it reads the centre crop); the home
+# picture shows them on the HUD rows and fitted text rows (P1's portrait and 1P mark). tools/edge_keys.lua writes WORK/edge_keys.txt.
+EDGE_KEYS = set()
+if "SAT_HOME" in os.environ.get("KERNEL_CFLAGS", "") and (WORK / "edge_keys.txt").exists():
+    EDGE_KEYS = {int(l.split()[1], 16) for l in open(WORK / "edge_keys.txt") if l.strip() and l.split()[0] == "1"}
 # Sprite tiles of the player characters' poses (palettes 0 and 1) from a button-fuzz census (tools/rounds_fuzz.py: jumps, jump attacks, attack bursts, gun, every
 # direction, with and without health held). The route censuses move straight ahead and hit one attack now and then, so poses of jumps, combos and hurt
 # reactions were never looked up and drew blank (lane avp-vanish: the player's body gone for about a second in a stage 02 fight, 40 tiles of one pose).
@@ -86,6 +98,13 @@ FUZZ_STAGE = {}   # stage name -> sprite keys the fuzz runs looked up in that st
 if os.environ.get("POSE_KEYS", "1") == "1" and (WORK / "fuzz_stage_keys").is_dir():
     for f in (WORK / "fuzz_stage_keys").glob("stage*.txt"):
         FUZZ_STAGE[f.stem] = {int(l, 16) for l in f.read_text().split()}
+# Home builds only: the whole caption font (scroll 1 codes 0x1260-0x131f, with the 0x1246-9 and 0x1256-9 signs, both column halves) in every round file. The census routes press
+# through the story scenes, so the glyphs a stage's own captions use ("These aliens are all from one hive", stage select starts and any
+# play that lets the story run) were not in its file: letters drew blank, "These   iens". The font is 192 codes in 12 rows of 16: signs (the apostrophe
+# is 0x126d), digits, capitals, lower case, top and bottom halves. 392 keys, about 12 KB of tiles per file.
+CAPTION_KEYS = set()
+if "SAT_HOME" in os.environ.get("KERNEL_CFLAGS", ""):
+    CAPTION_KEYS = {(c << 1) | h for c in list(range(0x1260, 0x1320)) + [0x1246, 0x1247, 0x1248, 0x1249, 0x1256, 0x1257, 0x1258, 0x1259] for h in (0, 1)}
 STRETCHES = [(0x02400000 + a, n) for a, n in ROUNDS["holes"] if n >= 0x4000]
 
 
@@ -294,6 +313,12 @@ def round_files(rom, code_end, cold1_at, only=None):
             frank.update({k: 1 << 40 for k in SCREEN_KEYS[0]})
         if f.get("gfx") and f["gfx"] not in raws:
             raws[f["gfx"]] = pathlib.Path(f["gfx"]).read_bytes()
+        if EDGE_KEYS:
+            keys[1] = keys[1] | EDGE_KEYS
+        if CAPTION_KEYS:
+            keys[1] = keys[1] | CAPTION_KEYS
+        if f["name"] == "front":
+            keys[1] = keys[1] | SELECT_DIGIT_KEYS
         p, dropped = rounds_pack.fit(raws.get(f.get("gfx"), raw), keys, room, free, frank)
         # Check every plan before the write loop, including optional guest stages
         # 06/1c/1e. A high rank alone never guarantees that the tiles fit.
@@ -469,7 +494,7 @@ SECTIONS {{
     _sat_cold1_end = .;
   }}
 {stretch_ld}  .lw {LW_BASE:#x} : {{
-    *(.text .text.* .rodata .rodata.* .data .data.*)
+    *(.text .text.* .rodata .rodata.* .data .data.*) *(.lwcode)
     . = ALIGN(4);
   }}
   .lwbss (NOLOAD) : {{ _sat_lw_bss_start = .; *(.lwgfx) *(.bss COMMON) . = ALIGN(4); _sat_lw_bss_end = .; }}
