@@ -650,6 +650,7 @@ typedef struct
     u32 s2[S2_ROWS * 64], s3[S3_ROWS * (384 / 32 + 1)]; /* code << 16 | attribute, visible cells only */
     u32 s1_sum, s2_sum, s3_sum; /* change detection: position and every visible word */
     u16 hud_flush;
+    u16 sel_ok;   /* the front end (stage word 0, play mode, no player): the character select can be up */
 #ifdef SAT_VDP1_PROFILE
     unsigned int profile_layer_ticks;
 #endif
@@ -1188,16 +1189,30 @@ static HOME_OS void home_map(const u32 *m, const u8 *wgt, int hud, int box, u8 *
 }
 /* One map per block of rows: rows that hold anything (not all droppable) and touch each other share the columns all of them can drop, so
    a 16 pixel letter's top and bottom halves, and a banner's rows, stay together (owner 11-08: the select screen's names broke apart). */
-static HOME_OS void home_maps_rows(u32 x0, u32 (*bm)[2])
+static HOME_OS int home_maps_rows(u32 x0, u32 (*bm)[2])
 {
     u32 r;
+    int c, n13 = 0, n14 = 0;
     for (r = 0; r < S1_ROWS; r++) home_row_blank(r, x0, bm[r]);
+    /* The character select: its panel rows 13 and 14 are full of cells in every state (timer shown or blank, intro slide, pick). The columns blank in
+       all of rows 7 to 25 change with the timer's digit (the greedy pick took 3 of the centre gap while the timer was blank and the 16 pixel crop while it
+       showed), so the whole screen jumped 35 pixels twice a second (owner 11-09). Those rows keep one fixed map in every state (home_row_map). */
+    for (c = 0; c < 48; c++) { n13 += !BL(bm[13], c); n14 += !BL(bm[14], c); }
+    return snap.sel_ok && n13 >= 30 && n14 >= 30;
 }
-static HOME_OS void home_row_map(u32 row, u32 (*bm)[2], u8 *map)
+static HOME_OS void home_row_map(u32 row, u32 (*bm)[2], int sel, u8 *map)
 {
     u32 m[2], a = row, b = row, q;
     u8 wgt[48];
     int c, full = bm[row][0] == 0xffffffffUL && bm[row][1] == 0xffffUL;
+    if (sel && row >= 7 && row <= 25)
+    {
+        /* Columns 0 and 47 are blank in every state; the gap's 22 and 25 hold only the timer's digit cells (rows 15-17) and 21 and 26 only the panels' last
+           letters (other rows): rows 15 to 17 drop 21 and 26, the rest 22 and 25, so a panel's columns land on the same pixel in every row. */
+        int a1 = row >= 15 && row <= 17 ? 21 : 22, a2 = a1 == 21 ? 26 : 25, n = 0;
+        for (c = 0; c < 48; c++) if (c != 0 && c != a1 && c != a2 && c != 47) map[n++] = (u8)c;
+        return;
+    }
     m[0] = bm[row][0]; m[1] = bm[row][1];
     for (c = 0; c < 48; c++) wgt[c] = 0;
     if (!full)
@@ -1216,7 +1231,7 @@ static void draw_scroll1(u16 sx, u16 sy)
     u32 row, col;
 #if SAT_GFX_FIT && defined(SAT_HOME)
     u32 bm[S1_ROWS][2];
-    home_maps_rows(x0, bm);
+    int sel = home_maps_rows(x0, bm);
 #ifdef SAT_HOME_DIAG
     sat_diag_frames++;
     diag_miss0 = sat_gfx_stats.missing;
@@ -1226,7 +1241,7 @@ static void draw_scroll1(u16 sx, u16 sy)
     {
 #if SAT_GFX_FIT && defined(SAT_HOME)
         u8 map[44];
-        home_row_map(row < S1_ROWS ? row : S1_ROWS - 1, bm, map);
+        home_row_map(row < S1_ROWS ? row : S1_ROWS - 1, bm, sel, map);
 #ifdef SAT_HOME_DIAG
         if (row < S1_ROWS && snap.home < 3)
         {
@@ -2192,9 +2207,10 @@ void sat_gfx_snapshot_layers(void)
     {
 #if SAT_GFX_FIT
         snap.hud_flush = RAMB[0x8001] == 2 && RAMB[0x8380] != 0;
+        snap.sel_ok = RAMB[0x8001] == 2 && RAMB[0x8380] == 0 && RAM16(0xff81e8UL) == 0;
 #endif
         x0 = (u32)snap.s1x + CPS_LEFT + S1_READ_X; y0 = (u32)snap.s1y + CPS_TOP;
-        snap.s1_sum = snap_layer(snap.s1, GFX(RAM16(SH_SCROLL1_BASE) & 0xffc0U), x0 >> 3, y0 >> 3, S1_ROWS, S1_COLS, 5, (x0 >> 3) | ((y0 >> 3) << 16) | ((u32)snap.hud_flush << 31), snap.s1_sum);
+        snap.s1_sum = snap_layer(snap.s1, GFX(RAM16(SH_SCROLL1_BASE) & 0xffc0U), x0 >> 3, y0 >> 3, S1_ROWS, S1_COLS, 5, (x0 >> 3) | ((y0 >> 3) << 16) | ((u32)snap.hud_flush << 31) | ((u32)snap.sel_ok << 30), snap.s1_sum);
     }
     if (layers & 4)
     {
