@@ -2,6 +2,12 @@
 
 Only source of current state. Branch `decomp/main`. Backlog: docs/BACKLOG.md.
 
+## Cloud correction candidate, 2026-11-08 (HOST; target, MAME, EMULATOR and HARDWARE UNRUN)
+
+`codex/avp-wolverine-frame-fixes-20261108`, based on `feat/wolverine` at `79c9580`, combines the runtime VDP1 fixes from `fix/vdp1-race` at `3b28109` with corrected guest tick/recovery timing, IRQ-safe pose publication, debug-state gating (150 fewer declared fixed-state bytes before alignment), emitted-pose residency and strict pack/cache/fit gates. The additional sprite-lane pose-census pack policy is not imported into this combined candidate. The VDP1-only candidate is `codex/avp-vdp1-frame-fixes-20261108`.
+
+HOST: 37 Python regressions, strict C90 guest/runtime tests in four configurations, actual VDP1-driver tests in seven configurations, existing graphics fixture, independent review and behavioural mutation checks pass. Required private 06/1c/1e fits, target link/disc, actual full walk, emulator cadence and Saturn timing remain UNRUN; no new fps claim. Source-function census unchanged. Details and the executable local assignment: `docs/notes/AVP_FRAME_WOLVERINE_FIXES_20261108.md`; profiler capture: `docs/notes/VDP1_PROFILE.md`.
+
 - P0: items 1, 2 and 3 done (item 3 pending merge of lane/item3).
 - P1: first gate measured, docs/notes/AVP_FIRST_GATE.md; recommendation GO, awaiting coordinator.
 - Whole-game comparison: not run. Hardware: UNRUN.

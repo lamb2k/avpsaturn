@@ -8,6 +8,7 @@
  * CRAM mode 1, 2048 entries: page * 32 + bank gives one of 128 sixteen colour banks, pen p at entry p + 1, entry 0 clear.
  */
 #include "sat_gfx.h"
+#include "vdp1_profile.h"
 
 extern unsigned char *PAGE[256];
 extern unsigned char RAMB[];
@@ -28,6 +29,11 @@ extern u16 sat_gfx_host_vdp1r[], sat_gfx_host_vdp2r[];
 #define CRAM_AT(e) (sat_gfx_host_cram + (u32)(e) * 2)
 #define VDP1R(o) (sat_gfx_host_vdp1r[(o) / 2])
 #define VDP2R(o) (sat_gfx_host_vdp2r[(o) / 2])
+#define UNC32(v) (v)
+#define UNC_PTR(type, p) ((volatile type *)(p))
+/* Optional host timing seam for the actual presentation state machine. */
+extern unsigned long sat_gfx_host_ticks(void);
+#define GFX_TICKS() sat_gfx_host_ticks()
 static u16 be16(const u8 *p) { return (u16)((p[0] << 8) | p[1]); }
 static u32 be32(const u8 *p) { return ((u32)p[0] << 24) | ((u32)p[1] << 16) | ((u32)p[2] << 8) | p[3]; }
 static void put16(u8 *p, u16 v) { p[0] = (u8)(v >> 8); p[1] = (u8)v; }
@@ -39,11 +45,18 @@ static void put32(u8 *p, u32 v) { p[0] = (u8)(v >> 24); p[1] = (u8)(v >> 16); p[
 #define CRAM_AT(e) ((u8 *)0x25F00000UL + (u32)(e) * 2)
 #define VDP1R(o) (*(volatile u16 *)(0x25D00000UL + (o)))
 #define VDP2R(o) (*(volatile u16 *)(0x25F80000UL + (o)))
+#define UNC32(v) (*(volatile u32 *)((u32)&(v) | 0x20000000UL))
+#define UNC_PTR(type, p) ((volatile type *)((unsigned long)(p) | 0x20000000UL))
+#define GFX_TICKS() (((u32)*(volatile u8 *)0xfffffe12UL << 8) | *(volatile u8 *)0xfffffe13UL)
 #define be16(p) (*(const u16 *)(const void *)(p))
 #define be32(p) (*(const u32 *)(const void *)(p))
 #define put16(d, v) (*(volatile u16 *)(void *)(d) = (u16)(v))
 #define put32(d, v) (*(volatile u32 *)(void *)(d) = (u32)(v))
 #define get32(d) (*(const volatile u32 *)(const void *)(d))
+#endif
+
+#if !defined(SAT_GFX_HOST) || defined(SAT_GFX_SYNC_TEST) || defined(SAT_VLOG)
+#define SAT_GFX_HAVE_SYNC
 #endif
 
 /* Game state, by address. */
@@ -138,6 +151,9 @@ typedef struct
     u16 *head;
     u32 memo_key[2]; /* last answer per column parity this frame: runs of one tile, mostly blank, skip the lookup */
     u16 memo_slot[2];
+#ifdef SAT_VLOG
+    u8 memo_cause[2];
+#endif
 } Cache;
 
 #define NOSLOT 0xffffU
@@ -165,6 +181,11 @@ static u32 census_count(void)
 
 static Section sections[4];
 static u16 stamp;
+static u16 prev_stamp;   /* the frame before: its sprite slots may still be read by a plot an emulator renders late */
+/* Two command tables, so the one VDP1 plots is never the one the slave writes: 0x20 to 0x8000 and 0x8020 to 0x10000, each local
+   coordinates, clear polygon, sprites, end. The system clip at 0 jumps to the table of the plot being started. */
+static u32 table_base;
+#define TABLE_B 0x8000UL
 
 static u32 spr_key[SAT_GFX_SPRITE_SLOTS];
 static u16 spr_stamp[SAT_GFX_SPRITE_SLOTS], spr_next[SAT_GFX_SPRITE_SLOTS], spr_head[HASH_SIZE];
@@ -244,9 +265,60 @@ extern u32 sat_vblanks_now(void);
 #define FRT_NOW() (((u32)*(volatile u8 *)0xfffffe12UL << 8) | *(volatile u8 *)0xfffffe13UL)
 #endif
 
+#ifdef SAT_VDP1_PROFILE
+/* Measurement storage is entirely absent in a normal image. With depth 16 the
+   two exported rings take 1984 bytes; current-row and snapshot state add 132.
+   This diagnostic build still has to pass the normal linker memory limits. */
+#ifdef SAT_GFX_HOST
+#define VP_RAM
+#else
+#define VP_RAM __attribute__((section(".lwgfx"), aligned(4)))
+#endif
+volatile unsigned int sat_vdp1_plots[SAT_VDP1_PROFILE_DEPTH][VP_PLOT_WORDS] VP_RAM;
+volatile unsigned int sat_vdp1_frames[SAT_VDP1_PROFILE_DEPTH][VF_FRAME_WORDS] VP_RAM;
+static unsigned int vp_current[VP_PLOT_WORDS] VP_RAM;
+static unsigned int vp_attempt, vp_active, vp_sprite_start, vp_layer_start;
+extern u32 sat_vblanks_now(void);
+#define VP(x) x
+static unsigned int vp_elapsed(unsigned int start)
+{
+    return (unsigned int)((GFX_TICKS() - start) & 0xffffUL);
+}
+static void vp_finish(unsigned int flags)
+{
+    unsigned int i, id = vp_current[VP_ATTEMPT];
+    volatile unsigned int *out = UNC_PTR(unsigned int, sat_vdp1_plots[id & (SAT_VDP1_PROFILE_DEPTH - 1)]);
+    vp_current[VP_FLAGS] |= flags;
+    vp_current[VP_CPU_TICKS] = vp_elapsed(vp_current[VP_CPU_TICKS]);
+    out[0] = 0;
+    for (i = 1; i < VP_PLOT_WORDS; i++) out[i] = vp_current[i];
+    out[0] = id;
+    vp_active = 0;
+}
+/* Bounding-box area clipped to the system clip, not opaque pixels or a fill
+   time estimate. Transparent texels and overdraw still cost the VDP1 work. */
+static void vp_sprite(int x, int y, int w, int h, unsigned int pmod,
+                      unsigned int source_texels)
+{
+    int right = x + w, bottom = y + h;
+    if (x < 0) x = 0;
+    if (y < 0) y = 0;
+    if (right > SAT_GFX_SCREEN_W) right = SAT_GFX_SCREEN_W;
+    if (bottom > SAT_GFX_SCREEN_H) bottom = SAT_GFX_SCREEN_H;
+    if (right > x && bottom > y)
+        vp_current[VP_SPRITE_PIXELS] += (unsigned int)((right - x) * (bottom - y));
+    vp_current[VP_SOURCE_TEXELS] += source_texels;
+    vp_current[VP_COLOUR_MODES] |= 1u << ((pmod >> 3) & 7u);
+    if ((pmod & 3u) == 3u) vp_current[VP_HALF_TRANSPARENT]++;
+}
+#else
+#define VP(x)
+#endif
+
 static void vram_copy(u8 *dest, const u8 *src, u32 bytes)
 {
     u32 i;
+    VP(unsigned int vp_upload_start = (unsigned int)GFX_TICKS();)
 #ifdef SAT_PROF
     u32 t0 = FRT_NOW();
 #endif
@@ -267,6 +339,11 @@ static void vram_copy(u8 *dest, const u8 *src, u32 bytes)
     for (i = 0; i < bytes / 4; i++) d[i] = s[i];
 #endif
 #endif
+    VP(if (vp_active && (u32)dest >= (u32)(VDP1_VRAM + TEX_BASE) &&
+          (u32)dest < (u32)(VDP1_VRAM + 0x80000UL)) {
+        vp_current[VP_UPLOAD_TICKS] += vp_elapsed(vp_upload_start);
+        vp_current[VP_UPLOAD_BYTES] += (unsigned int)bytes;
+    })
 #ifdef SAT_PROF
     if (speed_on) { u32 t = FRT_NOW() - t0; sat_speed.upload_ticks += t; if (t > sat_speed.peak_upload_ticks) sat_speed.peak_upload_ticks = t; }
 #endif
@@ -274,7 +351,7 @@ static void vram_copy(u8 *dest, const u8 *src, u32 bytes)
 
 #ifdef SAT_READOUT
 extern u32 sat_pad_raw;
-static u32 readout_pad(void) { return *(volatile u32 *)((unsigned long)&sat_pad_raw | 0x20000000UL); }
+static u32 readout_pad(void) { return *UNC_PTR(u32, &sat_pad_raw); }
 #endif
 #define HASH(k) (((k) ^ ((k) >> 10)) & (HASH_SIZE - 1))
 /* The per-frame snapshot: everything drawing reads from the game, copied once by the game's CPU. The two sides never share a structure: the
@@ -304,6 +381,9 @@ typedef struct
     u32 s1[S1_ROWS * S1_COLS], s2[S2_ROWS * 64], s3[S3_ROWS * (384 / 32 + 1)]; /* code << 16 | attribute, visible cells only */
     u8 obj[MAX_OBJECTS * 8];
     u32 pal_sum[SAT_GFX_PAGES], s1_sum, s2_sum, s3_sum; /* change detection: position and every visible word */
+#ifdef SAT_VDP1_PROFILE
+    unsigned int profile_vblank, profile_stage_chars, profile_snapshot_ticks, profile_handoff_tick;
+#endif
 #ifdef SAT_HOME
     u16 home; /* menu text on its own layer (NBG3) */
 #endif
@@ -318,24 +398,28 @@ static Snapshot snap;
 static Snapshot snap __attribute__((section(".lwgfx"), aligned(4)));
 #endif
 
+#ifdef SAT_VDP1_PROFILE
+static void vp_begin(void)
+{
+    unsigned int i;
+    for (i = 0; i < VP_PLOT_WORDS; i++) vp_current[i] = 0;
+    if (++vp_attempt == 0) vp_attempt = 1;
+    vp_current[VP_ATTEMPT] = vp_attempt;
+    vp_current[VP_SOURCE_VBLANK] = snap.profile_vblank;
+    vp_current[VP_STAGE_CHARACTERS] = snap.profile_stage_chars;
+    vp_current[VP_SNAPSHOT_TICKS] = snap.profile_snapshot_ticks;
+    vp_current[VP_HANDOFF_TICK] = snap.profile_handoff_tick;
+    vp_current[VP_RASTER_UPPER_TICKS] = 0xffffffffu;
+    vp_current[VP_CPU_TICKS] = (unsigned int)GFX_TICKS(); /* start, replaced by elapsed duration at commit */
+    vp_active = 1;
+}
+#endif
+
 #ifdef SAT_GFX_HOST
 #define put32_ram(p, v) put32((p), (v))
 #else
 #define put32_ram(p, v) (*(u32 *)(void *)(p) = (v))
 #endif
-
-static void snap_copy(u8 *dest, const u8 *src, u32 bytes)
-{
-    /* Whole longs: the sources are aligned object and graphics RAM. */
-    u32 i;
-#ifdef SAT_GFX_HOST
-    for (i = 0; i < bytes; i++) dest[i] = src[i];
-#else
-    u32 *d = (u32 *)(void *)dest;
-    const u32 *s = (const u32 *)(const void *)src;
-    for (i = 0; i < bytes / 4; i++) d[i] = s[i];
-#endif
-}
 
 /* Blank tiles fill most layers and never get a slot, so without this each one means a binary search of the pack on the cart, every frame. */
 #define BLANK_WAYS 2048
@@ -345,6 +429,15 @@ static u32 blank_seen[BLANK_WAYS];
 static u32 blank_seen[BLANK_WAYS] __attribute__((section(".lwgfx")));
 #endif
 
+#ifdef SAT_VLOG
+/* Diagnostic (lane avp-vanish): why the last lookup returned what it did. 0 slot, 1 blank tile, 2 key not in the pack, 3 no free slot. */
+static u8 vl_cause;
+#define VL_CAUSE(c) (vl_cause = (c))
+#define BLANK_MISS_BIT 0x80000000UL
+#else
+#define VL_CAUSE(c)
+#define BLANK_MISS_BIT 0
+#endif
 /* Slot holding a tile, uploading it on a miss. NOSLOT for a blank, missing or refused tile. */
 static u16 cache_find(Cache *c, u32 key, unsigned long *refused)
 {
@@ -358,13 +451,18 @@ static u16 cache_find(Cache *c, u32 key, unsigned long *refused)
         if (c->slot_key[s] == key)
         {
             if (c->slot_stamp[s] != stamp) { c->slot_stamp[s] = stamp; c->used++; }
+            VL_CAUSE(0);
             return s;
         }
         s = c->slot_next[s];
     }
     {
         u32 tag = (key << 2) | (u32)c->section, way = (tag ^ (tag >> 11)) & (BLANK_WAYS - 1);
+#ifdef SAT_VLOG
+        if ((blank_seen[way] & ~BLANK_MISS_BIT) == tag) { VL_CAUSE(blank_seen[way] & BLANK_MISS_BIT ? 2 : 1); return NOSLOT; }
+#else
         if (blank_seen[way] == tag) return NOSLOT;
+#endif
 #ifdef SAT_KEYLOG
         {   /* Test build only: every key the running game asks for, as bits in spare SCSP RAM, read back over MCP to size the tile pack by real play. */
             static const u32 base[4] = { 0x25A70000UL, 0x25A78000UL, 0x25A7C000UL, 0x25A7E000UL };
@@ -374,19 +472,19 @@ static u16 cache_find(Cache *c, u32 key, unsigned long *refused)
         idx = pack_find(&sections[c->section], key);
         if (idx < 0)
         {
-            sat_gfx_stats.missing++; blank_seen[way] = tag;
+            sat_gfx_stats.missing++; blank_seen[way] = tag | BLANK_MISS_BIT; VL_CAUSE(2);
             CENSUS(if (sat_gfx_census.missing_n < 32) sat_gfx_census.missing_key[sat_gfx_census.missing_n++] = key | ((u32)c->section << 28);)
             return NOSLOT;
         }
-        if ((u32)idx == BLANK_INDEX) { blank_seen[way] = tag; return NOSLOT; }
+        if ((u32)idx == BLANK_INDEX) { blank_seen[way] = tag; VL_CAUSE(1); return NOSLOT; }
     }
     for (scan = c->first; scan < c->capacity; scan++)
     {
         u16 t = c->hand;
         c->hand = (u16)(t + 1U >= c->capacity ? c->first : t + 1U);
-        if (c->slot_stamp[t] != stamp) { n = t; break; }
+        if (c->slot_stamp[t] != stamp && !(c->section == SEC_SPRITE && prev_stamp && c->slot_stamp[t] == prev_stamp)) { n = t; break; }
     }
-    if (n == NOSLOT) { (*refused)++; return NOSLOT; }
+    if (n == NOSLOT) { (*refused)++; VL_CAUSE(3); return NOSLOT; }
     if (c->slot_key[n] != NOKEY)
     {
         u16 *link = &c->head[HASH(c->slot_key[n])];
@@ -410,6 +508,7 @@ static u16 cache_find(Cache *c, u32 key, unsigned long *refused)
         vram_copy(c->vram + (u32)n * c->slot_bytes, from, c->slot_bytes);
     }
     if (c == &spr_cache) sat_gfx_stats.uploads++; else sat_gfx_stats.layer_uploads++;
+    VL_CAUSE(0);
     return n;
 }
 
@@ -420,7 +519,13 @@ static u16 cache_get(Cache *c, u32 key, unsigned long *refused)
     {
         c->memo_key[way] = key;
         c->memo_slot[way] = cache_find(c, key, refused);
+#ifdef SAT_VLOG
+        c->memo_cause[way] = vl_cause;
     }
+    vl_cause = c->memo_cause[way];
+#else
+    }
+#endif
     return c->memo_slot[way];
 }
 
@@ -720,20 +825,25 @@ static void update_priority(u16 layers, u16 pri)
     VDP2R(0xf6) = (u16)(s[6] | (s[7] << 8));
 }
 
+#if SAT_GFX_FIT != 1
 static void put_sprite(u8 *cmd, u16 flip, u16 colr, u32 tex, int x, int y)
 {
+#ifdef SAT_READOUT
+    u16 size = (u16)(readout_pad() & 0x0010 ? 0x0210 : 0x0101);
+#else
+    u16 size = 0x0210;
+#endif
+    VP(vp_sprite(x + NUDGE_X, y + NUDGE_Y, ((size >> 8) & 63) * 8, size & 255, 0x0880,
+                 (unsigned int)(((size >> 8) & 63) * 8 * (size & 255)));)
     put16(cmd + 0, flip);          /* normal sprite, jump next */
     put16(cmd + 4, 0x0880);        /* pre-clip off, end codes off, pen 0 clear, 16 colour bank */
     put16(cmd + 6, colr);
     put16(cmd + 8, (u16)(tex >> 3));
-#ifdef SAT_READOUT
-    put16(cmd + 10, readout_pad() & 0x0010 ? 0x0210 : 0x0101);   /* pad Z held: 8 x 1 texels per tile, so fetch cost stays and fill nearly goes */
-#else
-    put16(cmd + 10, 0x0210);       /* 16 x 16 */
-#endif
+    put16(cmd + 10, size);       /* 16 x 16; SAT_READOUT pad Z selects the existing 8 x 1 fill probe */
     put16(cmd + 12, (u16)x);
     put16(cmd + 14, (u16)y);
 }
+#endif
 
 #if SAT_GFX_FIT == 1 || SAT_GFX_FIT == 3
 /* sx + 16 in, source column out at 11/12. Each tile its two end columns, so neighbours meet. */
@@ -741,6 +851,7 @@ static u16 fit_x[417];
 static void put_sprite_fit(u8 *cmd, u16 flip, u16 colr, u32 tex, int x, int y)
 {
     int a = (int)fit_x[x + 16] - 14, b = (int)fit_x[x + 32] - 15; /* fit_x[16] = 14 is screen 0 */
+    VP(vp_sprite(a + NUDGE_X, y + NUDGE_Y, b - a + 1, 16, 0x0880, 256);)
     put16(cmd + 0, (u16)(flip | 1));   /* scaled sprite, two corners */
     put16(cmd + 4, 0x0880);
     put16(cmd + 6, colr);
@@ -767,12 +878,40 @@ static u8 *bar(u8 *cmd, int w, int y, u16 rgb)
 #endif
 /* Object list at 0x708000. The board keeps the first pixel down, drawing from the end of the list, so later entries win: VDP1 paints in
    list order, tiles of a block last to first. Each 16 pixel tile is one command. */
+#ifdef SAT_VLOG
+extern unsigned long sat_vl_sforced;
+/* Per plot, for the diagnostic ring sat_plog (one entry per plot serial, 16 deep): tiles seen, culled off screen, lost by cause, and the first three lost tiles
+   (cause 3 bits, palette 5, screen x 12, screen y 12). Lost = key not in the pack (2), no free slot (3), command table full (4). */
+static u16 vl_tiles, vl_off, vl_blank, vl_miss, vl_refslot, vl_refcmd;
+static u32 vl_lost[3];
+static u8 vl_nlost;
+static u16 vl_serial;   /* serial of the plot being built: drawn into its picture as 16 cells (top row, 4 pixels each, white 1 / green 0) so a screenshot says which plot it shows */
+/* Distinct sprite tile keys the pack lacks (tile number | palette << 20), first 40 seen; sat_vl_mkn counts lookups that missed. */
+volatile unsigned long sat_vl_mk[40] __attribute__((section(".lwgfx"), aligned(4)));
+unsigned long sat_vl_mkn, sat_vl_mku;
+static void vl_note_key(u32 tile, int pal)
+{
+    u32 k = tile | ((u32)(pal & 31) << 20), i;
+    sat_vl_mkn++;
+    for (i = 0; i < sat_vl_mku; i++) if (sat_vl_mk[i] == k) return;
+    if (sat_vl_mku < 40) sat_vl_mk[sat_vl_mku++] = k;
+}
+static void vl_note(u32 cause, int pal, int sx, int sy)
+{
+    if (vl_nlost < 3) vl_lost[vl_nlost] = (cause << 29) | ((u32)(pal & 31) << 24) | (((u32)sx & 0xfff) << 12) | ((u32)sy & 0xfff);
+    if (vl_nlost < 255) vl_nlost++;
+}
+#define VLN(x) x
+#else
+#define VLN(x)
+#endif
 static void draw_sprites(void)
 {
     const u8 *list = snap.obj;
-    u8 *cmd = VDP1_VRAM + 0x40; /* after clip and local */
+    u8 *cmd = VDP1_VRAM + table_base + 0x40; /* after clip and this table's local */
     int count = snap.objects, i;
     u16 commands = 0;
+    VP(vp_current[VP_CLEAR_PIXELS] = SAT_GFX_SCREEN_W * SAT_GFX_SCREEN_H;)
     /* Clear the buffer: plotting by hand gives no automatic erase, and old sprites otherwise pile up as trails. A polygon in colour 0 reads as clear. */
     put16(cmd + 0, 0x0004);
     put16(cmd + 4, 0x00c0);
@@ -783,6 +922,7 @@ static void draw_sprites(void)
     put16(cmd + 24, 0); put16(cmd + 26, SAT_GFX_SCREEN_H - 1);
     cmd += 32;
     sat_gfx_stats.objects = (u16)count;
+    VLN(vl_tiles = vl_off = vl_blank = vl_miss = vl_refslot = vl_refcmd = 0; vl_nlost = 0;)
     for (i = 0; i < count; i++)
     {
         const u8 *o = list + i * 8;
@@ -809,15 +949,25 @@ static void draw_sprites(void)
                 u32 tile;
                 u16 slot;
                 CENSUS(c_tiles++;)
-                if (sx <= -16 || sx >= SAT_GFX_SRC_W || sy <= -16 || sy >= SAT_GFX_SCREEN_H) { CENSUS(c_off++;) continue; }
+                VLN(vl_tiles++;)
+                if (sx <= -16 || sx >= SAT_GFX_SRC_W || sy <= -16 || sy >= SAT_GFX_SCREEN_H) { CENSUS(c_off++;) VLN(vl_off++;) continue; }
                 if (fx || fy)
                     tile = code + (u32)(fx ? nx - 1 - tx : tx) + 0x10UL * (u32)(fy ? ny - 1 - ty : ty);
                 else
                     tile = (code & ~0xfUL) + ((code + (u32)tx) & 0xfUL) + 0x10UL * (u32)ty;
                 slot = cache_get(&spr_cache, tile, &sat_gfx_stats.refused_sprite);
-                if (slot == NOSLOT) { CENSUS(c_empty++;) continue; }
+                if (slot == NOSLOT)
+                {
+                    CENSUS(c_empty++;)
+#ifdef SAT_VLOG
+                    if (vl_cause == 2) { vl_miss++; vl_note(2, bank & 31, sx, sy); vl_note_key(tile, bank & 31); }
+                    else if (vl_cause == 3) { vl_refslot++; vl_note(3, bank & 31, sx, sy); }
+                    else vl_blank++;
+#endif
+                    continue;
+                }
                 CENSUS(if (prev != tx + 1) c_runs++; prev = tx; census_bank((u32)bank);)
-                if (commands >= SAT_GFX_MAX_COMMANDS) { sat_gfx_stats.refused_commands++; continue; }
+                if (commands >= SAT_GFX_MAX_COMMANDS) { sat_gfx_stats.refused_commands++; VLN(vl_refcmd++; vl_note(4, bank & 31, sx, sy);) continue; }
 #if SAT_GFX_FIT == 3
                 if (SAT_FIT_ON) put_sprite_fit(cmd, flip, colr, TEX_BASE + (u32)slot * 128, sx, sy);
                 else put_sprite(cmd, flip, colr, TEX_BASE + (u32)slot * 128, sx, sy);
@@ -831,9 +981,23 @@ static void draw_sprites(void)
             }
         }
     }
+#ifdef SAT_VLOG
+    {
+        int b;
+        put16(CRAM_AT(2041), 0x83e0); put16(CRAM_AT(2043), 0xffff);
+        for (b = 0; b < 16; b++)
+        {
+            int x = SAT_GFX_SCREEN_W - 68 + b * 4;
+            put16(cmd + 0, 0x0004); put16(cmd + 4, 0x00c0); put16(cmd + 6, 0xe000 | ((vl_serial >> (15 - b)) & 1 ? 2043 : 2041));
+            put16(cmd + 12, x); put16(cmd + 14, 0); put16(cmd + 16, x + 3); put16(cmd + 18, 0);
+            put16(cmd + 20, x + 3); put16(cmd + 22, 3); put16(cmd + 24, x); put16(cmd + 26, 3);
+            cmd += 32;
+        }
+    }
+#endif
 #ifdef SAT_READOUT
     {
-        volatile unsigned long *r = (volatile unsigned long *)((unsigned long)sat_readout | 0x20000000UL);
+        volatile unsigned long *r = UNC_PTR(unsigned long, sat_readout);
         /* Four colours at the top of CRAM, past any palette page in use; sprite priority 7 so they sit over every layer. */
         put16(CRAM_AT(2041), 0x83e0); put16(CRAM_AT(2042), 0xfc00); put16(CRAM_AT(2043), 0xffff); put16(CRAM_AT(2044), 0xfc1f);
         cmd = bar(cmd, (int)(r[0] / 26), 0, 0xe000 | 2041);
@@ -844,6 +1008,7 @@ static void draw_sprites(void)
 #endif
     put16(cmd, 0x8000); /* end */
     sat_gfx_stats.commands = commands;
+    VP(vp_current[VP_COMMANDS] = commands; vp_current[VP_OBJECTS] = (unsigned int)count;)
 #ifdef SAT_PROF
     {
         u32 live = census_count();
@@ -927,6 +1092,12 @@ void sat_gfx_snapshot(void)
     const u8 *last;
     u32 x0, y0, n;
     int page, count = 0;
+    VP(unsigned int vp_snapshot_start = (unsigned int)GFX_TICKS();)
+
+    VP(snap.profile_vblank = (unsigned int)sat_vblanks_now();
+       snap.profile_stage_chars = (unsigned int)RAM16(0xff81e8UL) |
+           (unsigned int)(RAMB[0x8380] ? RAMB[0x8381] : 255) << 16 |
+           (unsigned int)(RAMB[0x8480] ? RAMB[0x8481] : 255) << 24;)
 
     snap.layers = layers;
     snap.priority = RAM16(SH_PRIORITY);
@@ -1040,16 +1211,171 @@ void sat_gfx_snapshot(void)
         if (snap.home >= 3) snap.s1_sum++;    /* scroll 1 redrawn on the title menus (its bottom rows hidden) */
     }
 #endif
+    VP(snap.profile_snapshot_ticks = vp_elapsed(vp_snapshot_start);
+       snap.profile_handoff_tick = (unsigned int)GFX_TICKS();)
 }
 
 /* Drawing side: everything from the snapshot. On the Saturn this runs on the slave SH-2. */
+/* VDP1 frame change, safe against a list still plotting (lane avp-vanish, 11-08). Two alternating command tables:
+   the slave starts a plot (PTMR) and counts it in plot_started; the master, first thing in each vblank-in, asks for the frame change
+   (FBCR) only when VDP1 reports the end of that plot (EDSR CEF) and counts it in plot_shown. The slave touches the table again only
+   once the last plot is shown, and starts the next plot only after the vblank in which the change happens. A list that is still
+   plotting at a vblank keeps the last whole picture on screen one more frame, as a dropped frame, never a half-drawn one.
+   Before the master's first vblank hook (standalone and host builds) the old path runs: change asked for at the plot. */
+#ifdef SAT_GFX_HAVE_SYNC
+#define EDSR_CEF 2
+#define TVSTAT_VBLANK 8
+static u32 plot_started, plot_shown, plot_held, plot_sync;   /* started: slave; shown, held, sync: master */
+u32 sat_gfx_plot_waits;   /* frames the master held the last picture because VDP1 had not finished (diagnostic) */
+#define SLAVE_WAIT_MAX 7000UL   /* about two frames of slave FRT ticks: a master with interrupts off (restart) cannot hold the slave */
+#ifdef SAT_VLOG
+extern u32 sat_vblanks_now(void);
+/* Per vblank-in, 16 deep, written by the master at the frame change decision: word 0 vblank<<16 | EDSR, 1 plots started<<16 | plots shown before,
+   2 plots shown after<<16 | action<<8 | held count (action 0 none to show, 1 change with CEF, 3 held for the end of the plot;
+   old action 2 is reserved and is no longer emitted). */
+volatile unsigned long sat_vb[16 * 4] __attribute__((section(".lwgfx"), aligned(4)));
+volatile unsigned long sat_plog[16 * 8] __attribute__((section(".lwgfx"), aligned(4)));
+unsigned long sat_vl_sforced;   /* retained SAT_VLOG ABI counter, always zero: unsafe forced changes were removed */
+#endif
+void sat_gfx_vblank(void)
+{
+    u32 s = UNC32(plot_started);
+#ifdef SAT_VDP1_PROFILE
+    unsigned int vp_before = (unsigned int)UNC32(plot_shown);
+    unsigned int vp_edsr = VDP1R(0x10), vp_vblank = (unsigned int)sat_vblanks_now() + 1;
+#endif
+#ifdef SAT_VLOG
+    u32 act = 0, before = UNC32(plot_shown), edsr = VDP1R(0x10), vbv = sat_vblanks_now() + 1;
+#endif
+    UNC32(plot_sync) = 1;
+    if (s != UNC32(plot_shown))
+    {
+        if (VDP1R(0x10) & EDSR_CEF)
+        {
+#ifdef SAT_VLOG
+            act = 1;
+#endif
+            VDP1R(FBCR) = 3;
+            UNC32(plot_shown) = s;
+            UNC32(plot_held) = 0;
+        }
+        else
+        {
+#ifdef SAT_VLOG
+            act = 3;
+#endif
+            UNC32(plot_held) = UNC32(plot_held) + 1;
+            UNC32(sat_gfx_plot_waits) = UNC32(sat_gfx_plot_waits) + 1;
+        }
+    }
+#ifdef SAT_VLOG
+    {
+        volatile unsigned long *e = UNC_PTR(unsigned long, &sat_vb[(vbv & 15) * 4]);
+        e[0] = (vbv & 0xffff) << 16 | (edsr & 0xffff); e[1] = (s & 0xffff) << 16 | (before & 0xffff);
+        e[2] = (UNC32(plot_shown) & 0xffff) << 16 | act << 8 | (UNC32(plot_held) & 0xff); e[3] = 0;
+    }
+#endif
+#ifdef SAT_VDP1_PROFILE
+    {
+        volatile unsigned int *row = UNC_PTR(unsigned int, sat_vdp1_frames[vp_vblank & (SAT_VDP1_PROFILE_DEPTH - 1)]);
+        row[VF_VBLANK] = 0;
+        row[VF_STARTED] = (unsigned int)s;
+        row[VF_SHOWN_BEFORE] = vp_before;
+        row[VF_SHOWN_AFTER] = (unsigned int)UNC32(plot_shown);
+        row[VF_EDSR] = vp_edsr;
+        row[VF_CPU_BUSY] = (unsigned int)sat_gfx_profile_busy();
+        row[VF_VBLANK] = vp_vblank;
+    }
+#endif
+}
+static u32 slave_ticks(void) { return GFX_TICKS(); }
+/* Before the table and the texture slots are touched: the last plot has ended (its change may still be pending; only PTMR waits for that). */
+static int plot_wait_end(void)
+{
+    u32 t0 = slave_ticks();
+    if (!UNC32(plot_sync)) return 1;
+    while (UNC32(plot_started) != UNC32(plot_shown) && !(VDP1R(0x10) & EDSR_CEF))
+        if (((slave_ticks() - t0) & 0xffffUL) > SLAVE_WAIT_MAX) {
+            VP(vp_current[VP_WAIT_END_TICKS] = vp_elapsed((unsigned int)t0);)
+            return 0;
+        }
+    VP(vp_current[VP_WAIT_END_TICKS] = vp_elapsed((unsigned int)t0);)
+    return 1;
+}
+/* Before PTMR: the change for the last plot has been asked for, so the new plot goes into the other buffer. */
+static int plot_wait_shown(void)
+{
+    u32 t0 = slave_ticks();
+    while (UNC32(plot_started) != UNC32(plot_shown))
+        if (((slave_ticks() - t0) & 0xffffUL) > SLAVE_WAIT_MAX) {
+            VP(vp_current[VP_WAIT_CHANGE_TICKS] = vp_elapsed((unsigned int)t0);)
+            return 0;
+        }
+    VP(vp_current[VP_WAIT_CHANGE_TICKS] = vp_elapsed((unsigned int)t0);)
+    return 1;
+}
+static int plot_start(void)
+{
+    if (!UNC32(plot_sync)) { VDP1R(FBCR) = 3; VDP1R(PTMR) = 1; return 1; }
+    if (!plot_wait_shown()) { VP(vp_current[VP_FLAGS] |= VP_CHANGE_TIMEOUT;) return 0; }
+    /* The plot goes into the back buffer only once the change has really happened. The change shifts EDSR (end flag of the current frame becomes the previous
+       frame's), so CEF going clear is the sign, on the console and in Yaba alike. Waiting for the end of vblank instead raced the emulator's own latch of the
+       change (a few lines after vblank-out): a plot that won the race drew into the buffer about to be shown, which put the buffer parity out of step and
+       showed old pictures every few frames (lane avp-vanish, stepped capture: 11 % of pictures went back to an older plot). */
+    if (prev_stamp)   /* first plot has no earlier change to latch; firmware may leave CEF set */
+    {
+        u32 t0 = slave_ticks();
+        while (VDP1R(0x10) & EDSR_CEF)
+            if (((slave_ticks() - t0) & 0xffffUL) >= SLAVE_WAIT_MAX) {
+                VP(vp_current[VP_WAIT_LATCH_TICKS] = vp_elapsed((unsigned int)t0);
+                   vp_current[VP_FLAGS] |= VP_LATCH_TIMEOUT;)
+                return 0;
+            }
+        VP(vp_current[VP_WAIT_LATCH_TICKS] = vp_elapsed((unsigned int)t0);)
+    }
+    VP(vp_current[VP_SUBMIT_TICK] = (unsigned int)GFX_TICKS();
+       vp_current[VP_START_VBLANK] = (unsigned int)sat_vblanks_now();)
+    VDP1R(PTMR) = 1;
+    UNC32(plot_started) = UNC32(plot_started) + 1;
+    VP(vp_current[VP_SERIAL] = (unsigned int)UNC32(plot_started);)
+    return 1;
+}
+static void plot_abandon_build(void)
+{
+    u16 i;
+    /* A hit restamps even a texture used by the previous plot. If submission
+       times out, restore protection for every touched slot, including new
+       uploads. This conservative scan runs only on failure and needs no list
+       or new RAM. It preserves the late-render emulator guard as well as the
+       hardware end-of-plot rule. */
+    for (i = 0; i < SAT_GFX_SPRITE_SLOTS; i++)
+        if (spr_stamp[i] == stamp) spr_stamp[i] = prev_stamp;
+}
+#endif
+
+#ifdef SAT_VLOG
+extern volatile unsigned long sat_vlog[16 * 4];
+#define VLOG(v) UNC_PTR(unsigned long, &sat_vlog[((v) & 15) * 4])
+#define SFRT() GFX_TICKS()
+#endif
 void sat_gfx_draw(void)
 {
     u16 layers = snap.layers;
     u16 s1x = snap.s1x, s1y = snap.s1y, s2x = snap.s2x, s2y = snap.s2y, s3x = snap.s3x, s3y = snap.s3y;
     u16 bgon = 0;
     int row_active = snap.row_active;
+#ifdef SAT_VLOG
+    u32 vlog_v = sat_vblanks_now();
+    VLOG(vlog_v)[1] = (unsigned long)VDP1R(0x10) << 16 | (SFRT() & 0xffff);
+#endif
+    VP(vp_begin();)
 
+#ifdef SAT_GFX_HAVE_SYNC
+    /* A timeout abandons this presentation, never the running game. Do this
+       before palette, texture, cache-stamp or command-table writes. A late plot
+       must keep all of its inputs intact until its end flag really arrives. */
+    if (!plot_wait_end()) { VP(vp_finish(VP_END_TIMEOUT);) return; }
+#endif
     stamp = (u16)(stamp + 1U == 0x10000UL ? 1U : stamp + 1U);
     cache_frame(&spr_cache); cache_frame(&s1_cache); cache_frame(&s2_cache); cache_frame(&s3_cache);
     sat_gfx_stats.uploads = 0;
@@ -1070,6 +1396,57 @@ void sat_gfx_draw(void)
     STAGE(0);
     update_palette();
     update_priority(layers, snap.priority);
+    /* Sprites first, then the plot starts: VDP1 draws while the slave does the layers below, instead of only in what is left of the
+       frame after them (lane avp-vanish: heavy layer frames left VDP1 too little time and the change came mid-plot). */
+#ifdef SAT_HOME
+    put16(VDP1_VRAM + table_base + 32 + 12, (u16)NUDGE_X); put16(VDP1_VRAM + table_base + 32 + 14, (u16)NUDGE_Y);   /* local origin follows the screen adjust */
+#endif
+
+    STAGE(4);
+#ifdef SAT_VLOG
+    VLOG(vlog_v)[2] = (unsigned long)VDP1R(0x10) << 16 | (SFRT() & 0xffff);
+#endif
+#ifdef SAT_PROF
+    { u32 v = sat_vblanks_now(); speed_on = v >= 1000 && v < 1650; }
+#endif
+    VLN(vl_serial = (u16)(UNC32(plot_started) + 1);)
+    VP(vp_sprite_start = (unsigned int)GFX_TICKS();)
+    draw_sprites();
+    VP(vp_current[VP_SPRITE_TICKS] = vp_elapsed(vp_sprite_start);)
+    note_slots();
+#ifdef SAT_VLOG
+    {   /* the plot about to start has serial plot_started + 1 */
+        volatile unsigned long *e = UNC_PTR(unsigned long, &sat_plog[((UNC32(plot_started) + 1) & 15) * 8]);
+        e[0] = 0;
+        e[1] = (unsigned long)sat_gfx_stats.objects << 16 | sat_gfx_stats.commands;
+        e[2] = (unsigned long)vl_tiles << 16 | vl_off;
+        e[3] = (unsigned long)vl_miss << 24 | (unsigned long)vl_refslot << 16 | (unsigned long)vl_refcmd << 8 | vl_nlost;
+        e[4] = (unsigned long)sat_gfx_stats.uploads << 16 | vl_blank;
+        e[5] = vl_lost[0]; e[6] = vl_lost[1]; e[7] = vl_lost[2];
+        e[0] = (UNC32(plot_started) + 1) << 16 | (vlog_v & 0xffff);   /* serial last: a reader that sees its serial sees the rest */
+    }
+#endif
+    STAGE(5);
+    put16(VDP1_VRAM + 0, 0x1009);   /* system clip, then jump (assign) to this table */
+    put16(VDP1_VRAM + 2, (u16)((table_base + 0x20) >> 3));
+#ifndef SAT_GFX_HAVE_SYNC
+    VDP1R(FBCR) = 3;
+    VDP1R(PTMR) = 1;
+#else
+    if (!plot_start()) { plot_abandon_build(); VP(vp_finish(0);) return; }
+#endif
+    VP(vp_current[VP_FLAGS] |= VP_SUBMITTED; vp_layer_start = (unsigned int)GFX_TICKS();)
+    /* Only a submitted plot owns the protected previous texture stamp. An
+       abandoned build must not release the last submitted plot's textures. */
+    prev_stamp = stamp;
+    table_base ^= TABLE_B;
+#ifdef SAT_VLOG
+    VLOG(vlog_v)[3] |= (sat_vblanks_now() - vlog_v) << 28 | (unsigned long)sat_gfx_stats.commands << 16 | (SFRT() & 0xffff) << 0;
+#endif
+#ifdef SAT_VLOG_VDP1
+    /* Measurement build only: the slave waits for VDP1's end flag and logs plot time in FRT ticks (costs the slave that wait). */
+    { u32 a = SFRT(), t = 0; while (!(VDP1R(0x10) & 2) && t < 30000u) t = (SFRT() - a) & 0xffffUL; VLOG(vlog_v)[2] = (VLOG(vlog_v)[2] & 0xffff0000UL) | (t & 0xffff); }
+#endif
 #ifdef SAT_HOME
     /* The menus on NBG3, in front of everything: panel cells (dot code 15) blend with the picture under them by colour calculation in MSB mode
        (only the panel colour, dot 15 of banks 62-63, has the MSB; per-dot mode drew opaque grey in Yaba); the font's dots stay solid. NBG3 gets cycle slots T3 (names) and T7 (cells) of bank A0 only while the menus are up;
@@ -1130,17 +1507,6 @@ void sat_gfx_draw(void)
     VDP2R(0x84) = (u16)((s3y + CPS_TOP - NUDGE_Y) & 0x7ff);
     VDP2R(0x90) = (u16)((s1x + CPS_LEFT + S1_REG_CROP - NUDGE_X) & 0x7ff);
     VDP2R(0x92) = (u16)((s1y + CPS_TOP - NUDGE_Y) & 0x7ff);
-#ifdef SAT_HOME
-    put16(VDP1_VRAM + 32 + 12, (u16)NUDGE_X); put16(VDP1_VRAM + 32 + 14, (u16)NUDGE_Y);   /* local origin follows the screen adjust */
-#endif
-
-    STAGE(4);
-#ifdef SAT_PROF
-    { u32 v = sat_vblanks_now(); speed_on = v >= 1000 && v < 1650; }
-#endif
-    draw_sprites();
-    note_slots();
-    STAGE(5);
 #ifdef SAT_PROF
     if (speed_on)
     {
@@ -1160,9 +1526,6 @@ void sat_gfx_draw(void)
     }
 #endif
 
-    /* Plot into the back buffer now; the swap comes with the next vblank. */
-    VDP1R(FBCR) = 3;
-    VDP1R(PTMR) = 1;
 #ifdef SAT_READOUT
     if (!(readout_pad() & 0x0020))   /* pad Y held: wait here for the list's end and show VDP1's time as the fourth bar. It costs the slave that wait. */
     {
@@ -1172,6 +1535,12 @@ void sat_gfx_draw(void)
     }
 #endif
     sat_gfx_stats.frames++;
+    VP(vp_current[VP_LAYER_TICKS] = vp_elapsed(vp_layer_start);
+       if (VDP1R(0x10) & 2) {
+           vp_current[VP_FLAGS] |= VP_CEF_AT_CPU_DONE;
+           vp_current[VP_RASTER_UPPER_TICKS] = vp_elapsed(vp_current[VP_SUBMIT_TICK]);
+       }
+       vp_finish(0);)
 }
 
 void sat_gfx_frame(void)
@@ -1238,6 +1607,8 @@ int sat_gfx_init(const void *pack)
     cache_setup(&s2_cache, VDP2_VRAM + CELL_S2, 128, SAT_GFX_S2_SLOTS, 0, SEC_S2, s2_key, s2_stamp, s2_next, s2_head);
     cache_setup(&s3_cache, VDP2_VRAM + CELL_S3, 512, SAT_GFX_S3_SLOTS, 0, SEC_S3, s3_key, s3_stamp, s3_next, s3_head);
     stamp = 0;
+    prev_stamp = 0;
+    table_base = 0;
     drawn_valid = 0;
 
     /* VRAM split into four banks, CRAM mode 1. */
@@ -1290,6 +1661,8 @@ int sat_gfx_init(const void *pack)
     put16(c + 20, SAT_GFX_SCREEN_W - 1);
     put16(c + 22, SAT_GFX_SCREEN_H - 1);
     put16(c + 32, 0x000a);                        /* local origin 0, 0 */
+    put16(c + TABLE_B + 32, 0x000a);              /* the second table's */
+    put16(c + TABLE_B + 64, 0x8000);
     put16(c + 64, 0x8000);
     VDP1R(PTMR) = 0;
 

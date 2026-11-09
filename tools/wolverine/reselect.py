@@ -1,73 +1,138 @@
 #!/usr/bin/env python
-"""Lane avp-wolverine-b: pick Wolverine's pose set again from an assets.py output, without a new MAME capture.
-assets.py writes every pose's tiles into gfx_wolverine.bin and the whole move lists ("moves") into remap.json, then trims the set to one budget
-("moves_one", "stage_keys"). The trimmed walk had 5 poses held 18-21 frames each, and the trimmed hp lost its middle poses (owner 11-08: his walk and
-slash stutter). Here the moves named in FULL keep every pose of their capture (the required poses of every other move stay, as in assets.py), then the
-rest fill up to BUDGET tiles in assets.py's order. The fit gate is tools/wolverine/fit.py on the result.
-HIT8=0 leaves out the hitstun poses held 8+ frames that assets.py keeps (188 tiles).
-usage: reselect.py IN_DIR OUT_DIR FULL_MOVES(comma list, or 'all'; 'walk/2' keeps every 2nd pose of walk) [BUDGET (tiles, default: no fill)]
-OUT_DIR gets remap.json (new moves_one, stage_keys, one_set) and a copy of gfx_wolverine.bin; run boxes.py on it after (boxes.json follows moves_one)."""
-import json, os, pathlib, shutil, sys
+"""Choose a gameplay pose set from an existing private assets.py capture.
 
-src, out = pathlib.Path(sys.argv[1]), pathlib.Path(sys.argv[2])
-full_names = sys.argv[3].split(",") if sys.argv[3] != "all" else None
-budget = int(sys.argv[4]) if len(sys.argv) > 4 else 0
-A = json.loads((src / "remap.json").read_text())
-P, moves, keys = A["poses"], A["moves"], A["keys"]
-if full_names is None:
-    full_names = list(moves)
-por = {e[2] for v in A["portraits"].values() for e in v}
-seen, fresh = set(), {}
-for name, seq in moves.items():
-    fresh[name] = [x for x in dict.fromkeys(q[0] for q in seq) if x not in seen] if name != "idle" else list(dict.fromkeys(q[0] for q in seq))
-    seen |= {q[0] for q in seq}
-hold = {}
-for seq in moves.values():
-    for pid, n, _ in seq:
-        hold[pid] = max(hold.get(pid, 0), n)
-need = set()
-for name, fr_ in fresh.items():
-    if fr_:
-        need |= {fr_[0], max(fr_, key=lambda i: hold[i]), fr_[-1]}
-        if name == "hit_etc" and os.environ.get("HIT8", "1") == "1":
-            need |= {i for i in fr_ if hold[i] >= 8}
-cost = lambda ids: len(por | {e[2] for i in ids for e in P[i]})
-for spec in full_names:   # "walk/2": every 2nd pose of that move's own poses (plus its first and last), the rest merge into the pose before
-    m, _, every = spec.partition("/")
-    plist = list(dict.fromkeys(p for p, _, _ in moves[m]))
-    step = int(every) if every else 1
-    need |= {p for j, p in enumerate(plist) if j % step == 0 or j == len(plist) - 1}
-print("required + full", full_names, "poses", len(need), "tiles", cost(need))
-if budget:
-    names = ["walk"] + [m for m in fresh if m != "walk"]
-    progress = True
-    while progress:
-        progress = False
-        for m in names:
-            fr_ = fresh[m]
-            cand = [j for j, i in enumerate(fr_) if i not in need]
-            if not cand:
-                continue
-            kept = [j for j, i in enumerate(fr_) if i in need]
-            j = max(cand, key=lambda j: min(abs(j - k) for k in kept) if kept else 0)
-            if cost(need | {fr_[j]}) <= budget:
-                need.add(fr_[j]); progress = True
-have = por | {e[2] for i in need for e in P[i]}
-mt = {}
-for name, seq in moves.items():
-    o = []
-    for pid, n, anc in seq:
-        if pid in need or not o:
-            o.append([pid, n, anc])
-        else:
-            o[-1][1] += n
-    mt[name] = o
-A["moves_one"] = mt
-A["stance_pose"] = 17   # the capture's ready stance (loop 17..24 then idle 0..4 follows every attack): an attack's recovery ends where it first appears after the last attack frame
-A["one_set"] = dict(budget=budget, full=full_names, tiles=len(have), poses=len(need))
-A["stage_keys"] = {f"{st:02x}": sorted(keys[i] for i in have) for st in range(2, 0x28, 2)}
-out.mkdir(parents=True, exist_ok=True)
-(out / "remap.json").write_text(json.dumps(A))
-if not (out / "gfx_wolverine.bin").exists():
-    shutil.copy(src / "gfx_wolverine.bin", out / "gfx_wolverine.bin")
-print("one set", A["one_set"], {m: (len({x[0] for x in q}), len(moves[m])) for m, q in mt.items()})
+usage: reselect.py IN_DIR OUT_DIR FULL_MOVES [BUDGET]
+FULL_MOVES is comma-separated: walk,hp,hk preserves every pose of those moves;
+walk/2 keeps alternate walk poses. 'all' preserves every move's poses. A missing
+BUDGET (or 0) keeps only the required/full set, without filling spare room.
+
+Only tiles referenced by emitted moves are resident in gameplay. Portraits and
+their graphics remain in the asset source for future HUD/select work. This does
+not prove Saturn fit: run fit.py on the result, then regenerate boxes.py's data.
+HIT8=0 omits optional long-held hitstun poses, as before.
+"""
+import json
+import os
+import pathlib
+import shutil
+import sys
+
+
+def select(asset, full_specs, budget=0, hit8=True):
+    poses, moves, keys = asset["poses"], asset["moves"], asset["keys"]
+    if not moves or any(not seq for seq in moves.values()):
+        raise ValueError("every move must contain at least one pose")
+    if budget < 0:
+        raise ValueError("BUDGET must be nonnegative")
+    seen, fresh, hold = set(), {}, {}
+    for name, seq in moves.items():
+        order = list(dict.fromkeys(step[0] for step in seq))
+        fresh[name] = [pose for pose in order if pose not in seen]
+        seen.update(order)
+        for pose, frames, _ in seq:
+            if not 0 <= pose < len(poses) or frames <= 0:
+                raise ValueError("invalid pose or duration in " + name)
+            hold[pose] = max(hold.get(pose, 0), frames)
+
+    # trim always emits the first pose of every move, even if it was previously
+    # seen in another move. Account for it before budgeting, not after packing.
+    need = {seq[0][0] for seq in moves.values()}
+    stance = asset.get("stance_pose", 17)
+    if not 0 <= stance < len(poses):
+        raise ValueError("stance_pose is absent from this capture")
+    if stance in seen:
+        need.add(stance)
+    for name, own in fresh.items():
+        if own:
+            need.update((own[0], max(own, key=hold.get), own[-1]))
+            if name == "hit_etc" and hit8:
+                need.update(pose for pose in own if hold[pose] >= 8)
+    for spec in full_specs:
+        name, _, every = spec.partition("/")
+        if name not in moves:
+            raise ValueError("unknown move: " + name)
+        stride = int(every) if every else 1
+        if stride < 1:
+            raise ValueError("pose stride must be positive: " + spec)
+        order = list(dict.fromkeys(pose for pose, _, _ in moves[name]))
+        need.update(pose for index, pose in enumerate(order)
+                    if index % stride == 0 or index == len(order) - 1)
+
+    def cost(pose_ids):
+        return len({tile[2] for pose in pose_ids for tile in poses[pose]})
+
+    floor = cost(need)
+    if budget and floor > budget:
+        raise ValueError("required/full poses need %d tiles, exceeding BUDGET %d" % (floor, budget))
+    if budget:
+        order = (["walk"] if "walk" in fresh else []) + [name for name in fresh if name != "walk"]
+        progress = True
+        while progress:
+            progress = False
+            for name in order:
+                own = fresh[name]
+                candidates = [index for index, pose in enumerate(own) if pose not in need]
+                if not candidates:
+                    continue
+                kept = [index for index, pose in enumerate(own) if pose in need]
+                index = max(candidates, key=lambda j: min(abs(j - k) for k in kept) if kept else 0)
+                if cost(need | {own[index]}) <= budget:
+                    need.add(own[index])
+                    progress = True
+
+    trimmed = {}
+    for name, seq in moves.items():
+        steps = []
+        for pose, frames, anchor in seq:
+            if pose in need or not steps:
+                steps.append([pose, frames, anchor])
+            else:
+                steps[-1][1] += frames
+        trimmed[name] = steps
+    emitted = {step[0] for seq in trimmed.values() for step in seq}
+    have = {tile[2] for pose in emitted for tile in poses[pose]}
+    portrait_tiles = {tile[2] for group in asset.get("portraits", {}).values() for tile in group}
+    result = dict(asset)
+    result["moves_one"] = trimmed
+    result["stance_pose"] = stance
+    result["boxes_pending"] = True
+    result["one_set"] = dict(budget=budget, floor=floor, full=list(full_specs),
+                             tiles=len(have), poses=len(emitted), residency="emitted_moves",
+                             portrait_only_tiles_omitted=len(portrait_tiles - have))
+    result["stage_keys"] = {"%02x" % stage: sorted(keys[tile] for tile in have)
+                            for stage in range(2, 0x28, 2)}
+    return result
+
+
+def main(argv=None):
+    argv = sys.argv[1:] if argv is None else argv
+    if not 3 <= len(argv) <= 4:
+        print("usage: reselect.py IN_DIR OUT_DIR FULL_MOVES [BUDGET]", file=sys.stderr)
+        return 2
+    try:
+        src, out = pathlib.Path(argv[0]), pathlib.Path(argv[1])
+        asset = json.loads((src / "remap.json").read_text())
+        full = list(asset["moves"]) if argv[2] == "all" else [name for name in argv[2].split(",") if name]
+        selected = select(asset, full, int(argv[3]) if len(argv) == 4 else 0,
+                          hit8=os.environ.get("HIT8", "1") == "1")
+        # Reject missing source bytes before publishing a new remap beside old
+        # graphics. Always refresh a different output's graphics from its source.
+        graphics = src / "gfx_wolverine.bin"
+        if not graphics.is_file():
+            raise ValueError("missing source gfx_wolverine.bin")
+        out.mkdir(parents=True, exist_ok=True)
+        if src.resolve() != out.resolve():
+            shutil.copyfile(graphics, out / "gfx_wolverine.bin")
+        (out / "remap.json").write_text(json.dumps(selected))
+        print("one set", selected["one_set"])
+        print("Regenerate boxes.json for these move steps, then run fit.py.")
+        # Keep existing evidence intact. gen_c refuses step-indexed boxes until
+        # boxes.py clears boxes_pending for this new selection.
+        return 0
+    except (OSError, ValueError, KeyError, IndexError, TypeError) as error:
+        print("NO-GO:", error, file=sys.stderr)
+        return 2
+
+
+if __name__ == "__main__":
+    raise SystemExit(main())

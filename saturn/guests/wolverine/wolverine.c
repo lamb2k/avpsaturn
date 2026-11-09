@@ -27,9 +27,12 @@ static const u8 wv_row1[0x28] = {10,22,21,22,20,22,18,22,22,22,8,22,23,22,22,22,
 
 /* Debug (lane avp-wolverine, anchor check): per player, the box of Schaefer's removed sprites and of Wolverine's drawn tiles in object
    coordinates (x0, y0, x1, y1), plus his state and pose. Read by the Yaba probe; never written to the screen. */
+#ifdef SAT_WOLVERINE_DEBUG
 s16 wv_dbg[2][12];
 s16 wv_lst[2][3];   /* per player: objects before his tiles, tiles asked, tiles that fit (a full list drops his tiles) */
+#endif
 static u8 step_[2], left_[2], face_[2], cur_[2] = {255, 255}, chain_[2], lastc_[2], held_[2];
+static void wv_reset(int i);
 
 /* Schaefer's player block state +4 +5 +6, measured under MAME (tools/wolverine/schaefer_states.lua, 11-08):
    020000 stand, 020002 walk (also depth and the dash), 020004 jump, 020006 attack (chain), 02000e chain finisher, 02000c gun,
@@ -57,7 +60,6 @@ static int move_for(int i)
     else if (a == 2 && b == 8) m = WV_CROUCH;   /* getting up: his crouch rises back to stand */
     else if (a == 4) m = WV_KNOCKDOWN;
     else if (a == 8) m = WV_WALK;
-    held_[i] = (a == 2 && b == 2) ? (u8)(held_[i] < 255 ? held_[i] + 1 : 255) : 0;
     lastc_[i] = (a == 2 && b == 0) ? c : 0;
     return m;
 }
@@ -73,7 +75,9 @@ static int move_for(int i)
 static int is_wolverine(int i);
 extern u8 *PAGE[256];
 #define PBY(a) (PAGE[((u32)(a) >> 16) & 0xff] + ((u32)(a) & 0xffff))
-static u16 wv_step_now[2] = {0xffff, 0xffff};   /* index into wv_box of the step he shows, per player; 0xffff none */
+/* One aligned word publishes a complete pose/box step to the vblank snapshot.
+   The IRQ must not combine cur_ from a new move with its previous step_. */
+static volatile u16 wv_step_now[2] = {0xffff, 0xffff};
 static u8 atk_cache[2][16];                       /* last nonzero attack index per Schaefer state +6 (by state >> 1) */
 static struct { u8 *p; u8 v[4]; } undo[8];
 static int nundo;
@@ -102,7 +106,7 @@ static int attack_state(int i, int *slot)
 static const WvBox *box_now(int i)
 {
     u16 k = wv_step_now[i];
-    if (k == 0xffff) return 0;
+    if (k >= wv_move_start[WV_MOVES]) return 0;
     if (!wv_box[k].uw) return &wv_box[wv_move_start[WV_IDLE]];   /* a step without a capture keeps his standing hurt box */
     return &wv_box[k];
 }
@@ -141,6 +145,7 @@ void sat_guest_wolverine_boxes(unsigned long a6, unsigned long a1, int restore)
 }
 /* Debug for the box sheets (wv_box_dbg[player]): Schaefer's own attack and hurt box from his frame (x0 y0 x1 y1, object coordinates),
    then Wolverine's. 9999 = none. */
+#ifdef SAT_WOLVERINE_DEBUG
 s16 wv_box_dbg[2][16];
 static void box_rect(s16 *o, int sx, int sy, int face, int x, int y, int hw, int hh)
 {
@@ -159,6 +164,7 @@ static void box_debug(int i, int sx, int sy)
     if (w && w->hw && att) box_rect(&wv_box_dbg[i][8], sx, sy, face, -w->hx, w->hy, w->hw, w->hh);
     if (w) box_rect(&wv_box_dbg[i][12], sx, sy, face, -w->ux, w->uy, w->uw, w->uh);
 }
+#endif
 
 static void put16(u8 *p, u16 v) { p[0] = (u8)(v >> 8); p[1] = (u8)v; }
 
@@ -193,15 +199,20 @@ write:
     names_on = (u8)on;
 }
 
-/* Move clock and timings (option B). The move clock runs in game ticks (one call of the player state machine, f_195ec, wrapped in game_bind.c),
-   not in drawn frames, so his poses, his box steps and the game's hits share one time. For each attack the capture's length T (MSHvSF frames from the
-   press to his return to stand, after the last frame with an attack box) is compared with how many ticks Schaefer's own state of that slot runs
-   (wv_nat, measured: wv_tdbg). When T is longer the state machine is held on the ticks in between (Bresenham, nat of every T ticks run), which
-   stretches Schaefer's timers to MSHvSF's: his startup, active frames and recovery land where the capture has them. The hit still needs an
-   MSHvSF attack box on the step shown (sat_guest_wolverine_boxes). Shorter captures are not cut (the state returns to stand on its own).
-   Held ticks freeze the whole state machine of that player (position, frame record, timers); other actors run on. */
-u8 wv_tdbg[5][4];   /* per held move (LP HP HK Berserker Tornado): last ticks run, last ticks passed, times seen, last T; read by the Yaba probe (little room in low RAM) */
+/* Move clock and timings (option B). The clock runs in player updates (source
+   0x195ec), never in snapshots. The existing measured native tick estimates
+   distribute updates through a longer captured move. A shorter actual native
+   path cannot truncate the remaining guest recovery: the post-hook observes
+   its return, without rolling back game RAM or replaying damage calls.
+   This is a duration/presentation contract, not a proof that AvP's attack,
+   damage or hitstop mechanics now match MSHvSF. Longer native moves are kept.
+   Held ticks freeze this player's native update; other actors still run. */
+#ifdef SAT_WOLVERINE_DEBUG
+u8 wv_tdbg[5][4];   /* per held move (LP HP HK Berserker Tornado): last ticks run, last ticks passed, times seen, last T */
+#endif
+#if !defined(WV_MEASURE) || defined(SAT_WOLVERINE_DEBUG)
 static int tslot(int m) { return m == WV_LP ? 0 : m == WV_HP ? 1 : m == WV_HK ? 2 : m == WV_BERSERKER ? 3 : m == WV_TORNADO ? 4 : -1; }
+#endif
 /* Schaefer's ticks per state slot, MAME (tools/wolverine/schaefer_states.lua: a tap of attack 15, the finisher 02000e 32, the special 020008 57);
    gun 02000c measured on Yaba from wv_tdbg. 0 = never held. */
 #ifndef WV_NAT_GUN
@@ -231,6 +242,11 @@ static int wv_move_len(int move)
     return T;
 }
 static u16 acc_[2], exec_[2], wall_[2];
+/* A native attack can return sooner than wv_nat predicts. Keep only its remaining
+   presentation/recovery time; the completed game state is never rolled back and
+   no additional damage calls are invented. Hit, grab, death and entry states
+   cancel this hold immediately. */
+static u8 recovery_[2];
 /* The walk cycle runs on distance, not time: his captured stride (MSHvSF: about 119 px of ground per 41-frame loop at his walk speed, boxcap/boxes.txt)
    is stepped by how far Schaefer's walk carried the player this tick (x and depth), so his feet keep to the ground at AvP's walk speed and the dash.
    The loop is the stretch of the capture's walk steps between a pose and its next appearance (steps before it are the start of the walk); standing still
@@ -273,34 +289,78 @@ static void wv_walk_step(int i)
     left_[i] = 0;
 }
 
-/* one tick of player i's move clock; returns 1 when the state machine runs this tick, 0 when held */
-static int wv_tick_move(int i)
+static void wv_begin_move(int i, int move)
 {
-    int move = move_for(i), n, hold = 0, T, nat;
-    if (move != cur_[i]) {
-        if (cur_[i] < WV_MOVES && tslot(cur_[i]) >= 0 && exec_[i]) { u8 *d = wv_tdbg[tslot(cur_[i])]; d[0] = (u8)(exec_[i] > 255 ? 255 : exec_[i]); d[1] = (u8)(wall_[i] > 255 ? 255 : wall_[i]); d[2]++; }
-        cur_[i] = (u8)move; step_[i] = 0; left_[i] = 0; exec_[i] = wall_[i] = 0; wwalk_[i] = 0;
-        nat = wv_nat(move); T = nat ? wv_move_len(move) : 0;
-        acc_[i] = (T > nat) ? (u16)(T - nat) : 0;   /* the first tick of the state runs */
+#ifdef SAT_WOLVERINE_DEBUG
+    if (cur_[i] < WV_MOVES && tslot(cur_[i]) >= 0 && exec_[i]) {
+        u8 *d = wv_tdbg[tslot(cur_[i])];
+        d[0] = (u8)(exec_[i] > 255 ? 255 : exec_[i]);
+        d[1] = (u8)(wall_[i] > 255 ? 255 : wall_[i]);
+        d[2]++;
     }
-    n = wv_move_start[move + 1] - wv_move_start[move];
+#endif
+    cur_[i] = (u8)move;
+    step_[i] = left_[i] = wwalk_[i] = recovery_[i] = 0;
+    acc_[i] = exec_[i] = wall_[i] = 0;
+}
+
+/* Publish this tick's pose before aging it. A one-tick opening pose must be
+   visible once; advancing at ++left >= frames used to skip it altogether. */
+static void wv_advance(int i)
+{
+    int move = cur_[i];
+    int n = wv_move_start[move + 1] - wv_move_start[move];
     if (move == WV_WALK) wv_walk_step(i);
     else {
         if (step_[i] >= n) step_[i] = 0;
-        if (++left_[i] >= wv_steps[wv_move_start[move] + step_[i]].frames) {   /* the move's steps: each pose its captured frames */
+        if (left_[i] >= wv_steps[wv_move_start[move] + step_[i]].frames) {
             left_[i] = 0;
             if (step_[i] + 1 < n) step_[i]++;
             else if (!ONCE(move)) step_[i] = 0;
         }
+        if (left_[i] < 255) left_[i]++;
     }
     wv_step_now[i] = (u16)(wv_move_start[move] + step_[i]);
+    if (wall_[i] < 65535) wall_[i]++;
+}
+
+static int wv_resting(int i)
+{
+    return R8(PL(i) + 4) == 2 && R8(PL(i) + 5) == 0 &&
+           (R8(PL(i) + 6) == 0 || R8(PL(i) + 6) == 2);
+}
+
+/* One player update, independently of how often its picture is drawn. A
+   completed native state stays completed: only a subsequent idle/walk update
+   is held for the remaining captured recovery. Other state changes interrupt
+   the guest immediately and retain all externally written game fields. */
+static int wv_tick_move(int i)
+{
+    int move = move_for(i), hold = 0, T, nat;
+    held_[i] = (R8(PL(i) + 4) == 2 && R8(PL(i) + 5) == 2) ?
+        (u8)(held_[i] < 255 ? held_[i] + 1 : 255) : 0;
+    if (recovery_[i] && wv_resting(i) && wall_[i] < wv_move_len(cur_[i])) {
+        wv_advance(i);
+        return 0;
+    }
+    if (move != cur_[i] || recovery_[i]) wv_begin_move(i, move);
+    wv_advance(i);
     nat = wv_nat(move);
     if (nat && WV_HAVE_BOXES) {
         T = wv_move_len(move);
+#ifdef SAT_WOLVERINE_DEBUG
         wv_tdbg[tslot(move)][3] = (u8)T;
-        if (T > nat) { acc_[i] = (u16)(acc_[i] + nat); if (acc_[i] < T) hold = 1; else acc_[i] = (u16)(acc_[i] - T); }
+#endif
+        /* Run the first native update on tick 1 and the last on tick T.
+           The old nat/T accumulator finished a 15-update, 51-tick move on
+           tick 49. Distribute the remaining nat-1 updates over T-1 ticks. */
+        if (T > nat && exec_[i] && wall_[i] < (u16)T) {
+            u32 next = (u32)acc_[i] + (u32)nat - 1u;
+            if (next < (u32)T - 1u) hold = 1;
+            else next -= (u32)T - 1u;
+            acc_[i] = (u16)next;
+        }
     }
-    if (wall_[i] < 65535) wall_[i]++;
     if (!hold && exec_[i] < 65535) exec_[i]++;
     return !hold;
 }
@@ -308,8 +368,35 @@ static int wv_tick_move(int i)
 int sat_guest_wolverine_tick(unsigned long a6)
 {
     int i = wv_player((u32)a6);
-    if (i < 0) return 1;
+    if (i < 0) {
+        if (a6 == PL(0) || a6 == PL(1)) wv_reset((int)((a6 - PL(0)) >> 8));
+        return 1;
+    }
     return wv_tick_move(i);
+}
+
+/* source 0x195ec: observe the state selected by the native player update in
+   this same tick. Waiting until the next pre-hook lost the first pose and let
+   early native returns truncate the guest's move. No game field is restored. */
+void sat_guest_wolverine_after_tick(unsigned long a6)
+{
+    int i = wv_player((u32)a6), move;
+    if (i < 0) {
+        if (a6 == PL(0) || a6 == PL(1)) wv_reset((int)((a6 - PL(0)) >> 8));
+        return;
+    }
+    move = move_for(i);
+    if (move == cur_[i]) return;
+#ifndef WV_MEASURE
+    if (cur_[i] < WV_MOVES && tslot(cur_[i]) >= 0 &&
+        WV_HAVE_BOXES && wv_resting(i)) {
+        recovery_[i] = 1;
+        return;
+    }
+#endif
+    wv_begin_move(i, move);
+    wv_advance(i);
+    exec_[i] = 1;
 }
 /* a gun shot (tag 4 in ff8680..ff957f, owner word +0x26; +2 is 5 while one flies) of a Wolverine player: Berserker Barrage is his gun slot's move, the shot itself does nothing */
 int sat_guest_wolverine_bullet(unsigned long a6)
@@ -328,34 +415,39 @@ int sat_guest_objects(u8 *obj, int count, int max, u8 *pal0)
     names(sat_guest_sel & 1);
     if (!(sat_guest_sel & 1)) return count;
     for (i = 0; i < 2; i++) {
-        u16 x, cam;
-        int move, st, sx, sy;
+        u16 x, cam, draw_step;
+        int st, sx, sy;
         if (!is_wolverine(i)) continue;
         any = 1;
         x = R16(PL(i) + 0x10);
         face_[i] = (u8)((R8(PL(i) + 0x0f) & 1) ^ 1);   /* +0f set = facing right (Yaba 11-08: set while walking right); his poses were captured facing right, so they mirror when it is clear */
-        if (cur_[i] == 255) wv_tick_move(i);   /* game ticks drive the move clock (sat_guest_wolverine_tick); this only covers the first frame */
-        move = cur_[i];
-        st = wv_steps[wv_move_start[move] + step_[i]].pose;
-        wv_step_now[i] = (u16)(wv_move_start[move] + step_[i]);
+        /* A snapshot may happen before the first player update. It can show
+           idle, but it must not tick simulation or choose an attack chain. */
+        draw_step = wv_step_now[i];
+        if (draw_step >= wv_move_start[WV_MOVES]) draw_step = wv_move_start[WV_IDLE];
+        st = wv_steps[draw_step].pose;
         cam = R16(0xff8278);
         sx = (int)x - (int)cam + WV_OX;
         sy = WV_OY - 0x100 - (s16)R16(PL(i) + 0x14) + (s16)R16(0xff827c);   /* the camera's depth (ff827c, 0x100 at rest) scrolls him as it does Schaefer */
+#ifdef SAT_WOLVERINE_DEBUG
         wv_dbg[i][0] = wv_dbg[i][1] = wv_dbg[i][4] = wv_dbg[i][5] = 9999; wv_dbg[i][2] = wv_dbg[i][3] = wv_dbg[i][6] = wv_dbg[i][7] = -9999;
         box_debug(i, sx, sy);
         wv_dbg[i][8] = (s16)sx; wv_dbg[i][9] = (s16)sy; wv_dbg[i][10] = (s16)(R8(PL(i) + 6) | R8(PL(i) + 5) << 8); wv_dbg[i][11] = (s16)(st | face_[i] << 12);
+#endif
         /* Schaefer's own sprites near him go */
         for (j = k = 0; j < count; j++) {
             u8 *e = obj + j * 8;
             int ex = ((e[0] << 8 | e[1]) & 0x3ff), pal = e[7] & 31;
             if (ex >= 768) ex -= 1024;
             if (pal == WV_SCH_PAL && ex > sx - 140 && ex < sx + 140) {
+#ifdef SAT_WOLVERINE_DEBUG
                 int ey = ((e[2] << 8 | e[3]) & 0x3ff), w = ((e[6] >> 0) & 15) + 1, h = ((e[6] >> 4) & 15) + 1;
                 if (ey >= 768) ey -= 1024;
                 if (ex < wv_dbg[i][0]) wv_dbg[i][0] = (s16)ex;
                 if (ey < wv_dbg[i][1]) wv_dbg[i][1] = (s16)ey;
                 if (ex + 16 * w > wv_dbg[i][2]) wv_dbg[i][2] = (s16)(ex + 16 * w);
                 if (ey + 16 * h > wv_dbg[i][3]) wv_dbg[i][3] = (s16)(ey + 16 * h);
+#endif
                 continue;
             }
             if (k != j) { int b; for (b = 0; b < 8; b++) obj[k * 8 + b] = e[b]; }
@@ -364,18 +456,24 @@ int sat_guest_objects(u8 *obj, int count, int max, u8 *pal0)
         count = k;
         /* his tiles go at the head of the list: earlier entries are in front on the board */
         n = wv_pose_start[st + 1] - wv_pose_start[st];
+#ifdef SAT_WOLVERINE_DEBUG
         wv_lst[i][0] = (s16)count; wv_lst[i][1] = (s16)n;
+#endif
         if (count + n > max) n = max - count;
+#ifdef SAT_WOLVERINE_DEBUG
         wv_lst[i][2] = (s16)n;
+#endif
         for (j = count * 8 - 1; j >= 0; j--) obj[j + n * 8] = obj[j];
         for (k = 0; k < n; k++) {
             const WvTile *t = &wv_tiles[wv_pose_start[st] + k];
             int hf = (t->flags & 1) ^ face_[i], dx = face_[i] ? -t->dx - 16 : t->dx;
             u8 *o = obj + k * 8;
+#ifdef SAT_WOLVERINE_DEBUG
             if (sx + dx < wv_dbg[i][4]) wv_dbg[i][4] = (s16)(sx + dx);
             if (sy + t->dy < wv_dbg[i][5]) wv_dbg[i][5] = (s16)(sy + t->dy);
             if (sx + dx + 16 > wv_dbg[i][6]) wv_dbg[i][6] = (s16)(sx + dx + 16);
             if (sy + t->dy + 16 > wv_dbg[i][7]) wv_dbg[i][7] = (s16)(sy + t->dy + 16);
+#endif
             put16(o, (u16)((sx + dx) & 0x3ff));
             put16(o + 2, (u16)((sy + t->dy) & 0x3ff));
             put16(o + 4, t->key);
@@ -397,6 +495,17 @@ int sat_guest_objects(u8 *obj, int count, int max, u8 *pal0)
 #define WV_CMD_GAP 10
 #define WV_CMD_HOLD 4
 static u8 dir_hist[2][4], dir_age[2][4], inj_left[2], inj_bits[2], last_btn[2];
+static void wv_reset(int i)
+{
+    int k;
+    cur_[i] = 255;
+    step_[i] = left_[i] = face_[i] = chain_[i] = lastc_[i] = held_[i] = 0;
+    acc_[i] = exec_[i] = wall_[i] = wph_[i] = wlx_[i] = wlz_[i] = 0;
+    wwalk_[i] = recovery_[i] = inj_left[i] = inj_bits[i] = last_btn[i] = 0;
+    wv_step_now[i] = 0xffff;
+    for (k = 0; k < 16; k++) atk_cache[i][k] = 0;
+    for (k = 0; k < 4; k++) dir_hist[i][k] = dir_age[i][k] = 0;
+}
 static int dir_of(u8 w, int face)   /* 1 forward, 2 down-forward, 3 down, 0 other; w active high */
 {
     int fwd = face ? (w & 1) : (w & 2), dn = w & 4;   /* +0f set: facing right (Yaba, stage 02: Schaefer's attack box sits right of him) */
@@ -414,11 +523,14 @@ void sat_guest_wolverine_pad(u16 *in0)
 {
     static const u8 qcf[3] = {3, 2, 1}, dp[3] = {1, 3, 2};
     int i, k;
-    if (!(sat_guest_sel & 1)) return;
+    if (!(sat_guest_sel & 1)) {
+        wv_reset(0); wv_reset(1);
+        return;
+    }
     for (i = 0; i < 2; i++) {
         int sh = i * 8, d;
         u8 w = (u8)~(*in0 >> sh), btn;
-        if (!is_wolverine(i)) { inj_left[i] = 0; continue; }
+        if (!is_wolverine(i)) { wv_reset(i); continue; }
         for (k = 0; k < 4; k++) if (dir_age[i][k] < 255) dir_age[i][k]++;
         d = dir_of(w, R8(PL(i) + 0x0f) != 0);
         if (d && d != dir_hist[i][0]) {

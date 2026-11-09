@@ -78,6 +78,8 @@ def main():
             s["hit"], s["active"], s["stand_in"] = hb, s["frames"], "hp"
         print("berserker: stand-in box from hp", hb)
     (adir / "boxes.json").write_text(json.dumps(out))
+    A["boxes_pending"] = False
+    (adir / "remap.json").write_text(json.dumps(A))
 
 
 if __name__ == "__main__":

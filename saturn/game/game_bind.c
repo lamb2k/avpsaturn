@@ -77,11 +77,19 @@ void f_aa59a(void)
 extern void sat_guest_wolverine_boxes(unsigned long a6, unsigned long a1, int restore) __attribute__((weak));
 extern int sat_guest_wolverine_bullet(unsigned long a6) __attribute__((weak));
 extern int sat_guest_wolverine_tick(unsigned long a6) __attribute__((weak));
+extern void sat_guest_wolverine_after_tick(unsigned long a6) __attribute__((weak));
+#ifdef SAT_WOLVERINE_DEBUG
 u8 wv_hdbg[8];   /* Yaba probe: calls with a player attacker: 0 f_1cf54, 1 f_1d03e, 2 f_1d116; hits: 3 f_1cf54, 4 f_1d03e, 5 f_1d116; 6 shots refused */
+#endif
 static void guest_pass(void (*lifted)(void), int which)
 {
+#ifndef SAT_WOLVERINE_DEBUG
+    (void)which;
+#endif
     if (sat_guest_wolverine_bullet && sat_guest_wolverine_bullet(R->a[6])) {
+#ifdef SAT_WOLVERINE_DEBUG
         wv_hdbg[6]++;
+#endif
         R->d[0] = 0;
         FLAGS(1, 0, 0, 0, 0);
         return;
@@ -90,7 +98,9 @@ static void guest_pass(void (*lifted)(void), int which)
     sat_guest_wolverine_boxes(R->a[6], R->a[1], 0);
     lifted();
     sat_guest_wolverine_boxes(0, 0, 1);
+#ifdef SAT_WOLVERINE_DEBUG
     if (R->a[6] >= 0xff8380u && R->a[6] < 0xff8580u) { wv_hdbg[which]++; if (R->d[0] == 1) wv_hdbg[3 + which]++; }
+#endif
 }
 void f_1cf54(void) { extern void lifted_1cf54(void); guest_pass(lifted_1cf54, 0); }
 void f_1d03e(void) { extern void lifted_1d03e(void); guest_pass(lifted_1d03e, 1); }
@@ -98,8 +108,12 @@ void f_1d116(void) { extern void lifted_1d116(void); guest_pass(lifted_1d116, 2)
 void f_195ec(void)
 {
     extern void lifted_195ec(void);
-    if (sat_guest_wolverine_tick && !sat_guest_wolverine_tick(R->a[6])) return;
+    u32 player = R->a[6];
+    if (sat_guest_wolverine_tick && !sat_guest_wolverine_tick(player)) return;
     lifted_195ec();
+    /* The lifted routine can use a6 for another actor. Observe the player
+       captured at entry, not the register it leaves behind. */
+    if (sat_guest_wolverine_after_tick) sat_guest_wolverine_after_tick(player);
 }
 #endif
 

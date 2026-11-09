@@ -241,14 +241,20 @@ def main():
     for seq in moves.values():
         for pid, n, _ in seq:
             hold[pid] = max(hold.get(pid, 0), n)
-    need = set()
+    # Every sequence's first pose is retained by trimming, including poses
+    # shared with an earlier move. Include those tiles in the budget up front.
+    need = {seq[0][0] for seq in moves.values() if seq}
     for name, fr_ in fresh.items():
         if fr_:
             need |= {fr_[0], max(fr_, key=lambda i: hold[i]), fr_[-1]}
             if name == "hit_etc":
                 need |= {i for i in fr_ if hold[i] >= 8}
-    cost = lambda ids: len(por | {e[2] for i in ids for e in P[i]})
+    # Current gameplay emits body poses only. Portrait/select art stays in the
+    # asset source, without occupying the stage's finite resident tile set.
+    cost = lambda ids: len({e[2] for i in ids for e in P[i]})
     floor = cost(need)
+    if floor > budget:
+        raise SystemExit(f"required gameplay poses need {floor} tiles, exceeding BUDGET {budget}")
     # Fill: round robin over moves (walk first), each time the move's unkept pose farthest from its kept ones in the timeline.
     names = ["walk"] + [m for m in fresh if m != "walk"]
     progress = True
@@ -263,7 +269,6 @@ def main():
             j = max(cand, key=lambda j: min(abs(j - k) for k in kept) if kept else 0)
             if cost(need | {fr_[j]}) <= budget:
                 need.add(fr_[j]); progress = True
-    have = por | {e[2] for i in need for e in P[i]}
     mt = {}
     for name, seq in moves.items():
         o = []
@@ -273,8 +278,11 @@ def main():
             else:
                 o[-1][1] += n
         mt[name] = o
+    emitted = {step[0] for seq in mt.values() for step in seq}
+    have = {e[2] for i in emitted for e in P[i]}
     A["moves_one"] = mt
-    A["one_set"] = dict(budget=budget, floor=floor, tiles=len(have), poses=len(need))
+    A["one_set"] = dict(budget=budget, floor=floor, tiles=len(have), poses=len(emitted),
+                       residency="emitted_moves", portrait_only_tiles_omitted=len(por - have))
     A["stage_keys"] = {f"{st:02x}": sorted(keys[i] for i in have) for st in range(2, 0x28, 2)}
     print("one set", A["one_set"], {m: (len({x[0] for x in q}), len(moves[m])) for m, q in mt.items()})
     (out / "remap.json").write_text(json.dumps(A))
