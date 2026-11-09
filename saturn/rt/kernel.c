@@ -547,9 +547,10 @@ void sat_vblank(void)
 #ifdef SAT_HOME
     if (sat_home_hold) {   /* the game is held: picture and sound only */
         if (UNCACHED(gfx_done) == UNCACHED(gfx_handed)) {
-            sat_gfx_snapshot();
+            sat_gfx_snapshot_begin();
             UNCACHED(gfx_handed) = UNCACHED(gfx_handed) + 1;
             SLAVE_WAKE = 0xffff;
+            sat_gfx_snapshot_layers();
         }
         sat_audio_frame();
         game_done = 1;
@@ -558,9 +559,10 @@ void sat_vblank(void)
 #endif
     /* Before the IRQ body, which moves the next frame's scroll words into place. A slave still drawing skips this frame's picture, never the game. */
     if (UNCACHED(gfx_done) == UNCACHED(gfx_handed)) {
-        sat_gfx_snapshot();
+        sat_gfx_snapshot_begin();
         UNCACHED(gfx_handed) = UNCACHED(gfx_handed) + 1;
         SLAVE_WAKE = 0xffff;
+        sat_gfx_snapshot_layers();   /* the slave builds the sprite commands meanwhile and waits for this before it reads a layer cell */
     } else
         sat_dbg.gfx_skips++;
     t1 = frt();

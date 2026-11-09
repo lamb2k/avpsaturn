@@ -64,6 +64,18 @@ if os.environ.get("GUEST_ASSETS"):
     assets = pathlib.Path(os.environ["GUEST_ASSETS"])
     remap = json.loads((assets / "remap.json").read_text())
     round_cache.require_unused_remap("Wolverine", remap["keys"], ARCADE_SPRITE_KEYS | SCREEN_KEYS[0])
+# Sprite tiles of the player characters' poses (palettes 0 and 1) from a button-fuzz census (tools/rounds_fuzz.py: jumps, jump attacks, attack bursts, gun, every
+# direction, with and without health held). The route censuses move straight ahead and hit one attack now and then, so poses of jumps, combos and hurt
+# reactions were never looked up and drew blank (lane avp-vanish: the player's body gone for about a second in a stage 02 fight, 40 tiles of one pose).
+# WORK/pose_keys.txt, one hex sprite key a line; tools/pose_keys.py writes it. Every stage file but the front end holds them, ranked POSE_RANK (just under the common census keys; screen keys stay first).
+POSE_RANK = int(os.environ.get("POSE_RANK", "400"))   # between the rarely used census keys (rank under 400) and the common ones (500 and up): a stage short of room drops the rare ones first
+POSE_KEYS = set()
+if (WORK / "pose_keys.txt").exists() and os.environ.get("POSE_KEYS", "1") == "1":
+    POSE_KEYS = {int(l, 16) for l in (WORK / "pose_keys.txt").read_text().split()}
+FUZZ_STAGE = {}   # stage name -> sprite keys the fuzz runs looked up in that stage (all palettes), unranked
+if os.environ.get("POSE_KEYS", "1") == "1" and (WORK / "fuzz_stage_keys").is_dir():
+    for f in (WORK / "fuzz_stage_keys").glob("stage*.txt"):
+        FUZZ_STAGE[f.stem] = {int(l, 16) for l in f.read_text().split()}
 STRETCHES = [(0x02400000 + a, n) for a, n in ROUNDS["holes"] if n >= 0x4000]
 
 
@@ -265,6 +277,9 @@ def round_files(rom, code_end, cold1_at, only=None):
             free = []
         if f["name"] != "front":   # continue and game over screens: reachable from every stage, kept first (tools/screen_keys.py)
             keys = [k | e for k, e in zip(keys, SCREEN_KEYS)]
+            keys[0] = keys[0] | POSE_KEYS
+            keys[0] = keys[0] | FUZZ_STAGE.get(f["name"].split("_")[0], set())
+            frank.update({k: POSE_RANK for k in POSE_KEYS if k not in frank or frank[k] < POSE_RANK})
             frank.update({k: 1 << 40 for k in SCREEN_KEYS[0]})
         if f.get("gfx") and f["gfx"] not in raws:
             raws[f["gfx"]] = pathlib.Path(f["gfx"]).read_bytes()
