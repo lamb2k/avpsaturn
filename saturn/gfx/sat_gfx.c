@@ -464,6 +464,7 @@ static void vp_sprite(int x, int y, int w, int h, unsigned int pmod,
 #endif
 #define HUD(x) x
 #define HUD_ROW0 24
+#define HUD_OS __attribute__((optimize("Os"), noinline))   /* none of this is hot, and high work RAM is what is short */
 extern u32 sat_pad_raw;
 extern volatile int sat_home_hold;
 extern volatile int sat_home_mode;
@@ -478,7 +479,7 @@ static char hud_text[2][44];
 static u32 hud_key = 0xffffffffUL;
 
 /* Master, from sat_gfx_vblank: cls 1 new picture, 2 held (plot unfinished), 3 nothing to show and the slave busy (skip), 4 nothing to show (late). */
-static void hud_master(unsigned cls)
+static HUD_OS void hud_master(unsigned cls)
 {
     u32 pad = sat_pad_raw & 0xffffUL;
     int combo = !(pad & 0x0008) && !(pad & 0x0010) && !(pad & 0x0080);   /* L, Z, R */
@@ -517,7 +518,7 @@ void sat_gfx_hud_idle(void)
     }
 }
 /* Start of a draw, after the previous plot has ended (or the wait gave up). */
-static void hud_begin(void)
+static HUD_OS void hud_begin(void)
 {
     u32 gen = UNC32(hm_gen);
     if (gen != hs.gen)
@@ -547,7 +548,7 @@ static void hud_begin(void)
     hs.counting = UNC32(hm_active);
 }
 /* Just before PTMR: the plot is going out. */
-static void hud_plot_out(void)
+static HUD_OS void hud_plot_out(void)
 {
     hs.s_tick = GFX_TICKS();
     hs.have = 0; hs.kind = 0; hs.watch = 0;
@@ -1226,12 +1227,12 @@ static void update_priority(u16 layers, u16 pri)
 
 #ifdef SAT_PERF_HUD
 /* The readout (hardware test): two text lines on the menu layer. Characters are the home font's (33 to 90), bit 7 the second colour; 0 and 1 are the panel (black). */
-static char *hud_str(char *p, const char *s, int hi)
+static HUD_OS char *hud_str(char *p, const char *s, int hi)
 {
     for (; *s; s++) *p++ = (char)(*s == ' ' ? 1 : (*s | (hi ? 0x80 : 0)));
     return p;
 }
-static char *hud_u(char *p, u32 v)
+static HUD_OS char *hud_u(char *p, u32 v)
 {
     char t[12];
     int n = 0;
@@ -1239,45 +1240,48 @@ static char *hud_u(char *p, u32 v)
     while (n) *p++ = t[--n];
     return p;
 }
-static char *hud_t(char *p, u32 tenths)
+/* " label" then the value: tenths 0 a whole number, 1 value is tenths of a unit. */
+static HUD_OS char *hud_val(char *p, const char *label, u32 v, int tenths)
 {
-    p = hud_u(p, tenths / 10);
+    p = hud_str(p, label, 0);
+    if (!tenths) return hud_u(p, v);
+    p = hud_u(p, v / 10);
     *p++ = '.';
-    *p++ = (char)('0' + tenths % 10);
+    *p++ = (char)('0' + v % 10);
     return p;
 }
-static u32 hud_per(u32 n, u32 d) { return d ? (n * 1000UL + d / 2) / d : 0; }   /* tenths of a percent */
-static u32 hud_avg(u32 sum, u32 n) { return n ? (sum + n / 2) / n : 0; }
+static HUD_OS u32 hud_avg(u32 sum, u32 n) { return n ? (sum + n / 2) / n : 0; }
+#define hud_per(n, d) hud_avg((n) * 1000UL, (d))   /* tenths of a percent */
 /* Line 1: arm, counted vblanks, DONE when frozen, then the shares of those vblanks: N new picture, H held (plot unfinished at the vblank), S skipped
    (the slave still building), L late (nothing new to show). Line 2: D mean/max ticks from PTMR to end of plot, C commands, B build ticks without uploads,
    W mean/max ticks the slave waited for the previous plot, P percent of D figures that are precise (idle poll or wait) rather than a layer-pass bound. */
-static void hud_format(void)
+static HUD_OS void hud_format(void)
 {
-    u32 frames = UNC32(hm_frames), frozen = UNC32(hm_frozen);
+    u32 frames = UNC32(hm_frames);
     char *p;
     u32 i;
     for (i = 0; i < 88; i++) (&hud_text[0][0])[i] = 0;
     p = hud_str(hud_text[0], HUD_ARM, 1);
-    if (!frames) { hud_str(p, " WAIT FOR GAMEPLAY", 0); }
+    if (!frames) { hud_str(p, " WAIT", 0); }
     else
     {
-        p = hud_str(p, " F", 0); p = hud_u(p, frames);
-        if (frozen) p = hud_str(p, " DONE", 1);
-        p = hud_str(p, " N", 0); p = hud_t(p, hud_per(UNC32(hm_new), frames));
-        p = hud_str(p, " H", 0); p = hud_t(p, hud_per(UNC32(hm_held), frames));
-        p = hud_str(p, " S", 0); p = hud_t(p, hud_per(UNC32(hm_skip), frames));
-        p = hud_str(p, " L", 0); p = hud_t(p, hud_per(UNC32(hm_late), frames));
+        p = hud_val(p, " F", frames, 0);
+        if (UNC32(hm_frozen)) p = hud_str(p, " DONE", 1);
+        p = hud_val(p, " N", hud_per(UNC32(hm_new), frames), 1);
+        p = hud_val(p, " H", hud_per(UNC32(hm_held), frames), 1);
+        p = hud_val(p, " S", hud_per(UNC32(hm_skip), frames), 1);
+        p = hud_val(p, " L", hud_per(UNC32(hm_late), frames), 1);
     }
     if (hs.plots)
     {
-        p = hud_str(hud_text[1], "D", 0); p = hud_u(p, hud_avg(hs.dsum, hs.dn)); p = hud_str(p, "/", 0); p = hud_u(p, hs.dmax);
-        p = hud_str(p, " C", 0); p = hud_u(p, hud_avg(hs.cmds, hs.plots));
-        p = hud_str(p, " B", 0); p = hud_u(p, hud_avg(hs.build, hs.plots));
-        p = hud_str(p, " W", 0); p = hud_u(p, hud_avg(hs.wsum, hs.pn)); p = hud_str(p, "/", 0); p = hud_u(p, hs.wmax);
-        p = hud_str(p, " P", 0); p = hud_u(p, (hs.n_idle + hs.n_wait) * 100UL / (hs.dn ? hs.dn : 1));
+        p = hud_val(hud_text[1], "D", hud_avg(hs.dsum, hs.dn), 0); p = hud_val(p, "/", hs.dmax, 0);
+        p = hud_val(p, " C", hud_avg(hs.cmds, hs.plots), 0);
+        p = hud_val(p, " B", hud_avg(hs.build, hs.plots), 0);
+        p = hud_val(p, " W", hud_avg(hs.wsum, hs.pn), 0); p = hud_val(p, "/", hs.wmax, 0);
+        p = hud_val(p, " P", hud_avg((hs.n_idle + hs.n_wait) * 100UL, hs.dn), 0);
     }
 }
-static u16 hud_name_of(u32 row, u32 col)
+static HUD_OS u16 hud_name_of(u32 row, u32 col)
 {
     u32 ch;
     if (row < HUD_ROW0 || row >= HUD_ROW0 + 2) return 0;
@@ -1286,17 +1290,17 @@ static u16 hud_name_of(u32 row, u32 col)
     return (u16)(((ch & 0x80) ? 15u : 14u) << 12 | ((SAT_GFX_HOME_FONT + (ch & 0x7f) - 33) & 0x3ff));
 }
 /* NBG3 as the readout's layer: the menus' set-up without the colour calculation (the panel cell is plain black). fresh: coming from a menu or the start. */
-static void hud_layer(int fresh)
+static HUD_OS void hud_layer(int fresh)
 {
     u32 row, col, key = UNC32(hm_frames) / 60 + (UNC32(hm_frozen) ? 0x10000UL + (hs.pn & 0xffffUL) * 0x20000UL : 0) + (UNC32(hm_gen) & 0xffUL) * 0x10000000UL;
     int changed = key != hud_key;
     if (changed) { hud_key = key; hud_format(); }
+    VDP2R(0x10) = 0x0123; VDP2R(0x12) = 0xff67;   /* every picture, as the menus do */
+    VDP2R(0x36) = 0x8063; VDP2R(0x4c) = 0x0f0f; VDP2R(0x4e) = 0x0f0f; VDP2R(0x94) = 0; VDP2R(0x96) = 0;
+    VDP2R(0x24) = 0; VDP2R(0x26) = 0; VDP2R(0xee) = 0; VDP2R(0x10a) = 0; VDP2R(0xec) = 0;
     if (fresh)
     {
         int e;
-        VDP2R(0x10) = 0x0123; VDP2R(0x12) = 0xff67;
-        VDP2R(0x36) = 0x8063; VDP2R(0x4c) = 0x0f0f; VDP2R(0x4e) = 0x0f0f; VDP2R(0x94) = 0; VDP2R(0x96) = 0;
-        VDP2R(0x24) = 0; VDP2R(0x26) = 0; VDP2R(0xee) = 0; VDP2R(0x10a) = 0; VDP2R(0xec) = 0;
         for (e = 62 * 16 + 1; e < 64 * 16; e++) put16(CRAM_AT(e), sat_gfx_colour(cram_shadow[e]));   /* the menu's translucent dot back to plain */
     }
     if (fresh || changed)
@@ -1763,8 +1767,8 @@ void sat_gfx_snapshot_begin(void)
 #ifdef SAT_SNAP_ALWAYS
         if (1)
 #elif defined(SAT_GUESTS) && SAT_GUEST_PAL_KEEP
-        if (page == 0 && gpal_applied ? sum == (snap.pal_sum[0] ^ 0x5a5a5a5aUL) : 0) pal0_same = 1;
-        if (!pal0_same && sum != snap.pal_sum[page])
+        if (page == 0) pal0_same = gpal_applied && sum == (snap.pal_sum[0] ^ 0x5a5a5a5aUL);
+        if (!(page == 0 && pal0_same) && sum != snap.pal_sum[page])   /* hwtest: the keep applies to page 0 only; as first written pal0_same also froze pages 1 and up (scroll 1 palette fades) */
 #else
         if (sum != snap.pal_sum[page])
 #endif
