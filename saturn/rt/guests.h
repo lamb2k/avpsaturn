@@ -19,4 +19,6 @@ extern const int sat_guest_row_n;
 int sat_guest_slots(void);
 /* Stage file for a row and the characters in play: the guest's variant when a guest's slot is in play, else the arcade's choice. */
 int sat_guest_file(int row, int chars, int variant, int arcade_file);
+/* A round file has just been loaded (row, characters in play, variant, file number): the guests whose art it holds get their select screen and HUD colours, the others the arcade's. */
+void sat_guest_loaded(int row, int chars, int variant, int file);
 #endif

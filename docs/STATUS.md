@@ -2,6 +2,15 @@
 
 Only source of current state. Candidate branch `codex/avp-wolverine-fps-next-20261109`. Backlog: docs/BACKLOG.md.
 
+## Wolverine select screen and HUD art, 2026-11-09 (HOST; SH-2 compile of kernel.c and guests.c; link, disc, MAME, EMULATOR and HARDWARE UNRUN)
+
+`lane/wolverine-art-20261109` on the FPS-compare base. The artist's five PNGs (select picture, name plate, HUD portrait, HUD name, ranking icon) replace Schaefer's art while Wolverine is on. Converted offline by `tools/wolverine/hud_art.py` into the slot character's own tile codes (select 0x2c20.., plate 0x0e30/0x0f30.., HUD portrait 0x1ae6.., HUD name 0x0be0..), so the arcade's own maps draw them: no draw code, no RAM table. The ranking icon is the HUD portrait's tiles (checked on the arcade's pictures), so piece E adds nothing of its own.
+- Tiles: the guest's stage files (`_wv`) read a graphics region with the HUD pieces patched in; a new `front_wv` file (select picture, plate, ranking icon) is the front end while Wolverine is on. Arcade files read the unpatched region. `kernel.c` reloads the front file when the title menu hands back with the setting changed.
+- Colours: the arcade copies its palettes from tables in the ROM image (palette RAM pen 15 holds the table's tag word, which identifies them). `guests.c` writes the guest's pens over every copy (select 3, plate 1, HUD portrait 22) after each file load while the loaded file holds his art, else the arcade's pens back; writes only where bytes differ. The name keeps the shared bank 0x27 (PNG indices mapped to its pens, checked against the ROM).
+- Memory: kernel.c +136 B high RAM text, guests +592 B cart, low RAM +0. Disc +1 front file (about 2 MB). Scroll payload per stage file -160 B; front +96 B. Real-data fit (tools/wolverine/fit.py with FIT_GFX_GUEST/FIT_GFX_FRONT): 76 of 76 guest stage files and the front file pass; dropped keys never above the art-less run (stage 24 variants 2 to 8 fewer).
+- Not run: any emulator. The ROM palette tables as the live source and the reload at the title menu need one Yaba/MAME look.
+- Mega Man: add a `SLOTS` and `GUESTS` entry in hud_art.py; BOTH needs a combined front file (open).
+
 ## FPS experiment candidate, 2026-11-09 (HOST; SH-2 link, MAME, EMULATOR and HARDWARE UNRUN)
 
 `codex/avp-wolverine-fps-next-20261109`, based on `lane/wolverine-disc-20261108` at `dd295f20d43ba7cbd9d42f7d502ff1fc0390491e`, with the current frame-chain runtime from `37c5b4a` and new experiments. Preserves the guest simulation clock, atomic pose publication, emitted-pose selection and strict pack/cache/fit gates. The old 76/76 stage-fit and full-walk disc results below do not qualify this new runtime; rebuild/fit and owner VideoCore 1 display remain required.
