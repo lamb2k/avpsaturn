@@ -2,6 +2,10 @@
 
 Only source of current state. Candidate branch `codex/avp-wolverine-fps-next-20261109`. Backlog: docs/BACKLOG.md.
 
+## Native Wolverine Stage 0 and Stage 1, 2026-11-09 (HOST and BUILD; EMULATOR and HARDWARE UNRUN)
+
+`lane/wolverine-native-20261109`: fork generator, host runner with the guest wrappers linked, 61-field per-vblank diff harness. HOST identity exact against stock Schaefer on golden_c1 (272,171 vblanks, all nine private routines reached) for the nine-routine clone and, separately, the attack + special fork. Stage 1 behind default-off `-DSAT_WV_NATIVE`: stateless data patch layer (no RAM backup), Schaefer walk weight (1.88 px a tick, bit-identical to stock; skin 2.58), Linn-speed taps 12/12/16 ticks against the owner-approved skin 16/16/51 (flagged). Native OFF is byte-identical to the pre-native source. Linked: hw_free 4,616, lw_free 92, cart tail +2,228 bytes inside the same 4 KB page. fit gate False at `stage24_ma` by one tile, the same rows as the recorded D6 fit (not caused by native). Details, side-by-side pacing and open findings (special cost is charged on connect, not on activation): `docs/notes/AVP_WOLVERINE_NATIVE_STAGE01_20261109.md`.
+
 ## FPS experiment candidate, 2026-11-09 (HOST; SH-2 link, MAME, EMULATOR and HARDWARE UNRUN)
 
 `codex/avp-wolverine-fps-next-20261109`, based on `lane/wolverine-disc-20261108` at `dd295f20d43ba7cbd9d42f7d502ff1fc0390491e`, with the current frame-chain runtime from `37c5b4a` and new experiments. Preserves the guest simulation clock, atomic pose publication, emitted-pose selection and strict pack/cache/fit gates. The old 76/76 stage-fit and full-walk disc results below do not qualify this new runtime; rebuild/fit and owner VideoCore 1 display remain required.
