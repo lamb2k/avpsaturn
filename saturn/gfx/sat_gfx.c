@@ -385,7 +385,9 @@ extern u32 sat_vblanks_now(void);
 /* Measurement storage is entirely absent in a normal image. With depth 16 the
    two exported rings take 1984 bytes; current-row and snapshot state add 132.
    This diagnostic build still has to pass the normal linker memory limits. */
-#ifdef SAT_GFX_HOST
+#if defined(SAT_GFX_HOST) || defined(SAT_VDP1_PROFILE_HWRAM)
+/* SAT_VDP1_PROFILE_HWRAM: rings in high work RAM (the guest build has no low work RAM left for them). Measurement builds only;
+   compare arms built the same way, not against low-RAM profile numbers. */
 #define VP_RAM
 #else
 #define VP_RAM __attribute__((section(".lwgfx"), aligned(4)))
