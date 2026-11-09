@@ -135,12 +135,7 @@ typedef struct
 } Section;
 
 /* A set of VRAM slots holding pack tiles; a slot not drawn this frame can be taken. */
-#define HASH_SIZE 1024   /* sprite tiles; the layer caches hold fewer slots and take smaller tables (high work RAM is the short resource) */
-#ifndef HASH_SIZE_S1
-#define HASH_SIZE_S1 512
-#define HASH_SIZE_S2 512
-#define HASH_SIZE_S3 256
-#endif
+#define HASH_SIZE 1024
 typedef struct { u32 key; u16 stamp, next; } SlotRec;
 typedef struct
 {
@@ -153,7 +148,6 @@ typedef struct
     int section;
     SlotRec *slots;   /* key, stamp and chain link of a slot in one 8 byte record: a lookup touches one cache line a node, not three */
     u16 *head;
-    u16 hmask; /* hash table size - 1 */
     u32 memo_key[2]; /* last answer per column parity this frame: runs of one tile, mostly blank, skip the lookup */
     u16 memo_slot[2];
 #ifdef SAT_VLOG
@@ -195,11 +189,11 @@ static u32 table_base;
 static SlotRec spr_slots[SAT_GFX_SPRITE_SLOTS] __attribute__((aligned(8)));
 static u16 spr_head[HASH_SIZE];
 static SlotRec s1_slots[SAT_GFX_S1_SLOTS] __attribute__((aligned(8)));
-static u16 s1_head[HASH_SIZE_S1];
+static u16 s1_head[HASH_SIZE];
 static SlotRec s2_slots[SAT_GFX_S2_SLOTS] __attribute__((aligned(8)));
-static u16 s2_head[HASH_SIZE_S2];
+static u16 s2_head[HASH_SIZE];
 static SlotRec s3_slots[SAT_GFX_S3_SLOTS] __attribute__((aligned(8)));
-static u16 s3_head[HASH_SIZE_S3];
+static u16 s3_head[HASH_SIZE];
 static Cache spr_cache, s1_cache, s2_cache, s3_cache;
 static u16 cram_shadow[2048];
 static u16 back_shadow;
@@ -207,14 +201,14 @@ static u16 back_shadow;
 SatGfxStats sat_gfx_stats;
 
 static void cache_setup(Cache *c, u8 *vram, u32 slot_bytes, u16 capacity, u16 first, int section,
-                        SlotRec *slots, u16 *head, u32 hsize)
+                        SlotRec *slots, u16 *head)
 {
     u32 i;
     c->vram = vram; c->slot_bytes = slot_bytes; c->capacity = capacity; c->hand = first; c->first = first; c->used = 0;
     c->memo_key[0] = c->memo_key[1] = NOKEY; c->memo_slot[0] = c->memo_slot[1] = NOSLOT;
-    c->section = section; c->slots = slots; c->head = head; c->hmask = (u16)(hsize - 1);
+    c->section = section; c->slots = slots; c->head = head;
     for (i = 0; i < capacity; i++) { slots[i].key = NOKEY; slots[i].stamp = 0; slots[i].next = NOSLOT; }
-    for (i = 0; i < hsize; i++) head[i] = NOSLOT;
+    for (i = 0; i < HASH_SIZE; i++) head[i] = NOSLOT;
 }
 
 static const u8 *pack_start;
@@ -358,7 +352,7 @@ static void vram_copy(u8 *dest, const u8 *src, u32 bytes)
 extern u32 sat_pad_raw;
 static u32 readout_pad(void) { return *UNC_PTR(u32, &sat_pad_raw); }
 #endif
-#define HASH(c, k) (((k) ^ ((k) >> 10)) & (c)->hmask)
+#define HASH(c, k) (((k) ^ ((k) >> 10)) & (HASH_SIZE - 1))
 /* The per-frame snapshot: everything drawing reads from the game, copied once by the game's CPU. The two sides never share a structure: the
    master owns game RAM, object RAM and graphics RAM; the drawing side owns VDP1, VDP2, CRAM, the caches and the shadows. */
 #define S1_ROWS (SAT_GFX_SCREEN_H / 8 + 1)
@@ -1885,10 +1879,10 @@ COLD_OS int sat_gfx_init(const void *pack)
     for (n = 0; n < 64 * 64; n++) { sh_s1[n] = CLEAR_NAME; sh_s2[n] = CLEAR_NAME; sh_s3[n] = NOKEY; }
     for (n = 0; n < SAT_GFX_SCREEN_H; n++) sh_row[n] = 0;
     for (n = 0; n < BLANK_WAYS; n++) blank_seen[n] = NOKEY;
-    cache_setup(&spr_cache, VDP1_VRAM + TEX_BASE, 128, SAT_GFX_SPRITE_SLOTS, 0, SEC_SPRITE, spr_slots, spr_head, HASH_SIZE);
-    cache_setup(&s1_cache, VDP2_VRAM + CELL_S1, 32, SAT_GFX_S1_SLOTS, 4, SEC_S1, s1_slots, s1_head, HASH_SIZE_S1);
-    cache_setup(&s2_cache, VDP2_VRAM + CELL_S2, 128, SAT_GFX_S2_SLOTS, 0, SEC_S2, s2_slots, s2_head, HASH_SIZE_S2);
-    cache_setup(&s3_cache, VDP2_VRAM + CELL_S3, 512, SAT_GFX_S3_SLOTS, 0, SEC_S3, s3_slots, s3_head, HASH_SIZE_S3);
+    cache_setup(&spr_cache, VDP1_VRAM + TEX_BASE, 128, SAT_GFX_SPRITE_SLOTS, 0, SEC_SPRITE, spr_slots, spr_head);
+    cache_setup(&s1_cache, VDP2_VRAM + CELL_S1, 32, SAT_GFX_S1_SLOTS, 4, SEC_S1, s1_slots, s1_head);
+    cache_setup(&s2_cache, VDP2_VRAM + CELL_S2, 128, SAT_GFX_S2_SLOTS, 0, SEC_S2, s2_slots, s2_head);
+    cache_setup(&s3_cache, VDP2_VRAM + CELL_S3, 512, SAT_GFX_S3_SLOTS, 0, SEC_S3, s3_slots, s3_head);
     stamp = 0;
     prev_stamp = 0;
     table_base = 0;
