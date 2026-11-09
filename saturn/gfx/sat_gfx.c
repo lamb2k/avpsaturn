@@ -789,10 +789,10 @@ static HOME_OS void draw_home(int fresh)
     u32 row, col;
     static u32 font_bg = 99;
     if (*(volatile u32 *)((unsigned long)&sat_home_seq | 0x20000000UL) & 1) return;   /* the master is copying a new screen: next frame */
-    if (font_bg != (snap.home == 3 ? 0u : 15u))   /* the title list's letters have no panel behind them, the option screens' have */
+    if (font_bg != (snap.home >= 3 ? 0u : 15u))   /* the title list's and the option screens' letters have no panel behind them; the pause menu's have */
     {
         int g;
-        font_bg = snap.home == 3 ? 0u : 15u;
+        font_bg = snap.home >= 3 ? 0u : 15u;
         for (g = 0; g < 58; g++) home_cell(home_font + g * 32, (u32)SAT_GFX_HOME_FONT + (u32)g, 0, font_bg);
     }
     for (row = 0; row < 28; row++)
@@ -800,7 +800,7 @@ static HOME_OS void draw_home(int fresh)
         {
             u32 ch = *(volatile u8 *)((unsigned long)&sat_home_shown[row][col] | 0x20000000UL);
             u16 name = 0;                                                       /* cell 0xc00: clear */
-            if (ch == 1) name = snap.home == 3 ? 0 : (u16)(14u << 12 | ((SAT_GFX_HOME_FONT + 58) & 0x3ff));   /* the sub-screens' translucent panel; the title list has none */
+            if (ch == 1) name = snap.home >= 3 ? 0 : (u16)(14u << 12 | ((SAT_GFX_HOME_FONT + 58) & 0x3ff));   /* the pause menu's translucent panel; the title list and the option screens have none (owner 11-09) */
             else if ((ch >= 2 && ch <= 0x20) || (ch >= 0x81 && ch <= 0xa0))   /* a large letter's half (sat_home_big) */
                 name = (u16)(15u << 12 | ((SAT_GFX_HOME_FONT + 59 + (ch <= 0x20 ? ch - 2 : ch - 0x81 + 31)) & 0x3ff));
             else if (ch & 0x7f) name = (u16)(((ch & 0x80) ? 15u : 14u) << 12 | ((SAT_GFX_HOME_FONT + (ch & 0x7f) - 33) & 0x3ff));
