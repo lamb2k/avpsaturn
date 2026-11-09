@@ -43,7 +43,7 @@ The boss death, the clear flag (ff81f3 set in section 2), the section change and
 
 Not equal, stated plainly: the bot took 36-37 hits with Wolverine and 2 with Schaefer in about the same stretch (runs are not deterministic and Yaba ran 6-13 v/s against 33 v/s for the Schaefer run, so this is
 an observation, not a measurement). Likely sources are his MSHvSF hurt boxes, shorter reach and slower recovery against Schaefer's data; it was not isolated. Score is 24-25 percent lower with Wolverine.
-The HUD name still reads Maj.Schaefer in the Wolverine runs (the name patch of `names()` changed the select screen text only, the HUD name is not taken from those bytes): found, not fixed.
+The HUD name still reads Maj.Schaefer in the Wolverine runs (`names()` patches ROM bytes at 0xaedca / 0xac699; the cause was not investigated): found, not fixed.
 The 0204xx state is the player being GRABBED by an enemy (xeno on his back, `clips\throw_off_k12.gif`, `clips\throw_on_k12.gif`), not a throw he performs; he shows his MSHvSF throw poses (move 10) while held, which reads as hunched and struggling.
 Frame-exact traces in `rec\gate_off_throw1.jsonl` (state 020406, cur 10, 52 frames) and `rec\gate_on_throw0.jsonl` (020408, 120 frames, still held at the cap).
 
