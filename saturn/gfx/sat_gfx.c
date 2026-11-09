@@ -373,7 +373,7 @@ static u32 readout_pad(void) { return *UNC_PTR(u32, &sat_pad_raw); }
 #define MAX_OBJECTS 0x400
 typedef struct
 {
-    u16 layers, priority, pal_pages, back_valid, back, row_active, objects, whole;   /* whole: scroll 2 read as a whole page (row scroll on), taken before a menu clears row_active */
+    u16 layers, priority, pal_pages, back_valid, back, row_active, objects, pad, whole;   /* pad: unused here (a pack generation in builds that add one). whole: scroll 2 read as a whole page (row scroll on), taken before a menu clears row_active */
     u16 s1x, s1y, s2x, s2y, s3x, s3y;
     u16 row[SAT_GFX_SCREEN_H];
     u8 palette[SAT_GFX_PAGES][0x400];
@@ -972,7 +972,11 @@ static void draw_sprites(void)
                     tile = code + (u32)(fx ? nx - 1 - tx : tx) + 0x10UL * (u32)(fy ? ny - 1 - ty : ty);
                 else
                     tile = (code & ~0xfUL) + ((code + (u32)tx) & 0xfUL) + 0x10UL * (u32)ty;
+#if defined(SAT_ABL) && (SAT_ABL & 2)
+                slot = (u16)(tile & 0x7ff);   /* measurement only: no lookup, no upload */
+#else
                 slot = cache_get(&spr_cache, tile, &sat_gfx_stats.refused_sprite);
+#endif
                 if (slot == NOSLOT)
                 {
                     CENSUS(c_empty++;)
@@ -989,7 +993,11 @@ static void draw_sprites(void)
                 if (SAT_FIT_ON) put_sprite_fit(cmd, flip, colr, TEX_BASE + (u32)slot * 128, sx, sy);
                 else put_sprite(cmd, flip, colr, TEX_BASE + (u32)slot * 128, sx, sy);
 #elif SAT_GFX_FIT == 1
+#if defined(SAT_ABL) && (SAT_ABL & 1)
+                (void)flip; (void)colr;   /* measurement only: no command writes */
+#else
                 put_sprite_fit(cmd, flip, colr, TEX_BASE + (u32)slot * 128, sx, sy);
+#endif
 #else
                 put_sprite(cmd, flip, colr, TEX_BASE + (u32)slot * 128, sx, sy);
 #endif
