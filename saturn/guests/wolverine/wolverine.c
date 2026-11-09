@@ -107,6 +107,15 @@ static int move_for(int i, int post)
    His hit is out only on the steps where MSHvSF had one, in Schaefer's attack states; when Schaefer's own frame has none there, the frame's
    index is borrowed from the last attack Schaefer's state showed (same damage record). */
 static int is_wolverine(int i);
+/* Lane wolverine-ground, default off: -DSAT_WV_SCALE=S draws him at S/16 of his size (sat_gfx put_sprite_fit_s, same scaled-sprite command) and scales his
+   boxes with him: centre and half sizes by S/16 about his feet (depth bytes are AvP's and stay). Unset: no code at all. */
+#ifdef SAT_WV_SCALE
+#define WVS(v) ((int)(v) * SAT_WV_SCALE / 16)
+#define WVH(v) (WVS(v) < 1 ? 1 : WVS(v))
+#else
+#define WVS(v) (v)
+#define WVH(v) (v)
+#endif
 extern u8 *PAGE[256];
 #define PBY(a) (PAGE[((u32)(a) >> 16) & 0xff] + ((u32)(a) & 0xffff))
 /* One aligned word publishes a complete pose/box step to the vblank snapshot.
@@ -171,7 +180,7 @@ void sat_guest_wolverine_boxes(unsigned long a6, unsigned long a1, int restore)
             if (idx) {
                 u8 *r = PBY(t + rd16(t + 2) + (u32)(s8)idx * 16);
                 if (idx != f[9]) poke4(f + 8, f[8], idx, f[10], f[11]);
-                poke4(r, -w->hx, w->hy, w->hw, w->hh);   /* AvP's record x is backward-positive (f_1d25e negates it when +0f is set, facing right) */
+                poke4(r, WVS(-w->hx), WVS(w->hy), WVH(w->hw), WVH(w->hh));   /* AvP's record x is backward-positive (f_1d25e negates it when +0f is set, facing right) */
             }
         }
     }
@@ -179,7 +188,7 @@ void sat_guest_wolverine_boxes(unsigned long a6, unsigned long a1, int restore)
         const WvBox *w = box_now(i);
         u32 fr = rd32((u32)a1 + 0x1c), t = rd32((u32)a1 + 0x50);
         u8 idx = PBY(fr)[8];
-        if (w && idx) poke4(PBY(t + rd16(t) + (u32)(s8)idx * 8), -w->ux, w->uy, w->uw, w->uh);
+        if (w && idx) poke4(PBY(t + rd16(t) + (u32)(s8)idx * 8), WVS(-w->ux), WVS(w->uy), WVH(w->uw), WVH(w->uh));
     }
 }
 /* Debug for the box sheets (wv_box_dbg[player]): Schaefer's own attack and hurt box from his frame (x0 y0 x1 y1, object coordinates),
@@ -552,6 +561,9 @@ int sat_guest_objects(u8 *obj, int count, int max, u8 *pal0)
                 sy -= l0 + (fr > 1 ? (l1 - l0) * (a > fr ? fr : a) / fr : 0);
             }
         }
+#ifdef SAT_WV_GROUND   /* lane wolverine-ground, default off: the step's feet-on-the-floor offset (gen_c.py wv_gy, tools/wolverine/ground.py) */
+        sy += wv_gy[draw_step];
+#endif
 #ifdef SAT_WOLVERINE_DEBUG
         wv_dbg[i][0] = wv_dbg[i][1] = wv_dbg[i][4] = wv_dbg[i][5] = 9999; wv_dbg[i][2] = wv_dbg[i][3] = wv_dbg[i][6] = wv_dbg[i][7] = -9999;
         box_debug(i, sx, sy);
@@ -612,12 +624,18 @@ int sat_guest_objects(u8 *obj, int count, int max, u8 *pal0)
             if (sx + dx + 16 > wv_dbg[i][6]) wv_dbg[i][6] = (s16)(sx + dx + 16);
             if (sy + t->dy + 16 > wv_dbg[i][7]) wv_dbg[i][7] = (s16)(sy + t->dy + 16);
 #endif
-#if SAT_GUEST_FAST_LIST
+#if SAT_GUEST_FAST_LIST && !defined(SAT_WV_SCALE)   /* the scale comparison keeps the word writes */
             put32b(o, (u32)((sx + dx) & 0x3ff) << 16 | (u32)((sy + t->dy) & 0x3ff));
             put32b(o + 4, (u32)t->key << 16 | (u16)(((t->flags >> 2) ? WV_PALROW1 : WV_SCH_PAL) | (hf << 5) | ((t->flags & 2) << 5)));
 #else
+#ifdef SAT_WV_SCALE
+            dx = (dx * SAT_WV_SCALE) >> 4;   /* about his centre line and the stance's sole row (7 rows above the grid bottom): tile origins stay S apart */
+            put16(o, (u16)(((sx + dx) & 0x3ff) | ((16 - SAT_WV_SCALE) << 10)));
+            put16(o + 2, (u16)((sy + (((t->dy + 7) * SAT_WV_SCALE) >> 4) - 7) & 0x3ff));
+#else
             put16(o, (u16)((sx + dx) & 0x3ff));
             put16(o + 2, (u16)((sy + t->dy) & 0x3ff));
+#endif
             put16(o + 4, t->key);
             put16(o + 6, (u16)(((t->flags >> 2) ? WV_PALROW1 : WV_SCH_PAL) | (hf << 5) | ((t->flags & 2) << 5)));
 #endif

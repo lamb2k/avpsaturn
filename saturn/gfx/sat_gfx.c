@@ -1132,6 +1132,20 @@ static void put_sprite_fit(u8 *cmd, u16 flip, u16 colr, u32 tex, int x, int y SP
     put32(cmd + 20, ((u32)(u16)b << 16) | (u16)(y + SPRITE_HEIGHT - 1));
 }
 #endif
+#if defined(SAT_WV_SCALE) && SAT_GFX_FIT == 1
+/* Lane wolverine-ground, default off: one of his tiles drawn at s x s (s < 16) through the same scaled-sprite command: the 11/12 table for the columns, the
+   rows 1:1 at the smaller size. The guest hook (wolverine.c) puts 16 - s in bits 10..12 of the object's x word and positions the tile itself. */
+static void put_sprite_fit_s(u8 *cmd, u16 flip, u16 colr, u32 tex, int x, int y, int s)
+{
+    int a = (int)fit_x[x + 16] - 14, b = (int)fit_x[x + 16 + s] - 15;
+    if (b < a) b = a;
+    put32(cmd + 0, (u32)(u16)(flip | 1) << 16);
+    put32(cmd + 4, (0x0880UL << 16) | colr);
+    put32(cmd + 8, ((u32)(u16)(tex >> 3) << 16) | (u16)(0x0200 | 16));
+    put32(cmd + 12, ((u32)(u16)a << 16) | (u16)y);
+    put32(cmd + 20, ((u32)(u16)b << 16) | (u16)(y + s - 1));
+}
+#endif
 #ifdef SAT_READOUT
 /* Frame-cost bars for a real console, where no debugger reads the timers: 8 pixels per ms from the left, top bar game on the master, second bar drawing on the slave, white tick at 16.7 ms.
    Values come from the kernel through the uncached alias. Physical numbers are read from a capture of the screen. */
@@ -1205,6 +1219,9 @@ static void draw_sprites(void)
         int nx = ((aw >> 8) & 15) + 1, ny = ((aw >> 12) & 15) + 1;
         int fx = (aw >> 5) & 1, fy = (aw >> 6) & 1;
         int x = xw, y = yw, tx, ty;
+#if defined(SAT_WV_SCALE) && SAT_GFX_FIT == 1
+        int wvs = 16 - (int)((xw >> 10) & 7);
+#endif
         int bank = sat_gfx_bank(0, aw & 31);
         u16 colr;
         u16 flip = (u16)((fx ? 0x10 : 0) | (fy ? 0x20 : 0));
@@ -1360,6 +1377,10 @@ static void draw_sprites(void)
 #if defined(SAT_ABL) && (SAT_ABL & 1)
                 (void)flip; (void)colr;   /* measurement only: no command writes */
 #else
+#if defined(SAT_WV_SCALE)
+                if (wvs != 16) put_sprite_fit_s(cmd, flip, colr, TEX_BASE + (u32)slot * 128, sx, sy, wvs);
+                else
+#endif
                 put_sprite_fit(cmd, flip, colr, TEX_BASE + (u32)slot * 128, sx, SPRITE_Y SPRITE_HEIGHT_ARGUMENT);
 #endif
 #else
