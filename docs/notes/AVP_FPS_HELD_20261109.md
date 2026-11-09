@@ -103,6 +103,35 @@ Name check 8 (lazy), remove Schaefer's sprites 38, shift 18, tiles 38, palette 1
 ### Default-off identity
 With every new switch off (and no probe), the profile build of the final source gives hw_free 8,220, lw_free 88 and an ELF the same size as the compare lane's `p_off`, with 3 bytes different (the same 3 as before the follow-up changes): loaded code unchanged.
 
+## Group loop out of the snapshot (lane/fps-group-20261109), in progress, paused 2026-11-09
+
+All EMULATOR (Yaba) / MODELLED; hardware unrun. Paused at the coordinator's request (the owner is playing the integrated disc in Yaba; the CPU is contended). No Yaba runs or builds are active.
+
+### Switch
+`SAT_GUEST_GROUPS_EARLY` (default off), `saturn/rt/guests.c` and `saturn/rt/kernel.c`. `=1`: when the game's frame is finished (`f_d86`, right after `game_done`) the master classifies every sprite group once (guest body, guest shot, Wolverine shot or flash). The snapshot consumes that and skips the group loop when no group is special. `=2`: check build; the snapshot still classifies itself and counts groups whose early class differs; per-task counters (see below).
+The early result is used only if all of these hold, else the snapshot classifies as before:
+- vblank stamp: made in the frame this vblank ends (the vblank count rises before the snapshot runs);
+- group-write sequence unchanged (`sat_guest_group` counts every call);
+- `sat_guest_sel` unchanged;
+- not invalidated: `sat_guest_groups_task(i)` runs before every game task that runs after `game_done` and clears the result unless task i is in the mask `SAT_GUEST_GROUPS_TASKS` (default 0: every task invalidates). The flag is cleared at the start of the early run and set last behind a barrier, so a vblank inside the run falls back.
+State lives in high work RAM (`.data`): every `.bss` goes to low work RAM, which has about 100 bytes free (the first link failed by 124 bytes). Counters exist only in profile (`SAT_GUEST_PROF`), check (`=2`) and host (`SAT_GUEST_GSTAT`) builds.
+
+### Host equivalence test
+`tests/test_guest_groups_early.py` with `tests/guest_groups_early_test.c`: 1,500 random scenarios (random players, shots, flashes, groups, lists, palettes, `sat_guest_sel` 0 to 3, a stand-in Mega Man), real `guests.c` and `wolverine.c`. List, count and palette dumps are byte-identical for `=0`, `=1`, `=2`, including stale cases: no early run (frame overran), state changed after a non-listed task, a group written after the early run, the setting changed, the vblank stamp off in either direction, and a listed task (stays valid). Last run: early result used in 558 snapshots, own classification 801, 164 snapshots with a special group, 0 groups differing between the early and the snapshot classification. Removing any of the three stamp checks makes the test fail. Not covered by the test by design: a game task that changes actor state after `game_done` without calling `sat_guest_groups_task` (it is called by the dispatcher for every task).
+
+### Yaba, 3 seeds x 400 vblanks (profile build, owner recipe flags + SAT_WV_JUMP=1, D11; valid timing runs, taken before the CPU contention)
+| Arm | New % | Held % | Held per seed | Late % | Snapshot ticks | Build ticks |
+| --- | ---: | ---: | --- | ---: | ---: | ---: |
+| BASE (switch off) | 81.9 | 2.2 | 3.2/2.7/0.7 | 15.9 | 489 | 1767 |
+| E1 (`=1`, strict guard, no task listed) | 83.5 | 2.2 | 3.2/3.2/0.2 | 14.2 | 503 | 1847 |
+
+E1 used the early result in **0 of 1,000 snapshots**: the dispatcher keeps walking the task list after `game_done` (per frame about 60 idle calls and 63 task runs, from `sat_dbg`), so some task always runs after the early pass and clears it. Done alone, the early run costs 91 ticks (1,191 runs, one a frame) and lands in the wait for the vblank: game-done mean 2,525 (BASE) and 2,710 (E1; includes the snapshot and the IRQ body), game overruns 5 in 1,188 vblanks for both, and 1 of 399 samples would pass one field (3,495) once the early cost is added. So the strict form moves nothing and the snapshot block is not smaller (E1 503 vs 489, noise).
+Builds: BASE hw_free 7,752 / lw_free 24 (profile), E1 7,744 / 24, E2 7,736 / 24. Each differing build is a full pack rebuild (about 28 min), not the 35 s kept-round-files case.
+
+### E2 run (check build, every post-done task allowed): invalid for timing
+A 3-seed E2 run (all tasks allowed through `EARLY_WL=0xffff`, to count per task how often a post-done run changes the classification) was stopped at the coordinator's request while other Yabas were competing for the CPU. Whatever it produced is not usable for timing and is not reported as such; the per-task counters (`sat_gtask_hist`, `sat_gtask_diff`, early-versus-snapshot differences) are tick-independent but the run was incomplete. Next, once resumed: rerun E2 one seed at a time, read which tasks run after `game_done` and whether any changes the classification; list the harmless ones in `SAT_GUEST_GROUPS_TASKS`, re-measure E1 (3 seeds), then the release link with the switch on (`hw_free` / `lw_free`, about 4.4 KB and 72 to 104 B available) and `fit.py` with D11 (the pack layout does not depend on the kernel switches, so the fit should repeat the integration's 76/76).
+A list of tasks justified by measurement is empirical; a stronger guarantee needs the lifted task code read for writes to the player blocks, shot and flash actors. The recommendation for the owner recipe stays "do not turn it on" until a listed-task build shows a snapshot gain and 0 differences.
+
 ## Next steps (not done)
 1. Group loop (about 44 ticks a snapshot): precompute during the game frame, or skip the loop when Mega Man is off and no Wolverine shot or flash group exists (needs its own equivalence check). Then a true fold into the kernel copy (30 to 40 ticks at most).
 2. Natural fade, continue screen, stage-end transition and Mega Man data are not covered by the look check; run them when a play-through lane has a state near each.

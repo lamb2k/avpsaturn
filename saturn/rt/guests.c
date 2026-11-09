@@ -177,8 +177,37 @@ void sat_guest_groups_early(void)
     t1 = GFRT();
     GSTAT(4, ++); GSTAT(5, += (t1 - t0) & 0xffffu);
 }
-/* kernel.c, f_d86: a game task is about to run after the frame was finished (or anything else that may change what the result was made from). */
-void sat_guest_groups_invalidate(void) { gpre.ok = 0; }
+/* kernel.c, f_d86: game task i is about to run after the frame was finished. After game_done the dispatcher goes on walking the task list until the
+   vblank (about 60 task runs a frame, measured), so any task could change what the early result was made from: it is invalidated unless task i is
+   listed in SAT_GUEST_GROUPS_TASKS, a bit mask of tasks that were shown not to write what classify() reads (the check build counts, per task, how often a
+   run changed the classification). Default 0: every task invalidates. */
+#ifndef SAT_GUEST_GROUPS_TASKS
+#define SAT_GUEST_GROUPS_TASKS 0
+#endif
+#if SAT_GUEST_GROUPS_EARLY == 2
+unsigned int sat_gearly_wl GHI = SAT_GUEST_GROUPS_TASKS;   /* check build: changeable from the debugger */
+unsigned int sat_gtask_hist[16] GHI, sat_gtask_diff[16] GHI;
+#define GWL sat_gearly_wl
+#else
+#define GWL SAT_GUEST_GROUPS_TASKS
+#endif
+void sat_guest_groups_task(int i)
+{
+#if SAT_GUEST_GROUPS_EARLY == 2
+    sat_gtask_hist[i & 15]++;
+#endif
+    if (!((GWL >> i) & 1u)) gpre.ok = 0;
+}
+#if SAT_GUEST_GROUPS_EARLY == 2
+/* check build: after a task that was allowed to run, is the classification still what the early run made? */
+void sat_guest_groups_task_after(int i)
+{
+    int g, d = 0;
+    if (!gpre.ok) return;
+    for (g = 0; g < ngrp; g++) if (gkind[g] != (sat_guest_sel ? classify(grp[g].actor) : 0)) d = 1;
+    if (d || gseq != gpre.seq) sat_gtask_diff[i & 15]++;
+}
+#endif
 #endif
 
 /* obj: the snapshot's copy of the object list (count entries, room for max). page0: the snapshot's sprite palette page. Returns the new count. */

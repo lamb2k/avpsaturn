@@ -19,7 +19,7 @@ int sat_guest_pal_keep;
 #if SAT_GUEST_GROUPS_EARLY
 extern unsigned int sat_gearly[8];
 void sat_guest_groups_early(void);
-void sat_guest_groups_invalidate(void);
+void sat_guest_groups_task(int i);
 #endif
 void sat_guest_group(unsigned long actor, unsigned long objptr);
 int sat_guest_objects(u8 *obj, int count, int max, u8 *page0);
@@ -88,7 +88,7 @@ int main(void)
     if (mmap((void *)0x02400000u, 0x200000, PROT_READ | PROT_WRITE, MAP_PRIVATE | MAP_ANONYMOUS | MAP_FIXED_NOREPLACE, -1, 0) == MAP_FAILED) return 2;   /* cart RAM, where the guest writes names */
     PAGE[0xff] = RAMB;
     for (t = 0; t < 1500; t++) {
-        int ng = (int)(rnd() % 14), g, count = 0, kase = (int)(rnd() % 9), i;
+        int ng = (int)(rnd() % 14), g, count = 0, kase = (int)(rnd() % 10), i;
         u32 at = 0;
         sat_guest_sel = (u8)(rnd() % 4 == 0 ? 3 : rnd() % 7 == 0 ? 2 : 1);
         if (rnd() % 11 == 0) sat_guest_sel = 0;
@@ -115,7 +115,8 @@ int main(void)
 #if SAT_GUEST_GROUPS_EARLY
         if (kase != 8) sat_guest_groups_early();   /* case 8: the frame overran, no early run */
         switch (kase) {
-        case 1: sat_guest_groups_invalidate(); R8(0xff8688u) = (u8)(R8(0xff8688u) ^ 4); break;   /* a task ran after the frame: state changed, invalidated */
+        case 1: sat_guest_groups_task(0); R8(0xff8688u) = (u8)(R8(0xff8688u) ^ 4); break;   /* a task (0, not listed) ran after the frame: state changed, invalidated */
+        case 6: sat_guest_groups_task(1); break;                                                    /* a listed task (1) ran: the result stays valid */
         case 2: sat_guest_group(0xff8380u, 0x708000UL + 900 * 8); break;                         /* one more group written: sequence moved */
         case 3: sat_guest_sel = (u8)(sat_guest_sel ^ 2); break;                                  /* the setting changed */
         case 4: vb += 1; break;                                                                   /* a vblank passed with no new early run: stamp two old */

@@ -32,7 +32,7 @@ class GroupsEarlyTest(unittest.TestCase):
             (td / "guest_files.inc").write_text("#define GUEST_ROWS 2\nstatic const unsigned short guest_file[2][5][3] = {%s};\n" % rows)
             outs = {}
             for early in (0, 1, 2):
-                flags = COMMON + ["-DSAT_GUEST_GROUPS_EARLY=%d" % early, "-DGFRT()=0u", "-I" + str(td), "-I" + str(ROOT / "saturn/rt")]
+                flags = COMMON + ["-DSAT_GUEST_GROUPS_EARLY=%d" % early, "-DSAT_GUEST_GROUPS_TASKS=2", "-DGFRT()=0u", "-I" + str(td), "-I" + str(ROOT / "saturn/rt")]
                 wv = td / ("wv%d.o" % early)
                 subprocess.run(["gcc", "-std=gnu99", "-Wall", "-Wextra", "-Werror", "-O2", "-c", "-Dsat_guest_objects=sat_guest_wolverine_objects"] + flags +
                                [str(ROOT / "saturn/guests/wolverine/wolverine.c"), "-o", str(wv)], check=True)

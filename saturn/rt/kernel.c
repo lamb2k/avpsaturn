@@ -425,7 +425,10 @@ static void slave_start(void)
 #include "guests.h"
 #if SAT_GUEST_GROUPS_EARLY
 void sat_guest_groups_early(void);
-void sat_guest_groups_invalidate(void);
+void sat_guest_groups_task(int i);
+#if SAT_GUEST_GROUPS_EARLY == 2
+void sat_guest_groups_task_after(int i);
+#endif
 #endif
 #endif
 u8 sat_aud_tables[0x2000] __attribute__((section(".lwgfx"), aligned(4)));
@@ -544,9 +547,12 @@ void f_d86(void)
             cpu.d[1] = (cpu.d[1] & 0xffffff00u) | st;
             if (st >= 4) {
 #if defined(SAT_GUESTS) && SAT_GUEST_GROUPS_EARLY
-                if (game_done) sat_guest_groups_invalidate();   /* a task runs after the frame was finished: the early group result is no longer safe */
+                if (game_done) sat_guest_groups_task(i);   /* a task runs after the frame was finished: the early group result is no longer safe unless this task is known not to touch it */
 #endif
                 run_task(i);
+#if defined(SAT_GUESTS) && SAT_GUEST_GROUPS_EARLY == 2
+                if (game_done) sat_guest_groups_task_after(i);
+#endif
                 sat_dbg.task_runs++;
                 cpu.a[0] = REC(i); LOWW(cpu.d[0], 15 - i);
             }
