@@ -870,14 +870,26 @@ extern char sat_home_shown[28][44];
 extern volatile u32 sat_home_seq;
 /* One 8x8 menu cell from the game's font: big = 1 doubles rows 0-3 of the glyph (a large letter's half) and thickens it one dot to the right.
    Lit dots keep their pens (the font's own blue lower edge is its outline). Clear dots take bg: 0, clear, so the picture shows between the
-   letters (the title list, straight on the title art as Capcom's Saturn menus draw their mode list), or 15, the panel's dot code, so the letters
-   sit on the translucent panel and not in holes through it (the option screens). An added outline or drop shadow filled the 8x8 font's
-   one-dot gaps and read as noise in Yaba, so there is none. */
+   letters (the title list, straight on the title art as Capcom's Saturn menus draw their mode list); 15, the panel's dot code, so the letters
+   sit on the translucent panel (the pause menu); or 14, a halo: only the clear dots touching a lit dot (8 neighbours, inside the cell) take the
+   panel's dot code, so the option screens have no panel but each letter keeps a darkened margin of the picture and reads over the logo (owner 11-09). */
 static void home_cell(const u8 *f, u32 cell, int big, u32 bg)
 {
-    u8 d[8][8]; int x, y;
+    u8 d[8][8]; int x, y, halo = bg == 14;
+    if (halo) bg = 0;
     for (y = 0; y < 8; y++) for (x = 0; x < 8; x++) { int sy = big ? y / 2 : y; d[y][x] = (u8)((f[sy * 4 + x / 2] >> (x & 1 ? 0 : 4)) & 15); }
     if (big) for (y = 0; y < 8; y++) for (x = 7; x > 0; x--) if (!d[y][x]) d[y][x] = d[y][x - 1];
+    if (halo)
+    {
+        u8 h[8][8];
+        for (y = 0; y < 8; y++) for (x = 0; x < 8; x++)
+        {
+            int j, k;
+            h[y][x] = 0;
+            for (j = y - 1; j <= y + 1; j++) for (k = x - 1; k <= x + 1; k++) if (j >= 0 && j < 8 && k >= 0 && k < 8 && d[j][k]) h[y][x] = 15;
+        }
+        for (y = 0; y < 8; y++) for (x = 0; x < 8; x++) if (!d[y][x]) d[y][x] = h[y][x];
+    }
     for (y = 0; y < 8; y++) { u32 o = 0;
         for (x = 0; x < 8; x++) { u32 v = d[y][x];
             o |= (v ? v : bg) << (28 - 4 * x); }
@@ -888,18 +900,19 @@ static HOME_OS void draw_home(int fresh)
     u32 row, col;
     static u32 font_bg = 99;
     if (*(volatile u32 *)((unsigned long)&sat_home_seq | 0x20000000UL) & 1) return;   /* the master is copying a new screen: next frame */
-    if (font_bg != (snap.home == 3 ? 0u : 15u))   /* the title list's letters have no panel behind them, the option screens' have */
+    if (font_bg != (snap.home == 3 ? 0u : snap.home == 4 ? 14u : 15u))   /* the title list's letters have no panel behind them, the option screens' a halo, the pause menu's a panel */
     {
-        int g;
-        font_bg = snap.home == 3 ? 0u : 15u;
+        int g, L;
+        font_bg = snap.home == 3 ? 0u : snap.home == 4 ? 14u : 15u;
         for (g = 0; g < 58; g++) home_cell(home_font + g * 32, (u32)SAT_GFX_HOME_FONT + (u32)g, 0, font_bg);
+        for (L = 0; L < 52; L++) home_cell(home_font + 32 * 32 + L * 16, (u32)SAT_GFX_HOME_FONT + 59 + (u32)L, 1, font_bg);   /* the header's large letters */
     }
     for (row = 0; row < 28; row++)
         for (col = 0; col < 44; col++)
         {
             u32 ch = *(volatile u8 *)((unsigned long)&sat_home_shown[row][col] | 0x20000000UL);
             u16 name = 0;                                                       /* cell 0xc00: clear */
-            if (ch == 1) name = snap.home == 3 ? 0 : (u16)(14u << 12 | ((SAT_GFX_HOME_FONT + 58) & 0x3ff));   /* the sub-screens' translucent panel; the title list has none */
+            if (ch == 1) name = snap.home >= 3 ? 0 : (u16)(14u << 12 | ((SAT_GFX_HOME_FONT + 58) & 0x3ff));   /* the pause menu's translucent panel; the title list and the option screens have none (owner 11-09) */
             else if ((ch >= 2 && ch <= 0x20) || (ch >= 0x81 && ch <= 0xa0))   /* a large letter's half (sat_home_big) */
                 name = (u16)(15u << 12 | ((SAT_GFX_HOME_FONT + 59 + (ch <= 0x20 ? ch - 2 : ch - 0x81 + 31)) & 0x3ff));
             else if (ch & 0x7f) name = (u16)(((ch & 0x80) ? 15u : 14u) << 12 | ((SAT_GFX_HOME_FONT + (ch & 0x7f) - 33) & 0x3ff));
