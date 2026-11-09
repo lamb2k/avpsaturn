@@ -79,7 +79,28 @@ NATIVE.update(A.get("native", {}))
 CHAIN = tuple(A.get("chain", CHAIN))
 if any(m not in moves for m in CHAIN) or len(CHAIN) != 4:
     raise SystemExit("NO-GO: the attack chain needs four stages naming resident moves")
+# Height above his standing feet line per step, from and to (pixels, the pose is drawn this much higher; interpolated across the step by the runtime).
+# Poses are anchored by their own bottom row, so a jump, which MSHvSF draws in the air, needs it; zero for every other move.
+LIFT = A.get("lift", {})
+lift = []
+for m, s_ in moves.items():
+    ls = LIFT.get(m, [])
+    if ls and len(ls) != len(s_):
+        raise SystemExit(f"NO-GO: lift table of {m} does not match its steps")
+    for k in range(len(s_)):
+        a, b = ls[k] if ls else (0, 0)
+        if not (0 <= a <= 255 and 0 <= b <= 255):
+            raise SystemExit("NO-GO: lift outside 0..255")
+        lift += [a, b]
 lines += [
+    f"static const unsigned char wv_lift[{len(lift)}] = {{{','.join(map(str, lift))}}};",
+]
+# Ground speed of his walk against Schaefer's, in 1/16 (16 = as Schaefer): AvP's walk is about 2.0 px a tick (Yaba, stage 02, 290 held frames, 1.8-2.2),
+# MSHvSF's about 2.8 px a frame (origin of boxcap/boxes.txt over frames 2005-2060): 22 is 1.375. Depth moves scale the same. His slot only.
+SPEED = dict(walk=22)
+SPEED.update(A.get("speed", {}))
+lines += [
+    "static const unsigned char wv_speed_tab[WV_MOVES] = {" + ",".join(str(SPEED.get(m, 16)) for m in names) + "};",
     "static const unsigned char wv_nat_tab[WV_MOVES] = {" + ",".join(str(NATIVE.get(m, 0)) for m in names) + "};",
     "static const unsigned char wv_chain_tab[4] = {" + ",".join("WV_" + m.upper() for m in CHAIN) + "};",
 ]

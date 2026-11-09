@@ -47,7 +47,7 @@ def main():
     out = {}
     for name, seq in moves.items():
         steps = []
-        if name == "idle" and name in WINDOWS:
+        if name in ("idle", "jump") and name in WINDOWS:
             # The standing loop (retime.py) is longer than its one-frame-pose window: every step takes the window's hurt box, no hit box.
             hurt = None
             for g in range(WINDOWS[name][0], WINDOWS[name][1] + 1):

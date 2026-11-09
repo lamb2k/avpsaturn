@@ -33,6 +33,9 @@ s16 wv_lst[2][3];   /* per player: objects before his tiles, tiles asked, tiles 
 #endif
 static u8 step_[2], left_[2], face_[2], cur_[2] = {255, 255}, chain_[2], lastc_[2], held_[2], hitk_[2], restart_[2], gap_[2], cstg_[2];
 static u16 acc_[2], exec_[2], wall_[2];
+static u8 landed_[2];   /* his attack in the current chain hit something (the collision hook saw the target take a hit) */
+static s16 sx_[2], sz_[2];   /* sub-pixel remainder of the walk speed scale, 1/16 px */
+static u16 xb_[2], zb_[2];  /* position before this tick's native update */
 static u16 hp_[2];   /* health before a hit; the hit's size picks his reaction */
 static void wv_reset(int i);
 
@@ -45,7 +48,7 @@ static void wv_reset(int i);
 #define WV_HIT_MEDIUM 13   /* health a hit took: medium from here, heavy from WV_HIT_HEAVY (player hits seen: 10 to 17, docs/notes/AVP_NOTES_ACTOR.md) */
 #define WV_HIT_HEAVY 17
 #endif
-#define ONCE(m) ((m) == WV_LP || (m) == WV_HP || (m) == WV_HK || (m) == WV_TORNADO || (m) == WV_KNOCKDOWN || (m) == WV_THROW || (m) == WV_HIT_ETC || (m) == WV_HIT_M || (m) == WV_HIT_H)
+#define ONCE(m) ((m) == WV_JUMP || (m) == WV_LP || (m) == WV_HP || (m) == WV_HK || (m) == WV_TORNADO || (m) == WV_KNOCKDOWN || (m) == WV_THROW || (m) == WV_HIT_ETC || (m) == WV_HIT_M || (m) == WV_HIT_H)
 /* Attack chain: Schaefer's attack state 020006 repeats while the button is tapped (measured: 56 ticks of it for about four 15-tick attacks, the
    state byte never leaves it), so each new attack of a chain is told by the native ticks of the one before it (pre = 1: the player update is about
    to run). His chain is light, light, heavy, then the kick as the finisher (MSHvSF normals); it starts over after WV_CHAIN_GAP ticks without an
@@ -64,6 +67,10 @@ static int move_for(int i, int pre)
         case 0x04: m = WV_JUMP; break;
         case 0x06:   /* each new attack takes the next of his normals */
             if (lastc_[i] != 0x06 || (pre && exec_[i] >= WV_NAT_ATK && (cur_[i] == WV_LP || cur_[i] == WV_HP || cur_[i] == WV_HK))) {
+#ifdef SAT_WV_NATIVE_TIMING
+                if (!landed_[i]) chain_[i] = 0;   /* the chain goes on only from a landed hit; a whiff starts it over */
+#endif
+                landed_[i] = 0;
                 cstg_[i] = chain_[i];
                 chain_[i] = (u8)((chain_[i] + 1) & 3);
                 if (lastc_[i] == 0x06) restart_[i] = 1;
@@ -107,6 +114,10 @@ extern u8 *PAGE[256];
 static volatile u16 wv_step_now[2] = {0xffff, 0xffff};
 static u8 atk_cache[2][16];                       /* last nonzero attack index per Schaefer state +6 (by state >> 1) */
 static struct { u8 *p; u8 v[4]; } undo[8];
+static int hit_i = -1;   /* Wolverine attacker of the collision call in flight, its target's health and hit-flag byte before it */
+static u16 hit_hp;
+static u8 hit_b48;
+static u32 hit_tgt;
 static int nundo;
 static u32 rd32(u32 a) { u8 *p = PBY(a); return (u32)p[0] << 24 | (u32)p[1] << 16 | (u32)p[2] << 8 | p[3]; }
 static u32 rd16(u32 a) { u8 *p = PBY(a); return (u32)p[0] << 8 | p[1]; }
@@ -142,16 +153,22 @@ void sat_guest_wolverine_boxes(unsigned long a6, unsigned long a1, int restore)
 {
     int i, slot;
     if (restore) {
+        if (hit_i >= 0) {   /* f_1d314 wrote the target's +48 (0xf0) and f_1d492 took health: a landed hit */
+            if (rd16(hit_tgt + 0x40) != hit_hp || PBY(hit_tgt + 0x48)[0] != hit_b48) landed_[hit_i] = 1;
+            hit_i = -1;
+        }
         while (nundo > 0) { nundo--; { int k; for (k = 0; k < 4; k++) undo[nundo].p[k] = undo[nundo].v[k]; } }
         return;
     }
     nundo = 0;
     if (!WV_HAVE_BOXES) return;
+    hit_i = -1;
     if ((i = wv_player((u32)a6)) >= 0) {   /* his hit */
         const WvBox *w = box_now(i);
         u32 fr = rd32((u32)a6 + 0x1c), t = rd32((u32)a6 + 0x50);
         u8 *f = PBY(fr), idx = f[9];
         int att = attack_state(i, &slot);
+        hit_i = i; hit_tgt = (u32)a1; hit_hp = (u16)rd16(hit_tgt + 0x40); hit_b48 = PBY(hit_tgt + 0x48)[0];
         if (att && idx) atk_cache[i][slot] = idx;
         if (!att || !w || !w->hw) { if (idx) poke4(f + 8, f[8], 0, f[10], f[11]); }
         else {
@@ -384,6 +401,20 @@ static int wv_tick_move(int i)
     if (!hold && exec_[i] < 65535) exec_[i]++;
     return !hold;
 }
+/* His ground speed (wv_speed_tab, 16 = Schaefer's): the native walk moved the player dx, dz this tick; the difference to the scaled step is added now,
+   with the remainder kept, to x and to both depth words. A jump of position (scene cut, knock-back) is left alone. */
+static void wv_speed(int i)
+{
+    int sp = wv_speed_tab[WV_WALK], dx, dz, e;
+    if (sp == 16 || R8(PL(i) + 4) != 2 || R8(PL(i) + 5) != 0 || R8(PL(i) + 6) != 2) { sx_[i] = sz_[i] = 0; return; }
+    dx = (s16)(R16(PL(i) + 0x10) - xb_[i]); dz = (s16)(R16(PL(i) + 0x18) - zb_[i]);
+    if (dx > 24 || dx < -24 || dz > 24 || dz < -24) return;
+    sx_[i] = (s16)(sx_[i] + dx * (sp - 16)); e = sx_[i] / 16; sx_[i] = (s16)(sx_[i] - e * 16);
+    R16(PL(i) + 0x10) = (u16)(R16(PL(i) + 0x10) + e);
+    sz_[i] = (s16)(sz_[i] + dz * (sp - 16)); e = sz_[i] / 16; sz_[i] = (s16)(sz_[i] - e * 16);
+    R16(PL(i) + 0x14) = (u16)(R16(PL(i) + 0x14) + e);
+    R16(PL(i) + 0x18) = (u16)(R16(PL(i) + 0x18) + e);
+}
 /* wrapper hook for f_195ec (player state machine, a6 = the player's block): 1 run it, 0 skip this tick */
 int sat_guest_wolverine_tick(unsigned long a6)
 {
@@ -392,6 +423,7 @@ int sat_guest_wolverine_tick(unsigned long a6)
         if (a6 == PL(0) || a6 == PL(1)) wv_reset((int)((a6 - PL(0)) >> 8));
         return 1;
     }
+    xb_[i] = R16(PL(i) + 0x10); zb_[i] = R16(PL(i) + 0x18);
     return wv_tick_move(i);
 }
 
@@ -405,6 +437,7 @@ void sat_guest_wolverine_after_tick(unsigned long a6)
         if (a6 == PL(0) || a6 == PL(1)) wv_reset((int)((a6 - PL(0)) >> 8));
         return;
     }
+    wv_speed(i);
     move = move_for(i, 0);
     if (move == cur_[i] && !restart_[i]) return;
 #ifndef WV_MEASURE
@@ -458,6 +491,13 @@ int sat_guest_objects(u8 *obj, int count, int max, u8 *pal0)
         cam = R16(0xff8278);
         sx = (int)x - (int)cam + WV_OX;
         sy = WV_OY - 0x100 - (s16)R16(PL(i) + 0x14) + (s16)R16(0xff827c);   /* the camera's depth (ff827c, 0x100 at rest) scrolls him as it does Schaefer */
+        {   /* height above his feet line (wv_lift, a jump): from the step's start value to its end value across the step */
+            int l0 = wv_lift[2 * draw_step], l1 = wv_lift[2 * draw_step + 1];
+            if (l0 | l1) {
+                int fr = wv_steps[draw_step].frames, a = left_[i] > 0 ? left_[i] - 1 : 0;
+                sy -= l0 + (fr > 1 ? (l1 - l0) * (a > fr ? fr : a) / fr : 0);
+            }
+        }
 #ifdef SAT_WOLVERINE_DEBUG
         wv_dbg[i][0] = wv_dbg[i][1] = wv_dbg[i][4] = wv_dbg[i][5] = 9999; wv_dbg[i][2] = wv_dbg[i][3] = wv_dbg[i][6] = wv_dbg[i][7] = -9999;
         box_debug(i, sx, sy);
@@ -528,7 +568,8 @@ static void wv_reset(int i)
 {
     int k;
     cur_[i] = 255;
-    step_[i] = left_[i] = face_[i] = chain_[i] = lastc_[i] = held_[i] = hitk_[i] = restart_[i] = gap_[i] = cstg_[i] = 0; hp_[i] = 0;
+    step_[i] = left_[i] = face_[i] = chain_[i] = lastc_[i] = held_[i] = hitk_[i] = restart_[i] = gap_[i] = cstg_[i] = landed_[i] = 0; hp_[i] = 0;
+    sx_[i] = sz_[i] = 0;
     acc_[i] = exec_[i] = wall_[i] = wph_[i] = wlx_[i] = wlz_[i] = 0;
     wwalk_[i] = recovery_[i] = inj_left[i] = inj_bits[i] = last_btn[i] = 0;
     wv_step_now[i] = 0xffff;

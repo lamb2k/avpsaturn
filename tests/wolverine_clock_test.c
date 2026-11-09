@@ -64,7 +64,7 @@ static void test_length(int action, int move, int native_length, int expected)
 {
     int frame, finished = 0;
     fresh(action);
-    if (move == WV_HP) chain_[0] = 2;   /* the third attack of the chain */
+    if (move == WV_HP) { chain_[0] = 2; landed_[0] = 1; }   /* the third attack of the chain */
     retire_after = native_length;
     for (frame = 1; frame <= expected; frame++) {
         update();
@@ -127,27 +127,32 @@ static void test_restart_and_reset(void)
     assert(cur_[0] == WV_LP);   /* the chain starts with the light punch */
     state(0, 2, 0, 0);  /* external state change, not a native retirement */
     update();
+    landed_[0] = 1;   /* every attack lands (SAT_WV_NATIVE_TIMING: the chain goes on only from a landed hit) */
     state(0, 2, 0, 6);
     update();
     assert(cur_[0] == WV_LP && step_[0] == 0 && wall_[0] == 1);   /* light, light */
     state(0, 2, 0, 0);
     update();
+    landed_[0] = 1;   /* every attack lands (SAT_WV_NATIVE_TIMING: the chain goes on only from a landed hit) */
     state(0, 2, 0, 6);
     update();
     assert(cur_[0] == WV_HP && step_[0] == 0 && wall_[0] == 1);   /* then the heavy punch */
     state(0, 2, 0, 0);
     update();
+    landed_[0] = 1;   /* every attack lands (SAT_WV_NATIVE_TIMING: the chain goes on only from a landed hit) */
     state(0, 2, 0, 6);
     update();
     assert(cur_[0] == WV_HK && step_[0] == 0 && wall_[0] == 1);   /* then the kick finisher */
     state(0, 2, 0, 0);
     update();
+    landed_[0] = 1;   /* every attack lands (SAT_WV_NATIVE_TIMING: the chain goes on only from a landed hit) */
     state(0, 2, 0, 6);
     update();
     assert(cur_[0] == WV_LP && chain_[0] == 1);   /* and round again */
-    for (k = 0; k < 4; k++) { state(0, 2, 0, 0); update(); state(0, 2, 0, 6); update(); }
+    for (k = 0; k < 4; k++) { state(0, 2, 0, 0); update(); landed_[0] = 1; state(0, 2, 0, 6); update(); }
     state(0, 2, 0, 0);
     for (k = 0; k < WV_CHAIN_GAP + 2; k++) update();
+    landed_[0] = 1;   /* every attack lands (SAT_WV_NATIVE_TIMING: the chain goes on only from a landed hit) */
     state(0, 2, 0, 6);
     update();
     assert(cur_[0] == WV_LP && chain_[0] == 1);   /* a pause starts the chain over */
@@ -156,6 +161,7 @@ static void test_restart_and_reset(void)
     R8(PL(0)) = 0;
     sat_guest_wolverine_pad(&pad);
     assert(cur_[0] == 255 && !atk_cache[0][3] && !dir_hist[0][0]);
+    landed_[0] = 1;   /* every attack lands (SAT_WV_NATIVE_TIMING: the chain goes on only from a landed hit) */
     state(0, 2, 0, 6);
     update();
     assert(cur_[0] == WV_LP && wall_[0] == 1);
@@ -177,6 +183,7 @@ static void test_continuous_chain(void)
     fresh(0);
     enter_action = 6;
     for (k = 0; k < 600 && n < 5; k++) {
+        landed_[0] = 1;
         update();
         if (wall_[0] == 1 && last != 1) assert(cur_[0] == want[n++]);
         last = wall_[0];
@@ -184,6 +191,22 @@ static void test_continuous_chain(void)
     assert(n == 5);
 }
 
+
+#ifdef SAT_WV_NATIVE_TIMING
+/* the chain goes on only from a landed hit: a whiff starts it over with the light punch */
+static void test_chain_on_hit(void)
+{
+    fresh(6);
+    update();
+    assert(cur_[0] == WV_LP && chain_[0] == 1);
+    landed_[0] = 1; state(0, 2, 0, 0); update(); state(0, 2, 0, 6); update();
+    assert(cur_[0] == WV_LP && chain_[0] == 2);
+    landed_[0] = 1; state(0, 2, 0, 0); update(); state(0, 2, 0, 6); update();
+    assert(cur_[0] == WV_HP && chain_[0] == 3);
+    state(0, 2, 0, 0); update(); state(0, 2, 0, 6); update();   /* the heavy punch whiffed */
+    assert(cur_[0] == WV_LP && chain_[0] == 1);
+}
+#endif
 static void test_draws_do_not_tick(void)
 {
     u8 objects[512], palette[1024];
@@ -232,6 +255,9 @@ int main(void)
     test_interruptions();
     test_restart_and_reset();
     test_continuous_chain();
+#ifdef SAT_WV_NATIVE_TIMING
+    test_chain_on_hit();
+#endif
     test_draws_do_not_tick();
     puts("Wolverine clock: HOST synthetic PASS (lengths, poses, interrupts, reset, draw independence)");
     return 0;

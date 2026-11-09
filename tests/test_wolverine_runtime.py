@@ -62,8 +62,8 @@ class WolverineRuntimeTest(unittest.TestCase):
             (temp / "boxes.json").write_text(json.dumps(boxes))
             subprocess.run([sys.executable, str(ROOT / "tools/wolverine/gen_c.py"),
                             str(temp), str(temp / "wolverine_data.inc")], check=True)
-            for debug, measure in ((False, False), (True, False), (False, True), (True, True)):
-                exe = temp / ("clock-%s-%s" % (debug, measure))
+            for debug, measure, native in ((False, False, False), (True, False, False), (False, True, False), (True, True, False), (False, False, True)):
+                exe = temp / ("clock-%s-%s-%s" % (debug, measure, native))
                 command = [
                     "gcc", "-std=c90", "-pedantic", "-Wall", "-Wextra", "-Werror", "-O2",
                     "-ffunction-sections", "-fdata-sections", "-DSAT_GUESTS",
@@ -71,6 +71,8 @@ class WolverineRuntimeTest(unittest.TestCase):
                     str(ROOT / "tests/wolverine_clock_test.c"),
                     str(ROOT / "saturn/game/game_bind.c"), "-Wl,--gc-sections", "-o", str(exe),
                 ]
+                if native:
+                    command.insert(1, "-DSAT_WV_NATIVE_TIMING")
                 if debug:
                     command.insert(1, "-DSAT_WOLVERINE_DEBUG")
                 if measure:
