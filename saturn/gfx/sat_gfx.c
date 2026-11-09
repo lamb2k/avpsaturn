@@ -784,7 +784,7 @@ static void home_cell(const u8 *f, u32 cell, int big, u32 bg)
             o |= (v ? v : bg) << (28 - 4 * x); }
         put32(VDP2_VRAM + CELL_S1 + cell * 32 + (u32)y * 4, o); }
 }
-static void draw_home(int fresh)
+static HOME_OS void draw_home(int fresh)
 {
     u32 row, col;
     static u32 font_bg = 99;
