@@ -16,6 +16,24 @@
 
 #define SAT_GFX_SCREEN_W 352
 #define SAT_GFX_SCREEN_H 224
+#ifndef SAT_VDP1_HW_ERASE
+#define SAT_VDP1_HW_ERASE 0
+#endif
+/* Experiment only; disabled unless explicitly selected in KERNEL_CFLAGS.
+ * Manual V-blank erase covers the first 160 rows; the normal clear polygon
+ * covers the rest. See docs/notes/VDP1_HARDWARE_ERASE.md before a console run. */
+#if SAT_VDP1_HW_ERASE
+#if SAT_GFX_SCREEN_W != 352 || SAT_GFX_SCREEN_H != 224
+#error Recalculate the VDP1 hardware erase budget for this display mode
+#endif
+#define SAT_VDP1_ERASE_ROWS 160
+/* OUT entry calls this with master IPL 15 so IN cannot rearm it midway. */
+void sat_gfx_vblank_out(void);
+/* Call with master interrupts masked before a long GFS/CD load. A zero return
+ * leaves TVMR untouched: restore interrupts and retry the load later. */
+int sat_gfx_erase_suspend(void);
+extern unsigned long sat_gfx_erase_reduced, sat_gfx_erase_full, sat_gfx_erase_canceled;
+#endif
 /* SAT_GFX_FIT, a crop still choice for the owner: 0 the 1:1 centre crop. 1 scale the 384 wide picture to 352: VDP2 zoom on NBG0 and NBG1, scaled VDP1 sprites, HUD flush. 2 the crop, HUD flush. */
 #ifndef SAT_GFX_FIT
 #define SAT_GFX_FIT 1   /* scaled: the owner's default, 2026-11-07 */
@@ -62,6 +80,41 @@ typedef struct
     unsigned long queries, hits, fallbacks, beyond_limit;
 } SatGfxSlotHintStats;
 extern SatGfxSlotHintStats sat_gfx_slot_hint_stats;
+#endif
+/* Experimental vertical pairs. 0 keeps the tile path; 16 or 32 reserves that
+ * many 16 x 32 textures within the existing sprite VRAM. No pack grows.
+ * Each pair reuses two ordinary slots and their existing SlotRec metadata. */
+#ifndef SAT_GFX_SPRITE_PAIRS
+#define SAT_GFX_SPRITE_PAIRS 0
+#endif
+#ifndef SAT_GFX_PAIR_REUSE
+#define SAT_GFX_PAIR_REUSE 0 /* pair ordinary slots only when already contiguous; no VRAM reservation */
+#endif
+#if SAT_GFX_PAIR_REUSE != 0 && SAT_GFX_PAIR_REUSE != 1
+#error SAT_GFX_PAIR_REUSE must be 0 or 1
+#endif
+#if SAT_GFX_PAIR_REUSE && SAT_GFX_SPRITE_PAIRS
+#error Select either SAT_GFX_PAIR_REUSE or SAT_GFX_SPRITE_PAIRS
+#endif
+#if (SAT_GFX_PAIR_REUSE || SAT_GFX_SPRITE_PAIRS) && (defined(SAT_KEYLOG) || defined(SAT_READOUT) || defined(SAT_ABL))
+#error Disable sprite pair experiments for SAT_KEYLOG, SAT_READOUT and SAT_ABL captures
+#endif
+#if SAT_GFX_SPRITE_PAIRS != 0 && SAT_GFX_SPRITE_PAIRS != 16 && SAT_GFX_SPRITE_PAIRS != 32
+#error SAT_GFX_SPRITE_PAIRS must be 0, 16 or 32
+#endif
+/* Cold pair creation competes with normal uploads. Bound it independently of
+ * hot hits: default two pairs, at most 512 extra texture bytes per build. */
+#ifndef SAT_GFX_PAIR_UPLOAD_BUDGET
+#define SAT_GFX_PAIR_UPLOAD_BUDGET 2
+#endif
+#if SAT_GFX_SPRITE_PAIRS && (SAT_GFX_PAIR_UPLOAD_BUDGET < 1 || SAT_GFX_PAIR_UPLOAD_BUDGET > SAT_GFX_SPRITE_PAIRS)
+#error SAT_GFX_PAIR_UPLOAD_BUDGET must be between 1 and SAT_GFX_SPRITE_PAIRS
+#endif
+#if (SAT_GFX_PAIR_REUSE || SAT_GFX_SPRITE_PAIRS) && defined(SAT_GFX_PAIR_STATS)
+/* Cumulative, cleared by init: successful hot hits, uploads, fallbacks and
+ * commands saved. Diagnostic counters only; four target longs = 16 bytes. */
+extern unsigned long sat_gfx_pair_hits, sat_gfx_pair_uploads;
+extern unsigned long sat_gfx_pair_fallbacks, sat_gfx_pair_saved;
 #endif
 #ifdef SAT_HOME
 #define SAT_GFX_S1_SLOTS 768 /* 0x18000-0x1e000; the menu layer (NBG3) map and its font take the rest */

@@ -10,6 +10,10 @@
 #include "sat_gfx.h"
 #include "vdp1_profile.h"
 
+#if SAT_GFX_SPRITE_PAIRS || SAT_GFX_PAIR_REUSE
+#define SPRITE_PAIR_ACTIVE
+#endif
+
 extern unsigned char *PAGE[256];
 extern unsigned char RAMB[];
 #if SAT_GFX_FIT == 3
@@ -57,6 +61,9 @@ static void put32(u8 *p, u32 v) { p[0] = (u8)(v >> 24); p[1] = (u8)(v >> 16); p[
 
 #if !defined(SAT_GFX_HOST) || defined(SAT_GFX_SYNC_TEST) || defined(SAT_VLOG)
 #define SAT_GFX_HAVE_SYNC
+#endif
+#if SAT_VDP1_HW_ERASE && !defined(SAT_GFX_HAVE_SYNC)
+#error SAT_VDP1_HW_ERASE requires the synchronized presentation path
 #endif
 
 /* Game state, by address. */
@@ -116,6 +123,97 @@ int sat_gfx_nudge_x, sat_gfx_nudge_y;
 #define EWDR 0x06
 #define EWLR 0x08
 #define EWRR 0x0a
+
+#if SAT_VDP1_HW_ERASE
+/* ST-013-R3 pp. 40, 49-50: NTSC 352x224 permits 63,180 erase pixels.
+ * ((352/8)+1)*160*8 = 57,600 including the manual's X-end allowance.
+ * A full 224-line V-blank erase cannot finish: keep a remainder polygon.
+ * All shared state is uncached; the serial names the change that cleared
+ * the OLD displayed buffer, which becomes the next drawing buffer. */
+static u32 erase_armed, erase_ready, erase_suppressed, erase_primed;
+unsigned long sat_gfx_erase_reduced, sat_gfx_erase_full, sat_gfx_erase_canceled;
+
+static void erase_invalidate(void)
+{
+    UNC32(erase_suppressed) = 1;
+    UNC32(erase_ready) = 0;
+    UNC32(erase_primed) = 0;
+    /* Keep erase_armed: the out interrupt must still turn VBE off. */
+}
+
+/* Existing command layout and capacity stay unchanged. Full clear is written
+ * while building; shrink only immediately before a confirmed submission. */
+static void erase_clear_polygon(u32 base, int first_row)
+{
+    put16(VDP1_VRAM + base + 0x40 + 14, (u16)first_row);
+    put16(VDP1_VRAM + base + 0x40 + 18, (u16)first_row);
+    if (first_row) sat_gfx_erase_reduced++;
+    else sat_gfx_erase_full++;
+}
+
+/* Called before the change decision, immediately at V-blank IN. A missing or
+ * delayed out interrupt never leaves VBE enabled for a held display. */
+static void erase_cancel_stale(void)
+{
+    if (UNC32(erase_armed))
+    {
+        VDP1R(TVMR) = 0;
+        UNC32(erase_armed) = 0;
+        erase_invalidate();
+        sat_gfx_erase_canceled++;
+    }
+}
+
+/* The IRQ wrapper masks higher-priority interrupts around this whole helper.
+ * A stale pending out IRQ can run during a newer blank. It cannot certify an
+ * erase that has not ended. The actual out IRQ will finish it, or IN cancels it.
+ * Clearing VBE precedes publishing the serial; no slave can use it early. */
+void sat_gfx_vblank_out(void)
+{
+    u32 serial;
+    if (VDP2R(0x04) & 8) return;
+    serial = UNC32(erase_armed);
+    if (!serial) return;
+    VDP1R(TVMR) = 0;
+    UNC32(erase_armed) = 0;
+    UNC32(erase_ready) = serial;
+}
+
+int sat_gfx_erase_suspend(void)
+{
+    /* GFS owns the SCU vectors/mask during a load. Do not leave a one-shot
+     * erase enabled while its OUT handler cannot run. The caller has masked
+     * interrupts, so IN cannot arm another erase between cleanup and load.
+     * Normally this waits only until OUT. On timeout the caller must restore
+     * interrupts and retry later; never write TVMR in an unconfirmed window. */
+    if (UNC32(erase_armed))
+    {
+        u32 t0 = GFX_TICKS();
+        while (VDP2R(0x04) & 8)
+            if (((GFX_TICKS() - t0) & 0xffffUL) >= 8000UL) return 0;
+        VDP1R(TVMR) = 0;
+        UNC32(erase_armed) = 0;
+        sat_gfx_erase_canceled++;
+    }
+    erase_invalidate();
+    return 1;
+}
+
+#ifndef SAT_GFX_HOST
+/* GCC's SH interrupt_handler preserves interrupted registers and returns with
+ * RTE. Unlike the game IRQ this handler never accesses the lifted CPU in r14. */
+void sat_gfx_vblank_out_entry(void) __attribute__((interrupt_handler));
+void sat_gfx_vblank_out_entry(void)
+{
+    /* IN is a higher priority than OUT. Do not allow it to cancel/rearm a
+     * newer change between the TVSTAT check and this helper's publication.
+     * RTE restores the interrupted SR; this short handler keeps IPL 15. */
+    __asm__ volatile ("ldc %0,sr" : : "r"(0xf0) : "memory");
+    *(volatile u32 *)0x25fe00a4UL = ~2UL;
+    sat_gfx_vblank_out();
+}
+#endif
+#endif
 
 #define SEC_SPRITE 0
 #define SEC_S1 1
@@ -602,6 +700,87 @@ static u16 sprite_lookup(u32 key, unsigned int position)
 }
 #endif
 
+#if (SAT_GFX_SPRITE_PAIRS || SAT_GFX_PAIR_REUSE) && defined(SAT_GFX_PAIR_STATS)
+unsigned long sat_gfx_pair_hits, sat_gfx_pair_uploads;
+unsigned long sat_gfx_pair_fallbacks, sat_gfx_pair_saved;
+#define PAIR_STAT(x) x
+#else
+#define PAIR_STAT(x)
+#endif
+#if SAT_GFX_SPRITE_PAIRS
+/* A vertical strip is already row-major: append tile key + 16 to tile key.
+ * Copy only on a cache miss, with no temporary pixels or additional pack data.
+ * Reserved SlotRec pairs never enter the ordinary hash; next is 0 for resident
+ * pixels, 1 for a missing/blank pair. The second record retains the same stamp
+ * so the ordinary abandoned-plot scan also protects both halves. Its other
+ * fields are unused: spr_slots[1].next holds this build's admission count. */
+static const u8 *pair_payload(u32 idx)
+{
+    const Section *sec = &sections[SEC_SPRITE];
+    const u8 *from = sec->data + idx * 128;
+    if (idx >= sec->split)
+    {
+        u32 k = be32(sec->spill);
+        while (k-- > 0)
+        {
+            u32 first = be32(sec->spill + 4 + k * 8);
+            if (idx >= first) { from = pack_start + be32(sec->spill + 8 + k * 8) + (idx - first) * 128; break; }
+        }
+    }
+    return from;
+}
+
+static u16 sprite_pair(u32 key)
+{
+    u16 n = (u16)(((key ^ (key >> 5)) & (SAT_GFX_SPRITE_PAIRS - 1)) * 2);
+    SlotRec *r = &spr_slots[n];
+    if (r->key != key)
+    {
+        long first, second;
+        /* A collision must never overwrite a texture used by this build or
+         * the previous submitted plot, including one rendered late. */
+        if (r->stamp == stamp || (prev_stamp && r->stamp == prev_stamp))
+        {
+            PAIR_STAT(sat_gfx_pair_fallbacks++;)
+            return NOSLOT;
+        }
+        if (spr_slots[1].next >= SAT_GFX_PAIR_UPLOAD_BUDGET)
+        {
+            PAIR_STAT(sat_gfx_pair_fallbacks++;)
+            return NOSLOT;
+        }
+        first = pack_find(&sections[SEC_SPRITE], key);
+        second = pack_find(&sections[SEC_SPRITE], key + 16);
+        r->key = key;
+        if (first < 0 || second < 0 || (u32)first == BLANK_INDEX || (u32)second == BLANK_INDEX)
+        {
+            r->next = 1; r->stamp = spr_slots[n + 1].stamp = 0;
+        }
+        else
+        {
+            vram_copy(spr_cache.vram + (u32)n * 128, pair_payload((u32)first), 128);
+            vram_copy(spr_cache.vram + (u32)(n + 1) * 128, pair_payload((u32)second), 128);
+            r->next = 0;
+            spr_slots[1].next++;
+            sat_gfx_stats.uploads += 2;
+            PAIR_STAT(sat_gfx_pair_uploads++;)
+        }
+    }
+    else if (!r->next) { PAIR_STAT(sat_gfx_pair_hits++;) }
+    if (r->next)
+    {
+        PAIR_STAT(sat_gfx_pair_fallbacks++;)
+        return NOSLOT;
+    }
+    if (r->stamp != stamp)
+    {
+        r->stamp = spr_slots[n + 1].stamp = stamp;
+        spr_cache.used = (u16)(spr_cache.used + 2);
+    }
+    return n;
+}
+#endif
+
 static void cache_frame(Cache *c)
 {
     c->used = 0;
@@ -898,20 +1077,32 @@ static void update_priority(u16 layers, u16 pri)
     VDP2R(0xf6) = (u16)(s[6] | (s[7] << 8));
 }
 
+/* Keep the disabled writer and call sites unchanged after preprocessing. */
+#ifdef SPRITE_PAIR_ACTIVE
+#define SPRITE_HEIGHT_PARAMETER , int height
+#define SPRITE_HEIGHT_ARGUMENT , height
+#define SPRITE_HEIGHT height
+#define SPRITE_Y draw_y
+#else
+#define SPRITE_HEIGHT_PARAMETER
+#define SPRITE_HEIGHT_ARGUMENT
+#define SPRITE_HEIGHT 16
+#define SPRITE_Y sy
+#endif
 #if SAT_GFX_FIT != 1
-static void put_sprite(u8 *cmd, u16 flip, u16 colr, u32 tex, int x, int y)
+static void put_sprite(u8 *cmd, u16 flip, u16 colr, u32 tex, int x, int y SPRITE_HEIGHT_PARAMETER)
 {
 #ifdef SAT_READOUT
     u16 size = (u16)(readout_pad() & 0x0010 ? 0x0210 : 0x0101);
 #else
-    u16 size = 0x0210;
+    u16 size = (u16)(0x0200 | SPRITE_HEIGHT);
 #endif
     VP(vp_sprite(x + NUDGE_X, y + NUDGE_Y, ((size >> 8) & 63) * 8, size & 255, 0x0880,
                  (unsigned int)(((size >> 8) & 63) * 8 * (size & 255)));)
     /* Long writes: four fewer bus writes per command than sixteen-bit stores; the link word is never written elsewhere and stays 0 (jump next). */
     put32(cmd + 0, (u32)flip << 16);                          /* normal sprite, jump next */
     put32(cmd + 4, (0x0880UL << 16) | colr);                  /* pre-clip off, end codes off, pen 0 clear, 16 colour bank */
-    put32(cmd + 8, ((u32)(u16)(tex >> 3) << 16) | size);      /* 16 x 16; SAT_READOUT pad Z selects the existing 8 x 1 fill probe */
+    put32(cmd + 8, ((u32)(u16)(tex >> 3) << 16) | size);      /* SAT_READOUT pad Z selects the existing 8 x 1 fill probe */
     put32(cmd + 12, ((u32)(u16)x << 16) | (u16)y);
 }
 #endif
@@ -919,16 +1110,16 @@ static void put_sprite(u8 *cmd, u16 flip, u16 colr, u32 tex, int x, int y)
 #if SAT_GFX_FIT == 1 || SAT_GFX_FIT == 3
 /* sx + 16 in, source column out at 11/12. Each tile its two end columns, so neighbours meet. */
 static u16 fit_x[417];
-static void put_sprite_fit(u8 *cmd, u16 flip, u16 colr, u32 tex, int x, int y)
+static void put_sprite_fit(u8 *cmd, u16 flip, u16 colr, u32 tex, int x, int y SPRITE_HEIGHT_PARAMETER)
 {
     int a = (int)fit_x[x + 16] - 14, b = (int)fit_x[x + 32] - 15; /* fit_x[16] = 14 is screen 0 */
-    VP(vp_sprite(a + NUDGE_X, y + NUDGE_Y, b - a + 1, 16, 0x0880, 256);)
+    VP(vp_sprite(a + NUDGE_X, y + NUDGE_Y, b - a + 1, SPRITE_HEIGHT, 0x0880, (unsigned int)(16 * SPRITE_HEIGHT));)
     /* Long writes (five bus writes a command, was nine); the link word stays 0 (jump next). */
     put32(cmd + 0, (u32)(u16)(flip | 1) << 16);                /* scaled sprite, two corners */
     put32(cmd + 4, (0x0880UL << 16) | colr);
-    put32(cmd + 8, ((u32)(u16)(tex >> 3) << 16) | 0x0210U);
+    put32(cmd + 8, ((u32)(u16)(tex >> 3) << 16) | (u16)(0x0200 | SPRITE_HEIGHT));
     put32(cmd + 12, ((u32)(u16)a << 16) | (u16)y);
-    put32(cmd + 20, ((u32)(u16)b << 16) | (u16)(y + 15));
+    put32(cmd + 20, ((u32)(u16)b << 16) | (u16)(y + SPRITE_HEIGHT - 1));
 }
 #endif
 #ifdef SAT_READOUT
@@ -947,7 +1138,7 @@ static u8 *bar(u8 *cmd, int w, int y, u16 rgb)
 }
 #endif
 /* Object list at 0x708000. The board keeps the first pixel down, drawing from the end of the list, so later entries win: VDP1 paints in
-   list order, tiles of a block last to first. Each 16 pixel tile is one command. */
+   list order, tiles of a block last to first. Optional nonoverlapping vertical pairs share a command. */
 #ifdef SAT_VLOG
 extern unsigned long sat_vl_sforced;
 /* Per plot, for the diagnostic ring sat_plog (one entry per plot serial, 16 deep): tiles seen, culled off screen, lost by cause, and the first three lost tiles
@@ -1007,6 +1198,15 @@ static void draw_sprites(void)
         int bank = sat_gfx_bank(0, aw & 31);
         u16 colr;
         u16 flip = (u16)((fx ? 0x10 : 0) | (fy ? 0x20 : 0));
+#ifdef SPRITE_PAIR_ACTIVE
+        u16 pair_next = 0;
+#endif
+#if SAT_GFX_PAIR_REUSE
+        u16 reuse_next = 0, reuse_slots[16];
+#ifdef SAT_VLOG
+        u8 reuse_causes[16];
+#endif
+#endif
         if (bank < 0) continue;
         colr = (u16)((xw & 0xe000U) | ((u32)bank << 4));
         if (aw & 0x80) { x += OBJ_XOFFS; y += OBJ_YOFFS; }
@@ -1017,16 +1217,38 @@ static void draw_sprites(void)
             /* Per row, once: the screen row, whether it is on screen at all, and the row's part of the tile code. */
             int sy = ((y + ty * 16) & 0x3ff) - CPS_TOP;
             u32 rowcode = (fx || fy) ? code + 0x10UL * (u32)(fy ? ny - 1 - ty : ty) : (code & ~0xfUL) + 0x10UL * (u32)ty;
+#ifdef SPRITE_PAIR_ACTIVE
+            u16 pair_skip = pair_next;
+#endif
+#if SAT_GFX_PAIR_REUSE
+            u16 reuse_mask = reuse_next;
+#endif
             CENSUS(int prev = -2;)
+#ifdef SPRITE_PAIR_ACTIVE
+            pair_next = 0;
+#endif
+#if SAT_GFX_PAIR_REUSE
+            reuse_next = 0;
+#endif
             if (sy <= -16 || sy >= SAT_GFX_SCREEN_H) { CENSUS(c_tiles += (u32)nx; c_off += (u32)nx;) VLN(vl_tiles += (u16)nx; vl_off += (u16)nx;) continue; }
             for (tx = nx - 1; tx >= 0; tx--)
             {
                 int sx = ((x + tx * 16) & 0x3ff) - CPS_LEFT - SAT_GFX_CROP_X;
                 u32 tile;
                 u16 slot;
+#ifdef SPRITE_PAIR_ACTIVE
+                int draw_y = sy, height = 16;
+#endif
                 CENSUS(c_tiles++;)
                 VLN(vl_tiles++;)
                 if (sx <= -16 || sx >= SAT_GFX_SRC_W) { CENSUS(c_off++;) VLN(vl_off++;) continue; }
+#ifdef SPRITE_PAIR_ACTIVE
+                if (pair_skip & (1U << tx))
+                {
+                    CENSUS(if (prev != tx + 1) c_runs++; prev = tx; census_bank((u32)bank);)
+                    continue;
+                }
+#endif
                 if (fx || fy)
                     tile = rowcode + (u32)(fx ? nx - 1 - tx : tx);
                 else
@@ -1036,10 +1258,77 @@ static void draw_sprites(void)
 #if SAT_GFX_SLOT_HINTS
                 hint_position++;
 #endif
-#elif SAT_GFX_SLOT_HINTS
+#else
+#ifdef SPRITE_PAIR_ACTIVE
+                slot = NOSLOT;
+                /* Two adjacent full rows only: no wrap, partial clipping or
+                 * readout fill probe. Different columns do not overlap, so
+                 * joining rows here preserves the order of visible pixels.
+                 * X endpoints stay exactly those of the original 16px tile;
+                 * FIT=1 therefore keeps its horizontal sampling unchanged. */
+#if SAT_GFX_PAIR_REUSE
+                if (reuse_mask & (1U << tx))
+                {
+                    slot = reuse_slots[tx];
+                    VLN(vl_cause = reuse_causes[tx];)
+                }
+                else
+#endif
+                if ((ty & 1) && sy >= 16 && sy + 16 <= SAT_GFX_SCREEN_H &&
+                    (((y + (ty - 1) * 16) & 0x3ff) - CPS_TOP == sy - 16))
+                {
+#if SAT_GFX_PAIR_REUSE
+                    u32 first_key = fy ? tile : tile - 16;
+                    u16 first, second;
+                    VLN(u8 first_cause; u8 second_cause;)
+                    /* Ask in source order. Cold ordinary tiles can occupy
+                     * adjacent slots; a warm noncontiguous pair stays two
+                     * commands. Retain the upper answer so a failed merge
+                     * never introduces a third lookup for this pair. */
+#if SAT_GFX_SLOT_HINTS
+                    first = sprite_lookup(first_key, hint_position++);
+#else
+                    first = cache_get(&spr_cache, first_key, &sat_gfx_stats.refused_sprite);
+#endif
+                    VLN(first_cause = vl_cause;)
+#if SAT_GFX_SLOT_HINTS
+                    second = sprite_lookup(first_key + 16, hint_position++);
+#else
+                    second = cache_get(&spr_cache, first_key + 16, &sat_gfx_stats.refused_sprite);
+#endif
+                    VLN(second_cause = vl_cause;)
+                    slot = fy ? first : second;
+                    reuse_slots[tx] = fy ? second : first;
+                    VLN(reuse_causes[tx] = fy ? second_cause : first_cause;
+                        vl_cause = fy ? first_cause : second_cause;)
+                    reuse_next |= (u16)(1U << tx);
+                    if (first != NOSLOT && second == first + 1U)
+                    {
+                        slot = first;
+                        PAIR_STAT(sat_gfx_pair_hits++;)
+#else
+                    slot = sprite_pair(fy ? tile : tile - 16);
+                    if (slot != NOSLOT)
+                    {
+#endif
+                        draw_y -= 16; height = 32;
+                        pair_next |= (u16)(1U << tx);
+                    }
+#if SAT_GFX_PAIR_REUSE
+                    else { PAIR_STAT(sat_gfx_pair_fallbacks++;) }
+#endif
+                }
+#if SAT_GFX_PAIR_REUSE
+                else
+#else
+                if (slot == NOSLOT)
+#endif
+#endif
+#if SAT_GFX_SLOT_HINTS
                 slot = sprite_lookup(tile, hint_position++);
 #else
                 slot = cache_get(&spr_cache, tile, &sat_gfx_stats.refused_sprite);
+#endif
 #endif
                 if (slot == NOSLOT)
                 {
@@ -1053,17 +1342,18 @@ static void draw_sprites(void)
                 }
                 CENSUS(if (prev != tx + 1) c_runs++; prev = tx; census_bank((u32)bank);)
                 if (commands >= SAT_GFX_MAX_COMMANDS) { sat_gfx_stats.refused_commands++; VLN(vl_refcmd++; vl_note(4, bank & 31, sx, sy);) continue; }
+                PAIR_STAT(if (SPRITE_HEIGHT == 32) sat_gfx_pair_saved++;)
 #if SAT_GFX_FIT == 3
-                if (SAT_FIT_ON) put_sprite_fit(cmd, flip, colr, TEX_BASE + (u32)slot * 128, sx, sy);
-                else put_sprite(cmd, flip, colr, TEX_BASE + (u32)slot * 128, sx, sy);
+                if (SAT_FIT_ON) put_sprite_fit(cmd, flip, colr, TEX_BASE + (u32)slot * 128, sx, SPRITE_Y SPRITE_HEIGHT_ARGUMENT);
+                else put_sprite(cmd, flip, colr, TEX_BASE + (u32)slot * 128, sx, SPRITE_Y SPRITE_HEIGHT_ARGUMENT);
 #elif SAT_GFX_FIT == 1
 #if defined(SAT_ABL) && (SAT_ABL & 1)
                 (void)flip; (void)colr;   /* measurement only: no command writes */
 #else
-                put_sprite_fit(cmd, flip, colr, TEX_BASE + (u32)slot * 128, sx, sy);
+                put_sprite_fit(cmd, flip, colr, TEX_BASE + (u32)slot * 128, sx, SPRITE_Y SPRITE_HEIGHT_ARGUMENT);
 #endif
 #else
-                put_sprite(cmd, flip, colr, TEX_BASE + (u32)slot * 128, sx, sy);
+                put_sprite(cmd, flip, colr, TEX_BASE + (u32)slot * 128, sx, SPRITE_Y SPRITE_HEIGHT_ARGUMENT);
 #endif
                 cmd += 32;
                 commands++;
@@ -1371,6 +1661,9 @@ void sat_gfx_vblank(void)
 #ifdef SAT_VLOG
     u32 act = 0, before = UNC32(plot_shown), edsr = VDP1R(0x10), vbv = sat_vblanks_now() + 1;
 #endif
+#if SAT_VDP1_HW_ERASE
+    erase_cancel_stale();
+#endif
     UNC32(plot_sync) = 1;
     if (s != UNC32(plot_shown))
     {
@@ -1380,6 +1673,15 @@ void sat_gfx_vblank(void)
             act = 1;
 #endif
             VDP1R(FBCR) = 3;
+#if SAT_VDP1_HW_ERASE
+            /* VBE is enabled only with this confirmed change, never on a held
+             * refresh. Serial zero is kept as invalid on counter rollover. */
+            UNC32(erase_ready) = 0;
+            UNC32(erase_armed) = s;
+            /* Erase registers latch on a framebuffer change. The first
+             * change after init/recovery only primes them; no VBE yet. */
+            if (s && UNC32(erase_primed)) VDP1R(TVMR) = 8;
+#endif
             UNC32(plot_shown) = s;
             UNC32(plot_held) = 0;
         }
@@ -1425,7 +1727,17 @@ static int plot_wait_end(void)
                The master asks for the change only after the end flag, so the slave would abandon every picture from here on and sprites stop for good
                (found by the Wolverine lane). Start the same list again, once for each plot (its table and textures are untouched: this slave has not
                written since), and wait one more bound. A plot that is only slow is not started over a second time, so it still finishes. */
-            if (kicked != UNC32(plot_started)) { kicked = UNC32(plot_started); VDP1R(PTMR) = 1; t0 = slave_ticks(); CEF_COUNT(sat_gfx_replots++;) continue; }
+            if (kicked != UNC32(plot_started)) {
+                kicked = UNC32(plot_started);
+#if SAT_VDP1_HW_ERASE
+                /* A missing end flag gives no ownership of the old table:
+                 * replay it unchanged, as before. Force the next safely built
+                 * list to clear fully; a replaced emulator state may still
+                 * show one imperfect replay before that full-clear list. */
+                erase_invalidate();
+#endif
+                VDP1R(PTMR) = 1; t0 = slave_ticks(); CEF_COUNT(sat_gfx_replots++;) continue;
+            }
             VP(vp_current[VP_WAIT_END_TICKS] = vp_elapsed((unsigned int)t0);)
             return 0;
         }
@@ -1462,13 +1774,42 @@ static int plot_start(void)
                    never latched or the chip state was replaced (a load_state; the VideoCore 2 core's end flag). Without a way out the slave waits
                    here every frame, never starts a plot and sprites stop for good (found by the Wolverine lane). Ask for the change ourselves once and wait one
                    more bound; then plot anyway, a lost or one-off wrong picture instead of a stalled slave. */
-                if (!asked) { asked = 1; VDP1R(FBCR) = 3; t0 = slave_ticks(); CEF_COUNT(sat_gfx_cef_asked++;) continue; }
+                if (!asked) {
+                    asked = 1;
+#if SAT_VDP1_HW_ERASE
+                    erase_invalidate();
+#endif
+                    VDP1R(FBCR) = 3; t0 = slave_ticks(); CEF_COUNT(sat_gfx_cef_asked++;) continue;
+                }
                 CEF_COUNT(sat_gfx_cef_forced++;)
                 VP(vp_current[VP_FLAGS] |= VP_LATCH_TIMEOUT;)
                 break;
             }
         VP(vp_current[VP_WAIT_LATCH_TICKS] = vp_elapsed((unsigned int)t0);)
     }
+#if SAT_VDP1_HW_ERASE
+    {
+        int row = 0;
+        int changed = !(VDP1R(0x10) & EDSR_CEF) && UNC32(erase_ready) &&
+            UNC32(erase_ready) == UNC32(plot_shown);
+        /* The hardware erases absolute screen coordinates. The command's own
+         * local origin is authoritative if the menu moved it during a build.
+         * CEF must be clear as well: forced latch recovery gets full clear. */
+        if (prev_stamp && changed && UNC32(erase_primed) && !UNC32(erase_suppressed) &&
+            get32(VDP1_VRAM + table_base + 32 + 12) == 0)
+            row = SAT_VDP1_ERASE_ROWS;
+        erase_clear_polygon(table_base, row);
+        VP(vp_current[VP_CLEAR_PIXELS] = SAT_GFX_SCREEN_W * (SAT_GFX_SCREEN_H - (unsigned int)row);)
+        /* Recovery has now produced a full-clear list with a confirmed latch.
+         * A later fresh erase/change may certify its other buffer again. */
+        if (!row && !(VDP1R(0x10) & EDSR_CEF))
+        {
+            if (changed) UNC32(erase_primed) = 1;
+            UNC32(erase_ready) = 0;
+            UNC32(erase_suppressed) = 0;
+        }
+    }
+#endif
     VP(vp_current[VP_SUBMIT_TICK] = (unsigned int)GFX_TICKS();
        vp_current[VP_START_VBLANK] = (unsigned int)sat_vblanks_now();)
     VDP1R(PTMR) = 1;
@@ -1514,6 +1855,9 @@ void sat_gfx_draw(void)
 #endif
     stamp = (u16)(stamp + 1U == 0x10000UL ? 1U : stamp + 1U);
     cache_frame(&spr_cache); cache_frame(&s1_cache); cache_frame(&s2_cache); cache_frame(&s3_cache);
+#if SAT_GFX_SPRITE_PAIRS
+    spr_slots[1].next = 0;
+#endif
     sat_gfx_stats.uploads = 0;
     sat_gfx_stats.layer_uploads = 0;
     sat_gfx_stats.layer_writes = 0;
@@ -1717,6 +2061,11 @@ int sat_gfx_swap_pack(const void *pack)
     u32 n;
     if (!pack || !open_pack((const u8 *)pack)) return 0;
     for (n = 0; n < BLANK_WAYS; n++) blank_seen[n] = NOKEY;
+#if SAT_GFX_SPRITE_PAIRS
+    /* A pair absent from the old pack can be present in the next round. */
+    for (n = 0; n < SAT_GFX_SPRITE_PAIRS * 2; n += 2)
+        if (spr_slots[n].next) spr_slots[n].key = NOKEY;
+#endif
     return 1;
 }
 
@@ -1742,7 +2091,11 @@ COLD_OS int sat_gfx_init(const void *pack)
     for (n = 0; n < 64 * 64; n++) { sh_s1[n] = CLEAR_NAME; sh_s2[n] = CLEAR_NAME; sh_s3[n] = NOKEY; }
     for (n = 0; n < SAT_GFX_SCREEN_H; n++) sh_row[n] = 0;
     for (n = 0; n < BLANK_WAYS; n++) blank_seen[n] = NOKEY;
-    cache_setup(&spr_cache, VDP1_VRAM + TEX_BASE, 128, SAT_GFX_SPRITE_SLOTS, 0, SEC_SPRITE, spr_slots, spr_head, HASH_SIZE);
+    cache_setup(&spr_cache, VDP1_VRAM + TEX_BASE, 128, SAT_GFX_SPRITE_SLOTS, SAT_GFX_SPRITE_PAIRS * 2, SEC_SPRITE, spr_slots, spr_head, HASH_SIZE);
+#if SAT_GFX_SPRITE_PAIRS
+    spr_slots[1].next = 0;
+#endif
+    PAIR_STAT(sat_gfx_pair_hits = sat_gfx_pair_uploads = sat_gfx_pair_fallbacks = sat_gfx_pair_saved = 0;)
     cache_setup(&s1_cache, VDP2_VRAM + CELL_S1, 32, SAT_GFX_S1_SLOTS, 4, SEC_S1, s1_slots, s1_head, HASH_SIZE_S1);
     cache_setup(&s2_cache, VDP2_VRAM + CELL_S2, 128, SAT_GFX_S2_SLOTS, 0, SEC_S2, s2_slots, s2_head, HASH_SIZE_S2);
     cache_setup(&s3_cache, VDP2_VRAM + CELL_S3, 512, SAT_GFX_S3_SLOTS, 0, SEC_S3, s3_slots, s3_head, HASH_SIZE_S3);
@@ -1802,7 +2155,13 @@ COLD_OS int sat_gfx_init(const void *pack)
     VDP1R(TVMR) = 0;
     VDP1R(EWDR) = 0;
     VDP1R(EWLR) = 0;
+#if SAT_VDP1_HW_ERASE
+    UNC32(erase_armed) = UNC32(erase_ready) = UNC32(erase_suppressed) = UNC32(erase_primed) = 0;
+    sat_gfx_erase_reduced = sat_gfx_erase_full = sat_gfx_erase_canceled = 0;
+    VDP1R(EWRR) = (u16)(((SAT_GFX_SCREEN_W >> 3) << 9) | (SAT_VDP1_ERASE_ROWS - 1));
+#else
     VDP1R(EWRR) = (u16)(((SAT_GFX_SCREEN_W >> 3) << 9) | (SAT_GFX_SCREEN_H - 1));
+#endif
     c = VDP1_VRAM;
     put16(c + 0, 0x0009);                         /* system clip */
     put16(c + 20, SAT_GFX_SCREEN_W - 1);

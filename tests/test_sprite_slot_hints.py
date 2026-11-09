@@ -34,7 +34,9 @@ class SpriteSlotHintsTests(unittest.TestCase):
 
     def test_presentation_ownership_with_hints(self):
         variants = [[], ["-DSAT_VLOG", "-DSAT_VDP1_PROFILE"],
-                    ["-DSAT_VLOG", "-DSAT_VDP1_PROFILE", "-DSAT_READOUT"]]
+                    ["-DSAT_VLOG", "-DSAT_VDP1_PROFILE", "-DSAT_READOUT"],
+                    ["-DSAT_VLOG", "-DSAT_VDP1_PROFILE", "-DSAT_GFX_PAIR_REUSE=1",
+                     "-DSAT_VDP1_HW_ERASE=1"]]
         with tempfile.TemporaryDirectory() as directory:
             for index, flags in enumerate(variants):
                 with self.subTest(flags=flags):

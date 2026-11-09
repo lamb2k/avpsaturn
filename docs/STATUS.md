@@ -1,6 +1,17 @@
 # Status
 
-Only source of current state. Branch `decomp/main`. Backlog: docs/BACKLOG.md.
+Only source of current state. Candidate branch `codex/avp-fps-next-20261109`. Backlog: docs/BACKLOG.md.
+
+## FPS experiment candidate, 2026-11-09 (HOST; SH-2 link, MAME, EMULATOR and HARDWARE UNRUN)
+
+`codex/avp-fps-next-20261109`, based on `lane/frame-chain-20261108` at `37c5b4a3a6f9276bbcad79530f539b3c61cada3b`. The guest integration is `codex/avp-wolverine-fps-next-20261109`.
+
+- Implemented, default off: previous-list validated slot hints; ordinary-cache vertical pairing; bounded reserved-pair comparison; partial VDP1 hardware erase with priming, serial/OUT checks and load suspension; master scheduler-completion recorder and decoder. The master is not proven idle, so no parallel command builder is enabled. The earlier changed-word shadow regressed Yaba and is not repeated.
+- First target experiment: `SAT_GFX_PAIR_REUSE=1`. Synthetic HOST FIT=1, 8,044 frames: 375,947 -> 265,676 commands (29.3% fewer), 796 -> 796 tile uploads, identical pixel oracle. No added persistent metadata or reserved VRAM; 32-byte retained-answer stack array, plus 16 with VLOG. This is not an FPS result. Current Wolverine one-tile guest objects do not pair; ordinary multirow actors do.
+- Hints cost two high-RAM bytes per entry; 512 entries = 1024 bytes. CPU probe depth 4 = 232 declared high BSS bytes. Partial erase = 28 declared high BSS bytes. None adds low BSS; enabled code and target stack still need a real linker map. Hardware erase retains the bottom 64-row polygon because full-screen V-blank erase exceeds the documented NTSC budget.
+- HOST: the integrated Wolverine suite passes 61 Python tests, including strict C90 actual-driver/recorder tests, pair/hint/erase combinations, pixel oracle, cache/abandoned-plot ownership, publication/overflow decoding, and preserved guest clock/asset/pack/fit regressions. Guest-enabled combined graphics syntax passes. Independent final review found no source blockers. With experiments off, FIT 0/1 32-bit HOST renderer `.text` is byte-identical to frame-chain `37c5b4a`; no SH-2 binary or target-fit claim follows.
+- The newer frame-chain base already records B-build new-picture share 73.2 -> 88.3%, held 22.4 -> 0.4% in stepped/modelled Yaba measurements. Those are prior lane results, not this candidate's measurements. The next target is the remaining slow-frame tail. Historical entries below remain tied to their original builds.
+- Handover, six-proposal decisions, option/storage table, capture order and acceptance gates: `docs/notes/AVP_FPS_EXPERIMENTS_20261109.md`. Function census unchanged; no new private assets or disc. No 60 fps claim.
 
 ## Frame chain: split handoff, command build, stuck-VDP1 recovery, 2026-11-09 (lane fps; EMULATOR Yaba VideoCore 1, stepped; MODELLED; hardware UNRUN)
 
