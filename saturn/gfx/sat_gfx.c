@@ -629,8 +629,10 @@ typedef struct
     u16 layers, priority, pal_pages, back_valid, back, row_active, objects, pad, whole;   /* pad: unused here (a pack generation in builds that add one). whole: scroll 2 read as a whole page (row scroll on), taken before a menu clears row_active */
     u16 s1x, s1y, s2x, s2y, s3x, s3y;
     u16 row[SAT_GFX_SCREEN_H];
-    u8 palette[SAT_GFX_PAGES][0x400];
-    u8 obj[MAX_OBJECTS * 8];
+    /* aligned(4): the guest pass (SAT_GUEST_FAST_LIST, PAL_KEEP) and the look check use 32 bit loads/stores on these. The menu merge's `whole` field
+       left them 2 bytes off a long boundary, and the SH-2 then read the wrong words: Wolverine's sprites never replaced Schaefer's (Yaba 11-09). */
+    u8 palette[SAT_GFX_PAGES][0x400] __attribute__((aligned(4)));
+    u8 obj[MAX_OBJECTS * 8] __attribute__((aligned(4)));
     u32 pal_sum[SAT_GFX_PAGES]; /* change detection: every palette word */
 #ifdef SAT_VDP1_PROFILE
     unsigned int profile_vblank, profile_stage_chars, profile_snapshot_ticks, profile_handoff_tick;
