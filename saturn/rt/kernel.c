@@ -38,6 +38,10 @@ volatile unsigned long sat_vlog[16 * 4];
 extern void sat_switch(void **save_sp, void *load_sp);
 extern void sat_vblank_entry(void);
 void sat_gfx_vblank(void);
+#if SAT_VDP1_HW_ERASE
+extern void sat_gfx_vblank_out_entry(void);
+extern int sat_gfx_erase_suspend(void);
+#endif
 extern void f_dispatch(u32);
 extern void f_e0e(void);
 extern void f_800(void);
@@ -271,9 +275,16 @@ static void irq_enable(void)
 {
     __asm__ volatile ("ldc %0,sr" : : "r"(0xf0));
     ((void (**)(void))0x06000000)[0x40] = sat_vblank_entry;
+#if SAT_VDP1_HW_ERASE
+    ((void (**)(void))0x06000000)[0x41] = sat_gfx_vblank_out_entry;
+#endif
     { u32 v = 0x06000000; __asm__ volatile ("ldc %0,vbr" : : "r"(v)); }
     *(volatile u32 *)0x25fe00a4 = 0;            /* clear pending */
+#if SAT_VDP1_HW_ERASE
+    *(volatile u32 *)0x25fe00a0 = 0xfffffffcu;  /* vblank-in and erase cleanup at vblank-out */
+#else
     *(volatile u32 *)0x25fe00a0 = 0xfffffffeu;  /* only vblank-in */
+#endif
     irq_on = 1;
     __asm__ volatile ("ldc %0,sr" : : "r"(0x00));
 }
@@ -337,6 +348,20 @@ static void pc_start(void)
 #define SMPC(o) (*(volatile u8 *)(0x20100000u + (o)))
 extern void sat_slave_entry(void);
 static u32 gfx_handed, gfx_done;
+#ifdef SAT_CPU_SLACK_PROFILE
+#define CPU_SLACK_ROW(i) ((volatile unsigned int *)((u32)&sat_cpu_slack[(i)] | 0x20000000u))
+#include "cpu_slack_profile.h"
+/* The vblank can interrupt this sample or its publication. A changed epoch or
+   cleared game_done rejects the sample; a partial mailbox has tag zero. */
+static void cpu_slack_mark_idle(void)
+{
+    u32 vblank = *(volatile u32 *)&sat_dbg.vblanks;
+    u32 tick = frt(), flags = (FTCSR & 2) ? CS_TIMER_WRAP : 0;
+    if (UNCACHED(gfx_handed) != UNCACHED(gfx_done)) flags |= CS_BUSY_DONE;
+    if (game_done && vblank == *(volatile u32 *)&sat_dbg.vblanks)
+        cpu_slack_publish_done(vblank, tick, flags);
+}
+#endif
 #ifdef SAT_VDP1_PROFILE
 int sat_gfx_profile_busy(void)
 {
@@ -420,6 +445,9 @@ static void round_check(void)
     static u32 settled;
     static int row_loaded;
     static u8 chars;
+#if SAT_VDP1_HW_ERASE
+    int erase_old_row = row_loaded;
+#endif
     if (row) chars |= r8(0xff81cc) & 15;
     if (row == row_loaded) { settled = 0; return; }
     /* The word flickers for a few frames as a scene closes; go only when it has held. */
@@ -437,6 +465,17 @@ static void round_check(void)
 #endif
     while (UNCACHED(gfx_done) != UNCACHED(gfx_handed)) ;   /* the slave finishes the picture in hand and stays off the pack */
     __asm__ volatile ("ldc %0,sr" : : "r"(0xf0));
+#if SAT_VDP1_HW_ERASE
+    if (!sat_gfx_erase_suspend())   /* GFS masks/replaces the OUT cleanup interrupt */
+    {
+        row_loaded = erase_old_row;
+        __asm__ volatile ("ldc %0,sr" : : "r"(0x00));
+#ifdef SAT_HOME
+        sat_home_loading(0);
+#endif
+        return;   /* a stuck blank flag must not cause a long masked erase */
+    }
+#endif
 #ifndef SAT_HOME
     sat_gfx_display(0);
 #endif
@@ -489,6 +528,9 @@ void f_d86(void)
         if (i == TASKS) {
             if (!game_done) {
                 game_done = 1; sat_dbg.game_ticks = frt(); *(volatile unsigned long *)((unsigned long)sat_readout | 0x20000000UL) = sat_dbg.game_ticks; if (sat_dbg.game_ticks > sat_dbg.game_peak) sat_dbg.game_peak = sat_dbg.game_ticks;
+#ifdef SAT_CPU_SLACK_PROFILE
+                cpu_slack_mark_idle();
+#endif
 #ifdef SAT_PROF
                 if (IN_WINDOW) { prof_add(sat_prof.frame, frame_carry + sat_dbg.game_ticks); sat_prof.done++; }
                 frame_carry = 0;
@@ -522,6 +564,9 @@ void sat_vblank(void)
     static Cpu save;
     int sc = cur;
     u32 t0, t1, t2;
+#ifdef SAT_CPU_SLACK_PROFILE
+    u32 slack_end = frt(), slack_wrap = (FTCSR & 2) ? CS_TIMER_WRAP : 0;
+#endif
     *(volatile u32 *)0x25fe00a4 = ~1u;
 #ifndef SAT_VDP1_RACE_OLD
     sat_gfx_vblank();   /* first: the frame change for a finished plot belongs early in vblank-in */
@@ -537,6 +582,17 @@ void sat_vblank(void)
     if (IN_WINDOW) { sat_prof.ticks++; if (!game_done) sat_prof.over++; }
     if (!game_done) frame_carry += frt();
 #endif
+#ifdef SAT_CPU_SLACK_PROFILE
+    cpu_slack_close(slack_end, game_done, slack_wrap, UNCACHED(gfx_handed), UNCACHED(gfx_done));
+    cpu_slack_begin(sat_dbg.vblanks,
+        (game_done ? 0 : CS_PREVIOUS_OVERRUN) |
+        (UNCACHED(gfx_handed) != UNCACHED(gfx_done) ? CS_BUSY_BEGIN : 0),
+        (u32)RAM16(0x81e8) | (u32)(RAMB[0x8380] ? RAMB[0x8381] : 255) << 16 |
+        (u32)(RAMB[0x8480] ? RAMB[0x8481] : 255) << 24);
+    /* SH7604 FTCSR bit 1 is read-then-write-zero OVF. Clear only this flag
+       alongside the existing counter reset; do not enable another interrupt. */
+    FTCSR = (u8)(FTCSR & ~2u);
+#endif
     game_done = 0;
     FRTH = 0; FRTL = 0;
 #ifdef SAT_PROF_PC
@@ -547,20 +603,37 @@ void sat_vblank(void)
 #ifdef SAT_HOME
     if (sat_home_hold) {   /* the game is held: picture and sound only */
         if (UNCACHED(gfx_done) == UNCACHED(gfx_handed)) {
-            sat_gfx_snapshot();
+            sat_gfx_snapshot_begin();
             UNCACHED(gfx_handed) = UNCACHED(gfx_handed) + 1;
             SLAVE_WAKE = 0xffff;
+#ifdef SAT_CPU_SLACK_PROFILE
+            cpu_slack_handoff(UNCACHED(gfx_handed), frt());
+#endif
+            sat_gfx_snapshot_layers();
+#ifdef SAT_CPU_SLACK_PROFILE
+            cpu_slack_layers(frt());
+#endif
         }
         sat_audio_frame();
         game_done = 1;
+#ifdef SAT_CPU_SLACK_PROFILE
+        cpu_slack_irq(frt(), 1);
+#endif
         return;
     }
 #endif
     /* Before the IRQ body, which moves the next frame's scroll words into place. A slave still drawing skips this frame's picture, never the game. */
     if (UNCACHED(gfx_done) == UNCACHED(gfx_handed)) {
-        sat_gfx_snapshot();
+        sat_gfx_snapshot_begin();
         UNCACHED(gfx_handed) = UNCACHED(gfx_handed) + 1;
         SLAVE_WAKE = 0xffff;
+#ifdef SAT_CPU_SLACK_PROFILE
+        cpu_slack_handoff(UNCACHED(gfx_handed), frt());
+#endif
+        sat_gfx_snapshot_layers();   /* the slave builds the sprite commands meanwhile and waits for this before it reads a layer cell */
+#ifdef SAT_CPU_SLACK_PROFILE
+        cpu_slack_layers(frt());
+#endif
     } else
         sat_dbg.gfx_skips++;
     t1 = frt();
@@ -578,6 +651,9 @@ void sat_vblank(void)
     if (t2 > sat_dbg.irq_peak) sat_dbg.irq_peak = t2;
     sat_dbg.ff8018 = RAM16(0x8018);
     if ((sat_dbg.vblanks & 63) == 0) stack_scan();
+#ifdef SAT_CPU_SLACK_PROFILE
+    cpu_slack_irq(frt(), 0);
+#endif
 }
 
 void sat_map_page(u32 page, u8 *base) { PAGE[page & 0xff] = base; }
@@ -594,6 +670,14 @@ void sat_main(void);
 void sat_home_restart(void)
 {
     __asm__ volatile ("ldc %0,sr" : : "r"(0xf0));
+#if SAT_VDP1_HW_ERASE
+    /* sat_main clears the erase bookkeeping before its initial CD load. */
+    if (!sat_gfx_erase_suspend())
+    {
+        __asm__ volatile ("ldc %0,sr" : : "r"(0x00));
+        return;
+    }
+#endif
     while (UNCACHED(gfx_done) != UNCACHED(gfx_handed)) ;
     *(volatile u32 *)0x25fe00a4 = 0;
     cur = -1; round_loaded = -1;

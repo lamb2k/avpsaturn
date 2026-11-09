@@ -11,7 +11,7 @@ void sat_fatal(u32 code, u32 detail);
 /* saturn/gfx. The master takes a snapshot at the start of a vblank, before the game's IRQ body, when the slave has finished the last one;
    the slave draws it. */
 int sat_gfx_init(const void *pack);
-void sat_gfx_snapshot(void);
+void sat_gfx_snapshot_begin(void), sat_gfx_snapshot_layers(void);
 void sat_gfx_draw(void);
 /* saturn/audio */
 int sat_audio_init(const void *pack);
