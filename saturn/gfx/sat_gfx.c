@@ -404,9 +404,6 @@ static u32 snap_layers_ready;   /* master writes 0 before the handoff and 1 when
 #if defined(SAT_VLOG) || defined(SAT_VDP1_PROFILE) || defined(SAT_GFX_HOST) || defined(SAT_LAYERS_COUNT)
 u32 sat_gfx_layers_late;     /* diagnostic: pictures whose slave reached the layers before the master had finished them */
 u32 sat_gfx_layers_timeout;  /* diagnostic: waits abandoned at SAT_LAYERS_WAIT_SPINS (must stay 0) */
-#define LAYERS_COUNT(x) x
-#else
-#define LAYERS_COUNT(x)
 #endif
 
 /* Polynomial, not rotate and xor: a palette fade changes every long by one mask, and with 256 longs a rotate cancels it out. */
@@ -1395,8 +1392,9 @@ void sat_gfx_snapshot_begin(void)
        snap.profile_handoff_tick = (unsigned int)GFX_TICKS();)
 }
 
-/* Master side, second half, after the slave has been woken. The game is stopped inside the vblank hook, so the registers read here are the ones the
-   first half read (a menu overrides only the copies in snap). Writes the layer cells and sums, then sets the flag the slave waits on. */
+/* Master side, second half, after the slave has been woken. The game is stopped inside the vblank hook, so the layer mask read here is the one the
+   first half read. Positions come from the first half's copies (a menu moves only scroll 1's, and masks the layers it hides: the sums carry the position, so
+   a later normal frame sees a changed sum and copies afresh). Writes the layer cells and sums, then sets the flag the slave waits on. */
 void sat_gfx_snapshot_layers(void)
 {
     u16 layers = RAM16(SH_LAYERS);
@@ -1407,19 +1405,19 @@ void sat_gfx_snapshot_layers(void)
 #if SAT_GFX_FIT
         snap.hud_flush = RAMB[0x8001] == 2 && RAMB[0x8380] != 0;
 #endif
-        x0 = (u32)RAM16(SH_S1X) + CPS_LEFT + S1_READ_X; y0 = (u32)RAM16(SH_S1Y) + CPS_TOP;
+        x0 = (u32)snap.s1x + CPS_LEFT + S1_READ_X; y0 = (u32)snap.s1y + CPS_TOP;
         snap.s1_sum = snap_layer(snap.s1, GFX(RAM16(SH_SCROLL1_BASE) & 0xffc0U), x0 >> 3, y0 >> 3, S1_ROWS, S1_COLS, 5, (x0 >> 3) | ((y0 >> 3) << 16) | ((u32)snap.hud_flush << 31), snap.s1_sum);
     }
     if (layers & 4)
     {
         u32 whole = snap.whole;
-        x0 = (u32)RAM16(SH_S2X) + CPS_LEFT + SAT_GFX_CROP_X; y0 = (u32)RAM16(SH_S2Y) + CPS_TOP;
+        x0 = (u32)snap.s2x + CPS_LEFT + SAT_GFX_CROP_X; y0 = (u32)snap.s2y + CPS_TOP;
         snap.s2_sum = snap_layer(snap.s2, GFX(RAM16(SH_SCROLL2_BASE) & 0xffc0U), whole ? 0 : x0 >> 4, y0 >> 4, S2_ROWS, whole ? 64 : S2_COLS, 4,
                                  (whole ? 0x80000000UL : (x0 >> 4)) | ((y0 >> 4) << 16), snap.s2_sum);
     }
     if (layers & 8)
     {
-        x0 = (u32)RAM16(SH_S3X) + CPS_LEFT + SAT_GFX_CROP_X; y0 = (u32)RAM16(SH_S3Y) + CPS_TOP;
+        x0 = (u32)snap.s3x + CPS_LEFT + SAT_GFX_CROP_X; y0 = (u32)snap.s3y + CPS_TOP;
         snap.s3_sum = snap_layer(snap.s3, GFX(RAM16(SH_SCROLL3_BASE) & 0xffc0U), x0 >> 5, y0 >> 5, S3_ROWS, S3_COLS, 3, (x0 >> 5) | ((y0 >> 5) << 16), snap.s3_sum);
     }
 #ifdef SAT_HOME
@@ -1430,25 +1428,22 @@ void sat_gfx_snapshot_layers(void)
     UNC32(snap_layers_ready) = 1;
 }
 
-/* Both halves in a row: the single-CPU path (standalone, host fixtures). */
-void sat_gfx_snapshot(void)
-{
-    sat_gfx_snapshot_begin();
-    sat_gfx_snapshot_layers();
-}
-
 /* Slave side: the layer half is in place. Normally already so by the time the command build and the plot start are done. */
 static void snap_layers_wait(void)
 {
+#if defined(SAT_VLOG) || defined(SAT_VDP1_PROFILE) || defined(SAT_GFX_HOST) || defined(SAT_LAYERS_COUNT)
     if (!UNC32(snap_layers_ready))
     {
         u32 spin = 0;
         VP(unsigned int vp_wait_start = (unsigned int)GFX_TICKS();)
-        LAYERS_COUNT(sat_gfx_layers_late++;)
+        sat_gfx_layers_late++;
         while (!UNC32(snap_layers_ready))
-            if (++spin > SAT_LAYERS_WAIT_SPINS) { LAYERS_COUNT(sat_gfx_layers_timeout++;) break; }
+            if (++spin > SAT_LAYERS_WAIT_SPINS) { sat_gfx_layers_timeout++; break; }
         VP(vp_current[VP_FLAGS] |= vp_elapsed(vp_wait_start) << 16;)
     }
+#else
+    while (!UNC32(snap_layers_ready)) ;   /* the master finishes the layer half within the same vblank hook that woke the slave */
+#endif
     SNAP_BARRIER();   /* no layer word is read before the flag */
 }
 
@@ -1801,11 +1796,13 @@ void sat_gfx_draw(void)
 
 void sat_gfx_frame(void)
 {
-    sat_gfx_snapshot();
+    sat_gfx_snapshot_begin();
+    sat_gfx_snapshot_layers();
     sat_gfx_draw();
 }
 
-static int open_pack(const u8 *p)
+#define COLD_OS __attribute__((optimize("Os")))   /* load-time code, once per round: built for size, high work RAM is what is short */
+static COLD_OS int open_pack(const u8 *p)
 {
     int i;
     pack_start = p;
@@ -1841,7 +1838,7 @@ int sat_gfx_swap_pack(const void *pack)
 
 void sat_gfx_display(int on) { VDP2R(0x00) = on ? 0x8001 : 0x0001; }
 
-int sat_gfx_init(const void *pack)
+COLD_OS int sat_gfx_init(const void *pack)
 {
 #ifdef SAT_KEYLOG
     { u32 i; for (i = 0; i < 0x10000; i += 2) *(volatile u16 *)(0x25A70000UL + i) = 0; }
