@@ -1207,10 +1207,16 @@ static HOME_OS void home_row_map(u32 row, u32 (*bm)[2], int sel, u8 *map)
     int c, full = bm[row][0] == 0xffffffffUL && bm[row][1] == 0xffffUL;
     if (sel && row >= 7 && row <= 25)
     {
-        /* Columns 0 and 47 are blank in every state; the gap's 22 and 25 hold only the timer's digit cells (rows 15-17) and 21 and 26 only the panels' last
-           letters (other rows): rows 15 to 17 drop 21 and 26, the rest 22 and 25, so a panel's columns land on the same pixel in every row. */
-        int a1 = row >= 15 && row <= 17 ? 21 : 22, a2 = a1 == 21 ? 26 : 25, n = 0;
-        for (c = 0; c < 48; c++) if (c != 0 && c != a1 && c != a2 && c != 47) map[n++] = (u8)c;
+        /* The select's elements are separate pictures that the 11/12 scaling moves by different amounts, so each row type has its own fixed drops. Column 0 and 47
+           are blank in every state; stat text rows (left text 16-20, right 27-31) drop 0 and 22 so the left text sits 1 column and the right 2 columns in;
+           bar rows (left bar 15-21, right 26-32) drop 0, one cell of each 7 cell bar (18, 29), as the scaling shortens them, and 47; the timer rows (digit cells
+           22-25) 0, 21, 26, 47; plate rows (plates 1-20 and 27-46) 0, 22, 25, 47. Nothing else is dropped, and the same on every frame. */
+        int a1, a2, a3, a4, n = 0;
+        if (row == 7 || row == 9 || row == 11 || row == 20 || row == 22 || row == 24) { a1 = 0; a2 = 22; a3 = 46; a4 = 47; }
+        else if (row == 8 || row == 10 || row == 12 || row == 21 || row == 23 || row == 25) { a1 = 0; a2 = 18; a3 = 29; a4 = 47; }
+        else if (row >= 15 && row <= 17) { a1 = 0; a2 = 21; a3 = 26; a4 = 47; }
+        else { a1 = 0; a2 = 22; a3 = 25; a4 = 47; }
+        for (c = 0; c < 48; c++) if (c != a1 && c != a2 && c != a3 && c != a4) map[n++] = (u8)c;
         return;
     }
     m[0] = bm[row][0]; m[1] = bm[row][1];
