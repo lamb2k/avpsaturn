@@ -12,6 +12,8 @@ import subprocess
 import time
 import sys
 
+import round_cache
+
 HERE = pathlib.Path(__file__).resolve().parent
 REPO = HERE.parents[1]
 WORK = pathlib.Path(sys.argv[1] if len(sys.argv) > 1 else "E:/AvP/learning/lane-satrt")
@@ -42,6 +44,7 @@ COLD1_ROOM = 0x20000   # cart tail for cold code that no ROM stretch takes
 COLD1_AT = CART_END - COLD1_ROOM
 # ROM stretches no walk of any stage or character reads (tools/rounds_census.py, WORK/rounds.json): cold chunks of lifted code stay in them for the whole game, per-round tiles take the rest.
 ROUNDS = json.loads((WORK / "rounds.json").read_text())
+ARCADE_SPRITE_KEYS = {k for f in ROUNDS["files"] for k in f["keys"][0]}
 if os.environ.get("GUEST_ASSETS"):   # bonus characters (SAT_GUESTS builds): guest stage file variants, tools/wolverine/guest_rounds.py
     sys.path.insert(0, str(REPO / "tools/wolverine"))
     import guest_rounds
@@ -57,6 +60,10 @@ for l in (open(WORK / "screen_keys.txt") if (WORK / "screen_keys.txt").exists() 
 SCREEN_KEYS[0].discard(0)
 if os.environ.get("SCREEN_KEYS_REQUIRED", "1") == "1" and not SCREEN_KEYS[0]:
     raise SystemExit("WORK/screen_keys.txt missing: run tools/screen_keys.py (SCREEN_KEYS_REQUIRED=0 to build without)")
+if os.environ.get("GUEST_ASSETS"):
+    assets = pathlib.Path(os.environ["GUEST_ASSETS"])
+    remap = json.loads((assets / "remap.json").read_text())
+    round_cache.require_unused_remap("Wolverine", remap["keys"], ARCADE_SPRITE_KEYS | SCREEN_KEYS[0])
 STRETCHES = [(0x02400000 + a, n) for a, n in ROUNDS["holes"] if n >= 0x4000]
 
 
@@ -78,9 +85,12 @@ def guest_plan():
     for item in spec.split(";"):
         gi, d = item.split("=", 1)
         gi, d = int(gi), pathlib.Path(d)
+        if str(gi) in gf:
+            raise SystemExit(f"NO-GO: guest row {gi} configured twice; use GUEST_ASSETS for Wolverine and SAT_GUEST_DATA only for other guests")
         A = json.loads((d / "remap.json").read_text())
         gfx = str(next(d.glob("gfx_*.bin")))
-        slot, gkeys = slots[gi], set(A["keys"])
+        round_cache.require_unused_remap(str(d), A["keys"], ARCADE_SPRITE_KEYS | SCREEN_KEYS[0])
+        slot = slots[gi]
         made, per = {}, gf.setdefault(str(gi), {})
         for st, files in vf.items():
             if only and int(st) not in only:
@@ -92,6 +102,9 @@ def guest_plan():
                 b = files[v]
                 if b not in made:
                     base = ROUNDS["files"][b]
+                    # A trimmed asset set may keep the full extraction in keys;
+                    # gameplay must use its selected set, as GUEST_ASSETS does.
+                    gkeys = set(A.get("stage_keys", {}).get(f"{int(st):02x}", A["keys"]))
                     own = set(base["keys"][0]) & data.own[slot]
                     nf = dict(base, name=base["name"] + f"_g{gi}", rank_from=base["name"], audio_from=b, gfx=gfx, guest_keys=sorted(gkeys),
                               keys=[sorted(set(base["keys"][0]) - own | gkeys)] + [list(k) for k in base["keys"][1:]])
@@ -256,6 +269,9 @@ def round_files(rom, code_end, cold1_at, only=None):
         if f.get("gfx") and f["gfx"] not in raws:
             raws[f["gfx"]] = pathlib.Path(f["gfx"]).read_bytes()
         p, dropped = rounds_pack.fit(raws.get(f.get("gfx"), raw), keys, room, free, frank)
+        # Check every plan before the write loop, including optional guest stages
+        # 06/1c/1e. A high rank alone never guarantees that the tiles fit.
+        round_cache.require_guest_tiles(f["name"], f.get("guest_keys", ()), keys[0], dropped, p)
         for first, a, take in p["segs"]:
             written.update(range(a // page, (a + (take * 128 + 2047 & -2048) + page - 1) // page))
         plans.append((p, dropped))
@@ -340,7 +356,10 @@ def main():
     home_cold = [cc(HERE / "home_cold.c", OBJ / "home_cold.o", ["-Os"] + os.environ.get("KERNEL_CFLAGS", "").split())] if home else []
     home_cold += home_cold_extra
     if OVERRIDES:
-        own += [cc(REPO / "saturn/game" / f"{n}.c", OBJ / f"game_{n}.o", ["-O2", "-DSAT_TARGET", "-I", REPO / "saturn/game"] + (["-DSAT_GUESTS"] if "SAT_GUESTS" in os.environ.get("KERNEL_CFLAGS", "") else [])) for n in ("game_hot", "game_bind")]
+        bind_flags = ["-DSAT_GUESTS"] if "SAT_GUESTS" in os.environ.get("KERNEL_CFLAGS", "") else []
+        if "SAT_WOLVERINE_DEBUG" in os.environ.get("KERNEL_CFLAGS", ""):
+            bind_flags.append("-DSAT_WOLVERINE_DEBUG")
+        own += [cc(REPO / "saturn/game" / f"{n}.c", OBJ / f"game_{n}.o", ["-O2", "-DSAT_TARGET", "-I", REPO / "saturn/game"] + bind_flags) for n in ("game_hot", "game_bind")]
     sizes = {o: code_size(o) for o in objs}
     # Hottest chunks in high work RAM, then low work RAM; the coldest run from the cart. Heat comes from the MAME route.
     heat = json.loads((WORK / "heat.json").read_text())
@@ -464,17 +483,49 @@ SECTIONS {{
     # The pack in main ends where cold1 starts: a kept file built for a lower cold1 would have its last tiles overwritten by cold code (seen as wrong tiles on crates in stages 24 and 1e).
     ends = [[st[0], syms[f"_sat_st{i}_end"]] for i, st in enumerate(STRETCHES)] + [[cold1_at, 0]]
     ends_file = WORK / "round_code_ends.json"
+    names = round_cache.round_names(len(ROUNDS["files"]))
+    head_sectors = round_cache.store_header_sectors(len(names))
     for f in (WORK / "rounds").glob("R[0-9][0-9][0-9].BIN"):   # SECTOR_STORE parks the round files here; kept files come back first
         if not (ISO / f.name).exists():
             shutil.move(str(f), ISO / f.name)
-    if os.environ.get("KEEP_ROUND_FILES") and (not ends_file.exists() or json.loads(ends_file.read_text()) == ends):
+    # Stage files depend on more than memory addresses: reselected poses, changed
+    # graphics or ranking can otherwise leave a new runtime using an old pack.
+    inputs = {
+        "build.py": pathlib.Path(__file__),
+        "round_cache.py": HERE / "round_cache.py",
+        "rounds_pack.py": REPO / "tools/rounds_pack.py",
+        "satgfx_pack.py": REPO / "tools/satgfx_pack.py",
+        "key_rank.json": WORK / "key_rank.json" if (WORK / "key_rank.json").exists() else None,
+        "gfx": pathlib.Path(os.environ.get("GFX_BIN", "E:/AvP/learning/lane-satgfx/gfx.bin")),
+    }
+    for i, f in enumerate(ROUNDS["files"]):
+        inputs[f"audio:{i}"] = WORK / "audio" / f"r{f.get('audio_from', i):03d}.bin"
+        if f.get("gfx"):
+            inputs[f"gfx:{i}"] = pathlib.Path(f["gfx"])
+    fingerprint = round_cache.packing_inputs(ROUNDS, ends, dict(
+        shared_min=SHARED_MIN, min_run=MIN_RUN, arena_keep=os.environ.get("ARENA_KEEP"),
+        screen_keys=[sorted(k) for k in SCREEN_KEYS], pack_address=CART["SAT_PACK"]), inputs)
+    receipt = WORK / "round_pack_receipt.json"
+    reason = round_cache.reuse_reason(receipt, fingerprint, ISO, names)
+    if os.environ.get("KEEP_ROUND_FILES") and reason is None:
         n = refresh_restores(rom)
         print("round files kept; ROM restore bytes refreshed in", n, "files")
-        miss = [i for i in range(len(ROUNDS["files"])) if not (ISO / f"R{i:03d}.BIN").exists()]
-        if miss:   # bonus character files (guest_plan) are new: build them beside the kept ones
-            round_files(rom, [tuple(e) for e in ends[:-1]], cold1_at, set(miss))
     else:
+        if os.environ.get("KEEP_ROUND_FILES"):
+            print("round files rebuilt:", reason)
         round_files(rom, [tuple(e) for e in ends[:-1]], cold1_at)
+    # A smaller plan must not leave surplus generated files in STORE.BIN. Park
+    # them for inspection instead of deleting an earlier build's artifacts.
+    for f in round_cache.extra_rounds(ISO, names):
+        parked = WORK / "stale_rounds" / (round_cache.file_hash(f) + "_" + f.name)
+        parked.parent.mkdir(parents=True, exist_ok=True)
+        if parked.exists():
+            if round_cache.file_hash(parked) != round_cache.file_hash(f):
+                raise SystemExit("NO-GO: stale-round archive conflict: " + str(parked))
+            f.unlink()   # identical preserved copy already exists
+        else:
+            shutil.move(str(f), str(parked))
+    round_cache.save_receipt(receipt, fingerprint, ISO, names)
     ends_file.write_text(json.dumps(ends))
     (WORK / "rom_final.bin").write_bytes(rom)
     b = OBJ / "boot.o"
@@ -484,7 +535,7 @@ SECTIONS {{
         print(sh([sys.executable, REPO / "tools/sector_store.py", ISO, "--keep", WORK / "rounds"]).strip())
     else:
         (ISO / "STORE.BIN").unlink(missing_ok=True)
-    sh([GCC, "-m2", "-mb", "-O2", "-w", "-fno-builtin", "-I", SGL / "INC", f"-DCOLD1_ADDR={cold1_at:#x}u"] + (["-DSECTOR_STORE"] if store else []) + (["-DSTORE_HEAD2"] if os.environ.get("GUEST_ASSETS") else []) + [ "-c", HERE / "boot.c", "-o", b])
+    sh([GCC, "-m2", "-mb", "-O2", "-w", "-fno-builtin", "-I", SGL / "INC", f"-DCOLD1_ADDR={cold1_at:#x}u"] + (["-DSECTOR_STORE"] if store else []) + (["-DSTORE_HEAD2"] if head_sectors == 2 else []) + [ "-c", HERE / "boot.c", "-o", b])
     lib = SGL / "LIB_ELF"
     sh([GCC, "-m2", "-mb", "-nostartfiles", "-T", HERE / "boot.ld", b, "-Wl,--start-group", lib / "SEGA_SYS.A", lib / "LIBCD.A", lib / "LIBSGL.A", "-lgcc", "-lc", "-Wl,--end-group",
         "-o", WORK / "boot.elf", f"-Wl,-Map={WORK / 'boot.map'},-e,_main"])

@@ -1,106 +1,230 @@
 #!/usr/bin/env python
-"""Lane avp-wolverine: real packer fit of Wolverine stage files against the Schaefer files they replace.
-Same planning as saturn/rt/build.py round_files (free ROM stretches, shared pages, screen keys, key rank, rounds_pack.fit),
-run on a finished build's WORK directory, without writing files.
-Wolverine file = Schaefer file's keys - Schaefer's own keys for that stage + Wolverine's remapped keys (tools/wolverine/assets.py).
-usage: fit.py WORK ASSETS_DIR [STAGE_FILTER]   prints a table and writes ASSETS_DIR/fit.json. ROM-derived inputs stay under E:/AvP/learning."""
-import json, pathlib, re, sys
+"""Check Wolverine's GUEST_ASSETS pack plan against the Schaefer files it replaces.
+
+Uses a finished build's layout and the real rounds_pack.fit implementation. No
+round files are written. All variants containing Schaefer must be checked for
+every requested stage; an empty or incomplete selection is an error.
+
+usage: fit.py WORK ASSETS_DIR [STAGES]   STAGES is comma-separated hex, e.g. 06,1c,1e.
+With no STAGES, check every non-front-end stage in variant_file. Writes
+ASSETS_DIR/fit[STAGES].json. Exit 0: all pass; 1: fit fails; 2: missing/bad inputs.
+Honours GUEST_SPEC, SCREEN_KEYS_REQUIRED, ROUND_SHARED_MIN, ROUND_MIN_RUN and
+ARENA_KEEP as build.py does. This checks full pack generation, not the old
+KEEP_ROUND_FILES partial-build shortcut. Private inputs stay outside Git.
+"""
+import json
+import os
+import pathlib
+import re
+import sys
+
 REPO = pathlib.Path(__file__).resolve().parents[2]
-sys.path.insert(0, str(REPO / "tools"))
-import rounds_pack
-
-SCH = 2                       # ff81cc mask bit of the slot Wolverine takes (owner 11-08: Schaefer)
-OTHERS = (1, 4, 8)
-PAIRS = {3: "m3", 6: "m6", 10: "ma"}
+SCH = 2
 SPEC = "E:/AvP/learning/lane-packs/spec.json"
-CART_PACK, SHARED_MIN, MIN_RUN = 0x02654000, 10, 1
+ROM_BASE, ROM_BYTES, CART_PACK, CART_END = 0x02400000, 0x200000, 0x02654000, 0x02800000
 
 
-def load(work):
-    R = json.loads((work / "rounds.json").read_text())
+def parse_stages(text):
+    if not text:
+        return None
+    stages = set()
+    for part in text.split(","):
+        if not re.fullmatch(r"(?:0[xX])?[0-9a-fA-F]{1,2}", part.strip()):
+            raise ValueError("STAGES must be comma-separated hexadecimal stage words")
+        word = int(part, 16)
+        if not word:
+            raise ValueError("stage 00 is the front end, not a Wolverine stage file")
+        stages.add(word)
+    return sorted(stages)
+
+
+def settings(environ):
+    shared = int(environ.get("ROUND_SHARED_MIN", "10"))
+    minimum = int(environ.get("ROUND_MIN_RUN", "1"))
+    if shared < 0 or minimum < 0:
+        raise ValueError("ROUND_SHARED_MIN and ROUND_MIN_RUN must be nonnegative")
+    return dict(shared_min=shared, min_run=minimum,
+                arena_keep=environ.get("ARENA_KEEP") or None)
+
+
+def load(work, environ):
+    rounds = json.loads((work / "rounds.json").read_text())
     ends = json.loads((work / "round_code_ends.json").read_text())
-    rom = (work / "rom_final.bin").read_bytes()
-    sk = [set(), set(), set(), set()]
-    for l in open(work / "screen_keys.txt"):
-        if l.strip():
-            sk[int(l.split()[0])].add(int(l.split()[1], 16))
-    sk[0].discard(0)
-    rank = json.loads((work / "key_rank.json").read_text())
-    return R, ends, rom, sk, rank
+    if not ends or not CART_PACK <= ends[-1][0] <= CART_END or ends[-1][1] != 0:
+        raise ValueError("round_code_ends.json has no valid cart-pack boundary")
+    screens = [set() for _ in range(4)]
+    screen_file = work / "screen_keys.txt"
+    for line in screen_file.read_text().splitlines() if screen_file.exists() else []:
+        if line.strip():
+            section, key = line.split()
+            section = int(section)
+            if not 0 <= section < 4:
+                raise ValueError("screen key section outside 0..3")
+            screens[section].add(int(key, 16))
+    screens[0].discard(0)
+    if environ.get("SCREEN_KEYS_REQUIRED", "1") == "1" and not screens[0]:
+        raise ValueError("WORK/screen_keys.txt missing or empty (SCREEN_KEYS_REQUIRED=0 to omit)")
+    rank_file = work / "key_rank.json"
+    rank = json.loads(rank_file.read_text()) if rank_file.exists() else {}
+    return rounds, ends, screens, rank
 
 
-def free_runs(R, ends):
-    page = R["page"]
-    code = bytearray(0x200000 // page)
+def selected_files(rounds, stages=None):
+    """Return every required (stage, variant, mask, base file); fail closed on gaps."""
+    masks = rounds.get("variant_masks", [])
+    variants = [(i, mask) for i, mask in enumerate(masks, 1) if mask & SCH]
+    if not variants or len(set(masks)) != len(masks):
+        raise ValueError("no valid Schaefer variants in variant_masks")
+    table, files = rounds.get("variant_file", {}), rounds.get("files", [])
+    declared = {int(st) for st in table if int(st)}
+    declared.update(int(st) for st in rounds.get("stage_file", {}) if int(st))
+    declared.update(st for f in files for st in f.get("stages", []) if st)
+    wanted = stages if stages is not None else sorted(declared)
+    if not wanted:
+        raise ValueError("no stages selected")
+    selected = []
+    for word in wanted:
+        row = table.get(str(word))
+        if not isinstance(row, list) or len(row) != len(masks) + 1:
+            raise ValueError("stage %02x has no complete variant row" % word)
+        for variant, mask in variants:
+            number = row[variant]
+            if not isinstance(number, int) or not 0 <= number < len(files):
+                raise ValueError("stage %02x mask %x has no file" % (word, mask))
+            base = files[number]
+            if base.get("name") == "front" or word not in base.get("stages", []):
+                raise ValueError("stage %02x mask %x maps to the wrong stage file" % (word, mask))
+            selected.append((word, variant, mask, base))
+    return selected
+
+
+def free_runs(rounds, ends, shared_min=10, min_run=1, arena_keep=None):
+    """Same code-page, shared-page, and ARENA_KEEP exclusions as round_files()."""
+    page = rounds["page"]
+    if page <= 0 or ROM_BYTES % page:
+        raise ValueError("invalid ROM census page size")
+    code = set()
     for at, end in ends[:-1]:
-        for q in range((at - 0x02400000) // page, (end - 0x02400000 + page - 1) // page):
-            code[q] = 1
-    base = [f for f in R["files"] if re.fullmatch(r"stage[0-9a-f]{2}", f["name"])]
+        if not ROM_BASE <= at <= end <= ROM_BASE + ROM_BYTES:
+            raise ValueError("cold code range outside the ROM image")
+        code.update(range((at - ROM_BASE) // page, (end - ROM_BASE + page - 1) // page))
+    base = [f for f in rounds["files"] if re.fullmatch(r"stage[0-9a-f]{2}", f["name"])]
     seen = {}
     for f in base:
         for q in set(f["keep_pages"]):
             seen[q] = seen.get(q, 0) + 1
-    shared = {q for q, c in seen.items() if c >= SHARED_MIN}
+    shared = {q for q, count in seen.items() if count >= shared_min}
+    k02 = set()
+    if arena_keep:
+        stage02 = next((f for f in base if f["name"] == "stage02"), None)
+        if stage02 is None:
+            raise ValueError("ARENA_KEEP requires stage02's keep_pages")
+        k02 = set(stage02["keep_pages"])
+        if arena_keep not in ("1", "all"):
+            wanted = set()
+            for span in arena_keep.split(","):
+                lo, hi = (int(value, 16) for value in span.split("-"))
+                if not 0 <= lo < hi <= ROM_BYTES:
+                    raise ValueError("ARENA_KEEP range outside the ROM image")
+                wanted.update(range(lo // page, (hi + page - 1) // page))
+            k02 &= wanted
 
     def free(f):
         keep = set(f["keep_pages"]) | shared
-        out, st = [], None
-        for q in range(0x200000 // page + 1):
-            ok = q < 0x200000 // page and q not in keep and not code[q]
-            if ok and st is None:
-                st = q
-            if not ok and st is not None:
-                if q - st >= MIN_RUN:
-                    out.append([st * page, (q - st) * page])
-                st = None
-        out.sort(key=lambda r: -r[1])
+        if k02 and set(f.get("stages", [])) & {0x0e, 0x1c, 0x1e, 0x24}:
+            keep |= k02
+        out, start = [], None
+        for q in range(ROM_BYTES // page + 1):
+            available = q < ROM_BYTES // page and q not in keep and q not in code
+            if available and start is None:
+                start = q
+            if not available and start is not None:
+                if q - start >= min_run:
+                    out.append([start * page, (q - start) * page])
+                start = None
+        out.sort(key=lambda item: -item[1])
         return out
     return free
 
 
-def run(raw, f, keys, room, free, rank, sk):
-    keys = [set(k) | e for k, e in zip(keys, sk)]
-    frank = {int(x): v for x, v in rank.items()}
-    frank.update({k: 1 << 40 for k in sk[0]})
-    p, dropped = rounds_pack.fit(raw, keys, room, free(f), frank)
-    return p, dropped
+def run(raw, f, keys, room, free, rank, screens, guest_keys=(), fit_fn=None):
+    """Apply build priorities before calling the packer; imports stay out of helpers."""
+    if fit_fn is None:
+        sys.path.insert(0, str(REPO / "tools"))
+        import rounds_pack
+        fit_fn = rounds_pack.fit
+    keys = [set(k) for k in keys]
+    frank = {int(key): value for key, value in rank.items()}
+    frank.update({key: 1 << 39 for key in guest_keys})
+    if f["name"] != "front":
+        keys = [k | extra for k, extra in zip(keys, screens)]
+        frank.update({key: 1 << 40 for key in screens[0]})
+    return fit_fn(raw, keys, room, free(f), frank)
 
 
-def main():
-    work, adir = pathlib.Path(sys.argv[1]), pathlib.Path(sys.argv[2])
-    filt = sys.argv[3] if len(sys.argv) > 3 else ""
-    R, ends, rom, sk, rank = load(work)
-    room = ends[-1][0] - CART_PACK
-    free = free_runs(R, ends)
-    A = json.loads((adir / "remap.json").read_text())
-    raw = (adir / "gfx_wolverine.bin").read_bytes()    # AvP graphics with Wolverine's tiles written at his remapped keys
-    stage_keys = {int(s, 16): set(v) for s, v in A["stage_keys"].items()} if "stage_keys" in A else None
-    wkeys_all = set(A["keys"])
-    files = {f["name"]: f for f in R["files"]}
-    import rounds_variants
-    sch_own = rounds_variants.Data(SPEC).own[SCH]
-    rows, out = [], {}
-    for name, f in files.items():
-        m = re.fullmatch(r"stage([0-9a-f]{2})_m([0-9a-f])", name)
-        if not m or int(m.group(2), 16) & SCH == 0 or not name.startswith("stage" + filt):
-            continue
-        st, mask = m.group(1), int(m.group(2), 16)
-        own = set(f["keys"][0]) & sch_own   # keys only Schaefer uses in the whole game (rounds_variants own set)
-        wk = stage_keys.get(int(st, 16), wkeys_all) if stage_keys else wkeys_all
-        p0, d0 = run(raw, f, f["keys"], room, free, rank.get(name, {}), sk)
-        k1 = [set(f["keys"][0]) - own | wk] + [set(k) for k in f["keys"][1:]]
-        r1 = dict(rank.get(name, {}))
-        r1.update({str(k): 1 << 39 for k in wk})   # his frames rank as the playing character's own route
-        p1, d1 = run(raw, f, k1, room, free, r1, sk)
-        wd = len(set(d1) & wk)
-        row = dict(file=name, schaefer_own=len(own), wolverine=len(wk), sch_drop=len(d0), wolv_drop=len(d1), wolv_own_dropped=wd,
-                   sch_tiles=p0["inmain"] + sum(x[2] for x in p0["segs"]), wolv_tiles=p1["inmain"] + sum(x[2] for x in p1["segs"]),
-                   gate=len(d1) <= len(d0) and wd == 0)
-        rows.append(row)
-        print(json.dumps(row), flush=True)
-    (adir / f"fit{filt}.json").write_text(json.dumps(rows, indent=0))
-    print("gate", all(r["gate"] for r in rows), "fail", [r["file"] for r in rows if not r["gate"]])
+def main(argv=None, environ=None, fit_fn=None, own_keys=None):
+    argv = sys.argv[1:] if argv is None else argv
+    environ = os.environ if environ is None else environ
+    if not 2 <= len(argv) <= 3:
+        print("usage: fit.py WORK ASSETS_DIR [06,1c,1e]", file=sys.stderr)
+        return 2
+    adir = pathlib.Path(argv[1])
+    report = adir / "fit.json"
+    rows = []
+    try:
+        stages = parse_stages(argv[2] if len(argv) == 3 else "")
+        suffix = "_".join("%02x" % word for word in stages) if stages else ""
+        report = adir / ("fit" + suffix + ".json")
+        config = settings(environ)
+        rounds, ends, screens, rank = load(pathlib.Path(argv[0]), environ)
+        selected = selected_files(rounds, stages)
+        room = ends[-1][0] - CART_PACK
+        free = free_runs(rounds, ends, **config)
+        assets = json.loads((adir / "remap.json").read_text())
+        raw = (adir / "gfx_wolverine.bin").read_bytes()
+        stage_keys = assets.get("stage_keys", {})
+        if own_keys is None:
+            sys.path.insert(0, str(REPO / "tools"))
+            import rounds_variants
+            own_keys = rounds_variants.Data(environ.get("GUEST_SPEC", SPEC)).own[SCH]
+        sources = {}
+        for word, variant, mask, base in selected:
+            own = set(base["keys"][0]) & set(own_keys)
+            # guest_rounds.extend keys a shared base file by its first stage.
+            asset_stage = base["stages"][0]
+            wk = set(stage_keys.get("%02x" % asset_stage, assets["keys"]))
+            name = base["name"]
+            r = rank.get(base.get("rank_from", name), {})
+            if base.get("gfx") and base["gfx"] not in sources:
+                sources[base["gfx"]] = pathlib.Path(base["gfx"]).read_bytes()
+            source = sources.get(base.get("gfx"), raw)
+            p0, d0 = run(source, base, base["keys"], room, free, r, screens, fit_fn=fit_fn)
+            guest = dict(base, name=name + "_wv", rank_from=name)
+            keys = [set(base["keys"][0]) - own | wk] + [set(k) for k in base["keys"][1:]]
+            p1, d1 = run(source, guest, keys, room, free, rank.get(name, {}), screens, wk, fit_fn)
+            missing = sorted(set(d1) & wk)
+            tiles = lambda p: p["inmain"] + sum(x[2] for x in p["segs"]) if p is not None else None
+            row = dict(file=name, stage="%02x" % word, variant=variant, mask=mask,
+                       schaefer_own=len(own), wolverine=len(wk), sch_drop=len(d0), wolv_drop=len(d1),
+                       wolv_own_dropped=len(missing), missing_guest_keys=missing,
+                       sch_tiles=tiles(p0), wolv_tiles=tiles(p1), cart_pack_room=room, controls=config,
+                       gate=p0 is not None and p1 is not None and len(d1) <= len(d0) and not missing)
+            rows.append(row)
+            print(json.dumps(row), flush=True)
+        report.write_text(json.dumps(rows, indent=0))
+        passed = bool(rows) and all(row["gate"] for row in rows)
+        print("gate", passed, "fail", [row["file"] for row in rows if not row["gate"]])
+        return 0 if passed else 1
+    except (OSError, ValueError, KeyError, IndexError, TypeError, ImportError) as exc:
+        # Do not leave a previous successful report looking like this attempt.
+        if adir.is_dir():
+            try:
+                report.write_text("[]\n")
+            except OSError:
+                pass
+        print("NO-GO:", exc, file=sys.stderr)
+        return 2
 
 
 if __name__ == "__main__":
-    main()
+    raise SystemExit(main())
