@@ -53,6 +53,11 @@ for l in (open(WORK / "screen_keys.txt") if (WORK / "screen_keys.txt").exists() 
 SCREEN_KEYS[0].discard(0)
 if os.environ.get("SCREEN_KEYS_REQUIRED", "1") == "1" and not SCREEN_KEYS[0]:
     raise SystemExit("WORK/screen_keys.txt missing: run tools/screen_keys.py (SCREEN_KEYS_REQUIRED=0 to build without)")
+# The character select's countdown digits (scroll 1 codes 0x0b00-0x0b3f, two cells wide, three rows high, both column halves) in the front file. The census routes press
+# Start at once, so only the digits 1, 4 and 5 were ever looked up; 6, 3, 2 and 0 drew blank. The digit's cells are blank or filled from one second to the next, and
+# home's column fit shares one map across the screen's rows, so the whole select screen (the stat bars, names, portraits) jumped one column each time the digit appeared
+# or vanished (owner 11-08, stat bars shifting on select; lane home-3, selcap/ logs).
+SELECT_DIGIT_KEYS = {(c << 1) | h for c in range(0x0b00, 0x0b40) for h in (0, 1)}
 # Home builds only: scroll 1 tiles at the outer columns (arcade 0, 1, 47) that the census never read (it reads the centre crop); the home
 # picture shows them on the HUD rows and fitted text rows (P1's portrait and 1P mark). tools/edge_keys.lua writes WORK/edge_keys.txt.
 EDGE_KEYS = set()
@@ -216,6 +221,8 @@ def round_files(rom, code_end, cold1_at):
             keys[1] = keys[1] | EDGE_KEYS
         if CAPTION_KEYS:
             keys[1] = keys[1] | CAPTION_KEYS
+        if f["name"] == "front":
+            keys[1] = keys[1] | SELECT_DIGIT_KEYS
         p, dropped = rounds_pack.fit(raw, keys, room, free, frank)
         for first, a, take in p["segs"]:
             written.update(range(a // page, (a + (take * 128 + 2047 & -2048) + page - 1) // page))
