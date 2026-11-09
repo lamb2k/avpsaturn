@@ -412,6 +412,15 @@ void sat_guest_wolverine_after_tick(unsigned long a6)
     wv_advance(i);
     exec_[i] = 1;
 }
+/* Pick-ups (game_bind.c f_19f9a): he takes food and score items only (kinds 0a and 0b of the item's byte +2); weapons and held items stay on the floor.
+   MSHvSF's Wolverine has no items. Returns nonzero when the pick-up is allowed. */
+int sat_guest_wolverine_pickup(unsigned long a6, unsigned long a4)
+{
+    u8 kind;
+    if (wv_player((u32)a6) < 0) return 1;
+    kind = PBY(0xff0000u | ((u32)a4 & 0xffffu))[2];
+    return kind == 0x0a || kind == 0x0b;
+}
 /* a gun shot (tag 4 in ff8680..ff957f, owner word +0x26; +2 is 5 while one flies) of a Wolverine player: Berserker Barrage is his gun slot's move, the shot itself does nothing */
 int sat_guest_wolverine_bullet(unsigned long a6)
 {

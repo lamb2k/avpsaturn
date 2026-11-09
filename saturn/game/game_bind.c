@@ -105,6 +105,20 @@ static void guest_pass(void (*lifted)(void), int which)
 void f_1cf54(void) { extern void lifted_1cf54(void); guest_pass(lifted_1cf54, 0); }
 void f_1d03e(void) { extern void lifted_1d03e(void); guest_pass(lifted_1d03e, 1); }
 void f_1d116(void) { extern void lifted_1d116(void); guest_pass(lifted_1d116, 2); }
+/* f_19f9a is the player's pick-up test (a6 = player block; a4 = the touched item, a6+8e): true (d0 = 1, Z clear) when the pick-up button is pressed on an
+   item that is free. Item kind +2: 0a food or health, 0b score; 02, 03, 07, 08 and the rest are weapons and held items (the player then carries it in
+   +5a), 0e a timed power-up. A Wolverine player takes only food and score: for the rest the test answers "nothing to pick up" (the arcade is untouched:
+   SAT_GUESTS builds, guest selected, Wolverine's slot only). */
+extern int sat_guest_wolverine_pickup(unsigned long a6, unsigned long a4) __attribute__((weak));
+void f_19f9a(void)
+{
+    extern void lifted_19f9a(void);
+    lifted_19f9a();
+    if (R->d[0] != 0 && sat_guest_wolverine_pickup && !sat_guest_wolverine_pickup(R->a[6], R->a[4])) {
+        R->d[0] = 0;
+        FLAGS(1, 0, 0, 0, 0);
+    }
+}
 void f_195ec(void)
 {
     extern void lifted_195ec(void);
