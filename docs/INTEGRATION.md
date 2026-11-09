@@ -38,6 +38,7 @@ Still awaiting the owner's choice: SAT_WV_GROUND (feet on the floor; ground.py d
 
 | Item | Branch | State |
 | --- | --- | --- |
+| Guest group loop out of the snapshot (about 44 ticks per snapshot), precomputed in the game frame | lane/fps-group | starting |
 | Menu mode flow, transparent option screens, title list lower; talk-box face/text 8 px offset | lane/wolverine-menu | merge done; building and checking |
 | Wolverine takes far more hits than Schaefer (Round 1 gate: 36-37 vs 2), and a wrong pose while an enemy holds him (0204xx shows throw poses) | lane/wolverine-defense | starting |
 | Native Wolverine (fork of Schaefer, plan aae2e10) | lane/wolverine-native | Stage 0 identity |
