@@ -2,6 +2,10 @@
 
 Only source of current state. Branch `decomp/main`. Backlog: docs/BACKLOG.md.
 
+## Wolverine disc v3, 2026-11-08 (EMULATOR, Yaba; hardware UNRUN)
+
+`lane/wolverine-disc-20261108`: full walk (21 steps), lp full, hp 11 of 15 steps, 1,511 tiles; 76 of 76 stage files fit (stage 24 is the limit near 1,514 tiles; full walk plus lp plus hp needs 1,599, 85 over). hw_free 1,148, lw_free 140. Uninterrupted LP 16-24 (target 16), HP 51-66 (target 51), HK not reached. Needs the owner's Yaba (VideoCore 1): the lane exe shows no sprites with the new VDP1 handoff. Details: docs/notes/AVP_WOLVERINE_DISC_V3_20261108.md.
+
 ## Cloud correction candidate, 2026-11-08 (HOST; target, MAME, EMULATOR and HARDWARE UNRUN)
 
 `codex/avp-wolverine-frame-fixes-20261108`, based on `feat/wolverine` at `79c9580`, combines the runtime VDP1 fixes from `fix/vdp1-race` at `3b28109` with corrected guest tick/recovery timing, IRQ-safe pose publication, debug-state gating (150 fewer declared fixed-state bytes before alignment), emitted-pose residency and strict pack/cache/fit gates. The additional sprite-lane pose-census pack policy is not imported into this combined candidate. The VDP1-only candidate is `codex/avp-vdp1-frame-fixes-20261108`.
