@@ -1,23 +1,19 @@
 #!/usr/bin/env python
-"""Wolverine reveal art: recolour the classic blue/yellow costume to the 80s colourway of revision 3 of the artist's palette (red-brown and gold).
+"""Wolverine reveal art: recolour the classic blue costume to the red he wears in play; the yellow costume stays as the artist drew it (owner, 11-09: "keeps his current in-play colour").
 usage: reveal_recolour.py SRC_DIR OUT_DIR   (SRC_DIR holds frame1_closed.png, frame2_opening.png, frame3_burst.png; the originals are never written)
 
-Palette (wolverine_hud_80s_matched/palette_manifest.json, revision 3), light to dark, the way hud_art.py maps a ramp:
-    red-brown  #bb7755  #995533  #662211  #331111      replaces the costume's blues
-    gold       #ffeebb  #ddbb66  #bb8833  #775522      replaces the costume's yellows
-Blue ramp of the costume, light to dark (palette index, colour):
-    light  53 #5566aa  54 #667799  55 #7788aa  57 #8899bb  58 #aabbdd   -> #bb7755
-    mid    50 #445599  51 #556677  52 #556688  49 #555577              -> #995533
-    dark   47 #445577  46 #445566  45 #444466                          -> #662211
-    darkest 43 #333344  42 #222233                                     -> #331111
-Yellow ramp: 35 #ffcc33 -> #ffeebb, 27 #ffbb22 -> #ddbb66, 26 #dd8811 -> #bb8833, 25 #bb7722 and 24 #996644 -> #775522 (24, the shade entry, one pixel from the gold only).
-Palette entries 50 and 53 are costume only (every pixel of them is in the six costume patches), so they change colour in place. Everything else is SHARED with
-the pipes, walls, hazard stripes, lamps, aliens' shading, skin and floor: only the costume's pixels of them are recoloured, and they move to entry 50 or 53
-(mid and light red-brown) or to new entries appended to the shared palette (dark and darkest red-brown, the four golds). A blue pixel is a costume pixel when a chain of
-blue-ramp pixels of at most 4 pixels joins it to 50 or 53; a yellow pixel is one when its 8-connected patch of yellow lies inside the figure's box (x 150 to 230, y 85 to 160)
-and holds at least 80 pixels. Everything else keeps its entry and colour: aliens (teal, steel purple), skin, belt, scenery; frames 1 and 2 are copied as they are.
-Every 16 x 16 tile still holds at most 15 opaque colours (checked; a tile pushed over loses its least used scenery colour of a recoloured entry to the nearest colour
-in the tile, reported)."""
+His in-play reds (his sprite, rounded to the 12-bit grid) take the costume's blues the way hud_art.py maps its blue ramp, light to light, dark to dark:
+    ramp step   in-play red   costume entries (palette index, colour)
+    light       #ee3300       53 #5566aa  54 #667799  55 #7788aa  57 #8899bb  58 #aabbdd
+    mid         #cc0000       50 #445599  51 #556677  52 #556688  49 #555577
+    dark        #880000       47 #445577  46 #445566  45 #444466
+    darkest     #550000       43 #333344  42 #222233
+Palette entries 50 and 53 are costume only (every pixel of them lies in the six costume patches), so they change colour in place. The others are SHARED with
+the pipes, walls, aliens' shading and floor of all three frames: only the costume's pixels of them are recoloured, and they move to entry 53 or 50 (light, mid) or to two
+new entries appended to the shared palette (dark, darkest). A pixel is a costume pixel when a chain of blue-ramp pixels of at most 4 pixels joins it to 50 or 53.
+Everything else keeps its entry and colour: the yellows, skin, belt, aliens (teal, steel purple) and scenery; frames 1 and 2 are copied as they are.
+Every 16 x 16 tile still holds at most 15 opaque colours (checked; a tile pushed over loses its least used scenery colour of a recoloured entry to the nearest colour in the tile, reported).
+(The 80s red-brown and gold variant of revision 3 of the artist's palette was tried on 11-09 and dropped: RB and GOLD below, RECOLOUR_YELLOW.)"""
 import json
 import pathlib
 import sys
@@ -26,12 +22,13 @@ from PIL import Image
 import numpy as np
 
 FRAMES = ("frame1_closed.png", "frame2_opening.png", "frame3_burst.png")
-RB = ((0xbb, 0x77, 0x55), (0x99, 0x55, 0x33), (0x66, 0x22, 0x11), (0x33, 0x11, 0x11))     # red-brown, light to dark
+RB = ((0xee, 0x33, 0x00), (0xcc, 0x00, 0x00), (0x88, 0x00, 0x00), (0x55, 0x00, 0x00))     # his sprite's reds, light to dark (80s variant: bb7755 995533 662211 331111)
 GOLD = ((0xff, 0xee, 0xbb), (0xdd, 0xbb, 0x66), (0xbb, 0x88, 0x33), (0x77, 0x55, 0x22))   # gold, light to dark
 IN_PLACE = {53: RB[0], 50: RB[1]}   # costume-only entries
 BLUE = {53: 0, 54: 0, 55: 0, 57: 0, 58: 0, 50: 1, 51: 1, 52: 1, 49: 1, 47: 2, 46: 2, 45: 2, 43: 3, 42: 3}   # entry -> red-brown step
-YELLOW = {35: 0, 27: 1, 26: 2, 25: 3}       # entry -> gold step
-YELLOW_SHADE = {24: 3}                       # one pixel from the gold only
+RECOLOUR_YELLOW = False                      # the 80s variant recoloured the costume's yellows to GOLD
+YELLOW = {35: 0, 27: 1, 26: 2, 25: 3} if RECOLOUR_YELLOW else {}       # entry -> gold step
+YELLOW_SHADE = {24: 3} if RECOLOUR_YELLOW else {}                       # one pixel from the gold only
 REACH = 4
 FIGURE = (150, 85, 230, 160)                 # x0 y0 x1 y1 of the figure's yellow in frame 3
 MIN_PATCH = 80
@@ -64,6 +61,8 @@ def blue_mask(a):
 def gold_mask(a):
     """8-connected patches of the yellow entries inside the figure's box with at least MIN_PATCH pixels, and the shade entry one pixel from them"""
     y_all = np.isin(a, list(YELLOW))
+    if not YELLOW:
+        return np.zeros(a.shape, dtype=bool), np.zeros(a.shape, dtype=bool)
     lab = np.zeros(a.shape, dtype=bool)
     seen = np.zeros(a.shape, dtype=bool)
     for y0, x0 in zip(*np.nonzero(y_all)):
@@ -112,7 +111,7 @@ def recolour(src, out):
     for i, rgb in IN_PLACE.items():
         new_pal[i * 3:i * 3 + 3] = list(rgb)
     idx = {}
-    for name, ramp, steps in (("rb", RB, (2, 3)), ("gold", GOLD, (0, 1, 2, 3))):
+    for name, ramp, steps in (("rb", RB, (2, 3)),) + ((("gold", GOLD, (0, 1, 2, 3)),) if RECOLOUR_YELLOW else ()):
         for s in steps:
             idx[(name, s)] = len(new_pal) // 3
             new_pal += list(ramp[s])
@@ -161,7 +160,7 @@ def recolour(src, out):
     for a, f in zip(new, FRAMES):
         o = Image.fromarray(a, "P")
         o.putpalette(new_pal + [0] * (768 - len(new_pal)))
-        o.save(out / f.replace(".png", "_80s.png"))
+        o.save(out / f.replace(".png", "_red.png"))
     keep = [i for i in range(npal) if i not in IN_PLACE]
     assert all(new_pal[i * 3:i * 3 + 3] == pal[i * 3:i * 3 + 3] for i in keep)
     old_rgb = np.array(pal).reshape(-1, 3)[arrs[2]]

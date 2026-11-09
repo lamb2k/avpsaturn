@@ -62,25 +62,25 @@ class RecolourTest(unittest.TestCase):
             names = synthetic_frames(src)
             rep = reveal_recolour.recolour(src, out)
             before = np.array(Image.open(src / names[2]))
-            im = Image.open(out / names[2].replace(".png", "_80s.png"))
+            im = Image.open(out / names[2].replace(".png", "_red.png"))
             after, pal = np.array(im), im.getpalette()
-            self.assertEqual(rep["palette_entries_after"], rep["palette_entries_before"] + 6)
-            # the costume blues became the 80s red-brown ramp, the yellows the gold ramp (revision 3)
-            self.assertEqual(tuple(pal[53 * 3:53 * 3 + 3]), (0xbb, 0x77, 0x55))
-            self.assertEqual(tuple(pal[50 * 3:50 * 3 + 3]), (0x99, 0x55, 0x33))
+            self.assertEqual(rep["palette_entries_after"], rep["palette_entries_before"] + 2)
+            # the costume blues became his sprite's reds; the yellows stay
+            self.assertEqual(tuple(pal[53 * 3:53 * 3 + 3]), (0xee, 0x33, 0x00))
+            self.assertEqual(tuple(pal[50 * 3:50 * 3 + 3]), (0xcc, 0x00, 0x00))
             red = lambda i: tuple(pal[i * 3:i * 3 + 3])
-            self.assertEqual(red(after[123, 125]), (0x33, 0x11, 0x11))   # costume darkest
-            self.assertEqual(red(after[121, 125]), (0x66, 0x22, 0x11))
+            self.assertEqual(red(after[123, 125]), (0x55, 0x00, 0x00))   # costume darkest
+            self.assertEqual(red(after[121, 125]), (0x88, 0x00, 0x00))
             # the scenery of the shared entries and the alien keep their entry and colour
             self.assertTrue((after[100:110, 300:310] == 47).all() and (after[110:120, 300:310] == 43).all())
             self.assertTrue((after[60:70, 200:210] == 37).all())
-            self.assertEqual(red(after[135, 170]), (0xbb, 0x88, 0x33))     # gold, third step
-            self.assertTrue((after[130:140, 300:310] == 26).all())          # the hazard stripe is still the artist's orange
+            self.assertTrue((after[130:145, 165:180] == 26).all())          # the costume's yellow stays as the artist drew it
+            self.assertTrue((after[130:140, 300:310] == 26).all())          # so does the hazard stripe
             self.assertEqual(red(37), (0x33, 0x44, 0x33))
             # frames 1 and 2 are copies
             for n in names[:2]:
                 a = np.array(Image.open(src / n))
-                b = np.array(Image.open(out / n.replace(".png", "_80s.png")))
+                b = np.array(Image.open(out / n.replace(".png", "_red.png")))
                 self.assertTrue((a == b).all())
             self.assertLessEqual(rep["max_opaque_colours_per_tile"], 15)
 
@@ -92,14 +92,14 @@ class RecolourTest(unittest.TestCase):
             before = [(src / n).read_bytes() for n in names]
             reveal_recolour.recolour(src, out)
             self.assertEqual(before, [(src / n).read_bytes() for n in names])
-            self.assertTrue(all((out / n.replace(".png", "_80s.png")).exists() for n in names))
+            self.assertTrue(all((out / n.replace(".png", "_red.png")).exists() for n in names))
 
 
 @unittest.skipIf(np is None, "numpy and Pillow are needed")
 class PackTest(unittest.TestCase):
     def test_committed_art_reproduces(self):
         art = ROOT / "art/wolverine-reveal"
-        frames = [art / n for n in ("frame1_closed_80s.png", "frame2_opening_80s.png", "frame3_burst_80s.png")]
+        frames = [art / n for n in ("frame1_closed_red.png", "frame2_opening_red.png", "frame3_burst_red.png")]
         with tempfile.TemporaryDirectory() as d:
             out = pathlib.Path(d) / "reveal.bin"
             reveal_pack.pack([str(f) for f in frames], str(out))
