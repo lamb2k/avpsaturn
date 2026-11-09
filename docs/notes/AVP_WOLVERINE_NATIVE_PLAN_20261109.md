@@ -348,10 +348,10 @@ Total about 12 to 15 working days (about 11 if Stage 3 is cut to the damage curv
 No gameplay change, no hardware or Yaba result, no damage-per-hit number. Frame data, byte-9 indices, reach and hitstop in sections 4 and 5.2 are proposals scaled from the measured columns. Code and data sizes of the native build are estimates until Stage 1 links. Absolute enemy HP loss per hit and the heal table are open.
 
 ## 10. Owner decisions (2026-11-09)
-- Costume in play: red and yellow (his current sprite palette). The select portrait, HUD face and rank icon are recoloured from blue to red to match
-  (PNG indices 7-10 -> #ee3300 #cc0000 #880000 #550000, taken from his in-game sprite); the backdrop colour is an open look question
-  (crimson blends with the red costume; navy proposed).
-- Special (attack+jump, 6 health): Berserker Barrage, not Tornado Claw. This reverses Section 8 Q1's "drop Berserker" and changes the tile budget:
-  Berserker (49 exclusive tiles) is core; Tornado Claw (107 exclusive tiles) becomes droppable. With Tornado and hit_h dropped the minimal set frees
-  about 206 tiles (estimate, re-fit needed).
+- Colours: no change. He stays the colour he is already: his in-game sprite keeps its red and yellow palette, and the artist's
+  select portrait, HUD face and rank icon stay exactly as delivered. No recolour of either.
+- Move set: an overall minimal combo and move set, with Berserker Barrage as the special (attack+jump, 6 health), not Tornado Claw.
+  Minimal set = walk (Schaefer weight), jump, chain LP LP HP + finisher kick (button chain, Linn speed), one jump attack, Berserker Barrage,
+  plus the shared states (hit, knockdown, getup, KO, held). Dropped: Tornado Claw (107 exclusive tiles), hit_h (99), dash, motion inputs,
+  chain-on-hit. This reverses Section 8 Q1 on Berserker; frees about 206 tiles (estimate, re-fit needed).
 - Route confirmed: native character forked from Schaefer's code; Schaefer's walk weight, Linn's attack speed; no new game concepts.
