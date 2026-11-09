@@ -36,20 +36,21 @@ Still awaiting the owner's choice: SAT_WV_GROUND (feet on the floor; ground.py d
 
 ## In progress (not merged yet)
 
+Updated 2026-11-09 evening. Merged at 4bfcdf6: sprite-dropout cart guards (13e63b5), menu dropfix first pass (e1e6158), claws-only first pass (62d16f7).
+
 | Item | Branch | State |
 | --- | --- | --- |
-| Sprite dropout and half speed (blocker) | lane/sprite-dropout | bisecting |
-| Select-screen column-drop regression from the talk-box fix 95b1167 | lane/menu-dropfix | on hold until the dropout lane is done |
-| Wolverine still fires Schaefer's gun (owner rule: claws only) | lane/wv-noguns-20261109 | built and gated (fit 76/76, hw_free 1,948, lw_free 60); no Yaba check yet |
-| Post-credits reveal + unlock | lane/wolverine-reveal 850fc42 (pushed) | built; end-to-end Yaba check not done (paused); voice clip not identified |
-| Guest group loop out of the snapshot (about 44 ticks per snapshot), precomputed in the game frame | lane/fps-group | starting |
-| Menu mode flow, transparent option screens, title list lower; talk-box face/text 8 px offset | lane/wolverine-menu | merge done; building and checking |
-| Wolverine takes far more hits than Schaefer (Round 1 gate: 36-37 vs 2), and a wrong pose while an enemy holds him (0204xx shows throw poses) | lane/wolverine-defense | PAUSED until the owner has played the integrated disc |
-| Native Wolverine (fork of Schaefer, plan aae2e10) | lane/wolverine-native | Stage 0 identity |
-| HURRY UP missing U (stage timer banner) | lane/hurryup | PAUSED until the owner has played the integrated disc |
-| Saturn hardware FPS test discs | E:\AvP\package-hwtest-20261109 (built from lane/hwtest, pre-integration) | to be rebuilt from avp/integration with the owner disc |
-| Talk-box face for Wolverine (crop of recoloured portrait) | not started | after the menu lane |
-| Stage font glyph gaps (packs keep only census-seen font glyphs) | not started | found by the hurryup lane |
+| Native Wolverine, plan revision 2 (docs/notes/AVP_WOLVERINE_NATIVE_PLAN_V2_20261109.md): no sprite replacement; first milestone one complete native attack | lane/wv-native-gfx-20261109 (5e5d568 pushed) | design and stand prototype done (SAT_WV_NATIVE_GFX, default off; stand drawn natively in Yaba); working on the HOST identity run, then his own data block and one attack |
+| Character select: fixed scroll 1 drops so panels never move and stat bars sit inside their boxes | lane/menu-dropfix-20261109 | first pass merged (stops the collapse); second pass (2f2f093, local) building; owner saw bars shifting on the merged pass |
+| Main-game text: font glyphs never seen by a census draw blank; HURRY UP! second U (lane/hurryup f36ff31); stage 14 caption garbage | lane/text-glyphs-20261109 | started |
+| Main-game sprite pieces dropped on stages 0e, 1c, 1e, 24; fatal 0xe2 at 0xa9cc4 once on 0e | lane/stage-sprites-20261109 | started |
+| Post-credits reveal + unlock | lane/wolverine-reveal 850fc42 (pushed) | built; end-to-end Yaba check not done; owner to pick the voice clip |
+| Saturn hardware FPS test discs | E:\AvP\package-hwtest-20261109 (pre-integration) | rebuild from avp/integration with the next owner disc (owner to confirm) |
+| Talk-box face for Wolverine | not started | part of native Wolverine |
+
+Dropped (owner 2026-11-09: no more work on the sprite-replacement Wolverine): claws-only follow-up (lane/wv-noguns-20261109-f2576a, not merged), guest group loop (lane/fps-group), Wolverine defense gate (lane/wolverine-defense), feet-on-floor ground/ground2 switches. Native Wolverine covers each of them.
+
+Parked (owner 2026-11-09): versus mode (Duel): RANDOM arena tile garbage, Hunter body not drawn in Linn vs Hunter, stage enemies entering on 1e/24.
 
 ## Owner discs
 | Disc | Commit | Package | State |
