@@ -43,6 +43,26 @@ extern volatile int sat_fit_scale;
 #define SAT_GFX_MAX_COMMANDS 1016
 #endif
 #define SAT_GFX_SPRITE_SLOTS 3584 /* 448 KB of 128 byte textures */
+/* Optional previous-list slot hints. Two bytes per entry in high work RAM;
+ * zero keeps the original lookup and allocates nothing. A hint is accepted
+ * only when the live slot still holds the requested tile. Size this from the
+ * target link, then measure whole-frame tails before enabling a release. */
+#ifndef SAT_GFX_SLOT_HINTS
+#define SAT_GFX_SLOT_HINTS 0
+#endif
+#if SAT_GFX_SLOT_HINTS < 0 || SAT_GFX_SLOT_HINTS > 1024
+#error SAT_GFX_SLOT_HINTS must be between 0 and 1024
+#endif
+#ifdef SAT_GFX_SLOT_HINT_STATS
+#if SAT_GFX_SLOT_HINTS == 0
+#error SAT_GFX_SLOT_HINT_STATS requires SAT_GFX_SLOT_HINTS
+#endif
+typedef struct
+{
+    unsigned long queries, hits, fallbacks, beyond_limit;
+} SatGfxSlotHintStats;
+extern SatGfxSlotHintStats sat_gfx_slot_hint_stats;
+#endif
 #ifdef SAT_HOME
 #define SAT_GFX_S1_SLOTS 768 /* 0x18000-0x1e000; the menu layer (NBG3) map and its font take the rest */
 #define SAT_GFX_HOME_FONT 880 /* font cells at 0x1ee00, after the menu map (0x1e000, 28 rows); panel cell at +58 */

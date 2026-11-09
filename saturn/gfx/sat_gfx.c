@@ -201,6 +201,19 @@ static u16 s2_head[HASH_SIZE_S2];
 static SlotRec s3_slots[SAT_GFX_S3_SLOTS] __attribute__((aligned(8)));
 static u16 s3_head[HASH_SIZE_S3];
 static Cache spr_cache, s1_cache, s2_cache, s3_cache;
+#if SAT_GFX_SLOT_HINTS
+/* Indexed by the visible tile's position in the preceding build, including
+ * blank/refused tiles. Object insertion, animation and eviction can make a
+ * hint wrong; validating the live key makes those cases ordinary misses.
+ * Only the slave reads or writes these hints and the sprite cache. */
+static u16 sprite_slot_hints[SAT_GFX_SLOT_HINTS];
+#ifdef SAT_GFX_SLOT_HINT_STATS
+SatGfxSlotHintStats sat_gfx_slot_hint_stats;
+#define HINT_STAT(x) x
+#else
+#define HINT_STAT(x)
+#endif
+#endif
 static u16 cram_shadow[2048];
 static u16 back_shadow;
 
@@ -551,6 +564,43 @@ static u16 cache_get(Cache *c, u32 key, unsigned long *refused)
 #endif
     return c->memo_slot[way];
 }
+
+#if SAT_GFX_SLOT_HINTS
+static u16 sprite_lookup(u32 key, unsigned int position)
+{
+    u16 slot;
+    HINT_STAT(sat_gfx_slot_hint_stats.queries++;)
+    if (position < SAT_GFX_SLOT_HINTS)
+    {
+        slot = sprite_slot_hints[position];
+        if (slot >= spr_cache.first && slot < spr_cache.capacity)
+        {
+            SlotRec *r = &spr_cache.slots[slot];
+            if (r->key == key)
+            {
+                u32 way = key & 1;
+                if (r->stamp != stamp) { r->stamp = stamp; spr_cache.used++; }
+                /* Preserve the ordinary two-entry memo and diagnostic cause.
+                 * The usual abort path also restores this slot's live stamp. */
+                spr_cache.memo_key[way] = key;
+                spr_cache.memo_slot[way] = slot;
+#ifdef SAT_VLOG
+                spr_cache.memo_cause[way] = 0;
+#endif
+                VL_CAUSE(0);
+                HINT_STAT(sat_gfx_slot_hint_stats.hits++;)
+                return slot;
+            }
+        }
+        HINT_STAT(sat_gfx_slot_hint_stats.fallbacks++;)
+        slot = cache_get(&spr_cache, key, &sat_gfx_stats.refused_sprite);
+        sprite_slot_hints[position] = slot;
+        return slot;
+    }
+    HINT_STAT(sat_gfx_slot_hint_stats.beyond_limit++;)
+    return cache_get(&spr_cache, key, &sat_gfx_stats.refused_sprite);
+}
+#endif
 
 static void cache_frame(Cache *c)
 {
@@ -931,6 +981,9 @@ static void draw_sprites(void)
     u8 *cmd = VDP1_VRAM + table_base + 0x40; /* after clip and this table's local */
     int count = snap.objects, i;
     u16 commands = 0;
+#if SAT_GFX_SLOT_HINTS
+    unsigned int hint_position = 0;
+#endif
     VP(vp_current[VP_CLEAR_PIXELS] = SAT_GFX_SCREEN_W * SAT_GFX_SCREEN_H;)
     /* Clear the buffer: plotting by hand gives no automatic erase, and old sprites otherwise pile up as trails. A polygon in colour 0 reads as clear. */
     put16(cmd + 0, 0x0004);
@@ -980,6 +1033,11 @@ static void draw_sprites(void)
                     tile = rowcode + ((code + (u32)tx) & 0xfUL);
 #if defined(SAT_ABL) && (SAT_ABL & 2)
                 slot = (u16)(tile & 0x7ff);   /* measurement only: no lookup, no upload */
+#if SAT_GFX_SLOT_HINTS
+                hint_position++;
+#endif
+#elif SAT_GFX_SLOT_HINTS
+                slot = sprite_lookup(tile, hint_position++);
 #else
                 slot = cache_get(&spr_cache, tile, &sat_gfx_stats.refused_sprite);
 #endif
@@ -1688,6 +1746,13 @@ COLD_OS int sat_gfx_init(const void *pack)
     cache_setup(&s1_cache, VDP2_VRAM + CELL_S1, 32, SAT_GFX_S1_SLOTS, 4, SEC_S1, s1_slots, s1_head, HASH_SIZE_S1);
     cache_setup(&s2_cache, VDP2_VRAM + CELL_S2, 128, SAT_GFX_S2_SLOTS, 0, SEC_S2, s2_slots, s2_head, HASH_SIZE_S2);
     cache_setup(&s3_cache, VDP2_VRAM + CELL_S3, 512, SAT_GFX_S3_SLOTS, 0, SEC_S3, s3_slots, s3_head, HASH_SIZE_S3);
+#if SAT_GFX_SLOT_HINTS
+    for (n = 0; n < SAT_GFX_SLOT_HINTS; n++) sprite_slot_hints[n] = NOSLOT;
+#ifdef SAT_GFX_SLOT_HINT_STATS
+    sat_gfx_slot_hint_stats.queries = sat_gfx_slot_hint_stats.hits = 0;
+    sat_gfx_slot_hint_stats.fallbacks = sat_gfx_slot_hint_stats.beyond_limit = 0;
+#endif
+#endif
     stamp = 0;
     prev_stamp = 0;
     table_base = 0;
