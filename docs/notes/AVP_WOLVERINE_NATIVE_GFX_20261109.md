@@ -77,6 +77,41 @@ His tiles use *free* keys (assets.py picks sprite keys no stage file uses; `gfx_
 
 Native references change none of that: the set of keys is the set of keys his emitted poses use (69 poses, 2,105 tile entries, 1,474 distinct keys, 1,217 tiles in his first palette row and 278 in the second), written into assemblies instead of `wv_tiles`.
 
+### 3b. Data source: decode his MSHvSF records directly (coordinator request; DATA tier from a MAME 0.289 `mshvsf` run, nothing committed)
+
+D11 was captured at run time (`mame_wolverine.lua`: object lists per frame, boxes through the marvel-hitboxes profile). MSHvSF is a CPS2 game with the same object RAM and sprite words, and its program ROM holds his animation as records of the same family as AvP's. Dump: `tools/wolverine/mshvsf_dump.lua` (data and opcode views of the 4 MB program space, player blocks, object lists, the graphics bank 0x0000..0x9fff, run through the MSHvSF repo's `tools/run_mshvsf_mame.py` with the input schedule `lane-wolverine/full.txt`) into `E:\AvP\learning\lane-wv-native-gfx\mshvsf`. Decoder check: `tools/wolverine/mshvsf_verify.py`.
+
+**Layout (MSHvSF, player 1 block 0xff3800, big-endian)**
+
+| Where | What |
+| --- | --- |
+| block +0x34 / +0x38 / +0x3c | current frame record / next record / frames left (the same trio as AvP's +0x1c / +0x0a) |
+| block +0x68 | box-id table base (0x1ce0f2): 16-byte entries; entry 1 = the standing ids; +0x70..+0x7a hold the current entry (attack ids +0x70, +0x72; hurt ids +0x74..+0x7a) |
+| block +0x6c | box geometry table (0x3a2000): 8-byte records `s16 x, u16 x radius, s16 y, u16 y radius`; a box id indexes it (`id & 0x1fff`) |
+| frame record, 16 bytes (20 with a jump target) | `+0 u16 flags` (0, 0x80, 0x82, 0x100 seen on attack records), `+2 u16 duration` (bit 15 = jump record, `u32` target at +16), `+4 u32 assembly`, `+8 u32 flags` (0x80000000, 0xa0008000), `+12 u32 box-set index` (the entry of the table above) |
+| assembly | `[0002][cell budget][pair count n][u32 position table]`, then n + 1 parts `[code][attr]` (attr as the CPS2 word: height-1 and width-1 nibbles, flip bits, palette 12 or 13 for his two rows; the facing flip is added at draw time) |
+| position table | `[0002][s16 x0][s16 y0]` then n pairs of `s8 dx, dy`: each part is placed at the previous part's position plus its pair; facing left draws `x = origin - width - cumulative x` (AvP's emitter does the same) |
+| per-character table 0xc38a (read at 0xc220) | 24 longs that are **code addresses** (opcode view), one handler routine per character: not animation data. His animation selection is in his handler; the table of his animations (index -> first record) is not extracted yet |
+
+Verified: his stance (record 0xd1d30, assembly 0x2b3a70, 11 parts, 29 cells) reproduces MAME's object list entry by entry (codes, attr, order), and the position table predicts every part position: **22 of 22 parts match** on frames 1995 and 2200 (`mshvsf_verify.py`; frame 2061's record had already advanced). Durations match what the capture saw (the idle chain 0xd1d30.. is 4 ticks a record, the record pointer changes every 3 to 4 frames). The LP chain starts at 0xd2878; its records carry box-set indexes 0x10..0x13 and the ids change with the record (live attack id 0x1f from the second record on), so **hit boxes are exact per record**, which D11's sampled boxes are not.
+
+**Region and size.** His records lie around 0xd1000..0xd6fff: 908 candidate 16-byte records (155 jump records), 398 assemblies, 3,610 parts, 9,116 distinct tile cells for every move he has (supers, taunts and all; the scan includes some false positives and is not a reachability walk). The six moves D11 started from (idle, walk, jump, LP, HP, HK; frames 1990..2399) visit **72 records and 59 assemblies**:
+
+| Form | Bytes |
+| --- | ---: |
+| MSHvSF native: 72 records + 59 assemblies + position tables | 1,152 + 4,378 = **5.5 KB** |
+| Converted to AvP family A (one 16x16 tile a piece, 8 bytes) | 15,652 + 1,152 = 16.8 KB |
+
+The block form is 3 times smaller, because his parts are rectangles (592 parts carry 1,868 cells) and all 1,868 cells are non-blank (Capcom drew them tight, so no tile is spent on blank cells).
+
+**What it does to the tiles.** The pixels are the same bytes D11 captured (gfx bank, code x 128). Without merging, the 59 assemblies reference 1,790 distinct tiles (1,868 cell uses; flipped duplicates: none beyond the same code). D11's 1,474 keys for 69 poses come from pose re-selection, pixel dedupe and the K12 near-duplicate merge, none of which the ROM does. So decoding does **not** shrink the tile set by itself; it changes only how a pose is described.
+
+**Assessment.**
+- Yes, decode directly. It gives the exact durations and jump structure, the exact box ids and boxes per record (a replacement for the sampled `boxes.json`), his true origin offsets per assembly (the heuristics of `pose_of` and `ground.py` guess where his feet are; the ROM states it relative to the actor), and the pose composition without a runtime capture. The conversion is a table walk: duration and jump word swap (`+2` <-> `+0`), box-set -> a T' entry, assembly -> AvP assembly, palette rows 12/13 -> rows 1 and the stage row.
+- **Assembly form is a trade, not a given.** Keeping his rectangles (family 6 or 4 with a position table, 4 to 6 bytes a part) is 3 times smaller, but a block draws `code + bx + 16 * by`, so its tile keys must be consecutive in a 16-wide grid; K12 merging and pixel dedupe replace tiles by tiles elsewhere in the pack and break that. A tile costs 128 bytes of pack, an extra 1x1 entry 8 bytes, so for any tile that merging removes the 1x1 form wins. Use blocks only where nothing is merged; that is a per-pose decision for the generator and costs rectangles of free keys (`assets.py` takes free keys one at a time today).
+- The full move list (9,116 cells) is far over the tile budget, so pose selection stays; what changes is that selection and thinning work from records (duration, role) instead of from frame diffs.
+- Open: his animation index table and the engine state behind record flags `+0` and `+8` (start-up, active, cancel, hit-stop); MSHvSF's game speed against 60 ticks a second; palette tables (colours are still read from palette RAM). The official Saturn disc was not used. `mvscu.zip` (Marvel vs. Capcom) was not touched.
+
 ## 4. Design: Wolverine as data
 
 ### 4.1 The records and assemblies
