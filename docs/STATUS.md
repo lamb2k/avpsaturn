@@ -325,3 +325,21 @@ Evidence E:/AvP/learning/lane-vanish (s1..s3, j2..j4, c2..c4, g2..g4 stepped run
 - Drawing-CPU skip: shows the last complete picture again (same plot serial). Nothing to re-show: the command table and the buffer are not touched by a skip.
 - Frame rate effect: pictures per vblank unchanged (new plots 65 to 75 % of vblanks before and after; the slave waits for CEF clear, held frames 20.7 % to 22 %).
 - Hardware unknown: whether the console applies a manual change at the next vblank-in (then the CEF wait costs up to a frame per plot) or at vblank-out. Plot start by CEF clear is correct in both, not measured.
+
+### Checks and verdicts, second pass (lane avp-vanish; EMULATOR; hardware UNRUN)
+
+- Counts per class, stepped stage 02 fights, 1600 frames per configuration unless noted (old = bc037c7, race = 75835cc):
+
+  | Class | old | race fix | + pose keys (8 runs, 1200 frames) |
+  |---|---|---|---|
+  | older plot shown again | 185 (11.6 %) | 0 | 0 |
+  | whole new picture | 71.9 % | 65.4 % | 73.7 % |
+  | held (VDP1 not done at vblank) | 20.7 % | 22.1 % | 22.4 % |
+  | new picture with lost tiles | 76 vblanks (4.8 %) | 154 (9.6 %) | 17 (2.1 %) |
+  | slave skip | 1.6 % | 1.6 % | 1.5 % |
+  | late plot | 1.0 % | 1.3 % | 0.3 % |
+
+  Refusals in every run: slot 0, command table full 0, forced change 0, slave forced change 0. Real-time bot fights (limiter on and off, host loaded): 0 of 199 screenshots lacked the sprite layer, 0 backward serials.
+- Yaba frame skip (the owner's EnableFrameSkipLimiter=true under load) is the one class outside the code: it drops whole frames in the emulator and shows the earlier picture. Not counted above (stepped runs do not skip).
+- Black alien silhouettes (ab_fix4/take01/contact.png, last row): the same stage 02 fight on the old code shows flat grey aliens too (stills/old_code_fight_flat_aliens.png), and the attract intro of the menu build, which has no sprite fix, shows them (stills/attract_old_flat_aliens.png). Verdict: not caused by the sprite fix; palette or pack-key related and not fully traced.
+- Six-golden host check on the final fix/vdp1-race code (host6.sh, WSL): r1s 15618, full 317908, c1 272171, c2 369051, c3 333669, 2p 329918 vblanks, every one clean, diff 0, missed 0. The arcade-build identity is unchanged (the fixes sit under SAT_HOME / SAT_VLOG and the pack).
