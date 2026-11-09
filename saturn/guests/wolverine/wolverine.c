@@ -536,6 +536,23 @@ int sat_guest_wolverine_bullet(unsigned long a6)
     owner = 0xff0000u | ((u32)b[o + 0x26] << 8) | b[o + 0x27];
     return wv_player(owner) >= 0;
 }
+/* Berserker Barrage runs in Schaefer's gun action (f_24060, a6 = the player's block), whose own body fires a shot, a muzzle flash and a gun-sound flag and
+   spends 0x28 of the heat gauge (+0x8c, 0x40 full). He has no gun: around that routine the shot pool's free count (ffee7c) reads 0, so the shot's allocation (f_1773e)
+   fails the way the routine already handles (no shot, no flash, no sound; the burst still runs its timers), and afterwards the count is given back and the gauge is full.
+   game_bind.c f_24060 calls this with end = 0 before the routine and 1 after it; the result of the first call says whether the second is needed. */
+int sat_guest_wolverine_gun(unsigned long a6, int end)
+{
+    static u8 saved;
+    if (end) {
+        R8(0xffee7cu) = (u8)(saved + R8(0xffee7cu));
+        R8(a6 + 0x8c) = 0x40;
+        return 1;
+    }
+    if (wv_player((u32)a6) < 0) return 0;
+    saved = R8(0xffee7cu);
+    R8(0xffee7cu) = 0;
+    return 1;
+}
 /* obj: the frame's object list (8 bytes each), count entries; returns the new count. pal0: sprite palette page (32 rows of 16 words). */
 int sat_guest_touched;   /* set when this frame's palette page was changed */
 #ifdef SAT_GUEST_PROF
@@ -771,6 +788,6 @@ void sat_guest_wolverine_pad(u16 *in0)
             u16 m = (u16)(0x70u << sh);
             inj_left[i]--;
             *in0 = (u16)((*in0 | m) & ~((u16)inj_bits[i] << sh));
-        }
+        } else *in0 |= (u16)(0x10u << sh);   /* no gun for him: the plain gun button reads as not pressed */
     }
 }
