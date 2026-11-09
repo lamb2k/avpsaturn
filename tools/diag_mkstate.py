@@ -14,7 +14,7 @@ def step(v, s):
     if not saved and bot.stage == 0xc and bot.sec == 6 and v > 1000:
         saved = True
         s.log("mkstate", bot.safe_save(s, 3), "v", v)
-        shutil.copy(r"E:\AvP\learning\lane-all\yaba7\saves\_003.yss", os.environ["OUT_STATE"])
+        shutil.copy(os.environ.get("SAVES", "E:/AvP/learning/lane-all/yaba7/saves") + "/_003.yss", os.environ["OUT_STATE"])
         s.log("state copied to", os.environ["OUT_STATE"])
         s.stop()
 fatal = bot.fatal

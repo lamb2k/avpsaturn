@@ -7,6 +7,7 @@ bot = importlib.util.module_from_spec(spec); spec.loader.exec_module(bot)
 ROM = open(os.environ["ROM_BIN"], "rb").read()
 CP = set(json.load(open(os.environ["CP"]))); CPALL = set(json.load(open(os.environ["CPALL"])))
 WARP = int(os.environ["WARP"], 16); done = False; r0 = None; at = None
+LIVE = set(json.load(open(os.environ["CPLIVE"]))["stages"][str(int(os.environ["WARP"], 16))]) if os.environ.get("CPLIVE") else None   # tools/const_live.py: this stage's own const pages
 def runs(pages):
     out = []; ps = sorted(pages)
     for p in ps:
@@ -38,6 +39,8 @@ def step(v, s):
         bad_cp = check(s, CP); bad_all = check(s, CPALL - CP); ctrl = check(s, set(range(0, 2048, 7)) - CPALL)
         res = dict(stage=hex(WARP), vblank=v, rounds=bot.rounds(s), const636_pages=len(CP), const636_mismatch=len(bad_cp), const636_bad=bad_cp[:50],
                    extra_all_pages=len(CPALL - CP), extra_all_mismatch=len(bad_all), extra_all_bad=bad_all[:50], control_pages=len(set(range(0, 2048, 7)) - CPALL), control_mismatch=len(ctrl))
+        if LIVE is not None:
+            bl = check(s, LIVE); res.update(live_pages=len(LIVE), live_mismatch=len(bl), live_bad=bl[:50])
         s.log("ROMCHECK", json.dumps(res)); open(s.work / "romcheck.json", "w").write(json.dumps(res)); s.stop()
 fatal = bot.fatal
 end = getattr(bot, "end", None)

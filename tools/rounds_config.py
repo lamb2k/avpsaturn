@@ -49,13 +49,32 @@ SHARED = {p for p, c in _n.items() if c >= SHARED_MIN} if SHARED_MIN else set()
 # table at 0x56632 from a page stage 0c did not keep, got 0 and set the player's animation pointer to 0x4a9: fatal 0xe2 at 0xa9cc4.
 if os.environ.get("ROUNDS_CONST_PAGES"):
     SHARED |= set(json.load(open(os.environ["ROUNDS_CONST_PAGES"])))
+# Per stage (env ROUNDS_CONST_LIVE, tools/const_live.py): the constant-address table pages of the functions that run in that stage, not all 636. Env ROUNDS_PAD_MODE=budget then
+# keeps the census pages without the page either side, adds the page after each own page (tables run forward; most read by other stages first) up to the size the stage's
+# keep list had without constants, and so never takes more tile room than before the constants (the dropped sprite keys of pkgG). Default: the page either side as always.
+CONST_LIVE = json.load(open(os.environ["ROUNDS_CONST_LIVE"]))["stages"] if os.environ.get("ROUNDS_CONST_LIVE") else None
+BUDGET = os.environ.get("ROUNDS_PAD_MODE") == "budget"
+NPG = 0x200000 // P
 for f in files:
     s = f["stages"][0]
     if s == 0:
         f["keep_pages"] = pad(sorted({p for v in pg.values() for p in v}))
     else:
         nxt = next((x for x in order if x > s), None)
-        f["keep_pages"] = sorted(set(pad(sorted(set(pg[s]) | set(pg[0]) | set(pg.get(nxt, []))))) | SHARED)
+        own, oth = set(pg[s]), set(pg[0]) | set(pg.get(nxt, []))
+        padded = set(pad(sorted(own | oth)))
+        if CONST_LIVE is None:
+            f["keep_pages"] = sorted(padded | SHARED)
+        else:
+            const = set(CONST_LIVE.get(str(s), []))
+            if not BUDGET:
+                f["keep_pages"] = sorted(padded | SHARED | const)
+            else:
+                keep = own | oth | SHARED | const
+                room = len(padded | SHARED) - len(keep) - int(os.environ.get("ROUNDS_FILL_MARGIN", "0"))   # margin: pages under the old size, for the fragmentation constants leave
+                fill = sorted((p + 1 for p in own if p + 1 < NPG and p + 1 not in keep), key=lambda q: (-_n.get(q - 1, 0), q))
+                f["keep_pages"] = sorted(keep | set(fill[:max(room, 0)]))
+                f["fill"] = [len(keep), min(len(fill), max(room, 0))]
 # Pages the lifted code read on real runs (-DSAT_READMAP, readmiss.py --out) that a stage's file did not keep: env ROUNDS_READ_EXTRA=JSON {stage hex: [pages]}.
 if os.environ.get("ROUNDS_READ_EXTRA"):
     _x = json.load(open(os.environ["ROUNDS_READ_EXTRA"]))
@@ -74,6 +93,8 @@ if os.environ.get("ROUNDS_VARIANTS"):
             row.append(len(files))
             files.append(dict(base, name=f"{base['name']}_m{m:x}", mask=m))
 (W / "rounds.json").write_text(json.dumps({"holes": C["holes"], "page": P, "stage_file": {str(k): v for k, v in stage_file.items()}, "files": files, "variant_masks": list(rounds_variants.MASKS) if VD else [], "variant_file": {str(k): v for k, v in variant_file.items()}}))
+if os.environ.get("ROUNDS_KEEP_ONLY"):   # keep lists only (rounds.json), no sound packs
+    print("keep lists", {f["name"]: len(f["keep_pages"]) for f in files if "mask" not in f}); sys.exit(0)
 tab = json.load(open(A / "sounds.json"))["sounds"]
 is_music = lambda c: tab.get(f"{c:x}", {}).get("cls") == "music"
 music = sorted({c for f in files for c in f["sound"] if is_music(c)})
