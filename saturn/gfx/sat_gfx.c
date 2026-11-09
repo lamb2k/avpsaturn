@@ -2064,7 +2064,7 @@ void sat_gfx_snapshot_begin(void)
 #if SAT_GUEST_PAL_KEEP
         sat_guest_pal_keep = gpal_applied && pal0_same && !(sat_guest_sel & 2);
 #endif
-        count = sat_guest_objects(snap.obj, count, MAX_OBJECTS, snap.palette[0]);
+        if (sat_guest_sel) count = sat_guest_objects(snap.obj, count, MAX_OBJECTS, snap.palette[0]);   /* nothing selected: it returns at once, but the call enters the cart (Yaba compiles each cart block on every entry) */
 #if SAT_GUEST_PAL_KEEP
         if (sat_guest_touched) { if (!sat_guest_pal_keep) { snap.pal_sum[0] ^= 0x5a5a5a5aUL; gpal_applied = 1; } }
         else gpal_applied = 0;
