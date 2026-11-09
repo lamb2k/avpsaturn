@@ -769,16 +769,38 @@ static void draw_scroll1(u16 sx, u16 sy)
 static u16 sh_home[28 * 44] LOW_RAM;
 extern char sat_home_shown[28][44];
 extern volatile u32 sat_home_seq;
+/* One 8x8 menu cell from the game's font: big = 1 doubles rows 0-3 of the glyph (a large letter's half) and thickens it one dot to the right.
+   Lit dots keep their pens (the font's own blue lower edge is its outline). Clear dots take bg: 0, clear, so the picture shows between the
+   letters (the title list, straight on the title art as Capcom's Saturn menus draw their mode list), or 15, the panel's dot code, so the letters
+   sit on the translucent panel and not in holes through it (the option screens). An added outline or drop shadow filled the 8x8 font's
+   one-dot gaps and read as noise in Yaba, so there is none. */
+static void home_cell(const u8 *f, u32 cell, int big, u32 bg)
+{
+    u8 d[8][8]; int x, y;
+    for (y = 0; y < 8; y++) for (x = 0; x < 8; x++) { int sy = big ? y / 2 : y; d[y][x] = (u8)((f[sy * 4 + x / 2] >> (x & 1 ? 0 : 4)) & 15); }
+    if (big) for (y = 0; y < 8; y++) for (x = 7; x > 0; x--) if (!d[y][x]) d[y][x] = d[y][x - 1];
+    for (y = 0; y < 8; y++) { u32 o = 0;
+        for (x = 0; x < 8; x++) { u32 v = d[y][x];
+            o |= (v ? v : bg) << (28 - 4 * x); }
+        put32(VDP2_VRAM + CELL_S1 + cell * 32 + (u32)y * 4, o); }
+}
 static void draw_home(int fresh)
 {
     u32 row, col;
+    static u32 font_bg = 99;
     if (*(volatile u32 *)((unsigned long)&sat_home_seq | 0x20000000UL) & 1) return;   /* the master is copying a new screen: next frame */
+    if (font_bg != (snap.home == 3 ? 0u : 15u))   /* the title list's letters have no panel behind them, the option screens' have */
+    {
+        int g;
+        font_bg = snap.home == 3 ? 0u : 15u;
+        for (g = 0; g < 58; g++) home_cell(home_font + g * 32, (u32)SAT_GFX_HOME_FONT + (u32)g, 0, font_bg);
+    }
     for (row = 0; row < 28; row++)
         for (col = 0; col < 44; col++)
         {
             u32 ch = *(volatile u8 *)((unsigned long)&sat_home_shown[row][col] | 0x20000000UL);
             u16 name = 0;                                                       /* cell 0xc00: clear */
-            if (ch == 1) name = (u16)(14u << 12 | ((SAT_GFX_HOME_FONT + 58) & 0x3ff));   /* the translucent panel */
+            if (ch == 1) name = snap.home == 3 ? 0 : (u16)(14u << 12 | ((SAT_GFX_HOME_FONT + 58) & 0x3ff));   /* the sub-screens' translucent panel; the title list has none */
             else if ((ch >= 2 && ch <= 0x20) || (ch >= 0x81 && ch <= 0xa0))   /* a large letter's half (sat_home_big) */
                 name = (u16)(15u << 12 | ((SAT_GFX_HOME_FONT + 59 + (ch <= 0x20 ? ch - 2 : ch - 0x81 + 31)) & 0x3ff));
             else if (ch & 0x7f) name = (u16)(((ch & 0x80) ? 15u : 14u) << 12 | ((SAT_GFX_HOME_FONT + (ch & 0x7f) - 33) & 0x3ff));
@@ -1685,18 +1707,12 @@ int sat_gfx_init(const void *pack)
 
     VDP2R(0x00) = 0x8001;                         /* display on */
     #ifdef SAT_HOME
-    /* The font with its clear dots as dot code 15, the panel's: letters sit on the translucent panel, not in holes through it. */
-    { u32 n; for (n = 0; n < sizeof home_font; n += 4) { u32 w = (u32)home_font[n] << 24 | (u32)home_font[n + 1] << 16 | (u32)home_font[n + 2] << 8 | home_font[n + 3], o = 0; int k;
-        for (k = 0; k < 32; k += 4) o |= (((w >> k) & 15) ? ((w >> k) & 15) : 15u) << k;
-        put32(VDP2_VRAM + CELL_S1 + (u32)SAT_GFX_HOME_FONT * 32 + n, o); } }
-    { u32 n; for (n = 0; n < 32; n += 4) put32(VDP2_VRAM + CELL_S1 + (u32)(SAT_GFX_HOME_FONT + 58) * 32 + n, 0xffffffffUL); }   /* the menu panel: every dot code 15 (pen 14, near black) */
+    /* The menu font's cells are written by draw_home (clear dots clear on the title list, panel dots on the option screens). The panel cell:
+       every dot code 15 (pen 14, near black). */
+    { u32 n; for (n = 0; n < 32; n += 4) put32(VDP2_VRAM + CELL_S1 + (u32)(SAT_GFX_HOME_FONT + 58) * 32 + n, 0xffffffffUL); }
     /* Screen names in large letters, as MSHvSF's OPTION MODE header: A to Z from the same font, each row doubled (8 x 16, two cells) and
-       thickened by one dot to the right; clear dots are the panel's. 52 cells after the panel, up to 0x1fbe0 (the row table is at 0x1fc00). */
-    { int L, h, y; for (L = 0; L < 26; L++) for (h = 0; h < 2; h++) for (y = 0; y < 8; y++) {
-        const u8 *f = home_font + (32 + L) * 32 + (h * 4 + y / 2) * 4;
-        u32 w = (u32)f[0] << 24 | (u32)f[1] << 16 | (u32)f[2] << 8 | f[3], o = 0; int k;
-        for (k = 28; k >= 0; k -= 4) { u32 d = (w >> k) & 15, l = k < 28 ? (w >> (k + 4)) & 15 : 0; d = d ? d : l; o |= (d ? d : 15u) << k; }
-        put32(VDP2_VRAM + CELL_S1 + (u32)(SAT_GFX_HOME_FONT + 59 + L * 2 + h) * 32 + (u32)y * 4, o); } }
+       thickened by one dot to the right; clear dots are the panel's (option screens only). 52 cells after the panel, up to 0x1fbe0 (the row table is at 0x1fc00). */
+    { int L, h; for (L = 0; L < 26; L++) for (h = 0; h < 2; h++) home_cell(home_font + (32 + L) * 32 + h * 16, (u32)SAT_GFX_HOME_FONT + 59 + (u32)(L * 2 + h), 1, 15); }
 #endif
     return 1;
 }
