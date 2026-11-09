@@ -144,29 +144,38 @@ static void late_change(unsigned char *pack)
     sat_gfx_draw();
     CHECK(plot_started == 1 && plot_shown == 0);
     CHECK(prev_stamp == live_stamp && table_base == saved_table);
-    CHECK(spr_stamp[0] == live_stamp); /* this build hit a texture shared with the prior plot */
+    CHECK(spr_slots[0].stamp == live_stamp); /* this build hit a texture shared with the prior plot */
     CHECK(sat_gfx_host_vdp1r[FBCR / 2] == 2);
     CHECK(sat_gfx_host_vdp1r[PTMR / 2] == 0);
 #ifdef SAT_VDP1_PROFILE
     CHECK(vp_current[VP_FLAGS] == VP_CHANGE_TIMEOUT);
 #endif
     frame_boundary(); /* change requested, CEF still set until latch */
+    /* CEF stays set and every plot started has been shown, so no change is pending: the flag is stuck (a load_state, the VideoCore 2 core).
+       The slave asks for the change itself, waits one more bound, then plots anyway: it must not wait for ever. */
     clock_reset(65530, 1000, 0);
+    sat_gfx_host_vdp1r[FBCR / 2] = 2;
     sat_gfx_draw();
-    CHECK(plot_started == 1 && plot_shown == 1);
-    CHECK(prev_stamp == live_stamp && table_base == saved_table);
-    CHECK(spr_stamp[0] == live_stamp);
-    CHECK(sat_gfx_host_vdp1r[PTMR / 2] == 0);
+    CHECK(sat_gfx_host_vdp1r[FBCR / 2] == 3);   /* asked */
+    CHECK(sat_gfx_host_vdp1r[PTMR / 2] == 1);   /* and started */
+    CHECK(plot_started == 2 && plot_shown == 1);
+    CHECK(prev_stamp == stamp && table_base != saved_table);
+    CHECK(sat_gfx_cef_asked == 1 && sat_gfx_cef_forced == 1);
 #ifdef SAT_VDP1_PROFILE
-    CHECK(vp_current[VP_FLAGS] == VP_LATCH_TIMEOUT);
+    CHECK(vp_current[VP_FLAGS] == (VP_LATCH_TIMEOUT | VP_SUBMITTED | VP_CEF_AT_CPU_DONE));
 #endif
-    /* The next attempt may safely submit after the real latch. */
+    /* The next attempt submits after a real latch, as before. */
+    frame_boundary();
+    CHECK(plot_shown == 2);
+    saved_table = table_base;
     clock_reset(0, 1, 1);
+    sat_gfx_host_vdp1r[PTMR / 2] = 0;
     sat_gfx_draw();
-    CHECK(plot_started == 2 && prev_stamp == stamp && table_base != saved_table);
+    CHECK(plot_started == 3 && prev_stamp == stamp && table_base != saved_table);
+    CHECK(sat_gfx_cef_asked == 1 && sat_gfx_cef_forced == 1);
 #ifdef SAT_VDP1_PROFILE
     CHECK(vp_current[VP_FLAGS] == VP_SUBMITTED);
-    CHECK(vp_current[VP_SERIAL] == 2);
+    CHECK(vp_current[VP_SERIAL] == 3);
     CHECK(vp_current[VP_SOURCE_TEXELS] == 256);
     CHECK(vp_current[VP_SPRITE_PIXELS] > 0 && vp_current[VP_SPRITE_PIXELS] <= 256);
     CHECK(vp_current[VP_CLEAR_PIXELS] == 352u * 224u);
@@ -191,17 +200,17 @@ static void abandoned_shared_texture(unsigned char *pack)
     reset_driver(pack);
     sat_gfx_frame();
     live_stamp = prev_stamp;
-    CHECK(spr_key[0] == 0 && spr_stamp[0] == live_stamp);
+    CHECK(spr_slots[0].key == 0 && spr_slots[0].stamp == live_stamp);
     sat_gfx_host_vdp1r[0x10 / 2] = 2;
     clock_reset(0, 1000, 0);
     sat_gfx_draw(); /* hits key 0, then times out waiting for the master */
-    CHECK(prev_stamp == live_stamp && spr_stamp[0] == live_stamp);
+    CHECK(prev_stamp == live_stamp && spr_slots[0].stamp == live_stamp);
     stamp++;
     cache_frame(&spr_cache);
     spr_cache.hand = 0; /* the next miss tries to evict the prior plot's texture */
     slot = cache_get(&spr_cache, 77, &sat_gfx_stats.refused_sprite);
     CHECK(slot != 0 && slot != NOSLOT);
-    CHECK(spr_key[0] == 0 && spr_stamp[0] == live_stamp);
+    CHECK(spr_slots[0].key == 0 && spr_slots[0].stamp == live_stamp);
 }
 
 #ifdef SAT_VDP1_PROFILE

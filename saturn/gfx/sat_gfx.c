@@ -135,7 +135,12 @@ typedef struct
 } Section;
 
 /* A set of VRAM slots holding pack tiles; a slot not drawn this frame can be taken. */
-#define HASH_SIZE 1024
+#define HASH_SIZE 1024   /* sprite tiles; the layer caches hold fewer slots and take smaller tables (high work RAM is the short resource) */
+#ifndef HASH_SIZE_S1
+#define HASH_SIZE_S1 512
+#define HASH_SIZE_S2 512
+#define HASH_SIZE_S3 256
+#endif
 typedef struct { u32 key; u16 stamp, next; } SlotRec;
 typedef struct
 {
@@ -148,6 +153,7 @@ typedef struct
     int section;
     SlotRec *slots;   /* key, stamp and chain link of a slot in one 8 byte record: a lookup touches one cache line a node, not three */
     u16 *head;
+    u16 hmask; /* hash table size - 1 */
     u32 memo_key[2]; /* last answer per column parity this frame: runs of one tile, mostly blank, skip the lookup */
     u16 memo_slot[2];
 #ifdef SAT_VLOG
@@ -189,11 +195,11 @@ static u32 table_base;
 static SlotRec spr_slots[SAT_GFX_SPRITE_SLOTS] __attribute__((aligned(8)));
 static u16 spr_head[HASH_SIZE];
 static SlotRec s1_slots[SAT_GFX_S1_SLOTS] __attribute__((aligned(8)));
-static u16 s1_head[HASH_SIZE];
+static u16 s1_head[HASH_SIZE_S1];
 static SlotRec s2_slots[SAT_GFX_S2_SLOTS] __attribute__((aligned(8)));
-static u16 s2_head[HASH_SIZE];
+static u16 s2_head[HASH_SIZE_S2];
 static SlotRec s3_slots[SAT_GFX_S3_SLOTS] __attribute__((aligned(8)));
-static u16 s3_head[HASH_SIZE];
+static u16 s3_head[HASH_SIZE_S3];
 static Cache spr_cache, s1_cache, s2_cache, s3_cache;
 static u16 cram_shadow[2048];
 static u16 back_shadow;
@@ -201,14 +207,14 @@ static u16 back_shadow;
 SatGfxStats sat_gfx_stats;
 
 static void cache_setup(Cache *c, u8 *vram, u32 slot_bytes, u16 capacity, u16 first, int section,
-                        SlotRec *slots, u16 *head)
+                        SlotRec *slots, u16 *head, u32 hsize)
 {
     u32 i;
     c->vram = vram; c->slot_bytes = slot_bytes; c->capacity = capacity; c->hand = first; c->first = first; c->used = 0;
     c->memo_key[0] = c->memo_key[1] = NOKEY; c->memo_slot[0] = c->memo_slot[1] = NOSLOT;
-    c->section = section; c->slots = slots; c->head = head;
+    c->section = section; c->slots = slots; c->head = head; c->hmask = (u16)(hsize - 1);
     for (i = 0; i < capacity; i++) { slots[i].key = NOKEY; slots[i].stamp = 0; slots[i].next = NOSLOT; }
-    for (i = 0; i < HASH_SIZE; i++) head[i] = NOSLOT;
+    for (i = 0; i < hsize; i++) head[i] = NOSLOT;
 }
 
 static const u8 *pack_start;
@@ -352,7 +358,7 @@ static void vram_copy(u8 *dest, const u8 *src, u32 bytes)
 extern u32 sat_pad_raw;
 static u32 readout_pad(void) { return *UNC_PTR(u32, &sat_pad_raw); }
 #endif
-#define HASH(k) (((k) ^ ((k) >> 10)) & (HASH_SIZE - 1))
+#define HASH(c, k) (((k) ^ ((k) >> 10)) & (c)->hmask)
 /* The per-frame snapshot: everything drawing reads from the game, copied once by the game's CPU. The two sides never share a structure: the
    master owns game RAM, object RAM and graphics RAM; the drawing side owns VDP1, VDP2, CRAM, the caches and the shadows. */
 #define S1_ROWS (SAT_GFX_SCREEN_H / 8 + 1)
@@ -457,7 +463,7 @@ static u8 vl_cause;
 /* Slot holding a tile, uploading it on a miss. NOSLOT for a blank, missing or refused tile. */
 static u16 cache_find(Cache *c, u32 key, unsigned long *refused)
 {
-    u32 h = HASH(key);
+    u32 h = HASH(c, key);
     u16 s = c->head[h];
     u16 n = NOSLOT;
     u32 scan;
@@ -504,7 +510,7 @@ static u16 cache_find(Cache *c, u32 key, unsigned long *refused)
     if (n == NOSLOT) { (*refused)++; VL_CAUSE(3); return NOSLOT; }
     if (c->slots[n].key != NOKEY)
     {
-        u16 *link = &c->head[HASH(c->slots[n].key)];
+        u16 *link = &c->head[HASH(c, c->slots[n].key)];
         while (*link != n) link = &c->slots[*link].next;
         *link = c->slots[n].next;
     }
@@ -955,20 +961,23 @@ static void draw_sprites(void)
         y += CPS_TOP - OBJ_YOFFS;
         for (ty = ny - 1; ty >= 0; ty--)
         {
+            /* Per row, once: the screen row, whether it is on screen at all, and the row's part of the tile code. */
+            int sy = ((y + ty * 16) & 0x3ff) - CPS_TOP;
+            u32 rowcode = (fx || fy) ? code + 0x10UL * (u32)(fy ? ny - 1 - ty : ty) : (code & ~0xfUL) + 0x10UL * (u32)ty;
             CENSUS(int prev = -2;)
+            if (sy <= -16 || sy >= SAT_GFX_SCREEN_H) { CENSUS(c_tiles += (u32)nx; c_off += (u32)nx;) VLN(vl_tiles += (u16)nx; vl_off += (u16)nx;) continue; }
             for (tx = nx - 1; tx >= 0; tx--)
             {
                 int sx = ((x + tx * 16) & 0x3ff) - CPS_LEFT - SAT_GFX_CROP_X;
-                int sy = ((y + ty * 16) & 0x3ff) - CPS_TOP;
                 u32 tile;
                 u16 slot;
                 CENSUS(c_tiles++;)
                 VLN(vl_tiles++;)
-                if (sx <= -16 || sx >= SAT_GFX_SRC_W || sy <= -16 || sy >= SAT_GFX_SCREEN_H) { CENSUS(c_off++;) VLN(vl_off++;) continue; }
+                if (sx <= -16 || sx >= SAT_GFX_SRC_W) { CENSUS(c_off++;) VLN(vl_off++;) continue; }
                 if (fx || fy)
-                    tile = code + (u32)(fx ? nx - 1 - tx : tx) + 0x10UL * (u32)(fy ? ny - 1 - ty : ty);
+                    tile = rowcode + (u32)(fx ? nx - 1 - tx : tx);
                 else
-                    tile = (code & ~0xfUL) + ((code + (u32)tx) & 0xfUL) + 0x10UL * (u32)ty;
+                    tile = rowcode + ((code + (u32)tx) & 0xfUL);
 #if defined(SAT_ABL) && (SAT_ABL & 2)
                 slot = (u16)(tile & 0x7ff);   /* measurement only: no lookup, no upload */
 #else
@@ -1278,6 +1287,12 @@ static void snap_layers_wait(void)
 #define TVSTAT_VBLANK 8
 static u32 plot_started, plot_shown, plot_held, plot_sync;   /* started: slave; shown, held, sync: master */
 u32 sat_gfx_plot_waits;   /* frames the master held the last picture because VDP1 had not finished (diagnostic) */
+#if defined(SAT_VLOG) || defined(SAT_VDP1_PROFILE) || defined(SAT_GFX_HOST) || defined(SAT_LAYERS_COUNT)
+u32 sat_gfx_cef_asked, sat_gfx_cef_forced;   /* diagnostic: stuck-CEF recoveries (plot_start): change asked by the slave, plot started without the flag clearing */
+#define CEF_COUNT(x) x
+#else
+#define CEF_COUNT(x)
+#endif
 #define SLAVE_WAIT_MAX 7000UL   /* about two frames of slave FRT ticks: a master with interrupts off (restart) cannot hold the slave */
 #ifdef SAT_VLOG
 extern u32 sat_vblanks_now(void);
@@ -1376,11 +1391,17 @@ static int plot_start(void)
     if (prev_stamp)   /* first plot has no earlier change to latch; firmware may leave CEF set */
     {
         u32 t0 = slave_ticks();
+        int asked = 0;
         while (VDP1R(0x10) & EDSR_CEF)
             if (((slave_ticks() - t0) & 0xffffUL) >= SLAVE_WAIT_MAX) {
-                VP(vp_current[VP_WAIT_LATCH_TICKS] = vp_elapsed((unsigned int)t0);
-                   vp_current[VP_FLAGS] |= VP_LATCH_TIMEOUT;)
-                return 0;
+                /* CEF is still set and no change is pending (every plot started has been shown, so the master asked for its change): the change was
+                   never latched or the chip state was replaced (a load_state; the VideoCore 2 core's end flag). Without a way out the slave waits
+                   here every frame, never starts a plot and sprites stop for good (found by the Wolverine lane). Ask for the change ourselves once and wait one
+                   more bound; then plot anyway, a lost or one-off wrong picture instead of a stalled slave. */
+                if (!asked) { asked = 1; VDP1R(FBCR) = 3; t0 = slave_ticks(); CEF_COUNT(sat_gfx_cef_asked++;) continue; }
+                CEF_COUNT(sat_gfx_cef_forced++;)
+                VP(vp_current[VP_FLAGS] |= VP_LATCH_TIMEOUT;)
+                break;
             }
         VP(vp_current[VP_WAIT_LATCH_TICKS] = vp_elapsed((unsigned int)t0);)
     }
@@ -1657,10 +1678,10 @@ COLD_OS int sat_gfx_init(const void *pack)
     for (n = 0; n < 64 * 64; n++) { sh_s1[n] = CLEAR_NAME; sh_s2[n] = CLEAR_NAME; sh_s3[n] = NOKEY; }
     for (n = 0; n < SAT_GFX_SCREEN_H; n++) sh_row[n] = 0;
     for (n = 0; n < BLANK_WAYS; n++) blank_seen[n] = NOKEY;
-    cache_setup(&spr_cache, VDP1_VRAM + TEX_BASE, 128, SAT_GFX_SPRITE_SLOTS, 0, SEC_SPRITE, spr_slots, spr_head);
-    cache_setup(&s1_cache, VDP2_VRAM + CELL_S1, 32, SAT_GFX_S1_SLOTS, 4, SEC_S1, s1_slots, s1_head);
-    cache_setup(&s2_cache, VDP2_VRAM + CELL_S2, 128, SAT_GFX_S2_SLOTS, 0, SEC_S2, s2_slots, s2_head);
-    cache_setup(&s3_cache, VDP2_VRAM + CELL_S3, 512, SAT_GFX_S3_SLOTS, 0, SEC_S3, s3_slots, s3_head);
+    cache_setup(&spr_cache, VDP1_VRAM + TEX_BASE, 128, SAT_GFX_SPRITE_SLOTS, 0, SEC_SPRITE, spr_slots, spr_head, HASH_SIZE);
+    cache_setup(&s1_cache, VDP2_VRAM + CELL_S1, 32, SAT_GFX_S1_SLOTS, 4, SEC_S1, s1_slots, s1_head, HASH_SIZE_S1);
+    cache_setup(&s2_cache, VDP2_VRAM + CELL_S2, 128, SAT_GFX_S2_SLOTS, 0, SEC_S2, s2_slots, s2_head, HASH_SIZE_S2);
+    cache_setup(&s3_cache, VDP2_VRAM + CELL_S3, 512, SAT_GFX_S3_SLOTS, 0, SEC_S3, s3_slots, s3_head, HASH_SIZE_S3);
     stamp = 0;
     prev_stamp = 0;
     table_base = 0;
