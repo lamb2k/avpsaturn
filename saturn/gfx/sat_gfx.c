@@ -136,6 +136,7 @@ typedef struct
 
 /* A set of VRAM slots holding pack tiles; a slot not drawn this frame can be taken. */
 #define HASH_SIZE 1024
+typedef struct { u32 key; u16 stamp, next; } SlotRec;
 typedef struct
 {
     u8 *vram;
@@ -145,9 +146,7 @@ typedef struct
     u16 first; /* slots below this are reserved */
     u16 used;  /* slots stamped this frame */
     int section;
-    u32 *slot_key;
-    u16 *slot_stamp;
-    u16 *slot_next;
+    SlotRec *slots;   /* key, stamp and chain link of a slot in one 8 byte record: a lookup touches one cache line a node, not three */
     u16 *head;
     u32 memo_key[2]; /* last answer per column parity this frame: runs of one tile, mostly blank, skip the lookup */
     u16 memo_slot[2];
@@ -187,14 +186,14 @@ static u16 prev_stamp;   /* the frame before: its sprite slots may still be read
 static u32 table_base;
 #define TABLE_B 0x8000UL
 
-static u32 spr_key[SAT_GFX_SPRITE_SLOTS];
-static u16 spr_stamp[SAT_GFX_SPRITE_SLOTS], spr_next[SAT_GFX_SPRITE_SLOTS], spr_head[HASH_SIZE];
-static u32 s1_key[SAT_GFX_S1_SLOTS];
-static u16 s1_stamp[SAT_GFX_S1_SLOTS], s1_next[SAT_GFX_S1_SLOTS], s1_head[HASH_SIZE];
-static u32 s2_key[SAT_GFX_S2_SLOTS];
-static u16 s2_stamp[SAT_GFX_S2_SLOTS], s2_next[SAT_GFX_S2_SLOTS], s2_head[HASH_SIZE];
-static u32 s3_key[SAT_GFX_S3_SLOTS];
-static u16 s3_stamp[SAT_GFX_S3_SLOTS], s3_next[SAT_GFX_S3_SLOTS], s3_head[HASH_SIZE];
+static SlotRec spr_slots[SAT_GFX_SPRITE_SLOTS] __attribute__((aligned(8)));
+static u16 spr_head[HASH_SIZE];
+static SlotRec s1_slots[SAT_GFX_S1_SLOTS] __attribute__((aligned(8)));
+static u16 s1_head[HASH_SIZE];
+static SlotRec s2_slots[SAT_GFX_S2_SLOTS] __attribute__((aligned(8)));
+static u16 s2_head[HASH_SIZE];
+static SlotRec s3_slots[SAT_GFX_S3_SLOTS] __attribute__((aligned(8)));
+static u16 s3_head[HASH_SIZE];
 static Cache spr_cache, s1_cache, s2_cache, s3_cache;
 static u16 cram_shadow[2048];
 static u16 back_shadow;
@@ -202,13 +201,13 @@ static u16 back_shadow;
 SatGfxStats sat_gfx_stats;
 
 static void cache_setup(Cache *c, u8 *vram, u32 slot_bytes, u16 capacity, u16 first, int section,
-                        u32 *key, u16 *st, u16 *next, u16 *head)
+                        SlotRec *slots, u16 *head)
 {
     u32 i;
     c->vram = vram; c->slot_bytes = slot_bytes; c->capacity = capacity; c->hand = first; c->first = first; c->used = 0;
     c->memo_key[0] = c->memo_key[1] = NOKEY; c->memo_slot[0] = c->memo_slot[1] = NOSLOT;
-    c->section = section; c->slot_key = key; c->slot_stamp = st; c->slot_next = next; c->head = head;
-    for (i = 0; i < capacity; i++) { key[i] = NOKEY; st[i] = 0; next[i] = NOSLOT; }
+    c->section = section; c->slots = slots; c->head = head;
+    for (i = 0; i < capacity; i++) { slots[i].key = NOKEY; slots[i].stamp = 0; slots[i].next = NOSLOT; }
     for (i = 0; i < HASH_SIZE; i++) head[i] = NOSLOT;
 }
 
@@ -465,13 +464,14 @@ static u16 cache_find(Cache *c, u32 key, unsigned long *refused)
     long idx;
     while (s != NOSLOT)
     {
-        if (c->slot_key[s] == key)
+        SlotRec *r = &c->slots[s];
+        if (r->key == key)
         {
-            if (c->slot_stamp[s] != stamp) { c->slot_stamp[s] = stamp; c->used++; }
+            if (r->stamp != stamp) { r->stamp = stamp; c->used++; }
             VL_CAUSE(0);
             return s;
         }
-        s = c->slot_next[s];
+        s = r->next;
     }
     {
         u32 tag = (key << 2) | (u32)c->section, way = (tag ^ (tag >> 11)) & (BLANK_WAYS - 1);
@@ -499,17 +499,17 @@ static u16 cache_find(Cache *c, u32 key, unsigned long *refused)
     {
         u16 t = c->hand;
         c->hand = (u16)(t + 1U >= c->capacity ? c->first : t + 1U);
-        if (c->slot_stamp[t] != stamp && !(c->section == SEC_SPRITE && prev_stamp && c->slot_stamp[t] == prev_stamp)) { n = t; break; }
+        if (c->slots[t].stamp != stamp && !(c->section == SEC_SPRITE && prev_stamp && c->slots[t].stamp == prev_stamp)) { n = t; break; }
     }
     if (n == NOSLOT) { (*refused)++; VL_CAUSE(3); return NOSLOT; }
-    if (c->slot_key[n] != NOKEY)
+    if (c->slots[n].key != NOKEY)
     {
-        u16 *link = &c->head[HASH(c->slot_key[n])];
-        while (*link != n) link = &c->slot_next[*link];
-        *link = c->slot_next[n];
+        u16 *link = &c->head[HASH(c->slots[n].key)];
+        while (*link != n) link = &c->slots[*link].next;
+        *link = c->slots[n].next;
     }
-    c->slot_key[n] = key; c->slot_stamp[n] = stamp; c->used++;
-    c->slot_next[n] = c->head[h]; c->head[h] = n;
+    c->slots[n].key = key; c->slots[n].stamp = stamp; c->used++;
+    c->slots[n].next = c->head[h]; c->head[h] = n;
     {
         const Section *sec = &sections[c->section];
         const u8 *from = sec->data + (u32)idx * c->slot_bytes;
@@ -1400,7 +1400,7 @@ static void plot_abandon_build(void)
        or new RAM. It preserves the late-render emulator guard as well as the
        hardware end-of-plot rule. */
     for (i = 0; i < SAT_GFX_SPRITE_SLOTS; i++)
-        if (spr_stamp[i] == stamp) spr_stamp[i] = prev_stamp;
+        if (spr_slots[i].stamp == stamp) spr_slots[i].stamp = prev_stamp;
 }
 #endif
 
@@ -1657,10 +1657,10 @@ COLD_OS int sat_gfx_init(const void *pack)
     for (n = 0; n < 64 * 64; n++) { sh_s1[n] = CLEAR_NAME; sh_s2[n] = CLEAR_NAME; sh_s3[n] = NOKEY; }
     for (n = 0; n < SAT_GFX_SCREEN_H; n++) sh_row[n] = 0;
     for (n = 0; n < BLANK_WAYS; n++) blank_seen[n] = NOKEY;
-    cache_setup(&spr_cache, VDP1_VRAM + TEX_BASE, 128, SAT_GFX_SPRITE_SLOTS, 0, SEC_SPRITE, spr_key, spr_stamp, spr_next, spr_head);
-    cache_setup(&s1_cache, VDP2_VRAM + CELL_S1, 32, SAT_GFX_S1_SLOTS, 4, SEC_S1, s1_key, s1_stamp, s1_next, s1_head);
-    cache_setup(&s2_cache, VDP2_VRAM + CELL_S2, 128, SAT_GFX_S2_SLOTS, 0, SEC_S2, s2_key, s2_stamp, s2_next, s2_head);
-    cache_setup(&s3_cache, VDP2_VRAM + CELL_S3, 512, SAT_GFX_S3_SLOTS, 0, SEC_S3, s3_key, s3_stamp, s3_next, s3_head);
+    cache_setup(&spr_cache, VDP1_VRAM + TEX_BASE, 128, SAT_GFX_SPRITE_SLOTS, 0, SEC_SPRITE, spr_slots, spr_head);
+    cache_setup(&s1_cache, VDP2_VRAM + CELL_S1, 32, SAT_GFX_S1_SLOTS, 4, SEC_S1, s1_slots, s1_head);
+    cache_setup(&s2_cache, VDP2_VRAM + CELL_S2, 128, SAT_GFX_S2_SLOTS, 0, SEC_S2, s2_slots, s2_head);
+    cache_setup(&s3_cache, VDP2_VRAM + CELL_S3, 512, SAT_GFX_S3_SLOTS, 0, SEC_S3, s3_slots, s3_head);
     stamp = 0;
     prev_stamp = 0;
     table_base = 0;
