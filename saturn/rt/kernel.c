@@ -187,7 +187,11 @@ static const HomeText HOME_COIN_TEXT[] = {
     { 2, 38, 8 }, { 2, 39, 9 }, { 2, 40, 10 }, { 2, 41, 8 }, { 2, 42, 9 }, { 2, 43, 10 },
     { 2, 44, 8 }, { 2, 45, 9 }, { 2, 46, 10 },
 };
-#define HOME_OS __attribute__((optimize("Os"), section(".lwcode")))   /* low work RAM (.lw): the high work RAM image is full */
+#ifdef SAT_HOME_TEXT_LOW   /* the menu base had no high work RAM left; the Wolverine build has about 3 KB high and no low, so the text writers stay high by default */
+#define HOME_OS __attribute__((optimize("Os"), section(".lwcode")))   /* low work RAM (.lw) */
+#else
+#define HOME_OS __attribute__((optimize("Os")))
+#endif
 static HOME_OS u32 home_text(u32 table, u32 idx)
 {
     u32 i;

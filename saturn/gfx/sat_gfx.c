@@ -2054,6 +2054,10 @@ void sat_gfx_draw(void)
     static u16 gen_seen;
 #endif
 
+#ifdef SAT_VLOG
+    u32 vlog_v = sat_vblanks_now();
+    VLOG(vlog_v)[1] = (unsigned long)VDP1R(0x10) << 16 | (SFRT() & 0xffff);
+#endif
     /* A new pack came in (sat_gfx_swap_pack, on the master). The master's clear of the blank list can sit behind stale lines in this CPU's
        cache, and a layer whose words held through the load is skipped by its unchanged sum: cells drawn blank while their tiles were missing
        from the old pack stayed blank. The score table after GAME OVER starts on the stage's pack, which lacks its picture, and kept a black
@@ -2066,10 +2070,6 @@ void sat_gfx_draw(void)
         for (n = 0; n < BLANK_WAYS; n++) blank_seen[n] = NOKEY;
         drawn_valid = 0;
     }
-#endif
-#ifdef SAT_VLOG
-    u32 vlog_v = sat_vblanks_now();
-    VLOG(vlog_v)[1] = (unsigned long)VDP1R(0x10) << 16 | (SFRT() & 0xffff);
 #endif
     VP(vp_begin();)
 
