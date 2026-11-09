@@ -38,7 +38,14 @@ extern volatile int sat_fit_scale;
 #endif
 #define SAT_GFX_PAGES 4
 #define SAT_GFX_BANKS_PER_PAGE 32
-#define SAT_GFX_MAX_COMMANDS 1016 /* two 32 KB tables (built and plotting), each less local, clear, end and the four readout bars */
+/* Two 32 KB tables. Keep the existing four-bar reserve even without SAT_READOUT.
+ * SAT_VLOG adds sixteen plot-serial polygons after the sprites; they need their
+ * own reserve or a full list overwrites the other table (or texture RAM). */
+#ifdef SAT_VLOG
+#define SAT_GFX_MAX_COMMANDS (1016 - 16)
+#else
+#define SAT_GFX_MAX_COMMANDS 1016
+#endif
 #define SAT_GFX_SPRITE_SLOTS 3584 /* 448 KB of 128 byte textures */
 #ifdef SAT_HOME
 #define SAT_GFX_S1_SLOTS 768 /* 0x18000-0x1e000; the menu layer (NBG3) map and its font take the rest */
@@ -88,6 +95,10 @@ void sat_gfx_frame(void);
 /* The two halves, for two CPUs. sat_gfx_snapshot copies what drawing needs out of game state and runs on the game's CPU, with the buffer
  * not in use by sat_gfx_draw. sat_gfx_draw reads only that buffer and owns the video chips, caches and stats. The caller does the handoff. */
 void sat_gfx_snapshot(void);
+/* The same snapshot in two halves for the two-CPU path: _begin copies registers, palette, rows and objects; the caller hands the picture to the slave and wakes it;
+   _layers then copies the layer cells while the slave builds the sprite commands. The slave waits for _layers to finish before it reads a layer cell. */
+void sat_gfx_snapshot_begin(void);
+void sat_gfx_snapshot_layers(void);
 void sat_gfx_draw(void);
 
 /* CRAM bank of a CPS palette page and bank, or -1 when outside the map: the capacity refusal. */

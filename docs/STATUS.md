@@ -2,6 +2,21 @@
 
 Only source of current state. Branch `decomp/main`. Backlog: docs/BACKLOG.md.
 
+## VDP1 held frames: where the time goes, 2026-11-08 (lane profile; EMULATOR Yaba, stepped; MODELLED; hardware UNRUN)
+
+Evidence E:/AvP/learning/lane-profile. Builds KERNEL_CFLAGS "-DSAT_HOME -DSAT_DUEL_MENU" plus -DSAT_VLOG (A, C) or -DSAT_VDP1_PROFILE_DEPTH=8 (B, no VLOG: the profile does not fit beside it). Stage 02 Warrior fight, scripted pad, 3 frames a step, 3 seeds x 400 frames.
+- Headroom (high / low work RAM free): release-like, profiling off 1476 / 1136 B; A (off, VLOG) 12 / 208; C (fix/vdp1-race, VLOG) 100 / 208; B (profile depth 8) 264 / 28. Depth 16 with VLOG is 1272 B over high and 1892 B over low.
+- Shares of vblanks, Yaba GL core (VideoCore 1, the vanish lane's setup), 1200 frames: A new 78.5 / held 18.0 / skip 2.0 / late 1.5; C 75.4 / 22.0 / 1.8 / 0.9 (vanish lane 73.7 / 22.4 / 1.5 / 0.3); B (profiling on) 69.2 / 25.0 / 5.1 / 0.7. VideoCore 2 (soft core): A 58.1 / 36.9 / 4.3 / 0.7, C 56.9 / 35.3 / 6.7 / 1.2. The soft core draws no sprites in the picture and its VDP1 time is not a flat model: use VideoCore 1 for causes.
+- Cause: the chain is serial in one frame. Per plot (ticks of 4.77 us, frame 3495): master snapshot 817 (3.9 ms) -> slave command build 2081 (9.9 ms, 5.2 ticks = 25 us a command, 354 commands) -> VDP1 about 664 ticks (3.2 ms, Yaba's flat model). A plot submitted later than about 2830 ticks after vblank-in misses the next vblank. 301 of 301 held vblanks were that. Uploads 16 ticks, palette and cache 66: negligible. Before-PTMR chain mean 3000 against a limit of 2830, so about half the plots miss and the picture settles into 2 new in 3 vblanks.
+- Cutting the chain by 1 / 2 / 3 ms turns 40 / 72 / 97 % of held vblanks into new pictures (+10 / +18 / +24 points).
+- Pixel work per plot: sprites 77k bounding-box pixels, full-screen clear polygon 78.8k (51 %). Colour mode 4 bpp bank only, no half transparency, no gouraud. Not a Yaba cost; a hardware fill question.
+- Change ece5924: sprite commands written with five long writes instead of nine word writes. Host: command tables identical to fix/vdp1-race over 600 random frames at FIT 1 and 0. Yaba: build 5.25 -> 5.04 ticks a command, held 25.0 -> 22.8 % (B), 18.0 -> 19.9 % (A, 2 seeds): inside seed noise. Not a clear win; kept as harmless.
+- Six goldens on this branch: r1s 15618, full 317908, c1 272171, c2 369051, c3 333669, 2p 329918, every one clean, missed IRQ 0.
+
+## VDP1 cloud correction candidate, 2026-11-08 (HOST; target, MAME, EMULATOR and HARDWARE UNRUN)
+
+`codex/avp-vdp1-frame-fixes-20261108`, based on this lane's `3b28109`: reserves VLOG marker commands; removes forced unconfirmed framebuffer changes/submissions; retains prior command/texture ownership across bounded timeout retries, including shared texture hits; handles the first-plot latch. Adds default-off `SAT_VDP1_PROFILE` rings and an offline decoder. HOST: strict C90 existing graphics fixture and actual-driver presentation tests across seven flag configurations; three decoder tests; independent review and behavioural mutations pass. Profiling adds 0 bytes disabled, 2116 bytes at depth16 or 380 at depth2 before padding; target fit and any fps change unproven. Capture and limitations: `docs/notes/VDP1_PROFILE.md`. Source-function census unchanged. The combined guest candidate is `codex/avp-wolverine-frame-fixes-20261108`.
+
 - P0: items 1, 2 and 3 done (item 3 pending merge of lane/item3).
 - P1: first gate measured, docs/notes/AVP_FIRST_GATE.md; recommendation GO, awaiting coordinator.
 - Whole-game comparison: not run. Hardware: UNRUN.
