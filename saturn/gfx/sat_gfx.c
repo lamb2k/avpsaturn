@@ -385,7 +385,9 @@ extern u32 sat_vblanks_now(void);
 /* Measurement storage is entirely absent in a normal image. With depth 16 the
    two exported rings take 1984 bytes; current-row and snapshot state add 132.
    This diagnostic build still has to pass the normal linker memory limits. */
-#ifdef SAT_GFX_HOST
+#if defined(SAT_GFX_HOST) || defined(SAT_VDP1_PROFILE_HWRAM)
+/* SAT_VDP1_PROFILE_HWRAM: rings in high work RAM (the guest build has no low work RAM left for them). Measurement builds only;
+   compare arms built the same way, not against low-RAM profile numbers. */
 #define VP_RAM
 #else
 #define VP_RAM __attribute__((section(".lwgfx"), aligned(4)))
@@ -1472,6 +1474,20 @@ static int rows_clear;
 
 /* Master side, first half: registers, palette, row scroll and the object list, everything the slave's command build needs. The caller then wakes
    the slave and runs sat_gfx_snapshot_layers (visible layer cells, the long part: about 2500 words hashed). Visible cells only, at the point the game's level 2 IRQ would start. */
+#ifdef SAT_GUESTS
+#ifndef SAT_GUEST_PAL_KEEP
+#define SAT_GUEST_PAL_KEEP 0   /* default off: as v4.1, the guest's palette rows flip page 0's sum every snapshot, so the page is recopied and rescanned every frame */
+#endif
+#if SAT_GUEST_PAL_KEEP
+/* Wolverine's two sprite palette rows are constant. Once they are in the snapshot's page 0 and the game's page has not changed (same sum), the next
+   snapshot keeps the page: no recopy, no rewrite of the rows, no sum flip, so the slave's palette scan sees no change either. */
+int sat_guest_pal_keep;
+static u8 gpal_applied;
+#endif
+#endif
+#ifdef SAT_GUEST_PROF
+u32 sat_gprof[8];   /* measurement: 0 sum ticks of sat_guest_objects, 1 calls, 2 max, 3 sum ticks of palette+object copy before it, 4 sum ticks of the whole begin, 5 calls that drew a guest, 6 their ticks, 7 their palette+copy ticks */
+#endif
 void sat_gfx_snapshot_begin(void)
 {
     u16 layers = RAM16(SH_LAYERS), video = RAM16(SH_VIDEO), pal_reg = RAM16(SH_PALETTE_BASE), pal_mask = RAM16(SH_PAL_PAGES);
@@ -1494,6 +1510,12 @@ void sat_gfx_snapshot_begin(void)
     snap.s2x = RAM16(SH_S2X); snap.s2y = RAM16(SH_S2Y);
     snap.s3x = RAM16(SH_S3X); snap.s3y = RAM16(SH_S3Y);
 
+#ifdef SAT_GUEST_PROF
+    u32 gp_t0 = GFX_TICKS(), gp_t1;
+#endif
+#if defined(SAT_GUESTS) && SAT_GUEST_PAL_KEEP
+    int pal0_same = 0;
+#endif
     snap.pal_pages = 0;
     for (page = 0; page < SAT_GFX_PAGES; page++)
     {
@@ -1508,6 +1530,9 @@ void sat_gfx_snapshot_begin(void)
 #endif
 #ifdef SAT_SNAP_ALWAYS
         if (1)
+#elif defined(SAT_GUESTS) && SAT_GUEST_PAL_KEEP
+        if (page == 0 && gpal_applied ? sum == (snap.pal_sum[0] ^ 0x5a5a5a5aUL) : 0) pal0_same = 1;
+        if (!pal0_same && sum != snap.pal_sum[page])
 #else
         if (sum != snap.pal_sum[page])
 #endif
@@ -1552,12 +1577,30 @@ void sat_gfx_snapshot_begin(void)
             put32_ram(out + 4, second);
         }
     }
+#ifdef SAT_GUEST_PROF
+    gp_t1 = GFX_TICKS(); sat_gprof[3] += (gp_t1 - gp_t0) & 0xffffu;   /* palette sum and recopy, then object list copy */
+#endif
 #ifdef SAT_GUESTS
     {   /* bonus characters (saturn/guests): a guest's sprites and colours replace its slot's character; a changed sum makes the next snapshot recopy the page */
         extern int sat_guest_objects(u8 *obj, int count, int max, u8 *pal0);
         extern int sat_guest_touched;
+        extern unsigned char sat_guest_sel;
+#ifdef SAT_GUEST_PROF
+        u32 gp_a = GFX_TICKS(), gp_d;
+#endif
+#if SAT_GUEST_PAL_KEEP
+        sat_guest_pal_keep = gpal_applied && pal0_same && !(sat_guest_sel & 2);
+#endif
         count = sat_guest_objects(snap.obj, count, MAX_OBJECTS, snap.palette[0]);
+#if SAT_GUEST_PAL_KEEP
+        if (sat_guest_touched) { if (!sat_guest_pal_keep) { snap.pal_sum[0] ^= 0x5a5a5a5aUL; gpal_applied = 1; } }
+        else gpal_applied = 0;
+#else
         if (sat_guest_touched) snap.pal_sum[0] ^= 0x5a5a5a5aUL;
+#endif
+#ifdef SAT_GUEST_PROF
+        gp_d = (GFX_TICKS() - gp_a) & 0xffffu; sat_gprof[0] += gp_d; sat_gprof[1]++; if (gp_d > sat_gprof[2]) sat_gprof[2] = gp_d; if (sat_guest_touched) { sat_gprof[5]++; sat_gprof[6] += gp_d; sat_gprof[7] += (gp_t1 - gp_t0) & 0xffffu; }
+#endif
     }
 #endif
     snap.objects = (u16)count;
@@ -1579,6 +1622,9 @@ void sat_gfx_snapshot_begin(void)
         for (n = 0; n < 64; n++) snap.palette[1][30 * 32 + n] = home_pal[n];
         snap.pal_sum[1]++;
     }
+#endif
+#ifdef SAT_GUEST_PROF
+    sat_gprof[4] += (GFX_TICKS() - gp_t0) & 0xffffu;
 #endif
     VP(snap.profile_snapshot_ticks = vp_elapsed(vp_snapshot_start);
        snap.profile_handoff_tick = (unsigned int)GFX_TICKS();)

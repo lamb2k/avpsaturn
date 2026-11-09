@@ -206,6 +206,28 @@ static void box_debug(int i, int sx, int sy)
 #endif
 
 static void put16(u8 *p, u16 v) { p[0] = (u8)(v >> 8); p[1] = (u8)v; }
+#ifndef SAT_GUEST_PAL_KEEP
+#define SAT_GUEST_PAL_KEEP 0   /* default off: the snapshot recopies sprite palette page 0 and the guest rewrites its rows every frame (as v4.1) */
+#endif
+#if SAT_GUEST_PAL_KEEP
+extern int sat_guest_pal_keep;   /* sat_gfx.c: the page still holds this guest's rows from the last snapshot and the game's page did not change */
+#endif
+#ifndef SAT_GUEST_FAST_LIST
+#define SAT_GUEST_FAST_LIST 0   /* default off: byte loops as v4.1 */
+#endif
+#if SAT_GUEST_FAST_LIST
+/* The pass rewrites the 8 byte object list on the master in the snapshot, from cart code: word moves and one 32 bit store a half entry. */
+typedef u32 __attribute__((may_alias)) au32;
+static void put32b(u8 *p, u32 v)
+{
+#if defined(__BYTE_ORDER__) && __BYTE_ORDER__ == __ORDER_BIG_ENDIAN__
+    *(au32 *)(void *)p = v;
+#else
+    p[0] = (u8)(v >> 24); p[1] = (u8)(v >> 16); p[2] = (u8)(v >> 8); p[3] = (u8)v;
+#endif
+}
+static void copy8(u8 *d, const u8 *s) { ((au32 *)(void *)d)[0] = ((const au32 *)(const void *)s)[0]; ((au32 *)(void *)d)[1] = ((const au32 *)(const void *)s)[1]; }
+#endif
 
 /* The block's character byte is not stable at KO: in the dying state (04) the game's death blink toggles byte +1 between its value and 0 every frame
    (Yaba 11-09, state 0400 for about 60 frames, Schaefer and Wolverine alike; the blank frames are the game hiding the body). Read raw, the slot stopped
@@ -231,12 +253,25 @@ static const struct { u32 at; u8 n; const char *wv; } wv_names[2] = {
     { 0xaedca, 16, "WOLVERINE       " },
     { 0xac699, 14, "  WOLVERINE   " },
 };
+#ifndef SAT_GUEST_NAMES_LAZY
+#define SAT_GUEST_NAMES_LAZY 0   /* default off: check the name bytes every snapshot (as v4.1) */
+#endif
 static u8 name_saved[2][16], names_on;
 static void names(int on)
 {
     int i, k;
     if (on == names_on) {
         if (!on) return;
+#if SAT_GUEST_NAMES_LAZY
+        /* The check below reads 30 bytes of cart RAM (A-bus) every snapshot, on the master: about 15 FRT ticks a snapshot (Yaba, lane fps-held).
+           Only a stage load restores the page, so check again only when the load count moves. =2 never checks (measurement only). */
+        {
+            extern struct { u32 current, loads, sectors, last_vblank; } sat_rounds;
+            static u32 seen_loads = 0xffffffffu;
+            if (SAT_GUEST_NAMES_LAZY == 2 || sat_rounds.loads == seen_loads) return;
+            seen_loads = sat_rounds.loads;
+        }
+#endif
         for (i = 0; i < 2; i++) for (k = 0; k < wv_names[i].n; k++) if (ROMB[wv_names[i].at + k] != (u8)wv_names[i].wv[k]) goto write;   /* a stage load restored the page */
         return;
     }
@@ -477,10 +512,21 @@ int sat_guest_wolverine_bullet(unsigned long a6)
 }
 /* obj: the frame's object list (8 bytes each), count entries; returns the new count. pal0: sprite palette page (32 rows of 16 words). */
 int sat_guest_touched;   /* set when this frame's palette page was changed */
+#ifdef SAT_GUEST_PROF
+u32 sat_gprof_w[8];   /* measurement: ticks summed over calls that drew a guest: 0 names, 1 setup, 2 remove Schaefer's sprites, 3 shift, 4 tiles, 5 palette, 6 calls */
+#define WT() ((((u32)*(volatile u8 *)0xfffffe12UL << 8) | *(volatile u8 *)0xfffffe13UL) & 0xffffu)
+#define WM(slot) do { u32 t_ = WT(); wp_[slot] += (t_ - wl_) & 0xffffu; wl_ = t_; } while (0)
+#else
+#define WM(slot) ((void)0)
+#endif
 int sat_guest_objects(u8 *obj, int count, int max, u8 *pal0)
 {
     int i, k, n, j, any = 0;
+#ifdef SAT_GUEST_PROF
+    u32 wp_[8] = {0, 0, 0, 0, 0, 0, 0, 0}, wl_ = WT();
+#endif
     names(sat_guest_sel & 1);
+    WM(0);
     if (!(sat_guest_sel & 1)) return count;
     for (i = 0; i < 2; i++) {
         u16 x, cam, draw_step;
@@ -488,6 +534,7 @@ int sat_guest_objects(u8 *obj, int count, int max, u8 *pal0)
         if (!is_wolverine(i)) continue;
         any = 1;
         if (wv_blank(i)) continue;
+        WM(0);
         x = R16(PL(i) + 0x10);
         face_[i] = (u8)((R8(PL(i) + 0x0f) & 1) ^ 1);   /* +0f set = facing right (Yaba 11-08: set while walking right); his poses were captured facing right, so they mirror when it is clear */
         /* A snapshot may happen before the first player update. It can show
@@ -510,10 +557,15 @@ int sat_guest_objects(u8 *obj, int count, int max, u8 *pal0)
         box_debug(i, sx, sy);
         wv_dbg[i][8] = (s16)sx; wv_dbg[i][9] = (s16)sy; wv_dbg[i][10] = (s16)(R8(PL(i) + 6) | R8(PL(i) + 5) << 8); wv_dbg[i][11] = (s16)(st | face_[i] << 12);
 #endif
+        WM(1);
         /* Schaefer's own sprites near him go */
         for (j = k = 0; j < count; j++) {
             u8 *e = obj + j * 8;
+#if SAT_GUEST_FAST_LIST && defined(__BYTE_ORDER__) && __BYTE_ORDER__ == __ORDER_BIG_ENDIAN__
+            int ex = (int)((((const au32 *)(const void *)e)[0] >> 16) & 0x3ff), pal = (int)(((const au32 *)(const void *)e)[1] & 31);
+#else
             int ex = ((e[0] << 8 | e[1]) & 0x3ff), pal = e[7] & 31;
+#endif
             if (ex >= 768) ex -= 1024;
             if (pal == WV_SCH_PAL && ex > sx - 140 && ex < sx + 140) {
 #ifdef SAT_WOLVERINE_DEBUG
@@ -526,10 +578,15 @@ int sat_guest_objects(u8 *obj, int count, int max, u8 *pal0)
 #endif
                 continue;
             }
+#if SAT_GUEST_FAST_LIST
+            if (k != j) copy8(obj + k * 8, e);
+#else
             if (k != j) { int b; for (b = 0; b < 8; b++) obj[k * 8 + b] = e[b]; }
+#endif
             k++;
         }
         count = k;
+        WM(2);
         /* his tiles go at the head of the list: earlier entries are in front on the board */
         n = wv_pose_start[st + 1] - wv_pose_start[st];
 #ifdef SAT_WOLVERINE_DEBUG
@@ -539,7 +596,12 @@ int sat_guest_objects(u8 *obj, int count, int max, u8 *pal0)
 #ifdef SAT_WOLVERINE_DEBUG
         wv_lst[i][2] = (s16)n;
 #endif
+#if SAT_GUEST_FAST_LIST
+        for (j = count - 1; j >= 0; j--) copy8(obj + (j + n) * 8, obj + j * 8);
+#else
         for (j = count * 8 - 1; j >= 0; j--) obj[j + n * 8] = obj[j];
+#endif
+        WM(3);
         for (k = 0; k < n; k++) {
             const WvTile *t = &wv_tiles[wv_pose_start[st] + k];
             int hf = (t->flags & 1) ^ face_[i], dx = face_[i] ? -t->dx - 16 : t->dx;
@@ -550,15 +612,33 @@ int sat_guest_objects(u8 *obj, int count, int max, u8 *pal0)
             if (sx + dx + 16 > wv_dbg[i][6]) wv_dbg[i][6] = (s16)(sx + dx + 16);
             if (sy + t->dy + 16 > wv_dbg[i][7]) wv_dbg[i][7] = (s16)(sy + t->dy + 16);
 #endif
+#if SAT_GUEST_FAST_LIST
+            put32b(o, (u32)((sx + dx) & 0x3ff) << 16 | (u32)((sy + t->dy) & 0x3ff));
+            put32b(o + 4, (u32)t->key << 16 | (u16)(((t->flags >> 2) ? WV_PALROW1 : WV_SCH_PAL) | (hf << 5) | ((t->flags & 2) << 5)));
+#else
             put16(o, (u16)((sx + dx) & 0x3ff));
             put16(o + 2, (u16)((sy + t->dy) & 0x3ff));
             put16(o + 4, t->key);
             put16(o + 6, (u16)(((t->flags >> 2) ? WV_PALROW1 : WV_SCH_PAL) | (hf << 5) | ((t->flags & 2) << 5)));
+#endif
         }
         count += n;
+        WM(4);
     }
     sat_guest_touched = any;
-    if (any) for (k = 0; k < 16; k++) { put16(pal0 + WV_SCH_PAL * 32 + k * 2, wv_pal[k]); put16(pal0 + WV_PALROW1 * 32 + k * 2, wv_pal[16 + k]); }
+#if SAT_GUEST_PAL_KEEP
+    if (any && !sat_guest_pal_keep)
+#else
+    if (any)
+#endif
+#if SAT_GUEST_FAST_LIST
+    for (k = 0; k < 16; k += 2) { put32b(pal0 + WV_SCH_PAL * 32 + k * 2, (u32)wv_pal[k] << 16 | wv_pal[k + 1]); put32b(pal0 + WV_PALROW1 * 32 + k * 2, (u32)wv_pal[16 + k] << 16 | wv_pal[17 + k]); }
+#else
+    for (k = 0; k < 16; k++) { put16(pal0 + WV_SCH_PAL * 32 + k * 2, wv_pal[k]); put16(pal0 + WV_PALROW1 * 32 + k * 2, wv_pal[16 + k]); }
+#endif
+#ifdef SAT_GUEST_PROF
+    if (any) { WM(5); wp_[6] = 1; for (k = 0; k < 7; k++) sat_gprof_w[k] += wp_[k]; }
+#endif
     return count;
 }
 
