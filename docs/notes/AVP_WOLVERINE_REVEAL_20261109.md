@@ -59,6 +59,16 @@ Losing the game (the continue countdown and GAME OVER at stage 0x24) also shows 
 - `-DSAT_WOLVERINE_UNLOCKED`: tester and QA builds start unlocked (nothing is read or written for the lock). `-DSAT_UNLOCK_DEBUG`: OPTION MODE > GAME OPTION gets a WOLVERINE row, LOCKED or UNLOCKED, that writes the flag
   and the record at once (clear and set). A build without the art (`REVEAL=0`) is never locked.
 
-## Voice
+## Voice ("Berserker Barrage!", owner addition)
 
-See the end of this note for the extraction and the result.
+Pipeline, built and run (EMULATOR for playback, see Verification): `tools/wolverine/reveal_voice.py` runs MAME 0.289 on the owner's mshvsf set (`mame_voice.lua`, no sound, no video), dumps the 8 MB QSound sample ROM,
+cuts one clip (bank/start/end in the ROM, 8 bit signed, 24038 Hz at rate 0x1000), resamples it to 22050 Hz, scales it to peak 120 and writes `reveal_voice.bin` (`RVV1`, u32 samples, 8 reserved, the samples).
+build.py puts it on the disc as `RVVOICE.BIN` (REVEAL_VOICE or GUEST_ASSETS/reveal_voice.bin; ROM-derived, never in git; without it the reveal plays silent). At frame 3 `reveal.c` loads it with the art, copies it
+to SCSP RAM at 0x70000 (stage 26's clips end near 0x55000) and plays it on SCSP slot 18 (0 to 15 are the game's channels, 16 and 17 the CD) at octave -1 (22050 Hz). It lives in the pack room only while the reveal starts
+and is copied out at once; nothing stays in work RAM. A 0.55 s clip is 12.2 KB.
+
+NOT DONE: the clip itself is not identified. `mame_voicescan.lua` sent every sound command 0 to 0x7ff through the 68000 mailbox and logged the QSound voice starts: 301 distinct samples of 0.3 to 2.5 s. They were run
+through offline speech recognition (faster-whisper small.en, installed in a venv on this PC; Windows SAPI first). None came out as "Berserker Barrage" (with a prompt naming the phrase it hallucinated it into noise, so those hits
+are worthless). The commands Wolverine's own moves send in a MAME run (0x120 to 0x127, 0x203 to 0x20d) are 0.1 to 0.3 s grunts. Either the shout is not a separate QSound clip in MSHvSF (its hyper combo name may be text only),
+or it is played in pieces. For playback testing a stand-in clip (20:b400:e7ff, command 0x91, 0.55 s; recognised once as "Barrage!" with the prompt, so not evidence) was cut. The owner should pick the clip by ear:
+`REVEAL_VOICE_CLIP=BANK:START:END reveal_voice.py cut WORKDIR out.bin`, the candidates are in the scan evidence (E:\AvP\learning\lane-wolverine-reveal\scan1\w, one WAV per clip named bank_start_end).

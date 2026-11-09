@@ -409,3 +409,13 @@ Evidence E:/AvP/learning/lane-vanish (s1..s3, j2..j4, c2..c4, g2..g4 stepped run
 - Yaba frame skip (the owner's EnableFrameSkipLimiter=true under load) is the one class outside the code: it drops whole frames in the emulator and shows the earlier picture. Not counted above (stepped runs do not skip).
 - Black alien silhouettes (ab_fix4/take01/contact.png, last row): the same stage 02 fight on the old code shows flat grey aliens too (stills/old_code_fight_flat_aliens.png), and the attract intro of the menu build, which has no sprite fix, shows them (stills/attract_old_flat_aliens.png). Verdict: not caused by the sprite fix; palette or pack-key related and not fully traced.
 - Six-golden host check on the final fix/vdp1-race code (host6.sh, WSL): r1s 15618, full 317908, c1 272171, c2 369051, c3 333669, 2p 329918 vblanks, every one clean, diff 0, missed 0. The arcade-build identity is unchanged (the fixes sit under SAT_HOME / SAT_VLOG and the pack).
+
+## Wolverine post-credits reveal and unlock, 2026-11-09 (lane wolverine-reveal; EMULATOR Yaba HLE BIOS for the pieces named below, HOST for the tools; hardware UNRUN)
+
+Design, recolour table, save format and what is not yet verified: docs/notes/AVP_WOLVERINE_REVEAL_20261109.md. Branch lane/wolverine-reveal-20261109.
+- The port had no save at all (settings and ranking live in RAM); this lane adds the first: a 64 byte `AVPSAT_SAVE` file in internal backup RAM (BIOS backup library, boot.c) holding the Wolverine unlock flag, with room kept for settings.
+- Locked until the reveal has played once (select screen shows Schaefer, OPTION MODE shows WOLVERINE LOCKED). -DSAT_WOLVERINE_UNLOCKED starts unlocked; -DSAT_UNLOCK_DEBUG adds a LOCKED/UNLOCKED row.
+- The three frames replace the GAME OVER card of the ending (stage word 0x26, ff8005 = 8) as a VDP2 NBG0 8 bit bitmap, 90 + 90 + about 250 vblanks, loaded from the disc at the card and gone after it. Losing never plays it.
+- Gates: fit.py True on D11 (76 files, 0 own dropped, 0 missing); hw_free 4216 (was 4480), lw_free 76 (same), cart_free 4404 (was 5840), cart_pack_room unchanged 1630208; tests 79 pass, 30 errors (the same private-dependency load errors as before), 5 new.
+- Voice: tool and playback path built, the clip is not identified (see the note).
+
