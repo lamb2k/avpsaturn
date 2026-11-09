@@ -1254,7 +1254,13 @@ static void update_priority(u16 layers, u16 pri)
     prin[0] = prin[1] = prin[2] = 0;
     for (i = 0; i < n; i++) prin[order[i] - 1] = (u16)(2 + 2 * i);
     VDP2R(0xf8) = (u16)(prin[1] | (prin[2] << 8)); /* NBG0 = scroll 2, NBG1 = scroll 3 */
+#ifdef SAT_HOME
+    /* NBG3 (the menu layer) keeps priority 7 through the whole picture: this write used to drop it to 0 at the start of every frame and draw_home
+       put it back near the end, so under the frame chain (the slave still building sprite commands at the vblank) the menu text was never shown. */
+    VDP2R(0xfa) = (u16)(prin[0] | (snap.home ? 0x0700 : 0));   /* NBG2 = scroll 1, NBG3 = menu */
+#else
     VDP2R(0xfa) = prin[0];                          /* NBG2 = scroll 1 */
+#endif
     prinb_last = prin[0];
     for (p = 0; p < 8; p++)
     {
