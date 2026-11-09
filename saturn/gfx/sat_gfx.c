@@ -1288,7 +1288,7 @@ static void snap_layers_wait(void)
 static u32 plot_started, plot_shown, plot_held, plot_sync;   /* started: slave; shown, held, sync: master */
 u32 sat_gfx_plot_waits;   /* frames the master held the last picture because VDP1 had not finished (diagnostic) */
 #if defined(SAT_VLOG) || defined(SAT_VDP1_PROFILE) || defined(SAT_GFX_HOST) || defined(SAT_LAYERS_COUNT)
-u32 sat_gfx_cef_asked, sat_gfx_cef_forced;   /* diagnostic: stuck-CEF recoveries (plot_start): change asked by the slave, plot started without the flag clearing */
+u32 sat_gfx_cef_asked, sat_gfx_cef_forced, sat_gfx_replots;   /* diagnostic: stuck-CEF recoveries (plot_start): change asked by the slave, plot started without the flag clearing */
 #define CEF_COUNT(x) x
 #else
 #define CEF_COUNT(x)
@@ -1359,9 +1359,15 @@ static u32 slave_ticks(void) { return GFX_TICKS(); }
 static int plot_wait_end(void)
 {
     u32 t0 = slave_ticks();
+    static u32 kicked;   /* serial of the plot already started again once */
     if (!UNC32(plot_sync)) return 1;
     while (UNC32(plot_started) != UNC32(plot_shown) && !(VDP1R(0x10) & EDSR_CEF))
         if (((slave_ticks() - t0) & 0xffffUL) > SLAVE_WAIT_MAX) {
+            /* A plot was started and its end flag never came for two frames: VDP1's state was replaced under it (a Yaba load_state, a core that lost the plot).
+               The master asks for the change only after the end flag, so the slave would abandon every picture from here on and sprites stop for good
+               (found by the Wolverine lane). Start the same list again, once for each plot (its table and textures are untouched: this slave has not
+               written since), and wait one more bound. A plot that is only slow is not started over a second time, so it still finishes. */
+            if (kicked != UNC32(plot_started)) { kicked = UNC32(plot_started); VDP1R(PTMR) = 1; t0 = slave_ticks(); CEF_COUNT(sat_gfx_replots++;) continue; }
             VP(vp_current[VP_WAIT_END_TICKS] = vp_elapsed((unsigned int)t0);)
             return 0;
         }
