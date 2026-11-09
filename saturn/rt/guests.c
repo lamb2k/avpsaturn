@@ -26,11 +26,28 @@ int sat_guest_file(int row, int chars, int variant, int arcade_file)
 {
     int i, f;
     for (i = 0; i < sat_guest_count && i < GUEST_ROWS; i++) {
-        if (!(sat_guest_sel & sat_guests[i].sel_bit) || !(chars & sat_guests[i].slot_mask)) continue;
+        /* A stage file needs the guest's slot in play; the front end (row 0) holds the select screen and the ranking, which show
+           every slot, so a guest with art for them has a front file of its own. */
+        if (!(sat_guest_sel & sat_guests[i].sel_bit) || (row && !(chars & sat_guests[i].slot_mask))) continue;
         f = guest_file[i][row][variant];
         if (f) return f;
     }
     return arcade_file;
+}
+
+/* Select screen and HUD colours: tables of the arcade's palettes in the program ROM image (guest_pal.h), written for a guest while its art
+   is what the loaded file holds. Called after every round file load (kernel.c, which also restores ROM pages), and at boot. */
+#include "guest_pal.h"
+#include "guest_hudpal.inc"   /* guest_pal[], GUEST_PAL_N: tools/wolverine/hud_art.py; empty without guest art */
+extern unsigned char *PAGE[256];
+void sat_guest_loaded(int row, int chars, int variant, int file)
+{
+    unsigned art = 0;
+    int i;
+    for (i = 0; i < sat_guest_count && i < GUEST_ROWS; i++)
+        if ((sat_guest_sel & sat_guests[i].sel_bit) && file && guest_file[i][row][variant] == file && (!row || (chars & sat_guests[i].slot_mask)))
+            art |= 1u << i;
+    if (GUEST_PAL_N) guest_pal_sync(guest_pal, GUEST_PAL_N, art, (volatile unsigned char *)PAGE[0]);
 }
 
 /* Drawing (phase 2): the game's sprite origin routine (0xaa59a, game_bind.c) runs once per sprite group with the actor in a4 and the

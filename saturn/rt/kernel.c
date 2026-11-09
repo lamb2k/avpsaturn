@@ -448,11 +448,17 @@ static void round_check(void)
 #if SAT_VDP1_HW_ERASE
     int erase_old_row = row_loaded;
 #endif
+    int stale = 0;
     if (row) chars |= r8(0xff81cc) & 15;
-    if (row == row_loaded) { settled = 0; return; }
+#ifdef SAT_GUESTS
+    /* The front end's file follows the bonus characters setting (guests with select screen art have a front file of their own): the
+       word is steady here, so no wait, and the load runs at once when the title menu hands back to the game. */
+    stale = !row && !row_loaded && round_loaded != sat_guest_file(0, 0, 0, row_file[0][0]);
+#endif
+    if (row == row_loaded && !stale) { settled = 0; return; }
     /* The word flickers for a few frames as a scene closes; go only when it has held. */
-    if (!settled) settled = sat_dbg.vblanks;
-    if (sat_dbg.vblanks - settled < 12) return;
+    if (!stale && !settled) settled = sat_dbg.vblanks;
+    if (!stale && sat_dbg.vblanks - settled < 12) return;
     settled = 0;
     if (!row) chars = 0;
     want = row_file[row][mask_variant[chars]];
@@ -488,6 +494,9 @@ static void round_check(void)
     sat_gfx_display(1);
 #endif
     round_loaded = want;
+#ifdef SAT_GUESTS
+    sat_guest_loaded(row, chars, mask_variant[chars], want);   /* guest colours follow the art this file holds */
+#endif
     sat_rounds.current = (u32)want;
     sat_rounds.loads++;
     sat_rounds.last_vblank = sat_dbg.vblanks;
@@ -712,8 +721,15 @@ void sat_main(void)
 #ifdef SAT_FREEPLAY_ONLY   /* test flag: the game's free play coinage; its paths are outside the census, 0xe2 fatal on stage 02 */
     save_block[0] = 9; save_block[0x30] = 9;
 #endif
+#ifdef SAT_GUESTS
+    i = sat_guest_file(0, 0, 0, 0);   /* the front end's file for the bonus characters setting */
+    load_round(i);
+    round_loaded = i;
+    sat_guest_loaded(0, 0, 0, i);
+#else
     load_round(0);
     round_loaded = 0;
+#endif
     if (!sat_gfx_init(SAT_PACK)) sat_fatal(0xeb, 0);
 #ifdef SAT_HOME
     if (!home_slave_on) { home_slave_on = 1; slave_start(); }

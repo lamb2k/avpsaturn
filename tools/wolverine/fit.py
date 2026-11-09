@@ -9,7 +9,8 @@ usage: fit.py WORK ASSETS_DIR [STAGES]   STAGES is comma-separated hex, e.g. 06,
 With no STAGES, check every non-front-end stage in variant_file. Writes
 ASSETS_DIR/fit[STAGES].json. Exit 0: all pass; 1: fit fails; 2: missing/bad inputs.
 Honours GUEST_SPEC, SCREEN_KEYS_REQUIRED, ROUND_SHARED_MIN, ROUND_MIN_RUN and
-ARENA_KEEP as build.py does. This checks full pack generation, not the old
+ARENA_KEEP as build.py does. FIT_GFX_GUEST and FIT_GFX_FRONT (tools/wolverine/hud_art.py's gfx_hud_stage.bin and
+gfx_hud_front.bin) pack the guest's files from the regions with his select screen and HUD art, and check his front file too. This checks full pack generation, not the old
 KEEP_ROUND_FILES partial-build shortcut. Private inputs stay outside Git.
 """
 import json
@@ -156,7 +157,7 @@ def run(raw, f, keys, room, free, rank, screens, guest_keys=(), fit_fn=None):
     keys = [set(k) for k in keys]
     frank = {int(key): value for key, value in rank.items()}
     frank.update({key: 1 << 39 for key in guest_keys})
-    if f["name"] != "front":
+    if not f["name"].startswith("front"):   # front_wv too
         keys = [k | extra for k, extra in zip(keys, screens)]
         frank.update({key: 1 << 40 for key in screens[0]})
     return fit_fn(raw, keys, room, free(f), frank)
@@ -188,6 +189,7 @@ def main(argv=None, environ=None, fit_fn=None, own_keys=None):
             import rounds_variants
             own_keys = rounds_variants.Data(environ.get("GUEST_SPEC", SPEC)).own[SCH]
         sources = {}
+        hud_stage = pathlib.Path(environ["FIT_GFX_GUEST"]).read_bytes() if environ.get("FIT_GFX_GUEST") else None
         for word, variant, mask, base in selected:
             own = set(base["keys"][0]) & set(own_keys)
             # guest_rounds.extend keys a shared base file by its first stage.
@@ -201,7 +203,7 @@ def main(argv=None, environ=None, fit_fn=None, own_keys=None):
             p0, d0 = run(source, base, base["keys"], room, free, r, screens, fit_fn=fit_fn)
             guest = dict(base, name=name + "_wv", rank_from=name)
             keys = [set(base["keys"][0]) - own | wk] + [set(k) for k in base["keys"][1:]]
-            p1, d1 = run(source, guest, keys, room, free, rank.get(name, {}), screens, wk, fit_fn)
+            p1, d1 = run(source if hud_stage is None else hud_stage, guest, keys, room, free, rank.get(name, {}), screens, wk, fit_fn)
             missing = sorted(set(d1) & wk)
             tiles = lambda p: p["inmain"] + sum(x[2] for x in p["segs"]) if p is not None else None
             row = dict(file=name, stage="%02x" % word, variant=variant, mask=mask,
@@ -209,6 +211,17 @@ def main(argv=None, environ=None, fit_fn=None, own_keys=None):
                        wolv_own_dropped=len(missing), missing_guest_keys=missing,
                        sch_tiles=tiles(p0), wolv_tiles=tiles(p1), cart_pack_room=room, controls=config,
                        gate=p0 is not None and p1 is not None and len(d1) <= len(d0) and not missing)
+            rows.append(row)
+            print(json.dumps(row), flush=True)
+        if environ.get("FIT_GFX_FRONT"):   # his front file: the arcade's keys and ranking, the select picture, plate and icon written in
+            front = next(f for f in rounds["files"] if f["name"] == "front")
+            fr = rank.get("front", {})
+            p0, d0 = run(raw, front, front["keys"], room, free, fr, screens, fit_fn=fit_fn)
+            p1, d1 = run(pathlib.Path(environ["FIT_GFX_FRONT"]).read_bytes(), dict(front, name="front_wv", rank_from="front"), front["keys"], room, free, fr, screens, fit_fn=fit_fn)
+            tiles = lambda p: p["inmain"] + sum(x[2] for x in p["segs"]) if p is not None else None
+            row = dict(file="front_wv", stage="00", variant=0, mask=0, sch_drop=len(d0), wolv_drop=len(d1), sch_tiles=tiles(p0), wolv_tiles=tiles(p1),
+                       sch_bytes=sum(len(t) for t in p0["tile"]) if p0 else None, wolv_bytes=sum(len(t) for t in p1["tile"]) if p1 else None,
+                       cart_pack_room=room, controls=config, gate=p0 is not None and p1 is not None and len(d1) <= len(d0))
             rows.append(row)
             print(json.dumps(row), flush=True)
         report.write_text(json.dumps(rows, indent=0))

@@ -45,10 +45,20 @@ COLD1_AT = CART_END - COLD1_ROOM
 # ROM stretches no walk of any stage or character reads (tools/rounds_census.py, WORK/rounds.json): cold chunks of lifted code stay in them for the whole game, per-round tiles take the rest.
 ROUNDS = json.loads((WORK / "rounds.json").read_text())
 ARCADE_SPRITE_KEYS = {k for f in ROUNDS["files"] for k in f["keys"][0]}
+sys.path.insert(0, str(REPO / "tools/wolverine"))
+import hud_art
+HUD = None   # guest select screen and HUD art (hud_art.build); guests.c always includes a palette table, empty without it
 if os.environ.get("GUEST_ASSETS"):   # bonus characters (SAT_GUESTS builds): guest stage file variants, tools/wolverine/guest_rounds.py
-    sys.path.insert(0, str(REPO / "tools/wolverine"))
     import guest_rounds
-    guest_rounds.extend(ROUNDS, os.environ["GUEST_ASSETS"])
+    # Select screen and HUD art of the guest (tools/wolverine/hud_art.py): GUEST_HUD_ART, else GUEST_ASSETS/hud_art; GUEST_HUD_ART=0 builds without it.
+    hud_dir = os.environ.get("GUEST_HUD_ART") or str(pathlib.Path(os.environ["GUEST_ASSETS"]) / "hud_art")
+    if hud_dir != "0" and pathlib.Path(hud_dir).is_dir():
+        HUD = hud_art.build(hud_dir, pathlib.Path(os.environ["GUEST_ASSETS"]) / "gfx_wolverine.bin", WORK / "rt.bin", GEN / "hud")
+        miss = hud_art.check_keys(ROUNDS, hud_art.GUESTS[0])
+        if miss:
+            raise SystemExit("NO-GO: guest art tiles no arcade file holds (wrong tile codes or parity?): " + ", ".join("%s %s %x" % m for m in miss[:8]))
+        print("guest hud art:", {k: v for k, v in HUD["report"]["tiles"].items()}, "palette copies", sum(p["copies"] for p in HUD["report"]["palettes"]), flush=True)
+    guest_rounds.extend(ROUNDS, os.environ["GUEST_ASSETS"], HUD)
 # Tile keys (sprites and the three layers) of the screens after a KO with no lives left: the continue countdown, name entry, GAME OVER.
 # The census routes continue at once, so they never saw the low countdown digits, and a stage whose census had no game over lacked the
 # screen's text and picture: the countdown and the "CONTINUE AND GET 1UP!" line drew blank. tools/screen_keys.py writes the list;
@@ -173,6 +183,7 @@ def gen_sources():
             f.seek(72 + 0xe90)
             seed.write_bytes(f.read(16))
     update(GEN / "seed.inc", ",".join(str(x) for x in seed.read_bytes()))
+    update(GEN / "guest_hudpal.inc", pathlib.Path(HUD["include"]).read_text() if HUD else hud_art.pal_include([]))   # guests.c: select screen and HUD colours of the guests
     save = WORK / "save_seed.bin"   # settings block the arcade keeps in EEPROM, from the golden dump
     if not save.exists():
         with open("E:/AvP/learning/mame/golden_c/probe.tsv", "rb") as f:
@@ -198,7 +209,7 @@ def gen_sources():
     for g, per in gf.items():
         gi = int(g)
         for st, files in per.items():
-            if srow[int(st)]:
+            if srow[int(st)] or int(st) == 0:   # stage word 0: the front end, row 0 (a guest's own front file, select screen art)
                 tab[gi][srow[int(st)]] = files
     update(GEN / "guest_files.inc", ("#define GUEST_ROWS %d" + chr(10) + "static const unsigned short guest_file[%d][%d][%d] = {%s};" + chr(10)) % (
         len(gf) and ng, ng, len(rows), len(masks) + 1, ",".join("{" + ",".join("{" + ",".join(map(str, r)) + "}" for r in t) + "}" for t in tab)))
@@ -275,7 +286,7 @@ def round_files(rom, code_end, cold1_at, only=None):
         frank.update({k: 1 << 39 for k in f.get("guest_keys", ())})   # a guest's frames rank as the playing character's own route
         if only is not None:
             free = []
-        if f["name"] != "front":   # continue and game over screens: reachable from every stage, kept first (tools/screen_keys.py)
+        if not f["name"].startswith("front"):   # (front_wv, a guest's front file, is a front file too) continue and game over screens: reachable from every stage, kept first (tools/screen_keys.py)
             keys = [k | e for k, e in zip(keys, SCREEN_KEYS)]
             keys[0] = keys[0] | POSE_KEYS
             keys[0] = keys[0] | FUZZ_STAGE.get(f["name"].split("_")[0], set())

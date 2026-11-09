@@ -3,14 +3,17 @@ Wolverine (guest 0) takes Schaefer's slot, ff81cc bit 2: for every stage word an
 Schaefer variant's candidates minus Schaefer's whole-game own keys plus Wolverine's keys (tools/wolverine/assets.py remap.json "stage_keys"),
 with the same sound and kept pages. ROUNDS["guest_files"] then maps guest -> stage word -> file per variant (0 = the arcade's file).
 The graphics region the packer reads becomes ASSETS/gfx_wolverine.bin: the AvP region with his tiles at sprite keys no AvP file uses,
-so every AvP file packs the same bytes as before."""
+so every AvP file packs the same bytes as before.
+Select screen and HUD art (tools/wolverine/hud_art.py, optional `hud`): the guest's stage files read the region with his HUD portrait and
+name written at Schaefer's tile codes, and a front end file of his own (the arcade's front file, the select picture, plate and ranking
+icon written the same way) is guest_files["0"]["0"], row 0, variant 0. Without `hud` nothing here changes."""
 import os, pathlib, sys
 
 SPEC = "E:/AvP/learning/lane-packs/spec.json"
 SLOT = 2
 
 
-def extend(R, assets):
+def extend(R, assets, hud=None):
     import json
     sys.path.insert(0, str(pathlib.Path(__file__).resolve().parents[1]))
     import rounds_variants
@@ -38,9 +41,16 @@ def extend(R, assets):
             f["rank_from"] = base["name"]
             f["guest_keys"] = sorted(wk)
             f["guest"] = 0
+            if hud:
+                f["gfx"] = str(hud["stage_gfx"])
             out[vi] = made[row[vi]] = len(files)
             files.append(f)
         table[word] = out
+    if hud:
+        assert files[0]["name"] == "front" and "0" not in table
+        front = dict(files[0], name=files[0]["name"] + "_wv", audio_from=0, rank_from=files[0]["name"], gfx=str(hud["front_gfx"]), guest=0)
+        table["0"] = [len(files)] + [0] * len(masks)   # row 0 is the front end: its file, variant 0 (no characters)
+        files.append(front)
     R["guest_files"] = {"0": table}
     os.environ["GFX_BIN"] = str(assets / "gfx_wolverine.bin")
     return R
