@@ -362,7 +362,7 @@ static void cpu_slack_mark_idle(void)
         cpu_slack_publish_done(vblank, tick, flags);
 }
 #endif
-#ifdef SAT_VDP1_PROFILE
+#if defined(SAT_VDP1_PROFILE) || defined(SAT_PERF_HUD)
 int sat_gfx_profile_busy(void)
 {
     return UNCACHED(gfx_done) != UNCACHED(gfx_handed);
@@ -370,17 +370,28 @@ int sat_gfx_profile_busy(void)
 #endif
 u32 sat_slave_stack[256] __attribute__((section(".lwgfx")));
 
+#ifdef SAT_PERF_HUD
+extern u32 sat_gfx_hud_pre;
+extern void sat_gfx_hud_idle(void);
+#endif
 void sat_slave_main(void)
 {
     CCR = 0x10; CCR = 0x01;
     FTCR = 2;
     for (;;) {
         u32 t, seen;
+#ifdef SAT_PERF_HUD
+        while (!(FTCSR & 0x80)) sat_gfx_hud_idle();   /* readout build: notes the moment VDP1 ends a plot while the slave would only wait */
+#else
         while (!(FTCSR & 0x80)) ;
+#endif
         FTCSR = (u8)(FTCSR & 0x7f);
         CCR = 0x11;
         seen = UNCACHED(gfx_handed);
         if (seen == UNCACHED(gfx_done)) continue;
+#ifdef SAT_PERF_HUD
+        sat_gfx_hud_pre = frt();   /* the slave's timer at the wake, before the per-draw reset: the readout's plot-end bound */
+#endif
         FRTH = 0; FRTL = 0;
         sat_gfx_draw();
         t = frt();

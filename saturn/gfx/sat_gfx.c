@@ -433,9 +433,143 @@ static void vp_sprite(int x, int y, int w, int h, unsigned int pmod,
 #define VP(x)
 #endif
 
+#ifdef SAT_PERF_HUD
+/* Hardware test readout (lane hwtest, 11-09). Default off. Cumulative counters since a reset, drawn as two lines of text on the menu layer (NBG3, the home
+   font) at rows 24 and 25, refreshed about once a second and frozen after SAT_PERF_HUD_WINDOW counted vblanks. Everything is in high work RAM; nothing here
+   touches low work RAM. Counting runs only while a stage is being played (the arcade's stage mode, a character in play, no menu or load up), so in the attract
+   it covers the demo's gameplay and nothing else. Reset: pad L + Z + R together.
+   The master (the vblank hook) owns the picture shares; the slave owns the per-plot figures. Each reads the other's through the uncached alias, no locks:
+   a displayed figure may be one count behind another for a second, and the frozen figures are exact.
+   VDP1 time is observed, never modelled: the slave notes its own free running timer at the PTMR write and again at the first moment it sees EDSR.CEF set,
+   in three places: between its layer passes (a bound: the segment), in its idle loop (a poll every few microseconds, precise) and, when the plot outlasts
+   the frame, in the wait at the start of the next draw (exact). */
+#ifndef SAT_HOME
+#error SAT_PERF_HUD needs SAT_HOME (the menu font and layer)
+#endif
+#ifndef SAT_PERF_HUD_WINDOW
+#define SAT_PERF_HUD_WINDOW 3600UL
+#endif
+#if SAT_VDP1_HW_ERASE
+#if SAT_GFX_PAIR_REUSE
+#define HUD_ARM "BOTH"
+#else
+#define HUD_ARM "HWCLR"
+#endif
+#else
+#if SAT_GFX_PAIR_REUSE
+#define HUD_ARM "PAIR"
+#else
+#define HUD_ARM "OFF"
+#endif
+#endif
+#define HUD(x) x
+#define HUD_ROW0 24
+#define HUD_OS __attribute__((optimize("Os"), noinline))   /* none of this is hot, and high work RAM is what is short */
+extern u32 sat_pad_raw;
+extern volatile int sat_home_hold;
+extern volatile int sat_home_mode;
+extern int sat_gfx_profile_busy(void);
+u32 sat_gfx_hud_pre;   /* slave: its timer when it was woken, before the per-draw reset (kernel.c) */
+static u32 hm_frames, hm_new, hm_held, hm_skip, hm_late, hm_frozen, hm_gen, hm_active, hm_combo;   /* master writes */
+static struct {
+    u32 gen, plots, cmds, build, pn, wsum, wmax, dn, dsum, dmax, n_in, n_idle, n_wait, n_unk;   /* slave writes: totals */
+    u32 t_cmds, t_build, upl, in_build, counting, pending, have, seen, s_tick, kind, watch, wait;   /* the plot in flight */
+} hs;
+static char hud_text[2][44];
+static u32 hud_key = 0xffffffffUL;
+
+/* Master, from sat_gfx_vblank: cls 1 new picture, 2 held (plot unfinished), 3 nothing to show and the slave busy (skip), 4 nothing to show (late). */
+static HUD_OS void hud_master(unsigned cls)
+{
+    u32 pad = sat_pad_raw & 0xffffUL;
+    int combo = !(pad & 0x0008) && !(pad & 0x0010) && !(pad & 0x0080);   /* L, Z, R */
+    int playing = RAMB[0x8001] == 2 && (RAMB[0x8380] || RAMB[0x8480]) && !sat_home_hold && !sat_home_mode;
+    if (combo && !hm_combo)
+    {
+        hm_frames = hm_new = hm_held = hm_skip = hm_late = 0;
+        hm_frozen = 0;
+        UNC32(hm_gen) = UNC32(hm_gen) + 1;
+    }
+    hm_combo = (u32)combo;
+    if (playing && !hm_frozen)
+    {
+        hm_frames++;
+        if (cls == 1) hm_new++; else if (cls == 2) hm_held++; else if (cls == 3) hm_skip++; else hm_late++;
+        if (hm_frames >= SAT_PERF_HUD_WINDOW) hm_frozen = 1;
+    }
+    UNC32(hm_active) = (u32)(playing && !hm_frozen);
+}
+
+/* Slave. The first moment EDSR.CEF is seen set after the PTMR write. */
+static void hud_poll(void)
+{
+    if (hs.pending && !hs.have && (VDP1R(0x10) & 2))
+    {
+        hs.seen = GFX_TICKS(); hs.have = 1; hs.kind = 1;
+    }
+}
+/* Called by the slave's idle loop (kernel.c) while it waits for the next picture. A few microseconds between reads keeps the bus to the master. */
+void sat_gfx_hud_idle(void)
+{
+    if (hs.watch)
+    {
+        if (VDP1R(0x10) & 2) { hs.seen = GFX_TICKS(); hs.have = 1; hs.kind = 2; hs.watch = 0; }
+        else { volatile int i; for (i = 0; i < 40; i++) ; }
+    }
+}
+/* Start of a draw, after the previous plot has ended (or the wait gave up). */
+static HUD_OS void hud_begin(void)
+{
+    u32 gen = UNC32(hm_gen);
+    if (gen != hs.gen)
+    {
+        hs.plots = hs.cmds = hs.build = hs.pn = hs.wsum = hs.wmax = 0;
+        hs.dn = hs.dsum = hs.dmax = hs.n_in = hs.n_idle = hs.n_wait = hs.n_unk = 0;
+        hs.gen = gen; hs.pending = 0;
+    }
+    if (hs.pending)
+    {
+        u32 d = 0;
+        int ok = 1;
+        if (hs.have) { d = (hs.seen - hs.s_tick) & 0xffffUL; if (d > 20000UL) ok = 0; }
+        else if (hs.wait) { d = (sat_gfx_hud_pre - hs.s_tick + hs.wait) & 0xffffUL; hs.kind = 3; if (d > 20000UL) ok = 0; }
+        else ok = 0;   /* ended unseen (the slave was off the register for the whole span): no figure, counted */
+        hs.pn++;
+        hs.wsum += hs.wait; if (hs.wait > hs.wmax) hs.wmax = hs.wait;
+        if (ok)
+        {
+            hs.dn++; hs.dsum += d; if (d > hs.dmax) hs.dmax = d;
+            if (hs.kind == 1) hs.n_in++; else if (hs.kind == 2) hs.n_idle++; else hs.n_wait++;
+        }
+        else hs.n_unk++;
+        hs.pending = 0;
+    }
+    hs.watch = 0;
+    hs.counting = UNC32(hm_active);
+}
+/* Just before PTMR: the plot is going out. */
+static HUD_OS void hud_plot_out(void)
+{
+    hs.s_tick = GFX_TICKS();
+    hs.have = 0; hs.kind = 0; hs.watch = 0;
+    hs.pending = hs.counting;
+    if (hs.counting) { hs.plots++; hs.cmds += hs.t_cmds; hs.build += hs.t_build; }
+}
+static void hud_draw_end(void)
+{
+    hud_poll();
+    hs.watch = hs.pending && !hs.have;
+}
+#define HUD_POLL() hud_poll()
+#else
+#define HUD(x)
+#define HUD_POLL()
+#endif
+
 static void vram_copy(u8 *dest, const u8 *src, u32 bytes)
 {
     u32 i;
+    HUD(u32 hud_upload_start = GFX_TICKS();)
     VP(unsigned int vp_upload_start = (unsigned int)GFX_TICKS();)
 #ifdef SAT_PROF
     u32 t0 = FRT_NOW();
@@ -457,6 +591,7 @@ static void vram_copy(u8 *dest, const u8 *src, u32 bytes)
     for (i = 0; i < bytes / 4; i++) d[i] = s[i];
 #endif
 #endif
+    HUD(if (hs.in_build) hs.upl += (GFX_TICKS() - hud_upload_start) & 0xffffUL;)
     VP(if (vp_active && (u32)dest >= (u32)(VDP1_VRAM + TEX_BASE) &&
           (u32)dest < (u32)(VDP1_VRAM + 0x80000UL)) {
         vp_current[VP_UPLOAD_TICKS] += vp_elapsed(vp_upload_start);
@@ -502,6 +637,9 @@ typedef struct
 #endif
 #ifdef SAT_HOME
     u16 home; /* menu text on its own layer (NBG3) */
+#endif
+#ifdef SAT_PERF_HUD
+    u16 hud;  /* readout lines on NBG3 this picture (no menu is up) */
 #endif
     /* Second half of the handoff (frame chain lane): the layer cells and their sums are written by the master after it has woken the slave, so
        nothing of the first half shares a cache line with them (group aligned to 16, structure size a multiple of 16) and the slave reads them
@@ -1077,7 +1215,7 @@ static void update_priority(u16 layers, u16 pri)
             for (i = 0; i < below; i++) if (p > lp[i]) { sat_gfx_stats.nonmonotone++; break; }
         }
 #ifdef SAT_HOME
-        if (snap.home && level > 6) level = 6;   /* the menu layer (NBG3, 7) in front of sprites too; a sprite wins ties, so 7 would hide it */
+        if ((snap.home HUD(|| snap.hud)) && level > 6) level = 6;   /* the menu layer (NBG3, 7) in front of sprites too; a sprite wins ties, so 7 would hide it */
 #endif
         s[p] = (u16)level;
     }
@@ -1086,6 +1224,99 @@ static void update_priority(u16 layers, u16 pri)
     VDP2R(0xf4) = (u16)(s[4] | (s[5] << 8));
     VDP2R(0xf6) = (u16)(s[6] | (s[7] << 8));
 }
+
+#ifdef SAT_PERF_HUD
+/* The readout (hardware test): two text lines on the menu layer. Characters are the home font's (33 to 90), bit 7 the second colour; 0 and 1 are the panel (black). */
+static HUD_OS char *hud_str(char *p, const char *s, int hi)
+{
+    for (; *s; s++) *p++ = (char)(*s == ' ' ? 1 : (*s | (hi ? 0x80 : 0)));
+    return p;
+}
+static HUD_OS char *hud_u(char *p, u32 v)
+{
+    char t[12];
+    int n = 0;
+    do { t[n++] = (char)('0' + v % 10); v /= 10; } while (v);
+    while (n) *p++ = t[--n];
+    return p;
+}
+/* " label" then the value: tenths 0 a whole number, 1 value is tenths of a unit. */
+static HUD_OS char *hud_val(char *p, const char *label, u32 v, int tenths)
+{
+    p = hud_str(p, label, 0);
+    if (!tenths) return hud_u(p, v);
+    p = hud_u(p, v / 10);
+    *p++ = '.';
+    *p++ = (char)('0' + v % 10);
+    return p;
+}
+static HUD_OS u32 hud_avg(u32 sum, u32 n) { return n ? (sum + n / 2) / n : 0; }
+#define hud_per(n, d) hud_avg((n) * 1000UL, (d))   /* tenths of a percent */
+/* Line 1: arm, counted vblanks, DONE when frozen, then the shares of those vblanks: N new picture, H held (plot unfinished at the vblank), S skipped
+   (the slave still building), L late (nothing new to show). Line 2: D mean/max ticks from PTMR to end of plot, C commands, B build ticks without uploads,
+   W mean/max ticks the slave waited for the previous plot, P percent of D figures that are precise (idle poll or wait) rather than a layer-pass bound. */
+static HUD_OS void hud_format(void)
+{
+    u32 frames = UNC32(hm_frames);
+    char *p;
+    u32 i;
+    for (i = 0; i < 88; i++) (&hud_text[0][0])[i] = 0;
+    p = hud_str(hud_text[0], HUD_ARM, 1);
+    if (!frames) { hud_str(p, " WAIT", 0); }
+    else
+    {
+        p = hud_val(p, " F", frames, 0);
+        if (UNC32(hm_frozen)) p = hud_str(p, " DONE", 1);
+        p = hud_val(p, " N", hud_per(UNC32(hm_new), frames), 1);
+        p = hud_val(p, " H", hud_per(UNC32(hm_held), frames), 1);
+        p = hud_val(p, " S", hud_per(UNC32(hm_skip), frames), 1);
+        p = hud_val(p, " L", hud_per(UNC32(hm_late), frames), 1);
+    }
+    if (hs.plots)
+    {
+        p = hud_val(hud_text[1], "D", hud_avg(hs.dsum, hs.dn), 0); p = hud_val(p, "/", hs.dmax, 0);
+        p = hud_val(p, " C", hud_avg(hs.cmds, hs.plots), 0);
+        p = hud_val(p, " B", hud_avg(hs.build, hs.plots), 0);
+        p = hud_val(p, " W", hud_avg(hs.wsum, hs.pn), 0); p = hud_val(p, "/", hs.wmax, 0);
+        p = hud_val(p, " P", hud_avg((hs.n_idle + hs.n_wait) * 100UL, hs.dn), 0);
+    }
+}
+static HUD_OS u16 hud_name_of(u32 row, u32 col)
+{
+    u32 ch;
+    if (row < HUD_ROW0 || row >= HUD_ROW0 + 2) return 0;
+    ch = (u8)hud_text[row - HUD_ROW0][col];
+    if (ch <= 1) return (u16)(14u << 12 | ((SAT_GFX_HOME_FONT + 58) & 0x3ff));
+    return (u16)(((ch & 0x80) ? 15u : 14u) << 12 | ((SAT_GFX_HOME_FONT + (ch & 0x7f) - 33) & 0x3ff));
+}
+/* NBG3 as the readout's layer: the menus' set-up without the colour calculation (the panel cell is plain black). fresh: coming from a menu or the start. */
+static HUD_OS void hud_layer(int fresh)
+{
+    u32 row, col, key = UNC32(hm_frames) / 60 + (UNC32(hm_frozen) ? 0x10000UL + (hs.pn & 0xffffUL) * 0x20000UL : 0) + (UNC32(hm_gen) & 0xffUL) * 0x10000000UL;
+    int changed = key != hud_key;
+    if (changed) { hud_key = key; hud_format(); }
+    VDP2R(0x10) = 0x0123; VDP2R(0x12) = 0xff67;   /* every picture, as the menus do */
+    VDP2R(0x36) = 0x8063; VDP2R(0x4c) = 0x0f0f; VDP2R(0x4e) = 0x0f0f; VDP2R(0x94) = 0; VDP2R(0x96) = 0;
+    VDP2R(0x24) = 0; VDP2R(0x26) = 0; VDP2R(0xee) = 0; VDP2R(0x10a) = 0; VDP2R(0xec) = 0;
+    if (fresh)
+    {
+        int e;
+        for (e = 62 * 16 + 1; e < 64 * 16; e++) put16(CRAM_AT(e), sat_gfx_colour(cram_shadow[e]));   /* the menu's translucent dot back to plain */
+    }
+    if (fresh || changed)
+        for (row = fresh ? 0 : HUD_ROW0; row < (fresh ? 28u : HUD_ROW0 + 2); row++)
+            for (col = 0; col < 44; col++)
+            {
+                u16 name = hud_name_of(row, col);
+                if (fresh || sh_home[row * 44 + col] != name)
+                {
+                    sh_home[row * 44 + col] = name;
+                    put16(VDP2_VRAM + MAP_HOME + (row * 64 + col) * 2, name);
+                }
+            }
+    VDP2R(0xfa) = (u16)(prinb_last | 0x0700);
+}
+#endif
 
 /* Keep the disabled writer and call sites unchanged after preprocessing. */
 #ifdef SPRITE_PAIR_ACTIVE
@@ -1509,6 +1740,9 @@ static u8 gpal_applied;
 #ifdef SAT_GUEST_PROF
 u32 sat_gprof[8];   /* measurement: 0 sum ticks of sat_guest_objects, 1 calls, 2 max, 3 sum ticks of palette+object copy before it, 4 sum ticks of the whole begin, 5 calls that drew a guest, 6 their ticks, 7 their palette+copy ticks */
 #endif
+#ifdef SAT_PERF_HUD
+static u32 hud_sum1;   /* the game's own sum of palette page 1 this frame */
+#endif
 void sat_gfx_snapshot_begin(void)
 {
     u16 layers = RAM16(SH_LAYERS), video = RAM16(SH_VIDEO), pal_reg = RAM16(SH_PALETTE_BASE), pal_mask = RAM16(SH_PAL_PAGES);
@@ -1538,6 +1772,7 @@ void sat_gfx_snapshot_begin(void)
     int pal0_same = 0;
 #endif
     snap.pal_pages = 0;
+    HUD(hud_sum1 = 0;)
     for (page = 0; page < SAT_GFX_PAGES; page++)
     {
         const u8 *src = palette_page(pal, pal_mask, page);
@@ -1545,6 +1780,7 @@ void sat_gfx_snapshot_begin(void)
         if (!src) continue;
         snap.pal_pages |= (u16)(1U << page);
         for (n = 0; n < 0x400; n += 4) sum = MIX(sum, be32(src + n));
+        HUD(if (page == 1) hud_sum1 = sum;)
 #ifdef SAT_SNAP_VERIFY
         if (sum == snap.pal_sum[page])
             for (n = 0; n < 0x400; n += 4) { sat_speed.verify_checked++; if (*(u32 *)(void *)(snap.palette[page] + n) != be32(src + n)) sat_speed.verify_bad++; }
@@ -1552,8 +1788,8 @@ void sat_gfx_snapshot_begin(void)
 #ifdef SAT_SNAP_ALWAYS
         if (1)
 #elif defined(SAT_GUESTS) && SAT_GUEST_PAL_KEEP
-        if (page == 0 && gpal_applied ? sum == (snap.pal_sum[0] ^ 0x5a5a5a5aUL) : 0) pal0_same = 1;
-        if (!pal0_same && sum != snap.pal_sum[page])
+        if (page == 0) pal0_same = gpal_applied && sum == (snap.pal_sum[0] ^ 0x5a5a5a5aUL);
+        if (!(page == 0 && pal0_same) && sum != snap.pal_sum[page])   /* hwtest: the keep applies to page 0 only; as first written pal0_same also froze pages 1 and up (scroll 1 palette fades) */
 #else
         if (sum != snap.pal_sum[page])
 #endif
@@ -1643,6 +1879,17 @@ void sat_gfx_snapshot_begin(void)
         for (n = 0; n < 64; n++) snap.palette[1][30 * 32 + n] = home_pal[n];
         snap.pal_sum[1]++;
     }
+#ifdef SAT_PERF_HUD
+    snap.hud = (u16)!snap.home;
+    if (snap.hud)
+    {
+        /* The readout's colours are the menus' (banks 62 and 63): the page is recopied from the game each frame and carries a marked sum, so the
+           drawing side sees an unchanged sum and does no palette work while the readout is the only user. */
+        snap.pal_pages |= 2;
+        for (n = 0; n < 64; n++) snap.palette[1][30 * 32 + n] = home_pal[n];
+        snap.pal_sum[1] = hud_sum1 ^ 0x48554421UL;
+    }
+#endif
 #endif
 #ifdef SAT_GUEST_PROF
     sat_gprof[4] += (GFX_TICKS() - gp_t0) & 0xffffu;
@@ -1737,6 +1984,7 @@ unsigned long sat_vl_sforced;   /* retained SAT_VLOG ABI counter, always zero: u
 void sat_gfx_vblank(void)
 {
     u32 s = UNC32(plot_started);
+    HUD(unsigned hud_cls = 4;)
 #ifdef SAT_VDP1_PROFILE
     unsigned int vp_before = (unsigned int)UNC32(plot_shown);
     unsigned int vp_edsr = VDP1R(0x10), vp_vblank = (unsigned int)sat_vblanks_now() + 1;
@@ -1767,6 +2015,7 @@ void sat_gfx_vblank(void)
 #endif
             UNC32(plot_shown) = s;
             UNC32(plot_held) = 0;
+            HUD(hud_cls = 1;)
         }
         else
         {
@@ -1775,8 +2024,10 @@ void sat_gfx_vblank(void)
 #endif
             UNC32(plot_held) = UNC32(plot_held) + 1;
             UNC32(sat_gfx_plot_waits) = UNC32(sat_gfx_plot_waits) + 1;
+            HUD(hud_cls = 2;)
         }
     }
+    HUD(else hud_cls = sat_gfx_profile_busy() ? 3u : 4u;)
 #ifdef SAT_VLOG
     {
         volatile unsigned long *e = UNC_PTR(unsigned long, &sat_vb[(vbv & 15) * 4]);
@@ -1796,6 +2047,7 @@ void sat_gfx_vblank(void)
         row[VF_VBLANK] = vp_vblank;
     }
 #endif
+    HUD(hud_master(hud_cls);)
 }
 static u32 slave_ticks(void) { return GFX_TICKS(); }
 /* Before the table and the texture slots are touched: the last plot has ended (its change may still be pending; only PTMR waits for that). */
@@ -1803,6 +2055,7 @@ static int plot_wait_end(void)
 {
     u32 t0 = slave_ticks();
     static u32 kicked;   /* serial of the plot already started again once */
+    HUD(hs.wait = 0;)
     if (!UNC32(plot_sync)) return 1;
     while (UNC32(plot_started) != UNC32(plot_shown) && !(VDP1R(0x10) & EDSR_CEF))
         if (((slave_ticks() - t0) & 0xffffUL) > SLAVE_WAIT_MAX) {
@@ -1825,6 +2078,7 @@ static int plot_wait_end(void)
             return 0;
         }
     VP(vp_current[VP_WAIT_END_TICKS] = vp_elapsed((unsigned int)t0);)
+    HUD(hs.wait = (slave_ticks() - t0) & 0xffffUL;)
     return 1;
 }
 /* Before PTMR: the change for the last plot has been asked for, so the new plot goes into the other buffer. */
@@ -1895,6 +2149,7 @@ static int plot_start(void)
 #endif
     VP(vp_current[VP_SUBMIT_TICK] = (unsigned int)GFX_TICKS();
        vp_current[VP_START_VBLANK] = (unsigned int)sat_vblanks_now();)
+    HUD(hud_plot_out();)
     VDP1R(PTMR) = 1;
     UNC32(plot_started) = UNC32(plot_started) + 1;
     VP(vp_current[VP_SERIAL] = (unsigned int)UNC32(plot_started);)
@@ -1934,7 +2189,8 @@ void sat_gfx_draw(void)
     /* A timeout abandons this presentation, never the running game. Do this
        before palette, texture, cache-stamp or command-table writes. A late plot
        must keep all of its inputs intact until its end flag really arrives. */
-    if (!plot_wait_end()) { VP(vp_finish(VP_END_TIMEOUT);) return; }
+    if (!plot_wait_end()) { HUD(hs.pending = 0; hs.counting = 0;) VP(vp_finish(VP_END_TIMEOUT);) return; }
+    HUD(hud_begin();)
 #endif
     stamp = (u16)(stamp + 1U == 0x10000UL ? 1U : stamp + 1U);
     cache_frame(&spr_cache); cache_frame(&s1_cache); cache_frame(&s2_cache); cache_frame(&s3_cache);
@@ -1974,7 +2230,9 @@ void sat_gfx_draw(void)
 #endif
     VLN(vl_serial = (u16)(UNC32(plot_started) + 1);)
     VP(vp_sprite_start = (unsigned int)GFX_TICKS();)
+    HUD(hs.upl = 0; hs.in_build = 1; hs.t_build = GFX_TICKS();)
     draw_sprites();
+    HUD(hs.t_build = ((GFX_TICKS() - hs.t_build) & 0xffffUL) - hs.upl; hs.in_build = 0; hs.t_cmds = sat_gfx_stats.commands;)
     VP(vp_current[VP_SPRITE_TICKS] = vp_elapsed(vp_sprite_start);)
     note_slots();
 #ifdef SAT_VLOG
@@ -1999,6 +2257,7 @@ void sat_gfx_draw(void)
     if (!plot_start()) { plot_abandon_build(); VP(vp_finish(0);) return; }
 #endif
     VP(vp_current[VP_FLAGS] |= VP_SUBMITTED; vp_layer_start = (unsigned int)GFX_TICKS();)
+    HUD_POLL();
     /* Only a submitted plot owns the protected previous texture stamp. An
        abandoned build must not release the last submitted plot's textures. */
     prev_stamp = stamp;
@@ -2016,6 +2275,7 @@ void sat_gfx_draw(void)
        leaving restores play's pattern, colour calculation and priority (update_priority writes 0xfa every frame). */
     {
         static int home_was;
+        HUD(static int hud_was;)
         if (snap.home)
         {
             VDP2R(0x10) = 0x0123; VDP2R(0x12) = 0xff67;
@@ -2026,36 +2286,42 @@ void sat_gfx_draw(void)
             /* Colour calculation by the colour's MSB (SFCCMD NBG3 mode 3): banks 62 and 63 written here with the MSB only on dot 15, the panel's. */
             { int e; for (e = 62 * 16 + 1; e < 64 * 16; e++) if (e & 15) put16(CRAM_AT(e), (u16)((sat_gfx_colour(cram_shadow[e]) & 0x7fffU) | ((e & 15) == 15 ? 0x8000U : 0))); }
         }
-        else if (home_was)
+        else if (home_was HUD(&& !snap.hud))
         {
             VDP2R(0x10) = 0x012f; VDP2R(0x12) = 0xff6f;
             VDP2R(0xec) = 0; VDP2R(0xee) = 0; VDP2R(0x10a) = 0;
             { int e; for (e = 62 * 16 + 1; e < 64 * 16; e++) put16(CRAM_AT(e), sat_gfx_colour(cram_shadow[e])); }   /* the game's colours back, MSB as everywhere */
         }
+        HUD(if (snap.hud && !snap.home) { hud_layer(home_was || !hud_was); hud_was = 1; } else hud_was = 0;)
         home_was = snap.home;
     }
 #endif
     STAGE(1);
     update_rowscroll();
     VDP2R(0x9a) = (u16)(row_active ? 0x0002 : 0);
+    HUD_POLL();
 
     STAGE(2);
     snap_layers_wait();
+    HUD_POLL();
     VP(vp_current[VP_SNAPSHOT_TICKS] |= snap.profile_layer_ticks << 16;)
     if (layers & 4)
     {
         bgon |= 1;
         if (!drawn_valid || snap.s2_sum != drawn_s2) { draw_scroll2(s2x, s2y, row_active); drawn_s2 = snap.s2_sum; }
+        HUD_POLL();
     }
     if (layers & 8)
     {
         bgon |= 2;
         if (!drawn_valid || snap.s3_sum != drawn_s3) { draw_scroll3(s3x, s3y); drawn_s3 = snap.s3_sum; }
+        HUD_POLL();
     }
     if (layers & 2)
     {
         bgon |= 4;
         if (!drawn_valid || snap.s1_sum != drawn_s1) { draw_scroll1(s1x, s1y); drawn_s1 = snap.s1_sum; }
+        HUD_POLL();
     }
     drawn_valid = 1;
     STAGE(3);
@@ -2063,7 +2329,7 @@ void sat_gfx_draw(void)
     bgon &= SAT_GFX_BGMASK;
 #endif
 #ifdef SAT_HOME
-    if (snap.home) bgon |= 8;
+    if (snap.home HUD(|| snap.hud)) bgon |= 8;
 #endif
     VDP2R(0x20) = bgon;
     VDP2R(0x70) = (u16)((s2x + CPS_LEFT + SAT_GFX_CROP_X - NUDGE_X) & 0x7ff);
@@ -2100,6 +2366,7 @@ void sat_gfx_draw(void)
     }
 #endif
     sat_gfx_stats.frames++;
+    HUD(hud_draw_end();)
     VP(vp_current[VP_LAYER_TICKS] = vp_elapsed(vp_layer_start);
        if (VDP1R(0x10) & 2) {
            vp_current[VP_FLAGS] |= VP_CEF_AT_CPU_DONE;
