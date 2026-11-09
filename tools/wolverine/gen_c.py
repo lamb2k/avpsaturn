@@ -92,9 +92,65 @@ for m, s_ in moves.items():
         if not (0 <= a <= 255 and 0 <= b <= 255):
             raise SystemExit("NO-GO: lift outside 0..255")
         lift += [a, b]
+# Lane wolverine-ground (11-09), all default off, nothing below changes a default build's tables:
+#   SAT_WV_GROUND=1 wv_gy[step]: y offset (down positive) that puts the step's drawn pose on the floor line (tools/wolverine/ground.py: the lowest
+#                   opaque row of each pose against the stance's; a pose is lifted only where MSHvSF itself lifts it), added to his draw y. =2 strict: no lifts at all.
+#                   With it the jump uses the sole-exact arc below (apex as now) so that take-off and landing touch the floor.
+#   SAT_WV_JUMP=1   the same sole-exact arc scaled to the AvP jumpers' apex (JUMP_APEX_AVP px of sole height); =2 half way between that and now.
+# The arc is MSHvSF's: only the heights are scaled, the rise and fall timing (the step table) is unchanged.
+JUMP_APEX_AVP = 88     # Predator Warrior and Hunter (sole height, MAME avspu, lane wolverine-ground ap_measure.lua); Linn 127, Schaefer 0 (his jump is flat)
+JA = A.get("jumpair")
+lift_sole = {}
+if JA:
+    apex = max(max(st[2], st[3]) for st in JA["steps"])
+    for tag, k in (("cur", 1.0), ("avp", JUMP_APEX_AVP / apex), ("mid", (1.0 + JUMP_APEX_AVP / apex) / 2)):
+        t = [0] * len(lift)
+        base = sum(len(m_) for nm, m_ in moves.items() if list(moves).index(nm) < list(moves).index("jump")) * 2
+        for i_, (st, dpv) in enumerate(zip(JA["steps"], JA["dp"])):
+            a0, a1 = round(k * st[2]) + dpv, round(k * st[3]) + dpv
+            if not (-128 <= a0 <= 127 and -128 <= a1 <= 127):
+                raise SystemExit("NO-GO: sole-exact lift outside a signed byte")
+            t[base + 2 * i_], t[base + 2 * i_ + 1] = a0, a1
+        lift_sole[tag] = (t, k)
+lines += [
+    "#if SAT_WV_JUMP == 1 || SAT_WV_JUMP == 2 || defined(SAT_WV_GROUND)",
+] if lift_sole else []
+if lift_sole:
+    lines += [
+        f"#if SAT_WV_JUMP == 1   /* apex {JUMP_APEX_AVP} px, x{lift_sole['avp'][1]:.3f} */",
+        f"static const signed char wv_lift[{len(lift)}] = {{{','.join(map(str, lift_sole['avp'][0]))}}};",
+        f"#elif SAT_WV_JUMP == 2   /* x{lift_sole['mid'][1]:.3f} */",
+        f"static const signed char wv_lift[{len(lift)}] = {{{','.join(map(str, lift_sole['mid'][0]))}}};",
+        "#else   /* SAT_WV_GROUND: today's apex, feet exact */",
+        f"static const signed char wv_lift[{len(lift)}] = {{{','.join(map(str, lift_sole['cur'][0]))}}};",
+        "#endif",
+        "#else",
+    ]
 lines += [
     f"static const unsigned char wv_lift[{len(lift)}] = {{{','.join(map(str, lift))}}};",
 ]
+if lift_sole:
+    lines += ["#endif"]
+GR = A.get("ground")
+if GR:
+    gys = {}
+    for tag, key in (("keep", "ground"), ("floor", "ground_floor")):
+        gy = []
+        for m, s_ in moves.items():
+            g_ = A.get(key, GR).get(m, [0] * len(s_))
+            if len(g_) != len(s_) or any(not -128 <= v <= 127 for v in g_):
+                raise SystemExit(f"NO-GO: ground table of {m} does not match its steps")
+            gy += g_
+        gys[tag] = gy
+    lines += [
+        "#ifdef SAT_WV_GROUND",
+        "#if SAT_WV_GROUND == 2   /* strict: every pose's lowest opaque row on the floor line */",
+        f"static const signed char wv_gy[{len(gys['floor'])}] = {{{','.join(map(str, gys['floor']))}}};",
+        "#else   /* feet on the floor, MSHvSF's deliberate lifts kept */",
+        f"static const signed char wv_gy[{len(gys['keep'])}] = {{{','.join(map(str, gys['keep']))}}};",
+        "#endif",
+        "#endif",
+    ]
 # Ground speed of his walk against Schaefer's, in 1/16 (16 = as Schaefer): AvP's walk is about 2.0 px a tick (Yaba, stage 02, 290 held frames, 1.8-2.2),
 # MSHvSF's about 2.8 px a frame (origin of boxcap/boxes.txt over frames 2005-2060): 22 is 1.375. Depth moves scale the same. His slot only.
 SPEED = dict(walk=22)

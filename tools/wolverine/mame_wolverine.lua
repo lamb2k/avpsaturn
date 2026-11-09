@@ -107,6 +107,9 @@ sub = emu.add_machine_frame_notifier(function()
     end
     if not boxf then boxf = assert(io.open(root .. "/boxes.txt", "w")) end
     boxf:write(table.concat(t, " ") .. string.char(10))
+    -- origin.txt (lane wolverine-ground): world and camera y/x of the origin, so a frame's height above his ground is known when the camera scrolls with a jump
+    if not orgf then orgf = assert(io.open(root .. "/origin.txt", "w")) end
+    orgf:write(string.format("o %d %d %d %d %d %d%s", frame, s16(prog:read_u16(b + 0x0c)), s16(prog:read_u16(b + 0x10)), s16(prog:read_u16(st + 0x0c)), s16(prog:read_u16(st + 0x10)), s16(prog:read_u16(b + 0x14)), string.char(10)))
   end
   if frame >= last then finish(); machine:exit() end
 end)
