@@ -5,10 +5,13 @@ Prints addresses and counts only. A native data block must be reachable through 
   - table slots in the opcode store holding a table base (patched once, 4 bytes each, entry for character 1);
   - code immediates holding a table base (resolved at build time through a macro);
   - pointers into the record and assembly range (audited one by one).
-usage: access_audit.py WORK"""
+usage: access_audit.py WORK [--emit-host FILE] [--emit-opx FILE]
+  --emit-host  the 68000 addresses of the table-base slots, one hex address a line (tools/lift_runner/host_reloc.c)
+  --emit-opx   the same slots as opcode-store offsets, a C array wv_reloc_slots[] (the target build; ROM-derived addresses, build directory only)"""
 import json, pathlib, re, sys
 
 W = pathlib.Path(sys.argv[1])
+ARGS = sys.argv[2:]
 ox = (W / "opx.bin").read_bytes()
 j = json.loads((W / "opx.json").read_text())
 inv = sorted((v, int(k, 16)) for k, v in j.items())
@@ -39,3 +42,14 @@ print("code immediates holding a table base:", len(imm))
 for a, b in imm: print("  at %x -> %s" % (a, b))
 print("opcode-store longs pointing into records or assemblies (%x..%x):" % (REC_LO, REC_HI), len(ptrs))
 for a, v in ptrs: print("  %x -> %x" % (a, v))
+
+if "--emit-host" in ARGS:
+    pathlib.Path(ARGS[ARGS.index("--emit-host") + 1]).write_text("".join("%x" % a + chr(10) for a, _ in slots))
+if "--emit-opx" in ARGS:
+    offs = {a: o for o, a in [(o, a) for o, a in inv]}
+    rev = []
+    for i in range(0, len(ox) - 3, 2):
+        if int.from_bytes(ox[i:i + 4], "big") in BASES:
+            rev.append(i)
+    pathlib.Path(ARGS[ARGS.index("--emit-opx") + 1]).write_text(
+        "#define WV_RELOC_SLOTS %d" % len(rev) + chr(10) + "static const unsigned int wv_reloc_slots[%d] = {%s};" % (len(rev), ",".join(map(str, rev))) + chr(10))

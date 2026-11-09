@@ -118,6 +118,64 @@ static int is_wolverine(int i);
 #endif
 extern u8 *PAGE[256];
 #define PBY(a) (PAGE[((u32)(a) >> 16) & 0xff] + ((u32)(a) & 0xffff))
+/* Lane wv-native-gfx (11-09), default off: -DSAT_WV_NATIVE_GFX (plan V2). His idle, walk and first claw attack are the game's own animation data: frame records and pose
+   assemblies in one 64 KB block (gen/wv_native.inc, tools/wolverine/gen_native.py) that the page table maps at 68000 address 0x300000 (PAGE[0x30]); the game's emitter
+   (0xa9cb6 -> 0xaa38a) draws them, its animation tick (f_1656e) advances them. Schaefer's index tables and records are relocated into the same block (donor-equivalent: only
+   named pointer fields change, tools/wolverine/reloc_check.py and the host identity run) and every access point is redirected, not patched in place:
+     - 26 slots of the opcode store (per-character tables, entry of character 1) hold a table base: delta added while the setting is on, taken off when it goes off;
+     - the lifted code's table-base immediates (build.py rewrites them to + sat_wv_anim_delta) follow the same variable;
+     - the per-character box table entry (0x19748) names his T' (donor copy plus his boxes) while on.
+   While a player's frame record is one of his native records (window address between WV_NAT_REC_LO and WV_NAT_REC_END) the replacement pass, the move clock with its holds, the box
+   swap and the walk speed scale all leave that player alone. wv_nat_dbg (debug port): bit 0 native data on (default), bit 1 force the skin's idle step 0 (A/B). */
+#ifdef SAT_WV_NATIVE_GFX
+#include "wv_native.inc"
+volatile u8 wv_nat_dbg = 1;
+u32 sat_wv_anim_delta;     /* the lifted code's table-base immediates add this (0 = Schaefer's own tables) */
+#define OPXB ((volatile u8 *)0x02600000u)
+static u8 wv_nat_on, wv_nat_row;
+static u32 opx_rd(u32 o) { volatile u16 *p = (volatile u16 *)(OPXB + o); return (u32)p[0] << 16 | p[1]; }
+static void opx_wr(u32 o, u32 v) { volatile u16 *p = (volatile u16 *)(OPXB + o); p[0] = (u16)(v >> 16); p[1] = (u16)v; }
+static void wv_nat_slots(int apply)
+{
+    int k;
+    for (k = 0; k < WV_RELOC_SLOTS; k++) {
+        u32 v = opx_rd(wv_reloc_slots[k]);
+        if (apply ? v < 0x200000u : v >= WV_NAT_WIN) opx_wr(wv_reloc_slots[k], apply ? v + WV_NAT_DELTA : v - WV_NAT_DELTA);
+    }
+    {
+        u32 v = opx_rd(WV_NAT_TSLOT);
+        if (apply ? v == WV_NAT_T_DONOR : v == WV_NAT_T) opx_wr(WV_NAT_TSLOT, apply ? WV_NAT_T : WV_NAT_T_DONOR);
+    }
+}
+static void wv_nat_sync(void)   /* once a vblank (pad hook) and on every player update: the data follows the setting, the second palette row follows the stage */
+{
+    if ((sat_guest_sel & 1) && (wv_nat_dbg & 1)) {
+        u8 row = (u8)WV_PALROW1;
+        if (!wv_nat_on) {
+            PAGE[0x30] = wv_blk;
+            wv_nat_slots(1);
+            sat_wv_anim_delta = WV_NAT_DELTA;
+            wv_nat_on = 1; wv_nat_row = 0;
+        }
+        if (row != wv_nat_row) {
+            int k;
+            for (k = 0; k < WV_NAT_NP1; k++) wv_blk[wv_nat_p1[k]] = (u8)((wv_blk[wv_nat_p1[k]] & 0xe0) | row);
+            wv_nat_row = row;
+        }
+    } else if (wv_nat_on) {
+        sat_wv_anim_delta = 0;
+        wv_nat_slots(0);
+        wv_nat_on = 0;
+    }
+}
+static int wv_nat_rec_at(u32 blk)   /* the block's current frame record is one of his native ones */
+{
+    u32 r = (u32)R16(blk + 0x1c) << 16 | R16(blk + 0x1e);
+    return r >= WV_NAT_REC_LO && r < WV_NAT_REC_END;
+}
+#define wv_nat_drawn(i) (wv_nat_on && wv_nat_rec_at(PL(i)))
+#endif
+
 /* One aligned word publishes a complete pose/box step to the vblank snapshot.
    The IRQ must not combine cur_ from a new move with its previous step_. */
 static volatile u16 wv_step_now[2] = {0xffff, 0xffff};
@@ -167,7 +225,11 @@ void sat_guest_wolverine_boxes(unsigned long a6, unsigned long a1, int restore)
     nundo = 0;
     if (!WV_HAVE_BOXES) return;
     hit_i = -1;
-    if ((i = wv_player((u32)a6)) >= 0) {   /* his hit */
+    if ((i = wv_player((u32)a6)) >= 0
+#ifdef SAT_WV_NATIVE_GFX
+        && !wv_nat_drawn(i)   /* his native records carry T' entries of their own */
+#endif
+        ) {   /* his hit */
         const WvBox *w = box_now(i);
         u32 fr = rd32((u32)a6 + 0x1c), t = rd32((u32)a6 + 0x50);
         u8 *f = PBY(fr), idx = f[9];
@@ -184,7 +246,11 @@ void sat_guest_wolverine_boxes(unsigned long a6, unsigned long a1, int restore)
             }
         }
     }
-    if ((i = wv_player((u32)a1)) >= 0) {   /* his hurt box */
+    if ((i = wv_player((u32)a1)) >= 0
+#ifdef SAT_WV_NATIVE_GFX
+        && !wv_nat_drawn(i)
+#endif
+        ) {   /* his hurt box */
         const WvBox *w = box_now(i);
         u32 fr = rd32((u32)a1 + 0x1c), t = rd32((u32)a1 + 0x50);
         u8 idx = PBY(fr)[8];
@@ -309,44 +375,6 @@ write:
         }
     names_on = (u8)on;
 }
-
-/* Lane wv-native-gfx (11-09), default off: -DSAT_WV_NATIVE_GFX draws ONE pose, his stand, from the game's own data. The game's emitter (0xa9cb6 -> 0xaa38a)
-   reads the player's frame record (block +1c) and walks the pose assembly it points to (record +4). Schaefer's stand is one record (anim table 0x162f90 entry 0,
-   0x163158: 4095 ticks, then a jump to itself). While Wolverine is chosen that record's assembly pointer is rewritten to 0x300000, a 68000 address the page table
-   (PAGE[0x30], else an unmapped sink) maps to wv_nat_asm: a family 0x000A assembly of his stance pose (tools/wolverine/gen_c.py). Nothing else changes: the game's
-   state machine, timer and box indexes are Schaefer's; the pass below skips this player while his record is the patched one. wv_nat_dbg (poke it through the
-   debug port): bit 0 native on (default), bit 1 force the skin's idle step 0 (for the A/B). Stage loads keep this page (every stage file reads it), so the
-   write stays; it is checked on every player update and undone when the setting goes off. */
-#ifdef SAT_WV_NATIVE_GFX
-#define WV_NAT_REC 0x163158u    /* Schaefer's stand frame record */
-#define WV_NAT_WIN 0x300000u    /* 68000 address of wv_nat_asm */
-volatile u8 wv_nat_dbg = 1;
-u32 wv_nat_orig;                /* the record's own assembly pointer, kept the first time it is seen unpatched */
-static u8 wv_nat_row;           /* second palette row written into wv_nat_asm */
-static u32 wv_nat_rd(void) { volatile u16 *p = (volatile u16 *)(ROMB + WV_NAT_REC + 4); return (u32)p[0] << 16 | p[1]; }
-static void wv_nat_wr(u32 v) { volatile u16 *p = (volatile u16 *)(ROMB + WV_NAT_REC + 4); p[0] = (u16)(v >> 16); p[1] = (u16)v; }
-static void wv_nat_sync(int on)
-{
-    u32 cur = wv_nat_rd();
-    if (on && (wv_nat_dbg & 1)) {
-        u8 row = (u8)WV_PALROW1;
-        if (cur != WV_NAT_WIN) {
-            wv_nat_orig = cur;
-            wv_nat_wr(WV_NAT_WIN);
-        }
-        PAGE[0x30] = wv_nat_asm;
-        if (row != wv_nat_row) {
-            int k;
-            for (k = 0; k < WV_NAT_NP1; k++) wv_nat_asm[wv_nat_p1[k]] = (u8)((wv_nat_asm[wv_nat_p1[k]] & 0xe0) | row);
-            wv_nat_row = row;
-        }
-    } else if (cur == WV_NAT_WIN && wv_nat_orig) wv_nat_wr(wv_nat_orig);
-}
-static int wv_nat_drawn(int i)   /* this player's frame record is the patched one: the game draws him, the pass below does not */
-{
-    return (wv_nat_dbg & 1) && wv_nat_rd() == WV_NAT_WIN && ((u32)R16(PL(i) + 0x1c) << 16 | R16(PL(i) + 0x1e)) == WV_NAT_REC;
-}
-#endif
 
 /* Move clock and timings (option B). The clock runs in player updates (source
    0x195ec), never in snapshots. The existing measured native tick estimates
@@ -530,7 +558,11 @@ int sat_guest_wolverine_tick(unsigned long a6)
     }
     xb_[i] = R16(PL(i) + 0x10); zb_[i] = R16(PL(i) + 0x18);
 #ifdef SAT_WV_NATIVE_GFX
-    wv_nat_sync(1);
+    wv_nat_sync();
+    if (wv_nat_drawn(i)) {   /* his own record: the game's clock runs it, nothing is held or drawn over it */
+        cur_[i] = 255; recovery_[i] = 0; held_[i] = 0; wv_step_now[i] = 0xffff;
+        return 1;
+    }
 #endif
     return wv_tick_move(i);
 }
@@ -545,6 +577,9 @@ void sat_guest_wolverine_after_tick(unsigned long a6)
         if (a6 == PL(0) || a6 == PL(1)) wv_reset((int)((a6 - PL(0)) >> 8));
         return;
     }
+#ifdef SAT_WV_NATIVE_GFX
+    if (wv_nat_drawn(i)) return;
+#endif
     wv_speed(i);
     move = move_for(i, 1);
     if (move == cur_[i] && !restart_[i]) return;
@@ -809,11 +844,11 @@ void sat_guest_wolverine_pad(u16 *in0)
 {
     static const u8 qcf[3] = {3, 2, 1}, dp[3] = {1, 3, 2};
     int i, k;
+#ifdef SAT_WV_NATIVE_GFX
+    wv_nat_sync();
+#endif
     if (!(sat_guest_sel & 1)) {
         wv_reset(0); wv_reset(1);
-#ifdef SAT_WV_NATIVE_GFX
-        wv_nat_sync(0);
-#endif
         return;
     }
     for (i = 0; i < 2; i++) {

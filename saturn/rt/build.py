@@ -180,6 +180,10 @@ def opx_rewrite(m):
     return f"OP{m[1]}{paren}0x{OPMAP[hex(int(m[2], 16))]:x}u"
 
 
+NATIVE_GFX = "SAT_WV_NATIVE_GFX" in os.environ.get("KERNEL_CFLAGS", "") and bool(os.environ.get("GUEST_ASSETS"))   # Wolverine's native animation data (plan V2; saturn/guests/wolverine)
+TABLE_BASES = re.compile(r"\(\(u32\)(0x(?:162f90|163032|163074|1630f6)u)\)")   # Schaefer\'s four animation index tables as immediates of the lifted code
+
+
 def gen_sources():
     out = []
     for s in sorted((WORK / "src").glob("c*.c"), key=lambda p: int(p.stem[1:])):
@@ -187,6 +191,9 @@ def gen_sources():
         a, b = t.index("#else\nregister Cpu *R"), t.index("#define SHL8(")
         t = t[:a] + '#else\n#include "lift_target.h"\n#endif\n' + t[b:]
         t = re.sub(r"\bOP(8|16|32)\(\(?0x([0-9a-f]+)u", opx_rewrite, t)
+        if NATIVE_GFX:   # the table-base immediates follow sat_wv_anim_delta (wolverine.c): 0 while the setting is off, the relocation delta while his native block is on
+            t = TABLE_BASES.sub(lambda m: "((u32)(" + m[1] + " + sat_wv_anim_delta))", t)
+            t = t.replace('#include "lift_target.h"' + chr(10) + '#endif' + chr(10), '#include "lift_target.h"' + chr(10) + '#endif' + chr(10) + 'extern unsigned sat_wv_anim_delta;' + chr(10), 1)
         for n in NATIVE + OVERRIDES + GUEST_WRAP:   # replaced natively; the lifted body stays linked as lifted_NNN
             t = t.replace(f"void f_{n}(void){{", f"void lifted_{n}(void){{")
         for n in OVERRIDES:   # memory is tight and the target never falls back: the replaced body goes
@@ -395,6 +402,8 @@ def main():
     if "SAT_GUESTS" in os.environ.get("KERNEL_CFLAGS", ""):   # bonus characters; builds without the flag are unchanged
         home_cold_extra.append(cc(HERE / "guests.c", OBJ / "guests.o", ["-Os", "-I", GEN] + os.environ.get("KERNEL_CFLAGS", "").split()))
         if os.environ.get("GUEST_ASSETS"):   # Wolverine's tables come from the user's ROM set at build time; his code runs from the cart
+            if NATIVE_GFX:   # his native animation block, from his program ROM (a MAME dump, tools/wolverine/mshvsf_dump.lua) and the guest assets
+                sh([sys.executable, REPO / "tools/wolverine/gen_native.py", WORK, os.environ["GUEST_ASSETS"], os.environ.get("WV_MSHVSF", "E:/AvP/learning/lane-wv-native-gfx/mshvsf"), GEN / "wv_native.inc"])
             sh([sys.executable, REPO / "tools/wolverine/gen_c.py", os.environ["GUEST_ASSETS"], GEN / "wolverine_data.inc"] + ([os.environ["WV_COLOUR"]] if os.environ.get("WV_COLOUR") else []))   # WV_COLOUR: a colours entry of remap.json (default: its default_colour)
             # guests.c dispatches: his whole-list pass is renamed so the group-indexed guests (Mega Man) run first
             home_cold_extra.append(cc(REPO / "saturn/guests/wolverine/wolverine.c", OBJ / "wolverine.o", ["-Os", "-I", GEN, "-I", HERE, "-Dsat_guest_objects=sat_guest_wolverine_objects"] + os.environ.get("KERNEL_CFLAGS", "").split()))
@@ -520,6 +529,14 @@ SECTIONS {{
            "lw_image": (ISO / "LW.BIN").stat().st_size, "lw_end": hex(lw_end), "lw_free": LW_LIMIT - lw_end,
            "lifted_code_total": sum(sizes.values()), "lifted_in_hw": used, "chunks_lw": [o.stem for o in lw],
            "cart_free": CART_END - syms["_sat_cold1_end"], "stretch_free": [s[0] + s[1] - syms[f"_sat_st{i}_end"] for i, s in enumerate(STRETCHES)]})
+    if NATIVE_GFX:   # canary for every stage including 26: his block sits in the cart tail, outside the ROM image and every ROM stretch the stage files spill tiles over
+        blk = syms["_wv_blk"]
+        sz = int(re.search(r"#define WV_NAT_SIZE (\d+)", (GEN / "wv_native.inc").read_text())[1])
+        bad = [n for n, (lo, hi) in [("ROM image", (CART["ROMB"], CART["ROMB"] + 0x200000))] + [("stretch %d" % k, (st[0], st[0] + st[1])) for k, st in enumerate(STRETCHES)] if blk < hi and blk + sz > lo]
+        ok = not bad and cold1_at <= blk and blk + sz <= CART_END
+        print({"wv_blk": hex(blk), "size": sz, "end": hex(blk + sz), "cold1_at": hex(cold1_at), "canary": "OUTSIDE the ROM image and every stretch, inside the cart tail" if ok else "BAD " + ",".join(bad)})
+        if not ok:
+            raise SystemExit("NO-GO: the native block overlaps pages a stage file takes: " + ",".join(bad))
     if syms["_sat_cold1_end"] > CART_END or any(syms[f"_sat_st{i}_end"] > s[0] + s[1] for i, s in enumerate(STRETCHES)):
         raise SystemExit("NO-GO: past the cart")
     if hw_end > HW_LIMIT or lw_end > LW_LIMIT:

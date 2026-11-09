@@ -34,13 +34,26 @@ def leg(s, tag, dbg):
     rom = s.m.read(0x02400000 + RECORD, 20)   # the cart's ROM image, A-bus
     d = s.m.read(s.syms["sat_dbg"], 12)
     row = dict(tag=tag, dbg=dbg, vblank=int.from_bytes(d[8:12], "big"), state=blk[4:7].hex(), x=int.from_bytes(blk[0x10:0x12], "big"),
-               z=int.from_bytes(blk[0x18:0x1a], "big"), face=blk[0x0f], frame_record=blk[0x1c:0x20].hex(), timer=int.from_bytes(blk[0x0a:0x0c], "big"),
+               z=int.from_bytes(blk[0x18:0x1a], "big"), face=blk[0x0f], cam_x=int.from_bytes(s.ram(0x8278, 2), "big"), cam_z=int.from_bytes(s.ram(0x827c, 2), "big"), frame_record=blk[0x1c:0x20].hex(), timer=int.from_bytes(blk[0x0a:0x0c], "big"),
                flags=blk[0x24:0x26].hex(), rom_record=rom.hex(), orig=rd(s, "wv_nat_orig", 4).hex(), dbg_now=rd(s, "wv_nat_dbg", 1).hex())
     with open(OUT + "/trace.jsonl", "a") as fh:
         fh.write(json.dumps(row) + "\n")
     m.call("framebuffer_screenshot", path=f"{OUT}/{tag}.png")
+    objdump(s, tag)
     s.log(tag, row)
     return row
+
+
+def objdump(s, tag):
+    """The game's object list (the 8-byte entries the emitters wrote) of the bank the game is drawing, as text: x, y, code, attr per entry, up to the first empty one."""
+    pg = int.from_bytes(s.m.read(s.syms["PAGE"] + 0x70 * 4, 4), "big") + 0x8000
+    raw = s.m.read(pg, 0x2000)
+    with open(f"{OUT}/{tag}_obj.txt", "w") as fh:
+        for o in range(0, 0x2000, 8):
+            e = raw[o:o + 8]
+            if e[4:6] == bytes([255, 255]) or (e == bytes(8) and o > 0x400):
+                break
+            fh.write("%04x %04x %04x %04x" % tuple(int.from_bytes(e[k:k + 2], "big") for k in (0, 2, 4, 6)) + chr(10))
 
 
 def counters(s):
