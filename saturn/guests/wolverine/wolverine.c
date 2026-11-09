@@ -50,14 +50,14 @@ static void wv_reset(int i);
 #endif
 #define ONCE(m) ((m) == WV_JUMP || (m) == WV_LP || (m) == WV_HP || (m) == WV_HK || (m) == WV_TORNADO || (m) == WV_KNOCKDOWN || (m) == WV_THROW || (m) == WV_HIT_ETC || (m) == WV_HIT_M || (m) == WV_HIT_H)
 /* Attack chain: Schaefer's attack state 020006 repeats while the button is tapped (measured: 56 ticks of it for about four 15-tick attacks, the
-   state byte never leaves it), so each new attack of a chain is told by the native ticks of the one before it (pre = 1: the player update is about
-   to run). His chain is light, light, heavy, then the kick as the finisher (MSHvSF normals); it starts over after WV_CHAIN_GAP ticks without an
+   state byte never leaves it), so each new attack of a chain is told by the native ticks of the one before it: when the update that follows its 15th has
+   run and the state is still 020006 (post = 1; before that update a lone attack looks the same). His chain is light, light, heavy, then the kick as the finisher (MSHvSF normals); it starts over after WV_CHAIN_GAP ticks without an
    attack. chain_ is the stage of the NEXT attack. */
 #ifndef WV_CHAIN_GAP
 #define WV_CHAIN_GAP 30
 #endif
 #define WV_NAT_ATK 15
-static int move_for(int i, int pre)
+static int move_for(int i, int post)
 {
     u8 a = R8(PL(i) + 4), b = R8(PL(i) + 5), c = R8(PL(i) + 6);
     int m = WV_IDLE;
@@ -66,7 +66,7 @@ static int move_for(int i, int pre)
         case 0x02: m = WV_WALK; break;
         case 0x04: m = WV_JUMP; break;
         case 0x06:   /* each new attack takes the next of his normals */
-            if (lastc_[i] != 0x06 || (pre && exec_[i] >= WV_NAT_ATK && (cur_[i] == WV_LP || cur_[i] == WV_HP || cur_[i] == WV_HK))) {
+            if (lastc_[i] != 0x06 || (post && exec_[i] > WV_NAT_ATK && (cur_[i] == WV_LP || cur_[i] == WV_HP || cur_[i] == WV_HK))) {
 #ifdef SAT_WV_NATIVE_TIMING
                 if (!landed_[i]) chain_[i] = 0;   /* the chain goes on only from a landed hit; a whiff starts it over */
 #endif
@@ -365,7 +365,7 @@ static int wv_resting(int i)
    the guest immediately and retain all externally written game fields. */
 static int wv_tick_move(int i)
 {
-    int move = move_for(i, 1), hold = 0, T, nat;
+    int move = move_for(i, 0), hold = 0, T, nat;
     held_[i] = (R8(PL(i) + 4) == 2 && R8(PL(i) + 5) == 2) ?
         (u8)(held_[i] < 255 ? held_[i] + 1 : 255) : 0;
     if (recovery_[i] && wv_resting(i) && wall_[i] < wv_move_len(cur_[i])) {
@@ -433,7 +433,7 @@ void sat_guest_wolverine_after_tick(unsigned long a6)
         return;
     }
     wv_speed(i);
-    move = move_for(i, 0);
+    move = move_for(i, 1);
     if (move == cur_[i] && !restart_[i]) return;
 #ifndef WV_MEASURE
     if (cur_[i] < WV_MOVES && tslot(cur_[i]) >= 0 &&
