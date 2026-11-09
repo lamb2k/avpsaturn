@@ -70,6 +70,19 @@ lines = [
     "enum { " + ", ".join(f"WV_{m.upper()}" for m in names) + ", WV_MOVES };",
     f"static const unsigned short wv_pal[{len(pal)}] = {{{','.join(hex(c) for c in pal)}}};",
 ]
+# Per-move numbers of the host game's driver, one table (a native Wolverine update would reuse it and swap only the driver):
+# native ticks of Schaefer's state that shows the move (MSHvSF holds stretch them: schaefer_states.lua, 11-08; gun 02000c measured on Yaba),
+# and his attack chain (the stage -> move of each new attack of a chain; light, light, heavy, kick finisher).
+NATIVE = dict(lp=15, hp=15, hk=32, berserker=30, tornado=57)
+CHAIN = ("lp", "lp", "hp", "hk")
+NATIVE.update(A.get("native", {}))
+CHAIN = tuple(A.get("chain", CHAIN))
+if any(m not in moves for m in CHAIN) or len(CHAIN) != 4:
+    raise SystemExit("NO-GO: the attack chain needs four stages naming resident moves")
+lines += [
+    "static const unsigned char wv_nat_tab[WV_MOVES] = {" + ",".join(str(NATIVE.get(m, 0)) for m in names) + "};",
+    "static const unsigned char wv_chain_tab[4] = {" + ",".join("WV_" + m.upper() for m in CHAIN) + "};",
+]
 # Boxes per move step (tools/wolverine/boxes.py -> boxes.json beside remap.json): centre and half size, x forward and y up of his feet.
 # WvBox: hit x, hit half w, hit y, hit half h, hurt x, hurt half w, hurt y, hurt half h; hit half w 0 = no hit box on that step.
 bj = pathlib.Path(sys.argv[1]) / "boxes.json"

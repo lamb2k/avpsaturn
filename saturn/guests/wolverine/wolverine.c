@@ -31,7 +31,8 @@ static const u8 wv_row1[0x28] = {10,22,21,22,20,22,18,22,22,22,8,22,23,22,22,22,
 s16 wv_dbg[2][12];
 s16 wv_lst[2][3];   /* per player: objects before his tiles, tiles asked, tiles that fit (a full list drops his tiles) */
 #endif
-static u8 step_[2], left_[2], face_[2], cur_[2] = {255, 255}, chain_[2], lastc_[2], held_[2], hitk_[2];
+static u8 step_[2], left_[2], face_[2], cur_[2] = {255, 255}, chain_[2], lastc_[2], held_[2], hitk_[2], restart_[2], gap_[2], cstg_[2];
+static u16 acc_[2], exec_[2], wall_[2];
 static u16 hp_[2];   /* health before a hit; the hit's size picks his reaction */
 static void wv_reset(int i);
 
@@ -45,7 +46,15 @@ static void wv_reset(int i);
 #define WV_HIT_HEAVY 17
 #endif
 #define ONCE(m) ((m) == WV_LP || (m) == WV_HP || (m) == WV_HK || (m) == WV_TORNADO || (m) == WV_KNOCKDOWN || (m) == WV_THROW || (m) == WV_HIT_ETC || (m) == WV_HIT_M || (m) == WV_HIT_H)
-static int move_for(int i)
+/* Attack chain: Schaefer's attack state 020006 repeats while the button is tapped (measured: 56 ticks of it for about four 15-tick attacks, the
+   state byte never leaves it), so each new attack of a chain is told by the native ticks of the one before it (pre = 1: the player update is about
+   to run). His chain is light, light, heavy, then the kick as the finisher (MSHvSF normals); it starts over after WV_CHAIN_GAP ticks without an
+   attack. chain_ is the stage of the NEXT attack. */
+#ifndef WV_CHAIN_GAP
+#define WV_CHAIN_GAP 30
+#endif
+#define WV_NAT_ATK 15
+static int move_for(int i, int pre)
 {
     u8 a = R8(PL(i) + 4), b = R8(PL(i) + 5), c = R8(PL(i) + 6);
     int m = WV_IDLE;
@@ -54,8 +63,12 @@ static int move_for(int i)
         case 0x02: m = WV_WALK; break;
         case 0x04: m = WV_JUMP; break;
         case 0x06:   /* each new attack takes the next of his normals */
-            if (lastc_[i] != 0x06) chain_[i] = (u8)((chain_[i] + 1) & 1);
-            m = chain_[i] ? WV_HP : WV_LP; break;
+            if (lastc_[i] != 0x06 || (pre && exec_[i] >= WV_NAT_ATK && (cur_[i] == WV_LP || cur_[i] == WV_HP || cur_[i] == WV_HK))) {
+                cstg_[i] = chain_[i];
+                chain_[i] = (u8)((chain_[i] + 1) & 3);
+                if (lastc_[i] == 0x06) restart_[i] = 1;
+            }
+            m = wv_chain_tab[cstg_[i]]; break;
         case 0x0e: m = WV_HK; break;
         case 0x0c: m = WV_BERSERKER; break;
         case 0x08: m = WV_TORNADO; break;
@@ -227,23 +240,14 @@ u8 wv_tdbg[5][4];   /* per held move (LP HP HK Berserker Tornado): last ticks ru
 #if !defined(WV_MEASURE) || defined(SAT_WOLVERINE_DEBUG)
 static int tslot(int m) { return m == WV_LP ? 0 : m == WV_HP ? 1 : m == WV_HK ? 2 : m == WV_BERSERKER ? 3 : m == WV_TORNADO ? 4 : -1; }
 #endif
-/* Schaefer's ticks per state slot, MAME (tools/wolverine/schaefer_states.lua: a tap of attack 15, the finisher 02000e 32, the special 020008 57);
-   gun 02000c measured on Yaba from wv_tdbg. 0 = never held. */
-#ifndef WV_NAT_GUN
-#define WV_NAT_GUN 30
-#endif
+/* Schaefer's ticks per state slot (table wv_nat_tab, tools/wolverine/gen_c.py NATIVE), MAME tools/wolverine/schaefer_states.lua: a tap of attack 15, the finisher
+   02000e 32, the special 020008 57; gun 02000c measured on Yaba from wv_tdbg. 0 = never held. */
 static u16 wv_nat(int move)
 {
 #ifdef WV_MEASURE
     return 0;   /* test build: no holds, wv_tdbg shows Schaefer's own tick counts */
 #endif
-    switch (move) {
-    case WV_LP: case WV_HP: return 15;
-    case WV_HK: return 32;
-    case WV_BERSERKER: return WV_NAT_GUN;
-    case WV_TORNADO: return 57;
-    }
-    return 0;
+    return move < WV_MOVES ? wv_nat_tab[move] : 0;   /* wv_nat_tab: gen_c.py NATIVE */
 }
 static int wv_move_len(int move)
 {
@@ -255,7 +259,6 @@ static int wv_move_len(int move)
     }
     return T;
 }
-static u16 acc_[2], exec_[2], wall_[2];
 /* A native attack can return sooner than wv_nat predicts. Keep only its remaining
    presentation/recovery time; the completed game state is never rolled back and
    no additional damage calls are invented. Hit, grab, death and entry states
@@ -314,7 +317,7 @@ static void wv_begin_move(int i, int move)
     }
 #endif
     cur_[i] = (u8)move;
-    step_[i] = left_[i] = wwalk_[i] = recovery_[i] = 0;
+    step_[i] = left_[i] = wwalk_[i] = recovery_[i] = restart_[i] = 0;
     acc_[i] = exec_[i] = wall_[i] = 0;
 }
 
@@ -350,16 +353,19 @@ static int wv_resting(int i)
    the guest immediately and retain all externally written game fields. */
 static int wv_tick_move(int i)
 {
-    int move = move_for(i), hold = 0, T, nat;
+    int move = move_for(i, 1), hold = 0, T, nat;
     held_[i] = (R8(PL(i) + 4) == 2 && R8(PL(i) + 5) == 2) ?
         (u8)(held_[i] < 255 ? held_[i] + 1 : 255) : 0;
     if (recovery_[i] && wv_resting(i) && wall_[i] < wv_move_len(cur_[i])) {
         wv_advance(i);
         return 0;
     }
-    if (move != cur_[i] || recovery_[i]) wv_begin_move(i, move);
+    if (move == WV_LP || move == WV_HP || move == WV_HK || move == WV_BERSERKER || move == WV_TORNADO) gap_[i] = 0;
+    else if (gap_[i] < 255 && ++gap_[i] > WV_CHAIN_GAP) chain_[i] = 0;
+    if (move != cur_[i] || recovery_[i] || restart_[i]) wv_begin_move(i, move);
     wv_advance(i);
     nat = wv_nat(move);
+    if (nat && move == WV_HK && R8(PL(i) + 6) == 0x06) nat = WV_NAT_ATK;   /* the chain's kick runs in the attack state's 15 ticks */
     if (nat && WV_HAVE_BOXES) {
         T = wv_move_len(move);
 #ifdef SAT_WOLVERINE_DEBUG
@@ -399,8 +405,8 @@ void sat_guest_wolverine_after_tick(unsigned long a6)
         if (a6 == PL(0) || a6 == PL(1)) wv_reset((int)((a6 - PL(0)) >> 8));
         return;
     }
-    move = move_for(i);
-    if (move == cur_[i]) return;
+    move = move_for(i, 0);
+    if (move == cur_[i] && !restart_[i]) return;
 #ifndef WV_MEASURE
     if (cur_[i] < WV_MOVES && tslot(cur_[i]) >= 0 &&
         WV_HAVE_BOXES && wv_resting(i)) {
@@ -522,7 +528,7 @@ static void wv_reset(int i)
 {
     int k;
     cur_[i] = 255;
-    step_[i] = left_[i] = face_[i] = chain_[i] = lastc_[i] = held_[i] = hitk_[i] = 0; hp_[i] = 0;
+    step_[i] = left_[i] = face_[i] = chain_[i] = lastc_[i] = held_[i] = hitk_[i] = restart_[i] = gap_[i] = cstg_[i] = 0; hp_[i] = 0;
     acc_[i] = exec_[i] = wall_[i] = wph_[i] = wlx_[i] = wlz_[i] = 0;
     wwalk_[i] = recovery_[i] = inj_left[i] = inj_bits[i] = last_btn[i] = 0;
     wv_step_now[i] = 0xffff;

@@ -64,6 +64,7 @@ static void test_length(int action, int move, int native_length, int expected)
 {
     int frame, finished = 0;
     fresh(action);
+    if (move == WV_HP) chain_[0] = 2;   /* the third attack of the chain */
     retire_after = native_length;
     for (frame = 1; frame <= expected; frame++) {
         update();
@@ -87,10 +88,10 @@ static void test_native_entry_and_register_clobber(void)
     enter_action = 6;
     clobber_a6 = 1;
     update();
-    assert(cur_[0] == WV_HP && step_[0] == 0 && wall_[0] == 1);
+    assert(cur_[0] == WV_LP && step_[0] == 0 && wall_[0] == 1);
     assert(cur_[1] == 255);
     update();
-    assert(cur_[0] == WV_HP && step_[0] == 1 && wall_[0] == 2);
+    assert(cur_[0] == WV_LP && step_[0] == 1 && wall_[0] == 2);
     assert(native_calls == 1);
 }
 
@@ -120,19 +121,36 @@ static void test_interruptions(void)
 static void test_restart_and_reset(void)
 {
     u16 pad = 0xffff;
+    int k;
     fresh(6);
     update();
-    assert(cur_[0] == WV_HP);
+    assert(cur_[0] == WV_LP);   /* the chain starts with the light punch */
     state(0, 2, 0, 0);  /* external state change, not a native retirement */
     update();
     state(0, 2, 0, 6);
     update();
-    assert(cur_[0] == WV_LP && step_[0] == 0 && wall_[0] == 1);
+    assert(cur_[0] == WV_LP && step_[0] == 0 && wall_[0] == 1);   /* light, light */
     state(0, 2, 0, 0);
     update();
     state(0, 2, 0, 6);
     update();
-    assert(cur_[0] == WV_HP && step_[0] == 0 && wall_[0] == 1);
+    assert(cur_[0] == WV_HP && step_[0] == 0 && wall_[0] == 1);   /* then the heavy punch */
+    state(0, 2, 0, 0);
+    update();
+    state(0, 2, 0, 6);
+    update();
+    assert(cur_[0] == WV_HK && step_[0] == 0 && wall_[0] == 1);   /* then the kick finisher */
+    state(0, 2, 0, 0);
+    update();
+    state(0, 2, 0, 6);
+    update();
+    assert(cur_[0] == WV_LP && chain_[0] == 1);   /* and round again */
+    for (k = 0; k < 4; k++) { state(0, 2, 0, 0); update(); state(0, 2, 0, 6); update(); }
+    state(0, 2, 0, 0);
+    for (k = 0; k < WV_CHAIN_GAP + 2; k++) update();
+    state(0, 2, 0, 6);
+    update();
+    assert(cur_[0] == WV_LP && chain_[0] == 1);   /* a pause starts the chain over */
     atk_cache[0][3] = 9;
     dir_hist[0][0] = 2;
     R8(PL(0)) = 0;
@@ -140,13 +158,30 @@ static void test_restart_and_reset(void)
     assert(cur_[0] == 255 && !atk_cache[0][3] && !dir_hist[0][0]);
     state(0, 2, 0, 6);
     update();
-    assert(cur_[0] == WV_HP && wall_[0] == 1);
+    assert(cur_[0] == WV_LP && wall_[0] == 1);
     sat_guest_sel = 0;
     sat_guest_wolverine_pad(&pad);
     assert(cur_[0] == 255 && wv_step_now[0] == 0xffff && pad == 0xffff);
     sat_guest_sel = 1;
     update();
-    assert(cur_[0] == WV_HP && wall_[0] == 1);
+    assert(cur_[0] == WV_LP && wall_[0] == 1);
+}
+
+
+/* Schaefer's attack state does not leave 020006 while the button is tapped: each 15 native ticks of it is the next attack of the chain. */
+static void test_continuous_chain(void)
+{
+    static const u8 want[5] = {WV_LP, WV_LP, WV_HP, WV_HK, WV_LP};
+    int k, n = 0;
+    u16 last = 0;
+    fresh(0);
+    enter_action = 6;
+    for (k = 0; k < 600 && n < 5; k++) {
+        update();
+        if (wall_[0] == 1 && last != 1) assert(cur_[0] == want[n++]);
+        last = wall_[0];
+    }
+    assert(n == 5);
 }
 
 static void test_draws_do_not_tick(void)
@@ -173,7 +208,7 @@ static void test_draws_do_not_tick(void)
        the last published aligned word, not either mutable clock field. */
     cur_[0] = WV_CROUCH; step_[0] = 255;
     sat_guest_objects(objects, 0, 64, palette);
-    assert((objects[4] << 8 | objects[5]) == 110);
+    assert((objects[4] << 8 | objects[5]) == 107);
     assert(wv_step_now[0] == published);
     cur_[0] = move; step_[0] = step;
     assert(munmap(rom, 0x200000) == 0);
@@ -196,6 +231,7 @@ int main(void)
     test_native_entry_and_register_clobber();
     test_interruptions();
     test_restart_and_reset();
+    test_continuous_chain();
     test_draws_do_not_tick();
     puts("Wolverine clock: HOST synthetic PASS (lengths, poses, interrupts, reset, draw independence)");
     return 0;
