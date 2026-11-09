@@ -14,7 +14,7 @@ An item leaves "In progress" only when it is merged here; a paused or parked lan
 | VDP1 profile rings in high RAM | 1665742 | measurement builds only | same |
 | Wolverine animation steps 1-3 (chain mapping, walk/jump, native timing switch) | lane/wolverine-anim 9728e4e | walk/jump on; SAT_WV_NATIVE_TIMING off | anim notes |
 | Wolverine select/HUD/rank art | lane/wolverine-art f518e5c | on with guest | art check 11-09 |
-| Wolverine KO invisibility fix | lane/wolverine-gate d5f2dda | on | host test wolverine_clock_test |
+| Wolverine KO invisibility fix; Round 1 gate notes | lane/wolverine-gate d5f2dda, 43f9c7d | on | host test wolverine_clock_test; AVP_WOLVERINE_GATE_20261109.md (boss clear and section 3 off/on/Schaefer, harness assists) |
 | Wolverine slowdown fix (FAST_LIST, NAMES_LAZY, PAL_KEEP) | lane/fps-held 457508b | all off (Yaba: held 11.4% -> 2.3% with all on) | AVP_FPS_HELD_20261109.md |
 | Saturn on-screen perf readout (SAT_PERF_HUD) + PAL_KEEP page-0-only fix | lane/hwtest 8a75ccb | readout off; used for console A/B discs | AVP_HWTEST_20261109.md |
 | Wolverine ground contact, jump height, size comparison (SAT_WV_GROUND=1/2, SAT_WV_JUMP=1/2, SAT_WV_SCALE=14) | lane/wolverine-ground 9745da7 | all off; owner comparison discs in E:\AvP\learning\lane-wolverine-ground\discs | AVP_WOLVERINE_GROUND_20261109.md; ground.py data must be regenerated for D11 before a switch is turned on |
@@ -37,7 +37,7 @@ The slowdown switches are waiting on the release fit and the PAL_KEEP look check
 | Item | Branch | State |
 | --- | --- | --- |
 | Menu mode flow, transparent option screens, title list lower; talk-box face/text 8 px offset | lane/wolverine-menu | merge done; building and checking |
-| Round 1 boss gate, throw look | lane/wolverine-gate | running |
+| Wolverine takes far more hits than Schaefer (Round 1 gate: 36-37 vs 2), and a wrong pose while an enemy holds him (0204xx shows throw poses) | lane/wolverine-defense | starting |
 | Native Wolverine (fork of Schaefer, plan aae2e10) | lane/wolverine-native | Stage 0 identity |
 | Post-credits reveal + unlock + Berserker Barrage voice | lane/wolverine-reveal | running |
 | HURRY UP missing U (stage timer banner) | lane/hurryup | finding the banner |
