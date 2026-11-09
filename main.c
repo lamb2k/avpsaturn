@@ -3732,6 +3732,7 @@ static int round1_composite_sprite_for_entry(const AvspObjectEntry *entry,
     int index;
     int victim = -1;
     long bytes;
+    unsigned long need;
     jo_img_4bits image;
 
     *width_out = width;
@@ -3753,18 +3754,15 @@ static int round1_composite_sprite_for_entry(const AvspObjectEntry *entry,
             return cached->sprite_id;
         }
     }
-    bytes = avsp_compose_entry_texture(
-        &tile_archive, entry->y, entry->code, entry->attr,
-        round1_composite_scratch, AVSP_COMPOSITE_MAX_TEXTURE_BYTES);
-    if (bytes < 0) return -1;
-    if (bytes == 0)
-        return -2;
+    /* Find a slot before composing: a refused entry must not cost a full
+     * cart-sourced composition every frame it stays on screen. */
+    need = (unsigned long)width * (unsigned long)height / 2UL;
     for (index = 0; index < round1_composite_sprite_count; ++index)
     {
         const AvspRound1CompositeSprite *candidate =
             &round1_composite_sprites[index];
         if (candidate->frame_pinned ||
-            candidate->capacity_bytes < (unsigned long)bytes)
+            candidate->capacity_bytes < need)
             continue;
         if (victim < 0 ||
             candidate->capacity_bytes <
@@ -3779,6 +3777,12 @@ static int round1_composite_sprite_for_entry(const AvspObjectEntry *entry,
         ++avsp_diag_round1_native_composite_exhaustions;
         return -2;
     }
+    bytes = avsp_compose_entry_texture(
+        &tile_archive, entry->y, entry->code, entry->attr,
+        round1_composite_scratch, AVSP_COMPOSITE_MAX_TEXTURE_BYTES);
+    if (bytes < 0) return -1;
+    if (bytes == 0)
+        return -2;
     image.width = width;
     image.height = height;
     image.data = round1_composite_scratch;
