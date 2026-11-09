@@ -1,0 +1,14 @@
+{
+  "+06": 40, "+1e": 40, "+24": 40, "+2c": 40, "+6e": 200, "+92": 40, "+e2": 200, "+f2": 200,
+  "_why": {
+    "+06": "action byte: the chain taps last 12/16 native ticks instead of 15 (data patch), so the action changes on other ticks",
+    "+1e": "animation frame record pointer (low word): the retimed records are reached on other ticks",
+    "+24": "animation script word: the same retiming",
+    "+2c": "hitstop written by the collision pass: a hit lands on a different tick",
+    "+6e": "hit hand-off flag: set by a hit on the prop or enemy in reach, which lands earlier or later",
+    "+92": "AI noise word written during the attack",
+    "+e2": "score/HUD stock follows the hit",
+    "+f2": "score/HUD stock follows the hit"
+  },
+  "_scope": "matched start, chain script trial, frames before the first enemy contact (about vblank 1300). The current skin build diverges from stock Schaefer in the same eight fields."
+}

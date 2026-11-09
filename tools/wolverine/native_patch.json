@@ -1,0 +1,9 @@
+{
+  "about": "Native Wolverine data patches over Schaefer's own attack frame records (plan section 4.2). Addresses are arcade ROM addresses; value is the replacement. Originals are read from the ROM at build time and stay in the generated include (never committed). A record is duration(2) flags(2) sprite pointer(4) hurt box, attack box, ...; the first word is the duration in ticks. Native taps: script A (stages 1 and 2, 15 ticks: 1 + 2 + 6 + 5 + 1) and script B (stage 3, heavy punch, 15 ticks: 1 + 2 + 6 + 3 + 2 + 1).",
+  "patches": [
+    {"name": "tapA_startup", "addr": "0x163644", "len": 2, "value": "0x0001", "note": "script A startup 2 -> 1: startup 2 ticks with the entry tick"},
+    {"name": "tapA_active", "addr": "0x163654", "len": 2, "value": "0x0004", "note": "script A active 6 -> 4: 12 ticks in all (2 / 4 / 6)"},
+    {"name": "tapB_active", "addr": "0x163698", "len": 2, "value": "0x0005", "note": "script B active 6 -> 5"},
+    {"name": "tapB_recovery", "addr": "0x1636b8", "len": 2, "value": "0x0004", "note": "script B recovery 2 -> 4: 16 ticks in all (3 / 5 / 8)"}
+  ]
+}

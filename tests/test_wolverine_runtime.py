@@ -81,5 +81,53 @@ class WolverineRuntimeTest(unittest.TestCase):
                 subprocess.run([str(exe)], check=True)
 
 
+    @unittest.skipUnless(shutil.which("gcc"), "gcc is needed for HOST C regressions")
+    def test_native_patch_warp_fork_and_walk(self):
+        """SAT_WV_NATIVE pieces (default off): data patch apply/undo, agreed attack lengths, fork gate, walk weight. Synthetic tables only."""
+        asset, boxes = synthetic_assets()
+        asset["moves"]["lp"] = [[7, 1, [0, 0]], [8, 6, [0, 0]], [9, 21, [0, 0]], [0, 8, [0, 0]]]
+        asset["moves"]["hp"] = [[10, 1, [0, 0]], [11, 9, [0, 0]], [12, 41, [0, 0]], [0, 8, [0, 0]]]
+        asset["moves_one"] = asset["moves"]
+        for name in ("lp", "hp"):
+            boxes[name] = [{"hit": [2, 8, 4, 8] if k == 1 else None, "hurt": [-4, 4, 0, 16]} for k in range(4)]
+        with tempfile.TemporaryDirectory() as d:
+            temp = Path(d)
+            (temp / "remap.json").write_text(json.dumps(asset))
+            (temp / "boxes.json").write_text(json.dumps(boxes))
+            subprocess.run([sys.executable, str(ROOT / "tools/wolverine/gen_c.py"), str(temp), str(temp / "wolverine_data.inc")], check=True)
+            (temp / "wv_patch.inc").write_text(
+                "typedef struct { unsigned long addr; unsigned char len, orig[4], now[4]; } WvPatch;\n#define WV_PATCHES 2\n"
+                "static const WvPatch wv_patch_tab[WV_PATCHES] = {{0x1000, 2, {0,2,0,0}, {0,1,0,0}}, {0x1100, 2, {0,6,0,0}, {0,4,0,0}}};\n")
+            exe = temp / "native-test"
+            subprocess.run(["gcc", "-std=c90", "-pedantic", "-Wall", "-Wextra", "-Werror", "-O2", "-DSAT_WV_NATIVE", "-DWV_HOST_ROM",
+                            "-I" + str(temp), "-I" + str(ROOT / "saturn/rt"), str(ROOT / "tests/wolverine_native_test.c"), "-o", str(exe)], check=True)
+            r = subprocess.run([str(exe)], capture_output=True, text=True)
+            self.assertEqual(r.returncode, 0, r.stdout + r.stderr)
+            self.assertIn("wolverine native test ok", r.stdout)
+
+    def test_forkgen_synthetic(self):
+        """forkgen on synthetic lifted text: entry copies, private-callee closure, wrappers, textual identity (no ROM input)."""
+        sys.path.insert(0, str(ROOT / "tools/wolverine"))
+        import forkgen
+        pro = "typedef unsigned int u32;\n#define X 1\n"
+
+        def fn(addr, body):
+            return "#define a6 (R->a[6])\nvoid f_%x(void){int fz=0;\n%s\n}\n#undef a6\n" % (addr, body)
+        text = pro + "extern void f_1656e(void);\n" + fn(0x24454, "f_1656e();") + fn(0x24f04, "f_1656e();") + fn(0x2539e, "f_252e6();") + fn(0x252e6, "f_1656e();")
+        src = {"c4.c": text}
+        r = forkgen.build(src, forkgen.SHIP_IDS)
+        self.assertEqual(r.wrapped, [0x24454, 0x24f04])
+        self.assertEqual(r.copied, [0x24454, 0x24f04])
+        self.assertIn("void wvf_24454(void)", r.text)
+        self.assertIn("if (sat_wv_fork_on(a6, 0))", r.text)
+        self.assertIn("lifted_24454", r.text)
+        self.assertEqual(forkgen.check_textual_identity(src, r), [])
+        # the jump routine owns its private callee: the clone is closed and calls the copy
+        j = forkgen.build(src, (2,))
+        self.assertEqual(j.copied, [0x252e6, 0x2539e])
+        self.assertIn("wvf_252e6()", j.text)
+        self.assertEqual(forkgen.check_textual_identity(src, j), [])
+
+
 if __name__ == "__main__":
     unittest.main()

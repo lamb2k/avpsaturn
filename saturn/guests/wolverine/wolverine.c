@@ -6,10 +6,19 @@ typedef unsigned char u8; typedef unsigned short u16; typedef unsigned int u32;
 typedef signed char s8; typedef short s16; typedef int s32;
 #include "guests.h"
 #include "wolverine_data.inc"
+#ifdef SAT_WV_NATIVE
+#include "wv_patch.inc"   /* tools/wolverine/nativepatch.py: address, original bytes, patched bytes */
+#endif
 
 extern u8 RAMB[];
 #define R8(a) (*(volatile u8 *)(RAMB + ((a) - 0xff0000u)))
+#ifdef WV_HOST_ROM   /* host runner: RAMB holds the game's big-endian bytes and the PC is little-endian */
+#define R16(a) ((u16)((RAMB[(a) - 0xff0000u] << 8) | RAMB[(a) - 0xff0000u + 1]))
+#define R16W(a, v) (RAMB[(a) - 0xff0000u] = (u8)((u16)(v) >> 8), RAMB[(a) - 0xff0000u + 1] = (u8)(v))
+#else
 #define R16(a) (*(volatile u16 *)(RAMB + ((a) - 0xff0000u)))
+#define R16W(a, v) (R16(a) = (v))
+#endif
 #define PL(i) (0xff8380u + (u32)(i) * 0x100u)
 /* Calibrated in Yaba on stage 02 (probe_sch.py, lane avp-wolverine): see WV_* below. */
 /* Yaba probe, stage 02, Schaefer as player 1 (probe_sch.py): block byte +1 is the character (mask bit 1 << it, Schaefer 1); his sprites are
@@ -57,6 +66,13 @@ static void wv_reset(int i);
 #define WV_CHAIN_GAP 30
 #endif
 #define WV_NAT_ATK 15
+static u16 wv_nat(int move);
+#ifdef SAT_WV_NATIVE
+/* The native tap of a stage ends after wv_nat() ticks (tools/wolverine/native_patch.json shortens Schaefer's records): 12 for the light taps, 16 for the heavy one. */
+static int nat_atk(int cur) { return (cur == WV_LP || cur == WV_HP) ? wv_nat(cur) : WV_NAT_ATK; }
+#else
+#define nat_atk(cur) WV_NAT_ATK
+#endif
 static int move_for(int i, int post)
 {
     u8 a = R8(PL(i) + 4), b = R8(PL(i) + 5), c = R8(PL(i) + 6);
@@ -66,7 +82,7 @@ static int move_for(int i, int post)
         case 0x02: m = WV_WALK; break;
         case 0x04: m = WV_JUMP; break;
         case 0x06:   /* each new attack takes the next of his normals */
-            if (lastc_[i] != 0x06 || (post && exec_[i] > WV_NAT_ATK && (cur_[i] == WV_LP || cur_[i] == WV_HP || cur_[i] == WV_HK))) {
+            if (lastc_[i] != 0x06 || (post && exec_[i] > nat_atk(cur_[i]) && (cur_[i] == WV_LP || cur_[i] == WV_HP || cur_[i] == WV_HK))) {
 #ifdef SAT_WV_NATIVE_TIMING
                 if (!landed_[i]) chain_[i] = 0;   /* the chain goes on only from a landed hit; a whiff starts it over */
 #endif
@@ -138,6 +154,17 @@ static int attack_state(int i, int *slot)
     *slot = (c >> 1) & 15;
     return a == 2 && b == 0 && (c == 0x06 || c == 0x0e || c == 0x0c || c == 0x08);
 }
+#ifdef SAT_WV_NATIVE
+static int wv_native_sar(int move, int *s, int *a, int *r);
+/* No hit box during the agreed startup of a played-over move (the capture's box can be out from its first pose); wall_ counts the ticks shown so far. */
+static int wv_in_startup(int i)
+{
+    int s = 0, a = 0, r = 0;
+    return cur_[i] < WV_MOVES && wv_native_sar(cur_[i], &s, &a, &r) && wall_[i] >= 1 && wall_[i] <= (u16)s;
+}
+#else
+#define wv_in_startup(i) 0
+#endif
 static const WvBox *box_now(int i)
 {
     u16 k = wv_step_now[i];
@@ -165,7 +192,7 @@ void sat_guest_wolverine_boxes(unsigned long a6, unsigned long a1, int restore)
         int att = attack_state(i, &slot);
         hit_i = i;
         if (att && idx) atk_cache[i][slot] = idx;
-        if (!att || !w || !w->hw) { if (idx) poke4(f + 8, f[8], 0, f[10], f[11]); }
+        if (!att || !w || !w->hw || wv_in_startup(i)) { if (idx) poke4(f + 8, f[8], 0, f[10], f[11]); }
         else {
             if (!idx) idx = atk_cache[i][slot];
             if (idx) {
@@ -215,7 +242,13 @@ static int is_wolverine(int i)
 /* Names: the game prints its character names from text in its ROM image, which the Saturn keeps in cart RAM (ROMB). While Wolverine is
    chosen, Schaefer's HUD name (16-byte field at 0xaedca) and his select-screen name (0xac699) read WOLVERINE; turned off, the bytes go back.
    Both are on pages the game reads, which stage files never take for tiles. */
-#define ROMB ((volatile u8 *)0x02400000u)
+#ifdef WV_HOST_ROM   /* the host runner (tools/lift_runner/build_native_host.py) points this at its ROM image array */
+extern u8 *const wv_host_rom;
+#define WV_ROMB ((volatile u8 *)wv_host_rom)
+#else
+#define WV_ROMB ((volatile u8 *)0x02400000u)
+#endif
+#define ROMB WV_ROMB
 static const struct { u32 at; u8 n; const char *wv; } wv_names[2] = {
     { 0xaedca, 16, "WOLVERINE       " },
     { 0xac699, 14, "  WOLVERINE   " },
@@ -259,9 +292,22 @@ static u16 wv_nat(int move)
 #ifdef WV_MEASURE
     return 0;   /* test build: no holds, wv_tdbg shows Schaefer's own tick counts */
 #endif
+#ifdef SAT_WV_NATIVE
+    if (move == WV_LP) return 12;   /* patched native taps: 2 / 4 / 6 and 3 / 5 / 8 (native_patch.json) */
+    if (move == WV_HP) return 16;
+#endif
     return move < WV_MOVES ? wv_nat_tab[move] : 0;   /* wv_nat_tab: gen_c.py NATIVE */
 }
-static int wv_move_len(int move)
+#ifdef SAT_WV_NATIVE
+/* Agreed ticks of a move (startup, active, recovery): the capture's own pose order and box windows, played over these lengths. 0 = the capture's timing. */
+static int wv_native_sar(int move, int *s, int *a, int *r)
+{
+    if (move == WV_LP) { *s = 2; *a = 4; *r = 6; return 1; }
+    if (move == WV_HP) { *s = 3; *a = 5; *r = 8; return 1; }
+    return 0;
+}
+#endif
+static int wv_move_len_capture(int move)
 {
     int s = wv_move_start[move], n = wv_move_start[move + 1] - s, k, last = -1, T = 0;
     for (k = 0; k < n; k++) if (wv_box[s + k].hw) last = k;
@@ -271,6 +317,35 @@ static int wv_move_len(int move)
     }
     return T;
 }
+static int wv_move_len(int move)
+{
+#ifdef SAT_WV_NATIVE
+    int s = 0, a = 0, r = 0;
+    if (wv_native_sar(move, &s, &a, &r)) return s + a + r;
+#endif
+    return wv_move_len_capture(move);
+}
+#ifdef SAT_WV_NATIVE
+/* The step shown at tick w of a move played over its agreed startup / active / recovery: each part of the capture (before the first hit-box step, the
+   hit-box steps, the rest) is stretched or squeezed linearly onto its agreed length. */
+static int wv_warp_step(int move, int w)
+{
+    int s0 = wv_move_start[move], n = wv_move_start[move + 1] - s0, first = -1, last = -1, k, So = 0, Ao = 0, Ro, To = wv_move_len_capture(move), Sn = 1, An = 1, Rn = 1, t, acc = 0;
+    wv_native_sar(move, &Sn, &An, &Rn);
+    for (k = 0; k < n; k++) if (wv_box[s0 + k].hw) { if (first < 0) first = k; last = k; }
+    if (first < 0) return w < n ? w : n - 1;
+    for (k = 0; k < first; k++) So += wv_steps[s0 + k].frames;
+    for (k = first; k <= last; k++) Ao += wv_steps[s0 + k].frames;
+    Ro = To - So - Ao;
+    if (Ro < 0) Ro = 0;
+    if (w < Sn) t = w * So / Sn;
+    else if (w < Sn + An) t = So + (w - Sn) * Ao / An;
+    else if (w < Sn + An + Rn) t = So + Ao + (w - Sn - An) * Ro / Rn;
+    else t = To;
+    for (k = 0; k < n; k++) { acc += wv_steps[s0 + k].frames; if (t < acc) return k; }
+    return n - 1;
+}
+#endif
 /* A native attack can return sooner than wv_nat predicts. Keep only its remaining
    presentation/recovery time; the completed game state is never rolled back and
    no additional damage calls are invented. Hit, grab, death and entry states
@@ -340,6 +415,12 @@ static void wv_advance(int i)
     int move = cur_[i];
     int n = wv_move_start[move + 1] - wv_move_start[move];
     if (move == WV_WALK) wv_walk_step(i);
+#ifdef SAT_WV_NATIVE
+    else if (move == WV_LP || move == WV_HP) {   /* played over the agreed startup / active / recovery */
+        step_[i] = (u8)wv_warp_step(move, wall_[i]);
+        left_[i] = 1;
+    }
+#endif
     else {
         if (step_[i] >= n) step_[i] = 0;
         if (left_[i] >= wv_steps[wv_move_start[move] + step_[i]].frames) {
@@ -401,25 +482,69 @@ static int wv_tick_move(int i)
 static void wv_speed(int i)
 {
     int sp = wv_speed_tab[WV_WALK], dx, dz, e;
+#ifdef SAT_WV_NATIVE
+    sp = 16;   /* Schaefer's own walk weight (about 2.08 px a tick): no scale */
+#endif
     if (sp == 16 || R8(PL(i) + 4) != 2 || R8(PL(i) + 5) != 0 || R8(PL(i) + 6) != 2) { sx_[i] = sz_[i] = 0; return; }
     dx = (s16)(R16(PL(i) + 0x10) - xb_[i]); dz = (s16)(R16(PL(i) + 0x18) - zb_[i]);
     if (dx > 24 || dx < -24 || dz > 24 || dz < -24) return;
     sx_[i] = (s16)(sx_[i] + dx * (sp - 16)); e = sx_[i] / 16; sx_[i] = (s16)(sx_[i] - e * 16);
-    R16(PL(i) + 0x10) = (u16)(R16(PL(i) + 0x10) + e);
+    R16W(PL(i) + 0x10, (u16)(R16(PL(i) + 0x10) + e));
     sz_[i] = (s16)(sz_[i] + dz * (sp - 16)); e = sz_[i] / 16; sz_[i] = (s16)(sz_[i] - e * 16);
-    R16(PL(i) + 0x14) = (u16)(R16(PL(i) + 0x14) + e);
-    R16(PL(i) + 0x18) = (u16)(R16(PL(i) + 0x18) + e);
+    R16W(PL(i) + 0x14, (u16)(R16(PL(i) + 0x14) + e));
+    R16W(PL(i) + 0x18, (u16)(R16(PL(i) + 0x18) + e));
 }
+#ifdef SAT_WV_NATIVE
+/* Gameplay data patch (plan section 4.2). Stateless: each entry holds the original bytes (generated from the ROM image at build time, so no RAM backup)
+   and the patched ones. want = 1 turns every entry that still reads original into patched; want = 0 undoes. Any other pattern is counted in wv_patch_bad and
+   left alone (a layout this table was not made for). Run before the player update reads the records; a stage load that restored the page is simply
+   patched again. The patched pages are kept by every stage file (nativepatch.py). */
+static u8 wv_patch_bad;
+static void wv_patch_sync(int want)
+{
+    int k, j;
+    for (k = 0; k < WV_PATCHES; k++) {
+        const WvPatch *p = &wv_patch_tab[k];
+        volatile u8 *m = ROMB + p->addr;
+        const u8 *from = want ? p->orig : p->now, *to = want ? p->now : p->orig;
+        int is_from = 1, is_to = 1;
+        for (j = 0; j < p->len; j++) { if (m[j] != from[j]) is_from = 0; if (m[j] != to[j]) is_to = 0; }
+        if (is_from) { for (j = 0; j < p->len; j++) m[j] = to[j]; }
+        else if (!is_to && wv_patch_bad < 255) wv_patch_bad++;
+    }
+}
+/* forkgen.py wrappers (f_24454 attack, f_24f04 special): the fork runs for a Wolverine player only. */
+int sat_wv_fork_on(unsigned long a6, int id);
+int sat_wv_fork_on(unsigned long a6, int id) { (void)id; return wv_player((u32)a6) >= 0; }
+#endif
+#ifdef WV_HOST_TRACE   /* host runner only (tools/lift_runner/host_guests.c): one record per player update, for the pacing reference */
+extern void wv_host_trace(int kind, int player, int a, int b, int c, int cur, int step, int left, int exec, int wall, int chain, int cstg, int hw, int x, int z);
+static void wv_trace(int kind, int i)
+{
+    u16 k = wv_step_now[i];
+    int hw = k < wv_move_start[WV_MOVES] && wv_box[k].hw != 0 && !wv_in_startup(i);
+    wv_host_trace(kind, i, R8(PL(i) + 4), R8(PL(i) + 5), R8(PL(i) + 6), cur_[i], (int)k, left_[i], exec_[i], wall_[i], chain_[i], cstg_[i], hw, R16(PL(i) + 0x10), R16(PL(i) + 0x18));
+}
+#else
+#define wv_trace(kind, i) ((void)0)
+#endif
 /* wrapper hook for f_195ec (player state machine, a6 = the player's block): 1 run it, 0 skip this tick */
 int sat_guest_wolverine_tick(unsigned long a6)
 {
     int i = wv_player((u32)a6);
+#ifdef SAT_WV_NATIVE
+    wv_patch_sync(sat_guest_sel & 1);
+#endif
     if (i < 0) {
         if (a6 == PL(0) || a6 == PL(1)) wv_reset((int)((a6 - PL(0)) >> 8));
         return 1;
     }
     xb_[i] = R16(PL(i) + 0x10); zb_[i] = R16(PL(i) + 0x18);
-    return wv_tick_move(i);
+    {
+        int run = wv_tick_move(i);
+        if (!run) wv_trace(0, i);
+        return run;
+    }
 }
 
 /* source 0x195ec: observe the state selected by the native player update in
@@ -434,17 +559,19 @@ void sat_guest_wolverine_after_tick(unsigned long a6)
     }
     wv_speed(i);
     move = move_for(i, 1);
-    if (move == cur_[i] && !restart_[i]) return;
+    if (move == cur_[i] && !restart_[i]) { wv_trace(1, i); return; }
 #ifndef WV_MEASURE
     if (cur_[i] < WV_MOVES && tslot(cur_[i]) >= 0 &&
         WV_HAVE_BOXES && wv_resting(i)) {
         recovery_[i] = 1;
+        wv_trace(1, i);
         return;
     }
 #endif
     wv_begin_move(i, move);
     wv_advance(i);
     exec_[i] = 1;
+    wv_trace(1, i);
 }
 /* Pick-ups (game_bind.c f_19f9a): he takes food and score items only (kinds 0a and 0b of the item's byte +2); weapons and held items stay on the floor.
    MSHvSF's Wolverine has no items. Returns nonzero when the pick-up is allowed. */
