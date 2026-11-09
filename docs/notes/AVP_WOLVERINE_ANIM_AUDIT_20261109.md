@@ -99,3 +99,34 @@ merge (idea: merge tiles within a few pixels) was not measured because numpy is 
 - Runtime: the walk speed scale runs in the post-update hook (the native step dx, dz is scaled with the remainder kept; jumps of position over 24 px are left
   alone). The collision hook now reports landed hits (target health or hit-flag byte changed across the call); with `-DSAT_WV_NATIVE_TIMING` the chain goes
   on only from a landed hit and a whiff starts it over with the light punch (host test covers it).
+
+## Results (second pass)
+
+| Check | Result | Tier |
+| --- | --- | --- |
+| Python tests | WSL: 91 run, 61 pass, 30 private-dep errors as before; `test_wolverine_*` 22 of 22 with the C fixture, now also built with `-DSAT_WV_NATIVE_TIMING` | HOST |
+| fit.py, 76 files, assets D6 | gate True, 0 own dropped, no missing keys, 1,511 Wolverine tiles (tightest file: wolverine drop 2,606 against Schaefer 2,607) | HOST |
+| Build, switch OFF | rc 0 (packs rebuilt 1,702 s; flag-only rebuild 37 s), hw_free 4,616, lw_free 76, iso 384,839,680 bytes | HOST |
+| Build, `-DSAT_WV_NATIVE_TIMING` | rc 0, hw_free 4,616, lw_free 72 | HOST |
+| Walk speed, Yaba probe | 1.78 px a tick before, 2.45 after (x1.375) | EMULATOR |
+| Jump, Yaba probe + clip | he leaves the ground; lift 0, 69, 99, 71, 66, 0 over 33 ticks (apex lifts the sprite about 99 px, MSHvSF's own arc by the pose bottom) | EMULATOR |
+| Chain, Yaba, mashed 020006 | OFF: LP LP HP HK; a lone tap no longer flashes HK after its HP (the first version did, fixed) | EMULATOR |
+| Chain on hit (ON) | LP LP HP progressed only when hits landed; whiffs restart at LP; the kick was not reached in the sampled ON run (his HP was cut by a hit) | EMULATOR |
+| Round 1 to boss, bot `r1bot.py` (play_round1_bot.py with the port made a variable), 1,100 s each | OFF: KO at vblank 3,600 / 6,634 / 8,933, boss present 5,337. ON: 4,052 / 6,859 / 8,867, boss present 5,219. Both reach the boss, no fatal, no stuck, same pattern. The bot does not clear the boss in 1,100 s at Yaba's 7-16 v/s, so boss clear, section 3, grabs, pick-ups, HUD and scripts were not compared | EMULATOR (partial) |
+| Save/load, 4 cycles | 4 of 4 plots advanced after each load | EMULATOR |
+| Walk, jump, knockdown/getup clips | viewed: walk poses coherent, knockdown flight and rise read well; throw was not reached (no 0204xx state in the clips) | EMULATOR |
+
+Found, not fixed: at KO (state 0400) the guest clock resets every few ticks (cur 255 flicker) and no Wolverine is drawn in the sampled frames; the same
+happens in the OFF build and in v4.1 data, so it is likely the long-standing invisible case, at death.
+
+## Step 3: what it does and what it does not
+
+`-DSAT_WV_NATIVE_TIMING` (default off): the chain advances on a landed hit (the collision pass answer, d0 = 1) and a whiff restarts at the light punch.
+Durations were already his own with the switch off (the hold table stretches Schaefer's 15 ticks to MSHvSF's 16 / 51 / 28 ...). Damage and pushback were
+NOT changed: no MSHvSF health value could be located in the player block dump (ff3800-ff4000 over the LP, HP and HK frames showed positions, velocities
+and counters only), and the AvP attack-record fields (bytes 11-13 feed +6b, +6c, +4e of the target, f_1d314) are unverified for scaling. P2's knockback in
+MSHvSF is measurable (about 45 px over a light punch) but has no AvP unit yet. Stated plainly: the switch gives chain-on-hit only.
+
+## Tile source (measured, not built)
+`tilemerge.py` on the 1,593-tile jump set: K 8 gives 1,511, K 12 gives 1,474, K 16 gives 1,434 (alpha weight 3). K 12 contact sheet still clean.
+Walk pose 10 (33 tiles) fits at K 12 (1,504); a full 16-pose walk loop needs about 120 more tiles than that, HP's missing attack poses 70.
