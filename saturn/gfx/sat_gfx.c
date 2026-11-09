@@ -835,13 +835,11 @@ static void put_sprite(u8 *cmd, u16 flip, u16 colr, u32 tex, int x, int y)
 #endif
     VP(vp_sprite(x + NUDGE_X, y + NUDGE_Y, ((size >> 8) & 63) * 8, size & 255, 0x0880,
                  (unsigned int)(((size >> 8) & 63) * 8 * (size & 255)));)
-    put16(cmd + 0, flip);          /* normal sprite, jump next */
-    put16(cmd + 4, 0x0880);        /* pre-clip off, end codes off, pen 0 clear, 16 colour bank */
-    put16(cmd + 6, colr);
-    put16(cmd + 8, (u16)(tex >> 3));
-    put16(cmd + 10, size);       /* 16 x 16; SAT_READOUT pad Z selects the existing 8 x 1 fill probe */
-    put16(cmd + 12, (u16)x);
-    put16(cmd + 14, (u16)y);
+    /* Long writes: four fewer bus writes per command than sixteen-bit stores; the link word is never written elsewhere and stays 0 (jump next). */
+    put32(cmd + 0, (u32)flip << 16);                          /* normal sprite, jump next */
+    put32(cmd + 4, (0x0880UL << 16) | colr);                  /* pre-clip off, end codes off, pen 0 clear, 16 colour bank */
+    put32(cmd + 8, ((u32)(u16)(tex >> 3) << 16) | size);      /* 16 x 16; SAT_READOUT pad Z selects the existing 8 x 1 fill probe */
+    put32(cmd + 12, ((u32)(u16)x << 16) | (u16)y);
 }
 #endif
 
@@ -852,13 +850,12 @@ static void put_sprite_fit(u8 *cmd, u16 flip, u16 colr, u32 tex, int x, int y)
 {
     int a = (int)fit_x[x + 16] - 14, b = (int)fit_x[x + 32] - 15; /* fit_x[16] = 14 is screen 0 */
     VP(vp_sprite(a + NUDGE_X, y + NUDGE_Y, b - a + 1, 16, 0x0880, 256);)
-    put16(cmd + 0, (u16)(flip | 1));   /* scaled sprite, two corners */
-    put16(cmd + 4, 0x0880);
-    put16(cmd + 6, colr);
-    put16(cmd + 8, (u16)(tex >> 3));
-    put16(cmd + 10, 0x0210);
-    put16(cmd + 12, (u16)a); put16(cmd + 14, (u16)y);
-    put16(cmd + 20, (u16)b); put16(cmd + 22, (u16)(y + 15));
+    /* Long writes (five bus writes a command, was nine); the link word stays 0 (jump next). */
+    put32(cmd + 0, (u32)(u16)(flip | 1) << 16);                /* scaled sprite, two corners */
+    put32(cmd + 4, (0x0880UL << 16) | colr);
+    put32(cmd + 8, ((u32)(u16)(tex >> 3) << 16) | 0x0210U);
+    put32(cmd + 12, ((u32)(u16)a << 16) | (u16)y);
+    put32(cmd + 20, ((u32)(u16)b << 16) | (u16)(y + 15));
 }
 #endif
 #ifdef SAT_READOUT
