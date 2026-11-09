@@ -97,7 +97,7 @@ static void guest_pass(void (*lifted)(void), int which)
     if (!sat_guest_wolverine_boxes) { lifted(); return; }
     sat_guest_wolverine_boxes(R->a[6], R->a[1], 0);
     lifted();
-    sat_guest_wolverine_boxes(0, 0, 1);
+    sat_guest_wolverine_boxes(0, 0, R->d[0] == 1 ? 2 : 1);
 #ifdef SAT_WOLVERINE_DEBUG
     if (R->a[6] >= 0xff8380u && R->a[6] < 0xff8580u) { wv_hdbg[which]++; if (R->d[0] == 1) wv_hdbg[3 + which]++; }
 #endif

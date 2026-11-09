@@ -114,10 +114,7 @@ extern u8 *PAGE[256];
 static volatile u16 wv_step_now[2] = {0xffff, 0xffff};
 static u8 atk_cache[2][16];                       /* last nonzero attack index per Schaefer state +6 (by state >> 1) */
 static struct { u8 *p; u8 v[4]; } undo[8];
-static int hit_i = -1;   /* Wolverine attacker of the collision call in flight, its target's health and hit-flag byte before it */
-static u16 hit_hp;
-static u8 hit_b48;
-static u32 hit_tgt;
+static int hit_i = -1;   /* Wolverine attacker of the collision call in flight */
 static int nundo;
 static u32 rd32(u32 a) { u8 *p = PBY(a); return (u32)p[0] << 24 | (u32)p[1] << 16 | (u32)p[2] << 8 | p[3]; }
 static u32 rd16(u32 a) { u8 *p = PBY(a); return (u32)p[0] << 8 | p[1]; }
@@ -148,15 +145,13 @@ static const WvBox *box_now(int i)
     if (!wv_box[k].uw) return &wv_box[wv_move_start[WV_IDLE]];   /* a step without a capture keeps his standing hurt box */
     return &wv_box[k];
 }
-/* restore = 0: before the call; 1: after it */
+/* restore = 0: before the call; 1: after it; 2: after it, and the pass answered hit (d0 = 1) */
 void sat_guest_wolverine_boxes(unsigned long a6, unsigned long a1, int restore)
 {
     int i, slot;
     if (restore) {
-        if (hit_i >= 0) {   /* f_1d314 wrote the target's +48 (0xf0) and f_1d492 took health: a landed hit */
-            if (rd16(hit_tgt + 0x40) != hit_hp || PBY(hit_tgt + 0x48)[0] != hit_b48) landed_[hit_i] = 1;
-            hit_i = -1;
-        }
+        if (hit_i >= 0 && restore == 2) landed_[hit_i] = 1;   /* the pass answered hit (d0 = 1) */
+        hit_i = -1;
         while (nundo > 0) { nundo--; { int k; for (k = 0; k < 4; k++) undo[nundo].p[k] = undo[nundo].v[k]; } }
         return;
     }
@@ -168,7 +163,7 @@ void sat_guest_wolverine_boxes(unsigned long a6, unsigned long a1, int restore)
         u32 fr = rd32((u32)a6 + 0x1c), t = rd32((u32)a6 + 0x50);
         u8 *f = PBY(fr), idx = f[9];
         int att = attack_state(i, &slot);
-        hit_i = i; hit_tgt = (u32)a1; hit_hp = (u16)rd16(hit_tgt + 0x40); hit_b48 = PBY(hit_tgt + 0x48)[0];
+        hit_i = i;
         if (att && idx) atk_cache[i][slot] = idx;
         if (!att || !w || !w->hw) { if (idx) poke4(f + 8, f[8], 0, f[10], f[11]); }
         else {

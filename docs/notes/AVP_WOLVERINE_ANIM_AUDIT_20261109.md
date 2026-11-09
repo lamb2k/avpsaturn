@@ -78,3 +78,24 @@ the Round 1 to boss gameplay-equivalence run was not made; the chain change touc
 One number for step 2: Schaefer's walk is about 2 px a tick (x 944 to 1182 in 120 ticks incl. start-up, MAME states.tsv); MSHvSF's is about 2.8 px a frame.
 The invisible-Wolverine case is untouched. Walk poses 10 and 12 (and ?0..?3 of the loop) need 117 + about 120 more tiles; the lossy near-duplicate tile
 merge (idea: merge tiles within a few pixels) was not measured because numpy is missing in the lane python.
+
+# Second pass (steps 2 and 3), same day
+
+## Finds
+- **Jump was broken, not thin.** The v4.1 jump move was a window that held the standing loop for 40 of its 117 ticks; the airborne poses were not
+  resident and poses are anchored by their own bottom row, so a jump showed him standing and sliding sideways. AvP keeps no height in the player block
+  (probe: +14 stays 320 through the jump; the jump is 33 ticks of 020004, 23 with a forward key held), the arc was in Schaefer's sprites.
+- **Walk speed:** AvP 1.8-2.2 px a tick (Yaba, 290 held frames, 1.78 mean over the held stretch incl. start); MSHvSF about 2.8 px a frame. Dash is the walk state: tap,
+  release, hold gives no faster travel than a held walk (x steps every 4-5 ticks, 2.2 px mean), so there is no dash speed to scale.
+- **MSHvSF jump** (capture frames 2103-2157): 41 frames airborne, apex 83 px (origin), 55 frames with crouch and landing; rise 14 frames, fall 26.
+
+## Changes
+- `retime.py` (RETIME_CAPTURE): jump rebuilt per tick over 33 ticks, resident air poses 27 28 29 (+25 30 31 32), per-step `lift`; `gen_c.py` emits
+  `wv_lift` (from/to a step, interpolated across it by the runtime), `wv_speed_tab` (walk 22/16 = 1.375, x and depth, his slot only) and keeps `wv_nat_tab`,
+  `wv_chain_tab`; JUMP is a once-move now.
+- `tilemerge.py` (numpy): merges resident tiles that differ in at most K weighted pixels (colour change 1, opaque against transparent 3), mirrors included.
+  K 8 takes the 1,593 tiles of the jump set to 1,511, the count v4.1 passed at; contact sheet comparison shows shading-level differences only (K 6 with an
+  unweighted count left specks, hence the alpha weight).
+- Runtime: the walk speed scale runs in the post-update hook (the native step dx, dz is scaled with the remainder kept; jumps of position over 24 px are left
+  alone). The collision hook now reports landed hits (target health or hit-flag byte changed across the call); with `-DSAT_WV_NATIVE_TIMING` the chain goes
+  on only from a landed hit and a whiff starts it over with the light punch (host test covers it).
