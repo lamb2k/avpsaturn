@@ -138,6 +138,9 @@ typedef struct
     u16 *head;
     u32 memo_key[2]; /* last answer per column parity this frame: runs of one tile, mostly blank, skip the lookup */
     u16 memo_slot[2];
+#ifdef SAT_VLOG
+    u8 memo_cause[2];
+#endif
 } Cache;
 
 #define NOSLOT 0xffffU
@@ -350,6 +353,15 @@ static u32 blank_seen[BLANK_WAYS];
 static u32 blank_seen[BLANK_WAYS] __attribute__((section(".lwgfx")));
 #endif
 
+#ifdef SAT_VLOG
+/* Diagnostic (lane avp-vanish): why the last lookup returned what it did. 0 slot, 1 blank tile, 2 key not in the pack, 3 no free slot. */
+static u8 vl_cause;
+#define VL_CAUSE(c) (vl_cause = (c))
+#define BLANK_MISS_BIT 0x80000000UL
+#else
+#define VL_CAUSE(c)
+#define BLANK_MISS_BIT 0
+#endif
 /* Slot holding a tile, uploading it on a miss. NOSLOT for a blank, missing or refused tile. */
 static u16 cache_find(Cache *c, u32 key, unsigned long *refused)
 {
@@ -363,13 +375,18 @@ static u16 cache_find(Cache *c, u32 key, unsigned long *refused)
         if (c->slot_key[s] == key)
         {
             if (c->slot_stamp[s] != stamp) { c->slot_stamp[s] = stamp; c->used++; }
+            VL_CAUSE(0);
             return s;
         }
         s = c->slot_next[s];
     }
     {
         u32 tag = (key << 2) | (u32)c->section, way = (tag ^ (tag >> 11)) & (BLANK_WAYS - 1);
+#ifdef SAT_VLOG
+        if ((blank_seen[way] & ~BLANK_MISS_BIT) == tag) { VL_CAUSE(blank_seen[way] & BLANK_MISS_BIT ? 2 : 1); return NOSLOT; }
+#else
         if (blank_seen[way] == tag) return NOSLOT;
+#endif
 #ifdef SAT_KEYLOG
         {   /* Test build only: every key the running game asks for, as bits in spare SCSP RAM, read back over MCP to size the tile pack by real play. */
             static const u32 base[4] = { 0x25A70000UL, 0x25A78000UL, 0x25A7C000UL, 0x25A7E000UL };
@@ -379,11 +396,11 @@ static u16 cache_find(Cache *c, u32 key, unsigned long *refused)
         idx = pack_find(&sections[c->section], key);
         if (idx < 0)
         {
-            sat_gfx_stats.missing++; blank_seen[way] = tag;
+            sat_gfx_stats.missing++; blank_seen[way] = tag | BLANK_MISS_BIT; VL_CAUSE(2);
             CENSUS(if (sat_gfx_census.missing_n < 32) sat_gfx_census.missing_key[sat_gfx_census.missing_n++] = key | ((u32)c->section << 28);)
             return NOSLOT;
         }
-        if ((u32)idx == BLANK_INDEX) { blank_seen[way] = tag; return NOSLOT; }
+        if ((u32)idx == BLANK_INDEX) { blank_seen[way] = tag; VL_CAUSE(1); return NOSLOT; }
     }
     for (scan = c->first; scan < c->capacity; scan++)
     {
@@ -391,7 +408,7 @@ static u16 cache_find(Cache *c, u32 key, unsigned long *refused)
         c->hand = (u16)(t + 1U >= c->capacity ? c->first : t + 1U);
         if (c->slot_stamp[t] != stamp && !(c->section == SEC_SPRITE && prev_stamp && c->slot_stamp[t] == prev_stamp)) { n = t; break; }
     }
-    if (n == NOSLOT) { (*refused)++; return NOSLOT; }
+    if (n == NOSLOT) { (*refused)++; VL_CAUSE(3); return NOSLOT; }
     if (c->slot_key[n] != NOKEY)
     {
         u16 *link = &c->head[HASH(c->slot_key[n])];
@@ -415,6 +432,7 @@ static u16 cache_find(Cache *c, u32 key, unsigned long *refused)
         vram_copy(c->vram + (u32)n * c->slot_bytes, from, c->slot_bytes);
     }
     if (c == &spr_cache) sat_gfx_stats.uploads++; else sat_gfx_stats.layer_uploads++;
+    VL_CAUSE(0);
     return n;
 }
 
@@ -425,7 +443,13 @@ static u16 cache_get(Cache *c, u32 key, unsigned long *refused)
     {
         c->memo_key[way] = key;
         c->memo_slot[way] = cache_find(c, key, refused);
+#ifdef SAT_VLOG
+        c->memo_cause[way] = vl_cause;
     }
+    vl_cause = c->memo_cause[way];
+#else
+    }
+#endif
     return c->memo_slot[way];
 }
 
@@ -883,6 +907,33 @@ static u8 *bar(u8 *cmd, int w, int y, u16 rgb)
 #endif
 /* Object list at 0x708000. The board keeps the first pixel down, drawing from the end of the list, so later entries win: VDP1 paints in
    list order, tiles of a block last to first. Each 16 pixel tile is one command. */
+#ifdef SAT_VLOG
+extern unsigned long sat_vl_sforced;
+/* Per plot, for the diagnostic ring sat_plog (one entry per plot serial, 16 deep): tiles seen, culled off screen, lost by cause, and the first three lost tiles
+   (cause 3 bits, palette 5, screen x 12, screen y 12). Lost = key not in the pack (2), no free slot (3), command table full (4). */
+static u16 vl_tiles, vl_off, vl_blank, vl_miss, vl_refslot, vl_refcmd;
+static u32 vl_lost[3];
+static u8 vl_nlost;
+static u16 vl_serial;   /* serial of the plot being built: drawn into its picture as 16 cells (top row, 4 pixels each, white 1 / green 0) so a screenshot says which plot it shows */
+/* Distinct sprite tile keys the pack lacks (tile number | palette << 20), first 40 seen; sat_vl_mkn counts lookups that missed. */
+volatile unsigned long sat_vl_mk[40] __attribute__((section(".lwgfx"), aligned(4)));
+unsigned long sat_vl_mkn, sat_vl_mku;
+static void vl_note_key(u32 tile, int pal)
+{
+    u32 k = tile | ((u32)(pal & 31) << 20), i;
+    sat_vl_mkn++;
+    for (i = 0; i < sat_vl_mku; i++) if (sat_vl_mk[i] == k) return;
+    if (sat_vl_mku < 40) sat_vl_mk[sat_vl_mku++] = k;
+}
+static void vl_note(u32 cause, int pal, int sx, int sy)
+{
+    if (vl_nlost < 3) vl_lost[vl_nlost] = (cause << 29) | ((u32)(pal & 31) << 24) | (((u32)sx & 0xfff) << 12) | ((u32)sy & 0xfff);
+    vl_nlost++;
+}
+#define VLN(x) x
+#else
+#define VLN(x)
+#endif
 static void draw_sprites(void)
 {
     const u8 *list = snap.obj;
@@ -899,6 +950,7 @@ static void draw_sprites(void)
     put16(cmd + 24, 0); put16(cmd + 26, SAT_GFX_SCREEN_H - 1);
     cmd += 32;
     sat_gfx_stats.objects = (u16)count;
+    VLN(vl_tiles = vl_off = vl_blank = vl_miss = vl_refslot = vl_refcmd = 0; vl_nlost = 0;)
     for (i = 0; i < count; i++)
     {
         const u8 *o = list + i * 8;
@@ -925,15 +977,25 @@ static void draw_sprites(void)
                 u32 tile;
                 u16 slot;
                 CENSUS(c_tiles++;)
-                if (sx <= -16 || sx >= SAT_GFX_SRC_W || sy <= -16 || sy >= SAT_GFX_SCREEN_H) { CENSUS(c_off++;) continue; }
+                VLN(vl_tiles++;)
+                if (sx <= -16 || sx >= SAT_GFX_SRC_W || sy <= -16 || sy >= SAT_GFX_SCREEN_H) { CENSUS(c_off++;) VLN(vl_off++;) continue; }
                 if (fx || fy)
                     tile = code + (u32)(fx ? nx - 1 - tx : tx) + 0x10UL * (u32)(fy ? ny - 1 - ty : ty);
                 else
                     tile = (code & ~0xfUL) + ((code + (u32)tx) & 0xfUL) + 0x10UL * (u32)ty;
                 slot = cache_get(&spr_cache, tile, &sat_gfx_stats.refused_sprite);
-                if (slot == NOSLOT) { CENSUS(c_empty++;) continue; }
+                if (slot == NOSLOT)
+                {
+                    CENSUS(c_empty++;)
+#ifdef SAT_VLOG
+                    if (vl_cause == 2) { vl_miss++; vl_note(2, bank & 31, sx, sy); vl_note_key(tile, bank & 31); }
+                    else if (vl_cause == 3) { vl_refslot++; vl_note(3, bank & 31, sx, sy); }
+                    else vl_blank++;
+#endif
+                    continue;
+                }
                 CENSUS(if (prev != tx + 1) c_runs++; prev = tx; census_bank((u32)bank);)
-                if (commands >= SAT_GFX_MAX_COMMANDS) { sat_gfx_stats.refused_commands++; continue; }
+                if (commands >= SAT_GFX_MAX_COMMANDS) { sat_gfx_stats.refused_commands++; VLN(vl_refcmd++; vl_note(4, bank & 31, sx, sy);) continue; }
 #if SAT_GFX_FIT == 3
                 if (SAT_FIT_ON) put_sprite_fit(cmd, flip, colr, TEX_BASE + (u32)slot * 128, sx, sy);
                 else put_sprite(cmd, flip, colr, TEX_BASE + (u32)slot * 128, sx, sy);
@@ -947,6 +1009,20 @@ static void draw_sprites(void)
             }
         }
     }
+#ifdef SAT_VLOG
+    {
+        int b;
+        put16(CRAM_AT(2041), 0x83e0); put16(CRAM_AT(2043), 0xffff);
+        for (b = 0; b < 16; b++)
+        {
+            int x = SAT_GFX_SCREEN_W - 68 + b * 4;
+            put16(cmd + 0, 0x0004); put16(cmd + 4, 0x00c0); put16(cmd + 6, 0xe000 | ((vl_serial >> (15 - b)) & 1 ? 2043 : 2041));
+            put16(cmd + 12, x); put16(cmd + 14, 0); put16(cmd + 16, x + 3); put16(cmd + 18, 0);
+            put16(cmd + 20, x + 3); put16(cmd + 22, 3); put16(cmd + 24, x); put16(cmd + 26, 3);
+            cmd += 32;
+        }
+    }
+#endif
 #ifdef SAT_READOUT
     {
         volatile unsigned long *r = (volatile unsigned long *)((unsigned long)sat_readout | 0x20000000UL);
@@ -1168,22 +1244,48 @@ static u32 plot_started, plot_shown, plot_held, plot_sync;   /* started: slave; 
 u32 sat_gfx_plot_waits;   /* frames the master held the last picture because VDP1 had not finished (diagnostic) */
 #define PLOT_WAIT_MAX 2   /* vblanks the master waits for the end flag before it changes anyway: an emulator without the flag still runs */
 #define SLAVE_WAIT_MAX 7000UL   /* about two frames of slave FRT ticks: a master with interrupts off (restart) cannot hold the slave */
+#ifdef SAT_VLOG
+extern u32 sat_vblanks_now(void);
+/* Per vblank-in, 16 deep, written by the master at the frame change decision: word 0 vblank<<16 | EDSR, 1 plots started<<16 | plots shown before,
+   2 plots shown after<<16 | action<<8 | held count (action 0 none to show, 1 change with CEF, 2 change forced without CEF, 3 held for the end of the plot). */
+volatile unsigned long sat_vb[16 * 4] __attribute__((section(".lwgfx"), aligned(4)));
+volatile unsigned long sat_plog[16 * 8] __attribute__((section(".lwgfx"), aligned(4)));
+unsigned long sat_vl_sforced;   /* the slave gave up waiting for the change and made it itself */   /* per plot serial, 16 deep: see draw_sprites; written by the slave */
+#endif
 void sat_gfx_vblank(void)
 {
     u32 s = UNC32(plot_started);
+#ifdef SAT_VLOG
+    u32 act = 0, before = UNC32(plot_shown), edsr = VDP1R(0x10), vbv = sat_vblanks_now() + 1;
+#endif
     UNC32(plot_sync) = 1;
-    if (s == UNC32(plot_shown)) return;
-    if ((VDP1R(0x10) & EDSR_CEF) || UNC32(plot_held) >= PLOT_WAIT_MAX)
+    if (s != UNC32(plot_shown))
     {
-        VDP1R(FBCR) = 3;
-        UNC32(plot_shown) = s;
-        UNC32(plot_held) = 0;
+        if ((VDP1R(0x10) & EDSR_CEF) || UNC32(plot_held) >= PLOT_WAIT_MAX)
+        {
+#ifdef SAT_VLOG
+            act = (VDP1R(0x10) & EDSR_CEF) ? 1 : 2;
+#endif
+            VDP1R(FBCR) = 3;
+            UNC32(plot_shown) = s;
+            UNC32(plot_held) = 0;
+        }
+        else
+        {
+#ifdef SAT_VLOG
+            act = 3;
+#endif
+            UNC32(plot_held) = UNC32(plot_held) + 1;
+            UNC32(sat_gfx_plot_waits) = UNC32(sat_gfx_plot_waits) + 1;
+        }
     }
-    else
+#ifdef SAT_VLOG
     {
-        UNC32(plot_held) = UNC32(plot_held) + 1;
-        UNC32(sat_gfx_plot_waits) = UNC32(sat_gfx_plot_waits) + 1;
+        volatile unsigned long *e = (volatile unsigned long *)((unsigned long)&sat_vb[(vbv & 15) * 4] | 0x20000000UL);
+        e[0] = (vbv & 0xffff) << 16 | (edsr & 0xffff); e[1] = (s & 0xffff) << 16 | (before & 0xffff);
+        e[2] = (UNC32(plot_shown) & 0xffff) << 16 | act << 8 | (UNC32(plot_held) & 0xff); e[3] = 0;
     }
+#endif
 }
 static inline u32 slave_ticks(void) { return ((u32)*(volatile u8 *)0xfffffe12u << 8) | *(volatile u8 *)0xfffffe13u; }
 /* Before the table and the texture slots are touched: the last plot has ended (its change may still be pending; only PTMR waits for that). */
@@ -1199,13 +1301,20 @@ static void plot_wait_shown(void)
 {
     u32 t0 = slave_ticks();
     while (UNC32(plot_started) != UNC32(plot_shown))
-        if (((slave_ticks() - t0) & 0xffffUL) > SLAVE_WAIT_MAX) { VDP1R(FBCR) = 3; UNC32(plot_shown) = UNC32(plot_started); break; }
+        if (((slave_ticks() - t0) & 0xffffUL) > SLAVE_WAIT_MAX) { VDP1R(FBCR) = 3; UNC32(plot_shown) = UNC32(plot_started); VLN(sat_vl_sforced++;) break; }
 }
 static void plot_start(void)
 {
     if (!UNC32(plot_sync)) { VDP1R(FBCR) = 3; VDP1R(PTMR) = 1; return; }
     plot_wait_shown();
-    while (VDP2R(0x04) & TVSTAT_VBLANK) ;   /* the change asked for in this vblank happens at its end; plot into the new back buffer after it */
+    /* The plot goes into the back buffer only once the change has really happened. The change shifts EDSR (end flag of the current frame becomes the previous
+       frame's), so CEF going clear is the sign, on the console and in Yaba alike. Waiting for the end of vblank instead raced the emulator's own latch of the
+       change (a few lines after vblank-out): a plot that won the race drew into the buffer about to be shown, which put the buffer parity out of step and
+       showed old pictures every few frames (lane avp-vanish, stepped capture: 11 % of pictures went back to an older plot). */
+    {
+        u32 t0 = slave_ticks();
+        while ((VDP1R(0x10) & EDSR_CEF) && ((slave_ticks() - t0) & 0xffffUL) < SLAVE_WAIT_MAX) ;
+    }
     VDP1R(PTMR) = 1;
     UNC32(plot_started) = UNC32(plot_started) + 1;
 }
@@ -1281,8 +1390,21 @@ void sat_gfx_draw(void)
 #ifdef SAT_PROF
     { u32 v = sat_vblanks_now(); speed_on = v >= 1000 && v < 1650; }
 #endif
+    VLN(vl_serial = (u16)(UNC32(plot_started) + 1);)
     draw_sprites();
     note_slots();
+#ifdef SAT_VLOG
+    {   /* the plot about to start has serial plot_started + 1 */
+        volatile unsigned long *e = (volatile unsigned long *)((unsigned long)&sat_plog[((UNC32(plot_started) + 1) & 15) * 8] | 0x20000000UL);
+        e[0] = 0;
+        e[1] = (unsigned long)sat_gfx_stats.objects << 16 | sat_gfx_stats.commands;
+        e[2] = (unsigned long)vl_tiles << 16 | vl_off;
+        e[3] = (unsigned long)vl_miss << 24 | (unsigned long)vl_refslot << 16 | (unsigned long)vl_refcmd << 8 | (vl_nlost > 255 ? 255 : vl_nlost);
+        e[4] = (unsigned long)sat_gfx_stats.uploads << 16 | vl_blank;
+        e[5] = vl_lost[0]; e[6] = vl_lost[1]; e[7] = vl_lost[2];
+        e[0] = (UNC32(plot_started) + 1) << 16 | (vlog_v & 0xffff);   /* serial last: a reader that sees its serial sees the rest */
+    }
+#endif
     STAGE(5);
     put16(VDP1_VRAM + 0, 0x1009);   /* system clip, then jump (assign) to this table */
     put16(VDP1_VRAM + 2, (u16)((table_base + 0x20) >> 3));
