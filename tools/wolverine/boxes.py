@@ -47,7 +47,15 @@ def main():
     out = {}
     for name, seq in moves.items():
         steps = []
-        if name in WINDOWS and WINDOWS[name][0] < 100000:
+        if name == "idle" and name in WINDOWS:
+            # The standing loop (retime.py) is longer than its one-frame-pose window: every step takes the window's hurt box, no hit box.
+            hurt = None
+            for g in range(WINDOWS[name][0], WINDOWS[name][1] + 1):
+                for r in fr.get(g, {}).get("hurt", []):
+                    hurt = union(hurt, r)
+            steps = [dict(hit=None, active=0, hurt=hurt, frames=n) for _p, n, _a in seq]
+            print(name, "loop of", len(seq), "steps, window hurt box", hurt)
+        elif name in WINDOWS and WINDOWS[name][0] < 100000:
             f = WINDOWS[name][0]
             for _pose, n, _anc in seq:
                 hit = hurt = None
