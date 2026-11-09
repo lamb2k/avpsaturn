@@ -91,6 +91,10 @@ void sat_gfx_frame(void);
 /* The two halves, for two CPUs. sat_gfx_snapshot copies what drawing needs out of game state and runs on the game's CPU, with the buffer
  * not in use by sat_gfx_draw. sat_gfx_draw reads only that buffer and owns the video chips, caches and stats. The caller does the handoff. */
 void sat_gfx_snapshot(void);
+/* The same snapshot in two halves for the two-CPU path: _begin copies registers, palette, rows and objects; the caller hands the picture to the slave and wakes it;
+   _layers then copies the layer cells while the slave builds the sprite commands. The slave waits for _layers to finish before it reads a layer cell. */
+void sat_gfx_snapshot_begin(void);
+void sat_gfx_snapshot_layers(void);
 void sat_gfx_draw(void);
 
 /* CRAM bank of a CPS palette page and bank, or -1 when outside the map: the capacity refusal. */

@@ -29,7 +29,7 @@ extern u16 sat_gfx_host_vdp1r[], sat_gfx_host_vdp2r[];
 #define CRAM_AT(e) (sat_gfx_host_cram + (u32)(e) * 2)
 #define VDP1R(o) (sat_gfx_host_vdp1r[(o) / 2])
 #define VDP2R(o) (sat_gfx_host_vdp2r[(o) / 2])
-#define UNC32(v) (v)
+#define UNC32(v) (*(volatile u32 *)&(v))
 #define UNC_PTR(type, p) ((volatile type *)(p))
 /* Optional host timing seam for the actual presentation state machine. */
 extern unsigned long sat_gfx_host_ticks(void);
@@ -373,21 +373,41 @@ static u32 readout_pad(void) { return *UNC_PTR(u32, &sat_pad_raw); }
 #define MAX_OBJECTS 0x400
 typedef struct
 {
-    u16 layers, priority, pal_pages, back_valid, back, row_active, objects, pad;
+    u16 layers, priority, pal_pages, back_valid, back, row_active, objects, whole;   /* whole: scroll 2 read as a whole page (row scroll on), taken before a menu clears row_active */
     u16 s1x, s1y, s2x, s2y, s3x, s3y;
     u16 row[SAT_GFX_SCREEN_H];
     u8 palette[SAT_GFX_PAGES][0x400];
-    u16 hud_flush;
-    u32 s1[S1_ROWS * S1_COLS], s2[S2_ROWS * 64], s3[S3_ROWS * (384 / 32 + 1)]; /* code << 16 | attribute, visible cells only */
     u8 obj[MAX_OBJECTS * 8];
-    u32 pal_sum[SAT_GFX_PAGES], s1_sum, s2_sum, s3_sum; /* change detection: position and every visible word */
+    u32 pal_sum[SAT_GFX_PAGES]; /* change detection: every palette word */
 #ifdef SAT_VDP1_PROFILE
     unsigned int profile_vblank, profile_stage_chars, profile_snapshot_ticks, profile_handoff_tick;
 #endif
 #ifdef SAT_HOME
     u16 home; /* menu text on its own layer (NBG3) */
 #endif
-} Snapshot;
+    /* Second half of the handoff (frame chain lane): the layer cells and their sums are written by the master after it has woken the slave, so
+       nothing of the first half shares a cache line with them (group aligned to 16, structure size a multiple of 16) and the slave reads them
+       only once snap_layers_ready is set. */
+    u32 s1[S1_ROWS * S1_COLS] __attribute__((aligned(16)));
+    u32 s2[S2_ROWS * 64], s3[S3_ROWS * (384 / 32 + 1)]; /* code << 16 | attribute, visible cells only */
+    u32 s1_sum, s2_sum, s3_sum; /* change detection: position and every visible word */
+    u16 hud_flush;
+#ifdef SAT_VDP1_PROFILE
+    unsigned int profile_layer_ticks;
+#endif
+} Snapshot __attribute__((aligned(16)));
+#define SNAP_BARRIER() __asm__ volatile ("" : : : "memory")
+static u32 snap_layers_ready;   /* master writes 0 before the handoff and 1 when the layer half is complete; slave reads it uncached */
+#ifndef SAT_LAYERS_WAIT_SPINS
+#define SAT_LAYERS_WAIT_SPINS 90000UL   /* about two frames of uncached reads: a stalled master cannot hold the slave for ever */
+#endif
+#if defined(SAT_VLOG) || defined(SAT_VDP1_PROFILE) || defined(SAT_GFX_HOST) || defined(SAT_LAYERS_COUNT)
+u32 sat_gfx_layers_late;     /* diagnostic: pictures whose slave reached the layers before the master had finished them */
+u32 sat_gfx_layers_timeout;  /* diagnostic: waits abandoned at SAT_LAYERS_WAIT_SPINS (must stay 0) */
+#define LAYERS_COUNT(x) x
+#else
+#define LAYERS_COUNT(x)
+#endif
 
 /* Polynomial, not rotate and xor: a palette fade changes every long by one mask, and with 256 longs a rotate cancels it out. */
 #define MIX(sum, w) ((((sum) << 5) + (sum)) + (w))
@@ -395,7 +415,7 @@ typedef struct
 #ifdef SAT_GFX_HOST
 static Snapshot snap;
 #else
-static Snapshot snap __attribute__((section(".lwgfx"), aligned(4)));
+static Snapshot snap __attribute__((section(".lwgfx"), aligned(16)));
 #endif
 
 #ifdef SAT_VDP1_PROFILE
@@ -1080,16 +1100,18 @@ static u32 snap_layer(u32 *dest, const u8 *map, u32 xc, u32 yc, u32 rows, u32 co
 
 static int rows_clear;
 
-/* Master side. Takes what drawing needs from game state, visible cells only, at the point the game's level 2 IRQ would start. */
-void sat_gfx_snapshot(void)
+/* Master side, first half: registers, palette, row scroll and the object list, everything the slave's command build needs. The caller then wakes
+   the slave and runs sat_gfx_snapshot_layers (visible layer cells, the long part: about 2500 words hashed). Visible cells only, at the point the game's level 2 IRQ would start. */
+void sat_gfx_snapshot_begin(void)
 {
     u16 layers = RAM16(SH_LAYERS), video = RAM16(SH_VIDEO), pal_reg = RAM16(SH_PALETTE_BASE), pal_mask = RAM16(SH_PAL_PAGES);
     const u8 *pal = GFX(pal_reg);
     const u8 *list = PAGE[0x70] + 0x8000;
     const u8 *last;
-    u32 x0, y0, n;
+    u32 n;
     int page, count = 0;
     VP(unsigned int vp_snapshot_start = (unsigned int)GFX_TICKS();)
+    UNC32(snap_layers_ready) = 0;
 
     VP(snap.profile_vblank = (unsigned int)sat_vblanks_now();
        snap.profile_stage_chars = (unsigned int)RAM16(0xff81e8UL) |
@@ -1148,27 +1170,8 @@ void sat_gfx_snapshot(void)
         for (n = 0; n < SAT_GFX_SCREEN_H; n++) snap.row[n] = 0;
         rows_clear = 1;
     }
+    snap.whole = (u16)(snap.row_active != 0);   /* before a menu clears row_active: the layer half still reads scroll 2 as the game has it */
 
-    if (layers & 2)
-    {
-#if SAT_GFX_FIT
-        snap.hud_flush = RAMB[0x8001] == 2 && RAMB[0x8380] != 0;
-#endif
-        x0 = (u32)snap.s1x + CPS_LEFT + S1_READ_X; y0 = (u32)snap.s1y + CPS_TOP;
-        snap.s1_sum = snap_layer(snap.s1, GFX(RAM16(SH_SCROLL1_BASE) & 0xffc0U), x0 >> 3, y0 >> 3, S1_ROWS, S1_COLS, 5, (x0 >> 3) | ((y0 >> 3) << 16) | ((u32)snap.hud_flush << 31), snap.s1_sum);
-    }
-    if (layers & 4)
-    {
-        u32 whole = snap.row_active != 0;
-        x0 = (u32)snap.s2x + CPS_LEFT + SAT_GFX_CROP_X; y0 = (u32)snap.s2y + CPS_TOP;
-        snap.s2_sum = snap_layer(snap.s2, GFX(RAM16(SH_SCROLL2_BASE) & 0xffc0U), whole ? 0 : x0 >> 4, y0 >> 4, S2_ROWS, whole ? 64 : S2_COLS, 4,
-                                 (whole ? 0x80000000UL : (x0 >> 4)) | ((y0 >> 4) << 16), snap.s2_sum);
-    }
-    if (layers & 8)
-    {
-        x0 = (u32)snap.s3x + CPS_LEFT + SAT_GFX_CROP_X; y0 = (u32)snap.s3y + CPS_TOP;
-        snap.s3_sum = snap_layer(snap.s3, GFX(RAM16(SH_SCROLL3_BASE) & 0xffc0U), x0 >> 5, y0 >> 5, S3_ROWS, S3_COLS, 3, (x0 >> 5) | ((y0 >> 5) << 16), snap.s3_sum);
-    }
     {
         u8 *out = snap.obj;
         for (; count < MAX_OBJECTS; count++, list += 8, out += 8)
@@ -1197,11 +1200,67 @@ void sat_gfx_snapshot(void)
         snap.pal_pages |= 2;
         for (n = 0; n < 64; n++) snap.palette[1][30 * 32 + n] = home_pal[n];
         snap.pal_sum[1]++;
-        if (snap.home >= 3) snap.s1_sum++;    /* scroll 1 redrawn on the title menus (its bottom rows hidden) */
     }
 #endif
     VP(snap.profile_snapshot_ticks = vp_elapsed(vp_snapshot_start);
        snap.profile_handoff_tick = (unsigned int)GFX_TICKS();)
+}
+
+/* Master side, second half, after the slave has been woken. The game is stopped inside the vblank hook, so the registers read here are the ones the
+   first half read (a menu overrides only the copies in snap). Writes the layer cells and sums, then sets the flag the slave waits on. */
+void sat_gfx_snapshot_layers(void)
+{
+    u16 layers = RAM16(SH_LAYERS);
+    u32 x0, y0;
+    VP(unsigned int vp_layers_start = (unsigned int)GFX_TICKS();)
+    if (layers & 2)
+    {
+#if SAT_GFX_FIT
+        snap.hud_flush = RAMB[0x8001] == 2 && RAMB[0x8380] != 0;
+#endif
+        x0 = (u32)RAM16(SH_S1X) + CPS_LEFT + S1_READ_X; y0 = (u32)RAM16(SH_S1Y) + CPS_TOP;
+        snap.s1_sum = snap_layer(snap.s1, GFX(RAM16(SH_SCROLL1_BASE) & 0xffc0U), x0 >> 3, y0 >> 3, S1_ROWS, S1_COLS, 5, (x0 >> 3) | ((y0 >> 3) << 16) | ((u32)snap.hud_flush << 31), snap.s1_sum);
+    }
+    if (layers & 4)
+    {
+        u32 whole = snap.whole;
+        x0 = (u32)RAM16(SH_S2X) + CPS_LEFT + SAT_GFX_CROP_X; y0 = (u32)RAM16(SH_S2Y) + CPS_TOP;
+        snap.s2_sum = snap_layer(snap.s2, GFX(RAM16(SH_SCROLL2_BASE) & 0xffc0U), whole ? 0 : x0 >> 4, y0 >> 4, S2_ROWS, whole ? 64 : S2_COLS, 4,
+                                 (whole ? 0x80000000UL : (x0 >> 4)) | ((y0 >> 4) << 16), snap.s2_sum);
+    }
+    if (layers & 8)
+    {
+        x0 = (u32)RAM16(SH_S3X) + CPS_LEFT + SAT_GFX_CROP_X; y0 = (u32)RAM16(SH_S3Y) + CPS_TOP;
+        snap.s3_sum = snap_layer(snap.s3, GFX(RAM16(SH_SCROLL3_BASE) & 0xffc0U), x0 >> 5, y0 >> 5, S3_ROWS, S3_COLS, 3, (x0 >> 5) | ((y0 >> 5) << 16), snap.s3_sum);
+    }
+#ifdef SAT_HOME
+    if (snap.home >= 3) snap.s1_sum++;    /* scroll 1 redrawn on the title menus (its bottom rows hidden) */
+#endif
+    VP(snap.profile_layer_ticks = vp_elapsed(vp_layers_start);)
+    SNAP_BARRIER();   /* every layer word is stored before the flag */
+    UNC32(snap_layers_ready) = 1;
+}
+
+/* Both halves in a row: the single-CPU path (standalone, host fixtures). */
+void sat_gfx_snapshot(void)
+{
+    sat_gfx_snapshot_begin();
+    sat_gfx_snapshot_layers();
+}
+
+/* Slave side: the layer half is in place. Normally already so by the time the command build and the plot start are done. */
+static void snap_layers_wait(void)
+{
+    if (!UNC32(snap_layers_ready))
+    {
+        u32 spin = 0;
+        VP(unsigned int vp_wait_start = (unsigned int)GFX_TICKS();)
+        LAYERS_COUNT(sat_gfx_layers_late++;)
+        while (!UNC32(snap_layers_ready))
+            if (++spin > SAT_LAYERS_WAIT_SPINS) { LAYERS_COUNT(sat_gfx_layers_timeout++;) break; }
+        VP(vp_current[VP_FLAGS] |= vp_elapsed(vp_wait_start) << 16;)
+    }
+    SNAP_BARRIER();   /* no layer word is read before the flag */
 }
 
 /* Drawing side: everything from the snapshot. On the Saturn this runs on the slave SH-2. */
@@ -1466,6 +1525,8 @@ void sat_gfx_draw(void)
     VDP2R(0x9a) = (u16)(row_active ? 0x0002 : 0);
 
     STAGE(2);
+    snap_layers_wait();
+    VP(vp_current[VP_SNAPSHOT_TICKS] |= snap.profile_layer_ticks << 16;)
     if (layers & 4)
     {
         bgon |= 1;
