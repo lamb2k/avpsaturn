@@ -135,15 +135,15 @@ void f_19f9a(void)
         FLAGS(1, 0, 0, 0, 0);
     }
 }
-/* f_24060 is the player's gun action (a6 = block; Berserker Barrage runs in it for Wolverine): no shot, flash, sound or heat for a Wolverine player
+/* f_2576a is Schaefer's gun action (a6 = block; action 0x0c dispatches per character through 0x19b68, Schaefer 0x2576a; Berserker Barrage runs in it for Wolverine): no shot, flash, sound or heat for a Wolverine player
    (saturn/guests/wolverine/wolverine.c sat_guest_wolverine_gun). */
 extern int sat_guest_wolverine_gun(unsigned long a6, int end) __attribute__((weak));
-void f_24060(void)
+void f_2576a(void)
 {
-    extern void lifted_24060(void);
+    extern void lifted_2576a(void);
     u32 player = R->a[6];
     int g = sat_guest_wolverine_gun ? sat_guest_wolverine_gun(player, 0) : 0;
-    lifted_24060();
+    lifted_2576a();
     if (g) sat_guest_wolverine_gun(player, 1);
 }
 void f_195ec(void)
