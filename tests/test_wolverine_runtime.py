@@ -27,6 +27,8 @@ def synthetic_assets():
         "knockdown": seq((22, 1), (23, 12)),
         "throw": seq((24, 1), (25, 12)),
         "hit_etc": seq((26, 1), (27, 12)),
+        "hit_m": seq((26, 1), (27, 12)),
+        "hit_h": seq((26, 1), (27, 12)),
         "crouch": seq((28, 1), (29, 12)),
     }
     asset = {

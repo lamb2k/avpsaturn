@@ -31,7 +31,8 @@ static const u8 wv_row1[0x28] = {10,22,21,22,20,22,18,22,22,22,8,22,23,22,22,22,
 s16 wv_dbg[2][12];
 s16 wv_lst[2][3];   /* per player: objects before his tiles, tiles asked, tiles that fit (a full list drops his tiles) */
 #endif
-static u8 step_[2], left_[2], face_[2], cur_[2] = {255, 255}, chain_[2], lastc_[2], held_[2];
+static u8 step_[2], left_[2], face_[2], cur_[2] = {255, 255}, chain_[2], lastc_[2], held_[2], hitk_[2];
+static u16 hp_[2];   /* health before a hit; the hit's size picks his reaction */
 static void wv_reset(int i);
 
 /* Schaefer's player block state +4 +5 +6, measured under MAME (tools/wolverine/schaefer_states.lua, 11-08):
@@ -39,7 +40,11 @@ static void wv_reset(int i);
    020008 special (attack + jump), 0202xx hit (about 28 frames; 107 when knocked down), 0204xx grab and throw (walking into an enemy),
    0208xx getting up, 04xxxx dying, 08xxxx entering. His own moves take their place: the gun is the Berserker Barrage (no gun for him),
    the special the Tornado Claw, a hit held past 40 frames the knockdown. */
-#define ONCE(m) ((m) == WV_LP || (m) == WV_HP || (m) == WV_HK || (m) == WV_TORNADO || (m) == WV_KNOCKDOWN || (m) == WV_THROW || (m) == WV_HIT_ETC)
+#ifndef WV_HIT_MEDIUM
+#define WV_HIT_MEDIUM 13   /* health a hit took: medium from here, heavy from WV_HIT_HEAVY (player hits seen: 10 to 17, docs/notes/AVP_NOTES_ACTOR.md) */
+#define WV_HIT_HEAVY 17
+#endif
+#define ONCE(m) ((m) == WV_LP || (m) == WV_HP || (m) == WV_HK || (m) == WV_TORNADO || (m) == WV_KNOCKDOWN || (m) == WV_THROW || (m) == WV_HIT_ETC || (m) == WV_HIT_M || (m) == WV_HIT_H)
 static int move_for(int i)
 {
     u8 a = R8(PL(i) + 4), b = R8(PL(i) + 5), c = R8(PL(i) + 6);
@@ -55,11 +60,20 @@ static int move_for(int i)
         case 0x0c: m = WV_BERSERKER; break;
         case 0x08: m = WV_TORNADO; break;
         }
-    } else if (a == 2 && b == 2) m = held_[i] > 40 ? WV_KNOCKDOWN : WV_HIT_ETC;
+    } else if (a == 2 && b == 2) {
+        /* A hit that does not knock him down is one of three standing reactions of MSHvSF (hitstun of the capture, state +06 = 12), by the health
+           the hit took: light (the stagger back), medium (arched back and hunched), heavy (curled and recovering). Longer than 40 ticks is the knockdown. */
+        if (!held_[i]) {
+            u16 hp = R16(PL(i) + 0x40), d = hp_[i] > hp ? (u16)(hp_[i] - hp) : 0;
+            hitk_[i] = (u8)(d >= WV_HIT_HEAVY ? 2 : d >= WV_HIT_MEDIUM ? 1 : 0);
+        }
+        m = held_[i] > 40 ? WV_KNOCKDOWN : hitk_[i] == 2 ? WV_HIT_H : hitk_[i] == 1 ? WV_HIT_M : WV_HIT_ETC;
+    }
     else if (a == 2 && b == 4) m = WV_THROW;
     else if (a == 2 && b == 8) m = WV_CROUCH;   /* getting up: his crouch rises back to stand */
     else if (a == 4) m = WV_KNOCKDOWN;
     else if (a == 8) m = WV_WALK;
+    if (!(a == 2 && b == 2)) hp_[i] = R16(PL(i) + 0x40);
     lastc_[i] = (a == 2 && b == 0) ? c : 0;
     return m;
 }
@@ -499,7 +513,7 @@ static void wv_reset(int i)
 {
     int k;
     cur_[i] = 255;
-    step_[i] = left_[i] = face_[i] = chain_[i] = lastc_[i] = held_[i] = 0;
+    step_[i] = left_[i] = face_[i] = chain_[i] = lastc_[i] = held_[i] = hitk_[i] = 0; hp_[i] = 0;
     acc_[i] = exec_[i] = wall_[i] = wph_[i] = wlx_[i] = wlz_[i] = 0;
     wwalk_[i] = recovery_[i] = inj_left[i] = inj_bits[i] = last_btn[i] = 0;
     wv_step_now[i] = 0xffff;

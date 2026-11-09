@@ -11,7 +11,7 @@ P, keys = A["poses"], A["keys"]
 moves = A.get("moves_one", A["moves"])
 if A.get("boxes_pending"):
     raise SystemExit("NO-GO: regenerate boxes.json with boxes.py after pose reselection")
-required = {"idle", "walk", "jump", "lp", "hp", "hk", "berserker", "tornado", "knockdown", "throw", "hit_etc", "crouch"}
+required = {"idle", "walk", "jump", "lp", "hp", "hk", "berserker", "tornado", "knockdown", "throw", "hit_etc", "hit_m", "hit_h", "crouch"}
 if required - moves.keys():
     raise SystemExit("NO-GO: missing runtime moves: " + ", ".join(sorted(required - moves.keys())))
 for name, steps in moves.items():

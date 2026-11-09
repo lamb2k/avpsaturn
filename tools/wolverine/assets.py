@@ -15,7 +15,8 @@ PALS = (12, 13)                  # player 1 rows in the capture
 # Windows by content (bounding-box timeline of full.txt, 11-08): the opponent knocked him down at 2580, so the old dash (2600) and crouch
 # (2660) windows held knockdown frames; dash and crouch now come from their own runs (dash.txt, crouch.txt via WV_EXTRA).
 WINDOWS = dict(idle=(1990, 1999), walk=(2000, 2062), jump=(2063, 2179), lp=(2180, 2239), hp=(2240, 2309), hk=(2310, 2399),
-               berserker=(2400, 2519), tornado=(2520, 2579), knockdown=(2580, 2739), hit_etc=(3100, 4500))
+               berserker=(2400, 2519), tornado=(2520, 2579), knockdown=(2580, 2739),
+               hit_etc=(3711, 3730), hit_m=(3436, 3457), hit_h=(3735, 3757))   # standing hitstun reactions (v4.1; was (3100, 4500), which began mid-knockdown)
 # Owner 11-08: the throw-attempt windows (2740-3099) are dropped; no real throw was captured.
 SELECT_FRAME, HUD_FRAME = 900, 2000
 TIGHT = (0x06, 0x0e, 0x1c, 0x1e, 0x24)   # stages that drop the most with his tiles (fit_thin, 11-08)
