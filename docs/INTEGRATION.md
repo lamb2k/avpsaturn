@@ -40,10 +40,10 @@ Still awaiting the owner's choice: SAT_WV_GROUND (feet on the floor; ground.py d
 | --- | --- | --- |
 | Guest group loop out of the snapshot (about 44 ticks per snapshot), precomputed in the game frame | lane/fps-group | starting |
 | Menu mode flow, transparent option screens, title list lower; talk-box face/text 8 px offset | lane/wolverine-menu | merge done; building and checking |
-| Wolverine takes far more hits than Schaefer (Round 1 gate: 36-37 vs 2), and a wrong pose while an enemy holds him (0204xx shows throw poses) | lane/wolverine-defense | starting |
+| Wolverine takes far more hits than Schaefer (Round 1 gate: 36-37 vs 2), and a wrong pose while an enemy holds him (0204xx shows throw poses) | lane/wolverine-defense | PAUSED until the owner has played the integrated disc |
 | Native Wolverine (fork of Schaefer, plan aae2e10) | lane/wolverine-native | Stage 0 identity |
 | Post-credits reveal + unlock + Berserker Barrage voice | lane/wolverine-reveal | running |
-| HURRY UP missing U (stage timer banner) | lane/hurryup | finding the banner |
+| HURRY UP missing U (stage timer banner) | lane/hurryup | PAUSED until the owner has played the integrated disc |
 | Saturn hardware FPS test discs | E:\AvP\package-hwtest-20261109 (built from lane/hwtest, pre-integration) | to be rebuilt from avp/integration with the owner disc |
 | Talk-box face for Wolverine (crop of recoloured portrait) | not started | after the menu lane |
 | Stage font glyph gaps (packs keep only census-seen font glyphs) | not started | found by the hurryup lane |
