@@ -20,8 +20,7 @@ An item leaves "In progress" only when it is merged here; a paused or parked lan
 
 Asset set for builds from this line: `E:\AvP\learning\lane-wolverine-merge\D11`. It holds the K12 tile-merged Wolverine set (1,474 tiles; stage24_ma has 38 tiles of
 margin with D9/D10) and the artist's revision 3 HUD art (80s red-brown/gold, crimson backdrop, no claws), exactly as delivered. remap.json gains a
-colour entry `eighties`, his sprite in the 80s red-brown/gold to match the art; build with WV_COLOUR=eighties. The default stays `kick` (red/yellow) until
-the owner compares the two.
+colour entry `eighties`, his sprite in the 80s red-brown/gold to match the art; WV_COLOUR=eighties builds it. Owner decision 11-09: his sprite keeps the default `kick` (red/yellow), so the owner disc does not set WV_COLOUR.
 
 ## Owner disc recipe (avp/integration)
 ```
@@ -29,7 +28,7 @@ POSE_KEYS=0 KEEP_ROUND_FILES=1 GUEST_ASSETS=/e/AvP/learning/lane-wolverine-merge
 ```
 Owner decisions in the recipe: SAT_WV_JUMP=1 (jump apex 88 px, owner 11-09). Wolverine keeps his current size: SAT_WV_SCALE stays off (owner 11-09).
 D11 carries the ground lane's `jumpair` data; its moves and lift match G1.
-Still awaiting the owner's choice: SAT_WV_GROUND (feet on the floor; ground.py data for D11 still to be generated), WV_COLOUR=eighties, and the slowdown switches.
+Still awaiting the owner's choice: SAT_WV_GROUND (feet on the floor; ground.py data for D11 still to be generated), and the slowdown switches.
 The slowdown switches are waiting on the release fit and the PAL_KEEP look check.
 
 ## In progress (not merged yet)
