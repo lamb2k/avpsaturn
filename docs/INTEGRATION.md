@@ -16,6 +16,7 @@ An item leaves "In progress" only when it is merged here; a paused or parked lan
 | Wolverine select/HUD/rank art | lane/wolverine-art f518e5c | on with guest | art check 11-09 |
 | Wolverine KO invisibility fix | lane/wolverine-gate d5f2dda | on | host test wolverine_clock_test |
 | Wolverine slowdown fix (FAST_LIST, NAMES_LAZY, PAL_KEEP) | lane/fps-held 457508b | all off (Yaba: held 11.4% -> 2.3% with all on) | AVP_FPS_HELD_20261109.md |
+| Wolverine ground contact, jump height, size comparison (SAT_WV_GROUND=1/2, SAT_WV_JUMP=1/2, SAT_WV_SCALE=14) | lane/wolverine-ground 9745da7 | all off; owner comparison discs in E:\AvP\learning\lane-wolverine-ground\discs | AVP_WOLVERINE_GROUND_20261109.md; ground.py data must be regenerated for D11 before a switch is turned on |
 
 Asset set for builds from this line: `E:\AvP\learning\lane-wolverine-merge\D11`. It holds the K12 tile-merged Wolverine set (1,474 tiles; stage24_ma has 38 tiles of
 margin with D9/D10) and the artist's revision 3 HUD art (80s red-brown/gold, crimson backdrop, no claws), exactly as delivered. remap.json gains a
@@ -28,7 +29,6 @@ the owner compares the two.
 | --- | --- | --- |
 | Menu mode flow, transparent option screens, title list lower; talk-box face/text 8 px offset | lane/wolverine-menu | merge done; building and checking |
 | Round 1 boss gate, throw look | lane/wolverine-gate | running |
-| Ground placement, jump height, sprite scale comparison | lane/wolverine-ground | running |
 | Native Wolverine (fork of Schaefer, plan aae2e10) | lane/wolverine-native | Stage 0 identity |
 | Post-credits reveal + unlock + Berserker Barrage voice | lane/wolverine-reveal | running |
 | HURRY UP missing U (stage timer banner) | lane/hurryup | finding the banner |
