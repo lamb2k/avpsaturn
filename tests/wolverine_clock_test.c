@@ -207,6 +207,37 @@ static void test_chain_on_hit(void)
     assert(cur_[0] == WV_LP && chain_[0] == 1);
 }
 #endif
+/* KO: the game's death blink toggles the block's byte +1 every frame in state 04. The clock must run through it, once, and the blank frames must not
+   restart it or draw his body. */
+static void test_ko_blink(void)
+{
+    int k, hidden = 0;
+    u16 pad = 0xffff;
+    u8 objects[512], palette[1024];
+    void *rom = mmap((void *)0x02400000u, 0x200000, PROT_READ | PROT_WRITE,
+                    MAP_PRIVATE | MAP_ANONYMOUS | MAP_FIXED_NOREPLACE, -1, 0);
+    assert(rom != MAP_FAILED);
+    fresh(0);
+    state(0, 2, 0, 2); update();
+    state(0, 4, 0, 0); update();
+    assert(cur_[0] == WV_KNOCKDOWN && wall_[0] >= 1);
+    for (k = 0; k < 90; k++) {
+        u16 w = wall_[0];
+        R8(PL(0) + 5) = (u8)(k < 10 ? 2 : 4);
+        R8(PL(0) + 1) = (u8)((k & 1) ? WV_CHAR_SCH : 0);   /* the blink */
+        sat_guest_wolverine_pad(&pad);
+        update();
+        assert(cur_[0] == WV_KNOCKDOWN && wall_[0] == w + 1);
+        memset(objects, 0, sizeof(objects));
+        if (!(k & 1)) { assert(wv_blank(0)); hidden++; assert(sat_guest_objects(objects, 0, 64, palette) == 0); }
+        else assert(sat_guest_objects(objects, 0, 64, palette) > 0);
+    }
+    assert(hidden == 45);
+    R8(PL(0)) = 0;   /* the slot is cleared after the KO: his clock resets */
+    sat_guest_wolverine_pad(&pad);
+    assert(cur_[0] == 255 && !wvid_[0]);
+    assert(munmap(rom, 0x200000) == 0);
+}
 static void test_draws_do_not_tick(void)
 {
     u8 objects[512], palette[1024];
@@ -259,6 +290,7 @@ int main(void)
     test_chain_on_hit();
 #endif
     test_draws_do_not_tick();
+    test_ko_blink();
     puts("Wolverine clock: HOST synthetic PASS (lengths, poses, interrupts, reset, draw independence)");
     return 0;
 }

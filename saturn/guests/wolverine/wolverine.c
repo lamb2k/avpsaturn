@@ -207,9 +207,20 @@ static void box_debug(int i, int sx, int sy)
 
 static void put16(u8 *p, u16 v) { p[0] = (u8)(v >> 8); p[1] = (u8)v; }
 
+/* The block's character byte is not stable at KO: in the dying state (04) the game's death blink toggles byte +1 between its value and 0 every frame
+   (Yaba 11-09, state 0400 for about 60 frames, Schaefer and Wolverine alike; the blank frames are the game hiding the body). Read raw, the slot stopped
+   being his every other frame, wv_reset restarted his clock each time and the knockdown never got past its first pose. The identity is latched while he is
+   alive and kept while the state is dying; the body is hidden on the blank frames (wv_blank), as the game hides Schaefer's. */
+static u8 wvid_[2];
 static int is_wolverine(int i)
 {
-    return R8(PL(i)) != 0 && R8(PL(i) + WV_CHAR_OFF) == WV_CHAR_SCH;
+    if (R8(PL(i)) == 0) return wvid_[i] = 0;
+    if (R8(PL(i) + 4) == 4 && wvid_[i]) return 1;
+    return wvid_[i] = R8(PL(i) + WV_CHAR_OFF) == WV_CHAR_SCH;
+}
+static int wv_blank(int i)   /* the death blink's blank frame: the game draws no body */
+{
+    return R8(PL(i) + 4) == 4 && R8(PL(i) + WV_CHAR_OFF) != WV_CHAR_SCH;
 }
 
 /* Names: the game prints its character names from text in its ROM image, which the Saturn keeps in cart RAM (ROMB). While Wolverine is
@@ -476,6 +487,7 @@ int sat_guest_objects(u8 *obj, int count, int max, u8 *pal0)
         int st, sx, sy;
         if (!is_wolverine(i)) continue;
         any = 1;
+        if (wv_blank(i)) continue;
         x = R16(PL(i) + 0x10);
         face_[i] = (u8)((R8(PL(i) + 0x0f) & 1) ^ 1);   /* +0f set = facing right (Yaba 11-08: set while walking right); his poses were captured facing right, so they mirror when it is clear */
         /* A snapshot may happen before the first player update. It can show
@@ -566,7 +578,7 @@ static void wv_reset(int i)
     step_[i] = left_[i] = face_[i] = chain_[i] = lastc_[i] = held_[i] = hitk_[i] = restart_[i] = gap_[i] = cstg_[i] = landed_[i] = 0; hp_[i] = 0;
     sx_[i] = sz_[i] = 0;
     acc_[i] = exec_[i] = wall_[i] = wph_[i] = wlx_[i] = wlz_[i] = 0;
-    wwalk_[i] = recovery_[i] = inj_left[i] = inj_bits[i] = last_btn[i] = 0;
+    wwalk_[i] = recovery_[i] = inj_left[i] = inj_bits[i] = last_btn[i] = wvid_[i] = 0;
     wv_step_now[i] = 0xffff;
     for (k = 0; k < 16; k++) atk_cache[i][k] = 0;
     for (k = 0; k < 4; k++) dir_hist[i][k] = dir_age[i][k] = 0;
