@@ -2,6 +2,10 @@
 
 Only source of current state. Branch `decomp/main`. Backlog: docs/BACKLOG.md.
 
+## VDP1 cloud correction candidate, 2026-11-08 (HOST; target, MAME, EMULATOR and HARDWARE UNRUN)
+
+`codex/avp-vdp1-frame-fixes-20261108`, based on this lane's `3b28109`: reserves VLOG marker commands; removes forced unconfirmed framebuffer changes/submissions; retains prior command/texture ownership across bounded timeout retries, including shared texture hits; handles the first-plot latch. Adds default-off `SAT_VDP1_PROFILE` rings and an offline decoder. HOST: strict C90 existing graphics fixture and actual-driver presentation tests across seven flag configurations; three decoder tests; independent review and behavioural mutations pass. Profiling adds 0 bytes disabled, 2116 bytes at depth16 or 380 at depth2 before padding; target fit and any fps change unproven. Capture and limitations: `docs/notes/VDP1_PROFILE.md`. Source-function census unchanged. The combined guest candidate is `codex/avp-wolverine-frame-fixes-20261108`.
+
 - P0: items 1, 2 and 3 done (item 3 pending merge of lane/item3).
 - P1: first gate measured, docs/notes/AVP_FIRST_GATE.md; recommendation GO, awaiting coordinator.
 - Whole-game comparison: not run. Hardware: UNRUN.

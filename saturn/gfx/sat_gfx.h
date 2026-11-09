@@ -34,7 +34,14 @@ extern volatile int sat_fit_scale;
 #endif
 #define SAT_GFX_PAGES 4
 #define SAT_GFX_BANKS_PER_PAGE 32
-#define SAT_GFX_MAX_COMMANDS 1016 /* two 32 KB tables (built and plotting), each less local, clear, end and the four readout bars */
+/* Two 32 KB tables. Keep the existing four-bar reserve even without SAT_READOUT.
+ * SAT_VLOG adds sixteen plot-serial polygons after the sprites; they need their
+ * own reserve or a full list overwrites the other table (or texture RAM). */
+#ifdef SAT_VLOG
+#define SAT_GFX_MAX_COMMANDS (1016 - 16)
+#else
+#define SAT_GFX_MAX_COMMANDS 1016
+#endif
 #define SAT_GFX_SPRITE_SLOTS 3584 /* 448 KB of 128 byte textures */
 #ifdef SAT_HOME
 #define SAT_GFX_S1_SLOTS 768 /* 0x18000-0x1e000; the menu layer (NBG3) map and its font take the rest */

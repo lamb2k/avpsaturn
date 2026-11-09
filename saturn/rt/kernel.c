@@ -6,6 +6,7 @@ typedef signed char s8; typedef short s16; typedef int s32;
 typedef struct { u32 d[8]; u32 a[8]; u32 ccz, ccn, ccc, ccv, ccx; } Cpu;
 #include "lift_target.h"
 #include "sat_rt.h"
+#include "../gfx/vdp1_profile.h"
 
 Cpu sat_cpu;
 u8 *PAGE[256];
@@ -336,6 +337,12 @@ static void pc_start(void)
 #define SMPC(o) (*(volatile u8 *)(0x20100000u + (o)))
 extern void sat_slave_entry(void);
 static u32 gfx_handed, gfx_done;
+#ifdef SAT_VDP1_PROFILE
+int sat_gfx_profile_busy(void)
+{
+    return UNCACHED(gfx_done) != UNCACHED(gfx_handed);
+}
+#endif
 u32 sat_slave_stack[256] __attribute__((section(".lwgfx")));
 
 void sat_slave_main(void)
