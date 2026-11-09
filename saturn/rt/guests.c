@@ -80,14 +80,18 @@ static int is_guest_shot(gu32 actor)
     return guest_draw(owner) == sat_guest_megaman_draw && sat_guest_megaman_draw;
 }
 
-/* Wolverine has no gun: a Wolverine player's shots (muzzle flash and tracer, the same pool) are not drawn. Their hits still go through the
-   game's path; his Berserker Barrage takes the gun's state slot (saturn/guests/wolverine/wolverine.c). */
+/* Wolverine has no gun: a Wolverine player's shots and the muzzle flash are not drawn. Berserker Barrage takes the gun's state slot
+   (saturn/guests/wolverine/wolverine.c). Yaba, stage 02, 11-08: a shot is a tag +8 = 4 actor (+2 = 5 while alive) in ff8680.. with the owner's
+   block word at +0x26; the muzzle flash is a tag 0x24 actor (+2 = 4, +3 = 1) in ffe080..ffe17f with the owner word at +0x28. The shots also do
+   no damage (the collision passes refuse them, game_bind.c). */
 static int is_wolverine_shot(gu32 actor)
 {
     gu8 *b = PAGE[0xff];
     gu32 o = actor & 0xffff, owner;
-    if (!(sat_guest_sel & 1) || (actor >> 16) != 0xff || o < 0x8680 || o >= 0x9580 || b[o + 8] != 4 || b[o + 2] != 0) return 0;
-    owner = ((gu32)b[o + 0x26] << 8) | b[o + 0x27];
+    if (!(sat_guest_sel & 1) || (actor >> 16) != 0xff || o < 0x8600 || o >= 0xe400) return 0;
+    if (b[o + 8] == 4) owner = ((gu32)b[o + 0x26] << 8) | b[o + 0x27];
+    else if (b[o + 8] == 0x24) owner = ((gu32)b[o + 0x28] << 8) | b[o + 0x29];
+    else return 0;
     if (owner < 0x8380 || owner >= 0x8580 || (owner & 0xff) != 0x80) return 0;
     return b[owner] != 0 && (b[owner + 0xd2] & 3) == 1;   /* +0xd2 character: 1 Schaefer, whose slot Wolverine takes */
 }

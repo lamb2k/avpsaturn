@@ -31,6 +31,7 @@ lines = [
     "typedef struct { short dx, dy; unsigned short key; unsigned char flags; } WvTile;   /* flags: 1 hflip, 2 vflip, 4.. palette row */",
     "typedef struct { unsigned char pose, frames; } WvStep;",
     f"#define WV_POSES {len(used)}",
+    f"#define WV_STANCE {pid.get(A.get('stance_pose', 17), 255)}   /* pose id of the ready stance after an attack */",
     f"static const WvTile wv_tiles[{len(ent)}] = {{{','.join(ent)}}};",
     f"static const unsigned short wv_pose_start[{len(start)}] = {{{','.join(map(str, start))}}};",
     f"static const WvStep wv_steps[{len(seq)}] = {{{','.join(seq)}}};",

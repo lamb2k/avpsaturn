@@ -69,16 +69,37 @@ void f_aa59a(void)
 }
 
 #ifdef SAT_GUESTS
-/* Bonus characters: the collision pass (attacker a6, target a1) runs with a guest's own boxes in place (saturn/guests/wolverine/wolverine.c);
-   the lifted body is kept whole (build.py GUEST_WRAP). */
-void f_1cf54(void)
+/* Bonus characters (build.py GUEST_WRAP keeps each lifted body whole as lifted_NNN):
+   - the collision passes f_1cf54 and f_1d03e (attacker a6, target a1) run with a Wolverine player's own boxes in place
+     (saturn/guests/wolverine/wolverine.c). f_1d03e is the players' melee pass (list 0xfff112 targets, 0x1cc3e), f_1cf54 the enemy and shot passes.
+   - a Wolverine player's gun shots do no damage (no gun for him): the pass answers "no hit" the way the lifted body does at its exit.
+   - f_195ec (the player state machine, a6 = block) is held on some ticks to stretch Schaefer's state timers to MSHvSF's. */
+extern void sat_guest_wolverine_boxes(unsigned long a6, unsigned long a1, int restore) __attribute__((weak));
+extern int sat_guest_wolverine_bullet(unsigned long a6) __attribute__((weak));
+extern int sat_guest_wolverine_tick(unsigned long a6) __attribute__((weak));
+u8 wv_hdbg[8];   /* Yaba probe: calls with a player attacker: 0 f_1cf54, 1 f_1d03e, 2 f_1d116; hits: 3 f_1cf54, 4 f_1d03e, 5 f_1d116; 6 shots refused */
+static void guest_pass(void (*lifted)(void), int which)
 {
-    extern void lifted_1cf54(void);
-    extern void sat_guest_wolverine_boxes(unsigned long a6, unsigned long a1, int restore) __attribute__((weak));
-    if (!sat_guest_wolverine_boxes) { lifted_1cf54(); return; }
+    if (sat_guest_wolverine_bullet && sat_guest_wolverine_bullet(R->a[6])) {
+        wv_hdbg[6]++;
+        R->d[0] = 0;
+        FLAGS(1, 0, 0, 0, 0);
+        return;
+    }
+    if (!sat_guest_wolverine_boxes) { lifted(); return; }
     sat_guest_wolverine_boxes(R->a[6], R->a[1], 0);
-    lifted_1cf54();
+    lifted();
     sat_guest_wolverine_boxes(0, 0, 1);
+    if (R->a[6] >= 0xff8380u && R->a[6] < 0xff8580u) { wv_hdbg[which]++; if (R->d[0] == 1) wv_hdbg[3 + which]++; }
+}
+void f_1cf54(void) { extern void lifted_1cf54(void); guest_pass(lifted_1cf54, 0); }
+void f_1d03e(void) { extern void lifted_1d03e(void); guest_pass(lifted_1d03e, 1); }
+void f_1d116(void) { extern void lifted_1d116(void); guest_pass(lifted_1d116, 2); }
+void f_195ec(void)
+{
+    extern void lifted_195ec(void);
+    if (sat_guest_wolverine_tick && !sat_guest_wolverine_tick(R->a[6])) return;
+    lifted_195ec();
 }
 #endif
 
