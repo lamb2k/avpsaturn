@@ -17,7 +17,10 @@ An item leaves "In progress" only when it is merged here; a paused or parked lan
 | Wolverine KO invisibility fix | lane/wolverine-gate d5f2dda | on | host test wolverine_clock_test |
 | Wolverine slowdown fix (FAST_LIST, NAMES_LAZY, PAL_KEEP) | lane/fps-held 457508b | all off (Yaba: held 11.4% -> 2.3% with all on) | AVP_FPS_HELD_20261109.md |
 
-Asset set for builds from this line: `E:\AvP\learning\lane-wolverine-merge\D10`. It is the K12 tile-merged Wolverine set (1,474 tiles; stage24_ma has 38 tiles of margin), with the HUD art recoloured red/yellow on navy and the artist's v2 select portrait (no claws).
+Asset set for builds from this line: `E:\AvP\learning\lane-wolverine-merge\D11`. It holds the K12 tile-merged Wolverine set (1,474 tiles; stage24_ma has 38 tiles of
+margin with D9/D10) and the artist's revision 3 HUD art (80s red-brown/gold, crimson backdrop, no claws), exactly as delivered. remap.json gains a
+colour entry `eighties`, his sprite in the 80s red-brown/gold to match the art; build with WV_COLOUR=eighties. The default stays `kick` (red/yellow) until
+the owner compares the two.
 
 ## In progress (not merged yet)
 

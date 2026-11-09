@@ -370,7 +370,7 @@ def main():
     if "SAT_GUESTS" in os.environ.get("KERNEL_CFLAGS", ""):   # bonus characters; builds without the flag are unchanged
         home_cold_extra.append(cc(HERE / "guests.c", OBJ / "guests.o", ["-Os", "-I", GEN] + os.environ.get("KERNEL_CFLAGS", "").split()))
         if os.environ.get("GUEST_ASSETS"):   # Wolverine's tables come from the user's ROM set at build time; his code runs from the cart
-            sh([sys.executable, REPO / "tools/wolverine/gen_c.py", os.environ["GUEST_ASSETS"], GEN / "wolverine_data.inc"])
+            sh([sys.executable, REPO / "tools/wolverine/gen_c.py", os.environ["GUEST_ASSETS"], GEN / "wolverine_data.inc"] + ([os.environ["WV_COLOUR"]] if os.environ.get("WV_COLOUR") else []))   # WV_COLOUR: a colours entry of remap.json (default: its default_colour)
             # guests.c dispatches: his whole-list pass is renamed so the group-indexed guests (Mega Man) run first
             home_cold_extra.append(cc(REPO / "saturn/guests/wolverine/wolverine.c", OBJ / "wolverine.o", ["-Os", "-I", GEN, "-I", HERE, "-Dsat_guest_objects=sat_guest_wolverine_objects"] + os.environ.get("KERNEL_CFLAGS", "").split()))
         for item in filter(None, os.environ.get("SAT_GUEST_DATA", "").split(";")):   # per-guest drawing code and tables (saturn/guests/<name>)
