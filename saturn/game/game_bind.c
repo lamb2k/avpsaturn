@@ -56,7 +56,13 @@ void f_aa59a(void)
     u32 shifted, out;
     GUARD(lifted_aa59a, 0xaa59au, 0xaa5e8u)
 #ifdef SAT_GUESTS
-    { extern void sat_guest_group(unsigned long actor, unsigned long objptr); sat_guest_group(R->a[4], R->a[1]); }   /* bonus characters: rt/guests.c */
+    {   /* bonus characters: rt/guests.c. Nothing is selected: the groups are never read (sat_guest_objects returns at once), so the cart is not entered.
+           Yaba's dynarec has no block cache outside high and low work RAM and the ROM image: every block run from the cart is compiled again on every
+           entry. This call came once for each sprite group of the frame (dropout lane 11-09). */
+        extern void sat_guest_group(unsigned long actor, unsigned long objptr);
+        extern unsigned char sat_guest_sel;
+        if (sat_guest_sel) sat_guest_group(R->a[4], R->a[1]);
+    }
 #endif
     sprite_origin_compute(&r, R->a[4], R->a[0]);
     R->a[0] += 4;
@@ -83,6 +89,16 @@ u8 wv_hdbg[8];   /* Yaba probe: calls with a player attacker: 0 f_1cf54, 1 f_1d0
 #endif
 static void guest_pass(void (*lifted)(void), int which)
 {
+    /* The collision passes run once for each attacker and target pair, many times a frame, and the two guest calls below live in the cart. Both do
+       nothing unless Wolverine is selected and the call concerns a player block (his boxes; a gun shot of a Wolverine player), so the common
+       case takes the lifted body without entering the cart (same tests as wv_player and sat_guest_wolverine_bullet in wolverine.c). */
+    {
+        extern unsigned char sat_guest_sel;
+        u32 a6 = R->a[6], a1 = R->a[1], o = a6 & 0xffffu;
+        int shot = (a6 >> 16) == 0xffu && o >= 0x8680u && o < 0x9580u;
+        int play = a6 == 0xff8380u || a6 == 0xff8480u || a1 == 0xff8380u || a1 == 0xff8480u;
+        if (!(sat_guest_sel & 1) || (!shot && !play)) { lifted(); return; }
+    }
 #ifndef SAT_WOLVERINE_DEBUG
     (void)which;
 #endif
@@ -118,6 +134,17 @@ void f_19f9a(void)
         R->d[0] = 0;
         FLAGS(1, 0, 0, 0, 0);
     }
+}
+/* f_24060 is the player's gun action (a6 = block; Berserker Barrage runs in it for Wolverine): no shot, flash, sound or heat for a Wolverine player
+   (saturn/guests/wolverine/wolverine.c sat_guest_wolverine_gun). */
+extern int sat_guest_wolverine_gun(unsigned long a6, int end) __attribute__((weak));
+void f_24060(void)
+{
+    extern void lifted_24060(void);
+    u32 player = R->a[6];
+    int g = sat_guest_wolverine_gun ? sat_guest_wolverine_gun(player, 0) : 0;
+    lifted_24060();
+    if (g) sat_guest_wolverine_gun(player, 1);
 }
 void f_195ec(void)
 {

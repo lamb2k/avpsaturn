@@ -40,7 +40,7 @@ Still awaiting the owner's choice: SAT_WV_GROUND (feet on the floor; ground.py d
 | --- | --- | --- |
 | Sprite dropout and half speed (blocker) | lane/sprite-dropout | bisecting |
 | Select-screen column-drop regression from the talk-box fix 95b1167 | lane/menu-dropfix | on hold until the dropout lane is done |
-| Wolverine still fires Schaefer's gun (owner rule: claws only) | not started | after the dropout fix |
+| Wolverine still fires Schaefer's gun (owner rule: claws only) | lane/wv-noguns-20261109 | built and gated (fit 76/76, hw_free 1,948, lw_free 60); no Yaba check yet |
 | Post-credits reveal + unlock | lane/wolverine-reveal 850fc42 (pushed) | built; end-to-end Yaba check not done (paused); voice clip not identified |
 | Guest group loop out of the snapshot (about 44 ticks per snapshot), precomputed in the game frame | lane/fps-group | starting |
 | Menu mode flow, transparent option screens, title list lower; talk-box face/text 8 px offset | lane/wolverine-menu | merge done; building and checking |
