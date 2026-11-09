@@ -16,6 +16,7 @@ An item leaves "In progress" only when it is merged here; a paused or parked lan
 | Wolverine select/HUD/rank art | lane/wolverine-art f518e5c | on with guest | art check 11-09 |
 | Wolverine KO invisibility fix | lane/wolverine-gate d5f2dda | on | host test wolverine_clock_test |
 | Wolverine slowdown fix (FAST_LIST, NAMES_LAZY, PAL_KEEP) | lane/fps-held 457508b | all off (Yaba: held 11.4% -> 2.3% with all on) | AVP_FPS_HELD_20261109.md |
+| Saturn on-screen perf readout (SAT_PERF_HUD) + PAL_KEEP page-0-only fix | lane/hwtest 8a75ccb | readout off; used for console A/B discs | AVP_HWTEST_20261109.md |
 | Wolverine ground contact, jump height, size comparison (SAT_WV_GROUND=1/2, SAT_WV_JUMP=1/2, SAT_WV_SCALE=14) | lane/wolverine-ground 9745da7 | all off; owner comparison discs in E:\AvP\learning\lane-wolverine-ground\discs | AVP_WOLVERINE_GROUND_20261109.md; ground.py data must be regenerated for D11 before a switch is turned on |
 
 Asset set for builds from this line: `E:\AvP\learning\lane-wolverine-merge\D11`. It holds the K12 tile-merged Wolverine set (1,474 tiles; stage24_ma has 38 tiles of
@@ -40,7 +41,7 @@ The slowdown switches are waiting on the release fit and the PAL_KEEP look check
 | Native Wolverine (fork of Schaefer, plan aae2e10) | lane/wolverine-native | Stage 0 identity |
 | Post-credits reveal + unlock + Berserker Barrage voice | lane/wolverine-reveal | running |
 | HURRY UP missing U (stage timer banner) | lane/hurryup | finding the banner |
-| Saturn hardware FPS test discs (on-screen readout; erase / pairing arms) | lane/hwtest | building |
+| Saturn hardware FPS test discs | E:\AvP\package-hwtest-20261109 (built from lane/hwtest, pre-integration) | to be rebuilt from avp/integration with the owner disc |
 | Slowdown fix follow-ups (release fit, PAL_KEEP look check, fold pass) | lane/fps-held | running |
 | Talk-box face for Wolverine (crop of recoloured portrait) | not started | after the menu lane |
 | Stage font glyph gaps (packs keep only census-seen font glyphs) | not started | found by the hurryup lane |
