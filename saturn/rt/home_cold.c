@@ -37,12 +37,20 @@ extern HomeCfg sat_home_cfg;
 typedef struct { const char *label; u8 off; u16 ram; u8 n; const char *const *names; } Opt;
 #ifdef SAT_GUESTS
 #include "guests.h"
+#ifdef SAT_UNLOCK_DEBUG
+#define GAME_OPTS 6
+#else
 #define GAME_OPTS 5
+#endif
 #else
 #define GAME_OPTS 4
 #endif
 static const char *const on_off[] = { "OFF", "ON" };
 static const char *const sound[] = { "MONAURAL", "STEREO" };
+#ifdef SAT_UNLOCK_DEBUG
+static const char *const unlock_names[] = { "LOCKED", "UNLOCKED" };
+extern long sat_reveal_call(int which, u32 a, u32 b, u32 c);
+#endif
 /* The game's own eight extend rules (its text table at 0xdd60; index 0 prints nothing). */
 static const char *const extend[] = { "NONE", "100000 ONLY", "400000 ONLY", "1000000 ONLY", "100000 400000", "400000 500000", "800000 600000", "1200000 1000000" };
 static const Opt opts[] = {
@@ -52,6 +60,9 @@ static const Opt opts[] = {
     { "LIVES", 0xff, 0, 9, 0 },          /* not the game's: sat_home_cfg.lives, see opt_get */
 #ifdef SAT_GUESTS
     { "BONUS CHARACTERS", 0xfe, 0, 4, sat_guest_row_names },   /* not the game's: sat_guest_sel (guests.c), OFF by default */
+#ifdef SAT_UNLOCK_DEBUG
+    { "WOLVERINE", 0xfd, 0, 2, unlock_names },                  /* test builds only: LOCKED or UNLOCKED, written to backup RAM at once (the reveal's flag, boot.c) */
+#endif
 #endif
     { "AUDIO", 0x04, 0x81d2, 2, sound },
     { "DEMO SOUND", 0x03, 0x81ad, 2, on_off },
@@ -72,11 +83,21 @@ static const u8 start_stock[8] = { 0, 1, 2, 4, 0, 1, 2, 4 };
 static int opt_get(const Opt *o) {
 #ifdef SAT_GUESTS
     if (o->off == 0xfe) return sat_guest_sel;
+#ifdef SAT_UNLOCK_DEBUG
+    if (o->off == 0xfd) return !sat_guest_locked();
+#endif
 #endif
     return o->off == 0xff ? (sat_home_cfg.lives ? sat_home_cfg.lives - 1 : start_stock[sat_home_get(0x12) & 7]) : sat_home_get(o->off); }
 static void opt_set(const Opt *o, int v) {
 #ifdef SAT_GUESTS
-    if (o->off == 0xfe) { sat_guest_sel = (u8)v; return; }
+    if (o->off == 0xfe) { sat_guest_sel = (u8)(v & ~sat_guest_locked()); return; }
+#ifdef SAT_UNLOCK_DEBUG
+    if (o->off == 0xfd) {   /* the flag word and backup RAM; locking again also turns Wolverine off */
+        sat_reveal_call(2, v ? 1 : 2, 1, 0x02754000u);
+        if (!v) sat_guest_sel &= (u8)~sat_guest_locked(); else sat_guest_unlocked();
+        return;
+    }
+#endif
 #endif
     if (o->off == 0xff) sat_home_cfg.lives = (u8)(v + 1); else { sat_home_set(o->off, v); RAMB[o->ram] = (u8)v; } }
 /* MSHvSF's OPTION MODE layout: the whole picture under the panel, the screen's name in large letters at the top, rows two apart from row 7 with
@@ -112,6 +133,9 @@ static int opt_page(const char *title, u32 screen, int first, int n, const char 
             num[0] = (char)('1' + v); num[1] = 0;
             label(ROW(i), o->label, i == cur);
             value(ROW(i), o->names ? o->names[v] : num, i == cur);
+#ifdef SAT_GUESTS
+            if (o->off == 0xfe && !v && sat_guest_locked()) value(ROW(i), "WOLVERINE LOCKED", i == cur);   /* until the reveal has played */
+#endif
         }
         if (x1) label(ROW(n), x1, cur == n);
         if (x2) label(ROW(n + 1), x2, cur == n + 1);
@@ -129,6 +153,9 @@ static int opt_page(const char *title, u32 screen, int first, int n, const char 
             const Opt *o = &opts[first + cur];
             int v = opt_get(o);
             v = (e & P_LEFT) ? (v ? v - 1 : o->n - 1) : (v + 1 < o->n ? v + 1 : 0);
+#ifdef SAT_GUESTS
+            if (o->off == 0xfe) while (v & sat_guest_locked()) v = (e & P_LEFT) ? (v ? v - 1 : o->n - 1) : (v + 1 < o->n ? v + 1 : 0);   /* a locked guest is skipped */
+#endif
             opt_set(o, v);
         }
     }

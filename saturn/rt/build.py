@@ -16,6 +16,12 @@ import round_cache
 
 HERE = pathlib.Path(__file__).resolve().parent
 REPO = HERE.parents[1]
+# The post-credits Wolverine reveal (reveal.c, boot.c unlock record, tools/wolverine/reveal_*.py): on in every SAT_GUESTS build, since the owner's art (art/wolverine-reveal) is in the tree.
+# It locks Wolverine until the reveal has played once; -DSAT_WOLVERINE_UNLOCKED starts a build unlocked (testers, QA), -DSAT_UNLOCK_DEBUG adds a LOCKED/UNLOCKED row to OPTION MODE.
+# REVEAL=0 builds without it. The voice (REVEAL_VOICE, or GUEST_ASSETS/reveal_voice.bin) is ROM-derived and stays out of git: without it the reveal is silent.
+REVEAL_ART = REPO / "art/wolverine-reveal/reveal.bin"
+if "SAT_GUESTS" in os.environ.get("KERNEL_CFLAGS", "") and REVEAL_ART.exists() and os.environ.get("REVEAL", "1") != "0":
+    os.environ["KERNEL_CFLAGS"] += " -DSAT_WV_REVEAL"
 WORK = pathlib.Path(sys.argv[1] if len(sys.argv) > 1 else "E:/AvP/learning/lane-satrt")
 JO = pathlib.Path(os.environ.get("JO", "E:/AvP/worktrees/saturn-hw/.deps/joengine"))
 BIN = JO / "Compiler/WINDOWS/bin"
@@ -218,7 +224,7 @@ def gen_sources():
 
 def cc(src, obj, extra=()):
     newest = max(src.stat().st_mtime, (HERE / "lift_target.h").stat().st_mtime)
-    if src.name in ("kernel.c", "pad.c", "sat_gfx.c", "home.c", "home_cold.c", "guests.c", "megaman.c", "wolverine.c", "game_bind.c"):
+    if src.name in ("kernel.c", "pad.c", "sat_gfx.c", "home.c", "home_cold.c", "guests.c", "megaman.c", "wolverine.c", "game_bind.c", "reveal.c"):
         newest = max(newest, (HERE / "sat_rt.h").stat().st_mtime, time.time() if os.environ.get("KERNEL_CFLAGS") else 0)
     if src.name == "sat_gfx.c":
         newest = max(newest, (src.parent / "sat_gfx.h").stat().st_mtime)
@@ -369,6 +375,8 @@ def main():
     home_cold_extra = []   # guest code and tables run from the cart tail with the cold home code (high RAM is full)
     if "SAT_GUESTS" in os.environ.get("KERNEL_CFLAGS", ""):   # bonus characters; builds without the flag are unchanged
         home_cold_extra.append(cc(HERE / "guests.c", OBJ / "guests.o", ["-Os", "-I", GEN] + os.environ.get("KERNEL_CFLAGS", "").split()))
+        if "SAT_WV_REVEAL" in os.environ.get("KERNEL_CFLAGS", ""):   # the post-credits reveal runs from the cart tail with the other cold code
+            home_cold_extra.append(cc(HERE / "reveal.c", OBJ / "reveal.o", ["-Os", "-I", gfx_dir, "-I", GEN] + os.environ.get("KERNEL_CFLAGS", "").split()))
         if os.environ.get("GUEST_ASSETS"):   # Wolverine's tables come from the user's ROM set at build time; his code runs from the cart
             sh([sys.executable, REPO / "tools/wolverine/gen_c.py", os.environ["GUEST_ASSETS"], GEN / "wolverine_data.inc"])
             # guests.c dispatches: his whole-list pass is renamed so the group-indexed guests (Mega Man) run first
@@ -483,6 +491,15 @@ SECTIONS {{
     sh([OBJCOPY, "-O", "binary", "-j", ".lw", elf, ISO / "LW.BIN"])
     syms = {p[2]: int(p[0], 16) for p in (l.split() for l in sh([NM, elf]).splitlines()) if len(p) == 3}
     shutil.copy(WORK / "opx.bin", ISO / "OPX.BIN")
+    if "SAT_WV_REVEAL" in os.environ.get("KERNEL_CFLAGS", ""):   # the reveal's art (the owner's, in git) and its voice (ROM-derived, never in git)
+        shutil.copy(REVEAL_ART, ISO / "REVEAL.BIN")
+        voice = pathlib.Path(os.environ.get("REVEAL_VOICE") or (pathlib.Path(os.environ.get("GUEST_ASSETS", ".")) / "reveal_voice.bin"))
+        if voice.is_file():
+            shutil.copy(voice, ISO / "RVVOICE.BIN")
+        else:
+            (ISO / "RVVOICE.BIN").unlink(missing_ok=True)
+            print("reveal: no voice file (REVEAL_VOICE or GUEST_ASSETS/reveal_voice.bin): the reveal plays silent", flush=True)
+        print("reveal: art", (ISO / "REVEAL.BIN").stat().st_size, "bytes; voice", (ISO / "RVVOICE.BIN").stat().st_size if (ISO / "RVVOICE.BIN").exists() else 0, "bytes", flush=True)
     if (WORK / "opx.bin").stat().st_size > OPX_MAX:
         raise SystemExit("NO-GO: store past its room")
     sh([OBJCOPY, "-O", "binary", "-j", ".cold1", elf, ISO / "COLD1.BIN"])
