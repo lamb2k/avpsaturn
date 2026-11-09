@@ -66,9 +66,46 @@ instruction counts are not the model: only the probe ticks and the snapshot tick
 - Best arm F3: New 85.5% (from 79.6), held 2.3% (from 11.4), snapshot 473 (from 644). Not yet at the frame-chain level (89.4 / 0.6 / 337): Wolverine still costs ~135 snapshot ticks and his extra objects add commands (375 vs 346).
 - With all switches off the profile build matches the compare lane's p_off: hw_free 8,220, lw_free 88, loaded code identical (3 bytes differ in the ELF tail).
 
+## Follow-up 2026-11-09 (second pass): release build, look check, fold
+
+All EMULATOR (Yaba) / MODELLED, hardware unrun. Same harness, own Yaba on port 9711, windows titled "AvP FPS-HELD: ...". The machine was heavily loaded by other lanes, so runs were slow; emulated ticks are not affected.
+
+### 1. Release recipe build (no profiling)
+`-DSAT_HOME -DSAT_DUEL_MENU -DSAT_GUESTS -DSAT_GUEST_DEFAULT=1 -DSAT_GUEST_FAST_LIST=1 -DSAT_GUEST_NAMES_LAZY=1 -DSAT_GUEST_PAL_KEEP=1`, assets v41/D, workdir copy of the compare lane's w_off (KEEP_ROUND_FILES):
+- rc 0. Before the PAL_KEEP page-0 fix: hw_free 4,468, lw_free 104. With the fix (final source): **hw_free 4,476, lw_free 104**. All switches off: 4,624 / 104, so the three switches cost 148 bytes of high work RAM.
+- `tools/wolverine/fit.py` on that workdir with a copy of assets v41/D: **76 of 76 files, gate True, fail [], rc 0**. The fit looks at the pack layout, which the kernel switches do not change; the figures match the compare lane's all-off fit_off.log.
+
+### 2. PAL_KEEP look check, and the page-0-only fix
+The hardware-test lane (lane/hwtest-20261109, fef8eb0) found that `pal0_same`, once set for page 0, also froze pages 1 and up (the scroll-1 palette: fades, the continue screen) while Wolverine's rows were kept. Applied by hand: `pal0_same` is set only on page 0 and the skip test is `!(page == 0 && pal0_same) && sum != snap.pal_sum[page]`. Figures measured before the fix are marked "pre-fix".
+
+Method. A pixel diff of whole pictures is not usable: the two modes change the snapshot timing, the game then runs a few frames apart and the shown picture lags by a plot, so differing pictures show timing, not colour. The check is exact and inside the build instead: a look-check build (`SAT_GUEST_PAL_KEEP=2`, release recipe + FAST_LIST + NAMES_LAZY; debug byte `sat_guest_pal_keep_off`, counters `sat_look_rows`, `sat_look_pg`, pointers `sat_look`). One Yaba session drives into the Stage 02 fight, saves a state, then replays the same pad script (130 steps of 3 vblanks) from that state with keep ON, with keep OFF (debug byte set: the v4.1 flip and recopy path) and with `sat_guest_sel` = 3 (the Mega Man bit, which switches keep off). In every snapshot the snapshot's page 0 is compared with the game's page 0 right after the guest pass, and at every pause the snapshot pages are read back and compared with the game's.
+- Wolverine fighting (pre-fix; 331 / 319 / 315 snapshots ON / OFF / sel3): the snapshot page differs from the game page only in rows 1 and 21 (Wolverine's two rows) and in row 20 pen 15 (a clear pen that update_palette skips; identical in OFF and sel3, so not caused by the keep). No other row ever differs, in any mode. His rows are byte-identical to the constant table.
+- Game-side palette changes (stand-in for a hit flash or explosion): 26 pokes into rows 5 and 7 of page 0 during the fight, which must force the recopy while the rows are kept. ON: 0 of 26 stale at the pause after the poke (OFF 1 of 26). The per-snapshot counter shows 21 (ON), 23 (OFF) and 20 (sel3) transient mismatches in the snapshot a poke lands in (the pause falls inside a snapshot): the same in all three modes. Natural hit flashes and explosions did not occur in the window.
+- Fade on page 1 (post-fix build): row 4 of page 1 rewritten every step for 130 steps (a fade ramp). The snapshot's page 1 followed the game's: **0 of 130 steps stale at the pause with keep ON** (OFF 1 of 130, sel3 0 of 130). The per-snapshot counter, transients as above, was 74 ON, 59 OFF, 61 sel3. A natural stage-start fade is in the drive-in (vblank about 700 to 1,000), but Wolverine's rows are not kept there, so only the poked fade exercises the fixed path. The continue screen and the stage-end fade were not reached in the window; they use the same pages-1-and-up path, which now always follows the game.
+- Mega Man: v41/D has no Mega Man data, so only the guard was checked: with `sat_guest_sel` = 3 the snapshot behaves like OFF (same rows, same page-1 result). The Mega Man palette path itself is unchecked.
+- Stage transitions were not reached. The stills were not kept (the comparison needed none; `an\look.py` reproduces them; game images stay on this PC).
+
+### 3. Fold of the pass (`SAT_GUEST_FOLD=1`, default off): no gain
+In place: one scan counts Schaefer's sprites (r), one backward pass moves every kept entry straight behind his n tiles, falling back to the two-pass code when n < r. Host check `tests/test_wolverine_list_identity.py` (400 random lists x 4 builds: default, FAST_LIST, FAST_LIST+FOLD, all switches) gives a byte-identical list and palette; `tests/test_wolverine_runtime.py` still passes. Yaba, 3 seeds x 400 vblanks:
+
+| Arm | New % | Held % | Held per seed | Snapshot | Build | Remove + shift part of the pass, ticks per call |
+| --- | ---: | ---: | --- | ---: | ---: | ---: |
+| F3b (FAST + LAZY + KEEP, pre-fix) | 85.2 | 1.7 | 1.0/3.7/0.5 | 474 | 1863 | 55.7 (37.7 scan, 18 shift) |
+| F4 (F3b + FOLD, pre-fix) | 83.4 | 3.3 | 4.5/0.5/5.0 | 474 | 1870 | 56.6 (scan and move) |
+| F3c (F3b rebuilt with the page-0 fix) | 86.5 | 2.9 | 1.2/7.2/0.2 | 486 | 1772 | 56 |
+
+The in-place fold costs as much as the compaction and shift it replaces, so it does not pay: **snapshot 474 against 474**. It stays as a switch only because its host identity is tested; keep it off. A fold into the kernel's object copy (the copy loop already writes each entry once) is bounded by the same arithmetic: at most the ~56 ticks of scan and move less the test done in the copy loop, so 30 to 40, and it needs the group pass below to run first on the unshifted list. Not built.
+Held moves by up to 7 points between seeds (F3c 0.2 to 7.2), so only the snapshot column separates arms. The post-fix snapshot (486) is 12 ticks above the pre-fix one (474): pages 1 and up compare their sums again, which the freeze had skipped.
+
+### What is left in the pass (probe, ticks per call that drew Wolverine, F3c-style build)
+Name check 8 (lazy), remove Schaefer's sprites 38, shift 18, tiles 38, palette 1, the `guests.c` group loop about 44, and 185 for the palette sum and object copy before the pass. An ablation build that skips the group loop (`SAT_GUEST_ABL_NOGROUPS`, measurement only: it also stops suppressing his shots) takes the whole call from 151 to 107. The group loop is the biggest single piece left. Its work could be done as the game calls `sat_guest_group` (once per sprite group, off the snapshot's critical path) with a per-frame "nothing special" flag, but the shot test reads actor state at call time, so equivalence needs its own check. Not done.
+
+### Default-off identity
+With every new switch off (and no probe), the profile build of the final source gives hw_free 8,220, lw_free 88 and an ELF the same size as the compare lane's `p_off`, with 3 bytes different (the same 3 as before the follow-up changes): loaded code unchanged.
+
 ## Next steps (not done)
-1. Fold the pass into the object copy: write his tiles first and copy only the kept entries straight from the game list (removes the compaction, the shift and a second copy), or let the slave place his tiles during the command build. This should take most of the remaining ~135 ticks.
-2. Run the release recipe (duel menu, no profile) with the three switches: check the link, compare the object list against the byte-loop pass (host test), and take a still pair of the fight palette.
+1. Group loop (about 44 ticks a snapshot): precompute during the game frame, or skip the loop when Mega Man is off and no Wolverine shot or flash group exists (needs its own equivalence check). Then a true fold into the kernel copy (30 to 40 ticks at most).
+2. Natural fade, continue screen, stage-end transition and Mega Man data are not covered by the look check; run them when a play-through lane has a state near each.
 3. These are Yaba numbers; real Saturn cart-RAM code speed is not modelled. Hardware unrun.
 
 ## Tooling kept

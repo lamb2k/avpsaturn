@@ -1735,6 +1735,12 @@ static int rows_clear;
    snapshot keeps the page: no recopy, no rewrite of the rows, no sum flip, so the slave's palette scan sees no change either. */
 int sat_guest_pal_keep;
 static u8 gpal_applied;
+#if SAT_GUEST_PAL_KEEP == 2
+u32 sat_look[4];
+u32 sat_look_pg[8];   /* snapshots in which page p (1 and up) differs from the game's page; [0] unused */
+u32 sat_look_rows[33];   /* snapshots in which palette row r of page 0 differs from the game's page right after the guest pass; [32] = snapshots counted */
+u8 sat_guest_pal_keep_off;   /* look-check build only: set from the debugger to run the v4.1 flip/recopy path in the same session */
+#endif
 #endif
 #endif
 #ifdef SAT_GUEST_PROF
@@ -1771,6 +1777,9 @@ void sat_gfx_snapshot_begin(void)
 #if defined(SAT_GUESTS) && SAT_GUEST_PAL_KEEP
     int pal0_same = 0;
 #endif
+#if defined(SAT_GUESTS) && SAT_GUEST_PAL_KEEP == 2
+    if (sat_guest_pal_keep_off) gpal_applied = 0;
+#endif
     snap.pal_pages = 0;
     HUD(hud_sum1 = 0;)
     for (page = 0; page < SAT_GFX_PAGES; page++)
@@ -1789,7 +1798,7 @@ void sat_gfx_snapshot_begin(void)
         if (1)
 #elif defined(SAT_GUESTS) && SAT_GUEST_PAL_KEEP
         if (page == 0) pal0_same = gpal_applied && sum == (snap.pal_sum[0] ^ 0x5a5a5a5aUL);
-        if (!(page == 0 && pal0_same) && sum != snap.pal_sum[page])   /* hwtest: the keep applies to page 0 only; as first written pal0_same also froze pages 1 and up (scroll 1 palette fades) */
+        if (!(page == 0 && pal0_same) && sum != snap.pal_sum[page])   /* the keep is for page 0 only: pages 1 and up (scroll 1 palette, fades) always follow the game (lane hwtest found pal0_same freezing them) */
 #else
         if (sum != snap.pal_sum[page])
 #endif
@@ -1861,6 +1870,30 @@ void sat_gfx_snapshot_begin(void)
     }
 #endif
     snap.objects = (u16)count;
+#if defined(SAT_GUESTS) && SAT_GUEST_PAL_KEEP == 2
+    {   /* look check: the snapshot page must equal the game's page except Wolverine's rows */
+        const u8 *src0 = palette_page(pal, pal_mask, 0);
+        if (src0)
+        {
+            int r, w;
+            for (r = 0; r < 32; r++)
+                for (w = 0; w < 32; w += 4)
+                    if (*(const u32 *)(const void *)(snap.palette[0] + r * 32 + w) != *(const u32 *)(const void *)(src0 + r * 32 + w)) { sat_look_rows[r]++; break; }
+            sat_look_rows[32]++;
+        }
+        {
+            int pg, w;
+            for (pg = 1; pg < SAT_GFX_PAGES && pg < 8; pg++)
+            {
+                const u8 *sp = palette_page(pal, pal_mask, pg);
+                if (!sp) continue;
+                for (w = 0; w < 0x400; w += 4)
+                    if (*(const u32 *)(const void *)(snap.palette[pg] + w) != *(const u32 *)(const void *)(sp + w)) { sat_look_pg[pg]++; break; }
+            }
+        }
+    }
+    sat_look[0] = (u32)(unsigned long)snap.palette[0]; sat_look[1] = (u32)(unsigned long)snap.obj; sat_look[2] = (u32)count; sat_look[3] = sat_vblanks_now();   /* look-check build: where the debugger reads the page and list */
+#endif
 #ifdef SAT_HOME
     snap.home = (u16)sat_home_mode;
     if (snap.home)

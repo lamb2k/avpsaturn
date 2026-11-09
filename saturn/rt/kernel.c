@@ -426,7 +426,7 @@ static void slave_start(void)
 #endif
 u8 sat_aud_tables[0x2000] __attribute__((section(".lwgfx"), aligned(4)));
 static int round_loaded = -1;
-struct { u32 current, loads, sectors, last_vblank; } sat_rounds;
+struct sat_rounds_s { u32 current, loads, sectors, last_vblank; } sat_rounds;
 /* The sound part of a round file lands at SAT_PACK first and goes to SCSP RAM here; the tile part then overwrites it. */
 static void round_sound_ready(void)
 {

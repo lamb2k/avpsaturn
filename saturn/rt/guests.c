@@ -126,6 +126,9 @@ int sat_guest_objects(gu8 *obj, int count, int max, gu8 *page0)
     int g, used = 0, shift = 0, wv = 0;
     if (!sat_guest_sel) return count;
     if (sat_guest_megaman_palette && (sat_guest_sel & 2)) sat_guest_megaman_palette(page0);
+#ifdef SAT_GUEST_ABL_NOGROUPS
+    ngrp = 0;   /* measurement only: what the group loop costs in the snapshot (it also stops dropping Wolverine's shots) */
+#endif
     for (g = 0; g < ngrp; g++) {
         int (*draw)(gu8 *, int, gu32, int, int, unsigned short, unsigned short) = guest_draw(grp[g].actor);
         int shot = 0;

@@ -214,7 +214,7 @@ static void box_debug(int i, int sx, int sy)
 }
 #endif
 
-static void put16(u8 *p, u16 v) { p[0] = (u8)(v >> 8); p[1] = (u8)v; }
+static void __attribute__((unused)) put16(u8 *p, u16 v) { p[0] = (u8)(v >> 8); p[1] = (u8)v; }
 #ifndef SAT_GUEST_PAL_KEEP
 #define SAT_GUEST_PAL_KEEP 0   /* default off: the snapshot recopies sprite palette page 0 and the guest rewrites its rows every frame (as v4.1) */
 #endif
@@ -223,6 +223,13 @@ extern int sat_guest_pal_keep;   /* sat_gfx.c: the page still holds this guest's
 #endif
 #ifndef SAT_GUEST_FAST_LIST
 #define SAT_GUEST_FAST_LIST 0   /* default off: byte loops as v4.1 */
+#endif
+#ifndef SAT_GUEST_FOLD
+#define SAT_GUEST_FOLD 0   /* default off: compaction pass, then a shift pass (as v4.1) */
+#endif
+#if SAT_GUEST_FOLD && (!SAT_GUEST_FAST_LIST || defined(SAT_WOLVERINE_DEBUG))
+#undef SAT_GUEST_FOLD
+#define SAT_GUEST_FOLD 0   /* needs the word moves; the debug build keeps its box probes in the removal loop */
 #endif
 #if SAT_GUEST_FAST_LIST
 /* The pass rewrites the 8 byte object list on the master in the snapshot, from cart code: word moves and one 32 bit store a half entry. */
@@ -233,6 +240,14 @@ static void put32b(u8 *p, u32 v)
     *(au32 *)(void *)p = v;
 #else
     p[0] = (u8)(v >> 24); p[1] = (u8)(v >> 16); p[2] = (u8)(v >> 8); p[3] = (u8)v;
+#endif
+}
+static u32 ld32(const u8 *p)   /* big-endian word, one load on the target */
+{
+#if defined(__BYTE_ORDER__) && __BYTE_ORDER__ == __ORDER_BIG_ENDIAN__
+    return *(const au32 *)(const void *)p;
+#else
+    return (u32)p[0] << 24 | (u32)p[1] << 16 | (u32)p[2] << 8 | p[3];
 #endif
 }
 static void copy8(u8 *d, const u8 *s) { ((au32 *)(void *)d)[0] = ((const au32 *)(const void *)s)[0]; ((au32 *)(void *)d)[1] = ((const au32 *)(const void *)s)[1]; }
@@ -265,6 +280,9 @@ static const struct { u32 at; u8 n; const char *wv; } wv_names[2] = {
 #ifndef SAT_GUEST_NAMES_LAZY
 #define SAT_GUEST_NAMES_LAZY 0   /* default off: check the name bytes every snapshot (as v4.1) */
 #endif
+#if SAT_GUEST_NAMES_LAZY
+extern struct sat_rounds_s { u32 current, loads, sectors, last_vblank; } sat_rounds;   /* kernel.c: loads counts the stage files loaded */
+#endif
 static u8 name_saved[2][16], names_on;
 static void names(int on)
 {
@@ -275,7 +293,6 @@ static void names(int on)
         /* The check below reads 30 bytes of cart RAM (A-bus) every snapshot, on the master: about 15 FRT ticks a snapshot (Yaba, lane fps-held).
            Only a stage load restores the page, so check again only when the load count moves. =2 never checks (measurement only). */
         {
-            extern struct { u32 current, loads, sectors, last_vblank; } sat_rounds;
             static u32 seen_loads = 0xffffffffu;
             if (SAT_GUEST_NAMES_LAZY == 2 || sat_rounds.loads == seen_loads) return;
             seen_loads = sat_rounds.loads;
@@ -570,11 +587,38 @@ int sat_guest_objects(u8 *obj, int count, int max, u8 *pal0)
         wv_dbg[i][8] = (s16)sx; wv_dbg[i][9] = (s16)sy; wv_dbg[i][10] = (s16)(R8(PL(i) + 6) | R8(PL(i) + 5) << 8); wv_dbg[i][11] = (s16)(st | face_[i] << 12);
 #endif
         WM(1);
+#if SAT_GUEST_FOLD
+        {   /* One scan counts Schaefer's sprites near him (r), one backward pass moves every kept entry straight to its final place behind his n tiles.
+               Needs n >= r so that no entry moves toward the head before it is read; otherwise the two-pass code below runs. */
+            int r = 0, nt = wv_pose_start[st + 1] - wv_pose_start[st];
+            for (j = 0; j < count; j++) {
+                const u8 *e = obj + j * 8;
+                int ex = (int)((ld32(e) >> 16) & 0x3ff);
+                if (ex >= 768) ex -= 1024;
+                if ((int)(ld32(e + 4) & 31) == WV_SCH_PAL && ex > sx - 140 && ex < sx + 140) r++;
+            }
+            if (nt >= r && count - r + nt <= max) {
+                int d = count - r + nt;
+                for (j = count - 1; j >= 0; j--) {
+                    const u8 *e = obj + j * 8;
+                    int ex = (int)((ld32(e) >> 16) & 0x3ff);
+                    if (ex >= 768) ex -= 1024;
+                    if ((int)(ld32(e + 4) & 31) == WV_SCH_PAL && ex > sx - 140 && ex < sx + 140) continue;
+                    d--;
+                    if (d != j) copy8(obj + d * 8, e);
+                }
+                count -= r;
+                n = nt;
+                WM(2);
+                goto tiles_;
+            }
+        }
+#endif
         /* Schaefer's own sprites near him go */
         for (j = k = 0; j < count; j++) {
             u8 *e = obj + j * 8;
-#if SAT_GUEST_FAST_LIST && defined(__BYTE_ORDER__) && __BYTE_ORDER__ == __ORDER_BIG_ENDIAN__
-            int ex = (int)((((const au32 *)(const void *)e)[0] >> 16) & 0x3ff), pal = (int)(((const au32 *)(const void *)e)[1] & 31);
+#if SAT_GUEST_FAST_LIST
+            int ex = (int)((ld32(e) >> 16) & 0x3ff), pal = (int)(ld32(e + 4) & 31);
 #else
             int ex = ((e[0] << 8 | e[1]) & 0x3ff), pal = e[7] & 31;
 #endif
@@ -614,6 +658,9 @@ int sat_guest_objects(u8 *obj, int count, int max, u8 *pal0)
         for (j = count * 8 - 1; j >= 0; j--) obj[j + n * 8] = obj[j];
 #endif
         WM(3);
+#if SAT_GUEST_FOLD
+tiles_:
+#endif
         for (k = 0; k < n; k++) {
             const WvTile *t = &wv_tiles[wv_pose_start[st] + k];
             int hf = (t->flags & 1) ^ face_[i], dx = face_[i] ? -t->dx - 16 : t->dx;
