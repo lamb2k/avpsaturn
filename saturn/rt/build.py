@@ -58,6 +58,13 @@ if os.environ.get("SCREEN_KEYS_REQUIRED", "1") == "1" and not SCREEN_KEYS[0]:
 EDGE_KEYS = set()
 if "SAT_HOME" in os.environ.get("KERNEL_CFLAGS", "") and (WORK / "edge_keys.txt").exists():
     EDGE_KEYS = {int(l.split()[1], 16) for l in open(WORK / "edge_keys.txt") if l.strip() and l.split()[0] == "1"}
+# Home builds only: the whole caption font (scroll 1 codes 0x1260-0x131f, with the 0x1246-9 and 0x1256-9 signs, both column halves) in every round file. The census routes press
+# through the story scenes, so the glyphs a stage's own captions use ("These aliens are all from one hive", stage select starts and any
+# play that lets the story run) were not in its file: letters drew blank, "These   iens". The font is 192 codes in 12 rows of 16: signs (the apostrophe
+# is 0x126d), digits, capitals, lower case, top and bottom halves. 392 keys, about 12 KB of tiles per file.
+CAPTION_KEYS = set()
+if "SAT_HOME" in os.environ.get("KERNEL_CFLAGS", ""):
+    CAPTION_KEYS = {(c << 1) | h for c in list(range(0x1260, 0x1320)) + [0x1246, 0x1247, 0x1248, 0x1249, 0x1256, 0x1257, 0x1258, 0x1259] for h in (0, 1)}
 STRETCHES = [(0x02400000 + a, n) for a, n in ROUNDS["holes"] if n >= 0x4000]
 
 
@@ -192,6 +199,8 @@ def round_files(rom, code_end, cold1_at):
             frank.update({k: 1 << 40 for k in SCREEN_KEYS[0]})
         if EDGE_KEYS:
             keys[1] = keys[1] | EDGE_KEYS
+        if CAPTION_KEYS:
+            keys[1] = keys[1] | CAPTION_KEYS
         p, dropped = rounds_pack.fit(raw, keys, room, free, frank)
         for first, a, take in p["segs"]:
             written.update(range(a // page, (a + (take * 128 + 2047 & -2048) + page - 1) // page))

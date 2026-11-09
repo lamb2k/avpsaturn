@@ -566,6 +566,11 @@ static const u8 home_pal[64] __attribute__((aligned(2))) = {
    has 7). Play's HUD rows (0-5 and 25 up, the audit's quick fix: the enemy and boss portraits sit on rows 5 and 25) keep the flush map (their middle 4 columns dropped) when those are blank. Replaces the HUD-only map at home. */
 #define HOME_OS __attribute__((optimize("Os")))
 #define BL(m, c) (((m)[(c) >> 5] >> ((c) & 31)) & 1)
+#ifdef SAT_HOME_DIAG   /* test builds only: which non-blank source cells the fit drops (banner runs, fallback crops), per frame; read over MCP */
+volatile u32 sat_diag_lost, sat_diag_frames, sat_diag_rowmask, sat_diag_row, sat_diag_s1miss, sat_diag_s1key[3];
+static u32 diag_nb[S1_ROWS][2];
+static unsigned long diag_miss0;
+#endif
 /* Droppable columns of one row, bit c of m[0..1]: no tile, the row's fill cell, the continue line's space cells (0x1100/0x1110, a solid
    tile), or a cell inside a run of one repeated cell (a banner or rule line). */
 static HOME_OS void home_row_blank(u32 row, u32 x0, u32 *m)
@@ -579,12 +584,26 @@ static HOME_OS void home_row_blank(u32 row, u32 x0, u32 *m)
     for (c = 0, k = 0; c < 48; c++) k += w[c] == fill;
     if (k < 4) fill = 0xffffffffUL;
     m[0] = m[1] = 0;
+#ifdef SAT_HOME_DIAG
+    diag_nb[row][0] = diag_nb[row][1] = 0;
+#endif
     for (c = 0; c < 48; c++)
     {
         int a = c == 0 ? 1 : c == 47 ? 46 : c - 1, b = c == 0 ? 2 : c == 47 ? 45 : c + 1;
         u32 c_src = (((x0 - S1_REG_CROP) >> 3) + (u32)c) & 63;
         if (w[c] == fill || ((w[c] >> 16) & 0xffef) == 0x1100 || (w[c] == w[a] && w[c] == w[b]) || cache_get(&s1_cache, ((w[c] >> 16) << 1) | (c_src & 1), &dummy) == NOSLOT)
+        {
             m[c >> 5] |= 1UL << (c & 31);
+#ifdef SAT_HOME_DIAG
+            { u16 sl = cache_get(&s1_cache, ((w[c] >> 16) << 1) | (c_src & 1), &dummy);
+              if (w[c] != fill && ((w[c] >> 16) & 0xffef) != 0x1100 && sl != NOSLOT)
+              {   /* a block of one pen is a filler (shadow, band), not a letter */
+                  const u32 *cell = (const u32 *)(VDP2_VRAM + CELL_S1 + (u32)sl * 32); u32 q, a0 = cell[0] & 15, same = 1;
+                  for (q = 0; q < 8; q++) { u32 v = cell[q]; if (v != a0 * 0x11111111UL) same = 0; }
+                  if (!same) { diag_nb[row][c >> 5] |= 1UL << (c & 31); }
+              } }
+#endif
+        }
     }
 }
 /* The 44 source columns from a droppable mask (see above): the HUD's flush map on play's HUD rows when their middle 4 columns are blank,
@@ -649,12 +668,29 @@ static void draw_scroll1(u16 sx, u16 sy)
 #if SAT_GFX_FIT && defined(SAT_HOME)
     u32 bm[S1_ROWS][2];
     home_maps_rows(x0, bm);
+#ifdef SAT_HOME_DIAG
+    sat_diag_frames++;
+    diag_miss0 = sat_gfx_stats.missing;
+#endif
 #endif
     for (row = 0; row <= SAT_GFX_SCREEN_H / 8; row++)
     {
 #if SAT_GFX_FIT && defined(SAT_HOME)
         u8 map[44];
         home_row_map(row < S1_ROWS ? row : S1_ROWS - 1, bm, map);
+#ifdef SAT_HOME_DIAG
+        if (row < S1_ROWS && snap.home < 3)
+        {
+            u32 kept0 = 0, kept1 = 0, lm0, lm1; int i2;
+            for (i2 = 0; i2 < 44; i2++) { if (map[i2] < 32) kept0 |= 1UL << map[i2]; else kept1 |= 1UL << (map[i2] - 32); }
+            lm0 = diag_nb[row][0] & ~kept0; lm1 = diag_nb[row][1] & ~kept1;
+            if (lm0 | lm1)
+            {
+                u32 n = 0, v; for (v = lm0; v; v &= v - 1) n++; for (v = lm1; v; v &= v - 1) n++;
+                sat_diag_lost += n; sat_diag_rowmask |= 1UL << row; sat_diag_row = row;
+            }
+        }
+#endif
 #endif
         for (col = 0; col <= SAT_GFX_SCREEN_W / 8; col++)
         {
@@ -675,7 +711,13 @@ static void draw_scroll1(u16 sx, u16 sy)
 #endif
             u16 code = (u16)(word >> 16), attr = (u16)word;
             /* Odd columns read the right half of the 16 pixel row. */
+#ifdef SAT_HOME_DIAG
+            unsigned long dm0 = sat_gfx_stats.missing;
+#endif
             u16 slot = cache_get(&s1_cache, ((u32)code << 1) | ((idx >> 5) & 1), &sat_gfx_stats.refused_layer);
+#ifdef SAT_HOME_DIAG
+            if (sat_gfx_stats.missing != dm0) { sat_diag_s1key[0] = ((u32)code << 1) | ((idx >> 5) & 1); sat_diag_s1key[1] = row * 64 + col; sat_diag_s1key[2]++; }
+#endif
             u32 name = CLEAR_NAME;
             if (slot != NOSLOT) name = name_of(attr, 1, (CELL_S1 + (u32)slot * 32) >> 5);
 #ifdef SAT_HOME
@@ -684,6 +726,9 @@ static void draw_scroll1(u16 sx, u16 sy)
             write_name(VDP2_VRAM + MAP_S1 + (r * 64 + c) * 4, name, &sh_s1[r * 64 + c]);
         }
     }
+#if defined(SAT_HOME_DIAG) && SAT_GFX_FIT && defined(SAT_HOME)
+    sat_diag_s1miss += sat_gfx_stats.missing - diag_miss0;
+#endif
 }
 
 #ifdef SAT_HOME
