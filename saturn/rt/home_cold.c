@@ -183,7 +183,8 @@ static void options(void)
 
 /* Home settings beyond the game's own block: screen adjust and button map. Kept in work RAM (home.c) for this power-on; backup saves are not decided. */
 extern int sat_gfx_nudge_x, sat_gfx_nudge_y;
-extern volatile u32 sat_home_warp, sat_home_rush;
+extern volatile u32 sat_home_warp, sat_home_rush, sat_home_ending;
+extern void sat_home_arm_ending(void);
 static void num(char *b, int v)   /* signed, up to 2 digits */
 {
     int i = 0;
@@ -317,7 +318,23 @@ static void buttons(void)
     }
 }
 /* Stage select, now after the character select (owner 11-09: mode > select character > select level). Opened by sat_home_flow when the select hands
-   the game stage word 02; the game is held, the picture black. Returns the stage word (02 to 24 by 2, as the game advances them), which goes in place of 02. */
+   the game stage word 02; the game is held, the picture black. Returns the stage word (02 to 24 by 2, as the game advances them), which goes in place of 02.
+   Names are the arcade's own numbering: seven STAGEs (the game's round byte ff8222 + 1; its table at 0xcca0 maps each stage word to a round), each with a few areas, so
+   stage word 14 is 6-2. The last area of a round is its boss, named by the game's table at 0xac6c8 (printed on the "HAS DESTROYED STAGE n BOSS" card). Word 14's controller
+   (table 0x1bdf0, code 0x2c3c4) is the one that prints the game's SPECIAL STAGE / BREAK CONTROL BOX! lines. The game has no other area names.
+   Entry 19, ENDING, starts the stage 24 arena and has the boss cleared (sat_home_ending, home.c), so the arcade plays its own clear and ending. */
+#define STAGES 18
+static const u8 stage_round[STAGES] = { 0, 0, 1, 1, 2, 3, 3, 4, 5, 5, 5, 5, 5, 6, 6, 6, 6, 6 };
+static const char *const boss_name[7] = { "CHRYSALIS", "RAZOR CLAWS", "ARACHNOID", "ALIEN QUEEN", "POWER LOADER", "MAD PREDATOR", "ALIEN QUEEN" };
+/* st 1 to 18: b gets "n-m"; tag and name are the second row, or 0. */
+static void stage_label(int st, char *b, const char **tag, const char **name)
+{
+    int r = stage_round[st - 1], m = 1, i, boss = st == STAGES || stage_round[st] != r;
+    for (i = st - 1; i > 0 && stage_round[i - 1] == r; i--) m++;
+    b[0] = (char)('1' + r); b[1] = '-'; b[2] = (char)('0' + m); b[3] = 0;
+    *tag = boss ? "BOSS" : st == 10 ? "BONUS" : 0;
+    *name = boss ? boss_name[r] : st == 10 ? "SPECIAL STAGE" : 0;
+}
 static int stage_select(void)
 {
     static int st = 1;
@@ -325,34 +342,50 @@ static int stage_select(void)
     prev = sat_pad_raw & 0xffff;
     for (;;) {
         char b[8];
+        const char *tag, *name;
         u32 e;
         sub("STAGE SELECT MODE");
         sat_home_mode = 2;             /* black: the select's own picture is what the held game shows */
-        b[0] = (char)('0' + st / 10); b[1] = (char)('0' + st % 10); b[2] = 0;
-        label(ROW(0), "STAGE", 0); value(ROW(0), b, 1);
+        label(ROW(0), "STAGE", 0);
+        if (st > STAGES) {
+            value(ROW(0), "ENDING", 1);
+            centre(ROW(3), "THE LAST BOSS IS CLEARED FOR YOU", 0);
+        } else {
+            stage_label(st, b, &tag, &name);
+            value(ROW(0), b, 1);
+            if (tag) { label(ROW(1), tag, 0); value(ROW(1), name, 0); }
+        }
         centre(FOOT, "PRESS START BUTTON TO PLAY", 0);
         sat_home_cursor = (u32)st;
         frame();
         e = edges();
-        if (e & P_LEFT) st = st > 1 ? st - 1 : 18;
-        if (e & P_RIGHT) st = st < 18 ? st + 1 : 1;
-        if (e & (P_START | P_A | P_C)) { sat_home_warp = (u32)(st * 2); return st * 2; }
+        if (e & P_LEFT) st = st > 1 ? st - 1 : STAGES + 1;
+        if (e & P_RIGHT) st = st < STAGES + 1 ? st + 1 : 1;
+        if (e & (P_START | P_A | P_C)) {
+            int w = st > STAGES ? 0x24 : st * 2;
+            sat_home_ending = 0;
+            if (st > STAGES) sat_home_arm_ending();   /* before the stage file loads */
+            sat_home_warp = (u32)w;
+            return w;
+        }
     }
 }
 #ifdef SAT_DUEL_MENU
 /* Duel rules (duel_smash.inc reads them). Characters are picked on the game's own select screen after this, each player with its own pad. */
 typedef struct { u8 stocks, minutes, aliens, p1, p2, arena; } DuelOpt;
 extern DuelOpt sat_duel_opt;
-/* RANDOM picks from arenas that draw clean. 0e, 1c, 1e and 24 show wrong tile data in the duel (Duel 5): their round files spill sprites into
-   ROM pages the stage's own walk never reads, and the duel reads some of them (with ROUND_SHARED_MIN=1 the 1c fight drew clean, s92.log).
-   They come back once the duel has round files that keep those pages. */
-static const u8 arenas[] = { 0x02 };
+/* ARENA: ROUND 1 is stage 02; RANDOM picks one of the five stages that make a flat arena (02, 0e, 1c, 1e, 24). The four later ones run the duel copy of their stage file
+   (build.py duel_plan, kernel.c duel_pairs): without it their tile spill overwrote ROM pages the duel reads and the picture filled with wrong tiles (Duel 5).
+   sat_duel_force_arena is a test hook (play_versus.py pokes a stage word here, 0 in play): it picks the arena without the menu. */
+static const u8 arenas[] = { 0x02, 0x0e, 0x1c, 0x1e, 0x24 };
+volatile u8 sat_duel_force_arena;
 static int duel_setup(void)
 {
-    static const char *const labels[] = { "STOCKS", "TIME", "ALIENS" };   /* no ARENA row: the duel is stage 02 only (owner 11-08) */
+    static const char *const labels[] = { "STOCKS", "TIME", "ALIENS", "ARENA" };
     static const char *const times[] = { "OFF", "2 MIN", "3 MIN" };
     static const char *const freq[] = { "OFF", "LOW", "HIGH" };
-    static int cur = 3;
+    static const char *const arena[] = { "ROUND 1", "RANDOM" };
+    static int cur = 4;
     sat_home_screen = 8;
     for (;;) {
         char b[4];
@@ -360,26 +393,23 @@ static int duel_setup(void)
         int i;
         panel(19);
         centre(19, "DUEL", 0);
-        for (i = 0; i < 3; i++) {
+        for (i = 0; i < 4; i++) {
             put(20 + i, 10, labels[i], i == cur);
             b[0] = (char)('0' + sat_duel_opt.stocks); b[1] = 0;
-            put(20 + i, 22, i == 0 ? (sat_duel_opt.minutes ? "-" : b) : i == 1 ? times[sat_duel_opt.minutes ? sat_duel_opt.minutes - 1 : 0] : freq[sat_duel_opt.aliens], i == cur);
+            put(20 + i, 22, i == 0 ? (sat_duel_opt.minutes ? "-" : b) : i == 1 ? times[sat_duel_opt.minutes ? sat_duel_opt.minutes - 1 : 0] : i == 2 ? freq[sat_duel_opt.aliens] : arena[sat_duel_opt.arena], i == cur);
         }
-        sat_duel_opt.arena = 0;
-        centre(24, "START", cur == 3);
+        centre(25, "START", cur == 4);
         sat_home_cursor = (u32)cur;
         frame();
         e = edges();
         if (e & P_B) return 0;
-        if (e & P_UP) cur = cur ? cur - 1 : 3;
-        if (e & P_DOWN) cur = cur < 3 ? cur + 1 : 0;
-        if (cur == 3) {
+        if (e & P_UP) cur = cur ? cur - 1 : 4;
+        if (e & P_DOWN) cur = cur < 4 ? cur + 1 : 0;
+        if (cur == 4) {
             if (e & (P_START | P_A | P_C)) {
                 sat_home_warp = sat_duel_opt.arena ? arenas[sat_vblanks_now() % sizeof arenas] : 0;
+                if (sat_duel_force_arena) sat_home_warp = sat_duel_force_arena;
                 if (sat_home_warp == 2) sat_home_warp = 0;
-#ifdef DUEL_ARENA_TEST   /* test build only: RANDOM always picks this stage */
-                if (sat_duel_opt.arena) sat_home_warp = DUEL_ARENA_TEST;
-#endif
                 return 1;
             }
             continue;
@@ -389,6 +419,7 @@ static int duel_setup(void)
             if (cur == 0) sat_duel_opt.stocks = (u8)(sat_duel_opt.stocks + d < 1 ? 5 : sat_duel_opt.stocks + d > 5 ? 1 : sat_duel_opt.stocks + d);
             if (cur == 1) sat_duel_opt.minutes = (u8)((sat_duel_opt.minutes == 0 ? (d > 0 ? 2 : 3) : sat_duel_opt.minutes == 2 ? (d > 0 ? 3 : 0) : (d > 0 ? 0 : 2)));
             if (cur == 2) sat_duel_opt.aliens = (u8)((sat_duel_opt.aliens + 3 + d) % 3);
+            if (cur == 3) sat_duel_opt.arena ^= 1;
         }
     }
 }
@@ -493,6 +524,7 @@ void sat_home_flow(void)
         sat_home_hold = 1; prev = sat_pad_raw & 0xffff;
         w = stage_select();
         G(0xff81e8) = (u8)(w >> 8); G(0xff81e9) = (u8)w;
+        G(0xff8222) = 0; G(0xff8223) = stage_round[w / 2 - 1];   /* the round byte the stage's clear would have set (the card's STAGE n and boss name read it) */
         sat_home_screen = 0; sat_home_mode = 0; sat_home_hold = 0;
         flow = 0;
     }
@@ -519,7 +551,7 @@ void sat_home_menu(void)
         pick = menu_list(1, 21, items, HOME_ITEMS, pick < 0 ? 0 : pick, HOME_IDLE);
         if (pick == -2) { pick = (int)sat_home_cursor; continue; }   /* B at the top level: nothing above it */
         p = pick >= 1 ? pick + DUEL_SHIFT : pick;
-        sat_home_warp = 0; sat_home_rush = 0; stage_after = 0;
+        sat_home_warp = 0; sat_home_rush = 0; sat_home_ending = 0; stage_after = 0;
         if (p == 4) options();
         else if (p == 3) { stage_after = 1; pick = 0; break; }   /* the stage is asked for after the character select (sat_home_flow) */
 #ifdef SAT_DUEL_MENU

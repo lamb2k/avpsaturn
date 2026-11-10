@@ -54,7 +54,7 @@ def main():
     (out / "obj").mkdir(parents=True, exist_ok=True)
     overrides = (T / "saturn/game/overrides.txt").read_text().split()
     ids = () if a.ids == "none" else forkgen.SHIP_IDS if a.ids == "ship" else forkgen.ALL_IDS if a.ids == "all" else tuple(int(x) for x in a.ids.split(","))
-    wrap = (GUEST_WRAP + (('2576a',) if '-DSAT_WV_NATIVE_GFX' in a.defs else ()) if a.guests else ()) + (forkgen.wrapped_names(ids) if a.guests else ())
+    wrap = (GUEST_WRAP + (('24f04',) if '-DSAT_WV_NATIVE_GFX' in a.defs else ()) if a.guests else ()) + (forkgen.wrapped_names(ids) if a.guests else ())
     sources_o = forkgen.read_sources(work / "src")
     hdr = ""
     if a.reloc:

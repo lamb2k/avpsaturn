@@ -66,19 +66,17 @@ def step(v, s):
         if int((t - 4) / 0.45) != int((t - 4) / 0.45 - 0.1): pass
     if os.environ.get("COOPGUN") and float(os.environ.get("GUN_FROM", "5")) <= t < float(os.environ.get("GUN_TO", "10")) and P2 is not None:   # the partner holds its gun button while the Wolverine player's Berserker (poked at 6 s) runs: shots must be the partner's only
         keys = [pre(1 - wv) + "c"]
-    for t0 in (12, 22):   # Berserker motion of the Wolverine player, forward = the way he faces
+    for t0 in (12, 22):   # Berserker of the Wolverine player: his special, attack + jump together
         u = t - t0
-        if 0 <= u < 1.2:
-            face = a[0x380 + 0x100 * wv + 0x0f] & 1
-            fw = wp + ("right" if face else "left")
-            seq = (0, [wp + "down"]), (0.3, [wp + "down", fw]), (0.6, [fw]), (0.9, [fw, wp + "a"]), (1.1, [])
+        if 0 <= u < 0.6:
+            seq = (0, [wp + "a", wp + "b"]), (0.4, [])
             for tt, ks in seq:
                 if u >= tt: keys = ks
             if u < 0.1: bz_t.append(t)
     if os.environ.get("ASSIST", "1") == "1":   # harness assist, both players alike: health topped up so the co-op checks are not cut short by deaths
         for off in (0x83c0, 0x84c0):
             s.m.call("memory_write", address=hex(s.syms["RAMB"] + off), size="word", value=hex(0x65))
-    for t0 in (tuple(float(x) for x in os.environ["BZ_AT"].split(",")) if os.environ.get("BZ_AT") else ((6, 13, 23) if os.environ.get("COOPGUN") else (13, 23))):   # the Berserker request of the Wolverine player, poked (the motion's timing against the partner is not what is under test); the motion itself is played at 12 and 22
+    for t0 in ():   # (the poked Berserker request of the old gun-slot entry is gone: the special press above is the entry) (the motion's timing against the partner is not what is under test); the motion itself is played at 12 and 22
         if t >= t0 and ("bzreq", t0) not in done and "bz_req" in s.syms:
             done.add(("bzreq", t0)); s.m.call("memory_write", address=hex(s.syms["bz_req"] + wv), size="byte", value=hex(6))
     s.set(keys)

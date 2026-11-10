@@ -3,7 +3,7 @@ frame in stage 02), then a free-running play policy for PROOF_SECS seconds with 
   - every change of the player's state word (+4..6) with the frame record, timer, health, stage word, lives, the Berserker byte and the vblank counter,
   - anomalies: a frame record outside his native window (a donor record he should not show), the same state held for more than PROOF_STUCK vblanks, a fatal,
   - the set of states and (state, record range) pairs reached, with counts.
-Policy: walk toward the nearest enemy (tag 0c), tap attack when near, QCF + attack every few seconds (Berserker), jump now and then; a KO is followed by start pulses (continue). Health is topped up only with PROOF_ASSIST=1.
+Policy: walk toward the nearest enemy (tag 0c), tap attack when near, attack + jump together every few seconds (Berserker, his special), jump now and then; a KO is followed by start pulses (continue). Health is topped up only with PROOF_ASSIST=1.
 Output: PROOF_OUT/soak.jsonl (events) and PROOF_OUT/soak_summary.json. Env: PROOF_OUT, PROOF_SECS (default 300), PROOF_SEED, PROOF_P2=1 (also drive nothing for player 2; only logs it), PROOF_TITLE.
 usage: YABA_CUE=<work>/sat.cue YABA_ELF=<work>/sat.elf YABA_EXE=<own yaba>/yabasanshiro.exe YABA_INI=<own yaba>/yabause.ini YABA_PORT=9718 YABA_VIDEO=1 YABA_SOUND=0 PROOF_OUT=<dir> python saturn/rt/play_yaba.py <work> tools/wolverine/native_soak.py 1500"""
 import collections, ctypes, json, os, random, re, time
@@ -122,8 +122,7 @@ def soak(s):
                 elif dz > 3: keys.append("down")
                 if abs(dx) < 90 and abs(dz) < 8 and polls % 3 == 0: keys.append("a")
                 if time.time() > t_qcf and abs(dx) < 120:
-                    f = "fwd"
-                    seq = [(["down"], .09), (["down", f], .09), ([f], .09), ([f, "a"], .09), ([], .05)]; seq_i, seq_t = 0, time.time()
+                    seq = [(["a", "b"], .09), (["a", "b"], .09), ([], .05)]; seq_i, seq_t = 0, time.time()
                     t_qcf = time.time() + rnd.uniform(4, 9)
                 if time.time() > jumped and rnd.random() < 0.02:
                     keys.append("b"); jumped = time.time() + 4

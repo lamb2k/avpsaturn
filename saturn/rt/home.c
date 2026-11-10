@@ -119,13 +119,19 @@ void sat_home_big(int r, const char *s)
 int sat_home_list_gap;                 /* rows between list items; 0: 1 for more than 4 items, else 2 */
 void sat_home_centre(int r, const char *s, int hi) { int n = 0; while (s[n]) n++; sat_home_put(r, (44 - n) / 2, s, hi); }
 
-void sat_home_frame(void)
+/* Publishes sat_home_text to the slave without waiting for a vblank. Text that is not a menu loop's (the duel's percent and stock line, the end of NOW LOADING) was never
+   copied once the menus drew from sat_home_shown: the duel HUD stayed blank and NOW LOADING stayed on screen for the whole fight (lane versus, 11-10). */
+void sat_home_commit(void)
 {
-    u32 v = sat_vblanks_now();
     int i;
     sat_home_seq++;
     for (i = 0; i < 28 * 44; i++) (&sat_home_shown[0][0])[i] = (&sat_home_text[0][0])[i];
     sat_home_seq++;
+}
+void sat_home_frame(void)
+{
+    u32 v = sat_vblanks_now();
+    sat_home_commit();
     while (sat_vblanks_now() == v) ;
 }
 u32 sat_home_edges(void) { u32 raw = sat_pad_raw & 0xffff, e = prev & ~raw; prev = raw; return e; }
@@ -170,6 +176,7 @@ void sat_home_loading(int on)
         sat_home_clear();
         sat_home_mode = was_mode;
         sat_home_hold = was_hold;
+        sat_home_commit();   /* NOW LOADING off the picture */
     }
 }
 
@@ -226,6 +233,24 @@ static void rush_poll(void)
     }
 }
 
+/* ENDING (the last stage select entry, home_cold.c). The arcade reaches stage word 26 only from the stage 24 clear (ff8004 = 0a, entered by the clear's jump to 0x8836); a game
+   started on word 26 runs the stage setup 0x91e4, whose table (0x91f0, one word per stage word up to 24) has no entry for it, so the jump at 0x91ec is a BADJUMP: fatal 0xe2.
+   So the entry starts the stage 24 arena (it starts at the boss, as in the boss rush) and, once the arena's setup is done and its play state runs (ff8004 = 4, ff8008 = 4), sets the
+   boss-down flag ff822a and the stage-clear flag ff81f3 that the stage's controller sets itself when the boss dies (0x840a then moves the game to its stage clear, 0xc7ea, and the
+   stage 24 clear ends in the ending). The arcade plays its own clear, the ending, the credits and GAME OVER. */
+volatile u32 sat_home_ending;          /* 0 off, else the stage file load count when armed, + 1 */
+void sat_home_arm_ending(void) { sat_home_ending = sat_rounds.loads + 1; }
+static void ending_poll(void)
+{
+    static u8 played;
+    if (!sat_home_ending) { played = 0; return; }
+    if (IN_ATTRACT) { if (played) sat_home_ending = 0; return; }   /* game over: back at the title */
+    played = 1;
+    if ((G(0xff81e8) << 8 | G(0xff81e9)) == 0x24 && G(0xff8001) == 2 && G(0xff8005) == 4 && G(0xff8009) == 4 && G(0xff8380) && sat_rounds.loads >= sat_home_ending) {
+        G(0xff822a) = 1; G(0xff81f3) = 1;
+    }
+}
+
 /* Once per task walk. */
 void sat_home_poll(void)
 {
@@ -258,6 +283,7 @@ void sat_home_poll(void)
         }
     }
     rush_poll();
+    ending_poll();
     if (inject && !IN_ATTRACT) inject = 0;
     sat_home_flow();   /* stage select, boss rush and duel skip the arcade's intro story before the character select (home_cold.c) */
     if (inject) return;
