@@ -64,19 +64,19 @@ This replaces the first design (locked until the reveal). There is no LOCKED sta
 - Flag-off identity (`REVEAL=0`, no `-DSAT_WV_REVEAL`): every part of the reveal is behind that define, boot.c included. Compiling the same sources at the base (7f26a1f) and now with the same command
   lines gives byte-identical objects for kernel, guests, home_cold, home, sat_gfx and boot (md5, evidence idc/run.sh).
 
-## Voice ("Berserker Barrage!", owner addition)
+## Voice: his round-entrance line (owner 11-10: "lets use his intro as the reveal sound")
 
-Pipeline, built and run (EMULATOR for playback, see Verification): `tools/wolverine/reveal_voice.py` runs MAME 0.289 on the owner's mshvsf set (`mame_voice.lua`, no sound, no video), dumps the 8 MB QSound sample ROM,
-cuts one clip (bank/start/end in the ROM, 8 bit signed, 24038 Hz at rate 0x1000), resamples it to 22050 Hz, scales it to peak 120 and writes `reveal_voice.bin` (`RVV1`, u32 samples, 8 reserved, the samples).
-build.py puts it on the disc as `RVVOICE.BIN` (REVEAL_VOICE or GUEST_ASSETS/reveal_voice.bin; ROM-derived, never in git; without it the reveal plays silent). At frame 3 `reveal.c` loads it with the art, copies it
-to SCSP RAM at 0x70000 (stage 26's clips end near 0x55000) and plays it on SCSP slot 18 (0 to 15 are the game's channels, 16 and 17 the CD) at octave -1 (22050 Hz). It lives in the pack room only while the reveal starts
-and is copied out at once; nothing stays in work RAM. A 0.55 s clip is 12.2 KB.
-
-NOT DONE: the clip itself is not identified. `mame_voicescan.lua` sent every sound command 0 to 0x7ff through the 68000 mailbox and logged the QSound voice starts: 301 distinct samples of 0.3 to 2.5 s. They were run
-through offline speech recognition (faster-whisper small.en, installed in a venv on this PC; Windows SAPI first). None came out as "Berserker Barrage" (with a prompt naming the phrase it hallucinated it into noise, so those hits
-are worthless). The commands Wolverine's own moves send in a MAME run (0x120 to 0x127, 0x203 to 0x20d) are 0.1 to 0.3 s grunts. Either the shout is not a separate QSound clip in MSHvSF (its hyper combo name may be text only),
-or it is played in pieces. For playback testing a stand-in clip (20:b400:e7ff, command 0x91, 0.55 s; recognised once as "Barrage!" with the prompt, so not evidence) was cut. The owner should pick the clip by ear:
-`REVEAL_VOICE_CLIP=BANK:START:END reveal_voice.py cut WORKDIR out.bin`, the candidates are in the scan evidence (E:\AvP\learning\lane-wolverine-reveal\scan1\w, one WAV per clip named bank_start_end).
+The reveal plays Wolverine's MSHvSF round-entrance line, "Let's go, bub." (arcade sound command 0x207), with frame 3. It replaces the "Berserker Barrage!" idea (no such clip was found; see below).
+- Source: the wv-sounds lane renders the line through the real Z80 driver and QSound in MAME (`tools/wolverine/wv_sound.py`, its branch lane/wv-sounds-20261109), after sending 0x484 to load his voice set. The same
+  command number plays different samples depending on the voice set loaded, and the whole 0.9 s line spans more than one QSound clip: the first one alone (0x207 with no voice set loaded, bank 0x28, 0.21 s)
+  is not it. That is also why my first search for a "Berserker Barrage" clip (commands sent without the voice set) found nothing.
+- `tools/wolverine/reveal_voice.py intro SOUND_ASSETS OUT.bin` takes the INTRO clip from that lane's asset directory (wv_sound.json and wv_sound.bin: 8 bit signed mono PCM, 11025 Hz, level in the SCSP total level)
+  and writes `RVVOICE.BIN`: 'RVV1', u32 samples, u8 total level, u8 octave nibble, 6 reserved, the samples. Build with `REVEAL_VOICE=OUT.bin` (build.py copies it to the disc; ROM-derived, never in git; without it the
+  reveal is silent). Result: command 0x207, 9,924 samples, 0.900 s, tl 42, **9,940 bytes** on the disc.
+- Playback (reveal.c): with frame 3 the clip, loaded with the art into the pack room and copied out, sits in SCSP RAM at 0x70000 (stage 26's clips end near 0x55000) and plays on slot 18 (0 to 15 are the game's
+  channels, 16 and 17 the CD) with its own level and octave (0xe = 11025 Hz). Nothing stays in work RAM.
+- Earlier work (kept in the history): the "Berserker Barrage!" search. `mame_voicescan.lua` sent every command 0 to 0x7ff, 301 distinct clips were run through offline speech recognition and none said it; the
+  tools remain (`reveal_voice.py cut`, `REVEAL_VOICE_CLIP`).
 
 ## Native Wolverine merge and gates (11-10)
 

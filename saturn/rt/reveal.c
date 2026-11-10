@@ -38,7 +38,7 @@ extern int sat_gfx_nudge_x, sat_gfx_nudge_y;
 #define T_FRAME2 90u
 #define T_FRAME3 180u
 #define MAX_VBLANKS 900u                     /* safety: the card is 432 */
-static u32 t0 = 1, voice_samples = 1;         /* initialised data: this code's bss is not cleared */
+static u32 t0 = 1, voice_samples = 1, voice_tl = 1, voice_oct = 0xf;         /* initialised data: this code's bss is not cleared */
 static u32 be32(const u8 *p) { return (u32)p[0] << 24 | (u32)p[1] << 16 | (u32)p[2] << 8 | p[3]; }
 static void frame_up(int f) { V2(0x3c) = (u16)(1 + f); }
 static void show_setup(const u8 *r)
@@ -78,7 +78,7 @@ static void show_setup(const u8 *r)
     }
     V2(0x00) = 0x8001;
 }
-/* Berserker Barrage: PCM 8 bit at 22050 Hz in SCSP RAM, one slot of its own. File: 'RVV1', u32 samples, 8 reserved, the samples. */
+/* The voice (his round-entrance line): PCM 8 bit in SCSP RAM, one slot of its own. File: 'RVV1', u32 samples, u8 total level, u8 octave nibble (0xe 11025 Hz, 0xf 22050 Hz), 6 reserved, the samples. */
 static void voice_load(const u8 *p)
 {
     u32 n = be32(p + 4), i;
@@ -89,8 +89,8 @@ static void voice_play(u32 samples)
     SLOT(VOICE_SLOT, 0x00) = (u16)(0x0010u | (VOICE_AT >> 16));
     SLOT(VOICE_SLOT, 0x02) = (u16)VOICE_AT;
     SLOT(VOICE_SLOT, 0x04) = 0; SLOT(VOICE_SLOT, 0x06) = (u16)(samples > 0xffffu ? 0xffffu : samples);
-    SLOT(VOICE_SLOT, 0x08) = 0x001fu | 1u << 5; SLOT(VOICE_SLOT, 0x0a) = 0x001fu; SLOT(VOICE_SLOT, 0x0c) = 0; SLOT(VOICE_SLOT, 0x0e) = 0;
-    SLOT(VOICE_SLOT, 0x10) = (u16)(0xfu << 11);            /* octave -1: 44100 / 2 = 22050 Hz */
+    SLOT(VOICE_SLOT, 0x08) = 0x001fu | 1u << 5; SLOT(VOICE_SLOT, 0x0a) = 0x001fu; SLOT(VOICE_SLOT, 0x0c) = (u16)voice_tl; SLOT(VOICE_SLOT, 0x0e) = 0;
+    SLOT(VOICE_SLOT, 0x10) = (u16)(voice_oct << 11);       /* octave -2: 11025 Hz, -1: 22050 Hz */
     SLOT(VOICE_SLOT, 0x12) = 0; SLOT(VOICE_SLOT, 0x14) = 0;
     SLOT(VOICE_SLOT, 0x16) = (u16)(7u << 13);
     SLOT(VOICE_SLOT, 0x00) = (u16)(SLOT(VOICE_SLOT, 0x00) | 0x1800u);   /* key on, execute */
@@ -108,6 +108,7 @@ static void begin(void)
     voice_samples = 0;
     if (sat_reveal_call(1, (u32)"RVVOICE.BIN", (u32)(BUF + size), 0) > 16 && BUF[size] == 'R') {
         voice_samples = be32(BUF + size + 4);
+        voice_tl = BUF[size + 8]; voice_oct = BUF[size + 9] & 15;
         voice_load(BUF + size);
     }
     sat_guest_reveal_done();                                /* the first time: Wolverine goes on, saved to backup RAM (the art and voice are copied out already, the scratch is free) */

@@ -5,10 +5,14 @@ usage:
   reveal_voice.py dump  WORKDIR                       run MAME 0.289 (mshvsf, no sound, no video) through tools/wolverine/mame_voice.lua: WORKDIR/qsound.bin, the 8 MB sample ROM
   reveal_voice.py cut   WORKDIR OUT.bin               cut the clip (CLIP below) from WORKDIR/qsound.bin, resample to 22050 Hz, 8 bit signed, write OUT.bin
   reveal_voice.py build OUT.bin [WORKDIR]             dump (when WORKDIR/qsound.bin is not there yet) then cut
+  reveal_voice.py intro SOUND_ASSETS OUT.bin          THE REVEAL'S VOICE (owner 11-10): Wolverine's round-entrance line "Let's go, bub." (arcade sound command 0x207, 0.9 s), taken from the clip the
+                                                      wv-sounds lane rendered through the real Z80 driver and QSound (tools/wolverine/wv_sound.py, voice set loaded with 0x484 first, so the whole line, not
+                                                      only the first QSound clip): SOUND_ASSETS is its asset directory (wv_sound.json and wv_sound.bin, 8 bit signed mono PCM at 11025 Hz, level in tl).
 env for dump: MSHVSF_REPO (the repo with tools/run_mshvsf_mame.py and the ROM set), MSHVSF_PY (its python).
 The clip is QSound sample ROM bank/start/end as the Z80 sound driver starts it: sound command CMD of the arcade's table, voice start (bank, address, end) read from the DSP writes
 (tools/wolverine/mame_voicescan.lua sends every command in turn). QSound plays 8 bit signed samples at 24038 Hz when its rate register is 0x1000.
-File format (big endian): 'RVV1', u32 samples, 8 reserved bytes, then the samples (PCM 8 bit signed, 22050 Hz, played by SCSP slot 18 at octave -1)."""
+File format (big endian): 'RVV1', u32 samples, u8 SCSP total level (0 loudest, 0.375 dB a step), u8 octave nibble (0xe = 11025 Hz, 0xf = 22050 Hz), 6 reserved bytes, then the samples
+(PCM 8 bit signed, played by SCSP slot 18)."""
 import os
 import pathlib
 import struct
@@ -58,8 +62,23 @@ def cut(work, out):
     pcm = np.clip(np.rint(x), -128, 127).astype(np.int8).tobytes()
     if len(pcm) % 2:
         pcm += b"\0"
-    pathlib.Path(out).write_bytes(b"RVV1" + struct.pack(">I", len(pcm)) + bytes(8) + pcm)
+    pathlib.Path(out).write_bytes(b"RVV1" + struct.pack(">IBB", len(pcm), 0, 0xf) + bytes(6) + pcm)
     return dict(samples=len(pcm), seconds=len(pcm) / OUT_HZ, file_bytes=16 + len(pcm))
+
+
+def intro(assets, out):
+    """the INTRO clip of the wv-sounds lane's assets as RVVOICE.BIN, at its own rate and level"""
+    import json
+    assets = pathlib.Path(assets)
+    j = json.loads((assets / "wv_sound.json").read_text())
+    blob = (assets / "wv_sound.bin").read_bytes()
+    s = next(x for x in j["sounds"] if x["name"] == "INTRO")
+    assert j["rate"] == 11025, "the reveal plays 11025 Hz clips (octave nibble 0xe)"
+    pcm = blob[s["off"]:s["off"] + s["n"]]
+    if len(pcm) % 2:
+        pcm += b"\0"
+    pathlib.Path(out).write_bytes(b"RVV1" + struct.pack(">IBB", len(pcm), s["tl"], 0xe) + bytes(6) + pcm)
+    return dict(command=hex(s["cmd"]), samples=len(pcm), seconds=round(len(pcm) / 11025, 3), tl=s["tl"], file_bytes=16 + len(pcm))
 
 
 if __name__ == "__main__":
@@ -68,6 +87,8 @@ if __name__ == "__main__":
         dump(sys.argv[2])
     elif cmd == "cut":
         print(cut(sys.argv[2], sys.argv[3]))
+    elif cmd == "intro":
+        print(intro(sys.argv[2], sys.argv[3]))
     elif cmd == "build":
         work = pathlib.Path(sys.argv[3] if len(sys.argv) > 3 else pathlib.Path(sys.argv[2]).parent / "voice_work")
         if not (work / "qsound.bin").exists():
