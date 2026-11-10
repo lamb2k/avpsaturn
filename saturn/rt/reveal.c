@@ -6,7 +6,7 @@
    Memory: nothing stays. The art (REVEAL.BIN) and the voice (RVVOICE.BIN) are read into the cart's pack room one megabyte into the stage's pack (SAT_PACK + 0x100000: stage 26's pack is under 600 KB),
    copied into VDP2 VRAM and SCSP RAM, and the room is free again. The chips go back to the game with sat_gfx_init: every cache empty, so each tile loads again.
    Timing, vblanks (60 a second): frame 1 for 90, frame 2 for 90, frame 3 until the card ends (about 250, so about 1.5 s, 1.5 s, 4.2 s of the card's 7.2 s). The voice starts with frame 3.
-   The unlock: once frame 1 is up the Wolverine flag is set and written to backup RAM (boot.c unlock_io), and the guest setting takes its default (guests.c). */
+   After frame 1 is up, the first time the reveal plays, Wolverine is switched on if he is off and that is written to backup RAM (guests.c, boot.c unlock_io); later endings leave the player's setting alone. */
 typedef unsigned char u8; typedef unsigned short u16; typedef unsigned int u32;
 #include "../gfx/sat_gfx.h"
 #include "unlock_save.h"
@@ -15,7 +15,7 @@ extern u32 sat_vblanks_now(void);
 extern void sat_reveal_takeover(int on);
 extern long sat_reveal_call(int which, u32 a, u32 b, u32 c);
 extern int sat_gfx_init(const void *pack);
-extern void sat_guest_unlocked(void);
+extern void sat_guest_reveal_done(void);
 extern u8 SAT_PACK[];
 #ifdef SAT_HOME
 extern int sat_gfx_nudge_x, sat_gfx_nudge_y;
@@ -110,8 +110,7 @@ static void begin(void)
         voice_samples = be32(BUF + size + 4);
         voice_load(BUF + size);
     }
-    sat_reveal_call(2, 1, SAVE_FLAG_WOLVERINE, (u32)BUF);   /* the unlock, written to backup RAM; art and voice are copied out already */
-    sat_guest_unlocked();
+    sat_guest_reveal_done();                                /* the first time: Wolverine goes on, saved to backup RAM (the art and voice are copied out already, the scratch is free) */
     t0 = sat_vblanks_now();
     DIAG[6] = 1;
 }

@@ -53,6 +53,27 @@ int main(void)
     CHECK(save_flags(a, SAVE_SIZE) == (SAVE_FLAG_WOLVERINE | 0x40));
     save_merge(b, a, SAVE_SIZE, 0, SAVE_FLAG_WOLVERINE);
     CHECK(save_flags(b, SAVE_SIZE) == 0x40);
+    /* the saved bonus-character setting (byte 7): none in a record without one, stored and read back, kept by a flag write, dropped when the sum failed, neighbours untouched */
+    memset(a, 0, sizeof a);
+    save_merge(a, a, 0, SAVE_FLAG_WOLVERINE, 0);
+    CHECK(save_sel(a, SAVE_SIZE) == -1);                         /* the first version's record: flag only, no setting */
+    save_merge2(b, a, SAVE_SIZE, 0, 0, 1);
+    CHECK(save_sel(b, SAVE_SIZE) == 1 && save_flags(b, SAVE_SIZE) == SAVE_FLAG_WOLVERINE);
+    save_merge2(a, b, SAVE_SIZE, 0, 0, 0);                       /* the player turns him off: saved as 0, not "none" */
+    CHECK(save_sel(a, SAVE_SIZE) == 0 && save_flags(a, SAVE_SIZE) == SAVE_FLAG_WOLVERINE);
+    save_merge(b, a, SAVE_SIZE, 0x40, 0);                        /* a flags write keeps the saved setting */
+    CHECK(save_sel(b, SAVE_SIZE) == 0);
+    save_merge2(a, b, SAVE_SIZE, 0, 0, 3);
+    CHECK(save_sel(a, SAVE_SIZE) == 3);
+    for (i = 8; i < SAVE_SIZE - 2; i++) CHECK(a[i] == b[i]);
+    memcpy(b, a, sizeof b);
+    b[30] ^= 0x11;                                              /* sum fails: no setting is trusted, and a rewrite does not bring it back */
+    CHECK(save_sel(b, SAVE_SIZE) == -1);
+    save_merge(a, b, SAVE_SIZE, SAVE_FLAG_WOLVERINE, 0);
+    CHECK(save_sel(a, SAVE_SIZE) == -1 && b[30] == a[30]);
+    memset(b, 0x5a, sizeof b);                                   /* not ours: from zero */
+    save_merge2(a, b, SAVE_SIZE, 0, 0, 2);
+    CHECK(save_sel(a, SAVE_SIZE) == 2 && save_flags(a, SAVE_SIZE) == 0 && a[30] == 0);
     if (fails) return 1;
     printf("unlock_save: pass\n");
     return 0;

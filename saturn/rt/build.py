@@ -17,7 +17,8 @@ import round_cache
 HERE = pathlib.Path(__file__).resolve().parent
 REPO = HERE.parents[1]
 # The post-credits Wolverine reveal (reveal.c, boot.c unlock record, tools/wolverine/reveal_*.py): on in every SAT_GUESTS build, since the owner's art (art/wolverine-reveal) is in the tree.
-# It locks Wolverine until the reveal has played once; -DSAT_WOLVERINE_UNLOCKED starts a build unlocked (testers, QA), -DSAT_UNLOCK_DEBUG adds a LOCKED/UNLOCKED row to OPTION MODE.
+# The reveal replaces the GAME OVER card after the ending and, the first time it plays, switches Wolverine on (he is a toggle in OPTION MODE from the first power-on; the setting is saved in backup RAM).
+# -DSAT_UNLOCK_DEBUG adds a REVEAL SEEN row to OPTION MODE (clear it and the next ending switches him on again). -DSAT_WOLVERINE_UNLOCKED no longer means anything (nothing is locked).
 # REVEAL=0 builds without it. The voice (REVEAL_VOICE, or GUEST_ASSETS/reveal_voice.bin) is ROM-derived and stays out of git: without it the reveal is silent.
 REVEAL_ART = REPO / "art/wolverine-reveal/reveal.bin"
 if "SAT_GUESTS" in os.environ.get("KERNEL_CFLAGS", "") and REVEAL_ART.exists() and os.environ.get("REVEAL", "1") != "0":
@@ -627,7 +628,7 @@ SECTIONS {{
         print(sh([sys.executable, REPO / "tools/sector_store.py", ISO, "--keep", WORK / "rounds"]).strip())
     else:
         (ISO / "STORE.BIN").unlink(missing_ok=True)
-    sh([GCC, "-m2", "-mb", "-O2", "-w", "-fno-builtin", "-I", SGL / "INC", f"-DCOLD1_ADDR={cold1_at:#x}u"] + (["-DSECTOR_STORE"] if store else []) + (["-DSTORE_HEAD2"] if head_sectors == 2 else []) + [ "-c", HERE / "boot.c", "-o", b])
+    sh([GCC, "-m2", "-mb", "-O2", "-w", "-fno-builtin", "-I", SGL / "INC", f"-DCOLD1_ADDR={cold1_at:#x}u"] + (["-DSECTOR_STORE"] if store else []) + (["-DSTORE_HEAD2"] if head_sectors == 2 else []) + (["-DSAT_WV_REVEAL"] if "SAT_WV_REVEAL" in os.environ.get("KERNEL_CFLAGS", "") else []) + [ "-c", HERE / "boot.c", "-o", b])
     lib = SGL / "LIB_ELF"
     sh([GCC, "-m2", "-mb", "-nostartfiles", "-T", HERE / "boot.ld", b, "-Wl,--start-group", lib / "SEGA_SYS.A", lib / "LIBCD.A", lib / "LIBSGL.A", "-lgcc", "-lc", "-Wl,--end-group",
         "-o", WORK / "boot.elf", f"-Wl,-Map={WORK / 'boot.map'},-e,_main"])

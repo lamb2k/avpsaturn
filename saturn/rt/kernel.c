@@ -638,7 +638,7 @@ static void round_check(void)
     irq_enable();
 }
 
-#if defined(SAT_GUESTS) && !SAT_VDP1_HW_ERASE
+#if defined(SAT_GUESTS) && defined(SAT_WV_REVEAL) && !SAT_VDP1_HW_ERASE
 /* The post-credits reveal (reveal.c, cold code) owns the picture while LOADER_DIAG[5] is set: the vblank hands nothing to the slave, so the chips are the cold code's.
    sat_reveal_call runs a loader function with the game stopped and the slave idle, as a round load does: which 1 load_file(name, dest), 2 unlock_io(op, bits, scratch). */
 #define REVEAL_ON (((volatile u32 *)0x06013fe0u)[5])
@@ -793,9 +793,12 @@ void sat_vblank(void)
     }
 #endif
     /* Before the IRQ body, which moves the next frame's scroll words into place. A slave still drawing skips this frame's picture, never the game. */
+#if defined(SAT_GUESTS) && defined(SAT_WV_REVEAL) && !SAT_VDP1_HW_ERASE
     if (REVEAL_ON) {
         /* the reveal's picture: nothing for the slave to draw */
-    } else if (UNCACHED(gfx_done) == UNCACHED(gfx_handed)) {
+    } else
+#endif
+    if (UNCACHED(gfx_done) == UNCACHED(gfx_handed)) {
         sat_gfx_snapshot_begin();
         UNCACHED(gfx_handed) = UNCACHED(gfx_handed) + 1;
         SLAVE_WAKE = 0xffff;
