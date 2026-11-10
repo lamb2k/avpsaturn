@@ -106,3 +106,27 @@ already in FONT_KEYS (0 new keys); on the plain integration base they are 889 mo
 
 Owner 2026-11-10: SAT_WV_DIALOG on with Wolverine is the intended default for owner discs. The code default stays 0; the integration recipe adds
 `-DSAT_WV_DIALOG=1` (build.py also accepts `-DSAT_WV_DIALOG`). Wording approved by the owner 2026-11-10 ("g2g").
+
+## 8. Continue picture (owner 2026-11-10: "it should use his art for the hud")
+
+Is it the same graphic as a portrait we already replace? No. The arcade's continue screen has two pictures chosen by the dying character's class, measured
+under MAME 0.289 on the four saved routes (tools/screen_keys.py): Schaefer and Linn draw the same Queen (identical tile key sets), the Warrior and
+the Hunter draw a Predator arm (another set). Neither is a HUD, select or rank portrait, so his existing replacements cannot reach it; the talk box
+case (same cells as the 2P HUD) does not apply. Stock Schaefer shows the Queen too, so the owner's "doesn't include Wolverine" is that he gets Schaefer's picture.
+
+How the Queen is drawn (MAME dump of the screen under the arcade, E:\AvP\learning\lane-wv-talkbox\mame_c1\dump.txt): scroll 3, a 12 by 4 cell band of
+32x32 tiles in rows 2 to 5 of the layer's 8 row window (38 picture tiles, codes 0x150a to 0x155f, palette bank 2 for all), the solid fill tiles 0x1005 (pen 9, the
+backdrop), 0x100f (pen 0, the black bars) and 0x1000 (transparent) elsewhere, and two sprite blocks of 5x4 tiles (palette 5) for her hands and head,
+sprite tiles 0x8e18 to 0x8fc9 (225 keys across animation frames; the census files hold them in varying numbers, so they are continue-only). The palette is
+the 32 byte ROM table at 0x1f3640 (tag 0x0802; two further copies of the same colours are the sprite bank's tables at 0x1ed2a0, 0x1ed6a0, 0x1edaa0).
+
+What was built (always with the guest, no flag; stock characters untouched):
+- hud_art.py piece `continue_picture`: the approved select portrait (128x64, the HUD art's colours) at 2x in the middle of the 384x128 band, backdrop
+  crimson over the whole band (pen 9: the fill tile's pen takes the portrait's backdrop colour), redrawn into the 38 tiles at the same codes; pen 0 stays black
+  for the bars; his 12 other colours take free pens; the table at 0x1f3640 gets those 15 words. 0 pixels lost: the portrait is backdrop wherever the map
+  has a fill tile. His sprite tiles are blank.
+- Linn: her continue draws the same Queen, so the new tiles and palette apply only in his files without her (variant masks 2, 3, 6; with Linn, mask 0xa, they keep
+  the Queen). Two regions: gfx_hud_stage.bin (talk box, HUD) and gfx_hud_stage_c.bin (that plus the continue picture); `guest_rounds.extend` picks by mask bit 8,
+  `fit.py` by FIT_GFX_GUEST_C. The palette's guest bit 0x80 is set by `sat_guest_loaded` for a stage file of his without Linn (not the front file).
+- Cost: no hw_free or lw_free; the 38 tiles and 20 sprite runs are payload slots of the keys the files already hold (SCREEN_KEYS), the table copy is a
+  27th palette copy in the cart tail include (about 50 bytes).
