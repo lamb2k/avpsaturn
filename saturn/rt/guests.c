@@ -96,6 +96,14 @@ int sat_guest_file(int row, int chars, int variant, int arcade_file)
    is what the loaded file holds. Called after every round file load (kernel.c, which also restores ROM pages), and at boot. */
 #include "guest_pal.h"
 #include "guest_hudpal.inc"   /* guest_pal[], GUEST_PAL_N: tools/wolverine/hud_art.py; empty without guest art */
+#include "guest_face.inc"     /* guest_face_*, GUEST_FACE_N: his talk box face cells (hud_art.py), drawn in every stage file while he is on (sat_gfx.c) */
+volatile unsigned char sat_guest_face_on;
+const unsigned char *sat_guest_face_tile(unsigned long key)
+{
+    int i;
+    for (i = 0; i < GUEST_FACE_N; i++) if (guest_face_key[i] == key) return guest_face_data[guest_face_idx[i]];
+    return 0;
+}
 extern unsigned char *PAGE[256];
 #ifndef SAT_WV_DIALOG
 #define SAT_WV_DIALOG 0   /* default off: Schaefer's lines for everyone (switch on: Wolverine's wording while he is the loaded guest) */
@@ -111,6 +119,10 @@ void sat_guest_loaded(int row, int chars, int variant, int file)
     for (i = 0; i < sat_guest_count && i < GUEST_ROWS; i++)
         if ((sat_guest_sel & sat_guests[i].sel_bit) && file && guest_file[i][row][variant] == file && (!row || (chars & sat_guests[i].slot_mask)))
             art |= 1u << i;
+    /* Schaefer's slot is his in every stage file while his bonus switch is on, not only in the files that hold his sprites: the continue select and the 4 character
+       scenes show his face, palette and words (the cells come from sat_guest_face_tile, the colours and text from the syncs below). */
+    sat_guest_face_on = (row && GUEST_FACE_N && (sat_guest_sel & sat_guests[0].sel_bit)) ? 1 : 0;
+    if (row && (sat_guest_sel & sat_guests[0].sel_bit)) art |= 1;
     if (GUEST_PAL_N) guest_pal_sync(guest_pal, GUEST_PAL_N, art, (volatile unsigned char *)PAGE[0]);
 #if SAT_WV_DIALOG
     /* Wolverine's story box wording and his name on the stage clear banner: written while his files are the loaded ones (tools/wolverine/dialog.py) */

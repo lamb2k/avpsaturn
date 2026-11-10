@@ -7,6 +7,7 @@
 #include <string.h>
 #include "guests.h"
 
+extern volatile unsigned char sat_guest_face_on;   /* guests.c: 0 here, the test writes no face cells (guest_face.inc is empty) */
 unsigned char *PAGE[256];
 #define ROMSIZE 0x4000
 static unsigned char rom[ROMSIZE], orig[ROMSIZE];
@@ -61,9 +62,14 @@ int main(void)
     memcpy(rom + 0x3000, orig + 0x3000, 0x20);
     sat_guest_loaded(3, 2, 1, 41);
     CHECK(word(0x3000) == 0x300u);
-    /* A stage without him (his file is not the one loaded) gets the arcade's colours again: the ROM is byte for byte the original. */
+    /* His slot is his in every stage file while his switch is on (the continue select shows his face when Warrior plays): the colours stay his, the face cells come
+       from sat_guest_face_tile. With his switch off the next load restores the arcade's colours: the ROM is byte for byte the original. */
     sat_guest_loaded(3, 1, 1, 5);
-    CHECK(SAME());
+    CHECK(word(0x3000) == 0x300u && sat_guest_face_on == 0);
+    sat_guest_sel = 0;
+    sat_guest_loaded(3, 1, 1, 5);
+    CHECK(SAME() && !sat_guest_face_on);
+    sat_guest_sel = 1;
     /* And the front end loaded without his file (the setting changed to off at the title menu): the same. */
     sat_guest_loaded(0, 0, 0, 40);
     CHECK(!SAME());

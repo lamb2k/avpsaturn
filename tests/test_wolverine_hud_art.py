@@ -225,6 +225,23 @@ class ConverterTest(unittest.TestCase):
         with self.assertRaisesRegex(ValueError, "HUD portrait's 15 colours"):
             hud_art.load_slot(self.art, SLOT)
 
+    def test_face_include_holds_the_talk_face_cells_by_key(self):
+        """guest_face.inc: the 30 keys (code << 1 | parity) of the 15 face cells and their 32 byte payloads as the stage region packs them; none for no guest art."""
+        r = hud_art.build(self.art, self.base, self.rom, self.out)
+        text = pathlib.Path(r["face_include"]).read_text()
+        stage = pathlib.Path(r["stage_gfx"]).read_bytes()
+        self.assertIn("#define GUEST_FACE_N 30", text)
+        keys = [int(x, 16) for x in text.split("guest_face_key[GUEST_FACE_N] = {")[1].split("}")[0].split(",")]
+        self.assertEqual(keys, sorted(keys))
+        want = {code << 1 | par for r_ in range(3) for c in range(5) for code in (0xfbd - c + 16 * r_,) for par in (0, 1)}
+        self.assertEqual(set(keys), want)
+        idx = [int(x) for x in text.split("guest_face_idx[GUEST_FACE_N] = {")[1].split("}")[0].split(",")]
+        datablock = text.split("guest_face_data[")[1].split("= {", 1)[1].rsplit("};", 1)[0]
+        rows = [[int(b) for b in row.split(",")] for row in datablock.replace("{{", "{").replace("}}", "}").strip("{}").split("},{")]
+        for k, i in zip(keys, idx):
+            self.assertEqual(bytes(rows[i]), satgfx_pack.payload(stage, 1, k)[0])
+        self.assertIn("#define GUEST_FACE_N 0", hud_art.face_include_empty())
+
     def test_base_region_is_never_written(self):
         before = self.base.read_bytes()
         hud_art.build(self.art, self.base, self.rom, self.out)
@@ -375,6 +392,7 @@ class RuntimeSelectionTest(unittest.TestCase):
         with tempfile.TemporaryDirectory() as td:
             td = pathlib.Path(td)
             (td / "guest_hudpal.inc").write_text(hud_art.pal_include(sets))
+            (td / "guest_face.inc").write_text(hud_art.face_include_empty())
             rows = [[[0] * 3 for _ in range(5)] for _ in range(2)]
             rows[0][0][0] = 40
             rows[0][3][1] = 41

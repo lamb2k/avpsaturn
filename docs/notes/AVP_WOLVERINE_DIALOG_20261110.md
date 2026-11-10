@@ -106,3 +106,27 @@ already in FONT_KEYS (0 new keys); on the plain integration base they are 889 mo
 
 Owner 2026-11-10: SAT_WV_DIALOG on with Wolverine is the intended default for owner discs. The code default stays 0; the integration recipe adds
 `-DSAT_WV_DIALOG=1` (build.py also accepts `-DSAT_WV_DIALOG`). Wording approved by the owner 2026-11-10 ("g2g").
+
+## 8. HUD continue select ("SELECT YOUR CHARACTER"), owner 2026-11-10: "it's the HUD continue character select"
+
+(The earlier idea of a Wolverine continue picture is dropped: the continue picture, a Queen for Schaefer and Linn or a Predator arm for the Warrior and the
+Hunter, is untouched. The WIP is kept on the local branch wip/continue-picture-20261110.)
+
+What the arcade draws (MAME 0.289 on the four saved routes, tools/screen_keys.lua variant: E:\AvP\learning\lane-wv-talkbox\work\sel_dump.lua, dumps in
+mame_sel_c1 and mame_sel_pw): after Start on the continue screen the stage's HUD shows, at the top left, a 5x3 cell face icon (scroll 1 map columns 0 to 4,
+rows 0 to 2, unflipped), the text SELECT YOUR CHARACTER (ROM message at 0x1e83a) and the countdown. The icon cycles through the four characters as the
+cursor moves: the face cell sets of the talk box and the 2P HUD, Warrior 0xf84 to 0xf88 (bank 0x12), Schaefer 0xfb9 to 0xfbd (0x13), Hunter 0xf89 to 0xf8d
+(0x14), Linn 0xfb4 to 0xfb8 (0x15), rows 16 codes apart. There is no name in it (the name appears in the HUD after the pick) and no other cell.
+
+Why he was missing: on avp_integration_3a the face cells of Schaefer's slot are Schaefer's (the talk box face fix is not on it), so the select offers
+Schaefer's face for his slot. With the talk face (section 1) his guest stage files carry his face in those cells and the HUD palette, so a player who is
+playing him sees him: the icon is the unmirrored view of the talk face (the talk box draws the cells flipped), HUD palette bank 0x13. What still
+failed: a player continuing as another character (Warrior, Hunter or Linn alone) has the arcade's own stage file loaded, which holds Schaefer's face, and
+the select showed Schaefer's face for the slot that plays Wolverine.
+
+Fix (SAT_GUESTS builds): while his bonus switch is on, Schaefer's slot is his in every stage file. `sat_guest_loaded` (guests.c) turns his HUD palette and
+story box wording on for every stage file, and sets `sat_guest_face_on`; the scroll 1 cell fetch in sat_gfx.c (`cache_find`, miss path only, 3 lines
+under `#if defined(SAT_GUESTS) && !defined(SAT_GFX_HOST)`) takes the 30 keys of the face cells from a resident table (`gen/guest_face.inc`, 15 payloads of
+32 bytes from hud_art.py, about 1.1 KB in the cart tail) instead of the file's pack. His guest files hold the same bytes, so nothing changes for them; the
+front end and every build without SAT_GUESTS are unchanged. Limit that stays: a character who joins as him mid-stage (continuing as his slot while another
+character was playing) gets his sprites and HUD name art at the next stage word, as the kernel documents for any joiner.
