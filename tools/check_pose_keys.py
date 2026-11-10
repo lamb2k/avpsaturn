@@ -17,7 +17,7 @@ def pack_keys(blob):
             packs += 1
             if packs == 2:
                 m = blob[at:at + size]
-                assert m[:4] in (b"SGP1", b"SGP2"), "not a tile pack"
+                assert m[:4] in (b"SGP1", b"SGP2", b"SGP3"), "not a tile pack"
                 out = []
                 for sec in range(4):   # sprite words key << 16 | index, scroll words key << 14 | index
                     count, keyoff = struct.unpack_from(">II", m, 4 + sec * 12)

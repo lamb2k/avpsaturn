@@ -327,7 +327,7 @@ def code_size(o):
 
 SHARED_MIN = int(os.environ.get("ROUND_SHARED_MIN", "10"))   # stages
 MIN_RUN = int(os.environ.get("ROUND_MIN_RUN", "1"))   # pages; a stretch costs 8 bytes of table, about 1 KB of a page is 8 sprites
-ROWTRIM = "SAT_TILE_ROWTRIM" in os.environ.get("KERNEL_CFLAGS", "")   # default off: sprite tiles as row masked records, SGP2 (tools/satgfx_pack.py record, saturn/gfx/sat_gfx.c rowtrim_load); the kernel and the packs must agree
+ROWTRIM = int((re.search(r"-DSAT_TILE_ROWTRIM(?:=(\d))?(?!\w)", os.environ.get("KERNEL_CFLAGS", "")) or [0, 0])[1] or 1) if "SAT_TILE_ROWTRIM" in os.environ.get("KERNEL_CFLAGS", "") else 0   # default off: sprite tiles as row masked records, SGP2 (tools/satgfx_pack.py record, saturn/gfx/sat_gfx.c rowtrim_load); the kernel and the packs must agree
 TAIL_FILL = os.environ.get("PACK_TAIL_FILL", "0") == "1"   # default off: tile spill uses the last odd page of a ROM stretch too (tools/rounds_pack.py plan, assemble)
 
 

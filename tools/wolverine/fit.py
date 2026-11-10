@@ -180,7 +180,7 @@ def run(raw, f, keys, room, free, rank, screens, guest_keys=(), fit_fn=None):
     if not f["name"].startswith("front"):   # front_wv too
         keys = [k | extra for k, extra in zip(keys, screens)]
         frank.update({key: 1 << 40 for key in screens[0]})
-    return fit_fn(raw, keys, room, free(f), frank, **({"rowtrim": True} if ROWTRIM else {}))
+    return fit_fn(raw, keys, room, free(f), frank, **({"rowtrim": ROWTRIM} if ROWTRIM else {}))
 
 
 def main(argv=None, environ=None, fit_fn=None, own_keys=None):
@@ -197,7 +197,8 @@ def main(argv=None, environ=None, fit_fn=None, own_keys=None):
         suffix = "_".join("%02x" % word for word in stages) if stages else ""
         report = adir / ("fit" + suffix + ".json")
         global ROWTRIM
-        ROWTRIM = "SAT_TILE_ROWTRIM" in environ.get("KERNEL_CFLAGS", "")
+        m = re.search(r"-DSAT_TILE_ROWTRIM(?:=(\d))?(?!\w)", environ.get("KERNEL_CFLAGS", ""))
+        ROWTRIM = int(m.group(1) or 1) if m else 0
         config = settings(environ)
         rounds, ends, screens, rank = load(pathlib.Path(argv[0]), environ)
         if environ.get("CHAR_FUZZ", "1") != "0":   # tools/char_fuzz.py as build.py applies it (WORK/char_fuzz.json; absent = nothing changes)

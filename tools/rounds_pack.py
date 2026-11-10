@@ -20,11 +20,11 @@ def seg_len(p, i):
     return p["seg_bytes"][i] if p.get("rowtrim") else p["segs"][i][2] * 128
 
 
-def plan_rowtrim(key, tile, secs, main_room, free):
+def plan_rowtrim(key, tile, secs, main_room, free, rowtrim=1):
     """SGP2: the sprite tiles are records of 4 + 8 n bytes (satgfx_pack.record). Same shape as plan(): the first payloads in main, the rest in the free runs, whole sectors."""
     t0, sizes, off = tile[0], [], 0
     while off < len(t0):
-        size = 4 + 8 * bin(struct.unpack_from(">H", t0, off)[0]).count("1")
+        size = 4 + 4 * bin(struct.unpack_from(">I", t0, off)[0]).count("1") if rowtrim == 2 else 4 + 8 * bin(struct.unpack_from(">H", t0, off)[0]).count("1")
         sizes.append(size); off += size
     pos = [0]
     for s in sizes:
@@ -55,7 +55,7 @@ def plan_rowtrim(key, tile, secs, main_room, free):
             break
     else:
         return None
-    return dict(key=key, tile=tile, secs=secs, inmain=inmain, segs=segs, rowtrim=True, pos=pos, seg_bytes=seg_bytes, n_tiles=n_tiles)
+    return dict(key=key, tile=tile, secs=secs, inmain=inmain, segs=segs, rowtrim=rowtrim, pos=pos, seg_bytes=seg_bytes, n_tiles=n_tiles)
 
 
 def plan(raw, keys, main_room, free, rowtrim=False):
@@ -69,7 +69,7 @@ def plan(raw, keys, main_room, free, rowtrim=False):
     tile = [data[secs[i][2]:ends[i]] for i in range(4)]
     key = [data[secs[i][1]:secs[i][2]] for i in range(4)]
     if rowtrim:
-        return plan_rowtrim(key, tile, secs, main_room, free)
+        return plan_rowtrim(key, tile, secs, main_room, free, rowtrim)
     fixed = HEAD + sum(len(k) for k in key) + sum((len(tile[i]) + 3) & ~3 for i in (1, 2, 3))
     n_tiles = len(tile[0]) // 128
     # room in main, keeping 8 bytes of table per stretch
@@ -161,7 +161,7 @@ def assemble_rowtrim(p, pack_addr, rom=None):
         at[i] = len(main); main += tile[i]
     main += bytes(-len(main) % 4)
     at[0] = len(main); main += tile[0][:pos[inmain]]
-    hdr, tail = [struct.pack(">I", 0x53475032)], []
+    hdr, tail = [struct.pack(">I", 0x53475033 if p["rowtrim"] == 2 else 0x53475032)], []
     for i in range(4):
         hdr.append(struct.pack(">III", secs[i][0], keyoff[i], at[i]))
         tail.append(struct.pack(">II", inmain if i == 0 else 0xffffffff, table if i == 0 else 0))
