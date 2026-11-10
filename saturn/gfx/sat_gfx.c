@@ -1474,13 +1474,18 @@ static HOME_OS void home_row_map(u32 row, u32 (*bm)[2], int sel, u8 *map)
    again only when its position changes (any scroll 1 move, a menu, a pack swap). Bit r of s1_done: row r is blank and clear in VDP2 at s1_key. In play 19 of the 29 rows
    are blank: the cell loop, the column fit and the lookups of those rows are skipped (about 1.4 K of the 3 K ticks of a scroll 1 redraw after SAT_S1_MEMO, Yaba cache ON). */
 static u32 s1_done, s1_key;
+/* Blank for good: the pack has no tile (missing or empty), as blank_seen records it. A NOSLOT from a full cache is not that: the tile may get a slot in a later picture. */
+static int s1_key_blank(u32 key)   /* no lookup, so no slot is taken in a different order: the normal pass of the row sets blank_seen, the next picture can skip */
+{
+    u32 tag = (key << 2) | (u32)s1_cache.section;
+    return blank_seen[(tag ^ (tag >> 11)) & (BLANK_WAYS - 1)] == tag;
+}
 static HOME_OS __attribute__((noinline)) int s1_blank_row(u32 row)
 {
     const u32 *w = snap.s1 + row * S1_COLS;
     u32 c, w0 = w[0], k = (w0 >> 16) << 1;
-    unsigned long d = 0;
     for (c = 1; c < S1_COLS; c++) if (w[c] != w0) goto no;
-    if (cache_get(&s1_cache, k, &d) != NOSLOT || cache_get(&s1_cache, k | 1, &d) != NOSLOT) goto no;
+    if (!s1_key_blank(k) || !s1_key_blank(k | 1)) goto no;
     if ((s1_done >> row) & 1)
     {
 #ifdef SAT_PERF_STAGES
