@@ -14,8 +14,8 @@
 
 /* ids; tools/wolverine/wv_sound.py SOUNDS has the same list (tests/test_wolverine_sound.py checks the two agree) */
 enum {
-    WV_SFX_SELECT = 0,       /* character select: his shout when he is picked (MSHvSF 0x21a); in the front end file only */
-    WV_SFX_INTRO,            /* round entrance: "Let's go, bub." (0x207) */
+    WV_SFX_SELECT = 0,       /* his own select shout (MSHvSF 0x21a): kept in the assets, in no pack (the select screen plays INTRO, owner 11-10) */
+    WV_SFX_INTRO,            /* "Let's go, bub." (0x207): the character select (front end file) and the round entrance (stage files) */
     WV_SFX_CLAW_L,           /* claw swing, light (0x124) */
     WV_SFX_CLAW_M,           /* claw swing, medium (0x125) */
     WV_SFX_CLAW_H,           /* claw swing, heavy (0x126) */

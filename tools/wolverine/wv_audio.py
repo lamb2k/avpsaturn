@@ -4,7 +4,7 @@
 A stage sound pack (saturn/audio/build_pack.py, SAU1: header, 16 byte sfx rows sorted by command, music rows, 8 bit PCM) is made once per stage file, nearly full (SCSP RAM holds 504 KB of clips and most packs
 have 2 to 4 KB spare). The pack of a Wolverine stage file is the base pack, rebuilt here:
   1. REMAP: rows of Schaefer's own sounds whose role Wolverine also has now play Wolverine's clip (same command, priority and channel, so the game's own calls need no change): his hurt voice 0x213,
-     his KO scream 0x214, the select shout 0x264, the special's pair 0x21c and 0x97 (Tornado Claw), the weapon sound 0x250. Schaefer's clips nothing else uses leave the pack.
+     his KO scream 0x214, the select shout 0x264 (he says "Let's go, bub." when picked, owner 11-10), the special's pair 0x21c and 0x97 (Tornado Claw), the weapon sound 0x250. Schaefer's clips nothing else uses leave the pack.
   2. One new row per Wolverine sound at WV_CMD_BASE + id (saturn/guests/wolverine/wv_sound.h): the commands wv_sfx() sends. Clips are shared when identical.
   3. If the pack is past SCSP_ROOM, the rows with the fewest route uses (WORK/sound_rank.json, the same ranking rounds_config.py used) leave first, never a Wolverine row.
 Rows keep their priority and channel mask; clip offsets are recomputed. The result for each stage file is WORK/audio/r{N}.bin and the stage file's audio_from points at it.
@@ -21,7 +21,7 @@ ROW = struct.Struct(">HBBBBBBII")
 # Schaefer's own command -> the Wolverine sound that plays in its place (name in wv_sound.py SOUNDS). Roles from the game's own code (docs/notes/AVP_WOLVERINE_SOUNDS_20261109.md):
 # 0x213 the hurt voice the player routine sends when a hit lands on him (f_1a96e, table 0x1b7b4), 0x214 his KO scream (f_1b16e, 0x1b7c4), 0x264 stage 0 only (the select shout),
 # 0x21c and 0x97 sent together when the special starts (f_24f04), 0x250 the weapon sound (table 0x1b814).
-REMAP = {0x213: "HURT_A", 0x214: "KO", 0x264: "SELECT", 0x21c: "TORNADO", 0x97: "CLAW_H", 0x250: "CLAW_M"}
+REMAP = {0x213: "HURT_A", 0x214: "KO", 0x264: "INTRO", 0x21c: "TORNADO", 0x97: "CLAW_H", 0x250: "CLAW_M"}
 
 
 def parse(pack):
@@ -49,7 +49,7 @@ def load_assets(assets):
 def build(pack, wv, rank=None, kind="stage", room=SCSP_ROOM, remap=REMAP):
     """Return (new pack bytes, report). rank: cmd -> route uses (higher stays). kind: "front" (the front end file: the select shout) or "stage" (everything else)."""
     rows, music, clips = parse(pack)
-    mine = [s for s in wv["sounds"] if s.get("where", "stage") == kind]
+    mine = [s for s in wv["sounds"] if s.get("where", "stage") in (kind, "both")]
     by_name = {s["name"]: s for s in mine}
     new = []
     report = dict(remapped=[], removed_bytes=0, dropped=[], added=0)

@@ -53,31 +53,31 @@ level in the SCSP total level `tl` exactly as the AvP clips, so they are as loud
 
 | id | name | MSHvSF cmd | file | priority | clip bytes | seconds | where it belongs |
 | --- | --- | --- | --- | --- | --- | --- | --- |
-| 0 | SELECT | 0x21a | front end | 6 | 8,980 | 0.81 | automatic: Schaefer's select shout (0x264, only in the front end file) plays this instead |
-| 1 | INTRO | 0x207 | stages | 6 | 9,923 | 0.90 | his entrance at stage start (call from the native lane's entrance record) |
-| 2 | CLAW_L | 0x124 | stages | 5 | 4,779 | 0.43 | first active record of a light attack (chain stage 1 and 2) |
-| 3 | CLAW_M | 0x125 | stages | 5 | 5,682 | 0.52 | jump attack; each Berserker slash |
-| 4 | CLAW_H | 0x126 | stages | 5 | 6,327 | 0.57 | the chain finisher (02000e) |
-| 5 | ATK_A | 0x20a | stages | 6 | 2,737 | 0.25 | shout on a light swing |
-| 6 | ATK_B | 0x20b | stages | 6 | 4,554 | 0.41 | shout, second chain hit |
-| 7 | ATK_D | 0x20d | stages | 6 | 4,749 | 0.43 | shout, medium swing |
-| 8 | ATK_H | 0x209 | stages | 6 | 5,513 | 0.50 | shout on the finisher |
-| 9 | HURT_A | 0x203 | stages | 6 | 5,256 | 0.48 | hurt voice: automatic through Schaefer's 0x213 |
-| 10 | HURT_B | 0x202 | stages | 6 | 2,462 | 0.22 | second hurt voice, available |
-| 11 | KO | 0x200 | stages | 7 | 9,923 | 0.90 | KO scream: automatic through Schaefer's 0x214 |
-| 12 | TORNADO | 0x204 | stages | 7 | 9,691 | 0.88 | special start: automatic through Schaefer's 0x21c |
-| 13 | BERSERKER | 0x206 | stages | 7 | 14,339 | 1.30 | `wv_on_berserker_start` |
-| 14 | CLAW_HIT_L | 0x10e | stages | 5 | 2,109 | 0.19 | `wv_on_berserker_connect`; a landed hit of a light attack |
-| 15 | CLAW_HIT_H | 0x243 | stages | 5 | 4,219 | 0.38 | a landed hit of the finisher |
-| 16 | BERSERKER_GRUNT | 0x20c | stages | 6 | 2,726 | 0.25 | `wv_on_berserker_connect` |
+| 0 | SELECT | 0x21a | none | 6 | 8,987 | 0.81 | kept in the assets and the wav folder, in no pack: the select screen plays INTRO (owner 11-10) |
+| 1 | INTRO | 0x207 | front end and stages | 6 | 14,101 | 1.28 | the character select (automatic: Schaefer's select shout 0x264, only in the front end file, plays this instead, owner 11-10) and his entrance at stage start (call from the native lane's entrance record); also the post-credits reveal voice (owner 11-10) |
+| 2 | CLAW_L | 0x124 | stages | 5 | 4,908 | 0.45 | first active record of a light attack (chain stage 1 and 2) |
+| 3 | CLAW_M | 0x125 | stages | 5 | 6,503 | 0.59 | jump attack; each Berserker slash |
+| 4 | CLAW_H | 0x126 | stages | 5 | 7,078 | 0.64 | the chain finisher (02000e) |
+| 5 | ATK_A | 0x20a | stages | 6 | 2,767 | 0.25 | shout on a light swing |
+| 6 | ATK_B | 0x20b | stages | 6 | 4,578 | 0.41 | shout, second chain hit |
+| 7 | ATK_D | 0x20d | stages | 6 | 4,755 | 0.43 | shout, medium swing |
+| 8 | ATK_H | 0x209 | stages | 6 | 8,973 | 0.81 | shout on the finisher |
+| 9 | HURT_A | 0x203 | stages | 6 | 5,458 | 0.49 | hurt voice: automatic through Schaefer's 0x213 |
+| 10 | HURT_B | 0x202 | stages | 6 | 2,633 | 0.24 | second hurt voice, available |
+| 11 | KO | 0x200 | stages | 7 | 13,570 | 1.23 | KO scream: automatic through Schaefer's 0x214 |
+| 12 | TORNADO | 0x204 | stages | 7 | 9,695 | 0.88 | special start: automatic through Schaefer's 0x21c |
+| 13 | BERSERKER | 0x206 | stages | 7 | 14,453 | 1.31 | **owner-confirmed 11-10 as his Berserker Barrage voice**, full length, once at the start of the move: `wv_on_berserker_start` (WV_SFX_BERSERKER) |
+| 14 | CLAW_HIT_L | 0x10e | stages | 5 | 2,113 | 0.19 | `wv_on_berserker_connect`; a landed hit of a light attack |
+| 15 | CLAW_HIT_H | 0x243 | stages | 5 | 4,222 | 0.38 | a landed hit of the finisher |
+| 16 | BERSERKER_GRUNT | 0x20c | stages | 6 | 2,873 | 0.26 | `wv_on_berserker_connect` |
 
-Total 103,980 bytes (stage files 94,989, front end file 8,980).
+Total 117,677 bytes in the assets (stage files 108,680 including INTRO; front end file 14,101: INTRO only; SELECT's 8,987 are in no pack). Every clip runs to the arcade's own end (cut where the render last passes 40 of 32767, as the AvP clips; a 3 ms fade at the end): an earlier build capped INTRO, ATK_H and KO at 0.9 / 0.5 / 0.9 s and cut words (owner 11-10); there is no length cap now.
 
 ## 4. How the game plays them
 
 **Automatic (no change to wolverine.c): the stage pack remap.** The game's own code sends Schaefer's sound numbers; the Wolverine stage files get a sound pack in which those rows hold his clip
 (`tools/wolverine/wv_audio.py REMAP`, same command, priority and channel): 0x213 (the voice the player routine sends when a hit lands on him, f_1a96e, table 0x1b7b4) to HURT_A, 0x214 (his KO scream, f_1b16e,
-table 0x1b7c4) to KO, 0x264 (stage 0 only, the select shout) to SELECT, 0x21c (the special's voice, sent with 0x97 by f_24f04) to TORNADO, 0x97 to CLAW_H, 0x250 (the weapon sound, table 0x1b814) to CLAW_M.
+table 0x1b7c4) to KO, 0x264 (stage 0 only, the select shout) to INTRO ("Let's go, bub." when he is picked, owner 11-10), 0x21c (the special's voice, sent with 0x97 by f_24f04) to TORNADO, 0x97 to CLAW_H, 0x250 (the weapon sound, table 0x1b814) to CLAW_M.
 Schaefer's other own sounds (0x215, 0x219, 0x21d..0x221, 0x268, 0x218, 0x21a, 0x61: roles not identified, mostly 1 to 7 plays in the whole route) stay as they were.
 
 **Explicit: `wv_sfx(id)`** (`saturn/guests/wolverine/wv_sound.c`, built with `-DSAT_WV_SOUND`): sends the command through the same mailbox the game's sender fills (interrupts masked for the 16 byte write, caller's mask restored),
@@ -95,26 +95,43 @@ from native code):
 | landed hit (the collision answer d0 = 1 that wolverine.c already reads) | `WV_SFX_CLAW_HIT_L` (light), `WV_SFX_CLAW_HIT_H` (finisher) |
 | entrance (native lane's T0 entrance set) | `WV_SFX_INTRO` |
 
-## 5. Budget (build `D:\AvP-lanes\lane-wv-sounds\wd`, assets D11 copy, owner recipe + `-DSAT_WV_NATIVE_GFX -DSAT_WV_SOUND -DSAT_WV_SOUND_HOOKS`)
+## 5. Budget (final build, native base 7f26a1f: owner recipe + `-DSAT_WV_NATIVE_GFX -DSAT_WV_SOUND -DSAT_WV_SOUND_HOOKS`, assets D11 copy)
 
-- **Program memory** (build.py report, no NO-GO): hw_free 964 (unchanged), **lw_free 32 (unchanged: 0 bytes of low work RAM)**, cart_free 5,984 (the native base b368017 has 6,168: 184 bytes, of which `wv_sfx` is about 140 and the test hook bodies the rest).
-  Without `-DSAT_WV_SOUND` nothing is compiled or changed (the packs and objects are the base's).
-- **Sound RAM** (SCSP, 504 KB of clip room per stage file): the Wolverine rows add 94,989 bytes (16 sounds) to a stage pack and 8,980 (the select shout) to the front end pack. Schaefer's clips that his remaps replace leave the pack
-  (0x213 3.1 KB, 0x214 12.9 KB, 0x21c 14.4 KB, 0x97 9.0 KB, 0x250 7.2 KB, 0x264 13.9 KB in the front end file), which is 46 KB in a stage pack; the rest, about 50 KB, comes from clips the rounds' routes never played, then the fewest-used ones
-  (`wv_audio.py`, same ranking as rounds_config.py). Over the 76 Wolverine stage files (`fitstat` over the base packs, `E:\AvP\learning\lane-wv-soundsitstat.py`): 497 never-used rows dropped (3.64 MB in all, 48 KB a file on average),
-  and **route plays lost: 8 in the 19 solo files, 127 to 413 in the 19 files of each pair variant** (808 in all, 45 files touched; the pair files already drop the most). Every pack stays at or under SCSP_ROOM 0x7e000
-  (largest 515,684 bytes; smallest 436,652 for stage 26; the front end pack 339,190). The front end pack gets smaller (339,190 against 344,118): the select shout is 9 KB against Schaefer's 13.9 KB.
-- **Disc**: every stage and front file keeps its number and its audio field is capped at the same SCSP_ROOM, so the disc grows by nothing but sector rounding (sat.iso 385,658,880 bytes); no new file, no new track. The sound assets (`wv_sound.bin` 103,980 bytes, `wv_sound.json`) are a build input, not a disc file.
+Full-length clips (owner 11-10: "the saturn voices seem cut off"; the first build capped INTRO at 0.9 s, ATK_H at 0.5 s, KO at 0.9 s and cut the tail of every clip below 250 of 32767; now every clip runs to the arcade's own end, 40 of 32767 as the AvP clips, 3 ms fade):
 
-## 6. Verification
+| clip | before | now | extra bytes | arcade |
+| --- | --- | --- | --- | --- |
+| INTRO | 0.900 s 9,923 | 1.279 s 14,101 | +4,178 | 1.250 s |
+| ATK_H | 0.500 s 5,513 | 0.814 s 8,973 | +3,460 | 0.804 s |
+| KO | 0.900 s 9,923 | 1.231 s 13,570 | +3,647 | 1.229 s |
+| CLAW_M | 0.515 s | 0.590 s 6,503 | +821 | 0.583 s |
+| CLAW_H | 0.574 s | 0.642 s 7,078 | +751 | 0.630 s |
+| the other twelve (SELECT included) | | | +841 together (HURT_A +202, HURT_B +171, BERSERKER_GRUNT +147, CLAW_L +129, BERSERKER +114, the rest under 31 each) | |
+| total | | | **+13,698** (stage clips 94,989 to 108,680; all assets 103,980 to 117,677) | |
 
-- **HOST**: `tests/test_wolverine_sound.py` 7 tests (header and Python list agree, the 0x2c0 range is unused by the game, pack rebuild keeps arcade rows and priorities, remaps, front/stage split, drop by rank never drops a Wolverine row,
-  `wv_sfx` mailbox bytes with a stub player compiled by gcc); WSL `unittest discover`: 112 run, the same 30 private-dependency errors, 0 failures. `fit.py` on a copy of D11: gate true, 76 of 76 files, 0 Wolverine-own tiles dropped
-  (stage24_ma 3,128 Schaefer against 3,080 Wolverine); run without the HUD gfx env, sound does not touch tiles.
-- **EMULATOR** (Yaba copy, port 9722, SoundCore 0, `AVP_SCSP_RAW` dump, stage 02 as Wolverine; runs t2/t3 in `E:\AvP\learning\lane-wv-sounds\yaba`): each of the 16 stage sounds injected through the game's own audio ring was started by the player
-  (sfx_started +1, unknown 0) and heard in the SCSP output; against MAME's render of the same command (`scsp_cmp.py t3`): level within -0.1 to -1.7 dB (median -0.4), duration within 0.06 s of the stored clip except INTRO (0.64 s heard against 0.90 stored: a quiet tail under the detection threshold),
-  10 ms envelope correlation 0.86 to 0.99 for 12 of 16 (INTRO 0.70 and ATK_H 0.72 are trimmed to 0.9 s and 0.5 s, BERSERKER_GRUNT 0.50 is 0.25 s long: too few bins). The game itself sent 0x213 and 0x214 (hurt, KO) while he was hit and killed,
-  which now play his clips; the select shout in the front end plays (0.77 s, onset 0.11 s after the pick, level -6 dB in the mono mean of a panned sound).
-- **Not shown**: `wv_sfx()` called by the Berserker hooks in a running game. The motion input never reached 02000c on Yaba (he is hit again every 28 frames in stage 02 even with health held, so QCF + A is interrupted in 12 tries with three buttons and both
-  directions), and forcing his state to 02000c reset the emulator's connection. The function itself is checked on the host with a stub player and its SH object is 140 bytes; the packs and the player path it feeds were checked by the injections above.
-  The claw swing, shout and hit calls are not made by anything yet (section 4). Nobody has listened to any of it; the pack remap of Schaefer's other own sounds (roles not identified) is unchanged.
+Tail of the last 30 ms (RMS of 32767): INTRO 43, KO 95, CLAW_M 39, CLAW_H 48, ATK_H 186, BERSERKER 132; CLAW_HIT_L 966 and TORNADO 156 are sounds the arcade itself cuts (3 ms fade only). Still no voice is cut by a cap.
+
+- **Select screen = INTRO** (owner 11-10): the front end file's row for Schaefer's select shout (0x264) plays INTRO ("Let's go, bub.", 14,101 bytes) instead of SELECT, which stays in the assets and wav folder but is in no pack. Front end pack 344,118 to 344,312 bytes (+194: INTRO against Schaefer's 13,924), 171,784 bytes of room left. INTRO is in the stage files too (the round entrance), where it is part of the 108,680.
+- **Program memory** (build.py report, no NO-GO) on the merged head: hw_free 1,080, lw_free 52, cart_free 4,436. My own cost, measured on the earlier base: **0 bytes of low work RAM** and 184 bytes of cart (about 140 `wv_sfx`, the rest the test hook bodies). Without `-DSAT_WV_SOUND` nothing is compiled or changed.
+- **Sound RAM** (SCSP, 504 KB of clip room per stage file): a stage pack gains 108,680 bytes of Wolverine clips; Schaefer's clips that the remaps replace leave the pack (0x213 3.1 KB, 0x214 12.9 KB, 0x21c 14.4 KB, 0x97 9.0 KB, 0x250 7.2 KB = 46 KB); the other ~63 KB comes from clips the rounds' routes never played, then the fewest used
+  (`wv_audio.py`, same ranking as rounds_config.py). Over the 76 Wolverine stage files (`fitstat.py`): 572 never-used rows dropped (4.07 MB in all, 54 KB a file), and **route plays lost: 19 in the 19 solo files, 181 / 477 / 574 in the pair variants (masks 10 / 6 / 3), 1,251 in all, 50 files touched**
+  (the uncut set costs 443 more plays than the capped one: 808 before). **Stage 26 fits easily**: its Wolverine pack is 444,924 bytes, room left 71,172, nothing dropped, clips end at SCSP 0x6c420; the reveal's voice at 0x70000 (28,202 bytes, 22,050 Hz) ends at 0x76f4a, inside the 512 KB with 14 KB between.
+  The tight files are the pair variants of the other stages (stages 24, 10, 20, 1c: room left 2 to 9 KB after dropping 15 to 25 rows).
+  **If those plays matter, what I would trade, in this order, without cutting a word:** (1) store the long voices (INTRO, KO, BERSERKER, TORNADO, ATK_H, 5 clips, 60 KB) at 8 kHz instead of 11,025 Hz: 27 percent less, about 16 KB a stage, needs a per-clip octave in `sat_audio.c start_sfx`
+  (everything above 4 kHz is lost on those clips; I have not listened to the difference); (2) drop the sound rows a stage does not use (ATK_A and BERSERKER_GRUNT, 5.6 KB); 16 bit would double everything. I found no ADPCM mode in the SCSP slot setup the player uses (PCM8 and PCM16 only), so 8-bit against ADPCM is not an option on this player; a lower rate is the trade.
+- **Disc**: every stage and front file keeps its number and its audio field is capped at the same SCSP_ROOM, so the disc grows by nothing but sector rounding; no new file or track (sat.iso 391,321,600 bytes on the new base, against 385,658,880 before the base moved). The sound assets (`wv_sound.bin` 117,677 bytes, `wv_sound.json`) are a build input, not a disc file.
+
+## 6. Reveal lane
+
+The owner chose INTRO as the reveal voice. `wv_sound.py reveal OUT.bin RENDER_DIR [NAME]` writes the reveal lane's `RVVOICE.BIN` (`RVV1`, u32 samples, 8 reserved, 8 bit signed mono at 22,050 Hz, peak 120, 4 ms fades, even length) from the same MAME render, uncut: 28,202 samples, 1.279 s, 28,218 bytes (`E:\AvP\learning\lane-wv-sounds\wav
+eveal_voice_intro.bin`; the reveal copies it to SCSP RAM 0x70000 and plays it on slot 18 at octave -1 = 22,050 Hz, as its note describes).
+Cut parameters, for anyone who rebuilds from the arcade render of command 0x207 (`mame_wvrender.lua`, command list `207 110`): onset minus 16 samples to the last sample above 40 of 32767 (mono mix of the 48 kHz stereo), lowered with a 63 tap windowed sinc at 0.45 of the target Nyquist, no length cap, mean removed, scaled to peak 120. The uncut 11,025 Hz clip is `wav\saturn_11025_INTRO.wav` (the same path as before, now full length); the arcade's own is `wav\mame_original_INTRO_mshvsf_207.wav`.
+
+## 7. Verification (second round, build of 09:30 on the merged native head)
+
+- **HOST**: `tests/test_wolverine_sound.py` 7 tests (list agreement, the 0x2c0 range is unused by the game, pack rebuild keeps arcade rows and priorities, remaps, front/stage/both/none split, drop by rank never drops a Wolverine row, `wv_sfx` mailbox bytes with a stub player compiled by gcc). WSL unittest after WSL was restarted: 113 run, the same 30 private-dependency errors, 0 failures. `fit.py` on a copy of D11 (this build): gate true, 76 of 76 files, 0 Wolverine-own tiles dropped (stage24_ma 2,872 Schaefer against 2,834 Wolverine, the documented D11 numbers).
+- **EMULATOR** (own Yaba copy, port 9722, ini checked before launch: SoundCore 1, Volume 100, UseSh2Cache false; the SCSP dump `AVP_SCSP_RAW` is independent of the sound core): run `t9` in `E:\AvP\learning\lane-wv-sounds\yaba`.
+  - **Select screen** (`select_check.py t9 207`): after the pick the line plays **once, in full**: one match with the arcade render (envelope correlation 0.967, onset 0.10 s, 1.29 s long across the two words), level -6 dB in the mono mean of a panned sound, last 30 ms RMS 48 (render 134), then silence for 10 s through the load and nothing matching again when the game moves to the stage (best later match 0.47: other sounds).
+  - **In game, from the hook**: his Berserker input (QCF + A, now a native action) reached `wv_on_berserker_start` and the test hook's `wv_sfx(WV_SFX_BERSERKER)` sent 0x2cd to the player, once at the start, as the BERSERKER row (`seen.json`: vblank 1607, command 0x2cd); the other Berserker tries were interrupted by hits. This is the first running-game call of `wv_sfx`.
+  - Injection of every stage clip through the game's audio ring (loud fight underneath, so judged where the sound stands alone): level -0.1 to -1.3 dB, envelope correlation 0.86 to 0.99 for CLAW_M, CLAW_H, ATK_A/B/D/H, HURT_A/B, KO, BERSERKER, CLAW_HIT_H; INTRO, TORNADO, CLAW_L, CLAW_HIT_L and BERSERKER_GRUNT were buried or split by the fight in this run (INTRO is judged by the select-screen check above, which is clean). The previous run's measurements of the capped set stand for those.
+- **Not done**: nobody has listened; hits of the claws (CLAW_HIT_*), swings and shouts are not called by anything yet (section 4); on hardware nothing was run.

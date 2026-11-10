@@ -11,6 +11,7 @@ made the AvP clips: what the arcade plays is what the clip is.
 usage:
   wv_sound.py render OUTDIR [CMDS_FILE]   run MAME over the commands (default: the SOUNDS list), writes OUTDIR/render.{wav,tsv,qs}
   wv_sound.py build  OUTDIR ASSETDIR      cut the clips from OUTDIR/render.wav, write ASSETDIR/wv_sound.json and wv_sound.bin (the Saturn clip format) and ASSETDIR/wav/*.wav (listening copies)
+  wv_sound.py reveal OUT.bin OUTDIR [NAME] the reveal lane's voice file (RVV1, 22050 Hz, uncut INTRO by default) from the same render
   wv_sound.py list                        print the sound list
 env: MSHVSF_REPO (the repo with tools/run_mshvsf_mame.py and the ROM set), WV_SOUND_PY (its python).
 
@@ -34,23 +35,23 @@ RATE = 11025
 CMD_BASE = 0x2c0          # first AvP sound number a Wolverine sound takes: 0x276..0x2ff are free in the driver's table (null entries), saturn/guests/wolverine/wv_sound.h
 LOAD_VOICES = 0x484       # VS screen call that loads Wolverine's voice set for the left player
 
-# (id, name, MSHvSF command, AvP priority, channel mask, max seconds, role). Order and ids are those of saturn/guests/wolverine/wv_sound.h. Evidence: docs/notes/AVP_WOLVERINE_SOUNDS_20261109.md.
+# (id, name, MSHvSF command, AvP priority, channel mask, max seconds (0: none, the arcade's whole sound), where: "front" the front end file, "stage" the stage files, "both", "none" (kept in the assets, not in any pack), role). Order and ids are those of saturn/guests/wolverine/wv_sound.h. Evidence: docs/notes/AVP_WOLVERINE_SOUNDS_20261109.md.
 # Channels are SCSP slots 0..15 as in the game's own table: 12 (0x1000) is where Schaefer's voices play, 10 (0x400) and 11 (0x800) are shared effect channels (the rule "priority >= occupant" decides).
 V, S, H = 0x1000, 0x0400, 0x0800
 _ROWS = [
     # name,          cmd,   prio, mask, max s, where, role
-    ("SELECT",       0x21a, 6, V, 0,   "front", "character select shout"),
-    ("INTRO",        0x207, 6, V, 0.9, "stage", "round entrance: Let's go, bub."),
+    ("SELECT",       0x21a, 6, V, 0,   "none",  "his own select shout (kept, not in the build: the select screen plays INTRO, owner 11-10)"),
+    ("INTRO",        0x207, 6, V, 0,   "both",  "Let's go, bub.: his select shout (front end) and the round entrance (stages); the reveal voice"),
     ("CLAW_L",       0x124, 5, S, 0,   "stage", "claw swing, light"),
     ("CLAW_M",       0x125, 5, S, 0,   "stage", "claw swing, medium"),
     ("CLAW_H",       0x126, 5, S, 0,   "stage", "claw swing, heavy"),
     ("ATK_A",        0x20a, 6, V, 0,   "stage", "attack shout, short"),
     ("ATK_B",        0x20b, 6, V, 0,   "stage", "attack shout"),
     ("ATK_D",        0x20d, 6, V, 0,   "stage", "attack shout"),
-    ("ATK_H",        0x209, 6, V, 0.5, "stage", "heavy attack shout"),
+    ("ATK_H",        0x209, 6, V, 0, "stage", "heavy attack shout"),
     ("HURT_A",       0x203, 6, V, 0,   "stage", "hurt voice"),
     ("HURT_B",       0x202, 6, V, 0,   "stage", "hurt voice, short"),
-    ("KO",           0x200, 7, V, 0.9, "stage", "knocked out scream"),
+    ("KO",           0x200, 7, V, 0, "stage", "knocked out scream"),
     ("TORNADO",      0x204, 7, V, 0,   "stage", "Tornado Claw!"),
     ("BERSERKER",    0x206, 7, V, 0,   "stage", "Berserker Barrage!"),
     ("CLAW_HIT_L",   0x10e, 5, H, 0,   "stage", "claw hits an enemy, light (sharp)"),
@@ -88,7 +89,7 @@ def read_wav(p):
         return sr, np.frombuffer(w.readframes(w.getnframes()), dtype="<i2").reshape(-1, w.getnchannels())
 
 
-TAIL = 250   # the clip ends where the render last passes this (of 32767): the AvP clips use 40, a voice tail below 250 is inaudible under the game
+TAIL = BP.SILENT   # the clip runs to where the render last passes this (40 of 32767, as the AvP clips): the arcade's own end, never a length cap (owner 11-10: voices were cut off)
 
 
 def cut_clip(st, sr, a, b, max_s, rate=RATE):
@@ -144,6 +145,30 @@ def build(out, assets):
     return len(blob), items
 
 
+def reveal_voice(out, render_dir, name="INTRO"):
+    """The post-credits reveal's voice file (saturn/rt/reveal.c RVVOICE.BIN, same format as tools/wolverine/reveal_voice.py): 'RVV1', u32 samples, 8 reserved, then 8 bit signed mono PCM at 22050 Hz,
+    scaled to peak 120 with a 4 ms fade at both ends. The clip is the whole arcade sound of `name` (default INTRO, MSHvSF 0x207, owner's choice 11-10), no length cap."""
+    import struct
+    render_dir = pathlib.Path(render_dir)
+    s = next(x for x in SOUNDS if x["name"] == name)
+    sr, st = read_wav(render_dir / "render.wav")
+    start, ends = {}, {}
+    for l in open(render_dir / "render.tsv"):
+        c, k, f, t = l.split()
+        (start if k == "S" else ends)[int(c, 16)] = float(t)
+    y = cut_clip(st, sr, start[s["cmd"]], ends[s["cmd"]], 0, rate=22050)
+    y = y - y.mean()
+    y *= 120 / max(1.0, np.abs(y).max())
+    f = int(22050 * 0.004)
+    y[:f] *= np.linspace(0, 1, f)
+    y[-f:] *= np.linspace(1, 0, f)
+    pcm = np.clip(np.rint(y), -128, 127).astype(np.int8).tobytes()
+    if len(pcm) % 2:
+        pcm += bytes(1)
+    pathlib.Path(out).write_bytes(b"RVV1" + struct.pack(">I", len(pcm)) + bytes(8) + pcm)
+    return dict(name=name, cmd=s["cmd"], samples=len(pcm), seconds=round(len(pcm) / 22050, 3), file_bytes=16 + len(pcm))
+
+
 if __name__ == "__main__":
     c = sys.argv[1] if len(sys.argv) > 1 else ""
     if c == "render":
@@ -151,6 +176,8 @@ if __name__ == "__main__":
     elif c == "build":
         n, items = build(sys.argv[2], sys.argv[3])
         print(n, "bytes", len(items), "sounds")
+    elif c == "reveal":   # reveal OUT.bin RENDER_DIR [NAME]
+        print(reveal_voice(sys.argv[2], sys.argv[3], sys.argv[4] if len(sys.argv) > 4 else "INTRO"))
     elif c == "list":
         for s in SOUNDS:
             print(s)
