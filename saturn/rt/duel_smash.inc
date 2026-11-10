@@ -53,6 +53,7 @@ static void smash_hit(int a, int t, int dmg)
 }
 
 extern char sat_home_text[28][44];
+extern void sat_home_commit(void);
 static void smash_hud(void)
 {
     int i;
@@ -75,6 +76,7 @@ static void smash_hud(void)
         /* centred under the player's name: the name and bar block spans screen x 24..167 (P1) and 200..343 (P2), centres at columns 12 and 34 */
         { int c0 = (i ? 34 : 12) - n / 2; for (s = 0; s < n; s++) sat_home_text[3][c0 + s] = b[s] ? (char)(b[s] | ((sat_smash.inv[i] & 8) ? 0x80 : 0)) : 1; }
     }
+    sat_home_commit();   /* the slave draws from the published copy (home.c) */
 }
 
 u32 sat_smash_kos;   /* game KOs turned into falls, for the bot */
@@ -254,12 +256,13 @@ static void alien_cull(int lo)
     }
     /* The doors and hives send their aliens into the tag 12 pool (0xff9580, 20 slots of 0xc0, release 0x176b4). Releasing them from here
        froze both players for good in the emulator (s7.log), so it is off until the door bodies are read. */
-    /* Instead the duel parks them: each tick an alien of the stage's alien classes in that pool is put 400 px off the arena's left edge, where
+    /* Instead the duel parks them: each tick every body in that pool (the stage's own enemies: lane versus, 11-10, 1e's stalkers and 24's soldiers were not of the alien classes
+       and came in) is put 400 px off the arena's left edge, where
        it is not drawn and cannot reach a fighter. It stays allocated, so the doors and the pool's other users (many allocate with no failure
        path; holding the free count at 0 hung the game, s10.log) carry on as before. */
     for (i = 0; i < 20; i++) {
         u32 a = 0xff9580u + (u32)i * 0xc0u;
-        if (!r32(a) || (r8(a + 2) != 0x1f && !alien_class(r8(a + 2)))) continue;   /* 0x1f: the class the stage 02 doors send (s11.log; READ by run) */
+        if (!r32(a) || r8(a + 8) != 0x0c) continue;   /* every live body of the pool is the stage's: stage 02's doors (class 0x1f), 1e's stalkers (class 0), 24's soldiers (classes 08 14 15 1c); the duel's own aliens are in the tag 20 pool */
         w16(a + 16, (u16)(lo - 400));
         sat_doors_parked++;
     }

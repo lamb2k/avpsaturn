@@ -4,6 +4,10 @@
 The owner's test disc is built only from this branch, and each disc lists the commit it came from.
 An item leaves "In progress" only when it is merged here; a paused or parked lane keeps its row.
 
+## Merge note 2026-11-10 (integration lane)
+
+avp/integration at 14eeb4a now holds, in this order: lane/stage-sprites-20261109 7ba526c (includes lane/text-glyphs f62d289), lane/wv-native-gfx-20261109 035d44c (native Wolverine), lane/stage-menu-20261110 6b005e9. Other lanes: merge avp/integration into your branch now. Build and Yaba gates on the combined line are running (results follow in this file); pending: versus (2ada807, DUEL_FILES=0), reveal (after it merges native + stage-menu), heal/flash and talk box from the native/features lanes, sounds.
+
 ## Merged (in avp/integration)
 
 | Item | Source | Switch / default | Gate evidence |

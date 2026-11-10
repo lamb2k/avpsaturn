@@ -21,6 +21,7 @@ def extend(R, assets, hud=None, s1_keys=()):
     assets = pathlib.Path(assets)
     A = json.loads((assets / "remap.json").read_text())
     own = rounds_variants.Data(os.environ.get("GUEST_SPEC", SPEC)).own[SLOT]
+    remap = set(A["keys"])
     masks = R["variant_masks"]
     files = R["files"]
     table, made = {}, {}
@@ -37,7 +38,7 @@ def extend(R, assets, hud=None, s1_keys=()):
             wk = set(A["stage_keys"].get(f"{st:02x}", A["keys"]))
             f = dict(base)
             f["name"] = base["name"] + "_wv"
-            f["keys"] = [sorted(set(base["keys"][0]) - own | wk)] + [list(k) for k in base["keys"][1:]]
+            f["keys"] = [sorted(set(base["keys"][0]) - own - remap | wk)] + [list(k) for k in base["keys"][1:]]   # remap: a key of his art holds his tile in the guest files, whatever the arcade file asks for there (fuzz keys, tools/char_fuzz.py)
             if s1_keys:   # scroll 1 keys the guest's own story box wording draws (tools/wolverine/dialog.py, SAT_WV_DIALOG)
                 f["keys"][1] = sorted(set(f["keys"][1]) | set(s1_keys))
             f["audio_from"] = row[vi]

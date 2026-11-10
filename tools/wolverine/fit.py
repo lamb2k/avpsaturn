@@ -45,10 +45,17 @@ def settings(environ):
     if shared < 0 or minimum < 0:
         raise ValueError("ROUND_SHARED_MIN and ROUND_MIN_RUN must be nonnegative")
     return dict(shared_min=shared, min_run=minimum,
-                arena_keep=environ.get("ARENA_KEEP") or None)
+                arena_keep=environ.get("ARENA_KEEP") or None,
+                tail_fill=environ.get("PACK_TAIL_FILL", "0") == "1")
+
+
+ROWTRIM = False   # main() sets it from KERNEL_CFLAGS: SAT_TILE_ROWTRIM packs SGP2 (build.py)
+STORY_PAGES = set()   # load() fills it: the story caption ROM pages every file keeps (tools/story_text_pages.py)
+FONT_KEYS = set()   # load() fills it: every text font glyph (tools/font_glyph_keys.py), kept in every file as build.py does
 
 
 def load(work, environ):
+    global FONT_KEYS, STORY_PAGES
     rounds = json.loads((work / "rounds.json").read_text())
     ends = json.loads((work / "round_code_ends.json").read_text())
     if not ends or not CART_PACK <= ends[-1][0] <= CART_END or ends[-1][1] != 0:
@@ -63,6 +70,14 @@ def load(work, environ):
                 raise ValueError("screen key section outside 0..3")
             screens[section].add(int(key, 16))
     screens[0].discard(0)
+    sys.path.insert(0, str(REPO / "tools"))
+    import system_banner_keys   # the "HURRY UP!" banner and countdown tiles: kept in every stage file, as build.py does
+    if (work / "rt.bin").exists() and (work / "op.bin").exists():   # every real work dir has both; a synthetic one (tests) does not
+        screens[1] |= system_banner_keys.from_work(work)
+        import font_glyph_keys   # the text fonts' glyph tables (both banks, both column parities), every file including the front end
+        FONT_KEYS = font_glyph_keys.from_work(work) if environ.get("FONT_KEYS", "1") == "1" else set()
+        import story_text_pages   # the story captions' ROM pages stay out of every file's tile spill, as build.py does
+        STORY_PAGES = story_text_pages.from_work(work, rounds["page"]) if environ.get("STORY_PAGES", "1") == "1" else set()
     if environ.get("SCREEN_KEYS_REQUIRED", "1") == "1" and not screens[0]:
         raise ValueError("WORK/screen_keys.txt missing or empty (SCREEN_KEYS_REQUIRED=0 to omit)")
     rank_file = work / "key_rank.json"
@@ -99,7 +114,7 @@ def selected_files(rounds, stages=None):
     return selected
 
 
-def free_runs(rounds, ends, shared_min=10, min_run=1, arena_keep=None):
+def free_runs(rounds, ends, shared_min=10, min_run=1, arena_keep=None, tail_fill=False):
     """Same code-page, shared-page, and ARENA_KEEP exclusions as round_files()."""
     page = rounds["page"]
     if page <= 0 or ROM_BYTES % page:
@@ -131,7 +146,7 @@ def free_runs(rounds, ends, shared_min=10, min_run=1, arena_keep=None):
             k02 &= wanted
 
     def free(f):
-        keep = set(f["keep_pages"]) | shared
+        keep = set(f["keep_pages"]) | shared | STORY_PAGES
         if k02 and set(f.get("stages", [])) & {0x0e, 0x1c, 0x1e, 0x24}:
             keep |= k02
         out, start = [], None
@@ -141,7 +156,8 @@ def free_runs(rounds, ends, shared_min=10, min_run=1, arena_keep=None):
                 start = q
             if not available and start is not None:
                 if q - start >= min_run:
-                    out.append([start * page, (q - start) * page])
+                    # PACK_TAIL_FILL as build.py: a run ending in a kept plain ROM page may use its odd page
+                    out.append([start * page, (q - start) * page] + ([True] if tail_fill and q < ROM_BYTES // page and q in keep and q not in code else []))
                 start = None
         out.sort(key=lambda item: -item[1])
         return out
@@ -155,12 +171,16 @@ def run(raw, f, keys, room, free, rank, screens, guest_keys=(), fit_fn=None):
         import rounds_pack
         fit_fn = rounds_pack.fit
     keys = [set(k) for k in keys]
+    keys[1] |= FONT_KEYS
     frank = {int(key): value for key, value in rank.items()}
+    if f.get("fuzz_keys") or f.get("body_keys"):   # CHAR_FUZZ_KEYS, as build.py
+        import char_fuzz
+        char_fuzz.rank(f, frank)
     frank.update({key: 1 << 39 for key in guest_keys})
     if not f["name"].startswith("front"):   # front_wv too
         keys = [k | extra for k, extra in zip(keys, screens)]
         frank.update({key: 1 << 40 for key in screens[0]})
-    return fit_fn(raw, keys, room, free(f), frank)
+    return fit_fn(raw, keys, room, free(f), frank, **({"rowtrim": True} if ROWTRIM else {}))
 
 
 def main(argv=None, environ=None, fit_fn=None, own_keys=None):
@@ -176,8 +196,18 @@ def main(argv=None, environ=None, fit_fn=None, own_keys=None):
         stages = parse_stages(argv[2] if len(argv) == 3 else "")
         suffix = "_".join("%02x" % word for word in stages) if stages else ""
         report = adir / ("fit" + suffix + ".json")
+        global ROWTRIM
+        ROWTRIM = "SAT_TILE_ROWTRIM" in environ.get("KERNEL_CFLAGS", "")
         config = settings(environ)
         rounds, ends, screens, rank = load(pathlib.Path(argv[0]), environ)
+        if environ.get("CHAR_FUZZ", "1") != "0":   # tools/char_fuzz.py as build.py applies it (WORK/char_fuzz.json; absent = nothing changes)
+            sys.path.insert(0, str(REPO / "tools"))
+            import char_fuzz
+            data = char_fuzz.load(pathlib.Path(argv[0]))
+            if data:
+                print("char fuzz:", char_fuzz.augment(rounds, data, keys=environ.get("CHAR_FUZZ_KEYS", "0") == "1",
+                                                      pages=environ.get("CHAR_FUZZ_PAGES", "1") == "1",
+                                                      key_stages={int(x, 16) for x in environ.get("CHAR_FUZZ_KEY_STAGES", "0e,1c,1e,24").split(",") if x} or None), flush=True)
         selected = selected_files(rounds, stages)
         room = ends[-1][0] - CART_PACK
         free = free_runs(rounds, ends, **config)
@@ -203,7 +233,7 @@ def main(argv=None, environ=None, fit_fn=None, own_keys=None):
             source = sources.get(base.get("gfx"), raw)
             p0, d0 = run(source, base, base["keys"], room, free, r, screens, fit_fn=fit_fn)
             guest = dict(base, name=name + "_wv", rank_from=name)
-            keys = [set(base["keys"][0]) - own | wk] + [set(k) for k in base["keys"][1:]]
+            keys = [set(base["keys"][0]) - own - set(assets["keys"]) | wk] + [set(k) for k in base["keys"][1:]]   # as guest_rounds.extend
             if dialog_keys:   # SAT_WV_DIALOG: the scroll 1 keys of his story box wording, as guest_rounds.extend adds them
                 keys[1] = keys[1] | dialog_keys
             p1, d1 = run(source if hud_stage is None else hud_stage, guest, keys, room, free, rank.get(name, {}), screens, wk, fit_fn)
