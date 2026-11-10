@@ -188,6 +188,38 @@ def guest_plan():
 guest_plan()
 
 
+DUEL_ARENAS = (0x0e, 0x1c, 0x1e, 0x24)
+def duel_plan():
+    """Versus mode (SAT_DUEL_MENU): the RANDOM arenas 0e, 1c, 1e and 24 read ROM pages that stage 02's walk reads and their own walks never do (lane versus: the colour
+    tables 0xffc00-0x1053ff and the effect and alien frame data around 0xbf000, 0xcf400, 0x190800), and their round files spill sprite tiles into exactly those pages: the duel
+    drew wrong tiles, noise blocks and black aliens. A copy of each pair file of an arena stage (arcade and guest files alike, appended after them so no number moves) keeps stage 02's
+    pages as well, and the kernel runs the copy while a duel is on (kernel.c duel_pairs). Normal play keeps its files, so the main game loses no sprite keys to it.
+    DUEL_FILES=0 builds without the copies (A/B). ROUNDS["duel_files"] = [[file, its duel copy]]."""
+    if "SAT_DUEL_MENU" not in os.environ.get("KERNEL_CFLAGS", "") or os.environ.get("DUEL_FILES", "1") == "0":
+        ROUNDS["duel_files"] = []
+        return
+    files, masks, vf = ROUNDS["files"], ROUNDS.get("variant_masks", []), ROUNDS.get("variant_file", {})
+    k02 = set(next(f for f in files if f["name"] == "stage02")["keep_pages"])
+    tables = [("%02x" % st, vf.get(str(st))) for st in DUEL_ARENAS]
+    tables = [(st, t, False) for st, t in tables if t] + [(st, t, True) for g in ROUNDS.get("guest_files", {}).values() for st, t in g.items() if st != "0" and int(st) in DUEL_ARENAS]
+    pairs, made = [], {}
+    for st, row, guest in tables:
+        for v, m in enumerate(masks, start=1):
+            i = row[v]
+            if bin(m).count("1") != 2 or not i or i in made:
+                continue
+            f = dict(files[i], name=files[i]["name"] + "_d", duel=True, audio_from=files[i].get("audio_from", i), rank_from=files[i].get("rank_from", files[i]["name"]),
+                     keep_pages=sorted(set(files[i]["keep_pages"]) | k02))
+            made[i] = len(files)
+            files.append(f)
+            pairs.append([i, made[i]])
+    ROUNDS["duel_files"] = pairs
+    print("duel files:", len(pairs), "keeping stage 02's", len(k02), "pages", flush=True)
+
+
+duel_plan()
+
+
 OPMAP = json.loads((WORK / "opx.json").read_text())
 
 
@@ -248,8 +280,9 @@ def gen_sources():
             srow[i] = len(rows)
             rows.append(vf.get(str(i), [f] * (len(masks) + 1)))
     mvar = [masks.index(m) + 1 if m in masks else 0 for m in range(16)]
-    update(GEN / "rounds.inc", "static const u8 stage_row[256] = {%s};\nstatic const u8 mask_variant[16] = {%s};\nstatic const unsigned short row_file[%d][%d] = {%s};\n" % (
-        ",".join(map(str, srow)), ",".join(map(str, mvar)), len(rows), len(masks) + 1, ",".join("{" + ",".join(map(str, r)) + "}" for r in rows)))
+    dp = ROUNDS.get("duel_files", [])
+    update(GEN / "rounds.inc", "static const u8 stage_row[256] = {%s};\nstatic const u8 mask_variant[16] = {%s};\nstatic const unsigned short row_file[%d][%d] = {%s};\n#define DUEL_PAIRS %d\nstatic const unsigned short duel_pairs[%d][2] = {%s};\n" % (
+        ",".join(map(str, srow)), ",".join(map(str, mvar)), len(rows), len(masks) + 1, ",".join("{" + ",".join(map(str, r)) + "}" for r in rows), len(dp), len(dp) + 1, ",".join("{%d,%d}" % tuple(x) for x in dp) or "{0,0}"))
     # Bonus characters (SAT_GUESTS): guest -> stage word -> file per variant, from rounds.json "guest_files"; 0 = the arcade's file.
     gf = ROUNDS.get("guest_files", {})
     ng = max([1] + [int(g) + 1 for g in gf])   # indexed by the guests.c row
