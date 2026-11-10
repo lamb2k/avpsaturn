@@ -88,7 +88,7 @@ disc, three ways (plain integration `integration\w1`, the flag-off and the flag-
 - the camera also moves between the probe that finds the box and the pause (seconds of wall time at Yaba's speed), which is why the fence was
   gone in the later frames of the same box.
 So story box evidence is taken as: the running-core screenshot, or a paused `framebuffer_screenshot`, or burst frames after the 4th. Burst frames 1
-to 3 are never used. (`E:\AvP\learning\lane-wv-talkbox\scripts	alk_walk.py` keeps all of them: `box*_running.png`, `_paused_shot.png`, 12 stepped frames, `_run0..2.png`.)
+to 3 are never used. (`E:\AvP\learning\lane-wv-talkbox\scripts\talk_walk.py` keeps all of them: `box*_running.png`, `_paused_shot.png`, 12 stepped frames, `_run0..2.png`.)
 
 ## 6. Cost of SAT_WV_DIALOG on top of the stage-sprites line (CHAR_FUZZ_KEYS, PACK_TAIL_FILL, ROWTRIM, text-glyphs FONT_KEYS)
 
