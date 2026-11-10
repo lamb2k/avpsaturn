@@ -71,9 +71,8 @@ def heal_leg(s):
     s.stop()
 
 
-def keys_for(face):   # Berserker Barrage: QCF + attack, forward = right when his facing byte (+0f) is set
-    fw = "right" if face else "left"
-    return [(0, []), (6, ["down"]), (12, ["down", fw]), (18, [fw]), (22, [fw, "a"]), (26, []), (200, [])]
+def keys_for(face):   # since native 035d44c Berserker is Schaefer's special: attack + jump together (state 020008), no motion
+    return [(0, []), (8, ["a", "b"]), (13, []), (200, [])]
 
 
 def flash_leg(s):
@@ -95,7 +94,7 @@ def flash_leg(s):
         os.makedirs(OUT + "/" + tag, exist_ok=True)
         keys = []; k = 0
         KEYS = keys_for(s.ram(0x838f, 1)[0] & 1)
-        s.log("facing", KEYS[2][1])
+        s.log("keys", KEYS)
         for f in range(frames):
             while k < len(KEYS) and KEYS[k][0] <= f:
                 keys = KEYS[k][1]; k += 1
