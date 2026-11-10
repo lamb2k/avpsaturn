@@ -282,6 +282,7 @@ def gen_sources():
             seed.write_bytes(f.read(16))
     update(GEN / "seed.inc", ",".join(str(x) for x in seed.read_bytes()))
     update(GEN / "guest_hudpal.inc", pathlib.Path(HUD["include"]).read_text() if HUD else hud_art.pal_include([]))   # guests.c: select screen and HUD colours of the guests
+    update(GEN / "guest_face.inc", pathlib.Path(HUD["face_include"]).read_text() if HUD else hud_art.face_include_empty())   # guests.c: his talk box face cells, drawn in every stage file while he is on
     save = WORK / "save_seed.bin"   # settings block the arcade keeps in EEPROM, from the golden dump
     if not save.exists():
         with open("E:/AvP/learning/mame/golden_c/probe.tsv", "rb") as f:

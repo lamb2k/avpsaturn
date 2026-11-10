@@ -779,6 +779,12 @@ static void rowtrim_load(u8 *dest, u32 idx)
 }
 #endif
 
+#if defined(SAT_GUESTS) && !defined(SAT_GFX_HOST)
+/* Bonus character's face cells (saturn/rt/guests.c, tools/wolverine/hud_art.py): while his slot is on, a scroll 1 cell of Schaefer's face (talk box, the HUD's
+   "SELECT YOUR CHARACTER" icon) is drawn from his payload whatever stage file is loaded, so the continue select shows him when another character is playing. */
+extern volatile unsigned char sat_guest_face_on;
+extern const unsigned char *sat_guest_face_tile(unsigned long key);
+#endif
 static u16 cache_find(Cache *c, u32 key, unsigned long *refused)
 {
     u32 h = HASH(c, key);
@@ -849,6 +855,9 @@ static u16 cache_find(Cache *c, u32 key, unsigned long *refused)
                 if ((u32)idx >= first) { from = pack_start + be32(sec->spill + 8 + k * 8) + ((u32)idx - first) * c->slot_bytes; break; }
             }
         }
+#if defined(SAT_GUESTS) && !defined(SAT_GFX_HOST)
+        if (c->section == SEC_S1 && sat_guest_face_on) { const u8 *g = sat_guest_face_tile(key); if (g) from = g; }
+#endif
         vram_copy(c->vram + (u32)n * c->slot_bytes, from, c->slot_bytes);
     }
 #ifdef SAT_TILE_ROWTRIM
