@@ -42,7 +42,7 @@ def heal_leg(s):
         buf = m.read(s.syms["RAMB"] + 0x9000, 0x3800)
         wrow(dict(mode="blocks", act=[(hex(0x9000 + o), buf[o], buf[o + 2], buf[o + 8], int.from_bytes(buf[o + 0x40:o + 0x42], "big")) for o in range(0, 0x3800 - 0x40, 0x40) if buf[o] and buf[o + 8] in (0x0c, 0x10, 0x14, 0x04, 0x08, 0x20)]))
     m.call("resume")
-    v0 = int.from_bytes(m.read(s.syms["sat_dbg"] + 8, 4), "big"); t_end = time.time() + secs; last = None
+    v0 = int.from_bytes(m.read(s.syms["sat_dbg"] + 8, 4), "big"); t_end = time.time() + secs; last = None; shot_hp = hp0
     while time.time() < t_end:
         v = int.from_bytes(m.read(s.syms["sat_dbg"] + 8, 4), "big") - v0
         blk = s.ram(0x8380, 0x100)
@@ -61,6 +61,9 @@ def heal_leg(s):
                 row[n] = list(m.read(s.syms[n], 2))
         if row != last:
             wrow(row); last = row
+        if os.environ.get("PROOF_SHOTS") and hp >= shot_hp + 10 and hp < 200:   # a picture each time the health is 10 higher: the HUD bar rises
+            shot_hp = hp
+            s.shot("heal_hp%03d" % hp)
         time.sleep(0.04)
     m.call("pause")
     s.shot("heal_end")
@@ -77,8 +80,15 @@ def flash_leg(s):
     m = s.m
     os.makedirs(OUT, exist_ok=True)
     m.call("pause"); s.set([])
-    nsp.approach(s)
-    s.log("save", m.call("save_state", slot=nsp.SLOT)[:60])
+    for attempt in range(6):   # a state saved in a hit reaction would ignore the motion: try again until the loaded state stands
+        nsp.approach(s)
+        s.log("save", m.call("save_state", slot=nsp.SLOT)[:60])
+        m.call("load_state", slot=nsp.SLOT); time.sleep(0.5)
+        st = s.ram(0x8384, 3).hex()
+        s.log("loaded state", st, "attempt", attempt)
+        if st in ("020000", "020002"):
+            break
+        m.call("resume"); time.sleep(1.5); m.call("pause")
     frames = int(os.environ.get("PROOF_FRAMES", "90"))
     for tag in ("run1",):
         m.call("pause"); m.call("load_state", slot=nsp.SLOT); time.sleep(0.5)
@@ -106,8 +116,79 @@ def flash_leg(s):
     s.stop()
 
 
+def retitle(s):
+    """Yaba puts its own title back on pause/resume and state loads; OBS finds the window by title, so ours is set again (and read back)."""
+    import ctypes
+    ctypes.windll.user32.SetWindowTextW(ctypes.c_void_p(s.hwnd), nsp.TITLE)
+    b = ctypes.create_unicode_buffer(200)
+    ctypes.windll.user32.GetWindowTextW(ctypes.c_void_p(s.hwnd), b, 200)
+    return b.value
+
+
+def clip_leg(s):
+    """Free-running footage for OBS (PROOF_MODE=clip): walk to the nearest enemy, Berserker (QCF + attack) when within reach, rest, repeat; health is put back to 60 under 30 (harness assist)."""
+    import subprocess
+    m = s.m
+    secs = float(os.environ.get("PROOF_SECS", "45"))
+    os.makedirs(OUT, exist_ok=True)
+    m.call("pause"); s.set([])
+    nsp.approach(s)
+    obs = None
+    s.log("title", retitle(s))
+    if os.environ.get("PROOF_OBS"):
+        obsdir = "C:/Program Files/obs-studio/bin/64bit"
+        obs = subprocess.Popen([obsdir + "/obs64.exe", "--profile", "avp-features", "--collection", "avp-features", "--startrecording", "--minimize-to-tray", "--disable-updater", "--disable-shutdown-check"], cwd=obsdir)
+        s.log("obs started", obs.pid)
+    m.call("resume")
+    s.log("title", retitle(s))
+    time.sleep(8 if obs else 0.5)
+    s.log("title", retitle(s))
+    vb = lambda: int.from_bytes(m.read(s.syms["sat_dbg"] + 8, 4), "big")
+    t_end = time.time() + secs; n = 0
+    while time.time() < t_end:
+        blk = s.ram(0x8380, 0x100)
+        hp = int.from_bytes(blk[0x40:0x42], "big"); face = blk[0x0f] & 1
+        if hp < 30 or hp > 60000:
+            m.call("memory_write", address=hex(s.syms["RAMB"] + 0x83c0), size="word", value=hex(60))
+        px, pz = int.from_bytes(blk[0x10:0x12], "big"), int.from_bytes(blk[0x18:0x1a], "big")
+        en = enemies_full(s)
+        near = min(en, key=lambda e: abs(e["x"] - px) + abs(e["z"] - pz)) if en else None
+        keys = []
+        if near and blk[4:7].hex() in ("020000", "020002", "020202", "020200") and abs(near["x"] - px) < 140 and abs(near["z"] - pz) < 14:
+            fw = "right" if near["x"] > px else "left"
+            v0 = vb(); n += 1
+            for off, ks in ((0, ["down"]), (6, ["down", fw]), (12, [fw]), (16, [fw, "a"]), (20, [])):
+                while vb() - v0 < off: time.sleep(0.005)
+                s.set(ks)
+            s.log("berserker", n, "near", near["x"] - px)
+            v1 = vb()
+            while vb() - v1 < 140 and time.time() < t_end: time.sleep(0.05)
+            continue
+        if near:
+            dx = near["x"] - px
+            keys = ["right" if dx > 0 else "left"] if abs(dx) > 100 else []
+            if near["z"] < pz - 3: keys.append("up")
+            elif near["z"] > pz + 3: keys.append("down")
+        s.set(keys)
+        time.sleep(0.04)
+        if n % 1 == 0 and int(time.time()) % 2 == 0:
+            retitle(s)
+    s.set([])
+    if obs:
+        time.sleep(1.5)
+        subprocess.run(["taskkill", "/PID", str(obs.pid)], capture_output=True)   # WM_CLOSE: OBS finishes the recording file
+        try:
+            obs.wait(20)
+        except Exception:
+            obs.terminate()
+        s.log("obs stopped")
+    m.call("pause")
+    s.log("clip done", n, "berserkers")
+    s.stop()
+
+
 def proof(s):
-    (heal_leg if MODE == "heal" else flash_leg)(s)
+    {"heal": heal_leg, "flash": flash_leg, "clip": clip_leg}[MODE](s)
 
 
 nsp.enemies = lambda s: [(e['x'], e['z']) for e in enemies_full(s)]   # native_states_proof walks ff9a00 in steps of 0x100: not the enemy pool's grid

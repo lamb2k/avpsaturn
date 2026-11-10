@@ -15,7 +15,7 @@ Evidence tiers as in the native notes: **MAME** (MSHvSF reference), **HOST** (li
 | `-DSAT_WV_FLASH[=1\|2]` | Berserker moment (needs `SAT_WV_NATIVE_GFX`): 1 at the move's start, 2 at its first contact | 1 |
 | `-DSAT_WV_FLASH_FREEZE=n` | ticks the enemy pool stands still (the game's hitstop byte +0x2c); 0 = flash only | 12 |
 | `-DSAT_WV_FLASH_HOLD=1` | also skip his own player update for those ticks | 0 |
-| `-DSAT_WV_FLASH_FRAMES="a, b, ..."` | VDP2 colour offset per vblank, 9 bit signed, all layers | `-56, -56, +192, +96` |
+| `-DSAT_WV_FLASH_FRAMES="a, b, ..."` | VDP2 colour offset per vblank, 9 bit signed, all layers | `-24, -24, +144, +64` |
 | `-DWV_SFX_BERSERKER=id` | with the sounds lane's `wv_sfx(id)`: called once at the moment (the hook point) | unset |
 
 Hook mechanism: `build.py` compiles `wolverine.c` with `-Dsat_guest_wolverine_tick=wv_tick_inner` (with `SAT_WV_HEAL` or `FLASH_HOLD=1`) and `-Dsat_guest_wolverine_pad=wv_pad_inner` (with `SAT_WV_FLASH`); `wv_features.c` defines the original names, calls his code first and then ours. The Berserker events are the native lane's weak `wv_on_berserker_start/connect/end`; `wv_features.c` holds the strong definitions.

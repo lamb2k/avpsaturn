@@ -23,7 +23,7 @@
                                 refuses a defender with +0x2c set, so contacts wait for the thaw; he, a partner and everything not in those pools run on.
        -DSAT_WV_FLASH_HOLD=1    also hold his own player update for the same ticks (the game's f_195ec is skipped, as the old attack hold does): the move's clock
                                 stops with the world and thaws with it, so no contact is lost to the freeze. Default 0: he runs through the freeze.
-       -DSAT_WV_FLASH_FRAMES    vblank table of VDP2 colour offset values (9 bit signed, all colour layers, +255 = white); default 4 frames: -56 -56 +192 +96
+       -DSAT_WV_FLASH_FRAMES    vblank table of VDP2 colour offset values (9 bit signed, all colour layers, +255 = white); default 4 frames: -24 -24 +144 +64
    Sound: if the sounds lane provides wv_sfx(id) and -DWV_SFX_BERSERKER=<id> is given, the move's start calls it (one hook point). */
 typedef unsigned char u8; typedef unsigned short u16; typedef unsigned int u32; typedef short s16;
 
@@ -124,7 +124,7 @@ static void wv_heal(int i)
 #define SAT_WV_FLASH_HOLD 0
 #endif
 #ifndef SAT_WV_FLASH_FRAMES
-#define SAT_WV_FLASH_FRAMES 0x1c8, 0x1c8, 0x0c0, 0x060   /* -56 -56 +192 +96: two dim frames, then a bright pop (MSHvSF's hyper: dim frames, then the cut-in) */
+#define SAT_WV_FLASH_FRAMES 0x1e8, 0x1e8, 0x090, 0x040   /* -24 -24 +144 +64: two dim frames, then a bright pop (MSHvSF's hyper: two frames at 78 % brightness, then the cut-in) */
 #endif
 #define VDP2R(o) (*(volatile u16 *)(0x25F80000UL + (o)))
 static const u16 fl_tab[] = { SAT_WV_FLASH_FRAMES };
