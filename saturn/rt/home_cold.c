@@ -350,16 +350,18 @@ static int stage_select(void)
 /* Duel rules (duel_smash.inc reads them). Characters are picked on the game's own select screen after this, each player with its own pad. */
 typedef struct { u8 stocks, minutes, aliens, p1, p2, arena; } DuelOpt;
 extern DuelOpt sat_duel_opt;
-/* RANDOM picks from arenas that draw clean. 0e, 1c, 1e and 24 show wrong tile data in the duel (Duel 5): their round files spill sprites into
-   ROM pages the stage's own walk never reads, and the duel reads some of them (with ROUND_SHARED_MIN=1 the 1c fight drew clean, s92.log).
-   They come back once the duel has round files that keep those pages. */
-static const u8 arenas[] = { 0x02 };
+/* ARENA: ROUND 1 is stage 02; RANDOM picks one of the five stages that make a flat arena (02, 0e, 1c, 1e, 24). The four later ones run the duel copy of their stage file
+   (build.py duel_plan, kernel.c duel_pairs): without it their tile spill overwrote ROM pages the duel reads and the picture filled with wrong tiles (Duel 5).
+   sat_duel_force_arena is a test hook (play_versus.py pokes a stage word here, 0 in play): it picks the arena without the menu. */
+static const u8 arenas[] = { 0x02, 0x0e, 0x1c, 0x1e, 0x24 };
+volatile u8 sat_duel_force_arena;
 static int duel_setup(void)
 {
-    static const char *const labels[] = { "STOCKS", "TIME", "ALIENS" };   /* no ARENA row: the duel is stage 02 only (owner 11-08) */
+    static const char *const labels[] = { "STOCKS", "TIME", "ALIENS", "ARENA" };
     static const char *const times[] = { "OFF", "2 MIN", "3 MIN" };
     static const char *const freq[] = { "OFF", "LOW", "HIGH" };
-    static int cur = 3;
+    static const char *const arena[] = { "ROUND 1", "RANDOM" };
+    static int cur = 4;
     sat_home_screen = 8;
     for (;;) {
         char b[4];
@@ -367,26 +369,23 @@ static int duel_setup(void)
         int i;
         panel(19);
         centre(19, "DUEL", 0);
-        for (i = 0; i < 3; i++) {
+        for (i = 0; i < 4; i++) {
             put(20 + i, 10, labels[i], i == cur);
             b[0] = (char)('0' + sat_duel_opt.stocks); b[1] = 0;
-            put(20 + i, 22, i == 0 ? (sat_duel_opt.minutes ? "-" : b) : i == 1 ? times[sat_duel_opt.minutes ? sat_duel_opt.minutes - 1 : 0] : freq[sat_duel_opt.aliens], i == cur);
+            put(20 + i, 22, i == 0 ? (sat_duel_opt.minutes ? "-" : b) : i == 1 ? times[sat_duel_opt.minutes ? sat_duel_opt.minutes - 1 : 0] : i == 2 ? freq[sat_duel_opt.aliens] : arena[sat_duel_opt.arena], i == cur);
         }
-        sat_duel_opt.arena = 0;
-        centre(24, "START", cur == 3);
+        centre(25, "START", cur == 4);
         sat_home_cursor = (u32)cur;
         frame();
         e = edges();
         if (e & P_B) return 0;
-        if (e & P_UP) cur = cur ? cur - 1 : 3;
-        if (e & P_DOWN) cur = cur < 3 ? cur + 1 : 0;
-        if (cur == 3) {
+        if (e & P_UP) cur = cur ? cur - 1 : 4;
+        if (e & P_DOWN) cur = cur < 4 ? cur + 1 : 0;
+        if (cur == 4) {
             if (e & (P_START | P_A | P_C)) {
                 sat_home_warp = sat_duel_opt.arena ? arenas[sat_vblanks_now() % sizeof arenas] : 0;
+                if (sat_duel_force_arena) sat_home_warp = sat_duel_force_arena;
                 if (sat_home_warp == 2) sat_home_warp = 0;
-#ifdef DUEL_ARENA_TEST   /* test build only: RANDOM always picks this stage */
-                if (sat_duel_opt.arena) sat_home_warp = DUEL_ARENA_TEST;
-#endif
                 return 1;
             }
             continue;
@@ -396,6 +395,7 @@ static int duel_setup(void)
             if (cur == 0) sat_duel_opt.stocks = (u8)(sat_duel_opt.stocks + d < 1 ? 5 : sat_duel_opt.stocks + d > 5 ? 1 : sat_duel_opt.stocks + d);
             if (cur == 1) sat_duel_opt.minutes = (u8)((sat_duel_opt.minutes == 0 ? (d > 0 ? 2 : 3) : sat_duel_opt.minutes == 2 ? (d > 0 ? 3 : 0) : (d > 0 ? 0 : 2)));
             if (cur == 2) sat_duel_opt.aliens = (u8)((sat_duel_opt.aliens + 3 + d) % 3);
+            if (cur == 3) sat_duel_opt.arena ^= 1;
         }
     }
 }

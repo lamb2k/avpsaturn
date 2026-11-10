@@ -119,13 +119,19 @@ void sat_home_big(int r, const char *s)
 int sat_home_list_gap;                 /* rows between list items; 0: 1 for more than 4 items, else 2 */
 void sat_home_centre(int r, const char *s, int hi) { int n = 0; while (s[n]) n++; sat_home_put(r, (44 - n) / 2, s, hi); }
 
-void sat_home_frame(void)
+/* Publishes sat_home_text to the slave without waiting for a vblank. Text that is not a menu loop's (the duel's percent and stock line, the end of NOW LOADING) was never
+   copied once the menus drew from sat_home_shown: the duel HUD stayed blank and NOW LOADING stayed on screen for the whole fight (lane versus, 11-10). */
+void sat_home_commit(void)
 {
-    u32 v = sat_vblanks_now();
     int i;
     sat_home_seq++;
     for (i = 0; i < 28 * 44; i++) (&sat_home_shown[0][0])[i] = (&sat_home_text[0][0])[i];
     sat_home_seq++;
+}
+void sat_home_frame(void)
+{
+    u32 v = sat_vblanks_now();
+    sat_home_commit();
     while (sat_vblanks_now() == v) ;
 }
 u32 sat_home_edges(void) { u32 raw = sat_pad_raw & 0xffff, e = prev & ~raw; prev = raw; return e; }
@@ -170,6 +176,7 @@ void sat_home_loading(int on)
         sat_home_clear();
         sat_home_mode = was_mode;
         sat_home_hold = was_hold;
+        sat_home_commit();   /* NOW LOADING off the picture */
     }
 }
 
