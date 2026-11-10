@@ -476,7 +476,11 @@ static void pc_start(void)
 #define SLAVE_WAKE (*(volatile u16 *)0x21000000u)
 #define SMPC(o) (*(volatile u8 *)(0x20100000u + (o)))
 extern void sat_slave_entry(void);
+#if defined(SAT_GUESTS) && defined(SAT_WV_REVEAL) && !SAT_VDP1_HW_ERASE
+u32 gfx_handed, gfx_done;   /* the reveal (cart code) waits for the slave and takes the picture over through these */
+#else
 static u32 gfx_handed, gfx_done;
+#endif
 #ifdef SAT_CPU_SLACK_PROFILE
 #define CPU_SLACK_ROW(i) ((volatile unsigned int *)((u32)&sat_cpu_slack[(i)] | 0x20000000u))
 #include "cpu_slack_profile.h"
@@ -658,6 +662,15 @@ static void round_check(void)
     irq_enable();
 }
 
+#if defined(SAT_GUESTS) && defined(SAT_WV_REVEAL) && !SAT_VDP1_HW_ERASE
+/* The post-credits reveal owns the picture while LOADER_DIAG[5] is set: the vblank hands nothing to the slave, so the chips are the reveal's. This test is all of the reveal that stays in
+   resident code (owner 11-10: the high RAM cost near zero); the takeover, the loader calls and the poll are in cart code (guests.c sat_reveal_call and sat_reveal_poll, the overlay reveal.c
+   loaded from REVCODE.BIN at the ending). The poll is called from sat_home_flow (home_cold.c), after round_check as before. */
+#define REVEAL_ON (((volatile u32 *)0x06013fe0u)[5])
+#else
+#define REVEAL_ON 0
+#endif
+
 /* Dispatcher 0xd86. A vblank sets the game's flag at 0xff0266 through f_e0e, which restarts the walk from task 0. */
 void f_d86(void)
 {
@@ -785,6 +798,11 @@ void sat_vblank(void)
     }
 #endif
     /* Before the IRQ body, which moves the next frame's scroll words into place. A slave still drawing skips this frame's picture, never the game. */
+#if defined(SAT_GUESTS) && defined(SAT_WV_REVEAL) && !SAT_VDP1_HW_ERASE
+    if (REVEAL_ON) {
+        /* the reveal's picture: nothing for the slave to draw */
+    } else
+#endif
     if (UNCACHED(gfx_done) == UNCACHED(gfx_handed)) {
         sat_gfx_snapshot_begin();
         UNCACHED(gfx_handed) = UNCACHED(gfx_handed) + 1;
