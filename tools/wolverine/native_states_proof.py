@@ -22,10 +22,12 @@ FREE = float(os.environ.get("PROOF_FREERUN", "0"))
 SLOT = int(os.environ.get("PROOF_SLOT", "3"))
 TITLE = os.environ.get("PROOF_TITLE", "AvP NATIVE: states [port 9718]")
 st = dict(lastp=0.0, started=False, n=0, titled=False)
-MODES = (("native", 1, None), ("schaefer", 0, 0))
+MODES = tuple(m for m in (("native", 1, None), ("schaefer", 0, 0)) if m[0] in os.environ.get("PROOF_LEGS", "native,schaefer").split(","))
 # (frames after the leg starts, keys held from there): attack taps every 14 frames for 160 frames (an enemy walking in is met in every leg), then walk away and back
 SCHEDULE = [(0, []), (6, ["a"]), (9, []), (22, ["a"]), (25, []), (38, ["a"]), (41, []), (100, ["b"]), (104, []), (190, ["b"]), (194, []), (200, ["a"]), (203, []),
             (260, ["down"]), (266, ["down", "right"]), (272, ["right"]), (276, ["right", "a"]), (280, []), (360, ["left"]), (420, []), (480, ["a"]), (483, []), (500, ["a"]), (503, []), (700, [])]
+if os.environ.get("PROOF_LONG"):   # unassisted: let the enemies hit him (no health top-up), attack taps now and then, to reach knockdown, getup and KO
+    SCHEDULE = [(0, [])] + [x for t in range(20, int(os.environ["PROOF_LONG"]) - 5, 60) for x in ((t, ["a"]), (t + 3, []))] + [(int(os.environ["PROOF_LONG"]), [])]
 
 
 def poke(s, name, val):
@@ -69,7 +71,7 @@ def paused_leg(s, tag, dbg, sel, shots):
         while k < len(SCHEDULE) and SCHEDULE[k][0] <= f:
             keys = SCHEDULE[k][1]; k += 1
         s.set(keys)
-        if f % 10 == 0: keep_alive(s)
+        if f % 10 == 0 and not os.environ.get("PROOF_NOKEEP"): keep_alive(s)
         snap(s, tag, f, list(keys))
         m.call("framebuffer_burst", directory=OUT + "/" + tag, frames=1, prefix="f%04d_" % f)
     s.set([])
