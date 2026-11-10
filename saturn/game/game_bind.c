@@ -166,6 +166,18 @@ void f_19f9a(void)
 /* f_24060 is the player's gun action (a6 = block; Berserker Barrage runs in it for Wolverine): no shot, flash, sound or heat for a Wolverine player
    (saturn/guests/wolverine/wolverine.c sat_guest_wolverine_gun). */
 #ifdef SAT_WV_NATIVE_GFX
+#ifdef WV_NO_GRAB   /* comparison switch (owner 11-10: first "turn it off", then "keep his grab and find a better pose": the grab is on by default) */
+/* f_1a586 is the player's own grab check (called from the stand/walk handler f_1997e for every character but Linn): a standing enemy in contact is taken (enemy state xx06xx, player to 020400, then the
+   lift 020406 and the slam 020408). With -DWV_NO_GRAB a Wolverine player does not grab; walking into an enemy just walks or pushes, he attacks with buttons only. Enemies grabbing
+   him (the enemy side, not this routine) and every other character are untouched. */
+void f_1a586(void)
+{
+    extern void lifted_1a586(void);
+    extern int sat_wv_nograb(unsigned long a6);
+    if (sat_wv_nograb(R->a[6])) { R->d[0] = 0; FLAGS(1, 0, 0, 0, 0); return; }
+    lifted_1a586();
+}
+#endif
 /* f_24f04 is Schaefer's state 020008 routine (the special: attack + jump; table 0x891e entry of character 1). A Wolverine player runs his own Berserker Barrage instead (no gun code at all). */
 void f_24f04(void)
 {

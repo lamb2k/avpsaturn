@@ -170,7 +170,11 @@ def main():
         add += [f"Input\\Port\\2\\Id\\1\\Controller\\2\\Key\\{i}={P2[n]}" for i, n in enumerate(P2_ORDER)]
         out[idx:idx] = add
     INI.write_bytes(("\n".join(out) + "\n").encode("latin-1"))
-    proc = subprocess.Popen([str(EXE)], cwd=str(EXE.parent))
+    # Owner 11-10 ("stop taking over my keyboard"): the emulator starts visible but not activated (STARTF_USESHOWWINDOW, SW_SHOWNOACTIVATE) and is then pushed to the bottom of the z-order without activating it
+    # (a window started minimised, SW_SHOWMINNOACTIVE, never paints and stalls the emulation: lane-input / sprites lane 11-10). Input goes only by PostMessage to this window's handle (Session._key) or the
+    # pad_set tool; nothing here activates a window or sends global input. Below-normal priority: the host is shared.
+    si = subprocess.STARTUPINFO(); si.dwFlags |= subprocess.STARTF_USESHOWWINDOW; si.wShowWindow = 4
+    proc = subprocess.Popen([str(EXE)], cwd=str(EXE.parent), startupinfo=si, creationflags=subprocess.BELOW_NORMAL_PRIORITY_CLASS)
     s = None
     global foreign
     foreign = False
@@ -195,6 +199,15 @@ def main():
             wins = windows_of(proc.pid)
         print("windows", wins, flush=True)
         hwnd = max(wins, key=lambda w: w[2] * w[3])[0]
+        try:   # keep the window shown (not minimised) and at the bottom of the z-order, never activated
+            u32 = ctypes.windll.user32
+            u32.ShowWindow.argtypes = [ctypes.c_void_p, ctypes.c_int]; u32.SetWindowPos.argtypes = [ctypes.c_void_p, ctypes.c_void_p, ctypes.c_int, ctypes.c_int, ctypes.c_int, ctypes.c_int, ctypes.c_uint]
+            for _ in range(10):
+                u32.ShowWindow(ctypes.c_void_p(hwnd), 4); u32.SetWindowPos(ctypes.c_void_p(hwnd), ctypes.c_void_p(1), 0, 0, 0, 0, 0x0013)
+                time.sleep(0.5)
+                if not u32.IsIconic(ctypes.c_void_p(hwnd)): break
+        except Exception as e:
+            print("z-order push failed", e, flush=True)
         if os.environ.get("YABA_LOAD"):   # one fresh process per leg, as docs/EMULATOR_MCP_CAPTURE.md says
             time.sleep(3)
             m.call("pause")
