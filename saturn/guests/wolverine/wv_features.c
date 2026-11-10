@@ -38,6 +38,13 @@ extern unsigned char sat_guest_sel;
 #define W16(a, v) (RAMB[(a) - 0xff0000u] = (u8)((v) >> 8), RAMB[(a) - 0xff0000u + 1] = (u8)(v))
 #endif
 #define PL(i) (0xff8380u + (u32)(i) * 0x100u)
+/* The game's enemy pool (tag 0x0c: Ganados, aliens; source_recon/avsrc_actor.c POOLS): 20 slots of 0xc0 bytes from ff9580. (wolverine.c's wv_enemy_hp walks ff9a00 in steps of 0x100, which is not
+   this pool's grid: it sees one block in three.) The tag 0x08 pool (ff9280, bosses) is left alone. */
+#define EN_FIRST 0xff9580u
+#define EN_N 20
+#define EN_STRIDE 0xc0u
+/* The state lives in the cart (the .data of the cart tail, RAM on the RAM cartridge), not in low work RAM: the linker script puts every .bss there and lw_free is 32 bytes. */
+#define CARTVAR __attribute__((section(".data")))
 
 #ifdef WVF_HOST   /* HOST runner only (tools/lift_runner/build_native_host.py --wvf 1): WVFTRACE=file, one line per Wolverine player update */
 #include <stdio.h>
@@ -49,8 +56,18 @@ static void wvf_log(const char *what, int i, int a, int b)
     if (!init) { const char *e = getenv("WVFTRACE"); init = 1; if (e) f = fopen(e, "w"); }
     if (f) fprintf(f, "%ld %s %d %d %d\n", host_vblank, what, i, a, b);
 }
+static void wvf_enemies(void)   /* per tick: health of the 20 slots of the enemy pool, -1 for a free slot (damage is read off the drops) */
+{
+    static FILE *f; static int init, k; u32 b;
+    if (!init) { const char *e = getenv("WVFEN"); init = 1; if (e) f = fopen(e, "w"); }
+    if (!f) return;
+    fprintf(f, "%ld", host_vblank);
+    for (k = 0, b = 0xff9580u; k < 20; k++, b += 0xc0u) fprintf(f, " %d", RAMB[b - 0xff0000u] && RAMB[b - 0xff0000u + 8] == 0x0c ? (RAMB[b - 0xff0000u + 0x40] << 8 | RAMB[b - 0xff0000u + 0x41]) : -1);
+    fprintf(f, "\n");
+}
 #else
 #define wvf_log(w, i, a, b) ((void)0)
+#define wvf_enemies() ((void)0)
 #endif
 #if defined(SAT_WV_HEAL) || defined(WVF_HOST) || (defined(SAT_WV_FLASH) && SAT_WV_FLASH_HOLD)
 extern int wv_tick_inner(unsigned long a6);
@@ -73,7 +90,7 @@ extern void wv_pad_inner(u16 *in0);
 #error SAT_WV_HEAL_DELAY 1..255, SAT_WV_HEAL_STEP 1..DELAY, SAT_WV_HEAL_AMT >= 1
 #endif
 #define WV_HP_FULL 101   /* the game's maximum (0x65, pickup_heal's cap) */
-static u8 hl_t[2], hl_hp[2];   /* ticks since his health last fell (the delay counts up, then the step); health seen last tick */
+static u8 hl_t[2] CARTVAR, hl_hp[2] CARTVAR;   /* ticks since his health last fell (the delay counts up, then the step); health seen last tick */
 static void wv_heal(int i)
 {
     u32 b = PL(i);
@@ -112,9 +129,9 @@ static void wv_heal(int i)
 #define VDP2R(o) (*(volatile u16 *)(0x25F80000UL + (o)))
 static const u16 fl_tab[] = { SAT_WV_FLASH_FRAMES };
 #define FL_N ((int)(sizeof fl_tab / sizeof fl_tab[0]))
-static u8 fl_left, fl_done;   /* vblanks of flash still to show; 1 = this burst has had its moment */
+static u8 fl_left CARTVAR, fl_done CARTVAR;   /* vblanks of flash still to show; 1 = this burst has had its moment */
 #if SAT_WV_FLASH_HOLD
-static u8 fz_left;   /* updates of his own still to skip; bit 7 = player index */
+static u8 fz_left CARTVAR;   /* updates of his own still to skip; bit 7 = player index */
 #endif
 #ifdef WV_SFX_BERSERKER
 extern void wv_sfx(int id) __attribute__((weak));
@@ -132,23 +149,23 @@ static void wv_super(int who)
     (void)who;
 #endif
     if (SAT_WV_FLASH_FREEZE > 0)
-        for (b = 0xff9a00u; b < 0xffc700u; b += 0x100u)
+        for (b = EN_FIRST; b < EN_FIRST + EN_N * EN_STRIDE; b += EN_STRIDE)
             if (R8(b) && R8(b + 8) == 0x0c && !R8(b + 0x2c)) R8(b + 0x2c) = SAT_WV_FLASH_FREEZE;
 #ifdef WV_SFX_BERSERKER
     if (wv_sfx) wv_sfx(WV_SFX_BERSERKER);
 #endif
 }
-void wv_on_berserker_start(int i) { (void)i; if (SAT_WV_FLASH == 1) wv_super(i); }
+void wv_on_berserker_start(int i) { fl_done = 0; if (SAT_WV_FLASH == 1) wv_super(i); else (void)i; }   /* a start is always a new move, whatever became of the last one's end */
 void wv_on_berserker_connect(int i, int damage) { (void)i; (void)damage; if (SAT_WV_FLASH == 2) wv_super(i); }
 void wv_on_berserker_end(int i) { (void)i; fl_done = 0; }
 #if !defined(SAT_WV_NATIVE_GFX)   /* HOST test only (the native build gets these events from wolverine.c): his state 02000c, edge and enemies' health */
-static u8 hs_on;
-static u16 hs_hp;
+static u8 hs_on CARTVAR;
+static u16 hs_hp CARTVAR;
 static void wv_host_events(int i)
 {
     int in = R8(PL(i) + 4) == 2 && R8(PL(i) + 5) == 0 && R8(PL(i) + 6) == 0x0c;
     u32 b; u16 t = 0;
-    for (b = 0xff9a00u; b < 0xffc700u; b += 0x100u) if (R8(b) && R8(b + 8) == 0x0c) t = (u16)(t + R16(b + 0x40));
+    for (b = EN_FIRST; b < EN_FIRST + EN_N * EN_STRIDE; b += EN_STRIDE) if (R8(b) && R8(b + 8) == 0x0c) t = (u16)(t + R16(b + 0x40));
     if (in) { if (!hs_on) { hs_on = 1; wv_on_berserker_start(i); } else if (t < hs_hp) wv_on_berserker_connect(i, hs_hp - t); hs_hp = t; }
     else if (hs_on) { hs_on = 0; wv_on_berserker_end(i); }
 }
@@ -175,6 +192,7 @@ int sat_guest_wolverine_tick(unsigned long a6)
 #if defined(SAT_WV_FLASH) && SAT_WV_FLASH_HOLD
     if ((fz_left & 0x7f) && (a6 == PL(0) || a6 == PL(1)) && (int)((a6 - PL(0)) >> 8) == (fz_left >> 7)) { fz_left--; return 0; }
 #endif
+    wvf_enemies();
     r = wv_tick_inner(a6);
 #if defined(SAT_WV_FLASH) && !defined(SAT_WV_NATIVE_GFX)
     if ((a6 == PL(0) || a6 == PL(1)) && (sat_guest_sel & 1) && R8(a6 + 1) == 1) wv_host_events((int)((a6 - PL(0)) >> 8));

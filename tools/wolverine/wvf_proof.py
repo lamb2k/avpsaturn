@@ -19,12 +19,12 @@ def wrow(row):
         fh.write(json.dumps(row) + chr(10))
 
 
-def enemies_full(s):
-    buf = s.ram(0x9a00, 0x2d00); out = []
-    for o in range(0, len(buf) - 0x80, 0x100):
-        b = buf[o:o + 0x100]
-        if b[0] and b[8] == 0x0c and b[1] != 0:
-            out.append(dict(x=int.from_bytes(b[0x10:0x12], "big"), z=int.from_bytes(b[0x18:0x1a], "big"), hs=b[0x2c], hp=int.from_bytes(b[0x40:0x42], "big"), st=b[4:7].hex()))
+def enemies_full(s):   # the game's enemy pool (tag 0c): 20 slots of 0xc0 bytes from ff9580
+    buf = s.ram(0x9580, 20 * 0xc0); out = []
+    for k in range(20):
+        b = buf[k * 0xc0:(k + 1) * 0xc0]
+        if b[0] and b[8] == 0x0c:
+            out.append(dict(slot=k, x=int.from_bytes(b[0x10:0x12], "big"), z=int.from_bytes(b[0x18:0x1a], "big"), hs=b[0x2c], hp=int.from_bytes(b[0x40:0x42], "big"), st=b[4:7].hex()))
     return out
 
 
@@ -38,6 +38,9 @@ def heal_leg(s):
     m.call("memory_write", address=hex(s.syms["RAMB"] + 0x83c0), size="word", value=hex(hp0))
     m.call("memory_write", address=hex(s.syms["RAMB"] + 0x83c2), size="word", value=hex(hp0))
     s.shot("heal_start")
+    if os.environ.get("PROOF_BLOCKS"):   # which blocks of the object pools are active: offset, class, tag, kind, health
+        buf = m.read(s.syms["RAMB"] + 0x9000, 0x3800)
+        wrow(dict(mode="blocks", act=[(hex(0x9000 + o), buf[o], buf[o + 2], buf[o + 8], int.from_bytes(buf[o + 0x40:o + 0x42], "big")) for o in range(0, 0x3800 - 0x40, 0x40) if buf[o] and buf[o + 8] in (0x0c, 0x10, 0x14, 0x04, 0x08, 0x20)]))
     m.call("resume")
     v0 = int.from_bytes(m.read(s.syms["sat_dbg"] + 8, 4), "big"); t_end = time.time() + secs; last = None
     while time.time() < t_end:
@@ -45,6 +48,12 @@ def heal_leg(s):
         blk = s.ram(0x8380, 0x100)
         hp = int.from_bytes(blk[0x40:0x42], "big")
         en = enemies_full(s)
+        if os.environ.get("PROOF_CLEAR"):   # harness assist, every leg alike: the stage's enemies (pools tag 0c and 08) are taken out of play (active byte 0) so the curve shows only the healing factor
+            for base, cnt in ((0x9580, 20), (0x9280, 4)):
+                buf = s.ram(base, cnt * 0xc0)
+                for k in range(cnt):
+                    if buf[k * 0xc0]:
+                        m.call("memory_write", address=hex(s.syms["RAMB"] + base + k * 0xc0), size="byte", value=hex(0))
         near = min((abs(e["x"] - int.from_bytes(blk[0x10:0x12], "big")) for e in en), default=9999)
         row = dict(mode="heal", v=v, hp=hp, hp_seen=int.from_bytes(blk[0x42:0x44], "big"), st=blk[4:7].hex(), enemies=len(en), nearest=near)
         for n in ("hl_t", "hl_hp"):
@@ -59,7 +68,9 @@ def heal_leg(s):
     s.stop()
 
 
-KEYS = [(0, []), (4, ["down"]), (8, ["down", "right"]), (12, ["right"]), (14, ["a"]), (18, []), (200, [])]   # Berserker Barrage: QCF + attack, facing right
+def keys_for(face):   # Berserker Barrage: QCF + attack, forward = right when his facing byte (+0f) is set
+    fw = "right" if face else "left"
+    return [(0, []), (6, ["down"]), (12, ["down", fw]), (18, [fw]), (22, [fw, "a"]), (26, []), (200, [])]
 
 
 def flash_leg(s):
@@ -73,6 +84,8 @@ def flash_leg(s):
         m.call("pause"); m.call("load_state", slot=nsp.SLOT); time.sleep(0.5)
         os.makedirs(OUT + "/" + tag, exist_ok=True)
         keys = []; k = 0
+        KEYS = keys_for(s.ram(0x838f, 1)[0] & 1)
+        s.log("facing", KEYS[2][1])
         for f in range(frames):
             while k < len(KEYS) and KEYS[k][0] <= f:
                 keys = KEYS[k][1]; k += 1
@@ -97,6 +110,7 @@ def proof(s):
     (heal_leg if MODE == "heal" else flash_leg)(s)
 
 
+nsp.enemies = lambda s: [(e['x'], e['z']) for e in enemies_full(s)]   # native_states_proof walks ff9a00 in steps of 0x100: not the enemy pool's grid
 nsp.proof = proof
 nsp.TITLE = os.environ.get("PROOF_TITLE", "AvP FEATURES: " + MODE + " [port 9724]")
 step = nsp.step
