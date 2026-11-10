@@ -13,8 +13,9 @@ which is why the box showed Schaefer's face in Wolverine's colours. The 2P HUD p
 `tools/wolverine/hud_art.py` now builds a `talk_face` piece: the head and shoulders of the approved select portrait (crop x 20, y 8, 88 x 50.9)
 shrunk to 38x22 by area average, each pixel to the nearest of the portrait's own 15 colours, inside the arcade's 1 px white frame (pen 1, which
 every arcade face has in its tiles). Stored mirrored in both halves of each block, stage files only. A `wolverine_talk_face_40x24.png` in the art
-directory (same 15 colours) replaces the crop if the artist wants to paint it. The approved portrait faces left; mirroring is one constant if
-the owner wants him to face the text like Schaefer. Memory: none (same payload slots; the ELF is byte-identical).
+directory (same 15 colours) replaces the crop if the artist wants to paint it. The approved portrait faces left; owner 2026-11-10 asked for the box
+face mirrored so he faces the text like Schaefer, so `TALK_FACE_MIRROR = True` (False restores the approved orientation). Memory: none (same
+payload slots; the ELF is byte-identical).
 
 ## 2. Story box wording, SAT_WV_DIALOG (default off)
 
@@ -75,3 +76,32 @@ Names that were checked and need nothing in text: the continue screen (CONTINUE?
 staff roll (no character names), the "BEST 50 HUNTERS" table (icon done by hud_art.py). Art, not text, still showing Schaefer or the four
 characters: the continue screen's per-character picture (the arcade draws the character's weapon; Schaefer's smartgun arm for his slot), the
 intro cast panel, the ending and staff roll group panels, and the attract profile pages. These need new art; none is a direct swap.
+
+## 5. Capturing a story box in Yaba (the "missing backdrop" of 2026-11-10 was the capture, not the game)
+
+The panel behind the face and text, the fence and barricades, and every sprite looked missing in `framebuffer_burst` captures. Same box, same
+disc, three ways (plain integration `integration\w1`, the flag-off and the flag-on builds all behave alike, so the game is not at fault):
+- free-running `framebuffer_screenshot`: panel, face, text, fence, barricades, sprites all present (the arcade's picture);
+- the first 2 to 3 stepped frames after `pause` (`framebuffer_burst`) have no VDP1 content at all: no panel, no sprites. The panel is a sprite
+  object, and the frame chain's command list is empty until the first presented frame after a resume. From the 3rd or 4th stepped frame on, panel
+  and sprites are back;
+- the camera also moves between the probe that finds the box and the pause (seconds of wall time at Yaba's speed), which is why the fence was
+  gone in the later frames of the same box.
+So story box evidence is taken as: the running-core screenshot, or a paused `framebuffer_screenshot`, or burst frames after the 4th. Burst frames 1
+to 3 are never used. (`E:\AvP\learning\lane-wv-talkbox\scripts	alk_walk.py` keeps all of them: `box*_running.png`, `_paused_shot.png`, 12 stepped frames, `_run0..2.png`.)
+
+## 6. Cost of SAT_WV_DIALOG on top of the stage-sprites line (CHAR_FUZZ_KEYS, PACK_TAIL_FILL, ROWTRIM, text-glyphs FONT_KEYS)
+
+Merged into a throwaway branch `lane/wv-dialog-on-sprites-20261110` (stage-sprites 7ba526c + this lane) and built with that lane's recipe:
+- Tile keys: the 176 keys the wording draws are all inside `FONT_KEYS` (every two row font glyph at both parities), so on that line the flag adds
+  no tile key: 0 of 176 are new. On the plain integration base (no FONT_KEYS) they cost 889 dropped keys, see section 4.
+- Room: the flag's 4,268 bytes (3,985 data, about 283 code) cross one 4 KB cart page (cart_free 4,340 to 4,168; `cart_pack_room` 1,630,208 to
+  1,626,112), which is the only cost left: 404 more dropped keys in total, all in 8 files of stages 0e (48 to 56 each) and 24 (41 to 65 each), and
+  no Wolverine tile. Dropped keys in the 77 files: 17,721 flag off, 18,125 flag on; fit.py 77 of 77, gate True both, rowtrim on.
+- To avoid the page the wording would have to fit in the 244 free bytes of the page, which it cannot; moving it to a ROM stretch only moves the
+  cost to the spill room.
+
+## 7. Intended recipe
+
+Owner 2026-11-10: SAT_WV_DIALOG on with Wolverine is the intended default for owner discs. The code default stays 0; the integration recipe adds
+`-DSAT_WV_DIALOG=1` (build.py also accepts `-DSAT_WV_DIALOG`). Wording approved by the owner 2026-11-10 ("g2g").
