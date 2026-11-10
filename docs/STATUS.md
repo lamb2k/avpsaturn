@@ -2,6 +2,10 @@
 
 Only source of current state. Candidate branch `codex/avp-wolverine-fps-next-20261109`. Backlog: docs/BACKLOG.md.
 
+## Native Wolverine graphics and data path, 2026-11-09 (HOST identity, BUILD, EMULATOR; hardware UNRUN)
+
+`lane/wv-native-gfx-20261109` on `avp/integration` 4bfcdf6, plan V2. Default-off switch `-DSAT_WV_NATIVE_GFX`: one 24.7 KB data block (Schaefer's index tables and records relocated, plus his native idle, walk and first claw attack read from the MSHvSF program ROM, his own box table) mapped at 68000 0x300000 (`PAGE[0x30]`), reached through redirected access points (26 opcode-store slots, 11 code immediates, the box table slot); the skin's pass, clock holds and box swap skip those records. Relocated donor data: whole golden route clean, 61 fields and blocks identical to the plain runner. Flag on: hw_free 1,252, lw_free 40 (60 off), cart_free 7,136 (4,340 off), cold1_at -28 KB, 76 of 76 fits, block outside the ROM image and every stretch. Flag off: build byte-identical to avp/integration except ISO volume dates. Yaba, same state and schedule: emulated vblanks per second native 54 to 58, skin 46 to 49, Schaefer 59. Not done: the other moves, counted Yaba contact, hardware. Details: docs/notes/AVP_WOLVERINE_NATIVE_GFX_20261109.md sections 10 and 11.
+
 ## Wolverine select screen and HUD art, 2026-11-09 (HOST; SH-2 compile of kernel.c and guests.c; link, disc, MAME, EMULATOR and HARDWARE UNRUN)
 
 `lane/wolverine-art-20261109` on the FPS-compare base. The artist's five PNGs (select picture, name plate, HUD portrait, HUD name, ranking icon) replace Schaefer's art while Wolverine is on. Converted offline by `tools/wolverine/hud_art.py` into the slot character's own tile codes (select 0x2c20.., plate 0x0e30/0x0f30.., HUD portrait 0x1ae6.., HUD name 0x0be0..), so the arcade's own maps draw them: no draw code, no RAM table. The ranking icon is the HUD portrait's tiles (checked on the arcade's pictures), so piece E adds nothing of its own.

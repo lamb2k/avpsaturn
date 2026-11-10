@@ -80,13 +80,40 @@ void f_aa59a(void)
      (saturn/guests/wolverine/wolverine.c). f_1d03e is the players' melee pass (list 0xfff112 targets, 0x1cc3e), f_1cf54 the enemy and shot passes.
    - a Wolverine player's gun shots do no damage (no gun for him): the pass answers "no hit" the way the lifted body does at its exit.
    - f_195ec (the player state machine, a6 = block) is held on some ticks to stretch Schaefer's state timers to MSHvSF's. */
+extern int sat_guest_wolverine_tick(unsigned long a6) __attribute__((weak));
+#ifndef SAT_WV_NATIVE_GFX   /* the skin build: box swap around the passes, shot refusal, the held clock and its observer */
 extern void sat_guest_wolverine_boxes(unsigned long a6, unsigned long a1, int restore) __attribute__((weak));
 extern int sat_guest_wolverine_bullet(unsigned long a6) __attribute__((weak));
-extern int sat_guest_wolverine_tick(unsigned long a6) __attribute__((weak));
 extern void sat_guest_wolverine_after_tick(unsigned long a6) __attribute__((weak));
 #ifdef SAT_WOLVERINE_DEBUG
 u8 wv_hdbg[8];   /* Yaba probe: calls with a player attacker: 0 f_1cf54, 1 f_1d03e, 2 f_1d116; hits: 3 f_1cf54, 4 f_1d03e, 5 f_1d116; 6 shots refused */
 #endif
+#endif
+#ifdef SAT_WV_NATIVE_GFX
+/* Wolverine's Berserker (wolverine.c sat_wv_bz_run): while a player is in it (one byte), the passes with that player as attacker ask for each target's share first and tell
+   the cart which target they hit (per-target hit cap; the first connect charges the cost). Nothing else runs here for him. */
+unsigned char sat_wv_cn[2] = {4, 4};   /* attack chain stages of each player (the lifted attack routine wraps its stage counter there; build.py rewrites its `& 3`); wolverine.c sets his */
+volatile unsigned char sat_wv_bz;   /* bit i: player i is in the Berserker (written by the cart's action); here so the test in every pass reads fast memory */
+extern int sat_wv_bz_run(unsigned long a6);
+extern int sat_wv_bz_gate(unsigned long a6, unsigned long a1);
+extern void sat_wv_bz_hit(unsigned long a6, unsigned long a1);
+#endif
+#ifdef SAT_WV_NATIVE_GFX
+static void guest_pass(void (*lifted)(void))
+{
+    u32 a6 = R->a[6], a1 = R->a[1];
+    if (sat_wv_bz && (a6 == 0xff8380u || a6 == 0xff8480u)) {
+        if (sat_wv_bz_gate(a6, a1)) { R->d[0] = 0; FLAGS(1, 0, 0, 0, 0); return; }
+        lifted();
+        if (R->d[0] == 1) sat_wv_bz_hit(a6, a1);
+        return;
+    }
+    lifted();
+}
+void f_1cf54(void) { extern void lifted_1cf54(void); guest_pass(lifted_1cf54); }
+void f_1d03e(void) { extern void lifted_1d03e(void); guest_pass(lifted_1d03e); }
+void f_1d116(void) { extern void lifted_1d116(void); guest_pass(lifted_1d116); }
+#else
 static void guest_pass(void (*lifted)(void), int which)
 {
     /* The collision passes run once for each attacker and target pair, many times a frame, and the two guest calls below live in the cart. Both do
@@ -121,6 +148,7 @@ static void guest_pass(void (*lifted)(void), int which)
 void f_1cf54(void) { extern void lifted_1cf54(void); guest_pass(lifted_1cf54, 0); }
 void f_1d03e(void) { extern void lifted_1d03e(void); guest_pass(lifted_1d03e, 1); }
 void f_1d116(void) { extern void lifted_1d116(void); guest_pass(lifted_1d116, 2); }
+#endif
 /* f_19f9a is the player's pick-up test (a6 = player block; a4 = the touched item, a6+8e): true (d0 = 1, Z clear) when the pick-up button is pressed on an
    item that is free. Item kind +2: 0a food or health, 0b score; 02, 03, 07, 08 and the rest are weapons and held items (the player then carries it in
    +5a), 0e a timed power-up. A Wolverine player takes only food and score: for the rest the test answers "nothing to pick up" (the arcade is untouched:
@@ -137,6 +165,14 @@ void f_19f9a(void)
 }
 /* f_24060 is the player's gun action (a6 = block; Berserker Barrage runs in it for Wolverine): no shot, flash, sound or heat for a Wolverine player
    (saturn/guests/wolverine/wolverine.c sat_guest_wolverine_gun). */
+#ifdef SAT_WV_NATIVE_GFX
+/* f_24f04 is Schaefer's state 020008 routine (the special: attack + jump; table 0x891e entry of character 1). A Wolverine player runs his own Berserker Barrage instead (no gun code at all). */
+void f_24f04(void)
+{
+    extern void lifted_24f04(void);
+    if (!sat_wv_bz_run(R->a[6])) lifted_24f04();
+}
+#else
 extern int sat_guest_wolverine_gun(unsigned long a6, int end) __attribute__((weak));
 void f_24060(void)
 {
@@ -146,6 +182,15 @@ void f_24060(void)
     lifted_24060();
     if (g) sat_guest_wolverine_gun(player, 1);
 }
+#endif
+#ifdef SAT_WV_NATIVE_GFX
+void f_195ec(void)
+{
+    extern void lifted_195ec(void);
+    if (sat_guest_wolverine_tick) sat_guest_wolverine_tick(R->a[6]);
+    lifted_195ec();
+}
+#else
 void f_195ec(void)
 {
     extern void lifted_195ec(void);
@@ -156,6 +201,7 @@ void f_195ec(void)
        captured at entry, not the register it leaves behind. */
     if (sat_guest_wolverine_after_tick) sat_guest_wolverine_after_tick(player);
 }
+#endif
 #endif
 
 void f_1689a(void)
