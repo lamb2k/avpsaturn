@@ -96,13 +96,16 @@ def pad(pages, limit):
     return {p + d for p in pages for d in (-1, 0, 1) if 0 <= p + d < limit}
 
 
-def augment(rounds, data, keys=False, pages=True, remap=()):
+def augment(rounds, data, keys=False, pages=True, remap=(), key_stages=None):
     """Add the fuzz data to rounds (rounds.json in memory). Returns a report dict.
     pages: every stage file keeps the ROM pages the fuzz runs read in its stage word, in the front end's and in the next stage's, each with a page either side
     (the keep rule of tools/rounds_config.py), and the pages the players' sprite scripts are read from in any stage. A correctness fix: a page a play reads must hold the
     ROM's bytes in the file that plays it.
     keys: a file's sprite candidates gain the sprite keys the fuzz runs of the characters in its mask looked up in its stage, and those characters' body keys
     (their own palette, every stage); both are ranked under the route keys and above the walks (fuzz_keys / body_keys on the file, read by build.py).
+    key_stages: stage words (ints) that take keys; None = all. Where every variant of a stage packs to the same bytes (no sprite key dropped) the sector store
+    (tools/sector_store.py, 2^18 sectors of 2 KB) keeps the 11 files once; a stage whose variants differ costs about 21 files of room. Only stages whose files already differ
+    (0e, 1c, 1e, 24 on the integration build) can take per-character keys without outgrowing the store.
     remap: sprite keys that must not enter (the bonus character's remap keys: a key it uses holds its tile in the guest files)."""
     report = dict(pages_added=0, keys_added=0, files=0)
     page = rounds["page"]
@@ -130,19 +133,25 @@ def augment(rounds, data, keys=False, pages=True, remap=()):
             if new:
                 f["keep_pages"] = sorted(set(f["keep_pages"]) | want)
                 report["pages_added"] += len(new)
-        if keys and s:
+        if keys and s and (key_stages is None or s in key_stages):
             mask = f.get("mask")
             bits = [b for b in SOLO if mask is None or mask & b]
-            fk, bk = set(), set()
-            for b in bits:
+            fk, bk, ak = set(), set(), set()
+            for b in SOLO:
                 c = data["chars"].get(str(b))
                 if c:
-                    fk.update(c["stage_keys"].get("%02x" % s, ()))
-                    bk.update(c["body_keys"])
+                    ak.update(c["stage_keys"].get("%02x" % s, ()))
+                    ak.update(c["body_keys"])
+                    if b in bits:
+                        fk.update(c["stage_keys"].get("%02x" % s, ()))
+                        bk.update(c["body_keys"])
             fk -= remap
             bk -= remap
+            ak -= remap
             have = set(f["keys"][0])
-            f["keys"][0] = sorted(have | fk | bk)
+            # Every variant of a stage asks for the same keys (all four characters' fuzz and body keys, ranked by the characters in the file): in a stage with room
+            # the variants then pack to identical files, which the sector store (tools/sector_store.py, 2^18 sectors) keeps once. The ranks decide what drops in a short stage.
+            f["keys"][0] = sorted(have | ak)
             f["fuzz_keys"] = sorted(fk)
             f["body_keys"] = sorted(bk)
             report["keys_added"] += len((fk | bk) - have)

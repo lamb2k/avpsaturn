@@ -52,14 +52,17 @@ ARCADE_SPRITE_KEYS = {k for f in ROUNDS["files"] for k in f["keys"][0]}
 #     Without them a file overwrites data that a jump attack, special or hurt reaction reads: page 0x171400 holds Linn's last script words and no stage file kept it (a stage file
 #     with tiles there hands the script reader garbage: fatal 0xe2 at 0xa9cc4, a word outside its 8 entry jump table), and pages 0xa5800-0xa6bff were read by fuzz runs of stage 04 and others.
 #   CHAR_FUZZ_KEYS (default 0, a visible change): a file also asks for the sprite keys the fuzz runs of its characters looked up in its stage and those characters' body
-#     tiles (tools/char_fuzz.py ranks), so poses the route never reached stop drawing blank; the room comes from other characters' material.
+#     tiles (tools/char_fuzz.py ranks), so poses the route never reached stop drawing blank; the room comes from other characters' material. Only the stages in
+#     CHAR_FUZZ_KEY_STAGES (default 0e,1c,1e,24, the ones whose files already differ per variant): any other stage would stop its 11 variants packing to identical files
+#     and outgrow the sector store (STORE.BIN, 2^18 sectors: 275k unique sectors against 122k).
 CHAR_FUZZ = None
 if os.environ.get("CHAR_FUZZ", "1") != "0":
     sys.path.insert(0, str(REPO / "tools"))
     import char_fuzz
     CHAR_FUZZ = char_fuzz.load(WORK)
     if True:   # without a census file the players' script stretch is still kept (tools/char_fuzz.py SCRIPT_REGION)
-        print("char fuzz:", char_fuzz.augment(ROUNDS, CHAR_FUZZ, keys=os.environ.get("CHAR_FUZZ_KEYS", "0") == "1", pages=os.environ.get("CHAR_FUZZ_PAGES", "1") == "1"), flush=True)   # the guest files drop a bonus character's remap keys (guest_rounds.extend)
+        print("char fuzz:", char_fuzz.augment(ROUNDS, CHAR_FUZZ, keys=os.environ.get("CHAR_FUZZ_KEYS", "0") == "1", pages=os.environ.get("CHAR_FUZZ_PAGES", "1") == "1",
+                                                key_stages={int(x, 16) for x in os.environ.get("CHAR_FUZZ_KEY_STAGES", "0e,1c,1e,24").split(",") if x} or None), flush=True)   # the guest files drop a bonus character's remap keys (guest_rounds.extend)
 sys.path.insert(0, str(REPO / "tools/wolverine"))
 import hud_art
 HUD = None   # guest select screen and HUD art (hud_art.build); guests.c always includes a palette table, empty without it

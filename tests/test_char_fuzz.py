@@ -45,15 +45,23 @@ class AugmentTests(unittest.TestCase):
         r = rounds()
         rep = char_fuzz.augment(r, data(), keys=True, pages=False, remap={77})
         f = {x["name"]: x for x in r["files"]}
-        self.assertEqual(f["stage04_m1"]["keys"][0], [1, 2, 5, 6, 8])
+        self.assertEqual(f["stage04_m1"]["keys"][0], [1, 2, 5, 6, 8, 9, 11])   # every variant asks for every character's keys; the ranks tell them apart
         self.assertEqual(f["stage04_m1"]["fuzz_keys"], [5, 6])
         self.assertEqual(f["stage04_m1"]["body_keys"], [8])
-        self.assertEqual(f["stage04_m2_wv"]["keys"][0], [1, 2, 9, 11])
+        self.assertEqual(f["stage04_m2_wv"]["keys"][0], [1, 2, 5, 6, 8, 9, 11])
+        self.assertEqual(f["stage04_m2_wv"]["fuzz_keys"], [9])
         self.assertEqual(f["stage04"]["keys"][0], [1, 2, 5, 6, 8, 9, 11])   # the file for three or four players asks for every character
         self.assertEqual(f["front"]["keys"][0], [1, 2])
         self.assertNotIn("fuzz_keys", f["front"])
         self.assertEqual(f["stage04"]["keep_pages"], [10])
         self.assertEqual(rep["files"], 4)
+
+    def test_keys_only_in_the_listed_stages(self):
+        r = rounds()
+        char_fuzz.augment(r, data(), keys=True, pages=False, key_stages={2})
+        f = {x["name"]: x for x in r["files"]}
+        self.assertEqual(f["stage04_m1"]["keys"][0], [1, 2])
+        self.assertNotIn("fuzz_keys", f["stage04"])
 
     def test_rank_raises_never_lowers(self):
         v = dict(mask=1, fuzz_keys=[5], body_keys=[8])

@@ -203,7 +203,8 @@ def main(argv=None, environ=None, fit_fn=None, own_keys=None):
             data = char_fuzz.load(pathlib.Path(argv[0]))
             if data:
                 print("char fuzz:", char_fuzz.augment(rounds, data, keys=environ.get("CHAR_FUZZ_KEYS", "0") == "1",
-                                                      pages=environ.get("CHAR_FUZZ_PAGES", "1") == "1"), flush=True)
+                                                      pages=environ.get("CHAR_FUZZ_PAGES", "1") == "1",
+                                                      key_stages={int(x, 16) for x in environ.get("CHAR_FUZZ_KEY_STAGES", "0e,1c,1e,24").split(",") if x} or None), flush=True)
         selected = selected_files(rounds, stages)
         room = ends[-1][0] - CART_PACK
         free = free_runs(rounds, ends, **config)
