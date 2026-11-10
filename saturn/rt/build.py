@@ -325,7 +325,7 @@ def gen_sources():
 
 def cc(src, obj, extra=()):
     newest = max(src.stat().st_mtime, (HERE / "lift_target.h").stat().st_mtime)
-    if src.name in ("kernel.c", "pad.c", "sat_gfx.c", "home.c", "home_cold.c", "guests.c", "megaman.c", "wolverine.c", "wv_features.c", "game_bind.c", "reveal.c"):
+    if src.name in ("kernel.c", "pad.c", "sat_gfx.c", "home.c", "home_cold.c", "fps_hud.c", "home_font_cold.c", "guests.c", "megaman.c", "wolverine.c", "wv_features.c", "game_bind.c", "reveal.c"):
         newest = max(newest, (HERE / "sat_rt.h").stat().st_mtime, time.time() if os.environ.get("KERNEL_CFLAGS") else 0)
     if src.name == "sat_gfx.c":
         newest = max(newest, (src.parent / "sat_gfx.h").stat().st_mtime)
@@ -516,6 +516,10 @@ def main():
             if name:
                 sh([sys.executable, REPO / f"tools/{name}/gen_runtime.py", pathlib.Path(d) / "remap.json", GEN / f"guest_{name}.inc"])
                 home_cold_extra.append(cc(REPO / f"saturn/guests/{name}/{name}.c", OBJ / f"guest_{name}.o", ["-Os", "-I", GEN] + os.environ.get("KERNEL_CFLAGS", "").split()))
+    if "SAT_HOME_FONT_COLD" in os.environ.get("KERNEL_CFLAGS", ""):   # menu font and text palettes in the cart tail (lane perf-reconcile), default off
+        home_cold_extra.append(cc(HERE / "home_font_cold.c", OBJ / "home_font_cold.o", ["-Os", "-I", GEN] + os.environ.get("KERNEL_CFLAGS", "").split()))
+    if "SAT_FPS_HUD" in os.environ.get("KERNEL_CFLAGS", ""):   # performance readout (lane perf-reconcile): cold code in the cart tail, default off
+        home_cold_extra.append(cc(HERE / "fps_hud.c", OBJ / "fps_hud.o", ["-Os", "-I", GEN] + os.environ.get("KERNEL_CFLAGS", "").split()))
     snap_bytes = 0
     if home:   # stage select's held title picture (home_cold.c sat_home_snap_frame) copies the graphics snapshot: its size comes from the gfx object (nm -S), so no constant stays in high RAM
         for l in sh([NM, "-S", OBJ / "gfx_sat_gfx.o"]).splitlines():
