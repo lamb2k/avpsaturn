@@ -358,6 +358,19 @@ static void index_section(Section *s, int which)
 
 /* Payload index of a key, BLANK_INDEX for an empty tile, or -1 when the pack lacks it. */
 #ifdef SAT_PERF_STAGES
+#define PNOW() (((u32)*(volatile u8 *)0xfffffe12UL << 8) | *(volatile u8 *)0xfffffe13UL)
+#define PSTAGE(i) (sat_gfx_stage[i] = PNOW())
+#define PSTAGE_ZERO(i) (sat_gfx_stage[i] = 0)
+#define PACC_BEGIN() u32 pacc_t = PNOW()
+#define PACC_END(i) (sat_gfx_stage[i] += (PNOW() - pacc_t) & 0xffffu)
+extern unsigned long sat_gfx_stage[16];
+#else
+#define PSTAGE(i)
+#define PSTAGE_ZERO(i)
+#define PACC_BEGIN()
+#define PACC_END(i)
+#endif
+#ifdef SAT_PERF_STAGES
 /* Measurement only (lane perf-reconcile 11-10): where the layer phase of a draw goes. [0] cache_find calls, [1] pack_find calls, [2] blank_seen hits,
    [3] cache_find hits in the hash, [4] scan loop iterations for a free slot. Read over the debugger. */
 unsigned long sat_gfx_pf[8];
@@ -1349,6 +1362,8 @@ static void draw_scroll1(u16 sx, u16 sy)
 #if SAT_GFX_FIT && defined(SAT_HOME)
     u32 bm[S1_ROWS][2];
     int sel = home_maps_rows(x0, bm);
+    PSTAGE(10);
+    PSTAGE_ZERO(11);
 #ifdef SAT_HOME_DIAG
     sat_diag_frames++;
     diag_miss0 = sat_gfx_stats.missing;
@@ -1358,7 +1373,9 @@ static void draw_scroll1(u16 sx, u16 sy)
     {
 #if SAT_GFX_FIT && defined(SAT_HOME)
         u8 map[44];
+        PACC_BEGIN();
         home_row_map(row < S1_ROWS ? row : S1_ROWS - 1, bm, sel, map);
+        PACC_END(11);
 #ifdef SAT_HOME_DIAG
         if (row < S1_ROWS && snap.home < 3)
         {
@@ -1407,6 +1424,7 @@ static void draw_scroll1(u16 sx, u16 sy)
             write_name(VDP2_VRAM + MAP_S1 + (r * 64 + c) * 4, name, &sh_s1[r * 64 + c]);
         }
     }
+    PSTAGE(12);
 #if defined(SAT_HOME_DIAG) && SAT_GFX_FIT && defined(SAT_HOME)
     sat_diag_s1miss += sat_gfx_stats.missing - diag_miss0;
 #endif
@@ -2060,17 +2078,11 @@ static void note_slots(void)
 #else
 /* Timer at each stage, for the frame profile. The kernel owns and restarts the timer. */
 #ifdef SAT_PERF_STAGES
-unsigned long sat_gfx_stage[12];   /* [6] after the layer wait, [7] after scroll 2, [8] after scroll 3, [9] after scroll 1 */
+unsigned long sat_gfx_stage[16];   /* [6] after the layer wait, [7] after scroll 2, [8] after scroll 3, [9] after scroll 1; inside scroll 1: [10] after home_maps_rows, [11] ticks summed in home_row_map, [12] after the row loop */
 #else
 unsigned long sat_gfx_stage[6];
 #endif
 #define STAGE(i) (sat_gfx_stage[i] = ((u32)*(volatile u8 *)0xfffffe12UL << 8) | *(volatile u8 *)0xfffffe13UL)
-#endif
-
-#ifdef SAT_PERF_STAGES
-#define PSTAGE(i) STAGE(i)
-#else
-#define PSTAGE(i)
 #endif
 
 /* One scroll layer's visible cells. Most frames nothing changed, so the first pass only sums and the copy runs when the sum moved: the drawing side
