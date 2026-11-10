@@ -399,14 +399,14 @@ Compiled out under `-DSAT_WV_NATIVE_GFX`: sprite removal and reinsertion and the
 | cold1_at | 0x27e2000 | 0x27db000 | **0x27e2000** |
 | block `wv_blk` | - | 25,128 | 22,064 |
 | wolverine.o text / data / rodata | 5.9 K / 14 B / 19.5 K | 6.6 K / 24.8 K / 19.9 K | **3.1 K / 22.2 K / 0.5 K** |
-| ISO | 391,497,728 | 385,818,624 | **391,497,728** |
+| ISO | 391,499,776 | 385,818,624 | **391,497,728** (one sector under the integration disc) |
 | fit.py, 76 stage files | 76 of 76 | 76 of 76 | **76 of 76, gate True**; stage24_ma: Schaefer drops 2,872, Wolverine 2,834 (margin 38); cart pack room 1,630,208 |
 
 **The native tail is back at the integration owner build's step: the memory credited is the 7 four-KB steps (224 tiles) step 2 had spent**; against flag off the native build costs no tiles (the stage24_ma figures are identical: 2,872 / 2,834, margin 38). Removing the skin was not enough for the last step (3,552 bytes were still missing): the rest came from sharing the 48 T3 slots (3,196 bytes: the stock gun's aim chains are dead for him), dropping T's unused leading entries (112 bytes; the collision pass adds sign-extended word offsets, so nothing was renumbered) and packing the palette marks and slot offsets as deltas (about 400). hw_free grew by 116 and lw_free by 44 against integration (the skin hooks left game_bind.c, the clock's statics left low RAM).
 
 ### 14.4 Gates
 - **HOST identity, stock Schaefer with the flag on** (wrappers linked, guest off `WV_SEL=0`, golden-checked lifted game): golden_c1 clean 272,171 of 272,171, golden_2p (the second Schaefer slot) clean 329,918 of 329,918, 0 differing bytes, missed IRQ 0, the same as the plain runner.
-- **Flag-off identity against avp/integration**: two builds from pristine copies of integration/w1, owner recipe, the integration archive and this branch with the flag undefined: IDENTITY_RESULT_PLACEHOLDER
+- **Flag-off identity against avp/integration**: two builds from pristine copies of integration/w1, owner recipe, the integration archive and this branch with the flag undefined: `HW.BIN`, `LW.BIN`, `COLD1.BIN`, `OPX.BIN` and `ROM.BIN` are byte-identical (sha256), `sat.elf` has the same size (2,047,072 bytes) and the same sorted `nm` table (sha256 fc883e35...), `sat.iso` has the same size (391,499,776) and 56 bytes differ in sectors 16, 18 and 23 (the ISO9660 volume descriptor and directory records, which carry the build time). The rounds were rebuilt in both builds (the integration w1 receipt did not match), 1,804 and 1,732 s.
 - fit.py D11 (on a copy of the asset directory): 76/76, gate True, none of his own keys dropped, no missing guest key.
 - WSL unittest: 106 run, 30 errors (the known private-dependency set, as integration), 1 skipped.
 - Builds: rc 0, no NO-GO.
