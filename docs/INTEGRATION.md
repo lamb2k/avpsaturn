@@ -53,6 +53,8 @@ Dropped (owner 2026-11-09: no more work on the sprite-replacement Wolverine): cl
 Parked (owner 2026-11-09): versus mode (Duel): RANDOM arena tile garbage, Hunter body not drawn in Linn vs Hunter, stage enemies entering on 1e/24.
 
 ## Owner discs
+
+- avp_integration_2 (70af5ed), 2026-11-09: E:\AvP\package-integration\avp_integration_2 (27 tracks, 662 MB). Gates: build rc 0 (hw_free 964, lw_free 60), fit.py D11 76/76, WSL unittest 106 run with the 30 known private-dependency errors, Yaba boot + walk to a stage 1 Wolverine fight with sprites drawn. Yaba speed not measured (host busy with other lanes). Replaces avp_integration_1.
 | Disc | Commit | Package | State |
 | --- | --- | --- | --- |
 | avp_integration_1 | a6e58aa | **WITHDRAWN 11-09**: owner saw sprites vanish on most frames and half speed in Yaba. The regression predates the menu/slowdown merges (anim-branch base also bad); lane/sprite-dropout is bisecting. |
