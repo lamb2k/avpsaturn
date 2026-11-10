@@ -385,7 +385,9 @@ extern u32 sat_vblanks_now(void);
 /* Measurement storage is entirely absent in a normal image. With depth 16 the
    two exported rings take 1984 bytes; current-row and snapshot state add 132.
    This diagnostic build still has to pass the normal linker memory limits. */
-#ifdef SAT_GFX_HOST
+#if defined(SAT_GFX_HOST) || defined(SAT_VDP1_PROFILE_HWRAM)
+/* SAT_VDP1_PROFILE_HWRAM: rings in high work RAM (the guest build has no low work RAM left for them). Measurement builds only;
+   compare arms built the same way, not against low-RAM profile numbers. */
 #define VP_RAM
 #else
 #define VP_RAM __attribute__((section(".lwgfx"), aligned(4)))
@@ -431,9 +433,143 @@ static void vp_sprite(int x, int y, int w, int h, unsigned int pmod,
 #define VP(x)
 #endif
 
+#ifdef SAT_PERF_HUD
+/* Hardware test readout (lane hwtest, 11-09). Default off. Cumulative counters since a reset, drawn as two lines of text on the menu layer (NBG3, the home
+   font) at rows 24 and 25, refreshed about once a second and frozen after SAT_PERF_HUD_WINDOW counted vblanks. Everything is in high work RAM; nothing here
+   touches low work RAM. Counting runs only while a stage is being played (the arcade's stage mode, a character in play, no menu or load up), so in the attract
+   it covers the demo's gameplay and nothing else. Reset: pad L + Z + R together.
+   The master (the vblank hook) owns the picture shares; the slave owns the per-plot figures. Each reads the other's through the uncached alias, no locks:
+   a displayed figure may be one count behind another for a second, and the frozen figures are exact.
+   VDP1 time is observed, never modelled: the slave notes its own free running timer at the PTMR write and again at the first moment it sees EDSR.CEF set,
+   in three places: between its layer passes (a bound: the segment), in its idle loop (a poll every few microseconds, precise) and, when the plot outlasts
+   the frame, in the wait at the start of the next draw (exact). */
+#ifndef SAT_HOME
+#error SAT_PERF_HUD needs SAT_HOME (the menu font and layer)
+#endif
+#ifndef SAT_PERF_HUD_WINDOW
+#define SAT_PERF_HUD_WINDOW 3600UL
+#endif
+#if SAT_VDP1_HW_ERASE
+#if SAT_GFX_PAIR_REUSE
+#define HUD_ARM "BOTH"
+#else
+#define HUD_ARM "HWCLR"
+#endif
+#else
+#if SAT_GFX_PAIR_REUSE
+#define HUD_ARM "PAIR"
+#else
+#define HUD_ARM "OFF"
+#endif
+#endif
+#define HUD(x) x
+#define HUD_ROW0 24
+#define HUD_OS __attribute__((optimize("Os"), noinline))   /* none of this is hot, and high work RAM is what is short */
+extern u32 sat_pad_raw;
+extern volatile int sat_home_hold;
+extern volatile int sat_home_mode;
+extern int sat_gfx_profile_busy(void);
+u32 sat_gfx_hud_pre;   /* slave: its timer when it was woken, before the per-draw reset (kernel.c) */
+static u32 hm_frames, hm_new, hm_held, hm_skip, hm_late, hm_frozen, hm_gen, hm_active, hm_combo;   /* master writes */
+static struct {
+    u32 gen, plots, cmds, build, pn, wsum, wmax, dn, dsum, dmax, n_in, n_idle, n_wait, n_unk;   /* slave writes: totals */
+    u32 t_cmds, t_build, upl, in_build, counting, pending, have, seen, s_tick, kind, watch, wait;   /* the plot in flight */
+} hs;
+static char hud_text[2][44];
+static u32 hud_key = 0xffffffffUL;
+
+/* Master, from sat_gfx_vblank: cls 1 new picture, 2 held (plot unfinished), 3 nothing to show and the slave busy (skip), 4 nothing to show (late). */
+static HUD_OS void hud_master(unsigned cls)
+{
+    u32 pad = sat_pad_raw & 0xffffUL;
+    int combo = !(pad & 0x0008) && !(pad & 0x0010) && !(pad & 0x0080);   /* L, Z, R */
+    int playing = RAMB[0x8001] == 2 && (RAMB[0x8380] || RAMB[0x8480]) && !sat_home_hold && !sat_home_mode;
+    if (combo && !hm_combo)
+    {
+        hm_frames = hm_new = hm_held = hm_skip = hm_late = 0;
+        hm_frozen = 0;
+        UNC32(hm_gen) = UNC32(hm_gen) + 1;
+    }
+    hm_combo = (u32)combo;
+    if (playing && !hm_frozen)
+    {
+        hm_frames++;
+        if (cls == 1) hm_new++; else if (cls == 2) hm_held++; else if (cls == 3) hm_skip++; else hm_late++;
+        if (hm_frames >= SAT_PERF_HUD_WINDOW) hm_frozen = 1;
+    }
+    UNC32(hm_active) = (u32)(playing && !hm_frozen);
+}
+
+/* Slave. The first moment EDSR.CEF is seen set after the PTMR write. */
+static void hud_poll(void)
+{
+    if (hs.pending && !hs.have && (VDP1R(0x10) & 2))
+    {
+        hs.seen = GFX_TICKS(); hs.have = 1; hs.kind = 1;
+    }
+}
+/* Called by the slave's idle loop (kernel.c) while it waits for the next picture. A few microseconds between reads keeps the bus to the master. */
+void sat_gfx_hud_idle(void)
+{
+    if (hs.watch)
+    {
+        if (VDP1R(0x10) & 2) { hs.seen = GFX_TICKS(); hs.have = 1; hs.kind = 2; hs.watch = 0; }
+        else { volatile int i; for (i = 0; i < 40; i++) ; }
+    }
+}
+/* Start of a draw, after the previous plot has ended (or the wait gave up). */
+static HUD_OS void hud_begin(void)
+{
+    u32 gen = UNC32(hm_gen);
+    if (gen != hs.gen)
+    {
+        hs.plots = hs.cmds = hs.build = hs.pn = hs.wsum = hs.wmax = 0;
+        hs.dn = hs.dsum = hs.dmax = hs.n_in = hs.n_idle = hs.n_wait = hs.n_unk = 0;
+        hs.gen = gen; hs.pending = 0;
+    }
+    if (hs.pending)
+    {
+        u32 d = 0;
+        int ok = 1;
+        if (hs.have) { d = (hs.seen - hs.s_tick) & 0xffffUL; if (d > 20000UL) ok = 0; }
+        else if (hs.wait) { d = (sat_gfx_hud_pre - hs.s_tick + hs.wait) & 0xffffUL; hs.kind = 3; if (d > 20000UL) ok = 0; }
+        else ok = 0;   /* ended unseen (the slave was off the register for the whole span): no figure, counted */
+        hs.pn++;
+        hs.wsum += hs.wait; if (hs.wait > hs.wmax) hs.wmax = hs.wait;
+        if (ok)
+        {
+            hs.dn++; hs.dsum += d; if (d > hs.dmax) hs.dmax = d;
+            if (hs.kind == 1) hs.n_in++; else if (hs.kind == 2) hs.n_idle++; else hs.n_wait++;
+        }
+        else hs.n_unk++;
+        hs.pending = 0;
+    }
+    hs.watch = 0;
+    hs.counting = UNC32(hm_active);
+}
+/* Just before PTMR: the plot is going out. */
+static HUD_OS void hud_plot_out(void)
+{
+    hs.s_tick = GFX_TICKS();
+    hs.have = 0; hs.kind = 0; hs.watch = 0;
+    hs.pending = hs.counting;
+    if (hs.counting) { hs.plots++; hs.cmds += hs.t_cmds; hs.build += hs.t_build; }
+}
+static void hud_draw_end(void)
+{
+    hud_poll();
+    hs.watch = hs.pending && !hs.have;
+}
+#define HUD_POLL() hud_poll()
+#else
+#define HUD(x)
+#define HUD_POLL()
+#endif
+
 static void vram_copy(u8 *dest, const u8 *src, u32 bytes)
 {
     u32 i;
+    HUD(u32 hud_upload_start = GFX_TICKS();)
     VP(unsigned int vp_upload_start = (unsigned int)GFX_TICKS();)
 #ifdef SAT_PROF
     u32 t0 = FRT_NOW();
@@ -455,6 +591,7 @@ static void vram_copy(u8 *dest, const u8 *src, u32 bytes)
     for (i = 0; i < bytes / 4; i++) d[i] = s[i];
 #endif
 #endif
+    HUD(if (hs.in_build) hs.upl += (GFX_TICKS() - hud_upload_start) & 0xffffUL;)
     VP(if (vp_active && (u32)dest >= (u32)(VDP1_VRAM + TEX_BASE) &&
           (u32)dest < (u32)(VDP1_VRAM + 0x80000UL)) {
         vp_current[VP_UPLOAD_TICKS] += vp_elapsed(vp_upload_start);
@@ -492,14 +629,19 @@ typedef struct
     u16 layers, priority, pal_pages, back_valid, back, row_active, objects, pad, whole;   /* pad: unused here (a pack generation in builds that add one). whole: scroll 2 read as a whole page (row scroll on), taken before a menu clears row_active */
     u16 s1x, s1y, s2x, s2y, s3x, s3y;
     u16 row[SAT_GFX_SCREEN_H];
-    u8 palette[SAT_GFX_PAGES][0x400];
-    u8 obj[MAX_OBJECTS * 8];
+    /* aligned(4): the guest pass (SAT_GUEST_FAST_LIST, PAL_KEEP) and the look check use 32 bit loads/stores on these. The menu merge's `whole` field
+       left them 2 bytes off a long boundary, and the SH-2 then read the wrong words: Wolverine's sprites never replaced Schaefer's (Yaba 11-09). */
+    u8 palette[SAT_GFX_PAGES][0x400] __attribute__((aligned(4)));
+    u8 obj[MAX_OBJECTS * 8] __attribute__((aligned(4)));
     u32 pal_sum[SAT_GFX_PAGES]; /* change detection: every palette word */
 #ifdef SAT_VDP1_PROFILE
     unsigned int profile_vblank, profile_stage_chars, profile_snapshot_ticks, profile_handoff_tick;
 #endif
 #ifdef SAT_HOME
     u16 home; /* menu text on its own layer (NBG3) */
+#endif
+#ifdef SAT_PERF_HUD
+    u16 hud;  /* readout lines on NBG3 this picture (no menu is up) */
 #endif
     /* Second half of the handoff (frame chain lane): the layer cells and their sums are written by the master after it has woken the slave, so
        nothing of the first half shares a cache line with them (group aligned to 16, structure size a multiple of 16) and the slave reads them
@@ -508,6 +650,7 @@ typedef struct
     u32 s2[S2_ROWS * 64], s3[S3_ROWS * (384 / 32 + 1)]; /* code << 16 | attribute, visible cells only */
     u32 s1_sum, s2_sum, s3_sum; /* change detection: position and every visible word */
     u16 hud_flush;
+    u16 sel_ok;   /* the front end (stage word 0, play mode, no player): the character select can be up */
 #ifdef SAT_VDP1_PROFILE
     unsigned int profile_layer_ticks;
 #endif
@@ -824,6 +967,10 @@ static const u8 *palette_page(const u8 *base, u16 mask, int page)
 /* What the chips already show: a layer whose words and position are unchanged does no lookups, so its cache sees no upload and can't lose a slot. */
 static u32 drawn_pal[SAT_GFX_PAGES], drawn_s1, drawn_s2, drawn_s3;
 static int drawn_valid;
+/* Master side: counts pack swaps; each snapshot carries it to the drawing side (snap.pad). */
+#if SAT_GFX_RANKFIX
+static u16 pack_gen;
+#endif
 
 static void update_palette(void)
 {
@@ -911,18 +1058,220 @@ static const u8 home_pal[64] __attribute__((aligned(2))) = {
 #endif
 #define HUD_ROWS_TOP 5   /* rows 0..4: names, health bars, the enemy label and its bar (row 4 was centre-cropped, 16 px off the rest) */
 #define HUD_ROWS_BOT 26
+#if SAT_GFX_FIT && defined(SAT_HOME)
+/* Home: scroll 1 on the 352 picture by the crop audit's rule (E:/AvP/learning/crop-audit/AUDIT.md, owner-approved 11-08). NBG0/1 and the
+   sprites are scaled 11/12; scroll 1 cannot be, so each row drops 4 of its 48 columns, blank ones, nearest to columns 6, 18, 30 and 42 (where
+   the scaled picture has gained 8 pixels on the 1:1 one), and the other 44 keep their order. Every non-blank cell then sits within about
+   4 pixels of round(col * 11/12), the column its scaled art moved to, and nothing leaves the screen; a column inside a wider gap goes before
+   a space between words; rows of one block share one map (home_row_map).
+   Fallback: a row with fewer than 4 blank columns keeps the 16 pixel centre crop (no arcade text line found has fewer; the continue line
+   has 7). Play's HUD rows (0-5 and 25 up, the audit's quick fix: the enemy and boss portraits sit on rows 5 and 25) keep the flush map (their middle 4 columns dropped) when those are blank. Replaces the HUD-only map at home. */
+#define HOME_OS __attribute__((optimize("Os")))
+#define BL(m, c) (((m)[(c) >> 5] >> ((c) & 31)) & 1)
+#ifdef SAT_HOME_DIAG   /* test builds only: which non-blank source cells the fit drops (banner runs, fallback crops), per frame; read over MCP */
+volatile u32 sat_diag_lost, sat_diag_frames, sat_diag_rowmask, sat_diag_row, sat_diag_s1miss, sat_diag_s1key[3];
+static u32 diag_nb[S1_ROWS][2];
+static unsigned long diag_miss0;
+#endif
+/* Droppable columns of one row, bit c of m[0..1]: no tile, the row's fill cell, the continue line's space cells (0x1100/0x1110, a solid
+   tile), or a cell inside a run of one repeated cell (a banner or rule line). */
+static HOME_OS void home_row_blank(u32 row, u32 x0, u32 *m)
+{
+    unsigned long dummy = 0;
+    int k, c;
+    const u32 *w = snap.s1 + row * S1_COLS;
+    u32 fill = w[47];   /* the row's fill cell: an edge cell repeated at least 4 times (the continue screen's black band is a tile, not a blank) */
+    for (c = 0, k = 0; c < 48; c++) k += w[c] == w[0];
+    if (k >= 4) fill = w[0];
+    for (c = 0, k = 0; c < 48; c++) k += w[c] == fill;
+    if (k < 4) fill = 0xffffffffUL;
+    m[0] = m[1] = 0;
+#ifdef SAT_HOME_DIAG
+    diag_nb[row][0] = diag_nb[row][1] = 0;
+#endif
+    for (c = 0; c < 48; c++)
+    {
+        int a = c == 0 ? 1 : c == 47 ? 46 : c - 1, b = c == 0 ? 2 : c == 47 ? 45 : c + 1;
+        u32 c_src = (((x0 - S1_REG_CROP) >> 3) + (u32)c) & 63;
+        if (w[c] == fill || ((w[c] >> 16) & 0xffef) == 0x1100 || (w[c] == w[a] && w[c] == w[b]) || cache_get(&s1_cache, ((w[c] >> 16) << 1) | (c_src & 1), &dummy) == NOSLOT)
+        {
+            m[c >> 5] |= 1UL << (c & 31);
+#ifdef SAT_HOME_DIAG
+            { u16 sl = cache_get(&s1_cache, ((w[c] >> 16) << 1) | (c_src & 1), &dummy);
+              if (w[c] != fill && ((w[c] >> 16) & 0xffef) != 0x1100 && sl != NOSLOT)
+              {   /* a block of one pen is a filler (shadow, band), not a letter */
+                  const u32 *cell = (const u32 *)(VDP2_VRAM + CELL_S1 + (u32)sl * 32); u32 q, a0 = cell[0] & 15, same = 1;
+                  for (q = 0; q < 8; q++) { u32 v = cell[q]; if (v != a0 * 0x11111111UL) same = 0; }
+                  if (!same) { diag_nb[row][c >> 5] |= 1UL << (c & 31); }
+              } }
+#endif
+        }
+    }
+}
+/* The 44 source columns from a droppable mask (see above): the HUD's flush map on play's HUD rows when their middle 4 columns are blank,
+   else 4 drops, else the centre crop. The 4 drops are the greedy pick: the droppable columns nearest 6, 18, 30, 42 (cheapest not yet taken: distance
+   from its target, plus 6 if it is not inside a run of 3 and 40 if it stands alone, a space between words, plus 20 next to a column already taken).
+   Story box (box: play, a block of rows 8 to 10 or 11, home_row_map): its blank columns lie only at the far left and right, the greedy pick put two
+   drops left of the face, and face and text sat 11 pixels left of the scaled box they are drawn in, the face outside its left edge (owner 11-09).
+   When the greedy pick leaves a cell of that block more than 8 pixels (12 twelfths of a column) left of its art, the drops are redone by dynamic
+   programming and used if they bring that under 8: kept column cost = its weight (cells it holds in the block's rows) times |12k - c|, times four
+   when it ends up left of its art, over the columns outside the block's content only (no gap between the face and the text, or between words, is
+   closed); a drop costs its distance from 12k+6. The same DP on every block (95b1167) closed the select screen's centre gap from 6 columns to 2,
+   the left and right stat boxes ran together (owner 11-09), so every other block keeps the greedy pick. */
+static HOME_OS int home_left(const u8 *dropped, const u8 *wgt)
+{
+    int c, k = 0, w = -9999;
+    for (c = 0; c < 48; c++)
+    {
+        if (dropped[c]) { k++; continue; }
+        if (wgt[c] && 12 * k - c > w) w = 12 * k - c;
+    }
+    return w;
+}
+static HOME_OS void home_map(const u32 *m, const u8 *wgt, int hud, int box, u8 *map)
+{
+    u8 dropped[48];
+    int k, c, n, j;
+    for (c = 0, n = 0; c < 48; c++) n += BL(m, c);
+    if (n < 4) { for (c = 0; c < 44; c++) map[c] = (u8)(c + 2); return; }
+    if (hud && BL(m, 22) && BL(m, 23) && BL(m, 24) && BL(m, 25)) { for (c = 0; c < 44; c++) map[c] = (u8)(c < 22 ? c : c + 4); return; }
+    for (c = 0; c < 48; c++) dropped[c] = 0;
+    for (k = 0; k < 4; k++)
+    {
+        int want = 12 * k + 6, best = -1, cost = 1 << 30;
+        for (c = 0; c < 48; c++)
+        {
+            int d, l = c > 0 && BL(m, c - 1), r = c < 47 && BL(m, c + 1);
+            if (!BL(m, c) || dropped[c]) continue;
+            d = (c > want ? c - want : want - c);
+            if (!(l && r)) d += 6;
+            if (!l && !r) d += 40;
+            if (c > 0 && dropped[c - 1]) d += 20;
+            if (c < 47 && dropped[c + 1]) d += 20;
+            if (d < cost) { cost = d; best = c; }
+        }
+        dropped[best] = 1;
+    }
+    if (box && home_left(dropped, wgt) > 12)
+    {
+        int dp[5], nw[5], lo = 47, hi = 0;
+        u8 ch[48], dd[48];
+        for (c = 0; c < 48; c++) if (wgt[c]) { if (c < lo) lo = c; hi = c; }
+        dp[0] = 0; for (k = 1; k < 5; k++) dp[k] = 0x3fffffff;
+        for (c = 0; c < 48; c++)
+        {
+            int l = c > 0 && BL(m, c - 1), r = c < 47 && BL(m, c + 1), pen = BL(m, c) && (c < lo || c > hi) ? (!(l && r) ? 6 : 0) + (!l && !r ? 30000 : 0) : -1;
+            for (k = 0; k < 5; k++) nw[k] = 0x3fffffff;
+            ch[c] = 0;
+            for (k = 0; k < 5; k++)
+            {
+                int v = dp[k], d;
+                if (v >= 0x3fffffff) continue;
+                d = 12 * k - c; d = d > 0 ? 4 * d : -d;
+                if (v + 8 * wgt[c] * d < nw[k]) { nw[k] = v + 8 * wgt[c] * d; ch[c] &= (u8)~(1 << k); }
+                if (k < 4 && pen >= 0)
+                {
+                    d = c - (12 * k + 6); if (d < 0) d = -d;
+                    if (v + d + pen < nw[k + 1]) { nw[k + 1] = v + d + pen; ch[c] |= (u8)(1 << (k + 1)); }
+                }
+            }
+            for (k = 0; k < 5; k++) dp[k] = nw[k];
+        }
+        if (dp[4] < 0x3fffffff)
+        {
+            for (c = 0; c < 48; c++) dd[c] = 0;
+            for (c = 47, k = 4; c >= 0; c--) if (ch[c] >> k & 1) { dd[c] = 1; k--; }
+            j = home_left(dd, wgt);
+            if (j <= 12 && j < home_left(dropped, wgt)) for (c = 0; c < 48; c++) dropped[c] = dd[c];
+        }
+    }
+    for (c = 0, n = 0; c < 48 && n < 44; c++) if (!dropped[c]) map[n++] = (u8)c;
+}
+/* One map per block of rows: rows that hold anything (not all droppable) and touch each other share the columns all of them can drop, so
+   a 16 pixel letter's top and bottom halves, and a banner's rows, stay together (owner 11-08: the select screen's names broke apart). */
+static HOME_OS int home_maps_rows(u32 x0, u32 (*bm)[2])
+{
+    u32 r;
+    int c, n13 = 0, n14 = 0;
+    for (r = 0; r < S1_ROWS; r++) home_row_blank(r, x0, bm[r]);
+    /* The character select: its panel rows 13 and 14 are full of cells in every state (timer shown or blank, intro slide, pick). The columns blank in
+       all of rows 7 to 25 change with the timer's digit (the greedy pick took 3 of the centre gap while the timer was blank and the 16 pixel crop while it
+       showed), so the whole screen jumped 35 pixels twice a second (owner 11-09). Those rows keep one fixed map in every state (home_row_map). */
+    for (c = 0; c < 48; c++) { n13 += !BL(bm[13], c); n14 += !BL(bm[14], c); }
+    return snap.sel_ok && n13 >= 30 && n14 >= 30;
+}
+static HOME_OS void home_row_map(u32 row, u32 (*bm)[2], int sel, u8 *map)
+{
+    u32 m[2], a = row, b = row, q;
+    u8 wgt[48];
+    int c, full = bm[row][0] == 0xffffffffUL && bm[row][1] == 0xffffUL;
+    if (sel && row >= 7 && row <= 25)
+    {
+        /* The select's elements are separate pictures that the 11/12 scaling moves by different amounts, so each row type has its own fixed drops. Column 0 and 47
+           are blank in every state; stat text rows (left text 16-20, right 27-31) drop 0 and 22 so the left text sits 1 column and the right 2 columns in;
+           bar rows (left bar 15-21, right 26-32) drop 0, one cell of each 7 cell bar (18, 29), as the scaling shortens them, and 47; the timer rows (digit cells
+           22-25) 0, 21, 26, 47; plate rows (plates 1-20 and 27-46) 0, 22, 25, 47. Nothing else is dropped, and the same on every frame. */
+        int a1, a2, a3, a4, n = 0;
+        if (row == 7 || row == 9 || row == 11 || row == 20 || row == 22 || row == 24) { a1 = 0; a2 = 22; a3 = 46; a4 = 47; }
+        else if (row == 8 || row == 10 || row == 12 || row == 21 || row == 23 || row == 25) { a1 = 0; a2 = 18; a3 = 29; a4 = 47; }
+        else if (row >= 15 && row <= 17) { a1 = 0; a2 = 21; a3 = 26; a4 = 47; }
+        else { a1 = 0; a2 = 22; a3 = 25; a4 = 47; }
+        for (c = 0; c < 48; c++) if (c != a1 && c != a2 && c != a3 && c != a4) map[n++] = (u8)c;
+        return;
+    }
+    m[0] = bm[row][0]; m[1] = bm[row][1];
+    for (c = 0; c < 48; c++) wgt[c] = 0;
+    if (!full)
+    {
+        while (a > 0 && !(bm[a - 1][0] == 0xffffffffUL && bm[a - 1][1] == 0xffffUL)) { a--; m[0] &= bm[a][0]; m[1] &= bm[a][1]; }
+        while (b + 1 < S1_ROWS && !(bm[b + 1][0] == 0xffffffffUL && bm[b + 1][1] == 0xffffUL)) { b++; m[0] &= bm[b][0]; m[1] &= bm[b][1]; }
+        for (q = a; q <= b; q++) for (c = 0; c < 48; c++) wgt[c] = (u8)(wgt[c] + !BL(bm[q], c));
+    }
+    home_map(m, wgt, snap.hud_flush && (row < 6 || row >= 25), snap.hud_flush && !full && a == 8 && (b == 10 || b == 11), map);
+}
+#endif
 static void draw_scroll1(u16 sx, u16 sy)
 {
     const u32 *cell = snap.s1;
     u32 x0 = (u32)sx + CPS_LEFT + S1_REG_CROP, y0 = (u32)sy + CPS_TOP;
     u32 row, col;
+#if SAT_GFX_FIT && defined(SAT_HOME)
+    u32 bm[S1_ROWS][2];
+    int sel = home_maps_rows(x0, bm);
+#ifdef SAT_HOME_DIAG
+    sat_diag_frames++;
+    diag_miss0 = sat_gfx_stats.missing;
+#endif
+#endif
     for (row = 0; row <= SAT_GFX_SCREEN_H / 8; row++)
+    {
+#if SAT_GFX_FIT && defined(SAT_HOME)
+        u8 map[44];
+        home_row_map(row < S1_ROWS ? row : S1_ROWS - 1, bm, sel, map);
+#ifdef SAT_HOME_DIAG
+        if (row < S1_ROWS && snap.home < 3)
+        {
+            u32 kept0 = 0, kept1 = 0, lm0, lm1; int i2;
+            for (i2 = 0; i2 < 44; i2++) { if (map[i2] < 32) kept0 |= 1UL << map[i2]; else kept1 |= 1UL << (map[i2] - 32); }
+            lm0 = diag_nb[row][0] & ~kept0; lm1 = diag_nb[row][1] & ~kept1;
+            if (lm0 | lm1)
+            {
+                u32 n = 0, v; for (v = lm0; v; v &= v - 1) n++; for (v = lm1; v; v &= v - 1) n++;
+                sat_diag_lost += n; sat_diag_rowmask |= 1UL << row; sat_diag_row = row;
+            }
+        }
+#endif
+#endif
         for (col = 0; col <= SAT_GFX_SCREEN_W / 8; col++)
         {
             u32 c = ((x0 >> 3) + col) & 63, r = ((y0 >> 3) + row) & 63;
 #if SAT_GFX_FIT
             /* The arcade's 48 columns on 44: the HUD rows lose four empty columns at the middle, so it sits flush at both edges; other rows are the centre crop. */
+#ifdef SAT_HOME
+            u32 src = col < 44 ? map[col] : (u32)map[43] + 1;   /* column 44 is the fine-scroll spill */
+#else
             u32 src = (snap.hud_flush && (row < HUD_ROWS_TOP || row >= HUD_ROWS_BOT)) ? (col < 22 ? col : col + 4) : col + 2;
+#endif
             u32 c_src = (((x0 - S1_REG_CROP) >> 3) + src) & 63;
             u32 idx = (r & 0x1f) + (c_src << 5) + ((r & 0x20) << 6);
             u32 word = cell[row * S1_COLS + src];
@@ -932,7 +1281,13 @@ static void draw_scroll1(u16 sx, u16 sy)
 #endif
             u16 code = (u16)(word >> 16), attr = (u16)word;
             /* Odd columns read the right half of the 16 pixel row. */
+#ifdef SAT_HOME_DIAG
+            unsigned long dm0 = sat_gfx_stats.missing;
+#endif
             u16 slot = cache_get(&s1_cache, ((u32)code << 1) | ((idx >> 5) & 1), &sat_gfx_stats.refused_layer);
+#ifdef SAT_HOME_DIAG
+            if (sat_gfx_stats.missing != dm0) { sat_diag_s1key[0] = ((u32)code << 1) | ((idx >> 5) & 1); sat_diag_s1key[1] = row * 64 + col; sat_diag_s1key[2]++; }
+#endif
             u32 name = CLEAR_NAME;
             if (slot != NOSLOT) name = name_of(attr, 1, (CELL_S1 + (u32)slot * 32) >> 5);
 #ifdef SAT_HOME
@@ -940,6 +1295,10 @@ static void draw_scroll1(u16 sx, u16 sy)
 #endif
             write_name(VDP2_VRAM + MAP_S1 + (r * 64 + c) * 4, name, &sh_s1[r * 64 + c]);
         }
+    }
+#if defined(SAT_HOME_DIAG) && SAT_GFX_FIT && defined(SAT_HOME)
+    sat_diag_s1miss += sat_gfx_stats.missing - diag_miss0;
+#endif
 }
 
 #ifdef SAT_HOME
@@ -949,23 +1308,57 @@ static void draw_scroll1(u16 sx, u16 sy)
 static u16 sh_home[28 * 44] LOW_RAM;
 extern char sat_home_shown[28][44];
 extern volatile u32 sat_home_seq;
-static void draw_home(int fresh)
+/* One 8x8 menu cell from the game's font: big = 1 doubles rows 0-3 of the glyph (a large letter's half) and thickens it one dot to the right.
+   Lit dots keep their pens (the font's own blue lower edge is its outline). Clear dots take bg: 0, clear, so the picture shows between the
+   letters (the title list, straight on the title art as Capcom's Saturn menus draw their mode list); 15, the panel's dot code, so the letters
+   sit on the translucent panel (the pause menu); or 14, a halo: only the clear dots touching a lit dot (8 neighbours, inside the cell) take the
+   panel's dot code, so the option screens have no panel but each letter keeps a darkened margin of the picture and reads over the logo (owner 11-09). */
+static void home_cell(const u8 *f, u32 cell, int big, u32 bg)
+{
+    u8 d[8][8]; int x, y, halo = bg == 14;
+    if (halo) bg = 0;
+    for (y = 0; y < 8; y++) for (x = 0; x < 8; x++) { int sy = big ? y / 2 : y; d[y][x] = (u8)((f[sy * 4 + x / 2] >> (x & 1 ? 0 : 4)) & 15); }
+    if (big) for (y = 0; y < 8; y++) for (x = 7; x > 0; x--) if (!d[y][x]) d[y][x] = d[y][x - 1];
+    if (halo)
+    {
+        u8 h[8][8];
+        for (y = 0; y < 8; y++) for (x = 0; x < 8; x++)
+        {
+            int j, k;
+            h[y][x] = 0;
+            for (j = y - 1; j <= y + 1; j++) for (k = x - 1; k <= x + 1; k++) if (j >= 0 && j < 8 && k >= 0 && k < 8 && d[j][k]) h[y][x] = 15;
+        }
+        for (y = 0; y < 8; y++) for (x = 0; x < 8; x++) if (!d[y][x]) d[y][x] = h[y][x];
+    }
+    for (y = 0; y < 8; y++) { u32 o = 0;
+        for (x = 0; x < 8; x++) { u32 v = d[y][x];
+            o |= (v ? v : bg) << (28 - 4 * x); }
+        put32(VDP2_VRAM + CELL_S1 + cell * 32 + (u32)y * 4, o); }
+}
+static HOME_OS void draw_home(int fresh)
 {
     u32 row, col;
+    static u32 font_bg = 99;
     static u32 redo;
     u32 s0, spin = 0;
     /* The master copies a new screen (sat_home_seq odd while it does) right after the vblank, where this frame chain's slave also starts drawing, so
-       skipping the frame drew nothing at all: wait for the copy (about 20 us), and draw everything again next frame if one began during this pass
-       (b0b5929 on fix/home-mode-flow-fps-20261109). */
+       skipping the frame drew nothing at all: wait for the copy (about 20 us), and draw everything again next frame if one began during this pass. */
     while (((s0 = *(volatile u32 *)((unsigned long)&sat_home_seq | 0x20000000UL)) & 1) && ++spin < 20000u) ;
     if (s0 & 1) { redo = 1; return; }
     fresh |= (int)redo; redo = 0;
+    if (font_bg != (snap.home == 3 ? 0u : snap.home == 4 ? 14u : 15u))   /* the title list's letters have no panel behind them, the option screens' a halo, the pause menu's a panel */
+    {
+        int g, L;
+        font_bg = snap.home == 3 ? 0u : snap.home == 4 ? 14u : 15u;
+        for (g = 0; g < 58; g++) home_cell(home_font + g * 32, (u32)SAT_GFX_HOME_FONT + (u32)g, 0, font_bg);
+        for (L = 0; L < 52; L++) home_cell(home_font + 32 * 32 + L * 16, (u32)SAT_GFX_HOME_FONT + 59 + (u32)L, 1, font_bg);   /* the header's large letters */
+    }
     for (row = 0; row < 28; row++)
         for (col = 0; col < 44; col++)
         {
             u32 ch = *(volatile u8 *)((unsigned long)&sat_home_shown[row][col] | 0x20000000UL);
             u16 name = 0;                                                       /* cell 0xc00: clear */
-            if (ch == 1) name = (u16)(14u << 12 | ((SAT_GFX_HOME_FONT + 58) & 0x3ff));   /* the translucent panel */
+            if (ch == 1) name = snap.home >= 3 ? 0 : (u16)(14u << 12 | ((SAT_GFX_HOME_FONT + 58) & 0x3ff));   /* the pause menu's translucent panel; the title list and the option screens have none (owner 11-09) */
             else if ((ch >= 2 && ch <= 0x20) || (ch >= 0x81 && ch <= 0xa0))   /* a large letter's half (sat_home_big) */
                 name = (u16)(15u << 12 | ((SAT_GFX_HOME_FONT + 59 + (ch <= 0x20 ? ch - 2 : ch - 0x81 + 31)) & 0x3ff));
             else if (ch & 0x7f) name = (u16)(((ch & 0x80) ? 15u : 14u) << 12 | ((SAT_GFX_HOME_FONT + (ch & 0x7f) - 33) & 0x3ff));
@@ -1063,7 +1456,13 @@ static void update_priority(u16 layers, u16 pri)
     prin[0] = prin[1] = prin[2] = 0;
     for (i = 0; i < n; i++) prin[order[i] - 1] = (u16)(2 + 2 * i);
     VDP2R(0xf8) = (u16)(prin[1] | (prin[2] << 8)); /* NBG0 = scroll 2, NBG1 = scroll 3 */
+#ifdef SAT_HOME
+    /* NBG3 (the menu layer) keeps priority 7 through the whole picture: this write used to drop it to 0 at the start of every frame and draw_home
+       put it back near the end, so under the frame chain (the slave still building sprite commands at the vblank) the menu text was never shown. */
+    VDP2R(0xfa) = (u16)(prin[0] | (snap.home ? 0x0700 : 0));   /* NBG2 = scroll 1, NBG3 = menu */
+#else
     VDP2R(0xfa) = prin[0];                          /* NBG2 = scroll 1 */
+#endif
     prinb_last = prin[0];
     for (p = 0; p < 8; p++)
     {
@@ -1073,9 +1472,17 @@ static void update_priority(u16 layers, u16 pri)
         {
             level = 1 + 2 * below;
             for (i = 0; i < below; i++) if (p > lp[i]) { sat_gfx_stats.nonmonotone++; break; }
+            /* The board's mask (MAME cps2 primasks): a layer hides a sprite only where no layer above it with a lower priority value is opaque,
+               and that upper layer shows the sprite over itself unless it hides the sprite too. One VDP2 level cannot do both, so the sprite goes
+               over the highest such layer. The score table needs it: the heading's sprites (priority 4) sit on scroll 3's band (value 2), drawn over
+               scroll 1 (value 7) so the list scrolls away under it; under the band the heading vanished. */
+#if SAT_GFX_RANKFIX
+            for (i = n - 1; i > below; i--)
+                if (lp[i] < lp[below] && p > lp[i]) { level = 3 + 2 * i; sat_gfx_stats.nonmonotone++; break; }
+#endif
         }
 #ifdef SAT_HOME
-        if (snap.home && level > 6) level = 6;   /* the menu layer (NBG3, 7) in front of sprites too; a sprite wins ties, so 7 would hide it */
+        if ((snap.home HUD(|| snap.hud)) && level > 6) level = 6;   /* the menu layer (NBG3, 7) in front of sprites too; a sprite wins ties, so 7 would hide it */
 #endif
         s[p] = (u16)level;
     }
@@ -1084,6 +1491,99 @@ static void update_priority(u16 layers, u16 pri)
     VDP2R(0xf4) = (u16)(s[4] | (s[5] << 8));
     VDP2R(0xf6) = (u16)(s[6] | (s[7] << 8));
 }
+
+#ifdef SAT_PERF_HUD
+/* The readout (hardware test): two text lines on the menu layer. Characters are the home font's (33 to 90), bit 7 the second colour; 0 and 1 are the panel (black). */
+static HUD_OS char *hud_str(char *p, const char *s, int hi)
+{
+    for (; *s; s++) *p++ = (char)(*s == ' ' ? 1 : (*s | (hi ? 0x80 : 0)));
+    return p;
+}
+static HUD_OS char *hud_u(char *p, u32 v)
+{
+    char t[12];
+    int n = 0;
+    do { t[n++] = (char)('0' + v % 10); v /= 10; } while (v);
+    while (n) *p++ = t[--n];
+    return p;
+}
+/* " label" then the value: tenths 0 a whole number, 1 value is tenths of a unit. */
+static HUD_OS char *hud_val(char *p, const char *label, u32 v, int tenths)
+{
+    p = hud_str(p, label, 0);
+    if (!tenths) return hud_u(p, v);
+    p = hud_u(p, v / 10);
+    *p++ = '.';
+    *p++ = (char)('0' + v % 10);
+    return p;
+}
+static HUD_OS u32 hud_avg(u32 sum, u32 n) { return n ? (sum + n / 2) / n : 0; }
+#define hud_per(n, d) hud_avg((n) * 1000UL, (d))   /* tenths of a percent */
+/* Line 1: arm, counted vblanks, DONE when frozen, then the shares of those vblanks: N new picture, H held (plot unfinished at the vblank), S skipped
+   (the slave still building), L late (nothing new to show). Line 2: D mean/max ticks from PTMR to end of plot, C commands, B build ticks without uploads,
+   W mean/max ticks the slave waited for the previous plot, P percent of D figures that are precise (idle poll or wait) rather than a layer-pass bound. */
+static HUD_OS void hud_format(void)
+{
+    u32 frames = UNC32(hm_frames);
+    char *p;
+    u32 i;
+    for (i = 0; i < 88; i++) (&hud_text[0][0])[i] = 0;
+    p = hud_str(hud_text[0], HUD_ARM, 1);
+    if (!frames) { hud_str(p, " WAIT", 0); }
+    else
+    {
+        p = hud_val(p, " F", frames, 0);
+        if (UNC32(hm_frozen)) p = hud_str(p, " DONE", 1);
+        p = hud_val(p, " N", hud_per(UNC32(hm_new), frames), 1);
+        p = hud_val(p, " H", hud_per(UNC32(hm_held), frames), 1);
+        p = hud_val(p, " S", hud_per(UNC32(hm_skip), frames), 1);
+        p = hud_val(p, " L", hud_per(UNC32(hm_late), frames), 1);
+    }
+    if (hs.plots)
+    {
+        p = hud_val(hud_text[1], "D", hud_avg(hs.dsum, hs.dn), 0); p = hud_val(p, "/", hs.dmax, 0);
+        p = hud_val(p, " C", hud_avg(hs.cmds, hs.plots), 0);
+        p = hud_val(p, " B", hud_avg(hs.build, hs.plots), 0);
+        p = hud_val(p, " W", hud_avg(hs.wsum, hs.pn), 0); p = hud_val(p, "/", hs.wmax, 0);
+        p = hud_val(p, " P", hud_avg((hs.n_idle + hs.n_wait) * 100UL, hs.dn), 0);
+    }
+}
+static HUD_OS u16 hud_name_of(u32 row, u32 col)
+{
+    u32 ch;
+    if (row < HUD_ROW0 || row >= HUD_ROW0 + 2) return 0;
+    ch = (u8)hud_text[row - HUD_ROW0][col];
+    if (ch <= 1) return (u16)(14u << 12 | ((SAT_GFX_HOME_FONT + 58) & 0x3ff));
+    return (u16)(((ch & 0x80) ? 15u : 14u) << 12 | ((SAT_GFX_HOME_FONT + (ch & 0x7f) - 33) & 0x3ff));
+}
+/* NBG3 as the readout's layer: the menus' set-up without the colour calculation (the panel cell is plain black). fresh: coming from a menu or the start. */
+static HUD_OS void hud_layer(int fresh)
+{
+    u32 row, col, key = UNC32(hm_frames) / 60 + (UNC32(hm_frozen) ? 0x10000UL + (hs.pn & 0xffffUL) * 0x20000UL : 0) + (UNC32(hm_gen) & 0xffUL) * 0x10000000UL;
+    int changed = key != hud_key;
+    if (changed) { hud_key = key; hud_format(); }
+    VDP2R(0x10) = 0x0123; VDP2R(0x12) = 0xff67;   /* every picture, as the menus do */
+    VDP2R(0x36) = 0x8063; VDP2R(0x4c) = 0x0f0f; VDP2R(0x4e) = 0x0f0f; VDP2R(0x94) = 0; VDP2R(0x96) = 0;
+    VDP2R(0x24) = 0; VDP2R(0x26) = 0; VDP2R(0xee) = 0; VDP2R(0x10a) = 0; VDP2R(0xec) = 0;
+    if (fresh)
+    {
+        int e;
+        for (e = 62 * 16 + 1; e < 64 * 16; e++) put16(CRAM_AT(e), sat_gfx_colour(cram_shadow[e]));   /* the menu's translucent dot back to plain */
+    }
+    if (fresh || changed)
+        for (row = fresh ? 0 : HUD_ROW0; row < (fresh ? 28u : HUD_ROW0 + 2); row++)
+            for (col = 0; col < 44; col++)
+            {
+                u16 name = hud_name_of(row, col);
+                if (fresh || sh_home[row * 44 + col] != name)
+                {
+                    sh_home[row * 44 + col] = name;
+                    put16(VDP2_VRAM + MAP_HOME + (row * 64 + col) * 2, name);
+                }
+            }
+    VDP2R(0xfa) = (u16)(prinb_last | 0x0700);
+}
+#endif
 
 /* Keep the disabled writer and call sites unchanged after preprocessing. */
 #ifdef SPRITE_PAIR_ACTIVE
@@ -1128,6 +1628,20 @@ static void put_sprite_fit(u8 *cmd, u16 flip, u16 colr, u32 tex, int x, int y SP
     put32(cmd + 8, ((u32)(u16)(tex >> 3) << 16) | (u16)(0x0200 | SPRITE_HEIGHT));
     put32(cmd + 12, ((u32)(u16)a << 16) | (u16)y);
     put32(cmd + 20, ((u32)(u16)b << 16) | (u16)(y + SPRITE_HEIGHT - 1));
+}
+#endif
+#if defined(SAT_WV_SCALE) && SAT_GFX_FIT == 1
+/* Lane wolverine-ground, default off: one of his tiles drawn at s x s (s < 16) through the same scaled-sprite command: the 11/12 table for the columns, the
+   rows 1:1 at the smaller size. The guest hook (wolverine.c) puts 16 - s in bits 10..12 of the object's x word and positions the tile itself. */
+static void put_sprite_fit_s(u8 *cmd, u16 flip, u16 colr, u32 tex, int x, int y, int s)
+{
+    int a = (int)fit_x[x + 16] - 14, b = (int)fit_x[x + 16 + s] - 15;
+    if (b < a) b = a;
+    put32(cmd + 0, (u32)(u16)(flip | 1) << 16);
+    put32(cmd + 4, (0x0880UL << 16) | colr);
+    put32(cmd + 8, ((u32)(u16)(tex >> 3) << 16) | (u16)(0x0200 | 16));
+    put32(cmd + 12, ((u32)(u16)a << 16) | (u16)y);
+    put32(cmd + 20, ((u32)(u16)b << 16) | (u16)(y + s - 1));
 }
 #endif
 #ifdef SAT_READOUT
@@ -1203,6 +1717,9 @@ static void draw_sprites(void)
         int nx = ((aw >> 8) & 15) + 1, ny = ((aw >> 12) & 15) + 1;
         int fx = (aw >> 5) & 1, fy = (aw >> 6) & 1;
         int x = xw, y = yw, tx, ty;
+#if defined(SAT_WV_SCALE) && SAT_GFX_FIT == 1
+        int wvs = 16 - (int)((xw >> 10) & 7);
+#endif
         int bank = sat_gfx_bank(0, aw & 31);
         u16 colr;
         u16 flip = (u16)((fx ? 0x10 : 0) | (fy ? 0x20 : 0));
@@ -1358,6 +1875,10 @@ static void draw_sprites(void)
 #if defined(SAT_ABL) && (SAT_ABL & 1)
                 (void)flip; (void)colr;   /* measurement only: no command writes */
 #else
+#if defined(SAT_WV_SCALE)
+                if (wvs != 16) put_sprite_fit_s(cmd, flip, colr, TEX_BASE + (u32)slot * 128, sx, sy, wvs);
+                else
+#endif
                 put_sprite_fit(cmd, flip, colr, TEX_BASE + (u32)slot * 128, sx, SPRITE_Y SPRITE_HEIGHT_ARGUMENT);
 #endif
 #else
@@ -1472,6 +1993,29 @@ static int rows_clear;
 
 /* Master side, first half: registers, palette, row scroll and the object list, everything the slave's command build needs. The caller then wakes
    the slave and runs sat_gfx_snapshot_layers (visible layer cells, the long part: about 2500 words hashed). Visible cells only, at the point the game's level 2 IRQ would start. */
+#ifdef SAT_GUESTS
+#ifndef SAT_GUEST_PAL_KEEP
+#define SAT_GUEST_PAL_KEEP 0   /* default off: as v4.1, the guest's palette rows flip page 0's sum every snapshot, so the page is recopied and rescanned every frame */
+#endif
+#if SAT_GUEST_PAL_KEEP
+/* Wolverine's two sprite palette rows are constant. Once they are in the snapshot's page 0 and the game's page has not changed (same sum), the next
+   snapshot keeps the page: no recopy, no rewrite of the rows, no sum flip, so the slave's palette scan sees no change either. */
+int sat_guest_pal_keep;
+static u8 gpal_applied;
+#if SAT_GUEST_PAL_KEEP == 2
+u32 sat_look[4];
+u32 sat_look_pg[8];   /* snapshots in which page p (1 and up) differs from the game's page; [0] unused */
+u32 sat_look_rows[33];   /* snapshots in which palette row r of page 0 differs from the game's page right after the guest pass; [32] = snapshots counted */
+u8 sat_guest_pal_keep_off;   /* look-check build only: set from the debugger to run the v4.1 flip/recopy path in the same session */
+#endif
+#endif
+#endif
+#ifdef SAT_GUEST_PROF
+u32 sat_gprof[8];   /* measurement: 0 sum ticks of sat_guest_objects, 1 calls, 2 max, 3 sum ticks of palette+object copy before it, 4 sum ticks of the whole begin, 5 calls that drew a guest, 6 their ticks, 7 their palette+copy ticks */
+#endif
+#ifdef SAT_PERF_HUD
+static u32 hud_sum1;   /* the game's own sum of palette page 1 this frame */
+#endif
 void sat_gfx_snapshot_begin(void)
 {
     u16 layers = RAM16(SH_LAYERS), video = RAM16(SH_VIDEO), pal_reg = RAM16(SH_PALETTE_BASE), pal_mask = RAM16(SH_PAL_PAGES);
@@ -1494,7 +2038,17 @@ void sat_gfx_snapshot_begin(void)
     snap.s2x = RAM16(SH_S2X); snap.s2y = RAM16(SH_S2Y);
     snap.s3x = RAM16(SH_S3X); snap.s3y = RAM16(SH_S3Y);
 
+#ifdef SAT_GUEST_PROF
+    u32 gp_t0 = GFX_TICKS(), gp_t1;
+#endif
+#if defined(SAT_GUESTS) && SAT_GUEST_PAL_KEEP
+    int pal0_same = 0;
+#endif
+#if defined(SAT_GUESTS) && SAT_GUEST_PAL_KEEP == 2
+    if (sat_guest_pal_keep_off) gpal_applied = 0;
+#endif
     snap.pal_pages = 0;
+    HUD(hud_sum1 = 0;)
     for (page = 0; page < SAT_GFX_PAGES; page++)
     {
         const u8 *src = palette_page(pal, pal_mask, page);
@@ -1502,12 +2056,16 @@ void sat_gfx_snapshot_begin(void)
         if (!src) continue;
         snap.pal_pages |= (u16)(1U << page);
         for (n = 0; n < 0x400; n += 4) sum = MIX(sum, be32(src + n));
+        HUD(if (page == 1) hud_sum1 = sum;)
 #ifdef SAT_SNAP_VERIFY
         if (sum == snap.pal_sum[page])
             for (n = 0; n < 0x400; n += 4) { sat_speed.verify_checked++; if (*(u32 *)(void *)(snap.palette[page] + n) != be32(src + n)) sat_speed.verify_bad++; }
 #endif
 #ifdef SAT_SNAP_ALWAYS
         if (1)
+#elif defined(SAT_GUESTS) && SAT_GUEST_PAL_KEEP
+        if (page == 0) pal0_same = gpal_applied && sum == (snap.pal_sum[0] ^ 0x5a5a5a5aUL);
+        if (!(page == 0 && pal0_same) && sum != snap.pal_sum[page])   /* the keep is for page 0 only: pages 1 and up (scroll 1 palette, fades) always follow the game (lane hwtest found pal0_same freezing them) */
 #else
         if (sum != snap.pal_sum[page])
 #endif
@@ -1552,15 +2110,60 @@ void sat_gfx_snapshot_begin(void)
             put32_ram(out + 4, second);
         }
     }
+#ifdef SAT_GUEST_PROF
+    gp_t1 = GFX_TICKS(); sat_gprof[3] += (gp_t1 - gp_t0) & 0xffffu;   /* palette sum and recopy, then object list copy */
+#endif
 #ifdef SAT_GUESTS
     {   /* bonus characters (saturn/guests): a guest's sprites and colours replace its slot's character; a changed sum makes the next snapshot recopy the page */
         extern int sat_guest_objects(u8 *obj, int count, int max, u8 *pal0);
         extern int sat_guest_touched;
-        count = sat_guest_objects(snap.obj, count, MAX_OBJECTS, snap.palette[0]);
+        extern unsigned char sat_guest_sel;
+#ifdef SAT_GUEST_PROF
+        u32 gp_a = GFX_TICKS(), gp_d;
+#endif
+#if SAT_GUEST_PAL_KEEP
+        sat_guest_pal_keep = gpal_applied && pal0_same && !(sat_guest_sel & 2);
+#endif
+        if (sat_guest_sel) count = sat_guest_objects(snap.obj, count, MAX_OBJECTS, snap.palette[0]);   /* nothing selected: it returns at once, but the call enters the cart (Yaba compiles each cart block on every entry) */
+#if SAT_GUEST_PAL_KEEP
+        if (sat_guest_touched) { if (!sat_guest_pal_keep) { snap.pal_sum[0] ^= 0x5a5a5a5aUL; gpal_applied = 1; } }
+        else gpal_applied = 0;
+#else
         if (sat_guest_touched) snap.pal_sum[0] ^= 0x5a5a5a5aUL;
+#endif
+#ifdef SAT_GUEST_PROF
+        gp_d = (GFX_TICKS() - gp_a) & 0xffffu; sat_gprof[0] += gp_d; sat_gprof[1]++; if (gp_d > sat_gprof[2]) sat_gprof[2] = gp_d; if (sat_guest_touched) { sat_gprof[5]++; sat_gprof[6] += gp_d; sat_gprof[7] += (gp_t1 - gp_t0) & 0xffffu; }
+#endif
     }
 #endif
     snap.objects = (u16)count;
+#if defined(SAT_GUESTS) && SAT_GUEST_PAL_KEEP == 2
+    {   /* look check: the snapshot page must equal the game's page except Wolverine's rows */
+        const u8 *src0 = palette_page(pal, pal_mask, 0);
+        if (src0)
+        {
+            int r, w;
+            for (r = 0; r < 32; r++)
+                for (w = 0; w < 32; w += 4)
+                    if (*(const u32 *)(const void *)(snap.palette[0] + r * 32 + w) != *(const u32 *)(const void *)(src0 + r * 32 + w)) { sat_look_rows[r]++; break; }
+            sat_look_rows[32]++;
+        }
+        {
+            int pg, w;
+            for (pg = 1; pg < SAT_GFX_PAGES && pg < 8; pg++)
+            {
+                const u8 *sp = palette_page(pal, pal_mask, pg);
+                if (!sp) continue;
+                for (w = 0; w < 0x400; w += 4)
+                    if (*(const u32 *)(const void *)(snap.palette[pg] + w) != *(const u32 *)(const void *)(sp + w)) { sat_look_pg[pg]++; break; }
+            }
+        }
+    }
+    sat_look[0] = (u32)(unsigned long)snap.palette[0]; sat_look[1] = (u32)(unsigned long)snap.obj; sat_look[2] = (u32)count; sat_look[3] = sat_vblanks_now();   /* look-check build: where the debugger reads the page and list */
+#endif
+#if SAT_GFX_RANKFIX
+    snap.pad = pack_gen;
+#endif
 #ifdef SAT_HOME
     snap.home = (u16)sat_home_mode;
     if (snap.home)
@@ -1579,6 +2182,20 @@ void sat_gfx_snapshot_begin(void)
         for (n = 0; n < 64; n++) snap.palette[1][30 * 32 + n] = home_pal[n];
         snap.pal_sum[1]++;
     }
+#ifdef SAT_PERF_HUD
+    snap.hud = (u16)!snap.home;
+    if (snap.hud)
+    {
+        /* The readout's colours are the menus' (banks 62 and 63): the page is recopied from the game each frame and carries a marked sum, so the
+           drawing side sees an unchanged sum and does no palette work while the readout is the only user. */
+        snap.pal_pages |= 2;
+        for (n = 0; n < 64; n++) snap.palette[1][30 * 32 + n] = home_pal[n];
+        snap.pal_sum[1] = hud_sum1 ^ 0x48554421UL;
+    }
+#endif
+#endif
+#ifdef SAT_GUEST_PROF
+    sat_gprof[4] += (GFX_TICKS() - gp_t0) & 0xffffu;
 #endif
     VP(snap.profile_snapshot_ticks = vp_elapsed(vp_snapshot_start);
        snap.profile_handoff_tick = (unsigned int)GFX_TICKS();)
@@ -1596,9 +2213,10 @@ void sat_gfx_snapshot_layers(void)
     {
 #if SAT_GFX_FIT
         snap.hud_flush = RAMB[0x8001] == 2 && RAMB[0x8380] != 0;
+        snap.sel_ok = RAMB[0x8001] == 2 && RAMB[0x8380] == 0 && RAM16(0xff81e8UL) == 0;
 #endif
         x0 = (u32)snap.s1x + CPS_LEFT + S1_READ_X; y0 = (u32)snap.s1y + CPS_TOP;
-        snap.s1_sum = snap_layer(snap.s1, GFX(RAM16(SH_SCROLL1_BASE) & 0xffc0U), x0 >> 3, y0 >> 3, S1_ROWS, S1_COLS, 5, (x0 >> 3) | ((y0 >> 3) << 16) | ((u32)snap.hud_flush << 31), snap.s1_sum);
+        snap.s1_sum = snap_layer(snap.s1, GFX(RAM16(SH_SCROLL1_BASE) & 0xffc0U), x0 >> 3, y0 >> 3, S1_ROWS, S1_COLS, 5, (x0 >> 3) | ((y0 >> 3) << 16) | ((u32)snap.hud_flush << 31) | ((u32)snap.sel_ok << 30), snap.s1_sum);
     }
     if (layers & 4)
     {
@@ -1670,6 +2288,7 @@ unsigned long sat_vl_sforced;   /* retained SAT_VLOG ABI counter, always zero: u
 void sat_gfx_vblank(void)
 {
     u32 s = UNC32(plot_started);
+    HUD(unsigned hud_cls = 4;)
 #ifdef SAT_VDP1_PROFILE
     unsigned int vp_before = (unsigned int)UNC32(plot_shown);
     unsigned int vp_edsr = VDP1R(0x10), vp_vblank = (unsigned int)sat_vblanks_now() + 1;
@@ -1700,6 +2319,7 @@ void sat_gfx_vblank(void)
 #endif
             UNC32(plot_shown) = s;
             UNC32(plot_held) = 0;
+            HUD(hud_cls = 1;)
         }
         else
         {
@@ -1708,8 +2328,10 @@ void sat_gfx_vblank(void)
 #endif
             UNC32(plot_held) = UNC32(plot_held) + 1;
             UNC32(sat_gfx_plot_waits) = UNC32(sat_gfx_plot_waits) + 1;
+            HUD(hud_cls = 2;)
         }
     }
+    HUD(else hud_cls = sat_gfx_profile_busy() ? 3u : 4u;)
 #ifdef SAT_VLOG
     {
         volatile unsigned long *e = UNC_PTR(unsigned long, &sat_vb[(vbv & 15) * 4]);
@@ -1729,6 +2351,7 @@ void sat_gfx_vblank(void)
         row[VF_VBLANK] = vp_vblank;
     }
 #endif
+    HUD(hud_master(hud_cls);)
 }
 static u32 slave_ticks(void) { return GFX_TICKS(); }
 /* Before the table and the texture slots are touched: the last plot has ended (its change may still be pending; only PTMR waits for that). */
@@ -1736,6 +2359,7 @@ static int plot_wait_end(void)
 {
     u32 t0 = slave_ticks();
     static u32 kicked;   /* serial of the plot already started again once */
+    HUD(hs.wait = 0;)
     if (!UNC32(plot_sync)) return 1;
     while (UNC32(plot_started) != UNC32(plot_shown) && !(VDP1R(0x10) & EDSR_CEF))
         if (((slave_ticks() - t0) & 0xffffUL) > SLAVE_WAIT_MAX) {
@@ -1758,6 +2382,7 @@ static int plot_wait_end(void)
             return 0;
         }
     VP(vp_current[VP_WAIT_END_TICKS] = vp_elapsed((unsigned int)t0);)
+    HUD(hs.wait = (slave_ticks() - t0) & 0xffffUL;)
     return 1;
 }
 /* Before PTMR: the change for the last plot has been asked for, so the new plot goes into the other buffer. */
@@ -1828,6 +2453,7 @@ static int plot_start(void)
 #endif
     VP(vp_current[VP_SUBMIT_TICK] = (unsigned int)GFX_TICKS();
        vp_current[VP_START_VBLANK] = (unsigned int)sat_vblanks_now();)
+    HUD(hud_plot_out();)
     VDP1R(PTMR) = 1;
     UNC32(plot_started) = UNC32(plot_started) + 1;
     VP(vp_current[VP_SERIAL] = (unsigned int)UNC32(plot_started);)
@@ -1857,9 +2483,26 @@ void sat_gfx_draw(void)
     u16 s1x = snap.s1x, s1y = snap.s1y, s2x = snap.s2x, s2y = snap.s2y, s3x = snap.s3x, s3y = snap.s3y;
     u16 bgon = 0;
     int row_active = snap.row_active;
+#if SAT_GFX_RANKFIX
+    static u16 gen_seen;
+#endif
+
 #ifdef SAT_VLOG
     u32 vlog_v = sat_vblanks_now();
     VLOG(vlog_v)[1] = (unsigned long)VDP1R(0x10) << 16 | (SFRT() & 0xffff);
+#endif
+    /* A new pack came in (sat_gfx_swap_pack, on the master). The master's clear of the blank list can sit behind stale lines in this CPU's
+       cache, and a layer whose words held through the load is skipped by its unchanged sum: cells drawn blank while their tiles were missing
+       from the old pack stayed blank. The score table after GAME OVER starts on the stage's pack, which lacks its picture, and kept a black
+       background and an empty scroll 2 after the front end's pack came in. So forget the blanks here too and redraw every layer. */
+#if SAT_GFX_RANKFIX
+    if (snap.pad != gen_seen)
+    {
+        u32 n;
+        gen_seen = snap.pad;
+        for (n = 0; n < BLANK_WAYS; n++) blank_seen[n] = NOKEY;
+        drawn_valid = 0;
+    }
 #endif
     VP(vp_begin();)
 
@@ -1867,7 +2510,8 @@ void sat_gfx_draw(void)
     /* A timeout abandons this presentation, never the running game. Do this
        before palette, texture, cache-stamp or command-table writes. A late plot
        must keep all of its inputs intact until its end flag really arrives. */
-    if (!plot_wait_end()) { VP(vp_finish(VP_END_TIMEOUT);) return; }
+    if (!plot_wait_end()) { HUD(hs.pending = 0; hs.counting = 0;) VP(vp_finish(VP_END_TIMEOUT);) return; }
+    HUD(hud_begin();)
 #endif
     stamp = (u16)(stamp + 1U == 0x10000UL ? 1U : stamp + 1U);
     cache_frame(&spr_cache); cache_frame(&s1_cache); cache_frame(&s2_cache); cache_frame(&s3_cache);
@@ -1907,7 +2551,9 @@ void sat_gfx_draw(void)
 #endif
     VLN(vl_serial = (u16)(UNC32(plot_started) + 1);)
     VP(vp_sprite_start = (unsigned int)GFX_TICKS();)
+    HUD(hs.upl = 0; hs.in_build = 1; hs.t_build = GFX_TICKS();)
     draw_sprites();
+    HUD(hs.t_build = ((GFX_TICKS() - hs.t_build) & 0xffffUL) - hs.upl; hs.in_build = 0; hs.t_cmds = sat_gfx_stats.commands;)
     VP(vp_current[VP_SPRITE_TICKS] = vp_elapsed(vp_sprite_start);)
     note_slots();
 #ifdef SAT_VLOG
@@ -1932,6 +2578,7 @@ void sat_gfx_draw(void)
     if (!plot_start()) { plot_abandon_build(); VP(vp_finish(0);) return; }
 #endif
     VP(vp_current[VP_FLAGS] |= VP_SUBMITTED; vp_layer_start = (unsigned int)GFX_TICKS();)
+    HUD_POLL();
     /* Only a submitted plot owns the protected previous texture stamp. An
        abandoned build must not release the last submitted plot's textures. */
     prev_stamp = stamp;
@@ -1949,6 +2596,7 @@ void sat_gfx_draw(void)
        leaving restores play's pattern, colour calculation and priority (update_priority writes 0xfa every frame). */
     {
         static int home_was;
+        HUD(static int hud_was;)
         if (snap.home)
         {
             VDP2R(0x10) = 0x0123; VDP2R(0x12) = 0xff67;
@@ -1959,36 +2607,42 @@ void sat_gfx_draw(void)
             /* Colour calculation by the colour's MSB (SFCCMD NBG3 mode 3): banks 62 and 63 written here with the MSB only on dot 15, the panel's. */
             { int e; for (e = 62 * 16 + 1; e < 64 * 16; e++) if (e & 15) put16(CRAM_AT(e), (u16)((sat_gfx_colour(cram_shadow[e]) & 0x7fffU) | ((e & 15) == 15 ? 0x8000U : 0))); }
         }
-        else if (home_was)
+        else if (home_was HUD(&& !snap.hud))
         {
             VDP2R(0x10) = 0x012f; VDP2R(0x12) = 0xff6f;
             VDP2R(0xec) = 0; VDP2R(0xee) = 0; VDP2R(0x10a) = 0;
             { int e; for (e = 62 * 16 + 1; e < 64 * 16; e++) put16(CRAM_AT(e), sat_gfx_colour(cram_shadow[e])); }   /* the game's colours back, MSB as everywhere */
         }
+        HUD(if (snap.hud && !snap.home) { hud_layer(home_was || !hud_was); hud_was = 1; } else hud_was = 0;)
         home_was = snap.home;
     }
 #endif
     STAGE(1);
     update_rowscroll();
     VDP2R(0x9a) = (u16)(row_active ? 0x0002 : 0);
+    HUD_POLL();
 
     STAGE(2);
     snap_layers_wait();
+    HUD_POLL();
     VP(vp_current[VP_SNAPSHOT_TICKS] |= snap.profile_layer_ticks << 16;)
     if (layers & 4)
     {
         bgon |= 1;
         if (!drawn_valid || snap.s2_sum != drawn_s2) { draw_scroll2(s2x, s2y, row_active); drawn_s2 = snap.s2_sum; }
+        HUD_POLL();
     }
     if (layers & 8)
     {
         bgon |= 2;
         if (!drawn_valid || snap.s3_sum != drawn_s3) { draw_scroll3(s3x, s3y); drawn_s3 = snap.s3_sum; }
+        HUD_POLL();
     }
     if (layers & 2)
     {
         bgon |= 4;
         if (!drawn_valid || snap.s1_sum != drawn_s1) { draw_scroll1(s1x, s1y); drawn_s1 = snap.s1_sum; }
+        HUD_POLL();
     }
     drawn_valid = 1;
     STAGE(3);
@@ -1996,7 +2650,7 @@ void sat_gfx_draw(void)
     bgon &= SAT_GFX_BGMASK;
 #endif
 #ifdef SAT_HOME
-    if (snap.home) bgon |= 8;
+    if (snap.home HUD(|| snap.hud)) bgon |= 8;
 #endif
     VDP2R(0x20) = bgon;
     VDP2R(0x70) = (u16)((s2x + CPS_LEFT + SAT_GFX_CROP_X - NUDGE_X) & 0x7ff);
@@ -2033,6 +2687,7 @@ void sat_gfx_draw(void)
     }
 #endif
     sat_gfx_stats.frames++;
+    HUD(hud_draw_end();)
     VP(vp_current[VP_LAYER_TICKS] = vp_elapsed(vp_layer_start);
        if (VDP1R(0x10) & 2) {
            vp_current[VP_FLAGS] |= VP_CEF_AT_CPU_DONE;
@@ -2081,6 +2736,9 @@ int sat_gfx_swap_pack(const void *pack)
     /* A pair absent from the old pack can be present in the next round. */
     for (n = 0; n < SAT_GFX_SPRITE_PAIRS * 2; n += 2)
         if (spr_slots[n].next) spr_slots[n].key = NOKEY;
+#endif
+#if SAT_GFX_RANKFIX
+    pack_gen++;   /* the drawing side forgets its blanks and redraws every layer when the next snapshot carries this */
 #endif
     return 1;
 }
@@ -2190,18 +2848,12 @@ COLD_OS int sat_gfx_init(const void *pack)
 
     VDP2R(0x00) = 0x8001;                         /* display on */
     #ifdef SAT_HOME
-    /* The font with its clear dots as dot code 15, the panel's: letters sit on the translucent panel, not in holes through it. */
-    { u32 n; for (n = 0; n < sizeof home_font; n += 4) { u32 w = (u32)home_font[n] << 24 | (u32)home_font[n + 1] << 16 | (u32)home_font[n + 2] << 8 | home_font[n + 3], o = 0; int k;
-        for (k = 0; k < 32; k += 4) o |= (((w >> k) & 15) ? ((w >> k) & 15) : 15u) << k;
-        put32(VDP2_VRAM + CELL_S1 + (u32)SAT_GFX_HOME_FONT * 32 + n, o); } }
-    { u32 n; for (n = 0; n < 32; n += 4) put32(VDP2_VRAM + CELL_S1 + (u32)(SAT_GFX_HOME_FONT + 58) * 32 + n, 0xffffffffUL); }   /* the menu panel: every dot code 15 (pen 14, near black) */
+    /* The menu font's cells are written by draw_home (clear dots clear on the title list, panel dots on the option screens). The panel cell:
+       every dot code 15 (pen 14, near black). */
+    { u32 n; for (n = 0; n < 32; n += 4) put32(VDP2_VRAM + CELL_S1 + (u32)(SAT_GFX_HOME_FONT + 58) * 32 + n, 0xffffffffUL); }
     /* Screen names in large letters, as MSHvSF's OPTION MODE header: A to Z from the same font, each row doubled (8 x 16, two cells) and
-       thickened by one dot to the right; clear dots are the panel's. 52 cells after the panel, up to 0x1fbe0 (the row table is at 0x1fc00). */
-    { int L, h, y; for (L = 0; L < 26; L++) for (h = 0; h < 2; h++) for (y = 0; y < 8; y++) {
-        const u8 *f = home_font + (32 + L) * 32 + (h * 4 + y / 2) * 4;
-        u32 w = (u32)f[0] << 24 | (u32)f[1] << 16 | (u32)f[2] << 8 | f[3], o = 0; int k;
-        for (k = 28; k >= 0; k -= 4) { u32 d = (w >> k) & 15, l = k < 28 ? (w >> (k + 4)) & 15 : 0; d = d ? d : l; o |= (d ? d : 15u) << k; }
-        put32(VDP2_VRAM + CELL_S1 + (u32)(SAT_GFX_HOME_FONT + 59 + L * 2 + h) * 32 + (u32)y * 4, o); } }
+       thickened by one dot to the right; clear dots are the panel's (option screens only). 52 cells after the panel, up to 0x1fbe0 (the row table is at 0x1fc00). */
+    { int L, h; for (L = 0; L < 26; L++) for (h = 0; h < 2; h++) home_cell(home_font + (32 + L) * 32 + h * 16, (u32)SAT_GFX_HOME_FONT + 59 + (u32)(L * 2 + h), 1, 15); }
 #endif
     return 1;
 }

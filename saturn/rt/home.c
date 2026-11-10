@@ -84,10 +84,9 @@ u32 sat_home_pad(u32 raw)
     /* No coin to insert at home, and no coin sound: a credit is simply there whenever one is wanted. The game's start path spends it. Free play's own coinage is not used: its paths are outside the census the stage files keep ROM for. */
     if (cred < (sat_duel_on ? 2u : 1u) && (inject || !IN_ATTRACT)) { G(0xff818c) = (u8)(sat_duel_on ? 2 : 1); cred = G(0xff818c); }
     if (inject) {
-        if (cred) { inject--; return (inject & 4) ? raw | P_START : raw & ~P_START; }
-        return raw | P_START;
-    }
-    if (IN_ATTRACT || PAUSE_OK) return raw | P_START;
+        if (!cred) return raw | P_START;
+        inject--; raw = (inject & 4) ? raw | P_START : raw & ~P_START;   /* on the select's story (sat_home_flow) these Start presses become Attack, below */
+    } else if (IN_ATTRACT || PAUSE_OK) return raw | P_START;
     /* Character select (and the story before it): the arcade takes only Attack (MAME 0.289: Start leaves the timer running), but a Saturn player
        confirms with Start, so player 1's Start is Attack there. Player 2 keeps Start to join. */
     if (SELECTING && !(raw & P_START)) return (raw | P_START) & ~P_A;
@@ -152,6 +151,7 @@ int sat_home_list(int screen, int row0, const char *const *items, int n, int sta
 }
 
 extern void sat_home_menu(void);
+extern void sat_home_flow(void);
 
 /* NOW LOADING, as Capcom's Saturn ports show it: the game held, a black picture with the line in the game's font in the bottom right corner,
    drawn before a stage file load (round_check, kernel.c) and left on screen while the load runs; off again before the stage's first picture. */
@@ -173,22 +173,7 @@ void sat_home_loading(int on)
     }
 }
 
-static void pause_menu(void)
-{
-    static const char *const items[] = { "RESUME", "QUIT TO TITLE" };
-    int pick;
-    sat_home_hold = 1;
-    sat_home_clear();
-    { int r, c; for (r = 7; r < 17; r++) for (c = 12; c < 32; c++) sat_home_text[r][c] = 1; }
-    sat_home_centre(9, "PAUSE", 1);
-    sat_home_mode = 1;
-    prev = sat_pad_raw & 0xffff;
-    pick = sat_home_list(3, 13, items, 2, 0, 0);
-    sat_home_screen = 0;
-    sat_home_mode = 0;
-    sat_home_hold = 0;
-    if (pick == 1) sat_home_restart();
-}
+extern void pause_menu(void);   /* home_cold.c: out of work RAM */
 
 /* Boss rush (menu, home_cold.c): the last stage of each of the game's seven rounds ends on its boss (the stage's controller waits on the boss-down flag ff822a, then clears with ff81f3).
    Five of them are arenas that start at the boss (stage words 04 08 0a 1a 24); the 0e and 10 bosses sit at the end of a long stage and are left out until a start near them is built.
@@ -205,58 +190,7 @@ static u32 rush_mark;                  /* stage file loads when the fight was se
 static u8 rush_mark_set;
 static u8 rush_played;                 /* the rush's game has left attract */
 static u8 rush_phase;                  /* 0 wait for the fight, 1 in the fight, 2 cleared, wait for the advance */
-static void rush_time(char *b, u32 v)  /* mm:ss.cc from vblanks (60 per second) */
-{
-    u32 cs = v * 100u / 60u, s = cs / 100u, m = s / 60u;
-    b[0] = (char)('0' + m / 10 % 10); b[1] = (char)('0' + m % 10); b[2] = ':';
-    b[3] = (char)('0' + s % 60 / 10); b[4] = (char)('0' + s % 10); b[5] = '.';
-    b[6] = (char)('0' + cs % 100 / 10); b[7] = (char)('0' + cs % 10); b[8] = 0;
-}
-static void rush_card(int n)           /* the break before a fight: the game held, a short card over its picture */
-{
-    char b[13] = "FIGHT 1 OF 5";
-    int i, r, c;
-    b[6] = (char)('0' + n);
-    sat_home_hold = 1;
-    sat_home_clear();
-    for (r = 10; r < 15; r++) for (c = 12; c < 32; c++) sat_home_text[r][c] = 1;
-    sat_home_centre(11, "BOSS RUSH", 1);
-    sat_home_centre(13, b, 0);
-    sat_home_mode = 1;
-    sat_home_screen = 8;
-    for (i = 0; i < 120; i++) sat_home_frame();
-    sat_home_screen = 0;
-    sat_home_mode = 0;
-    sat_home_hold = 0;
-}
-static void rush_result(void)
-{
-    char b[12];
-    int i;
-    u32 tot = 0;
-    sat_home_hold = 1;
-    sat_home_clear();
-    sat_home_centre(6, "BOSS RUSH CLEAR", 1);
-    for (i = 0; i < 5; i++) {
-        char t[] = "FIGHT 1";
-        t[6] = (char)('1' + i);
-        sat_home_put(9 + 2 * i, 12, t, 0);
-        tot += sat_home_rush_t[2 * i + 1] - sat_home_rush_t[2 * i];
-        rush_time(b, sat_home_rush_t[2 * i + 1] - sat_home_rush_t[2 * i]); sat_home_put(9 + 2 * i, 23, b, 0);
-    }
-    sat_home_put(20, 12, "TOTAL", 1);
-    rush_time(b, tot); sat_home_put(20, 23, b, 1);
-    sat_home_centre(24, "PRESS START", 0);
-    sat_home_mode = 2;
-    sat_home_screen = 9;
-    prev = sat_pad_raw & 0xffff;
-    while (!(sat_home_edges() & P_START)) sat_home_frame();
-    sat_home_screen = 0;
-    sat_home_mode = 0;
-    sat_home_hold = 0;
-    sat_home_rush = 0;
-    sat_home_restart();
-}
+extern void rush_card(int n), rush_result(void);   /* home_cold.c */
 /* Fight times count from the end of each card; the break between fights (clear, card) is not in the total. */
 static void rush_poll(void)
 {
@@ -325,6 +259,7 @@ void sat_home_poll(void)
     }
     rush_poll();
     if (inject && !IN_ATTRACT) inject = 0;
+    sat_home_flow();   /* stage select, boss rush and duel skip the arcade's intro story before the character select (home_cold.c) */
     if (inject) return;
     if (IN_ATTRACT) {
         /* First sight once the boot warning has gone, then on Start. */
