@@ -1662,6 +1662,12 @@ static void update_rowscroll(void)
         write_name(VDP2_VRAM + ROWTAB + line * 4, (u32)snap.row[line] << 16, &sh_row[line]);
 }
 
+#ifdef SAT_FPS_HUD
+static int fps_on;   /* the performance readout's layer (NBG3) is up this picture: priority 7, sprites kept under it */
+#define FPS_HUD(x) x
+#else
+#define FPS_HUD(x)
+#endif
 static u16 prinb_last; /* VDP2 registers are write-only: what update_priority last put in PRINB */
 /* Layer order and the priority table. VDP2 levels: layers 2, 4, 6; a sprite level sits just under the highest layer it hides behind. */
 static void update_priority(u16 layers, u16 pri)
@@ -1679,7 +1685,7 @@ static void update_priority(u16 layers, u16 pri)
 #ifdef SAT_HOME
     /* NBG3 (the menu layer) keeps priority 7 through the whole picture: this write used to drop it to 0 at the start of every frame and draw_home
        put it back near the end, so under the frame chain (the slave still building sprite commands at the vblank) the menu text was never shown. */
-    VDP2R(0xfa) = (u16)(prin[0] | (snap.home ? 0x0700 : 0));   /* NBG2 = scroll 1, NBG3 = menu */
+    VDP2R(0xfa) = (u16)(prin[0] | ((snap.home FPS_HUD(|| fps_on)) ? 0x0700 : 0));   /* NBG2 = scroll 1, NBG3 = menu */
 #else
     VDP2R(0xfa) = prin[0];                          /* NBG2 = scroll 1 */
 #endif
@@ -1702,7 +1708,7 @@ static void update_priority(u16 layers, u16 pri)
 #endif
         }
 #ifdef SAT_HOME
-        if ((snap.home HUD(|| snap.hud)) && level > 6) level = 6;   /* the menu layer (NBG3, 7) in front of sprites too; a sprite wins ties, so 7 would hide it */
+        if ((snap.home HUD(|| snap.hud) FPS_HUD(|| fps_on)) && level > 6) level = 6;   /* the menu layer (NBG3, 7) in front of sprites too; a sprite wins ties, so 7 would hide it */
 #endif
         s[p] = (u16)level;
     }
@@ -2705,10 +2711,6 @@ extern volatile unsigned long sat_vlog[16 * 4];
 #include "sat_rt.h"
 extern int sat_fps_hud(u32 shown, int fresh);
 static u32 fps_next;
-static int fps_on;
-#define FPS_HUD(x) x
-#else
-#define FPS_HUD(x)
 #endif
 void sat_gfx_draw(void)
 {
