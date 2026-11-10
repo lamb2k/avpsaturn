@@ -90,7 +90,7 @@ Free-running footage (an OBS clip) was not delivered: OBS recorded black frames 
 ## 7. Gates
 
 - Builds: base, flag off, HEAL, FLASH, HEAL + FLASH, HEAL step 60: rc 0, no NO-GO (`evidence/build_*.log`).
-- `fit.py` on a copy of D11 against the HEAL+FLASH layout (identical in every variant): see the end of the report in the hand-back (the run was still going when this was written).
+- `fit.py` on a copy of D11 against the HEAL+FLASH layout (identical in every variant): **76/76, gate True**; stage24_ma: Schaefer drops 2,910, Wolverine 2,866, no own key dropped.
 - HOST: section 5. Yaba: section 6.
 - Merge: native d436009 (Berserker as its own native action) merged at 43e3fed; the hooks (`wv_on_berserker_*`, tick, pad) kept their names; nothing of ours needed to change.
 
