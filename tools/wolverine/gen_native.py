@@ -545,7 +545,7 @@ BZ_SLOTS = (6, 6, 5, 5, 4, 3, 3, 4, 5, 5, 6, 6)
 # and 112's low edge), a deliberate approximation (rect = forward x0, x1, up y0, y1). Owner-visible: contact geometry of the flurry.
 BZ_BOX = (26, 84, 13, 85)
 BZ_TICKS = int(os.environ.get("WV_BZ_TICKS", "4"))
-BZ_HURT = int(os.environ.get("WV_BZ_HURT", "1"))   # 1 (default): he can be hit during the Berserker (his flurry poses' hurt box); 0: no hurt box, as Schaefer's own special (donor chain T1.42 names none: unhittable) - comparison switch
+BZ_HURT = int(os.environ.get("WV_BZ_HURT", "0"))   # owner 11-10 ("he shouldn't be hittable during the berserker, should be consistent with stock characters"): 0 (default) = no hurt box on the Berserker records, as Schaefer's own special (donor chain T1.42 names none, so no hit lands on him); 1 = his flurry poses' hurt box (hittable), comparison switch only
 BZ = "BZ"
 bz_src = pick_sources("BERS3", None)
 t3b, t3n = TABLES[3]

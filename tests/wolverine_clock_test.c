@@ -22,7 +22,7 @@ static int player_index;
 static void state(int i, int a, int b, int c)
 {
     R8(PL(i)) = 1;
-    R8(PL(i) + 1) = WV_CHAR_SCH;
+    R8(PL(i) + WV_CHAR_OFF) = WV_CHAR_SCH;
     R8(PL(i) + 4) = (u8)a;
     R8(PL(i) + 5) = (u8)b;
     R8(PL(i) + 6) = (u8)c;
@@ -224,7 +224,7 @@ static void test_ko_blink(void)
     for (k = 0; k < 90; k++) {
         u16 w = wall_[0];
         R8(PL(0) + 5) = (u8)(k < 10 ? 2 : 4);
-        R8(PL(0) + 1) = (u8)((k & 1) ? WV_CHAR_SCH : 0);   /* the blink */
+        R8(PL(0) + WV_CHAR_OFF) = (u8)((k & 1) ? WV_CHAR_SCH : 0);   /* the blink */
         sat_guest_wolverine_pad(&pad);
         update();
         assert(cur_[0] == WV_KNOCKDOWN && wall_[0] == w + 1);

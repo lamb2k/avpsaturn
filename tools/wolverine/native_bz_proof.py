@@ -74,7 +74,7 @@ def snap(s, tag, f, keys):
     row = dict(tag=tag, f=f, v=int.from_bytes(d[8:12], "big"), keys=keys, sub=blk[7], lock=blk[0xad], cls=blk[0x92], swing=blk[0x67], hitflag=blk[0x6e], hits80=blk[0x80], stage=blk[0x81],
                bz=(s.m.read(bz, 1)[0] if bz else -1), evt=([int.from_bytes(s.m.read(ev_ + 4 * k, 4), "big") for k in range(4)] if ev_ else None), hp42=int.from_bytes(blk[0x42:0x44], "big"), ehp_list=[int.from_bytes(en[o + 0x40:o + 0x42], "big") for o in range(0, 20 * 0xc0, 0xc0) if en[o]], st=blk[4:7].hex(), x=int.from_bytes(blk[0x10:0x12], "big"), z=int.from_bytes(blk[0x18:0x1a], "big"),
                face=blk[0x0f], rec=hex(rec), timer=int.from_bytes(blk[0x0a:0x0c], "big"), flags=blk[0x24:0x26].hex(), hold=int.from_bytes(blk[0x90:0x92], "big"), hp=int.from_bytes(blk[0x40:0x42], "big"),
-               rec_bytes=rb.hex(), enemy_hp=hp, native=int(0x300000 <= rec < 0x310000))
+               rec_bytes=rb.hex(), enemy_hp=hp, native=int(0x300000 <= rec < 0x310000), vdp2_clof=(list(s.m.read(0x25F80110, 10)) if os.environ.get('PROOF_VDP') else None), en2c=([en[o + 0x2c] for o in range(0, 20 * 0xc0, 0xc0) if en[o]] if os.environ.get('PROOF_VDP') else None))
     with open(OUT + "/trace.jsonl", "a") as fh:
         fh.write(json.dumps(row) + chr(10))
     return row

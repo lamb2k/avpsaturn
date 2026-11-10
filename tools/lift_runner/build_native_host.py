@@ -23,7 +23,7 @@ T = pathlib.Path(__file__).resolve().parents[2]
 sys.path.insert(0, str(T / "tools/wolverine"))
 import forkgen
 
-GUEST_WRAP = ("1cf54", "1d03e", "1d116", "195ec", "19f9a")
+GUEST_WRAP = ("1cf54", "1d03e", "1d116", "195ec", "19f9a", "24060")
 
 
 def wsl(p):
@@ -48,13 +48,15 @@ def main():
     ap.add_argument("--defs", default="")
     ap.add_argument("--mutate", default="", help="negative control: FROM=>TO replaced once in the fork text (the harness must report DIFFERENT)")
     ap.add_argument("--reloc", type=int, default=0, help="1: the relocated animation block (plan V2): the 10 table-base immediates go through WVB(), host_reloc.c is linked; WVBLOCK/WVSLOTS at run time switch it on")
+    ap.add_argument("--wvf", type=int, default=0, help="1: lane wv-features: his tick and pad hooks are wrapped by saturn/guests/wolverine/wv_features.c (as saturn/rt/build.py does); pass -DSAT_WV_HEAL ... in --defs")
     ap.add_argument("--kernel", default=str(T / "tools/lift_runner/host_kernel.c"))
     a = ap.parse_args()
     work, out = pathlib.Path(a.work), pathlib.Path(a.outdir)
     (out / "obj").mkdir(parents=True, exist_ok=True)
     overrides = (T / "saturn/game/overrides.txt").read_text().split()
     ids = () if a.ids == "none" else forkgen.SHIP_IDS if a.ids == "ship" else forkgen.ALL_IDS if a.ids == "all" else tuple(int(x) for x in a.ids.split(","))
-    wrap = (GUEST_WRAP + (('24f04',) if '-DSAT_WV_NATIVE_GFX' in a.defs else ()) if a.guests else ()) + (forkgen.wrapped_names(ids) if a.guests else ())
+    native = '-DSAT_WV_NATIVE_GFX' in a.defs   # the native target build wraps f_24f04 (his special) and no longer f_24060 (game_bind.c)
+    wrap = (tuple(x for x in GUEST_WRAP if not (native and x == '24060')) + (('24f04',) if native else ()) if a.guests else ()) + (forkgen.wrapped_names(ids) if a.guests else ())
     sources_o = forkgen.read_sources(work / "src")
     hdr = ""
     if a.reloc:
@@ -108,9 +110,10 @@ def main():
         wv = T / "saturn/guests/wolverine/wolverine.c"
         hg = T / "tools/lift_runner/host_guests.c"
         inc = "-I%s -I%s -I%s" % (wsl(gen), wsl(T / "saturn/rt"), wsl(g))
+        wvf = " -Dsat_guest_wolverine_tick=wv_tick_inner -Dsat_guest_wolverine_pad=wv_pad_inner" if a.wvf else ""   # the host kernel never calls the pad hook; the rename only satisfies the link
         for src, nm, fl in ((T / "saturn/rt/guests.c", "guests", ""),
-                            (wv, "wolverine", "-Dsat_guest_objects=sat_guest_wolverine_objects -DWV_HOST_ROM"),
-                            (hg, "host_guests", "")):
+                            (wv, "wolverine", "-Dsat_guest_objects=sat_guest_wolverine_objects -DWV_HOST_ROM" + wvf),
+                            (hg, "host_guests", "")) + (((T / "saturn/guests/wolverine/wv_features.c", "wv_features", "-DWVF_HOST"),) if a.wvf else ()):
             o = out / "obj" / ("%s_%s.o" % (nm, a.name))
             jobs.append((src, o, "-DHOST_CHECK -O1 %s %s %s" % (inc, a.defs, fl)))
             extra.append(o)

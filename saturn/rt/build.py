@@ -317,7 +317,7 @@ def gen_sources():
 
 def cc(src, obj, extra=()):
     newest = max(src.stat().st_mtime, (HERE / "lift_target.h").stat().st_mtime)
-    if src.name in ("kernel.c", "pad.c", "sat_gfx.c", "home.c", "home_cold.c", "guests.c", "megaman.c", "wolverine.c", "game_bind.c"):
+    if src.name in ("kernel.c", "pad.c", "sat_gfx.c", "home.c", "home_cold.c", "guests.c", "megaman.c", "wolverine.c", "wv_features.c", "game_bind.c"):
         newest = max(newest, (HERE / "sat_rt.h").stat().st_mtime, time.time() if os.environ.get("KERNEL_CFLAGS") else 0)
     if src.name == "sat_gfx.c":
         newest = max(newest, (src.parent / "sat_gfx.h").stat().st_mtime)
@@ -489,10 +489,15 @@ def main():
                 sh([sys.executable, REPO / "tools/wolverine/gen_native.py", WORK, os.environ["GUEST_ASSETS"], os.environ.get("WV_MSHVSF", "E:/AvP/learning/lane-wv-native-gfx/mshvsf"), GEN / "wv_native.inc"])
             sh([sys.executable, REPO / "tools/wolverine/gen_c.py", os.environ["GUEST_ASSETS"], GEN / "wolverine_data.inc"] + ([os.environ["WV_COLOUR"]] if os.environ.get("WV_COLOUR") else []))   # WV_COLOUR: a colours entry of remap.json (default: its default_colour)
             # guests.c dispatches: his whole-list pass is renamed so the group-indexed guests (Mega Man) run first
-            home_cold_extra.append(cc(REPO / "saturn/guests/wolverine/wolverine.c", OBJ / "wolverine.o", ["-Os", "-I", GEN, "-I", HERE, "-Dsat_guest_objects=sat_guest_wolverine_objects"] + os.environ.get("KERNEL_CFLAGS", "").split()))
+            # Lane wv-features: with SAT_WV_HEAL / SAT_WV_FLASH his tick and pad hooks are renamed so saturn/guests/wolverine/wv_features.c wraps them (no edit to wolverine.c)
+            wvf = "SAT_WV_HEAL" in os.environ.get("KERNEL_CFLAGS", "") or "SAT_WV_FLASH" in os.environ.get("KERNEL_CFLAGS", "")
+            wv_ren = (["-Dsat_guest_wolverine_tick=wv_tick_inner"] if ("SAT_WV_HEAL" in os.environ.get("KERNEL_CFLAGS", "") or "SAT_WV_FLASH_HOLD=1" in os.environ.get("KERNEL_CFLAGS", "")) else []) + (["-Dsat_guest_wolverine_pad=wv_pad_inner"] if "SAT_WV_FLASH" in os.environ.get("KERNEL_CFLAGS", "") else [])
+            home_cold_extra.append(cc(REPO / "saturn/guests/wolverine/wolverine.c", OBJ / "wolverine.o", ["-Os", "-I", GEN, "-I", HERE, "-Dsat_guest_objects=sat_guest_wolverine_objects"] + wv_ren + os.environ.get("KERNEL_CFLAGS", "").split()))
+            if wvf:
+                home_cold_extra.append(cc(REPO / "saturn/guests/wolverine/wv_features.c", OBJ / "wv_features.o", ["-Os", "-I", GEN, "-I", HERE] + os.environ.get("KERNEL_CFLAGS", "").split()))
             if "SAT_WV_SOUND" in os.environ.get("KERNEL_CFLAGS", ""):   # wv_sfx(): Wolverine's own sounds (lane wv-sounds); default off, the objects without the flag are unchanged
                 home_cold_extra.append(cc(REPO / "saturn/guests/wolverine/wv_sound.c", OBJ / "wv_sound.o", ["-Os", "-I", REPO / "saturn/guests/wolverine"]))
-                if "SAT_WV_SOUND_HOOKS" in os.environ.get("KERNEL_CFLAGS", ""):   # test-only Berserker hook bodies; the features lane owns the real ones
+                if "SAT_WV_SOUND_HOOKS" in os.environ.get("KERNEL_CFLAGS", "") and not wvf:   # test-only Berserker hook bodies; the features lane owns the real ones
                     home_cold_extra.append(cc(REPO / "saturn/guests/wolverine/wv_sound_hooks.c", OBJ / "wv_sound_hooks.o", ["-Os", "-I", REPO / "saturn/guests/wolverine"]))
         for item in filter(None, os.environ.get("SAT_GUEST_DATA", "").split(";")):   # per-guest drawing code and tables (saturn/guests/<name>)
             gi, d = item.split("=", 1)

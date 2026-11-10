@@ -62,6 +62,7 @@ def step(v, s):
     if play_v[0] is None:
         play_v[0] = s.v; s.log("play at vblank", s.v)
     if os.environ.get("CAP"): cap(s)
+    elif os.environ.get("FEAT"): feat(s)
     else: live(s)
 
 
@@ -73,7 +74,7 @@ def cap(s):
         if f >= tgt and ("cap", tgt) not in done:
             done.add(("cap", tgt)); a = s.ram(0x81e8, 2); b = s.ram(0x8380, 0x200)
             name = "cap_%s_f%d" % (os.environ.get("CAPNAME", "x"), tgt); s.shot(name)
-            caps.append(dict(name=name, f=f, v=s.v, stage=a.hex(), kinds=(b[0xd2], b[0x100 + 0xd2]), players_active=(b[0], b[0x100])))
+            caps.append(dict(name=name, f=f, v=s.v, stage=a.hex(), kinds_d2=(b[0xd2], b[0x100 + 0xd2]), byte_plus1=(b[1], b[0x101]), players_active=(b[0], b[0x100]), wvid=(list(s.m.read(s.syms['wvid_'], 2)) if 'wvid_' in s.syms else None), guest_sel=s.m.read(s.syms['sat_guest_sel'], 1)[0]))
             s.log("capture", name, "stage", a.hex(), "kinds", (b[0xd2], b[0x100 + 0xd2]))
     if f > max(targets) + 20:
         os.makedirs(OUT, exist_ok=True); json.dump(caps, open(OUT + "/cap.json", "w"), indent=1); s.stop()
@@ -133,6 +134,61 @@ def live(s):
     rows.append(dict(f=f, v=s.v, press=pressing, ids=[a[0], a[1], a[0xd2], a[0x100], a[0x101], a[0x100 + 0xd2]], in0=(s.word('in0', 0, 2) if pressing else None), btn=gb[0xee], btn_prev=gb[0xef], gun_player=gp + 1, gun_state=gb[4:7].hex(), other_state=a[0x100 * wvi + 4:0x100 * wvi + 7].hex(), pinned=pinned[0], ehp=ehp, px=gx, ex=(int.from_bytes(buf[pinned[0] + 0x10:pinned[0] + 0x12], "big") if pinned[0] is not None else None), ents=ents))
     if ents and len(shots_kept) < 24 and f - (shots_kept[-1] if shots_kept else -99) >= 3:   # pictures of the frames with pool objects
         shots_kept.append(f); s.shot("gun_%04d" % f)
+
+
+def feat(s):
+    """heal / flash checks (owner 11-10, features lane handover): FEAT=heal: both players' health set to 50 once, every enemy kept 400 px away, health of both logged; FEAT=flash: the Wolverine player plays his special (attack + jump) every 140 vblanks at a pinned enemy,
+    the poll logs the enemy pool's hitstop byte +0x2c (freeze), the players' and the boss pool's +0x2c (must stay untouched) and the VDP2 colour offset registers (flash)"""
+    m = s.m
+    k0 = s.ram(0x8380, 0x200); kinds = (k0[0xd2], k0[0x100 + 0xd2])
+    if want_kinds[0] is None:
+        want_kinds[0] = kinds; s.log("character kinds P1,P2", kinds)
+    wvi = 0 if kinds[0] == 1 else 1; pi = 1 - wvi; f = s.v - play_v[0]; mode = os.environ["FEAT"]
+    NF = int(os.environ.get("FEAT_LEN", "900"))
+    if f > NF:
+        os.makedirs(OUT, exist_ok=True)
+        with open(OUT + "/feat_trace.jsonl", "w") as fh:
+            for r in rows: fh.write(json.dumps(r) + chr(10))
+        json.dump(dict(mode=mode, kinds=kinds, wolverine_index_p=wvi + 1, partner_index_p=pi + 1, polls=len(rows), last_v=s.v), open(OUT + "/feat_summary.json", "w"), indent=1); s.stop(); return
+    blk = s.ram(0x8380, 0x2100)
+    a = blk[:0x200]; wb = a[0x100 * wvi:0x100 * wvi + 0x100]; pb = a[0x100 * pi:0x100 * pi + 0x100]
+    wx, wz, wf = int.from_bytes(wb[0x10:0x12], "big"), int.from_bytes(wb[0x18:0x1a], "big"), wb[0x0f] & 1
+    keys = []
+    if mode == "heal":
+        if f in range(40, 60) and ("hp", 1) not in done:
+            done.add(("hp", 1))
+            for off in (0x83c0, 0x83c2, 0x84c0, 0x84c2): m.call("memory_write", address=hex(s.syms["RAMB"] + off), size="word", value=hex(50))
+        if f - last_pin[0] >= 4:   # every enemy 400 px behind the Wolverine player (a partner would keep its own)
+            last_pin[0] = f; buf = blk[0x1200:0x1200 + 20 * 0xc0]
+            for o in range(0, 20 * 0xc0, 0xc0):
+                b = buf[o:o + 0xc0]
+                if b[0] and b[1] != 0: m.call("memory_write", address=hex(s.syms["RAMB"] + 0x9580 + o + 0x10), size="word", value=hex((wx - 400 if wf else wx + 400) & 0xffff))
+    else:   # flash
+        if f - last_assist[0] >= 40:
+            last_assist[0] = f
+            for off in (0x83c0, 0x84c0): m.call("memory_write", address=hex(s.syms["RAMB"] + off), size="word", value=hex(0x65))
+        wp = pre(wvi)
+        if 150 <= f and (f - 150) % 140 < 30: keys = [wp + "a", wp + "b"]
+        if f - last_pin[0] >= 4 and f >= 100:
+            last_pin[0] = f; buf = blk[0x1200:0x1200 + 20 * 0xc0]; best = None
+            for o in range(0, 20 * 0xc0, 0xc0):
+                b = buf[o:o + 0xc0]
+                if b[0] and b[1] != 0 and int.from_bytes(b[0x40:0x42], "big") < 0x8000:
+                    d = abs(int.from_bytes(b[0x10:0x12], "big") - wx)
+                    if best is None or d < best[0]: best = (d, o)
+            if best:
+                o = best[1]; base = s.syms["RAMB"] + 0x9580 + o
+                if pinned[0] != o: pinned[0] = o; m.call("memory_write", address=hex(base + 0x40), size="word", value=hex(0x190))
+                x = (wx + 70) if wf else (wx - 70)
+                for off, val in ((0x10, x & 0xffff), (0x14, int.from_bytes(wb[0x14:0x16], "big")), (0x18, wz)): m.call("memory_write", address=hex(base + off), size="word", value=hex(val))
+    s.set(keys)
+    buf = blk[0x1200:0x1200 + 20 * 0xc0]
+    en2c = [buf[o + 0x2c] for o in range(0, 20 * 0xc0, 0xc0) if buf[o]]
+    boss = s.ram(0x9280, 0x300); boss2c = [boss[o + 0x2c] for o in range(0, 0x300, 0xc0)]
+    try: vdp = list(s.m.read(0x25F80110, 10))
+    except Exception: vdp = None
+    rows.append(dict(f=f, v=s.v, w_hp=int.from_bytes(wb[0x40:0x42], "big"), p_hp=int.from_bytes(pb[0x40:0x42], "big"), w_state=wb[4:7].hex(), p_state=pb[4:7].hex(), w_2c=wb[0x2c], p_2c=pb[0x2c], en_2c=en2c, boss_2c=boss2c, vdp2=vdp,
+                     ehp=[int.from_bytes(buf[o + 0x40:o + 0x42], "big") for o in range(0, 20 * 0xc0, 0xc0) if buf[o]]))
 
 
 def finish(s, gp, wvi):
