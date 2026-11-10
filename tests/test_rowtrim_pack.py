@@ -24,7 +24,7 @@ def gfx(n=600, seed=3):
             r = rnd.random()
             for g in range(2):
                 o = k * 0x80 + row * 8 + g * 4
-                if r < 0.35:
+                if r < 0.35 or (r < 0.55 and g == rnd.randrange(2)):   # a row or one half of it transparent
                     raw[o:o + 4] = b"\xff\xff\xff\xff"
                 else:
                     raw[o:o + 4] = bytes(rnd.randrange(256) for _ in range(4))
@@ -52,15 +52,17 @@ def read(mem, addr, n):
 
 
 class RowtrimTests(unittest.TestCase):
-    def reader(self, regions):
+    def reader(self, regions, mode=1):
         """The runtime's view: open_pack, then rowtrim_load for a payload index."""
         mem = load(regions)
         main = mem[PACK]
-        assert main[:4] == b"SGP2"
+        assert main[:4] == (b"SGP3" if mode == 2 else b"SGP2")
         be32 = lambda b, o: struct.unpack_from(">I", b, o)[0]
         sec0 = (be32(main, 4), be32(main, 8), be32(main, 12))
         split, spill = be32(main, 52), be32(main, 56)
         rtbase, rtoffs = be32(main, 84), be32(main, 88)
+
+        size = (lambda b: 4 + 4 * bin(struct.unpack(">I", b)[0]).count("1")) if mode == 2 else (lambda b: 4 + 8 * bin(struct.unpack(">H", b[:2])[0]).count("1"))
 
         def pos(i):
             return be32(main, rtbase + (i >> 10) * 4) + struct.unpack_from(">H", main, rtoffs + i * 2)[0] * 4
@@ -75,20 +77,24 @@ class RowtrimTests(unittest.TestCase):
                     first = be32(main, spill + 4 + k * 8)
                     if i >= first:
                         a = (PACK + be32(main, spill + 8 + k * 8) + (pos(i) - pos(first))) & 0xffffffff
-                        n = 4 + 8 * bin(struct.unpack(">H", read(mem, a, 2))[0]).count("1")
-                        return satgfx_pack.expand(read(mem, a, n))
-            n = 4 + 8 * bin(struct.unpack_from(">H", src, rec_at)[0]).count("1")
-            return satgfx_pack.expand(src[rec_at:rec_at + n])
+                        n = size(read(mem, a, 4))
+                        return satgfx_pack.expand(read(mem, a, n), mode)
+            n = size(src[rec_at:rec_at + 4])
+            return satgfx_pack.expand(src[rec_at:rec_at + n], mode)
         return sec0, load_tile
 
     def test_every_tile_reads_back_identically_main_and_spill(self):
+        for mode in (1, 2):
+            self.check_modes(mode)
+
+    def check_modes(self, mode):
         raw = gfx()
         keys = [set(range(0, 600)), set(), set(), set()]
         free = [[0x10000, 32768], [0x20000, 3072, True], [0x30000, 32768]]
         # room for 150 tiles of the stream in main so the rest spills
         plain = rounds_pack.plan(raw, keys, rounds_pack.HEAD + 4 + 8 * 3 + 4 * 600 + 150 * 128, free)
         self.assertIsNotNone(plain)
-        p = rounds_pack.plan(raw, keys, rounds_pack.HEAD + 4 + 8 * 3 + 4 * 600 + 80 * 128 + 4096, free, rowtrim=True)
+        p = rounds_pack.plan(raw, keys, rounds_pack.HEAD + 4 + 8 * 3 + 4 * 600 + 80 * 128 + 4096, free, rowtrim=mode)
         self.assertIsNotNone(p)
         self.assertTrue(p["segs"], "the case must spill")
         self.assertLess(len(p["tile"][0]), len(plain["tile"][0]))
@@ -96,7 +102,7 @@ class RowtrimTests(unittest.TestCase):
         regions = rounds_pack.assemble(p, PACK, rom)
         for a, d in regions:
             self.assertEqual(len(d) % 1, 0)
-        sec0, load_tile = self.reader(regions)
+        sec0, load_tile = self.reader(regions, mode)
         n = len(plain["tile"][0]) // 128
         self.assertEqual(p["n_tiles"], n)
         for i in range(n):
@@ -128,7 +134,9 @@ class RowtrimTests(unittest.TestCase):
         raw = gfx()
         keys = [set(range(0, 400)), set(), set(), set()]
         plain, _ = satgfx_pack.pack(raw, keys)
-        rt, _ = satgfx_pack.pack(raw, keys, rowtrim=True)
+        rt, _ = satgfx_pack.pack(raw, keys, rowtrim=1)
+        rt2, _ = satgfx_pack.pack(raw, keys, rowtrim=2)
+        self.assertLessEqual(len(rt2), len(rt))
         self.assertLess(len(rt), len(plain))
 
 

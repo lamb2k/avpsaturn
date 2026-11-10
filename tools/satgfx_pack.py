@@ -56,7 +56,16 @@ def payload(raw, sec, key):
     return pl, any(p != 15 for r in px for p in r)
 
 
-def record(pl):
+def record(pl, mode=1):
+    """mode 2 (SAT_TILE_ROWTRIM=2): u32 mask, bit 31 = long 0 of the 32 longs of the payload, set = the long is not zero, then those longs (4 + 4 n bytes)."""
+    if mode == 2:
+        longs = [pl[i:i + 4] for i in range(0, 128, 4)]
+        mask = 0
+        for i, l in enumerate(longs):
+            if l != bytes(4):
+                mask |= 0x80000000 >> i
+        return struct.pack(">I", mask) + b"".join(l for l in longs if l != bytes(4))
+
     """Row masked sprite tile (SGP2, saturn/gfx/sat_gfx.c rowtrim_decode): u16 mask (bit 15 = row 0, set = the row has a visible pen), u16 0, then 8 bytes for each set bit.
     A cleared row is eight zero bytes in the plain 128 byte payload (texture pen 0 is transparent)."""
     rows = [pl[i:i + 8] for i in range(0, 128, 8)]
@@ -67,8 +76,17 @@ def record(pl):
     return struct.pack(">HH", mask, 0) + b"".join(row for row in rows if row != bytes(8))
 
 
-def expand(rec):
+def expand(rec, mode=1):
     """The 128 byte payload of a record."""
+    if mode == 2:
+        mask = struct.unpack_from(">I", rec)[0]
+        out, at = bytearray(), 4
+        for i in range(32):
+            if mask & (0x80000000 >> i):
+                out += rec[at:at + 4]; at += 4
+            else:
+                out += bytes(4)
+        return bytes(out)
     mask = struct.unpack_from(">H", rec)[0]
     out, at = bytearray(), 4
     for r in range(16):
@@ -93,7 +111,7 @@ def pack(raw, used, rowtrim=False):
                 continue
             if pl not in seen:
                 seen[pl] = len(seen)
-                data += record(pl) if rowtrim and s == 0 else pl
+                data += record(pl, rowtrim) if rowtrim and s == 0 else pl
             keys.append(k << ks | seen[pl])
         assert len(seen) < blank and all(k >> 32 == 0 for k in keys)
         secs.append((keys, bytes(data)))

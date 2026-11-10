@@ -726,6 +726,27 @@ static u8 vl_cause;
 /* A sprite tile in an SGP2 pack is a record: u16 mask (bit 15 = row 0, set = the row has a visible pen), u16 spare, then 8 bytes for each set bit. A cleared row is all zero
  * in the plain tile (texture pen 0 is transparent), so the 128 byte slot comes out byte for byte as the SGP1 pack gives it. Rows are written once, in order, with no
  * buffer (low work RAM is full); the cart is read less than a 128 byte copy reads it. */
+#if SAT_TILE_ROWTRIM == 2
+/* SAT_TILE_ROWTRIM=2: u32 mask, bit 31 = long 0 of the tile's 32 longs, set = not zero, then those longs. Same shape of loop, 32 steps of one long. */
+static void rowtrim_decode(u8 *dest, const u8 *rec)
+{
+    u32 mask = ((u32)rec[0] << 24) | ((u32)rec[1] << 16) | ((u32)rec[2] << 8) | rec[3];
+    int i;
+#ifdef SAT_GFX_HOST
+    const u8 *s = rec + 4;
+    for (i = 0; i < 32; i++, mask <<= 1, dest += 4)
+    {
+        int j;
+        for (j = 0; j < 4; j++) dest[j] = (mask & 0x80000000UL) ? s[j] : 0;
+        if (mask & 0x80000000UL) s += 4;
+    }
+#else
+    const u32 *s = (const u32 *)(const void *)(rec + 4);
+    volatile u32 *d = (volatile u32 *)(void *)dest;
+    for (i = 0; i < 32; i++, mask <<= 1) *d++ = (mask & 0x80000000UL) ? *s++ : 0;
+#endif
+}
+#else
 static void rowtrim_decode(u8 *dest, const u8 *rec)
 {
     u32 mask = ((u32)rec[0] << 8) | rec[1];
@@ -747,6 +768,7 @@ static void rowtrim_decode(u8 *dest, const u8 *rec)
     }
 #endif
 }
+#endif
 
 static u32 rowtrim_pos(const Section *sec, u32 idx)
 {
@@ -2786,7 +2808,11 @@ static COLD_OS int open_pack(const u8 *p)
     int i;
     pack_start = p;
 #ifdef SAT_TILE_ROWTRIM
+#if SAT_TILE_ROWTRIM == 2
+    if (be32(p) != 0x53475033UL) return 0; /* SGP3: SGP1 with the sprite tiles as long masked records (tools/satgfx_pack.py record mode 2) */
+#else
     if (be32(p) != 0x53475032UL) return 0; /* SGP2: SGP1 with the sprite tiles as row masked records (tools/satgfx_pack.py rowtrim) */
+#endif
 #else
     if (be32(p) != 0x53475031UL) return 0; /* SGP1 */
 #endif

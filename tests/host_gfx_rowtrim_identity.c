@@ -40,8 +40,12 @@ static unsigned char sprite_byte(unsigned long k, unsigned long j)
 {
     unsigned long row = j / 8;
     if ((k * 7 + row * 3) % 5 == 0) return 0;   /* a transparent row */
+    if ((k * 5 + row * 7) % 4 == 0 && (j % 8) < 4) return 0;   /* the left long of a row */
     return (unsigned char)((k * 31 + j * 7) & 0xff) | (j == 0 ? 0x11 : 0) | 0x01;
 }
+
+static int long_set(unsigned long k, unsigned long l) { unsigned long b; for (b = 0; b < 4; b++) if (sprite_byte(k, l * 4 + b)) return 1; return 0; }
+static int row_set(unsigned long k, unsigned long r) { return long_set(k, r * 2) || long_set(k, r * 2 + 1); }
 
 static unsigned char *make_pack(void)
 {
@@ -58,10 +62,15 @@ static unsigned char *make_pack(void)
     off += 16;   /* spill table: count and one (first, offset) pair */
     for (k = 0; k < NSP; k++)
     {
-        unsigned long rows = 0;
+        unsigned long rows = 0, longs = 0;
         recpos[k] = pos;
-        for (j = 0; j < 16; j++) if (sprite_byte(k, j * 8)) rows++;
+        for (j = 0; j < 16; j++) if (row_set(k, j)) rows++;
+        for (j = 0; j < 32; j++) if (long_set(k, j)) longs++;
+#ifdef RT2
+        pos += 4 + 4 * longs;
+#else
         pos += 4 + 8 * rows;
+#endif
         if (k == firstspill) spillpos = recpos[k];
     }
     recpos[NSP] = pos;
@@ -74,7 +83,11 @@ static unsigned char *make_pack(void)
     spill_at = off; off += pos - spillpos;
     total = off;
     p = (unsigned char *)calloc(total, 1);
+#ifdef RT2
+    w32(p, 0x53475033UL);
+#else
     w32(p, 0x53475032UL);
+#endif
     w32(p + 84, bases_at); w32(p + 88, offs_at);
 #else
     for (i = 0; i < 4; i++) { dataoff[i] = off; off += counts[i] * slot[i]; }
@@ -116,10 +129,17 @@ static unsigned char *make_pack(void)
         for (k = 0; k < NSP; k++)
         {
             unsigned char *dst = k < firstspill ? p + stream_at + recpos[k] : p + spill_at + (recpos[k] - spillpos);
+#ifdef RT2
+            unsigned long mask = 0, r = 0, b;
+            for (j = 0; j < 32; j++) if (long_set(k, j)) mask |= 0x80000000UL >> j;
+            w32(dst, mask);
+            for (j = 0; j < 32; j++) if (mask & (0x80000000UL >> j)) { for (b = 0; b < 4; b++) dst[4 + r * 4 + b] = sprite_byte(k, j * 4 + b); r++; }
+#else
             unsigned mask = 0, r = 0;
-            for (j = 0; j < 16; j++) if (sprite_byte(k, j * 8)) mask |= 0x8000u >> j;
+            for (j = 0; j < 16; j++) if (row_set(k, j)) mask |= 0x8000u >> j;
             w16(dst, mask);
             for (j = 0; j < 16; j++) if (mask & (0x8000u >> j)) { unsigned long b; for (b = 0; b < 8; b++) dst[4 + r * 8 + b] = sprite_byte(k, j * 8 + b); r++; }
+#endif
         }
     }
 #endif
