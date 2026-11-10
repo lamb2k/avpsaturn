@@ -24,19 +24,23 @@ Readability: stage rows sit on black under the logo, no overlap; the header sits
 
 ## Memory, gates
 
+First version (2502a30) kept the save/restore loops in sat_gfx.c: hw_free 164 against 436, -272 B. The owner's rule is hw_free first, so everything but one call moved to cold code (this head).
+
 | | hw_free | lw_free | cart_free |
 | --- | --- | --- | --- |
-| avp/integration 4c3dc09 (link only: scratch work dir, killed after the placement line, `base2.log`) | 436 | 60 | 7908 |
-| this branch (bg1.log) | 164 | 60 | 7808 |
+| avp/integration 4c3dc09 (link only, scratch work dir, `base2.log`) | 436 | 60 | 7908 |
+| first version 2502a30 (bg1.log) | 164 | 60 | 7808 |
+| this head (lo.log) | 428 | 76 | 7672 |
 
-+272 B high work RAM (the save/restore loops and the freeze tests in sat_gfx.c, three words of state in home.c), 0 low, -100 cart. hw_free 164 is thin; the loops could go to cold code if the next lane needs the room.
+-8 B in high work RAM (the call and two tests in the vblank's held branch). lw is +16 free (the compiler's layout, not a design change). Cart: -236 B (the cold half and its state byte pair).
 
-- Build rc 0 (3,521 s: the pack is rebuilt for the new head, `round files rebuilt: stage-pack inputs or layout changed`).
-- fit.py D11 (POSE_KEYS=0, KEEP_ROUND_FILES=1; assets copied to scratch): 76 of 76 stage files and the front file pass, gate True, fail [] (`fit_bg.log`).
+- Build rc 0, Idle priority (3,831 s; the cold size moved, so the pack is rebuilt).
+- Yaba, one at a time, below normal priority, window shown without activation (a minimized window did not start video at 16:40: frame 0 and the loader's PC stuck for 150 s with both this disc and 3a; SW_SHOWNOACTIVE boots it): the five stage-select captures are pixel-identical to the first version (`evg5after_*.png` against `bgafter_*.png`, bbox none); held game RAM md5 equal at the select and 3 s later; stage 1-1 loads and plays (`evg5area1.log`); ENDING plays to the title, 212 s, no fatal (`evg5end.log`).
+- fit.py D11 (Idle priority): 76 of 76 stage files and the front file pass, gate True, fail [] (`fit_bg2.log`).
 - check_round_pages 0 of 323, check_screen_keys 0 of 323, check_caption_keys 323 files short 0.
-- WSL unittest: 131 run, 30 errors, 1 skipped, same error set as 4c3dc09 (`unittest_bgbase.log`).
-- tests/home_stage_menu_test.c (updated for the AREA row) and home_lives_test.c pass.
-- HOST goldens clean, missed IRQ 0: r1s 15618, full 317908, c1 272171, c2 369051, c3 333669, 2p 329918 (`host_bg.log`).
-- Input: PostMessage to my own window only; Yaba launched SW_SHOWMINNOACTIVE (no focus) from this run on.
+- WSL unittest: 131 run, 30 errors, 1 skipped, same error set as 4c3dc09 (`unittest_bg2.log`, `unittest_bgbase.log`).
+- tests/home_stage_menu_test.c (now also the held-picture call) and home_lives_test.c pass.
+- HOST goldens clean on the first version of this branch (r1s 15618, full 317908, c1 272171, c2 369051, c3 333669, 2p 329918, missed IRQ 0, `host_bg.log`); not rerun for this head: it changes no host input (no tools/, saturn/game, or non-SAT_HOME gfx code; the gfx change is under SAT_HOME).
+- Input: PostMessage to my own window only; no focus API anywhere.
 
-Note for the reveal lane: its SAVE_SCRATCH is 0x02754000 (menu and ending); this lane's stash is 0x02760000 to about 0x02763c00, in the title and stage select only, so they do not overlap in use.
+Note for the reveal lane: its SAVE_SCRATCH is 0x02754000 (menu and ending); this lane's stash is 0x02760000 to about 0x02765c00 (22,752 B), in the title and stage select only, so they do not overlap in use.
