@@ -32,6 +32,9 @@ if os.environ.get("PROOF_BZ"):   # Berserker: QCF (facing right: down, down+righ
     if os.environ.get("PROOF_BZPOKE"): SCHEDULE = [(0, [])]
     if os.environ.get("PROOF_BZ2"): SCHEDULE += [(100, ["down"]), (104, ["down", "right"]), (108, ["right"]), (112, ["right", "a"]), (115, [])]
     SCHEDULE += [(int(os.environ["PROOF_BZ"]), [])]
+if os.environ.get("PROOF_CHAIN"):   # attack chain: PROOF_CHAIN=<taps>; one tap of attack every PROOF_GAP frames (default 16); with PROOF_PIN a pinned enemy is in front the whole time
+    gap = int(os.environ.get("PROOF_GAP", "16"))
+    SCHEDULE = [(0, [])] + [x for i in range(int(os.environ["PROOF_CHAIN"])) for x in ((4 + gap * i, ["a"]), (7 + gap * i, []))] + [(4 + gap * int(os.environ["PROOF_CHAIN"]) + 60, [])]
 if os.environ.get("PROOF_LONG"):   # unassisted: let the enemies hit him (no health top-up), attack taps now and then, to reach knockdown, getup and KO
     SCHEDULE = [(0, [])] + [x for t in range(20, int(os.environ["PROOF_LONG"]) - 5, 60) for x in ((t, ["a"]), (t + 3, []))] + [(int(os.environ["PROOF_LONG"]), [])]
 
@@ -93,10 +96,10 @@ def paused_leg(s, tag, dbg, sel, shots):
     mode_set(s, tag, dbg, sel)
     os.makedirs(OUT + "/" + tag, exist_ok=True)
     keys = []; k = 0; end = SCHEDULE[-1][0]
-    if os.environ.get("PROOF_BZ"):   # wait (unkeyed, paused one frame at a time) until he stands or walks free of any hit, so the motion is judged on an idle player
+    if os.environ.get("PROOF_BZ") or os.environ.get("PROOF_CHAIN"):   # wait (unkeyed, paused one frame at a time) until he stands or walks free of any hit, so the motion is judged on an idle player
         for pre in range(int(os.environ.get("PROOF_PRE", "400"))):
             a = s.ram(0x8380, 0x100)
-            if a[4:7].hex() in ("020000", "020002") and a[0xad] == 0 and a[0x5c] == 0: break
+            if a[4:7].hex() in (("020000",) if os.environ.get("PROOF_BZPOKE") else ("020000", "020002")) and a[0xad] == 0 and a[0x5c] == 0: break
             s.set([]); m.call("framebuffer_burst", directory=OUT + "/" + tag, frames=1, prefix="p%04d_" % pre)
         s.log("pre-roll", pre, "frames")
     for f in range(end):

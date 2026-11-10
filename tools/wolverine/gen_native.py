@@ -436,6 +436,7 @@ def make_chain(start, role, skel_from=None):
         if atk:
             if has_atk:
                 j = min(has_atk, key=lambda x: abs(x - pk)); hit = mv_boxes(src[j][0])[0]
+                if role.split("-")[0] == "HK" and hit: hit = (hit[0], hit[1], min(hit[2], 13), min(hit[3], 85))   # MSHvSF's kick box (hit id 39) is up 103..127, above a standing AvP enemy's head: it never connected; reach kept, height lowered to the heavy punch's body band (owner-visible)
                 pick = src[j] if abs(j - pk) <= 1 else pick
                 atk_i = atk_index(hit)
             else:

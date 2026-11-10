@@ -125,6 +125,21 @@ def r1step(v,s):
         if v-sec3[0]>=int(os.environ.get('SEC3_RUN','600')): s.shot(f'after_end_{v}'); s.log('SECTION 3 run done, counts',cnt,'x',x,'hp',hp); s.stop(); return
         if (v-sec3[0])//600!=sec3[1]: sec3[1]=(v-sec3[0])//600; s.shot(f'after_{v}')
     now=time.time()
+    sc_=s.word('sat_home_screen') if 'sat_home_screen' in s.syms else 0   # the home menu of this build (title, pause): Start
+    if sc_ in (1,3):
+        s.set([])
+        if now-lastpress>0.8:
+            lastpress=now; s.pulse('start',0.1)
+        return
+    sel_=(mode==2 and not a[0x380] and not a[0x1e8] and not a[0x1e9] and h==0)   # the character select: Wolverine's slot is cursor 2 (as native_soak.py)
+    if sel_:
+        s.set([])
+        if now-lastpress>0.6:
+            lastpress=now
+            s.pulse('right' if a[0x1cc]!=2 else 'start',0.08)
+        return
+    if h and sc_==0:   # the attract before the home menu is up: Start here would restart the game (home.c), so wait for the menu
+        s.set([]); return
     if h or mode==4 or mode==0:
         s.set([])
         if now-lastpress>0.8:

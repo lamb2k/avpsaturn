@@ -40,12 +40,12 @@ def step(v, s):
             if sel_at is None: sel_at = v; s.log("select")
             t = v - sel_at
             acts = [("p2start", 60)] if P2 is not None else []
-            for n, k in enumerate(filter(None, os.environ.get("SEQ", "").split(";"))):   # select moves in order, 28 vblanks apart from vblank 100 on: "p2down;right;p2left;p2up"
-                acts.append((k, 100 + 28 * n))
+            for n, k in enumerate(filter(None, os.environ.get("SEQ", "").split(";"))):   # select moves in order, 35 vblanks apart from vblank 190 on (P2 has joined by then): "p2down;right;p2left;p2up"
+                acts.append((k, 190 + 35 * n))
             for n, (k, at) in enumerate(acts):
                 if t >= at and n not in done:
                     done.add(n); s.pulse(k, .1)
-            if t > 100 + 28 * len(acts) + 60 and now - lastp > .6:
+            if t > 190 + 35 * len(acts) + 50 and now - lastp > .6:
                 lastp = now; s.pulse("a", .08)
                 if P2 is not None: s.pulse("p2a", .08)
         elif a[0x1b0] == 0 and now - lastp > .7: lastp = now; s.pulse("start", .1)
@@ -64,6 +64,8 @@ def step(v, s):
         base = [("a",), ("a",), ("c",), ("a",), ("b",), ("a",)][ph]
         keys = [pre(i) + x for i in range(2 if P2 is not None else 1) for x in (base if (i != wv or base[0] != "c") else ("a",))]
         if int((t - 4) / 0.45) != int((t - 4) / 0.45 - 0.1): pass
+    if os.environ.get("COOPGUN") and float(os.environ.get("GUN_FROM", "5")) <= t < float(os.environ.get("GUN_TO", "10")) and P2 is not None:   # the partner holds its gun button while the Wolverine player's Berserker (poked at 6 s) runs: shots must be the partner's only
+        keys = [pre(1 - wv) + "c"]
     for t0 in (12, 22):   # Berserker motion of the Wolverine player, forward = the way he faces
         u = t - t0
         if 0 <= u < 1.2:
@@ -76,7 +78,7 @@ def step(v, s):
     if os.environ.get("ASSIST", "1") == "1":   # harness assist, both players alike: health topped up so the co-op checks are not cut short by deaths
         for off in (0x83c0, 0x84c0):
             s.m.call("memory_write", address=hex(s.syms["RAMB"] + off), size="word", value=hex(0x65))
-    for t0 in (13, 23):   # the Berserker request of the Wolverine player, poked (the motion's timing against the partner is not what is under test); the motion itself is played at 12 and 22
+    for t0 in (tuple(float(x) for x in os.environ["BZ_AT"].split(",")) if os.environ.get("BZ_AT") else ((6, 13, 23) if os.environ.get("COOPGUN") else (13, 23))):   # the Berserker request of the Wolverine player, poked (the motion's timing against the partner is not what is under test); the motion itself is played at 12 and 22
         if t >= t0 and ("bzreq", t0) not in done and "bz_req" in s.syms:
             done.add(("bzreq", t0)); s.m.call("memory_write", address=hex(s.syms["bz_req"] + wv), size="byte", value=hex(6))
     s.set(keys)

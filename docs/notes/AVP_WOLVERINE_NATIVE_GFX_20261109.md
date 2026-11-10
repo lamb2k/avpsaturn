@@ -361,3 +361,78 @@ Free-running (`perf1`, 15 s a leg, two repetitions, same schedule, health topped
 - **Flag-off identity (BUILD)**: avp/integration 55cf228 (`git archive`) and this branch with the flag undefined, owner recipe, copies of integration/w1: `HW.BIN`, `LW.BIN`, `COLD1.BIN`, `OPX.BIN`, `ROM.BIN` byte-identical (sha256), `sat.elf` the same size (2,047,072 bytes). The two builds were stopped after the link (round files were still rebuilding because the merged select-screen change touched pack inputs); the disc image and sector comparison were not repeated.
 - **Berserker hooks** (for the sound, flash/freeze and healing lanes), `wolverine.c`, native build only, weak default-empty functions: `wv_on_berserker_start(player)` on the tick his state becomes 02000c, `wv_on_berserker_connect(player, damage)` on a tick in that state where the tag-0c enemy blocks lost health (read from the enemies' health words, not the collision code), `wv_on_berserker_end(player)` the first tick after. Cost: lw_free 40 to 32, cart_free 6,336 to 6,168, hw_free 964 unchanged.
 - **OBS footage** of a native leg (`perf1b`): E:\AvP\learning\integrationideo6-11-09 21-55-55.mkv, window "AvP NATIVE: perf1 [port 9718]", 70 s x 2 free-running legs, native Wolverine fighting in stage 02; host shared with two builds and the recorder: 43.05 and 40.99 vblanks/s (footage only; the clean numbers are in 13.4).
+
+
+## 14. Step 3 (11-10): Berserker as his own action, skin machinery out of the native build, lifecycle checks, comparison discs
+
+Evidence tiers as in section 11. **No hardware.** Yaba legs ran on a shared, busy host (emulated vblanks per wall second 20 to 40, other lanes on 9721-9725): speed numbers are noisy and not reported; pictures were judged from paused `framebuffer_burst` frames. Owner decisions applied: stay resident-only (no extra tiles); the flurry poses are kept; claws only (no gun code for him); the cost is the stock special's, 6 health, charged on connect; multi-hit with a per-target cap; chain LP LP HP with HK only as a comparison; every timing change ships as a comparison first.
+
+### 14.1 Berserker: what runs now
+- **State 02000c, routine `sat_wv_bz_run`** (wolverine.c). Schaefer's own 02000c routine is `f_2576a` (table 0x893e entry of character 1; `f_24060` is the Warrior's and Hunter's gun, so the earlier `f_24060` wrapper never saw him). game_bind.c wraps `f_2576a` (native build only): a Wolverine player runs his routine, everyone else the lifted body. Nothing of the gun runs for him: no shot, muzzle flash, gun sound, heat or ammo test, and the projectile-pool suppression, the shot refusal in the collision wrappers and the draw-time shot drop (guests.c) are not compiled in the native build. The co-op partner's gun is the stock routine (no wrapper on `f_24060` in the ELF).
+- **Entry**: QCF + attack (pad hook) no longer injects the gun button. It releases all three buttons for 4 vblanks and sets a request (`bz_req`, 6 vblanks); the pre-hook of his player update (`wv_bz_enter`) applies the engine's own entry rules (stand or walk state, `+0x5c`, `+0xad`, `+0x8b` clear, `ff8208` and `ff822b` clear, not stage word 0a) and writes the state the stock entry writes (02000c00, lock `+0xad`). The plain gun button stays masked (one line in the pad hook): it does nothing for him.
+- **Action** (the state machine's conventions for a melee action): lock `+0xad`, action class `+0x92`, facing `f_1a364`, a **new strike id (`f_1d768`) at every record**, frame record advanced by `f_1656e`, exit through `f_1a3e2` when the terminal record is reached. His own chain (gen_native.py `BZ`: 12 strike records of 4 ticks and a terminal record, 48 ticks; poses = the six resident flurry poses in the order the stock gun burst visits them, T3 slots 6 6 5 5 4 3 3 4 5 5 6 6, so the approved look is unchanged).
+- **Contact box**: MSHvSF's record of these poses carries one box, a column above his head (forward -12..12, up 108..144, hit id 97), which cannot touch a standing enemy; the strikes use the light punch's reach (forward 26..84, id 31) at the heavy punch's body band (up 13..85). **Owner-visible approximation**: the poses are the spin and the claws-up pose while contact is forward (sparks on the enemy in front of him while his claws are raised, `ev/bz8/sheet.png`).
+- **Cost and cap**: the collision wrappers (game_bind.c; one byte `sat_wv_bz` is tested in every pass, the cart is entered only while he is in the action) ask `sat_wv_bz_gate` before a pass and tell `sat_wv_bz_hit` after one that hit. The first connect of an activation charges the stock rule (`f_1b492`: 6, health left under 6 goes to 0), nothing on a whiff. A target takes at most `WV_BZ_CAP` = 6 strikes per activation (6 targets tracked); a refused pass answers "no hit" the way the lifted exit does.
+- **Hooks** (`wv_on_berserker_start/connect/end`): names, arguments and call points unchanged (pre-hook of his update, state 02000c, enemy-health based contact); `start` now fires on the tick the state is entered.
+
+Yaba (EMULATOR, builds b3 and b8, paused legs from one saved state, `tools/wolverine/native_bz_proof.py`, traces `ev/bz*`):
+
+| Leg | Result |
+|---|---|
+| Whiff (bz4) | QCF + A: state 02000c entered 2 frames after the press; 12 strike records 0x3027ac..0x30286c, 4 ticks each, strike id 75 -> 86; back to stand after 47 ticks; health 101 throughout; `sat_wv_bz` set and cleared; no shot, flash or gun state |
+| Contact (bz8, enemy pinned 60 px in front, 87 hp) | hits at frames 5, 16, 27, 38: enemy 87 -> 63 -> 39 -> 15 -> dead (24 per hit, score 100 -> 2800), health 101 -> **95 once**, constant afterwards |
+| Cap 6 (bz10, enemy health pinned) | six hits (frames 5, 16, 27, 38, 49, 60: one per strike); the run was cut at frame 63 by another enemy's hit (020202, `bz` cleared at once), so the seventh refusal was not seen at cap 6 |
+| Cap 2 test build (cap2c, `-DWV_BZ_CAP=2`) | two hits (frames 5 and 18), then strikes 3..12 refused (no damage while the enemy stayed in reach), the flurry ran to its end (frame 67), cost 101 -> 95 once |
+
+Grab conflict (found, stock behaviour): the QCF contains down + forward; with an enemy within about 70 px the engine starts its grab (020400/020406) before the motion's attack button arrives, so the request cannot be accepted. The old gun injection had the same conflict; it is the stock game's walk-into-enemy grab.
+
+### 14.2 Skin machinery retired from the native build (flag on); the skin build stays (flag off)
+Compiled out under `-DSAT_WV_NATIVE_GFX`: sprite removal and reinsertion and the whole-list pass (`sat_guest_objects` keeps the HUD/select names and his two palette rows), the hold/recovery scheduler and move clock (`wv_tick_move`, `wv_advance`, `wv_begin_move`, `move_for`, the tables `wv_nat_tab`, `wv_steps`, `wv_lift`, `wv_tiles`, `wv_box`), collision patch-and-restore (`sat_guest_wolverine_boxes`, `poke4`, the undo list, the box calls in `guest_pass`), in-place Schaefer record changes, the walk scale (`wv_speed`), the after-tick observer, the gun wrapper with the projectile suppression, the shot refusal and the shot drop. The native ELF has none of `wv_tiles`, `wv_box`, `sat_guest_wolverine_boxes/_bullet/_gun/_after_tick`, `lifted_24060`. With the flag off the same sources compile to the same code (identity below).
+
+### 14.3 Memory (BUILD, D11, owner recipe + `-DSAT_WV_NATIVE_GFX`, workdir copy of integration/w1)
+
+| | integration 55cf228 (flag off) | step 2 native (b368017) | **step 3 native** |
+|---|---:|---:|---:|
+| hw_free | 964 | 964 | **1,080** |
+| lw_free | 60 | 32 | **104** |
+| cart_free | 4,340 | 6,168 | **4,140** (44 bytes before the next 4 KB step) |
+| cold1_at | 0x27e2000 | 0x27db000 | **0x27e2000** |
+| block `wv_blk` | - | 25,128 | 22,064 |
+| wolverine.o text / data / rodata | 5.9 K / 14 B / 19.5 K | 6.6 K / 24.8 K / 19.9 K | **3.1 K / 22.2 K / 0.5 K** |
+| ISO | 391,497,728 | 385,818,624 | **391,497,728** |
+| fit.py, 76 stage files | 76 of 76 | 76 of 76 | **76 of 76, gate True**; stage24_ma: Schaefer drops 2,872, Wolverine 2,834 (margin 38); cart pack room 1,630,208 |
+
+**The native tail is back at the integration owner build's step: the memory credited is the 7 four-KB steps (224 tiles) step 2 had spent**; against flag off the native build costs no tiles (the stage24_ma figures are identical: 2,872 / 2,834, margin 38). Removing the skin was not enough for the last step (3,552 bytes were still missing): the rest came from sharing the 48 T3 slots (3,196 bytes: the stock gun's aim chains are dead for him), dropping T's unused leading entries (112 bytes; the collision pass adds sign-extended word offsets, so nothing was renumbered) and packing the palette marks and slot offsets as deltas (about 400). hw_free grew by 116 and lw_free by 44 against integration (the skin hooks left game_bind.c, the clock's statics left low RAM).
+
+### 14.4 Gates
+- **HOST identity, stock Schaefer with the flag on** (wrappers linked, guest off `WV_SEL=0`, golden-checked lifted game): golden_c1 clean 272,171 of 272,171, golden_2p (the second Schaefer slot) clean 329,918 of 329,918, 0 differing bytes, missed IRQ 0, the same as the plain runner.
+- **Flag-off identity against avp/integration**: two builds from pristine copies of integration/w1, owner recipe, the integration archive and this branch with the flag undefined: IDENTITY_RESULT_PLACEHOLDER
+- fit.py D11 (on a copy of the asset directory): 76/76, gate True, none of his own keys dropped, no missing guest key.
+- WSL unittest: 106 run, 30 errors (the known private-dependency set, as integration), 1 skipped.
+- Builds: rc 0, no NO-GO.
+
+### 14.5 The unverified states of section 13.5 (EMULATOR, tools `native_soak.py`, `native_coop.py`, `r1run.py`)
+
+| State / flow | Result |
+|---|---|
+| Soak, stage 02, unassisted (soak2: 10,776 vblanks, 2,503 polls) | 19 state words reached; every sample has his frame record in the native window (0 donor records); 3 KOs with 3 continues (the game's own continue, the select screen, his slot chosen again); 0 stuck states (the three holds over 400 vblanks are the continue countdowns); 0 fatals |
+| Grabbed / held 020400, 020406, thrown 020408 | reached in play and in Round 1: native records 0x300db4.., 0x300f2c..; no stall; the poses are his hit poses (placeholder, 14.7) |
+| Getup / KO 040200 040202 040204 040206 040208 040400 | reached, same sequence as Schaefer's; he is removed and respawns through the continue |
+| Stage entrance 080000 and section changes | reached after continues and in Round 1 (section 1, boss, section 3); data valid after each |
+| Continue after KO, restart | works (3 in the soak, 6 in the Round 1 run); every Yaba launch is a cold boot with the block applied |
+| Save/load | the Yaba save state (cart RAM and BSS) loaded for every paused leg and for the second Round 1 leg; the game's own saves hold nothing of his |
+| Stage 26 | **not reached**: the stage select goes to 24, and a warp to 0x26 ends in FATAL 0xe2 detail 0x91ec on the **unmodified integration build as well** (`ev/st26base`), so it is not this lane's result. Established: the block is in the cart tail, outside the ROM image and every ROM stretch (the build canary), and fit.py's `stage26_m*_wv` files pass with none of his keys dropped. A full-play run to the ending was not done. |
+| Co-op: Wolverine P1 with Warrior, Hunter, Linn as P2; Wolverine P2 with Warrior, Hunter, Linn as P1 (`ev/coop_*`) | 92 to 137 samples each; his frame records native in every sample; the partner's states normal; 0 anomalies, 0 fatals; his Berserker entered in 5 of the runs; no shot actor owned by him in any run; the Warrior partner's gun fired normally in the one run where it was pressed while he was present (6 shots owned by the partner) |
+| Wolverine as P1 and as P2 | both slots work (the runs above) |
+| Unassisted Round 1 (`r1run.py`: no top-up, no boss boost, no warp, no kill; two legs joined by a Yaba save state in the boss fight) | boss present at vblank 5019 (first leg) and 9221 (second leg, from the saved state), 6 KOs and continues in all, 12 Berserker motions played, boss cleared (flag in section 2 at vblank 14420), section 3 reached at 14588 and run 600 vblanks; no fatal, no stuck state |
+
+Bug found and fixed in this lane: `wv_nat_sync` runs from the pad hook (vblank) and from the player update and wrote the four table-base immediates with `+=`; two callers in a row doubled them (table base 0x49d070 = 0x162f90 + 2 * 0x19d070, the game hung; seen twice in Yaba). All its writes are absolute now.
+
+### 14.6 Comparison variants and the owner disc
+Knobs (gen_native.py, build time; defaults are the standing decisions): `WV_CHAIN` 3 (default: LP, LP, HP; the stock stage counter has four stages, so the two `& 3` sites of the lifted attack routine read his count `sat_wv_cn`, 4 for everyone else) or 4 (LP, LP, HP, HK); `WV_HP_TICKS` 0 (default: the donor's heavy stage skeleton, 2/2/6/5/3 = 18 ticks) or N (rescaled; 12 for the fast heavy punch). The kick keeps the donor stage's 18-tick skeleton (not the planned 22 or 28), its reach from MSHvSF and its height lowered to the body band (the ROM's box, up 103..127, never connected). Yaba chain checks (pinned enemy, 6 taps): default LP, LP, HP and then LP again (the counter wraps at 3); `WV_HP_TICKS=12` heavy punch records 2/1/4/3/2; `WV_CHAIN=4` LP, LP, HP, HK (records 0x300a30..0x300a80) and the kick connects.
+Disc set `E:\AvP\package-integration\wv_native_compare_1` (iso + cue + 26 audio tracks per disc; the tracks stored once and hard-linked into the other folders): `A_default`, `B_fast_heavy_punch`, `C_chain_with_kick`, README.txt. Each packaged cue boots in Yaba to a stage 02 standing frame with native records.
+
+### 14.7 Not done, and owner decisions
+- Hardware, a full-play run to stage 26, speed numbers (host busy). The grabbed, held and thrown chains and the ground holds still show his reaction poses (the placeholder roles of 13.1): visible when he grabs.
+- Owner-visible decisions: (1) the Berserker's contact geometry (the poses spin, the box reaches forward); (2) cap of 6 hits per target and 48 ticks; (3) the kick box lowered; (4) which comparison variant becomes the default. Also the grab that comes before the QCF is finished when an enemy is close.
+- Tail margin: 44 bytes before the next 4 KB step (a lane that adds data must trim first).
