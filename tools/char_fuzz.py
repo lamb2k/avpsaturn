@@ -154,6 +154,9 @@ def augment(rounds, data, keys=False, pages=True, remap=(), key_stages=None):
             f["keys"][0] = sorted(have | ak)
             f["fuzz_keys"] = sorted(fk)
             f["body_keys"] = sorted(bk)
+            # What the characters other than Schaefer (the slot a bonus character takes) looked up: tools/wolverine/guest_rounds.py keeps these in a guest file even where the
+            # census calls them Schaefer's own (1c: 28 keys Warrior's fuzz play used that no census route of his saw).
+            f["other_keys"] = sorted(set().union(*(set(data["chars"][str(b)]["stage_keys"].get("%02x" % s, ())) | set(data["chars"][str(b)]["body_keys"]) for b in bits if b != 2 and str(b) in data["chars"])) - remap) if len(bits) > (1 if 2 in bits else 0) else []
             report["keys_added"] += len((fk | bk) - have)
             report["files"] += 1
     return report
