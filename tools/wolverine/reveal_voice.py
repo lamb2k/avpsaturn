@@ -11,7 +11,7 @@ usage:
 env for dump: MSHVSF_REPO (the repo with tools/run_mshvsf_mame.py and the ROM set), MSHVSF_PY (its python).
 The clip is QSound sample ROM bank/start/end as the Z80 sound driver starts it: sound command CMD of the arcade's table, voice start (bank, address, end) read from the DSP writes
 (tools/wolverine/mame_voicescan.lua sends every command in turn). QSound plays 8 bit signed samples at 24038 Hz when its rate register is 0x1000.
-File format (big endian): 'RVV1', u32 samples, u8 SCSP total level (0 loudest, 0.375 dB a step), u8 octave nibble (0xe = 11025 Hz, 0xf = 22050 Hz), 6 reserved bytes, then the samples
+File format (big endian): 'RVV1', u32 samples, u8 SCSP total level (0 loudest, 0.375 dB a step), u8 octave nibble (0xe = 11025 Hz, 0xf = 22050 Hz; 0 = not set, read as 0xf, which is what wv_sound.py reveal writes: 8 reserved bytes), 6 reserved bytes, then the samples
 (PCM 8 bit signed, played by SCSP slot 18)."""
 import os
 import pathlib

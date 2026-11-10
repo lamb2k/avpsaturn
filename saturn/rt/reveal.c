@@ -5,6 +5,7 @@
    frame 2 in B0 (0x40000), frame 3 in B1 (0x60000), the palette in CRAM 0, the zoom of SAT_GFX_FIT (384 pixels on 352) or its 16 pixel crop, sprites off (priority 0), black outside the picture rows.
    Memory: nothing stays. The art (REVEAL.BIN) and the voice (RVVOICE.BIN) are read into the cart's pack room one megabyte into the stage's pack (SAT_PACK + 0x100000: stage 26's pack is under 600 KB),
    copied into VDP2 VRAM and SCSP RAM, and the room is free again. The chips go back to the game with sat_gfx_init: every cache empty, so each tile loads again.
+   Plays only when it has not played before and Wolverine is OFF (owner 11-10); otherwise the stock card follows.
    Timing, vblanks (60 a second): frame 1 for 90, frame 2 for 90, frame 3 until the card ends (about 250, so about 1.5 s, 1.5 s, 4.2 s of the card's 7.2 s). The voice starts with frame 3.
    After frame 1 is up, the first time the reveal plays, Wolverine is switched on if he is off and that is written to backup RAM (guests.c, boot.c unlock_io); later endings leave the player's setting alone. */
 typedef unsigned char u8; typedef unsigned short u16; typedef unsigned int u32;
@@ -16,6 +17,7 @@ extern void sat_reveal_takeover(int on);
 extern long sat_reveal_call(int which, u32 a, u32 b, u32 c);
 extern int sat_gfx_init(const void *pack);
 extern void sat_guest_reveal_done(void);
+extern unsigned char sat_guest_sel;
 extern u8 SAT_PACK[];
 #ifdef SAT_HOME
 extern int sat_gfx_nudge_x, sat_gfx_nudge_y;
@@ -109,6 +111,7 @@ static void begin(void)
     if (sat_reveal_call(1, (u32)"RVVOICE.BIN", (u32)(BUF + size), 0) > 16 && BUF[size] == 'R') {
         voice_samples = be32(BUF + size + 4);
         voice_tl = BUF[size + 8]; voice_oct = BUF[size + 9] & 15;
+        if (!voice_oct) voice_oct = 0xf;                    /* a file with no octave byte (the first RVV1 layout, 8 reserved bytes) is 22050 Hz */
         voice_load(BUF + size);
     }
     sat_guest_reveal_done();                                /* the first time: Wolverine goes on, saved to backup RAM (the art and voice are copied out already, the scratch is free) */
@@ -128,7 +131,12 @@ void sat_reveal_poll(void)
     u32 st = DIAG[6], stage = (u32)(G(0xff81e8) << 8 | G(0xff81e9));
     int card = stage == 0x26 && G(0xff8001) == 2 && G(0xff8005) == 8;
     if (st == 0) {
-        if (card && !G(0xff81b0)) begin();
+        /* owner 11-10: the reveal plays only when it has not played before and Wolverine is OFF; seen before, or already switched on in OPTION MODE, the ending goes straight to the stock GAME OVER card
+           (nothing is written then: the flag stays as it was). */
+        if (card && !G(0xff81b0)) {
+            if (!(*(volatile u32 *)0x06013fdcu & 1u) && !(sat_guest_sel & 1)) begin();
+            else DIAG[6] = 4;
+        }
     } else if (st == 4) {
         if (stage != 0x26) DIAG[6] = 0;                     /* the ending is left: ready for the next one */
     } else {

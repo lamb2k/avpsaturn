@@ -112,3 +112,18 @@ times and had not reached the card when paused; Yaba froze mid-run each time (se
   The select screen after the restart loaded the front file with his art (round file 286, front_wv); a clean capture of it is still to take (the integration lane's STAGE SELECT > ENDING run covers the rest).
 - The "stray figure" on the Queen's body in the P.Warrior run is the game's own roast food pickup (platter with tomatoes), not Wolverine: look/e2e/bleed_a_zoom.png. That investigation belongs to the native lane.
 - Scope now: reveal frames and display, the save and auto-on, the Options toggle, the voice. The branch is pushed without the native merge; merge avp/integration (with native and stage-menu) when it has them.
+
+## Update 11-10 (evening): reveal only when not seen and Wolverine OFF, uncut voice, merged with avp/integration
+
+Owner: "The shared ending is fine for now, just the reveal shouldn't occur if he's already unlocked."
+- Rule (`reveal.c sat_reveal_poll`): at the stage 0x26 card the reveal plays only if the reveal-seen flag (bit 0 of the loader flags word) is clear AND Wolverine is currently OFF (`sat_guest_sel & 1` clear).
+  Otherwise nothing is written and the stock GAME OVER card follows. The seen flag is set whenever the reveal plays (with Wolverine switched on, one write); a skipped ending leaves the flag as found.
+  `-DSAT_UNLOCK_DEBUG`'s REVEAL SEEN row still clears it.
+- Voice: the sounds lane's uncut "Let's go, bub." (`wv_sound.py reveal`, RVV1, 22,050 Hz 8 bit mono, 28,202 samples = 1.279 s, file 28,218 bytes) is the build-time `RVVOICE.BIN` source (`REVEAL_VOICE=...reveal_voice_intro.bin`).
+  That file stores octave nibble 0, so reveal.c reads 0 as 0xf (22,050 Hz); total level 0. SCSP RAM 0x70000 to 0x76e2a: clear of stage 26's clips (end 0x6c420) and the 512 KB limit.
+- Yaba checks (EMULATOR, own copy port 9726, UseSh2Cache=false, SoundCore 1, Volume 100, build w11 = avp/integration d13fd4b merged + this lane, STAGE SELECT MODE > ENDING, Warrior, fresh backup file each unless noted):
+  - (a) first ending, Wolverine OFF, flags 0x80000000: card reached at vblank 8468, reveal frame 1 at 8494, frame 2 at 8579 (+85), frame 3 at 8672 (+93), front end at 8910; flags 0x80000301, `sat_guest_sel` 1.
+    At frame 3 slot 18: key on, PCM8, start 0x70000, LEA 0x6e2a (28,202), no loop, TL 0, octave 0xf; SCSP RAM 0x70000 for 28,202 bytes equals the file's samples byte for byte; frame 3 stays up about 240 vblanks, longer than the 1.28 s clip.
+  - (b) second ending on the same backup file (flags 0x80000301): no reveal (frames seen none), the stock GAME OVER card shows (look/e2e/sb_card_after_120.png), then the front end; flags stay 0x80000301.
+  - (c) fresh backup file, Wolverine turned ON in OPTION MODE first (flags 0x80000300, saved setting): no reveal, stock card, flag UNCHANGED (0x80000300, bit 0 still clear), so a later ending with him turned OFF would still play the reveal once.
+  Captures: look/e2e/sa_reveal_frame1..3.png, sa_front_end.png, sb_card_after_120.png, sc_card_after_120.png, sc_options_on.png.
