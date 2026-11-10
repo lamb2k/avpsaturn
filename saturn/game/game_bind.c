@@ -166,11 +166,11 @@ void f_19f9a(void)
 /* f_24060 is the player's gun action (a6 = block; Berserker Barrage runs in it for Wolverine): no shot, flash, sound or heat for a Wolverine player
    (saturn/guests/wolverine/wolverine.c sat_guest_wolverine_gun). */
 #ifdef SAT_WV_NATIVE_GFX
-/* f_2576a is Schaefer's state 02000c routine (the gun action; table 0x893e entry of character 1). A Wolverine player runs his own action instead (no gun code at all). */
-void f_2576a(void)
+/* f_24f04 is Schaefer's state 020008 routine (the special: attack + jump; table 0x891e entry of character 1). A Wolverine player runs his own Berserker Barrage instead (no gun code at all). */
+void f_24f04(void)
 {
-    extern void lifted_2576a(void);
-    if (!sat_wv_bz_run(R->a[6])) lifted_2576a();
+    extern void lifted_24f04(void);
+    if (!sat_wv_bz_run(R->a[6])) lifted_24f04();
 }
 #else
 extern int sat_guest_wolverine_gun(unsigned long a6, int end) __attribute__((weak));
