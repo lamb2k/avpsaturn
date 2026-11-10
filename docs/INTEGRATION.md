@@ -42,7 +42,7 @@ Updated 2026-11-09 evening. Merged at 4bfcdf6: sprite-dropout cart guards (13e63
 | --- | --- | --- |
 | Native Wolverine, plan revision 2 (docs/notes/AVP_WOLVERINE_NATIVE_PLAN_V2_20261109.md): no sprite replacement; first milestone one complete native attack | lane/wv-native-gfx-20261109 (5e5d568 pushed) | design and stand prototype done (SAT_WV_NATIVE_GFX, default off; stand drawn natively in Yaba); working on the HOST identity run, then his own data block and one attack |
 | Character select: fixed scroll 1 drops so panels never move and stat bars sit inside their boxes | lane/menu-dropfix-20261109 | first pass merged (stops the collapse); second pass (2f2f093, local) building; owner saw bars shifting on the merged pass |
-| Main-game text: font glyphs never seen by a census draw blank; HURRY UP! second U (lane/hurryup f36ff31); stage 14 caption garbage | lane/text-glyphs-20261109 | started |
+| Main-game text: font glyphs never seen by a census draw blank; HURRY UP! second U (lane/hurryup f36ff31); stage 14 caption garbage | lane/text-glyphs-20261109 (f62d289 pushed) | done and gated (fit 76/76, check_screen_keys 0/287 missing, Yaba HURRY UP and stage 14 caption checked); costs +400-800 dropped sprite keys on 0e/1c/1e/24, so owner 2026-11-09: WAIT and merge together with the stage-sprites fix |
 | Main-game sprite pieces dropped on stages 0e, 1c, 1e, 24; fatal 0xe2 at 0xa9cc4 once on 0e | lane/stage-sprites-20261109 | started |
 | Post-credits reveal + unlock | lane/wolverine-reveal 850fc42 (pushed) | built; end-to-end Yaba check not done; owner to pick the voice clip |
 | Saturn hardware FPS test discs | E:\AvP\package-hwtest-20261109 (pre-integration) | rebuild from avp/integration with the next owner disc (owner to confirm) |
