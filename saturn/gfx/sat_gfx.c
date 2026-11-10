@@ -230,6 +230,10 @@ typedef struct
     const u8 *data;
     const u8 *spill; /* payload indexes from split on live in other stretches of the cart: count, then (first index, offset from the pack) pairs, ascending */
     u32 split;
+#ifdef SAT_TILE_ROWTRIM
+    const u8 *rtbase; /* sprite section of an SGP2 pack: u32 stream position of every 1024th payload, then a u16 a payload, its position from that base in 4 byte units */
+    const u8 *rtoffs;
+#endif
 } Section;
 
 /* A set of VRAM slots holding pack tiles; a slot not drawn this frame can be taken. */
@@ -715,6 +719,66 @@ static u8 vl_cause;
 #define BLANK_MISS_BIT 0
 #endif
 /* Slot holding a tile, uploading it on a miss. NOSLOT for a blank, missing or refused tile. */
+#if defined(SAT_TILE_ROWTRIM) && defined(SAT_TILE_DMA)
+#error SAT_TILE_ROWTRIM and SAT_TILE_DMA are separate upload experiments
+#endif
+#ifdef SAT_TILE_ROWTRIM
+/* A sprite tile in an SGP2 pack is a record: u16 mask (bit 15 = row 0, set = the row has a visible pen), u16 spare, then 8 bytes for each set bit. A cleared row is all zero
+ * in the plain tile (texture pen 0 is transparent), so the 128 byte slot comes out byte for byte as the SGP1 pack gives it. Rows are written once, in order, with no
+ * buffer (low work RAM is full); the cart is read less than a 128 byte copy reads it. */
+static void rowtrim_decode(u8 *dest, const u8 *rec)
+{
+    u32 mask = ((u32)rec[0] << 8) | rec[1];
+    int r;
+#ifdef SAT_GFX_HOST
+    const u8 *s = rec + 4;
+    for (r = 0; r < 16; r++, mask <<= 1, dest += 8)
+    {
+        int i;
+        for (i = 0; i < 8; i++) dest[i] = (mask & 0x8000) ? *s++ : 0;
+    }
+#else
+    const u32 *s = (const u32 *)(const void *)(rec + 4);
+    volatile u32 *d = (volatile u32 *)(void *)dest;
+    for (r = 0; r < 16; r++, mask <<= 1, d += 2)
+    {
+        if (mask & 0x8000) { d[0] = s[0]; d[1] = s[1]; s += 2; }
+        else { d[0] = 0; d[1] = 0; }
+    }
+#endif
+}
+
+static u32 rowtrim_pos(const Section *sec, u32 idx)
+{
+    return be32(sec->rtbase + (idx >> 10) * 4) + (u32)be16(sec->rtoffs + idx * 2) * 4;
+}
+
+static void rowtrim_load(u8 *dest, u32 idx)
+{
+    const Section *sec = &sections[SEC_SPRITE];
+    u32 pos = rowtrim_pos(sec, idx);
+    const u8 *rec = sec->data + pos;
+    HUD(u32 hud_upload_start = GFX_TICKS();)
+    VP(unsigned int vp_upload_start = (unsigned int)GFX_TICKS();)
+    if (idx >= sec->split)
+    {
+        u32 k = be32(sec->spill);
+        while (k-- > 0)
+        {
+            u32 first = be32(sec->spill + 4 + k * 8);
+            if (idx >= first) { rec = pack_start + be32(sec->spill + 8 + k * 8) + (pos - rowtrim_pos(sec, first)); break; }
+        }
+    }
+    rowtrim_decode(dest, rec);
+    HUD(if (hs.in_build) hs.upl += (GFX_TICKS() - hud_upload_start) & 0xffffUL;)
+    VP(if (vp_active && (u32)dest >= (u32)(VDP1_VRAM + TEX_BASE) &&
+          (u32)dest < (u32)(VDP1_VRAM + 0x80000UL)) {
+        vp_current[VP_UPLOAD_TICKS] += vp_elapsed(vp_upload_start);
+        vp_current[VP_UPLOAD_BYTES] += 128U;
+    })
+}
+#endif
+
 static u16 cache_find(Cache *c, u32 key, unsigned long *refused)
 {
     u32 h = HASH(c, key);
@@ -772,6 +836,9 @@ static u16 cache_find(Cache *c, u32 key, unsigned long *refused)
     c->slots[n].next = c->head[h]; c->head[h] = n;
     {
         const Section *sec = &sections[c->section];
+#ifdef SAT_TILE_ROWTRIM
+        if (c->section == SEC_SPRITE) { rowtrim_load(c->vram + (u32)n * c->slot_bytes, (u32)idx); goto uploaded; }
+#endif
         const u8 *from = sec->data + (u32)idx * c->slot_bytes;
         if ((u32)idx >= sec->split)
         {
@@ -784,6 +851,9 @@ static u16 cache_find(Cache *c, u32 key, unsigned long *refused)
         }
         vram_copy(c->vram + (u32)n * c->slot_bytes, from, c->slot_bytes);
     }
+#ifdef SAT_TILE_ROWTRIM
+uploaded:
+#endif
     if (c == &spr_cache) sat_gfx_stats.uploads++; else sat_gfx_stats.layer_uploads++;
     VL_CAUSE(0);
     return n;
@@ -857,6 +927,7 @@ unsigned long sat_gfx_pair_fallbacks, sat_gfx_pair_saved;
  * pixels, 1 for a missing/blank pair. The second record retains the same stamp
  * so the ordinary abandoned-plot scan also protects both halves. Its other
  * fields are unused: spr_slots[1].next holds this build's admission count. */
+#ifndef SAT_TILE_ROWTRIM
 static const u8 *pair_payload(u32 idx)
 {
     const Section *sec = &sections[SEC_SPRITE];
@@ -872,6 +943,7 @@ static const u8 *pair_payload(u32 idx)
     }
     return from;
 }
+#endif
 
 static u16 sprite_pair(u32 key)
 {
@@ -901,8 +973,13 @@ static u16 sprite_pair(u32 key)
         }
         else
         {
+#ifdef SAT_TILE_ROWTRIM
+            rowtrim_load(spr_cache.vram + (u32)n * 128, (u32)first);
+            rowtrim_load(spr_cache.vram + (u32)(n + 1) * 128, (u32)second);
+#else
             vram_copy(spr_cache.vram + (u32)n * 128, pair_payload((u32)first), 128);
             vram_copy(spr_cache.vram + (u32)(n + 1) * 128, pair_payload((u32)second), 128);
+#endif
             r->next = 0;
             spr_slots[1].next++;
             sat_gfx_stats.uploads += 2;
@@ -2708,7 +2785,11 @@ static COLD_OS int open_pack(const u8 *p)
 {
     int i;
     pack_start = p;
+#ifdef SAT_TILE_ROWTRIM
+    if (be32(p) != 0x53475032UL) return 0; /* SGP2: SGP1 with the sprite tiles as row masked records (tools/satgfx_pack.py rowtrim) */
+#else
     if (be32(p) != 0x53475031UL) return 0; /* SGP1 */
+#endif
     for (i = 0; i < 4; i++)
     {
         sections[i].count = be32(p + 4 + i * 12);
@@ -2718,6 +2799,10 @@ static COLD_OS int open_pack(const u8 *p)
         sections[i].spill = p + be32(p + 56 + i * 8);
         index_section(&sections[i], i);
     }
+#ifdef SAT_TILE_ROWTRIM
+    sections[SEC_SPRITE].rtbase = p + be32(p + 84);
+    sections[SEC_SPRITE].rtoffs = p + be32(p + 88);
+#endif
     return 1;
 }
 

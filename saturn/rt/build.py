@@ -47,6 +47,22 @@ COLD1_AT = CART_END - COLD1_ROOM
 # ROM stretches no walk of any stage or character reads (tools/rounds_census.py, WORK/rounds.json): cold chunks of lifted code stay in them for the whole game, per-round tiles take the rest.
 ROUNDS = json.loads((WORK / "rounds.json").read_text())
 ARCADE_SPRITE_KEYS = {k for f in ROUNDS["files"] for k in f["keys"][0]}
+# Per-character button-fuzz censuses (tools/char_fuzz.py, WORK/char_fuzz.json; absent = nothing changes).
+#   CHAR_FUZZ_PAGES (default 1, a correctness fix): every stage file also keeps the ROM pages the fuzz runs read in its stage, and the players' whole script stretch 0x161400-0x1717ff.
+#     Without them a file overwrites data that a jump attack, special or hurt reaction reads: page 0x171400 holds Linn's last script words and no stage file kept it (a stage file
+#     with tiles there hands the script reader garbage: fatal 0xe2 at 0xa9cc4, a word outside its 8 entry jump table), and pages 0xa5800-0xa6bff were read by fuzz runs of stage 04 and others.
+#   CHAR_FUZZ_KEYS (default 0, a visible change): a file also asks for the sprite keys the fuzz runs of its characters looked up in its stage and those characters' body
+#     tiles (tools/char_fuzz.py ranks), so poses the route never reached stop drawing blank; the room comes from other characters' material. Only the stages in
+#     CHAR_FUZZ_KEY_STAGES (default 0e,1c,1e,24, the ones whose files already differ per variant): any other stage would stop its 11 variants packing to identical files
+#     and outgrow the sector store (STORE.BIN, 2^18 sectors: 275k unique sectors against 122k).
+CHAR_FUZZ = None
+if os.environ.get("CHAR_FUZZ", "1") != "0":
+    sys.path.insert(0, str(REPO / "tools"))
+    import char_fuzz
+    CHAR_FUZZ = char_fuzz.load(WORK)
+    if True:   # without a census file the players' script stretch is still kept (tools/char_fuzz.py SCRIPT_REGION)
+        print("char fuzz:", char_fuzz.augment(ROUNDS, CHAR_FUZZ, keys=os.environ.get("CHAR_FUZZ_KEYS", "0") == "1", pages=os.environ.get("CHAR_FUZZ_PAGES", "1") == "1",
+                                                key_stages={int(x, 16) for x in os.environ.get("CHAR_FUZZ_KEY_STAGES", "0e,1c,1e,24").split(",") if x} or None), flush=True)   # the guest files drop a bonus character's remap keys (guest_rounds.extend)
 sys.path.insert(0, str(REPO / "tools/wolverine"))
 import hud_art
 HUD = None   # guest select screen and HUD art (hud_art.build); guests.c always includes a palette table, empty without it
@@ -70,6 +86,15 @@ for l in (open(WORK / "screen_keys.txt") if (WORK / "screen_keys.txt").exists() 
     if l.strip():
         SCREEN_KEYS[int(l.split()[0])].add(int(l.split()[1], 16))
 SCREEN_KEYS[0].discard(0)
+# The arcade's rare system banners (the timed stages' "HURRY UP!" and its countdown): tools/system_banner_keys.py derives the scroll 1 keys from the
+# ROM's own tables. The census never sees them, and a stage file without them drew the second U of the banner blank.
+sys.path.insert(0, str(REPO / "tools"))
+import system_banner_keys
+SCREEN_KEYS[1] |= system_banner_keys.from_work(WORK)
+# Every text font the arcade can print (tools/font_glyph_keys.py: the ROM's glyph tables, both banks, both column parities) in every round file, front end included:
+# a glyph no census route reached drew blank. FONT_KEYS=0 builds without them (A/B).
+import font_glyph_keys
+FONT_KEYS = font_glyph_keys.from_work(WORK) if os.environ.get("FONT_KEYS", "1") == "1" else set()
 if os.environ.get("SCREEN_KEYS_REQUIRED", "1") == "1" and not SCREEN_KEYS[0]:
     raise SystemExit("WORK/screen_keys.txt missing: run tools/screen_keys.py (SCREEN_KEYS_REQUIRED=0 to build without)")
 if os.environ.get("GUEST_ASSETS"):
@@ -106,6 +131,10 @@ CAPTION_KEYS = set()
 if "SAT_HOME" in os.environ.get("KERNEL_CFLAGS", ""):
     CAPTION_KEYS = {(c << 1) | h for c in list(range(0x1260, 0x1320)) + [0x1246, 0x1247, 0x1248, 0x1249, 0x1256, 0x1257, 0x1258, 0x1259] for h in (0, 1)}
 STRETCHES = [(0x02400000 + a, n) for a, n in ROUNDS["holes"] if n >= 0x4000]
+# The story captions' ROM pages (tools/story_text_pages.py) stay intact in every round file: a caption the census let skip sat in a page the file treated as free and overwrote
+# with tile bytes (stage 14's second caption box, 17 cells of tile bytes before "ized by the aliens!"). Pages under cold lifted code cannot stay. STORY_PAGES=0 builds without.
+import story_text_pages
+STORY_PAGES = story_text_pages.from_work(WORK, ROUNDS["page"]) if os.environ.get("STORY_PAGES", "1") == "1" else set()
 
 
 def guest_plan():
@@ -253,6 +282,8 @@ def code_size(o):
 
 SHARED_MIN = int(os.environ.get("ROUND_SHARED_MIN", "10"))   # stages
 MIN_RUN = int(os.environ.get("ROUND_MIN_RUN", "1"))   # pages; a stretch costs 8 bytes of table, about 1 KB of a page is 8 sprites
+ROWTRIM = "SAT_TILE_ROWTRIM" in os.environ.get("KERNEL_CFLAGS", "")   # default off: sprite tiles as row masked records, SGP2 (tools/satgfx_pack.py record, saturn/gfx/sat_gfx.c rowtrim_load); the kernel and the packs must agree
+TAIL_FILL = os.environ.get("PACK_TAIL_FILL", "0") == "1"   # default off: tile spill uses the last odd page of a ROM stretch too (tools/rounds_pack.py plan, assemble)
 
 
 def round_files(rom, code_end, cold1_at, only=None):
@@ -268,6 +299,8 @@ def round_files(rom, code_end, cold1_at, only=None):
         for q in range((at - CART["ROMB"]) // page, (end - CART["ROMB"] + page - 1) // page):
             code[q] = 1
     plans, written = [], set()
+    if STORY_PAGES:
+        print("story caption pages kept in every round file: %d, of them under cold code (cannot stay): %s" % (len(STORY_PAGES), ", ".join("%#x" % (q * page) for q in sorted(STORY_PAGES) if code[q]) or "none"), flush=True)
     # Census gap: a mode or setting outside the census can read common tables a walk of this stage never touched. Pages most stages read stay in every stage. Costs sprites only in stages already short of room.
     base = [f for f in ROUNDS["files"] if re.fullmatch(r"stage[0-9a-f]{2}", f["name"])]
     seen = {}
@@ -289,7 +322,7 @@ def round_files(rom, code_end, cold1_at, only=None):
         if only is not None and fi not in only:
             plans.append(None)
             continue
-        keep = set(f["keep_pages"]) | shared
+        keep = set(f["keep_pages"]) | shared | STORY_PAGES
         if k02 and set(f.get("stages", [])) & {0x0e, 0x1c, 0x1e, 0x24}: keep |= k02
         free, st = [], None
         for q in range(0x200000 // page + 1):
@@ -298,10 +331,12 @@ def round_files(rom, code_end, cold1_at, only=None):
                 st = q
             if not ok and st is not None:
                 if q - st >= MIN_RUN:
-                    free.append([st * page, (q - st) * page])
+                    # PACK_TAIL_FILL: a run ending in a page this file keeps (plain ROM, no cold code) may use its odd page: the sector's tail rewrites that page with the ROM's bytes
+                    free.append([st * page, (q - st) * page] + ([True] if TAIL_FILL and q < 0x200000 // page and q in keep and not code[q] else []))
                 st = None
         free.sort(key=lambda r: -r[1])
         keys, frank = [set(k) for k in f["keys"]], {int(x): v for x, v in rank.get(f.get("rank_from", f["name"]), {}).items()}
+        char_fuzz.rank(f, frank) if CHAR_FUZZ else None   # fuzz and body keys (tools/char_fuzz.py); a guest's keys below still outrank them
         frank.update({k: 1 << 39 for k in f.get("guest_keys", ())})   # a guest's frames rank as the playing character's own route
         if only is not None:
             free = []
@@ -313,27 +348,31 @@ def round_files(rom, code_end, cold1_at, only=None):
             frank.update({k: 1 << 40 for k in SCREEN_KEYS[0]})
         if f.get("gfx") and f["gfx"] not in raws:
             raws[f["gfx"]] = pathlib.Path(f["gfx"]).read_bytes()
+        if FONT_KEYS:
+            keys[1] = keys[1] | FONT_KEYS
         if EDGE_KEYS:
             keys[1] = keys[1] | EDGE_KEYS
         if CAPTION_KEYS:
             keys[1] = keys[1] | CAPTION_KEYS
         if f["name"] == "front":
             keys[1] = keys[1] | SELECT_DIGIT_KEYS
-        p, dropped = rounds_pack.fit(raws.get(f.get("gfx"), raw), keys, room, free, frank)
+        p, dropped = rounds_pack.fit(raws.get(f.get("gfx"), raw), keys, room, free, frank, ROWTRIM)
         # Check every plan before the write loop, including optional guest stages
         # 06/1c/1e. A high rank alone never guarantees that the tiles fit.
         round_cache.require_guest_tiles(f["name"], f.get("guest_keys", ()), keys[0], dropped, p)
-        for first, a, take in p["segs"]:
-            written.update(range(a // page, (a + (take * 128 + 2047 & -2048) + page - 1) // page))
+        for si, (first, a, take) in enumerate(p["segs"]):
+            written.update(range(a // page, (a + (rounds_pack.seg_len(p, si) + 2047 & -2048) + page - 1) // page))
         plans.append((p, dropped))
     stats = {}
+    if only is None:   # the pages each file keeps as the planner saw them (own, front end, next stage, fuzz, shared): tools/check_round_pages.py reads the built files against this
+        (WORK / "round_keep.json").write_text(json.dumps([[f["name"], sorted(set(f["keep_pages"]) | shared)] for f in ROUNDS["files"]]))
     for i, (f, pl) in enumerate(zip(ROUNDS["files"], plans)):
         if pl is None:
             continue
         p, dropped = pl
         if only is not None:
             written = set(f["keep_pages"]) | shared   # built alone: restore every kept page
-        own = {x for first, a, take in p["segs"] for x in range(a // page, (a + (take * 128 + 2047 & -2048) + page - 1) // page)}
+        own = {x for si, (first, a, take) in enumerate(p["segs"]) for x in range(a // page, (a + (rounds_pack.seg_len(p, si) + 2047 & -2048) + page - 1) // page)}
         back = sorted((written & (set(f["keep_pages"]) | shared)) - own)
         restores, st = [], None
         for q in back + [None]:
@@ -343,7 +382,7 @@ def round_files(rom, code_end, cold1_at, only=None):
                 break
             st = [q, q + 1] if st is None else [st[0], q + 1]
         audio = (WORK / "audio" / f"r{f.get('audio_from', i):03d}.bin").read_bytes()
-        n = rounds_pack.write_file(ISO / f"R{i:03d}.BIN", audio, restores, rounds_pack.assemble(p, CART["SAT_PACK"]))
+        n = rounds_pack.write_file(ISO / f"R{i:03d}.BIN", audio, restores, rounds_pack.assemble(p, CART["SAT_PACK"], rom if TAIL_FILL else None))
         stats[f["name"]] = dict(file=n, sprites_in_main=p["inmain"], sprites_spill=sum(x[2] for x in p["segs"]), spill_runs=len(p["segs"]), restore=sum(len(d) for _, d in restores), restore_runs=len(restores), dropped_keys=len(dropped), dropped=dropped, audio=len(audio))
         print(f["name"], {k: v for k, v in stats[f["name"]].items() if k != "dropped"}, flush=True)
     if only is None:
@@ -554,7 +593,7 @@ SECTIONS {{
         if f.get("gfx"):
             inputs[f"gfx:{i}"] = pathlib.Path(f["gfx"])
     fingerprint = round_cache.packing_inputs(ROUNDS, ends, dict(
-        shared_min=SHARED_MIN, min_run=MIN_RUN, arena_keep=os.environ.get("ARENA_KEEP"),
+        shared_min=SHARED_MIN, min_run=MIN_RUN, tail_fill=TAIL_FILL, rowtrim=ROWTRIM, arena_keep=os.environ.get("ARENA_KEEP"),
         screen_keys=[sorted(k) for k in SCREEN_KEYS], pack_address=CART["SAT_PACK"]), inputs)
     receipt = WORK / "round_pack_receipt.json"
     reason = round_cache.reuse_reason(receipt, fingerprint, ISO, names)
