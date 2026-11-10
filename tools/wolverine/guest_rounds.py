@@ -45,7 +45,8 @@ def extend(R, assets, hud=None, s1_keys=()):
             f["guest_keys"] = sorted(wk)
             f["guest"] = 0
             if hud:
-                f["gfx"] = str(hud["stage_gfx"])
+                # his files without Linn (variant mask bit 8) also carry the continue picture; her continue draws the same Queen, so with her it stays
+                f["gfx"] = str(hud["stage_gfx_c"] if hud.get("stage_gfx_c") and not m & 8 else hud["stage_gfx"])
             out[vi] = made[row[vi]] = len(files)
             files.append(f)
         table[word] = out

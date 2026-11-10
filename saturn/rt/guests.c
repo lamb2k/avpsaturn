@@ -54,6 +54,7 @@ void sat_guest_loaded(int row, int chars, int variant, int file)
     for (i = 0; i < sat_guest_count && i < GUEST_ROWS; i++)
         if ((sat_guest_sel & sat_guests[i].sel_bit) && file && guest_file[i][row][variant] == file && (!row || (chars & sat_guests[i].slot_mask)))
             art |= 1u << i;
+    if (row && (art & 1) && !(chars & 8)) art |= 0x80;   /* the continue picture's palette (hud_art.py): his art file without Linn, whose continue draws the same Queen */
     if (GUEST_PAL_N) guest_pal_sync(guest_pal, GUEST_PAL_N, art, (volatile unsigned char *)PAGE[0]);
 #if SAT_WV_DIALOG
     /* Wolverine's story box wording and his name on the stage clear banner: written while his files are the loaded ones (tools/wolverine/dialog.py) */

@@ -15,6 +15,12 @@ Talk box face (2026-11-09, lane wv-talkbox): the story box's speaker picture is 
 0xfd9-0xfdd, palette bank 0x13, drawn x-flipped; both halves of every code block hold the same cell). It is cropped and shrunk from the approved
 select portrait (TALK_FACE_CROP) onto the same 15 colours, or read from wolverine_talk_face_40x24.png when the artist supplies one.
 
+Continue picture (2026-11-10, owner: "it should use his art for the hud"): the arcade's continue screen draws one of two pictures by the dying
+character's class, a Queen (Schaefer and Linn) or a Predator arm (Warrior and Hunter). The Queen is 40 scroll 3 tiles of 32x32 (codes 0x150a to 0x155f,
+12 by 4 cells of the screen's 384x128 band, palette bank 2) and sprite tiles 0x8e18 to 0x8fc9 (her hands and head); it is its own picture, not a
+portrait we already replace. For his files without Linn (her continue draws the same Queen) the tiles are redrawn from the approved select portrait
+at 2x on its own palette (page 8 bank 2 table at 0x1f3640), the sprite tiles blank. That region is gfx_hud_stage_c.bin.
+
 PNG convention (the artist's, checked here): index 0 = transparent = arcade pen 15; index n = pen n - 1; colours are multiples of 17.
 The name's palette (bank 0x27) is shared by every character, so that piece only maps its indices to the bank's existing pens and
 never changes a colour. Mega Man (Predator Hunter's slot) needs the same four pieces: add a SLOTS entry and a GUESTS row.
@@ -44,6 +50,22 @@ SCROLL_BASE = 0x800000   # scroll tiles in the graphics region (satgfx_pack.payl
 TALK_FACE_CROP = (20, 8, 88, 50.9)
 TALK_FACE_FRAME_PEN = 1
 TALK_FACE_MIRROR = True
+# The continue screen's Queen: scroll 3 map cells (window row, column) -> tile code (rows 2 to 5 of the screen's 8 row window; every other cell is the solid
+# tile 0x1005 (pen 9), 0x100f (pen 0, the black bars) or 0x1000 (transparent)); read from the arcade under MAME (tools/screen_keys.lua).
+CONTINUE_GRID = {}
+for _r, _row in ((2, [None] * 4 + [0x1510, 0x1511, 0x1512, 0x1513, 0x1518, 0x1519, None, None]),
+                 (3, [None, None, 0x150e, 0x150f, 0x1514, 0x1515, 0x1516, 0x1517, 0x151c, 0x151d, 0x151e, 0x151f]),
+                 (4, [None, 0x150a, 0x154a, 0x154b, 0x1550, 0x1551, 0x1552, 0x1553, 0x1558, 0x1559, 0x155a, 0x155b]),
+                 (5, [None, 0x150b, 0x154e, 0x154f, 0x1554, 0x1555, 0x1556, 0x1557, 0x155c, 0x155d, 0x155e, 0x155f])):
+    for _c, _code in enumerate(_row):
+        if _code is not None:
+            CONTINUE_GRID[(_r, _c)] = _code
+CONTINUE_BG_PEN = 9        # the solid fill tile 0x1005's pen: his backdrop colour
+CONTINUE_PENS = (1, 2, 3, 4, 5, 6, 7, 8, 10, 11, 12, 13, 14)   # pens 0 (the bars' black) and 9 (the backdrop) are taken
+CONTINUE_PORTRAIT_AT = (64, 0)   # the 128x64 portrait at 2x (256x128) centred in the 384x128 band
+# Sprite tile runs of the Queen's hands and head (continue screen only: the census files hold them in varying numbers), blanked in his files.
+CONTINUE_BLANK_SPRITES = [(0x8e18, 0x8e1c), (0x8e28, 0x8e2c), (0x8e38, 0x8e3c), (0x8ea3, 0x8ea7), (0x8eb3, 0x8eb7), (0x8ec3, 0x8ec7), (0x8ed3, 0x8ed7)] + [
+    (b, b + 14) for b in range(0x8f00, 0x8fc0, 0x10)] + [(0x8fc0, 0x8fc9)]
 
 
 # One slot's pieces. code(r, c): scroll tile code of the picture's tile row r, column c. cell: tile size in pixels. parity0: scroll 1 draws
@@ -67,6 +89,9 @@ SLOTS = {
         # `both`: the arcade holds the same cell in both halves of a code block, so the key's column parity does not matter; so does the copy.
         "talk_face": dict(png="wolverine_talk_face_40x24.png", size=(40, 24), cell=8, layer=1, parity0=0, flip=True, both=True,
                           derive="select_portrait", code=lambda r, c: 0xfbd - c + r * 16, pens=PORTRAIT_PENS, front=False, stage=True),
+        # The continue screen's Queen (see the docstring): `kind` continue, redrawn from the select portrait; only in the region for his files without Linn.
+        "continue_picture": dict(png=None, size=(384, 128), cell=32, layer=3, kind="continue", derive="select_portrait",
+                                 code=lambda r, c: CONTINUE_GRID.get((r + 2, c)), pens=tuple(range(15)), front=False, stage=False, stagec=True),
         # The ranking table draws the HUD portrait's own tiles (checked on the arcade's pictures: the icon is the portrait, two pixels
         # over), so the ranking icon is a copy of piece C and carries no tiles of its own.
         "rank_icon": dict(png="wolverine_rank_icon_24x16.png", size=(24, 16), same_as="hud_portrait"),
@@ -79,6 +104,8 @@ PALETTES = {
         dict(piece="select_portrait", at=[0x1f0a60, 0x1f1340, 0x1f6ac0], tags=[0x0903, 0x0b0a, 0x00e6]),
         dict(piece="select_plate", at=[0x1ee340], tags=[0x000a]),
         dict(piece="hud_portrait", at=[0x1ee460, 0x1f0640] + STAGE_PAGES, tags=[0x0013, 0x0802] + [0x0113] * 20),
+        # the Queen's palette (scroll 3 page 8 bank 2); guest bit 0x80 = Wolverine's art loaded and Linn not in play (saturn/rt/guests.c)
+        dict(piece="continue_picture", at=[0x1f3640], tags=[0x0802], guest_bit=0x80),
     ],
 }
 # Guest row of saturn/rt/guests.c -> the slot it takes and the folder of its art under the art directory.
@@ -181,6 +208,70 @@ def put_scroll2(raw, code, tile):
             raw[at:at + 4] = planes(tile[y][g * 8:g * 8 + 8])
 
 
+def put_scroll3(raw, code, tile):
+    """A 32x32 tile of pens as scroll 3 code: 16 bytes a row, four groups of eight pixels."""
+    base = SCROLL_BASE + code * 0x200
+    for y in range(32):
+        for g in range(4):
+            at = base + y * 16 + g * 4
+            raw[at:at + 4] = planes(tile[y][g * 8:g * 8 + 8])
+
+
+def blank_sprites(raw):
+    """Sprite tiles of the runs, fully transparent (pen 15 in every plane)."""
+    for a, b in CONTINUE_BLANK_SPRITES:
+        for key in range(a, b + 1):
+            raw[key * 0x80:(key + 1) * 0x80] = b"\xff" * 0x80
+
+
+def continue_piece(src):
+    """The 384x128 band in continue pens, and the 15 palette words: pen 0 black (the bars), pen 9 his backdrop, the portrait's other colours in the free
+    pens (the two closest merge when it uses more than 13). Pen 0 of the portrait is its backdrop."""
+    w, h = len(src["pens"][0]), len(src["pens"])
+    ox, oy = CONTINUE_PORTRAIT_AT
+    big = [[0] * 384 for _ in range(128)]   # the portrait's backdrop pen all over the band, the portrait 2x in the middle
+    for y in range(h):
+        for x in range(w):
+            for dy in (0, 1):
+                for dx in (0, 1):
+                    big[oy + 2 * y + dy][ox + 2 * x + dx] = src["pens"][y][x]
+    count = {}
+    for r in big:
+        for p in r:
+            if p not in (0, 15):
+                count[p] = count.get(p, 0) + 1
+    word = lambda p: src["words"][p]
+    dist = lambda a, b: sum((((word(a) >> sh) & 15) - ((word(b) >> sh) & 15)) ** 2 for sh in (8, 4, 0))
+    pens = sorted(count)
+    merged = {}
+    while len(pens) > len(CONTINUE_PENS):   # merge the rarest colour into its nearest
+        rare = min(pens, key=lambda p: count[p])
+        pens.remove(rare)
+        near = min(pens, key=lambda p: dist(rare, p))
+        merged[rare] = near
+        count[near] += count[rare]
+    slot = dict(zip(pens, CONTINUE_PENS))
+    cmap = {0: CONTINUE_BG_PEN, 15: 15}
+    cmap.update(slot)
+    for rare in list(merged):
+        near = merged[rare]
+        while near in merged:
+            near = merged[near]
+        cmap[rare] = slot[near]
+    band = [[cmap[p] for p in r] for r in big]
+    words = {q: 0 for q in range(15)}
+    words[CONTINUE_BG_PEN] = word(0)
+    for p, q in slot.items():
+        words[q] = word(p)
+    # the band must be the backdrop where the map draws the solid fill tile (those cells keep it): count the pixels that would be lost
+    lost = 0
+    for r in range(4):
+        for c in range(12):
+            if (r + 2, c) not in CONTINUE_GRID:
+                lost += sum(1 for y in range(32) for x in range(32) if band[r * 32 + y][c * 32 + x] not in (CONTINUE_BG_PEN, 15))
+    return dict(pens=band, words=words, pal=None, derived=True, lost=lost)
+
+
 def cells(name, spec, pens):
     """(code, parity or None, tile) for every tile of a piece. `flip`: the stored cell is the picture's cell mirrored (the arcade draws it
     x-flipped); `both`: the cell is written to both halves of its code block."""
@@ -191,6 +282,8 @@ def cells(name, spec, pens):
             tile = [row[c * n:(c + 1) * n] for row in pens[r * n:(r + 1) * n]]
             if spec.get("flip"):
                 tile = [t[::-1] for t in tile]
+            if spec["code"](r, c) is None:   # a cell of the band that the arcade's map draws with a fill tile, not a picture tile of its own
+                continue
             if spec.get("both"):
                 for par in (0, 1):
                     yield spec["code"](r, c), par, tile
@@ -199,21 +292,26 @@ def cells(name, spec, pens):
 
 
 def patch(raw, slot, pieces, which):
-    """Copy of the graphics region with the pieces of `which` ('front' or 'stage') written at the slot character's tile codes."""
+    """Copy of the graphics region with the pieces of `which` ('front', 'stage', or 'stage_c': the stage pieces and the continue picture) written at the
+    slot character's tile codes."""
     out = bytearray(raw)
     written = {}
     for name, spec in SLOTS[slot].items():
-        if "same_as" in spec or not spec.get(which):
+        if "same_as" in spec or not (spec.get(which) or (which == "stage_c" and (spec.get("stage") or spec.get("stagec")))):
             continue
         for code, par, tile in cells(name, spec, pieces[name]["pens"]):
             k = (spec["layer"], code, par)
             if k in written:
                 raise ValueError("%s: tile %04x written twice (also by %s)" % (name, code, written[k]))
             written[k] = name
-            if spec["layer"] == 2:
+            if spec["layer"] == 3:
+                put_scroll3(out, code, tile)
+            elif spec["layer"] == 2:
                 put_scroll2(out, code, tile)
             else:
                 put_scroll1(out, code, par, tile)
+    if which == "stage_c":
+        blank_sprites(out)
     return out
 
 
@@ -249,7 +347,7 @@ def palette_sets(slot, guest, pieces, rom):
             if struct.unpack(">H", rom[at + 30:at + 32])[0] != tag:
                 raise ValueError("%s: ROM copy at %06x has tag %04x, expected %04x" % (p["piece"], at, struct.unpack(">H", rom[at + 30:at + 32])[0], tag))
         neu = [pieces[p["piece"]]["words"][q] if pen_mask >> q & 1 else orig[q] for q in range(15)]
-        sets.append(dict(piece=p["piece"], guest=1 << guest, mask=pen_mask, neu=neu, orig=orig, at=list(p["at"])))
+        sets.append(dict(piece=p["piece"], guest=p.get("guest_bit", 1 << guest), mask=pen_mask, neu=neu, orig=orig, at=list(p["at"])))
     return sets
 
 
@@ -275,12 +373,15 @@ def load_slot(art, slot):
     for name, spec in SLOTS[slot].items():
         if "same_as" in spec:   # the same pixels and colours, under its own file name
             spec = dict(SLOTS[slot][spec["same_as"]], png=spec["png"])
-        if "derive" in spec and not (pathlib.Path(art) / spec["png"]).exists():
+        if "derive" in spec and (not spec.get("png") or not (pathlib.Path(art) / spec["png"]).exists()):
             continue   # cropped below, once its source is loaded
         pieces[name] = load_piece(art, name, spec)
     for name, spec in SLOTS[slot].items():
         if name not in pieces:
             src = pieces[spec["derive"]]
+            if spec.get("kind") == "continue":
+                pieces[name] = continue_piece(src)
+                continue
             w, h = spec["size"]
             inner = shrink(src, TALK_FACE_CROP, (w - 2, h - 2))
             if TALK_FACE_MIRROR:
@@ -320,7 +421,7 @@ def build(art, base_gfx, rom_path, out_dir, guest=0):
     pieces = load_slot(art, slot)
     check_shared_palette(slot, pieces, rom)
     res = {}
-    for which in ("stage", "front"):
+    for which in ("stage", "stage_c", "front"):   # stage_c: his files without Linn, with the continue picture
         data = bytes(patch(raw, slot, pieces, which))
         res[which] = out / ("gfx_hud_%s.bin" % which)
         _write(res[which], data)
@@ -328,14 +429,15 @@ def build(art, base_gfx, rom_path, out_dir, guest=0):
     inc = out / "guest_hudpal.inc"
     _write(inc, pal_include(sets).encode())
     report = dict(slot=slot, guest=guest,
-                  stage_gfx=str(res["stage"]), front_gfx=str(res["front"]), include=str(inc),
+                  stage_gfx=str(res["stage"]), stage_gfx_c=str(res["stage_c"]), front_gfx=str(res["front"]), include=str(inc),
+                  continue_lost_pixels=pieces["continue_picture"]["lost"],
                   tiles={n: sum(1 for _ in cells(n, s, pieces[n]["pens"])) for n, s in SLOTS[slot].items() if "same_as" not in s},
                   palettes=[dict(piece=s["piece"], copies=len(s["at"]), mask="0x%04x" % s["mask"]) for s in sets],
                   base_sha256=hashlib.sha256(raw).hexdigest(),
-                  art_sha256={s["png"]: hashlib.sha256((pathlib.Path(art) / s["png"]).read_bytes()).hexdigest() for s in SLOTS[slot].values() if (pathlib.Path(art) / s["png"]).exists()},
+                  art_sha256={s["png"]: hashlib.sha256((pathlib.Path(art) / s["png"]).read_bytes()).hexdigest() for s in SLOTS[slot].values() if s.get("png") and (pathlib.Path(art) / s["png"]).exists()},
                   talk_face=("derived from the select portrait, crop %s" % (TALK_FACE_CROP,)) if pieces["talk_face"].get("derived") else SLOTS[slot]["talk_face"]["png"])
     (out / "hud_art_report.json").write_text(json.dumps(report, indent=1))
-    return dict(stage_gfx=str(res["stage"]), front_gfx=str(res["front"]), include=str(inc), report=report)
+    return dict(stage_gfx=str(res["stage"]), stage_gfx_c=str(res["stage_c"]), front_gfx=str(res["front"]), include=str(inc), report=report)
 
 
 def check_keys(rounds, slot):
@@ -346,9 +448,11 @@ def check_keys(rounds, slot):
         if "keys" in f:
             have.update(f["keys"][1])
     have2 = set()
+    have3 = set()
     for f in rounds["files"]:
         if "keys" in f:
             have2.update(f["keys"][2])
+            have3.update(f["keys"][3])
     miss = []
     for name, spec in SLOTS[slot].items():
         if "same_as" in spec:
@@ -358,12 +462,17 @@ def check_keys(rounds, slot):
         for r in range(h // n):
             for c in range(w // n):
                 code = spec["code"](r, c)
-                if spec["layer"] == 1:
+                if code is None:
+                    continue
+                if spec["layer"] == 3:
+                    if code not in have3:
+                        miss.append((name, "s3", code))
+                elif spec["layer"] == 1:
                     for par in ((0, 1) if spec.get("both") else ((spec["parity0"] + c) & 1,)):
                         k = code << 1 | par
                         if k not in have:
                             miss.append((name, "s1", k))
-                elif code not in have2:
+                elif spec["layer"] == 2 and code not in have2:
                     miss.append((name, "s2", code))
     return miss
 

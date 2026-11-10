@@ -5,7 +5,7 @@ Uses a finished build's layout and the real rounds_pack.fit implementation. No
 round files are written. All variants containing Schaefer must be checked for
 every requested stage; an empty or incomplete selection is an error.
 
-usage: fit.py WORK ASSETS_DIR [STAGES]   (FIT_DIALOG_KEYS=gen/guest_dialog_keys.json adds the SAT_WV_DIALOG scroll 1 keys to his files)   STAGES is comma-separated hex, e.g. 06,1c,1e.
+usage: fit.py WORK ASSETS_DIR [STAGES]   (FIT_GFX_GUEST_C=gfx_hud_stage_c.bin for his files without Linn; FIT_DIALOG_KEYS=gen/guest_dialog_keys.json adds the SAT_WV_DIALOG scroll 1 keys to his files)   STAGES is comma-separated hex, e.g. 06,1c,1e.
 With no STAGES, check every non-front-end stage in variant_file. Writes
 ASSETS_DIR/fit[STAGES].json. Exit 0: all pass; 1: fit fails; 2: missing/bad inputs.
 Honours GUEST_SPEC, SCREEN_KEYS_REQUIRED, ROUND_SHARED_MIN, ROUND_MIN_RUN and
@@ -191,6 +191,7 @@ def main(argv=None, environ=None, fit_fn=None, own_keys=None):
         sources = {}
         dialog_keys = set(json.loads(pathlib.Path(environ["FIT_DIALOG_KEYS"]).read_text())) if environ.get("FIT_DIALOG_KEYS") else set()   # gen/guest_dialog_keys.json
         hud_stage = pathlib.Path(environ["FIT_GFX_GUEST"]).read_bytes() if environ.get("FIT_GFX_GUEST") else None
+        hud_stage_c = pathlib.Path(environ["FIT_GFX_GUEST_C"]).read_bytes() if environ.get("FIT_GFX_GUEST_C") else None   # gfx_hud_stage_c.bin: his files without Linn
         for word, variant, mask, base in selected:
             own = set(base["keys"][0]) & set(own_keys)
             # guest_rounds.extend keys a shared base file by its first stage.
@@ -206,7 +207,8 @@ def main(argv=None, environ=None, fit_fn=None, own_keys=None):
             keys = [set(base["keys"][0]) - own | wk] + [set(k) for k in base["keys"][1:]]
             if dialog_keys:   # SAT_WV_DIALOG: the scroll 1 keys of his story box wording, as guest_rounds.extend adds them
                 keys[1] = keys[1] | dialog_keys
-            p1, d1 = run(source if hud_stage is None else hud_stage, guest, keys, room, free, rank.get(name, {}), screens, wk, fit_fn)
+            region = hud_stage_c if hud_stage_c is not None and not mask & 8 else hud_stage
+            p1, d1 = run(source if region is None else region, guest, keys, room, free, rank.get(name, {}), screens, wk, fit_fn)
             missing = sorted(set(d1) & wk)
             tiles = lambda p: p["inmain"] + sum(x[2] for x in p["segs"]) if p is not None else None
             row = dict(file=name, stage="%02x" % word, variant=variant, mask=mask,

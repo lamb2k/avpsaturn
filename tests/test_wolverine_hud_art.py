@@ -119,7 +119,7 @@ class ConverterTest(unittest.TestCase):
             data = pathlib.Path(r[which + "_gfx"]).read_bytes()
             touched = set()
             for name, s in spec.items():
-                if "same_as" in s:
+                if "same_as" in s or s["layer"] == 3:
                     continue
                 n = s["cell"]
                 w, h = s["size"]
@@ -225,6 +225,44 @@ class ConverterTest(unittest.TestCase):
         with self.assertRaisesRegex(ValueError, "HUD portrait's 15 colours"):
             hud_art.load_slot(self.art, SLOT)
 
+    def test_continue_picture_only_in_the_region_without_linn(self):
+        """The Queen's 38 scroll 3 tiles are redrawn from the select portrait at 2x in gfx_hud_stage_c.bin only, her sprite tiles are blank there, the palette
+        set carries guest bit 0x80, and the stage and front regions keep the arcade's bytes at those places."""
+        r = hud_art.build(self.art, self.base, self.rom, self.out)
+        stage, stage_c, front = (pathlib.Path(r[k]).read_bytes() for k in ("stage_gfx", "stage_gfx_c", "front_gfx"))
+        pieces = hud_art.load_slot(self.art, SLOT)
+        cont = pieces["continue_picture"]
+        self.assertEqual((len(cont["pens"][0]), len(cont["pens"])), (384, 128))
+        self.assertEqual(len(hud_art.CONTINUE_GRID), 38)
+        self.assertEqual(set(cont["words"]), set(range(15)))
+        self.assertEqual(cont["words"][hud_art.CONTINUE_BG_PEN], pieces["select_portrait"]["words"][0])   # the portrait's backdrop is the fill tile's colour
+        pens_used = {p for row in cont["pens"] for p in row}
+        self.assertTrue(pens_used <= set(hud_art.CONTINUE_PENS) | {hud_art.CONTINUE_BG_PEN})
+        self.assertNotIn(0, pens_used)   # pen 0 stays black for the bars
+        for (row, col), code in hud_art.CONTINUE_GRID.items():
+            tile = [cont["pens"][(row - 2) * 32 + y][col * 32:(col + 1) * 32] for y in range(32)]
+            pl, _ = satgfx_pack.payload(stage_c, 3, code)
+            want = b"".join(satgfx_pack.cells16(satgfx_pack.part(tile, y, x, 16, 16)) for y, x in ((0, 0), (0, 16), (16, 0), (16, 16)))
+            self.assertEqual(pl, want, "tile %04x" % code)
+            for data in (stage, front):
+                self.assertEqual(satgfx_pack.payload(data, 3, code)[0], satgfx_pack.payload(self.gfx, 3, code)[0])
+        for a, b in hud_art.CONTINUE_BLANK_SPRITES:
+            for key in (a, b):
+                self.assertFalse(satgfx_pack.payload(stage_c, 0, key)[1])    # no visible pen
+                self.assertEqual(satgfx_pack.payload(stage, 0, key), satgfx_pack.payload(self.gfx, 0, key))
+        sets = {x["piece"]: x for x in hud_art.palette_sets(SLOT, 0, pieces, self.romb)}
+        self.assertEqual(sets["continue_picture"]["guest"], 0x80)
+        self.assertEqual(sets["continue_picture"]["at"], [0x1f3640])
+        self.assertEqual(sets["hud_portrait"]["guest"], 1)
+        # outside the written tiles and sprite runs the stage_c region is the stage region
+        diff = [i for i in range(len(stage)) if stage[i] != stage_c[i]]
+        allowed = set()
+        for code in hud_art.CONTINUE_GRID.values():
+            allowed.update(range(0x800000 + code * 0x200, 0x800000 + code * 0x200 + 0x200))
+        for a, b in hud_art.CONTINUE_BLANK_SPRITES:
+            allowed.update(range(a * 0x80, (b + 1) * 0x80))
+        self.assertTrue(diff and set(diff) <= allowed)
+
     def test_base_region_is_never_written(self):
         before = self.base.read_bytes()
         hud_art.build(self.art, self.base, self.rom, self.out)
@@ -234,7 +272,7 @@ class ConverterTest(unittest.TestCase):
         r = hud_art.build(self.art, self.base, self.rom, self.out)
         pieces = hud_art.load_slot(self.art, SLOT)
         sets = hud_art.palette_sets(SLOT, 0, pieces, self.romb)
-        self.assertEqual([len(s["at"]) for s in sets], [3, 1, 22])
+        self.assertEqual([len(s["at"]) for s in sets], [3, 1, 22, 1])
         for s in sets:
             for q in range(15):
                 if s["mask"] >> q & 1:
@@ -244,7 +282,7 @@ class ConverterTest(unittest.TestCase):
         self.assertEqual(sets[1]["mask"], 0x3e01)
         self.assertEqual(sets[0]["mask"], 0x7fff)
         text = pathlib.Path(r["include"]).read_text()
-        self.assertIn("#define GUEST_PAL_N 3", text)
+        self.assertIn("#define GUEST_PAL_N 4", text)
         self.assertEqual(hud_art.cps_word((204, 51, 51)), 0xc33)   # the brief's #cc3333: CPS word 0xfc33 without the brightness nibble
         self.assertEqual(hud_art.cps_word((255, 238, 102)), 0xfe6)
         self.assertEqual(hud_art.pen(0), 15)
@@ -305,11 +343,14 @@ class ConverterTest(unittest.TestCase):
                     for par in parities(s, c):
                         have.add(s["code"](r, c) << 1 | par)
         s2 = {spec["select_portrait"]["code"](r, c) for r in range(4) for c in range(8)}
-        rounds = dict(files=[dict(keys=[[], sorted(have), sorted(s2), []])])
+        s3 = sorted(hud_art.CONTINUE_GRID.values())
+        rounds = dict(files=[dict(keys=[[], sorted(have), sorted(s2), s3])])
         self.assertEqual(hud_art.check_keys(rounds, SLOT), [])
         have.discard(0x0be0 << 1 | 1)
-        rounds = dict(files=[dict(keys=[[], sorted(have), sorted(s2), []])])
+        rounds = dict(files=[dict(keys=[[], sorted(have), sorted(s2), s3])])
         self.assertEqual(hud_art.check_keys(rounds, SLOT), [("hud_name", "s1", 0x0be0 << 1 | 1)])
+        rounds = dict(files=[dict(keys=[[], sorted(have | {0x0be0 << 1 | 1}), sorted(s2), s3[1:]])])
+        self.assertEqual(hud_art.check_keys(rounds, SLOT), [("continue_picture", "s3", s3[0])])
 
 
 class GuestRoundsTest(unittest.TestCase):
@@ -353,6 +394,44 @@ class GuestRoundsTest(unittest.TestCase):
                 # arcade files are the same dictionaries as without art: their graphics region is the build's
                 self.assertTrue(all("gfx" not in f for f in art["files"] if not f["name"].endswith("_wv")))
                 self.assertEqual([f for f in art["files"][:n] if not f["name"].endswith("_wv")], [f for f in plain["files"] if not f["name"].endswith("_wv")])
+        finally:
+            if old is None:
+                sys.modules.pop("rounds_variants", None)
+            else:
+                sys.modules["rounds_variants"] = old
+            if saved is None:
+                os.environ.pop("GFX_BIN", None)
+            else:
+                os.environ["GFX_BIN"] = saved
+
+
+class GuestRoundsContinueRegionTest(unittest.TestCase):
+    def test_continue_region_only_for_his_files_without_linn(self):
+        spec = importlib.util.spec_from_file_location("guest_rounds_c", ROOT / "tools/wolverine/guest_rounds.py")
+        gr = importlib.util.module_from_spec(spec)
+        spec.loader.exec_module(gr)
+
+        class Data:
+            def __init__(self, path):
+                self.own = {2: {7}}
+        fake = type(sys)("rounds_variants")
+        fake.Data = Data
+        old = sys.modules.get("rounds_variants")
+        sys.modules["rounds_variants"] = fake
+        saved = os.environ.get("GFX_BIN")
+        try:
+            files = [dict(name="front", stages=[0], keys=[[1, 7], [], [], []], sound=[], keep_pages=[]),
+                     dict(name="stage02", stages=[2], keys=[[1, 7], [], [], []], keep_pages=[])]
+            row = [1]
+            for m in (2, 3, 6, 10):   # Schaefer alone, with the Warrior, with the Hunter, with Linn
+                files.append(dict(files[1], name="stage02_m%d" % m))
+                row.append(len(files) - 1)
+            rounds = dict(files=files, variant_masks=[2, 3, 6, 10], variant_file={"2": row}, stage_file={}, page=1024)
+            with tempfile.TemporaryDirectory() as td:
+                (pathlib.Path(td) / "remap.json").write_text(json.dumps(dict(stage_keys={}, keys=[100, 101])))
+                art = gr.extend(rounds, td, dict(stage_gfx="S.bin", stage_gfx_c="SC.bin", front_gfx="F.bin"))
+                got = {f["name"]: f["gfx"] for f in art["files"] if f["name"].endswith("_wv") and not f["name"].startswith("front")}
+                self.assertEqual(got, {"stage02_m2_wv": "SC.bin", "stage02_m3_wv": "SC.bin", "stage02_m6_wv": "SC.bin", "stage02_m10_wv": "S.bin"})
         finally:
             if old is None:
                 sys.modules.pop("rounds_variants", None)
