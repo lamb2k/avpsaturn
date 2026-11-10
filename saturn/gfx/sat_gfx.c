@@ -1090,6 +1090,9 @@ static const u8 *palette_page(const u8 *base, u16 mask, int page)
 
 /* What the chips already show: a layer whose words and position are unchanged does no lookups, so its cache sees no upload and can't lose a slot. */
 static u32 drawn_pal[SAT_GFX_PAGES], drawn_s1, drawn_s2, drawn_s3;
+#ifdef SAT_S1_EVERY
+static u8 s1_age;   /* pictures since scroll 1 was last drawn */
+#endif
 static int drawn_valid;
 /* Master side: counts pack swaps; each snapshot carries it to the drawing side (snap.pad). */
 #if SAT_GFX_RANKFIX
@@ -2883,7 +2886,14 @@ void sat_gfx_draw(void)
     if (layers & 2)
     {
         bgon |= 4;
+#ifdef SAT_S1_EVERY
+        /* Approximation (lane perf-reconcile 11-10, default off): while a stage is played (hud_flush) the scroll 1 layer (HUD text, banners) is redrawn at most every
+           SAT_S1_EVERY pictures. A changed HUD word shows up to SAT_S1_EVERY - 1 pictures late (33 ms at 2); the sprites and the other layers are never held back. */
+        s1_age++;
+        if (!drawn_valid || (snap.s1_sum != drawn_s1 && (!snap.hud_flush || s1_age >= SAT_S1_EVERY))) { draw_scroll1(s1x, s1y); drawn_s1 = snap.s1_sum; s1_age = 0; }
+#else
         if (!drawn_valid || snap.s1_sum != drawn_s1) { draw_scroll1(s1x, s1y); drawn_s1 = snap.s1_sum; }
+#endif
         HUD_POLL();
         PSTAGE(9);
     }
