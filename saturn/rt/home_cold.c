@@ -5,7 +5,7 @@ extern u32 sat_pad_raw;
 extern u32 sat_vblanks_now(void);
 extern void sat_home_set(int block_off, int value);
 extern int sat_home_get(int block_off);
-extern volatile int sat_home_hold, sat_home_mode;
+extern volatile int sat_home_hold, sat_home_mode, sat_home_freeze, sat_home_snapcmd;
 extern volatile u32 sat_home_screen, sat_home_cursor, sat_duel_on;
 extern char sat_home_text[28][44];
 extern u32 sat_home_inject, sat_home_prev;
@@ -302,34 +302,39 @@ static void buttons(void)
 #define STAGES 18
 static const u8 stage_round[STAGES] = { 0, 0, 1, 1, 2, 3, 3, 4, 5, 5, 5, 5, 5, 6, 6, 6, 6, 6 };
 static const char *const boss_name[7] = { "CHRYSALIS", "RAZOR CLAWS", "ARACHNOID", "ALIEN QUEEN", "POWER LOADER", "MAD PREDATOR", "ALIEN QUEEN" };
-/* st 1 to 18: b gets "n-m"; tag and name are the second row, or 0. */
-static void stage_label(int st, char *b, const char **tag, const char **name)
+/* st 1 to 18: b gets "n-m", the second row is tag and name (name may be nb, "m OF k"). */
+static void stage_label(int st, char *b, char *nb, const char **tag, const char **name)
 {
-    int r = stage_round[st - 1], m = 1, i, boss = st == STAGES || stage_round[st] != r;
+    int r = stage_round[st - 1], m = 1, k, i, boss = st == STAGES || stage_round[st] != r;
     for (i = st - 1; i > 0 && stage_round[i - 1] == r; i--) m++;
+    for (k = m, i = st; i < STAGES && stage_round[i] == r; i++) k++;
     b[0] = (char)('1' + r); b[1] = '-'; b[2] = (char)('0' + m); b[3] = 0;
-    *tag = boss ? "BOSS" : st == 10 ? "BONUS" : 0;
-    *name = boss ? boss_name[r] : st == 10 ? "SPECIAL STAGE" : 0;
+    nb[0] = (char)('0' + m); nb[1] = ' '; nb[2] = 'O'; nb[3] = 'F'; nb[4] = ' '; nb[5] = (char)('0' + k); nb[6] = 0;
+    *tag = boss ? "BOSS" : st == 10 ? "BONUS" : "AREA";
+    *name = boss ? boss_name[r] : st == 10 ? "SPECIAL STAGE" : nb;
 }
+/* The rows sit under the title logo (rows 0 to 18), like the other option screens' header over it; the game's own start lines at rows 19 and down are hidden in mode 4. */
+#define SROW(i) (20 + 2 * (i))
 static int stage_select(void)
 {
     static int st = 1;
     sat_home_screen = 7;
     prev = sat_pad_raw & 0xffff;
+    sat_home_mode = 4;
+    sat_home_freeze = 1; sat_home_snapcmd = 2;   /* the title picture saved when the menu closed (sat_gfx.c), held while this screen is up: the game itself stays held and untouched */
     for (;;) {
-        char b[8];
+        char b[8], nb[8];
         const char *tag, *name;
         u32 e;
-        sub("STAGE SELECT MODE");
-        sat_home_mode = 2;             /* black: the select's own picture is what the held game shows */
-        label(ROW(0), "STAGE", 0);
+        sub("STAGE SELECT MODE");      /* mode 4: the title art behind, as the option screens */
+        label(SROW(0), "STAGE", 0);
         if (st > STAGES) {
-            value(ROW(0), "ENDING", 1);
-            centre(ROW(3), "THE LAST BOSS IS CLEARED FOR YOU", 0);
+            value(SROW(0), "ENDING", 1);
+            centre(SROW(1), "THE LAST BOSS IS CLEARED FOR YOU", 0);
         } else {
-            stage_label(st, b, &tag, &name);
-            value(ROW(0), b, 1);
-            if (tag) { label(ROW(1), tag, 0); value(ROW(1), name, 0); }
+            stage_label(st, b, nb, &tag, &name);
+            value(SROW(0), b, 1);
+            label(SROW(1), tag, 0); value(SROW(1), name, 0);
         }
         centre(FOOT, "PRESS START BUTTON TO PLAY", 0);
         sat_home_cursor = (u32)st;
@@ -342,6 +347,7 @@ static int stage_select(void)
             sat_home_ending = 0;
             if (st > STAGES) sat_home_arm_ending();   /* before the stage file loads */
             sat_home_warp = (u32)w;
+            sat_home_freeze = 0;                       /* the next snapshot is the game's again */
             return w;
         }
     }
@@ -529,7 +535,7 @@ void sat_home_menu(void)
         p = pick >= 1 ? pick + DUEL_SHIFT : pick;
         sat_home_warp = 0; sat_home_rush = 0; sat_home_ending = 0; stage_after = 0;
         if (p == 4) options();
-        else if (p == 3) { stage_after = 1; pick = 0; break; }   /* the stage is asked for after the character select (sat_home_flow) */
+        else if (p == 3) { stage_after = 1; sat_home_snapcmd = 1; pick = 0; break; }   /* the next snapshot call saves the title's picture for the stage select (sat_gfx.c) */   /* the stage is asked for after the character select (sat_home_flow) */
 #ifdef SAT_DUEL_MENU
         else if (p == 1) { if (duel_setup()) break; }   /* VERSUS MODE: duel rules, then the game's select */
 #endif

@@ -1125,6 +1125,8 @@ extern char sat_home_text[28][44];
 #ifndef SAT_HOME_RATIO
 #define SAT_HOME_RATIO 11   /* logo kept at about 0.45 of its brightness, as MSHvSF OPTION MODE keeps its own (0.47); measured from stills at 2, 5, 8 (lane-home overlay/dark_sheet.png) */
 #endif
+extern volatile int sat_home_freeze, sat_home_snapcmd;   /* home.c: stage select's held title picture, see sat_gfx_snapshot_begin */
+#define SAT_HOME_STASH 0x02760000UL
 volatile unsigned short sat_home_ratio = SAT_HOME_RATIO; /* panel colour calculation ratio (CCRNB NBG3), 0 to 31 */
 static const u8 home_font[58 * 32] __attribute__((aligned(4))) = {
 #include "home_font.inc"
@@ -2103,6 +2105,21 @@ void sat_gfx_snapshot_begin(void)
     int page, count = 0;
     VP(unsigned int vp_snapshot_start = (unsigned int)GFX_TICKS();)
     UNC32(snap_layers_ready) = 0;
+#ifdef SAT_HOME
+    /* Stage select over the title art (home_cold.c). The game is held at its character select, whose picture is not the title's, so the title's snapshot is kept: sat_home_snapcmd 1
+       saves it (the one before this vblank's, taken when the title menu closes), 2 puts it back; while sat_home_freeze is set the snapshot stays as it is and only the sprites go
+       (the logo's "vs." would sit on the rows). The slave is idle here, as for any snapshot; the sums differ from what the chips show, so it redraws every layer and palette page.
+       Kept at the cart's pack room 0x2760000 on, which the front file's pack (ends 0x274b000) leaves free while the menus run. */
+    if (sat_home_snapcmd)
+    {
+        u32 *c = (u32 *)SAT_HOME_STASH, *p = (u32 *)(void *)&snap, n;
+        u32 w1 = (u32)__builtin_offsetof(Snapshot, obj) / 4, w2a = (u32)__builtin_offsetof(Snapshot, pal_sum) / 4, w2 = sizeof(Snapshot) / 4;
+        if (sat_home_snapcmd == 1) { for (n = 0; n < w1; n++) c[n] = p[n]; for (n = w2a; n < w2; n++) c[n - w2a + w1] = p[n]; }
+        else { for (n = 0; n < w1; n++) p[n] = c[n]; for (n = w2a; n < w2; n++) p[n] = c[n - w2a + w1]; }
+        sat_home_snapcmd = 0;
+    }
+    if (sat_home_freeze) { snap.home = (u16)sat_home_mode; snap.objects = 0; return; }
+#endif
 
     VP(snap.profile_vblank = (unsigned int)sat_vblanks_now();
        snap.profile_stage_chars = (unsigned int)RAM16(0xff81e8UL) |
@@ -2286,6 +2303,9 @@ void sat_gfx_snapshot_layers(void)
     u16 layers = RAM16(SH_LAYERS);
     u32 x0, y0;
     VP(unsigned int vp_layers_start = (unsigned int)GFX_TICKS();)
+#ifdef SAT_HOME
+    if (sat_home_freeze) { SNAP_BARRIER(); UNC32(snap_layers_ready) = 1; return; }
+#endif
     if (layers & 2)
     {
 #if SAT_GFX_FIT

@@ -8,6 +8,7 @@ extern void sat_home_set(int block_off, int value);
 extern int sat_home_get(int block_off);
 extern void sat_home_restart(void);
 volatile int sat_home_hold;
+volatile int sat_home_freeze, sat_home_snapcmd;   /* stage select over the title art: hold the picture, save/restore the title's snapshot (sat_gfx.c) */
 volatile int sat_home_mode;            /* 0 off, 1 text over the held picture, 2 text alone, 3 title menus (1 with the title's start lines hidden) */
 char sat_home_text[28][44];
 /* What the slave draws: a copy taken in sat_home_frame, after the screen is built and away from the vblank the slave draws in (the menu loops rebuild

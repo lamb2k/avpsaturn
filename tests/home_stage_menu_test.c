@@ -22,14 +22,14 @@ int main(void)
 {
     /* The game's own tables: round of each stage word (0xcca0, word 02 to 24), boss names (0xac6c8). */
     static const char *const want[STAGES] = { "1-1", "1-2", "2-1", "2-2", "3-1", "4-1", "4-2", "5-1", "6-1", "6-2", "6-3", "6-4", "6-5", "7-1", "7-2", "7-3", "7-4", "7-5" };
-    static const char *const row2[STAGES] = { 0, "CHRYSALIS", 0, "RAZOR CLAWS", "ARACHNOID", 0, "ALIEN QUEEN", "POWER LOADER", 0, "SPECIAL STAGE", 0, 0, "MAD PREDATOR", 0, 0, 0, 0, "ALIEN QUEEN" };
+    static const char *const row2[STAGES] = { "1 OF 2", "CHRYSALIS", "1 OF 2", "RAZOR CLAWS", "ARACHNOID", "1 OF 2", "ALIEN QUEEN", "POWER LOADER", "1 OF 5", "SPECIAL STAGE", "3 OF 5", "4 OF 5", "MAD PREDATOR", "1 OF 5", "2 OF 5", "3 OF 5", "4 OF 5", "ALIEN QUEEN" };
     int st, i;
     for (st = 1; st <= STAGES; st++) {
-        char b[8];
+        char b[8], nb[8];
         const char *tag, *name;
-        stage_label(st, b, &tag, &name);
+        stage_label(st, b, nb, &tag, &name);
         CHECK(!strcmp(b, want[st - 1]), "stage %d is %s, want %s", st, b, want[st - 1]);
-        CHECK((name == 0) == (row2[st - 1] == 0) && (!name || !strcmp(name, row2[st - 1])), "row 2 of stage %d", st);
+        CHECK(name && !strcmp(name, row2[st - 1]), "row 2 of stage %d is %s", st, name ? name : "none");
         CHECK(strlen(b) == 3 && (!name || strlen(name) <= 13), "fits");
     }
     /* Round numbers climb by at most one and end at 7: the seven STAGEs. */
