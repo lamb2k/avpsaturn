@@ -15,6 +15,8 @@ for fn in files:
     i = b.find(b"SGP1")
     if i < 0:
         i = b.find(b"SGP2")
+    if i < 0:
+        i = b.find(b"SGP3")
     h = struct.unpack_from(">13I", b, i)
     n, ko = h[4], h[5]
     have = {struct.unpack_from(">I", b, i + ko + j * 4)[0] >> 14 for j in range(n)}
