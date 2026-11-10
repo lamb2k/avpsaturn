@@ -226,14 +226,15 @@ HOME_OS static int txt_shift(u32 p, int w)
     return 0;
 }
 /* The writers 0xaba96 (small) and 0xabbae (big) with a column shift, same cells and attributes. */
-HOME_OS static void txt_draw(u32 p, int big, int erase, int sh)
+HOME_OS static void txt_draw(u32 p, int big, int erase, int sh, int lim)   /* lim: draw only the first record, at most lim letters; 0 all */
 {
+    int n = 0;
     for (;;)
     {
         u32 a = txt_cell((u32)((int)RD8(p) + sh), RD8(p + 1));
         u32 pal = (u16)(s16)(s8)RD8(p + 2), c;
         p += 3;
-        while ((c = RD8(p)) != 0 && c != '/')
+        while ((c = RD8(p)) != 0 && c != '/' && (!lim || n++ < lim))
         {
             p++;
             if (erase) { WR32(a, 0x200000u | (pal & 0xff)); if (big) { WR32(a + 4, 0x200000u | (pal & 0xff)); WR32(a + 128, 0x200000u | (pal & 0xff)); WR32(a + 132, 0x200000u | (pal & 0xff)); a += 256; } else a += 128; continue; }
@@ -250,7 +251,7 @@ HOME_OS static void txt_draw(u32 p, int big, int erase, int sh)
                 a += 256;
             }
         }
-        if (!c) break;
+        if (!c || lim) break;
         p++;
     }
 }
@@ -261,7 +262,7 @@ HOME_OS void f_aba96(void)
     if (idx == 0xff) return;
     sh = txt_shift(txt_msg(TXT_SMALL, idx), 1);
     if (!sh) { lifted_aba96(); return; }
-    txt_draw(txt_msg(TXT_SMALL, idx), 0, erase != 0, sh);
+    txt_draw(txt_msg(TXT_SMALL, idx), 0, erase != 0, sh, 0);
 }
 HOME_OS void f_abb0a(void)
 {
@@ -274,9 +275,15 @@ HOME_OS void f_abbae(void)
     int sh;
     if (idx == 0xff) return;
     cpu.d[0] = (cpu.d[0] & ~0xffu) | idx | erase;
+    if (idx >= 2 && idx <= 4)   /* the title's "PRESS START BUTTON" with "ONLY ONE PLAYER" or "UP TO TWO / THREE PLAYERS" under it (the game picks by credits; owner 11-10: just PRESS START):
+                                   the first 11 letters of message 2's PRESS START BUTTON record, same row, palette and font, moved from column 6 to 13 = centred on the screen's middle, nothing else */
+    {
+        txt_draw(txt_msg(TXT_BIG, 2) + 5, 1, erase != 0, 7, 11);
+        return;
+    }
     sh = txt_shift(txt_msg(TXT_BIG, idx), 2);
     if (!sh) { lifted_abbae(); return; }
-    txt_draw(txt_msg(TXT_BIG, idx), 1, erase != 0, sh);
+    txt_draw(txt_msg(TXT_BIG, idx), 1, erase != 0, sh, 0);
 }
 #endif
 
