@@ -10,15 +10,14 @@
        -DSAT_WV_HEAL_STEP=30    ticks between points once it runs (2 points a second)
        -DSAT_WV_HEAL_AMT=1      points each step
      Any drop of his health restarts the delay, whatever its cause (a hit, a grab's damage, the Berserker cost charged by the game on connect), so
-     Berserker is never free. Healing runs only on a tick where his state is 020000..020006 / 02000x with substate 0 (stand, walk, jump, attacks,
-     Berserker, special), in the running stage (route byte ff8001 = 2), not attract (ff81b0), not after the stage or boss clear (ff81f3, ff822a),
-     with health between 0 and 100. The pause menu holds the game, so no tick runs; a hit (0202), a grab (0204), getting up (0208), the dying and
-     continue states (04, 08) reset the delay. State: 4 bytes. Health is written to +0x40 and +0x42 (the HUD's latched value) as pickup_heal does,
-     so the bar simply rises.
+     Berserker is never free. Healing runs only on a tick where his state is 02 00 xx (stand, walk, jump, attacks, Berserker, special: not a hit 02 02,
+     a grab 02 04, getting up 02 08, dying or continue 04, 08), not in attract (ff81b0), not once the stage clear flag is up (ff81f3), with health
+     between 0 and 100. The pause menu holds the game, so no tick runs. State: 4 bytes. Health is written to +0x40 and +0x42 (the HUD's latched value)
+     as pickup_heal does, so the bar simply rises.
 
    -DSAT_WV_FLASH[=1|2]     Berserker super moment (needs SAT_WV_NATIVE_GFX: the events come from wolverine.c's wv_on_berserker_* hooks).
        1 (default): when the move starts; 2: at its first contact.
-       -DSAT_WV_FLASH_FREEZE=12 ticks every tag-0c enemy block (ff9a00.., stride 0x100: Ganados, aliens, bosses) stands still: the game's own hitstop byte
+       -DSAT_WV_FLASH_FREEZE=12 ticks every slot of the enemy pool (20 slots of 0xc0 bytes from ff9580: Ganados, aliens; not the boss pool) stands still: the game's own hitstop byte
                                 +0x2c, set only on blocks where it is zero, so a hit enemy's own count is never cut short or lengthened. The game's box test
                                 refuses a defender with +0x2c set, so contacts wait for the thaw; he, a partner and everything not in those pools run on.
        -DSAT_WV_FLASH_HOLD=1    also hold his own player update for the same ticks (the game's f_195ec is skipped, as the old attack hold does): the move's clock
@@ -95,7 +94,7 @@ static void wv_heal(int i)
 {
     u32 b = PL(i);
     int hp = (s16)R16(b + 0x40);
-    int ok = R8(b) && R8(b + 4) == 2 && R8(b + 5) == 0 && R8(0xff8001) == 2 && !R8(0xff81b0) && !R8(0xff81f3) && !R8(0xff822a) && hp >= 0 && hp < WV_HP_FULL;
+    int ok = R16(b + 4) == 0x0200 && !R8(0xff81b0) && !R8(0xff81f3) && (unsigned)hp < WV_HP_FULL;
     if (hp < hl_hp[i] || !ok) hl_t[i] = 0;   /* a drop of any kind restarts the delay */
     else if (++hl_t[i] >= SAT_WV_HEAL_DELAY) {
         hl_t[i] = SAT_WV_HEAL_DELAY - SAT_WV_HEAL_STEP;
@@ -104,7 +103,7 @@ static void wv_heal(int i)
         W16(b + 0x40, hp);
         W16(b + 0x42, hp);
     }
-    hl_hp[i] = (u8)(hp < 0 ? 0 : hp > 255 ? 255 : hp);
+    hl_hp[i] = (u8)hp;   /* -1 (overkill) reads as 255: the next real value counts as a drop and restarts the delay, which a dead or reviving player wants */
     wvf_log("t", i, R8(b + 4) << 16 | R8(b + 5) << 8 | R8(b + 6), hp << 8 | hl_t[i]);
 }
 #endif
@@ -141,7 +140,7 @@ static void wv_super(int who)
     u32 b;
     if (fl_done) return;
     fl_done = 1;
-    fl_left = FL_N;
+    fl_left = FL_N + 1;
     wvf_log("super", who, 0, 0);
 #if SAT_WV_FLASH_HOLD
     fz_left = (u8)(SAT_WV_FLASH_FREEZE | (who << 7));
@@ -170,16 +169,14 @@ static void wv_host_events(int i)
     else if (hs_on) { hs_on = 0; wv_on_berserker_end(i); }
 }
 #endif
-static void wv_flash_vblank(void)   /* once a vblank: the colour offset (enable: every layer, offset A) follows the table, then off */
+static void wv_flash_vblank(void)   /* once a vblank: the colour offset (enable: every layer, offset A) follows the table, then one more vblank writes it off (no read of the register) */
 {
     if (fl_left) {
-        u16 v = fl_tab[FL_N - fl_left] & 0x1ff;
-        VDP2R(0x110) = 0x007f; VDP2R(0x112) = 0;
-        VDP2R(0x114) = v; VDP2R(0x116) = v; VDP2R(0x118) = v;
-        fl_left--;
-    } else if (VDP2R(0x110)) {
-        VDP2R(0x110) = 0;
-        VDP2R(0x114) = VDP2R(0x116) = VDP2R(0x118) = 0;
+        volatile u16 *r = (volatile u16 *)0x25F80110UL;   /* CLOFEN, CLOFSL, COAR, COAG, COAB */
+        int k = FL_N + 1 - fl_left--;
+        u16 v = k < FL_N ? fl_tab[k] & 0x1ff : 0;
+        r[0] = k < FL_N ? 0x007f : 0; r[1] = 0;
+        r[2] = v; r[3] = v; r[4] = v;
     }
 }
 #endif
