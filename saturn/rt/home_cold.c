@@ -505,8 +505,14 @@ void rush_result(void)
 static u8 flow;                        /* 0 off, 1 armed (waits for the game to leave attract), 2 skipping the story, 3 stage select: waiting for the select to end */
 static u8 stage_after;                 /* the title list's STAGE SELECT MODE was picked */
 static u32 flow_t;
+#ifdef SAT_WV_REVEAL
+extern void sat_reveal_poll(void);   /* guests.c: the post-credits reveal, once per walk of the dispatcher (kernel.c f_d86 -> sat_home_poll -> here) */
+#endif
 void sat_home_flow(void)
 {
+#ifdef SAT_WV_REVEAL
+    sat_reveal_poll();
+#endif
     if (!flow) return;
     if (flow == 1) {
         if (G(0xff81b0)) return;       /* still in attract: the start path is running */

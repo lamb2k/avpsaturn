@@ -21,7 +21,7 @@ REPO = HERE.parents[1]
 # -DSAT_UNLOCK_DEBUG adds a REVEAL SEEN row to OPTION MODE (clear it and the next ending switches him on again). -DSAT_WOLVERINE_UNLOCKED no longer means anything (nothing is locked).
 # REVEAL=0 builds without it. The voice (REVEAL_VOICE, or GUEST_ASSETS/reveal_voice.bin) is ROM-derived and stays out of git: without it the reveal is silent.
 REVEAL_ART = REPO / "art/wolverine-reveal/reveal.bin"
-if "SAT_GUESTS" in os.environ.get("KERNEL_CFLAGS", "") and REVEAL_ART.exists() and os.environ.get("REVEAL", "1") != "0":
+if "SAT_GUESTS" in os.environ.get("KERNEL_CFLAGS", "") and "SAT_HOME" in os.environ.get("KERNEL_CFLAGS", "") and REVEAL_ART.exists() and os.environ.get("REVEAL", "1") != "0":
     os.environ["KERNEL_CFLAGS"] += " -DSAT_WV_REVEAL"
 WORK = pathlib.Path(sys.argv[1] if len(sys.argv) > 1 else "E:/AvP/learning/lane-satrt")
 JO = pathlib.Path(os.environ.get("JO", "E:/AvP/worktrees/saturn-hw/.deps/joengine"))
@@ -489,10 +489,11 @@ def main():
     if home:
         own += [cc(HERE / "home.c", OBJ / "home.o", ["-Os"] + os.environ.get("KERNEL_CFLAGS", "").split())]
     home_cold_extra = []   # guest code and tables run from the cart tail with the cold home code (high RAM is full)
+    reveal_obj = None
+    if "SAT_WV_REVEAL" in os.environ.get("KERNEL_CFLAGS", ""):   # the post-credits reveal is an overlay on the disc (REVCODE.BIN, linked after sat.elf below), not resident code: the cart step and high RAM stay as they were
+        reveal_obj = cc(HERE / "reveal.c", OBJ / "reveal.o", ["-Os", "-I", gfx_dir, "-I", GEN] + os.environ.get("KERNEL_CFLAGS", "").split())
     if "SAT_GUESTS" in os.environ.get("KERNEL_CFLAGS", ""):   # bonus characters; builds without the flag are unchanged
         home_cold_extra.append(cc(HERE / "guests.c", OBJ / "guests.o", ["-Os", "-I", GEN] + os.environ.get("KERNEL_CFLAGS", "").split()))
-        if "SAT_WV_REVEAL" in os.environ.get("KERNEL_CFLAGS", ""):   # the post-credits reveal runs from the cart tail with the other cold code
-            home_cold_extra.append(cc(HERE / "reveal.c", OBJ / "reveal.o", ["-Os", "-I", gfx_dir, "-I", GEN] + os.environ.get("KERNEL_CFLAGS", "").split()))
         if os.environ.get("GUEST_ASSETS"):   # Wolverine's tables come from the user's ROM set at build time; his code runs from the cart
             if NATIVE_GFX:   # his native animation block, from his program ROM (a MAME dump, tools/wolverine/mshvsf_dump.lua) and the guest assets
                 sh([sys.executable, REPO / "tools/wolverine/gen_native.py", WORK, os.environ["GUEST_ASSETS"], os.environ.get("WV_MSHVSF", "E:/AvP/learning/lane-wv-native-gfx/mshvsf"), GEN / "wv_native.inc"])
@@ -620,6 +621,13 @@ SECTIONS {{
     sh([OBJCOPY, "-O", "binary", "-j", ".lw", elf, ISO / "LW.BIN"])
     syms = {p[2]: int(p[0], 16) for p in (l.split() for l in sh([NM, elf]).splitlines()) if len(p) == 3}
     shutil.copy(WORK / "opx.bin", ISO / "OPX.BIN")
+    if reveal_obj:   # the reveal's code: linked at 0x02750000 against the finished sat.elf (its symbols only), read from the disc at the ending (reveal.c, guests.c sat_reveal_poll)
+        ov = WORK / "reveal_ov.elf"
+        sh([GCC, "-m2", "-mb", "-nostdlib", "-T", HERE / "reveal_ov.ld", reveal_obj, f"-Wl,--just-symbols={elf}", "-o", ov])
+        sh([OBJCOPY, "-O", "binary", "-j", ".ov", ov, ISO / "REVCODE.BIN"])
+        if not 16 <= (ISO / "REVCODE.BIN").stat().st_size <= 0x4000:   # the art buffer starts at 0x02754000
+            raise SystemExit("NO-GO: REVCODE.BIN is %d bytes (room 16 KB below the art buffer)" % (ISO / "REVCODE.BIN").stat().st_size)
+        print("reveal: code", (ISO / "REVCODE.BIN").stat().st_size, "bytes (overlay at 0x02750000)", flush=True)
     if "SAT_WV_REVEAL" in os.environ.get("KERNEL_CFLAGS", ""):   # the reveal's art (the owner's, in git) and its voice (ROM-derived, never in git)
         shutil.copy(REVEAL_ART, ISO / "REVEAL.BIN")
         voice = pathlib.Path(os.environ.get("REVEAL_VOICE") or (pathlib.Path(os.environ.get("GUEST_ASSETS", ".")) / "reveal_voice.bin"))
@@ -715,7 +723,7 @@ SECTIONS {{
         print(sh([sys.executable, REPO / "tools/sector_store.py", ISO, "--keep", WORK / "rounds"]).strip())
     else:
         (ISO / "STORE.BIN").unlink(missing_ok=True)
-    sh([GCC, "-m2", "-mb", "-O2", "-w", "-fno-builtin", "-I", SGL / "INC", f"-DCOLD1_ADDR={cold1_at:#x}u"] + (["-DSECTOR_STORE"] if store else []) + (["-DSTORE_HEAD2"] if head_sectors == 2 else []) + (["-DSAT_WV_REVEAL"] if "SAT_WV_REVEAL" in os.environ.get("KERNEL_CFLAGS", "") else []) + [ "-c", HERE / "boot.c", "-o", b])
+    sh([GCC, "-m2", "-mb", "-O2", "-w", "-fno-builtin", "-I", SGL / "INC", f"-DCOLD1_ADDR={cold1_at:#x}u"] + (["-DSECTOR_STORE"] if store else []) + (["-DSTORE_HEAD2"] if head_sectors == 2 else []) + (["-DSAT_WV_REVEAL"] + ([f"-DGUEST_SEL_ADDR={syms['_sat_guest_sel']:#x}u"] if "_sat_guest_sel" in syms else []) if "SAT_WV_REVEAL" in os.environ.get("KERNEL_CFLAGS", "") else []) + [ "-c", HERE / "boot.c", "-o", b])
     lib = SGL / "LIB_ELF"
     sh([GCC, "-m2", "-mb", "-nostartfiles", "-T", HERE / "boot.ld", b, "-Wl,--start-group", lib / "SEGA_SYS.A", lib / "LIBCD.A", lib / "LIBSGL.A", "-lgcc", "-lc", "-Wl,--end-group",
         "-o", WORK / "boot.elf", f"-Wl,-Map={WORK / 'boot.map'},-e,_main"])

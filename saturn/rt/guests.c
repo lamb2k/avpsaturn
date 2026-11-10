@@ -10,35 +10,63 @@ const int sat_guest_row_n = 4;
 #ifndef SAT_GUEST_DEFAULT
 #define SAT_GUEST_DEFAULT 0   /* OFF; a test build may start with a guest on (-DSAT_GUEST_DEFAULT=1) */
 #endif
+#ifdef SAT_WV_REVEAL   /* initialised data even when the default is 0 (it would be bss, which the kernel clears at start): boot.c writes a saved setting over it in the cart data */
+unsigned char sat_guest_sel __attribute__((section(".data"))) = SAT_GUEST_DEFAULT;
+#else
 unsigned char sat_guest_sel = SAT_GUEST_DEFAULT;
+#endif
 
 #ifdef SAT_WV_REVEAL
 /* The bonus-character setting and the post-credits reveal (reveal.c). The player's choice in OPTION MODE is saved in backup RAM (boot.c reads the record at power-on into the loader's flags
    word, unlock_save.h has the format): bit 0 the reveal has already played once and switched Wolverine on, bit 8 a setting is saved, bits 9 and 10 that setting (sat_guest_sel's guest bits).
-   A saved setting replaces the build's default at the first use; the player's own choice wins from then on. The first time the reveal plays, Wolverine is switched on if he is off, and
+   boot.c writes a saved setting over sat_guest_sel's initial value (the cart data is loaded by then), so it replaces the build's default from power-on; the player's own choice wins from then on. The first time the reveal plays, Wolverine is switched on if he is off, and
    that is saved; later endings leave the setting alone. Losing never plays the reveal. */
 #define UNLOCK_FLAGS (*(volatile unsigned long *)0x06013fdcu)
-extern long sat_reveal_call(int which, unsigned a, unsigned b, unsigned c);
 #define SAVE_SCRATCH 0x02754000u   /* the cart's pack room, free in a menu and in the ending (reveal.c) */
-static unsigned char saved_pending = 1;   /* initialised data: this code's bss is not cleared */
-static void saved_apply(void)
+/* The loader runs a function of its own with the game stopped and the slave idle, as a round load does (boot.c reveal_io): which 1 load_file(name, dest), 2 unlock_io(op, bits, scratch).
+   GFS takes the SCU mask and the vectors for itself, so they are put back after it, as kernel.c does after a round load. Cart code: the only resident part of the reveal is the vblank's flag test. */
+#define LOADER_API ((volatile unsigned long *)0x06013fd0u)
+#define UNC(v) (*(volatile unsigned long *)((unsigned long)&(v) | 0x20000000u))
+extern unsigned long gfx_done, gfx_handed;
+extern void sat_vblank_entry(void), sat_exc_illegal(void), sat_exc_slot(void), sat_exc_addr(void);
+long sat_reveal_call(int which, unsigned a, unsigned b, unsigned c)
 {
-    if (!saved_pending) return;
-    saved_pending = 0;
-    if (UNLOCK_FLAGS & 0x100u) sat_guest_sel = (unsigned char)(UNLOCK_FLAGS >> 9 & 3u);
+    long r;
+    void (**vt)(void) = (void (**)(void))0x06000000;
+    unsigned long v = 0x06000000;
+    while (UNC(gfx_done) != UNC(gfx_handed)) ;
+    __asm__ volatile ("ldc %0,sr" : : "r"(0xf0));
+    r = ((long (*)(int, unsigned, unsigned, unsigned))LOADER_API[1])(which, a, b, c);
+    *(volatile unsigned char *)0xfffffe92u = 0x11;   /* cache purge */
+    vt[4] = sat_exc_illegal; vt[6] = sat_exc_slot; vt[9] = sat_exc_addr; vt[10] = sat_exc_addr; vt[0x40] = sat_vblank_entry;
+    __asm__ volatile ("ldc %0,vbr" : : "r"(v));
+    *(volatile unsigned long *)0x25fe00a4 = 0;       /* clear pending */
+    *(volatile unsigned long *)0x25fe00a0 = 0xfffffffeu;   /* only vblank-in (kernel.c irq_enable; the reveal needs SAT_VDP1_HW_ERASE off) */
+    __asm__ volatile ("ldc %0,sr" : : "r"(0x00));
+    return r;
 }
 /* OPTION MODE changed the setting: keep it. */
 void sat_guest_save(void) { sat_reveal_call(2, 1, 0x400u | ((unsigned)(sat_guest_sel & 3) << 8), SAVE_SCRATCH); }
-/* The reveal has started: the first time, Wolverine goes on (the setting and the flag are written in one go). */
-void sat_guest_reveal_done(void)
+/* The post-credits reveal (reveal.c, an overlay on the disc as REVCODE.BIN): called each walk of the dispatcher from sat_home_flow. It plays only at the stage 0x26 card (ff8005 = 8) when it has not
+   played before and Wolverine is OFF (owner 11-10); otherwise nothing is written and the stock card follows. LOADER_DIAG[6] is its state: 0 idle, 1 to 3 a frame showing, 4 done until the ending is left. */
+#define DIAG ((volatile unsigned long *)0x06013fe0u)
+#define OV 0x02750000u
+extern unsigned char RAMB[];
+void sat_reveal_poll(void)
 {
-    if (UNLOCK_FLAGS & 1u) return;
-    sat_guest_sel |= 1;
-    sat_reveal_call(2, 1, 1u | 0x400u | ((unsigned)(sat_guest_sel & 3) << 8), SAVE_SCRATCH);
+    unsigned long st = DIAG[6];
+    const unsigned char *w = RAMB + 0x81e8, *g = RAMB + 0x8000;   /* the stage word ff81e8, the game's mode and phase ff8001 and ff8005 */
+    if (st == 0) {
+        if (w[0] || w[1] != 0x26 || g[1] != 2 || g[5] != 8 || w[-0x38]) return;
+        DIAG[6] = 4;   /* once per ending, whatever happens */
+        if ((UNLOCK_FLAGS & 1u) || (sat_guest_sel & 1)) return;
+        if (sat_reveal_call(1, (unsigned)"REVCODE.BIN", OV, 0) < 16) return;
+    } else if (st == 4) {
+        if (w[0] || w[1] != 0x26) DIAG[6] = 0;
+        return;
+    }
+    ((void (**)(void))OV)[1 + (st != 0)]();
 }
-#define SAVED_APPLY() saved_apply()
-#else
-#define SAVED_APPLY()
 #endif
 
 /* guest_file[g][row][variant]: file number, 0 = no guest file (the arcade's file is used). Generated by saturn/rt/build.py. */
@@ -47,7 +75,6 @@ void sat_guest_reveal_done(void)
 int sat_guest_slots(void)
 {
     int i, m = 0;
-    SAVED_APPLY();
     for (i = 0; i < sat_guest_count; i++) if (sat_guest_sel & sat_guests[i].sel_bit) m |= sat_guests[i].slot_mask;
     return m;
 }
@@ -55,7 +82,6 @@ int sat_guest_slots(void)
 int sat_guest_file(int row, int chars, int variant, int arcade_file)
 {
     int i, f;
-    SAVED_APPLY();
     for (i = 0; i < sat_guest_count && i < GUEST_ROWS; i++) {
         /* A stage file needs the guest's slot in play; the front end (row 0) holds the select screen and the ranking, which show
            every slot, so a guest with art for them has a front file of its own. */

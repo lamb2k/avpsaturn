@@ -130,3 +130,26 @@ Owner: "The shared ending is fine for now, just the reveal shouldn't occur if he
 - Gates on w11 (build rc 0; the full build n4 took 2930 s, the quick rebuild with the final reveal.c and the uncut voice 124 s): fit.py with the D11 copy gate True, 76/76, 0 failed; check_screen_keys, check_caption_keys (323 files, 0 short) and check_round_pages (210 files) PASS;
   unittest 137 ran, 30 known errors, 1 skipped, no failures; hw_free 288, lw_free 80, cart_free 7,920 (7,964 in the build before the final reveal.c); `cart_pack_room` 1,626,112 against 1,630,208 in the native-only build, one 4 KB step
   (32 tiles) lower after merging avp/integration; flag-off objects are unchanged by this update (reveal.c and the loader code are only built under -DSAT_WV_REVEAL).
+
+## Update 11-10 (night): the reveal's resident cost cut to a flag test (owner: performance first; integration measured hw_free 520 to 248, lw -4, one 4 KB cart step)
+
+Integration's measure of the first design (reveal as cart cold code plus `sat_reveal_takeover` and `sat_reveal_call` in kernel.c): hw_free 520 to 248 (-272), lw_free 84 to 80, cart_free 4556 to 7132 (a 4 KB step crossed, 1,520 bytes of cold code).
+- Overlay. `reveal.c` is no longer linked into the program. build.py links it at 0x02750000 (SAT_PACK + 0xFC000: the pack room past stage 26's and the front end's tile packs, below the art buffer at 0x02754000) against the finished sat.elf
+  (`ld --just-symbols`, `reveal_ov.ld`) and writes it to the disc as `REVCODE.BIN` (1,272 bytes, built with the art and voice, 16 KB at most, checked). The ending reads it with the art and nothing of it stays.
+  Its head is a table: magic 'RVC1', begin, step.
+- Resident in high RAM: only the vblank's test of the takeover flag (`kernel.c`, 12 bytes of code: .text +20, .bss -8 in kernel.o, because `gfx_handed` and `gfx_done` became global in a reveal build so the overlay can wait on the slave).
+  Hw cost against the build without the reveal: about 12 bytes (hw_free 536 on this head; 520 before the reveal).
+- Cart cold code (guests.c): `sat_reveal_call` (144 bytes: the loader call with the slave idle, then exceptions, vblank vector and the SCU mask put back), `sat_reveal_poll` (168: the stage, mode and phase test, the seen-flag and Wolverine-off test, the load of REVCODE.BIN,
+  the call into the overlay) and `sat_guest_save` (40), plus 8 bytes in `sat_home_flow` which calls the poll: about 360 bytes against 1,520 before. The poll is called from `sat_home_flow` (home_cold.c, called by `sat_home_poll` each walk), so the dispatcher's loop has no reveal call any more.
+- The saved BONUS CHARACTERS setting is applied by boot.c at power-on: it writes the setting over `sat_guest_sel` in the cart data (`-DGUEST_SEL_ADDR`, from the finished sat.elf). That removed `saved_apply` and its two inlined calls (about 110 bytes of cold code).
+  `sat_guest_sel` is now initialised data in a reveal build (`.data`, section attribute): at default 0 it was bss, which the kernel clears at start, so boot's write was lost on the first try (a Yaba run showed flags 0x80000301 and `sat_guest_sel` 0 at power-on) and the
+  4 bytes of lw_free it cost came back (lw_free 84).
+- Loader (boot.c, resident in the loader's own area 0x06004000 to 0x06010000, outside hw_free, lw_free and the cart): one entry `reveal_io` in `LOADER_API[1]` replaces the two entries; the backup RAM read at power-on (`unlock_io`) stays there because it runs before anything of the program does.
+  The loader's bss ends at 0x06010000 (the check against the API words at 0x06013fe0 passes).
+- This build (w11, head a4b9757 plus this change): rc 0, hw_free 536, lw_free 84, cart_free 4,956, `cold1_at` 0x27e2000, no 4 KB step crossed. Flag-off identity: kernel, guests, home_cold, home, sat_gfx and boot objects are identical to a4b9757 with the same command lines and no -DSAT_WV_REVEAL.
+- Yaba (EMULATOR, own copy port 9726, cache off, started with SW_SHOWNOACTIVATE: a minimised start never draws a frame; foreground window checked, not mine): the three ending scenarios again with this build.
+  (a) fresh file, Wolverine OFF: reveal frames 1, 2, 3 at vblanks 8546, 8623, 8707 (card at 8506); flags 0x80000000 to 0x80000301, `sat_guest_sel` 0 to 1; slot 18 TL 0, octave 0xf, LEA 28202; SCSP RAM at 0x70000 equals the file's samples.
+  (b) same file, second ending: power-on shows flags 0x80000301 and `sat_guest_sel` 1 (the saved setting, applied by boot), no reveal, stock card (look/e2e/sb_card_after_120.png), flags unchanged.
+  (c) fresh file, Wolverine ON in OPTION MODE first (flags 0x80000300): no reveal, stock card, flag unchanged (0x80000300).
+- Gates on this build: fit.py (D11 copy) gate True, 76/76, `cart_pack_room` 1,630,208 (1,626,112 with the first design: the step is back); check_screen_keys, check_caption_keys (323 files, 0 short), check_round_pages (210 files) PASS;
+  unittest 151 ran, 30 known errors, 2 skipped, no failures.

@@ -121,7 +121,7 @@ static long load_regions(const char *name, void (*mark)(void))
 }
 #endif
 #ifdef SAT_WV_REVEAL
-/* Any one file of the disc into RAM (the post-credits reveal reads its art and voice this way at the ending, kernel.c sat_reveal_call). The caller has masked interrupts and stopped the slave. Returns bytes read, or a negative stage. */
+/* Any one file of the disc into RAM (the post-credits reveal reads its code, art and voice this way at the ending, guests.c sat_reveal_call). The caller has masked interrupts and stopped the slave. Returns bytes read, or a negative stage. */
 static long load_file(const char *name, void *dest)
 {
     Sint32 id, ss, n, last, got;
@@ -182,6 +182,11 @@ static long unlock_io(unsigned op, unsigned bits, unsigned char *scratch)
     bd.blocksize = 0;
     return BUP_Write(0, &bd, rec, 0) ? -4 : 0;
 }
+/* The one entry the runtime calls (LOADER_API[1]): which 1 load_file(name, dest), else unlock_io(op, bits, scratch). */
+static long reveal_io(int which, unsigned a, unsigned b, unsigned c)
+{
+    return which == 1 ? load_file((const char *)a, (void *)b) : unlock_io(a, b, (unsigned char *)c);
+}
 #endif
 int main(void)
 {
@@ -193,8 +198,8 @@ int main(void)
     *(volatile unsigned long *)0x25fe00b8 = 0x00000013;
     *(volatile unsigned short *)0x257efffe = 1;
 #ifdef SAT_WV_REVEAL
-    LOADER_API[1] = (unsigned long)load_file;
-    LOADER_API[2] = (unsigned long)unlock_io;
+    LOADER_API[1] = (unsigned long)reveal_io;
+    LOADER_API[2] = 0;
     LOADER_API[3] = 0;
     LOADER_DIAG[5] = 0; LOADER_DIAG[6] = 0; LOADER_DIAG[7] = 0;   /* the reveal's takeover flag and state (reveal.c) */
 #endif
@@ -212,6 +217,9 @@ int main(void)
     GFS_Reset();
 #ifdef SAT_WV_REVEAL
     unlock_io(0, 0, (unsigned char *)0x02754000u);   /* the save record, once the loads are done; scratch in the cart's pack room, which the first round file fills later */
+#ifdef GUEST_SEL_ADDR   /* a saved BONUS CHARACTERS setting replaces the build default in the cart data (guests.c sat_guest_sel), so no runtime code has to apply it */
+    if (LOADER_API[3] & 0x100u) *(volatile unsigned char *)GUEST_SEL_ADDR = (unsigned char)(LOADER_API[3] >> 9 & 3u);
+#endif
 #endif
     LOADER_API[0] = (unsigned long)load_regions;
     *(volatile unsigned char *)0xfffffe92 = 0x10;

@@ -16,9 +16,8 @@ extern unsigned char sat_guest_sel;          /* 0 OFF; bits per guest (row value
 extern const char *const sat_guest_row_names[];
 extern const int sat_guest_row_n;
 #ifdef SAT_WV_REVEAL
-/* OPTION MODE changed sat_guest_sel: save it in backup RAM. The reveal has started: the first time, switch Wolverine on and save that (guests.c). */
+/* OPTION MODE changed sat_guest_sel: save it in backup RAM. The reveal (reveal.c, an overlay) switches Wolverine on and saves it the first time. */
 void sat_guest_save(void);
-void sat_guest_reveal_done(void);
 #endif
 /* Slot bits taken by an active guest. */
 int sat_guest_slots(void);

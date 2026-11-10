@@ -476,7 +476,11 @@ static void pc_start(void)
 #define SLAVE_WAKE (*(volatile u16 *)0x21000000u)
 #define SMPC(o) (*(volatile u8 *)(0x20100000u + (o)))
 extern void sat_slave_entry(void);
+#if defined(SAT_GUESTS) && defined(SAT_WV_REVEAL) && !SAT_VDP1_HW_ERASE
+u32 gfx_handed, gfx_done;   /* the reveal (cart code) waits for the slave and takes the picture over through these */
+#else
 static u32 gfx_handed, gfx_done;
+#endif
 #ifdef SAT_CPU_SLACK_PROFILE
 #define CPU_SLACK_ROW(i) ((volatile unsigned int *)((u32)&sat_cpu_slack[(i)] | 0x20000000u))
 #include "cpu_slack_profile.h"
@@ -659,30 +663,12 @@ static void round_check(void)
 }
 
 #if defined(SAT_GUESTS) && defined(SAT_WV_REVEAL) && !SAT_VDP1_HW_ERASE
-/* The post-credits reveal (reveal.c, cold code) owns the picture while LOADER_DIAG[5] is set: the vblank hands nothing to the slave, so the chips are the cold code's.
-   sat_reveal_call runs a loader function with the game stopped and the slave idle, as a round load does: which 1 load_file(name, dest), 2 unlock_io(op, bits, scratch). */
+/* The post-credits reveal owns the picture while LOADER_DIAG[5] is set: the vblank hands nothing to the slave, so the chips are the reveal's. This test is all of the reveal that stays in
+   resident code (owner 11-10: the high RAM cost near zero); the takeover, the loader calls and the poll are in cart code (guests.c sat_reveal_call and sat_reveal_poll, the overlay reveal.c
+   loaded from REVCODE.BIN at the ending). The poll is called from sat_home_flow (home_cold.c), after round_check as before. */
 #define REVEAL_ON (((volatile u32 *)0x06013fe0u)[5])
-void sat_reveal_takeover(int on)
-{
-    REVEAL_ON = (u32)on;
-    if (on) while (UNCACHED(gfx_done) != UNCACHED(gfx_handed)) ;
-}
-long sat_reveal_call(int which, u32 a, u32 b, u32 c)
-{
-    long r;
-    while (UNCACHED(gfx_done) != UNCACHED(gfx_handed)) ;
-    __asm__ volatile ("ldc %0,sr" : : "r"(0xf0));
-    r = which == 1 ? ((long (*)(const char *, void *))LOADER_API[1])((const char *)a, (void *)b) : ((long (*)(unsigned, unsigned, unsigned char *))LOADER_API[2])(a, b, (unsigned char *)c);
-    CCR_M = 0x11;
-    exceptions_install();
-    irq_enable();
-    return r;
-}
-extern void sat_reveal_poll(void);
-#define SAT_REVEAL_POLL() sat_reveal_poll()
 #else
 #define REVEAL_ON 0
-#define SAT_REVEAL_POLL()
 #endif
 
 /* Dispatcher 0xd86. A vblank sets the game's flag at 0xff0266 through f_e0e, which restarts the walk from task 0. */
@@ -696,7 +682,6 @@ void f_d86(void)
     for (;;) {
         int i;
         round_check();
-        SAT_REVEAL_POLL();
 #ifdef SAT_HOME
         sat_home_poll();
         sat_duel_step();
