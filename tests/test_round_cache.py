@@ -168,7 +168,7 @@ class RoundCacheTests(unittest.TestCase):
                          CART={"ROMB": 0x2400000, "SAT_PACK": 0x2654000},
                          SHARED_MIN=10, MIN_RUN=1, SCREEN_KEYS=[set()] * 4,
                          POSE_KEYS=set(), POSE_RANK=400, FUZZ_STAGE={},
-                         EDGE_KEYS=set(), CAPTION_KEYS=set(), SELECT_DIGIT_KEYS=set(),
+                         EDGE_KEYS=set(), CAPTION_KEYS=set(), SELECT_DIGIT_KEYS=set(), FONT_KEYS=set(), STORY_PAGES=set(),
                          TAIL_FILL=False, CHAR_FUZZ=None, round_cache=round_cache)
         planner = build_function("round_files", namespace)
         with patch.dict(sys.modules, {"rounds_pack": fake}), patch.dict(

@@ -49,7 +49,12 @@ def settings(environ):
                 tail_fill=environ.get("PACK_TAIL_FILL", "0") == "1")
 
 
+STORY_PAGES = set()   # load() fills it: the story caption ROM pages every file keeps (tools/story_text_pages.py)
+FONT_KEYS = set()   # load() fills it: every text font glyph (tools/font_glyph_keys.py), kept in every file as build.py does
+
+
 def load(work, environ):
+    global FONT_KEYS, STORY_PAGES
     rounds = json.loads((work / "rounds.json").read_text())
     ends = json.loads((work / "round_code_ends.json").read_text())
     if not ends or not CART_PACK <= ends[-1][0] <= CART_END or ends[-1][1] != 0:
@@ -64,6 +69,14 @@ def load(work, environ):
                 raise ValueError("screen key section outside 0..3")
             screens[section].add(int(key, 16))
     screens[0].discard(0)
+    sys.path.insert(0, str(REPO / "tools"))
+    import system_banner_keys   # the "HURRY UP!" banner and countdown tiles: kept in every stage file, as build.py does
+    if (work / "rt.bin").exists() and (work / "op.bin").exists():   # every real work dir has both; a synthetic one (tests) does not
+        screens[1] |= system_banner_keys.from_work(work)
+        import font_glyph_keys   # the text fonts' glyph tables (both banks, both column parities), every file including the front end
+        FONT_KEYS = font_glyph_keys.from_work(work) if environ.get("FONT_KEYS", "1") == "1" else set()
+        import story_text_pages   # the story captions' ROM pages stay out of every file's tile spill, as build.py does
+        STORY_PAGES = story_text_pages.from_work(work, rounds["page"]) if environ.get("STORY_PAGES", "1") == "1" else set()
     if environ.get("SCREEN_KEYS_REQUIRED", "1") == "1" and not screens[0]:
         raise ValueError("WORK/screen_keys.txt missing or empty (SCREEN_KEYS_REQUIRED=0 to omit)")
     rank_file = work / "key_rank.json"
@@ -132,7 +145,7 @@ def free_runs(rounds, ends, shared_min=10, min_run=1, arena_keep=None, tail_fill
             k02 &= wanted
 
     def free(f):
-        keep = set(f["keep_pages"]) | shared
+        keep = set(f["keep_pages"]) | shared | STORY_PAGES
         if k02 and set(f.get("stages", [])) & {0x0e, 0x1c, 0x1e, 0x24}:
             keep |= k02
         out, start = [], None
@@ -157,6 +170,7 @@ def run(raw, f, keys, room, free, rank, screens, guest_keys=(), fit_fn=None):
         import rounds_pack
         fit_fn = rounds_pack.fit
     keys = [set(k) for k in keys]
+    keys[1] |= FONT_KEYS
     frank = {int(key): value for key, value in rank.items()}
     if f.get("fuzz_keys") or f.get("body_keys"):   # CHAR_FUZZ_KEYS, as build.py
         import char_fuzz

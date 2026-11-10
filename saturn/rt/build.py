@@ -83,6 +83,15 @@ for l in (open(WORK / "screen_keys.txt") if (WORK / "screen_keys.txt").exists() 
     if l.strip():
         SCREEN_KEYS[int(l.split()[0])].add(int(l.split()[1], 16))
 SCREEN_KEYS[0].discard(0)
+# The arcade's rare system banners (the timed stages' "HURRY UP!" and its countdown): tools/system_banner_keys.py derives the scroll 1 keys from the
+# ROM's own tables. The census never sees them, and a stage file without them drew the second U of the banner blank.
+sys.path.insert(0, str(REPO / "tools"))
+import system_banner_keys
+SCREEN_KEYS[1] |= system_banner_keys.from_work(WORK)
+# Every text font the arcade can print (tools/font_glyph_keys.py: the ROM's glyph tables, both banks, both column parities) in every round file, front end included:
+# a glyph no census route reached drew blank. FONT_KEYS=0 builds without them (A/B).
+import font_glyph_keys
+FONT_KEYS = font_glyph_keys.from_work(WORK) if os.environ.get("FONT_KEYS", "1") == "1" else set()
 if os.environ.get("SCREEN_KEYS_REQUIRED", "1") == "1" and not SCREEN_KEYS[0]:
     raise SystemExit("WORK/screen_keys.txt missing: run tools/screen_keys.py (SCREEN_KEYS_REQUIRED=0 to build without)")
 if os.environ.get("GUEST_ASSETS"):
@@ -119,6 +128,10 @@ CAPTION_KEYS = set()
 if "SAT_HOME" in os.environ.get("KERNEL_CFLAGS", ""):
     CAPTION_KEYS = {(c << 1) | h for c in list(range(0x1260, 0x1320)) + [0x1246, 0x1247, 0x1248, 0x1249, 0x1256, 0x1257, 0x1258, 0x1259] for h in (0, 1)}
 STRETCHES = [(0x02400000 + a, n) for a, n in ROUNDS["holes"] if n >= 0x4000]
+# The story captions' ROM pages (tools/story_text_pages.py) stay intact in every round file: a caption the census let skip sat in a page the file treated as free and overwrote
+# with tile bytes (stage 14's second caption box, 17 cells of tile bytes before "ized by the aliens!"). Pages under cold lifted code cannot stay. STORY_PAGES=0 builds without.
+import story_text_pages
+STORY_PAGES = story_text_pages.from_work(WORK, ROUNDS["page"]) if os.environ.get("STORY_PAGES", "1") == "1" else set()
 
 
 def guest_plan():
@@ -282,6 +295,8 @@ def round_files(rom, code_end, cold1_at, only=None):
         for q in range((at - CART["ROMB"]) // page, (end - CART["ROMB"] + page - 1) // page):
             code[q] = 1
     plans, written = [], set()
+    if STORY_PAGES:
+        print("story caption pages kept in every round file: %d, of them under cold code (cannot stay): %s" % (len(STORY_PAGES), ", ".join("%#x" % (q * page) for q in sorted(STORY_PAGES) if code[q]) or "none"), flush=True)
     # Census gap: a mode or setting outside the census can read common tables a walk of this stage never touched. Pages most stages read stay in every stage. Costs sprites only in stages already short of room.
     base = [f for f in ROUNDS["files"] if re.fullmatch(r"stage[0-9a-f]{2}", f["name"])]
     seen = {}
@@ -303,7 +318,7 @@ def round_files(rom, code_end, cold1_at, only=None):
         if only is not None and fi not in only:
             plans.append(None)
             continue
-        keep = set(f["keep_pages"]) | shared
+        keep = set(f["keep_pages"]) | shared | STORY_PAGES
         if k02 and set(f.get("stages", [])) & {0x0e, 0x1c, 0x1e, 0x24}: keep |= k02
         free, st = [], None
         for q in range(0x200000 // page + 1):
@@ -329,6 +344,8 @@ def round_files(rom, code_end, cold1_at, only=None):
             frank.update({k: 1 << 40 for k in SCREEN_KEYS[0]})
         if f.get("gfx") and f["gfx"] not in raws:
             raws[f["gfx"]] = pathlib.Path(f["gfx"]).read_bytes()
+        if FONT_KEYS:
+            keys[1] = keys[1] | FONT_KEYS
         if EDGE_KEYS:
             keys[1] = keys[1] | EDGE_KEYS
         if CAPTION_KEYS:
