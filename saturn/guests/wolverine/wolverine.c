@@ -15,11 +15,7 @@ extern u8 RAMB[];
 /* Yaba probe, stage 02, Schaefer as player 1 (probe_sch.py): block byte +1 is the character (mask bit 1 << it, Schaefer 1); his sprites are
    palette row 1, big blocks centred about 72 px right of (+0x10 x - ff8278 camera) in object coordinates; feet at about 523 - (+0x14) with the camera's depth word ff827c at rest (0x100); ff827c follows the player's depth and scrolls
    his sprites by (ff827c - 0x100) (probe_cam.py, 11-08: before that fix Wolverine stood up to 48 px below Schaefer's body at the front of the stage). */
-#ifdef SAT_WV_NATIVE_GFX
-#define WV_CHAR_OFF 0xd2   /* the game's own character index (block +0xd2: 0 Warrior, 1 Schaefer, 2 Hunter, 3 Linn; the same byte f_1b0c4 and the state tables index by). Byte +1 reads 1 for EVERY player in co-op (Yaba 11-10, gun proof), so with +1 a Warrior or Hunter partner counted as Wolverine and lost its gun button */
-#else
-#define WV_CHAR_OFF 1
-#endif
+#define WV_CHAR_OFF 0xd2   /* the game's own character index (block +0xd2: 0 Warrior, 1 Schaefer, 2 Hunter, 3 Linn; the byte f_1b0c4 and the state tables index by, and saturn/rt/guests.c guest_draw tests). Byte +1, the earlier test, reads 1 for EVERY live player in co-op (Yaba 11-10: +1 = 1, 1 with +0xd2 = 0, 1), so with it a Warrior or Hunter partner counted as Wolverine in every build: drawn with his parts, gun bit masked, his hooks. Owner 11-10: all builds */
 #define WV_CHAR_SCH 1
 #define WV_SCH_PAL 1        /* Schaefer's sprite palette row: his sprites leave the list, Wolverine's first row takes it */
 /* Wolverine's second row (claws, highlights), per stage word: from a per-frame census of four whole-game MAME walks (tools/wolverine/pal_census.lua,
