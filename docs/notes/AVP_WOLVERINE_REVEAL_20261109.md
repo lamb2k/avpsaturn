@@ -96,3 +96,19 @@ toggle at OFF and the first ending switches him on), stand-in voice, no SAT_UNLO
 Options toggle verified on w11 with a fresh backup file: BONUS CHARACTERS shows OFF at first power-on; right gives WOLVERINE and the loader's flags word went 0x80000000 to 0x80000300 (saved setting 1) at once;
 left back to OFF gave 0x80000100 (saved setting 0). Captures: look/e2e/e1_option_off.png, e1_option_wolverine.png. The ending run (assist: Queen set to 1 hit point, health held, Start to continue) was started three
 times and had not reached the card when paused; Yaba froze mid-run each time (see report).
+
+## Update 11-10 (late): native 035d44c, restart check, scope
+
+- Build with native 035d44c merged (local WIP branch `wip/reveal-with-native-035d44c`, not pushed: lanes no longer merge each other, the integration lane does): rc 0 (2343 s), hw_free 808, lw_free 80, cart_free 4396;
+  the native lane's smaller cold code means the reveal no longer crosses the 4 KB step there (cart_pack_room 1,630,208, unchanged). fit.py D11: gate True, 76/76, 0 own dropped, 0 missing, stage24_ma 16,504 tiles vs 16,488.
+  check_screen_keys all stage files pass (front_wv is exempt), check_caption_keys 287 files 0 short, check_round_pages PASS (210 base files). unittest 111 ran, 30 known errors, 1 skipped; flag-off objects identical to 035d44c.
+- Queen death with NO memory writes (Yaba, cache off, assist = Start to continue only): no fatal; the game cleared and ran the ending. The coordinator's fatal 0xf4 at f_b2672 (a one-instruction
+  tile-address routine, code intact in the cart) came after pokes of her health block: +0x40 health, +0x42 the displayed health that chases +0x40, +0x44 a HUD value (0x138 at the start, 0x108 after hits, 0x138 again
+  near the end: it is not a constant maximum), so writing 1 to all three changes what the death path reads. The player's three words are all 0x65 (101) at full health; a write of 0x65 is the true full value.
+- End to end on Yaba (EMULATOR, cache off, fresh backup file, Warrior, Wolverine OFF, stage warp 0x24 and the fight with no pokes): at the card ff8005 = 8 the reveal loaded, Wolverine went on and was saved (flags word
+  0x80000000 to 0x80000301, `sat_guest_sel` 0 to 1), frame 1 at vblank 29,271, frame 2 at 29,356 (+85), frame 3 at 29,444 (+88), then the front end at 29,692 with the ranking scroll and the title. SCSP slot 18 at frame 3:
+  key on, PCM8, start 0x70000, 9,924 samples (stand-in clip of that build), total level 0x2a, octave 0xe. Captures (paused): look/e2e/e4_1_reveal_frame1_m8.png, frame2, frame3, e4_1_front_end.png.
+  Restart: same backup file, flags 0x80000301, sel 1; OPTION MODE shows WOLVERINE; turned OFF it saved (0x80000101) and the next power-on stayed OFF (player's choice wins); ON again (0x80000301).
+  The select screen after the restart loaded the front file with his art (round file 286, front_wv); a clean capture of it is still to take (the integration lane's STAGE SELECT > ENDING run covers the rest).
+- The "stray figure" on the Queen's body in the P.Warrior run is the game's own roast food pickup (platter with tomatoes), not Wolverine: look/e2e/bleed_a_zoom.png. That investigation belongs to the native lane.
+- Scope now: reveal frames and display, the save and auto-on, the Options toggle, the voice. The branch is pushed without the native merge; merge avp/integration (with native and stage-menu) when it has them.
