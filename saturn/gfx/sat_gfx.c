@@ -1205,6 +1205,18 @@ static HOME_OS void home_row_blank(u32 row, u32 x0, u32 *m)
     int k, c;
     const u32 *w = snap.s1 + row * S1_COLS;
     u32 fill = w[47];   /* the row's fill cell: an edge cell repeated at least 4 times (the continue screen's black band is a tile, not a blank) */
+#ifdef SAT_S1_MEMO
+    /* A row of 48 equal words is its own fill: every column is droppable (the passes below would find k = 48 twice and set every bit). Exact. */
+    for (c = 1; c < 48 && w[c] == w[0]; c++) ;
+    if (c == 48)
+    {
+        m[0] = 0xffffffffUL; m[1] = 0xffffUL;
+#ifdef SAT_HOME_DIAG
+        diag_nb[row][0] = diag_nb[row][1] = 0;
+#endif
+        return;
+    }
+#endif
     for (c = 0, k = 0; c < 48; c++) k += w[c] == w[0];
     if (k >= 4) fill = w[0];
     for (c = 0, k = 0; c < 48; c++) k += w[c] == fill;
@@ -1252,6 +1264,9 @@ static HOME_OS int home_left(const u8 *dropped, const u8 *wgt)
     }
     return w;
 }
+#ifdef SAT_S1_MEMO
+#define home_map home_map_calc
+#endif
 static HOME_OS void home_map(const u32 *m, const u8 *wgt, int hud, int box, u8 *map)
 {
     u8 dropped[48];
@@ -1311,6 +1326,69 @@ static HOME_OS void home_map(const u32 *m, const u8 *wgt, int hud, int box, u8 *
     }
     for (c = 0, n = 0; c < 48 && n < 44; c++) if (!dropped[c]) map[n++] = (u8)c;
 }
+#ifdef SAT_S1_MEMO
+#undef home_map
+/* Exact memo of home_map (lane perf-reconcile 11-10, SAT_S1_MEMO, default off). Without the story box (box = 0) the 44 source columns are a pure function of the droppable
+   mask (m[0], m[1]) and the HUD flag, and every result is the 48 columns less 4 drops (the greedy pick, the 16 pixel crop 0,1,46,47 and the flush map 22..25 alike). A
+   direct mapped table keeps those 4 drops. In play the blank rows (19 of 29) and the HUD rows repeat the same masks every picture, so the greedy pick (4 x 48 steps a row, over
+   60 percent of a scroll 1 redraw: lane perf-reconcile, Yaba cache ON, ps_0e_on) runs once per mask instead of once per row per redraw. */
+typedef struct { u32 m0; u16 m1; u8 used, hud; u8 drop[4]; } HomeMemo;
+#ifndef HOME_MEMO_N
+#define HOME_MEMO_N 8
+#endif
+static HomeMemo home_memo[HOME_MEMO_N];
+#ifdef SAT_PERF_STAGES
+u8 sat_s1_memo_off, sat_s1_memo_verify;   /* debugger switches in measurement builds: off = always compute; verify = compute on a hit and count a difference */
+u32 sat_s1m[4];                            /* hits, misses, verify differences, calls with box */
+#endif
+static HOME_OS void home_map(const u32 *m, const u8 *wgt, int hud, int box, u8 *map)
+{
+    HomeMemo *e;
+    u32 m0 = m[0], m1 = m[1] & 0xffffUL;
+    int c, n, k;
+    if (box
+#ifdef SAT_PERF_STAGES
+        || sat_s1_memo_off
+#endif
+       )
+    {
+#ifdef SAT_PERF_STAGES
+        sat_s1m[3]++;
+#endif
+        home_map_calc(m, wgt, hud, box, map);
+        return;
+    }
+    e = &home_memo[(m0 ^ (m0 >> 7) ^ (m1 * 13u) ^ (u32)hud) & (HOME_MEMO_N - 1)];
+    if (e->used && e->m0 == m0 && e->m1 == m1 && e->hud == (u8)hud)
+    {
+        for (c = 0, n = 0, k = 0; c < 48 && n < 44; c++)
+        {
+            if (k < 4 && c == e->drop[k]) { k++; continue; }
+            map[n++] = (u8)c;
+        }
+#ifdef SAT_PERF_STAGES
+        sat_s1m[0]++;
+        if (sat_s1_memo_verify)
+        {
+            u8 chk[44];
+            home_map_calc(m, wgt, hud, 0, chk);
+            for (c = 0; c < 44; c++) if (chk[c] != map[c]) { sat_s1m[2]++; break; }
+        }
+#endif
+        return;
+    }
+    home_map_calc(m, wgt, hud, 0, map);
+#ifdef SAT_PERF_STAGES
+    sat_s1m[1]++;
+#endif
+    for (c = 0, n = 0, k = 0; c < 48; c++)
+    {
+        if (n < 44 && map[n] == c) n++;
+        else if (k < 4) e->drop[k++] = (u8)c;
+    }
+    e->m0 = m0; e->m1 = (u16)m1; e->hud = (u8)hud; e->used = 1;
+}
+#endif
 /* One map per block of rows: rows that hold anything (not all droppable) and touch each other share the columns all of them can drop, so
    a 16 pixel letter's top and bottom halves, and a banner's rows, stay together (owner 11-08: the select screen's names broke apart). */
 static HOME_OS int home_maps_rows(u32 x0, u32 (*bm)[2])
@@ -1344,12 +1422,22 @@ static HOME_OS void home_row_map(u32 row, u32 (*bm)[2], int sel, u8 *map)
         return;
     }
     m[0] = bm[row][0]; m[1] = bm[row][1];
+#ifndef SAT_S1_MEMO
     for (c = 0; c < 48; c++) wgt[c] = 0;
+#endif
     if (!full)
     {
         while (a > 0 && !(bm[a - 1][0] == 0xffffffffUL && bm[a - 1][1] == 0xffffUL)) { a--; m[0] &= bm[a][0]; m[1] &= bm[a][1]; }
         while (b + 1 < S1_ROWS && !(bm[b + 1][0] == 0xffffffffUL && bm[b + 1][1] == 0xffffUL)) { b++; m[0] &= bm[b][0]; m[1] &= bm[b][1]; }
+#ifdef SAT_S1_MEMO
+        if (snap.hud_flush && a == 8 && (b == 10 || b == 11))   /* the weights are read only for the story box */
+        {
+            for (c = 0; c < 48; c++) wgt[c] = 0;
+            for (q = a; q <= b; q++) for (c = 0; c < 48; c++) wgt[c] = (u8)(wgt[c] + !BL(bm[q], c));
+        }
+#else
         for (q = a; q <= b; q++) for (c = 0; c < 48; c++) wgt[c] = (u8)(wgt[c] + !BL(bm[q], c));
+#endif
     }
     home_map(m, wgt, snap.hud_flush && (row < 6 || row >= 25), snap.hud_flush && !full && a == 8 && (b == 10 || b == 11), map);
 }
