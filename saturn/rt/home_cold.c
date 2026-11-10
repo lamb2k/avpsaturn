@@ -323,6 +323,9 @@ extern DuelOpt sat_duel_opt;
    ROM pages the stage's own walk never reads, and the duel reads some of them (with ROUND_SHARED_MIN=1 the 1c fight drew clean, s92.log).
    They come back once the duel has round files that keep those pages. */
 static const u8 arenas[] = { 0x02 };
+#ifdef DUEL_ARENA_TEST
+volatile u8 sat_duel_test_stage;   /* test builds: the bot pokes a stage word here at the duel menu; START then warps to it (tools: play_versus.py) */
+#endif
 static int duel_setup(void)
 {
     static const char *const labels[] = { "STOCKS", "TIME", "ALIENS" };   /* no ARENA row: the duel is stage 02 only (owner 11-08) */
@@ -353,8 +356,8 @@ static int duel_setup(void)
             if (e & (P_START | P_A | P_C)) {
                 sat_home_warp = sat_duel_opt.arena ? arenas[sat_vblanks_now() % sizeof arenas] : 0;
                 if (sat_home_warp == 2) sat_home_warp = 0;
-#ifdef DUEL_ARENA_TEST   /* test build only: RANDOM always picks this stage */
-                if (sat_duel_opt.arena) sat_home_warp = DUEL_ARENA_TEST;
+#ifdef DUEL_ARENA_TEST   /* test build only: a poked stage word is the arena */
+                if (sat_duel_test_stage) sat_home_warp = sat_duel_test_stage;
 #endif
                 return 1;
             }

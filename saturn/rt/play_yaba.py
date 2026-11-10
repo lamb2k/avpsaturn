@@ -195,6 +195,8 @@ def main():
             wins = windows_of(proc.pid)
         print("windows", wins, flush=True)
         hwnd = max(wins, key=lambda w: w[2] * w[3])[0]
+        if os.environ.get("YABA_TITLE"):   # label the window with its use (lanes share the desktop)
+            u32.SetWindowTextW(hwnd, os.environ["YABA_TITLE"])
         if os.environ.get("YABA_LOAD"):   # one fresh process per leg, as docs/EMULATOR_MCP_CAPTURE.md says
             time.sleep(3)
             m.call("pause")

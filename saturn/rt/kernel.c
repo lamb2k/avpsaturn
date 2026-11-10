@@ -572,9 +572,13 @@ static void load_round(int file)
     if (got < 0) sat_fatal(0xed, (u32)-got);
     sat_rounds.sectors = (u32)got;
 }
+#ifdef SAT_DUEL_MENU
+extern volatile u32 sat_duel_on;
+volatile u8 sat_duel_plain;   /* test hook (play_versus.py PLAIN=1), 0 in play: 1 = a duel runs the stage's plain file, for a before and after on one disc */
+#endif
 static void round_check(void)
 {
-    int row = stage_row[(r8(0xff81b0) || r8(0xff8001) != 2) ? 0 : r16(0xff81e8) & 0xff], want;
+    int row = stage_row[(r8(0xff81b0) || r8(0xff8001) != 2) ? 0 : r16(0xff81e8) & 0xff], want, want0;
     static u32 settled;
     static int row_loaded;
     static u8 chars;
@@ -597,6 +601,15 @@ static void round_check(void)
     want = row_file[row][mask_variant[chars]];
 #ifdef SAT_GUESTS
     want = sat_guest_file(row, chars, mask_variant[chars], want);   /* bonus characters: guests.c */
+#endif
+    want0 = want;
+#ifdef SAT_DUEL_MENU
+    /* A duel on an arena stage runs the file's duel copy (build.py duel_plan): it also keeps the ROM pages stage 02's walk reads, which the duel reads and the stage's own file spills tiles into. */
+    if (sat_duel_on && row && !sat_duel_plain) {
+        int d;
+        for (d = 0; d < DUEL_PAIRS; d++)
+            if (duel_pairs[d][0] == want) { want = duel_pairs[d][1]; break; }
+    }
 #endif
     row_loaded = row;
 #ifdef SAT_HOME
@@ -628,7 +641,7 @@ static void round_check(void)
 #endif
     round_loaded = want;
 #ifdef SAT_GUESTS
-    sat_guest_loaded(row, chars, mask_variant[chars], want);   /* guest colours follow the art this file holds */
+    sat_guest_loaded(row, chars, mask_variant[chars], want0);   /* guest colours follow the art this file holds */
 #endif
     sat_rounds.current = (u32)want;
     sat_rounds.loads++;

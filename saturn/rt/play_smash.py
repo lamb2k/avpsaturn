@@ -12,8 +12,9 @@ def step(v,s):
     if n%40==0: s.log("scr",sc,"cur",s.word("sat_home_cursor"),"duel",on,"mode",a[1],"att",a[0x1b0],"st",hex(u16(0x1e8)),"p",a[0x380],a[0x384],a[0x480],a[0x484],"hp",u16(0x3c0),u16(0x4c0),"xy",u16(0x390),u16(0x394),u16(0x490),u16(0x494),"z",u16(0x398),u16(0x498),"cam",u16(0x278),"result",s.word("sat_duel_result"),"hits",s.word("sat_duel_stats",0),s.word("sat_duel_stats",4))
     if getattr(s,"res",0) and sc==1: s.log("BACK AT TITLE after",now-s.res); s.shot("duel_title"); s.stop(); return
     if sc==1:
-        if s.word("sat_home_cursor")!=2:
-            if now-lastp>.5: lastp=now; s.pulse("up",.12)
+        tgt=int(os.environ.get("TITLE_ITEM","1")); cu=s.word("sat_home_cursor")   # title list: 0 ARCADE, 1 VERSUS, 2 BOSS RUSH, 3 STAGE SELECT, 4 OPTION
+        if cu!=tgt:
+            if now-lastp>.5: lastp=now; s.pulse("down" if cu<tgt else "up",.12)
         elif now-lastp>.5: lastp=now; s.shot("home_duel"); s.pulse("start",.12)
         return
     if sc==8:
