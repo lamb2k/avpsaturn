@@ -26,7 +26,7 @@ int main(void)
     PAGE[0xff] = RAMB;
     sat_guest_sel = 1;
     wv_reset(0); wv_reset(1);
-    R8(PL(0)) = 1; R8(PL(0) + 1) = WV_CHAR_SCH;
+    R8(PL(0)) = 1; R8(PL(0) + WV_CHAR_OFF) = WV_CHAR_SCH;
     for (t = 0; t < 400; t++) {
         unsigned sx;
         R16(PL(0) + 0x10) = (u16)(rnd() & 0x3ff);

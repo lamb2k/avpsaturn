@@ -73,6 +73,7 @@ def soak(s):
     ko_seen = 0
     v0 = int.from_bytes(m.read(s.syms["sat_dbg"] + 8, 4), "big")
     s.shot("soak_start")
+    n_shots = [0]
     while time.time() < t_end:
         polls += 1
         blk = s.ram(0x8380, 0x200)
@@ -90,6 +91,7 @@ def soak(s):
             row = dict(v=v, state=stw, rec=hex(rec), cls=rc, timer=int.from_bytes(p1[0x0a:0x0c], "big"), hp=hp, sub=p1[7], face=p1[0x0f], x=int.from_bytes(p1[0x10:0x12], "big"),
                        stage=s.ram16(0x81e8), p2=p2[4:7].hex(), bz=(m.read(bz, 1)[0] if bz else -1), alive=p1[0], tag=p1[8], swing=p1[0x67], hit=p1[0x6e])
             ev.write(json.dumps(row) + "\n"); ev.flush()
+            if stw in ('020008', '020006') and n_shots[0] < int(os.environ.get('SOAK_SHOTS', '0')) and polls % 2 == 0: n_shots[0] += 1; s.shot('soak_%s_v%d' % (stw, v))   # looks: his special and attack chain in free-running play
             last_state, since_v = stw, v
         elif v - since_v > STUCK and stw not in ("020000", "020002", "080000"):
             if len(anomalies) < 40: anomalies.append(dict(v=v, kind="state held", state=stw, vblanks=v - since_v, rec=hex(rec)))
