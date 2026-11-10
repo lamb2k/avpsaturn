@@ -20,7 +20,8 @@ SLOT = int(os.environ.get("PROOF_SLOT", "3"))
 TITLE = os.environ.get("PROOF_TITLE", "AvP NATIVE-GFX: attack [port 9718]")
 st = dict(lastp=0.0, started=False, n=0, titled=False)
 MODES = (("native", 1, None), ("skin", 0, None), ("schaefer", 0, 0))
-SCHEDULE = [(0, []), (90, ["right"]), (210, []), (240, ["a"]), (246, []), (300, ["a"]), (306, []), (360, ["left"]), (420, [])]   # (frames after the leg starts, keys held from there)
+# (frames after the leg starts, keys held from there): attack taps every 14 frames for 160 frames (an enemy walking in is met in every leg), then walk away and back
+SCHEDULE = [(0, []), (4, ["a"]), (8, []), (18, ["a"]), (22, []), (32, ["a"]), (36, []), (46, ["a"]), (50, []), (60, ["a"]), (64, []), (74, ["a"]), (78, []), (88, ["a"]), (92, []), (102, ["a"]), (106, []), (116, ["a"]), (120, []), (130, ["a"]), (134, []), (144, ["a"]), (148, []), (158, ["a"]), (162, []), (200, ["left"]), (260, ["right"]), (320, [])]
 
 
 def poke(s, name, val):
@@ -95,6 +96,7 @@ def free_leg(s, tag, dbg, sel, secs):
             keys = SCHEDULE[k][1]; k += 1
         if v % (SCHEDULE[-1][0] + 60) < 5 and k >= len(SCHEDULE): k = 0
         s.set(keys)
+        keep_alive(s)
         rec = int.from_bytes(s.ram(0x839c, 4), "big")
         if rec != last:
             poses.append(rec); last = rec
@@ -111,10 +113,55 @@ def free_leg(s, tag, dbg, sel, secs):
     return row
 
 
+def keep_alive(s):
+    """harness assist, every leg alike: the player's health word is put back to its full value so an unattended run is not cut short by his death (the stage-02 enemies keep coming)"""
+    s.m.call("memory_write", address=hex(s.syms["RAMB"] + 0x83c0), size="word", value=hex(0x65))
+
+
+def enemies(s):
+    buf = s.ram(0x9a00, 0x2d00); out = []
+    for o in range(0, len(buf) - 0x80, 0x100):
+        b = buf[o:o + 0x100]
+        if b[0] and b[8] == 0x0c and b[1] != 0:
+            out.append((int.from_bytes(b[0x10:0x12], "big"), int.from_bytes(b[0x18:0x1a], "big")))
+    return out
+
+
+def approach(s):
+    """free-run toward the nearest enemy (as tools v4rec.py did), pause with him in front, so the attack legs have a target"""
+    m = s.m
+    m.call("resume")
+    t0 = time.time(); near = None
+    while time.time() - t0 < 60:
+        a = s.ram(0x8380, 0x20)
+        px, pz = int.from_bytes(a[0x10:0x12], "big"), int.from_bytes(a[0x18:0x1a], "big")
+        en = enemies(s)
+        near = min(en, key=lambda e: abs(e[0] - px) + abs(e[1] - pz)) if en else None
+        if near and 55 < abs(near[0] - px) < 85 and abs(near[1] - pz) < 5 and a[4:7].hex() in ("020000", "020002"):
+            break
+        keys = []
+        if near:
+            dx = near[0] - px
+            if dx < -85: keys.append("left")
+            elif dx > 85: keys.append("right")
+            elif abs(dx) < 55: keys.append("right" if dx < 0 else "left")   # too close: step back
+            if near[1] < pz - 3: keys.append("up")
+            elif near[1] > pz + 3: keys.append("down")
+        s.set(keys)
+        keep_alive(s)
+        time.sleep(0.02)
+    s.set([])
+    keep_alive(s)
+    m.call("pause")
+    s.log("approach done", near, px, pz)
+
+
 def proof(s):
     m = s.m
     m.call("pause"); s.set([])
     os.makedirs(OUT, exist_ok=True)
+    if not os.environ.get("PROOF_NOAPPROACH"):
+        approach(s)
     s.log("save", m.call("save_state", slot=SLOT)[:80])
     for tag, dbg, sel in MODES[:2]:
         paused_leg(s, tag, dbg, sel, True)

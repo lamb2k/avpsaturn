@@ -206,7 +206,7 @@ Switch `-DSAT_WV_NATIVE_GFX` (default off). One pose: idle step 0, which is the 
 Files: `tools/wolverine/gen_c.py` (emits `wv_nat_asm`, `wv_nat_p1` under `#ifdef`), `saturn/guests/wolverine/wolverine.c` (apply on every Wolverine player update, undo from the vblank pad hook when the setting is off, skip in the pass), `tools/wolverine/native_gfx_proof.py` (paused A/B capture). Apply is idempotent and keeps the original pointer the first time it sees the record unpatched. The second palette row is written into the assembly's attr low bits from the stage word (5 byte stores) when the stage changes.
 
 ### Result
-RESULT_PLACEHOLDER
+Result (run1, 11-09, EMULATOR, paused A/B in one stage 02 scene): the game's emitter drew the stance from the 236-byte assembly (`N.png`, record 0x163158 held pointer 0x300000, trace in `shots/run1/trace.jsonl`); the player's frame record, timer and flags read as Schaefer's stand throughout. The object list of the native leg holds 23 first-row and 5 second-row tiles of his stance and the game's shadow entry; the skin leg's list holds Schaefer's two blocks (the skin's tiles are inserted later, in the snapshot). Differences seen: none beyond the 8 px mirror-axis shift (measured: native tile columns span object x 24..104 against the skin's 32..112 about the same actor x) and the camera, which scrolled 10 px between the legs and explains most of the apparent shift between the two screenshots. The shadow is present in both lists and the luminance band under the feet is the same in both pictures (35.5 against 33.0). This prototype is superseded by section 11 (the flag now maps the whole native block).
 
 ## 10. Revision for plan V2 (owner-approved, 753c435): relocation, not in-place; the access-point audit
 
@@ -234,11 +234,80 @@ Budget consequence: the identity block is 20 KB, five tail steps, about 160 tile
 
 Recorded for this lane: commit 4bfcdf6 plus this branch; assets D11; flags `POSE_KEYS=0 KEEP_ROUND_FILES=1`, `KERNEL_CFLAGS="-DSAT_HOME -DSAT_DUEL_MENU -DSAT_GUESTS -DSAT_GUEST_DEFAULT=1 -DSAT_WV_JUMP=1 -DSAT_GUEST_FAST_LIST=1 -DSAT_GUEST_NAMES_LAZY=1 -DSAT_GUEST_PAL_KEEP=1"` (plus `-DSAT_WV_NATIVE_GFX` for the prototype); emulator: the sprite-dropout lane's Yaba copy (own folder, port 9718, VideoCore 1, SoundCore 0). A host-load dependent dropout is a known property of that emulator, so every free-running number is paired with the stepped capture. `native_gfx_proof.py` reports separately: emulated vblanks per wall second, skipped pictures (`sat_dbg` +0x64), pictures started and shown (`plot_started`, `plot_shown`), plot waits, and the game's own pose (frame record, timer) per leg. Open: input scheduled by emulated ticks for the attack, pose-change counts per tick for the reference build, and a single-session A/B of Schaefer (setting off) against the skin and the native build.
 
-## 11. Status against the V2 milestone
+## 11. V2 milestone: native idle, walk and first claw attack (flag `-DSAT_WV_NATIVE_GFX`, default off)
 
-- Done: format and access findings (sections 1 to 3), the relocation data proof, the access-point audit, the stand prototype (section 8).
-- **Not done: the one-attack native build, the clip, the performance comparison.** The path is long and I did not shortcut it: (1) HOST: build the relocated Schaefer-equivalent block into the native host runner (window page, 26 slots, 10 resolver sites) and run the 61-field and outbound-region comparison on the 272,171-frame route, only the named pointer deltas allowed; (2) generate Wolverine's block for idle, walk and one claw attack (slot 32 chain) with boxes in a character-owned table T' in the same window, flag skeleton copied from the donor chain; (3) target link, memory map, stage 26 canary; (4) Yaba clip with paused and free-running legs under the baseline protocol. Rough estimate: (1) and (2) about a day each, (3) and (4) half a day each, after a slot census limited to the slots this milestone touches (stand 0, 15, 24..28, 44..47, 58; walk 2; first claw attack 32 and 33; the terminal records).
-- Fit: the approach fits (section 5). The stand prototype alone costs 862 bytes of tail and crosses a 4 KB step; that is expected and does not change the verdict.
+Evidence tiers: **DATA** (program image), **HOST** (lifted game on a PC against MAME's golden, WSL gcc), **BUILD** (SH-2 link, D11 assets), **EMULATOR** (Yaba, own copy, port 9718). **No hardware.** Everything ROM-derived stays under `E:\AvP\learning\lane-wv-native-gfx` and `D:\AvP-lanes\lane-wv-native-gfx` (images and dumps are not in git).
+
+### 11.1 What was built
+
+- `tools/wolverine/gen_native.py` writes the block `gen/wv_native.inc` (and `.bin` for the host runner). One 64 KB window at 68000 address 0x300000 (`PAGE[0x30]`), **24,736 bytes**: 17,904 bytes of Schaefer's index tables and frame records relocated verbatim (548 reachable records, 0x163158..0x16754e, the span's own assemblies stay in the ROM image); then his native data, **6,832 bytes**: 27 records in 3 chains at 0x3045f0..0x3047ac, 22 pose assemblies (5,640 bytes, family 0xA), his box table T' (748 bytes: the donor's 12 hurt and 38 attack entries, plus 3 hurt and 1 attack entry of his own).
+- **Idle**: MSHvSF's 17-record standing loop (0xd1c90, jump record at the end, ticks per record 4 to 12 from the ROM); 12 records are kept, the 5 whose tiles are not in the stage packs lend their ticks to the record before (the rule of `assets.py` THIN; D11's own idle is also 12 steps). **Walk**: Schaefer's 12-record skeleton (durations, flag parameter bytes, event bytes, shadow index: his walk speed is therefore exactly Schaefer's, as the plan's first pass asks), with his pose chosen by phase from MSHvSF's 16-record walk cycle. **First claw attack**: MSHvSF's light punch (0xd2878, 6 records; box-set indexes name his hurt and attack ids, boxes converted by the rule of `boxes.py`): startup record (flag 0), live record (flag 1, attack index into T', 7 ticks), terminal record (flag 0x8001, 4095 ticks, jump to itself, the donor chain's own shape).
+- Tile pixels are matched to D11 keys with the weighted distance of `tilemerge.py` (K = 12): 632 ROM cells matched exactly, 434 within K by a merged tile, none "far" in the kept records. No new tile key: the stage packs and `fit.py` are unchanged.
+- **Access points, all redirected, none patched in place**: the 26 opcode-store slots (4 bytes each, written when the setting turns on, restored when it turns off), the 11 immediates of the lifted code (`build.py` rewrites them to read `sat_wv_tb[4]`, a 16-byte table in the cart that holds Schaefer's own table addresses or the relocated ones), and the per-character box table entry at 0x19748 (named T' while on). `wv_nat_sync` runs once a vblank (pad hook) and on every player update; it also writes the second palette row of his 136 second-row tile entries from the stage word.
+- While a player's frame record lies in his native range the skin leaves that player alone: the replacement pass, the move clock with its holds and recovery, the box swap and the x1.375 walk scale all skip him (`wv_nat_drawn`). Everything else (his other moves, hit reactions, grabs, KO) still goes through the relocated donor records and the skin, unchanged.
+- Switches: build `-DSAT_WV_NATIVE_GFX` (with `GUEST_ASSETS`); runtime `wv_nat_dbg` bit 0 (debug port) takes the native data on or off in the same build (`native` / `skin` legs below).
+
+### 11.2 Identity of the relocation (donor-equivalent data), HOST
+
+Plan V2 order: relocated records holding Schaefer's own data first, only named pointer-address changes allowed. Runner: `tools/lift_runner/build_native_host.py --reloc 1` (new `host_reloc.c`: window page, 26 slots, the 11 immediates), the golden-checked lifted game against MAME's `golden_c1` route (272,171 vblanks, Schaefer). Named pointer changes the harness accepts: 4-byte values equal to the golden value plus the delta 0x19d070 inside Schaefer's table and record range (in work RAM, in the IRQ registers, in the PDUMP records), and nothing else.
+
+| Run | Result |
+| --- | --- |
+| Plain runner (baseline) | clean 272,171 of 272,171, missed IRQ 0 |
+| Relocated block (verbatim, 132 jump targets rebased, 26 slots, 11 immediates), mask extended for the pointer fields (+0x1c record, +0x52 table base, +0x96, +0xa6 of 0x80-aligned blocks) | **clean 272,171 of 272,171, 0 differing bytes outside the named pointer fields, missed IRQ 0** (a first version stopped matching at vblank 1130 because a pointer-holding register and a table base in an object block were compared raw; found by IRQ debug, fixed by the named-change rules above) |
+
+Data-level proof (`reloc_check.py`; its closure was cut at 0x165480 by a range test, the full closure used by the host run has 548 records in two clusters and 132 jump targets, section 11.1): 637 records of the first relocation compared, 55,584 emitted object entries equal, 0 mismatches. Not the same as a 61-field diff against the base run: `fielddiff.py` of two runs is only meaningful where the golden mask does not hide a field; the second full relocated run (normalising the compare, `reloc_full2`) was still writing its PDUMP when this note was committed, see section 13.
+
+### 11.3 Native native data, HOST (FREERUN, fight pad, same pad script, `scenario.py`)
+
+Base runner against the relocated runner with his native block (idle, walk, attack chains and T' on, Schaefer's art, no skin): both reach the same set of state transitions (stand -> attack -> stand, attack -> hit reaction, ...), no new edge; the native run lands the light punch (24 damage, then 31 for the stronger hit the donor chain already gives) at vblank 1508 and 1520, which Schaefer's own chain misses in that window.
+
+### 11.4 Memory (BUILD, D11, owner recipe, work directories from `integration/w1`)
+
+| | flag off (avp/integration 4bfcdf6) | flag on |
+| --- | ---: | ---: |
+| hw_free | 1,252 | **1,252** |
+| lw_free | 60 | **40** (the 11 rewritten sites and the 16-byte table) |
+| cart_free | 4,340 | **7,136** |
+| cold1_at | 0x27e2000 | **0x27db000** (7 steps of 4 KB: 224 tiles) |
+| block `wv_blk` | - | 0x27f35a0 .. 0x27f9640, 24,736 bytes |
+| wolverine.o text / data / rodata | 5.9 K / 14 B / 19.5 K | 6.6 K / 24.8 K / 19.9 K |
+| fit.py, 76 stage files | 76 of 76 | **76 of 76, gate True**, no own key dropped, stage24_ma margin 48 tiles (Schaefer variant drops 3,128, his 3,080; before this lane 38 at the integration room) |
+| ISO | 391,497,728 | 385,818,624 |
+
+The block is in the cart tail: the build's canary line (`build.py`) reports it **outside the ROM image (0x2400000..0x2600000) and every ROM stretch, inside the tail**, so no stage file, stage 26 included, can drop or overwrite it. 17.9 KB of the block is the donor span copied for identity; the span's assembly gap (5.9 KB between the two record clusters) could be compacted out at the price of 30 changed table words, and the donor copies could go once every slot has a native chain. The brief's 108-byte margin was one D6 build; this link's margin before the step was 244 bytes (cart_free 4,340 minus 4,096), and the flag-on build crosses it by 6.8 KB, accepted here as a measurement build.
+
+### 11.5 Yaba: paused sequence, contact, free-running comparison (EMULATOR)
+
+Same saved machine state loaded for every leg (stage 02, he stands, enemies near), mode set by poking `wv_nat_dbg` / `sat_guest_sel` in that state. Paused legs advance one frame at a time (`framebuffer_burst`); the trace per frame is in `shots/att*/trace.jsonl`.
+
+- **Idle**: the player's frame record walks 0x3045f0..0x3046a0 and jumps back to 0x3045f0 (12 records, 4 to 12 ticks each), no skin pass drawing him.
+- **Walk** (`right`, `left`): state 020002, records 0x3046b4..0x304764, parameter bytes 0a 06 07 09 0e 0e 0a 05 08 07 01 10, loop; x advances 10, 16, 7, 9 px over the first four records of a `left` press (1,182 -> 1,172 -> 1,156 -> 1,149 -> 1,140), Schaefer's own stride; the skin leg takes 13, 22, 10, 12 (1,184 -> 1,127) because of its x1.375 scale, which is skipped for native records.
+- **First claw attack**: tap at frame 27 (att3): state 020006 at once, record 0x304778 for 2 ticks (startup, hold 2), 0x304788 for 7 ticks (live, flag 1, attack index set), terminal 0x304798 (flag 8001), back to stand at frame 37: **10 ticks from press to stand** against 16 for the skin leg (frames 27 to 43; Schaefer's records 0x163644, 0x163654, 0x163664, 0x163674 are 13 ticks, the rest is the skin's held updates). A fast second tap restarts the chain (frames 127, 135); a hit interrupts it (att3 frame 186: state 020200, record 0x301364, health 101 -> 91, the same frame in the skin leg: the same enemy timing, the same hit).
+- **Contact**: the enemy-health counter I log (tag-0c blocks) did not move in the native legs (att3, att4, att5) and moved in one skin leg only (att4: 174 -> 150 -> 126 at frames 66 and 81, because the skin's longer attack was still running when an enemy walked in). The contact sheet `evidence/lp_native_vs_skin_att4.png` (every second frame from 4 to 24, native over skin) shows his claws at full reach with bright spark effects beside them in both rows (native frames 14 to 16, skin 16 to 18), so **contact is seen in the Yaba frames but not counted there; the damage count (24 per light hit) is the HOST result of 11.3**. A scripted enemy at a fixed distance is what a counted Yaba contact needs; not done. The attack box against the claws is checked on the data (`native_overlay.py`, `evidence/overlay_lp.png`): the live record's box sits on the extended claws, his hurt box covers the body and the feet are on the line.
+- **Free-running comparison** (same state, same input schedule paced by polling the emulated vblank counter, 15 s a leg, two repetitions, Schaefer = `sat_guest_sel` 0; the player's health is topped up in every leg alike so a leg is not cut short):
+
+| Run | Leg | Emulated vblanks / wall s | Pictures started / shown per vblank | Skipped (d_skips / vblank) | Record changes seen |
+| --- | --- | ---: | ---: | ---: | ---: |
+| att1 | native | 56.4, 56.8 | 0.78 / 0.78 | 0.22, 0.23 | 149, 144 (all native) |
+| att1 | skin | 46.2, 46.3 | 0.75 / 0.75 | 0.25, 0.26 | 91, 86 |
+| att1 | Schaefer | 59.4, 59.4 | 0.78 / 0.78 | 0.22, 0.21 | 102, 116 |
+| att3 | native | 53.8, 58.2 | 0.75, 0.80 | 0.26, 0.20 | 96, 127 |
+| att3 | skin | 47.9, 49.2 | 0.73, 0.78 | 0.27, 0.22 | 74, 75 |
+| att3 | Schaefer | 59.3, 59.6 | 0.75, 0.60 | 0.24, 0.40 | 81, 86 |
+
+So in this scene the skin costs about **20 percent of the emulator's frame rate against Schaefer** (46 to 49 against 59), the native path takes it back to **95 percent in att1 (56.6) and 91 to 98 percent in att3** (53.8, 58.2). The scene is the same state but the enemies are not scripted, so picture counts differ by the fights; the vblank rate is the cleanest column. **Emulated game work** (the guest pass's own ticks, `sat_gprof`) is not in these runs: the build has no `SAT_GUEST_PROF`, so that column is not reported. Host speed here is dominated by Yaba's recompilation of the cart-resident guest code on every call (the dropout lane's finding), which is exactly what the native path removes from the per-frame path; presentation (new/held/skipped/late) is reported as started, shown and skipped pictures, the late count (`plot waits`) per leg was 15 and 14 (native), 23 and 20 (skin), 8 and 8 (Schaefer) in att1 and 0 and 1, 1 and 1, 0 and 0 in att3. A hardware figure does not exist.
+
+### 11.6 Flag-off identity against avp/integration
+
+Identity builds from copies of `integration/w1`: avp/integration at 4bfcdf6 (`id_a`) against this branch with the flag undefined (`id_b`, recipe unchanged): result in section 13 if the comparison finished. `hw_free` 1,252, `lw_free` 60, `cart_free` 4,340 of `id_a` agree with the integration owner build's figures.
+
+### 11.7 What is not done, plainly
+
+- Only idle, walk and the first claw attack are native. The other 189 slots still run the relocated donor records and the skin (hits, jump, throw, KO, the finisher, Berserker); the skin pass, the clock and the box swap are still in the build.
+- LP keeps 3 of the 6 ROM records (the others' tiles are not resident in the stage packs); startup and live frames are 2 and 7 ticks, not the ROM's 2, 2, 2, 1, 2. His other attack records, the slot census, T' for every record, native walk durations, jump arc, palette from the game's table: stages 3 to 6 of section 7.
+- The mirror axis change of 8 px (section 4.1) is in these captures. The shadow on the stand (run1) was not missing: the shadow object is in both object lists and the luminance band under his feet is the same in both pictures; the offset the coordinator saw between N.png and S.png was mostly the camera scrolling 10 px between the legs.
+- Input is paced by the poll of the vblank counter, not by a scripted pad inside the machine (needs a build flag); enemies are not scripted; no unassisted Round 1; no hardware.
 
 ## 12. Not done, not claimed
 

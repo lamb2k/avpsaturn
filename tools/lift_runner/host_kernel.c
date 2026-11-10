@@ -121,8 +121,8 @@ static void lastd_set(long d); static long midrun; static void compare_inner(voi
     long od=0; for(i=0;i<0x2000;i++) if(OBJ_CUR[0x8000+i]!=gbuf[8+0x10000+i]) od++;
     if(od&&getenv("OBJPAGE")){ u8*op=OBJB[OBJ_CUR==OBJB[0]?1:0]; long o2=0; for(i=0;i<0x2000;i++) if(op[0x8000+i]!=gbuf[8+0x10000+i]) o2++; { long hi=0,z=-1; for(i=0;i<0x2000;i++) if(OBJ_CUR[0x8000+i]!=gbuf[8+0x10000+i]){ if(z<0) z=i; hi=i; } printf("objpage v%ld cur %d diffs %ld other %ld first %lx last %lx%c",curv,OBJ_CUR==OBJB[1],od,o2,z,hi,10);} } if(od&&getenv("OBJDBG")){ for(i=0;i<0x2000;i++) if(OBJ_CUR[0x8000+i]!=gbuf[8+0x10000+i]){ printf(" obj %lx:%02x/%02x",i,OBJ_CUR[0x8000+i],gbuf[8+0x10000+i]); if(i>64)break; } printf("\n"); } lastd_set(d); if(d||od){ ndiv++; if(ndiv<=40||firstdiv<0){ printf("vblank %ld: ram diffs %ld first %lx (host %02x mame %02x) obj diffs %ld\n",curv,d,first<0?0:0xff0000+first,first<0?0:RAMB[first],first<0?0:gbuf[8+first],od); { long k,sh=0; for(k=first;k>=0&&k<0x10000&&sh<12;k++) if(!mask[k]&&RAMB[k]!=gbuf[8+k]){ printf(" %lx:%02x/%02x",0xff0000+k,RAMB[k],gbuf[8+k]); sh++; } printf("\n"); } fflush(stdout);} if(firstdiv<0) firstdiv=curv; if(getenv("STOP_DIV")&&ndiv>=atoi(getenv("STOP_DIV"))){ printf("stop\n"); exit(0);} } else nclean++; }
 /* Relocation run (host_reloc.c): a 32-bit word in the window 0x2d0000..0x2dffff of work RAM is a named pointer-address change; the compare and the dumps see it minus the delta. */
-extern unsigned wv_anim_delta __attribute__((weak)); static u8 ram_keep[0x10000];
-static void compare(void){ long k; if(&wv_anim_delta&&wv_anim_delta){ memcpy(ram_keep,RAMB,0x10000); for(k=0;k+4<=0x10000;k+=2){ u32 v=(u32)RAMB[k]<<24|RAMB[k+1]<<16|RAMB[k+2]<<8|RAMB[k+3], g=(u32)gbuf[8+k]<<24|gbuf[8+k+1]<<16|gbuf[8+k+2]<<8|gbuf[8+k+3]; if(v!=g&&v-wv_anim_delta==g&&g>=0x162f90u&&g<0x165490u){ RAMB[k]=(u8)(g>>24); RAMB[k+1]=(u8)(g>>16); RAMB[k+2]=(u8)(g>>8); RAMB[k+3]=(u8)g; k+=2; } } compare_inner(); memcpy(RAMB,ram_keep,0x10000); } else compare_inner(); }
+extern unsigned wv_anim_delta __attribute__((weak)); static void rn_fix(const u8*g); static u8 ram_keep[0x10000];
+static void compare(void){ if(&wv_anim_delta&&wv_anim_delta){ memcpy(ram_keep,RAMB,0x10000); rn_fix(gbuf+8); compare_inner(); memcpy(RAMB,ram_keep,0x10000); } else compare_inner(); }
 
 static void run_irq(void){ Cpu save=cpu; int sc=cur; u32 sr=r32(G_CUR); cur=-1; cpu.a[5]=0xff8000; cpu.a[7]=0xff8000; f_e0e(); cpu=save; cur=sc; (void)sr; }
 
@@ -132,8 +132,12 @@ u32 irq_pc=0xffffffffu; static u32 ipr[15]; static long nmatch, nkern, nmiss; st
 static int want19; static u8 nrec[8+64+0x10000]; static int freerun; /* FREERUN=1: no IRQ placement from the golden; one IRQ per frame once every task has blocked. Pad and I/O still replay by vblank. For runs that change game timing (the golden no longer matches). */
 static int peek_ip(void){ u8*h=nrec; if(!gold_fetch()) return 0; memcpy(nrec,la,sizeof nrec); want19=nrec[72+0x8019]; irq_pc=freerun?0xffffffffu:be(h+8); for(int i=0;i<15;i++) ipr[i]=be(h+12+i*4); return 1; }
 /* Kernel points carry little register state (a whole dispatcher pass can look like the last), so an IRQ there lands when work RAM equals the next dump. A real divergence never matches and is reported as a miss. */
-static int seg[256][2], nseg; static void seg_build(void){ int i=0; while(i<0x10000){ if(mask[i]){i++;continue;} int b=i; while(i<0x10000&&!mask[i]) i++; seg[nseg][0]=b; seg[nseg++][1]=i-b; } }
-static int state_eq(void){ int k; if(irq_pc==0xffffffffu) return 0; for(k=0;k<nseg;k++) if(memcmp(RAMB+seg[k][0],nrec+72+seg[k][0],seg[k][1])) return 0; return 1; }
+static int seg[4096][2], nseg; static void seg_build(void){ int i=0; while(i<0x10000){ if(mask[i]){i++;continue;} int b=i; while(i<0x10000&&!mask[i]) i++; seg[nseg][0]=b; seg[nseg++][1]=i-b; } }
+static int state_eq_raw(void){ int k; if(irq_pc==0xffffffffu) return 0; for(k=0;k<nseg;k++) if(memcmp(RAMB+seg[k][0],nrec+72+seg[k][0],seg[k][1])) return 0; return 1; }
+/* Relocation run (host_reloc.c): a long of work RAM that is the golden long plus the relocation delta, inside Schaefer's table and record range, is a named pointer-address change: the compare sees it minus the delta. */
+extern unsigned wv_anim_delta __attribute__((weak)); static u8 rn_keep[0x10000];
+static void rn_fix(const u8*g){ long k; for(k=0;k+4<=0x10000;k+=2){ u32 v=(u32)RAMB[k]<<24|RAMB[k+1]<<16|RAMB[k+2]<<8|RAMB[k+3], q=(u32)g[k]<<24|g[k+1]<<16|g[k+2]<<8|g[k+3]; if(v!=q&&v-wv_anim_delta==q&&q>=0x162f90u&&q<0x167600u){ RAMB[k]=(u8)(q>>24); RAMB[k+1]=(u8)(q>>16); RAMB[k+2]=(u8)(q>>8); RAMB[k+3]=(u8)q; k+=2; } } }
+static int state_eq(void){ int r=state_eq_raw(); if(r||!(&wv_anim_delta&&wv_anim_delta)||irq_pc==0xffffffffu) return r; memcpy(rn_keep,RAMB,0x10000); rn_fix(nrec+72); r=state_eq_raw(); memcpy(RAMB,rn_keep,0x10000); return r; }
 /* A loop that writes only object RAM looks the same on each pass, so the object list decides too. */
 static int obj_eq(void){ return !memcmp(OBJ_CUR+0x8000,la+72+0x10000,0x2000); }
 /* CENS=1: objects written per frame, split by the actor pool a4 points into when a1 moved through the object page. Finds the frame with the most tiles. */
@@ -169,7 +173,8 @@ static void take_irq(void){ host_warp(); sw_check(); u32 t=irq_pc; if(cs_on) cs_
 int p_watch; static u32 w_addr; static int w_last=-1; static long w_from; static u32 w_prev;
 static u32 tp[8]; static int ntp;
 static void watch_step(u32 a){ for(int k=0;k<ntp;k++) if(a==tp[k]&&curv>=w_from) printf("T v%ld pc %x d0 %x d1 %x d2 %x d5 %x d6 %x a4 %x a6 %x%c",curv,a,cpu.d[0],cpu.d[1],cpu.d[2],cpu.d[5],cpu.d[6],cpu.a[4],cpu.a[6],10); if(curv<w_from) { w_last=RAMB[w_addr]; w_prev=a; return; } int v=RAMB[w_addr]; if(v!=w_last){ printf("W v%ld %x: %02x->%02x after %x next %x cur %d d0 %x d1 %x d2 %x a0 %x a6 %x%c",curv,0xff0000+w_addr,w_last,v,w_prev,a,cur,cpu.d[0],cpu.d[1],cpu.d[2],cpu.a[0],cpu.a[6],10); w_last=v; } w_prev=a; }
-static long lastd; static long ram_diffs(void){ long i,d=0; for(i=0;i<0x10000;i++) if(!mask[i]&&RAMB[i]!=nrec[72+i]) d++; return d; }
+static long lastd; static long ram_diffs_raw(void){ long i,d=0; for(i=0;i<0x10000;i++) if(!mask[i]&&RAMB[i]!=nrec[72+i]) d++; return d; }
+static long ram_diffs(void){ long d=ram_diffs_raw(); if(!d||!(&wv_anim_delta&&wv_anim_delta)) return d; memcpy(rn_keep,RAMB,0x10000); rn_fix(nrec+72); d=ram_diffs_raw(); memcpy(RAMB,rn_keep,0x10000); return d; }
 static void lastd_set(long d){ lastd=d; }
 /* Relocation run: a register holding a relocated table base or record pointer matches the golden register minus the delta (a named pointer-address change). */
 extern unsigned wv_anim_delta __attribute__((weak)); static int regne(u32 v,u32 g){ return v!=g&&!(&wv_anim_delta&&wv_anim_delta&&v-wv_anim_delta==g); }

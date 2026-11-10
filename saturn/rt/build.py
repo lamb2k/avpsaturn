@@ -191,9 +191,9 @@ def gen_sources():
         a, b = t.index("#else\nregister Cpu *R"), t.index("#define SHL8(")
         t = t[:a] + '#else\n#include "lift_target.h"\n#endif\n' + t[b:]
         t = re.sub(r"\bOP(8|16|32)\(\(?0x([0-9a-f]+)u", opx_rewrite, t)
-        if NATIVE_GFX:   # the table-base immediates follow sat_wv_anim_delta (wolverine.c): 0 while the setting is off, the relocation delta while his native block is on
-            t = TABLE_BASES.sub(lambda m: "((u32)(" + m[1] + " + sat_wv_anim_delta))", t)
-            t = t.replace('#include "lift_target.h"' + chr(10) + '#endif' + chr(10), '#include "lift_target.h"' + chr(10) + '#endif' + chr(10) + 'extern unsigned sat_wv_anim_delta;' + chr(10), 1)
+        if NATIVE_GFX:   # the table-base immediates read sat_wv_tb[] (wolverine.c): Schaefer's own table addresses while the setting is off, the relocated ones while his native block is on
+            t = TABLE_BASES.sub(lambda m: "((u32)sat_wv_tb[" + str(["0x162f90u", "0x163032u", "0x163074u", "0x1630f6u"].index(m[1])) + "])", t)
+            t = t.replace('#include "lift_target.h"' + chr(10) + '#endif' + chr(10), '#include "lift_target.h"' + chr(10) + '#endif' + chr(10) + 'extern unsigned sat_wv_tb[4];' + chr(10), 1)
         for n in NATIVE + OVERRIDES + GUEST_WRAP:   # replaced natively; the lifted body stays linked as lifted_NNN
             t = t.replace(f"void f_{n}(void){{", f"void lifted_{n}(void){{")
         for n in OVERRIDES:   # memory is tight and the target never falls back: the replaced body goes

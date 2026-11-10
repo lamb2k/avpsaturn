@@ -352,6 +352,7 @@ lines = [
     "static unsigned char wv_blk[WV_NAT_SIZE] __attribute__((aligned(4))) = {%s};" % ",".join(map(str, full[:size])),
 ]
 OUT.write_text("\n".join(lines) + "\n")
+OUT.with_suffix(".bin").write_bytes(bytes(full))   # HOST runner: WVBLOCK (tools/lift_runner/host_reloc.c) with WVTNEW = WV_NAT_T
 print("block: donor span %d bytes, native records %d..%d (%d B), assemblies %d (%d B, %d second-row tiles), T' %d B (hurt %d + %d new, attack %d + %d new); %d table entries and %d donor jump targets renamed; total %d bytes" % (
     len(blk), REC_LO, REC_END, REC_END - REC_LO, len(poses), len(asm_blob), len(p1_marks), len(T), 12, len(hurt_new), 38, len(atk_new), tchanged,
     sum(1 for a, fl in recs.items() if fl & 0x8000 and l(rom, a + 16) in chain_at), size))

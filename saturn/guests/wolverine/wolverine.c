@@ -123,14 +123,14 @@ extern u8 *PAGE[256];
    (0xa9cb6 -> 0xaa38a) draws them, its animation tick (f_1656e) advances them. Schaefer's index tables and records are relocated into the same block (donor-equivalent: only
    named pointer fields change, tools/wolverine/reloc_check.py and the host identity run) and every access point is redirected, not patched in place:
      - 26 slots of the opcode store (per-character tables, entry of character 1) hold a table base: delta added while the setting is on, taken off when it goes off;
-     - the lifted code's table-base immediates (build.py rewrites them to + sat_wv_anim_delta) follow the same variable;
+     - the lifted code's table-base immediates (build.py rewrites them to read sat_wv_tb[]) follow the same variable;
      - the per-character box table entry (0x19748) names his T' (donor copy plus his boxes) while on.
    While a player's frame record is one of his native records (window address between WV_NAT_REC_LO and WV_NAT_REC_END) the replacement pass, the move clock with its holds, the box
    swap and the walk speed scale all leave that player alone. wv_nat_dbg (debug port): bit 0 native data on (default), bit 1 force the skin's idle step 0 (A/B). */
 #ifdef SAT_WV_NATIVE_GFX
 #include "wv_native.inc"
 volatile u8 wv_nat_dbg = 1;
-u32 sat_wv_anim_delta;     /* the lifted code's table-base immediates add this (0 = Schaefer's own tables) */
+u32 sat_wv_tb[4] = {0x162f90u, 0x163032u, 0x163074u, 0x1630f6u};   /* the lifted code's table-base immediates read these (build.py): Schaefer's own tables, or the relocated ones while on */
 #define OPXB ((volatile u8 *)0x02600000u)
 static u8 wv_nat_on, wv_nat_row;
 static u32 opx_rd(u32 o) { volatile u16 *p = (volatile u16 *)(OPXB + o); return (u32)p[0] << 16 | p[1]; }
@@ -154,7 +154,7 @@ static void wv_nat_sync(void)   /* once a vblank (pad hook) and on every player 
         if (!wv_nat_on) {
             PAGE[0x30] = wv_blk;
             wv_nat_slots(1);
-            sat_wv_anim_delta = WV_NAT_DELTA;
+            { int k; for (k = 0; k < 4; k++) sat_wv_tb[k] += WV_NAT_DELTA; }
             wv_nat_on = 1; wv_nat_row = 0;
         }
         if (row != wv_nat_row) {
@@ -163,7 +163,7 @@ static void wv_nat_sync(void)   /* once a vblank (pad hook) and on every player 
             wv_nat_row = row;
         }
     } else if (wv_nat_on) {
-        sat_wv_anim_delta = 0;
+        { int k; for (k = 0; k < 4; k++) sat_wv_tb[k] -= WV_NAT_DELTA; }
         wv_nat_slots(0);
         wv_nat_on = 0;
     }

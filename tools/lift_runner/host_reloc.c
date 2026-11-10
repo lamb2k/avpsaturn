@@ -29,5 +29,9 @@ void wv_reloc_init(void)
         n++;
     }
     fclose(f);
+    if (getenv("WVTNEW")) {   /* his box table T': the per-character entry of character 1 (0x19748) names it */
+        u32 a = 0x19748, v = (u32)strtoul(getenv("WVTNEW"), 0, 16);
+        OPB[a] = (u8)(v >> 24); OPB[a + 1] = (u8)(v >> 16); OPB[a + 2] = (u8)(v >> 8); OPB[a + 3] = (u8)v;
+    }
     printf("relocation: delta %x, %d slots patched, window 0x300000\n", wv_anim_delta, n); fflush(stdout);
 }
