@@ -38,7 +38,9 @@ if "SAT_HOME" in os.environ.get("KERNEL_CFLAGS", ""):   # home only (the arcade 
 # Readable replacements, saturn/game. GAME_OVERRIDES=0 builds without them, for an A/B.
 OVERRIDES = () if os.environ.get("GAME_OVERRIDES") == "0" else tuple((REPO / "saturn/game/overrides.txt").read_text().split())
 # Bonus characters (SAT_GUESTS only): lifted routines wrapped in game_bind.c, body kept (the collision passes for guest boxes, the player state machine for guest timings).
-GUEST_WRAP = ("1cf54", "1d03e", "1d116", "195ec", "19f9a", "24060") if "SAT_GUESTS" in os.environ.get("KERNEL_CFLAGS", "") else ()
+NATIVE_GFX = "SAT_WV_NATIVE_GFX" in os.environ.get("KERNEL_CFLAGS", "") and bool(os.environ.get("GUEST_ASSETS"))   # Wolverine's native animation data (plan V2; saturn/guests/wolverine)
+# native Wolverine: the gun routine of Warrior and Hunter (24060) stays stock; Schaefer's own state 02000c routine (2576a) is the one his Berserker replaces
+GUEST_WRAP = ("1cf54", "1d03e", "1d116", "195ec", "19f9a", "2576a" if NATIVE_GFX else "24060") if "SAT_GUESTS" in os.environ.get("KERNEL_CFLAGS", "") else ()
 CART = dict(ROMB=0x02400000, OPX=0x02600000, SAT_SINK=0x02640000, SAT_OBJ=0x02650000, SAT_PACK=0x02654000)
 CART_END = 0x02800000
 OPX_MAX = 0x40000
@@ -180,7 +182,6 @@ def opx_rewrite(m):
     return f"OP{m[1]}{paren}0x{OPMAP[hex(int(m[2], 16))]:x}u"
 
 
-NATIVE_GFX = "SAT_WV_NATIVE_GFX" in os.environ.get("KERNEL_CFLAGS", "") and bool(os.environ.get("GUEST_ASSETS"))   # Wolverine's native animation data (plan V2; saturn/guests/wolverine)
 TABLE_BASES = re.compile(r"\(\(u32\)(0x(?:162f90|163032|163074|1630f6)u)\)")   # Schaefer\'s four animation index tables as immediates of the lifted code
 
 
@@ -193,7 +194,11 @@ def gen_sources():
         t = re.sub(r"\bOP(8|16|32)\(\(?0x([0-9a-f]+)u", opx_rewrite, t)
         if NATIVE_GFX:   # the table-base immediates read sat_wv_tb[] (wolverine.c): Schaefer's own table addresses while the setting is off, the relocated ones while his native block is on
             t = TABLE_BASES.sub(lambda m: "((u32)sat_wv_tb[" + str(["0x162f90u", "0x163032u", "0x163074u", "0x1630f6u"].index(m[1])) + "])", t)
-            t = t.replace('#include "lift_target.h"' + chr(10) + '#endif' + chr(10), '#include "lift_target.h"' + chr(10) + '#endif' + chr(10) + 'extern unsigned sat_wv_tb[4];' + chr(10), 1)
+            t = t.replace('#include "lift_target.h"' + chr(10) + '#endif' + chr(10), '#include "lift_target.h"' + chr(10) + '#endif' + chr(10) + 'extern unsigned sat_wv_tb[4];' + chr(10) + 'extern unsigned char sat_wv_cn[2];' + chr(10), 1)
+            # Schaefer's attack chain counter (+0x81) wraps at 4 stages (two `& 3` sites of f_24454); a Wolverine player's count is set by wolverine.c (sat_wv_cn, 4 for everyone else, so the arcade is unchanged)
+            for site in ("24528", "2454c"):
+                t = t.replace("P(0x%su);{{u8 s=((u8)0x3u);u8 v=RD8((a6+(129)))&s;WR8((a6+(129)),(u8)(v));}}" % site,
+                              "P(0x%su);{{u8 s=((u8)0x3u);u8 v=RD8((a6+(129)))&s;if(v>=sat_wv_cn[((a6>>8)+1)&1])v=0;WR8((a6+(129)),(u8)(v));}}" % site)
         for n in NATIVE + OVERRIDES + GUEST_WRAP:   # replaced natively; the lifted body stays linked as lifted_NNN
             t = t.replace(f"void f_{n}(void){{", f"void lifted_{n}(void){{")
         for n in OVERRIDES:   # memory is tight and the target never falls back: the replaced body goes
@@ -424,6 +429,8 @@ def main():
         bind_flags = ["-DSAT_GUESTS"] if "SAT_GUESTS" in os.environ.get("KERNEL_CFLAGS", "") else []
         if "SAT_WOLVERINE_DEBUG" in os.environ.get("KERNEL_CFLAGS", ""):
             bind_flags.append("-DSAT_WOLVERINE_DEBUG")
+        if NATIVE_GFX:
+            bind_flags.append("-DSAT_WV_NATIVE_GFX")
         own += [cc(REPO / "saturn/game" / f"{n}.c", OBJ / f"game_{n}.o", ["-O2", "-DSAT_TARGET", "-I", REPO / "saturn/game"] + bind_flags) for n in ("game_hot", "game_bind")]
     sizes = {o: code_size(o) for o in objs}
     # Hottest chunks in high work RAM, then low work RAM; the coldest run from the cart. Heat comes from the MAME route.

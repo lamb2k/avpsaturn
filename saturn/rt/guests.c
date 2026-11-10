@@ -133,7 +133,9 @@ int sat_guest_objects(gu8 *obj, int count, int max, gu8 *page0)
         int (*draw)(gu8 *, int, gu32, int, int, unsigned short, unsigned short) = guest_draw(grp[g].actor);
         int shot = 0;
         if (!draw && sat_guest_megaman_draw && is_guest_shot(grp[g].actor)) { draw = sat_guest_megaman_draw; shot = 1; }
+#ifndef SAT_WV_NATIVE_GFX   /* the native Wolverine fires no shot */
         if (!draw && is_wolverine_shot(grp[g].actor)) { draw = no_draw; shot = 1; }
+#endif
         int s = grp[g].at + shift, e = g + 1 < ngrp ? grp[g + 1].at + shift : count, i, x0 = 0, x1 = 0, bottom = -1000, n, room;
         int bx;
         gu8 tmp[8 * 96];

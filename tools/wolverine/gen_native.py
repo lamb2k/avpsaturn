@@ -316,6 +316,18 @@ ROLE_T1 = {1: "IDLE", 3: "JUMP", 4: "LAND", 5: "LAND", 6: "LAND", 7: "IDLE", 8: 
            54: "HIT_H", 55: "HIT_H", 56: "LAND", 57: "IDLE", 59: "WALK", 61: "IDLE", 62: "IDLE", 63: "IDLE", 64: "IDLE", 65: "IDLE", 66: "IDLE", 67: "HP", 68: "HP", 69: "HP",
            70: "HP", 71: "IDLE", 72: "IDLE", 73: "IDLE", 74: "IDLE", 75: "IDLE", 76: "HP", 77: "HP", 78: "IDLE", 79: "IDLE"}
 HOLD_AT = dict(JUMP=0.45, LAND=1.0, IDLE=0.0)
+# Comparison knobs (owner 11-09: every timing change ships as a comparison first). Defaults are the standing decisions.
+#   WV_CHAIN=3 (default): the attack chain is LP, LP, HP. Schaefer's state routine has four stages (0..3, slots T1.32..35, stage 3 follows only after a connect on stage 2); stages 0 and 1 are the
+#                         first claw attack, stage 2 (slot T1.34) his heavy punch, and the stage counter wraps after stage 2 (build.py rewrites its two `& 3` sites to the count wolverine.c sets).
+#   WV_CHAIN=4          : LP, LP, HP, HK (stage 3, slot T1.35, is his kick).
+#   WV_HP_TICKS=N       : the heavy punch's length in ticks. Default 0 = the donor's heavy stage skeleton (slot T1.35: 2, 2, 6, 5, 3 = 18 ticks, no cancel flags); N rescales its durations to N ticks (the faster
+#                         heavy punch of the comparison disc: 12, as quick as the planned light punches).
+WV_CHAIN = int(os.environ.get("WV_CHAIN", "3"))
+WV_HP_TICKS = int(os.environ.get("WV_HP_TICKS", "0"))
+assert WV_CHAIN in (3, 4)
+HP_SLOT, HK_SLOT = 0x163688, 0x1636dc   # donor chain starts of T1.34 (stage 2) and T1.35 (stage 3)
+ROLE_T1[34] = "HP"
+ROLE_T1[35] = "HK" if WV_CHAIN == 4 else "HP"
 role_of = {}   # donor chain start -> (role name, source key)
 
 
@@ -370,9 +382,22 @@ new_chains = {}      # donor chain start -> list of record dicts
 report = []
 
 
-def make_chain(start, role):
-    """donor skeleton + the role's MSHvSF poses by phase; boxes from the same MSHvSF records"""
-    ch = skel(start)
+def rescale(recs_, total):
+    """durations of a chain's timed records (not the 4095-tick terminal) scaled to `total` ticks, each at least 1"""
+    timed = [r for r in recs_ if r["dur"] < 255]
+    cur = sum(r["dur"] for r in timed) or 1
+    d = [max(1, int(round(r["dur"] * total / cur))) for r in timed]
+    k = 0
+    while sum(d) != total and k < 100:
+        i = max(range(len(d)), key=lambda j: d[j]) if sum(d) > total else min(range(len(d)), key=lambda j: d[j])
+        d[i] += -1 if sum(d) > total else 1; k += 1
+    for r, v in zip(timed, d): r["dur"] = v
+
+
+def make_chain(start, role, skel_from=None):
+    """donor skeleton + the role's MSHvSF poses by phase; boxes from the same MSHvSF records. skel_from: take the skeleton of another donor chain (the heavy punch of the 3-stage chain sits in
+    stage 2's slot and uses the heavy stage's skeleton)"""
+    ch = skel(skel_from if skel_from is not None else start)
     src = pick_sources(role, ch)
     dropped = 0
     if not src:
@@ -465,21 +490,52 @@ new_chains[STAND] = idle_recs
 new_chains[WALK] = walk_recs
 new_chains[LP] = lp_recs
 for r in idle_recs + walk_recs + lp_recs: r.setdefault("donor", None)
+
 for a in order:
     if a in new_chains: continue
     role = chain_role(a, first_slot[a])
-    new_chains[a], used = make_chain(a, role)
+    new_chains[a], used = make_chain(a, role, HK_SLOT if a == HP_SLOT else None)
     role_of[a] = used
+    if a == HP_SLOT and WV_HP_TICKS: rescale(new_chains[a], WV_HP_TICKS)
 apply_arc(ARC_CHAIN)
 role_of[ARC_CHAIN] = "JUMP(arc)"
 role_of[STAND], role_of[WALK], role_of[LP] = "IDLE(ROM)", "WALK(ROM)", "LP1(ROM)"
+
+# ---- Berserker (plan V2 section 6): his own native action (wolverine.c wv_bz_run) with its own chain, not the gun's T3 slot cycling. The flurry poses are the ones the T3 chains of the gun action
+# showed (SRC BERS3, one pose per slot) in the order the stock gun burst visits them (the aim sweep table of Schaefer's 02000c routine, 0x25ac6: T3 slots 6 6 5 5 4 3 3 4 5 5 6 6), 4 ticks
+# each = 48 ticks, one record per strike; every record that has an MSHvSF attack box carries it (a new strike id is taken at each record, so each strike can connect), then a terminal record
+# that the action reads as the end. No donor chain: bytes +10/+11/+12..15 come from the stand record and T3's first chain.
+BZ_SLOTS = (6, 6, 5, 5, 4, 3, 3, 4, 5, 5, 6, 6)
+# Contact box of every strike: the MSHvSF record of these poses (the 6 resident ones of sub-table 22 entry 10, a rising spin) carries one box, a column above his head (forward -12..12, up 108..144,
+# hit id 97), which cannot touch a standing enemy of AvP's size. The strikes use the light punch's reach (forward 26..84, MSHvSF hit id 31) at the heavy punch's body height (up 13..85, ids 70
+# and 112's low edge), a deliberate approximation (rect = forward x0, x1, up y0, y1). Owner-visible: contact geometry of the flurry.
+BZ_BOX = (26, 84, 13, 85)
+BZ_TICKS = int(os.environ.get("WV_BZ_TICKS", "4"))
+BZ = "BZ"
+bz_src = pick_sources("BERS3", None)
+t3b, t3n = TABLES[3]
+bz_recs = []
+t3_donor = None
+for sl in BZ_SLOTS:
+    a_ = t3b + s16(w(rom, t3b + 2 * sl))
+    t3_donor = t3_donor or a_
+    k = first_slot[a_][1] % len(bz_src)
+    pk = bz_src[k]
+    hit_, hurt_ = mv_boxes(pk[0])
+    if os.environ.get('WV_DEBUG'): print('BZ slot', sl, 'pose', k, hex(pk[0]), 'hit rect', hit_, 'hurt', hurt_, 'ids', [w(mv, 0x1ce0f2 + l(mv, pk[0] + 12) * 16 + 2 * j) for j in range(8)])
+    bz_recs.append(dict(src=pk[0], cells=floor_cells(pk[1]), dur=BZ_TICKS, flags=0, hurt=hurt_index(hurt_) if hurt_ else rom[STAND + 8], atk=atk_index(BZ_BOX),
+                        b10=0, b11=rom[STAND + 11], tail=rom[STAND + 12:STAND + 16], donor=None))
+bz_last = dict(bz_recs[-1]); bz_last.update(dur=1, flags=0x8000, atk=0, jump="self", donor=None)
+bz_recs.append(bz_last)
+new_chains[BZ] = bz_recs
+role_of[BZ] = "BERSERKER(own)"
 
 # ---- layout
 off = (len(blk) + 15) & ~15
 REC_LO = off
 at_of = {}            # donor chain start -> window offset of its first record
 rec_at = {}           # donor record address -> window offset
-for a in [STAND, WALK, LP] + [x for x in order if x not in (STAND, WALK, LP)]:
+for a in [STAND, WALK, LP] + [x for x in order if x not in (STAND, WALK, LP)] + [BZ]:
     rs = new_chains[a]
     at_of[a] = off
     for r in rs:
@@ -494,7 +550,7 @@ for a, fl in recs.items():
         for st in order:
             ch = skel(st)
             if a in ch and st in at_of:
-                rec_at[a] = at_of[st] + sum(20 if (new_chains[st][k]["flags"] & 0x8000) else 16 for k in range(ch.index(a)))
+                rec_at[a] = at_of[st] + sum(20 if (new_chains[st][k]["flags"] & 0x8000) else 16 for k in range(min(ch.index(a), len(new_chains[st]) - 1)))
                 break
 # the stand / walk / lp records have no donor addresses of their own: map the donor chains' first records
 for st in (STAND, WALK, LP):
@@ -578,6 +634,10 @@ lines = [
     "#define WV_NAT_REC_LO 0x%xu   /* first native record (window address) */" % (WIN + REC_LO),
     "#define WV_NAT_REC_END 0x%xu" % (WIN + REC_END),
     "#define WV_NAT_SIZE %d" % size,
+    "#define WV_BZ_CHAIN 0x%xu   /* his Berserker chain: first record (window address) */" % (WIN + at_of[BZ]),
+    "#define WV_BZ_N %d   /* strike records before the terminal one */" % (len(bz_recs) - 1),
+    "#define WV_CHAIN %d   /* attack chain length (stages of Schaefer's counter that his slots use), see the knobs in gen_native.py */" % WV_CHAIN,
+    "#define WV_HP_TICKS %d" % (sum(r["dur"] for r in new_chains[HP_SLOT] if r["dur"] < 255)),
     "#define WV_NAT_T 0x%xu   /* his box table T' */" % (WIN + T_off),
     "#define WV_NAT_T_DONOR 0x%xu" % donor_T_addr,
     "#define WV_NAT_TSLOT %du   /* opcode-store offset of the per-character box table entry of character 1 */" % tslot,
@@ -594,7 +654,7 @@ print("block: index tables %d bytes, %d native chains / %d records %d..%d (%d B)
     len(blk), len(new_chains), nrec, REC_LO, REC_END, REC_END - REC_LO, len(poses), len(asm_blob), len(p1_marks), len(T), 12, len(hurt_new), 38, len(atk_new), tchanged, size))
 print("slots", len(slots), "tslot", tslot)
 rep = OUT.with_suffix(".roles.txt")
-rep.write_text("\n".join("%x %s %s %d recs %s" % (a, first_slot.get(a, ("T1", 0)), role_of.get(a, "?"), len(new_chains[a]), "+".join(str(r["dur"]) for r in new_chains[a])) for a in new_chains) + "\n" + "\n".join(report) + "\n")
+rep.write_text("\n".join("%s %s %s %d recs %s" % (a if isinstance(a, str) else "%x" % a, first_slot.get(a, ("T1", 0)), role_of.get(a, "?"), len(new_chains[a]), "+".join(str(r["dur"]) for r in new_chains[a])) for a in new_chains) + "\n" + "\n".join(report) + "\n")
 import collections
 print("roles:", dict(collections.Counter(v.split("(")[0] for v in role_of.values())))
 print("donor attack boxes kept for", len(report), "records (his chain has no attack box)")
