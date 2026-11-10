@@ -90,16 +90,17 @@ disc, three ways (plain integration `integration\w1`, the flag-off and the flag-
 So story box evidence is taken as: the running-core screenshot, or a paused `framebuffer_screenshot`, or burst frames after the 4th. Burst frames 1
 to 3 are never used. (`E:\AvP\learning\lane-wv-talkbox\scripts\talk_walk.py` keeps all of them: `box*_running.png`, `_paused_shot.png`, 12 stepped frames, `_run0..2.png`.)
 
-## 6. Cost of SAT_WV_DIALOG on top of the stage-sprites line (CHAR_FUZZ_KEYS, PACK_TAIL_FILL, ROWTRIM, text-glyphs FONT_KEYS)
+Matched-moment evidence (lane report, E:\AvP\learning\lane-wv-talkbox\deliver): `backdrop_trio_mame_integration_flagon.png` (MAME frame 1290,
+plain integration, this lane with the flag on and the mirrored face: panel, fence, barricades, sprites, face and text in all three),
+`backdrop_stepped_frames_artifact.png` (stepped frame 1, frame 5 and the free-running screenshot of one plain-integration box),
+`backdrop_flagoff_C_and_flagon_D_same_box.png`. The camera at the moment of a box differs run to run in every build (fence on screen in 2 of
+3 plain integration runs and 1 of 3 flag-on runs; the flag-off captures had the door in view), so the fence is a camera position, not a layer.
 
-Merged into a throwaway branch `lane/wv-dialog-on-sprites-20261110` (stage-sprites 7ba526c + this lane) and built with that lane's recipe:
-- Tile keys: the 176 keys the wording draws are all inside `FONT_KEYS` (every two row font glyph at both parities), so on that line the flag adds
-  no tile key: 0 of 176 are new. On the plain integration base (no FONT_KEYS) they cost 889 dropped keys, see section 4.
-- Room: the flag's 4,268 bytes (3,985 data, about 283 code) cross one 4 KB cart page (cart_free 4,340 to 4,168; `cart_pack_room` 1,630,208 to
-  1,626,112), which is the only cost left: 404 more dropped keys in total, all in 8 files of stages 0e (48 to 56 each) and 24 (41 to 65 each), and
-  no Wolverine tile. Dropped keys in the 77 files: 17,721 flag off, 18,125 flag on; fit.py 77 of 77, gate True both, rowtrim on.
-- To avoid the page the wording would have to fit in the 244 free bytes of the page, which it cannot; moving it to a ROM stretch only moves the
-  cost to the spill room.
+## 6. Sprite room
+
+The flag's cart-tail cost (4,268 bytes, one 4 KB page of the sprite pack) and its dropped keys are owned by the stage-sprites lane from
+2026-11-10 (it owns the stage-file tile budget). Facts handed over: on the stage-sprites + text-glyphs line all 176 keys the wording draws are
+already in FONT_KEYS (0 new keys); on the plain integration base they are 889 more dropped keys (section 4).
 
 ## 7. Intended recipe
 
