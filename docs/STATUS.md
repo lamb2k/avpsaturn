@@ -464,3 +464,12 @@ Merged private-origin/fix/home-mode-flow-fps-20261109 (mode flow, transparent op
 - Residual: a text line of 27 or more characters ends flush with the box's right edge (text cannot be scaled; dropping word spaces was rejected).
 - Talk face with Wolverine selected is Schaefer's face in Wolverine's palette (art decision pending, not changed).
 - fit.py on D11: gate True, fail [], 76 files, 0 Wolverine-own dropped, 0 missing. WSL tests: 105 run, the same 30 private-dependency load errors as before the merge, every test_wolverine_* passes; test_round_cache namespace updated for the menu key sets.
+
+## Wolverine's own sounds, 2026-11-10 (lane wv-sounds; branch lane/wv-sounds-20261109; HOST + EMULATOR Yaba own copy port 9722; hardware UNRUN)
+
+Details and evidence: docs/notes/AVP_WOLVERINE_SOUNDS_20261109.md. Sounds are rendered from the user's MSHvSF set through MAME (tools/wolverine/wv_sound.py, mame_wvrender.lua) and added to the Wolverine stage files' sound packs
+(tools/wolverine/wv_audio.py, hooked in guest_rounds.py; `-DSAT_WV_SOUND`, default off, needs the wv_sound/ asset directory). 16 sounds on commands 0x2c0 + id plus the select shout in the front end file; Schaefer's hurt (0x213), KO (0x214),
+select (0x264), special (0x21c, 0x97) and weapon (0x250) sounds now play his clips with no change to wolverine.c. `wv_sfx(id)` (saturn/guests/wolverine/wv_sound.c) is the call for the native and features lanes.
+- Found: the arcade's "Berserker Barrage!" is command 0x206 (QCF + P special), "Tornado Claw!" 0x204, "Drill Claw!" 0x205; the earlier scan missed them. Not heard by a person.
+- Memory: hw_free 964, lw_free 32 (unchanged), cart_free 5,984 (184 bytes). Sound RAM: 95 KB added to a stage pack, 46 KB freed by the remaps, the rest from never-played clips; route plays lost 8 (solo files), 127 to 413 per pair variant.
+- Yaba: all 16 sounds play and match MAME's render in level (within 1.7 dB) and envelope; the Berserker hook calls were not exercised in a running game (see the note).

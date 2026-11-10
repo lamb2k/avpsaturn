@@ -13,14 +13,21 @@ void wv_sfx_pan(int id, int pan)
     unsigned i;
     if ((unsigned)id >= WV_SFX_COUNT) return;
     if ((unsigned)pan > 0x20u) pan = 0x10;
+#ifdef __sh__
     __asm__ volatile("stc sr,%0" : "=r"(save) : : "memory");
     masked = save | 0xf0UL;
     __asm__ volatile("ldc %0,sr" : : "r"(masked) : "memory", "t");
+#else   /* host test (tests/test_wolverine_sound.py): no interrupts to mask */
+    save = masked = 0;
+#endif
     mailbox(0, (unsigned)(cmd >> 8)); mailbox(1, (unsigned)(cmd & 0xff));
     for (i = 2; i < 15; i++) mailbox(i, 0);
     mailbox(7, (unsigned)pan);
     sat_audio_io_write8(0x61801fUL, 0);
+#ifdef __sh__
     __asm__ volatile("ldc %0,sr" : : "r"(save) : "memory", "t");
+#endif
+    (void)masked; (void)save;
 }
 
 void wv_sfx(int id) { wv_sfx_pan(id, 0x10); }

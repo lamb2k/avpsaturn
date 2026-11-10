@@ -101,5 +101,21 @@ class PackRebuild(unittest.TestCase):
         self.assertEqual(rep["size"], len(out))
 
 
+class HostApi(unittest.TestCase):
+    def test_wv_sfx_mailbox_bytes(self):
+        import shutil, subprocess, tempfile
+        cc = shutil.which("gcc") or shutil.which("cc")
+        if not cc:
+            self.skipTest("no host C compiler")
+        with tempfile.TemporaryDirectory() as d:
+            exe = Path(d) / "t"
+            subprocess.run([cc, "-o", str(exe), str(ROOT / "tests/wv_sound_host_test.c"), str(ROOT / "saturn/guests/wolverine/wv_sound.c")], check=True)
+            out = subprocess.run([str(exe)], capture_output=True, text=True, check=True).stdout.splitlines()
+        names = [s["name"] for s in wv_sound.SOUNDS]
+        base = wv_sound.CMD_BASE
+        self.assertEqual(out[:3], ["%04x pan 10 zero 1" % (base + names.index("BERSERKER")), "%04x pan 03 zero 1" % (base + names.index("KO")), "%04x pan 10 zero 1" % (base + names.index("KO"))])
+        self.assertEqual([x for x in out[3:] if x], [])
+
+
 if __name__ == "__main__":
     unittest.main()

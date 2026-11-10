@@ -33,7 +33,8 @@ and the Z80 turns the command number into QSound voice starts (bank, address, pi
 | DP + P (Tornado Claw) | 0x204 (+11) | "Tornado Claw!" (ASR: "Tornado Claw!") |
 | QCF + P | 0x206 (+10), then 0x125 per slash, player 2's hurt voices and 0x642 hits | 1.3 s shout (ASR: "PIZZA KIPARAGE!", i.e. "Berserker Barrage!") then the slash flurry |
 | QCB + K in the air | 0x205 | "Drill Claw!" |
-| hyper QCF QCF + P+P (gauge poked full) | 0x140 (+27), 0x13c (effect object, +42), 0x20e (+43), then every slash 0x124/0x125/0x120/0x121/0x126 + shout 0x20a/0x20c + hurt voice and 0x643 on the target | 0x140 metallic ring (claws out), 0x20e "Let's go." |
+| hyper QCF QCF + LP+MP (gauge poked full) | 0x140 (+27), 0x13c (effect object, +42), 0x20e (+43), then every slash 0x124/0x125/0x120/0x121/0x126 + shout 0x20a/0x20c + hurt voice and 0x643 on the target | 0x140 metallic ring (claws out), 0x20e "Let's go." |
+| hyper QCF QCF + HP+HK | 0x21c (+27) | ASR "RUCKY" (second hyper's shout) |
 | round entrance | 0x207 (frame 1771) | "Let's go, bub." |
 | picked on the select screen | 0x21a | "HAAAAA!" (Ryu: 0x2ba) |
 | he is hit | 0x50c (generic impact), 0x202 / 0x203 voices, 0x130 / 0x12c thump | |
@@ -94,10 +95,26 @@ from native code):
 | landed hit (the collision answer d0 = 1 that wolverine.c already reads) | `WV_SFX_CLAW_HIT_L` (light), `WV_SFX_CLAW_HIT_H` (finisher) |
 | entrance (native lane's T0 entrance set) | `WV_SFX_INTRO` |
 
-## 5. Budget
+## 5. Budget (build `D:\AvP-lanes\lane-wv-sounds\wd`, assets D11 copy, owner recipe + `-DSAT_WV_NATIVE_GFX -DSAT_WV_SOUND -DSAT_WV_SOUND_HOOKS`)
 
-(filled in section 6 with the build numbers)
+- **Program memory** (build.py report, no NO-GO): hw_free 964 (unchanged), **lw_free 32 (unchanged: 0 bytes of low work RAM)**, cart_free 5,984 (the native base b368017 has 6,168: 184 bytes, of which `wv_sfx` is about 140 and the test hook bodies the rest).
+  Without `-DSAT_WV_SOUND` nothing is compiled or changed (the packs and objects are the base's).
+- **Sound RAM** (SCSP, 504 KB of clip room per stage file): the Wolverine rows add 94,989 bytes (16 sounds) to a stage pack and 8,980 (the select shout) to the front end pack. Schaefer's clips that his remaps replace leave the pack
+  (0x213 3.1 KB, 0x214 12.9 KB, 0x21c 14.4 KB, 0x97 9.0 KB, 0x250 7.2 KB, 0x264 13.9 KB in the front end file), which is 46 KB in a stage pack; the rest, about 50 KB, comes from clips the rounds' routes never played, then the fewest-used ones
+  (`wv_audio.py`, same ranking as rounds_config.py). Over the 76 Wolverine stage files (`fitstat` over the base packs, `E:\AvP\learning\lane-wv-soundsitstat.py`): 497 never-used rows dropped (3.64 MB in all, 48 KB a file on average),
+  and **route plays lost: 8 in the 19 solo files, 127 to 413 in the 19 files of each pair variant** (808 in all, 45 files touched; the pair files already drop the most). Every pack stays at or under SCSP_ROOM 0x7e000
+  (largest 515,684 bytes; smallest 436,652 for stage 26; the front end pack 339,190). The front end pack gets smaller (339,190 against 344,118): the select shout is 9 KB against Schaefer's 13.9 KB.
+- **Disc**: every stage and front file keeps its number and its audio field is capped at the same SCSP_ROOM, so the disc grows by nothing but sector rounding (sat.iso 385,658,880 bytes); no new file, no new track. The sound assets (`wv_sound.bin` 103,980 bytes, `wv_sound.json`) are a build input, not a disc file.
 
 ## 6. Verification
 
-(see below)
+- **HOST**: `tests/test_wolverine_sound.py` 7 tests (header and Python list agree, the 0x2c0 range is unused by the game, pack rebuild keeps arcade rows and priorities, remaps, front/stage split, drop by rank never drops a Wolverine row,
+  `wv_sfx` mailbox bytes with a stub player compiled by gcc); WSL `unittest discover`: 112 run, the same 30 private-dependency errors, 0 failures. `fit.py` on a copy of D11: gate true, 76 of 76 files, 0 Wolverine-own tiles dropped
+  (stage24_ma 3,128 Schaefer against 3,080 Wolverine); run without the HUD gfx env, sound does not touch tiles.
+- **EMULATOR** (Yaba copy, port 9722, SoundCore 0, `AVP_SCSP_RAW` dump, stage 02 as Wolverine; runs t2/t3 in `E:\AvP\learning\lane-wv-sounds\yaba`): each of the 16 stage sounds injected through the game's own audio ring was started by the player
+  (sfx_started +1, unknown 0) and heard in the SCSP output; against MAME's render of the same command (`scsp_cmp.py t3`): level within -0.1 to -1.7 dB (median -0.4), duration within 0.06 s of the stored clip except INTRO (0.64 s heard against 0.90 stored: a quiet tail under the detection threshold),
+  10 ms envelope correlation 0.86 to 0.99 for 12 of 16 (INTRO 0.70 and ATK_H 0.72 are trimmed to 0.9 s and 0.5 s, BERSERKER_GRUNT 0.50 is 0.25 s long: too few bins). The game itself sent 0x213 and 0x214 (hurt, KO) while he was hit and killed,
+  which now play his clips; the select shout in the front end plays (0.77 s, onset 0.11 s after the pick, level -6 dB in the mono mean of a panned sound).
+- **Not shown**: `wv_sfx()` called by the Berserker hooks in a running game. The motion input never reached 02000c on Yaba (he is hit again every 28 frames in stage 02 even with health held, so QCF + A is interrupted in 12 tries with three buttons and both
+  directions), and forcing his state to 02000c reset the emulator's connection. The function itself is checked on the host with a stub player and its SH object is 140 bytes; the packs and the player path it feeds were checked by the injections above.
+  The claw swing, shout and hit calls are not made by anything yet (section 4). Nobody has listened to any of it; the pack remap of Schaefer's other own sounds (roles not identified) is unchanged.
