@@ -84,7 +84,7 @@ if os.environ.get("GUEST_ASSETS"):   # bonus characters (SAT_GUESTS builds): gue
         DIALOG = dialog.build(WORK / "rt.bin", GEN)
         DIALOG_KEYS = DIALOG["keys"]   # his stage files hold the tiles the new wording draws
         print("guest dialog:", {k: v for k, v in DIALOG.items() if k not in ("include", "keys")}, flush=True)
-    guest_rounds.extend(ROUNDS, os.environ["GUEST_ASSETS"], HUD, DIALOG_KEYS)
+    guest_rounds.extend(ROUNDS, os.environ["GUEST_ASSETS"], HUD, DIALOG_KEYS, WORK if "SAT_WV_SOUND" in os.environ.get("KERNEL_CFLAGS", "") else None)   # -DSAT_WV_SOUND: Wolverine's sounds (wv_sound/ in the assets) are added to the stage sound packs (tools/wolverine/wv_audio.py)
 # Tile keys (sprites and the three layers) of the screens after a KO with no lives left: the continue countdown, name entry, GAME OVER.
 # The census routes continue at once, so they never saw the low countdown digits, and a stage whose census had no game over lacked the
 # screen's text and picture: the countdown and the "CONTINUE AND GET 1UP!" line drew blank. tools/screen_keys.py writes the list;
@@ -490,6 +490,10 @@ def main():
             sh([sys.executable, REPO / "tools/wolverine/gen_c.py", os.environ["GUEST_ASSETS"], GEN / "wolverine_data.inc"] + ([os.environ["WV_COLOUR"]] if os.environ.get("WV_COLOUR") else []))   # WV_COLOUR: a colours entry of remap.json (default: its default_colour)
             # guests.c dispatches: his whole-list pass is renamed so the group-indexed guests (Mega Man) run first
             home_cold_extra.append(cc(REPO / "saturn/guests/wolverine/wolverine.c", OBJ / "wolverine.o", ["-Os", "-I", GEN, "-I", HERE, "-Dsat_guest_objects=sat_guest_wolverine_objects"] + os.environ.get("KERNEL_CFLAGS", "").split()))
+            if "SAT_WV_SOUND" in os.environ.get("KERNEL_CFLAGS", ""):   # wv_sfx(): Wolverine's own sounds (lane wv-sounds); default off, the objects without the flag are unchanged
+                home_cold_extra.append(cc(REPO / "saturn/guests/wolverine/wv_sound.c", OBJ / "wv_sound.o", ["-Os", "-I", REPO / "saturn/guests/wolverine"]))
+                if "SAT_WV_SOUND_HOOKS" in os.environ.get("KERNEL_CFLAGS", ""):   # test-only Berserker hook bodies; the features lane owns the real ones
+                    home_cold_extra.append(cc(REPO / "saturn/guests/wolverine/wv_sound_hooks.c", OBJ / "wv_sound_hooks.o", ["-Os", "-I", REPO / "saturn/guests/wolverine"]))
         for item in filter(None, os.environ.get("SAT_GUEST_DATA", "").split(";")):   # per-guest drawing code and tables (saturn/guests/<name>)
             gi, d = item.split("=", 1)
             name = {"1": "megaman"}.get(gi)
