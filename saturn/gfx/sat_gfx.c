@@ -371,6 +371,10 @@ extern unsigned long sat_gfx_stage[16];
 #define PACC_END(i)
 #endif
 #ifdef SAT_PERF_STAGES
+u8 sat_s1_memo_off, sat_s1_memo_verify;   /* debugger switches in measurement builds: off = always compute; verify = check every memo hit and every skipped blank row */
+u32 sat_s1m[8];                            /* 0 memo hits, 1 misses, 2 memo verify differences, 3 calls with the story box, 4 blank rows skipped, 5 blank row verify differences */
+#endif
+#ifdef SAT_PERF_STAGES
 /* Measurement only (lane perf-reconcile 11-10): where the layer phase of a draw goes. [0] cache_find calls, [1] pack_find calls, [2] blank_seen hits,
    [3] cache_find hits in the hash, [4] scan loop iterations for a free slot. Read over the debugger. */
 unsigned long sat_gfx_pf[8];
@@ -1347,10 +1351,6 @@ typedef struct { u32 m0; u16 m1; u8 used, hud; u8 drop[4]; } HomeMemo;
 #define HOME_MEMO_N 8
 #endif
 static HomeMemo home_memo[HOME_MEMO_N];
-#ifdef SAT_PERF_STAGES
-u8 sat_s1_memo_off, sat_s1_memo_verify;   /* debugger switches in measurement builds: off = always compute; verify = compute on a hit and count a difference */
-u32 sat_s1m[4];                            /* hits, misses, verify differences, calls with box */
-#endif
 static HOME_OS void home_map(const u32 *m, const u8 *wgt, int hud, int box, u8 *map)
 {
     HomeMemo *e;
@@ -1468,7 +1468,16 @@ static HOME_OS __attribute__((noinline)) int s1_blank_row(u32 row)
     unsigned long d = 0;
     for (c = 1; c < S1_COLS; c++) if (w[c] != w0) goto no;
     if (cache_get(&s1_cache, k, &d) != NOSLOT || cache_get(&s1_cache, k | 1, &d) != NOSLOT) goto no;
-    if ((s1_done >> row) & 1) return 1;
+    if ((s1_done >> row) & 1)
+    {
+#ifdef SAT_PERF_STAGES
+        sat_s1m[4]++;
+        if (sat_s1_memo_verify)
+        {   u32 r = (((s1_key >> 8) & 0xff) + row) & 63, col;
+            for (col = 0; col < 45; col++) if (sh_s1[r * 64 + (((s1_key & 0xff) + col) & 63)] != CLEAR_NAME) sat_s1m[5]++; }
+#endif
+        return 1;
+    }
     s1_done |= 1UL << row;
     return 0;
 no:
