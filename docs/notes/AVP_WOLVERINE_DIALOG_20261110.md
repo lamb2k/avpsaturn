@@ -39,8 +39,31 @@ The stage clear banner's name: the ROM has Schaefer's name three times in the ba
 (0x11a75f), a single centred name message (0x11a7d3), and the "DATA OF FILE" listing (0x11a837, attract profile pages, left alone because it
 sits beside Dutch's picture). The first two read WOLVERINE while his files are loaded.
 
-Memory (flag on): data 3,985 bytes in the cart tail with `guests.c`, which comes out of the sprite pack room (`cart_pack_room`), not hw_free or
-lw_free; code about 200 bytes in the same place. See section 4 for the build's own numbers.
+His stage files also have to hold the tiles the new wording draws: a stage file draws a font cell blank unless its tile pack holds the key
+(cell code << 1 | column parity), and the arcade's file holds only the keys its own lines used (a first build showed "They Kee  coming  b b").
+`dialog.needed_keys()` lists them (176) and `guest_rounds.extend(..., s1_keys)` adds them to the 76 guest stage files; `fit.py` takes them from
+`FIT_DIALOG_KEYS`. The banner's CONGRATULATIONS letters that no stage's census saw are a separate, existing gap (the text-glyphs lane).
+
+## 4. Gates (owner recipe, assets D11; HOST and EMULATOR, no hardware)
+
+Face only, flag off (code 9135ff4; later commits are flag-gated): build rc 0, hw_free 964, lw_free 60, cart_free 4,340, the same as avp_integration_2;
+the ELF is byte-identical to the owner build; the 210 arcade round files are byte-identical and 76 of the 77 guest files differ (front_wv is the
+same); fit.py on a copy of D11: 77 of 77 (76 stage files and front_wv), gate True; screen keys 0 of 285 stage files missing, caption keys 0 of 287;
+WSL unittest 112 run, the 30 known private-dependency errors, 0 failures. check_round_pages is not in this base (it and round_keep.json come with
+the stage-sprites lane's fuzz-page fix), so it was not run.
+
+SAT_WV_DIALOG=1 (d35375b): build rc 0, hw_free 964, lw_free 60, cart_free 4,168. The wording and its originals are 3,985 bytes plus about 200
+bytes of code in the cart tail, which moves the sprite pack's end by 4,096 bytes (`cart_pack_room` 1,630,208 to 1,626,112), not hw_free or
+lw_free. fit.py with the 176 keys: 77 of 77, gate True, no Wolverine tile dropped; 889 more dropped keys in total than the flag-off build, all in
+16 files that already drop keys (stages 1c, 1e, 24; the most is 133 in stage1c_ma). The arcade round files differ from the flag-off build (132 of
+210: the cold code moved, and kept round files carry the build's bytes), so flag-on is its own disc, not a delta.
+
+HOST: tests/test_wolverine_dialog.py (font round trip, record and hash checks, the C sync over a ROM buffer: off never changes a byte, on writes
+exactly the wording and the name fields, off restores, twice on equals once, other speakers untouched). EMULATOR: with the flag on and BONUS
+CHARACTERS off, Schaefer shows the arcade's own line and face.
+
+Speed: the owner's rule of 2026-11-10 (UseSh2Cache=false in every Yaba copy) was applied from 08:40; the face captures and the dialog captures
+through B2_off ran before it. No speed or timing number is reported.
 
 ## 3. Where the wording appears
 
