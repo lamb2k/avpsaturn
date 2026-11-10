@@ -38,12 +38,20 @@ extern HomeCfg sat_home_cfg;
 typedef struct { const char *label; u8 off; u16 ram; u8 n; const char *const *names; } Opt;
 #ifdef SAT_GUESTS
 #include "guests.h"
+#ifdef SAT_UNLOCK_DEBUG
+#define GAME_OPTS 6
+#else
 #define GAME_OPTS 5
+#endif
 #else
 #define GAME_OPTS 4
 #endif
 static const char *const on_off[] = { "OFF", "ON" };
 static const char *const sound[] = { "MONAURAL", "STEREO" };
+#ifdef SAT_UNLOCK_DEBUG
+static const char *const unlock_names[] = { "NO", "YES" };
+extern long sat_reveal_call(int which, u32 a, u32 b, u32 c);
+#endif
 /* The game's own eight extend rules (its text table at 0xdd60; index 0 prints nothing). */
 static const char *const extend[] = { "NONE", "100000 ONLY", "400000 ONLY", "1000000 ONLY", "100000 400000", "400000 500000", "800000 600000", "1200000 1000000" };
 static const Opt opts[] = {
@@ -53,6 +61,9 @@ static const Opt opts[] = {
     { "LIVES", 0xff, 0, 9, 0 },          /* not the game's: sat_home_cfg.lives, see opt_get */
 #ifdef SAT_GUESTS
     { "BONUS CHARACTERS", 0xfe, 0, 4, sat_guest_row_names },   /* not the game's: sat_guest_sel (guests.c), OFF by default */
+#ifdef SAT_UNLOCK_DEBUG
+    { "REVEAL SEEN", 0xfd, 0, 2, unlock_names },                /* test builds only: whether the reveal has already switched Wolverine on; NO lets the next ending do it again (written to backup RAM at once, boot.c) */
+#endif
 #endif
     { "AUDIO", 0x04, 0x81d2, 2, sound },
     { "DEMO SOUND", 0x03, 0x81ad, 2, on_off },
@@ -73,11 +84,24 @@ static const u8 start_stock[8] = { 0, 1, 2, 4, 0, 1, 2, 4 };
 static int opt_get(const Opt *o) {
 #ifdef SAT_GUESTS
     if (o->off == 0xfe) return sat_guest_sel;
+#ifdef SAT_UNLOCK_DEBUG
+    if (o->off == 0xfd) return (int)(*(volatile unsigned long *)0x06013fdcu & 1u);
+#endif
 #endif
     return o->off == 0xff ? (sat_home_cfg.lives ? sat_home_cfg.lives - 1 : start_stock[sat_home_get(0x12) & 7]) : sat_home_get(o->off); }
 static void opt_set(const Opt *o, int v) {
 #ifdef SAT_GUESTS
-    if (o->off == 0xfe) { sat_guest_sel = (u8)v; return; }
+    if (o->off == 0xfe) {   /* the player's choice, kept in backup RAM */
+#ifdef SAT_WV_REVEAL
+        if (sat_guest_sel != (u8)v) { sat_guest_sel = (u8)v; sat_guest_save(); }
+#else
+        sat_guest_sel = (u8)v;
+#endif
+        return;
+    }
+#ifdef SAT_UNLOCK_DEBUG
+    if (o->off == 0xfd) { sat_reveal_call(2, v ? 1 : 2, 1, 0x02754000u); return; }   /* the flag word and backup RAM */
+#endif
 #endif
     if (o->off == 0xff) sat_home_cfg.lives = (u8)(v + 1); else { sat_home_set(o->off, v); RAMB[o->ram] = (u8)v; } }
 /* MSHvSF's OPTION MODE layout: the whole picture under the panel, the screen's name in large letters at the top, rows two apart from row 7 with
@@ -481,8 +505,14 @@ void rush_result(void)
 static u8 flow;                        /* 0 off, 1 armed (waits for the game to leave attract), 2 skipping the story, 3 stage select: waiting for the select to end */
 static u8 stage_after;                 /* the title list's STAGE SELECT MODE was picked */
 static u32 flow_t;
+#ifdef SAT_WV_REVEAL
+extern void sat_reveal_poll(void);   /* guests.c: the post-credits reveal, once per walk of the dispatcher (kernel.c f_d86 -> sat_home_poll -> here) */
+#endif
 void sat_home_flow(void)
 {
+#ifdef SAT_WV_REVEAL
+    sat_reveal_poll();
+#endif
     if (!flow) return;
     if (flow == 1) {
         if (G(0xff81b0)) return;       /* still in attract: the start path is running */

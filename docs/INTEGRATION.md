@@ -6,7 +6,7 @@ An item leaves "In progress" only when it is merged here; a paused or parked lan
 
 ## Merge note 2026-11-10 (integration lane, evening)
 
-avp/integration holds, merged in this order: stage-sprites 7ba526c (text-glyphs inside), native Wolverine 035d44c, stage-menu 6b005e9, versus 2ada807, stage-sprites final 9298450 (SAT_TILE_ROWTRIM=2), talk box 7b02556, sounds 0246dd1, native e0a0f1c (heal, flash, unhittable Berserker, +0xd2 test in every build). The reveal (b2c0abf) is merged on branch `wip/integration-with-reveal-20261110` only: with it hw_free is 248, so it waits until the reveal lane moves its 272 B of resident code into cold or cart code. Lanes: merge avp/integration into your branch.
+avp/integration holds, merged in this order: stage-sprites 7ba526c (text-glyphs inside), native Wolverine 035d44c, stage-menu 6b005e9, versus 2ada807, stage-sprites final 9298450 (SAT_TILE_ROWTRIM=2), talk box 7b02556, sounds 0246dd1, native e0a0f1c (heal, flash, unhittable Berserker, +0xd2 test in every build). The reveal (aaa05a0, overlay REVCODE.BIN read from disc at the ending) is merged (4d105c0); disc 3g carries it with SAT_GUEST_DEFAULT=0. Lanes: merge avp/integration into your branch.
 
 Memory, owner recipe, assets D11 (hw_free / lw_free / cart_free; Yaba-built, measured on the build of each step):
 
@@ -17,7 +17,8 @@ Memory, owner recipe, assets D11 (hw_free / lw_free / cart_free; Yaba-built, mea
 | + final sprites 9298450 (rowtrim 2) + talk box (7bcd7ab) | 520 | 84 | 5,172 |
 | + sounds (57e7d43) | 520 | 84 | 4,988 |
 | + native e0a0f1c: heal, flash, unhittable (45c867c) = disc 3e | 520 | 84 | 4,556 |
-| + reveal b2c0abf (a4b9757, not on avp/integration) | 248 | 80 | 7,132 (crosses a 4 KB cart step; the reveal alone costs hw -272) |
+| + reveal b2c0abf first version (a4b9757, wip branch only) | 248 | 80 | 7,132 (crosses a 4 KB cart step) |
+| + reveal aaa05a0 (overlay) = disc 3g (4d105c0), SAT_GUEST_DEFAULT=0 | 496 | 84 | 4,168 |
 
 ## Merged (in avp/integration)
 
@@ -49,7 +50,7 @@ colour entry `eighties`, his sprite in the 80s red-brown/gold to match the art; 
 DUEL_FILES=0 CHAR_FUZZ_KEYS=1 PACK_TAIL_FILL=1 CHAR_FUZZ_KEY_STAGES= WV_SOUND=/e/AvP/learning/lane-wv-sounds/assets3 POSE_KEYS=0 KEEP_ROUND_FILES=1 GUEST_ASSETS=/e/AvP/learning/lane-wolverine-merge/D11 KERNEL_CFLAGS="-DSAT_HOME -DSAT_DUEL_MENU -DSAT_GUESTS -DSAT_GUEST_DEFAULT=1 -DSAT_WV_JUMP=1 -DSAT_GUEST_FAST_LIST=1 -DSAT_GUEST_NAMES_LAZY=1 -DSAT_GUEST_PAL_KEEP=1   -DSAT_TILE_ROWTRIM=2 -DSAT_WV_NATIVE_GFX -DSAT_WV_DIALOG=1 -DSAT_WV_SOUND -DSAT_WV_HEAL -DSAT_WV_FLASH=1 -DSAT_WV_FLASH_FREEZE=12 -DWV_SFX_BERSERKER=13" python saturn/rt/build.py <workdir>      # also: copy WORK/char_fuzz.json from E:\AvP\learning\lane-stage-sprites (private, not in git)
 ```
 Owner decisions in the recipe: SAT_WV_JUMP=1 (jump apex 88 px); his size unchanged (SAT_WV_SCALE off); native only, no skin; DUEL_FILES=0; Berserker unhittable (WV_BZ_HURT default 0 in the native code now, no env override needed).
-**When the reveal goes in, owner discs use `-DSAT_GUEST_DEFAULT=0`** (owner model: Wolverine off by default, OPTION toggle, auto-on at the first ending; the reveal is on by default in every SAT_GUESTS build after its merge, `REVEAL=0` builds without it, `REVEAL_VOICE=E:/AvP/learning/lane-wv-sounds/wav/reveal_voice_intro.bin`, keep SAT_UNLOCK_DEBUG out). With SAT_GUEST_DEFAULT=1 the reveal never plays.
+**With the reveal merged (disc 3g on), owner discs use `-DSAT_GUEST_DEFAULT=0` and `-DSAT_WV_REVEAL` (automatic in SAT_GUESTS builds)** (owner model: Wolverine off by default, OPTION toggle, auto-on at the first ending; the reveal is on by default in every SAT_GUESTS build after its merge, `REVEAL=0` builds without it, `REVEAL_VOICE=E:/AvP/learning/lane-wv-sounds/wav/reveal_voice_intro.bin`, keep SAT_UNLOCK_DEBUG out). With SAT_GUEST_DEFAULT=1 the reveal never plays.
 Do not set SAT_WV_SOUND_HOOKS with SAT_WV_HEAL/FLASH (the features hooks own the Berserker events; build.py skips the test hooks then).
 Asset sets: D11 as above; sprite fuzz data `char_fuzz.json` is private and goes in the work dir.
 
@@ -59,7 +60,8 @@ Updated 2026-11-10 evening.
 
 | Item | Branch | State |
 | --- | --- | --- |
-| Post-credits reveal + Options toggle + auto-on | lane/wolverine-reveal-20261109 b2c0abf | merged only on `wip/integration-with-reveal-20261110` (a4b9757): hw_free 248 with it (reveal costs 272 B of resident code, one 4 KB cart step). The reveal lane moves that code into cold/cart code; then merge and rebuild with SAT_GUEST_DEFAULT=0. Ending test on 3f (reveal build) in this file's discs section. |
+| Native knockdown/jump-pose fix, Schaefer tables gated to a live Wolverine player, grab off for Wolverine | lane/wv-native-gfx-20261109 (next head) | not pushed yet; merge into the next disc |
+| Stage select over title art (stage-menu-bg) | lane/stage-menu-bg-20261110 2502a30 | waits for its hw move |
 | Opening cutscene is missing Schaefer and some sprites; Wolverine shows jump poses when hit; the automatic grab uses placeholder poses | native / sprites lanes | being fixed (owner known issues for disc 3e) |
 | Saturn hardware FPS test discs | E:\AvP\package-hwtest-20261109 (pre-integration) | rebuild from avp/integration with an owner disc (owner to confirm) |
 
@@ -69,9 +71,11 @@ Dropped (owner 2026-11-09: no more work on the sprite-replacement Wolverine): cl
 
 | Disc | Commit | Package | State |
 | --- | --- | --- | --- |
-| avp_integration_3e | 45c867c | E:\AvP\package-integrationvp_integration_3e | current: everything above except the reveal; SAT_GUEST_DEFAULT=1 |
+| avp_integration_3g | 4d105c0 | E:\AvP\package-integrationvp_integration_3g | current: 3e + reveal; SAT_GUEST_DEFAULT=0 (Wolverine off on a fresh save; Options toggle or the reveal turns him on) |
+| avp_integration_3e | 45c867c | E:\AvP\package-integrationvp_integration_3e | everything except the reveal; SAT_GUEST_DEFAULT=1; superseded by 3g |
 | avp_integration_3a | 4c3dc09 | E:\AvP\package-integrationvp_integration_3a | first native disc (sprites 7ba526c rowtrim 1, native 035d44c, stage menu, versus); Berserker hittable on it; superseded by 3e |
 | avp_integration_2 | 70af5ed | E:\AvP\package-integrationvp_integration_2 | skin Wolverine; superseded |
 
+Gates for 3g (4d105c0): build rc 0, hw_free 496 / lw_free 84 / cart_free 4,168, STORE 162,336 of 262,144, fit.py D11 77/77, check_round_pages/screen/caption 0 of 287, six HOST goldens clean, WSL unittest 151 run / 30 known errors / 0 failures, reveal end to end in Yaba (flags word 0x80000000 -> 0x80000301, survives a restart), cache ON smoke (Warrior): 1,192 vblanks, no fatal, gfx peak 23,779 / game peak 3,467 / overruns 34 (disc 2: 23,650 / 3,471 / 37).
 Gates for 3e: see the report of 2026-11-10 (build rc 0, hw_free 520 / lw_free 84 / cart_free 4,556, STORE 162,336 of 262,144, fit.py D11 77/77 with the dialog keys, check_round_pages / check_screen_keys / check_caption_keys 0 of 287, six HOST goldens clean, WSL unittest 145 run / 30 known errors / 0 failures, Yaba cache off and cache ON smoke, Berserker unhittable, heal Wolverine-only).
 avp_integration_1 was WITHDRAWN 11-09 (sprites vanished, half speed). wolverine-v4, package-fps and package-home-combined are superseded.

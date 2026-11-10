@@ -15,6 +15,10 @@ extern const int sat_guest_count;
 extern unsigned char sat_guest_sel;          /* 0 OFF; bits per guest (row values: OFF, each guest, BOTH) */
 extern const char *const sat_guest_row_names[];
 extern const int sat_guest_row_n;
+#ifdef SAT_WV_REVEAL
+/* OPTION MODE changed sat_guest_sel: save it in backup RAM. The reveal (reveal.c, an overlay) switches Wolverine on and saves it the first time. */
+void sat_guest_save(void);
+#endif
 /* Slot bits taken by an active guest. */
 int sat_guest_slots(void);
 /* Stage file for a row and the characters in play: the guest's variant when a guest's slot is in play, else the arcade's choice. */
