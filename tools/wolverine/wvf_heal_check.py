@@ -34,7 +34,7 @@ def main():
                 healed = True
                 heals[pl] += 1; heal_states[(pl, "%06x" % st)] += 1
                 firsts.setdefault(pl, v)
-                if not ok_state or hp != qhp + a.amt and qhp + a.amt <= 100:
+                if not ok_state or hp <= qhp:   # hp above qhp + amt: a pick-up in the same update
                     viol.append((v, pl, "heal in state %06x hp %d->%d" % (st, qhp, hp)))
             if hp < qhp:
                 drops += 1
