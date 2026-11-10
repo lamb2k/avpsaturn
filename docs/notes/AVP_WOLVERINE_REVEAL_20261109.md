@@ -127,3 +127,6 @@ Owner: "The shared ending is fine for now, just the reveal shouldn't occur if he
   - (b) second ending on the same backup file (flags 0x80000301): no reveal (frames seen none), the stock GAME OVER card shows (look/e2e/sb_card_after_120.png), then the front end; flags stay 0x80000301.
   - (c) fresh backup file, Wolverine turned ON in OPTION MODE first (flags 0x80000300, saved setting): no reveal, stock card, flag UNCHANGED (0x80000300, bit 0 still clear), so a later ending with him turned OFF would still play the reveal once.
   Captures: look/e2e/sa_reveal_frame1..3.png, sa_front_end.png, sb_card_after_120.png, sc_card_after_120.png, sc_options_on.png.
+- Gates on w11 (build rc 0; the full build n4 took 2930 s, the quick rebuild with the final reveal.c and the uncut voice 124 s): fit.py with the D11 copy gate True, 76/76, 0 failed; check_screen_keys, check_caption_keys (323 files, 0 short) and check_round_pages (210 files) PASS;
+  unittest 137 ran, 30 known errors, 1 skipped, no failures; hw_free 288, lw_free 80, cart_free 7,920 (7,964 in the build before the final reveal.c); `cart_pack_room` 1,626,112 against 1,630,208 in the native-only build, one 4 KB step
+  (32 tiles) lower after merging avp/integration; flag-off objects are unchanged by this update (reveal.c and the loader code are only built under -DSAT_WV_REVEAL).
