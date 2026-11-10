@@ -143,6 +143,17 @@ int main(int argc, char **argv)
         self.assertTrue(set(changed) <= allowed)
         self.assertEqual(orig[0x1180:0x1200], on[0x1180:0x1200])                      # another speaker's record is never touched
 
+    def test_needed_keys_are_the_cells_of_the_new_lines_at_their_parity(self):
+        keys = set(dialog.needed_keys())
+        # "They keep coming, bub." with the first character at an odd column: T at parity 1, k (index 5) at parity 0, both cells of each
+        self.assertIn(0x2c8 << 1 | 1, keys)
+        self.assertIn((0x2c8 + 0x10) << 1 | 1, keys)
+        self.assertIn(0x2e9 << 1 | 0, keys)
+        self.assertNotIn(0x100 << 1 | 1, keys)                # spaces are never asked for
+        for c in "WOLVERINE":                                   # the banner's name at both parities
+            for par in (0, 1):
+                self.assertIn(dialog.GLYPH[c] << 1 | par, keys)
+
     def test_lines_fit_and_use_only_the_font(self):
         for at, (l1, l2) in dialog_lines.LINES.items():
             self.assertLessEqual(len(l1), 27, "%x" % at)   # 28 is the field; the last cell stays blank as in the arcade's lines

@@ -133,8 +133,31 @@ def build(rom_path, out_dir):
     text = "\n".join(out) + "\n"
     if not inc.exists() or inc.read_text() != text:
         inc.write_text(text)
-    return dict(include=str(inc), records=len(dialog_lines.LINES), data_bytes=len(data), glyphs=len(glyphs),
+    keys = needed_keys()
+    import json
+    (p / "guest_dialog_keys.json").write_text(json.dumps(keys))   # for tools/wolverine/fit.py (FIT_DIALOG_KEYS)
+    return dict(include=str(inc), keys=keys, records=len(dialog_lines.LINES), data_bytes=len(data), glyphs=len(glyphs), s1_keys=len(keys),
                 names=len(names), table_bytes=len(data) + 2 * len(glyphs) + sum(2 * n for _, n, _, _ in dialog_lines.NAMES))
+
+
+def needed_keys():
+    """Scroll 1 tile keys (cell code << 1 | column parity) the new wording draws: the story font's top and bottom cells of every character of every
+    new line, at the parity of its column (the arcade starts a line at a map column of odd parity: character i is at parity (i + 1) & 1; found
+    by checking the arcade's own stage files, which hold exactly those keys for its lines), and the banner's name at both parities (its columns
+    are not fixed). A stage file draws a cell blank unless its tile pack holds the key, and the arcade's file holds only the keys its own lines used."""
+    keys = set()
+    for l1, l2 in dialog_lines.LINES.values():
+        for line in (l1, l2):
+            for i, c in enumerate(line):
+                if c == " ":
+                    continue
+                for cell in (GLYPH[c], GLYPH[c] + 0x10):
+                    keys.add(cell << 1 | ((i + 1) & 1))
+    for at, n, text, align in dialog_lines.NAMES:
+        for c in text:
+            for cell in (GLYPH[c], GLYPH[c] + 0x10):
+                keys.update((cell << 1 | 0, cell << 1 | 1))
+    return sorted(keys)
 
 
 def table(rom_path):
