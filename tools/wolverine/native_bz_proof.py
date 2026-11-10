@@ -29,6 +29,7 @@ SCHEDULE = [(0, []), (6, ["a"]), (9, []), (22, ["a"]), (25, []), (38, ["a"]), (4
             (260, ["down"]), (266, ["down", "right"]), (272, ["right"]), (276, ["right", "a"]), (280, []), (360, ["left"]), (420, []), (480, ["a"]), (483, []), (500, ["a"]), (503, []), (700, [])]
 if os.environ.get("PROOF_BZ"):   # Berserker: QCF (facing right: down, down+right, right) then attack, then watch; PROOF_BZ=<frames to watch>; PROOF_BZ2=1 does it twice
     SCHEDULE = [(0, []), (6, ["down"]), (10, ["down", "right"]), (14, ["right"]), (18, ["right", "a"]), (21, [])]
+    if os.environ.get("PROOF_BZPOKE"): SCHEDULE = [(0, [])]
     if os.environ.get("PROOF_BZ2"): SCHEDULE += [(100, ["down"]), (104, ["down", "right"]), (108, ["right"]), (112, ["right", "a"]), (115, [])]
     SCHEDULE += [(int(os.environ["PROOF_BZ"]), [])]
 if os.environ.get("PROOF_LONG"):   # unassisted: let the enemies hit him (no health top-up), attack taps now and then, to reach knockdown, getup and KO
@@ -68,6 +69,24 @@ def snap(s, tag, f, keys):
     return row
 
 
+def pin(s, dx):
+    """test assist (PROOF_PIN=<px>): the nearest live tag-0c enemy is put dx px in front of the player at his depth, every frame, so a contact test does not depend on the enemies' own movement"""
+    a = s.ram(0x8380, 0x100)
+    px, pz, ph = int.from_bytes(a[0x10:0x12], "big"), int.from_bytes(a[0x18:0x1a], "big"), int.from_bytes(a[0x14:0x16], "big")
+    face = a[0x0f] & 1
+    buf = s.ram(0x9a00, 0x2d00); best = None
+    for o in range(0, len(buf) - 0x80, 0x100):
+        b = buf[o:o + 0x100]
+        if b[0] and b[8] == 0x0c and b[1] != 0:
+            d = abs(int.from_bytes(b[0x10:0x12], "big") - px)
+            if best is None or d < best[0]: best = (d, o)
+    if best is None: return
+    base = s.syms["RAMB"] + 0x9a00 + best[1]
+    x = (px + dx) if face else (px - dx)
+    for off, val in ((0x10, x & 0xffff), (0x14, ph), (0x18, pz)) + (((0x40, 0x190),) if os.environ.get("PROOF_PINHP") else ()):
+        s.m.call("memory_write", address=hex(base + off), size="word", value=hex(val))
+
+
 def paused_leg(s, tag, dbg, sel, shots):
     m = s.m
     m.call("pause"); m.call("load_state", slot=SLOT); time.sleep(0.5)
@@ -86,6 +105,9 @@ def paused_leg(s, tag, dbg, sel, shots):
         s.set(keys)
         if f % 10 == 0 and not os.environ.get("PROOF_NOKEEP"): keep_alive(s)
         if os.environ.get("PROOF_KILL") and f == int(os.environ["PROOF_KILL"]): s.m.call("memory_write", address=hex(s.syms["RAMB"] + 0x83c0), size="word", value=hex(1))   # harness assist, every leg alike: one hit from death
+        if os.environ.get("PROOF_PIN"): pin(s, int(os.environ["PROOF_PIN"]))
+        if os.environ.get("PROOF_BZPOKE") and f == int(os.environ["PROOF_BZPOKE"]) and "bz_req" in s.syms:   # ask for the action directly (the motion is not the thing under test)
+            s.m.call("memory_write", address=hex(s.syms["bz_req"]), size="byte", value=hex(6))
         snap(s, tag, f, list(keys))
         m.call("framebuffer_burst", directory=OUT + "/" + tag, frames=1, prefix="f%04d_" % f)
     s.set([])

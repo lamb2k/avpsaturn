@@ -136,6 +136,7 @@ extern u8 *PAGE[256];
 #ifdef SAT_WV_NATIVE_GFX
 #include "wv_native.inc"
 volatile u8 wv_nat_dbg = 1;
+static const u32 wv_tb0[4] = {0x162f90u, 0x163032u, 0x163074u, 0x1630f6u};   /* Schaefer's four index tables */
 u32 sat_wv_tb[4] = {0x162f90u, 0x163032u, 0x163074u, 0x1630f6u};   /* the lifted code's table-base immediates read these (build.py): Schaefer's own tables, or the relocated ones while on */
 #define OPXB ((volatile u8 *)0x02600000u)
 static u8 wv_nat_on, wv_nat_row;
@@ -144,9 +145,12 @@ static void opx_wr(u32 o, u32 v) { volatile u16 *p = (volatile u16 *)(OPXB + o);
 static void wv_nat_slots(int apply)
 {
     int k;
+    u32 at = 0;
     for (k = 0; k < WV_RELOC_SLOTS; k++) {
-        u32 v = opx_rd(wv_reloc_slots[k]);
-        if (apply ? v < 0x200000u : v >= WV_NAT_WIN) opx_wr(wv_reloc_slots[k], apply ? v + WV_NAT_DELTA : v - WV_NAT_DELTA);
+        u32 v;
+        at += (u32)wv_reloc_delta[k] << 1;
+        v = opx_rd(at);
+        if (apply ? v < 0x200000u : v >= WV_NAT_WIN) opx_wr(at, apply ? v + WV_NAT_DELTA : v - WV_NAT_DELTA);
     }
     {
         u32 v = opx_rd(WV_NAT_TSLOT);
@@ -157,19 +161,20 @@ static void wv_nat_sync(void)   /* once a vblank (pad hook) and on every player 
 {
     if ((sat_guest_sel & 1) && (wv_nat_dbg & 1)) {
         u8 row = (u8)WV_PALROW1;
-        if (!wv_nat_on) {
+        if (!wv_nat_on) {   /* the pad hook (vblank) and the player update both call this: every write below is absolute, so two callers in a row do the same as one (an earlier += doubled the table bases: yaba 11-10, record 0x49d070, hang) */
             PAGE[0x30] = wv_blk;
             wv_nat_slots(1);
-            { int k; for (k = 0; k < 4; k++) sat_wv_tb[k] += WV_NAT_DELTA; }
+            { int k; for (k = 0; k < 4; k++) sat_wv_tb[k] = wv_tb0[k] + WV_NAT_DELTA; }
             wv_nat_on = 1; wv_nat_row = 0;
         }
         if (row != wv_nat_row) {
             int k;
-            for (k = 0; k < WV_NAT_NP1; k++) wv_blk[wv_nat_p1[k]] = (u8)((wv_blk[wv_nat_p1[k]] & 0xe0) | row);
+            u32 o = WV_NAT_P1_FIRST;
+            for (k = 0; k < WV_NAT_NP1; k++) { o += wv_nat_p1[k]; wv_blk[(o << 2) | 3] = (u8)((wv_blk[(o << 2) | 3] & 0xe0) | row); }
             wv_nat_row = row;
         }
     } else if (wv_nat_on) {
-        { int k; for (k = 0; k < 4; k++) sat_wv_tb[k] -= WV_NAT_DELTA; }
+        { int k; for (k = 0; k < 4; k++) sat_wv_tb[k] = wv_tb0[k]; }
         wv_nat_slots(0);
         wv_nat_on = 0;
     }
@@ -801,11 +806,17 @@ int sat_guest_objects(u8 *obj, int count, int max, u8 *pal0)
 #else
     if (any)
 #endif
+    {   /* his two palette rows: the first takes Schaefer's row, the second the stage's free row (the row macro reads game RAM: once, not in the loop) */
+        u8 *rw[2];
+        int r;
+        rw[0] = pal0 + WV_SCH_PAL * 32; rw[1] = pal0 + (u8)WV_PALROW1 * 32;
+        for (r = 0; r < 2; r++)
 #if SAT_GUEST_FAST_LIST
-    for (k = 0; k < 16; k += 2) { put32b(pal0 + WV_SCH_PAL * 32 + k * 2, (u32)wv_pal[k] << 16 | wv_pal[k + 1]); put32b(pal0 + WV_PALROW1 * 32 + k * 2, (u32)wv_pal[16 + k] << 16 | wv_pal[17 + k]); }
+            for (k = 0; k < 16; k += 2) put32b(rw[r] + k * 2, (u32)wv_pal[r * 16 + k] << 16 | wv_pal[r * 16 + k + 1]);
 #else
-    for (k = 0; k < 16; k++) { put16(pal0 + WV_SCH_PAL * 32 + k * 2, wv_pal[k]); put16(pal0 + WV_PALROW1 * 32 + k * 2, wv_pal[16 + k]); }
+            for (k = 0; k < 16; k++) put16(rw[r] + k * 2, wv_pal[r * 16 + k]);
 #endif
+    }
     return count;
 }
 #else
