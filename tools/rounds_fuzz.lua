@@ -25,7 +25,30 @@ local B = bucket(0)
 local PK = {}
 math.randomseed(tonumber(os.getenv("ROUNDS_SEED") or "1"))
 local irq = 0
+-- ROUNDS_SCRIPTLOG=1 (lane stage-sprites): the sprite script reader at 0xa9cbe reads a script word with move.w (a0)+,d0 and jumps through an 8 entry table at 0xa9ce4 indexed by it
+-- (fatal 0xe2 at 0xa9cc4 when the index is outside it). The table read happens with a0 one word past the script word: record script address, index and object (a4, low word) per stage word.
+local SL = {}
+if os.getenv("ROUNDS_SCRIPTLOG") then
+    rw_sl = ops:install_read_tap(0xa9ce4, 0xa9cf3, "rw_sl", function(o)
+        local a0 = (cpu.state["A0"].value - 2) & 0xffffff
+        local t = SL[cur]; if not t then t = {}; SL[cur] = t end
+        t[a0] = ((o & 0xffffe) - 0xa9ce4) | ((cpu.state["A4"].value & 0xffff) << 8)   -- index in the low byte, the object (a4) above it
+    end)
+end
+WIN_FRAME = 0
 local function dump()
+    if WIN > 0 then
+        for s, ps in pairs(WIN_T) do
+            local h = assert(io.open(string.format("%s/w%02x.txt", root, s & 0xff), "w"))
+            for pg in pairs(ps) do h:write(string.format("p %d\n", pg)) end
+            h:close()
+        end
+    end
+    if os.getenv("ROUNDS_SCRIPTLOG") then
+        local h = assert(io.open(root .. "/scriptlog.txt", "w"))
+        for s, t in pairs(SL) do for a, w in pairs(t) do h:write(string.format("%x %x %x\n", s, a, w)) end end
+        h:close()
+    end
     do local h = assert(io.open(root .. "/fuzz_pal.txt", "w")); for p, set_ in pairs(PK) do for k in pairs(set_) do h:write(string.format("%d %x\n", p, k)) end end; h:close() end
     for s, b in pairs(R) do
         local h = assert(io.open(string.format(s >= 0x100 and "%s/k%02x.txt" or "%s/s%02x.txt", root, s & 0xff), "w"))
@@ -37,7 +60,13 @@ local function dump()
         h:close()
     end
 end
-rw_rd = prog:install_read_tap(0, 0x1fffff, "rw_rd", function(o) B.reads[o & 0x1ffffe] = true end)
+-- ROUNDS_WINDOW=N (lane stage-sprites): also the ROM pages read in the first N frames after each stage word change, per entered stage (wNN.txt, "p page"). The Saturn kernel loads a
+-- stage file only after the word has held 12 vblanks, so the old file must still hold what the game reads in that window; build.py keeps all of the next stage's pages for it.
+WIN, WIN_T, WIN_UNTIL, WIN_B = tonumber(os.getenv("ROUNDS_WINDOW") or "0"), {}, 0, nil
+rw_rd = prog:install_read_tap(0, 0x1fffff, "rw_rd", function(o)
+    B.reads[o & 0x1ffffe] = true
+    if WIN_B and WIN_FRAME < WIN_UNTIL then WIN_B[(o & 0x1ffffe) >> 10] = true end
+end)
 rw_od = ops:install_read_tap(0, 0x10ffff, "rw_od", function(o) B.oreads[o & 0x10fffe] = true end)
 -- the game's sender, mailbox at 0x618000 and 0x618002
 local mb = {}
@@ -111,12 +140,14 @@ local nocoin = os.getenv("ROUNDS_NOCOIN") ~= nil
 local want, picked, story = tonumber(os.getenv("ROUNDS_CHAR") or "0"), nil, false
 rw_f = emu.add_machine_frame_notifier(function()
     frame = frame + 1
+    WIN_FRAME = frame
     local stage, sec, att, cred, top, p0 = rd(0xff81e8), rb(0xffd182), rb(0xff81b0), rb(0xff818c), rb(0xff8384), rb(0xff8380)
     local x = rd(0xff8390)
     local b = (att ~= 0 or rb(0xff8001) ~= 2) and 0 or stage   -- as the Saturn loader picks its file
     if nocheat and b ~= 0 and (top == 4 or p0 ~= 1) then b = 0x100 end   -- KO, continue and game over: can happen in any stage, so kept in all
     if b ~= cur then
         cur = b; B = bucket(b)
+        if WIN > 0 then WIN_T[b] = WIN_T[b] or {}; WIN_B = WIN_T[b]; WIN_UNTIL = frame + WIN end
         log:write(string.format("STAGE %x frame %d sec %d\n", b, frame, sec))
         dump()
         if once then

@@ -36,10 +36,13 @@ def plan(raw, keys, main_room, free):
         inmain = min(n_tiles, room // 128)
         left = n_tiles - inmain
         segs, need, first = [], left, inmain
-        for a, n in free:
+        for r in free:
             if not need:
                 break
-            take = min(need, (n & -SEC) // 128)   # whole sectors: the loader pads a region to a sector, which must stay in the stretch
+            a, n = r[0], r[1]
+            # whole sectors: the loader pads a region to a sector, which must stay in the stretch. A run that ends in a page the file keeps may spill 1 KB into it
+            # (r[2]): assemble() fills that tail with the ROM's own bytes for the page, which the file needs there anyway.
+            take = min(need, (n if len(r) > 2 and r[2] else n & -SEC) // 128)
             if take:
                 segs.append((first, a, take)); first += take; need -= take
         if need:
@@ -51,7 +54,9 @@ def plan(raw, keys, main_room, free):
     return dict(key=key, tile=tile, secs=secs, inmain=inmain, segs=segs)
 
 
-def assemble(p, pack_addr):
+def assemble(p, pack_addr, rom=None):
+    """rom: the ROM image (offsets as the free runs). A spill region is padded to its sector with the ROM's bytes after it, not zeros: where the sector reaches into
+    the page after a run, that page holds what the file keeps there."""
     key, tile, secs, inmain, segs = p["key"], p["tile"], p["secs"], p["inmain"], p["segs"]
     main = bytearray(HEAD)
     keyoff = []
@@ -75,7 +80,10 @@ def assemble(p, pack_addr):
     regions = [(pack_addr, bytes(main))]
     off = inmain * 128
     for first, a, take in segs:
-        regions.append((ROMB + a, tile[0][(first) * 128:(first + take) * 128]))
+        d = tile[0][(first) * 128:(first + take) * 128]
+        if rom is not None and len(d) % SEC:
+            d += bytes(rom[a + len(d):a + len(d) + (-len(d) % SEC)])
+        regions.append((ROMB + a, d))
     return regions
 
 

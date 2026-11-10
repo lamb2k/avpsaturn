@@ -45,7 +45,8 @@ def settings(environ):
     if shared < 0 or minimum < 0:
         raise ValueError("ROUND_SHARED_MIN and ROUND_MIN_RUN must be nonnegative")
     return dict(shared_min=shared, min_run=minimum,
-                arena_keep=environ.get("ARENA_KEEP") or None)
+                arena_keep=environ.get("ARENA_KEEP") or None,
+                tail_fill=environ.get("PACK_TAIL_FILL", "0") == "1")
 
 
 def load(work, environ):
@@ -99,7 +100,7 @@ def selected_files(rounds, stages=None):
     return selected
 
 
-def free_runs(rounds, ends, shared_min=10, min_run=1, arena_keep=None):
+def free_runs(rounds, ends, shared_min=10, min_run=1, arena_keep=None, tail_fill=False):
     """Same code-page, shared-page, and ARENA_KEEP exclusions as round_files()."""
     page = rounds["page"]
     if page <= 0 or ROM_BYTES % page:
@@ -141,7 +142,8 @@ def free_runs(rounds, ends, shared_min=10, min_run=1, arena_keep=None):
                 start = q
             if not available and start is not None:
                 if q - start >= min_run:
-                    out.append([start * page, (q - start) * page])
+                    # PACK_TAIL_FILL as build.py: a run ending in a kept plain ROM page may use its odd page
+                    out.append([start * page, (q - start) * page] + ([True] if tail_fill and q < ROM_BYTES // page and q in keep and q not in code else []))
                 start = None
         out.sort(key=lambda item: -item[1])
         return out
@@ -156,6 +158,9 @@ def run(raw, f, keys, room, free, rank, screens, guest_keys=(), fit_fn=None):
         fit_fn = rounds_pack.fit
     keys = [set(k) for k in keys]
     frank = {int(key): value for key, value in rank.items()}
+    if f.get("fuzz_keys") or f.get("body_keys"):   # CHAR_FUZZ_KEYS, as build.py
+        import char_fuzz
+        char_fuzz.rank(f, frank)
     frank.update({key: 1 << 39 for key in guest_keys})
     if not f["name"].startswith("front"):   # front_wv too
         keys = [k | extra for k, extra in zip(keys, screens)]
@@ -178,6 +183,13 @@ def main(argv=None, environ=None, fit_fn=None, own_keys=None):
         report = adir / ("fit" + suffix + ".json")
         config = settings(environ)
         rounds, ends, screens, rank = load(pathlib.Path(argv[0]), environ)
+        if environ.get("CHAR_FUZZ", "1") != "0":   # tools/char_fuzz.py as build.py applies it (WORK/char_fuzz.json; absent = nothing changes)
+            sys.path.insert(0, str(REPO / "tools"))
+            import char_fuzz
+            data = char_fuzz.load(pathlib.Path(argv[0]))
+            if data:
+                print("char fuzz:", char_fuzz.augment(rounds, data, keys=environ.get("CHAR_FUZZ_KEYS", "0") == "1",
+                                                      pages=environ.get("CHAR_FUZZ_PAGES", "1") == "1"), flush=True)
         selected = selected_files(rounds, stages)
         room = ends[-1][0] - CART_PACK
         free = free_runs(rounds, ends, **config)
@@ -202,7 +214,7 @@ def main(argv=None, environ=None, fit_fn=None, own_keys=None):
             source = sources.get(base.get("gfx"), raw)
             p0, d0 = run(source, base, base["keys"], room, free, r, screens, fit_fn=fit_fn)
             guest = dict(base, name=name + "_wv", rank_from=name)
-            keys = [set(base["keys"][0]) - own | wk] + [set(k) for k in base["keys"][1:]]
+            keys = [set(base["keys"][0]) - own - set(assets["keys"]) | wk] + [set(k) for k in base["keys"][1:]]   # as guest_rounds.extend
             p1, d1 = run(source if hud_stage is None else hud_stage, guest, keys, room, free, rank.get(name, {}), screens, wk, fit_fn)
             missing = sorted(set(d1) & wk)
             tiles = lambda p: p["inmain"] + sum(x[2] for x in p["segs"]) if p is not None else None
