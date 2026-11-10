@@ -43,14 +43,14 @@ def step(v,s):
         if getattr(s,"m2",None) is not None and pick>=s.m2+2 and not getattr(s,"selwait",0):   # after both start presses   # the select screen: it changes resolution, so wait for the picture (s36.log: about 3 s after mode 2)
             s.selwait=1
             for j in range(4): time.sleep(0.8); s.shot(f"char_select_{j}")
-            for side,keys in (("",os.environ.get("P1MOVE","")),("p2",os.environ.get("P2MOVE",""))):
+            for side,keys in (("p2",os.environ.get("P2MOVE","")),("",os.environ.get("P1MOVE",""))):   # P2 first: a cursor does not step onto the cell the other holds (P1 right onto Schaefer waits for P2 to leave it)
                 for kk in keys.split(","):
                     if kk: s.pulse(side+kk,.15); time.sleep(.5)
-            time.sleep(.4); s.shot("char_select_moved"); lastp=time.time()
+            time.sleep(.4); s.shot("char_select_moved"); lastp=time.time(); s.moved=1
         if now-lastp>.6:
             lastp=now; pick+=1
             s.pulse("start" if pick%2 else "p2start",.1)
-            if pick%6==0: s.pulse("c",.08); s.pulse("p2c",.08)
+            if pick%6==0 and (getattr(s,"moved",0) or not (os.environ.get("P1MOVE") or os.environ.get("P2MOVE"))): s.pulse("c",.08); s.pulse("p2c",.08)   # C confirms: not before the cursors are where the run wants them
         s.set([]); return
     if t0 is None: t0=now; s.shot("duel_begin"); s.log("CHARS d2",a[0x380+0xd2],a[0x480+0xd2],"81cc",a[0x1cc],"round",s.word("sat_rounds"),"loads",s.word("sat_rounds",4),"stage",hex(u16(0x1e8)),"menu",s.word("sat_duel_opt",0,4).to_bytes(4,"big").hex() if "sat_duel_opt" in s.syms else "")
     pc=(s.word("sat_smash",0,2),s.word("sat_smash",2,2)); st=(s.word("sat_smash",16,1),s.word("sat_smash",17,1)); rg=s.word("sat_smash",44)
@@ -140,6 +140,9 @@ def step(v,s):
     elif dx<-40: k+=["left","p2right"]
     if dy>4: k+=["down","p2down"]   # the harness's P2 up/down raise and lower +0x14 the other way round from P1 (s58, s59)
     elif dy<-4: k+=["up","p2up"]
+    if os.environ.get("KEEPDEPTH"):   # stay on the visible floor: both closing in on each other's depth drifted to the stage's lowest line, below the picture (0e, 1c)
+        if py>int(os.environ["KEEPDEPTH"]): k=[x for x in k if x!="down"]+["up"]
+        if qy>int(os.environ["KEEPDEPTH"]): k=[x for x in k if x!="p2up"]+["p2down"]
     if abs(dx)<=60 and abs(dy)<=6:
         if n%6<2: k.append("a")
         elif 3<=n%6<5: k.append("p2a")

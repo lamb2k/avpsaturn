@@ -9,11 +9,11 @@ ps = importlib.util.module_from_spec(_spec); _spec.loader.exec_module(ps)
 GRID = {"warrior": (0, 0), "schaefer": (0, 1), "wolverine": (0, 1), "linn": (1, 0), "hunter": (1, 1)}
 def moves(frm, to):
     (r0, c0), (r1, c1) = GRID[frm], GRID[to]
-    out = []
-    if c1 > c0: out += ["right"]
-    if c1 < c0: out += ["left"]
+    out = []   # vertical first: a cursor does not step onto the cell the other player's cursor holds (Schaefer to Linn by left, down landed on Hunter)
     if r1 > r0: out += ["down"]
     if r1 < r0: out += ["up"]
+    if c1 > c0: out += ["right"]
+    if c1 < c0: out += ["left"]
     return ",".join(out)
 if os.environ.get("P1CHAR"): os.environ["P1MOVE"] = moves("warrior", os.environ["P1CHAR"])
 if os.environ.get("P2CHAR"): os.environ["P2MOVE"] = moves("schaefer", os.environ["P2CHAR"])
@@ -49,12 +49,14 @@ def step(v, s):
                 s.log("BURST", i, "at", round(el), "->", str(d).replace("\\", "/"), "stage", s.ram(0x81e8, 2).hex(), "chars", s.ram(0x8380 + 0xd2, 1).hex(), s.ram(0x8480 + 0xd2, 1).hex())
     if t0 and os.environ.get("SCANAT") and (v - v0) / 60.0 >= float(os.environ["SCANAT"]) and ("scan", 0) not in snapped:   # records whose x word (+0x10) lies right of the camera: who is the figure at the screen edge
         snapped.add(("scan", 0))
-        cam = int.from_bytes(s.ram(0x8278, 2), "big"); M = s.ram(0x8600, 0x7a00)
+        cam = int.from_bytes(s.ram(0x8278, 2), "big"); M = s.ram(0x8380, 0x7c80)
         out = []
         for o in range(0, len(M) - 0x40, 0x20):
-            x = int.from_bytes(M[o + 0x10:o + 0x12], "big")
-            if M[o] and cam + 250 <= x <= cam + 520: out.append("%x:%s x%d" % (0x8600 + o, M[o:o + 12].hex(), x))
-        s.log("SCAN cam", cam, len(out), " | ".join(out[:40]))
+            x = int.from_bytes(M[o + 0x10:o + 0x12], "big"); y = int.from_bytes(M[o + 0x14:o + 0x16], "big")
+            if M[o] and cam - 60 <= x <= cam + 460: out.append("%x:%s x%d y%d" % (0x8380 + o, M[o:o + 12].hex(), x, y))
+        s.log("SCAN cam", cam, len(out), " | ".join(out[:60]))
+        P = s.ram(0x8380, 0x300)
+        for j in range(3): s.log("PLAYER", j, "act", P[j * 0x100 + 4:j * 0x100 + 8].hex(), "d2", P[j * 0x100 + 0xd2], "x", int.from_bytes(P[j * 0x100 + 0x10:j * 0x100 + 0x12], "big"), "y", int.from_bytes(P[j * 0x100 + 0x14:j * 0x100 + 0x16], "big"), "rec", P[j * 0x100:j * 0x100 + 16].hex())
         C = s.ram(0xce80, 0x800)
         s.log("CTLPOOL", " | ".join("%x:%s/%s" % (0xce80 + o, C[o:o + 8].hex(), C[o + 0x40:o + 0x50].hex()) for o in range(0, 0x800, 0x40) if C[o]))
     if t0 and os.environ.get("RINGOUT"):   # RINGOUT=15,35: at those game seconds P2 is thrown 420 px sideways (a ring-out, the effect that showed the noise in the earlier lane's stills)
