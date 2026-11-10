@@ -317,7 +317,7 @@ def gen_sources():
 
 def cc(src, obj, extra=()):
     newest = max(src.stat().st_mtime, (HERE / "lift_target.h").stat().st_mtime)
-    if src.name in ("kernel.c", "pad.c", "sat_gfx.c", "home.c", "home_cold.c", "guests.c", "megaman.c", "wolverine.c", "wv_features.c", "game_bind.c"):
+    if src.name in ("kernel.c", "pad.c", "sat_gfx.c", "home.c", "home_cold.c", "fps_hud.c", "guests.c", "megaman.c", "wolverine.c", "wv_features.c", "game_bind.c"):
         newest = max(newest, (HERE / "sat_rt.h").stat().st_mtime, time.time() if os.environ.get("KERNEL_CFLAGS") else 0)
     if src.name == "sat_gfx.c":
         newest = max(newest, (src.parent / "sat_gfx.h").stat().st_mtime)
@@ -505,6 +505,8 @@ def main():
             if name:
                 sh([sys.executable, REPO / f"tools/{name}/gen_runtime.py", pathlib.Path(d) / "remap.json", GEN / f"guest_{name}.inc"])
                 home_cold_extra.append(cc(REPO / f"saturn/guests/{name}/{name}.c", OBJ / f"guest_{name}.o", ["-Os", "-I", GEN] + os.environ.get("KERNEL_CFLAGS", "").split()))
+    if "SAT_FPS_HUD" in os.environ.get("KERNEL_CFLAGS", ""):   # performance readout (lane perf-reconcile): cold code in the cart tail, default off
+        home_cold_extra.append(cc(HERE / "fps_hud.c", OBJ / "fps_hud.o", ["-Os", "-I", GEN] + os.environ.get("KERNEL_CFLAGS", "").split()))
     home_cold = [cc(HERE / "home_cold.c", OBJ / "home_cold.o", ["-Os"] + os.environ.get("KERNEL_CFLAGS", "").split())] if home else []
     home_cold += home_cold_extra
     if OVERRIDES:

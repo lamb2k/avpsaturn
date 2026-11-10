@@ -2598,6 +2598,15 @@ extern volatile unsigned long sat_vlog[16 * 4];
 #define VLOG(v) UNC_PTR(unsigned long, &sat_vlog[((v) & 15) * 4])
 #define SFRT() GFX_TICKS()
 #endif
+#ifdef SAT_FPS_HUD
+#include "sat_rt.h"
+extern int sat_fps_hud(u32 shown, int fresh);
+static u32 fps_next;
+static int fps_on;
+#define FPS_HUD(x) x
+#else
+#define FPS_HUD(x)
+#endif
 void sat_gfx_draw(void)
 {
     u16 layers = snap.layers;
@@ -2735,6 +2744,15 @@ void sat_gfx_draw(void)
             { int e; for (e = 62 * 16 + 1; e < 64 * 16; e++) put16(CRAM_AT(e), sat_gfx_colour(cram_shadow[e])); }   /* the game's colours back, MSB as everywhere */
         }
         HUD(if (snap.hud && !snap.home) { hud_layer(home_was || !hud_was); hud_was = 1; } else hud_was = 0;)
+#ifdef SAT_FPS_HUD
+        /* The performance readout (saturn/rt/fps_hud.c, cart code): called once a second and when the menus have just gone; the layer bit is set below. */
+        if (!snap.home)
+        {
+            if (home_was || (int)(sat_dbg.vblanks - fps_next) >= 0) { fps_next = sat_dbg.vblanks + 60; sat_fps_hud(UNC32(plot_shown), home_was); }
+            fps_on = 1;
+        }
+        else fps_on = 0;
+#endif
         home_was = snap.home;
     }
 #endif
@@ -2775,7 +2793,7 @@ void sat_gfx_draw(void)
     bgon &= SAT_GFX_BGMASK;
 #endif
 #ifdef SAT_HOME
-    if (snap.home HUD(|| snap.hud)) bgon |= 8;
+    if (snap.home HUD(|| snap.hud) FPS_HUD(|| fps_on)) bgon |= 8;
 #endif
     VDP2R(0x20) = bgon;
     VDP2R(0x70) = (u16)((s2x + CPS_LEFT + SAT_GFX_CROP_X - NUDGE_X) & 0x7ff);
