@@ -42,6 +42,8 @@ extern unsigned char sat_guest_sel;
 #define EN_FIRST 0xff9580u
 #define EN_N 20
 #define EN_STRIDE 0xc0u
+/* Who is Wolverine: the game's character index in the block (+0xd2: 0 Warrior, 1 Schaefer, 2 Hunter, 3 Linn), as wolverine.c's is_wolverine() since 035d44c. Byte +1 reads 1 for every live player. */
+#define WVF_IS_WV(b) ((sat_guest_sel & 1) && R8((b) + 0xd2) == 1)
 /* The state lives in the cart (the .data of the cart tail, RAM on the RAM cartridge), not in low work RAM: the linker script puts every .bss there and lw_free is 32 bytes. */
 #define CARTVAR __attribute__((section(".data")))
 
@@ -157,12 +159,12 @@ static void wv_super(int who)
 void wv_on_berserker_start(int i) { fl_done = 0; if (SAT_WV_FLASH == 1) wv_super(i); else (void)i; }   /* a start is always a new move, whatever became of the last one's end */
 void wv_on_berserker_connect(int i, int damage) { (void)i; (void)damage; if (SAT_WV_FLASH == 2) wv_super(i); }
 void wv_on_berserker_end(int i) { (void)i; fl_done = 0; }
-#if !defined(SAT_WV_NATIVE_GFX)   /* HOST test only (the native build gets these events from wolverine.c): his state 02000c, edge and enemies' health */
+#if !defined(SAT_WV_NATIVE_GFX)   /* HOST test only (the native build gets these events from wolverine.c): his special 020008 (attack + jump), edge and enemies' health */
 static u8 hs_on CARTVAR;
 static u16 hs_hp CARTVAR;
 static void wv_host_events(int i)
 {
-    int in = R8(PL(i) + 4) == 2 && R8(PL(i) + 5) == 0 && R8(PL(i) + 6) == 0x0c;
+    int in = R8(PL(i) + 4) == 2 && R8(PL(i) + 5) == 0 && R8(PL(i) + 6) == 0x08;
     u32 b; u16 t = 0;
     for (b = EN_FIRST; b < EN_FIRST + EN_N * EN_STRIDE; b += EN_STRIDE) if (R8(b) && R8(b + 8) == 0x0c) t = (u16)(t + R16(b + 0x40));
     if (in) { if (!hs_on) { hs_on = 1; wv_on_berserker_start(i); } else if (t < hs_hp) wv_on_berserker_connect(i, hs_hp - t); hs_hp = t; }
@@ -192,12 +194,12 @@ int sat_guest_wolverine_tick(unsigned long a6)
     wvf_enemies();
     r = wv_tick_inner(a6);
 #if defined(SAT_WV_FLASH) && !defined(SAT_WV_NATIVE_GFX)
-    if ((a6 == PL(0) || a6 == PL(1)) && (sat_guest_sel & 1) && R8(a6 + 1) == 1) wv_host_events((int)((a6 - PL(0)) >> 8));
+    if ((a6 == PL(0) || a6 == PL(1)) && WVF_IS_WV(a6)) wv_host_events((int)((a6 - PL(0)) >> 8));
 #endif
 #ifdef SAT_WV_HEAL
     if (a6 == PL(0) || a6 == PL(1)) {
         int i = (int)((a6 - PL(0)) >> 8);
-        if ((sat_guest_sel & 1) && R8(a6 + 1) == 1) wv_heal(i);
+        if (WVF_IS_WV(a6)) wv_heal(i);
         else hl_t[i] = 0;
     }
 #endif
