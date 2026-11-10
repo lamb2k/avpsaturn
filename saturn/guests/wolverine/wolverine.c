@@ -585,8 +585,9 @@ __attribute__((weak)) void wv_on_berserker_start(int i) { (void)i; }
 __attribute__((weak)) void wv_on_berserker_connect(int i, int damage) { (void)i; (void)damage; }
 __attribute__((weak)) void wv_on_berserker_end(int i) { (void)i; }
 #endif
-static u8 wv_bz_on_[2], bz_hitp[2];   /* bz_hitp: a pass hit something since the last look (set by sat_wv_bz_hit) */
-static u32 bz_rec[2], bz_fired[2];   /* bz_rec: his current strike record; bz_fired: the strike record the connect call was made for */
+static u8 wv_bz_on_[2], bz_hitp[2];   /* bz_hitp: looks left until the connect call of a strike that landed (armed by sat_wv_bz_hit, once per strike) */
+static u16 bz_acc[2];   /* enemy health lost since the strike was armed */
+static u32 bz_rec[2], bz_fired[2];   /* bz_rec: his current strike record; bz_fired: the strike record last armed */
 static u16 wv_bz_php[20];   /* health of each block of the enemy pool at the last look (0xffff = the block is not in use) */
 /* The enemy pool: 20 blocks of 0xc0 from ff9580 (the boss is ffa3c0), health +0x40. Returns the health the live blocks lost since the last call (snap: only take the numbers). A block that is
    not in use is unknown, not zero (a block that leaves or joins the pool must not read as damage); a dying block reads 0xffff and counts as 0, so the killing blow is seen. */
@@ -607,13 +608,12 @@ static void wv_berserker_events(int i)
     int in = R8(PL(i) + 4) == 2 && R8(PL(i) + 5) == 0 && R8(PL(i) + 6) == 0x0c;
     if (in) {
         if (!wv_bz_on_[i]) { wv_bz_on_[i] = 1; bz_hitp[i] = 0; bz_fired[i] = 0; wv_pool_loss(1); wv_on_berserker_start(i); }
-        else {   /* connect: once per landed strike (the first pass that hit since the last look, whatever number of targets it and the strike's other passes hit), with the pool's loss of this tick */
-            int d = wv_pool_loss(0);
-            if (bz_hitp[i] && bz_fired[i] != bz_rec[i]) { bz_fired[i] = bz_rec[i]; wv_on_berserker_connect(i, d); }
-            bz_hitp[i] = 0;
+        else {   /* connect: once per landed strike. A pass that hit arms it (sat_wv_bz_hit, first hit of the strike only); the game applies the damage a tick later, so the call is made on the second look after, with the loss since */
+            bz_acc[i] = (u16)(bz_acc[i] + wv_pool_loss(0));
+            if (bz_hitp[i] && !--bz_hitp[i]) wv_on_berserker_connect(i, bz_acc[i]);
         }
     } else if (wv_bz_on_[i]) {
-        if (bz_hitp[i] && bz_fired[i] != bz_rec[i]) wv_on_berserker_connect(i, wv_pool_loss(0));   /* the last strike landed on the tick the state ended */
+        if (bz_hitp[i]) wv_on_berserker_connect(i, bz_acc[i] + wv_pool_loss(0));   /* the last strike landed just before the state ended */
         bz_hitp[i] = 0; wv_bz_on_[i] = 0; sat_wv_bz &= (u8)~(1u << i); wv_on_berserker_end(i);
     }
 }
@@ -704,7 +704,10 @@ void sat_wv_bz_hit(unsigned long a6, unsigned long a1)   /* collision wrapper, a
         if (!bz_tgt[i][k].n && f == -1) f = k;
     }
     if (f >= 0) { bz_tgt[i][f].t = (u16)a1; bz_tgt[i][f].n = 1; }
-    bz_hitp[i] = 1;
+    if (bz_fired[i] != bz_rec[i]) {   /* arm the connect call, once per strike (the call of the strike before, if still waiting for its damage, is made first) */
+        if (bz_hitp[i]) wv_on_berserker_connect(i, bz_acc[i]);
+        bz_fired[i] = bz_rec[i]; bz_hitp[i] = 2; bz_acc[i] = 0;
+    }
     if (!bz_paid[i]) {   /* the stock drain (f_1b492) on the first connect */
         u16 hp = R16(PL(i) + 0x40);
         bz_paid[i] = 1;

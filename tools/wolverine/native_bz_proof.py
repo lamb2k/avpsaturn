@@ -97,6 +97,13 @@ def pin(s, dx):
             d = abs(int.from_bytes(b[0x10:0x12], "big") - px)
             if best is None or d < best[0]: best = (d, o)
     if best is None: return
+    if os.environ.get("PROOF_ONE"):   # one target only: the first block chosen stays the pinned one, every other live enemy is put 400 px behind him
+        if "one" not in pin.__dict__: pin.one = best[1]
+        if pin.one != best[1] and buf[pin.one] and int.from_bytes(buf[pin.one + 0x40:pin.one + 0x42], "big") < 0x8000: best = (0, pin.one)
+        for o in range(0, 20 * 0xc0, 0xc0):
+            b = buf[o:o + 0xc0]
+            if o != best[1] and b[0] and b[1] != 0:
+                s.m.call("memory_write", address=hex(s.syms["RAMB"] + 0x9580 + o + 0x10), size="word", value=hex((px - 400 if face else px + 400) & 0xffff))
     base = s.syms["RAMB"] + 0x9580 + best[1]
     x = (px + dx) if face else (px - dx)
     for off, val in ((0x10, x & 0xffff), (0x14, ph), (0x18, pz)) + (((0x40, 0x190),) if os.environ.get("PROOF_PINHP") else ()):
