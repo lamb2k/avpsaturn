@@ -22,7 +22,8 @@ NM = "E:/AvP/worktrees/saturn-hw/.deps/joengine/Compiler/WINDOWS/sh-elf/bin/nm.e
 def setup(cue, video="1", extra=None):
     ini = D / "yaba" / "yabause.ini"
     kv = {r"General\CdRomISO": cue, r"Debug\McpServerPort": str(PORT), r"Video\VideoCore": video, r"General\SaveStates": str(D / "saves").replace("\\", "/"),
-          r"Memory\Path": str(D / "saves/bkram.bin").replace("\\", "/"), r"General\EnableEmulatedBios": "true", r"Cartridge\Type": "7", "autostart": "true", r"Sound\SoundCore": "0"}
+          r"Memory\Path": str(D / "saves/bkram.bin").replace("\\", "/"), r"General\EnableEmulatedBios": "true", r"Cartridge\Type": "7", "autostart": "true", r"Sound\SoundCore": "0",
+          r"General\UseSh2Cache": "false"}   # owner rule 11-10: every Yaba copy runs with UseSh2Cache=false; a running Yaba can rewrite its ini, so this is set before each launch
     kv.update(extra or {})
     out, seen = [], set()
     for l in ini.read_text(encoding="latin-1").splitlines():
