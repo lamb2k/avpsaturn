@@ -12,9 +12,14 @@ typedef unsigned char u8; typedef unsigned short u16; typedef unsigned int u32;
 #include "sat_rt.h"
 extern u32 sat_gfx_plot_waits;           /* swaps put off for an unfinished plot, since boot */
 extern unsigned short sat_gfx_colour(unsigned short cps);
+#ifdef SAT_HOME_FONT_COLD
+extern const u8 sat_home_pal[64];
+#define home_pal sat_home_pal
+#else
 static const u8 home_pal[64] __attribute__((aligned(2))) = {
 #include "home_pal.inc"
 };
+#endif
 #define VDP2R(o) (*(volatile u16 *)(0x25F80000UL + (o)))
 #define VDP2_VRAM ((volatile u16 *)0x25E00000UL)
 #define CRAM ((volatile u16 *)0x25F00000UL)

@@ -1176,12 +1176,19 @@ extern char sat_home_text[28][44];
 #define SAT_HOME_RATIO 11   /* logo kept at about 0.45 of its brightness, as MSHvSF OPTION MODE keeps its own (0.47); measured from stills at 2, 5, 8 (lane-home overlay/dark_sheet.png) */
 #endif
 volatile unsigned short sat_home_ratio = SAT_HOME_RATIO; /* panel colour calculation ratio (CCRNB NBG3), 0 to 31 */
+#ifdef SAT_HOME_FONT_COLD
+/* Lane perf-reconcile 11-10, default off: the menu font cells and the two text palettes live in the cart tail (saturn/rt/home_font_cold.c) instead of high work RAM: 1,920 bytes. Read only when a menu opens. */
+extern const u8 sat_home_font[58 * 32], sat_home_pal[64];
+#define home_font sat_home_font
+#define home_pal sat_home_pal
+#else
 static const u8 home_font[58 * 32] __attribute__((aligned(4))) = {
 #include "home_font.inc"
 };
 static const u8 home_pal[64] __attribute__((aligned(2))) = {
 #include "home_pal.inc"
 };
+#endif
 #endif
 #define HUD_ROWS_TOP 5   /* rows 0..4: names, health bars, the enemy label and its bar (row 4 was centre-cropped, 16 px off the rest) */
 #define HUD_ROWS_BOT 26
@@ -1445,6 +1452,30 @@ static HOME_OS void home_row_map(u32 row, u32 (*bm)[2], int sel, u8 *map)
     home_map(m, wgt, snap.hud_flush && (row < 6 || row >= 25), snap.hud_flush && !full && a == 8 && (b == 10 || b == 11), map);
 }
 #endif
+#if defined(SAT_S1_BLANKROWS) && !(SAT_GFX_FIT && defined(SAT_HOME))
+#error SAT_S1_BLANKROWS needs the fitted scroll 1 of the home build
+#endif
+#ifdef SAT_S1_BLANKROWS
+/* Exact skip of blank rows (lane perf-reconcile 11-10, default off). A row of scroll 1 whose cells are all one word with no tile (both column parities miss the cache:
+   a blank tile) draws CLEAR_NAME in every column at the same map row, whatever the column fit does. Once such a row has been written for this map position it is written
+   again only when its position changes (any scroll 1 move, a menu, a pack swap). Bit r of s1_done: row r is blank and clear in VDP2 at s1_key. In play 19 of the 29 rows
+   are blank: the cell loop, the column fit and the lookups of those rows are skipped (about 1.4 K of the 3 K ticks of a scroll 1 redraw after SAT_S1_MEMO, Yaba cache ON). */
+static u32 s1_done, s1_key;
+static HOME_OS __attribute__((noinline)) int s1_blank_row(u32 row)
+{
+    const u32 *w = snap.s1 + row * S1_COLS;
+    u32 c, w0 = w[0], k = (w0 >> 16) << 1;
+    unsigned long d = 0;
+    for (c = 1; c < S1_COLS; c++) if (w[c] != w0) goto no;
+    if (cache_get(&s1_cache, k, &d) != NOSLOT || cache_get(&s1_cache, k | 1, &d) != NOSLOT) goto no;
+    if ((s1_done >> row) & 1) return 1;
+    s1_done |= 1UL << row;
+    return 0;
+no:
+    s1_done &= ~(1UL << row);
+    return 0;
+}
+#endif
 static void draw_scroll1(u16 sx, u16 sy)
 {
     const u32 *cell = snap.s1;
@@ -1460,8 +1491,15 @@ static void draw_scroll1(u16 sx, u16 sy)
     diag_miss0 = sat_gfx_stats.missing;
 #endif
 #endif
+#ifdef SAT_S1_BLANKROWS
+    {   u32 key = (x0 >> 3) | ((y0 >> 3) << 8) | ((u32)snap.home << 16);
+        if (key != s1_key || !drawn_valid) { s1_key = key; s1_done = 0; } }
+#endif
     for (row = 0; row <= SAT_GFX_SCREEN_H / 8; row++)
     {
+#ifdef SAT_S1_BLANKROWS
+        if (row < S1_ROWS && s1_blank_row(row)) continue;
+#endif
 #if SAT_GFX_FIT && defined(SAT_HOME)
         u8 map[44];
         PACC_BEGIN();
