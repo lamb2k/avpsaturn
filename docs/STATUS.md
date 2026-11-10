@@ -2,6 +2,10 @@
 
 Only source of current state. Candidate branch `codex/avp-wolverine-fps-next-20261109`. Backlog: docs/BACKLOG.md.
 
+## Stage select names, ENDING entry, boot PRESS START, 2026-11-10 (lane stage-menu; EMULATOR Yaba; HOST tests; hardware UNRUN)
+
+`lane/stage-menu-20261110`. Stage select shows the arcade's own numbering, STAGE n-m (7 stages, the game's round table 0xcca0), with the boss name (table 0xac6c8) or SPECIAL STAGE (stage word 14) on a second row; the pick also sets the round byte ff8222. New last entry ENDING: the arcade reaches stage word 26 only from the stage 24 clear, and a start on 26 runs the stage setup 0x91e4 whose 19-word table has no entry for it (fatal 0xe2 at 0x91ec, reproduced on integration), so the entry starts the stage 24 arena and sets the boss-down and stage-clear flags (ff822a, ff81f3) in its play state; the game plays its own clear, ending, credits, GAME OVER and ranking (Yaba, Warrior and Wolverine, no fatal). The boot title's PRESS START BUTTON / ONLY ONE PLAYER (title messages 2 to 4) now draws as PRESS START, centred. hw_free 692 (integration 964), lw_free 60, cart_free 8020 (4340). Details, table and evidence: docs/notes/AVP_STAGE_MENU_20261110.md.
+
 ## Wolverine select screen and HUD art, 2026-11-09 (HOST; SH-2 compile of kernel.c and guests.c; link, disc, MAME, EMULATOR and HARDWARE UNRUN)
 
 `lane/wolverine-art-20261109` on the FPS-compare base. The artist's five PNGs (select picture, name plate, HUD portrait, HUD name, ranking icon) replace Schaefer's art while Wolverine is on. Converted offline by `tools/wolverine/hud_art.py` into the slot character's own tile codes (select 0x2c20.., plate 0x0e30/0x0f30.., HUD portrait 0x1ae6.., HUD name 0x0be0..), so the arcade's own maps draw them: no draw code, no RAM table. The ranking icon is the HUD portrait's tiles (checked on the arcade's pictures), so piece E adds nothing of its own.
