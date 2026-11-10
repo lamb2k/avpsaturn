@@ -127,6 +127,7 @@ static u8 save_block[128] __attribute__((aligned(2))) = {
 int sat_home_get(int off) { return save_block[off]; }
 void sat_home_set(int off, int v) { save_block[off] = (u8)v; save_block[off + 0x30] = (u8)v; }
 extern volatile int sat_home_hold;
+extern int sat_home_snap_frame(void);   /* home_cold.c */
 extern void sat_home_loading(int);
 extern void sat_home_poll(void);
 extern void sat_duel_step(void);
@@ -765,13 +766,14 @@ void sat_vblank(void)
 #ifdef SAT_HOME
     if (sat_home_hold) {   /* the game is held: picture and sound only */
         if (UNCACHED(gfx_done) == UNCACHED(gfx_handed)) {
-            sat_gfx_snapshot_begin();
+            u32 held = (u32)sat_home_snap_frame();   /* stage select's held title picture (home_cold.c): 1 = hand the slave the snapshot it has */
+            if (!held) sat_gfx_snapshot_begin();
             UNCACHED(gfx_handed) = UNCACHED(gfx_handed) + 1;
             SLAVE_WAKE = 0xffff;
 #ifdef SAT_CPU_SLACK_PROFILE
             cpu_slack_handoff(UNCACHED(gfx_handed), frt());
 #endif
-            sat_gfx_snapshot_layers();
+            if (!held) sat_gfx_snapshot_layers();
 #ifdef SAT_CPU_SLACK_PROFILE
             cpu_slack_layers(frt());
 #endif

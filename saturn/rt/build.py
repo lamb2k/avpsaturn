@@ -490,7 +490,17 @@ def main():
             if name:
                 sh([sys.executable, REPO / f"tools/{name}/gen_runtime.py", pathlib.Path(d) / "remap.json", GEN / f"guest_{name}.inc"])
                 home_cold_extra.append(cc(REPO / f"saturn/guests/{name}/{name}.c", OBJ / f"guest_{name}.o", ["-Os", "-I", GEN] + os.environ.get("KERNEL_CFLAGS", "").split()))
-    home_cold = [cc(HERE / "home_cold.c", OBJ / "home_cold.o", ["-Os"] + os.environ.get("KERNEL_CFLAGS", "").split())] if home else []
+    snap_bytes = 0
+    if home:   # stage select's held title picture (home_cold.c sat_home_snap_frame) copies the graphics snapshot: its size comes from the gfx object (nm -S), so no constant stays in high RAM
+        for l in sh([NM, "-S", OBJ / "gfx_sat_gfx.o"]).splitlines():
+            f = l.split()
+            if len(f) == 4 and f[3] in ("snap", "_snap"):
+                snap_bytes = int(f[1], 16)
+        stamp = GEN / "snap_bytes.txt"
+        if not stamp.exists() or stamp.read_text() != str(snap_bytes):
+            (OBJ / "home_cold.o").unlink(missing_ok=True)
+            stamp.write_text(str(snap_bytes))
+    home_cold = [cc(HERE / "home_cold.c", OBJ / "home_cold.o", ["-Os", f"-DSAT_SNAP_BYTES={snap_bytes}"] + os.environ.get("KERNEL_CFLAGS", "").split())] if home else []
     home_cold += home_cold_extra
     if OVERRIDES:
         bind_flags = ["-DSAT_GUESTS"] if "SAT_GUESTS" in os.environ.get("KERNEL_CFLAGS", "") else []

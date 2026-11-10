@@ -5,7 +5,8 @@ extern u32 sat_pad_raw;
 extern u32 sat_vblanks_now(void);
 extern void sat_home_set(int block_off, int value);
 extern int sat_home_get(int block_off);
-extern volatile int sat_home_hold, sat_home_mode, sat_home_freeze, sat_home_snapcmd;
+extern volatile int sat_home_hold, sat_home_mode;
+volatile u8 sat_home_snap[2] __attribute__((section(".data.snapstate")));   /* [0] hold, [1] save 1 / restore 2: in the cart with this code (a .data section is read from disc with it), no work RAM */
 extern volatile u32 sat_home_screen, sat_home_cursor, sat_duel_on;
 extern char sat_home_text[28][44];
 extern u32 sat_home_inject, sat_home_prev;
@@ -302,6 +303,25 @@ static void buttons(void)
 #define STAGES 18
 static const u8 stage_round[STAGES] = { 0, 0, 1, 1, 2, 3, 3, 4, 5, 5, 5, 5, 5, 6, 6, 6, 6, 6 };
 static const char *const boss_name[7] = { "CHRYSALIS", "RAZOR CLAWS", "ARACHNOID", "ALIEN QUEEN", "POWER LOADER", "MAD PREDATOR", "ALIEN QUEEN" };
+/* Stage select over the title art, cold half (kernel.c, the held-game branch of the vblank, calls it every held vblank). The held game's picture is the character select's, so the
+   title's snapshot is kept: [1] 1 saves the whole snapshot (about 23 KB, global `snap` of sat_gfx.c) to the cart's pack room at 0x02760000 (the front file's tile pack ends at 0x0274b000,
+   cold code starts at 0x027e0000), 2 puts it back; [0] holds it: returns 1, and the vblank then hands the slave the same snapshot again with the menu's mode and the sprites off (header
+   words 9 and 6) instead of taking a new one, so the chips keep showing the title. Returns 0 otherwise: the vblank takes its snapshot as usual (the save is of the one before it). */
+extern u16 snap[];
+#ifndef SAT_SNAP_BYTES
+#define SAT_SNAP_BYTES 0   /* build.py passes sizeof the gfx snapshot (nm -S of the gfx object); 0 saves and restores nothing */
+#endif
+int sat_home_snap_frame(void)
+{
+    u32 *c = (u32 *)0x02760000UL, *p = (u32 *)(void *)snap, n, w = SAT_SNAP_BYTES / 4;
+    u8 cmd = sat_home_snap[1];
+    if (cmd == 1) for (n = 0; n < w; n++) c[n] = p[n];
+    else if (cmd == 2) for (n = 0; n < w; n++) p[n] = c[n];
+    sat_home_snap[1] = 0;
+    if (!sat_home_snap[0]) return 0;
+    snap[9] = (u16)sat_home_mode; snap[6] = 0;
+    return 1;
+}
 /* st 1 to 18: b gets "n-m", the second row is tag and name (name may be nb, "m OF k"). */
 static void stage_label(int st, char *b, char *nb, const char **tag, const char **name)
 {
@@ -321,7 +341,7 @@ static int stage_select(void)
     sat_home_screen = 7;
     prev = sat_pad_raw & 0xffff;
     sat_home_mode = 4;
-    sat_home_freeze = 1; sat_home_snapcmd = 2;   /* the title picture saved when the menu closed (sat_gfx.c), held while this screen is up: the game itself stays held and untouched */
+    sat_home_snap[0] = 1; sat_home_snap[1] = 2;   /* the title picture saved when the menu closed (sat_gfx.c), held while this screen is up: the game itself stays held and untouched */
     for (;;) {
         char b[8], nb[8];
         const char *tag, *name;
@@ -347,7 +367,7 @@ static int stage_select(void)
             sat_home_ending = 0;
             if (st > STAGES) sat_home_arm_ending();   /* before the stage file loads */
             sat_home_warp = (u32)w;
-            sat_home_freeze = 0;                       /* the next snapshot is the game's again */
+            sat_home_snap[0] = 0;                      /* the next snapshot is the game's again */
             return w;
         }
     }
@@ -535,7 +555,7 @@ void sat_home_menu(void)
         p = pick >= 1 ? pick + DUEL_SHIFT : pick;
         sat_home_warp = 0; sat_home_rush = 0; sat_home_ending = 0; stage_after = 0;
         if (p == 4) options();
-        else if (p == 3) { stage_after = 1; sat_home_snapcmd = 1; pick = 0; break; }   /* the next snapshot call saves the title's picture for the stage select (sat_gfx.c) */   /* the stage is asked for after the character select (sat_home_flow) */
+        else if (p == 3) { stage_after = 1; { int k; sat_home_snap[1] = 1; for (k = 0; k < 60 && sat_home_snap[1]; k++) frame(); } pick = 0; break; }   /* the held vblank saves the title's picture for the stage select (sat_home_snap_frame); the stage is asked for after the character select (sat_home_flow) */
 #ifdef SAT_DUEL_MENU
         else if (p == 1) { if (duel_setup()) break; }   /* VERSUS MODE: duel rules, then the game's select */
 #endif
