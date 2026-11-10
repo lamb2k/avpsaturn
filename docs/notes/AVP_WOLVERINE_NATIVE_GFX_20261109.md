@@ -541,8 +541,53 @@ Build rc 0; fit.py D11 (copy) 76/76, gate True, stage24_ma 2,872 / 2,834; HOST g
 ### 17.4 Tools (code only; their outputs are local, not in git)
 `attract_shots.py` (attract and opening shots with the table base), `recmap.py` (record to role), `motion_compare.py`, `mshvsf_catalog.py`, `baseline_table.py`, `baseline_swap.py` (CURRENT vs PROPOSED mapping sheet for the remap, review only), `tile_cost.py`. `play_yaba.py` now starts Yaba with SW_SHOWNOACTIVATE, at the bottom of the z-order and BelowNormal; it takes no focus and sends no global input.
 
-### 17.5 Remap review (not built)
-The sheet is `baseline_swap.png/.md/.csv`. The proposed mapping needs 866 new tiles: +877 against the keys his native records use (1,164), +567 against the 1,474-key pack. The remap is not built until the owner approves it and picks a trimming option.
+### 17.5 Remap review
+The review sheet (`baseline_swap.png/.md/.csv`, local) proposed a full swap of 866 new tiles (+877 against the keys his native records used, +567 against the 1,474-key pack). An independent MAME-driven review (`REVIEW_ANSWER.md`, local) corrected three identities and cut the set to the essentials; section 18 is what was built.
 
 ### 17.6 Gates on this head
 Build rc 0 (full rebuild b_w5, then cached b_w6): hw_free 1,080, lw_free 84, block 20,912 bytes (was 21,164) ending at 0x27fe784, ISO 391,497,728. fit.py D11 (copy) 76/76, gate True, no own key dropped, stage24_ma 2,872 / 2,834 (margin 38), cart pack room 1,630,208; HOST (guest off, flag on, features via `--wvf 1`) golden_c1 clean 272,171 and golden_2p clean 329,918, 0 differing, missed IRQ 0; WSL unittest 106 run, 30 errors (the known set, identical names), 1 skipped. Flag-off identity was not re-run on this head: every change since 16.1 sits behind `SAT_WV_NATIVE_GFX` or `WV_NO_GRAB` (the `GUEST_WRAP` additions and the `f_1a586` wrapper are gated on the same flags); a re-run belongs to the release candidate. Yaba (cache off, own copy): opening scene, Wolverine stage-02 free-running soak with no JUMP role and 0 anomalies, grab strip.
+
+## 18. Essentials remap (11-10): one consistent mapping from the arcade Wolverine
+
+Switch: `WV_REMAP` (default 1) in `gen_native.py`; `WV_REMAP=0` builds the section 17 mapping (comparison only). Needs the D12 asset set (below). All ROM-derived output is local, never in git.
+
+### 18.1 Identities (MAME, headless, the owner's `mshvsf` set: player 1's animation record logged per frame)
+| Input | Entry |
+|---|---|
+| standing medium punch, then medium punch again (MP, MP: the double claw) | 8.1, then 8.4 |
+| jumping light / medium / heavy punch | 12.0 / 12.1 / 12.2 |
+| QCF + punch, then taps (Berserker Barrage) | 22.22, then 22.24 / 22.23, then 22.25 |
+| forward + medium punch / heavy punch, close (the two throws) | 16.0 / 16.2 |
+| swept | 14.9, 14.31 (lying), 18.0 (get-up) |
+| F, D, DF + two punches (Weapon X) | 23.0, 23.1 (56 frames), 23.2, lands with 23.3 |
+Corrections to the 11-10 sheet: the double claw's input is medium PUNCH twice (not kicks); 23.1 is the Weapon X hyper, not the Barrage; 18.0 is the get-up from a knockdown, not an air attack; 22.10 (today's Berserker before this) is the Drill Claw family.
+
+### 18.2 What each Schaefer state shows now
+| State / slots | Arcade source | New tiles |
+|---|---|---|
+| attack stages 1 and 2 (T1.32, T1.33 alias), lunge 02000a (T1.41) | 8.1 records 2, 5, 6 (the thrust, its hold, the resident hold); stage 2 reuses them (8.4 is the upgrade) | 8.1 |
+| attack stage 3, finisher 02000e (T1.16) | 8.2 (unchanged) | 0 |
+| jump attack (T1.38) | 12.2 records 1, 2, effect sprites apart from the body dropped (`MASS_RECS`: the slash spark below the body raised the whole pose) | 12.2 |
+| Berserker 020008 (own chain, 12 records of 4 ticks) | 22.22 r1, then 22.24 r1 / 22.23 r1 alternating (ten), then 22.25 r0; every record keeps the strike box; hurt 0 as before | 22.2x |
+| auto-grab hold 0204xx (T1.48..54) | 16.2 records 3 (the hold) and 5 (the stab) | 16.2 |
+| auto-grab leap 020406 (T1.55) and stomp 020408 (T1.56) | 16.0 record 1 (hop up), record 5 (stab down); Schaefer's code, timing and attack box 24 unchanged | 16.0 |
+| after the stomp (T1.57) | 1.3 (resident) | 0 |
+| ground, lying (T2 two-record ground chains) | 14.31 (one lying frame; the ground state was a crouch) | 14.31 |
+| getup (T2.23, T2.24) | 22.5 (resident) | 0 |
+| entrance close (T0.24) | 23.3, the landing after Weapon X (resident) | 0 |
+| state 020014 (T1.64..79, 13 chains) | 8.1 thrust (their donor attack boxes kept as the other roles keep theirs) | 0 |
+| KO tumble, hit flinch, knockdown flight | unchanged (14.x resident) | 0 |
+
+State 020014 is not a weapon pickup: the attack branch at 0x1a6dc enters 020006 and then 020014 when the player block's word at +0x5a is non-zero. That word is the link to an enemy that has seized him (the enemy-side grab routines such as 0x538f4 write each block's +0x5a with the other's pointer; the 0x53ffe style sites clear it). So it is the break-free attack. Read from the lifted source; not reproduced in Yaba (no enemy grab of the player was triggered in any run).
+
+### 18.3 Tiles: the D12 asset set (`make_d12.py`)
+- `gen_native.py` with `WV_ADD` adds the tiles of the frames the remap names (SRC entries with record indexes) that have no resident tile within the merge distance K = 12, deduplicated among themselves, at free AvP sprite keys (`gfx_wolverine.bin`, `remap.json` keys and `stage_keys` of every stage). Modelled 334 tiles, built **328**.
+- `WV_KEYS_OUT` lists the keys his native records draw: **1,441** (1,164 before). `stage_keys` of every stage becomes those plus filler (33 of D11's skin-only keys) up to D11's count of **1,474**, so no stage file's resident tile count grows; the 328 other skin-only keys leave the pack. `gen_c.py` takes `WV_SKIP_KEYCHECK=1` for these sets (the skin tables are not drawn in native builds). The native block is byte-identical before and after the pruning (`make_d12.py` checks).
+- fit.py on a copy of D12: **76 of 76, gate True**, no own key dropped, no missing guest key; **Wolverine tiles per stage file: change 0 at most, -31 at stage 0e (14,874 -> 14,843)**; stage 0e margins (Schaefer drops minus Wolverine drops) 396, 270, 379, 334 (392, 273, 345, 329 before); tightest file stage24, margin 40 / 44 / 44 (38 to 49 before).
+- Cost: the block grew from 20,912 to 23,316 bytes (9 more assemblies), then 23,116 with 020014 on 8.1 records. cold1_at moved 0x27e2000 -> 0x27e1000 (one 4 KB step), cart pack room 1,630,208 -> 1,626,112 (32 tiles at every file, charged to Schaefer's variants too, so the margins above already include it).
+
+### 18.4 Yaba (cache off, own copy, window messages only; builds b_r2 then b_r3 = 020014)
+Free-running soaks, 0 anomalies each (play, into-enemy, knockdown): the states reach the new roles (`recmap.py`): LP1 (double claw), BERS3 (Berserker chain), GRAB_HOLD, GRAB_LIFT, GRAB_SLAM, GETUP, LYING (T2.21, T2.22), ENTR (T0.24). Pictures (local): `remap/play_berserker.png`, `play_attack.png`, `into_grab.png` (hop up with the claws raised, stab down), `play_lying.png` (knockdown flight and the lying frame), `play_down_getup.png`. Not captured in play: the jump attack T1.38 (the soak policy does not press attack in the air) and 020014 (no seizing enemy). Before and after pose sheets with the arcade frames beside ours: `remap/remap_sheet.png` (`remap_sheets.py`).
+
+### 18.5 Tools
+`remap_probe.py` (per-record tile cost and pictures of any arcade entries), `make_d12.py`, `remap_sheets.py`.

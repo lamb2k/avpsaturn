@@ -2,7 +2,7 @@
 """Wolverine's poses, moves and colours as C tables for saturn/guests/wolverine (build time, from tools/wolverine/assets.py remap.json).
 Output goes to the build's gen directory (ROM-derived, never in git).
 usage: gen_c.py ASSETS_DIR OUT.inc [COLOUR]"""
-import json, pathlib, re, sys
+import json, os, pathlib, re, sys
 
 A = json.loads((pathlib.Path(sys.argv[1]) / "remap.json").read_text())
 out = pathlib.Path(sys.argv[2])
@@ -33,7 +33,9 @@ if "stance_pose" in A and A["stance_pose"] not in pid:
 required_keys = {keys[tile[2]] for pose in used for tile in P[pose]}
 for stage, stage_keys in A.get("stage_keys", {}).items():
     missing = required_keys - set(stage_keys)
-    if missing:
+    if missing and os.environ.get("WV_SKIP_KEYCHECK") == "1":   # make_d12.py asset sets: the pack holds the keys his native records draw, not the skin pose set (the skin is not drawn in native builds)
+        print("WARNING: stage %s omits %d skin pose tiles (WV_SKIP_KEYCHECK=1)" % (stage, len(missing)))
+    elif missing:
         raise SystemExit(f"NO-GO: stage {stage} omits {len(missing)} emitted-pose tiles; rerun reselect.py")
 ent, start = [], [0]
 for p in used:

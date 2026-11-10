@@ -121,12 +121,29 @@ def mv_boxes(rec):
     return (mv_rect(hit) if hit else None), hurt
 
 
+MASS_RECS = set()   # records whose pose keeps only its largest connected group of cells (arcade effect sprites drawn apart from the body are dropped: 12.2, which would otherwise carry a slash spark far below the body and raise the whole pose)
+
+
+def main_mass(items):
+    """items: [(cx, cy, ...)]; keeps the largest group of cells connected by touching (16 px) neighbours"""
+    n = len(items); comp = list(range(n))
+    def find(a):
+        while comp[a] != a: comp[a] = comp[comp[a]]; a = comp[a]
+        return a
+    for i in range(n):
+        for j in range(i + 1, n):
+            if abs(items[i][0] - items[j][0]) <= 16 and abs(items[i][1] - items[j][1]) <= 16: comp[find(i)] = find(j)
+    groups = {}
+    for i in range(n): groups.setdefault(find(i), []).append(items[i])
+    return max(groups.values(), key=len) if groups else []
+
+
 def mv_pose(rec):
     """cells of a record's assembly: [(x, y, key, hflip, vflip, pal)] with x, y relative to his origin (MSHvSF draws facing left unflipped, as the AvP emitter does for facing 0)."""
     ap = l(mv, rec + 4)
     n = w(mv, ap + 4); tab = l(mv, ap + 6)
     px, py = s16(w(mv, tab + 2)), s16(w(mv, tab + 4))
-    cells = []; far = []
+    allc = []
     for i in range(n + 1):
         if i:
             px += s8(mv[tab + 6 + 2 * (i - 1)]); py += s8(mv[tab + 7 + 2 * (i - 1)])
@@ -136,11 +153,15 @@ def mv_pose(rec):
             for bx in range(wd):
                 kk = key_of(code + bx + 16 * by)
                 if kk is None: continue
-                if kk == "far": far.append(code + bx + 16 * by); continue
                 cx = px + 16 * ((wd - 1 - bx) if hf else bx)
                 cy = py + 16 * ((ht - 1 - by) if vf else by)
-                cells.append((cx, cy, kk[0], hf ^ kk[1], vf ^ kk[2], pal))
-    mv_pose.far = len(far)
+                allc.append((cx, cy, code + bx + 16 * by, kk, hf, vf, pal))
+    if rec in MASS_RECS: allc = main_mass(allc)
+    cells = []; far = []
+    for cx, cy, c, kk, hf, vf, pal in allc:
+        if kk == "far": far.append(c); continue
+        cells.append((cx, cy, kk[0], hf ^ kk[1], vf ^ kk[2], pal))
+    mv_pose.far = len(far); mv_pose.far_codes = far
     return cells
 
 
@@ -189,10 +210,109 @@ def thin(chain, want_flags=None):
     return keep
 
 
+def thin_strict(chain):
+    """records whose tiles are all resident; a dropped record's ticks go to the previous kept one (the first kept one takes the leading ticks)"""
+    keep, lead = [], 0
+    for r in chain:
+        cells, ok = resident_pose(r)
+        dur = w(mv, r + 2) & 0x7fff
+        if ok and cells:
+            keep.append([r, cells, dur + lead]); lead = 0
+        elif keep: keep[-1][2] += dur
+        else: lead += dur
+    return keep
+
+
+
+# MSHvSF entry addresses: the 27 sub-tables at 0xd1a7e (mvlib.MV.tables)
+def mv_tables():
+    subs, cur, a = [], None, 0xd1a7e
+    while a < 0xd1c90:
+        v = w(mv, a)
+        if v == 0: cur = None
+        else:
+            if cur is None:
+                cur = [a, []]; subs.append(cur)
+            cur[1].append(cur[0] + s16(v))
+        a += 2
+    return subs
+
+
+SUBS = mv_tables()
+SRC_ADDR = {(si, ei): ts[ei] for si, (b, ts) in enumerate(SUBS) for ei in range(len(ts))}
+
+WV_REMAP = os.environ.get("WV_REMAP", "1") != "0"   # owner-approved essentials remap; WV_REMAP=0 builds the 11-10 mapping (comparison only)
+SRC = dict(IDLE=(0, 0), WALK=(0, 1), JUMP=(1, 0), LAND=(1, 3), LP1=(8, 0), LP2=(8, 3), HP=(8, 2), GRAB_HOLD=(8, 3), GRAB_SLAM=(8, 2), HK=(9, 2), HIT_M=(14, 2), HIT_E=(14, 3), HIT_H=(14, 4), BERS=(22, 10), BERS3=(22, 10), JATK=(1, 0), GRAB_LIFT=(8, 3), LYING=(1, 3), GETUP=(1, 3), ENTR=(0, 1))
+if WV_REMAP:   # essentials remap (REVIEW_ANSWER.md 11-10, MAME-confirmed identities): (sub, entry, record indexes); records not named are not used, so their tiles are not added to the pack
+    SRC.update(LP1=(8, 1, (2, 5, 6)),          # standing medium punch, the double claw's first thrust and its hold (the second hit, 8.4, reuses these frames)
+               JATK=(12, 2, (1, 2)),           # jumping heavy punch: the downward claw slash
+               GRAB_HOLD=(16, 2, (3, 5)),      # forward + heavy punch throw: the 48-tick hold and the stab
+               GRAB_LIFT=(16, 0, (1,)),        # forward + medium punch throw: the hop up (Schaefer's code leaps off the held enemy, state 020406)
+               GRAB_SLAM=(16, 0, (5,)),        # ... and the stab down (state 020408)
+               LYING=(14, 31, (0,)),           # lying on the ground after a knockdown
+               GETUP=(22, 5), ENTR=(23, 3),    # all records already resident
+               BERS=(22, 23, (1,)), BERS3=(22, 24, (1,)),
+               BZ_START=(22, 22, (1,)), BZ_A=(22, 23, (1,)), BZ_B=(22, 24, (1,)), BZ_END=(22, 25, (0,)))   # the Berserker Barrage (QCF + punch, then taps): 22.22 start, 22.24 / 22.23 strikes, 22.25 end
+
+if WV_REMAP:
+    for _a in mv_chain(SRC_ADDR[(12, 2)]): MASS_RECS.add(_a)
+
+if os.environ.get("WV_ADD"):
+    # make_d12.py step 1: write ASSETS + the tiles the remap frames need (a tile with no resident tile within the merge distance, deduplicated among themselves) at free AvP sprite keys.
+    # Output dir WV_ADD = a copy of ASSETS with gfx_wolverine.bin carrying the new tiles, remap.json keys + stage_keys (every stage) extended. Nothing else changes.
+    import shutil
+    frames = sorted({(v[0], v[1], i) for v in SRC.values() if len(v) > 2 for i in v[2]})
+    codes = []
+    for si, ei, idx in frames:
+        mv_pose(mv_chain(SRC_ADDR[(si, ei)])[idx])
+        for c in mv_pose.far_codes:
+            if c not in codes: codes.append(c)
+    added, ax = [], []   # representative code, pens
+    for c in codes:
+        px = np.array(assets.pens(gfx[c * 128:c * 128 + 128]), dtype=np.uint8)
+        hit = False
+        for h, v in ((0, 0), (1, 0), (0, 1), (1, 1)):
+            q = px[:, ::-1] if h else px
+            q = q[::-1, :] if v else q
+            u = q.reshape(1, 256)
+            for o in ax:
+                if (((u != o) & (u != 15) & (o != 15)).sum() + ALPHA * ((u == 15) != (o == 15)).sum()) <= K: hit = True; break
+            if hit: break
+        if not hit:
+            added.append(c); ax.append(px.reshape(1, 256))
+    R = json.loads((WORK / "rounds.json").read_text())
+    used = set()
+    for f in R["files"]: used |= set(f["keys"][0])
+    for ln in open(WORK / "screen_keys.txt"):
+        if ln.strip() and ln.split()[0] == "0": used.add(int(ln.split()[1], 16))
+    have = set(A["keys"])
+    free = [k for k in range(1, 0x10000) if k not in used and k not in have]
+    free.sort(key=lambda k: (keyraw[k * 128:k * 128 + 128] != b"\xff" * 128, k))
+    if len(free) < len(added): raise SystemExit("not enough free sprite keys")
+    newkeys = free[:len(added)]
+    outd = pathlib.Path(os.environ["WV_ADD"])
+    if outd.exists(): shutil.rmtree(outd)
+    shutil.copytree(ASSETS, outd)
+    raw = bytearray(keyraw)
+    for k, c in zip(newkeys, added): raw[k * 128:k * 128 + 128] = gfx[c * 128:c * 128 + 128]
+    (outd / "gfx_wolverine.bin").write_bytes(raw)
+    B = json.loads((ASSETS / "remap.json").read_text())
+    B["keys"] = B["keys"] + newkeys
+    B["stage_keys"] = {st: sorted(set(v) | set(newkeys)) for st, v in B["stage_keys"].items()}
+    B["wv_added"] = dict(keys=newkeys, codes=added, frames=["%d.%d#%d" % f for f in frames])
+    (outd / "remap.json").write_text(json.dumps(B))
+    print("ADD: %d frames, %d far cells' codes, %d new tiles at keys %d..%d -> %s" % (len(frames), len(codes), len(added), min(newkeys) if newkeys else 0, max(newkeys) if newkeys else 0, outd))
+    raise SystemExit(0)
+
+
 idle_src = thin(mv_chain(0xd1c90))
 walk_src = thin(mv_chain(0xd1da4))
-lp_chain = mv_chain(0xd2878)
-lp_src = thin(lp_chain)
+if WV_REMAP:
+    # The main attack is the double claw: standing medium punch 8.1 (the arcade's MP, MP is 8.1 then 8.4; the second hit reuses the first's frames). Frames 2 and 5 are the thrust and its hold; 6 is resident.
+    lp_chain = mv_chain(SRC_ADDR[(8, 1)]); lp_src = thin_strict([lp_chain[i] for i in (2, 5, 6)])
+else:
+    lp_chain = mv_chain(0xd2878)
+    lp_src = thin(lp_chain)
 print("idle %d of %d records kept, walk %d of %d, lp %d of %d; tile cells exact %d, merged-near %d" % (
     len(idle_src), len(mv_chain(0xd1c90)), len(walk_src), len(mv_chain(0xd1da4)), len(lp_src), len(lp_chain), miss["exact"], miss["near"]))
 
@@ -263,19 +383,6 @@ def skel(start):
     return donor_chain(start)
 
 
-def thin_strict(chain):
-    """records whose tiles are all resident; a dropped record's ticks go to the previous kept one (the first kept one takes the leading ticks)"""
-    keep, lead = [], 0
-    for r in chain:
-        cells, ok = resident_pose(r)
-        dur = w(mv, r + 2) & 0x7fff
-        if ok and cells:
-            keep.append([r, cells, dur + lead]); lead = 0
-        elif keep: keep[-1][2] += dur
-        else: lead += dur
-    return keep
-
-
 _sole_cache = {}
 
 
@@ -326,7 +433,7 @@ def floor_cells(cells, lift=0):
 
 
 # MSHvSF animation index entries (sub-table, entry), tools/wolverine/mvlib.py MV.tables(); provenance by tile match of D11's poses (census note section 5)
-SRC = dict(IDLE=(0, 0), WALK=(0, 1), JUMP=(1, 0), LAND=(1, 3), LP1=(8, 0), LP2=(8, 3), HP=(8, 2), GRAB_HOLD=(8, 3), GRAB_SLAM=(8, 2), HK=(9, 2), HIT_M=(14, 2), HIT_E=(14, 3), HIT_H=(14, 4), BERS=(22, 10), BERS3=(22, 10))
+# (SRC: defined with the MSHvSF entry tables above)
 # role: donor chain -> (source, hold_at): hold_at = where in the source (0..1) the donor's long hold record (255+ ticks) takes its pose; None = the last pose
 # first slot naming the chain decides; the table below is the first assignment (provisional where the state is not identified, listed in the census note)
 ROLE_T1 = {1: "IDLE", 3: "JUMP", 4: "LAND", 5: "LAND", 6: "LAND", 7: "IDLE", 8: "IDLE", 9: "IDLE", 10: "JUMP", 11: "IDLE", 12: "IDLE", 13: "IDLE", 14: "HK", 16: "HK",
@@ -365,6 +472,14 @@ if os.environ.get("WV_LEAP_TUCK") != "1":
 if os.environ.get("WV_GRAB_OLD") != "1":
     for _i in range(48, 56): ROLE_T1[_i] = "GRAB_HOLD"
     ROLE_T1[56] = "GRAB_SLAM"
+if WV_REMAP:
+    # Essentials remap (REVIEW_ANSWER.md 11-10). The auto grab is 020400 (hold: T1.48..54), 020406 (T1.55: Schaefer's code leaps off the held enemy) and 020408 (T1.56: the stomp), then T1.57.
+    # The arcade's two throws give the poses: the heavy-punch throw 16.2 holds and stabs, the medium-punch throw 16.0 hops up (T1.55) and stabs down (T1.56); after the stomp he lands (1.3).
+    ROLE_T1[55] = "GRAB_LIFT"; ROLE_T1[56] = "GRAB_SLAM"; ROLE_T1[57] = "LAND"
+    ROLE_T1[41] = "LP1"      # the lunge (02000a) is a forward thrust: the double claw's frames, no longer the tall upward slash 8.2
+    ROLE_T1[38] = "JATK"     # the air attack of the leap (T1.40 is never reached in the census and keeps its idle)
+    for _i in range(64, 80): ROLE_T1[_i] = "LP1"   # state 020014 (T1.64..79): the attack pressed while an enemy has seized him (the player block's +0x5a link word is set), a break-free attack: the 8.1 thrust (their attack boxes stay the donor's)
+    HOLD_AT["GRAB_HOLD"] = 0.0   # the donor's long hold record shows the held pose (16.2 frame 3), the timed records after it show the stabs
 ROLE_T1[34] = "HP"
 ROLE_T1[35] = "HK" if WV_CHAIN == 4 else "HP"
 role_of = {}   # donor chain start -> (role name, source key)
@@ -373,14 +488,15 @@ role_of = {}   # donor chain start -> (role name, source key)
 def chain_role(start, first):
     t, i = first
     if t == "T1" and i in ROLE_T1: return ROLE_T1[i]
+    if WV_REMAP and t == "T0" and i == 24: return "ENTR"   # the entrance's closing chain: the landing after Weapon X (23.3), resident and free
     if t == "T3": return "BERS3"   # T3 = the gun action's aim chains (state 02000c = Berserker for him): the flurry poses, one per slot, so the rapid slot cycling animates it
     if t == "T2":
         ch = skel(start)
         sh = {rom[a + 11] for a in ch}
         if i == 0: return "HIT_H"
-        if len(ch) >= 9: return "LAND"                       # the 9-record chains (getup)
+        if len(ch) >= 9: return "GETUP" if WV_REMAP else "LAND"   # the 9-record chains (getup): 22.5 (crouch to stand) with the remap
         if sh & {13, 15}: return "JUMP" if os.environ.get("WV_KD_JUMP") == "1" else "HIT_H"   # knockdown flight (shadow 13 / 15): the heavy-hit tumble poses (owner 11-10: being knocked down must not look like jumping); WV_KD_JUMP=1 = the old jump poses, comparison only
-        if len(ch) == 2 and i in (16, 20, 21, 22, 28, 36, 49, 57): return "LAND"   # ground states of the knockdown family
+        if len(ch) == 2 and i in (16, 20, 21, 22, 28, 36, 49, 57): return "LYING" if WV_REMAP else "LAND"   # ground states of the knockdown family
         if i in (54, 63): return "HIT_E"
         return "HIT_M"
     return "IDLE"
@@ -388,26 +504,13 @@ def chain_role(start, first):
 
 def pick_sources(src_key, donor_recs):
     """MSHvSF chain of a role, thinned to the records whose tiles are all resident: [[rec, cells, dur]]"""
-    sub, ent = SRC[src_key]
-    return thin_strict(mv_chain(SRC_ADDR[(sub, ent)]))
+    v = SRC[src_key]
+    ch = mv_chain(SRC_ADDR[(v[0], v[1])])
+    if len(v) > 2: ch = [ch[i] for i in v[2]]   # the frames the remap names
+    out = thin_strict(ch)
+    if len(v) > 2 and not out: raise SystemExit("NO-GO: the remap frames of %s are not resident: GUEST_ASSETS must be a make_d12.py output (or WV_REMAP=0)" % src_key)
+    return out
 
-
-# MSHvSF entry addresses: the 27 sub-tables at 0xd1a7e (mvlib.MV.tables)
-def mv_tables():
-    subs, cur, a = [], None, 0xd1a7e
-    while a < 0xd1c90:
-        v = w(mv, a)
-        if v == 0: cur = None
-        else:
-            if cur is None:
-                cur = [a, []]; subs.append(cur)
-            cur[1].append(cur[0] + s16(v))
-        a += 2
-    return subs
-
-
-SUBS = mv_tables()
-SRC_ADDR = {(si, ei): ts[ei] for si, (b, ts) in enumerate(SUBS) for ei in range(len(ts))}
 
 if os.environ.get("WV_EXPLORE"):   # diagnostics: every MSHvSF animation entry, how many of its records are drawable from resident tiles (WV_EXPLORE=<json path>)
     ex = []
@@ -607,7 +710,13 @@ bz_src = pick_sources("BERS3", None)
 t3b, t3n = TABLES[3]
 bz_recs = []
 t3_donor = None
-for sl in BZ_SLOTS:
+if WV_REMAP:
+    # The real Berserker Barrage (22.22 to 22.25 of MSHvSF, MAME-confirmed): the start pose, ten alternating strikes (22.24, 22.23) and the end pose; 12 records of BZ_TICKS ticks as before, every one with the strike box.
+    for key in ["BZ_START"] + ["BZ_B", "BZ_A"] * 5 + ["BZ_END"]:
+        pk = pick_sources(key, None)[0]
+        bz_recs.append(dict(src=pk[0], cells=floor_cells(pk[1]), dur=BZ_TICKS, flags=0, hurt=(hurt_index(mv_boxes(pk[0])[1]) if mv_boxes(pk[0])[1] else rom[STAND + 8]) if BZ_HURT else 0, atk=atk_index(BZ_BOX),
+                            b10=0, b11=rom[STAND + 11], tail=rom[STAND + 12:STAND + 16], donor=None))
+for sl in (() if WV_REMAP else BZ_SLOTS):
     a_ = t3b + s16(w(rom, t3b + 2 * sl))
     t3_donor = t3_donor or a_
     k = first_slot[a_][1] % len(bz_src)
@@ -695,6 +804,8 @@ for pid, cells in enumerate(poses):
         if c[5] == 13: p1_marks.append(asm_off + 12 + 8 * i + 3)
     asm_blob += ab; asm_off += len(ab)
 T_off = (asm_off + 3) & ~3
+if os.environ.get("WV_KEYS_OUT"):   # the keys his native records draw (make_d12.py prunes the pack's key list to these plus filler)
+    json.dump(sorted({c[2] for cells in poses for c in cells}), open(os.environ["WV_KEYS_OUT"], "w"))
 
 # T': the donor table with the new hurt boxes after its 12 entries, then the attack table (38 donor entries and the new ones)
 donor_T_addr = 0x11b166
