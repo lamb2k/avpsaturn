@@ -46,13 +46,19 @@ Updated 2026-11-09 evening. Merged at 4bfcdf6: sprite-dropout cart guards (13e63
 | Main-game sprite pieces dropped on stages 0e, 1c, 1e, 24; fatal 0xe2 at 0xa9cc4 once on 0e | lane/stage-sprites-20261109 (merged with text-glyphs f62d289) | built, offline and host gates passed (docs/notes/AVP_STAGE_SPRITES_20261109.md). Fatal 0xe2 cause found: Linn's script page 0x171400 kept by no stage file; fixed by CHAR_FUZZ_PAGES (default on). CHAR_FUZZ_KEYS=1 PACK_TAIL_FILL=1 (default off) cut fuzz-drawn missing keys in 1c, 1e, 24 solo files from 500-1,600 to 0-346 (held-out run); 0e Schaefer/Linn and the 2P pairs still short. row-trimmed tiles (SAT_TILE_ROWTRIM, default off) built and gated: stages 02-26 drop 0 fuzz-drawn keys with CHAR_FUZZ_KEYS=1 in every stage, hw_free 1,004, lw_free 60 unchanged; Yaba A/B done as a proxy (docs note section 6) |
 | Post-credits reveal + unlock | lane/wolverine-reveal 850fc42 (pushed) | built; end-to-end Yaba check not done; owner to pick the voice clip |
 | Saturn hardware FPS test discs | E:\AvP\package-hwtest-20261109 (pre-integration) | rebuild from avp/integration with the next owner disc (owner to confirm) |
-| Talk-box face for Wolverine | not started | part of native Wolverine |
+| Wolverine sounds from MSHvSF (claws, hits, Berserker voice, select/KO voice, reveal clip) | lane/wv-sounds-20261109 (port 9722) | started 2026-11-09 |
+| Wolverine talk-box face (crop of approved portrait) and identity leaks | lane/wv-talkbox-20261109 (port 9723) | started 2026-11-09 |
+| Wolverine healing factor (SAT_WV_HEAL) and Berserker flash/freeze (SAT_WV_FLASH) | lane/wv-features-20261109 (port 9724) | started 2026-11-09 (owner un-deferred healing) |
+| Versus mode (Duel): RANDOM arena garbage, Hunter not drawn, stage enemies entering, full pairing matrix | lane/versus-20261109 (port 9725) | unparked by owner 2026-11-09 |
+| Row-trimmed tile encoding (SAT_TILE_ROWTRIM) on top of stage-sprites | lane/stage-sprites-20261109 19f87b0 | implemented, offline numbers done; gates and Yaba A/B running |
 
 Dropped (owner 2026-11-09: no more work on the sprite-replacement Wolverine): claws-only follow-up (lane/wv-noguns-20261109-f2576a, not merged), guest group loop (lane/fps-group), Wolverine defense gate (lane/wolverine-defense), feet-on-floor ground/ground2 switches. Native Wolverine covers each of them.
 
-Parked (owner 2026-11-09): versus mode (Duel): RANDOM arena tile garbage, Hunter body not drawn in Linn vs Hunter, stage enemies entering on 1e/24.
+Versus mode was parked earlier on 2026-11-09 and unparked the same night (lane/versus-20261109).
 
 ## Owner discs
+
+- avp_integration_2 (70af5ed), 2026-11-09: E:\AvP\package-integration\avp_integration_2 (27 tracks, 662 MB). Gates: build rc 0 (hw_free 964, lw_free 60), fit.py D11 76/76, WSL unittest 106 run with the 30 known private-dependency errors, Yaba boot + walk to a stage 1 Wolverine fight with sprites drawn. Yaba speed not measured (host busy with other lanes). Replaces avp_integration_1.
 | Disc | Commit | Package | State |
 | --- | --- | --- | --- |
 | avp_integration_1 | a6e58aa | **WITHDRAWN 11-09**: owner saw sprites vanish on most frames and half speed in Yaba. The regression predates the menu/slowdown merges (anim-branch base also bad); lane/sprite-dropout is bisecting. |

@@ -6,14 +6,15 @@ The graphics region the packer reads becomes ASSETS/gfx_wolverine.bin: the AvP r
 so every AvP file packs the same bytes as before.
 Select screen and HUD art (tools/wolverine/hud_art.py, optional `hud`): the guest's stage files read the region with his HUD portrait and
 name written at Schaefer's tile codes, and a front end file of his own (the arcade's front file, the select picture, plate and ranking
-icon written the same way) is guest_files["0"]["0"], row 0, variant 0. Without `hud` nothing here changes."""
+icon written the same way) is guest_files["0"]["0"], row 0, variant 0. Without `hud` nothing here changes.
+Optional `s1_keys` (SAT_WV_DIALOG): scroll 1 keys added to every guest stage file, for the guest's story box wording."""
 import os, pathlib, sys
 
 SPEC = "E:/AvP/learning/lane-packs/spec.json"
 SLOT = 2
 
 
-def extend(R, assets, hud=None):
+def extend(R, assets, hud=None, s1_keys=()):
     import json
     sys.path.insert(0, str(pathlib.Path(__file__).resolve().parents[1]))
     import rounds_variants
@@ -38,6 +39,8 @@ def extend(R, assets, hud=None):
             f = dict(base)
             f["name"] = base["name"] + "_wv"
             f["keys"] = [sorted(set(base["keys"][0]) - own - remap | wk)] + [list(k) for k in base["keys"][1:]]   # remap: a key of his art holds his tile in the guest files, whatever the arcade file asks for there (fuzz keys, tools/char_fuzz.py)
+            if s1_keys:   # scroll 1 keys the guest's own story box wording draws (tools/wolverine/dialog.py, SAT_WV_DIALOG)
+                f["keys"][1] = sorted(set(f["keys"][1]) | set(s1_keys))
             f["audio_from"] = row[vi]
             f["rank_from"] = base["name"]
             f["guest_keys"] = sorted(wk)
