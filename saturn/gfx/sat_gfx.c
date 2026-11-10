@@ -357,12 +357,38 @@ static void index_section(Section *s, int which)
 }
 
 /* Payload index of a key, BLANK_INDEX for an empty tile, or -1 when the pack lacks it. */
+#ifdef SAT_PERF_STAGES
+#define PNOW() (((u32)*(volatile u8 *)0xfffffe12UL << 8) | *(volatile u8 *)0xfffffe13UL)
+#define PSTAGE(i) (sat_gfx_stage[i] = PNOW())
+#define PSTAGE_ZERO(i) (sat_gfx_stage[i] = 0)
+#define PACC_BEGIN() u32 pacc_t = PNOW()
+#define PACC_END(i) (sat_gfx_stage[i] += (PNOW() - pacc_t) & 0xffffu)
+extern unsigned long sat_gfx_stage[16];
+#else
+#define PSTAGE(i)
+#define PSTAGE_ZERO(i)
+#define PACC_BEGIN()
+#define PACC_END(i)
+#endif
+#ifdef SAT_PERF_STAGES
+u8 sat_s1_memo_off, sat_s1_memo_verify;   /* debugger switches in measurement builds: off = always compute; verify = check every memo hit and every skipped blank row */
+u32 sat_s1m[8];                            /* 0 memo hits, 1 misses, 2 memo verify differences, 3 calls with the story box, 4 blank rows skipped, 5 blank row verify differences */
+#endif
+#ifdef SAT_PERF_STAGES
+/* Measurement only (lane perf-reconcile 11-10): where the layer phase of a draw goes. [0] cache_find calls, [1] pack_find calls, [2] blank_seen hits,
+   [3] cache_find hits in the hash, [4] scan loop iterations for a free slot. Read over the debugger. */
+unsigned long sat_gfx_pf[8];
+#define PF(i) (sat_gfx_pf[i]++)
+#else
+#define PF(i)
+#endif
 static long pack_find(const Section *s, u32 key)
 {
     u32 bucket = key >> s->shift;
     const u16 *index = pack_index[s - sections];
     long lo, hi;
     int ks = KEY_SHIFT(s);
+    PF(1);
     if (bucket >= INDEX_BUCKETS) return -1;
     lo = index[bucket]; hi = (long)index[bucket + 1] - 1;
     while (lo <= hi)
@@ -818,6 +844,7 @@ static u16 cache_find(Cache *c, u32 key, unsigned long *refused)
     u16 n = NOSLOT;
     u32 scan;
     long idx;
+    PF(0);
     while (s != NOSLOT)
     {
         SlotRec *r = &c->slots[s];
@@ -825,6 +852,7 @@ static u16 cache_find(Cache *c, u32 key, unsigned long *refused)
         {
             if (r->stamp != stamp) { r->stamp = stamp; c->used++; }
             VL_CAUSE(0);
+            PF(3);
             return s;
         }
         s = r->next;
@@ -834,7 +862,7 @@ static u16 cache_find(Cache *c, u32 key, unsigned long *refused)
 #ifdef SAT_VLOG
         if ((blank_seen[way] & ~BLANK_MISS_BIT) == tag) { VL_CAUSE(blank_seen[way] & BLANK_MISS_BIT ? 2 : 1); return NOSLOT; }
 #else
-        if (blank_seen[way] == tag) return NOSLOT;
+        if (blank_seen[way] == tag) { PF(2); return NOSLOT; }
 #endif
 #ifdef SAT_KEYLOG
         {   /* Test build only: every key the running game asks for, as bits in spare SCSP RAM, read back over MCP to size the tile pack by real play. */
@@ -854,6 +882,7 @@ static u16 cache_find(Cache *c, u32 key, unsigned long *refused)
     for (scan = c->first; scan < c->capacity; scan++)
     {
         u16 t = c->hand;
+        PF(4);
         c->hand = (u16)(t + 1U >= c->capacity ? c->first : t + 1U);
         if (c->slots[t].stamp != stamp && !(c->section == SEC_SPRITE && prev_stamp && c->slots[t].stamp == prev_stamp)) { n = t; break; }
     }
@@ -1078,6 +1107,9 @@ static const u8 *palette_page(const u8 *base, u16 mask, int page)
 
 /* What the chips already show: a layer whose words and position are unchanged does no lookups, so its cache sees no upload and can't lose a slot. */
 static u32 drawn_pal[SAT_GFX_PAGES], drawn_s1, drawn_s2, drawn_s3;
+#ifdef SAT_S1_EVERY
+static u8 s1_age;   /* pictures since scroll 1 was last drawn */
+#endif
 static int drawn_valid;
 /* Master side: counts pack swaps; each snapshot carries it to the drawing side (snap.pad). */
 #if SAT_GFX_RANKFIX
@@ -1161,12 +1193,19 @@ extern char sat_home_text[28][44];
 #define SAT_HOME_RATIO 11   /* logo kept at about 0.45 of its brightness, as MSHvSF OPTION MODE keeps its own (0.47); measured from stills at 2, 5, 8 (lane-home overlay/dark_sheet.png) */
 #endif
 volatile unsigned short sat_home_ratio = SAT_HOME_RATIO; /* panel colour calculation ratio (CCRNB NBG3), 0 to 31 */
+#ifdef SAT_HOME_FONT_COLD
+/* Lane perf-reconcile 11-10, default off: the menu font cells and the two text palettes live in the cart tail (saturn/rt/home_font_cold.c) instead of high work RAM: 1,920 bytes. Read only when a menu opens. */
+extern const u8 sat_home_font[58 * 32], sat_home_pal[64];
+#define home_font sat_home_font
+#define home_pal sat_home_pal
+#else
 static const u8 home_font[58 * 32] __attribute__((aligned(4))) = {
 #include "home_font.inc"
 };
 static const u8 home_pal[64] __attribute__((aligned(2))) = {
 #include "home_pal.inc"
 };
+#endif
 #endif
 #define HUD_ROWS_TOP 5   /* rows 0..4: names, health bars, the enemy label and its bar (row 4 was centre-cropped, 16 px off the rest) */
 #define HUD_ROWS_BOT 26
@@ -1193,6 +1232,18 @@ static HOME_OS void home_row_blank(u32 row, u32 x0, u32 *m)
     int k, c;
     const u32 *w = snap.s1 + row * S1_COLS;
     u32 fill = w[47];   /* the row's fill cell: an edge cell repeated at least 4 times (the continue screen's black band is a tile, not a blank) */
+#ifdef SAT_S1_MEMO
+    /* A row of 48 equal words is its own fill: every column is droppable (the passes below would find k = 48 twice and set every bit). Exact. */
+    for (c = 1; c < 48 && w[c] == w[0]; c++) ;
+    if (c == 48)
+    {
+        m[0] = 0xffffffffUL; m[1] = 0xffffUL;
+#ifdef SAT_HOME_DIAG
+        diag_nb[row][0] = diag_nb[row][1] = 0;
+#endif
+        return;
+    }
+#endif
     for (c = 0, k = 0; c < 48; c++) k += w[c] == w[0];
     if (k >= 4) fill = w[0];
     for (c = 0, k = 0; c < 48; c++) k += w[c] == fill;
@@ -1240,6 +1291,9 @@ static HOME_OS int home_left(const u8 *dropped, const u8 *wgt)
     }
     return w;
 }
+#ifdef SAT_S1_MEMO
+#define home_map home_map_calc
+#endif
 static HOME_OS void home_map(const u32 *m, const u8 *wgt, int hud, int box, u8 *map)
 {
     u8 dropped[48];
@@ -1299,6 +1353,65 @@ static HOME_OS void home_map(const u32 *m, const u8 *wgt, int hud, int box, u8 *
     }
     for (c = 0, n = 0; c < 48 && n < 44; c++) if (!dropped[c]) map[n++] = (u8)c;
 }
+#ifdef SAT_S1_MEMO
+#undef home_map
+/* Exact memo of home_map (lane perf-reconcile 11-10, SAT_S1_MEMO, default off). Without the story box (box = 0) the 44 source columns are a pure function of the droppable
+   mask (m[0], m[1]) and the HUD flag, and every result is the 48 columns less 4 drops (the greedy pick, the 16 pixel crop 0,1,46,47 and the flush map 22..25 alike). A
+   direct mapped table keeps those 4 drops. In play the blank rows (19 of 29) and the HUD rows repeat the same masks every picture, so the greedy pick (4 x 48 steps a row, over
+   60 percent of a scroll 1 redraw: lane perf-reconcile, Yaba cache ON, ps_0e_on) runs once per mask instead of once per row per redraw. */
+typedef struct { u32 m0; u16 m1; u8 used, hud; u8 drop[4]; } HomeMemo;
+#ifndef HOME_MEMO_N
+#define HOME_MEMO_N 8
+#endif
+static HomeMemo home_memo[HOME_MEMO_N];
+static HOME_OS void home_map(const u32 *m, const u8 *wgt, int hud, int box, u8 *map)
+{
+    HomeMemo *e;
+    u32 m0 = m[0], m1 = m[1] & 0xffffUL;
+    int c, n, k;
+    if (box
+#ifdef SAT_PERF_STAGES
+        || sat_s1_memo_off
+#endif
+       )
+    {
+#ifdef SAT_PERF_STAGES
+        sat_s1m[3]++;
+#endif
+        home_map_calc(m, wgt, hud, box, map);
+        return;
+    }
+    e = &home_memo[(m0 ^ (m0 >> 7) ^ (m1 * 13u) ^ (u32)hud) & (HOME_MEMO_N - 1)];
+    if (e->used && e->m0 == m0 && e->m1 == m1 && e->hud == (u8)hud)
+    {
+        for (c = 0, n = 0, k = 0; c < 48 && n < 44; c++)
+        {
+            if (k < 4 && c == e->drop[k]) { k++; continue; }
+            map[n++] = (u8)c;
+        }
+#ifdef SAT_PERF_STAGES
+        sat_s1m[0]++;
+        if (sat_s1_memo_verify)
+        {
+            u8 chk[44];
+            home_map_calc(m, wgt, hud, 0, chk);
+            for (c = 0; c < 44; c++) if (chk[c] != map[c]) { sat_s1m[2]++; break; }
+        }
+#endif
+        return;
+    }
+    home_map_calc(m, wgt, hud, 0, map);
+#ifdef SAT_PERF_STAGES
+    sat_s1m[1]++;
+#endif
+    for (c = 0, n = 0, k = 0; c < 48; c++)
+    {
+        if (n < 44 && map[n] == c) n++;
+        else if (k < 4) e->drop[k++] = (u8)c;
+    }
+    e->m0 = m0; e->m1 = (u16)m1; e->hud = (u8)hud; e->used = 1;
+}
+#endif
 /* One map per block of rows: rows that hold anything (not all droppable) and touch each other share the columns all of them can drop, so
    a 16 pixel letter's top and bottom halves, and a banner's rows, stay together (owner 11-08: the select screen's names broke apart). */
 static HOME_OS int home_maps_rows(u32 x0, u32 (*bm)[2])
@@ -1332,14 +1445,57 @@ static HOME_OS void home_row_map(u32 row, u32 (*bm)[2], int sel, u8 *map)
         return;
     }
     m[0] = bm[row][0]; m[1] = bm[row][1];
+#ifndef SAT_S1_MEMO
     for (c = 0; c < 48; c++) wgt[c] = 0;
+#endif
     if (!full)
     {
         while (a > 0 && !(bm[a - 1][0] == 0xffffffffUL && bm[a - 1][1] == 0xffffUL)) { a--; m[0] &= bm[a][0]; m[1] &= bm[a][1]; }
         while (b + 1 < S1_ROWS && !(bm[b + 1][0] == 0xffffffffUL && bm[b + 1][1] == 0xffffUL)) { b++; m[0] &= bm[b][0]; m[1] &= bm[b][1]; }
+#ifdef SAT_S1_MEMO
+        if (snap.hud_flush && a == 8 && (b == 10 || b == 11))   /* the weights are read only for the story box */
+        {
+            for (c = 0; c < 48; c++) wgt[c] = 0;
+            for (q = a; q <= b; q++) for (c = 0; c < 48; c++) wgt[c] = (u8)(wgt[c] + !BL(bm[q], c));
+        }
+#else
         for (q = a; q <= b; q++) for (c = 0; c < 48; c++) wgt[c] = (u8)(wgt[c] + !BL(bm[q], c));
+#endif
     }
     home_map(m, wgt, snap.hud_flush && (row < 6 || row >= 25), snap.hud_flush && !full && a == 8 && (b == 10 || b == 11), map);
+}
+#endif
+#if defined(SAT_S1_BLANKROWS) && !(SAT_GFX_FIT && defined(SAT_HOME))
+#error SAT_S1_BLANKROWS needs the fitted scroll 1 of the home build
+#endif
+#ifdef SAT_S1_BLANKROWS
+/* Exact skip of blank rows (lane perf-reconcile 11-10, default off). A row of scroll 1 whose cells are all one word with no tile (both column parities miss the cache:
+   a blank tile) draws CLEAR_NAME in every column at the same map row, whatever the column fit does. Once such a row has been written for this map position it is written
+   again only when its position changes (any scroll 1 move, a menu, a pack swap). Bit r of s1_done: row r is blank and clear in VDP2 at s1_key. In play 19 of the 29 rows
+   are blank: the cell loop, the column fit and the lookups of those rows are skipped (about 1.4 K of the 3 K ticks of a scroll 1 redraw after SAT_S1_MEMO, Yaba cache ON). */
+static u32 s1_done, s1_key;
+static HOME_OS __attribute__((noinline)) int s1_blank_row(u32 row)
+{
+    const u32 *w = snap.s1 + row * S1_COLS;
+    u32 c, w0 = w[0], k = (w0 >> 16) << 1;
+    unsigned long d = 0;
+    for (c = 1; c < S1_COLS; c++) if (w[c] != w0) goto no;
+    if (cache_get(&s1_cache, k, &d) != NOSLOT || cache_get(&s1_cache, k | 1, &d) != NOSLOT) goto no;
+    if ((s1_done >> row) & 1)
+    {
+#ifdef SAT_PERF_STAGES
+        sat_s1m[4]++;
+        if (sat_s1_memo_verify)
+        {   u32 r = (((s1_key >> 8) & 0xff) + row) & 63, col;
+            for (col = 0; col < 45; col++) if (sh_s1[r * 64 + (((s1_key & 0xff) + col) & 63)] != CLEAR_NAME) sat_s1m[5]++; }
+#endif
+        return 1;
+    }
+    s1_done |= 1UL << row;
+    return 0;
+no:
+    s1_done &= ~(1UL << row);
+    return 0;
 }
 #endif
 static void draw_scroll1(u16 sx, u16 sy)
@@ -1350,16 +1506,27 @@ static void draw_scroll1(u16 sx, u16 sy)
 #if SAT_GFX_FIT && defined(SAT_HOME)
     u32 bm[S1_ROWS][2];
     int sel = home_maps_rows(x0, bm);
+    PSTAGE(10);
+    PSTAGE_ZERO(11);
 #ifdef SAT_HOME_DIAG
     sat_diag_frames++;
     diag_miss0 = sat_gfx_stats.missing;
 #endif
 #endif
+#ifdef SAT_S1_BLANKROWS
+    {   u32 key = (x0 >> 3) | ((y0 >> 3) << 8) | ((u32)snap.home << 16);
+        if (key != s1_key || !drawn_valid) { s1_key = key; s1_done = 0; } }
+#endif
     for (row = 0; row <= SAT_GFX_SCREEN_H / 8; row++)
     {
+#ifdef SAT_S1_BLANKROWS
+        if (row < S1_ROWS && s1_blank_row(row)) continue;
+#endif
 #if SAT_GFX_FIT && defined(SAT_HOME)
         u8 map[44];
+        PACC_BEGIN();
         home_row_map(row < S1_ROWS ? row : S1_ROWS - 1, bm, sel, map);
+        PACC_END(11);
 #ifdef SAT_HOME_DIAG
         if (row < S1_ROWS && snap.home < 3)
         {
@@ -1408,6 +1575,7 @@ static void draw_scroll1(u16 sx, u16 sy)
             write_name(VDP2_VRAM + MAP_S1 + (r * 64 + c) * 4, name, &sh_s1[r * 64 + c]);
         }
     }
+    PSTAGE(12);
 #if defined(SAT_HOME_DIAG) && SAT_GFX_FIT && defined(SAT_HOME)
     sat_diag_s1miss += sat_gfx_stats.missing - diag_miss0;
 #endif
@@ -1554,6 +1722,12 @@ static void update_rowscroll(void)
         write_name(VDP2_VRAM + ROWTAB + line * 4, (u32)snap.row[line] << 16, &sh_row[line]);
 }
 
+#ifdef SAT_FPS_HUD
+static int fps_on;   /* the performance readout's layer (NBG3) is up this picture: priority 7, sprites kept under it */
+#define FPS_HUD(x) x
+#else
+#define FPS_HUD(x)
+#endif
 static u16 prinb_last; /* VDP2 registers are write-only: what update_priority last put in PRINB */
 /* Layer order and the priority table. VDP2 levels: layers 2, 4, 6; a sprite level sits just under the highest layer it hides behind. */
 static void update_priority(u16 layers, u16 pri)
@@ -1571,7 +1745,7 @@ static void update_priority(u16 layers, u16 pri)
 #ifdef SAT_HOME
     /* NBG3 (the menu layer) keeps priority 7 through the whole picture: this write used to drop it to 0 at the start of every frame and draw_home
        put it back near the end, so under the frame chain (the slave still building sprite commands at the vblank) the menu text was never shown. */
-    VDP2R(0xfa) = (u16)(prin[0] | (snap.home ? 0x0700 : 0));   /* NBG2 = scroll 1, NBG3 = menu */
+    VDP2R(0xfa) = (u16)(prin[0] | ((snap.home FPS_HUD(|| fps_on)) ? 0x0700 : 0));   /* NBG2 = scroll 1, NBG3 = menu */
 #else
     VDP2R(0xfa) = prin[0];                          /* NBG2 = scroll 1 */
 #endif
@@ -1594,7 +1768,7 @@ static void update_priority(u16 layers, u16 pri)
 #endif
         }
 #ifdef SAT_HOME
-        if ((snap.home HUD(|| snap.hud)) && level > 6) level = 6;   /* the menu layer (NBG3, 7) in front of sprites too; a sprite wins ties, so 7 would hide it */
+        if ((snap.home HUD(|| snap.hud) FPS_HUD(|| fps_on)) && level > 6) level = 6;   /* the menu layer (NBG3, 7) in front of sprites too; a sprite wins ties, so 7 would hide it */
 #endif
         s[p] = (u16)level;
     }
@@ -2060,7 +2234,11 @@ static void note_slots(void)
 #define STAGE(i)
 #else
 /* Timer at each stage, for the frame profile. The kernel owns and restarts the timer. */
+#ifdef SAT_PERF_STAGES
+unsigned long sat_gfx_stage[16];   /* [6] after the layer wait, [7] after scroll 2, [8] after scroll 3, [9] after scroll 1; inside scroll 1: [10] after home_maps_rows, [11] ticks summed in home_row_map, [12] after the row loop */
+#else
 unsigned long sat_gfx_stage[6];
+#endif
 #define STAGE(i) (sat_gfx_stage[i] = ((u32)*(volatile u8 *)0xfffffe12UL << 8) | *(volatile u8 *)0xfffffe13UL)
 #endif
 
@@ -2589,6 +2767,11 @@ extern volatile unsigned long sat_vlog[16 * 4];
 #define VLOG(v) UNC_PTR(unsigned long, &sat_vlog[((v) & 15) * 4])
 #define SFRT() GFX_TICKS()
 #endif
+#ifdef SAT_FPS_HUD
+#include "sat_rt.h"
+extern int sat_fps_hud(u32 shown, int fresh);
+static u32 fps_next;
+#endif
 void sat_gfx_draw(void)
 {
     u16 layers = snap.layers;
@@ -2726,6 +2909,15 @@ void sat_gfx_draw(void)
             { int e; for (e = 62 * 16 + 1; e < 64 * 16; e++) put16(CRAM_AT(e), sat_gfx_colour(cram_shadow[e])); }   /* the game's colours back, MSB as everywhere */
         }
         HUD(if (snap.hud && !snap.home) { hud_layer(home_was || !hud_was); hud_was = 1; } else hud_was = 0;)
+#ifdef SAT_FPS_HUD
+        /* The performance readout (saturn/rt/fps_hud.c, cart code): called once a second and when the menus have just gone; the layer bit is set below. */
+        if (!snap.home)
+        {
+            if (home_was || (int)(sat_dbg.vblanks - fps_next) >= 0) { fps_next = sat_dbg.vblanks + 60; sat_fps_hud(UNC32(plot_shown), home_was); }
+            fps_on = 1;
+        }
+        else fps_on = 0;
+#endif
         home_was = snap.home;
     }
 #endif
@@ -2737,24 +2929,35 @@ void sat_gfx_draw(void)
     STAGE(2);
     snap_layers_wait();
     HUD_POLL();
+    PSTAGE(6);
     VP(vp_current[VP_SNAPSHOT_TICKS] |= snap.profile_layer_ticks << 16;)
     if (layers & 4)
     {
         bgon |= 1;
         if (!drawn_valid || snap.s2_sum != drawn_s2) { draw_scroll2(s2x, s2y, row_active); drawn_s2 = snap.s2_sum; }
         HUD_POLL();
+        PSTAGE(7);
     }
     if (layers & 8)
     {
         bgon |= 2;
         if (!drawn_valid || snap.s3_sum != drawn_s3) { draw_scroll3(s3x, s3y); drawn_s3 = snap.s3_sum; }
         HUD_POLL();
+        PSTAGE(8);
     }
     if (layers & 2)
     {
         bgon |= 4;
+#ifdef SAT_S1_EVERY
+        /* Approximation (lane perf-reconcile 11-10, default off): while a stage is played (hud_flush) the scroll 1 layer (HUD text, banners) is redrawn at most every
+           SAT_S1_EVERY pictures. A changed HUD word shows up to SAT_S1_EVERY - 1 pictures late (33 ms at 2); the sprites and the other layers are never held back. */
+        s1_age++;
+        if (!drawn_valid || (snap.s1_sum != drawn_s1 && (!snap.hud_flush || s1_age >= SAT_S1_EVERY))) { draw_scroll1(s1x, s1y); drawn_s1 = snap.s1_sum; s1_age = 0; }
+#else
         if (!drawn_valid || snap.s1_sum != drawn_s1) { draw_scroll1(s1x, s1y); drawn_s1 = snap.s1_sum; }
+#endif
         HUD_POLL();
+        PSTAGE(9);
     }
     drawn_valid = 1;
     STAGE(3);
@@ -2762,7 +2965,7 @@ void sat_gfx_draw(void)
     bgon &= SAT_GFX_BGMASK;
 #endif
 #ifdef SAT_HOME
-    if (snap.home HUD(|| snap.hud)) bgon |= 8;
+    if (snap.home HUD(|| snap.hud) FPS_HUD(|| fps_on)) bgon |= 8;
 #endif
     VDP2R(0x20) = bgon;
     VDP2R(0x70) = (u16)((s2x + CPS_LEFT + SAT_GFX_CROP_X - NUDGE_X) & 0x7ff);
