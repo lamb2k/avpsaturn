@@ -548,6 +548,36 @@ static void wv_speed(int i)
     R16(PL(i) + 0x14) = (u16)(R16(PL(i) + 0x14) + e);
     R16(PL(i) + 0x18) = (u16)(R16(PL(i) + 0x18) + e);
 }
+/* Berserker events for the feature lanes (sounds, flash/freeze, healing): one named call each, default empty (weak), so another object overrides it with one function.
+   wv_on_berserker_start(player)    the tick his state becomes 02000c (the flurry; Schaefer's gun action reused by the stock input path)
+   wv_on_berserker_connect(player, damage)   a tick in that state on which the hit points of the tag-0c enemy blocks (ff9a00.., stride 0x100, health +0x40) fell by `damage`
+   wv_on_berserker_end(player)      the first tick after the state ended
+   Called from the pre-hook of his player update, once per update, only while his record is native. Contact is read from the enemies' health, not from the collision code. */
+#ifdef SAT_WV_NATIVE_GFX
+__attribute__((weak)) void wv_on_berserker_start(int i) { (void)i; }
+__attribute__((weak)) void wv_on_berserker_connect(int i, int damage) { (void)i; (void)damage; }
+__attribute__((weak)) void wv_on_berserker_end(int i) { (void)i; }
+static u8 wv_bz_on_[2];
+static u16 wv_bz_hp_[2];
+static u16 wv_enemy_hp(void)
+{
+    u32 b; u16 t = 0;
+    for (b = 0xff9a00u; b < 0xffc700u; b += 0x100u)
+        if (R8(b) && R8(b + 8) == 0x0c) t = (u16)(t + R16(b + 0x40));
+    return t;
+}
+static void wv_berserker_events(int i)
+{
+    int in = R8(PL(i) + 4) == 2 && R8(PL(i) + 5) == 0 && R8(PL(i) + 6) == 0x0c;
+    if (in) {
+        u16 hp = wv_enemy_hp();
+        if (!wv_bz_on_[i]) { wv_bz_on_[i] = 1; wv_on_berserker_start(i); }
+        else if (hp < wv_bz_hp_[i]) wv_on_berserker_connect(i, wv_bz_hp_[i] - hp);
+        wv_bz_hp_[i] = hp;
+    } else if (wv_bz_on_[i]) { wv_bz_on_[i] = 0; wv_on_berserker_end(i); }
+}
+#endif
+
 /* wrapper hook for f_195ec (player state machine, a6 = the player's block): 1 run it, 0 skip this tick */
 int sat_guest_wolverine_tick(unsigned long a6)
 {
@@ -561,6 +591,7 @@ int sat_guest_wolverine_tick(unsigned long a6)
     wv_nat_sync();
     if (wv_nat_drawn(i)) {   /* his own record: the game's clock runs it, nothing is held or drawn over it */
         cur_[i] = 255; recovery_[i] = 0; held_[i] = 0; wv_step_now[i] = 0xffff;
+        wv_berserker_events(i);
         return 1;
     }
 #endif
