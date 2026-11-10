@@ -48,8 +48,8 @@ static void setup(void)
     VDP2R(0x10) = 0x0123; VDP2R(0x12) = 0xff67;   /* the menus' access pattern and NBG3 set-up, as the hardware test readout does */
     VDP2R(0x36) = 0x8063; VDP2R(0x4c) = 0x0f0f; VDP2R(0x4e) = 0x0f0f; VDP2R(0x94) = 0; VDP2R(0x96) = 0;
     VDP2R(0x24) = 0; VDP2R(0x26) = 0; VDP2R(0xee) = 0; VDP2R(0x10a) = 0; VDP2R(0xec) = 0;
-    for (e = 1; e < 32; e++)                     /* banks 62 and 63: the home font's white and yellow, plain (no translucent dot) */
-        CRAM[62 * 16 + e] = sat_gfx_colour((u16)(((u32)home_pal[e * 2] << 8) | home_pal[e * 2 + 1]));
+    for (e = 0; e < 32; e++)                     /* banks 62 and 63: the home font's white and yellow, plain (no translucent dot). Pen p sits at entry p + 1 of its bank, pen 15 has none. */
+        if ((e & 15) != 15) CRAM[62 * 16 + e + 1] = sat_gfx_colour((u16)(((u32)home_pal[e * 2] << 8) | home_pal[e * 2 + 1]));
     for (e = 0; e < 28 * 64; e++) VDP2_VRAM[(MAP_HOME >> 1) + e] = 0;
     shadow[0][0] = 0xffff; shadow[1][0] = 0xffff;
     { u32 r, c; for (r = 0; r < 2; r++) for (c = 0; c < COLS; c++) shadow[r][c] = 0xffff; }
