@@ -392,6 +392,7 @@ class RuntimeSelectionTest(unittest.TestCase):
         with tempfile.TemporaryDirectory() as td:
             td = pathlib.Path(td)
             (td / "guest_hudpal.inc").write_text(hud_art.pal_include(sets))
+            (td / "guest_face.inc").write_text(hud_art.face_include_empty())
             rows = [[[0] * 3 for _ in range(5)] for _ in range(2)]
             rows[0][0][0] = 40
             rows[0][3][1] = 41
