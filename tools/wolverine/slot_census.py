@@ -19,6 +19,7 @@ l = lambda a: int.from_bytes(rom[a:a + 4], "big")
 s16 = lambda v: v - 65536 if v >= 32768 else v
 TABLES = {"T1": (0x162f90, 80), "T0": (0x163032, 33), "T2": (0x163074, 65), "T3": (0x1630f6, 49)}
 BASES = {v[0]: k for k, v in TABLES.items()}
+BASES.update({v[0] + 0x19d070: k for k, v in TABLES.items()})   # the relocated block (window 0x300000)
 FIRST_REC = 0x163158
 
 
