@@ -91,7 +91,7 @@ def key_of(code):
 
 
 # ---- MSHvSF's data
-FEET = 13
+FEET = int(os.environ.get("WV_FEET", "14"))   # the feet line below the origin's row. 13 put his soles 2 screen px (stand) to 7 px (walk) lower than stock Schaefer's against the game's shadow (Yaba 11-10, shad1): the ellipse is the stock one (same rows, same order), so the poses move up one row
 
 
 def mv_rect(i):
@@ -160,7 +160,7 @@ def assembly(cells):
     be = lambda v: (v & 0xffff).to_bytes(2, "big")
     b += be(0x000a) + be(len(cells)) + be(len(cells)) + be(0) + be(0) + be(0xfff5)
     for cx, cy, k, hf, vf, pal in cells:
-        b += be(k) + be(vf << 6 | hf << 5 | 1) + be(cx) + be(cy - FEET)
+        b += be(k) + be(vf << 6 | hf << 5 | (0 if pal == 13 else 1)) + be(cx) + be(cy - FEET)   # second-row tiles carry palette 0 until the runtime writes the stage's row (the first row is always 1)
     return bytes(b)
 
 
@@ -299,6 +299,25 @@ def sole_of(cells):
     return best
 
 
+# Hurt boxes (owner-visible, 11-10): the engine lets a hit land only when the target's record names a hurt box (index 0 = none: the collision pass f_1cf54 refuses at once). Schaefer's records name none
+# during hit reactions, knockdown, getup, landing and his special, so he is not hittable there; a record whose donor names none keeps none (the box also floated above the lying poses). A named MSHvSF box is
+# used only where it covers the pose it belongs to (tucked jump poses carry a box 45 px above the pose).
+def hurt_or_donor(rom_hurt, rect, cells):
+    """hurt index for a floor-aligned record: 0 where the donor names none; the MSHvSF box where it covers at least half of the pose's height; else the donor's own index
+    (MSHvSF's box of a tucked jump pose stands 45 px above the pose: leap launch and landing): the idle's standing box, as the donor's index 1 is
+    (only reached for records whose donor names a box, so the lying/flight states stay at 0)"""
+    if rom_hurt == 0: return 0
+    if rect is None: return idle_recs[0]["hurt"]
+    rows = [(cy - FEET + (15 - tile_rows(k)[1] if vf else tile_rows(k)[0]), cy - FEET + (15 - tile_rows(k)[0] if vf else tile_rows(k)[1])) for cx, cy, k, hf, vf, pal in cells if tile_rows(k)]
+    if rows:
+        top, bot = min(r[0] for r in rows), max(r[1] for r in rows)
+        ov = min(bot, -rect[2]) - max(top, -rect[3])
+        if ov * 2 < bot - top:
+            report.append('hurt box of a pose off its body: standing box kept (donor index %d)' % rom_hurt)
+            return idle_recs[0]["hurt"]
+    return hurt_index(rect)
+
+
 def floor_cells(cells, lift=0):
     """MSHvSF puts its own height into a pose (jump, hit flight, getup); AvP's game moves the actor for those, so a state the game lifts shows his pose with the sole on the stance's
     floor line (the idle's first pose). lift = extra px up (the leap arc, which the game does not move)"""
@@ -317,17 +336,25 @@ ROLE_T1 = {1: "IDLE", 3: "JUMP", 4: "LAND", 5: "LAND", 6: "LAND", 7: "IDLE", 8: 
            70: "HP", 71: "IDLE", 72: "IDLE", 73: "IDLE", 74: "IDLE", 75: "IDLE", 76: "HP", 77: "HP", 78: "IDLE", 79: "IDLE"}
 HOLD_AT = dict(JUMP=0.45, LAND=1.0, IDLE=0.0)
 # Comparison knobs (owner 11-09: every timing change ships as a comparison first). Defaults are the standing decisions.
+#   Owner 11-10 ("ok all slashes"): the default is variant B, LP LP HP with the 12-tick heavy punch; A (WV_HP_TICKS=0) and C (WV_CHAIN=4) stay as switches for comparison only.
 #   WV_CHAIN=3 (default): the attack chain is LP, LP, HP. Schaefer's state routine has four stages (0..3, slots T1.32..35, stage 3 follows only after a connect on stage 2); stages 0 and 1 are the
 #                         first claw attack, stage 2 (slot T1.34) his heavy punch, and the stage counter wraps after stage 2 (build.py rewrites its two `& 3` sites to the count wolverine.c sets).
 #   WV_CHAIN=4          : LP, LP, HP, HK (stage 3, slot T1.35, is his kick).
-#   WV_HP_TICKS=N       : the heavy punch's length in ticks. Default 0 = the donor's heavy stage skeleton (slot T1.35: 2, 2, 6, 5, 3 = 18 ticks, no cancel flags); N rescales its durations to N ticks (the faster
-#                         heavy punch of the comparison disc: 12, as quick as the planned light punches).
+#   WV_HP_TICKS=N       : the heavy punch's length in ticks. 0 = the donor's heavy stage skeleton (variant A) (slot T1.35: 2, 2, 6, 5, 3 = 18 ticks, no cancel flags); N rescales its durations to N ticks (default 12, as quick as
+#                         the planned light punches).
 WV_CHAIN = int(os.environ.get("WV_CHAIN", "3"))
-WV_HP_TICKS = int(os.environ.get("WV_HP_TICKS", "0"))
+WV_HP_TICKS = int(os.environ.get("WV_HP_TICKS", "12"))
 WV_T3_SHARE = int(os.environ.get("WV_T3_SHARE", "1"))   # 1: the 48 T3 slots (the stock gun action's aim chains, unused by his native Berserker) share one chain; 0: one chain each (3.2 KB more)
 t3_shared = []
 assert WV_CHAIN in (3, 4)
 HP_SLOT, HK_SLOT = 0x163688, 0x1636dc   # donor chain starts of T1.34 (stage 2) and T1.35 (stage 3)
+# Owner 11-10 ("why does wolverine still kick": all slashes means no kick anywhere): the three slots Schaefer's donor uses for a kick-like swing take claw slashes of his resident set.
+#   T1.41  state 02000a, the air attack (jump + attack; donor records 2 and 3 carry attack boxes 12 and 21): HP slash
+#   T1.16  state 02000e, entered by the player action-request path (f_1ab1a; donor attack box 8 on its second record): HP slash
+#   T1.14  the 2-record pose of the stand handler f_198b0 (no attack box): the first light slash
+# WV_KICK=1 (comparison build only) restores the MSHvSF kick poses (role HK) in all three, as chain C does for the stage-3 slot.
+if os.environ.get("WV_KICK") != "1":
+    ROLE_T1[41] = ROLE_T1[16] = "HP"; ROLE_T1[14] = "LP1"
 ROLE_T1[34] = "HP"
 ROLE_T1[35] = "HK" if WV_CHAIN == 4 else "HP"
 role_of = {}   # donor chain start -> (role name, source key)
@@ -414,7 +441,7 @@ def make_chain(start, role, skel_from=None):
         hit3, hurt3 = mv_boxes(pk3[0])
         for k, a in enumerate(ch):
             last = bool(w(rom, a + 2) & 0x8000)
-            out.append(dict(src=pk3[0], cells=floor_cells(pk3[1]), dur=w(rom, a), flags=w(rom, a + 2), hurt=hurt_index(hurt3) if hurt3 else rom[a + 8],
+            out.append(dict(src=pk3[0], cells=floor_cells(pk3[1]), dur=w(rom, a), flags=w(rom, a + 2), hurt=hurt_or_donor(rom[a + 8], hurt3, floor_cells(pk3[1])),
                             atk=atk_index(hit3) if (last and hit3) else rom[a + 9], b10=rom[a + 10], b11=rom[a + 11], tail=rom[a + 12:a + 16], donor=a, jump=("donor" if last else None)))
         return out, role
     hold_at = HOLD_AT.get(role.split("-")[0], 1.0 if role not in HOLD_AT else 0.0)
@@ -444,7 +471,7 @@ def make_chain(start, role, skel_from=None):
                 report.append("%x rec %d keeps donor attack box %d" % (start, k, atk))
         else:
             atk_i = 0
-        out.append(dict(src=pick[0], cells=floor_cells(pick[1]), dur=dur, flags=fl, hurt=hurt_index(hurt) if hurt else rom[a + 8], atk=atk_i, b10=rom[a + 10], b11=rom[a + 11],
+        out.append(dict(src=pick[0], cells=floor_cells(pick[1]), dur=dur, flags=fl, hurt=hurt_or_donor(rom[a + 8], hurt, floor_cells(pick[1])), atk=atk_i, b10=rom[a + 10], b11=rom[a + 11],
                         tail=rom[a + 12:a + 16], donor=a, jump=("donor" if last else None)))
     return out, role
 
@@ -518,6 +545,7 @@ BZ_SLOTS = (6, 6, 5, 5, 4, 3, 3, 4, 5, 5, 6, 6)
 # and 112's low edge), a deliberate approximation (rect = forward x0, x1, up y0, y1). Owner-visible: contact geometry of the flurry.
 BZ_BOX = (26, 84, 13, 85)
 BZ_TICKS = int(os.environ.get("WV_BZ_TICKS", "4"))
+BZ_HURT = int(os.environ.get("WV_BZ_HURT", "1"))   # 1 (default): he can be hit during the Berserker (his flurry poses' hurt box); 0: no hurt box, as Schaefer's own special (donor chain T1.42 names none: unhittable) - comparison switch
 BZ = "BZ"
 bz_src = pick_sources("BERS3", None)
 t3b, t3n = TABLES[3]
@@ -530,12 +558,41 @@ for sl in BZ_SLOTS:
     pk = bz_src[k]
     hit_, hurt_ = mv_boxes(pk[0])
     if os.environ.get('WV_DEBUG'): print('BZ slot', sl, 'pose', k, hex(pk[0]), 'hit rect', hit_, 'hurt', hurt_, 'ids', [w(mv, 0x1ce0f2 + l(mv, pk[0] + 12) * 16 + 2 * j) for j in range(8)])
-    bz_recs.append(dict(src=pk[0], cells=floor_cells(pk[1]), dur=BZ_TICKS, flags=0, hurt=hurt_index(hurt_) if hurt_ else rom[STAND + 8], atk=atk_index(BZ_BOX),
+    bz_recs.append(dict(src=pk[0], cells=floor_cells(pk[1]), dur=BZ_TICKS, flags=0, hurt=(hurt_index(hurt_) if hurt_ else rom[STAND + 8]) if BZ_HURT else 0, atk=atk_index(BZ_BOX),
                         b10=0, b11=rom[STAND + 11], tail=rom[STAND + 12:STAND + 16], donor=None))
 bz_last = dict(bz_recs[-1]); bz_last.update(dur=1, flags=0x8000, atk=0, jump="self", donor=None)
 bz_recs.append(bz_last)
 new_chains[BZ] = bz_recs
 role_of[BZ] = "BERSERKER(own)"
+if WV_T3_SHARE and t3_shared:   # the 48 T3 slots (the stock gun's aim chains, never entered by his native Berserker) answer with the Berserker's own chain instead of a chain of their own
+    t3list = new_chains[t3_shared[0]]
+    for a_, v_ in list(new_chains.items()):
+        if v_ is t3list: new_chains[a_] = bz_recs
+
+# Chains with byte-identical records (same durations, flags, poses, boxes, event bytes, and a terminal that jumps to itself or to the same record) are stored once: the index tables of every slot
+# that named a duplicate point at the first copy. Lossless (a terminal jumping to itself behaves the same in either copy); WV_DEDUPE=0 keeps every chain.
+def chain_key(rs):
+    k = []
+    for r in rs:
+        jump = None
+        if r["flags"] & 0x8000:
+            if r.get("jump") == "donor":
+                t = l(rom, r["donor"] + 16); jump = "self" if t == r["donor"] else ("tgt", t)
+            else: jump = r.get("jump")
+        k.append((r["dur"], r["flags"], tuple(r["cells"]), r["hurt"], r["atk"], r["b10"], r["b11"], bytes(r["tail"]), jump))
+    return tuple(k)
+
+
+if int(os.environ.get("WV_DEDUPE", "1")):
+    first_of, ndup, dupbytes = {}, 0, 0
+    for a in list(new_chains):
+        rs = new_chains[a]
+        if a in (STAND, WALK, LP, BZ): continue
+        kk = chain_key(rs)
+        if kk in first_of and first_of[kk] is not rs:
+            new_chains[a] = first_of[kk]; ndup += 1; dupbytes += sum(20 if (r["flags"] & 0x8000) else 16 for r in rs)
+        else: first_of.setdefault(kk, rs)
+    print("duplicate chains aliased: %d (%d bytes)" % (ndup, dupbytes))
 
 # ---- layout
 off = (len(blk) + 15) & ~15
@@ -569,6 +626,7 @@ for st in (STAND, WALK, LP):
     for k, a in enumerate(ch):
         rec_at.setdefault(a, at_of[st] + sum(20 if (new_chains[st][j]["flags"] & 0x8000) else 16 for j in range(min(k, len(new_chains[st]) - 1))))
 asm_off = (off + 3) & ~3
+ASM_START = asm_off
 asm_where = {}
 for a, rs in new_chains.items():
     for r in rs:
@@ -577,6 +635,7 @@ for pid, cells in enumerate(poses):
     asm_where[pid] = asm_off
     ab = assembly(cells)
     for i, c in enumerate(cells):
+        assert c[5] in (12, 13), "palette rows of his tiles are 12 and 13"
         if c[5] == 13: p1_marks.append(asm_off + 12 + 8 * i + 3)
     asm_blob += ab; asm_off += len(ab)
 T_off = (asm_off + 3) & ~3
@@ -648,7 +707,6 @@ for i in range(0, len(ox) - 3, 2):
         a = max((o, ad) for o, ad in inv if o <= i); src = a[1] + i - a[0]
         if src == 0x19744 + 4: tslot = i
 assert tslot is not None, "the per-character box table slot (0x19748) is not in the opcode store"
-assert all(b % 4 == 3 for b in p1_marks) and all(((b >> 2) - (a >> 2)) < 256 for a, b in zip(sorted(p1_marks), sorted(p1_marks)[1:])), "second-row marks must be 3 mod 4 and within 1020 bytes of each other"
 assert all((b - a) % 2 == 0 and (b - a) >> 1 < 65536 for a, b in zip([0] + slots, slots)), "reloc slot steps must fit a 16-bit word of 2-byte units"
 lines = [
     "/* Generated by tools/wolverine/gen_native.py: do not commit (ROM-derived). */",
@@ -666,10 +724,8 @@ lines = [
     "#define WV_NAT_TSLOT %du   /* opcode-store offset of the per-character box table entry of character 1 */" % tslot,
     "#define WV_RELOC_SLOTS %d" % len(slots),
     "static const unsigned short wv_reloc_delta[%d] = {%s};   /* opcode-store offsets, ascending, in steps of 2 */" % (len(slots), ",".join(str((b - a) >> 1) for a, b in zip([0] + slots, slots))),
-    "#define WV_NAT_NP1 %d" % len(p1_marks),
-    "#define WV_NAT_P1_FIRST %d   /* (byte offset of the first second-row attribute) >> 2 */" % ((sorted(p1_marks)[0] >> 2) if p1_marks else 0),
-    "static const unsigned char wv_nat_p1[%d] = {%s};   /* steps of 4 bytes between the attribute bytes of his second-row tiles (offsets are 3 mod 4), first step 0 */" % (
-        max(1, len(p1_marks)), ",".join(str(((b >> 2) - (a >> 2))) for a, b in zip([sorted(p1_marks)[0]] + sorted(p1_marks), sorted(p1_marks))) if p1_marks else "0"),
+    "#define WV_NAT_ASM %d   /* block offset of the first pose assembly; WV_NAT_ASMN assemblies follow back to back (12 byte header, count at +2, 8 bytes a tile: the attribute low byte at +3 of a tile is 1 for his first row, 0 for the second until the stage row is written) */" % ASM_START,
+    "#define WV_NAT_ASMN %d" % len(poses),
     "static unsigned char wv_blk[WV_NAT_SIZE] __attribute__((aligned(4))) = {%s};" % ",".join(map(str, full[:size])),
 ]
 OUT.write_text("\n".join(lines) + "\n")

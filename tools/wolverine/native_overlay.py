@@ -18,7 +18,8 @@ WIN, LO, END, T = const("WV_NAT_WIN"), const("WV_NAT_REC_LO"), const("WV_NAT_REC
 A = json.loads((adir / "remap.json").read_text())
 raw = (adir / "gfx_wolverine.bin").read_bytes()
 col = A["colours"][A["default_colour"]]
-p1 = set(int(v) for v in re.search(r"wv_nat_p1\[\d+\] = \{([0-9,]*)\}", inc)[1].split(","))
+_m = re.search(r"wv_nat_p1\[\d+\] = \{([0-9,]*)\}", inc)
+p1 = set(int(v) for v in _m[1].split(",")) if _m else None   # older blocks list the second-row tiles; current ones mark them in the assembly itself (attribute low byte 0 = second row, written by the runtime)
 w = lambda o: int.from_bytes(blk[o:o + 2], "big")
 l = lambda o: int.from_bytes(blk[o:o + 4], "big")
 s16 = lambda v: v - 65536 if v >= 32768 else v
@@ -46,7 +47,7 @@ for n, r in enumerate(sel):
         po = ap + 12 + 8 * i
         key, at, dx, dy = w(po), w(po + 2), s16(w(po + 4)), s16(w(po + 6))
         hf, vf = at >> 5 & 1, at >> 6 & 1
-        pal = col[1 if (po + 3) in p1 else 0]
+        pal = col[1 if ((po + 3) in p1 if p1 is not None else not at & 1) else 0]
         px = tile(key)
         for y in range(16):
             for x in range(16):
@@ -58,7 +59,7 @@ for n, r in enumerate(sel):
     ho, ao = r and blk[r + 8], blk[r + 9]
     ta, tb = T + 0, T
     toff = T - WIN
-    hurt0, atk0 = toff + w(toff), toff + w(toff + 2)
+    hurt0, atk0 = toff + s16(w(toff)), toff + s16(w(toff + 2))   # biased offsets (entries below the lowest used index are not stored)
     for idx, base, size, colr in ((blk[r + 8], hurt0, 8, (60, 200, 255)), (blk[r + 9], atk0, 16, (255, 60, 60))):
         if idx:
             e = base + idx * size

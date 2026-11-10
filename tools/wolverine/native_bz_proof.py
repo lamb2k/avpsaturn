@@ -27,11 +27,18 @@ MODES = tuple(m for m in (("native", 1, None), ("skin", 0, None), ("schaefer", 0
 # (frames after the leg starts, keys held from there): attack taps every 14 frames for 160 frames (an enemy walking in is met in every leg), then walk away and back
 SCHEDULE = [(0, []), (6, ["a"]), (9, []), (22, ["a"]), (25, []), (38, ["a"]), (41, []), (100, ["b"]), (104, []), (190, ["b"]), (194, []), (200, ["a"]), (203, []),
             (260, ["down"]), (266, ["down", "right"]), (272, ["right"]), (276, ["right", "a"]), (280, []), (360, ["left"]), (420, []), (480, ["a"]), (483, []), (500, ["a"]), (503, []), (700, [])]
-if os.environ.get("PROOF_BZ"):   # Berserker: QCF (facing right: down, down+right, right) then attack, then watch; PROOF_BZ=<frames to watch>; PROOF_BZ2=1 does it twice
-    SCHEDULE = [(0, []), (6, ["down"]), (10, ["down", "right"]), (14, ["right"]), (18, ["right", "a"]), (21, [])]
+if os.environ.get("PROOF_BZ"):   # Berserker (owner 11-10: his special): attack + jump pressed together (keys a and b), then watch; PROOF_BZ=<frames to watch>; PROOF_BZ2=1 does it twice
+    SCHEDULE = [(0, []), (6, ["a", "b"]), (9, [])]
     if os.environ.get("PROOF_BZPOKE"): SCHEDULE = [(0, [])]
-    if os.environ.get("PROOF_BZ2"): SCHEDULE += [(100, ["down"]), (104, ["down", "right"]), (108, ["right"]), (112, ["right", "a"]), (115, [])]
+    if os.environ.get("PROOF_BZ2"): SCHEDULE += [(100, ["a", "b"]), (103, [])]
     SCHEDULE += [(int(os.environ["PROOF_BZ"]), [])]
+if os.environ.get("PROOF_SHAD"):   # idle, walk right, idle, one attack, idle (stock Schaefer and Wolverine from the same saved state, to compare the shadow under the feet)
+    SCHEDULE = [(0, []), (30, ["right"]), (54, []), (80, ["a"]), (83, []), (130, [])]
+if os.environ.get("PROOF_POKE"): SCHEDULE = [(0, []), (int(os.environ.get("PROOF_WATCH", "70")), [])]
+if os.environ.get("PROOF_AIR"):   # air attack (state 02000a): jump (b), then attack (a) PROOF_AIR frames later (default 10), watch 90 frames; PROOF_RUN=1: hold right (dash) and attack instead
+    g = int(os.environ["PROOF_AIR"])
+    SCHEDULE = [(0, []), (6, ["b"]), (9, []), (6 + g, ["a"]), (9 + g, []), (110, [])]
+    if os.environ.get("PROOF_RUN"): SCHEDULE = [(0, []), (6, ["right"]), (20, []), (24, ["right"]), (30, []), (32, ["right"]), (50, ["right", "a"]), (53, ["right"]), (80, [])]
 if os.environ.get("PROOF_CHAIN"):   # attack chain: PROOF_CHAIN=<taps>; one tap of attack every PROOF_GAP frames (default 16); with PROOF_PIN a pinned enemy is in front the whole time
     gap = int(os.environ.get("PROOF_GAP", "16"))
     SCHEDULE = [(0, [])] + [x for i in range(int(os.environ["PROOF_CHAIN"])) for x in ((4 + gap * i, ["a"]), (7 + gap * i, []))] + [(4 + gap * int(os.environ["PROOF_CHAIN"]) + 60, [])]
@@ -59,12 +66,13 @@ def snap(s, tag, f, keys):
     blk = s.ram(0x8380, 0x100)
     rec = int.from_bytes(blk[0x1c:0x20], "big")
     rb = rec_bytes(s, rec) if 0x160000 <= rec < 0x170000 or 0x300000 <= rec < 0x310000 else bytes(16)
-    en = s.ram(0x9a00, 0x2d00)
-    hp = sum(int.from_bytes(en[o + 0x40:o + 0x42], "big") for o in range(0, len(en) - 0x100, 0x100) if en[o] and en[o + 8] == 0x0c)
+    en = s.ram(0x9580, 20 * 0xc0)   # the enemy pool: 20 blocks of 0xc0 from ff9580
+    hp = sum(int.from_bytes(en[o + 0x40:o + 0x42], "big") for o in range(0, 20 * 0xc0, 0xc0) if en[o] and int.from_bytes(en[o + 0x40:o + 0x42], "big") < 0x8000)
     d = s.m.read(s.syms["sat_dbg"], 12)
     bz = s.syms.get("sat_wv_bz")
+    ev_ = s.syms.get("wv_evt")   # test build -DWV_BZ_EVENT_TEST: start, connect calls, damage summed, end
     row = dict(tag=tag, f=f, v=int.from_bytes(d[8:12], "big"), keys=keys, sub=blk[7], lock=blk[0xad], cls=blk[0x92], swing=blk[0x67], hitflag=blk[0x6e], hits80=blk[0x80], stage=blk[0x81],
-               bz=(s.m.read(bz, 1)[0] if bz else -1), hp42=int.from_bytes(blk[0x42:0x44], "big"), ehp_list=[int.from_bytes(en[o + 0x40:o + 0x42], "big") for o in range(0, len(en) - 0x100, 0x100) if en[o] and en[o + 8] == 0x0c], st=blk[4:7].hex(), x=int.from_bytes(blk[0x10:0x12], "big"), z=int.from_bytes(blk[0x18:0x1a], "big"),
+               bz=(s.m.read(bz, 1)[0] if bz else -1), evt=([int.from_bytes(s.m.read(ev_ + 4 * k, 4), "big") for k in range(4)] if ev_ else None), hp42=int.from_bytes(blk[0x42:0x44], "big"), ehp_list=[int.from_bytes(en[o + 0x40:o + 0x42], "big") for o in range(0, 20 * 0xc0, 0xc0) if en[o]], st=blk[4:7].hex(), x=int.from_bytes(blk[0x10:0x12], "big"), z=int.from_bytes(blk[0x18:0x1a], "big"),
                face=blk[0x0f], rec=hex(rec), timer=int.from_bytes(blk[0x0a:0x0c], "big"), flags=blk[0x24:0x26].hex(), hold=int.from_bytes(blk[0x90:0x92], "big"), hp=int.from_bytes(blk[0x40:0x42], "big"),
                rec_bytes=rb.hex(), enemy_hp=hp, native=int(0x300000 <= rec < 0x310000))
     with open(OUT + "/trace.jsonl", "a") as fh:
@@ -72,19 +80,38 @@ def snap(s, tag, f, keys):
     return row
 
 
+def far(s):
+    """test assist (PROOF_FAR=1): every live enemy of the pool is put 400 px behind the player, every frame, so the flurry cannot touch anything (a clean whiff)"""
+    a = s.ram(0x8380, 0x100)
+    px, face = int.from_bytes(a[0x10:0x12], "big"), a[0x0f] & 1
+    buf = s.ram(0x9580, 20 * 0xc0)
+    for o in range(0, 20 * 0xc0, 0xc0):
+        b = buf[o:o + 0xc0]
+        if b[0] and b[1] != 0:
+            x = (px - 400 if face else px + 400) & 0xffff
+            s.m.call("memory_write", address=hex(s.syms["RAMB"] + 0x9580 + o + 0x10), size="word", value=hex(x))
+
+
 def pin(s, dx):
     """test assist (PROOF_PIN=<px>): the nearest live tag-0c enemy is put dx px in front of the player at his depth, every frame, so a contact test does not depend on the enemies' own movement"""
     a = s.ram(0x8380, 0x100)
     px, pz, ph = int.from_bytes(a[0x10:0x12], "big"), int.from_bytes(a[0x18:0x1a], "big"), int.from_bytes(a[0x14:0x16], "big")
     face = a[0x0f] & 1
-    buf = s.ram(0x9a00, 0x2d00); best = None
-    for o in range(0, len(buf) - 0x80, 0x100):
-        b = buf[o:o + 0x100]
-        if b[0] and b[8] == 0x0c and b[1] != 0:
+    buf = s.ram(0x9580, 20 * 0xc0); best = None   # the enemy pool: 20 blocks of 0xc0 from ff9580
+    for o in range(0, 20 * 0xc0, 0xc0):
+        b = buf[o:o + 0xc0]
+        if b[0] and b[1] != 0 and int.from_bytes(b[0x40:0x42], "big") < 0x8000:
             d = abs(int.from_bytes(b[0x10:0x12], "big") - px)
             if best is None or d < best[0]: best = (d, o)
     if best is None: return
-    base = s.syms["RAMB"] + 0x9a00 + best[1]
+    if os.environ.get("PROOF_ONE"):   # one target only: the first block chosen stays the pinned one, every other live enemy is put 400 px behind him
+        if "one" not in pin.__dict__: pin.one = best[1]
+        if pin.one != best[1] and buf[pin.one] and int.from_bytes(buf[pin.one + 0x40:pin.one + 0x42], "big") < 0x8000: best = (0, pin.one)
+        for o in range(0, 20 * 0xc0, 0xc0):
+            b = buf[o:o + 0xc0]
+            if o != best[1] and b[0] and b[1] != 0:
+                s.m.call("memory_write", address=hex(s.syms["RAMB"] + 0x9580 + o + 0x10), size="word", value=hex((px - 400 if face else px + 400) & 0xffff))
+    base = s.syms["RAMB"] + 0x9580 + best[1]
     x = (px + dx) if face else (px - dx)
     for off, val in ((0x10, x & 0xffff), (0x14, ph), (0x18, pz)) + (((0x40, 0x190),) if os.environ.get("PROOF_PINHP") else ()):
         s.m.call("memory_write", address=hex(base + off), size="word", value=hex(val))
@@ -96,7 +123,7 @@ def paused_leg(s, tag, dbg, sel, shots):
     mode_set(s, tag, dbg, sel)
     os.makedirs(OUT + "/" + tag, exist_ok=True)
     keys = []; k = 0; end = SCHEDULE[-1][0]
-    if os.environ.get("PROOF_BZ") or os.environ.get("PROOF_CHAIN"):   # wait (unkeyed, paused one frame at a time) until he stands or walks free of any hit, so the motion is judged on an idle player
+    if os.environ.get("PROOF_BZ") or os.environ.get("PROOF_CHAIN") or os.environ.get("PROOF_AIR") or os.environ.get("PROOF_POKE") or os.environ.get("PROOF_SHAD"):   # wait (unkeyed, paused one frame at a time) until he stands or walks free of any hit, so the motion is judged on an idle player
         for pre in range(int(os.environ.get("PROOF_PRE", "400"))):
             a = s.ram(0x8380, 0x100)
             if a[4:7].hex() in (("020000",) if os.environ.get("PROOF_BZPOKE") else ("020000", "020002")) and a[0xad] == 0 and a[0x5c] == 0: break
@@ -105,12 +132,21 @@ def paused_leg(s, tag, dbg, sel, shots):
     for f in range(end):
         while k < len(SCHEDULE) and SCHEDULE[k][0] <= f:
             keys = SCHEDULE[k][1]; k += 1
+        if os.environ.get("PROOF_BZPOKE") and int(os.environ["PROOF_BZPOKE"]) <= f < int(os.environ["PROOF_BZPOKE"]) + 3: keys = ["a", "b"]   # the special press at that frame (the schedule is empty then)
         s.set(keys)
         if f % 10 == 0 and not os.environ.get("PROOF_NOKEEP"): keep_alive(s)
         if os.environ.get("PROOF_KILL") and f == int(os.environ["PROOF_KILL"]): s.m.call("memory_write", address=hex(s.syms["RAMB"] + 0x83c0), size="word", value=hex(1))   # harness assist, every leg alike: one hit from death
+        if os.environ.get("PROOF_POKE"):   # PROOF_POKE=02000a00@10: write the player's state long (+4..+7) at that frame, to run a state whose trigger is not known (the routine's own entry runs on sub-state 0)
+            val, at = os.environ["PROOF_POKE"].split("@")
+            if f == int(at):
+                for o, wd in ((0x8384, val[:4]), (0x8386, val[4:])): s.m.call("memory_write", address=hex(s.syms["RAMB"] + o), size="word", value="0x" + wd)
+        if os.environ.get("PROOF_HP") and f == 2:   # harness assist: the player's health (block +0x40 and its mirror +0x42) for the low-health checks of the special
+            for off in (0x83c0, 0x83c2): s.m.call("memory_write", address=hex(s.syms["RAMB"] + off), size="word", value=hex(int(os.environ["PROOF_HP"])))
         if os.environ.get("PROOF_PIN"): pin(s, int(os.environ["PROOF_PIN"]))
-        if os.environ.get("PROOF_BZPOKE") and f == int(os.environ["PROOF_BZPOKE"]) and "bz_req" in s.syms:   # ask for the action directly (the motion is not the thing under test)
-            s.m.call("memory_write", address=hex(s.syms["bz_req"]), size="byte", value=hex(6))
+        if os.environ.get("PROOF_FAR"): far(s)
+        if os.environ.get("PROOF_DBGNEAR") and 6 <= f <= 14:   # who is within reach of him (pool blocks, any state), to explain a contact
+            a = s.ram(0x8380, 0x100); buf = s.ram(0x9580, 20 * 0xc0); px = int.from_bytes(a[0x10:0x12], "big")
+            s.log("near f", f, "player x", px, "z", int.from_bytes(a[0x18:0x1a], "big"), "state", a[4:7].hex(), [(o // 0xc0, b[0], b[1], int.from_bytes(b[0x10:0x12], "big") - px, int.from_bytes(b[0x18:0x1a], "big"), int.from_bytes(b[0x40:0x42], "big")) for o in range(0, 20 * 0xc0, 0xc0) for b in [buf[o:o + 0xc0]] if b[0] and abs(int.from_bytes(b[0x10:0x12], "big") - px) < 260])
         snap(s, tag, f, list(keys))
         m.call("framebuffer_burst", directory=OUT + "/" + tag, frames=1, prefix="f%04d_" % f)
     s.set([])
