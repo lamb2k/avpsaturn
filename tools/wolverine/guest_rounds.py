@@ -13,7 +13,7 @@ SPEC = "E:/AvP/learning/lane-packs/spec.json"
 SLOT = 2
 
 
-def extend(R, assets, hud=None):
+def extend(R, assets, hud=None, work=None):
     import json
     sys.path.insert(0, str(pathlib.Path(__file__).resolve().parents[1]))
     import rounds_variants
@@ -23,6 +23,15 @@ def extend(R, assets, hud=None):
     masks = R["variant_masks"]
     files = R["files"]
     table, made = {}, {}
+    wv_snd, wv_rank = None, {}
+    if work is not None:   # Wolverine's own sounds (tools/wolverine/wv_sound.py, wv_audio.py): GUEST_ASSETS/wv_sound or env WV_SOUND; without them the packs stay the arcade's
+        import wv_audio
+        sdir = pathlib.Path(os.environ.get("WV_SOUND") or assets / "wv_sound")
+        if (sdir / "wv_sound.json").exists():
+            wv_snd = wv_audio.load_assets(sdir)
+            rk = pathlib.Path(work) / "sound_rank.json"
+            wv_rank = json.loads(rk.read_text())["uses"] if rk.exists() else {}
+            wv_stats = {}
     for word, row in R["variant_file"].items():
         out = [0] * (len(masks) + 1)
         for vi, m in enumerate(masks, start=1):
@@ -44,13 +53,26 @@ def extend(R, assets, hud=None):
             if hud:
                 f["gfx"] = str(hud["stage_gfx"])
             out[vi] = made[row[vi]] = len(files)
+            if wv_snd is not None:
+                uses = {int(k, 16): n for k, n in wv_rank.get(f"{st:02x}", {}).items()}
+                pack, rep = wv_audio.build((pathlib.Path(work) / "audio" / f"r{row[vi]:03d}.bin").read_bytes(), wv_snd, uses, "stage")
+                (pathlib.Path(work) / "audio" / f"r{len(files):03d}.bin").write_bytes(pack)
+                f["audio_from"] = len(files)
+                wv_stats[f["name"]] = rep
             files.append(f)
         table[word] = out
     if hud:
         assert files[0]["name"] == "front" and "0" not in table
         front = dict(files[0], name=files[0]["name"] + "_wv", audio_from=0, rank_from=files[0]["name"], gfx=str(hud["front_gfx"]), guest=0)
         table["0"] = [len(files)] + [0] * len(masks)   # row 0 is the front end: its file, variant 0 (no characters)
+        if wv_snd is not None:
+            pack, rep = wv_audio.build((pathlib.Path(work) / "audio" / "r000.bin").read_bytes(), wv_snd, {}, "front")
+            (pathlib.Path(work) / "audio" / f"r{len(files):03d}.bin").write_bytes(pack)
+            front["audio_from"] = len(files)
+            wv_stats[front["name"]] = rep
         files.append(front)
     R["guest_files"] = {"0": table}
+    if wv_snd is not None:
+        (pathlib.Path(work) / "wv_sound_report.json").write_text(json.dumps(wv_stats, indent=0, default=str))
     os.environ["GFX_BIN"] = str(assets / "gfx_wolverine.bin")
     return R

@@ -41,6 +41,7 @@ Updated 2026-11-09 evening. Merged at 4bfcdf6: sprite-dropout cart guards (13e63
 | Item | Branch | State |
 | --- | --- | --- |
 | Native Wolverine, plan revision 2 (docs/notes/AVP_WOLVERINE_NATIVE_PLAN_V2_20261109.md): no sprite replacement; first milestone one complete native attack | lane/wv-native-gfx-20261109 (5e5d568 pushed) | design and stand prototype done (SAT_WV_NATIVE_GFX, default off; stand drawn natively in Yaba); working on the HOST identity run, then his own data block and one attack |
+| Wolverine's own sounds (MSHvSF claw swings, shouts, hurt, KO, Tornado Claw, Berserker Barrage voice; `wv_sfx(id)` API) | lane/wv-sounds-20261109 | `-DSAT_WV_SOUND`, default off (build recipe unchanged without it); needs the wv_sound/ asset directory (`tools/wolverine/wv_sound.py`) | docs/notes/AVP_WOLVERINE_SOUNDS_20261109.md |
 | Character select: fixed scroll 1 drops so panels never move and stat bars sit inside their boxes | lane/menu-dropfix-20261109 | first pass merged (stops the collapse); second pass (2f2f093, local) building; owner saw bars shifting on the merged pass |
 | Main-game text: font glyphs never seen by a census draw blank; HURRY UP! second U (lane/hurryup f36ff31); stage 14 caption garbage | lane/text-glyphs-20261109 | started |
 | Main-game sprite pieces dropped on stages 0e, 1c, 1e, 24; fatal 0xe2 at 0xa9cc4 once on 0e | lane/stage-sprites-20261109 | started |
