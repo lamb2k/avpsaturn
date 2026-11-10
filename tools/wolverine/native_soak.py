@@ -25,12 +25,36 @@ def rec_class(rec):
 
 
 def enemies(s):
-    buf = s.ram(0x9a00, 0x2d00); out = []
-    for o in range(0, len(buf) - 0x80, 0x100):
-        b = buf[o:o + 0x100]
-        if b[0] and b[8] == 0x0c and b[1] != 0:
+    buf = s.ram(0x9580, 20 * 0xc0); out = []   # the enemy pool: 20 blocks of 0xc0 from ff9580
+    for o in range(0, 20 * 0xc0, 0xc0):
+        b = buf[o:o + 0xc0]
+        if b[0] and b[1] != 0 and int.from_bytes(b[0x40:0x42], "big") < 0x8000:
             out.append((int.from_bytes(b[0x10:0x12], "big"), int.from_bytes(b[0x18:0x1a], "big")))
     return out
+
+
+nav_t = [0.0]
+
+
+def nav(s, ev):
+    """front end / continue: the same navigation step() uses, driven while the player block is inactive"""
+    now = time.time()
+    a = s.ram(0x8000, 0x400)
+    sc = s.word("sat_home_screen")
+    if now - nav_t[0] < 0.6: return
+    sel = a[1] == 2 and not a[0x380] and not a[0x1e8] and not a[0x1e9] and a[0x1b0] == 0
+    if sc in (1, 3): nav_t[0] = now; s.pulse("start", .1); return
+    if sel:
+        nav_t[0] = now
+        if a[0x1cc] != 2: s.pulse("right", .08)
+        else: s.pulse("start", .1)
+        ev.write(json.dumps(dict(nav="select", cursor=a[0x1cc], mode=a[1])) + chr(10))
+        return
+    if a[1] == 4 or a[1] == 0 or a[0x1b0]:   # game over / attract: coin then start
+        nav_t[0] = now; s.pulse("x" if a[0x18c] == 0 else "start", .08)
+        ev.write(json.dumps(dict(nav="continue", mode=a[1], attract=a[0x1b0], credits=a[0x18c])) + chr(10))
+        return
+    nav_t[0] = now; s.pulse("start", .1)
 
 
 def soak(s):
@@ -48,6 +72,7 @@ def soak(s):
     polls = 0
     ko_seen = 0
     v0 = int.from_bytes(m.read(s.syms["sat_dbg"] + 8, 4), "big")
+    s.shot("soak_start")
     while time.time() < t_end:
         polls += 1
         blk = s.ram(0x8380, 0x200)
@@ -63,7 +88,7 @@ def soak(s):
             if len(anomalies) < 40: anomalies.append(dict(v=v, kind="record outside the native window", state=stw, rec=hex(rec)))
         if stw != last_state:
             row = dict(v=v, state=stw, rec=hex(rec), cls=rc, timer=int.from_bytes(p1[0x0a:0x0c], "big"), hp=hp, sub=p1[7], face=p1[0x0f], x=int.from_bytes(p1[0x10:0x12], "big"),
-                       stage=s.ram8(0x81e8), p2=p2[4:7].hex(), bz=(m.read(bz, 1)[0] if bz else -1), alive=p1[0], tag=p1[8], swing=p1[0x67], hit=p1[0x6e])
+                       stage=s.ram16(0x81e8), p2=p2[4:7].hex(), bz=(m.read(bz, 1)[0] if bz else -1), alive=p1[0], tag=p1[8], swing=p1[0x67], hit=p1[0x6e])
             ev.write(json.dumps(row) + "\n"); ev.flush()
             last_state, since_v = stw, v
         elif v - since_v > STUCK and stw not in ("020000", "020002", "080000"):
@@ -71,13 +96,15 @@ def soak(s):
             since_v = v
         if p1[0] == 0 or hp == 0xffff or stw.startswith("04"):
             ko_seen += 1
+        if p1[0] == 0:   # between lives: the game's own continue (coin, start) and the select screen: pick Wolverine's slot again, then start
+            nav(s, ev)
+            time.sleep(0.05)
+            continue
         # --- input policy
         keys = []
         if ASSIST and hp != 0xffff and hp < 40:
             s.m.call("memory_write", address=hex(s.syms["RAMB"] + 0x83c0), size="word", value=hex(0x65))
-        if ko_seen and (polls % 20) < 3:
-            keys = ["start"]
-        elif seq is not None:
+        if seq is not None:
             if seq_i < len(seq):
                 if time.time() - seq_t > seq[seq_i][1]:
                     seq_i += 1; seq_t = time.time()
@@ -106,6 +133,7 @@ def soak(s):
         if polls % 40 == 0:
             s.log("soak", stw, "hp", hp, "v", v - v0, "states", len(states), "anoms", len(anomalies))
     s.set([])
+    s.shot("soak_end")
     summary = dict(polls=polls, vblanks=v - v0, states=dict(states), pairs={"%s/%s" % k: c for k, c in pairs.items()}, anomalies=anomalies, ko_polls=ko_seen)
     json.dump(summary, open(OUT + "/soak_summary.json", "w"), indent=1)
     s.log("soak done", len(states), "states", len(anomalies), "anomalies")
@@ -125,6 +153,10 @@ def step(v, s):
     a = s.ram(0x8000, 0x400)
     sc = s.word("sat_home_screen")
     st["n"] += 1
+    sel0 = a[1] == 2 and not a[0x380] and not a[0x1e8] and not a[0x1e9] and a[0x1b0] == 0
+    if os.environ.get("PROOF_WARP") and sel0 and sc == 0 and "sat_home_warp" in s.syms and a[0x18c] is not None and s.word("sat_home_warp") == 0:   # start the game at another stage: home.c replaces stage word 2 by sat_home_warp (the menus clear it, so it is set on the select screen)
+        s.m.call("memory_write", address=hex(s.syms["sat_home_warp"] + 2), size="word", value=hex(int(os.environ["PROOF_WARP"], 16)))
+        s.log("warp set", os.environ["PROOF_WARP"], "screen", sc, "mode", a[1])
     if sc == 3:
         if now - st["lastp"] > 1.0:
             st["lastp"] = now; s.pulse("start", .1)

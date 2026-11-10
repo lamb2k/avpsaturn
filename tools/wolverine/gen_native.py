@@ -160,7 +160,7 @@ def assembly(cells):
     be = lambda v: (v & 0xffff).to_bytes(2, "big")
     b += be(0x000a) + be(len(cells)) + be(len(cells)) + be(0) + be(0) + be(0xfff5)
     for cx, cy, k, hf, vf, pal in cells:
-        b += be(k) + be(vf << 6 | hf << 5 | 1) + be(cx) + be(cy - FEET)
+        b += be(k) + be(vf << 6 | hf << 5 | (0 if pal == 13 else 1)) + be(cx) + be(cy - FEET)   # second-row tiles carry palette 0 until the runtime writes the stage's row (the first row is always 1)
     return bytes(b)
 
 
@@ -324,6 +324,8 @@ HOLD_AT = dict(JUMP=0.45, LAND=1.0, IDLE=0.0)
 #                         heavy punch of the comparison disc: 12, as quick as the planned light punches).
 WV_CHAIN = int(os.environ.get("WV_CHAIN", "3"))
 WV_HP_TICKS = int(os.environ.get("WV_HP_TICKS", "0"))
+WV_T3_SHARE = int(os.environ.get("WV_T3_SHARE", "1"))   # 1: the 48 T3 slots (the stock gun action's aim chains, unused by his native Berserker) share one chain; 0: one chain each (3.2 KB more)
+t3_shared = []
 assert WV_CHAIN in (3, 4)
 HP_SLOT, HK_SLOT = 0x163688, 0x1636dc   # donor chain starts of T1.34 (stage 2) and T1.35 (stage 3)
 ROLE_T1[34] = "HP"
@@ -434,6 +436,7 @@ def make_chain(start, role, skel_from=None):
         if atk:
             if has_atk:
                 j = min(has_atk, key=lambda x: abs(x - pk)); hit = mv_boxes(src[j][0])[0]
+                if role.split("-")[0] == "HK" and hit: hit = (hit[0], hit[1], min(hit[2], 13), min(hit[3], 85))   # MSHvSF's kick box (hit id 39) is up 103..127, above a standing AvP enemy's head: it never connected; reach kept, height lowered to the heavy punch's body band (owner-visible)
                 pick = src[j] if abs(j - pk) <= 1 else pick
                 atk_i = atk_index(hit)
             else:
@@ -494,8 +497,12 @@ for r in idle_recs + walk_recs + lp_recs: r.setdefault("donor", None)
 for a in order:
     if a in new_chains: continue
     role = chain_role(a, first_slot[a])
+    if role == "BERS3" and WV_T3_SHARE and t3_shared:   # the gun action's aim chains are dead for him (his Berserker has its own chain): one chain answers every T3 slot
+        new_chains[a] = new_chains[t3_shared[0]]; role_of[a] = "BERS3(shared)"
+        continue
     new_chains[a], used = make_chain(a, role, HK_SLOT if a == HP_SLOT else None)
     role_of[a] = used
+    if role == "BERS3": t3_shared.append(a)
     if a == HP_SLOT and WV_HP_TICKS: rescale(new_chains[a], WV_HP_TICKS)
 apply_arc(ARC_CHAIN)
 role_of[ARC_CHAIN] = "JUMP(arc)"
@@ -529,14 +536,47 @@ bz_last = dict(bz_recs[-1]); bz_last.update(dur=1, flags=0x8000, atk=0, jump="se
 bz_recs.append(bz_last)
 new_chains[BZ] = bz_recs
 role_of[BZ] = "BERSERKER(own)"
+if WV_T3_SHARE and t3_shared:   # the 48 T3 slots (the stock gun's aim chains, never entered by his native Berserker) answer with the Berserker's own chain instead of a chain of their own
+    t3list = new_chains[t3_shared[0]]
+    for a_, v_ in list(new_chains.items()):
+        if v_ is t3list: new_chains[a_] = bz_recs
+
+# Chains with byte-identical records (same durations, flags, poses, boxes, event bytes, and a terminal that jumps to itself or to the same record) are stored once: the index tables of every slot
+# that named a duplicate point at the first copy. Lossless (a terminal jumping to itself behaves the same in either copy); WV_DEDUPE=0 keeps every chain.
+def chain_key(rs):
+    k = []
+    for r in rs:
+        jump = None
+        if r["flags"] & 0x8000:
+            if r.get("jump") == "donor":
+                t = l(rom, r["donor"] + 16); jump = "self" if t == r["donor"] else ("tgt", t)
+            else: jump = r.get("jump")
+        k.append((r["dur"], r["flags"], tuple(r["cells"]), r["hurt"], r["atk"], r["b10"], r["b11"], bytes(r["tail"]), jump))
+    return tuple(k)
+
+
+if int(os.environ.get("WV_DEDUPE", "1")):
+    first_of, ndup, dupbytes = {}, 0, 0
+    for a in list(new_chains):
+        rs = new_chains[a]
+        if a in (STAND, WALK, LP, BZ): continue
+        kk = chain_key(rs)
+        if kk in first_of and first_of[kk] is not rs:
+            new_chains[a] = first_of[kk]; ndup += 1; dupbytes += sum(20 if (r["flags"] & 0x8000) else 16 for r in rs)
+        else: first_of.setdefault(kk, rs)
+    print("duplicate chains aliased: %d (%d bytes)" % (ndup, dupbytes))
 
 # ---- layout
 off = (len(blk) + 15) & ~15
 REC_LO = off
 at_of = {}            # donor chain start -> window offset of its first record
 rec_at = {}           # donor record address -> window offset
+seen_chain = {}
 for a in [STAND, WALK, LP] + [x for x in order if x not in (STAND, WALK, LP)] + [BZ]:
     rs = new_chains[a]
+    if id(rs) in seen_chain:   # shared chain: same records
+        at_of[a] = seen_chain[id(rs)]; continue
+    seen_chain[id(rs)] = off
     at_of[a] = off
     for r in rs:
         r["at"] = off
@@ -558,6 +598,7 @@ for st in (STAND, WALK, LP):
     for k, a in enumerate(ch):
         rec_at.setdefault(a, at_of[st] + sum(20 if (new_chains[st][j]["flags"] & 0x8000) else 16 for j in range(min(k, len(new_chains[st]) - 1))))
 asm_off = (off + 3) & ~3
+ASM_START = asm_off
 asm_where = {}
 for a, rs in new_chains.items():
     for r in rs:
@@ -566,6 +607,7 @@ for pid, cells in enumerate(poses):
     asm_where[pid] = asm_off
     ab = assembly(cells)
     for i, c in enumerate(cells):
+        assert c[5] in (12, 13), "palette rows of his tiles are 12 and 13"
         if c[5] == 13: p1_marks.append(asm_off + 12 + 8 * i + 3)
     asm_blob += ab; asm_off += len(ab)
 T_off = (asm_off + 3) & ~3
@@ -577,13 +619,23 @@ atk_d = [rom[donor_T_addr + 0x64 + 16 * i:donor_T_addr + 0x74 + 16 * i] for i in
 htmpl, atmpl = hurt_d[1], atk_d[1]
 hurt_b = hurt_d + [bytes(cwbytes(r)) + htmpl[4:8] for r in hurt_new]
 atk_b = atk_d + [bytes(cwbytes(r)) + atmpl[4:16] for r in atk_new]
+# Entries below the lowest index any native record names are not stored: the collision pass reads T + s16(T[0]) + 8 * hurt index and T + s16(T[2]) + 16 * attack index (the offsets are
+# sign-extended words), and index 0 means none and is never read, so the tables start at the first used index and the offsets are biased. No index is renumbered (donor indices keep their
+# meaning for any code that tests them), only the unused leading entries go (his own records name hurt 12..20 and attack 1, 16..42: 12 hurt and 1 attack entry, 112 bytes).
+_uniq = {id(v): v for v in new_chains.values()}.values()
+used_h = sorted({r["hurt"] for v in _uniq for r in v} - {0}); used_a = sorted({r["atk"] for v in _uniq for r in v} - {0})
+hlo, alo = used_h[0], used_a[0]
+hurt_s, atk_s = hurt_b[hlo:max(used_h) + 1], atk_b[alo:max(used_a) + 1]
 T = bytearray()
-T += (4).to_bytes(2, "big") + (4 + 8 * len(hurt_b)).to_bytes(2, "big")
-for b in hurt_b: T += b
-for b in atk_b: T += b
+T += ((4 - 8 * hlo) & 0xffff).to_bytes(2, "big") + ((4 + 8 * len(hurt_s) - 16 * alo) & 0xffff).to_bytes(2, "big")
+for b in hurt_s: T += b
+for b in atk_s: T += b
+_s16 = lambda b, o: int.from_bytes(T[o:o + 2], "big", signed=True)
+assert all(bytes(T[_s16(T, 0) + 8 * i:_s16(T, 0) + 8 * i + 8]) == hurt_b[i] for i in used_h), "hurt table biasing"
+assert all(bytes(T[_s16(T, 2) + 16 * i:_s16(T, 2) + 16 * i + 16]) == atk_b[i] for i in used_a), "attack table biasing"
 T_end = T_off + len(T)
 assert T_end <= 0x10000, "block %x" % T_end
-assert len(hurt_b) <= 255 and len(atk_b) <= 255
+assert len(hurt_b) <= 255 and len(atk_b) <= 255 and all(1 <= x < len(hurt_b) for x in used_h) and all(1 <= x < len(atk_b) for x in used_a)
 
 # ---- write the block
 full = bytearray(0x10000)
@@ -627,6 +679,7 @@ for i in range(0, len(ox) - 3, 2):
         a = max((o, ad) for o, ad in inv if o <= i); src = a[1] + i - a[0]
         if src == 0x19744 + 4: tslot = i
 assert tslot is not None, "the per-character box table slot (0x19748) is not in the opcode store"
+assert all((b - a) % 2 == 0 and (b - a) >> 1 < 65536 for a, b in zip([0] + slots, slots)), "reloc slot steps must fit a 16-bit word of 2-byte units"
 lines = [
     "/* Generated by tools/wolverine/gen_native.py: do not commit (ROM-derived). */",
     "#define WV_NAT_DELTA 0x%xu" % D,
@@ -642,13 +695,17 @@ lines = [
     "#define WV_NAT_T_DONOR 0x%xu" % donor_T_addr,
     "#define WV_NAT_TSLOT %du   /* opcode-store offset of the per-character box table entry of character 1 */" % tslot,
     "#define WV_RELOC_SLOTS %d" % len(slots),
-    "static const unsigned int wv_reloc_slots[%d] = {%s};" % (len(slots), ",".join(map(str, slots))),
-    "#define WV_NAT_NP1 %d" % len(p1_marks),
-    "static const unsigned short wv_nat_p1[%d] = {%s};" % (max(1, len(p1_marks)), ",".join(map(str, p1_marks)) if p1_marks else "0"),
+    "static const unsigned short wv_reloc_delta[%d] = {%s};   /* opcode-store offsets, ascending, in steps of 2 */" % (len(slots), ",".join(str((b - a) >> 1) for a, b in zip([0] + slots, slots))),
+    "#define WV_NAT_ASM %d   /* block offset of the first pose assembly; WV_NAT_ASMN assemblies follow back to back (12 byte header, count at +2, 8 bytes a tile: the attribute low byte at +3 of a tile is 1 for his first row, 0 for the second until the stage row is written) */" % ASM_START,
+    "#define WV_NAT_ASMN %d" % len(poses),
     "static unsigned char wv_blk[WV_NAT_SIZE] __attribute__((aligned(4))) = {%s};" % ",".join(map(str, full[:size])),
 ]
 OUT.write_text("\n".join(lines) + "\n")
 OUT.with_suffix(".bin").write_bytes(bytes(full))   # HOST runner: WVBLOCK (tools/lift_runner/host_reloc.c) with WVTNEW = WV_NAT_T
+if os.environ.get('WV_DEBUG'):
+    uniq = {id(v): v for v in new_chains.values()}.values()
+    uh = sorted({r['hurt'] for v in uniq for r in v}); ua = sorted({r['atk'] for v in uniq for r in v})
+    print('used hurt idx', len(uh), uh); print('used atk idx', len(ua), ua)
 nrec = sum(len(v) for v in new_chains.values())
 print("block: index tables %d bytes, %d native chains / %d records %d..%d (%d B), %d assemblies (%d B, %d second-row tiles), T' %d B (hurt %d + %d new, attack %d + %d new); %d table entries; total %d bytes" % (
     len(blk), len(new_chains), nrec, REC_LO, REC_END, REC_END - REC_LO, len(poses), len(asm_blob), len(p1_marks), len(T), 12, len(hurt_new), 38, len(atk_new), tchanged, size))
