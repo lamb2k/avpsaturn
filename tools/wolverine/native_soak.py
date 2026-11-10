@@ -25,10 +25,10 @@ def rec_class(rec):
 
 
 def enemies(s):
-    buf = s.ram(0x9a00, 0x2d00); out = []
-    for o in range(0, len(buf) - 0x80, 0x100):
-        b = buf[o:o + 0x100]
-        if b[0] and b[8] == 0x0c and b[1] != 0:
+    buf = s.ram(0x9580, 20 * 0xc0); out = []   # the enemy pool: 20 blocks of 0xc0 from ff9580
+    for o in range(0, 20 * 0xc0, 0xc0):
+        b = buf[o:o + 0xc0]
+        if b[0] and b[1] != 0 and int.from_bytes(b[0x40:0x42], "big") < 0x8000:
             out.append((int.from_bytes(b[0x10:0x12], "big"), int.from_bytes(b[0x18:0x1a], "big")))
     return out
 

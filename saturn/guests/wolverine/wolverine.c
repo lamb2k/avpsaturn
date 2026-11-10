@@ -169,8 +169,12 @@ static void wv_nat_sync(void)   /* once a vblank (pad hook) and on every player 
         }
         if (row != wv_nat_row) {
             int k;
-            u32 o = WV_NAT_P1_FIRST;
-            for (k = 0; k < WV_NAT_NP1; k++) { o += wv_nat_p1[k]; wv_blk[(o << 2) | 3] = (u8)((wv_blk[(o << 2) | 3] & 0xe0) | row); }
+            u32 o = WV_NAT_ASM, n, c;   /* walk the assemblies; a tile whose palette is not his first row (1) is a second-row tile and takes the stage's row */
+            for (k = 0; k < WV_NAT_ASMN; k++, o += 12 + 8 * n)
+                for (n = (u32)wv_blk[o + 2] << 8 | wv_blk[o + 3], c = 0; c < n; c++) {
+                    u8 *a = wv_blk + o + 15 + 8 * c;
+                    if ((*a & 31) != WV_SCH_PAL) *a = (u8)((*a & 0xe0) | row);
+                }
             wv_nat_row = row;
         }
     } else if (wv_nat_on) {
@@ -567,21 +571,33 @@ static void wv_speed(int i)
 #endif
 /* Berserker events for the feature lanes (sounds, flash/freeze, healing): one named call each, default empty (weak), so another object overrides it with one function.
    wv_on_berserker_start(player)    the tick his state becomes 02000c (the flurry; Schaefer's gun action reused by the stock input path)
-   wv_on_berserker_connect(player, damage)   a tick in that state on which the hit points of the tag-0c enemy blocks (ff9a00.., stride 0x100, health +0x40) fell by `damage`
+   wv_on_berserker_connect(player, damage)   a tick in that state on which the hit points of the enemy pool (ff9580 + k * 0xc0, 20 blocks, health +0x40; a dying block counts 0) fell by `damage`
    wv_on_berserker_end(player)      the first tick after the state ended
    Called from the pre-hook of his player update, once per update, only while his record is native. Contact is read from the enemies' health, not from the collision code. */
 #ifdef SAT_WV_NATIVE_GFX
+#ifdef WV_BZ_EVENT_TEST   /* test build only: counters in place of the weak defaults, read over the debug port (start, connect calls, damage summed, end) */
+u32 wv_evt[4];
+void wv_on_berserker_start(int i) { (void)i; wv_evt[0]++; }
+void wv_on_berserker_connect(int i, int damage) { (void)i; wv_evt[1]++; wv_evt[2] += (u32)damage; }
+void wv_on_berserker_end(int i) { (void)i; wv_evt[3]++; }
+#else
 __attribute__((weak)) void wv_on_berserker_start(int i) { (void)i; }
 __attribute__((weak)) void wv_on_berserker_connect(int i, int damage) { (void)i; (void)damage; }
 __attribute__((weak)) void wv_on_berserker_end(int i) { (void)i; }
+#endif
 static u8 wv_bz_on_[2];
-static u16 wv_bz_hp_[2];
-static u16 wv_enemy_hp(void)
+static u16 wv_bz_php[20];   /* health of each block of the enemy pool at the last look (0xffff = the block is not in use) */
+/* The enemy pool: 20 blocks of 0xc0 from ff9580 (the boss is ffa3c0), health +0x40. Returns the health the live blocks lost since the last call (snap: only take the numbers). A block that is
+   not in use is unknown, not zero (a block that leaves or joins the pool must not read as damage); a dying block reads 0xffff and counts as 0, so the killing blow is seen. */
+static int wv_pool_loss(int snap)
 {
-    u32 b; u16 t = 0;
-    for (b = 0xff9a00u; b < 0xffc700u; b += 0x100u)
-        if (R8(b) && R8(b + 8) == 0x0c) t = (u16)(t + R16(b + 0x40));
-    return t;
+    u32 b = 0xff9580u; int k, d = 0;
+    for (k = 0; k < 20; k++, b += 0xc0u) {
+        u16 c = !R8(b) ? 0xffffu : R16(b + 0x40) < 0x8000u ? R16(b + 0x40) : 0;
+        if (!snap && c != 0xffffu && wv_bz_php[k] != 0xffffu && c < wv_bz_php[k]) d += wv_bz_php[k] - c;
+        wv_bz_php[k] = c;
+    }
+    return d;
 }
 extern u8 sat_wv_cn[2];
 extern volatile u8 sat_wv_bz;   /* bit i: player i is in the Berserker (game_bind.c: the collision wrapper tests it in every pass) */
@@ -589,10 +605,8 @@ static void wv_berserker_events(int i)
 {
     int in = R8(PL(i) + 4) == 2 && R8(PL(i) + 5) == 0 && R8(PL(i) + 6) == 0x0c;
     if (in) {
-        u16 hp = wv_enemy_hp();
-        if (!wv_bz_on_[i]) { wv_bz_on_[i] = 1; wv_on_berserker_start(i); }
-        else if (hp < wv_bz_hp_[i]) wv_on_berserker_connect(i, wv_bz_hp_[i] - hp);
-        wv_bz_hp_[i] = hp;
+        if (!wv_bz_on_[i]) { wv_bz_on_[i] = 1; wv_pool_loss(1); wv_on_berserker_start(i); }
+        else { int d = wv_pool_loss(0); if (d) wv_on_berserker_connect(i, d); }
     } else if (wv_bz_on_[i]) { wv_bz_on_[i] = 0; sat_wv_bz &= (u8)~(1u << i); wv_on_berserker_end(i); }
 }
 
