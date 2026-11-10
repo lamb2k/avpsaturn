@@ -282,6 +282,7 @@ def code_size(o):
 
 SHARED_MIN = int(os.environ.get("ROUND_SHARED_MIN", "10"))   # stages
 MIN_RUN = int(os.environ.get("ROUND_MIN_RUN", "1"))   # pages; a stretch costs 8 bytes of table, about 1 KB of a page is 8 sprites
+ROWTRIM = "SAT_TILE_ROWTRIM" in os.environ.get("KERNEL_CFLAGS", "")   # default off: sprite tiles as row masked records, SGP2 (tools/satgfx_pack.py record, saturn/gfx/sat_gfx.c rowtrim_load); the kernel and the packs must agree
 TAIL_FILL = os.environ.get("PACK_TAIL_FILL", "0") == "1"   # default off: tile spill uses the last odd page of a ROM stretch too (tools/rounds_pack.py plan, assemble)
 
 
@@ -355,12 +356,12 @@ def round_files(rom, code_end, cold1_at, only=None):
             keys[1] = keys[1] | CAPTION_KEYS
         if f["name"] == "front":
             keys[1] = keys[1] | SELECT_DIGIT_KEYS
-        p, dropped = rounds_pack.fit(raws.get(f.get("gfx"), raw), keys, room, free, frank)
+        p, dropped = rounds_pack.fit(raws.get(f.get("gfx"), raw), keys, room, free, frank, ROWTRIM)
         # Check every plan before the write loop, including optional guest stages
         # 06/1c/1e. A high rank alone never guarantees that the tiles fit.
         round_cache.require_guest_tiles(f["name"], f.get("guest_keys", ()), keys[0], dropped, p)
-        for first, a, take in p["segs"]:
-            written.update(range(a // page, (a + (take * 128 + 2047 & -2048) + page - 1) // page))
+        for si, (first, a, take) in enumerate(p["segs"]):
+            written.update(range(a // page, (a + (rounds_pack.seg_len(p, si) + 2047 & -2048) + page - 1) // page))
         plans.append((p, dropped))
     stats = {}
     if only is None:   # the pages each file keeps as the planner saw them (own, front end, next stage, fuzz, shared): tools/check_round_pages.py reads the built files against this
@@ -371,7 +372,7 @@ def round_files(rom, code_end, cold1_at, only=None):
         p, dropped = pl
         if only is not None:
             written = set(f["keep_pages"]) | shared   # built alone: restore every kept page
-        own = {x for first, a, take in p["segs"] for x in range(a // page, (a + (take * 128 + 2047 & -2048) + page - 1) // page)}
+        own = {x for si, (first, a, take) in enumerate(p["segs"]) for x in range(a // page, (a + (rounds_pack.seg_len(p, si) + 2047 & -2048) + page - 1) // page)}
         back = sorted((written & (set(f["keep_pages"]) | shared)) - own)
         restores, st = [], None
         for q in back + [None]:
@@ -592,7 +593,7 @@ SECTIONS {{
         if f.get("gfx"):
             inputs[f"gfx:{i}"] = pathlib.Path(f["gfx"])
     fingerprint = round_cache.packing_inputs(ROUNDS, ends, dict(
-        shared_min=SHARED_MIN, min_run=MIN_RUN, tail_fill=TAIL_FILL, arena_keep=os.environ.get("ARENA_KEEP"),
+        shared_min=SHARED_MIN, min_run=MIN_RUN, tail_fill=TAIL_FILL, rowtrim=ROWTRIM, arena_keep=os.environ.get("ARENA_KEEP"),
         screen_keys=[sorted(k) for k in SCREEN_KEYS], pack_address=CART["SAT_PACK"]), inputs)
     receipt = WORK / "round_pack_receipt.json"
     reason = round_cache.reuse_reason(receipt, fingerprint, ISO, names)

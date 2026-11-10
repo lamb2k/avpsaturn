@@ -102,7 +102,7 @@ class TailFillTests(unittest.TestCase):
         off = 4 + 12 * 4 + 8 * 4
         body = bytes(range(256)) * (tiles // 2)
 
-        def fake(raw, keys):
+        def fake(raw, keys, rowtrim=False):
             hdr = struct.pack(">I", 0x53475031) + struct.pack(">III", tiles, off, off)
             for _ in range(3):
                 hdr += struct.pack(">III", 0, off + len(body), off + len(body))

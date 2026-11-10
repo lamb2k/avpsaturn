@@ -49,6 +49,7 @@ def settings(environ):
                 tail_fill=environ.get("PACK_TAIL_FILL", "0") == "1")
 
 
+ROWTRIM = False   # main() sets it from KERNEL_CFLAGS: SAT_TILE_ROWTRIM packs SGP2 (build.py)
 STORY_PAGES = set()   # load() fills it: the story caption ROM pages every file keeps (tools/story_text_pages.py)
 FONT_KEYS = set()   # load() fills it: every text font glyph (tools/font_glyph_keys.py), kept in every file as build.py does
 
@@ -179,7 +180,7 @@ def run(raw, f, keys, room, free, rank, screens, guest_keys=(), fit_fn=None):
     if not f["name"].startswith("front"):   # front_wv too
         keys = [k | extra for k, extra in zip(keys, screens)]
         frank.update({key: 1 << 40 for key in screens[0]})
-    return fit_fn(raw, keys, room, free(f), frank)
+    return fit_fn(raw, keys, room, free(f), frank, **({"rowtrim": True} if ROWTRIM else {}))
 
 
 def main(argv=None, environ=None, fit_fn=None, own_keys=None):
@@ -195,6 +196,8 @@ def main(argv=None, environ=None, fit_fn=None, own_keys=None):
         stages = parse_stages(argv[2] if len(argv) == 3 else "")
         suffix = "_".join("%02x" % word for word in stages) if stages else ""
         report = adir / ("fit" + suffix + ".json")
+        global ROWTRIM
+        ROWTRIM = "SAT_TILE_ROWTRIM" in environ.get("KERNEL_CFLAGS", "")
         config = settings(environ)
         rounds, ends, screens, rank = load(pathlib.Path(argv[0]), environ)
         if environ.get("CHAR_FUZZ", "1") != "0":   # tools/char_fuzz.py as build.py applies it (WORK/char_fuzz.json; absent = nothing changes)
