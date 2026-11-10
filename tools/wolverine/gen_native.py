@@ -326,7 +326,7 @@ def floor_cells(cells, lift=0):
 
 
 # MSHvSF animation index entries (sub-table, entry), tools/wolverine/mvlib.py MV.tables(); provenance by tile match of D11's poses (census note section 5)
-SRC = dict(IDLE=(0, 0), WALK=(0, 1), JUMP=(1, 0), LAND=(1, 3), LP1=(8, 0), LP2=(8, 3), HP=(8, 2), HK=(9, 2), HIT_M=(14, 2), HIT_E=(14, 3), HIT_H=(14, 4), BERS=(22, 10), BERS3=(22, 10))
+SRC = dict(IDLE=(0, 0), WALK=(0, 1), JUMP=(1, 0), LAND=(1, 3), LP1=(8, 0), LP2=(8, 3), HP=(8, 2), GRAB_HOLD=(8, 3), GRAB_SLAM=(8, 2), HK=(9, 2), HIT_M=(14, 2), HIT_E=(14, 3), HIT_H=(14, 4), BERS=(22, 10), BERS3=(22, 10))
 # role: donor chain -> (source, hold_at): hold_at = where in the source (0..1) the donor's long hold record (255+ ticks) takes its pose; None = the last pose
 # first slot naming the chain decides; the table below is the first assignment (provisional where the state is not identified, listed in the census note)
 ROLE_T1 = {1: "IDLE", 3: "JUMP", 4: "LAND", 5: "LAND", 6: "LAND", 7: "IDLE", 8: "IDLE", 9: "IDLE", 10: "JUMP", 11: "IDLE", 12: "IDLE", 13: "IDLE", 14: "HK", 16: "HK",
@@ -355,6 +355,16 @@ HP_SLOT, HK_SLOT = 0x163688, 0x1636dc   # donor chain starts of T1.34 (stage 2) 
 # WV_KICK=1 (comparison build only) restores the MSHvSF kick poses (role HK) in all three, as chain C does for the stage-3 slot.
 if os.environ.get("WV_KICK") != "1":
     ROLE_T1[41] = ROLE_T1[16] = "HP"; ROLE_T1[14] = "LP1"
+# Owner 11-10 ("he shouldn't be randomly jumping"): the donor's leap launch (T1.3, also the stage entrance T0.3) and landing (T1.10, T0.10) chains are 2-record knee-bend holds, not the airborne part (the arc is
+# T1.37, only with a jump press). With his JUMP poses (the tucked flight) they showed him jumping at every stage entrance; they take his crouch (LAND) poses. WV_LEAP_TUCK=1 restores the tucked poses.
+if os.environ.get("WV_LEAP_TUCK") != "1":
+    ROLE_T1[3] = ROLE_T1[10] = "LAND"
+# Owner 11-10 ("keep his grab and just find a better pose"): the grab states keep the stock timing, flags and boxes; their poses were hit recoils (HIT_H) and a landing crouch: now claw holds
+# (T1.48 to 54, state 0204xx: the grab and the hold; T1.55, 020406: the lift) take his second light slash, and the slam (T1.56, 020408, the stomp with the donor's attack box 24) his heavy punch.
+# WV_GRAB_OLD=1 restores the recoil and crouch poses.
+if os.environ.get("WV_GRAB_OLD") != "1":
+    for _i in range(48, 56): ROLE_T1[_i] = "GRAB_HOLD"
+    ROLE_T1[56] = "GRAB_SLAM"
 ROLE_T1[34] = "HP"
 ROLE_T1[35] = "HK" if WV_CHAIN == 4 else "HP"
 role_of = {}   # donor chain start -> (role name, source key)
@@ -369,7 +379,7 @@ def chain_role(start, first):
         sh = {rom[a + 11] for a in ch}
         if i == 0: return "HIT_H"
         if len(ch) >= 9: return "LAND"                       # the 9-record chains (getup)
-        if sh & {13, 15}: return "JUMP"                       # knockdown flight (shadow 13 / 15)
+        if sh & {13, 15}: return "JUMP" if os.environ.get("WV_KD_JUMP") == "1" else "HIT_H"   # knockdown flight (shadow 13 / 15): the heavy-hit tumble poses (owner 11-10: being knocked down must not look like jumping); WV_KD_JUMP=1 = the old jump poses, comparison only
         if len(ch) == 2 and i in (16, 20, 21, 22, 28, 36, 49, 57): return "LAND"   # ground states of the knockdown family
         if i in (54, 63): return "HIT_E"
         return "HIT_M"
@@ -399,6 +409,52 @@ def mv_tables():
 SUBS = mv_tables()
 SRC_ADDR = {(si, ei): ts[ei] for si, (b, ts) in enumerate(SUBS) for ei in range(len(ts))}
 
+if os.environ.get("WV_EXPLORE"):   # diagnostics: every MSHvSF animation entry, how many of its records are drawable from resident tiles (WV_EXPLORE=<json path>)
+    ex = []
+    for (si, ei), a0 in sorted(SRC_ADDR.items()):
+        ch = mv_chain(a0)
+        keep = thin_strict(ch)
+        ex.append(dict(sub=si, ent=ei, addr=hex(a0), records=len(ch), resident=len(keep), ticks=sum(w(mv, r + 2) & 0x7fff for r in ch), res_addrs=[hex(k[0]) for k in keep]))
+    json.dump(ex, open(os.environ["WV_EXPLORE"], "w"), indent=0)
+    print("explore written", len(ex))
+    if os.environ.get("WV_EXPLORE_MOVES"):   # which MSHvSF records the skin build's resident poses (D11 remap.json moves) were taken from: same multiset of tile keys
+        sig = lambda cells: tuple(sorted(c[2] for c in cells))
+        cand = {}
+        for (si, ei), a0 in SRC_ADDR.items():
+            for r in mv_chain(a0):
+                cells, ok = resident_pose(r)
+                if ok and cells: cand.setdefault(sig(cells), []).append((si, ei, hex(r)))
+        for mv_name in os.environ["WV_EXPLORE_MOVES"].split(","):
+            res = []
+            for pi, ticks, off in A["moves"][mv_name]:
+                pc = A["poses"][pi]
+                res.append((pi, ticks, sorted(set((a, b) for a, b, c in cand.get(tuple(sorted(c[2] for c in pc)), [])))[:3]))
+            print("MOVE", mv_name, res)
+    if os.environ.get("WV_EXPLORE_PNG"):   # pictures of the resident records of the entries named in WV_EXPLORE_SET ("sub.ent,sub.ent")
+        from PIL import Image, ImageDraw
+        col = A["colours"][A["default_colour"]]
+        want = [tuple(int(x) for x in t.split(".")) for t in os.environ["WV_EXPLORE_SET"].split(",")]
+        W, H = 110, 120
+        rows_ = []
+        for se in want:
+            keep = thin_strict(mv_chain(SRC_ADDR[se]))
+            rows_.append((se, keep[:12]))
+        img = Image.new("RGB", (W * 12, H * len(rows_)), (40, 40, 48)); dr = ImageDraw.Draw(img)
+        for ri, (se, keep) in enumerate(rows_):
+            for ci, (ra, cells, dur) in enumerate(keep):
+                ox, oy = ci * W + 55, ri * H + 95
+                sole = sole_of(cells)
+                for cx, cy, k, hf, vf, pal in cells:
+                    px = assets.pens(keyraw[k * 128:k * 128 + 128])
+                    for yy in range(16):
+                        for xx in range(16):
+                            pv = px[15 - yy if vf else yy][15 - xx if hf else xx]
+                            if pv != 15:
+                                X, Y = ox + cx + xx, oy + cy - (sole or 0) + yy - 16
+                                if 0 <= X < img.width and 0 <= Y < img.height: img.putpixel((X, Y), tuple(col[1 if pal == 13 else 0][pv]))
+                dr.text((ci * W + 2, ri * H + 2), "%d.%d #%d t%d" % (se[0], se[1], ci, dur), fill=(255, 255, 255))
+        img.save(os.environ["WV_EXPLORE_PNG"]); print("explore png", len(rows_))
+    raise SystemExit(0)
 # first slot naming each distinct donor chain, in table order
 first_slot, order = {}, []
 for t, (b, n) in (("T1", TABLES[0]), ("T0", TABLES[1]), ("T2", TABLES[2]), ("T3", TABLES[3])):
@@ -465,13 +521,13 @@ def make_chain(start, role, skel_from=None):
                 j = min(has_atk, key=lambda x: abs(x - pk)); hit = mv_boxes(src[j][0])[0]
                 if role.split("-")[0] == "HK" and hit: hit = (hit[0], hit[1], min(hit[2], 13), min(hit[3], 85))   # MSHvSF's kick box (hit id 39) is up 103..127, above a standing AvP enemy's head: it never connected; reach kept, height lowered to the heavy punch's body band (owner-visible)
                 pick = src[j] if abs(j - pk) <= 1 else pick
-                atk_i = atk_index(hit)
+                atk_i = atk if role.startswith("GRAB") else atk_index(hit)   # the grab states keep the donor's attack box (index 24 on the slam)
             else:
                 atk_i = atk   # no attack box in his chain: the donor's index into T' (kept donor entries)
                 report.append("%x rec %d keeps donor attack box %d" % (start, k, atk))
         else:
             atk_i = 0
-        out.append(dict(src=pick[0], cells=floor_cells(pick[1]), dur=dur, flags=fl, hurt=hurt_or_donor(rom[a + 8], hurt, floor_cells(pick[1])), atk=atk_i, b10=rom[a + 10], b11=rom[a + 11],
+        out.append(dict(src=pick[0], cells=floor_cells(pick[1]), dur=dur, flags=fl, hurt=(idle_recs[0]["hurt"] if (role.startswith("GRAB") and rom[a + 8]) else hurt_or_donor(rom[a + 8], hurt, floor_cells(pick[1]))), atk=atk_i, b10=rom[a + 10], b11=rom[a + 11],
                         tail=rom[a + 12:a + 16], donor=a, jump=("donor" if last else None)))
     return out, role
 

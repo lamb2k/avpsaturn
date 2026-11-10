@@ -56,7 +56,7 @@ def main():
     overrides = (T / "saturn/game/overrides.txt").read_text().split()
     ids = () if a.ids == "none" else forkgen.SHIP_IDS if a.ids == "ship" else forkgen.ALL_IDS if a.ids == "all" else tuple(int(x) for x in a.ids.split(","))
     native = '-DSAT_WV_NATIVE_GFX' in a.defs   # the native target build wraps f_24f04 (his special) and no longer f_24060 (game_bind.c)
-    wrap = (tuple(x for x in GUEST_WRAP if not (native and x == '24060')) + (('24f04',) if native else ()) if a.guests else ()) + (forkgen.wrapped_names(ids) if a.guests else ())
+    wrap = (tuple(x for x in GUEST_WRAP if not (native and x == '24060')) + (('24f04',) + (('1a586',) if '-DWV_NO_GRAB' in a.defs else ()) if native else ()) if a.guests else ()) + (forkgen.wrapped_names(ids) if a.guests else ())
     sources_o = forkgen.read_sources(work / "src")
     hdr = ""
     if a.reloc:

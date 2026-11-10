@@ -73,7 +73,7 @@ def soak(s):
     ko_seen = 0
     v0 = int.from_bytes(m.read(s.syms["sat_dbg"] + 8, 4), "big")
     s.shot("soak_start")
-    n_shots = [0]
+    n_shots = [0]; last_rec_ = [0]
     while time.time() < t_end:
         polls += 1
         blk = s.ram(0x8380, 0x200)
@@ -87,12 +87,12 @@ def soak(s):
         pairs[(stw, rc)] += 1
         if p1[0] and rc != "native" and p1[0xd2] == 1:
             if len(anomalies) < 40: anomalies.append(dict(v=v, kind="record outside the native window", state=stw, rec=hex(rec)))
-        if stw != last_state:
+        if stw != last_state or (os.environ.get('SOAK_RECS') and rec != last_rec_[0]):
             row = dict(v=v, state=stw, rec=hex(rec), cls=rc, timer=int.from_bytes(p1[0x0a:0x0c], "big"), hp=hp, sub=p1[7], face=p1[0x0f], x=int.from_bytes(p1[0x10:0x12], "big"),
                        stage=s.ram16(0x81e8), p2=p2[4:7].hex(), bz=(m.read(bz, 1)[0] if bz else -1), alive=p1[0], tag=p1[8], swing=p1[0x67], hit=p1[0x6e])
             ev.write(json.dumps(row) + "\n"); ev.flush()
-            if stw in ('020008', '020006') and n_shots[0] < int(os.environ.get('SOAK_SHOTS', '0')) and polls % 2 == 0: n_shots[0] += 1; s.shot('soak_%s_v%d' % (stw, v))   # looks: his special and attack chain in free-running play
-            last_state, since_v = stw, v
+            if stw in os.environ.get('SHOT_STATES', '020008,020006').split(',') and n_shots[0] < int(os.environ.get('SOAK_SHOTS', '0')) and (polls % 2 == 0 or os.environ.get('SHOT_ALL')): n_shots[0] += 1; s.shot('soak_%s_v%d' % (stw, v))   # looks: his special and attack chain in free-running play
+            last_state, since_v = stw, v; last_rec_[0] = rec
         elif v - since_v > STUCK and stw not in ("020000", "020002", "080000"):
             if len(anomalies) < 40: anomalies.append(dict(v=v, kind="state held", state=stw, vblanks=v - since_v, rec=hex(rec)))
             since_v = v
@@ -118,15 +118,16 @@ def soak(s):
             near = min(en, key=lambda e: abs(e[0] - px) + abs(e[1] - pz)) if en else None
             if near:
                 dx, dz = near[0] - px, near[1] - pz
-                if abs(dx) > 70: keys.append("right" if dx > 0 else "left")
-                elif abs(dx) < 40: keys.append("left" if dx > 0 else "right")
+                gap_lo, gap_hi = (0, 12) if os.environ.get("INTO") else (40, 70)   # INTO=1: walk into the enemy (the stock grab), default: keep a fighting distance
+                if abs(dx) > gap_hi: keys.append("right" if dx > 0 else "left")
+                elif abs(dx) < gap_lo: keys.append("left" if dx > 0 else "right")
                 if dz < -3: keys.append("up")
                 elif dz > 3: keys.append("down")
                 if abs(dx) < 90 and abs(dz) < 8 and polls % 3 == 0: keys.append("a")
-                if time.time() > t_qcf and abs(dx) < 120:
+                if time.time() > t_qcf and abs(dx) < 120 and not os.environ.get("NOJUMP"):
                     seq = [(["a", "b"], .09), (["a", "b"], .09), ([], .05)]; seq_i, seq_t = 0, time.time()
                     t_qcf = time.time() + rnd.uniform(4, 9)
-                if time.time() > jumped and rnd.random() < 0.02:
+                if time.time() > jumped and rnd.random() < 0.02 and not os.environ.get("NOJUMP"):
                     keys.append("b"); jumped = time.time() + 4
             else:
                 keys.append("right")
