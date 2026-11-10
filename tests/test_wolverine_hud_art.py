@@ -187,6 +187,14 @@ class ConverterTest(unittest.TestCase):
         self.assertNotIn(15, {p for row in face["pens"] for p in row})
         fp = hud_art.TALK_FACE_FRAME_PEN   # the arcade's faces carry a 1 pixel white frame in their tiles
         self.assertTrue(all(p == fp for p in face["pens"][0] + face["pens"][-1]) and all(r[0] == fp and r[-1] == fp for r in face["pens"]))
+        # mirrored by default (he faces the text); the constant turns it off and the inside of the frame is then the exact mirror
+        self.assertTrue(hud_art.TALK_FACE_MIRROR)
+        hud_art.TALK_FACE_MIRROR = False
+        try:
+            plain = hud_art.load_slot(self.art, SLOT)["talk_face"]["pens"]
+        finally:
+            hud_art.TALK_FACE_MIRROR = True
+        self.assertEqual([r[1:-1] for r in face["pens"][1:-1]], [r[1:-1][::-1] for r in plain[1:-1]])
         spec = hud_art.SLOTS[SLOT]["talk_face"]
         for row in range(3):
             for col in range(5):

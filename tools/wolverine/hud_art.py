@@ -39,9 +39,11 @@ import satgfx_pack
 SCROLL_BASE = 0x800000   # scroll tiles in the graphics region (satgfx_pack.payload)
 # The talk box face is this box of the 128x64 select portrait (x, y, w, h) shrunk to 38x22 (the whole head and shoulders: head x 32-108, y 10-57),
 # area average to the nearest of the portrait's own colours, inside the arcade's 1 pixel white frame (pen 1, the portrait's white; every arcade face
-# has it in its tiles). Not mirrored: the approved portrait looks left, as in the select screen.
+# has it in its tiles). The approved portrait looks left, as in the select screen; the talk box shows him facing the text like Schaefer's face does,
+# so the crop is mirrored (owner 2026-11-10: "mirror the talk-box portrait so he faces the text like Schaefer"). TALK_FACE_MIRROR = False restores it.
 TALK_FACE_CROP = (20, 8, 88, 50.9)
 TALK_FACE_FRAME_PEN = 1
+TALK_FACE_MIRROR = True
 
 
 # One slot's pieces. code(r, c): scroll tile code of the picture's tile row r, column c. cell: tile size in pixels. parity0: scroll 1 draws
@@ -281,6 +283,8 @@ def load_slot(art, slot):
             src = pieces[spec["derive"]]
             w, h = spec["size"]
             inner = shrink(src, TALK_FACE_CROP, (w - 2, h - 2))
+            if TALK_FACE_MIRROR:
+                inner = [r[::-1] for r in inner]
             pens = [[TALK_FACE_FRAME_PEN] * w] + [[TALK_FACE_FRAME_PEN] + r + [TALK_FACE_FRAME_PEN] for r in inner] + [[TALK_FACE_FRAME_PEN] * w]
             pieces[name] = dict(pens=pens, words=dict(src["words"]), pal=src["pal"], derived=True)
     check_pieces(slot, pieces)
