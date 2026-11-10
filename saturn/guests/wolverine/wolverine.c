@@ -15,7 +15,11 @@ extern u8 RAMB[];
 /* Yaba probe, stage 02, Schaefer as player 1 (probe_sch.py): block byte +1 is the character (mask bit 1 << it, Schaefer 1); his sprites are
    palette row 1, big blocks centred about 72 px right of (+0x10 x - ff8278 camera) in object coordinates; feet at about 523 - (+0x14) with the camera's depth word ff827c at rest (0x100); ff827c follows the player's depth and scrolls
    his sprites by (ff827c - 0x100) (probe_cam.py, 11-08: before that fix Wolverine stood up to 48 px below Schaefer's body at the front of the stage). */
+#ifdef SAT_WV_NATIVE_GFX
+#define WV_CHAR_OFF 0xd2   /* the game's own character index (block +0xd2: 0 Warrior, 1 Schaefer, 2 Hunter, 3 Linn; the same byte f_1b0c4 and the state tables index by). Byte +1 reads 1 for EVERY player in co-op (Yaba 11-10, gun proof), so with +1 a Warrior or Hunter partner counted as Wolverine and lost its gun button */
+#else
 #define WV_CHAR_OFF 1
+#endif
 #define WV_CHAR_SCH 1
 #define WV_SCH_PAL 1        /* Schaefer's sprite palette row: his sprites leave the list, Wolverine's first row takes it */
 /* Wolverine's second row (claws, highlights), per stage word: from a per-frame census of four whole-game MAME walks (tools/wolverine/pal_census.lua,
@@ -570,8 +574,8 @@ static void wv_speed(int i)
 }
 #endif
 /* Berserker events for the feature lanes (sounds, flash/freeze, healing): one named call each, default empty (weak), so another object overrides it with one function.
-   wv_on_berserker_start(player)    the tick his state becomes 02000c (the flurry; Schaefer's gun action reused by the stock input path)
-   wv_on_berserker_connect(player, damage)   a tick in that state on which the hit points of the enemy pool (ff9580 + k * 0xc0, 20 blocks, health +0x40; a dying block counts 0) fell by `damage`
+   wv_on_berserker_start(player)    the tick his state becomes 020008 (his special: attack + jump pressed together, the game's own special input; the flurry)
+   wv_on_berserker_connect(player, damage)   a tick in that state (once per landed strike) on which the hit points of the enemy pool (ff9580 + k * 0xc0, 20 blocks, health +0x40; a dying block counts 0) fell by `damage`
    wv_on_berserker_end(player)      the first tick after the state ended
    Called from the pre-hook of his player update, once per update, only while his record is native. Contact is read from the enemies' health, not from the collision code. */
 #ifdef SAT_WV_NATIVE_GFX
@@ -605,7 +609,7 @@ extern u8 sat_wv_cn[2];
 extern volatile u8 sat_wv_bz;   /* bit i: player i is in the Berserker (game_bind.c: the collision wrapper tests it in every pass) */
 static void wv_berserker_events(int i)
 {
-    int in = R8(PL(i) + 4) == 2 && R8(PL(i) + 5) == 0 && R8(PL(i) + 6) == 0x0c;
+    int in = R8(PL(i) + 4) == 2 && R8(PL(i) + 5) == 0 && R8(PL(i) + 6) == 0x08;
     if (in) {
         if (!wv_bz_on_[i]) { wv_bz_on_[i] = 1; bz_hitp[i] = 0; bz_fired[i] = 0; wv_pool_loss(1); wv_on_berserker_start(i); }
         else {   /* connect: once per landed strike. A pass that hit arms it (sat_wv_bz_hit, first hit of the strike only); the game applies the damage a tick later, so the call is made on the second look after, with the loss since */
@@ -618,13 +622,14 @@ static void wv_berserker_events(int i)
     }
 }
 
-/* Berserker Barrage, his own native action (plan V2 section 6). QCF + attack (the pad hook below) does not press the gun button any more: it releases all three buttons for a few
-   vblanks and asks for the action (bz_req); the pre-hook of his player update (wv_bz_enter) puts the block into state 02000c and the player state machine runs the action's routine
-   (sat_wv_bz_run, called from game_bind.c in place of Schaefer's gun routine f_2576a for a Wolverine player). Nothing of the gun runs: no shot, muzzle flash, gun sound or heat.
+/* Berserker Barrage, his own native action (plan V2 section 6, owner 11-10: it is his special). The game's special input (attack + jump pressed together; any two of gun, attack and jump) is
+   unchanged: its own entry (f_1a7e6, refused at health 0, while busy or when already in the special) writes the special state 020008 with sub-state 0, and the player state machine runs the
+   special routine of the Schaefer slot, f_24f04, which game_bind.c replaces for a Wolverine player by sat_wv_bz_run. No motion input: the pad hook only keeps the gun button released.
+   Nothing of Schaefer's special or of the gun runs: no leap, no object, no sound, no shot, flash or heat.
    The action keeps the state machine's conventions of a melee action (lock +0xad, action class +0x92, strike id +0x67 renewed by f_1d768, frame record +0x1c advanced by f_1656e,
-   exit through f_1a3e2) and walks its own chain (gen_native.py, WV_BZ_CHAIN): WV_BZ_N strikes of the flurry poses, each record with its MSHvSF attack box. A new strike id is taken at every record
+   exit through f_1a3e2) and walks its own chain (gen_native.py, WV_BZ_CHAIN): WV_BZ_N strikes of the flurry poses, each record with its attack box. A new strike id is taken at every record
    so that every strike can connect; each target takes at most WV_BZ_CAP of them (the collision wrapper asks sat_wv_bz_gate before a pass and tells sat_wv_bz_hit after one). The cost is the
-   stock special's rule, f_1b492 with one connect: 6 health, once per activation, charged at the first connect (nothing for a whiff), and health that would be left under 6 goes to 0. */
+   stock special's rule (f_1b492 with one connect): 6 health, once per activation, charged at the first connect (nothing for a whiff); health that would be left under 6 goes to 0. */
 typedef struct { u32 d[8]; u32 a[8]; u32 ccz, ccn, ccc, ccv, ccx; } WvCpu;
 #ifdef HOST_CHECK
 extern WvCpu *R;
@@ -638,32 +643,21 @@ extern void f_1656e(void), f_1a3e2(void), f_1a364(void), f_1d768(void);
 #ifndef WV_BZ_COST
 #define WV_BZ_COST 6     /* health, the stock special's table (0x94ce) */
 #endif
-#define WV_BZ_REQ 6      /* vblanks a request waits for the engine to accept it */
-static u8 bz_req[2], bz_paid[2];
+static u8 bz_paid[2];
 #define WV_BZ_TGT 6      /* targets tracked for the cap */
 static struct { u16 t; u8 n; } bz_tgt[2][WV_BZ_TGT];
 static u32 r32(u32 a) { return (u32)R16(a) << 16 | R16(a + 2); }
 static void w32(u32 a, u32 v) { R16(a) = (u16)(v >> 16); R16(a + 2) = (u16)v; }
-static void wv_bz_enter(int i)   /* pre-hook: the engine's own acceptance rules of the gun entry (f_1a75e), then the state the stock entry writes */
-{
-    u32 b = PL(i);
-    if (!bz_req[i] || !wv_nat_on) return;
-    if (R8(b + 4) == 2 && R8(b + 5) == 0 && (R8(b + 6) == 0 || R8(b + 6) == 2) && !R8(b + 0x5c) && !R8(b + 0xad) && !R8(b + 0x8b)
-        && !R8(0xff8208) && !R8(0xff822b) && R16(0xff81e8) != 0x0a) {
-        R16(b + 4) = 0x0200; R16(b + 6) = 0x0c00; R8(b + 0xad) = 1;
-        bz_req[i] = 0;
-    }
-}
 static void wv_bz_record(u32 b, u32 rec)   /* what f_16526 stores: the record, its timer and flags (and the hit hold of f_1b0c4) */
 {
     u8 *p = PBY(rec);
     u32 dur = (u32)p[0] << 8 | p[1];
     w32(b + 0x1c, rec); R16(b + 0x0a) = (u16)dur; R16(b + 0x24) = (u16)((u32)p[2] << 8 | p[3]); R16(b + 0x90) = (u16)dur;
 }
-int sat_wv_bz_run(unsigned long a6)   /* f_2576a, the state 02000c routine of the Schaefer slot: nonzero = done here, zero = the stock routine runs */
+int sat_wv_bz_run(unsigned long a6)   /* f_24f04, the state 020008 (special) routine of the Schaefer slot: nonzero = done here, zero = the stock routine runs */
 {
     int i = wv_player((u32)a6);
-    if (i < 0 || !wv_nat_on || R16(0xff81e8) == 0x0a) return 0;
+    if (i < 0 || !wv_nat_on) return 0;
     R->a[6] = (u32)a6;
     if (R8(a6 + 7) == 0) {   /* entry */
         int k;
@@ -731,7 +725,6 @@ int sat_guest_wolverine_tick(unsigned long a6)
 #ifdef SAT_WV_NATIVE_GFX
     sat_wv_cn[i] = WV_CHAIN;
     wv_nat_sync();   /* his own records and the game's state machine do everything else; this pre-hook only carries the data switch, the Berserker request and its events */
-    wv_bz_enter(i);
     wv_berserker_events(i);
     return 1;
 #else
@@ -1015,6 +1008,27 @@ tiles_:
 
 #endif
 
+#ifdef SAT_WV_NATIVE_GFX
+/* Native build: no motion inputs. His special (Berserker Barrage) is the game's own attack + jump; the pad hook only keeps the table bases in step and the gun button released. */
+static void wv_reset(int i)
+{
+    wvid_[i] = 0;
+    sat_wv_bz &= (u8)~(1u << i); sat_wv_cn[i] = 4;
+}
+void sat_guest_wolverine_pad(u16 *in0)
+{
+    int i;
+    wv_nat_sync();
+    if (!(sat_guest_sel & 1)) {
+        wv_reset(0); wv_reset(1);
+        return;
+    }
+    for (i = 0; i < 2; i++) {
+        if (!is_wolverine(i)) { wv_reset(i); continue; }
+        *in0 |= (u16)(0x10u << (i * 8));   /* no gun for him: the plain gun button reads as not pressed */
+    }
+}
+#else
 /* Motion inputs (option B), MSHvSF style: the game's pad word (pad.c in0: per player byte, active low, 1 right, 2 left, 4 down, 8 up,
    0x10 gun, 0x20 attack, 0x40 jump) passes through here once a vblank. Directions are read against his facing (+0f: 1 right).
    Berserker Barrage: down, down-forward, forward, then attack within the window -> the gun button (his gun state slot, 020c).
@@ -1027,10 +1041,6 @@ static u8 dir_hist[2][4], dir_age[2][4], inj_left[2], inj_bits[2], last_btn[2];
 static void wv_reset(int i)
 {
     int k;
-#ifdef SAT_WV_NATIVE_GFX
-    inj_left[i] = inj_bits[i] = last_btn[i] = wvid_[i] = 0;
-    bz_req[i] = 0; sat_wv_bz &= (u8)~(1u << i); sat_wv_cn[i] = 4;
-#else
     cur_[i] = 255;
     step_[i] = left_[i] = face_[i] = chain_[i] = lastc_[i] = held_[i] = hitk_[i] = restart_[i] = gap_[i] = cstg_[i] = landed_[i] = 0; hp_[i] = 0;
     sx_[i] = sz_[i] = 0;
@@ -1038,7 +1048,6 @@ static void wv_reset(int i)
     wwalk_[i] = recovery_[i] = inj_left[i] = inj_bits[i] = last_btn[i] = wvid_[i] = 0;
     wv_step_now[i] = 0xffff;
     for (k = 0; k < 16; k++) atk_cache[i][k] = 0;
-#endif
     for (k = 0; k < 4; k++) dir_hist[i][k] = dir_age[i][k] = 0;
 }
 static int dir_of(u8 w, int face)   /* 1 forward, 2 down-forward, 3 down, 0 other; w active high */
@@ -1058,9 +1067,6 @@ void sat_guest_wolverine_pad(u16 *in0)
 {
     static const u8 qcf[3] = {3, 2, 1}, dp[3] = {1, 3, 2};
     int i, k;
-#ifdef SAT_WV_NATIVE_GFX
-    wv_nat_sync();
-#endif
     if (!(sat_guest_sel & 1)) {
         wv_reset(0); wv_reset(1);
         return;
@@ -1079,17 +1085,10 @@ void sat_guest_wolverine_pad(u16 *in0)
         btn = w & 0x20;
         if (btn && !last_btn[i] && !inj_left[i]) {
             if (seen(i, dp)) { inj_bits[i] = 0x60; inj_left[i] = WV_CMD_HOLD; }        /* Tornado Claw: attack + jump */
-#ifdef SAT_WV_NATIVE_GFX
-            else if (seen(i, qcf)) { inj_bits[i] = 0; inj_left[i] = WV_CMD_HOLD; bz_req[i] = WV_BZ_REQ; }   /* Berserker Barrage: all buttons released, the native action is asked for (wv_bz_enter) */
-#else
             else if (seen(i, qcf)) { inj_bits[i] = 0x10; inj_left[i] = WV_CMD_HOLD; }  /* Berserker Barrage: gun */
-#endif
             if (inj_left[i]) for (k = 0; k < 4; k++) dir_hist[i][k] = 0;
         }
         last_btn[i] = btn;
-#ifdef SAT_WV_NATIVE_GFX
-        if (bz_req[i]) bz_req[i]--;
-#endif
         if (inj_left[i]) {
             u16 m = (u16)(0x70u << sh);
             inj_left[i]--;
@@ -1097,3 +1096,4 @@ void sat_guest_wolverine_pad(u16 *in0)
         } else *in0 |= (u16)(0x10u << sh);   /* no gun for him: the plain gun button reads as not pressed */
     }
 }
+#endif

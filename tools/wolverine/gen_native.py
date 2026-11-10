@@ -91,7 +91,7 @@ def key_of(code):
 
 
 # ---- MSHvSF's data
-FEET = 13
+FEET = int(os.environ.get("WV_FEET", "14"))   # the feet line below the origin's row. 13 put his soles 2 screen px (stand) to 7 px (walk) lower than stock Schaefer's against the game's shadow (Yaba 11-10, shad1): the ellipse is the stock one (same rows, same order), so the poses move up one row
 
 
 def mv_rect(i):
@@ -299,6 +299,25 @@ def sole_of(cells):
     return best
 
 
+# Hurt boxes (owner-visible, 11-10): the engine lets a hit land only when the target's record names a hurt box (index 0 = none: the collision pass f_1cf54 refuses at once). Schaefer's records name none
+# during hit reactions, knockdown, getup, landing and his special, so he is not hittable there; a record whose donor names none keeps none (the box also floated above the lying poses). A named MSHvSF box is
+# used only where it covers the pose it belongs to (tucked jump poses carry a box 45 px above the pose).
+def hurt_or_donor(rom_hurt, rect, cells):
+    """hurt index for a floor-aligned record: 0 where the donor names none; the MSHvSF box where it covers at least half of the pose's height; else the donor's own index
+    (MSHvSF's box of a tucked jump pose stands 45 px above the pose: leap launch and landing): the idle's standing box, as the donor's index 1 is
+    (only reached for records whose donor names a box, so the lying/flight states stay at 0)"""
+    if rom_hurt == 0: return 0
+    if rect is None: return idle_recs[0]["hurt"]
+    rows = [(cy - FEET + (15 - tile_rows(k)[1] if vf else tile_rows(k)[0]), cy - FEET + (15 - tile_rows(k)[0] if vf else tile_rows(k)[1])) for cx, cy, k, hf, vf, pal in cells if tile_rows(k)]
+    if rows:
+        top, bot = min(r[0] for r in rows), max(r[1] for r in rows)
+        ov = min(bot, -rect[2]) - max(top, -rect[3])
+        if ov * 2 < bot - top:
+            report.append('hurt box of a pose off its body: standing box kept (donor index %d)' % rom_hurt)
+            return idle_recs[0]["hurt"]
+    return hurt_index(rect)
+
+
 def floor_cells(cells, lift=0):
     """MSHvSF puts its own height into a pose (jump, hit flight, getup); AvP's game moves the actor for those, so a state the game lifts shows his pose with the sole on the stance's
     floor line (the idle's first pose). lift = extra px up (the leap arc, which the game does not move)"""
@@ -317,17 +336,25 @@ ROLE_T1 = {1: "IDLE", 3: "JUMP", 4: "LAND", 5: "LAND", 6: "LAND", 7: "IDLE", 8: 
            70: "HP", 71: "IDLE", 72: "IDLE", 73: "IDLE", 74: "IDLE", 75: "IDLE", 76: "HP", 77: "HP", 78: "IDLE", 79: "IDLE"}
 HOLD_AT = dict(JUMP=0.45, LAND=1.0, IDLE=0.0)
 # Comparison knobs (owner 11-09: every timing change ships as a comparison first). Defaults are the standing decisions.
+#   Owner 11-10 ("ok all slashes"): the default is variant B, LP LP HP with the 12-tick heavy punch; A (WV_HP_TICKS=0) and C (WV_CHAIN=4) stay as switches for comparison only.
 #   WV_CHAIN=3 (default): the attack chain is LP, LP, HP. Schaefer's state routine has four stages (0..3, slots T1.32..35, stage 3 follows only after a connect on stage 2); stages 0 and 1 are the
 #                         first claw attack, stage 2 (slot T1.34) his heavy punch, and the stage counter wraps after stage 2 (build.py rewrites its two `& 3` sites to the count wolverine.c sets).
 #   WV_CHAIN=4          : LP, LP, HP, HK (stage 3, slot T1.35, is his kick).
-#   WV_HP_TICKS=N       : the heavy punch's length in ticks. Default 0 = the donor's heavy stage skeleton (slot T1.35: 2, 2, 6, 5, 3 = 18 ticks, no cancel flags); N rescales its durations to N ticks (the faster
-#                         heavy punch of the comparison disc: 12, as quick as the planned light punches).
+#   WV_HP_TICKS=N       : the heavy punch's length in ticks. 0 = the donor's heavy stage skeleton (variant A) (slot T1.35: 2, 2, 6, 5, 3 = 18 ticks, no cancel flags); N rescales its durations to N ticks (default 12, as quick as
+#                         the planned light punches).
 WV_CHAIN = int(os.environ.get("WV_CHAIN", "3"))
-WV_HP_TICKS = int(os.environ.get("WV_HP_TICKS", "0"))
+WV_HP_TICKS = int(os.environ.get("WV_HP_TICKS", "12"))
 WV_T3_SHARE = int(os.environ.get("WV_T3_SHARE", "1"))   # 1: the 48 T3 slots (the stock gun action's aim chains, unused by his native Berserker) share one chain; 0: one chain each (3.2 KB more)
 t3_shared = []
 assert WV_CHAIN in (3, 4)
 HP_SLOT, HK_SLOT = 0x163688, 0x1636dc   # donor chain starts of T1.34 (stage 2) and T1.35 (stage 3)
+# Owner 11-10 ("why does wolverine still kick": all slashes means no kick anywhere): the three slots Schaefer's donor uses for a kick-like swing take claw slashes of his resident set.
+#   T1.41  state 02000a, the air attack (jump + attack; donor records 2 and 3 carry attack boxes 12 and 21): HP slash
+#   T1.16  state 02000e, entered by the player action-request path (f_1ab1a; donor attack box 8 on its second record): HP slash
+#   T1.14  the 2-record pose of the stand handler f_198b0 (no attack box): the first light slash
+# WV_KICK=1 (comparison build only) restores the MSHvSF kick poses (role HK) in all three, as chain C does for the stage-3 slot.
+if os.environ.get("WV_KICK") != "1":
+    ROLE_T1[41] = ROLE_T1[16] = "HP"; ROLE_T1[14] = "LP1"
 ROLE_T1[34] = "HP"
 ROLE_T1[35] = "HK" if WV_CHAIN == 4 else "HP"
 role_of = {}   # donor chain start -> (role name, source key)
@@ -414,7 +441,7 @@ def make_chain(start, role, skel_from=None):
         hit3, hurt3 = mv_boxes(pk3[0])
         for k, a in enumerate(ch):
             last = bool(w(rom, a + 2) & 0x8000)
-            out.append(dict(src=pk3[0], cells=floor_cells(pk3[1]), dur=w(rom, a), flags=w(rom, a + 2), hurt=hurt_index(hurt3) if hurt3 else rom[a + 8],
+            out.append(dict(src=pk3[0], cells=floor_cells(pk3[1]), dur=w(rom, a), flags=w(rom, a + 2), hurt=hurt_or_donor(rom[a + 8], hurt3, floor_cells(pk3[1])),
                             atk=atk_index(hit3) if (last and hit3) else rom[a + 9], b10=rom[a + 10], b11=rom[a + 11], tail=rom[a + 12:a + 16], donor=a, jump=("donor" if last else None)))
         return out, role
     hold_at = HOLD_AT.get(role.split("-")[0], 1.0 if role not in HOLD_AT else 0.0)
@@ -444,7 +471,7 @@ def make_chain(start, role, skel_from=None):
                 report.append("%x rec %d keeps donor attack box %d" % (start, k, atk))
         else:
             atk_i = 0
-        out.append(dict(src=pick[0], cells=floor_cells(pick[1]), dur=dur, flags=fl, hurt=hurt_index(hurt) if hurt else rom[a + 8], atk=atk_i, b10=rom[a + 10], b11=rom[a + 11],
+        out.append(dict(src=pick[0], cells=floor_cells(pick[1]), dur=dur, flags=fl, hurt=hurt_or_donor(rom[a + 8], hurt, floor_cells(pick[1])), atk=atk_i, b10=rom[a + 10], b11=rom[a + 11],
                         tail=rom[a + 12:a + 16], donor=a, jump=("donor" if last else None)))
     return out, role
 
@@ -518,6 +545,7 @@ BZ_SLOTS = (6, 6, 5, 5, 4, 3, 3, 4, 5, 5, 6, 6)
 # and 112's low edge), a deliberate approximation (rect = forward x0, x1, up y0, y1). Owner-visible: contact geometry of the flurry.
 BZ_BOX = (26, 84, 13, 85)
 BZ_TICKS = int(os.environ.get("WV_BZ_TICKS", "4"))
+BZ_HURT = int(os.environ.get("WV_BZ_HURT", "1"))   # 1 (default): he can be hit during the Berserker (his flurry poses' hurt box); 0: no hurt box, as Schaefer's own special (donor chain T1.42 names none: unhittable) - comparison switch
 BZ = "BZ"
 bz_src = pick_sources("BERS3", None)
 t3b, t3n = TABLES[3]
@@ -530,7 +558,7 @@ for sl in BZ_SLOTS:
     pk = bz_src[k]
     hit_, hurt_ = mv_boxes(pk[0])
     if os.environ.get('WV_DEBUG'): print('BZ slot', sl, 'pose', k, hex(pk[0]), 'hit rect', hit_, 'hurt', hurt_, 'ids', [w(mv, 0x1ce0f2 + l(mv, pk[0] + 12) * 16 + 2 * j) for j in range(8)])
-    bz_recs.append(dict(src=pk[0], cells=floor_cells(pk[1]), dur=BZ_TICKS, flags=0, hurt=hurt_index(hurt_) if hurt_ else rom[STAND + 8], atk=atk_index(BZ_BOX),
+    bz_recs.append(dict(src=pk[0], cells=floor_cells(pk[1]), dur=BZ_TICKS, flags=0, hurt=(hurt_index(hurt_) if hurt_ else rom[STAND + 8]) if BZ_HURT else 0, atk=atk_index(BZ_BOX),
                         b10=0, b11=rom[STAND + 11], tail=rom[STAND + 12:STAND + 16], donor=None))
 bz_last = dict(bz_recs[-1]); bz_last.update(dur=1, flags=0x8000, atk=0, jump="self", donor=None)
 bz_recs.append(bz_last)
