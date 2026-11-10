@@ -53,6 +53,10 @@ def main():
     fonts = font_glyph_keys.from_work(work)
     want[1] |= fonts
     names = [f["name"] for f in json.loads((work / "rounds.json").read_text())["files"]]
+    if (work / "round_stats.json").exists():   # a build with guest files (SAT_GUESTS) has more round files than rounds.json lists; round_stats.json names them in file order
+        stats = list(json.loads((work / "round_stats.json").read_text()))
+        if len(stats) > len(names) and stats[:len(names)] == names:
+            names = stats
     bad = 0
     for i, blob in round_files(work).items():
         have = pack_keys(blob)
