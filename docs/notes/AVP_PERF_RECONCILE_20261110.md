@@ -58,3 +58,27 @@ Default off. Rows 24 and 25 on the menu layer (NBG3) once a second: `PIC n GAME 
 Code in the cart tail (`saturn/rt/fps_hud.c`, 0.7 KB, cold code), hot side one call a second and two words. Cost on: hw_free 520 -> 304 (216 B: the call site, the priority and layer checks), lw_free unchanged (84),
 the cart tail steps by 4 KB (cart_free 4,556 -> 7,496), which costs stage 0e 64 more dropped rare sprite keys (243, against 179 on 3e); every other stage drops 0 as before.
 Cost off: none (same objects).
+
+## 6. Review answer checked (REVIEW_ANSWER_60FPS.md), field length, cache OFF
+
+- The review's bottleneck (scroll 1 redraw) matches the stage-timer data above. Field length: draws that finish in 1 field top out at 3,458 ticks and draws that need 2 start at 3,670; draws needing 3 end at 10,603 and 4 start at 10,631
+  (3,452 draws, runs d2/a3/e3 0e and 1e, cache ON). With the wake offset s: F - s in [3,458, 3,670] and 3F - s in [10,603, 10,631], so F is 3,470 to 3,590, about 3,495. The 3,728 in the task text is refuted.
+- Cache OFF (the owner's normal Yaba play setting; look setting, labelled): the master falls behind too. Stage 0e disc 3e: pictures 46 / 41 / 37 per second (idle / walk / attack), held 0 / 13 / 21 percent, overruns 0 / 25 / 46 per 144 vblanks; free run 18 pictures per second, 244 overruns in 1,196 vblanks.
+  Disc 2: 47 / 33 / 31, held 0 / 23 / 21, free run 30 per second. The emulation without cache is about 1.9 times slower per instruction, so a hung master shows there that the cache-ON runs do not show.
+
+## 7. Memo A/B on disc 3g (f36b96b, GUEST_DEFAULT=0, reveal), Yaba cache ON, same scripted scenes
+
+(g3base = avp_integration_3g as packaged; g3M = the same tree with SAT_S1_MEMO; hw_free 496 -> 72, cart_free and sprite store unchanged: stage 0e still drops 179 keys)
+Stage 0e, pictures per second (idle / walk right / attack), skipped percent, burst at the stage opening (64 vblank bursts, 3 of them):
+- g3base: 52.9 / 54.6 / 55.8; skipped 11.8 / 9.0 / 6.9; opening burst 31.3 swaps; heavy draws 9.5 to 11.4 K ticks
+- g3M:   57.5 / 57.5 / 57.5; skipped 4.2 each; opening burst 46.9 swaps; heaviest draw 5.8 K ticks
+(more stages and the blank-row and readout discs follow in the report)
+
+## 8. SAT_S1_BLANKROWS and SAT_HOME_FONT_COLD
+
+- SAT_S1_BLANKROWS (exact): rows of scroll 1 whose cells are one word with no tile (19 of 29 in play) are written once per map position and then skipped by the cell loop, the column fit and the lookups.
+  Cost measured by compile: +296 bytes of hot code, +8 bytes bss (not the 64 bytes asked: the row test needs the cache lookups, which live in high RAM). The same logic in cart code would be about 40 bytes hot but a cart addition
+  over 72 bytes steps the cart tail by 4 KB (3g cart_free 4,168), which takes room from the stage 0e sprite store (64 more dropped keys).
+- SAT_HOME_FONT_COLD: moves the menu font cells and text palettes (1,920 bytes of rodata) from high RAM to the cart tail (saturn/rt/home_font_cold.c). That funds MEMO (424), BLANKROWS (about 300), the readout (216) and EVERY (72) together: all four on need about 1,000 bytes, leaving about 1,400 of hw_free on 3g.
+  It adds 1.9 KB to the cart tail, so on its own it also steps the tail by 4 KB; on the readout discs the readout has already paid that step.
+- SAT_S1_EVERY=2 changed nothing measurable on stage 0e once MEMO is on (m8e2 vs m8: opening burst 47.2 vs 47.8, idle 57.5 vs 56.7); it is not recommended.
