@@ -78,7 +78,13 @@ if os.environ.get("GUEST_ASSETS"):   # bonus characters (SAT_GUESTS builds): gue
         if miss:
             raise SystemExit("NO-GO: guest art tiles no arcade file holds (wrong tile codes or parity?): " + ", ".join("%s %s %x" % m for m in miss[:8]))
         print("guest hud art:", {k: v for k, v in HUD["report"]["tiles"].items()}, "palette copies", sum(p["copies"] for p in HUD["report"]["palettes"]), flush=True)
-    guest_rounds.extend(ROUNDS, os.environ["GUEST_ASSETS"], HUD)
+    DIALOG_KEYS = ()
+    if any(f in ("-DSAT_WV_DIALOG", "-DSAT_WV_DIALOG=1") for f in os.environ.get("KERNEL_CFLAGS", "").split()):   # Wolverine's story box wording, from the user's ROM (tools/wolverine/dialog.py)
+        import dialog
+        DIALOG = dialog.build(WORK / "rt.bin", GEN)
+        DIALOG_KEYS = DIALOG["keys"]   # his stage files hold the tiles the new wording draws
+        print("guest dialog:", {k: v for k, v in DIALOG.items() if k not in ("include", "keys")}, flush=True)
+    guest_rounds.extend(ROUNDS, os.environ["GUEST_ASSETS"], HUD, DIALOG_KEYS)
 # Tile keys (sprites and the three layers) of the screens after a KO with no lives left: the continue countdown, name entry, GAME OVER.
 # The census routes continue at once, so they never saw the low countdown digits, and a stage whose census had no game over lacked the
 # screen's text and picture: the countdown and the "CONTINUE AND GET 1UP!" line drew blank. tools/screen_keys.py writes the list;

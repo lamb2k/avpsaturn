@@ -40,6 +40,13 @@ int sat_guest_file(int row, int chars, int variant, int arcade_file)
 #include "guest_pal.h"
 #include "guest_hudpal.inc"   /* guest_pal[], GUEST_PAL_N: tools/wolverine/hud_art.py; empty without guest art */
 extern unsigned char *PAGE[256];
+#ifndef SAT_WV_DIALOG
+#define SAT_WV_DIALOG 0   /* default off: Schaefer's lines for everyone (switch on: Wolverine's wording while he is the loaded guest) */
+#endif
+#if SAT_WV_DIALOG
+#include "guest_dialog.h"
+#include "guest_dialog.inc"   /* dlg_data, dlg_glyph, dlg_names: tools/wolverine/dialog.py */
+#endif
 void sat_guest_loaded(int row, int chars, int variant, int file)
 {
     unsigned art = 0;
@@ -48,6 +55,11 @@ void sat_guest_loaded(int row, int chars, int variant, int file)
         if ((sat_guest_sel & sat_guests[i].sel_bit) && file && guest_file[i][row][variant] == file && (!row || (chars & sat_guests[i].slot_mask)))
             art |= 1u << i;
     if (GUEST_PAL_N) guest_pal_sync(guest_pal, GUEST_PAL_N, art, (volatile unsigned char *)PAGE[0]);
+#if SAT_WV_DIALOG
+    /* Wolverine's story box wording and his name on the stage clear banner: written while his files are the loaded ones (tools/wolverine/dialog.py) */
+    guest_dialog_sync(dlg_data, dlg_glyph, (art & 1) != 0, (volatile unsigned char *)PAGE[0]);
+    guest_name_sync(dlg_names, (int)(sizeof dlg_names / sizeof dlg_names[0]), (art & 1) != 0, (volatile unsigned char *)PAGE[0]);
+#endif
 }
 
 /* Drawing (phase 2): the game's sprite origin routine (0xaa59a, game_bind.c) runs once per sprite group with the actor in a4 and the

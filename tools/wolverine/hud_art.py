@@ -11,6 +11,10 @@ maps draw them with no new code, and into the colour changes that go with them:
   colours  guest_hudpal.inc, read by saturn/rt/guests.c (guest_pal.h): the arcade loads these palettes from tables in its program ROM
            image; while the guest's art files are the loaded ones, the guest's words are written over the tables' pens, else the originals.
 
+Talk box face (2026-11-09, lane wv-talkbox): the story box's speaker picture is a 40x24 face of 5x3 scroll 1 cells (codes 0xfb9-0xfbd, 0xfc9-0xfcd,
+0xfd9-0xfdd, palette bank 0x13, drawn x-flipped; both halves of every code block hold the same cell). It is cropped and shrunk from the approved
+select portrait (TALK_FACE_CROP) onto the same 15 colours, or read from wolverine_talk_face_40x24.png when the artist supplies one.
+
 PNG convention (the artist's, checked here): index 0 = transparent = arcade pen 15; index n = pen n - 1; colours are multiples of 17.
 The name's palette (bank 0x27) is shared by every character, so that piece only maps its indices to the bank's existing pens and
 never changes a colour. Mega Man (Predator Hunter's slot) needs the same four pieces: add a SLOTS entry and a GUESTS row.
@@ -33,6 +37,13 @@ sys.path.insert(0, str(HERE.parent))
 import satgfx_pack
 
 SCROLL_BASE = 0x800000   # scroll tiles in the graphics region (satgfx_pack.payload)
+# The talk box face is this box of the 128x64 select portrait (x, y, w, h) shrunk to 38x22 (the whole head and shoulders: head x 32-108, y 10-57),
+# area average to the nearest of the portrait's own colours, inside the arcade's 1 pixel white frame (pen 1, the portrait's white; every arcade face
+# has it in its tiles). The approved portrait looks left, as in the select screen; the talk box shows him facing the text like Schaefer's face does,
+# so the crop is mirrored (owner 2026-11-10: "mirror the talk-box portrait so he faces the text like Schaefer"). TALK_FACE_MIRROR = False restores it.
+TALK_FACE_CROP = (20, 8, 88, 50.9)
+TALK_FACE_FRAME_PEN = 1
+TALK_FACE_MIRROR = True
 
 
 # One slot's pieces. code(r, c): scroll tile code of the picture's tile row r, column c. cell: tile size in pixels. parity0: scroll 1 draws
@@ -51,6 +62,11 @@ SLOTS = {
         "hud_name": dict(png="wolverine_hud_name_88x16.png", size=(88, 16), cell=8, layer=1, parity0=1,
                          code=lambda r, c: 0x0be0 + r * 16 + c, pens=(1, 2, 3, 4, 5, 6, 8), front=False, stage=True,
                          shared_palette=0x1ee2e0),
+        # The story box's face (and the 2P HUD's, unflipped): the stored cells are mirrored, the box draws them x-flipped in descending code order.
+        # `derive`: no PNG of its own, cropped from another piece (TALK_FACE_CROP of the select portrait) unless the art directory has the PNG.
+        # `both`: the arcade holds the same cell in both halves of a code block, so the key's column parity does not matter; so does the copy.
+        "talk_face": dict(png="wolverine_talk_face_40x24.png", size=(40, 24), cell=8, layer=1, parity0=0, flip=True, both=True,
+                          derive="select_portrait", code=lambda r, c: 0xfbd - c + r * 16, pens=PORTRAIT_PENS, front=False, stage=True),
         # The ranking table draws the HUD portrait's own tiles (checked on the arcade's pictures: the icon is the portrait, two pixels
         # over), so the ranking icon is a copy of piece C and carries no tiles of its own.
         "rank_icon": dict(png="wolverine_rank_icon_24x16.png", size=(24, 16), same_as="hud_portrait"),
@@ -96,6 +112,35 @@ def cps_word(rgb):
     return (rgb[0] // 17) << 8 | (rgb[1] // 17) << 4 | rgb[2] // 17
 
 
+def shrink(src, crop, size):
+    """Crop box (x, y, w, h) of a loaded piece shrunk by area averaging to size; each pixel takes the nearest of the piece's colours (never transparent)."""
+    sw, sh = len(src["pens"][0]), len(src["pens"])
+    ow, oh = size
+    x0, y0, cw, ch = crop
+    pal, pens = src["pal"], src["pens"]   # pen p is PNG colour p + 1
+    out = []
+    for oy in range(oh):
+        row = []
+        for ox in range(ow):
+            xa, xb, ya, yb = x0 + ox * cw / ow, x0 + (ox + 1) * cw / ow, y0 + oy * ch / oh, y0 + (oy + 1) * ch / oh
+            acc, tot = [0.0, 0.0, 0.0], 0.0
+            for yy in range(int(ya), int(yb + 0.9999)):
+                for xx in range(int(xa), int(xb + 0.9999)):
+                    if not (0 <= xx < sw and 0 <= yy < sh) or pens[yy][xx] == 15:
+                        continue
+                    wt = max(0.0, min(xb, xx + 1) - max(xa, xx)) * max(0.0, min(yb, yy + 1) - max(ya, yy))
+                    c = pal[pens[yy][xx] + 1]
+                    for k in range(3):
+                        acc[k] += c[k] * wt
+                    tot += wt
+            if tot == 0:
+                raise ValueError("talk face crop %s has no opaque pixel at %d,%d" % (crop, ox, oy))
+            a = [v / tot for v in acc]
+            row.append(min(range(15), key=lambda p: (sum((pal[p + 1][k] - a[k]) ** 2 for k in range(3)), p)))
+        out.append(row)
+    return out
+
+
 def load_piece(art, name, spec):
     """Validated pixels of one piece: rows of pens, and its palette words by pen."""
     w, h, rows, pal = read_png(pathlib.Path(art) / spec["png"])
@@ -137,13 +182,20 @@ def put_scroll2(raw, code, tile):
 
 
 def cells(name, spec, pens):
-    """(code, parity or None, tile) for every tile of a piece."""
+    """(code, parity or None, tile) for every tile of a piece. `flip`: the stored cell is the picture's cell mirrored (the arcade draws it
+    x-flipped); `both`: the cell is written to both halves of its code block."""
     n = spec["cell"]
     w, h = spec["size"]
     for r in range(h // n):
         for c in range(w // n):
             tile = [row[c * n:(c + 1) * n] for row in pens[r * n:(r + 1) * n]]
-            yield spec["code"](r, c), (spec["parity0"] + c) & 1 if spec["layer"] == 1 else None, tile
+            if spec.get("flip"):
+                tile = [t[::-1] for t in tile]
+            if spec.get("both"):
+                for par in (0, 1):
+                    yield spec["code"](r, c), par, tile
+            else:
+                yield spec["code"](r, c), (spec["parity0"] + c) & 1 if spec["layer"] == 1 else None, tile
 
 
 def patch(raw, slot, pieces, which):
@@ -176,6 +228,8 @@ def check_pieces(slot, pieces):
     p, c = pieces["select_portrait"], pieces["hud_portrait"]
     if p["words"] != c["words"]:
         raise ValueError("select portrait and HUD portrait must use the same 15 colours in the same order")
+    if "talk_face" in pieces and pieces["talk_face"]["words"] != c["words"]:
+        raise ValueError("talk face must use the HUD portrait's 15 colours (it draws in the same palette bank)")
 
 
 def rom_words(rom, at):
@@ -221,7 +275,18 @@ def load_slot(art, slot):
     for name, spec in SLOTS[slot].items():
         if "same_as" in spec:   # the same pixels and colours, under its own file name
             spec = dict(SLOTS[slot][spec["same_as"]], png=spec["png"])
+        if "derive" in spec and not (pathlib.Path(art) / spec["png"]).exists():
+            continue   # cropped below, once its source is loaded
         pieces[name] = load_piece(art, name, spec)
+    for name, spec in SLOTS[slot].items():
+        if name not in pieces:
+            src = pieces[spec["derive"]]
+            w, h = spec["size"]
+            inner = shrink(src, TALK_FACE_CROP, (w - 2, h - 2))
+            if TALK_FACE_MIRROR:
+                inner = [r[::-1] for r in inner]
+            pens = [[TALK_FACE_FRAME_PEN] * w] + [[TALK_FACE_FRAME_PEN] + r + [TALK_FACE_FRAME_PEN] for r in inner] + [[TALK_FACE_FRAME_PEN] * w]
+            pieces[name] = dict(pens=pens, words=dict(src["words"]), pal=src["pal"], derived=True)
     check_pieces(slot, pieces)
     return pieces
 
@@ -267,7 +332,8 @@ def build(art, base_gfx, rom_path, out_dir, guest=0):
                   tiles={n: sum(1 for _ in cells(n, s, pieces[n]["pens"])) for n, s in SLOTS[slot].items() if "same_as" not in s},
                   palettes=[dict(piece=s["piece"], copies=len(s["at"]), mask="0x%04x" % s["mask"]) for s in sets],
                   base_sha256=hashlib.sha256(raw).hexdigest(),
-                  art_sha256={s["png"]: hashlib.sha256((pathlib.Path(art) / s["png"]).read_bytes()).hexdigest() for s in SLOTS[slot].values()})
+                  art_sha256={s["png"]: hashlib.sha256((pathlib.Path(art) / s["png"]).read_bytes()).hexdigest() for s in SLOTS[slot].values() if (pathlib.Path(art) / s["png"]).exists()},
+                  talk_face=("derived from the select portrait, crop %s" % (TALK_FACE_CROP,)) if pieces["talk_face"].get("derived") else SLOTS[slot]["talk_face"]["png"])
     (out / "hud_art_report.json").write_text(json.dumps(report, indent=1))
     return dict(stage_gfx=str(res["stage"]), front_gfx=str(res["front"]), include=str(inc), report=report)
 
@@ -293,9 +359,10 @@ def check_keys(rounds, slot):
             for c in range(w // n):
                 code = spec["code"](r, c)
                 if spec["layer"] == 1:
-                    k = code << 1 | ((spec["parity0"] + c) & 1)
-                    if k not in have:
-                        miss.append((name, "s1", k))
+                    for par in ((0, 1) if spec.get("both") else ((spec["parity0"] + c) & 1,)):
+                        k = code << 1 | par
+                        if k not in have:
+                            miss.append((name, "s1", k))
                 elif code not in have2:
                     miss.append((name, "s2", code))
     return miss
