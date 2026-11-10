@@ -22,7 +22,7 @@ FREE = float(os.environ.get("PROOF_FREERUN", "0"))
 SLOT = int(os.environ.get("PROOF_SLOT", "3"))
 TITLE = os.environ.get("PROOF_TITLE", "AvP NATIVE: states [port 9718]")
 st = dict(lastp=0.0, started=False, n=0, titled=False)
-MODES = tuple(m for m in (("native", 1, None), ("schaefer", 0, 0)) if m[0] in os.environ.get("PROOF_LEGS", "native,schaefer").split(","))
+MODES = tuple(m for m in (("native", 1, None), ("skin", 0, None), ("schaefer", 0, 0)) if m[0] in os.environ.get("PROOF_LEGS", "native,schaefer").split(","))
 # (frames after the leg starts, keys held from there): attack taps every 14 frames for 160 frames (an enemy walking in is met in every leg), then walk away and back
 SCHEDULE = [(0, []), (6, ["a"]), (9, []), (22, ["a"]), (25, []), (38, ["a"]), (41, []), (100, ["b"]), (104, []), (190, ["b"]), (194, []), (200, ["a"]), (203, []),
             (260, ["down"]), (266, ["down", "right"]), (272, ["right"]), (276, ["right", "a"]), (280, []), (360, ["left"]), (420, []), (480, ["a"]), (483, []), (500, ["a"]), (503, []), (700, [])]
@@ -72,6 +72,7 @@ def paused_leg(s, tag, dbg, sel, shots):
             keys = SCHEDULE[k][1]; k += 1
         s.set(keys)
         if f % 10 == 0 and not os.environ.get("PROOF_NOKEEP"): keep_alive(s)
+        if os.environ.get("PROOF_KILL") and f == int(os.environ["PROOF_KILL"]): s.m.call("memory_write", address=hex(s.syms["RAMB"] + 0x83c0), size="word", value=hex(1))   # harness assist, every leg alike: one hit from death
         snap(s, tag, f, list(keys))
         m.call("framebuffer_burst", directory=OUT + "/" + tag, frames=1, prefix="f%04d_" % f)
     s.set([])
@@ -170,7 +171,7 @@ def proof(s):
     if not os.environ.get("PROOF_NOAPPROACH"):
         approach(s)
     s.log("save", m.call("save_state", slot=SLOT)[:80])
-    for tag, dbg, sel in MODES:
+    for tag, dbg, sel in ([] if os.environ.get("PROOF_NOPAUSED") else MODES):
         paused_leg(s, tag, dbg, sel, True)
     if FREE:
         for rep in range(2):

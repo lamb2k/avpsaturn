@@ -276,6 +276,36 @@ def thin_strict(chain):
     return keep
 
 
+_sole_cache = {}
+
+
+def tile_rows(key):
+    """(first, last) opaque pixel row of a resident tile as stored (None for an empty tile)"""
+    if key not in _sole_cache:
+        px = assets.pens(keyraw[key * 128:key * 128 + 128])
+        rows = [y for y in range(16) if any(px[y][x] != 15 for x in range(16))]
+        _sole_cache[key] = (rows[0], rows[-1]) if rows else None
+    return _sole_cache[key]
+
+
+def sole_of(cells):
+    """lowest opaque pixel row of a pose in its own coordinates (the pose's feet line)"""
+    best = None
+    for cx, cy, k, hf, vf, pal in cells:
+        r = tile_rows(k)
+        if r is None: continue
+        low = cy + (15 - r[0] if vf else r[1])
+        best = low if best is None else max(best, low)
+    return best
+
+
+def floor_cells(cells, lift=0):
+    """MSHvSF puts its own height into a pose (jump, hit flight, getup); AvP's game moves the actor for those, so a state the game lifts shows his pose with the sole on the stance's
+    floor line (the idle's first pose). lift = extra px up (the leap arc, which the game does not move)"""
+    d = FLOOR_SOLE - sole_of(cells) - lift
+    return [(cx, cy + d, k, hf, vf, pal) for cx, cy, k, hf, vf, pal in cells]
+
+
 # MSHvSF animation index entries (sub-table, entry), tools/wolverine/mvlib.py MV.tables(); provenance by tile match of D11's poses (census note section 5)
 SRC = dict(IDLE=(0, 0), WALK=(0, 1), JUMP=(1, 0), LAND=(1, 3), LP1=(8, 0), LP2=(8, 3), HP=(8, 2), HK=(9, 2), HIT_M=(14, 2), HIT_E=(14, 3), HIT_H=(14, 4), BERS=(22, 10), BERS3=(22, 10))
 # role: donor chain -> (source, hold_at): hold_at = where in the source (0..1) the donor's long hold record (255+ ticks) takes its pose; None = the last pose
@@ -357,7 +387,7 @@ def make_chain(start, role):
         hit3, hurt3 = mv_boxes(pk3[0])
         for k, a in enumerate(ch):
             last = bool(w(rom, a + 2) & 0x8000)
-            out.append(dict(src=pk3[0], cells=pk3[1], dur=w(rom, a), flags=w(rom, a + 2), hurt=hurt_index(hurt3) if hurt3 else rom[a + 8],
+            out.append(dict(src=pk3[0], cells=floor_cells(pk3[1]), dur=w(rom, a), flags=w(rom, a + 2), hurt=hurt_index(hurt3) if hurt3 else rom[a + 8],
                             atk=atk_index(hit3) if (last and hit3) else rom[a + 9], b10=rom[a + 10], b11=rom[a + 11], tail=rom[a + 12:a + 16], donor=a, jump=("donor" if last else None)))
         return out, role
     hold_at = HOLD_AT.get(role.split("-")[0], 1.0 if role not in HOLD_AT else 0.0)
@@ -386,7 +416,7 @@ def make_chain(start, role):
                 report.append("%x rec %d keeps donor attack box %d" % (start, k, atk))
         else:
             atk_i = 0
-        out.append(dict(src=pick[0], cells=pick[1], dur=dur, flags=fl, hurt=hurt_index(hurt) if hurt else rom[a + 8], atk=atk_i, b10=rom[a + 10], b11=rom[a + 11],
+        out.append(dict(src=pick[0], cells=floor_cells(pick[1]), dur=dur, flags=fl, hurt=hurt_index(hurt) if hurt else rom[a + 8], atk=atk_i, b10=rom[a + 10], b11=rom[a + 11],
                         tail=rom[a + 12:a + 16], donor=a, jump=("donor" if last else None)))
     return out, role
 
@@ -413,20 +443,22 @@ def apply_arc(start):
         span = f * ARC_TICKS / tot
         for k in range(n):
             a_, b_ = k / n, (k + 1) / n
-            lift = int(round(ARC_SCALE * (l0 + (l1 - l0) * (a_ + b_) / 2)))
+            lift = int(round(ARC_SCALE * (l0 + (l1 - l0) * (a_ + b_) / 2)))   # sole height above the floor (D11 jumpair): the pose is floor-aligned first
             dur = max(1, int(round(span * b_)) - int(round(span * a_)))
             arcs.append([cells, lift, dur, rec])
     first = recs_[0]
-    first["cells"] = resident_pose(ARC_RECS[0])[0]
+    first["cells"] = floor_cells(resident_pose(ARC_RECS[0])[0])
     out = [first]
     for cells, lift, dur, rec in arcs:
-        out.append(dict(src=rec, cells=[(cx, cy - lift, k, hf, vf, pal) for (cx, cy, k, hf, vf, pal) in cells], dur=dur, flags=0, hurt=launch["hurt"], atk=0,
+        out.append(dict(src=rec, cells=floor_cells(cells, lift), dur=dur, flags=0, hurt=launch["hurt"], atk=0,
                         b10=hold["b10"], b11=hold["b11"], tail=hold["tail"], donor=None, jump=None))
     last_cells = resident_pose(ARC_RECS[-1])[0]
-    hold.update(cells=last_cells, src=ARC_RECS[-1])
+    hold.update(cells=floor_cells(last_cells), src=ARC_RECS[-1])
     out.append(hold)
     new_chains[start] = out
 
+
+FLOOR_SOLE = sole_of(idle_src[0][1])
 
 # the three chains with ROM timing (milestone 1)
 new_chains[STAND] = idle_recs
