@@ -657,6 +657,9 @@ static u32 readout_pad(void) { return *UNC_PTR(u32, &sat_pad_raw); }
 typedef struct
 {
     u16 layers, priority, pal_pages, back_valid, back, row_active, objects, pad, whole;   /* pad: unused here (a pack generation in builds that add one). whole: scroll 2 read as a whole page (row scroll on), taken before a menu clears row_active */
+#ifdef SAT_HOME
+    u16 home; /* menu text on its own layer (NBG3); index 9 of the header words: home_cold.c sat_home_snap_frame sets it with objects (index 6) in the held title picture */
+#endif
     u16 s1x, s1y, s2x, s2y, s3x, s3y;
     u16 row[SAT_GFX_SCREEN_H];
     /* aligned(4): the guest pass (SAT_GUEST_FAST_LIST, PAL_KEEP) and the look check use 32 bit loads/stores on these. The menu merge's `whole` field
@@ -666,9 +669,6 @@ typedef struct
     u32 pal_sum[SAT_GFX_PAGES]; /* change detection: every palette word */
 #ifdef SAT_VDP1_PROFILE
     unsigned int profile_vblank, profile_stage_chars, profile_snapshot_ticks, profile_handoff_tick;
-#endif
-#ifdef SAT_HOME
-    u16 home; /* menu text on its own layer (NBG3) */
 #endif
 #ifdef SAT_PERF_HUD
     u16 hud;  /* readout lines on NBG3 this picture (no menu is up) */
@@ -701,7 +701,11 @@ u32 sat_gfx_layers_timeout;  /* diagnostic: waits abandoned at SAT_LAYERS_WAIT_S
 #ifdef SAT_GFX_HOST
 static Snapshot snap;
 #else
+#ifdef SAT_HOME
+Snapshot snap __attribute__((section(".lwgfx"), aligned(16)));   /* global: the stage select's held title picture saves and restores it (home_cold.c) */
+#else
 static Snapshot snap __attribute__((section(".lwgfx"), aligned(16)));
+#endif
 #endif
 
 #ifdef SAT_VDP1_PROFILE
@@ -827,6 +831,12 @@ static void rowtrim_load(u8 *dest, u32 idx)
 }
 #endif
 
+#if defined(SAT_GUESTS) && !defined(SAT_GFX_HOST)
+/* Bonus character's face cells (saturn/rt/guests.c, tools/wolverine/hud_art.py): while his slot is on, a scroll 1 cell of Schaefer's face (talk box, the HUD's
+   "SELECT YOUR CHARACTER" icon) is drawn from his payload whatever stage file is loaded, so the continue select shows him when another character is playing. */
+extern volatile unsigned char sat_guest_face_on;
+extern const unsigned char *sat_guest_face_tile(unsigned long key);
+#endif
 static u16 cache_find(Cache *c, u32 key, unsigned long *refused)
 {
     u32 h = HASH(c, key);
@@ -900,6 +910,9 @@ static u16 cache_find(Cache *c, u32 key, unsigned long *refused)
                 if ((u32)idx >= first) { from = pack_start + be32(sec->spill + 8 + k * 8) + ((u32)idx - first) * c->slot_bytes; break; }
             }
         }
+#if defined(SAT_GUESTS) && !defined(SAT_GFX_HOST)
+        if (c->section == SEC_S1 && sat_guest_face_on) { const u8 *g = sat_guest_face_tile(key); if (g) from = g; }
+#endif
         vram_copy(c->vram + (u32)n * c->slot_bytes, from, c->slot_bytes);
     }
 #ifdef SAT_TILE_ROWTRIM

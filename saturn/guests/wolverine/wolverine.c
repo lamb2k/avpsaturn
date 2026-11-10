@@ -157,9 +157,16 @@ static void wv_nat_slots(int apply)
         if (apply ? v == WV_NAT_T_DONOR : v == WV_NAT_T) opx_wr(WV_NAT_TSLOT, apply ? WV_NAT_T : WV_NAT_T_DONOR);
     }
 }
-static void wv_nat_sync(void)   /* once a vblank (pad hook) and on every player update: the data follows the setting, the second palette row follows the stage */
+/* A live Wolverine player: a player block in use whose character index (+0xd2) is the Schaefer slot's. The index tables are global per character slot, so the native tables stand in for Schaefer's only while
+   such a player exists: in the front end, attract, the opening street scene and any story scene where Dutch Schaefer is drawn as a non-player (his own records and art are the stock ones there) the
+   stock tables stay (sprites lane, 11-10: from boot on, every scene with Dutch drew him from records whose tiles the front file does not hold, and he was blank). */
+static int wv_live(void)
 {
-    if ((sat_guest_sel & 1) && (wv_nat_dbg & 1)) {
+    return (R8(PL(0)) && R8(PL(0) + WV_CHAR_OFF) == WV_CHAR_SCH) || (R8(PL(1)) && R8(PL(1) + WV_CHAR_OFF) == WV_CHAR_SCH);
+}
+static void wv_nat_sync(void)   /* once a vblank (pad hook) and on every player update: the data follows the setting and a live Wolverine player, the second palette row follows the stage */
+{
+    if ((sat_guest_sel & 1) && (wv_nat_dbg & 1) && wv_live()) {
         u8 row = (u8)WV_PALROW1;
         if (!wv_nat_on) {   /* the pad hook (vblank) and the player update both call this: every write below is absolute, so two callers in a row do the same as one (an earlier += doubled the table bases: yaba 11-10, record 0x49d070, hang) */
             PAGE[0x30] = wv_blk;
@@ -650,6 +657,9 @@ static void wv_bz_record(u32 b, u32 rec)   /* what f_16526 stores: the record, i
     u32 dur = (u32)p[0] << 8 | p[1];
     w32(b + 0x1c, rec); R16(b + 0x0a) = (u16)dur; R16(b + 0x24) = (u16)((u32)p[2] << 8 | p[3]); R16(b + 0x90) = (u16)dur;
 }
+#ifdef WV_NO_GRAB
+int sat_wv_nograb(unsigned long a6) { return wv_player((u32)a6) >= 0; }   /* game_bind.c f_1a586: a Wolverine player has no grab of his own (comparison switch) */
+#endif
 int sat_wv_bz_run(unsigned long a6)   /* f_24f04, the state 020008 (special) routine of the Schaefer slot: nonzero = done here, zero = the stock routine runs */
 {
     int i = wv_player((u32)a6);

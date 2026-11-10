@@ -19,6 +19,9 @@ Memory, owner recipe, assets D11 (hw_free / lw_free / cart_free; Yaba-built, mea
 | + native e0a0f1c: heal, flash, unhittable (45c867c) = disc 3e | 520 | 84 | 4,556 |
 | + reveal b2c0abf first version (a4b9757, wip branch only) | 248 | 80 | 7,132 (crosses a 4 KB cart step) |
 | + reveal aaa05a0 (overlay) = disc 3g (4d105c0), SAT_GUEST_DEFAULT=0 | 496 | 84 | 4,168 |
+| + native 26a406d/7882c2f (knockdown poses, tables gated, grab poses) + stage-menu-bg e3feb86 (362324a) | 480 | 100 | 4,136 |
+| + talkbox 0b44fd8 (HUD continue select) = disc 3h (9fff850); the talkbox step costs 0 B hw/lw/cart (same sources before and after) | 480 | 100 | 4,136 |
+| (not merged) perf-reconcile 9ae1f42 with SAT_FPS_HUD on: lane figure -216 B hw (so about 264), cart tail steps 4 KB; SAT_HOME_FONT_COLD frees 1,920 B hw | | | |
 
 ## Merged (in avp/integration)
 
@@ -56,6 +59,8 @@ Asset sets: D11 as above; sprite fuzz data `char_fuzz.json` is private and goes 
 
 ## In progress (not merged yet)
 
+Perf lane (lane/perf-reconcile-20261110 9ae1f42, switches default off: SAT_FPS_HUD readout, SAT_S1_MEMO, SAT_S1_BLANKROWS, SAT_HOME_FONT_COLD) is merged only on `wip/integration-with-perf-20261110` (0fb8fbc); it is not on avp/integration until the hardware numbers say what goes in. Note the readout flag is SAT_FPS_HUD (SAT_PERF_HUD is the older hwtest readout).
+
 Updated 2026-11-10 evening.
 
 | Item | Branch | State |
@@ -71,11 +76,13 @@ Dropped (owner 2026-11-09: no more work on the sprite-replacement Wolverine): cl
 
 | Disc | Commit | Package | State |
 | --- | --- | --- | --- |
+| avp_integration_3h | 9fff850 | E:\AvP\package-integrationvp_integration_3h (Fenrir folder: E:\AvP\package-integrationenrirvp_integration_3h) | current: 3g + native 7882c2f + stage-menu-bg + talkbox 0b44fd8; SAT_GUEST_DEFAULT=0; first hardware run |
 | avp_integration_3g | 4d105c0 | E:\AvP\package-integrationvp_integration_3g | current: 3e + reveal; SAT_GUEST_DEFAULT=0 (Wolverine off on a fresh save; Options toggle or the reveal turns him on) |
 | avp_integration_3e | 45c867c | E:\AvP\package-integrationvp_integration_3e | everything except the reveal; SAT_GUEST_DEFAULT=1; superseded by 3g |
 | avp_integration_3a | 4c3dc09 | E:\AvP\package-integrationvp_integration_3a | first native disc (sprites 7ba526c rowtrim 1, native 035d44c, stage menu, versus); Berserker hittable on it; superseded by 3e |
 | avp_integration_2 | 70af5ed | E:\AvP\package-integrationvp_integration_2 | skin Wolverine; superseded |
 
+Gates for 3h (9fff850): build rc 0, hw_free 480 / lw_free 100 / cart_free 4,136, STORE 157,133 of 262,144, ISO 326 MB; fit.py D11 77/77; round/screen/caption checks 0 of 287; six HOST goldens clean (combined build); WSL unittest 152 run / 30 known errors / 0 failures; flag-off identity (9fff850 against the same tree with native batch 2f55840 reverted, flag-off recipe, layout stage): HW.BIN, LW.BIN, COLD1.BIN, OPX.BIN, ROM.BIN sha256 identical; Yaba cache off: reveal end to end (flags 0x80000000 -> 0x80000301, survives restart), stage select over title art, Wolverine slashes + Berserker (state 020008), hit frames show no tucked jump pose, opening street scene draws Dutch; cache ON smoke (Wolverine, saves with him on): 1,185 vblanks, no fatal, play-window gfx peak about 14k per frame, game peak 3,355, overruns 32; the boot-to-menu gfx peak is 42,901 ticks (3g: 23,779), a menu-time frame (stage select over the title art, measured before play starts).
 Gates for 3g (4d105c0): build rc 0, hw_free 496 / lw_free 84 / cart_free 4,168, STORE 162,336 of 262,144, fit.py D11 77/77, check_round_pages/screen/caption 0 of 287, six HOST goldens clean, WSL unittest 151 run / 30 known errors / 0 failures, reveal end to end in Yaba (flags word 0x80000000 -> 0x80000301, survives a restart), cache ON smoke (Warrior): 1,192 vblanks, no fatal, gfx peak 23,779 / game peak 3,467 / overruns 34 (disc 2: 23,650 / 3,471 / 37).
 Gates for 3e: see the report of 2026-11-10 (build rc 0, hw_free 520 / lw_free 84 / cart_free 4,556, STORE 162,336 of 262,144, fit.py D11 77/77 with the dialog keys, check_round_pages / check_screen_keys / check_caption_keys 0 of 287, six HOST goldens clean, WSL unittest 145 run / 30 known errors / 0 failures, Yaba cache off and cache ON smoke, Berserker unhittable, heal Wolverine-only).
 avp_integration_1 was WITHDRAWN 11-09 (sprites vanished, half speed). wolverine-v4, package-fps and package-home-combined are superseded.

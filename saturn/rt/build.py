@@ -47,7 +47,7 @@ OVERRIDES = () if os.environ.get("GAME_OVERRIDES") == "0" else tuple((REPO / "sa
 # Bonus characters (SAT_GUESTS only): lifted routines wrapped in game_bind.c, body kept (the collision passes for guest boxes, the player state machine for guest timings).
 NATIVE_GFX = "SAT_WV_NATIVE_GFX" in os.environ.get("KERNEL_CFLAGS", "") and bool(os.environ.get("GUEST_ASSETS"))   # Wolverine's native animation data (plan V2; saturn/guests/wolverine)
 # native Wolverine: the gun routine of Warrior and Hunter (24060) stays stock; Schaefer's own special routine (24f04, state 020008: attack + jump) is the one his Berserker replaces
-GUEST_WRAP = ("1cf54", "1d03e", "1d116", "195ec", "19f9a", "24f04" if NATIVE_GFX else "24060") if "SAT_GUESTS" in os.environ.get("KERNEL_CFLAGS", "") else ()
+GUEST_WRAP = ("1cf54", "1d03e", "1d116", "195ec", "19f9a", "24f04" if NATIVE_GFX else "24060") + (("1a586",) if NATIVE_GFX and "WV_NO_GRAB" in os.environ.get("KERNEL_CFLAGS", "") else ()) if "SAT_GUESTS" in os.environ.get("KERNEL_CFLAGS", "") else ()
 CART = dict(ROMB=0x02400000, OPX=0x02600000, SAT_SINK=0x02640000, SAT_OBJ=0x02650000, SAT_PACK=0x02654000)
 CART_END = 0x02800000
 OPX_MAX = 0x40000
@@ -289,6 +289,7 @@ def gen_sources():
             seed.write_bytes(f.read(16))
     update(GEN / "seed.inc", ",".join(str(x) for x in seed.read_bytes()))
     update(GEN / "guest_hudpal.inc", pathlib.Path(HUD["include"]).read_text() if HUD else hud_art.pal_include([]))   # guests.c: select screen and HUD colours of the guests
+    update(GEN / "guest_face.inc", pathlib.Path(HUD["face_include"]).read_text() if HUD else hud_art.face_include_empty())   # guests.c: his talk box face cells, drawn in every stage file while he is on
     save = WORK / "save_seed.bin"   # settings block the arcade keeps in EEPROM, from the golden dump
     if not save.exists():
         with open("E:/AvP/learning/mame/golden_c/probe.tsv", "rb") as f:
@@ -519,7 +520,17 @@ def main():
         home_cold_extra.append(cc(HERE / "home_font_cold.c", OBJ / "home_font_cold.o", ["-Os", "-I", GEN] + os.environ.get("KERNEL_CFLAGS", "").split()))
     if "SAT_FPS_HUD" in os.environ.get("KERNEL_CFLAGS", ""):   # performance readout (lane perf-reconcile): cold code in the cart tail, default off
         home_cold_extra.append(cc(HERE / "fps_hud.c", OBJ / "fps_hud.o", ["-Os", "-I", GEN] + os.environ.get("KERNEL_CFLAGS", "").split()))
-    home_cold = [cc(HERE / "home_cold.c", OBJ / "home_cold.o", ["-Os"] + os.environ.get("KERNEL_CFLAGS", "").split())] if home else []
+    snap_bytes = 0
+    if home:   # stage select's held title picture (home_cold.c sat_home_snap_frame) copies the graphics snapshot: its size comes from the gfx object (nm -S), so no constant stays in high RAM
+        for l in sh([NM, "-S", OBJ / "gfx_sat_gfx.o"]).splitlines():
+            f = l.split()
+            if len(f) == 4 and f[3] in ("snap", "_snap"):
+                snap_bytes = int(f[1], 16)
+        stamp = GEN / "snap_bytes.txt"
+        if not stamp.exists() or stamp.read_text() != str(snap_bytes):
+            (OBJ / "home_cold.o").unlink(missing_ok=True)
+            stamp.write_text(str(snap_bytes))
+    home_cold = [cc(HERE / "home_cold.c", OBJ / "home_cold.o", ["-Os", f"-DSAT_SNAP_BYTES={snap_bytes}"] + os.environ.get("KERNEL_CFLAGS", "").split())] if home else []
     home_cold += home_cold_extra
     if OVERRIDES:
         bind_flags = ["-DSAT_GUESTS"] if "SAT_GUESTS" in os.environ.get("KERNEL_CFLAGS", "") else []

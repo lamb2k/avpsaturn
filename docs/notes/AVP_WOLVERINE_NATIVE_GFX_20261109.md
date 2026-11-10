@@ -520,3 +520,29 @@ One free-running pass with `UseSh2Cache=true` (the lane's VideoCore 1 Yaba copy;
 
 ### 16.5 Gates on this head (build with the owner heal and flash switches)
 Build rc 0; fit.py D11 (copy) 76/76, gate True, stage24_ma 2,872 / 2,834; HOST golden_c1 clean 272,171 and golden_2p clean 329,918 (guest off, flag on, features compiled via `--wvf 1`, 0 differing, missed IRQ 0); WSL unittest 106 run, 30 errors (the known set, same names), 1 skipped after the test fix above; flag-off identity as in 16.1.
+
+## 17. Knockdown and jump poses, Schaefer tables for Dutch, grab poses (11-10)
+
+### 17.1 No jump pose without a jump
+- T1.3 / T1.10 (and T0.3 / T0.10) are 2-record knee-bend holds that the game also uses for the state-020004 turn holds and the stage entrance. They showed his tucked jump poses. They now use his LAND poses. The leap arc (T1.37) and the jump attack (T1.38) keep their JUMP poses.
+- Knockdown flight (T2.14 / 16 / 20) used the JUMP role. It now uses HIT_H. Switches in `gen_native.py`: `WV_KD_JUMP=1` and `WV_LEAP_TUCK=1` restore the old forms for comparison.
+- Yaba, free-running, NOJUMP soak on the final build: 0 anomalies, no JUMP role in any state (`recmap.py` of `soak.jsonl`); knockdown flight reads HIT_H (T2.14 / 16 / 20), the leap holds and getup read LAND.
+
+### 17.2 Schaefer's tables stand while no Wolverine player exists
+- The per-slot index tables (`sat_wv_tb`) are global to a character slot, so Dutch Schaefer in the opening street scene drew from the native block. `wv_live()` is true only while a live player block has +0xd2 == 1; `wv_nat_sync()` flips to the native tables only then and restores Schaefer's otherwise.
+- Yaba, opening and attract (build g6, `attract_shots.py`, 36 samples to vblank 5,295, Start pressed by window message): `sat_wv_tb` = 0x162f90 in every sample; the opening street scene shows Dutch with Linn drawn normally.
+- Limit: a Dutch NPC that coexists with a live Wolverine player is not handled (the stage-26 ending could not be reached; a warp to stage 26 crashes on the unmodified integration build as well).
+
+### 17.3 Grab: stock grab stays on, better poses
+- Owner decision: keep the stock grab (walking into a standing enemy) and give it better poses. `WV_NO_GRAB=1` is the default-off switch that suppresses it for Wolverine (an `f_1a586` wrapper returning 0, wired in `game_bind.c`, `build.py` and `build_native_host.py`).
+- Chain 020400 -> 020406 (lift, T1.55) -> 020408 (slam, T1.56): the hold uses his claw-forward poses (MSHvSF 8.3), the slam his slash (8.2); donor timing and the donor attack box are kept; the hurt box is his standing box.
+- Yaba, free-running into an enemy (`soak_020406_*`, `soak_020408_*` strip): 020406 x3 and 020408 x17 reached, every record in the native window, 0 anomalies.
+
+### 17.4 Tools (code only; their outputs are local, not in git)
+`attract_shots.py` (attract and opening shots with the table base), `recmap.py` (record to role), `motion_compare.py`, `mshvsf_catalog.py`, `baseline_table.py`, `baseline_swap.py` (CURRENT vs PROPOSED mapping sheet for the remap, review only), `tile_cost.py`. `play_yaba.py` now starts Yaba with SW_SHOWNOACTIVATE, at the bottom of the z-order and BelowNormal; it takes no focus and sends no global input.
+
+### 17.5 Remap review (not built)
+The sheet is `baseline_swap.png/.md/.csv`. The proposed mapping needs 866 new tiles: +877 against the keys his native records use (1,164), +567 against the 1,474-key pack. The remap is not built until the owner approves it and picks a trimming option.
+
+### 17.6 Gates on this head
+Build rc 0 (full rebuild b_w5, then cached b_w6): hw_free 1,080, lw_free 84, block 20,912 bytes (was 21,164) ending at 0x27fe784, ISO 391,497,728. fit.py D11 (copy) 76/76, gate True, no own key dropped, stage24_ma 2,872 / 2,834 (margin 38), cart pack room 1,630,208; HOST (guest off, flag on, features via `--wvf 1`) golden_c1 clean 272,171 and golden_2p clean 329,918, 0 differing, missed IRQ 0; WSL unittest 106 run, 30 errors (the known set, identical names), 1 skipped. Flag-off identity was not re-run on this head: every change since 16.1 sits behind `SAT_WV_NATIVE_GFX` or `WV_NO_GRAB` (the `GUEST_WRAP` additions and the `f_1a586` wrapper are gated on the same flags); a re-run belongs to the release candidate. Yaba (cache off, own copy): opening scene, Wolverine stage-02 free-running soak with no JUMP role and 0 anomalies, grab strip.

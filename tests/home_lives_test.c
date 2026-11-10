@@ -5,6 +5,7 @@
 #include "../saturn/rt/home.c"
 #include "../saturn/rt/home_cold.c"
 u8 RAMB[0x10000];
+u16 snap[16];   /* sat_gfx.c's snapshot, for sat_home_snap_frame (home_cold.c) */
 u32 sat_pad_raw = 0xffff;
 volatile u32 sat_duel_on;
 __typeof__(sat_rounds) sat_rounds;
