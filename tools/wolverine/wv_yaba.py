@@ -39,8 +39,12 @@ def setup(cue, video="1", extra=None):
 
 
 def start(raw):
+    """Own Yaba copy, shown without activation (SW_SHOWNOACTIVATE: a minimized launch never boots), below normal priority (the host is shared)."""
     env = dict(os.environ, QT_OPENGL="desktop", APPDATA=str(D / "appdata"), AVP_SCSP_RAW=str(raw))
-    return subprocess.Popen([str(D / "yaba" / "yabasanshiro.exe")], cwd=str(D / "yaba"), env=env)
+    si = subprocess.STARTUPINFO()
+    si.dwFlags |= subprocess.STARTF_USESHOWWINDOW
+    si.wShowWindow = 4   # SW_SHOWNOACTIVATE
+    return subprocess.Popen([str(D / "yaba" / "yabasanshiro.exe")], cwd=str(D / "yaba"), env=env, startupinfo=si, creationflags=0x4000)   # BELOW_NORMAL_PRIORITY_CLASS
 
 
 def syms_of(elf):
