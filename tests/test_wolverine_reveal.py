@@ -15,6 +15,7 @@ try:
     from PIL import Image
     import reveal_pack
     import reveal_recolour
+    import reveal_voice
 except ImportError:   # pragma: no cover
     np = None
 
@@ -127,6 +128,29 @@ class PackTest(unittest.TestCase):
             im.save(src / names[0])
             with self.assertRaises(AssertionError):
                 reveal_pack.pack([str(src / n) for n in names], str(src / "x.bin"))
+
+
+@unittest.skipIf(np is None, "numpy and Pillow are needed")
+class VoiceFileTest(unittest.TestCase):
+    def test_intro_file(self):
+        """the reveal's voice file from a (synthetic) wv-sounds asset directory: header, level, octave, samples, even length"""
+        import json
+        with tempfile.TemporaryDirectory() as d:
+            d = pathlib.Path(d)
+            blob = bytes((i * 7) & 0xff for i in range(100)) + bytes(range(1, 52))
+            (d / "wv_sound.bin").write_bytes(blob)
+            (d / "wv_sound.json").write_text(json.dumps({"rate": 11025, "sounds": [
+                {"name": "SELECT", "cmd": 538, "off": 0, "n": 100, "tl": 44},
+                {"name": "INTRO", "cmd": 519, "off": 100, "n": 51, "tl": 42}]}))
+            out = d / "v.bin"
+            rep = reveal_voice.intro(d, out)
+            b = out.read_bytes()
+            self.assertEqual((rep["command"], rep["samples"]), ("0x207", 52))
+            self.assertEqual(b[:4], b"RVV1")
+            self.assertEqual(struct.unpack(">I", b[4:8])[0], 52)
+            self.assertEqual((b[8], b[9]), (42, 0xe))                  # SCSP total level, octave nibble: 11025 Hz
+            self.assertEqual(b[16:16 + 51], blob[100:151])
+            self.assertEqual(len(b), 16 + 52)
 
 
 class UnlockRecordTest(unittest.TestCase):
