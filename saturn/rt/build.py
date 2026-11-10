@@ -77,7 +77,7 @@ if os.environ.get("GUEST_ASSETS"):   # bonus characters (SAT_GUESTS builds): gue
             raise SystemExit("NO-GO: guest art tiles no arcade file holds (wrong tile codes or parity?): " + ", ".join("%s %s %x" % m for m in miss[:8]))
         print("guest hud art:", {k: v for k, v in HUD["report"]["tiles"].items()}, "palette copies", sum(p["copies"] for p in HUD["report"]["palettes"]), flush=True)
     DIALOG_KEYS = ()
-    if "-DSAT_WV_DIALOG=1" in os.environ.get("KERNEL_CFLAGS", "").split():   # Wolverine's story box wording, from the user's ROM (tools/wolverine/dialog.py)
+    if any(f in ("-DSAT_WV_DIALOG", "-DSAT_WV_DIALOG=1") for f in os.environ.get("KERNEL_CFLAGS", "").split()):   # Wolverine's story box wording, from the user's ROM (tools/wolverine/dialog.py)
         import dialog
         DIALOG = dialog.build(WORK / "rt.bin", GEN)
         DIALOG_KEYS = DIALOG["keys"]   # his stage files hold the tiles the new wording draws
