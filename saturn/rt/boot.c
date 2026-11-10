@@ -1,5 +1,9 @@
 /* First read at 0x06004000: map the cart, load segments from disc, enter the runtime. Lifted code never sees GFS. */
 #include "SEGA_GFS.H"
+#ifdef SAT_WV_REVEAL   /* the post-credits reveal and the save record (saturn/rt/reveal.c); without it this file is the loader as it was */
+#include "SEGA_BUP.H"
+#include "unlock_save.h"
+#endif
 #define LOADER_DIAG ((volatile unsigned long *)0x06013fe0u)
 #define LOADER_API ((volatile unsigned long *)0x06013fd0u)
 #define ENTRY 0x06014000u
@@ -116,6 +120,69 @@ static long load_regions(const char *name, void (*mark)(void))
     return total;
 }
 #endif
+#ifdef SAT_WV_REVEAL
+/* Any one file of the disc into RAM (the post-credits reveal reads its art and voice this way at the ending, kernel.c sat_reveal_call). The caller has masked interrupts and stopped the slave. Returns bytes read, or a negative stage. */
+static long load_file(const char *name, void *dest)
+{
+    Sint32 id, ss, n, last, got;
+    GfsHn h;
+    if (GFS_Init(1, gfs_work, &dir) < 0) return -1;
+    id = GFS_NameToId((Sint8 *)name);
+    if (id < 0) { GFS_Reset(); return -2; }
+    h = GFS_Open(id);
+    if (!h) { GFS_Reset(); return -3; }
+    GFS_GetFileSize(h, &ss, &n, &last);
+    GFS_SetTmode(h, GFS_TMODE_CPU);
+    got = GFS_Fread(h, n, dest, ss * n);
+    GFS_Close(h);
+    GFS_Reset();
+    return got > 0 ? got : -4;
+}
+/* The port's save record in the Saturn's internal backup RAM, one 64 byte file through the BIOS backup library (unlock_save.h has the format and the rules).
+   op 0 reads. op 1 sets flag bits (bits 0 to 7) and, when bit 10 is set, stores the bonus-character setting in bits 8 and 9. op 2 clears flag bits (bits 0 to 7).
+   scratch: 24 KB of RAM nobody uses at that moment, 4 byte aligned (the library copies itself into the first 16 KB and keeps its work in the next 8 KB).
+   The flags word LOADER_API[3] is what the runtime reads: bit 31 once read, bit 0 the reveal has turned Wolverine on, bit 8 a setting is saved, bits 9 and 10 that setting.
+   A write is in the word before it is tried, so a full or missing backup RAM still holds the change for this power-on. A failed read leaves the word clear (nothing saved).
+   The device is only formatted when the library says it is unformatted, never for any other state. Returns 0, or a negative stage. */
+static long unlock_io(unsigned op, unsigned bits, unsigned char *scratch)
+{
+    static const Uint8 name[12] = { 'A', 'V', 'P', 'S', 'A', 'T', '_', 'S', 'A', 'V', 'E', 0 };
+    BupConfig cfg[3];
+    BupStat st;
+    BupDir bd;
+    BupDate when;
+    unsigned char old[SAVE_SIZE], rec[SAVE_SIZE];
+    unsigned have = 0;
+    long r;
+    unsigned long init = *(volatile unsigned long *)0x6000358;
+    if (op == 1) {
+        LOADER_API[3] |= 0x80000000u | (bits & 0xffu);
+        if (bits & 0x400u) LOADER_API[3] = (LOADER_API[3] & ~0x600u) | 0x100u | ((bits & 0x300u) << 1);
+    } else if (op == 2) LOADER_API[3] &= ~(bits & 0xffu);
+    if (init < 0x100 || init >= 0x80000) return -1;   /* the BIOS's library entry; the function table pointer at 0x6000354 is set by BUP_Init itself */
+    BUP_Init((volatile Uint32 *)scratch, (Uint32 *)(scratch + 0x4000), cfg);
+    if (!*(volatile unsigned long *)0x6000354) return -1;
+    r = BUP_Stat(0, SAVE_SIZE, &st);
+    if (r == BUP_UNFORMAT && op) { if (BUP_Format(0)) return -2; r = BUP_Stat(0, SAVE_SIZE, &st); }
+    if (r) return -3;
+    if (BUP_Dir(0, (Uint8 *)name, 1, &bd) > 0 && !BUP_Read(0, (Uint8 *)name, old)) have = SAVE_SIZE;
+    if (!op) {
+        int sel = save_sel(old, have);
+        LOADER_API[3] = 0x80000000u | save_flags(old, have) | (sel >= 0 ? 0x100u | (unsigned)sel << 9 : 0);
+        return 0;
+    }
+    save_merge2(rec, old, have, op == 1 ? bits & 0xffu : 0, op == 2 ? bits & 0xffu : 0, op == 1 && (bits & 0x400u) ? (int)(bits >> 8 & 3u) : -1);
+    for (r = 0; r < 12; r++) bd.filename[r] = name[r];
+    for (r = 0; r < 11; r++) bd.comment[r] = "AVP SAVE   "[r];
+    bd.comment[10] = 0;
+    bd.language = BUP_ENGLISH;
+    when.year = 17; when.month = 1; when.day = 1; when.time = 0; when.min = 0; when.week = 0;
+    bd.date = BUP_SetDate(&when);
+    bd.datasize = SAVE_SIZE;
+    bd.blocksize = 0;
+    return BUP_Write(0, &bd, rec, 0) ? -4 : 0;
+}
+#endif
 int main(void)
 {
     unsigned char *c;
@@ -125,6 +192,12 @@ int main(void)
     *(volatile unsigned long *)0x25fe00b0 = 0x23301ff0;
     *(volatile unsigned long *)0x25fe00b8 = 0x00000013;
     *(volatile unsigned short *)0x257efffe = 1;
+#ifdef SAT_WV_REVEAL
+    LOADER_API[1] = (unsigned long)load_file;
+    LOADER_API[2] = (unsigned long)unlock_io;
+    LOADER_API[3] = 0;
+    LOADER_DIAG[5] = 0; LOADER_DIAG[6] = 0; LOADER_DIAG[7] = 0;   /* the reveal's takeover flag and state (reveal.c) */
+#endif
     cart[0] = 0x12345678; cart[1] = 0xedcba987;
     if (cart[0] != 0x12345678 || cart[1] != 0xedcba987) halt(0xe0f0, cart[0]);
     GFS_DIRTBL_TYPE(&dir) = GFS_DIR_NAME;
@@ -137,6 +210,9 @@ int main(void)
     load("COLD1.BIN", (void *)COLD1_ADDR, 0x600);
     load("HW.BIN", (void *)ENTRY, 0x400);
     GFS_Reset();
+#ifdef SAT_WV_REVEAL
+    unlock_io(0, 0, (unsigned char *)0x02754000u);   /* the save record, once the loads are done; scratch in the cart's pack room, which the first round file fills later */
+#endif
     LOADER_API[0] = (unsigned long)load_regions;
     *(volatile unsigned char *)0xfffffe92 = 0x10;
     *(volatile unsigned char *)0xfffffe92 = 0x01;

@@ -658,6 +658,33 @@ static void round_check(void)
     irq_enable();
 }
 
+#if defined(SAT_GUESTS) && defined(SAT_WV_REVEAL) && !SAT_VDP1_HW_ERASE
+/* The post-credits reveal (reveal.c, cold code) owns the picture while LOADER_DIAG[5] is set: the vblank hands nothing to the slave, so the chips are the cold code's.
+   sat_reveal_call runs a loader function with the game stopped and the slave idle, as a round load does: which 1 load_file(name, dest), 2 unlock_io(op, bits, scratch). */
+#define REVEAL_ON (((volatile u32 *)0x06013fe0u)[5])
+void sat_reveal_takeover(int on)
+{
+    REVEAL_ON = (u32)on;
+    if (on) while (UNCACHED(gfx_done) != UNCACHED(gfx_handed)) ;
+}
+long sat_reveal_call(int which, u32 a, u32 b, u32 c)
+{
+    long r;
+    while (UNCACHED(gfx_done) != UNCACHED(gfx_handed)) ;
+    __asm__ volatile ("ldc %0,sr" : : "r"(0xf0));
+    r = which == 1 ? ((long (*)(const char *, void *))LOADER_API[1])((const char *)a, (void *)b) : ((long (*)(unsigned, unsigned, unsigned char *))LOADER_API[2])(a, b, (unsigned char *)c);
+    CCR_M = 0x11;
+    exceptions_install();
+    irq_enable();
+    return r;
+}
+extern void sat_reveal_poll(void);
+#define SAT_REVEAL_POLL() sat_reveal_poll()
+#else
+#define REVEAL_ON 0
+#define SAT_REVEAL_POLL()
+#endif
+
 /* Dispatcher 0xd86. A vblank sets the game's flag at 0xff0266 through f_e0e, which restarts the walk from task 0. */
 void f_d86(void)
 {
@@ -669,6 +696,7 @@ void f_d86(void)
     for (;;) {
         int i;
         round_check();
+        SAT_REVEAL_POLL();
 #ifdef SAT_HOME
         sat_home_poll();
         sat_duel_step();
@@ -785,6 +813,11 @@ void sat_vblank(void)
     }
 #endif
     /* Before the IRQ body, which moves the next frame's scroll words into place. A slave still drawing skips this frame's picture, never the game. */
+#if defined(SAT_GUESTS) && defined(SAT_WV_REVEAL) && !SAT_VDP1_HW_ERASE
+    if (REVEAL_ON) {
+        /* the reveal's picture: nothing for the slave to draw */
+    } else
+#endif
     if (UNCACHED(gfx_done) == UNCACHED(gfx_handed)) {
         sat_gfx_snapshot_begin();
         UNCACHED(gfx_handed) = UNCACHED(gfx_handed) + 1;
