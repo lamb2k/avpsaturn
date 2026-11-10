@@ -26,10 +26,9 @@ print("in stage", hex(Y.arc(0xff81e8)), flush=True)
 rnd = random.Random(5); t0 = time.time(); n = 0; last = 0
 while time.time() - t0 < secs:
     r = rnd.random(); ks = {"right"} if r < .45 else ({"left"} if r < .6 else set())
-    if rnd.random() < .5: ks |= {"b"}
-    if rnd.random() < .15: ks |= {"a"}
+    if rnd.random() < .3: ks |= {"b"}
     Y.set(sorted(ks)); time.sleep(0.3)
-    if time.time() - last > 4:
+    if time.time() - last > 3:
         last = time.time(); n += 1
         print(Y.m.call("framebuffer_screenshot", path=f"{out}/play_{n:02d}.png").replace("\n", " | ")[:200], flush=True)
 Y.set([])
