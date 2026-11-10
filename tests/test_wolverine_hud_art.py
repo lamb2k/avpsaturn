@@ -90,7 +90,13 @@ def make_world(d, seed=1):
 
 def expected_tile(pens, spec, r, c):
     n = spec["cell"]
-    return [row[c * n:(c + 1) * n] for row in pens[r * n:(r + 1) * n]]
+    tile = [row[c * n:(c + 1) * n] for row in pens[r * n:(r + 1) * n]]
+    return [t[::-1] for t in tile] if spec.get("flip") else tile   # a flipped piece is stored mirrored
+
+
+def parities(spec, c):
+    """The halves of a code block a piece's cell is written to (`both`: the arcade holds the same cell in both)."""
+    return (0, 1) if spec.get("both") else ((spec["parity0"] + c) & 1,)
 
 
 @unittest.skipIf(Image is None, "Pillow is needed")
@@ -129,17 +135,23 @@ class ConverterTest(unittest.TestCase):
                             if inplay:
                                 touched.update(span)
                         else:
-                            parity = (s["parity0"] + col) & 1
-                            pl, vis = satgfx_pack.payload(data, 1, code << 1 | parity)
-                            want = satgfx_pack.tex(tile)
-                            span = [0x800000 + code * 0x40 + y * 8 + parity * 4 + k for y in range(8) for k in range(4)]
-                            if inplay:
-                                touched.update(span)
+                            for parity in parities(s, col):
+                                pl, vis = satgfx_pack.payload(data, 1, code << 1 | parity)
+                                want = satgfx_pack.tex(tile)
+                                span = [0x800000 + code * 0x40 + y * 8 + parity * 4 + k for y in range(8) for k in range(4)]
+                                if inplay:
+                                    touched.update(span)
+                                    self.assertEqual(pl, want, "%s tile %04x half %d (%s)" % (name, code, parity, which))
+                                    self.assertEqual(vis, any(p != 15 for row_ in tile for p in row_))
+                                else:
+                                    base_pl, _ = satgfx_pack.payload(self.gfx, 1, code << 1 | parity)
+                                    self.assertEqual(pl, base_pl, "%s must not change in the %s region" % (name, which))
+                            continue
                         if inplay:
                             self.assertEqual(pl, want, "%s tile %04x (%s)" % (name, code, which))
                             self.assertEqual(vis, any(p != 15 for row_ in tile for p in row_))
                         else:
-                            base_pl, _ = satgfx_pack.payload(self.gfx, 2 if s["layer"] == 2 else 1, code if s["layer"] == 2 else code << 1 | parity)
+                            base_pl, _ = satgfx_pack.payload(self.gfx, 2, code)
                             self.assertEqual(pl, base_pl, "%s must not change in the %s region" % (name, which))
             # outside the written bytes the region is the original, byte for byte
             diff = [i for i in range(len(self.gfx)) if data[i] != self.gfx[i]]
@@ -160,6 +172,50 @@ class ConverterTest(unittest.TestCase):
         self.assertNotEqual(block(stage, 0x0be0, 1), block(self.gfx, 0x0be0, 1))
         self.assertEqual(block(front, 0x1ae6, 1), block(stage, 0x1ae6, 1))
         self.assertNotEqual(block(front, 0x1ae6, 1), block(self.gfx, 0x1ae6, 1))
+
+    def test_talk_face_is_cropped_from_the_select_portrait_and_drawn_flipped(self):
+        """The story box's face: 5x3 cells at codes 0xfbd-c + 16 r, stored mirrored in both halves of each code block, in the stage files only,
+        on the portrait's own colours, and a PNG of its own in the art directory replaces the crop."""
+        r = hud_art.build(self.art, self.base, self.rom, self.out)
+        stage, front = (pathlib.Path(r[k]).read_bytes() for k in ("stage_gfx", "front_gfx"))
+        pieces = hud_art.load_slot(self.art, SLOT)
+        face = pieces["talk_face"]
+        self.assertTrue(face["derived"])
+        self.assertEqual((len(face["pens"][0]), len(face["pens"])), (40, 24))
+        portrait = {p for row in pieces["select_portrait"]["pens"] for p in row}
+        self.assertTrue({p for row in face["pens"] for p in row} <= portrait)   # nothing outside the portrait's colours; none transparent
+        self.assertNotIn(15, {p for row in face["pens"] for p in row})
+        fp = hud_art.TALK_FACE_FRAME_PEN   # the arcade's faces carry a 1 pixel white frame in their tiles
+        self.assertTrue(all(p == fp for p in face["pens"][0] + face["pens"][-1]) and all(r[0] == fp and r[-1] == fp for r in face["pens"]))
+        spec = hud_art.SLOTS[SLOT]["talk_face"]
+        for row in range(3):
+            for col in range(5):
+                code = 0xfbd - col + 16 * row
+                self.assertEqual(spec["code"](row, col), code)
+                cell = [face["pens"][row * 8 + y][col * 8:(col + 1) * 8] for y in range(8)]
+                for half in (0, 1):
+                    pl, _ = satgfx_pack.payload(stage, 1, code << 1 | half)
+                    self.assertEqual(pl, satgfx_pack.tex([c[::-1] for c in cell]))   # the box flips it back on draw
+                    base_pl, _ = satgfx_pack.payload(self.gfx, 1, code << 1 | half)
+                    self.assertEqual(satgfx_pack.payload(front, 1, code << 1 | half)[0], base_pl)   # front end file keeps the arcade's face
+        # an artist's PNG of the right size and colours wins over the crop
+        im = Image.new("P", (40, 24), 0)
+        im.putpalette(Image.open(self.art / hud_art.SLOTS[SLOT]["hud_portrait"]["png"]).getpalette())
+        for y in range(24):
+            for x in range(40):
+                im.putpixel((x, y), 1 + (x + y) % 15)
+        im.save(self.art / spec["png"])
+        pieces2 = hud_art.load_slot(self.art, SLOT)
+        self.assertNotIn("derived", pieces2["talk_face"])
+        self.assertEqual(pieces2["talk_face"]["pens"][3][5], (5 + 3) % 15)
+        # colours must be the HUD portrait's
+        pal = Image.open(self.art / spec["png"]).getpalette()
+        pal[3 * 2] ^= 17
+        im2 = Image.open(self.art / spec["png"])
+        im2.putpalette(pal)
+        im2.save(self.art / spec["png"])
+        with self.assertRaisesRegex(ValueError, "HUD portrait's 15 colours"):
+            hud_art.load_slot(self.art, SLOT)
 
     def test_base_region_is_never_written(self):
         before = self.base.read_bytes()
@@ -238,7 +294,8 @@ class ConverterTest(unittest.TestCase):
                 continue
             for r in range(s["size"][1] // 8):
                 for c in range(s["size"][0] // 8):
-                    have.add(s["code"](r, c) << 1 | ((s["parity0"] + c) & 1))
+                    for par in parities(s, c):
+                        have.add(s["code"](r, c) << 1 | par)
         s2 = {spec["select_portrait"]["code"](r, c) for r in range(4) for c in range(8)}
         rounds = dict(files=[dict(keys=[[], sorted(have), sorted(s2), []])])
         self.assertEqual(hud_art.check_keys(rounds, SLOT), [])
@@ -351,8 +408,9 @@ class RealArtTest(unittest.TestCase):
                                 pl, _ = satgfx_pack.payload(data, 2, code)
                                 self.assertEqual(pl, satgfx_pack.cells16(tile))
                             else:
-                                pl, _ = satgfx_pack.payload(data, 1, code << 1 | ((s["parity0"] + col) & 1))
-                                self.assertEqual(pl, satgfx_pack.tex(tile))
+                                for par in parities(s, col):
+                                    pl, _ = satgfx_pack.payload(data, 1, code << 1 | par)
+                                    self.assertEqual(pl, satgfx_pack.tex(tile))
             # Schaefer's own pieces are still what they were in the unpatched region, which the arcade files keep using
             self.assertNotEqual(base, pathlib.Path(r["stage_gfx"]).read_bytes())
             rom = REAL_ROM.read_bytes()
