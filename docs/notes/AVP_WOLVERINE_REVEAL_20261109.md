@@ -77,3 +77,22 @@ through offline speech recognition (faster-whisper small.en, installed in a venv
 are worthless). The commands Wolverine's own moves send in a MAME run (0x120 to 0x127, 0x203 to 0x20d) are 0.1 to 0.3 s grunts. Either the shout is not a separate QSound clip in MSHvSF (its hyper combo name may be text only),
 or it is played in pieces. For playback testing a stand-in clip (20:b400:e7ff, command 0x91, 0.55 s; recognised once as "Barrage!" with the prompt, so not evidence) was cut. The owner should pick the clip by ear:
 `REVEAL_VOICE_CLIP=BANK:START:END reveal_voice.py cut WORKDIR out.bin`, the candidates are in the scan evidence (E:\AvP\learning\lane-wolverine-reveal\scan1\w, one WAV per clip named bank_start_end).
+
+## Native Wolverine merge and gates (11-10)
+
+Merged `lane/wv-native-gfx-20261109` (7f26a1f) into the lane (486c982; only docs/STATUS.md conflicted, both sections kept). Build `w11`: commit e40987d, D11, recipe flags
+`-DSAT_HOME -DSAT_DUEL_MENU -DSAT_GUESTS -DSAT_GUEST_DEFAULT=0 -DSAT_WV_JUMP=1 -DSAT_GUEST_FAST_LIST=1 -DSAT_GUEST_NAMES_LAZY=1 -DSAT_GUEST_PAL_KEEP=1 -DSAT_WV_NATIVE_GFX` (default OFF so a first power-on shows the
+toggle at OFF and the first ending switches him on), stand-in voice, no SAT_UNLOCK_DEBUG. rc 0, 1586 s.
+- Memory: hw_free 808, lw_free 48, cart_free 7292. The reveal costs 1425 B of cold code (reveal.o 1196, guests.c +213, home_cold.c +16) and 264 B of work RAM that the lane's kernel hooks need; work-RAM is the
+  resident part, nothing of the art or voice stays. The cold code crosses ONE 4 KB step of the cart tail (cold code without it ends 525 B under the step): cold1 starts at 0x27e1000 instead of 0x27e2000,
+  cart_pack_room 1,626,112 instead of 1,630,208, that is 32 tiles (4096 B) of pack room.
+- fit.py on a copy of D11: gate True, 76 of 76, 0 own dropped, 0 missing; stage24_ma wolverine 16,473 tiles vs Schaefer 16,457, drops 2,866 vs 2,910 (44 tiles of margin).
+- check_screen_keys: every stage file passes (the guest front file `front_wv` is a front file and exempt; the tool needs the file names from round_stats.json on a guest build). check_caption_keys: 287 files, 0 short.
+  check_round_pages (tool from the stage-sprites lane, not in this base): PASS over the 210 base files (its keep list in rounds.json has no guest files).
+- unittest (WSL): 111 ran, 30 errors (the known private-dependency load errors), 1 skipped; all test_wolverine_* OK. Host test unlock_save_test: pass.
+- Flag-off identity: kernel, guests, home_cold, home, sat_gfx and boot objects compile byte-identical to 7f26a1f without -DSAT_WV_REVEAL (md5, evidence idc/run.sh).
+
+## Yaba (EMULATOR, own copy, port 9726) so far
+Options toggle verified on w11 with a fresh backup file: BONUS CHARACTERS shows OFF at first power-on; right gives WOLVERINE and the loader's flags word went 0x80000000 to 0x80000300 (saved setting 1) at once;
+left back to OFF gave 0x80000100 (saved setting 0). Captures: look/e2e/e1_option_off.png, e1_option_wolverine.png. The ending run (assist: Queen set to 1 hit point, health held, Start to continue) was started three
+times and had not reached the card when paused; Yaba froze mid-run each time (see report).
