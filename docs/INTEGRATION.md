@@ -46,11 +46,15 @@ Updated 2026-11-09 evening. Merged at 4bfcdf6: sprite-dropout cart guards (13e63
 | Main-game sprite pieces dropped on stages 0e, 1c, 1e, 24; fatal 0xe2 at 0xa9cc4 once on 0e | lane/stage-sprites-20261109 | started |
 | Post-credits reveal + unlock | lane/wolverine-reveal 850fc42 (pushed) | built; end-to-end Yaba check not done; owner to pick the voice clip |
 | Saturn hardware FPS test discs | E:\AvP\package-hwtest-20261109 (pre-integration) | rebuild from avp/integration with the next owner disc (owner to confirm) |
-| Talk-box face for Wolverine | not started | part of native Wolverine |
+| Wolverine sounds from MSHvSF (claws, hits, Berserker voice, select/KO voice, reveal clip) | lane/wv-sounds-20261109 (port 9722) | started 2026-11-09 |
+| Wolverine talk-box face (crop of approved portrait) and identity leaks | lane/wv-talkbox-20261109 (port 9723) | started 2026-11-09 |
+| Wolverine healing factor (SAT_WV_HEAL) and Berserker flash/freeze (SAT_WV_FLASH) | lane/wv-features-20261109 (port 9724) | started 2026-11-09 (owner un-deferred healing) |
+| Versus mode (Duel): RANDOM arena garbage, Hunter not drawn, stage enemies entering, full pairing matrix | lane/versus-20261109 (port 9725) | unparked by owner 2026-11-09 |
+| Row-trimmed tile encoding (SAT_TILE_ROWTRIM) on top of stage-sprites | lane/stage-sprites-20261109 19f87b0 | implemented, offline numbers done; gates and Yaba A/B running |
 
 Dropped (owner 2026-11-09: no more work on the sprite-replacement Wolverine): claws-only follow-up (lane/wv-noguns-20261109-f2576a, not merged), guest group loop (lane/fps-group), Wolverine defense gate (lane/wolverine-defense), feet-on-floor ground/ground2 switches. Native Wolverine covers each of them.
 
-Parked (owner 2026-11-09): versus mode (Duel): RANDOM arena tile garbage, Hunter body not drawn in Linn vs Hunter, stage enemies entering on 1e/24.
+Versus mode was parked earlier on 2026-11-09 and unparked the same night (lane/versus-20261109).
 
 ## Owner discs
 
