@@ -47,6 +47,16 @@ def step(v, s):
                 r = s.m.call("framebuffer_burst", directory=str(d), frames=int(os.environ.get("BURST", "3")), prefix="f")
                 s.m.call("resume")
                 s.log("BURST", i, "at", round(el), "->", str(d).replace("\\", "/"), "stage", s.ram(0x81e8, 2).hex(), "chars", s.ram(0x8380 + 0xd2, 1).hex(), s.ram(0x8480 + 0xd2, 1).hex())
+    if t0 and os.environ.get("SCANAT") and (v - v0) / 60.0 >= float(os.environ["SCANAT"]) and ("scan", 0) not in snapped:   # records whose x word (+0x10) lies right of the camera: who is the figure at the screen edge
+        snapped.add(("scan", 0))
+        cam = int.from_bytes(s.ram(0x8278, 2), "big"); M = s.ram(0x8600, 0x7a00)
+        out = []
+        for o in range(0, len(M) - 0x40, 0x20):
+            x = int.from_bytes(M[o + 0x10:o + 0x12], "big")
+            if M[o] and cam + 250 <= x <= cam + 520: out.append("%x:%s x%d" % (0x8600 + o, M[o:o + 12].hex(), x))
+        s.log("SCAN cam", cam, len(out), " | ".join(out[:40]))
+        C = s.ram(0xce80, 0x800)
+        s.log("CTLPOOL", " | ".join("%x:%s/%s" % (0xce80 + o, C[o:o + 8].hex(), C[o + 0x40:o + 0x50].hex()) for o in range(0, 0x800, 0x40) if C[o]))
     if t0 and os.environ.get("RINGOUT"):   # RINGOUT=15,35: at those game seconds P2 is thrown 420 px sideways (a ring-out, the effect that showed the noise in the earlier lane's stills)
         for t in (float(x) for x in os.environ["RINGOUT"].split(",")):
             if (v - v0) / 60.0 >= t and ("ro", t) not in snapped:
