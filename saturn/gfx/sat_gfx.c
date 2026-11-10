@@ -357,12 +357,21 @@ static void index_section(Section *s, int which)
 }
 
 /* Payload index of a key, BLANK_INDEX for an empty tile, or -1 when the pack lacks it. */
+#ifdef SAT_PERF_STAGES
+/* Measurement only (lane perf-reconcile 11-10): where the layer phase of a draw goes. [0] cache_find calls, [1] pack_find calls, [2] blank_seen hits,
+   [3] cache_find hits in the hash, [4] scan loop iterations for a free slot. Read over the debugger. */
+unsigned long sat_gfx_pf[8];
+#define PF(i) (sat_gfx_pf[i]++)
+#else
+#define PF(i)
+#endif
 static long pack_find(const Section *s, u32 key)
 {
     u32 bucket = key >> s->shift;
     const u16 *index = pack_index[s - sections];
     long lo, hi;
     int ks = KEY_SHIFT(s);
+    PF(1);
     if (bucket >= INDEX_BUCKETS) return -1;
     lo = index[bucket]; hi = (long)index[bucket + 1] - 1;
     while (lo <= hi)
@@ -808,6 +817,7 @@ static u16 cache_find(Cache *c, u32 key, unsigned long *refused)
     u16 n = NOSLOT;
     u32 scan;
     long idx;
+    PF(0);
     while (s != NOSLOT)
     {
         SlotRec *r = &c->slots[s];
@@ -815,6 +825,7 @@ static u16 cache_find(Cache *c, u32 key, unsigned long *refused)
         {
             if (r->stamp != stamp) { r->stamp = stamp; c->used++; }
             VL_CAUSE(0);
+            PF(3);
             return s;
         }
         s = r->next;
@@ -824,7 +835,7 @@ static u16 cache_find(Cache *c, u32 key, unsigned long *refused)
 #ifdef SAT_VLOG
         if ((blank_seen[way] & ~BLANK_MISS_BIT) == tag) { VL_CAUSE(blank_seen[way] & BLANK_MISS_BIT ? 2 : 1); return NOSLOT; }
 #else
-        if (blank_seen[way] == tag) return NOSLOT;
+        if (blank_seen[way] == tag) { PF(2); return NOSLOT; }
 #endif
 #ifdef SAT_KEYLOG
         {   /* Test build only: every key the running game asks for, as bits in spare SCSP RAM, read back over MCP to size the tile pack by real play. */
@@ -844,6 +855,7 @@ static u16 cache_find(Cache *c, u32 key, unsigned long *refused)
     for (scan = c->first; scan < c->capacity; scan++)
     {
         u16 t = c->hand;
+        PF(4);
         c->hand = (u16)(t + 1U >= c->capacity ? c->first : t + 1U);
         if (c->slots[t].stamp != stamp && !(c->section == SEC_SPRITE && prev_stamp && c->slots[t].stamp == prev_stamp)) { n = t; break; }
     }
@@ -2047,8 +2059,18 @@ static void note_slots(void)
 #define STAGE(i)
 #else
 /* Timer at each stage, for the frame profile. The kernel owns and restarts the timer. */
+#ifdef SAT_PERF_STAGES
+unsigned long sat_gfx_stage[12];   /* [6] after the layer wait, [7] after scroll 2, [8] after scroll 3, [9] after scroll 1 */
+#else
 unsigned long sat_gfx_stage[6];
+#endif
 #define STAGE(i) (sat_gfx_stage[i] = ((u32)*(volatile u8 *)0xfffffe12UL << 8) | *(volatile u8 *)0xfffffe13UL)
+#endif
+
+#ifdef SAT_PERF_STAGES
+#define PSTAGE(i) STAGE(i)
+#else
+#define PSTAGE(i)
 #endif
 
 /* One scroll layer's visible cells. Most frames nothing changed, so the first pass only sums and the copy runs when the sum moved: the drawing side
@@ -2724,24 +2746,28 @@ void sat_gfx_draw(void)
     STAGE(2);
     snap_layers_wait();
     HUD_POLL();
+    PSTAGE(6);
     VP(vp_current[VP_SNAPSHOT_TICKS] |= snap.profile_layer_ticks << 16;)
     if (layers & 4)
     {
         bgon |= 1;
         if (!drawn_valid || snap.s2_sum != drawn_s2) { draw_scroll2(s2x, s2y, row_active); drawn_s2 = snap.s2_sum; }
         HUD_POLL();
+        PSTAGE(7);
     }
     if (layers & 8)
     {
         bgon |= 2;
         if (!drawn_valid || snap.s3_sum != drawn_s3) { draw_scroll3(s3x, s3y); drawn_s3 = snap.s3_sum; }
         HUD_POLL();
+        PSTAGE(8);
     }
     if (layers & 2)
     {
         bgon |= 4;
         if (!drawn_valid || snap.s1_sum != drawn_s1) { draw_scroll1(s1x, s1y); drawn_s1 = snap.s1_sum; }
         HUD_POLL();
+        PSTAGE(9);
     }
     drawn_valid = 1;
     STAGE(3);
