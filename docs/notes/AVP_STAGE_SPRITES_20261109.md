@@ -155,3 +155,32 @@ Timing and speed numbers in sections 1 to 6 were taken with the SH-2 cache emula
 - Character select now steers by ff81cc (ys.enter_stage) and was checked on each character (Warrior 1, Schaefer 2, Hunter 4, Linn 8); the "l" runs in section 6 were Warrior.
 
 Not done: Yaba A/B on the 2P pairs and the Wolverine pairs (no second pad); a repeat of the Wolverine stage 24 key log; hardware.
+
+## 8. Stage file tile budget for all lanes, dialog glyphs, before/after captures (2026-11-10; this lane owns the budget)
+
+Headroom of the stage files with everything held (owner recipe + text fixes + CHAR_FUZZ_KEYS=1 CHAR_FUZZ_KEY_STAGES= PACK_TAIL_FILL=1 + SAT_TILE_ROWTRIM=2; offline replay of build.py's packer, KB of cart room left, main plus spill; a new key beyond it drops the lowest ranked keys first, other characters' material, then the fuzz and body keys of the characters in the file):
+
+| File | Tiles held | Headroom KB |
+| --- | --- | --- |
+| stage02 | 15,519 | 850 |
+| stage04 / 06 / 0c | 18,520 / 19,768 / 20,168 | 582 / 350 / 362 |
+| stage0e (base and all variants) | 22,469 | 10 |
+| stage0e Wolverine files | 21,329 | 112 |
+| stage1c / 1e | 21,307 / 21,852 | 239 / 250 |
+| stage1c / 1e Wolverine files | 20,126 / 20,785 | 346 / 347 |
+| stage20 / 26 | 18,240 / 11,665 | 507 / 1,052 |
+| stage24 | 23,078 | 163 |
+| stage24 Wolverine files | 22,010 | 261 |
+
+Stage 0e is the tight one (10 KB, about 120 tiles of the average record size). The lever not taken: keep the next stage's pages as the 45 frame load window instead of the whole next stage (measured, section 3: +181 pages in 0e, about 1,448 raw tiles, 976 in 1e), which needs the census page lists and a host golden run; ask for it before a lane adds sprite keys to 0e.
+
+Talk-box dialog glyphs (lane/wv-talkbox-20261109, SAT_WV_DIALOG, tools/wolverine/dialog.py needed_keys): 176 scroll 1 keys (cell code << 1 | column parity of the story font's top and bottom cells, plus the banner name at both parities). All 176 are already in tools/font_glyph_keys.py (the two row font table 0xab70e, bank 0, both parities): with FONT_KEYS on the dialog adds 0 keys and 0 bytes to any stage file, so nothing has to be made room for. Replay with the 176 keys added to the Wolverine files, rowtrim 2 and the keys in every stage: dropped sprite keys 0 with and 0 without the dialog keys in all 16 Wolverine files of 0e, 1c, 1e and 24, even with FONT_KEYS off (dialog_keys.json, ev4\\D0_*, N0_*); on the old pack format (no rowtrim, four stage keys, text fixes on) stage 24 m2_wv drops 3,481 and m3_wv 3,288 with and without the dialog keys (identical, as the keys are in FONT_KEYS). The 889 extra drops that lane saw were measured without FONT_KEYS in the tight four stages. Nothing to change in the talk-box lane's guest_rounds s1_keys; if it merges first, its keys union into keys[1] and the packer sees no new key.
+
+Before and after, same stage, paused framebuffer_burst, deterministic stepping (section 7), Warrior, jump attack, cache emulation off, files in D:\\AvP-lanes\\lane-stage-sprites\\y2\\montage2:
+- s_1e_c060.png (stage 1e, integration left, fix + rowtrim 2 right): integration draws the spear and the hands of the Warrior in the air, no body; fix + rowtrim draws the Predator whole in the same jump.
+- s3_0e_c080.png (stage 0e, integration, fix without rowtrim, fix + rowtrim 2): integration draws only the spear; the fix builds draw the Warrior whole (the fights have drifted a few pixels apart, the poses are near, not equal).
+- s_c040.png and s_c060.png (0e, opening, identical state, both complete); s_1c_c070.png (1c, the ROUND 7 card).
+- Stage 24 could not be captured this way: the stage warp to 24 fell back to the mode menu (s_24_c080.png shows the menu on both discs); its in-play check is the KEYLOG one in section 7.
+- The jump-attack frames are the pose class the census never saw; the integration disc's blank body is the symptom this lane exists for.
+
+Hunter report (Wolverine parts on a Hunter; now the native lane's, not this lane's): evidence paths, all under D:\\AvP-lanes\\lane-stage-sprites\\y2. gsel_int_h.log, gsel_rt_h.log, gsel_int_w.log, gsel_rt_w.log (P1 block byte +1 is 1 for Hunter, Warrior and Wolverine; +0xd2 is 2, 0 and 1; sat_guest_sel shipped 1); gsel_rt_s.log (Wolverine +0xd2 1); gsel2\\int_h2\\ and gsel2\\rt_h2\\ (14 trials: paused 3 frame bursts from one save_state, guest as shipped against sat_guest_sel=0: in the 10 clean trials, the ones where both frames hold sprites, the playfield pixels are identical); kl\\*.json with vis.json (the asked keys, with 587 to 961 of Wolverine's remap keys asked in every Warrior, Hunter and Linn run); fprobe on the keylog disc (solo Hunter loads file 82, stage0e_m4, which holds none of his tiles); montage2\\hunter_ref.png (MAME Hunter beside Yaba). No Hunter frame with his pieces was captured: in a solo file his tiles are not there to draw.
