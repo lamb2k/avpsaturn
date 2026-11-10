@@ -38,23 +38,23 @@ Ours (EMULATOR/HOST, see sections 5 and 6): at the move's start the enemy pool (
 
 ## 4. Memory (BUILD)
 
-Owner recipe + `-DSAT_WV_NATIVE_GFX`, workdir = copy of integration/w1, assets D11, `KEEP_ROUND_FILES=1`. Base = native lane d436009 (the native Berserker action merged; the skin machinery is out of the native build).
+Owner recipe + `-DSAT_WV_NATIVE_GFX`, workdir = copy of integration/w1, assets D11, `KEEP_ROUND_FILES=1`. Two native heads were built against: d436009 (Berserker as a native action) and 125611a (step 3: tail back at the integration step).
 
-| | flag off (base d436009) | HEAL | FLASH | HEAL + FLASH |
-| --- | ---: | ---: | ---: | ---: |
-| hw_free | 1,080 | 1,080 | 1,080 | 1,080 |
-| lw_free | 104 | 104 | 104 | 104 |
-| cart_free | 4,576 | 4,316 (-260) | 4,376 (-200) | 4,116 (-460) |
-| cold1_at | 0x27e1000 | same | same | same (no new 4 KB step, no sprite tiles lost) |
-| sections (text + rodata + data) | 0 | 258 | 198 | 458 |
+| | d436009 flag off | HEAL | FLASH | both | **125611a (latest) flag off** | HEAL | FLASH | both |
+| --- | ---: | ---: | ---: | ---: | ---: | ---: | ---: | ---: |
+| hw_free | 1,080 | 1,080 | 1,080 | 1,080 | 1,080 | 1,080 | 1,080 | 1,080 |
+| lw_free | 104 | 104 | 104 | 104 | 104 | 104 | 104 | 104 |
+| cart_free | 4,576 | 4,316 | 4,376 | 4,116 | 4,140 | 7,976 | 8,036 | 7,776 |
+| cold1_at | 0x27e1000 | same | same | same | 0x27e2000 | **0x27e1000** | **0x27e1000** | **0x27e1000** |
+| code added (text + rodata + data) | | 258 | 198 | 458 | | 258 | 198 | 458 |
 
-State, all in the cart (`.data` of the cart tail; the linker script sends every `.bss` to low work RAM, so the state is declared `section(".data")`): HEAL 4 bytes (`hl_t[2]`, `hl_hp[2]`), FLASH 2 bytes (`fl_left`, `fl_done`), +1 with `FLASH_HOLD`; table 8 bytes (`fl_tab`). Nothing in high or low work RAM, nothing added to game_bind.c. A first version kept the state in `.bss` and cost lw_free 8 bytes (HEAL) and 4 (FLASH); that is the reason for `CARTVAR`.
+State, all in the cart (`.data` of the cart tail; the linker script sends every `.bss` to low work RAM, so the state is declared `section(".data")`): HEAL 4 bytes (`hl_t[2]`, `hl_hp[2]`), FLASH 2 bytes (`fl_left`, `fl_done`), +1 with `FLASH_HOLD`; table 8 bytes (`fl_tab`). Nothing in high or low work RAM, nothing added to game_bind.c. A first version kept the state in `.bss` and cost lw_free 8 bytes (HEAL) and 4 (FLASH): the reason for `CARTVAR`.
 
-**The cart tail step.** `build.py` sizes the tail as `(sum of cold code + 0x1fff) & ~0xfff`: a 4 KB step costs 32 sprite tiles. On d436009 the margin before the next step is 472 bytes (cold sections 122,408 of 122,880). HEAL (258) and FLASH (198) each fit; the first version of both together (534 bytes) crossed it (cold1_at 0x27e0000, cart_free 8,136, one more step). The code was cut to 458 bytes both on (state byte checks merged, no VDP2 register read, fewer gates), 14 bytes under the step. **Any growth of the native lane's cart code by more than 14 bytes with both switches on, or 214 / 274 bytes with one, takes the step.** (Before the merge the margin was larger: HEAL, FLASH and both fit with 6,168 free.)
+**The cart tail step.** `build.py` sizes the tail as `(sum of cold code + 0x1fff) & ~0xfff`: a 4 KB step costs 32 sprite tiles. On d436009 the margin before the next step was 472 bytes: HEAL and FLASH each fit and, after trimming the code to 458 bytes, both fit (14 bytes spare; the first version, 534 bytes, crossed). **On the latest head 125611a the margin is 37 bytes (cold sections 118,748 of 118,785): any switch takes one 4 KB step (cold1_at 0x27e2000 to 0x27e1000, 32 tiles; the tail returns to d436009's size).** The cost is the same for HEAL, FLASH or both; the owner's A/B discs therefore sit on the d436009 layout for the tile gate (which passed, section 7) and the feature discs of the latest head carry the step. The native lane can take it back by freeing 421 bytes of cart code (both switches), 221 (HEAL) or 161 (FLASH).
 
-Gates: no NO-GO in any build log; `fit.py` (D11 copy) see section 7; WSL unittest 106 run, 30 errors (the known private-dependency set), 1 skipped, same as the base.
+Gates: no NO-GO in any build log (base, flag off, HEAL, FLASH, both, HEAL step 60 on both heads); `fit.py` section 7; WSL unittest 106 run, 30 errors (the known private-dependency set), 1 skipped, same as the base.
 
-Flag-off identity (d436009 built in a second tree against this branch with no switch, both from the same workdir): HW.BIN, LW.BIN, COLD1.BIN, 0.BIN, ROM.BIN, OPX.BIN and STORE.BIN md5 equal; `sat.elf` identical. (Before the merge the same check on b368017: identical, and the ISOs differed in 47 bytes in the first sectors, the volume dates.) With a switch only COLD1.BIN and HW.BIN change (HW.BIN holds the cart addresses the lifted hooks jump to; same size, hw_free unchanged).
+Flag-off identity (d436009 built in a second tree against this branch with no switch, both from the same workdir): HW.BIN, LW.BIN, COLD1.BIN, 0.BIN, ROM.BIN, OPX.BIN and STORE.BIN md5 equal; `sat.elf` identical. (Before that merge the same check on b368017: identical, the ISOs differing in 47 bytes in the first sectors, the volume dates.) The same files are not re-compared on 125611a (a base build there needs another 30 minute round-file rebuild); the flag-off build compiles none of this lane's code. With a switch only COLD1.BIN and HW.BIN change (HW.BIN holds the cart addresses the lifted hooks jump to; same size, hw_free unchanged).
 
 ## 5. HOST (lifted game on a PC, WSL, golden_c1 start, FREERUN, pad script)
 
@@ -90,9 +90,9 @@ Free-running footage (an OBS clip) was not delivered: OBS recorded black frames 
 ## 7. Gates
 
 - Builds: base, flag off, HEAL, FLASH, HEAL + FLASH, HEAL step 60: rc 0, no NO-GO (`evidence/build_*.log`).
-- `fit.py` on a copy of D11 against the HEAL+FLASH layout (identical in every variant): **76/76, gate True**; stage24_ma: Schaefer drops 2,910, Wolverine 2,866, no own key dropped.
+- `fit.py` on a copy of D11, against the layout with a switch on (cold1_at 0x27e1000; the same on d436009 with both on and on 125611a with any switch): **76/76, gate True** on both heads; stage24_ma: Schaefer drops 2,910, Wolverine 2,866, no own key dropped.
 - HOST: section 5. Yaba: section 6.
-- Merge: native d436009 (Berserker as its own native action) merged at 43e3fed; the hooks (`wv_on_berserker_*`, tick, pad) kept their names; nothing of ours needed to change.
+- Merges: native d436009 (Berserker as its own native action) at 43e3fed and 125611a (step 3, tail back) at 445ad4d; the hooks (`wv_on_berserker_*`, tick, pad) kept their names; nothing of ours needed to change. The discs and traces in section 6 are from the 125611a build (HEAL + FLASH, `all4`): heal 29.9 ticks a step (median 31), the same flash frames.
 
 ## 8. For the native lane
 
