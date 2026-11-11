@@ -1599,27 +1599,27 @@ static HOME_OS __attribute__((noinline)) int s1d_begin(u32 x0, u32 y0, u32 *flag
 {
     u32 f = (x0 >> 3) | ((y0 >> 3) << 8) | ((u32)snap.home << 16) | ((u32)snap.hud_flush << 20) | ((u32)snap.sel_ok << 21) | 0x80000000UL;
     *flags = f;
+#ifdef S1D_STATS
+    if (sat_s1d_off) return 0;
+#endif
     return drawn_valid && snap.s1_from == drawn_s1 && f == s1d_key && s1d_clean && !snap.home && !snap.sel_ok && (snap.s1_rows & S1_ALL) != S1_ALL;
 }
 static u32 s1d_refs(void) { return sat_gfx_stats.refused_layer + s1_bm_refused; }
 #endif
 #ifdef SAT_GFX_HOST
 unsigned long sat_gfx_s1_draws;   /* host test: scroll 1 redraws so far */
+#define S1_DRAWN() (sat_gfx_s1_draws++)
+#else
+#define S1_DRAWN()
 #endif
 static void draw_scroll1(u16 sx, u16 sy)
 {
     const u32 *cell = snap.s1;
-#ifdef SAT_GFX_HOST
-    sat_gfx_s1_draws++;
-#endif
     u32 x0 = (u32)sx + CPS_LEFT + S1_REG_CROP, y0 = (u32)sy + CPS_TOP;
     u32 row, col;
 #ifdef SAT_S1_DIRTY
     u32 s1d_flags, s1d_redraw = S1_ALL, s1d_ref0 = s1d_refs(), s1d_bad = 0, s1d_pass = 0;
     int s1d_dirty = s1d_begin(x0, y0, &s1d_flags);
-#ifdef S1D_STATS
-    if (sat_s1d_off) s1d_dirty = 0;
-#endif
 #endif
 #if SAT_GFX_FIT && defined(SAT_HOME)
     u32 bm[S1_ROWS][2];
@@ -3153,9 +3153,9 @@ void sat_gfx_draw(void)
         /* Approximation (lane perf-reconcile 11-10, default off): while a stage is played (hud_flush) the scroll 1 layer (HUD text, banners) is redrawn at most every
            SAT_S1_EVERY pictures. A changed HUD word shows up to SAT_S1_EVERY - 1 pictures late (33 ms at 2); the sprites and the other layers are never held back. */
         s1_age++;
-        if (!drawn_valid || (snap.s1_sum != drawn_s1 && (!snap.hud_flush || s1_age >= SAT_S1_EVERY))) { draw_scroll1(s1x, s1y); drawn_s1 = snap.s1_sum; s1_age = 0; }
+        if (!drawn_valid || (snap.s1_sum != drawn_s1 && (!snap.hud_flush || s1_age >= SAT_S1_EVERY))) { draw_scroll1(s1x, s1y); S1_DRAWN(); drawn_s1 = snap.s1_sum; s1_age = 0; }
 #else
-        if (!drawn_valid || snap.s1_sum != drawn_s1) { draw_scroll1(s1x, s1y); drawn_s1 = snap.s1_sum; }
+        if (!drawn_valid || snap.s1_sum != drawn_s1) { draw_scroll1(s1x, s1y); S1_DRAWN(); drawn_s1 = snap.s1_sum; }
 #endif
         HUD_POLL();
         PSTAGE(9);
