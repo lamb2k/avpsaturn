@@ -388,6 +388,135 @@ static void boot_save_read(unsigned char *scratch)
 }
 #endif
 static void spin(unsigned long n) { while (n--) __asm__ volatile ("nop"); }
+
+#ifdef AVP_CYC_DIAG
+/* ---- VDP2 access cycle diagnostic (hwboot lane fix6d, 2026-11-11), -DAVP_CYC_DIAG in BOOT_CFLAGS ----
+   The loader never loads the game: after the clock change it builds a frozen numbered-tile picture with the game's VDP2 layer set-up (352 x 224, NBG0/NBG1 2 x 2 character 16 colour
+   with 2 word names and the half-reduction fit ZMCTL 0x0101 / increment 1 + 23/256, NBG2 1 x 1 2 word names, NBG3 1 x 1 1 word names, the game's map, cell and palette addresses) and lets
+   the pad change, at V-blank IN only, (A) the VRAM access cycle pattern, (B) the layer isolation, (C) the fit on or off. Nothing is written to VRAM after the set-up.
+   Every character holds its column number in hex (white digits) over a 14 colour gradient across its dots, so a lost dot column or a shifted cell shows. Bands: NBG0 lines 0 to 47,
+   NBG1 48 to 95, NBG2 96 to 119, NBG3 120 to 143; the stripes at the bottom show 0xDsly: s = pattern set, l = layer (0 all, 1..4 = NBG0..3), y = fit (1 on).
+   Pattern sets (CYCA0L A0U A1L A1U B0L B0U, B1 as B0): 0 as fix5 ran in play and menus, 1 fix6, 2 the super agent's schedule (two names per reduced layer), 3 one name, one cell per layer
+   with CPU slots (meant for the fit off). */
+static const unsigned short cd_cyc[4][6] = {
+    { 0x0123, 0xff67, 0x4444, 0x4444, 0x5555, 0x5555 },
+    { 0x0123, 0xee67, 0xeeee, 0x44ee, 0xeeee, 0xe55e },
+    { 0x0167, 0x0123, 0x44ff, 0xffff, 0xf55f, 0xeeee },
+    { 0x0123, 0xfe67, 0x4fff, 0xfeff, 0xf5fe, 0xeeee } };
+static const unsigned short cd_hue[14] = { 0x001f, 0x01bf, 0x037f, 0x03f6, 0x03e9, 0x13e0, 0x4be0, 0x7fe0, 0x7e40, 0x7c80, 0x7c09, 0x7c16, 0x6c1f, 0x341f };
+static const unsigned short cd_font[16] = { 0x7b6f, 0x2c97, 0x73e7, 0x73cf, 0x5bc9, 0x79cf, 0x79ef, 0x7249, 0x7bef, 0x7bcf, 0x7bed, 0x6bae, 0x7927, 0x6b6e, 0x79e7, 0x79e4 };
+#define CD_VW32(a, v) (*(volatile unsigned long *)(0x25e00000u + (a)) = (unsigned long)(v))
+static void cd_cell(unsigned a, int xoff, int glyph)   /* one 8 x 8, 16 colour cell: pens 1..14 across the dots, the column number in pen 15 (glyph >= 0) */
+{
+    int y, x;
+    for (y = 0; y < 8; y++) {
+        unsigned long w = 0;
+        for (x = 0; x < 8; x++) {
+            unsigned pen = (unsigned)(xoff + x);
+            while (pen >= 14) pen -= 14;
+            pen++;
+            if (glyph >= 0 && y >= 1 && y <= 5) {
+                int gy = y - 1;
+                if (x < 3 && ((cd_font[glyph >> 4] >> (14 - (gy * 3 + x))) & 1)) pen = 15;
+                else if (x >= 4 && x < 7 && ((cd_font[glyph & 15] >> (14 - (gy * 3 + x - 4))) & 1)) pen = 15;
+            }
+            w = (w << 4) | pen;
+        }
+        CD_VW32(a + (unsigned)y * 4, w);
+    }
+}
+static void cd_zero(unsigned a, unsigned bytes) { unsigned i; for (i = 0; i < bytes; i += 4) CD_VW32(a + i, 0); }
+static void cd_apply(unsigned set, unsigned lay, unsigned fit)   /* only at V-blank IN */
+{
+    V2R(0x10) = cd_cyc[set][0]; V2R(0x12) = cd_cyc[set][1];
+    V2R(0x14) = cd_cyc[set][2]; V2R(0x16) = cd_cyc[set][3];
+    V2R(0x18) = cd_cyc[set][4]; V2R(0x1a) = cd_cyc[set][5];
+    V2R(0x1c) = cd_cyc[set][4]; V2R(0x1e) = cd_cyc[set][5];
+    V2R(0x20) = (unsigned short)(lay ? 1u << (lay - 1) : 0xfu);
+    V2R(0x7a) = fit ? 0x1700 : 0; V2R(0x8a) = fit ? 0x1700 : 0; V2R(0x98) = fit ? 0x0101 : 0;
+    diag_code(0xd000u | set << 8 | lay << 4 | fit);
+}
+static unsigned cd_pad(void)   /* the SMPC pad word, active low as saturn/rt/pad.c reads it; one INTBACK per call, SF written before the command */
+{
+    static unsigned raw = 0xffff;
+    volatile unsigned char *m = (volatile unsigned char *)0x20100000u;
+    if (!(m[0x63] & 1)) {
+        unsigned st = m[0x21], id = m[0x23];
+        if (st == 0xf1 && (id >> 4) == 0) raw = ((unsigned)m[0x25] << 8) | m[0x27];
+        else if (st == 0xf0) raw = 0xffff;
+        if (m[0x61] & 0x20) { m[1] = 0x40; m[0x63] = 1; }
+        else { m[1] = 0x00; m[3] = 0x0a; m[5] = 0xf0; m[0x63] = 1; m[0x1f] = 0x10; }
+    }
+    return raw;
+}
+static void cyc_diag(void)
+{
+    unsigned c, r, e, set = 0, lay = 0, fit = 1, prev = 0, raw;
+    V2R(0x00) = 0x0101;                 /* display off while the picture is built */
+    V2R(0x20) = 0;
+    V2R(0x0e) = 0x1300;                 /* four VRAM banks, CRAM mode 1 */
+    for (e = 0x10; e <= 0x1e; e += 2) V2R(e) = 0xeeee;
+    /* palettes: bank 0 NBG0, 1 NBG1, 2 NBG2, 62 NBG3 (supplement 3), each the same gradient rotated */
+    {
+        static const unsigned short bk[4] = { 0, 1, 2, 62 };
+        unsigned b, p;
+        for (b = 0; b < 4; b++) {
+            volatile unsigned short *pal = (volatile unsigned short *)(0x25f00000u + (unsigned)bk[b] * 32u);
+            pal[0] = 0;
+            for (p = 0; p < 14; p++) { unsigned h = p + b * 4; while (h >= 14) h -= 14; pal[p + 1] = cd_hue[h]; }
+            pal[15] = 0x7fff;
+        }
+    }
+    /* cells: NBG0 0x20000, NBG1 0x40000 (2 x 2 characters of 128 bytes, one per column 0..23, the 25th blank); NBG2 0x18000, NBG3 0x1c000 (8 x 8 cells, one per column 0..43, the 45th blank) */
+    for (c = 0; c < 24; c++) {
+        unsigned a0 = 0x20000u + c * 128u, a1 = 0x40000u + c * 128u;
+        cd_cell(a0, 0, (int)c); cd_cell(a0 + 32, 8, -1); cd_cell(a0 + 64, 0, -1); cd_cell(a0 + 96, 8, -1);
+        cd_cell(a1, 0, (int)c); cd_cell(a1 + 32, 8, -1); cd_cell(a1 + 64, 0, -1); cd_cell(a1 + 96, 8, -1);
+    }
+    cd_zero(0x20000u + 24 * 128u, 128); cd_zero(0x40000u + 24 * 128u, 128);
+    for (c = 0; c < 44; c++) {
+        unsigned x8 = c * 8u;
+        while (x8 >= 14) x8 -= 14;
+        cd_cell(0x18000u + c * 32u, (int)x8, (int)c); cd_cell(0x1c000u + c * 32u, (int)x8, (int)c);
+    }
+    cd_zero(0x18000u + 44 * 32u, 32); cd_zero(0x1c000u + 44 * 32u, 32);
+    /* names: NBG0 page at 0 (32 x 32 characters, 2 words), NBG1 page at 0x8000, NBG2 page at 0x4000 (64 x 64, 2 words), NBG3 page at 0x1e000 (64 x 64, 1 word) */
+    for (r = 0; r < 32; r++) for (c = 0; c < 32; c++) {
+        unsigned b0 = r < 3 && c < 24, b1 = r >= 3 && r < 6 && c < 24;
+        CD_VW32(0x0000u + (r * 32 + c) * 4, (0x1000u + (b0 ? c : 24) * 4));
+        CD_VW32(0x8000u + (r * 32 + c) * 4, (1ul << 16) | (0x2000u + (b1 ? c : 24) * 4));
+    }
+    for (r = 0; r < 64; r++) for (c = 0; c < 64; c++) {
+        unsigned b2 = r >= 12 && r < 15 && c < 44, b3 = r >= 15 && r < 18 && c < 44;
+        CD_VW32(0x4000u + (r * 64 + c) * 4, (2ul << 16) | (0xc00u + (b2 ? c : 44)));
+        *(volatile unsigned short *)(0x25e00000u + 0x1e000u + (r * 64 + c) * 2) = (unsigned short)((14u << 12) | (0x200u + (b3 ? c : 44)));
+    }
+    /* registers as sat_gfx_init sets them (the fit part is applied at V-blank IN) */
+    V2R(0x22) = 0; V2R(0x24) = 0; V2R(0x26) = 0; V2R(0x28) = 0x0101; V2R(0x2a) = 0; V2R(0x2c) = 0; V2R(0x2e) = 0;
+    V2R(0x30) = 0; V2R(0x32) = 0; V2R(0x34) = 0; V2R(0x36) = 0x8063; V2R(0x38) = 0; V2R(0x3a) = 0x000f; V2R(0x3c) = 0;
+    V2R(0x40) = 0; V2R(0x42) = 0; V2R(0x44) = (unsigned short)(8 | (12 << 8)); V2R(0x46) = (unsigned short)(16 | (20 << 8));
+    V2R(0x48) = 0x0101; V2R(0x4a) = 0x0101; V2R(0x4c) = 0x0f0f; V2R(0x4e) = 0x0f0f;
+    V2R(0x70) = 0; V2R(0x72) = 0; V2R(0x74) = 0; V2R(0x76) = 0; V2R(0x78) = 1; V2R(0x7c) = 1; V2R(0x7e) = 0;
+    V2R(0x80) = 0; V2R(0x82) = 0; V2R(0x84) = 0; V2R(0x86) = 0; V2R(0x88) = 1; V2R(0x8c) = 1; V2R(0x8e) = 0;
+    V2R(0x90) = 0; V2R(0x92) = 0; V2R(0x94) = 0; V2R(0x96) = 0; V2R(0x9a) = 0;
+    V2R(0xe0) = 0x0001; V2R(0xec) = 0; V2R(0xee) = 0; V2R(0x10a) = 0;
+    V2R(0xf0) = 0; V2R(0xf2) = 0; V2R(0xf4) = 0; V2R(0xf6) = 0; V2R(0xf8) = 0x0302; V2R(0xfa) = 0x0504;
+    diag_fill(0, DIAG_LINES, C_BLACK);
+    cd_apply(set, lay, fit);
+    V2R(0x00) = diag_tvmd;              /* display on, 352 x 224 */
+    for (;;) {
+        unsigned now, edge;
+        while (V2R(0x04) & 8) ;
+        while (!(V2R(0x04) & 8)) ;      /* V-blank IN */
+        raw = cd_pad(); now = ~raw & 0xffffu; edge = now & ~prev; prev = now;
+        if (edge & 0x0400u) set = (set + 1) & 3;          /* A: access cycle pattern */
+        if (edge & 0x0100u) lay = lay >= 4 ? 0 : lay + 1; /* B: layer isolation */
+        if (edge & 0x0200u) fit ^= 1;                     /* C: fit (half reduction) on / off */
+        cd_apply(set, lay, fit);
+    }
+}
+#endif
+
 int main(void)
 {
     unsigned char *c;
@@ -402,6 +531,9 @@ int main(void)
     DIAG_API[1] = (unsigned long)diag_fatal_k; DIAG_API[2] = (unsigned long)diag_done_k; DIAG_API[4] = (unsigned long)diag_reinit_k; DIAG_API[5] = (unsigned long)diag_slave_k;
     diag_stage_k(0, 0);                                 /* band 1: the loader runs */
     clock_352();                                        /* first: it resets the chips and, in Ymir, the cart RAM, so nothing is loaded yet */
+#ifdef AVP_CYC_DIAG
+    cyc_diag();
+#endif
     diag_stage_k(0, 0);                                 /* the clock change is done */
 #ifdef SAT_WV_REVEAL
     LOADER_API[1] = (unsigned long)reveal_io;
