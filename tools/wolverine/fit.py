@@ -206,8 +206,8 @@ def main(argv=None, environ=None, fit_fn=None, own_keys=None):
             sys.path.insert(0, str(REPO / "tools"))
             import stage_window
             sw = stage_window.load(pathlib.Path(argv[0]))
-            print("stage window:", stage_window.apply(rounds, sw), flush=True)
-            window = stage_window.windows(sw)
+            print("stage window:", stage_window.apply(rounds, sw, extra=int(environ.get("STAGE_WINDOW_PAD", "2"))), flush=True)
+            window = stage_window.windows(sw, int(environ.get("STAGE_WINDOW_PAD", "2")))
         if environ.get("CHAR_FUZZ", "1") != "0":   # tools/char_fuzz.py as build.py applies it (WORK/char_fuzz.json; absent = nothing changes)
             sys.path.insert(0, str(REPO / "tools"))
             import char_fuzz

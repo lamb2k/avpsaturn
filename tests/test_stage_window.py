@@ -50,6 +50,12 @@ class WindowTests(unittest.TestCase):
         self.assertEqual((rep["windowed"], rep["files"]), (3, 4))
         self.assertGreater(rep["pages_freed"], 0)
 
+    def test_extra_margin_widens_the_window_pages(self):
+        r = rounds()
+        stage_window.apply(r, DATA, extra=2)
+        f = {x["name"]: x for x in r["files"]}
+        self.assertEqual(f["stage02"]["keep_pages"], sorted(set(pad([20, 21, 100])) | {p + d for p in (30, 32) for d in range(-3, 4)}))
+
     def test_window_pages_are_a_subset_of_the_old_keep(self):
         r = rounds()
         old = {x["name"]: set(x["keep_pages"]) for x in r["files"]}

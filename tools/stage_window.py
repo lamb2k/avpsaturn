@@ -80,14 +80,16 @@ def load(work):
     return json.loads(p.read_text()) if p.exists() else None
 
 
-def windows(data):
-    """{stage word (int): pages} the window rule keeps of a stage entered next; absent where a stage has no window run (the whole stage stays kept)."""
-    return {int(st, 16): set(ps) for st, ps in data["window"].items() if data["runs"].get(st, 0) >= 1} if data else {}
+def windows(data, extra=0):
+    """{stage word (int): pages} the window rule keeps of a stage entered next, each page with `extra` more pages either side (the callers pad by one more); absent where
+    a stage has no window run (the whole stage stays kept)."""
+    return {int(st, 16): pad(ps, ROM_BYTES // PAGE, extra) if extra else set(ps) for st, ps in data["window"].items() if data["runs"].get(st, 0) >= 1} if data else {}
 
 
-def apply(rounds, data, min_runs=1):
+def apply(rounds, data, min_runs=1, extra=0):
     """Replace the next-stage term of every stage file's keep_pages (rounds.json as tools/rounds_config.py wrote it, before char_fuzz.augment) by the window pages.
-    The old rule is recomputed from the census pages and must reproduce keep_pages exactly (else the census is not the one rounds.json was made from)."""
+    extra: pages of margin either side of every window page on top of the one the keep rule always adds (STAGE_WINDOW_PAD; the sampled window runs are not exhaustive: a few
+    runs of 16 still found one to three pages the others had not). The old rule is recomputed from the census pages and must reproduce keep_pages exactly (else the census is not the one rounds.json was made from)."""
     if not data:
         raise ValueError("STAGE_WINDOW=1 needs WORK/stage_window.json (tools/stage_window.py)")
     if data["page"] != rounds["page"]:
@@ -95,7 +97,7 @@ def apply(rounds, data, min_runs=1):
     limit = ROM_BYTES // rounds["page"]
     pg = {int(st, 16): set(ps) for st, ps in data["census"].items()}
     order = sorted(pg)
-    win = {st: ps for st, ps in windows(data).items() if data["runs"].get("%02x" % st, 0) >= min_runs}
+    win = {st: ps for st, ps in windows(data, extra).items() if data["runs"].get("%02x" % st, 0) >= min_runs}
     report = dict(files=0, windowed=0, pages_freed=0, whole=[])
     for f in rounds["files"]:
         s = f["stages"][0]

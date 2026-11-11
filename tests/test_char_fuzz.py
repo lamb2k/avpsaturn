@@ -134,5 +134,29 @@ class TailFillTests(unittest.TestCase):
         self.assertEqual(len(zero), 3072)   # unpadded here; write_file pads it with zeros as before
 
 
+class BuildAddTests(unittest.TestCase):
+    def run_dir(self, root, name, keys, pages, pal):
+        d = Path(root) / name
+        d.mkdir()
+        (d / "s04.txt").write_text("".join("0 %x\n" % k for k in keys) + "".join("r %x\n" % (p * PAGE) for p in pages))
+        (d / "fuzz_pal.txt").write_text("".join("%d %x\n" % (pl, k) for pl, k in pal))
+        return str(d)
+
+    def test_add_extends_the_census_instead_of_replacing_it(self):
+        with tempfile.TemporaryDirectory() as t:
+            a = self.run_dir(t, "a", [5, 6], [30], [(0, 5)])
+            b = self.run_dir(t, "b", [6, 7], [31], [(0, 9)])
+            char_fuzz.build(t, {1: [a]})
+            out = char_fuzz.build(t, {1: [b], 8: [b]}, add=True)
+            self.assertEqual(out["chars"]["1"]["stage_keys"]["04"], [5, 6, 7])
+            self.assertEqual(out["chars"]["1"]["body_keys"], [5, 9])
+            self.assertEqual(len(out["chars"]["1"]["runs"]), 2)
+            self.assertEqual(out["chars"]["8"]["stage_keys"]["04"], [6, 7])
+            self.assertEqual(out["pages"]["04"], [30, 31])
+            self.assertEqual(char_fuzz.load(t)["chars"]["1"]["stage_keys"]["04"], [5, 6, 7])
+            replaced = char_fuzz.build(t, {1: [b]})
+            self.assertEqual(replaced["chars"]["1"]["stage_keys"]["04"], [6, 7])
+
+
 if __name__ == "__main__":
     unittest.main()
