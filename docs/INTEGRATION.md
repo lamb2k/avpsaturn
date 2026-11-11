@@ -71,6 +71,7 @@ Updated 2026-11-10 evening.
 | Stage select over title art (stage-menu-bg) | lane/stage-menu-bg-20261110 2502a30 | waits for its hw move |
 | Opening cutscene is missing Schaefer and some sprites; Wolverine shows jump poses when hit; the automatic grab uses placeholder poses | native / sprites lanes | being fixed (owner known issues for disc 3e) |
 | Saturn hardware FPS test discs | E:\AvP\package-hwtest-20261109 (pre-integration) | rebuild from avp/integration with an owner disc (owner to confirm) |
+| Performance round 2: `SAT_S1_DIRTY` (incremental scroll 1 redraw, exact), readout DRAW/PEAK row, `SAT_INPUT_SCRIPT2`, cold menu and init code (`SAT_HOME_MENU_COLD`, `SAT_GFX_INIT_COLD`) | lane/perf2-20261111 (docs/notes/AVP_PERF2_20261111.md) | all default off; Yaba: B 58/58/58 to B + DIRTY 60/60/60 pictures/s on 0e, hw_free 944 with the boot fixes and the cold moves (DIRTY is 1,024 bytes hot); console A/B discs `E:\AvP\learning\lane-perf2\disc_PA3` and `disc_PD3`; merges the hwboot branch and its build.py syntax fix (5969470) |
 
 Dropped (owner 2026-11-09: no more work on the sprite-replacement Wolverine): claws-only follow-up, guest group loop (lane/fps-group), Wolverine defense gate, feet-on-floor ground/ground2 switches. Native Wolverine covers each of them. Closed lanes (merged here): stage-menu, versus.
 

@@ -1,4 +1,4 @@
-"""Screenshot of the SAT_FPS_HUD readout in a stage (lane perf2, 2026-11-11): usage shot_hud.py CUE ELF TAG STAGE(hex) CHAR [OUTPNG]
+"""Screenshot (env COOP=1: with the scripted second pad joined, SAT_INPUT_SCRIPT2 builds) of a stage, with the SAT_FPS_HUD readout when the build has it (lane perf2, 2026-11-11): usage shot_hud.py CUE ELF TAG STAGE(hex) CHAR [OUTPNG]
 Enters the stage as run2.py does, lets it play 400 vblanks, saves the Yaba frame buffer (EMULATOR, cache on)."""
 import sys, time, os
 sys.path.insert(0, 'E:/AvP/worktrees/perf2/tools/perf')
@@ -23,8 +23,12 @@ while time.time() - t0 < 300:
             Y.pulse("right" if wx > x else "left" if wx < x else ("down" if wy > yy else "up"), gap=0.8)
     else: Y.pulse("a", gap=0.9)
     time.sleep(0.1)
+if os.environ.get('COOP') == '1':   # SAT_INPUT_SCRIPT2 build: arm the scripted second pad, give it 700 vblanks to join and walk
+    Y.m.call("memory_write", address=hex(Y.s['sat_pad2_t0']), size="long", value=hex(Y.vb()))
+    wait = 700
+else: wait = 400
 v = Y.vb()
-while Y.vb() - v < 400: time.sleep(0.5)
+while Y.vb() - v < wait: time.sleep(0.5)
 Y.set(["right"]); time.sleep(2.0); Y.set([])
 Y.m.call("pause"); time.sleep(0.5)
 print(Y.m.call("framebuffer_screenshot", path=out).replace("\n", " | ")[:120])
