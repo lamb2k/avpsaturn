@@ -14,7 +14,7 @@ typedef unsigned char u8; typedef unsigned short u16; typedef unsigned int u32;
 #include "sat_rt.h"
 #include "../gfx/sat_vdp2_cfg.h"
 extern unsigned long sat_tk_run, sat_tk_skip;
-extern u32 sat_ld_log[4][4], sat_ld_n;
+extern u32 sat_ld_log[4][4], sat_ld_n, sat_ld_t0;
 extern u32 sat_gfx_plot_waits;           /* swaps put off for an unfinished plot, since boot */
 extern unsigned short sat_gfx_colour(unsigned short cps);
 #ifdef SAT_HOME_FONT_COLD
@@ -81,9 +81,10 @@ static void format(u32 dv)
     p = put_str(text[2], "F"); *p++ = (char)('0' + SAT_GFX_FIT); *p++ = ' '; p = put_str(p, SAT_BUILD_REV_STR); *p++ = ' ';   /* build id: presentation mode (1 scaled, 2 native crop) and the first 6 hex digits of the source commit */
     p = put_str(p, "FLIP "); p = put_num(p, udiv(flips * 60 + (dv >> 1), dv)); p = put_str(p, " VBL "); p = put_num(p, dv); *p = 0;
     p = put_str(text[3], "TASK RUN "); p = put_num(p, udiv((sat_tk_run - st[10]) * 60 + (dv >> 1), dv)); p = put_str(p, " CUT "); p = put_num(p, udiv((sat_tk_skip - st[11]) * 60 + (dv >> 1), dv)); *p = 0;   /* per 60 vblanks: game tasks run, and runnable tasks a vblank cut off (the game time the console loses) */
-    if (sat_ld_n) {   /* last round-file load: how many so far, file, sectors, length in vblanks, and the vblank it ended at (kernel.c sat_ld_log) */
+    if (sat_ld_n) {   /* last round-file load: how many so far, file, sectors, seconds it took, seconds since boot at its end (kernel.c sat_ld_log, real-time clock, +-1 s) */
         const u32 *e = sat_ld_log[(sat_ld_n - 1) & 3];
-        p = put_str(text[4], "LD"); p = put_num(p, sat_ld_n); p = put_str(p, " F"); p = put_num(p, e[0]); p = put_str(p, " S"); p = put_num(p, e[1]); p = put_str(p, " T"); p = put_num(p, e[3] - e[2]); p = put_str(p, " @"); p = put_num(p, e[3]); *p = 0;
+        u32 len = (e[3] - e[2]) % 3600u, since = (e[3] - (sat_ld_t0 - 1)) % 3600u;
+        p = put_str(text[4], "LD"); p = put_num(p, sat_ld_n); p = put_str(p, " F"); p = put_num(p, e[0]); p = put_str(p, " S"); p = put_num(p, e[1]); p = put_str(p, " D"); p = put_num(p, len); p = put_str(p, " B"); p = put_num(p, since); *p = 0;
     }
     p = put_str(text[1], "MISS "); p = put_num(p, over); p = put_str(p, " SKIP "); p = put_num(p, skips); p = put_str(p, " HELD "); p = put_num(p, waits); *p = 0;
 }

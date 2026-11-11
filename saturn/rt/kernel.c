@@ -588,11 +588,22 @@ u8 sat_aud_tables[0x2000] __attribute__((section(".lwgfx"), aligned(4)));
 static int round_loaded = -1;
 struct sat_rounds_s { u32 current, loads, sectors, last_vblank; } sat_rounds;
 #ifdef SAT_FPS_HUD
-/* Load log (readout line 5, and for a trace): the last four round-file loads as {file, sectors, vblank at start, vblank at end}, newest at sat_ld_n - 1. A photo of the readout
-   then shows the last load's file, size and length in vblanks (boot to title: the first entry; title to select, select to stage, door and stage loads: the later ones). If the
-   vblank count stands still while GFS runs (the vblank is masked then), the length reads 0 and only the vblank stamps and sizes are valid. */
+/* Load log (readout line 5, and for a trace): the last four round-file loads as {file, sectors, clock at start, clock at end}, newest at sat_ld_n - 1. The clock is the SMPC's
+   real-time clock (minutes and seconds, GETTIM), because the vblank count stands still while GFS runs (Ymir 11-11: the 1090 sector front file took 3 vblanks of count). It reads to
+   the second, so a length is good to +-1 s. A photo of the readout then shows the last load's file, size, length and the seconds since boot at its end (boot to title: the first
+   entry; title to select, select to stage, door and stage loads: the later ones). The pad's INTBACK result is not disturbed: sat_pad_tick takes only a status byte of 0xf0/0xf1 as a pad. */
 u32 sat_ld_log[4][4];
-u32 sat_ld_n;
+u32 sat_ld_n, sat_ld_t0;
+static u32 rtc_secs(void)
+{
+    u32 n = 0, v;
+    while ((SMPC(0x63) & 1) && n++ < 400000u) ;
+    SMPC(0x63) = 1; SMPC(0x1f) = 0x0e;   /* GETTIM: SF first, then the command */
+    n = 0; while ((SMPC(0x63) & 1) && n++ < 400000u) ;
+    v = SMPC(0x2b);   /* OREG5, minutes (BCD) */
+    n = SMPC(0x2d);   /* OREG6, seconds (BCD) */
+    return ((v >> 4) * 10 + (v & 15)) * 60 + (n >> 4) * 10 + (n & 15);
+}
 #endif
 /* The sound part of a round file lands at SAT_PACK first and goes to SCSP RAM here; the tile part then overwrites it. */
 static void round_sound_ready(void)
@@ -633,6 +644,9 @@ static void round_check(void)
     int erase_old_row = row_loaded;
 #endif
     int stale = 0;
+#ifdef SAT_FPS_HUD
+    if (!sat_ld_t0) sat_ld_t0 = rtc_secs() + 1;   /* kernel start (the first dispatcher pass), +1 so 0 means unset */
+#endif
     if (row) chars |= r8(0xff81cc) & 15;
 #ifdef SAT_GUESTS
     /* The front end's file follows the bonus characters setting (guests with select screen art have a front file of their own): the
@@ -661,7 +675,7 @@ static void round_check(void)
     row_loaded = row;
     DIAG_MARK(5, 16, 0);
 #ifdef SAT_FPS_HUD
-    sat_ld_log[sat_ld_n & 3][2] = sat_dbg.vblanks;
+    sat_ld_log[sat_ld_n & 3][2] = rtc_secs();
 #endif
 #ifdef SAT_HOME
     sat_home_loading(1);   /* NOW LOADING stays on screen through the load */
@@ -698,7 +712,7 @@ static void round_check(void)
     sat_rounds.loads++;
     sat_rounds.last_vblank = sat_dbg.vblanks;
 #ifdef SAT_FPS_HUD
-    { u32 *e = sat_ld_log[sat_ld_n & 3]; e[0] = (u32)want; e[1] = sat_rounds.sectors; e[3] = sat_dbg.vblanks; sat_ld_n++; }
+    { u32 *e = sat_ld_log[sat_ld_n & 3]; e[0] = (u32)want; e[1] = sat_rounds.sectors; e[3] = rtc_secs(); sat_ld_n++; }
 #endif
     /* GFS takes the SCU mask and vectors for itself: without this the vblank never comes back after a load. */
     exceptions_install();
