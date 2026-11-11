@@ -358,7 +358,12 @@ static long reveal_io(int which, unsigned a, unsigned b, unsigned c)
 static void clock_352(void)
 {
     void (*chgsysck)(unsigned long) = *(void (**)(unsigned long))0x06000320u;
+    unsigned o;
     chgsysck(1);
+    /* SGL's slInitSystem writes every VDP2 register (all zero but the ones it uses); the runtime sets only what it uses and relies on the rest being zero, which the
+       clock change's reset gives on the console only if it really resets them: write the zeros (not TVMD, the read-only status registers, or EXTEN/VRSIZE kept at 0). */
+    V2R(0x02) = 0; V2R(0x06) = 0;
+    for (o = 0x0e; o < 0x120; o += 2) V2R(o) = 0;
     diag_tvmd = 0x8001;
     diag_reinit_k(0, 0);                                /* the chips were reset: the display again, 352 wide */
     diag_info(0x4001u);                                 /* 4001: the BIOS clock change returned */
