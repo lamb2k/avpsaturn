@@ -94,7 +94,7 @@ void sat_pad_tick(void)
         else sat_pad_raw2 = 0xffff;
 #endif
         if (SR & 0x20) { IREG(0) = 0x40; SF = 1; }  /* more ports queued, drop them */
-        else { IREG(0) = 0x00; IREG(1) = 0x0a; IREG(2) = 0xf0; COMREG = 0x10; SF = 1; }
+        else { IREG(0) = 0x00; IREG(1) = 0x0a; IREG(2) = 0xf0; SF = 1; COMREG = 0x10; }   /* SF first, then the command, the SMPC's documented order: the command clears SF when it ends. SF after COMREG could land after the end of a fast command (strict Ymir) and leave SF set for good: no pad input after that. */
     }
 #ifdef SAT_INPUT_SCRIPT
     map_pad(script_word(sat_vblanks_now()));
