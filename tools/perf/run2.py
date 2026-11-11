@@ -55,7 +55,7 @@ def counters():
     pl = Y.m.read(S["plot_held"], 12)        # plot_held, plot_shown, plot_started
     pw = Y.m.read(S["sat_gfx_plot_waits"], 4)
     gs = Y.m.read(S["sat_gfx_stats"], 56)
-    sg = Y.m.read(S["sat_gfx_stage"], 64 if PS else 24)
+    sg = Y.m.read(S["sat_gfx_stage_last" if "sat_gfx_stage_last" in S else "sat_gfx_stage"], 64 if PS else 24)   # the last finished draw's marks (the array itself is the draw in progress)
     pf_ = Y.m.read(S["sat_gfx_pf"], 20) if PS else b""
     s1d = Y.m.read(S["sat_s1d"], 32) if "sat_s1d" in S else b""
     return dict(stg=[u(sg, i * 4) for i in range(13 if PS else 6)], pfc=[u(pf_, i * 4) for i in range(5)] if PS else [],

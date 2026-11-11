@@ -370,12 +370,16 @@ static void index_section(Section *s, int which)
 #define PNOW() (((u32)*(volatile u8 *)0xfffffe12UL << 8) | *(volatile u8 *)0xfffffe13UL)
 #define PSTAGE(i) (sat_gfx_stage[i] = PNOW())
 #define PSTAGE_ZERO(i) (sat_gfx_stage[i] = 0)
+/* The array above is the draw in progress: a debugger that stops at a vblank sees the next draw already begun. The last finished draw's marks are copied here at its end. */
+extern unsigned long sat_gfx_stage_last[16];
+#define PSTAGE_COPY() do { int i_; for (i_ = 0; i_ < 16; i_++) sat_gfx_stage_last[i_] = sat_gfx_stage[i_]; } while (0)
 #define PACC_BEGIN() u32 pacc_t = PNOW()
 #define PACC_END(i) (sat_gfx_stage[i] += (PNOW() - pacc_t) & 0xffffu)
 extern unsigned long sat_gfx_stage[16];
 #else
 #define PSTAGE(i)
 #define PSTAGE_ZERO(i)
+#define PSTAGE_COPY()
 #define PACC_BEGIN()
 #define PACC_END(i)
 #endif
@@ -2398,6 +2402,7 @@ static void note_slots(void)
 #else
 /* Timer at each stage, for the frame profile. The kernel owns and restarts the timer. */
 #ifdef SAT_PERF_STAGES
+unsigned long sat_gfx_stage_last[16];
 unsigned long sat_gfx_stage[16];   /* [6] after the layer wait, [7] after scroll 2, [8] after scroll 3, [9] after scroll 1; inside scroll 1: [10] after home_maps_rows, [11] ticks summed in home_row_map, [12] after the row loop */
 #else
 unsigned long sat_gfx_stage[6];
@@ -3166,6 +3171,7 @@ void sat_gfx_draw(void)
     }
     drawn_valid = 1;
     STAGE(3);
+    PSTAGE_COPY();
     #ifdef SAT_GFX_BGMASK
     bgon &= SAT_GFX_BGMASK;
 #endif
