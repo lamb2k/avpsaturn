@@ -98,6 +98,12 @@ static void diag_init(void)
     DIAG_API[0] = (unsigned long)diag_stage_k;
     DIAG_API[3] = 1;
 }
+static void diag_slave_k(unsigned long which, unsigned long b)   /* the slave CPU's two marks, between the bands and the stripes: 1 it runs, 2 the master woke it */
+{
+    (void)b;
+    if (!diag_active) return;
+    diag_fill(which == 1 ? 142 : 146, which == 1 ? 145 : 149, which == 1 ? C_YELLOW : C_WHITE);
+}
 static void diag_reinit_k(unsigned long a, unsigned long b)   /* the runtime's graphics init cleared VRAM and the registers: take the screen back, bands and stripes as they were */
 {
     (void)a; (void)b;
@@ -361,7 +367,7 @@ int main(void)
     diag_init();                                        /* grey screen: the BIOS ran 0.BIN */
     vt[4] = (volatile unsigned long *)diag_exc4; vt[6] = (volatile unsigned long *)diag_exc6;
     vt[9] = (volatile unsigned long *)diag_exc9; vt[10] = (volatile unsigned long *)diag_exc10;
-    DIAG_API[1] = (unsigned long)diag_fatal_k; DIAG_API[2] = (unsigned long)diag_done_k; DIAG_API[4] = (unsigned long)diag_reinit_k;
+    DIAG_API[1] = (unsigned long)diag_fatal_k; DIAG_API[2] = (unsigned long)diag_done_k; DIAG_API[4] = (unsigned long)diag_reinit_k; DIAG_API[5] = (unsigned long)diag_slave_k;
     diag_stage_k(0, 0);                                 /* band 1: the loader runs */
 #ifdef SAT_WV_REVEAL
     LOADER_API[1] = (unsigned long)reveal_io;

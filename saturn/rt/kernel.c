@@ -516,6 +516,7 @@ void sat_slave_main(void)
 {
     CCR = 0x10; CCR = 0x01;
     FTCR = 2;
+    diag_call(5, 1, 0);   /* the loader's display: the slave runs */
     for (;;) {
         u32 t, seen;
 #ifdef SAT_PERF_HUD
@@ -525,6 +526,7 @@ void sat_slave_main(void)
 #endif
         FTCSR = (u8)(FTCSR & 0x7f);
         CCR = 0x11;
+        diag_call(5, 2, 0);   /* the master woke the slave */
         seen = UNCACHED(gfx_handed);
         if (seen == UNCACHED(gfx_done)) continue;
 #ifdef SAT_PERF_HUD
