@@ -60,7 +60,7 @@ static int irq_on;
 
 /* The loader's boot display (boot.c) stays ours until the first picture: a stop before then shows its code instead of the BIOS logo. */
 #define DIAG_API ((volatile u32 *)0x06013fa0u)
-static void diag_call(int i, u32 a, u32 b) { u32 f = DIAG_API[i]; if (f && DIAG_API[3]) ((void (*)(u32, u32))f)(a, b); }
+static void __attribute__((noinline)) diag_call(int i, u32 a, u32 b) { if (DIAG_API[3]) ((void (*)(u32, u32))DIAG_API[i])(a, b); }
 /* SAT_BOOT_DIAG (default off): the loader's boot display follows the runtime step by step (bands, slave and first vblank marks, a reinit after the graphics init).
    Without it the loader's display ends at the graphics init (diag_call 2 below), and only a stop (sat_fatal) still reaches it: about 40 bytes of resident code instead of 1,150. */
 #ifdef SAT_BOOT_DIAG

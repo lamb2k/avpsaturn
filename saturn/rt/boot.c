@@ -79,6 +79,7 @@ static void diag_tick(void)
     diag_fill(top + diag_mark, top + diag_mark + 2, C_WHITE);
 }
 static void diag_info(unsigned v) { if (diag_active) diag_code(v); }
+static unsigned short diag_tvmd = 0x8000;   /* 320 wide until clock_352 */
 static void diag_takeover(void)
 {
     V2R(0x20) = 0;                        /* BGON: no scroll screen */
@@ -86,7 +87,7 @@ static void diag_takeover(void)
     V2R(0xec) = 0;                        /* CCCTL */
     V2R(0x10) = 0xffff; V2R(0x12) = 0xffff; V2R(0x14) = 0xffff; V2R(0x16) = 0xffff;   /* VRAM cycle patterns: no layer reads VRAM, so none can show (the runtime's init leaves its own) */
     V2R(0x18) = 0xffff; V2R(0x1a) = 0xffff; V2R(0x1c) = 0xffff; V2R(0x1e) = 0xffff;
-    V2R(0x00) = 0x8000;                   /* TVMD: display on, 320 x 224 */
+    V2R(0x00) = diag_tvmd;                /* TVMD: display on, 320 x 224 (352 x 224 after the clock change) */
     V2R(0xac) = 0x8003;                   /* BKTAU: per-line back screen, table at VRAM 0x7fe00 */
     V2R(0xae) = 0xff00;                   /* BKTAL */
 }
@@ -349,6 +350,30 @@ static long reveal_io(int which, unsigned a, unsigned b, unsigned c)
     return which == 1 ? load_file((const char *)a, (void *)b) : unlock_io(a, b, (unsigned char *)c);
 }
 #endif
+/* The game runs the VDP2 in its 352 wide mode (sat_gfx_init writes TVMD HRESO = 1). That mode needs the SMPC clock change (command 0x0E, CKCHG352): the BIOS runs the 320 clock, and a 352
+   mode on the 320 dot clock gives timing the TV cannot lock on (rolling white noise on the console; Yaba and Ymir show a picture regardless). The command resets VDP1, VDP2, the SCU and the
+   sound chip, switches the slave off, takes about 100 ms and ends with an NMI to the master, so: vector 11 gets a handler, the command is sent with interrupts masked, the NMI is awaited.
+   Done once, here, after the loads (nothing of ours is running on those chips yet); the boot display is taken again in the new mode. */
+static volatile int nmi_seen;
+static void nmi_handler(void) __attribute__((interrupt_handler));
+static void nmi_handler(void) { nmi_seen = 1; }
+static void clock_352(void)
+{
+    volatile unsigned char *smpc = (volatile unsigned char *)0x20100000u;
+    volatile unsigned long *vt = (volatile unsigned long *)0x06000000u;
+    unsigned long n;
+    vt[11] = (unsigned long)nmi_handler;
+    __asm__ volatile ("ldc %0,sr" : : "r"(0xf0));
+    for (n = 0; n < 2000000ul && (smpc[0x63] & 1); n++) ;
+    nmi_seen = 0;
+    smpc[0x63] = 1;
+    smpc[0x1f] = 0x0e;                                  /* CKCHG352 */
+    for (n = 0; n < 12000000ul && !nmi_seen; n++) ;     /* the NMI ends the change (about 100 ms) */
+    for (n = 0; n < 2000000ul && (smpc[0x63] & 1); n++) ;
+    diag_tvmd = 0x8001;
+    diag_reinit_k(0, 0);                                /* the chips were reset: the display again, 352 wide */
+    diag_info(0x4000u | (nmi_seen ? 1u : 0u));          /* 4001 the change finished with its NMI, 4000 the wait ran out */
+}
 /* The save record read (BIOS backup library). Where it runs is a build choice, because on the console the library is BIOS code that Yaba's HLE never executes:
    default           first thing, before the cart bus timing changes and before any disc read, with the library copied into high work RAM (0x060C0000, 24 KB; HW.BIN loads over it later);
    AVP_BUP_LATE_CART the original place: after the loads, library run from the 4 MB cart at 0x02754000 (hardware diagnosis disc D1);
@@ -447,6 +472,8 @@ int main(void)
 #endif
 #endif
     LOADER_API[0] = (unsigned long)load_regions;
+    diag_stage_k(0, 0);                                 /* the clock change */
+    clock_352();
     diag_stage_k(0, 0);                                 /* the runtime is entered next */
     *(volatile unsigned char *)0xfffffe92 = 0x10;
     *(volatile unsigned char *)0xfffffe92 = 0x01;
