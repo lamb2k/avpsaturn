@@ -113,7 +113,7 @@ def thumb(se, frame=None, sc=0.5):
 G = [
     ("stand", "020000 (also 080000 entrance stand)", ["T1.0", "T1.29", "T1.30", "T1.1"], (0, 0), None, "already his idle (12 of 17 frames resident)"),
     ("walk", "020002", ["T1.2"], (0, 1), None, "already his walk"),
-    ("attack stage 1", "020006 (T1.32; T1.33 is an alias of the same chain)", ["T1.32"], (8, 0), (8, 1), "owner: the main attack is the double claw (MK, MK): first hit 8.1 (inferred by pose: a wide two-claw thrust, 20 ticks)"),
+    ("attack stage 1", "020006 (T1.32; T1.33 is an alias of the same chain)", ["T1.32"], (8, 0), (8, 1), "owner: the main attack is the double claw (medium punch twice, MP MP; MAME-confirmed 11-10): first hit 8.1 (inferred by pose: a wide two-claw thrust, 20 ticks)"),
     ("attack stage 2", "020006 (T1.33, aliased to stage 1 today: needs its own chain)", ["T1.33"], (8, 0), (8, 4), "second hit of the double claw: 8.4, the twin of 8.1 with a different start (inferred by pose)"),
     ("attack stage 3", "020006 (T1.34)", ["T1.34"], (8, 2), None, "heavy punch 8.2 stays unless the owner wants a third claw hit; chain B timing kept"),
     ("finisher, lunge", "02000e (T1.14, T1.16), 02000a (T1.41)", ["T1.14", "T1.16", "T1.41"], (8, 2), None, "stay claw slashes (no kicks)"),
