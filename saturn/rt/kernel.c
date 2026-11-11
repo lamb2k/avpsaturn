@@ -768,6 +768,13 @@ void sat_vblank(void)
     u32 first = !sat_dbg.vblanks;
 #define DIAG_AT(n) do { if (first) diag_call(5, (n), 0); } while (0)
     *(volatile u32 *)0x25fe00a4 = ~1u;
+    /* The SCU sets its whole interrupt mask when the CPU accepts an interrupt (so handlers do not nest); the handler must put its mask back or no further
+       interrupt arrives: the game stopped after the first picture on hardware-accurate cores (Ymir) while Yaba, which does not do this, kept going. */
+#if SAT_VDP1_HW_ERASE
+    *(volatile u32 *)0x25fe00a0 = 0xfffffffcu;
+#else
+    *(volatile u32 *)0x25fe00a0 = 0xfffffffeu;
+#endif
     DIAG_AT(3);
     if (sat_dbg.vblanks == 1) diag_call(5, 11, 0);   /* the second vblank is entered */
 #ifndef SAT_VDP1_RACE_OLD
