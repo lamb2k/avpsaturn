@@ -533,7 +533,9 @@ void sat_slave_main(void)
         sat_gfx_hud_pre = frt();   /* the slave's timer at the wake, before the per-draw reset: the readout's plot-end bound */
 #endif
         FRTH = 0; FRTL = 0;
+        diag_call(5, 13, 0);
         sat_gfx_draw();
+        diag_call(5, 14, 0);
         t = frt();
         sat_dbg.gfx_ticks = t; *(volatile unsigned long *)((unsigned long)&sat_readout[1] | 0x20000000UL) = t;
         if (t > sat_dbg.gfx_peak) sat_dbg.gfx_peak = t;
@@ -760,10 +762,12 @@ void sat_vblank(void)
 #define DIAG_AT(n) do { if (first) diag_call(5, (n), 0); } while (0)
     *(volatile u32 *)0x25fe00a4 = ~1u;
     DIAG_AT(3);
+    if (sat_dbg.vblanks == 1) diag_call(5, 11, 0);   /* the second vblank is entered */
 #ifndef SAT_VDP1_RACE_OLD
     sat_gfx_vblank();   /* first: the frame change for a finished plot belongs early in vblank-in */
 #endif
     DIAG_AT(4);
+    if (sat_dbg.vblanks == 1) diag_call(5, 12, 0);
     sat_dbg.vblanks++;
     if (DIAG_API[3]) { if (sat_dbg.vblanks <= 3) diag_call(0, 0, 0); else if (sat_dbg.vblanks == 4) diag_call(2, 1, 0); }   /* the loader's display ends on the 4th vblank */
 #ifdef SAT_VLOG
