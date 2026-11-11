@@ -50,6 +50,9 @@ Asset set for builds from this line: `E:\AvP\learning\lane-wolverine-merge\D11`.
 margin with D9/D10) and the artist's revision 3 HUD art (80s red-brown/gold, crimson backdrop, no claws), exactly as delivered. remap.json gains a
 colour entry `eighties`, his sprite in the 80s red-brown/gold to match the art; WV_COLOUR=eighties builds it. Owner decision 11-09: his sprite keeps the default `kick` (red/yellow), so the owner disc does not set WV_COLOUR.
 
+## Disc 4 recipe additions (3d71d43)
+On top of the 3e recipe below: `GUEST_ASSETS=D12` (lane-wv-native-gfx), `WV_SKIP_KEYCHECK=1`, `STAGE_WINDOW=1 STAGE_WINDOW_PAD=2` with `stage_window.json` and the extended `char_fuzz.json` from E:\AvP\learning\lane-sprite-store\wd_n2 copied into the work dir, `-DSAT_HOME_OPT=2`, and (hardware pair) `-DSAT_HOME_FONT_COLD -DSAT_FPS_HUD` (A) plus `-DSAT_S1_MEMO -DSAT_S1_BLANKROWS` (B). hwboot's build.py had an unterminated string in the NO-GO message (d2b12d8 did not parse); fixed in 3d71d43.
+
 ## Owner disc recipe (avp/integration, disc 3e)
 ```
 DUEL_FILES=0 CHAR_FUZZ_KEYS=1 PACK_TAIL_FILL=1 CHAR_FUZZ_KEY_STAGES= WV_SOUND=/e/AvP/learning/lane-wv-sounds/assets3 POSE_KEYS=0 KEEP_ROUND_FILES=1 GUEST_ASSETS=/e/AvP/learning/lane-wolverine-merge/D11 KERNEL_CFLAGS="-DSAT_HOME -DSAT_DUEL_MENU -DSAT_GUESTS -DSAT_GUEST_DEFAULT=1 -DSAT_WV_JUMP=1 -DSAT_GUEST_FAST_LIST=1 -DSAT_GUEST_NAMES_LAZY=1 -DSAT_GUEST_PAL_KEEP=1   -DSAT_TILE_ROWTRIM=2 -DSAT_WV_NATIVE_GFX -DSAT_WV_DIALOG=1 -DSAT_WV_SOUND -DSAT_WV_HEAL -DSAT_WV_FLASH=1 -DSAT_WV_FLASH_FREEZE=12 -DWV_SFX_BERSERKER=13" python saturn/rt/build.py <workdir>      # also: copy WORK/char_fuzz.json from E:\AvP\learning\lane-stage-sprites (private, not in git)
@@ -79,6 +82,7 @@ Dropped (owner 2026-11-09: no more work on the sprite-replacement Wolverine): cl
 
 | Disc | Commit | Package | State |
 | --- | --- | --- | --- |
+| avp_4_A / avp_4_B | 3d71d43 | E:\AvP\package-integrationenrirvp_4_A and ...vp_4_B (Brooklyn Bangout cue layout) | disc 4 hardware pair: hwboot d2b12d8 (SCU mask, SGL relocs, boot display) + native 97de971 + frontend 48d6b73 (SAT_HOME_OPT=2) + sprite-store f78f55f (STAGE_WINDOW=1 PAD=2; stage_window.json and char_fuzz.json from lane-sprite-store/wd_n2); A = FONT_COLD + FPS_HUD, B = A + MEMO + BLANKROWS; hw_free A 888 / B 200, lw 96, cart_free 4,428, cold1 0x27e0000, 0 dropped keys on every stage, STORE 147,053 sectors; fit 77/77, checks 0 of 287, HOST goldens clean, unittest 166 run / 30 known errors / 0 failures; booted from the folders in Yaba with the real JP BIOS (cache on) and strict Ymir (no data-access misalignment, no writes) |
 | avp_3h_A_base / avp_3h_B_perf | 5e49c52 | E:\AvP\package-integrationenrirvp_3h_A_base and ...vp_3h_B_perf (Brooklyn Bangout cue layout) | hardware A/B pair; same base, B adds MEMO + BLANKROWS; STORE 151,962 sectors, ISO 316 MB; fit 77/77 (D12), checks 0 of 287, flag-off identity (combined tree vs remap reverted) identical, both boot in Yaba from their folders |
 | avp_integration_3h | 9fff850 | E:\AvP\package-integrationvp_integration_3h (Fenrir folder: E:\AvP\package-integrationenrirvp_integration_3h) | current: 3g + native 7882c2f + stage-menu-bg + talkbox 0b44fd8; SAT_GUEST_DEFAULT=0; first hardware run |
 | avp_integration_3g | 4d105c0 | E:\AvP\package-integrationvp_integration_3g | current: 3e + reveal; SAT_GUEST_DEFAULT=0 (Wolverine off on a fresh save; Options toggle or the reveal turns him on) |
