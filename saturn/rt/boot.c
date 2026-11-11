@@ -372,10 +372,14 @@ int main(void)
     boot_save_read((unsigned char *)0x060c0000u);
 #endif
 #endif
-    /* A-bus timing and cart enable, as the 4 MB cart requires (ST-TECH-47: ASR0, AREF, then a WORD write of 1). */
+    /* The 4 MB cart (ST-TECH-47: ASR0, AREF, then a WORD write of 1 to 0x257efffe). The BIOS's own timing is ASR0 = ASR1 = 0x1ff01ff0, AREF = 0x1f; the working JO disc runs the
+       cart on it and never writes ASR0/AREF. Default build: enable the cart on the BIOS timing and verify it, only then switch to ours (0x23301ff0 / 0x13), verify again and go
+       back to the BIOS timing if that fails (yellow band). AVP_CART_ORIG (diagnosis discs): ours first, the BIOS's as the fallback. */
+#define ABUS_BIOS() do { *(volatile unsigned long *)0x25fe00b0 = 0x1ff01ff0; *(volatile unsigned long *)0x25fe00b8 = 0x0000001f; } while (0)
+#define ABUS_OURS() do { *(volatile unsigned long *)0x25fe00b0 = 0x23301ff0; *(volatile unsigned long *)0x25fe00b8 = 0x00000013; } while (0)
+#ifdef AVP_CART_ORIG
     for (;;) {
-        if (!tried) { *(volatile unsigned long *)0x25fe00b0 = 0x23301ff0; *(volatile unsigned long *)0x25fe00b8 = 0x00000013; }
-        else { *(volatile unsigned long *)0x25fe00b0 = 0x1ff01ff0; *(volatile unsigned long *)0x25fe00b8 = 0x0000001f; }   /* the BIOS's own timing, as the working JO disc runs */
+        if (!tried) ABUS_OURS(); else ABUS_BIOS();
         *(volatile unsigned short *)0x257efffe = 1;
         id = *cart_id;
         diag_info(0x1000u | id);                        /* the cart's ID byte: 5c is a 4 MB RAM cart */
@@ -384,6 +388,25 @@ int main(void)
         if (tried) diag_fail(id == 0x5c ? 0xe0f0u : 0xe0f2u, C_RED, id);   /* e0f0 the cart did not answer, e0f2 and no 4 MB cart ID either */
         tried = 1;
     }
+#else
+    *(volatile unsigned short *)0x257efffe = 1;          /* the BIOS's timing is still in force */
+    id = *cart_id;
+    diag_info(0x1000u | id);                            /* the cart's ID byte: 5c is a 4 MB RAM cart */
+    cart[0] = 0x12345678; cart[1] = 0xedcba987;
+    if (cart[0] != 0x12345678 || cart[1] != 0xedcba987) diag_fail(id == 0x5c ? 0xe0f0u : 0xe0f2u, C_RED, id);   /* red: e0f0 the cart did not answer, e0f2 no 4 MB cart ID either */
+#ifndef AVP_ABUS_BIOS
+    ABUS_OURS();
+    *(volatile unsigned short *)0x257efffe = 1;
+    cart[0] = 0x87654321; cart[1] = 0x0123456f;
+    if (cart[0] != 0x87654321 || cart[1] != 0x0123456f) {
+        ABUS_BIOS();
+        *(volatile unsigned short *)0x257efffe = 1;
+        cart[0] = 0x12345678; cart[1] = 0xedcba987;
+        if (cart[0] != 0x12345678 || cart[1] != 0xedcba987) diag_fail(0xe0f1u, C_RED, id);
+        tried = 1;
+    }
+#endif
+#endif
     diag_stage_k(tried ? C_YELLOW : 0, 0);              /* yellow: only the BIOS's timing worked, not ours */
     if (tried) diag_info(0x2001u);
     GFS_DIRTBL_TYPE(&dir) = GFS_DIR_NAME;
