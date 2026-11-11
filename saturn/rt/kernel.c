@@ -522,7 +522,11 @@ void sat_slave_main(void)
 #ifdef SAT_PERF_HUD
         while (!(FTCSR & 0x80)) sat_gfx_hud_idle();   /* readout build: notes the moment VDP1 ends a plot while the slave would only wait */
 #else
+#ifdef AVP_DIAG_SLAVEPOLL   /* analysis builds only: marks (line 120-121) whether the SCU ever shows a pending vblank-in after the first handler */
+        while (!(FTCSR & 0x80)) { if (UNCACHED(sat_dbg.vblanks) && (*(volatile u32 *)0x25fe00a4 & 1)) diag_call(5, 15, 0); }
+#else
         while (!(FTCSR & 0x80)) ;
+#endif
 #endif
         FTCSR = (u8)(FTCSR & 0x7f);
         CCR = 0x11;
