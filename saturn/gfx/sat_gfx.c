@@ -1199,17 +1199,21 @@ static void lat_publish(void)   /* the slave, once the draw has written every re
     for (i = 0; i < LAT_N; i++) { *UNC_PTR(u16, &lat_pub[i]) = lat_wr[i]; *UNC_PTR(u8, &lat_pv[i]) = lat_wv[i]; }
     UNC32(lat_seq) = q + 2;
 }
-static void lat_apply(void)   /* the master at V-blank IN: every register of the last complete record, written once per V-blank as SGL's V-blank handler writes its shadows */
+static u16 lat_snap[LAT_N];
+static u8 lat_sv[LAT_N];
+static void lat_apply(void)   /* the master at V-blank IN: every register of the last complete record, written once per V-blank as SGL's V-blank handler writes its shadows. The record is first copied to lat_snap and
+                                 checked (sequence word even before and unchanged after the copy); only a verified copy reaches the chip, so an interrupted copy never writes anything (tests/lat_protocol_test.py) */
 {
     unsigned i, t;
     for (t = 0; t < 4; t++)
     {
         u32 q = UNC32(lat_seq);
         if (q & 1) { sat_lat_retries++; continue; }
+        for (i = 0; i < LAT_N; i++) { lat_sv[i] = *UNC_PTR(u8, &lat_pv[i]); lat_snap[i] = *UNC_PTR(u16, &lat_pub[i]); }
+        if (UNC32(lat_seq) != q) { sat_lat_retries++; continue; }
         for (i = 0; i < LAT_N; i++)
-            if (*UNC_PTR(u8, &lat_pv[i])) VDP2R(i * 2) = *UNC_PTR(u16, &lat_pub[i]);
-        if (UNC32(lat_seq) == q) return;
-        sat_lat_retries++;
+            if (lat_sv[i]) VDP2R(i * 2) = lat_snap[i];
+        return;
     }
     sat_lat_skips++;
 }
