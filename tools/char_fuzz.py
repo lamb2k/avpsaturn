@@ -6,7 +6,7 @@ attacks, hurt poses, specials, enemy frames the route never met). Fuzz runs (ran
 them: 400 to 1300 sprite keys per character and stage that no stage file held, and ROM pages (0x171400, 0xa5800 to 0xa6c00) that no stage file kept, so a
 Linn or Hunter move could read tile data instead of a table.
 
-usage: char_fuzz.py WORK BIT=DIR[,DIR...] [BIT=DIR...] [scripts=DIR[,DIR...]]
+usage: char_fuzz.py WORK BIT=DIR[,DIR...] [BIT=DIR...] [scripts=DIR[,DIR...]] [--add]   (--add: extend the WORK/char_fuzz.json that is there)
   BIT: the game's character bit (ff81cc): 1 Warrior, 2 Schaefer, 4 Hunter, 8 Linn. DIR: a fuzz run directory (fuzz_pal.txt, sNN.txt).
   scripts: runs made with ROUNDS_SCRIPTLOG=1 (scriptlog.txt): the pages the players' sprite scripts were read from. A script is a character's move, the same in every stage, and
   a move the stage's census never saw sits in a page its file does not keep: one such page, 0x171400, holds Linn's script words and is what fatal 0xe2 at 0xa9cc4 (a script
@@ -68,11 +68,18 @@ def script_pages(dirs):
     return out
 
 
-def build(work, spec, scripts=()):
+def build(work, spec, scripts=(), add=False):
+    """add: extend WORK/char_fuzz.json (its runs, keys, pages and script pages stay) with the runs in spec and scripts, instead of replacing it."""
     out = dict(version=1, page=PAGE, palette={str(k): v for k, v in PALETTE.items()}, chars={}, pages={}, player_script_pages=sorted(script_pages(scripts)))
-    for bit, dirs in spec.items():
-        keys, body, runs = {}, set(), []
-        for d in dirs:
+    prior = load(work) if add else None
+    if prior:
+        out["player_script_pages"] = sorted(set(out["player_script_pages"]) | set(prior["player_script_pages"]))
+        out["pages"] = {st: set(ps) for st, ps in prior["pages"].items()}
+    for bit in sorted(set(spec) | {int(b) for b in (prior["chars"] if prior else ())}):
+        old = prior["chars"].get(str(bit)) if prior else None
+        keys = {st: set(v) for st, v in old["stage_keys"].items()} if old else {}
+        body, runs = set(old["body_keys"]) if old else set(), list(old["runs"]) if old else []
+        for d in spec.get(bit, ()):
             k, pal, pages = read_run(d)
             runs.append(str(d))
             for st, ks in k.items():
@@ -96,7 +103,7 @@ def pad(pages, limit):
     return {p + d for p in pages for d in (-1, 0, 1) if 0 <= p + d < limit}
 
 
-def augment(rounds, data, keys=False, pages=True, remap=(), key_stages=None):
+def augment(rounds, data, keys=False, pages=True, remap=(), key_stages=None, window=None):
     """Add the fuzz data to rounds (rounds.json in memory). Returns a report dict.
     pages: every stage file keeps the ROM pages the fuzz runs read in its stage word, in the front end's and in the next stage's, each with a page either side
     (the keep rule of tools/rounds_config.py), and the pages the players' sprite scripts are read from in any stage. A correctness fix: a page a play reads must hold the
@@ -106,7 +113,8 @@ def augment(rounds, data, keys=False, pages=True, remap=(), key_stages=None):
     key_stages: stage words (ints) that take keys; None = all. Where every variant of a stage packs to the same bytes (no sprite key dropped) the sector store
     (tools/sector_store.py, 2^18 sectors of 2 KB) keeps the 11 files once; a stage whose variants differ costs about 21 files of room. Only stages whose files already differ
     (0e, 1c, 1e, 24 on the integration build) can take per-character keys without outgrowing the store.
-    remap: sprite keys that must not enter (the bonus character's remap keys: a key it uses holds its tile in the guest files)."""
+    remap: sprite keys that must not enter (the bonus character's remap keys: a key it uses holds its tile in the guest files).
+    window: {stage word: pages} (tools/stage_window.py windows(), STAGE_WINDOW=1): the next stage's term is the pages its first frames read, not every page its fuzz runs read."""
     report = dict(pages_added=0, keys_added=0, files=0)
     page = rounds["page"]
     limit = 0x200000 // page
@@ -128,7 +136,7 @@ def augment(rounds, data, keys=False, pages=True, remap=(), key_stages=None):
                 want = pad(allp | scripts, limit)
             else:
                 nxt = next((x for x in order if x > s), None)
-                want = pad(fz.get(s, set()) | fz.get(0, set()) | fz.get(nxt, set()) | scripts, limit)
+                want = pad(fz.get(s, set()) | fz.get(0, set()) | ((window or {}).get(nxt) if nxt in (window or {}) else fz.get(nxt, set())) | scripts, limit)
             new = want - set(f["keep_pages"])
             if new:
                 f["keep_pages"] = sorted(set(f["keep_pages"]) | want)
@@ -174,14 +182,17 @@ def rank(f, frank):
 
 
 if __name__ == "__main__":
-    spec, scripts = {}, []
+    spec, scripts, add = {}, [], False
     for a in sys.argv[2:]:
+        if a == "--add":
+            add = True
+            continue
         bit, dirs = a.split("=", 1)
         found = [x for d in dirs.split(",") for x in sorted(glob.glob(d)) or [d]]
         if bit == "scripts":
             scripts += found
         else:
             spec.setdefault(int(bit), []).extend(found)
-    o = build(sys.argv[1], spec, scripts)
+    o = build(sys.argv[1], spec, scripts, add)
     print({b: (len(c["runs"]), sum(len(v) for v in c["stage_keys"].values()), len(c["body_keys"])) for b, c in o["chars"].items()},
           "page stages", {st: len(ps) for st, ps in o["pages"].items()}, "player script pages", len(o["player_script_pages"]))
