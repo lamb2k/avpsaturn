@@ -21,8 +21,8 @@ static GfsDirName names[256];
 #define DIAG_TAB ((volatile unsigned short *)0x25e7fe00u)   /* last 512 bytes of VDP2 VRAM: back screen table, one colour per line */
 #define DIAG_API ((volatile unsigned long *)0x06013fa0u)    /* 0 stage(colour or 0), 1 fatal(code, detail), 2 done(restore), 3 active, 4 reinit (after the runtime's VRAM clear) */
 #define DIAG_LINES 224
-#define DIAG_BANDS 15
-#define DIAG_CODE_TOP 156
+#define DIAG_BANDS 18
+#define DIAG_CODE_TOP 150
 #define C_BLACK 0x0000u
 #define C_GREY 0x4631u
 #define C_RED 0x001fu
@@ -36,7 +36,7 @@ static unsigned short diag_col[DIAG_BANDS + 1];
 static int diag_active, diag_seq, diag_cur, diag_ticks, diag_mark;
 static unsigned diag_info_value;
 static void diag_fill(int a, int b, unsigned short c) { for (; a < b && a < DIAG_LINES; a++) DIAG_TAB[a] = c; }
-static void diag_band(int k, unsigned short c) { if (k < DIAG_BANDS) diag_fill(1 + 10 * k, 9 + 10 * k, c); }
+static void diag_band(int k, unsigned short c) { if (k < DIAG_BANDS) diag_fill(1 + 8 * k, 7 + 8 * k, c); }
 static void diag_code(unsigned v)
 {
     int i;
@@ -73,9 +73,9 @@ static void diag_tick(void)
 {
     int top, k = diag_cur;
     if (!diag_active || k >= DIAG_BANDS) return;
-    top = 1 + 10 * k;
+    top = 1 + 8 * k;
     if (diag_mark >= 0) diag_fill(top + diag_mark, top + diag_mark + 2, diag_col[k]);
-    diag_mark = 2 * (diag_ticks++ & 3);
+    diag_mark = 2 * (diag_ticks++ % 3);
     diag_fill(top + diag_mark, top + diag_mark + 2, C_WHITE);
 }
 static void diag_info(unsigned v) { if (diag_active) diag_code(v); }

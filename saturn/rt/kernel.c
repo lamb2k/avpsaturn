@@ -684,7 +684,9 @@ static void round_check(void)
 /* Dispatcher 0xd86. A vblank sets the game's flag at 0xff0266 through f_e0e, which restarts the walk from task 0. */
 void f_d86(void)
 {
+    diag_call(0, 0, 0);   /* the game's dispatcher is reached */
     if (!irq_on) irq_enable();
+    diag_call(0, 0, 0);   /* the vblank interrupt is enabled */
     sat_dbg.stage = 2;
 #ifdef SAT_PROF_PC
     pc_start();
