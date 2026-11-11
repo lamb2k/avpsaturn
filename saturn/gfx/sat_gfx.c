@@ -1193,6 +1193,9 @@ extern char sat_home_text[28][44];
 #define SAT_HOME_RATIO 11   /* logo kept at about 0.45 of its brightness, as MSHvSF OPTION MODE keeps its own (0.47); measured from stills at 2, 5, 8 (lane-home overlay/dark_sheet.png) */
 #endif
 volatile unsigned short sat_home_ratio = SAT_HOME_RATIO; /* panel colour calculation ratio (CCRNB NBG3), 0 to 31 */
+#if defined(SAT_HOME_OPT) && SAT_HOME_OPT == 2 && !defined(SAT_HOME_DIM)
+#define SAT_HOME_DIM 0x1b0   /* -80 of 255 on each colour (9 bit two's complement) */
+#endif
 #ifdef SAT_HOME_FONT_COLD
 /* Lane perf-reconcile 11-10, default off: the menu font cells and the two text palettes live in the cart tail (saturn/rt/home_font_cold.c) instead of high work RAM: 1,920 bytes. Read only when a menu opens. */
 extern const u8 sat_home_font[58 * 32], sat_home_pal[64];
@@ -1620,6 +1623,60 @@ static void home_cell(const u8 *f, u32 cell, int big, u32 bg)
             o |= (v ? v : bg) << (28 - 4 * x); }
         put32(VDP2_VRAM + CELL_S1 + cell * 32 + (u32)y * 4, o); }
 }
+#if defined(SAT_HOME_OPT) && SAT_HOME_OPT == 1
+/* Mock-up (a) of lane frontend issue #9, default off: the option screens' halo computed across cell edges. Each cell of an option screen is built from the 3x3 cells around
+   it (a letter's halo may land in the next cell, even a blank one), so no letter loses its halo where it touches a cell edge. The cells come from a pool of OPT_POOL slots at the
+   top of the scroll 1 cache's range (the held title's picture uses a few of the 880), deduplicated by comparing with the pool's VRAM cells (no RAM table); a full pool starts over and redraws. Cells of the large header letters
+   keep the panel look of before. Measurement build only. */
+#define OPT_POOL 200
+#define OPT_POOL0 (880 - OPT_POOL)
+static int opt_n, opt_again;
+static const u8 *opt_glyph(u32 row, u32 col, int dr, int dc)
+{
+    int r = (int)row + dr, c = (int)col + dc;
+    u32 ch;
+    if (r < 0 || r >= 28 || c < 0 || c >= 44) return 0;
+    ch = *(volatile u8 *)((unsigned long)&sat_home_shown[r][c] | 0x20000000UL);
+    if ((ch & 0x7f) < 33 || (ch & 0x7f) - 33 >= 58) return 0;
+    return home_font + ((ch & 0x7f) - 33) * 32;
+}
+static u16 opt_name(u32 row, u32 col, u32 ch, int *full)
+{
+    const u8 *g[3][3];
+    u8 d[8][8];
+    u32 out[8];
+    int dr, dc, x, y, n = 0, k;
+    for (dr = -1; dr <= 1; dr++) for (dc = -1; dc <= 1; dc++) { g[dr + 1][dc + 1] = opt_glyph(row, col, dr, dc); n += g[dr + 1][dc + 1] != 0; }
+    if (!n) return 0;
+    for (y = 0; y < 8; y++) for (x = 0; x < 8; x++)
+    {
+        int lit = 0;
+        d[y][x] = g[1][1] ? (u8)((g[1][1][y * 4 + x / 2] >> (x & 1 ? 0 : 4)) & 15) : 0;
+        if (d[y][x]) continue;
+        for (dr = -1; dr <= 1 && !lit; dr++) for (dc = -1; dc <= 1 && !lit; dc++)
+        {
+            int yy = y + dr, xx = x + dc, gr = 1, gc = 1;
+            const u8 *f;
+            if (yy < 0) { yy += 8; gr = 0; } else if (yy > 7) { yy -= 8; gr = 2; }
+            if (xx < 0) { xx += 8; gc = 0; } else if (xx > 7) { xx -= 8; gc = 2; }
+            f = g[gr][gc];
+            if (f && ((f[yy * 4 + xx / 2] >> (xx & 1 ? 0 : 4)) & 15)) lit = 1;
+        }
+        if (lit) d[y][x] = 15;
+    }
+    for (y = 0; y < 8; y++) { u32 o = 0; for (x = 0; x < 8; x++) o |= (u32)d[y][x] << (28 - 4 * x); out[y] = o; }
+    for (k = 0; k < opt_n; k++)
+    {
+        volatile u32 *cell = (volatile u32 *)(VDP2_VRAM + CELL_S1 + (u32)(OPT_POOL0 + k) * 32);
+        if (cell[0] != out[0]) continue;
+        for (y = 1; y < 8 && cell[y] == out[y]; y++) ;
+        if (y == 8) return (u16)(((ch & 0x80) ? 15u : 14u) << 12 | ((OPT_POOL0 + k) & 0x3ff));
+    }
+    if (opt_n >= OPT_POOL) { *full = 1; return 0; }
+    for (y = 0; y < 8; y++) put32(VDP2_VRAM + CELL_S1 + (u32)(OPT_POOL0 + opt_n) * 32 + (u32)y * 4, out[y]);
+    return (u16)(((ch & 0x80) ? 15u : 14u) << 12 | ((OPT_POOL0 + opt_n++) & 0x3ff));
+}
+#endif
 static HOME_OS void draw_home(int fresh)
 {
     u32 row, col;
@@ -1638,7 +1695,21 @@ static HOME_OS void draw_home(int fresh)
         for (g = 0; g < 58; g++) home_cell(home_font + g * 32, (u32)SAT_GFX_HOME_FONT + (u32)g, 0, font_bg);
         for (L = 0; L < 52; L++) home_cell(home_font + 32 * 32 + L * 16, (u32)SAT_GFX_HOME_FONT + 59 + (u32)L, 1, font_bg);   /* the header's large letters */
     }
+#if defined(SAT_HOME_OPT) && SAT_HOME_OPT == 1
+    if (fresh) opt_n = 0;
+#endif
     for (row = 0; row < 28; row++)
+    {
+#if defined(SAT_HOME_OPT) && SAT_HOME_OPT == 3
+        /* Mock-up (c): a translucent panel behind the text rows only: in each row with text, every cell from one before the first letter to one after the last. */
+        int lo = 99, hi = -1;
+        if (snap.home == 4)
+            for (col = 0; col < 44; col++)
+            {
+                u32 c2 = *(volatile u8 *)((unsigned long)&sat_home_shown[row][col] | 0x20000000UL);
+                if (c2 >= 2) { if ((int)col < lo) lo = (int)col; hi = (int)col; }
+            }
+#endif
         for (col = 0; col < 44; col++)
         {
             u32 ch = *(volatile u8 *)((unsigned long)&sat_home_shown[row][col] | 0x20000000UL);
@@ -1647,13 +1718,29 @@ static HOME_OS void draw_home(int fresh)
             else if ((ch >= 2 && ch <= 0x20) || (ch >= 0x81 && ch <= 0xa0))   /* a large letter's half (sat_home_big) */
                 name = (u16)(15u << 12 | ((SAT_GFX_HOME_FONT + 59 + (ch <= 0x20 ? ch - 2 : ch - 0x81 + 31)) & 0x3ff));
             else if (ch & 0x7f) name = (u16)(((ch & 0x80) ? 15u : 14u) << 12 | ((SAT_GFX_HOME_FONT + (ch & 0x7f) - 33) & 0x3ff));
+#if defined(SAT_HOME_OPT) && SAT_HOME_OPT == 1
+            if (snap.home == 4 && !((ch >= 2 && ch <= 0x20) || (ch >= 0x81 && ch <= 0xa0)))
+            {
+                int full = 0;
+                u16 n2 = opt_name(row, col, ch, &full);
+                if (full) { opt_n = 0; opt_again = 1; }
+                else name = n2;
+            }
+#endif
+#if defined(SAT_HOME_OPT) && SAT_HOME_OPT == 3
+            if (snap.home == 4 && name == 0 && (int)col >= lo - 1 && (int)col <= hi + 1 && hi >= 0) name = (u16)(14u << 12 | ((SAT_GFX_HOME_FONT + 58) & 0x3ff));
+#endif
             if (fresh || sh_home[row * 44 + col] != name)
             {
                 sh_home[row * 44 + col] = name;
                 put16(VDP2_VRAM + MAP_HOME + (row * 64 + col) * 2, name);
             }
         }
+    }
     redo = *(volatile u32 *)((unsigned long)&sat_home_seq | 0x20000000UL) != s0;
+#if defined(SAT_HOME_OPT) && SAT_HOME_OPT == 1
+    if (opt_again) { redo = 1; opt_again = 0; }
+#endif
 }
 #endif
 
@@ -2903,6 +2990,11 @@ void sat_gfx_draw(void)
             VDP2R(0x36) = 0x8063; VDP2R(0x4c) = 0x0f0f; VDP2R(0x4e) = 0x0f0f; VDP2R(0x94) = 0; VDP2R(0x96) = 0;
             VDP2R(0xfa) = (u16)(prinb_last | 0x0700);
             VDP2R(0x24) = 0; VDP2R(0x26) = 0x0080; VDP2R(0xee) = 0x00c0; VDP2R(0x10a) = (u16)(sat_home_ratio << 8); VDP2R(0xec) = 0x0008;
+#if defined(SAT_HOME_OPT) && SAT_HOME_OPT == 2
+            /* Mock-up (b): the option screens dim the picture (colour offset A, every screen but the menu layer NBG3 and the back screen; sprites included). */
+            if (snap.home == 4) { VDP2R(0x112) = 0; VDP2R(0x114) = SAT_HOME_DIM; VDP2R(0x116) = SAT_HOME_DIM; VDP2R(0x118) = SAT_HOME_DIM; VDP2R(0x110) = 0x0057; }
+            else VDP2R(0x110) = 0;
+#endif
             draw_home(!home_was);
             /* Colour calculation by the colour's MSB (SFCCMD NBG3 mode 3): banks 62 and 63 written here with the MSB only on dot 15, the panel's. */
             { int e; for (e = 62 * 16 + 1; e < 64 * 16; e++) if (e & 15) put16(CRAM_AT(e), (u16)((sat_gfx_colour(cram_shadow[e]) & 0x7fffU) | ((e & 15) == 15 ? 0x8000U : 0))); }
@@ -2911,6 +3003,9 @@ void sat_gfx_draw(void)
         {
             VDP2R(0x10) = 0x012f; VDP2R(0x12) = 0xff6f;
             VDP2R(0xec) = 0; VDP2R(0xee) = 0; VDP2R(0x10a) = 0;
+#if defined(SAT_HOME_OPT) && SAT_HOME_OPT == 2
+            VDP2R(0x110) = 0;
+#endif
             { int e; for (e = 62 * 16 + 1; e < 64 * 16; e++) put16(CRAM_AT(e), sat_gfx_colour(cram_shadow[e])); }   /* the game's colours back, MSB as everywhere */
         }
         HUD(if (snap.hud && !snap.home) { hud_layer(home_was || !hud_was); hud_was = 1; } else hud_was = 0;)
