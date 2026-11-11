@@ -559,7 +559,7 @@ void sat_slave_main(void)
     }
 }
 
-static void smpc_idle(void)   /* the SMPC is busy while SF is set (the BIOS polls it every frame); a bounded wait, never a spin */
+static void __attribute__((noinline)) smpc_idle(void)   /* the SMPC is busy while SF is set (the BIOS polls it every frame); a bounded wait, never a spin */
 {
     u32 n;
     for (n = 0; n < 4000000u && (SMPC(0x63) & 1); n++) ;
