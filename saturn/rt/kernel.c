@@ -58,9 +58,13 @@ static void *sched_sp;
 static volatile int cur = -1;
 static int irq_on;
 
+/* The loader's boot display (boot.c) stays ours until the first picture: a stop before then shows its code instead of the BIOS logo. */
+#define DIAG_API ((volatile u32 *)0x06013fa0u)
+static void diag_call(int i, u32 a, u32 b) { u32 f = DIAG_API[i]; if (f && DIAG_API[3]) ((void (*)(u32, u32))f)(a, b); }
 void sat_fatal(u32 code, u32 detail)
 {
     __asm__ volatile ("ldc %0,sr" : : "r"(0xf0));
+    diag_call(1, code, detail);
     sat_dbg.fatal = code; sat_dbg.fatal_detail = detail; sat_dbg.fatal_task = (u32)cur;
     sat_dbg.fatal_a[0] = cpu.a[0]; sat_dbg.fatal_a[1] = cpu.a[1]; sat_dbg.fatal_a[2] = cpu.a[7];
     for (;;) ;
@@ -512,22 +516,30 @@ void sat_slave_main(void)
 {
     CCR = 0x10; CCR = 0x01;
     FTCR = 2;
+    diag_call(5, 1, 0);   /* the loader's display: the slave runs */
     for (;;) {
         u32 t, seen;
 #ifdef SAT_PERF_HUD
         while (!(FTCSR & 0x80)) sat_gfx_hud_idle();   /* readout build: notes the moment VDP1 ends a plot while the slave would only wait */
 #else
+#ifdef AVP_DIAG_SLAVEPOLL   /* analysis builds only: marks (line 120-121) whether the SCU ever shows a pending vblank-in after the first handler */
+        while (!(FTCSR & 0x80)) { if (UNCACHED(sat_dbg.vblanks) && (*(volatile u32 *)0x25fe00a4 & 1)) diag_call(5, 15, 0); }
+#else
         while (!(FTCSR & 0x80)) ;
+#endif
 #endif
         FTCSR = (u8)(FTCSR & 0x7f);
         CCR = 0x11;
+        diag_call(5, 2, 0);   /* the master woke the slave */
         seen = UNCACHED(gfx_handed);
         if (seen == UNCACHED(gfx_done)) continue;
 #ifdef SAT_PERF_HUD
         sat_gfx_hud_pre = frt();   /* the slave's timer at the wake, before the per-draw reset: the readout's plot-end bound */
 #endif
         FRTH = 0; FRTL = 0;
+        diag_call(5, 13, 0);
         sat_gfx_draw();
+        diag_call(5, 14, 0);
         t = frt();
         sat_dbg.gfx_ticks = t; *(volatile unsigned long *)((unsigned long)&sat_readout[1] | 0x20000000UL) = t;
         if (t > sat_dbg.gfx_peak) sat_dbg.gfx_peak = t;
@@ -538,15 +550,20 @@ void sat_slave_main(void)
     }
 }
 
+static void smpc_idle(void)   /* the SMPC is busy while SF is set (the BIOS polls it every frame); a bounded wait, never a spin */
+{
+    u32 n;
+    for (n = 0; n < 4000000u && (SMPC(0x63) & 1); n++) ;
+}
 static void slave_start(void)
 {
-    while (SMPC(0x63) & 1) ;
+    smpc_idle();
     SMPC(0x63) = 1; SMPC(0x1f) = 0x03;   /* SSHOFF */
-    while (SMPC(0x63) & 1) ;
+    smpc_idle();
     *(void (**)(void))0x06000250u = sat_slave_entry;
     *(u32 *)0x060002acu = (u32)(sat_slave_stack + 256);
     SMPC(0x63) = 1; SMPC(0x1f) = 0x02;   /* SSHON */
-    while (SMPC(0x63) & 1) ;
+    smpc_idle();
 }
 
 /* Rounds: each round's tile pack and sound set come from CD between rounds (RNN.BIN, tools/rounds_pack.py), on the master, with the game stopped and the slave idle.
@@ -579,7 +596,9 @@ static void load_round(int file)
     char name[] = "R000.BIN";
     long got;
     name[1] = (char)('0' + file / 100); name[2] = (char)('0' + file / 10 % 10); name[3] = (char)('0' + file % 10);
+    diag_call(5, 17, 0);
     got = ((long (*)(const char *, void (*)(void)))LOADER_API[0])(name, round_sound_ready);
+    diag_call(5, 18, 0);
     CCR_M = 0x11;
     if (got < 0) sat_fatal(0xed, (u32)-got);
     sat_rounds.sectors = (u32)got;
@@ -624,6 +643,7 @@ static void round_check(void)
     }
 #endif
     row_loaded = row;
+    diag_call(5, 16, 0);
 #ifdef SAT_HOME
     sat_home_loading(1);   /* NOW LOADING stays on screen through the load */
 #endif
@@ -675,7 +695,9 @@ static void round_check(void)
 /* Dispatcher 0xd86. A vblank sets the game's flag at 0xff0266 through f_e0e, which restarts the walk from task 0. */
 void f_d86(void)
 {
+    diag_call(0, 0, 0);   /* the game's dispatcher is reached */
     if (!irq_on) irq_enable();
+    diag_call(0, 0, 0);   /* the vblank interrupt is enabled */
     sat_dbg.stage = 2;
 #ifdef SAT_PROF_PC
     pc_start();
@@ -743,11 +765,25 @@ void sat_vblank(void)
 #ifdef SAT_CPU_SLACK_PROFILE
     u32 slack_end = frt(), slack_wrap = (FTCSR & 2) ? CS_TIMER_WRAP : 0;
 #endif
+    u32 first = !sat_dbg.vblanks;
+#define DIAG_AT(n) do { if (first) diag_call(5, (n), 0); } while (0)
     *(volatile u32 *)0x25fe00a4 = ~1u;
+    /* The SCU sets its whole interrupt mask when the CPU accepts an interrupt (so handlers do not nest); the handler must put its mask back or no further
+       interrupt arrives: the game stopped after the first picture on hardware-accurate cores (Ymir) while Yaba, which does not do this, kept going. */
+#if SAT_VDP1_HW_ERASE
+    *(volatile u32 *)0x25fe00a0 = 0xfffffffcu;
+#else
+    *(volatile u32 *)0x25fe00a0 = 0xfffffffeu;
+#endif
+    DIAG_AT(3);
+    if (sat_dbg.vblanks == 1) diag_call(5, 11, 0);   /* the second vblank is entered */
 #ifndef SAT_VDP1_RACE_OLD
     sat_gfx_vblank();   /* first: the frame change for a finished plot belongs early in vblank-in */
 #endif
+    DIAG_AT(4);
+    if (sat_dbg.vblanks == 1) diag_call(5, 12, 0);
     sat_dbg.vblanks++;
+    if (DIAG_API[3]) { if (sat_dbg.vblanks <= 3) diag_call(0, 0, 0); else if (sat_dbg.vblanks == 4) diag_call(2, 1, 0); }   /* the loader's display ends on the 4th vblank */
 #ifdef SAT_VLOG
     { volatile unsigned long *e = (volatile unsigned long *)((unsigned long)&sat_vlog[(sat_dbg.vblanks & 15) * 4] | 0x20000000UL);
       e[0] = sat_dbg.vblanks << 16 | *(volatile unsigned short *)0x25D00010UL; e[1] = 0; e[2] = 0; e[3] = (UNCACHED(gfx_done) != UNCACHED(gfx_handed)); }
@@ -776,6 +812,7 @@ void sat_vblank(void)
 #endif
     sat_pad_tick();
     t0 = frt();
+    DIAG_AT(5);
 #ifdef SAT_HOME
     if (sat_home_hold) {   /* the game is held: picture and sound only */
         if (UNCACHED(gfx_done) == UNCACHED(gfx_handed)) {
@@ -809,10 +846,12 @@ void sat_vblank(void)
         sat_gfx_snapshot_begin();
         UNCACHED(gfx_handed) = UNCACHED(gfx_handed) + 1;
         SLAVE_WAKE = 0xffff;
+        DIAG_AT(6);
 #ifdef SAT_CPU_SLACK_PROFILE
         cpu_slack_handoff(UNCACHED(gfx_handed), frt());
 #endif
         sat_gfx_snapshot_layers();   /* the slave builds the sprite commands meanwhile and waits for this before it reads a layer cell */
+        DIAG_AT(7);
 #ifdef SAT_CPU_SLACK_PROFILE
         cpu_slack_layers(frt());
 #endif
@@ -821,9 +860,12 @@ void sat_vblank(void)
     t1 = frt();
     save = cpu;
     cur = -1; cpu.a[5] = 0xff8000; cpu.a[7] = 0xff8000;
+    DIAG_AT(8);
     f_e0e();
     cpu = save; cur = sc;
+    DIAG_AT(9);
     sat_audio_frame();
+    DIAG_AT(10);
     t2 = frt();
     sat_dbg.snap_ticks = t1 - t0; sat_dbg.irq_ticks = t2;
     if (t1 - t0 > sat_dbg.snap_peak) sat_dbg.snap_peak = t1 - t0;
@@ -878,6 +920,7 @@ void sat_main(void)
     for (p = sat_lw_bss_start; p < sat_lw_bss_end; p++) *p = 0;
 #endif
     sat_dbg.magic = 0x53415452;
+    diag_call(0, 0, 0);   /* the loader's band: the runtime is entered */
     exceptions_install();
     for (i = 0; i < TASKS; i++) { u32 k; for (k = 0; k < TASK_STACK / 4; k++) task_stacks[i][k] = 0xa5a5a5a5u; }
     for (i = 0; i < 256; i++) PAGE[i] = SAT_SINK;
@@ -903,12 +946,16 @@ void sat_main(void)
     load_round(0);
     round_loaded = 0;
 #endif
+    diag_call(0, 0, 0);   /* first round file and sound set done */
     if (!sat_gfx_init(SAT_PACK)) sat_fatal(0xeb, 0);
+    diag_call(4, 0, 0);   /* graphics init cleared VRAM and the registers: the loader's display comes back */
+    diag_call(0, 0, 0);
 #ifdef SAT_HOME
     if (!home_slave_on) { home_slave_on = 1; slave_start(); }
 #else
     slave_start();
 #endif
+    diag_call(0, 0, 0);   /* slave started */
     sat_dbg.stage = 1;
     f_800();
     sat_fatal(0xe8, 0);

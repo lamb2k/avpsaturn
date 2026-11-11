@@ -438,6 +438,7 @@ unsigned long sat_audio_pack_keep(const void *pack)
 static void smpc(unsigned command)
 {
     int wait;
+    for (wait = 0; wait < 100000 && (SMPC_SF & 1); wait++) ;   /* wait for idle first: the BIOS polls the SMPC every frame and a command written while it is busy is lost */
     SMPC_SF = 1;
     SMPC_COM = (u8)command;
     for (wait = 0; wait < 100000 && (SMPC_SF & 1); wait++) ;
