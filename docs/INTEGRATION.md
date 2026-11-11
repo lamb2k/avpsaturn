@@ -70,6 +70,7 @@ Updated 2026-11-10 evening.
 | Native knockdown/jump-pose fix, Schaefer tables gated to a live Wolverine player, grab off for Wolverine | lane/wv-native-gfx-20261109 (next head) | not pushed yet; merge into the next disc |
 | Stage select over title art (stage-menu-bg) | lane/stage-menu-bg-20261110 2502a30 | waits for its hw move |
 | Opening cutscene is missing Schaefer and some sprites; Wolverine shows jump poses when hit; the automatic grab uses placeholder poses | native / sprites lanes | being fixed (owner known issues for disc 3e) |
+| Select screen name plates fitted to the scaled picture (issue 7: plate art resampled 11/12 offline, `PLATE_FIT`, default on, data only, 0 B RAM; hw/lw/cart free unchanged 432 / 96 / 5,292 on the D12 recipe without perf switches); option menu text mock-ups (issue 9, `SAT_HOME_OPT=1/2/3`, default off, owner picks: hw cost 976 B / 40 B / 120 B); opening street vanish classified (issue 8: not reproduced, see notes) | lane/frontend-20261111 | docs/notes/AVP_FRONTEND_20261111.md; plates ready to merge, mock-ups wait for the owner's pick |
 | Saturn hardware FPS test discs | E:\AvP\package-hwtest-20261109 (pre-integration) | rebuild from avp/integration with an owner disc (owner to confirm) |
 
 Dropped (owner 2026-11-09: no more work on the sprite-replacement Wolverine): claws-only follow-up, guest group loop (lane/fps-group), Wolverine defense gate, feet-on-floor ground/ground2 switches. Native Wolverine covers each of them. Closed lanes (merged here): stage-menu, versus.
