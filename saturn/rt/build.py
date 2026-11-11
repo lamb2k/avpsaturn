@@ -75,12 +75,17 @@ if os.environ.get("CHAR_FUZZ", "1") != "0":
 sys.path.insert(0, str(REPO / "tools/wolverine"))
 import hud_art
 HUD = None   # guest select screen and HUD art (hud_art.build); guests.c always includes a palette table, empty without it
+# Select screen name plates fitted to the 352 picture (lane frontend 11-11, issue #7; tools/wolverine/hud_art.py plate_fit): the four stock plates' tiles, and the guest's, are resampled 11/12 into the scaled frame's
+# place in the front end file's graphics region, so no plate pokes out of its frame. Data only: the same keys, no code or RAM. PLATE_FIT=0 builds the unfitted plates (the old build, byte for byte).
+PLATE_FIT = os.environ.get("PLATE_FIT", "1") == "1"
+if PLATE_FIT:
+    ROUNDS["files"][0]["gfx"] = str(hud_art.build_stock_front(os.environ.get("GFX_BIN", "E:/AvP/learning/lane-satgfx/gfx.bin"), WORK / "rt.bin", GEN / "hud"))
 if os.environ.get("GUEST_ASSETS"):   # bonus characters (SAT_GUESTS builds): guest stage file variants, tools/wolverine/guest_rounds.py
     import guest_rounds
     # Select screen and HUD art of the guest (tools/wolverine/hud_art.py): GUEST_HUD_ART, else GUEST_ASSETS/hud_art; GUEST_HUD_ART=0 builds without it.
     hud_dir = os.environ.get("GUEST_HUD_ART") or str(pathlib.Path(os.environ["GUEST_ASSETS"]) / "hud_art")
     if hud_dir != "0" and pathlib.Path(hud_dir).is_dir():
-        HUD = hud_art.build(hud_dir, pathlib.Path(os.environ["GUEST_ASSETS"]) / "gfx_wolverine.bin", WORK / "rt.bin", GEN / "hud")
+        HUD = hud_art.build(hud_dir, pathlib.Path(os.environ["GUEST_ASSETS"]) / "gfx_wolverine.bin", WORK / "rt.bin", GEN / "hud", fit=PLATE_FIT)
         miss = hud_art.check_keys(ROUNDS, hud_art.GUESTS[0])
         if miss:
             raise SystemExit("NO-GO: guest art tiles no arcade file holds (wrong tile codes or parity?): " + ", ".join("%s %s %x" % m for m in miss[:8]))
