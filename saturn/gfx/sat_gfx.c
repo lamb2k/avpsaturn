@@ -1688,10 +1688,15 @@ static HOME_OS void draw_home(int fresh)
     while (((s0 = *(volatile u32 *)((unsigned long)&sat_home_seq | 0x20000000UL)) & 1) && ++spin < 20000u) ;
     if (s0 & 1) { redo = 1; return; }
     fresh |= (int)redo; redo = 0;
-    if (font_bg != (snap.home == 3 ? 0u : snap.home == 4 ? 14u : 15u))   /* the title list's letters have no panel behind them, the option screens' a halo, the pause menu's a panel */
+#if defined(SAT_HOME_OPT) && SAT_HOME_OPT == 3
+#define OPT_FONT_BG 15u   /* mock-up (c): the letters' cells carry the panel too, so a text row is one even band */
+#else
+#define OPT_FONT_BG 14u
+#endif
+    if (font_bg != (snap.home == 3 ? 0u : snap.home == 4 ? OPT_FONT_BG : 15u))   /* the title list's letters have no panel behind them, the option screens' a halo, the pause menu's a panel */
     {
         int g, L;
-        font_bg = snap.home == 3 ? 0u : snap.home == 4 ? 14u : 15u;
+        font_bg = snap.home == 3 ? 0u : snap.home == 4 ? OPT_FONT_BG : 15u;
         for (g = 0; g < 58; g++) home_cell(home_font + g * 32, (u32)SAT_GFX_HOME_FONT + (u32)g, 0, font_bg);
         for (L = 0; L < 52; L++) home_cell(home_font + 32 * 32 + L * 16, (u32)SAT_GFX_HOME_FONT + 59 + (u32)L, 1, font_bg);   /* the header's large letters */
     }
