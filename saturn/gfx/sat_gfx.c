@@ -16,9 +16,6 @@
 
 extern unsigned char *PAGE[256];
 extern unsigned char RAMB[];
-#if SAT_GFX_FIT == 3
-volatile int sat_fit_scale;
-#endif
 
 typedef unsigned char u8;
 typedef unsigned short u16;
@@ -111,27 +108,25 @@ int sat_gfx_nudge_x, sat_gfx_nudge_y;
 #define OBJ_YOFFS 0x10
 #define CPS_LEFT 64
 #define CPS_TOP 16
-/* VRAM access cycles (see sat_gfx_init). Also in saturn/rt/boot.c (diag_done_k), which puts them back after the boot display. */
-#define SAT_CYC_A0L 0x0123
-#define SAT_CYC_A0U 0xee67
-#define SAT_CYC_A1L 0xeeee
-#define SAT_CYC_A1U 0x44ee
-#define SAT_CYC_B0L 0xeeee
-#define SAT_CYC_B0U 0xe55e
 
 /* A graphics RAM base as the game writes it: 0x90c0 is 0x90c000. */
 #define GFX(reg) (PAGE[((reg) >> 8) & 0xff] + (((u32)(reg) << 8) & 0xffffUL))
 
 /* VDP2 layout */
-#define MAP_S2 0x00000UL
-#define MAP_S1 0x04000UL
-#define MAP_S3 0x08000UL
-#define CELL_S1 0x18000UL
+#define MAP_S2 SAT_V2_MAP_S2##UL
+#define MAP_S1 SAT_V2_MAP_S1##UL
+#define MAP_S3 SAT_V2_MAP_S3##UL
+#define CELL_S1 SAT_V2_CELL_S1##UL
 #define ROWTAB 0x1fc00UL
 #define BACKCOL 0x1fffeUL
 #define CLEAR_NAME (CELL_S1 >> 5) /* four clear cells at the start of the scroll 1 slab */
-#define CELL_S2 0x20000UL
-#define CELL_S3 0x40000UL
+#define CELL_S2 SAT_V2_CELL_S2##UL
+#define CELL_S3 SAT_V2_CELL_S3##UL
+/* Blank characters in each layer's own bank (a name whose cell lies in a bank the layer has no cell slot in reads nothing defined on the console). */
+#define CLEAR_S2 (SAT_V2_CLEAR_S2##UL >> 5)
+#define CLEAR_S3 (SAT_V2_CLEAR_S3##UL >> 5)
+typedef char sat_v2_chk_s2[(SAT_V2_CLEAR_S2 == SAT_V2_CELL_S2 + SAT_V2_S2_SLOTS * 128 && SAT_V2_MAP_S2 == SAT_V2_CLEAR_S2 + 0x80) ? 1 : -1];
+typedef char sat_v2_chk_s3[(SAT_V2_CLEAR_S3 == SAT_V2_CELL_S3 + SAT_V2_S3_SLOTS * 512) ? 1 : -1];
 /* VDP1 layout */
 #define TEX_BASE 0x10000UL
 
@@ -1717,7 +1712,7 @@ static void draw_scroll2(u16 sx, u16 sy, int full_row)
             u32 word = *cell++;
             u16 code = (u16)(word >> 16), attr = (u16)word;
             u16 slot = cache_get(&s2_cache, code, &sat_gfx_stats.refused_layer);
-            u32 name = CLEAR_NAME;
+            u32 name = CLEAR_S2;
             if (slot != NOSLOT) name = name_of(attr, 2, (CELL_S2 + (u32)slot * 128) >> 5);
             write_name(s2_name(r, c), name, &sh_s2[r * 64 + c]);
         }
@@ -1748,7 +1743,7 @@ static void draw_scroll3(u16 sx, u16 sy)
             sh_s3[r * 64 + c] = id;
             for (sub = 0; sub < 4; sub++)
             {
-                u32 name = CLEAR_NAME;
+                u32 name = CLEAR_S3;
                 if (slot != NOSLOT)
                 {
                     /* A flipped tile also swaps its characters. */
@@ -1895,7 +1890,7 @@ static HUD_OS void hud_layer(int fresh)
     u32 row, col, key = UNC32(hm_frames) / 60 + (UNC32(hm_frozen) ? 0x10000UL + (hs.pn & 0xffffUL) * 0x20000UL : 0) + (UNC32(hm_gen) & 0xffUL) * 0x10000000UL;
     int changed = key != hud_key;
     if (changed) { hud_key = key; hud_format(); }
-    VDP2L(0x36, 0x8063); VDP2L(0x4c, 0x0f0f); VDP2L(0x4e, 0x0f0f); VDP2L(0x94, 0); VDP2L(0x96, 0);   /* the access cycle pattern already gives NBG3 its slots (sat_gfx_init) */
+    VDP2L(0x36, SAT_V2_PNC3); VDP2L(0x4c, SAT_V2_MPAB3); VDP2L(0x4e, SAT_V2_MPCD3); VDP2L(0x94, 0); VDP2L(0x96, 0);   /* the access cycle pattern already gives NBG3 its slots (sat_gfx_init) */
     VDP2L(0x24, 0); VDP2L(0x26, 0); VDP2L(0xee, 0); VDP2L(0x10a, 0); VDP2L(0xec, 0);
     if (fresh)
     {
@@ -2867,16 +2862,6 @@ void sat_gfx_draw(void)
     sat_gfx_stats.layer_writes = 0;
     sat_gfx_stats.top_bank = 0;
 
-#if SAT_GFX_FIT == 3
-    {
-        static int was;
-        if (was != SAT_FIT_ON)
-        {
-            was = SAT_FIT_ON; drawn_valid = 0;
-            VDP2L(0x7a, was ? 0x1700 : 0); VDP2L(0x8a, was ? 0x1700 : 0); VDP2L(0x98, (u16)(was ? 0x0101 : 0));
-        }
-    }
-#endif
     STAGE(0);
     update_palette();
     update_priority(layers, snap.priority);
@@ -2943,7 +2928,7 @@ void sat_gfx_draw(void)
         HUD(static int hud_was;)
         if (snap.home)
         {
-            VDP2L(0x36, 0x8063); VDP2L(0x4c, 0x0f0f); VDP2L(0x4e, 0x0f0f); VDP2L(0x94, 0); VDP2L(0x96, 0);
+            VDP2L(0x36, SAT_V2_PNC3); VDP2L(0x4c, SAT_V2_MPAB3); VDP2L(0x4e, SAT_V2_MPCD3); VDP2L(0x94, 0); VDP2L(0x96, 0);
             VDP2L(0xfa, (u16)(prinb_last | 0x0700));
             VDP2L(0x24, 0); VDP2L(0x26, 0x0080); VDP2L(0xee, 0x00c0); VDP2L(0x10a, (u16)(sat_home_ratio << 8)); VDP2L(0xec, 0x0008);
             draw_home(!home_was);
@@ -3138,8 +3123,10 @@ COLD_OS int sat_gfx_init(const void *pack)
     for (i = 0; i < 2048; i++) { put16(CRAM_AT(i), 0); cram_shadow[i] = 0; }
     back_shadow = 0;
 
-    for (n = 0; n < CELL_S1; n += 4) put32(VDP2_VRAM + n, CLEAR_NAME);
-    for (n = 0; n < 64 * 64; n++) { sh_s1[n] = CLEAR_NAME; sh_s2[n] = CLEAR_NAME; sh_s3[n] = NOKEY; }
+    for (n = 0; n < MAP_S3; n += 4) put32(VDP2_VRAM + n, CLEAR_NAME);          /* scroll 1 map (the old scroll 2 map area below it is unused) */
+    for (n = MAP_S3; n < CELL_S1; n += 4) put32(VDP2_VRAM + n, CLEAR_S3);        /* scroll 3 maps */
+    for (n = 0; n < 0x4000UL; n += 4) put32(VDP2_VRAM + MAP_S2 + n, CLEAR_S2);   /* scroll 2 map, bank A1 */
+    for (n = 0; n < 64 * 64; n++) { sh_s1[n] = CLEAR_NAME; sh_s2[n] = CLEAR_S2; sh_s3[n] = NOKEY; }
     for (n = 0; n < SAT_GFX_SCREEN_H; n++) sh_row[n] = 0;
     for (n = 0; n < BLANK_WAYS; n++) blank_seen[n] = NOKEY;
     cache_setup(&spr_cache, VDP1_VRAM + TEX_BASE, 128, SAT_GFX_SPRITE_SLOTS, SAT_GFX_SPRITE_PAIRS * 2, SEC_SPRITE, spr_slots, spr_head, HASH_SIZE);
@@ -3162,49 +3149,36 @@ COLD_OS int sat_gfx_init(const void *pack)
     table_base = 0;
     drawn_valid = 0;
 
-    /* VRAM split into four banks, CRAM mode 1. */
-    VDP2R(0x0e) = 0x1300;
-    /* VRAM access cycles, the arrangement of SGL's examples and of games that run on the console (T0 to T7 per bank; 0..3 pattern name of NBG0..3, 4..7 character pattern of NBG0..3,
-       E the CPU, as SGL's slInitSystem fills the slots nobody reads):
-         A0  T0 NBG0 names, T1 NBG1 names, T2 NBG2 names, T3 NBG3 names (the readout and menus), T4 and T5 CPU, T6 NBG2 cells (scroll 1), T7 NBG3 cells
-         A1  T4 and T5 NBG0 cells (scroll 2), every other slot CPU
-         B0, B1  T5 and T6 NBG1 cells (scroll 3), every other slot CPU
-       Each layer's names come first and its cells later in the cycle, in the slots the VDP2 accepts for that name slot; NBG0 and NBG1 have two cell reads for the 1/2 reduction
-       mode (ZMCTL, the 384 on 352 fit). The earlier pattern gave NBG0 and NBG1 a cell read in all eight slots of their banks, including slots before and at the name read (T0 to T4)
-       that the VDP2 does not accept for that name slot, and no CPU slot in any bank. INFERRED, not verified on the console: those extra cell reads are the likely cause of the
-       vertical column dropouts that only NBG0 and NBG1 showed (NBG2 and NBG3, one legal cell slot each, were clean), and with no CPU slot the SH-2's VRAM writes can only complete in
-       the blanking periods, which would slow every picture. Strict Ymir and Yaba ignore both effects. */
+    /* VRAM split into four banks, CRAM mode 1. The cycle pattern and every register it depends on come from sat_vdp2_cfg.h, checked against Sega's VDP2 manual by
+       tools/vdp2_cycle_check.py at build time (names per layer 1 / 2 with the half reduction, cell reads, legal slots, the CPU slot pair rule). */
+    VDP2R(0x0e) = SAT_V2_RAMCTL;
     VDP2R(0x10) = SAT_CYC_A0L; VDP2R(0x12) = SAT_CYC_A0U;
     VDP2R(0x14) = SAT_CYC_A1L; VDP2R(0x16) = SAT_CYC_A1U;
     VDP2R(0x18) = SAT_CYC_B0L; VDP2R(0x1a) = SAT_CYC_B0U;
-    VDP2R(0x1c) = SAT_CYC_B0L; VDP2R(0x1e) = SAT_CYC_B0U;
+    VDP2R(0x1c) = SAT_CYC_B1L; VDP2R(0x1e) = SAT_CYC_B1U;
 #ifndef SAT_GFX_HOST
     lat_reset();
 #endif
     VDP2R(0x22) = 0; VDP2R(0x24) = 0; VDP2R(0x26) = 0;
-    VDP2R(0x28) = 0x0101;                         /* NBG0, NBG1: 16 colour, 2 x 2 cell characters */
-    VDP2R(0x2a) = 0;                              /* NBG2: 16 colour, 1 cell */
-    VDP2R(0x30) = 0; VDP2R(0x32) = 0; VDP2R(0x34) = 0; /* two word names */
+    VDP2R(0x28) = SAT_V2_CHCTLA;                  /* NBG0, NBG1: 16 colour, 2 x 2 cell characters */
+    VDP2R(0x2a) = SAT_V2_CHCTLB;                  /* NBG2, NBG3: 16 colour, 1 cell */
+    VDP2R(0x30) = SAT_V2_PNC0; VDP2R(0x32) = SAT_V2_PNC1; VDP2R(0x34) = SAT_V2_PNC2;
     VDP2R(0x38) = 0;
-    VDP2R(0x3a) = 0x000f;                         /* NBG0, NBG1 planes 2 x 2 pages; NBG2 1 page */
+    VDP2R(0x3a) = SAT_V2_PLSZ;
     VDP2R(0x3c) = 0;                              /* map offsets 0 */
     /* Map values count pages: 4K for 2 x 2 characters, 16K for 1 cell. */
-    VDP2R(0x40) = 0x0000; VDP2R(0x42) = 0x0000;   /* NBG0, scroll 2: every plane at 0 */
-    VDP2R(0x44) = (u16)(8 | (12 << 8));           /* NBG1, scroll 3: four planes from 0x8000 */
-    VDP2R(0x46) = (u16)(16 | (20 << 8));
-    VDP2R(0x48) = 0x0101; VDP2R(0x4a) = 0x0101;   /* NBG2, scroll 1: one page at 0x4000 */
+    VDP2R(0x40) = SAT_V2_MPAB0; VDP2R(0x42) = SAT_V2_MPCD0;   /* NBG0, scroll 2: every plane at the one 16 KB plane in bank A1 */
+    VDP2R(0x44) = SAT_V2_MPAB1; VDP2R(0x46) = SAT_V2_MPCD1;   /* NBG1, scroll 3: four planes from 0x8000 */
+    VDP2R(0x48) = SAT_V2_MPAB2; VDP2R(0x4a) = SAT_V2_MPCD2;   /* NBG2, scroll 1: one page at 0x4000 */
     VDP2R(0x72) = 0; VDP2R(0x76) = 0; VDP2R(0x82) = 0; VDP2R(0x86) = 0;
     VDP2R(0x78) = 1; VDP2R(0x7a) = 0; VDP2R(0x7c) = 1; VDP2R(0x7e) = 0;
     VDP2R(0x88) = 1; VDP2R(0x8a) = 0; VDP2R(0x8c) = 1; VDP2R(0x8e) = 0;
 #if SAT_GFX_FIT == 1
-    /* 384 source pixels on 352: increment 1 + 23/256 (the register keeps 8 fraction bits), half-reduction mode; NBG0 and NBG1 already have two character reads a slot. */
+    /* 384 source pixels on 352: increment 1 + 23/256 (the register keeps 8 fraction bits), half-reduction mode: the access cycles give NBG0 and NBG1 two name and two cell reads. */
     VDP2R(0x78) = 1; VDP2R(0x7a) = 0x1700; VDP2R(0x88) = 1; VDP2R(0x8a) = 0x1700;
-    VDP2R(0x98) = 0x0101;
-#elif SAT_GFX_FIT == 3
-    VDP2R(0x98) = 0;
-#else
-    VDP2R(0x98) = 0;
 #endif
+    VDP2R(0x98) = SAT_V2_ZMCTL;
+    VDP2R(0x36) = SAT_V2_PNC3; VDP2R(0x4c) = SAT_V2_MPAB3; VDP2R(0x4e) = SAT_V2_MPCD3;   /* NBG3 (menus, readout) is always set up */
 #if SAT_GFX_FIT == 1 || SAT_GFX_FIT == 3
     { int i2; for (i2 = 0; i2 <= 416; i2++) fit_x[i2] = (u16)(i2 * 11 / 12); }
 #endif

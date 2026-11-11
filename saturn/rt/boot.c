@@ -1,5 +1,6 @@
 /* First read at 0x06004000: map the cart, load segments from disc, enter the runtime. Lifted code never sees GFS. */
 #include "SEGA_GFS.H"
+#include "../gfx/sat_vdp2_cfg.h"
 #ifdef SAT_WV_REVEAL   /* the post-credits reveal and the save record (saturn/rt/reveal.c); without it this file is the loader as it was */
 #include "SEGA_BUP.H"
 #include "unlock_save.h"
@@ -147,8 +148,8 @@ static void diag_done_k(unsigned long restore, unsigned long b)   /* the boot di
     (void)b;
     if (restore) {   /* what sat_gfx_init set and diag_takeover changed (values from sat_gfx_init; BACKCOL 0x1fffe) */
         V2R(0x00) = 0x8101; V2R(0xac) = 0; V2R(0xae) = 0xffff;
-        V2R(0x10) = 0x0123; V2R(0x12) = 0xee67; V2R(0x14) = 0xeeee; V2R(0x16) = 0x44ee;   /* the access cycles of saturn/gfx/sat_gfx.c (SAT_CYC_*) */
-        V2R(0x18) = 0xeeee; V2R(0x1a) = 0xe55e; V2R(0x1c) = 0xeeee; V2R(0x1e) = 0xe55e;
+        V2R(0x10) = SAT_CYC_A0L; V2R(0x12) = SAT_CYC_A0U; V2R(0x14) = SAT_CYC_A1L; V2R(0x16) = SAT_CYC_A1U;   /* the access cycles of saturn/gfx/sat_vdp2_cfg.h */
+        V2R(0x18) = SAT_CYC_B0L; V2R(0x1a) = SAT_CYC_B0U; V2R(0x1c) = SAT_CYC_B1L; V2R(0x1e) = SAT_CYC_B1U;
     }
     diag_active = 0; DIAG_API[3] = 0;
 }

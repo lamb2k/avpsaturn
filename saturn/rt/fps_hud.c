@@ -1,7 +1,9 @@
 /* Performance readout, -DSAT_FPS_HUD (lane perf-reconcile, 2026-11-10). Default off; the owner reads it off a real Saturn.
-   Two short text lines on the menu layer (NBG3, the home font) at rows 24 and 25, refreshed about once a second:
+   Three short text lines on the menu layer (NBG3, the home font) at rows 24 to 26, refreshed about once a second:
      PIC n   new pictures that reached the screen in the last second (VDP1 frame-buffer swaps, 60 is the most)
-     GAME n  game frames run in the last second (60 is full speed)
+     DONE n  game frames COMPLETED in the last second, normalised to 60 vblanks (60 is full speed): vblanks minus the ones where the game's task walk had not reached its end. Until fix6 this
+             field was called GAME and counted writes to the object bank select (one per walk START), which stays 60 while the walk is cut off: it overstated the speed
+     FLIP n VBL n  that raw count (object bank selects) and the vblanks of the window, third line
      MISS n  game frames that were not finished when the next vblank came (the game fell behind)
      SKIP n  vblanks where the slave was still drawing, so no new snapshot was taken
      HELD n  swaps put off one vblank because VDP1 had not finished the plot
@@ -10,6 +12,7 @@
    test readout (SAT_PERF_HUD in sat_gfx.c, which needs 2.7 KB of high RAM and does not fit the current builds). */
 typedef unsigned char u8; typedef unsigned short u16; typedef unsigned int u32;
 #include "sat_rt.h"
+#include "../gfx/sat_vdp2_cfg.h"
 extern u32 sat_gfx_plot_waits;           /* swaps put off for an unfinished plot, since boot */
 extern unsigned short sat_gfx_colour(unsigned short cps);
 #ifdef SAT_HOME_FONT_COLD
@@ -28,8 +31,8 @@ extern void sat_gfx_vdp2_latch(unsigned off, unsigned val);
 #define COLS 24
 static u32 st[10] = { 1, 1, 1, 1, 1, 1, 1, 1, 1, 1 };   /* nonzero so they stay in .data */
 /* 0 inited, 1 last vblank, 2 last shown, 3 last overruns, 4 last flips, 5 last skips, 6 last waits, 7 pics, 8 (unused), 9 (unused) */
-static u16 shadow[2][COLS] = { { 0xffff } };
-static char text[2][COLS + 1] = { { 'P' }, { 'M' } };   /* initialised: the cold image has no .bss */
+static u16 shadow[3][COLS] = { { 0xffff } };
+static char text[3][COLS + 1] = { { 'P' }, { 'M' }, { 'F' } };   /* initialised: the cold image has no .bss */
 
 static u32 udiv(u32 n, u32 d) { u32 q = 0; if (!d) return 0; while (n >= d) { n -= d; q++; } return q; }
 static char *put_str(char *p, const char *s) { while (*s) *p++ = *s++; return p; }
@@ -51,13 +54,13 @@ static void setup(void)
 {
     u32 e;
     /* The access cycles already carry NBG3's slots (sat_gfx_init). The registers go through the draw's latch (applied at V-blank IN), never mid-frame. */
-    sat_gfx_vdp2_latch(0x36, 0x8063); sat_gfx_vdp2_latch(0x4c, 0x0f0f); sat_gfx_vdp2_latch(0x4e, 0x0f0f); sat_gfx_vdp2_latch(0x94, 0); sat_gfx_vdp2_latch(0x96, 0);
+    sat_gfx_vdp2_latch(0x36, SAT_V2_PNC3); sat_gfx_vdp2_latch(0x4c, SAT_V2_MPAB3); sat_gfx_vdp2_latch(0x4e, SAT_V2_MPCD3); sat_gfx_vdp2_latch(0x94, 0); sat_gfx_vdp2_latch(0x96, 0);
     sat_gfx_vdp2_latch(0x24, 0); sat_gfx_vdp2_latch(0x26, 0); sat_gfx_vdp2_latch(0xee, 0); sat_gfx_vdp2_latch(0x10a, 0); sat_gfx_vdp2_latch(0xec, 0);
     for (e = 0; e < 32; e++)                     /* banks 62 and 63: the home font's white and yellow, plain (no translucent dot). Pen p sits at entry p + 1 of its bank, pen 15 has none. */
         if ((e & 15) != 15) CRAM[62 * 16 + e + 1] = sat_gfx_colour((u16)(((u32)home_pal[e * 2] << 8) | home_pal[e * 2 + 1]));
     for (e = 0; e < 28 * 64; e++) VDP2_VRAM[(MAP_HOME >> 1) + e] = 0;
     shadow[0][0] = 0xffff; shadow[1][0] = 0xffff;
-    { u32 r, c; for (r = 0; r < 2; r++) for (c = 0; c < COLS; c++) shadow[r][c] = 0xffff; }
+    { u32 r, c; for (r = 0; r < 3; r++) for (c = 0; c < COLS; c++) shadow[r][c] = 0xffff; }
 }
 static void format(u32 dv)
 {
@@ -66,13 +69,14 @@ static void format(u32 dv)
     (void)shown;
     over = sat_dbg.overruns - st[3]; flips = sat_dbg.obj_flips - st[4]; skips = sat_dbg.gfx_skips - st[5]; waits = sat_gfx_plot_waits - st[6];
     d = shown;   /* new swaps in the window, set by the caller */
-    p = put_str(text[0], "PIC "); p = put_num(p, udiv(d * 60 + (dv >> 1), dv)); p = put_str(p, " GAME "); p = put_num(p, udiv(flips * 60 + (dv >> 1), dv)); *p = 0;
+    p = put_str(text[0], "PIC "); p = put_num(p, udiv(d * 60 + (dv >> 1), dv)); p = put_str(p, " DONE "); p = put_num(p, udiv((over >= dv ? 0 : dv - over) * 60 + (dv >> 1), dv)); *p = 0;
+    p = put_str(text[2], "FLIP "); p = put_num(p, udiv(flips * 60 + (dv >> 1), dv)); p = put_str(p, " VBL "); p = put_num(p, dv); *p = 0;
     p = put_str(text[1], "MISS "); p = put_num(p, over); p = put_str(p, " SKIP "); p = put_num(p, skips); p = put_str(p, " HELD "); p = put_num(p, waits); *p = 0;
 }
 static void paint(void)
 {
     u32 r, c;
-    for (r = 0; r < 2; r++)
+    for (r = 0; r < 3; r++)
     {
         int num = 0;
         for (c = 0; c < COLS; c++)
@@ -101,7 +105,7 @@ int sat_fps_hud(u32 shown, int fresh)
     if (fresh || st[0])
     {
         setup(); st[0] = 0; st[1] = v; st[2] = shown; st[3] = sat_dbg.overruns; st[4] = sat_dbg.obj_flips; st[5] = sat_dbg.gfx_skips; st[6] = sat_gfx_plot_waits;
-        text[0][0] = 'P'; text[0][1] = 'I'; text[0][2] = 'C'; text[0][3] = 0; text[1][0] = 0;
+        text[0][0] = 'P'; text[0][1] = 'I'; text[0][2] = 'C'; text[0][3] = 0; text[1][0] = 0; text[2][0] = 0;
         paint();
         return 1;
     }

@@ -1,0 +1,9 @@
+# file | substring of the line | reason     (writes of the VDP2 registers covered by tools/vdp2_cycle_check.py that do not use the sat_vdp2_cfg.h macros)
+saturn/rt/boot.c | V2R(0x10) = 0xffff | boot display (diag_takeover): no layer enabled (BGON 0), every slot no access
+saturn/rt/boot.c | V2R(0x18) = 0xffff | boot display (diag_takeover): no layer enabled, every slot no access
+saturn/rt/reveal.c | V2(0x0e) = 0x1300 | post-credits reveal screen (own mode, checked by check_reveal in vdp2_cycle_check.py)
+saturn/rt/reveal.c | V2(0x10) = 0xffff | reveal screen: A0 not read
+saturn/rt/reveal.c | V2(0x28) = 0x0012 | reveal screen: NBG0 512x256 256 colour bitmap
+saturn/rt/reveal.c | V2(0x2a) = 0 | reveal screen
+saturn/rt/reveal.c | V2(0x98) = 0x0101 | reveal screen: the game's fit on the bitmap
+saturn/rt/reveal.c | V2(0x98) = 0 | reveal screen: 1:1 crop variant

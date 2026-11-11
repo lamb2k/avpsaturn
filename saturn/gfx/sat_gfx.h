@@ -35,6 +35,7 @@ int sat_gfx_erase_suspend(void);
 extern unsigned long sat_gfx_erase_reduced, sat_gfx_erase_full, sat_gfx_erase_canceled;
 #endif
 /* SAT_GFX_FIT, a crop still choice for the owner: 0 the 1:1 centre crop. 1 scale the 384 wide picture to 352: VDP2 zoom on NBG0 and NBG1, scaled VDP1 sprites, HUD flush. 2 the crop, HUD flush. */
+#include "sat_vdp2_cfg.h"
 #ifndef SAT_GFX_FIT
 #define SAT_GFX_FIT 1   /* scaled: the owner's default, 2026-11-07 */
 #endif
@@ -126,8 +127,8 @@ extern unsigned long sat_gfx_pair_fallbacks, sat_gfx_pair_saved;
 #else
 #define SAT_GFX_S1_SLOTS 992 /* 4 stay clear */
 #endif
-#define SAT_GFX_S2_SLOTS 1024
-#define SAT_GFX_S3_SLOTS 512
+#define SAT_GFX_S2_SLOTS SAT_V2_S2_SLOTS   /* 895: the scroll 2 map (16 KB) and its blank character take the last 17 KB of bank A1 */
+#define SAT_GFX_S3_SLOTS SAT_V2_S3_SLOTS   /* 510: the scroll 3 blank character takes the last 1 KB of bank B1 below the boot display's table */
 
 typedef struct
 {

@@ -476,6 +476,11 @@ def refresh_restores(rom):
 
 
 def main():
+    # Gate: the VDP2 VRAM access cycle pattern and every write of the registers it depends on must follow Sega's VDP2 manual (names per layer with the reduction, cell reads, legal slots, CPU slot pairs): tools/vdp2_cycle_check.py.
+    r = subprocess.run([sys.executable, str(HERE.parents[1] / "tools" / "vdp2_cycle_check.py"), "--root", str(HERE.parents[1]), "--quiet"], capture_output=True, text=True)
+    if r.returncode:
+        raise SystemExit("NO-GO: VDP2 access cycle rules (tools/vdp2_cycle_check.py): " + r.stdout[-3000:].replace(chr(10), " | "))
+    print("vdp2 access cycles:", r.stdout.strip().splitlines()[-1])
     gen = gen_sources()
     with cf.ThreadPoolExecutor(max_workers=3) as ex:
         objs = list(ex.map(lambda s: cc(s, OBJ / (s.stem + ".o"), [OPT]), gen))
