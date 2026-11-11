@@ -100,12 +100,13 @@ static void diag_init(void)
 }
 static void diag_slave_k(unsigned long which, unsigned long b)   /* marks between the bands and the stripes: 1 the slave runs (yellow block), 2 the master woke it (white block), 3.. one line each, first vblank only: 3 entered, 4 after sat_gfx_vblank, 5 held-path test, 6 wake sent, 7 layers done, 8 f_e0e done, 9 handler end */
 {
-    static const unsigned short col[10] = { 0, 0, 0, C_RED, C_GREEN, C_BLUE, C_CYAN, C_MAGENTA, C_YELLOW, C_WHITE };
+    static const unsigned short col[11] = { 0, 0, 0, C_RED, C_GREEN, C_BLUE, C_CYAN, C_MAGENTA, C_YELLOW, C_WHITE, C_RED };
     (void)b;
     if (!diag_active) return;
     if (which == 1) diag_fill(134, 138, C_YELLOW);
     else if (which == 2) diag_fill(138, 142, C_WHITE);
     else if (which < 10) diag_fill(140 + (int)which, 141 + (int)which, col[which]);
+    else if (which == 10) diag_fill(132, 134, col[10]);
 }
 static void diag_reinit_k(unsigned long a, unsigned long b)   /* the runtime's graphics init cleared VRAM and the registers: take the screen back, bands and stripes as they were */
 {

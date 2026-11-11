@@ -765,7 +765,7 @@ void sat_vblank(void)
 #endif
     DIAG_AT(4);
     sat_dbg.vblanks++;
-    if (DIAG_API[3]) { if (sat_dbg.vblanks == 1) diag_call(0, 0, 0); else if (sat_dbg.vblanks == 4) diag_call(2, 1, 0); }   /* the loader's display ends on the 4th vblank */
+    if (DIAG_API[3]) { if (sat_dbg.vblanks <= 3) diag_call(0, 0, 0); else if (sat_dbg.vblanks == 4) diag_call(2, 1, 0); }   /* the loader's display ends on the 4th vblank */
 #ifdef SAT_VLOG
     { volatile unsigned long *e = (volatile unsigned long *)((unsigned long)&sat_vlog[(sat_dbg.vblanks & 15) * 4] | 0x20000000UL);
       e[0] = sat_dbg.vblanks << 16 | *(volatile unsigned short *)0x25D00010UL; e[1] = 0; e[2] = 0; e[3] = (UNCACHED(gfx_done) != UNCACHED(gfx_handed)); }
@@ -847,6 +847,7 @@ void sat_vblank(void)
     cpu = save; cur = sc;
     DIAG_AT(9);
     sat_audio_frame();
+    DIAG_AT(10);
     t2 = frt();
     sat_dbg.snap_ticks = t1 - t0; sat_dbg.irq_ticks = t2;
     if (t1 - t0 > sat_dbg.snap_peak) sat_dbg.snap_peak = t1 - t0;
