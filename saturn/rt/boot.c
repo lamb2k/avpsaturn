@@ -147,8 +147,8 @@ static void diag_done_k(unsigned long restore, unsigned long b)   /* the boot di
     (void)b;
     if (restore) {   /* what sat_gfx_init set and diag_takeover changed (values from sat_gfx_init; BACKCOL 0x1fffe) */
         V2R(0x00) = 0x8101; V2R(0xac) = 0; V2R(0xae) = 0xffff;
-        V2R(0x10) = 0x012f; V2R(0x12) = 0xff6f; V2R(0x14) = 0x4444; V2R(0x16) = 0x4444;
-        V2R(0x18) = 0x5555; V2R(0x1a) = 0x5555; V2R(0x1c) = 0x5555; V2R(0x1e) = 0x5555;
+        V2R(0x10) = 0x0123; V2R(0x12) = 0xee67; V2R(0x14) = 0xeeee; V2R(0x16) = 0x44ee;   /* the access cycles of saturn/gfx/sat_gfx.c (SAT_CYC_*) */
+        V2R(0x18) = 0xeeee; V2R(0x1a) = 0xe55e; V2R(0x1c) = 0xeeee; V2R(0x1e) = 0xe55e;
     }
     diag_active = 0; DIAG_API[3] = 0;
 }

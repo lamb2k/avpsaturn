@@ -59,6 +59,18 @@ static void put32(u8 *p, u32 v) { p[0] = (u8)(v >> 24); p[1] = (u8)(v >> 16); p[
 #define get32(d) (*(const volatile u32 *)(const void *)(d))
 #endif
 
+/* VDP2 registers written while a picture is drawn go through a latch and reach the chip at V-blank IN (SGL's rule: the display registers are set in the V-blank).
+   The slave draws at any beam position; a scroll register written mid-frame is taken by the VDP2 at the next line, and a vertical scroll write of NBG2 or NBG3
+   restarts that layer's vertical coordinate from the new value at that very line, so the whole scroll 1 layer (HUD, banners) showed again from the beam's line down
+   (the doubled HUD of the first console runs; strict Ymir shows it too, it resets the NBG2/NBG3 vertical counter on the write). The master applies the changed ones first
+   thing in sat_gfx_vblank. Registers are write-only, so the latch also skips a write of the value the chip already has. */
+#ifdef SAT_GFX_HOST
+#define VDP2L(o, v) (VDP2R(o) = (u16)(v))
+#else
+void sat_gfx_vdp2_latch(unsigned off, unsigned val);
+#define VDP2L(o, v) sat_gfx_vdp2_latch((o), (v))
+#endif
+
 #if !defined(SAT_GFX_HOST) || defined(SAT_GFX_SYNC_TEST) || defined(SAT_VLOG)
 #define SAT_GFX_HAVE_SYNC
 #endif
@@ -99,6 +111,13 @@ int sat_gfx_nudge_x, sat_gfx_nudge_y;
 #define OBJ_YOFFS 0x10
 #define CPS_LEFT 64
 #define CPS_TOP 16
+/* VRAM access cycles (see sat_gfx_init). Also in saturn/rt/boot.c (diag_done_k), which puts them back after the boot display. */
+#define SAT_CYC_A0L 0x0123
+#define SAT_CYC_A0U 0xee67
+#define SAT_CYC_A1L 0xeeee
+#define SAT_CYC_A1U 0x44ee
+#define SAT_CYC_B0L 0xeeee
+#define SAT_CYC_B0U 0xe55e
 
 /* A graphics RAM base as the game writes it: 0x90c0 is 0x90c000. */
 #define GFX(reg) (PAGE[((reg) >> 8) & 0xff] + (((u32)(reg) << 8) & 0xffffUL))
@@ -1164,6 +1183,28 @@ static void update_palette(void)
 #define LOW_RAM __attribute__((section(".lwgfx")))
 #endif
 static u32 sh_s1[64 * 64] LOW_RAM, sh_s2[64 * 64] LOW_RAM, sh_s3[64 * 64] LOW_RAM, sh_row[SAT_GFX_SCREEN_H] LOW_RAM;
+#ifndef SAT_GFX_HOST
+#define LAT_N 0x88                                  /* registers 0x00 to 0x10e: the latch covers the display registers the draw writes (highest: 0x10a) */
+static u16 lat_val[LAT_N] LOW_RAM, lat_applied[LAT_N] LOW_RAM;   /* lat_val: the slave's last value (0xffff: none yet); lat_applied: the master's last write (0xfffe: none) */
+void sat_gfx_vdp2_latch(unsigned off, unsigned val)
+{
+    *UNC_PTR(u16, &lat_val[off >> 1]) = (u16)val;
+}
+static void lat_apply(void)
+{
+    unsigned i;
+    for (i = 0; i < LAT_N; i++)
+    {
+        u16 v = *UNC_PTR(u16, &lat_val[i]);
+        if (v != 0xffff && v != lat_applied[i]) { VDP2R(i * 2) = v; lat_applied[i] = v; }
+    }
+}
+static void lat_reset(void)
+{
+    unsigned i;
+    for (i = 0; i < LAT_N; i++) { *UNC_PTR(u16, &lat_val[i]) = 0xffff; lat_applied[i] = 0xfffe; }
+}
+#endif
 
 static void write_name(u8 *addr, u32 name, u32 *shadow)
 {
@@ -1747,13 +1788,13 @@ static void update_priority(u16 layers, u16 pri)
     }
     prin[0] = prin[1] = prin[2] = 0;
     for (i = 0; i < n; i++) prin[order[i] - 1] = (u16)(2 + 2 * i);
-    VDP2R(0xf8) = (u16)(prin[1] | (prin[2] << 8)); /* NBG0 = scroll 2, NBG1 = scroll 3 */
+    VDP2L(0xf8, (u16)(prin[1] | (prin[2] << 8))); /* NBG0 = scroll 2, NBG1 = scroll 3 */
 #ifdef SAT_HOME
     /* NBG3 (the menu layer) keeps priority 7 through the whole picture: this write used to drop it to 0 at the start of every frame and draw_home
        put it back near the end, so under the frame chain (the slave still building sprite commands at the vblank) the menu text was never shown. */
-    VDP2R(0xfa) = (u16)(prin[0] | ((snap.home FPS_HUD(|| fps_on)) ? 0x0700 : 0));   /* NBG2 = scroll 1, NBG3 = menu */
+    VDP2L(0xfa, (u16)(prin[0] | ((snap.home FPS_HUD(|| fps_on)) ? 0x0700 : 0)));   /* NBG2 = scroll 1, NBG3 = menu */
 #else
-    VDP2R(0xfa) = prin[0];                          /* NBG2 = scroll 1 */
+    VDP2L(0xfa, prin[0]);                          /* NBG2 = scroll 1 */
 #endif
     prinb_last = prin[0];
     for (p = 0; p < 8; p++)
@@ -1778,10 +1819,10 @@ static void update_priority(u16 layers, u16 pri)
 #endif
         s[p] = (u16)level;
     }
-    VDP2R(0xf0) = (u16)(s[0] | (s[1] << 8));
-    VDP2R(0xf2) = (u16)(s[2] | (s[3] << 8));
-    VDP2R(0xf4) = (u16)(s[4] | (s[5] << 8));
-    VDP2R(0xf6) = (u16)(s[6] | (s[7] << 8));
+    VDP2L(0xf0, (u16)(s[0] | (s[1] << 8)));
+    VDP2L(0xf2, (u16)(s[2] | (s[3] << 8)));
+    VDP2L(0xf4, (u16)(s[4] | (s[5] << 8)));
+    VDP2L(0xf6, (u16)(s[6] | (s[7] << 8)));
 }
 
 #ifdef SAT_PERF_HUD
@@ -1854,9 +1895,8 @@ static HUD_OS void hud_layer(int fresh)
     u32 row, col, key = UNC32(hm_frames) / 60 + (UNC32(hm_frozen) ? 0x10000UL + (hs.pn & 0xffffUL) * 0x20000UL : 0) + (UNC32(hm_gen) & 0xffUL) * 0x10000000UL;
     int changed = key != hud_key;
     if (changed) { hud_key = key; hud_format(); }
-    VDP2R(0x10) = 0x0123; VDP2R(0x12) = 0xff67;   /* every picture, as the menus do */
-    VDP2R(0x36) = 0x8063; VDP2R(0x4c) = 0x0f0f; VDP2R(0x4e) = 0x0f0f; VDP2R(0x94) = 0; VDP2R(0x96) = 0;
-    VDP2R(0x24) = 0; VDP2R(0x26) = 0; VDP2R(0xee) = 0; VDP2R(0x10a) = 0; VDP2R(0xec) = 0;
+    VDP2L(0x36, 0x8063); VDP2L(0x4c, 0x0f0f); VDP2L(0x4e, 0x0f0f); VDP2L(0x94, 0); VDP2L(0x96, 0);   /* the access cycle pattern already gives NBG3 its slots (sat_gfx_init) */
+    VDP2L(0x24, 0); VDP2L(0x26, 0); VDP2L(0xee, 0); VDP2L(0x10a, 0); VDP2L(0xec, 0);
     if (fresh)
     {
         int e;
@@ -1873,7 +1913,7 @@ static HUD_OS void hud_layer(int fresh)
                     put16(VDP2_VRAM + MAP_HOME + (row * 64 + col) * 2, name);
                 }
             }
-    VDP2R(0xfa) = (u16)(prinb_last | 0x0700);
+    VDP2L(0xfa, (u16)(prinb_last | 0x0700));
 }
 #endif
 
@@ -2584,6 +2624,9 @@ unsigned long sat_vl_sforced;   /* retained SAT_VLOG ABI counter, always zero: u
 void sat_gfx_vblank(void)
 {
     u32 s = UNC32(plot_started);
+#ifndef SAT_GFX_HOST
+    lat_apply();   /* the display registers the slave drew with, at V-blank IN */
+#endif
     HUD(unsigned hud_cls = 4;)
 #ifdef SAT_VDP1_PROFILE
     unsigned int vp_before = (unsigned int)UNC32(plot_shown);
@@ -2830,7 +2873,7 @@ void sat_gfx_draw(void)
         if (was != SAT_FIT_ON)
         {
             was = SAT_FIT_ON; drawn_valid = 0;
-            VDP2R(0x7a) = VDP2R(0x8a) = (u16)(was ? 0x1700 : 0); VDP2R(0x98) = (u16)(was ? 0x0101 : 0);
+            VDP2L(0x7a, was ? 0x1700 : 0); VDP2L(0x8a, was ? 0x1700 : 0); VDP2L(0x98, (u16)(was ? 0x0101 : 0));
         }
     }
 #endif
@@ -2893,25 +2936,23 @@ void sat_gfx_draw(void)
 #endif
 #ifdef SAT_HOME
     /* The menus on NBG3, in front of everything: panel cells (dot code 15) blend with the picture under them by colour calculation in MSB mode
-       (only the panel colour, dot 15 of banks 62-63, has the MSB; per-dot mode drew opaque grey in Yaba); the font's dots stay solid. NBG3 gets cycle slots T3 (names) and T7 (cells) of bank A0 only while the menus are up;
-       leaving restores play's pattern, colour calculation and priority (update_priority writes 0xfa every frame). */
+       (only the panel colour, dot 15 of banks 62-63, has the MSB; per-dot mode drew opaque grey in Yaba); the font's dots stay solid. NBG3's cycle slots (T3 names, T7 cells of bank A0) are always there now;
+       leaving the menus restores play's colour calculation and priority (update_priority writes 0xfa every frame). */
     {
         static int home_was;
         HUD(static int hud_was;)
         if (snap.home)
         {
-            VDP2R(0x10) = 0x0123; VDP2R(0x12) = 0xff67;
-            VDP2R(0x36) = 0x8063; VDP2R(0x4c) = 0x0f0f; VDP2R(0x4e) = 0x0f0f; VDP2R(0x94) = 0; VDP2R(0x96) = 0;
-            VDP2R(0xfa) = (u16)(prinb_last | 0x0700);
-            VDP2R(0x24) = 0; VDP2R(0x26) = 0x0080; VDP2R(0xee) = 0x00c0; VDP2R(0x10a) = (u16)(sat_home_ratio << 8); VDP2R(0xec) = 0x0008;
+            VDP2L(0x36, 0x8063); VDP2L(0x4c, 0x0f0f); VDP2L(0x4e, 0x0f0f); VDP2L(0x94, 0); VDP2L(0x96, 0);
+            VDP2L(0xfa, (u16)(prinb_last | 0x0700));
+            VDP2L(0x24, 0); VDP2L(0x26, 0x0080); VDP2L(0xee, 0x00c0); VDP2L(0x10a, (u16)(sat_home_ratio << 8)); VDP2L(0xec, 0x0008);
             draw_home(!home_was);
             /* Colour calculation by the colour's MSB (SFCCMD NBG3 mode 3): banks 62 and 63 written here with the MSB only on dot 15, the panel's. */
             { int e; for (e = 62 * 16 + 1; e < 64 * 16; e++) if (e & 15) put16(CRAM_AT(e), (u16)((sat_gfx_colour(cram_shadow[e]) & 0x7fffU) | ((e & 15) == 15 ? 0x8000U : 0))); }
         }
         else if (home_was HUD(&& !snap.hud))
         {
-            VDP2R(0x10) = 0x012f; VDP2R(0x12) = 0xff6f;
-            VDP2R(0xec) = 0; VDP2R(0xee) = 0; VDP2R(0x10a) = 0;
+            VDP2L(0xec, 0); VDP2L(0xee, 0); VDP2L(0x10a, 0);
             { int e; for (e = 62 * 16 + 1; e < 64 * 16; e++) put16(CRAM_AT(e), sat_gfx_colour(cram_shadow[e])); }   /* the game's colours back, MSB as everywhere */
         }
         HUD(if (snap.hud && !snap.home) { hud_layer(home_was || !hud_was); hud_was = 1; } else hud_was = 0;)
@@ -2929,7 +2970,7 @@ void sat_gfx_draw(void)
 #endif
     STAGE(1);
     update_rowscroll();
-    VDP2R(0x9a) = (u16)(row_active ? 0x0002 : 0);
+    VDP2L(0x9a, (u16)(row_active ? 0x0002 : 0));
     HUD_POLL();
 
     STAGE(2);
@@ -2973,13 +3014,13 @@ void sat_gfx_draw(void)
 #ifdef SAT_HOME
     if (snap.home HUD(|| snap.hud) FPS_HUD(|| fps_on)) bgon |= 8;
 #endif
-    VDP2R(0x20) = bgon;
-    VDP2R(0x70) = (u16)((s2x + CPS_LEFT + SAT_GFX_CROP_X - NUDGE_X) & 0x7ff);
-    VDP2R(0x74) = (u16)((s2y + CPS_TOP - NUDGE_Y) & 0x7ff);
-    VDP2R(0x80) = (u16)((s3x + CPS_LEFT + SAT_GFX_CROP_X - NUDGE_X) & 0x7ff);
-    VDP2R(0x84) = (u16)((s3y + CPS_TOP - NUDGE_Y) & 0x7ff);
-    VDP2R(0x90) = (u16)((s1x + CPS_LEFT + S1_REG_CROP - NUDGE_X) & 0x7ff);
-    VDP2R(0x92) = (u16)((s1y + CPS_TOP - NUDGE_Y) & 0x7ff);
+    VDP2L(0x20, bgon);
+    VDP2L(0x70, (u16)((s2x + CPS_LEFT + SAT_GFX_CROP_X - NUDGE_X) & 0x7ff));
+    VDP2L(0x74, (u16)((s2y + CPS_TOP - NUDGE_Y) & 0x7ff));
+    VDP2L(0x80, (u16)((s3x + CPS_LEFT + SAT_GFX_CROP_X - NUDGE_X) & 0x7ff));
+    VDP2L(0x84, (u16)((s3y + CPS_TOP - NUDGE_Y) & 0x7ff));
+    VDP2L(0x90, (u16)((s1x + CPS_LEFT + S1_REG_CROP - NUDGE_X) & 0x7ff));
+    VDP2L(0x92, (u16)((s1y + CPS_TOP - NUDGE_Y) & 0x7ff));
 #ifdef SAT_PROF
     if (speed_on)
     {
@@ -3123,11 +3164,23 @@ COLD_OS int sat_gfx_init(const void *pack)
 
     /* VRAM split into four banks, CRAM mode 1. */
     VDP2R(0x0e) = 0x1300;
-    /* Reads: A0 names for all three plus scroll 1 cells, A1 scroll 2 cells, B0 and B1 scroll 3 cells. */
-    VDP2R(0x10) = 0x012f; VDP2R(0x12) = 0xff6f;
-    VDP2R(0x14) = 0x4444; VDP2R(0x16) = 0x4444;
-    VDP2R(0x18) = 0x5555; VDP2R(0x1a) = 0x5555;
-    VDP2R(0x1c) = 0x5555; VDP2R(0x1e) = 0x5555;
+    /* VRAM access cycles, the arrangement of SGL's examples and of games that run on the console (T0 to T7 per bank; 0..3 pattern name of NBG0..3, 4..7 character pattern of NBG0..3,
+       E the CPU, as SGL's slInitSystem fills the slots nobody reads):
+         A0  T0 NBG0 names, T1 NBG1 names, T2 NBG2 names, T3 NBG3 names (the readout and menus), T4 and T5 CPU, T6 NBG2 cells (scroll 1), T7 NBG3 cells
+         A1  T4 and T5 NBG0 cells (scroll 2), every other slot CPU
+         B0, B1  T5 and T6 NBG1 cells (scroll 3), every other slot CPU
+       Each layer's names come first and its cells later in the cycle, in the slots the VDP2 accepts for that name slot; NBG0 and NBG1 have two cell reads for the 1/2 reduction
+       mode (ZMCTL, the 384 on 352 fit). The earlier pattern gave NBG0 and NBG1 a cell read in all eight slots of their banks, including slots before and at the name read (T0 to T4)
+       that the VDP2 does not accept for that name slot, and no CPU slot in any bank. INFERRED, not verified on the console: those extra cell reads are the likely cause of the
+       vertical column dropouts that only NBG0 and NBG1 showed (NBG2 and NBG3, one legal cell slot each, were clean), and with no CPU slot the SH-2's VRAM writes can only complete in
+       the blanking periods, which would slow every picture. Strict Ymir and Yaba ignore both effects. */
+    VDP2R(0x10) = SAT_CYC_A0L; VDP2R(0x12) = SAT_CYC_A0U;
+    VDP2R(0x14) = SAT_CYC_A1L; VDP2R(0x16) = SAT_CYC_A1U;
+    VDP2R(0x18) = SAT_CYC_B0L; VDP2R(0x1a) = SAT_CYC_B0U;
+    VDP2R(0x1c) = SAT_CYC_B0L; VDP2R(0x1e) = SAT_CYC_B0U;
+#ifndef SAT_GFX_HOST
+    lat_reset();
+#endif
     VDP2R(0x22) = 0; VDP2R(0x24) = 0; VDP2R(0x26) = 0;
     VDP2R(0x28) = 0x0101;                         /* NBG0, NBG1: 16 colour, 2 x 2 cell characters */
     VDP2R(0x2a) = 0;                              /* NBG2: 16 colour, 1 cell */
