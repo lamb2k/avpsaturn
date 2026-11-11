@@ -48,6 +48,8 @@ def main():
         nonlocal bursts
         if not (regs.get(0x00, 0) & 0x8000) or not (regs.get(0x20, 0) & 0xf):
             return
+        if a.layout != "none" and regs.get(0x0e, 0) != 0x1300:   # the BIOS's own screens (SEGA logo) before the game's set-up: not ours to judge
+            return
         key = tuple(regs.get(o, 0) for o in CYC + (0x0e, 0x20, 0x28, 0x2a, 0x30, 0x32, 0x34, 0x36, 0x3a, 0x40, 0x42, 0x44, 0x46, 0x48, 0x4a, 0x4c, 0x4e, 0x98))
         bursts += 1
         if key in states:
