@@ -105,6 +105,16 @@ static void paint(void)
         }
     }
 }
+/* Called by the master's vblank handler when the slave has drawn no picture for two seconds: "SLAVE STOP" and the picture count (4 hex digits) on the readout's row 27, written straight into the menu layer's map (the slave
+   that normally writes the readout is the one that has stopped). Repeats every 64 vblanks while the stall lasts. */
+void sat_fps_stall(u32 still, u32 frames)
+{
+    static const char msg[] = "SLAVE STOP ";
+    u32 c, v = frames;
+    (void)still;
+    for (c = 0; c < 11; c++) VDP2_VRAM[(MAP_HOME >> 1) + 27 * 64 + c] = name_of(msg[c], 1);
+    for (c = 0; c < 4; c++) { u32 d = (v >> (12 - 4 * c)) & 15; VDP2_VRAM[(MAP_HOME >> 1) + 27 * 64 + 11 + c] = name_of((char)(d < 10 ? '0' + d : 'A' + d - 10), 1); }
+}
 /* Called by sat_gfx_draw about once a second, and once when the menus have just gone. shown: the VDP1 frame-buffer swap count (plot_shown). Returns 1: layer on. */
 int sat_fps_hud(u32 shown, int fresh)
 {

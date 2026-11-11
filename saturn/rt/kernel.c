@@ -826,6 +826,16 @@ void sat_vblank(void)
     pc_arm(200 + (sat_dbg.vblanks * 37) % PC_STEP);
 #endif
     sat_pad_tick();
+#ifdef SAT_FPS_HUD
+    {   /* watchdog: the slave draws every picture (and the readout); if its picture counter stands still for two seconds while this handler keeps running, the readout says so (fps_hud.c sat_fps_stall) */
+        static u32 wd_last, wd_still;
+        extern void sat_fps_stall(u32 still, u32 frames);
+        extern unsigned long sat_gfx_stats;   /* SatGfxStats: its first member is the slave's picture counter, read through the cache-through alias */
+        u32 wd_f = *(volatile unsigned long *)((unsigned long)&sat_gfx_stats | 0x20000000UL);
+        if (wd_f != wd_last) { wd_last = wd_f; wd_still = 0; }
+        else if (++wd_still >= 120 && (wd_still & 63) == 56) sat_fps_stall(wd_still, wd_f);
+    }
+#endif
     t0 = frt();
     DIAG_AT(5);
 #ifdef SAT_HOME

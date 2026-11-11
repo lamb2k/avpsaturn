@@ -632,8 +632,18 @@ static void vram_copy(u8 *dest, const u8 *src, u32 bytes)
     for (i = 0; i < bytes; i++) dest[i] = src[i];
 #else
     volatile u32 *d = (volatile u32 *)(void *)dest;
-    const u32 *s = (const u32 *)(const void *)src;
-    for (i = 0; i < bytes / 4; i++) d[i] = s[i];
+    if ((u32)src & 3UL)
+    {
+        /* A source that is not long aligned (the guest face cells, saturn/rt/guest_face.inc, were 2 mod 4): a long load from it is an address error on the console (the slave stopped in the middle of the
+           first Wolverine talk box); the emulators accept it. Four byte loads, one long store (big endian), the same bytes. */
+        const u8 *b = (const u8 *)src;
+        for (i = 0; i < bytes / 4; i++, b += 4) d[i] = ((u32)b[0] << 24) | ((u32)b[1] << 16) | ((u32)b[2] << 8) | b[3];
+    }
+    else
+    {
+        const u32 *s = (const u32 *)(const void *)src;
+        for (i = 0; i < bytes / 4; i++) d[i] = s[i];
+    }
 #endif
 #endif
     HUD(if (hs.in_build) hs.upl += (GFX_TICKS() - hud_upload_start) & 0xffffUL;)

@@ -322,13 +322,13 @@ def face_include(pieces, stage_data):
            "#define GUEST_FACE_N %d" % len(keys),
            "static const unsigned long guest_face_key[GUEST_FACE_N] = {%s};" % ",".join("0x%x" % k for k, _ in keys),
            "static const unsigned char guest_face_idx[GUEST_FACE_N] = {%s};" % ",".join(str(i) for _, i in keys),
-           "static const unsigned char guest_face_data[%d][32] = {%s};" % (len(data), ",".join("{" + ",".join(str(b) for b in pl) + "}" for pl in data))]
+           "static const unsigned char guest_face_data[%d][32] __attribute__((aligned(4))) = {%s};" % (len(data), ",".join("{" + ",".join(str(b) for b in pl) + "}" for pl in data))]
     return "\n".join(out) + "\n"
 
 
 def face_include_empty():
     return "\n".join(["/* no guest art: no face override */", "#define GUEST_FACE_N 0", "static const unsigned long guest_face_key[1] = {0};",
-                    "static const unsigned char guest_face_idx[1] = {0};", "static const unsigned char guest_face_data[1][32] = {{0}};"]) + "\n"
+                    "static const unsigned char guest_face_idx[1] = {0};", "static const unsigned char guest_face_data[1][32] __attribute__((aligned(4))) = {{0}};"]) + "\n"
 
 
 def _write(path, data):
