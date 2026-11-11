@@ -752,9 +752,7 @@ SECTIONS {{
     import check_boot_data
     bad = check_boot_data.check(WORK / "boot.elf", WORK / "boot.map")
     if bad:
-        raise SystemExit("NO-GO: loader data addresses (check_boot_data.py):
-" + "
-".join(bad[:20]))
+        raise SystemExit("NO-GO: loader data addresses (check_boot_data.py):" + chr(10) + chr(10).join(bad[:20]))
     print("boot data addresses: ok")
     cd_stat = next(int(l.split()[0], 16) for l in sh([NM, WORK / "boot.elf"]).splitlines() if l.endswith(" _cd_stat"))
     code = (ISO / "0.BIN").read_bytes()
