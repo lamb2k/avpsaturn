@@ -24,6 +24,14 @@ typedef unsigned char u8;
 typedef unsigned short u16;
 typedef unsigned long u32;
 
+#ifdef SAT_GFX_INIT_COLD
+/* Lane perf2 11-11, default off: sat_gfx_init and clear_vram (1 KB, run once at boot) are linked into the cart tail with
+   the cold home code (input section .coldtext, build.py), where COLD1.BIN is already loaded when the kernel starts. Only these two: the cart tail has about 1.1 KB before its next 4 KB step (the menu painters took 0.9 KB of it). */
+#define INIT_COLD __attribute__((section(".coldtext")))
+#else
+#define INIT_COLD
+#endif
+
 #ifdef SAT_GFX_HOST
 /* Host test: plain big-endian memory in place of the chips. */
 extern u8 *sat_gfx_host_vdp1, *sat_gfx_host_vdp2, *sat_gfx_host_cram;
@@ -3241,7 +3249,7 @@ static COLD_OS int open_pack(const u8 *p)
     return 1;
 }
 
-static void clear_vram(u8 *p, u32 bytes)
+static INIT_COLD void clear_vram(u8 *p, u32 bytes)
 {
     u32 i;
     for (i = 0; i < bytes; i += 4) put32(p + i, 0);
@@ -3265,7 +3273,7 @@ int sat_gfx_swap_pack(const void *pack)
 
 void sat_gfx_display(int on) { VDP2R(0x00) = on ? 0x8001 : 0x0001; }
 
-COLD_OS int sat_gfx_init(const void *pack)
+COLD_OS INIT_COLD int sat_gfx_init(const void *pack)
 {
 #ifdef SAT_KEYLOG
     { u32 i; for (i = 0; i < 0x10000; i += 2) *(volatile u16 *)(0x25A70000UL + i) = 0; }
