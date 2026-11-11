@@ -1180,25 +1180,49 @@ static void update_palette(void)
 static u32 sh_s1[64 * 64] LOW_RAM, sh_s2[64 * 64] LOW_RAM, sh_s3[64 * 64] LOW_RAM, sh_row[SAT_GFX_SCREEN_H] LOW_RAM;
 #ifndef SAT_GFX_HOST
 #define LAT_N 0x88                                  /* registers 0x00 to 0x10e: the latch covers the display registers the draw writes (highest: 0x10a) */
-static u16 lat_val[LAT_N];                          /* the slave's last value per register (0xffff: none yet); high work RAM, the low RAM is full */
+/* One picture's display state is built in lat_wr / lat_wv (the slave only: every VDP2L of the draw, valid flags kept apart from the values, so no register value means "unset"), published
+   as a whole at the end of the draw (lat_publish: sequence word odd while it copies, even when complete) and written to the chip by the master at V-blank IN from the last complete
+   record (lat_apply: re-read if the slave published meanwhile). A vblank therefore never applies registers from two different pictures. High work RAM; the low RAM is full. */
+static u16 lat_wr[LAT_N], lat_pub[LAT_N];
+static u8 lat_wv[LAT_N], lat_pv[LAT_N];
+static u32 lat_seq;
+unsigned long sat_lat_retries, sat_lat_skips;       /* diagnostic: records re-read because one was published during the apply, vblanks that found one being published for good */
 void sat_gfx_vdp2_latch(unsigned off, unsigned val)
 {
-    *UNC_PTR(u16, &lat_val[off >> 1]) = (u16)val;
+    lat_wr[off >> 1] = (u16)val; lat_wv[off >> 1] = 1;
 }
-static void lat_apply(void)   /* every latched register is written once per V-blank, as SGL's V-blank handler writes its shadows */
+static void lat_publish(void)   /* the slave, once the draw has written every register of this picture */
 {
     unsigned i;
-    for (i = 0; i < LAT_N; i++)
+    u32 q = UNC32(lat_seq);
+    UNC32(lat_seq) = q + 1;
+    for (i = 0; i < LAT_N; i++) { *UNC_PTR(u16, &lat_pub[i]) = lat_wr[i]; *UNC_PTR(u8, &lat_pv[i]) = lat_wv[i]; }
+    UNC32(lat_seq) = q + 2;
+}
+static void lat_apply(void)   /* the master at V-blank IN: every register of the last complete record, written once per V-blank as SGL's V-blank handler writes its shadows */
+{
+    unsigned i, t;
+    for (t = 0; t < 4; t++)
     {
-        u16 v = *UNC_PTR(u16, &lat_val[i]);
-        if (v != 0xffff) VDP2R(i * 2) = v;
+        u32 q = UNC32(lat_seq);
+        if (q & 1) { sat_lat_retries++; continue; }
+        for (i = 0; i < LAT_N; i++)
+            if (*UNC_PTR(u8, &lat_pv[i])) VDP2R(i * 2) = *UNC_PTR(u16, &lat_pub[i]);
+        if (UNC32(lat_seq) == q) return;
+        sat_lat_retries++;
     }
+    sat_lat_skips++;
 }
 static void lat_reset(void)
 {
     unsigned i;
-    for (i = 0; i < LAT_N; i++) *UNC_PTR(u16, &lat_val[i]) = 0xffff;
+    for (i = 0; i < LAT_N; i++) { lat_wr[i] = 0; lat_wv[i] = 0; *UNC_PTR(u16, &lat_pub[i]) = 0; *UNC_PTR(u8, &lat_pv[i]) = 0; }
+    UNC32(lat_seq) = 0;
+    sat_lat_retries = sat_lat_skips = 0;
 }
+#define LAT_PUBLISH() lat_publish()
+#else
+#define LAT_PUBLISH() ((void)0)
 #endif
 
 static void write_name(u8 *addr, u32 name, u32 *shadow)
@@ -3006,6 +3030,7 @@ void sat_gfx_draw(void)
     VDP2L(0x84, (u16)((s3y + CPS_TOP - NUDGE_Y) & 0x7ff));
     VDP2L(0x90, (u16)((s1x + CPS_LEFT + S1_REG_CROP - NUDGE_X) & 0x7ff));
     VDP2L(0x92, (u16)((s1y + CPS_TOP - NUDGE_Y) & 0x7ff));
+    LAT_PUBLISH();   /* the whole display state of this picture, for the next V-blank IN */
 #ifdef SAT_PROF
     if (speed_on)
     {
