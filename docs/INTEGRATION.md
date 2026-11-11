@@ -21,7 +21,9 @@ Memory, owner recipe, assets D11 (hw_free / lw_free / cart_free; Yaba-built, mea
 | + reveal aaa05a0 (overlay) = disc 3g (4d105c0), SAT_GUEST_DEFAULT=0 | 496 | 84 | 4,168 |
 | + native 26a406d/7882c2f (knockdown poses, tables gated, grab poses) + stage-menu-bg e3feb86 (362324a) | 480 | 100 | 4,136 |
 | + talkbox 0b44fd8 (HUD continue select) = disc 3h (9fff850); the talkbox step costs 0 B hw/lw/cart (same sources before and after) | 480 | 100 | 4,136 |
-| (not merged) perf-reconcile 9ae1f42 with SAT_FPS_HUD on: lane figure -216 B hw (so about 264), cart tail steps 4 KB; SAT_HOME_FONT_COLD frees 1,920 B hw | | | |
+| + perf-reconcile 5640b80 merged (default off) + native ESSENTIALS remap c6a7294 (D12 assets, WV_SKIP_KEYCHECK=1) = 5e49c52. Hardware A/B pair: A = + SAT_HOME_FONT_COLD + SAT_FPS_HUD | 2,136 | 96 | 6,352 (remap crossed a 4 KB step; stage 0e drops 323 keys, was 243) |
+| B = A + SAT_S1_MEMO + SAT_S1_BLANKROWS (only gfx_sat_gfx.o differs) | 1,448 | 96 | 6,352 |
+| (earlier lane figure) perf-reconcile 9ae1f42 with SAT_FPS_HUD on: lane figure -216 B hw (so about 264), cart tail steps 4 KB; SAT_HOME_FONT_COLD frees 1,920 B hw | | | |
 
 ## Merged (in avp/integration)
 
@@ -59,7 +61,7 @@ Asset sets: D11 as above; sprite fuzz data `char_fuzz.json` is private and goes 
 
 ## In progress (not merged yet)
 
-Perf lane (lane/perf-reconcile-20261110 9ae1f42, switches default off: SAT_FPS_HUD readout, SAT_S1_MEMO, SAT_S1_BLANKROWS, SAT_HOME_FONT_COLD) is merged only on `wip/integration-with-perf-20261110` (0fb8fbc); it is not on avp/integration until the hardware numbers say what goes in. Note the readout flag is SAT_FPS_HUD (SAT_PERF_HUD is the older hwtest readout).
+Perf lane (lane/perf-reconcile-20261110 5640b80: SAT_FPS_HUD readout, SAT_S1_MEMO, SAT_S1_BLANKROWS, SAT_HOME_FONT_COLD) is merged on avp/integration with every switch default off; the A/B pair turns them on. Note the readout flag is SAT_FPS_HUD (SAT_PERF_HUD is the older hwtest readout).
 
 Updated 2026-11-10 evening.
 
@@ -76,6 +78,7 @@ Dropped (owner 2026-11-09: no more work on the sprite-replacement Wolverine): cl
 
 | Disc | Commit | Package | State |
 | --- | --- | --- | --- |
+| avp_3h_A_base / avp_3h_B_perf | 5e49c52 | E:\AvP\package-integrationenrirvp_3h_A_base and ...vp_3h_B_perf (Brooklyn Bangout cue layout) | hardware A/B pair; same base, B adds MEMO + BLANKROWS; STORE 151,962 sectors, ISO 316 MB; fit 77/77 (D12), checks 0 of 287, flag-off identity (combined tree vs remap reverted) identical, both boot in Yaba from their folders |
 | avp_integration_3h | 9fff850 | E:\AvP\package-integrationvp_integration_3h (Fenrir folder: E:\AvP\package-integrationenrirvp_integration_3h) | current: 3g + native 7882c2f + stage-menu-bg + talkbox 0b44fd8; SAT_GUEST_DEFAULT=0; first hardware run |
 | avp_integration_3g | 4d105c0 | E:\AvP\package-integrationvp_integration_3g | current: 3e + reveal; SAT_GUEST_DEFAULT=0 (Wolverine off on a fresh save; Options toggle or the reveal turns him on) |
 | avp_integration_3e | 45c867c | E:\AvP\package-integrationvp_integration_3e | everything except the reveal; SAT_GUEST_DEFAULT=1; superseded by 3g |
