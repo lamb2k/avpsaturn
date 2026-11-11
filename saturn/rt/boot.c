@@ -414,7 +414,8 @@ int main(void)
     /* The 4 MB cart (ST-TECH-47: ASR0, AREF, then a WORD write of 1 to 0x257efffe). The BIOS's own timing is ASR0 = ASR1 = 0x1ff01ff0, AREF = 0x1f; the working JO disc runs the
        cart on it and never writes ASR0/AREF. Default build: enable the cart on the BIOS timing and verify it, only then switch to ours (0x23301ff0 / 0x13), verify again and go
        back to the BIOS timing if that fails (yellow band). AVP_CART_ORIG (diagnosis discs): ours first, the BIOS's as the fallback. */
-#define ABUS_BIOS() do { *(volatile unsigned long *)0x25fe00b0 = 0x1ff01ff0; *(volatile unsigned long *)0x25fe00b8 = 0x0000001f; } while (0)
+#define ABUS_BIOS() do { *(volatile unsigned long *)0x25fe00b0 = 0x1ff01ff0; *(volatile unsigned long *)0x25fe00b4 = 0x1ff01ff0; *(volatile unsigned long *)0x25fe00b8 = 0x0000001f; } while (0)
+static void spin(unsigned long n) { while (n--) __asm__ volatile ("nop"); }
 #define ABUS_OURS() do { *(volatile unsigned long *)0x25fe00b0 = 0x23301ff0; *(volatile unsigned long *)0x25fe00b8 = 0x00000013; } while (0)
 #ifdef AVP_CART_ORIG
     for (;;) {
@@ -428,11 +429,21 @@ int main(void)
         tried = 1;
     }
 #else
-    *(volatile unsigned short *)0x257efffe = 1;          /* the BIOS's timing is still in force */
-    id = *cart_id;
-    diag_info(0x1000u | id);                            /* the cart's ID byte: 5c is a 4 MB RAM cart */
-    cart[0] = 0x12345678; cart[1] = 0xedcba987;
-    if (cart[0] != 0x12345678 || cart[1] != 0xedcba987) diag_fail(id == 0x5c ? 0xe0f0u : 0xe0f2u, C_RED, id);   /* red: e0f0 the cart did not answer, e0f2 no 4 MB cart ID either */
+    ABUS_BIOS();                                         /* the clock change service leaves the A-bus at these values; written again so nothing depends on how a console's SCU reset left them */
+    *(volatile unsigned short *)0x257efffe = 1;
+    spin(300000);                                        /* a few ms for the cart after the reset */
+    {
+        int k;
+        for (k = 0; k < 4; k++) {
+            id = *cart_id;
+            cart[0] = 0x12345678; cart[1] = 0xedcba987;
+            if (cart[0] == 0x12345678 && cart[1] == 0xedcba987) break;
+            spin(300000);
+            *(volatile unsigned short *)0x257efffe = 1;
+        }
+        diag_info(0x1000u | id);                        /* the cart's ID byte: 5c is a 4 MB RAM cart */
+        if (cart[0] != 0x12345678 || cart[1] != 0xedcba987) diag_fail(id == 0x5c ? 0xe0f0u : 0xe0f2u, C_RED, id);   /* red: e0f0 the cart did not answer, e0f2 no 4 MB cart ID either */
+    }
 #ifndef AVP_ABUS_BIOS
     ABUS_OURS();
     *(volatile unsigned short *)0x257efffe = 1;
