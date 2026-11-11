@@ -68,8 +68,7 @@ static void put32(u8 *p, u32 v) { p[0] = (u8)(v >> 24); p[1] = (u8)(v >> 16); p[
 #define VDP2L(o, v) (VDP2R(o) = (u16)(v))
 #else
 void sat_gfx_vdp2_latch(unsigned off, unsigned val);
-#define VDP2L(o, v) (VDP2R(o) = (u16)(v))   /* EXPERIMENT E1: no latch */
-#define SAT_E1 1
+#define VDP2L(o, v) sat_gfx_vdp2_latch((o), (v))
 #endif
 
 #if !defined(SAT_GFX_HOST) || defined(SAT_GFX_SYNC_TEST) || defined(SAT_VLOG)
@@ -2626,7 +2625,7 @@ void sat_gfx_vblank(void)
 {
     u32 s = UNC32(plot_started);
 #ifndef SAT_GFX_HOST
-    /*E1*/ /* lat_apply();   the display registers the slave drew with, at V-blank IN */
+    lat_apply();   /* the display registers the slave drew with, at V-blank IN */
 #endif
     HUD(unsigned hud_cls = 4;)
 #ifdef SAT_VDP1_PROFILE
