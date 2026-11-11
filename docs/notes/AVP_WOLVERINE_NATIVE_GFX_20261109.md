@@ -591,3 +591,10 @@ Free-running soaks, 0 anomalies each (play, into-enemy, knockdown): the states r
 
 ### 18.5 Tools
 `remap_probe.py` (per-record tile cost and pictures of any arcade entries), `make_d12.py`, `remap_sheets.py`.
+
+### 18.6 Gates on the final head (build b_r3, D12, owner heal and flash switches)
+- Build rc 0 (b_r2 full, 1,974 s; b_r3 cached with 020014 on 8.1, 24 s): hw_free 1,080, lw_free 84, block 23,116 bytes, cold1_at 0x27e1000.
+- fit.py on a D12 copy (b_r2 and again on b_r3): 76/76, gate True, none of his own keys dropped, no missing guest key; Wolverine tiles per stage file +0 at most, -31 at stage 0e; stage 0e margins 396 / 270 / 379 / 334; tightest stage24 40 / 44 / 44; cart pack room 1,626,112.
+- HOST (guest off, flag on, `--wvf 1`): golden_c1 clean 272,171, golden_2p clean 329,918, 0 differing, missed IRQ 0. WSL unittest: 106 run, 30 errors (the known set, same names), 1 skipped.
+- Flag-off identity: the run (`identity.sh`, two builds) compared this tree against `git archive avp/integration`. By the time it ran, `avp/integration` (5e49c52) already contained this branch's remap (c6a7294) and 98 other commits (disc 3h, the perf lane), so the two sides differ in HW, LW, COLD1, ROM and size (489 MB against 391 MB) for reasons unrelated to the switches: the result is not a valid identity check and is not used. The owner-approved speed-up moves the identity to the integration lane's combined A/B build; nothing here waits on it. The change set since the last valid identity (section 16.1) is behind `SAT_WV_NATIVE_GFX` and `WV_NO_GRAB`, or runs only with `GUEST_ASSETS`.
+- Rebuilding the asset set: `make_d12.py WORK D11 MSHVSF_DUMP D12_OUT`, then build with `GUEST_ASSETS=D12_OUT` and `WV_SKIP_KEYCHECK=1` (the native block needs the D12 tiles; with D11 `gen_native.py` stops with a NO-GO naming the role whose frames are not resident, or build with `WV_REMAP=0`).
