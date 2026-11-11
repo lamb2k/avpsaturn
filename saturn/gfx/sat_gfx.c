@@ -1549,10 +1549,13 @@ no:
 #define S1_ALL ((1UL << S1_ROWS) - 1)
 static u32 s1d_key, s1d_have;   /* flags and position of the last scroll 1 draw (bit 31 set once drawn); rows whose blank mask is computed in this draw */
 static u8 s1d_clean;            /* that draw had no refused lookup */
-#if defined(SAT_PERF_STAGES) || defined(SAT_GFX_HOST)
-#define S1D_STATS
+#if defined(SAT_PERF_STAGES) || defined(SAT_GFX_HOST) || defined(SAT_S1D_VERIFY)
+#define S1D_STATS   /* counters and the off switch (about 100 bytes) */
+#if defined(SAT_S1D_VERIFY) || defined(SAT_GFX_HOST)
+#define S1D_VERIFY_CODE   /* the verify pass (about 650 bytes: measurement builds SAT_S1D_VERIFY and the host test) */
+#endif
 u32 sat_s1d[8];                 /* 0 incremental draws, 1 full draws, 2 rows redrawn, 3 rows kept, 4 rows checked by the verify pass, 5 rows that differed, 6 draws with an empty mask, 7 draws that refused a lookup */
-u8 sat_s1d_verify, sat_s1d_off; /* debugger switches in measurement builds: verify = after an incremental draw recompute every kept row and count the ones whose names differ; off = always the full path */
+u8 sat_s1d_verify, sat_s1d_off; /* debugger switches in measurement builds (sat_s1d_verify only with SAT_S1D_VERIFY): verify = after an incremental draw recompute every kept row and count the ones whose names differ; off = always the full path */
 #endif
 /* Blank mask of row q, once per draw; true when the row is fully droppable (it then bounds a block). */
 static HOME_OS __attribute__((noinline)) int s1d_full(u32 q, u32 x0, u32 (*bm)[2])
@@ -1724,6 +1727,8 @@ again:
         s1d_clean = (u8)(s1d_refs() == s1d_ref0);
 #ifdef S1D_STATS
         if (!s1d_clean) sat_s1d[7]++;
+#endif
+#ifdef S1D_VERIFY_CODE
         if (s1d_dirty && sat_s1d_verify)
         {
             u32 q;
@@ -1732,7 +1737,7 @@ again:
         }
 #endif
     }
-#ifdef S1D_STATS
+#ifdef S1D_VERIFY_CODE
     else
     {
         u32 n = 0, v;

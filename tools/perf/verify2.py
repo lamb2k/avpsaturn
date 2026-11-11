@@ -27,8 +27,9 @@ while time.time() - t0 < 300:
 print("entered stage", hex(Y.arc(0xff81e8)), flush=True)
 time.sleep(4)
 S = Y.s
-def wb(name, v): Y.m.call("memory_write", address=hex(S[name]), size="byte", value=hex(v))
-def cnt(): return [int.from_bytes(Y.m.read(S['sat_s1m'] + i * 4, 4), "big") for i in range(6)]
+def wb(name, v):
+    if name in S: Y.m.call("memory_write", address=hex(S[name]), size="byte", value=hex(v))   # the memo and blank row switches exist only in SAT_PERF_STAGES builds
+def cnt(): return [int.from_bytes(Y.m.read(S['sat_s1m'] + i * 4, 4), "big") for i in range(6)] if 'sat_s1m' in S else [0] * 6
 def cntd(): return [int.from_bytes(Y.m.read(S['sat_s1d'] + i * 4, 4), "big") for i in range(8)]
 wb('sat_s1_memo_verify', 1); wb('sat_s1_memo_off', 0); wb('sat_s1d_verify', 1); wb('sat_s1d_off', 0)
 c0 = cnt(); d0 = cntd(); rnd = random.Random(9); t0 = time.time()
