@@ -59,7 +59,7 @@ static volatile int cur = -1;
 static int irq_on;
 
 /* The loader's boot display (boot.c) stays ours until the first picture: a stop before then shows its code instead of the BIOS logo. */
-#define DIAG_API ((volatile u32 *)0x06013fc0u)
+#define DIAG_API ((volatile u32 *)0x06013fa0u)
 static void diag_call(int i, u32 a, u32 b) { u32 f = DIAG_API[i]; if (f && DIAG_API[3]) ((void (*)(u32, u32))f)(a, b); }
 void sat_fatal(u32 code, u32 detail)
 {
@@ -757,6 +757,7 @@ void sat_vblank(void)
     sat_gfx_vblank();   /* first: the frame change for a finished plot belongs early in vblank-in */
 #endif
     sat_dbg.vblanks++;
+    if (DIAG_API[3]) { if (sat_dbg.vblanks == 1) diag_call(0, 0, 0); else if (sat_dbg.vblanks == 4) diag_call(2, 1, 0); }   /* the loader's display ends on the 4th vblank */
 #ifdef SAT_VLOG
     { volatile unsigned long *e = (volatile unsigned long *)((unsigned long)&sat_vlog[(sat_dbg.vblanks & 15) * 4] | 0x20000000UL);
       e[0] = sat_dbg.vblanks << 16 | *(volatile unsigned short *)0x25D00010UL; e[1] = 0; e[2] = 0; e[3] = (UNCACHED(gfx_done) != UNCACHED(gfx_handed)); }
@@ -914,13 +915,15 @@ void sat_main(void)
     round_loaded = 0;
 #endif
     diag_call(0, 0, 0);   /* first round file and sound set done */
-    diag_call(2, 0, 0);   /* the loader's display ends here: sat_gfx_init draws its own */
     if (!sat_gfx_init(SAT_PACK)) sat_fatal(0xeb, 0);
+    diag_call(4, 0, 0);   /* graphics init cleared VRAM and the registers: the loader's display comes back */
+    diag_call(0, 0, 0);
 #ifdef SAT_HOME
     if (!home_slave_on) { home_slave_on = 1; slave_start(); }
 #else
     slave_start();
 #endif
+    diag_call(0, 0, 0);   /* slave started */
     sat_dbg.stage = 1;
     f_800();
     sat_fatal(0xe8, 0);

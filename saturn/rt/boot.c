@@ -19,7 +19,7 @@ static GfsDirName names[256];
    DIAG_API (stage, fatal, done) until its own first picture. No scroll screen, sprite or SGL is used; VDP2 registers are write-only, so none is saved. */
 #define V2R(o) (*(volatile unsigned short *)(0x25f80000u + (o)))
 #define DIAG_TAB ((volatile unsigned short *)0x25e7fe00u)   /* last 512 bytes of VDP2 VRAM: back screen table, one colour per line */
-#define DIAG_API ((volatile unsigned long *)0x06013fc0u)    /* 0 stage(colour or 0), 1 fatal(code, detail), 2 done, 3 active */
+#define DIAG_API ((volatile unsigned long *)0x06013fa0u)    /* 0 stage(colour or 0), 1 fatal(code, detail), 2 done(restore), 3 active, 4 reinit (after the runtime's VRAM clear) */
 #define DIAG_LINES 224
 #define DIAG_BANDS 15
 #define DIAG_CODE_TOP 156
@@ -79,7 +79,7 @@ static void diag_tick(void)
     diag_fill(top + diag_mark, top + diag_mark + 2, C_WHITE);
 }
 static void diag_info(unsigned v) { if (diag_active) diag_code(v); }
-static void diag_init(void)
+static void diag_takeover(void)
 {
     V2R(0x20) = 0;                        /* BGON: no scroll screen */
     V2R(0xf0) = 0; V2R(0xf2) = 0; V2R(0xf4) = 0; V2R(0xf6) = 0;   /* PRISA-D: sprite priority 0 hides the logo's VDP1 sprites */
@@ -87,10 +87,21 @@ static void diag_init(void)
     V2R(0x00) = 0x8000;                   /* TVMD: display on, 320 x 224 */
     V2R(0xac) = 0x8003;                   /* BKTAU: per-line back screen, table at VRAM 0x7fe00 */
     V2R(0xae) = 0xff00;                   /* BKTAL */
+}
+static void diag_init(void)
+{
+    diag_takeover();
     diag_fill(0, DIAG_LINES, C_GREY);
     diag_active = 1;
     DIAG_API[0] = (unsigned long)diag_stage_k;
     DIAG_API[3] = 1;
+}
+static void diag_reinit_k(unsigned long a, unsigned long b)   /* the runtime's graphics init cleared VRAM and the registers: take the screen back, bands and stripes as they were */
+{
+    (void)a; (void)b;
+    if (!diag_active) return;
+    diag_takeover();
+    diag_render(diag_info_value);
 }
 static void diag_fail(unsigned code, unsigned short colour, unsigned extra)
 {
@@ -110,9 +121,10 @@ static void diag_fatal_k(unsigned long code, unsigned long detail)   /* the runt
 {
     diag_fail((unsigned)((code & 0xff) << 8 | (detail & 0xff)), code >= 0xf0 ? C_MAGENTA : C_RED, (unsigned)detail & 0xffffu);
 }
-static void diag_done_k(unsigned long a, unsigned long b)   /* the runtime is about to draw its own picture */
+static void diag_done_k(unsigned long restore, unsigned long b)   /* the boot display ends; restore != 0: after the runtime's graphics init, put back the two registers this file changed that it set (TVMD, back screen table); the rest it rewrites every frame */
 {
-    (void)a; (void)b;
+    (void)b;
+    if (restore) { V2R(0x00) = 0x8001; V2R(0xac) = 0; V2R(0xae) = 0xffff; }   /* BACKCOL 0x1fffe in sat_gfx.c */
     diag_active = 0; DIAG_API[3] = 0;
 }
 static void diag_exc_c(unsigned long pc, unsigned long vec) { diag_fail(0xfe00u | (unsigned)vec, C_MAGENTA, (unsigned)pc & 0xffffu); }
@@ -343,7 +355,7 @@ int main(void)
     diag_init();                                        /* grey screen: the BIOS ran 0.BIN */
     vt[4] = (volatile unsigned long *)diag_exc4; vt[6] = (volatile unsigned long *)diag_exc6;
     vt[9] = (volatile unsigned long *)diag_exc9; vt[10] = (volatile unsigned long *)diag_exc10;
-    DIAG_API[1] = (unsigned long)diag_fatal_k; DIAG_API[2] = (unsigned long)diag_done_k;
+    DIAG_API[1] = (unsigned long)diag_fatal_k; DIAG_API[2] = (unsigned long)diag_done_k; DIAG_API[4] = (unsigned long)diag_reinit_k;
     diag_stage_k(0, 0);                                 /* band 1: the loader runs */
 #ifdef SAT_WV_REVEAL
     LOADER_API[1] = (unsigned long)reveal_io;
