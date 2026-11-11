@@ -11,20 +11,143 @@ extern unsigned char _bstart, _bend;
 static unsigned char gfs_work[GFS_WORK_SIZE(1)];
 static GfsDirTbl dir;
 static GfsDirName names[256];
-static void halt(unsigned long s, unsigned long d) { LOADER_DIAG[0] = 0x4156504c; LOADER_DIAG[1] = s; LOADER_DIAG[2] = d; for (;;) __asm__ volatile ("nop"); }
+/* ---- boot display (hardware bring-up, hwboot lane 2026-11-10) ----
+   The BIOS leaves its SEGA logo up until the runtime's first picture, and a failure here used to spin with the logo still showing. From the first
+   instruction of this file the screen is ours: VDP2's back screen in per-line mode shows one band per boot step (a white 2-line tick moves inside
+   the current band while a file is read), the bottom stripes hold a 16 bit value (white = 1, black = 0, most significant bit on top), and a
+   failure turns the current band red (exception: magenta) and flashes the whole screen with the code. The runtime reaches this through
+   DIAG_API (stage, fatal, done) until its own first picture. No scroll screen, sprite or SGL is used; VDP2 registers are write-only, so none is saved. */
+#define V2R(o) (*(volatile unsigned short *)(0x25f80000u + (o)))
+#define DIAG_TAB ((volatile unsigned short *)0x25e7fe00u)   /* last 512 bytes of VDP2 VRAM: back screen table, one colour per line */
+#define DIAG_API ((volatile unsigned long *)0x06013fc0u)    /* 0 stage(colour or 0), 1 fatal(code, detail), 2 done, 3 active */
+#define DIAG_LINES 224
+#define DIAG_BANDS 15
+#define DIAG_CODE_TOP 156
+#define C_BLACK 0x0000u
+#define C_GREY 0x4631u
+#define C_RED 0x001fu
+#define C_GREEN 0x03e0u
+#define C_BLUE 0x7c00u
+#define C_YELLOW 0x03ffu
+#define C_CYAN 0x7fe0u
+#define C_MAGENTA 0x7c1fu
+#define C_WHITE 0x7fffu
+static unsigned short diag_col[DIAG_BANDS + 1];
+static int diag_active, diag_seq, diag_cur, diag_ticks, diag_mark;
+static unsigned diag_info_value;
+static void diag_fill(int a, int b, unsigned short c) { for (; a < b && a < DIAG_LINES; a++) DIAG_TAB[a] = c; }
+static void diag_band(int k, unsigned short c) { if (k < DIAG_BANDS) diag_fill(1 + 10 * k, 9 + 10 * k, c); }
+static void diag_code(unsigned v)
+{
+    int i;
+    diag_info_value = v;
+    for (i = 0; i < 16; i++) {
+        diag_fill(DIAG_CODE_TOP + 4 * i, DIAG_CODE_TOP + 4 * i + 3, ((v >> (15 - i)) & 1) ? C_WHITE : C_BLACK);
+        diag_fill(DIAG_CODE_TOP + 4 * i + 3, DIAG_CODE_TOP + 4 * i + 4, C_GREY);
+    }
+}
+static void diag_render(unsigned code)
+{
+    int k;
+    diag_fill(0, DIAG_LINES, C_GREY);
+    for (k = 0; k < diag_seq && k < DIAG_BANDS; k++) diag_band(k, diag_col[k]);
+    diag_code(code);
+}
+static void diag_wait(int frames)
+{
+    while (frames-- > 0) { while (V2R(0x04) & 8) ; while (!(V2R(0x04) & 8)) ; }
+}
+static void diag_stage_k(unsigned long colour, unsigned long unused)
+{
+    unsigned short c = (unsigned short)colour;
+    (void)unused;
+    if (!diag_active) return;
+    if (!c) c = (diag_seq & 1) ? C_BLUE : C_GREEN;
+    diag_cur = diag_seq;
+    if (diag_seq < DIAG_BANDS) diag_col[diag_seq] = c;
+    diag_band(diag_seq, c);
+    diag_seq++;
+    diag_ticks = 0; diag_mark = -1;
+}
+static void diag_tick(void)
+{
+    int top, k = diag_cur;
+    if (!diag_active || k >= DIAG_BANDS) return;
+    top = 1 + 10 * k;
+    if (diag_mark >= 0) diag_fill(top + diag_mark, top + diag_mark + 2, diag_col[k]);
+    diag_mark = 2 * (diag_ticks++ & 3);
+    diag_fill(top + diag_mark, top + diag_mark + 2, C_WHITE);
+}
+static void diag_info(unsigned v) { if (diag_active) diag_code(v); }
+static void diag_init(void)
+{
+    V2R(0x20) = 0;                        /* BGON: no scroll screen */
+    V2R(0xf0) = 0; V2R(0xf2) = 0; V2R(0xf4) = 0; V2R(0xf6) = 0;   /* PRISA-D: sprite priority 0 hides the logo's VDP1 sprites */
+    V2R(0xec) = 0;                        /* CCCTL */
+    V2R(0x00) = 0x8000;                   /* TVMD: display on, 320 x 224 */
+    V2R(0xac) = 0x8003;                   /* BKTAU: per-line back screen, table at VRAM 0x7fe00 */
+    V2R(0xae) = 0xff00;                   /* BKTAL */
+    diag_fill(0, DIAG_LINES, C_GREY);
+    diag_active = 1;
+    DIAG_API[0] = (unsigned long)diag_stage_k;
+    DIAG_API[3] = 1;
+}
+static void diag_fail(unsigned code, unsigned short colour, unsigned extra)
+{
+    LOADER_DIAG[0] = 0x4156504c; LOADER_DIAG[1] = code; LOADER_DIAG[2] = extra;
+    if (!diag_active) for (;;) __asm__ volatile ("nop");
+    __asm__ volatile ("ldc %0,sr" : : "r"(0xf0));
+    if (diag_cur < DIAG_BANDS) diag_col[diag_cur] = colour;
+    for (;;) {
+        diag_fill(0, DIAG_LINES, colour);
+        diag_wait(30);
+        diag_render(code);
+        diag_wait(60);
+        if (extra) { diag_render(extra & 0xffffu); diag_wait(60); }
+    }
+}
+static void diag_fatal_k(unsigned long code, unsigned long detail)   /* the runtime's sat_fatal, before its first picture */
+{
+    diag_fail((unsigned)((code & 0xff) << 8 | (detail & 0xff)), code >= 0xf0 ? C_MAGENTA : C_RED, (unsigned)detail & 0xffffu);
+}
+static void diag_done_k(unsigned long a, unsigned long b)   /* the runtime is about to draw its own picture */
+{
+    (void)a; (void)b;
+    diag_active = 0; DIAG_API[3] = 0;
+}
+static void diag_exc_c(unsigned long pc, unsigned long vec) { diag_fail(0xfe00u | (unsigned)vec, C_MAGENTA, (unsigned)pc & 0xffffu); }
+__asm__(".text\n.align 2\n"
+        ".global _diag_exc4\n_diag_exc4: mov.l @r15,r4\n bra 9f\n mov #4,r5\n"
+        ".global _diag_exc6\n_diag_exc6: mov.l @r15,r4\n bra 9f\n mov #6,r5\n"
+        ".global _diag_exc9\n_diag_exc9: mov.l @r15,r4\n bra 9f\n mov #9,r5\n"
+        ".global _diag_exc10\n_diag_exc10: mov.l @r15,r4\n mov #10,r5\n"
+        "9: mov.l 1f,r0\n jmp @r0\n nop\n.align 2\n1: .long _diag_exc_tramp\n");
+extern void diag_exc4(void), diag_exc6(void), diag_exc9(void), diag_exc10(void);
+void diag_exc_tramp(unsigned long pc, unsigned long vec) { diag_exc_c(pc, vec); }
+static void halt(unsigned long s, unsigned long d)
+{
+    diag_fail((unsigned)s, C_RED, (unsigned)d & 0xffffu);
+}
+#define LOAD_CHUNK 128   /* sectors per read, so the tick moves while a file loads */
 static void load(const char *name, void *dest, unsigned long code)
 {
-    Sint32 id = GFS_NameToId((Sint8 *)name), ss, n, last, got;
+    Sint32 id = GFS_NameToId((Sint8 *)name), ss, n, last, got, total = 0, left;
+    unsigned char *d = (unsigned char *)dest;
     GfsHn h;
     if (id < 0) halt(code | 1, (unsigned long)id);
     h = GFS_Open(id);
     if (!h) halt(code | 2, 0);
     GFS_GetFileSize(h, &ss, &n, &last);
     GFS_SetTmode(h, GFS_TMODE_CPU);
-    got = GFS_Fread(h, n, dest, ss * n);
+    for (left = n; left > 0; ) {
+        Sint32 c = left > LOAD_CHUNK ? LOAD_CHUNK : left;
+        got = GFS_Fread(h, c, d, ss * c);
+        if (got <= 0) { GFS_Close(h); halt(code | 3, (unsigned long)got); }
+        total += got; d += ss * c; left -= c;
+        diag_tick();
+    }
     GFS_Close(h);
-    if (got <= 0) halt(code | 3, (unsigned long)got);
-    LOADER_DIAG[3] = code; LOADER_DIAG[4] = (unsigned long)got;
+    LOADER_DIAG[3] = code; LOADER_DIAG[4] = (unsigned long)total;
 }
 /* Between rounds the runtime calls this through LOADER_API (lifted code never does): one file of whole sectors, its first sector a list of
    u32 count, then count pairs of u32 destination, u32 bytes (multiples of 2048), destination 1 being a call to mark. The caller has masked interrupts and stopped the slave. Returns sectors read, or a negative stage. */
@@ -56,8 +179,10 @@ static Sint32 vread(GfsHn h, Sint32 secs, unsigned char *dest)
             if (GFS_Seek(h, run_at, GFS_SEEK_SET) < 0) return -3;
         }
         take = secs < run_left ? secs : run_left;
+        if (take > LOAD_CHUNK) take = LOAD_CHUNK;
         got = GFS_Fread(h, take, dest, take * 2048);
         if (got != take * 2048) return -4;
+        diag_tick();
         run_at += take; run_left -= take; secs -= take; dest += take * 2048;
     }
     return 0;
@@ -188,40 +313,82 @@ static long reveal_io(int which, unsigned a, unsigned b, unsigned c)
     return which == 1 ? load_file((const char *)a, (void *)b) : unlock_io(a, b, (unsigned char *)c);
 }
 #endif
+/* The save record read (BIOS backup library). Where it runs is a build choice, because on the console the library is BIOS code that Yaba's HLE never executes:
+   default           first thing, before the cart bus timing changes and before any disc read, with the library copied into high work RAM (0x060C0000, 24 KB; HW.BIN loads over it later);
+   AVP_BUP_LATE_CART the original place: after the loads, library run from the 4 MB cart at 0x02754000 (hardware diagnosis disc D1);
+   AVP_BUP_NONE      no read at boot (the save reads as empty; diagnosis disc D2). */
+#ifdef SAT_WV_REVEAL
+static void boot_save_read(unsigned char *scratch)
+{
+#ifdef AVP_BUP_NONE
+    (void)scratch;
+    diag_stage_k(C_CYAN, 0); diag_stage_k(0, 0); diag_info(0x30ffu);
+#else
+    long r;
+    diag_stage_k(C_CYAN, 0);              /* a cyan band that is the last one means the BIOS library did not return */
+    r = unlock_io(0, 0, scratch);
+    diag_stage_k(0, 0);
+    diag_info(0x3000u | ((unsigned)r & 0xffu));   /* 0 read ok; ff -1 no library, fe -2 format, fd -3 stat */
+#endif
+}
+#endif
 int main(void)
 {
     unsigned char *c;
-    volatile unsigned long *cart = (volatile unsigned long *)0x02700000u;
+    volatile unsigned long *cart = (volatile unsigned long *)0x22700000u;   /* the cache-through alias: a cached read could not tell a missing cart */
+    volatile unsigned char *cart_id = (volatile unsigned char *)0x24ffffffu;
+    unsigned id, tried = 0;
+    volatile unsigned long **vt = (volatile unsigned long **)0x06000000u;
     for (c = &_bstart; c < &_bend; c++) *c = 0;
-    /* A-bus timing and cart enable, as the 4 MB cart requires. */
-    *(volatile unsigned long *)0x25fe00b0 = 0x23301ff0;
-    *(volatile unsigned long *)0x25fe00b8 = 0x00000013;
-    *(volatile unsigned short *)0x257efffe = 1;
+    diag_init();                                        /* grey screen: the BIOS ran 0.BIN */
+    vt[4] = (volatile unsigned long *)diag_exc4; vt[6] = (volatile unsigned long *)diag_exc6;
+    vt[9] = (volatile unsigned long *)diag_exc9; vt[10] = (volatile unsigned long *)diag_exc10;
+    DIAG_API[1] = (unsigned long)diag_fatal_k; DIAG_API[2] = (unsigned long)diag_done_k;
+    diag_stage_k(0, 0);                                 /* band 1: the loader runs */
 #ifdef SAT_WV_REVEAL
     LOADER_API[1] = (unsigned long)reveal_io;
     LOADER_API[2] = 0;
     LOADER_API[3] = 0;
     LOADER_DIAG[5] = 0; LOADER_DIAG[6] = 0; LOADER_DIAG[7] = 0;   /* the reveal's takeover flag and state (reveal.c) */
+#if !defined(AVP_BUP_LATE_CART)
+    boot_save_read((unsigned char *)0x060c0000u);
 #endif
-    cart[0] = 0x12345678; cart[1] = 0xedcba987;
-    if (cart[0] != 0x12345678 || cart[1] != 0xedcba987) halt(0xe0f0, cart[0]);
+#endif
+    /* A-bus timing and cart enable, as the 4 MB cart requires (ST-TECH-47: ASR0, AREF, then a WORD write of 1). */
+    for (;;) {
+        if (!tried) { *(volatile unsigned long *)0x25fe00b0 = 0x23301ff0; *(volatile unsigned long *)0x25fe00b8 = 0x00000013; }
+        else { *(volatile unsigned long *)0x25fe00b0 = 0x1ff01ff0; *(volatile unsigned long *)0x25fe00b8 = 0x0000001f; }   /* the BIOS's own timing, as the working JO disc runs */
+        *(volatile unsigned short *)0x257efffe = 1;
+        id = *cart_id;
+        diag_info(0x1000u | id);                        /* the cart's ID byte: 5c is a 4 MB RAM cart */
+        cart[0] = 0x12345678; cart[1] = 0xedcba987;
+        if (cart[0] == 0x12345678 && cart[1] == 0xedcba987) break;
+        if (tried) diag_fail(id == 0x5c ? 0xe0f0u : 0xe0f2u, C_RED, id);   /* e0f0 the cart did not answer, e0f2 and no 4 MB cart ID either */
+        tried = 1;
+    }
+    diag_stage_k(tried ? C_YELLOW : 0, 0);              /* yellow: only the BIOS's timing worked, not ours */
+    if (tried) diag_info(0x2001u);
     GFS_DIRTBL_TYPE(&dir) = GFS_DIR_NAME;
     GFS_DIRTBL_DIRNAME(&dir) = names;
     GFS_DIRTBL_NDIR(&dir) = 256;
     if (GFS_Init(1, gfs_work, &dir) < 0) halt(0xe001, 0);
-    load("LW.BIN", (void *)0x00200000u, 0x100);
-    load("ROM.BIN", (void *)0x02400000u, 0x200);
-    load("OPX.BIN", (void *)0x02600000u, 0x300);
-    load("COLD1.BIN", (void *)COLD1_ADDR, 0x600);
-    load("HW.BIN", (void *)ENTRY, 0x400);
+    diag_stage_k(0, 0);                                 /* GFS_Init passed */
+    diag_stage_k(0, 0); load("LW.BIN", (void *)0x00200000u, 0x100);
+    diag_stage_k(0, 0); load("ROM.BIN", (void *)0x02400000u, 0x200);
+    diag_stage_k(0, 0); load("OPX.BIN", (void *)0x02600000u, 0x300);
+    diag_stage_k(0, 0); load("COLD1.BIN", (void *)COLD1_ADDR, 0x600);
+    diag_stage_k(0, 0); load("HW.BIN", (void *)ENTRY, 0x400);
     GFS_Reset();
 #ifdef SAT_WV_REVEAL
-    unlock_io(0, 0, (unsigned char *)0x02754000u);   /* the save record, once the loads are done; scratch in the cart's pack room, which the first round file fills later */
+#if defined(AVP_BUP_LATE_CART)
+    boot_save_read((unsigned char *)0x02754000u);   /* the original: scratch in the cart's pack room, which the first round file fills later */
+#endif
 #ifdef GUEST_SEL_ADDR   /* a saved BONUS CHARACTERS setting replaces the build default in the cart data (guests.c sat_guest_sel), so no runtime code has to apply it */
     if (LOADER_API[3] & 0x100u) *(volatile unsigned char *)GUEST_SEL_ADDR = (unsigned char)(LOADER_API[3] >> 9 & 3u);
 #endif
 #endif
     LOADER_API[0] = (unsigned long)load_regions;
+    diag_stage_k(0, 0);                                 /* the runtime is entered next */
     *(volatile unsigned char *)0xfffffe92 = 0x10;
     *(volatile unsigned char *)0xfffffe92 = 0x01;
     ((void (*)(void))ENTRY)();

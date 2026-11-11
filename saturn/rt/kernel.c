@@ -58,9 +58,13 @@ static void *sched_sp;
 static volatile int cur = -1;
 static int irq_on;
 
+/* The loader's boot display (boot.c) stays ours until the first picture: a stop before then shows its code instead of the BIOS logo. */
+#define DIAG_API ((volatile u32 *)0x06013fc0u)
+static void diag_call(int i, u32 a, u32 b) { u32 f = DIAG_API[i]; if (f && DIAG_API[3]) ((void (*)(u32, u32))f)(a, b); }
 void sat_fatal(u32 code, u32 detail)
 {
     __asm__ volatile ("ldc %0,sr" : : "r"(0xf0));
+    diag_call(1, code, detail);
     sat_dbg.fatal = code; sat_dbg.fatal_detail = detail; sat_dbg.fatal_task = (u32)cur;
     sat_dbg.fatal_a[0] = cpu.a[0]; sat_dbg.fatal_a[1] = cpu.a[1]; sat_dbg.fatal_a[2] = cpu.a[7];
     for (;;) ;
@@ -538,15 +542,20 @@ void sat_slave_main(void)
     }
 }
 
+static void smpc_idle(void)   /* the SMPC is busy while SF is set (the BIOS polls it every frame); a bounded wait, never a spin */
+{
+    u32 n;
+    for (n = 0; n < 4000000u && (SMPC(0x63) & 1); n++) ;
+}
 static void slave_start(void)
 {
-    while (SMPC(0x63) & 1) ;
+    smpc_idle();
     SMPC(0x63) = 1; SMPC(0x1f) = 0x03;   /* SSHOFF */
-    while (SMPC(0x63) & 1) ;
+    smpc_idle();
     *(void (**)(void))0x06000250u = sat_slave_entry;
     *(u32 *)0x060002acu = (u32)(sat_slave_stack + 256);
     SMPC(0x63) = 1; SMPC(0x1f) = 0x02;   /* SSHON */
-    while (SMPC(0x63) & 1) ;
+    smpc_idle();
 }
 
 /* Rounds: each round's tile pack and sound set come from CD between rounds (RNN.BIN, tools/rounds_pack.py), on the master, with the game stopped and the slave idle.
@@ -878,6 +887,7 @@ void sat_main(void)
     for (p = sat_lw_bss_start; p < sat_lw_bss_end; p++) *p = 0;
 #endif
     sat_dbg.magic = 0x53415452;
+    diag_call(0, 0, 0);   /* the loader's band: the runtime is entered */
     exceptions_install();
     for (i = 0; i < TASKS; i++) { u32 k; for (k = 0; k < TASK_STACK / 4; k++) task_stacks[i][k] = 0xa5a5a5a5u; }
     for (i = 0; i < 256; i++) PAGE[i] = SAT_SINK;
@@ -903,6 +913,8 @@ void sat_main(void)
     load_round(0);
     round_loaded = 0;
 #endif
+    diag_call(0, 0, 0);   /* first round file and sound set done */
+    diag_call(2, 0, 0);   /* the loader's display ends here: sat_gfx_init draws its own */
     if (!sat_gfx_init(SAT_PACK)) sat_fatal(0xeb, 0);
 #ifdef SAT_HOME
     if (!home_slave_on) { home_slave_on = 1; slave_start(); }
