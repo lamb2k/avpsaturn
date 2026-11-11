@@ -1,8 +1,8 @@
 # Stage sprite store: next-stage load-window keep, 2026-11-11 (lane sprite-store; HOST + offline pack replay + EMULATOR Yaba; hardware UNRUN)
 
-Branch lane/sprite-store-20261111 on avp/integration d0540c8. Switch: `STAGE_WINDOW=1` (build.py environment, default off) with `STAGE_WINDOW_PAD=2`.
-Evidence: E:\AvP\learning\lane-sprite-store (builds wd_base, wd_win, wd_f1, wd_f2, wd_f2kl; logs b_*.log, fit_*.log, hostwin\, hostf2\, hostneg\, trans\, headroom_*.log, unseen_*.json; fuzz runs fz\s16c0 to s21c3).
-All ROM-derived data stays outside git.
+Branch lane/sprite-store-20261111 on avp/integration d0540c8 (the evaluation tree merges native 97de971 into it: throwaway branch wip/sprite-store-eval-20261111, local). Switch: `STAGE_WINDOW=1` (build.py environment, default off) with `STAGE_WINDOW_PAD=2`.
+Evidence: E:\AvP\learning\lane-sprite-store: builds wd_base (baseline), wd_n1, wd_n2 (final), wd_n2kl (final + SAT_KEYLOG, for Yaba), wd_win and wd_f2 (tree A without the native 97de971); logs b_*.log, fit_*.log, hostn2\ hostf2\ hostwin\ hostneg\, trans\ (Yaba),
+headroom_*.log, unseen_*.json, fuzz runs fz\s16c0 to s21c3, harness\ (trans2.py, ys.py). All ROM-derived data stays outside git. Disk: DELETED.txt there lists the work directories removed.
 
 ## 1. Baseline (task 1)
 
@@ -95,7 +95,41 @@ The risk that remains is a page read in the first 12 vblanks of a stage entered 
 
 ## 4. Stage change evidence (Yaba)
 
-YABA_EVIDENCE
+Disc: n2kl = the final build n2 plus `-DSAT_KEYLOG` (same keep lists and packs: round_keep.json and round_stats.json are byte-identical to n2; hw_free 2,064). Emulator: my own copy of yaba-mcp-sdl (E:\AvP\learning\lane-sprite-store\yaba), `General\UseSh2Cache=false`,
+SoundCore 1, Volume 100, MCP port 9740, started SW_SHOWNOACTIVATE, window "AvP SPRITESTORE: ...", PostMessage input only, no focus calls. Warrior, home warp to the stage. EMULATOR evidence (not console).
+
+Why not "play the stage to its end": a random-input bot needs the 16,000 frames (0c) or 40,000 (0e) the MAME fuzz runs took, at 10 to 17 emulated vblanks a second here: more than 40 minutes a stage, and two of those sessions hung (below).
+Instead (harness/trans2.py): enter the stage, let it run 900 vblanks, pause, set the clear flag ff81f3 (the flag the arcade sets at the boss's death; the stage's own controller then runs its clear and writes the next stage word itself:
+probe_clear.py, 0c ends 1,140 vblanks after the poke), then 30 frame bursts with a save state before each. When the word changes, the state two bursts earlier is loaded. From that one state, each variant steps the same frames and logs per step the vblank,
+stage word, round file, md5 of the 64 KB game work RAM, sprite objects and commands, and the bitmap of sprite keys asked (KEYLOG):
+
+| Variant | What differs from A |
+| --- | --- |
+| A | the build as is (tile spill in the pages the window rule freed) |
+| A2 | nothing (repeatability) |
+| R | every page the old file spilled tiles over holds the ROM's own bytes (disc/ROM.BIN): the game reads what the old rule would have kept |
+| Z | **every page the rule freed** (the next stage's census pages the old file does not keep for any reason) holds 0xA5: the worst case, all of them garbage |
+| Q | control: all of the next stage's own census pages that neither the old stage nor the front end read hold 0xA5 |
+
+Identical work RAM, objects, commands and key bitmaps for every step means the game never used a page the rule gave away during the stage change.
+
+| Leg | Old file | Spill | Pages freed (Z) | Window pages kept only for the next stage | Q pages | Steps | Word changes | File load starts | Result against A |
+| --- | --- | --- | --- | --- | --- | --- | --- | --- | --- |
+| 0c to 0e (prev to 0e) | stage0c_m1 (file 70) | 9 regions, 440 KB | 35 | 74 | 63 | 88 | step 7 (vb 3,794 to 3,804) | vb 3,816 (12 vblank hold), file 80 loaded at step 57 | A2, R, Z, Q: **work RAM equal at all 88 steps, objects and commands equal, key bitmaps equal** |
+| 0e to 10 (0e to next) | stage0e_m1 (file 80) | 25 regions, 710 KB | **176** | 12 | 159 | 84 | step 7 (vb 4,542 to 4,552) | vb 4,561, file 90 loaded at step 53 | R, Z, Q: **equal at all 84 steps** |
+
+Sprite keys asked before the file load (KEYLOG, from the saved state to the start of the load): 0 in 0c to 0e, 2 in 0e to 10; **absent from the old file: 0** (so no piece drew blank in the hold). Asked in all, to 30 frames after the load: 32,332 and 32,589 (the new stage's first uploads), equal in every variant.
+Q equal to A means the game does not read those next-stage pages in the hold in these two transitions either; it is the host neg control (above, 24 to 26) that shows a transition where it does. The in-state test has no variant that differs, so it shows no sensitivity of its own;
+its value is the Z result: with 176 pages of the 0e file's freed pages garbage, the 0e to 10 change is bit for bit the same.
+Paused frames (A, single steps through the hold, the NOW LOADING screen and 30 frames after the load): E:\AvP\learning\lane-sprite-store\trans\n2kl_0c_0e_10\leg_0c_0e\A_008..022, 058, 063, 087.png and n2kl_0e_10r\leg_0e_10\A_008..019, 054, 059, 083.png.
+Looked at: A_012 of 0e to 10 (Warrior and a Xenomorph drawn whole on the 0e screen as the word changes), and 0c to 0e A_008, A_015, A_022 (NOW LOADING), A_063 and A_087 (the new stage's fade-in with its HUD); nothing blank, no wrong tiles.
+
+Limits: two legs (0c to 0e is the "prev to 0e" load, 0e to 10 the "0e to next"), one character, the clear started by the flag poke and not by a boss kill (the stage's own clear code runs from there), emulator only. Not run: 1c, 1e, 24 legs (the MAME window data has 12 runs for them),
+the BOSS RUSH transitions that skip stages (04 to 08, 08 to 0a, 0a to 1a, 1a to 24: the old rule did not keep the target stage there either, so the window rule does not make them worse by construction, but they were not run).
+Harness stalls (not isolated, listed because a stall can also be a game fault): three Yaba sessions stopped answering. (1) the first approach (periodic pause, save_state, resume every 3 s while a bot played 0c, tree A disc): the master spun in the BIOS with SR=0xF0 (PC 0x6004B5A, registers constant)
+at vb 21,988 with no file load running, fatal word 0; (2) the first session on the final disc, in the burst and save loop of the 0e to 10 leg after the 0c to 0e leg had finished (an MCP call that never returned, Yaba stopped between bursts and answering other calls); (3) the next session of that leg,
+after variants A and A2, as R began (same picture). None repeated in the final sessions (88 and 84 steps, five and four variants).
+Harness changes after them: no periodic saves, a heartbeat watchdog that exits after 240 s, and RESUME_SLOT to continue from a saved state in a new session; the 0e to 10 leg was run that way from the state its first session had saved (slot 5).
 
 ## 5. Fuzz seeds (task 3)
 
