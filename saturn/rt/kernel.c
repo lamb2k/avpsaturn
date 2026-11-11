@@ -596,7 +596,9 @@ static void load_round(int file)
     char name[] = "R000.BIN";
     long got;
     name[1] = (char)('0' + file / 100); name[2] = (char)('0' + file / 10 % 10); name[3] = (char)('0' + file % 10);
+    diag_call(5, 17, 0);
     got = ((long (*)(const char *, void (*)(void)))LOADER_API[0])(name, round_sound_ready);
+    diag_call(5, 18, 0);
     CCR_M = 0x11;
     if (got < 0) sat_fatal(0xed, (u32)-got);
     sat_rounds.sectors = (u32)got;
@@ -641,6 +643,7 @@ static void round_check(void)
     }
 #endif
     row_loaded = row;
+    diag_call(5, 16, 0);
 #ifdef SAT_HOME
     sat_home_loading(1);   /* NOW LOADING stays on screen through the load */
 #endif

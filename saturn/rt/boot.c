@@ -112,6 +112,9 @@ static void diag_slave_k(unsigned long which, unsigned long b)   /* marks betwee
     else if (which == 13) diag_fill(124, 126, C_WHITE);
     else if (which == 14) diag_fill(122, 124, C_GREEN);
     else if (which == 15) diag_fill(120, 122, C_RED);
+    else if (which == 16) diag_fill(118, 120, C_YELLOW);
+    else if (which == 17) diag_fill(116, 118, C_CYAN);
+    else if (which == 18) diag_fill(114, 116, C_MAGENTA);
 }
 static void diag_reinit_k(unsigned long a, unsigned long b)   /* the runtime's graphics init cleared VRAM and the registers: take the screen back, bands and stripes as they were */
 {
