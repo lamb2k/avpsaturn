@@ -589,19 +589,27 @@ static int round_loaded = -1;
 struct sat_rounds_s { u32 current, loads, sectors, last_vblank; } sat_rounds;
 #ifdef SAT_FPS_HUD
 /* Load log (readout line 5, and for a trace): the last four round-file loads as {file, sectors, clock at start, clock at end}, newest at sat_ld_n - 1. The clock is the SMPC's
-   real-time clock (minutes and seconds, GETTIM), because the vblank count stands still while GFS runs (Ymir 11-11: the 1090 sector front file took 3 vblanks of count). It reads to
+   real-time clock (minutes and seconds, from the INTBACK status report), because the vblank count stands still while GFS runs (Ymir 11-11: the 1090 sector front file took 3 vblanks of count). It reads to
    the second, so a length is good to +-1 s. A photo of the readout then shows the last load's file, size, length and the seconds since boot at its end (boot to title: the first
    entry; title to select, select to stage, door and stage loads: the later ones). The pad's INTBACK result is not disturbed: sat_pad_tick takes only a status byte of 0xf0/0xf1 as a pad. */
 u32 sat_ld_log[4][4];
 u32 sat_ld_n, sat_ld_t0;
 static u32 rtc_secs(void)
 {
-    u32 n = 0, v;
+    u32 n = 0, v, sr;
+    __asm__ volatile ("stc sr,%0" : "=r"(sr));
+    __asm__ volatile ("ldc %0,sr" : : "r"(0xf0));   /* the vblank's pad INTBACK must not land inside this sequence */
     while ((SMPC(0x63) & 1) && n++ < 400000u) ;
-    SMPC(0x63) = 1; SMPC(0x1f) = 0x0e;   /* GETTIM: SF first, then the command */
+    if (SMPC(0x61) & 0x20) {   /* a pad INTBACK still has peripheral data queued: break it first */
+        SMPC(0x01) = 0x40; SMPC(0x63) = 1; SMPC(0x1f) = 0x10;
+        n = 0; while ((SMPC(0x63) & 1) && n++ < 400000u) ;
+    }
+    SMPC(0x01) = 0x01; SMPC(0x03) = 0x00; SMPC(0x05) = 0xf0;   /* INTBACK, status only: it carries the clock (GETTIM does not exist; 0x0e is CKCHG352, a reset: found on the first test build) */
+    SMPC(0x63) = 1; SMPC(0x1f) = 0x10;   /* SF first, then the command */
     n = 0; while ((SMPC(0x63) & 1) && n++ < 400000u) ;
-    v = SMPC(0x2b);   /* OREG5, minutes (BCD) */
-    n = SMPC(0x2d);   /* OREG6, seconds (BCD) */
+    v = SMPC(0x2d);   /* OREG6, minutes (BCD) */
+    n = SMPC(0x2f);   /* OREG7, seconds (BCD) */
+    __asm__ volatile ("ldc %0,sr" : : "r"(sr));
     return ((v >> 4) * 10 + (v & 15)) * 60 + (n >> 4) * 10 + (n & 15);
 }
 #endif
