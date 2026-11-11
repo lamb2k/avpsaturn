@@ -146,7 +146,7 @@ static void diag_done_k(unsigned long restore, unsigned long b)   /* the boot di
 {
     (void)b;
     if (restore) {   /* what sat_gfx_init set and diag_takeover changed (values from sat_gfx_init; BACKCOL 0x1fffe) */
-        V2R(0x00) = 0x8001; V2R(0xac) = 0; V2R(0xae) = 0xffff;
+        V2R(0x00) = 0x8101; V2R(0xac) = 0; V2R(0xae) = 0xffff;
         V2R(0x10) = 0x012f; V2R(0x12) = 0xff6f; V2R(0x14) = 0x4444; V2R(0x16) = 0x4444;
         V2R(0x18) = 0x5555; V2R(0x1a) = 0x5555; V2R(0x1c) = 0x5555; V2R(0x1e) = 0x5555;
     }
@@ -364,7 +364,7 @@ static void clock_352(void)
        clock change's reset gives on the console only if it really resets them: write the zeros (not TVMD, the read-only status registers, or EXTEN/VRSIZE kept at 0). */
     V2R(0x02) = 0; V2R(0x06) = 0;
     for (o = 0x0e; o < 0x120; o += 2) V2R(o) = 0;
-    diag_tvmd = 0x8001;
+    diag_tvmd = 0x8101;                                 /* SGL's TVMD for 352 x 224 NTSC */
     diag_reinit_k(0, 0);                                /* the chips were reset: the display again, 352 wide */
     diag_info(0x4001u);                                 /* 4001: the BIOS clock change returned */
 }
