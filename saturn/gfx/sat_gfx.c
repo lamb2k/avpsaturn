@@ -63,7 +63,7 @@ static void put32(u8 *p, u32 v) { p[0] = (u8)(v >> 24); p[1] = (u8)(v >> 16); p[
    The slave draws at any beam position; a scroll register written mid-frame is taken by the VDP2 at the next line, and a vertical scroll write of NBG2 or NBG3
    restarts that layer's vertical coordinate from the new value at that very line, so the whole scroll 1 layer (HUD, banners) showed again from the beam's line down
    (the doubled HUD of the first console runs; strict Ymir shows it too, it resets the NBG2/NBG3 vertical counter on the write). The master applies the changed ones first
-   thing in sat_gfx_vblank. Registers are write-only, so the latch also skips a write of the value the chip already has. */
+   thing in sat_gfx_vblank. */
 #ifdef SAT_GFX_HOST
 #define VDP2L(o, v) (VDP2R(o) = (u16)(v))
 #else
@@ -1185,24 +1185,24 @@ static void update_palette(void)
 static u32 sh_s1[64 * 64] LOW_RAM, sh_s2[64 * 64] LOW_RAM, sh_s3[64 * 64] LOW_RAM, sh_row[SAT_GFX_SCREEN_H] LOW_RAM;
 #ifndef SAT_GFX_HOST
 #define LAT_N 0x88                                  /* registers 0x00 to 0x10e: the latch covers the display registers the draw writes (highest: 0x10a) */
-static u16 lat_val[LAT_N] LOW_RAM, lat_applied[LAT_N] LOW_RAM;   /* lat_val: the slave's last value (0xffff: none yet); lat_applied: the master's last write (0xfffe: none) */
+static u16 lat_val[LAT_N];                          /* the slave's last value per register (0xffff: none yet); high work RAM, the low RAM is full */
 void sat_gfx_vdp2_latch(unsigned off, unsigned val)
 {
     *UNC_PTR(u16, &lat_val[off >> 1]) = (u16)val;
 }
-static void lat_apply(void)
+static void lat_apply(void)   /* every latched register is written once per V-blank, as SGL's V-blank handler writes its shadows */
 {
     unsigned i;
     for (i = 0; i < LAT_N; i++)
     {
         u16 v = *UNC_PTR(u16, &lat_val[i]);
-        if (v != 0xffff && v != lat_applied[i]) { VDP2R(i * 2) = v; lat_applied[i] = v; }
+        if (v != 0xffff) VDP2R(i * 2) = v;
     }
 }
 static void lat_reset(void)
 {
     unsigned i;
-    for (i = 0; i < LAT_N; i++) { *UNC_PTR(u16, &lat_val[i]) = 0xffff; lat_applied[i] = 0xfffe; }
+    for (i = 0; i < LAT_N; i++) *UNC_PTR(u16, &lat_val[i]) = 0xffff;
 }
 #endif
 
