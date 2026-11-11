@@ -201,6 +201,13 @@ def main(argv=None, environ=None, fit_fn=None, own_keys=None):
         ROWTRIM = int(m.group(1) or 1) if m else 0
         config = settings(environ)
         rounds, ends, screens, rank = load(pathlib.Path(argv[0]), environ)
+        window = None
+        if environ.get("STAGE_WINDOW", "0") == "1":   # tools/stage_window.py as build.py applies it (WORK/stage_window.json)
+            sys.path.insert(0, str(REPO / "tools"))
+            import stage_window
+            sw = stage_window.load(pathlib.Path(argv[0]))
+            print("stage window:", stage_window.apply(rounds, sw), flush=True)
+            window = stage_window.windows(sw)
         if environ.get("CHAR_FUZZ", "1") != "0":   # tools/char_fuzz.py as build.py applies it (WORK/char_fuzz.json; absent = nothing changes)
             sys.path.insert(0, str(REPO / "tools"))
             import char_fuzz
@@ -208,7 +215,7 @@ def main(argv=None, environ=None, fit_fn=None, own_keys=None):
             if data:
                 print("char fuzz:", char_fuzz.augment(rounds, data, keys=environ.get("CHAR_FUZZ_KEYS", "0") == "1",
                                                       pages=environ.get("CHAR_FUZZ_PAGES", "1") == "1",
-                                                      key_stages={int(x, 16) for x in environ.get("CHAR_FUZZ_KEY_STAGES", "0e,1c,1e,24").split(",") if x} or None), flush=True)
+                                                      key_stages={int(x, 16) for x in environ.get("CHAR_FUZZ_KEY_STAGES", "0e,1c,1e,24").split(",") if x} or None, window=window), flush=True)
         selected = selected_files(rounds, stages)
         room = ends[-1][0] - CART_PACK
         free = free_runs(rounds, ends, **config)

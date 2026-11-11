@@ -96,7 +96,7 @@ def pad(pages, limit):
     return {p + d for p in pages for d in (-1, 0, 1) if 0 <= p + d < limit}
 
 
-def augment(rounds, data, keys=False, pages=True, remap=(), key_stages=None):
+def augment(rounds, data, keys=False, pages=True, remap=(), key_stages=None, window=None):
     """Add the fuzz data to rounds (rounds.json in memory). Returns a report dict.
     pages: every stage file keeps the ROM pages the fuzz runs read in its stage word, in the front end's and in the next stage's, each with a page either side
     (the keep rule of tools/rounds_config.py), and the pages the players' sprite scripts are read from in any stage. A correctness fix: a page a play reads must hold the
@@ -106,7 +106,8 @@ def augment(rounds, data, keys=False, pages=True, remap=(), key_stages=None):
     key_stages: stage words (ints) that take keys; None = all. Where every variant of a stage packs to the same bytes (no sprite key dropped) the sector store
     (tools/sector_store.py, 2^18 sectors of 2 KB) keeps the 11 files once; a stage whose variants differ costs about 21 files of room. Only stages whose files already differ
     (0e, 1c, 1e, 24 on the integration build) can take per-character keys without outgrowing the store.
-    remap: sprite keys that must not enter (the bonus character's remap keys: a key it uses holds its tile in the guest files)."""
+    remap: sprite keys that must not enter (the bonus character's remap keys: a key it uses holds its tile in the guest files).
+    window: {stage word: pages} (tools/stage_window.py windows(), STAGE_WINDOW=1): the next stage's term is the pages its first frames read, not every page its fuzz runs read."""
     report = dict(pages_added=0, keys_added=0, files=0)
     page = rounds["page"]
     limit = 0x200000 // page
@@ -128,7 +129,7 @@ def augment(rounds, data, keys=False, pages=True, remap=(), key_stages=None):
                 want = pad(allp | scripts, limit)
             else:
                 nxt = next((x for x in order if x > s), None)
-                want = pad(fz.get(s, set()) | fz.get(0, set()) | fz.get(nxt, set()) | scripts, limit)
+                want = pad(fz.get(s, set()) | fz.get(0, set()) | ((window or {}).get(nxt) if nxt in (window or {}) else fz.get(nxt, set())) | scripts, limit)
             new = want - set(f["keep_pages"])
             if new:
                 f["keep_pages"] = sorted(set(f["keep_pages"]) | want)
