@@ -681,7 +681,7 @@ typedef struct
     u32 s2[S2_ROWS * 64], s3[S3_ROWS * (384 / 32 + 1)]; /* code << 16 | attribute, visible cells only */
     u32 s1_sum, s2_sum, s3_sum; /* change detection: position and every visible word */
 #ifdef SAT_S1_DIRTY
-    /* Written with the scroll 1 words, only when the sum moved (snap_layer_s1): bit r of s1_rows = row r of s1 differs from the copy before; s1_from = s1_sum of that
+    /* Written with the scroll 1 words, only when the sum moved (snap_layer): bit r of s1_rows = row r of s1 differs from the copy before; s1_from = s1_sum of that
        copy; s1_seed = position and flags the words were read at. The drawing side uses the mask only if it drew exactly s1_from (draw_scroll1). */
     u32 s1_rows, s1_from, s1_seed;
 #endif
@@ -1227,6 +1227,13 @@ static const u8 home_pal[64] __attribute__((aligned(2))) = {
    Fallback: a row with fewer than 4 blank columns keeps the 16 pixel centre crop (no arcade text line found has fewer; the continue line
    has 7). Play's HUD rows (0-5 and 25 up, the audit's quick fix: the enemy and boss portraits sit on rows 5 and 25) keep the flush map (their middle 4 columns dropped) when those are blank. Replaces the HUD-only map at home. */
 #define HOME_OS __attribute__((optimize("Os")))
+#ifdef SAT_HOME_MENU_COLD
+/* Lane perf2 11-11, default off: the menu painters (draw_home, home_cell: 0.9 KB, run only while a menu is up) are linked into the cart tail with the cold home code (build.py puts
+   input section .coldtext of the gfx object in .cold1) instead of high work RAM, which SAT_S1_DIRTY needs. */
+#define HOME_COLD __attribute__((section(".coldtext")))
+#else
+#define HOME_COLD
+#endif
 #define BL(m, c) (((m)[(c) >> 5] >> ((c) & 31)) & 1)
 #ifdef SAT_HOME_DIAG   /* test builds only: which non-blank source cells the fit drops (banner runs, fallback crops), per frame; read over MCP */
 volatile u32 sat_diag_lost, sat_diag_frames, sat_diag_rowmask, sat_diag_row, sat_diag_s1miss, sat_diag_s1key[3];
@@ -1535,6 +1542,12 @@ static u8 s1d_clean;            /* that draw had no refused lookup */
 u32 sat_s1d[8];                 /* 0 incremental draws, 1 full draws, 2 rows redrawn, 3 rows kept, 4 rows checked by the verify pass, 5 rows that differed, 6 draws with an empty mask, 7 draws that refused a lookup */
 u8 sat_s1d_verify, sat_s1d_off; /* debugger switches in measurement builds: verify = after an incremental draw recompute every kept row and count the ones whose names differ; off = always the full path */
 #endif
+/* Blank mask of row q, once per draw; true when the row is fully droppable (it then bounds a block). */
+static HOME_OS __attribute__((noinline)) int s1d_full(u32 q, u32 x0, u32 (*bm)[2])
+{
+    if (!((s1d_have >> q) & 1)) { home_row_blank(q, x0, bm[q]); s1d_have |= 1UL << q; }
+    return bm[q][0] == 0xffffffffUL && bm[q][1] == 0xffffUL;
+}
 static HOME_OS __attribute__((noinline)) u32 s1_dirty_plan(u32 x0, u32 y0, u32 (*bm)[2])
 {
     u32 mask = snap.s1_rows & S1_ALL, redo = mask, seen = 0, near_ = (mask | (mask << 1) | (mask >> 1)) & S1_ALL, r0 = y0 >> 3, c0 = x0 >> 3, row, col, s;
@@ -1546,7 +1559,7 @@ static HOME_OS __attribute__((noinline)) u32 s1_dirty_plan(u32 x0, u32 y0, u32 (
     for (row = 0; row < S1_ROWS; row++)
     {
         const u32 *sh;
-#ifdef S1D_TEST_NORESTAMP
+#ifdef S1D_TEST_NORESTAMP   /* mutation for the host test */
         continue;
 #endif
         if (((mask | s1_done) >> row) & 1) continue;
@@ -1562,22 +1575,25 @@ static HOME_OS __attribute__((noinline)) u32 s1_dirty_plan(u32 x0, u32 y0, u32 (
         }
     }
     /* 2. Widen to blocks: each changed row, and the runs of rows that are not fully droppable touching it above and below (on the new words) */
-#define S1D_FULL(q) (bm[q][0] == 0xffffffffUL && bm[q][1] == 0xffffUL)
-#define S1D_ENSURE(q) do { if (!((s1d_have >> (q)) & 1)) { home_row_blank((q), x0, bm[q]); s1d_have |= 1UL << (q); } } while (0)
     for (s = 0; s < S1_ROWS; s++)
     {
         u32 a = s, b = s, run;
-        if (!((near_ >> s) & 1) || ((seen >> s) & 1)) continue;
-        S1D_ENSURE(s);
-        if (S1D_FULL(s)) continue;
-        while (a > 0) { S1D_ENSURE(a - 1); if (S1D_FULL(a - 1)) break; a--; }
-        while (b + 1 < S1_ROWS) { S1D_ENSURE(b + 1); if (S1D_FULL(b + 1)) break; b++; }
+        if (!((near_ >> s) & 1) || ((seen >> s) & 1) || s1d_full(s, x0, bm)) continue;
+        while (a > 0 && !s1d_full(a - 1, x0, bm)) a--;
+        while (b + 1 < S1_ROWS && !s1d_full(b + 1, x0, bm)) b++;
         run = ((2UL << b) - 1) & ~((1UL << a) - 1);
         seen |= run; redo |= run;
     }
-#undef S1D_FULL
     return redo;
 }
+/* Can this draw be incremental? Also returns the flags that identify position and mode, which s1d_end stores. */
+static HOME_OS __attribute__((noinline)) int s1d_begin(u32 x0, u32 y0, u32 *flags)
+{
+    u32 f = (x0 >> 3) | ((y0 >> 3) << 8) | ((u32)snap.home << 16) | ((u32)snap.hud_flush << 20) | ((u32)snap.sel_ok << 21) | 0x80000000UL;
+    *flags = f;
+    return drawn_valid && snap.s1_from == drawn_s1 && f == s1d_key && s1d_clean && !snap.home && !snap.sel_ok && (snap.s1_rows & S1_ALL) != S1_ALL;
+}
+static u32 s1d_refs(void) { return sat_gfx_stats.refused_layer + s1_bm_refused; }
 #endif
 #ifdef SAT_GFX_HOST
 unsigned long sat_gfx_s1_draws;   /* host test: scroll 1 redraws so far */
@@ -1591,9 +1607,8 @@ static void draw_scroll1(u16 sx, u16 sy)
     u32 x0 = (u32)sx + CPS_LEFT + S1_REG_CROP, y0 = (u32)sy + CPS_TOP;
     u32 row, col;
 #ifdef SAT_S1_DIRTY
-    u32 s1d_flags = (x0 >> 3) | ((y0 >> 3) << 8) | ((u32)snap.home << 16) | ((u32)snap.hud_flush << 20) | ((u32)snap.sel_ok << 21) | 0x80000000UL;
-    u32 s1d_redraw = S1_ALL, s1d_ref0 = sat_gfx_stats.refused_layer + s1_bm_refused, s1d_bad = 0, s1d_pass = 0;
-    int s1d_dirty = drawn_valid && snap.s1_from == drawn_s1 && s1d_flags == s1d_key && s1d_clean && !snap.home && !snap.sel_ok && (snap.s1_rows & S1_ALL) != S1_ALL;
+    u32 s1d_flags, s1d_redraw = S1_ALL, s1d_ref0 = s1d_refs(), s1d_bad = 0, s1d_pass = 0;
+    int s1d_dirty = s1d_begin(x0, y0, &s1d_flags);
 #ifdef S1D_STATS
     if (sat_s1d_off) s1d_dirty = 0;
 #endif
@@ -1694,7 +1709,7 @@ again:
     if (!s1d_pass)
     {
         s1d_key = s1d_flags;
-        s1d_clean = (u8)(sat_gfx_stats.refused_layer + s1_bm_refused == s1d_ref0);
+        s1d_clean = (u8)(s1d_refs() == s1d_ref0);
 #ifdef S1D_STATS
         if (!s1d_clean) sat_s1d[7]++;
         if (s1d_dirty && sat_s1d_verify)
@@ -1733,7 +1748,7 @@ extern volatile u32 sat_home_seq;
    letters (the title list, straight on the title art as Capcom's Saturn menus draw their mode list); 15, the panel's dot code, so the letters
    sit on the translucent panel (the pause menu); or 14, a halo: only the clear dots touching a lit dot (8 neighbours, inside the cell) take the
    panel's dot code, so the option screens have no panel but each letter keeps a darkened margin of the picture and reads over the logo (owner 11-09). */
-static void home_cell(const u8 *f, u32 cell, int big, u32 bg)
+static HOME_COLD void home_cell(const u8 *f, u32 cell, int big, u32 bg)
 {
     u8 d[8][8]; int x, y, halo = bg == 14;
     if (halo) bg = 0;
@@ -1755,7 +1770,7 @@ static void home_cell(const u8 *f, u32 cell, int big, u32 bg)
             o |= (v ? v : bg) << (28 - 4 * x); }
         put32(VDP2_VRAM + CELL_S1 + cell * 32 + (u32)y * 4, o); }
 }
-static HOME_OS void draw_home(int fresh)
+static HOME_OS HOME_COLD void draw_home(int fresh)
 {
     u32 row, col;
     static u32 font_bg = 99;
@@ -2384,7 +2399,14 @@ unsigned long sat_gfx_stage[6];
 
 /* One scroll layer's visible cells. Most frames nothing changed, so the first pass only sums and the copy runs when the sum moved: the drawing side
    skips an unchanged sum, and the snapshot still holds those words. The game's maps run down columns, so the reads stay on cache lines. */
-static u32 snap_layer(u32 *dest, const u8 *map, u32 xc, u32 yc, u32 rows, u32 cols, u32 row_bits, u32 sum, u32 old)
+#ifdef SAT_S1_DIRTY
+#define SNAP_MASK , u32 *mask_out   /* scroll 1 only: bit r = row r has a word that differs from the copy before (0 for the other layers) */
+#define SNAP_NULL , 0
+#else
+#define SNAP_MASK
+#define SNAP_NULL
+#endif
+static u32 snap_layer(u32 *dest, const u8 *map, u32 xc, u32 yc, u32 rows, u32 cols, u32 row_bits, u32 sum, u32 old SNAP_MASK)
 {
     u32 row_off[S1_ROWS], col, row, low = (1UL << row_bits) - 1;
     for (row = 0; row < rows; row++)
@@ -2410,6 +2432,20 @@ static u32 snap_layer(u32 *dest, const u8 *map, u32 xc, u32 yc, u32 rows, u32 co
 #ifndef SAT_SNAP_ALWAYS
     if (sum == old) return sum;
 #endif
+#ifdef SAT_S1_DIRTY
+    if (mask_out)
+    {
+        u32 mask = 0;
+        for (col = 0; col < cols; col++)
+        {
+            const u8 *base = map + ((((xc + col) & 63) << row_bits) * 4);
+            u32 *cell = dest + col;
+            for (row = 0; row < rows; row++, cell += cols) { u32 v = be32(base + row_off[row]); mask |= (u32)(*cell != v) << row; *cell = v; }
+        }
+        *mask_out = mask;
+        return sum;
+    }
+#endif
     for (col = 0; col < cols; col++)
     {
         const u8 *base = map + ((((xc + col) & 63) << row_bits) * 4);
@@ -2419,33 +2455,6 @@ static u32 snap_layer(u32 *dest, const u8 *map, u32 xc, u32 yc, u32 rows, u32 co
     return sum;
 }
 
-#ifdef SAT_S1_DIRTY
-/* snap_layer for scroll 1 (play build: FIT 1, row_bits 5) that also records which rows' words changed. Same sum, same copy. */
-static u32 snap_layer_s1(const u8 *map, u32 xc, u32 yc, u32 seed)
-{
-    u32 row_off[S1_ROWS], col, row, sum = seed, old = snap.s1_sum, mask = 0;
-    for (row = 0; row < S1_ROWS; row++)
-    {
-        u32 r = (yc + row) & 63;
-        row_off[row] = ((r & 31) + ((r & 32) << 6)) * 4;
-    }
-    for (col = 0; col < S1_COLS; col++)
-    {
-        const u8 *base = map + ((((xc + col) & 63) << 5) * 4);
-        for (row = 0; row < S1_ROWS; row++) sum = MIX(sum, be32(base + row_off[row]));
-    }
-    if (sum == old) return sum;
-    for (col = 0; col < S1_COLS; col++)
-    {
-        const u8 *base = map + ((((xc + col) & 63) << 5) * 4);
-        u32 *cell = snap.s1 + col;
-        for (row = 0; row < S1_ROWS; row++, cell += S1_COLS) { u32 v = be32(base + row_off[row]); mask |= (u32)(*cell != v) << row; *cell = v; }
-    }
-    if (seed != snap.s1_seed) mask = S1_ALL;
-    snap.s1_rows = mask; snap.s1_from = old; snap.s1_seed = seed;
-    return sum;
-}
-#endif
 
 static int rows_clear;
 
@@ -2675,7 +2684,11 @@ void sat_gfx_snapshot_layers(void)
 #endif
         x0 = (u32)snap.s1x + CPS_LEFT + S1_READ_X; y0 = (u32)snap.s1y + CPS_TOP;
 #ifdef SAT_S1_DIRTY
-        snap.s1_sum = snap_layer_s1(GFX(RAM16(SH_SCROLL1_BASE) & 0xffc0U), x0 >> 3, y0 >> 3, (x0 >> 3) | ((y0 >> 3) << 16) | ((u32)snap.hud_flush << 31) | ((u32)snap.sel_ok << 30));
+        {
+            u32 seed = (x0 >> 3) | ((y0 >> 3) << 16) | ((u32)snap.hud_flush << 31) | ((u32)snap.sel_ok << 30), old = snap.s1_sum, mask;
+            snap.s1_sum = snap_layer(snap.s1, GFX(RAM16(SH_SCROLL1_BASE) & 0xffc0U), x0 >> 3, y0 >> 3, S1_ROWS, S1_COLS, 5, seed, old, &mask);
+            if (snap.s1_sum != old) { snap.s1_rows = seed != snap.s1_seed ? S1_ALL : mask; snap.s1_from = old; snap.s1_seed = seed; }
+        }
 #else
         snap.s1_sum = snap_layer(snap.s1, GFX(RAM16(SH_SCROLL1_BASE) & 0xffc0U), x0 >> 3, y0 >> 3, S1_ROWS, S1_COLS, 5, (x0 >> 3) | ((y0 >> 3) << 16) | ((u32)snap.hud_flush << 31) | ((u32)snap.sel_ok << 30), snap.s1_sum);
 #endif
@@ -2685,12 +2698,12 @@ void sat_gfx_snapshot_layers(void)
         u32 whole = snap.whole;
         x0 = (u32)snap.s2x + CPS_LEFT + SAT_GFX_CROP_X; y0 = (u32)snap.s2y + CPS_TOP;
         snap.s2_sum = snap_layer(snap.s2, GFX(RAM16(SH_SCROLL2_BASE) & 0xffc0U), whole ? 0 : x0 >> 4, y0 >> 4, S2_ROWS, whole ? 64 : S2_COLS, 4,
-                                 (whole ? 0x80000000UL : (x0 >> 4)) | ((y0 >> 4) << 16), snap.s2_sum);
+                                 (whole ? 0x80000000UL : (x0 >> 4)) | ((y0 >> 4) << 16), snap.s2_sum SNAP_NULL);
     }
     if (layers & 8)
     {
         x0 = (u32)snap.s3x + CPS_LEFT + SAT_GFX_CROP_X; y0 = (u32)snap.s3y + CPS_TOP;
-        snap.s3_sum = snap_layer(snap.s3, GFX(RAM16(SH_SCROLL3_BASE) & 0xffc0U), x0 >> 5, y0 >> 5, S3_ROWS, S3_COLS, 3, (x0 >> 5) | ((y0 >> 5) << 16), snap.s3_sum);
+        snap.s3_sum = snap_layer(snap.s3, GFX(RAM16(SH_SCROLL3_BASE) & 0xffc0U), x0 >> 5, y0 >> 5, S3_ROWS, S3_COLS, 3, (x0 >> 5) | ((y0 >> 5) << 16), snap.s3_sum SNAP_NULL);
     }
 #ifdef SAT_HOME
     if (snap.home >= 3) snap.s1_sum++;    /* scroll 1 redrawn on the title menus (its bottom rows hidden) */
