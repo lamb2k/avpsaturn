@@ -146,7 +146,7 @@ static void diag_done_k(unsigned long restore, unsigned long b)   /* the boot di
 {
     (void)b;
     if (restore) {   /* what sat_gfx_init set and diag_takeover changed (values from sat_gfx_init; BACKCOL 0x1fffe) */
-        V2R(0x00) = 0x8001; V2R(0xac) = 0; V2R(0xae) = 0xffff;
+        V2R(0x00) = 0x8101; V2R(0xac) = 0; V2R(0xae) = 0xffff;
         V2R(0x10) = 0x012f; V2R(0x12) = 0xff6f; V2R(0x14) = 0x4444; V2R(0x16) = 0x4444;
         V2R(0x18) = 0x5555; V2R(0x1a) = 0x5555; V2R(0x1c) = 0x5555; V2R(0x1e) = 0x5555;
     }
@@ -350,29 +350,23 @@ static long reveal_io(int which, unsigned a, unsigned b, unsigned c)
     return which == 1 ? load_file((const char *)a, (void *)b) : unlock_io(a, b, (unsigned char *)c);
 }
 #endif
-/* The game runs the VDP2 in its 352 wide mode (sat_gfx_init writes TVMD HRESO = 1). That mode needs the SMPC clock change (command 0x0E, CKCHG352): the BIOS runs the 320 clock, and a 352
-   mode on the 320 dot clock gives timing the TV cannot lock on (rolling white noise on the console; Yaba and Ymir show a picture regardless). The command resets VDP1, VDP2, the SCU and the
-   sound chip, switches the slave off, takes about 100 ms and ends with an NMI to the master, so: vector 11 gets a handler, the command is sent with interrupts masked, the NMI is awaited.
-   Done once, first thing in the loader (before the cart is enabled and anything is loaded: the reset also clears the cart RAM in Ymir's model); the boot display is taken again in the new mode. */
-static volatile int nmi_seen;
-static void nmi_handler(void) __attribute__((interrupt_handler));
-static void nmi_handler(void) { nmi_seen = 1; }
+/* The game runs the VDP2 in its 352 wide mode (sat_gfx_init writes TVMD HRESO = 1). That mode needs the system clock change: the BIOS runs the 320 clock, and a 352 mode on the
+   320 dot clock gives timing the TV cannot lock on (rolling white noise on the console; Yaba and Ymir show a picture regardless). This is the BIOS's own service, SYS_CHGSYSCK(1)
+   (SEGA_SYS.H: the function pointer at 0x06000320; 0 = 26 MHz, 320/640 modes, 1 = 28 MHz, 352/704 modes), exactly what SGL's slInitSystem calls for a 352 mode. It does the SMPC
+   command, the NMI wait and the reset of the SCU, A-bus (ASR0/ASR1 = 0x1ff01ff0, AREF = 0x1f), SCU timers and DMA, which are therefore at the BIOS defaults afterwards: the cart is
+   brought up after it, never before. Done once, first thing in the loader (before the cart is enabled and anything is loaded), then the boot display is taken again in the 352 mode. */
 static void clock_352(void)
 {
-    volatile unsigned char *smpc = (volatile unsigned char *)0x20100000u;
-    volatile unsigned long *vt = (volatile unsigned long *)0x06000000u;
-    unsigned long n;
-    vt[11] = (unsigned long)nmi_handler;
-    __asm__ volatile ("ldc %0,sr" : : "r"(0xf0));
-    for (n = 0; n < 2000000ul && (smpc[0x63] & 1); n++) ;
-    nmi_seen = 0;
-    smpc[0x63] = 1;
-    smpc[0x1f] = 0x0e;                                  /* CKCHG352 */
-    for (n = 0; n < 12000000ul && !nmi_seen; n++) ;     /* the NMI ends the change (about 100 ms) */
-    for (n = 0; n < 2000000ul && (smpc[0x63] & 1); n++) ;
-    diag_tvmd = 0x8001;
+    void (*chgsysck)(unsigned long) = *(void (**)(unsigned long))0x06000320u;
+    unsigned o;
+    chgsysck(1);
+    /* SGL's slInitSystem writes every VDP2 register (all zero but the ones it uses); the runtime sets only what it uses and relies on the rest being zero, which the
+       clock change's reset gives on the console only if it really resets them: write the zeros (not TVMD, the read-only status registers, or EXTEN/VRSIZE kept at 0). */
+    V2R(0x02) = 0; V2R(0x06) = 0;
+    for (o = 0x0e; o < 0x120; o += 2) V2R(o) = 0;
+    diag_tvmd = 0x8101;                                 /* SGL's TVMD for 352 x 224 NTSC */
     diag_reinit_k(0, 0);                                /* the chips were reset: the display again, 352 wide */
-    diag_info(0x4000u | (nmi_seen ? 1u : 0u));          /* 4001 the change finished with its NMI, 4000 the wait ran out */
+    diag_info(0x4001u);                                 /* 4001: the BIOS clock change returned */
 }
 /* The save record read (BIOS backup library). Where it runs is a build choice, because on the console the library is BIOS code that Yaba's HLE never executes:
    default           first thing, before the cart bus timing changes and before any disc read, with the library copied into high work RAM (0x060C0000, 24 KB; HW.BIN loads over it later);
@@ -393,6 +387,7 @@ static void boot_save_read(unsigned char *scratch)
 #endif
 }
 #endif
+static void spin(unsigned long n) { while (n--) __asm__ volatile ("nop"); }
 int main(void)
 {
     unsigned char *c;
@@ -420,7 +415,7 @@ int main(void)
     /* The 4 MB cart (ST-TECH-47: ASR0, AREF, then a WORD write of 1 to 0x257efffe). The BIOS's own timing is ASR0 = ASR1 = 0x1ff01ff0, AREF = 0x1f; the working JO disc runs the
        cart on it and never writes ASR0/AREF. Default build: enable the cart on the BIOS timing and verify it, only then switch to ours (0x23301ff0 / 0x13), verify again and go
        back to the BIOS timing if that fails (yellow band). AVP_CART_ORIG (diagnosis discs): ours first, the BIOS's as the fallback. */
-#define ABUS_BIOS() do { *(volatile unsigned long *)0x25fe00b0 = 0x1ff01ff0; *(volatile unsigned long *)0x25fe00b8 = 0x0000001f; } while (0)
+#define ABUS_BIOS() do { *(volatile unsigned long *)0x25fe00b0 = 0x1ff01ff0; *(volatile unsigned long *)0x25fe00b4 = 0x1ff01ff0; *(volatile unsigned long *)0x25fe00b8 = 0x0000001f; } while (0)
 #define ABUS_OURS() do { *(volatile unsigned long *)0x25fe00b0 = 0x23301ff0; *(volatile unsigned long *)0x25fe00b8 = 0x00000013; } while (0)
 #ifdef AVP_CART_ORIG
     for (;;) {
@@ -434,11 +429,21 @@ int main(void)
         tried = 1;
     }
 #else
-    *(volatile unsigned short *)0x257efffe = 1;          /* the BIOS's timing is still in force */
-    id = *cart_id;
-    diag_info(0x1000u | id);                            /* the cart's ID byte: 5c is a 4 MB RAM cart */
-    cart[0] = 0x12345678; cart[1] = 0xedcba987;
-    if (cart[0] != 0x12345678 || cart[1] != 0xedcba987) diag_fail(id == 0x5c ? 0xe0f0u : 0xe0f2u, C_RED, id);   /* red: e0f0 the cart did not answer, e0f2 no 4 MB cart ID either */
+    ABUS_BIOS();                                         /* the clock change service leaves the A-bus at these values; written again so nothing depends on how a console's SCU reset left them */
+    *(volatile unsigned short *)0x257efffe = 1;
+    spin(300000);                                        /* a few ms for the cart after the reset */
+    {
+        int k;
+        for (k = 0; k < 4; k++) {
+            id = *cart_id;
+            cart[0] = 0x12345678; cart[1] = 0xedcba987;
+            if (cart[0] == 0x12345678 && cart[1] == 0xedcba987) break;
+            spin(300000);
+            *(volatile unsigned short *)0x257efffe = 1;
+        }
+        diag_info(0x1000u | id);                        /* the cart's ID byte: 5c is a 4 MB RAM cart */
+        if (cart[0] != 0x12345678 || cart[1] != 0xedcba987) diag_fail(id == 0x5c ? 0xe0f0u : 0xe0f2u, C_RED, id);   /* red: e0f0 the cart did not answer, e0f2 no 4 MB cart ID either */
+    }
 #ifndef AVP_ABUS_BIOS
     ABUS_OURS();
     *(volatile unsigned short *)0x257efffe = 1;

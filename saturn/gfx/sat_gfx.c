@@ -3176,7 +3176,10 @@ int sat_gfx_swap_pack(const void *pack)
     return 1;
 }
 
-void sat_gfx_display(int on) { VDP2R(0x00) = on ? 0x8001 : 0x0001; }
+/* TVMD as SGL's slInitSystem writes it for a 352 x 224 NTSC picture: HRESO 1, BDCLMD 1 (back screen colour when the display is off), 0x8000 = display on. */
+#define TVMD_352_OFF 0x0101
+#define TVMD_352_ON 0x8101
+void sat_gfx_display(int on) { VDP2R(0x00) = on ? TVMD_352_ON : TVMD_352_OFF; }
 
 COLD_OS int sat_gfx_init(const void *pack)
 {
@@ -3188,7 +3191,7 @@ COLD_OS int sat_gfx_init(const void *pack)
     u8 *c;
     if (!pack || !open_pack((const u8 *)pack)) return 0;
 
-    VDP2R(0x00) = 0x0001;                         /* display off, 352 x 224 */
+    VDP2R(0x00) = TVMD_352_OFF;                   /* display off, 352 x 224 */
     clear_vram(VDP2_VRAM, 0x80000UL);
     clear_vram(VDP1_VRAM, 0x80000UL);
     for (i = 0; i < 2048; i++) { put16(CRAM_AT(i), 0); cram_shadow[i] = 0; }
@@ -3279,7 +3282,7 @@ COLD_OS int sat_gfx_init(const void *pack)
     put16(c + 64, 0x8000);
     VDP1R(PTMR) = 0;
 
-    VDP2R(0x00) = 0x8001;                         /* display on */
+    VDP2R(0x00) = TVMD_352_ON;                    /* display on */
     #ifdef SAT_HOME
     /* The menu font's cells are written by draw_home (clear dots clear on the title list, panel dots on the option screens). The panel cell:
        every dot code 15 (pen 14, near black). */
