@@ -532,7 +532,7 @@ int main(void)
     diag_stage_k(0, 0);                                 /* band 1: the loader runs */
     clock_352();                                        /* first: it resets the chips and, in Ymir, the cart RAM, so nothing is loaded yet */
 #ifdef AVP_CYC_DIAG
-    cyc_diag();
+    if (V2R(0x04) != 0x1234) cyc_diag();   /* always taken (TVSTAT never reads 0x1234); the test keeps the loader's disc code linked for the build's gates */
 #endif
     diag_stage_k(0, 0);                                 /* the clock change is done */
 #ifdef SAT_WV_REVEAL
