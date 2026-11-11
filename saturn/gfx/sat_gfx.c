@@ -1573,6 +1573,10 @@ no:
     return 0;
 }
 #endif
+#ifdef SAT_EDGE_STATS
+static u32 es_cnt[8];           /* 0 objects, 1 touching a strip, 2 fully hidden, 3 entering/leaving, 4 pictures, 5 pictures with an object touching a strip, 6 pictures with a fully hidden object */
+static int es_pic_strip, es_pic_hidden;
+#endif
 static void draw_scroll1(u16 sx, u16 sy)
 {
     const u32 *cell = snap.s1;
@@ -2116,6 +2120,18 @@ static void draw_sprites(void)
             reuse_next = 0;
 #endif
             if (sy <= -16 || sy >= SAT_GFX_SCREEN_H) { CENSUS(c_tiles += (u32)nx; c_off += (u32)nx;) VLN(vl_tiles += (u16)nx; vl_off += (u16)nx;) continue; }
+#ifdef SAT_EDGE_STATS
+            {   /* measurement build only: sprite objects (not background) against the outer 16 columns of the arcade's 384 that the 352 crop hides */
+                int xo = (x & 0x3ff) - CPS_LEFT, xe = xo + nx * 16;
+                if (xe > 0 && xo < 384)
+                {
+                    es_cnt[0]++;                                   /* objects on the 384 screen */
+                    if (xo < 16 || xe > 368) { es_cnt[1]++; es_pic_strip = 1; }          /* touching a hidden strip */
+                    if (xe <= 16 || xo >= 368) { es_cnt[2]++; es_pic_hidden = 1; }       /* entirely in a hidden strip */
+                    if (xo < 0 || xe > 384) es_cnt[3]++;                                 /* entering or leaving the 384 picture */
+                }
+            }
+#endif
             for (tx = nx - 1; tx >= 0; tx--)
             {
                 int sx = ((x + tx * 16) & 0x3ff) - CPS_LEFT - SAT_GFX_CROP_X;
@@ -3040,6 +3056,10 @@ void sat_gfx_draw(void)
     VDP2L(0x90, (u16)((s1x + CPS_LEFT + S1_REG_CROP - NUDGE_X) & 0x7ff));
     VDP2L(0x92, (u16)((s1y + CPS_TOP - NUDGE_Y) & 0x7ff));
     LAT_PUBLISH();   /* the whole display state of this picture, for the next V-blank IN */
+#ifdef SAT_EDGE_STATS
+    es_cnt[4]++; es_cnt[5] += (u32)es_pic_strip; es_cnt[6] += (u32)es_pic_hidden; es_pic_strip = es_pic_hidden = 0;
+    { int q; for (q = 0; q < 7; q++) put32(VDP2_VRAM + 0x7ff00UL + (u32)q * 4, es_cnt[q]); }   /* read back by the patched Ymir's VRAM log */
+#endif
 #ifdef SAT_PROF
     if (speed_on)
     {

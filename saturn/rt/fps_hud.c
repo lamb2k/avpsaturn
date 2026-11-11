@@ -23,6 +23,12 @@ static const u8 home_pal[64] __attribute__((aligned(2))) = {
 #include "home_pal.inc"
 };
 #endif
+#ifndef SAT_BUILD_REV
+#define SAT_BUILD_REV 000000
+#endif
+#define SAT_STR2(x) #x
+#define SAT_STR(x) SAT_STR2(x)
+#define SAT_BUILD_REV_STR SAT_STR(SAT_BUILD_REV)
 extern void sat_gfx_vdp2_latch(unsigned off, unsigned val);
 #define VDP2_VRAM ((volatile u16 *)0x25E00000UL)
 #define CRAM ((volatile u16 *)0x25F00000UL)
@@ -32,7 +38,7 @@ extern void sat_gfx_vdp2_latch(unsigned off, unsigned val);
 static u32 st[10] = { 1, 1, 1, 1, 1, 1, 1, 1, 1, 1 };   /* nonzero so they stay in .data */
 /* 0 inited, 1 last vblank, 2 last shown, 3 last overruns, 4 last flips, 5 last skips, 6 last waits, 7 pics, 8 (unused), 9 (unused) */
 static u16 shadow[3][COLS] = { { 0xffff } };
-static char text[3][COLS + 1] = { { 'P' }, { 'M' }, { 'F' } };   /* initialised: the cold image has no .bss */
+static char text[3][COLS + 16] = { { 'P' }, { 'M' }, { 'F' } };   /* painted: COLS columns; the rest is slack so no line can overrun */   /* initialised: the cold image has no .bss */
 
 static u32 udiv(u32 n, u32 d) { u32 q = 0; if (!d) return 0; while (n >= d) { n -= d; q++; } return q; }
 static char *put_str(char *p, const char *s) { while (*s) *p++ = *s++; return p; }
@@ -70,7 +76,8 @@ static void format(u32 dv)
     over = sat_dbg.overruns - st[3]; flips = sat_dbg.obj_flips - st[4]; skips = sat_dbg.gfx_skips - st[5]; waits = sat_gfx_plot_waits - st[6];
     d = shown;   /* new swaps in the window, set by the caller */
     p = put_str(text[0], "PIC "); p = put_num(p, udiv(d * 60 + (dv >> 1), dv)); p = put_str(p, " DONE "); p = put_num(p, udiv((over >= dv ? 0 : dv - over) * 60 + (dv >> 1), dv)); *p = 0;
-    p = put_str(text[2], "FLIP "); p = put_num(p, udiv(flips * 60 + (dv >> 1), dv)); p = put_str(p, " VBL "); p = put_num(p, dv); *p = 0;
+    p = put_str(text[2], "F"); *p++ = (char)('0' + SAT_GFX_FIT); *p++ = ' '; p = put_str(p, SAT_BUILD_REV_STR); *p++ = ' ';   /* build id: presentation mode (1 scaled, 2 native crop) and the first 6 hex digits of the source commit */
+    p = put_str(p, "FLIP "); p = put_num(p, udiv(flips * 60 + (dv >> 1), dv)); p = put_str(p, " VBL "); p = put_num(p, dv); *p = 0;
     p = put_str(text[1], "MISS "); p = put_num(p, over); p = put_str(p, " SKIP "); p = put_num(p, skips); p = put_str(p, " HELD "); p = put_num(p, waits); *p = 0;
 }
 static void paint(void)
