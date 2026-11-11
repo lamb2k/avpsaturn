@@ -2445,7 +2445,9 @@ static u32 snap_layer(u32 *dest, const u8 *map, u32 xc, u32 yc, u32 rows, u32 co
     {
         /* Four columns at a time: the old words are read (a plain copy only writes), and a row's four words share a cache line of the snapshot, where a column at a time
            would fill a line for every word (Yaba, cache on: +430 ticks of the master's snapshot against +100 here). */
-        u32 mask = 0, c4, k, n;
+        /* The SH-2 has no variable shift (a shift by the row is a loop of up to 28 steps, which cost more than the copy), so a row's difference is an OR of xors and the mask is built last. */
+        u32 diff[S1_ROWS], mask = 0, c4, k, n;
+        for (row = 0; row < rows; row++) diff[row] = 0;
         for (c4 = 0; c4 < cols; c4 += 4)
         {
             const u8 *base[4];
@@ -2453,10 +2455,12 @@ static u32 snap_layer(u32 *dest, const u8 *map, u32 xc, u32 yc, u32 rows, u32 co
             for (k = 0; k < n; k++) base[k] = map + ((((xc + c4 + k) & 63) << row_bits) * 4);
             for (row = 0; row < rows; row++)
             {
-                u32 *cell = dest + row * cols + c4;
-                for (k = 0; k < n; k++) { u32 v = be32(base[k] + row_off[row]); mask |= (u32)(cell[k] != v) << row; cell[k] = v; }
+                u32 *cell = dest + row * cols + c4, d = diff[row];
+                for (k = 0; k < n; k++) { u32 v = be32(base[k] + row_off[row]); d |= cell[k] ^ v; cell[k] = v; }
+                diff[row] = d;
             }
         }
+        for (row = rows; row-- > 0; ) mask = (mask << 1) | (diff[row] != 0);
         *mask_out = mask;
         return sum;
     }
