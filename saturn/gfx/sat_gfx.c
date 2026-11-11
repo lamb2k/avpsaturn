@@ -113,18 +113,18 @@ int sat_gfx_nudge_x, sat_gfx_nudge_y;
 #define GFX(reg) (PAGE[((reg) >> 8) & 0xff] + (((u32)(reg) << 8) & 0xffffUL))
 
 /* VDP2 layout */
-#define MAP_S2 SAT_V2_MAP_S2##UL
-#define MAP_S1 SAT_V2_MAP_S1##UL
-#define MAP_S3 SAT_V2_MAP_S3##UL
-#define CELL_S1 SAT_V2_CELL_S1##UL
+#define MAP_S2 ((unsigned long)SAT_V2_MAP_S2)
+#define MAP_S1 ((unsigned long)SAT_V2_MAP_S1)
+#define MAP_S3 ((unsigned long)SAT_V2_MAP_S3)
+#define CELL_S1 ((unsigned long)SAT_V2_CELL_S1)
 #define ROWTAB 0x1fc00UL
 #define BACKCOL 0x1fffeUL
 #define CLEAR_NAME (CELL_S1 >> 5) /* four clear cells at the start of the scroll 1 slab */
-#define CELL_S2 SAT_V2_CELL_S2##UL
-#define CELL_S3 SAT_V2_CELL_S3##UL
+#define CELL_S2 ((unsigned long)SAT_V2_CELL_S2)
+#define CELL_S3 ((unsigned long)SAT_V2_CELL_S3)
 /* Blank characters in each layer's own bank (a name whose cell lies in a bank the layer has no cell slot in reads nothing defined on the console). */
-#define CLEAR_S2 (SAT_V2_CLEAR_S2##UL >> 5)
-#define CLEAR_S3 (SAT_V2_CLEAR_S3##UL >> 5)
+#define CLEAR_S2 (((unsigned long)SAT_V2_CLEAR_S2) >> 5)
+#define CLEAR_S3 (((unsigned long)SAT_V2_CLEAR_S3) >> 5)
 typedef char sat_v2_chk_s2[(SAT_V2_CLEAR_S2 == SAT_V2_CELL_S2 + SAT_V2_S2_SLOTS * 128 && SAT_V2_MAP_S2 == SAT_V2_CLEAR_S2 + 0x80) ? 1 : -1];
 typedef char sat_v2_chk_s3[(SAT_V2_CLEAR_S3 == SAT_V2_CELL_S3 + SAT_V2_S3_SLOTS * 512) ? 1 : -1];
 /* VDP1 layout */
