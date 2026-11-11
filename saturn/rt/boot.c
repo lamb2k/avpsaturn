@@ -353,7 +353,7 @@ static long reveal_io(int which, unsigned a, unsigned b, unsigned c)
 /* The game runs the VDP2 in its 352 wide mode (sat_gfx_init writes TVMD HRESO = 1). That mode needs the SMPC clock change (command 0x0E, CKCHG352): the BIOS runs the 320 clock, and a 352
    mode on the 320 dot clock gives timing the TV cannot lock on (rolling white noise on the console; Yaba and Ymir show a picture regardless). The command resets VDP1, VDP2, the SCU and the
    sound chip, switches the slave off, takes about 100 ms and ends with an NMI to the master, so: vector 11 gets a handler, the command is sent with interrupts masked, the NMI is awaited.
-   Done once, here, after the loads (nothing of ours is running on those chips yet); the boot display is taken again in the new mode. */
+   Done once, first thing in the loader (before the cart is enabled and anything is loaded: the reset also clears the cart RAM in Ymir's model); the boot display is taken again in the new mode. */
 static volatile int nmi_seen;
 static void nmi_handler(void) __attribute__((interrupt_handler));
 static void nmi_handler(void) { nmi_seen = 1; }
@@ -406,6 +406,8 @@ int main(void)
     vt[9] = (volatile unsigned long *)diag_exc9; vt[10] = (volatile unsigned long *)diag_exc10;
     DIAG_API[1] = (unsigned long)diag_fatal_k; DIAG_API[2] = (unsigned long)diag_done_k; DIAG_API[4] = (unsigned long)diag_reinit_k; DIAG_API[5] = (unsigned long)diag_slave_k;
     diag_stage_k(0, 0);                                 /* band 1: the loader runs */
+    clock_352();                                        /* first: it resets the chips and, in Ymir, the cart RAM, so nothing is loaded yet */
+    diag_stage_k(0, 0);                                 /* the clock change is done */
 #ifdef SAT_WV_REVEAL
     LOADER_API[1] = (unsigned long)reveal_io;
     LOADER_API[2] = 0;
@@ -472,8 +474,6 @@ int main(void)
 #endif
 #endif
     LOADER_API[0] = (unsigned long)load_regions;
-    diag_stage_k(0, 0);                                 /* the clock change */
-    clock_352();
     diag_stage_k(0, 0);                                 /* the runtime is entered next */
     *(volatile unsigned char *)0xfffffe92 = 0x10;
     *(volatile unsigned char *)0xfffffe92 = 0x01;
