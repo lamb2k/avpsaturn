@@ -745,10 +745,17 @@ SECTIONS {{
     fixes = {n: fixlib.fix_archive(str(JO / "Compiler/WINDOWS/sh-elf/bin/ar.exe"), SGL / "LIB_ELF" / n, lib / n) for n in ("SEGA_SYS.A", "LIBCD.A", "LIBSGL.A")}
     print("sgl library relocations fixed", fixes)
     sh([GCC, "-m2", "-mb", "-nostartfiles", "-T", HERE / "boot.ld", b, "-Wl,--start-group", lib / "SEGA_SYS.A", lib / "LIBCD.A", lib / "LIBSGL.A", "-lgcc", "-lc", "-Wl,--end-group",
-        "-o", WORK / "boot.elf", f"-Wl,-Map={WORK / 'boot.map'},-e,_main"])
+        "-o", WORK / "boot.elf", f"-Wl,-Map={WORK / 'boot.map'},-e,_main,-q"])   # -q (emit-relocs) keeps the relocations for the data address gate below
     sh([OBJCOPY, "-O", "binary", "-j", ".text", WORK / "boot.elf", ISO / "0.BIN"])
     bend = next(int(l.split()[0], 16) for l in sh([NM, WORK / "boot.elf"]).splitlines() if l.endswith("__bend"))
     # Gate: the library's cd_stat must be addressed at its own symbol (fixlib.py), never at symbol + the section VMA (an address error on the console).
+    import check_boot_data
+    bad = check_boot_data.check(WORK / "boot.elf", WORK / "boot.map")
+    if bad:
+        raise SystemExit("NO-GO: loader data addresses (check_boot_data.py):
+" + "
+".join(bad[:20]))
+    print("boot data addresses: ok")
     cd_stat = next(int(l.split()[0], 16) for l in sh([NM, WORK / "boot.elf"]).splitlines() if l.endswith(" _cd_stat"))
     code = (ISO / "0.BIN").read_bytes()
     if cd_stat.to_bytes(4, "big") not in code or (cd_stat + 0x152).to_bytes(4, "big") in code:
