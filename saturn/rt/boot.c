@@ -387,6 +387,7 @@ static void boot_save_read(unsigned char *scratch)
 #endif
 }
 #endif
+static void spin(unsigned long n) { while (n--) __asm__ volatile ("nop"); }
 int main(void)
 {
     unsigned char *c;
@@ -415,7 +416,6 @@ int main(void)
        cart on it and never writes ASR0/AREF. Default build: enable the cart on the BIOS timing and verify it, only then switch to ours (0x23301ff0 / 0x13), verify again and go
        back to the BIOS timing if that fails (yellow band). AVP_CART_ORIG (diagnosis discs): ours first, the BIOS's as the fallback. */
 #define ABUS_BIOS() do { *(volatile unsigned long *)0x25fe00b0 = 0x1ff01ff0; *(volatile unsigned long *)0x25fe00b4 = 0x1ff01ff0; *(volatile unsigned long *)0x25fe00b8 = 0x0000001f; } while (0)
-static void spin(unsigned long n) { while (n--) __asm__ volatile ("nop"); }
 #define ABUS_OURS() do { *(volatile unsigned long *)0x25fe00b0 = 0x23301ff0; *(volatile unsigned long *)0x25fe00b8 = 0x00000013; } while (0)
 #ifdef AVP_CART_ORIG
     for (;;) {
