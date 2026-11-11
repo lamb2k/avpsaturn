@@ -739,11 +739,20 @@ SECTIONS {{
     else:
         (ISO / "STORE.BIN").unlink(missing_ok=True)
     sh([GCC, "-m2", "-mb", "-O2", "-w", "-fno-builtin", "-I", SGL / "INC", f"-DCOLD1_ADDR={cold1_at:#x}u"] + (["-DSECTOR_STORE"] if store else []) + (["-DSTORE_HEAD2"] if head_sectors == 2 else []) + (["-DSAT_WV_REVEAL"] + ([f"-DGUEST_SEL_ADDR={syms['_sat_guest_sel']:#x}u"] if "_sat_guest_sel" in syms else []) if "SAT_WV_REVEAL" in os.environ.get("KERNEL_CFLAGS", "") else []) + os.environ.get("BOOT_CFLAGS", "").split() + [ "-c", HERE / "boot.c", "-o", b])
-    lib = SGL / "LIB_ELF"
+    # SGL's LIB_ELF members carry a non-zero input VMA on .data/.bss; this ld then puts their variables at the wrong address (fixlib.py): patched copies for the link.
+    import fixlib
+    lib = WORK / "libfix"
+    fixes = {n: fixlib.fix_archive(str(JO / "Compiler/WINDOWS/sh-elf/bin/ar.exe"), SGL / "LIB_ELF" / n, lib / n) for n in ("SEGA_SYS.A", "LIBCD.A", "LIBSGL.A")}
+    print("sgl library relocations fixed", fixes)
     sh([GCC, "-m2", "-mb", "-nostartfiles", "-T", HERE / "boot.ld", b, "-Wl,--start-group", lib / "SEGA_SYS.A", lib / "LIBCD.A", lib / "LIBSGL.A", "-lgcc", "-lc", "-Wl,--end-group",
         "-o", WORK / "boot.elf", f"-Wl,-Map={WORK / 'boot.map'},-e,_main"])
     sh([OBJCOPY, "-O", "binary", "-j", ".text", WORK / "boot.elf", ISO / "0.BIN"])
     bend = next(int(l.split()[0], 16) for l in sh([NM, WORK / "boot.elf"]).splitlines() if l.endswith("__bend"))
+    # Gate: the library's cd_stat must be addressed at its own symbol (fixlib.py), never at symbol + the section VMA (an address error on the console).
+    cd_stat = next(int(l.split()[0], 16) for l in sh([NM, WORK / "boot.elf"]).splitlines() if l.endswith(" _cd_stat"))
+    code = (ISO / "0.BIN").read_bytes()
+    if cd_stat.to_bytes(4, "big") not in code or (cd_stat + 0x152).to_bytes(4, "big") in code:
+        raise SystemExit("NO-GO: 0.BIN addresses the SGL cd_stat wrongly (library relocations)")
     print("boot", (ISO / "0.BIN").stat().st_size, "bytes, bss end", hex(bend))
     if bend > 0x06013fe0:
         raise SystemExit("loader overlaps the runtime")
