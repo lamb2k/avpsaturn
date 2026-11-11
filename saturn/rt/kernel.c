@@ -701,6 +701,7 @@ static void round_check(void)
 #define REVEAL_ON 0
 #endif
 
+unsigned long sat_tk_run, sat_tk_skip;   /* tasks run and runnable tasks cut off by a vblank, since boot (the readout's TASK line) */
 /* Dispatcher 0xd86. A vblank sets the game's flag at 0xff0266 through f_e0e, which restarts the walk from task 0. */
 void f_d86(void)
 {
@@ -721,13 +722,13 @@ void f_d86(void)
         w8(G_VFLAG, 0);
         for (i = 0; i < TASKS; i++) {
             u32 st;
-            if (r8(G_VFLAG)) break;
+            if (r8(G_VFLAG)) { int j; for (j = i; j < TASKS; j++) if (r8(REC(j)) >= 4) sat_tk_skip++; break; }   /* a vblank cuts the walk: the runnable tasks it never reached (game time lost) */
             st = r8(REC(i));
             cpu.a[0] = REC(i); LOWW(cpu.d[0], 15 - i);
             cpu.d[1] = (cpu.d[1] & 0xffffff00u) | st;
             if (st >= 4) {
                 run_task(i);
-                sat_dbg.task_runs++;
+                sat_dbg.task_runs++; sat_tk_run++;
                 cpu.a[0] = REC(i); LOWW(cpu.d[0], 15 - i);
             }
             cur = -1;
