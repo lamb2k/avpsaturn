@@ -54,6 +54,25 @@ if hp.exists():
 else:
     print("skip  Ymir source not found")
 
+
+# Positive control: the retail MSHvSF Saturn disc's steady play schedule (register log of the disc in strict Ymir, CPS2_PORTS_FIT_20261111.md): four 16 colour 1x layers, all names in B1, every layer's
+# cells in A0, A1, B0 at T0-T3, CPU at T7. The checker must accept it with MSHvSF's own layout, and must reject it with ours (our maps live in A0/A1, NBG1's cells in B0 and B1).
+def mshv(words, layout_ours):
+    cfg = chk.parse_cfg_text(chk.fit_filtered_macros((ROOT / "saturn/gfx/sat_vdp2_cfg.h").read_text(), 0))
+    L = chk.layer_model(cfg, 0)
+    for l in L:
+        l.update(colours=16, red=1, req_pn=1, req_cg=1)
+        if not layout_ours:
+            l["maps"] = [(0x60000, 0x62000)]
+            l["cells"] = [(0x00000, 0x60000)]
+    errs, warns, info = [], [], []
+    chk.check(chk.words_to_codes(words), L, {0, 1, 2, 3}, 0x1300, "mshvsf", errs, warns, info, vcell_ok=True)
+    return errs, warns, info
+MSHV = [0x6745, 0xfffe, 0x6745, 0xfffe, 0x6745, 0xfffe, 0xcd01, 0x23fe]
+e, w, i = mshv(MSHV, False)
+print(("ok   " if not e else "FAIL ") + f"MSHvSF steady words with MSHvSF's layout: {'pass' if not e else e[:3]}; " + "; ".join(x.split(': ', 1)[1] for x in i if 'CPU slots' in x)); fails += bool(e)
+e, w, i = mshv(MSHV, True)
+print(("ok   " if e else "FAIL ") + f"MSHvSF steady words with our layout: {len(e)} errors (names in B1, our maps in A0/A1)"); fails += not e
 print("info  shipped-game vectors are listed in the notes (docs/notes/AVP_HWBOOT_FIX7_20261111.md); not asserted here")
 print("tests:", "PASS" if not fails else f"FAIL ({fails})")
 sys.exit(1 if fails else 0)

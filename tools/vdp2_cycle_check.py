@@ -124,11 +124,13 @@ def layer_model(cfg, fit_zm, old_layout=False):
     return layers
 
 
-def check(codes, layers, enabled, ramctl, label, errs, warns, info):
+def check(codes, layers, enabled, ramctl, label, errs, warns, info, vcell_ok=False):
     split_a, split_b = bool(ramctl & 0x100), bool(ramctl & 0x200)
     for b, row in codes.items():
         for t, c in enumerate(row):
-            if c in (0xc, 0xd):
+            if c in (0xc, 0xd) and vcell_ok:
+                info.append(f"{label}: {b} T{t} vertical cell scroll read ({CODE_NAME[c]}), not judged")
+            elif c in (0xc, 0xd):
                 errs.append(f"{label}: {b} T{t} uses vertical cell scroll reads, not modelled")
     bank_list = [b for b in BANKS if not ((b == "A1" and not split_a) or (b == "B1" and not split_b))]
     pn_banks = set()

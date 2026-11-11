@@ -475,6 +475,18 @@ def refresh_restores(rom):
     return n
 
 
+def boot_flags():
+    """BOOT_CFLAGS plus the presentation mode of the kernel build: the loader puts the VDP2 access cycles back after its boot display (sat_vdp2_cfg.h, picked by SAT_GFX_FIT), so it must be built for the same SAT_GFX_FIT as the renderer. Two different values are a NO-GO."""
+    boot = os.environ.get("BOOT_CFLAGS", "").split()
+    kfit = re.findall(r"-DSAT_GFX_FIT=(\d)", os.environ.get("KERNEL_CFLAGS", ""))
+    bfit = re.findall(r"-DSAT_GFX_FIT=(\d)", " ".join(boot))
+    if bfit and (kfit[-1:] or ["1"]) != bfit[-1:]:
+        raise SystemExit(f"NO-GO: loader SAT_GFX_FIT {bfit[-1]} differs from the kernel's {(kfit[-1:] or ['1'])[0]} (BOOT_CFLAGS / KERNEL_CFLAGS)")
+    if kfit and not bfit:
+        boot.append(f"-DSAT_GFX_FIT={kfit[-1]}")
+    return boot
+
+
 def main():
     # Gate: the VDP2 VRAM access cycle pattern and every write of the registers it depends on must follow Sega's VDP2 manual (names per layer with the reduction, cell reads, legal slots, CPU slot pairs): tools/vdp2_cycle_check.py.
     r = subprocess.run([sys.executable, str(HERE.parents[1] / "tools" / "vdp2_cycle_check.py"), "--root", str(HERE.parents[1]), "--quiet"], capture_output=True, text=True)
@@ -743,7 +755,7 @@ SECTIONS {{
         print(sh([sys.executable, REPO / "tools/sector_store.py", ISO, "--keep", WORK / "rounds"]).strip())
     else:
         (ISO / "STORE.BIN").unlink(missing_ok=True)
-    sh([GCC, "-m2", "-mb", "-O2", "-w", "-fno-builtin", "-I", SGL / "INC", f"-DCOLD1_ADDR={cold1_at:#x}u"] + (["-DSECTOR_STORE"] if store else []) + (["-DSTORE_HEAD2"] if head_sectors == 2 else []) + (["-DSAT_WV_REVEAL"] + ([f"-DGUEST_SEL_ADDR={syms['_sat_guest_sel']:#x}u"] if "_sat_guest_sel" in syms else []) if "SAT_WV_REVEAL" in os.environ.get("KERNEL_CFLAGS", "") else []) + os.environ.get("BOOT_CFLAGS", "").split() + [ "-c", HERE / "boot.c", "-o", b])
+    sh([GCC, "-m2", "-mb", "-O2", "-w", "-fno-builtin", "-I", SGL / "INC", f"-DCOLD1_ADDR={cold1_at:#x}u"] + (["-DSECTOR_STORE"] if store else []) + (["-DSTORE_HEAD2"] if head_sectors == 2 else []) + (["-DSAT_WV_REVEAL"] + ([f"-DGUEST_SEL_ADDR={syms['_sat_guest_sel']:#x}u"] if "_sat_guest_sel" in syms else []) if "SAT_WV_REVEAL" in os.environ.get("KERNEL_CFLAGS", "") else []) + boot_flags() + [ "-c", HERE / "boot.c", "-o", b])
     # SGL's LIB_ELF members carry a non-zero input VMA on .data/.bss; this ld then puts their variables at the wrong address (fixlib.py): patched copies for the link.
     import fixlib
     lib = WORK / "libfix"

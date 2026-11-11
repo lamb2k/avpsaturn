@@ -1491,6 +1491,12 @@ static HOME_OS void home_row_map(u32 row, u32 (*bm)[2], int sel, u8 *map)
     u32 m[2], a = row, b = row, q;
     u8 wgt[48];
     int c, full = bm[row][0] == 0xffffffffUL && bm[row][1] == 0xffffUL;
+#if SAT_GFX_FIT == 2
+    /* Native presentation (the 352 crop): scroll 2, scroll 3 and the sprites are not scaled, so the text goes where the art is, a plain 16 pixel crop (source columns 2 to 45), on every row. Only
+       a row block that has something in the outer 2 columns on a side, and is not a HUD row (those keep the flush map, nothing lost), is squeezed by dropping 4 blank columns (home_map), so
+       full width lines such as the continue line stay whole. The 11/12 tables below belong to the scaled art and are not used. */
+    if (sel && row >= 7 && row <= 25) { for (c = 0; c < 44; c++) map[c] = (u8)(c + 2); return; }
+#endif
     if (sel && row >= 7 && row <= 25)
     {
         /* The select's elements are separate pictures that the 11/12 scaling moves by different amounts, so each row type has its own fixed drops. Column 0 and 47
@@ -1523,6 +1529,9 @@ static HOME_OS void home_row_map(u32 row, u32 (*bm)[2], int sel, u8 *map)
         for (q = a; q <= b; q++) for (c = 0; c < 48; c++) wgt[c] = (u8)(wgt[c] + !BL(bm[q], c));
 #endif
     }
+#if SAT_GFX_FIT == 2
+    if (!(snap.hud_flush && (row < 6 || row >= 25)) && BL(m, 0) && BL(m, 1) && BL(m, 46) && BL(m, 47)) { for (c = 0; c < 44; c++) map[c] = (u8)(c + 2); return; }
+#endif
     home_map(m, wgt, snap.hud_flush && (row < 6 || row >= 25), snap.hud_flush && !full && a == 8 && (b == 10 || b == 11), map);
 }
 #endif
