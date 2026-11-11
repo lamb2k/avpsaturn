@@ -84,6 +84,8 @@ static void diag_takeover(void)
     V2R(0x20) = 0;                        /* BGON: no scroll screen */
     V2R(0xf0) = 0; V2R(0xf2) = 0; V2R(0xf4) = 0; V2R(0xf6) = 0;   /* PRISA-D: sprite priority 0 hides the logo's VDP1 sprites */
     V2R(0xec) = 0;                        /* CCCTL */
+    V2R(0x10) = 0xffff; V2R(0x12) = 0xffff; V2R(0x14) = 0xffff; V2R(0x16) = 0xffff;   /* VRAM cycle patterns: no layer reads VRAM, so none can show (the runtime's init leaves its own) */
+    V2R(0x18) = 0xffff; V2R(0x1a) = 0xffff; V2R(0x1c) = 0xffff; V2R(0x1e) = 0xffff;
     V2R(0x00) = 0x8000;                   /* TVMD: display on, 320 x 224 */
     V2R(0xac) = 0x8003;                   /* BKTAU: per-line back screen, table at VRAM 0x7fe00 */
     V2R(0xae) = 0xff00;                   /* BKTAL */
@@ -124,7 +126,11 @@ static void diag_fatal_k(unsigned long code, unsigned long detail)   /* the runt
 static void diag_done_k(unsigned long restore, unsigned long b)   /* the boot display ends; restore != 0: after the runtime's graphics init, put back the two registers this file changed that it set (TVMD, back screen table); the rest it rewrites every frame */
 {
     (void)b;
-    if (restore) { V2R(0x00) = 0x8001; V2R(0xac) = 0; V2R(0xae) = 0xffff; }   /* BACKCOL 0x1fffe in sat_gfx.c */
+    if (restore) {   /* what sat_gfx_init set and diag_takeover changed (values from sat_gfx_init; BACKCOL 0x1fffe) */
+        V2R(0x00) = 0x8001; V2R(0xac) = 0; V2R(0xae) = 0xffff;
+        V2R(0x10) = 0x012f; V2R(0x12) = 0xff6f; V2R(0x14) = 0x4444; V2R(0x16) = 0x4444;
+        V2R(0x18) = 0x5555; V2R(0x1a) = 0x5555; V2R(0x1c) = 0x5555; V2R(0x1e) = 0x5555;
+    }
     diag_active = 0; DIAG_API[3] = 0;
 }
 static void diag_exc_c(unsigned long pc, unsigned long vec) { diag_fail(0xfe00u | (unsigned)vec, C_MAGENTA, (unsigned)pc & 0xffffu); }
