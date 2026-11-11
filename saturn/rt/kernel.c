@@ -756,10 +756,14 @@ void sat_vblank(void)
 #ifdef SAT_CPU_SLACK_PROFILE
     u32 slack_end = frt(), slack_wrap = (FTCSR & 2) ? CS_TIMER_WRAP : 0;
 #endif
+    u32 first = !sat_dbg.vblanks;
+#define DIAG_AT(n) do { if (first) diag_call(5, (n), 0); } while (0)
     *(volatile u32 *)0x25fe00a4 = ~1u;
+    DIAG_AT(3);
 #ifndef SAT_VDP1_RACE_OLD
     sat_gfx_vblank();   /* first: the frame change for a finished plot belongs early in vblank-in */
 #endif
+    DIAG_AT(4);
     sat_dbg.vblanks++;
     if (DIAG_API[3]) { if (sat_dbg.vblanks == 1) diag_call(0, 0, 0); else if (sat_dbg.vblanks == 4) diag_call(2, 1, 0); }   /* the loader's display ends on the 4th vblank */
 #ifdef SAT_VLOG
@@ -790,6 +794,7 @@ void sat_vblank(void)
 #endif
     sat_pad_tick();
     t0 = frt();
+    DIAG_AT(5);
 #ifdef SAT_HOME
     if (sat_home_hold) {   /* the game is held: picture and sound only */
         if (UNCACHED(gfx_done) == UNCACHED(gfx_handed)) {
@@ -823,10 +828,12 @@ void sat_vblank(void)
         sat_gfx_snapshot_begin();
         UNCACHED(gfx_handed) = UNCACHED(gfx_handed) + 1;
         SLAVE_WAKE = 0xffff;
+        DIAG_AT(6);
 #ifdef SAT_CPU_SLACK_PROFILE
         cpu_slack_handoff(UNCACHED(gfx_handed), frt());
 #endif
         sat_gfx_snapshot_layers();   /* the slave builds the sprite commands meanwhile and waits for this before it reads a layer cell */
+        DIAG_AT(7);
 #ifdef SAT_CPU_SLACK_PROFILE
         cpu_slack_layers(frt());
 #endif
@@ -835,8 +842,10 @@ void sat_vblank(void)
     t1 = frt();
     save = cpu;
     cur = -1; cpu.a[5] = 0xff8000; cpu.a[7] = 0xff8000;
+    DIAG_AT(8);
     f_e0e();
     cpu = save; cur = sc;
+    DIAG_AT(9);
     sat_audio_frame();
     t2 = frt();
     sat_dbg.snap_ticks = t1 - t0; sat_dbg.irq_ticks = t2;

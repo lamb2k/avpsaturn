@@ -21,7 +21,7 @@ static GfsDirName names[256];
 #define DIAG_TAB ((volatile unsigned short *)0x25e7fe00u)   /* last 512 bytes of VDP2 VRAM: back screen table, one colour per line */
 #define DIAG_API ((volatile unsigned long *)0x06013fa0u)    /* 0 stage(colour or 0), 1 fatal(code, detail), 2 done(restore), 3 active, 4 reinit (after the runtime's VRAM clear) */
 #define DIAG_LINES 224
-#define DIAG_BANDS 18
+#define DIAG_BANDS 22
 #define DIAG_CODE_TOP 150
 #define C_BLACK 0x0000u
 #define C_GREY 0x4631u
@@ -36,7 +36,7 @@ static unsigned short diag_col[DIAG_BANDS + 1];
 static int diag_active, diag_seq, diag_cur, diag_ticks, diag_mark;
 static unsigned diag_info_value;
 static void diag_fill(int a, int b, unsigned short c) { for (; a < b && a < DIAG_LINES; a++) DIAG_TAB[a] = c; }
-static void diag_band(int k, unsigned short c) { if (k < DIAG_BANDS) diag_fill(1 + 8 * k, 7 + 8 * k, c); }
+static void diag_band(int k, unsigned short c) { if (k < DIAG_BANDS) diag_fill(1 + 6 * k, 6 + 6 * k, c); }
 static void diag_code(unsigned v)
 {
     int i;
@@ -73,9 +73,9 @@ static void diag_tick(void)
 {
     int top, k = diag_cur;
     if (!diag_active || k >= DIAG_BANDS) return;
-    top = 1 + 8 * k;
+    top = 1 + 6 * k;
     if (diag_mark >= 0) diag_fill(top + diag_mark, top + diag_mark + 2, diag_col[k]);
-    diag_mark = 2 * (diag_ticks++ % 3);
+    diag_mark = 2 * (diag_ticks++ & 1);
     diag_fill(top + diag_mark, top + diag_mark + 2, C_WHITE);
 }
 static void diag_info(unsigned v) { if (diag_active) diag_code(v); }
@@ -98,11 +98,14 @@ static void diag_init(void)
     DIAG_API[0] = (unsigned long)diag_stage_k;
     DIAG_API[3] = 1;
 }
-static void diag_slave_k(unsigned long which, unsigned long b)   /* the slave CPU's two marks, between the bands and the stripes: 1 it runs, 2 the master woke it */
+static void diag_slave_k(unsigned long which, unsigned long b)   /* marks between the bands and the stripes: 1 the slave runs (yellow block), 2 the master woke it (white block), 3.. one line each, first vblank only: 3 entered, 4 after sat_gfx_vblank, 5 held-path test, 6 wake sent, 7 layers done, 8 f_e0e done, 9 handler end */
 {
+    static const unsigned short col[10] = { 0, 0, 0, C_RED, C_GREEN, C_BLUE, C_CYAN, C_MAGENTA, C_YELLOW, C_WHITE };
     (void)b;
     if (!diag_active) return;
-    diag_fill(which == 1 ? 142 : 146, which == 1 ? 145 : 149, which == 1 ? C_YELLOW : C_WHITE);
+    if (which == 1) diag_fill(134, 138, C_YELLOW);
+    else if (which == 2) diag_fill(138, 142, C_WHITE);
+    else if (which < 10) diag_fill(140 + (int)which, 141 + (int)which, col[which]);
 }
 static void diag_reinit_k(unsigned long a, unsigned long b)   /* the runtime's graphics init cleared VRAM and the registers: take the screen back, bands and stripes as they were */
 {
