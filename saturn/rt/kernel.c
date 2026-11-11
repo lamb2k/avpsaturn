@@ -60,7 +60,9 @@ static int irq_on;
 
 /* The loader's boot display (boot.c) stays ours until the first picture: a stop before then shows its code instead of the BIOS logo. */
 #define DIAG_API ((volatile u32 *)0x06013fa0u)
-static void __attribute__((noinline)) diag_call(int i, u32 a, u32 b) { if (DIAG_API[3]) ((void (*)(u32, u32))DIAG_API[i])(a, b); }
+#ifdef SAT_BOOT_DIAG
+static void diag_call(int i, u32 a, u32 b) { if (DIAG_API[3]) ((void (*)(u32, u32))DIAG_API[i])(a, b); }
+#endif
 /* SAT_BOOT_DIAG (default off): the loader's boot display follows the runtime step by step (bands, slave and first vblank marks, a reinit after the graphics init).
    Without it the loader's display ends at the graphics init (diag_call 2 below), and only a stop (sat_fatal) still reaches it: about 40 bytes of resident code instead of 1,150. */
 #ifdef SAT_BOOT_DIAG
@@ -71,7 +73,7 @@ static void __attribute__((noinline)) diag_call(int i, u32 a, u32 b) { if (DIAG_
 void sat_fatal(u32 code, u32 detail)
 {
     __asm__ volatile ("ldc %0,sr" : : "r"(0xf0));
-    diag_call(1, code, detail);
+    if (DIAG_API[3]) ((void (*)(u32, u32))DIAG_API[1])(code, detail);   /* the loader's stop display, until the graphics init */
     sat_dbg.fatal = code; sat_dbg.fatal_detail = detail; sat_dbg.fatal_task = (u32)cur;
     sat_dbg.fatal_a[0] = cpu.a[0]; sat_dbg.fatal_a[1] = cpu.a[1]; sat_dbg.fatal_a[2] = cpu.a[7];
     for (;;) ;
@@ -961,7 +963,7 @@ void sat_main(void)
 #endif
     DIAG_MARK(0, 0, 0);   /* first round file and sound set done */
 #ifndef SAT_BOOT_DIAG
-    diag_call(2, 0, 0);   /* the loader's display ends here: sat_gfx_init sets every register it uses */
+    DIAG_API[3] = 0;   /* the loader's display ends here: sat_gfx_init sets every register it uses */
 #endif
     if (!sat_gfx_init(SAT_PACK)) sat_fatal(0xeb, 0);
     DIAG_MARK(4, 0, 0);   /* graphics init cleared VRAM and the registers: the loader's display comes back */
