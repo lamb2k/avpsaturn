@@ -348,6 +348,11 @@ def cc(src, obj, extra=()):
     return obj
 
 
+def cold_text_size(o):   # input section .coldtext of an own object (SAT_HOME_MENU_COLD: the menu painters of sat_gfx.c), linked into the cart tail with the cold home code
+    rows = (l.split() for l in sh([OBJDUMP, "-h", o]).splitlines())
+    return sum(int(r[2], 16) + 16 for r in rows if len(r) > 3 and r[1].startswith(".coldtext"))
+
+
 def code_size(o):
     rows = (l.split() for l in sh([OBJDUMP, "-h", o]).splitlines())
     return sum(int(r[2], 16) for r in rows if len(r) > 3 and r[1].startswith((".text", ".rodata", ".data")))
@@ -603,7 +608,7 @@ def main():
     cold3 = best[3]
     cold1 = [o for o in cold if o not in cold2 and o not in cold3]
     # The cart tail holds only what cold code needs; the rest is sprite room.
-    cold1_at = CART_END - ((sum(sizes[o] for o in cold1) + sum(code_size(o) for o in home_cold) + 0x1fff) & ~0xfff)
+    cold1_at = CART_END - ((sum(sizes[o] for o in cold1) + sum(code_size(o) for o in home_cold) + sum(cold_text_size(o) for o in own) + 0x1fff) & ~0xfff)
     lw = [o for o in rest if o not in cold]
     usedl = sum(sizes[o] for o in lw)
     print("placement", {"hw": len(hw), "lw": [o.stem for o in lw], "cold1": [(o.stem, sizes[o], heat.get(o.stem)) for o in cold1], "stretches": [[o.stem for o in p] for p in placed]})
@@ -632,6 +637,7 @@ SECTIONS {{
   }}
   .cold1 {cold1_at:#x} : {{
 {inp(cold1 + home_cold, tx)}
+{inp(own, '.coldtext .coldtext.*')}
     . = ALIGN(4);
     _sat_cold1_end = .;
   }}

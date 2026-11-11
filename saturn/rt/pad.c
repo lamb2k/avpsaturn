@@ -50,6 +50,31 @@ static u32 script_word(u32 v)
 }
 #endif
 
+#ifdef SAT_INPUT_SCRIPT2
+/* Test flag (lane perf2, 2026-11-11), needs SAT_HOME: a scripted second pad, so co-op can be measured with one person at the console (or with the one keyboard Yaba gets).
+   Scripted, never interactive proof. It is idle until the debugger (or a test driver) writes the vblank count to start from into sat_pad2_t0; then, with r = vblanks since:
+     r 20..400   Start for 3 vblanks every 60 (the join: the home build keeps a credit available, sat_home_pad), Attack for 3 vblanks every 60 from r 40 (confirms a character on the select)
+     r >= 400    player 2 walks right for 150 vblanks and left for 150, Attack for 6 vblanks every 55, Gun every 85, Jump every 170: the same kind of load as the first pad's route script
+   The first pad stays whatever it is (the real pad, or SAT_INPUT_SCRIPT). Saturn pad words, so sat_home_remap and sat_home_pad2 see it as they see a real second pad. */
+extern u32 sat_vblanks_now(void);
+volatile u32 sat_pad2_t0;
+static u32 script2_word(u32 r)
+{
+    u32 w = 0xffff;
+    if (r < 400) {
+        if (r >= 20 && r % 60 < 3) w &= ~0x0800u;
+        if (r >= 40 && r % 60 >= 30 && r % 60 < 33) w &= ~0x0400u;
+    } else {
+        u32 q = r - 400;
+        if (q % 300 < 150) w &= ~0x8000u; else w &= ~0x4000u;
+        if (q % 55 < 6) w &= ~0x0400u;
+        if (q % 85 < 5) w &= ~0x0200u;
+        if (q % 170 < 6) w &= ~0x0100u;
+    }
+    return w;
+}
+#endif
+
 static void map_pad(u32 p)
 {
     u32 w = 0xff;
@@ -67,7 +92,12 @@ static void map_pad(u32 p)
     in2 = (u16)w;
 #ifdef SAT_HOME
     {
+#ifdef SAT_INPUT_SCRIPT2
+        u32 t0 = sat_pad2_t0, p2 = t0 ? script2_word(sat_vblanks_now() - t0) : sat_pad_raw2;
+        u32 q = sat_home_pad2(sat_home_remap(p2)), v = 0xff;
+#else
         u32 q = sat_home_pad2(sat_home_remap(sat_pad_raw2)), v = 0xff;
+#endif
         if (!(q & 0x8000)) v &= ~1u;
         if (!(q & 0x4000)) v &= ~2u;
         if (!(q & 0x2000)) v &= ~4u;

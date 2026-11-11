@@ -552,6 +552,9 @@ void sat_slave_main(void)
         t = frt();
         sat_dbg.gfx_ticks = t; *(volatile unsigned long *)((unsigned long)&sat_readout[1] | 0x20000000UL) = t;
         if (t > sat_dbg.gfx_peak) sat_dbg.gfx_peak = t;
+#ifdef SAT_FPS_HUD
+        { extern u32 sat_fps_dmax; if (t > sat_fps_dmax) sat_fps_dmax = t; }   /* the readout's DRAW row (fps_hud.c reads and clears it once a second) */
+#endif
 #ifdef SAT_PROF
         if (IN_WINDOW) prof_add(sat_prof.gfx, t);
 #endif

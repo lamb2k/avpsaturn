@@ -82,3 +82,37 @@ Stage 0e, pictures per second (idle / walk right / attack), skipped percent, bur
 - SAT_HOME_FONT_COLD: moves the menu font cells and text palettes (1,920 bytes of rodata) from high RAM to the cart tail (saturn/rt/home_font_cold.c). That funds MEMO (424), BLANKROWS (about 300), the readout (216) and EVERY (72) together: all four on need about 1,000 bytes, leaving about 1,400 of hw_free on 3g.
   It adds 1.9 KB to the cart tail, so on its own it also steps the tail by 4 KB; on the readout discs the readout has already paid that step.
 - SAT_S1_EVERY=2 changed nothing measurable on stage 0e once MEMO is on (m8e2 vs m8: opening burst 47.2 vs 47.8, idle 57.5 vs 56.7); it is not recommended.
+
+## 9. The A/B pair on disc 3h (avp/integration 1583c9f), 2026-11-10 evening
+
+Recipe: the 3h recipe (docs/INTEGRATION.md) plus the switches below. A = `-DSAT_HOME_FONT_COLD -DSAT_FPS_HUD`; B = A + `-DSAT_S1_MEMO -DSAT_S1_BLANKROWS`. Switch names are stable. SAT_S1_EVERY exists and is not recommended (no gain once MEMO is on).
+Branch lane/perf-reconcile-20261110 merges onto 1583c9f (one build.py conflict, resolved, keeps the stage-select snap_bytes block).
+
+Memory (build.py report, workdir copies of wd3h):
+| Build | hw_free | lw_free | cart_free | stage 0e dropped keys |
+| --- | ---: | ---: | ---: | ---: |
+| 3h plain | 480 | 84 | 7,496 | 243 |
+| 3h + FONT_COLD + MEMO + BLANKROWS | 1,664 | 84 | 5,576 | 243 |
+| B (that + readout) | 1,448 | 84 | 4,460 | 243 |
+Per switch: FONT_COLD frees 1,920 B hot (adds 1.9 KB cart); MEMO 424 B hot; BLANKROWS about 300 B hot; readout 216 B hot, about 1.4 KB cart. 3h already stepped the cart tail (243 dropped keys); B stays above the 4,096 byte step.
+
+Exactness (all three switches):
+- HOST: tests/host_gfx_s1_identity.sh (WSL gcc, WORK/gen for the ROM-derived font): 600 random HUD-like frames (scroll 1 mostly one blank word, rows of tiles that come and go, position that mostly holds, play flag toggling); VDP1 VRAM, VDP2 VRAM, CRAM and register hashes identical to the plain build for MEMO, BLANKROWS, FONT_COLD and all three together. It caught a slot-order difference in the first BLANKROWS (it probed the tile cache); fixed by testing blank_seen only. Menu modes (draw_home) are not host-safe and are covered in the emulator.
+- EMULATOR (build h3V = B + SAT_PERF_STAGES verify counters, Yaba cache ON, 40 s random-input play): stage 0e memo hits 693, misses 26, differences 0, blank rows skipped 927, differences 0; stage 1e 329 / 33 / 0 and 972 / 0; stage 24 314 / 37 / 0 and 636 / 0.
+  Still pair from one save state, memo off against on, frame 70: 0 differing pixels on 0e and 24; on 1e 201 pixels in the readout's text rows (PIC counts differ between the two runs), none elsewhere.
+
+A/B results (cache ON, same scripted scenes; pictures per second = VDP1 swaps; stepped counters; see the table in the report):
+| Stage, scene | 3h plain | B |
+| --- | --- | --- |
+| 0e idle / walk / attack | 52.9 / 55.8 / 55.4 (skipped 11.8 / 6.9 / 7.6 %) | 58.8 / 57.9 / 57.5 (2.1 / 3.5 / 3.5 %) |
+| 0e stage-opening bursts (64 vblanks) | 30.6 swaps | 54.1 swaps |
+| 1e idle / walk / attack | 56.7 / 54.2 / 39.2 | 60.0 / 60.0 / 60.0 (0 % skipped) |
+| 24 idle / walk / attack | 3g plain 53.3 / 50.0 / 52.5 | 56.7 / 57.5 / 58.3 |
+Heaviest slave picture: 0e 11.4 K -> 5.0 K; 1e 17.1 K -> 2.8 K; 24 12.0 K (3g) -> 6.7 K (sprite build alone is 1.5 to 2.1 K there).
+
+## 10. gfx_peak 42,879 on 3h
+
+Yaba cache ON, boot to the title, character select, then entering stage 2: gfx_peak 15.6 K at the title, 17.3 K when the character select opens, 42,879 after the stage is entered (3g: 17.2 K at the same moments, no jump). It is one draw at the start of a stage, set before gameplay; not the stage-select picture and not a per-frame cost.
+Caught with the stage timers (h3V, same key sequence, stage 2 start): peak 35,251 on that build; of it 31.8 K ticks (stg[8] to stg[10]) are `home_maps_rows`, the blank-mask pass of the first scroll 1 draw of the stage: every cell of the 29 rows looks its tile up with cold caches (cache_find, then pack_find on the cart, blank_seen empty). It happens once per stage entry, while the stage loads, with the game not yet in play. Not a per-frame cost; a recurring hitch only if a stage change redraws scroll 1 cold (the same pass is what SAT_S1_BLANKROWS and the blank_seen table make cheap on later pictures). On the console the pack lookups on the cart cost more or less than Yaba models: unknown.
+
+A disc (3h + FONT_COLD + readout, no memo or blank rows; h3A), cache ON: 0e idle/walk/attack 52.1 / 52.9 / 52.9 pictures per second (skipped 13.9 / 11.8 / 11.8 %), 1e 56.7 / 55.8 / 55.8, 24 52.9 / 50.4 / 54.2: the same as plain 3h, so the readout and the font move cost nothing measurable; B (above) is the speed-up.
