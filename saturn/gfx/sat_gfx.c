@@ -3001,6 +3001,7 @@ void sat_gfx_draw(void)
     }
 #endif
     STAGE(0);
+    PSTAGE_ZERO(10); PSTAGE_ZERO(12);   /* scroll 1's inner marks: zero in a draw that does not redraw it */
     update_palette();
     update_priority(layers, snap.priority);
     /* Sprites first, then the plot starts: VDP1 draws while the slave does the layers below, instead of only in what is left of the
