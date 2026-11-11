@@ -14,6 +14,7 @@ typedef unsigned char u8; typedef unsigned short u16; typedef unsigned int u32;
 #include "sat_rt.h"
 #include "../gfx/sat_vdp2_cfg.h"
 extern unsigned long sat_tk_run, sat_tk_skip;
+extern u32 sat_ld_log[4][4], sat_ld_n;
 extern u32 sat_gfx_plot_waits;           /* swaps put off for an unfinished plot, since boot */
 extern unsigned short sat_gfx_colour(unsigned short cps);
 #ifdef SAT_HOME_FONT_COLD
@@ -38,8 +39,8 @@ extern void sat_gfx_vdp2_latch(unsigned off, unsigned val);
 #define COLS 24
 static u32 st[12] = { 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1 };   /* 10, 11: last task run and skip counts */   /* nonzero so they stay in .data */
 /* 0 inited, 1 last vblank, 2 last shown, 3 last overruns, 4 last flips, 5 last skips, 6 last waits, 7 pics, 8 (unused), 9 (unused) */
-static u16 shadow[4][COLS] = { { 0xffff } };
-static char text[4][COLS + 16] = { { 'P' }, { 'M' }, { 'F' }, { 'T' } };   /* painted: COLS columns; the rest is slack so no line can overrun */   /* initialised: the cold image has no .bss */
+static u16 shadow[5][COLS] = { { 0xffff } };
+static char text[5][COLS + 16] = { { 'P' }, { 'M' }, { 'F' }, { 'T' }, { 'L' } };   /* painted: COLS columns; the rest is slack so no line can overrun */   /* initialised: the cold image has no .bss */
 
 static u32 udiv(u32 n, u32 d) { u32 q = 0; if (!d) return 0; while (n >= d) { n -= d; q++; } return q; }
 static char *put_str(char *p, const char *s) { while (*s) *p++ = *s++; return p; }
@@ -67,7 +68,7 @@ static void setup(void)
         if ((e & 15) != 15) CRAM[62 * 16 + e + 1] = sat_gfx_colour((u16)(((u32)home_pal[e * 2] << 8) | home_pal[e * 2 + 1]));
     for (e = 0; e < 28 * 64; e++) VDP2_VRAM[(MAP_HOME >> 1) + e] = 0;
     shadow[0][0] = 0xffff; shadow[1][0] = 0xffff;
-    { u32 r, c; for (r = 0; r < 4; r++) for (c = 0; c < COLS; c++) shadow[r][c] = 0xffff; }
+    { u32 r, c; for (r = 0; r < 5; r++) for (c = 0; c < COLS; c++) shadow[r][c] = 0xffff; }
 }
 static void format(u32 dv)
 {
@@ -80,12 +81,16 @@ static void format(u32 dv)
     p = put_str(text[2], "F"); *p++ = (char)('0' + SAT_GFX_FIT); *p++ = ' '; p = put_str(p, SAT_BUILD_REV_STR); *p++ = ' ';   /* build id: presentation mode (1 scaled, 2 native crop) and the first 6 hex digits of the source commit */
     p = put_str(p, "FLIP "); p = put_num(p, udiv(flips * 60 + (dv >> 1), dv)); p = put_str(p, " VBL "); p = put_num(p, dv); *p = 0;
     p = put_str(text[3], "TASK RUN "); p = put_num(p, udiv((sat_tk_run - st[10]) * 60 + (dv >> 1), dv)); p = put_str(p, " CUT "); p = put_num(p, udiv((sat_tk_skip - st[11]) * 60 + (dv >> 1), dv)); *p = 0;   /* per 60 vblanks: game tasks run, and runnable tasks a vblank cut off (the game time the console loses) */
+    if (sat_ld_n) {   /* last round-file load: how many so far, file, sectors, length in vblanks, and the vblank it ended at (kernel.c sat_ld_log) */
+        const u32 *e = sat_ld_log[(sat_ld_n - 1) & 3];
+        p = put_str(text[4], "LD"); p = put_num(p, sat_ld_n); p = put_str(p, " F"); p = put_num(p, e[0]); p = put_str(p, " S"); p = put_num(p, e[1]); p = put_str(p, " T"); p = put_num(p, e[3] - e[2]); p = put_str(p, " @"); p = put_num(p, e[3]); *p = 0;
+    }
     p = put_str(text[1], "MISS "); p = put_num(p, over); p = put_str(p, " SKIP "); p = put_num(p, skips); p = put_str(p, " HELD "); p = put_num(p, waits); *p = 0;
 }
 static void paint(void)
 {
     u32 r, c;
-    for (r = 0; r < 4; r++)
+    for (r = 0; r < 5; r++)
     {
         int num = 0;
         for (c = 0; c < COLS; c++)
@@ -102,7 +107,7 @@ static void paint(void)
             if (shadow[r][c] != name)
             {
                 shadow[r][c] = name;
-                VDP2_VRAM[(MAP_HOME >> 1) + (24 + r) * 64 + c] = name;
+                VDP2_VRAM[(MAP_HOME >> 1) + (23 + r) * 64 + c] = name;
             }
         }
     }
@@ -124,7 +129,7 @@ int sat_fps_hud(u32 shown, int fresh)
     if (fresh || st[0])
     {
         setup(); st[0] = 0; st[1] = v; st[2] = shown; st[3] = sat_dbg.overruns; st[4] = sat_dbg.obj_flips; st[5] = sat_dbg.gfx_skips; st[6] = sat_gfx_plot_waits; st[10] = sat_tk_run; st[11] = sat_tk_skip;
-        text[0][0] = 'P'; text[0][1] = 'I'; text[0][2] = 'C'; text[0][3] = 0; text[1][0] = 0; text[2][0] = 0; text[3][0] = 0;
+        text[0][0] = 'P'; text[0][1] = 'I'; text[0][2] = 'C'; text[0][3] = 0; text[1][0] = 0; text[2][0] = 0; text[3][0] = 0; text[4][0] = 0;
         paint();
         return 1;
     }

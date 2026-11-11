@@ -587,6 +587,13 @@ static void slave_start(void)
 u8 sat_aud_tables[0x2000] __attribute__((section(".lwgfx"), aligned(4)));
 static int round_loaded = -1;
 struct sat_rounds_s { u32 current, loads, sectors, last_vblank; } sat_rounds;
+#ifdef SAT_FPS_HUD
+/* Load log (readout line 5, and for a trace): the last four round-file loads as {file, sectors, vblank at start, vblank at end}, newest at sat_ld_n - 1. A photo of the readout
+   then shows the last load's file, size and length in vblanks (boot to title: the first entry; title to select, select to stage, door and stage loads: the later ones). If the
+   vblank count stands still while GFS runs (the vblank is masked then), the length reads 0 and only the vblank stamps and sizes are valid. */
+u32 sat_ld_log[4][4];
+u32 sat_ld_n;
+#endif
 /* The sound part of a round file lands at SAT_PACK first and goes to SCSP RAM here; the tile part then overwrites it. */
 static void round_sound_ready(void)
 {
@@ -653,6 +660,9 @@ static void round_check(void)
 #endif
     row_loaded = row;
     DIAG_MARK(5, 16, 0);
+#ifdef SAT_FPS_HUD
+    sat_ld_log[sat_ld_n & 3][2] = sat_dbg.vblanks;
+#endif
 #ifdef SAT_HOME
     sat_home_loading(1);   /* NOW LOADING stays on screen through the load */
 #endif
@@ -687,6 +697,9 @@ static void round_check(void)
     sat_rounds.current = (u32)want;
     sat_rounds.loads++;
     sat_rounds.last_vblank = sat_dbg.vblanks;
+#ifdef SAT_FPS_HUD
+    { u32 *e = sat_ld_log[sat_ld_n & 3]; e[0] = (u32)want; e[1] = sat_rounds.sectors; e[3] = sat_dbg.vblanks; sat_ld_n++; }
+#endif
     /* GFS takes the SCU mask and vectors for itself: without this the vblank never comes back after a load. */
     exceptions_install();
     irq_enable();
