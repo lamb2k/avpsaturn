@@ -26,7 +26,7 @@ vector, IMS = 0xFFFFF17C.
 | cart / A-bus | ASR0 / AREF / 0x257EFFFE | Jo writes 0x25FE0080 / 0x25FE0033 (wrong addresses, so BIOS defaults stay) | same as sgl | BIOS defaults first, enable + verify, then ASR0 = 0x23301FF0, AREF = 0x13, re-verify, fall back to defaults | deviation (ours is the documented ST-TECH-47 timing; verified with fall-back) |
 | sound start | SMPC SNDOFF/SNDON (07, 06) | in the BIOS before the app | same | kernel sat_audio_init after the clock change (the change resets the SCSP) | equal sequence; order matters and is respected |
 | slave start | SMPC 03, 02 | right after the clock change | n/a | kernel `slave_start`, after the VDP init | deviation: the slave is ours (renders VDP1/VDP2), started when the runtime is ready |
-| VDP2 | TVMD | 0x0101, then 0x8101 | 0x0110, 0x8110 | 0x0001 (display off, 352), 0x8001 | BDCLMD = 0 (black border) and the 224-line mode: harmless deviation |
+| VDP2 | TVMD | 0x0101, then 0x8101 | 0x0110, 0x8110 | fix5: 0x0101 / 0x8101 (BDCLMD set, as SGL); fix4: 0x0001 / 0x8001 | equal to SGL in fix5 (the 320 boot display uses 0x8000 before the clock change) |
 | VDP2 | all other registers | written explicitly (zeros and its values) | same | fix5: zeros written after the clock change; then only what the runtime uses | equal for the unused ones; used ones are ours (below) |
 | VDP2 | RAMCTL | 0x1327 | 0x1327 | 0x1300 | rotation-bank bits unused here; deviation |
 | VDP2 | CYCxx, CHCTL, PNC, MPxx, PLSZ, scroll/zoom, BGON | SGL's two-layer set-up | same | our layout (NBG0/1/2/3, 16-colour cells, row scroll) | by design: the game's own layers |
@@ -46,3 +46,11 @@ vector, IMS = 0xFFFFF17C.
 ## Not changed, with the reason
 - Writing TVMD outside vblank: the register accepts it; SGL's switch happens in the vblank handler. Our picture is dark/black until the first frame anyway.
 - Our own vblank, slave and layer set-up replace SGL's by design; calling slInitSystem itself would also install SGL's interrupt vectors, its work area at 0x06000000.. and its slave usage, which conflict with the runtime.
+
+## fix5 verification (strict Ymir, real JP 1.01 BIOS, 4 MB cart; Yaba real BIOS)
+- Strict Ymir: no exception (vectors 4/6/9/10/12), 0 misaligned data accesses, the clock change shows the same SMPC command sequence (1A, 0E, 00, 19) and the same SCU register values as SGL's.
+- Yaba: home menu, stage select, stage 02 play state, no fatal. Loader data check: ok. RAM cost: default build 80 B (hw_free 2,056 of 2,136); SAT_BOOT_DIAG build 1,016 B.
+
+## What the fix4 console photos showed (2026-11-11)
+Two stripe screens, decoded by measuring the 16 rows: **0xE0F0** (red stop: the cart did not answer although the ID byte read 5C) and **0x005C** (the detail screen: the ID byte).
+Bands green, blue (clock change done), then the cyan backup-read band. So fix4 failed at the cart check right after its hand-written clock change.
