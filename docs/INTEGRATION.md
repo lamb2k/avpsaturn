@@ -70,6 +70,7 @@ Updated 2026-11-10 evening.
 | Native knockdown/jump-pose fix, Schaefer tables gated to a live Wolverine player, grab off for Wolverine | lane/wv-native-gfx-20261109 (next head) | not pushed yet; merge into the next disc |
 | Stage select over title art (stage-menu-bg) | lane/stage-menu-bg-20261110 2502a30 | waits for its hw move |
 | Opening cutscene is missing Schaefer and some sprites; Wolverine shows jump poses when hit; the automatic grab uses placeholder poses | native / sprites lanes | being fixed (owner known issues for disc 3e) |
+| Stage file load-window keep, STAGE_WINDOW=1 STAGE_WINDOW_PAD=2 (+ fuzz seeds 16 to 19 data): stage 0e 265 to 374 dropped keys a file -> 0, all gates pass | lane/sprite-store-20261111 (head in the notes) | default off; needs WORK/stage_window.json and the extended char_fuzz.json (E:\AvP\learning\lane-sprite-store\wd_n2); notes AVP_SPRITE_STORE_20261111.md |
 | Saturn hardware FPS test discs | E:\AvP\package-hwtest-20261109 (pre-integration) | rebuild from avp/integration with an owner disc (owner to confirm) |
 
 Dropped (owner 2026-11-09: no more work on the sprite-replacement Wolverine): claws-only follow-up, guest group loop (lane/fps-group), Wolverine defense gate, feet-on-floor ground/ground2 switches. Native Wolverine covers each of them. Closed lanes (merged here): stage-menu, versus.
