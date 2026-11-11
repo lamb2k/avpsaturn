@@ -5,12 +5,18 @@
      MISS n  game frames that were not finished when the next vblank came (the game fell behind)
      SKIP n  vblanks where the slave was still drawing, so no new snapshot was taken
      HELD n  swaps put off one vblank because VDP1 had not finished the plot
+   A third line (lane perf2, 2026-11-11), row 26:
+     DRAW n  the longest slave picture (wake to return of sat_gfx_draw) in the last second, in slave timer ticks: one tick is 4.76 microseconds, a field about 3,503 ticks
+     PEAK n  the longest since the game stage word last changed (the first picture of a stage is the one that matters)
+   The hot side is one compare and store per picture (kernel.c, sat_fps_dmax); this file reads and clears it once a second.
    All of it runs from the cart tail with the cold home code: the hot side (sat_gfx_draw) keeps two words and a call once a second. State lives in the
    cart (writable). Nothing here touches work RAM. The font cells and the panel cell are written by the home menus at boot (draw_home), as for the hardware
    test readout (SAT_PERF_HUD in sat_gfx.c, which needs 2.7 KB of high RAM and does not fit the current builds). */
 typedef unsigned char u8; typedef unsigned short u16; typedef unsigned int u32;
 #include "sat_rt.h"
 extern u32 sat_gfx_plot_waits;           /* swaps put off for an unfinished plot, since boot */
+extern u8 RAMB[];                        /* the game's RAM, big endian words */
+u32 sat_fps_dmax = 1;                    /* longest picture since the last read; the slave stores it (kernel.c), nonzero so it stays in .data */
 extern unsigned short sat_gfx_colour(unsigned short cps);
 #ifdef SAT_HOME_FONT_COLD
 extern const u8 sat_home_pal[64];
@@ -27,16 +33,16 @@ static const u8 home_pal[64] __attribute__((aligned(2))) = {
 #define FONT 880u                        /* SAT_GFX_HOME_FONT */
 #define COLS 24
 static u32 st[10] = { 1, 1, 1, 1, 1, 1, 1, 1, 1, 1 };   /* nonzero so they stay in .data */
-/* 0 inited, 1 last vblank, 2 last shown, 3 last overruns, 4 last flips, 5 last skips, 6 last waits, 7 pics, 8 (unused), 9 (unused) */
-static u16 shadow[2][COLS] = { { 0xffff } };
-static char text[2][COLS + 1] = { { 'P' }, { 'M' } };   /* initialised: the cold image has no .bss */
+/* 0 inited, 1 last vblank, 2 last shown, 3 last overruns, 4 last flips, 5 last skips, 6 last waits, 7 pics, 8 longest picture since the stage changed, 9 stage word then */
+static u16 shadow[3][COLS] = { { 0xffff } };
+static char text[3][COLS + 1] = { { 'P' }, { 'M' }, { 'D' } };   /* initialised: the cold image has no .bss */
 
 static u32 udiv(u32 n, u32 d) { u32 q = 0; if (!d) return 0; while (n >= d) { n -= d; q++; } return q; }
 static char *put_str(char *p, const char *s) { while (*s) *p++ = *s++; return p; }
 static char *put_num(char *p, u32 v)
 {
-    char t[8]; int n = 0;
-    if (v > 9999) v = 9999;
+    char t[8]; int n = 0;   /* up to 5 digits */
+    if (v > 99999) v = 99999;
     do { u32 q = udiv(v, 10); t[n++] = (char)('0' + (v - q * 10)); v = q; } while (v);
     while (n) *p++ = t[--n];
     return p;
@@ -56,8 +62,7 @@ static void setup(void)
     for (e = 0; e < 32; e++)                     /* banks 62 and 63: the home font's white and yellow, plain (no translucent dot). Pen p sits at entry p + 1 of its bank, pen 15 has none. */
         if ((e & 15) != 15) CRAM[62 * 16 + e + 1] = sat_gfx_colour((u16)(((u32)home_pal[e * 2] << 8) | home_pal[e * 2 + 1]));
     for (e = 0; e < 28 * 64; e++) VDP2_VRAM[(MAP_HOME >> 1) + e] = 0;
-    shadow[0][0] = 0xffff; shadow[1][0] = 0xffff;
-    { u32 r, c; for (r = 0; r < 2; r++) for (c = 0; c < COLS; c++) shadow[r][c] = 0xffff; }
+    { u32 r, c; for (r = 0; r < 3; r++) for (c = 0; c < COLS; c++) shadow[r][c] = 0xffff; }
 }
 static void format(u32 dv)
 {
@@ -68,11 +73,18 @@ static void format(u32 dv)
     d = shown;   /* new swaps in the window, set by the caller */
     p = put_str(text[0], "PIC "); p = put_num(p, udiv(d * 60 + (dv >> 1), dv)); p = put_str(p, " GAME "); p = put_num(p, udiv(flips * 60 + (dv >> 1), dv)); *p = 0;
     p = put_str(text[1], "MISS "); p = put_num(p, over); p = put_str(p, " SKIP "); p = put_num(p, skips); p = put_str(p, " HELD "); p = put_num(p, waits); *p = 0;
+    {   /* the longest slave picture of the window, and since the stage word changed */
+        u32 dmax = sat_fps_dmax, stage = ((u32)RAMB[0x81e8] << 8) | RAMB[0x81e9];
+        sat_fps_dmax = 1;
+        if (stage != st[9]) { st[9] = stage; st[8] = dmax; }
+        else if (dmax > st[8]) st[8] = dmax;
+        p = put_str(text[2], "DRAW "); p = put_num(p, dmax); p = put_str(p, " PEAK "); p = put_num(p, st[8]); *p = 0;
+    }
 }
 static void paint(void)
 {
     u32 r, c;
-    for (r = 0; r < 2; r++)
+    for (r = 0; r < 3; r++)
     {
         int num = 0;
         for (c = 0; c < COLS; c++)
@@ -101,7 +113,8 @@ int sat_fps_hud(u32 shown, int fresh)
     if (fresh || st[0])
     {
         setup(); st[0] = 0; st[1] = v; st[2] = shown; st[3] = sat_dbg.overruns; st[4] = sat_dbg.obj_flips; st[5] = sat_dbg.gfx_skips; st[6] = sat_gfx_plot_waits;
-        text[0][0] = 'P'; text[0][1] = 'I'; text[0][2] = 'C'; text[0][3] = 0; text[1][0] = 0;
+        text[0][0] = 'P'; text[0][1] = 'I'; text[0][2] = 'C'; text[0][3] = 0; text[1][0] = 0; text[2][0] = 0;
+        sat_fps_dmax = 1; st[8] = 1; st[9] = ((u32)RAMB[0x81e8] << 8) | RAMB[0x81e9];
         paint();
         return 1;
     }

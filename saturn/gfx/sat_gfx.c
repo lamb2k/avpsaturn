@@ -680,6 +680,11 @@ typedef struct
     u32 s1[S1_ROWS * S1_COLS] __attribute__((aligned(16)));
     u32 s2[S2_ROWS * 64], s3[S3_ROWS * (384 / 32 + 1)]; /* code << 16 | attribute, visible cells only */
     u32 s1_sum, s2_sum, s3_sum; /* change detection: position and every visible word */
+#ifdef SAT_S1_DIRTY
+    /* Written with the scroll 1 words, only when the sum moved (snap_layer_s1): bit r of s1_rows = row r of s1 differs from the copy before; s1_from = s1_sum of that
+       copy; s1_seed = position and flags the words were read at. The drawing side uses the mask only if it drew exactly s1_from (draw_scroll1). */
+    u32 s1_rows, s1_from, s1_seed;
+#endif
     u16 hud_flush;
     u16 sel_ok;   /* the front end (stage word 0, play mode, no player): the character select can be up */
 #ifdef SAT_VDP1_PROFILE
@@ -1112,6 +1117,9 @@ static u32 drawn_pal[SAT_GFX_PAGES], drawn_s1, drawn_s2, drawn_s3;
 static u8 s1_age;   /* pictures since scroll 1 was last drawn */
 #endif
 static int drawn_valid;
+#ifdef SAT_S1_DIRTY
+static unsigned long s1_bm_refused;   /* refused lookups of the blank-mask pass (home_row_blank), which draw_scroll1's own counter does not see */
+#endif
 /* Master side: counts pack swaps; each snapshot carries it to the drawing side (snap.pad). */
 #if SAT_GFX_RANKFIX
 static u16 pack_gen;
@@ -1271,6 +1279,9 @@ static HOME_OS void home_row_blank(u32 row, u32 x0, u32 *m)
 #endif
         }
     }
+#ifdef SAT_S1_DIRTY
+    s1_bm_refused += dummy;
+#endif
 }
 /* The 44 source columns from a droppable mask (see above): the HUD's flush map on play's HUD rows when their middle 4 columns are blank,
    else 4 drops, else the centre crop. The 4 drops are the greedy pick: the droppable columns nearest 6, 18, 30, 42 (cheapest not yet taken: distance
@@ -1504,14 +1515,102 @@ no:
     return 0;
 }
 #endif
+#ifdef SAT_S1_DIRTY
+#if !defined(SAT_S1_MEMO) || !defined(SAT_S1_BLANKROWS) || defined(SAT_S1_EVERY)
+#error SAT_S1_DIRTY needs SAT_S1_MEMO and SAT_S1_BLANKROWS, and excludes SAT_S1_EVERY
+#endif
+/* Incremental scroll 1 redraw (lane perf2 11-11, SAT_S1_DIRTY, default off). The master marks the rows whose words changed (snapshot s1_rows). When this slave drew exactly the copy
+   that mask is relative to (s1_from == drawn_s1), at the same position and flags, with no refused lookup in that draw, only the changed rows and the rows whose column map they can
+   change are drawn again; every other visible row keeps its names and its tile slots are stamped first so no lookup of this draw can take them.
+   Why a clean row stays right: its words are unchanged (exact compare on the master), its column map is a function of the blank masks of its block (the run of rows that are
+   not fully droppable) and the HUD flag, and a row's block changes only if a row in it or next to it changed (the changed row and the runs touching it, judged on the new words,
+   are drawn again), the bank formula is fixed, and its slots hold its tiles because slots change hands only in cache_find on s1_cache, whose callers are the blank mask pass and the
+   cell loop, after the re-stamp. The picture is the same as a full redraw; VDP2 VRAM is not byte-identical when a full redraw would have evicted and re-uploaded a tile
+   (host test: resolved layer comparison). */
+#define S1_ALL ((1UL << S1_ROWS) - 1)
+static u32 s1d_key, s1d_have;   /* flags and position of the last scroll 1 draw (bit 31 set once drawn); rows whose blank mask is computed in this draw */
+static u8 s1d_clean;            /* that draw had no refused lookup */
+#if defined(SAT_PERF_STAGES) || defined(SAT_GFX_HOST)
+#define S1D_STATS
+u32 sat_s1d[8];                 /* 0 incremental draws, 1 full draws, 2 rows redrawn, 3 rows kept, 4 rows checked by the verify pass, 5 rows that differed, 6 draws with an empty mask, 7 draws that refused a lookup */
+u8 sat_s1d_verify, sat_s1d_off; /* debugger switches in measurement builds: verify = after an incremental draw recompute every kept row and count the ones whose names differ; off = always the full path */
+#endif
+static HOME_OS __attribute__((noinline)) u32 s1_dirty_plan(u32 x0, u32 y0, u32 (*bm)[2])
+{
+    u32 mask = snap.s1_rows & S1_ALL, redo = mask, seen = 0, near_ = (mask | (mask << 1) | (mask >> 1)) & S1_ALL, r0 = y0 >> 3, c0 = x0 >> 3, row, col, s;
+    s1d_have = 0;
+#ifdef S1D_TEST_NOWIDEN   /* mutation for the host test: no widening to blocks, the test must notice */
+    near_ = 0;
+#endif
+    /* 1. Re-stamp, before any lookup: the slots of every kept row's names (a row blank for good holds none) */
+    for (row = 0; row < S1_ROWS; row++)
+    {
+        const u32 *sh;
+#ifdef S1D_TEST_NORESTAMP
+        continue;
+#endif
+        if (((mask | s1_done) >> row) & 1) continue;
+        sh = &sh_s1[((r0 + row) & 63) * 64];
+        for (col = 0; col <= SAT_GFX_SCREEN_W / 8; col++)
+        {
+            u32 slot = (sh[(c0 + col) & 63] & 0xffffUL) - (CELL_S1 >> 5);
+            if (slot - 4 < (u32)SAT_GFX_S1_SLOTS - 4)
+            {
+                SlotRec *r = &s1_slots[slot];
+                if (r->stamp != stamp) { r->stamp = stamp; s1_cache.used++; }
+            }
+        }
+    }
+    /* 2. Widen to blocks: each changed row, and the runs of rows that are not fully droppable touching it above and below (on the new words) */
+#define S1D_FULL(q) (bm[q][0] == 0xffffffffUL && bm[q][1] == 0xffffUL)
+#define S1D_ENSURE(q) do { if (!((s1d_have >> (q)) & 1)) { home_row_blank((q), x0, bm[q]); s1d_have |= 1UL << (q); } } while (0)
+    for (s = 0; s < S1_ROWS; s++)
+    {
+        u32 a = s, b = s, run;
+        if (!((near_ >> s) & 1) || ((seen >> s) & 1)) continue;
+        S1D_ENSURE(s);
+        if (S1D_FULL(s)) continue;
+        while (a > 0) { S1D_ENSURE(a - 1); if (S1D_FULL(a - 1)) break; a--; }
+        while (b + 1 < S1_ROWS) { S1D_ENSURE(b + 1); if (S1D_FULL(b + 1)) break; b++; }
+        run = ((2UL << b) - 1) & ~((1UL << a) - 1);
+        seen |= run; redo |= run;
+    }
+#undef S1D_FULL
+    return redo;
+}
+#endif
+#ifdef SAT_GFX_HOST
+unsigned long sat_gfx_s1_draws;   /* host test: scroll 1 redraws so far */
+#endif
 static void draw_scroll1(u16 sx, u16 sy)
 {
     const u32 *cell = snap.s1;
+#ifdef SAT_GFX_HOST
+    sat_gfx_s1_draws++;
+#endif
     u32 x0 = (u32)sx + CPS_LEFT + S1_REG_CROP, y0 = (u32)sy + CPS_TOP;
     u32 row, col;
+#ifdef SAT_S1_DIRTY
+    u32 s1d_flags = (x0 >> 3) | ((y0 >> 3) << 8) | ((u32)snap.home << 16) | ((u32)snap.hud_flush << 20) | ((u32)snap.sel_ok << 21) | 0x80000000UL;
+    u32 s1d_redraw = S1_ALL, s1d_ref0 = sat_gfx_stats.refused_layer + s1_bm_refused, s1d_bad = 0, s1d_pass = 0;
+    int s1d_dirty = drawn_valid && snap.s1_from == drawn_s1 && s1d_flags == s1d_key && s1d_clean && !snap.home && !snap.sel_ok && (snap.s1_rows & S1_ALL) != S1_ALL;
+#ifdef S1D_STATS
+    if (sat_s1d_off) s1d_dirty = 0;
+#endif
+#endif
 #if SAT_GFX_FIT && defined(SAT_HOME)
     u32 bm[S1_ROWS][2];
+#ifdef SAT_S1_DIRTY
+    int sel = 0;
+    if (s1d_dirty) s1d_redraw = s1_dirty_plan(x0, y0, bm);
+    else sel = home_maps_rows(x0, bm);
+#ifdef S1D_STATS
+    if (s1d_dirty) { u32 n = 0, v; for (v = s1d_redraw; v; v &= v - 1) n++; sat_s1d[0]++; sat_s1d[2] += n; sat_s1d[3] += S1_ROWS - n; if (!(snap.s1_rows & S1_ALL)) sat_s1d[6]++; }
+    else sat_s1d[1]++;
+#endif
+#else
     int sel = home_maps_rows(x0, bm);
+#endif
     PSTAGE(10);
     PSTAGE_ZERO(11);
 #ifdef SAT_HOME_DIAG
@@ -1523,9 +1622,15 @@ static void draw_scroll1(u16 sx, u16 sy)
     {   u32 key = (x0 >> 3) | ((y0 >> 3) << 8) | ((u32)snap.home << 16);
         if (key != s1_key || !drawn_valid) { s1_key = key; s1_done = 0; } }
 #endif
+#ifdef SAT_S1_DIRTY
+again:
+#endif
     for (row = 0; row <= SAT_GFX_SCREEN_H / 8; row++)
     {
-#ifdef SAT_S1_BLANKROWS
+#ifdef SAT_S1_DIRTY
+        if (s1d_pass ? ((s1d_redraw >> row) & 1) : (s1d_dirty && !((s1d_redraw >> row) & 1))) continue;   /* pass 1 (verify builds): the kept rows only */
+        if (!s1d_pass && row < S1_ROWS && s1_blank_row(row)) continue;
+#elif defined(SAT_S1_BLANKROWS)
         if (row < S1_ROWS && s1_blank_row(row)) continue;
 #endif
 #if SAT_GFX_FIT && defined(SAT_HOME)
@@ -1578,9 +1683,38 @@ static void draw_scroll1(u16 sx, u16 sy)
 #ifdef SAT_HOME
             if (snap.home >= 3 && row >= 19) name = CLEAR_NAME;   /* the game's start and credits lines under the menus; its logo stays */
 #endif
+#ifdef SAT_S1_DIRTY
+            if (s1d_pass) { if (sh_s1[r * 64 + c] != name) { s1d_bad |= 1UL << row; break; } }   /* verify pass: compare, never write */
+            else
+#endif
             write_name(VDP2_VRAM + MAP_S1 + (r * 64 + c) * 4, name, &sh_s1[r * 64 + c]);
         }
     }
+#ifdef SAT_S1_DIRTY
+    if (!s1d_pass)
+    {
+        s1d_key = s1d_flags;
+        s1d_clean = (u8)(sat_gfx_stats.refused_layer + s1_bm_refused == s1d_ref0);
+#ifdef S1D_STATS
+        if (!s1d_clean) sat_s1d[7]++;
+        if (s1d_dirty && sat_s1d_verify)
+        {
+            u32 q;
+            for (q = 0; q < S1_ROWS; q++) if (!((s1d_have >> q) & 1)) { home_row_blank(q, x0, bm[q]); s1d_have |= 1UL << q; }
+            s1d_pass = 1; goto again;
+        }
+#endif
+    }
+#ifdef S1D_STATS
+    else
+    {
+        u32 n = 0, v;
+        for (v = s1d_bad; v; v &= v - 1) n++;
+        for (v = ~s1d_redraw & S1_ALL; v; v &= v - 1) sat_s1d[4]++;
+        sat_s1d[5] += n;
+    }
+#endif
+#endif
     PSTAGE(12);
 #if defined(SAT_HOME_DIAG) && SAT_GFX_FIT && defined(SAT_HOME)
     sat_diag_s1miss += sat_gfx_stats.missing - diag_miss0;
@@ -2285,6 +2419,34 @@ static u32 snap_layer(u32 *dest, const u8 *map, u32 xc, u32 yc, u32 rows, u32 co
     return sum;
 }
 
+#ifdef SAT_S1_DIRTY
+/* snap_layer for scroll 1 (play build: FIT 1, row_bits 5) that also records which rows' words changed. Same sum, same copy. */
+static u32 snap_layer_s1(const u8 *map, u32 xc, u32 yc, u32 seed)
+{
+    u32 row_off[S1_ROWS], col, row, sum = seed, old = snap.s1_sum, mask = 0;
+    for (row = 0; row < S1_ROWS; row++)
+    {
+        u32 r = (yc + row) & 63;
+        row_off[row] = ((r & 31) + ((r & 32) << 6)) * 4;
+    }
+    for (col = 0; col < S1_COLS; col++)
+    {
+        const u8 *base = map + ((((xc + col) & 63) << 5) * 4);
+        for (row = 0; row < S1_ROWS; row++) sum = MIX(sum, be32(base + row_off[row]));
+    }
+    if (sum == old) return sum;
+    for (col = 0; col < S1_COLS; col++)
+    {
+        const u8 *base = map + ((((xc + col) & 63) << 5) * 4);
+        u32 *cell = snap.s1 + col;
+        for (row = 0; row < S1_ROWS; row++, cell += S1_COLS) { u32 v = be32(base + row_off[row]); mask |= (u32)(*cell != v) << row; *cell = v; }
+    }
+    if (seed != snap.s1_seed) mask = S1_ALL;
+    snap.s1_rows = mask; snap.s1_from = old; snap.s1_seed = seed;
+    return sum;
+}
+#endif
+
 static int rows_clear;
 
 /* Master side, first half: registers, palette, row scroll and the object list, everything the slave's command build needs. The caller then wakes
@@ -2512,7 +2674,11 @@ void sat_gfx_snapshot_layers(void)
         snap.sel_ok = RAMB[0x8001] == 2 && RAMB[0x8380] == 0 && RAM16(0xff81e8UL) == 0;
 #endif
         x0 = (u32)snap.s1x + CPS_LEFT + S1_READ_X; y0 = (u32)snap.s1y + CPS_TOP;
+#ifdef SAT_S1_DIRTY
+        snap.s1_sum = snap_layer_s1(GFX(RAM16(SH_SCROLL1_BASE) & 0xffc0U), x0 >> 3, y0 >> 3, (x0 >> 3) | ((y0 >> 3) << 16) | ((u32)snap.hud_flush << 31) | ((u32)snap.sel_ok << 30));
+#else
         snap.s1_sum = snap_layer(snap.s1, GFX(RAM16(SH_SCROLL1_BASE) & 0xffc0U), x0 >> 3, y0 >> 3, S1_ROWS, S1_COLS, 5, (x0 >> 3) | ((y0 >> 3) << 16) | ((u32)snap.hud_flush << 31) | ((u32)snap.sel_ok << 30), snap.s1_sum);
+#endif
     }
     if (layers & 4)
     {
