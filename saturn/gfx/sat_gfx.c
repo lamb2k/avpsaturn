@@ -2435,12 +2435,19 @@ static u32 snap_layer(u32 *dest, const u8 *map, u32 xc, u32 yc, u32 rows, u32 co
 #ifdef SAT_S1_DIRTY
     if (mask_out)
     {
-        u32 mask = 0;
-        for (col = 0; col < cols; col++)
+        /* Four columns at a time: the old words are read (a plain copy only writes), and a row's four words share a cache line of the snapshot, where a column at a time
+           would fill a line for every word (Yaba, cache on: +430 ticks of the master's snapshot against +100 here). */
+        u32 mask = 0, c4, k, n;
+        for (c4 = 0; c4 < cols; c4 += 4)
         {
-            const u8 *base = map + ((((xc + col) & 63) << row_bits) * 4);
-            u32 *cell = dest + col;
-            for (row = 0; row < rows; row++, cell += cols) { u32 v = be32(base + row_off[row]); mask |= (u32)(*cell != v) << row; *cell = v; }
+            const u8 *base[4];
+            n = cols - c4 < 4 ? cols - c4 : 4;
+            for (k = 0; k < n; k++) base[k] = map + ((((xc + c4 + k) & 63) << row_bits) * 4);
+            for (row = 0; row < rows; row++)
+            {
+                u32 *cell = dest + row * cols + c4;
+                for (k = 0; k < n; k++) { u32 v = be32(base[k] + row_off[row]); mask |= (u32)(cell[k] != v) << row; cell[k] = v; }
+            }
         }
         *mask_out = mask;
         return sum;
