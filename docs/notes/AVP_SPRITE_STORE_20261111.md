@@ -38,7 +38,7 @@ after the stage word has held 12 vblanks (saturn/rt/kernel.c round_check) and th
 
 `tools/stage_window.py` replaces the next-stage term with the pages read in the first 45 frames after the stage word changed (tools/rounds_fuzz.lua `ROUNDS_WINDOW=45`, 3.75 times the 12 vblank hold),
 unioned over every census run that has window files, with `STAGE_WINDOW_PAD` (default 2) more pages of margin either side of each window page. The next stage's own file restores whatever the old file spilled over
-(the existing restore machinery: `back = written & keep - own`). Data: `WORK/stage_window.json` (tools/stage_window.py WORK CENSUS RUNDIR...), 28 runs in the final build (24 of them reach 0e, 12 to 24 for the other stages).
+(the existing restore machinery: `back = written & keep - own`). Data: `WORK/stage_window.json` (tools/stage_window.py WORK CENSUS RUNDIR...), 28 run directories in the final build (runs per stage word: 28 for 02 to 06, 24 for 0a to 10 including 0e, 20 for 14 to 22, 18 for 24, 13 for 26).
 The old rule is recomputed from the census (lane-chars/census.json plus the KO and continue pages) and has to reproduce rounds.json's keep_pages exactly for all 209 files, else the tool refuses. The fuzz page rule (char_fuzz.augment `window=`) uses the same window.
 A stage without window data keeps the whole next stage (none of the 20 stages lacks data). Default off: with the switch unset every code path is the one before (the identity above).
 
@@ -148,10 +148,11 @@ Visible keys new to the data, summed over the two seeds of a batch (per characte
 | 24 | 102 (51 Warrior, 51 Hunter) | 13 | **0** |
 | other stages, seeds 20, 21 | | | 12: 181, 20: 122, 14: 74, 02: 43, 04: 14, 10: 14, 0c: 13, 08: 3, 16: 7, 18: 7, 22: 5, 06, 0a, 1a, 26: 0 |
 
-What remains is a heavy tail in a few runs: one run of one character finds 50 to 230 keys in one stage that 8 to 20 other runs did not (Hunter 1c 234, Linn 1c 84, Warrior 0e 50), the rest of the runs find none. 1c is the stage with the long tail (a rare enemy or event the fuzz reaches
-about one run in four); 0e is down to one run in 8 finding keys (26 in the last batch, from 75 and 31); 1e and 24 found none in the last batch. The census is a sample, as the stage-sprites lane said; this is the size of the sample error, measured with fresh seeds.
+What remains is a heavy tail in a few runs: one run of one character finds 50 to 230 keys in one stage that 8 to 20 other runs did not (Hunter 1c 234 and 76, Linn 1c 96 and 84, Warrior 0e 50), most of the other runs find a few or none.
+In stage 0e the visible new keys per batch of 8 runs fell 75, 31, 26 (the last all from one Linn run); 1e fell 7, 18, 0; 24 fell 102, 13, 0; 1c did not fall (330, 208, 208, mostly Linn and Hunter), and stages 12, 20 and 14 show 181, 122 and 74 in the last batch.
+The census is a sample, as the stage-sprites lane said; this is the size of the sample error measured with fresh seeds, per eight runs. I did not look at what the 1c, 12 and 20 keys draw.
 
-Fit of the merged data (all packs keep every key of the data; build log, fit.py): the final build (seeds 16 to 19 merged, window pad 2) drops 0 keys in all 209 files, 77 of 77 fit rows pass. The data with seeds 20, 21 merged as well (`wd_f3`, 14 runs a character, 32 to 19 window runs a stage)
+Fit of the merged data (all packs keep every key of the data; build log, fit.py): the final build (seeds 16 to 19 merged, window pad 2) drops 0 keys in all 209 files, 77 of 77 fit rows pass. The data with seeds 20, 21 merged as well (`wd_f3`, 14 runs a character, 19 to 32 window runs a stage)
 was replayed with tools/stage_headroom.py for every stage: 0 keys dropped in all 19 stages, 0e headroom 155.6 KB (replay), 1c 185.8, 24 155.2, 1e 329.0. It was not built (replay only); the merge is `python tools/char_fuzz.py WORK 1=... --add` (data in
 E:\AvP\learning\lane-sprite-store\wd_f3\char_fuzz.json and stage_window.json). Not covered by any of this: keys of a character's moves no fuzz run reaches (a script enumerator over the ROM's move tables would give them without a run; not started).
 
