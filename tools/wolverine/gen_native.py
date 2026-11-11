@@ -252,6 +252,8 @@ if WV_REMAP:   # essentials remap (REVIEW_ANSWER.md 11-10, MAME-confirmed identi
                LYING=(14, 31, (0,)),           # lying on the ground after a knockdown
                GETUP=(22, 5), ENTR=(23, 3),    # all records already resident
                BERS=(22, 23, (1,)), BERS3=(22, 24, (1,)),
+               HIT_H=((14, 4) + ((tuple(int(x) for x in os.environ.get("WV_HITH_SUB", "0,2,4,6").split(",")),) if os.environ.get("WV_HITH_SUB", "0,2,4,6") != "all" else ())),   # the heavy-hit tumble (flight and heavy flinch) draws 4 of its 7 poses: 424 B of the cart tail (WV_HITH_SUB=all: every pose)
+               HIT_E=((14, 3) + ((tuple(int(x) for x in os.environ["WV_HITE_SUB"].split(",")),) if os.environ.get("WV_HITE_SUB") else ())),
                BZ_START=(22, 22, (1,)), BZ_A=(22, 23, (1,)), BZ_B=(22, 24, (1,)), BZ_END=(22, 25, (0,)))   # the Berserker Barrage (QCF + punch, then taps): 22.22 start, 22.24 / 22.23 strikes, 22.25 end
 
 if WV_REMAP:
@@ -506,7 +508,7 @@ def pick_sources(src_key, donor_recs):
     """MSHvSF chain of a role, thinned to the records whose tiles are all resident: [[rec, cells, dur]]"""
     v = SRC[src_key]
     ch = mv_chain(SRC_ADDR[(v[0], v[1])])
-    if len(v) > 2: ch = [ch[i] for i in v[2]]   # the frames the remap names
+    if len(v) > 2: ch = [ch[i] for i in v[2] if i < len(ch)]   # the frames the remap names
     out = thin_strict(ch)
     if len(v) > 2 and not out: raise SystemExit("NO-GO: the remap frames of %s are not resident: GUEST_ASSETS must be a make_d12.py output (or WV_REMAP=0)" % src_key)
     return out
@@ -680,8 +682,34 @@ new_chains[WALK] = walk_recs
 new_chains[LP] = lp_recs
 for r in idle_recs + walk_recs + lp_recs: r.setdefault("donor", None)
 
+def walk_like(start):
+    """T1.59 (a second 12-record walk loop of Schaefer's, 4 ticks a record, never reached in the census): his walk poses by phase of the same cycle, drawn as the walk draws them (not floor-aligned),
+    so every pose is one of the walk's own assemblies (WV_WALK59=0 keeps the floor-aligned WALK role: 8 assemblies and 1.5 KB more)"""
+    ch = skel(start); tot = sum(w(rom, x) for x in ch[:-1]) or 1; cum = 0; out = []
+    for x in ch:
+        dur = w(rom, x); last = bool(w(rom, x + 2) & 0x8000)
+        t = ((cum + dur / 2.0) / tot) * mtot; cum += dur
+        acc, pick = 0, walk_src[-1]
+        for r in walk_src:
+            if acc + r[2] > t: pick = r; break
+            acc += r[2]
+        out.append(dict(src=pick[0], cells=pick[1], dur=dur, flags=w(rom, x + 2), hurt=hurt_index(mv_boxes(pick[0])[1]), atk=0, b10=rom[x + 10], b11=rom[x + 11], tail=rom[x + 12:x + 16], donor=x, jump=("donor" if last else None)))
+    used_by_walk = {id(r["cells"]) for r in walk_recs}   # snap to the poses T1.2 already draws: no assembly of its own (about 500 B of the cart tail)
+    order_ = [k for k, r in enumerate(walk_src)]
+    for r in out:
+        if id(r["cells"]) not in used_by_walk:
+            k = next(k for k, q in enumerate(walk_src) if q[1] is r["cells"])
+            near = min((j for j, q in enumerate(walk_src) if id(q[1]) in used_by_walk), key=lambda j: abs(j - k))
+            r["cells"], r["src"] = walk_src[near][1], walk_src[near][0]
+            r["hurt"] = hurt_index(mv_boxes(r["src"])[1])
+    return out
+
+
 for a in order:
     if a in new_chains: continue
+    if WV_REMAP and os.environ.get("WV_WALK59") != "0" and first_slot[a] == ("T1", 59):
+        new_chains[a] = walk_like(a); role_of[a] = "WALK(phase)"
+        continue
     role = chain_role(a, first_slot[a])
     if role == "BERS3" and WV_T3_SHARE and t3_shared:   # the gun action's aim chains are dead for him (his Berserker has its own chain): one chain answers every T3 slot
         new_chains[a] = new_chains[t3_shared[0]]; role_of[a] = "BERS3(shared)"
@@ -712,7 +740,8 @@ bz_recs = []
 t3_donor = None
 if WV_REMAP:
     # The real Berserker Barrage (22.22 to 22.25 of MSHvSF, MAME-confirmed): the start pose, ten alternating strikes (22.24, 22.23) and the end pose; 12 records of BZ_TICKS ticks as before, every one with the strike box.
-    for key in ["BZ_START"] + ["BZ_B", "BZ_A"] * 5 + ["BZ_END"]:
+    bz_seq = (["BZ_START"] + ["BZ_B", "BZ_A"] * 5 + ["BZ_END"]) if os.environ.get("WV_BZ_START") == "1" else (["BZ_B", "BZ_A"] * 5 + ["BZ_B", "BZ_END"])   # the start pose (22.22) costs an assembly (240 B of the cart tail): off by default, the flurry opens on its first strike
+    for key in bz_seq:
         pk = pick_sources(key, None)[0]
         bz_recs.append(dict(src=pk[0], cells=floor_cells(pk[1]), dur=BZ_TICKS, flags=0, hurt=(hurt_index(mv_boxes(pk[0])[1]) if mv_boxes(pk[0])[1] else rom[STAND + 8]) if BZ_HURT else 0, atk=atk_index(BZ_BOX),
                             b10=0, b11=rom[STAND + 11], tail=rom[STAND + 12:STAND + 16], donor=None))
