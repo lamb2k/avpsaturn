@@ -85,6 +85,100 @@ PALETTES = {
 GUESTS = {0: "schaefer"}
 
 
+# Select screen name plates fitted to the scaled picture (lane frontend 2026-11-11, owner issue #7).
+# The home picture is 352 wide: scroll 2 and 3 (the portraits and the silver frames) are scaled 11/12 by VDP2, but scroll 1 (the name plates, stat bars, text) cannot
+# be, so it keeps the arcade's 8 pixel cells and drops 4 of 48 columns (sat_gfx.c home_row_map: plate rows drop 0, 22, 25, 47 on the select). A plate stays 160 pixels
+# wide while the frame it sits in shrinks to 147, so every plate stuck out about 7 pixels at one side. The fix is in the art: each plate's pixels are resampled 11/12
+# (area average, nearest of the plate's own pens, transparent where less than half is covered) into the place the scaled frame has put its bar, so the cells the arcade
+# draws are the same cells at the same keys and no code or RAM changes.
+# Geometry: a plate's first pixel is arcade x 8 (left plates, columns 1-20) or 216 (right plates, columns 27-46); the fit puts them at Saturn x 0 and 192 (cells 0-19, 24-43).
+# An output pixel q (Saturn x = sx0 + q) takes the arcade interval (sx0 + q) * 12/11 - ax0 of the plate's art.
+PLATE_W, PLATE_H = 160, 24
+PLATE_SIDES = {"L": (8, 0), "R": (216, 192)}   # (arcade x of the plate's first pixel, Saturn x of its first pixel)
+# The four stock plates: scroll 1 code of the first tile (rows stride 16, columns 16 on in the next 0x100 block), side, ROM palette table (15 pens, 0RGB; tag word 0x000a is Schaefer's).
+STOCK_PLATES = {
+    "warrior": dict(code=0x0e00, side="L", pal=0x1ee360),
+    "schaefer": dict(code=0x0e30, side="R", pal=0x1ee340),
+    "hunter": dict(code=0x0e60, side="R", pal=0x1ee300),
+    "linn": dict(code=0x0e90, side="L", pal=0x1ee320),
+}
+PLATE_BANK_TAGS = {"warrior": 0x000b, "schaefer": 0x000a, "hunter": 0x0008, "linn": 0x0009}
+
+
+def plate_code(base, r, c):
+    return (base + r * 16 + c) if c < 16 else (base + 0x100 + r * 16 + c - 16)
+
+
+def plate_keys(base):
+    """Scroll 1 keys (code << 1 | column parity) of a plate's 60 tiles; the first column is arcade column 1, so the first half is the odd one."""
+    return {plate_code(base, r, c) << 1 | ((1 + c) & 1) for r in range(PLATE_H // 8) for c in range(PLATE_W // 8)}
+
+
+def plate_fit(pens, rgb, side, allowed=None):
+    """24 rows of 160 pens (15 = transparent) -> the same shape, resampled 11/12 into the scaled frame's place. rgb: (r, g, b) of pens 0 to 14; allowed: the pens the result may use."""
+    ax0, sx0 = PLATE_SIDES[side]
+    k = 12.0 / 11.0
+    allowed = list(range(15)) if allowed is None else list(allowed)
+    out = []
+    for row in pens:
+        new = []
+        for q in range(PLATE_W):
+            xa = (sx0 + q) * k - ax0
+            xb = xa + k
+            acc, tot = [0.0, 0.0, 0.0], 0.0
+            for xx in range(int(xa // 1), int(xb) + 1):
+                wt = max(0.0, min(xb, xx + 1) - max(xa, xx))
+                if wt <= 0 or not 0 <= xx < PLATE_W or row[xx] == 15:
+                    continue
+                c = rgb[row[xx]]
+                for i in range(3):
+                    acc[i] += c[i] * wt
+                tot += wt
+            if tot < 0.5 * k:
+                new.append(15)
+                continue
+            a = [v / tot for v in acc]
+            new.append(min(allowed, key=lambda p: (sum((rgb[p][i] - a[i]) ** 2 for i in range(3)), p)))
+        out.append(new)
+    return out
+
+
+def get_plate(raw, base):
+    """The 160x24 pens of a stock plate, from the scroll 1 tiles the select screen draws (first column = arcade column 1)."""
+    pens = [[15] * PLATE_W for _ in range(PLATE_H)]
+    for r in range(PLATE_H // 8):
+        for c in range(PLATE_W // 8):
+            px = satgfx_pack.pens(raw, SCROLL_BASE + plate_code(base, r, c) * 0x40, 16, 8, 8)
+            tile = satgfx_pack.part(px, 0, 8 * ((1 + c) & 1), 8, 8)
+            for y in range(8):
+                pens[r * 8 + y][c * 8:c * 8 + 8] = tile[y]
+    return pens
+
+
+def put_plate(raw, base, pens):
+    for r in range(PLATE_H // 8):
+        for c in range(PLATE_W // 8):
+            put_scroll1(raw, plate_code(base, r, c), (1 + c) & 1, [row[c * 8:c * 8 + 8] for row in pens[r * 8:r * 8 + 8]])
+
+
+def stock_plate_rgb(rom, name):
+    spec = STOCK_PLATES[name]
+    tag = struct.unpack(">H", rom[spec["pal"] + 30:spec["pal"] + 32])[0]
+    if tag != PLATE_BANK_TAGS[name]:
+        raise ValueError("%s plate palette at %06x has tag %04x, expected %04x" % (name, spec["pal"], tag, PLATE_BANK_TAGS[name]))
+    return [((w >> 8 & 15) * 17, (w >> 4 & 15) * 17, (w & 15) * 17) for w in rom_words(rom, spec["pal"])]
+
+
+def fit_stock_plates(raw, rom, skip=()):
+    """Copy of the graphics region with the stock plates (not those in `skip`) fitted."""
+    out = bytearray(raw)
+    for name, spec in STOCK_PLATES.items():
+        if name in skip:
+            continue
+        put_plate(out, spec["code"], plate_fit(get_plate(raw, spec["code"]), stock_plate_rgb(rom, name), spec["side"]))
+    return out
+
+
 def read_png(path):
     """(width, height, rows of palette indices, 16 (r, g, b) entries)."""
     from PIL import Image
@@ -337,8 +431,27 @@ def _write(path, data):
         path.write_bytes(data)
 
 
-def build(art, base_gfx, rom_path, out_dir, guest=0):
-    """Writes the two patched graphics regions and the palette include; returns their paths and a report."""
+def fit_guest_plate(pieces, slot):
+    """The guest's plate resampled 11/12 like the stock ones (plate_fit), on the pens his PNG may use."""
+    spec = SLOTS[slot]["select_plate"]
+    p = pieces["select_plate"]
+    rgb = [p["pal"][i + 1] for i in range(15)]
+    out = dict(pieces)
+    out["select_plate"] = dict(p, pens=plate_fit(p["pens"], rgb, "R", [q for q in spec["pens"] if q != 15]))
+    return out
+
+
+def build_stock_front(base_gfx, rom_path, out_dir):
+    """Writes the region the arcade's own front end file packs from (stock plates fitted); returns its path."""
+    out = pathlib.Path(out_dir)
+    out.mkdir(parents=True, exist_ok=True)
+    path = out / "gfx_front_plates.bin"
+    _write(path, bytes(fit_stock_plates(pathlib.Path(base_gfx).read_bytes(), pathlib.Path(rom_path).read_bytes())))
+    return path
+
+
+def build(art, base_gfx, rom_path, out_dir, guest=0, fit=False):
+    """Writes the two patched graphics regions and the palette include; returns their paths and a report. fit: the plates (stock and the guest's) are fitted to the scaled picture."""
     slot = GUESTS[guest]
     out = pathlib.Path(out_dir)
     out.mkdir(parents=True, exist_ok=True)
@@ -347,8 +460,10 @@ def build(art, base_gfx, rom_path, out_dir, guest=0):
     pieces = load_slot(art, slot)
     check_shared_palette(slot, pieces, rom)
     res = {}
+    if fit:
+        pieces = fit_guest_plate(pieces, slot)
     for which in ("stage", "front"):
-        data = bytes(patch(raw, slot, pieces, which))
+        data = bytes(patch(fit_stock_plates(raw, rom, skip=("schaefer",)) if fit and which == "front" else raw, slot, pieces, which))
         res[which] = out / ("gfx_hud_%s.bin" % which)
         _write(res[which], data)
     sets = palette_sets(slot, guest, pieces, rom)

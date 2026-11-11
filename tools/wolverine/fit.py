@@ -250,7 +250,7 @@ def main(argv=None, environ=None, fit_fn=None, own_keys=None):
         if environ.get("FIT_GFX_FRONT"):   # his front file: the arcade's keys and ranking, the select picture, plate and icon written in
             front = next(f for f in rounds["files"] if f["name"] == "front")
             fr = rank.get("front", {})
-            p0, d0 = run(raw, front, front["keys"], room, free, fr, screens, fit_fn=fit_fn)
+            p0, d0 = run(pathlib.Path(environ["FIT_GFX_FRONT_STOCK"]).read_bytes() if environ.get("FIT_GFX_FRONT_STOCK") else raw, front, front["keys"], room, free, fr, screens, fit_fn=fit_fn)   # FIT_GFX_FRONT_STOCK: the arcade front file's region with the plates fitted (build.py PLATE_FIT, gen/hud/gfx_front_plates.bin)
             p1, d1 = run(pathlib.Path(environ["FIT_GFX_FRONT"]).read_bytes(), dict(front, name="front_wv", rank_from="front"), front["keys"], room, free, fr, screens, fit_fn=fit_fn)
             tiles = lambda p: p["inmain"] + sum(x[2] for x in p["segs"]) if p is not None else None
             row = dict(file="front_wv", stage="00", variant=0, mask=0, sch_drop=len(d0), wolv_drop=len(d1), sch_tiles=tiles(p0), wolv_tiles=tiles(p1),
