@@ -350,29 +350,18 @@ static long reveal_io(int which, unsigned a, unsigned b, unsigned c)
     return which == 1 ? load_file((const char *)a, (void *)b) : unlock_io(a, b, (unsigned char *)c);
 }
 #endif
-/* The game runs the VDP2 in its 352 wide mode (sat_gfx_init writes TVMD HRESO = 1). That mode needs the SMPC clock change (command 0x0E, CKCHG352): the BIOS runs the 320 clock, and a 352
-   mode on the 320 dot clock gives timing the TV cannot lock on (rolling white noise on the console; Yaba and Ymir show a picture regardless). The command resets VDP1, VDP2, the SCU and the
-   sound chip, switches the slave off, takes about 100 ms and ends with an NMI to the master, so: vector 11 gets a handler, the command is sent with interrupts masked, the NMI is awaited.
-   Done once, first thing in the loader (before the cart is enabled and anything is loaded: the reset also clears the cart RAM in Ymir's model); the boot display is taken again in the new mode. */
-static volatile int nmi_seen;
-static void nmi_handler(void) __attribute__((interrupt_handler));
-static void nmi_handler(void) { nmi_seen = 1; }
+/* The game runs the VDP2 in its 352 wide mode (sat_gfx_init writes TVMD HRESO = 1). That mode needs the system clock change: the BIOS runs the 320 clock, and a 352 mode on the
+   320 dot clock gives timing the TV cannot lock on (rolling white noise on the console; Yaba and Ymir show a picture regardless). This is the BIOS's own service, SYS_CHGSYSCK(1)
+   (SEGA_SYS.H: the function pointer at 0x06000320; 0 = 26 MHz, 320/640 modes, 1 = 28 MHz, 352/704 modes), exactly what SGL's slInitSystem calls for a 352 mode. It does the SMPC
+   command, the NMI wait and the reset of the SCU, A-bus (ASR0/ASR1 = 0x1ff01ff0, AREF = 0x1f), SCU timers and DMA, which are therefore at the BIOS defaults afterwards: the cart is
+   brought up after it, never before. Done once, first thing in the loader (before the cart is enabled and anything is loaded), then the boot display is taken again in the 352 mode. */
 static void clock_352(void)
 {
-    volatile unsigned char *smpc = (volatile unsigned char *)0x20100000u;
-    volatile unsigned long *vt = (volatile unsigned long *)0x06000000u;
-    unsigned long n;
-    vt[11] = (unsigned long)nmi_handler;
-    __asm__ volatile ("ldc %0,sr" : : "r"(0xf0));
-    for (n = 0; n < 2000000ul && (smpc[0x63] & 1); n++) ;
-    nmi_seen = 0;
-    smpc[0x63] = 1;
-    smpc[0x1f] = 0x0e;                                  /* CKCHG352 */
-    for (n = 0; n < 12000000ul && !nmi_seen; n++) ;     /* the NMI ends the change (about 100 ms) */
-    for (n = 0; n < 2000000ul && (smpc[0x63] & 1); n++) ;
+    void (*chgsysck)(unsigned long) = *(void (**)(unsigned long))0x06000320u;
+    chgsysck(1);
     diag_tvmd = 0x8001;
     diag_reinit_k(0, 0);                                /* the chips were reset: the display again, 352 wide */
-    diag_info(0x4000u | (nmi_seen ? 1u : 0u));          /* 4001 the change finished with its NMI, 4000 the wait ran out */
+    diag_info(0x4001u);                                 /* 4001: the BIOS clock change returned */
 }
 /* The save record read (BIOS backup library). Where it runs is a build choice, because on the console the library is BIOS code that Yaba's HLE never executes:
    default           first thing, before the cart bus timing changes and before any disc read, with the library copied into high work RAM (0x060C0000, 24 KB; HW.BIN loads over it later);
