@@ -210,6 +210,7 @@ void sat_gfx_vblank_out_entry(void)
      * RTE restores the interrupted SR; this short handler keeps IPL 15. */
     __asm__ volatile ("ldc %0,sr" : : "r"(0xf0) : "memory");
     *(volatile u32 *)0x25fe00a4UL = ~2UL;
+    *(volatile u32 *)0x25fe00a0UL = 0xfffffffcUL;   /* the SCU masks everything when it hands over an interrupt: see sat_vblank */
     sat_gfx_vblank_out();
 }
 #endif
