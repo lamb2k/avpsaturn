@@ -20,11 +20,7 @@ static u16 in0 = 0xffff, in2 = 0xffff;
 extern u32 sat_vblanks_now(void);
 /* Test flag: the retained Round 1 route's schedule (tools/mame_capture_oracle11_player_audio.lua) as pad words, replacing the SMPC read only.
    Frame number = vblank + 900: the route waits 1200 frames in attract, the coin here lands at vblank 300, so a run reaches Round 1 inside the one minute limit. */
-#ifdef SAT_PLACE_FN
-static u32 __attribute__((noinline, optimize("Os"), section(".lwcode"))) script_word(u32 v)   /* test flag only: kept out of high RAM (lane perf-hw) so a scripted build lays out like the release one */
-#else
-static u32 __attribute__((noinline, optimize("Os"))) script_word(u32 v)
-#endif
+static u32 __attribute__((noinline, optimize("Os"), section(".cartcode"))) script_word(u32 v)   /* test flag only: runs from the cart tail (build.py .cold1), so a scripted build lays out like the release one */
 {
     u32 f = v + 900, w = 0xffff;
     int coin, start, right, gun, attack, jump;
@@ -100,7 +96,9 @@ void sat_pad_tick(void)
         if (SR & 0x20) { IREG(0) = 0x40; SF = 1; }  /* more ports queued, drop them */
         else { IREG(0) = 0x00; IREG(1) = 0x0a; IREG(2) = 0xf0; SF = 1; COMREG = 0x10; }   /* SF first, then the command, the SMPC's documented order: the command clears SF when it ends. SF after COMREG could land after the end of a fast command (strict Ymir) and leave SF set for good: no pad input after that. */
     }
-#ifdef SAT_INPUT_SCRIPT
+#if defined(SAT_INPUT_SCRIPT) && defined(SAT_INPUT_SCRIPT_TICK)
+    /* the script is applied when the game reads its inputs (sat_pad_in0) */
+#elif defined(SAT_INPUT_SCRIPT)
     map_pad(script_word(sat_vblanks_now()));
 #elif defined(SAT_HOME)
     map_pad(sat_home_pad(sat_home_remap(sat_pad_raw)));
@@ -111,5 +109,26 @@ void sat_pad_tick(void)
     { extern void sat_guest_wolverine_pad(u16 *in0) __attribute__((weak)); if (sat_guest_wolverine_pad) sat_guest_wolverine_pad(&in0); }   /* bonus characters: motion inputs */
 #endif
 }
+#ifdef SAT_INPUT_SCRIPT_TICK
+/* Test flag (lane perf-hw, with SAT_INPUT_SCRIPT): inside a stage the script advances by game ticks, not vblanks. The word is worked out when the game reads its inputs, from the number of ticks since the
+   stage was entered (the byte at ff8019, summed) added to the vblank of the entry: two builds that run the same ticks see the same pad words whatever phase their ticks have against the vblank. Outside a
+   stage (menus, loads) it is the vblank as before. */
+extern u8 RAMB[];
+static u32 sc_in, sc_base, sc_cnt, sc_last;
+static void __attribute__((noinline, section(".cartcode"))) sc_refresh(void)
+{
+    u32 stage = RAMB[0x81e9], vb = sat_vblanks_now(), b = RAMB[0x8019], idx;
+    if (!stage) { sc_in = 0; idx = vb; }
+    else {
+        if (!sc_in) { sc_in = 1; sc_base = vb; sc_cnt = 0; sc_last = b; }
+        sc_cnt += (b - sc_last) & 255u; sc_last = b;
+        idx = sc_base + sc_cnt;
+    }
+    map_pad(script_word(idx));
+}
+u32 sat_pad_in0(void) { sc_refresh(); return in0; }
+u32 sat_pad_in2(void) { sc_refresh(); return in2; }
+#else
 u32 sat_pad_in0(void) { return in0; }
 u32 sat_pad_in2(void) { return in2; }
+#endif

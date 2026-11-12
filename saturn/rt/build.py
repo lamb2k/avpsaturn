@@ -552,8 +552,12 @@ def plan_functions(hw, lw, cold1, placed, home_cold, data_in_hw, need_slack, lw_
     cap = hw_text - data_in_hw + need_slack
     funcs.sort(key=lambda f: -f[0])
     keep, used = set(), 0
+    # first: every function that ran in any profiled scene and sat in high RAM before stays there (code that ran in fix7n4's high RAM is never left cold in low RAM); then the rest by cost per byte
     for sc, sz, o, sec, r in funcs:
-        if sc > 0 and used + sz <= cap:
+        if r == "hw" and sc > 0 and used + sz <= cap:
+            keep.add((o, sec)); used += sz
+    for sc, sz, o, sec, r in funcs:
+        if sc > 0 and (o, sec) not in keep and used + sz <= cap:
             keep.add((o, sec)); used += sz
     promote, demote_c = {}, []
     for sc, sz, o, sec, r in funcs:
@@ -769,6 +773,7 @@ SECTIONS {{
   .cold1 {cold1_at:#x} : {{
 {inp(cold1 + home_cold, tx)}
 {with_extra("cold1")}
+    *(.cartcode)
     . = ALIGN(4);
     _sat_cold1_end = .;
   }}
