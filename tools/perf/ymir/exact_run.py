@@ -9,8 +9,8 @@ out = f'{ygs.HERE}/runs/{name}'; os.makedirs(out, exist_ok=True)
 y = ygs.Y(cue)
 t0 = time.time(); last = 0; lf = open(out + '/run.log', 'w')
 if os.environ.get('HW_DUMP_FINAL'):
-    while y.vb() < 400 and y.pr.poll() is None: time.sleep(1)
-    open(ygs.HERE + '/hw_cmd.txt', 'w').write('reset x')
+    while y.vb() < min(400, vbs // 2) and y.pr.poll() is None: time.sleep(1)
+    if not os.environ.get('HW_NO_RESET'): open(ygs.HERE + '/hw_cmd.txt', 'w').write('reset x')
 try:
     while y.vb() < vbs and y.pr.poll() is None and time.time() - t0 < 1500:
         time.sleep(1.0)

@@ -1,5 +1,5 @@
 --- /e/AvP/learning/lane-perf/ymir_gs/sh2.cpp	2026-11-12 07:16:59.753849600 -0500
-+++ /e/AvP/learning/lane-perf-hw/ymir_hw/sh2.cpp	2026-11-12 14:07:54.889273800 -0500
++++ /e/AvP/learning/lane-perf-hw/ymir_hw/sh2.cpp	2026-11-12 15:07:04.632142100 -0500
 @@ -15,14 +15,15 @@
  
  #include <cstdio>
@@ -187,7 +187,7 @@
 -    for (int k = 0; k < 5; k++) if (ta[k] >= a && ta[k] < a + nb) { gsB[k] = (value >> (8 * (nb - 1 - (ta[k] - a)))) & 255; if (k == 1) gsTw++; }
 +    static const unsigned gsOffR = [] { const char *e = std::getenv("GS_OFFR"); return e ? (unsigned)std::strtoul(e, nullptr, 0) : gsOff; }();
 +    const unsigned ar = (address & 0x1FFFFFFFu) - gsOffR;
-+    for (int k = 0; k < 5; k++) if (ta[k] >= ar && ta[k] < ar + nb) { gsB[k] = (value >> (8 * (nb - 1 - (ta[k] - ar)))) & 255; if (k == 1) { gsTw++; gsTwPub = gsTw; static std::vector<unsigned> tg = [] { std::vector<unsigned> v; const char *e = std::getenv("HW_DUMP_TICKS"); if (e) { unsigned x = 0; bool in = false; for (const char *q = e; ; q++) { if (*q >= '0' && *q <= '9') { x = x * 10 + (*q - '0'); in = true; } else { if (in) v.push_back(x); x = 0; in = false; if (!*q) break; } } } return v; }(); for (unsigned t : tg) if (t == gsTw) gsRamReq = (int)t; } }
++    for (int k = 0; k < 5; k++) if (ta[k] >= ar && ta[k] < ar + nb) { gsB[k] = (value >> (8 * (nb - 1 - (ta[k] - ar)))) & 255; if (k == 1) { gsTw++; gsTwPub = gsTw; static std::vector<unsigned> rtg = [] { std::vector<unsigned> v; const char *e = std::getenv("HW_DUMP_RTICKS"); if (e) { unsigned x = 0; bool in = false; for (const char *q = e; ; q++) { if (*q >= '0' && *q <= '9') { x = x * 10 + (*q - '0'); in = true; } else { if (in) v.push_back(x); x = 0; in = false; if (!*q) break; } } } return v; }(); static unsigned twStage = 0; static bool inStage = false; if (gsStage == 0) inStage = false; else if (!inStage) { inStage = true; twStage = gsTw; } if (inStage) for (unsigned t : rtg) if (gsTw - twStage == t) gsRamReq = (int)t;  static std::vector<unsigned> tg = [] { std::vector<unsigned> v; const char *e = std::getenv("HW_DUMP_TICKS"); if (e) { unsigned x = 0; bool in = false; for (const char *q = e; ; q++) { if (*q >= '0' && *q <= '9') { x = x * 10 + (*q - '0'); in = true; } else { if (in) v.push_back(x); x = 0; in = false; if (!*q) break; } } } return v; }(); for (unsigned t : tg) if (t == gsTw) gsRamReq = (int)t; } }
      gsV8 = gsB[0]; gsT8 = gsB[1]; gsFF = gsB[2]; gsStage = (gsB[3] << 8) | gsB[4];
      if (bits == 32) {
          switch (a) {
@@ -207,11 +207,17 @@
      static std::set<unsigned long long> seen;
      unsigned long long k = ((unsigned long long)pc << 16) ^ (size << 4) ^ (unsigned)kind[0] ^ ((unsigned long long)who.size() << 8) ^ ((unsigned long long)(who.empty() ? 0 : who[0]) << 40);
      if (f && seen.insert(k).second) { std::fprintf(f, "%s %.*s PC=%08X addr=%08X %u-bit\n", kind, (int)who.size(), who.data(), pc, addr, size); std::fflush(f); }
-@@ -596,7 +733,16 @@
+@@ -596,7 +733,22 @@
          {   // lane perf 2026-11-12: GS_MSLOW=f makes the MASTER f times slower than the scheduler's cycle count (a what-if for the console's bus and cart cost; the slave and the video chips are not touched)
              static const unsigned long long gsF = [] { const char *e = std::getenv("GS_MSLOW"); double f = e ? std::atof(e) : 1.0; return (unsigned long long)(f * 256.0 + 0.5); }();
              static unsigned long long gsAcc = 0;
 +            const int hwc = IsMaster() ? 0 : 1; const uint32 hwpc = PC;
++            {   // test: HW_BOOTDELAY=n adds n cycles the first time the master enters sat_main (HW_MAIN, hex), so two builds whose boots differ start the game at the same video phase
++                static const unsigned bdMain = [] { const char *e = std::getenv("HW_MAIN"); return e ? (unsigned)std::strtoul(e, nullptr, 16) : 0u; }();
++                static const unsigned long long bdN = [] { const char *e = std::getenv("HW_BOOTDELAY"); return e ? std::strtoull(e, nullptr, 0) : 0ull; }();
++                static bool bdDone = false;
++                if (!bdDone && bdMain && hwc == 0 && (hwpc & 0x1FFFFFFFu) == bdMain) { bdDone = true; m_cyclesExecuted += bdN; }
++            }
 +            if (hwp::C.prof || hwp::C.model) { hwp::S[hwc].pen = 0; }
              uint64 c = InterpretNext<debug, emulateCache>();
 +            if (hwp::C.prof || hwp::C.model) { hwp::St &hs = hwp::S[hwc]; if (hwp::C.model) c += hs.pen; hs.clk += c; if (hwp::C.prof) { hwp::InitHist(); hwp::RecPc(hwc, hwpc, c, hs.pen); } if (hwc == 0) hwp::Poll(); }
@@ -224,7 +230,7 @@
              if (gsF != 256 && IsMaster()) { gsAcc += c * gsF; c = gsAcc >> 8; gsAcc &= 255; }
              m_cyclesExecuted += c;
          }
-@@ -803,6 +949,7 @@
+@@ -803,6 +955,7 @@
                          if (IsValidCacheWay(way)) {
                              // Fill line
                              const uint32 baseAddress = address & ~0xF;
@@ -232,7 +238,7 @@
                              for (uint32 offset = 0; offset < 16; offset += 4) {
                                  const uint32 addressInc = (address + 4 + offset) & 0xC;
                                  const uint32 memValue = m_bus.Read<uint32>((baseAddress + addressInc) & 0x7FFFFFF);
-@@ -837,6 +984,7 @@
+@@ -837,6 +990,7 @@
          if constexpr (peek) {
              return m_bus.Peek<T>(address & 0x7FFFFFF);
          } else {
@@ -240,7 +246,7 @@
              return m_bus.Read<T>(address & 0x7FFFFFF);
          }
      case 0b010: // associative purge
-@@ -935,6 +1083,7 @@
+@@ -935,6 +1089,7 @@
          if constexpr (poke) {
              m_bus.Poke<T>(address & 0x7FFFFFF, value);
          } else {
@@ -248,7 +254,7 @@
              m_bus.Write<T>(address & 0x7FFFFFF, value);
          }
          break;
-@@ -1114,6 +1263,7 @@
+@@ -1114,6 +1269,7 @@
  template <mem_primitive T, bool write, bool emulateCache>
  FORCE_INLINE_EX uint64 SH2::AccessCycles(uint32 address) {
      const uint32 partition = (address >> 29u) & 0b111;
@@ -256,7 +262,7 @@
      switch (partition) {
      case 0b000: // cache
          if constexpr (emulateCache && !write) {
-@@ -1154,6 +1304,7 @@
+@@ -1154,6 +1310,7 @@
      case 0b001: [[fallthrough]]; // cache-through
      case 0b101:                  // cache-through
      {
