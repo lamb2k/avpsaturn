@@ -596,21 +596,25 @@ u32 sat_ld_log[4][4];
 u32 sat_ld_n, sat_ld_t0;
 static u32 rtc_secs(void)
 {
-    u32 n = 0, v, sr;
+    static u32 last;
+    u32 n = 0, v, sr, tries, got = 0;
     __asm__ volatile ("stc sr,%0" : "=r"(sr));
     __asm__ volatile ("ldc %0,sr" : : "r"(0xf0));   /* the vblank's pad INTBACK must not land inside this sequence */
-    while ((SMPC(0x63) & 1) && n++ < 400000u) ;
-    if (SMPC(0x61) & 0x20) {   /* a pad INTBACK still has peripheral data queued: break it first */
-        SMPC(0x01) = 0x40; SMPC(0x63) = 1; SMPC(0x1f) = 0x10;
+    for (tries = 0; tries < 3 && !got; tries++) {   /* a status report read while peripheral data was still queued gave minutes and seconds that were not BCD (Ymir 11-12: a 1705 s load): read again until both bytes are valid BCD */
         n = 0; while ((SMPC(0x63) & 1) && n++ < 400000u) ;
+        if (SMPC(0x61) & 0x20) {   /* a pad INTBACK still has peripheral data queued: break it first */
+            SMPC(0x01) = 0x40; SMPC(0x63) = 1; SMPC(0x1f) = 0x10;
+            n = 0; while ((SMPC(0x63) & 1) && n++ < 400000u) ;
+        }
+        SMPC(0x01) = 0x01; SMPC(0x03) = 0x00; SMPC(0x05) = 0xf0;   /* INTBACK, status only: it carries the clock (GETTIM does not exist; 0x0e is CKCHG352, a reset: found on the first test build) */
+        SMPC(0x63) = 1; SMPC(0x1f) = 0x10;   /* SF first, then the command */
+        n = 0; while ((SMPC(0x63) & 1) && n++ < 400000u) ;
+        v = SMPC(0x2d);   /* OREG6, minutes (BCD) */
+        n = SMPC(0x2f);   /* OREG7, seconds (BCD) */
+        if ((v & 15) <= 9 && (v >> 4) <= 5 && (n & 15) <= 9 && (n >> 4) <= 5) { last = ((v >> 4) * 10 + (v & 15)) * 60 + (n >> 4) * 10 + (n & 15); got = 1; }
     }
-    SMPC(0x01) = 0x01; SMPC(0x03) = 0x00; SMPC(0x05) = 0xf0;   /* INTBACK, status only: it carries the clock (GETTIM does not exist; 0x0e is CKCHG352, a reset: found on the first test build) */
-    SMPC(0x63) = 1; SMPC(0x1f) = 0x10;   /* SF first, then the command */
-    n = 0; while ((SMPC(0x63) & 1) && n++ < 400000u) ;
-    v = SMPC(0x2d);   /* OREG6, minutes (BCD) */
-    n = SMPC(0x2f);   /* OREG7, seconds (BCD) */
     __asm__ volatile ("ldc %0,sr" : : "r"(sr));
-    return ((v >> 4) * 10 + (v & 15)) * 60 + (n >> 4) * 10 + (n & 15);
+    return last;
 }
 #endif
 /* The sound part of a round file lands at SAT_PACK first and goes to SCSP RAM here; the tile part then overwrites it. */
