@@ -551,6 +551,7 @@ def plan_functions(hw, lw, cold1, placed, home_cold, data_in_hw, need_slack, lw_
     cands = sorted(((chunk_heat.get(o.stem, 1 << 40), -sz, o.name, o, sec) for o in hw for sec, sz in secs[o] if not hot(o, sec)))
     need = sum(P.values()) + data_in_hw - need_slack
     budget = {r: v - 16 for r, v in P.items() if r != "lw"}   # cart regions: no more bytes than the hot code that left
+    budget["cold1"] = budget.get("cold1", 0) + int(os.environ.get("PLACE_FN_COLD1_EXTRA", "2048"))   # cold1_at is fixed by the object sizes, so the cart tail below its end can take a little more cold code: the slack that lets the two work RAMs both fit
     budget["lw"] = P.get("lw", 0) + data_in_hw + lw_slack
     demote, moved = {}, 0
     for _, nsz, _, o, sec in cands:
@@ -559,13 +560,14 @@ def plan_functions(hw, lw, cold1, placed, home_cold, data_in_hw, need_slack, lw_
             break
         # fill the cart regions first (their freed bytes are otherwise lost and low work RAM has no room to take them), then low work RAM
         for r in sorted(budget, key=lambda r: (r == "lw", -budget[r])):
-            if budget[r] >= sz + 4:
-                budget[r] -= sz + 4
+            pad = 0 if r == "lw" else 1   # the cart regions are hard limits: a byte of alignment a function
+            if budget[r] >= sz + pad:
+                budget[r] -= sz + pad
                 demote.setdefault(r, []).append((o, sec, sz))
                 moved += sz
                 break
-    if moved < need:
-        raise SystemExit(f"NO-GO (SAT_PLACE_FN): only {moved} bytes of never-run code can leave high RAM, {need} needed (hot code in: {sum(P.values())}, data in: {data_in_hw}); budgets left {budget}")
+    if moved < need:   # the link check in main() decides: it is the real size that has to fit
+        print(f"place_fn: {need - moved} bytes short of the target; budgets left {budget}", flush=True)
     rep = {"hot_bytes_in": P, "functions_promoted": sum(len(v) for v in promote.values()), "demoted_bytes": {r: sum(x[2] for x in l) for r, l in demote.items()}, "data_in_hw": data_in_hw, "need": need}
     return promote, demote, rep
 
@@ -704,7 +706,7 @@ def main():
     if HOT_GFX_HW:
         data_hw.append((gfx_o, ".lwgfx"))
     data_in_hw = sum(section_size(o, sec) + 16 for o, sec in data_hw)
-    need_slack, lw_slack = int(os.environ.get("PLACE_FN_SLACK", "500")), int(os.environ.get("PLACE_FN_LWSLACK", "64"))
+    need_slack, lw_slack = int(os.environ.get("PLACE_FN_SLACK", "824")), int(os.environ.get("PLACE_FN_LWSLACK", "-4"))
     for attempt in range(6):
         promote, demote, place_rep = ({}, {}, None)
         if PLACE_FN:
@@ -779,7 +781,7 @@ SECTIONS {{
         if hw_over > -32:
             need_slack -= hw_over + 64   # more has to leave high RAM
         elif lw_over > -16:
-            need_slack += lw_over + 64   # less may go to low RAM
+            lw_slack -= lw_over + 48   # less may go to low RAM
         else:
             break
     else:
