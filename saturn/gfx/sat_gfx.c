@@ -3199,6 +3199,7 @@ int sat_gfx_swap_pack(const void *pack)
 #define TVMD_352_ON 0x8101
 void sat_gfx_display(int on) { VDP2R(0x00) = on ? TVMD_352_ON : TVMD_352_OFF; }
 
+volatile u32 sat_gfx_selftest;   /* bit 0 CRAM, 1 VDP2 VRAM, 2 VDP1 VRAM read back as written at the end of sat_gfx_init */
 COLD_OS int sat_gfx_init(const void *pack)
 {
 #ifdef SAT_KEYLOG
@@ -3310,5 +3311,19 @@ COLD_OS int sat_gfx_init(const void *pack)
        thickened by one dot to the right; clear dots are the panel's (option screens only). 52 cells after the panel, up to 0x1fbe0 (the row table is at 0x1fc00). */
     { int L, h; for (L = 0; L < 26; L++) for (h = 0; h < 2; h++) home_cell(home_font + (32 + L) * 32 + h * 16, (u32)SAT_GFX_HOME_FONT + 59 + (u32)(L * 2 + h), 1, 15); }
 #endif
+    /* Power-up self test (readout line 6): can the CPU write and read back each chip memory the picture depends on, now that the display is on. Bit 0 CRAM (the last entry), bit 1 VDP2 VRAM, bit 2 VDP1 VRAM; set = read back as written.
+       First-boot report on the console (11-11): crushed colours and no sound on one power-up only; this tells at the next one whether the chips took the writes. */
+    {
+        u32 ok = 0;
+        volatile u16 *cr = (volatile u16 *)CRAM_AT(2047);
+        volatile u16 *v2 = (volatile u16 *)(VDP2_VRAM + 0x7ff80UL);
+        volatile u16 *v1 = (volatile u16 *)(VDP1_VRAM + 0x7ff80UL);
+        *cr = 0x5aa5; *v2 = 0x5aa5; *v1 = 0x5aa5;
+        if (*cr == 0x5aa5) ok |= 1;
+        if (*v2 == 0x5aa5) ok |= 2;
+        if (*v1 == 0x5aa5) ok |= 4;
+        *cr = 0; *v2 = 0; *v1 = 0;
+        sat_gfx_selftest = ok;
+    }
     return 1;
 }

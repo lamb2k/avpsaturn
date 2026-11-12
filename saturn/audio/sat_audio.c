@@ -435,13 +435,21 @@ unsigned long sat_audio_pack_keep(const void *pack)
     return 12UL + 16UL * (be16(p + 4) + be16(p + 6));
 }
 
+/* Init report for the readout (line 6): low byte = start attempts, bit 8 = the SCSP master volume register read back after SNDON, bit 9 = an SMPC wait ran out. */
+volatile u32 sat_audio_status;
 static void smpc(unsigned command)
 {
     int wait;
-    for (wait = 0; wait < 100000 && (SMPC_SF & 1); wait++) ;   /* wait for idle first: the BIOS polls the SMPC every frame and a command written while it is busy is lost */
+    for (wait = 0; wait < 400000 && (SMPC_SF & 1); wait++) ;   /* wait for idle first: the BIOS polls the SMPC every frame and a command written while it is busy is lost */
+    if (wait >= 400000) sat_audio_status |= 0x200u;
+    if (*(volatile u8 *)0x20100061UL & 0x20) {   /* a peripheral INTBACK still has data queued and the SMPC ignores other commands until it is broken (pad.c does the same) */
+        *(volatile u8 *)0x20100001UL = 0x40u; SMPC_SF = 1; SMPC_COM = 0x10u;
+        for (wait = 0; wait < 400000 && (SMPC_SF & 1); wait++) ;
+    }
     SMPC_SF = 1;
     SMPC_COM = (u8)command;
-    for (wait = 0; wait < 100000 && (SMPC_SF & 1); wait++) ;
+    for (wait = 0; wait < 400000 && (SMPC_SF & 1); wait++) ;
+    if (wait >= 400000) sat_audio_status |= 0x200u;
 }
 
 int sat_audio_init(const void *pack)
@@ -455,12 +463,17 @@ int sat_audio_init(const void *pack)
     sfx_table = (const Sfx *)(p + 12);
     music_table = (const Music *)(sfx_table + sfx_count);
     clips = (const u8 *)(music_table + music_count);
-    smpc(SMPC_SNDOFF);
-    SCSP_RAM[0] = 0x0007u; SCSP_RAM[1] = 0xfffcu;      /* 68000 reset: stack */
-    SCSP_RAM[2] = 0x0000u; SCSP_RAM[3] = 0x0010u;      /* pc */
-    SCSP_RAM[8] = 0x60feu;                             /* bra.s to itself */
-    smpc(SMPC_SNDON);
-    SCSP_MIXER = 0x0200u | 0xfu;                       /* 512 KB RAM, master volume full */
+    sat_audio_status = 0;
+    for (n = 0; n < 3; n++) {   /* up to three starts: the SCSP master volume must read back after SNDON, else the command did not take (11-11 first-boot report: no sound) */
+        sat_audio_status = (sat_audio_status & 0xff00u) | (u32)(n + 1);
+        smpc(SMPC_SNDOFF);
+        SCSP_RAM[0] = 0x0007u; SCSP_RAM[1] = 0xfffcu;      /* 68000 reset: stack */
+        SCSP_RAM[2] = 0x0000u; SCSP_RAM[3] = 0x0010u;      /* pc */
+        SCSP_RAM[8] = 0x60feu;                             /* bra.s to itself */
+        smpc(SMPC_SNDON);
+        SCSP_MIXER = 0x0200u | 0xfu;                       /* 512 KB RAM, master volume full */
+        if ((SCSP_MIXER & 0x020fu) == 0x020fu && SCSP_RAM[8] == 0x60feu) { sat_audio_status |= 0x100u; break; }
+    }
     for (n = 0; n < 32; n++) for (i = 0; i < 0x18; i += 2) SLOT(n, i) = 0;
     SLOT(0, 0) = KEY_EXECUTE;
     if (!sat_audio_clips_loaded)

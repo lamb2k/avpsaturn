@@ -42,4 +42,4 @@ saturn/rt/lift_target.h 620c429ee5 ROM32: as RAM32, with ROMB 4 aligned
 saturn/rt/lift_target.h 82a97e9034 RD16: arcade address through the page table, even by the 68000 rule
 saturn/rt/lift_target.h fbea9d4457 WR16: same, store
 saturn/rt/reveal.c 665a5313c2 reveal picture record + 4: record offsets in REVEAL.BIN header checked 4 aligned by align_packs, loaded at SAT_PACK + 0x100000
-saturn/rt/fps_hud.c b1d348db36 positive control for tools/ymir_misalign_gate.py: a deliberate misaligned long read compiled only under SAT_ALIGN_CONTROL, which build.py refuses unless ALIGN_CONTROL=1
+saturn/rt/fps_hud.c a006f33324 positive control for tools/ymir_misalign_gate.py: a deliberate misaligned long read compiled only under SAT_ALIGN_CONTROL, which build.py refuses unless ALIGN_CONTROL=1
