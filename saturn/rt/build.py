@@ -33,7 +33,19 @@ MKISOFS = str(JO / "Compiler/WINDOWS/Other Utilities/mkisofs.exe")
 SGL = JO / "Compiler/COMMON/SGL_302j"
 OPT = os.environ.get("LIFT_OPT", "-Os")
 CF = ["-m2", "-mb", "-fno-strict-aliasing", "-ffixed-r14", "-w", "-fno-builtin", "-I", str(HERE)]
-GEN, OBJ, ISO = WORK / "gen", WORK / f"obj{OPT}", WORK / "disc"
+# Lane perf-hw (2026-11-12): hot code and hot data placement, each its own switch in KERNEL_CFLAGS (docs/notes/AVP_PERF_HW_20261112.md).
+#   -DSAT_PLACE_FN        function level placement: the chunks are built with -ffunction-sections and every function that the profiling Ymir saw the master run (saturn/rt/place_fn.json, tools/perf/fn_heat.py)
+#                         goes to high work RAM; the same number of bytes of never-run functions go the other way (to the region the hot one left). Behaviour is untouched: only addresses move.
+#   -DSAT_HOT_STACK_HW    the slave's stack (1 KB, 14 M writes in 1200 vblanks of a crowd) moves from low to high work RAM
+#   -DSAT_HOT_GFXRAM_HW   kernel.c's .lwgfx (the game's 128 KB graphics RAM image the vblank snapshot reads, the sound tables) moves to high work RAM
+#   -DSAT_HOT_GFX_HW      sat_gfx.c's .lwgfx (snapshot, layer shadows, blank tags, pack index) moves to high work RAM
+_KF = os.environ.get("KERNEL_CFLAGS", "").split()
+PLACE_FN = "-DSAT_PLACE_FN" in _KF
+HOT_STACK_HW = "-DSAT_HOT_STACK_HW" in _KF
+HOT_GFXRAM_HW = "-DSAT_HOT_GFXRAM_HW" in _KF
+HOT_GFX_HW = "-DSAT_HOT_GFX_HW" in _KF
+FSEC = ["-ffunction-sections"] if PLACE_FN else []
+GEN, OBJ, ISO = WORK / "gen", WORK / f"obj{OPT}{'-fs' if PLACE_FN else ''}", WORK / "disc"
 for d in (GEN, OBJ, ISO):
     d.mkdir(parents=True, exist_ok=True)
 HW_BASE, HW_LIMIT, LW_BASE, LW_LIMIT = 0x06014000, 0x06100000, 0x00200000, 0x00300000
@@ -487,6 +499,76 @@ def boot_flags():
     return boot
 
 
+
+def text_sections(o):
+    """[(section, size)] of the per-function .text input sections of an object built with -ffunction-sections."""
+    out = []
+    for l in sh([OBJDUMP, "-h", o]).splitlines():
+        r = l.split()
+        if len(r) > 3 and r[1].startswith(".text.") and int(r[2], 16):
+            out.append((r[1], int(r[2], 16)))
+    return out
+
+
+def section_size(o, name):
+    for l in sh([OBJDUMP, "-h", o]).splitlines():
+        r = l.split()
+        if len(r) > 3 and r[1] == name:
+            return int(r[2], 16)
+    return 0
+
+
+def fn_key(o, sec):
+    return f"{o.stem}:" + re.sub(r"^\.text\.(unlikely\.|hot\.|startup\.)?", "", sec)
+
+
+def plan_functions(hw, lw, cold1, placed, home_cold, data_in_hw, need_slack, lw_slack):
+    """Function level placement (-DSAT_PLACE_FN). Every function the profiling Ymir saw the master run (place_fn.json: executed instructions in the game tick or the vblank handler
+    in any profiled scene) goes to high work RAM. The bytes that arrive there leave as never-run functions: into the region each hot function left (low work RAM, the cold1 tail,
+    a ROM stretch), so every region keeps its size and the cart tail does not move. Returns (promote {region: [(obj, sec, size)]}, demote {region: [(obj, sec, size)]}, report)."""
+    heat = json.loads((REPO / "saturn/rt/place_fn.json").read_text())
+    chunk_heat = json.loads((WORK / "heat.json").read_text())
+    region_of = {}
+    for o in hw:
+        region_of[o] = "hw"
+    for o in lw:
+        region_of[o] = "lw"
+    for o in cold1:
+        region_of[o] = "cold1"
+    for k, pl in enumerate(placed):
+        for o in pl:
+            region_of[o] = f"st{k}"
+    for o in home_cold:
+        if o.stem == "guests":
+            region_of[o] = "cold1"
+    secs = {o: text_sections(o) for o in region_of}
+    hot = lambda o, sec: (heat.get(fn_key(o, sec)) or {"exec": 0})["exec"] > 0
+    promote = {}
+    for o, r in region_of.items():
+        if r != "hw":
+            promote.setdefault(r, []).extend((o, sec, sz) for sec, sz in secs[o] if hot(o, sec))
+    P = {r: sum(x[2] for x in l) for r, l in promote.items()}
+    cands = sorted(((chunk_heat.get(o.stem, 1 << 40), -sz, o.name, o, sec) for o in hw for sec, sz in secs[o] if not hot(o, sec)))
+    need = sum(P.values()) + data_in_hw - need_slack
+    budget = {r: v - 16 for r, v in P.items() if r != "lw"}   # cart regions: no more bytes than the hot code that left
+    budget["lw"] = P.get("lw", 0) + data_in_hw + lw_slack
+    demote, moved = {}, 0
+    for _, nsz, _, o, sec in cands:
+        sz = -nsz
+        if moved >= need:
+            break
+        # fill the cart regions first (their freed bytes are otherwise lost and low work RAM has no room to take them), then low work RAM
+        for r in sorted(budget, key=lambda r: (r == "lw", -budget[r])):
+            if budget[r] >= sz + 4:
+                budget[r] -= sz + 4
+                demote.setdefault(r, []).append((o, sec, sz))
+                moved += sz
+                break
+    if moved < need:
+        raise SystemExit(f"NO-GO (SAT_PLACE_FN): only {moved} bytes of never-run code can leave high RAM, {need} needed (hot code in: {sum(P.values())}, data in: {data_in_hw}); budgets left {budget}")
+    rep = {"hot_bytes_in": P, "functions_promoted": sum(len(v) for v in promote.values()), "demoted_bytes": {r: sum(x[2] for x in l) for r, l in demote.items()}, "data_in_hw": data_in_hw, "need": need}
+    return promote, demote, rep
+
 def main():
     # Gate: the VDP2 VRAM access cycle pattern and every write of the registers it depends on must follow Sega's VDP2 manual (names per layer with the reduction, cell reads, legal slots, CPU slot pairs): tools/vdp2_cycle_check.py.
     r = subprocess.run([sys.executable, str(HERE.parents[1] / "tools" / "vdp2_cycle_check.py"), "--root", str(HERE.parents[1]), "--quiet"], capture_output=True, text=True)
@@ -495,7 +577,7 @@ def main():
     print("vdp2 access cycles:", r.stdout.strip().splitlines()[-1])
     gen = gen_sources()
     with cf.ThreadPoolExecutor(max_workers=3) as ex:
-        objs = list(ex.map(lambda s: cc(s, OBJ / (s.stem + ".o"), [OPT]), gen))
+        objs = list(ex.map(lambda s: cc(s, OBJ / (s.stem + ".o"), [OPT] + FSEC), gen))
     home = "SAT_HOME" in os.environ.get("KERNEL_CFLAGS", "")
     if home:
         sh([sys.executable, REPO / "tools/home_font.py", WORK, os.environ.get("GFX_BIN", "E:/AvP/learning/lane-satgfx/gfx.bin")])
@@ -511,7 +593,7 @@ def main():
     if "SAT_WV_REVEAL" in os.environ.get("KERNEL_CFLAGS", ""):   # the post-credits reveal is an overlay on the disc (REVCODE.BIN, linked after sat.elf below), not resident code: the cart step and high RAM stay as they were
         reveal_obj = cc(HERE / "reveal.c", OBJ / "reveal.o", ["-Os", "-I", gfx_dir, "-I", GEN] + os.environ.get("KERNEL_CFLAGS", "").split())
     if "SAT_GUESTS" in os.environ.get("KERNEL_CFLAGS", ""):   # bonus characters; builds without the flag are unchanged
-        home_cold_extra.append(cc(HERE / "guests.c", OBJ / "guests.o", ["-Os", "-I", GEN] + os.environ.get("KERNEL_CFLAGS", "").split()))
+        home_cold_extra.append(cc(HERE / "guests.c", OBJ / "guests.o", ["-Os", "-I", GEN] + FSEC + os.environ.get("KERNEL_CFLAGS", "").split()))
         if os.environ.get("GUEST_ASSETS"):   # Wolverine's tables come from the user's ROM set at build time; his code runs from the cart
             if NATIVE_GFX:   # his native animation block, from his program ROM (a MAME dump, tools/wolverine/mshvsf_dump.lua) and the guest assets
                 sh([sys.executable, REPO / "tools/wolverine/gen_native.py", WORK, os.environ["GUEST_ASSETS"], os.environ.get("WV_MSHVSF", "E:/AvP/learning/lane-wv-native-gfx/mshvsf"), GEN / "wv_native.inc"])
@@ -612,17 +694,54 @@ def main():
     print("placement", {"hw": len(hw), "lw": [o.stem for o in lw], "cold1": [(o.stem, sizes[o], heat.get(o.stem)) for o in cold1], "stretches": [[o.stem for o in p] for p in placed]})
     inp = lambda l, s: "\n".join(f'    "{o.as_posix()}"({s})' for o in l)
     tx = ".text .text.* .rodata .rodata.* .data .data.*"
-    stretch_ld = "".join(f"""  .st{i} {s[0]:#x} : {{
+    kernel_o = next(o for o in own if o.name == "kernel.o")
+    gfx_o = OBJ / "gfx_sat_gfx.o"
+    data_hw = []   # (object, input section) moved from low to high work RAM bss: hot data (SAT_HOT_*_HW)
+    if HOT_STACK_HW:
+        data_hw.append((kernel_o, ".hwstack"))
+    if HOT_GFXRAM_HW:
+        data_hw.append((kernel_o, ".lwgfx"))
+    if HOT_GFX_HW:
+        data_hw.append((gfx_o, ".lwgfx"))
+    data_in_hw = sum(section_size(o, sec) + 16 for o, sec in data_hw)
+    need_slack, lw_slack = int(os.environ.get("PLACE_FN_SLACK", "500")), int(os.environ.get("PLACE_FN_LWSLACK", "64"))
+    for attempt in range(6):
+        promote, demote, place_rep = ({}, {}, None)
+        if PLACE_FN:
+            promote, demote, place_rep = plan_functions(hw, lw, cold1, placed, home_cold, data_in_hw, need_slack, lw_slack)
+            print("place_fn:", place_rep, flush=True)
+        demoted_secs = {}   # object -> set of sections that left high work RAM
+        for r, l in demote.items():
+            for o, sec, sz in l:
+                demoted_secs.setdefault(o, set()).add(sec)
+
+        def by_obj(l):
+            return sorted({(o, tuple(sorted(x for oo, x, _ in l if oo == o))) for o, _, _ in l}, key=lambda t: t[0].name)
+
+        def with_extra(region):   # explicit input section lines for functions that moved into this region
+            return "\n".join(f'    "{o.as_posix()}"({" ".join(secs)})' for o, secs in by_obj(demote.get(region, [])))
+        hw_lines = []
+        for o in hw:
+            if o in demoted_secs:
+                kept = [sec for sec, _ in text_sections(o) if sec not in demoted_secs[o]]
+                hw_lines.append(f'    "{o.as_posix()}"(.text {" ".join(kept)} .rodata .rodata.* .data .data.*)')
+            else:
+                hw_lines.append(f'    "{o.as_posix()}"({tx})')
+        for r, l in promote.items():
+            hw_lines.extend(f'    "{o.as_posix()}"({" ".join(secs)})' for o, secs in by_obj(l))
+        stretch_ld = "".join(f"""  .st{i} {s[0]:#x} : {{
 {inp(placed[i], tx)}
+{with_extra(f"st{i}")}
     . = ALIGN(4);
     _sat_st{i}_end = .;
   }}
 """ for i, s in enumerate(STRETCHES))
-    ld = f"""ENTRY(_sat_start)
+        hwbss_extra = "\n".join(f'    "{o.as_posix()}"({sec})' for o, sec in data_hw)
+        ld = f"""ENTRY(_sat_start)
 SECTIONS {{
   .hw {HW_BASE:#x} : {{
 {inp(own, '.text .text.*')}
-{inp(hw, tx)}
+{chr(10).join(hw_lines)}
 {inp(own, '.rodata .rodata.* .data .data.*')}
     . = ALIGN(4);
   }}
@@ -630,11 +749,13 @@ SECTIONS {{
     _sat_bss_start = .;
 {inp(own, '.bss COMMON')}
 {inp(hw, '.bss COMMON')}
+{hwbss_extra}
     . = ALIGN(4);
     _sat_bss_end = .;
   }}
   .cold1 {cold1_at:#x} : {{
 {inp(cold1 + home_cold, tx)}
+{with_extra("cold1")}
     . = ALIGN(4);
     _sat_cold1_end = .;
   }}
@@ -642,13 +763,27 @@ SECTIONS {{
     *(.text .text.* .rodata .rodata.* .data .data.*) *(.lwcode)
     . = ALIGN(4);
   }}
-  .lwbss (NOLOAD) : {{ _sat_lw_bss_start = .; *(.lwgfx) *(.bss COMMON) . = ALIGN(4); _sat_lw_bss_end = .; }}
+  .lwbss (NOLOAD) : {{ _sat_lw_bss_start = .; *(.lwgfx) *(.lwstack) *(.bss COMMON) . = ALIGN(4); _sat_lw_bss_end = .; }}
   /DISCARD/ : {{ *(.comment) *(.eh_frame*) }}
 }}
 """ + "".join(f"_{k} = {v:#x};\n" for k, v in CART.items())
-    (WORK / "sat.ld").write_text(ld)
-    elf = WORK / "sat.elf"
-    sh([GCC, "-m2", "-mb", "-nostdlib", "-T", WORK / "sat.ld", *own, *home_cold, *objs, "-lgcc", "-o", elf, f"-Wl,-Map={WORK / 'sat.map'}"])
+        (WORK / "sat.ld").write_text(ld)
+        elf = WORK / "sat.elf"
+        sh([GCC, "-m2", "-mb", "-nostdlib", "-T", WORK / "sat.ld", *own, *home_cold, *objs, "-lgcc", "-o", elf, f"-Wl,-Map={WORK / 'sat.map'}"])
+        if not PLACE_FN:
+            break
+        sy = {p[2]: int(p[0], 16) for p in (l.split() for l in sh([NM, elf]).splitlines()) if len(p) == 3}
+        hw_over, lw_over = sy["_sat_bss_end"] - HW_LIMIT, sy["_sat_lw_bss_end"] - LW_LIMIT
+        c1_over = sy["_sat_cold1_end"] - CART_END
+        print(f"place_fn attempt {attempt}: high RAM free {-hw_over}, low RAM free {-lw_over}, cart free {-c1_over}", flush=True)
+        if hw_over > -32:
+            need_slack -= hw_over + 64   # more has to leave high RAM
+        elif lw_over > -16:
+            need_slack += lw_over + 64   # less may go to low RAM
+        else:
+            break
+    else:
+        raise SystemExit("NO-GO (SAT_PLACE_FN): no plan fits both work RAMs")
     sh([OBJCOPY, "-O", "binary", "-j", ".hw", elf, ISO / "HW.BIN"])
     sh([OBJCOPY, "-O", "binary", "-j", ".lw", elf, ISO / "LW.BIN"])
     syms = {p[2]: int(p[0], 16) for p in (l.split() for l in sh([NM, elf]).splitlines()) if len(p) == 3}

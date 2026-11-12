@@ -438,6 +438,17 @@ static void irq_enable(void)
 #define FTCR (*(volatile u8 *)0xfffffe16u)
 static inline u32 frt(void) { u32 h = FRTH; return (h << 8) | FRTL; }
 static volatile int game_done;
+#ifdef SAT_PROF_LINE
+/* Lane perf-hw: where the master's time goes, for the readout's PROF line (fps_hud.c). All in FRT ticks (4.5 us, a field is about 3,500), summed over fields:
+   fld   the length of the field (the FRT at the vblank entry, before its reset)
+   idle  the part of the field after the task walk finished (the master only spins), 0 when the walk did not finish
+   irq   the vblank handler (snapshot, the game's IRQ body, sound), sat_dbg.irq_ticks of the field's own handler
+   gfx   its snapshot part (sat_dbg.snap_ticks), snd its sound part
+   tick  the game tick: task 4's runs, with the handler's time taken out when a vblank landed inside one (one writer: f_d86; the handler only reads)
+   n     fields. The readout takes differences once a second. MODELLED until read on the console; the FRT is the real timer. */
+volatile u32 sat_pf[8];   /* 0 n, 1 fld, 2 idle, 3 irq, 4 gfx, 5 snd, 6 tick */
+static volatile u32 pf_fld_last, pf_snd_last, pf_tick_total, pf_tick_seen;
+#endif
 
 #ifdef SAT_PROF
 /* Test flag: per-frame histograms over a fixed vblank window, 128 FRT ticks a bucket (about 0.61 ms). MODELLED until run on a console.
@@ -515,7 +526,11 @@ int sat_gfx_profile_busy(void)
     return UNCACHED(gfx_done) != UNCACHED(gfx_handed);
 }
 #endif
+#ifdef SAT_HOT_STACK_HW   /* lane perf-hw: the slave's stack in high work RAM (low RAM costs 14 clocks a long write on the board: 14 M writes in 1200 vblanks of a crowd), build.py links .hwstack into the high bss */
+u32 sat_slave_stack[256] __attribute__((section(".hwstack")));
+#else
 u32 sat_slave_stack[256] __attribute__((section(".lwgfx")));
+#endif
 
 #ifdef SAT_PERF_HUD
 extern u32 sat_gfx_hud_pre;
@@ -766,6 +781,15 @@ void f_d86(void)
             cpu.a[0] = REC(i); LOWW(cpu.d[0], 15 - i);
             cpu.d[1] = (cpu.d[1] & 0xffffff00u) | st;
             if (st >= 4) {
+#ifdef SAT_PROF_LINE
+                if (i == 4) {   /* the gameplay loop: one run is one tick */
+                    u32 t_s = frt(), v_s = sat_dbg.vblanks, t_e, dt;
+                    run_task(i);
+                    t_e = frt();
+                    dt = (sat_dbg.vblanks == v_s) ? t_e - t_s : (pf_fld_last - t_s) + (t_e > sat_dbg.irq_ticks ? t_e - sat_dbg.irq_ticks : 0);   /* a vblank landed inside the tick: the rest of that field, then what is left after the handler */
+                    if (dt < 60000u) pf_tick_total += dt;
+                } else
+#endif
                 run_task(i);
                 sat_dbg.task_runs++; sat_tk_run++;
                 cpu.a[0] = REC(i); LOWW(cpu.d[0], 15 - i);
@@ -860,6 +884,14 @@ void sat_vblank(void)
        alongside the existing counter reset; do not enable another interrupt. */
     FTCSR = (u8)(FTCSR & ~2u);
 #endif
+#ifdef SAT_PROF_LINE
+    {   /* the field that just ended (see sat_pf above) */
+        u32 fl = frt(), g = sat_dbg.game_ticks, tt = pf_tick_total;
+        pf_fld_last = fl;
+        sat_pf[1] += fl; sat_pf[2] += (game_done && fl > g) ? fl - g : 0; sat_pf[3] += sat_dbg.irq_ticks; sat_pf[4] += sat_dbg.snap_ticks; sat_pf[5] += pf_snd_last;
+        sat_pf[6] += tt - pf_tick_seen; pf_tick_seen = tt; sat_pf[0]++;
+    }
+#endif
     game_done = 0;
     FRTH = 0; FRTL = 0;
 #ifdef SAT_PROF_PC
@@ -929,7 +961,11 @@ void sat_vblank(void)
     f_e0e();
     cpu = save; cur = sc;
     DIAG_AT(9);
+#ifdef SAT_PROF_LINE
+    { u32 a0 = frt(); sat_audio_frame(); pf_snd_last = frt() - a0; }
+#else
     sat_audio_frame();
+#endif
     DIAG_AT(10);
     t2 = frt();
     sat_dbg.snap_ticks = t1 - t0; sat_dbg.irq_ticks = t2;
@@ -978,7 +1014,11 @@ void sat_main(void)
 {
     u32 *p; int i;
     __asm__ volatile ("ldc %0,sr" : : "r"(0xf0));
+#ifdef SAT_HOT_STACK_HW   /* a restart runs this with the slave already up on its stack */
+    for (p = sat_bss_start; p < sat_bss_end; p++) { if (p >= sat_boot_stack && p < sat_boot_stack + 2048) continue; if (p >= sat_slave_stack && p < sat_slave_stack + 256) continue; *p = 0; }
+#else
     for (p = sat_bss_start; p < sat_bss_end; p++) { if (p >= sat_boot_stack && p < sat_boot_stack + 2048) continue; *p = 0; }
+#endif
 #ifdef SAT_HOME   /* a restart runs this with the slave already up, on this stack */
     for (p = sat_lw_bss_start; p < sat_lw_bss_end; p++) { if (p >= sat_slave_stack && p < sat_slave_stack + 256) continue; *p = 0; }
 #else

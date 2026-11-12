@@ -21,6 +21,12 @@ typedef unsigned char u8; typedef unsigned short u16; typedef unsigned int u32;
 extern unsigned long sat_tk_run, sat_tk_skip;
 extern u32 sat_ld_log[4][4], sat_ld_n, sat_ld_t0;
 extern volatile u32 sat_audio_status, sat_gfx_selftest;
+#ifdef SAT_PROF_LINE
+extern volatile u32 sat_pf[8];            /* kernel.c: the master's field time split (lane perf-hw): n, field, idle, irq, snapshot, sound, tick */
+#define NROWS 7
+#else
+#define NROWS 6
+#endif
 extern u32 sat_gfx_plot_waits;           /* swaps put off for an unfinished plot, since boot */
 extern unsigned short sat_gfx_colour(unsigned short cps);
 #ifdef SAT_HOME_FONT_COLD
@@ -45,8 +51,9 @@ extern void sat_gfx_vdp2_latch(unsigned off, unsigned val);
 #define COLS 24
 static u32 st[12] = { 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1 };   /* 10, 11: last task run and skip counts */   /* nonzero so they stay in .data */
 /* 0 inited, 1 last vblank, 2 last shown, 3 last overruns, 4 last flips, 5 last skips, 6 last waits, 7 pics, 8 last ff8018 word (TICK), 9 (unused) */
-static u16 shadow[6][COLS] = { { 0xffff } };
-static char text[6][COLS + 16] = { { 'P' }, { 'M' }, { 'F' }, { 'T' }, { 'L' }, { 'H' } };   /* painted: COLS columns; the rest is slack so no line can overrun */   /* initialised: the cold image has no .bss */
+static u16 shadow[7][COLS] = { { 0xffff } };
+static u32 pfs[7] = { 1, 1, 1, 1, 1, 1, 1 };   /* sat_pf at the last readout (nonzero so it stays in .data) */
+static char text[7][COLS + 16] = { { 'P' }, { 'M' }, { 'F' }, { 'T' }, { 'L' }, { 'H' }, { 'R' } };   /* 6: the PROF line, drawn on the row above the others */   /* painted: COLS columns; the rest is slack so no line can overrun */   /* initialised: the cold image has no .bss */
 
 static u32 udiv(u32 n, u32 d) { u32 q = 0; if (!d) return 0; while (n >= d) { n -= d; q++; } return q; }
 static char *put_str(char *p, const char *s) { while (*s) *p++ = *s++; return p; }
@@ -74,7 +81,7 @@ static void setup(void)
         if ((e & 15) != 15) CRAM[62 * 16 + e + 1] = sat_gfx_colour((u16)(((u32)home_pal[e * 2] << 8) | home_pal[e * 2 + 1]));
     for (e = 0; e < 28 * 64; e++) VDP2_VRAM[(MAP_HOME >> 1) + e] = 0;
     shadow[0][0] = 0xffff; shadow[1][0] = 0xffff;
-    { u32 r, c; for (r = 0; r < 6; r++) for (c = 0; c < COLS; c++) shadow[r][c] = 0xffff; }
+    { u32 r, c; for (r = 0; r < 7; r++) for (c = 0; c < COLS; c++) shadow[r][c] = 0xffff; }
 }
 static void format(u32 dv)
 {
@@ -101,12 +108,23 @@ static void format(u32 dv)
         u32 a = sat_audio_status;
         p = put_str(text[5], "HW SND "); p = put_num(p, a & 0xff); p = put_str(p, (a & 0x100) ? " OK" : " NO"); if (a & 0x200) p = put_str(p, " TMO"); if (a & 0x400) p = put_str(p, " RB"); p = put_str(p, " TEST "); p = put_num(p, sat_gfx_selftest); *p = 0;
     }
+#ifdef SAT_PROF_LINE
+    {   /* PROF: the master's time over the window, percent of the fields' length: T game tick, G graphics (the vblank snapshot), S sound, O the rest of the work (other game tasks, the game's vblank body), I idle (the task walk was done, the master spun) */
+        u32 f = sat_pf[1] - pfs[1], t = sat_pf[6] - pfs[6], g = sat_pf[4] - pfs[4], so = sat_pf[5] - pfs[5], id = sat_pf[2] - pfs[2], o, tp, gp, sp, ip, op;
+        if (f) {
+            o = f > id + t + g + so ? f - id - t - g - so : 0;
+            tp = udiv(t * 100 + (f >> 1), f); gp = udiv(g * 100 + (f >> 1), f); sp = udiv(so * 100 + (f >> 1), f); ip = udiv(id * 100 + (f >> 1), f); op = udiv(o * 100 + (f >> 1), f);
+            p = put_str(text[6], "PROF T"); p = put_num(p, tp); p = put_str(p, " G"); p = put_num(p, gp); p = put_str(p, " S"); p = put_num(p, sp); p = put_str(p, " O"); p = put_num(p, op); p = put_str(p, " I"); p = put_num(p, ip); *p = 0;
+        }
+        { u32 k; for (k = 1; k < 7; k++) pfs[k] = sat_pf[k]; }
+    }
+#endif
     p = put_str(text[1], "MISS "); p = put_num(p, over); p = put_str(p, " SKIP "); p = put_num(p, skips); p = put_str(p, " HELD "); p = put_num(p, waits); *p = 0;
 }
 static void paint(void)
 {
     u32 r, c;
-    for (r = 0; r < 6; r++)
+    for (r = 0; r < NROWS; r++)
     {
         int num = 0;
         for (c = 0; c < COLS; c++)
@@ -123,7 +141,7 @@ static void paint(void)
             if (shadow[r][c] != name)
             {
                 shadow[r][c] = name;
-                VDP2_VRAM[(MAP_HOME >> 1) + (22 + r) * 64 + c] = name;
+                VDP2_VRAM[(MAP_HOME >> 1) + (r == 6 ? 21 : 22 + r) * 64 + c] = name;
             }
         }
     }
@@ -147,8 +165,12 @@ int sat_fps_hud(u32 shown, int fresh)
 #endif
     if (fresh || st[0])
     {
+        
+#ifdef SAT_PROF_LINE
+        { u32 k; for (k = 1; k < 7; k++) pfs[k] = sat_pf[k]; }
+#endif
         st[8] = sat_dbg.ff8018; setup(); st[0] = 0; st[1] = v; st[2] = shown; st[3] = sat_dbg.overruns; st[4] = sat_dbg.obj_flips; st[5] = sat_dbg.gfx_skips; st[6] = sat_gfx_plot_waits; st[10] = sat_tk_run; st[11] = sat_tk_skip;
-        text[0][0] = 'P'; text[0][1] = 'I'; text[0][2] = 'C'; text[0][3] = 0; text[1][0] = 0; text[2][0] = 0; text[3][0] = 0; text[4][0] = 0; text[5][0] = 0;
+        text[0][0] = 'P'; text[0][1] = 'I'; text[0][2] = 'C'; text[0][3] = 0; text[1][0] = 0; text[2][0] = 0; text[3][0] = 0; text[4][0] = 0; text[5][0] = 0; text[6][0] = 0;
         paint();
         return 1;
     }
