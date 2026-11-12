@@ -7,6 +7,11 @@
      MISS n  game frames that were not finished when the next vblank came (the game fell behind)
      SKIP n  vblanks where the slave was still drawing, so no new snapshot was taken
      HELD n  swaps put off one vblank because VDP1 had not finished the plot
+     TICK n  GAME SPEED (lane gamespeed, 2026-11-12): gameplay ticks the game ran in the window, per 60 vblanks. 60 is the arcade's rate and full speed; 45 means the game ran at 75 % speed.
+             It is the game's own clock, the byte at ff8019 that the gameplay loop adds one to for every tick, read next to the IRQ count at ff8018 in the one word kept in sat_dbg.ff8018, so both are
+             from the same instant. It reads 0 outside play (menus, fades, loads: the loop is held) and can read over 60 for a moment in the scripted scenes (a held button fast-forwards them in the
+             arcade); the byte wraps at 256, so a window of more than 250 vblanks is not shown.
+     CUT n   runnable tasks a vblank cut off per 60 vblanks (kernel f_d86); not a speed number. (TASK RUN, which sat at its display cap of 9999, is gone.)
    All of it runs from the cart tail with the cold home code: the hot side (sat_gfx_draw) keeps two words and a call once a second. State lives in the
    cart (writable). Nothing here touches work RAM. The font cells and the panel cell are written by the home menus at boot (draw_home), as for the hardware
    test readout (SAT_PERF_HUD in sat_gfx.c, which needs 2.7 KB of high RAM and does not fit the current builds). */
@@ -38,7 +43,7 @@ extern void sat_gfx_vdp2_latch(unsigned off, unsigned val);
 #define FONT 880u                        /* SAT_GFX_HOME_FONT */
 #define COLS 24
 static u32 st[12] = { 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1 };   /* 10, 11: last task run and skip counts */   /* nonzero so they stay in .data */
-/* 0 inited, 1 last vblank, 2 last shown, 3 last overruns, 4 last flips, 5 last skips, 6 last waits, 7 pics, 8 (unused), 9 (unused) */
+/* 0 inited, 1 last vblank, 2 last shown, 3 last overruns, 4 last flips, 5 last skips, 6 last waits, 7 pics, 8 last ff8018 word (TICK), 9 (unused) */
 static u16 shadow[5][COLS] = { { 0xffff } };
 static char text[5][COLS + 16] = { { 'P' }, { 'M' }, { 'F' }, { 'T' }, { 'L' } };   /* painted: COLS columns; the rest is slack so no line can overrun */   /* initialised: the cold image has no .bss */
 
@@ -80,7 +85,12 @@ static void format(u32 dv)
     p = put_str(text[0], "PIC "); p = put_num(p, udiv(d * 60 + (dv >> 1), dv)); p = put_str(p, " DONE "); p = put_num(p, udiv((over >= dv ? 0 : dv - over) * 60 + (dv >> 1), dv)); *p = 0;
     p = put_str(text[2], "F"); *p++ = (char)('0' + SAT_GFX_FIT); *p++ = ' '; p = put_str(p, SAT_BUILD_REV_STR); *p++ = ' ';   /* build id: presentation mode (1 scaled, 2 native crop) and the first 6 hex digits of the source commit */
     p = put_str(p, "FLIP "); p = put_num(p, udiv(flips * 60 + (dv >> 1), dv)); p = put_str(p, " VBL "); p = put_num(p, dv); *p = 0;
-    p = put_str(text[3], "TASK RUN "); p = put_num(p, udiv((sat_tk_run - st[10]) * 60 + (dv >> 1), dv)); p = put_str(p, " CUT "); p = put_num(p, udiv((sat_tk_skip - st[11]) * 60 + (dv >> 1), dv)); *p = 0;   /* per 60 vblanks: game tasks run, and runnable tasks a vblank cut off (the game time the console loses) */
+    {   /* game speed: ticks and IRQs from one word, ff8018 (IRQ count, high byte) and ff8019 (tick count, low byte), per 60 IRQs */
+        u32 w = sat_dbg.ff8018, di = ((w >> 8) - (st[8] >> 8)) & 255u, dt = (w - st[8]) & 255u;
+        st[8] = w; if (dv > 250) di = 0;
+        p = put_str(text[3], "TICK "); p = put_num(p, di ? udiv(dt * 60 + (di >> 1), di) : 0);
+    }
+    p = put_str(p, " CUT "); p = put_num(p, udiv((sat_tk_skip - st[11]) * 60 + (dv >> 1), dv)); *p = 0;   /* CUT: runnable tasks a vblank cut off, per 60 vblanks */
     if (sat_ld_n) {   /* last round-file load: how many so far, file, sectors, seconds it took, seconds since boot at its end (kernel.c sat_ld_log, real-time clock, +-1 s) */
         const u32 *e = sat_ld_log[(sat_ld_n - 1) & 3];
         u32 len = (e[3] - e[2]) % 3600u, since = (e[3] - (sat_ld_t0 - 1)) % 3600u;
@@ -132,7 +142,7 @@ int sat_fps_hud(u32 shown, int fresh)
 #endif
     if (fresh || st[0])
     {
-        setup(); st[0] = 0; st[1] = v; st[2] = shown; st[3] = sat_dbg.overruns; st[4] = sat_dbg.obj_flips; st[5] = sat_dbg.gfx_skips; st[6] = sat_gfx_plot_waits; st[10] = sat_tk_run; st[11] = sat_tk_skip;
+        st[8] = sat_dbg.ff8018; setup(); st[0] = 0; st[1] = v; st[2] = shown; st[3] = sat_dbg.overruns; st[4] = sat_dbg.obj_flips; st[5] = sat_dbg.gfx_skips; st[6] = sat_gfx_plot_waits; st[10] = sat_tk_run; st[11] = sat_tk_skip;
         text[0][0] = 'P'; text[0][1] = 'I'; text[0][2] = 'C'; text[0][3] = 0; text[1][0] = 0; text[2][0] = 0; text[3][0] = 0; text[4][0] = 0;
         paint();
         return 1;
