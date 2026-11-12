@@ -27,6 +27,8 @@ usage: hud_art.py build ART_DIR BASE_GFX ROM OUT_DIR   writes OUT_DIR/gfx_hud_st
        hud_art.py preview ART_DIR BASE_GFX ROM OUT.png   what the converted tiles and colours draw (nearest neighbour, for review)
 """
 import hashlib
+import os as _os
+FACE_ALIGN = "" if _os.environ.get("HUD_FACE_ALIGN") == "0" else "__attribute__((aligned(4)))"   # HUD_FACE_ALIGN=0 only for the alignment gates' positive control (the 11-11 console freeze)
 import json
 import pathlib
 import struct
@@ -322,7 +324,7 @@ def face_include(pieces, stage_data):
            "#define GUEST_FACE_N %d" % len(keys),
            "static const unsigned long guest_face_key[GUEST_FACE_N] = {%s};" % ",".join("0x%x" % k for k, _ in keys),
            "static const unsigned char guest_face_idx[GUEST_FACE_N] = {%s};" % ",".join(str(i) for _, i in keys),
-           "static const unsigned char guest_face_data[%d][32] __attribute__((aligned(4))) = {%s};" % (len(data), ",".join("{" + ",".join(str(b) for b in pl) + "}" for pl in data))]
+           "static const unsigned char guest_face_data[%d][32] %s = {%s};" % (len(data), FACE_ALIGN, ",".join("{" + ",".join(str(b) for b in pl) + "}" for pl in data))]
     return "\n".join(out) + "\n"
 
 

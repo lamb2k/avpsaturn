@@ -789,8 +789,10 @@ SECTIONS {{
     r = subprocess.run([sys.executable, str(REPO / "tools" / "align_gate.py"), "--repo", str(REPO), "--nm", str(NM), "--work", str(WORK),
                         "--elf", f"{WORK / 'sat.elf'}::{WORK / 'sat.map'}", "--elf", f"{WORK / 'boot.elf'}::{WORK / 'boot.map'}",
                         "--report", str(WORK / "align_gate.txt")], capture_output=True, text=True)
-    print(r.stdout.strip().splitlines()[0] if r.stdout.strip() else "align gate: no output", flush=True)
-    if r.returncode:
+    print(" | ".join(r.stdout.strip().splitlines()[:2]) if r.stdout.strip() else "align gate: no output", flush=True)
+    if r.returncode and os.environ.get("ALIGN_CONTROL") == "1":
+        print("align gate (positive control build): hits expected and listed, not fatal: " + r.stdout[-1200:].replace(chr(10), " | "), flush=True)
+    elif r.returncode:
         raise SystemExit("NO-GO: data alignment (tools/align_gate.py): " + r.stdout[-3500:].replace(chr(10), " | "))
     iso = WORK / "sat.iso"
     r = subprocess.run([MKISOFS, "-quiet", "-sysid", "SEGA SATURN", "-volid", "AVP_SAT_RT", "-generic-boot", str(ip), "-full-iso9660-filenames",

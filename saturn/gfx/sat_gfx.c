@@ -632,7 +632,11 @@ static void vram_copy(u8 *dest, const u8 *src, u32 bytes)
     for (i = 0; i < bytes; i++) dest[i] = src[i];
 #else
     volatile u32 *d = (volatile u32 *)(void *)dest;
+#ifndef SAT_ALIGN_CONTROL   /* the control build puts the 11-11 console freeze back (long reads of an unaligned source) for tools/ymir_misalign_gate.py */
     if ((u32)src & 3UL)
+#else
+    if (0)
+#endif
     {
         /* A source that is not long aligned (the guest face cells, saturn/rt/guest_face.inc, were 2 mod 4): a long load from it is an address error on the console (the slave stopped in the middle of the
            first Wolverine talk box); the emulators accept it. Four byte loads, one long store (big endian), the same bytes. */
