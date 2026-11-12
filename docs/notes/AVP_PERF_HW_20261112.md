@@ -89,6 +89,8 @@ Not a cost worth a change: cache-through reads (about 280 a vblank, 0.4 %), VDP2
 
 Room: the three data switches need 226 KB of high RAM; they depend on `SAT_PLACE_FN` for it. Budgets of the shipped build (fix7n4 in brackets): high RAM free 72 (924), low RAM free 2,432 (96), cart free 2,448 (5,008; `cold1_at` unchanged at 0x027DF000, so the 4 KB step is not crossed; 2 KB of the margin was given to cold code on purpose, `PLACE_FN_COLD1_EXTRA`). The planner relinks until both RAMs fit, so a future change that grows high RAM makes it demote more instead of failing.
 
+Layout check (EMULATED, from the PCs my Ymir saw, not from Yaba, which was not used): the master's instructions in the game tick and the vblank handler came from high RAM 41.8 %, low RAM 53.0 %, cart 5.2 % in fix7n4 and come from high RAM 97.0 %, low RAM 2.8 %, cart 0.2 % in fix7p1; in the link map `sat_gfxram` is at 0x060CB084, `sat_slave_stack` 0x060C8C84, `snap` 0x060F9DB0 (fix7n4: 0x002CADE0, 0x002CA9E0, 0x002F9B00).
+
 Not changed: no assembly, no hot-loop edits. Not touched either: the `.hw` objects of the platform (kernel, gfx, audio), which stay in high RAM whole.
 
 ## 5. Exactness (EMULATED, strict Ymir)
