@@ -523,11 +523,11 @@ def fn_key(o, sec):
 
 
 def plan_functions(hw, lw, cold1, placed, home_cold, data_in_hw, need_slack, lw_slack):
-    """Function level placement (-DSAT_PLACE_FN). Every function the profiling Ymir saw the master run (place_fn.json: executed instructions in the game tick or the vblank handler
-    in any profiled scene) goes to high work RAM. The bytes that arrive there leave as never-run functions: into the region each hot function left (low work RAM, the cold1 tail,
-    a ROM stretch), so every region keeps its size and the cart tail does not move. Returns (promote {region: [(obj, sec, size)]}, demote {region: [(obj, sec, size)]}, report)."""
+    """Function level placement (-DSAT_PLACE_FN). place_fn.json holds, per lifted function, what the profiling Ymir saw the master do in it over several play scenes (instructions executed and
+    instruction cache line fills, in the game tick and the vblank handler). Functions are ranked by cost per byte and the best fill high work RAM up to its code capacity (what the
+    chunks held before, less the hot data that moves in, plus slack). Everything else leaves high RAM: into the region each promoted function came from (low work RAM, the cold1 tail, a ROM
+    stretch), so every region keeps its size and the cart tail does not move. Returns (promote {region: [(obj, sec, size)]}, demote {region: [(obj, sec, size)]}, report)."""
     heat = json.loads((REPO / "saturn/rt/place_fn.json").read_text())
-    chunk_heat = json.loads((WORK / "heat.json").read_text())
     region_of = {}
     for o in hw:
         region_of[o] = "hw"
@@ -542,34 +542,44 @@ def plan_functions(hw, lw, cold1, placed, home_cold, data_in_hw, need_slack, lw_
         if o.stem == "guests":
             region_of[o] = "cold1"
     secs = {o: text_sections(o) for o in region_of}
-    hot = lambda o, sec: (heat.get(fn_key(o, sec)) or {"exec": 0})["exec"] > 0
-    promote = {}
+    funcs = []   # (score, size, obj, sec, region)
     for o, r in region_of.items():
-        if r != "hw":
-            promote.setdefault(r, []).extend((o, sec, sz) for sec, sz in secs[o] if hot(o, sec))
+        for sec, sz in secs[o]:
+            h = heat.get(fn_key(o, sec)) or {"exec": 0, "ifill": 0}
+            funcs.append(((h["exec"] + 16 * h["ifill"]) / max(sz, 1), sz, o, sec, r))
+    hw_text = sum(f[1] for f in funcs if f[4] == "hw")
+    cap = hw_text - data_in_hw + need_slack
+    funcs.sort(key=lambda f: -f[0])
+    keep, used = set(), 0
+    for sc, sz, o, sec, r in funcs:
+        if sc > 0 and used + sz <= cap:
+            keep.add((o, sec)); used += sz
+    promote, demote_c = {}, []
+    for sc, sz, o, sec, r in funcs:
+        if r != "hw" and (o, sec) in keep:
+            promote.setdefault(r, []).append((o, sec, sz))
+        elif r == "hw" and (o, sec) not in keep:
+            demote_c.append((sz, o, sec))
     P = {r: sum(x[2] for x in l) for r, l in promote.items()}
-    cands = sorted(((chunk_heat.get(o.stem, 1 << 40), -sz, o.name, o, sec) for o in hw for sec, sz in secs[o] if not hot(o, sec)))
-    need = sum(P.values()) + data_in_hw - need_slack
-    budget = {r: v - 16 for r, v in P.items() if r != "lw"}   # cart regions: no more bytes than the hot code that left
-    budget["cold1"] = budget.get("cold1", 0) + int(os.environ.get("PLACE_FN_COLD1_EXTRA", "2048"))   # cold1_at is fixed by the object sizes, so the cart tail below its end can take a little more cold code: the slack that lets the two work RAMs both fit
+    budget = {r: v - 16 for r, v in P.items() if r != "lw"}   # cart regions: no more bytes than the hot code that left them
+    budget["cold1"] = budget.get("cold1", 0) + int(os.environ.get("PLACE_FN_COLD1_EXTRA", "2048"))   # cold1_at is fixed by the object sizes, so the cart tail below its end can take a little more cold code
     budget["lw"] = P.get("lw", 0) + data_in_hw + lw_slack
-    demote, moved = {}, 0
-    for _, nsz, _, o, sec in cands:
-        sz = -nsz
-        if moved >= need:
-            break
-        # fill the cart regions first (their freed bytes are otherwise lost and low work RAM has no room to take them), then low work RAM
+    demote, left = {}, 0
+    for sz, o, sec in sorted(demote_c, key=lambda t: -t[0]):   # largest first: the cart regions fill exactly, low work RAM takes the rest
         for r in sorted(budget, key=lambda r: (r == "lw", -budget[r])):
             pad = 0 if r == "lw" else 1   # the cart regions are hard limits: a byte of alignment a function
             if budget[r] >= sz + pad:
                 budget[r] -= sz + pad
                 demote.setdefault(r, []).append((o, sec, sz))
-                moved += sz
                 break
-    if moved < need:   # the link check in main() decides: it is the real size that has to fit
-        print(f"place_fn: {need - moved} bytes short of the target; budgets left {budget}", flush=True)
-    rep = {"hot_bytes_in": P, "functions_promoted": sum(len(v) for v in promote.values()), "demoted_bytes": {r: sum(x[2] for x in l) for r, l in demote.items()}, "data_in_hw": data_in_hw, "need": need}
+        else:
+            left += sz
+    if left:   # these stay in high work RAM; the link check in main() decides whether that fits
+        print(f"place_fn: {left} bytes of functions that should leave high RAM found no room; budgets left {budget}", flush=True)
+    rep = {"hot_bytes_in": P, "functions_promoted": sum(len(v) for v in promote.values()), "demoted_bytes": {r: sum(x[2] for x in l) for r, l in demote.items()},
+           "data_in_hw": data_in_hw, "hw_code_kept": used, "hw_code_before": hw_text, "functions_with_heat": sum(1 for f in funcs if f[0] > 0), "functions_kept_in_hw": len(keep)}
     return promote, demote, rep
+
 
 def main():
     # Gate: the VDP2 VRAM access cycle pattern and every write of the registers it depends on must follow Sega's VDP2 manual (names per layer with the reduction, cell reads, legal slots, CPU slot pairs): tools/vdp2_cycle_check.py.
@@ -706,7 +716,7 @@ def main():
     if HOT_GFX_HW:
         data_hw.append((gfx_o, ".lwgfx"))
     data_in_hw = sum(section_size(o, sec) + 16 for o, sec in data_hw)
-    need_slack, lw_slack = int(os.environ.get("PLACE_FN_SLACK", "824")), int(os.environ.get("PLACE_FN_LWSLACK", "-4"))
+    need_slack, lw_slack = int(os.environ.get("PLACE_FN_SLACK", "2600")), int(os.environ.get("PLACE_FN_LWSLACK", "-4"))
     for attempt in range(6):
         promote, demote, place_rep = ({}, {}, None)
         if PLACE_FN:
