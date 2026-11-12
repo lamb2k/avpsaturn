@@ -43,3 +43,6 @@ saturn/rt/lift_target.h 82a97e9034 RD16: arcade address through the page table, 
 saturn/rt/lift_target.h fbea9d4457 WR16: same, store
 saturn/rt/reveal.c 665a5313c2 reveal picture record + 4: record offsets in REVEAL.BIN header checked 4 aligned by align_packs, loaded at SAT_PACK + 0x100000
 saturn/rt/fps_hud.c a006f33324 positive control for tools/ymir_misalign_gate.py: a deliberate misaligned long read compiled only under SAT_ALIGN_CONTROL, which build.py refuses unless ALIGN_CONTROL=1
+saturn/gfx/sat_gfx.c f799a21411 power-up self test: 16 bit access to CRAM entry 2047 (even address)
+saturn/gfx/sat_gfx.c bb04817a9b power-up self test: 16 bit access at VDP2 VRAM + 0x7ff80 (even address)
+saturn/gfx/sat_gfx.c 87fc9dc543 power-up self test: 16 bit access at VDP1 VRAM + 0x7ff80 (even address)
