@@ -34,7 +34,8 @@ def check(path):
 def run(cue, secs, keys, exe, profile, log):
     u = ctypes.WinDLL("user32")
     if os.path.exists(log):
-        os.remove(log)
+        try: os.remove(log)
+        except OSError: pass   # another Ymir still holds it open; the patched exe truncates the file (fopen "w") when this run first logs
     si = subprocess.STARTUPINFO(); si.dwFlags |= 1; si.wShowWindow = 4   # SW_SHOWNOACTIVATE
     args = [exe] + (["-p", profile] if profile else []) + ["-d", cue]
     pr = subprocess.Popen(args, cwd=os.path.dirname(exe), startupinfo=si, stdout=subprocess.DEVNULL, stderr=subprocess.STDOUT)
