@@ -1612,7 +1612,7 @@ no:
 }
 #endif
 #ifdef SAT_EDGE_STATS
-static u32 es_cnt[8];           /* 0 objects, 1 touching a strip, 2 fully hidden, 3 entering/leaving, 4 pictures, 5 pictures with an object touching a strip, 6 pictures with a fully hidden object */
+static u32 es_cnt[8];           /* counted per OBJECT ROW (a tile row of an object, the loop below runs once per row, so a 3 tile tall object counts 3 times; not actors): 0 rows, 1 rows touching a strip, 2 rows fully hidden, 3 entering/leaving, 4 pictures, 5 pictures with a row touching a strip, 6 pictures with a fully hidden row */
 static int es_pic_strip, es_pic_hidden;
 #endif
 static void draw_scroll1(u16 sx, u16 sy)
