@@ -435,7 +435,7 @@ unsigned long sat_audio_pack_keep(const void *pack)
     return 12UL + 16UL * (be16(p + 4) + be16(p + 6));
 }
 
-/* Init report for the readout (line 6): low byte = start attempts, bit 8 = the SCSP master volume register read back after SNDON, bit 9 = an SMPC wait ran out. */
+/* Init report for the readout (line 6): low byte = start attempts, bit 8 = the SCSP RAM word read back and no SMPC wait ran out, bit 9 = an SMPC wait ran out, bit 10 = the master volume register read back (information). */
 volatile u32 sat_audio_status;
 static void smpc(unsigned command)
 {
@@ -464,7 +464,7 @@ int sat_audio_init(const void *pack)
     music_table = (const Music *)(sfx_table + sfx_count);
     clips = (const u8 *)(music_table + music_count);
     sat_audio_status = 0;
-    for (n = 0; n < 3; n++) {   /* up to three starts: the SCSP master volume must read back after SNDON, else the command did not take (11-11 first-boot report: no sound) */
+    for (n = 0; n < 3; n++) {   /* up to three starts if a wait ran out or the RAM word did not read back (11-11 first-boot report: no sound) */
         sat_audio_status = (sat_audio_status & 0xff00u) | (u32)(n + 1);
         smpc(SMPC_SNDOFF);
         SCSP_RAM[0] = 0x0007u; SCSP_RAM[1] = 0xfffcu;      /* 68000 reset: stack */
@@ -472,7 +472,8 @@ int sat_audio_init(const void *pack)
         SCSP_RAM[8] = 0x60feu;                             /* bra.s to itself */
         smpc(SMPC_SNDON);
         SCSP_MIXER = 0x0200u | 0xfu;                       /* 512 KB RAM, master volume full */
-        if ((SCSP_MIXER & 0x020fu) == 0x020fu && SCSP_RAM[8] == 0x60feu) { sat_audio_status |= 0x100u; break; }
+        if ((SCSP_MIXER & 0x020fu) == 0x020fu) sat_audio_status |= 0x400u;   /* information only: the master volume register read back (Ymir does not return it; not known for the console) */
+        if (SCSP_RAM[8] == 0x60feu && !(sat_audio_status & 0x200u)) { sat_audio_status |= 0x100u; break; }   /* the SCSP RAM word read back and no SMPC wait ran out */
     }
     for (n = 0; n < 32; n++) for (i = 0; i < 0x18; i += 2) SLOT(n, i) = 0;
     SLOT(0, 0) = KEY_EXECUTE;

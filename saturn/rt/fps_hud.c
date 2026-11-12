@@ -87,9 +87,9 @@ static void format(u32 dv)
         u32 len = (e[3] - e[2]) % 3600u, since = (e[3] - (sat_ld_t0 - 1)) % 3600u;
         p = put_str(text[4], "LD"); p = put_num(p, sat_ld_n); p = put_str(p, " F"); p = put_num(p, e[0]); p = put_str(p, " S"); p = put_num(p, e[1]); p = put_str(p, " D"); p = put_num(p, len); p = put_str(p, " B"); p = put_num(p, since); *p = 0;
     }
-    {   /* power-up report: SND = SCSP start attempts, OK = the master volume read back after SNDON, TMO = an SMPC wait ran out; TEST bits 1 CRAM, 2 VDP2 VRAM, 4 VDP1 VRAM read back as written at init (7 = all) */
+    {   /* power-up report: SND = SCSP start attempts, OK = SCSP RAM read back and no SMPC wait ran out, TMO = an SMPC wait ran out, RB = the master volume register read back; TEST bits 1 CRAM, 2 VDP2 VRAM, 4 VDP1 VRAM read back as written at init (7 = all) */
         u32 a = sat_audio_status;
-        p = put_str(text[5], "HW SND "); p = put_num(p, a & 0xff); p = put_str(p, (a & 0x100) ? " OK" : " NO"); if (a & 0x200) p = put_str(p, " TMO"); p = put_str(p, " TEST "); p = put_num(p, sat_gfx_selftest); *p = 0;
+        p = put_str(text[5], "HW SND "); p = put_num(p, a & 0xff); p = put_str(p, (a & 0x100) ? " OK" : " NO"); if (a & 0x200) p = put_str(p, " TMO"); if (a & 0x400) p = put_str(p, " RB"); p = put_str(p, " TEST "); p = put_num(p, sat_gfx_selftest); *p = 0;
     }
     p = put_str(text[1], "MISS "); p = put_num(p, over); p = put_str(p, " SKIP "); p = put_num(p, skips); p = put_str(p, " HELD "); p = put_num(p, waits); *p = 0;
 }
