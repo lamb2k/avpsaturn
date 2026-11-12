@@ -190,6 +190,19 @@ static void wv_nat_sync(void)   /* once a vblank (pad hook) and on every player 
         wv_nat_on = 0;
     }
 }
+/* Quit to title (kernel.c sat_home_restart, before the boot's bss clear): the native tables must go back to Schaefer's own while the restart still knows they are on. The setting-off branch of wv_nat_sync does that when the
+   Wolverine player goes away, but a restart from the pause menu happens with him alive: the bss clear then zeroes wv_nat_on, nothing takes the tables back, the opcode store (the cart, not reloaded) keeps its 26 table slots
+   at his block's window (0x300000) while the boot unmaps that page, and the first Schaefer scene or the next arcade start read zeros as animation scripts (f_a9cb6: an odd-address read, black screen). Found 11-12 (lane perf-hw);
+   the same on the fix7n4 source with Wolverine on. */
+void sat_guest_wolverine_reset(void)
+{
+    if (wv_nat_on) {
+        int k;
+        for (k = 0; k < 4; k++) sat_wv_tb[k] = wv_tb0[k];
+        wv_nat_slots(0);
+        wv_nat_on = 0;
+    }
+}
 static int wv_nat_rec_at(u32 blk)   /* the block's current frame record is one of his native ones */
 {
     u32 r = (u32)R16(blk + 0x1c) << 16 | R16(blk + 0x1e);

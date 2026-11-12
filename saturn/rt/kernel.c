@@ -995,6 +995,9 @@ void sat_main(void);
 void sat_home_restart(void)
 {
     __asm__ volatile ("ldc %0,sr" : : "r"(0xf0));
+#ifdef SAT_GUESTS   /* a guest's data patches (Wolverine's native tables in the opcode store, the cart) are undone here: the boot below does not reload the store */
+    { extern void sat_guest_wolverine_reset(void) __attribute__((weak)); if (sat_guest_wolverine_reset) sat_guest_wolverine_reset(); }
+#endif
 #if SAT_VDP1_HW_ERASE
     /* sat_main clears the erase bookkeeping before its initial CD load. */
     if (!sat_gfx_erase_suspend())
