@@ -127,6 +127,9 @@ void sat_fps_stall(u32 still, u32 frames)
 int sat_fps_hud(u32 shown, int fresh)
 {
     u32 v = sat_dbg.vblanks, dv = v - st[1];
+#ifdef SAT_ALIGN_CONTROL
+    { volatile u32 sink = *(volatile u32 *)((u8 *)st + 2); (void)sink; }   /* positive control for tools/ymir_misalign_gate.py: a data long read at 2 mod 4 (NEVER in a release build) */
+#endif
     if (fresh || st[0])
     {
         setup(); st[0] = 0; st[1] = v; st[2] = shown; st[3] = sat_dbg.overruns; st[4] = sat_dbg.obj_flips; st[5] = sat_dbg.gfx_skips; st[6] = sat_gfx_plot_waits; st[10] = sat_tk_run; st[11] = sat_tk_skip;

@@ -1546,6 +1546,26 @@ static HOME_OS void home_row_map(u32 row, u32 (*bm)[2], int sel, u8 *map)
 #if SAT_GFX_FIT == 2
     if (!(snap.hud_flush && (row < 6 || row >= 25)) && BL(m, 0) && BL(m, 1) && BL(m, 46) && BL(m, 47)) { for (c = 0; c < 44; c++) map[c] = (u8)(c + 2); return; }
 #endif
+#if SAT_GFX_FIT == 2 && !defined(SAT_HUD_NO_INSET)
+    /* Play's HUD rows keep the flush map, which puts the 2P PRESS START and the 1P portrait on the very last cell of each side. A CRT's overscan cuts that (console photo 76e2facf: the right end of
+       PRESS START gone). One empty cell on each side instead: six blank columns around the middle go (the flush map's 22 to 25 and the two nearest blank ones, 21/26 then 20/27 and so on), the
+       other 42 keep their order and sit in display cells 1 to 42; cells 0 and 43 show a blank source column. The row falls back to the flush map when two more blank columns are not there. */
+    if (snap.hud_flush && (row < 6 || row >= 25) && BL(m, 22) && BL(m, 23) && BL(m, 24) && BL(m, 25))
+    {
+        static const u8 near_[6] = { 21, 26, 20, 27, 19, 28 };
+        u8 drop[48];
+        int n = 0, k, extra = 0;
+        for (c = 0; c < 48; c++) drop[c] = (c >= 22 && c <= 25);
+        for (k = 0; k < 6 && extra < 2; k++)
+            if (BL(m, near_[k])) { drop[near_[k]] = 1; extra++; }
+        if (extra == 2)
+        {
+            map[0] = 24; map[43] = 24;   /* blank cells: 24 is one of the dropped, all-blank columns */
+            for (c = 0; c < 48; c++) if (!drop[c]) map[1 + n++] = (u8)c;
+            return;
+        }
+    }
+#endif
     home_map(m, wgt, snap.hud_flush && (row < 6 || row >= 25), snap.hud_flush && !full && a == 8 && (b == 10 || b == 11), map);
 }
 #endif

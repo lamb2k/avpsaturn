@@ -375,7 +375,7 @@ static const struct { u32 at; u8 n; const char *wv; } wv_names[2] = {
 #if SAT_GUEST_NAMES_LAZY
 extern struct sat_rounds_s { u32 current, loads, sectors, last_vblank; } sat_rounds;   /* kernel.c: loads counts the stage files loaded */
 #endif
-static u8 name_saved[2][16], names_on;
+static u8 name_saved[2][16] __attribute__((aligned(4))), names_on;
 static void names(int on)
 {
     int i, k;

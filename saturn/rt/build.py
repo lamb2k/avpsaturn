@@ -782,6 +782,16 @@ SECTIONS {{
     sh([sys.executable, REPO / "tools/build_loader_ip.py", JO / "Compiler/COMMON/IP.BIN", ip])
     for n in ("ABS.TXT", "CPY.TXT", "BIB.TXT"):
         (ISO / n).write_bytes((REPO / "cd" / n).read_bytes())
+    # Gate: data alignment (tools/align_gate.py). The SH-2 faults on a 16/32 bit access at an address that is not a multiple of the width and the emulators do not (11-11: the Wolverine face cells at 2 mod 4 stopped the slave on the console).
+    # Byte data held to 4 alignment, wide data to its width, every cast read of byte data reviewed or on a byte path, accessor offsets, and the round files' pack structures. SAT_ALIGN_CONTROL (a deliberate misaligned read, the positive control of the Ymir gate) is refused unless ALIGN_CONTROL=1.
+    if "SAT_ALIGN_CONTROL" in os.environ.get("KERNEL_CFLAGS", "") and os.environ.get("ALIGN_CONTROL") != "1":
+        raise SystemExit("NO-GO: SAT_ALIGN_CONTROL is a test-only build (set ALIGN_CONTROL=1 for the Ymir gate's positive control)")
+    r = subprocess.run([sys.executable, str(REPO / "tools" / "align_gate.py"), "--repo", str(REPO), "--nm", str(NM), "--work", str(WORK),
+                        "--elf", f"{WORK / 'sat.elf'}::{WORK / 'sat.map'}", "--elf", f"{WORK / 'boot.elf'}::{WORK / 'boot.map'}",
+                        "--report", str(WORK / "align_gate.txt")], capture_output=True, text=True)
+    print(r.stdout.strip().splitlines()[0] if r.stdout.strip() else "align gate: no output", flush=True)
+    if r.returncode:
+        raise SystemExit("NO-GO: data alignment (tools/align_gate.py): " + r.stdout[-3500:].replace(chr(10), " | "))
     iso = WORK / "sat.iso"
     r = subprocess.run([MKISOFS, "-quiet", "-sysid", "SEGA SATURN", "-volid", "AVP_SAT_RT", "-generic-boot", str(ip), "-full-iso9660-filenames",
                         "-abstract", "ABS.TXT", "-copyright", "CPY.TXT", "-biblio", "BIB.TXT", "-o", str(iso), "."],

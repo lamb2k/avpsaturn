@@ -9,7 +9,7 @@ extern int sat_home_get(int block_off);
 extern void sat_home_restart(void);
 volatile int sat_home_hold;
 volatile int sat_home_mode;            /* 0 off, 1 text over the held picture, 2 text alone, 3 title menus (1 with the title's start lines hidden) */
-char sat_home_text[28][44];
+char sat_home_text[28][44] __attribute__((aligned(4)));
 /* What the slave draws: a copy taken in sat_home_frame, after the screen is built and away from the vblank the slave draws in (the menu loops rebuild
    sat_home_text right after each vblank, so drawing from it showed half-built rows). sat_home_seq is odd while the copy is made. */
 char sat_home_shown[28][44];

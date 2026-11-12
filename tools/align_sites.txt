@@ -1,0 +1,45 @@
+# Reviewed non-literal casts to 16/32 bit pointers (tools/align_gate.py). Format: file hash(of the normalised line) reason. A new or edited line fails the build until it is reviewed here.
+# Review means: the source is aligned to the access width by construction (and checked by the symbol, pack or offsets gate), or a byte path exists. Reviewed 2026-11-12 (fix7n3 lane).
+saturn/game/game_hot.h 6e874c8fe9 16 bit word access to the arcade RAM/ROM image; the 68000 faults on an odd address, so the game never makes one (even by construction)
+saturn/game/game_hot.h c09dfce8aa same, 16 bit store
+saturn/gfx/sat_gfx.c 1ab23ae7f8 be16 target accessor: callers pass 2 aligned structures (pack u16 tables via align_packs, snapshot, arcade RAM words, VDP) plus literal offsets checked by the offsets gate
+saturn/gfx/sat_gfx.c d9f607e0d9 be32 target accessor: callers pass 4 aligned bases (pack header/keys/tables via align_packs, snapshot arrays aligned(4), arcade gfx RAM at 0x400/0x800 unit bases) plus literal offsets checked by the offsets gate
+saturn/gfx/sat_gfx.c 9508cd83e5 put16 target accessor: VDP1/VDP2/CRAM and snapshot words, even offsets (offsets gate)
+saturn/gfx/sat_gfx.c a6b37ce3bc put32 target accessor: VDP1 command table, VRAM, snapshot; 4 aligned bases, offsets gate
+saturn/gfx/sat_gfx.c 32f03e638a get32 target accessor: same as be32
+saturn/gfx/sat_gfx.c bef52fa667 vram_copy destination: a VDP VRAM slot, cell or CRAM address; slots are 32 or 128 byte multiples
+saturn/gfx/sat_gfx.c 101d6baf60 vram_copy source, long path: taken only when (src & 3) == 0; an unaligned source goes the byte path above (11-11: guest face cells were 2 mod 4)
+saturn/gfx/sat_gfx.c 4b755450b9 put32_ram: snapshot object list and palette copies, aligned(4) members (Snapshot), offsets multiples of 4
+saturn/gfx/sat_gfx.c e12b802b53 rowtrim_decode source: a sprite record, 4 aligned: bases and spill destinations and 4 byte position units are checked on every round file by align_packs, the header is read here byte-wise
+saturn/gfx/sat_gfx.c bef52fa667 rowtrim_decode destination: a texture slot in VDP1 VRAM (128 byte multiple)
+saturn/gfx/sat_gfx.c e12b802b53 rowtrim_decode source (mode 1): as above
+saturn/gfx/sat_gfx.c bef52fa667 rowtrim_decode destination (mode 1): texture slot
+saturn/gfx/sat_gfx.c 10b062a852 VDP2 VRAM cell row: 32 byte multiples from the layer cell base
+saturn/gfx/sat_gfx.c 5f2515df6f SAT_SNAP_VERIFY test code: snapshot palette (aligned(4)), n multiple of 4
+saturn/gfx/sat_gfx.c 78678d402c look check: snapshot palette (aligned(4)) and arcade palette page (0x400 unit base), offsets r * 32 + w with w a multiple of 4
+saturn/gfx/sat_gfx.c 5c80fdf73a look check: as above
+saturn/guests/wolverine/wolverine.c dc1329e127 16 bit word of the arcade RAM image; even by the 68000 rule
+saturn/guests/wolverine/wolverine.c 009026e868 two 16 bit reads (not a long) of the opcode view at an arcade address: even
+saturn/guests/wolverine/wolverine.c d74568c32d two 16 bit stores at an arcade address: even
+saturn/guests/wolverine/wolverine.c b336e3c6ce put32b: callers pass the 8 byte object list entries (snap.obj, aligned(4), entries of 8) and palette rows (snap.palette aligned(4), offsets k * 2 with k even)
+saturn/guests/wolverine/wolverine.c 11c5456419 ld32: same callers as put32b
+saturn/guests/wolverine/wolverine.c 6fa2afa57e copy8: object list entries, 8 byte stride in aligned(4) snap.obj
+saturn/guests/wolverine/wv_features.c dc1329e127 16 bit word of the arcade RAM image; even by the 68000 rule
+saturn/rt/boot.c bb1b9fa8f4 function addresses stored in the vector table (a store of a pointer value, not a read through it)
+saturn/rt/boot.c 0fd0066f34 same
+saturn/rt/home_cold.c ecf40c4a2d snapshot save/restore in longs: snap is the Snapshot object (aligned(16)); the other side is a fixed cart address 0x02760000
+saturn/rt/kernel.c e44f6bc674 save_block is aligned(2) and read as 16 bit words at even indices
+saturn/rt/kernel.c 873a86841a same, stores
+saturn/rt/kernel.c 0a784e2cbb uncached alias of sat_readout, a volatile unsigned long array
+saturn/rt/lift_target.h a7162ae4f9 w2_rd32: two 16 bit reads; needs only 2 alignment, which the 68000 rule gives
+saturn/rt/lift_target.h 766a1b8218 w2_wr32: two 16 bit stores; as above
+saturn/rt/lift_target.h b9c29810de RAM16: arcade RAM word, even
+saturn/rt/lift_target.h 9d953ef39c RAM32: offsets with bit 1 set go through two 16 bit reads; otherwise a long read at RAMB + o, with RAMB 4 aligned (checked by the symbol gate) and o a multiple of 4
+saturn/rt/lift_target.h 40605af582 RAMW32: same as RAM32 for stores
+saturn/rt/lift_target.h 7885e88d65 OP16: opcode view word, even
+saturn/rt/lift_target.h 39a5148e9e ROM16: ROM image word, even
+saturn/rt/lift_target.h 620c429ee5 ROM32: as RAM32, with ROMB 4 aligned
+saturn/rt/lift_target.h 82a97e9034 RD16: arcade address through the page table, even by the 68000 rule
+saturn/rt/lift_target.h fbea9d4457 WR16: same, store
+saturn/rt/reveal.c 665a5313c2 reveal picture record + 4: record offsets in REVEAL.BIN header checked 4 aligned by align_packs, loaded at SAT_PACK + 0x100000
+saturn/rt/fps_hud.c b1d348db36 positive control for tools/ymir_misalign_gate.py: a deliberate misaligned long read compiled only under SAT_ALIGN_CONTROL, which build.py refuses unless ALIGN_CONTROL=1
