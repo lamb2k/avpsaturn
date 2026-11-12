@@ -97,16 +97,24 @@ def main():
             o = obj_of(syms[i][0])
             if o is None:
                 continue
-            k = f"{o}:{syms[i][2][1:] if syms[i][2].startswith(chr(95)) else syms[i][2]}"
-            h = heat[k]
-            h["size"] = syms[i][1]
-            if t[0] == "P":
-                h["exec"] += int(t[3])
-            else:
-                h["ifill"] += int(t[3])
-            if k not in seen:
-                seen.add(k)
-                h["scenes"] += 1
+            # symbols that share an address (identical split-off bodies, f_aa8ea.part.0 and f_aa886.part.0) all get the heat: the linker section carries one of the names
+            j0 = i
+            while j0 > 0 and syms[j0 - 1][0] == syms[i][0]:
+                j0 -= 1
+            j1 = i
+            while j1 + 1 < len(syms) and syms[j1 + 1][0] == syms[i][0]:
+                j1 += 1
+            for j in range(j0, j1 + 1):
+                k = f"{o}:{syms[j][2][1:] if syms[j][2].startswith(chr(95)) else syms[j][2]}"
+                h = heat[k]
+                h["size"] = syms[j][1]
+                if t[0] == "P":
+                    h["exec"] += int(t[3])
+                else:
+                    h["ifill"] += int(t[3])
+                if k not in seen:
+                    seen.add(k)
+                    h["scenes"] += 1
     json.dump(heat, open(out, "w"), indent=0, sort_keys=True)
     ex = [k for k, v in heat.items() if v["exec"] > 0]
     print(f"{len(heat)} functions with heat, {len(ex)} executed, {sum(heat[k]['size'] for k in ex)} bytes")

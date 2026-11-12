@@ -744,6 +744,8 @@ def main():
                 hw_lines.append(f'    "{o.as_posix()}"(.text {" ".join(kept)} .rodata .rodata.* .data .data.*)')
             else:
                 hw_lines.append(f'    "{o.as_posix()}"({tx})')
+        if PLACE_FN:   # the compiler's division, shift and block move routines are hot (3.5 % of the master's instructions in a Wolverine fight) and tiny: they ran from low RAM
+            hw_lines.append("    *libgcc.a:*(.text .text.* .rodata .rodata.*)")
         for r, l in promote.items():
             hw_lines.extend(f'    "{o.as_posix()}"({" ".join(secs)})' for o, secs in by_obj(l))
         stretch_ld = "".join(f"""  .st{i} {s[0]:#x} : {{
