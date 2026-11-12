@@ -906,6 +906,9 @@ void sat_vblank(void)
         u32 wd_f = *(volatile unsigned long *)((unsigned long)&sat_gfx_stats | 0x20000000UL);
         if (wd_f != wd_last) { wd_last = wd_f; wd_still = 0; }
         else if (++wd_still >= 120 && (wd_still & 63) == 56) sat_fps_stall(wd_still, wd_f);
+#ifdef SAT_TR_LINE
+        { extern void sat_fps_vb(u32 pics); sat_fps_vb(wd_f); }   /* the transition line (fps_hud.c): picture counter and scene code once per vblank */
+#endif
     }
 #endif
     t0 = frt();
