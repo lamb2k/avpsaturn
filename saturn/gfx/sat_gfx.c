@@ -623,10 +623,12 @@ static void vram_copy(u8 *dest, const u8 *src, u32 bytes)
     /* Experiment: SCU DMA level 0, direct mode, longs read, words written, waiting for the end. */
     {
         volatile u32 *scu = (volatile u32 *)0x25fe0000UL;
+        if (((u32)src | (u32)dest | bytes) & 3UL) { for (i = 0; i < bytes; i++) dest[i] = src[i]; }   /* the DMA reads longs: an unaligned source or odd length goes byte by byte (alignment gate) */
+        else {
         scu[0] = (u32)src & 0x0fffffffUL; scu[1] = (u32)dest & 0x0fffffffUL; scu[2] = bytes; scu[3] = 0x101; scu[5] = 7; scu[4] = 0x101;
         while (*(volatile u32 *)0x25fe007cUL & 0x10) ;
+        }
     }
-    (void)i;
 #else
 #ifdef SAT_GFX_HOST
     for (i = 0; i < bytes; i++) dest[i] = src[i];
