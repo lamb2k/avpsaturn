@@ -44,8 +44,9 @@ PLACE_FN = "-DSAT_PLACE_FN" in _KF
 HOT_STACK_HW = "-DSAT_HOT_STACK_HW" in _KF
 HOT_GFXRAM_HW = "-DSAT_HOT_GFXRAM_HW" in _KF
 HOT_GFX_HW = "-DSAT_HOT_GFX_HW" in _KF
-FSEC = ["-ffunction-sections"] if PLACE_FN else []
-GEN, OBJ, ISO = WORK / "gen", WORK / f"obj{OPT}{'-fs' if PLACE_FN else ''}", WORK / "disc"
+FSEC_ONLY = "-DSAT_FSEC_ONLY" in _KF   # test: the function-section compile and the old placement, the reference for the exactness runs (same instructions, old layout)
+FSEC = ["-ffunction-sections"] if (PLACE_FN or FSEC_ONLY) else []
+GEN, OBJ, ISO = WORK / "gen", WORK / f"obj{OPT}{'-fs' if FSEC else ''}", WORK / "disc"
 for d in (GEN, OBJ, ISO):
     d.mkdir(parents=True, exist_ok=True)
 HW_BASE, HW_LIMIT, LW_BASE, LW_LIMIT = 0x06014000, 0x06100000, 0x00200000, 0x00300000

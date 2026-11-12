@@ -20,7 +20,11 @@ static u16 in0 = 0xffff, in2 = 0xffff;
 extern u32 sat_vblanks_now(void);
 /* Test flag: the retained Round 1 route's schedule (tools/mame_capture_oracle11_player_audio.lua) as pad words, replacing the SMPC read only.
    Frame number = vblank + 900: the route waits 1200 frames in attract, the coin here lands at vblank 300, so a run reaches Round 1 inside the one minute limit. */
-static u32 script_word(u32 v)
+#ifdef SAT_PLACE_FN
+static u32 __attribute__((noinline, optimize("Os"), section(".lwcode"))) script_word(u32 v)   /* test flag only: kept out of high RAM (lane perf-hw) so a scripted build lays out like the release one */
+#else
+static u32 __attribute__((noinline, optimize("Os"))) script_word(u32 v)
+#endif
 {
     u32 f = v + 900, w = 0xffff;
     int coin, start, right, gun, attack, jump;

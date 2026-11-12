@@ -1014,6 +1014,10 @@ void sat_main(void)
 {
     u32 *p; int i;
     __asm__ volatile ("ldc %0,sr" : : "r"(0xf0));
+#ifdef SAT_BOOT_CLEAR_EQ   /* test flag for the exactness runs (lane perf-hw): both bss clears are one and the same loop, so the boot takes the same cycles whichever RAM a stack or a table sits in */
+    for (p = sat_bss_start; p < sat_bss_end; p++) { if (p >= sat_boot_stack && p < sat_boot_stack + 2048) continue; if (p >= sat_slave_stack && p < sat_slave_stack + 256) continue; *p = 0; }
+    for (p = sat_lw_bss_start; p < sat_lw_bss_end; p++) { if (p >= sat_boot_stack && p < sat_boot_stack + 2048) continue; if (p >= sat_slave_stack && p < sat_slave_stack + 256) continue; *p = 0; }
+#else
 #ifdef SAT_HOT_STACK_HW   /* a restart runs this with the slave already up on its stack */
     for (p = sat_bss_start; p < sat_bss_end; p++) { if (p >= sat_boot_stack && p < sat_boot_stack + 2048) continue; if (p >= sat_slave_stack && p < sat_slave_stack + 256) continue; *p = 0; }
 #else
@@ -1023,6 +1027,7 @@ void sat_main(void)
     for (p = sat_lw_bss_start; p < sat_lw_bss_end; p++) { if (p >= sat_slave_stack && p < sat_slave_stack + 256) continue; *p = 0; }
 #else
     for (p = sat_lw_bss_start; p < sat_lw_bss_end; p++) *p = 0;
+#endif
 #endif
     sat_dbg.magic = 0x53415452;
     DIAG_MARK(0, 0, 0);   /* the loader's band: the runtime is entered */
