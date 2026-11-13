@@ -1,0 +1,19 @@
+# Sound commands the route census missed, for tools/audio_extra.py: "STAGEHEX CMDHEX USES" ('00' = front end, '26' = ending epilogue).
+# USES: the arcade (MAME avspu 0.289, coverage lane logs mame/runs/sw_XX, a_stage1, end1) enqueue counts; it ranks the clip against others when a file is full (score = uses * 1000).
+00 156 3      # character select / story (arcade f=1891 area), 34 enqueues over 34 runs
+00 4f 3       # front end: story
+26 8e 5       # ending epilogue (credits story pages)
+26 14e 3
+26 14f 3
+26 156 3
+1e 56 48      # stage 7-2: 48 enqueues in a short window
+20 5b 2
+20 64 2
+20 12c 1
+20 134 1
+14 67 5
+14 87 2
+1a 67 2
+0a 7f 3
+12 7f 5
+22 94 1
