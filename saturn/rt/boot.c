@@ -759,7 +759,7 @@ int main(void)
 #endif
 #endif
 #ifdef SAT_LOAD_SELFTEST   /* test build only: load every round file in turn and compare the SAT_LOAD_SUM sum of its regions with SUMS.BIN (made by tools/sector_store.py from the original round files). Never enters the game. Results at
-                              0x06013fc0 (files that differ or failed), 0x06013fc4 (first of them), 0x06013fc8 (files done), 0x06013fcc (the count of rounds). The boot display's stripes show 0xAnnn while running, 0xFnnn at the end (nnn = fails). */
+                              0x06013fc0 (files that differ or failed), 0x06013fc4 (first of them), 0x06013fc8 (files done), 0x06013fcc (the count of rounds), 0x06013fd0 the marker 'LZST'. The boot display's stripes show 0xAnnn while running, 0xFnnn at the end (nnn = fails). */
     {
         volatile unsigned long *res = (volatile unsigned long *)0x06013fc0u, *sum = (volatile unsigned long *)0x06013fb8u;
         unsigned long r, nr = 0, fails = 0, first = 0xffffffffu;
@@ -768,7 +768,7 @@ int main(void)
         if (GFS_Init(1, gfs_work, &dir) < 0) halt(0xe0c1, 0);
         load("SUMS.BIN", (void *)lz_scr, 0x700);
         GFS_Reset();
-        res[0] = 0; res[1] = 0xffffffffu; res[2] = 0;
+        res[0] = 0; res[1] = 0xffffffffu; res[2] = 0; ((volatile unsigned long *)0x06013fd0u)[0] = 0x4c5a5354u;   /* 'LZST': the marker a Ymir route scans for */
         for (r = 0; r < 512; r++) {
             long got;
             nm[1] = (char)('0' + r / 100); nm[2] = (char)('0' + r / 10 % 10); nm[3] = (char)('0' + r % 10);
