@@ -661,6 +661,22 @@ static void load_round(int file)
 extern volatile u32 sat_duel_on;
 volatile u8 sat_duel_plain;   /* test hook (play_versus.py PLAIN=1), 0 in play: 1 = a duel runs the stage's plain file, for a before and after on one disc */
 #endif
+#ifdef SAT_CHAR_RELOAD
+/* Coverage lane (co-op, continue): the file a stage runs on follows the characters in play (rounds.inc), but it was chosen once, at the stage word. A player who joins mid-stage, or a
+   continue that picks another character, brought a character the file does not hold (no sprites for him). guests.c sat_char_reload watches the live player blocks and asks for the file of the
+   wider mask; round_file_for is that file with the bonus guests applied, as the load below picks it. */
+static int round_file_for(int row, int ch)
+{
+    int w = row_file[row][mask_variant[ch]];
+#ifdef SAT_GUESTS
+    w = sat_guest_file(row, ch, mask_variant[ch], w);
+#endif
+    return w;
+}
+extern int sat_char_reload(int row, int ld_chars, int ld_file, int (*file_of)(int, int), u8 *chars);
+static u8 chars_ld;
+static int want0_ld;
+#endif
 static void round_check(void)
 {
     int row = stage_row[(r8(0xff81b0) || r8(0xff8001) != 2) ? 0 : r16(0xff81e8) & 0xff], want, want0;
@@ -679,6 +695,10 @@ static void round_check(void)
     /* The front end's file follows the bonus characters setting (guests with select screen art have a front file of their own): the
        word is steady here, so no wait, and the load runs at once when the title menu hands back to the game. */
     stale = !row && !row_loaded && round_loaded != sat_guest_file(0, 0, 0, row_file[0][0]);
+#endif
+#ifdef SAT_CHAR_RELOAD
+    if (row && row == row_loaded && !stale && sat_char_reload(row, chars_ld, want0_ld, round_file_for, &chars)) settled = 0;   /* a wider mask asks for another file: fall through to the load */
+    else
 #endif
     if (row == row_loaded && !stale) { settled = 0; return; }
     /* The word flickers for a few frames as a scene closes; go only when it has held. */
@@ -732,6 +752,9 @@ static void round_check(void)
     sat_gfx_display(1);
 #endif
     round_loaded = want;
+#ifdef SAT_CHAR_RELOAD
+    chars_ld = chars; want0_ld = want0;
+#endif
 #ifdef SAT_GUESTS
     sat_guest_loaded(row, chars, mask_variant[chars], want0);   /* guest colours follow the art this file holds */
 #endif
