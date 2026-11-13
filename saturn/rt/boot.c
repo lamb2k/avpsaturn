@@ -201,6 +201,12 @@ static unsigned long store_dir[512], store_run[512];
 #define STORE_HS 1
 #endif
 static Sint32 run_at, run_left, run_sec = -1, run_next, run_end;
+#ifdef SAT_LOAD_COALESCE
+#define COAL_MAX 64u   /* sectors; every restore region of the stage files and the front end file is below this, the tile and sound regions are not */
+#endif
+#ifdef SAT_LOAD_SUM
+static unsigned long load_sum;
+#endif
 static Sint32 vread(GfsHn h, Sint32 secs, unsigned char *dest)
 {
     while (secs) {
@@ -247,12 +253,51 @@ static long load_regions(const char *name, void (*mark)(void))
     if ((unsigned long)r >= store_dir[1]) { GFS_Close(h); GFS_Reset(); return -0x100; }
     run_next = (Sint32)store_dir[2 + r * 2]; run_end = run_next + (Sint32)store_dir[3 + r * 2]; run_left = 0;
     if (vread(h, 1, (unsigned char *)load_head)) { GFS_Close(h); GFS_Reset(); return -0x101; }
+#ifdef SAT_LOAD_SUM
+    load_sum = 0;
+#endif
     for (i = 0; i < load_head[0]; i++) {
         Sint32 secs = (Sint32)(load_head[2 + i * 2] / 2048u);
         if (load_head[1 + i * 2] == 1) { mark(); continue; }
+#ifdef SAT_LOAD_COALESCE
+        /* lane loading, 2026-11-12 (default off): the file lists dozens of regions of one to a few sectors (the ROM pages a stage restores, ~35 in a stage file, ~70 in the front end file), each its own
+           GFS read, and each read is its own play command: the CD block seeks and the drive loses a turn between two reads of neighbouring sectors (Ymir: 37 ms each; a console is probably worse). They lie
+           one after another in the file, so a group of them is read in one go into the pack room (region 0's address, whose sound data the mark() call above has already taken and which the big
+           tile region overwrites after) and each region is then copied to its address. Same bytes at the same addresses; fewer commands. Only regions of up to COAL_MAX sectors, groups up to
+           the size of region 0, and only once region 0 (the pack room) has been read. */
+        if (i >= 2 && secs <= COAL_MAX && secs > 0 && load_head[1] != 1 && load_head[3] == 1 && load_head[2] >= 65536u) {   /* region 1 is the mark: the sound part in region 0 has been taken */
+            unsigned long room = load_head[2] / 2048u, tot = 0;
+            unsigned long j = i;
+            while (j < load_head[0] && load_head[1 + j * 2] != 1 && (load_head[2 + j * 2] / 2048u) <= COAL_MAX && (load_head[2 + j * 2] / 2048u) > 0 && tot + load_head[2 + j * 2] / 2048u <= room) { tot += load_head[2 + j * 2] / 2048u; j++; }
+            if (j - i >= 2) {
+                unsigned char *stage = (unsigned char *)load_head[1], *p = stage;
+                unsigned long k;
+                if (vread(h, (Sint32)tot, stage)) { GFS_Close(h); GFS_Reset(); return -4 - (long)i; }
+                for (k = i; k < j; k++) {
+                    unsigned long n = load_head[2 + k * 2] / 4u, *d = (unsigned long *)load_head[1 + k * 2], *sp = (unsigned long *)p, q;
+                    for (q = 0; q < n; q++) d[q] = sp[q];
+                    p += load_head[2 + k * 2];
+                }
+                total += (Sint32)tot; i = j - 1;
+                continue;
+            }
+        }
+#endif
         if (vread(h, secs, (unsigned char *)load_head[1 + i * 2])) { GFS_Close(h); GFS_Reset(); return -4 - (long)i; }
         total += secs;
     }
+#ifdef SAT_LOAD_SUM   /* test flag: a rotating sum of every byte the regions wrote, read back from their addresses, so two builds' loads of one file can be compared: 0x06013fb8 counts the loads, 0x06013fbc holds the last sum */
+    {
+        unsigned long k, q, sum = 0;
+        for (k = 0; k < load_head[0]; k++) {
+            unsigned long dst = load_head[1 + k * 2], n = load_head[2 + k * 2] / 4u;
+            volatile unsigned long *d = (volatile unsigned long *)dst;
+            if (dst == 1) continue;
+            for (q = 0; q < n; q++) sum = (sum << 1 | sum >> 31) ^ d[q];
+        }
+        ((volatile unsigned long *)0x06013fb8u)[0]++; ((volatile unsigned long *)0x06013fb8u)[1] = sum;
+    }
+#endif
     GFS_Close(h);
     GFS_Reset();
     return total;
@@ -597,11 +642,19 @@ int main(void)
     GFS_DIRTBL_NDIR(&dir) = 256;
     if (GFS_Init(1, gfs_work, &dir) < 0) halt(0xe001, 0);
     diag_stage_k(0, 0);                                 /* GFS_Init passed */
+#ifdef SAT_BOOT_DISC_ORDER   /* lane loading, 2026-11-12: the five files in the order they lie on the disc (COLD1 43, HW 109, LW 385, OPX 896, ROM 1106), so the drive sweeps forward once instead of jumping back four times. Same bytes to the same addresses. */
+    diag_stage_k(0, 0); load("COLD1.BIN", (void *)COLD1_ADDR, 0x600);
+    diag_stage_k(0, 0); load("HW.BIN", (void *)ENTRY, 0x400);
+    diag_stage_k(0, 0); load("LW.BIN", (void *)0x00200000u, 0x100);
+    diag_stage_k(0, 0); load("OPX.BIN", (void *)0x02600000u, 0x300);
+    diag_stage_k(0, 0); load("ROM.BIN", (void *)0x02400000u, 0x200);
+#else
     diag_stage_k(0, 0); load("LW.BIN", (void *)0x00200000u, 0x100);
     diag_stage_k(0, 0); load("ROM.BIN", (void *)0x02400000u, 0x200);
     diag_stage_k(0, 0); load("OPX.BIN", (void *)0x02600000u, 0x300);
     diag_stage_k(0, 0); load("COLD1.BIN", (void *)COLD1_ADDR, 0x600);
     diag_stage_k(0, 0); load("HW.BIN", (void *)ENTRY, 0x400);
+#endif
     GFS_Reset();
 #ifdef SAT_WV_REVEAL
 #if defined(AVP_BUP_LATE_CART)
