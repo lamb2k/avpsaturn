@@ -1,0 +1,20 @@
+--- lane-perf-hw/ymir_hw/sh2.cpp	2026-11-12 15:07:04.632142100 -0500
++++ /tmp/mine_sh2.cpp	2026-11-12 19:33:36.197627300 -0500
+@@ -205,6 +205,9 @@
+     }
+     static const unsigned gsOff = [] { const char *e = std::getenv("GS_OFF"); return e ? (unsigned)std::strtoul(e, nullptr, 0) : 0u; }();
+     static const unsigned gsOff2 = [] { const char *e = std::getenv("GS_OFF2"); return e ? (unsigned)std::strtoul(e, nullptr, 0) : gsOff; }();
++    { static const unsigned stgA = [] { const char *e = std::getenv("HW_STAGE"); return e ? (unsigned)std::strtoul(e, nullptr, 16) : 0u; }();
++      unsigned aa2 = address & 0x1FFFFFFFu;
++      if (stgA && bits == 32 && aa2 >= stgA && aa2 < stgA + 64) { if (std::FILE *f = GsFile()) { std::fprintf(f, "S %u %u %u\n", gsVb, (aa2 - stgA) / 4, value); } } }
+     if (bits == 32) { unsigned a2 = (address & 0x1FFFFFFFu) - gsOff2; if (a2 == 0x060FEF84u) gsPics = value; else if (a2 == 0x060FEFDCu) gsWaits = value; }
+     unsigned a = (address & 0x1FFFFFFFu) - gsOff;
+     if (a < 0x060DE000u || a >= 0x06100000u) return;
+@@ -223,6 +226,7 @@
+         case 0x060DEA74u: gsRuns = value; break;
+         case 0x060DEA78u: gsIdle = value; break;
+         case 0x060DEAA8u: gsGt = value; break;
++        case 0x060DEAA0u: if (std::FILE *f = GsFile()) { std::fprintf(f, "D %u %u\n", gsVb, value); } break;
+         case 0x060DEAB8u: gsOvr = value; break;
+         case 0x060DEABCu: gsFlip = value; break;
+         case 0x060DEAC8u: gsSkp = value; break;

@@ -2232,10 +2232,14 @@ static u8 cmd_stg[2 * CMD_STG * 32] __attribute__((aligned(16)));
 #define DMA_WAIT() ((void)0)
 static void cmd_dma(u8 *dest, const u8 *src, u32 bytes) { u32 i; for (i = 0; i < bytes; i++) dest[i] = src[i]; }
 #else
-#define DMA_WAIT() while (*(volatile u32 *)0x25fe007cUL & 0x10) ;
+u32 sat_cmd_dma_timeouts;   /* waits that ran out (the board never showed the end of a transfer): must stay 0; the build goes on, a wrong command table is then visible */
+/* SCU DMA level 2, not level 0: the disc loader (GFS) takes level 0 for the CD transfer and finds it as it left it (the first stage load after menus drawn with level 0 never finished in Ymir: the
+   loader waited for its DMA end with the SCU mask it had set; the vblank never came back). Level 2 is the lowest priority, direct mode up to 4 KB a transfer: registers D2R 0x40, D2W 0x44, D2C 0x48,
+   D2AD 0x4c, D2EN 0x50, D2MD 0x54; DSTA bit 12 is "level 2 in operation". */
+#define DMA_WAIT() do { u32 dw_n = 0; while ((*(volatile u32 *)0x25fe007cUL & 0x1000) && ++dw_n < 20000UL) ; if (dw_n >= 20000UL) sat_cmd_dma_timeouts++; } while (0)
 static void cmd_dma(u8 *dest, const u8 *src, u32 bytes)
 {
-    volatile u32 *scu = (volatile u32 *)0x25fe0000UL;
+    volatile u32 *scu = (volatile u32 *)0x25fe0040UL;
     scu[0] = (u32)src & 0x0fffffffUL; scu[1] = (u32)dest & 0x0fffffffUL; scu[2] = bytes; scu[3] = 0x101; scu[5] = 7; scu[4] = 0x101;
 }
 #endif
