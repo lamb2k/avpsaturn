@@ -132,7 +132,15 @@ static void __attribute__((noinline, section(".cartcode"))) sc_refresh(void)
             static u8 done;
             u32 k;
             for (k = 0; k < sizeof marks / sizeof marks[0]; k++)
-                if (sc_cnt == marks[k] && !((done >> k) & 1)) { u32 v0 = vb; done |= (u8)(1u << k); while (((sat_vblanks_now() - v0) & 0xffffffffu) < 100u) ; }
+                if (sc_cnt == marks[k] && !((done >> k) & 1))
+                {   /* the game reads its inputs with interrupts masked: open them for the wait (the vblank has to come), put the mask back after */
+                    u32 v0 = vb, sr;
+                    done |= (u8)(1u << k);
+                    __asm__ volatile ("stc sr,%0" : "=r"(sr));
+                    __asm__ volatile ("ldc %0,sr" : : "r"(0));
+                    while (((sat_vblanks_now() - v0) & 0xffffffffu) < 100u) ;
+                    __asm__ volatile ("ldc %0,sr" : : "r"(sr));
+                }
         }
 #endif
     }

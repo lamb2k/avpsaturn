@@ -1,0 +1,71 @@
+# Pictures per second: the slave's draw, what it costs and what moved (lane perf-pic, 2026-11-12)
+
+Disc `avp_3h_A_fix7q1`, source commit `9b3dce7` (readout id `F2 9B3DCE`), branch `lane/perf-pic-20261112`, based on `lane/perf-hw-20261112` fd88228 (fix7p2). It replaces fix7p2 (kept as it was). Read `AVP_PERF_HW_20261112.md` and `AVP_PERF_HW_FIX7P2_20261112.md` first for the cost model. Labels as there: **EMULATED** = strict Ymir with its stock bus costs, **MODELLED** = the same Ymir with the board's memory costs (`HW_MODEL=1`, lane copy `ymir_pic`, probes in `tools/perf/ymir/sh2_perf_pic.diff`), **CONSOLE** = owner photos only (none for this disc). Nothing here is a console measurement.
+
+## 1. Result in six lines
+1. **The scroll 1 (HUD text) redraw was the slave's cost, and two exact switches that were already in the tree were not in the fix7n4 to fix7p2 recipe.** `SAT_S1_MEMO` and `SAT_S1_BLANKROWS` (perf-reconcile, host-verified identical over 600 frames) were landed default off and the recipe of the hardware discs never turned them on. In fix7p2 the slave spent 54 to 62 % of its work per picture in scroll 1 (`draw_scroll1`, `home_row_blank`, `home_row_map`, the lookups behind them).
+2. **MODELLED, stage 1-1 crowd: PIC 40.3 with fix7p2, 60.0 with MEMO and BLANKROWS, 60.0 with the new dirty-row redraw on top** (slave draw length mean 3,053 -> 1,949 -> 1,288 FRT ticks; a field is about 3,500; draws over a field 58 % -> 0 -> 0). Stage 0A (the heaviest of the 18 stage list entries): 32.7 -> 59.5 -> 60.0. The 1-2 boss: 54.3 -> 60.0 -> 60.0. Wolverine's fight: 55.8 -> 59.7. EMULATED (stock Ymir) crowd: 57.9 -> 60.0.
+3. **`SAT_S1_DIRTY` (new, `saturn/gfx/sat_gfx.c`): redraw only the scroll 1 rows that changed, and keep the tile slots of the others.** Picture-exact in the host test (resolved layer, VDP1, CRAM, registers, frame for frame, FIT 1 and 2, with a mutation check that the test sees a missing restamp and a missing block expansion). Costs 232 bytes of low RAM data and about 0.9 KB of code.
+4. **Game RAM over the tick-indexed route (stage ticks 300 to 3500) is the same as in fix7p2**; the only bytes that differ are 2 to 5 at ff7fc6 to ff7fe7 per mark (the 68000 stack scratch), the same class as the placement lane found, and a control (the same build twice in stock timing) differs there too.
+5. **`SAT_CMD_DMA` (VDP1 command table by SCU DMA) is built, host-identical, and NOT in the recipe.** On SCU level 0 it hung the first stage load in Ymir; level 2 is TBD below. Console risk and no modelled PIC need (the draw already fits a field with margin) put it on the shelf.
+6. **Wolverine's fight stays at TICK 56**: the master, not the slave, is the limit there (his cart hooks), outside this lane.
+
+## 2. Where the slave's time goes, per picture (MODELLED, fix7p2, `tools/perf/slave_table.py`, `an_stage.py`)
+Instructions and stall cycles per slave draw (cache line fills and write buffer waits), idle wait left out. A field is 3,500 FRT ticks = 448 K cycles. Windows: 1,200 vblanks, bot with health held (stage select, entry 0 = 1-1 crowd, entry 1 = 1-2 boss, entry 4 = stage 0A).
+
+| group | crowd | boss | stage 0A |
+|---|---|---|---|
+| scroll 1 total (draw_scroll1, home_row_blank, home_row_map, name_of/bank, shifts) | 176 K instr + 9 K stall (about 41 % of the draw) | 82 K + 5 K | 207 K + 12 K |
+| tile lookups `cache_find` (sprites and scroll 1) | 37 K + 20 K | 19 K + 12 K | 59 K + 31 K |
+| sprite build and the rest of `sat_gfx_draw` (VDP1 command writes are most of its stall) | 40 K + 39 K | 22 K + 22 K | 65 K + 47 K |
+| total per draw (instr + stall) | 271 K + 69 K | 133 K + 38 K | 368 K + 90 K |
+| draws per window / PIC | 806 / 40.3 | 1,091 / 54.3 | 655 / 32.7 |
+
+How a picture is lost: the master hands over a snapshot at each vblank only if the slave finished the last one (`gfx_done == gfx_handed`). A draw longer than a field costs that picture and the next hand-over. The draw length is read from `sat_dbg.gfx_ticks` (a `D` line per draw in the lane's Ymir). In the fix7p2 crowd, 58 % of the draws were over a field. The phases of a draw (`an_stage.py`, from `sat_gfx_stage`): sprite build 916 ticks, scroll 1 redraw 1,392 ticks in 57 % of the draws (of it `home_maps_rows` 652 and the row loop 739), scroll 2 and 3 about 10, the wait for the master's layer half about 0.
+
+The rest of the time in the slave table is mostly the VDP1 command writes (about 45 cycles a long write, MODELLED: Ymir's own table), the 12 M stack writes of the lookup calls, and the hash walks.
+
+## 3. The switches (each default OFF in the tree, ON in the fix7q1 recipe unless marked)
+| switch | what | state |
+|---|---|---|
+| `SAT_S1_MEMO`, `SAT_S1_BLANKROWS` | exact memo of the column fit (`home_map`), blank-row skip (lane perf-reconcile 5640b80) | existed, not in the recipe; **ON now** |
+| `SAT_S1_DIRTY` | master: `snap_layer_dirty` compares each scroll 1 word with the one it replaces and ORs a row mask into `snap.s1_dirty` (exact, no hash). Slave: when the last scroll 1 draw ran to the end with no refused cell, and position, menu mode and play flags are unchanged, and no menu or character select: `s1_restamp` stamps every clean non-blank row's tile slots with this draw's stamp before any lookup (so `cache_find` cannot evict a visible tile), `home_row_blank` runs for the dirty rows only (the others keep their blank masks), `s1_expand` widens the set to the rows next to a changed row and to every non-blank block with one (a block shares one column map), and only those rows go through the existing row code. Anything else takes today's full path. | new; **ON** |
+| `SAT_GFX_COLD_CART` | set-up and menu code that never runs in play (`cache_setup`, `index_section`, `open_pack`, `sat_gfx_init`, `draw_home`, about 2 KB) linked into the cart tail instead of high RAM | new, optional; **OFF** (not needed without DMA; fits in Ymir: crowd PIC 60, draw mean 1,329) |
+| `SAT_CMD_DMA` | sprite commands built in a work RAM buffer, moved to VDP1 by SCU DMA | new; **OFF**, see section 6 |
+| build.py | when high RAM overflows the planner now also lets low RAM take the demoted cold code as far as it really has room (it only ever shrank `lw_slack` before, so a switch that added hot code to high RAM could not be fitted into 1 KB of free low RAM) | tool fix, all builds |
+| test flags | `SAT_SCRIPT_FREEZE` (pad.c: the tick task waits 100 vblanks at fixed stage ticks so a screenshot shows one exact game state; test builds only) | off in every release recipe |
+
+## 4. Exactness
+**Host (EMULATED, `tests/host_gfx_s1_dirty.sh`, WSL gcc):** plain build, MEMO+BLANKROWS, and +DIRTY give the same hash frame for frame: VDP1 VRAM, CRAM, the display registers, VDP2 VRAM outside scroll 1, and scroll 1 *resolved* (each name of the visible 29 x 45 window followed to its cell with its flip and bank bits; raw VDP2 bytes differ because a partial redraw does not move a tile into another slot). Six data sets, FIT 1 and 2, 3,000 frames: random layers, a sticky stage like run, a play HUD (a few words change in the top and bottom rows every picture; `PLAYLIKE`, 1,400 of 1,500 scroll 1 draws partial), and heavy ones (`S1HEAVY`, more tiles than slots). In the heavy data the builds are identical until the first picture in which the plain build refuses a cell for lack of a slot (frame 2,254); from there which cells go blank depends on the order of the lookups, which a partial redraw changes (documented limit: under slot starvation the picture can differ for a picture or more, and the next full draw corrects it). Mutation check (`MUTATE=1`): leaving out the restamp is detected at frame 2,164, before any refusal, and leaving out the block expansion at frame 1 to 1,532.
+**Ymir, game RAM (EMULATED, `ramdiff.py`):** `SAT_INPUT_SCRIPT` + `SAT_INPUT_SCRIPT_TICK` + `SAT_BOOT_CLEAR_EQ` builds, 64 KB of game RAM dumped at stage ticks 300, 600, 1000, 1500, 2000, 3000, 3500 (`HW_DUMP_RTICKS`). `Q0T` = fix7p2 recipe, `Q2T` = + MEMO + BLANKROWS + DIRTY. Flat cost model (`HW_FLAT=1`): the same build twice is identical at all 7 marks; Q0T against Q2T differs by 0 to 3 bytes a mark, all at ff7fc6 to ff7fe7. Stock timing: 3 to 5 bytes a mark, same range; the control (Q0T twice) differs by 3 bytes there too (the interrupt lands at another instruction). No byte of game state differs. Same method as the placement lane's section 4.
+**Look check (EMULATED, auto pixel diff):** TBD.
+
+## 5. PIC before and after (MODELLED unless marked; stage select scenes, bot, health held, 1,200 vblanks, `an_runs.py`)
+| scene | fix7p2 PIC / SKIP / draw mean / p99 / over a field | + MEMO + BLANKROWS | + DIRTY |
+|---|---|---|---|
+| 1-1 crowd (entry 0) | 40.3 / 19.8 / 3,053 / 4,562 / 58 % | 60.0 / 0 / 1,949 / 3,007 / 0 % | 60.0 / 0 / 1,288 / 2,148 / 0 % |
+| 1-2 boss (entry 1) | 54.3 / 5.7 / 1,536 / 4,302 / 9.9 % | 60.0 / 0 / 764 / 2,363 / 0 % | 60.0 / 0 / 627 / 1,572 / 0 % |
+| stage 0A (entry 4) | 32.7 / 27.3 / 3,747 / 4,969 / 83 % | 59.5 / 0.5 / 2,176 / 3,526 / 1.3 % | 60.0 / 0 / 1,678 / 2,736 / 0 % |
+| stage 1 end (entry 7, word 10) | 57.0 / 3.0 / 1,754 / 3,978 / 7.4 % | 60.0 / 0 / 937 / 2,585 / 0 % | 60.0 / 0 / 652 / 1,694 / 0 % |
+| Wolverine, Coffee Shop (GUEST_DEFAULT=1 build) | 55.8 / 4.2 / 838 / 8,975 / 5.8 % | n/a | 59.7 / 0.3 / 597 / 2,185 / 0.4 % |
+| EMULATED (stock Ymir), 1-1 crowd | 57.9 / 2.1 / 2,228 / 3,965 / 6 % | n/a | 60.0 / 0 / 1,017 / 1,766 / 0 % |
+All other 15 stage list entries with MEMO + BLANKROWS: PIC 59.5 to 60.0. TICK is 60 in every scene but Wolverine's (56.2 before, 56.3 after: his hooks in the vblank handler and tick make the master the limit, a wait of up to 13,000 ticks for the master's layer half shows up once in a while in his fight).
+
+## 6. SAT_CMD_DMA: why it is off
+TBD (level 2 result).
+
+## 7. Memory (fix7q1)
+High RAM free 72 (fix7p2: 56), low RAM free 552 (2,440), cart tail free 2,444 (2,444), `cold1_at` 0x027DF000 unchanged. The three switches moved about 1.9 KB of never-run code from high to low RAM (planner); DIRTY costs 232 bytes of `bm_keep`, 16 of snapshot, about 700 bytes of code. Low RAM free is 552, not 2,440: that is where the room came from.
+
+## 8. Gates
+Build (fails on them): `vdp2_cycle_check` PASS, alignment gate (328 data symbols, 0 of unknown type, 46 reviewed cast sites, 197 accessor calls, 287 round files and REVEAL.BIN, 0 hits), boot data addresses, Wolverine block canary, budgets as above. Tests: `align_gate_test`, `lat_protocol_test`, `vdp2_cycle_check_test` pass. TICK 60 in stock Ymir (crowd: TICK 60.0, MISS 0). TBD: Ymir misalignment gate on the final disc.
+
+## 9. Risks and what is not known
+- Everything is emulator and model; the A-bus cart figure, the VDP1 write cost (45 cycles a long) and the master/slave bus contention are the model's assumptions (note 1, section 10). A console PIC will tell. If the slave were 1.5 times slower than modelled, the 1-1 crowd would still draw in a field (mean 1,288 ticks, p99 2,148 of 3,500).
+- DIRTY under slot starvation (section 4); `snap.s1_dirty` is one more snapshot field the master writes (the stage select's held title picture saves and restores the snapshot: after a restore a full draw runs because the menu mode is not play).
+- Wolverine's fight is master limited (TICK 56). Not touched.
+- The readout's PROF line is unchanged.
+- The tick-aligned RAM test covers stage 1 (3,500 ticks); the stage change and the load are not tick-aligned.
+
+## 10. Files
+Lane folder `E:\AvP\learning\lane-perf-pic` (`ymir_pic`, `ymir_pic2..4`: the lane's Ymir copies, `runs/*`, `hwprof_*.txt`, `exact/` RAM dumps, `tables_slave.txt`). Repo: `tools/perf/pic/` (harness), `tools/perf/an_runs.py`, `an_stage.py`, `an_pic.py`, `slave_table.py`, `tools/perf/ymir/sh2_perf_pic.diff`, `tests/host_gfx_s1_dirty.sh`, `tests/host_gfx_cmd_dma.sh`, `tests/host_gfx_s1_identity.c`, `saturn/gfx/sat_gfx.c`, `saturn/rt/build.py`, `saturn/rt/pad.c`.
