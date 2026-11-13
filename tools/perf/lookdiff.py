@@ -4,8 +4,10 @@ Compares the picture area (the emulator window's client area without its title a
 than THR in any channel, as a count and a share of the picture, the bounding box of the difference, and a diff image (OUT_DIR/diff_<n>.png: A | B | difference in red on black)."""
 import os, sys
 from PIL import Image, ImageChops
-a, b = sys.argv[1], sys.argv[2]; out = sys.argv[3] if len(sys.argv) > 3 else None
+args = [x for x in sys.argv[1:] if not x.startswith('--')]
+a, b = args[0], args[1]; out = args[2] if len(args) > 2 else None
 THR = 24
+MASK_BLINK = '--keep-blink' not in sys.argv
 if out: os.makedirs(out, exist_ok=True)
 tot = 0
 for n in range(1, 8):
@@ -19,6 +21,7 @@ for n in range(1, 8):
     d = ImageChops.difference(A, B).convert('L').point(lambda v: 255 if v > THR else 0)
     w, h = d.size
     d.paste(0, (0, int(h * 0.74), int(w * 0.55), h))   # the readout box (7 lines at the bottom left)
+    if MASK_BLINK: d.paste(0, (int(w * 0.62), 0, w, int(h * 0.16)))   # the 2P PRESS START text at the top right flashes by the vblank counter, not by the game tick: its phase differs between builds
     px = d.load(); cnt = sum(1 for y in range(h) for x in range(w) if px[x, y])
     bb = d.getbbox()
     tot += cnt
