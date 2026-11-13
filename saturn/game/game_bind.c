@@ -61,7 +61,13 @@ void f_aa59a(void)
            entry. This call came once for each sprite group of the frame (dropout lane 11-09). */
         extern void sat_guest_group(unsigned long actor, unsigned long objptr);
         extern unsigned char sat_guest_sel;
+#if defined(SAT_GUEST_GROUPS_MM) && defined(SAT_WV_NATIVE_GFX)
+        /* lane wv-speed: the group list is read only for a guest drawn through guest_draw (Mega Man) and, in the skin build, for Wolverine's shots; the native Wolverine needs none, so with him alone
+           selected the call into the cart (4 K cycles a vblank, 0.4 % of a field in a fight) is not made. sat_guest_objects finds an empty list and leaves the object list as it was. */
+        if (sat_guest_sel & 2) sat_guest_group(R->a[4], R->a[1]);
+#else
         if (sat_guest_sel) sat_guest_group(R->a[4], R->a[1]);
+#endif
     }
 #endif
     sprite_origin_compute(&r, R->a[4], R->a[0]);

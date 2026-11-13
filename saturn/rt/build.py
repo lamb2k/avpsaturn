@@ -44,6 +44,8 @@ PLACE_FN = "-DSAT_PLACE_FN" in _KF
 HOT_STACK_HW = "-DSAT_HOT_STACK_HW" in _KF
 HOT_GFXRAM_HW = "-DSAT_HOT_GFXRAM_HW" in _KF
 HOT_GFX_HW = "-DSAT_HOT_GFX_HW" in _KF
+WV_PLACE = PLACE_FN and "-DSAT_WV_PLACE" in _KF   # lane wv-speed: Wolverine's cart code (wolverine.c, wv_features.c, wv_sound.c) is built function by function and placed by heat like the lifted chunks (saturn/rt/place_fn_wv.json)
+WV_FSEC = ["-ffunction-sections"] if WV_PLACE else []
 FSEC_ONLY = "-DSAT_FSEC_ONLY" in _KF   # test: the function-section compile and the old placement, the reference for the exactness runs (same instructions, old layout)
 FSEC = ["-ffunction-sections"] if (PLACE_FN or FSEC_ONLY) else []
 GEN, OBJ, ISO = WORK / "gen", WORK / f"obj{OPT}{'-fs' if FSEC else ''}", WORK / "disc"
@@ -574,8 +576,12 @@ def plan_functions(hw, lw, cold1, placed, home_cold, data_in_hw, need_slack, lw_
         for o in pl:
             region_of[o] = f"st{k}"
     for o in home_cold:
-        if o.stem == "guests":
+        if o.stem == "guests" or (WV_PLACE and o.stem in ("wolverine", "wv_features", "wv_sound")):
             region_of[o] = "cold1"
+    if WV_PLACE:   # heat of the guest objects (fn_heat.py on Wolverine fights); the lifted chunks' keys are untouched
+        for k, v in json.loads((REPO / "saturn/rt/place_fn_wv.json").read_text()).items():   # added to the base heat (the lifted functions the Wolverine scenes ran from low RAM or the cart are the point)
+            h = heat.setdefault(k, {"exec": 0, "ifill": 0, "size": v.get("size", 0), "scenes": 0})
+            h["exec"] += v["exec"]; h["ifill"] += v["ifill"]; h["scenes"] += v.get("scenes", 0)
     secs = {o: text_sections(o) for o in region_of}
     funcs = []   # (score, size, obj, sec, region)
     for o, r in region_of.items():
@@ -653,11 +659,11 @@ def main():
             # Lane wv-features: with SAT_WV_HEAL / SAT_WV_FLASH his tick and pad hooks are renamed so saturn/guests/wolverine/wv_features.c wraps them (no edit to wolverine.c)
             wvf = "SAT_WV_HEAL" in os.environ.get("KERNEL_CFLAGS", "") or "SAT_WV_FLASH" in os.environ.get("KERNEL_CFLAGS", "")
             wv_ren = (["-Dsat_guest_wolverine_tick=wv_tick_inner"] if ("SAT_WV_HEAL" in os.environ.get("KERNEL_CFLAGS", "") or "SAT_WV_FLASH_HOLD=1" in os.environ.get("KERNEL_CFLAGS", "")) else []) + (["-Dsat_guest_wolverine_pad=wv_pad_inner"] if "SAT_WV_FLASH" in os.environ.get("KERNEL_CFLAGS", "") else [])
-            home_cold_extra.append(cc(REPO / "saturn/guests/wolverine/wolverine.c", OBJ / "wolverine.o", ["-Os", "-I", GEN, "-I", HERE, "-Dsat_guest_objects=sat_guest_wolverine_objects"] + wv_ren + os.environ.get("KERNEL_CFLAGS", "").split()))
+            home_cold_extra.append(cc(REPO / "saturn/guests/wolverine/wolverine.c", OBJ / "wolverine.o", ["-Os", "-I", GEN, "-I", HERE, "-Dsat_guest_objects=sat_guest_wolverine_objects"] + wv_ren + WV_FSEC + os.environ.get("KERNEL_CFLAGS", "").split()))
             if wvf:
-                home_cold_extra.append(cc(REPO / "saturn/guests/wolverine/wv_features.c", OBJ / "wv_features.o", ["-Os", "-I", GEN, "-I", HERE] + os.environ.get("KERNEL_CFLAGS", "").split()))
+                home_cold_extra.append(cc(REPO / "saturn/guests/wolverine/wv_features.c", OBJ / "wv_features.o", ["-Os", "-I", GEN, "-I", HERE] + WV_FSEC + os.environ.get("KERNEL_CFLAGS", "").split()))
             if "SAT_WV_SOUND" in os.environ.get("KERNEL_CFLAGS", ""):   # wv_sfx(): Wolverine's own sounds (lane wv-sounds); default off, the objects without the flag are unchanged
-                home_cold_extra.append(cc(REPO / "saturn/guests/wolverine/wv_sound.c", OBJ / "wv_sound.o", ["-Os", "-I", REPO / "saturn/guests/wolverine"]))
+                home_cold_extra.append(cc(REPO / "saturn/guests/wolverine/wv_sound.c", OBJ / "wv_sound.o", ["-Os", "-I", REPO / "saturn/guests/wolverine"] + WV_FSEC))
                 if "SAT_WV_SOUND_HOOKS" in os.environ.get("KERNEL_CFLAGS", "") and not wvf:   # test-only Berserker hook bodies; the features lane owns the real ones
                     home_cold_extra.append(cc(REPO / "saturn/guests/wolverine/wv_sound_hooks.c", OBJ / "wv_sound_hooks.o", ["-Os", "-I", REPO / "saturn/guests/wolverine"]))
         for item in filter(None, os.environ.get("SAT_GUEST_DATA", "").split(";")):   # per-guest drawing code and tables (saturn/guests/<name>)

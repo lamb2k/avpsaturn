@@ -31,6 +31,11 @@ static u32 __attribute__((noinline, optimize("Os"), section(".cartcode"))) scrip
         right = f >= 2600 && f < 4200;
         attack = f >= 2600 && f < 4200 && f % 310 < 7;
         jump = f >= 2600 && f < 4200 && f % 430 < 7;
+#ifdef SAT_INPUT_SCRIPT_WV
+        /* lane wv-speed, Wolverine route (test flag): one right on the character select picks him (the start at f 1410 confirms), and his special (attack + jump together, 8 ticks) every 260 */
+        right = right || (f >= 1385 && f < 1388);
+        if (f >= 2600 && f < 4200 && f % 260 < 8) { attack = 1; jump = 1; }
+#endif
     } else {
         u32 r = f - 4200;
         coin = r % 600 >= 30 && r % 600 < 34;
@@ -39,6 +44,9 @@ static u32 __attribute__((noinline, optimize("Os"), section(".cartcode"))) scrip
         gun = r % 45 < 7;
         attack = r % 180 < 8;
         jump = r % 240 < 8;
+#ifdef SAT_INPUT_SCRIPT_WV
+        if (r % 260 < 8) { attack = 1; jump = 1; }
+#endif
     }
     if (right) w &= ~0x8000u;
     if (start) w &= ~0x0800u;
