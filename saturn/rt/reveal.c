@@ -121,6 +121,15 @@ static void begin(void)
     n = sat_reveal_call(1, (u32)"REVEAL.BIN", (u32)BUF, 0);
     size = be32(BUF + 4);
     if (n < 280 || BUF[0] != 'R' || BUF[1] != 'V' || BUF[2] != 'L' || BUF[3] != '1' || (u32)n < size) { takeover(0); return; }
+#ifndef SAT_REVEAL_NO_UNLATCH
+    /* The display registers are latched since fix7n: the slave publishes a record and the master's vblank (sat_gfx_vblank -> lat_apply) writes it again at every V-blank IN, BGON, the scroll,
+       zoom and priority registers among them. With the takeover the slave publishes nothing new, so the last game picture's record (BGON = the readout layer only, the game's priorities) was written over
+       the reveal's registers every frame: NBG0 never showed and the card stayed black (strict Ymir, fix7n4 and later; owner: black picture). sat_gfx_init empties the latch (lat_reset), the same call the
+       end of the reveal makes, so until then only the reveal's own writes reach the chip. Off with -DSAT_REVEAL_NO_UNLATCH (A/B). */
+    __asm__ volatile ("ldc %0,sr" : : "r"(0xf0));
+    sat_gfx_init(SAT_PACK);
+    __asm__ volatile ("ldc %0,sr" : : "r"(0x00));
+#endif
     show_setup(BUF);
     voice_samples = 0;
     if (sat_reveal_call(1, (u32)"RVVOICE.BIN", (u32)(BUF + size), 0) > 16 && BUF[size] == 'R') {
