@@ -286,7 +286,7 @@ static long load_regions(const char *name, void (*mark)(void))
         if (vread(h, secs, (unsigned char *)load_head[1 + i * 2])) { GFS_Close(h); GFS_Reset(); return -4 - (long)i; }
         total += secs;
     }
-#ifdef SAT_LOAD_SUM   /* test flag: a rotating sum of every byte the regions wrote, read back from their addresses, so two builds' loads of one file can be compared: 0x06013ff8 counts the loads, 0x06013ffc holds the last sum (LOADER_DIAG[6] and [7], the reveal's state words, which a test run does not reach) */
+#ifdef SAT_LOAD_SUM   /* test flag: a rotating sum of every byte the regions wrote, read back from their addresses, so two builds' loads of one file can be compared: 0x06013fb8 counts the loads, 0x06013ffc holds the last sum (the free words between the boot display API and the loader API) */
     {
         unsigned long k, q, sum = 0;
         for (k = 0; k < load_head[0]; k++) {
@@ -295,7 +295,7 @@ static long load_regions(const char *name, void (*mark)(void))
             if (dst == 1) continue;
             for (q = 0; q < n; q++) sum = (sum << 1 | sum >> 31) ^ d[q];
         }
-        ((volatile unsigned long *)0x06013ff8u)[0]++; ((volatile unsigned long *)0x06013ff8u)[1] = sum;
+        ((volatile unsigned long *)0x06013fb8u)[0]++; ((volatile unsigned long *)0x06013fb8u)[1] = sum;
     }
 #endif
     GFS_Close(h);
