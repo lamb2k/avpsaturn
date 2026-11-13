@@ -17,7 +17,7 @@ try: os.remove(f'{out}/trace.log')
 except OSError: pass
 y = ygs.Y(cue, label='LOADING lane Ymir (EMULATED) - ' + name)
 class Tail:
-    def __init__(self, p): self.p = p; self.pos = 0; self.vb = 0; self.sect = 0; self.lastsect_vb = 0; self.f = None; self.nsect = 0
+    def __init__(self, p): self.p = p; self.pos = 0; self.vb = 0; self.sect = 0; self.lastsect_vb = 0; self.f = None; self.nsect = 0; self.bright = 0
     def poll(self):
         if self.f is None:
             if not os.path.exists(self.p): return
@@ -30,6 +30,10 @@ class Tail:
         for l in data[:cut].split(b'\n'):
             if l.rstrip().endswith(b' VB'): self.vb += 1
             elif b' SECT ' in l: self.nsect += 1; self.lastsect_vb = self.vb
+            elif b' FR ' in l:
+                try: nz = int(l.split(b'nz=')[1].split()[0])
+                except Exception: nz = 0
+                self.bright = self.bright + 1 if nz >= 25000 else 0
 T = Tail(f'{out}/trace.log')
 lf = open(out + '/run.log', 'w')
 _base = [None]; _base_hw = []
@@ -69,6 +73,8 @@ try:
                 hold, _, gap = rest.partition(':'); hold = int(hold or 8); gap = int(gap or 30)
             else: hold, gap = int(rest), 0
             T.poll(); ygs.pad(*ks); wait_frames(T.vb + hold); ygs.pad(); wait_frames(T.vb + gap)
+        elif k == 'b':   # b:  wait until a bright picture has held for 2 s (125 frames) and the CD has been idle 10 s (the title after the boot): the route's anchor on every disc, whatever the boot took
+            while not (T.bright >= 125 and T.nsect > 0 and T.vb - T.lastsect_vb >= 600) and y.pr.poll() is None: tick(); time.sleep(0.05)
         elif k == 'q':
             s = float(a or 2); n0 = T.nsect; qend = T.vb + int(os.environ.get('QMAX', '4000'))
             while y.pr.poll() is None:

@@ -83,11 +83,10 @@ def main():
     files = [p.read_bytes() for p in names]
     if os.environ.get("SAT_LOAD_LZ") == "1":   # compressed tile regions (tools/lzstore.py); the plain store below stays the default
         import lzstore
-        store, streams, info = lzstore.build_lz(files, int(os.environ.get("STORE_DUP", "512")))
+        sums = [lzstore.expected_sum(b) for b in files] if os.environ.get("SAT_LOAD_SELFTEST") == "1" else None
+        store, streams, info = lzstore.build_lz(files, int(os.environ.get("STORE_DUP", "512")), sums)
         bad = [i for i, b in enumerate(files) if lzstore.rebuild_round(store, i) != b]
         print("lz store", info)
-        if os.environ.get("SAT_LOAD_SELFTEST") == "1":
-            (disc / "SUMS.BIN").write_bytes(b"".join(struct.pack(">I", lzstore.expected_sum(b)) for b in files))
         rounds = [[0]] * len(files)
         if bad:
             raise SystemExit(f"lz store: rounds differ {bad}")

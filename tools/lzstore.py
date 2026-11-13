@@ -128,7 +128,7 @@ def tile_index(regs):
     return None
 
 
-def build_lz(files, dup=512):
+def build_lz(files, dup=512, sums=None):
     """files: round files (bytes). Returns (STORE.BIN bytes, info). Layout: header sector(s) as sector_store (+ one word: blob area start sector at 8 + 8 * rounds), run table, pool data, blob area."""
     n = len(files)
     parts = []
@@ -203,7 +203,7 @@ def build_lz(files, dup=512):
             streams.append(b)
     data, rounds = dedup_pool(streams, dup)
     nruns = sum(len(r) for r in rounds)
-    hs = -(-(8 + 8 * n + 4) // SEC)
+    hs = -(-(8 + 8 * n + 4 + (4 * n if sums else 0)) // SEC)
     if hs > 2:
         raise SystemExit("lz store: too many rounds")
     run_secs = -(-nruns * 4 // SEC)
@@ -218,6 +218,9 @@ def build_lz(files, dup=512):
         for q, c in r:
             tab += struct.pack(">I", (base + q) << 14 | c)
     head += struct.pack(">I", blob_base)
+    if sums:   # self test builds: the expected SAT_LOAD_SUM of every round file, after the blob base word (boot.c SAT_LOAD_SELFTEST reads them from the directory it already holds)
+        head += b"".join(struct.pack(">I", x) for x in sums)
+        assert len(head) <= hs * SEC
     out = head + bytes(hs * SEC - len(head)) + tab + bytes(run_secs * SEC - len(tab)) + b"".join(data) + b"".join(blob_data)
     info = dict(files=n, lz_files=len(use_lz), raw_files=n - len(use_lz), pool_sectors=len(data), blob_sectors=blob_sec, blocks=len(blocks), store_sectors=len(out) // SEC,
                 tail_max=max([t for _, t in use_lz.values()] or [0]), tile_raw_sectors=sum(len(t) // SEC for t in tiles.values()))

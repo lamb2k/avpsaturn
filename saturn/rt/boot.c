@@ -783,24 +783,20 @@ int main(void)
     if (LOADER_API[3] & 0x100u) *(volatile unsigned char *)GUEST_SEL_ADDR = (unsigned char)(LOADER_API[3] >> 9 & 3u);
 #endif
 #endif
-#ifdef SAT_LOAD_SELFTEST   /* test build only: load every round file in turn and compare the SAT_LOAD_SUM sum of its regions with SUMS.BIN (made by tools/sector_store.py from the original round files). Never enters the game.
+#ifdef SAT_LOAD_SELFTEST   /* test build only: load every round file in turn and compare the SAT_LOAD_SUM sum of its regions with the expected sums the builder put in the store header (tools/lzstore.py, from the original round files). Never enters the game.
                               Results in sat_ld_diag (words 2 fails, 3 first failing round, 4 rounds done, 5 rounds in the store, 7 the marker). The boot display's stripes show 0xAnnn while running, 0xFnnn at the end (nnn = fails). */
     {
         volatile unsigned long *res = sat_ld_diag + 2, *sum = sat_ld_diag;
         { volatile unsigned long ka = 0x6b7c9a21ul, kb = 0x2726c975ul; sat_ld_diag[7] = ka ^ kb; }   /* 0x4c5a5354, 'LZST', built at run time so the literal is not in the code image the route also finds */
         unsigned long r, nr = 0, fails = 0, first = 0xffffffffu;
         char nm[] = "R000.BIN";
-        GFS_Reset();
-        if (GFS_Init(1, gfs_work, &dir) < 0) halt(0xe0c1, 0);
-        load("SUMS.BIN", (void *)lz_scr, 0x700);
-        GFS_Reset();
         res[0] = 0; res[1] = 0xffffffffu; res[2] = 0;
         for (r = 0; r < 512; r++) {
             long got;
             nm[1] = (char)('0' + r / 100); nm[2] = (char)('0' + r / 10 % 10); nm[3] = (char)('0' + r % 10);
             got = load_regions(nm, st_mark);
             if (r == 0) nr = store_dir[1];
-            if (got < 0 || sum[1] != lz_scr[r]) { fails++; if (first == 0xffffffffu) first = r; }
+            if (got < 0 || sum[1] != store_dir[3 + 2 * nr + r])   /* the builder put the expected sums after the blob base word of the store header */ { fails++; if (first == 0xffffffffu) first = r; }
             res[0] = fails; res[1] = first; res[2] = r + 1; res[3] = nr;
             if ((r & 7) == 0) diag_info(0xa000u | (unsigned)r);
             if (r + 1 >= nr) break;
