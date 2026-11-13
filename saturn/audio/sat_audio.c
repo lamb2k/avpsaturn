@@ -69,6 +69,17 @@ static u32 fade_level = 0xffffUL;
 static s16 fade_dir;
 static u16 fade_rate;
 volatile SatAudioStats sat_audio_stats;
+#ifdef SAT_AUDIO_LOG
+/* Test builds (coverage lane): a ring of the sound requests the game made and what this library did with each. 8 bytes an entry: frame (u16), kind, x, a (u16), b (u16).
+   kind 1 request (a = word), 2 sfx started (a = word, b = first channel), 3 sfx refused (a), 4 music started (a = word, b = intro track << 8 | loop track), 5 control (a = code, b = param),
+   6 unknown word (a), 7 CD play (a = track, b = repeat), 8 CD pause, 9 music resumed after a load (a = word), 10 round sound swap, 11 request dropped (pending full). */
+typedef struct AudLog { unsigned short frame; unsigned char kind, x; unsigned short a, b; } AudLog;
+volatile AudLog sat_audio_log[1024];
+volatile unsigned long sat_audio_log_n;
+#define ALOG(k, xx, aa, bb) do { volatile AudLog *e_ = &sat_audio_log[sat_audio_log_n & 1023]; e_->frame = (unsigned short)sat_audio_stats.frames; e_->kind = (k); e_->x = (xx); e_->a = (unsigned short)(aa); e_->b = (unsigned short)(bb); sat_audio_log_n++; } while (0)
+#else
+#define ALOG(k, xx, aa, bb) do { } while (0)
+#endif
 int sat_audio_clips_loaded;   /* set by a caller whose loader already put the clips in SCSP RAM; then pack need only hold the tables */
 
 #ifdef SAT_AUDIO_MIX
@@ -141,11 +152,13 @@ static void cd_command(unsigned cr1, unsigned cr2, unsigned cr3, unsigned cr4)
 
 static void cd_play_track(unsigned track, int repeat)
 {
+    ALOG(7, 0, track, repeat);
     cd_command(0x1000u, track << 8 | 1u, repeat ? 0x0f00u : 0u, track << 8 | 99u);   /* Play Disc, track and index */
 }
 
 static void cd_pause(void)
 {
+    ALOG(8, 0, 0, 0);
     cd_command(0x11ffu, 0xffffu, 0, 0);
     cd_loop_next = 0;
 }
@@ -275,7 +288,8 @@ static void start_sfx(const Sfx *s, const u8 *mb)
         channel[n].looping = s->flags & 1;
         if (clip < 0) clip = n;
     }
-    if (clip < 0) { sat_audio_stats.sfx_refused++; return; }
+    if (clip < 0) { sat_audio_stats.sfx_refused++; ALOG(3, 0, (unsigned)(s->cmd_hi << 8 | s->cmd_lo), 0); return; }
+    ALOG(2, 0, (unsigned)(s->cmd_hi << 8 | s->cmd_lo), clip);
     channel[clip].has_clip = 1;
     pan_setup(&channel[clip], mb);
     offset += CLIP_BASE;
@@ -311,6 +325,7 @@ static int music_start(unsigned cmd)
         const Music *m = &music_table[i];
         if ((unsigned)(m->cmd_hi << 8 | m->cmd_lo) != cmd) continue;
         last_music = cmd;
+        ALOG(4, 0, cmd, m->intro_track << 8 | m->loop_track);
         fade_level = 0xffffUL; fade_dir = 0;
         cd_play_track(m->intro_track ? m->intro_track : m->loop_track, !m->intro_track);
         cd_loop_next = m->intro_track ? m->loop_track : 0;
@@ -325,6 +340,7 @@ static void control(unsigned code, unsigned param)
 {
     int n;
     sat_audio_stats.controls++;
+    ALOG(5, 0, code, param);
     switch (code) {
     case 0: for (n = 0; n < CHANNELS; n++) channel_end(n); cd_pause(); last_music = 0; fade_dir = 0; break;
     case 1: for (n = 0; n < CHANNELS; n++) channel_end(n); break;
@@ -350,11 +366,12 @@ static void dispatch(const u8 *mb)
     const Sfx *s;
     sat_audio_stats.commands++;
     sat_audio_stats.last_command = word;
+    ALOG(1, mb[7], word, mb[0] == 0xff ? (unsigned)(mb[3] << 8 | mb[4]) : (unsigned)(mb[7] << 8 | mb[8]));
     if (mb[0] == 0xff) { control(mb[1], (unsigned)(mb[3] << 8 | mb[4])); return; }
     word %= SOUND_TABLE_SIZE;
     s = find_sfx(word);
     if (s) start_sfx(s, mb);
-    else if (!music_start(word)) sat_audio_stats.sfx_unknown++;
+    else if (!music_start(word)) { sat_audio_stats.sfx_unknown++; ALOG(6, 0, word, 0); }
 }
 
 void sat_audio_io_write8(unsigned long addr, unsigned long value)
@@ -366,7 +383,7 @@ void sat_audio_io_write8(unsigned long addr, unsigned long value)
             int i;
             for (i = 0; i < MAILBOX_BYTES; i++) pending[pending_count][i] = mailbox[i];
             pending_count++;
-        }
+        } else if (value == 0) ALOG(11, 0, mailbox[0] << 8 | mailbox[1], 0);
         return;
     }
     mailbox[(addr - 0x618001UL) >> 1] = (u8)value;
@@ -412,8 +429,14 @@ int sat_audio_swap(const void *tables, const void *clips)
     bytes = be32(p + 8);
     if (bytes + CLIP_BASE > SCSP_RAM_BYTES) return 0;
     for (n = 0; n < CHANNELS; n++) channel_end(n);
+    ALOG(10, 0, be16(p + 4), be16(p + 6));
     for (n = 0; n < 32; n++) for (i = 0; i < 0x18; i += 2) SLOT(n, i) = 0;
     SLOT(0, 0) = KEY_EXECUTE;
+#ifdef SAT_CD_LEVEL_FIX
+    /* The loop above also clears the CD input's effect send (slots 16 and 17, register 0x16). cd_level() writes it only when the level changes, and the first round file of a boot
+       (front end: story, character select) is not followed by sat_audio_resume_music(), so every CD track was silent until the first stage load. Forget the level written: the next frame writes it again. */
+    cd_level_now = 0xff;
+#endif
     sfx_count = be16(p + 4); music_count = be16(p + 6);
     sfx_table = (const Sfx *)(p + 12);
     music_table = (const Music *)(sfx_table + sfx_count);
@@ -425,7 +448,7 @@ void sat_audio_resume_music(void)
 {
     cd_want = 0; cd_loop_next = 0;
     cd_level_now = 0xff;
-    if (last_music) music_start(last_music);
+    if (last_music) { ALOG(9, 0, last_music, 0); music_start(last_music); }
     cd_level(fade_level >> 13);
 }
 
