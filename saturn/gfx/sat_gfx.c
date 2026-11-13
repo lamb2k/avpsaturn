@@ -1698,6 +1698,51 @@ static int es_pic_strip, es_pic_hidden;
 #ifdef SAT_GFX_HOST
 unsigned long sat_gfx_host_s1x0, sat_gfx_host_s1y0;   /* test harness: the map window of the last scroll 1 draw (tests/host_gfx_s1_identity.c, resolved hash) */
 #endif
+#if defined(SAT_CONT_LINE2) && !(defined(SAT_S1_DIRTY) && SAT_GFX_FIT && defined(SAT_HOME))
+#error SAT_CONT_LINE2 needs SAT_S1_DIRTY and the fitted scroll 1 of the home build
+#endif
+#ifdef SAT_CONT_LINE2
+/* The full-width continue line (coverage lane fix7c2, SAT_CONT_LINE2). The arcade's continue screen ends with one 48 column, 16 pixel tall line, "CONTINUE AND GET 1UP!  CAN START WITH
+   2PLAYERS!": cells 0 to 20 the first sentence, 21 and 22 the break (two space cells), 23 to 47 the second, on two map rows (top halves, then bottom halves, codes + 0x10), with two blank map
+   rows under it. The 352 crop shows 44 columns, so the plain crop cuts it and the column fit squeezed its word gaps away. Here the two sentences are laid out as two centred lines at the
+   same size: sentence one on the line's own rows, sentence two on the two blank rows below, each cell kept whole (its source column, so the right half of a 16 pixel tile stays the right half),
+   at least 9 cells clear of each edge. Found by shape on the snapshot (the break, three word gaps, the same on the bottom half rows, two uniform rows under it), so the 1P, 2P and double KO
+   screens all get it. */
+static int cl_row = -1, cl_prev = -1;
+#define CL_SP(w, code) (((w) >> 16) == (code))
+static int cont_line_find(void)
+{
+    u32 r;
+    for (r = 8; r + 3 < S1_ROWS; r++)
+    {
+        const u32 *a = snap.s1 + r * S1_COLS, *b = a + S1_COLS, *c = b + S1_COLS, *d = c + S1_COLS;
+        u32 i;
+        if (!(CL_SP(a[21], 0x1100) && CL_SP(a[22], 0x1100) && CL_SP(a[8], 0x1100) && CL_SP(a[12], 0x1100) && CL_SP(a[16], 0x1100))) continue;
+        if (!(CL_SP(b[21], 0x1110) && CL_SP(b[22], 0x1110) && CL_SP(b[8], 0x1110) && CL_SP(b[12], 0x1110) && CL_SP(b[16], 0x1110))) continue;
+        if (CL_SP(a[0], 0x1100) || CL_SP(a[47], 0x1100) || CL_SP(a[23], 0x1100) || CL_SP(a[20], 0x1100)) continue;
+        for (i = 1; i < 48; i++) if (c[i] != c[0] || d[i] != d[0]) break;
+        if (i < 48) continue;
+        return (int)r;
+    }
+    return -1;
+}
+/* Source word and column of output column col on the screen row row of the block that starts at cl_row. */
+static void cont_line_cell(u32 row, u32 col, u32 *wrow, u32 *src)
+{
+    u32 k = row - (u32)cl_row;
+    if (k < 2)
+    {   /* sentence one, 21 cells from output column 11 */
+        *wrow = row;
+        *src = (col >= 11 && col < 32) ? col - 11 : 8;   /* outside it the break's space cell: solid black, as behind the arcade's line */
+    }
+    else if (col >= 9 && col < 34)
+    {   /* sentence two, 25 cells from output column 9, from the line's own rows */
+        *wrow = (u32)cl_row + k - 2;
+        *src = 23 + (col - 9);
+    }
+    else *src = (col < 44 ? col : 43) + 2;   /* the uniform row under it, as the plain crop */
+}
+#endif
 static void draw_scroll1(u16 sx, u16 sy)
 {
     const u32 *cell = snap.s1;
@@ -1712,8 +1757,15 @@ static void draw_scroll1(u16 sx, u16 sy)
     u32 redraw = S1_ALL, rbit;
     unsigned long refused0 = sat_gfx_stats.refused_layer;
     int sel = 0, part = 0;
+#ifdef SAT_CONT_LINE2
+    cl_row = cont_line_find();
+#endif
     {   u32 dk = (x0 >> 3) | ((y0 >> 3) << 8) | ((u32)snap.home << 16) | ((u32)snap.hud_flush << 20) | ((u32)snap.sel_ok << 21);
         part = drawn_valid && s1_part_ok && dk == s1_dkey && !snap.sel_ok && snap.home < 3;
+#ifdef SAT_CONT_LINE2
+        if (cl_row >= 0 || cl_prev >= 0) { part = 0; s1_done = 0; }   /* the two rows under the line are blank in the source and change only with it: draw every row while it is up and once more as it goes */
+        cl_prev = cl_row;
+#endif
         s1_dkey = dk; s1_part_ok = 0; }
     if (part)
     {
@@ -1771,7 +1823,11 @@ static void draw_scroll1(u16 sx, u16 sy)
         if (!(redraw & rbit)) continue;
 #endif
 #ifdef SAT_S1_BLANKROWS
+#ifdef SAT_CONT_LINE2
+        if (row < S1_ROWS && !(cl_row >= 0 && row >= (u32)cl_row && row < (u32)cl_row + 4) && s1_blank_row(row)) continue;
+#else
         if (row < S1_ROWS && s1_blank_row(row)) continue;
+#endif
 #endif
 #if SAT_GFX_FIT && defined(SAT_HOME)
         u8 map[44];
@@ -1799,12 +1855,20 @@ static void draw_scroll1(u16 sx, u16 sy)
             /* The arcade's 48 columns on 44: the HUD rows lose four empty columns at the middle, so it sits flush at both edges; other rows are the centre crop. */
 #ifdef SAT_HOME
             u32 src = col < 44 ? map[col] : (u32)map[43] + 1;   /* column 44 is the fine-scroll spill */
+#ifdef SAT_CONT_LINE2
+            u32 wrow = row < S1_ROWS ? row : S1_ROWS - 1;
+            if (cl_row >= 0 && row >= (u32)cl_row && row < (u32)cl_row + 4) cont_line_cell(row, col, &wrow, &src);
+#endif
 #else
             u32 src = (snap.hud_flush && (row < HUD_ROWS_TOP || row >= HUD_ROWS_BOT)) ? (col < 22 ? col : col + 4) : col + 2;
 #endif
             u32 c_src = (((x0 - S1_REG_CROP) >> 3) + src) & 63;
             u32 idx = (r & 0x1f) + (c_src << 5) + ((r & 0x20) << 6);
+#if defined(SAT_CONT_LINE2) && SAT_GFX_FIT && defined(SAT_HOME)
+            u32 word = cell[wrow * S1_COLS + src];
+#else
             u32 word = cell[row * S1_COLS + src];
+#endif
 #else
             u32 idx = (r & 0x1f) + (c << 5) + ((r & 0x20) << 6);
             u32 word = *cell++;
@@ -3144,6 +3208,11 @@ void sat_gfx_draw(void)
         gen_seen = snap.pad;
         for (n = 0; n < BLANK_WAYS; n++) blank_seen[n] = NOKEY;
         drawn_valid = 0;
+#ifdef SAT_CHAR_RELOAD_HUD
+        /* A reload of the stage file for another character set (SAT_CHAR_RELOAD) brings art for the same scroll 1 keys (the guest's HUD name and portrait at the Schaefer slot's codes): the
+           cache is keyed by key alone and would keep the old file's cells, so the HUD kept "Maj.Schaefer" and his face for Wolverine. Forget them; every layer is redrawn anyway. */
+        cache_setup(&s1_cache, VDP2_VRAM + CELL_S1, 32, SAT_GFX_S1_SLOTS, 4, SEC_S1, s1_slots, s1_head, HASH_SIZE_S1);
+#endif
     }
 #endif
     VP(vp_begin();)
