@@ -462,7 +462,7 @@ def round_files(rom, code_end, cold1_at, only=None):
             story = STORY_KEYS.get(f["name"].split("_")[0][5:], None)   # "stage0a_m1" -> "0a"
             if story:
                 keys = [k | e for k, e in zip(keys, story)]
-                frank.update({k: (1 << 39) - 1 for k in story[0] if k not in SCREEN_KEYS[0] and (k not in frank or frank[k] < (1 << 39) - 1)})
+                frank.update({k: POSE_RANK - 1 for k in story[0] if k not in SCREEN_KEYS[0] and k not in frank})   # just under the pose keys: they fill free room, and are the first to go in a file already short of room (stage 0e)
             keys[0] = keys[0] | POSE_KEYS
             keys[0] = keys[0] | FUZZ_STAGE.get(f["name"].split("_")[0], set())
             frank.update({k: POSE_RANK for k in POSE_KEYS if k not in frank or frank[k] < POSE_RANK})
