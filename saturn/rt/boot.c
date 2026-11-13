@@ -268,7 +268,7 @@ static long load_regions(const char *name, void (*mark)(void))
         if (i >= 2 && secs <= COAL_MAX && secs > 0 && load_head[1] != 1 && load_head[3] == 1 && load_head[2] >= 65536u) {   /* region 1 is the mark: the sound part in region 0 has been taken */
             unsigned long room = load_head[2] / 2048u, tot = 0;
             unsigned long j = i;
-            while (j < load_head[0] && load_head[1 + j * 2] != 1 && (load_head[2 + j * 2] / 2048u) <= COAL_MAX && (load_head[2 + j * 2] / 2048u) > 0 && tot + load_head[2 + j * 2] / 2048u <= room) { tot += load_head[2 + j * 2] / 2048u; j++; }
+            while (j < load_head[0] && load_head[1 + j * 2] != 1 && (load_head[1 + j * 2] & 3u) == 0 && (load_head[2 + j * 2] % 2048u) == 0 && (load_head[2 + j * 2] / 2048u) <= COAL_MAX && (load_head[2 + j * 2] / 2048u) > 0 && tot + load_head[2 + j * 2] / 2048u <= room) { tot += load_head[2 + j * 2] / 2048u; j++; }
             if (j - i >= 2) {
                 unsigned char *stage = (unsigned char *)load_head[1], *p = stage;
                 unsigned long k;

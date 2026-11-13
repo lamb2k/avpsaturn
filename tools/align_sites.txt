@@ -46,3 +46,5 @@ saturn/rt/fps_hud.c a006f33324 positive control for tools/ymir_misalign_gate.py:
 saturn/gfx/sat_gfx.c f799a21411 power-up self test: 16 bit access to CRAM entry 2047 (even address)
 saturn/gfx/sat_gfx.c bb04817a9b power-up self test: 16 bit access at VDP2 VRAM + 0x7ff80 (even address)
 saturn/gfx/sat_gfx.c 87fc9dc543 power-up self test: 16 bit access at VDP1 VRAM + 0x7ff80 (even address)
+saturn/rt/boot.c 18612199b7 SAT_LOAD_SUM test code (not in a release build): reads the words of a region back from its address; the group test above requires 4 aligned addresses and sizes of whole sectors for the copy, and the region list of every round file is checked by align_packs
+saturn/rt/boot.c 0926688333 SAT_LOAD_COALESCE copy: a region's address is a multiple of 4 and its size a whole number of sectors (the group loop tests both before a region joins a group), the staging source starts at region 0's address (a multiple of 2048) and advances by whole sectors
