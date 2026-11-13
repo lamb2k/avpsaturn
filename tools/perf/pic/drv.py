@@ -83,6 +83,20 @@ try:
                 if f % 700 < 5: keys.append('b')
                 pad(*keys); auto(); time.sleep(0.03)
             pad(); log('bot done')
+        elif k == 'q':   # log the slave's sat_gfx_stats counters (frames, missing tiles, refused ...) read from my own Ymir's memory
+            import struct
+            OFF2 = int(os.environ.get('GS_OFF2', '0'), 0); OFF = int(os.environ.get('GS_OFF', '0'), 0)
+            pp = memscan.Proc(y.pr.pid); got = None
+            for h in pp.find(b'SATR'):
+                c = h - 0xDEA64 - OFF
+                d = pp.read(c + (0x060FEF84 + OFF2 - 0x06000000), 0x60)
+                if d and len(d) >= 0x2c:
+                    v = struct.unpack('>I', d[0:4])[0]; l = y.last()
+                    if l and abs(v - int(l['pics'])) < 400: got = d; break
+            if got:
+                fr, = struct.unpack('>I', got[0:4]); mi, rc, rs = struct.unpack('>III', got[0x20:0x2c])
+                log('stats', a, 'frames', fr, 'missing', mi, 'refused_commands', rc, 'refused_next', rs)
+            else: log('stats: not found')
         elif k == 'x':
             open(ygs.HERE + '/hw_cmd.txt', 'w').write(a.replace('_', ' ') + (' ' + name if a == 'dump' else '')); log('cmd', a)
         elif k == 'n':   # n:select[:secs] wait until the screen looks like the reference (refs/NAME.png)
