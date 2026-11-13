@@ -75,6 +75,52 @@ def to_pcm8(y):
     return np.clip(np.round(y * g), -128, 127).astype(np.int8), tl
 
 
+LOOP_MAX = 0xffff   # the SCSP's 16 bit loop end, in samples
+LOOP_TARGET_S = 0.6
+
+
+def loop_clip(y, rate):
+    """A render that never ended (the Z80 loops it until a stop control; render_mame.lua caps it at 10 s) as a short seamless loop: skip the first second (attack), find the period, and
+    cut a whole number of periods of about LOOP_TARGET_S, starting where the two ends meet best. The slot loops the whole clip (loop start 0), so the attack is not replayed. None if no
+    steady period is found (the caller then leaves the sound out as before)."""
+    a = int(rate * 1.0)
+    if len(y) < a + int(rate * 3.0):
+        return None
+    x = y[a:].astype(np.float64)
+    x = x - x.mean()
+    n = len(x)
+    f = np.fft.rfft(x, 2 * n)
+    ac = np.fft.irfft(f * np.conj(f))[:n]
+    ac = ac / max(1.0, ac[0])
+    lo, hi = int(0.02 * rate), int(min(LOOP_TARGET_S * 2, 5.0) * rate)
+    p = lo + int(np.argmax(ac[lo:hi]))
+    if ac[p] < 0.5:
+        return None
+    m = max(1, int(round(LOOP_TARGET_S * rate / p)))
+    best = None
+    for L in range(max(lo, m * p - 24), min(LOOP_MAX, m * p + 25)):
+        c = correlation(x[:rate], x[L:L + rate]) if len(x) > L + rate else -1
+        if best is None or c > best[0]:
+            best = (c, L)
+    L = best[1]
+    if L > LOOP_MAX or best[0] < 0.5:
+        return None
+    # start where x[s] and x[s + L] agree in value and slope within one period
+    sc = np.arange(0, min(p, len(x) - L - 2))
+    cost = np.abs(x[sc] - x[sc + L]) + np.abs((x[sc + 1] - x[sc]) - (x[sc + L + 1] - x[sc + L]))
+    s0 = int(sc[int(np.argmin(cost))])
+    # the last X samples of the loop fade into the X samples that follow the loop in the render (equal power), so the wrap has no step
+    X = min(256, L // 4)
+    if a + s0 + L + X > len(y):
+        X = 0
+    z = y[a + s0:a + s0 + L + X].astype(np.float64)
+    out = z[:L].copy()
+    if X:
+        w = np.sin(np.linspace(0, np.pi / 2, X, endpoint=False))
+        out[:X] = z[:X] * w + z[L:L + X] * np.cos(np.linspace(0, np.pi / 2, X, endpoint=False))
+    return out
+
+
 def loop_of(m):
     """Find (loop_start_s, loop_end_s) by matching the last 8 s of the render earlier in it; none if the track ended."""
     sr = 44100 // 16
@@ -128,6 +174,10 @@ def main():
         census["route_bytes"] += len(y) if cmd in route else 0
         if capped:
             census["looping"].append(hex(cmd))
+            if len(y) > LOOP_MAX:   # a render that never ended: keep a seamless loop of it
+                y2 = loop_clip(y, rate)
+                if y2 is not None:
+                    y = y2
         if not (full or cmd in route):
             continue
         pcm, tl = to_pcm8(y)
