@@ -17,3 +17,5 @@
 0a 7f 3
 12 7f 5
 22 94 1
+00 26d 3      # name entry (a ranking score), arcade f=6916 in mame/runs/go1; shown by the front end after a game over
+00 252 3      # ranking page jingle (arcade f=6795, after music 0x03), front end
