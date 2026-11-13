@@ -182,6 +182,43 @@ unsigned long sat_ld_diag[8];   /* (bss: the loader's image holds only .text) te
 #define LZ_TMAX 6144
 static LzCtx lz_ctx;
 static lz32 lz_scr[(LZ_TMAX + 8) / 4 + 1];   /* the tail kept out of the way of the in-place decode (also the self test's sum table) */
+#define CCR_B (*(volatile unsigned char *)0xfffffe92u)
+static unsigned char lz_ccr;
+/* The loader runs with the cache as the BIOS left it (off); the decoder is much faster with it on. It is switched on, purged, for each decoding step only: the CD transfer writes behind the cache. */
+#define LZ_CACHE_ON() do { lz_ccr = CCR_B; CCR_B = 0x11; } while (0)
+#define LZ_CACHE_OFF() do { CCR_B = (unsigned char)((lz_ccr & 1) ? (lz_ccr | 0x10) : 0x10); } while (0)
+/* Read the streams of a unit into the end of its destination and decode them while they arrive (GFS non-blocking read, GFS_NwExecOne moves the data by CPU): the drive keeps reading while the CPU
+   decodes, so the time is the CD's, not the CD's plus the decoder's. gsec/gcnt: ngrp groups of contiguous disc sectors, in the order of the streams; seek_first 0: the file position is already at the first. */
+static long lz_stream(GfsHn h, lz8 *dest, lz32 raw_total, lz32 nblk, const lz32 *blk, lz32 tail, const lz32 *gsec, const lz32 *gcnt, lz32 ngrp, int seek_first)
+{
+    LzUnit u; lz32 g, done = 0; int r = 0;
+    lz_unit_begin(&lz_ctx, &u, dest, raw_total, nblk, blk, tail, (lz8 *)lz_scr);
+    for (g = 0; g < ngrp; g++) {
+        Sint32 am = 0, nd = 0;
+        if (g > 0 || seek_first) if (GFS_Seek(h, (Sint32)gsec[g], GFS_SEEK_SET) < 0) return -4;
+        if (GFS_NwFread(h, (Sint32)gcnt[g], u.base + done, 2048 * (Sint32)gcnt[g]) < 0) return -5;
+        for (;;) {
+            lz32 arrived;
+            GFS_NwExecOne(h);
+            GFS_NwGetStat(h, &am, &nd);
+            arrived = done + (lz32)nd;
+            if (GFS_NwIsComplete(h)) { arrived = done + 2048ul * gcnt[g]; }
+            LZ_CACHE_ON();
+            while ((r = lz_unit_step(&lz_ctx, &u, arrived, 0)) > 0) ;
+            LZ_CACHE_OFF();
+            if (r < 0) return -6;
+            if (GFS_NwIsComplete(h)) break;
+            diag_tick();
+        }
+        done += 2048ul * gcnt[g];
+    }
+    LZ_CACHE_ON();
+    lz_unit_tailcopy(&lz_ctx, &u);
+    while ((r = lz_unit_step(&lz_ctx, &u, u.padded, 1)) > 0) ;
+    LZ_CACHE_OFF();
+    if (r < 0) return -7;
+    return (u.k == u.nblk && u.out == raw_total) ? 0 : -8;
+}
 #endif
 static void load(const char *name, void *dest, unsigned long code)
 {
@@ -197,20 +234,12 @@ static void load(const char *name, void *dest, unsigned long code)
     /* A compressed boot file: header sector 'LZB1', raw_total, tail, nblk, (raw, compressed) pairs, then each stream padded to whole sectors. Read into the end of the destination, decode forward in place. */
     if (n > 1 && GFS_Fread(h, 1, load_head, 2048) == 2048) {
         if (load_head[0] == 0x4c5a4231ul) {
-            lz32 raw_total = load_head[1], tail = load_head[2], nblk = load_head[3], k, padded = 0, secs;
-            lz8 *p;
+            lz32 raw_total = load_head[1], tail = load_head[2], nblk = load_head[3], k, padded = 0;
+            lz32 gs = 0, gc;
             if (nblk > 250 || tail > LZ_TMAX) { GFS_Close(h); halt(code | 4, 1); }
             for (k = 0; k < nblk; k++) padded += (load_head[5 + 2 * k] + 2047ul) & ~2047ul;
-            p = (lz8 *)dest + raw_total - padded;
-            for (secs = padded >> 11; secs > 0; ) {
-                Sint32 c = secs > LOAD_CHUNK ? LOAD_CHUNK : (Sint32)secs;
-                got = GFS_Fread(h, c, p, 2048 * c);
-                if (got != 2048 * c) { GFS_Close(h); halt(code | 3, (unsigned long)got); }
-                p += 2048 * c; secs -= c;
-                diag_tick();
-            }
-            *(volatile unsigned char *)0xfffffe92u = 0x11;   /* purge the cache: the CD transfer wrote the streams behind it */
-            if (lz_unit(&lz_ctx, (lz8 *)dest, raw_total, nblk, load_head + 4, tail, (lz8 *)lz_scr)) { GFS_Close(h); halt(code | 5, 0); }
+            gc = padded >> 11;
+            if (lz_stream(h, (lz8 *)dest, raw_total, nblk, load_head + 4, tail, &gs, &gc, 1, 0)) { GFS_Close(h); halt(code | 5, 0); }
             GFS_Close(h);
             LOADER_DIAG[3] = code; LOADER_DIAG[4] = raw_total;
             return;
@@ -282,28 +311,21 @@ static unsigned long lz_blob_base;
    forward in place (lzdec.h lz_unit): the first sectors of the destination are free while the blobs sit behind them. Returns 0 or a negative code. */
 static long lz_tile(GfsHn h, unsigned long i)
 {
-    static lz32 blk[2 * LZ_MAXB];
-    lz32 *info = load_head + 256, nblk, raw_total, tail, k, padded = 0;
-    lz8 *dest = (lz8 *)load_head[1 + i * 2], *p;
+    static lz32 blk[2 * LZ_MAXB], gsec[LZ_MAXB], gcnt[LZ_MAXB];
+    lz32 *info = load_head + 256, nblk, raw_total, tail, k, padded = 0, ngrp = 0;
+    lz8 *dest = (lz8 *)load_head[1 + i * 2];
     if (info[0] != 0x4c5a3031ul) return -1;
     raw_total = info[1]; tail = info[2]; nblk = info[3];
     if (nblk > LZ_MAXB || tail > LZ_TMAX) return -2;
-    for (k = 0; k < nblk; k++) { blk[2 * k] = info[4 + 2 * k]; blk[2 * k + 1] = info[5 + 2 * k]; padded += (blk[2 * k + 1] + 2047ul) & ~2047ul; }
-    if (padded > raw_total) return -3;
-    p = dest + raw_total - padded;
     for (k = 0; k < nblk; k++) {
-        Sint32 secs = (Sint32)((blk[2 * k + 1] + 2047ul) >> 11);
-        if (GFS_Seek(h, (Sint32)(lz_blob_base + info[4 + 2 * nblk + k]), GFS_SEEK_SET) < 0) return -4;
-        while (secs > 0) {
-            Sint32 c = secs > LOAD_CHUNK ? LOAD_CHUNK : secs;
-            if (GFS_Fread(h, c, p, 2048 * c) != 2048 * c) return -5;
-            diag_tick();
-            p += 2048 * c; secs -= c;
-        }
+        lz32 sec = lz_blob_base + info[4 + 2 * nblk + k], n = (info[5 + 2 * k] + 2047ul) >> 11;
+        blk[2 * k] = info[4 + 2 * k]; blk[2 * k + 1] = info[5 + 2 * k]; padded += n << 11;
+        if (ngrp && gsec[ngrp - 1] + gcnt[ngrp - 1] == sec) gcnt[ngrp - 1] += n;   /* neighbouring streams on the disc: one read */
+        else { gsec[ngrp] = sec; gcnt[ngrp] = n; ngrp++; }
     }
+    if (padded > raw_total) return -3;
     run_reseek = 1;
-    *(volatile unsigned char *)0xfffffe92u = 0x11;   /* purge the cache: the CD transfer wrote the streams behind it */
-    return lz_unit(&lz_ctx, dest, raw_total, nblk, blk, tail, (lz8 *)lz_scr) ? -6 : 0;
+    return lz_stream(h, dest, raw_total, nblk, blk, tail, gsec, gcnt, ngrp, 1);
 }
 #endif
 static long load_regions(const char *name, void (*mark)(void))

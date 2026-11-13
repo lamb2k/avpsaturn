@@ -151,22 +151,49 @@ static long lz_inflate(LzCtx *z, const lz8 *src, lz8 *dst, lz8 *dend)
     return (long)(d - d0);
 }
 /* Decode nblk streams in place. dest: buffer of raw_total bytes. blk[2k] = raw bytes of stream k, blk[2k+1] = its compressed bytes; stream k lies at base + (sum of the padded sizes before it), where
-   base = dest + raw_total - (sum of all padded sizes) and a padded size is the compressed size rounded up to 2048. The last `tail` bytes of the buffer are copied
-   to `scratch` first (capacity tail + 8); the decoder switches to the copy when its input reaches them. Returns 0, or a negative code. */
+   base = dest + raw_total - (sum of all padded sizes) and a padded size is the compressed size rounded up to 2048. The last `tail` bytes of the buffer are copied to `scratch` (capacity tail + 8)
+   once the streams have all arrived; the decoder switches to the copy when its input reaches them. The unit can be run in steps while the streams are still arriving (boot.c lz_stream): a stream
+   may be decoded as soon as its padded bytes are in, and whose output does not reach the tail before the tail has been copied. */
+typedef struct { lz8 *dest; lz32 raw_total, nblk, tail, k, off, out, padded; const lz32 *blk; lz8 *scratch, *base, *swp; } LzUnit;
+static void lz_unit_begin(LzCtx *z, LzUnit *u, lz8 *dest, lz32 raw_total, lz32 nblk, const lz32 *blk, lz32 tail, lz8 *scratch)
+{
+    lz32 k;
+    u->dest = dest; u->raw_total = raw_total; u->nblk = nblk; u->blk = blk; u->tail = tail; u->scratch = scratch;
+    u->k = 0; u->off = 0; u->out = 0; u->padded = 0;
+    for (k = 0; k < nblk; k++) u->padded += (blk[2 * k + 1] + 2047ul) & ~2047ul;
+    u->base = dest + raw_total - u->padded; u->swp = dest + raw_total - tail;
+    z->swp = (const lz8 *)0; z->scr = scratch;   /* until the tail has been copied the decoder never reads it */
+}
+static void lz_unit_tailcopy(LzCtx *z, LzUnit *u)
+{
+    lz32 q;
+    z->scr = u->scratch; z->swp = u->tail ? u->swp : (const lz8 *)0;
+    for (q = 0; q < u->tail; q++) u->scratch[q] = u->swp[q];
+    for (q = 0; q < 8; q++) u->scratch[u->tail + q] = 0;
+}
+/* the next stream: 1 = decoded, 0 = it must wait (its padded bytes have not all arrived, `arrived` = number of bytes from base that have; or its output would reach the tail before the tail is copied), < 0 = error */
+static int lz_unit_step(LzCtx *z, LzUnit *u, lz32 arrived, int tail_done)
+{
+    lz32 pk, pad_k; const lz8 *s; long n;
+    if (u->k >= u->nblk) return 0;
+    pk = u->blk[2 * u->k + 1]; pad_k = (pk + 2047ul) & ~2047ul;
+    if (u->off + pad_k > arrived) return 0;
+    if (!tail_done && u->tail && u->dest + u->out + u->blk[2 * u->k] > u->swp) return 0;
+    s = u->base + u->off;
+    if (tail_done && u->tail && s >= u->swp) s = u->scratch + (s - u->swp);
+    n = lz_inflate(z, s, u->dest + u->out, u->dest + u->raw_total);
+    if (n != (long)u->blk[2 * u->k]) return -1 - (int)u->k;
+    u->out += u->blk[2 * u->k]; u->off += pad_k; u->k++;
+    return 1;
+}
+/* all at once (the streams are all in): 0 or a negative code */
 static int lz_unit(LzCtx *z, lz8 *dest, lz32 raw_total, lz32 nblk, const lz32 *blk, lz32 tail, lz8 *scratch)
 {
-    lz32 k, padded = 0, off = 0, out = 0; lz8 *base, *swp = dest + raw_total - tail;
-    z->swp = tail ? swp : (const lz8 *)0; z->scr = scratch;
-    for (k = 0; k < nblk; k++) padded += (blk[2 * k + 1] + 2047ul) & ~2047ul;
-    base = dest + raw_total - padded;
-    { lz32 q; for (q = 0; q < tail; q++) scratch[q] = swp[q]; for (q = 0; q < 8; q++) scratch[tail + q] = 0; }
-    for (k = 0; k < nblk; k++) {
-        const lz8 *s = base + off; long n;
-        if (s >= swp) s = scratch + (s - swp);
-        n = lz_inflate(z, s, dest + out, dest + raw_total);
-        if (n != (long)blk[2 * k]) return -1 - (int)k;
-        out += blk[2 * k]; off += (blk[2 * k + 1] + 2047ul) & ~2047ul;
-    }
-    return out == raw_total ? 0 : -100;
+    LzUnit u; int r;
+    lz_unit_begin(z, &u, dest, raw_total, nblk, blk, tail, scratch);
+    lz_unit_tailcopy(z, &u);
+    while ((r = lz_unit_step(z, &u, u.padded, 1)) > 0) ;
+    if (r < 0) return r;
+    return (u.k == u.nblk && u.out == raw_total) ? 0 : -100;
 }
 #endif
