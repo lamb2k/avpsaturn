@@ -1710,7 +1710,8 @@ unsigned long sat_gfx_host_s1x0, sat_gfx_host_s1y0;   /* test harness: the map w
    screens all get it. */
 static int cl_row = -1, cl_prev = -1;
 #define CL_SP(w, code) (((w) >> 16) == (code))
-static int cont_line_find(void)
+#define CL_CART __attribute__((noinline, section(".cartcode")))   /* low work RAM is full: this code runs from the cart tail */
+static CL_CART int cont_line_find(void)
 {
     u32 r;
     for (r = 8; r + 3 < S1_ROWS; r++)
@@ -1727,7 +1728,7 @@ static int cont_line_find(void)
     return -1;
 }
 /* Source word and column of output column col on the screen row row of the block that starts at cl_row. */
-static void cont_line_cell(u32 row, u32 col, u32 *wrow, u32 *src)
+static CL_CART void cont_line_cell(u32 row, u32 col, u32 *wrow, u32 *src)
 {
     u32 k = row - (u32)cl_row;
     if (k < 2)
@@ -3183,6 +3184,12 @@ extern volatile unsigned long sat_vlog[16 * 4];
 extern int sat_fps_hud(u32 shown, int fresh);
 static u32 fps_next;
 #endif
+#ifdef SAT_CHAR_RELOAD_HUD
+static __attribute__((noinline, section(".cartcode"))) void s1_forget(void)
+{
+    cache_setup(&s1_cache, VDP2_VRAM + CELL_S1, 32, SAT_GFX_S1_SLOTS, 4, SEC_S1, s1_slots, s1_head, HASH_SIZE_S1);
+}
+#endif
 void sat_gfx_draw(void)
 {
     u16 layers = snap.layers;
@@ -3211,7 +3218,7 @@ void sat_gfx_draw(void)
 #ifdef SAT_CHAR_RELOAD_HUD
         /* A reload of the stage file for another character set (SAT_CHAR_RELOAD) brings art for the same scroll 1 keys (the guest's HUD name and portrait at the Schaefer slot's codes): the
            cache is keyed by key alone and would keep the old file's cells, so the HUD kept "Maj.Schaefer" and his face for Wolverine. Forget them; every layer is redrawn anyway. */
-        cache_setup(&s1_cache, VDP2_VRAM + CELL_S1, 32, SAT_GFX_S1_SLOTS, 4, SEC_S1, s1_slots, s1_head, HASH_SIZE_S1);
+        s1_forget();
 #endif
     }
 #endif
