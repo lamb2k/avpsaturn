@@ -8,18 +8,30 @@
 #define LZDEC_H
 #define LZ_LB 9u
 #define LZ_DB 7u
+#ifdef _MSC_VER
+#define LZ_AL4
+#else
+#define LZ_AL4 __attribute__((aligned(4)))
+#endif
 typedef unsigned char lz8; typedef unsigned short lz16; typedef unsigned long lz32;
 typedef struct {
     const lz8 *src, *swp, *scr; lz32 bits; int nbits; lz8 *dst, *dend;   /* when src reaches swp it continues at scr (the tail kept in scratch) */
     lz16 lcnt[16], lsym[288], dcnt[16], dsym[32], ltab[1u << LZ_LB], dtab[1u << LZ_DB];
 } LzCtx;
-static const lz16 lz_lbase[29] = { 3, 4, 5, 6, 7, 8, 9, 10, 11, 13, 15, 17, 19, 23, 27, 31, 35, 43, 51, 59, 67, 83, 99, 115, 131, 163, 195, 227, 258 };
+static const lz16 lz_lbase[29] LZ_AL4 = { 3, 4, 5, 6, 7, 8, 9, 10, 11, 13, 15, 17, 19, 23, 27, 31, 35, 43, 51, 59, 67, 83, 99, 115, 131, 163, 195, 227, 258 };
 static const lz8 lz_lext[29] = { 0, 0, 0, 0, 0, 0, 0, 0, 1, 1, 1, 1, 2, 2, 2, 2, 3, 3, 3, 3, 4, 4, 4, 4, 5, 5, 5, 5, 0 };
-static const lz16 lz_dbase[30] = { 1, 2, 3, 4, 5, 7, 9, 13, 17, 25, 33, 49, 65, 97, 129, 193, 257, 385, 513, 769, 1025, 1537, 2049, 3073, 4097, 6145, 8193, 12289, 16385, 24577 };
+static const lz16 lz_dbase[30] LZ_AL4 = { 1, 2, 3, 4, 5, 7, 9, 13, 17, 25, 33, 49, 65, 97, 129, 193, 257, 385, 513, 769, 1025, 1537, 2049, 3073, 4097, 6145, 8193, 12289, 16385, 24577 };
 static const lz8 lz_dext[30] = { 0, 0, 0, 0, 1, 1, 2, 2, 3, 3, 4, 4, 5, 5, 6, 6, 7, 7, 8, 8, 9, 9, 10, 10, 11, 11, 12, 12, 13, 13 };
 static const lz8 lz_clorder[19] = { 16, 17, 18, 0, 8, 7, 9, 6, 10, 5, 11, 4, 12, 3, 13, 2, 14, 1, 15 };
 
-static void lz_need(LzCtx *z, int n) { while (z->nbits < n) { if (z->src == z->swp) z->src = z->scr; z->bits |= (lz32)*z->src++ << z->nbits; z->nbits += 8; } }
+/* 16 bits of the input per refill, always from an even address (every stream starts on a sector and the tail copy on an even offset): one aligned halfword read and a byte swap on the SH-2 (big endian) instead of
+   two byte reads. */
+#if defined(__sh__) && !defined(LZ_HOST)
+#define LZ_RD16(p) ((lz32)__builtin_bswap16(*(const lz16 *)(p)))
+#else
+#define LZ_RD16(p) ((lz32)(((const lz8 *)(p))[0] | ((lz32)((const lz8 *)(p))[1] << 8)))
+#endif
+static void lz_need(LzCtx *z, int n) { while (z->nbits < n) { if (z->src == z->swp) z->src = z->scr; z->bits |= LZ_RD16(z->src) << z->nbits; z->src += 2; z->nbits += 16; } }
 
 /* canonical table from code lengths: cnt[len], sym sorted by (length, symbol), tab[bit reversed code] = sym << 4 | len for codes of up to tb bits. */
 static void lz_build(lz16 *cnt, lz16 *sym, lz16 *tab, unsigned tb, const lz8 *len, int n)
@@ -80,7 +92,7 @@ static long lz_inflate(LzCtx *z, const lz8 *src, lz8 *dst, lz8 *dend)
     int last; lz8 *d0 = dst;
     const lz8 *swp = z->swp, *scr = z->scr;
     lz32 bb = 0; int nb = 0; const lz8 *sp = src; lz8 *d = dst;
-#define LZ_NEED(n) while (nb < (n)) { if (sp == swp) sp = scr; bb |= LZ_SHLB(*sp, nb); sp++; nb += 8; }
+#define LZ_NEED(n) while (nb < (n)) { if (sp == swp) sp = scr; bb |= LZ_SHLB(LZ_RD16(sp), nb); sp += 2; nb += 16; }
 #define LZ_BITS(n, v) { LZ_NEED(n); (v) = (int)(bb & lz_mask[n]); bb = LZ_SHR(bb, n); nb -= (n); }
 #define LZ_SAVE() { z->src = sp; z->bits = bb; z->nbits = nb; }
 #define LZ_LOAD() { sp = z->src; bb = z->bits; nb = z->nbits; }
@@ -142,7 +154,9 @@ static long lz_inflate(LzCtx *z, const lz8 *src, lz8 *dst, lz8 *dend)
                     if (s < 0 || s >= 30) return -1;
                     x = lz_dext[s]; dist = lz_dbase[s]; if (x) { int v; LZ_BITS(x, v); dist += v; }
                     if (d - d0 < dist || d + len > dend) return -1;
-                    p = d - dist; while (len--) *d++ = *p++;
+                    p = d - dist;
+                    if (len >= 4 && !(((lz32)d | (lz32)p) & 1)) { while (len >= 2) { *(lz16 *)d = *(const lz16 *)p; d += 2; p += 2; len -= 2; } }   /* both even: halfword moves (dist >= 2: reads stay behind the writes) */
+                    while (len--) *d++ = *p++;
                 }
             }
         } else return -1;

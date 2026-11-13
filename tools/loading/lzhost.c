@@ -1,5 +1,6 @@
 /* lzhost.c: host build (MSVC DLL) of saturn/rt/lzdec.h for tools/loading/lzstore.py: decode check and the in-place simulation of the loader's lz_unit, from the very same source.
    build: cl /nologo /O2 /LD tools/loading/lzhost.c /I saturn/rt /Fe:lzhost.dll */
+#define LZ_HOST 1
 #include "lzdec.h"
 static LzCtx ctx;
 static lz8 scratch[1 << 17];
