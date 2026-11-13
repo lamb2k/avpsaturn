@@ -173,6 +173,9 @@ static void halt(unsigned long s, unsigned long d)
 }
 #define LOAD_CHUNK 128   /* sectors per read, so the tick moves while a file loads */
 static unsigned long load_head[512];
+#if defined(SAT_LOAD_SUM) || defined(SAT_LOAD_SELFTEST)
+unsigned long sat_ld_diag[8];   /* (bss: the loader's image holds only .text) test words: 0 loads done, 1 last SAT_LOAD_SUM sum, 2 selftest fails, 3 first failing round, 4 rounds done, 5 rounds in the store, 7 the marker 'LZST' a Ymir route scans for */
+#endif
 #ifdef SAT_LOAD_LZ   /* lane loading, 2026-11-12: compressed boot files and tile regions (tools/lzstore.py, saturn/rt/lzdec.h) */
 #include "lzdec.h"
 #define LZ_MAXB 80
@@ -386,7 +389,7 @@ static long load_regions(const char *name, void (*mark)(void))
             if (dst == 1) continue;
             for (q = 0; q < n; q++) sum = sum * 0x9e3779b1u + d[q];
         }
-        ((volatile unsigned long *)0x06013fb8u)[0]++; ((volatile unsigned long *)0x06013fb8u)[1] = sum;
+        sat_ld_diag[0]++; sat_ld_diag[1] = sum;
     }
 #endif
     GFS_Close(h);
@@ -758,17 +761,18 @@ int main(void)
     if (LOADER_API[3] & 0x100u) *(volatile unsigned char *)GUEST_SEL_ADDR = (unsigned char)(LOADER_API[3] >> 9 & 3u);
 #endif
 #endif
-#ifdef SAT_LOAD_SELFTEST   /* test build only: load every round file in turn and compare the SAT_LOAD_SUM sum of its regions with SUMS.BIN (made by tools/sector_store.py from the original round files). Never enters the game. Results at
-                              0x06013fc0 (files that differ or failed), 0x06013fc4 (first of them), 0x06013fc8 (files done), 0x06013fcc (the count of rounds), 0x06013fd0 the marker 'LZST'. The boot display's stripes show 0xAnnn while running, 0xFnnn at the end (nnn = fails). */
+#ifdef SAT_LOAD_SELFTEST   /* test build only: load every round file in turn and compare the SAT_LOAD_SUM sum of its regions with SUMS.BIN (made by tools/sector_store.py from the original round files). Never enters the game.
+                              Results in sat_ld_diag (words 2 fails, 3 first failing round, 4 rounds done, 5 rounds in the store, 7 the marker). The boot display's stripes show 0xAnnn while running, 0xFnnn at the end (nnn = fails). */
     {
-        volatile unsigned long *res = (volatile unsigned long *)0x06013fc0u, *sum = (volatile unsigned long *)0x06013fb8u;
+        volatile unsigned long *res = sat_ld_diag + 2, *sum = sat_ld_diag;
+        sat_ld_diag[7] = 0x4c5a5354u;
         unsigned long r, nr = 0, fails = 0, first = 0xffffffffu;
         char nm[] = "R000.BIN";
         GFS_Reset();
         if (GFS_Init(1, gfs_work, &dir) < 0) halt(0xe0c1, 0);
         load("SUMS.BIN", (void *)lz_scr, 0x700);
         GFS_Reset();
-        res[0] = 0; res[1] = 0xffffffffu; res[2] = 0; ((volatile unsigned long *)0x06013fd0u)[0] = 0x4c5a5354u;   /* 'LZST': the marker a Ymir route scans for */
+        res[0] = 0; res[1] = 0xffffffffu; res[2] = 0;
         for (r = 0; r < 512; r++) {
             long got;
             nm[1] = (char)('0' + r / 100); nm[2] = (char)('0' + r / 10 % 10); nm[3] = (char)('0' + r % 10);
