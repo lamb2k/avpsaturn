@@ -710,6 +710,8 @@ def main():
         bind_flags = ["-DSAT_GUESTS"] if "SAT_GUESTS" in os.environ.get("KERNEL_CFLAGS", "") else []
         if "SAT_WOLVERINE_DEBUG" in os.environ.get("KERNEL_CFLAGS", ""):
             bind_flags.append("-DSAT_WOLVERINE_DEBUG")
+        if CAPTURE_INVULN:   # reveal-video capture build only
+            bind_flags.append("-DSAT_CAPTURE_INVULN")
         if NATIVE_GFX:
             bind_flags.append("-DSAT_WV_NATIVE_GFX")
         if "SAT_GUEST_GROUPS_MM" in os.environ.get("KERNEL_CFLAGS", ""):   # lane wv-speed: game_bind.c notes sprite groups only for Mega Man (and the skin build's Wolverine shots)
