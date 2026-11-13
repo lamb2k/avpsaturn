@@ -756,6 +756,9 @@ static void round_check(void)
 #endif
 
 unsigned long sat_tk_run, sat_tk_skip;   /* tasks run and runnable tasks cut off by a vblank, since boot (the readout's TASK line) */
+#ifdef SAT_SCRIPT_FREEZE
+extern volatile u32 sat_freeze_until;
+#endif
 /* Dispatcher 0xd86. A vblank sets the game's flag at 0xff0266 through f_e0e, which restarts the walk from task 0. */
 void f_d86(void)
 {
@@ -780,6 +783,9 @@ void f_d86(void)
             st = r8(REC(i));
             cpu.a[0] = REC(i); LOWW(cpu.d[0], 15 - i);
             cpu.d[1] = (cpu.d[1] & 0xffffff00u) | st;
+#ifdef SAT_SCRIPT_FREEZE
+            if (i == 4 && (int)(sat_freeze_until - sat_dbg.vblanks) > 0) { cur = -1; continue; }   /* look-check test flag (pad.c): the tick task waits */
+#endif
             if (st >= 4) {
 #ifdef SAT_PROF_LINE
                 if (i == 4) {   /* the gameplay loop: one run is one tick */

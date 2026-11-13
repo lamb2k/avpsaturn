@@ -115,6 +115,9 @@ void sat_pad_tick(void)
    stage (menus, loads) it is the vblank as before. */
 extern u8 RAMB[];
 static u32 sc_in, sc_base, sc_cnt, sc_last;
+#ifdef SAT_SCRIPT_FREEZE
+volatile u32 sat_freeze_until;   /* vblank until which the dispatcher does not start the gameplay tick (test flag, look checks) */
+#endif
 static void __attribute__((noinline, section(".cartcode"))) sc_refresh(void)
 {
     u32 stage = RAMB[0x81e9], vb = sat_vblanks_now(), b = RAMB[0x8019], idx;
@@ -124,23 +127,15 @@ static void __attribute__((noinline, section(".cartcode"))) sc_refresh(void)
         sc_cnt += (b - sc_last) & 255u; sc_last = b;
         idx = sc_base + sc_cnt;
 #ifdef SAT_SCRIPT_FREEZE
-        /* Test flag (lane perf-pic, look checks): at the stage ticks below the game's tick task stops for 100 vblanks (a spin here, interrupts on), the vblank handler goes on taking snapshots and the slave
+        /* Test flag (lane perf-pic, look checks): after the tick that reads the pad at the stage ticks below, the game's tick task is not started for 100 vblanks, the vblank handler goes on taking snapshots and the slave
            goes on drawing, so the screen settles on the picture of that exact game state: two builds with the same game state show the same picture, whatever their frame skips. The run stops being
-           comparable by RAM after the first freeze (the wait moves the vblank counter), so RAM checks use a build without this flag. */
+           comparable by RAM after the first freeze (the pause moves the vblank counter), so RAM checks use a build without this flag. */
         {
             static const u16 marks[] = { 500, 900, 1400, 2000, 2600, 3200, 3700 };
             static u8 done;
             u32 k;
             for (k = 0; k < sizeof marks / sizeof marks[0]; k++)
-                if (sc_cnt == marks[k] && !((done >> k) & 1))
-                {   /* the game reads its inputs with interrupts masked: open them for the wait (the vblank has to come), put the mask back after */
-                    u32 v0 = vb, sr;
-                    done |= (u8)(1u << k);
-                    __asm__ volatile ("stc sr,%0" : "=r"(sr));
-                    __asm__ volatile ("ldc %0,sr" : : "r"(0));
-                    while (((sat_vblanks_now() - v0) & 0xffffffffu) < 100u) ;
-                    __asm__ volatile ("ldc %0,sr" : : "r"(sr));
-                }
+                if (sc_cnt == marks[k] && !((done >> k) & 1)) { done |= (u8)(1u << k); sat_freeze_until = vb + 100u; }   /* the game reads its inputs inside the vblank handler (the arcade's IRQ samples them): no waiting here; the dispatcher (kernel.c) stops starting the tick task until that vblank */
         }
 #endif
     }
