@@ -664,7 +664,7 @@ volatile u8 sat_duel_plain;   /* test hook (play_versus.py PLAIN=1), 0 in play: 
 #ifdef SAT_CHAR_RELOAD
 /* Coverage lane (co-op, continue): the file a stage runs on follows the characters in play (rounds.inc), but it was chosen once, at the stage word. A player who joins mid-stage, or a
    continue that picks another character, brought a character the file does not hold (no sprites for him). guests.c sat_char_reload watches the live player blocks and asks for the file of the
-   wider mask; round_file_for is that file with the bonus guests applied, as the load below picks it. */
+   characters in play; round_file_for is that file with the bonus guests applied, as the load below picks it. */
 static int round_file_for(int row, int ch)
 {
     int w = row_file[row][mask_variant[ch]];
@@ -697,7 +697,7 @@ static void round_check(void)
     stale = !row && !row_loaded && round_loaded != sat_guest_file(0, 0, 0, row_file[0][0]);
 #endif
 #ifdef SAT_CHAR_RELOAD
-    if (row && row == row_loaded && !stale && sat_char_reload(row, chars_ld, want0_ld, round_file_for, &chars)) settled = 0;   /* a wider mask asks for another file: fall through to the load */
+    if (row && row == row_loaded && !stale && sat_char_reload(row, chars_ld, want0_ld, round_file_for, &chars)) ;   /* a wider mask asks for another file: fall through to the load (after the usual 12 vblank settle) */
     else
 #endif
     if (row == row_loaded && !stale) { settled = 0; return; }

@@ -115,7 +115,7 @@ extern unsigned char *PAGE[256];
 #ifdef SAT_CHAR_RELOAD
 /* Co-op and continue (coverage lane, SAT_CHAR_RELOAD): the stage file holds the characters that were in play when it was chosen (kernel.c round_check). A player who joins mid-stage, or a
    continue that picks another character, brings one the file does not hold: no sprites for him until the next stage word. Called from round_check every pass while a stage is loaded; looks
-   at the live player blocks (ff8380, ff8480, ff8580; +0xd2 = the character, the ff81cc bit index) while the stage plays (mode 2, state 4), and asks for the file of the wider mask once
+   at the live player blocks (ff8380, ff8480, ff8580; +0xd2 = the character, the ff81cc bit index) while the stage plays (mode 2, state 4), and asks for the file of the characters in play once
    it has held for 90 vblanks (a select cursor or a block being set up must not trigger a load). Returns 1 while it asks (the caller then loads as for a new stage word) and sets *chars. */
 extern unsigned long sat_vblanks_now(void);
 int sat_char_reload(int row, int ld_chars, int ld_file, int (*file_of)(int, int), unsigned char *chars)
@@ -129,7 +129,7 @@ int sat_char_reload(int row, int ld_chars, int ld_file, int (*file_of)(int, int)
     for (i = 0; i < 3; i++)
         if (b[0x8380 + 0x100 * i]) pc |= 1u << (b[0x8380 + 0x100 * i + 0xd2] & 3);
     if (!(pc & ~(unsigned)ld_chars)) { since = 0; return 0; }
-    m = (unsigned)ld_chars | pc;
+    m = pc;   /* the characters in play now, not the union: the guest files cover one and two character masks (a union of three is the arcade's one-for-all file, which holds no guest art) */
     if (file_of(row, (int)m) == ld_file) { since = 0; return 0; }   /* the loaded file already holds them */
     if (!since) since = sat_vblanks_now() | 1;
     if (sat_vblanks_now() - (since & ~1ul) < 90) return 0;
