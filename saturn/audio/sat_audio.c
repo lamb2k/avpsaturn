@@ -279,8 +279,8 @@ static void start_sfx(const Sfx *s, const u8 *mb)
     unsigned mask = (unsigned)(s->mask_hi << 8 | s->mask_lo);
     u32 samples = be32(s->samples), offset = be32(s->offset);
 #ifdef SAT_PACK_RATE
-    static const u16 rate_hz[3] = { 11025u, 8000u, 5512u };
-    static const u16 rate_oct[3] = { (u16)(0xeu << 11), (u16)(0xdu << 11 | 462u), (u16)(0xdu << 11) };   /* SCSP rate = 44100 * 2^OCT * (1 + FNS / 1024): OCT -2 = 11025, OCT -3 + FNS 462 = 7999.8, OCT -3 = 5512.5 */
+    static const u16 rate_hz[3] __attribute__((aligned(4))) = { 11025u, 8000u, 5512u };
+    static const u16 rate_oct[3] __attribute__((aligned(4))) = { (u16)(0xeu << 11), (u16)(0xdu << 11 | 462u), (u16)(0xdu << 11) };   /* SCSP rate = 44100 * 2^OCT * (1 + FNS / 1024): OCT -2 = 11025, OCT -3 + FNS 462 = 7999.8, OCT -3 = 5512.5 */
     unsigned rc = s->rate < 3 ? s->rate : 0;
     u32 frames = samples * FRAMES_PER_SECOND / rate_hz[rc] + 2;
 #else
