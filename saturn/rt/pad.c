@@ -32,8 +32,8 @@ static u32 __attribute__((noinline, optimize("Os"), section(".cartcode"))) scrip
         attack = f >= 2600 && f < 4200 && f % 310 < 7;
         jump = f >= 2600 && f < 4200 && f % 430 < 7;
 #ifdef SAT_INPUT_SCRIPT_WV
-        /* lane wv-speed, Wolverine route (test flag): one right on the character select picks him (the start at f 1410 confirms), and his special (attack + jump together, 8 ticks) every 260 */
-        right = right || (f >= 1385 && f < 1388);
+        /* lane wv-speed, Wolverine route (test flag): one right on the character select picks him (it is up at f 1790 to 1950; the start at f 1950 confirms), and his special (attack + jump together, 8 ticks) every 260 */
+        right = right || (f >= 1810 && f < 1814);
         if (f >= 2600 && f < 4200 && f % 260 < 8) { attack = 1; jump = 1; }
 #endif
     } else {
