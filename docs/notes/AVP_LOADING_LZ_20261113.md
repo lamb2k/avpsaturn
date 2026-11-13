@@ -80,7 +80,7 @@ Build gates (the build fails on them), final recipe build `L6`: see section 8. M
 - **Ymir data misalignment gate** (`tools/ymir_misalign_gate.py --run`, my strict exe copy, default route boot, title, ARCADE, stage 1, KO, continue): **0 data accesses** on L5 (7,064 instruction fetch artefacts filtered) and on the final L6 (7,135).
 - **TICK 60 in play, stock Ymir (L6, stage 1):** `TICK 60 CUT 31`, `PIC 60 DONE 60 MISS 0 SKIP 0 HELD 0` (`runs\l6_a\play_crop.png`); L5: `TICK 60 CUT 14`, same PIC/DONE/MISS.
 - **Routes played on L6 (EMULATED):** `l6_a` (boot, ARCADE, stage 1, KO, game over, ranking, title, ARCADE, stage 1, pause, quit to title), `l6_vs`, `l6_br`, `l6_end` (stage select ENDING: arena, ending, credits, front end). Times in section 4; the same routes on the fix7p3 recipe (`l5b_*`) are the baseline. HW-model runs `m5b` / `m5` (stage 1).
-- **Staged:** `E:\AvP\package-integrationenrirvp_3h_A_fix7p4` (track01 = L6's ISO, 26 audio tracks as in the other discs, cue, README.txt, SHA256SUMS). The disc is on fix7q2 (`628bab5b`) as asked.
+- **Staged:** `E:\AvP\package-integration\fenrir\avp_3h_A_fix7p4` (track01 = L6's ISO, 26 audio tracks as in the other discs, cue, README.txt, SHA256SUMS). The disc is on fix7q2 (`628bab5b`) as asked.
 
 ## 9. Known issues
 
