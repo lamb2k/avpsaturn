@@ -81,6 +81,25 @@ def main():
     if nums != list(range(len(nums))):
         raise SystemExit("sector store: round files not numbered 0..n-1")
     files = [p.read_bytes() for p in names]
+    if os.environ.get("SAT_LOAD_LZ") == "1":   # compressed tile regions (tools/lzstore.py); the plain store below stays the default
+        import lzstore
+        store, streams, info = lzstore.build_lz(files, int(os.environ.get("STORE_DUP", "512")))
+        bad = [i for i, b in enumerate(files) if lzstore.rebuild_round(store, i) != b]
+        print("lz store", info)
+        if os.environ.get("SAT_LOAD_SELFTEST") == "1":
+            (disc / "SUMS.BIN").write_bytes(b"".join(struct.pack(">I", lzstore.expected_sum(b)) for b in files))
+        rounds = [[0]] * len(files)
+        if bad:
+            raise SystemExit(f"lz store: rounds differ {bad}")
+        (disc / "STORE.BIN").write_bytes(store)
+        if keep:
+            keep.mkdir(parents=True, exist_ok=True)
+            for p in keep.glob("R[0-9][0-9][0-9].BIN"):
+                p.unlink()
+        for p in names:
+            shutil.move(str(p), keep / p.name) if keep else p.unlink()
+        print("sector store (lz)", dict(rounds=len(files), round_sectors=sum(len(b) for b in files) // SEC, store_sectors=len(store) // SEC))
+        return
     store, rounds = build(files, int(os.environ.get("STORE_DUP", "512")))
     bad = [i for i, b in enumerate(files) if rebuild(store, i) != b]
     if bad:

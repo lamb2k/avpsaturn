@@ -941,8 +941,18 @@ SECTIONS {{
     b = OBJ / "boot.o"
     # SECTOR_STORE (default 1; 0 = old R*.BIN files, for A/B): the round files become runs of one shared STORE.BIN (tools/sector_store.py), so the game fits an 80-minute CD-R.
     store = os.environ.get("SECTOR_STORE", "1") != "0"
+    # SAT_LOAD_LZ (BOOT_CFLAGS -DSAT_LOAD_LZ, default off; lane loading 2026-11-12): compressed tile regions in the store and compressed boot files (tools/lzstore.py, saturn/rt/lzdec.h).
+    lz = "-DSAT_LOAD_LZ" in os.environ.get("BOOT_CFLAGS", "")
+    if lz:
+        if not store:
+            raise SystemExit("SAT_LOAD_LZ needs SECTOR_STORE")
+        os.environ["SAT_LOAD_LZ"] = "1"
+        if "-DSAT_LOAD_SELFTEST" in os.environ.get("BOOT_CFLAGS", ""):
+            os.environ["SAT_LOAD_SELFTEST"] = "1"
     if store:
         print(sh([sys.executable, REPO / "tools/sector_store.py", ISO, "--keep", WORK / "rounds"]).strip())
+        if lz:
+            print(sh([sys.executable, REPO / "tools/lzstore.py", "boot", ISO, "LW.BIN", "ROM.BIN", "OPX.BIN", "COLD1.BIN", "HW.BIN"]).strip())
     else:
         (ISO / "STORE.BIN").unlink(missing_ok=True)
     sh([GCC, "-m2", "-mb", "-O2", "-w", "-fno-builtin", "-I", SGL / "INC", f"-DCOLD1_ADDR={cold1_at:#x}u"] + (["-DSECTOR_STORE"] if store else []) + (["-DSTORE_HEAD2"] if head_sectors == 2 else []) + (["-DSAT_WV_REVEAL"] + ([f"-DGUEST_SEL_ADDR={syms['_sat_guest_sel']:#x}u"] if "_sat_guest_sel" in syms else []) if "SAT_WV_REVEAL" in os.environ.get("KERNEL_CFLAGS", "") else []) + boot_flags() + [ "-c", HERE / "boot.c", "-o", b])

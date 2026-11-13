@@ -11,7 +11,12 @@
 extern unsigned char _bstart, _bend;
 static unsigned char gfs_work[GFS_WORK_SIZE(1)];
 static GfsDirTbl dir;
-static GfsDirName names[256];
+#ifdef SAT_LOAD_LZ
+#define BOOT_NAMES 64   /* the disc has 13 root files: the 256 entry table's 3 KB pays for the decoder's buffers */
+#else
+#define BOOT_NAMES 256
+#endif
+static GfsDirName names[BOOT_NAMES];
 /* ---- boot display (hardware bring-up, hwboot lane 2026-11-10) ----
    The BIOS leaves its SEGA logo up until the runtime's first picture, and a failure here used to spin with the logo still showing. From the first
    instruction of this file the screen is ours: VDP2's back screen in per-line mode shows one band per boot step (a white 2-line tick moves inside
@@ -167,6 +172,14 @@ static void halt(unsigned long s, unsigned long d)
     diag_fail((unsigned)s, C_RED, (unsigned)d & 0xffffu);
 }
 #define LOAD_CHUNK 128   /* sectors per read, so the tick moves while a file loads */
+static unsigned long load_head[512];
+#ifdef SAT_LOAD_LZ   /* lane loading, 2026-11-12: compressed boot files and tile regions (tools/lzstore.py, saturn/rt/lzdec.h) */
+#include "lzdec.h"
+#define LZ_MAXB 80
+#define LZ_TMAX 6144
+static LzCtx lz_ctx;
+static lz32 lz_scr[(LZ_TMAX + 8) / 4 + 1];   /* the tail kept out of the way of the in-place decode (also the self test's sum table) */
+#endif
 static void load(const char *name, void *dest, unsigned long code)
 {
     Sint32 id = GFS_NameToId((Sint8 *)name), ss, n, last, got, total = 0, left;
@@ -177,6 +190,30 @@ static void load(const char *name, void *dest, unsigned long code)
     if (!h) halt(code | 2, 0);
     GFS_GetFileSize(h, &ss, &n, &last);
     GFS_SetTmode(h, GFS_TMODE_CPU);
+#ifdef SAT_LOAD_LZ
+    /* A compressed boot file: header sector 'LZB1', raw_total, tail, nblk, (raw, compressed) pairs, then each stream padded to whole sectors. Read into the end of the destination, decode forward in place. */
+    if (n > 1 && GFS_Fread(h, 1, load_head, 2048) == 2048) {
+        if (load_head[0] == 0x4c5a4231ul) {
+            lz32 raw_total = load_head[1], tail = load_head[2], nblk = load_head[3], k, padded = 0, secs;
+            lz8 *p;
+            if (nblk > 250 || tail > LZ_TMAX) { GFS_Close(h); halt(code | 4, 1); }
+            for (k = 0; k < nblk; k++) padded += (load_head[5 + 2 * k] + 2047ul) & ~2047ul;
+            p = (lz8 *)dest + raw_total - padded;
+            for (secs = padded >> 11; secs > 0; ) {
+                Sint32 c = secs > LOAD_CHUNK ? LOAD_CHUNK : (Sint32)secs;
+                got = GFS_Fread(h, c, p, 2048 * c);
+                if (got != 2048 * c) { GFS_Close(h); halt(code | 3, (unsigned long)got); }
+                p += 2048 * c; secs -= c;
+                diag_tick();
+            }
+            if (lz_unit(&lz_ctx, (lz8 *)dest, raw_total, nblk, load_head + 4, tail, (lz8 *)lz_scr)) { GFS_Close(h); halt(code | 5, 0); }
+            GFS_Close(h);
+            LOADER_DIAG[3] = code; LOADER_DIAG[4] = raw_total;
+            return;
+        }
+        if (GFS_Seek(h, 0, GFS_SEEK_SET) < 0) { GFS_Close(h); halt(code | 6, 0); }
+    }
+#endif
     for (left = n; left > 0; ) {
         Sint32 c = left > LOAD_CHUNK ? LOAD_CHUNK : left;
         got = GFS_Fread(h, c, d, ss * c);
@@ -189,7 +226,6 @@ static void load(const char *name, void *dest, unsigned long code)
 }
 /* Between rounds the runtime calls this through LOADER_API (lifted code never does): one file of whole sectors, its first sector a list of
    u32 count, then count pairs of u32 destination, u32 bytes (multiples of 2048), destination 1 being a call to mark. The caller has masked interrupts and stopped the slave. Returns sectors read, or a negative stage. */
-static unsigned long load_head[512];
 #ifdef SECTOR_STORE
 /* SECTOR_STORE (tools/sector_store.py): the round files live as runs of one shared STORE.BIN. RNNN.BIN names round NNN; its runs, read in order,
    are that file's sectors, so the walk below sees the same stream and the cart gets the same bytes. Adjacent runs were joined when packed. */
@@ -200,7 +236,7 @@ static unsigned long store_dir[1024], store_run[512];
 static unsigned long store_dir[512], store_run[512];
 #define STORE_HS 1
 #endif
-static Sint32 run_at, run_left, run_sec = -1, run_next, run_end;
+static Sint32 run_at, run_left, run_sec = -1, run_next, run_end, run_reseek;   /* run_reseek: another read moved the file pointer (the compressed tile region): seek to run_at before the next read */
 #ifdef SAT_LOAD_COALESCE
 static unsigned long coal_big;   /* set once a region larger than COAL_MAX has been read after the mark */
 #define COAL_MAX 64u   /* sectors; every restore region of the stage files and the front end file is below this, the tile and sound regions are not */
@@ -222,7 +258,10 @@ static Sint32 vread(GfsHn h, Sint32 secs, unsigned char *dest)
             }
             run_at = (Sint32)(store_run[run_next % 512] >> 14); run_left = (Sint32)(store_run[run_next % 512] & 0x3fff); run_next++;
             if (GFS_Seek(h, run_at, GFS_SEEK_SET) < 0) return -3;
+        } else if (run_reseek) {
+            if (GFS_Seek(h, run_at, GFS_SEEK_SET) < 0) return -3;
         }
+        run_reseek = 0;
         take = secs < run_left ? secs : run_left;
         if (take > LOAD_CHUNK) take = LOAD_CHUNK;
         got = GFS_Fread(h, take, dest, take * 2048);
@@ -232,6 +271,36 @@ static Sint32 vread(GfsHn h, Sint32 secs, unsigned char *dest)
     }
     return 0;
 }
+#ifdef SAT_LOAD_LZ
+static unsigned long lz_blob_base;
+/* Region i of the head has bit 0 of its byte count set: its tile data is stored compressed (tools/lzstore.py). The unit table sits at byte 1024 of the head sector: 'LZ01', raw_total, tail, nblk,
+   nblk pairs (raw bytes, compressed bytes), nblk blob sectors (relative to the blob area). The blobs are read into the END of the region's destination, each padded to whole sectors, and decoded
+   forward in place (lzdec.h lz_unit): the first sectors of the destination are free while the blobs sit behind them. Returns 0 or a negative code. */
+static long lz_tile(GfsHn h, unsigned long i)
+{
+    static lz32 blk[2 * LZ_MAXB];
+    lz32 *info = load_head + 256, nblk, raw_total, tail, k, padded = 0;
+    lz8 *dest = (lz8 *)load_head[1 + i * 2], *p;
+    if (info[0] != 0x4c5a3031ul) return -1;
+    raw_total = info[1]; tail = info[2]; nblk = info[3];
+    if (nblk > LZ_MAXB || tail > LZ_TMAX) return -2;
+    for (k = 0; k < nblk; k++) { blk[2 * k] = info[4 + 2 * k]; blk[2 * k + 1] = info[5 + 2 * k]; padded += (blk[2 * k + 1] + 2047ul) & ~2047ul; }
+    if (padded > raw_total) return -3;
+    p = dest + raw_total - padded;
+    for (k = 0; k < nblk; k++) {
+        Sint32 secs = (Sint32)((blk[2 * k + 1] + 2047ul) >> 11);
+        if (GFS_Seek(h, (Sint32)(lz_blob_base + info[4 + 2 * nblk + k]), GFS_SEEK_SET) < 0) return -4;
+        while (secs > 0) {
+            Sint32 c = secs > LOAD_CHUNK ? LOAD_CHUNK : secs;
+            if (GFS_Fread(h, c, p, 2048 * c) != 2048 * c) return -5;
+            diag_tick();
+            p += 2048 * c; secs -= c;
+        }
+    }
+    run_reseek = 1;
+    return lz_unit(&lz_ctx, dest, raw_total, nblk, blk, tail, (lz8 *)lz_scr) ? -6 : 0;
+}
+#endif
 static long load_regions(const char *name, void (*mark)(void))
 {
     Sint32 id, total = 1, r = (name[1] - '0') * 100 + (name[2] - '0') * 10 + (name[3] - '0');
@@ -251,6 +320,9 @@ static long load_regions(const char *name, void (*mark)(void))
 #endif
         run_sec = -1;
     }
+#ifdef SAT_LOAD_LZ
+    lz_blob_base = store_dir[2 + 2 * store_dir[1]];
+#endif
     if ((unsigned long)r >= store_dir[1]) { GFS_Close(h); GFS_Reset(); return -0x100; }
     run_next = (Sint32)store_dir[2 + r * 2]; run_end = run_next + (Sint32)store_dir[3 + r * 2]; run_left = 0;
     if (vread(h, 1, (unsigned char *)load_head)) { GFS_Close(h); GFS_Reset(); return -0x101; }
@@ -263,6 +335,16 @@ static long load_regions(const char *name, void (*mark)(void))
     for (i = 0; i < load_head[0]; i++) {
         Sint32 secs = (Sint32)(load_head[2 + i * 2] / 2048u);
         if (load_head[1 + i * 2] == 1) { mark(); continue; }
+#ifdef SAT_LOAD_LZ
+        if (load_head[2 + i * 2] & 1u) {
+            if (lz_tile(h, i)) { GFS_Close(h); GFS_Reset(); return -4 - (long)i; }
+            total += (Sint32)(load_head[2 + i * 2] / 2048u);
+#ifdef SAT_LOAD_COALESCE
+            coal_big = 1;
+#endif
+            continue;
+        }
+#endif
 #ifdef SAT_LOAD_COALESCE
         /* lane loading, 2026-11-12 (default off): the file lists dozens of regions of one to a few sectors (the ROM pages a stage restores, ~35 in a stage file, ~70 in the front end file), each its own
            GFS read, and each read is its own play command: the CD block seeks and the drive loses a turn between two reads of neighbouring sectors (Ymir: 37 ms each; a console is probably worse). They lie
@@ -297,7 +379,7 @@ static long load_regions(const char *name, void (*mark)(void))
     {
         unsigned long k, q, sum = 0;
         for (k = 0; k < load_head[0]; k++) {
-            unsigned long dst = load_head[1 + k * 2], n = load_head[2 + k * 2] / 4u;
+            unsigned long dst = load_head[1 + k * 2], n = (load_head[2 + k * 2] & ~1ul) / 4u;
             volatile unsigned long *d = (volatile unsigned long *)(dst | 0x20000000u);
             if (dst == 1) continue;
             for (q = 0; q < n; q++) sum = sum * 0x9e3779b1u + d[q];
@@ -570,6 +652,9 @@ static void cyc_diag(void)
 }
 #endif
 
+#ifdef SAT_LOAD_SELFTEST
+static void st_mark(void) {}
+#endif
 int main(void)
 {
     unsigned char *c;
@@ -646,7 +731,7 @@ int main(void)
     if (tried) diag_info(0x2001u);
     GFS_DIRTBL_TYPE(&dir) = GFS_DIR_NAME;
     GFS_DIRTBL_DIRNAME(&dir) = names;
-    GFS_DIRTBL_NDIR(&dir) = 256;
+    GFS_DIRTBL_NDIR(&dir) = BOOT_NAMES;
     if (GFS_Init(1, gfs_work, &dir) < 0) halt(0xe001, 0);
     diag_stage_k(0, 0);                                 /* GFS_Init passed */
 #ifdef SAT_BOOT_DISC_ORDER   /* lane loading, 2026-11-12: the five files in the order they lie on the disc (COLD1 43, HW 109, LW 385, OPX 896, ROM 1106), so the drive sweeps forward once instead of jumping back four times. Same bytes to the same addresses. */
@@ -670,6 +755,31 @@ int main(void)
 #ifdef GUEST_SEL_ADDR   /* a saved BONUS CHARACTERS setting replaces the build default in the cart data (guests.c sat_guest_sel), so no runtime code has to apply it */
     if (LOADER_API[3] & 0x100u) *(volatile unsigned char *)GUEST_SEL_ADDR = (unsigned char)(LOADER_API[3] >> 9 & 3u);
 #endif
+#endif
+#ifdef SAT_LOAD_SELFTEST   /* test build only: load every round file in turn and compare the SAT_LOAD_SUM sum of its regions with SUMS.BIN (made by tools/sector_store.py from the original round files). Never enters the game. Results at
+                              0x06013fc0 (files that differ or failed), 0x06013fc4 (first of them), 0x06013fc8 (files done), 0x06013fcc (the count of rounds). The boot display's stripes show 0xAnnn while running, 0xFnnn at the end (nnn = fails). */
+    {
+        volatile unsigned long *res = (volatile unsigned long *)0x06013fc0u, *sum = (volatile unsigned long *)0x06013fb8u;
+        unsigned long r, nr = 0, fails = 0, first = 0xffffffffu;
+        char nm[] = "R000.BIN";
+        GFS_Reset();
+        if (GFS_Init(1, gfs_work, &dir) < 0) halt(0xe0c1, 0);
+        load("SUMS.BIN", (void *)lz_scr, 0x700);
+        GFS_Reset();
+        res[0] = 0; res[1] = 0xffffffffu; res[2] = 0;
+        for (r = 0; r < 512; r++) {
+            long got;
+            nm[1] = (char)('0' + r / 100); nm[2] = (char)('0' + r / 10 % 10); nm[3] = (char)('0' + r % 10);
+            got = load_regions(nm, st_mark);
+            if (r == 0) nr = store_dir[1];
+            if (got < 0 || sum[1] != lz_scr[r]) { fails++; if (first == 0xffffffffu) first = r; }
+            res[0] = fails; res[1] = first; res[2] = r + 1; res[3] = nr;
+            if ((r & 7) == 0) diag_info(0xa000u | (unsigned)r);
+            if (r + 1 >= nr) break;
+        }
+        diag_info(0xf000u | (unsigned)(fails & 0xfff));
+        for (;;) __asm__ volatile ("nop");
+    }
 #endif
     LOADER_API[0] = (unsigned long)load_regions;
     diag_stage_k(0, 0);                                 /* the runtime is entered next */
