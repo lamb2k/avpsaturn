@@ -235,3 +235,17 @@ void f_1689a(void)
     R->d[0] = c.distance;
     R->d[1] = c.reach;
 }
+
+#ifdef SAT_CAPTURE_INVULN
+/* Capture-only switch (default off; set only in the reveal-video capture build, never in a release recipe): hits on a player do no damage, so
+   footage for the reveal video shows the game's own health bars at full without any RAM write from outside. damage_apply (0x1d504, a1 = defender)
+   is the game's own damage path (docs/notes/AVP_NOTES_ACTOR.md); the players are the blocks at 0xff8380 and 0xff8480. Enemies take damage as stock.
+   Hit reactions, effects and sounds still happen; only the health subtraction is skipped. */
+void f_1d504(void)
+{
+    extern void lifted_1d504(void);
+    u32 a1 = R->a[1];
+    if (a1 == 0xff8380u || a1 == 0xff8480u) return;
+    lifted_1d504();
+}
+#endif

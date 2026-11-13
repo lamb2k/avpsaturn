@@ -63,6 +63,8 @@ OVERRIDES = () if os.environ.get("GAME_OVERRIDES") == "0" else tuple((REPO / "sa
 NATIVE_GFX = "SAT_WV_NATIVE_GFX" in os.environ.get("KERNEL_CFLAGS", "") and bool(os.environ.get("GUEST_ASSETS"))   # Wolverine's native animation data (plan V2; saturn/guests/wolverine)
 # native Wolverine: the gun routine of Warrior and Hunter (24060) stays stock; Schaefer's own special routine (24f04, state 020008: attack + jump) is the one his Berserker replaces
 GUEST_WRAP = ("1cf54", "1d03e", "1d116", "195ec", "19f9a", "24f04" if NATIVE_GFX else "24060") + (("1a586",) if NATIVE_GFX and "WV_NO_GRAB" in os.environ.get("KERNEL_CFLAGS", "") else ()) if "SAT_GUESTS" in os.environ.get("KERNEL_CFLAGS", "") else ()
+# Capture-only damage gate (SAT_CAPTURE_INVULN, game_bind.c): damage_apply stays linked as lifted_1d504 behind a wrapper that skips hits on a player.
+CAPTURE_INVULN = ("1d504",) if "SAT_CAPTURE_INVULN" in os.environ.get("KERNEL_CFLAGS", "") else ()
 CART = dict(ROMB=0x02400000, OPX=0x02600000, SAT_SINK=0x02640000, SAT_OBJ=0x02650000, SAT_PACK=0x02654000)
 CART_END = 0x02800000
 OPX_MAX = 0x40000
@@ -300,7 +302,7 @@ def gen_sources():
             for site in ("24528", "2454c"):
                 t = t.replace("P(0x%su);{{u8 s=((u8)0x3u);u8 v=RD8((a6+(129)))&s;WR8((a6+(129)),(u8)(v));}}" % site,
                               "P(0x%su);{{u8 s=((u8)0x3u);u8 v=RD8((a6+(129)))&s;if(v>=sat_wv_cn[((a6>>8)+1)&1])v=0;WR8((a6+(129)),(u8)(v));}}" % site)
-        for n in NATIVE + OVERRIDES + GUEST_WRAP:   # replaced natively; the lifted body stays linked as lifted_NNN
+        for n in NATIVE + OVERRIDES + GUEST_WRAP + CAPTURE_INVULN:   # replaced natively; the lifted body stays linked as lifted_NNN
             t = t.replace(f"void f_{n}(void){{", f"void lifted_{n}(void){{")
         for n in OVERRIDES:   # memory is tight and the target never falls back: the replaced body goes
             t = re.sub(r"^void lifted_%s\(void\)\{.*?^\}\n" % n, "", t, flags=re.M | re.S)
