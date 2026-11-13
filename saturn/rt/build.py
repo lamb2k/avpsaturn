@@ -114,6 +114,17 @@ for l in (open(WORK / "screen_keys.txt") if (WORK / "screen_keys.txt").exists() 
     if l.strip():
         SCREEN_KEYS[int(l.split()[0])].add(int(l.split()[1], 16))
 SCREEN_KEYS[0].discard(0)
+# Story pages and cut-ins of each stage (lane coverage 2026-11-13, tools/story_keys.py -> WORK/story_keys.txt, "STAGEHEX section hexkey" lines). The route censuses skip the
+# stage's intro story and the stage-clear story with Attack, so a stage file lacked those pictures' sprite tiles and the story drew with holes (the stage 0a intro: 40+ sprite
+# keys missing, seen in the Boss Rush and the stage select). Each stage's file holds the keys of its own story, ranked with the screen keys. STORY_KEYS=0 builds without (A/B).
+STORY_KEYS = {}
+if os.environ.get("STORY_KEYS", "1") == "1" and (WORK / "story_keys.txt").exists():
+    for l in open(WORK / "story_keys.txt"):
+        t = l.split()
+        if len(t) == 3:
+            STORY_KEYS.setdefault(t[0], [set(), set(), set(), set()])[int(t[1])].add(int(t[2], 16))
+    for v in STORY_KEYS.values():
+        v[0].discard(0)
 # The arcade's rare system banners (the timed stages' "HURRY UP!" and its countdown): tools/system_banner_keys.py derives the scroll 1 keys from the
 # ROM's own tables. The census never sees them, and a stage file without them drew the second U of the banner blank.
 sys.path.insert(0, str(REPO / "tools"))
@@ -448,6 +459,10 @@ def round_files(rom, code_end, cold1_at, only=None):
             free = []
         if not f["name"].startswith("front"):   # (front_wv, a guest's front file, is a front file too) continue and game over screens: reachable from every stage, kept first (tools/screen_keys.py)
             keys = [k | e for k, e in zip(keys, SCREEN_KEYS)]
+            story = STORY_KEYS.get(f["name"].split("_")[0][5:], None)   # "stage0a_m1" -> "0a"
+            if story:
+                keys = [k | e for k, e in zip(keys, story)]
+                frank.update({k: (1 << 39) - 1 for k in story[0] if k not in SCREEN_KEYS[0] and (k not in frank or frank[k] < (1 << 39) - 1)})
             keys[0] = keys[0] | POSE_KEYS
             keys[0] = keys[0] | FUZZ_STAGE.get(f["name"].split("_")[0], set())
             frank.update({k: POSE_RANK for k in POSE_KEYS if k not in frank or frank[k] < POSE_RANK})
