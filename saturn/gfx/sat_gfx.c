@@ -336,7 +336,15 @@ static u16 back_shadow;
 
 SatGfxStats sat_gfx_stats;
 
-static void cache_setup(Cache *c, u8 *vram, u32 slot_bytes, u16 capacity, u16 first, int section,
+#ifdef SAT_GFX_COLD_CART
+/* Lane perf-pic, SAT_GFX_COLD_CART (default off): the set-up and menu code that never runs in play (cache_setup, index_section, open_pack, sat_gfx_init and the menu layer's draw_home, about 2.0 KB)
+   is linked into the cart tail (.cartcode, as the readout and the guest code are) instead of high work RAM, which is full. Run once per boot or round, or only while a menu is up (a draw of
+   it refills its few cache lines over the cart bus once a picture). The room goes to the hot code the other switches add. The cart tail has about 2.4 KB; all of it moved made it -48. */
+#define COLD_CART __attribute__((section(".cartcode")))
+#else
+#define COLD_CART
+#endif
+static COLD_CART void cache_setup(Cache *c, u8 *vram, u32 slot_bytes, u16 capacity, u16 first, int section,
                         SlotRec *slots, u16 *head, u32 hsize)
 {
     u32 i;
@@ -357,7 +365,7 @@ static u16 pack_index[4][INDEX_BUCKETS + 1]
 #endif
     ;
 
-static void index_section(Section *s, int which)
+static COLD_CART void index_section(Section *s, int which)
 {
     u16 *index = pack_index[which];
     u32 top = s->count ? be32(s->keys + (s->count - 1) * 4) >> KEY_SHIFT(s) : 0, i, b = 0;
@@ -1853,7 +1861,7 @@ static void home_cell(const u8 *f, u32 cell, int big, u32 bg)
             o |= (v ? v : bg) << (28 - 4 * x); }
         put32(VDP2_VRAM + CELL_S1 + cell * 32 + (u32)y * 4, o); }
 }
-static HOME_OS void draw_home(int fresh)
+static HOME_OS COLD_CART void draw_home(int fresh)
 {
     u32 row, col;
     static u32 font_bg = 99;
@@ -2217,7 +2225,7 @@ static void vl_note(u32 cause, int pal, int sx, int sy)
    a batch is not written to before the one before it has gone, and the plot does not start before the last one has. Same bytes in the table (the 16 bytes of a command the CPU never wrote are
    whatever the buffer held: VDP1 does not read them for a sprite). The DMA reads WRAM-H: the board gives the SCU the bus for the transfer. EMULATED/MODELLED only until read on the console. */
 #ifndef CMD_STG
-#define CMD_STG 16   /* commands per batch, two batches in turn: 1 KB of high RAM */
+#define CMD_STG 8   /* commands per batch, two batches in turn: 512 bytes of high RAM (high RAM is full: the DMA start is about 100 cycles, a batch saves about 1,400 of the CPU's bus writes) */
 #endif
 static u8 cmd_stg[2 * CMD_STG * 32] __attribute__((aligned(16)));
 #ifdef SAT_GFX_HOST
@@ -3337,7 +3345,7 @@ void sat_gfx_frame(void)
     sat_gfx_draw();
 }
 
-#define COLD_OS __attribute__((optimize("Os")))   /* load-time code, once per round: built for size, high work RAM is what is short */
+#define COLD_OS __attribute__((optimize("Os"))) COLD_CART   /* load-time code, once per round: built for size, high work RAM is what is short */
 static COLD_OS int open_pack(const u8 *p)
 {
     int i;

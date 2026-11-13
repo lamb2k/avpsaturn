@@ -832,6 +832,7 @@ SECTIONS {{
         print(f"place_fn attempt {attempt}: high RAM free {-hw_over}, low RAM free {-lw_over}, cart free {-c1_over}", flush=True)
         if hw_over > -32:
             need_slack -= hw_over + 64   # more has to leave high RAM
+            lw_slack += min(hw_over + 64, max(0, -lw_over - 64))   # lane perf-pic: and low RAM takes it as far as it really has room (it only ever shrank before: a switch that adds hot code to high RAM could not demote more cold code into 1 KB of free low RAM)
         elif lw_over > -16:
             lw_slack -= lw_over + 48   # less may go to low RAM
         else:

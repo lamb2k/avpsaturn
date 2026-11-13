@@ -123,6 +123,18 @@ static void __attribute__((noinline, section(".cartcode"))) sc_refresh(void)
         if (!sc_in) { sc_in = 1; sc_base = vb; sc_cnt = 0; sc_last = b; }
         sc_cnt += (b - sc_last) & 255u; sc_last = b;
         idx = sc_base + sc_cnt;
+#ifdef SAT_SCRIPT_FREEZE
+        /* Test flag (lane perf-pic, look checks): at the stage ticks below the game's tick task stops for 100 vblanks (a spin here, interrupts on), the vblank handler goes on taking snapshots and the slave
+           goes on drawing, so the screen settles on the picture of that exact game state: two builds with the same game state show the same picture, whatever their frame skips. The run stops being
+           comparable by RAM after the first freeze (the wait moves the vblank counter), so RAM checks use a build without this flag. */
+        {
+            static const u16 marks[] = { 500, 900, 1400, 2000, 2600, 3200, 3700 };
+            static u8 done;
+            u32 k;
+            for (k = 0; k < sizeof marks / sizeof marks[0]; k++)
+                if (sc_cnt == marks[k] && !((done >> k) & 1)) { u32 v0 = vb; done |= (u8)(1u << k); while (((sat_vblanks_now() - v0) & 0xffffffffu) < 100u) ; }
+        }
+#endif
     }
     map_pad(script_word(idx));
 }
