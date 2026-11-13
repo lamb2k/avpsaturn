@@ -105,10 +105,20 @@ def main():
             else:
                 code, ratios = 0, {r: bp.band_ratio(trimmed, RATE, r / 2) for r, _ in bp.RATE_STEPS}
             y = trimmed if code == 0 else render(c, RATE_HZ[code], TRIM)
-        if tl is None:
-            pcm, tl2 = bp.to_pcm8(y)
-        else:
-            pcm, tl2 = bp.to_pcm8_tl(y, tl), tl
+        # level: the clip keeps the level of the fix7c2 clip (a row's own TL, or the TL its 11,025 Hz render would get); a lower rate or a trim must not make it quieter, so the new samples are
+        # scaled up to the old RMS over the span both have (never beyond the 8 bit peak)
+        tl2 = tl if tl is not None else bp.to_pcm8(y11)[1]
+        pcm = bp.to_pcm8_tl(y, tl2)
+        hz = RATE_HZ[code]
+        if code != 0 or TRIM:
+            sec = min(len(y11) / 11025.0, len(y) / hz)
+            a_old, a_new = y11[:int(sec * 11025)], y[:int(sec * hz)]
+            r_old, r_new = float(np.sqrt((a_old * a_old).mean())) if len(a_old) else 0.0, float(np.sqrt((a_new * a_new).mean())) if len(a_new) else 0.0
+            if r_new > 0 and r_old > r_new:
+                pk = float(np.abs(pcm).max()) or 1.0
+                sc = min(r_old / r_new, 127.0 / pk)
+                if sc > 1.0:
+                    pcm = bp.to_pcm8_tl(y * sc, tl2)
         out = dict(pcm=pcm, tl=tl2, rate=code, loop=int(capped), prio=info["prio"], mask=sum(1 << x for x in info["chans"]), ratios=ratios, y11=y11, y=y)
         cache[key] = out
         return out
