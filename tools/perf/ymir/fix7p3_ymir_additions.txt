@@ -1,0 +1,5 @@
+fix7p3 additions to my copies of Ymir (sh2.cpp; sources are GPL and not in this repo, see sh2_perf_hw.diff for the base patch)
+1. memdump: a third region {0x02400000, 0x200000, "rom"} next to opx and cold (the ROM image in cart RAM, 2 MB), written to mem_NAME_rom.bin. Used to diff the ROM image against the ROM plus a round file's regions
+   at the moment the crate is on screen (the tile spill segments sat on pages the guest sync patches).
+2. write trace: in SH2::MemWrite, every master or slave write into 0x024bf000..0x02514000 is logged once per (PC, size) to ymir_romwr.log (who, PC, address, size, value). Found sat_guest_loaded.
+Both only act with HW_PROF=1 or HW_MODEL=1 (the Poll loop) or when the range is hit; the exes are my copies (ymir_hw3 run\ymir-hwp8.exe and hwp9.exe).
