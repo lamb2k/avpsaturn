@@ -1,0 +1,254 @@
+--- a/cdblock/cdblock.cpp
++++ b/cdblock/cdblock.cpp
+@@ -1,4 +1,6 @@
+ #include <ymir/hw/cdblock/cdblock.hpp>
++extern "C" void AvpLog(unsigned long long count, const char *fmt, ...);
++extern "C" unsigned long long g_avp_count;
+ 
+ #include "cdblock_devlog.hpp"
+ 
+@@ -779,7 +781,7 @@
+             m_status.controlADR = trackInfo->controlADR;
+             m_status.track = trackInfo->number;
+             m_status.index = 1;
+-            m_seekTicks = kSeekTicks; // TODO: calculate realistic seek time
++            m_seekTicks = kSeekTicks; AvpLog(m_scheduler.CurrentCount(), "SEEK to=%06X from=%06X", m_status.frameAddress, m_cdif.GetSeekFrameAddress());
+ 
+             if (m_status.controlADR == 0x41) {
+                 m_targetDriveCycles = kDriveCyclesPlaying1x / m_readSpeed;
+@@ -856,7 +858,7 @@
+             m_status.controlADR = trackInfo->controlADR;
+             m_status.track = trackInfo->number;
+             m_status.index = 1;
+-            m_seekTicks = kSeekTicks; // TODO: calculate realistic seek time
++            m_seekTicks = kSeekTicks; AvpLog(m_scheduler.CurrentCount(), "SEEK to=%06X from=%06X", m_status.frameAddress, m_cdif.GetSeekFrameAddress());
+ 
+             if (m_status.controlADR == 0x41) {
+                 m_targetDriveCycles = kDriveCyclesPlaying1x / m_readSpeed;
+@@ -941,7 +943,7 @@
+     m_status.controlADR = info->controlADR;
+     m_status.track = info->number;
+     m_status.index = 1;
+-    m_seekTicks = kSeekTicks; // TODO: calculate realistic seek time
++    m_seekTicks = kSeekTicks; AvpLog(m_scheduler.CurrentCount(), "SEEK to=%06X from=%06X", m_status.frameAddress, m_cdif.GetSeekFrameAddress());
+ 
+     devlog::debug<grp::play_init>("Read file {} (ID {}), offset {}, filter {}, frame addresses {:06X} to {:06X}",
+                                   fileInfo.name, fileID, offset, filterNumber, m_playStartPos, m_playEndPos);
+@@ -1045,6 +1047,7 @@
+ 
+         if (m_bufferFullPause) {
+             devlog::trace<grp::play>("Can't play disc, no buffers available");
++            { static unsigned bf = 0; if ((bf++ & 63) == 0) AvpLog(m_scheduler.CurrentCount(), "BUFFULL %06X", frameAddress); }
+             return;
+         }
+ 
+@@ -1053,6 +1056,7 @@
+ 
+         // Sanity check: is the track valid?
+         if (m_cdif.ReadSector(frameAddress, buffer.data, &discPos)) [[likely]] {
++            if (discPos.controlADR != 0x01) AvpLog(m_scheduler.CurrentCount(), "SECT %06X", frameAddress);
+             devlog::trace<grp::play>("Read sector from frame address {:06X}", frameAddress);
+ 
+             if (discPos.controlADR == 0x01) {
+--- a/vdp/vdp.cpp
++++ b/vdp/vdp.cpp
+@@ -1,4 +1,6 @@
+ #include <ymir/hw/vdp/vdp.hpp>
++extern "C" void AvpLog(unsigned long long count, const char *fmt, ...);
++extern "C" unsigned long long g_avp_count;
+ 
+ #include <ymir/util/bit_ops.hpp>
+ #include <ymir/util/dev_log.hpp>
+@@ -888,6 +890,8 @@
+     devlog::trace<grp::intr>("## VBlank IN");
+ 
+     m_state.regs2.TVSTAT.VBLANK = 1;
++    g_avp_count = m_scheduler.CurrentCount();
++    AvpLog(g_avp_count, "VB");
+     m_cbVBlankStateChange(true);
+     m_cbTriggerSMPCVBlankIN();
+ 
+@@ -952,6 +956,7 @@
+ 
+     m_state.regs1.LatchEraseParameters();
+ 
++    AvpLog(m_scheduler.CurrentCount(), "SWAP");
+     m_renderer->VDP1SwapFramebuffer();
+ 
+     // NOTE: this flip needs to happen *after* the renderer processes the framebuffer swap.
+--- a/vdp/renderer/vdp_renderer_sw.cpp
++++ b/vdp/renderer/vdp_renderer_sw.cpp
+@@ -1,4 +1,6 @@
+ #include <ymir/hw/vdp/renderer/vdp_renderer_sw.hpp>
++extern "C" void AvpLog(unsigned long long count, const char *fmt, ...);
++extern "C" unsigned long long g_avp_count;
+ 
+ #include <ymir/util/constexpr_for.hpp>
+ #include <ymir/util/dev_log.hpp>
+@@ -557,6 +559,11 @@
+         m_resolutionChanged = false;
+         Callbacks.VDP2ResolutionChanged(m_HRes, m_VRes);
+     }
++    {   // loading lane: a hash of the frame and how much of it is black / one colour, for blank and frozen picture time
++        unsigned long long h = 1469598103934665603ull; unsigned nz = 0, eq0 = 0; const uint32 *p = m_framebuffer.data(); const uint32 n = m_HRes * m_VRes; const uint32 p0 = n ? (p[0] & 0xffffff) : 0;
++        for (uint32 i = 0; i < n; i++) { const uint32 v = p[i] & 0xffffff; h = (h ^ v) * 1099511628211ull; nz += v != 0; eq0 += v == p0; }
++        AvpLog(g_avp_count, "FR %llx nz=%u eq=%u n=%u", h, nz, eq0, n);
++    }
+     Callbacks.VDP2DrawFinished();
+     SwCallbacks.FrameComplete(m_framebuffer.data(), m_HRes, m_VRes);
+ }
+--- a/peripheral_impl_control_pad.cpp
++++ b/pad.cpp
+@@ -1,69 +1,83 @@
+-#include <ymir/hw/smpc/peripheral/peripheral_impl_control_pad.hpp>
+-
+-#include <ymir/util/bit_ops.hpp>
+-#include <cstdio>
+-#include <cstdlib>
+-
+-namespace ymir::peripheral {
+-
+-ControlPad::ControlPad(CBPeripheralReport callback)
+-    : BasePeripheral(PeripheralType::ControlPad, 0x0, callback) {}
+-
+-void ControlPad::UpdateInputs() {
+-    PeripheralReport report{.type = PeripheralType::ControlPad, .report = {.controlPad = {.buttons = Button::Default}}};
+-    m_cbPeripheralReport(report);
+-    {   // hwboot lane: scripted pad, 1 = pressed (bit 15 right .. bit 3 L), read from a file so a run needs no keyboard focus
+-        static unsigned cnt = 0;
+-        static unsigned mask = 0;
+-        if ((cnt++ & 3) == 0) {
+-            if (std::FILE *f = std::fopen("E:/AvP/learning/lane-perf-hw/ymir_hw/ymir_pad.txt", "r")) { unsigned m = 0; if (std::fscanf(f, "%x", &m) == 1) mask = m; std::fclose(f); }
+-        }
+-        if (mask) report.report.controlPad.buttons = static_cast<Button>(static_cast<uint16>(Button::All) & ~mask);
+-    }
+-    m_report = report.report.controlPad;
+-    m_report.buttons &= Button::All;
+-    m_report.buttons |= static_cast<Button>(0b111);
+-}
+-
+-uint8 ControlPad::GetReportLength() const {
+-    return 2;
+-}
+-
+-void ControlPad::Read(std::span<uint8> out) {
+-    assert(out.size() == 2);
+-
+-    // [0] 7-0 = right, left, down, up, start, A, C, B
+-    // [1] 7-3 = R, X, Y, Z, L; 2-0 = fixed 0b111
+-    const uint16 btnValue = static_cast<uint16>(m_report.buttons);
+-    out[0] = bit::extract<8, 15>(btnValue);
+-    out[1] = bit::extract<0, 7>(btnValue);
+-}
+-
+-uint8 ControlPad::WritePDR(uint8 ddr, uint8 value, bool exle) {
+-    const uint16 btnValue = static_cast<uint16>(m_report.buttons);
+-
+-    switch (ddr & 0x7F) {
+-    case 0x40: // TH control mode
+-        if (value & 0x40) {
+-            return 0x70 | 0b0100;
+-        } else {
+-            return 0x30 | 0b0101;
+-        }
+-        break;
+-    case 0x60: // TH/TR control mode
+-        switch (value & 0x60) {
+-        case 0x60: // 1st data: L 1 0 0
+-            return 0x70 | (bit::extract<3>(btnValue) << 3) | 0b100;
+-        case 0x20: // 2nd data: right left down up
+-            return 0x30 | bit::extract<12, 15>(btnValue);
+-        case 0x40: // 3rd data: start A C B
+-            return 0x50 | bit::extract<8, 11>(btnValue);
+-        case 0x00: // 4th data: R X Y Z
+-            return 0x10 | bit::extract<4, 7>(btnValue);
+-        }
+-    }
+-
+-    return 0xFF;
+-}
+-
+-} // namespace ymir::peripheral
++#include <ymir/hw/smpc/peripheral/peripheral_impl_control_pad.hpp>
++
++#include <ymir/util/bit_ops.hpp>
++#include <cstdio>
++#include <cstdlib>
++#include <cstdarg>
++#include <mutex>
++extern "C" unsigned long long g_avp_count = 0;
++extern "C" void AvpLog(unsigned long long count, const char *fmt, ...) {
++    static std::mutex m; static std::FILE *f = nullptr; static unsigned n = 0;
++    std::lock_guard<std::mutex> g(m);
++    if (!f) f = std::fopen("E:/AvP/learning/lane-loading/ymir/trace.log", "w");
++    if (!f) return;
++    std::fprintf(f, "%llu ", count);
++    va_list a; va_start(a, fmt); std::vfprintf(f, fmt, a); va_end(a);
++    std::fputc(10, f);
++    if ((++n & 31) == 0) std::fflush(f);
++}
++
++namespace ymir::peripheral {
++
++ControlPad::ControlPad(CBPeripheralReport callback)
++    : BasePeripheral(PeripheralType::ControlPad, 0x0, callback) {}
++
++void ControlPad::UpdateInputs() {
++    PeripheralReport report{.type = PeripheralType::ControlPad, .report = {.controlPad = {.buttons = Button::Default}}};
++    m_cbPeripheralReport(report);
++    {   // hwboot lane: scripted pad, 1 = pressed (bit 15 right .. bit 3 L), read from a file so a run needs no keyboard focus
++        static unsigned cnt = 0;
++        static unsigned mask = 0;
++        if ((cnt++ & 3) == 0) {
++            if (std::FILE *f = std::fopen("E:/AvP/learning/lane-loading/ymir/ymir_pad.txt", "r")) { unsigned m = 0; if (std::fscanf(f, "%x", &m) == 1) mask = m; std::fclose(f); }
++        }
++        { static unsigned lastm = 0xffffffff; if (mask != lastm) { lastm = mask; AvpLog(g_avp_count, "PAD %04x", mask); } }
++        if (mask) report.report.controlPad.buttons = static_cast<Button>(static_cast<uint16>(Button::All) & ~mask);
++    }
++    m_report = report.report.controlPad;
++    m_report.buttons &= Button::All;
++    m_report.buttons |= static_cast<Button>(0b111);
++}
++
++uint8 ControlPad::GetReportLength() const {
++    return 2;
++}
++
++void ControlPad::Read(std::span<uint8> out) {
++    assert(out.size() == 2);
++
++    // [0] 7-0 = right, left, down, up, start, A, C, B
++    // [1] 7-3 = R, X, Y, Z, L; 2-0 = fixed 0b111
++    const uint16 btnValue = static_cast<uint16>(m_report.buttons);
++    out[0] = bit::extract<8, 15>(btnValue);
++    out[1] = bit::extract<0, 7>(btnValue);
++}
++
++uint8 ControlPad::WritePDR(uint8 ddr, uint8 value, bool exle) {
++    const uint16 btnValue = static_cast<uint16>(m_report.buttons);
++
++    switch (ddr & 0x7F) {
++    case 0x40: // TH control mode
++        if (value & 0x40) {
++            return 0x70 | 0b0100;
++        } else {
++            return 0x30 | 0b0101;
++        }
++        break;
++    case 0x60: // TH/TR control mode
++        switch (value & 0x60) {
++        case 0x60: // 1st data: L 1 0 0
++            return 0x70 | (bit::extract<3>(btnValue) << 3) | 0b100;
++        case 0x20: // 2nd data: right left down up
++            return 0x30 | bit::extract<12, 15>(btnValue);
++        case 0x40: // 3rd data: start A C B
++            return 0x50 | bit::extract<8, 11>(btnValue);
++        case 0x00: // 4th data: R X Y Z
++            return 0x10 | bit::extract<4, 7>(btnValue);
++        }
++    }
++
++    return 0xFF;
++}
++
++} // namespace ymir::peripheral

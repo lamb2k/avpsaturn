@@ -1,0 +1,35 @@
+Data behind LOADING_20261112.md (lane loading, 2026-11-12). EMULATED / offline arithmetic only.
+
+1. zlib level 6 compression ratio of the shipped bytes (disc avp_3h_A_fix7p2, STORE.BIN round files rebuilt from the run table, boot files read from the ISO)
+   R000 0.494 (901 sectors)   R001 0.630   R020 0.637   R030 0.636   R040 0.616   R060 0.621   R080 0.611   R100 0.617
+   R120 0.625   R150 0.618   R190 0.627   R200 0.616   R286 0.493 (901 sectors, the guest front end file)   total over these 13: 0.607
+   LW.BIN 0.440 (511 sectors)  ROM.BIN 0.437 (1024)  OPX.BIN 0.550 (127)  HW.BIN 0.530 (276)  COLD1.BIN 0.494 (65)
+   (python zlib.compress(level 6) per file; an LZSS-class coder on an SH-2 would give less: ASSUMED 85 to 90 percent of the zlib gain)
+
+2. Round file structure (287 files): median 48 regions of 1 to 64 sectors, 42 of them before the tile region; median 161 sectors in them; max 94. Front end R286: 69 tiny regions, 460 tiny sectors at most 50 each.
+
+3. Stage files (row, stage word, variant 1 file, sectors, runs, jump distances in sectors, 150 sect/s ideal)
+   front/0 file0 901 s 1 run ; 1/0x02 f20 1090 s 3 runs [22993 22442] 7.3 s ; 2/0x04 f30 1222 2 [27300] 8.1 ; 3/0x06 f40 1342 3 [29197 28259] 8.9 ; 4/0x08 f50 1171 2 [31892] 7.8
+   5/0x0a f60 1053 2 [33888] 7.0 ; 6/0x0c f70 1336 3 [35907 35302] 8.9 ; 7/0x0e f80 1481 1 9.9 ; 8/0x10 f90 1358 3 [55205 54245] 9.1 ; 9/0x12 f100 1145 1 7.6
+   10/0x14 f110 956 1 6.4 ; 11/0x16 f120 1071 3 [60100 59446] 7.1 ; 12/0x18 f130 1203 3 [63198 62371] 8.0 ; 13/0x1a f140 1062 2 [65763] 7.1 ; 14/0x1c f150 1400 1 9.3
+   15/0x1e f160 1391 2 [70460] 9.3 ; 16/0x20 f170 1265 3 [72143 71307] 8.4 ; 17/0x22 f180 1101 1 7.3 ; 18/0x24 f190 1431 3 [77440 76865] 9.5 ; 19/0x26 f200 912 2 [79942] 6.1
+
+4. CD facts from the Ymir sources (baseline a9f0cdae): kDriveCyclesPlaying1x = 800000 (tripled units) = 13.33 ms per sector at 1x, 6.67 ms at 2x; kSeekTicks = 5 drive ticks per play command (33 ms at 2x); readSpeedFactor default 2.
+
+5. Measured loads (EMULATED, trace.log of each run, loads.py)
+   run  disc   load                      sectors  duration  swap gap
+   r2   fix7p2 boot loader 5 files        2003     13.9 s (11.38..25.21)
+   r2   fix7p2 front R286 (boot)           901     8.45 s
+   r2   fix7p2 stage 1 R020+R001          1093     8.93 s    9.03 s
+   r2   fix7p2 game over front R286        901     8.45 s    8.51 s
+   r4   fix7p2 quit to title front R286    901     8.45 s    8.66 s (pause picture frozen, no card)
+   r5   fix7p2 versus R211                1032     8.49 s    8.57 s
+   r6   fix7p2 stage select R020+R001     1093     8.93 s    9.03 s
+   r7   fix7p2 boss rush R030+R002        1225     9.96 s   10.06 s
+   le   L1     ending entry R194+R195     1434    11.99 s   12.12 s
+   le   L1     stage 24 to ending R205+R019 914    7.58 s    7.66 s
+   le   L1     ending to title R286        901     8.45 s    8.51 s
+   l2d  L2     boot loader (order switch)  2003    13.9 s    (same as r2)
+   l2d  L2     front R286 coalesced        901     6.55 s
+   l2d  L2     stage 1 R020+R001 coalesced 1093    7.88 s    8.17 s
+   l2d  L2     boss R030+R002 coalesced    1224    8.79 s
