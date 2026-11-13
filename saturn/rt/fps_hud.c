@@ -76,8 +76,8 @@ static char text[NTEXT][COLS + 16] = { { 'P' }, { 'M' }, { 'F' }, { 'T' }, { 'L'
 
 #ifdef SAT_TR_LINE
 /* Transition state (cart data, writable: initialised nonzero so it stays in .data; the first call clears it). */
-static u32 tr_s[13] = { 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1 };   /* 0 last picture counter, 1 vblanks without a new picture, 2 scene code at the last vblank, 3 file loads seen, 4 first call pending,
-                                                                       5 load seconds in vblanks (+1), 6 scene before the load, 7 scene at the start of a stillness, 8 transitions n, 9 from, 10 to, 11 length in vblanks, 12 a load was inside it */
+static u32 tr_s[14] = { 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1 };   /* 0 last picture counter, 1 vblanks without a new picture, 2 scene code at the last vblank, 3 file loads seen, 4 first call pending,
+                                                                       5 load seconds in vblanks (+1), 6 scene before the load, 7 scene at the start of a stillness, 8 transitions n, 9 from, 10 to, 11 length in vblanks, 12 a load was inside it, 13 the scene code before the last change of it */
 #define tr_n tr_s[8]
 #define tr_from tr_s[9]
 #define tr_to tr_s[10]
@@ -102,11 +102,12 @@ static char *put_hex4(char *p, u32 v) { int i; for (i = 12; i >= 0; i -= 4) { u3
 void sat_fps_vb(u32 pics)
 {
     u32 code = scene_code();
-    if (tr_s[4]) { u32 k; for (k = 0; k < 13; k++) tr_s[k] = 0; tr_s[0] = pics; tr_s[2] = code; tr_s[3] = sat_ld_n; return; }
+    if (tr_s[4]) { u32 k; for (k = 0; k < 14; k++) tr_s[k] = 0; tr_s[0] = pics; tr_s[2] = code; tr_s[13] = code; tr_s[3] = sat_ld_n; return; }
+    if (code != tr_s[2]) tr_s[13] = tr_s[2];   /* the game moves its stage word a few vblanks before round_check starts the load (it waits for the word to hold): the scene to report as the one left is the one before that change */
     if (sat_ld_n != tr_s[3]) {   /* a file load ran since the last vblank: its whole seconds (kernel.c sat_ld_log, SMPC clock) plus the stillness that follows */
         const u32 *e = sat_ld_log[(sat_ld_n - 1) & 3];
         tr_s[3] = sat_ld_n; tr_s[5] = ((e[3] - e[2]) % 3600u) * 60u + 1u;   /* 5: seconds of load in vblanks, +1 so a load of under a second still counts */
-        tr_s[6] = tr_s[2];     /* 6: the scene at the last vblank before the load */
+        tr_s[6] = tr_s[13];    /* 6: the scene before the last change of the scene code */
     }
     if (pics != tr_s[0]) {
         u32 len = tr_s[1] + (tr_s[5] ? tr_s[5] - 1 : 0);
