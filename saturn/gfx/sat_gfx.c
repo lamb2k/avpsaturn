@@ -301,6 +301,15 @@ static u32 census_count(void)
 #define CENSUS(x)
 #endif
 
+#ifdef SAT_MISSLOG
+/* Test build only (coverage lane): the distinct tile keys the pack lacked, with the gfx frame of the first miss (key | section << 28). Read from Ymir. */
+volatile u32 sat_miss_n, sat_miss_key[48]; volatile u16 sat_miss_frame[48];
+#define MISSLOG(k, sec) do { u32 kk_ = (k) | ((u32)(sec) << 28), i_; for (i_ = 0; i_ < sat_miss_n && i_ < 48; i_++) if (sat_miss_key[i_] == kk_) break; \
+    if (i_ == sat_miss_n && i_ < 48) { sat_miss_key[i_] = kk_; sat_miss_frame[i_] = (u16)sat_gfx_stats.frames; sat_miss_n = i_ + 1; } } while (0)
+#else
+#define MISSLOG(k, sec) do { } while (0)
+#endif
+
 static Section sections[4];
 static u16 stamp;
 static u16 prev_stamp;   /* the frame before: its sprite slots may still be read by a plot an emulator renders late */
@@ -915,7 +924,7 @@ static u16 cache_find(Cache *c, u32 key, unsigned long *refused)
         idx = pack_find(&sections[c->section], key);
         if (idx < 0)
         {
-            sat_gfx_stats.missing++; blank_seen[way] = tag | BLANK_MISS_BIT; VL_CAUSE(2);
+            sat_gfx_stats.missing++; blank_seen[way] = tag | BLANK_MISS_BIT; VL_CAUSE(2); MISSLOG(key, c->section);
             CENSUS(if (sat_gfx_census.missing_n < 32) sat_gfx_census.missing_key[sat_gfx_census.missing_n++] = key | ((u32)c->section << 28);)
             return NOSLOT;
         }
