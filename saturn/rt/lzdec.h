@@ -20,7 +20,6 @@ static const lz8 lz_dext[30] = { 0, 0, 0, 0, 1, 1, 2, 2, 3, 3, 4, 4, 5, 5, 6, 6,
 static const lz8 lz_clorder[19] = { 16, 17, 18, 0, 8, 7, 9, 6, 10, 5, 11, 4, 12, 3, 13, 2, 14, 1, 15 };
 
 static void lz_need(LzCtx *z, int n) { while (z->nbits < n) { if (z->src == z->swp) z->src = z->scr; z->bits |= (lz32)*z->src++ << z->nbits; z->nbits += 8; } }
-static lz32 lz_get(LzCtx *z, int n) { lz32 v; if (!n) return 0; lz_need(z, n); v = z->bits & ((1ul << n) - 1); z->bits >>= n; z->nbits -= n; return v; }
 
 /* canonical table from code lengths: cnt[len], sym sorted by (length, symbol), tab[bit reversed code] = sym << 4 | len for codes of up to tb bits. */
 static void lz_build(lz16 *cnt, lz16 *sym, lz16 *tab, unsigned tb, const lz8 *len, int n)
@@ -60,18 +59,40 @@ static int lz_sym(LzCtx *z, const lz16 *tab, unsigned tb, const lz16 *cnt, const
     }
     return -1;
 }
-/* one deflate stream into dst (up to dend); returns bytes written or -1 */
+/* Shifts by a variable count: the SH-2 has only fixed shifts (1, 2, 8, 16), so a variable shift is a libgcc loop. Right shifts go through a 32x32 -> 64 bit multiply (dmulu.l, high word) and
+   left shifts through a multiply by a power of two, both table driven. Other targets (the host test) use the plain operators. */
+#ifdef __sh__
+static const lz32 lz_p32[32] = { 0, 0x80000000ul, 0x40000000ul, 0x20000000ul, 0x10000000ul, 0x8000000ul, 0x4000000ul, 0x2000000ul, 0x1000000ul, 0x800000ul, 0x400000ul, 0x200000ul, 0x100000ul, 0x80000ul, 0x40000ul, 0x20000ul,
+    0x10000ul, 0x8000ul, 0x4000ul, 0x2000ul, 0x1000ul, 0x800ul, 0x400ul, 0x200ul, 0x100ul, 0x80ul, 0x40ul, 0x20ul, 0x10ul, 8ul, 4ul, 2ul };
+static const lz32 lz_p2[32] = { 1ul, 2ul, 4ul, 8ul, 0x10ul, 0x20ul, 0x40ul, 0x80ul, 0x100ul, 0x200ul, 0x400ul, 0x800ul, 0x1000ul, 0x2000ul, 0x4000ul, 0x8000ul, 0x10000ul, 0x20000ul, 0x40000ul, 0x80000ul, 0x100000ul,
+    0x200000ul, 0x400000ul, 0x800000ul, 0x1000000ul, 0x2000000ul, 0x4000000ul, 0x8000000ul, 0x10000000ul, 0x20000000ul, 0x40000000ul, 0x80000000ul };
+#define LZ_SHR(x, n) ((n) ? (lz32)(((unsigned long long)(x) * lz_p32[n]) >> 32) : (x))
+#define LZ_SHLB(b, n) ((lz32)(b) * lz_p2[n])
+#else
+#define LZ_SHR(x, n) ((x) >> (n))
+#define LZ_SHLB(b, n) ((lz32)(b) << (n))
+#endif
+static const lz16 lz_mask[17] = { 0, 1, 3, 7, 15, 31, 63, 127, 255, 511, 1023, 2047, 4095, 8191, 16383, 32767, 65535 };
+
+/* one deflate stream into dst (up to dend); returns bytes written or -1. The bit buffer lives in locals in the symbol loop. */
 static long lz_inflate(LzCtx *z, const lz8 *src, lz8 *dst, lz8 *dend)
 {
     int last; lz8 *d0 = dst;
-    z->src = src; z->bits = 0; z->nbits = 0; z->dst = dst; z->dend = dend;
+    const lz8 *swp = z->swp, *scr = z->scr;
+    lz32 bb = 0; int nb = 0; const lz8 *sp = src; lz8 *d = dst;
+#define LZ_NEED(n) while (nb < (n)) { if (sp == swp) sp = scr; bb |= LZ_SHLB(*sp, nb); sp++; nb += 8; }
+#define LZ_BITS(n, v) { LZ_NEED(n); (v) = (int)(bb & lz_mask[n]); bb = LZ_SHR(bb, n); nb -= (n); }
+#define LZ_SAVE() { z->src = sp; z->bits = bb; z->nbits = nb; }
+#define LZ_LOAD() { sp = z->src; bb = z->bits; nb = z->nbits; }
     do {
-        int type; last = (int)lz_get(z, 1); type = (int)lz_get(z, 2);
+        int type, t1;
+        LZ_BITS(1, last); LZ_BITS(2, type);
         if (type == 0) {
-            lz32 len; z->bits >>= z->nbits & 7; z->nbits -= z->nbits & 7;
-            len = lz_get(z, 16); lz_get(z, 16);
-            if (z->dst + len > z->dend) return -1;
-            while (len--) *z->dst++ = (lz8)lz_get(z, 8);
+            int len, nlen;
+            bb = LZ_SHR(bb, nb & 7); nb -= nb & 7;
+            LZ_BITS(16, len); LZ_BITS(16, nlen); (void)nlen;
+            if (d + len > dend) return -1;
+            while (len--) { int v; LZ_BITS(8, v); *d++ = (lz8)v; }
         } else if (type == 1 || type == 2) {
             lz8 lens[320]; int i, nlen, ndist;
             if (type == 1) {
@@ -82,17 +103,18 @@ static long lz_inflate(LzCtx *z, const lz8 *src, lz8 *dst, lz8 *dend)
                 for (i = 0; i < 30; i++) lens[288 + i] = 5;
                 nlen = 288; ndist = 30;
             } else {
-                lz8 cl[19]; lz16 ccnt[16], csym[19], ctab[1];
-                nlen = (int)lz_get(z, 5) + 257; ndist = (int)lz_get(z, 5) + 1; i = (int)lz_get(z, 4) + 4;
+                lz8 cl[19]; lz16 ccnt[16], csym[19], ctab[1]; int hc;
+                LZ_BITS(5, nlen); nlen += 257; LZ_BITS(5, ndist); ndist += 1; LZ_BITS(4, hc); hc += 4;
                 if (nlen > 286 || ndist > 30) return -1;
-                { int k; for (k = 0; k < 19; k++) cl[k] = 0; for (k = 0; k < i; k++) cl[lz_clorder[k]] = (lz8)lz_get(z, 3); }
+                { int k; for (k = 0; k < 19; k++) cl[k] = 0; for (k = 0; k < hc; k++) { int v; LZ_BITS(3, v); cl[lz_clorder[k]] = (lz8)v; } }
                 lz_build(ccnt, csym, ctab, 0, cl, 19);
                 for (i = 0; i < nlen + ndist; ) {
-                    int s = lz_sym(z, ctab, 0, ccnt, csym), rep, v = 0;
+                    int s, rep, v = 0;
+                    LZ_SAVE(); s = lz_sym(z, ctab, 0, ccnt, csym); LZ_LOAD();
                     if (s < 0) return -1;
                     if (s < 16) { lens[i++] = (lz8)s; continue; }
-                    if (s == 16) { if (!i) return -1; v = lens[i - 1]; rep = 3 + (int)lz_get(z, 2); }
-                    else if (s == 17) rep = 3 + (int)lz_get(z, 3); else rep = 11 + (int)lz_get(z, 7);
+                    if (s == 16) { if (!i) return -1; v = lens[i - 1]; LZ_BITS(2, rep); rep += 3; }
+                    else if (s == 17) { LZ_BITS(3, rep); rep += 3; } else { LZ_BITS(7, rep); rep += 11; }
                     if (i + rep > nlen + ndist) return -1;
                     while (rep--) lens[i++] = (lz8)v;
                 }
@@ -100,23 +122,33 @@ static long lz_inflate(LzCtx *z, const lz8 *src, lz8 *dst, lz8 *dend)
             }
             lz_build(z->lcnt, z->lsym, z->ltab, LZ_LB, lens, nlen);
             lz_build(z->dcnt, z->dsym, z->dtab, LZ_DB, lens + 288, ndist);
+            t1 = 0;
             for (;;) {
-                int s = lz_sym(z, z->ltab, LZ_LB, z->lcnt, z->lsym);
-                if (s < 256) { if (s < 0 || z->dst >= z->dend) return -1; *z->dst++ = (lz8)s; }
-                else if (s == 256) break;
-                else {
-                    int len, dist; lz8 *p;
+                int s; lz16 e;
+                LZ_NEED(15);
+                e = z->ltab[bb & ((1u << LZ_LB) - 1)];
+                if (e) { int l = e & 15; bb = LZ_SHR(bb, l); nb -= l; s = e >> 4; }
+                else { LZ_SAVE(); s = lz_sym(z, z->ltab, LZ_LB, z->lcnt, z->lsym); LZ_LOAD(); }
+                if (s < 256) { if (s < 0 || d >= dend) return -1; *d++ = (lz8)s; continue; }
+                if (s == 256) break;
+                {
+                    int len, dist, x; const lz8 *p;
                     s -= 257; if (s >= 29) return -1;
-                    len = lz_lbase[s] + (int)lz_get(z, lz_lext[s]);
-                    s = lz_sym(z, z->dtab, LZ_DB, z->dcnt, z->dsym); if (s < 0 || s >= 30) return -1;
-                    dist = lz_dbase[s] + (int)lz_get(z, lz_dext[s]);
-                    if (z->dst - d0 < dist || z->dst + len > z->dend) return -1;
-                    p = z->dst - dist; while (len--) *z->dst++ = *p++;
+                    x = lz_lext[s]; len = lz_lbase[s]; if (x) { int v; LZ_BITS(x, v); len += v; }
+                    LZ_NEED(15);
+                    e = z->dtab[bb & ((1u << LZ_DB) - 1)];
+                    if (e) { int l = e & 15; bb = LZ_SHR(bb, l); nb -= l; s = e >> 4; }
+                    else { LZ_SAVE(); s = lz_sym(z, z->dtab, LZ_DB, z->dcnt, z->dsym); LZ_LOAD(); }
+                    if (s < 0 || s >= 30) return -1;
+                    x = lz_dext[s]; dist = lz_dbase[s]; if (x) { int v; LZ_BITS(x, v); dist += v; }
+                    if (d - d0 < dist || d + len > dend) return -1;
+                    p = d - dist; while (len--) *d++ = *p++;
                 }
             }
         } else return -1;
     } while (!last);
-    return (long)(z->dst - d0);
+    z->dst = d;
+    return (long)(d - d0);
 }
 /* Decode nblk streams in place. dest: buffer of raw_total bytes. blk[2k] = raw bytes of stream k, blk[2k+1] = its compressed bytes; stream k lies at base + (sum of the padded sizes before it), where
    base = dest + raw_total - (sum of all padded sizes) and a padded size is the compressed size rounded up to 2048. The last `tail` bytes of the buffer are copied

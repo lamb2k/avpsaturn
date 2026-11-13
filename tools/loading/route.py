@@ -93,12 +93,11 @@ try:
                 if not _base_hw: 
                     p = memscan.Proc(y.pr.pid); hs = p.find(bytes.fromhex('4c5a5354'))
                     for h in hs:
-                        d = p.read(h - 16, 16)
-                        if d: _base_hw.append((p, h - (0x06013fd0 - 0x06013fd0)))
+                        _base_hw.append((p, h - 28))
                         break
                 if _base_hw:
                     import struct
-                    d = _base_hw[0][0].read(_base_hw[0][1] + (ad - 0x06013fd0), 4 * nn); log('PEEK %08x' % ad, ' '.join('%08x' % w for w in struct.unpack('>%dI' % nn, d)) if d else 'unreadable')
+                    d = _base_hw[0][0].read(_base_hw[0][1] + 4 * ad, 4 * nn); log('PEEK diag[%d]' % ad, ' '.join('%08x' % w for w in struct.unpack('>%dI' % nn, d)) if d else 'unreadable')
                 else: log('PEEK no marker')
             else:
                 r = ram()
