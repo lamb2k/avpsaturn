@@ -667,6 +667,10 @@ static void round_check(void)
     static u32 settled;
     static int row_loaded;
     static u8 chars;
+#ifdef SAT_CONT_RELOAD
+    static u8 chars_loaded;   /* the characters the loaded file was chosen for */
+    int cont = 0;
+#endif
 #if SAT_VDP1_HW_ERASE
     int erase_old_row = row_loaded;
 #endif
@@ -680,7 +684,15 @@ static void round_check(void)
        word is steady here, so no wait, and the load runs at once when the title menu hands back to the game. */
     stale = !row && !row_loaded && round_loaded != sat_guest_file(0, 0, 0, row_file[0][0]);
 #endif
+#ifdef SAT_CONT_RELOAD
+    /* Continue with another character (lane coverage, item 7): the stage's file was chosen for the characters that started the area, and a continue's SELECT YOUR CHARACTER can
+       pick one whose art the file dropped (a solo file keeps its own character's banks). ff81cc gets the new bit when the pick is made and the new player's block is live, so the
+       same stage's file is loaded again for the characters now in play (a pair file, or the base file for three or more). The area's state is in the game's RAM and stays. */
+    cont = row && row == row_loaded && (chars & ~chars_loaded) && r8(0xff8380) && r8(0xff8001) == 2;
+    if (row == row_loaded && !stale && !cont) { settled = 0; return; }
+#else
     if (row == row_loaded && !stale) { settled = 0; return; }
+#endif
     /* The word flickers for a few frames as a scene closes; go only when it has held. */
     if (!stale && !settled) settled = sat_dbg.vblanks;
     if (!stale && sat_dbg.vblanks - settled < 12) return;
@@ -698,6 +710,9 @@ static void round_check(void)
         for (d = 0; d < DUEL_PAIRS; d++)
             if (duel_pairs[d][0] == want) { want = duel_pairs[d][1]; break; }
     }
+#endif
+#ifdef SAT_CONT_RELOAD
+    if (cont && want == round_loaded) { chars_loaded = chars; return; }   /* the file for the new set is the one already loaded (the base file for three or more characters) */
 #endif
     row_loaded = row;
     DIAG_MARK(5, 16, 0);
@@ -732,6 +747,9 @@ static void round_check(void)
     sat_gfx_display(1);
 #endif
     round_loaded = want;
+#ifdef SAT_CONT_RELOAD
+    chars_loaded = chars;
+#endif
 #ifdef SAT_GUESTS
     sat_guest_loaded(row, chars, mask_variant[chars], want0);   /* guest colours follow the art this file holds */
 #endif
