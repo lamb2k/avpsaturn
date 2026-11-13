@@ -274,7 +274,7 @@ static long load_regions(const char *name, void (*mark)(void))
                 unsigned long k;
                 if (vread(h, (Sint32)tot, stage)) { GFS_Close(h); GFS_Reset(); return -4 - (long)i; }
                 for (k = i; k < j; k++) {
-                    unsigned long n = load_head[2 + k * 2] / 4u, *d = (unsigned long *)load_head[1 + k * 2], *sp = (unsigned long *)p, q;
+                    unsigned long n = load_head[2 + k * 2] / 4u, *d = (unsigned long *)load_head[1 + k * 2], *sp = (unsigned long *)((unsigned long)p | 0x20000000u), q;   /* the staged bytes are read through the cache-through alias: the CD block transfer wrote them behind the cache */
                     for (q = 0; q < n; q++) d[q] = sp[q];
                     p += load_head[2 + k * 2];
                 }
@@ -291,7 +291,7 @@ static long load_regions(const char *name, void (*mark)(void))
         unsigned long k, q, sum = 0;
         for (k = 0; k < load_head[0]; k++) {
             unsigned long dst = load_head[1 + k * 2], n = load_head[2 + k * 2] / 4u;
-            volatile unsigned long *d = (volatile unsigned long *)dst;
+            volatile unsigned long *d = (volatile unsigned long *)(dst | 0x20000000u);
             if (dst == 1) continue;
             for (q = 0; q < n; q++) sum = (sum << 1 | sum >> 31) ^ d[q];
         }
