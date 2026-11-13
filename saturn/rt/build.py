@@ -358,6 +358,37 @@ ROWTRIM = int((re.search(r"-DSAT_TILE_ROWTRIM(?:=(\d))?(?!\w)", os.environ.get("
 TAIL_FILL = os.environ.get("PACK_TAIL_FILL", "0") == "1"   # default off: tile spill uses the last odd page of a ROM stretch too (tools/rounds_pack.py plan, assemble)
 
 
+def guest_sync_pages(page):
+    """ROM pages the guest sync routines write (guests.c sat_guest_loaded after every round file load: guest_pal_sync, guest_dialog_sync, guest_name_sync). They write the guest's or the
+    arcade's bytes over the ROM image wherever the bytes differ, so a page a round file used for tile spill gets overwritten with palette or text words (the distorted crate in the
+    stage 24 ending scene: sprite records of spill segment 1 at ROM 0xbf000 overwritten at 0xbf01e, found by logging the writes into the cart in Ymir). Every file keeps these pages as the ROM has them."""
+    pages = set()
+    def add(at, n):
+        pages.update(range(at // page, (at + n - 1) // page + 1))
+    f = GEN / "guest_hudpal.inc"
+    if f.exists():
+        for m in re.finditer(r"hudpal_at\d+\[\d+\] = \{([^}]*)\}", f.read_text()):
+            for v in m.group(1).split(","):
+                add(int(v, 16), 30)   # 15 words a table
+    f = GEN / "guest_dialog.inc"
+    if f.exists():
+        t = f.read_text()
+        m = re.search(r"dlg_data\[\d+\] = \{([^}]*)\}", t)
+        if m:
+            d = bytes(int(x) for x in m.group(1).split(",") if x.strip())
+            q = 0
+            while q + 4 <= len(d):
+                at = int.from_bytes(d[q:q + 4], "big"); q += 4
+                if not at:
+                    break
+                for _ in range(4):   # new line 1, new line 2, old line 1, old line 2
+                    q += 1 + d[q]
+                add(at, 58 + 56)     # line 2 starts 58 bytes on; 28 cells a line
+        for m in re.finditer(r"\{ (0x[0-9a-f]+), (\d+), dlg_name_new", t):
+            add(int(m.group(1), 16), int(m.group(2)))
+    return pages
+
+
 def round_files(rom, code_end, cold1_at, only=None):
     """only: file numbers to build alone (kept round files beside them; guest files): no spill into ROM stretches, every kept page restored.
     One RNN.BIN per stage. Sprites past the cart's room go to ROM stretches that stage does not read; whatever any file overwrites, each stage that reads it gets back."""
@@ -371,6 +402,9 @@ def round_files(rom, code_end, cold1_at, only=None):
         for q in range((at - CART["ROMB"]) // page, (end - CART["ROMB"] + page - 1) // page):
             code[q] = 1
     plans, written = [], set()
+    SYNC_PAGES = guest_sync_pages(page) if os.environ.get("GUEST_SYNC_KEEP", "1") == "1" else set()
+    if SYNC_PAGES:
+        print("guest sync pages kept in every round file: %d, of them under cold code (cannot stay): %s" % (len(SYNC_PAGES), ", ".join("%#x" % (q * page) for q in sorted(SYNC_PAGES) if code[q]) or "none"), flush=True)
     if STORY_PAGES:
         print("story caption pages kept in every round file: %d, of them under cold code (cannot stay): %s" % (len(STORY_PAGES), ", ".join("%#x" % (q * page) for q in sorted(STORY_PAGES) if code[q]) or "none"), flush=True)
     # Census gap: a mode or setting outside the census can read common tables a walk of this stage never touched. Pages most stages read stay in every stage. Costs sprites only in stages already short of room.
@@ -394,7 +428,7 @@ def round_files(rom, code_end, cold1_at, only=None):
         if only is not None and fi not in only:
             plans.append(None)
             continue
-        keep = set(f["keep_pages"]) | shared | STORY_PAGES
+        keep = set(f["keep_pages"]) | shared | STORY_PAGES | SYNC_PAGES
         if k02 and set(f.get("stages", [])) & {0x0e, 0x1c, 0x1e, 0x24}: keep |= k02
         free, st = [], None
         for q in range(0x200000 // page + 1):
@@ -437,7 +471,7 @@ def round_files(rom, code_end, cold1_at, only=None):
         plans.append((p, dropped))
     stats = {}
     if only is None:   # the pages each file keeps as the planner saw them (own, front end, next stage, fuzz, shared): tools/check_round_pages.py reads the built files against this
-        (WORK / "round_keep.json").write_text(json.dumps([[f["name"], sorted(set(f["keep_pages"]) | shared)] for f in ROUNDS["files"]]))
+        (WORK / "round_keep.json").write_text(json.dumps([[f["name"], sorted(set(f["keep_pages"]) | shared | SYNC_PAGES)] for f in ROUNDS["files"]]))
     for i, (f, pl) in enumerate(zip(ROUNDS["files"], plans)):
         if pl is None:
             continue
