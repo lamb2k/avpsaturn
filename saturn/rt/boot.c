@@ -765,7 +765,7 @@ int main(void)
                               Results in sat_ld_diag (words 2 fails, 3 first failing round, 4 rounds done, 5 rounds in the store, 7 the marker). The boot display's stripes show 0xAnnn while running, 0xFnnn at the end (nnn = fails). */
     {
         volatile unsigned long *res = sat_ld_diag + 2, *sum = sat_ld_diag;
-        sat_ld_diag[7] = 0x4c5a5354u;
+        { volatile unsigned long ka = 0x6b7c9a21ul, kb = 0x2726c975ul; sat_ld_diag[7] = ka ^ kb; }   /* 0x4c5a5354, 'LZST', built at run time so the literal is not in the code image the route also finds */
         unsigned long r, nr = 0, fails = 0, first = 0xffffffffu;
         char nm[] = "R000.BIN";
         GFS_Reset();
