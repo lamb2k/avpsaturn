@@ -75,6 +75,12 @@ static unsigned char *make_pack(void)
 
 static unsigned long h;
 static void mix(const unsigned char *p, unsigned long n) { unsigned long i; for (i = 0; i < n; i++) h = (h ^ p[i]) * 16777619UL; }
+#ifdef CMD_DMA_MASK
+/* SAT_CMD_DMA test: the 16 bytes of a sprite command the CPU never writes (bytes 16 to 31) hold whatever the staging buffer held in the DMA build; VDP1 does not read them for a sprite. Skip them in the command tables. */
+static void mixv1(const unsigned char *p, unsigned long n) { unsigned long i; for (i = 0; i < n; i++) if (i < 0x60 || i >= 0x10000 || (i & 31) < 16) h = (h ^ p[i]) * 16777619UL; }
+#else
+#define mixv1 mix
+#endif
 
 static void set_layer_word(unsigned char *base, unsigned off, unsigned code, unsigned attr) { w16(base + off, code); w16(base + off + 2, attr); }
 
@@ -258,7 +264,7 @@ int main(int argc, char **argv)
 #endif
         }
 #else
-        mix(V1, 0x80000); mix(V2, 0x80000); mix(CR, 0x1000);
+        mixv1(V1, 0x80000); mix(V2, 0x80000); mix(CR, 0x1000);
         mix((const unsigned char *)sat_gfx_host_vdp1r, sizeof sat_gfx_host_vdp1r);
         mix((const unsigned char *)sat_gfx_host_vdp2r, sizeof sat_gfx_host_vdp2r);
         printf("%d %u %u %u %lx\n", f, sat_gfx_stats.commands, sat_gfx_stats.uploads, sat_gfx_stats.layer_uploads, h);

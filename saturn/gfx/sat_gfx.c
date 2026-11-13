@@ -2211,6 +2211,27 @@ static void vl_note(u32 cause, int pal, int sx, int sy)
 #else
 #define VLN(x)
 #endif
+#ifdef SAT_CMD_DMA
+/* Lane perf-pic, SAT_CMD_DMA (default off): the sprite commands are built in a work RAM buffer and moved to VDP1's command table by SCU DMA (level 0, direct mode, long reads, word writes,
+   as the SAT_TILE_DMA experiment in vram_copy), CMD_STG commands at a time, instead of four 45 cycle (MODELLED) bus writes a command from the CPU. The CPU builds the next batch while the DMA runs;
+   a batch is not written to before the one before it has gone, and the plot does not start before the last one has. Same bytes in the table (the 16 bytes of a command the CPU never wrote are
+   whatever the buffer held: VDP1 does not read them for a sprite). The DMA reads WRAM-H: the board gives the SCU the bus for the transfer. EMULATED/MODELLED only until read on the console. */
+#ifndef CMD_STG
+#define CMD_STG 16   /* commands per batch, two batches in turn: 1 KB of high RAM */
+#endif
+static u8 cmd_stg[2 * CMD_STG * 32] __attribute__((aligned(16)));
+#ifdef SAT_GFX_HOST
+#define DMA_WAIT() ((void)0)
+static void cmd_dma(u8 *dest, const u8 *src, u32 bytes) { u32 i; for (i = 0; i < bytes; i++) dest[i] = src[i]; }
+#else
+#define DMA_WAIT() while (*(volatile u32 *)0x25fe007cUL & 0x10) ;
+static void cmd_dma(u8 *dest, const u8 *src, u32 bytes)
+{
+    volatile u32 *scu = (volatile u32 *)0x25fe0000UL;
+    scu[0] = (u32)src & 0x0fffffffUL; scu[1] = (u32)dest & 0x0fffffffUL; scu[2] = bytes; scu[3] = 0x101; scu[5] = 7; scu[4] = 0x101;
+}
+#endif
+#endif
 static void draw_sprites(void)
 {
     const u8 *list = snap.obj;
@@ -2230,6 +2251,11 @@ static void draw_sprites(void)
     put16(cmd + 20, SAT_GFX_SCREEN_W - 1); put16(cmd + 22, SAT_GFX_SCREEN_H - 1);
     put16(cmd + 24, 0); put16(cmd + 26, SAT_GFX_SCREEN_H - 1);
     cmd += 32;
+#ifdef SAT_CMD_DMA
+    u8 *vbase = cmd;   /* VDP1 address of the first command in the batch being built */
+    u32 nstg = 0, half = 0;
+    cmd = cmd_stg;
+#endif
     sat_gfx_stats.objects = (u16)count;
     VLN(vl_tiles = vl_off = vl_blank = vl_miss = vl_refslot = vl_refcmd = 0; vl_nlost = 0;)
     for (i = 0; i < count; i++)
@@ -2421,9 +2447,21 @@ static void draw_sprites(void)
 #endif
                 cmd += 32;
                 commands++;
+#ifdef SAT_CMD_DMA
+                if (++nstg == CMD_STG)
+                {   /* the DMA of the other batch (started a batch ago) must be through before this one starts; the CPU builds the next while this one goes */
+                    DMA_WAIT(); cmd_dma(vbase, cmd_stg + half * CMD_STG * 32, CMD_STG * 32);
+                    vbase += CMD_STG * 32; nstg = 0; half ^= 1; cmd = cmd_stg + half * CMD_STG * 32;
+                }
+#endif
             }
         }
     }
+#ifdef SAT_CMD_DMA
+    if (nstg) { DMA_WAIT(); cmd_dma(vbase, cmd_stg + half * CMD_STG * 32, nstg * 32); vbase += nstg * 32; }
+    DMA_WAIT();
+    cmd = vbase;
+#endif
 #ifdef SAT_VLOG
     {
         int b;
