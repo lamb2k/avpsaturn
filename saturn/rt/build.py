@@ -694,6 +694,8 @@ def main():
             bind_flags.append("-DSAT_WOLVERINE_DEBUG")
         if NATIVE_GFX:
             bind_flags.append("-DSAT_WV_NATIVE_GFX")
+        if "SAT_GUEST_GROUPS_MM" in os.environ.get("KERNEL_CFLAGS", ""):   # lane wv-speed: game_bind.c notes sprite groups only for Mega Man (and the skin build's Wolverine shots)
+            bind_flags.append("-DSAT_GUEST_GROUPS_MM")
         own += [cc(REPO / "saturn/game" / f"{n}.c", OBJ / f"game_{n}.o", ["-O2", "-DSAT_TARGET", "-I", REPO / "saturn/game"] + bind_flags) for n in ("game_hot", "game_bind")]
     sizes = {o: code_size(o) for o in objs}
     # Hottest chunks in high work RAM, then low work RAM; the coldest run from the cart. Heat comes from the MAME route.
