@@ -1,0 +1,30 @@
+w0_stage0_m|W0|stage:0||
+p0_pred0_m|P0|pred:0||
+w6_stage0_m|W6|stage:0||
+p6_pred0_m|P6|pred:0||
+w0_stage1_m|W0|stage:1||
+p0_pred1_m|P0|pred:1||
+w6_stage1_m|W6|stage:1||
+p6_pred1_m|P6|pred:1||
+w0_stage4_m|W0|stage:4||
+p0_pred4_m|P0|pred:4||
+w6_stage4_m|W6|stage:4||
+p6_pred4_m|P6|pred:4||
+w0_s0e_m|W0|stage:0|PRE=60 LEN=1500|
+w6_s0e_m|W6|stage:0|PRE=60 LEN=1500|
+w0_stage2_m|W0|stage:2||
+w6_stage2_m|W6|stage:2||
+w0_stage3_m|W0|stage:3||
+w6_stage3_m|W6|stage:3||
+w0_stage5_m|W0|stage:5||
+w6_stage5_m|W6|stage:5||
+w0_stage7_m|W0|stage:7||
+w6_stage7_m|W6|stage:7||
+w0_s4_c10|W0|stage:4|HW_CARTBEAT=10 HW_WBUF=0|
+w6_s4_c10|W6|stage:4|HW_CARTBEAT=10 HW_WBUF=0|
+w0_s4_x16|W0|stage:4|GS_MSLOW=1.6|
+w6_s4_x16|W6|stage:4|GS_MSLOW=1.6|
+w0_s0_c10|W0|stage:0|HW_CARTBEAT=10 HW_WBUF=0|
+w6_s0_c10|W6|stage:0|HW_CARTBEAT=10 HW_WBUF=0|
+w0_s0_x16|W0|stage:0|GS_MSLOW=1.6|
+w6_s0_x16|W6|stage:0|GS_MSLOW=1.6|
