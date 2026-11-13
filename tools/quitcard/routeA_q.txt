@@ -1,0 +1,1 @@
+b: r:420 t:start:8:100 r:900 t:a:8:120 r:300 t:a:8:60 q:2 p:stage1 r:900 p:play k: r:1800 q:2 p:rank r:900 p:title1 t:start:8:100 r:900 t:a:8:120 r:300 t:a:8:60 q:2 p:stage1b r:600 t:start:8:90 t:down:8:60 t:a:8:60 q:2 p:quit r:1500 p:title2
