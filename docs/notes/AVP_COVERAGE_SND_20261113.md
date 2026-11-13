@@ -12,7 +12,7 @@ The 14 commands were not all "absent from the census". Eleven of them (0x08e, 0x
 - Tile data is untouched: stage 0e still drops 659 keys (the 0e family 11 files, max 941 as before), stage 24 drops 0; budgets high RAM 72, low RAM 508, cart tail 2,332 (same as fix7c1; only audio data changed). ISO 326.5 MB (fix7c1: 326.1).
 
 ## Where each command plays (Saturn run against the MAME log of the same moment)
-Saturn column: audio frame relative to the anchor music request of the scene (same anchor in MAME: story 0x1a, ending 0x1b, stage music), `STARTED` = the library started a clip (`sfx_started`), slot = the SCSP slot carrying it (per-slot mean |output| from 0 to the value shown, frames above 0 after the request). RMS evidence is in `runs\gA_*\audio.raw`; the slot trace is the clean evidence because music and other effects share the mix.
+Saturn column: audio frame relative to the anchor music request of the scene (same anchor in MAME: story 0x1a, ending 0x1b, stage music), `STARTED` = the library started a clip (`sfx_started`), slot = the SCSP slot carrying it (per-slot mean |output| from 0 to the value shown, frames above 0 after the request). The raw captures were deleted after the checks (disk). Kept: runs/gA_*/trace.log (SLOTE lines: slot energy per 1/60 s) and audpoll.txt (every request and its outcome). The slot trace is the clean evidence because music and other effects share the mix; the 0.4 s RMS of the mix before and after a request is dominated by the music, so it is not proof.
 | cmd | scene | MAME rel frame | Saturn rel frame | result |
 |---|---|---|---|---|
 | 0x156 | story (character intro) | +422 | +422 | STARTED, slot 13 0 to 325, 52 frames |
