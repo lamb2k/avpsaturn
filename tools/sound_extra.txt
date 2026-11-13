@@ -17,5 +17,11 @@
 0a 7f 3
 12 7f 5
 22 94 1
-00 26d 3      # name entry (a ranking score), arcade f=6916 in mame/runs/go1; shown by the front end after a game over
-00 252 3      # ranking page jingle (arcade f=6795, after music 0x03), front end
+00 26d 3      # front end too (the ranking after the reload)
+00 252 3
+# Name entry (0x26d) and ranking page (0x252) jingles are requested while the STAGE file is loaded (Saturn run gA_go: unknown there). A stage file has no room for both (24.8 KB) without
+# dropping route-played clips (cost table in docs/notes/AVP_COVERAGE_SND_20261113.md); only the two files that take them for free (1-1: unused clips only; 6-2: free room) get them.
+02 26d 3
+02 252 3
+14 26d 3
+14 252 3
