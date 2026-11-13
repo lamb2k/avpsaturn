@@ -14,6 +14,7 @@ OUT = pathlib.Path(sys.argv[2] if len(sys.argv) > 2 else WORK / "story_keys_runs
 STAGES = [f"{w:02x}" for w in range(2, 0x26, 2)]
 JOBS = [(w, kind) for w in STAGES for kind in ("s", "c")]
 WINDOW_START = 1000   # frames after the warp: keys first seen before it belong to the stage's intro story and round card
+WINDOW_CLEAR_END = 3000   # frames after the warp: keys still on screen after it belong to the next stage's fight
 WINDOW_CLEAR = 900    # frames after the warp: the clear runs set the flags at 900 frames of play (the warp to the first play frame takes a few), so what is first seen after it is the clear sequence
 
 
@@ -29,12 +30,15 @@ def one(job):
     out = set()
     for l in open(d / "keys.txt"):
         t = l.split()
-        if len(t) < 4:
+        if len(t) < 5:
             continue
-        tag, sec, key, seen = t[0], int(t[1]), int(t[2], 16), int(t[3])
-        if kind == "s" and seen >= WINDOW_START:   # a start run keeps the story and the round card (the first frames)
+        tag, sec, key, seen, last = t[0], int(t[1]), int(t[2], 16), int(t[3]), int(t[4])
+        # Story-only keys: a start run keeps what is first seen in the story window AND is gone again before it ends (the story pictures, the round card; fight sprites stay on screen
+        # and are the census's job); a clear run keeps what is first seen after the clear flags and is gone before the run's last stretch (the clear sequence and story, the boss's
+        # death frames; the next stage's own fight sprites are still there at the end).
+        if kind == "s" and not (seen < WINDOW_START and last < WINDOW_START):
             continue
-        if kind == "c" and seen < WINDOW_CLEAR:    # a clear run keeps what is first seen after the clear flags (the clear sequence, the clear story, the next stage's intro)
+        if kind == "c" and not (seen >= WINDOW_CLEAR and last < WINDOW_CLEAR_END):
             continue
         out.add((tag, sec, key))
         if kind == "c":

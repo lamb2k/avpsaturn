@@ -2,7 +2,7 @@
 -- pages (round 3: "These aliens all come from one hive" ... "We'll use the APC!") and the stage-clear story, so the stage's round file lacked their pictures' sprite tiles
 -- (the story drew with holes under the stage's own file: the Boss Rush / stage select start of stage 0a). This script warps to a stage, presses NOTHING, holds the player's
 -- health and, with S_CLEAR_AT, sets the boss-down flags (ff822a, ff81f3) at that many frames of play so the clear sequence and the next stage's start run too.
--- Output keys.txt, one line per key first seen: STAGEWORD(hex) SECTION(0 sprite, 1..3 scroll 1..3) KEY(hex) FRAMES_SINCE_WARP; the stage word is the one the game holds when the key is seen.
+-- Output keys.txt, one line per key first seen: STAGEWORD(hex) SECTION(0 sprite, 1..3 scroll 1..3) KEY(hex) FIRST_SEEN LAST_SEEN (frames since the warp); the stage word is the one the game holds when the key is seen.
 -- env: S_OUT (dir), S_STAGE (hex), S_SPAN (frames after the warp to run), S_FRAMES (hard stop), S_CLEAR_AT (play frames, -1 none).  Pinned MAME 0.289, avspu, nvram baseline; coin/start taken from the same routine as tools/screen_keys.lua.
 local machine = manager.machine
 local cpu = machine.devices[":maincpu"]
@@ -18,7 +18,7 @@ local in2 = machine.ioport.ports[":IN2"].fields
 local coin, start = in2["Coin 1"], in2["1 Player Start"]
 local frame, warped, warpf, play0 = 0, false, nil, nil
 local keys = {{}, {}, {}, {}}
-local seen = {}
+local seen, lastseen = {}, {}
 local function grab()
     for i = 0, 0x3ff do
         local a = 0x708000 + i * 8
@@ -86,12 +86,12 @@ story_am_f = emu.add_machine_frame_notifier(function()
         local w = rd(0xff81e8)
         for s = 1, 4 do for k in pairs(keys[s]) do
             local id = string.format("%02x %d %x", w, s - 1, k)
-            if not seen[id] then seen[id] = frame - warpf end
+            if not seen[id] then seen[id] = frame - warpf end; lastseen[id] = frame - warpf
         end end
     end
     if frame >= maxf or (warpf and frame - warpf >= span) then
         local kf = assert(io.open(out .. "/keys.txt", "w"))
-        for id, f in pairs(seen) do kf:write(id .. " " .. f .. "\n") end
+        for id, f in pairs(seen) do kf:write(id .. " " .. f .. " " .. lastseen[id] .. "\n") end
         kf:close()
         manager.machine:exit()
     end
