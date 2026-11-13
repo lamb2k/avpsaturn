@@ -937,7 +937,7 @@ SECTIONS {{
             inputs[f"gfx:{i}"] = pathlib.Path(f["gfx"])
     fingerprint = round_cache.packing_inputs(ROUNDS, ends, dict(
         shared_min=SHARED_MIN, min_run=MIN_RUN, tail_fill=TAIL_FILL, rowtrim=ROWTRIM, arena_keep=os.environ.get("ARENA_KEEP"),
-        screen_keys=[sorted(k) for k in SCREEN_KEYS], pack_address=CART["SAT_PACK"]), inputs)
+        screen_keys=[sorted(k) for k in SCREEN_KEYS], story_keys={w: [sorted(k) for k in v] for w, v in sorted(STORY_KEYS.items())}, pack_address=CART["SAT_PACK"]), inputs)
     receipt = WORK / "round_pack_receipt.json"
     reason = round_cache.reuse_reason(receipt, fingerprint, ISO, names)
     if os.environ.get("KEEP_ROUND_FILES") and reason is None:
