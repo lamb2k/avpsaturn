@@ -155,7 +155,10 @@ def build_lz(files, dup=512):
         while cuts[i] < q + c:
             out.append((cuts[i], cuts[i + 1] - cuts[i])); i += 1
         return out
-    truns = [[list(sg) for q, c in runs for sg in segments(q, c)] for runs in truns]
+    PIECE = int(os.environ.get("LZ_PIECE", "32"))   # sectors of raw data per stream at most: the loader decodes a stream as soon as it has arrived, while the next ones are still being read
+    def pieces(q, c):
+        return [(q + o, min(PIECE, c - o)) for o in range(0, c, PIECE)]
+    truns = [[list(pc) for q, c in runs for sg in segments(q, c) for pc in pieces(*sg)] for runs in truns]
     blocks = {}
     for ri, runs in zip(order, truns):
         for q, c in runs:
