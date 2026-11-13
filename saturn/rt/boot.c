@@ -206,6 +206,7 @@ static void load(const char *name, void *dest, unsigned long code)
                 p += 2048 * c; secs -= c;
                 diag_tick();
             }
+            *(volatile unsigned char *)0xfffffe92u = 0x11;   /* purge the cache: the CD transfer wrote the streams behind it */
             if (lz_unit(&lz_ctx, (lz8 *)dest, raw_total, nblk, load_head + 4, tail, (lz8 *)lz_scr)) { GFS_Close(h); halt(code | 5, 0); }
             GFS_Close(h);
             LOADER_DIAG[3] = code; LOADER_DIAG[4] = raw_total;
@@ -298,6 +299,7 @@ static long lz_tile(GfsHn h, unsigned long i)
         }
     }
     run_reseek = 1;
+    *(volatile unsigned char *)0xfffffe92u = 0x11;   /* purge the cache: the CD transfer wrote the streams behind it */
     return lz_unit(&lz_ctx, dest, raw_total, nblk, blk, tail, (lz8 *)lz_scr) ? -6 : 0;
 }
 #endif
