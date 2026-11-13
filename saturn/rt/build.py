@@ -120,6 +120,7 @@ SCREEN_KEYS[0].discard(0)
 # stage's intro story and the stage-clear story with Attack, so a stage file lacked those pictures' sprite tiles and the story drew with holes (the stage 0a intro: 40+ sprite
 # keys missing, seen in the Boss Rush and the stage select). Each stage's file holds the keys of its own story, ranked with the screen keys. STORY_KEYS=0 builds without (A/B).
 STORY_KEYS = {}
+STORY_SKIP = set(os.environ.get("STORY_SKIP", "0e").split(","))   # stage files already over their room (stage 0e drops 659 keys): the story keys would push 400 more out, so they get none (STORY_SKIP= for all)
 if os.environ.get("STORY_KEYS", "1") == "1" and (WORK / "story_keys.txt").exists():
     for l in open(WORK / "story_keys.txt"):
         t = l.split()
@@ -461,7 +462,7 @@ def round_files(rom, code_end, cold1_at, only=None):
             free = []
         if not f["name"].startswith("front"):   # (front_wv, a guest's front file, is a front file too) continue and game over screens: reachable from every stage, kept first (tools/screen_keys.py)
             keys = [k | e for k, e in zip(keys, SCREEN_KEYS)]
-            story = STORY_KEYS.get(f["name"].split("_")[0][5:], None)   # "stage0a_m1" -> "0a"
+            story = STORY_KEYS.get(f["name"].split("_")[0][5:], None) if f["name"].split("_")[0][5:] not in STORY_SKIP else None   # "stage0a_m1" -> "0a"
             if story:
                 keys = [k | e for k, e in zip(keys, story)]
                 frank.update({k: POSE_RANK - 1 for k in story[0] if k not in SCREEN_KEYS[0] and k not in frank})   # just under the pose keys: they fill free room, and are the first to go in a file already short of room (stage 0e)
