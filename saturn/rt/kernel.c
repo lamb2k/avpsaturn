@@ -1016,6 +1016,9 @@ void sat_home_restart(void)
 void sat_main(void)
 {
     u32 *p; int i;
+#ifdef SAT_TR_LINE
+    u32 tr_t0;
+#endif
     __asm__ volatile ("ldc %0,sr" : : "r"(0xf0));
 #ifdef SAT_BOOT_CLEAR_EQ   /* test flag for the exactness runs (lane perf-hw): both bss clears are one and the same loop, so the boot takes the same cycles whichever RAM a stack or a table sits in */
     for (p = sat_bss_start; p < sat_bss_end; p++) { if (p >= sat_boot_stack && p < sat_boot_stack + 2048) continue; if (p >= sat_slave_stack && p < sat_slave_stack + 256) continue; *p = 0; }
@@ -1050,6 +1053,9 @@ void sat_main(void)
 #ifdef SAT_FREEPLAY_ONLY   /* test flag: the game's free play coinage; its paths are outside the census, 0xe2 fatal on stage 02 */
     save_block[0] = 9; save_block[0x30] = 9;
 #endif
+#ifdef SAT_TR_LINE
+    tr_t0 = rtc_secs();   /* the front end's file at power-up and at every restart (quit to title) is a transition too: its seconds go to the readout's TR line (fps_hud.c sat_fps_boot) */
+#endif
 #ifdef SAT_GUESTS
     i = sat_guest_file(0, 0, 0, 0);   /* the front end's file for the bonus characters setting */
     load_round(i);
@@ -1058,6 +1064,9 @@ void sat_main(void)
 #else
     load_round(0);
     round_loaded = 0;
+#endif
+#ifdef SAT_TR_LINE
+    { extern void sat_fps_boot(u32 secs); sat_fps_boot((rtc_secs() - tr_t0) % 3600u); }
 #endif
     DIAG_MARK(0, 0, 0);   /* first round file and sound set done */
 #ifndef SAT_BOOT_DIAG

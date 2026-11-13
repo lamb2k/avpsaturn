@@ -122,6 +122,16 @@ void sat_fps_vb(u32 pics)
     tr_s[2] = code;
 }
 #endif
+#ifdef SAT_TR_LINE
+/* Called by sat_main once its front end file is in (power-up and every restart, quit to title included): that load does not pass round_check, so it is not in the LD log, and a restart clears the kernel's
+   counters. The transition is recorded here with the load's whole seconds: from the scene code last seen, to the front end (0000). */
+void sat_fps_boot(u32 secs)
+{
+    if (tr_s[4]) { u32 k; for (k = 0; k < 14; k++) tr_s[k] = 0; tr_s[4] = 0; }
+    tr_n++; tr_from = tr_s[2]; tr_to = 0; tr_len = secs * 60u; tr_ld = 1;
+    tr_s[0] = 0; tr_s[1] = 0; tr_s[3] = 0; tr_s[5] = 0; tr_s[13] = tr_s[2];
+}
+#endif
 /* name table word: palette 14 white (labels), 15 yellow (numbers); a space is the panel cell, the black block every line sits on */
 static u16 name_of(char c, int yellow)
 {
