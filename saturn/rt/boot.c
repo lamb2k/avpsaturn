@@ -173,13 +173,17 @@ static void halt(unsigned long s, unsigned long d)
 }
 #define LOAD_CHUNK 128   /* sectors per read, so the tick moves while a file loads */
 static unsigned long load_head[512];
-#if defined(SAT_LOAD_SUM) || defined(SAT_LOAD_SELFTEST)
-unsigned long sat_ld_diag[8];   /* (bss: the loader's image holds only .text) test words: 0 loads done, 1 last SAT_LOAD_SUM sum, 2 selftest fails, 3 first failing round, 4 rounds done, 5 rounds in the store, 7 the marker 'LZST' a Ymir route scans for */
+#if defined(SAT_LOAD_SUM) || defined(SAT_LOAD_SELFTEST) || defined(SAT_LZ_DBG)
+unsigned long sat_ld_diag[8 + 96];   /* (bss: the loader's image holds only .text) test words: 0 loads done, 1 last SAT_LOAD_SUM sum, 2 selftest fails, 3 first failing round, 4 rounds done, 5 rounds in the store, 7 the marker 'LZST' a Ymir route scans for */
 #endif
 #ifdef SAT_LOAD_LZ   /* lane loading, 2026-11-12: compressed boot files and tile regions (tools/lzstore.py, saturn/rt/lzdec.h) */
 #include "lzdec.h"
 #define LZ_MAXB 80
+#ifdef SAT_LZ_DBG
+#define LZ_TMAX 7168   /* the debug array's room (the builds of this layout need at most 7168) */
+#else
 #define LZ_TMAX 8192
+#endif
 static LzCtx lz_ctx;
 static lz32 lz_scr[(LZ_TMAX + 8) / 4 + 1];   /* the tail kept out of the way of the in-place decode (also the self test's sum table) */
 #define CCR_B (*(volatile unsigned char *)0xfffffe92u)
@@ -189,6 +193,10 @@ static unsigned char lz_ccr;
 #define LZ_CACHE_OFF() do { CCR_B = (unsigned char)((lz_ccr & 1) ? (lz_ccr | 0x10) : 0x10); } while (0)
 /* Read the streams of a unit into the end of its destination and decode them while they arrive (GFS non-blocking read, GFS_NwExecOne moves the data by CPU): the drive keeps reading while the CPU
    decodes, so the time is the CD's, not the CD's plus the decoder's. gsec/gcnt: ngrp groups of contiguous disc sectors, in the order of the streams; seek_first 0: the file position is already at the first. */
+#ifdef SAT_LZ_DBG
+lz32 dbg_ak, dbg_aoff;
+lz32 dbg_now(void) { static lz32 T, last; lz32 f = *(volatile unsigned char *)0xfffffe12u; f = (f << 8) | *(volatile unsigned char *)0xfffffe13u; T += (f - last) & 0xffffu; last = f; return T; }
+#endif
 static long lz_stream(GfsHn h, lz8 *dest, lz32 raw_total, lz32 nblk, const lz32 *blk, lz32 tail, const lz32 *gsec, const lz32 *gcnt, lz32 ngrp, int seek_first)
 {
     LzUnit u; lz32 g, done = 0; int r = 0;
@@ -204,7 +212,23 @@ static long lz_stream(GfsHn h, lz8 *dest, lz32 raw_total, lz32 nblk, const lz32 
             arrived = done + (lz32)nd;
             if (GFS_NwIsComplete(h)) { arrived = done + 2048ul * gcnt[g]; }
             LZ_CACHE_ON();
+#ifdef SAT_LZ_DBG
+            {   /* timing of the tile streams (FRT, phi/128 = 4.5 us per count): sat_ld_diag[8 + k] arrival, [33 + k] decode start, [58 + k] decode end (counts since the first stream's request) */
+                extern lz32 dbg_now(void);
+                lz32 tn = dbg_now();
+                if (sat_ld_diag[5]) {
+                    while (dbg_ak < nblk && dbg_aoff + ((blk[2 * dbg_ak + 1] + 2047ul) & ~2047ul) <= arrived) { if (dbg_ak < 25) sat_ld_diag[8 + dbg_ak] = tn; dbg_aoff += (blk[2 * dbg_ak + 1] + 2047ul) & ~2047ul; dbg_ak++; }
+                    for (;;) {
+                        lz32 kk = u.k, t0 = dbg_now();
+                        r = lz_unit_step(&lz_ctx, &u, arrived, 0);
+                        if (r <= 0) break;
+                        if (kk < 25) { sat_ld_diag[33 + kk] = t0; sat_ld_diag[58 + kk] = dbg_now(); }
+                    }
+                } else while ((r = lz_unit_step(&lz_ctx, &u, arrived, 0)) > 0) ;
+            }
+#else
             while ((r = lz_unit_step(&lz_ctx, &u, arrived, 0)) > 0) ;
+#endif
             LZ_CACHE_OFF();
             if (r < 0) return -6;
             if (GFS_NwIsComplete(h)) break;
@@ -213,8 +237,14 @@ static long lz_stream(GfsHn h, lz8 *dest, lz32 raw_total, lz32 nblk, const lz32 
         done += 2048ul * gcnt[g];
     }
     LZ_CACHE_ON();
+#ifdef SAT_LZ_DBG
+    { extern lz32 dbg_now(void); if (sat_ld_diag[5]) sat_ld_diag[83] = dbg_now(); }
+#endif
     lz_unit_tailcopy(&lz_ctx, &u);
     while ((r = lz_unit_step(&lz_ctx, &u, u.padded, 1)) > 0) ;
+#ifdef SAT_LZ_DBG
+    { extern lz32 dbg_now(void); if (sat_ld_diag[5]) sat_ld_diag[84] = dbg_now(); }
+#endif
     LZ_CACHE_OFF();
     if (r < 0) return -7;
     return (u.k == u.nblk && u.out == raw_total) ? 0 : -8;
@@ -325,6 +355,9 @@ static long lz_tile(GfsHn h, unsigned long i)
     }
     if (padded > raw_total) return -3;
     run_reseek = 1;
+#ifdef SAT_LZ_DBG
+    { int q; volatile unsigned long ka = 0x6b7c9a21ul, kb = 0x2726c975ul; extern lz32 dbg_now(void); for (q = 8; q < 104; q++) sat_ld_diag[q] = 0; sat_ld_diag[7] = ka ^ kb; *(volatile unsigned char *)0xfffffe16u = 2; (void)dbg_now(); sat_ld_diag[5] = 1; sat_ld_diag[8 + 90] = dbg_now(); dbg_ak = 0; dbg_aoff = 0; }
+#endif
     return lz_stream(h, dest, raw_total, nblk, blk, tail, gsec, gcnt, ngrp, 1);
 }
 #endif

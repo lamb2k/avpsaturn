@@ -6,7 +6,7 @@
    buffer, the output grows from its start; the last `tail` bytes of the buffer are copied to a scratch area first and the decoder reads them from there (so the output may pass over them). */
 #ifndef LZDEC_H
 #define LZDEC_H
-#define LZ_LB 9u
+#define LZ_LB 10u
 #define LZ_DB 7u
 #ifdef _MSC_VER
 #define LZ_AL4
@@ -79,9 +79,11 @@ static const lz32 lz_p32[32] = { 0, 0x80000000ul, 0x40000000ul, 0x20000000ul, 0x
 static const lz32 lz_p2[32] = { 1ul, 2ul, 4ul, 8ul, 0x10ul, 0x20ul, 0x40ul, 0x80ul, 0x100ul, 0x200ul, 0x400ul, 0x800ul, 0x1000ul, 0x2000ul, 0x4000ul, 0x8000ul, 0x10000ul, 0x20000ul, 0x40000ul, 0x80000ul, 0x100000ul,
     0x200000ul, 0x400000ul, 0x800000ul, 0x1000000ul, 0x2000000ul, 0x4000000ul, 0x8000000ul, 0x10000000ul, 0x20000000ul, 0x40000000ul, 0x80000000ul };
 #define LZ_SHR(x, n) ((n) ? (lz32)(((unsigned long long)(x) * lz_p32[n]) >> 32) : (x))
+#define LZ_SHR1(x, n) ((lz32)(((unsigned long long)(x) * lz_p32[n]) >> 32))   /* n >= 1 (a table entry's length) */
 #define LZ_SHLB(b, n) ((lz32)(b) * lz_p2[n])
 #else
 #define LZ_SHR(x, n) ((x) >> (n))
+#define LZ_SHR1(x, n) ((x) >> (n))
 #define LZ_SHLB(b, n) ((lz32)(b) << (n))
 #endif
 static const lz16 lz_mask[17] = { 0, 1, 3, 7, 15, 31, 63, 127, 255, 511, 1023, 2047, 4095, 8191, 16383, 32767, 65535 };
@@ -97,7 +99,7 @@ static long lz_inflate(LzCtx *z, const lz8 *src, lz8 *dst, lz8 *dend)
 #define LZ_SAVE() { z->src = sp; z->bits = bb; z->nbits = nb; }
 #define LZ_LOAD() { sp = z->src; bb = z->bits; nb = z->nbits; }
     do {
-        int type, t1;
+        int type;
         LZ_BITS(1, last); LZ_BITS(2, type);
         if (type == 0) {
             int len, nlen;
@@ -134,14 +136,19 @@ static long lz_inflate(LzCtx *z, const lz8 *src, lz8 *dst, lz8 *dend)
             }
             lz_build(z->lcnt, z->lsym, z->ltab, LZ_LB, lens, nlen);
             lz_build(z->dcnt, z->dsym, z->dtab, LZ_DB, lens + 288, ndist);
-            t1 = 0;
             for (;;) {
                 int s; lz16 e;
-                LZ_NEED(15);
+                /* one refill test per symbol: nb <= 16 -> 16 more bits (nb <= 32); then nb >= 17 covers any code (15 bits). Literals do not test the output end: it is checked here, at the refill, and at every match. */
+                if (nb <= 16) { if (sp == swp) sp = scr; bb |= LZ_SHLB(LZ_RD16(sp), nb); sp += 2; nb += 16; if (d > dend) return -1; }
                 e = z->ltab[bb & ((1u << LZ_LB) - 1)];
-                if (e) { int l = e & 15; bb = LZ_SHR(bb, l); nb -= l; s = e >> 4; }
-                else { LZ_SAVE(); s = lz_sym(z, z->ltab, LZ_LB, z->lcnt, z->lsym); LZ_LOAD(); }
-                if (s < 256) { if (s < 0 || d >= dend) return -1; *d++ = (lz8)s; continue; }
+                if (e) {
+                    int l = e & 15; bb = LZ_SHR1(bb, l); nb -= l; s = e >> 4;
+                    if (s < 256) { *d++ = (lz8)s; continue; }
+                } else {
+                    LZ_SAVE(); s = lz_sym(z, z->ltab, LZ_LB, z->lcnt, z->lsym); LZ_LOAD();
+                    if (s < 0) return -1;
+                    if (s < 256) { if (d >= dend) return -1; *d++ = (lz8)s; continue; }
+                }
                 if (s == 256) break;
                 {
                     int len, dist, x; const lz8 *p;
@@ -156,6 +163,7 @@ static long lz_inflate(LzCtx *z, const lz8 *src, lz8 *dst, lz8 *dend)
                     if (d - d0 < dist || d + len > dend) return -1;
                     p = d - dist;
                     if (len >= 4 && !(((lz32)d | (lz32)p) & 1)) { while (len >= 2) { *(lz16 *)d = *(const lz16 *)p; d += 2; p += 2; len -= 2; } }   /* both even: halfword moves (dist >= 2: reads stay behind the writes) */
+                    while (len >= 4) { d[0] = p[0]; d[1] = p[1]; d[2] = p[2]; d[3] = p[3]; d += 4; p += 4; len -= 4; }   /* bytes in order: a distance below 4 overlaps its own output */
                     while (len--) *d++ = *p++;
                 }
             }

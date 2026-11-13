@@ -142,59 +142,68 @@ def build_lz(files, dup=512, sums=None):
         if t is not None:
             tiles[i] = b[offs[t]:offs[t] + regs[t][1]]
     order = sorted(tiles)
-    pool, truns = dedup_pool([tiles[i] for i in order], 0)   # no in-line copies: a blob is read once per load either way
-    # atomic segments: cut the tile pool at every place any file's run starts or ends, so each pool sector is compressed once and a run is a list of segments (more blocks per file, none twice)
-    cuts = set()
-    for runs in truns:
-        for q, c in runs:
-            cuts.add(q); cuts.add(q + c)
-    cuts = sorted(cuts)
-    import bisect
-    def segments(q, c):
-        i = bisect.bisect_left(cuts, q); out = []
-        while cuts[i] < q + c:
-            out.append((cuts[i], cuts[i + 1] - cuts[i])); i += 1
-        return out
-    PIECE = int(os.environ.get("LZ_PIECE", "32"))   # sectors of raw data per stream at most: the loader decodes a stream as soon as it has arrived, while the next ones are still being read
-    def pieces(q, c):
-        return [(q + o, min(PIECE, c - o)) for o in range(0, c, PIECE)]
-    truns = [[list(pc) for q, c in runs for sg in segments(q, c) for pc in pieces(*sg)] for runs in truns]
-    blocks = {}
-    for ri, runs in zip(order, truns):
-        for q, c in runs:
-            if (q, c) not in blocks:
-                raw = b"".join(pool[q:q + c])
+    # Uniform pieces of PIECE sectors counted from the start of each file's tile region, compressed once per distinct content. The files of a family share most pieces at the same place, so a content keyed
+    # blob area needs few reads per file (6 % more blob sectors than cutting at every sector run of the raw pool, but 1 to 3 groups a file instead of 3 to 24: a group is a seek).
+    PIECE = int(os.environ.get("LZ_PIECE", "32"))   # sectors of raw data per stream: the loader decodes a stream as soon as it has arrived, while the next ones are still being read
+    DUPB = int(os.environ.get("LZ_DUPB", "0"))      # a run of placed pieces shorter than this many blob sectors is copied again instead of shared
+    zc = {}
+    def piece_keys(ri):
+        keys = []
+        t = tiles[ri]
+        for o in range(0, len(t), PIECE * SEC):
+            raw = t[o:o + PIECE * SEC]
+            k = hashlib.blake2b(raw, digest_size=16).digest()
+            if k not in zc:
                 z = deflate(raw)
                 if len(z) >= len(raw):
-                    z = deflate(raw, zlib.Z_FIXED)   # any valid stream: a stored block when nothing is gained
-                    co = zlib.compressobj(0, zlib.DEFLATED, -15); z = co.compress(raw) + co.flush()
-                blocks[(q, c)] = (len(raw), z)
-    # blob area: each distinct block once, sector aligned, in order of first use
-    blob_off, blob_data, blob_sec = {}, [], 0
-    for ri, runs in zip(order, truns):
-        for key in runs:
-            key = tuple(key)
-            if key not in blob_off:
-                z = blocks[key][1]; blob_off[key] = blob_sec
-                blob_data.append(z + bytes(pad(len(z)) - len(z))); blob_sec += pad(len(z)) // SEC
+                    co = zlib.compressobj(0, zlib.DEFLATED, -15); z = co.compress(raw) + co.flush()   # a stored block when nothing is gained
+                zc[k] = (len(raw), z)
+            keys.append(k)
+        return keys
     # per file: proof of the in-place decode; a file that fails keeps its tile region in the stream
-    use_lz = {}
-    for ri, runs in zip(order, truns):
-        bl = [(blocks[tuple(r)][0], blocks[tuple(r)][1]) for r in runs]
-        T = place_and_check(tiles[ri], bl)
-        if T is not None:
-            use_lz[ri] = (runs, T)
+    use_lz, proven = {}, {}
+    for ri in order:
+        keys = piece_keys(ri)
+        pk = tuple(keys)
+        if pk not in proven:
+            proven[pk] = place_and_check(tiles[ri], [zc[k] for k in keys])
+        if proven[pk] is not None:
+            use_lz[ri] = (keys, proven[pk])
+    # blob area: pieces in the order of first use; a file's pieces that are already placed and follow one another there are shared (one read)
+    blob_data, where, end, starts = [], {}, 0, {}
+    def psec(k): return pad(len(zc[k][1])) // SEC
+    for ri in order:
+        if ri not in use_lz:
+            continue
+        keys = use_lz[ri][0]; nk = len(keys); j = 0; st = [0] * nk
+        while j < nk:
+            if keys[j] in where:
+                k = j
+                while k + 1 < nk and keys[k + 1] in where and where[keys[k + 1]] == where[keys[k]] + psec(keys[k]):
+                    k += 1
+                if sum(psec(x) for x in keys[j:k + 1]) > DUPB:
+                    for x in range(j, k + 1):
+                        st[x] = where[keys[x]]
+                    j = k + 1
+                    continue
+            k = keys[j]; st[j] = end
+            if k not in where:
+                where[k] = end
+            z = zc[k][1]; blob_data.append(z + bytes(pad(len(z)) - len(z))); end += psec(k); j += 1
+        starts[ri] = st
+    blob_sec = end
+    blocks = zc
     streams = []
     for i, (b, (regs, offs, t)) in enumerate(zip(files, parts)):
         if i in use_lz:
-            runs, T = use_lz[i]
+            keys, T = use_lz[i]
             head = bytearray(b[:SEC])
             struct.pack_into(">I", head, 4 + 8 * t + 4, regs[t][1] | 1)
-            info = [MAGIC_LZ, regs[t][1], T, len(runs)]
-            for r in runs:
-                bl = blocks[tuple(r)]
+            info = [MAGIC_LZ, regs[t][1], T, len(keys)]
+            for k in keys:
+                bl = zc[k]
                 info += [bl[0], len(bl[1])]
-            info += [blob_off[tuple(r)] for r in runs]
+            info += starts[i]
             assert 4 * len(info) <= SEC - 1024
             struct.pack_into(">%dI" % len(info), head, 1024, *info)
             body = b[SEC:offs[t]] + b[offs[t] + regs[t][1]:]
@@ -222,7 +231,7 @@ def build_lz(files, dup=512, sums=None):
         head += b"".join(struct.pack(">I", x) for x in sums)
         assert len(head) <= hs * SEC
     out = head + bytes(hs * SEC - len(head)) + tab + bytes(run_secs * SEC - len(tab)) + b"".join(data) + b"".join(blob_data)
-    info = dict(files=n, lz_files=len(use_lz), raw_files=n - len(use_lz), pool_sectors=len(data), blob_sectors=blob_sec, blocks=len(blocks), store_sectors=len(out) // SEC,
+    info = dict(files=n, lz_files=len(use_lz), raw_files=n - len(use_lz), pool_sectors=len(data), blob_sectors=blob_sec, blocks=len(zc), groups=sum(1 + sum(1 for q in range(1, len(st)) if st[q] != st[q - 1] + psec(use_lz[ri][0][q - 1])) for ri, st in starts.items()), store_sectors=len(out) // SEC,
                 tail_max=max([t for _, t in use_lz.values()] or [0]), tile_raw_sectors=sum(len(t) // SEC for t in tiles.values()))
     return out, streams, info
 

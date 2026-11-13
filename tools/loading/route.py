@@ -111,6 +111,10 @@ try:
                     import struct
                     dbg = int(os.environ['GS_DBG'], 16); host = r[1] - (int(os.environ['GS_RAMB'], 16) - dbg) + (ad - dbg); d = r[0].read(host, 4 * nn)
                     log('PEEK %08x' % ad, ' '.join('%08x' % w for w in struct.unpack('>%dI' % nn, d)) if d else 'unreadable')
+        elif k == 'C':   # C:reset or C:dump_NAME (underscore = space): command file of the profiling Ymir
+            open(f'{HERE}/hw_hw_cmd.txt', 'w').write(a.replace('_', ' ')); log('cmd', a); time.sleep(4)
+        elif k == 'D':   # D:name  command file for the profiling Ymir: dump its PC histogram to hw_hwprof_<name>.txt
+            open(f'{HERE}/hw_cmd.txt', 'w').write('dump ' + a); log('cmd dump', a); time.sleep(6)
         elif k == 'k':   # k: health 0 (a KO)
             r = ram()
             if r: r[0].write(r[1] + 0x83c0, b'\x00\x00'); log('KO poke')
