@@ -174,16 +174,17 @@ static void halt(unsigned long s, unsigned long d)
 #define LOAD_CHUNK 128   /* sectors per read, so the tick moves while a file loads */
 static unsigned long load_head[512];
 #if defined(SAT_LOAD_SUM) || defined(SAT_LOAD_SELFTEST) || defined(SAT_LZ_DBG)
-unsigned long sat_ld_diag[8 + 96];   /* (bss: the loader's image holds only .text) test words: 0 loads done, 1 last SAT_LOAD_SUM sum, 2 selftest fails, 3 first failing round, 4 rounds done, 5 rounds in the store, 7 the marker 'LZST' a Ymir route scans for */
+#ifdef SAT_LZ_DBG
+unsigned long sat_ld_diag[8 + 96];
+#else
+unsigned long sat_ld_diag[8 + 12];   /* words 8 to 19: the sum and byte count of each boot file as loaded, in load order (boot_note) */
+#endif
+/* (bss: the loader's image holds only .text) test words: 0 loads done, 1 last SAT_LOAD_SUM sum, 2 selftest fails, 3 first failing round, 4 rounds done, 5 rounds in the store, 7 the marker 'LZST' a Ymir route scans for */
 #endif
 #ifdef SAT_LOAD_LZ   /* lane loading, 2026-11-12: compressed boot files and tile regions (tools/lzstore.py, saturn/rt/lzdec.h) */
 #include "lzdec.h"
 #define LZ_MAXB 80
-#ifdef SAT_LZ_DBG
-#define LZ_TMAX 7168   /* the debug array's room (the builds of this layout need at most 7168) */
-#else
-#define LZ_TMAX 8192
-#endif
+#define LZ_TMAX 7168   /* tail scratch bytes; tools/lzstore.py TMAX is the same (a file whose in-place decode needs more stays uncompressed; the shipped files need at most 7168) */
 static LzCtx lz_ctx;
 static lz32 lz_scr[(LZ_TMAX + 8) / 4 + 1];   /* the tail kept out of the way of the in-place decode (also the self test's sum table) */
 #define CCR_B (*(volatile unsigned char *)0xfffffe92u)
@@ -250,6 +251,22 @@ static long lz_stream(GfsHn h, lz8 *dest, lz32 raw_total, lz32 nblk, const lz32 
     return (u.k == u.nblk && u.out == raw_total) ? 0 : -8;
 }
 #endif
+#if defined(SAT_LOAD_SUM) || defined(SAT_LOAD_SELFTEST)
+static unsigned long boot_n;
+/* test builds: the multiplicative sum (SAT_LOAD_SUM's) of each boot file as it lies in memory after load(), in load order: sat_ld_diag[8 + 2n] sum, [9 + 2n] bytes; the marker is set here so a route can find the array
+   (tools/loading/bootsum.py compares them with the sums of the files as the plain build writes them). */
+static void boot_note(const void *dest, unsigned long bytes)
+{
+    const volatile unsigned long *p = (const volatile unsigned long *)dest; unsigned long s = 0, q;
+    volatile unsigned long ka = 0x6b7c9a21ul, kb = 0x2726c975ul;
+    for (q = 0; q < bytes / 4; q++) s = s * 0x9e3779b1ul + p[q];
+    sat_ld_diag[7] = ka ^ kb;
+    if (boot_n < 6) { sat_ld_diag[8 + 2 * boot_n] = s; sat_ld_diag[9 + 2 * boot_n] = bytes; boot_n++; }
+}
+#define BOOT_NOTE(d, n) boot_note((d), (n))
+#else
+#define BOOT_NOTE(d, n) ((void)0)
+#endif
 static void load(const char *name, void *dest, unsigned long code)
 {
     Sint32 id = GFS_NameToId((Sint8 *)name), ss, n, last, got, total = 0, left;
@@ -272,6 +289,7 @@ static void load(const char *name, void *dest, unsigned long code)
             if (lz_stream(h, (lz8 *)dest, raw_total, nblk, load_head + 4, tail, &gs, &gc, 1, 0)) { GFS_Close(h); halt(code | 5, 0); }
             GFS_Close(h);
             LOADER_DIAG[3] = code; LOADER_DIAG[4] = raw_total;
+            BOOT_NOTE(dest, raw_total);
             return;
         }
         if (GFS_Seek(h, 0, GFS_SEEK_SET) < 0) { GFS_Close(h); halt(code | 6, 0); }
@@ -286,6 +304,7 @@ static void load(const char *name, void *dest, unsigned long code)
     }
     GFS_Close(h);
     LOADER_DIAG[3] = code; LOADER_DIAG[4] = (unsigned long)total;
+    BOOT_NOTE(dest, (unsigned long)total);
 }
 /* Between rounds the runtime calls this through LOADER_API (lifted code never does): one file of whole sectors, its first sector a list of
    u32 count, then count pairs of u32 destination, u32 bytes (multiples of 2048), destination 1 being a call to mark. The caller has masked interrupts and stopped the slave. Returns sectors read, or a negative stage. */

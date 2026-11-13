@@ -17,7 +17,7 @@ import ctypes, hashlib, os, pathlib, struct, subprocess, sys, zlib
 SEC = 2048
 HERE = pathlib.Path(__file__).resolve().parent
 REPO = HERE.parent
-TMAX = 8192          # scratch bytes the loader keeps for the tail (boot.c lz_scr)
+TMAX = 7168          # scratch bytes the loader keeps for the tail (boot.c LZ_TMAX / lz_scr)
 COAL = 64            # sectors: regions up to this size are 'tiny' (boot.c COAL_MAX)
 MAGIC_LZ, MAGIC_LZB = 0x4c5a3031, 0x4c5a4231
 _dll = None
@@ -64,7 +64,7 @@ def place_and_check(raw, blocks):
     blk = (ctypes.c_ulong * (2 * len(blocks)))()
     for k, (r, s) in enumerate(blocks):
         blk[2 * k] = r; blk[2 * k + 1] = len(s)
-    tails = [t for t in (0, 512, 1024, 1536, 2048, 3072, 4096, 5120, 6144, 7168, 8192) if t <= TMAX]
+    tails = [t for t in (0, 512, 1024, 1536, 2048, 3072, 4096, 5120, 6144, 7168) if t <= TMAX]
     for T in tails:
         buf = ctypes.create_string_buffer(total + 16)
         ctypes.memset(buf, 0xAA, total)
