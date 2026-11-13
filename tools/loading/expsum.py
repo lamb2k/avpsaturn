@@ -17,7 +17,7 @@ def expected(iso, store_lba, r):
         o=d-0x02400000
         for q in range(0,b,4):
             w=struct.unpack('>I',mem[o+q:o+q+4])[0]
-            s=((s<<1|s>>31)&0xffffffff)^w
+            s=(s*0x9e3779b1+w)&0xffffffff
     return s, cnt, pos//2048
 if __name__=='__main__':
     iso=sys.argv[1]; st=int(sys.argv[2])

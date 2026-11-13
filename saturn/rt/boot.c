@@ -202,6 +202,7 @@ static unsigned long store_dir[512], store_run[512];
 #endif
 static Sint32 run_at, run_left, run_sec = -1, run_next, run_end;
 #ifdef SAT_LOAD_COALESCE
+static unsigned long coal_big;   /* set once a region larger than COAL_MAX has been read after the mark */
 #define COAL_MAX 64u   /* sectors; every restore region of the stage files and the front end file is below this, the tile and sound regions are not */
 #endif
 #ifdef SAT_LOAD_SUM
@@ -256,6 +257,9 @@ static long load_regions(const char *name, void (*mark)(void))
 #ifdef SAT_LOAD_SUM
     load_sum = 0;
 #endif
+#ifdef SAT_LOAD_COALESCE
+    coal_big = 0;
+#endif
     for (i = 0; i < load_head[0]; i++) {
         Sint32 secs = (Sint32)(load_head[2 + i * 2] / 2048u);
         if (load_head[1 + i * 2] == 1) { mark(); continue; }
@@ -265,7 +269,7 @@ static long load_regions(const char *name, void (*mark)(void))
            one after another in the file, so a group of them is read in one go into the pack room (region 0's address, whose sound data the mark() call above has already taken and which the big
            tile region overwrites after) and each region is then copied to its address. Same bytes at the same addresses; fewer commands. Only regions of up to COAL_MAX sectors, groups up to
            the size of region 0, and only once region 0 (the pack room) has been read. */
-        if (i >= 2 && secs <= COAL_MAX && secs > 0 && load_head[1] != 1 && load_head[3] == 1 && load_head[2] >= 65536u) {   /* region 1 is the mark: the sound part in region 0 has been taken */
+        if (i >= 2 && !coal_big && secs <= COAL_MAX && secs > 0 && load_head[1] != 1 && load_head[3] == 1 && load_head[2] >= 65536u) {   /* region 1 is the mark: the sound part in region 0 has been taken */
             unsigned long room = load_head[2] / 2048u, tot = 0;
             unsigned long j = i;
             while (j < load_head[0] && load_head[1 + j * 2] != 1 && (load_head[1 + j * 2] & 3u) == 0 && (load_head[2 + j * 2] % 2048u) == 0 && (load_head[2 + j * 2] / 2048u) <= COAL_MAX && (load_head[2 + j * 2] / 2048u) > 0 && tot + load_head[2 + j * 2] / 2048u <= room) { tot += load_head[2 + j * 2] / 2048u; j++; }
@@ -285,15 +289,18 @@ static long load_regions(const char *name, void (*mark)(void))
 #endif
         if (vread(h, secs, (unsigned char *)load_head[1 + i * 2])) { GFS_Close(h); GFS_Reset(); return -4 - (long)i; }
         total += secs;
+#ifdef SAT_LOAD_COALESCE
+        if (i >= 2 && secs > COAL_MAX) coal_big = 1;   /* the tile region is in the pack room: nothing may be staged there any more (regions after it are read one by one; 11-12: staging them over the first 130 sectors of the tile region corrupted 157 of the 287 files) */
+#endif
     }
-#ifdef SAT_LOAD_SUM   /* test flag: a rotating sum of every byte the regions wrote, read back from their addresses, so two builds' loads of one file can be compared: 0x06013fb8 counts the loads, 0x06013fbc holds the last sum (the free words between the boot display API and the loader API) */
+#ifdef SAT_LOAD_SUM   /* test flag: a multiplicative sum (sum * 0x9e3779b1 + word; the first rotating version cancelled where regions overlap and could not see a corrupted pack room) of every byte the regions wrote, read back from their addresses, so two builds' loads of one file can be compared: 0x06013fb8 counts the loads, 0x06013fbc holds the last sum (the free words between the boot display API and the loader API) */
     {
         unsigned long k, q, sum = 0;
         for (k = 0; k < load_head[0]; k++) {
             unsigned long dst = load_head[1 + k * 2], n = load_head[2 + k * 2] / 4u;
             volatile unsigned long *d = (volatile unsigned long *)(dst | 0x20000000u);
             if (dst == 1) continue;
-            for (q = 0; q < n; q++) sum = (sum << 1 | sum >> 31) ^ d[q];
+            for (q = 0; q < n; q++) sum = sum * 0x9e3779b1u + d[q];
         }
         ((volatile unsigned long *)0x06013fb8u)[0]++; ((volatile unsigned long *)0x06013fb8u)[1] = sum;
     }
