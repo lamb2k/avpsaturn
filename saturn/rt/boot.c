@@ -179,7 +179,7 @@ unsigned long sat_ld_diag[8];   /* (bss: the loader's image holds only .text) te
 #ifdef SAT_LOAD_LZ   /* lane loading, 2026-11-12: compressed boot files and tile regions (tools/lzstore.py, saturn/rt/lzdec.h) */
 #include "lzdec.h"
 #define LZ_MAXB 80
-#define LZ_TMAX 6144
+#define LZ_TMAX 8192
 static LzCtx lz_ctx;
 static lz32 lz_scr[(LZ_TMAX + 8) / 4 + 1];   /* the tail kept out of the way of the in-place decode (also the self test's sum table) */
 #define CCR_B (*(volatile unsigned char *)0xfffffe92u)
