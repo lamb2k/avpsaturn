@@ -23,3 +23,9 @@
 # dropping route-played clips (cost table in docs/notes/AVP_COVERAGE_SND_20261113.md); only stage 14 (6-2, 51 KB free) takes them without dropping a clip; the front end and the ending file have them too.
 14 26d 3
 14 252 3
+# fix7c3 (PACK_RESTORE): the name entry and ranking jingles in every stage file when the smaller clips leave room (ALL = every stage file), 0x56 in 4-2 and 7-3 and 0x94 in 7-4 (arcade uses from the logs above)
+ALL 26d 3
+ALL 252 3
+0e 56 2
+20 56 2
+22 94 1

@@ -62,6 +62,68 @@ def clip_of(st, a, b, rate, tail_s=0.25):
     return np.interp(np.arange(0, len(y) / k) * k, np.arange(len(y)), y), lat
 
 
+# ---- fix7c3 (coverage lane): smaller clips, same sounds. Switches PACK_TRIM and PACK_RATE (env, default off) are read by tools/audio_extra.py; the functions live here next to clip_of.
+TRIM_DB = 50.0       # the head and the tail go where the clip stays below this many dB under its own peak (never below SILENT)
+TRIM_WIN = 64        # envelope window, samples at 44.1 kHz (1.5 ms)
+TRIM_FADE_S = 0.005  # fade out into the cut, fade in when the head was cut
+BAND_MAX = float(os.environ.get("PACK_BAND", "0.001"))     # (env PACK_BAND) a clip drops to a lower rate only if at most this share of its energy (-30 dB) lies above the new Nyquist frequency
+RATE_STEPS = [(5512.5, 2), (8000.0, 1)]   # lowest first; code 0 = 11025 Hz (the pack row's rate byte; sat_audio.c with SAT_PACK_RATE: OCT/FNS from the code)
+
+
+def clip_variant(st, a, b, rate, tail_s=0.25, trim=False):
+    """clip_of at any rate, with an optional trim of head and tail at TRIM_DB under the peak (a short fade into the cut). Mono float, lat."""
+    i, j = int(a * 44100), min(len(st), int((b + tail_s) * 44100))
+    m = st[i:j].astype(np.float64).mean(axis=1)
+    loud = np.nonzero(np.abs(m) > SILENT)[0]
+    if not len(loud):
+        return None, 0
+    lo, hi = max(0, loud[0] - 16), loud[-1] + 1
+    if trim:
+        floor = max(SILENT, float(np.abs(m).max()) * 10 ** (-TRIM_DB / 20))
+        n = (len(m) + TRIM_WIN - 1) // TRIM_WIN
+        e = np.abs(np.concatenate([m, np.zeros(n * TRIM_WIN - len(m))])).reshape(n, TRIM_WIN).max(axis=1)
+        w = np.nonzero(e > floor)[0]
+        t_lo, t_hi = max(0, w[0] * TRIM_WIN - 16), min(len(m), (w[-1] + 1) * TRIM_WIN)
+        head_cut, tail_cut = t_lo > lo, t_hi < hi
+        lo, hi = max(lo, t_lo), min(hi, t_hi)
+        m = m[:hi].copy()
+        f = min(int(TRIM_FADE_S * 44100), (hi - lo) // 4)
+        if tail_cut and f:
+            m[hi - f:hi] *= np.linspace(1.0, 0.0, f, endpoint=False)
+        if head_cut and f:
+            m[lo:lo + f] *= np.linspace(0.0, 1.0, f, endpoint=False)
+    m = m[lo:hi]
+    lat = (i + lo) / 44100 - a
+    y = np.convolve(m, decimator(rate), mode="same")
+    k = 44100 / rate
+    return np.interp(np.arange(0, len(y) / k) * k, np.arange(len(y)), y), lat
+
+
+def band_ratio(y, rate, nyquist):
+    """Share of the clip's energy above nyquist (Hz); y is a float clip at rate."""
+    if len(y) < 8:
+        return 0.0
+    f = np.abs(np.fft.rfft(y * np.hanning(len(y)))) ** 2
+    fr = np.fft.rfftfreq(len(y), 1.0 / rate)
+    tot = float(f.sum())
+    return float(f[fr > nyquist].sum() / tot) if tot > 0 else 0.0
+
+
+def pick_rate(y11):
+    """(rate_hz, code, ratios) for a clip at 11025 Hz: the lowest step whose Nyquist leaves at most BAND_MAX of the energy above it."""
+    ratios = {r: band_ratio(y11, 11025, r / 2) for r, _ in RATE_STEPS}
+    for r, code in RATE_STEPS:
+        if ratios[r] <= BAND_MAX:
+            return r, code, ratios
+    return 11025.0, 0, ratios
+
+
+def to_pcm8_tl(y, tl):
+    """8 bit signed at a given TL (the level of the clip it replaces)."""
+    g = 127 / (32767 * 10 ** (-tl * 0.375 / 20))
+    return np.clip(np.round(y * g), -128, 127).astype(np.int8)
+
+
 def correlation(a, b):
     a, b = a.astype(np.float64), b.astype(np.float64)
     return np.dot(a, b) / max(1.0, np.sqrt(np.dot(a, a) * np.dot(b, b)))

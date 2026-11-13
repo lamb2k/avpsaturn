@@ -31,7 +31,7 @@ def parse(pack):
     rows = []
     for i in range(nsfx):
         c, prio, mh, ml, tl, fl, pad, off, n = ROW.unpack_from(pack, HDR.size + 16 * i)
-        rows.append(dict(cmd=c, prio=prio, mask=mh << 8 | ml, tl=tl, flags=fl, off=off, n=n))
+        rows.append(dict(cmd=c, prio=prio, mask=mh << 8 | ml, tl=tl, flags=fl, off=off, n=n, rate=pad))   # rate: the clip's rate code (coverage lane fix7c3, SAT_PACK_RATE; 0 = 11025 Hz)
     music = pack[HDR.size + 16 * nsfx:HDR.size + 16 * (nsfx + nmusic)]
     clips = pack[HDR.size + 16 * (nsfx + nmusic):HDR.size + 16 * (nsfx + nmusic) + nclip]
     return rows, bytes(music), bytes(clips)
@@ -58,7 +58,7 @@ def build(pack, wv, rank=None, kind="stage", room=SCSP_ROOM, remap=REMAP):
         w = by_name.get(remap.get(r["cmd"]))
         if w is not None:
             report["remapped"].append(hex(r["cmd"]))
-            r.update(tl=w["tl"], flags=0, data=w["data"], n=w["n"], wv=True)
+            r.update(tl=w["tl"], flags=0, data=w["data"], n=w["n"], wv=True, rate=0)
         new.append(r)
     base = wv["cmd_base"]
     for s in mine:
@@ -86,7 +86,7 @@ def build(pack, wv, rank=None, kind="stage", room=SCSP_ROOM, remap=REMAP):
             blob += r["data"]
             if len(blob) & 1:
                 blob += bytes(1)
-        table += ROW.pack(r["cmd"], r["prio"], r["mask"] >> 8, r["mask"] & 255, r["tl"], r["flags"], 0, offs[r["data"]], len(r["data"]))
+        table += ROW.pack(r["cmd"], r["prio"], r["mask"] >> 8, r["mask"] & 255, r["tl"], r["flags"], r.get("rate", 0), offs[r["data"]], len(r["data"]))
     out = HDR.pack(b"SAU1", len(new), len(music) // 16, len(blob)) + bytes(table) + music + bytes(blob)
     report.update(size=len(out), room_left=room - len(out), rows=len(new))
     return out, report

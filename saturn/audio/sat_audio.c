@@ -45,7 +45,7 @@ typedef signed short s16;
 #define CD_FRAMES_PER_SECOND 75u
 #define PAN_TICK_EXTRA_EVERY 24u       /* the driver steps at 62.5 Hz, this runs at 60 */
 
-typedef struct Sfx { u8 cmd_hi, cmd_lo, prio, mask_hi, mask_lo, tl, flags, pad; u8 offset[4], samples[4]; } Sfx;
+typedef struct Sfx { u8 cmd_hi, cmd_lo, prio, mask_hi, mask_lo, tl, flags, rate; u8 offset[4], samples[4]; } Sfx;   /* rate: 0 = 11025 Hz; with SAT_PACK_RATE 1 = 8000 Hz, 2 = 5512.5 Hz (build_pack.py / tools/audio_extra.py PACK_RATE) */
 typedef struct Music { u8 cmd_hi, cmd_lo, intro_track, loop_track, intro_cd_frames[2], pad[10]; } Music;
 
 typedef struct Channel {
@@ -278,7 +278,14 @@ static void start_sfx(const Sfx *s, const u8 *mb)
 {
     unsigned mask = (unsigned)(s->mask_hi << 8 | s->mask_lo);
     u32 samples = be32(s->samples), offset = be32(s->offset);
+#ifdef SAT_PACK_RATE
+    static const u16 rate_hz[3] = { 11025u, 8000u, 5512u };
+    static const u16 rate_oct[3] = { (u16)(0xeu << 11), (u16)(0xdu << 11 | 462u), (u16)(0xdu << 11) };   /* SCSP rate = 44100 * 2^OCT * (1 + FNS / 1024): OCT -2 = 11025, OCT -3 + FNS 462 = 7999.8, OCT -3 = 5512.5 */
+    unsigned rc = s->rate < 3 ? s->rate : 0;
+    u32 frames = samples * FRAMES_PER_SECOND / rate_hz[rc] + 2;
+#else
     u32 frames = samples * FRAMES_PER_SECOND / CLIP_RATE + 2;
+#endif
     int n, clip = -1;
     for (n = 0; n < CHANNELS; n++) {
         if (!(mask >> n & 1) || s->prio < channel[n].prio) continue;   /* a losing channel is skipped; the rest still plays */
@@ -309,7 +316,11 @@ static void start_sfx(const Sfx *s, const u8 *mb)
     SLOT(clip, 0x0a) = 0x001fu;                        /* release at once */
     SLOT(clip, 0x0c) = s->tl;
     SLOT(clip, 0x0e) = 0;
+#ifdef SAT_PACK_RATE
+    SLOT(clip, 0x10) = rate_oct[rc];                   /* octave and FNS of the clip's own rate */
+#else
     SLOT(clip, 0x10) = (u16)(0xeu << 11);              /* octave -2: 44100 / 4 = 11025 Hz */
+#endif
     SLOT(clip, 0x12) = 0;
     SLOT(clip, 0x14) = 0;
     slot_pan(clip);
