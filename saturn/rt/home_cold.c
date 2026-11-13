@@ -452,6 +452,7 @@ static int duel_setup(void)
 #endif
 /* Pause and boss rush screens, moved out of home.c (work RAM is full; they run between stages). */
 extern void sat_home_restart(void);
+extern void sat_home_loading(int on);   /* home.c */
 void pause_menu(void)
 {
     static const char *const items[] = { "RESUME", "QUIT TO TITLE" };
@@ -466,7 +467,15 @@ void pause_menu(void)
     sat_home_screen = 0;
     sat_home_mode = 0;
     sat_home_hold = 0;
-    if (pick == 1) sat_home_restart();
+    if (pick == 1) {
+#ifdef SAT_QUIT_CARD   /* the standard NOW LOADING card (home.c) before the restart reloads the front end file; sat_home_restart (kernel.c) is untouched, so the Wolverine reset still runs first thing in it */
+        sat_home_loading(1);
+#endif
+        sat_home_restart();
+#ifdef SAT_QUIT_CARD   /* only reached when the restart was refused (stuck erase): back to the game, card off */
+        sat_home_loading(0);
+#endif
+    }
 }
 
 extern u32 sat_home_rush_t[10];

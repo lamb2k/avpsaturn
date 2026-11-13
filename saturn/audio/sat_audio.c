@@ -472,7 +472,9 @@ int sat_audio_init(const void *pack)
         SCSP_RAM[8] = 0x60feu;                             /* bra.s to itself */
         smpc(SMPC_SNDON);
         SCSP_MIXER = 0x0200u | 0xfu;                       /* 512 KB RAM, master volume full */
+#ifdef SAT_BOOT_SELFTEST   /* default off: the register read-back is information for readout line 6 only, the retry below does not use it */
         if ((SCSP_MIXER & 0x020fu) == 0x020fu) sat_audio_status |= 0x400u;   /* information only: the master volume register read back (Ymir does not return it; not known for the console) */
+#endif
         if (SCSP_RAM[8] == 0x60feu && !(sat_audio_status & 0x200u)) { sat_audio_status |= 0x100u; break; }   /* the SCSP RAM word read back and no SMPC wait ran out */
     }
     for (n = 0; n < 32; n++) for (i = 0; i < 0x18; i += 2) SLOT(n, i) = 0;
