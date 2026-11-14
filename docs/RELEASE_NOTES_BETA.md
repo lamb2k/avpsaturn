@@ -8,13 +8,23 @@ and report problems.
 
 **Play it in a browser:** https://avp.retronetplay.com (emulator build, no download).
 
-<!-- Video: add the reveal video link or embed here, e.g.
-[![Watch the reveal](images/release/beta-video-thumb.jpg)](VIDEO_URL) -->
+## Watch it
 
-<!-- Screenshots: add in-game shots here, e.g.
-| Title | Round 1 | Boss |
+![Round 1 gameplay, Saturn beta](images/release/round1-gameplay.gif)
+
+[![Watch the beta trailer (52 s)](images/release/round1-fight.jpg)](media/avp-saturn-beta.mp4)
+
+**[Watch the 52-second beta capture (MP4)](media/avp-saturn-beta.mp4)**: title, attract intro, character select and the Round 1 Coffee Shop fight. Silent.
+
+## Screenshots
+
+| Title menu | Attract intro | Character select |
 |---|---|---|
-| ![](images/release/title.jpg) | ![](images/release/round1.jpg) | ![](images/release/boss.jpg) | -->
+| ![Title menu](images/release/title-menu.jpg) | ![Attract intro](images/release/intro.jpg) | ![Character select](images/release/character-select.jpg) |
+| **Round 1: City of Despair** | **Coffee Shop** | **Round 1 fight** |
+| ![Round 1 card](images/release/round1-card.jpg) | ![Coffee Shop](images/release/round1-coffee-shop.jpg) | ![Round 1 fight](images/release/round1-fight.jpg) |
+
+*Captured from the browser test build (Build duel-1, image a04b2d43ff54) on 2026-11-14.*
 
 ## What's in it
 
@@ -29,11 +39,7 @@ and report problems.
 ## Status
 
 - **Beta.** Tested on emulators only. It has not run on a real Saturn yet.
-- Expect rough edges. In the native Round 1 build, open defects include:
-  the player has no KO or continue at zero health, two repair-unit props stay
-  fixed on screen while the camera scrolls, score and enemy health bars do not
-  update, play stops after the Coffee Shop exit, and some sound effects are
-  silent.
+- Expect rough edges and missing pieces. Please report what looks or feels wrong.
 
 ## Coming next
 
