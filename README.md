@@ -13,6 +13,16 @@ Alien vs. Predator (Capcom CPS2 arcade, 1994) as a native Sega Saturn game.
 - **Needs:** a Saturn with the 4 MB RAM cartridge.
 - **Tested:** on emulators only. It hasn't run on a real Saturn yet.
 
+**Beta:** read the [v0.1.0-beta release notes](docs/RELEASE_NOTES_BETA.md): what's in it, what you need and what's next.
+
+![Round 1 gameplay, Saturn beta](docs/images/release/round1-gameplay.gif)
+
+**[Watch the 52-second beta capture (MP4)](docs/media/avp-saturn-beta.mp4)**
+
+| Title menu | Character select | Round 1 |
+|---|---|---|
+| ![Title menu](docs/images/release/title-menu.jpg) | ![Character select](docs/images/release/character-select.jpg) | ![Round 1 fight](docs/images/release/round1-fight.jpg) |
+
 **Intended for software preservation.** This project exists to preserve Alien vs. Predator as playable software on the Sega Saturn. Build it only from a ROM set you are authorized to use; the game itself belongs to its rights holders (see [NOTICE.md](NOTICE.md)). The general CPS2-to-Saturn tooling and playbook live in [lamb2k/cps2saturn](https://github.com/lamb2k/cps2saturn).
 
 This private, authorized preservation project targets MAME set `avspu`, `Alien vs. Predator (USA 940520)`, as a native NTSC Sega Saturn port requiring the 32 Mbit expansion-RAM cartridge.
@@ -79,4 +89,4 @@ Read back `build/last_compile_profile.txt` and `build/hardware_release_manifest.
 
 ## Content boundary
 
-Do not commit or distribute ROMs, keys, disc images, raw captures, generated copyrighted graphics/audio, memory dumps, screenshots, ISO/cue files, or disassembly bytes. Commit code, schemas, manifests of hashes/counts, tests, and documentation only.
+Do not commit or distribute ROMs, keys, disc images, raw captures, generated copyrighted graphics/audio, memory dumps, ISO/cue files, or disassembly bytes. Screenshots and the short capture under `docs/images/release/` and `docs/media/` are owner-approved release media (2026-11-14); add no other screenshots. Commit code, schemas, manifests of hashes/counts, tests, and documentation only.
