@@ -6,6 +6,11 @@ Capcom's Alien vs. Predator (CPS2 arcade, 1994) as a native Sega Saturn game. It
 Saturn: the game's own logic is rebuilt for the Saturn's chips. This is the first beta, for players who want to try
 it and report what's wrong.
 
+## Get it
+
+- **Disc:** `avp_saturn_beta_v0.1.0.zip` on this release. Unzip it and open the `.cue` file, not a `.bin`.
+- **Browser:** https://avp.retronetplay.com runs the same disc in an emulator, with nothing to download.
+
 ## Watch it
 
 ![Round 1 gameplay, Saturn beta](images/release/round1-gameplay.gif)
@@ -48,7 +53,6 @@ Round 1 Coffee Shop fight.
 
 ## Known issues
 
-- After Wolverine joins or continues mid-stage, the health bar still shows Dutch's name and face.
 - A few rarely played sound effects are still missing from some stages.
 - Expect rough edges. Please report what looks, sounds or feels wrong, with the stage and the moment.
 
