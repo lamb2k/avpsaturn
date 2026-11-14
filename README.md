@@ -8,16 +8,17 @@ Alien vs. Predator (Capcom CPS2 arcade, 1994) as a native Sega Saturn game.
 
 **Play it in a browser:** https://avp.retronetplay.com (emulator build; it needs no download).
 
-- **Now:** the arcade game, with all four characters to pick from, plus a home menu with a Smash-style Duel, Boss Rush, Stage Select and Options.
-- **Coming next:** menus laid out like Capcom's own Saturn ports, a NOW LOADING indicator, a music player, and a disc that fits on an 80-minute CD-R.
-- **Needs:** a Saturn with the 4 MB RAM cartridge.
-- **Tested:** on emulators only. It hasn't run on a real Saturn yet.
+- **Now (beta v0.1.0):** the whole arcade game for one or two players, all four characters, music and sound, and a
+  home menu with Stage Select, Boss Rush, Versus and Options. Bonus character: Wolverine.
+- **Needs:** an NTSC Saturn with the 4 MB RAM cartridge. The disc fits on an 80-minute CD-R.
+- **Tested:** runs on a real Saturn, with slowdown in crowded fights. Speed work is next.
+- **Coming next:** full speed on a real Saturn, and menus laid out like Capcom's own Saturn ports.
 
 **Beta:** read the [v0.1.0-beta release notes](docs/RELEASE_NOTES_BETA.md): what's in it, what you need and what's next.
 
 ![Round 1 gameplay, Saturn beta](docs/images/release/round1-gameplay.gif)
 
-**[Watch the 52-second beta capture (MP4)](docs/media/avp-saturn-beta.mp4)**
+**[Watch the beta capture (MP4)](docs/media/avp-saturn-beta.mp4)**
 
 | Title menu | Character select | Round 1 |
 |---|---|---|
