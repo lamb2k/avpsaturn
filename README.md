@@ -1,4 +1,19 @@
-# Alien vs. Predator native Sega Saturn port
+# AvP Saturn
+
+Alien vs. Predator (Capcom CPS2 arcade, 1994) as a native Sega Saturn game.
+
+![Alien vs. Predator, Sega Saturn cover](docs/images/cover/avp-saturn-cover.jpg)
+
+*Cover art by the production team, for this repository and its release notes.*
+
+**Play it in a browser:** https://avp.retronetplay.com (emulator build; it needs no download).
+
+- **Now:** the arcade game, with all four characters to pick from, plus a home menu with a Smash-style Duel, Boss Rush, Stage Select and Options.
+- **Coming next:** menus laid out like Capcom's own Saturn ports, a NOW LOADING indicator, a music player, and a disc that fits on an 80-minute CD-R.
+- **Needs:** a Saturn with the 4 MB RAM cartridge.
+- **Tested:** on emulators only. It hasn't run on a real Saturn yet.
+
+**Intended for software preservation.** This project exists to preserve Alien vs. Predator as playable software on the Sega Saturn. Build it only from a ROM set you are authorized to use; the game itself belongs to its rights holders (see [NOTICE.md](NOTICE.md)). The general CPS2-to-Saturn tooling and playbook live in [lamb2k/cps2saturn](https://github.com/lamb2k/cps2saturn).
 
 This private, authorized preservation project targets MAME set `avspu`, `Alien vs. Predator (USA 940520)`, as a native NTSC Sega Saturn port requiring the 32 Mbit expansion-RAM cartridge.
 
