@@ -24,7 +24,7 @@ Round 1 Coffee Shop fight.
 | **Round 1: City of Despair** | **Coffee Shop** | **Round 1 fight** |
 | ![Round 1 card](images/release/round1-card.jpg) | ![Coffee Shop](images/release/round1-coffee-shop.jpg) | ![Round 1 fight](images/release/round1-fight.jpg) |
 
-*Emulator captures (Yaba) of the beta disc, build fix7c3.*
+*Emulator captures (Yaba) of the v0.1.0-beta disc.*
 
 ## What's in it
 
