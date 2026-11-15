@@ -1,77 +1,90 @@
 # AvP Saturn
 
-Alien vs. Predator (Capcom CPS2 arcade, 1994) as a native Sega Saturn game.
+Alien vs. Predator, Capcom's 1994 arcade brawler, running natively on the Sega Saturn.
 
 ![Alien vs. Predator, Sega Saturn cover](docs/images/cover/avp-saturn-cover.jpg)
 
-*Cover art by the production team, for this repository and its release notes.*
+*Cover art by the AvP Saturn production team.*
 
-**Play it in a browser:** https://avp.retronetplay.com (emulator build; it needs no download).
+**[Download the v0.1.0 beta](https://github.com/lamb2k/avpsaturn/releases/tag/v0.1.0-beta)** ·
+**[Play in your browser](https://avp.retronetplay.com)** ·
+[Release notes](docs/RELEASE_NOTES_BETA.md)
 
-- **Now (beta v0.1.0):** the whole arcade game for one or two players, all four characters, music and sound, and a
-  home menu with Stage Select, Boss Rush, Versus and Options. Bonus character: Wolverine.
-- **Needs:** an NTSC Saturn with the 4 MB RAM cartridge. The disc fits on an 80-minute CD-R.
-- **Tested:** runs on a real Saturn, with slowdown in crowded fights. Speed work is next.
-- **Coming next:** full speed on a real Saturn, and menus laid out like Capcom's own Saturn ports.
+- **What works:** the whole arcade game for one or two players, all four characters, music and sound effects, and a
+  home menu with Versus, Boss Rush, Stage Select and Options. Wolverine is in as a bonus character.
+- **What you need:** an NTSC Saturn with the 4 MB RAM cartridge, or an emulator that supports it. The disc fits on
+  an 80-minute CD-R.
+- **What's rough:** it slows down in crowded fights on a real Saturn. Getting it to full speed is the next job.
+- **Coming next:** full speed on real hardware, and menus styled after Capcom's own Saturn releases.
 
-**Beta:** read the [v0.1.0-beta release notes](docs/RELEASE_NOTES_BETA.md): what's in it, what you need and what's next.
+![Round 1 gameplay](docs/images/release/round1-gameplay.gif)
 
-![Round 1 gameplay, Saturn beta](docs/images/release/round1-gameplay.gif)
-
-**[Watch the beta capture (MP4)](docs/media/avp-saturn-beta.mp4)**
+**[Watch a 47-second clip, with sound (MP4)](docs/media/avp-saturn-beta.mp4)**
 
 | Title menu | Character select | Round 1 |
 |---|---|---|
 | ![Title menu](docs/images/release/title-menu.jpg) | ![Character select](docs/images/release/character-select.jpg) | ![Round 1 fight](docs/images/release/round1-fight.jpg) |
 
-**Intended for software preservation.** This project exists to preserve Alien vs. Predator as playable software on the Sega Saturn. Build it only from a ROM set you are authorized to use; the game itself belongs to its rights holders (see [NOTICE.md](NOTICE.md)). The general CPS2-to-Saturn tooling and playbook live in [lamb2k/cps2saturn](https://github.com/lamb2k/cps2saturn).
+Found a bug? [Open an issue](https://github.com/lamb2k/avpsaturn/issues) with the stage and what was happening.
 
-This preservation project targets MAME set `avspu`, `Alien vs. Predator (USA 940520)`, as a native NTSC Sega Saturn port requiring the 32 Mbit expansion-RAM cartridge.
+## About the project
 
-## Architecture
+AvP Saturn is a fan preservation project. The goal is to keep Alien vs. Predator playable as real software on the
+Saturn, not as an emulator running on top of it. The game belongs to its rights holders (see [NOTICE.md](NOTICE.md)),
+so only build from a ROM set you're entitled to use.
 
-The project now follows a title-specific hybrid architecture:
+The port is based on the US arcade release (MAME set `avspu`, "Alien vs. Predator (USA 940520)") and needs the
+Saturn's 4 MB RAM cartridge. The general tools and playbook for porting CPS2 games to the Saturn live in their own
+repo, [lamb2k/cps2saturn](https://github.com/lamb2k/cps2saturn).
 
-- exact ROM identity and reproducible offline extraction;
-- sparse original-address data where useful;
-- selective lifting of bounded 68000 game logic;
-- native SH-2 input, simulation, collision, stage, render, audio, load, and telemetry systems;
-- MAME 0.289 as a deterministic differential oracle;
-- VDP1 per-16x16-tile 4bpp baseline, VDP2 stage/final composition, fixed cart phases, and SCSP PCM plus CDDA.
+## How it works
 
-The complete decision is [docs/research/CPS2_TO_SATURN_RESET.md](docs/research/CPS2_TO_SATURN_RESET.md). Its [source ledger](docs/research/CPS2_TO_SATURN_SOURCE_LEDGER.md) and [evidence ledger](docs/research/CPS2_TO_SATURN_EVIDENCE_LEDGER.md) define what is known and what remains unverified.
+- **MAME is the reference.** We record what the arcade does in MAME and check the Saturn version against it.
+- **The game logic comes from the arcade.** The 68000 code is translated to C, then cleaned up into readable C one
+  function at a time, checking each step against the original.
+- **The hardware side is written for the Saturn.** Sprites go through VDP1, backgrounds through VDP2, sound through
+  the SCSP, music plays as CD audio, and the 4 MB cartridge holds the graphics that don't fit in main memory.
 
-## Current state
+The background research behind this approach is in
+[docs/research/CPS2_TO_SATURN_RESET.md](docs/research/CPS2_TO_SATURN_RESET.md), with its
+[source ledger](docs/research/CPS2_TO_SATURN_SOURCE_LEDGER.md) and
+[evidence ledger](docs/research/CPS2_TO_SATURN_EVIDENCE_LEDGER.md). Some of it predates the current method.
 
-The repository has strong MAME extraction, actor/collision/animation/object analyzers, deterministic manifests, palette/bounds checks, and bounded Saturn render fixtures. The old mixed runtime and playable-skeleton prototype now enter subsystem salvage benches; neither is production gameplay authority or a parity gate.
+## For developers
 
-The former RP presentation roadmap is archived under `docs/archive/pre-reset-2026-08-20/`. It is not active guidance. [docs/PARITY_PLAN.md](docs/PARITY_PLAN.md) is the only roadmap, [project_state.yaml](project_state.yaml) is machine-readable state, [data/port_v2_migration_map.yaml](data/port_v2_migration_map.yaml) is the subsystem ledger, and the active bounded body is the task card named by project state.
+The rest of this page is working notes for anyone building from source. Fair warning: the build is still a
+developer setup, not a one-command affair yet.
 
-## Active documents
+### Project documents
 
-- [AGENTS.md](AGENTS.md)
+- [AGENTS.md](AGENTS.md): how the decompilation work is run
+- [docs/STATUS.md](docs/STATUS.md): where things stand
+- [docs/BACKLOG.md](docs/BACKLOG.md): what's left to do
 - [docs/GOAL.md](docs/GOAL.md)
 - [docs/ARCHITECTURE.md](docs/ARCHITECTURE.md)
-- [docs/PARITY_PLAN.md](docs/PARITY_PLAN.md)
 - [docs/TEST_PLAN.md](docs/TEST_PLAN.md)
 - [docs/HARDWARE_TEST.md](docs/HARDWARE_TEST.md)
 - [docs/AGENT_HANDOFF.md](docs/AGENT_HANDOFF.md)
 - [project_state.yaml](project_state.yaml)
-- the task card named by [project_state.yaml](project_state.yaml)
 
-## Toolchain
+Older plans are kept for reference under `docs/archive/`.
+
+### Toolchain
 
 - Jo Engine commit `556d081146211b6a1cfa6591d70f9487d406758b`, plus `engine-patches/joengine-4bpp-sprites.patch`
 - SH-ELF GCC 9.3.0
 - MAME 0.289, pinned under `.deps/mame/mame0289`
 - Yaba Sanshiro `1.20.37-2986eb`
-- Python 3 and WSL GCC for generators and strict host tests
+- Python 3, and GCC under WSL for the generators and host tests
 
-Use `setup_engine.ps1` and `setup_emulator.ps1` only in a disposable or dedicated implementation worktree when setup is required. The main audit worktree is intentionally dirty and contains private evidence.
+`setup_engine.ps1` and `setup_emulator.ps1` install the engine and emulator. Run them in a separate working copy.
 
-## Checks and builds
+### Building and testing
 
-Use DEV, BENCH, and CHECKPOINT verification from [docs/TEST_PLAN.md](docs/TEST_PLAN.md). Run split repository lanes only at the risk boundaries named by the active card:
+The beta disc is built with `saturn/rt/build.py`, with its feature switches passed in through `KERNEL_CFLAGS`,
+`BOOT_CFLAGS` and `AUDIO_CFLAGS`. A documented one-command recipe for it is still to come.
+
+The older test lanes are still available (see [docs/TEST_PLAN.md](docs/TEST_PLAN.md)):
 
 ```powershell
 .\verify.ps1 -Lane Fast
@@ -80,14 +93,11 @@ Use DEV, BENCH, and CHECKPOINT verification from [docs/TEST_PLAN.md](docs/TEST_P
 .\verify.ps1 -Lane Full
 ```
 
-`Full` calls `test.ps1`, which regenerates tracked evidence, so use an isolated copy unless the checkpoint explicitly owns every resulting file. A normal target build is:
+`Full` regenerates tracked files, so run it in a separate working copy. Emulator results don't replace the checks on
+real hardware in [docs/HARDWARE_TEST.md](docs/HARDWARE_TEST.md).
 
-```powershell
-.\build.ps1 -Clean -Release
-```
+### What not to commit
 
-Read back `build/last_compile_profile.txt` and `build/hardware_release_manifest.txt`; only `release-normal-release` plus the required semantic/render/final-scanout emulator readback can satisfy Saturn-facing acceptance. Emulator output is not a substitute for the physical checks in [docs/HARDWARE_TEST.md](docs/HARDWARE_TEST.md).
-
-## Content boundary
-
-Do not commit or distribute ROMs, keys, disc images, raw captures, generated copyrighted graphics/audio, memory dumps, ISO/cue files, or disassembly bytes. Screenshots and the short capture under `docs/images/release/` and `docs/media/` are owner-approved release media (2026-11-14); add no other screenshots. Commit code, schemas, manifests of hashes/counts, tests, and documentation only.
+No ROMs, keys, disc images, ISO/cue files, raw captures, memory dumps, disassembly bytes or generated game graphics
+and audio. The only screenshots and video in the repo are the release media under `docs/images/release/` and
+`docs/media/`. Code, schemas, hash and count manifests, tests and documentation are all fine.

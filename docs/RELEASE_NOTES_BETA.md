@@ -1,22 +1,30 @@
-# AvP Saturn: Beta (v0.1.0-beta)
+# AvP Saturn v0.1.0 beta
 
 ![Alien vs. Predator, Sega Saturn cover](images/cover/avp-saturn-cover.jpg)
 
-Capcom's Alien vs. Predator (CPS2 arcade, 1994) as a native Sega Saturn game. It is not an emulator running on the
-Saturn: the game's own logic is rebuilt for the Saturn's chips. This is the first beta, for players who want to try
-it and report what's wrong.
+Alien vs. Predator, Capcom's 1994 arcade brawler, running natively on the Sega Saturn. The arcade's 68000 game code
+has been translated to C and rebuilt around the Saturn's own hardware, with no emulation layer in between.
 
-## Get it
+This is the first public beta. You can play the whole game from start to finish, but on a real Saturn it still slows
+down when the screen gets busy. Bug reports are very welcome.
 
-- **Disc:** `avp_saturn_beta_v0.1.0.zip` on this release. Unzip it and open the `.cue` file, not a `.bin`.
-- **Browser:** https://avp.retronetplay.com runs the same disc in an emulator, with nothing to download.
+## Download
 
-## Watch it
+Grab `avp_saturn_beta_v0.1.0.zip` below, unzip it, and load the `.cue` file.
 
-![Round 1 gameplay, Saturn beta](images/release/round1-gameplay.gif)
+You'll need one of these:
 
-**[Watch the beta capture (MP4)](media/avp-saturn-beta.mp4)**: title, attract intro, character select and the
-Round 1 Coffee Shop fight.
+- An NTSC Saturn with the 4 MB RAM cartridge, running the disc from an optical drive emulator (we test on a Fenrir)
+  or a burned CD-R. The disc is 63.5 minutes, so a 74 or 80 minute blank works.
+- An emulator that supports the 4 MB cartridge, such as Yaba Sanshiro or Ymir.
+
+No Saturn handy? Play it in your browser at https://avp.retronetplay.com.
+
+## Screenshots
+
+![Round 1 gameplay](images/release/round1-gameplay.gif)
+
+**[Watch a 47-second clip, with sound (MP4)](media/avp-saturn-beta.mp4)**
 
 | Title menu | Attract intro | Character select |
 |---|---|---|
@@ -24,45 +32,35 @@ Round 1 Coffee Shop fight.
 | **Round 1: City of Despair** | **Coffee Shop** | **Round 1 fight** |
 | ![Round 1 card](images/release/round1-card.jpg) | ![Coffee Shop](images/release/round1-coffee-shop.jpg) | ![Round 1 fight](images/release/round1-fight.jpg) |
 
-*Emulator captures (Yaba) of the v0.1.0-beta disc.*
+*Captured in Yaba Sanshiro from this disc.*
 
-## What's in it
+## What's in this build
 
-- **The whole arcade game,** from the first street to the ending, for one or two players.
-- **All four arcade characters:** Dutch Schaefer, Linn Kurosawa, Predator Warrior and Predator Hunter.
-- **Music and sound:** CD music from the story screens on, and the arcade's sound effects.
-- **Home menu:**
-  - Arcade, Stage Select and Boss Rush.
-  - Versus: two players duel while aliens drop in.
-  - Options: lives, button config, sound test, screen adjust, bonus characters.
-  - Pause and quit to title.
-- **Bonus character:** Wolverine. Finish the game to unlock him, or switch him on in Options.
-- **Saves** your options to the Saturn's backup memory.
-
-## What you need
-
-- An NTSC Sega Saturn with the **4 MB RAM cartridge**, plus an optical drive emulator or a burned disc.
-- Or an emulator with the 4 MB cartridge, such as Yaba Sanshiro or Ymir.
-- The disc is 63.5 minutes long, so it fits on a 74- or 80-minute CD-R.
-
-## Status
-
-- **Runs on a real Saturn.** Earlier builds of this line were played on a console from a Fenrir drive. The fixes in
-  this build were checked on emulators.
-- **Slows down in crowded fights** on a real Saturn. Speed work is next.
+- The full arcade game for one or two players, all the way to the ending.
+- Dutch Schaefer, Linn Kurosawa, Predator Warrior and Predator Hunter.
+- The arcade music as CD audio, plus the original sound effects.
+- A home menu with Arcade, Versus, Boss Rush, Stage Select and Options.
+- Versus is a two-player duel, with aliens dropping in to keep things messy.
+- Options for lives, button layout, sound test and screen adjust. Your settings are saved to backup memory.
+- Pause at any time, and quit back to the title.
+- Wolverine as a bonus character. Beat the game to unlock him, or turn him on in Options.
 
 ## Known issues
 
-- A few rarely played sound effects are still missing from some stages.
-- Expect rough edges. Please report what looks, sounds or feels wrong, with the stage and the moment.
+- Slowdown in crowded fights on real hardware. This is the main thing we're working on.
+- A handful of rarely heard sound effects are missing in some stages.
+- We've played earlier builds on a real Saturn, but this exact disc has only been tested in emulators so far.
 
-## Coming next
+If something looks, sounds or plays wrong, [open an issue](https://github.com/lamb2k/avpsaturn/issues) and tell us
+the stage and what was happening on screen.
 
-- Full speed in crowded fights on a real Saturn.
-- Menus laid out like Capcom's own Saturn ports.
+## Next up
 
-## Rights
+- Full speed on real hardware.
+- Menus styled after Capcom's own Saturn releases.
 
-Intended for software preservation. Alien vs. Predator belongs to its rights holders; see
-[NOTICE.md](../NOTICE.md). Build or play only from a ROM set you are authorized to use. The general CPS2-to-Saturn
-tools live in [lamb2k/cps2saturn](https://github.com/lamb2k/cps2saturn).
+## Legal
+
+AvP Saturn is a fan preservation project. Alien vs. Predator and its characters belong to their owners; see
+[NOTICE.md](../NOTICE.md). Only build from a ROM set you're entitled to use. Our general CPS2-to-Saturn tools are in
+[lamb2k/cps2saturn](https://github.com/lamb2k/cps2saturn).
