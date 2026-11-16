@@ -12,7 +12,7 @@ extern unsigned char _bstart, _bend;
 static unsigned char gfs_work[GFS_WORK_SIZE(1)];
 static GfsDirTbl dir;
 #ifdef SAT_LOAD_LZ
-#define BOOT_NAMES 24   /* the disc has 13 root files (15 entries with . and ..; build.py checks the count): the 256 entry table's 6 KB pays for the decoder's buffers and the stop screen's font */
+#define BOOT_NAMES 20   /* the disc has 13 root files (15 entries with . and ..; build.py checks the count): the 256 entry table's 6 KB pays for the decoder's buffers and the stop screen's font */
 #else
 #define BOOT_NAMES 256
 #endif
@@ -142,21 +142,21 @@ static const unsigned char diag_font[59 * 7] = {
 #define T_CEL ((volatile unsigned long *)0x25e00000u)
 #define T_COLS 44
 static int t_row;
-static int t_at(int row, int col, const char *s)
+static __attribute__((optimize("Os"), noinline)) int t_at(int row, int col, const char *s)
 {
     volatile unsigned short *m = T_MAP + row * 64 + col;
     for (; *s && col < T_COLS; s++, col++) { unsigned c = (unsigned char)*s; *m++ = (unsigned short)(c >= 32 && c <= 90 ? c - 32 : 0); }
     return col;
 }
-static void t_line(const char *s) { t_at(t_row++, 2, s); }
-static int t_hex(int row, int col, unsigned v, int n)
+static __attribute__((optimize("Os"), noinline)) void t_line(const char *s) { t_at(t_row++, 2, s); }
+static __attribute__((optimize("Os"), noinline)) int t_hex(int row, int col, unsigned v, int n)
 {
     char b[5]; int i;
     for (i = n - 1; i >= 0; i--, v >>= 4) b[i] = "0123456789ABCDEF"[v & 15];
     b[n] = 0;
     return t_at(row, col, b);
 }
-static void diag_text_init(unsigned short bg)
+static __attribute__((optimize("Os"), noinline)) void diag_text_init(unsigned short bg)
 {
     int g, r, j;
     diag_takeover();                      /* no layer, sprites hidden, display on, per-line back screen, every access cycle no access */
@@ -184,27 +184,25 @@ static void diag_text_init(unsigned short bg)
     V2R(0x20) = 1;                        /* BGON: NBG0 on, colour 0 transparent */
 }
 static const char *const t_file[7] = { "", "LW.BIN", "ROM.BIN", "OPX.BIN", "HW.BIN", "", "COLD1.BIN" };
-static void diag_explain(unsigned code, unsigned extra)
+static __attribute__((optimize("Os"), noinline)) void diag_explain(unsigned code, unsigned extra)
 {
     unsigned hi = code >> 8, k = code & 15;
     int c;
     t_row = 2; t_line("AVP SATURN COULD NOT START");
     t_row = 5;
     if (code == 0xe0f2) {
-        t_line("NO 4 MB RAM CARTRIDGE FOUND.");
+        t_line("NO 4 MB RAM CART FOUND.");
         t_line("THIS GAME NEEDS THE SEGA 4 MB RAM CART");
-        t_line("(A 1 MB CART IS NOT ENOUGH).");
+        t_line("(1 MB IS NOT ENOUGH).");
         t_row++;
-        t_line("CONSOLE: POWER OFF, PUT THE CART IN,");
-        t_line("THEN POWER ON.");
+        t_line("CONSOLE: INSERT IT WITH THE POWER OFF.");
         t_line("SAROO OR EMULATOR: TURN ON ITS 4 MB");
         t_line("RAM CART MODE FOR THIS GAME.");
     } else if (code == 0xe0f0 || code == 0xe0f1) {
         t_line("A 4 MB RAM CART WAS FOUND, BUT ITS");
         t_line(code == 0xe0f0 ? "MEMORY DID NOT WORK." : "MEMORY STOPPED WORKING AT START-UP.");
         t_row++;
-        t_line("CONSOLE: POWER OFF, RESEAT THE CART");
-        t_line("AND CLEAN ITS CONTACTS.");
+        t_line("CONSOLE: RESEAT AND CLEAN THE CART.");
         t_line("SAROO: ITS RAM CART MODE MAY NOT WORK");
         t_line("WITH THIS DISC YET.");
     } else if (code == 0xe001 || (code >= 0x100 && code < 0x700) || hi == 0xed) {
@@ -216,9 +214,8 @@ static void diag_explain(unsigned code, unsigned extra)
             t_at(t_row++, c + 1, k == 1 ? "IS MISSING." : k == 2 ? "DID NOT OPEN." : k == 3 ? "DID NOT READ." : "IS DAMAGED.");
         }
         t_row++;
-        t_line("CHECK THE DISC IMAGE: COPY IT AGAIN");
-        t_line("AND COMPARE IT WITH SHA256SUMS.");
-        t_line("BURNED DISC: CLEAN IT OR BURN SLOWER.");
+        t_line("COPY THE DISC IMAGE AGAIN AND CHECK");
+        t_line("IT AGAINST SHA256SUMS.");
     } else if (hi >= 0xf0) t_line("THE GAME CRASHED (CPU EXCEPTION).");
     else if (hi == 0xeb) t_line("GRAPHICS COULD NOT BE SET UP.");
     else if (hi == 0xec) t_line("SOUND COULD NOT START.");
@@ -230,7 +227,7 @@ static void diag_explain(unsigned code, unsigned extra)
     c = t_at(19, c, "  STEP ");
     t_hex(19, c, (unsigned)diag_cur, 2);
     t_row = 22;
-    t_line("PLEASE PHOTO THIS SCREEN AND REPORT AT");
+    t_line("PHOTO THIS SCREEN AND REPORT IT AT");
     t_line("GITHUB.COM/LAMB2K/AVPSATURN/ISSUES");
 }
 static void diag_fail(unsigned code, unsigned short colour, unsigned extra)
