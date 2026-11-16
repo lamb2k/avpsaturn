@@ -12,7 +12,7 @@ extern unsigned char _bstart, _bend;
 static unsigned char gfs_work[GFS_WORK_SIZE(1)];
 static GfsDirTbl dir;
 #ifdef SAT_LOAD_LZ
-#define BOOT_NAMES 20   /* the disc has 13 root files (15 entries with . and ..; build.py checks the count): the 256 entry table's 6 KB pays for the decoder's buffers and the stop screen's font */
+#define BOOT_NAMES 18   /* the disc has 13 root files (15 entries with . and ..; build.py checks the count): the 256 entry table's 6 KB pays for the decoder's buffers and the stop screen's font */
 #else
 #define BOOT_NAMES 256
 #endif
