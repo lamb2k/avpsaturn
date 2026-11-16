@@ -678,7 +678,7 @@ static int __attribute__((optimize("Os"), noinline)) cart_soak(void)
         x += 0x55555555u; u += 0x4000;
     }
     *(volatile unsigned char *)0xfffffe92 |= 0x10;   /* CCR.CP */
-    DIAG_API[6] = bad; DIAG_API[7] = (unsigned long)u;   /* for test runs: the wrong bits, and the block it ended on (0x2273c000 = all four ran) */
+    DIAG_API[6] = bad; DIAG_API[7] = (unsigned long)u;   /* for test runs: the wrong bits, and the block it ended on (0x22730000 = all four ran) */
     return bad != 0;
 }
 static void clock_352(void)
