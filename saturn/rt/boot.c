@@ -834,7 +834,7 @@ int main(void)
     unsigned char *c;
     volatile unsigned long *cart = (volatile unsigned long *)0x22700000u;   /* the cache-through alias: a cached read could not tell a missing cart */
     volatile unsigned char *cart_id = (volatile unsigned char *)0x24ffffffu;
-    unsigned id, tried = 0;
+    unsigned id, tried = 0, saroo = 0;
     volatile unsigned long **vt = (volatile unsigned long **)0x06000000u;
     for (c = &_bstart; c < &_bend; c++) *c = 0;
     diag_init();                                        /* grey screen: the BIOS ran 0.BIN */
@@ -873,7 +873,12 @@ int main(void)
         tried = 1;
     }
 #else
-    ABUS_BIOS();                                         /* the clock change service leaves the A-bus at these values; written again so nothing depends on how a console's SCU reset left them */
+    /* SAROO (cartridge-slot ODE, firmware tpunix/SAROO Firm_Saturn/game_load.c): its 4 MB RAM cart mode runs on its own A-bus timing, ASR0 = 0x38803880, which its hook on the
+       BIOS clock change service (clock_352 above) sets, and it patches retail games' own ASR0 = 0x23301ff0 writes out (game_patch.c). Our writes below undid it, a likely
+       cause of the Saroo boot reports (2026-11-16). When the clock change left exactly that value, keep it: no BIOS timing, no faster timing; the cart test still runs.
+       Any other value (a console, Fenrir, emulators) takes the old path unchanged. */
+    saroo = *(volatile unsigned long *)0x25fe00b0 == 0x38803880u;
+    if (!saroo) ABUS_BIOS();                             /* the clock change service leaves the A-bus at these values; written again so nothing depends on how a console's SCU reset left them */
     *(volatile unsigned short *)0x257efffe = 1;
     spin(300000);                                        /* a few ms for the cart after the reset */
     {
@@ -889,10 +894,10 @@ int main(void)
         if (cart[0] != 0x12345678 || cart[1] != 0xedcba987) diag_fail(id == 0x5c ? 0xe0f0u : 0xe0f2u, C_RED, id);   /* red: e0f0 the cart did not answer, e0f2 no 4 MB cart ID either */
     }
 #ifndef AVP_ABUS_BIOS
-    ABUS_OURS();
+    if (!saroo) ABUS_OURS();
     *(volatile unsigned short *)0x257efffe = 1;
     cart[0] = 0x87654321; cart[1] = 0x0123456f;
-    if (cart[0] != 0x87654321 || cart[1] != 0x0123456f) {
+    if (!saroo && (cart[0] != 0x87654321 || cart[1] != 0x0123456f)) {
         ABUS_BIOS();
         *(volatile unsigned short *)0x257efffe = 1;
         cart[0] = 0x12345678; cart[1] = 0xedcba987;

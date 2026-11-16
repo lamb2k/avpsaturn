@@ -18,6 +18,10 @@ LOADER_LOAD_ADDRESS = JO_ENGINE_LOAD_ADDRESS
 # Jo Engine's proven boot header leaves this field zero, causing the BIOS/IP
 # path to use the first ISO member's actual length.
 LOADER_READ_SIZE = 0x00000000
+# Product number (IP 0x20, 10 bytes): Jo Engine leaves it blank, so drive emulators that key per-game settings on product + version (SAROO's
+# saroocfg.txt sections, "[AVPSAT01  V1.000]") could not tell this disc from other homebrew. Fixed across releases so such settings keep matching.
+PRODUCT_OFFSET = 0x20
+PRODUCT = b"AVPSAT01  "
 
 
 def be32(data: bytes, offset: int) -> int:
@@ -59,6 +63,7 @@ def main() -> int:
     patched[READ_SIZE_OFFSET : READ_SIZE_OFFSET + 4] = (
         LOADER_READ_SIZE.to_bytes(4, "big")
     )
+    patched[PRODUCT_OFFSET : PRODUCT_OFFSET + len(PRODUCT)] = PRODUCT
     args.output.parent.mkdir(parents=True, exist_ok=True)
     args.output.write_bytes(patched)
 
@@ -67,6 +72,8 @@ def main() -> int:
         raise SystemExit("loader IP load-address verification failed")
     if be32(emitted, EMBEDDED_LOAD_ADDRESS_OFFSET) != LOADER_LOAD_ADDRESS:
         raise SystemExit("loader IP embedded-address verification failed")
+    if emitted[PRODUCT_OFFSET : PRODUCT_OFFSET + len(PRODUCT)] != PRODUCT:
+        raise SystemExit("loader IP product number verification failed")
     if be32(emitted, READ_SIZE_OFFSET) != LOADER_READ_SIZE:
         raise SystemExit("loader IP read-size verification failed")
     print(
