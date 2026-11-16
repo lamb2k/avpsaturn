@@ -25,7 +25,7 @@ static GfsDirName names[BOOT_NAMES];
    DIAG_API (stage, fatal, done) until its own first picture. No scroll screen, sprite or SGL is used; VDP2 registers are write-only, so none is saved. */
 #define V2R(o) (*(volatile unsigned short *)(0x25f80000u + (o)))
 #define DIAG_TAB ((volatile unsigned short *)0x25e7fe00u)   /* last 512 bytes of VDP2 VRAM: back screen table, one colour per line */
-#define DIAG_API ((volatile unsigned long *)0x06013fa0u)    /* 0 stage(colour or 0), 1 fatal(code, detail), 2 done(restore), 3 active, 4 reinit (after the runtime's VRAM clear) */
+#define DIAG_API ((volatile unsigned long *)0x06013fa0u)    /* 0 stage(colour or 0), 1 fatal(code, detail), 2 done(restore), 3 active, 4 reinit (after the runtime's VRAM clear), 6-7 cart_soak result */
 #define DIAG_LINES 224
 #define DIAG_BANDS 22
 #define DIAG_CODE_TOP 150
@@ -678,6 +678,7 @@ static int __attribute__((optimize("Os"), noinline)) cart_soak(void)
         x += 0x55555555u; u += 0x4000;
     }
     *(volatile unsigned char *)0xfffffe92 |= 0x10;   /* CCR.CP */
+    DIAG_API[6] = bad; DIAG_API[7] = (unsigned long)u;   /* for test runs: the wrong bits, and the block it ended on (0x2273c000 = all four ran) */
     return bad != 0;
 }
 static void clock_352(void)
