@@ -7,3 +7,11 @@ saturn/rt/reveal.c | V2(0x28) = 0x0012 | reveal screen: NBG0 512x256 256 colour 
 saturn/rt/reveal.c | V2(0x2a) = 0 | reveal screen
 saturn/rt/reveal.c | V2(0x98) = 0x0101 | reveal screen: the game's fit on the bitmap
 saturn/rt/reveal.c | V2(0x98) = 0 | reveal screen: 1:1 crop variant
+saturn/rt/boot.c | V2R(0x0e) = 0x0300 | stop screen (diag_text_init): end of the run, own mode; VRAM split, CRAM mode 0
+saturn/rt/boot.c | V2R(0x10) = 0x4fff | stop screen: A0 T0 NBG0 cells (Table 3.4: names at T0 allow cells at T0)
+saturn/rt/boot.c | V2R(0x18) = 0x0fff | stop screen: B0 T0 NBG0 names
+saturn/rt/boot.c | V2R(0x28) = 0; V2R(0x2a) = 0 | stop screen: NBG0 16 colour cells 1x1
+saturn/rt/boot.c | V2R(0x30) = 0x8000 | stop screen: NBG0 one-word names
+saturn/rt/boot.c | V2R(0x3a) = 0; V2R(0x3c) = 0 | stop screen: 1x1 planes, map offset 0
+saturn/rt/boot.c | V2R(0x40) = 0x2020; V2R(0x42) = 0x2020 | stop screen: NBG0 planes at VRAM 0x40000
+saturn/rt/boot.c | V2R(0x22) = 0; V2R(0x98) = 0; V2R(0x9a) = 0 | stop screen: no mosaic, no reduction, no line scroll
