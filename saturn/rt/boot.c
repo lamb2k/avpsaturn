@@ -893,7 +893,7 @@ int main(void)
         diag_info(0x1000u | id);                        /* the cart's ID byte: 5c is a 4 MB RAM cart */
         if (cart[0] != 0x12345678 || cart[1] != 0xedcba987) diag_fail(id == 0x5c ? 0xe0f0u : 0xe0f2u, C_RED, id);   /* red: e0f0 the cart did not answer, e0f2 no 4 MB cart ID either */
     }
-#ifndef AVP_ABUS_BIOS
+#ifdef AVP_ABUS_FAST   /* Fenrir report 11-16 (speckled menus, garbled sprites on a console): our faster cart timing is opt-in now; the cart keeps the BIOS standard timing */
     if (!saroo) ABUS_OURS();
     *(volatile unsigned short *)0x257efffe = 1;
     cart[0] = 0x87654321; cart[1] = 0x0123456f;
