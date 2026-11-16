@@ -1000,8 +1000,10 @@ SECTIONS {{
     if cd_stat.to_bytes(4, "big") not in code or (cd_stat + 0x152).to_bytes(4, "big") in code:
         raise SystemExit("NO-GO: 0.BIN addresses the SGL cd_stat wrongly (library relocations)")
     print("boot", (ISO / "0.BIN").stat().st_size, "bytes, bss end", hex(bend))
-    if bend > 0x06013fe0:
+    if bend > 0x06013fa0:   # DIAG_API (boot.c) starts there, then the loader words the runtime reads
         raise SystemExit("loader overlaps the runtime")
+    if "SAT_LOAD_LZ" in " ".join(boot_flags()) and len(list(ISO.iterdir())) + 2 > 24:   # boot.c BOOT_NAMES: GFS reads only that many directory entries (. and .. count)
+        raise SystemExit(f"NO-GO: {len(list(ISO.iterdir()))} root files, the loader's directory table (BOOT_NAMES) holds 22")
     ip = WORK / "IP.BIN"
     sh([sys.executable, REPO / "tools/build_loader_ip.py", JO / "Compiler/COMMON/IP.BIN", ip])
     for n in ("ABS.TXT", "CPY.TXT", "BIB.TXT"):

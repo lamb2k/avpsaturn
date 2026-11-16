@@ -12,7 +12,7 @@ extern unsigned char _bstart, _bend;
 static unsigned char gfs_work[GFS_WORK_SIZE(1)];
 static GfsDirTbl dir;
 #ifdef SAT_LOAD_LZ
-#define BOOT_NAMES 64   /* the disc has 13 root files: the 256 entry table's 3 KB pays for the decoder's buffers */
+#define BOOT_NAMES 24   /* the disc has 13 root files (15 entries with . and ..; build.py checks the count): the 256 entry table's 6 KB pays for the decoder's buffers and the stop screen's font */
 #else
 #define BOOT_NAMES 256
 #endif
@@ -130,19 +130,117 @@ static void diag_reinit_k(unsigned long a, unsigned long b)   /* the runtime's g
     diag_takeover();
     diag_render(diag_info_value);
 }
+/* ---- stop screen in words (2026-11-16, owner: "make the diagnostic / error screen state the issue instead of relying on codes so users can report") ----
+   A stop used to flash coloured bands and binary stripes that only the source could read. Now it says what went wrong, what to try and the codes in hex,
+   on a dark screen that holds still for a photo. Text is NBG0, 16 colours, one-word names: cells in VRAM-A0 from 0 (cell n = ASCII 32 + n, the loader's own
+   5x7 font from tools/boot_font.py, no game data: the game's font lives in the cart, which may be what is missing), map in VRAM-B0 at 0x40000 (plane 32).
+   Access cycles: A0 T0 = NBG0 cells, B0 T0 = NBG0 names (Table 3.4: names at T0 allow cells at T0). It is the end of the run, so VRAM and the registers are ours. */
+static const unsigned char diag_font[59 * 7] = {
+#include "boot_font.inc"
+};
+#define T_MAP ((volatile unsigned short *)0x25e40000u)
+#define T_CEL ((volatile unsigned long *)0x25e00000u)
+#define T_COLS 44
+static int t_row;
+static int t_at(int row, int col, const char *s)
+{
+    volatile unsigned short *m = T_MAP + row * 64 + col;
+    for (; *s && col < T_COLS; s++, col++) { unsigned c = (unsigned char)*s; *m++ = (unsigned short)(c >= 32 && c <= 90 ? c - 32 : 0); }
+    return col;
+}
+static void t_line(const char *s) { t_at(t_row++, 2, s); }
+static int t_hex(int row, int col, unsigned v, int n)
+{
+    char b[5]; int i;
+    for (i = n - 1; i >= 0; i--, v >>= 4) b[i] = "0123456789ABCDEF"[v & 15];
+    b[n] = 0;
+    return t_at(row, col, b);
+}
+static void diag_text_init(unsigned short bg)
+{
+    int g, r, j;
+    diag_takeover();                      /* no layer, sprites hidden, display on, per-line back screen, every access cycle no access */
+    diag_fill(0, DIAG_LINES, bg);
+    V2R(0x0e) = 0x0300;                   /* RAMCTL: VRAM-A and VRAM-B split, CRAM mode 0 */
+    V2R(0x10) = 0x4fff;                   /* CYCA0L: T0 NBG0 cells */
+    V2R(0x18) = 0x0fff;                   /* CYCB0L: T0 NBG0 names */
+    V2R(0x28) = 0; V2R(0x2a) = 0;         /* CHCTLA/B: NBG0 16 colours, cells 1x1 */
+    V2R(0x30) = 0x8000;                   /* PNCN0: one-word names, cell number in the low 10 bits */
+    V2R(0x3a) = 0; V2R(0x3c) = 0;         /* PLSZ, MPOFN */
+    V2R(0x40) = 0x2020; V2R(0x42) = 0x2020;   /* MPABN0, MPCDN0: every plane at 0x40000 */
+    for (r = 0x70; r <= 0x7e; r += 2) V2R(r) = 0;
+    V2R(0x78) = 1; V2R(0x7c) = 1;         /* ZMXIN0, ZMYIN0: 1x */
+    V2R(0x22) = 0; V2R(0x98) = 0; V2R(0x9a) = 0;   /* MZCTL, ZMCTL, SCRCTL */
+    V2R(0xc0) = 0; V2R(0xe4) = 0; V2R(0xe8) = 0; V2R(0x110) = 0;   /* WCTLA, CRAOFA, LNCLEN, CLOFEN */
+    V2R(0xf8) = 7;                        /* PRINA: NBG0 priority 7 */
+    ((volatile unsigned short *)0x25f00000u)[1] = C_WHITE;
+    for (r = 0; r < 64 * 32; r++) T_MAP[r] = 0;
+    for (g = 0; g < 59; g++)
+        for (r = 0; r < 8; r++) {
+            unsigned bits = r < 7 ? diag_font[g * 7 + r] : 0, w = 0;
+            for (j = 0; j < 8; j++) if (bits & (0x80u >> j)) w |= 1u << (28 - 4 * j);
+            T_CEL[g * 8 + r] = w;
+        }
+    V2R(0x20) = 1;                        /* BGON: NBG0 on, colour 0 transparent */
+}
+static const char *const t_file[7] = { "", "LW.BIN", "ROM.BIN", "OPX.BIN", "HW.BIN", "", "COLD1.BIN" };
+static void diag_explain(unsigned code, unsigned extra)
+{
+    unsigned hi = code >> 8, k = code & 15;
+    int c;
+    t_row = 2; t_line("AVP SATURN COULD NOT START");
+    t_row = 5;
+    if (code == 0xe0f2) {
+        t_line("NO 4 MB RAM CARTRIDGE FOUND.");
+        t_line("THIS GAME NEEDS THE SEGA 4 MB RAM CART");
+        t_line("(A 1 MB CART IS NOT ENOUGH).");
+        t_row++;
+        t_line("CONSOLE: POWER OFF, PUT THE CART IN,");
+        t_line("THEN POWER ON.");
+        t_line("SAROO OR EMULATOR: TURN ON ITS 4 MB");
+        t_line("RAM CART MODE FOR THIS GAME.");
+    } else if (code == 0xe0f0 || code == 0xe0f1) {
+        t_line("A 4 MB RAM CART WAS FOUND, BUT ITS");
+        t_line(code == 0xe0f0 ? "MEMORY DID NOT WORK." : "MEMORY STOPPED WORKING AT START-UP.");
+        t_row++;
+        t_line("CONSOLE: POWER OFF, RESEAT THE CART");
+        t_line("AND CLEAN ITS CONTACTS.");
+        t_line("SAROO: ITS RAM CART MODE MAY NOT WORK");
+        t_line("WITH THIS DISC YET.");
+    } else if (code == 0xe001 || (code >= 0x100 && code < 0x700) || hi == 0xed) {
+        if (code == 0xe001) t_line("THE CD SYSTEM DID NOT START.");
+        else if (hi == 0xed) t_line("THE DISC COULD NOT BE READ.");
+        else {
+            c = t_at(t_row, 2, "FILE ");
+            c = t_at(t_row, c, t_file[hi]);
+            t_at(t_row++, c + 1, k == 1 ? "IS MISSING." : k == 2 ? "DID NOT OPEN." : k == 3 ? "DID NOT READ." : "IS DAMAGED.");
+        }
+        t_row++;
+        t_line("CHECK THE DISC IMAGE: COPY IT AGAIN");
+        t_line("AND COMPARE IT WITH SHA256SUMS.");
+        t_line("BURNED DISC: CLEAN IT OR BURN SLOWER.");
+    } else if (hi >= 0xf0) t_line("THE GAME CRASHED (CPU EXCEPTION).");
+    else if (hi == 0xeb) t_line("GRAPHICS COULD NOT BE SET UP.");
+    else if (hi == 0xec) t_line("SOUND COULD NOT START.");
+    else t_line("INTERNAL ERROR.");
+    c = t_at(19, 2, "ERROR ");
+    c = t_hex(19, c, code, 4);
+    c = t_at(19, c, "  DETAIL ");
+    c = t_hex(19, c, extra, 4);
+    c = t_at(19, c, "  STEP ");
+    t_hex(19, c, (unsigned)diag_cur, 2);
+    t_row = 22;
+    t_line("PLEASE PHOTO THIS SCREEN AND REPORT AT");
+    t_line("GITHUB.COM/LAMB2K/AVPSATURN/ISSUES");
+}
 static void diag_fail(unsigned code, unsigned short colour, unsigned extra)
 {
     LOADER_DIAG[0] = 0x4156504c; LOADER_DIAG[1] = code; LOADER_DIAG[2] = extra;
     if (!diag_active) for (;;) __asm__ volatile ("nop");
     __asm__ volatile ("ldc %0,sr" : : "r"(0xf0));
-    if (diag_cur < DIAG_BANDS) diag_col[diag_cur] = colour;
-    for (;;) {
-        diag_fill(0, DIAG_LINES, colour);
-        diag_wait(30);
-        diag_render(code);
-        diag_wait(60);
-        if (extra) { diag_render(extra & 0xffffu); diag_wait(60); }
-    }
+    diag_text_init(colour == C_MAGENTA ? 0x2c0bu : 0x000bu);   /* dark magenta: exception, dark red: everything else */
+    diag_explain(code, extra & 0xffffu);
+    for (;;) __asm__ volatile ("nop");
 }
 static void diag_fatal_k(unsigned long code, unsigned long detail)   /* the runtime's sat_fatal, before its first picture */
 {
