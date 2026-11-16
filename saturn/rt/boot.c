@@ -664,6 +664,23 @@ static long reveal_io(int which, unsigned a, unsigned b, unsigned c)
    (SEGA_SYS.H: the function pointer at 0x06000320; 0 = 26 MHz, 320/640 modes, 1 = 28 MHz, 352/704 modes), exactly what SGL's slInitSystem calls for a 352 mode. It does the SMPC
    command, the NMI wait and the reset of the SCU, A-bus (ASR0/ASR1 = 0x1ff01ff0, AREF = 0x1f), SCU timers and DMA, which are therefore at the BIOS defaults afterwards: the cart is
    brought up after it, never before. Done once, first thing in the loader (before the cart is enabled and anything is loaded), then the boot display is taken again in the 352 mode. */
+/* The cart at the timing just set: 4 blocks of 64 KB at 0x700000 (above anything this check could disturb; nothing is loaded yet), each filled with i * 0x9e3779b9
+   XOR one of 0, ~0, 0x55555555, 0xaaaaaaaa, then read back through the cache-through alias and through the cached alias (lines never fetched before, so each read is a
+   cache line fill as the game's reads are). Nonzero: some word came back wrong. */
+static int __attribute__((optimize("Os"), noinline)) cart_soak(void)
+{
+    unsigned p, i;
+    unsigned long bad = 0;
+    for (p = 0; p < 4; p++) {
+        volatile unsigned long *u = (volatile unsigned long *)(0x22700000u + p * 0x10000u);
+        const volatile unsigned long *c = (const volatile unsigned long *)(0x02700000u + p * 0x10000u);
+        unsigned long x = (p & 2 ? 0x55555555u : 0) ^ (p & 1 ? 0xffffffffu : 0);
+        for (i = 0; i < 0x4000; i++) u[i] = (i * 0x9e3779b9u) ^ x;
+        for (i = 0; i < 0x4000; i++) { unsigned long v = (i * 0x9e3779b9u) ^ x; bad |= (u[i] ^ v) | (c[i] ^ v); }
+    }
+    *(volatile unsigned char *)0xfffffe92 |= 0x10;   /* CCR.CP: purge the cache, so no line of this test is left for the cart's later contents */
+    return bad != 0;
+}
 static void clock_352(void)
 {
     void (*chgsysck)(unsigned long) = *(void (**)(unsigned long))0x06000320u;
@@ -893,11 +910,13 @@ int main(void)
         diag_info(0x1000u | id);                        /* the cart's ID byte: 5c is a 4 MB RAM cart */
         if (cart[0] != 0x12345678 || cart[1] != 0xedcba987) diag_fail(id == 0x5c ? 0xe0f0u : 0xe0f2u, C_RED, id);   /* red: e0f0 the cart did not answer, e0f2 no 4 MB cart ID either */
     }
-#ifdef AVP_ABUS_FAST   /* Fenrir report 11-16 (speckled menus, garbled sprites on a console): our faster cart timing is opt-in now; the cart keeps the BIOS standard timing */
+#ifndef AVP_ABUS_SAFE   /* AVP_ABUS_SAFE: never try the faster timing */
+    /* Fenrir report 11-16 (speckled menus, garbled sprites on a console): two words written once passed on a cart too marginal for our faster timing. Now the faster timing
+       has to pass cart_soak (256 KB, four bit patterns, read back uncached and through the cache) or the cart goes back to the BIOS timing (yellow band, info 2001). A cart
+       that keeps up keeps the faster timing; nothing needs a reset, it is one register write either way. */
     if (!saroo) ABUS_OURS();
     *(volatile unsigned short *)0x257efffe = 1;
-    cart[0] = 0x87654321; cart[1] = 0x0123456f;
-    if (!saroo && (cart[0] != 0x87654321 || cart[1] != 0x0123456f)) {
+    if (!saroo && cart_soak()) {
         ABUS_BIOS();
         *(volatile unsigned short *)0x257efffe = 1;
         cart[0] = 0x12345678; cart[1] = 0xedcba987;
