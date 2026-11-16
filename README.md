@@ -6,14 +6,16 @@ Alien vs. Predator, Capcom's 1994 arcade brawler, running natively on the Sega S
 
 *Cover art by the AvP Saturn production team.*
 
-**[Download the v0.1.0 beta](https://github.com/lamb2k/avpsaturn/releases/tag/v0.1.0-beta)** ·
+**[Download the v0.1.1 beta](https://github.com/lamb2k/avpsaturn/releases/tag/v0.1.1-beta)** ·
 **[Play in your browser](https://avp.retronetplay.com)** ·
-[Release notes](docs/RELEASE_NOTES_BETA.md)
+[Release notes](docs/RELEASE_NOTES_v0.1.1.md)
 
+- **New in v0.1.1:** a fix for starting on SAROO, and a plain-words error screen if the game can't start (for
+  example, no 4 MB RAM cart). The game itself is the same as v0.1.0 ([v0.1.0 notes](docs/RELEASE_NOTES_BETA.md)).
 - **What works:** the whole arcade game for one or two players, all four characters, music and sound effects, and a
   home menu with Versus, Boss Rush, Stage Select and Options. Wolverine is in as a bonus character.
-- **What you need:** an NTSC Saturn with the 4 MB RAM cartridge, or an emulator that supports it. The disc fits on
-  an 80-minute CD-R.
+- **What you need:** an NTSC Saturn with the 4 MB RAM cartridge (Fenrir, a burned CD-R, or a SAROO, which supplies
+  the cart itself), or an emulator that supports it. The disc fits on an 80-minute CD-R.
 - **What's rough:** it slows down in crowded fights on a real Saturn. Getting it to full speed is the next job.
 - **Coming next:** full speed on real hardware, and menus styled after Capcom's own Saturn releases.
 
