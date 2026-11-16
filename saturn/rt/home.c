@@ -171,7 +171,11 @@ void sat_home_loading(int on)
         sat_home_put(25, 31, "NOW LOADING", 0);
         sat_home_hold = 1;
         sat_home_mode = 2;
-        for (i = 0; i < 3; i++) sat_home_frame();   /* the slave draws it before the load takes the bus */
+        /* The slave draws it before the load takes the bus. A picture needs the draw (slave) and then one more V-blank IN to be shown (lat_apply writes its display registers and the
+           master asks for the VDP1 frame change there), and neither happens once the load has masked interrupts. Three frames covered that in the emulator; a console can miss or hold
+           pictures (Fenrir report 11-16), so the card also waits until three pictures have actually been shown since it went up (at most 30 frames). The emulator still takes 3. */
+        { extern u32 sat_gfx_pictures(void); u32 p0 = sat_gfx_pictures();
+          for (i = 0; i < 30; i++) { sat_home_frame(); if (i >= 2 && sat_gfx_pictures() - p0 >= 3) break; } }   /* the slave draws it before the load takes the bus */
     } else {
         sat_home_clear();
         sat_home_mode = was_mode;

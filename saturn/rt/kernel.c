@@ -729,6 +729,9 @@ static void round_check(void)
 #endif
     while (UNCACHED(gfx_done) != UNCACHED(gfx_handed)) ;   /* the slave finishes the picture in hand and stays off the pack */
     __asm__ volatile ("ldc %0,sr" : : "r"(0xf0));
+#ifdef SAT_HOME
+    { extern void sat_gfx_load_hold(void); sat_gfx_load_hold(); }   /* only the card's layer on while the load runs (sat_gfx.c) */
+#endif
 #if SAT_VDP1_HW_ERASE
     if (!sat_gfx_erase_suspend())   /* GFS masks/replaces the OUT cleanup interrupt */
     {

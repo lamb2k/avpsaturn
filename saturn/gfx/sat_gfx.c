@@ -1167,6 +1167,10 @@ static int drawn_valid;
 static u16 pack_gen;
 #endif
 
+#ifdef SAT_HOME
+static u16 home_cram[32];   /* banks 62-63 as the menu block last wrote them; update_palette and leaving the menus invalidate it */
+static int home_cram_ok;
+#endif
 static void update_palette(void)
 {
     int page;
@@ -1191,6 +1195,9 @@ static void update_palette(void)
                 cram_shadow[e] = c;
                 put16(CRAM_AT(e), sat_gfx_colour(c));
                 written++;
+#ifdef SAT_HOME
+                if (e >= 62 * 16) home_cram_ok = 0;
+#endif
             }
         }
     }
@@ -1935,6 +1942,21 @@ static void home_cell(const u8 *f, u32 cell, int big, u32 bg)
             o |= (v ? v : bg) << (28 - 4 * x); }
         put32(VDP2_VRAM + CELL_S1 + cell * 32 + (u32)y * 4, o); }
 }
+/* Fenrir field report 11-16 (speckled text on the pause and NOW LOADING screens, console only): the font and its two palettes are read from the cart (SAT_HOME_FONT_COLD).
+   Each block is read through the cache-through alias twice and used only when both reads agree (up to 8 tries), so a misread cart word cannot become a speckled letter. */
+unsigned long sat_gfx_cart_rereads;   /* diagnostic: reads that disagreed */
+static HOME_OS COLD_CART void cart_copy_checked(u8 *dst, const u8 *src, int n)
+{
+    const volatile u8 *v = (const volatile u8 *)((unsigned long)src | 0x20000000UL);
+    int t, i;
+    for (t = 0; t < 8; t++)
+    {
+        for (i = 0; i < n; i++) dst[i] = v[i];
+        for (i = 0; i < n && v[i] == dst[i]; i++) ;
+        if (i == n) return;
+        sat_gfx_cart_rereads++;
+    }
+}
 static HOME_OS COLD_CART void draw_home(int fresh)
 {
     u32 row, col;
@@ -1950,8 +1972,9 @@ static HOME_OS COLD_CART void draw_home(int fresh)
     {
         int g, L;
         font_bg = snap.home == 3 ? 0u : snap.home == 4 ? 14u : 15u;
-        for (g = 0; g < 58; g++) home_cell(home_font + g * 32, (u32)SAT_GFX_HOME_FONT + (u32)g, 0, font_bg);
-        for (L = 0; L < 52; L++) home_cell(home_font + 32 * 32 + L * 16, (u32)SAT_GFX_HOME_FONT + 59 + (u32)L, 1, font_bg);   /* the header's large letters */
+        u8 gl[32] __attribute__((aligned(4)));
+        for (g = 0; g < 58; g++) { cart_copy_checked(gl, home_font + g * 32, 32); home_cell(gl, (u32)SAT_GFX_HOME_FONT + (u32)g, 0, font_bg); }
+        for (L = 0; L < 52; L++) { cart_copy_checked(gl, home_font + 32 * 32 + L * 16, 16); home_cell(gl, (u32)SAT_GFX_HOME_FONT + 59 + (u32)L, 1, font_bg); }   /* the header's large letters */
     }
     for (row = 0; row < 28; row++)
         for (col = 0; col < 44; col++)
@@ -2874,7 +2897,7 @@ void sat_gfx_snapshot_begin(void)
         }
         /* Banks 30 and 31 of the scroll 1 page, white and yellow; the next normal snapshot sees a changed sum and restores them. */
         snap.pal_pages |= 2;
-        for (n = 0; n < 64; n++) snap.palette[1][30 * 32 + n] = home_pal[n];
+        cart_copy_checked(&snap.palette[1][30 * 32], home_pal, 64);
         snap.pal_sum[1]++;
     }
 #ifdef SAT_PERF_HUD
@@ -2884,7 +2907,7 @@ void sat_gfx_snapshot_begin(void)
         /* The readout's colours are the menus' (banks 62 and 63): the page is recopied from the game each frame and carries a marked sum, so the
            drawing side sees an unchanged sum and does no palette work while the readout is the only user. */
         snap.pal_pages |= 2;
-        for (n = 0; n < 64; n++) snap.palette[1][30 * 32 + n] = home_pal[n];
+        cart_copy_checked(&snap.palette[1][30 * 32], home_pal, 64);
         snap.pal_sum[1] = hud_sum1 ^ 0x48554421UL;
     }
 #endif
@@ -3312,9 +3335,13 @@ void sat_gfx_draw(void)
             VDP2L(0x24, 0); VDP2L(0x26, 0x0080); VDP2L(0xee, 0x00c0); VDP2L(0x10a, (u16)(sat_home_ratio << 8)); VDP2L(0xec, 0x0008);
             draw_home(!home_was);
             /* Colour calculation by the colour's MSB (SFCCMD NBG3 mode 3): banks 62 and 63 written here with the MSB only on dot 15, the panel's. */
-            { int e; for (e = 62 * 16 + 1; e < 64 * 16; e++) if (e & 15) put16(CRAM_AT(e), (u16)((sat_gfx_colour(cram_shadow[e]) & 0x7fffU) | ((e & 15) == 15 ? 0x8000U : 0))); }
+            /* Written only when a colour differs from what this block last wrote (it rewrote all 30 every picture, mid-display; Fenrir report 11-16). */
+            { int e; for (e = 62 * 16 + 1; e < 64 * 16; e++) if (e & 15) { u16 c = (u16)((sat_gfx_colour(cram_shadow[e]) & 0x7fffU) | ((e & 15) == 15 ? 0x8000U : 0));
+                if (!home_cram_ok || home_cram[e - 62 * 16] != c) { home_cram[e - 62 * 16] = c; put16(CRAM_AT(e), c); } }
+              home_cram_ok = 1; }
         }
-        else if (home_was HUD(&& !snap.hud))
+        else home_cram_ok = 0;
+        if (!snap.home && home_was HUD(&& !snap.hud))
         {
             VDP2L(0xec, 0); VDP2L(0xee, 0); VDP2L(0x10a, 0);
             { int e; for (e = 62 * 16 + 1; e < 64 * 16; e++) put16(CRAM_AT(e), sat_gfx_colour(cram_shadow[e])); }   /* the game's colours back, MSB as everywhere */
@@ -3490,6 +3517,22 @@ int sat_gfx_swap_pack(const void *pack)
 #define TVMD_352_OFF 0x0101
 #define TVMD_352_ON 0x8101
 void sat_gfx_display(int on) { VDP2R(0x00) = on ? TVMD_352_ON : TVMD_352_OFF; }
+#ifdef SAT_HOME
+/* Pictures shown so far (VDP1 frame changes the master has asked for): NOW LOADING waits on it before the load (home.c). */
+COLD_OS u32 sat_gfx_pictures(void) { return UNC32(plot_shown); }
+/* The master, interrupts masked, NOW LOADING up, just before a load (round_check, kernel.c): at the next V-blank only the menu layer (NBG3, the card's line) stays on and
+   every sprite priority goes to 0, so nothing under the card can show while the load runs, whether or not the card's own registers reached the chip on a console (Fenrir report 11-16).
+   The first V-blank after the load writes the next picture's full record again (lat_apply: 0x20 and 0xf0-0xf6 are in every record). */
+COLD_OS void sat_gfx_load_hold(void)
+{
+    u32 t0 = GFX_TICKS();
+    while ((VDP2R(0x04) & 8) && ((GFX_TICKS() - t0) & 0xffffUL) < 8000UL) ;
+    t0 = GFX_TICKS();
+    while (!(VDP2R(0x04) & 8) && ((GFX_TICKS() - t0) & 0xffffUL) < 8000UL) ;
+    VDP2R(0x20) = 0x0008;
+    VDP2R(0xf0) = 0; VDP2R(0xf2) = 0; VDP2R(0xf4) = 0; VDP2R(0xf6) = 0;
+}
+#endif
 
 #ifdef SAT_BOOT_SELFTEST   /* default off (owner 2026-11-13: remove the boot diagnostics): the power-up read-back checks and readout line 6 */
 volatile u32 sat_gfx_selftest;   /* bit 0 CRAM, 1 VDP2 VRAM, 2 VDP1 VRAM read back as written at the end of sat_gfx_init */
