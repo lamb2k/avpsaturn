@@ -66,7 +66,7 @@ _sat_vblank_entry:
     mov.l   .Lcpu,r14
     mov.l   .Lvblank,r0
     jsr     @r0
-    nop
+    mov     r8,r4               /* sat_vblank(frame): the saved registers, then the interrupted PC (the freeze watch) */
     mov     r8,r15
     lds.l   @r15+,pr
     lds.l   @r15+,macl

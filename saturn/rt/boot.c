@@ -249,8 +249,7 @@ static __attribute__((optimize("Os"), noinline)) void diag_explain(unsigned code
 static void diag_fail(unsigned code, unsigned short colour, unsigned extra)
 {
     LOADER_DIAG[0] = 0x4156504c; LOADER_DIAG[1] = code; LOADER_DIAG[2] = extra;
-    if (!diag_active) for (;;) __asm__ volatile ("nop");
-    __asm__ volatile ("ldc %0,sr" : : "r"(0xf0));
+    __asm__ volatile ("ldc %0,sr" : : "r"(0xf0));   /* also after the boot display has ended: a stop in play used to leave the last picture up, a silent freeze (SAROO report 11-17) */
     diag_text_init(colour == C_MAGENTA ? 0x2c0bu : 0x000bu);   /* dark magenta: exception, dark red: everything else */
     diag_explain(code, extra & 0xffffu);
     for (;;) __asm__ volatile ("nop");
