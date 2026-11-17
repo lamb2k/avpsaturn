@@ -38,6 +38,16 @@ static GfsDirName names[BOOT_NAMES];
 #define C_CYAN 0x7fe0u
 #define C_MAGENTA 0x7c1fu
 #define C_WHITE 0x7fffu
+/* Quiet boot (owner 2026-11-16, for releases): the screen stays black while the loader runs. Only what a player should report still shows:
+   the stop screen in words, a yellow band (the cart failed the fast-timing check), a cyan band left behind if the BIOS save library never returns.
+   AVP_BOOT_BANDS brings back the full bring-up display (grey screen, a band per step, the moving tick, the binary stripes) for test discs. */
+#ifdef AVP_BOOT_BANDS
+#define C_BG C_GREY
+#define C_STEP(s) (((s) & 1) ? C_BLUE : C_GREEN)
+#else
+#define C_BG C_BLACK
+#define C_STEP(s) C_BLACK
+#endif
 static unsigned short diag_col[DIAG_BANDS + 1];
 static int diag_active, diag_seq, diag_cur, diag_ticks, diag_mark;
 static unsigned diag_info_value;
@@ -47,6 +57,9 @@ static void diag_code(unsigned v)
 {
     int i;
     diag_info_value = v;
+#ifndef AVP_BOOT_BANDS
+    return;
+#endif
     for (i = 0; i < 16; i++) {
         diag_fill(DIAG_CODE_TOP + 4 * i, DIAG_CODE_TOP + 4 * i + 3, ((v >> (15 - i)) & 1) ? C_WHITE : C_BLACK);
         diag_fill(DIAG_CODE_TOP + 4 * i + 3, DIAG_CODE_TOP + 4 * i + 4, C_GREY);
@@ -55,7 +68,7 @@ static void diag_code(unsigned v)
 static void diag_render(unsigned code)
 {
     int k;
-    diag_fill(0, DIAG_LINES, C_GREY);
+    diag_fill(0, DIAG_LINES, C_BG);
     for (k = 0; k < diag_seq && k < DIAG_BANDS; k++) diag_band(k, diag_col[k]);
     diag_code(code);
 }
@@ -68,7 +81,7 @@ static void diag_stage_k(unsigned long colour, unsigned long unused)
     unsigned short c = (unsigned short)colour;
     (void)unused;
     if (!diag_active) return;
-    if (!c) c = (diag_seq & 1) ? C_BLUE : C_GREEN;
+    if (!c) c = C_STEP(diag_seq);
     diag_cur = diag_seq;
     if (diag_seq < DIAG_BANDS) diag_col[diag_seq] = c;
     diag_band(diag_seq, c);
@@ -78,6 +91,9 @@ static void diag_stage_k(unsigned long colour, unsigned long unused)
 static void diag_tick(void)
 {
     int top, k = diag_cur;
+#ifndef AVP_BOOT_BANDS
+    return;
+#endif
     if (!diag_active || k >= DIAG_BANDS) return;
     top = 1 + 6 * k;
     if (diag_mark >= 0) diag_fill(top + diag_mark, top + diag_mark + 2, diag_col[k]);
@@ -100,7 +116,7 @@ static void diag_takeover(void)
 static void diag_init(void)
 {
     diag_takeover();
-    diag_fill(0, DIAG_LINES, C_GREY);
+    diag_fill(0, DIAG_LINES, C_BG);
     diag_active = 1;
     DIAG_API[0] = (unsigned long)diag_stage_k;
     DIAG_API[3] = 1;
@@ -708,6 +724,9 @@ static void boot_save_read(unsigned char *scratch)
     long r;
     diag_stage_k(C_CYAN, 0);              /* a cyan band that is the last one means the BIOS library did not return */
     r = unlock_io(0, 0, scratch);
+#ifndef AVP_BOOT_BANDS
+    diag_col[diag_cur] = C_BLACK; diag_band(diag_cur, C_BLACK);   /* it returned: the cyan band goes */
+#endif
     diag_stage_k(0, 0);
     diag_info(0x3000u | ((unsigned)r & 0xffu));   /* 0 read ok; ff -1 no library, fe -2 format, fd -3 stat */
 #endif
