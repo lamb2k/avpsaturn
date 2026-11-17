@@ -309,20 +309,33 @@ static unsigned char lz_ccr;
 lz32 dbg_ak, dbg_aoff;
 lz32 dbg_now(void) { static lz32 T, last; lz32 f = *(volatile unsigned char *)0xfffffe12u; f = (f << 8) | *(volatile unsigned char *)0xfffffe13u; T += (f - last) & 0xffffu; last = f; return T; }
 #endif
+/* SAROO field report (2026-11-17: boots, freezes on the load into stage 2), a fix in advance of any capture. Two guards for every setup: a streamed read that reports an error
+   or brings no new data for LZ_IDLE_MAX polls ends with an error code instead of spinning for ever (the loop had no way out), and load_regions retries a failed load twice
+   from GFS_Init before the stop screen. On SAROO (load_saroo, set from the A-bus timing it leaves) the compressed streams are read with a plain blocking GFS_Fread, then
+   decoded: no GFS non-blocking server between the drive and the decoder. */
+#define LZ_IDLE_MAX 0x100000ul
+static unsigned long load_saroo;
 static long lz_stream(GfsHn h, lz8 *dest, lz32 raw_total, lz32 nblk, const lz32 *blk, lz32 tail, const lz32 *gsec, const lz32 *gcnt, lz32 ngrp, int seek_first)
 {
     LzUnit u; lz32 g, done = 0; int r = 0;
     lz_unit_begin(&lz_ctx, &u, dest, raw_total, nblk, blk, tail, (lz8 *)lz_scr);
     for (g = 0; g < ngrp; g++) {
-        Sint32 am = 0, nd = 0;
+        Sint32 am = 0, nd = 0, all = 2048 * (Sint32)gcnt[g], fin = 0;
+        lz32 idle = 0, seen = 0;
         if (g > 0 || seek_first) if (GFS_Seek(h, (Sint32)gsec[g], GFS_SEEK_SET) < 0) return -4;
-        if (GFS_NwFread(h, (Sint32)gcnt[g], u.base + done, 2048 * (Sint32)gcnt[g]) < 0) return -5;
+        if (load_saroo) { if (GFS_Fread(h, (Sint32)gcnt[g], u.base + done, all) != all) return -5; fin = 1; }
+        else if (GFS_NwFread(h, (Sint32)gcnt[g], u.base + done, all) < 0) return -5;
         for (;;) {
             lz32 arrived;
-            GFS_NwExecOne(h);
-            GFS_NwGetStat(h, &am, &nd);
+            if (!fin) {
+                if (GFS_NwExecOne(h) == GFS_SVR_ERROR) return -7;
+                GFS_NwGetStat(h, &am, &nd);
+                if ((lz32)nd != seen) { seen = (lz32)nd; idle = 0; }
+                else if (++idle > LZ_IDLE_MAX) { GFS_NwStop(h); return -8; }
+                fin = GFS_NwIsComplete(h);
+            }
             arrived = done + (lz32)nd;
-            if (GFS_NwIsComplete(h)) { arrived = done + 2048ul * gcnt[g]; }
+            if (fin) { arrived = done + (lz32)all; }
             LZ_CACHE_ON();
 #ifdef SAT_LZ_DBG
             {   /* timing of the tile streams (FRT, phi/128 = 4.5 us per count): sat_ld_diag[8 + k] arrival, [33 + k] decode start, [58 + k] decode end (counts since the first stream's request) */
@@ -343,7 +356,7 @@ static long lz_stream(GfsHn h, lz8 *dest, lz32 raw_total, lz32 nblk, const lz32 
 #endif
             LZ_CACHE_OFF();
             if (r < 0) return -6;
-            if (GFS_NwIsComplete(h)) break;
+            if (fin) break;
             diag_tick();
         }
         done += 2048ul * gcnt[g];
@@ -491,7 +504,7 @@ static long lz_tile(GfsHn h, unsigned long i)
     return lz_stream(h, dest, raw_total, nblk, blk, tail, gsec, gcnt, ngrp, 1);
 }
 #endif
-static long load_regions(const char *name, void (*mark)(void))
+static long load_once(const char *name, void (*mark)(void))
 {
     Sint32 id, total = 1, r = (name[1] - '0') * 100 + (name[2] - '0') * 10 + (name[3] - '0');
     GfsHn h;
@@ -580,6 +593,17 @@ static long load_regions(const char *name, void (*mark)(void))
     GFS_Close(h);
     GFS_Reset();
     return total;
+}
+static long load_regions(const char *name, void (*mark)(void))
+{
+    long got = 0;
+    int t;
+    for (t = 0; t < 3; t++) {
+        got = load_once(name, mark);
+        if (got >= 0) break;
+        store_dir[0] = 0; run_sec = -1;   /* read the directory and run table again */
+    }
+    return got;
 }
 #else
 static long load_regions(const char *name, void (*mark)(void))
@@ -914,6 +938,10 @@ int main(void)
        cause of the Saroo boot reports (2026-11-16). When the clock change left exactly that value, keep it: no BIOS timing, no faster timing; the cart test still runs.
        Any other value (a console, Fenrir, emulators) takes the old path unchanged. */
     saroo = *(volatile unsigned long *)0x25fe00b0 == 0x38803880u;
+    load_saroo = saroo;
+#ifdef AVP_TEST_SAROO_LOAD
+    load_saroo = 1;   /* test discs: the SAROO read path on any setup */
+#endif
     if (!saroo) ABUS_BIOS();                             /* the clock change service leaves the A-bus at these values; written again so nothing depends on how a console's SCU reset left them */
     *(volatile unsigned short *)0x257efffe = 1;
     spin(300000);                                        /* a few ms for the cart after the reset */
