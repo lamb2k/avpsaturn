@@ -2,7 +2,8 @@
 """Build the Saturn image of the lifted game. Everything ROM-derived stays in the work directory, never in git.
 usage: build.py [WORK]   default E:/AvP/learning/lane-satrt, which holds src/c*.c, dispatch.inc, rt.bin, opx.bin, opx.json, heat.json (tools/satint_merge.py), pack.bin, pack_hole.bin (tools/satint_pack.py).
 env: KERNEL_CFLAGS, LIFT_OPT (-Os; -O2 overflows work RAM), JO (Jo Engine root).
-SAT_BOOT_RAW_ROM=1 keeps ROM.BIN uncompressed and checks its cartridge RAM contents after load."""
+SAT_BOOT_RAW_ROM=1 keeps ROM.BIN uncompressed and checks its cartridge RAM contents after load.
+SAT_BOOT_VERIFY_FILES=1 enables readback checks on every boot file for diagnostics."""
 import concurrent.futures as cf
 import json
 import os
@@ -580,6 +581,25 @@ def boot_flags():
     return boot
 
 
+def boot_readback_sum(data):
+    checksum = 0
+    word_end = len(data) & ~3
+    for word, in struct.iter_unpack(">I", memoryview(data)[:word_end]):
+        checksum = (checksum * 0x9e3779b1 + word) & 0xffffffff
+    for byte in data[word_end:]:
+        checksum = (checksum * 0x9e3779b1 + byte) & 0xffffffff
+    return checksum
+
+
+def boot_verify_flags(iso):
+    # boot.c uses the high byte of the stop code as the index. 0 and 5 are unused.
+    names = (None, "LW.BIN", "ROM.BIN", "OPX.BIN", "HW.BIN", None, "COLD1.BIN")
+    checks = []
+    for name in names:
+        data = (iso / name).read_bytes() if name else b""
+        checks.append(f"{{{len(data)}u,{boot_readback_sum(data):#010x}ul}}")
+    return ["-DAVP_BOOT_FILE_CHECKS=" + ",".join(checks)]
+
 
 def text_sections(o):
     """[(section, size)] of the per-function .text input sections of an object built with -ffunction-sections."""
@@ -1013,12 +1033,11 @@ SECTIONS {{
         if "-DSAT_LOAD_SELFTEST" in os.environ.get("BOOT_CFLAGS", ""):
             os.environ["SAT_LOAD_SELFTEST"] = "1"
     raw_rom = os.environ.get("SAT_BOOT_RAW_ROM") == "1"
-    rom_flags = []
+    readback_flags = []
     if raw_rom:
-        checksum = 0
-        for word, in struct.iter_unpack(">I", rom):
-            checksum = (checksum * 0x9e3779b1 + word) & 0xffffffff
-        rom_flags.append(f"-DAVP_BOOT_ROM_SUM={checksum:#010x}ul")
+        readback_flags.append(f"-DAVP_BOOT_ROM_SUM={boot_readback_sum(rom):#010x}ul")
+    if os.environ.get("SAT_BOOT_VERIFY_FILES") == "1":
+        readback_flags += boot_verify_flags(ISO)
     if store:
         print(sh([sys.executable, REPO / "tools/sector_store.py", ISO, "--keep", WORK / "rounds"]).strip())
         if lz:
@@ -1028,7 +1047,7 @@ SECTIONS {{
             print(sh([sys.executable, REPO / "tools/lzstore.py", "boot", ISO, *boot_files]).strip())
     else:
         (ISO / "STORE.BIN").unlink(missing_ok=True)
-    sh([GCC, "-m2", "-mb", "-O2", "-w", "-fno-builtin", "-I", SGL / "INC", f"-DCOLD1_ADDR={cold1_at:#x}u"] + (["-DSECTOR_STORE"] if store else []) + (["-DSTORE_HEAD2"] if head_sectors == 2 else []) + (["-DSAT_WV_REVEAL"] + ([f"-DGUEST_SEL_ADDR={syms['_sat_guest_sel']:#x}u"] if "_sat_guest_sel" in syms else []) if "SAT_WV_REVEAL" in os.environ.get("KERNEL_CFLAGS", "") else []) + boot_flags() + rom_flags + [ "-c", HERE / "boot.c", "-o", b])
+    sh([GCC, "-m2", "-mb", "-O2", "-w", "-fno-builtin", "-I", SGL / "INC", f"-DCOLD1_ADDR={cold1_at:#x}u"] + (["-DSECTOR_STORE"] if store else []) + (["-DSTORE_HEAD2"] if head_sectors == 2 else []) + (["-DSAT_WV_REVEAL"] + ([f"-DGUEST_SEL_ADDR={syms['_sat_guest_sel']:#x}u"] if "_sat_guest_sel" in syms else []) if "SAT_WV_REVEAL" in os.environ.get("KERNEL_CFLAGS", "") else []) + boot_flags() + readback_flags + [ "-c", HERE / "boot.c", "-o", b])
     # SGL's LIB_ELF members carry a non-zero input VMA on .data/.bss; this ld then puts their variables at the wrong address (fixlib.py): patched copies for the link.
     import fixlib
     lib = WORK / "libfix"

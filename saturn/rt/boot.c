@@ -251,10 +251,16 @@ static __attribute__((optimize("Os"), noinline)) void diag_explain(unsigned code
             t_at(t_row++, c + 1, k == 1 ? "IS MISSING." : k == 2 ? "DID NOT OPEN." :
                  k == 4 ? "BAD LOAD HEADER." : k == 6 ? "SEEK FAILED." :
                  k == 5 ? "COMPRESSED LOAD FAILED." :
-#ifdef AVP_BOOT_ROM_SUM
+#if defined(AVP_BOOT_ROM_SUM) || defined(AVP_BOOT_FILE_CHECKS)
                  k == 7 ? "CHECKSUM FAILED." :
 #endif
                  "READ FAILED.");
+#ifdef AVP_BOOT_FILE_CHECKS
+            if (k == 3) {
+                c = t_hex(21, t_at(21, 2, "SECTOR "), (unsigned)LOADER_DIAG[3], 4);
+                t_hex(21, t_at(21, c, "  EXPECTED BYTES "), (unsigned)LOADER_DIAG[4], 8);
+            }
+#endif
             if (k == 5) {
                 c = t_hex(21, t_at(21, 2, "BLOCK "), (unsigned)LOADER_DIAG[3], 4);
                 t_hex(21, t_at(21, c, "  BYTES "), (unsigned)LOADER_DIAG[4], 8);
@@ -300,7 +306,7 @@ static __attribute__((optimize("Os"), noinline)) void diag_explain(unsigned code
     t_line("REPORT A PHOTO AT");
     t_line("GITHUB.COM/LAMB2K/AVPSATURN/ISSUES");
 }
-static void diag_fail(unsigned code, unsigned short colour, unsigned extra)
+static __attribute__((noreturn)) void diag_fail(unsigned code, unsigned short colour, unsigned extra)
 {
     LOADER_DIAG[0] = 0x4156504c; LOADER_DIAG[1] = code; LOADER_DIAG[2] = extra;
     __asm__ volatile ("ldc %0,sr" : : "r"(0xf0));   /* also after the boot display has ended: a stop in play used to leave the last picture up, a silent freeze (SAROO report 11-17) */
@@ -332,7 +338,7 @@ __asm__(".text\n.align 2\n"
         "9: mov.l 1f,r0\n jmp @r0\n nop\n.align 2\n1: .long _diag_exc_tramp\n");
 extern void diag_exc4(void), diag_exc6(void), diag_exc9(void), diag_exc10(void);
 void diag_exc_tramp(unsigned long pc, unsigned long vec) { diag_exc_c(pc, vec); }
-static void halt(unsigned long s, unsigned long d)
+static __attribute__((noreturn)) void halt(unsigned long s, unsigned long d)
 {
     diag_fail((unsigned)s, C_RED, (unsigned)d);
 }
@@ -458,6 +464,48 @@ static void boot_note(const void *dest, unsigned long bytes)
 #else
 #define BOOT_NOTE(d, n) ((void)0)
 #endif
+#if defined(AVP_BOOT_ROM_SUM) || defined(AVP_BOOT_FILE_CHECKS)
+static __attribute__((optimize("Os"))) unsigned long boot_readback_sum(const void *dest, unsigned long bytes)
+{
+    const volatile unsigned long *data = (const volatile unsigned long *)((unsigned long)dest | 0x20000000u);
+    unsigned long sum = 0;
+    while (bytes >= 4) {
+        sum = sum * 0x9e3779b1u + *data++;
+        bytes -= 4;
+    }
+#ifdef AVP_BOOT_FILE_CHECKS
+    {
+        const volatile unsigned char *tail = (const volatile unsigned char *)data;
+        for (; bytes; bytes--) sum = sum * 0x9e3779b1u + *tail++;
+    }
+#endif
+    return sum;
+}
+#endif
+static void boot_loaded(const void *dest, unsigned long code, unsigned long bytes)
+{
+#ifdef AVP_BOOT_FILE_CHECKS
+    /* Indexed by the file number in the stop code. The builder records the bytes before compression. */
+    static const unsigned long checks[][2] = { AVP_BOOT_FILE_CHECKS };
+    const unsigned long *expected = checks[code >> 8];
+    unsigned long sum;
+    if (bytes != expected[0]) halt(code | 4, bytes);
+    sum = boot_readback_sum(dest, bytes);
+    if (sum != expected[1]) halt(code | 7, sum);
+#endif
+    LOADER_DIAG[3] = code;
+    LOADER_DIAG[4] = bytes;
+    BOOT_NOTE(dest, bytes);
+}
+static __attribute__((noreturn)) void boot_read_failed(GfsHn h, unsigned long code, Sint32 sector, Sint32 expected, Sint32 got)
+{
+    GFS_Close(h);
+#ifdef AVP_BOOT_FILE_CHECKS
+    LOADER_DIAG[3] = sector;
+    LOADER_DIAG[4] = expected;
+#endif
+    halt(code | 3, (unsigned long)got);
+}
 static __attribute__((optimize("Os"))) void load(const char *name, void *dest, unsigned long code)
 {
     Sint32 id = GFS_NameToId((Sint8 *)name), ss, n, last, got, total = 0, left;
@@ -467,12 +515,13 @@ static __attribute__((optimize("Os"))) void load(const char *name, void *dest, u
     h = GFS_Open(id);
     if (!h) halt(code | 2, 0);
     GFS_GetFileSize(h, &ss, &n, &last);
+    if (n <= 0 || ss != 2048 || last <= 0 || last > 2048) { GFS_Close(h); halt(code | 4, 3); }
     GFS_SetTmode(h, GFS_TMODE_CPU);
 #ifdef SAT_LOAD_LZ
     /* A compressed boot file: header sector 'LZB1', raw_total, tail, nblk, (raw, compressed) pairs, then each stream padded to whole sectors. Read into the end of the destination, decode forward in place. */
     if (n > 1) {
         got = GFS_Fread(h, 1, load_head, 2048);
-        if (got != 2048) { GFS_Close(h); halt(code | 3, (unsigned long)got); }
+        if (got != 2048) boot_read_failed(h, code, 0, 2048, got);
         if (load_head[0] == 0x4c5a4231ul) {
             lz32 raw_total = load_head[1], tail = load_head[2], nblk = load_head[3], k, padded = 0;
             lz32 gs = 0, gc;
@@ -499,8 +548,7 @@ static __attribute__((optimize("Os"))) void load(const char *name, void *dest, u
                 halt(code | 5, (unsigned long)-got);
             }
             GFS_Close(h);
-            LOADER_DIAG[3] = code; LOADER_DIAG[4] = raw_total;
-            BOOT_NOTE(dest, raw_total);
+            boot_loaded(dest, code, raw_total);
             return;
         }
         if (GFS_Seek(h, 0, GFS_SEEK_SET) < 0) { GFS_Close(h); halt(code | 6, 0); }
@@ -508,14 +556,14 @@ static __attribute__((optimize("Os"))) void load(const char *name, void *dest, u
 #endif
     for (left = n; left > 0; ) {
         Sint32 c = left > LOAD_CHUNK ? LOAD_CHUNK : left;
-        got = GFS_Fread(h, c, d, ss * c);
-        if (got <= 0) { GFS_Close(h); halt(code | 3, (unsigned long)got); }
-        total += got; d += ss * c; left -= c;
+        Sint32 expected = 2048 * (c - 1) + (c == left ? last : 2048);
+        got = GFS_Fread(h, c, d, expected);
+        if (got != expected) boot_read_failed(h, code, n - left, expected, got);
+        total += got; d += got; left -= c;
         diag_tick();
     }
     GFS_Close(h);
-    LOADER_DIAG[3] = code; LOADER_DIAG[4] = (unsigned long)total;
-    BOOT_NOTE(dest, (unsigned long)total);
+    boot_loaded(dest, code, (unsigned long)total);
 }
 /* Between rounds the runtime calls this through LOADER_API (lifted code never does): one file of whole sectors, its first sector a list of
    u32 count, then count pairs of u32 destination, u32 bytes (multiples of 2048), destination 1 being a call to mark. The caller has masked interrupts and stopped the slave. Returns sectors read, or a negative stage. */
@@ -1107,9 +1155,7 @@ int main(void)
 #endif
 #ifdef AVP_BOOT_ROM_SUM
     {
-        const volatile unsigned long *rom = (const volatile unsigned long *)0x22400000u;
-        unsigned long sum = 0, word;
-        for (word = 0; word < 0x200000u / 4u; word++) sum = sum * 0x9e3779b1ul + rom[word];
+        unsigned long sum = boot_readback_sum((const void *)0x02400000u, 0x200000u);
         if (sum != AVP_BOOT_ROM_SUM) halt(0x207, sum);
     }
 #endif
