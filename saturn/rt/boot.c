@@ -25,7 +25,7 @@ static GfsDirName names[BOOT_NAMES];
    DIAG_API (stage, fatal, done) until its own first picture. No scroll screen, sprite or SGL is used; VDP2 registers are write-only, so none is saved. */
 #define V2R(o) (*(volatile unsigned short *)(0x25f80000u + (o)))
 #define DIAG_TAB ((volatile unsigned short *)0x25e7fe00u)   /* last 512 bytes of VDP2 VRAM: back screen table, one colour per line */
-#define DIAG_API ((volatile unsigned long *)0x06013fa0u)    /* 0 stage(colour or 0), 1 fatal(code, detail), 2 done(restore), 3 active, 4 reinit (after the runtime's VRAM clear), 6-7 cart_soak result */
+#define DIAG_API ((volatile unsigned long *)0x06013fa0u)    /* 0 stage, 1 fatal(code, detail, context), 2 done, 3 active, 4 reinit, 6-7 cart_soak result */
 #define DIAG_LINES 224
 #define DIAG_BANDS 22
 #define DIAG_CODE_TOP 150
@@ -38,8 +38,7 @@ static GfsDirName names[BOOT_NAMES];
 #define C_CYAN 0x7fe0u
 #define C_MAGENTA 0x7c1fu
 #define C_WHITE 0x7fffu
-/* Quiet boot (owner 2026-11-16, for releases): the screen stays black while the loader runs. Only what a player should report still shows:
-   the stop screen in words, a yellow band (the cart failed the fast-timing check), a cyan band left behind if the BIOS save library never returns.
+/* Quiet boot uses a black loading screen. The stop screen, a yellow band (fast cart timing failed), and a cyan band (BIOS save library stuck) still show.
    AVP_BOOT_BANDS brings back the full bring-up display (grey screen, a band per step, the moving tick, the binary stripes) for test discs. */
 #ifdef AVP_BOOT_BANDS
 #define C_BG C_GREY
@@ -150,7 +149,7 @@ static void diag_reinit_k(unsigned long a, unsigned long b)   /* the runtime's g
    A stop used to flash coloured bands and binary stripes that only the source could read. Now it says what went wrong, what to try and the codes in hex,
    on a dark screen that holds still for a photo. Text is NBG0, 16 colours, one-word names: cells in VRAM-A0 from 0 (cell n = ASCII 32 + n, the loader's own
    5x7 font from tools/boot_font.py, no game data: the game's font lives in the cart, which may be what is missing), map in VRAM-B0 at 0x40000 (plane 32).
-   Access cycles: A0 T0 = NBG0 cells, B0 T0 = NBG0 names (Table 3.4: names at T0 allow cells at T0). It is the end of the run, so VRAM and the registers are ours. */
+   Access cycles: A0 T0 = NBG0 cells, B0 T0 = NBG0 names (Table 3.4: names at T0 allow cells at T0). The loader owns VRAM at boot and on a stop. */
 static const unsigned char diag_font[59 * 7] = {
 #include "boot_font.inc"
 };
@@ -167,7 +166,7 @@ static __attribute__((optimize("Os"), noinline)) int t_at(int row, int col, cons
 static __attribute__((optimize("Os"), noinline)) void t_line(const char *s) { t_at(t_row++, 2, s); }
 static __attribute__((optimize("Os"), noinline)) int t_hex(int row, int col, unsigned v, int n)
 {
-    char b[5]; int i;
+    char b[9]; int i;
     for (i = n - 1; i >= 0; i--, v >>= 4) b[i] = "0123456789ABCDEF"[v & 15];
     b[n] = 0;
     return t_at(row, col, b);
@@ -200,50 +199,73 @@ static __attribute__((optimize("Os"), noinline)) void diag_text_init(unsigned sh
     V2R(0x20) = 1;                        /* BGON: NBG0 on, colour 0 transparent */
 }
 static const char *const t_file[7] = { "", "LW.BIN", "ROM.BIN", "OPX.BIN", "HW.BIN", "", "COLD1.BIN" };
+enum {
+    LZ_SEEK_FAILED = 4,
+    LZ_READ_FAILED,
+    LZ_DECODE_FAILED,
+    LZ_STREAM_FAILED,
+    LZ_STREAM_TIMEOUT,
+    LZ_TAIL_FAILED,
+    LZ_SIZE_MISMATCH
+};
+#ifdef AVP_DIAG_BUILD
+#define BUILD_TEXT_(id) #id
+#define BUILD_TEXT(id) BUILD_TEXT_(id)
+#endif
 static __attribute__((optimize("Os"), noinline)) void diag_explain(unsigned code, unsigned extra)
 {
     unsigned hi = code >> 8, k = code & 15;
     int c;
-    t_row = 2; t_line("AVP SATURN COULD NOT START");
+    t_row = 2; t_line("AVP SATURN STOPPED");
+#ifdef AVP_DIAG_BUILD
+#ifdef AVP_ABUS_SAFE
+    t_line("BUILD " BUILD_TEXT(AVP_DIAG_BUILD) " SAFE");
+#else
+    t_line("BUILD " BUILD_TEXT(AVP_DIAG_BUILD));
+#endif
+#endif
     t_row = 5;
     if (code == 0xe0f2) {
         t_line("NO 4 MB RAM CART FOUND.");
-        t_line("THIS GAME NEEDS THE SEGA 4 MB RAM CART");
-        t_line("(1 MB IS NOT ENOUGH).");
-        t_row++;
-        t_line("CONSOLE: INSERT IT WITH THE POWER OFF.");
-        t_line("SAROO OR EMULATOR: TURN ON ITS 4 MB");
-        t_line("RAM CART MODE FOR THIS GAME.");
+        t_line("INSERT A 4 MB CART WITH POWER OFF.");
+        t_line("SAROO OR EMULATOR: ENABLE 4 MB MODE.");
     } else if (code == 0xe0f0 || code == 0xe0f1) {
-        t_line("A 4 MB RAM CART WAS FOUND, BUT ITS");
-        t_line(code == 0xe0f0 ? "MEMORY DID NOT WORK." : "MEMORY STOPPED WORKING AT START-UP.");
-        t_row++;
-        t_line("CONSOLE: RESEAT AND CLEAN THE CART.");
-        t_line("SAROO: ITS RAM CART MODE MAY NOT WORK");
-        t_line("WITH THIS DISC YET.");
+        t_line("4 MB RAM CART CHECK FAILED.");
+        t_line("POWER OFF, THEN RESEAT THE CART.");
     } else if (code == 0xe001 || (code >= 0x100 && code < 0x700) || hi == 0xed) {
         if (code == 0xe001) t_line("THE CD SYSTEM DID NOT START.");
         else if (hi == 0xed) t_line("THE DISC COULD NOT BE READ.");
         else {
             c = t_at(t_row, 2, "FILE ");
             c = t_at(t_row, c, t_file[hi]);
-            t_at(t_row++, c + 1, k == 1 ? "IS MISSING." : k == 2 ? "DID NOT OPEN." : k == 3 ? "DID NOT READ." : "IS DAMAGED.");
+            t_at(t_row++, c + 1, k == 1 ? "IS MISSING." : k == 2 ? "DID NOT OPEN." :
+                 k == 4 ? "BAD LOAD HEADER." : k == 6 ? "SEEK FAILED." :
+                 k == 5 ? "COMPRESSED LOAD FAILED." : "READ FAILED.");
+            if (k == 5) {
+                c = t_hex(21, t_at(21, 2, "BLOCK "), (unsigned)LOADER_DIAG[3], 4);
+                t_hex(21, t_at(21, c, "  BYTES "), (unsigned)LOADER_DIAG[4], 8);
+            }
         }
-        t_row++;
-        t_line("COPY THE DISC IMAGE AGAIN AND CHECK");
-        t_line("IT AGAINST SHA256SUMS.");
-    } else if (hi >= 0xf0) t_line("THE GAME CRASHED (CPU EXCEPTION).");
-    else if (hi == 0xeb) t_line("GRAPHICS COULD NOT BE SET UP.");
-    else if (hi == 0xec) t_line("SOUND COULD NOT START.");
+    } else if (hi >= 0xf0) t_line("CPU EXCEPTION.");
+    else if (hi == 0xeb) t_line("GRAPHICS SETUP FAILED.");
+    else if (hi == 0xec) t_line("SOUND SETUP FAILED.");
+    else if (hi == 0xef) t_line("PICTURE STALLED.");
+    else if (hi == 0xe4) t_line("UNEXPECTED TASK RETURN.");
+    else if (hi >= 0x80 && hi < 0xe0) t_line("GAME UPDATE STALLED.");
     else t_line("INTERNAL ERROR.");
+    if (hi >= 0x80 && hi != 0xe0 && hi != 0xfe) {
+        unsigned context = (unsigned)LOADER_DIAG[4];
+        c = t_hex(21, t_at(21, 2, "TASK "), context >> 16, 4);
+        t_hex(21, t_at(21, c, "  STAGE "), context & 0xffffu, 4);
+    }
     c = t_at(19, 2, "ERROR ");
     c = t_hex(19, c, code, 4);
     c = t_at(19, c, "  DETAIL ");
-    c = t_hex(19, c, extra, 4);
+    c = t_hex(19, c, extra, 8);
     c = t_at(19, c, "  STEP ");
     t_hex(19, c, (unsigned)diag_cur, 2);
-    t_row = 22;
-    t_line("PHOTO THIS SCREEN AND REPORT IT AT");
+    t_row = 23;
+    t_line("REPORT A PHOTO AT");
     t_line("GITHUB.COM/LAMB2K/AVPSATURN/ISSUES");
 }
 static void diag_fail(unsigned code, unsigned short colour, unsigned extra)
@@ -251,12 +273,13 @@ static void diag_fail(unsigned code, unsigned short colour, unsigned extra)
     LOADER_DIAG[0] = 0x4156504c; LOADER_DIAG[1] = code; LOADER_DIAG[2] = extra;
     __asm__ volatile ("ldc %0,sr" : : "r"(0xf0));   /* also after the boot display has ended: a stop in play used to leave the last picture up, a silent freeze (SAROO report 11-17) */
     diag_text_init(colour == C_MAGENTA ? 0x2c0bu : 0x000bu);   /* dark magenta: exception, dark red: everything else */
-    diag_explain(code, extra & 0xffffu);
+    diag_explain(code, extra);
     for (;;) __asm__ volatile ("nop");
 }
-static void diag_fatal_k(unsigned long code, unsigned long detail)   /* the runtime's sat_fatal, before its first picture */
+static void diag_fatal_k(unsigned long code, unsigned long detail, unsigned long context)
 {
-    diag_fail((unsigned)((code & 0xff) << 8 | (detail & 0xff)), code >= 0xf0 ? C_MAGENTA : C_RED, (unsigned)detail & 0xffffu);
+    LOADER_DIAG[4] = context;
+    diag_fail((unsigned)((code & 0xff) << 8 | (detail & 0xff)), code >= 0xf0 ? C_MAGENTA : C_RED, (unsigned)detail);
 }
 static void diag_done_k(unsigned long restore, unsigned long b)   /* the boot display ends; restore != 0: after the runtime's graphics init, put back the two registers this file changed that it set (TVMD, back screen table); the rest it rewrites every frame */
 {
@@ -268,7 +291,7 @@ static void diag_done_k(unsigned long restore, unsigned long b)   /* the boot di
     }
     diag_active = 0; DIAG_API[3] = 0;
 }
-static void diag_exc_c(unsigned long pc, unsigned long vec) { diag_fail(0xfe00u | (unsigned)vec, C_MAGENTA, (unsigned)pc & 0xffffu); }
+static void diag_exc_c(unsigned long pc, unsigned long vec) { diag_fail(0xfe00u | (unsigned)vec, C_MAGENTA, (unsigned)pc); }
 __asm__(".text\n.align 2\n"
         ".global _diag_exc4\n_diag_exc4: mov.l @r15,r4\n bra 9f\n mov #4,r5\n"
         ".global _diag_exc6\n_diag_exc6: mov.l @r15,r4\n bra 9f\n mov #6,r5\n"
@@ -279,7 +302,7 @@ extern void diag_exc4(void), diag_exc6(void), diag_exc9(void), diag_exc10(void);
 void diag_exc_tramp(unsigned long pc, unsigned long vec) { diag_exc_c(pc, vec); }
 static void halt(unsigned long s, unsigned long d)
 {
-    diag_fail((unsigned)s, C_RED, (unsigned)d & 0xffffu);
+    diag_fail((unsigned)s, C_RED, (unsigned)d);
 }
 #define LOAD_CHUNK 128   /* sectors per read, so the tick moves while a file loads */
 static unsigned long load_head[512];
@@ -314,6 +337,13 @@ lz32 dbg_now(void) { static lz32 T, last; lz32 f = *(volatile unsigned char *)0x
    decoded: no GFS non-blocking server between the drive and the decoder. */
 #define LZ_IDLE_MAX 0x100000ul
 static unsigned long load_saroo;
+static lz32 lz_failed_block, lz_bytes_received;
+static __attribute__((optimize("Os"), noinline)) long lz_error(const LzUnit *u, lz32 arrived, int reason)
+{
+    lz_failed_block = u->k;
+    lz_bytes_received = arrived;
+    return -reason;
+}
 static long lz_stream(GfsHn h, lz8 *dest, lz32 raw_total, lz32 nblk, const lz32 *blk, lz32 tail, const lz32 *gsec, const lz32 *gcnt, lz32 ngrp, int seek_first)
 {
     LzUnit u; lz32 g, done = 0; int r = 0;
@@ -321,16 +351,21 @@ static long lz_stream(GfsHn h, lz8 *dest, lz32 raw_total, lz32 nblk, const lz32 
     for (g = 0; g < ngrp; g++) {
         Sint32 am = 0, nd = 0, all = 2048 * (Sint32)gcnt[g], fin = 0;
         lz32 idle = 0, seen = 0;
-        if (g > 0 || seek_first) if (GFS_Seek(h, (Sint32)gsec[g], GFS_SEEK_SET) < 0) return -4;
-        if (load_saroo) { if (GFS_Fread(h, (Sint32)gcnt[g], u.base + done, all) != all) return -5; fin = 1; }
-        else if (GFS_NwFread(h, (Sint32)gcnt[g], u.base + done, all) < 0) return -5;
+        if (g > 0 || seek_first)
+            if (GFS_Seek(h, (Sint32)gsec[g], GFS_SEEK_SET) < 0) return lz_error(&u, done, LZ_SEEK_FAILED);
+        if (load_saroo) {
+            nd = GFS_Fread(h, (Sint32)gcnt[g], u.base + done, all);
+            if (nd != all) return lz_error(&u, done + (nd > 0 ? (lz32)nd : 0), LZ_READ_FAILED);
+            fin = 1;
+        } else if (GFS_NwFread(h, (Sint32)gcnt[g], u.base + done, all) < 0)
+            return lz_error(&u, done, LZ_READ_FAILED);
         for (;;) {
             lz32 arrived;
             if (!fin) {
-                if (GFS_NwExecOne(h) == GFS_SVR_ERROR) return -7;
+                if (GFS_NwExecOne(h) == GFS_SVR_ERROR) return lz_error(&u, done + seen, LZ_STREAM_FAILED);
                 GFS_NwGetStat(h, &am, &nd);
                 if ((lz32)nd != seen) { seen = (lz32)nd; idle = 0; }
-                else if (++idle > LZ_IDLE_MAX) { GFS_NwStop(h); return -8; }
+                else if (++idle > LZ_IDLE_MAX) { GFS_NwStop(h); return lz_error(&u, done + (lz32)nd, LZ_STREAM_TIMEOUT); }
                 fin = GFS_NwIsComplete(h);
             }
             arrived = done + (lz32)nd;
@@ -354,7 +389,7 @@ static long lz_stream(GfsHn h, lz8 *dest, lz32 raw_total, lz32 nblk, const lz32 
             while ((r = lz_unit_step(&lz_ctx, &u, arrived, 0)) > 0) ;
 #endif
             LZ_CACHE_OFF();
-            if (r < 0) return -6;
+            if (r < 0) return lz_error(&u, arrived, LZ_DECODE_FAILED);
             if (fin) break;
             diag_tick();
         }
@@ -370,8 +405,9 @@ static long lz_stream(GfsHn h, lz8 *dest, lz32 raw_total, lz32 nblk, const lz32 
     { extern lz32 dbg_now(void); if (sat_ld_diag[5]) sat_ld_diag[84] = dbg_now(); }
 #endif
     LZ_CACHE_OFF();
-    if (r < 0) return -7;
-    return (u.k == u.nblk && u.out == raw_total) ? 0 : -8;
+    if (r < 0) return lz_error(&u, done, LZ_TAIL_FAILED);
+    if (u.k != u.nblk || u.out != raw_total) return lz_error(&u, done, LZ_SIZE_MISMATCH);
+    return 0;
 }
 #endif
 #if defined(SAT_LOAD_SUM) || defined(SAT_LOAD_SELFTEST)
@@ -390,7 +426,7 @@ static void boot_note(const void *dest, unsigned long bytes)
 #else
 #define BOOT_NOTE(d, n) ((void)0)
 #endif
-static void load(const char *name, void *dest, unsigned long code)
+static __attribute__((optimize("Os"))) void load(const char *name, void *dest, unsigned long code)
 {
     Sint32 id = GFS_NameToId((Sint8 *)name), ss, n, last, got, total = 0, left;
     unsigned char *d = (unsigned char *)dest;
@@ -402,14 +438,23 @@ static void load(const char *name, void *dest, unsigned long code)
     GFS_SetTmode(h, GFS_TMODE_CPU);
 #ifdef SAT_LOAD_LZ
     /* A compressed boot file: header sector 'LZB1', raw_total, tail, nblk, (raw, compressed) pairs, then each stream padded to whole sectors. Read into the end of the destination, decode forward in place. */
-    if (n > 1 && GFS_Fread(h, 1, load_head, 2048) == 2048) {
+    if (n > 1) {
+        got = GFS_Fread(h, 1, load_head, 2048);
+        if (got != 2048) { GFS_Close(h); halt(code | 3, (unsigned long)got); }
         if (load_head[0] == 0x4c5a4231ul) {
             lz32 raw_total = load_head[1], tail = load_head[2], nblk = load_head[3], k, padded = 0;
             lz32 gs = 0, gc;
-            if (nblk > 250 || tail > LZ_TMAX) { GFS_Close(h); halt(code | 4, 1); }
+            if (nblk == 0 || nblk > 250 || tail > LZ_TMAX || tail > raw_total) { GFS_Close(h); halt(code | 4, 1); }
             for (k = 0; k < nblk; k++) padded += (load_head[5 + 2 * k] + 2047ul) & ~2047ul;
             gc = padded >> 11;
-            if (lz_stream(h, (lz8 *)dest, raw_total, nblk, load_head + 4, tail, &gs, &gc, 1, 0)) { GFS_Close(h); halt(code | 5, 0); }
+            if (padded > raw_total || gc != (lz32)(n - 1)) { GFS_Close(h); halt(code | 4, 2); }
+            got = lz_stream(h, (lz8 *)dest, raw_total, nblk, load_head + 4, tail, &gs, &gc, 1, 0);
+            if (got < 0) {
+                GFS_Close(h);
+                LOADER_DIAG[3] = lz_failed_block;
+                LOADER_DIAG[4] = lz_bytes_received;
+                halt(code | 5, (unsigned long)-got);
+            }
             GFS_Close(h);
             LOADER_DIAG[3] = code; LOADER_DIAG[4] = raw_total;
             BOOT_NOTE(dest, raw_total);
@@ -654,7 +699,7 @@ static long load_file(const char *name, void *dest)
    The flags word LOADER_API[3] is what the runtime reads: bit 31 once read, bit 0 the reveal has turned Wolverine on, bit 8 a setting is saved, bits 9 and 10 that setting.
    A write is in the word before it is tried, so a full or missing backup RAM still holds the change for this power-on. A failed read leaves the word clear (nothing saved).
    The device is only formatted when the library says it is unformatted, never for any other state. Returns 0, or a negative stage. */
-static long unlock_io(unsigned op, unsigned bits, unsigned char *scratch)
+static __attribute__((optimize("Os"))) long unlock_io(unsigned op, unsigned bits, unsigned char *scratch)
 {
     static const Uint8 name[12] = { 'A', 'V', 'P', 'S', 'A', 'T', '_', 'S', 'A', 'V', 'E', 0 };
     BupConfig cfg[3];
@@ -730,7 +775,12 @@ static void clock_352(void)
     V2R(0x02) = 0; V2R(0x06) = 0;
     for (o = 0x0e; o < 0x120; o += 2) V2R(o) = 0;
     diag_tvmd = 0x8101;                                 /* SGL's TVMD for 352 x 224 NTSC */
+#ifdef AVP_BOOT_BANDS
     diag_reinit_k(0, 0);                                /* the chips were reset: the display again, 352 wide */
+#else
+    diag_text_init(C_BLACK);
+    t_at(DIAG_LINES / 16, (T_COLS - (sizeof "NOW LOADING" - 1)) / 2, "NOW LOADING");
+#endif
     diag_info(0x4001u);                                 /* 4001: the BIOS clock change returned */
 }
 /* The save record read (BIOS backup library). Where it runs is a build choice, because on the console the library is BIOS code that Yaba's HLE never executes:

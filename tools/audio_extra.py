@@ -21,7 +21,7 @@ sys.path.insert(0, str(pathlib.Path(__file__).resolve().parents[1] / "saturn" / 
 import build_pack as bp
 
 SCSP_ROOM = 0x7e000
-TARGET = [0x8e, 0x14e, 0x14f, 0x156, 0x5b, 0x64, 0x67, 0x7f, 0x87, 0x94, 0x12c, 0x134, 0x4f, 0x56, 0x26d, 0x252]   # 0x26d name entry jingle, 0x252 ranking jingle
+TARGET = [0x8e, 0x14e, 0x14f, 0x156, 0x5b, 0x64, 0x67, 0x7f, 0x87, 0x94, 0x12c, 0x134, 0x4f, 0x56, 0x26d, 0x252, 0x202]
 RATE = 11025
 TRIM, RATEON, RESTORE = (os.environ.get(k) == "1" for k in ("PACK_TRIM", "PACK_RATE", "PACK_RESTORE"))
 RATE_HZ = {0: 11025.0, 1: 8000.0, 2: 5512.5}
@@ -140,9 +140,14 @@ def main():
         rows, mus, nm, blob = parse(b)
         blobs, idx = [], {}   # the clip table of this file: unique offsets
         for r in rows:
-            if r["off"] not in idx:
-                idx[r["off"]] = len(blobs); blobs.append(blob[r["off"]:r["off"] + r["n"]])
-            r["clip"] = idx[r["off"]]
+            offset = r["off"]
+            if offset not in idx:
+                idx[offset] = len(blobs)
+                blobs.append(b"")
+            r["clip"] = idx[offset]
+            # Commands sharing an offset can have different sample counts.
+            if r["n"] > len(blobs[r["clip"]]):
+                blobs[r["clip"]] = blob[offset:offset + r["n"]]
         # ---- shrink the existing one-shot clips (PACK_TRIM / PACK_RATE): the clip is made again from the render at the row's own level and replaces the old one only if it reproduces it
         if TRIM or RATEON:
             groups = {}

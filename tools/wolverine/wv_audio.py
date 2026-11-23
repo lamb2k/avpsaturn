@@ -46,12 +46,12 @@ def load_assets(assets):
     return j
 
 
-def build(pack, wv, rank=None, kind="stage", room=SCSP_ROOM, remap=REMAP):
-    """Return (new pack bytes, report). rank: cmd -> route uses (higher stays). kind: "front" (the front end file: the select shout) or "stage" (everything else)."""
+def build(pack, wv, rank=None, kind="stage", room=SCSP_ROOM, remap=REMAP, optional_commands=()):
+    """Build the normal guest mix, then fit any optional commands in its remaining room."""
     rows, music, clips = parse(pack)
     mine = [s for s in wv["sounds"] if s.get("where", "stage") in (kind, "both")]
     by_name = {s["name"]: s for s in mine}
-    new = []
+    new, optional = [], []
     report = dict(remapped=[], removed_bytes=0, dropped=[], added=0)
     for r in rows:
         r = dict(r, data=clips[r["off"]:r["off"] + r["n"]])
@@ -59,7 +59,10 @@ def build(pack, wv, rank=None, kind="stage", room=SCSP_ROOM, remap=REMAP):
         if w is not None:
             report["remapped"].append(hex(r["cmd"]))
             r.update(tl=w["tl"], flags=0, data=w["data"], n=w["n"], wv=True, rate=0)
-        new.append(r)
+        if r["cmd"] in optional_commands and w is None:
+            optional.append(r)
+        else:
+            new.append(r)
     base = wv["cmd_base"]
     for s in mine:
         new.append(dict(cmd=base + s["id"], prio=s["prio"], mask=s["mask"], tl=s["tl"], flags=0, data=s["data"], n=s["n"], wv=True))
@@ -78,6 +81,13 @@ def build(pack, wv, rank=None, kind="stage", room=SCSP_ROOM, remap=REMAP):
         report["dropped"].append((hex(d["cmd"]), (rank or {}).get(d["cmd"], 0), d["n"]))
     if size(new) > room:
         raise SystemExit("NO-GO: Wolverine sounds do not fit even with every other clip dropped")
+    for r in optional:
+        if size(new + [r]) <= room:
+            new.append(r)
+        else:
+            report.setdefault("optional_unfit", []).append(hex(r["cmd"]))
+    if optional:
+        new.sort(key=lambda r: r["cmd"])
     offs, blob = {}, bytearray()
     table = bytearray()
     for r in new:

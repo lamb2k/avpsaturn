@@ -75,7 +75,7 @@ void sat_fatal(u32 code, u32 detail)
     __asm__ volatile ("ldc %0,sr" : : "r"(0xf0));
     sat_dbg.fatal = code; sat_dbg.fatal_detail = detail; sat_dbg.fatal_task = (u32)cur;
     sat_dbg.fatal_a[0] = cpu.a[0]; sat_dbg.fatal_a[1] = cpu.a[1]; sat_dbg.fatal_a[2] = cpu.a[7];
-    if (DIAG_API[1]) ((void (*)(u32, u32))DIAG_API[1])(code, detail);   /* the loader's stop screen in words, at any time (it used to end at the graphics init, so a stop in play was a silent freeze) */
+    if (DIAG_API[1]) ((void (*)(u32, u32, u32))DIAG_API[1])(code, detail, (u32)cur << 16 | r16(0xff81e8));
     for (;;) ;
 }
 
@@ -864,8 +864,7 @@ static void stack_scan(void)
 /* C body of the vblank IRQ, on its own stack. Runs the game's level 2 handler, as the board does, then the hook. */
 /* Freeze watch (SAROO report 2026-11-17: a freeze late in the stage 2 boss fight). The game finishes a frame (game_done) and the slave shows a picture many times a second
    in every mode, pause and menus included; loads run with this interrupt masked. If either stands still for WATCH_VB vblanks, stop on the screen in words:
-   master stuck: code 0x80 | PC bits 16-22, detail PC bits 0-15 (the screen shows ERROR [code][PC 7-0] DETAIL [PC 15-0]); the picture stuck: code 0xe4, detail
-   handed minus done pictures. Code addresses: high work RAM 0x06000000 (bits 16-22 0x00-0x0f), the cart 0x02200000-0x025fffff (0x20-0x5f), low work RAM 0x00200000 (0x20-0x2f). */
+   Master stuck: code 0x80 | PC bits 16-22, detail full PC. Picture stuck: code 0xef, detail handed minus done pictures. */
 #define WATCH_VB 600u
 extern u32 sat_gfx_pictures(void);
 static void freeze_watch(const u32 *fr)
@@ -874,8 +873,8 @@ static void freeze_watch(const u32 *fr)
     u32 p = sat_gfx_pictures();
     still = game_done ? 0 : still + 1;
     if (p != pic_last) { pic_last = p; pic_still = 0; } else pic_still++;
-    if (still > WATCH_VB) { u32 pc = fr[13]; sat_dbg.exc_pc = pc; sat_dbg.exc_pr = fr[0]; sat_fatal(0x80u | (pc >> 16 & 0x7fu), pc & 0xffffu); }
-    if (pic_still > WATCH_VB) sat_fatal(0xe4, (UNCACHED(gfx_handed) - UNCACHED(gfx_done)) & 0xffu);
+    if (still > WATCH_VB) { u32 pc = fr[13]; sat_dbg.exc_pc = pc; sat_dbg.exc_pr = fr[0]; sat_fatal(0x80u | (pc >> 16 & 0x7fu), pc); }
+    if (pic_still > WATCH_VB) sat_fatal(0xef, (UNCACHED(gfx_handed) - UNCACHED(gfx_done)) & 0xffu);
 }
 void sat_vblank(const u32 *fr)
 {

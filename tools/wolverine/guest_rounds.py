@@ -12,6 +12,9 @@ import os, pathlib, sys
 
 SPEC = "E:/AvP/learning/lane-packs/spec.json"
 SLOT = 2
+# The opening-stage Warrior continue cue is an addition to the base mix.
+# Only a guest pack with room after its normal fit can carry it.
+OPTIONAL_AUDIO = {0x02: (0x0202,)}
 
 
 def extend(R, assets, hud=None, s1_keys=(), work=None):
@@ -59,7 +62,10 @@ def extend(R, assets, hud=None, s1_keys=(), work=None):
             out[vi] = made[row[vi]] = len(files)
             if wv_snd is not None:
                 uses = {int(k, 16): n for k, n in wv_rank.get(f"{st:02x}", {}).items()}
-                pack, rep = wv_audio.build((pathlib.Path(work) / "audio" / f"r{row[vi]:03d}.bin").read_bytes(), wv_snd, uses, "stage")
+                pack, rep = wv_audio.build(
+                    (pathlib.Path(work) / "audio" / f"r{row[vi]:03d}.bin").read_bytes(),
+                    wv_snd, uses, "stage", optional_commands=OPTIONAL_AUDIO.get(st, ()),
+                )
                 (pathlib.Path(work) / "audio" / f"r{len(files):03d}.bin").write_bytes(pack)
                 f["audio_from"] = len(files)
                 wv_stats[f["name"]] = rep
