@@ -19,9 +19,11 @@ import numpy as np
 
 sys.path.insert(0, str(pathlib.Path(__file__).resolve().parents[1] / "saturn" / "audio"))
 import build_pack as bp
+from wolverine.wv_audio import ROUND_SOUND_TABLE_ROOM, SCSP_PCM_ROOM, STAGE_HIT_CUES
 
 SCSP_ROOM = 0x7e000
-TARGET = [0x8e, 0x14e, 0x14f, 0x156, 0x5b, 0x64, 0x67, 0x7f, 0x87, 0x94, 0x12c, 0x134, 0x4f, 0x56, 0x26d, 0x252, 0x202]
+TARGET = [0x8e, 0x14e, 0x14f, 0x156, 0x5b, 0x64, 0x67, 0x7f, 0x87, 0x94, 0x12c, 0x134, 0x4f, 0x56, 0x26d, 0x252, 0x202,
+          0x4a, 0x10f, 0x111, 0x115, 0x41, 0x10c]
 RATE = 11025
 TRIM, RATEON, RESTORE = (os.environ.get(k) == "1" for k in ("PACK_TRIM", "PACK_RATE", "PACK_RESTORE"))
 RATE_HZ = {0: 11025.0, 1: 8000.0, 2: 5512.5}
@@ -138,9 +140,15 @@ def main():
         s = f["stages"][0]
         b = (orig / f"r{i:03d}.bin").read_bytes()
         rows, mus, nm, blob = parse(b)
+        offsets = sorted({r["off"] for r in rows} | {len(blob)})
+        available = {start: stop - start for start, stop in zip(offsets, offsets[1:])}
         blobs, idx = [], {}   # the clip table of this file: unique offsets
         for r in rows:
             offset = r["off"]
+            samples = available.get(offset, 0)
+            # Legacy aliases can advertise more samples than their stored clip.
+            # Keep playback inside that clip when new clips follow it in the bank.
+            r["n"] = min(r["n"], samples)
             if offset not in idx:
                 idx[offset] = len(blobs)
                 blobs.append(b"")
@@ -175,14 +183,18 @@ def main():
 
         def size(rs, bl):
             return 12 + 16 * (len(rs) + nm) + sum(len(x) + (len(x) & 1) for x in bl)
-        free_start = SCSP_ROOM - size(rows, blobs)
         u = uses.get(s, {})
         have = {r["cmd"] for r in rows}
         # candidates: TARGET commands this file's arcade stage plays, plus (PACK_RESTORE) the clips this file dropped
         want = [c for c in TARGET if c not in have and (c in f["sound"] or c in extra.get(s, {}) or (RESTORE and c in extra_all and s != 0x26)) and score(c) > (500 if c in any_sound else 0)]
         restore = [c for c in dropped_old.get(f["name"], []) if c not in have and c in rows_log and c not in want] if RESTORE else []
         added, evicted, unfit, restored = [], [], [], []
-        for c in sorted(want + restore, key=lambda c: -score(c)):
+        stage_hits = STAGE_HIT_CUES.get(s, ())
+        ordinary = sorted((c for c in want + restore if c not in stage_hits), key=lambda c: -score(c))
+        for position, c in enumerate(ordinary + list(stage_hits)):
+            added_after_mix = position >= len(ordinary)
+            if added_after_mix and any(row["cmd"] == c for row in rows):
+                continue
             key = alias.get(c, c)
             new_clip = None
             if key != c and key in [x["cmd"] for x in rows if x["cmd"] in TARGET]:
@@ -197,11 +209,11 @@ def main():
                     if r["rate"] != cl["rate"] or r["loop"] or abs(r["n"] - len(cl["pcm"])) > bp.SAME_LENGTH:
                         continue
                     o = np.frombuffer(blobs[r["clip"]], dtype=np.int8)
-                    kk = min(len(o), len(cl["pcm"]))
-                    if kk and bp.correlation(o[:kk], cl["pcm"][:kk]) >= bp.SAME_SOUND:
+                    samples = len(cl["pcm"])
+                    if len(o) >= samples and samples and bp.correlation(o[:samples], cl["pcm"]) >= bp.SAME_SOUND:
                         new_clip = r["clip"]; pcm_bytes = None; break
             cost = 16 + (0 if new_clip is not None else len(pcm_bytes) + (len(pcm_bytes) & 1))
-            if not RESTORE:
+            if not RESTORE and not added_after_mix:
                 groups = {}
                 for r in rows:
                     groups.setdefault(r["clip"], []).append(r)
@@ -218,7 +230,13 @@ def main():
                         evicted += [(hex(r["cmd"]), score(r["cmd"])) for r in groups[k]]
                         rows = [r for r in rows if r["clip"] != k]
                         blobs[k] = b""
-            if SCSP_ROOM - size(rows, blobs) < cost:
+            new_size = size(rows, blobs) + cost
+            new_table = 12 + 16 * (len(rows) + nm + 1)
+            if added_after_mix:
+                fits = new_table <= ROUND_SOUND_TABLE_ROOM and new_size - new_table <= SCSP_PCM_ROOM
+            else:
+                fits = new_size <= SCSP_ROOM
+            if not fits:
                 unfit.append(hex(c)); continue
             if new_clip is None:
                 blobs.append(pcm_bytes); new_clip = len(blobs) - 1
@@ -229,13 +247,19 @@ def main():
             r["clip"] = ren[r["clip"]]
         blobs = [blobs[k] for k in used]
         nb = build(rows, mus, nm, blobs)
-        assert len(nb) <= SCSP_ROOM, (i, len(nb))
+        if stage_hits:
+            samples = struct.unpack_from(">I", nb, 8)[0]
+            assert samples <= SCSP_PCM_ROOM and len(nb) - samples <= ROUND_SOUND_TABLE_ROOM, (i, len(nb))
+            free_before, free_after = SCSP_PCM_ROOM - len(blob), SCSP_PCM_ROOM - samples
+        else:
+            assert len(nb) <= SCSP_ROOM, (i, len(nb))
+            free_before, free_after = SCSP_ROOM - len(b), SCSP_ROOM - len(nb)
         (work / "audio" / f"r{i:03d}.bin").write_bytes(nb)
-        file_rows.append(dict(file=i, name=f["name"], stage=f"{s:02x}", pack_before=len(b), pack_after=len(nb), free_before=SCSP_ROOM - len(b), free_after=SCSP_ROOM - len(nb), clips=len(rows),
+        file_rows.append(dict(file=i, name=f["name"], stage=f"{s:02x}", pack_before=len(b), pack_after=len(nb), free_before=free_before, free_after=free_after, clips=len(rows),
                               added=" ".join(added), restored=" ".join(restored), evicted=" ".join(f"{c}({n})" for c, n in evicted), unfit=" ".join(unfit),
                               dropped_old=" ".join(hex(c) for c in dropped_old.get(f["name"], []))))
         if added or evicted or unfit or restored:
-            summary.append(dict(file=i, name=f["name"], added=added, restored=restored, evicted=evicted, unfit=unfit, free_before=SCSP_ROOM - len(b), free_after=SCSP_ROOM - len(nb)))
+            summary.append(dict(file=i, name=f["name"], added=added, restored=restored, evicted=evicted, unfit=unfit, free_before=free_before, free_after=free_after))
     # ---- per-clip report: levels as played (sample * 10^(-TL * 0.375 / 20)), RMS over the first min(old, new) seconds
     for c, (ok, m, nold) in shrink_seen.items():
         y11, hz, tl = m["y11"], RATE_HZ[m["rate"]], m["tl"]

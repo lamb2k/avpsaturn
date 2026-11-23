@@ -13,7 +13,9 @@ from unittest.mock import patch
 
 ROOT = Path(__file__).resolve().parents[1]
 sys.path.insert(0, str(ROOT / "saturn/rt"))
+sys.path.insert(0, str(ROOT / "tools"))
 import round_cache
+from wolverine import relocate_tiles
 
 
 def build_function(name, namespace):
@@ -168,11 +170,12 @@ class RoundCacheTests(unittest.TestCase):
                          CART={"ROMB": 0x2400000, "SAT_PACK": 0x2654000},
                          SHARED_MIN=10, MIN_RUN=1, SCREEN_KEYS=[set()] * 4,
                          POSE_KEYS=set(), POSE_RANK=400, FUZZ_STAGE={},
-                         EDGE_KEYS=set(), CAPTION_KEYS=set(), SELECT_DIGIT_KEYS=set(), FONT_KEYS=set(), STORY_PAGES=set(),
+                         EDGE_KEYS=set(), CAPTION_KEYS=set(), SELECT_DIGIT_KEYS=set(), FONT_KEYS=set(),
+                         STORY_PAGES=set(), STORY_KEYS={}, STORY_SKIP=set(),
                          TAIL_FILL=False, ROWTRIM=False, CHAR_FUZZ=None, round_cache=round_cache)
         planner = build_function("round_files", namespace)
         with patch.dict(sys.modules, {"rounds_pack": fake}), patch.dict(
-                os.environ, {"GFX_BIN": str(self.gfx)}, clear=True):
+                os.environ, {"GFX_BIN": str(self.gfx), "GUEST_SYNC_KEEP": "0"}, clear=True):
             with self.assertRaisesRegex(ValueError, "required guest tiles"):
                 planner(bytearray(0x200000), [], 0x27e0000)
         self.assertEqual(calls, [])
@@ -181,6 +184,28 @@ class RoundCacheTests(unittest.TestCase):
         round_cache.require_unused_remap("guest", [100, 101], [1, 2])
         with self.assertRaisesRegex(ValueError, "regenerate guest assets"):
             round_cache.require_unused_remap("guest", [100, 101], [1, 101])
+
+    def test_relocating_wolverine_preserves_arcade_grab_and_guest_tile(self):
+        source = self.root / "guest"
+        source.mkdir()
+        arcade = self.root / "arcade.bin"
+        tile_bytes = relocate_tiles.TILE_BYTES
+        stock = bytearray(relocate_tiles.BLANK * 0x10000)
+        stock[3 * tile_bytes:4 * tile_bytes] = b"\x11" * tile_bytes
+        arcade.write_bytes(stock)
+        guest = bytearray(stock)
+        guest[3 * tile_bytes:4 * tile_bytes] = b"\x22" * tile_bytes
+        (source / "gfx_wolverine.bin").write_bytes(guest)
+        remap = {"keys": [3, 7], "stage_keys": {"02": [3, 7]}, "wv_added": {"keys": [3]}}
+        (source / "remap.json").write_text(json.dumps(remap))
+
+        result = relocate_tiles.prepare(source, arcade, self.root / "remap", {3}, {1, 2})
+        patched = (result / "gfx_wolverine.bin").read_bytes()
+        self.assertEqual(patched[3 * tile_bytes:4 * tile_bytes], b"\x11" * tile_bytes)
+        self.assertEqual(patched[4 * tile_bytes:5 * tile_bytes], b"\x22" * tile_bytes)
+        self.assertEqual(json.loads((result / "remap.json").read_text()),
+                         {"keys": [4, 7], "stage_keys": {"02": [4, 7]}, "wv_added": {"keys": [4]}})
+        self.assertEqual((source / "gfx_wolverine.bin").read_bytes(), guest)
 
     def test_store_directory_boundary_matches_real_packer(self):
         spec = importlib.util.spec_from_file_location("sector_store", ROOT / "tools/sector_store.py")

@@ -18,6 +18,14 @@
 12 7f 5
 22 94 1
 02 202 1      # Predator Warrior continue-entry effect (avspu 0.289, stage 02, damage frame 3538)
+# Opening Warrior combo. Verified FD6 requests at contact (10f, 111) and wind-up (4a, 115).
+02 4a 4
+02 10f 5
+02 111 5
+02 115 3
+# Opening Hunter melee impacts observed during damage in FD8.
+02 41 9
+02 10c 10
 00 26d 3      # front end too (the ranking after the reload)
 00 252 3
 # Name entry (0x26d) and ranking page (0x252) jingles are requested while the STAGE file is loaded (Saturn run gA_go: unknown there). A stage file has no room for both (24.8 KB) without

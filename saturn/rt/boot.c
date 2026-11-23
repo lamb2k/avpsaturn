@@ -8,6 +8,13 @@
 #define LOADER_DIAG ((volatile unsigned long *)0x06013fe0u)
 #define LOADER_API ((volatile unsigned long *)0x06013fd0u)
 #define ENTRY 0x06014000u
+#ifdef AVP_VERIFY_ROUND
+#if !defined(SECTOR_STORE) || !defined(AVP_VERIFY_ROUND_SUM)
+#error AVP_VERIFY_ROUND requires SECTOR_STORE and the expected AVP_VERIFY_ROUND_SUM
+#endif
+#define ROUND_SUM_ERROR 0xe600u
+#define ROUND_SUM_MISMATCH (-0x102)
+#endif
 extern unsigned char _bstart, _bend;
 static unsigned char gfs_work[GFS_WORK_SIZE(1)];
 static GfsDirTbl dir;
@@ -50,6 +57,9 @@ static GfsDirName names[BOOT_NAMES];
 static unsigned short diag_col[DIAG_BANDS + 1];
 static int diag_active, diag_seq, diag_cur, diag_ticks, diag_mark;
 static unsigned diag_info_value;
+#ifdef AVP_BOOT_ROM_RETRY
+static unsigned long rom_retry_first_bytes, rom_retry_first_block;
+#endif
 static void diag_fill(int a, int b, unsigned short c) { for (; a < b && a < DIAG_LINES; a++) DIAG_TAB[a] = c; }
 static void diag_band(int k, unsigned short c) { if (k < DIAG_BANDS) diag_fill(1 + 6 * k, 6 + 6 * k, c); }
 static void diag_code(unsigned v)
@@ -240,20 +250,42 @@ static __attribute__((optimize("Os"), noinline)) void diag_explain(unsigned code
             c = t_at(t_row, c, t_file[hi]);
             t_at(t_row++, c + 1, k == 1 ? "IS MISSING." : k == 2 ? "DID NOT OPEN." :
                  k == 4 ? "BAD LOAD HEADER." : k == 6 ? "SEEK FAILED." :
-                 k == 5 ? "COMPRESSED LOAD FAILED." : "READ FAILED.");
+                 k == 5 ? "COMPRESSED LOAD FAILED." :
+#ifdef AVP_BOOT_ROM_SUM
+                 k == 7 ? "CHECKSUM FAILED." :
+#endif
+                 "READ FAILED.");
             if (k == 5) {
                 c = t_hex(21, t_at(21, 2, "BLOCK "), (unsigned)LOADER_DIAG[3], 4);
                 t_hex(21, t_at(21, c, "  BYTES "), (unsigned)LOADER_DIAG[4], 8);
+#ifdef AVP_BOOT_ROM_RETRY
+                if (hi == 2 && rom_retry_first_bytes) {
+                    c = t_hex(22, t_at(22, 2, "FIRST BLOCK "), (unsigned)rom_retry_first_block, 4);
+                    t_hex(22, t_at(22, c, "  BYTES "), (unsigned)rom_retry_first_bytes, 8);
+                }
+#endif
             }
         }
-    } else if (hi >= 0xf0) t_line("CPU EXCEPTION.");
+    }
+#ifdef AVP_VERIFY_ROUND
+    else if (code == ROUND_SUM_ERROR) {
+        t_line("ROUND DATA CHECKSUM FAILED.");
+        c = t_hex(21, t_at(21, 2, "ROUND "), AVP_VERIFY_ROUND, 4);
+        t_hex(21, t_at(21, c, "  EXPECTED "), AVP_VERIFY_ROUND_SUM, 8);
+    }
+#endif
+    else if (hi >= 0xf0) t_line("CPU EXCEPTION.");
     else if (hi == 0xeb) t_line("GRAPHICS SETUP FAILED.");
     else if (hi == 0xec) t_line("SOUND SETUP FAILED.");
     else if (hi == 0xef) t_line("PICTURE STALLED.");
     else if (hi == 0xe4) t_line("UNEXPECTED TASK RETURN.");
     else if (hi >= 0x80 && hi < 0xe0) t_line("GAME UPDATE STALLED.");
     else t_line("INTERNAL ERROR.");
-    if (hi >= 0x80 && hi != 0xe0 && hi != 0xfe) {
+    if (hi >= 0x80 && hi != 0xe0 && hi != 0xfe
+#ifdef AVP_VERIFY_ROUND
+        && code != ROUND_SUM_ERROR
+#endif
+    ) {
         unsigned context = (unsigned)LOADER_DIAG[4];
         c = t_hex(21, t_at(21, 2, "TASK "), context >> 16, 4);
         t_hex(21, t_at(21, c, "  STAGE "), context & 0xffffu, 4);
@@ -449,6 +481,17 @@ static __attribute__((optimize("Os"))) void load(const char *name, void *dest, u
             gc = padded >> 11;
             if (padded > raw_total || gc != (lz32)(n - 1)) { GFS_Close(h); halt(code | 4, 2); }
             got = lz_stream(h, (lz8 *)dest, raw_total, nblk, load_head + 4, tail, &gs, &gc, 1, 0);
+#ifdef AVP_BOOT_ROM_RETRY
+            /* Try the same ROM again with a blocking read after a streaming decode failure. */
+            if (code == 0x200 && got == -LZ_DECODE_FAILED && !load_saroo && GFS_NwStop(h) >= 0) {
+                rom_retry_first_block = lz_failed_block;
+                rom_retry_first_bytes = lz_bytes_received;
+                gs = 1;   /* skip the header sector already held in load_head */
+                load_saroo = 1;
+                got = lz_stream(h, (lz8 *)dest, raw_total, nblk, load_head + 4, tail, &gs, &gc, 1, 1);
+                load_saroo = 0;
+            }
+#endif
             if (got < 0) {
                 GFS_Close(h);
                 LOADER_DIAG[3] = lz_failed_block;
@@ -491,8 +534,20 @@ static Sint32 run_at, run_left, run_sec = -1, run_next, run_end, run_reseek;   /
 static unsigned long coal_big;   /* set once a region larger than COAL_MAX has been read after the mark */
 #define COAL_MAX 64u   /* sectors; every restore region of the stage files and the front end file is below this, the tile and sound regions are not */
 #endif
-#ifdef SAT_LOAD_SUM
-static unsigned long load_sum;
+#if defined(SAT_LOAD_SUM) || defined(AVP_VERIFY_ROUND)
+/* Match tools/lzstore.py: sum the final bytes in each destination, in
+   region order. Read through the uncached alias after all writes. */
+static unsigned long round_readback_sum(void)
+{
+    unsigned long k, q, sum = 0;
+    for (k = 0; k < load_head[0]; k++) {
+        unsigned long dst = load_head[1 + k * 2], n = (load_head[2 + k * 2] & ~1ul) / 4u;
+        volatile unsigned long *d = (volatile unsigned long *)(dst | 0x20000000u);
+        if (dst == 1) continue;
+        for (q = 0; q < n; q++) sum = sum * 0x9e3779b1u + d[q];
+    }
+    return sum;
+}
 #endif
 static Sint32 vread(GfsHn h, Sint32 secs, unsigned char *dest)
 {
@@ -548,6 +603,11 @@ static long lz_tile(GfsHn h, unsigned long i)
     return lz_stream(h, dest, raw_total, nblk, blk, tail, gsec, gcnt, ngrp, 1);
 }
 #endif
+/* With the raw ROM checksum, keep the round dispatcher within loader RAM.
+   The LZ decoder keeps its existing optimization settings. */
+#if defined(AVP_BOOT_ROM_SUM) && !defined(AVP_BOOT_ROM_RETRY)
+__attribute__((optimize("Os")))
+#endif
 static long load_once(const char *name, void (*mark)(void))
 {
     Sint32 id, total = 1, r = (name[1] - '0') * 100 + (name[2] - '0') * 10 + (name[3] - '0');
@@ -573,9 +633,6 @@ static long load_once(const char *name, void (*mark)(void))
     if ((unsigned long)r >= store_dir[1]) { GFS_Close(h); GFS_Reset(); return -0x100; }
     run_next = (Sint32)store_dir[2 + r * 2]; run_end = run_next + (Sint32)store_dir[3 + r * 2]; run_left = 0;
     if (vread(h, 1, (unsigned char *)load_head)) { GFS_Close(h); GFS_Reset(); return -0x101; }
-#ifdef SAT_LOAD_SUM
-    load_sum = 0;
-#endif
 #ifdef SAT_LOAD_COALESCE
     coal_big = 0;
 #endif
@@ -622,16 +679,20 @@ static long load_once(const char *name, void (*mark)(void))
         if (i >= 2 && secs > COAL_MAX) coal_big = 1;   /* the tile region is in the pack room: nothing may be staged there any more (regions after it are read one by one; 11-12: staging them over the first 130 sectors of the tile region corrupted 157 of the 287 files) */
 #endif
     }
-#ifdef SAT_LOAD_SUM   /* test flag: a multiplicative sum (sum * 0x9e3779b1 + word; the first rotating version cancelled where regions overlap and could not see a corrupted pack room) of every byte the regions wrote, read back from their addresses, so two builds' loads of one file can be compared: 0x06013fb8 counts the loads, 0x06013fbc holds the last sum (the free words between the boot display API and the loader API) */
-    {
-        unsigned long k, q, sum = 0;
-        for (k = 0; k < load_head[0]; k++) {
-            unsigned long dst = load_head[1 + k * 2], n = (load_head[2 + k * 2] & ~1ul) / 4u;
-            volatile unsigned long *d = (volatile unsigned long *)(dst | 0x20000000u);
-            if (dst == 1) continue;
-            for (q = 0; q < n; q++) sum = sum * 0x9e3779b1u + d[q];
+#ifdef SAT_LOAD_SUM
+    sat_ld_diag[0]++; sat_ld_diag[1] = round_readback_sum();
+#endif
+#ifdef AVP_VERIFY_ROUND
+    if (r == AVP_VERIFY_ROUND) {
+#ifdef SAT_LOAD_SUM
+        unsigned long sum = sat_ld_diag[1];
+#else
+        unsigned long sum = round_readback_sum();
+#endif
+        if (sum != AVP_VERIFY_ROUND_SUM) {
+            LOADER_DIAG[2] = sum;
+            total = ROUND_SUM_MISMATCH;
         }
-        sat_ld_diag[0]++; sat_ld_diag[1] = sum;
     }
 #endif
     GFS_Close(h);
@@ -647,6 +708,9 @@ static long load_regions(const char *name, void (*mark)(void))
         if (got >= 0) break;
         store_dir[0] = 0; run_sec = -1;   /* read the directory and run table again */
     }
+#ifdef AVP_VERIFY_ROUND
+    if (got == ROUND_SUM_MISMATCH) halt(ROUND_SUM_ERROR, LOADER_DIAG[2]);
+#endif
     return got;
 }
 #else
@@ -1040,6 +1104,14 @@ int main(void)
     diag_stage_k(0, 0); load("OPX.BIN", (void *)0x02600000u, 0x300);
     diag_stage_k(0, 0); load("COLD1.BIN", (void *)COLD1_ADDR, 0x600);
     diag_stage_k(0, 0); load("HW.BIN", (void *)ENTRY, 0x400);
+#endif
+#ifdef AVP_BOOT_ROM_SUM
+    {
+        const volatile unsigned long *rom = (const volatile unsigned long *)0x22400000u;
+        unsigned long sum = 0, word;
+        for (word = 0; word < 0x200000u / 4u; word++) sum = sum * 0x9e3779b1ul + rom[word];
+        if (sum != AVP_BOOT_ROM_SUM) halt(0x207, sum);
+    }
 #endif
     GFS_Reset();
 #ifdef SAT_WV_REVEAL

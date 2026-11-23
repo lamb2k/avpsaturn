@@ -1,13 +1,15 @@
 #!/usr/bin/env python
 """Build the Saturn image of the lifted game. Everything ROM-derived stays in the work directory, never in git.
 usage: build.py [WORK]   default E:/AvP/learning/lane-satrt, which holds src/c*.c, dispatch.inc, rt.bin, opx.bin, opx.json, heat.json (tools/satint_merge.py), pack.bin, pack_hole.bin (tools/satint_pack.py).
-env: KERNEL_CFLAGS, LIFT_OPT (-Os; -O2 overflows work RAM), JO (Jo Engine root)."""
+env: KERNEL_CFLAGS, LIFT_OPT (-Os; -O2 overflows work RAM), JO (Jo Engine root).
+SAT_BOOT_RAW_ROM=1 keeps ROM.BIN uncompressed and checks its cartridge RAM contents after load."""
 import concurrent.futures as cf
 import json
 import os
 import pathlib
 import re
 import shutil
+import struct
 import subprocess
 import time
 import sys
@@ -87,26 +89,6 @@ if os.environ.get("CHAR_FUZZ", "1") != "0":
     if True:   # without a census file the players' script stretch is still kept (tools/char_fuzz.py SCRIPT_REGION)
         print("char fuzz:", char_fuzz.augment(ROUNDS, CHAR_FUZZ, keys=os.environ.get("CHAR_FUZZ_KEYS", "0") == "1", pages=os.environ.get("CHAR_FUZZ_PAGES", "1") == "1",
                                                 key_stages={int(x, 16) for x in os.environ.get("CHAR_FUZZ_KEY_STAGES", "0e,1c,1e,24").split(",") if x} or None), flush=True)   # the guest files drop a bonus character's remap keys (guest_rounds.extend)
-sys.path.insert(0, str(REPO / "tools/wolverine"))
-import hud_art
-HUD = None   # guest select screen and HUD art (hud_art.build); guests.c always includes a palette table, empty without it
-if os.environ.get("GUEST_ASSETS"):   # bonus characters (SAT_GUESTS builds): guest stage file variants, tools/wolverine/guest_rounds.py
-    import guest_rounds
-    # Select screen and HUD art of the guest (tools/wolverine/hud_art.py): GUEST_HUD_ART, else GUEST_ASSETS/hud_art; GUEST_HUD_ART=0 builds without it.
-    hud_dir = os.environ.get("GUEST_HUD_ART") or str(pathlib.Path(os.environ["GUEST_ASSETS"]) / "hud_art")
-    if hud_dir != "0" and pathlib.Path(hud_dir).is_dir():
-        HUD = hud_art.build(hud_dir, pathlib.Path(os.environ["GUEST_ASSETS"]) / "gfx_wolverine.bin", WORK / "rt.bin", GEN / "hud")
-        miss = hud_art.check_keys(ROUNDS, hud_art.GUESTS[0])
-        if miss:
-            raise SystemExit("NO-GO: guest art tiles no arcade file holds (wrong tile codes or parity?): " + ", ".join("%s %s %x" % m for m in miss[:8]))
-        print("guest hud art:", {k: v for k, v in HUD["report"]["tiles"].items()}, "palette copies", sum(p["copies"] for p in HUD["report"]["palettes"]), flush=True)
-    DIALOG_KEYS = ()
-    if any(f in ("-DSAT_WV_DIALOG", "-DSAT_WV_DIALOG=1") for f in os.environ.get("KERNEL_CFLAGS", "").split()):   # Wolverine's story box wording, from the user's ROM (tools/wolverine/dialog.py)
-        import dialog
-        DIALOG = dialog.build(WORK / "rt.bin", GEN)
-        DIALOG_KEYS = DIALOG["keys"]   # his stage files hold the tiles the new wording draws
-        print("guest dialog:", {k: v for k, v in DIALOG.items() if k not in ("include", "keys")}, flush=True)
-    guest_rounds.extend(ROUNDS, os.environ["GUEST_ASSETS"], HUD, DIALOG_KEYS, WORK if "SAT_WV_SOUND" in os.environ.get("KERNEL_CFLAGS", "") else None)   # -DSAT_WV_SOUND: Wolverine's sounds (wv_sound/ in the assets) are added to the stage sound packs (tools/wolverine/wv_audio.py)
 # Tile keys (sprites and the three layers) of the screens after a KO with no lives left: the continue countdown, name entry, GAME OVER.
 # The census routes continue at once, so they never saw the low countdown digits, and a stage whose census had no game over lacked the
 # screen's text and picture: the countdown and the "CONTINUE AND GET 1UP!" line drew blank. tools/screen_keys.py writes the list;
@@ -139,10 +121,6 @@ import font_glyph_keys
 FONT_KEYS = font_glyph_keys.from_work(WORK) if os.environ.get("FONT_KEYS", "1") == "1" else set()
 if os.environ.get("SCREEN_KEYS_REQUIRED", "1") == "1" and not SCREEN_KEYS[0]:
     raise SystemExit("WORK/screen_keys.txt missing: run tools/screen_keys.py (SCREEN_KEYS_REQUIRED=0 to build without)")
-if os.environ.get("GUEST_ASSETS"):
-    assets = pathlib.Path(os.environ["GUEST_ASSETS"])
-    remap = json.loads((assets / "remap.json").read_text())
-    round_cache.require_unused_remap("Wolverine", remap["keys"], ARCADE_SPRITE_KEYS | SCREEN_KEYS[0])
 # The character select's countdown digits (scroll 1 codes 0x0b00-0x0b3f, two cells wide, three rows high, both column halves) in the front file. The census routes press
 # Start at once, so only the digits 1, 4 and 5 were ever looked up; 6, 3, 2 and 0 drew blank. The digit's cells are blank or filled from one second to the next, and
 # home's column fit shares one map across the screen's rows, so the whole select screen (the stat bars, names, portraits) jumped one column each time the digit appeared
@@ -165,6 +143,50 @@ FUZZ_STAGE = {}   # stage name -> sprite keys the fuzz runs looked up in that st
 if os.environ.get("POSE_KEYS", "1") == "1" and (WORK / "fuzz_stage_keys").is_dir():
     for f in (WORK / "fuzz_stage_keys").glob("stage*.txt"):
         FUZZ_STAGE[f.stem] = {int(l, 16) for l in f.read_text().split()}
+import warrior_grab
+WARRIOR_GRAB_KEYS = warrior_grab.sprite_keys((WORK / "rt.bin").read_bytes())
+for round_file in ROUNDS["files"]:
+    if 2 <= round_file["stages"][0] <= 0x24 and round_file.get("mask", 15) & 1:
+        round_file["warrior_grab_keys"] = sorted(WARRIOR_GRAB_KEYS)
+        round_file["keys"][0] = sorted(set(round_file["keys"][0]) | WARRIOR_GRAB_KEYS)
+ARCADE_SPRITE_KEYS |= WARRIOR_GRAB_KEYS
+
+sys.path.insert(0, str(REPO / "tools/wolverine"))
+import hud_art
+HUD = None   # guest select screen and HUD art (hud_art.build); guests.c always includes a palette table, empty without it
+GUEST_DIR = None
+if os.environ.get("GUEST_ASSETS"):   # bonus characters (SAT_GUESTS builds): guest stage file variants, tools/wolverine/guest_rounds.py
+    import guest_rounds
+    import relocate_tiles
+    source_assets = pathlib.Path(os.environ["GUEST_ASSETS"])
+    allocated = {key for f in ROUNDS["files"] for key in f["keys"][0]}
+    allocated.update(SCREEN_KEYS[0] | POSE_KEYS)
+    for story in STORY_KEYS.values():
+        allocated.update(story[0])
+    for keys in FUZZ_STAGE.values():
+        allocated.update(keys)
+    GUEST_DIR = relocate_tiles.prepare(
+        source_assets, pathlib.Path(os.environ.get("GFX_BIN", "E:/AvP/learning/lane-satgfx/gfx.bin")),
+        GEN / "wolverine_remap", WARRIOR_GRAB_KEYS, allocated,
+    )
+    remap = json.loads((GUEST_DIR / "remap.json").read_text())
+    round_cache.require_unused_remap("Wolverine", remap["keys"], ARCADE_SPRITE_KEYS | SCREEN_KEYS[0])
+    # Select screen and HUD art of the guest (tools/wolverine/hud_art.py): GUEST_HUD_ART, else GUEST_ASSETS/hud_art; GUEST_HUD_ART=0 builds without it.
+    hud_dir = os.environ.get("GUEST_HUD_ART") or str(source_assets / "hud_art")
+    if hud_dir != "0" and pathlib.Path(hud_dir).is_dir():
+        HUD = hud_art.build(hud_dir, GUEST_DIR / "gfx_wolverine.bin", WORK / "rt.bin", GEN / "hud")
+        miss = hud_art.check_keys(ROUNDS, hud_art.GUESTS[0])
+        if miss:
+            raise SystemExit("NO-GO: guest art tiles no arcade file holds (wrong tile codes or parity?): " + ", ".join("%s %s %x" % m for m in miss[:8]))
+        print("guest hud art:", {k: v for k, v in HUD["report"]["tiles"].items()}, "palette copies", sum(p["copies"] for p in HUD["report"]["palettes"]), flush=True)
+    DIALOG_KEYS = ()
+    if any(f in ("-DSAT_WV_DIALOG", "-DSAT_WV_DIALOG=1") for f in os.environ.get("KERNEL_CFLAGS", "").split()):   # Wolverine's story box wording, from the user's ROM (tools/wolverine/dialog.py)
+        import dialog
+        DIALOG = dialog.build(WORK / "rt.bin", GEN)
+        DIALOG_KEYS = DIALOG["keys"]   # his stage files hold the tiles the new wording draws
+        print("guest dialog:", {k: v for k, v in DIALOG.items() if k not in ("include", "keys")}, flush=True)
+    sound_work = WORK if "SAT_WV_SOUND" in os.environ.get("KERNEL_CFLAGS", "") else None
+    guest_rounds.extend(ROUNDS, GUEST_DIR, HUD, DIALOG_KEYS, sound_work, source_assets=source_assets)
 # Home builds only: the whole caption font (scroll 1 codes 0x1260-0x131f, with the 0x1246-9 and 0x1256-9 signs, both column halves) in every round file. The census routes press
 # through the story scenes, so the glyphs a stage's own captions use ("These aliens are all from one hive", stage select starts and any
 # play that lets the story run) were not in its file: letters drew blank, "These   iens". The font is 192 codes in 12 rows of 16: signs (the apostrophe
@@ -403,7 +425,7 @@ def guest_sync_pages(page):
     return pages
 
 
-def round_files(rom, code_end, cold1_at, only=None):
+def round_files(rom, code_end, cold1_at, only=None, audio_paths=None):
     """only: file numbers to build alone (kept round files beside them; guest files): no spill into ROM stretches, every kept page restored.
     One RNN.BIN per stage. Sprites past the cart's room go to ROM stretches that stage does not read; whatever any file overwrites, each stage that reads it gets back."""
     sys.path.insert(0, str(REPO / "tools"))
@@ -458,6 +480,8 @@ def round_files(rom, code_end, cold1_at, only=None):
         keys, frank = [set(k) for k in f["keys"]], {int(x): v for x, v in rank.get(f.get("rank_from", f["name"]), {}).items()}
         char_fuzz.rank(f, frank) if CHAR_FUZZ else None   # fuzz and body keys (tools/char_fuzz.py); a guest's keys below still outrank them
         frank.update({k: 1 << 39 for k in f.get("guest_keys", ())})   # a guest's frames rank as the playing character's own route
+        grab_keys = f.get("warrior_grab_keys", ())
+        frank.update({k: 1 << 39 for k in grab_keys})
         if only is not None:
             free = []
         if not f["name"].startswith("front"):   # (front_wv, a guest's front file, is a front file too) continue and game over screens: reachable from every stage, kept first (tools/screen_keys.py)
@@ -484,12 +508,16 @@ def round_files(rom, code_end, cold1_at, only=None):
         # Check every plan before the write loop, including optional guest stages
         # 06/1c/1e. A high rank alone never guarantees that the tiles fit.
         round_cache.require_guest_tiles(f["name"], f.get("guest_keys", ()), keys[0], dropped, p)
+        round_cache.require_guest_tiles(f["name"], grab_keys, keys[0], dropped, p, owner="Warrior grab")
         for si, (first, a, take) in enumerate(p["segs"]):
             written.update(range(a // page, (a + (rounds_pack.seg_len(p, si) + 2047 & -2048) + page - 1) // page))
         plans.append((p, dropped))
     stats = {}
     if only is None:   # the pages each file keeps as the planner saw them (own, front end, next stage, fuzz, shared): tools/check_round_pages.py reads the built files against this
         (WORK / "round_keep.json").write_text(json.dumps([[f["name"], sorted(set(f["keep_pages"]) | shared | SYNC_PAGES)] for f in ROUNDS["files"]]))
+    if audio_paths is None:
+        audio_paths = [WORK / "audio" / f"r{f.get('audio_from', i):03d}.bin"
+                       for i, f in enumerate(ROUNDS["files"])]
     for i, (f, pl) in enumerate(zip(ROUNDS["files"], plans)):
         if pl is None:
             continue
@@ -505,7 +533,7 @@ def round_files(rom, code_end, cold1_at, only=None):
             if q is None:
                 break
             st = [q, q + 1] if st is None else [st[0], q + 1]
-        audio = (WORK / "audio" / f"r{f.get('audio_from', i):03d}.bin").read_bytes()
+        audio = audio_paths[i].read_bytes()
         n = rounds_pack.write_file(ISO / f"R{i:03d}.BIN", audio, restores, rounds_pack.assemble(p, CART["SAT_PACK"], rom if TAIL_FILL else None))
         stats[f["name"]] = dict(file=n, sprites_in_main=p["inmain"], sprites_spill=sum(x[2] for x in p["segs"]), spill_runs=len(p["segs"]), restore=sum(len(d) for _, d in restores), restore_runs=len(restores), dropped_keys=len(dropped), dropped=dropped, audio=len(audio))
         print(f["name"], {k: v for k, v in stats[f["name"]].items() if k != "dropped"}, flush=True)
@@ -669,8 +697,8 @@ def main():
         home_cold_extra.append(cc(HERE / "guests.c", OBJ / "guests.o", ["-Os", "-I", GEN] + FSEC + os.environ.get("KERNEL_CFLAGS", "").split()))
         if os.environ.get("GUEST_ASSETS"):   # Wolverine's tables come from the user's ROM set at build time; his code runs from the cart
             if NATIVE_GFX:   # his native animation block, from his program ROM (a MAME dump, tools/wolverine/mshvsf_dump.lua) and the guest assets
-                sh([sys.executable, REPO / "tools/wolverine/gen_native.py", WORK, os.environ["GUEST_ASSETS"], os.environ.get("WV_MSHVSF", "E:/AvP/learning/lane-wv-native-gfx/mshvsf"), GEN / "wv_native.inc"])
-            sh([sys.executable, REPO / "tools/wolverine/gen_c.py", os.environ["GUEST_ASSETS"], GEN / "wolverine_data.inc"] + ([os.environ["WV_COLOUR"]] if os.environ.get("WV_COLOUR") else []))   # WV_COLOUR: a colours entry of remap.json (default: its default_colour)
+                sh([sys.executable, REPO / "tools/wolverine/gen_native.py", WORK, GUEST_DIR, os.environ.get("WV_MSHVSF", "E:/AvP/learning/lane-wv-native-gfx/mshvsf"), GEN / "wv_native.inc"])
+            sh([sys.executable, REPO / "tools/wolverine/gen_c.py", GUEST_DIR, GEN / "wolverine_data.inc"] + ([os.environ["WV_COLOUR"]] if os.environ.get("WV_COLOUR") else []))   # WV_COLOUR: a colours entry of remap.json (default: its default_colour)
             # guests.c dispatches: his whole-list pass is renamed so the group-indexed guests (Mega Man) run first
             # Lane wv-features: with SAT_WV_HEAL / SAT_WV_FLASH his tick and pad hooks are renamed so saturn/guests/wolverine/wv_features.c wraps them (no edit to wolverine.c)
             wvf = "SAT_WV_HEAL" in os.environ.get("KERNEL_CFLAGS", "") or "SAT_WV_FLASH" in os.environ.get("KERNEL_CFLAGS", "")
@@ -922,6 +950,17 @@ SECTIONS {{
     for f in (WORK / "rounds").glob("R[0-9][0-9][0-9].BIN"):   # SECTOR_STORE parks the round files here; kept files come back first
         if not (ISO / f.name).exists():
             shutil.move(str(f), ISO / f.name)
+    import predator_audio
+    audio_paths = [WORK / "audio" / f"r{f.get('audio_from', i):03d}.bin"
+                   for i, f in enumerate(ROUNDS["files"])]
+    guest_rates = any(flag.partition("=")[0] == "-DSAT_PACK_RATE"
+                      for flag in os.environ.get("AUDIO_CFLAGS", "").split())
+    output_audio, unfit_cues = predator_audio.prepare(
+        ROUNDS["files"], audio_paths, GEN / "predator_audio", guest_rates=guest_rates,
+    )
+    print("Predator attack sounds:", sum(a != b for a, b in zip(audio_paths, output_audio)), "updated banks")
+    for name, cues in unfit_cues.items():
+        print("Predator attack sounds unavailable in", name, ", ".join(f"{cue:04x}" for cue in cues))
     # Stage files depend on more than memory addresses: reselected poses, changed
     # graphics or ranking can otherwise leave a new runtime using an old pack.
     inputs = {
@@ -933,7 +972,7 @@ SECTIONS {{
         "gfx": pathlib.Path(os.environ.get("GFX_BIN", "E:/AvP/learning/lane-satgfx/gfx.bin")),
     }
     for i, f in enumerate(ROUNDS["files"]):
-        inputs[f"audio:{i}"] = WORK / "audio" / f"r{f.get('audio_from', i):03d}.bin"
+        inputs[f"audio:{i}"] = output_audio[i]
         if f.get("gfx"):
             inputs[f"gfx:{i}"] = pathlib.Path(f["gfx"])
     fingerprint = round_cache.packing_inputs(ROUNDS, ends, dict(
@@ -947,7 +986,7 @@ SECTIONS {{
     else:
         if os.environ.get("KEEP_ROUND_FILES"):
             print("round files rebuilt:", reason)
-        round_files(rom, [tuple(e) for e in ends[:-1]], cold1_at)
+        round_files(rom, [tuple(e) for e in ends[:-1]], cold1_at, audio_paths=output_audio)
     # A smaller plan must not leave surplus generated files in STORE.BIN. Park
     # them for inspection instead of deleting an earlier build's artifacts.
     for f in round_cache.extra_rounds(ISO, names):
@@ -973,13 +1012,23 @@ SECTIONS {{
         os.environ["SAT_LOAD_LZ"] = "1"
         if "-DSAT_LOAD_SELFTEST" in os.environ.get("BOOT_CFLAGS", ""):
             os.environ["SAT_LOAD_SELFTEST"] = "1"
+    raw_rom = os.environ.get("SAT_BOOT_RAW_ROM") == "1"
+    rom_flags = []
+    if raw_rom:
+        checksum = 0
+        for word, in struct.iter_unpack(">I", rom):
+            checksum = (checksum * 0x9e3779b1 + word) & 0xffffffff
+        rom_flags.append(f"-DAVP_BOOT_ROM_SUM={checksum:#010x}ul")
     if store:
         print(sh([sys.executable, REPO / "tools/sector_store.py", ISO, "--keep", WORK / "rounds"]).strip())
         if lz:
-            print(sh([sys.executable, REPO / "tools/lzstore.py", "boot", ISO, "LW.BIN", "ROM.BIN", "OPX.BIN", "COLD1.BIN", "HW.BIN"]).strip())
+            boot_files = ["LW.BIN", "ROM.BIN", "OPX.BIN", "COLD1.BIN", "HW.BIN"]
+            if raw_rom:
+                boot_files.remove("ROM.BIN")
+            print(sh([sys.executable, REPO / "tools/lzstore.py", "boot", ISO, *boot_files]).strip())
     else:
         (ISO / "STORE.BIN").unlink(missing_ok=True)
-    sh([GCC, "-m2", "-mb", "-O2", "-w", "-fno-builtin", "-I", SGL / "INC", f"-DCOLD1_ADDR={cold1_at:#x}u"] + (["-DSECTOR_STORE"] if store else []) + (["-DSTORE_HEAD2"] if head_sectors == 2 else []) + (["-DSAT_WV_REVEAL"] + ([f"-DGUEST_SEL_ADDR={syms['_sat_guest_sel']:#x}u"] if "_sat_guest_sel" in syms else []) if "SAT_WV_REVEAL" in os.environ.get("KERNEL_CFLAGS", "") else []) + boot_flags() + [ "-c", HERE / "boot.c", "-o", b])
+    sh([GCC, "-m2", "-mb", "-O2", "-w", "-fno-builtin", "-I", SGL / "INC", f"-DCOLD1_ADDR={cold1_at:#x}u"] + (["-DSECTOR_STORE"] if store else []) + (["-DSTORE_HEAD2"] if head_sectors == 2 else []) + (["-DSAT_WV_REVEAL"] + ([f"-DGUEST_SEL_ADDR={syms['_sat_guest_sel']:#x}u"] if "_sat_guest_sel" in syms else []) if "SAT_WV_REVEAL" in os.environ.get("KERNEL_CFLAGS", "") else []) + boot_flags() + rom_flags + [ "-c", HERE / "boot.c", "-o", b])
     # SGL's LIB_ELF members carry a non-zero input VMA on .data/.bss; this ld then puts their variables at the wrong address (fixlib.py): patched copies for the link.
     import fixlib
     lib = WORK / "libfix"

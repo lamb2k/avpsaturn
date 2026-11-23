@@ -2072,7 +2072,7 @@ static int fps_on;   /* the performance readout's layer (NBG3) is up this pictur
 #define FPS_HUD(x)
 #endif
 static u16 prinb_last; /* VDP2 registers are write-only: what update_priority last put in PRINB */
-/* Layer order and the priority table. VDP2 levels: layers 2, 4, 6; a sprite level sits just under the highest layer it hides behind. */
+/* Layer order and the priority table. VDP2 levels: layers 2, 4, 6. */
 static void update_priority(u16 layers, u16 pri)
 {
     int order[3], lp[3], n = 0, i, p;
@@ -2095,9 +2095,20 @@ static void update_priority(u16 layers, u16 pri)
     prinb_last = prin[0];
     for (p = 0; p < 8; p++)
     {
-        int level = 7, below = -1;
-        for (i = 0; i < n; i++) if (p <= lp[i]) below = i;
-        if (below >= 0)
+        int level = 7, first = -1, below = -1, exact = 1;
+        for (i = 0; i < n; i++)
+        {
+            if (p <= lp[i])
+            {
+                if (first < 0) first = i;
+                below = i;
+            }
+            else if (first >= 0) exact = 0;
+        }
+        /* If every layer above the first blocking layer also blocks the
+           sprite, one VDP2 priority reproduces all the CPS masks. */
+        if (first >= 0 && exact) level = 1 + 2 * first;
+        else if (below >= 0)
         {
             level = 1 + 2 * below;
             for (i = 0; i < below; i++) if (p > lp[i]) { sat_gfx_stats.nonmonotone++; break; }

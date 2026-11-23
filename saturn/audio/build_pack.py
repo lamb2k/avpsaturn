@@ -41,9 +41,9 @@ def log_rows(p):
     return rows
 
 
-def decimator(rate):
+def decimator(rate, source_rate=44100):
     n = 63
-    cut = 0.45 * rate / 44100
+    cut = 0.45 * rate / source_rate
     h = np.sinc(2 * cut * (np.arange(n) - (n - 1) / 2)) * np.hamming(n)
     return h / h.sum()
 

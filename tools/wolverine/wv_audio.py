@@ -13,8 +13,15 @@ import json
 import pathlib
 import struct
 import sys
+from collections import defaultdict
 
 SCSP_ROOM = 0x7e000
+# Each pair shares one clip. Process the longer Hunter entry first.
+STAGE_HIT_CUES = {0x06: (0x0046, 0x0111, 0x010C, 0x0041, 0x004A)}
+# sat_audio_swap copies PCM above the SCSP vectors. round_sound_ready
+# copies the SAU1 header and tables into a separate buffer.
+SCSP_PCM_ROOM = 0x80000 - 0x20
+ROUND_SOUND_TABLE_ROOM = 0x2000
 HDR = struct.Struct(">4sHHI")
 ROW = struct.Struct(">HBBBBBBII")
 
@@ -37,6 +44,79 @@ def parse(pack):
     return rows, bytes(music), bytes(clips)
 
 
+def encode(rows, music, pcm):
+    table = b"".join(ROW.pack(
+        row["cmd"], row["prio"], row["mask"] >> 8, row["mask"] & 255,
+        row["tl"], row["flags"], row["rate"], row["off"], row["n"],
+    ) for row in sorted(rows, key=lambda row: row["cmd"]))
+    header = HDR.pack(b"SAU1", len(rows), len(music) // ROW.size, len(pcm))
+    return header + table + music + pcm
+
+
+def free_guest_pcm(pack, need):
+    """Use lower-rate guest one-shots only when they can free the requested space."""
+    import numpy as np
+    from .wv_sound import BP, CMD_BASE, SOUNDS
+
+    rows, music, pcm = parse(pack)
+    guest_commands = {CMD_BASE + sound["id"] for sound in SOUNDS}
+    groups = defaultdict(list)
+    for row in rows:
+        groups[row["off"]].append(row)
+    positions = sorted(groups)
+    options = []
+    previous_end = 0
+    for offset, following in zip(positions, positions[1:] + [len(pcm)]):
+        aliases = groups[offset]
+        size = max(row["n"] for row in aliases)
+        end = offset + ((size + 1) & ~1)
+        separate = previous_end <= offset and end <= following and offset % 2 == 0
+        previous_end = max(previous_end, end)
+        commands = {row["cmd"] for row in aliases}
+        if not separate or size < 63 or not commands.intersection(guest_commands):
+            continue
+        if any(row["flags"] or row["rate"] or
+               (row["cmd"] not in REMAP and row["cmd"] not in guest_commands) for row in aliases):
+            continue
+        wave = np.frombuffer(pcm[offset:offset + size], dtype=np.int8).astype(float)
+        rate, code, _ = BP.pick_rate(wave)
+        if not code:
+            continue
+        lengths = [max(1, round(row["n"] * rate / 11025)) if row["n"] else 0 for row in aliases]
+        filtered = np.convolve(wave, BP.decimator(rate, 11025), mode="same")
+        reduced = np.interp(np.arange(max(lengths)) * (11025 / rate), np.arange(size), filtered)
+        data = np.clip(np.rint(reduced), -128, 127).astype(np.int8).tobytes()
+        padded = data + bytes(len(data) & 1)
+        saving = end - offset - len(padded)
+        if saving > 0:
+            options.append((saving, offset, end, code, lengths, padded))
+
+    selected = {}
+    for saving, offset, end, code, lengths, data in sorted(options, reverse=True):
+        selected[offset] = (end, code, lengths, data)
+        need -= saving
+        if need <= 0:
+            break
+    if need > 0:
+        return None
+
+    result = bytearray()
+    cursor = 0
+    for offset in positions:
+        result.extend(pcm[cursor:offset])
+        aliases = groups[offset]
+        for row in aliases:
+            row["off"] = len(result)
+        cursor = offset
+        if offset in selected:
+            cursor, code, lengths, data = selected[offset]
+            result.extend(data)
+            for row, length in zip(aliases, lengths):
+                row.update(rate=code, n=length)
+    result.extend(pcm[cursor:])
+    return encode(rows, music, result)
+
+
 def load_assets(assets):
     assets = pathlib.Path(assets)
     j = json.loads((assets / "wv_sound.json").read_text())
@@ -46,8 +126,9 @@ def load_assets(assets):
     return j
 
 
-def build(pack, wv, rank=None, kind="stage", room=SCSP_ROOM, remap=REMAP, optional_commands=()):
-    """Build the normal guest mix, then fit any optional commands in its remaining room."""
+def build(pack, wv, rank=None, kind="stage", room=SCSP_ROOM, remap=REMAP, optional_commands=(), reserved_commands=()):
+    """Fit optional effects into the usual mix, then use spare PCM RAM for reserved effects."""
+    additions = (*optional_commands, *reserved_commands)
     rows, music, clips = parse(pack)
     mine = [s for s in wv["sounds"] if s.get("where", "stage") in (kind, "both")]
     by_name = {s["name"]: s for s in mine}
@@ -59,7 +140,7 @@ def build(pack, wv, rank=None, kind="stage", room=SCSP_ROOM, remap=REMAP, option
         if w is not None:
             report["remapped"].append(hex(r["cmd"]))
             r.update(tl=w["tl"], flags=0, data=w["data"], n=w["n"], wv=True, rate=0)
-        if r["cmd"] in optional_commands and w is None:
+        if r["cmd"] in additions and w is None:
             optional.append(r)
         else:
             new.append(r)
@@ -70,19 +151,30 @@ def build(pack, wv, rank=None, kind="stage", room=SCSP_ROOM, remap=REMAP, option
     new.sort(key=lambda r: r["cmd"])
 
     def size(rs):
-        seen = {}
-        for r in rs:
-            seen.setdefault(r["data"], 0)
-        return HDR.size + 16 * (len(rs) + len(music) // 16) + sum(len(d) + (len(d) & 1) for d in seen)
+        clips = {r["data"] for r in rs}
+        return HDR.size + 16 * len(rs) + len(music), sum(len(d) + (len(d) & 1) for d in clips)
     order = sorted((r for r in new if not r.get("wv")), key=lambda r: (rank or {}).get(r["cmd"], 0))
-    while size(new) > room and order:
+    while sum(size(new)) > room and order:
         d = order.pop(0)
         new.remove(d)
         report["dropped"].append((hex(d["cmd"]), (rank or {}).get(d["cmd"], 0), d["n"]))
-    if size(new) > room:
+    if sum(size(new)) > room:
         raise SystemExit("NO-GO: Wolverine sounds do not fit even with every other clip dropped")
+    optional.sort(key=lambda r: additions.index(r["cmd"]))
+    shared = {}
     for r in optional:
-        if size(new + [r]) <= room:
+        if len(r["data"]) > len(shared.get(r["off"], b"")):
+            shared[r["off"]] = r["data"]
+    for r in optional:
+        # An optional row can use a shorter part of another row's backing PCM.
+        r["n"] = len(r["data"])
+        r["data"] = shared.get(r["off"], r["data"])
+        tables, samples = size(new + [r])
+        if r["cmd"] in reserved_commands:
+            fits = tables <= ROUND_SOUND_TABLE_ROOM and samples <= SCSP_PCM_ROOM
+        else:
+            fits = tables + samples <= room
+        if fits:
             new.append(r)
         else:
             report.setdefault("optional_unfit", []).append(hex(r["cmd"]))
@@ -96,9 +188,9 @@ def build(pack, wv, rank=None, kind="stage", room=SCSP_ROOM, remap=REMAP, option
             blob += r["data"]
             if len(blob) & 1:
                 blob += bytes(1)
-        table += ROW.pack(r["cmd"], r["prio"], r["mask"] >> 8, r["mask"] & 255, r["tl"], r["flags"], r.get("rate", 0), offs[r["data"]], len(r["data"]))
+        table += ROW.pack(r["cmd"], r["prio"], r["mask"] >> 8, r["mask"] & 255, r["tl"], r["flags"], r.get("rate", 0), offs[r["data"]], min(r["n"], len(r["data"])))
     out = HDR.pack(b"SAU1", len(new), len(music) // 16, len(blob)) + bytes(table) + music + bytes(blob)
-    report.update(size=len(out), room_left=room - len(out), rows=len(new))
+    report.update(size=len(out), room_left=SCSP_PCM_ROOM - len(blob) if reserved_commands else room - len(out), rows=len(new))
     return out, report
 
 

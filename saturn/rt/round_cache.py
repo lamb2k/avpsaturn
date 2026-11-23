@@ -96,15 +96,15 @@ def save_receipt(receipt, inputs, directory, names):
     temporary.replace(receipt)
 
 
-def require_guest_tiles(name, required, candidates, dropped, plan):
-    """Priority is a preference; guest residency is an all-or-fail contract."""
+def require_guest_tiles(name, required, candidates, dropped, plan, owner="guest"):
+    """Priority is a preference. Required tiles must all survive packing."""
     if plan is None:
         raise ValueError("NO-GO: stage pack does not fit: " + name)
     missing = (set(required) - set(candidates)) | (set(required) & set(dropped))
     if missing:
         sample = ", ".join("%04x" % key for key in sorted(missing)[:12])
-        raise ValueError("NO-GO: %s loses %d required guest tiles (%s); "
-                         "reduce the pose set or free pack space" % (name, len(missing), sample))
+        raise ValueError("NO-GO: %s loses %d required %s tiles (%s); "
+                         "free pack space" % (name, len(missing), owner, sample))
 
 
 def require_unused_remap(label, remapped, arcade_keys):
